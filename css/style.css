@@ -9,3 +9,11 @@ body {
     background-attachment: fixed; /* Keeps the background fixed during scrolling */
     font-family: Arial, sans-serif; /* Optional: Set a default font */
 }
+
+#title{
+
+    color: white; /* Set the text color to white */
+    font-size: 2em; /* Set the font size */
+    text-align: center; /* Center the text */
+    margin-top: 20px; /* Add some space above the title */
+}
