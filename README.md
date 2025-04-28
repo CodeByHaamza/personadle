@@ -1,77 +1,83 @@
 # 🎭 Personadle
 
-Un jeu inspiré de Smashdle, basé sur l'univers **Persona**.  
-Chaque jour, un nouveau personnage est à deviner à partir de ses caractéristiques !
+A game inspired by Smashdle, based on the **Persona** universe.  
+Each day, guess a new character based on their traits!
 
 ---
 
-## 📌 Objectif
+## 📌 Objective
 
-Créer un jeu interactif en JavaScript pur, dans un style proche du célèbre [Smashdle](https://smashdle.net), mais centré sur l’univers des jeux **Persona**.  
-Le joueur dispose de plusieurs essais pour trouver le bon personnage en se basant sur :
+Create an interactive game using pure JavaScript, in a style similar to the famous [Smashdle](https://smashdle.net), but centered around the **Persona** games universe.  
+The player has multiple attempts to find the correct character based on:
 
-- Ses caractéristiques (âge, type d’ombre, Arcana, etc.)
-- Une silhouette floutée qui devient de plus en plus visible
-- Une suite d’émojis indicatifs
-- Ou même une vidéo ou musique floutée
+- Their traits (age, shadow type, Arcana, etc.)
+- A blurred silhouette that becomes clearer over time
+- A series of hinting emojis
+- Or even a blurred video or music clip
 
 ---
 
-## 🔧 Technologies utilisées
+## 🔧 Technologies Used
 
 - HTML5
 - CSS3
 - JavaScript (ES6)
-- JSON pour les données
-- Git & GitHub pour le versioning
+- JSON for data
+- Git & GitHub for version control
 
 ---
 
-## 📁 Organisation du projet
+## 📁 Project Organization
 
-
----
-
-## 🚧 Fonctionnalités prévues
-
-- [ ] Affichage quotidien d’un personnage mystère
-- [ ] Système d’essais et indices avec feedback couleur
-- [ ] Plusieurs modes de jeu (caractéristiques, image floue, emoji, etc.)
-- [ ] Stockage local des scores
-- [ ] Responsive mobile / tablette
+_(to be detailed later)_
 
 ---
 
-## ✅ Objectifs techniques
+## 🚧 Planned Features
 
-- Appliquer les notions JS étudiées
-- Manipuler le DOM dynamiquement
-- Charger et parcourir des fichiers JSON
-- Utiliser des fonctions modernes (filter, map, etc.)
-- S’entraîner à structurer un projet web complet
-
----
-
-## 🔮 À venir
-
-- Version React.js + Node.js (score en ligne, compte utilisateur, daily random, etc.)
-- Mise en ligne sur GitHub Pages ou Vercel
-- Système de dons (optionnel)
+- [ ] Daily display of a mystery character
+- [ ] Attempt system with color-coded feedback and hints
+- [ ] Multiple game modes (traits, blurred image, emojis, etc.)
+- [ ] Local storage of scores
+- [ ] Mobile / tablet responsive design
 
 ---
 
-## 👤 Auteur
+## ✅ Technical Goals
+
+- Apply studied JavaScript concepts
+- Dynamically manipulate the DOM
+- Load and navigate through JSON files
+- Use modern functions (filter, map, etc.)
+- Practice structuring a complete web project
+
+---
+
+## 🔮 Coming Soon
+
+- React.js + Node.js version (online scores, user accounts, daily random characters, etc.)
+- Deployment on GitHub Pages or Vercel
+- Optional donation system
+
+---
+
+## 👤 Authors
 
 **Hamza**  
-Étudiant en BUT Informatique  
-Fan de Persona, JoJo et code ✨
+Computer Science undergraduate  
+Fan of Persona, JoJo, and coding ✨  
+
+**Léo**  
+Computer Science undergraduate  
+Fan of Persona too, TKKF, RL, design, and data (idk why) 🎨📈
 
 ---
 
-## 🎮 Capture d'écran (à ajouter plus tard)
+## 🎮 Screenshot (to be added later)
 
 ---
 
-## 📜 Licence
+## 📜 License
 
-Projet open-source, libre de modification et d’amélioration.
+Open-source project, free to modify and improve.
+
