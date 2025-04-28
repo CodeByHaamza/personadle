@@ -1,7 +1,7 @@
 /* General style for the website background */
 body {
-    margin: 0;
-    padding: 0;
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
     background-image: url('../img/personadle_wallpaper.jpg'); /* Set the background image */
     background-size: cover; /* Make sure the image covers the entire screen */
     background-position: center; /* Center the background image */
@@ -47,29 +47,29 @@ body {
 
 /* Style for the input field and button */
 .input-wrapper {
-    margin-top: 20px;
-    text-align: center;
+    margin-top: 20px; /* Add space above the input-wrapper */
+    text-align: center; /* Center the input field and button */
 }
 
 #guessInput {
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    width: 250px;
-    margin-right: 10px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+    padding: 10px; /* Add padding inside the input field */
+    font-size: 16px; /* Set font size for the input text */
+    border-radius: 5px; /* Round the corners of the input field */
+    border: 1px solid #ccc; /* Add a light gray border */
+    width: 250px; /* Set the width of the input field */
+    margin-right: 10px; /* Add space to the right of the input field */
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for better appearance */
 }
 
 #submitGuess {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #2e86de; /* Persona blue */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    padding: 10px 20px; /* Add padding inside the button */
+    font-size: 16px; /* Set font size for the button text */
+    background-color: #2e86de; /* Persona blue background color */
+    color: white; /* Set the text color to white */
+    border: none; /* Remove the border */
+    border-radius: 5px; /* Round the corners of the button */
+    cursor: pointer; /* Change the cursor to a pointer on hover */
+    transition: background-color 0.3s ease; /* Smooth transition for background color change */
 }
 
 #submitGuess:hover {
