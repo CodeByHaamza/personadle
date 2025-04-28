@@ -67,9 +67,6 @@ _(to be detailed later)_
 Computer Science undergraduate  
 Fan of Persona, JoJo, and coding ✨  
 
-**Léo**  
-Computer Science undergraduate  
-Fan of Persona too, TKKF, RL, design, and data (idk why) 🎨📈
 
 ---
 
