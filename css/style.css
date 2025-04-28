@@ -44,3 +44,34 @@ body {
 .title-wrapper:not(:hover) {
     transform: scale(1); /* Reset to original size when not hovered */
 }
+
+/* Style for the input field and button */
+.input-wrapper {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#guessInput {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 250px;
+    margin-right: 10px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+#submitGuess {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #2e86de; /* Persona blue */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#submitGuess:hover {
+    background-color: #1b4f72; /* Darker blue on hover */
+}
