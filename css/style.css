@@ -1,19 +1,46 @@
-/* Style for setting a background image for the website */
+/* General style for the website background */
 body {
     margin: 0;
     padding: 0;
-    background-image: url('../img/personadle_wallpaper.jpg'); /* Replace with your image path */
-    background-size: cover; /* Ensures the image covers the entire screen */
-    background-position: center; /* Centers the image */
-    background-repeat: no-repeat; /* Prevents the image from repeating */
-    background-attachment: fixed; /* Keeps the background fixed during scrolling */
-    font-family: Arial, sans-serif; /* Optional: Set a default font */
+    background-image: url('../img/personadle_wallpaper.jpg'); /* Set the background image */
+    background-size: cover; /* Make sure the image covers the entire screen */
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat; /* Do not repeat the background image */
+    background-attachment: fixed; /* Keep the background image fixed while scrolling */
+    font-family: Arial, sans-serif; /* Set a default font for the website */
 }
 
-#title{
+/* Style for the title */
+#title {
+    display: inline-block; /* Shrink the background to fit the text */
+    color: #000000; /* Set the text color to black */
+    font-family: 'Times New Roman', Times, serif; /* Use the Times New Roman font */
+    font-size: 30px; /* Set the font size */
+    font-style: normal; /* Normal font style */
+    font-weight: normal; /* Normal font weight */
+    text-decoration: none; /* No underline or decoration */
+    text-transform: none; /* Keep the text as written */
+    background-color: aliceblue; /* Set the background color */
+    border-style: none; /* No border */
+    padding: 10px 20px; /* Add space around the text */
+    border-radius: 10px; /* Optional: make corners rounded */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); /* Optional: soft shadow for better look */
+}
 
-    color: white; /* Set the text color to white */
-    font-size: 2em; /* Set the font size */
-    text-align: center; /* Center the text */
-    margin-top: 20px; /* Add some space above the title */
+/* Center the title */
+.title-wrapper {
+    text-align: center; /* Center the inline-block title */
+}
+
+/* Add zoom-out effect when the mouse leaves the title-wrapper */
+.title-wrapper {
+    transition: transform 0.3s ease-in-out; /* Ensure smooth transition for both hover and mouse leave */
+}
+
+.title-wrapper:hover {
+    transform: scale(1.1); /* Slightly increase the size on hover */
+}
+
+.title-wrapper:not(:hover) {
+    transform: scale(1); /* Reset to original size when not hovered */
 }
