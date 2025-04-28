@@ -75,3 +75,23 @@ body {
 #submitGuess:hover {
     background-color: #1b4f72; /* Darker blue on hover */
 }
+
+#imgHomePage{
+    width: 1200px; /* Set the width of the image */
+    height: auto; /* Maintain aspect ratio */
+    transition: transform 0.3s ease-in-out; /* Smooth transition for zoom effect */
+
+    /* Zoom-in effect on hover */
+    &:hover {
+        transform: scale(1.1); /* Slightly increase the size on hover */
+    }
+
+    /* Reset to original size when not hovered */
+    &:not(:hover) {
+        transform: scale(1); /* Reset to original size */
+    }
+    display: block; /* Make the image a block element */
+    margin-left: auto; /* Center the image horizontally */
+    margin-right: auto; /* Center the image horizontally */
+    padding-top: 15px; /* Add space above the image */
+}
