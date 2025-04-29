@@ -3,22 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personadle</title>
+    
+    <!-- Styles & Icon -->
     <link rel="stylesheet" href="/css/style.css">
     <link rel="icon" type="image/gif" href="/img/persona_64x64.gif">
-    <title>Personadle</title>
 </head>
 <body>
-    <div id = "homepage">
-        <a href = "/index.html"><img src="/img/Logo_PersonaDLE .png" alt="Persona Logo" class="logo_HomePage" id = "imgHomePage"></a>
-    </div>
-    <div class = "title-wrapper">
-    <h1 id = "title">Try to guess the Persona character (Persona 3 to Persona 5)</h1>
-</div>
 
-<div class="input-wrapper">
-    <input type="text" id="guessInput" placeholder="Enter character name..." />
-    <button id="submitGuess">Submit</button>
-</div>
+    <!-- Logo Persona -->
+    <header id="homepage">
+        <a href="/index.html">
+            <img src="/img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage">
+        </a>
+    </header>
+
+    <!-- Titre principal -->
+    <section class="title-wrapper">
+        <h1 class="gamemode-title">Try to guess the Persona character (Persona 3 to Persona 5)</h1>
+    </section>
+    
+    <!-- Buttons for game modes -->
+
+        <button class="gamemode-button" id="shadowsButton" onclick="location.href='/shadow-mode.html'">
+            <img src="/img/Shadows_button_Velvet_room.png" alt="Shadows Mode">
+        </button>
+    </section>
+
+    <!-- Zone de saisie -->
+    <section class="input-wrapper">
+        <input type="text" id="guessInput" placeholder="Enter character name..." aria-label="Guess character name">
+        <button id="submitGuess">Submit</button>
+    </section>
 
 </body>
 </html>
