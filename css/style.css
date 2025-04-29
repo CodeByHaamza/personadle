@@ -13,18 +13,16 @@ body {
 /* Style for the title */
 #title {
     display: inline-block; /* Shrink the background to fit the text */
-    color: #000000; /* Set the text color to black */
+    color: #51ff00; /* Set the text color to black */
     font-family: 'Times New Roman', Times, serif; /* Use the Times New Roman font */
     font-size: 30px; /* Set the font size */
     font-style: normal; /* Normal font style */
     font-weight: normal; /* Normal font weight */
     text-decoration: none; /* No underline or decoration */
     text-transform: none; /* Keep the text as written */
-    background-color: aliceblue; /* Set the background color */
     border-style: none; /* No border */
     padding: 10px 20px; /* Add space around the text */
     border-radius: 10px; /* Optional: make corners rounded */
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); /* Optional: soft shadow for better look */
 }
 
 /* Center the title */
@@ -32,18 +30,6 @@ body {
     text-align: center; /* Center the inline-block title */
 }
 
-/* Add zoom-out effect when the mouse leaves the title-wrapper */
-.title-wrapper {
-    transition: transform 0.3s ease-in-out; /* Ensure smooth transition for both hover and mouse leave */
-}
-
-.title-wrapper:hover {
-    transform: scale(1.1); /* Slightly increase the size on hover */
-}
-
-.title-wrapper:not(:hover) {
-    transform: scale(1); /* Reset to original size when not hovered */
-}
 
 /* Style for the input field and button */
 .input-wrapper {
@@ -95,3 +81,49 @@ body {
     margin-right: auto; /* Center the image horizontally */
     padding-top: 15px; /* Add space above the image */
 }
+
+.gamemode-button {
+    width: 100%;
+    max-width: 500px; /* ajuste selon la taille de ton image */
+    height: auto;
+    border: none;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: block;
+    margin: 20px auto;
+  }
+  
+  .gamemode-button img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  #shadowsButton:hover img {
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgb(48, 172, 255);
+  }
+  
+  .gamemode-title{
+    text-align: center;
+    color: white;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 36px;
+    border: 4px solid rgb(202, 202, 202);
+    padding: 15px 30px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 15px rgba(8, 8, 8, 0.7);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    /* Centre horizontalement */
+    display: block;
+    width: fit-content;
+    margin: 30px auto;
+}
+
