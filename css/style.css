@@ -104,10 +104,34 @@ body {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   
+ 
+
+  #classicButton:hover img {
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgb(32, 131, 245);
+  }
+
+  #EmojiButton:hover img {
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgb(240, 198, 12)
+    }
+
+#AllOutAttackButton:hover img {
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgb(255, 52, 52);
+  }
+
   #shadowsButton:hover img {
     transform: scale(1.03);
-    box-shadow: 0 6px 14px rgb(48, 172, 255);
+    box-shadow: 0 6px 14px rgb(41, 99, 138);
   }
+
+#PersonaeButton:hover img {
+    transform: scale(1.03);
+    box-shadow: 0 6px 14px rgb(199, 169, 0);
+  }
+
+
   
   .gamemode-title{
     text-align: center;
