@@ -3,35 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personadle - Emoji </title>
+    <title>Personadle - Emoji</title>
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="/css/style.css">
+    <!--<link rel="stylesheet" href="/css/style.css">f0f0f0 -->
     <link rel="icon" type="image/gif" href="/img/persona_64x64.gif">
+    <style>
+        .center-img-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh; /* Ajustable selon besoin */
+        }
+        .center-img-container img {
+            max-width: 50%;
+            height: auto;
+        }
+        body {
+            background-color: #f9deb4; 
+        }
+    </style>
 </head>
-
-
-
 <body>
-    <!-- Logo Persona -->
+
+    <!-- Logo Persona 
     <header id="homepage">
         <a href="/index.html">
             <img src="/img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage">
         </a>
-    </header>
+    </header>-->
 
+    <div class="center-img-container">
+        <img src="/img/Still working.png" alt="Still working">
+        <h1>Workin' on !</h1>
+    </div>
 
-    <!-- Box Presentation-->
-    <div class="personadle-box">
-        <h1>Guess today’s Persona character !</h1>
-        <p>Type any character to start.</p>
-      </div>
-      
-
-     <!-- Zone de saisie -->
-     <section class="input-wrapper">
-        <input type="text" id="guessInput" placeholder="Enter character name..." aria-label="Guess character name">
-        <button id="submitGuess">Submit</button>
-    </section>
-    
 </body>
 </html>
