@@ -1,0 +1,30 @@
+/**
+ * A mapping between character names and their corresponding portrait identifiers.
+ * This object is used to link autocompletion inputs to the appropriate portrait images.
+ */
+export const portraitsMap = {
+  "Ai Ebihara": "Ai",
+  "Ayane Matsunaga": "Ayane",
+  "Chie Satonaka": "Chie",
+  "Daisuke Nagase": "Daisuke",
+  "Eri Minami": "Eri",
+  "Fox": "Fox",
+  "Hisano Kuroda": "Hisano",
+  "Kanji Tatsumi": "Kanji",
+  "Kou Ichijo": "Kou",
+  "Margaret": "Margaret",
+  "Marie": "Marie",
+  "Nanako Dojima": "Nanako",
+  "Naoki Konishi": "Naoki",
+  "Naoto Shirogane": "Naoto",
+  "Rise Kujikawa": "Rise",
+  "Ryotaro Dojima": "Dojima",
+  "Sayako Uehara": "Sayako",
+  "Shu Nakajima": "Shu",
+  "Teddie": "Teddie",
+  "Tohru Adachi": "Tohru",
+  "Yosuke Hanamura": "Yosuke",
+  "Yu Narukami": "Yu",
+  "Yumi Ozawa": "Yumi",
+  "Yukiko Amagi":"Yukiko",
+};
