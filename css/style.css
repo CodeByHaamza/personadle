@@ -1,176 +1,251 @@
-/* General style for the website background */
+/* ========== Global Styles ========== */
 body {
-    margin: 0; /* Remove default margin */
-    padding: 0; /* Remove default padding */
-    background-image: url('../img/personadle_wallpaper.jpg'); /* Set the background image */
-    background-size: cover; /* Make sure the image covers the entire screen */
-    background-position: center; /* Center the background image */
-    background-repeat: no-repeat; /* Do not repeat the background image */
-    background-attachment: fixed; /* Keep the background image fixed while scrolling */
-    font-family: Arial, sans-serif; /* Set a default font for the website */
+  /* Reset margin and padding for the body */
+  margin: 0;
+  padding: 0;
+  /* Set a background image with specific properties */
+  background-image: url('../img/personadle_wallpaper.jpg');
+  background-size: cover; /* Make the image cover the entire background */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent the image from repeating */
+  background-attachment: fixed; /* Fix the background while scrolling */
+  font-family: Arial, sans-serif; /* Set the default font for the body */
 }
 
-/* Style for the title */
+/* ========== Title ========== */
 #title {
-    display: inline-block; /* Shrink the background to fit the text */
-    color: #51ff00; /* Set the text color to black */
-    font-family: 'Times New Roman', Times, serif; /* Use the Times New Roman font */
-    font-size: 30px; /* Set the font size */
-    font-style: normal; /* Normal font style */
-    font-weight: normal; /* Normal font weight */
-    text-decoration: none; /* No underline or decoration */
-    text-transform: none; /* Keep the text as written */
-    border-style: none; /* No border */
-    padding: 10px 20px; /* Add space around the text */
-    border-radius: 10px; /* Optional: make corners rounded */
+  /* Style for the title element */
+  display: inline-block; /* Make it inline-block for better control */
+  color: #51ff00; /* Set the text color */
+  font-family: 'Times New Roman', Times, serif; /* Use a serif font */
+  font-size: 30px; /* Set font size */
+  padding: 10px 20px; /* Add padding around the title */
+  border-radius: 10px; /* Round the corners */
 }
 
-/* Center the title */
 .title-wrapper {
-    text-align: center; /* Center the inline-block title */
+  /* Center the title wrapper */
+  text-align: center;
 }
 
-
-/* Style for the input field and button */
+/* ========== Input Field & Button ========== */
 .input-wrapper {
-    margin-top: 20px; /* Add space above the input-wrapper */
-    text-align: center; /* Center the input field and button */
+  /* Add spacing and center the input field and button */
+  margin-top: 20px;
+  text-align: center;
 }
 
-#guessInput {
-    padding: 10px; /* Add padding inside the input field */
-    font-size: 16px; /* Set font size for the input text */
-    border-radius: 5px; /* Round the corners of the input field */
-    border: 1px solid #ccc; /* Add a light gray border */
-    width: 250px; /* Set the width of the input field */
-    margin-right: 10px; /* Add space to the right of the input field */
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for better appearance */
+#textbar {
+  /* Style the input field */
+  padding: 10px; /* Add padding inside the input */
+  font-size: 16px; /* Set font size */
+  border-radius: 5px; /* Round the corners */
+  border: 1px solid #ccc; /* Add a light border */
+  width: 250px; /* Set width */
+  margin-right: 10px; /* Add spacing to the right */
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
 }
 
-#submitGuess {
-    padding: 10px 20px; /* Add padding inside the button */
-    font-size: 16px; /* Set font size for the button text */
-    background-color: #2e86de; /* Persona blue background color */
-    color: white; /* Set the text color to white */
-    border: none; /* Remove the border */
-    border-radius: 5px; /* Round the corners of the button */
-    cursor: pointer; /* Change the cursor to a pointer on hover */
-    transition: background-color 0.3s ease; /* Smooth transition for background color change */
+#guessButton {
+  /* Style the button */
+  padding: 10px 20px; /* Add padding */
+  font-size: 16px; /* Set font size */
+  background-color: #2e86de; /* Set background color */
+  color: white; /* Set text color */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Round the corners */
+  cursor: pointer; /* Change cursor to pointer on hover */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
-#submitGuess:hover {
-    background-color: #1b4f72; /* Darker blue on hover */
+#guessButton:hover {
+  /* Change background color on hover */
+  background-color: #1b4f72;
 }
 
-#imgHomePage{
-    width: 1200px; /* Set the width of the image */
-    height: auto; /* Maintain aspect ratio */
-    transition: transform 0.3s ease-in-out; /* Smooth transition for zoom effect */
-
-    /* Zoom-in effect on hover */
-    &:hover {
-        transform: scale(1.1); /* Slightly increase the size on hover */
-    }
-
-    /* Reset to original size when not hovered */
-    &:not(:hover) {
-        transform: scale(1); /* Reset to original size */
-    }
-    display: block; /* Make the image a block element */
-    margin-left: auto; /* Center the image horizontally */
-    margin-right: auto; /* Center the image horizontally */
-    padding-top: 15px; /* Add space above the image */
+/* ========== Logo Home Page ========== */
+#imgHomePage {
+  /* Style for the homepage logo */
+  width: 1200px; /* Set width */
+  height: auto; /* Maintain aspect ratio */
+  transition: transform 0.3s ease-in-out; /* Smooth scaling effect */
+  display: block; /* Center the image */
+  margin: 15px auto 0; /* Add margin */
 }
 
+#imgHomePage:hover {
+  /* Scale the logo slightly on hover */
+  transform: scale(1.1);
+}
+
+/* ========== Gamemode Buttons ========== */
 .gamemode-button {
-    width: 100%;
-    max-width: 500px; /* ajuste selon la taille de ton image */
-    height: auto;
-    border: none;
-    padding: 0;
-    background: none;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: block;
-    margin: 20px auto;
-  }
-  
-  .gamemode-button img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
- 
+  /* Style for gamemode buttons */
+  width: 100%; /* Full width */
+  max-width: 500px; /* Set max width */
+  height: auto; /* Maintain aspect ratio */
+  border: none; /* Remove border */
+  padding: 0; /* Remove padding */
+  background: none; /* Transparent background */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effects */
+  display: block; /* Center the button */
+  margin: 20px auto; /* Add margin */
+}
 
-  #classicButton:hover img {
-    transform: scale(1.03);
-    box-shadow: 0 6px 14px rgb(32, 131, 245);
-  }
+.gamemode-button img {
+  /* Style for images inside gamemode buttons */
+  width: 100%; /* Full width */
+  height: auto; /* Maintain aspect ratio */
+  display: block; /* Block-level element */
+  border-radius: 15px; /* Round the corners */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Add shadow */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effects */
+}
 
-  #EmojiButton:hover img {
-    transform: scale(1.03);
-    box-shadow: 0 6px 14px rgb(240, 198, 12)
-    }
+/* Hover effects for specific gamemode buttons */
+#classicButton:hover img {
+  transform: scale(1.03); /* Slightly scale up */
+  box-shadow: 0 6px 14px rgb(32, 131, 245); /* Change shadow color */
+}
+
+#EmojiButton:hover img {
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px rgb(240, 198, 12);
+}
 
 #AllOutAttackButton:hover img {
-    transform: scale(1.03);
-    box-shadow: 0 6px 14px rgb(255, 52, 52);
-  }
-
-  #shadowsButton:hover img {
-    transform: scale(1.03);
-    box-shadow: 0 6px 14px rgb(41, 99, 138);
-  }
-
-#PersonaeButton:hover img {
-    transform: scale(1.03);
-    box-shadow: 0 6px 14px rgb(199, 169, 0);
-  }
-
-
-  
-  .gamemode-title{
-    text-align: center;
-    color: white;
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 36px;
-    border: 4px solid rgb(202, 202, 202);
-    padding: 15px 30px;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.6);
-    box-shadow: 0 0 15px rgba(8, 8, 8, 0.7);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-    /* Centre horizontalement */
-    display: block;
-    width: fit-content;
-    margin: 30px auto;
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px rgb(255, 52, 52);
 }
 
+#shadowsButton:hover img {
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px rgb(41, 99, 138);
+}
 
+#PersonaeButton:hover img {
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px rgb(199, 169, 0);
+}
+
+/* ========== Gamemode Title ========== */
+.gamemode-title {
+  /* Style for gamemode titles */
+  text-align: center; /* Center the text */
+  color: white; /* Set text color */
+  font-family: 'Times New Roman', Times, serif; /* Use serif font */
+  font-size: 36px; /* Set font size */
+  border: 4px solid rgb(202, 202, 202); /* Add border */
+  padding: 15px 30px; /* Add padding */
+  border-radius: 12px; /* Round the corners */
+  background: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+  box-shadow: 0 0 15px rgba(8, 8, 8, 0.7); /* Add shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+  display: block; /* Block-level element */
+  width: fit-content; /* Adjust width to content */
+  margin: 30px auto; /* Center and add margin */
+}
+
+/* ========== Header Box ========== */
 .personadle-box {
-    background: rgba(0, 102, 204, 0.87);
-    color: white;
-    padding: 30px 40px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-    max-width: 400px;
-    margin: auto;
+  /* Style for the header box */
+  background: rgba(0, 102, 204, 0.87); /* Semi-transparent blue background */
+  color: white; /* Set text color */
+  padding: 30px 40px; /* Add padding */
+  border-radius: 10px; /* Round the corners */
+  text-align: center; /* Center the text */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Add shadow */
+  max-width: 400px; /* Set max width */
+  margin: auto; /* Center the box */
+}
+
+.personadle-box h1 {
+  /* Style for header text */
+  margin: 0 0 15px; /* Add bottom margin */
+  font-size: 26px; /* Set font size */
+  font-family: Verdana, Geneva, Tahoma, sans-serif; /* Use sans-serif font */
+}
+
+.personadle-box p {
+  /* Style for paragraph text */
+  font-size: 16px; /* Set font size */
+  color: #e0e0e0; /* Light gray text color */
+}
+
+/* ========== Autocomplete Styles ========== */
+.autocomplete-items {
+  /* Style for autocomplete dropdown */
+  position: absolute; /* Position relative to parent */
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Adjust centering */
+  background-color: #ffffff; /* White background */
+  border: 2px solid #000000; /* Black border */
+  border-radius: 14px; /* Round the corners */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Add shadow */
+  z-index: 99; /* Ensure it appears above other elements */
+  top: 100%; /* Position below the input */
+  margin-top: 6px; /* Add spacing */
+  width: 340px; /* Set width */
+  max-height: 320px; /* Limit height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  font-family: 'Segoe UI', sans-serif; /* Use sans-serif font */
+  animation: fadeZoomIn 0.25s ease-out; /* Add fade-in animation */
+}
+
+.list-options {
+  /* Style for each autocomplete option */
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Center items vertically */
+  padding: 12px 16px; /* Add padding */
+  font-size: 17px; /* Set font size */
+  font-weight: 600; /* Make text bold */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-bottom: 1px solid #ddd; /* Add bottom border */
+  transition: background-color 0.2s ease-in-out; /* Smooth hover effect */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+.list-options:last-child {
+  /* Remove border for the last option */
+  border-bottom: none;
+}
+
+.list-options:hover {
+  /* Change background color on hover */
+  background-color: #f0f0f0;
+}
+
+.list-options img {
+  /* Style for images in autocomplete options */
+  width: 100px; /* Set width */
+  height: 100px; /* Set height */
+  border-radius: 8px; /* Round the corners */
+  margin-right: 12px; /* Add spacing */
+  object-fit: cover; /* Ensure the image covers the area */
+  flex-shrink: 0; /* Prevent shrinking */
+  background: #eee; /* Light gray background */
+  border: 1px solid #ccc; /* Add border */
+}
+
+.list-options span {
+  /* Style for text in autocomplete options */
+  overflow: hidden; /* Hide overflow text */
+  text-overflow: ellipsis; /* Add ellipsis for overflow */
+  white-space: nowrap; /* Prevent text wrapping */
+  max-width: 230px; /* Limit width */
+  display: inline-block; /* Inline-block for better control */
+}
+
+/* ========== Animations ========== */
+@keyframes fadeZoomIn {
+  /* Animation for fade and zoom effect */
+  from {
+    opacity: 0; /* Start with no opacity */
+    transform: translateX(-50%) scale(0.95); /* Slightly smaller */
   }
-  
-  .personadle-box h1 {
-    margin: 0 0 15px;
-    font-size: 26px;
-    font-family:Verdana, Geneva, Tahoma, sans-serif;
+  to {
+    opacity: 1; /* Fully visible */
+    transform: translateX(-50%) scale(1); /* Original size */
   }
-  
-  .personadle-box p {
-    font-size: 16px;
-    color: #e0e0e0;
-  }
-  
+}
