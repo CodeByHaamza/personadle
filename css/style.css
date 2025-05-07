@@ -237,15 +237,201 @@ body {
   display: inline-block; /* Inline-block for better control */
 }
 
-/* ========== Animations ========== */
-@keyframes fadeZoomIn {
-  /* Animation for fade and zoom effect */
-  from {
-    opacity: 0; /* Start with no opacity */
-    transform: translateX(-50%) scale(0.95); /* Slightly smaller */
+.autocomplete-active {
+  background-color: #7b8383 !important;
+}
+
+
+
+
+/* ========== Hint Button & Quote Text ========== */
+#hintButton {
+  margin-top: 20px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  border-radius: 6px;
+  border: 2px solid #228b22;
+  background-color: #2ecc71;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#hintButton:enabled {
+  cursor: pointer;
+  opacity: 1;
+  background-color: #27ae60;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+
+#hintButton:hover:enabled {
+  background-color: #219150;
+}
+
+#resetButton {
+  margin-left: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#resetButton:hover {
+  background-color: #ca6f1e;
+}
+
+#giveUpButton {
+  margin-top: 10px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  border-radius: 6px;
+  border: 2px solid #b03a2e;
+  background-color: #e74c3c;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#giveUpButton:enabled {
+  cursor: pointer;
+  opacity: 1;
+  background-color: #c0392b;
+  box-shadow: 0 0 8px rgba(192, 57, 43, 0.6);
+}
+
+#giveUpButton:hover:enabled {
+  background-color: #a93226;
+}
+
+
+
+/* Style pour le texte de l'indice */
+#quoteHint {
+  font-size: 17px;
+  font-style: italic;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 12px 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  margin: 20px auto 0;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  display: none;
+}
+
+#output {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.guess-row {
+  display: grid;
+  grid-template-columns: 100px repeat(7, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.849);
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: fit-content;
+  animation: fadeIn 0.5s ease;
+}
+
+  .guess-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #ccc;
   }
-  to {
-    opacity: 1; /* Fully visible */
-    transform: translateX(-50%) scale(1); /* Original size */
+
+.guess-cell {
+  width: 130px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  color: white;
+  border-radius: 10px;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  animation: flipIn 0.5s ease forwards;
+  transform: rotateX(90deg);
+  text-align: center;
+  padding: 0 5px;
+}
+
+
+
+/* Delay l'animation de chaque case */
+.guess-cell:nth-child(2) { animation-delay: 0.1s; }
+.guess-cell:nth-child(3) { animation-delay: 0.2s; }
+.guess-cell:nth-child(4) { animation-delay: 0.3s; }
+.guess-cell:nth-child(5) { animation-delay: 0.4s; }
+.guess-cell:nth-child(6) { animation-delay: 0.5s; }
+
+.category-row {
+  display: grid;
+  grid-template-columns: 100px repeat(7, 1fr); /* 1 image + 7 critères */
+  gap: 12px;
+  margin: 20px 0 10px;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  color: white;
+  text-transform: uppercase;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  border-radius: 12px;
+}
+
+
+
+.correct {
+  background-color: #2ecc71;
+}
+
+.misplaced {
+  background-color: #f1c40f;
+  color: black;
+}
+
+.wrong {
+  background-color: #e74c3c;
+}
+
+@keyframes flipIn {
+  0% {
+    transform: rotateX(90deg);
+    opacity: 0;
   }
+  100% {
+    transform: rotateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
