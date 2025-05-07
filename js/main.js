@@ -1,25 +1,259 @@
-// Importing data for personas and their corresponding portraits
-import { personas } from "../database/personas.js";
+// main.js
+import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
+import { characters } from "../database/characters_clean.js";
 
-// Wait for the DOM to fully load before initializing the autocomplete
+let personas = [...originalPersonas];
+let gameOver = false;
+
 document.addEventListener("DOMContentLoaded", () => {
   const textbar = document.getElementById("textbar");
+  const guessButton = document.getElementById("guessButton");
+  const hintButton = document.getElementById("hintButton");
+  const quoteHint = document.getElementById("quoteHint");
+  const output = document.getElementById("output");
+  const resetButton = document.getElementById("resetButton");
+  const giveUpButton = document.getElementById("giveUpButton");
+
+  // Initialize autocomplete with personas
   initializeAutocomplete(textbar, personas);
+
+  let attempts = parseInt(localStorage.getItem("attempts")) || 0;
+  let target = JSON.parse(localStorage.getItem("target"));
+
+  // If no target is stored, select a random character as the target
+  if (!target) {
+    target = characters[Math.floor(Math.random() * characters.length)];
+    localStorage.setItem("target", JSON.stringify(target));
+  }
+
+  // Enable hint and give-up buttons based on attempts
+  if (attempts >= 3) enableHintButton();
+  if (attempts >= 8) enableGiveUpButton();
+
+  // Event listener for the guess button
+  guessButton.addEventListener("click", () => {
+    if (gameOver) return;
+
+    const guessName = textbar.value.trim();
+    if (guessName === "") return;
+
+    attempts++;
+    localStorage.setItem("attempts", attempts);
+
+    if (attempts >= 3) enableHintButton();
+    if (attempts >= 8) enableGiveUpButton();
+
+    checkGuess(guessName, target);
+    textbar.value = "";
+  });
+
+  // Event listener for the reset button
+  resetButton.addEventListener("click", () => {
+    resetGame();
+  });
+
+  // Event listener for the hint button
+  hintButton.addEventListener("click", () => {
+    if (target && target.quote) {
+      quoteHint.textContent = target.quote;
+      quoteHint.style.display = "block";
+      hintButton.disabled = true;
+      hintButton.style.cursor = "not-allowed";
+    }
+  });
+
+  // Event listener for the give-up button
+  giveUpButton.addEventListener("click", () => {
+    if (target && target.nom) {
+      checkGuess(target.nom, target, true);
+    }
+    textbar.disabled = true;
+    guessButton.disabled = true;
+    giveUpButton.disabled = true;
+    gameOver = true;
+  });
+
+  // Enable the hint button
+  function enableHintButton() {
+    hintButton.disabled = false;
+    hintButton.style.cursor = "pointer";
+  }
+
+  // Enable the give-up button
+  function enableGiveUpButton() {
+    giveUpButton.disabled = false;
+    giveUpButton.style.cursor = "pointer";
+  }
+
+  // Reset the game state
+  function resetGame() {
+    localStorage.removeItem("target");
+    localStorage.removeItem("attempts");
+    output.innerHTML = "";
+    quoteHint.style.display = "none";
+    textbar.disabled = false;
+    guessButton.disabled = false;
+    hintButton.disabled = true;
+    hintButton.style.cursor = "not-allowed";
+    giveUpButton.disabled = true;
+    giveUpButton.style.cursor = "not-allowed";
+    textbar.value = "";
+
+    personas = [...originalPersonas];
+    initializeAutocomplete(textbar, personas);
+    gameOver = false;
+
+    target = characters[Math.floor(Math.random() * characters.length)];
+    localStorage.setItem("target", JSON.stringify(target));
+  }
+
+  // Check the user's guess
+  function checkGuess(name, target, forceReveal = false) {
+    const guess = characters.find(c => c.nom.toLowerCase() === name.toLowerCase());
+    if (!guess) {
+      output.innerHTML += `<p class="wrong">${name} does not exist in the database!</p>`;
+      return;
+    }
+
+    // Add category row if not already present
+    if (!document.querySelector(".category-row")) {
+      const categoryRow = document.createElement("div");
+      categoryRow.classList.add("category-row");
+      categoryRow.innerHTML = `
+        <div></div>
+        <div>Name</div>
+        <div>Gender</div>
+        <div>Age</div>
+        <div>Persona User</div>
+        <div>Persona</div>
+        <div>Arcana</div>
+        <div>Opus</div>
+      `;
+      output.insertBefore(categoryRow, output.firstChild);
+    }
+
+    const row = document.createElement("div");
+    row.classList.add("guess-row");
+
+    // Add portrait image
+    const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
+    const portraitName = encodeURIComponent(imageName);
+    const img = document.createElement("img");
+    img.src = `../database/portraits/${portraitName}.webp`;
+    img.alt = guess.nom;
+    img.className = "guess-image";
+    row.appendChild(img);
+
+    // Compare guess with target for each key
+    const keysToCompare = ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
+    keysToCompare.forEach((key, index) => {
+      const cell = document.createElement("div");
+      cell.classList.add("guess-cell");
+
+      let value = guess[key];
+      let targetVal = target[key];
+
+      if (typeof value === "boolean") value = value ? "Yes" : "No";
+      if (typeof targetVal === "boolean") targetVal = targetVal ? "Yes" : "No";
+
+      let displayValue = Array.isArray(value) ? value.join(", ") : value;
+
+      // Special case for age: numeric comparison with arrows
+      if (key === "age") {
+        const guessAge = parseInt(value);
+        const targetAge = parseInt(targetVal);
+
+        if (!isNaN(guessAge) && !isNaN(targetAge)) {
+          if (guessAge === targetAge) {
+            cell.classList.add("correct");
+          } else {
+            const diffSymbol = guessAge < targetAge ? "↑" : "↓";
+            displayValue += ` ${diffSymbol}`;
+            cell.classList.add("wrong");
+          }
+        } else {
+          cell.classList.add("wrong");
+        }
+      }
+
+      // Special case for gender (case-insensitive)
+      else if (key === "genre") {
+        if (
+          typeof value === "string" &&
+          typeof targetVal === "string" &&
+          value.toLowerCase() === targetVal.toLowerCase()
+        ) {
+          cell.classList.add("correct");
+        } else {
+          cell.classList.add("wrong");
+        }
+      }
+
+      // Special case for arrays (e.g., arcana)
+      else if (Array.isArray(targetVal)) {
+        const guessArr = Array.isArray(value) ? value : [value];
+        const intersection = guessArr.filter(val =>
+          targetVal.includes(val)
+        );
+
+        if (
+          intersection.length === guessArr.length &&
+          guessArr.length === targetVal.length
+        ) {
+          cell.classList.add("correct");
+        } else if (intersection.length > 0) {
+          cell.classList.add("misplaced");
+        } else {
+          cell.classList.add("wrong");
+        }
+      }
+
+      // Default case for other keys
+      else {
+        if (
+          typeof value === "string" &&
+          typeof targetVal === "string" &&
+          value.toLowerCase() === targetVal.toLowerCase()
+        ) {
+          cell.classList.add("correct");
+        } else if (Object.values(target).includes(value)) {
+          cell.classList.add("misplaced");
+        } else {
+          cell.classList.add("wrong");
+        }
+      }
+
+      cell.textContent = displayValue;
+      setTimeout(() => {
+        cell.classList.add("flip");
+      }, 100 * (index + 1));
+
+      row.appendChild(cell);
+    });
+
+    output.insertBefore(row, output.querySelector(".category-row")?.nextSibling);
+    removeFromAutocomplete(guess.nom);
+
+    // End game if the guess is correct or forceReveal is true
+    if (guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal) {
+      textbar.disabled = true;
+      guessButton.disabled = true;
+      giveUpButton.disabled = true;
+      gameOver = true;
+    }
+  }
 });
 
-/**
- * Initializes the autocomplete functionality for a given input element.
- * @param {HTMLElement} element - The input element to attach autocomplete to.
- * @param {Array} array - The array of strings to use for autocomplete suggestions.
- */
+// Initialize autocomplete functionality
 function initializeAutocomplete(element, array) {
-  element.addEventListener("input", function () {
-    const val = this.value.trim(); // Get the trimmed input value
-    closeList(null, element); // Close any existing autocomplete lists
-    if (!val) return false; // Exit if input is empty
+  let currentFocus = -1;
 
-    // Create a container for autocomplete suggestions
+  element.addEventListener("input", function () {
+    const val = this.value.trim();
+    closeList(null, element);
+    if (!val) return false;
+
     const list = document.createElement("DIV");
     list.setAttribute("id", "autocomplete-list");
     list.setAttribute("class", "autocomplete-items");
@@ -27,7 +261,6 @@ function initializeAutocomplete(element, array) {
 
     const matches = [];
 
-    // Find matches in the array based on the input value
     for (let i = 0; i < array.length; i++) {
       const displayName = array[i];
       const lowerName = displayName.toLowerCase();
@@ -35,29 +268,23 @@ function initializeAutocomplete(element, array) {
 
       if (lowerName.includes(lowerVal)) {
         const [firstName, lastName] = displayName.split(" ");
-
-        // Assign priority based on whether the match is at the start of the first or last name
         let priority = 3;
         if (firstName?.toLowerCase().startsWith(lowerVal)) priority = 1;
         else if (lastName?.toLowerCase().startsWith(lowerVal)) priority = 2;
-
         matches.push({ name: displayName, priority });
       }
     }
 
-    // Sort matches by priority and alphabetically
     matches.sort((a, b) => {
       if (a.priority !== b.priority) return a.priority - b.priority;
       return a.name.localeCompare(b.name);
     });
 
-    // Create and append suggestion elements to the list
     matches.forEach((matchObj) => {
       const displayName = matchObj.name;
-      const imageName = portraitsMap[displayName] || displayName;
+      const imageName = portraitsMap[displayName] || displayName.split(" ")[0];
       const portraitName = encodeURIComponent(imageName);
 
-      // Highlight the matching part of the name
       const matchIndex = displayName.toLowerCase().indexOf(val.toLowerCase());
       const before = displayName.substring(0, matchIndex);
       const match = displayName.substring(matchIndex, matchIndex + val.length);
@@ -65,8 +292,6 @@ function initializeAutocomplete(element, array) {
 
       const option = document.createElement("DIV");
       option.className = "list-options";
-
-      // Use a template literal for the suggestion's HTML
       option.innerHTML = `
         <img src="../database/portraits/${portraitName}.webp" alt="${displayName} portrait"
              onerror="this.src='../database/portraits/unknown.webp'" />
@@ -76,32 +301,68 @@ function initializeAutocomplete(element, array) {
         <input type='hidden' value='${displayName}'>
       `;
 
-      // Set the input value to the selected suggestion on click
       option.addEventListener("click", function () {
         element.value = this.getElementsByTagName("input")[0].value;
         closeList(null, element);
+        document.getElementById("guessButton")?.click();
       });
 
       list.appendChild(option);
     });
+
+    currentFocus = -1;
   });
 
-  // Close the autocomplete list when clicking outside of it
+  element.addEventListener("keydown", function (e) {
+    const items = document.querySelectorAll("#autocomplete-list .list-options");
+    if (!items.length) return;
+
+    if (e.key === "ArrowDown") {
+      currentFocus++;
+      updateActive(items);
+    } else if (e.key === "ArrowUp") {
+      currentFocus--;
+      updateActive(items);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (currentFocus > -1) {
+        items[currentFocus].click();
+      } else {
+        items[0]?.click();
+      }
+    }
+  });
+
+  function updateActive(items) {
+    if (!items) return;
+    removeActive(items);
+    if (currentFocus >= items.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = items.length - 1;
+    items[currentFocus].classList.add("autocomplete-active");
+    items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function removeActive(items) {
+    for (let item of items) item.classList.remove("autocomplete-active");
+  }
+
   document.addEventListener("click", (e) => {
     closeList(e.target, element);
   });
 }
 
-/**
- * Closes all autocomplete suggestion lists except the one associated with the input element.
- * @param {HTMLElement} e - The clicked element.
- * @param {HTMLElement} inputElement - The input element associated with the autocomplete.
- */
+// Close autocomplete list
 function closeList(e, inputElement) {
   const items = document.getElementsByClassName("autocomplete-items");
-  for (let i = items.length - 1; i >= 0; i--) {
+  for (let i = 0; i < items.length; i++) {
     if (e !== items[i] && e !== inputElement) {
       items[i].parentNode.removeChild(items[i]);
     }
   }
+}
+
+// Remove a name from the autocomplete list
+function removeFromAutocomplete(name) {
+  const index = personas.findIndex(n => n.toLowerCase() === name.toLowerCase());
+  if (index !== -1) personas.splice(index, 1);
 }
