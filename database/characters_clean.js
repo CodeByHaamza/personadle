@@ -1,4 +1,5 @@
-export const characters = [  {
+export const characters = [
+  {
     nom: "Yu Narukami",
     genre: "Male",
     age: 17,
@@ -6,7 +7,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: true,
     persona: "Izanagi",
-    emoji: "🗡️⚡😐",
+    emoji: ["🗡️", "⚡", "😐"],
     quote: "People can do it. As long as they open their eyes and look around, they'll see it..."
   },
   {
@@ -17,7 +18,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "💅💔😤",
+    emoji: ["💅", "💔", "😤"],
     quote: "I've carried that thing around ever since I decided to change who I was..."
   },
   {
@@ -28,7 +29,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "🎺😖🌱",
+    emoji: ["🎺", "😖", "🌱"],
     quote: "I've been keeping a lot of... unpleasant emotions buried inside..."
   },
   {
@@ -39,7 +40,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: true,
     persona: "Tomoe",
-    emoji: "🥋🍖🤩",
+    emoji: ["🥋", "🍖", "🤩"],
     quote: "...I think this \"power\" of mine is what I wanted all along..."
   },
   {
@@ -50,7 +51,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "⚽💪😅",
+    emoji: ["⚽", "💪", "😅"],
     quote: "I kept pretending that I was trying my hardest..."
   },
   {
@@ -61,7 +62,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "👩‍👦📖😔",
+    emoji: ["👩‍👦", "📖", "😔"],
     quote: "I wasn't even trying to see him for myself. Maybe I was just afraid..."
   },
   {
@@ -72,7 +73,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "🦊🎴🙏",
+    emoji: ["🦊", "🎴", "🙏"],
     quote: "*Yip*"
   },
   {
@@ -83,7 +84,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "💔👵💀",
+    emoji: ["💔", "👵", "💀"],
     quote: "Live a long and full life. That is the greatest thing you can do..."
   },
   {
@@ -94,7 +95,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: true,
     persona: "Take-Mikazuchi",
-    emoji: "🧵💢🚴‍♂️",
+    emoji: ["🧵", "💢", "🚴‍♂️"],
     quote: "I get it now... This is what he was talking about..."
   },
   {
@@ -105,7 +106,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "🏀😎🎭",
+    emoji: ["🏀", "😎", "🎭"],
     quote: "I thought I had it all figured out, but I just didn't get it..."
   },
   {
@@ -116,7 +117,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "📖✨😏",
+    emoji: ["📖", "✨", "😏"],
     quote: "Truth is a thing which only appears to those who have observed..."
   },
   {
@@ -127,7 +128,7 @@ export const characters = [  {
     opus: "P4G",
     personaUser: false,
     persona: "NONE",
-    emoji: "📝🌧️💚",
+    emoji: ["📝", "🌧️", "💚"],
     quote: "There are things that you can't do by yourself, but can do with others..."
   },
   {
@@ -138,7 +139,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "🧃🎶😊",
+    emoji: ["🧃", "🎶", "😊"],
     quote: "Every day's great at your Junes!"
   },
   {
@@ -149,7 +150,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "🛒😞🪄",
+    emoji: ["🛒", "😞", "🪄"],
     quote: "There's a river separating us... Sis is gone, and I'm still here..."
   },
   {
@@ -160,7 +161,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "🚬🕵️‍♂️😓",
+    emoji: ["🚬", "🕵️‍♂️", "😓"],
     quote: "This town is my town. It's the place where you and Nanako live..."
   },
   {
@@ -171,7 +172,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "🏥🍶😏",
+    emoji: ["🏥", "🍶", "😏"],
     quote: "So... I'm going. I'm going to find that path I gave up on..."
   },
   {
@@ -182,7 +183,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "📚🎓😠",
+    emoji: ["📚", "🎓", "😠"],
     quote: "I'm going to be my own guide. Thinking, walking, taking responsibility for myself..."
   },
   {
@@ -193,7 +194,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: false,
     persona: "NONE",
-    emoji: "🎭💔😭",
+    emoji: ["🎭", "💔", "😭"],
     quote: "Dad... Thank you for bringing me... into this world..."
   },
   {
@@ -204,8 +205,8 @@ export const characters = [  {
     opus: "P4",
     personaUser: true,
     persona: "Sukuna-Hikona",
-    emoji: "🔍🕵️‍♂️🔫",
-    quote: "The title of detective became a burden to me... I thought I had no other aspects apart from detective self. But you and the others gave me a reason to be, as neither adult nor man... So, I... I was able to face myself as myself. Before the detective, before the child, before the woman. By spending time with you all, I change, day by day. It frightened me before... But now... With everyone... With you, I can proudly proclaim that I am myself. Nothing more, but nothing less."
+    emoji: ["🔍", "🕵️‍♂️", "🔫"],
+    quote: "The title of detective became a burden to me... [...]"
   },
   {
     nom: "Rise Kujikawa",
@@ -215,8 +216,8 @@ export const characters = [  {
     opus: "P4",
     personaUser: true,
     persona: "Himiko",
-    emoji: "🎤💕😜",
-    quote: "Senpai... I won't make the same mistake. There's no such thing as a me who isn't me. So I won't run away... I won't try to be someone I'm not. There's a lot of Rises inside me... I won't try to change them. Instead... I'll let people know that those Rises exist... That's the me I want to be."
+    emoji: ["🎤", "💕", "😜"],
+    quote: "Senpai... I won't make the same mistake. [...]"
   },
   {
     nom: "Teddie",
@@ -226,8 +227,8 @@ export const characters = [  {
     opus: "P4",
     personaUser: true,
     persona: "Kintoki-Douji",
-    emoji: "🧸❄️🤣",
-    quote: "Doesn't matter how far apart we are. The bonds we've made will remain strong. Everyone's hearts is connected to the people they know and trust. It's those bonds that let us all search for our purpose in life. As long as it's a purpose that you believe in, there will always be someone who could help you fulfill it. You, me, and everyone else, there are no barriers. Our hearts are one. Right, Sensei?"
+    emoji: ["🧸", "❄️", "🤣"],
+    quote: "Doesn't matter how far apart we are. [...]"
   },
   {
     nom: "Tohru Adachi",
@@ -237,8 +238,8 @@ export const characters = [  {
     opus: "P4G",
     personaUser: true,
     persona: "Magatsu-Izanagi",
-    emoji: "🍆🔫😈",
-    quote: "Let's be honest. There's nothing great about the real world, is there? It's just dull and annoying as hell. No one accepts that's the way things are... They're just stuck with it because they can't deny it, either. Those who actually succeed in life... They just happen to be born with the magic ticket called talent. If you don't have it, you can either accept or deny that fact until you die. That's your only choice. Once you realize that, all you have left in life is despair. The ultimate game over. Wouldn't it be better if that kind of reality was wiped away?"
+    emoji: ["🍆", "🔫", "😈"],
+    quote: "Let's be honest. There's nothing great about the real world, is there? [...]"
   },
   {
     nom: "Yosuke Hanamura",
@@ -248,8 +249,8 @@ export const characters = [  {
     opus: "P4",
     personaUser: true,
     persona: "Jiraya",
-    emoji: "🎧🚲😂",
-    quote: "Is Saki-senpai watching us...? Is she smiling at us? Senpai... I'm going to live. Without lying to myself, without deceiving myself... Days like today, days like before when I did nothing... They're all important days... They're all days you didn't live to see... I'm going to live them here."
+    emoji: ["🎧", "🚲", "😂"],
+    quote: "Is Saki-senpai watching us...? [...]"
   },
   {
     nom: "Yukiko Amagi",
@@ -259,9 +260,7 @@ export const characters = [  {
     opus: "P4",
     personaUser: true,
     persona: "Konohana Sakuya",
-    emoji: "🏯🔥😳",
-    quote: "I wanted to become completely self-sufficient. But I think I was being presumptuous. I have the inn, I have my family, I have the waitresses and chefs... I am who I am now because I was raised by such a kind group... When I think of it that way, my problems aren't just my own. That's why... I'm going to stay here. By my own will."
-  },
+    emoji: ["🏯", "🔥", "😳"],
+    quote: "I wanted to become completely self-sufficient. [...]"
+  }
 ];
-
-
