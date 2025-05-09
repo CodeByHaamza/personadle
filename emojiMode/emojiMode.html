@@ -1,41 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personadle - Emoji</title>
-    <!-- Styles & Icon -->
-    <!--<link rel="stylesheet" href="/css/style.css">f0f0f0 -->
-    <link rel="icon" type="image/gif" href="/img/persona_64x64.gif">
-    <style>
-        .center-img-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80vh; /* Ajustable selon besoin */
-        }
-        .center-img-container img {
-            max-width: 50%;
-            height: auto;
-        }
-        body {
-            background-color: #f9deb4; 
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personadle - Emoji Mode</title>
+
+  <!-- Styles & Icon -->
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" type="image/gif" href="/img/persona_64x64.gif" />
 </head>
+
 <body>
+  <!-- Logo -->
+  <header id="homepage">
+    <a href="/index.html">
+      <img
+        src="/img/Logo_PersonaDLE.png"
+        alt="PersonaDLE Logo"
+        class="logo_HomePage"
+        id="imgHomePage"
+      />
+    </a>
+  </header>
 
-    <!-- Logo Persona 
-    <header id="homepage">
-        <a href="/index.html">
-            <img src="/img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage">
-        </a>
-    </header>-->
 
-    <div class="center-img-container">
-        <img src="/img/Still working.png" alt="Still working">
-        <h1>Workin' on !</h1>
-    </div>
+  <!-- Zone stylisée pour les emojis -->
+  <div class="emoji-hint-zone">
+    <h2>Which character do these emojis describe?</h2>
+    <div id="emojiDisplay" style="margin-top: 20px;"></div>
+    <p>Each try unlocks an emoji.</p>
+  </div>
 
+<!-- Zone de victoire (image + message) -->
+<div id="victoryBox" class="victory-box" style="display: none;">
+    <img id="victoryPortrait" src="" alt="Portrait" />
+    <p id="winMessage" class="win-message"></p>
+  </div>
+  
+
+  <!-- Champ de saisie + boutons -->
+  <section class="input-wrapper" style="position: relative;">
+    <input
+      type="text"
+      id="textbar"
+      placeholder="Enter character name..."
+      aria-label="Guess character name"
+    />
+    <button id="guessButton">Submit</button>
+    <button id="resetButton">Replay</button>
+    <button id="giveUpButton" disabled>Give Up</button>
+  </section>
+
+  <!-- Script principal -->
+  <script type="module" src="./emojiMode.js"></script>
 </body>
 </html>
