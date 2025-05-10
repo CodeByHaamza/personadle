@@ -217,16 +217,16 @@ body {
 }
 
 .list-options img {
-  /* Style for images in autocomplete options */
-  width: 100px; /* Set width */
-  height: 100px; /* Set height */
-  border-radius: 8px; /* Round the corners */
-  margin-right: 12px; /* Add spacing */
-  object-fit: cover; /* Ensure the image covers the area */
-  flex-shrink: 0; /* Prevent shrinking */
-  background: #eee; /* Light gray background */
-  border: 1px solid #ccc; /* Add border */
+  width: 100px;
+  height: 100px;
+  object-fit: contain; /* Pour voir l’image entière */
+  background-color: white; /* Fond blanc si l’image est petite */
+  border-radius: 8px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  border: 1px solid #ccc;
 }
+
 
 .list-options span {
   /* Style for text in autocomplete options */
