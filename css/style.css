@@ -355,12 +355,14 @@ body {
 }
 
   .guess-image {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid #ccc;
-  }
+  width: 100px;
+  height: 100px;
+  object-fit: contain; /* Voir l’image en entier sans déformation */
+  background-color: white; /* Pour éviter le noir autour des images transparentes */
+  border-radius: 10px;
+  border: 2px solid #ccc;
+}
+
 
 .guess-cell {
   width: 130px;
