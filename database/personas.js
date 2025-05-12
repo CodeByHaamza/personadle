@@ -61,6 +61,7 @@ export const personas = [
   "Ryoji Mochizuki",
   "Ryotaro Dojima",
   "Ryuji Sakamoto",
+  "Rise Kujikawa",
   "Rio Iwasaki",
   "Sadayo Kawakami",
   "Saori Hasegawa",
