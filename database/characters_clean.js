@@ -185,7 +185,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["🏀", "💃", "🏅"],
+    emoji: ["👩‍👦", "🏅", "🏃"],
     quote: "I learned a lot from those kids. When I first started coaching them. I was thinking about how I would teach my own kids one day... an I didn't have the slightest clue. Well, that all changed. If you hadn't been there with me, I'm not sure if I would've been able to coach those kids. And I would have never thought about my future, either. ...So, thank you."
   },
   {
