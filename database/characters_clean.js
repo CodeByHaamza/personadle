@@ -15,7 +15,7 @@ export const characters = [
   {
     nom: "Junpei Iori",
     genre: "Male",
-    age: 17,
+    age: 16,
     arcane: ["Magician"],
     opus: "P3",
     personaUser: true,
