@@ -885,7 +885,7 @@ export const characters = [
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["💥", "🔐", "👯‍♀️"],
+      emoji: ["⚔️","‼️","🧢"],
       quote: "Listen up, Inmate! You may think you're getting stronger, but don't get ahead of yourself! Your rehabilitation is far from over, and we won't tolerate any slacking. Justine and I will be keeping a close eye on you, so don't you dare disappoint us! The strength of your heart is what will determine your fate… So prove to us that you're worthy of standing before our master!"
     },
     {
@@ -896,18 +896,18 @@ export const characters = [
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["💥", "🔐", "👯‍♀️"],
+      emoji: ["📖","🔗","🎀"],
       quote: "Inmate, you're not doing enough to atone for your crimes. If you truly desire to change your fate, you will need to push yourself further. We can see your potential, but you are still weak. So, prove to us that you can grow stronger! You might think you're gaining strength from all the battles, but there's more to it than that. Your true strength lies in your heart and mind, not just your Persona."
     },
     {
       nom: "Lavenza",
       genre: "Female",
       age: "Unknown",
-      arcane: ["Strenght"],
+      arcane: ["Strength"],
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["💥", "🔐", "👯‍♀️"],
+      emoji: ["✨","🔮","👁️"],
       quote: "I... am Lavenza. The true form of the twins. All of the memories and experiences I have accumulated as Caroline and Justine... they are now part of me. You have proven yourself worthy, and I am here to support you in your final trial. We have seen your growth, and though the road ahead will be difficult, I will stand by your side. Your heart is the key to your fate. It is not about the choices you make, but the resolve you hold in your heart. Do not falter, and remember, the strength you've gained is more than just physical."
     },
     {
