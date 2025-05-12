@@ -80,6 +80,7 @@ export const personas = [
   "Toranosuke Yoshida",
   "Yosuke Hanamura",
   "Yu Narukami",
+  "Yuko Nishiwaki",
   "Yukari Takeba",
   "Yukiko Amagi",
   "Yumi Ozawa",
