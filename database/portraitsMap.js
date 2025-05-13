@@ -40,4 +40,7 @@ export const portraitsMap = {
    "Tae Takemi": "Takemi",
    "Yuuki Mishima": "Mishima",
    "Makoto Niijima": "Makoto",
+   "Kinshiro Morooka": "Morooka",
+   "Mr. Edogawa": "Edgoawa",
+
 };

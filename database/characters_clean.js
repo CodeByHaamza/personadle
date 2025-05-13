@@ -15,7 +15,7 @@ export const characters = [
   {
     nom: "Junpei Iori",
     genre: "Male",
-    age: 16,
+    age: 17,
     arcane: ["Magician"],
     opus: "P3",
     personaUser: true,
@@ -185,7 +185,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["👩‍👦", "🏅", "🏃"],
+    emoji: ["🏀", "💃", "🏅"],
     quote: "I learned a lot from those kids. When I first started coaching them. I was thinking about how I would teach my own kids one day... an I didn't have the slightest clue. Well, that all changed. If you hadn't been there with me, I'm not sure if I would've been able to coach those kids. And I would have never thought about my future, either. ...So, thank you."
   },
   {
@@ -262,7 +262,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["⭐​", "🍡​", "🏃🏻​"],
+    emoji: ["🧑‍🦳", "⚔️", "💔"],
     quote: "You helped me realize a lot of stuff, y'know? I always blamed school or my family for everything. I didn't want to face the fact that I was responsible... I really lucked out, y'know? If we hadn't met, I'd still be a jerk. I won't forget you."
   },
   {
@@ -885,7 +885,7 @@ export const characters = [
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["⚔️","‼️","🧢"],
+      emoji: ["💥", "🔐", "👯‍♀️"],
       quote: "Listen up, Inmate! You may think you're getting stronger, but don't get ahead of yourself! Your rehabilitation is far from over, and we won't tolerate any slacking. Justine and I will be keeping a close eye on you, so don't you dare disappoint us! The strength of your heart is what will determine your fate… So prove to us that you're worthy of standing before our master!"
     },
     {
@@ -896,18 +896,18 @@ export const characters = [
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["📖","🔗","🎀"],
+      emoji: ["💥", "🔐", "👯‍♀️"],
       quote: "Inmate, you're not doing enough to atone for your crimes. If you truly desire to change your fate, you will need to push yourself further. We can see your potential, but you are still weak. So, prove to us that you can grow stronger! You might think you're gaining strength from all the battles, but there's more to it than that. Your true strength lies in your heart and mind, not just your Persona."
     },
     {
       nom: "Lavenza",
       genre: "Female",
       age: "Unknown",
-      arcane: ["Strength"],
+      arcane: ["Strenght"],
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["✨","🔮","👁️"],
+      emoji: ["💥", "🔐", "👯‍♀️"],
       quote: "I... am Lavenza. The true form of the twins. All of the memories and experiences I have accumulated as Caroline and Justine... they are now part of me. You have proven yourself worthy, and I am here to support you in your final trial. We have seen your growth, and though the road ahead will be difficult, I will stand by your side. Your heart is the key to your fate. It is not about the choices you make, but the resolve you hold in your heart. Do not falter, and remember, the strength you've gained is more than just physical."
     },
     {
@@ -932,4 +932,72 @@ export const characters = [
       emoji: ["🔎", "⚖️", "👩‍⚖️"],
       quote: "Still, I'm glad I was able to save you in court. I've never felt so happy in my entire life. I'm not quite sure how to put it, but... saving your future meant more to me than my own career. I feel like you even taught me how to live."
     },
+    {
+      nom: "Kinshiro Morooka",
+      genre: "Male",
+      age: 45,
+      arcane: ["NONE"],
+      opus: "P4",
+      personaUser: false,
+      persona: "NONE",
+      emoji: ["😡", "🦷", "👨‍🏫"],
+      quote: "Now listen up! This town is miles away from your big city of perverts and assholes, in more ways than one. You better not even think of getting involved with the girls here, let alone abusing them! But what do I know... it's not like the old days. Even here, kids grow up so damn fast. Every time I turn my back, you're fooling around on those damn phones, checking your life-journals and your my-places..."
+    },
+    {
+      nom: "Noriko Kashiwagi",
+      genre: "Female",
+      age: 40,
+      arcane: ["NONE"],
+      opus: "P4",
+      personaUser: false,
+      persona: "NONE",
+      emoji: ["🥵", "💄", "👩‍🏫"],
+      quote: "Oh, and one more thing. That idol in our first-year class... Ms. Kujikawa, was it? In person, she's nothing like she seems on TV, so don't get your hopes up, mmkay? What's so great about an idol anyway, right class? She's just a piece of inexperienced jailbait."
+    },
+    {
+      nom: "Hanako Ohtani",
+      genre: "Female",
+      age: 16,
+      arcane: ["NONE"],
+      opus: "P4",
+      personaUser: false,
+      persona: "NONE",
+      emoji: ["🍰", "🙄", "🛵"],
+      quote: "The best girls don't go steady for nothing, you know? You need to make an effort."
+    },
+    {
+      nom: "Mitsuo Kubo",
+      genre: "Male",
+      age: 16,
+      arcane: ["NONE"],
+      opus: "P4",
+      personaUser: false,
+      persona: "NONE",
+      emoji: ["😐", "🔪", "👾"],
+      quote: "What...? What's that supposed to mean!? I'm... I'm not nothing..."
+    },
+    {
+      nom: "Mr. Edogawa",
+      genre: "Male",
+      age: 40,
+      arcane: ["NONE"],
+      opus: "P3",
+      personaUser: false,
+      persona: "NONE",
+      emoji: ["🧙‍♂️", "👨‍🏫", "💤"],
+      quote: "Today, we’ll be discussing the summoning of demons... which, of course, is strictly forbidden by school regulations."
+    },
+    {
+      nom: "Jose",
+      genre: "Male",
+      age: "Unknown",
+      arcane: ["NONE"],
+      opus: "P5R",
+      personaUser: false,
+      persona: "NONE",
+      emoji: ["🚗", "🌻", "🌠"],
+      quote: "Good job!"
+    },
+  
+  
   ];
