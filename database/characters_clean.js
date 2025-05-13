@@ -903,7 +903,7 @@ export const characters = [
       nom: "Lavenza",
       genre: "Female",
       age: "Unknown",
-      arcane: ["Strenght"],
+      arcane: ["Strength"],
       opus: "P5",
       personaUser: false,
       persona: "NONE",
