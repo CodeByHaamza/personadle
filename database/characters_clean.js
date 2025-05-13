@@ -20,7 +20,7 @@ export const characters = [
     opus: "P3",
     personaUser: true,
     persona: "Hermes",
-    emoji: ["🦸‍♂️","🎮","💥"],
+    emoji: ["⚾","🎮","🪽"],
     quote: "Ya know, I don't think it's completely hit me yet... It's just all so hard to believe... But, that doesn't mean we should just sit around and wait for it to happen. You're pretty cool, man. That thing was inside you for ten years, and you harnessed its power and made it your own..."
   },
   {
@@ -31,7 +31,7 @@ export const characters = [
     opus: "P3",
     personaUser: true,
     persona: "Lucia",
-    emoji: ["📱","📚","🌸"],
+    emoji: ["💻","📚","📡"],
     quote: "I guess there is something I want after all... It makes me happy to see everyone else happy too. So, I want us all to remain friends. The power to connect people, even when they're apart... My Persona has given me this amazing gift."
   },
   {
@@ -42,7 +42,7 @@ export const characters = [
     opus: "P3",
     personaUser: true,
     persona: "Penthesilea",
-    emoji: ["👩‍💼","🏰","❄️"],
+    emoji: ["🏍️","🤺","❄️"],
     quote: "I remember... Yes... With my father's death, I lost my purpose in life... But now I have something to live for. No longer will I run from the future! I will face it head on, carrying out my father's will! I am resolved and without reservation. I owe it all to my invaluable friends... And we have promised to never lose hope, no matter what tomorrow may bring."
   },
   {
@@ -86,7 +86,7 @@ export const characters = [
     opus: "P3",
     personaUser: true,
     persona: "Io",
-    emoji: ["🏹","👩‍🎤","🌙"],
+    emoji: ["🏹","👩‍🎤","❤️"],
     quote: "He was involved in dangerous work, but in the end, he fought to make things right. He believed the Shadows needed to be stopped, even if it meant losing his life. That's why I choose to fight. I'm going to destroy the Dark Hour and finish what my dad started. That's all I can do. That we can do. Right, Mitsuru-senpai?"
   },
   {
@@ -119,7 +119,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["🏅", "📚", "💼"],
+    emoji: ["🫣", "📚", "💼"],
     quote: "Normally, I'm quiet and timid, but when it comes to something I care about, then I become aggressive."
   },
   {
@@ -130,7 +130,7 @@ export const characters = [
     opus: "P3",
     personaUser: true,
     persona: "Nemesis",
-    emoji: ["👦","🐶","💔"],
+    emoji: ["🧒","🐶","💔"],
     quote: "Normally, I'm quiet and timid, but when it comes to something I care about, then I become aggressive."
   },
   {
@@ -141,7 +141,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["💫", "🕹️", "🎮"],
+    emoji: ["👩‍💻", "🕹️", "🎮"],
     quote: "Everyone has darkness in their hearts, but they fight against it, right? It's true that hope isn't something you come across so easily in our society... But that hardly gives them license to give up! They should be able to stand on their own two feet! ...Anyway, that's what I thought. I hope you were paying attention, class. Something profound like that is bound to be on the final exam."
   },
   {
@@ -163,7 +163,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["🚶‍♂️", "🏃‍♂️", "🛠️"],
+    emoji: ["🧑‍⚕️", "🧑‍🎨", "💰"],
     quote: "I have my own dreams too, you know! Ugh, I can't stand it anymore!"
   },
   {
@@ -185,7 +185,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["🏀", "💃", "🏅"],
+    emoji: ["🏃", "🧑‍🧒", "🏅"],
     quote: "I learned a lot from those kids. When I first started coaching them. I was thinking about how I would teach my own kids one day... an I didn't have the slightest clue. Well, that all changed. If you hadn't been there with me, I'm not sure if I would've been able to coach those kids. And I would have never thought about my future, either. ...So, thank you."
   },
   {
@@ -196,7 +196,7 @@ export const characters = [
     opus: "P3",
     personaUser: true,
     persona: "Cerberus",
-    emoji: ["💫", "🐾", "🐕"],
+    emoji: ["⛩️", "🐾", "🐕"],
     quote: "Woof! Woof woof! Arf! Arf!"
   },
   {
@@ -229,7 +229,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["🏖️", "🍷", "🎩"],
+    emoji: ["🪡", "🍷", "🇫🇷"],
     quote: "When my uncle sees zis, he will surely let me come back to Nihon! It eez time for 'im to concede! I must 'urry up and go see 'im! So, I 'ave to say goodbye for a little while... <Farewell>... But, I'll be back! I will not give in to my uncle!"
   },
   {
@@ -262,7 +262,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["🧑‍🦳", "⚔️", "💔"],
+    emoji: ["🌟", "🏃", "💔"],
     quote: "You helped me realize a lot of stuff, y'know? I always blamed school or my family for everything. I didn't want to face the fact that I was responsible... I really lucked out, y'know? If we hadn't met, I'd still be a jerk. I won't forget you."
   },
   {
@@ -284,7 +284,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["🕴", "💼", "📖"],
+    emoji: ["🍱", "🍜", "💼"],
     quote: "I feel like I've been a fake all this time... But, I will become the true Gourmet King one day! I will become a food critic. It will be my job to eat... And I will master it! Then, once I die and go to the afterlife, I can face my brother... And he'll be impressed by the fact that I was able to master something, all by myself!"
   },
   {
@@ -295,7 +295,7 @@ export const characters = [
     opus: "P3",
     personaUser: true,
     persona: "Castor",
-    emoji: ["💔", "🥃", "💣"],
+    emoji: ["🪓", "💉", "🩸"],
     quote: "Heh... Why the long face? Isn't this... what you wanted? It's alright... give yourself time... Let your anger be your strength. You're still just a kid, Ken... You got your whole life ahead of you... So don't waste it... Make it your own... Okay?"
   },
   {
@@ -328,7 +328,7 @@ export const characters = [
     opus: "P3P",
     personaUser: true,
     persona: "Orpheus",
-    emoji: ["🎹", "🎵", "🎤"],
+    emoji: ["🎧","🌙","♀️"],
     quote: "Time never waits. It delivers all equally to the same end. You, who wish to safeguard the future, however limited it may be... You will be given one year; go forth without falter, with your heart as your guide..."
   },
   {
@@ -339,7 +339,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["👑", "🎩", "🧳"],
+    emoji: ["🧢", "🛝", "📖"],
     quote: "Well then, a song to celebrate my victory... Veeelvet, oh velvet..."
   },
   {
@@ -350,7 +350,7 @@ export const characters = [
     opus: "P3",
     personaUser: true,
     persona: "Orpheus",
-    emoji: ["🧑‍🎤", "🦸‍♂️", "⚡"],
+    emoji: ["🎧","🌙","♂️"],
     quote: "Time never waits. It delivers all equally to the same end. You, who wish to safeguard the future, however limited it may be... You will be given one year; go forth without falter, with your heart as your guide..."
   },
   {
@@ -663,7 +663,7 @@ export const characters = [
       opus: "P5",
       personaUser: true,
       persona: "Captain Kidd",
-      emoji: ["⚡", "🏃‍♂️", "💥"],
+      emoji: ["⚡", "🏃‍♂️", "🏴‍☠️"],
       quote: "I get it now... We're doin' this to make sure people don't gotta go through the same crap we did. It doesn't matter if they think we're just or not. We gotta do what we believe in! Heh, and it's not like people think much of me anyways. I'm gonna dash through this the only way I know how!"
     },
     {
@@ -797,7 +797,7 @@ export const characters = [
       opus: "P5",
       personaUser: true,
       persona: "Necronomicon",
-      emoji: ["👸", "🌸", "💻"],
+      emoji: ["💻", "🛸", "👩‍💻"],
       quote: "...I don't want to run away from this. I ran from my mom's death for so long... I misunderstood it... Everything was just too painful for me to handle. But... I never want to be left in the dark again! ...That's probably why my Persona is a little bit special. Because I want to learn the truth. That's how I really feel! Well, I've come this far... I'll follow you wherever you go, on my own two feet!"
     },
     {
@@ -885,7 +885,7 @@ export const characters = [
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["💥", "🔐", "👯‍♀️"],
+      emoji: ["💢", "🔒", "👮‍♀️"],
       quote: "Listen up, Inmate! You may think you're getting stronger, but don't get ahead of yourself! Your rehabilitation is far from over, and we won't tolerate any slacking. Justine and I will be keeping a close eye on you, so don't you dare disappoint us! The strength of your heart is what will determine your fate… So prove to us that you're worthy of standing before our master!"
     },
     {
@@ -896,7 +896,7 @@ export const characters = [
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["💥", "🔐", "👯‍♀️"],
+      emoji: ["📖", "🔐", "🧘‍♀️"],
       quote: "Inmate, you're not doing enough to atone for your crimes. If you truly desire to change your fate, you will need to push yourself further. We can see your potential, but you are still weak. So, prove to us that you can grow stronger! You might think you're gaining strength from all the battles, but there's more to it than that. Your true strength lies in your heart and mind, not just your Persona."
     },
     {
@@ -907,7 +907,7 @@ export const characters = [
       opus: "P5",
       personaUser: false,
       persona: "NONE",
-      emoji: ["💥", "🔐", "👯‍♀️"],
+      emoji: ["👑", "🔐", "👯‍♀️"],
       quote: "I... am Lavenza. The true form of the twins. All of the memories and experiences I have accumulated as Caroline and Justine... they are now part of me. You have proven yourself worthy, and I am here to support you in your final trial. We have seen your growth, and though the road ahead will be difficult, I will stand by your side. Your heart is the key to your fate. It is not about the choices you make, but the resolve you hold in your heart. Do not falter, and remember, the strength you've gained is more than just physical."
     },
     {
