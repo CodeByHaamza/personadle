@@ -262,7 +262,7 @@ export const characters = [
     opus: "P3",
     personaUser: false,
     persona: "NONE",
-    emoji: ["🧑‍🦳", "⚔️", "💔"],
+    emoji: ["⭐​", "🍡​", "🏃🏻​"],
     quote: "You helped me realize a lot of stuff, y'know? I always blamed school or my family for everything. I didn't want to face the fact that I was responsible... I really lucked out, y'know? If we hadn't met, I'd still be a jerk. I won't forget you."
   },
   {
