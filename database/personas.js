@@ -58,6 +58,7 @@ export const personas = [
   "Pharos",
   "President Tanaka",
   "Ren Amamiya",
+  "Rise Kujikawa",
   "Ryoji Mochizuki",
   "Ryotaro Dojima",
   "Ryuji Sakamoto",
