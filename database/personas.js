@@ -83,6 +83,7 @@ export const personas = [
   "Yukari Takeba",
   "Yukiko Amagi",
   "Yumi Ozawa",
+  "Yuko Nishiwaki",
   "Yusuke Kitagawa",
   "Yuuki Mishima",
   "Kinshiro Morooka",
