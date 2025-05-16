@@ -194,6 +194,7 @@ body {
 }
 
 .list-options {
+  
   /* Style for each autocomplete option */
   display: flex; /* Use flexbox for alignment */
   align-items: center; /* Center items vertically */
@@ -225,17 +226,18 @@ body {
   margin-right: 12px;
   flex-shrink: 0;
   border: 1px solid #ccc;
+  
 }
 
 
 .list-options span {
-  /* Style for text in autocomplete options */
-  overflow: hidden; /* Hide overflow text */
-  text-overflow: ellipsis; /* Add ellipsis for overflow */
-  white-space: nowrap; /* Prevent text wrapping */
-  max-width: 230px; /* Limit width */
-  display: inline-block; /* Inline-block for better control */
+  white-space: normal;       /* Permet les retours à la ligne */
+  overflow: visible;         /* Ne masque pas le texte */
+  text-overflow: unset;      /* Plus d’ellipse */
+  max-width: 230px;          /* Conserve une largeur propre */
+  line-height: 1.2;          /* Un peu de respi */
 }
+
 
 .autocomplete-active {
   background-color: #7b8383 !important;
@@ -552,3 +554,16 @@ body {
 }
 
 
+
+.codename {
+  font-weight: 700;
+  font-size: 16px;
+  color: black;
+}
+
+.realname {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
+  line-height: 1.1;
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personadle - All Out Attack</title>
+
+  <!-- Styles & Icon -->
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
+</head>
+
+<body>
+  <!-- Logo -->
+  <header id="homepage">
+    <a href="../index.html">
+      <img
+        src="../img/Logo_PersonaDLE.png"
+        alt="PersonaDLE Logo"
+        class="logo_HomePage"
+        id="imgHomePage"
+      />
+    </a>
+  </header>
+
+  <!-- Présentation -->
+  <div class="personadle-box">
+    <h1>Guess today’s Persona character!</h1>
+    <p>Type any character to start.</p>
+  </div>
+
+  <!-- Bouton indice -->
+  <button id="hintButton" disabled>Afficher un indice</button>
+
+  <!-- Zone de l’indice -->
+  <p id="quoteHint" style="display:none;"></p>
+
+  <!-- Champ de saisie + bouton -->
+  <section class="input-wrapper" style="position: relative;">
+    <input
+      type="text"
+      id="textbar"
+      placeholder="Enter character name..."
+      aria-label="Guess character name"
+    />
+    <button id="guessButton">Submit</button>
+    <button id="resetButton">Replay</button>
+    <button id="giveUpButton">Give Up</button>
+
+  </section>
+
+  <!-- Résultats -->
+  <div id="output" style="margin-top: 30px;"></div>
+
+  <!-- Script principal -->
+  <script type="module" src="./modeAllOutAttack.js"></script>
+
+
+
+   
+</body>
+</html>
