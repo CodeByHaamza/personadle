@@ -2,6 +2,8 @@ import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
 
+
+
 let personas = [...originalPersonas];
 let gameOver = false;
 
@@ -134,7 +136,6 @@ function showConfettiExplosion() {
     emoji.classList.add("confetti-emoji");
 
     const isLeft = i < numEmojisPerSide;
-
     emoji.style.left = isLeft ? "0vw" : "100vw";
     emoji.style.bottom = "0vh";
 
@@ -147,7 +148,6 @@ function showConfettiExplosion() {
     emoji.style.setProperty("--rotate", rotate + "deg");
 
     document.body.appendChild(emoji);
-
     setTimeout(() => emoji.remove(), 1000);
   }
 }
@@ -160,16 +160,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const output = document.getElementById("output");
   const resetButton = document.getElementById("resetButton");
   const giveUpButton = document.getElementById("giveUpButton");
+  const giveUpCounter = document.getElementById("giveUpCounter");
+  const hintCounter = document.getElementById("hintCounter");
 
   initializeAutocomplete(textbar, personas);
 
   let attempts = parseInt(localStorage.getItem("attempts")) || 0;
   let target = JSON.parse(localStorage.getItem("target"));
+  let history = JSON.parse(localStorage.getItem("guessHistory")) || [];
 
   if (!target) {
     target = characters[Math.floor(Math.random() * characters.length)];
     localStorage.setItem("target", JSON.stringify(target));
   }
+
+  // Affiche les anciennes tentatives
+  history.forEach(name => checkGuess(name, target));
+
+  updateCounters();
 
   if (attempts >= 3) enableHintButton();
   if (attempts >= 8) enableGiveUpButton();
@@ -178,10 +186,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gameOver) return;
 
     const guessName = textbar.value.trim();
-    if (guessName === "") return;
+    if (!guessName) return;
 
     attempts++;
     localStorage.setItem("attempts", attempts);
+    history.push(guessName);
+    localStorage.setItem("guessHistory", JSON.stringify(history));
+
+    updateCounters();
 
     if (attempts >= 3) enableHintButton();
     if (attempts >= 8) enableGiveUpButton();
@@ -190,9 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
     textbar.value = "";
   });
 
-  resetButton.addEventListener("click", () => {
-    resetGame();
-  });
+  resetButton.addEventListener("click", resetGame);
 
   hintButton.addEventListener("click", () => {
     if (target && target.quote) {
@@ -204,6 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   giveUpButton.addEventListener("click", () => {
+    if (attempts < 8) return;
     if (target && target.nom) {
       checkGuess(target.nom, target, true);
     }
@@ -212,6 +223,11 @@ document.addEventListener("DOMContentLoaded", () => {
     giveUpButton.disabled = true;
     gameOver = true;
   });
+
+  function updateCounters() {
+    if (giveUpCounter) giveUpCounter.textContent = `(${attempts} / 8)`;
+    if (hintCounter) hintCounter.textContent = `(${Math.min(attempts, 3)} / 3)`;
+  }
 
   function enableHintButton() {
     hintButton.disabled = false;
@@ -226,6 +242,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function resetGame() {
     localStorage.removeItem("target");
     localStorage.removeItem("attempts");
+    localStorage.removeItem("guessHistory");
+
     output.innerHTML = "";
     quoteHint.style.display = "none";
     textbar.disabled = false;
@@ -234,6 +252,8 @@ document.addEventListener("DOMContentLoaded", () => {
     hintButton.style.cursor = "not-allowed";
     giveUpButton.disabled = true;
     giveUpButton.style.cursor = "not-allowed";
+    if (giveUpCounter) giveUpCounter.textContent = "(0 / 8)";
+    if (hintCounter) hintCounter.textContent = "(0 / 3)";
     textbar.value = "";
 
     personas = [...originalPersonas];
@@ -244,6 +264,17 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("target", JSON.stringify(target));
   }
 
+  function convertAgeToValue(age) {
+    const map = {
+      "< 15": 10,
+      "15-20": 17.5,
+      "21-40": 30,
+      "40+": 50,
+      "80+": 85
+    };
+    return map[age] ?? -1;
+  }
+
   function checkGuess(name, target, forceReveal = false) {
     const guess = characters.find(c => c.nom.toLowerCase() === name.toLowerCase());
     if (!guess) {
@@ -252,20 +283,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!document.querySelector(".category-row")) {
-      const categoryRow = document.createElement("div");
-      categoryRow.classList.add("category-row");
-      categoryRow.innerHTML = `
-        <div></div>
-        <div>Name</div>
-        <div>Gender</div>
-        <div>Age</div>
-        <div>Persona User</div>
-        <div>Persona</div>
-        <div>Arcana</div>
-        <div>Opus</div>
-      `;
-      output.insertBefore(categoryRow, output.firstChild);
-    }
+  const categoryRow = document.createElement("div");
+  categoryRow.classList.add("category-row");
+  categoryRow.innerHTML = `
+    <div></div>
+    <div class="tooltip-cat">NAME<span class="tooltip-text">Full character name.</span></div>
+    <div class="tooltip-cat">GENDER<span class="tooltip-text">Biological or metaphysical gender.</span></div>
+    <div class="tooltip-cat">AGE<span class="tooltip-text">Approximate age range of the character.</span></div>
+    <div class="tooltip-cat">PERSONA USER<span class="tooltip-text">Can they summon/use a Persona?</span></div>
+    <div class="tooltip-cat">PERSONA<span class="tooltip-text">Name of their primary Persona.</span></div>
+    <div class="tooltip-cat">ARCANA<span class="tooltip-text">Their Social Link Arcana.</span></div>
+    <div class="tooltip-cat">OPUS<span class="tooltip-text">Games where they appear (P3, P4G, etc).</span></div>
+  `;
+  output.insertBefore(categoryRow, output.firstChild);
+}
+
 
     const row = document.createElement("div");
     row.classList.add("guess-row");
@@ -285,46 +317,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let value = guess[key];
       let targetVal = target[key];
-
-      if (typeof value === "boolean") value = value ? "Yes" : "No";
-      if (typeof targetVal === "boolean") targetVal = targetVal ? "Yes" : "No";
-
       let displayValue = Array.isArray(value) ? value.join(", ") : value;
 
       if (key === "age") {
-        const guessAge = parseInt(value);
-        const targetAge = parseInt(targetVal);
-        const ageUnknownValues = ["Unknown", -1, "unknown"];
-
-        if (ageUnknownValues.includes(value) && ageUnknownValues.includes(targetVal)) {
+        const guessVal = convertAgeToValue(value);
+        const targetValue = convertAgeToValue(targetVal);
+        if (value === targetVal) {
           cell.classList.add("correct");
-          displayValue = "Unknown";
-        } else if (!isNaN(guessAge) && !isNaN(targetAge)) {
-          if (guessAge === targetAge) {
-            cell.classList.add("correct");
-          } else {
-            const diffSymbol = guessAge < targetAge ? "↑" : "↓";
-            displayValue += ` ${diffSymbol}`;
-            cell.classList.add("wrong");
-          }
+        } else if (guessVal !== -1 && targetValue !== -1) {
+          const arrow = guessVal < targetValue ? "↑" : "↓";
+          cell.classList.add("misplaced");
+          displayValue += ` ${arrow}`;
         } else {
           cell.classList.add("wrong");
         }
-      } else if (key === "genre") {
-        if (
-          typeof value === "string" &&
-          typeof targetVal === "string" &&
-          value.toLowerCase() === targetVal.toLowerCase()
-        ) {
-          cell.classList.add("correct");
-        } else {
-          cell.classList.add("wrong");
-        }
+      } else if (typeof value === "boolean" || typeof targetVal === "boolean") {
+        const boolStr = val => val ? "Yes" : "No";
+        displayValue = boolStr(value);
+        cell.classList.add(value === targetVal ? "correct" : "wrong");
       } else if (Array.isArray(targetVal)) {
         const guessArr = Array.isArray(value) ? value : [value];
-        const intersection = guessArr.filter(val => targetVal.includes(val));
-
-        if (intersection.length === guessArr.length && guessArr.length === targetVal.length) {
+        const intersection = guessArr.filter(v => targetVal.includes(v));
+        if (intersection.length === targetVal.length && guessArr.length === targetVal.length) {
           cell.classList.add("correct");
         } else if (intersection.length > 0) {
           cell.classList.add("misplaced");
@@ -338,8 +352,6 @@ document.addEventListener("DOMContentLoaded", () => {
           value.toLowerCase() === targetVal.toLowerCase()
         ) {
           cell.classList.add("correct");
-        } else if (Object.values(target).includes(value)) {
-          cell.classList.add("misplaced");
         } else {
           cell.classList.add("wrong");
         }
@@ -349,7 +361,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         cell.classList.add("flip");
       }, 100 * (index + 1));
-
       row.appendChild(cell);
     });
 

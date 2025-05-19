@@ -29,23 +29,42 @@
     <p>Type any character to start.</p>
   </div>
 
-  <!-- Bouton indice -->
-  <button id="hintButton" disabled>Afficher un indice</button>
+  <!-- Ligne de catégories avec infobulles -->
 
-  <!-- Zone de l’indice -->
-  <p id="quoteHint" style="display:none;"></p>
 
-  <!-- Champ de saisie + bouton -->
-  <section class="input-wrapper" style="position: relative;">
-    <input
-      type="text"
-      id="textbar"
-      placeholder="Enter character name..."
-      aria-label="Guess character name"
-    />
-    <button id="guessButton">Submit</button>
-    <button id="resetButton">Replay</button>
-    <button id="giveUpButton">Give Up</button>
+
+<!-- Bouton indice + compteur -->
+<div style="text-align: center; margin-top: 20px;">
+  <button id="hintButton" disabled>Hint a quote</button>
+  <span id="hintCounter" style="margin-left: 8px; font-size: 16px; color: white;">
+    (0 / 3)
+  </span>
+</div>
+
+<!-- Zone de l’indice -->
+<p id="quoteHint" style="display:none;"></p>
+
+<!-- Champ de saisie + boutons principaux -->
+<section class="input-wrapper" style="position: relative;">
+  <input
+    type="text"
+    id="textbar"
+    placeholder="Enter character name..."
+    aria-label="Guess character name"
+  />
+  <button id="guessButton">Submit</button>
+  <button id="resetButton">Replay</button>
+</section>
+
+<!-- Give up + compteur -->
+<div id="giveUpWrapper" style="text-align: center; margin-top: 10px;">
+  <button id="giveUpButton" disabled>Give Up</button>
+  <span id="giveUpCounter" style="margin-left: 10px; font-size: 16px; color: white;">
+    (0 / 8)
+  </span>
+</div>
+
+
 
   </section>
 

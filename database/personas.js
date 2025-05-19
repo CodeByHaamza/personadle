@@ -91,5 +91,15 @@ export const personas = [
   "Hanako Ohtani",
   "Mitsuo Kubo",
   "Mr. Edogawa",
-  "Jose"
+  "Jose",
+  "Metis",
+  "Sho Minazuki",
+  "Labrys",
+  "Suguru Kamoshida",
+  "Ichiryusai Madarame",
+  "Junya Kaneshiro",
+  "Jin Shirato",
+  "Shuji Ikutsuki",
+  "Chidori Yoshino",
+  "Takaya Sakaki",
 ];

@@ -365,7 +365,6 @@ body {
   border: 2px solid #ccc;
 }
 
-
 .guess-cell {
   width: 130px;
   height: 100px;
@@ -382,8 +381,13 @@ body {
   animation: flipIn 0.5s ease forwards;
   transform: rotateX(90deg);
   text-align: center;
-  padding: 0 5px;
+  padding: 10px; /* ⇦ plus de "marge intérieure" */
+  line-height: 1.4; /* ⇦ plus d’espace entre les lignes */
+  white-space: normal; /* ⇦ permet les retours à la ligne */
+  word-break: break-word; /* ⇦ évite les débordements moches */
+  box-sizing: border-box; /* ⇦ évite que le padding dépasse le width */
 }
+
 
 
 
@@ -397,8 +401,8 @@ body {
 .category-row {
   display: grid;
   grid-template-columns: 100px repeat(7, 1fr); /* 1 image + 7 critères */
-  gap: 12px;
-  margin: 20px 0 10px;
+  gap: 23px;
+  margin: 50px 0 10px;
   font-weight: bold;
   font-size: 14px;
   text-align: center;
@@ -566,4 +570,41 @@ body {
   color: #555;
   font-style: italic;
   line-height: 1.1;
+}
+
+
+.tooltip-cat {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+  font-weight: bold;
+  font-size: 15px;
+  color: white;
+  text-transform: uppercase;
+}
+
+.tooltip-cat .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: rgba(33, 33, 33, 0.95);
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 8px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 14px;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  white-space: normal;
+}
+
+.tooltip-cat:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
