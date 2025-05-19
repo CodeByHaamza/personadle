@@ -2,11 +2,11 @@ import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
 
-
-
+// ===== Variables globales =====
 let personas = [...originalPersonas];
 let gameOver = false;
 
+// ===== Fonction d'autocomplétion =====
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
 
@@ -152,6 +152,7 @@ function showConfettiExplosion() {
   }
 }
 
+// ===== DOMContentLoaded =====
 document.addEventListener("DOMContentLoaded", () => {
   const textbar = document.getElementById("textbar");
   const guessButton = document.getElementById("guessButton");
@@ -174,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("target", JSON.stringify(target));
   }
 
-  // Affiche les anciennes tentatives
+  // Réaffichage des anciennes tentatives
   history.forEach(name => checkGuess(name, target));
 
   updateCounters();
@@ -222,11 +223,17 @@ document.addEventListener("DOMContentLoaded", () => {
     guessButton.disabled = true;
     giveUpButton.disabled = true;
     gameOver = true;
+
+    // Enregistre aussi le "give up" dans l’historique
+    if (!history.includes(target.nom)) {
+      history.push(target.nom);
+      localStorage.setItem("guessHistory", JSON.stringify(history));
+    }
   });
 
   function updateCounters() {
     if (giveUpCounter) giveUpCounter.textContent = `(${attempts} / 8)`;
-    if (hintCounter) hintCounter.textContent = `(${Math.min(attempts, 3)} / 3)`;
+    if (hintCounter) hintCounter.textContent = `(${attempts} / 3)`;
   }
 
   function enableHintButton() {
@@ -283,21 +290,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!document.querySelector(".category-row")) {
-  const categoryRow = document.createElement("div");
-  categoryRow.classList.add("category-row");
-  categoryRow.innerHTML = `
-    <div></div>
-    <div class="tooltip-cat">NAME<span class="tooltip-text">Full character name.</span></div>
-    <div class="tooltip-cat">GENDER<span class="tooltip-text">Biological or metaphysical gender.</span></div>
-    <div class="tooltip-cat">AGE<span class="tooltip-text">Approximate age range of the character.</span></div>
-    <div class="tooltip-cat">PERSONA USER<span class="tooltip-text">Can they summon/use a Persona?</span></div>
-    <div class="tooltip-cat">PERSONA<span class="tooltip-text">Name of their primary Persona.</span></div>
-    <div class="tooltip-cat">ARCANA<span class="tooltip-text">Their Social Link Arcana.</span></div>
-    <div class="tooltip-cat">OPUS<span class="tooltip-text">Games where they appear (P3, P4G, etc).</span></div>
-  `;
-  output.insertBefore(categoryRow, output.firstChild);
-}
+      const categoryRow = document.createElement("div");
+      categoryRow.classList.add("category-row");
+      categoryRow.innerHTML = `
+  <div></div>
+  <div class="tooltip">Name
+  <span class="tooltip-text">The full name of the character as known in the Persona universe.</span>
+</div>
 
+<div class="tooltip">Gender
+  <span class="tooltip-text">Represents the character’s identity or nature — can be Human, Artificial, Shadow, or Entity.</span>
+</div>
+
+<div class="tooltip">Age
+  <span class="tooltip-text">Age range based on lore, from "< 15" to "40+", including unique entities like "80+".</span>
+</div>
+
+<div class="tooltip">Persona User / Shadow
+  <span class="tooltip-text">Indicates if the character can summon a Persona or is a Shadow themselves.</span>
+</div>
+
+<div class="tooltip">Persona / Shadow
+  <span class="tooltip-text">The specific Persona linked to the character — or their Shadow form if applicable.</span>
+</div>
+
+<div class="tooltip">Arcana
+  <span class="tooltip-text">Their corresponding Tarot Arcana, which defines their symbolic and narrative role.</span>
+</div>
+
+<div class="tooltip">Opus
+  <span class="tooltip-text">The game(s) in which this character appears: P3, P4G, P5, PQ2, P5T, etc.</span>
+</div>
+
+`;
+
+      output.insertBefore(categoryRow, output.firstChild);
+    }
 
     const row = document.createElement("div");
     row.classList.add("guess-row");

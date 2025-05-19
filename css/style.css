@@ -336,6 +336,7 @@ body {
   display: none;
 }
 
+/* Conteneur principal des résultats */
 #output {
   margin-top: 40px;
   display: flex;
@@ -343,37 +344,40 @@ body {
   align-items: center;
 }
 
+/* Lignes de réponse */
 .guess-row {
   display: grid;
-  grid-template-columns: 100px repeat(7, 1fr);
-  gap: 12px;
+  grid-template-columns: 100px repeat(7, 140px); /* chaque colonne = largeur fixe */
+  gap: 14px;
   margin-bottom: 20px;
-  padding: 15px;
-  background-color: rgba(255, 255, 255, 0.849);
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  width: fit-content;
-  animation: fadeIn 0.5s ease;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.88);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  width: auto; /* auto plutôt que fit-content */
+  max-width: 1300px;
 }
 
-  .guess-image {
+
+ .guess-image {
   width: 100px;
   height: 100px;
-  object-fit: contain; /* Voir l’image en entier sans déformation */
-  background-color: white; /* Pour éviter le noir autour des images transparentes */
+  object-fit: contain;
+  background-color: white;
   border-radius: 10px;
   border: 2px solid #ccc;
 }
 
+
 .guess-cell {
-  width: 130px;
+  width: 140px;
   height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
   font-family: 'Arial', sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   color: white;
   border-radius: 10px;
   backface-visibility: hidden;
@@ -381,12 +385,13 @@ body {
   animation: flipIn 0.5s ease forwards;
   transform: rotateX(90deg);
   text-align: center;
-  padding: 10px; /* ⇦ plus de "marge intérieure" */
-  line-height: 1.4; /* ⇦ plus d’espace entre les lignes */
-  white-space: normal; /* ⇦ permet les retours à la ligne */
-  word-break: break-word; /* ⇦ évite les débordements moches */
-  box-sizing: border-box; /* ⇦ évite que le padding dépasse le width */
+  padding: 12px;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+  box-sizing: border-box;
 }
+
 
 
 
@@ -400,17 +405,18 @@ body {
 
 .category-row {
   display: grid;
-  grid-template-columns: 100px repeat(7, 1fr); /* 1 image + 7 critères */
-  gap: 23px;
-  margin: 50px 0 10px;
+  grid-template-columns: 100px repeat(7, 140px); /* identique à .guess-row */
+  gap: 14px;
+  margin: 50px auto 10px auto;
   font-weight: bold;
   font-size: 14px;
   text-align: center;
   color: white;
   text-transform: uppercase;
   background-color: rgba(0, 0, 0, 0.4);
-  padding: 10px;
-  border-radius: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  max-width: 1300px;
 }
 
 
@@ -573,38 +579,46 @@ body {
 }
 
 
-.tooltip-cat {
+.tooltip {
   position: relative;
   display: inline-block;
   cursor: help;
-  font-weight: bold;
-  font-size: 15px;
-  color: white;
-  text-transform: uppercase;
 }
 
-.tooltip-cat .tooltip-text {
+.tooltip .tooltip-text {
   visibility: hidden;
-  width: 200px;
-  background-color: rgba(33, 33, 33, 0.95);
+  width: max-content;
+  max-width: 280px;
+  background-color: rgba(0, 0, 0, 0.85);
   color: #fff;
-  text-align: center;
-  border-radius: 8px;
-  padding: 8px;
+  text-align: left;
+  font-size: 13px;
+  font-family: Arial, sans-serif;
+  border-radius: 6px;
+  padding: 8px 10px;
   position: absolute;
   z-index: 100;
-  bottom: 125%;
+  bottom: 125%; /* Au-dessus du texte */
   left: 50%;
   transform: translateX(-50%);
   opacity: 0;
   transition: opacity 0.3s;
-  font-size: 14px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   pointer-events: none;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
-  white-space: normal;
 }
 
-.tooltip-cat:hover .tooltip-text {
+.tooltip:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
+}
+
+.tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* Flèche en dessous */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
 }
