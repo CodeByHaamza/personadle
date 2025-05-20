@@ -165,6 +165,13 @@ function updateEmojiHint() {
   });
 }
 
+function updateCounters() {
+  const giveUpCounter = document.getElementById("giveUpCounter");
+  const hintCounter = document.getElementById("hintCounter");
+  if (giveUpCounter) giveUpCounter.textContent = `(${attempts} / 8)`;
+  if (hintCounter) hintCounter.textContent = `(${attempts} / 3)`;
+}
+
 function checkEmojiGuess(name, forceReveal = false) {
   const displayZone = document.getElementById("emojiDisplay");
   const winMessage = document.getElementById("winMessage");
@@ -197,7 +204,6 @@ function checkEmojiGuess(name, forceReveal = false) {
       : `✅ Correct! It was ${target.nom}!`;
 
     victoryBox.style.display = "flex";
-
     showConfettiExplosion();
     textbar.disabled = true;
     document.getElementById("guessButton").disabled = true;
@@ -205,11 +211,12 @@ function checkEmojiGuess(name, forceReveal = false) {
     gameOver = true;
   } else {
     attempts++;
+    localStorage.setItem("attemptsEmoji", attempts);
     updateEmojiHint();
-    if (attempts >= 8) {
-      enableGiveUpButton();
-    }
+    updateCounters();
+    if (attempts >= 8) enableGiveUpButton();
   }
+
   removeFromAutocomplete(name);
 }
 
@@ -241,7 +248,10 @@ function resetGame() {
   attempts = 1;
 
   target = characters[Math.floor(Math.random() * characters.length)];
+  localStorage.setItem("targetEmoji", JSON.stringify(target));
+  localStorage.setItem("attemptsEmoji", attempts);
   updateEmojiHint();
+  updateCounters();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -251,7 +261,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetButton = document.getElementById("resetButton");
 
   initializeAutocomplete(textbar, personas);
-  resetGame();
+
+  // Restore from localStorage
+  target = JSON.parse(localStorage.getItem("targetEmoji")) || characters[Math.floor(Math.random() * characters.length)];
+  attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
+
+  localStorage.setItem("targetEmoji", JSON.stringify(target));
+  localStorage.setItem("attemptsEmoji", attempts);
+
+  updateEmojiHint();
+  updateCounters();
+
+  if (attempts >= 8) enableGiveUpButton();
 
   guessButton.addEventListener("click", () => {
     if (gameOver) return;
@@ -262,10 +283,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   giveUpButton.addEventListener("click", () => {
-    checkEmojiGuess(target.nom, true);
+    if (!gameOver) {
+      checkEmojiGuess(target.nom, true);
+    }
   });
 
   resetButton.addEventListener("click", () => {
+    localStorage.removeItem("targetEmoji");
+    localStorage.removeItem("attemptsEmoji");
     resetGame();
   });
 });
