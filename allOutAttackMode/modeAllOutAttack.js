@@ -6,11 +6,35 @@ let attempts = 0;
 let gameOver = false;
 let target = null;
 
+let previousTarget = null;
+
+let lastFiveTargets = [];
+
 function getBetterRandomCharacter() {
-  const seed = Date.now() + Math.floor(Math.random() * 99999);
-  const index = Math.floor((Math.sin(seed) + 1) * 0.5 * personas.length);
-  return personas[index % personas.length];
+  const filteredPool = personas.filter(name => !lastFiveTargets.includes(name));
+  const pool = filteredPool.length > 0 ? filteredPool : [...personas];
+
+  const chaosSeed = performance.now() + Date.now() * Math.random() * 999999;
+  let hash = 0;
+
+  for (let i = 0; i < chaosSeed.toString().length; i++) {
+    hash = (hash << 5) - hash + chaosSeed.toString().charCodeAt(i);
+    hash |= 0;
+  }
+
+  const index = Math.abs(hash) % pool.length;
+  const selected = pool[index];
+
+  lastFiveTargets.push(selected);
+  if (lastFiveTargets.length > 5) {
+    lastFiveTargets.shift();
+  }
+
+  return selected;
 }
+
+
+
 
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
@@ -208,7 +232,13 @@ function showVictoryBox(name) {
   text.textContent = `🎉 You found ${name}!`;
 
   box.style.display = "flex";
+
+  // ✅ Scroll vers la victoire
+  setTimeout(() => {
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 300); // petit délai pour que la box soit visible avant scroll
 }
+
 
 function giveUp() {
   if (gameOver) return;
