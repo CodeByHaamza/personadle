@@ -4,7 +4,7 @@ import { characters } from "../database/characters_clean.js";
 
 let personas = [...originalPersonas];
 let gameOver = false;
-let attempts = 1;
+let attempts = 0;
 let target = null;
 
 function initializeAutocomplete(element, array) {

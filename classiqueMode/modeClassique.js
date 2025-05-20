@@ -250,6 +250,10 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("target");
     localStorage.removeItem("attempts");
     localStorage.removeItem("guessHistory");
+    attempts = 0;
+history = [];
+updateCounters();
+
 
     output.innerHTML = "";
     quoteHint.style.display = "none";
