@@ -29,8 +29,10 @@
     <p>Type any character to start.</p>
   </div>
 
-  <!-- Bouton indice -->
-  <button id="hintButton" disabled>Afficher un indice</button>
+  <<div class="aoa-gif-zone">
+  <img id="aoaGif" alt="All-Out Attack" />
+</div>
+
 
   <!-- Zone de l’indice -->
   <p id="quoteHint" style="display:none;"></p>
@@ -45,12 +47,23 @@
     />
     <button id="guessButton">Submit</button>
     <button id="resetButton">Replay</button>
-    <button id="giveUpButton">Give Up</button>
 
-  </section>
+  </section><div style="text-align: center; margin-top: 10px;">
+  <button id="giveUpButton" disabled>Give Up</button>
+<span id="giveUpCounter" class="counter">(0 / 5)</span>
+
+</div>
+
+
+
+  <div id="victoryBox" class="victory-box" style="display: none;">
+  <img id="victoryImage" src="" alt="Victory Character">
+  <p class="win-message" id="victoryText"></p>
+</div>
 
   <!-- Résultats -->
-  <div id="output" style="margin-top: 30px;"></div>
+  <div id="wrongGuessList"></div>
+
 
   <!-- Script principal -->
   <script type="module" src="./modeAllOutAttack.js"></script>

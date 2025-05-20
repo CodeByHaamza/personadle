@@ -15,6 +15,8 @@ export const portraitsMap = {
   "Mitsuru Kirijo": "Mitsuru",
   "Shinjiro Aragaki": "Shinjiro",
   "Yukari Takeba": "Yukari",
+  "Metis": "Metis",
+  "Aigis ( P3FES )": "Aigis_FES",
 
   // P5 - alias comme nom d’image
   "Panther ( Ann Takamaki )": "Panther",

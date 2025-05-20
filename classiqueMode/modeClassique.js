@@ -231,10 +231,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function updateCounters() {
-    if (giveUpCounter) giveUpCounter.textContent = `(${attempts} / 8)`;
-    if (hintCounter) hintCounter.textContent = `(${attempts} / 3)`;
+ function updateCounters() {
+  const hintCounter = document.getElementById("hintCounter");
+  const giveUpCounter = document.getElementById("giveUpCounter");
+
+  if (hintCounter) {
+    hintCounter.textContent = `(${attempts} / 3)`;
+    if (attempts >= 3) {
+      hintCounter.classList.add("activated");
+    } else {
+      hintCounter.classList.remove("activated");
+    }
   }
+
+  if (giveUpCounter) {
+    giveUpCounter.textContent = `(${attempts} / 8)`;
+    if (attempts >= 8) {
+      giveUpCounter.classList.add("activated");
+    } else {
+      giveUpCounter.classList.remove("activated");
+    }
+  }
+}
+
 
   function enableHintButton() {
     hintButton.disabled = false;

@@ -3,6 +3,7 @@
  */
 export const personas = [
   "Aigis",
+  "Aigis ( P3FES )",
   "Akihiko Sanada",
   "Panther  ( Ann Takamaki ) ",
   "Caroline & Justine",
@@ -17,6 +18,7 @@ export const personas = [
   "Lavenza",
   "Makoto Yuki",
   "Queen ( Makoto Niijima )",
+  "Metis",
   "Mitsuru Kirijo",
   "Mona ( Morgana )",
   "Joker ( Ren Amamiya )",

@@ -1,8 +1,16 @@
-// MODULE D'AUTOCOMPLÉTION POUR MODE ALL OUT ATTACK AVEC IMAGE
 import { personas as originalPersonas } from "./database/personas_allOut.js";
 import { portraitsMap } from "./database/portraitsMap.js";
 
 let personas = [...originalPersonas];
+let attempts = 0;
+let gameOver = false;
+let target = null;
+
+function getBetterRandomCharacter() {
+  const seed = Date.now() + Math.floor(Math.random() * 99999);
+  const index = Math.floor((Math.sin(seed) + 1) * 0.5 * personas.length);
+  return personas[index % personas.length];
+}
 
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
@@ -33,37 +41,29 @@ function initializeAutocomplete(element, array) {
       }
     }
 
-    matches.sort((a, b) => {
-      if (a.priority !== b.priority) return a.priority - b.priority;
-      return a.name.localeCompare(b.name);
-    });
+    matches.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
 
     matches.forEach((matchObj) => {
       const displayName = matchObj.name;
       const imageName = portraitsMap[displayName] || displayName.split(" ")[0];
       const portraitName = encodeURIComponent(imageName);
-
-      const matchIndex = displayName.toLowerCase().indexOf(val.toLowerCase());
-      const before = displayName.substring(0, matchIndex);
-      const match = displayName.substring(matchIndex, matchIndex + val.length);
-      const after = displayName.substring(matchIndex + val.length);
+      const realName = displayName.includes("(") ? displayName.split("(")[1].replace(")", "") : "";
 
       const option = document.createElement("DIV");
       option.className = "list-options";
       option.innerHTML = `
-        <img src="./database/img/${portraitName}.webp" alt="${displayName} portrait"
-             onerror="this.src='./database/img/unknown.webp'" />
-        <span title="${displayName}" style="display: flex; flex-direction: column;">
-  <span class="codename">${displayName.split(" (")[0]}</span>
-  ${displayName.includes(" (") ? `<span class="realname">(${displayName.split(" (")[1].replace(")", "")})</span>` : ""}
-</span>
-
-
+        <img src="./database/img/${portraitName}.webp" alt="${displayName}">
+        <span style="display: flex; flex-direction: column;">
+          <span class="codename">${displayName.split(" (")[0]}</span>
+          ${realName ? `<span class="realname">(${realName})</span>` : ""}
+        </span>
         <input type='hidden' value='${displayName}'>
       `;
 
       option.addEventListener("click", function () {
         element.value = this.getElementsByTagName("input")[0].value;
+        removeFromAutocomplete(element.value);
+        handleGuess();
         closeList(null, element);
       });
 
@@ -85,16 +85,12 @@ function initializeAutocomplete(element, array) {
       updateActive(items);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (currentFocus > -1) {
-        items[currentFocus].click();
-      } else {
-        items[0]?.click();
-      }
+      if (currentFocus > -1) items[currentFocus].click();
+      else items[0]?.click();
     }
   });
 
   function updateActive(items) {
-    if (!items) return;
     removeActive(items);
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = items.length - 1;
@@ -113,10 +109,8 @@ function initializeAutocomplete(element, array) {
 
 function closeList(e, inputElement) {
   const items = document.getElementsByClassName("autocomplete-items");
-  for (let i = 0; i < items.length; i++) {
-    if (e !== items[i] && e !== inputElement) {
-      items[i].parentNode.removeChild(items[i]);
-    }
+  for (let item of items) {
+    if (e !== item && e !== inputElement) item.remove();
   }
 }
 
@@ -125,8 +119,194 @@ function removeFromAutocomplete(name) {
   if (index !== -1) personas.splice(index, 1);
 }
 
-// INITIALISATION AUTOMATIQUE À L’OUVERTURE
+function showConfettiExplosion() {
+  const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
+  const numEmojisPerSide = 20;
+
+  for (let i = 0; i < numEmojisPerSide * 2; i++) {
+    const emoji = document.createElement("span");
+    emoji.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
+    emoji.classList.add("confetti-emoji");
+
+    const isLeft = i < numEmojisPerSide;
+    emoji.style.left = isLeft ? "0vw" : "100vw";
+    emoji.style.bottom = "0vh";
+
+    const xTarget = isLeft ? Math.random() * 50 + 25 : -(Math.random() * 50 + 25);
+    const yTarget = -(Math.random() * 50 + 30);
+    const rotate = Math.random() * 360;
+
+    emoji.style.setProperty("--x-move", xTarget + "vw");
+    emoji.style.setProperty("--y-move", yTarget + "vh");
+    emoji.style.setProperty("--rotate", rotate + "deg");
+
+    document.body.appendChild(emoji);
+    setTimeout(() => emoji.remove(), 1000);
+  }
+}
+
+// ... le reste du code reste identique jusqu’à la fonction showWrongFeedback
+
+function showWrongFeedback(name) {
+  const imageName = portraitsMap[name] || name.split(" ")[0];
+  const listZone = document.getElementById("wrongGuessList");
+
+  const div = document.createElement("div");
+  div.className = "wrong-mini";
+
+  const img = document.createElement("img");
+  img.src = `./database/img/${imageName}.webp`;
+  img.alt = name;
+
+  div.appendChild(img);
+  listZone.appendChild(div);
+
+  setTimeout(() => {
+    div.classList.add("shake");
+  }, 50);
+}
+
+
+function handleGuess() {
+  if (gameOver) return;
+
+  const input = document.getElementById("textbar");
+  const guess = input.value.trim();
+  if (!guess) return;
+
+  attempts++;
+  updateGiveUpCounter(); // met à jour le compteur + bouton
+
+  if (guess.toLowerCase() === target.toLowerCase()) {
+    document.getElementById("aoaGif").style.filter = "none";
+    showVictoryBox(target);
+    showConfettiExplosion();
+    gameOver = true;
+    disableInputs();
+    return;
+  }
+
+  showWrongFeedback(guess);
+  removeFromAutocomplete(guess);
+
+  const blurLevel = Math.max(20 - attempts * 3, 0);
+  document.getElementById("aoaGif").style.filter = `blur(${blurLevel}px)`;
+
+  input.value = "";
+}
+
+function showVictoryBox(name) {
+  const baseName = (portraitsMap[name] || name.split(" ")[0]).trim();
+  const imgSrc = `./database/img/${baseName}_Battle.webp`;
+
+  const box = document.getElementById("victoryBox");
+  const img = document.getElementById("victoryImage");
+  const text = document.getElementById("victoryText");
+
+  img.src = imgSrc;
+  img.alt = name;
+  text.textContent = `🎉 You found ${name}!`;
+
+  box.style.display = "flex";
+}
+
+function giveUp() {
+  if (gameOver) return;
+  document.getElementById("aoaGif").style.filter = "none";
+  showVictoryBox(target);
+  showConfettiExplosion();
+  disableInputs();
+  gameOver = true;
+}
+
+function resetGame() {
+  const input = document.getElementById("textbar");
+  const gifElement = document.getElementById("aoaGif");
+  const wrongList = document.getElementById("wrongGuessList");
+
+  gameOver = false;
+  attempts = 0;
+  document.getElementById("victoryBox").style.display = "none";
+
+  personas = [...originalPersonas];
+  target = getBetterRandomCharacter();
+
+  const imageName = portraitsMap[target] || target.split(" ")[0];
+  gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
+  gifElement.style.filter = "blur(20px)";
+
+  input.disabled = false;
+  document.getElementById("guessButton").disabled = false;
+  input.value = "";
+
+  // ✅ SUPPRESSION des feedbacks d’erreur (images rouges)
+  if (wrongList) {
+    wrongList.innerHTML = "";
+  }
+
+  // ✅ Recharge de l’autocomplétion avec liste complète
+  initializeAutocomplete(input, personas);
+  updateGiveUpButton();
+  updateGiveUpCounter();
+
+
+}
+
+function updateGiveUpButton() {
+  const giveUpButton = document.getElementById("giveUpButton");
+  if (attempts >= 5) {
+    giveUpButton.disabled = false;
+    giveUpButton.style.cursor = "pointer";
+  } else {
+    giveUpButton.disabled = true;
+    giveUpButton.style.cursor = "not-allowed";
+  }
+}
+
+function updateGiveUpCounter() {
+  const giveUpCounter = document.getElementById("giveUpCounter");
+  const giveUpButton = document.getElementById("giveUpButton");
+
+  if (giveUpCounter) {
+    giveUpCounter.textContent = `(${attempts} / 5)`;
+
+    // Ajoute un style "activated" quand on atteint 5 essais
+    if (attempts >= 5) {
+      giveUpCounter.classList.add("activated");
+    } else {
+      giveUpCounter.classList.remove("activated");
+    }
+  }
+
+  if (giveUpButton) {
+    giveUpButton.disabled = attempts < 5;
+    giveUpButton.style.cursor = attempts >= 5 ? "pointer" : "not-allowed";
+  }
+}
+
+
+
+
+function disableInputs() {
+  document.getElementById("textbar").disabled = true;
+  document.getElementById("guessButton").disabled = true;
+  document.getElementById("giveUpButton").disabled = true; // ✅ bloque Give Up aussi
+  document.getElementById("giveUpButton").style.cursor = "not-allowed"; // pour le visuel
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const textbar = document.getElementById("textbar");
+  const guessButton = document.getElementById("guessButton");
+  const gifElement = document.getElementById("aoaGif");
+
   initializeAutocomplete(textbar, personas);
+  guessButton.addEventListener("click", handleGuess);
+  document.getElementById("giveUpButton").addEventListener("click", giveUp);
+  document.getElementById("resetButton").addEventListener("click", resetGame);
+
+  target = getBetterRandomCharacter();
+  const imageName = portraitsMap[target] || target.split(" ")[0];
+  gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
+  gifElement.style.filter = "blur(20px)";
 });
