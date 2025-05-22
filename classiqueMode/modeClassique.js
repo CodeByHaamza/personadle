@@ -2,11 +2,9 @@ import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
 
-// ===== Variables globales =====
 let personas = [...originalPersonas];
 let gameOver = false;
 
-// ===== Fonction d'autocomplétion =====
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
 
@@ -152,7 +150,6 @@ function showConfettiExplosion() {
   }
 }
 
-// ===== DOMContentLoaded =====
 document.addEventListener("DOMContentLoaded", () => {
   const textbar = document.getElementById("textbar");
   const guessButton = document.getElementById("guessButton");
@@ -175,30 +172,23 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("target", JSON.stringify(target));
   }
 
-  // Réaffichage des anciennes tentatives
   history.forEach(name => checkGuess(name, target));
 
   updateCounters();
-
   if (attempts >= 3) enableHintButton();
   if (attempts >= 8) enableGiveUpButton();
 
   guessButton.addEventListener("click", () => {
     if (gameOver) return;
-
     const guessName = textbar.value.trim();
     if (!guessName) return;
-
     attempts++;
     localStorage.setItem("attempts", attempts);
     history.push(guessName);
     localStorage.setItem("guessHistory", JSON.stringify(history));
-
     updateCounters();
-
     if (attempts >= 3) enableHintButton();
     if (attempts >= 8) enableGiveUpButton();
-
     checkGuess(guessName, target);
     textbar.value = "";
   });
@@ -223,37 +213,22 @@ document.addEventListener("DOMContentLoaded", () => {
     guessButton.disabled = true;
     giveUpButton.disabled = true;
     gameOver = true;
-
-    // Enregistre aussi le "give up" dans l’historique
     if (!history.includes(target.nom)) {
       history.push(target.nom);
       localStorage.setItem("guessHistory", JSON.stringify(history));
     }
   });
 
- function updateCounters() {
-  const hintCounter = document.getElementById("hintCounter");
-  const giveUpCounter = document.getElementById("giveUpCounter");
-
-  if (hintCounter) {
-    hintCounter.textContent = `(${attempts} / 3)`;
-    if (attempts >= 3) {
-      hintCounter.classList.add("activated");
-    } else {
-      hintCounter.classList.remove("activated");
+  function updateCounters() {
+    if (hintCounter) {
+      hintCounter.textContent = `(${attempts} / 3)`;
+      hintCounter.classList.toggle("activated", attempts >= 3);
+    }
+    if (giveUpCounter) {
+      giveUpCounter.textContent = `(${attempts} / 8)`;
+      giveUpCounter.classList.toggle("activated", attempts >= 8);
     }
   }
-
-  if (giveUpCounter) {
-    giveUpCounter.textContent = `(${attempts} / 8)`;
-    if (attempts >= 8) {
-      giveUpCounter.classList.add("activated");
-    } else {
-      giveUpCounter.classList.remove("activated");
-    }
-  }
-}
-
 
   function enableHintButton() {
     hintButton.disabled = false;
@@ -270,10 +245,8 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("attempts");
     localStorage.removeItem("guessHistory");
     attempts = 0;
-history = [];
-updateCounters();
-
-
+    history = [];
+    updateCounters();
     output.innerHTML = "";
     quoteHint.style.display = "none";
     textbar.disabled = false;
@@ -285,11 +258,9 @@ updateCounters();
     if (giveUpCounter) giveUpCounter.textContent = "(0 / 8)";
     if (hintCounter) hintCounter.textContent = "(0 / 3)";
     textbar.value = "";
-
     personas = [...originalPersonas];
     initializeAutocomplete(textbar, personas);
     gameOver = false;
-
     target = characters[Math.floor(Math.random() * characters.length)];
     localStorage.setItem("target", JSON.stringify(target));
   }
@@ -316,37 +287,14 @@ updateCounters();
       const categoryRow = document.createElement("div");
       categoryRow.classList.add("category-row");
       categoryRow.innerHTML = `
-  <div></div>
-  <div class="tooltip">Name
-  <span class="tooltip-text">The full name of the character as known in the Persona universe.</span>
-</div>
-
-<div class="tooltip">Gender
-  <span class="tooltip-text">Represents the character’s identity or nature — can be Human, Artificial, Shadow, or Entity.</span>
-</div>
-
-<div class="tooltip">Age
-  <span class="tooltip-text">Age range based on lore, from "< 15" to "40+", including unique entities like "80+".</span>
-</div>
-
-<div class="tooltip">Persona User / Shadow
-  <span class="tooltip-text">Indicates if the character can summon a Persona or is a Shadow themselves.</span>
-</div>
-
-<div class="tooltip">Persona / Shadow
-  <span class="tooltip-text">The specific Persona linked to the character — or their Shadow form if applicable.</span>
-</div>
-
-<div class="tooltip">Arcana
-  <span class="tooltip-text">Their corresponding Tarot Arcana, which defines their symbolic and narrative role.</span>
-</div>
-
-<div class="tooltip">Opus
-  <span class="tooltip-text">The game(s) in which this character appears: P3, P4G, P5, PQ2, P5T, etc.</span>
-</div>
-
-`;
-
+      <div></div>
+      <div class="tooltip">Name<span class="tooltip-text">The full name of the character as known in the Persona universe.</span></div>
+      <div class="tooltip">Gender<span class="tooltip-text">Represents the character’s identity or nature — can be Human, Artificial, Shadow, or Entity.</span></div>
+      <div class="tooltip">Age<span class="tooltip-text">Age range based on lore, from "< 15" to "40+", including unique entities like "80+".</span></div>
+      <div class="tooltip">Persona User / Shadow<span class="tooltip-text">Indicates if the character can summon a Persona or is a Shadow themselves.</span></div>
+      <div class="tooltip">Persona / Shadow<span class="tooltip-text">The specific Persona linked to the character — or their Shadow form if applicable.</span></div>
+      <div class="tooltip">Arcana<span class="tooltip-text">Their corresponding Tarot Arcana, which defines their symbolic and narrative role.</span></div>
+      <div class="tooltip">Opus<span class="tooltip-text">The game(s) in which this character appears: P3, P4G, P5, PQ2, P5T, etc.</span></div>`;
       output.insertBefore(categoryRow, output.firstChild);
     }
 
@@ -362,6 +310,8 @@ updateCounters();
     row.appendChild(img);
 
     const keysToCompare = ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
+    const isWin = guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal;
+
     keysToCompare.forEach((key, index) => {
       const cell = document.createElement("div");
       cell.classList.add("guess-cell");
@@ -370,7 +320,9 @@ updateCounters();
       let targetVal = target[key];
       let displayValue = Array.isArray(value) ? value.join(", ") : value;
 
-      if (key === "age") {
+      if (isWin) {
+        cell.classList.add("correct");
+      } else if (key === "age") {
         const guessVal = convertAgeToValue(value);
         const targetValue = convertAgeToValue(targetVal);
         if (value === targetVal) {
@@ -397,11 +349,7 @@ updateCounters();
           cell.classList.add("wrong");
         }
       } else {
-        if (
-          typeof value === "string" &&
-          typeof targetVal === "string" &&
-          value.toLowerCase() === targetVal.toLowerCase()
-        ) {
+        if (typeof value === "string" && typeof targetVal === "string" && value.toLowerCase() === targetVal.toLowerCase()) {
           cell.classList.add("correct");
         } else {
           cell.classList.add("wrong");
@@ -409,16 +357,14 @@ updateCounters();
       }
 
       cell.textContent = displayValue;
-      setTimeout(() => {
-        cell.classList.add("flip");
-      }, 100 * (index + 1));
+      setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
       row.appendChild(cell);
     });
 
     output.insertBefore(row, output.querySelector(".category-row")?.nextSibling);
     removeFromAutocomplete(guess.nom);
 
-    if (guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal) {
+    if (isWin) {
       textbar.disabled = true;
       guessButton.disabled = true;
       giveUpButton.disabled = true;
