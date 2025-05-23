@@ -383,7 +383,7 @@ export const characters = [
   genre: ["Human","Female"],
   age: "15-20",
   arcane: ["Moon"],
-  opus: ["P4", "P4G", "P4AU"],
+  opus: ["P4", "P4G"],
   personaUser: false,
   persona: "NONE",
   emoji: ["💅", "💔", "😤"],
