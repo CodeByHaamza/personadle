@@ -1117,6 +1117,20 @@ export const characters = [
         emoji: ["🕊️", "🔫", "🩸"],
         quote: "My life was stolen from me... And in its place, I was given a power I never asked for... And so, I learned that the future is only a delusion. Only by striving to live every moment to its fullest can the soul truly be satisfied. That is why we welcome this glorious revelation, to shine a light upon this darkened world!"
       },
+        
+      {
+        nom: "Hatsune Miku",
+        genre: ["Vocaloid", "Female"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus: ["P4D"],
+        personaUser: false,
+        persona: "NONE",
+        emoji: ["👔", "💎", "🎤"],
+        quote: "I'm the number one princess in the world."
+      },
+  
+  
 
   
   
