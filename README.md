@@ -36,7 +36,7 @@ _(to be detailed later)_
 ## 🚧 Planned Features
 
 - [ ] Daily display of a mystery character
-- [ ] Attempt system with color-coded feedback and hints
+- [X] Attempt system with color-coded feedback and hints
 - [ ] Multiple game modes (traits, blurred image, emojis, etc.)
 - [ ] Local storage of scores
 - [ ] Mobile / tablet responsive design
