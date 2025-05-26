@@ -47,7 +47,7 @@ _(to be detailed later)_
 
 - Apply studied JavaScript concepts
 - Dynamically manipulate the DOM
-- Load and navigate through JSON files
+- Load and navigate through JavaScript files
 - Use modern functions (filter, map, etc.)
 - Practice structuring a complete web project
 
