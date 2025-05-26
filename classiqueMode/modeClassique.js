@@ -276,6 +276,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return map[age] ?? -1;
   }
 
+
+
   function checkGuess(name, target, forceReveal = false) {
     const guess = characters.find(c => c.nom.toLowerCase() === name.toLowerCase());
     if (!guess) {
@@ -372,4 +374,26 @@ document.addEventListener("DOMContentLoaded", () => {
       showConfettiExplosion();
     }
   }
+
+    // === GESTION DU BOUTON "COMMENT JOUER" ===
+  const rulesModal = document.getElementById("rulesModal");
+  const rulesButton = document.getElementById("rulesButton");
+  const closeRulesBtn = document.querySelector(".modal .close");
+
+  if (rulesButton && rulesModal && closeRulesBtn) {
+    rulesButton.addEventListener("click", () => {
+      rulesModal.style.display = "block";
+    });
+
+    closeRulesBtn.addEventListener("click", () => {
+      rulesModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === rulesModal) {
+        rulesModal.style.display = "none";
+      }
+    });
+  }
+
 });

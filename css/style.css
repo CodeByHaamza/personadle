@@ -781,3 +781,74 @@ body {
   color: black;
   transform: scale(1.05);
 }
+
+
+/* ===== MODALE - Comment jouer ===== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+.modal .close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #aaa;
+}
+
+.modal .close:hover {
+  color: #000;
+}
+
+
+.rules-button-wrapper {
+  text-align: center;
+  margin: 40px auto;
+}
+
+.persona-btn {
+  background: linear-gradient(135deg, #ff003c, #c60000);
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  padding: 12px 28px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #000;
+  font-family: 'Arial Black', sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease-in-out;
+}
+
+.persona-btn:hover {
+  transform: scale(1.05) rotate(-1deg);
+  background: linear-gradient(135deg, #ff0055, #d00000);
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #000, 0 0 10px #ff0000;
+}
+
+.persona-btn:active {
+  transform: scale(0.98) rotate(0deg);
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px #000;
+}

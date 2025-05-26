@@ -339,4 +339,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const imageName = portraitsMap[target] || target.split(" ")[0];
   gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
   gifElement.style.filter = "blur(20px)";
-});
+})
+
+  // === GESTION DU BOUTON "COMMENT JOUER" ===
+  const rulesModal = document.getElementById("rulesModal");
+  const rulesButton = document.getElementById("rulesButton");
+  const closeRulesBtn = document.querySelector(".modal .close");
+
+  if (rulesButton && rulesModal && closeRulesBtn) {
+    rulesButton.addEventListener("click", () => {
+      rulesModal.style.display = "block";
+    });
+
+    closeRulesBtn.addEventListener("click", () => {
+      rulesModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === rulesModal) {
+        rulesModal.style.display = "none";
+      }
+    });
+  }
+
+;

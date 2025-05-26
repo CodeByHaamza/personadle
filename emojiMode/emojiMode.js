@@ -293,4 +293,26 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("attemptsEmoji");
     resetGame();
   });
+  // === GESTION DU BOUTON "COMMENT JOUER" ===
+  const rulesModal = document.getElementById("rulesModal");
+  const rulesButton = document.getElementById("rulesButton");
+  const closeRulesBtn = document.querySelector(".modal .close");
+
+  if (rulesButton && rulesModal && closeRulesBtn) {
+    rulesButton.addEventListener("click", () => {
+      rulesModal.style.display = "block";
+    });
+
+    closeRulesBtn.addEventListener("click", () => {
+      rulesModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === rulesModal) {
+        rulesModal.style.display = "none";
+      }
+    });
+  }
+
+
 });
