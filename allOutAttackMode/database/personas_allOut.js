@@ -5,7 +5,7 @@ export const personas = [
   "Aigis",
   "Aigis ( P3FES )",
   "Akihiko Sanada",
-  "Panther  ( Ann Takamaki ) ",
+  "Panther ( Ann Takamaki )",
   "Caroline & Justine",
   "Oracle ( Futaba Sakura )",
   "Crow ( Goro Akechi )",
