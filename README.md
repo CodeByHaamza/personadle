@@ -36,7 +36,7 @@ _(to be detailed later)_
 ## 🚧 Planned Features
 
 - [ ] Daily display of a mystery character
-- [ ] Attempt system with color-coded feedback and hints
+- [X] Attempt system with color-coded feedback and hints
 - [ ] Multiple game modes (traits, blurred image, emojis, etc.)
 - [ ] Local storage of scores
 - [ ] Mobile / tablet responsive design
@@ -47,7 +47,7 @@ _(to be detailed later)_
 
 - Apply studied JavaScript concepts
 - Dynamically manipulate the DOM
-- Load and navigate through JSON files
+- Load and navigate through JavaScript files
 - Use modern functions (filter, map, etc.)
 - Practice structuring a complete web project
 
