@@ -29,19 +29,48 @@
 </div>
 
 
-<!-- Modale des règles -->
+<!-- Rules Modal -->
 <div id="rulesModal" class="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <h2>Règles du mode Classique</h2>
+    <h2>Classic Mode Rules</h2>
     <p id="rulesText">
-      Devinez le personnage Persona du jour en entrant son nom.  
-      Chaque tentative remplit une ligne avec des attributs (genre, arcane, âge, etc.).  
-      Les couleurs indiquent si l’attribut est correct, partiellement correct ou faux.  
-      Vous avez un nombre d’essais limité. Bonne chance !
+      <strong>🎯 Goal:</strong><br>
+      Guess today’s Persona character by entering their full name or alias.  
+      Each attempt fills a row with the following attributes:
+
+      <ul style="margin-top: 10px;">
+        <li><strong>🧍 Name</strong> — The character's full name as known in the database.</li>
+        <li><strong>🚻 Gender</strong> — Can be: <code>Male</code>, <code>Female</code>, <code>Artificial</code>, <code>Entity</code>, <code>Shadow</code>, <code>Velvet</code>.</li>
+        <li><strong>🎂 Age</strong> — Value ranges: <code>&lt; 15</code>, <code>15-20</code>, <code>21-40</code>, <code>40+</code>, <code>80+</code>.</li>
+        <li><strong>🎭 Persona User / Shadow</strong> — Shows <strong>Yes</strong> if the character is a Persona user or a Shadow. Otherwise: <strong>No</strong>.</li>
+        <li><strong>👻 Persona / Shadow</strong> — The exact name of their Persona or shadow form. Example: <code>Arsène</code>, <code>Thanatos</code>, <code>Lucia</code>, or <code>NONE</code>.</li>
+        <li><strong>🃏 Arcana</strong> — Associated tarot Arcana. Examples: <code>Fool</code>, <code>Lovers</code>, <code>Death</code>, <code>Magician</code>.</li>
+        <li><strong>🎮 Opus</strong> — Games in which the character appears:  
+          <code>P1</code>, <code>P2IS</code>, <code>P2EP</code>,  
+          <code>P3</code>, <code>P3FES</code>, <code>P3P</code>,  
+          <code>P4</code>, <code>P4G</code>, <code>P4AU</code>, <code>P4D</code>,  
+          <code>P5</code>, <code>P5R</code>, <code>P5S</code>, <code>P5T</code>,  
+        </li>
+      </ul>
+
+      <strong>🎨 Feedback colors:</strong>
+      <ul>
+        <li><span style="color: #6bbf59;"><strong>Green</strong></span> — Exact match.</li>
+        <li><span style="color: #f7c04a;"><strong>Yellow</strong></span> — Partially correct (e.g. right Arcana but not all values match).</li>
+        <li><span style="color: #c0392b;"><strong>Red</strong></span> — Completely incorrect.</li>
+        <li><strong>↑ / ↓</strong> — For age: indicates if your guess is younger or older than the target.</li>
+      </ul>
+
+      <strong>🧠 Hint system:</strong><br>
+      - After <strong>3 attempts</strong>: a quote can be revealed.<br>
+      - After <strong>8 attempts</strong>: the <em>Give Up</em> button appears to reveal the answer.
+
+      <br><br><em>Use your Metaverse knowledge and may fate guide your insight.</em>
     </p>
   </div>
 </div>
+
 
 
   <!-- Présentation -->
