@@ -360,6 +360,29 @@ document.addEventListener("DOMContentLoaded", () => {
         rulesModal.style.display = "none";
       }
     });
+
+    // === Modale "How to Play"
+const rulesModal = document.getElementById("rulesModal");
+const rulesBtn = document.getElementById("rulesButton");
+const closeBtn = rulesModal.querySelector(".close");
+
+rulesBtn.addEventListener("click", () => {
+  rulesModal.style.display = "block";
+  document.body.classList.add("modal-open");
+});
+
+closeBtn.addEventListener("click", () => {
+  rulesModal.style.display = "none";
+  document.body.classList.remove("modal-open");
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === rulesModal) {
+    rulesModal.style.display = "none";
+    document.body.classList.remove("modal-open");
+  }
+});
+
   }
 
 ;

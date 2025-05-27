@@ -2,10 +2,25 @@ import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
 
+const validOpus = {
+  P3: ["P3", "P3FES", "P3P"],
+  P4: ["P4", "P4G", "P4AU", "P4D"],
+  P5: ["P5", "P5R", "P5S", "P5T"]
+};
+
+let activeOpus = ["P3", "P4", "P5"];
 let personas = [...originalPersonas];
 let gameOver = false;
 let attempts = 0;
 let target = null;
+
+function filterCharacterPool() {
+  const allValid = activeOpus.flatMap(o => validOpus[o]);
+  return characters.filter(c => {
+    const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
+    return charOpus.some(op => allValid.includes(op));
+  });
+}
 
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
@@ -36,10 +51,7 @@ function initializeAutocomplete(element, array) {
       }
     }
 
-    matches.sort((a, b) => {
-      if (a.priority !== b.priority) return a.priority - b.priority;
-      return a.name.localeCompare(b.name);
-    });
+    matches.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
 
     matches.forEach((matchObj) => {
       const displayName = matchObj.name;
@@ -86,16 +98,12 @@ function initializeAutocomplete(element, array) {
       updateActive(items);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      if (currentFocus > -1) {
-        items[currentFocus].click();
-      } else {
-        items[0]?.click();
-      }
+      if (currentFocus > -1) items[currentFocus].click();
+      else items[0]?.click();
     }
   });
 
   function updateActive(items) {
-    if (!items) return;
     removeActive(items);
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = items.length - 1;
@@ -114,10 +122,8 @@ function initializeAutocomplete(element, array) {
 
 function closeList(e, inputElement) {
   const items = document.getElementsByClassName("autocomplete-items");
-  for (let i = 0; i < items.length; i++) {
-    if (e !== items[i] && e !== inputElement) {
-      items[i].parentNode.removeChild(items[i]);
-    }
+  for (let item of items) {
+    if (e !== item && e !== inputElement) item.remove();
   }
 }
 
@@ -167,9 +173,7 @@ function updateEmojiHint() {
 
 function updateCounters() {
   const giveUpCounter = document.getElementById("giveUpCounter");
-  const hintCounter = document.getElementById("hintCounter");
   if (giveUpCounter) giveUpCounter.textContent = `(${attempts} / 8)`;
-  if (hintCounter) hintCounter.textContent = `(${attempts} / 3)`;
 }
 
 function checkEmojiGuess(name, forceReveal = false) {
@@ -242,12 +246,13 @@ function resetGame() {
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
   textbar.value = "";
 
-  personas = [...originalPersonas];
+  personas = filterCharacterPool().map(c => c.nom);
   initializeAutocomplete(textbar, personas);
   gameOver = false;
   attempts = 1;
 
-  target = characters[Math.floor(Math.random() * characters.length)];
+  const filteredCharacters = filterCharacterPool();
+  target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
   updateEmojiHint();
@@ -260,10 +265,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const giveUpButton = document.getElementById("giveUpButton");
   const resetButton = document.getElementById("resetButton");
 
+  // === Gestion filtres ===
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  filterButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("active");
+      activeOpus = Array.from(filterButtons)
+        .filter(b => b.classList.contains("active"))
+        .map(b => b.dataset.opus);
+
+      personas = filterCharacterPool().map(c => c.nom);
+      initializeAutocomplete(textbar, personas);
+
+      const filteredCharacters = filterCharacterPool();
+      if (filteredCharacters.length > 0) {
+        target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+        localStorage.setItem("targetEmoji", JSON.stringify(target));
+        attempts = 1;
+        localStorage.setItem("attemptsEmoji", attempts);
+        updateEmojiHint();
+        updateCounters();
+      }
+    });
+  });
+
+  personas = filterCharacterPool().map(c => c.nom);
   initializeAutocomplete(textbar, personas);
 
-  // Restore from localStorage
-  target = JSON.parse(localStorage.getItem("targetEmoji")) || characters[Math.floor(Math.random() * characters.length)];
+  target = JSON.parse(localStorage.getItem("targetEmoji")) || filterCharacterPool()[Math.floor(Math.random() * filterCharacterPool().length)];
   attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
 
   localStorage.setItem("targetEmoji", JSON.stringify(target));
@@ -271,7 +300,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateEmojiHint();
   updateCounters();
-
   if (attempts >= 8) enableGiveUpButton();
 
   guessButton.addEventListener("click", () => {
@@ -283,9 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   giveUpButton.addEventListener("click", () => {
-    if (!gameOver) {
-      checkEmojiGuess(target.nom, true);
-    }
+    if (!gameOver) checkEmojiGuess(target.nom, true);
   });
 
   resetButton.addEventListener("click", () => {
@@ -293,26 +319,26 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("attemptsEmoji");
     resetGame();
   });
-  // === GESTION DU BOUTON "COMMENT JOUER" ===
+
+  // === Modale "Comment jouer" ===
   const rulesModal = document.getElementById("rulesModal");
-  const rulesButton = document.getElementById("rulesButton");
-  const closeRulesBtn = document.querySelector(".modal .close");
+  const rulesBtn = document.getElementById("rulesButton");
+  const closeBtn = rulesModal.querySelector(".close");
 
-  if (rulesButton && rulesModal && closeRulesBtn) {
-    rulesButton.addEventListener("click", () => {
-      rulesModal.style.display = "block";
-    });
+  rulesBtn.addEventListener("click", () => {
+    rulesModal.style.display = "block";
+    document.body.classList.add("modal-open");
+  });
 
-    closeRulesBtn.addEventListener("click", () => {
+  closeBtn.addEventListener("click", () => {
+    rulesModal.style.display = "none";
+    document.body.classList.remove("modal-open");
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === rulesModal) {
       rulesModal.style.display = "none";
-    });
-
-    window.addEventListener("click", (e) => {
-      if (e.target === rulesModal) {
-        rulesModal.style.display = "none";
-      }
-    });
-  }
-
-
+      document.body.classList.remove("modal-open");
+    }
+  });
 });

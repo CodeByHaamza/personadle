@@ -23,9 +23,29 @@
     </a>
   </header>
 
+  <!-- Boutons de filtre par opus -->
+<div class="filter-buttons">
+  <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
+  <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
+  <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
+</div>
+
+
+<!-- 
+  Filter Switches for Opus Selection
+  Each switch allows the user to enable or disable characters from Persona 3 (P3), Persona 4 (P4), or Persona 5 (P5).
+  - The input is a checkbox, checked by default (active).
+  - The 'slider' span is styled for the switch appearance and colored per game.
+  - The 'label-text' span shows the game label.
+-->
+
+
+
+
+
     <!-- Bouton Comment Jouer -->
 <div class="rules-button-wrapper">
-  <button id="rulesButton" class="persona-btn">📜 Comment jouer</button>
+  <button id="rulesButton" class="persona-btn">📜 How to play</button>
 </div>
 
 
@@ -35,39 +55,63 @@
     <span class="close">&times;</span>
     <h2>Classic Mode Rules</h2>
     <p id="rulesText">
-      <strong>🎯 Goal:</strong><br>
-      Guess today’s Persona character by entering their full name or alias.  
-      Each attempt fills a row with the following attributes:
+  <strong>🎯 Objective:</strong><br>
+  Guess the Persona character of the day by typing their full name or a known alias.
 
-      <ul style="margin-top: 10px;">
-        <li><strong>🧍 Name</strong> — The character's full name as known in the database.</li>
-        <li><strong>🚻 Gender</strong> — Can be: <code>Male</code>, <code>Female</code>, <code>Artificial</code>, <code>Entity</code>, <code>Shadow</code>, <code>Velvet</code>.</li>
-        <li><strong>🎂 Age</strong> — Value ranges: <code>&lt; 15</code>, <code>15-20</code>, <code>21-40</code>, <code>40+</code>, <code>80+</code>.</li>
-        <li><strong>🎭 Persona User / Shadow</strong> — Shows <strong>Yes</strong> if the character is a Persona user or a Shadow. Otherwise: <strong>No</strong>.</li>
-        <li><strong>👻 Persona / Shadow</strong> — The exact name of their Persona or shadow form. Example: <code>Arsène</code>, <code>Thanatos</code>, <code>Lucia</code>, or <code>NONE</code>.</li>
-        <li><strong>🃏 Arcana</strong> — Associated tarot Arcana. Examples: <code>Fool</code>, <code>Lovers</code>, <code>Death</code>, <code>Magician</code>.</li>
-        <li><strong>🎮 Opus</strong> — Games in which the character appears:  
-          <code>P1</code>, <code>P2IS</code>, <code>P2EP</code>,  
-          <code>P3</code>, <code>P3FES</code>, <code>P3P</code>,  
-          <code>P4</code>, <code>P4G</code>, <code>P4AU</code>, <code>P4D</code>,  
-          <code>P5</code>, <code>P5R</code>, <code>P5S</code>, <code>P5T</code>,  
-        </li>
-      </ul>
+  <hr class="separator" />
 
-      <strong>🎨 Feedback colors:</strong>
-      <ul>
-        <li><span style="color: #6bbf59;"><strong>Green</strong></span> — Exact match.</li>
-        <li><span style="color: #f7c04a;"><strong>Yellow</strong></span> — Partially correct (e.g. right Arcana but not all values match).</li>
-        <li><span style="color: #c0392b;"><strong>Red</strong></span> — Completely incorrect.</li>
-        <li><strong>↑ / ↓</strong> — For age: indicates if your guess is younger or older than the target.</li>
-      </ul>
+  <strong>📊 How it works:</strong>
+  <ul>
+    <li>Each attempt fills a row with the character’s attributes:</li>
+    <ul>
+      <li><strong>Name</strong> — Full name of the character</li>
+      <li><strong>Gender</strong> — E.g., Male, Female, Entity, Velvet, Shadow...</li>
+      <li><strong>Age</strong> — "< 15", "15-20", "21-40", "40+", etc.</li>
+      <li><strong>Persona User / Shadow</strong> — Can they summon a Persona? Are they a Shadow?</li>
+      <li><strong>Persona / Shadow</strong> — The name of the Persona or alter ego</li>
+      <li><strong>Arcana</strong> — Their Tarot Arcana (e.g. Fool, Empress, Magician…)</li>
+      <li><strong>Opus</strong> — Games they appear in:
+        <code>P1</code>, <code>P2IS</code>, <code>P2EP</code>, 
+        <code>P3</code>, <code>P3FES</code>, <code>P3P</code>,
+        <code>P4</code>, <code>P4G</code>, <code>P4AU</code>, <code>P4D</code>,
+        <code>P5</code>, <code>P5R</code>, <code>P5S</code>, <code>P5T</code>,
+        <code>PQ2</code>
+      </li>
+    </ul>
+  </ul>
 
-      <strong>🧠 Hint system:</strong><br>
-      - After <strong>3 attempts</strong>: a quote can be revealed.<br>
-      - After <strong>8 attempts</strong>: the <em>Give Up</em> button appears to reveal the answer.
+  <hr class="separator" />
 
-      <br><br><em>Use your Metaverse knowledge and may fate guide your insight.</em>
-    </p>
+  <strong>🎨 Feedback colors:</strong>
+  <ul>
+    <li><span style="color: #6bbf59;"><strong>Green</strong></span>: Exact match</li>
+    <li><span style="color: #f7c04a;"><strong>Yellow</strong></span>: Partially correct (e.g. one matching arcana or opus)</li>
+    <li><span style="color: #c0392b;"><strong>Red</strong></span>: Incorrect</li>
+    <li><strong>↑ / ↓</strong>: Age too young or too old compared to the answer</li>
+  </ul>
+
+  <hr class="separator" />
+
+  <strong>🧠 Hint system:</strong>
+  <ul>
+    <li>After <strong>3 attempts</strong>: a quote from the target character may be revealed</li>
+    <li>After <strong>8 attempts</strong>: you can reveal the answer using the <em>Give Up</em> button</li>
+  </ul>
+
+  <hr class="separator" />
+
+  <strong>🛡️ Spoiler protection:</strong>
+  <p>
+    Use the buttons in the top left to activate or deactivate the games whose characters can be selected.<br>
+    This allows you to avoid being spoiled on characters from games you haven’t played yet.<br>
+    For example, if you’ve only played Persona 4, disable <strong>P3</strong> and <strong>P5</strong> to avoid unexpected reveals.
+  </p>
+
+  <hr class="separator" />
+
+  <em>Use your memory, your knowledge... and a bit of luck!</em>
+</p>
+
   </div>
 </div>
 

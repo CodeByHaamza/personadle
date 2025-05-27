@@ -23,11 +23,17 @@
     </a>
   </header>
 
-  <!-- Bouton Comment Jouer -->
-<div class="rules-button-wrapper">
-  <button id="rulesButton" class="persona-btn">📜 Comment jouer</button>
+  <!-- Boutons de filtre par opus -->
+<div class="filter-buttons">
+  <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
+  <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
+  <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
 </div>
 
+<!-- Bouton Comment Jouer -->
+<div class="rules-button-wrapper">
+  <button id="rulesButton" class="persona-btn">📜 How to play</button>
+</div>
 
 <!-- Rules Modal -->
 <div id="rulesModal" class="modal">
@@ -38,29 +44,46 @@
       <strong>🎯 Goal:</strong><br>
       Guess which Persona character is being described by a sequence of emojis.
 
-      <ul style="margin-top: 10px;">
+      <hr class="separator" />
+
+      <strong>🧠 How it works:</strong>
+      <ul>
         <li>You start with <strong>1 emoji</strong>.</li>
-        <li><strong>Each wrong guess unlocks 1 new emoji</strong>.</li>
-        <li>Once the correct answer is found, all emojis are revealed.</li>
+        <li><strong>Each wrong guess unlocks 1 more emoji</strong>.</li>
+        <li>Once correct, the full emoji chain is revealed.</li>
       </ul>
 
-      <strong>🧠 Tips:</strong>
+      <hr class="separator" />
+
+      <strong>💡 Tips:</strong>
       <ul>
-        <li>Emojis can reflect the character’s role, personality, arcana, events, or abilities.</li>
-        <li>Example: 🗡️⚡😐 could represent a serious sword-wielding Persona user.</li>
+        <li>Emojis may refer to: personality, arcana, story events, role, weapon...</li>
+        <li>Example: 🗡️⚡😐 might describe a serious Persona user with a sword and electric element.</li>
       </ul>
+
+      <hr class="separator" />
 
       <strong>🎮 Game flow:</strong>
       <ul>
-        <li>Type a name and select it from the autocomplete suggestions.</li>
-        <li>If the guess is wrong, you get more visual clues (emojis).</li>
-        <li>If you give up, the answer and full emoji chain are revealed.</li>
+        <li>Type a character’s name and choose from suggestions.</li>
+        <li>Wrong answers = more clues. 8 tries max.</li>
+        <li>You can give up to see the correct answer and emojis.</li>
       </ul>
 
-      <br><em>Let your intuition speak... and read between the emojis.</em>
+      <hr class="separator" />
+
+      <strong>🛡️ Spoiler protection:</strong>
+      <p>
+        Use the P3 / P4 / P5 filter buttons to limit which games the characters are drawn from.  
+        This helps avoid spoilers if you haven’t played every game yet.
+      </p>
+
+      <hr class="separator" />
+      <em>Let your intuition guide you... and read between the emojis.</em>
     </p>
   </div>
 </div>
+
 
 
 

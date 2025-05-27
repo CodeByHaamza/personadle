@@ -852,3 +852,183 @@ body {
   transform: scale(0.98) rotate(0deg);
   box-shadow: 0 0 0 3px #fff, 0 0 0 5px #000;
 }
+
+
+/* ========== Filtres Opus ========== */
+.filter-buttons {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 999;
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  font-family: 'Arial Black', sans-serif;
+  text-shadow: 1px 1px 2px black;
+  transition: 0.2s;
+  opacity: 0.8;
+}
+
+.filter-btn:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.filter-btn.active {
+  box-shadow: 0 0 0 3px white, 0 0 0 5px black;
+  opacity: 1;
+}
+
+.filter-p3 {
+  background-color: #0074D9; /* Bleu */
+}
+
+.filter-p4 {
+  background-color: #FFDC00; /* Jaune */
+  color: #ffffff;
+}
+
+.filter-p5 {
+  background-color: #FF4136; /* Rouge Persona 5 */
+}
+
+/* Modale - verrouille le scroll en arrière-plan */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Conteneur principal de la modale */
+.modal {
+  display: none; /* Affichée dynamiquement */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.8);
+}
+
+/* Contenu interne avec scroll vertical */
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-family: 'Arial', sans-serif;
+  box-shadow: 0 0 15px #000;
+}
+
+/* Fermer */
+.modal .close {
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
+
+.modal .close:hover {
+  color: red;
+}
+
+/* Texte des règles + mise en page */
+#rulesText {
+  line-height: 1.7;
+}
+
+#rulesText ul {
+  margin-top: 10px;
+  margin-bottom: 25px;
+  padding-left: 20px;
+}
+
+#rulesText ul ul {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+#rulesText strong {
+  display: block;
+  margin-top: 20px;
+  font-size: 1.1em;
+  color: #111;
+}
+
+
+.separator {
+  border: none;
+  border-top: 2px dashed #ccc;
+  margin: 30px 0;
+  opacity: 0.6;
+}
+
+
+.filter-switches {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 15px;
+  z-index: 1000;
+}
+
+.switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  width: 40px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 20px;
+  position: relative;
+  transition: 0.2s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 2px;
+  left: 2px;
+  border-radius: 50%;
+  background-color: white;
+  transition: 0.2s;
+}
+
+input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+input:checked + .slider.blue { background-color: #0074D9; }
+input:checked + .slider.yellow { background-color: #FFDC00; }
+input:checked + .slider.red { background-color: #FF4136; }
+
+.label-text {
+  font-family: 'Arial Black', sans-serif;
+  color: white;
+  text-shadow: 1px 1px 2px black;
+  font-size: 0.9em;
+}

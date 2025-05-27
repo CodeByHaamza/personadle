@@ -5,6 +5,15 @@ import { characters } from "../database/characters_clean.js";
 let personas = [...originalPersonas];
 let gameOver = false;
 
+// === Filtres par opus ===
+const validOpus = {
+  P3: ["P3", "P3FES", "P3P"],
+  P4: ["P4", "P4G", "P4AU", "P4D"],
+  P5: ["P5", "P5R", "P5S", "P5T"]
+};
+
+let activeOpus = ["P3", "P4", "P5"]; // Tous actifs par défaut
+
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
 
@@ -150,6 +159,20 @@ function showConfettiExplosion() {
   }
 }
 
+// === Filtres opus ===
+function filterCharacterPool() {
+  const allValid = activeOpus.flatMap(o => validOpus[o]);
+
+  personas = originalPersonas.filter(name => {
+    const character = characters.find(c => c.nom === name);
+    if (!character || !character.opus) return false;
+    const charOpus = Array.isArray(character.opus) ? character.opus : [character.opus];
+    return charOpus.some(op => allValid.includes(op));
+  });
+
+  initializeAutocomplete(document.getElementById("textbar"), personas);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const textbar = document.getElementById("textbar");
   const guessButton = document.getElementById("guessButton");
@@ -161,14 +184,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const giveUpCounter = document.getElementById("giveUpCounter");
   const hintCounter = document.getElementById("hintCounter");
 
-  initializeAutocomplete(textbar, personas);
+  // Filtres actifs
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  filterButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn.classList.toggle("active");
+
+    activeOpus = Array.from(filterButtons)
+      .filter(b => b.classList.contains("active"))
+      .map(b => b.dataset.opus);
+
+    filterCharacterPool();
+
+    // 🔁 Corriger ici : changer aussi le personnage tiré !
+    const filteredCharacters = characters.filter(c => {
+      const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
+      return charOpus.some(op => activeOpus.flatMap(o => validOpus[o]).includes(op));
+    });
+
+    if (filteredCharacters.length > 0) {
+      target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+      localStorage.setItem("target", JSON.stringify(target));
+    } else {
+      console.warn("⚠ No characters match the selected filters.");
+    }
+  });
+});
+
+
+  filterCharacterPool();
 
   let attempts = parseInt(localStorage.getItem("attempts")) || 0;
   let target = JSON.parse(localStorage.getItem("target"));
   let history = JSON.parse(localStorage.getItem("guessHistory")) || [];
 
   if (!target) {
-    target = characters[Math.floor(Math.random() * characters.length)];
+    const filteredCharacters = characters.filter(c => {
+      const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
+      return charOpus.some(op => activeOpus.flatMap(o => validOpus[o]).includes(op));
+    });
+    target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
     localStorage.setItem("target", JSON.stringify(target));
   }
 
@@ -193,7 +248,34 @@ document.addEventListener("DOMContentLoaded", () => {
     textbar.value = "";
   });
 
-  resetButton.addEventListener("click", resetGame);
+  resetButton.addEventListener("click", () => {
+    localStorage.removeItem("target");
+    localStorage.removeItem("attempts");
+    localStorage.removeItem("guessHistory");
+    attempts = 0;
+    history = [];
+    updateCounters();
+    output.innerHTML = "";
+    quoteHint.style.display = "none";
+    textbar.disabled = false;
+    guessButton.disabled = false;
+    hintButton.disabled = true;
+    hintButton.style.cursor = "not-allowed";
+    giveUpButton.disabled = true;
+    giveUpButton.style.cursor = "not-allowed";
+    giveUpCounter.textContent = "(0 / 8)";
+    hintCounter.textContent = "(0 / 3)";
+    textbar.value = "";
+    filterCharacterPool();
+    gameOver = false;
+
+    const filteredCharacters = characters.filter(c => {
+      const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
+      return charOpus.some(op => activeOpus.flatMap(o => validOpus[o]).includes(op));
+    });
+    target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+    localStorage.setItem("target", JSON.stringify(target));
+  });
 
   hintButton.addEventListener("click", () => {
     if (target && target.quote) {
@@ -240,31 +322,6 @@ document.addEventListener("DOMContentLoaded", () => {
     giveUpButton.style.cursor = "pointer";
   }
 
-  function resetGame() {
-    localStorage.removeItem("target");
-    localStorage.removeItem("attempts");
-    localStorage.removeItem("guessHistory");
-    attempts = 0;
-    history = [];
-    updateCounters();
-    output.innerHTML = "";
-    quoteHint.style.display = "none";
-    textbar.disabled = false;
-    guessButton.disabled = false;
-    hintButton.disabled = true;
-    hintButton.style.cursor = "not-allowed";
-    giveUpButton.disabled = true;
-    giveUpButton.style.cursor = "not-allowed";
-    if (giveUpCounter) giveUpCounter.textContent = "(0 / 8)";
-    if (hintCounter) hintCounter.textContent = "(0 / 3)";
-    textbar.value = "";
-    personas = [...originalPersonas];
-    initializeAutocomplete(textbar, personas);
-    gameOver = false;
-    target = characters[Math.floor(Math.random() * characters.length)];
-    localStorage.setItem("target", JSON.stringify(target));
-  }
-
   function convertAgeToValue(age) {
     const map = {
       "< 15": 10,
@@ -275,7 +332,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     return map[age] ?? -1;
   }
-
 
 
   function checkGuess(name, target, forceReveal = false) {
@@ -394,6 +450,10 @@ document.addEventListener("DOMContentLoaded", () => {
         rulesModal.style.display = "none";
       }
     });
+
+    
   }
+
+  
 
 });
