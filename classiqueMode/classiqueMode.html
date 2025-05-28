@@ -11,167 +11,191 @@
 </head>
 
 <body>
-  <!-- Logo -->
+  <!-- Logo en haut de la page, cliquable pour revenir à l'accueil -->
   <header id="homepage">
     <a href="../index.html">
-      <img
-        src="../img/Logo_PersonaDLE.png"
-        alt="PersonaDLE Logo"
-        class="logo_HomePage"
-        id="imgHomePage"
-      />
+      <img src="../img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage" />
     </a>
   </header>
 
-  <!-- Boutons de filtre par opus -->
-<div class="filter-buttons">
-  <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
-  <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
-  <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
-</div>
-
-
-<!-- 
-  Filter Switches for Opus Selection
-  Each switch allows the user to enable or disable characters from Persona 3 (P3), Persona 4 (P4), or Persona 5 (P5).
-  - The input is a checkbox, checked by default (active).
-  - The 'slider' span is styled for the switch appearance and colored per game.
-  - The 'label-text' span shows the game label.
--->
-
-
-
-
-
-    <!-- Bouton Comment Jouer -->
-<div class="rules-button-wrapper">
-  <button id="rulesButton" class="persona-btn">📜 How to play</button>
-</div>
-
-
-<!-- Rules Modal -->
-<div id="rulesModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>Classic Mode Rules</h2>
-    <p id="rulesText">
-  <strong>🎯 Objective:</strong><br>
-  Guess the Persona character of the day by typing their full name or a known alias.
-
-  <hr class="separator" />
-
-  <strong>📊 How it works:</strong>
-  <ul>
-    <li>Each attempt fills a row with the character’s attributes:</li>
-    <ul>
-      <li><strong>Name</strong> — Full name of the character</li>
-      <li><strong>Gender</strong> — E.g., Male, Female, Entity, Velvet, Shadow...</li>
-      <li><strong>Age</strong> — "< 15", "15-20", "21-40", "40+", etc.</li>
-      <li><strong>Persona User / Shadow</strong> — Can they summon a Persona? Are they a Shadow?</li>
-      <li><strong>Persona / Shadow</strong> — The name of the Persona or alter ego</li>
-      <li><strong>Arcana</strong> — Their Tarot Arcana (e.g. Fool, Empress, Magician…)</li>
-      <li><strong>Opus</strong> — Games they appear in:
-        <code>P1</code>, <code>P2IS</code>, <code>P2EP</code>, 
-        <code>P3</code>, <code>P3FES</code>, <code>P3P</code>,
-        <code>P4</code>, <code>P4G</code>, <code>P4AU</code>, <code>P4D</code>,
-        <code>P5</code>, <code>P5R</code>, <code>P5S</code>, <code>P5T</code>,
-        <code>PQ2</code>
-      </li>
-    </ul>
-  </ul>
-
-  <hr class="separator" />
-
-  <strong>🎨 Feedback colors:</strong>
-  <ul>
-    <li><span style="color: #6bbf59;"><strong>Green</strong></span>: Exact match</li>
-    <li><span style="color: #f7c04a;"><strong>Yellow</strong></span>: Partially correct (e.g. one matching arcana or opus)</li>
-    <li><span style="color: #c0392b;"><strong>Red</strong></span>: Incorrect</li>
-    <li><strong>↑ / ↓</strong>: Age too young or too old compared to the answer</li>
-  </ul>
-
-  <hr class="separator" />
-
-  <strong>🧠 Hint system:</strong>
-  <ul>
-    <li>After <strong>3 attempts</strong>: a quote from the target character may be revealed</li>
-    <li>After <strong>8 attempts</strong>: you can reveal the answer using the <em>Give Up</em> button</li>
-  </ul>
-
-  <hr class="separator" />
-
-  <strong>🛡️ Spoiler protection:</strong>
-  <p>
-    Use the buttons in the top left to activate or deactivate the games whose characters can be selected.<br>
-    This allows you to avoid being spoiled on characters from games you haven’t played yet.<br>
-    For example, if you’ve only played Persona 4, disable <strong>P3</strong> and <strong>P5</strong> to avoid unexpected reveals.
-  </p>
-
-  <hr class="separator" />
-
-  <em>Use your memory, your knowledge... and a bit of luck!</em>
-</p>
-
+  <!-- Boutons pour filtrer les personnages par opus (P3, P4, P5) -->
+  <div class="filter-buttons">
+    <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
+    <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
+    <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
   </div>
-</div>
 
+  <!-- Fenêtre modale affichant les règles du mode classique -->
+  <div id="rulesModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Classic Mode Rules</h2>
+      <p id="rulesText">
+        <!-- Explications détaillées des règles du jeu -->
+        ...
+      </p>
+    </div>
+  </div>
 
-
-  <!-- Présentation -->
+  <!-- Boîte de présentation principale avec bouton pour afficher les règles -->
   <div class="personadle-box">
+    <!-- Bouton image pour ouvrir la modale des règles (en haut à droite) -->
+    <div style="position: absolute; top: -40px; right: -95px;">
+      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
+          <img class="active" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
+        </div>
+        <div class="shape-wrapper">
+          <!-- Formes SVG décoratives -->
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+              <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/>
+            </svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+              <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Titre et texte d'introduction -->
     <h1>Guess today’s Persona character!</h1>
     <p>Type any character to start.</p>
   </div>
 
-  <!-- Ligne de catégories avec infobulles -->
+  <!-- Zone où s'affiche l'indice (citation) si débloqué -->
+  <p id="quoteHint" style="display:none;"></p>
 
+  <!-- Ligne contenant les boutons Hint et Give Up -->
+  <div class="hint-giveup-row">
+    <!-- Bloc pour demander un indice -->
+    <div class="hint-block">
+      <div class="link-wrapper" id="hintButton">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/Hint_button.webp" alt="Hint" style="height: 100px;">
+          <img class="active" src="../assets/buttons/Hint_button_rouge.webp" alt="Hint" style="height: 100px;">
+        </div>
+        <div class="shape-wrapper">
+          <!-- Formes SVG décoratives -->
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+              <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/>
+            </svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+              <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <!-- Compteur d'indices utilisés -->
+      <span id="hintCounter" class="counter">(0 / 3)</span>
+    </div>
 
+    <!-- Bloc pour abandonner et révéler la réponse -->
+    <div class="giveup-block">
+      <div class="link-wrapper" id="giveUpButton">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/Give-up_button.webp" alt="Give Up" style="height: 100px;">
+          <img class="active" src="../assets/buttons/Give-up_button_rouge.webp" alt="Give Up" style="height: 100px;">
+        </div>
+        <div class="shape-wrapper">
+          <!-- Formes SVG décoratives -->
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+              <polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40"/>
+            </svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+              <polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <!-- Compteur d'abandons -->
+      <span id="giveUpCounter" class="counter">(0 / 3)</span>
+    </div>
+  </div>
 
-<!-- Bouton indice + compteur -->
-<div style="text-align: center; margin-top: 20px;">
-  <button id="hintButton" disabled>Hint a quote</button>
-  <span id="hintCounter" class="counter">
+  <!-- Section pour la saisie de la réponse et les boutons associés -->
+  <section class="input-wrapper">
+    <div class="input-row">
 
-    (0 / 3)
-  </span>
-</div>
+      <!-- Bouton pour recommencer la partie (à gauche) -->
+      <div class="button-left">
+        <div class="link-wrapper" id="resetButton">
+          <div class="img-wrapper">
+            <img class="normal" src="../assets/buttons/Replay_button.webp" alt="Replay" style="height: 90px;">
+            <img class="active" src="../assets/buttons/Replay_button_rouge.webp" alt="Replay" style="height: 90px;">
+          </div>
+          <div class="shape-wrapper">
+            <!-- Formes SVG décoratives -->
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                <polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42"/>
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                <polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<!-- Zone de l’indice -->
-<p id="quoteHint" style="display:none;"></p>
+      <!-- Champ de saisie du nom du personnage (au centre) -->
+      <div class="textbar-container">
+        <input
+          type="text"
+          id="textbar"
+          placeholder="Enter character name..."
+          aria-label="Guess character name"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+      </div>
 
-<!-- Champ de saisie + boutons principaux -->
-<section class="input-wrapper" style="position: relative;">
-  <input
-    type="text"
-    id="textbar"
-    placeholder="Enter character name..."
-    aria-label="Guess character name"
-  />
-  <button id="guessButton">Submit</button>
-  <button id="resetButton">Replay</button>
-</section>
+      <!-- Bouton pour valider la réponse (à droite) -->
+      <div class="button-right">
+        <div class="link-wrapper" id="guessButton">
+          <div class="img-wrapper">
+            <img class="normal" src="../assets/buttons/Submit_button.webp" alt="Submit" style="height: 90px;">
+            <img class="active" src="../assets/buttons/Submit_button_rouge.webp" alt="Submit" style="height: 90px;">
+          </div>
+          <div class="shape-wrapper">
+            <!-- Formes SVG décoratives -->
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                <polygon fill="#FF0000" points="12,5 108,0 98,35 10,40"/>
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                <polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<!-- Give up + compteur -->
-<div id="giveUpWrapper" style="text-align: center; margin-top: 10px;">
-  <button id="giveUpButton" disabled>Give Up</button>
- <span id="giveUpCounter" class="counter">
-
-    (0 / 8)
-  </span>
-</div>
-
-
-
+    <!-- Liste déroulante pour l'autocomplétion des noms -->
+    <ul id="autocompleteList" class="autocomplete-items" style="margin-top: 10px;"></ul>
   </section>
 
-  <!-- Résultats -->
+  <!-- Zone d'affichage des résultats des tentatives -->
   <div id="output" style="margin-top: 30px;"></div>
 
-  <!-- Script principal -->
+  <!-- Script principal du mode classique -->
   <script type="module" src="./modeClassique.js"></script>
-
-
-  <!-- js-confetti est importé depuis le module JS -->
-   
 </body>
 </html>
