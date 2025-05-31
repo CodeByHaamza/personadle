@@ -26,16 +26,71 @@
   </div>
 
   <!-- Fenêtre modale affichant les règles du mode classique -->
-  <div id="rulesModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Classic Mode Rules</h2>
-      <p id="rulesText">
-        <!-- Explications détaillées des règles du jeu -->
-        ...
+  <!-- Fenêtre modale affichant les règles du mode classique -->
+<div id="rulesModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>📋 Classic Mode Rules</h2>
+
+    <p id="rulesText">
+      <strong>🎯 Goal:</strong><br>
+      Guess the Persona character of the day using deduction and clues 🧩🕵️.
+
+      <hr class="separator" />
+
+      <strong>🧠 How it works:</strong>
+      <ul>
+        <li>🔍 Each attempt shows how close your guess is to the correct character.</li>
+        <li>📊 A grid compares multiple attributes like name, gender, age, arcana, etc.</li>
+        <li>🟩 Green = correct, 🟨 Yellow = partial match, 🟥 Red = wrong.</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>📊 Criteria compared:</strong>
+      <ul>
+        <li>👤 <strong>Name</strong> – Exact match required</li>
+        <li>⚧️ <strong>Gender</strong> – Human, Shadow, Entity, etc.</li>
+        <li>🎂 <strong>Age</strong> – Range (e.g. 15–20, 40+)</li>
+        <li>💥 <strong>Persona User / Shadow</strong> – Can they use a Persona or are they a Shadow?</li>
+        <li>👺 <strong>Persona</strong> – The specific Persona or Shadow form</li>
+        <li>🃏 <strong>Arcana</strong> – Their Tarot Arcana (Fool, Magician, etc.)</li>
+        <li>🎮 <strong>Opus</strong> – Which Persona games they appear in</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>💡 Tips:</strong>
+      <ul>
+        <li>🧠 Use deduction based on color-coded clues.</li>
+        <li>📈 If the age isn’t exact, an arrow ↑ or ↓ appears.</li>
+        <li>🟨 Yellow means partial match (ex: same Arcana but not only that).</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>🎮 Game flow:</strong>
+      <ul>
+        <li>⌨️ Type a name and select from suggestions.</li>
+        <li>🔁 You have <strong>8 attempts</strong> max.</li>
+        <li>💬 At 3 attempts: 🔓 Hint button unlocks (displays a quote).</li>
+        <li>❌ At 8 attempts: 🔓 Give Up button unlocks (reveals the answer).</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>🛡️ Spoiler protection:</strong>
+      <p>
+        🕹️ Use the P3 / P4 / P5 filter buttons to limit characters by game.<br>
+        👀 This avoids spoilers if you haven’t played them all.
       </p>
-    </div>
+
+      <hr class="separator" />
+      <em>🎭 Think like a Phantom Thief... and unveil the truth!</em>
+    </p>
   </div>
+</div>
+
 
   <!-- Boîte de présentation principale avec bouton pour afficher les règles -->
   <div class="personadle-box">

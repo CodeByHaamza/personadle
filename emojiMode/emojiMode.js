@@ -173,7 +173,10 @@ function updateEmojiHint() {
 
 function updateCounters() {
   const giveUpCounter = document.getElementById("giveUpCounter");
-  if (giveUpCounter) giveUpCounter.textContent = `(${attempts} / 8)`;
+  if (giveUpCounter) {
+    giveUpCounter.textContent = `(${attempts} / 8)`;
+    giveUpCounter.classList.toggle("activated", attempts >= 8);
+  }
 }
 
 function checkEmojiGuess(name, forceReveal = false) {

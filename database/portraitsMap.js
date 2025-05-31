@@ -43,5 +43,7 @@ export const portraitsMap = {
    "Kinshiro Morooka": "Morooka",
    "Mr. Edogawa": "Edgoawa",
    "Ichiryusai Madarame": "Madarame",
+   "Hatsune Miku": "Miku",
+   "Shuji Ikutsuki": "Ikutsuki",
 
 };
