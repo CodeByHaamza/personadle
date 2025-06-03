@@ -1114,6 +1114,14 @@ body {
   opacity: 1;
 }
 
+.filter-p1 {
+  background-color: purple;
+}
+
+.filter-p2 {
+  background-color: rgb(223, 155, 30);
+}
+
 .filter-p3 {
   background-color: #0074D9; /* Bleu */
 }

@@ -7,12 +7,15 @@ let gameOver = false;
 
 // === Filtres par opus ===
 const validOpus = {
+  P1: ["P1"],
+  P2: ["P2IS", "P2EP"],
   P3: ["P3", "P3FES", "P3P"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
   P5: ["P5", "P5R", "P5S", "P5T"]
 };
 
-let activeOpus = ["P3", "P4", "P5"]; // Tous actifs par défaut
+let activeOpus = ["P1", "P2", "P3", "P4", "P5"];
+
 
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;

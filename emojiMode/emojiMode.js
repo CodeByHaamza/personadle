@@ -2,13 +2,16 @@ import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
 
+// === Filtres par opus ===
 const validOpus = {
+  P1: ["P1"],
+  P2: ["P2IS", "P2EP"],
   P3: ["P3", "P3FES", "P3P"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
   P5: ["P5", "P5R", "P5S", "P5T"]
 };
 
-let activeOpus = ["P3", "P4", "P5"];
+let activeOpus = ["P1", "P2", "P3", "P4", "P5"];
 let personas = [...originalPersonas];
 let gameOver = false;
 let attempts = 0;
