@@ -912,10 +912,10 @@ export const characters = [
     },
     {
       nom: "Igor",
-      genre: ["Velvet","Male"],
+      genre: ["Velvet", "Male"],
       age: "Unknown",
       arcane: ["Fool"],
-      opus: ["P3","P3FES","P3P","P4","P4G","P4AU","P5","P5R","P5S","P5T"],
+      opus: ["P1", "P2IS", "P2EP", "P3", "P3FES", "P3P", "P4", "P4G", "P4AU", "P5", "P5R", "P5S", "P5T"],
       personaUser: false,
       persona: "NONE",
       emoji: ["🔮", "🗝️", "👃"],
@@ -1128,6 +1128,108 @@ export const characters = [
         persona: "NONE",
         emoji: ["👔", "💎", "🎤"],
         quote: "I'm the number one princess in the world."
+      },
+
+        //Persona 1 and 2
+      
+      {
+        nom: "Naoya Todou",
+        genre: ["Human", "Male"],
+        age: "15-20",
+        arcane: ["Emperor"],
+        opus: ["P1"],
+        personaUser: true,
+        persona: "Seimen Kongou",
+        emoji: ["🧑‍🎓", "🌀", "🔥"],
+        quote: "As for his fate... That's for you to decide."
+      },
+      {
+        nom: "Maki Sonomura",
+        genre: ["Human", "Female"],
+        age: "15-20",
+        arcane: ["Priestess"],
+        opus: ["P1", "P2IS"],
+        personaUser: true,
+        persona: "Maso",
+        emoji: ["🪞", "🌫️", "💊"],
+        quote: "Thank you. I hope you'll still think about me at least once in a while. Goodbye. I love you."
+      },
+      {
+        nom: "Tatsuya Suou",
+        genre: ["Human", "Male"],
+        age: "15-20",
+        arcane: ["Sun"],
+        opus: ["P2IS", "P2EP"],
+        personaUser: true,
+        persona: "Vulcanus",
+        emoji: ["🔥", "🎸", "🤐"],
+        quote: "That's right... I remember now... A sin that must not exist... How do I atone...?"
+      },
+      {
+        nom: "Maya Amano",
+        genre: ["Human", "Female"],
+        age: "21-40",
+        arcane: ["Moon"],
+        opus: ["P2IS", "P2EP"],
+        personaUser: true,
+        persona: "Maia",
+        emoji: ["📝", "🌕", "😊"],
+        quote: "Let's think positive!"
+      },
+      {
+        nom: "Lisa Silverman",
+        genre: ["Human", "Female"],
+        age: "15-20",
+        arcane: ["Lovers"],
+        opus: ["P2IS"],
+        personaUser: true,
+        persona: "Eros",
+        emoji: ["💃", "🇭🇰", "🎤"],
+        quote: "Chinyan... Remember me, no matter what...! I love you..."
+      },
+      {
+        nom: "Jun Kurosu",
+        genre: ["Human", "Male"],
+        age: "15-20",
+        arcane: ["Fortune"],
+        opus: ["P2IS"],
+        personaUser: true,
+        persona: "Hermes",
+        emoji: ["🃏", "🌒", "🌹"],
+        quote: "People often compare their goals to the stars. They shine brightly even after the sun goes down... fixed stars in a dark expanse."
+      },
+      {
+        nom: "Eikichi Mishina",
+        genre: ["Human", "Male"],
+        age: "15-20",
+        arcane: ["Emperor"],
+        opus: ["P2IS"],
+        personaUser: true,
+        persona: "Rhadamanthus",
+        emoji: ["🎤", "💀", "🎸"],
+        quote: "Call me the ‘Death Boss’ — I may look flashy, but I fight for my friends."
+      },
+      {
+        nom: "Baofu",
+        genre: ["Human", "Male"],
+        age: "21-40",
+        arcane: ["Hanged Man"],
+        opus: ["P2EP"],
+        personaUser: true,
+        persona: "Odysseus",
+        emoji: ["🕶️", "📞", "🕷️"],
+        quote: "How I chose to live has nothing to do with you...If you want sympathy, ask someone else..."
+      },
+      {
+        nom: "Joker",
+        genre: ["Entity", "Male"],
+        age: "Unkown",
+        arcane: ["NONE"],
+        opus: ["P2IS"],
+        personaUser: true,
+        persona: "Nyarlathotep",
+        emoji: ["🎭", "🃏", "📞"],
+        quote: "Pathetic, misguided humans, obey me! Only I can lead you, the ignorant! If you will not obey, then you will DIE!"
       },
   
   
