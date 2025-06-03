@@ -240,7 +240,11 @@ function showVictoryBox(name) {
 }
 
 
+// Par cette version corrigée :
 function giveUp() {
+  // ✅ Ajouter cette vérification pour empêcher le give up si pas assez d'essais
+  if (attempts < 5) return;
+  
   if (gameOver) return;
   document.getElementById("aoaGif").style.filter = "none";
   showVictoryBox(target);
@@ -248,7 +252,6 @@ function giveUp() {
   disableInputs();
   gameOver = true;
 }
-
 function resetGame() {
   const input = document.getElementById("textbar");
   const gifElement = document.getElementById("aoaGif");

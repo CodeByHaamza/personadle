@@ -313,9 +313,13 @@ document.addEventListener("DOMContentLoaded", () => {
     textbar.value = "";
   });
 
-  giveUpButton.addEventListener("click", () => {
-    if (!gameOver) checkEmojiGuess(target.nom, true);
-  });
+  // Par cette version corrigée :
+giveUpButton.addEventListener("click", () => {
+  // ✅ Ajouter cette vérification pour empêcher le give up si pas assez d'essais
+  if (attempts < 8) return;
+  
+  if (!gameOver) checkEmojiGuess(target.nom, true);
+});
 
   resetButton.addEventListener("click", () => {
     localStorage.removeItem("targetEmoji");

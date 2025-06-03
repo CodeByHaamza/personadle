@@ -14,108 +14,162 @@
   <!-- Logo -->
   <header id="homepage">
     <a href="../index.html">
-      <img
-        src="../img/Logo_PersonaDLE.png"
-        alt="PersonaDLE Logo"
-        class="logo_HomePage"
-        id="imgHomePage"
-      />
+      <img src="../img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage" />
     </a>
   </header>
 
- <!-- Bouton Comment Jouer -->
-<div class="rules-button-wrapper">
-  <button id="rulesButton" class="persona-btn">📜 How to Play</button>
-</div>
 
-<!-- Rules Modal -->
-<div id="rulesModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>All-Out Attack Mode Rules</h2>
-    <p id="rulesText">
-      <strong>🎯 Goal:</strong><br>
-      Guess the Persona character based on their All-Out Attack animation.
+  
 
-      <hr class="separator" />
-
-      <strong>💥 Gameplay:</strong>
-      <ul>
-        <li>You start with a <strong>blurry All-Out Attack GIF</strong>.</li>
-        <li><strong>Each incorrect guess reduces the blur</strong>.</li>
-        <li>Try to guess with the fewest attempts possible!</li>
-      </ul>
-
-      <hr class="separator" />
-
-      <strong>🎮 Included games:</strong>
-      <ul>
-        <li>Only characters from <strong>Persona 3 Reload</strong> and <strong>Persona 5 / Royal</strong> are used.</li>
-        <li>All GIFs are official animations extracted from these games.</li>
-      </ul>
-
-      <hr class="separator" />
-
-      <strong>📉 Give Up option:</strong>
-      <ul>
-        <li>After <strong>5 incorrect guesses</strong>, the <em>Give Up</em> button activates.</li>
-        <li>It reveals the character and their battle portrait.</li>
-      </ul>
-
-      <hr class="separator" />
-
-      <em>Let your eyes adjust, focus your instincts, and go for the critical hit!</em>
-    </p>
-  </div>
-</div>
-
-  <!-- Présentation -->
-  <div class="personadle-box">
+   <!-- Zone principale d'affichage des emojis et du titre -->
+  <div class="emoji-hint-zone" style="position: relative;">
+    <!-- Bouton pour afficher les règles (en haut à droite) -->
+    <div style="position: absolute; top: -40px; right: -80px;">
+      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
+          <img class="active" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 80px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+              <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/>
+            </svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+              <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Contenu central -->
+     <div style = "color: white;">
     <h1>Guess today’s Persona character!</h1>
     <p>Type any character to start.</p>
+    </div>
   </div>
 
-  <<div class="aoa-gif-zone">
-  <img id="aoaGif" alt="All-Out Attack" />
-</div>
+  
+  <!-- Modal Règles -->
+  <div id="rulesModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>All-Out Attack Mode Rules</h2>
+      <p id="rulesText">
+        <strong>🎯 Goal:</strong><br>
+        Guess the Persona character based on their All-Out Attack animation.
+        <hr class="separator" />
+        <strong>💥 Gameplay:</strong>
+        <ul>
+          <li>You start with a <strong>blurry All-Out Attack GIF</strong>.</li>
+          <li><strong>Each incorrect guess reduces the blur</strong>.</li>
+          <li>Try to guess with the fewest attempts possible!</li>
+        </ul>
+        <hr class="separator" />
+        <strong>🎮 Included games:</strong>
+        <ul>
+          <li>Only characters from <strong>Persona 3 Reload</strong> and <strong>Persona 5 / Royal</strong> are used.</li>
+        </ul>
+        <hr class="separator" />
+        <strong>📉 Give Up option:</strong>
+        <ul>
+          <li>After <strong>5 incorrect guesses</strong>, the <em>Give Up</em> button activates.</li>
+        </ul>
+        <hr class="separator" />
+        <em>Let your eyes adjust, focus your instincts, and go for the critical hit!</em>
+      </p>
+    </div>
+  </div>
 
+  <!-- Zone GIF -->
+  <div class="aoa-gif-zone">
+    <img id="aoaGif" alt="All-Out Attack" />
+  </div>
 
-  <!-- Zone de l’indice -->
-  <p id="quoteHint" style="display:none;"></p>
+  <!-- Give Up -->
+  <div class="giveup-block" style="display: flex; justify-content: center; margin-top: 20px; gap: 12px;">
+    <div class="link-wrapper" id="giveUpButton">
+      <div class="img-wrapper">
+        <img class="normal" src="../assets/buttons/Give-up_button.webp" alt="Give Up" style="height: 90px;">
+        <img class="active" src="../assets/buttons/Give-up_button_rouge.webp" alt="Give Up" style="height: 90px;">
+      </div>
+      <div class="shape-wrapper">
+        <div class="shape red-fill jelly">
+          <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40"/></svg>
+        </div>
+        <div class="shape cyan-fill jelly">
+          <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38"/></svg>
+        </div>
+      </div>
+    </div>
+    <span id="giveUpCounter" class="counter">(0 / 5)</span>
+  </div>
 
-  <!-- Champ de saisie + bouton -->
-  <section class="input-wrapper" style="position: relative;">
-    <input
-      type="text"
-      id="textbar"
-      placeholder="Enter character name..."
-      aria-label="Guess character name"
-    />
-    <button id="guessButton">Submit</button>
-    <button id="resetButton">Replay</button>
+  <!-- Zone d’input + boutons -->
+  <section class="input-wrapper" style="margin-top: 30px; display: flex; justify-content: center;">
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center;">
 
-  </section><div style="text-align: center; margin-top: 10px;">
-  <button id="giveUpButton" disabled>Give Up</button>
-<span id="giveUpCounter" class="counter">(0 / 5)</span>
+      <!-- Replay -->
+      <div class="link-wrapper" id="resetButton">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/Replay_button.webp" alt="Replay" style="height: 90px;">
+          <img class="active" src="../assets/buttons/Replay_button_rouge.webp" alt="Replay" style="height: 90px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42"/></svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35"/></svg>
+          </div>
+        </div>
+      </div>
 
-</div>
+      <!-- Input -->
+      <input
+        type="text"
+        id="textbar"
+        placeholder="Enter character name..."
+        aria-label="Guess character name"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
 
+      <!-- Submit -->
+      <div class="link-wrapper" id="guessButton">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/Submit_button.webp" alt="Submit" style="height: 90px;">
+          <img class="active" src="../assets/buttons/Submit_button_rouge.webp" alt="Submit" style="height: 90px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="12,5 108,0 98,35 10,40"/></svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38"/></svg>
+          </div>
+        </div>
+      </div>
 
+    </div>
+  </section>
 
+  
+
+  <!-- Victoire -->
   <div id="victoryBox" class="victory-box" style="display: none;">
-  <img id="victoryImage" src="" alt="Victory Character">
-  <p class="win-message" id="victoryText"></p>
-</div>
+    <img id="victoryImage" src="" alt="Victory Character">
+    <p class="win-message" id="victoryText"></p>
+  </div>
 
   <!-- Résultats -->
   <div id="wrongGuessList"></div>
 
-
-  <!-- Script principal -->
+  <!-- Script -->
   <script type="module" src="./modeAllOutAttack.js"></script>
-
-
-
-   
 </body>
 </html>

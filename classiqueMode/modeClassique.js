@@ -278,14 +278,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   hintButton.addEventListener("click", () => {
-    if (target && target.quote) {
-      quoteHint.textContent = target.quote;
-      quoteHint.style.display = "block";
-      hintButton.disabled = true;
-      hintButton.style.cursor = "not-allowed";
-    }
-  });
-
+  // ✅ Ajouter cette vérification pour empêcher le hint si pas assez d'essais
+  if (attempts < 3) return;
+  
+  if (target && target.quote) {
+    quoteHint.textContent = target.quote;
+    quoteHint.style.display = "block";
+    hintButton.disabled = true;
+    hintButton.style.cursor = "not-allowed";
+  }
+});
   giveUpButton.addEventListener("click", () => {
     if (attempts < 8) return;
     if (target && target.nom) {
