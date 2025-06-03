@@ -46,4 +46,14 @@ export const portraitsMap = {
    "Hatsune Miku": "Miku",
    "Shuji Ikutsuki": "Ikutsuki",
 
+    "Naoya Todou": "Naoya",
+   "Maki Sonomura": "Maki",
+   "Joker": "JOKER",
+   "Baofu": "Baofu",
+   "Eikichi Mishina": "Eikichi",
+   "Jun Kurosu": "Jun",
+   "Lisa Silverman": "Lisa",
+   "Maya Amano": "Maya_A",
+   "Tatsuya Suou": "Tatsuya",
+
 };
