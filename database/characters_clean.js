@@ -1223,7 +1223,7 @@ export const characters = [
       {
         nom: "Joker",
         genre: ["Entity", "Male"],
-        age: "Unkown",
+        age: "Unknown",
         arcane: ["NONE"],
         opus: ["P2IS"],
         personaUser: true,
