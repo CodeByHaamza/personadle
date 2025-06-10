@@ -329,6 +329,7 @@ function disableInputs() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+  applyDarkModeStyles();
   const textbar = document.getElementById("textbar");
   const guessButton = document.getElementById("guessButton");
   const gifElement = document.getElementById("aoaGif");
@@ -389,3 +390,50 @@ window.addEventListener("click", (e) => {
   }
 
 ;
+
+
+function applyDarkModeStyles() {
+  if (document.body.classList.contains("darkmode")) {
+    const emojiZone = document.querySelector(".emoji-hint-zone");
+    if (emojiZone) {
+      emojiZone.style.background = "rgba(20, 20, 20, 0.7)";
+      emojiZone.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.2)";
+    
+    const autocompleteList = document.getElementById("autocompleteList");
+    if (autocompleteList) {
+      autocompleteList.style.backgroundColor = "#222";
+      autocompleteList.style.color = "#fff";
+      autocompleteList.style.border = "2px solid #666";
+      autocompleteList.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
+    }
+
+    const textbar = document.getElementById("textbar");
+    if (textbar) {
+      textbar.style.backgroundColor = "#111";
+      textbar.style.color = "#fff";
+      textbar.style.border = "2px solid #666";
+    }
+
+  }
+
+    const persoBox = document.querySelector(".personadle-box");
+    if (persoBox) {
+      persoBox.style.background = "rgba(10, 10, 10, 0.7)";
+      persoBox.style.color = "white";
+      persoBox.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
+    }
+
+    const gifZone = document.querySelector(".aoa-gif-zone");
+    if (gifZone) {
+      gifZone.style.background = "rgba(20, 20, 20, 0.8)";
+      gifZone.style.borderColor = "#ffaaaa";
+    }
+
+    const victoryBox = document.getElementById("victoryBox");
+    if (victoryBox) {
+      victoryBox.style.backgroundColor = "#1a1a1a";
+      victoryBox.style.color = "#90ee90";
+      victoryBox.style.border = "3px solid #4caf50";
+    }
+  }
+}

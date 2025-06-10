@@ -1199,7 +1199,6 @@ body.modal-open {
   display: block;
   margin-top: 20px;
   font-size: 1.1em;
-  color: #111;
 }
 
 
@@ -1423,3 +1422,282 @@ input:checked + .slider.red { background-color: #FF4136; }
   transition: none;
 }
 
+/* Bouton switch mode sombre */
+.darkmode-toggle {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 12px;
+  border-radius: 14px;
+  box-shadow: 0 0 6px black;
+}
+
+.switch input {
+  display: none;
+}
+
+.switch .slider {
+  width: 40px;
+  height: 22px;
+  background-color: #ccc;
+  border-radius: 30px;
+  position: relative;
+  transition: 0.2s;
+}
+
+.switch .slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background-color: white;
+  transition: 0.2s;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(18px);
+}
+
+.switch input:checked + .slider {
+  background-color: #4caf50;
+}
+
+.slider.round {
+  border-radius: 30px;
+}
+
+.label-text {
+  font-family: 'Arial Black', sans-serif;
+  color: white;
+  font-size: 0.9rem;
+}
+
+/* Fond d’écran avec transition */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-image: url('../img/personadle_wallpaper.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  z-index: -1;
+  opacity: 1;
+  transition: background-image 0.5s ease-in-out;
+  pointer-events: none;
+}
+
+body.darkmode::before {
+  background-image: url('../img/personadle_wallpaper_dark.jpg');
+}
+
+/* Toggle bouton */
+.darkmode-toggle {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 12px;
+  border-radius: 14px;
+  box-shadow: 0 0 6px black;
+}
+
+.switch input {
+  display: none;
+}
+
+.switch .slider {
+  width: 40px;
+  height: 22px;
+  background-color: #ccc;
+  border-radius: 30px;
+  position: relative;
+  transition: 0.2s;
+}
+
+.switch .slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background-color: white;
+  transition: 0.2s;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(18px);
+}
+
+.switch input:checked + .slider {
+  background-color: #4caf50;
+}
+
+.slider.round {
+  border-radius: 30px;
+}
+
+.label-text {
+  font-family: 'Arial Black', sans-serif;
+  color: white;
+  font-size: 0.9rem;
+}
+
+/* ========== Dark Mode Polishing ========== */
+body.darkmode input[type="text"],
+body.darkmode #textbar {
+  background-color: #111;
+  color: #fff !important;
+  border: 2px solid #666;
+}
+
+body.darkmode .autocomplete-items,
+body.darkmode #autocompleteList {
+  background-color: #222;
+  color: #fff !important;
+  border: 2px solid #666;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+body.darkmode .list-options:hover {
+  background-color: #333 !important;
+}
+
+body.darkmode .list-options {
+  border-bottom: 1px solid #555;
+  color: #fff;
+}
+
+body.darkmode .list-options span {
+  color: #ffffff !important;
+}
+
+body.darkmode .list-options img {
+  background-color: #000;
+  border: 1px solid #555;
+}
+
+body.darkmode .counter {
+  background-color: #444;
+  color: #fdd835;
+  border-color: #888;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
+
+body.darkmode .aoa-gif-zone {
+  background: rgba(40, 40, 40, 0.85);
+  border-color: #ff6a6a;
+}
+/* ===== Dark Mode pour la modale des règles ===== */
+body.darkmode .modal-content {
+  background-color: #1c1c1c;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+  border: 1px solid #444;
+}
+
+body.darkmode .modal-content h2,
+body.darkmode .modal-content strong {
+  color: #ff5555;
+}
+
+body.darkmode .modal-content ul {
+  color: #dddddd;
+}
+
+body.darkmode .modal-content p {
+  color: #cccccc;
+}
+
+body.darkmode .modal .close {
+  color: #aaa;
+}
+
+body.darkmode .modal .close:hover {
+  color: #fff;
+} 
+
+/* Fix du texte noir dans .modal-content en dark mode */
+body.darkmode #rulesText strong {
+  color: #fcf2f2 !important;
+}
+
+/* ===== Dark Mode - Résultats du Classique Mode ===== */
+body.darkmode .guess-row {
+  background-color: rgba(30, 30, 30, 0.9);
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.15);
+}
+
+body.darkmode .guess-cell {
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border: 1px solid #555;
+}
+
+body.darkmode .guess-image {
+  background-color: #000;
+  border: 2px solid #666;
+}
+
+body.darkmode .category-row {
+  background-color: rgba(60, 60, 60, 0.7);
+  color: #fff;
+  border: 1px solid #444;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+/* Couleurs spécifiques des feedbacks restent identiques */
+body.darkmode .correct {
+  background-color: #2ecc71; /* vert */
+}
+body.darkmode .misplaced {
+  background-color: #f1c40f; /* jaune */
+  color: black;
+}
+body.darkmode .wrong {
+  background-color: #e74c3c; /* rouge */
+  color: white;
+}
+
+/* ===== Dark Mode - Compteur max atteint ===== */
+body.darkmode .counter.activated {
+  background-color: #fdd835;
+  color: #000;
+  border-color: #888;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+
+/* Footer */
+footer {
+    background-color: #222;
+    color: #fff;
+    text-align: center;
+    padding: 15px;
+    font-size: 14px;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    font-family: Arial, sans-serif;
+}
+
+footer p {
+    margin: 5px 0;
+}

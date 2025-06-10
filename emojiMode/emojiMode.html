@@ -199,6 +199,38 @@
   </div>
 </div>
 
+<!-- Bouton Mode Sombre -->
+<div class="darkmode-toggle">
+  <label class="switch">
+    <input type="checkbox" id="darkModeToggle">
+    <span class="slider round"></span>
+  </label>
+  <span class="label-text">Dark Mode</span>
+</div>
+
+<!-- Script intégré -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.getElementById("darkModeToggle");
+    const savedMode = localStorage.getItem("darkMode");
+    if (savedMode === "enabled") {
+      document.body.classList.add("darkmode");
+      toggle.checked = true;
+    }
+
+    toggle.addEventListener("change", () => {
+      if (toggle.checked) {
+        document.body.classList.add("darkmode");
+        localStorage.setItem("darkMode", "enabled");
+      } else {
+        document.body.classList.remove("darkmode");
+        localStorage.setItem("darkMode", "disabled");
+      }
+    });
+  });
+</script>
+
+
 
   <!-- Script -->
   <script type="module" src="./emojiMode.js"></script>
