@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personadle - Silhouette Mode</title>
+
+  <!-- Style général -->
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
+</head>
+
+<body>
+  <!-- Logo Home -->
+  <header id="homepage">
+    <a href="../index.html">
+      <img src="../img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage" />
+    </a>
+  </header>
+
+  <!-- Titre et instructions -->
+  <div class="emoji-hint-zone" style="position: relative;">
+    <div style="position: absolute; top: -40px; right: -80px;">
+      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
+          <img class="active" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 80px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/></svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="color: white;">
+      <h1>Guess today's Persona character!</h1>
+      <p>Look at the silhouette and type your guess.</p>
+    </div>
+  </div>
+
+  <!-- Modal Règles -->
+  <div id="rulesModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Silhouette Mode Rules</h2>
+      <p id="rulesText">
+  <strong>🎯 Goal:</strong><br>
+  🕵️‍♂️ Guess the Persona character based on their black silhouette!
+
+  <hr class="separator" />
+
+  <strong>🕶️ Gameplay:</strong>
+  <ul>
+    <li>🔍 You start with a <strong>zoomed-in black silhouette</strong> of a character.</li>
+    <li>❌ Each wrong guess <strong>zooms the image out slightly</strong>, revealing more of the shadowy figure.</li>
+    <li>✅ When you find the right answer, the full color image is revealed in all its glory 🎉.</li>
+  </ul>
+
+  <hr class="separator" />
+
+  <strong>🎮 Included games:</strong>
+  <ul>
+    <li>🕹️ Characters can come from <strong>Persona 1</strong>, <strong>Persona 2: Innocent Sin</strong>, <strong>Persona 2: Eternal Punishment</strong>, <strong>Persona 3</strong>, <strong>Persona 4</strong>, <strong>Persona 5</strong>, and their spin-offs (P3P, P4G, P5R, P4D, P5S, etc.).</li>
+  </ul>
+
+  <hr class="separator" />
+
+  <strong>📉 Give Up option:</strong>
+  <ul>
+    <li>⚠️ The <em>Give Up</em> button activates after <strong>5 failed attempts</strong>.</li>
+  </ul>
+
+  <hr class="separator" />
+
+  <em>🧠 Trust your memory, 👀 watch the shape, and 🔓 uncover the truth behind the shadow...</em>
+</p>
+
+    </div>
+  </div>
+
+  <!-- Zone Silhouette -->
+  <div class="aoa-gif-zone">
+    <img id="silhouetteImage" alt="Silhouette" />
+  </div>
+
+  <!-- Give Up & Compteur -->
+  <div class="giveup-block" style="display: flex; justify-content: center; margin-top: 20px; gap: 12px;">
+    <div class="link-wrapper" id="giveUpButton">
+      <div class="img-wrapper">
+        <img class="normal" src="../assets/buttons/Give-up_button.webp" alt="Give Up" style="height: 90px;">
+        <img class="active" src="../assets/buttons/Give-up_button_rouge.webp" alt="Give Up" style="height: 90px;">
+      </div>
+      <div class="shape-wrapper">
+        <div class="shape red-fill jelly">
+          <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40"/></svg>
+        </div>
+        <div class="shape cyan-fill jelly">
+          <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38"/></svg>
+        </div>
+      </div>
+    </div>
+    <span id="giveUpCounter" class="counter">(0 / 5)</span>
+  </div>
+
+  <!-- Input + Boutons -->
+  <section class="input-wrapper" style="margin-top: 30px; display: flex; justify-content: center;">
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center;">
+
+      <!-- Replay -->
+      <div class="link-wrapper" id="resetButton">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/Replay_button.webp" alt="Replay" style="height: 90px;">
+          <img class="active" src="../assets/buttons/Replay_button_rouge.webp" alt="Replay" style="height: 90px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42"/></svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <input
+        type="text"
+        id="textbar"
+        placeholder="Enter character name..."
+        aria-label="Guess character name"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+
+      <!-- Submit -->
+      <div class="link-wrapper" id="guessButton">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/Submit_button.webp" alt="Submit" style="height: 90px;">
+          <img class="active" src="../assets/buttons/Submit_button_rouge.webp" alt="Submit" style="height: 90px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="12,5 108,0 98,35 10,40"/></svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38"/></svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Victoire -->
+  <div id="victoryBox" class="victory-box" style="display: none;">
+    <img id="victoryImage" src="" alt="Victory Character">
+    <p class="win-message" id="victoryText"></p>
+  </div>
+
+  <!-- Erreurs -->
+  <div id="wrongGuessList"></div>
+
+  <!-- Script principal -->
+  <script type="module" src="./modeSilhouette.js"></script>
+
+  <!-- Mode sombre -->
+  <div class="darkmode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider round"></span>
+    </label>
+    <span class="label-text">Dark Mode</span>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggle = document.getElementById("darkModeToggle");
+      const savedMode = localStorage.getItem("darkMode");
+      if (savedMode === "enabled") {
+        document.body.classList.add("darkmode");
+        toggle.checked = true;
+      }
+
+      toggle.addEventListener("change", () => {
+        if (toggle.checked) {
+          document.body.classList.add("darkmode");
+          localStorage.setItem("darkMode", "enabled");
+        } else {
+          document.body.classList.remove("darkmode");
+          localStorage.setItem("darkMode", "disabled");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

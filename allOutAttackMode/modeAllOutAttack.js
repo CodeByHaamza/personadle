@@ -1,13 +1,26 @@
 import { personas as originalPersonas } from "./database/personas_allOut.js";
 import { portraitsMap } from "./database/portraitsMap.js";
+import { aoaCharacters } from "./database/aoaCharacters.js";
 
-let personas = [...originalPersonas];
+let activeOpusFilters = ["P3", "P5"]; // filtres actifs
+
+const validOpus = {
+  P3: ["P3"],
+  P5: ["P5"]
+};
+
+function getFilteredPersonas() {
+  return originalPersonas.filter(name => {
+    const entry = aoaCharacters.find(p => p.nom === name);
+    if (!entry) return false;
+    return entry.opus.some(opus => activeOpusFilters.includes(opus));
+  });
+}
+
+let personas = getFilteredPersonas();
 let attempts = 0;
 let gameOver = false;
 let target = null;
-
-let previousTarget = null;
-
 let lastFiveTargets = [];
 
 function getBetterRandomCharacter() {
@@ -32,9 +45,6 @@ function getBetterRandomCharacter() {
 
   return selected;
 }
-
-
-
 
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
@@ -169,8 +179,6 @@ function showConfettiExplosion() {
   }
 }
 
-// ... le reste du code reste identique jusqu’à la fonction showWrongFeedback
-
 function showWrongFeedback(name) {
   const imageName = portraitsMap[name] || name.split(" ")[0];
   const listZone = document.getElementById("wrongGuessList");
@@ -190,7 +198,6 @@ function showWrongFeedback(name) {
   }, 50);
 }
 
-
 function handleGuess() {
   if (gameOver) return;
 
@@ -199,7 +206,7 @@ function handleGuess() {
   if (!guess) return;
 
   attempts++;
-  updateGiveUpCounter(); // met à jour le compteur + bouton
+  updateGiveUpCounter();
 
   if (guess.toLowerCase() === target.toLowerCase()) {
     document.getElementById("aoaGif").style.filter = "none";
@@ -233,25 +240,20 @@ function showVictoryBox(name) {
 
   box.style.display = "flex";
 
-  // ✅ Scroll vers la victoire
   setTimeout(() => {
     box.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, 300); // petit délai pour que la box soit visible avant scroll
+  }, 300);
 }
 
-
-// Par cette version corrigée :
 function giveUp() {
-  // ✅ Ajouter cette vérification pour empêcher le give up si pas assez d'essais
-  if (attempts < 5) return;
-  
-  if (gameOver) return;
+  if (attempts < 5 || gameOver) return;
   document.getElementById("aoaGif").style.filter = "none";
   showVictoryBox(target);
   showConfettiExplosion();
   disableInputs();
   gameOver = true;
 }
+
 function resetGame() {
   const input = document.getElementById("textbar");
   const gifElement = document.getElementById("aoaGif");
@@ -261,7 +263,7 @@ function resetGame() {
   attempts = 0;
   document.getElementById("victoryBox").style.display = "none";
 
-  personas = [...originalPersonas];
+  personas = getFilteredPersonas();
   target = getBetterRandomCharacter();
 
   const imageName = portraitsMap[target] || target.split(" ")[0];
@@ -272,28 +274,17 @@ function resetGame() {
   document.getElementById("guessButton").disabled = false;
   input.value = "";
 
-  // ✅ SUPPRESSION des feedbacks d’erreur (images rouges)
-  if (wrongList) {
-    wrongList.innerHTML = "";
-  }
+  if (wrongList) wrongList.innerHTML = "";
 
-  // ✅ Recharge de l’autocomplétion avec liste complète
   initializeAutocomplete(input, personas);
   updateGiveUpButton();
   updateGiveUpCounter();
-
-
 }
 
 function updateGiveUpButton() {
   const giveUpButton = document.getElementById("giveUpButton");
-  if (attempts >= 5) {
-    giveUpButton.disabled = false;
-    giveUpButton.style.cursor = "pointer";
-  } else {
-    giveUpButton.disabled = true;
-    giveUpButton.style.cursor = "not-allowed";
-  }
+  giveUpButton.disabled = attempts < 5;
+  giveUpButton.style.cursor = attempts >= 5 ? "pointer" : "not-allowed";
 }
 
 function updateGiveUpCounter() {
@@ -302,13 +293,7 @@ function updateGiveUpCounter() {
 
   if (giveUpCounter) {
     giveUpCounter.textContent = `(${attempts} / 5)`;
-
-    // Ajoute un style "activated" quand on atteint 5 essais
-    if (attempts >= 5) {
-      giveUpCounter.classList.add("activated");
-    } else {
-      giveUpCounter.classList.remove("activated");
-    }
+    giveUpCounter.classList.toggle("activated", attempts >= 5);
   }
 
   if (giveUpButton) {
@@ -317,16 +302,12 @@ function updateGiveUpCounter() {
   }
 }
 
-
-
-
 function disableInputs() {
   document.getElementById("textbar").disabled = true;
   document.getElementById("guessButton").disabled = true;
-  document.getElementById("giveUpButton").disabled = true; // ✅ bloque Give Up aussi
-  document.getElementById("giveUpButton").style.cursor = "not-allowed"; // pour le visuel
+  document.getElementById("giveUpButton").disabled = true;
+  document.getElementById("giveUpButton").style.cursor = "not-allowed";
 }
-
 
 document.addEventListener("DOMContentLoaded", () => {
   applyDarkModeStyles();
@@ -334,106 +315,105 @@ document.addEventListener("DOMContentLoaded", () => {
   const guessButton = document.getElementById("guessButton");
   const gifElement = document.getElementById("aoaGif");
 
+  personas = getFilteredPersonas();
   initializeAutocomplete(textbar, personas);
   guessButton.addEventListener("click", handleGuess);
   document.getElementById("giveUpButton").addEventListener("click", giveUp);
   document.getElementById("resetButton").addEventListener("click", resetGame);
 
+  const rulesModal = document.getElementById("rulesModal");
+  const rulesButton = document.getElementById("rulesButton");
+  const closeRulesBtn = rulesModal.querySelector(".close");
+
+  rulesButton.addEventListener("click", () => {
+    rulesModal.style.display = "block";
+    document.body.classList.add("modal-open");
+  });
+
+  closeRulesBtn.addEventListener("click", () => {
+    rulesModal.style.display = "none";
+    document.body.classList.remove("modal-open");
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === rulesModal) {
+      rulesModal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    }
+  });
+
   target = getBetterRandomCharacter();
   const imageName = portraitsMap[target] || target.split(" ")[0];
   gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
   gifElement.style.filter = "blur(20px)";
-})
+  
+  // Filtres dynamiques
+document.querySelectorAll(".filter-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const group = btn.dataset.opus;
+    btn.classList.toggle("active");
 
-  // === GESTION DU BOUTON "COMMENT JOUER" ===
-  const rulesModal = document.getElementById("rulesModal");
-  const rulesButton = document.getElementById("rulesButton");
-  const closeRulesBtn = document.querySelector(".modal .close");
+    if (btn.classList.contains("active")) {
+      if (!activeOpusFilters.includes(group)) activeOpusFilters.push(group);
+    } else {
+      activeOpusFilters = activeOpusFilters.filter(o => o !== group);
+    }
 
-  if (rulesButton && rulesModal && closeRulesBtn) {
-    rulesButton.addEventListener("click", () => {
-      rulesModal.style.display = "block";
-    });
+    // ➤ Mise à jour complète des personas
+    personas = getFilteredPersonas();
+    initializeAutocomplete(document.getElementById("textbar"), personas);
 
-    closeRulesBtn.addEventListener("click", () => {
-      rulesModal.style.display = "none";
-    });
+    // ➤ Re-tirage immédiat d'un personnage valide
+    target = getBetterRandomCharacter();
+    const imageName = portraitsMap[target] || target.split(" ")[0];
+    const gifElement = document.getElementById("aoaGif");
+    gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
+    gifElement.style.filter = "blur(20px)";
 
-    window.addEventListener("click", (e) => {
-      if (e.target === rulesModal) {
-        rulesModal.style.display = "none";
-      }
-    });
-
-    // === Modale "How to Play"
-const rulesModal = document.getElementById("rulesModal");
-const rulesBtn = document.getElementById("rulesButton");
-const closeBtn = rulesModal.querySelector(".close");
-
-rulesBtn.addEventListener("click", () => {
-  rulesModal.style.display = "block";
-  document.body.classList.add("modal-open");
+    // ➤ Reset input + erreurs visuelles
+    document.getElementById("textbar").value = "";
+    document.getElementById("wrongGuessList").innerHTML = "";
+    attempts = 0;
+    updateGiveUpButton();
+    updateGiveUpCounter();
+  });
 });
 
-closeBtn.addEventListener("click", () => {
-  rulesModal.style.display = "none";
-  document.body.classList.remove("modal-open");
 });
-
-window.addEventListener("click", (e) => {
-  if (e.target === rulesModal) {
-    rulesModal.style.display = "none";
-    document.body.classList.remove("modal-open");
-  }
-});
-
-  }
-
-;
-
 
 function applyDarkModeStyles() {
-  if (document.body.classList.contains("darkmode")) {
-    const emojiZone = document.querySelector(".emoji-hint-zone");
-    if (emojiZone) {
-      emojiZone.style.background = "rgba(20, 20, 20, 0.7)";
-      emojiZone.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.2)";
-    
-    const autocompleteList = document.getElementById("autocompleteList");
-    if (autocompleteList) {
-      autocompleteList.style.backgroundColor = "#222";
-      autocompleteList.style.color = "#fff";
-      autocompleteList.style.border = "2px solid #666";
-      autocompleteList.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
-    }
+  if (!document.body.classList.contains("darkmode")) return;
 
-    const textbar = document.getElementById("textbar");
-    if (textbar) {
-      textbar.style.backgroundColor = "#111";
-      textbar.style.color = "#fff";
-      textbar.style.border = "2px solid #666";
-    }
-
+  const emojiZone = document.querySelector(".emoji-hint-zone");
+  if (emojiZone) {
+    emojiZone.style.background = "rgba(20, 20, 20, 0.7)";
+    emojiZone.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.2)";
   }
 
-    const persoBox = document.querySelector(".personadle-box");
-    if (persoBox) {
-      persoBox.style.background = "rgba(10, 10, 10, 0.7)";
-      persoBox.style.color = "white";
-      persoBox.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
-    }
+  const textbar = document.getElementById("textbar");
+  if (textbar) {
+    textbar.style.backgroundColor = "#111";
+    textbar.style.color = "#fff";
+    textbar.style.border = "2px solid #666";
+  }
 
-    const gifZone = document.querySelector(".aoa-gif-zone");
-    if (gifZone) {
-      gifZone.style.background = "rgba(20, 20, 20, 0.8)";
-      gifZone.style.borderColor = "#ffaaaa";
-    }
+  const persoBox = document.querySelector(".personadle-box");
+  if (persoBox) {
+    persoBox.style.background = "rgba(10, 10, 10, 0.7)";
+    persoBox.style.color = "white";
+    persoBox.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
+  }
 
-    const victoryBox = document.getElementById("victoryBox");
-    if (victoryBox) {
-      victoryBox.style.backgroundColor = "#1a1a1a";
-      victoryBox.style.color = "#90ee90";
-      victoryBox.style.border = "3px solid #4caf50";
-    }
+  const gifZone = document.querySelector(".aoa-gif-zone");
+  if (gifZone) {
+    gifZone.style.background = "rgba(20, 20, 20, 0.8)";
+    gifZone.style.borderColor = "#ffaaaa";
+  }
+
+  const victoryBox = document.getElementById("victoryBox");
+  if (victoryBox) {
+    victoryBox.style.backgroundColor = "#1a1a1a";
+    victoryBox.style.color = "#90ee90";
+    victoryBox.style.border = "3px solid #4caf50";
   }
 }
