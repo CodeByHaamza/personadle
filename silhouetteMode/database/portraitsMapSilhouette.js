@@ -37,7 +37,7 @@ export const portraitsMapSilhouette = {
   "Labrys": "Labrys",
   "Lavenza": "Lavenza",
   "Maiko": "Maiko",
-  "Makoto Yuki": "Yuki",
+  "Makoto Nijima": "Makoto",
   "Margaret": "Margaret",
   "Marie": "Marie",
   "Maya Amano": "Maya",

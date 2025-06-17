@@ -1044,6 +1044,26 @@ export const characters = [
       persona: "Asmodeus",
       emoji: ["👑", "👨‍🏫", "🏐"],
       quote: "People around me were the ones who kept it secret. Adults who want to share in my accomplishments, students who have the drive to become winners... they willingly protect it so we all may profit from it."
+    },{
+      nom: "Kunikazu Okumura",
+      genre: ["Human", "Male"],
+      age: "40+",
+      arcane: ["NONE"],
+      opus: ["P5","P5R"],
+      personaUser: true,
+      persona: "Mammon",
+      emoji: ["👔", "🍔", "👨‍🏭"],
+      quote: "I've received a calling card from the Phantom Thieves. I need you to send it over to the police. Don't make me repeat myself. Give it to the police. That's an order. These scoundrels have threatened me. Aren't the police supposed to side with law-abiding citizens?"
+    },{
+      nom: "Masayoshi Shido",
+      genre: ["Human", "Male"],
+      age: "40+",
+      arcane: ["NONE"],
+      opus: ["P5","P5R"],
+      personaUser: true,
+      persona: "Samael",
+      emoji: ["🛳️", "🎤", "👔"],
+      quote: "Sacrifices are inevitable in the path of reform. I only require that the foolish entrust themselves to their superiors. I shall guide them."
     },
 
     {
