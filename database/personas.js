@@ -112,4 +112,7 @@ export const personas = [
   "Eikichi Mishina",
   "Baofu",
   "Joker",
+  "Sophia",
+  "Zenkichi Hasegawa"
+
 ];

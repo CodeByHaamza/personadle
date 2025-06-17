@@ -915,7 +915,7 @@ export const characters = [
       genre: ["Velvet", "Male"],
       age: "Unknown",
       arcane: ["Fool"],
-      opus: ["P1", "P2IS", "P2EP", "P3", "P3FES", "P3P", "P4", "P4G", "P4AU", "P5", "P5R", "P5S", "P5T"],
+      opus: ["P1", "P2IS", "P2EP", "P3", "P3FES", "P3P", "P4", "P4G", "P4AU", "P5", "P5R"],
       personaUser: false,
       persona: "NONE",
       emoji: ["🔮", "🗝️", "👃"],
@@ -926,9 +926,9 @@ export const characters = [
       genre: ["Human","Female"],
       age: "21-40",
       arcane: ["Judgement"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
+      opus: ["P5","P5R","P5S"],
+      personaUser: true,
+      persona: "Leviathan",
       emoji: ["🔎", "⚖️", "👩‍⚖️"],
       quote: "Still, I'm glad I was able to save you in court. I've never felt so happy in my entire life. I'm not quite sure how to put it, but... saving your future meant more to me than my own career. I feel like you even taught me how to live."
     },
@@ -1232,6 +1232,28 @@ export const characters = [
         quote: "Pathetic, misguided humans, obey me! Only I can lead you, the ignorant! If you will not obey, then you will DIE!"
       },
   
+      {
+  nom: "Sophia",
+  genre: ["Artificial","Female"],
+  age: "< 15",
+  arcane: ["Hope"],
+  opus: ["P5S"],
+  personaUser: true,
+  persona: "Pithos",
+  emoji: ["🤖", "🪀", "❤️"],
+  quote: "The power... to change... I've got it now... That's what a heart is!"
+  },
+  {
+  nom: "Zenkichi Hasegawa",
+  genre: ["Human","Male"],
+  age: "21-40",
+  arcane: ["Apostle"],
+  opus: ["P5S"],
+  personaUser: true,
+  persona: "Valjean",
+  emoji: ["🕴️", "🐺", "🔫"],
+  quote: "I may not be a hero, and I sure as hell don't deserve any awards... But at least I know what makes a person evil. Evil only cares about itself. It's the mark of a man who would bring another to ruin and dare not show remorse. I will never let people like that go free. And I'll give everything I have to bring them down!"
+  },
   
 
   

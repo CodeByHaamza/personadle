@@ -4,22 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Personadle - Silhouette Mode</title>
-
-  <!-- Style général -->
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 </head>
 
 <body>
-  <!-- Logo Home -->
+  <!-- Logo -->
   <header id="homepage">
     <a href="../index.html">
       <img src="../img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage" />
     </a>
   </header>
 
-  <!-- Titre et instructions -->
+  <!-- Boutons filtres -->
+  <div class="filter-buttons">
+    <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
+    <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
+    <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
+  </div>
+
+  <!-- Zone principale -->
   <div class="emoji-hint-zone" style="position: relative;">
+    <!-- Bouton Rules -->
     <div style="position: absolute; top: -40px; right: -80px;">
       <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
         <div class="img-wrapper">
@@ -36,58 +42,52 @@
         </div>
       </div>
     </div>
+
+    <!-- Titre central -->
     <div style="color: white;">
-      <h1>Guess today's Persona character!</h1>
-      <p>Look at the silhouette and type your guess.</p>
+      <h1>Guess today’s Persona character from their silhouette!</h1>
+      <p>Type any name to start 👤</p>
     </div>
   </div>
 
-  <!-- Modal Règles -->
+  <!-- Modal règles -->
   <div id="rulesModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Silhouette Mode Rules</h2>
       <p id="rulesText">
-  <strong>🎯 Goal:</strong><br>
-  🕵️‍♂️ Guess the Persona character based on their black silhouette!
-
-  <hr class="separator" />
-
-  <strong>🕶️ Gameplay:</strong>
-  <ul>
-    <li>🔍 You start with a <strong>zoomed-in black silhouette</strong> of a character.</li>
-    <li>❌ Each wrong guess <strong>zooms the image out slightly</strong>, revealing more of the shadowy figure.</li>
-    <li>✅ When you find the right answer, the full color image is revealed in all its glory 🎉.</li>
-  </ul>
-
-  <hr class="separator" />
-
-  <strong>🎮 Included games:</strong>
-  <ul>
-    <li>🕹️ Characters can come from <strong>Persona 1</strong>, <strong>Persona 2: Innocent Sin</strong>, <strong>Persona 2: Eternal Punishment</strong>, <strong>Persona 3</strong>, <strong>Persona 4</strong>, <strong>Persona 5</strong>, and their spin-offs (P3P, P4G, P5R, P4D, P5S, etc.).</li>
-  </ul>
-
-  <hr class="separator" />
-
-  <strong>📉 Give Up option:</strong>
-  <ul>
-    <li>⚠️ The <em>Give Up</em> button activates after <strong>5 failed attempts</strong>.</li>
-  </ul>
-
-  <hr class="separator" />
-
-  <em>🧠 Trust your memory, 👀 watch the shape, and 🔓 uncover the truth behind the shadow...</em>
-</p>
-
+        <strong>🎯 Goal:</strong><br>
+        Guess the Persona character based on their <strong>black silhouette</strong>.
+        <hr class="separator" />
+        <strong>👤 Gameplay:</strong>
+        <ul>
+          <li>You start with a <strong>zoomed silhouette</strong>.</li>
+          <li>❌ Each incorrect guess will <strong>zoom out the image</strong>.</li>
+          <li>✅ If you guess correctly, the real portrait is revealed.</li>
+        </ul>
+        <hr class="separator" />
+        <strong>🎮 Included games:</strong>
+        <ul>
+          <li>Characters from <strong>Persona 3</strong>, <strong>4</strong> and <strong>5</strong>.</li>
+        </ul>
+        <hr class="separator" />
+        <strong>📉 Give Up option:</strong>
+        <ul>
+          <li>After <strong>3 failed attempts</strong>, the Give Up button activates.</li>
+        </ul>
+        <hr class="separator" />
+        <em>Focus on the pose, the hairstyle, and go with your intuition 🕵️</em>
+      </p>
     </div>
   </div>
 
-  <!-- Zone Silhouette -->
-  <div class="aoa-gif-zone">
-    <img id="silhouetteImage" alt="Silhouette" />
-  </div>
+  <!-- Image silhouette -->
+  <div class="silhouette-box">
+  <img id="silhouetteImage" alt="Silhouette" />
+</div>
 
-  <!-- Give Up & Compteur -->
+
+  <!-- Bouton Give Up -->
   <div class="giveup-block" style="display: flex; justify-content: center; margin-top: 20px; gap: 12px;">
     <div class="link-wrapper" id="giveUpButton">
       <div class="img-wrapper">
@@ -103,13 +103,13 @@
         </div>
       </div>
     </div>
-    <span id="giveUpCounter" class="counter">(0 / 5)</span>
+    <span id="giveUpCounter" class="counter">(0 / 3)</span>
   </div>
 
-  <!-- Input + Boutons -->
+  <!-- Input + boutons -->
   <section class="input-wrapper" style="margin-top: 30px; display: flex; justify-content: center;">
     <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center;">
-
+      
       <!-- Replay -->
       <div class="link-wrapper" id="resetButton">
         <div class="img-wrapper">
@@ -163,13 +163,13 @@
     <p class="win-message" id="victoryText"></p>
   </div>
 
-  <!-- Erreurs -->
+  <!-- Résultats -->
   <div id="wrongGuessList"></div>
 
-  <!-- Script principal -->
+  <!-- Script du jeu -->
   <script type="module" src="./modeSilhouette.js"></script>
 
-  <!-- Mode sombre -->
+  <!-- Dark Mode -->
   <div class="darkmode-toggle">
     <label class="switch">
       <input type="checkbox" id="darkModeToggle">
@@ -186,7 +186,6 @@
         document.body.classList.add("darkmode");
         toggle.checked = true;
       }
-
       toggle.addEventListener("change", () => {
         if (toggle.checked) {
           document.body.classList.add("darkmode");

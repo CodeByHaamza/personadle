@@ -1135,6 +1135,10 @@ body {
   background-color: #FF4136; /* Rouge Persona 5 */
 }
 
+.filter-p5x {
+  background-color: #afafafc7; /* Rouge Persona 5 */
+}
+
 /* Modale - verrouille le scroll en arrière-plan */
 body.modal-open {
   overflow: hidden;
@@ -1700,4 +1704,124 @@ footer {
 
 footer p {
     margin: 5px 0;
+}
+
+
+/* ===== Silhouette Mode Zone ===== */
+/* ===== Silhouette Mode Zone ===== */
+.silhouette-box {
+  width: 100%;
+  max-width: 600px;
+  height: 600px;
+  margin: 40px auto 20px auto;
+  background: #f0f0f0; /* couleur claire pour bien voir la silhouette noire */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid #333;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s ease-in-out;
+}
+
+.darkmode .silhouette-box {
+  background: #1f1f2f; /* gris-bleu foncé, visible sur silhouette noire */
+  border-color: #ccc;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.1);
+}
+
+#silhouetteImage {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+  filter: brightness(0); /* silhouette noire */
+  transform: scale(1);
+    margin-bottom: 20px;
+}
+
+
+/* Liste des mauvaises réponses */
+.wrong-guess {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px auto;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background-color: #330000;
+  color: white;
+  font-weight: bold;
+  max-width: 300px;
+  animation: shake 0.4s ease-in-out;
+}
+
+.wrong-guess img {
+  height: 48px;
+  border-radius: 8px;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+.victory-message {
+  margin-top: 12px;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #66ff66;
+  text-align: center;
+}
+
+/* Pour le mode Silhouette uniquement : cacher l’image dans .victory-box */
+.silhouette-box .victory-box img {
+  display: none;
+}
+
+/* Centrer la boîte de victoire dans la silhouette */
+.silhouette-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+
+/* Centrer le texte dans la victory-box */
+.silhouette-box .victory-box {
+  margin-top: 20px;
+  background-color: #e6fbe6;
+  border: 3px solid #4caf50;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.2);
+  animation: fadeInVictory 0.3s ease-in-out;
+}
+
+.silhouette-box .victory-message {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+#silhouetteImage {
+  animation: popInSilhouette 0.4s ease;
+}
+
+@keyframes popInSilhouette {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
