@@ -1,7 +1,9 @@
 // === IMPORTS ===
 import { silhouetteCharacters as originalCharacters } from "./database/silhouetteCharacters.js";
-import { portraitsMap } from "../database/portraitsMap.js";
-import { personas } from "../database/personas.js";
+import { portraitsMapSilhouette as portraitsMap } from "./database/portraitsMapSilhouette.js";
+import { personas } from "./database/persona.js";
+
+
 
 // === CONSTANTES ===
 const validOpus = {
@@ -59,6 +61,10 @@ function pickCharacter() {
   silhouetteImg.src = `./database/img/${target.image}.webp`;
   silhouetteImg.alt = "Silhouette";
   silhouetteImg.style.filter = "brightness(0)";
+    localStorage.setItem("silhouetteTarget", JSON.stringify(target));
+  localStorage.setItem("silhouetteAttempts", attempts);
+  localStorage.setItem("silhouetteGameOver", "false");
+
 }
 
 // === AUTOCOMPLETE ===
@@ -67,7 +73,7 @@ function initializeAutocomplete(input, personasList) {
 
   input.addEventListener("input", function () {
     closeList();
-    const val = this.value.trim().toLowerCase();
+    const val = this.value.trim();
     if (!val) return;
 
     const list = document.createElement("DIV");
@@ -75,34 +81,60 @@ function initializeAutocomplete(input, personasList) {
     list.setAttribute("class", "autocomplete-items");
     this.parentNode.appendChild(list);
 
-    const matches = personasList
-      .filter(displayName => {
-        const character = originalCharacters.find(c => c.nom.toLowerCase() === displayName.toLowerCase());
-        return character && !character._guessed && displayName.toLowerCase().includes(val)
-          && character.opus.some(o => validOpus[activeFilters.find(f => validOpus[f].includes(o))]);
-      })
-      .sort((a, b) => a.localeCompare(b));
+    const lowerVal = val.toLowerCase();
+    const matches = [];
 
-    matches.forEach(nom => {
+    for (let i = 0; i < personasList.length; i++) {
+      const displayName = personasList[i];
+      const lowerName = displayName.toLowerCase();
+
+      const character = originalCharacters.find(c => c.nom.trim().toLowerCase() === displayName.trim().toLowerCase());
+      if (
+        !character ||
+        character._guessed ||
+        !lowerName.includes(lowerVal) ||
+        !character.opus.some(o => validOpus[activeFilters.find(f => validOpus[f].includes(o))])
+      ) continue;
+
+      const [firstName, lastName] = displayName.split(" ");
+      let priority = 3;
+      if (firstName?.toLowerCase().startsWith(lowerVal)) priority = 1;
+      else if (lastName?.toLowerCase().startsWith(lowerVal)) priority = 2;
+
+      matches.push({ name: displayName, priority });
+    }
+
+    matches.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
+
+    matches.forEach(matchObj => {
+      const nom = matchObj.name;
       const imageName = portraitsMap[nom] || nom.split(" ")[0];
+      const portraitName = encodeURIComponent(imageName);
+
       const option = document.createElement("DIV");
       option.className = "list-options";
       option.innerHTML = `
-        <img src="../database/portraits/${imageName}.webp" alt="${nom}">
-        <span>${nom}</span>
+        <img src="../database/portraits/${portraitName}.webp" alt="${nom}">
+        <span style="display: flex; flex-direction: column;">
+          <span class="codename">${nom.split(" (")[0]}</span>
+        </span>
         <input type='hidden' value='${nom}'>
       `;
+
       option.addEventListener("click", function () {
         input.value = this.querySelector("input").value;
         handleGuess();
         closeList();
       });
+
       list.appendChild(option);
     });
+
+    currentFocus = -1;
   });
 
   input.addEventListener("keydown", function (e) {
-    let items = document.querySelectorAll("#autocomplete-list .list-options");
+    const items = document.querySelectorAll("#autocomplete-list .list-options");
     if (!items.length) return;
 
     if (e.key === "ArrowDown") {
@@ -139,6 +171,7 @@ function initializeAutocomplete(input, personasList) {
     }
   }
 }
+
 
 // === CONFETTIS ===
 function showConfettiExplosion() {
@@ -192,6 +225,9 @@ message.innerHTML = force
     let winCount = localStorage.getItem("silhouetteWins") || 0;
     localStorage.setItem("silhouetteWins", parseInt(winCount) + 1);
   }
+    localStorage.setItem("silhouetteGameOver", "true");
+  localStorage.setItem("silhouetteForceReveal", force);
+
 }
 
 // === ERREUR
@@ -220,7 +256,9 @@ function handleGuess() {
   if (!guess) return;
 
   attempts++;
+  localStorage.setItem("silhouetteAttempts", attempts);
   giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
+
 
   if (attempts >= maxAttempts) {
     giveUpBtn.disabled = false;
@@ -252,6 +290,8 @@ function giveUp() {
 
 // === RESET
 function resetGame() {
+    localStorage.removeItem("silhouetteForceReveal");
+
   gameOver = false;
   attempts = 0;
   giveUpCounter.textContent = `(0 / ${maxAttempts})`;
@@ -308,16 +348,112 @@ function applyDarkModeStyles() {
 }
 
 // === INIT ===
+// === INIT ===
 document.addEventListener("DOMContentLoaded", () => {
   setupRulesModal();
   setupFilterButtons();
   applyDarkModeStyles();
 
   guessBtn.addEventListener("click", handleGuess);
-  resetBtn.addEventListener("click", resetGame);
+  resetBtn.addEventListener("click", () => {
+    localStorage.removeItem("silhouetteTarget");
+    localStorage.removeItem("silhouetteAttempts");
+    localStorage.removeItem("silhouetteGameOver");
+    resetGame();
+  });
   giveUpBtn.addEventListener("click", giveUp);
 
   const usableNames = personas.sort((a, b) => a.localeCompare(b));
   initializeAutocomplete(textbar, usableNames);
-  resetGame();
+
+  // === 🧠 Reprise automatique de la session en cours ===
+  const stored = localStorage.getItem("silhouetteTarget");
+  const storedAttempts = parseInt(localStorage.getItem("silhouetteAttempts")) || 0;
+  const storedGameOver = localStorage.getItem("silhouetteGameOver") === "true";
+
+  if (stored) {
+    try {
+      target = JSON.parse(stored);
+      filteredCharacters = getFilteredCharacters();
+      currentZoom = 1.8 - 0.2 * storedAttempts;
+      applyZoom(currentZoom);
+      silhouetteImg.src = `./database/img/${target.image}.webp`;
+      silhouetteImg.alt = "Silhouette";
+      silhouetteImg.style.filter = storedGameOver ? "none" : "brightness(0)";
+      attempts = storedAttempts;
+      giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
+      if (attempts >= maxAttempts) {
+        giveUpBtn.disabled = false;
+        giveUpBtn.style.cursor = "pointer";
+        giveUpCounter.classList.add("activated");
+      }
+      if (storedGameOver) showVictory(localStorage.getItem("silhouetteForceReveal") === "true");
+    } catch (e) {
+      resetGame();
+    }
+  } else {
+    resetGame();
+  }
 });
+
+
+// =======================
+// 🧪 DEBUG PERSONNAGE
+// =======================
+function debugAllSilhouettes() {
+  console.log("=== DÉBUT DU DEBUG SILHOUETTE MODE ===");
+
+  const errors = [];
+  const usableNames = personas.sort((a, b) => a.localeCompare(b));
+  const accepted = activeFilters.flatMap(o => validOpus[o]);
+
+  for (const name of usableNames) {
+    const result = { nom: name, found: false, inMap: false, inSilhouette: false, passesFilter: false };
+
+    const character = originalCharacters.find(c => c.nom === name);
+    result.inSilhouette = !!character;
+
+    if (!character) {
+      console.warn(`❌ ${name} — Introuvable dans silhouetteCharacters.js`);
+      errors.push({ nom: name, cause: "Absent de silhouetteCharacters.js" });
+      continue;
+    }
+
+    result.found = personas.includes(name);
+    if (!result.found) {
+      console.warn(`❌ ${name} — Pas présent dans personas.js`);
+      errors.push({ nom: name, cause: "Absent de personas.js" });
+    }
+
+    const imageKey = portraitsMap[name];
+    result.inMap = !!imageKey;
+    if (!imageKey) {
+      console.warn(`❌ ${name} — Aucune image dans portraitsMapSilhouette`);
+      errors.push({ nom: name, cause: "Image manquante dans portraitsMapSilhouette" });
+    }
+
+    const charOpus = Array.isArray(character.opus) ? character.opus : [character.opus];
+    result.passesFilter = charOpus.some(o => accepted.includes(o));
+    if (!result.passesFilter) {
+      console.warn(`⚠️ ${name} — Ne passe pas les filtres actuels (${charOpus})`);
+    }
+
+    // Résumé du personnage
+    if (result.found && result.inMap && result.inSilhouette) {
+      console.log(`✅ OK : ${name}`);
+    }
+  }
+
+  // Résumé global
+  if (errors.length > 0) {
+    console.log(`\n=== TEST TERMINÉ : ${errors.length} problème(s) détecté(s) ===`);
+    for (const err of errors) {
+      console.log(`- ❌ ${err.nom} — ${err.cause}`);
+    }
+  } else {
+    console.log("🎉 Aucune erreur détectée !");
+  }
+
+  console.log("=== FIN DU DEBUG ===");
+}
+

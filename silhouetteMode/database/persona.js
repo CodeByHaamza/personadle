@@ -10,7 +10,7 @@ export const personas = [
   "Ayane Matsunaga",
   "Bebe",
   "Bunkichi",
-  "Caroline and Justine",
+  "Caroline & Justine",
   "Chidori Yoshino",
   "Chie Satonaka",
   "Chihaya Mifune",
