@@ -202,6 +202,10 @@ function checkEmojiGuess(name, forceReveal = false) {
       span.textContent = e;
       span.classList.add("emoji-unit");
       displayZone.appendChild(span);
+      // 🟩 Ajout à faire ici :
+  localStorage.setItem("emojiGameOver", "true");
+  localStorage.setItem("emojiForceReveal", forceReveal); // pour distinguer victoire ou give up
+
     });
 
     const imageName = portraitsMap[target.nom] || target.nom.split(" ")[0];
@@ -219,6 +223,8 @@ function checkEmojiGuess(name, forceReveal = false) {
     document.getElementById("guessButton").disabled = true;
     document.getElementById("giveUpButton").disabled = true;
     gameOver = true;
+    localStorage.setItem("emojiWin", "true");
+
   } else {
     attempts++;
     localStorage.setItem("attemptsEmoji", attempts);
@@ -301,6 +307,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   target = JSON.parse(localStorage.getItem("targetEmoji")) || filterCharacterPool()[Math.floor(Math.random() * filterCharacterPool().length)];
   attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
+  const emojiGameOver = localStorage.getItem("emojiGameOver") === "true";
+const forceReveal = localStorage.getItem("emojiForceReveal") === "true";
+
 
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
@@ -308,6 +317,8 @@ document.addEventListener("DOMContentLoaded", () => {
   updateEmojiHint();
   updateCounters();
   if (attempts >= 8) enableGiveUpButton();
+  if (emojiGameOver) checkEmojiGuess(target.nom, forceReveal);
+
 
   guessButton.addEventListener("click", () => {
     if (gameOver) return;
@@ -329,6 +340,9 @@ giveUpButton.addEventListener("click", () => {
     localStorage.removeItem("targetEmoji");
     localStorage.removeItem("attemptsEmoji");
     resetGame();
+    localStorage.removeItem("emojiGameOver");
+localStorage.removeItem("emojiForceReveal");
+
   });
 
   // === Modale "Comment jouer" ===
@@ -392,4 +406,56 @@ function applyDarkModeStyles() {
       victoryBox.style.border = "3px solid #4caf50";
     }
   }
+}
+
+function debugCharactersFull() {
+  const allValid = activeOpus.flatMap(o => validOpus[o]);
+  const filtered = characters.filter(c => {
+    const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
+    return charOpus.some(op => allValid.includes(op));
+  });
+
+  const missingInPersonas = [];
+  const missingInPortraits = [];
+  const invalidEmojis = [];
+
+  console.log("=== DEBUG PERSONNAGES FILTRÉS ===");
+
+  filtered.forEach((char, i) => {
+    const name = char.nom;
+    const foundInPersonas = personas.includes(name);
+    const portraitKey = portraitsMap[name] || name.split(" ")[0];
+    const hasPortrait = !!portraitKey;
+    const hasEmoji = char.emoji !== undefined;
+    const validEmoji = Array.isArray(char.emoji) && char.emoji.length > 0;
+
+    let status = `✅ OK : ${name}`;
+
+    if (!foundInPersonas) {
+      status = `❌ Problème : ${name} → ❗ Absente de personas.js`;
+      missingInPersonas.push(name);
+    } else if (!hasPortrait) {
+      status = `❌ Problème : ${name} → ❗ Aucune correspondance dans portraitsMap.js`;
+      missingInPortraits.push(name);
+    } else if (!hasEmoji) {
+      status = `❌ Problème : ${name} → ❗ Pas de champ 'emoji' dans characters_clean.js`;
+      invalidEmojis.push(name);
+    } else if (!validEmoji) {
+      status = `❌ Problème : ${name} → ❗ Champ 'emoji' invalide (pas un tableau non vide)`;
+      invalidEmojis.push(name);
+    }
+
+    console.log(status);
+  });
+
+  console.log("\n=== RÉSUMÉ ===");
+  console.log(`🔍 Personnages manquants dans personas.js : ${missingInPersonas.length}`);
+  console.log(`🖼️  Personnages sans image/portrait valide : ${missingInPortraits.length}`);
+  console.log(`😶 Personnages avec champ emoji absent/invalide : ${invalidEmojis.length}`);
+
+  if (missingInPersonas.length) console.log("→ À ajouter dans personas.js :", missingInPersonas);
+  if (missingInPortraits.length) console.log("→ À corriger dans portraitsMap.js :", missingInPortraits);
+  if (invalidEmojis.length) console.log("→ À corriger dans characters_clean.js :", invalidEmojis);
+
+  console.log("=== DEBUG TERMINÉ ===");
 }

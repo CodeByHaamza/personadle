@@ -260,6 +260,9 @@ body {
 }
 
 
+.textbar-container {
+  position: relative;
+}
 
 
 /* ========== Hint Button & Quote Text ========== */

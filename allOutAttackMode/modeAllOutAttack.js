@@ -206,6 +206,8 @@ function handleGuess() {
   if (!guess) return;
 
   attempts++;
+  localStorage.setItem("aoaAttempts", attempts);
+
   updateGiveUpCounter();
 
   if (guess.toLowerCase() === target.toLowerCase()) {
@@ -213,6 +215,10 @@ function handleGuess() {
     showVictoryBox(target);
     showConfettiExplosion();
     gameOver = true;
+    localStorage.setItem("aoaGameOver", "true");
+localStorage.setItem("aoaTarget", target);
+localStorage.setItem("aoaAttempts", attempts);
+
     disableInputs();
     return;
   }
@@ -252,9 +258,13 @@ function giveUp() {
   showConfettiExplosion();
   disableInputs();
   gameOver = true;
+  localStorage.setItem("aoaGameOver", "true");
+localStorage.setItem("aoaTarget", target);
+localStorage.setItem("aoaAttempts", attempts);
+
 }
 
-function resetGame() {
+function resetGame(){
   const input = document.getElementById("textbar");
   const gifElement = document.getElementById("aoaGif");
   const wrongList = document.getElementById("wrongGuessList");
@@ -272,14 +282,21 @@ function resetGame() {
 
   input.disabled = false;
   document.getElementById("guessButton").disabled = false;
+  document.getElementById("giveUpButton").disabled = true;
+  document.getElementById("giveUpButton").style.cursor = "not-allowed";
   input.value = "";
 
   if (wrongList) wrongList.innerHTML = "";
 
   initializeAutocomplete(input, personas);
-  updateGiveUpButton();
   updateGiveUpCounter();
+
+  // 🟢 Sauvegarde du nouvel état
+  localStorage.setItem("aoaTarget", target);
+  localStorage.setItem("aoaAttempts", attempts);
+  localStorage.removeItem("aoaGameOver");
 }
+
 
 function updateGiveUpButton() {
   const giveUpButton = document.getElementById("giveUpButton");
@@ -317,10 +334,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
   personas = getFilteredPersonas();
   initializeAutocomplete(textbar, personas);
+
+  // === ✅ Récupération du state
+  const savedTarget = localStorage.getItem("aoaTarget");
+  const savedAttempts = parseInt(localStorage.getItem("aoaAttempts")) || 0;
+  const savedGameOver = localStorage.getItem("aoaGameOver") === "true";
+
+  if (savedTarget) {
+    target = savedTarget;
+    attempts = savedAttempts;
+    gameOver = savedGameOver;
+
+    const imageName = portraitsMap[target] || target.split(" ")[0];
+    gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
+    gifElement.style.filter = gameOver ? "none" : `blur(${Math.max(20 - attempts * 3, 0)}px)`;
+
+    updateGiveUpCounter();
+
+    if (gameOver) {
+      showVictoryBox(target);
+      disableInputs();
+    }
+
+    if (attempts >= 5) {
+      document.getElementById("giveUpButton").disabled = false;
+      document.getElementById("giveUpButton").style.cursor = "pointer";
+    }
+
+  } else {
+    // 👇 Si aucune sauvegarde : partie normale
+    target = getBetterRandomCharacter();
+    const imageName = portraitsMap[target] || target.split(" ")[0];
+    gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
+    gifElement.style.filter = "blur(20px)";
+    localStorage.setItem("aoaTarget", target);
+    localStorage.setItem("aoaAttempts", 0);
+  }
+
+  // === Écouteurs des boutons
   guessButton.addEventListener("click", handleGuess);
   document.getElementById("giveUpButton").addEventListener("click", giveUp);
-  document.getElementById("resetButton").addEventListener("click", resetGame);
+  document.getElementById("resetButton").addEventListener("click", () => {
+    localStorage.removeItem("aoaTarget");
+    localStorage.removeItem("aoaAttempts");
+    localStorage.removeItem("aoaGameOver");
+    resetGame();
+  });
 
+  // === Modal règles
   const rulesModal = document.getElementById("rulesModal");
   const rulesButton = document.getElementById("rulesButton");
   const closeRulesBtn = rulesModal.querySelector(".close");
@@ -342,43 +403,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  target = getBetterRandomCharacter();
-  const imageName = portraitsMap[target] || target.split(" ")[0];
-  gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
-  gifElement.style.filter = "blur(20px)";
-  
-  // Filtres dynamiques
-document.querySelectorAll(".filter-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const group = btn.dataset.opus;
-    btn.classList.toggle("active");
+  // === Filtres dynamiques
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.dataset.opus;
+      btn.classList.toggle("active");
 
-    if (btn.classList.contains("active")) {
-      if (!activeOpusFilters.includes(group)) activeOpusFilters.push(group);
-    } else {
-      activeOpusFilters = activeOpusFilters.filter(o => o !== group);
-    }
+      if (btn.classList.contains("active")) {
+        if (!activeOpusFilters.includes(group)) activeOpusFilters.push(group);
+      } else {
+        activeOpusFilters = activeOpusFilters.filter(o => o !== group);
+      }
 
-    // ➤ Mise à jour complète des personas
-    personas = getFilteredPersonas();
-    initializeAutocomplete(document.getElementById("textbar"), personas);
+      personas = getFilteredPersonas();
+      initializeAutocomplete(textbar, personas);
 
-    // ➤ Re-tirage immédiat d'un personnage valide
-    target = getBetterRandomCharacter();
-    const imageName = portraitsMap[target] || target.split(" ")[0];
-    const gifElement = document.getElementById("aoaGif");
-    gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
-    gifElement.style.filter = "blur(20px)";
+      target = getBetterRandomCharacter();
+      const imageName = portraitsMap[target] || target.split(" ")[0];
+      gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
+      gifElement.style.filter = "blur(20px)";
 
-    // ➤ Reset input + erreurs visuelles
-    document.getElementById("textbar").value = "";
-    document.getElementById("wrongGuessList").innerHTML = "";
-    attempts = 0;
-    updateGiveUpButton();
-    updateGiveUpCounter();
+      textbar.value = "";
+      document.getElementById("wrongGuessList").innerHTML = "";
+      attempts = 0;
+      localStorage.setItem("aoaTarget", target);
+      localStorage.setItem("aoaAttempts", 0);
+      localStorage.removeItem("aoaGameOver");
+      updateGiveUpButton();
+      updateGiveUpCounter();
+    });
   });
-});
-
 });
 
 function applyDarkModeStyles() {
@@ -416,4 +470,73 @@ function applyDarkModeStyles() {
     victoryBox.style.color = "#90ee90";
     victoryBox.style.border = "3px solid #4caf50";
   }
+}
+function debugAllOutAttack() {
+  console.log("===== 🛠️ DEBUG ALL OUT ATTACK MODE =====");
+
+  // Vérifie le nombre de personnages valides avec les filtres actuels
+  const filtered = getFilteredPersonas();
+  console.log(`🎯 Nombre de personas filtrés : ${filtered.length}`);
+  console.log("🎯 Personas filtrés :", filtered);
+
+  // Vérifie les noms présents dans originalPersonas mais absents de aoaCharacters
+  const missingFromAoa = originalPersonas.filter(n =>
+    !aoaCharacters.some(e => e.nom === n)
+  );
+  if (missingFromAoa.length > 0) {
+    console.warn("❌ Noms présents dans personas_allOut.js mais ABSENTS de aoaCharacters.js :", missingFromAoa);
+  } else {
+    console.log("✅ Tous les noms de personas_allOut sont présents dans aoaCharacters.");
+  }
+
+  // Vérifie les noms dans aoaCharacters absents de originalPersonas
+  const extraInAoa = aoaCharacters.filter(e =>
+    !originalPersonas.includes(e.nom)
+  );
+  if (extraInAoa.length > 0) {
+    console.warn("❌ Noms présents dans aoaCharacters.js mais NON listés dans personas_allOut.js :", extraInAoa.map(e => e.nom));
+  } else {
+    console.log("✅ Tous les noms de aoaCharacters sont listés dans personas_allOut.");
+  }
+
+  // Vérifie si les noms du pool filtré ont bien un mapping portraits
+  const notMapped = filtered.filter(name => !portraitsMap[name] && !name.includes("&"));
+  if (notMapped.length > 0) {
+    console.warn("⚠️ Noms SANS mapping explicite dans portraitsMap :", notMapped);
+  } else {
+    console.log("✅ Tous les noms du pool filtré ont un mapping dans portraitsMap (ou sont des cas spéciaux).");
+  }
+
+  // Vérifie que les GIFs All-Out Attack existent
+  const missingGifs = [];
+  filtered.forEach(name => {
+    const base = portraitsMap[name] || name.split(" ")[0];
+    const path = `./database/allOutAttack/${encodeURIComponent(base)}.gif`;
+    const img = new Image();
+    img.onload = () => {};
+    img.onerror = () => {
+      missingGifs.push({ name, path });
+      console.error(`❌ GIF introuvable : ${name} → ${path}`);
+    };
+    img.src = path;
+  });
+
+  // Affiche les infos du target actuel
+  if (target) {
+    console.log("🎯 Target actuel :", target);
+    const targetEntry = aoaCharacters.find(c => c.nom === target);
+    if (!targetEntry) {
+      console.error("❌ Target NON trouvé dans aoaCharacters.js :", target);
+    } else {
+      console.log("✅ Target trouvé dans aoaCharacters.js :", targetEntry);
+    }
+
+    const gifName = portraitsMap[target] || target.split(" ")[0];
+    const gifPath = `./database/allOutAttack/${encodeURIComponent(gifName)}.gif`;
+    console.log(`🎞️ Chemin GIF : ${gifPath}`);
+  } else {
+    console.warn("⚠️ Target non défini actuellement.");
+  }
+
+  console.log("===== ✅ DEBUG TERMINÉ =====");
 }

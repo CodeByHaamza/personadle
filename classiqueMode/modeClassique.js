@@ -503,3 +503,78 @@ function applyDarkModeStyles() {
     }
   }
 }
+
+function debugModeClassique() {
+  console.log("=== 🛠 DEBUG PERSONAS CLASSIQUE ===");
+
+  const namesSeen = new Set();
+  const duplicates = [];
+  const notInCharacters = [];
+  const missingPortraits = [];
+
+  // Doublons dans personas.js
+  personas.forEach(name => {
+    if (namesSeen.has(name)) {
+      duplicates.push(name);
+    } else {
+      namesSeen.add(name);
+    }
+  });
+
+  if (duplicates.length > 0) {
+    console.warn(`❌ Doublons dans personas.js (${duplicates.length}) :`, duplicates);
+  } else {
+    console.log("✅ Aucun doublon dans personas.js");
+  }
+
+  // Vérifie que chaque nom est présent dans characters
+  personas.forEach(name => {
+    const found = characters.find(c => c.nom === name);
+    if (!found) notInCharacters.push(name);
+  });
+
+  if (notInCharacters.length > 0) {
+    console.error(`❌ ${notInCharacters.length} noms dans personas.js ne sont pas dans characters :`, notInCharacters);
+  } else {
+    console.log("✅ Tous les noms de personas.js sont présents dans characters");
+  }
+
+  // Vérifie les images disponibles dans portraitsMap
+  personas.forEach(name => {
+    const imageName = portraitsMap[name] || name.split(" ")[0];
+    const imagePath = `../database/portraits/${encodeURIComponent(imageName)}.webp`;
+
+    // Test en préchargeant l’image
+    const img = new Image();
+    img.onload = () => {
+      // OK
+    };
+    img.onerror = () => {
+      missingPortraits.push({ name, path: imagePath });
+      console.warn(`🖼️ Image manquante pour "${name}" → ${imagePath}`);
+    };
+    img.src = imagePath;
+  });
+
+  setTimeout(() => {
+    if (missingPortraits.length === 0) {
+      console.log("✅ Toutes les images sont présentes pour l’autocomplétion");
+    } else {
+      console.error(`❌ ${missingPortraits.length} images manquantes dans portraitsMap :`, missingPortraits);
+    }
+
+    // Vérifie si le personnage cible correspond aux filtres actifs
+    const currentTarget = JSON.parse(localStorage.getItem("target"));
+    const allValidOpus = activeOpus.flatMap(o => validOpus[o]);
+    const targetOpus = Array.isArray(currentTarget.opus) ? currentTarget.opus : [currentTarget.opus];
+    const isInFilter = targetOpus.some(op => allValidOpus.includes(op));
+
+    if (isInFilter) {
+      console.log(`🎯 Cible "${currentTarget.nom}" est bien dans les filtres actifs ✅`);
+    } else {
+      console.warn(`❌ Cible "${currentTarget.nom}" ne correspond pas aux filtres actifs !`, currentTarget.opus);
+    }
+
+    console.log("=== ✅ FIN DEBUG CLASSIQUE ===");
+  }, 1000); // Laisse le temps au chargement d’image
+}
