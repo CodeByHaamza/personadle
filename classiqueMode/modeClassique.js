@@ -16,6 +16,12 @@ const validOpus = {
 
 let activeOpus = ["P1", "P2", "P3", "P4", "P5"];
 
+let daltonianMode = localStorage.getItem("daltonianMode") === "enabled";
+const daltonianToggle = document.getElementById("daltonianToggle");
+daltonianToggle.textContent = `Daltonian Mode: ${daltonianMode ? "ON" : "OFF"}`;
+
+
+
 
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
@@ -420,9 +426,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      cell.textContent = displayValue;
-      setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
+      if (daltonianMode) {
+  let symbol = "";
+  let bgColor = "";
+  if (cell.classList.contains("correct")) {
+    symbol = " ✔";
+    bgColor = "#4F81BD"; // Bleu
+  } else if (cell.classList.contains("misplaced")) {
+    symbol = " ▲";
+    bgColor = "#F79646"; // Orange
+  } else if (cell.classList.contains("wrong")) {
+    symbol = " ✖";
+    bgColor = "#A6A6A6"; // Gris
+  }
+
+  cell.textContent = `${displayValue}${symbol}`;
+  cell.style.backgroundColor = bgColor;
+  cell.style.color = "white";
+} else {
+  cell.textContent = displayValue;
+}
+ 
+
+setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
+
       row.appendChild(cell);
+
+      if (daltonianMode) {
+  if (cell.classList.contains("correct")) cell.textContent = "✔️";
+  else if (cell.classList.contains("misplaced")) cell.textContent = "➡️";
+  else if (cell.classList.contains("wrong")) cell.textContent = "❌";
+}
+
     });
 
     output.insertBefore(row, output.querySelector(".category-row")?.nextSibling);
@@ -458,9 +493,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     
+
+    
   }
 
-  
+ document.getElementById("daltonianToggle").addEventListener("click", () => {
+  daltonianMode = !daltonianMode;
+  localStorage.setItem("daltonianMode", daltonianMode ? "enabled" : "disabled");
+  document.getElementById("daltonianToggle").textContent = `Daltonian Mode: ${daltonianMode ? "ON" : "OFF"}`;
+  location.reload(); // ⬅ recharge la page pour que le mode s'applique immédiatement
+});
+
+
 
 });
 

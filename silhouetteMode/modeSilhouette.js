@@ -3,8 +3,6 @@ import { silhouetteCharacters as originalCharacters } from "./database/silhouett
 import { portraitsMapSilhouette as portraitsMap } from "./database/portraitsMapSilhouette.js";
 import { personas } from "./database/persona.js";
 
-
-
 // === CONSTANTES ===
 const validOpus = {
   P3: ["P3", "P3P", "P3FES"],
@@ -25,6 +23,10 @@ let lastFiveTargets = [];
 // === ELEMENTS ===
 const textbar = document.getElementById("textbar");
 const silhouetteImg = document.getElementById("silhouetteImage");
+silhouetteImg.style.visibility = "hidden";
+silhouetteImg.style.transform = "scale(1.8)";
+silhouetteImg.style.transition = "none";
+
 const guessBtn = document.getElementById("guessButton");
 const resetBtn = document.getElementById("resetButton");
 const giveUpBtn = document.getElementById("giveUpButton");
@@ -57,14 +59,25 @@ function pickCharacter() {
   if (lastFiveTargets.length > 5) lastFiveTargets.shift();
 
   currentZoom = 1.8;
-  applyZoom(currentZoom);
+
+  // Avant chargement, applique zoom et cache l'image sans transition
+  silhouetteImg.style.visibility = "hidden";
+  silhouetteImg.style.transition = "none";
+  silhouetteImg.style.transform = `scale(${currentZoom})`;
+  silhouetteImg.style.filter = "brightness(0)";
+
+  silhouetteImg.onload = () => {
+    silhouetteImg.style.visibility = "visible";
+    silhouetteImg.style.transition = "transform 0.3s ease-out";
+  };
+
   silhouetteImg.src = `./database/img/${target.image}.webp`;
   silhouetteImg.alt = "Silhouette";
-  silhouetteImg.style.filter = "brightness(0)";
-    localStorage.setItem("silhouetteTarget", JSON.stringify(target));
+
+  // Sauvegarde dans localStorage
+  localStorage.setItem("silhouetteTarget", JSON.stringify(target));
   localStorage.setItem("silhouetteAttempts", attempts);
   localStorage.setItem("silhouetteGameOver", "false");
-
 }
 
 // === AUTOCOMPLETE ===
@@ -172,7 +185,6 @@ function initializeAutocomplete(input, personasList) {
   }
 }
 
-
 // === CONFETTIS ===
 function showConfettiExplosion() {
   const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
@@ -211,12 +223,11 @@ function showVictory(force = false) {
   silhouetteImg.style.filter = "none";
 
   document.querySelectorAll(".victory-message").forEach(e => e.remove());
- const message = document.createElement("div");
-message.className = "victory-box";
-message.innerHTML = force
-  ? `<span class="failure-text">❌ The answer was <strong>${target.nom}</strong></span>`
-  : `<span class="success-text">🎉 You found <strong>${target.nom}</strong>!</span>`;
-
+  const message = document.createElement("div");
+  message.className = "victory-box";
+  message.innerHTML = force
+    ? `<span class="failure-text">❌ The answer was <strong>${target.nom}</strong></span>`
+    : `<span class="success-text">🎉 You found <strong>${target.nom}</strong>!</span>`;
 
   silhouetteBox.insertAdjacentElement("afterend", message);
 
@@ -225,9 +236,8 @@ message.innerHTML = force
     let winCount = localStorage.getItem("silhouetteWins") || 0;
     localStorage.setItem("silhouetteWins", parseInt(winCount) + 1);
   }
-    localStorage.setItem("silhouetteGameOver", "true");
+  localStorage.setItem("silhouetteGameOver", "true");
   localStorage.setItem("silhouetteForceReveal", force);
-
 }
 
 // === ERREUR
@@ -259,7 +269,6 @@ function handleGuess() {
   localStorage.setItem("silhouetteAttempts", attempts);
   giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
 
-
   if (attempts >= maxAttempts) {
     giveUpBtn.disabled = false;
     giveUpBtn.style.cursor = "pointer";
@@ -278,8 +287,7 @@ function handleGuess() {
   }
 
   textbar.value = "";
-  textbar.dispatchEvent(new Event("input")); // force la mise à jour de l'autocomplétion
-
+  textbar.dispatchEvent(new Event("input")); // force update autocomplete
 }
 
 // === GIVE UP
@@ -290,7 +298,7 @@ function giveUp() {
 
 // === RESET
 function resetGame() {
-    localStorage.removeItem("silhouetteForceReveal");
+  localStorage.removeItem("silhouetteForceReveal");
 
   gameOver = false;
   attempts = 0;
@@ -302,7 +310,7 @@ function resetGame() {
   guessBtn.disabled = false;
   wrongList.innerHTML = "";
   textbar.value = "";
-document.querySelectorAll(".victory-message, .victory-box").forEach(e => e.remove());
+  document.querySelectorAll(".victory-message, .victory-box").forEach(e => e.remove());
 
   originalCharacters.forEach(c => c._guessed = false);
   pickCharacter();
@@ -348,7 +356,6 @@ function applyDarkModeStyles() {
 }
 
 // === INIT ===
-// === INIT ===
 document.addEventListener("DOMContentLoaded", () => {
   setupRulesModal();
   setupFilterButtons();
@@ -366,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const usableNames = personas.sort((a, b) => a.localeCompare(b));
   initializeAutocomplete(textbar, usableNames);
 
-  // === 🧠 Reprise automatique de la session en cours ===
+  // === 🧠 Restore session ===
   const stored = localStorage.getItem("silhouetteTarget");
   const storedAttempts = parseInt(localStorage.getItem("silhouetteAttempts")) || 0;
   const storedGameOver = localStorage.getItem("silhouetteGameOver") === "true";
@@ -377,6 +384,9 @@ document.addEventListener("DOMContentLoaded", () => {
       filteredCharacters = getFilteredCharacters();
       currentZoom = 1.8 - 0.2 * storedAttempts;
       applyZoom(currentZoom);
+      silhouetteImg.style.visibility = "hidden";
+      silhouetteImg.style.transition = "none";
+      silhouetteImg.style.transform = `scale(1.8)`;
       silhouetteImg.src = `./database/img/${target.image}.webp`;
       silhouetteImg.alt = "Silhouette";
       silhouetteImg.style.filter = storedGameOver ? "none" : "brightness(0)";
@@ -388,6 +398,12 @@ document.addEventListener("DOMContentLoaded", () => {
         giveUpCounter.classList.add("activated");
       }
       if (storedGameOver) showVictory(localStorage.getItem("silhouetteForceReveal") === "true");
+
+      silhouetteImg.onload = () => {
+        silhouetteImg.style.visibility = "visible";
+        silhouetteImg.style.transition = "transform 0.3s ease-out";
+      };
+
     } catch (e) {
       resetGame();
     }
@@ -395,7 +411,6 @@ document.addEventListener("DOMContentLoaded", () => {
     resetGame();
   }
 });
-
 
 // =======================
 // 🧪 DEBUG PERSONNAGE
@@ -456,4 +471,3 @@ function debugAllSilhouettes() {
 
   console.log("=== FIN DU DEBUG ===");
 }
-

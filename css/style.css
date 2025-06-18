@@ -1621,7 +1621,7 @@ body.darkmode .modal-content {
 
 body.darkmode .modal-content h2,
 body.darkmode .modal-content strong {
-  color: #ff5555;
+  color: #c1c1c1;
 }
 
 body.darkmode .modal-content ul {
@@ -1642,7 +1642,7 @@ body.darkmode .modal .close:hover {
 
 /* Fix du texte noir dans .modal-content en dark mode */
 body.darkmode #rulesText strong {
-  color: #fcf2f2 !important;
+  color: #ffffff !important;
 }
 
 /* ===== Dark Mode - Résultats du Classique Mode ===== */
@@ -1740,9 +1740,11 @@ footer p {
   object-fit: contain;
   transition: transform 0.4s ease;
   filter: brightness(0); /* silhouette noire */
-  transform: scale(1);
-    margin-bottom: 20px;
+  transform: scale(1.8); /* <- zoom par défaut ! */
+  margin-bottom: 20px;
+  visibility: hidden; /* <- cachée tant qu’elle n’est pas chargée */
 }
+
 
 
 /* Liste des mauvaises réponses */
@@ -1827,4 +1829,40 @@ footer p {
     transform: scale(1);
     opacity: 1;
   }
+}
+#daltonianToggle {
+  background-color: #1f1f1f;
+  color: #f0f0f0;
+  border: 2px solid #4caf50;
+  padding: 8px 16px;
+  font-weight: bold;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 10px;
+  transition: all 0.2s ease-in-out;
+}
+
+#daltonianToggle:hover {
+  background-color: #2e2e2e;
+  border-color: #81c784;
+}
+
+#daltonianToggle:active {
+  transform: scale(0.98);
+  background-color: #3d3d3d;
+}
+
+
+/* Mode daltonien : les cellules n'ont pas de couleur de fond */
+body.daltonian-mode .guess-cell.correct,
+body.daltonian-mode .guess-cell.misplaced,
+body.daltonian-mode .guess-cell.wrong {
+  background-color: transparent !important;
+  color: rgb(76, 67, 67) !important;
+  border: 2px solid gray;
+} 
+
+#silhouetteImage {
+  visibility: hidden;
 }
