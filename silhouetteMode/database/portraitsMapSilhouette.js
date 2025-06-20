@@ -86,4 +86,5 @@ export const portraitsMapSilhouette = {
   "Yumi Ozawa": "Yumi",
   "Yusuke Kitagawa": "Yusuke",
   "Makoto Yuki": "Yuki",
+  "Shuji Ikutsuki": "Ikutsuki"
 };

@@ -88,7 +88,10 @@ export const silhouetteCharacters = [
   { nom: "Yumi Ozawa", image: "Yumi_silhouette", opus: ["P4"] },
   { nom: "Yusuke Kitagawa", image: "Yusuke_silhouette", opus: ["P5"] },
   { nom: "Sophia", image: "Sophia_silhouette", opus: ["P5S"] },
-  { nom: "Zenkichi Hasegawa", image: "Zenkichi_silhouette", opus: ["P5S"] }
+  { nom: "Zenkichi Hasegawa", image: "Zenkichi_silhouette", opus: ["P5S"] },
+  { nom: "Shuji Ikutsuki", image: "Ikutsuki_silhouette.webp", opus: ["P3"] }
+
+
 
   
 ]; 
