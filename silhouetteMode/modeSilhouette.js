@@ -471,3 +471,4 @@ function debugAllSilhouettes() {
 
   console.log("=== FIN DU DEBUG ===");
 }
+debugAllSilhouettes()

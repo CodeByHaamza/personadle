@@ -7,7 +7,7 @@ export const silhouetteCharacters = [
   { nom: "Ayane Matsunaga", image: "Ayane_silhouette", opus: ["P4"] },
   { nom: "Bebe", image: "Bebe_silhouette", opus: ["P3"] },
   { nom: "Bunkichi", image: "Bunkichi_silhouette", opus: ["P3"] },
-  { nom: "Caroline & Justine", image: "Caroline_and_Justine", opus: ["P5"] }
+  { nom: "Caroline & Justine", image: "Caroline_and_Justine_silhouette", opus: ["P5"] }
 , { nom: "Chidori Yoshino", image: "Chidori_silhouette", opus: ["P3"] },
   { nom: "Chie Satonaka", image: "Chie_silhouette", opus: ["P4"] },
   { nom: "Chihaya Mifune", image: "Chihaya_silhouette", opus: ["P5"] },

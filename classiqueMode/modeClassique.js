@@ -453,10 +453,26 @@ setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
       row.appendChild(cell);
 
       if (daltonianMode) {
-  if (cell.classList.contains("correct")) cell.textContent = "✔️";
-  else if (cell.classList.contains("misplaced")) cell.textContent = "➡️";
-  else if (cell.classList.contains("wrong")) cell.textContent = "❌";
+  let symbol = "";
+  let bgColor = "";
+  if (cell.classList.contains("correct")) {
+    symbol = " ✔";
+    bgColor = "#4F81BD"; // Bleu
+  } else if (cell.classList.contains("misplaced")) {
+    symbol = " ▲";
+    bgColor = "#F79646"; // Orange
+  } else if (cell.classList.contains("wrong")) {
+    symbol = " ✖";
+    bgColor = "#A6A6A6"; // Gris
+  }
+
+  cell.textContent = `${displayValue}${symbol}`;
+  cell.style.backgroundColor = bgColor;
+  cell.style.color = "white";
+} else {
+  cell.textContent = displayValue;
 }
+
 
     });
 
