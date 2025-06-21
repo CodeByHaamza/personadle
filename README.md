@@ -1,83 +1,122 @@
-# 🎭 Personadle
+# 🎭 PERSONADLE
 
-A game inspired by Smashdle, based on the **Persona** universe.  
-Each day, guess a new character based on their traits!
+**A daily guessing game set in the Persona universe.**  
+Inspired by [Smashdle](https://smashdle.net), reimagined with the flair of the **Persona** series — from P1 to P5.
 
----
-
-## 📌 Objective
-
-Create an interactive game using pure JavaScript, in a style similar to the famous [Smashdle](https://smashdle.net), but centered around the **Persona** games universe.  
-The player has multiple attempts to find the correct character based on:
-
-- Their traits (age, shadow type, Arcana, etc.)
-- A blurred silhouette that becomes clearer over time
-- A series of hinting emojis
-- Or even a blurred video or music clip
+Each mode offers a different way to challenge your memory and love for the franchise.  
+From silhouettes and battle animations to emojis and trait analysis — can you guess today's character?
 
 ---
 
-## 🔧 Technologies Used
+## 🧠 Concept
 
-- HTML5
-- CSS3
-- JavaScript (ES6)
-- JSON for data
-- Git & GitHub for version control
+**Personadle** is a 100% front-end fan-made game created to celebrate the Persona franchise.  
+The objective is simple: **guess the daily character** through various clues depending on the selected game mode.
 
----
-
-## 📁 Project Organization
-
-_(to be detailed later)_
+Whether you're a Persona veteran or discovering the series, the game's stylish interface, mode diversity, and daily challenges aim to give you an exciting experience, every day.
 
 ---
 
-## 🚧 Planned Features
+## 🎮 Available Game Modes
 
-- [ ] Daily display of a mystery character
-- [X] Attempt system with color-coded feedback and hints
-- [ ] Multiple game modes (traits, blurred image, emojis, etc.)
-- [ ] Local storage of scores
-- [ ] Mobile / tablet responsive design
+| Mode              | Description                                                                 |
+|-------------------|-----------------------------------------------------------------------------|
+| 🧩 **Classic Mode**      | Compare character traits (Arcana, gender, age, game, etc.) with colored feedback. |
+| 🖤 **Silhouette Mode**   | A black silhouette slowly zooms out after each failed attempt — no blur.        |
+| 🔥 **All-Out Attack**    | A blurred battle GIF becomes clearer with every wrong guess.                 |
+| 😺 **Emoji Mode**        | A series of emojis appears one by one as clues.                            |
+| 👥 **Personae Mode**     | Guess the Persona user based on the Persona shown.                         |
+| 🕶️ **Shadow Mode**      | Identify a character based on their Shadow form.                          |
 
----
-
-## ✅ Technical Goals
-
-- Apply studied JavaScript concepts
-- Dynamically manipulate the DOM
-- Load and navigate through JavaScript files
-- Use modern functions (filter, map, etc.)
-- Practice structuring a complete web project
+Each mode is distinct, replayable, and features full **autocompletion**, **custom styling**, and **daily challenges**.
 
 ---
 
-## 🔮 Coming Soon
+## ✨ Features
 
-- React.js + Node.js version (online scores, user accounts, daily random characters, etc.)
-- Deployment on GitHub Pages or Vercel
-- Optional donation system
-
----
-
-## 👤 Authors
-
-**Hamza**  
-Computer Science undergraduate  
-Fan of Persona, JoJo, and coding ✨  
-
-**Léo**  
-Computer Science undergraduate  
-Fan of Persona too, TKKF, RL, design, and data (idk why) 🎨📈
+- 🎨 **Stylized UI** inspired by **Persona 5** (SVG menus, animations, feedback effects)
+- 📆 **Daily character rotation** with memory persistence per mode
+- 🧠 **Smart autocompletion** with portraits, keyboard navigation & removal of previous attempts
+- 🌀 **Detailed feedback** (color-coded results, zoom, blur, progressive reveal)
+- 🧮 **LocalStorage** support — refresh the page without losing progress
+- 🎚️ **Difficulty scaling** per mode
+- 🌙 **Dark Mode** enabled by default
+- 🟡 **Colorblind Mode** for better accessibility
+- 📱 **Mobile-first responsive design**
+- 🎯 **Opus filters** (P1, P2, P3, P4, P5) to customize the challenge
 
 ---
 
-## 🎮 Screenshot (to be added later)
+## 🛠️ Tech Stack
+
+Built entirely with **vanilla technologies** for fast loading and full control over the experience:
+
+- **HTML5** – Semantic, accessible markup  
+- **CSS3** – Custom styling, animations, and responsive layouts  
+- **JavaScript (ES6+)** – Modular architecture with clean, maintainable logic  
+- **No frameworks**, no build tools, no dependencies
+
+Everything is handcrafted — just like a Velvet Room contract ✨
 
 ---
 
-## 📜 License
+## 🚧 Future Roadmap
 
-Open-source project, free to modify and improve.
+| Feature                         | Status     |
+|---------------------------------|------------|
+| All 6 Game Modes                | ✅ Done     |
+| Colorblind Mode                 | ✅ Done     |
+| Dark Mode                       | ✅ Done     |
+| Daily Mystery Character System  | ✅ Done     |
+| Mobile Optimizations            | ✅ Done     |
+| Opus Filtering System           | ✅ Done     |
+| Stylized SVG Buttons (P5 UI)    | ✅ Done     |
+| 🎯 **Online Leaderboards**           | 🔜 Planned  |
+| 🧑‍💻 **Player Profiles & Stats**      | 🔜 Planned  |
+| 📊 **Streaks, history & progress**   | 🔜 Planned  |
+| 🌍 **Deployment (Vercel / GitHub)** | 🔜 Planned  |
+| ❤️ **Donations & Credits Page**     | 🔜 Planned  |
 
+---
+
+## 🧑‍💻 Authors
+
+### **Hamza** – *Lead Developer*  
+💻 Full logic, game design, animations, interface, and core engine  
+🎮 *Computer Science undergraduate*  
+✨ *Fan of Persona, JoJo, and clean, scalable codebases*  
+📐 *Enjoys turning chaos into structure and ideas into interactivity*
+
+---
+
+### **Léo** – *Full Stack Designer & Data Manager*  
+🎨 UI design, database entries, balance, persona maps & visual choices  
+🧠 *Computer Science undergraduate*  
+👾 *Fan of Persona too, plus TKKF, Rocket League and weirdly... spreadsheets*  
+📈 *Loves making things both beautiful and meaningful*
+
+---
+
+## 🖼️ Previews & Screenshots
+
+*(Coming soon – including gameplay of each mode, animations, and feedback effects)*
+
+---
+
+## 🛡️ Disclaimer & License
+
+This is a **non-commercial fan project**, made with passion by and for the Persona community.  
+We are **not affiliated with Atlus, SEGA, or any official Persona property**. All character names, portraits, and designs belong to their respective owners.  
+The codebase is open-source and can be reused or modified under fair-use/fan-use conditions.
+
+---
+
+## 💖 Support & Spread the Word
+
+If you like the project:
+
+- ⭐ Star it on GitHub
+- 🗣️ Share it with other Persona fans
+- ☕ Consider supporting development when donation options become available
+
+Stay tuned for updates — and don't forget to guess today's character 🔍
