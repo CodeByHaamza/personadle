@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personadle - Personae Mode</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
+</head>
+
+<body>
+  <!-- Logo -->
+  <header id="homepage">
+    <a href="../index.html">
+      <img src="../img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage" />
+    </a>
+  </header>
+
+  <!-- Boutons filtres -->
+  <div class="filter-buttons">
+    <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
+    <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
+    <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
+  </div>
+
+  <!-- Zone principale -->
+  <div class="emoji-hint-zone" style="position: relative;">
+    <!-- Bouton Rules -->
+    <div style="position: absolute; top: -40px; right: -80px;">
+      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
+          <img class="active" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 80px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/></svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Titre central -->
+    <div style="color: white;">
+      <h1>Guess the Persona User from their Personae!</h1>
+      <p>Type a name to start 💥</p>
+    </div>
+  </div>
+
+<!-- Modal règles -->
+<div id="rulesModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>🎭 Personae Mode — How to Play</h2>
+    <p id="rulesText">
+      <strong>🎯 Objective:</strong><br>
+      A Persona is displayed on screen... <br>
+      Your mission? <strong>Identify its user!</strong><br><br>
+
+      <strong>💡 Tips & Tricks:</strong>
+      <ul>
+        <li>Pay close attention to the Persona's design — it reflects the personality, style, or theme of its user.</li>
+        <li>Some Personas might belong to more than one character. Choose wisely!</li>
+        <li>Use your knowledge of the lore, visuals, and vibes from the Persona universe.</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>🎮 Games Included:</strong>
+      <ul>
+        <li>Characters and Personae from <strong>Persona 3</strong>, <strong>Persona 4</strong>, and <strong>Persona 5</strong> (including spin-offs).</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>❌ Give Up Mechanic:</strong>
+      <ul>
+        <li>Stuck? The <strong>Give Up</strong> button appears after <strong>3 incorrect guesses</strong>.</li>
+        <li>Use it wisely… or keep digging!</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <em>Use your <strong>memory</strong>, your <strong>intuition</strong>, and your <strong>passion for Persona</strong> to succeed!</em>
+    </p>
+  </div>
+</div>
+
+  <!-- Image Persona -->
+ <div class="persona-box">
+  <img id="personaImage" src="" alt="Persona">
+</div>
+
+    <div id="victoryBox" class="victory-box" style="display: none;">
+  <img id="victoryImage" src="" alt="Persona image">
+  <div id="victoryText" class="victory-message"></div>
+</div>
+
+  <!-- Bouton Give Up -->
+  <div class="giveup-block" style="display: flex; justify-content: center; margin-top: 20px; gap: 12px;">
+    <div class="link-wrapper" id="giveUpButton">
+      <div class="img-wrapper">
+        <img class="normal" src="../assets/buttons/Give-up_button.webp" alt="Give Up" style="height: 90px;">
+        <img class="active" src="../assets/buttons/Give-up_button_rouge.webp" alt="Give Up" style="height: 90px;">
+      </div>
+      <div class="shape-wrapper">
+        <div class="shape red-fill jelly">
+          <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40"/></svg>
+        </div>
+        <div class="shape cyan-fill jelly">
+          <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38"/></svg>
+        </div>
+      </div>
+    </div>
+    <span id="giveUpCounter" class="counter">(0 / 3)</span>
+  </div>
+
+  <!-- Input + boutons -->
+  <section class="input-wrapper" style="margin-top: 30px; display: flex; justify-content: center;">
+    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center;">
+      
+      <!-- Replay -->
+      <div class="link-wrapper" id="resetButton">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/Replay_button.webp" alt="Replay" style="height: 90px;">
+          <img class="active" src="../assets/buttons/Replay_button_rouge.webp" alt="Replay" style="height: 90px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42"/></svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35"/></svg>
+          </div>
+        </div>
+      </div>
+
+   
+
+      <!-- Input -->
+      <div class="textbar-container">
+        <input
+          type="text"
+          id="textbar"
+          placeholder="Enter a character name..."
+          aria-label="Guess user name"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+      </div>
+
+      <!-- Submit -->
+      <div class="link-wrapper" id="guessButton">
+        <div class="img-wrapper">
+          <img class="normal" src="../assets/buttons/Submit_button.webp" alt="Submit" style="height: 90px;">
+          <img class="active" src="../assets/buttons/Submit_button_rouge.webp" alt="Submit" style="height: 90px;">
+        </div>
+        <div class="shape-wrapper">
+          <div class="shape red-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="12,5 108,0 98,35 10,40"/></svg>
+          </div>
+          <div class="shape cyan-fill jelly">
+            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38"/></svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+
+  <!-- Résultats -->
+  <div id="wrongGuessList"></div>
+
+  <!-- Script du jeu -->
+  <script type="module" src="./modePersonae.js"></script>
+
+  <!-- Dark Mode -->
+  <div class="darkmode-toggle">
+    <label class="switch">
+      <input type="checkbox" id="darkModeToggle">
+      <span class="slider round"></span>
+    </label>
+    <span class="label-text">Dark Mode</span>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggle = document.getElementById("darkModeToggle");
+      const savedMode = localStorage.getItem("darkMode");
+      if (savedMode === "enabled") {
+        document.body.classList.add("darkmode");
+        toggle.checked = true;
+      }
+      toggle.addEventListener("change", () => {
+        if (toggle.checked) {
+          document.body.classList.add("darkmode");
+          localStorage.setItem("darkMode", "enabled");
+        } else {
+          document.body.classList.remove("darkmode");
+          localStorage.setItem("darkMode", "disabled");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

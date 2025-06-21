@@ -1831,17 +1831,23 @@ footer p {
   }
 }
 #daltonianToggle {
+  position: absolute; /* Change ici */
+  top: 60px;
+  right: 12px;
+
   background-color: #1f1f1f;
   color: #f0f0f0;
   border: 2px solid #4caf50;
-  padding: 8px 16px;
+  padding: 6px 20px; /* Moins haut */
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;   /* Légèrement réduit */
   border-radius: 8px;
   cursor: pointer;
-  margin: 10px;
   transition: all 0.2s ease-in-out;
+
+  z-index: 10; /* S'assurer qu'il passe devant */
 }
+
 
 #daltonianToggle:hover {
   background-color: #2e2e2e;
@@ -1865,4 +1871,69 @@ body.daltonian-mode .guess-cell.wrong {
 
 #silhouetteImage {
   visibility: hidden;
+}
+
+
+.persona-box {
+  width: 500px;
+  height: 500px;
+  border: 4px solid #ff4757;
+  background-color: #1e1e2f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+  transition: transform 0.3s ease-in-out;
+}
+
+#personaImage {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.victory-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 25px auto;
+  padding: 20px 25px;
+  max-width: 600px;
+  border-radius: 16px;
+  background-color: #ffffff;
+  border: 3px solid #45bd00;
+  box-shadow: 0 0 18px #147501bb;
+  font-family: 'Arial Black', Impact, sans-serif;
+  text-align: center;
+  animation: pulseWin 0.5s ease-in-out;
+}
+
+.victory-box img {
+  width: 120px;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.victory-message {
+  color: white;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 #857679;
+}
+
+@keyframes pulseWin {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
