@@ -134,24 +134,32 @@ function initializeAutocomplete(input, personasList) {
     const lowerVal = val.toLowerCase();
     const matches = [];
 
-    for (let i = 0; i < personasList.length; i++) {
-      const displayName = personasList[i];
-      const lowerName = displayName.toLowerCase();
-      if (!lowerName.includes(lowerVal)) continue;
+for (let i = 0; i < personasList.length; i++) {
+  const displayName = personasList[i];
+  const lowerName = displayName.toLowerCase();
+  const lowerVal = val.toLowerCase();
 
-      const character = originalCharacters.find(c => {
-        const users = Array.isArray(c.user) ? c.user : [c.user];
-        return users.some(u => u.toLowerCase() === displayName.toLowerCase());
-      });
+  const [firstName = "", lastName = ""] = displayName.toLowerCase().split(" ");
 
-      if (!character || character._guessed) continue;
+  const character = originalCharacters.find(c => {
+    const users = Array.isArray(c.user) ? c.user : [c.user];
+    return users.some(u => u.toLowerCase() === displayName.toLowerCase());
+  });
 
-      const accepted = activeFilters.flatMap(o => validOpus[o]);
-      const opus = Array.isArray(character.opus) ? character.opus : [character.opus];
-      if (!opus.some(op => accepted.includes(op))) continue;
+  if (!character || character._guessed) continue;
 
-      matches.push(displayName);
-    }
+  const accepted = activeFilters.flatMap(o => validOpus[o]);
+  const opus = Array.isArray(character.opus) ? character.opus : [character.opus];
+  if (!opus.some(op => accepted.includes(op))) continue;
+
+  // Si le prénom commence par ce que tape l'utilisateur → priorité
+  if (firstName.startsWith(lowerVal)) {
+    matches.unshift(displayName); // on met en haut
+  } else if (lastName.startsWith(lowerVal) || lowerName.includes(lowerVal)) {
+    matches.push(displayName); // on met en bas
+  }
+}
+
 
     matches.forEach(nom => {
       const imageName = portraitsMap[nom] || nom.split(" ")[0];
