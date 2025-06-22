@@ -36,8 +36,19 @@ document.addEventListener("DOMContentLoaded", () => {
   victoryImage = document.getElementById("victoryImage");
   victoryText = document.getElementById("victoryText");
 
+  // ✅ Restore filters from localStorage
+  const storedFilters = localStorage.getItem("personaeActiveFilters");
+  if (storedFilters) {
+    try {
+      const parsed = JSON.parse(storedFilters);
+      if (Array.isArray(parsed)) activeFilters = parsed;
+    } catch (e) {
+      console.warn("⚠️ Error reading stored filters:", e);
+    }
+  }
+
   setupRulesModal();
-  setupFilterButtons();
+  setupFilterButtons(); // applique visuellement les bons filtres
   applyDarkModeStyles();
 
   guessBtn.addEventListener("click", handleGuess);
@@ -45,42 +56,40 @@ document.addEventListener("DOMContentLoaded", () => {
   giveUpBtn.addEventListener("click", giveUp);
 
   initializeAutocomplete(textbar, personas.sort((a, b) => a.localeCompare(b)));
-  // === 🧠 Restore session ===
-const stored = localStorage.getItem("personaeTarget");
-const storedAttempts = parseInt(localStorage.getItem("personaeAttempts")) || 0;
-const storedGameOver = localStorage.getItem("personaeGameOver") === "true";
 
-if (stored) {
-  try {
-    target = JSON.parse(stored);
-    filteredCharacters = getFilteredCharacters();
-    attempts = storedAttempts;
-    giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
+  // Restore session
+  const stored = localStorage.getItem("personaeTarget");
+  const storedAttempts = parseInt(localStorage.getItem("personaeAttempts")) || 0;
+  const storedGameOver = localStorage.getItem("personaeGameOver") === "true";
 
-    // Image Persona
-    personaImg.src = `./database/img/${target.image}.webp`;
-    personaImg.alt = target.persona;
+  if (stored) {
+    try {
+      target = JSON.parse(stored);
+      filteredCharacters = getFilteredCharacters();
+      attempts = storedAttempts;
+      giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
 
-    // Bouton Give Up
-    if (attempts >= maxAttempts) {
-      giveUpBtn.disabled = false;
-      giveUpCounter.classList.add("activated");
+      personaImg.src = `./database/img/${target.image}.webp`;
+      personaImg.alt = target.persona;
+
+      if (attempts >= maxAttempts) {
+        giveUpBtn.disabled = false;
+        giveUpCounter.classList.add("activated");
+      }
+
+      if (storedGameOver) {
+        const force = localStorage.getItem("personaeForceReveal") === "true";
+        showVictory(force, force ? null : (Array.isArray(target.user) ? target.user[0] : target.user));
+      }
+
+    } catch (e) {
+      resetGame();
     }
-
-    // Victoire si partie finie
-    if (storedGameOver) {
-      const force = localStorage.getItem("personaeForceReveal") === "true";
-      showVictory(force, force ? null : (Array.isArray(target.user) ? target.user[0] : target.user));
-    }
-
-  } catch (e) {
+  } else {
     resetGame();
   }
-} else {
-  resetGame();
-}
-
 });
+
 
 // === UTILS ===
 function getFilteredCharacters() {
@@ -292,15 +301,32 @@ function resetGame() {
 
 // === UI SETUP ===
 function setupFilterButtons() {
-  document.querySelectorAll(".filter-btn").forEach(btn => {
+  const btns = document.querySelectorAll(".filter-btn");
+
+  // ✅ Met à jour visuellement les boutons selon les filtres actifs
+  btns.forEach(btn => {
+    const val = btn.dataset.opus;
+    if (activeFilters.includes(val)) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+
+  // ✅ Gestion du clic
+  btns.forEach(btn => {
     btn.addEventListener("click", () => {
       const val = btn.dataset.opus;
       btn.classList.toggle("active");
+
       if (btn.classList.contains("active")) {
         if (!activeFilters.includes(val)) activeFilters.push(val);
       } else {
         activeFilters = activeFilters.filter(o => o !== val);
       }
+
+      // ✅ Sauvegarde du filtre actif
+      localStorage.setItem("personaeActiveFilters", JSON.stringify(activeFilters));
       resetGame();
     });
   });
@@ -365,3 +391,4 @@ export function debugAllPersonae() {
   else console.log("🎉 Aucune erreur détectée !");
   console.log("=== FIN DU DEBUG ===");
 }
+debugAllPersonae(); // 

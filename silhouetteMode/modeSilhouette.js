@@ -123,6 +123,7 @@ function initializeAutocomplete(input, personasList) {
       const nom = matchObj.name;
       const imageName = portraitsMap[nom] || nom.split(" ")[0];
       const portraitName = encodeURIComponent(imageName);
+      const realName = nom.includes("(") ? nom.split("(")[1].replace(")", "") : "";
 
       const option = document.createElement("DIV");
       option.className = "list-options";
@@ -130,6 +131,7 @@ function initializeAutocomplete(input, personasList) {
         <img src="../database/portraits/${portraitName}.webp" alt="${nom}">
         <span style="display: flex; flex-direction: column;">
           <span class="codename">${nom.split(" (")[0]}</span>
+          ${realName ? `<span class="realname">(${realName})</span>` : ""}
         </span>
         <input type='hidden' value='${nom}'>
       `;
