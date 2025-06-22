@@ -228,6 +228,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let target = JSON.parse(localStorage.getItem("target"));
   let history = JSON.parse(localStorage.getItem("guessHistory")) || [];
 
+  if (history.includes(target?.nom)) {
+  gameOver = true;
+  textbar.disabled = true;
+  guessButton.disabled = true;
+  giveUpButton.disabled = true;
+  revealNextLink(); // ✅ Affiche le lien si la partie est terminée
+}
+
+
   if (!target) {
     const filteredCharacters = characters.filter(c => {
       const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
@@ -285,6 +294,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
     localStorage.setItem("target", JSON.stringify(target));
+
+    const next = document.getElementById("nextLinkContainer");
+if (next) {
+  next.style.display = "none";
+  next.classList.remove("reveal-style");
+}
+
   });
 
   hintButton.addEventListener("click", () => {
@@ -485,6 +501,7 @@ setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
       giveUpButton.disabled = true;
       gameOver = true;
       showConfettiExplosion();
+        revealNextLink(); // ⬅️ fait apparaître le lien
     }
   }
 
@@ -637,4 +654,17 @@ function debugModeClassique() {
 
     console.log("=== ✅ FIN DEBUG CLASSIQUE ===");
   }, 1000); // Laisse le temps au chargement d’image
+}
+
+function revealNextLink() {
+  const next = document.getElementById("nextLinkContainer");
+  if (next) {
+    next.style.display = "block";
+    next.classList.add("reveal-style");
+
+    // ⏳ Scroll après un délai de 2 secondes
+    setTimeout(() => {
+      next.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 1500);
+  }
 }

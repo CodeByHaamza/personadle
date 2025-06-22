@@ -214,6 +214,8 @@ function handleGuess() {
     document.getElementById("aoaGif").style.filter = "none";
     showVictoryBox(target);
     showConfettiExplosion();
+    revealNextLink(); // ✅ scroll + affiche le lien
+
     gameOver = true;
     localStorage.setItem("aoaGameOver", "true");
 localStorage.setItem("aoaTarget", target);
@@ -295,6 +297,13 @@ function resetGame(){
   localStorage.setItem("aoaTarget", target);
   localStorage.setItem("aoaAttempts", attempts);
   localStorage.removeItem("aoaGameOver");
+
+  const next = document.getElementById("nextLinkContainer");
+if (next) {
+  next.style.display = "none";
+  next.classList.remove("reveal-style");
+}
+
 }
 
 
@@ -354,6 +363,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gameOver) {
       showVictoryBox(target);
       disableInputs();
+      revealNextLink(); // 👉 Affiche le lien si le joueur recharge la page après avoir gagné
+
     }
 
     if (attempts >= 5) {
@@ -539,4 +550,16 @@ function debugAllOutAttack() {
   }
 
   console.log("===== ✅ DEBUG TERMINÉ =====");
+}
+
+function revealNextLink() {
+  const next = document.getElementById("nextLinkContainer");
+  if (next) {
+    next.style.display = "block";
+    next.classList.add("reveal-style");
+
+    setTimeout(() => {
+      next.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 1500);
+  }
 }

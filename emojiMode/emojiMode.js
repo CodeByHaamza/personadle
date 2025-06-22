@@ -219,6 +219,8 @@ function checkEmojiGuess(name, forceReveal = false) {
 
     victoryBox.style.display = "flex";
     showConfettiExplosion();
+    revealNextLink(); // ⬅️ Affiche le lien et scroll
+
     textbar.disabled = true;
     document.getElementById("guessButton").disabled = true;
     document.getElementById("giveUpButton").disabled = true;
@@ -269,6 +271,12 @@ function resetGame() {
   localStorage.setItem("attemptsEmoji", attempts);
   updateEmojiHint();
   updateCounters();
+  const nextLink = document.getElementById("nextLinkContainer");
+if (nextLink) {
+  nextLink.style.display = "none";
+  nextLink.classList.remove("reveal-style");
+}
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -458,4 +466,17 @@ function debugCharactersFull() {
   if (invalidEmojis.length) console.log("→ À corriger dans characters_clean.js :", invalidEmojis);
 
   console.log("=== DEBUG TERMINÉ ===");
+}
+
+function revealNextLink() {
+  const next = document.getElementById("nextLinkContainer");
+  if (next) {
+    next.style.display = "block";
+    next.classList.add("reveal-style");
+
+    // ⏳ Scroll après un petit délai
+    setTimeout(() => {
+      next.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 1500);
+  }
 }

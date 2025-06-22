@@ -235,12 +235,17 @@ function showVictory(force = false) {
 
   if (!force) {
     showConfettiExplosion();
+    revealNextLink(); // ✅ scroll + affiche le lien
     let winCount = localStorage.getItem("silhouetteWins") || 0;
     localStorage.setItem("silhouetteWins", parseInt(winCount) + 1);
+  } else {
+    revealNextLink(); // ✅ même en cas de give up
   }
+
   localStorage.setItem("silhouetteGameOver", "true");
   localStorage.setItem("silhouetteForceReveal", force);
 }
+
 
 // === ERREUR
 function showWrong(name) {
@@ -316,6 +321,12 @@ function resetGame() {
 
   originalCharacters.forEach(c => c._guessed = false);
   pickCharacter();
+  const next = document.getElementById("nextLinkContainer");
+if (next) {
+  next.style.display = "none";
+  next.classList.remove("reveal-style");
+}
+
 }
 
 // === FILTRES
@@ -400,6 +411,8 @@ document.addEventListener("DOMContentLoaded", () => {
         giveUpCounter.classList.add("activated");
       }
       if (storedGameOver) showVictory(localStorage.getItem("silhouetteForceReveal") === "true");
+      if (storedGameOver) revealNextLink();
+
 
       silhouetteImg.onload = () => {
         silhouetteImg.style.visibility = "visible";
@@ -472,4 +485,16 @@ function debugAllSilhouettes() {
   }
 
   console.log("=== FIN DU DEBUG ===");
+}
+
+function revealNextLink() {
+  const next = document.getElementById("nextLinkContainer");
+  if (next) {
+    next.style.display = "block";
+    next.classList.add("reveal-style");
+
+    setTimeout(() => {
+      next.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 1500);
+  }
 }
