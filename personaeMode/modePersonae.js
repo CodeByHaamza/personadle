@@ -228,10 +228,10 @@ function showVictory(force = false, name = null) {
   victoryImage.alt = name;
 
   if (force) {
-    victoryText.innerHTML = `❌ Too bad! <strong>${target.user}</strong>'s Persona was <strong>${target.persona}</strong>.`;
+victoryText.innerHTML = `❌ Too bad!&nbsp;<span class="user-name">${target.user}</span>'s Persona was&nbsp;<span class="persona-name">${target.persona}</span>.`;
     victoryText.className = "victory-message failure-text";
   } else {
-    victoryText.innerHTML = `✅ Bravo! <strong>${target.persona}</strong> is the Persona of <strong>${name}</strong>!`;
+victoryText.innerHTML = `✅ Good Guess!&nbsp;<span class="persona-name">${target.persona}</span>&nbsp;is the Persona of&nbsp;<span class="user-name">${name}</span>!`;
     victoryText.className = "victory-message success-text";
     showConfettiExplosion();
   }
@@ -272,13 +272,31 @@ function handleGuess() {
   else showWrong(guess);
 
   textbar.value = "";
+  // Empêche ce personnage de réapparaître dans l'autocomplétion
+const guessedCharacter = originalCharacters.find(c => {
+  const users = Array.isArray(c.user) ? c.user : [c.user];
+  return users.some(u => u.toLowerCase() === guess.toLowerCase());
+});
+if (guessedCharacter) guessedCharacter._guessed = true;
+
   textbar.dispatchEvent(new Event("input"));
 }
 
 function giveUp() {
   if (attempts < maxAttempts || gameOver) return;
-  showVictory(true);
+
+  // Marque le jeu comme terminé
+  gameOver = true;
+
+  // Enregistre l'état de fin dans le localStorage
+  localStorage.setItem("personaeGameOver", "true");
+  localStorage.setItem("personaeForceReveal", "true");
+
+  // Affiche la box de victoire (comme défaite)
+  showVictory(true, Array.isArray(target.user) ? target.user[0] : target.user);
 }
+
+
 
 function resetGame() {
   gameOver = false;

@@ -1896,6 +1896,7 @@ body.daltonian-mode .guess-cell.wrong {
   transition: transform 0.3s ease;
 }
 
+/* === Victory Box - Style clair par défaut === */
 .victory-box {
   display: flex;
   flex-direction: column;
@@ -1913,11 +1914,19 @@ body.daltonian-mode .guess-cell.wrong {
   animation: pulseWin 0.5s ease-in-out;
 }
 
+body.darkmode .victory-box {
+  background-color: #2f2f45;
+  color: #f0f0f0;
+  border: 3px solid #45bd00;
+  box-shadow: 0 0 22px rgba(69, 189, 0, 0.6);
+}
+
 .victory-box img {
   width: 175px;
   height: auto;
   border-radius: 10px;
   margin-bottom: 15px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 .victory-message {
@@ -1927,6 +1936,42 @@ body.daltonian-mode .guess-cell.wrong {
   text-shadow: 1px 1px 0 #000, 2px 2px 0 #857679;
 }
 
+body.darkmode .victory-message {
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #000, 2px 2px 3px #888;
+}
+
+/* === Nom du Persona === */
+.persona-name {
+  color: #e53935; /* rouge profond */
+  letter-spacing: 1.2px;
+  font-weight: bold;
+  text-shadow: 0 0 4px #fcfcfc, 0 0 8px #b71c1c;
+  animation: appear-glow 0.8s ease forwards;
+  opacity: 0;
+}
+
+body.darkmode .persona-name {
+  text-shadow: 0 0 4px #ffffff00, 0 0 8px #630000;
+}
+
+/* === Apparition et effet lueur (optionnel) === */
+@keyframes appear-glow {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 4px #8e44ad, 0 0 10px #8e44ad;
+  }
+  to {
+    text-shadow: 0 0 6px #9b59b6, 0 0 14px #9b59b6;
+  }
+}
+
+/* === Animation victoire === */
 @keyframes pulseWin {
   0% {
     transform: scale(0.95);
@@ -1936,4 +1981,26 @@ body.daltonian-mode .guess-cell.wrong {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+
+.user-name {
+  color: #3498db; /* bleu Persona */
+  letter-spacing: 1px;
+  font-weight: bold;
+  text-shadow: 0 0 4px #ffffff, 0 0 6px #2c3e50;
+}
+
+body.darkmode .user-name {
+  text-shadow: 0 0 4px #d0d0d000, 0 0 8px #001727;
+}
+
+
+.persona-name,
+.user-name {
+  margin: 0 6px;
+}
+
+.connector {
+  margin: 0 4px;
 }
