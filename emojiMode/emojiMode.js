@@ -219,7 +219,10 @@ function checkEmojiGuess(name, forceReveal = false) {
 
     victoryBox.style.display = "flex";
     showConfettiExplosion();
-    revealNextLink(); // ⬅️ Affiche le lien et scroll
+revealNextLink({
+  prevHref: "../classiqueMode/classiqueMode.html",
+  nextHref: "../allOutAttackMode/allOutAttack.html"
+});
 
     textbar.disabled = true;
     document.getElementById("guessButton").disabled = true;
@@ -271,11 +274,12 @@ function resetGame() {
   localStorage.setItem("attemptsEmoji", attempts);
   updateEmojiHint();
   updateCounters();
-  const nextLink = document.getElementById("nextLinkContainer");
-if (nextLink) {
-  nextLink.style.display = "none";
-  nextLink.classList.remove("reveal-style");
+  const nav = document.getElementById("modeNavigationContainer");
+if (nav) {
+  nav.style.display = "none";
+  nav.classList.remove("reveal-style");
 }
+
 
 }
 
@@ -350,6 +354,12 @@ giveUpButton.addEventListener("click", () => {
     resetGame();
     localStorage.removeItem("emojiGameOver");
 localStorage.removeItem("emojiForceReveal");
+
+revealNextLink({
+  prevHref: "../classiqueMode/classiqueMode.html",
+  nextHref: "../allOutAttackMode/allOutAttack.html"
+});
+
 
   });
 
@@ -468,15 +478,29 @@ function debugCharactersFull() {
   console.log("=== DEBUG TERMINÉ ===");
 }
 
-function revealNextLink() {
-  const next = document.getElementById("nextLinkContainer");
-  if (next) {
-    next.style.display = "block";
-    next.classList.add("reveal-style");
+function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
+  const nav = document.getElementById("modeNavigationContainer");
+  const nextButton = document.getElementById("nextModeButton");
+  const prevButton = document.getElementById("prevModeButton");
 
-    // ⏳ Scroll après un petit délai
+  if (nextButton && nextHref) {
+    nextButton.onclick = () => (location.href = nextHref);
+  }
+
+  if (prevButton) {
+    if (prevHref) {
+      prevButton.style.visibility = "visible";
+      prevButton.onclick = () => (location.href = prevHref);
+    } else {
+      prevButton.style.visibility = "hidden";
+      prevButton.onclick = null;
+    }
+  }
+
+  if (nav) {
+    nav.style.display = "flex";
     setTimeout(() => {
-      next.scrollIntoView({ behavior: "smooth", block: "center" });
+      nav.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 1500);
   }
 }

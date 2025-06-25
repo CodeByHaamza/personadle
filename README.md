@@ -103,11 +103,20 @@ Everything is handcrafted — just like a Velvet Room contract ✨
 
 ---
 
-## 🛡️ Disclaimer & License
+## 🛡️ License
 
-This is a **non-commercial fan project**, made with passion by and for the Persona community.  
-We are **not affiliated with Atlus, SEGA, or any official Persona property**. All character names, portraits, and designs belong to their respective owners.  
-The codebase is open-source and can be reused or modified under fair-use/fan-use conditions.
+This project is licensed under the [MIT License](./LICENSE).
+
+All original code and logic are © 2025 Hamza & L2GENDAIRE.  
+You are free to use, modify, and redistribute it for non-commercial purposes as long as proper credit is given.
+
+---
+
+## ⚠️ Disclaimer
+
+Personadle is a non-commercial fan-made project.  
+It is not affiliated with or endorsed by ATLUS, SEGA, or any official Persona entity.  
+All Persona characters, names, assets, and related content are the property of their respective copyright holders.
 
 ---
 

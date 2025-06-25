@@ -40,6 +40,9 @@
         <button class="gamemode-button" id="PersonaeButton" onclick="location.href='./personaeMode/personae.html'">
             <img src="./img/personae button.png" alt="Persona Mode">
             </button>
+           <button class="gamemode-button" id="MusicButton" onclick="location.href='./musicsMode/musics.html'">
+            <img src="./img/musicmode.png" alt="Persona Mode">
+            </button>
     </div>
    
 <!-- Bouton Mode Sombre -->
@@ -72,12 +75,97 @@
     });
   });
 </script>
-
 <footer>
-    <p>personadle.net — 2025</p>
-    <p>Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders.</p>
+  <p>personadle.net — 2025</p>
+  <p>
+    Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders. 
+    <a href="#" id="legalLink">Legal Notice</a>
+  </p>
 </footer>
 
+<!-- Legal Modal -->
+<div id="legalModal" class="legal-modal" style="display: none;">
+  <div class="legal-content">
+    <span id="closeLegal" class="close">&times;</span>
+    <h2>📝 Legal Notice / Terms of Use</h2>
+    <p><strong>Last updated:</strong> June 2025</p>
+
+    <p>
+      This website ("<strong>Personadle</strong>") is a non-commercial fan project and tribute to the <em>Persona</em> franchise, created purely for educational and entertainment purposes.
+    </p>
+
+    <p>
+      All code and game logic are original and developed by <strong>Hamza</strong> & <strong>L2GENDAIRE</strong>.  
+      The project is entirely free of charge and released under the open-source <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
+    </p>
+
+    <h3>🎭 Intellectual Property</h3>
+    <p>
+      This site is an unofficial fan creation and is not affiliated with or endorsed by ATLUS, SEGA, or any official Persona development team.<br>
+      All Persona characters, names, music, and visual assets remain the property of their respective rights holders:  
+      © ATLUS, © SEGA, © Shoji Meguro, © Lyn Inaizumi, © Lotus Juice, and others.
+    </p>
+
+    <p>
+      Some UI components (such as button styles, interface layout, and animations) were custom-made by the Personadle team and are not extracted from any original game assets.
+    </p>
+
+    <p>
+      The "Blind Test" mode features short audio excerpts used strictly for non-commercial, transformative fan purposes.  
+      Tracks are credited appropriately, and no full-length music is distributed. If any copyright holder requests removal or modification, we will comply promptly.
+    </p>
+
+    <p>
+      No copyright infringement is intended. All content is used under the principles of fair use, where applicable, with no monetization involved.
+    </p>
+
+    <h3>🔐 Data & Privacy</h3>
+    <p>
+      <strong>Personadle</strong> does not collect, track, or store any personal data.  
+      All game progress is saved only in your browser via <code>localStorage</code>. No cookies, no analytics, no third-party tracking.
+    </p>
+
+    <h3>🛠️ Open Source</h3>
+    <p>
+      The full project source code is publicly available under the MIT License.  
+      Contributions and forks are welcome, as long as the original authors are credited and no commercial use is made.
+    </p>
+
+    <h3>💬 Credits & Thanks</h3>
+    <p>
+      Developed by <strong>Hamza</strong> & <strong>L2GENDAIRE</strong>.<br>
+      With gratitude to the GitHub community, Persona fans on Reddit, and all the supportive feedback from Discord developers ❤️
+    </p>
+
+    <h3>📬 Contact</h3>
+    <p>
+      📧 Email: <a href="mailto:hamza.karrouchi.dev@gmail.com">hamza.karrouchi.dev@gmail.com</a><br>
+      🐙 GitHub: <a href="https://github.com/yourusername" target="_blank">github.com/yourusername</a>
+    </p>
+  </div>
+</div>
+
+
+<script>
+  const legalModal = document.getElementById("legalModal");
+  const legalLink = document.getElementById("legalLink");
+  const closeLegal = document.getElementById("closeLegal");
+
+  legalLink.onclick = function (e) {
+    e.preventDefault();
+    legalModal.style.display = "block";
+  };
+
+  closeLegal.onclick = function () {
+    legalModal.style.display = "none";
+  };
+
+  window.onclick = function (event) {
+    if (event.target === legalModal) {
+      legalModal.style.display = "none";
+    }
+  };
+</script>
 
 
 </body>

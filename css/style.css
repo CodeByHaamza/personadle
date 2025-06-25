@@ -127,6 +127,11 @@ body {
   box-shadow: 0 6px 14px rgb(199, 169, 0);
 }
 
+#MusicButton:hover img {
+  transform: scale(1.03);
+  box-shadow: 0 6px 14px rgb(180, 22, 154);
+}
+
 /* ========== Gamemode Title ========== */
 .gamemode-title {
   /* Style for gamemode titles */
@@ -1906,8 +1911,8 @@ body.daltonian-mode .guess-cell.wrong {
   padding: 20px 25px;
   max-width: 600px;
   border-radius: 16px;
-  background-color: #ffffff;
-  border: 3px solid #45bd00;
+  background-color: #e7e7e7;
+  border: 3px solid #000000;
   box-shadow: 0 0 18px #147501bb;
   font-family: 'Arial Black', Impact, sans-serif;
   text-align: center;
@@ -1930,7 +1935,7 @@ body.darkmode .victory-box {
 }
 
 .victory-message {
-  color: white;
+  color: rgb(255, 255, 255);
   font-size: 1.1rem;
   line-height: 1.4;
   text-shadow: 1px 1px 0 #000, 2px 2px 0 #857679;
@@ -2005,3 +2010,189 @@ body.darkmode .user-name {
   margin: 0 4px;
 }
 
+
+audio {
+  width: 300px;
+  height: 40px;
+  outline: none;
+  border: none;
+  background-color: #1c1c1c;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.6), 0 0 6px rgba(0, 255, 255, 0.4);
+  transition: box-shadow 0.3s ease;
+  margin: 20px auto;
+  display: block;
+}
+
+/* Personnalisation quand le dark mode est actif */
+body.darkmode audio {
+  background-color: #111;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5), 0 0 6px rgba(255, 0, 0, 0.3);
+}
+
+/* Optionnel : Hover */
+audio:hover {
+  box-shadow: 0 0 16px rgba(255, 0, 0, 0.8), 0 0 8px rgba(0, 255, 255, 0.5);
+}
+
+
+.audio-wrapper {
+  background-color: #f4f4f4;
+  padding: 20px 30px;
+  border-radius: 16px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  width: fit-content;
+  margin: 30px auto;
+  border: 2px solid #d62828;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.audio-wrapper:hover {
+  border-color: #00ffff;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+body.darkmode .audio-wrapper {
+  background-color: #1b1b1b;
+  border-color: #00ffff;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+}
+
+.victory-link {
+  color: #ffa500;
+  text-decoration: underline;
+  font-weight: bold;
+}
+.victory-link:hover {
+  color: #ffd700;
+}
+/* === Personadle Music Mode - Victory Box Plus Grande === */
+body.music-mode .victory-box {
+  max-width: 750px;
+  padding: 30px 35px;
+  border: 4px solid #f5067d;
+  box-shadow: 0 0 28px #f73093b9;
+}
+
+body.music-mode .victory-box img {
+  width: 300px;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Mode sombre amélioré */
+body.music-mode.darkmode .victory-box {
+  background-color: #2c1f2f;
+  border-color: #ff66cc;
+  box-shadow: 0 0 30px rgba(255, 102, 204, 0.6);
+}
+
+.legal-modal {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.8);
+  padding-top: 60px;
+}
+
+.legal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 30px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 800px;
+  border-radius: 10px;
+  color: #000;
+}
+
+.legal-content h2, .legal-content h3 {
+  margin-top: 20px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #000;
+}
+
+
+.nav-button {
+  background: linear-gradient(135deg, #f7f7f7, #e5e5e5);
+  color: #222;
+  padding: 18px 28px;
+  font-size: 1.4em;
+  font-weight: bold;
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  text-align: center;
+  width: 220px;
+}
+
+.nav-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 18px #000000;
+}
+
+.prev-mode {
+  margin-left: 5%;
+  color: #c62828;
+  box-shadow: 0 0 12px rgba(198, 40, 40, 0.5);
+}
+
+.prev-mode:hover {
+  box-shadow: 0 0 18px #ff5252;
+}
+
+.next-mode {
+  margin-right: 5%;
+  color: #b8860b;
+  box-shadow: 0 0 12px rgba(184, 134, 11, 0.5);
+}
+
+.next-mode:hover {
+  box-shadow: 0 0 18px #f0c60c;
+}
+
+body.darkmode .nav-button {
+  background: linear-gradient(135deg, #222, #333);
+  color: #f0c60c;
+  box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+body.darkmode .nav-button:hover {
+  background: linear-gradient(135deg, #333, #444);
+  box-shadow: 0 0 18px #f0c60c;
+}
+
+body.darkmode .prev-mode {
+  color: #ff5050;
+  box-shadow: 0 0 12px rgba(255, 80, 80, 0.7);
+}
+
+body.darkmode .prev-mode:hover {
+  box-shadow: 0 0 18px #ff5050;
+}
+
+body.darkmode .next-mode {
+  color: #f0c60c;
+  box-shadow: 0 0 12px rgba(240, 198, 12, 0.7);
+}
+
+body.darkmode .next-mode:hover {
+  box-shadow: 0 0 18px #f0c60c;
+}

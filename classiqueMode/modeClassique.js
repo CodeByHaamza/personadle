@@ -233,7 +233,9 @@ document.addEventListener("DOMContentLoaded", () => {
   textbar.disabled = true;
   guessButton.disabled = true;
   giveUpButton.disabled = true;
-  revealNextLink(); // ✅ Affiche le lien si la partie est terminée
+revealNextLink({
+  nextHref: "../emojiMode/emojiMode.html"
+});
 }
 
 
@@ -295,11 +297,12 @@ document.addEventListener("DOMContentLoaded", () => {
     target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
     localStorage.setItem("target", JSON.stringify(target));
 
-    const next = document.getElementById("nextLinkContainer");
-if (next) {
-  next.style.display = "none";
-  next.classList.remove("reveal-style");
+ const nav = document.getElementById("modeNavigationContainer");
+if (nav) {
+  nav.style.display = "none";
+  nav.classList.remove("reveal-style");
 }
+
 
   });
 
@@ -327,6 +330,10 @@ if (next) {
       history.push(target.nom);
       localStorage.setItem("guessHistory", JSON.stringify(history));
     }
+    revealNextLink({
+  nextHref: "../emojiMode/emojiMode.html"
+});
+
   });
 
   function updateCounters() {
@@ -501,7 +508,9 @@ setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
       giveUpButton.disabled = true;
       gameOver = true;
       showConfettiExplosion();
-        revealNextLink(); // ⬅️ fait apparaître le lien
+revealNextLink({
+  nextHref: "../emojiMode/emojiMode.html"
+});
     }
   }
 
@@ -656,15 +665,29 @@ function debugModeClassique() {
   }, 1000); // Laisse le temps au chargement d’image
 }
 
-function revealNextLink() {
-  const next = document.getElementById("nextLinkContainer");
-  if (next) {
-    next.style.display = "block";
-    next.classList.add("reveal-style");
+function revealNextLink({ nextHref = "", prevHref = null }) {
+  const nav = document.getElementById("modeNavigationContainer");
+  const nextButton = document.getElementById("nextModeButton");
+  const prevButton = document.getElementById("prevModeButton");
 
-    // ⏳ Scroll après un délai de 2 secondes
+  if (nextButton && nextHref) {
+    nextButton.onclick = () => (location.href = nextHref);
+  }
+
+  if (prevButton) {
+    if (prevHref) {
+      prevButton.style.visibility = "visible";
+      prevButton.onclick = () => (location.href = prevHref);
+    } else {
+      prevButton.style.visibility = "hidden";
+      prevButton.onclick = null;
+    }
+  }
+
+  if (nav) {
+    nav.style.display = "flex";
     setTimeout(() => {
-      next.scrollIntoView({ behavior: "smooth", block: "center" });
+      nav.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 1500);
   }
 }

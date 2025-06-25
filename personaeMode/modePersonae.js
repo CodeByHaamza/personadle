@@ -243,8 +243,17 @@ victoryText.innerHTML = `✅ Good Guess!&nbsp;<span class="persona-name">${targe
     victoryText.className = "victory-message success-text";
     showConfettiExplosion();
   }
+setTimeout(() => {
+  victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
+}, 500);
 
   victoryBox.style.display = "block";
+  
+revealNextLink({
+  prevHref: "../silhouetteMode/silhouette.html",
+  nextHref: "../musicsMode/musics.html"
+});
+
   localStorage.setItem("personaeGameOver", "true");
 }
 
@@ -262,10 +271,14 @@ function showWrong(name) {
 
 // === GAME LOGIC ===
 function handleGuess() {
+
+  
   if (gameOver) return;
   const guess = textbar.value.trim();
   if (!guess) return;
   attempts++;
+  localStorage.setItem("personaeAttempts", attempts);
+
   giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
 
   if (attempts >= maxAttempts) {
@@ -307,6 +320,14 @@ function giveUp() {
 
 
 function resetGame() {
+  localStorage.removeItem("personaeTarget");
+localStorage.removeItem("personaeAttempts");
+localStorage.removeItem("personaeGameOver");
+localStorage.removeItem("personaeForceReveal");
+
+  const nav = document.getElementById("modeNavigationContainer");
+  if (nav) nav.style.display = "none";
+
   gameOver = false;
   attempts = 0;
   giveUpCounter.textContent = `(0 / ${maxAttempts})`;
@@ -322,8 +343,24 @@ function resetGame() {
   victoryImage.src = "";
 
   originalCharacters.forEach(c => c._guessed = false);
+
+  // ✅ NE PAS re-piocher un perso si on en a déjà un en mémoire
+  const stored = localStorage.getItem("personaeTarget");
+  if (stored) {
+    try {
+      target = JSON.parse(stored);
+      personaImg.src = `./database/img/${target.image}.webp`;
+      personaImg.alt = target.persona;
+      return;
+    } catch (e) {
+      console.warn("⚠️ Erreur en rechargeant le personnage : ", e);
+    }
+  }
+
+  // Si rien dans le localStorage ou échec → on pioche un nouveau
   pickCharacter();
 }
+
 
 // === UI SETUP ===
 function setupFilterButtons() {
@@ -418,3 +455,30 @@ export function debugAllPersonae() {
   console.log("=== FIN DU DEBUG ===");
 }
 debugAllPersonae(); // 
+
+function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
+  const nav = document.getElementById("modeNavigationContainer");
+  const nextButton = document.getElementById("nextModeButton");
+  const prevButton = document.getElementById("prevModeButton");
+
+  if (nextButton && nextHref) {
+    nextButton.onclick = () => (location.href = nextHref);
+  }
+
+  if (prevButton) {
+    if (prevHref) {
+      prevButton.style.visibility = "visible";
+      prevButton.onclick = () => (location.href = prevHref);
+    } else {
+      prevButton.style.visibility = "hidden";
+      prevButton.onclick = null;
+    }
+  }
+
+  if (nav) {
+    nav.style.display = "flex";
+    setTimeout(() => {
+      nav.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 1500);
+  }
+}

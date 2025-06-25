@@ -214,7 +214,10 @@ function handleGuess() {
     document.getElementById("aoaGif").style.filter = "none";
     showVictoryBox(target);
     showConfettiExplosion();
-    revealNextLink(); // ✅ scroll + affiche le lien
+revealNextLink({
+  prevHref: "../emojiMode/emojiMode.html",
+  nextHref: "../silhouetteMode/silhouette.html"
+});
 
     gameOver = true;
     localStorage.setItem("aoaGameOver", "true");
@@ -298,10 +301,10 @@ function resetGame(){
   localStorage.setItem("aoaAttempts", attempts);
   localStorage.removeItem("aoaGameOver");
 
-  const next = document.getElementById("nextLinkContainer");
-if (next) {
-  next.style.display = "none";
-  next.classList.remove("reveal-style");
+const nav = document.getElementById("modeNavigationContainer");
+if (nav) {
+  nav.style.display = "none";
+  nav.classList.remove("reveal-style");
 }
 
 }
@@ -363,7 +366,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (gameOver) {
       showVictoryBox(target);
       disableInputs();
-      revealNextLink(); // 👉 Affiche le lien si le joueur recharge la page après avoir gagné
+revealNextLink({
+  prevHref: "../emojiMode/emojiMode.html",
+  nextHref: "../silhouetteMode/silhouette.html"
+});
 
     }
 
@@ -552,14 +558,29 @@ function debugAllOutAttack() {
   console.log("===== ✅ DEBUG TERMINÉ =====");
 }
 
-function revealNextLink() {
-  const next = document.getElementById("nextLinkContainer");
-  if (next) {
-    next.style.display = "block";
-    next.classList.add("reveal-style");
+function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
+  const nav = document.getElementById("modeNavigationContainer");
+  const nextButton = document.getElementById("nextModeButton");
+  const prevButton = document.getElementById("prevModeButton");
 
+  if (nextButton && nextHref) {
+    nextButton.onclick = () => (location.href = nextHref);
+  }
+
+  if (prevButton) {
+    if (prevHref) {
+      prevButton.style.visibility = "visible";
+      prevButton.onclick = () => (location.href = prevHref);
+    } else {
+      prevButton.style.visibility = "hidden";
+      prevButton.onclick = null;
+    }
+  }
+
+  if (nav) {
+    nav.style.display = "flex";
     setTimeout(() => {
-      next.scrollIntoView({ behavior: "smooth", block: "center" });
+      nav.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 1500);
   }
 }

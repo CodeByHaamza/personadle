@@ -1,0 +1,14 @@
+# Fichiers système (macOS, Windows)
+.DS_Store
+Thumbs.db
+
+# PSD ou sources design
+*.psd
+
+# Fichiers logs ou backup
+*.log
+*.zip
+
+# Cache éventuel navigateur ou éditeur
+.cache/
+.vscode/

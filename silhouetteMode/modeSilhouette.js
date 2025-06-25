@@ -235,11 +235,17 @@ function showVictory(force = false) {
 
   if (!force) {
     showConfettiExplosion();
-    revealNextLink(); // ✅ scroll + affiche le lien
+revealNextLink({
+  prevHref: "../allOutAttackMode/allOutAttack.html",
+  nextHref: "../personaeMode/personae.html"
+});
     let winCount = localStorage.getItem("silhouetteWins") || 0;
     localStorage.setItem("silhouetteWins", parseInt(winCount) + 1);
   } else {
-    revealNextLink(); // ✅ même en cas de give up
+revealNextLink({
+  prevHref: "../allOutAttackMode/allOutAttack.html",
+  nextHref: "../personaeMode/personae.html"
+});
   }
 
   localStorage.setItem("silhouetteGameOver", "true");
@@ -305,6 +311,9 @@ function giveUp() {
 
 // === RESET
 function resetGame() {
+  const nav = document.getElementById("modeNavigationContainer");
+if (nav) nav.style.display = "none";
+
   localStorage.removeItem("silhouetteForceReveal");
 
   gameOver = false;
@@ -487,14 +496,29 @@ function debugAllSilhouettes() {
   console.log("=== FIN DU DEBUG ===");
 }
 
-function revealNextLink() {
-  const next = document.getElementById("nextLinkContainer");
-  if (next) {
-    next.style.display = "block";
-    next.classList.add("reveal-style");
+function revealNextLink({ nextHref = "../personaeMode/personae.html", prevHref = "../allOutAttackMode/allOutAttack.html" } = {}) {
+  const nav = document.getElementById("modeNavigationContainer");
+  const nextButton = document.getElementById("nextModeButton");
+  const prevButton = document.getElementById("prevModeButton");
 
+  if (nextButton && nextHref) {
+    nextButton.onclick = () => (location.href = nextHref);
+  }
+
+  if (prevButton) {
+    if (prevHref) {
+      prevButton.style.visibility = "visible";
+      prevButton.onclick = () => (location.href = prevHref);
+    } else {
+      prevButton.style.visibility = "hidden";
+      prevButton.onclick = null;
+    }
+  }
+
+  if (nav) {
+    nav.style.display = "flex";
     setTimeout(() => {
-      next.scrollIntoView({ behavior: "smooth", block: "center" });
+      nav.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 1500);
   }
 }
