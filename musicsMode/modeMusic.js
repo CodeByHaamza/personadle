@@ -220,6 +220,10 @@ localStorage.removeItem("musicForceReveal");
   victoryText.innerHTML = "";
   victoryImage.src = "";
   pickSong();
+  // Cache le container des liens de navigation
+const navContainer = document.getElementById("modeNavigationContainer");
+if (navContainer) navContainer.style.display = "none";
+
 }
 
 // === AUTOCOMPLETE ===
