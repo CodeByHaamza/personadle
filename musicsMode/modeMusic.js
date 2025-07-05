@@ -6,10 +6,12 @@ import { musicTitles } from "./database/musicTitles.js";
 const validOpus = {
   P3: ["P3", "P3P", "P3FES", "P3R"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"]
+  P5: ["P5", "P5R", "P5S", "P5T"],
+  P5X: ["P5X"]
+
 };
 
-let activeFilters = ["P3", "P4", "P5"];
+let activeFilters = ["P3", "P4", "P5", "P5X"];
 let filteredSongs = [];
 let target = null;
 let attempts = 0;
@@ -75,6 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
   giveUpBtn.addEventListener("click", giveUp);
 
   initializeAutocomplete(textbar, musicTitles.sort((a, b) => a.localeCompare(b)));
+    setupDailyReset(); // 🕛 Auto-reset every midnight (Paris time)
+
 });
 
 
@@ -425,4 +429,23 @@ function revealNextLink({ prevHref = null, nextHref = null } = {}) {
   setTimeout(() => {
     container.scrollIntoView({ behavior: "smooth", block: "center" });
   }, 1500);
+}
+
+function setupDailyReset() {
+  const parisOffset = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
+  const parisNow = new Date(parisOffset);
+  const tomorrow = new Date(parisNow);
+  tomorrow.setDate(parisNow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+
+  const timeUntilMidnight = tomorrow.getTime() - parisNow.getTime();
+
+  console.log(`🕛 Next auto-reset in ${Math.round(timeUntilMidnight / 60000)} minutes`);
+
+  setTimeout(() => {
+    console.log("🔄 Auto-reset triggered at Paris midnight");
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+    else location.reload(); // fallback
+  }, timeUntilMidnight + 500);
 }

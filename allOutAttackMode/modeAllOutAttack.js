@@ -450,6 +450,8 @@ revealNextLink({
       updateGiveUpCounter();
     });
   });
+    setupDailyReset(); // 🕛 Redémarre chaque jour à minuit (heure de Paris)
+
 });
 
 function applyDarkModeStyles() {
@@ -583,4 +585,23 @@ function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
       nav.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 1500);
   }
+}
+
+function setupDailyReset() {
+  const parisOffset = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
+  const parisNow = new Date(parisOffset);
+  const tomorrow = new Date(parisNow);
+  tomorrow.setDate(parisNow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+
+  const timeUntilMidnight = tomorrow.getTime() - parisNow.getTime();
+
+  console.log(`🕛 Next auto-reset in ${Math.round(timeUntilMidnight / 1000 / 60)} minutes`);
+
+  setTimeout(() => {
+    console.log("🔄 Auto-reset triggered at Paris midnight");
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+    else location.reload(); // fallback si le bouton reset est absent
+  }, timeUntilMidnight + 500);
 }

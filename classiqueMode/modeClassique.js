@@ -544,9 +544,11 @@ revealNextLink({
   localStorage.setItem("daltonianMode", daltonianMode ? "enabled" : "disabled");
   document.getElementById("daltonianToggle").textContent = `Daltonian Mode: ${daltonianMode ? "ON" : "OFF"}`;
   location.reload(); // ⬅ recharge la page pour que le mode s'applique immédiatement
+  
+  // 🔁 Lancer le reset automatique chaque jour à minuit (heure de Paris)
 });
 
-
+  setupDailyReset(); // ← ajoute ceci ici
 
 });
 
@@ -690,4 +692,24 @@ function revealNextLink({ nextHref = "", prevHref = null }) {
       nav.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 1500);
   }
+}
+
+
+function setupDailyReset() {
+  const parisOffset = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
+  const parisNow = new Date(parisOffset);
+  const tomorrow = new Date(parisNow);
+  tomorrow.setDate(parisNow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+
+  const timeUntilMidnight = tomorrow.getTime() - parisNow.getTime();
+
+  console.log(`🕛 Next auto-reset in ${Math.floor(timeUntilMidnight / 1000 / 60)} minutes`);
+
+  setTimeout(() => {
+    console.log("🔁 Auto-reset triggered at Paris midnight");
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+    else location.reload(); // fallback
+  }, timeUntilMidnight + 500); // +500ms pour être sûr qu’on est bien après minuit
 }

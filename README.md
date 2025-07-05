@@ -105,7 +105,7 @@ Everything is handcrafted — just like a Velvet Room contract ✨
 
 ## 🛡️ License
 
-This project is licensed under the [MIT License](./LICENSE).
+This project is licensed under the [MIT License](./LICENSE.txt).
 
 All original code and logic are © 2025 Hamza & L2GENDAIRE.  
 You are free to use, modify, and redistribute it for non-commercial purposes as long as proper credit is given.

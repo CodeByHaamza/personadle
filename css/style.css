@@ -1144,8 +1144,12 @@ body {
 }
 
 .filter-p5x {
-  background-color: #afafafc7; /* Rouge Persona 5 */
+  background: linear-gradient(145deg, #1a1a1a, #8b0000); /* Dégradé noir vers rouge foncé */
+  color: #ffffff;
+  border: 1px solid #ff003c; /* Rouge vif pour accent */
+  box-shadow: 0 0 6px #ff003c80; /* Glow léger rouge néon */
 }
+
 
 /* Modale - verrouille le scroll en arrière-plan */
 body.modal-open {
@@ -1347,17 +1351,6 @@ input:checked + .slider.red { background-color: #FF4136; }
   gap: 10px;
 }
 
-@media screen and (min-width: 600px) {
-  .hint-block,
-  .giveup-block {
-    flex-direction: row;
-  }
-
-  .hint-block .counter,
-  .giveup-block .counter {
-    align-self: center;
-  }
-}
 
 /* ========== Alignement Textbar avec Replay à gauche et Submit à droite ========== */
 .input-wrapper {
@@ -1836,22 +1829,23 @@ footer p {
   }
 }
 #daltonianToggle {
-  position: absolute; /* Change ici */
+  position: fixed; /* <-- C'est ça le plus important */
   top: 60px;
   right: 12px;
 
   background-color: #1f1f1f;
   color: #f0f0f0;
   border: 2px solid #4caf50;
-  padding: 6px 20px; /* Moins haut */
+  padding: 6px 20px;
   font-weight: bold;
-  font-size: 13px;   /* Légèrement réduit */
+  font-size: 13px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 
-  z-index: 10; /* S'assurer qu'il passe devant */
+  z-index: 10;
 }
+
 
 
 #daltonianToggle:hover {
@@ -2249,4 +2243,345 @@ body.darkmode #socialLinks a img {
 body.darkmode #socialLinks a:hover {
   background-color: #333;
   border-color: #888;
+}
+.daily-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #111;
+  color: white;
+  padding: 10px 20px;
+  border: 2px solid #ff0040;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.3s, color 0.3s;
+}
+
+body:not(.darkmode) .daily-btn {
+  background-color: #f0f0f0;
+  color: #111;
+  border: 2px solid #cc0033;
+}
+
+.daily-modal {
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.daily-modal-content {
+  margin: 10% auto;
+  padding: 20px;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 12px;
+  text-align: center;
+  border: 3px solid;
+  transition: all 0.3s;
+}
+
+/* 🌑 Mode sombre */
+body.darkmode .daily-modal-content {
+  background-color: #1c1c1c;
+  color: white;
+  border-color: #ff0040;
+}
+
+/* ☀️ Mode clair */
+body:not(.darkmode) .daily-modal-content {
+  background-color: #ffffff;
+  color: #111;
+  border-color: #cc0033;
+}
+
+.daily-modal .close {
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+  color: inherit;
+}
+
+#dailyCountdown {
+  font-family: monospace;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #00cc66;
+}
+
+/* === RESPONSIVE FIX MOBILE & TABLETTE - VERSION CLASSIQUE AMÉLIORÉE === */
+
+body {
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tap targets */
+button, .link-wrapper, .persona-btn {
+  min-height: 48px;
+  padding: 12px 20px;
+}
+
+#textbar {
+  font-size: 17px;
+}
+
+/* Écrans ≤ 768px */
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll !important;
+    background-size: cover !important;
+    background-position: center top !important;
+    padding: 10px;
+  }
+
+  body::before {
+    background-attachment: scroll !important;
+    background-size: cover;
+    background-position: center top;
+  }
+
+  #imgHomePage {
+    width: 90%;
+    max-width: 400px;
+    margin: 10px auto;
+    display: block;
+  }
+
+  .gamemode-title {
+    font-size: 24px;
+    padding: 10px 20px;
+    margin: 20px auto;
+    max-width: 95%;
+  }
+
+  .input-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  #textbar {
+    width: 80%;
+    max-width: 300px;
+    margin-right: 0;
+  }
+
+  #guessButton, #resetButton, #hintButton, #giveUpButton {
+    width: 80%;
+    max-width: 250px;
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+
+  #resetButton {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+
+  .guess-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px 10px;
+    width: 95%;
+    max-width: 350px;
+    margin: auto;
+  }
+
+  .category-row {
+    display: none;
+  }
+
+  .guess-image {
+    width: 120px;
+    height: 120px;
+    align-self: center;
+    margin-bottom: 10px;
+  }
+
+  .guess-cell {
+    width: 100%;
+    height: 70px;
+    font-size: 12px;
+    padding: 5px;
+    position: relative;
+  }
+
+  .guess-cell::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    font-size: 10px;
+    opacity: 0.8;
+  }
+
+  .autocomplete-items {
+    width: 90%;
+    max-width: 320px;
+    max-height: 250px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .list-options {
+    padding: 10px 12px;
+    font-size: 15px;
+    min-height: 60px;
+  }
+
+  .list-options img {
+    width: 60px;
+    height: 60px;
+    margin-right: 10px;
+  }
+
+  .list-options span {
+    max-width: 200px;
+    font-size: 14px;
+  }
+
+  .emoji-hint-zone {
+    padding: 20px 15px;
+    margin: 20px auto;
+    max-width: 95%;
+  }
+
+  .emoji-unit {
+    font-size: 2.5rem;
+    margin: 0 6px;
+  }
+
+  .emoji-unit:hover {
+    transform: scale(1.15);
+  }
+
+  #quoteHint {
+    max-width: 95%;
+    margin: 15px auto;
+    padding: 10px 15px;
+    font-size: 15px;
+  }
+
+  .victory-box {
+    max-width: 95%;
+    margin: 20px auto;
+    padding: 15px;
+  }
+
+  .victory-box img {
+    width: 120px;
+  }
+
+  .win-message {
+    font-size: 1.2rem;
+  }
+
+  .confetti-emoji {
+    font-size: 1.8rem;
+  }
+
+  .gamemode-button:hover img {
+    transform: scale(1.01);
+  }
+
+  /* Chevauchement fixe : boutons flottants */
+  .darkmode-toggle {
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+  }
+
+  #daltonianToggle {
+    top: 60px;
+    right: 10px;
+    z-index: 1000;
+  }
+
+  .filter-buttons, .filter-switches {
+    top: 110px;
+    left: 10px;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1000;
+  }
+
+  .daily-btn {
+    bottom: 20px;
+    right: 12px;
+    font-size: 14px;
+    padding: 8px 14px;
+    z-index: 1000;
+  }
+}
+
+/* Écrans < 480px */
+@media (max-width: 480px) {
+  body { padding: 5px; }
+
+  #title { font-size: 20px; }
+
+  .gamemode-title { font-size: 20px; padding: 8px 15px; }
+
+  .guess-cell {
+    height: 60px;
+    font-size: 11px;
+  }
+
+  .guess-cell::before {
+    font-size: 9px;
+  }
+
+  .guess-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .emoji-unit {
+    font-size: 2rem;
+    margin: 0 4px;
+  }
+
+  .victory-box img {
+    width: 100px;
+  }
+
+  .win-message {
+    font-size: 1.1rem;
+  }
+}
+
+/* Accessibilité */
+@media (hover: none) and (pointer: coarse) {
+  .gamemode-button,
+  #guessButton,
+  #hintButton,
+  #resetButton,
+  #giveUpButton {
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  #imgHomePage:hover,
+  .gamemode-button:hover img,
+  .emoji-unit:hover {
+    transform: none;
+  }
 }

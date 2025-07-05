@@ -83,7 +83,7 @@
   <a href="https://discord.gg/wpMdGGDp3y" target="_blank" title="Discord">
     <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
   </a>
-  <a href="#" target="_blank" title="kofi">
+  <a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
     <img src="./assets/buttons/kofi.svg" alt="Twitter" width="30" height="30" />
   </a>
 </div>
@@ -178,6 +178,50 @@
       legalModal.style.display = "none";
     }
   };
+</script>
+
+<!-- 🕛 Daily Reset Button + Modal -->
+<button id="dailyInfoBtn" class="daily-btn">🕛 Daily Reset Info</button>
+
+<div id="dailyModal" class="daily-modal" style="display: none;">
+  <div class="daily-modal-content">
+    <span id="closeDaily" class="close">&times;</span>
+    <h2>🕛 Daily Reset</h2>
+    <p>
+      Each day at midnight (Paris time), a new challenge is available in each mode.<br>
+      Your progress resets, and you can try again with a brand-new Persona, song, or challenge!
+    </p>
+    <p class="countdown-text">Next reset in: <span id="dailyCountdown">--:--:--:--</span></p>
+  </div>
+</div>
+
+<script>
+  const dailyModal = document.getElementById("dailyModal");
+  const dailyBtn = document.getElementById("dailyInfoBtn");
+  const closeDaily = document.getElementById("closeDaily");
+  const countdownEl = document.getElementById("dailyCountdown");
+
+  dailyBtn.onclick = () => dailyModal.style.display = "block";
+  closeDaily.onclick = () => dailyModal.style.display = "none";
+  window.onclick = (e) => { if (e.target === dailyModal) dailyModal.style.display = "none"; };
+
+  function updateCountdown() {
+    const now = new Date();
+    const parisTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+    const nextMidnight = new Date(parisTime);
+    nextMidnight.setHours(24, 0, 0, 0);
+    const diff = nextMidnight - parisTime;
+
+    const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+    const ms = String(Math.floor((diff % 1000) / 10)).padStart(2, '0');
+
+    countdownEl.textContent = `${h}:${m}:${s}:${ms}`;
+    requestAnimationFrame(updateCountdown);
+  }
+
+  updateCountdown();
 </script>
 
 

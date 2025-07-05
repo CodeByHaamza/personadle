@@ -9,6 +9,15 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=Fd6MW-XhO5I"
   },
   {
+    titre: "Ambitions and Visions",
+    fichier: "Ambitions_and_Visions.mp3",
+    opus: ["P5X"],
+    image: "P5X.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=djfP0FKXhqw"
+  },
+  {
     titre: "Backside Of The TV",
     fichier: "Backside_Of_The_TV.mp3",
     opus: ["P4"],
@@ -25,7 +34,16 @@ export const songs = [
     vocalist: "Lyn Inaizumi",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=woz5qvDdMRM"
+  },{
+    titre: "Brand New Days",
+    fichier: "Brand_new_days.mp3",
+    opus: ["P3FES"],
+    image: "P3FES.webp",
+    vocalist: "Yumi Kawamura ",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=bE3Z4WoiFwc"
   },
+  
   {
     titre: "Burn My Dread",
     fichier: "Burn_My_Dread.mp3",
@@ -63,7 +81,7 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=j9Sn1nFGQQ8"
   },
   {
-    titre: "Dance !",
+    titre: "Dance!",
     fichier: "Dance_!.mp3",
     opus: ["P4D"],
     image: "P4D.webp",
@@ -79,6 +97,15 @@ export const songs = [
     vocalist: "Lyn Inaizumi",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=RZB8WMuf2aQ"
+  },
+  {
+    titre: "Deep Breath Deep Breath",
+    fichier: "Deep_breath.mp3",
+    opus: ["P3R"],
+    image: "P3R.webp",
+    vocalist: "Yumi Kawamura , Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=I0LTJ4TrMNw"
   },
   {
     titre: "Disconnected",
@@ -160,6 +187,15 @@ export const songs = [
     vocalist: "Lyn Inaizumi , Benjamin Franklin",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=ZNGqBDRJgvo"
+  },
+  {
+    titre: "Layer Cake",
+    fichier: "Layer_Cake.mp3",
+    opus: ["P5"],
+    image: "P5.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=C4nTv-pVk0k"
   },
   {
     titre: "Life Will Change",
@@ -252,6 +288,15 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=c1OZfkbhLhM"
   },
   {
+    titre: "Shadow Loop",
+    fichier: "Shadow_Loop.mp3",
+    opus: ["P5X"],
+    image: "P5X.webp",
+    vocalist: "Lyn Inaizumi ",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=qs37TC3B774"
+  },
+  {
     titre: "Shadow World",
     fichier: "Shadow_World.mp3",
     opus: ["P4G"],
@@ -278,6 +323,16 @@ export const songs = [
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=BhaNZ-4HOJ0"
   },
+  {
+    titre: "Soul Phrase",
+    fichier: "Soul_phrase.mp3",
+    opus: ["P3P"],
+    image: "P3P.webp",
+    vocalist: "Shuhei Kita",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=4iEsjG2iO5s"
+  },
+  
   {
     titre: "specialist",
     fichier: "specialist.mp3",
@@ -340,6 +395,15 @@ export const songs = [
     vocalist: "Lyn Inaizumi , Benjamin Franklin",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=azNG-AU0eGg"
+  },
+  {
+    titre: "Wake Up Your Hero",
+    fichier: "Wake_up_your_hero.mp3",
+    opus: ["P5X"],
+    image: "P5X.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=kaWOEiUf_rA"
   },
   {
     titre: "When the Moon Reaches for the Stars",
