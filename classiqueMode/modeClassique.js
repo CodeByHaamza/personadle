@@ -2,6 +2,14 @@ import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
 
+import { updateProfileStats } from "../profile/profileStats.js"; // 🔁 Ajoute cette ligne si ce n’est pas déjà fait
+
+const modeName = "Classic";
+const todayKey = `statsLogged_${modeName}_${new Date().toISOString().split("T")[0]}`;
+let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
+let sessionStartTime = Date.now();
+
+
 let personas = [...originalPersonas];
 let gameOver = false;
 
@@ -233,6 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
   textbar.disabled = true;
   guessButton.disabled = true;
   giveUpButton.disabled = true;
+ 
 revealNextLink({
   nextHref: "../emojiMode/emojiMode.html"
 });
@@ -270,6 +279,10 @@ revealNextLink({
   });
 
   resetButton.addEventListener("click", () => {
+    localStorage.removeItem(todayKey); // ➕ Autorise à nouveau l’enregistrement stats
+statsAlreadyLogged = false;        // Remet le flag local à zéro
+sessionStartTime = Date.now();     // Redémarre la session
+
     localStorage.removeItem("target");
     localStorage.removeItem("attempts");
     localStorage.removeItem("guessHistory");
@@ -330,6 +343,15 @@ if (nav) {
       history.push(target.nom);
       localStorage.setItem("guessHistory", JSON.stringify(history));
     }
+    if (!statsAlreadyLogged) {
+  updateProfileStats({
+    result: "giveup",
+    mode: modeName,
+    sessionDuration: Date.now() - sessionStartTime
+  });
+  localStorage.setItem(todayKey, "true");
+}
+
     revealNextLink({
   nextHref: "../emojiMode/emojiMode.html"
 });
@@ -507,6 +529,16 @@ setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
       guessButton.disabled = true;
       giveUpButton.disabled = true;
       gameOver = true;
+      if (localStorage.getItem(todayKey) !== "true") {
+  updateProfileStats({
+    result: "win",
+    mode: modeName,
+    sessionDuration: Date.now() - sessionStartTime
+  });
+  localStorage.setItem(todayKey, "true");
+
+}
+
       showConfettiExplosion();
 revealNextLink({
   nextHref: "../emojiMode/emojiMode.html"

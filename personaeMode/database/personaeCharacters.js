@@ -512,4 +512,181 @@ export const personaeCharacters = [
     user: ["Sophia"],
     opus: ["P5S"]
   },
+  {
+  persona: "Jánošík",
+  image: "Janosik",
+  user: ["Nagisa Kamishiro"],
+  opus: ["P5X"]
+},
+{
+  persona: "Rob Roy",
+  image: "Rob_Roy",
+  user: ["Lufel"],
+  opus: ["P5X"]
+},
+{
+  persona: "Awilda",
+  image: "Awilda",
+  user: ["Motoha Arai"],
+  opus: ["P5X"]
+},
+{
+  persona: "Mandrin",
+  image: "Mandrin",
+  user: ["Shun Kano"],
+  opus: ["P5X"]
+},
+{
+  persona: "Chiyome",
+  image: "Chiyome",
+  user: ["Riko Tanemura"],
+  opus: ["P5X"]
+},
+{
+  persona: "Ghino",
+  image: "Ghino",
+  user: ["Shoki Ikenami"],
+  opus: ["P5X"]
+},
+{
+  persona: "Leucothea",
+  image: "Leucothea",
+  user: ["Seiji Shiratori"],
+  opus: ["P5X"]
+},
+{
+  persona: "Terpsichore",
+  image: "Terpsichore",
+  user: ["Kotone Montagne"],
+  opus: ["P5X"]
+},
+{
+  persona: "Styx",
+  image: "Styx",
+  user: ["Yukimi Fujikawa"],
+  opus: ["P5X"]
+},
+{
+  persona: "Prosymna",
+  image: "Prosymna",
+  user: ["Tomoko Noge"],
+  opus: ["P5X"]
+},
+{
+  persona: "Erytheia",
+  image: "Erytheia",
+  user: ["Leo Kamiyama"],
+  opus: ["P5X"]
+},
+{
+  persona: "Meng Po",
+  image: "Meng_Po",
+  user: ["Yaoling Li"],
+  opus: ["P5X"]
+},
+{
+  persona: "Syke",
+  image: "Syke",
+  user: ["Kiyoshi Kurotani"],
+  opus: ["P5X"]
+},
+{
+  persona: "Cleodora",
+  image: "Cleodora",
+  user: ["Kayo Tomiyama"],
+  opus: ["P5X"]
+},
+{
+  persona: "Nemertes",
+  image: "Nemertes",
+  user: ["Miyu Sahara"],
+  opus: ["P5X"]
+},
+{
+  persona: "Gorgyra",
+  image: "Gorgyra",
+  user: ["Toshiya Sumi"],
+  opus: ["P5X"]
+},
+{
+  persona: "Daeira",
+  image: "Daeira",
+  user: ["Haruna Nishimori"],
+  opus: ["P5X"]
+},
+{
+  persona: "Apseudes",
+  image: "Apseudes",
+  user: ["YUI"],
+  opus: ["P5X"]
+},
+{
+  persona: "Thalia",
+  image: "Thalia",
+  user: ["Minami Miyashita"],
+  opus: ["P5X"]
+},
+{
+  persona: "Ampelos",
+  image: "Ampelos",
+  user: ["Chizuko Nagao"],
+  opus: ["P5X"]
+},
+{
+  persona: "Urania",
+  image: "Urania",
+  user: ["Yumi Shiina"],
+  opus: ["P5X"]
+},
+{
+  persona: "Calliope",
+  image: "Calliope",
+  user: ["Ayaka Sakai"],
+  opus: ["P5X"]
+},
+{
+  persona: "Harpyia",
+  image: "Harpyia",
+  user: ["Kira Kitazato"],
+  opus: ["P5X"]
+},
+{
+  persona: "Amalthea",
+  image: "Amalthea",
+  user: ["Masaki Ashiya"],
+  opus: ["P5X"]
+},
+{
+  persona: "Aura",
+  image: "Aura",
+  user: ["Runa Dogenzaka"],
+  opus: ["P5X"]
+},
+{
+  persona: "Minthe",
+  image: "Minthe",
+  user: ["Mio Natsukawa"],
+  opus: ["P5X"]
+},
+{
+  persona: "Pitys",
+  image: "Pitys",
+  user: ["Mayumi Hashimoto"],
+  opus: ["P5X"]
+},
+{
+  persona: "Euterpe",
+  image: "Euterpe",
+  user: ["Manaka Nagao"],
+  opus: ["P5X"]
+},
+
+{
+  persona: "Thelxiepeia",
+  image: "Thelxiepeia",
+  user: ["Ichigo Shikano"],
+  opus: ["P5X"]
+},
+
+
 ];

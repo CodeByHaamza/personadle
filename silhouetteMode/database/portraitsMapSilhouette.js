@@ -38,7 +38,7 @@ export const portraitsMapSilhouette = {
   "Labrys": "Labrys",
   "Lavenza": "Lavenza",
   "Maiko": "Maiko",
-  "Makoto Nijima": "Makoto",
+"Makoto Niijima": "Makoto",
   "Margaret": "Margaret",
   "Marie": "Marie",
   "Maya Amano": "Maya",
@@ -86,5 +86,47 @@ export const portraitsMapSilhouette = {
   "Yumi Ozawa": "Yumi",
   "Yusuke Kitagawa": "Yusuke",
   "Makoto Yuki": "Yuki",
-  "Shuji Ikutsuki": "Ikutsuki"
+  "Shuji Ikutsuki": "Ikutsuki",
+  "Ayaka Sakai": "Ayaka",
+"Chizuko Nagao": "Chizuko", 
+"Ichigo Shikano": "Ichigo",
+"Kayo Tomiyama": "Kayo",
+"Kira Kitazato": "Kira",
+"Kiyoshi Kurotani": "Kiyoshi",
+"Kotone Montagne": "Montagne",
+"Leo Kamiyama": "Reo",
+"Lufel": "Lufel",
+"Manaka Nagao": "Manaka",
+"Masaki Ashiya": "Masaki",
+"Mayumi Hashimoto": "Mayumi",
+"Merope": "Merope",
+"Minami Miyashita": "Minami",
+"Mio Natsukawa": "Mio",
+"Miyu Sahara": "Miyu",
+"Nagisa Kamishiro": "Nagisa",
+"Riko Tanemura": "Riko",
+"Runa Dogenzaka": "Runa",
+"Seiji Shiratori": "Seiji",
+"Shoki Ikenami": "Shoki",
+"Shun Kano": "Shun",
+"Tomoko Noge": "Tomoko",
+"Toshiya Sumi": "Toshiya",
+"Yaoling Li": "Yaoling",
+"YUI": "YUI",
+"Yukimi Fujikawa": "Yukimi",
+"Yumi Shiina": "Yumi_S",
+"Aigis": "Aigis",
+"Akihiko Sanada": "Akihiko",
+"Sophia": "Sophia",
+"Zenkichi Hasegawa": "Zenkichi",
+"Motoha Arai": "Arai", // déjà présent mais sous "Arai", à renommer si tu veux l'uniformiser
+"Haruna Nishimori": "Haruna",
+"Maiko Oohashi": "Maiko",
+"Maya": "Maya", // seulement si le fichier s'appelle Maya_silhouette.webp
+
+
+
+
+
+  
 };

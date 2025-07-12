@@ -55,5 +55,8 @@ export const portraitsMap = {
    "Lisa Silverman": "Lisa",
    "Maya Amano": "Maya_A",
    "Tatsuya Suou": "Tatsuya",
-
+   "Motoha Arai": "Arai",
+  "Kotone Montagne": "Montagne",
+  "Leo Kamiyama": "Reo",
+  "Yumi Shiina": "Yumi_S",
 };

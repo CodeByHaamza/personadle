@@ -89,7 +89,40 @@ export const silhouetteCharacters = [
   { nom: "Yusuke Kitagawa", image: "Yusuke_silhouette", opus: ["P5"] },
   { nom: "Sophia", image: "Sophia_silhouette", opus: ["P5S"] },
   { nom: "Zenkichi Hasegawa", image: "Zenkichi_silhouette", opus: ["P5S"] },
-  { nom: "Shuji Ikutsuki", image: "Ikutsuki_silhouette.webp", opus: ["P3"] }
+  { nom: "Shuji Ikutsuki", image: "Ikutsuki_silhouette", opus: ["P3"] },
+  { nom: "Motoha Arai", image: "Arai_silhouette", opus: ["P5X"] },
+{ nom: "Ayaka Sakai", image: "Ayaka_silhouette", opus: ["P5X"] },
+{ nom: "Haruna Nishimori", image: "Haruna_silhouette", opus: ["P5X"] },
+{ nom: "Ichigo Shikano", image: "Ichigo_silhouette", opus: ["P5X"] },
+{ nom: "Kayo Tomiyama", image: "Kayo_silhouette", opus: ["P5X"] },
+{ nom: "Kira Kitazato", image: "Kira_silhouette", opus: ["P5X"] },
+{ nom: "Kiyoshi Kurotani", image: "Kiyoshi_silhouette", opus: ["P5X"] },
+{ nom: "Leo Kamiyama", image: "Leo_silhouette", opus: ["P5X"] },
+{ nom: "Lufel", image: "Lufel_silhouette", opus: ["P5X"] },
+{ nom: "Manaka Nagao", image: "Manaka_silhouette", opus: ["P5X"] },
+{ nom: "Masaki Ashiya", image: "Masaki_silhouette", opus: ["P5X"] },
+{ nom: "Mayumi Hashimoto", image: "Mayumi_silhouette", opus: ["P5X"] },
+{ nom: "Merope", image: "Merope_silhouette", opus: ["P5X"] },
+{ nom: "Minami Miyashita", image: "Minami_silhouette", opus: ["P5X"] },
+{ nom: "Mio Natsukawa", image: "Mio_silhouette", opus: ["P5X"] },
+{ nom: "Miyu Sahara", image: "Miyu_silhouette", opus: ["P5X"] },
+{ nom: "Kotone Montagne", image: "Montagne_silhouette", opus: ["P5X"] },
+{ nom: "Nagisa Kamishiro", image: "Nagisa_silhouette", opus: ["P5X"] },
+{ nom: "Riko Tanemura", image: "Riko_silhouette", opus: ["P5X"] },
+{ nom: "Runa Dogenzaka", image: "Runa_silhouette", opus: ["P5X"] },
+{ nom: "Seiji Shiratori", image: "Seiji_silhouette", opus: ["P5X"] },
+{ nom: "Shoki Ikenami", image: "Shoki_silhouette", opus: ["P5X"] },
+{ nom: "Shun Kano", image: "Shun_silhouette", opus: ["P5X"] },
+{ nom: "Tomoko Noge", image: "Tomoko_silhouette", opus: ["P5X"] },
+{ nom: "Toshiya Sumi", image: "Toshiya_silhouette", opus: ["P5X"] },
+{ nom: "Yaoling Li", image: "Yaoling_silhouette", opus: ["P5X"] },
+{ nom: "YUI", image: "YUI_silhouette", opus: ["P5X"] },
+{ nom: "Yukimi Fujikawa", image: "Yukimi_silhouette", opus: ["P5X"] },
+{ nom: "Yumi Shiina", image: "Yumi_S_silhouette", opus: ["P5X"] },
+{ nom: "Chizuko Nagao", image: "Chizuko_silhouette", opus: ["P5X"] },
+
+
+  
 
 
 

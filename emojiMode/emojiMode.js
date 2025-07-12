@@ -1,6 +1,9 @@
 import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
+import { updateProfileStats } from "../profile/profileStats.js";
+
+
 
 // === Filtres par opus ===
 const validOpus = {
@@ -14,6 +17,11 @@ const validOpus = {
 let activeOpus = ["P1", "P2", "P3", "P4", "P5"];
 let personas = [...originalPersonas];
 let gameOver = false;
+const modeName = "Emoji";
+const todayKey = `statsLogged_${modeName}_${new Date().toISOString().split("T")[0]}`;
+let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
+let sessionStartTime = Date.now();
+
 let attempts = 0;
 let target = null;
 
@@ -224,6 +232,17 @@ revealNextLink({
   nextHref: "../allOutAttackMode/allOutAttack.html"
 });
 
+if (!statsAlreadyLogged) {
+  updateProfileStats({
+    result: forceReveal ? "giveup" : "win",
+    mode: modeName,
+    sessionTime: Date.now() - sessionStartTime
+  });
+  localStorage.setItem(todayKey, "true");
+  statsAlreadyLogged = true;
+}
+
+
     textbar.disabled = true;
     document.getElementById("guessButton").disabled = true;
     document.getElementById("giveUpButton").disabled = true;
@@ -248,6 +267,10 @@ function enableGiveUpButton() {
 }
 
 function resetGame() {
+  localStorage.removeItem(todayKey);
+statsAlreadyLogged = false;
+sessionStartTime = Date.now();
+
   const displayZone = document.getElementById("emojiDisplay");
   const winMessage = document.getElementById("winMessage");
   const textbar = document.getElementById("textbar");

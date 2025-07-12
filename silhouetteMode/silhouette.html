@@ -21,6 +21,7 @@
     <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
     <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
     <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
+    <button class="filter-btn filter-p5x active" data-opus="P5X">P5X</button>
   </div>
 
   <!-- Zone principale -->
@@ -50,40 +51,60 @@
     </div>
   </div>
 
-  <!-- Modal règles -->
-  <div id="rulesModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Silhouette Mode Rules</h2>
-      <p id="rulesText">
-        <strong>🎯 Goal:</strong><br>
-        Guess the Persona character based on their <strong>black silhouette</strong>.
-        <hr class="separator" />
-        <strong>👤 Gameplay:</strong>
-        <ul>
-          <li>You start with a <strong>zoomed silhouette</strong>.</li>
-          <li>❌ Each incorrect guess will <strong>zoom out the image</strong>.</li>
-          <li>✅ If you guess correctly, the real portrait is revealed.</li>
-        </ul>
-        <hr class="separator" />
-        <strong>🎮 Included games:</strong>
-        <ul>
-          <li>Characters from <strong>Persona 3</strong>, <strong>4</strong> and <strong>5</strong>.</li>
-        </ul>
-        <hr class="separator" />
-        <strong>📉 Give Up option:</strong>
-        <ul>
-          <li>After <strong>3 failed attempts</strong>, the Give Up button activates.</li>
-        </ul>
-        <hr class="separator" />
-        <em>Focus on the pose, the hairstyle, and go with your intuition 🕵️</em>
+<!-- Modal règles -->
+<div id="rulesModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>🕶️ Silhouette Mode — How to Play</h2>
+    <p id="rulesText">
+      <strong>🎯 Goal:</strong><br>
+      A shadowy figure stands before you...<br>
+      Can you identify the Persona character just from their <strong>black silhouette</strong>?
+      <br><br>
+
+      <hr class="separator" />
+
+      <strong>👤 How it works:</strong>
+      <ul>
+        <li>🔍 The game starts with a <strong>heavily zoomed-in silhouette</strong> of a character.</li>
+        <li>❌ Every wrong guess <strong>zooms the image out</strong>, revealing more of the outline.</li>
+        <li>✅ Find the right name, and the character’s full portrait is revealed!</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>💡 Tips:</strong>
+      <ul>
+        <li>🧍 Pay attention to the silhouette’s <strong>pose, hairstyle, weapon, or accessories</strong>.</li>
+        <li>👓 Some characters have distinct stances or iconic features — spot them!</li>
+        <li>🎮 Use your knowledge from Persona 3, 4, and 5 (plus spin-offs).</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>📉 Give Up Mechanic:</strong>
+      <ul>
+        <li>🆘 The <strong>Give Up</strong> button unlocks after <strong>3 failed attempts</strong>.</li>
+        <li>🙈 You’ll see the answer — but it counts as a loss!</li>
+      </ul>
+
+      <hr class="separator" />
+
+      <strong>🎮 Games Included:</strong>
+      <p>
+        Characters come from <strong>Persona 3</strong>, <strong>Persona 4</strong>,  <strong>Persona 5</strong> and <strong>Persona 5 The Phantom X</strong>  including related spin-offs. Use the filter buttons to narrow it down.
       </p>
-    </div>
+
+      <hr class="separator" />
+      <em>🧠 Observe the shadows, trust your instincts, and become the ultimate silhouette detective!</em>
+    </p>
   </div>
+</div>
 
   <!-- Image silhouette -->
-  <div class="silhouette-box">
-  <img id="silhouetteImage" alt="Silhouette" />
+ <div class="silhouette-box">
+    <img id="silhouetteImage" src="" alt="Silhouette">
+  </div>
 </div>
 
 

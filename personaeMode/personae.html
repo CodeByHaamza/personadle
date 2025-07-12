@@ -21,6 +21,7 @@
     <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
     <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
     <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
+    <button class="filter-btn filter-p5x active" data-opus="P5X">P5X</button>
   </div>
 
   <!-- Zone principale -->
@@ -51,43 +52,54 @@
   </div>
 
 <!-- Modal règles -->
-<div id="rulesModal" class="modal">
+<div id="rulesModal" class="modal" style="display: none;">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <h2>🎭 Personae Mode — How to Play</h2>
+    <h2>👥 Personae Mode — How to Play</h2>
     <p id="rulesText">
-      <strong>🎯 Objective:</strong><br>
-      A Persona is displayed on screen... <br>
-      Your mission? <strong>Identify its user!</strong><br><br>
+      <strong>🎯 Goal:</strong><br>
+      A mysterious Persona appears on screen...<br>
+      Your mission? <strong>Guess who it belongs to!</strong><br><br>
 
-      <strong>💡 Tips & Tricks:</strong>
+      <hr class="separator" />
+
+      <strong>🧠 How it works:</strong>
       <ul>
-        <li>Pay close attention to the Persona's design — it reflects the personality, style, or theme of its user.</li>
-        <li>Some Personas might belong to more than one character. Choose wisely!</li>
-        <li>Use your knowledge of the lore, visuals, and vibes from the Persona universe.</li>
+        <li>🖼️ A Persona is displayed in full glory — observe its design, motifs, and overall style.</li>
+        <li>👤 Enter the name of the character you believe is the rightful user of that Persona.</li>
+        <li>✅ If you’re correct, the result is revealed and counted as a win!</li>
       </ul>
 
       <hr class="separator" />
 
-      <strong>🎮 Games Included:</strong>
+      <strong>💡 Tips:</strong>
       <ul>
-        <li>Characters and Personae from <strong>Persona 3</strong>, <strong>Persona 4</strong>, and <strong>Persona 5</strong> (including spin-offs).</li>
+        <li>🎨 Persona designs often reflect their user's personality, backstory, or arcana.</li>
+        <li>🔄 Some Personae are shared by multiple characters — context is everything!</li>
+        <li>📖 Use your lore knowledge and visual intuition from Persona 3, 4, and 5 (and spin-offs).</li>
       </ul>
 
       <hr class="separator" />
 
       <strong>❌ Give Up Mechanic:</strong>
       <ul>
-        <li>Stuck? The <strong>Give Up</strong> button appears after <strong>3 incorrect guesses</strong>.</li>
-        <li>Use it wisely… or keep digging!</li>
+        <li>🔁 After <strong>3 failed attempts</strong>, the <strong>Give Up</strong> button becomes available.</li>
+        <li>🆘 Clicking it will reveal the correct character — but it will count as a loss.</li>
       </ul>
 
       <hr class="separator" />
 
-      <em>Use your <strong>memory</strong>, your <strong>intuition</strong>, and your <strong>passion for Persona</strong> to succeed!</em>
+      <strong>🎮 Games Included:</strong>
+      <p>
+        Features Personae from <strong>Persona 3</strong>, <strong>Persona 4</strong>, <strong>Persona 5</strong>, <strong>Persona 5 The Phantom X</strong> and their respective spin-offs. Use filter buttons (P3 / P4 / P5 / P5X) to customize your experience.
+      </p>
+
+      <hr class="separator" />
+      <em>🔍 Trust your insight, rely on your memory, and prove your Persona mastery!</em>
     </p>
   </div>
 </div>
+
 
   <!-- Image Persona -->
  <div class="persona-box">

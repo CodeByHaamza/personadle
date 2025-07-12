@@ -1275,6 +1275,338 @@ export const characters = [
   quote: "I may not be a hero, and I sure as hell don't deserve any awards... But at least I know what makes a person evil. Evil only cares about itself. It's the mark of a man who would bring another to ruin and dare not show remorse. I will never let people like that go free. And I'll give everything I have to bring them down!"
   },
   
+   // Persona 5 X
+    {
+        nom: "Nagisa Kamishiro",
+        genre: ["Male", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Jánošík",
+        emoji: ["🎭","🗡","⚫"],
+        quote: ""
+    } ,
+    {
+        nom: "Lufel",
+        genre: ["Male", "Animal"],
+        age: "Unknown",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Rob Roy",
+        emoji: ["👓","🔥","🦉"],
+        quote: "This is a new one, luck is on your side today."
+    },
+    {
+        nom: "Motoha Arai",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Awilda",
+        emoji: ["⚾","⚡","🏃‍♀️"],
+        quote: "With this power! I can send Kiuchi flying and avenge Tomoko... Get ready for a double play!"
+    },
+    {
+        nom: "Shun Kano",
+        genre: ["Male", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Mandrin",
+        emoji: ["🪓","🔵","🤠"],
+        quote: "Well now, I think I get the picture. This is a stick-up! Go, Mandrin!"
+    },
+    {
+        nom: "Riko Tanemura",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Chiyome",
+        emoji: ["🌂","👘","🎐"],
+        quote: ""
+        },
+    {
+        nom: "Shoki Ikenami",
+        genre: ["Male", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Ghino",
+        emoji: ["🗡","🎭","🤴"],
+        quote: "Grazie!"
+    },
+    {
+        nom: "Seiji Shiratori",
+        genre: ["Male", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Leucothea",
+        emoji: ["👔","⚫","🤺"],
+        quote: ""
+    },
+    {
+        nom: "Kotone Montagne",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Terpsichore",
+        emoji: ["💃","🏔","🧊"],
+        quote: "Merci!"
+    },
+    {
+        nom: "Yukimi Fujikawa",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Styx",
+        emoji: ["👘","🟣","👩‍💼"],
+        quote: ""
+    },
+    {
+        nom: "Tomoko Noge",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Prosymna",
+        emoji: ["⚾","🍳","🟣"],
+        quote: ""
+    },
+    {
+        nom: "Leo Kamiyama",
+        genre: ["Male", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Erytheia",
+        emoji: ["🤖","🟢","👨‍🎤"],
+        quote: ""
+    },
+    {
+        nom: "Yaoling Li",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Meng Po",
+        emoji: ["☕","🏮","🥘"],
+        quote: ""
+    },
+    {
+        nom: "Kiyoshi Kurotani",
+        genre: ["Male", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Syke",
+        emoji: ["🗡","⚪","👔"],
+        quote: ""
+    },
+    {
+        nom: "Kayo Tomiyama",
+        genre: ["Female", "Human"],
+        age: "40+",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Cleodora",
+        emoji: ["🍤","🤳","👱‍♀️"],
+        quote: ""
+    },
+    {
+        nom: "Miyu Sahara",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Nemertes",
+        emoji: ["🍟","🛥","👩‍🦳"],
+        quote: ""
+    },
+    {
+        nom: "Toshiya Sumi",
+        genre: ["Male", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Gorgyra",
+        emoji: ["🎩","🦯","⚫"],
+        quote: ""
+    },
+    {
+        nom: "Haruna Nishimori",
+        genre: ["Female", "Human"],
+        age: "< 15",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Daeira",
+        emoji: ["⚙","🟤","⛏"],
+        quote: ""
+    },
+    {
+        nom: "YUI",
+        genre: ["Female", "Artificial"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Apseudes",
+        emoji: ["👗","🤖","🔵"],
+        quote: ""
+    },
+    {
+        nom: "Minami Miyashita",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Thalia",
+        emoji: ["❤","🌿","👩‍⚕️"],
+        quote: ""
+    },
+    {
+        nom: "Chizuko Nagao",
+        genre: ["Female", "Human"],
+        age: "80+",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Ampelos",
+        emoji: ["🐟","🏴‍☠️","👵"],
+        quote: ""
+    },
+    {
+        nom: "Yumi Shiina",
+        genre: ["Female", "Human"],
+        age: "21-40",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Urania",
+        emoji: ["🌙","🟢","🧝‍♀️"],
+        quote: ""
+    },
+    {
+        nom: "Ayaka Sakai",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Calliope",
+        emoji: ["🐈","🎸","👩‍🎤"],
+        quote: ""
+    },
+    {
+        nom: "Kira Kitazato",
+        genre: ["Male", "Human"],
+        age: "21-40",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Harpyia",
+        emoji: ["💉","🐦","👨‍⚕️"],
+        quote: ""
+    },
+    {
+        nom: "Masaki Ashiya",
+        genre: ["Male", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Amalthea",
+        emoji: ["🗡","🟣","💐"],
+        quote: ""
+    },
+    {
+        nom: "Runa Dogenzaka",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Aura",
+        emoji: ["🍜","⚡","🐕"],
+        quote: ""
+    },
+    {
+        nom: "Mio Natsukawa",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Minthe",
+        emoji: ["💧","🐍","👩‍🚒"],
+        quote: ""
+    },
+    {
+        nom: "Mayumi Hashimoto",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Pitys",
+        emoji: ["📹","🚗","🏁"],
+        quote: ""
+    },
+    {
+        nom: "Manaka Nagao",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Euterpe",
+        emoji: ["👼","👩‍🎤","🦽"],
+        quote: ""
+    },
+    {
+        nom: "Ichigo Shikano",
+        genre: ["Female", "Human"],
+        age: "15-20",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "Thelxiepeia",
+        emoji: ["🖤","💀","😏"],
+        quote: ""
+    },
+        {
+        nom: "Merope",
+        genre: ["Female", "Velvet"],
+        age: "Unknown",
+        arcane: ["NONE"],
+        opus:["P5X"],
+        personaUser: true,
+        persona: "NONE",
+        emoji: ["✨","📖","👩‍🎤"],
+        quote: ""
+    },
+
 
   
   

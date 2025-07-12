@@ -1,21 +1,36 @@
 import { personas as originalPersonas } from "./database/personas_allOut.js";
 import { portraitsMap } from "./database/portraitsMap.js";
 import { aoaCharacters } from "./database/aoaCharacters.js";
+import { updateProfileStats } from "../profile/profileStats.js";
 
-let activeOpusFilters = ["P3", "P5"]; // filtres actifs
+
+let activeOpusFilters = ["P3", "P5","P5X"]; // filtres actifs
+let sessionStartTime = Date.now();
+
 
 const validOpus = {
   P3: ["P3"],
-  P5: ["P5"]
+  P5: ["P5"],
+  P5X: ["P5X"],
 };
 
+const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
+
+
 function getFilteredPersonas() {
-  return originalPersonas.filter(name => {
+  const filtered = originalPersonas.filter(name => {
     const entry = aoaCharacters.find(p => p.nom === name);
     if (!entry) return false;
     return entry.opus.some(opus => activeOpusFilters.includes(opus));
   });
+
+  if (filtered.length === 0) {
+    console.warn("⚠️ Aucun personnage filtré. activeOpusFilters =", activeOpusFilters);
+  }
+
+  return filtered;
 }
+
 
 let personas = getFilteredPersonas();
 let attempts = 0;
@@ -26,6 +41,11 @@ let lastFiveTargets = [];
 function getBetterRandomCharacter() {
   const filteredPool = personas.filter(name => !lastFiveTargets.includes(name));
   const pool = filteredPool.length > 0 ? filteredPool : [...personas];
+  if (pool.length === 0) {
+  alert("Aucun personnage disponible avec les filtres actuels.");
+  return null;
+}
+
 
   const chaosSeed = performance.now() + Date.now() * Math.random() * 999999;
   let hash = 0;
@@ -221,6 +241,16 @@ revealNextLink({
 
     gameOver = true;
     localStorage.setItem("aoaGameOver", "true");
+    if (!localStorage.getItem(todayKey)) {
+  const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+  updateProfileStats({
+    result: "win",
+    mode: "All Out Attack",
+    timeSpent
+  });
+  localStorage.setItem(todayKey, "1");
+}
+
 localStorage.setItem("aoaTarget", target);
 localStorage.setItem("aoaAttempts", attempts);
 
@@ -263,6 +293,16 @@ function giveUp() {
   showConfettiExplosion();
   disableInputs();
   gameOver = true;
+  if (!localStorage.getItem(todayKey)) {
+  const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+  updateProfileStats({
+    result: "giveup",
+    mode: "All Out Attack",
+    timeSpent
+  });
+  localStorage.setItem(todayKey, "1");
+}
+
   localStorage.setItem("aoaGameOver", "true");
 localStorage.setItem("aoaTarget", target);
 localStorage.setItem("aoaAttempts", attempts);
@@ -270,6 +310,10 @@ localStorage.setItem("aoaAttempts", attempts);
 }
 
 function resetGame(){
+  sessionStartTime = Date.now();
+  localStorage.removeItem(todayKey); // 👈 Permet d'enregistrer une nouvelle victoire/giveup dans la même journée
+
+
   const input = document.getElementById("textbar");
   const gifElement = document.getElementById("aoaGif");
   const wrongList = document.getElementById("wrongGuessList");
@@ -280,6 +324,10 @@ function resetGame(){
 
   personas = getFilteredPersonas();
   target = getBetterRandomCharacter();
+  const newTarget = getBetterRandomCharacter();
+if (!newTarget) return; // sécurité anti-erreur
+target = newTarget;
+
 
   const imageName = portraitsMap[target] || target.split(" ")[0];
   gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
@@ -605,3 +653,5 @@ function setupDailyReset() {
     else location.reload(); // fallback si le bouton reset est absent
   }, timeUntilMidnight + 500);
 }
+
+debugAllOutAttack(); //

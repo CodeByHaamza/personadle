@@ -32,5 +32,37 @@ export const portraitsMap = {
   "Black Mask ( Goro Akechi )": "Black_mask",
 
   // Velvet Room
-  "Caroline & Justine": "Caroline_and_Justine"
+  "Caroline & Justine": "Caroline_and_Justine",
+
+    // P5X
+  "Wonder ( Nagisa Kamishiro )": "Wonder",
+  "Closer ( Motoha Arai )": "Closer",
+  "Fleuret ( Ayaka Sakai )": "Fleuret",
+  "Leon ( Leo Kamiyama )": "Leon",
+  "Rin ( Yaoling Li )": "Rin",
+  "Wind ( Riko Tanemura )": "Wind",
+  "Soy ( Shun Kano )": "Soy",
+  "Moko ( Tomoko Noge )": "Moko",
+  "Sepia ( Toshiya Sumi )": "Sepia",
+  "Key ( Kiyoshi Kurotani )": "Key",
+  "Okyann ( Kayo Tomiyama )": "Okyann",
+  "Puppet ( Miyu Sahara )": "Puppet",
+  "Riddle ( Haruna Nishimori )": "Riddle",
+  "Yuki ( Yukimi Fujikawa )": "YukiX",
+  "Mont ( Kotone Montagne )": "Mont",
+  "Chord ( Ayaka Sakai )": "Chord",
+  "Messa ( Kira Kitazato )": "Messa",
+  "Cherish ( Masaki Ashiya )": "Cherish",
+  "Howler ( Runa Dogenzaka )": "Howler",
+  "Matoi ( Mio Natsukawa )": "Matoi",
+  "Turbo ( Mayumi Hashimoto )": "Turbo",
+  "Ange ( Manaka Nagao )": "Ange",
+  "Phoebe ( Yumi S. )": "Phoebe",
+  "Cattle ( Lufel )": "Cattle",
+  "Bui ( YUI )": "Bui",
+  "Marian ( Minami Miyashita )": "Marian",
+  "Vino ( Chizuko Nagao )": "Vino",
+  "Luce ( Shoki Ikenami )": "Luce",
+  "Berry ( Ichigo Shikano )": "Berry",
+
 };

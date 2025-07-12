@@ -28,5 +28,36 @@ export const aoaCharacters = [
 
   // === Velvet Room ===
   { nom: "Lavenza", gif: "Lavenza", opus: ["P5"] },
-  { nom: "Caroline & Justine", gif: "Caroline_and_Justine", opus: ["P5"] }
+  { nom: "Caroline & Justine", gif: "Caroline_and_Justine", opus: ["P5"] },
+
+   // === Persona 5 X ===
+  { nom: "Wonder ( Nagisa Kamishiro )", gif: "Wonder", opus: ["P5X"] },
+{ nom: "Chord ( Ayaka Sakai )", gif: "Chord", opus: ["P5X"] },
+  { nom: "Closer ( Motoha Arai )", gif: "Closer", opus: ["P5X"] },
+  { nom: "Fleuret ( Ayaka Sakai )", gif: "Fleuret", opus: ["P5X"] },
+  { nom: "Leon ( Leo Kamiyama )", gif: "Leon", opus: ["P5X"] },
+  { nom: "Rin ( Yaoling Li )", gif: "Rin", opus: ["P5X"] },
+  { nom: "Wind ( Riko Tanemura )", gif: "Wind", opus: ["P5X"] },
+  { nom: "Soy ( Shun Kano )", gif: "Soy", opus: ["P5X"] },
+  { nom: "Moko ( Tomoko Noge )", gif: "Moko", opus: ["P5X"] },
+  { nom: "Sepia ( Toshiya Sumi )", gif: "Sepia", opus: ["P5X"] },
+  { nom: "Key ( Kiyoshi Kurotani )", gif: "Key", opus: ["P5X"] },
+  { nom: "Okyann ( Kayo Tomiyama )", gif: "Okyann", opus: ["P5X"] },
+  { nom: "Puppet ( Miyu Sahara )", gif: "Puppet", opus: ["P5X"] },
+  { nom: "Riddle ( Haruna Nishimori )", gif: "Riddle", opus: ["P5X"] },
+  { nom: "Yuki ( Yukimi Fujikawa )", gif: "Yuki_X", opus: ["P5X"] },
+  { nom: "Mont ( Kotone Montagne )", gif: "Mont", opus: ["P5X"] },
+  { nom: "Messa ( Kira Kitazato )", gif: "Messa", opus: ["P5X"] },
+  { nom: "Cherish ( Masaki Ashiya )", gif: "Cherish", opus: ["P5X"] },
+  { nom: "Howler ( Runa Dogenzaka )", gif: "Howler", opus: ["P5X"] },
+  { nom: "Matoi ( Mio Natsukawa )", gif: "Matoi", opus: ["P5X"] },
+  { nom: "Turbo ( Mayumi Hashimoto )", gif: "Turbo", opus: ["P5X"] },
+  { nom: "Ange ( Manaka Nagao )", gif: "Ange", opus: ["P5X"] },
+  { nom: "Phoebe ( Yumi S. )", gif: "Phoebe", opus: ["P5X"] },
+  { nom: "Cattle ( Lufel )", gif: "Cattle", opus: ["P5X"] },
+  { nom: "Bui ( YUI )", gif: "Bui", opus: ["P5X"] },
+  { nom: "Marian ( Minami Miyashita )", gif: "Marian", opus: ["P5X"] },
+  { nom: "Vino ( Chizuko Nagao )", gif: "Vino", opus: ["P5X"] },
+  { nom: "Luce ( Shoki Ikenami )", gif: "Luce", opus: ["P5X"] },
+  { nom: "Berry ( Ichigo Shikano )", gif: "Berry", opus: ["P5X"] }
 ];

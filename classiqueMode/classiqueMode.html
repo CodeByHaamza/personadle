@@ -26,13 +26,15 @@
     <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
     <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
     <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
+        <button class="filter-btn filter-p5x active" data-opus="P5X">P5X</button>
+
   </div>
 
   <button id="daltonianToggle">Daltonian Mode: OFF</button>
 
   <!-- Fenêtre modale affichant les règles du mode classique -->
   <!-- Fenêtre modale affichant les règles du mode classique -->
-<div id="rulesModal" class="modal">
+<div id="rulesModal" class="modal" style="display: none;">
   <div class="modal-content">
     <span class="close">&times;</span>
     <h2>📋 Classic Mode Rules</h2>
@@ -94,7 +96,7 @@
 
   <strong>🛡️ Spoiler protection:</strong>
   <p>
-    🕹️ Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>, <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>)
+    🕹️ Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>, <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>)
     to limit characters by game.<br>
     👀 This helps avoid spoilers if you haven’t played them all!
   </p>
@@ -111,7 +113,7 @@
   <div class="personadle-box">
     <!-- Bouton image pour ouvrir la modale des règles (en haut à droite) -->
     <div style="position: absolute; top: -40px; right: -95px;">
-      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button">
         <div class="img-wrapper">
           <img class="normal" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
           <img class="active" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">

@@ -1,6 +1,8 @@
 // === IMPORTS ===
 import { songs as originalSongs } from "./database/songs.js";
 import { musicTitles } from "./database/musicTitles.js";
+import { updateProfileStats } from "../profile/profileStats.js";
+
 
 // === CONSTANTES ===
 const validOpus = {
@@ -17,6 +19,9 @@ let target = null;
 let attempts = 0;
 const maxAttempts = 3;
 let gameOver = false;
+let sessionStartTime = Date.now();
+const todayKey = `statsLogged_Music_${new Date().toISOString().split("T")[0]}`;
+
 let lastFiveTargets = [];
 let triedTitles = [];
 
@@ -113,6 +118,16 @@ function pickSong() {
 
 function showVictory(force = false) {
   gameOver = true;
+  if (!localStorage.getItem(todayKey)) {
+  const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+  updateProfileStats({
+    result: "win",
+    mode: "Music",
+    timeSpent
+  });
+  localStorage.setItem(todayKey, "1");
+}
+
   textbar.disabled = true;
   guessBtn.disabled = true;
   giveUpBtn.disabled = true;
@@ -198,6 +213,15 @@ function giveUp() {
   if (attempts < maxAttempts || gameOver) return;
   gameOver = true;
   localStorage.setItem("musicForceReveal", "true");
+  if (!localStorage.getItem(todayKey)) {
+  const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+  updateProfileStats({
+    result: "giveup",
+    mode: "Music",
+    timeSpent
+  });
+  localStorage.setItem(todayKey, "1");
+}
 
   showVictory(true);
 }
@@ -208,6 +232,9 @@ localStorage.removeItem("musicAttempts");
 localStorage.removeItem("musicGameOver");
 localStorage.removeItem("musicTriedTitles");
 localStorage.removeItem("musicForceReveal");
+sessionStartTime = Date.now();
+localStorage.removeItem(todayKey);
+
 
   gameOver = false;
   attempts = 0;

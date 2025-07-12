@@ -2,15 +2,32 @@
 import { silhouetteCharacters as originalCharacters } from "./database/silhouetteCharacters.js";
 import { portraitsMapSilhouette as portraitsMap } from "./database/portraitsMapSilhouette.js";
 import { personas } from "./database/persona.js";
+import { updateProfileStats } from "../profile/profileStats.js";
+
+const modeName = "Shadow";
+const todayKey = `statsLogged_${modeName}_${new Date().toISOString().split("T")[0]}`;
+let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
+let sessionStartTime = Date.now();
+
 
 // === CONSTANTES ===
 const validOpus = {
   P3: ["P3", "P3P", "P3FES"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"]
+  P5: ["P5", "P5R", "P5S", "P5T"],
+  P5X: ["P5X"],
 };
 
-let activeFilters = ["P3", "P4", "P5"];
+let activeFilters = ["P3", "P4", "P5", "P5X"]; // Filtres actifs par défaut
+const storedFilters = localStorage.getItem("silhouetteActiveFilters");
+if (storedFilters) {
+  try {
+    const parsed = JSON.parse(storedFilters);
+    if (Array.isArray(parsed)) activeFilters = parsed;
+  } catch (e) {
+    console.warn("⚠️ Erreur lecture filtre localStorage:", e);
+  }
+}
 let filteredCharacters = [];
 let target = null;
 let attempts = 0;
@@ -51,8 +68,19 @@ function applyZoom(zoomFactor) {
 // === RANDOM ===
 function pickCharacter() {
   filteredCharacters = getFilteredCharacters();
+  if (filteredCharacters.length === 0) {
+    console.error("❌ Aucun personnage disponible après filtrage. Vérifie les filtres actifs ou les données.");
+    return;
+  }
+
   const pool = filteredCharacters.filter(c => !lastFiveTargets.includes(c.nom));
   const choices = pool.length > 0 ? pool : [...filteredCharacters];
+
+  target = choices[Math.floor(Math.random() * choices.length)];
+  if (!target) {
+    console.error("❌ Aucune cible (target) définie. Vérifie le contenu de 'choices'.");
+    return;
+  }
 
   target = choices[Math.floor(Math.random() * choices.length)];
   lastFiveTargets.push(target.nom);
@@ -60,25 +88,29 @@ function pickCharacter() {
 
   currentZoom = 1.8;
 
-  // Avant chargement, applique zoom et cache l'image sans transition
+  // Cache l'image pendant le chargement
   silhouetteImg.style.visibility = "hidden";
   silhouetteImg.style.transition = "none";
   silhouetteImg.style.transform = `scale(${currentZoom})`;
   silhouetteImg.style.filter = "brightness(0)";
+  silhouetteImg.src = ""; // vide temporairement pour éviter le flash
 
-  silhouetteImg.onload = () => {
+  // Pré-charge via objet Image
+  const tempImage = new Image();
+  tempImage.onload = () => {
+    silhouetteImg.src = tempImage.src;
+    silhouetteImg.alt = "Silhouette";
     silhouetteImg.style.visibility = "visible";
     silhouetteImg.style.transition = "transform 0.3s ease-out";
   };
-
-  silhouetteImg.src = `./database/img/${target.image}.webp`;
-  silhouetteImg.alt = "Silhouette";
+  tempImage.src = `./database/img/${target.image}.webp`;
 
   // Sauvegarde dans localStorage
   localStorage.setItem("silhouetteTarget", JSON.stringify(target));
   localStorage.setItem("silhouetteAttempts", attempts);
   localStorage.setItem("silhouetteGameOver", "false");
 }
+
 
 // === AUTOCOMPLETE ===
 function initializeAutocomplete(input, personasList) {
@@ -234,6 +266,15 @@ function showVictory(force = false) {
   silhouetteBox.insertAdjacentElement("afterend", message);
 
   if (!force) {
+      if (!statsAlreadyLogged) {
+    updateProfileStats({
+      result: "win",
+      mode: modeName,
+      sessionDuration: Date.now() - sessionStartTime
+    });
+    localStorage.setItem(todayKey, "true");
+  }
+
     showConfettiExplosion();
 revealNextLink({
   prevHref: "../allOutAttackMode/allOutAttack.html",
@@ -307,6 +348,15 @@ function handleGuess() {
 function giveUp() {
   if (attempts < maxAttempts || gameOver) return;
   showVictory(true);
+  if (!statsAlreadyLogged) {
+  updateProfileStats({
+    result: "giveup",
+    mode: modeName,
+    sessionDuration: Date.now() - sessionStartTime
+  });
+  localStorage.setItem(todayKey, "true");
+}
+
 }
 
 // === RESET
@@ -341,18 +391,32 @@ if (next) {
 // === FILTRES
 function setupFilterButtons() {
   document.querySelectorAll(".filter-btn").forEach(btn => {
+    const val = btn.dataset.opus;
+
+    // ✅ Restaure l'état visuel au chargement
+    if (activeFilters.includes(val)) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+
     btn.addEventListener("click", () => {
-      const val = btn.dataset.opus;
       btn.classList.toggle("active");
+
       if (btn.classList.contains("active")) {
         if (!activeFilters.includes(val)) activeFilters.push(val);
       } else {
         activeFilters = activeFilters.filter(o => o !== val);
       }
+
+      // ✅ Sauvegarde dans localStorage
+      localStorage.setItem("silhouetteActiveFilters", JSON.stringify(activeFilters));
+
       resetGame();
     });
   });
 }
+
 
 // === RÈGLES
 function setupRulesModal() {
@@ -388,6 +452,12 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("silhouetteTarget");
     localStorage.removeItem("silhouetteAttempts");
     localStorage.removeItem("silhouetteGameOver");
+
+
+  localStorage.removeItem(todayKey);
+  statsAlreadyLogged = false;
+  sessionStartTime = Date.now();
+  
     resetGame();
   });
   giveUpBtn.addEventListener("click", giveUp);
@@ -442,61 +512,76 @@ document.addEventListener("DOMContentLoaded", () => {
 // 🧪 DEBUG PERSONNAGE
 // =======================
 function debugAllSilhouettes() {
-  console.log("=== DÉBUT DU DEBUG SILHOUETTE MODE ===");
+  console.log("🔍 === DÉBUT DU DEBUG SILHOUETTE MODE ===");
 
   const errors = [];
-  const usableNames = personas.sort((a, b) => a.localeCompare(b));
+  const warnings = [];
+
+  const usableNames = [...personas].sort((a, b) => a.localeCompare(b));
   const accepted = activeFilters.flatMap(o => validOpus[o]);
 
+  const foundInSilhouette = new Set(originalCharacters.map(c => c.nom));
+  const foundInPersonas = new Set(usableNames);
+  const foundInMap = new Set(Object.keys(portraitsMap));
+
+  // === Analyse des noms depuis personas.js ===
   for (const name of usableNames) {
-    const result = { nom: name, found: false, inMap: false, inSilhouette: false, passesFilter: false };
+    const inSilhouette = foundInSilhouette.has(name);
+    const inMap = foundInMap.has(name);
 
-    const character = originalCharacters.find(c => c.nom === name);
-    result.inSilhouette = !!character;
-
-    if (!character) {
+    if (!inSilhouette) {
       console.warn(`❌ ${name} — Introuvable dans silhouetteCharacters.js`);
       errors.push({ nom: name, cause: "Absent de silhouetteCharacters.js" });
-      continue;
     }
 
-    result.found = personas.includes(name);
-    if (!result.found) {
-      console.warn(`❌ ${name} — Pas présent dans personas.js`);
-      errors.push({ nom: name, cause: "Absent de personas.js" });
-    }
-
-    const imageKey = portraitsMap[name];
-    result.inMap = !!imageKey;
-    if (!imageKey) {
-      console.warn(`❌ ${name} — Aucune image dans portraitsMapSilhouette`);
+    if (!inMap) {
+      console.warn(`❌ ${name} — Image manquante dans portraitsMapSilhouette`);
       errors.push({ nom: name, cause: "Image manquante dans portraitsMapSilhouette" });
     }
 
-    const charOpus = Array.isArray(character.opus) ? character.opus : [character.opus];
-    result.passesFilter = charOpus.some(o => accepted.includes(o));
-    if (!result.passesFilter) {
-      console.warn(`⚠️ ${name} — Ne passe pas les filtres actuels (${charOpus})`);
-    }
-
-    // Résumé du personnage
-    if (result.found && result.inMap && result.inSilhouette) {
-      console.log(`✅ OK : ${name}`);
+    if (inSilhouette) {
+      const character = originalCharacters.find(c => c.nom === name);
+      const charOpus = Array.isArray(character.opus) ? character.opus : [character.opus];
+      const passesFilter = charOpus.some(o => accepted.includes(o));
+      if (!passesFilter) {
+        console.warn(`⚠️ ${name} — Ne passe pas les filtres actuels (${charOpus.join(", ")})`);
+        warnings.push({ nom: name, cause: "Non concerné par les filtres" });
+      } else {
+        console.log(`✅ ${name} — OK`);
+      }
     }
   }
 
-  // Résumé global
-  if (errors.length > 0) {
-    console.log(`\n=== TEST TERMINÉ : ${errors.length} problème(s) détecté(s) ===`);
+  // === Noms dans silhouetteCharacters non présents dans personas.js ===
+  for (const character of originalCharacters) {
+    if (!foundInPersonas.has(character.nom)) {
+      console.warn(`❌ ${character.nom} — Présent dans silhouetteCharacters.js mais NON listé dans personas.js`);
+      errors.push({ nom: character.nom, cause: "Absent de personas.js" });
+    }
+  }
+
+  // === Résumé final ===
+  const total = usableNames.length;
+  const totalSilhouettes = originalCharacters.length;
+  const totalErrors = errors.length;
+  const totalWarnings = warnings.length;
+
+  console.log(`\n📊 === RÉSUMÉ DU DEBUG SILHOUETTE ===`);
+  console.log(`🔢 Total de noms dans personas.js : ${total}`);
+  console.log(`📁 Total de silhouettes dans silhouetteCharacters.js : ${totalSilhouettes}`);
+  console.log(`❌ Erreurs détectées : ${totalErrors}`);
+  console.log(`⚠️ Avertissements (filtres) : ${totalWarnings}`);
+
+  if (totalErrors > 0) {
+    console.log(`\n🛑 Liste des erreurs :`);
     for (const err of errors) {
       console.log(`- ❌ ${err.nom} — ${err.cause}`);
     }
-  } else {
-    console.log("🎉 Aucune erreur détectée !");
   }
 
-  console.log("=== FIN DU DEBUG ===");
+  console.log("✅ === FIN DU DEBUG ===");
 }
+
 
 function revealNextLink({ nextHref = "../personaeMode/personae.html", prevHref = "../allOutAttackMode/allOutAttack.html" } = {}) {
   const nav = document.getElementById("modeNavigationContainer");
@@ -542,3 +627,4 @@ function setupDailyReset() {
     else location.reload();
   }, timeUntilMidnight + 500);
 }
+

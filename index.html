@@ -11,12 +11,32 @@
 </head>
 <body>
 
+
+  
+ 
     <!-- Logo Persona -->
     <header id="homepage">
         <a href="./index.html">
             <img src="./img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage">
         </a>
     </header>
+<div id="profileWrapper" style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
+  <div id="profileDisplay" style="position: relative; display: inline-block;">
+    <img id="headerAvatar" src="" alt="Avatar" 
+     style="width: 172px; height: auto; border-radius: 50%; object-fit: cover; border: 4px solid black;">
+
+    <span id="headerPseudo"
+          style="position: absolute; bottom: 4px; left: 4px; font-weight: bold; font-size: 22px;
+                 background: rgba(0, 0, 0, 0.65); color: white; padding: 1px 5px; border-radius: 6px;">
+    </span>
+  </div>
+
+  <button id="profileButton" class="profile-btn" style="margin-top: 10px;">👤 My Account</button>
+
+ 
+</div>
+
+
 
     <!-- Titre principal -->
     <section class="title-wrapper">
@@ -77,7 +97,7 @@
 </script>
 
 <div id="socialLinks" style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
-  <a href="#" target="_blank" title="GitHub">
+  <a href="https://github.com/HamzaKarrouchi/personadle" target="_blank" title="GitHub">
     <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
   </a>
   <a href="https://discord.gg/wpMdGGDp3y" target="_blank" title="Discord">
@@ -153,7 +173,7 @@
     <h3>📬 Contact</h3>
     <p>
       📧 Email: <a href="mailto:hamza.karrouchi.dev@gmail.com">hamza.karrouchi.dev@gmail.com</a><br>
-      🐙 GitHub: <a href="https://github.com/yourusername" target="_blank">github.com/yourusername</a>
+      🐙 GitHub: <a href="https://github.com/HamzaKarrouchi" target="_blank">GitHub.com /</a>
     </p>
   </div>
 </div>
@@ -220,10 +240,81 @@
     countdownEl.textContent = `${h}:${m}:${s}:${ms}`;
     requestAnimationFrame(updateCountdown);
   }
-
   updateCountdown();
+
+
 </script>
 
+<!-- === Profile Modal === -->
+<div id="profileModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="closeProfile">&times;</span>
+    <h2>🧑 My profil</h2>
+    <label for="pseudoInput">Pseudo :</label>
+    <input type="text" id="pseudoInput" />
+
+    <h3>Avatar :</h3>
+   <img id="avatarPreview" src="" alt="Avatar" class="avatar-preview"
+     style="border: 4px solid black; border-radius: 50%; width: 150px; height: auto;">
+
+    <button id="editAvatarBtn">Change picture</button>
+
+    <div style="margin-top: 12px; display: flex; align-items: right; gap: 10px;">
+<label for="borderColorPicker" class="border-color-label">Border Color:</label>
+  <input type="color" id="borderColorPicker" style="width: 36px; height: 36px; padding: 0; border: none; background: none; cursor: pointer;">
+
+ <button 
+    id="saveAndRefreshBtn"
+    style="
+      background-color: #51ff00;
+      color: #111;
+      font-weight: bold;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(81, 255, 0, 0.5);
+      transition: all 0.2s ease;
+    "
+    onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 12px rgba(81, 255, 0, 0.8)'"
+    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 8px rgba(81, 255, 0, 0.5)'"
+  >
+    ✅ Save & Refresh
+  </button>
+</div>
+
+
+    <h3>Statistiques :</h3>
+    <div id="statsContainer"></div>
+
+    <h3>Export / Import</h3>
+    <button id="exportProfile">📤 Export</button>
+    <input type="file" id="importFileInput" />
+    <button id="importProfile">📥 Import</button>
+
+    <button id="resetProfile" style="background-color: #c0392b; color: white; margin-top: 10px;">
+  🔄 Reset Profile
+</button>
+
+  </div>
+</div>
+
+<!-- === Avatar Crop Modal === -->
+<div id="avatarCropModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="closeCropper">&times;</span>
+    <h3>Choose your picture</h3>
+    <div id="avatarGrid"></div>
+    <canvas id="avatarCanvas" width="300" height="300"></canvas>
+    <div class="crop-controls">
+      <button id="zoomIn">🔍+</button>
+      <button id="zoomOut">🔍-</button>
+      <button id="confirmCrop">✅ Ok</button>
+    </div>
+  </div>
+</div>
+<script src="./profile/profile.js"></script>
 
 </body>
 </html>

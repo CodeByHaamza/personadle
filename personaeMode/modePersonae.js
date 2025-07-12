@@ -2,15 +2,17 @@
 import { personaeCharacters as originalCharacters } from "./database/personaeCharacters.js";
 import { portraitsMapPersonae as portraitsMap } from "./database/portraitsMapPersonae.js";
 import { personas } from "./database/persona.js";
+import { updateProfileStats } from "../profile/profileStats.js";
 
 // === CONSTANTES ===
 const validOpus = {
   P3: ["P3", "P3P", "P3FES"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"]
+  P5: ["P5", "P5R", "P5S", "P5T"],
+  P5X: ["P5X"]
 };
 
-let activeFilters = ["P3", "P4", "P5"];
+let activeFilters = ["P3", "P4", "P5", "P5X"]; 
 let filteredCharacters = [];
 let target = null;
 let attempts = 0;
@@ -20,6 +22,14 @@ let lastFiveTargets = [];
 
 let victoryBox, victoryImage, victoryText;
 let textbar, guessBtn, resetBtn, giveUpBtn, giveUpCounter, wrongList, personaImg;
+let sessionStartTime = Date.now();
+const todayKey = new Date().toISOString().split("T")[0];
+const statsKey = `statsLogged_Personae_${todayKey}`;
+// 🩹 Si le profil est dans "personaUserProfile", copie-le dans "playerProfile"
+if (!localStorage.getItem("playerProfile") && localStorage.getItem("personaUserProfile")) {
+  localStorage.setItem("playerProfile", localStorage.getItem("personaUserProfile"));
+}
+
 
 // === INIT GLOBAL ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -256,7 +266,15 @@ revealNextLink({
   nextHref: "../musicsMode/musics.html"
 });
 
-  localStorage.setItem("personaeGameOver", "true");
+  // === Update stats si pas déjà enregistré aujourd'hui ===
+  if (!localStorage.getItem(statsKey)) {
+    const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000); // en secondes
+    updateProfileStats({ result: "win", mode: "Personae", timeSpent: sessionDuration });
+    localStorage.removeItem("playerProfile"); // Nettoie pour ne pas impacter les autres
+
+    localStorage.setItem(statsKey, "true");
+  }  
+localStorage.setItem("personaeGameOver", "true");
 }
 
 function showWrong(name) {
@@ -311,6 +329,17 @@ function giveUp() {
   // Marque le jeu comme terminé
   gameOver = true;
 
+if (!localStorage.getItem(statsKey)) {
+  const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+  updateProfileStats({ result: "giveup", mode: "Personae", timeSpent: sessionDuration }); // ✅ Correct
+  localStorage.removeItem("playerProfile"); // Nettoie pour ne pas impacter les autres
+
+  localStorage.setItem(statsKey, "true");
+}
+
+
+
+
   // Enregistre l'état de fin dans le localStorage
   localStorage.setItem("personaeGameOver", "true");
   localStorage.setItem("personaeForceReveal", "true");
@@ -322,10 +351,14 @@ function giveUp() {
 
 
 function resetGame() {
+    sessionStartTime = Date.now();
+
   localStorage.removeItem("personaeTarget");
 localStorage.removeItem("personaeAttempts");
 localStorage.removeItem("personaeGameOver");
 localStorage.removeItem("personaeForceReveal");
+localStorage.removeItem(statsKey); // autorise une nouvelle stat pour la journée
+
 
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) nav.style.display = "none";
@@ -487,6 +520,8 @@ function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
 
 function setupDailyReset() {
   const parisOffset = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
+    sessionStartTime = Date.now();
+
   const parisNow = new Date(parisOffset);
   const tomorrow = new Date(parisNow);
   tomorrow.setDate(parisNow.getDate() + 1);
