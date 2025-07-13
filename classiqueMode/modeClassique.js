@@ -192,6 +192,7 @@ function filterCharacterPool() {
 
 document.addEventListener("DOMContentLoaded", () => {
   applyDarkModeStyles();
+
   const textbar = document.getElementById("textbar");
   const guessButton = document.getElementById("guessButton");
   const hintButton = document.getElementById("hintButton");
@@ -202,32 +203,52 @@ document.addEventListener("DOMContentLoaded", () => {
   const giveUpCounter = document.getElementById("giveUpCounter");
   const hintCounter = document.getElementById("hintCounter");
 
-  // Filtres actifs
+  // ✅ Déclaration des boutons de filtre
   const filterButtons = document.querySelectorAll(".filter-btn");
+
+  // ✅ Lecture des filtres sauvegardés
+  const savedFilters = JSON.parse(localStorage.getItem("filters_Classic"));
+  if (Array.isArray(savedFilters)) {
+    activeOpus = savedFilters;
+  }
+
+  // ✅ Appliquer l’état visuel aux boutons
   filterButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    btn.classList.toggle("active");
-
-    activeOpus = Array.from(filterButtons)
-      .filter(b => b.classList.contains("active"))
-      .map(b => b.dataset.opus);
-
-    filterCharacterPool();
-
-    // 🔁 Corriger ici : changer aussi le personnage tiré !
-    const filteredCharacters = characters.filter(c => {
-      const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-      return charOpus.some(op => activeOpus.flatMap(o => validOpus[o]).includes(op));
-    });
-
-    if (filteredCharacters.length > 0) {
-      target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
-      localStorage.setItem("target", JSON.stringify(target));
+    const filter = btn.dataset.opus;
+    if (activeOpus.includes(filter)) {
+      btn.classList.add("active");
     } else {
-      console.warn("⚠ No characters match the selected filters.");
+      btn.classList.remove("active");
     }
   });
-});
+
+  // ✅ Gérer les clics sur les boutons de filtre
+  filterButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("active");
+
+      activeOpus = Array.from(filterButtons)
+        .filter(b => b.classList.contains("active"))
+        .map(b => b.dataset.opus);
+
+      localStorage.setItem("filters_Classic", JSON.stringify(activeOpus));
+      filterCharacterPool();
+
+      const filteredCharacters = characters.filter(c => {
+        const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
+        return charOpus.some(op => activeOpus.flatMap(o => validOpus[o]).includes(op));
+      });
+
+      if (filteredCharacters.length > 0) {
+        target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+        localStorage.setItem("target", JSON.stringify(target));
+      } else {
+        console.warn("⚠ No characters match the selected filters.");
+      }
+    });
+  });
+
+  // ... (le reste de ton code continue ici)
 
 
   filterCharacterPool();

@@ -389,6 +389,22 @@ function disableInputs() {
 document.addEventListener("DOMContentLoaded", () => {
   applyDarkModeStyles();
   const textbar = document.getElementById("textbar");
+  // ✅ Étape 1 : Lire les filtres sauvegardés
+const savedFilters = JSON.parse(localStorage.getItem("filters_AllOutAttack"));
+if (Array.isArray(savedFilters)) {
+  activeOpusFilters = savedFilters;
+}
+
+// ✅ Étape 2 : Appliquer les états visuels aux boutons
+document.querySelectorAll(".filter-btn").forEach((btn) => {
+  const group = btn.dataset.opus;
+  if (activeOpusFilters.includes(group)) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
+  }
+});
+
   const guessButton = document.getElementById("guessButton");
   const gifElement = document.getElementById("aoaGif");
 
@@ -478,6 +494,9 @@ revealNextLink({
         if (!activeOpusFilters.includes(group)) activeOpusFilters.push(group);
       } else {
         activeOpusFilters = activeOpusFilters.filter(o => o !== group);
+            // ✅ Étape 3 : Sauvegarder les filtres actifs
+    localStorage.setItem("filters_AllOutAttack", JSON.stringify(activeOpusFilters));
+
       }
 
       personas = getFilteredPersonas();

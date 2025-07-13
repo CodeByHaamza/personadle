@@ -73,6 +73,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Setup UI
+  // ✅ Restauration des filtres depuis le localStorage
+const storedFilters = localStorage.getItem("musicActiveFilters");
+if (storedFilters) {
+  try {
+    const parsed = JSON.parse(storedFilters);
+    if (Array.isArray(parsed)) activeFilters = parsed;
+  } catch (e) {
+    console.warn("⚠️ Erreur lors de la lecture des filtres :", e);
+  }
+}
+
   setupFilterButtons();
   applyDarkModeStyles();
   setupRulesModal();

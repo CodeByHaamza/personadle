@@ -315,12 +315,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === Gestion filtres ===
   const filterButtons = document.querySelectorAll(".filter-btn");
+  // ✅ Lecture des filtres sauvegardés
+const savedFilters = JSON.parse(localStorage.getItem("filters_Emoji"));
+if (Array.isArray(savedFilters)) {
+  activeOpus = savedFilters;
+}
+
+// ✅ Appliquer l’état visuel aux boutons
+filterButtons.forEach(btn => {
+  const filter = btn.dataset.opus;
+  if (activeOpus.includes(filter)) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
+  }
+});
+
   filterButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       btn.classList.toggle("active");
       activeOpus = Array.from(filterButtons)
+      
         .filter(b => b.classList.contains("active"))
         .map(b => b.dataset.opus);
+          // ✅ Sauvegarde dans localStorage
+    localStorage.setItem("filters_Emoji", JSON.stringify(activeOpus));
 
       personas = filterCharacterPool().map(c => c.nom);
       initializeAutocomplete(textbar, personas);
