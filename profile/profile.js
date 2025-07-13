@@ -138,48 +138,65 @@ document.getElementById("borderColorPicker").oninput = (e) => {
 
 
 const avatarList = [
-  "Adachi2.jpeg", "Adachi.jpg", "Aigis2.jpg", "Aigis.jpg", "Akechi2.jpg", "Akechi.jpg", "Akihiko.jpg",
-  "Ann.jpg", "ANn.jpg", "Chie2.jpg", "Chie.jpg", "Ekichi2.jpeg", "Ekichi.jpeg", "Eriko.png",
-  "Futaba.jpg", "Futaba.webp", "Fuuka2.jpeg", "Fuuka.jpeg", "Har.jpg", "Haru.png", "Hidehiko.png",
-  "Hidehiko.webp", "Inaba2.webp", "Inaba.webp", "Joker.jpg", "Jun.jpg", "Junpei2.jpg", "Junpei.png",
-  "Kanji.avif", "Kanji.jpg", "Kei2.jpg", "Kei.webp", "Ken.jpeg", "Koromaru2.jpg", "Koromaru.jpg",
-  "Kotone2.jpeg", "Kotone.jpeg", "Lisa.jpeg", "Makoto2.jpg", "Makoto.jpg", "Maya2.jpeg", "Maya.jpg",
-  "Mitsuru.jpg", "Mitsuru.webp", "Morgana.jpg", "Morgana.png", "Nanako2.jpg", "Nanako.jpg", "Naoto2.jpg",
-  "Naoto.jpg", "Naoya1.jpg", "Naoya.jpg", "Ren.gif", "Rise.jpg", "Rise.png", "Ryuji.jpg", "Ryuji.png",
-  "Shinji.jpg", "Shinji.webp", "Sumire2.jpg", "Sumire.jpg", "Tatsuya2.jpg", "Tatsuya.jpg", "Teddie2.jpg",
-  "Teddie.jpg", "Wonder.jpg", "Yosuke2.jpg", "Yosuke.jpg", "Yu2.jpg", "Yu.gif", "Yu.jpg", "Yukari2.jpg",
-  "Yukari.jpg", "Yuka.webp", "Yuki.gif", "Yuki.jpeg", "Yukiko2.jpg", "Yukiko.jpg", "Yukino.webp", "Yusuke.jpg", "Yusuke.webp"
+  // === P1 ===
+  "Naoya.jpg", "Naoya1.jpg", "Yuka.webp", "Hidehiko.png", "Hidehiko.webp", "Inaba2.webp", "Inaba.webp", "Eriko.png",
+
+  // === P2 ===
+  "Tatsuya2.jpg", "Tatsuya.jpg", "Lisa.jpeg", "Jun.jpg", "Ekichi2.jpeg", "Ekichi.jpeg", "Maya2.jpeg", "Maya.jpg",
+
+  // === P3 ===
+  "Yuki.jpeg", "yuki.jpg","Kotone2.jpeg", "Kotone.jpeg","Kotone3.jpeg","Aigis2.jpg", "Aigis.jpg", "Akihiko.jpg", "Mitsuru.jpg", "Mitsuru.webp",
+  "Junpei2.jpg", "Junpei.png", "Fuuka2.jpeg", "Fuuka.jpeg", "Ken.jpeg", "Koromaru2.jpg", "Koromaru.jpg", "Shinji.jpg", "Shinji.webp","Yukari2.jpg", "Yukari.jpg",
+
+  // === P4 ===
+  "Yu2.jpg", "Yu.jpg", "Yosuke2.jpg", "Yosuke.jpg", "Chie2.jpg", "Chie.jpg", "Yukiko2.jpg", "Yukiko.jpg",
+  "Kanji.avif", "Kanji.jpg", "Rise.jpg", "Rise.png", "Teddie2.jpg", "Teddie.jpg", "Naoto2.jpg", "Naoto.jpg", "Nanako2.jpg", "Nanako.jpg",
+
+  // === P5 ===
+  "Joker.jpg","ren_t.webp","Ann.jpg", "ANn.jpg", "Ryuji.jpg", "Ryuji.png", "Morgana.jpg", "Morgana.png", "Yusuke.jpg", "Yusuke.webp",
+  "Haru.png", "Har.jpg", "Futaba.jpg", "Futaba.webp", "Akechi2.jpg", "Akechi.jpg", "Sumire2.jpg", "Sumire.jpg", "Makoto2.jpg", "Makoto.jpg",
+  
+
+  // === P5X ===
+  "Wonder.jpg", "wonder1.png", "wonder2.png","Lufel2.png", "Lufel.png","Arai2.png", "Arai.png","Shun2.png", "Shun.png",
+ "Riko2.png", "Riko.png","Kayo2.png", "Kayo.png",  
+   "Tomoko2.png", "Tomoko.png", 
+  "Yaoling2.png", "Yaoling.png", "YUI2.png", "YUI.png",
+
+// === GIFs Only ===
+"Yuki.gif","Yuki2.gif", "Yu.gif","Yu2.gif", "Ren.gif","Ren2.gif","catlisabeth.gif","luix-dextructor-aigis.gif","Anniversary.gif","aigis.gif"
 ];
 
-// === Avatar Grid Rendering ===
-function initAvatarGrid() {
-  avatarGrid.innerHTML =
-    `<div class="avatar-none" data-src="none" style="display: flex; align-items: center; justify-content: center; background: #333; color: white; font-weight: bold; border-radius: 8px; height: 80px; cursor: pointer;">
-      NONE
-    </div>` +
-    avatarList.map(name =>
-      `<img src="./img/avatar/${name}" data-src="./img/avatar/${name}" />`
-    ).join("");
 
-  avatarGrid.querySelectorAll("img").forEach(img => {
-    img.onclick = () => {
-      selectedAvatarSrc = img.dataset.src;
-      loadImageToCanvas(selectedAvatarSrc);
-    };
-  });
+  // === Avatar Grid Rendering ===
+  function initAvatarGrid() {
+    avatarGrid.innerHTML =
+      `<div class="avatar-none" data-src="none" style="display: flex; align-items: center; justify-content: center; background: #333; color: white; font-weight: bold; border-radius: 8px; height: 80px; cursor: pointer;">
+        NONE
+      </div>` +
+      avatarList.map(name =>
+        `<img src="./img/avatar/${name}" data-src="./img/avatar/${name}" />`
+      ).join("");
 
-  const noneOption = avatarGrid.querySelector(".avatar-none");
-  if (noneOption) {
-    noneOption.onclick = () => {
-      selectedAvatarSrc = "none";
-      profile.avatar = "";
-      avatarPreview.src = "./img/default_avatar.png";
-      document.getElementById("headerAvatar").src = "./img/default_avatar.png";
-      saveProfile();
-      cropModal.classList.add("hidden");
-    };
+    avatarGrid.querySelectorAll("img").forEach(img => {
+      img.onclick = () => {
+        selectedAvatarSrc = img.dataset.src;
+        loadImageToCanvas(selectedAvatarSrc);
+      };
+    });
+
+    const noneOption = avatarGrid.querySelector(".avatar-none");
+    if (noneOption) {
+      noneOption.onclick = () => {
+        selectedAvatarSrc = "none";
+        profile.avatar = "";
+        avatarPreview.src = "./img/default_avatar.png";
+        document.getElementById("headerAvatar").src = "./img/default_avatar.png";
+        saveProfile();
+        cropModal.classList.add("hidden");
+      };
+    }
   }
-}
 
 // === CANVAS CROP ===
 let image = new Image();
