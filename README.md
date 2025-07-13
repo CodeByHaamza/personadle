@@ -52,8 +52,7 @@ Each mode is carefully designed with:
 - 📆 **Daily challenge** system (auto-reset at midnight Paris time)
 - 🔁 **Persistent filters** per mode (P1–P5X)
 - 🧠 **Smart autocompletion** with portrait thumbnails and keyboard navigation
-- 📱 **Fully responsive** on mobile, tablet, and desktop
-- 🌙 **Dark mode** enabled by default
+- 🌙 **Dark mode** 
 - 🟡 **Colorblind mode** available
 - 🧑‍🎤 **Player profile system**:
   - 🎭 Choose your pseudo & avatar (with cropping)
@@ -101,8 +100,8 @@ Built entirely with **vanilla front-end technologies** — lightweight, fast, an
 | Stylized SVG UI (Persona 5)     | ✅ Done     |
 | 🎯 Online Leaderboards           | 🔜 Planned  |
 | 📊 Streak History / Share Stats | 🔜 Planned  |
-| 🌍 Deployment (GitHub / Vercel) | 🔜 Planned  |
-| ❤️ Donations / Support Page     | 🔜 Planned  |
+| 🌍 Deployment (GitHub ) | 🔜 Planned  |
+
 
 ---
 
