@@ -1,5 +1,10 @@
 # 🎭 PERSONADLE
 
+<p align="center">
+  <img src="./img/Logo_PersonaDLE.png" alt="Personadle Logo" width="200">
+</p>
+
+
 **A stylish daily guessing game set in the Persona universe.**  
 Inspired by [Smashdle](https://smashdle.net), reimagined with the flair of **Persona** — from P1 to P5X.
 
@@ -50,9 +55,10 @@ Each mode is carefully designed with:
 
 - 🎨 **Persona 5-inspired UI** with SVG menus, blur/zoom reveals, and stylized feedback
 - 📆 **Daily challenge** system (auto-reset at midnight Paris time)
-- 🔁 **Persistent filters** per mode (P1–P5X)
+- 🔁 **Persistent filters** per mode (P1–P5X), auto-restored on refresh with instant reset logic
 - 🧠 **Smart autocompletion** with portrait thumbnails and keyboard navigation
-- 🌙 **Dark mode** 
+- 📱 **Fully responsive** on mobile, tablet, and desktop
+- 🌙 **Dark mode** enabled by default
 - 🟡 **Colorblind mode** available
 - 🧑‍🎤 **Player profile system**:
   - 🎭 Choose your pseudo & avatar (with cropping)
@@ -100,8 +106,7 @@ Built entirely with **vanilla front-end technologies** — lightweight, fast, an
 | Stylized SVG UI (Persona 5)     | ✅ Done     |
 | 🎯 Online Leaderboards           | 🔜 Planned  |
 | 📊 Streak History / Share Stats | 🔜 Planned  |
-| 🌍 Deployment (GitHub ) | 🔜 Planned  |
-
+| 🌍 Deployment (GitHub / Vercel) | 🔜 Planned  |
 
 ---
 
@@ -123,7 +128,26 @@ Built entirely with **vanilla front-end technologies** — lightweight, fast, an
 
 ## 🖼️ Screenshots
 
-*(Coming soon – see each mode’s interface, feedback animations, and mobile layouts.)*
+### 🧩 Classic Mode
+![Classic](./img/preview/preview_classic.png)
+![Classic Victory](./img/preview/preview_classic_victory.png)
+
+### 😺 Emoji Mode
+![Emoji](./img/preview/preview_emoji.png)
+
+### 🔥 All-Out Attack Mode
+![All-Out Attack](./img/preview/preview_all_out_attack.png)
+![All-Out Victory](./img/preview/preview_all_out_attack_victory.png)
+
+### 🖤 Shadow Mode
+![Shadow](./img/preview/preview_shadow.png)
+
+### 👥 Personae Mode
+![Personae](./img/preview/preview_personae.png)
+
+### 🎵 Music Mode
+![Music](./img/preview/preview_music.png)
+
 
 ---
 
