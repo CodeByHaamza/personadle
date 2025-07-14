@@ -600,6 +600,7 @@ revealNextLink({
   
   // 🔁 Lancer le reset automatique chaque jour à minuit (heure de Paris)
 });
+checkResetOnLoad();
 
   setupDailyReset(); // ← ajoute ceci ici
 
@@ -765,4 +766,19 @@ function setupDailyReset() {
     if (resetBtn) resetBtn.click();
     else location.reload(); // fallback
   }, timeUntilMidnight + 500); // +500ms pour être sûr qu’on est bien après minuit
+}
+
+function checkResetOnLoad() {
+  const storedDate = localStorage.getItem("lastPlayedDate_Classic");
+  const today = new Date().toISOString().split("T")[0];
+
+  if (storedDate !== today) {
+    console.log("📅 Nouvelle journée détectée → reset automatique");
+    localStorage.setItem("lastPlayedDate_Classic", today);
+
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+  } else {
+    console.log("📅 Même jour, aucune réinitialisation nécessaire");
+  }
 }

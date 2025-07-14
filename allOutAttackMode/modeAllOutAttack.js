@@ -517,7 +517,8 @@ revealNextLink({
       updateGiveUpCounter();
     });
   });
-    setupDailyReset(); // 🕛 Redémarre chaque jour à minuit (heure de Paris)
+checkResetOnLoad();
+setupDailyReset();
 
 });
 
@@ -673,4 +674,24 @@ function setupDailyReset() {
   }, timeUntilMidnight + 500);
 }
 
-debugAllOutAttack(); //
+function checkResetOnLoad() {
+  const storedDate = localStorage.getItem("lastPlayedDate_AllOut");
+  const today = new Date().toISOString().split("T")[0];
+
+  if (storedDate !== today) {
+    console.log("📅 Nouvelle journée détectée → reset automatique (All Out)");
+    localStorage.setItem("lastPlayedDate_AllOut", today);
+
+    // Facultatif : nettoie l’ancienne entrée stats
+    if (storedDate) {
+      const oldStatsKey = `statsLogged_AllOut_${storedDate}`;
+      localStorage.removeItem(oldStatsKey);
+    }
+
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+    else location.reload();
+  } else {
+    console.log("📅 Même jour, aucune réinitialisation nécessaire (All Out)");
+  }
+}

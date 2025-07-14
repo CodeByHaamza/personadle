@@ -425,7 +425,8 @@ revealNextLink({
       rulesModal.style.display = "none";
       document.body.classList.remove("modal-open");
     }
-  setupDailyReset(); // ⏱ Redémarrage automatique chaque jour à minuit (heure de Paris)
+checkResetOnLoad();
+setupDailyReset(); // déjà présent
 });
 });
 
@@ -565,4 +566,26 @@ function setupDailyReset() {
     if (resetBtn) resetBtn.click();
     else location.reload(); // Fallback si le bouton est manquant
   }, timeUntilMidnight + 500);
+}
+
+function checkResetOnLoad() {
+  const storedDate = localStorage.getItem("lastPlayedDate_Emoji");
+  const today = new Date().toISOString().split("T")[0];
+
+  if (storedDate !== today) {
+    console.log("📅 Nouvelle journée détectée → reset automatique (Emoji)");
+    localStorage.setItem("lastPlayedDate_Emoji", today);
+
+    // Nettoyage des stats d’hier (facultatif)
+    if (storedDate) {
+      const oldStatsKey = `statsLogged_Emoji_${storedDate}`;
+      localStorage.removeItem(oldStatsKey);
+    }
+
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+    else location.reload(); // fallback si pas de bouton
+  } else {
+    console.log("📅 Même jour, aucune réinitialisation nécessaire (Emoji)");
+  }
 }

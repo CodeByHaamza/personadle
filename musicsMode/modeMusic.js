@@ -93,6 +93,8 @@ if (storedFilters) {
   giveUpBtn.addEventListener("click", giveUp);
 
   initializeAutocomplete(textbar, musicTitles.sort((a, b) => a.localeCompare(b)));
+  checkResetOnLoad();
+
     setupDailyReset(); // 🕛 Auto-reset every midnight (Paris time)
 
 });
@@ -486,4 +488,25 @@ function setupDailyReset() {
     if (resetBtn) resetBtn.click();
     else location.reload(); // fallback
   }, timeUntilMidnight + 500);
+}
+function checkResetOnLoad() {
+  const storedDate = localStorage.getItem("lastPlayedDate_Music");
+  const today = new Date().toISOString().split("T")[0];
+
+  if (storedDate !== today) {
+    console.log("📅 Nouvelle journée détectée → reset automatique (Music)");
+    localStorage.setItem("lastPlayedDate_Music", today);
+
+    // Nettoyage de l'entrée stats de la veille
+    if (storedDate) {
+      const oldStatsKey = `statsLogged_Music_${storedDate}`;
+      localStorage.removeItem(oldStatsKey);
+    }
+
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+    else location.reload();
+  } else {
+    console.log("📅 Même jour, aucune réinitialisation nécessaire (Music)");
+  }
 }

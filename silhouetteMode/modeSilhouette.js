@@ -504,7 +504,9 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     resetGame();
   }
-    setupDailyReset(); // 🕛 Auto-reset every midnight (Paris time)
+    setupDailyReset(); 
+    checkResetOnLoad();
+// 🕛 Auto-reset every midnight (Paris time)
 
 });
 
@@ -628,3 +630,24 @@ function setupDailyReset() {
   }, timeUntilMidnight + 500);
 }
 
+function checkResetOnLoad() {
+  const storedDate = localStorage.getItem("lastPlayedDate_Shadow");
+  const today = new Date().toISOString().split("T")[0];
+
+  if (storedDate !== today) {
+    console.log("📅 Nouvelle journée détectée → reset automatique (Shadow)");
+    localStorage.setItem("lastPlayedDate_Shadow", today);
+
+    // Facultatif : nettoie les anciennes stats
+    if (storedDate) {
+      const oldStatsKey = `statsLogged_Shadow_${storedDate}`;
+      localStorage.removeItem(oldStatsKey);
+    }
+
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+    else location.reload(); // fallback si le bouton n'est pas encore chargé
+  } else {
+    console.log("📅 Même jour, aucune réinitialisation nécessaire (Shadow)");
+  }
+}
