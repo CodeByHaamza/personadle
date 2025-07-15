@@ -6,6 +6,8 @@ import { updateProfileStats } from "../profile/profileStats.js";
 
 // === CONSTANTES ===
 const validOpus = {
+  P1: ["P1"],
+  P2: ["P2IS", "P2EP"],
   P3: ["P3", "P3P", "P3FES", "P3R"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
   P5: ["P5", "P5R", "P5S", "P5T"],

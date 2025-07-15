@@ -1,5 +1,14 @@
 export const songs = [
   {
+    titre: "A Lone Prayer",
+    fichier: "A_lone_prayer.mp3",
+    opus: ["P1"],
+    image: "P1.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=Xb4PX3rPg6o"
+  },
+  {
     titre: "A Way of Life",
     fichier: "A_Way_of_Life.mp3",
     opus: ["P3P"],
@@ -27,6 +36,14 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=shSGDbQgLLc"
   },
   {
+    titre: "Blood Destiny",
+    fichier: "Blood_destiny.mp3",
+    opus: ["P1"],
+    image: "P1.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=vTSFyORPu0s"
+  }, {
     titre: "Beneath the Mask",
     fichier: "Beneath_the_Mask.mp3",
     opus: ["P5"],
@@ -216,13 +233,22 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=S0GgBcNKK5g"
   },
   {
-    titre: "Memories of You",
-    fichier: "Memories_of_You.mp3",
-    opus: ["P3R"],
-    image: "P3R.webp",
-    vocalist: "Azumi Takahashi",
+    titre: "Map I",
+    fichier: "Map_I.mp3",
+    opus: ["P2EP"],
+    image: "P2EP.webp",
+    vocalist: "",
     proprietaire: "ATLUS",
-    lien: "https://www.youtube.com/watch?v=H5Qtu8fCycE"
+    lien: "https://www.youtube.com/watch?v=tdAD8YRDsTo"
+  },
+  {
+    titre: "Maya Theme",
+    fichier: "Maya_theme.mp3",
+    opus: ["P2EP"],
+    image: "P2EP.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=6UUlE-n_AFU"
   },
   {
     titre: "Never More",
@@ -277,6 +303,14 @@ export const songs = [
     vocalist: "Lyn Inaizumi , Benjamin Franklin",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=lvuHvXsZPrk"
+  },{
+    titre: "School Days",
+    fichier: "School_Days.mp3",
+    opus: ["P1"],
+    image: "P1.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=c1OZfkbhLhM"
   },
   {
     titre: "Secret Base",
@@ -286,6 +320,15 @@ export const songs = [
     vocalist: "",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=c1OZfkbhLhM"
+  },
+  {
+    titre: "Seven Sisters Theme",
+    fichier: "Seven_sisters_theme.mp3",
+    opus: ["P2IS"],
+    image: "P2IS.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=hzxn--2cXLw"
   },
   {
     titre: "Shadow Loop",
@@ -386,6 +429,15 @@ export const songs = [
     vocalist: "Lyn Inaizumi",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=GTesXj_27EE"
+  },
+  {
+    titre: "Unbreakable Tie",
+    fichier: "Unbreakable_tie.mp3",
+    opus: ["P2IS"],
+    image: "P2IS.webp",
+    vocalist: "Lotus Juice , Asami Izawa",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/eAarVmqJwNw?si=AJ2hcr0ZDKqTqGvW"
   },
   {
     titre: "Wake Up, Get Up, Get Out There",

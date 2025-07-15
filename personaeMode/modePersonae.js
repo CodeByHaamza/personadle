@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     resetGame();
   }
+  checkResetOnLoad();    // 🆕 Ajout ici
     setupDailyReset(); // 🕛 Daily reset à minuit (heure de Paris)
 
 });
@@ -537,4 +538,25 @@ function setupDailyReset() {
     if (resetBtn) resetBtn.click();
     else location.reload();
   }, timeUntilMidnight + 500);
+}
+function checkResetOnLoad() {
+  const storedDate = localStorage.getItem("lastPlayedDate_Personae");
+  const today = new Date().toISOString().split("T")[0];
+
+  if (storedDate !== today) {
+    console.log("📅 Nouvelle journée détectée → reset automatique (Personae)");
+    localStorage.setItem("lastPlayedDate_Personae", today);
+
+    // Supprime aussi l'ancienne entrée stats du jour précédent
+    if (storedDate) {
+      const oldStatsKey = `statsLogged_Personae_${storedDate}`;
+      localStorage.removeItem(oldStatsKey);
+    }
+
+    const resetBtn = document.getElementById("resetButton");
+    if (resetBtn) resetBtn.click();
+    else location.reload(); // fallback si resetButton non présent
+  } else {
+    console.log("📅 Même jour, aucune réinitialisation nécessaire (Personae)");
+  }
 }
