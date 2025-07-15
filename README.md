@@ -101,14 +101,66 @@ Built entirely with **vanilla front-end technologies** — lightweight, fast, an
 | Local Profiles & Stats          | ✅ Done     |
 | Colorblind Mode                 | ✅ Done     |
 | Daily Reset System              | ✅ Done     |
-| Mobile Optimizations            | ✅ Done     |
+| Mobile Optimizations (basic)   | ✅ Done     |
+| Full Responsive Design         | 🔜 Planned  |
 | Filter Persistence              | ✅ Done     |
 | Stylized SVG UI (Persona 5)     | ✅ Done     |
 | 🎯 Online Leaderboards           | 🔜 Planned  |
 | 📊 Streak History / Share Stats | 🔜 Planned  |
-| 🌍 Deployment (GitHub / Vercel) | 🔜 Planned  |
+| 🌍 Deployment (GitHub ) | 🔜 Planned  |
 
 ---
+
+## 🏅 Suggested Future Improvements
+
+### 🎖 Achievements & Badges System
+This feature is already in the works!  
+Examples: “First Try!”, “7-Win Streak”, “P4 Specialist”  
+Unlockable in-game and displayed on the player profile
+
+### 🎼 Audio Customization
+Let players unlock and set Persona OSTs as background music  
+Tracks could play in the menu or during gameplay
+
+### 🖼️ Profile Background Customization
+Allow background themes based on favorite game or unlocked milestones  
+Could be subtle (gradients, blurred images, dynamic visuals)
+
+### 📱 PWA / Mobile App
+Turn the game into a **Progressive Web App**  
+Installable on home screen with custom icon and offline play support
+
+### 🌍 Multi-language Support (EN / FR / JP)
+To reach more Persona fans around the world
+
+
+---
+
+## 🏅 Suggested Future Improvements
+
+### 🎖 Achievements & Badges System
+This feature is already in the works!  
+Examples: “First Try!”, “7-Win Streak”, “P4 Specialist”  
+Unlockable in-game and displayed on the player profile
+
+### 🎼 Audio Customization
+Let players unlock and set Persona OSTs as background music  
+Tracks could play in the menu or during gameplay
+
+### 🖼️ Profile Background Customization
+Allow background themes based on favorite game or unlocked milestones  
+Could be subtle (gradients, blurred images, dynamic visuals)
+
+### 📱 PWA / Mobile App
+Turn the game into a **Progressive Web App**  
+Installable on home screen with custom icon and offline play support
+
+### 🌍 Multi-language Support (EN / FR / JP)
+To reach more Persona fans around the world
+
+---
+
+
 
 ## 🧑‍💻 Authors
 
