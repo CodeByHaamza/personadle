@@ -140,6 +140,7 @@
   "Jun Kurosu",
   "Eikichi Mishina",
   "Baofu",
-  "Joker"
+  "Joker",
+  "Izanami",
 
   ];

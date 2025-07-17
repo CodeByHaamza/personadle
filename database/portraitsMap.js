@@ -59,4 +59,6 @@ export const portraitsMap = {
   "Kotone Montagne": "Montagne",
   "Leo Kamiyama": "Reo",
   "Yumi Shiina": "Yumi_S",
+  "Taro Namatame": "Namatame",
+"Izanami": "Izanami",
 };

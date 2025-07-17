@@ -1684,7 +1684,28 @@ export const characters = [
     },
 
 
-  
+  {
+    nom: "Taro Namatame",
+    genre:  ["Male", "Human"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus:["P4", "P4G"],
+    personaUser: true,
+    persona: "Kunino-sagiri",
+    emoji: ["💍","🚚","📺"],
+    quote: "I can't let her end up like Mayumi and the other girl...this time, I'm gonna do something..."
+  },
+   {
+    nom: "Izanami",
+    genre:  ["Male", "Demon"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus:["P4", "P4G"],
+    personaUser: true,
+    persona: "Izanami-no-Mikoto",
+    emoji: ["💀","👹","⛽"],
+    quote: "Knowledge of the truth is not everything. Yet drunk with truth, you exceeded your role and became too involved... Now, learn for yourselves whose wrath you have brought down!"
+  },
   
   ];
 

@@ -140,7 +140,10 @@ export const silhouetteCharacters = [
   { nom: "Jun Kurosu", image: "Jun_Kurosu_silhouette", opus: ["P2IS"] },
   { nom: "Eikichi Mishina", image: "Eikichi_Mishina_silhouette", opus: ["P2IS"] },
   { nom: "Baofu", image: "Baofu_silhouette", opus: ["P2EP"] },
-  { nom: "Joker", image: "Joker_silhouette", opus: ["P2IS"] }
+  { nom: "Joker", image: "Joker_silhouette", opus: ["P2IS"] },
+
+
+    { nom: "Izanami", image: "Izanami_shilouette", opus: ["P4"] }
 
 
 

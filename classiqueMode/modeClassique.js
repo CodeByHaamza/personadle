@@ -454,7 +454,13 @@ if (nav) {
 
       let value = guess[key];
       let targetVal = target[key];
-      let displayValue = Array.isArray(value) ? value.join(", ") : value;
+let displayValue;
+
+if (typeof value === "boolean") {
+  displayValue = value ? "Yes" : "No";
+} else {
+  displayValue = Array.isArray(value) ? value.join(", ") : value;
+}
 
       if (isWin) {
         cell.classList.add("correct");

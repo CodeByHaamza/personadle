@@ -152,7 +152,9 @@ export const personas = [
   "Mayumi Hashimoto",
   "Manaka Nagao",
   "Ichigo Shikano",
-  "Merope"
+  "Merope",
+  "Taro Namatame",
+"Izanami",
 
 
 ];
