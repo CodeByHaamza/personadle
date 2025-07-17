@@ -6,13 +6,14 @@ import { updateProfileStats } from "../profile/profileStats.js";
 
 // === CONSTANTES ===
 const validOpus = {
+  P2: ["P2IS", "P2EP"],
   P3: ["P3", "P3P", "P3FES"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
   P5: ["P5", "P5R", "P5S", "P5T"],
   P5X: ["P5X"]
 };
 
-let activeFilters = ["P3", "P4", "P5", "P5X"]; 
+let activeFilters = ["P2","P3", "P4", "P5", "P5X"]; 
 let filteredCharacters = [];
 let target = null;
 let attempts = 0;

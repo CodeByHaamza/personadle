@@ -1149,9 +1149,7 @@ export const characters = [
         emoji: ["👔", "💎", "🎤"],
         quote: "I'm the number one princess in the world."
       },
-
-        //Persona 1 and 2
-      
+      //Persona 1
       {
         nom: "Naoya Todou",
         genre: ["Human", "Male"],
@@ -1174,6 +1172,85 @@ export const characters = [
         emoji: ["🪞", "🌫️", "💊"],
         quote: "Thank you. I hope you'll still think about me at least once in a while. Goodbye. I love you."
       },
+      {
+        nom: "Masao Inaba",
+        genre: ["Human", "Male"],
+        age: "15-20",
+        arcane: ["Chariot"],
+        opus: ["P1",],
+        personaUser: true,
+        persona: "Ogun",
+        emoji: ["🏥", "🤡", "❤"],
+        quote: "The spoiled son of Inaba Dry Cleaning's owners. Earnest and excitable."
+      },
+      {
+        nom: "Kei Nanjo",
+        genre: ["Human", "Male"],
+        age: "15-20",
+        arcane: ["Hierophant"],
+        opus: ["P1", "P2EP"],
+        personaUser: true,
+        persona: "Aizen Myouou",
+        emoji: ["1", "💵", "👓"],
+        quote: "Heir to the Nanjo Group. An utter pragmatist and skeptic."
+      },
+      {
+        nom: "Yukino Mayuzumi",
+        genre: ["Human", "Female"],
+        age: "15-20",
+        arcane: ["Empress"],
+        opus: ["P1", "P2EIS"],
+        personaUser: true,
+        persona: "Vesta",
+        emoji: ["🤬", "🏍", "📷"],
+        quote: "The hell did you just say...? YOU PIECE OF SHIT!"
+      },
+      {
+        nom: "Hidehiko Uesugi",
+        genre: ["Human", "Male"],
+        age: "15-20",
+        arcane: ["Justice"],
+        opus: ["P1", "P2EP"],
+        personaUser: true,
+        persona: "Nemhain",
+        emoji: ["🔴", "😎", "♠"],
+        quote: "Craves attention and doesn't take things very seriously."
+      },
+      {
+        nom: "Eriko Kirishima",
+        genre: ["Human", "Female"],
+        age: "15-20",
+        arcane: ["Judgement"],
+        opus: ["P1", "P2EP"],
+        personaUser: true,
+        persona: "Nike",
+        emoji: ["🎭", "🏆", "🧙‍♀️"],
+        quote: "I am an angelic bringer of victory! From now on, you have my protection!"
+      },
+      {
+        nom: "Yuka Ayase",
+        genre: ["Human", "Female"],
+        age: "15-20",
+        arcane: ["Magician"],
+        opus: ["P1",],
+        personaUser: true,
+        persona: "Houri",
+        emoji: ["🎢", "👩‍👧‍👦", "💅"],
+        quote: "Like, Persona!"
+      },
+      {
+        nom: "Reiji Kido",
+        genre: ["Human", "Male"],
+        age: "15-20",
+        arcane: ["Devil", "Death"],
+        opus: ["P1", "P2EP"],
+        personaUser: true,
+        persona: "Bres",
+        emoji: ["✖", "💪", "🇺🇸"],
+        quote: "A quiet loner who transferred to St. Hermelin High six months ago."
+      },
+         //Persona 2
+
       {
         nom: "Tatsuya Suou",
         genre: ["Human", "Male"],
@@ -1251,7 +1328,6 @@ export const characters = [
         emoji: ["🎭", "🃏", "📞"],
         quote: "Pathetic, misguided humans, obey me! Only I can lead you, the ignorant! If you will not obey, then you will DIE!"
       },
-  
       {
   nom: "Sophia",
   genre: ["Artificial","Female"],

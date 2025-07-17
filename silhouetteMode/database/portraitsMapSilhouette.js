@@ -124,8 +124,8 @@ export const portraitsMapSilhouette = {
 "Maiko Oohashi": "Maiko",
 "Maya": "Maya", // seulement si le fichier s'appelle Maya_silhouette.webp
 
-
-
+   "Maya Amano": "Maya_A",
+   "Joker": "JOKER",
 
 
   

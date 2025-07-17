@@ -121,6 +121,25 @@
     "Mayumi Hashimoto",
     "Manaka Nagao",
     "Ichigo Shikano",
-    "Merope"
+    "Merope",
+
+  // === Persona 1 & 2 ===
+
+  "Naoya Todou",
+  "Maki Sonomura",
+  "Masao Inaba",
+  "Kei Nanjo",
+  "Yukino Mayuzumi",
+  "Hidehiko Uesugi",
+  "Eriko Kirishima",
+  "Yuka Ayase",
+  "Reiji Kido",
+  "Tatsuya Suou",
+  "Maya Amano",
+  "Lisa Silverman",
+  "Jun Kurosu",
+  "Eikichi Mishina",
+  "Baofu",
+  "Joker"
 
   ];

@@ -687,6 +687,84 @@ export const personaeCharacters = [
   user: ["Ichigo Shikano"],
   opus: ["P5X"]
 },
-
+  // Persona 2 ( P2IS, P2EP )
+  {
+    persona: "Vulcanus",
+    image: "Vulcanus",
+    user: ["Tatsuya Suou"],
+    opus: ["P2IS", "P2EP"]
+  },
+  {
+    persona: "Apollo",
+    image: "Apollo",
+    user: ["Tatsuya Suou"],
+    opus: ["P2IS", "P2EP"]
+  },
+  {
+    persona: "Maia",
+    image: "Maia",
+    user: ["Maya Amano"],
+    opus: ["P2IS", "P2EP"]
+  },
+  {
+    persona: "Artemis",
+    image: "Artemis",
+    user: ["Maya Amano"],
+    opus: ["P2IS", "P2EP"]
+  },
+  {
+    persona: "Eros",
+    image: "Eros",
+    user: ["Lisa Silverman"],
+    opus: ["P2IS"]
+  },
+  {
+    persona: "Venus",
+    image: "Venus",
+    user: ["Lisa Silverman"],
+    opus: ["P2IS"]
+  },
+  {
+    persona: "Hermes",
+    image: "Jun_Hermes",
+    user: ["Jun Kurosu"],
+    opus: ["P2IS"]
+  },
+  {
+    persona: "Chronos",
+    image: "Chronos",
+    user: ["Jun Kurosu"],
+    opus: ["P2IS"]
+  },
+  {
+    persona: "Rhadamanthus",
+    image: "Rhadamanthus",
+    user: ["Eikichi Mishina"],
+    opus: ["P2IS"]
+  },
+  {
+    persona: "Hades",
+    image: "Hades",
+    user: ["Eikichi Mishina"],
+    opus: ["P2IS"]
+  },
+  {
+    persona: "Odysseus",
+    image: "Odysseus",
+    user: ["Baofu"],
+    opus: ["P2EP"]
+  },
+  {
+    persona: "Prometheus",
+    image: "Baofu_Prometheus",
+    user: ["Baofu"],
+    opus: ["P2EP"]
+  },
+  {
+    persona: "Nyarlathotep",
+    image: "Joker_Nyarlathotep",
+    user: ["Joker"],
+    opus: ["P2IS"]
+  }
 
 ];

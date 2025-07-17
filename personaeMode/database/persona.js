@@ -67,4 +67,12 @@ export const personas = [
 "Mayumi Hashimoto",
 "Manaka Nagao",
 "Ichigo Shikano",
+ "Tatsuya Suou",
+  "Maya Amano",
+  "Lisa Silverman",
+  "Jun Kurosu",
+  "Eikichi Mishina",
+  "Baofu",
+  "Joker",
+
 ];

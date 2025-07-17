@@ -66,7 +66,9 @@ export const portraitsMapPersonae = {
     "Mio Natsukawa": "Mio",
     "Mayumi Hashimoto": "Mayumi",
     "Manaka Nagao": "Manaka",
-    
+      "Maya Amano": "Maya_A",
+   "Joker": "JOKER",
+
 
     
 };

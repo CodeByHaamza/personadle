@@ -43,11 +43,29 @@ The entire experience is built for **daily play**, with memory of your progress 
    A music snippet plays. Guess the character or the track it’s associated with. From boss themes to overworld ambiance — only the most attentive fans will prevail.
 
 
-Each mode is carefully designed with:
+Each mode is carefully designed with:*
+
 - 🎯 Smart autocomplete (with portraits)
 - 🔁 Filter persistence (your choices are remembered)
 - 🧠 Unique logic & difficulty
 - ✨ Fully custom animations and reveal systems
+
+---
+
+## 🚀 How to Play
+
+Just open the game in your browser — no installation required.  
+Your progress is saved automatically via `localStorage`.  
+All features are offline-friendly and 100% private.
+
+You can:
+
+- Play one mode per day (auto-reset at midnight Paris time)
+- Use the **🔁 Replay button** to restart as many times as you want
+- Click the **❌ Give Up button** if you're stuck and want to reveal the answer
+- Track your stats, wins, and streaks per mode
+- Export/import your progress as a JSON file
+
 
 ---
 
@@ -71,6 +89,7 @@ Each mode is carefully designed with:
 ## 📊 Profile System Example
 
 Each player gets a **local account** with:
+
 - 💬 Editable pseudonym
 - 🖼️ Custom avatar (upload & crop)
 - 🟢 Total wins, 🔴 give-ups, 📈 streaks
@@ -101,13 +120,13 @@ Built entirely with **vanilla front-end technologies** — lightweight, fast, an
 | Local Profiles & Stats          | ✅ Done     |
 | Colorblind Mode                 | ✅ Done     |
 | Daily Reset System              | ✅ Done     |
-| Mobile Optimizations (basic)   | ✅ Done     |
-| Full Responsive Design         | 🔜 Planned  |
+| Mobile Support (basic UI scaling) | ✅ Done  |
+| Full Responsive Layout & touch UX | 🔜 Planned |
 | Filter Persistence              | ✅ Done     |
 | Stylized SVG UI (Persona 5)     | ✅ Done     |
 | 🎯 Online Leaderboards           | 🔜 Planned  |
 | 📊 Streak History / Share Stats | 🔜 Planned  |
-| 🌍 Deployment (GitHub ) | 🔜 Planned  |
+| 🌍 Deployment (GitHub) | 🔜 Planned  |
 
 
 
@@ -116,23 +135,28 @@ Built entirely with **vanilla front-end technologies** — lightweight, fast, an
 ## 🏅 Suggested Future Improvements
 
 ### 🎖 Achievements & Badges System
+
 This feature is already in the works!  
 Examples: “First Try!”, “7-Win Streak”, “P4 Specialist”  
 Unlockable in-game and displayed on the player profile
 
 ### 🎼 Audio Customization
+
 Let players unlock and set Persona OSTs as background music  
 Tracks could play in the menu or during gameplay
 
 ### 🖼️ Profile Background Customization
+
 Allow background themes based on favorite game or unlocked milestones  
 Could be subtle (gradients, blurred images, dynamic visuals)
 
 ### 📱 PWA / Mobile App
+
 Turn the game into a **Progressive Web App**  
 Installable on home screen with custom icon and offline play support
 
 ### 🌍 Multi-language Support (EN / FR / JP)
+
 To reach more Persona fans around the world
 
 ---
@@ -142,6 +166,7 @@ To reach more Persona fans around the world
 ## 🧑‍💻 Authors
 
 ### **Hamza** – *Lead Developer*  
+
 🎮 JavaScript logic, game engine, UI animations, profile system  
 👨‍💻 *Computer Science student*  
 🕶️ *Persona, JoJo, and UX design enthusiast*
@@ -149,6 +174,7 @@ To reach more Persona fans around the world
 ---
 
 ### **Léo** – *Data & Design*  
+
 📊 Character databases, portrait mappings, visual layout, mode balancing  
 🎨 *Also a CS student*  
 💡 *UI + database nerd with spreadsheet powers*
@@ -158,6 +184,7 @@ To reach more Persona fans around the world
 ## 🖼️ Screenshots
 
 ### 🧩 Classic Mode
+
 ![Classic](./img/preview/preview_classic.png)
 ![Classic Victory](./img/preview/preview_classic_victory.png)
 
@@ -165,16 +192,20 @@ To reach more Persona fans around the world
 ![Emoji](./img/preview/preview_emoji.png)
 
 ### 🔥 All-Out Attack Mode
+
 ![All-Out Attack](./img/preview/preview_all_out_attack.png)
 ![All-Out Victory](./img/preview/preview_all_out_attack_victory.png)
 
 ### 🖤 Shadow Mode
+
 ![Shadow](./img/preview/preview_shadow.png)
 
 ### 👥 Personae Mode
+
 ![Personae](./img/preview/preview_personae.png)
 
 ### 🎵 Music Mode
+
 ![Music](./img/preview/preview_music.png)
 
 
