@@ -1,250 +1,218 @@
-# 🎭 PERSONADLE
+# PERSONADLE
 
 <p align="center">
   <img src="./img/Logo_PersonaDLE.png" alt="Personadle Logo" width="700">
 </p>
 
+**A daily guessing game set in the Persona universe.**  
+Inspired by [Smashdle](https://smashdle.net), Personadle brings a stylish twist from Persona 1 to Persona 5X.
 
-**A stylish daily guessing game set in the Persona universe.**  
-Inspired by [Smashdle](https://smashdle.net), reimagined with the flair of **Persona** — from P1 to P5X.
-
-Guess a new character each day through silhouettes, emojis, quotes, and more.  
-Every game mode offers a unique challenge tailored to Persona fans, newcomers and veterans alike.
+Each day, guess a new character using visual, textual, or symbolic clues—depending on the mode you choose.  
+Whether you're a long-time fan or new to the series, there's something for everyone.
 
 ---
 
 ## 🧠 Concept
 
-**Personadle** is a free, fan-made web game that celebrates the world of Persona.  
-Your goal: **identify the daily character** by guessing based on the clues — visual, textual, logical, or symbolic — depending on the selected mode.
+**Personadle** is a free, fan-made browser game celebrating the world of Persona.  
+Your goal: **identify the daily character** based on clues tailored to each mode—silhouettes, quotes, personas, emojis, and more.
 
-The entire experience is built for **daily play**, with memory of your progress and performance in each mode, plus stylish animations and Persona-inspired visuals.
+It's designed for daily play, with your progress saved locally and a UI inspired by the Persona aesthetic.
 
 ---
 
 ## 🎮 Game Modes
 
-1. 🧩 **Classic Mode**  
-   Compare the guessed character's traits — Arcana, gender, age, game, Persona, etc. — with color-coded feedback and symbols. Each attempt gives detailed clues to help you narrow down the target.
+1. **Classic Mode**  
+   Compare character traits—Arcana, gender, age, game, Persona, etc.—with color-coded feedback. Each guess brings you closer to the target.
 
-2. 😺 **Emoji Mode**  
-   A series of emojis is revealed progressively. Use intuition and logic to link them to a Persona character. Be quick — the emoji chain gets weirder the longer you wait.
+2. **Emoji Mode**  
+   A series of emojis gradually appears. Use logic (and a bit of chaos) to link them to a character. The longer you wait, the weirder it gets.
 
-3. 🔥 **All-Out Attack Mode**  
-   A battle animation (GIF) is revealed behind a blur. Each incorrect guess makes the image clearer. Recognize the attack pattern, pose, or costume!
+3. **All-Out Attack Mode**  
+   A blurred battle animation is revealed step by step. Spot the pose, the costume, or the attack pattern to find who's behind it.
 
-4. 🖤 **Shadow Mode**  
-   A mysterious black silhouette slowly zooms out with every wrong attempt. No blur — just pure outline. Visual recognition and character memory are key here.
+4. **Shadow Mode**  
+   A dark silhouette zooms out with each wrong guess. No blur—just outlines and your memory.
 
-5. 👥 **Personae Mode**  
-   You’re shown a Persona. Your job? Guess who uses it. With multiple games and spin-offs, this one's for lore enthusiasts and Velvet Room veterans.
+5. **Personae Mode**  
+   You're shown a Persona. Can you guess who uses it? A challenge for Velvet Room veterans and lore lovers.
 
-6. 🎵 **Music Mode**  
-   A music snippet plays. Guess the character or the track it’s associated with. From boss themes to overworld ambiance — only the most attentive fans will prevail.
+6. **Music Mode**  
+   A short music clip plays. Identify the character or the theme. From overworld tracks to boss music—only true fans will know.
 
+---
 
-Each mode is carefully designed with:*
+### All modes include:
 
-- 🎯 Smart autocomplete (with portraits)
-- 🔁 Filter persistence (your choices are remembered)
-- 🧠 Unique logic & difficulty
-- ✨ Fully custom animations and reveal systems
+- Smart autocompletion with character portraits  
+- Filter persistence between sessions  
+- Unique mechanics per mode  
+- Custom animations and reveal systems  
 
 ---
 
 ## 🚀 How to Play
 
-Just open the game in your browser — no installation required.  
-Your progress is saved automatically via `localStorage`.  
-All features are offline-friendly and 100% private.
+No installation needed—just open the game in your browser.
 
-You can:
+- Play once per day (auto-resets at midnight, Paris time)
+- Use the **Replay** button to restart as many times as you'd like
+- Use the **Give Up** button if you're stuck and want the answer
+- Your progress and stats are saved locally
+- You can export or import your data as a JSON file
 
-- Play one mode per day (auto-reset at midnight Paris time)
-- Use the **🔁 Replay button** to restart as many times as you want
-- Click the **❌ Give Up button** if you're stuck and want to reveal the answer
-- Track your stats, wins, and streaks per mode
-- Export/import your progress as a JSON file
-
+All data is stored in your browser using `localStorage`. Nothing is uploaded online.
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-- 🎨 **Persona 5-inspired UI** with SVG menus, blur/zoom reveals, and stylized feedback
-- 📆 **Daily challenge** system (auto-reset at midnight Paris time)
-- 🔁 **Persistent filters** per mode (P1–P5X), auto-restored on refresh with instant reset logic
-- 🧠 **Smart autocompletion** with portrait thumbnails and keyboard navigation
-- 📱 **Fully responsive** on mobile, tablet, and desktop
-- 🌙 **Dark mode** enabled by default
-- 🟡 **Colorblind mode** available
-- 🧑‍🎤 **Player profile system**:
-  - 🎭 Choose your pseudo & avatar (with cropping)
-  - 🏆 Track wins, give-ups, longest streak, and favorite mode
-  - 📤 Export / import / reset your data locally
-- 🧮 **Stats system per mode** with anti-duplicate protection and session time tracking
+- Persona 5-inspired UI with SVG effects and dynamic transitions
+- Daily reset system synced to Paris time
+- Persistent game filters (P1 to P5X) across sessions
+- Keyboard-friendly autocompletion with thumbnails
+- Fully responsive across devices
+- Dark mode enabled by default
+- Optional colorblind-friendly symbols
+- Local player profile:
+  - Custom pseudonym & avatar (with cropping)
+  - Stats: wins, give-ups, streaks, favorite mode
+  - Export/import/reset via JSON
+- Per-mode session tracking with anti-duplicate logging
 
 ---
 
-## 📊 Profile System Example
+## 📊 Profile Overview
 
-Each player gets a **local account** with:
+Each player has a local profile with:
 
-- 💬 Editable pseudonym
-- 🖼️ Custom avatar (upload & crop)
-- 🟢 Total wins, 🔴 give-ups, 📈 streaks
-- 🎮 Preferred game mode based on playtime
-- ⏳ Daily session time tracking
-- 🔐 Export / import / reset buttons (via JSON)
+- Editable pseudonym  
+- Custom avatar (upload + crop)  
+- Tracked wins, give-ups, streaks  
+- Favorite mode (based on time spent)  
+- Daily playtime tracker  
+- Full data control: export, import, reset  
 
-Stored in `localStorage` — **nothing is sent online**, it's 100% private.
+Everything is saved privately in your browser only.
 
 ---
 
 ## 🛠️ Tech Stack
 
-Built entirely with **vanilla front-end technologies** — lightweight, fast, and framework-free:
+Built entirely with vanilla web technologies — fast, lightweight, and dependency-free:
 
-- **HTML5** – semantic markup, accessible UI
-- **CSS3** – animations, dark mode, responsive design
-- **JavaScript (ES6+)** – modular logic, localStorage, dynamic UI
-- **No dependencies**, no frameworks, no external calls — pure web magic
+- **HTML5** — semantic markup and accessible structure  
+- **CSS3** — custom animations, responsive design, dark mode  
+- **JavaScript (ES6+)** — modular logic, localStorage, dynamic UI  
+
+No frameworks, no external libraries, no backend.
 
 ---
 
 ## 🚧 Roadmap
 
-| Feature                         | Status     |
-|---------------------------------|------------|
-| All 6 Game Modes                | ✅ Done     |
-| Local Profiles & Stats          | ✅ Done     |
-| Colorblind Mode                 | ✅ Done     |
-| Daily Reset System              | ✅ Done     |
-| Mobile Support (basic UI scaling) | ✅ Done  |
-| Full Responsive Layout & touch UX | 🔜 Planned |
-| Filter Persistence              | ✅ Done     |
-| Stylized SVG UI (Persona 5)     | ✅ Done     |
-| 🎯 Online Leaderboards           | 🔜 Planned  |
-| 📊 Streak History / Share Stats | 🔜 Planned  |
-| 🌍 Deployment (GitHub) | 🔜 Planned  |
-
-
+| Feature                            | Status     |
+|------------------------------------|------------|
+| All 6 Game Modes                   | ✅ Done     |
+| Local Profiles & Stats             | ✅ Done     |
+| Colorblind Mode                    | ✅ Done     |
+| Daily Reset System                 | ✅ Done     |
+| Mobile UI Support                  | ✅ Done     |
+| Full Responsive Layout             | 🔜 Planned  |
+| Filter Persistence                 | ✅ Done     |
+| Persona-style SVG UI               | ✅ Done     |
+| Online Leaderboards                | 🔜 Planned  |
+| Shareable Streak History / Stats  | 🔜 Planned  |
+| Website Deployment (GitHub Pages) | 🔜 Planned  |
 
 ---
 
-## 🏅 Suggested Future Improvements
+## 🏅 Coming Soon
 
-### 🎖 Achievements & Badges System
+### Achievements & Badges
 
-This feature is already in the works!  
-Examples: “First Try!”, “7-Win Streak”, “P4 Specialist”  
-Unlockable in-game and displayed on the player profile
+Unlockable milestones based on your gameplay.  
+Examples: “First Try!”, “7-Win Streak”, “P4 Expert”  
+Badges will show up in your profile.
 
-### 🎼 Audio Customization
+### Audio Customization
 
-Let players unlock and set Persona OSTs as background music  
-Tracks could play in the menu or during gameplay
+Unlock Persona music to set as background audio.  
+Could play in menus or during gameplay.
 
-### 🖼️ Profile Background Customization
+### Profile Backgrounds
 
-Allow background themes based on favorite game or unlocked milestones  
-Could be subtle (gradients, blurred images, dynamic visuals)
+Choose a visual background based on your favorite game or achievements.  
+From soft gradients to dynamic effects.
 
-### 📱 PWA / Mobile App
+### Mobile App / PWA
 
-Turn the game into a **Progressive Web App**  
-Installable on home screen with custom icon and offline play support
+Make Personadle installable as a Progressive Web App.  
+Offline play and quick access with a custom icon.
 
-### 🌍 Multi-language Support (EN / FR / JP)
+### Multi-language Support (EN / FR / JP)
 
-To reach more Persona fans around the world
-
----
-
-
-
-## 🧑‍💻 Authors
-
-### **Hamza** – *Lead Developer*  
-
-🎮 JavaScript logic, game engine, UI animations, profile system  
-👨‍💻 *Computer Science student*  
-🕶️ *Persona, JoJo, and UX design enthusiast*
+To make the game more accessible for Persona fans around the world.
 
 ---
 
-### **Léo** – *Data & Design*  
+## 👤 Authors
 
-📊 Character databases, portrait mappings, visual layout, mode balancing  
-🎨 *Also a CS student*  
-💡 *UI + database nerd with spreadsheet powers*
+### **Hamza** – Lead Developer  
+Game logic, animations, UI, profile system  
+Computer science student and Persona/JoJo enjoyer
+
+### **Léo** – Data & Design  
+Character database, layout balancing, portraits  
+Spreadsheet wizard and UI enthusiast
 
 ---
 
 ## 🖼️ Screenshots
 
-### 🧩 Classic Mode
-
-![Classic](./img/preview/preview_classic.png)
+### Classic Mode  
+![Classic](./img/preview/preview_classic.png)  
 ![Classic Victory](./img/preview/preview_classic_victory.png)
 
-### 😺 Emoji Mode
+### Emoji Mode  
 ![Emoji](./img/preview/preview_emoji.png)
 
-### 🔥 All-Out Attack Mode
-
-![All-Out Attack](./img/preview/preview_all_out_attack.png)
+### All-Out Attack Mode  
+![All-Out Attack](./img/preview/preview_all_out_attack.png)  
 ![All-Out Victory](./img/preview/preview_all_out_attack_victory.png)
 
-### 🖤 Shadow Mode
-
+### Shadow Mode  
 ![Shadow](./img/preview/preview_shadow.png)
 
-### 👥 Personae Mode
-
+### Personae Mode  
 ![Personae](./img/preview/preview_personae.png)
 
-### 🎵 Music Mode
-
+### Music Mode  
 ![Music](./img/preview/preview_music.png)
-
 
 ---
 
 ## 🛡️ License
 
-This project is licensed under the [MIT License](./LICENSE.txt).  
-You are free to use, modify, and redistribute the code for non-commercial use.  
-Just credit the creators, and keep it stylish 🎭
+This project is under the [MIT License](./LICENSE.txt).  
+You’re free to use, modify, and share the code for non-commercial use — just credit the authors and keep it stylish.
 
 ---
 
 ## ⚠️ Disclaimer
 
-**Personadle is an unofficial, fan-made game.**  
-It is not affiliated with ATLUS, SEGA, or the Persona franchise.
+**Personadle is a fan-made project** and is not affiliated with ATLUS, SEGA, or the Persona franchise.
 
-All characters, music, and media referenced belong to their rightful owners.  
-No assets are redistributed — only reinterpreted via minimal, original recreations for educational and fan purposes.
-
----
-
-## 💖 Support the Project
-
-If you enjoy Personadle:
-
-- 🌟 Star the repo on GitHub
-- 📢 Share it with fellow Persona fans
-- ☕ Support the devs when donation links go live!
-
-Thank you for playing — and don’t forget to guess today’s character! 🎭
+All characters, music, and references remain the property of their respective rights holders.  
+No copyrighted assets are used — all visuals and audio are minimal recreations for educational and entertainment purposes.
 
 ---
 
-## 🙏 Credits & Thanks
+## 🙌 Thanks & Credits
 
-- 💡 Inspired by **[SmashDLE](https://smashdle.net/)** by *Pimeko*
-- 👨‍💻 Referenced structure from [Pokedle](https://github.com/maxm33/pokedle)
-- 🎶 Persona series by **ATLUS / SEGA** — thank you for the universe
+- Inspired by **[Smashdle](https://smashdle.net/)** by *Pimeko*  
+- Codebase inspired by [Pokedle](https://github.com/maxm33/pokedle)  
+- Huge thanks to ATLUS and SEGA for creating the Persona universe
 
-Let’s make every day a Metaverse mission!
+Let’s make every day a Metaverse mission.
