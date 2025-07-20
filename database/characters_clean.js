@@ -301,7 +301,7 @@ export const characters = [
   {
     nom: "Akinari Kamiki",
     genre: ["Human", "Male"],
-    age: "19",
+    age: "15-20",
     arcane: ["Sun"],
     opus: ["P3", "P3FES", "P3P"],
     personaUser: false,
