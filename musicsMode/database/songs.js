@@ -89,7 +89,7 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=5iksTXMTh-8"
   },
   {
-    titre: "Colour Your Night",
+    titre: "Color Your Night",
     fichier: "Colour_Your_Night.mp3",
     opus: ["P3R"],
     image: "P3R.webp",

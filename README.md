@@ -10,6 +10,11 @@ Inspired by [Smashdle](https://smashdle.net), Personadle brings a stylish twist 
 Each day, guess a new character using visual, textual, or symbolic clues—depending on the mode you choose.  
 Whether you're a long-time fan or new to the series, there's something for everyone.
 
+
+Each day, guess a new character using visual, textual, or symbolic clues—depending on the mode you choose.  
+Whether you're a long-time fan or new to the series, there's something for everyone.  
+👉 Try it now at [**personadle.net**](https://personadle.net)
+
 ---
 
 ## 🧠 Concept

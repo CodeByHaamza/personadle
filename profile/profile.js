@@ -147,7 +147,7 @@ const avatarList = [
   // === P3 ===
   "Yuki.jpeg", "yuki.jpg","Kotone2.jpeg", "Kotone.jpeg","Kotone3.jpeg","Aigis2.jpg", "Aigis.jpg", "Akihiko.jpg", "Mitsuru.jpg", "Mitsuru.webp",
   "Junpei2.jpg", "Junpei.png", "Fuuka2.jpeg", "Fuuka.jpeg", "Ken.jpeg", "Koromaru2.jpg", "Koromaru.jpg", "Shinji.jpg", "Shinji.webp","Yukari2.jpg", "Yukari.jpg",
-  "Metis.jpg", "Metis2.jpeg", "Elizabeth.jpg", "Elizabeth2.jpg", 
+  "Metis.jpg", "Metis2.jpeg", "Elisabeth.jpeg", "Elisabeth2.jpeg", 
 
   // === P4 ===
   "Yu2.jpg", "Yu.jpg", "Yosuke2.jpg", "Yosuke.jpg", "Chie2.jpg", "Chie.jpg", "Yukiko2.jpg", "Yukiko.jpg",
