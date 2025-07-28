@@ -9,7 +9,7 @@ export const musicTitles = [
   "Burn My Dread",
   "Changing Seasons",
   "Colors Flying High",
-  "Colour Your Night",
+  "Color Your Night",
   "Dance!",
   "Daredevil",
   "Deep Breath Deep Breath",
