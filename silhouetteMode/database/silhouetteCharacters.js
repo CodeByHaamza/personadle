@@ -143,9 +143,11 @@ export const silhouetteCharacters = [
   { nom: "Joker", image: "Joker_silhouette", opus: ["P2IS"] },
 
 
-    { nom: "Izanami", image: "Izanami_shilouette", opus: ["P4"] }
+    { nom: "Izanami", image: "Izanami_shilouette", opus: ["P4"] },
 
-
+    // === Persona 5 Tactica ===
+{ nom: "Erina", image: "Erina_silhouette", opus: ["P5T"] },
+{ nom: "Toshiro Kasukabe", image: "Toshiro_silhouette", opus: ["P5T"] },
 
   
 ]; 

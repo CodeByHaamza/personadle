@@ -904,7 +904,7 @@ export const characters = [
       genre: ["Velvet","Female"],
       age: "Unknown",
       arcane: ["Strength"],
-      opus: ["P5","P5R","P5T"],
+      opus: ["P5","P5R","P5T","P5S"],
       personaUser: false,
       persona: "NONE",
       emoji: ["👑", "🔐", "👯‍♀️"],
@@ -1706,6 +1706,31 @@ export const characters = [
     emoji: ["💀","👹","⛽"],
     quote: "Knowledge of the truth is not everything. Yet drunk with truth, you exceeded your role and became too involved... Now, learn for yourselves whose wrath you have brought down!"
   },
+
+
+  // Persona 5 Tactica exclusifs
+{
+  nom: "Erina",
+  genre: ["Human","Female"],
+  age: "15-20",
+  arcane: ["NONE"],
+  opus: ["P5T"],
+  personaUser: true,
+  persona: "Ernesto",
+  emoji: ["🎀", "⚔️", "🔥"],
+  quote: "I'm scared we're entering a world where corruption is free to flourish... And, even worse... I'm scared of becoming someone who's okay with that. So I fight because I refuse to give up and turn a blind eye to the injustices in my world."
+},
+{
+  nom: "Toshiro Kasukabe",
+  genre: ["Human","Male"],
+  age: "21-40",
+  arcane: ["NONE"],
+  opus: ["P5T"],
+  personaUser: true,
+  persona: "Ernesto",
+  emoji: ["🧑‍💼", "📜", "🕊️"],
+  quote: "You can't stop us. The rebellion is here. The rebellion... within my heart!"
+},
   
   ];
 

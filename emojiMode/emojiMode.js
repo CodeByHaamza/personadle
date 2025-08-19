@@ -563,8 +563,13 @@ function setupDailyReset() {
   setTimeout(() => {
     console.log("🔄 Auto-reset triggered at Paris midnight");
     const resetBtn = document.getElementById("resetButton");
-    if (resetBtn) resetBtn.click();
-    else location.reload(); // Fallback si le bouton est manquant
+   if (resetBtn) {
+  resetGame(); // ✅ on appelle la fonction directement
+  location.reload(); // recharge la page pour garder un état propre
+} else {
+  location.reload();
+}
+
   }, timeUntilMidnight + 500);
 }
 
@@ -583,8 +588,13 @@ function checkResetOnLoad() {
     }
 
     const resetBtn = document.getElementById("resetButton");
-    if (resetBtn) resetBtn.click();
-    else location.reload(); // fallback si pas de bouton
+if (resetBtn) {
+  resetGame(); // ✅ on ne simule plus de clic
+  location.reload();
+} else {
+  location.reload();
+}
+
   } else {
     console.log("📅 Même jour, aucune réinitialisation nécessaire (Emoji)");
   }

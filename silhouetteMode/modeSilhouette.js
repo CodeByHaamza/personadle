@@ -37,6 +37,8 @@ const maxAttempts = 5;
 let maxZoomOut = 1;
 let currentZoom = 1.8;
 let gameOver = false;
+let currentPickToken = 0;
+
 let lastFiveTargets = [];
 
 // === ELEMENTS ===
@@ -67,7 +69,6 @@ function applyZoom(zoomFactor) {
   silhouetteImg.style.transform = `scale(${zoomFactor})`;
 }
 
-// === RANDOM ===
 function pickCharacter() {
   filteredCharacters = getFilteredCharacters();
   if (filteredCharacters.length === 0) {
@@ -84,7 +85,6 @@ function pickCharacter() {
     return;
   }
 
-  target = choices[Math.floor(Math.random() * choices.length)];
   lastFiveTargets.push(target.nom);
   if (lastFiveTargets.length > 5) lastFiveTargets.shift();
 
@@ -97,15 +97,24 @@ function pickCharacter() {
   silhouetteImg.style.filter = "brightness(0)";
   silhouetteImg.src = ""; // vide temporairement pour éviter le flash
 
+  // 🔑 Protection anti-course
+  const myToken = ++currentPickToken;
+
   // Pré-charge via objet Image
   const tempImage = new Image();
   tempImage.onload = () => {
+    if (myToken !== currentPickToken) return; // un autre pick a eu lieu entre-temps
     silhouetteImg.src = tempImage.src;
     silhouetteImg.alt = "Silhouette";
     silhouetteImg.style.visibility = "visible";
     silhouetteImg.style.transition = "transform 0.3s ease-out";
   };
-  tempImage.src = `./database/img/${target.image}.webp`;
+  tempImage.onerror = () => {
+    if (myToken !== currentPickToken) return;
+    console.error(`❌ Image introuvable pour ${target.nom} → ./database/img/${encodeURIComponent(target.image)}.webp`);
+  };
+
+  tempImage.src = `./database/img/${encodeURIComponent(target.image)}.webp`;
 
   // Sauvegarde dans localStorage
   localStorage.setItem("silhouetteTarget", JSON.stringify(target));

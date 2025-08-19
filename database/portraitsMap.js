@@ -61,4 +61,8 @@ export const portraitsMap = {
   "Yumi Shiina": "Yumi_S",
   "Taro Namatame": "Namatame",
 "Izanami": "Izanami",
+  "Erina": "Erina",
+  "Toshiro Kasukabe": "Toshiro",
+  
+
 };

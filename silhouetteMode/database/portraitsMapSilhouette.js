@@ -127,6 +127,8 @@ export const portraitsMapSilhouette = {
    "Maya Amano": "Maya_A",
    "Joker": "JOKER",
    "Izanami": "Izanami",
+  "Erina": "Erina",
+  "Toshiro Kasukabe": "Toshiro",
 
 
   

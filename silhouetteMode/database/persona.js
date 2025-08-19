@@ -143,4 +143,8 @@
   "Joker",
   "Izanami",
 
+  // === Persona 5 Tactica ===
+  "Erina",
+  "Toshiro Kasukabe",
+
   ];

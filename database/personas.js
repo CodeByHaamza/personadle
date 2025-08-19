@@ -155,6 +155,8 @@ export const personas = [
   "Merope",
   "Taro Namatame",
 "Izanami",
+"Erina",
+"Toshiro Kasukabe",
 
 
 ];

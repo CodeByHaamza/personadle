@@ -122,6 +122,120 @@
   </p>
 </footer>
 
+<!-- 🔔 News Popup -->
+<button id="newsBtn" class="news-btn">📰 News</button>
+
+<div id="newsModal" class="news-modal" style="display: none;">
+  <div class="news-modal-content">
+    <span class="close" id="closeNews">&times;</span>
+    <h2>📰 Latest Updates</h2>
+
+    <!-- Exemple de news -->
+    <article class="news-item">
+      <p class="news-date">19 Aug 2025</p>
+      <ul>
+        <li>✨ Added Persona 5 Tactica characters (Erina, Toshiro).</li>
+        <li>🐞 Bug fix: Silhouette Mode now shows correct images.</li>
+        <li>⚙️ Emoji Mode reset issue resolved.</li>
+      </ul>
+    </article>
+
+    
+  </div>
+</div>
+
+<style>
+/* Bouton News */
+.news-btn {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;      
+  background: #eee;      /* clair par défaut */
+  color: #111;           /* texte sombre */
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 15px;
+  font-weight: bold;
+  transition: background 0.2s, transform 0.2s;
+}
+.news-btn:hover { 
+  background: #ddd;      /* hover plus foncé */
+  transform: scale(1.05);
+}
+
+/* Modal News */
+.news-modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+}
+
+.news-modal-content {
+  background: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+}
+
+.news-item {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+}
+.news-date {
+  margin: 0;
+  font-weight: bold;
+  font-size: 13px;
+  color: #444;
+}
+
+/* Dark mode support */
+body.darkmode .news-modal-content {
+  background: #1e1e1e;
+  color: #eee;
+}
+body.darkmode .news-date { color: #bbb; }
+
+/* Bouton close */
+.news-modal-content .close {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Dark mode pour le bouton News */
+body.darkmode .news-btn {
+  background: #222;   /* sombre */
+  color: #fff;        /* texte clair */
+}
+body.darkmode .news-btn:hover {
+  background: #444;
+}
+
+
+</style>
+
+<script>
+  const newsModal = document.getElementById("newsModal");
+  const newsBtn = document.getElementById("newsBtn");
+  const closeNews = document.getElementById("closeNews");
+
+  newsBtn.onclick = () => newsModal.style.display = "block";
+  closeNews.onclick = () => newsModal.style.display = "none";
+  window.onclick = (e) => { if (e.target === newsModal) newsModal.style.display = "none"; };
+</script>
+
+
 <!-- Legal Modal -->
 <div id="legalModal" class="legal-modal" style="display: none;">
   <div class="legal-content">
