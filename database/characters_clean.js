@@ -748,7 +748,7 @@ export const characters = [
       genre: ["Human","Female"],
       age: "15-20",
       arcane: ["Faith"],
-      opus: ["P5","P5R","P5T"],
+      opus: ["P5R","P5T"],
       personaUser: true,
       persona: "Cendrillon",
       emoji: ["✨", "🎀", "🤸‍♀️"],

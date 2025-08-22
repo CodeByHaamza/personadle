@@ -1,11 +1,11 @@
+// === IMPORTS ===
 import { personas as originalPersonas } from "../database/personas.js";
 import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
 import { updateProfileStats } from "../profile/profileStats.js";
 
 
-
-// === Filtres par opus ===
+// === CONSTANTES / HELPERS ===
 const validOpus = {
   P1: ["P1"],
   P2: ["P2IS", "P2EP"],
@@ -14,17 +14,55 @@ const validOpus = {
   P5: ["P5", "P5R", "P5S", "P5T"]
 };
 
-let activeOpus = ["P1", "P2", "P3", "P4", "P5"];
-let personas = [...originalPersonas];
-let gameOver = false;
 const modeName = "Emoji";
-const todayKey = `statsLogged_${modeName}_${new Date().toISOString().split("T")[0]}`;
-let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
-let sessionStartTime = Date.now();
 
+// Date "YYYY-MM-DD" **en Europe/Paris** (DST safe)
+function parisDateKey(d = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Paris",
+    year: "numeric", month: "2-digit", day: "2-digit"
+  }).format(d);
+}
+
+// Clé de stats du jour (toujours recalculée à la volée)
+function getTodayStatsKey() {
+  return `statsLogged_${modeName}_${parisDateKey()}`;
+}
+
+// Ms jusqu'au prochain minuit Paris (sans parser de string locale)
+function msUntilNextParisMidnight() {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Paris",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+  })
+    .formatToParts(now)
+    .reduce((acc, p) => ((acc[p.type] = p.value), acc), {});
+
+  // On construit deux dates « Z » pour ne manipuler que des deltas
+  const parisNow = new Date(`${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:${parts.second}Z`);
+  const midnightParis = new Date(`${parts.year}-${parts.month}-${parts.day}T00:00:00Z`);
+  const nextMidnightParis = new Date(midnightParis.getTime() + 24 * 60 * 60 * 1000);
+
+  return nextMidnightParis.getTime() - parisNow.getTime();
+}
+
+
+// === ÉTAT ===
+let activeOpus = ["P1", "P2", "P3", "P4", "P5"];
+let personas = [...originalPersonas];   // sera remplacé par la liste filtrée (noms)
+let gameOver = false;
+
+let sessionStartTime = Date.now();
 let attempts = 0;
 let target = null;
 
+// Pour éviter la multiplication des listeners sur l’autocomplete:
+let autocompleteBound = false;
+
+
+// === POOL / FILTRES ===
 function filterCharacterPool() {
   const allValid = activeOpus.flatMap(o => validOpus[o]);
   return characters.filter(c => {
@@ -33,7 +71,16 @@ function filterCharacterPool() {
   });
 }
 
-function initializeAutocomplete(element, array) {
+
+// === AUTOCOMPLETE ===
+function initializeAutocomplete(element, sourceArray) {
+  // Si déjà bind, on remplace l’input par un clone pour reset tous les listeners
+  if (autocompleteBound) {
+    const clone = element.cloneNode(true);
+    element.parentNode.replaceChild(clone, element);
+    element = clone;
+  }
+
   let currentFocus = -1;
 
   element.addEventListener("input", function () {
@@ -47,9 +94,8 @@ function initializeAutocomplete(element, array) {
     this.parentNode.appendChild(list);
 
     const matches = [];
-
-    for (let i = 0; i < array.length; i++) {
-      const displayName = array[i];
+    for (let i = 0; i < sourceArray.length; i++) {
+      const displayName = sourceArray[i];
       const lowerName = displayName.toLowerCase();
       const lowerVal = val.toLowerCase();
 
@@ -129,6 +175,8 @@ function initializeAutocomplete(element, array) {
   document.addEventListener("click", (e) => {
     closeList(e.target, element);
   });
+
+  autocompleteBound = true;
 }
 
 function closeList(e, inputElement) {
@@ -139,10 +187,12 @@ function closeList(e, inputElement) {
 }
 
 function removeFromAutocomplete(name) {
-  const index = personas.findIndex(n => n.toLowerCase() === name.toLowerCase());
-  if (index !== -1) personas.splice(index, 1);
+  const idx = personas.findIndex(n => n.toLowerCase() === name.toLowerCase());
+  if (idx !== -1) personas.splice(idx, 1); // on MUTATE pour que l’autocomplete suive sans rebind
 }
 
+
+// === CONFETTIS ===
 function showConfettiExplosion() {
   const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
   const numEmojisPerSide = 20;
@@ -169,6 +219,8 @@ function showConfettiExplosion() {
   }
 }
 
+
+// === UI / HINTS ===
 function updateEmojiHint() {
   const displayZone = document.getElementById("emojiDisplay");
   displayZone.innerHTML = "";
@@ -190,6 +242,8 @@ function updateCounters() {
   }
 }
 
+
+// === GAME LOGIC ===
 function checkEmojiGuess(name, forceReveal = false) {
   const displayZone = document.getElementById("emojiDisplay");
   const winMessage = document.getElementById("winMessage");
@@ -204,51 +258,55 @@ function checkEmojiGuess(name, forceReveal = false) {
   }
 
   if (guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal) {
+    // Révèle tous les émojis
     displayZone.innerHTML = "";
     target.emoji.forEach(e => {
       const span = document.createElement("span");
       span.textContent = e;
       span.classList.add("emoji-unit");
       displayZone.appendChild(span);
-      // 🟩 Ajout à faire ici :
-  localStorage.setItem("emojiGameOver", "true");
-  localStorage.setItem("emojiForceReveal", forceReveal); // pour distinguer victoire ou give up
-
     });
 
+    // Marqueurs de fin
+    localStorage.setItem("emojiGameOver", "true");
+    localStorage.setItem("emojiForceReveal", String(forceReveal));
+
+    // Portrait
     const imageName = portraitsMap[target.nom] || target.nom.split(" ")[0];
     const portraitName = encodeURIComponent(imageName);
     victoryPortrait.src = `../database/portraits/${portraitName}.webp`;
     victoryPortrait.alt = target.nom;
 
+    // Message
     winMessage.textContent = forceReveal
       ? `You gave up! The answer was: ${target.nom}`
       : `✅ Correct! It was ${target.nom}!`;
 
+    // UI fin de partie
     victoryBox.style.display = "flex";
     showConfettiExplosion();
-revealNextLink({
-  prevHref: "../classiqueMode/classiqueMode.html",
-  nextHref: "../allOutAttackMode/allOutAttack.html"
-});
+    revealNextLink({
+      prevHref: "../classiqueMode/classiqueMode.html",
+      nextHref: "../allOutAttackMode/allOutAttack.html"
+    });
 
-if (!statsAlreadyLogged) {
-  updateProfileStats({
-    result: forceReveal ? "giveup" : "win",
-    mode: modeName,
-    sessionTime: Date.now() - sessionStartTime
-  });
-  localStorage.setItem(todayKey, "true");
-  statsAlreadyLogged = true;
-}
-
+    // Stats (anti double comptage par clé du jour Paris)
+    const todayKey = getTodayStatsKey();
+    if (!localStorage.getItem(todayKey)) {
+      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+      updateProfileStats({
+        result: forceReveal ? "giveup" : "win",
+        mode: modeName,
+        timeSpent
+      });
+      localStorage.setItem(todayKey, "true");
+    }
 
     textbar.disabled = true;
     document.getElementById("guessButton").disabled = true;
     document.getElementById("giveUpButton").disabled = true;
     gameOver = true;
     localStorage.setItem("emojiWin", "true");
-
   } else {
     attempts++;
     localStorage.setItem("attemptsEmoji", attempts);
@@ -267,9 +325,8 @@ function enableGiveUpButton() {
 }
 
 function resetGame() {
-  localStorage.removeItem(todayKey);
-statsAlreadyLogged = false;
-sessionStartTime = Date.now();
+  // ⚠️ Ne PAS supprimer la clé de stats du jour: on garde l’anti-double comptage
+  sessionStartTime = Date.now();
 
   const displayZone = document.getElementById("emojiDisplay");
   const winMessage = document.getElementById("winMessage");
@@ -286,190 +343,71 @@ sessionStartTime = Date.now();
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
   textbar.value = "";
 
-  personas = filterCharacterPool().map(c => c.nom);
-  initializeAutocomplete(textbar, personas);
-  gameOver = false;
-  attempts = 1;
+  // Pool filtré + liste de noms MUTABLE pour que l’autocomplete suive
+  const pool = filterCharacterPool();
+  personas.length = 0;
+  personas.push(...pool.map(c => c.nom));
 
-  const filteredCharacters = filterCharacterPool();
+  gameOver = false;
+  attempts = 1; // garde ton UX: 1 emoji révélé dès le départ
+
+  const filteredCharacters = pool;
   target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
+
   updateEmojiHint();
   updateCounters();
+
   const nav = document.getElementById("modeNavigationContainer");
-if (nav) {
-  nav.style.display = "none";
-  nav.classList.remove("reveal-style");
-}
-
-
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  applyDarkModeStyles();
-  const textbar = document.getElementById("textbar");
-  const guessButton = document.getElementById("guessButton");
-  const giveUpButton = document.getElementById("giveUpButton");
-  const resetButton = document.getElementById("resetButton");
-
-  // === Gestion filtres ===
-  const filterButtons = document.querySelectorAll(".filter-btn");
-  // ✅ Lecture des filtres sauvegardés
-const savedFilters = JSON.parse(localStorage.getItem("filters_Emoji"));
-if (Array.isArray(savedFilters)) {
-  activeOpus = savedFilters;
-}
-
-// ✅ Appliquer l’état visuel aux boutons
-filterButtons.forEach(btn => {
-  const filter = btn.dataset.opus;
-  if (activeOpus.includes(filter)) {
-    btn.classList.add("active");
-  } else {
-    btn.classList.remove("active");
+  if (nav) {
+    nav.style.display = "none";
+    nav.classList.remove("reveal-style");
   }
-});
-
-  filterButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      btn.classList.toggle("active");
-      activeOpus = Array.from(filterButtons)
-      
-        .filter(b => b.classList.contains("active"))
-        .map(b => b.dataset.opus);
-          // ✅ Sauvegarde dans localStorage
-    localStorage.setItem("filters_Emoji", JSON.stringify(activeOpus));
-
-      personas = filterCharacterPool().map(c => c.nom);
-      initializeAutocomplete(textbar, personas);
-
-      const filteredCharacters = filterCharacterPool();
-      if (filteredCharacters.length > 0) {
-        target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
-        localStorage.setItem("targetEmoji", JSON.stringify(target));
-        attempts = 1;
-        localStorage.setItem("attemptsEmoji", attempts);
-        updateEmojiHint();
-        updateCounters();
-      }
-    });
-  });
-
-  personas = filterCharacterPool().map(c => c.nom);
-  initializeAutocomplete(textbar, personas);
-
-  target = JSON.parse(localStorage.getItem("targetEmoji")) || filterCharacterPool()[Math.floor(Math.random() * filterCharacterPool().length)];
-  attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
-  const emojiGameOver = localStorage.getItem("emojiGameOver") === "true";
-const forceReveal = localStorage.getItem("emojiForceReveal") === "true";
+}
 
 
-  localStorage.setItem("targetEmoji", JSON.stringify(target));
-  localStorage.setItem("attemptsEmoji", attempts);
-
-  updateEmojiHint();
-  updateCounters();
-  if (attempts >= 8) enableGiveUpButton();
-  if (emojiGameOver) checkEmojiGuess(target.nom, forceReveal);
-
-
-  guessButton.addEventListener("click", () => {
-    if (gameOver) return;
-    const guess = textbar.value.trim();
-    if (!guess) return;
-    checkEmojiGuess(guess);
-    textbar.value = "";
-  });
-
-  // Par cette version corrigée :
-giveUpButton.addEventListener("click", () => {
-  // ✅ Ajouter cette vérification pour empêcher le give up si pas assez d'essais
-  if (attempts < 8) return;
-  
-  if (!gameOver) checkEmojiGuess(target.nom, true);
-});
-
-  resetButton.addEventListener("click", () => {
-    localStorage.removeItem("targetEmoji");
-    localStorage.removeItem("attemptsEmoji");
-    resetGame();
-    localStorage.removeItem("emojiGameOver");
-localStorage.removeItem("emojiForceReveal");
-
-revealNextLink({
-  prevHref: "../classiqueMode/classiqueMode.html",
-  nextHref: "../allOutAttackMode/allOutAttack.html"
-});
-
-
-  });
-
-  // === Modale "Comment jouer" ===
-  const rulesModal = document.getElementById("rulesModal");
-  const rulesBtn = document.getElementById("rulesButton");
-  const closeBtn = rulesModal.querySelector(".close");
-
-  rulesBtn.addEventListener("click", () => {
-    rulesModal.style.display = "block";
-    document.body.classList.add("modal-open");
-  });
-
-  closeBtn.addEventListener("click", () => {
-    rulesModal.style.display = "none";
-    document.body.classList.remove("modal-open");
-  });
-
-  window.addEventListener("click", (e) => {
-    if (e.target === rulesModal) {
-      rulesModal.style.display = "none";
-      document.body.classList.remove("modal-open");
-    }
-checkResetOnLoad();
-setupDailyReset(); // déjà présent
-});
-});
-
-
+// === DARK MODE ===
 function applyDarkModeStyles() {
-  if (document.body.classList.contains("darkmode")) {
-    const emojiZone = document.querySelector(".emoji-hint-zone");
-    if (emojiZone) {
-      emojiZone.style.background = "rgba(20, 20, 20, 0.7)";
-      emojiZone.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.2)";
-    
-    const autocompleteList = document.getElementById("autocompleteList");
-    if (autocompleteList) {
-      autocompleteList.style.backgroundColor = "#222";
-      autocompleteList.style.color = "#fff";
-      autocompleteList.style.border = "2px solid #666";
-      autocompleteList.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
-    }
+  if (!document.body.classList.contains("darkmode")) return;
 
+  const emojiZone = document.querySelector(".emoji-hint-zone");
+  if (emojiZone) {
+    emojiZone.style.background = "rgba(20, 20, 20, 0.7)";
+    emojiZone.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.2)";
   }
 
-    const persoBox = document.querySelector(".personadle-box");
-    if (persoBox) {
-      persoBox.style.background = "rgba(10, 10, 10, 0.7)";
-      persoBox.style.color = "white";
-      persoBox.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
-    }
+  const autocompleteList = document.getElementById("autocompleteList");
+  if (autocompleteList) {
+    autocompleteList.style.backgroundColor = "#222";
+    autocompleteList.style.color = "#fff";
+    autocompleteList.style.border = "2px solid #666";
+    autocompleteList.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
+  }
 
-    const gifZone = document.querySelector(".aoa-gif-zone");
-    if (gifZone) {
-      gifZone.style.background = "rgba(20, 20, 20, 0.8)";
-      gifZone.style.borderColor = "#ffaaaa";
-    }
+  const persoBox = document.querySelector(".personadle-box");
+  if (persoBox) {
+    persoBox.style.background = "rgba(10, 10, 10, 0.7)";
+    persoBox.style.color = "white";
+    persoBox.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
+  }
 
-    const victoryBox = document.getElementById("victoryBox");
-    if (victoryBox) {
-      victoryBox.style.backgroundColor = "#1a1a1a";
-      victoryBox.style.color = "#90ee90";
-      victoryBox.style.border = "3px solid #4caf50";
-    }
+  const gifZone = document.querySelector(".aoa-gif-zone");
+  if (gifZone) {
+    gifZone.style.background = "rgba(20, 20, 20, 0.8)";
+    gifZone.style.borderColor = "#ffaaaa";
+  }
+
+  const victoryBox = document.getElementById("victoryBox");
+  if (victoryBox) {
+    victoryBox.style.backgroundColor = "#1a1a1a";
+    victoryBox.style.color = "#90ee90";
+    victoryBox.style.border = "3px solid #4caf50";
   }
 }
 
+
+// === DEBUG (optionnel inchangé) ===
 function debugCharactersFull() {
   const allValid = activeOpus.flatMap(o => validOpus[o]);
   const filtered = characters.filter(c => {
@@ -483,7 +421,7 @@ function debugCharactersFull() {
 
   console.log("=== DEBUG PERSONNAGES FILTRÉS ===");
 
-  filtered.forEach((char, i) => {
+  filtered.forEach((char) => {
     const name = char.nom;
     const foundInPersonas = personas.includes(name);
     const portraitKey = portraitsMap[name] || name.split(" ")[0];
@@ -511,17 +449,17 @@ function debugCharactersFull() {
   });
 
   console.log("\n=== RÉSUMÉ ===");
-  console.log(`🔍 Personnages manquants dans personas.js : ${missingInPersonas.length}`);
-  console.log(`🖼️  Personnages sans image/portrait valide : ${missingInPortraits.length}`);
-  console.log(`😶 Personnages avec champ emoji absent/invalide : ${invalidEmojis.length}`);
-
+  console.log(`🔍 Manquants dans personas.js : ${missingInPersonas.length}`);
+  console.log(`🖼️  Sans portrait valide : ${missingInPortraits.length}`);
+  console.log(`😶 Emoji absent/invalide : ${invalidEmojis.length}`);
   if (missingInPersonas.length) console.log("→ À ajouter dans personas.js :", missingInPersonas);
-  if (missingInPortraits.length) console.log("→ À corriger dans portraitsMap.js :", missingInPortraits);
-  if (invalidEmojis.length) console.log("→ À corriger dans characters_clean.js :", invalidEmojis);
-
+  if (missingInPortraits.length) console.log("→ À corriger portraitsMap.js :", missingInPortraits);
+  if (invalidEmojis.length) console.log("→ À corriger characters_clean.js :", invalidEmojis);
   console.log("=== DEBUG TERMINÉ ===");
 }
 
+
+// === NAVIGATION ===
 function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
   const nav = document.getElementById("modeNavigationContainer");
   const nextButton = document.getElementById("nextModeButton");
@@ -549,53 +487,184 @@ function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
   }
 }
 
+
+// === DAILY RESET (Paris) ===
 function setupDailyReset() {
-  const parisOffset = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
-  const parisNow = new Date(parisOffset);
-  const tomorrow = new Date(parisNow);
-  tomorrow.setDate(parisNow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
+  const fire = () => {
+    console.log("🔄 Auto-reset (minuit Paris)");
+    localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
+    resetGame();
+    location.reload(); // garde un état propre
+  };
 
-  const timeUntilMidnight = tomorrow.getTime() - parisNow.getTime();
+  const schedule = () => {
+    const ms = msUntilNextParisMidnight();
+    console.log(`🕛 Next auto-reset in ~${Math.round(ms / 60000)} minutes (Paris)`);
+    clearTimeout(window.__emojiResetTimer);
+    window.__emojiResetTimer = setTimeout(fire, ms + 500);
+  };
 
-  console.log(`🕛 Next auto-reset in ${Math.round(timeUntilMidnight / 1000 / 60)} minutes`);
+  schedule();
 
-  setTimeout(() => {
-    console.log("🔄 Auto-reset triggered at Paris midnight");
-    const resetBtn = document.getElementById("resetButton");
-   if (resetBtn) {
-  resetGame(); // ✅ on appelle la fonction directement
-  location.reload(); // recharge la page pour garder un état propre
-} else {
-  location.reload();
-}
-
-  }, timeUntilMidnight + 500);
+  // Si l’onglet revient après veille, on vérifie et on reprogramme
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      checkResetOnLoad();
+      schedule();
+    }
+  });
+  window.addEventListener("focus", () => {
+    checkResetOnLoad();
+  });
 }
 
 function checkResetOnLoad() {
+  const todayParis = parisDateKey();
   const storedDate = localStorage.getItem("lastPlayedDate_Emoji");
-  const today = new Date().toISOString().split("T")[0];
 
-  if (storedDate !== today) {
+  if (storedDate !== todayParis) {
     console.log("📅 Nouvelle journée détectée → reset automatique (Emoji)");
-    localStorage.setItem("lastPlayedDate_Emoji", today);
-
-    // Nettoyage des stats d’hier (facultatif)
+    // Nettoyage stats d’hier (si tu veux)
     if (storedDate) {
-      const oldStatsKey = `statsLogged_Emoji_${storedDate}`;
-      localStorage.removeItem(oldStatsKey);
+      localStorage.removeItem(`statsLogged_${modeName}_${storedDate}`);
     }
+    localStorage.setItem("lastPlayedDate_Emoji", todayParis);
 
-    const resetBtn = document.getElementById("resetButton");
-if (resetBtn) {
-  resetGame(); // ✅ on ne simule plus de clic
-  location.reload();
-} else {
-  location.reload();
-}
-
+    resetGame();
+    location.reload();
   } else {
-    console.log("📅 Même jour, aucune réinitialisation nécessaire (Emoji)");
+    console.log("📅 Même jour (Paris), aucune réinitialisation nécessaire (Emoji)");
   }
 }
+
+
+// === BOOTSTRAP ===
+document.addEventListener("DOMContentLoaded", () => {
+  applyDarkModeStyles();
+
+  const textbar = document.getElementById("textbar");
+  const guessButton = document.getElementById("guessButton");
+  const giveUpButton = document.getElementById("giveUpButton");
+  const resetButton = document.getElementById("resetButton");
+
+  // === Gestion filtres ===
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  // Restauration filtres
+  const savedFilters = (() => {
+    try { return JSON.parse(localStorage.getItem("filters_Emoji")); } catch { return null; }
+  })();
+  if (Array.isArray(savedFilters)) activeOpus = savedFilters;
+
+  // État visuel
+  filterButtons.forEach(btn => {
+    const filter = btn.dataset.opus;
+    btn.classList.toggle("active", activeOpus.includes(filter));
+  });
+
+  // Pool + personas (MUTABLE)
+  const poolInit = filterCharacterPool();
+  personas = poolInit.map(c => c.nom); // on remplace le contenu juste pour le premier bind
+  // Important: l’autocomplete manipule "personas" par mutation ensuite
+
+  // Cible / tentatives
+  target = JSON.parse(localStorage.getItem("targetEmoji")) || poolInit[Math.floor(Math.random() * poolInit.length)];
+  attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
+  localStorage.setItem("targetEmoji", JSON.stringify(target));
+  localStorage.setItem("attemptsEmoji", attempts);
+
+  // Autocomplete (bind unique, ensuite on MUTATE personas)
+  initializeAutocomplete(textbar, personas);
+
+  // UI init
+  updateEmojiHint();
+  updateCounters();
+  if (attempts >= 8) enableGiveUpButton();
+
+  // Restauration fin de partie
+  const emojiGameOver = localStorage.getItem("emojiGameOver") === "true";
+  const forceReveal = localStorage.getItem("emojiForceReveal") === "true";
+  if (emojiGameOver && target?.nom) {
+    checkEmojiGuess(target.nom, forceReveal);
+  }
+
+  // Listeners filtres
+  filterButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      btn.classList.toggle("active");
+      activeOpus = Array.from(filterButtons)
+        .filter(b => b.classList.contains("active"))
+        .map(b => b.dataset.opus);
+
+      localStorage.setItem("filters_Emoji", JSON.stringify(activeOpus));
+
+      // Recalcule pool + mutate personas (pas de rebind)
+      const filteredCharacters = filterCharacterPool();
+      personas.length = 0;
+      personas.push(...filteredCharacters.map(c => c.nom));
+
+      if (filteredCharacters.length > 0) {
+        target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+        localStorage.setItem("targetEmoji", JSON.stringify(target));
+        attempts = 1;
+        localStorage.setItem("attemptsEmoji", attempts);
+        updateEmojiHint();
+        updateCounters();
+      }
+    });
+  });
+
+  // Guess
+  guessButton.addEventListener("click", () => {
+    if (gameOver) return;
+    const guess = textbar.value.trim();
+    if (!guess) return;
+    checkEmojiGuess(guess);
+    textbar.value = "";
+  });
+
+  // Give up (seulement si 8 essais)
+  giveUpButton.addEventListener("click", () => {
+    if (attempts < 8) return;
+    if (!gameOver) checkEmojiGuess(target.nom, true);
+  });
+
+  // Reset bouton
+  resetButton.addEventListener("click", () => {
+    localStorage.removeItem("targetEmoji");
+    localStorage.removeItem("attemptsEmoji");
+    localStorage.removeItem("emojiGameOver");
+    localStorage.removeItem("emojiForceReveal");
+    resetGame();
+
+    revealNextLink({
+      prevHref: "../classiqueMode/classiqueMode.html",
+      nextHref: "../allOutAttackMode/allOutAttack.html"
+    });
+  });
+
+  // Modale "Comment jouer"
+  const rulesModal = document.getElementById("rulesModal");
+  const rulesBtn = document.getElementById("rulesButton");
+  const closeBtn = rulesModal.querySelector(".close");
+
+  rulesBtn.addEventListener("click", () => {
+    rulesModal.style.display = "block";
+    document.body.classList.add("modal-open");
+  });
+
+  closeBtn.addEventListener("click", () => {
+    rulesModal.style.display = "none";
+    document.body.classList.remove("modal-open");
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === rulesModal) {
+      rulesModal.style.display = "none";
+      document.body.classList.remove("modal-open");
+    }
+  });
+
+  // ✅ Daily reset (Paris) au chargement, pas besoin d’un clic
+  checkResetOnLoad();
+  setupDailyReset();
+});
