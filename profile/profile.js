@@ -147,7 +147,7 @@ const avatarList = [
   // === P3 ===
   "Yuki.jpeg", "yuki.jpg","Kotone2.jpeg", "Kotone.jpeg","Kotone3.jpeg","Aigis2.jpg", "Aigis.jpg", "Akihiko.jpg", "Mitsuru.jpg", "Mitsuru.webp",
   "Junpei2.jpg", "Junpei.png", "Fuuka2.jpeg", "Fuuka.jpeg", "Ken.jpeg", "Koromaru2.jpg", "Koromaru.jpg", "Shinji.jpg", "Shinji.webp","Yukari2.jpg", "Yukari.jpg",
-  "Metis.jpg", "Metis2.jpeg", "Elisabeth.jpeg", "Elisabeth2.jpeg", 
+  "Metis.jpg", "Metis2.jpeg", "Elisabeth.jpeg", "Elisabeth2.jpeg","Chidori.jpg","Chidori2.jpg",
 
   // === P4 ===
   "Yu2.jpg", "Yu.jpg", "Yosuke2.jpg", "Yosuke.jpg", "Chie2.jpg", "Chie.jpg", "Yukiko2.jpg", "Yukiko.jpg",
@@ -157,7 +157,7 @@ const avatarList = [
   // === P5 ===
   "Joker.jpg","ren_t.webp","Ann.jpg", "ANn.jpg", "Ryuji.jpg", "Ryuji.png", "Morgana.jpg", "Morgana.png", "Yusuke.jpg", "Yusuke.webp",
   "Haru.png", "Har.jpg", "Futaba.jpg", "Futaba.webp", "Akechi2.jpg", "Akechi.jpg", "Sumire2.jpg", "Sumire.jpg", "Makoto2.jpg", "Makoto.jpg","Caroline&justine.png","Lavenza.jpg",
-  
+  "Tae.jpg","Tae2.jpg",  
 
   // === P5X ===
   "Wonder.jpg", "wonder1.png", "wonder2.png","Lufel2.png", "Lufel.png","Arai2.png", "Arai.png","Shun2.png", "Shun.png",
@@ -166,7 +166,7 @@ const avatarList = [
   "Yaoling2.png", "Yaoling.png", "YUI2.png", "YUI.png",
 
 // === GIFs Only ===
-"Yuki.gif","Yuki2.gif", "Yu.gif","Yu2.gif", "Ren.gif","Ren2.gif","catlisabeth.gif","luix-dextructor-aigis.gif","Anniversary.gif","aigis.gif","Lavenza7.gif"
+"Yuki.gif","Yuki2.gif", "Yu.gif","Yu2.gif", "Ren.gif","Ren2.gif","catlisabeth.gif","luix-dextructor-aigis.gif","Anniversary.gif","aigis.gif","Lavenza7.gif","Maruki.gif",
 ];
 
 
