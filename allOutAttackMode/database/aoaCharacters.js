@@ -12,6 +12,7 @@ export const aoaCharacters = [
   { nom: "Mitsuru Kirijo", gif: "Mitsuru", opus: ["P3"] },
   { nom: "Shinjiro Aragaki", gif: "Shinjiro", opus: ["P3"] },
   { nom: "Yukari Takeba", gif: "Yukari", opus: ["P3"] },
+  { nom: "Fuuka Yamagishi", gif: "Fuuka", opus: ["P3"] },
 
   // === Persona 5 ===
   { nom: "Panther ( Ann Takamaki )", gif: "Panther", opus: ["P5"] },

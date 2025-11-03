@@ -17,6 +17,7 @@ export const personas = [
   "Crow ( Goro Akechi )",
   "Fleuret ( Ayaka Sakai )",
   "Fox ( Yusuke Kitagawa )",
+  "Fuuka Yamagishi",
   "Howler ( Runa Dogenzaka )",
   "Joker ( Ren Amamiya )",
   "Junpei Iori",

@@ -1,7 +1,36 @@
 import { personas as originalPersonas } from "./database/personas_allOut.js";
 import { portraitsMap } from "./database/portraitsMap.js";
 import { aoaCharacters } from "./database/aoaCharacters.js";
+// 🔥 Indexation rapide des personnages pour éviter les recherches O(n²)
+const AOA_BY_NAME = new Map(aoaCharacters.map(c => [c.nom, c]));
+
 import { updateProfileStats } from "../profile/profileStats.js";
+
+
+
+// 🌐 URL publique du bucket R2
+const CDN_BASE_URL = "https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev/";
+
+// ⚙️ Forcer le cache navigateur (si CDN le permet)
+const CACHE_CONTROL = "public, max-age=86400"; // 24h
+
+// 🚀 Détection locale : si offline, bascule sur dossier local
+const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+
+// 🔧 Fonction utilitaire unique et optimisée
+function cdn(subfolder, filename, ext = "webp") {
+ if (IS_LOCAL) {
+  return `./database/allOutAttack/${encodeURIComponent(filename)}.${ext}`;
+}
+
+
+  // Version CDN avec paramètre de cache
+  const url = `${CDN_BASE_URL}${subfolder}/${encodeURIComponent(filename)}.${ext}`;
+  const params = new URLSearchParams({ cache: CACHE_CONTROL });
+  return `${url}?${params}`;
+}
+
+
 
 
 let activeOpusFilters = ["P3", "P5","P5X"]; // filtres actifs
@@ -18,18 +47,27 @@ const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
 
 
 function getFilteredPersonas() {
-  const filtered = originalPersonas.filter(name => {
-    const entry = aoaCharacters.find(p => p.nom === name);
-    if (!entry) return false;
-    return entry.opus.some(opus => activeOpusFilters.includes(opus));
-  });
+  const res = [];
+  for (const name of originalPersonas) {
+    const entry = AOA_BY_NAME.get(name);
+    if (!entry) continue;
 
-  if (filtered.length === 0) {
+    // ✅ test ultra rapide sans .some()
+    for (let i = 0; i < entry.opus.length; i++) {
+      if (activeOpusFilters.includes(entry.opus[i])) {
+        res.push(name);
+        break;
+      }
+    }
+  }
+
+  if (res.length === 0) {
     console.warn("⚠️ Aucun personnage filtré. activeOpusFilters =", activeOpusFilters);
   }
 
-  return filtered;
+  return res;
 }
+
 
 
 let personas = getFilteredPersonas();
@@ -41,21 +79,14 @@ let lastFiveTargets = [];
 function getBetterRandomCharacter() {
   const filteredPool = personas.filter(name => !lastFiveTargets.includes(name));
   const pool = filteredPool.length > 0 ? filteredPool : [...personas];
+
   if (pool.length === 0) {
-  alert("Aucun personnage disponible avec les filtres actuels.");
-  return null;
-}
-
-
-  const chaosSeed = performance.now() + Date.now() * Math.random() * 999999;
-  let hash = 0;
-
-  for (let i = 0; i < chaosSeed.toString().length; i++) {
-    hash = (hash << 5) - hash + chaosSeed.toString().charCodeAt(i);
-    hash |= 0;
+    alert("Aucun personnage disponible avec les filtres actuels.");
+    return null;
   }
 
-  const index = Math.abs(hash) % pool.length;
+  // Utiliser Math.random() de base, qui est suffisant pour le jeu
+  const index = Math.floor(Math.random() * pool.length);
   const selected = pool[index];
 
   lastFiveTargets.push(selected);
@@ -301,6 +332,11 @@ function giveUp() {
     timeSpent
   });
   localStorage.setItem(todayKey, "1");
+  revealNextLink({
+  prevHref: "../emojiMode/emojiMode.html",
+  nextHref: "../silhouetteMode/silhouette.html"
+});
+
 }
 
   localStorage.setItem("aoaGameOver", "true");
@@ -308,6 +344,26 @@ localStorage.setItem("aoaTarget", target);
 localStorage.setItem("aoaAttempts", attempts);
 
 }
+
+async function preloadGifs(list) {
+  const limitedList = list.slice(0, 10); // précharge seulement les 10 premiers
+  for (const name of limitedList) {
+    const base = portraitsMap[name] || name.split(" ")[0];
+    const img = new Image();
+    img.loading = "lazy";
+    img.src = cdn("allOutAttack", base);
+    await new Promise(r => setTimeout(r, 50)); // petit délai non bloquant
+  }
+}
+
+function showLoading(gifElement) {
+  gifElement.style.filter = "none";       // ✅ enlève le blur inline
+  gifElement.style.opacity = "1";         // rétablit opacité normale
+  gifElement.src = "../img/loading.gif";  // affiche le gif
+}
+
+
+
 
 function resetGame(){
   sessionStartTime = Date.now();
@@ -323,14 +379,31 @@ function resetGame(){
   document.getElementById("victoryBox").style.display = "none";
 
   personas = getFilteredPersonas();
-  target = getBetterRandomCharacter();
-  const newTarget = getBetterRandomCharacter();
+const newTarget = getBetterRandomCharacter();
 if (!newTarget) return; // sécurité anti-erreur
 target = newTarget;
 
 
-  const imageName = portraitsMap[target] || target.split(" ")[0];
-  gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
+gifElement.style.filter = "none"; // ✅ retire tout blur avant le loading
+showLoading(gifElement);
+
+const imageName = portraitsMap[target] || target.split(" ")[0];
+const newSrc = cdn("allOutAttack", imageName);
+
+// ⏳ charge la nouvelle image sans flash ni blur sur loading
+const tempImg = new Image();
+tempImg.src = newSrc;
+tempImg.onload = () => {
+  gifElement.src = newSrc;
+  gifElement.style.opacity = "1"; // revient à pleine opacité
+  gifElement.style.filter = "blur(20px)"; // flou uniquement sur l'image chargée
+};
+
+
+  // ⚡ Préchargement progressif après reset
+setTimeout(() => preloadGifs(personas), 500);
+
+
   gifElement.style.filter = "blur(20px)";
 
   input.disabled = false;
@@ -387,6 +460,7 @@ function disableInputs() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  
   applyDarkModeStyles();
   const textbar = document.getElementById("textbar");
   // ✅ Étape 1 : Lire les filtres sauvegardés
@@ -409,6 +483,13 @@ document.querySelectorAll(".filter-btn").forEach((btn) => {
   const gifElement = document.getElementById("aoaGif");
 
   personas = getFilteredPersonas();
+// ⏳ Préchargement différé pour ne pas bloquer l'UI
+setTimeout(() => preloadGifs(personas), 1000);
+
+
+
+
+
   initializeAutocomplete(textbar, personas);
 
   // === ✅ Récupération du state
@@ -422,7 +503,7 @@ document.querySelectorAll(".filter-btn").forEach((btn) => {
     gameOver = savedGameOver;
 
     const imageName = portraitsMap[target] || target.split(" ")[0];
-    gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
+    gifElement.src = cdn("allOutAttack", imageName);
     gifElement.style.filter = gameOver ? "none" : `blur(${Math.max(20 - attempts * 3, 0)}px)`;
 
     updateGiveUpCounter();
@@ -446,8 +527,18 @@ revealNextLink({
     // 👇 Si aucune sauvegarde : partie normale
     target = getBetterRandomCharacter();
     const imageName = portraitsMap[target] || target.split(" ")[0];
-    gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
-    gifElement.style.filter = "blur(20px)";
+gifElement.style.filter = "none"; // retire le blur résiduel avant loading
+showLoading(gifElement);
+
+const newSrc = cdn("allOutAttack", imageName);
+const tempImg = new Image();
+tempImg.src = newSrc;
+tempImg.onload = () => {
+  gifElement.src = newSrc;
+  gifElement.style.opacity = "1";
+  gifElement.style.filter = "blur(20px)";
+};
+
     localStorage.setItem("aoaTarget", target);
     localStorage.setItem("aoaAttempts", 0);
   }
@@ -484,42 +575,91 @@ revealNextLink({
     }
   });
 
-  // === Filtres dynamiques
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const group = btn.dataset.opus;
-      btn.classList.toggle("active");
-
-      if (btn.classList.contains("active")) {
-        if (!activeOpusFilters.includes(group)) activeOpusFilters.push(group);
-      } else {
-        activeOpusFilters = activeOpusFilters.filter(o => o !== group);
-            // ✅ Étape 3 : Sauvegarder les filtres actifs
-    localStorage.setItem("filters_AllOutAttack", JSON.stringify(activeOpusFilters));
-
-      }
-
-      personas = getFilteredPersonas();
-      initializeAutocomplete(textbar, personas);
-
-      target = getBetterRandomCharacter();
-      const imageName = portraitsMap[target] || target.split(" ")[0];
-      gifElement.src = `./database/allOutAttack/${encodeURIComponent(imageName)}.gif`;
-      gifElement.style.filter = "blur(20px)";
-
-      textbar.value = "";
-      document.getElementById("wrongGuessList").innerHTML = "";
-      attempts = 0;
-      localStorage.setItem("aoaTarget", target);
-      localStorage.setItem("aoaAttempts", 0);
-      localStorage.removeItem("aoaGameOver");
-      updateGiveUpButton();
-      updateGiveUpCounter();
-    });
+  
   });
 checkResetOnLoad();
 setupDailyReset();
 
+// === 🧠 Filtres dynamiques persistants et réactifs
+const filterButtons = document.querySelectorAll(".filter-btn");
+
+// 🔹 Étape 1 : Charger les filtres sauvegardés
+const savedFilters = JSON.parse(localStorage.getItem("filters_AllOutAttack"));
+if (Array.isArray(savedFilters) && savedFilters.length > 0) {
+  activeOpusFilters = savedFilters;
+}
+
+// 🔹 Étape 2 : Appliquer visuellement les filtres restaurés
+filterButtons.forEach((btn) => {
+  const group = btn.dataset.opus;
+  if (activeOpusFilters.includes(group)) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
+  }
+});
+
+// 🔹 Étape 3 : Clic sur un filtre → mise à jour dynamique + sauvegarde
+filterButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const group = btn.dataset.opus;
+    btn.classList.toggle("active");
+
+    // ✅ Met à jour les filtres actifs
+    if (btn.classList.contains("active")) {
+      if (!activeOpusFilters.includes(group)) activeOpusFilters.push(group);
+    } else {
+      activeOpusFilters = activeOpusFilters.filter(o => o !== group);
+    }
+
+    // 💾 Sauvegarde immédiate
+    localStorage.setItem("filters_AllOutAttack", JSON.stringify(activeOpusFilters));
+
+    // ⚙️ Recalcule le pool de personnages filtré
+    personas = getFilteredPersonas();
+
+    // 🚫 Si plus aucun perso dispo, avertir et stopper
+    if (personas.length === 0) {
+      alert("Aucun personnage ne correspond à ces filtres !");
+      return;
+    }
+
+    // 🔄 Nouveau personnage aléatoire adapté aux filtres
+    target = getBetterRandomCharacter();
+    const imageName = portraitsMap[target] || target.split(" ")[0];
+    const newSrc = cdn("allOutAttack", imageName);
+
+    const gifElement = document.getElementById("aoaGif");
+    const tempImg = new Image();
+    showLoading(gifElement);
+    tempImg.src = newSrc;
+
+    tempImg.onload = () => {
+      gifElement.src = newSrc;
+      gifElement.style.opacity = "1";
+      gifElement.style.filter = "blur(20px)";
+    };
+
+    // 🧹 Reset de la partie
+    attempts = 0;
+    document.getElementById("wrongGuessList").innerHTML = "";
+    document.getElementById("victoryBox").style.display = "none";
+    localStorage.setItem("aoaTarget", target);
+    localStorage.setItem("aoaAttempts", 0);
+    localStorage.removeItem("aoaGameOver");
+    updateGiveUpCounter();
+
+    // 🧠 Réinitialise l’autocomplétion avec le nouveau pool
+    const textbar = document.getElementById("textbar");
+    initializeAutocomplete(textbar, personas);
+    textbar.value = "";
+    textbar.disabled = false;
+
+    // Désactive temporairement le bouton Give Up
+    const giveUpButton = document.getElementById("giveUpButton");
+    giveUpButton.disabled = true;
+    giveUpButton.style.cursor = "not-allowed";
+  });
 });
 
 function applyDarkModeStyles() {
@@ -598,7 +738,8 @@ function debugAllOutAttack() {
   const missingGifs = [];
   filtered.forEach(name => {
     const base = portraitsMap[name] || name.split(" ")[0];
-    const path = `./database/allOutAttack/${encodeURIComponent(base)}.gif`;
+    const path = cdn("allOutAttack", base);
+
     const img = new Image();
     img.onload = () => {};
     img.onerror = () => {
@@ -619,7 +760,8 @@ function debugAllOutAttack() {
     }
 
     const gifName = portraitsMap[target] || target.split(" ")[0];
-    const gifPath = `./database/allOutAttack/${encodeURIComponent(gifName)}.gif`;
+    const gifPath = cdn("allOutAttack", gifName);
+
     console.log(`🎞️ Chemin GIF : ${gifPath}`);
   } else {
     console.warn("⚠️ Target non défini actuellement.");

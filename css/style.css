@@ -901,6 +901,14 @@ body {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* ✅ Supprime le blur quand l'image affichée est le gif de chargement */
+#aoaGif[src*="loading.gif"] {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+
+
 .aoa-gif-zone {
   display: flex;
   justify-content: center;
@@ -909,9 +917,20 @@ body {
   padding: 20px;
   max-width: 700px;
   border-radius: 15px;
-  background: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
-  border: 2px solid #ff3c3c;
+
+  /* 🎨 Effet Persona stable */
+  background: rgba(0, 0, 0, 0.65);
+  border: 3px solid rgba(255, 0, 0, 0.7);
+  box-shadow:
+    inset 0 0 20px rgba(255, 0, 0, 0.3),
+    0 0 25px rgba(255, 0, 0, 0.25);
+
+  /* 🧱 Fix pour le flicker */
+  will-change: transform;
+  backface-visibility: hidden;
+  isolation: isolate;
+  contain: paint;
+  transition: none !important;
 }
 
 #aoaGif {
@@ -921,9 +940,18 @@ body {
   height: auto;
   margin: 40px auto;
   border-radius: 16px;
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-  transition: filter 0.3s ease;
+
+  /* 🔒 Stabilisation GPU */
+  will-change: opacity, filter;
+  backface-visibility: hidden;
+  image-rendering: auto;
+
+  /* 🎯 Lueur fixe autour du GIF */
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.25);
 }
+
+
+
 
 /* ===== VICTORY BOX IMAGE PLUS GRANDE ===== */
 .victory-box img {
