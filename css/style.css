@@ -2833,4 +2833,104 @@ body.darkmode .border-color-label {
   color: white;
 }
 
+/* Style du bouton PDF */
+.pdf-container {
+    margin-top: 15px;
+    text-align: right; /* Place le bouton à droite */
+}
 
+.see-more-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #d92323; /* Rouge Persona */
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: sans-serif;
+    border-radius: 4px;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 2px 2px 0px #000; /* Petite ombre noire style comics */
+}
+
+.see-more-btn:hover {
+    background-color: #b01010;
+    transform: translateY(-2px); /* Petit effet de saut */
+}
+
+
+/* === PROFILE SHARE CARD === */
+.share-card {
+  width: 400px;
+  background: linear-gradient(180deg, #0f0f2b, #1a1a40);
+  border-radius: 20px;
+  color: white;
+  text-align: center;
+  padding: 25px 15px;
+  font-family: "Poppins", sans-serif;
+  position: relative;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+}
+
+.share-card .share-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #4b6cff;
+  object-fit: cover;
+  margin-bottom: 12px;
+}
+
+.share-card h3 {
+  margin: 0;
+  font-size: 22px;
+  color: #fff;
+}
+
+.share-card .share-stats {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 15px 0;
+}
+
+.share-card .stat {
+  text-align: center;
+}
+
+.share-card .stat span {
+  display: block;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.share-card .stat strong {
+  font-size: 20px;
+  color: #ffd84f;
+}
+
+.share-card .share-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.share-card .share-badges img {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s;
+}
+.share-card .share-badges img:hover {
+  transform: scale(1.15);
+}
+
+.share-card .footer {
+  position: absolute;
+  bottom: 6px;
+  width: 100%;
+  font-size: 11px;
+  color: #bbb;
+}

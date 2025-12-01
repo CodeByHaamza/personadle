@@ -1,0 +1,846 @@
+/* === BADGES STYLES === */
+
+/* === 🏅 PREVIEW (4 badges) === */
+#previewBadges {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.badge-preview-img {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  border: 3px solid #ffd700;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.badge-preview-img:hover {
+  transform: scale(1.1);
+}
+
+/* === 📋 MODAL BADGES === */
+#badgesModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(20, 20, 20, 0.98);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  max-width: 700px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10000;
+  border: 2px solid #444;
+}
+
+#badgesModal.hidden {
+  display: none;
+}
+
+.badges-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.badges-header h3 {
+  margin: 0;
+  font-size: 1.8em;
+  color: #ffd700;
+}
+
+.close-btn {
+  background: #c0392b;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: 0.2s;
+}
+
+.close-btn:hover {
+  background: #e74c3c;
+  transform: scale(1.1);
+}
+
+.badges-counter {
+  text-align: center;
+  font-size: 1.1em;
+  color: #2ecc71;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* === 🎖️ GRILLE BADGES === */
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  padding: 10px 15px;
+}
+
+.badge-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  background: rgba(40, 40, 40, 0.8);
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.badge-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+.badge-item img {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: filter 0.3s;
+}
+
+.badge-item p {
+  font-size: 0.9em;
+  text-align: center;
+  margin: 0;
+  color: white;
+}
+
+/* === 💬 TOOLTIP - BASE === */
+.badge-tooltip {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 0.9em;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 10001;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  border: 2px solid #ffd700;
+  min-width: 200px;
+  max-width: 280px;
+  white-space: normal;
+  pointer-events: none;
+  word-wrap: break-word;
+}
+
+.badge-item:hover .badge-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -10px);
+}
+
+/* ✅ AJUSTEMENT POUR LES BADGES À GAUCHE (1ère colonne) */
+.badge-item:nth-child(4n+1) .badge-tooltip {
+  left: 0;
+  transform: translateX(0) translateY(0);
+}
+
+.badge-item:nth-child(4n+1):hover .badge-tooltip {
+  transform: translateX(0) translateY(-10px);
+}
+
+/* ✅ AJUSTEMENT POUR LES BADGES À DROITE (dernière colonne) */
+.badge-item:nth-child(4n) .badge-tooltip {
+  left: auto;
+  right: 0;
+  transform: translateX(0) translateY(0);
+}
+
+.badge-item:nth-child(4n):hover .badge-tooltip {
+  transform: translateX(0) translateY(-10px);
+}
+
+.badge-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-top-color: #34495e;
+}
+
+/* ✅ AJUSTER LA FLÈCHE POUR LES BADGES À GAUCHE */
+.badge-item:nth-child(4n+1) .badge-tooltip::after {
+  left: 30%;
+}
+
+/* ✅ AJUSTER LA FLÈCHE POUR LES BADGES À DROITE */
+.badge-item:nth-child(4n) .badge-tooltip::after {
+  left: 70%;
+}
+
+.badge-tooltip strong {
+  display: block;
+  font-size: 1.05em;
+  margin-bottom: 6px;
+  color: #ffd700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.badge-tooltip span {
+  display: block;
+  font-size: 0.9em;
+  opacity: 0.95;
+  line-height: 1.4;
+}
+
+.badge-tooltip small {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75em;
+  color: #ffd700;
+  font-style: italic;
+}
+
+/* === 🔒 LOCKED STATE === */
+.badge-item.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.badge-item.locked img {
+  filter: grayscale(100%) brightness(0.4);
+}
+
+.badge-item.locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ✅ TOOLTIP POUR BADGES VERROUILLÉS - Opaque et lisible */
+.badge-item.locked .badge-tooltip {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #e94560;
+  box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5);
+  opacity: 0;
+}
+
+.badge-item.locked:hover .badge-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.badge-item.locked .badge-tooltip::after {
+  border-top-color: #16213e;
+}
+
+.badge-item.locked .badge-tooltip strong {
+  color: #ff6b81;
+  text-shadow: 0 0 8px rgba(255, 107, 129, 0.6);
+  font-weight: bold;
+}
+
+.badge-item.locked .badge-tooltip span {
+  color: #e0e0e0;
+  opacity: 1;
+  font-weight: 500;
+}
+
+/* === ✅ SELECTED STATE === */
+.badge-item.selected {
+  border-color: #2ecc71;
+  background: rgba(46, 204, 113, 0.2);
+}
+
+.check-mark {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #2ecc71;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* === 🎉 NOTIFICATION POPUP === */
+.badge-notification {
+  position: fixed;
+  top: -200px;
+  right: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 99999;
+  min-width: 320px;
+  transition: top 0.5s ease;
+  border: 2px solid #ffd700;
+}
+
+.badge-notification.show {
+  top: 20px;
+  animation: bounce 0.6s;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
+}
+
+.badge-notif-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.badge-notif-content img {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  border: 2px solid #ffd700;
+}
+
+.badge-notif-content h4 {
+  margin: 0 0 5px 0;
+  color: #ffd700;
+  font-size: 1.2em;
+}
+
+.badge-notif-content p {
+  margin: 0;
+  font-weight: bold;
+  font-size: 1em;
+  color: white;
+}
+
+.badge-notif-content small {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85em;
+}
+
+/* === 🎟️ EVENT CODE SECTION === */
+#eventCodeSection {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#eventCodeInput {
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #555;
+  background: #222;
+  color: white;
+  width: 60%;
+  max-width: 250px;
+  font-size: 1em;
+}
+
+#redeemEventCodeBtn {
+  margin-left: 10px;
+  padding: 10px 16px;
+  background: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+#redeemEventCodeBtn:hover {
+  background: #27ae60;
+  transform: scale(1.05);
+}
+
+#eventCodeMessage {
+  margin-top: 10px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+/* === 🔍 BADGE ZOOM MODAL === */
+.badge-zoom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.badge-zoom-modal.show {
+  opacity: 1;
+}
+
+.badge-zoom-content {
+  position: relative;
+  text-align: center;
+  padding: 40px;
+  background: rgba(20, 20, 20, 0.98);
+  border-radius: 25px;
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+  max-width: 550px;
+  width: 90%;
+  animation: zoomPopup 0.25s ease forwards;
+  transform: scale(0.6);
+  opacity: 0;
+}
+
+.badge-zoom-content img {
+  width: 280px;
+  height: 280px;
+  border-radius: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.badge-zoom-content h3 {
+  color: #ffd700;
+  font-size: 2.2em;
+  margin: 15px 0 10px 0;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+  font-weight: bold;
+}
+
+.badge-zoom-content .badge-condition {
+  color: #2ecc71;
+  font-size: 1.05em;
+  font-weight: bold;
+  margin: 12px 0;
+  opacity: 0.95;
+  padding: 8px 16px;
+  background: rgba(46, 204, 113, 0.15);
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.badge-zoom-content .badge-description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.15em;
+  line-height: 1.7;
+  margin: 20px 0;
+  font-style: italic;
+  padding: 0 20px;
+  text-align: center;
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.badge-zoom-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 2.2em;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.badge-zoom-close:hover {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.2);
+  transform: rotate(90deg);
+}
+
+@keyframes zoomPopup {
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* === 🌙 DARK MODE SUPPORT === */
+body.darkmode #badgesModal {
+  background: rgba(10, 10, 10, 0.98);
+  border-color: #333;
+}
+
+body.darkmode .badges-header h3 {
+  color: #ffd700;
+}
+
+body.darkmode .badge-item {
+  background: rgba(30, 30, 30, 0.9);
+}
+
+body.darkmode .badge-item:hover {
+  background: rgba(40, 40, 40, 0.9);
+}
+
+body.darkmode .badge-tooltip {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-color: #ffd700;
+}
+
+body.darkmode .badge-tooltip::after {
+  border-top-color: #2d2d2d;
+}
+
+body.darkmode .badge-item.locked .badge-tooltip {
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+  border-color: #ff4757;
+  box-shadow: 0 6px 25px rgba(255, 71, 87, 0.6);
+}
+
+body.darkmode .badge-item.locked .badge-tooltip::after {
+  border-top-color: #1a1a2e;
+}
+
+body.darkmode .badge-item.locked .badge-tooltip strong {
+  color: #ff6b81;
+  text-shadow: 0 0 10px rgba(255, 107, 129, 0.7);
+}
+
+body.darkmode .badge-item.locked .badge-tooltip span {
+  color: #f0f0f0;
+}
+
+/* === ☀️ LIGHT MODE === */
+body:not(.darkmode) #badgesModal {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #ddd;
+  color: #222;
+}
+
+body:not(.darkmode) .badges-header h3 {
+  color: #e74c3c;
+}
+
+body:not(.darkmode) .badge-item {
+  background: rgba(240, 240, 240, 0.9);
+  color: #222;
+}
+
+body:not(.darkmode) .badge-item p {
+  color: #222;
+}
+
+body:not(.darkmode) .badge-item:hover {
+  background: rgba(230, 230, 230, 0.9);
+}
+
+body:not(.darkmode) .badge-tooltip {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  color: #222;
+  border-color: #333;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+body:not(.darkmode) .badge-tooltip::after {
+  border-top-color: #f0f0f0;
+}
+
+body:not(.darkmode) .badge-tooltip strong {
+  color: #e74c3c;
+  text-shadow: none;
+}
+
+body:not(.darkmode) .badge-tooltip small {
+  color: #e74c3c;
+}
+
+body:not(.darkmode) .badge-item.locked .badge-tooltip {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border: 2px solid #e74c3c;
+  box-shadow: 0 6px 25px rgba(231, 76, 60, 0.4);
+}
+
+body:not(.darkmode) .badge-item.locked .badge-tooltip::after {
+  border-top-color: #34495e;
+}
+
+body:not(.darkmode) .badge-item.locked .badge-tooltip strong {
+  color: #ff6b6b;
+  text-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+}
+
+body:not(.darkmode) .badge-item.locked .badge-tooltip span {
+  color: #ecf0f1;
+  font-weight: 500;
+}
+
+body:not(.darkmode) .badge-zoom-modal {
+  background: rgba(212, 212, 212, 0.92);
+}
+
+body:not(.darkmode) .badge-zoom-content {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: #e74c3c;
+  box-shadow: 0 0 50px rgba(231, 76, 60, 0.4);
+}
+
+body:not(.darkmode) .badge-zoom-content h3 {
+  color: #e74c3c;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+body:not(.darkmode) .badge-zoom-content .badge-condition {
+  color: #27ae60;
+  background: rgba(46, 204, 113, 0.1);
+}
+
+body:not(.darkmode) .badge-zoom-content .badge-description {
+  color: rgba(0, 0, 0, 0.85);
+}
+
+body:not(.darkmode) .badge-zoom-close {
+  color: #333;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body:not(.darkmode) .badge-zoom-close:hover {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.15);
+}
+
+/* === 📱 RESPONSIVE === */
+@media (max-width: 600px) {
+  .badges-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+
+  .badge-item img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .badge-notification {
+    min-width: 280px;
+    right: 10px;
+  }
+  
+  .badge-zoom-content {
+    padding: 20px;
+  }
+  
+  .badge-zoom-content img {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .badge-zoom-content h3 {
+    font-size: 1.5em;
+  }
+  
+  .badge-zoom-content .badge-condition {
+    font-size: 0.9em;
+  }
+  
+  .badge-zoom-content .badge-description {
+    font-size: 0.95em;
+  }
+}
+/* === ℹ️ BADGE AI INFO (à ajouter à la fin de badges.css) === */
+.badge-ai-info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+
+.info-icon {
+  font-size: 1.2em;
+  background: #3498db;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.badge-ai-info:hover .info-icon {
+  background: #2980b9;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.5);
+}
+
+.info-tooltip-ai {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  width: 320px;
+  font-size: 0.85em;
+  line-height: 1.6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  z-index: 10002;
+  border: 2px solid #3498db;
+}
+
+.badge-ai-info:hover .info-tooltip-ai {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(5px);
+}
+
+/* Flèche vers le haut */
+.info-tooltip-ai::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 8px;
+  border: 8px solid transparent;
+  border-bottom-color: #3498db;
+}
+
+.info-tooltip-ai::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 10px;
+  border: 6px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.95);
+}
+
+.info-tooltip-ai strong {
+  color: #3498db;
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+  padding-bottom: 6px;
+}
+
+/* Dark mode support */
+body.darkmode .info-icon {
+  background: #2980b9;
+  box-shadow: 0 2px 8px rgba(41, 128, 185, 0.4);
+}
+
+body.darkmode .badge-ai-info:hover .info-icon {
+  background: #3498db;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.6);
+}
+
+body.darkmode .info-tooltip-ai {
+  background: rgba(20, 20, 20, 0.98);
+  border-color: #2980b9;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
+}
+
+body.darkmode .info-tooltip-ai::before {
+  border-bottom-color: #2980b9;
+}
+
+body.darkmode .info-tooltip-ai::after {
+  border-bottom-color: rgba(20, 20, 20, 0.98);
+}
+
+body.darkmode .info-tooltip-ai strong {
+  color: #5dade2;
+  border-bottom-color: rgba(93, 173, 226, 0.3);
+}
+
+/* Light mode */
+body:not(.darkmode) .info-icon {
+  background: #3498db;
+}
+
+body:not(.darkmode) .badge-ai-info:hover .info-icon {
+  background: #2980b9;
+}
+
+body:not(.darkmode) .info-tooltip-ai {
+  background: rgba(255, 255, 255, 0.98);
+  color: #222;
+  border-color: #3498db;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+body:not(.darkmode) .info-tooltip-ai::before {
+  border-bottom-color: #3498db;
+}
+
+body:not(.darkmode) .info-tooltip-ai::after {
+  border-bottom-color: rgba(255, 255, 255, 0.98);
+}
+
+body:not(.darkmode) .info-tooltip-ai strong {
+  color: #2980b9;
+  border-bottom-color: rgba(52, 152, 219, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .info-tooltip-ai {
+    width: 280px;
+    font-size: 0.8em;
+    padding: 14px 16px;
+  }
+  
+  .info-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .info-tooltip-ai {
+    width: calc(100vw - 40px);
+    right: -10px;
+  }
+}
+
+/* Effet hover sur la notification */
+.badge-notification:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+}
+
+.badge-notification {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}

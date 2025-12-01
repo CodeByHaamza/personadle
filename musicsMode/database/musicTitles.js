@@ -44,7 +44,7 @@ export const musicTitles = [
   "Soul Phrase",  
   "specialist",
   "Take Over",
-  "The Days When My Mother Was There",
+  "When Mother Was There",
   "The Whims of Fate",
   "Time To Make History",
   "Tokyo Daylight",

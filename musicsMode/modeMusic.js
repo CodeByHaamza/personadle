@@ -133,48 +133,108 @@ function pickSong() {
 
 function showVictory(force = false) {
   gameOver = true;
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🎖️ VÉRIFICATION BADGE "BURN MY DREAD"
+  // ═══════════════════════════════════════════════════════════════════════
+  if (!force && target) {
+    console.log("🔍 Checking for Burn My Dread badge...");
+    console.log("Target title:", target.titre);
+    console.log("Normalized target:", normalize(target.titre));
+    
+    if (normalize(target.titre) === normalize("Burn My Dread")) {
+      console.log("✅ Burn My Dread found! Unlocking badge...");
+      
+      // Récupérer le profil
+      const profile = JSON.parse(localStorage.getItem('personaUserProfile')) || {};
+      console.log("Current profile foundBurnMyDread:", profile.foundBurnMyDread);
+      
+      if (!profile.foundBurnMyDread) {
+        // Marquer le badge comme débloqué
+        profile.foundBurnMyDread = true;
+        
+        // Ajouter à la file d'attente des notifications
+        if (!profile.pendingBadgeNotifications) {
+          profile.pendingBadgeNotifications = [];
+        }
+        
+        if (!profile.pendingBadgeNotifications.includes('burn_my_dread')) {
+          profile.pendingBadgeNotifications.push('burn_my_dread');
+          console.log("🔔 Badge ajouté à la file de notifications");
+        }
+        
+        // Sauvegarder
+        localStorage.setItem('personaUserProfile', JSON.stringify(profile));
+        console.log("💾 Profile saved with badge unlock");
+        
+      
+        
+      } else {
+        console.log("ℹ️ Badge already unlocked");
+      }
+    } else {
+      console.log("❌ Not Burn My Dread, skipping badge check");
+    }
+  }
+  
+  // ═══════════════════════════════════════════════════════════════════════
+  // 📊 MISE À JOUR DES STATISTIQUES
+  // ═══════════════════════════════════════════════════════════════════════
   if (!localStorage.getItem(todayKey)) {
-  const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-  updateProfileStats({
-    result: "win",
-    mode: "Music",
-    timeSpent
-  });
-  localStorage.setItem(todayKey, "1");
-}
+    const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+    updateProfileStats({
+      result: force ? "giveup" : "win",
+      mode: "Music",
+      timeSpent
+    });
+    localStorage.setItem(todayKey, "1");
+  }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🎨 AFFICHAGE DE LA VICTOIRE
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // Désactiver les contrôles
   textbar.disabled = true;
   guessBtn.disabled = true;
   giveUpBtn.disabled = true;
 
+  // Image et titre
   victoryImage.src = `./database/img/${target.image}`;
   victoryImage.alt = target.titre;
+  
+  // Ligne vocale (si présente)
   const vocal = target.vocalist?.trim();
-let vocalLine = "";
-if (vocal) vocalLine = `<br>🧑‍🎤 Vocal: <strong>${vocal}</strong>`;
+  const vocalLine = vocal ? `<br>🧑‍🎤 Vocal: <strong>${vocal}</strong>` : "";
 
-const linkLine = target.lien
-  ? `<br>🔗 <a href="${target.lien}" target="_blank" class="victory-link">Listen here</a>`
-  : "";
+  // Lien YouTube (si présent)
+  const linkLine = target.lien
+    ? `<br>🔗 <a href="${target.lien}" target="_blank" class="victory-link">Listen here</a>`
+    : "";
 
-victoryText.innerHTML = force
-  ? `💡 It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`
-  : `🎉 Correct! It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`;
+  // Message de victoire
+  victoryText.innerHTML = force
+    ? `💡 It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`
+    : `🎉 Correct! It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`;
 
-
+  // Afficher la box de victoire
   victoryBox.style.display = "block";
+  
+  // Scroll vers la victoire
   setTimeout(() => {
-  victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
-}, 500);
+    victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 500);
 
-   showConfettiExplosion();
+  // Confettis
+  showConfettiExplosion();
+  
+  // Sauvegarder l'état
   localStorage.setItem("musicGameOver", "true");
 
-  // ⏮ Affiche le lien vers Personae Mode
+  // Afficher le lien vers le mode suivant
   revealNextLink({
     prevHref: "../personaeMode/personae.html"
   });
-
 }
 
 function showWrong(name) {

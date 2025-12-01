@@ -262,6 +262,7 @@ function handleGuess() {
   updateGiveUpCounter();
 
   if (guess.toLowerCase() === target.toLowerCase()) {
+      checkAkechiBadge(target);
     document.getElementById("aoaGif").style.filter = "none";
     showVictoryBox(target);
     showConfettiExplosion();
@@ -297,7 +298,57 @@ localStorage.setItem("aoaAttempts", attempts);
 
   input.value = "";
 }
+// === 🎭 DÉBLOCAGE DU BADGE AKECHI ===
+function checkAkechiBadge(characterName) {
+  const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
+  if (!profile) return;
 
+  let shouldSave = false;
+
+  // Vérifier si c'est Crow
+  if (characterName.toLowerCase().includes("crow") && characterName.toLowerCase().includes("akechi")) {
+    if (!profile.foundCrow) {
+      profile.foundCrow = true;
+      shouldSave = true;
+      console.log("🎭 Crow (Goro Akechi) found!");
+    }
+  }
+
+  // Vérifier si c'est Black Mask
+  if (characterName.toLowerCase().includes("black mask") && characterName.toLowerCase().includes("akechi")) {
+    if (!profile.foundBlackMask) {
+      profile.foundBlackMask = true;
+      shouldSave = true;
+      console.log("🎭 Black Mask (Goro Akechi) found!");
+    }
+  }
+
+  // Si l'un des deux a été trouvé, sauvegarder
+  if (shouldSave) {
+    localStorage.setItem("personaUserProfile", JSON.stringify(profile));
+
+    // Si les deux sont trouvés, ajouter une notification en attente
+    if (profile.foundCrow && profile.foundBlackMask) {
+      if (!profile.pendingBadgeNotifications) {
+        profile.pendingBadgeNotifications = [];
+      }
+      
+      // Ajouter le badge seulement s'il n'est pas déjà débloqué
+      if (!profile.badges?.includes("truth_duality")) {
+        profile.badges = profile.badges || [];
+        profile.badges.push("truth_duality");
+        
+        // Ajouter à la liste des notifications en attente
+        if (!profile.pendingBadgeNotifications.includes("truth_duality")) {
+          profile.pendingBadgeNotifications.push("truth_duality");
+        }
+        
+        localStorage.setItem("personaUserProfile", JSON.stringify(profile));
+        console.log("🎉 Truth & Duality badge unlocked! Notification pending...");
+      }
+    }
+  }
+}
 function showVictoryBox(name) {
   const baseName = (portraitsMap[name] || name.split(" ")[0]).trim();
   const imgSrc = `./database/img/${baseName}_Battle.webp`;
@@ -798,22 +849,21 @@ function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
 }
 
 function setupDailyReset() {
-  const parisOffset = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
-  const parisNow = new Date(parisOffset);
-  const tomorrow = new Date(parisNow);
-  tomorrow.setDate(parisNow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
+  // ✅ FIX : Utiliser la même méthode que pour Emoji
+  const nowInParis = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  const midnightParis = new Date(nowInParis);
+  midnightParis.setHours(24, 0, 0, 0);
+  
+  const timeUntilMidnight = midnightParis.getTime() - nowInParis.getTime();
 
-  const timeUntilMidnight = tomorrow.getTime() - parisNow.getTime();
-
-  console.log(`🕛 Next auto-reset in ${Math.round(timeUntilMidnight / 1000 / 60)} minutes`);
+  console.log(`🕛 Next auto-reset in ${Math.round(timeUntilMidnight / 1000 / 60)} minutes (All Out)`);
 
   setTimeout(() => {
-    console.log("🔄 Auto-reset triggered at Paris midnight");
+    console.log("🔄 Auto-reset triggered at Paris midnight (All Out)");
     const resetBtn = document.getElementById("resetButton");
     if (resetBtn) resetBtn.click();
-    else location.reload(); // fallback si le bouton reset est absent
-  }, timeUntilMidnight + 500);
+    else location.reload();
+  }, timeUntilMidnight + 1000); // ✅ 1000ms au lieu de 500ms
 }
 
 function checkResetOnLoad() {
@@ -822,17 +872,23 @@ function checkResetOnLoad() {
 
   if (storedDate !== today) {
     console.log("📅 Nouvelle journée détectée → reset automatique (All Out)");
-    localStorage.setItem("lastPlayedDate_AllOut", today);
-
-    // Facultatif : nettoie l’ancienne entrée stats
+    
+    // ✅ NETTOYER TOUTES les clés du jeu AVANT de mettre à jour la date
+    localStorage.removeItem("aoaTarget");
+    localStorage.removeItem("aoaAttempts");
+    localStorage.removeItem("aoaGameOver");
+    
+    // Nettoie l'ancienne entrée stats
     if (storedDate) {
       const oldStatsKey = `statsLogged_AllOut_${storedDate}`;
       localStorage.removeItem(oldStatsKey);
     }
+    
+    // ✅ Mettre à jour la date APRÈS le nettoyage
+    localStorage.setItem("lastPlayedDate_AllOut", today);
 
-    const resetBtn = document.getElementById("resetButton");
-    if (resetBtn) resetBtn.click();
-    else location.reload();
+    // ✅ Recharger la page pour forcer un état propre
+    location.reload();
   } else {
     console.log("📅 Même jour, aucune réinitialisation nécessaire (All Out)");
   }

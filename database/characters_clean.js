@@ -1199,7 +1199,7 @@ export const characters = [
         genre: ["Human", "Female"],
         age: "15-20",
         arcane: ["Empress"],
-        opus: ["P1", "P2EIS"],
+        opus: ["P1", "P2IS"],
         personaUser: true,
         persona: "Vesta",
         emoji: ["🤬", "🏍", "📷"],

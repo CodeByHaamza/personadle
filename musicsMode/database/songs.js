@@ -395,7 +395,7 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=lk8BMgl9vp0"
   },
   {
-    titre: "The Days When My Mother Was There",
+    titre: "When Mother Was There",
     fichier: "The_Days_When_My_Mother_Was_There.mp3",
     opus: ["P5"],
     image: "P5.webp",
@@ -476,7 +476,7 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=-iy47Q--EbU"
   },
   {
-    titre: "Your Are Stronger",
+    titre: "You Are Stronger",
     fichier: "You_are_stronger.mp3",
     opus: ["P5S"],
     image: "P5S.webp",

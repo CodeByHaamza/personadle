@@ -1,448 +1,890 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Personadle</title>
-      <meta name="description" content="Guess the Persona character of the day! Inspired by P1 to P5X.">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://www.personadle.com">
-  <meta property="og:title" content="Personadle – Daily Persona Game">
-  <meta property="og:image" content="https://www.personadle.com/img/Logo_PersonaDLE.png">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personadle</title>
+    <meta name="description" content="Guess the Persona character of the day! Inspired by P1 to P5X.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.personadle.com">
+<meta property="og:title" content="Personadle – Daily Persona Game">
+<meta property="og:image" content="https://www.personadle.com/img/Logo_PersonaDLE.png">
 
-      
-      <!-- Styles & Icon -->
-      <link rel="stylesheet" href="./css/style.css">
-      <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
-  </head>
-  <body>
+    
+    <!-- Styles & Icon -->
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./profile/badges/badges.css">
+    <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
+</head>
+<body>
 
 
   
  
-    <!-- Logo Persona -->
-    <header id="homepage">
-        <a href="./index.html">
-            <img src="./img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage">
-        </a>
-    </header>
+  <!-- Logo Persona -->
+  <header id="homepage">
+      <a href="./index.html">
+          <img src="./img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage">
+      </a>
+  </header>
 <div id="profileWrapper" style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
-  <div id="profileDisplay" style="position: relative; display: inline-block;">
-    <img id="headerAvatar" src="" alt="Avatar" 
-     style="width: 172px; height: auto; border-radius: 50%; object-fit: cover; border: 4px solid black;">
+<div id="profileDisplay" style="position: relative; display: inline-block;">
+  <img id="headerAvatar" src="" alt="Avatar" 
+   style="width: 172px; height: auto; border-radius: 50%; object-fit: cover; border: 4px solid black;">
 
-    <span id="headerPseudo"
-          style="position: absolute; bottom: 4px; left: 4px; font-weight: bold; font-size: 22px;
-                 background: rgba(0, 0, 0, 0.65); color: white; padding: 1px 5px; border-radius: 6px;">
-    </span>
-  </div>
+  <span id="headerPseudo"
+        style="position: absolute; bottom: 4px; left: 4px; font-weight: bold; font-size: 22px;
+               background: rgba(0, 0, 0, 0.65); color: white; padding: 1px 5px; border-radius: 6px;">
+  </span>
+</div>
 
-  <button id="profileButton" class="profile-btn" style="margin-top: 10px;">👤 My Account</button>
+<button id="profileButton" class="profile-btn" style="margin-top: 10px;">👤 My Account</button>
 
  
 </div>
 
 
 
-    <!-- Titre principal -->
-    <section class="title-wrapper">
-        <h1 class="gamemode-title">Try to guess the Persona character (Persona 1 to Persona 5)</h1>
-    </section>
-    
-    <!-- Buttons for game modes -->
-    <div id ="gameModeSelector">
-        <button class="gamemode-button" id="classicButton" onclick="location.href='./classiqueMode/classiqueMode.html'">
-            <img src="./img/classic_button_thanatos (1).png" alt="Classique Mode">
-        </button>
-        <button class="gamemode-button" id="EmojiButton" onclick="location.href='./emojiMode/emojiMode.html'">
-            <img src="./img/Emoji_button_final.png" alt="Emoji Mode">
-        </button>
-        <button class="gamemode-button" id="AllOutAttackButton" onclick="location.href='./allOutAttackMode/allOutAttack.html'">
-            <img src="./img/all-ou-attack_avec_masque (1).png" alt="All Out Attack Mode">
-        </button>
-        <button class="gamemode-button" id="shadowsButton" onclick="location.href='./silhouetteMode/silhouette.html'">
-            <img src="./img/Shadows_button_Velvet_room.png" alt="Shadows Mode">
-        </button>
-        <button class="gamemode-button" id="PersonaeButton" onclick="location.href='./personaeMode/personae.html'">
-            <img src="./img/personae button.png" alt="Persona Mode">
-            </button>
-           <button class="gamemode-button" id="MusicButton" onclick="location.href='./musicsMode/musics.html'">
-            <img src="./img/musicmode.png" alt="Persona Mode">
-            </button>
-    </div>
-   
+  <!-- Titre principal -->
+  <section class="title-wrapper">
+      <h1 class="gamemode-title">Try to guess the Persona character (Persona 1 to Persona 5)</h1>
+  </section>
+  
+  <!-- Buttons for game modes -->
+  <div id ="gameModeSelector">
+      <button class="gamemode-button" id="classicButton" onclick="location.href='./classiqueMode/classiqueMode.html'">
+          <img src="./img/classic_button_thanatos (1).png" alt="Classique Mode">
+      </button>
+      <button class="gamemode-button" id="EmojiButton" onclick="location.href='./emojiMode/emojiMode.html'">
+          <img src="./img/Emoji_button_final.png" alt="Emoji Mode">
+      </button>
+      <button class="gamemode-button" id="AllOutAttackButton" onclick="location.href='./allOutAttackMode/allOutAttack.html'">
+          <img src="./img/all-ou-attack_avec_masque (1).png" alt="All Out Attack Mode">
+      </button>
+      <button class="gamemode-button" id="shadowsButton" onclick="location.href='./silhouetteMode/silhouette.html'">
+          <img src="./img/Shadows_button_Velvet_room.png" alt="Shadows Mode">
+      </button>
+      <button class="gamemode-button" id="PersonaeButton" onclick="location.href='./personaeMode/personae.html'">
+          <img src="./img/personae button.png" alt="Persona Mode">
+          </button>
+         <button class="gamemode-button" id="MusicButton" onclick="location.href='./musicsMode/musics.html'">
+          <img src="./img/musicmode.png" alt="Persona Mode">
+          </button>
+  </div>
+ 
 <!-- Bouton Mode Sombre -->
 <div class="darkmode-toggle">
-  <label class="switch">
-    <input type="checkbox" id="darkModeToggle">
-    <span class="slider round"></span>
-  </label>
-  <span class="label-text">Dark Mode</span>
+<label class="switch">
+  <input type="checkbox" id="darkModeToggle">
+  <span class="slider round"></span>
+</label>
+<span class="label-text">Dark Mode</span>
 </div>
 
 <!-- Script intégré -->
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const toggle = document.getElementById("darkModeToggle");
-    const savedMode = localStorage.getItem("darkMode");
-    if (savedMode === "enabled") {
-      document.body.classList.add("darkmode");
-      toggle.checked = true;
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("darkModeToggle");
+  const savedMode = localStorage.getItem("darkMode");
+  if (savedMode === "enabled") {
+    document.body.classList.add("darkmode");
+    toggle.checked = true;
+  }
 
-    toggle.addEventListener("change", () => {
-      if (toggle.checked) {
-        document.body.classList.add("darkmode");
-        localStorage.setItem("darkMode", "enabled");
-      } else {
-        document.body.classList.remove("darkmode");
-        localStorage.setItem("darkMode", "disabled");
-      }
-    });
+  toggle.addEventListener("change", () => {
+    if (toggle.checked) {
+      document.body.classList.add("darkmode");
+      localStorage.setItem("darkMode", "enabled");
+    } else {
+      document.body.classList.remove("darkmode");
+      localStorage.setItem("darkMode", "disabled");
+    }
   });
+});
 </script>
 
 <div id="socialLinks" style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
-  <a href="https://github.com/HamzaKarrouchi/personadle" target="_blank" title="GitHub">
-    <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
-  </a>
-  <a href="https://discord.gg/wpMdGGDp3y" target="_blank" title="Discord">
-    <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
-  </a>
-  <a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
-    <img src="./assets/buttons/kofi.svg" alt="Twitter" width="30" height="30" />
-  </a>
+<a href="https://github.com/HamzaKarrouchi/personadle" target="_blank" title="GitHub">
+  <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
+</a>
+<a href="https://discord.gg/wpMdGGDp3y" target="_blank" title="Discord">
+  <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
+</a>
+<a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
+  <img src="./assets/buttons/kofi.svg" alt="Twitter" width="30" height="30" />
+</a>
 </div>
 
 <footer>
-  <p>personadle.net — 2025</p>
-  <p>
-    Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders. 
-    <a href="#" id="legalLink">Legal Notice</a>
-  </p>
+<p>personadle.net — 2025</p>
+<p>
+  Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders. 
+  <a href="#" id="legalLink">Legal Notice</a>
+</p>
 </footer>
 
 <!-- 🔔 News Popup -->
 <button id="newsBtn" class="news-btn">📰 News</button>
 
+<!-- Ajoute ce CSS dans la section <style> existante -->
+<style>
+/* === 🎨 CHIBI DECORATIONS === */
+.chibi-deco {
+  position: relative;
+  width: 120px;
+  height: auto;
+  pointer-events: none; /* Ne bloque pas les clics */
+  z-index: 10;
+  opacity: 0;
+  animation: chibi-appear 0.5s ease-out 0.3s forwards;
+}
+
+.chibi-deco.top-left {
+  top: -10px;
+  left: -10px;
+}
+
+.chibi-deco.bottom-right {
+  top: -10px;
+  right: -440px;
+}
+
+/* Animation d'apparition */
+@keyframes chibi-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Ajuster la modal pour permettre les positions absolues */
+
+
+/* Dark mode */
+body.darkmode .chibi-deco {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+/* Responsive - masquer sur petit écran */
+@media (max-width: 768px) {
+  .chibi-deco {
+    width: 80px; /* Plus petit sur mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .chibi-deco {
+    display: none; /* Cache complètement sur très petit écran */
+  }
+}
+</style>
+
+<!-- Remplace ta modal News par ceci : -->
 <div id="newsModal" class="news-modal" style="display: none;">
   <div class="news-modal-content">
-    <span class="close" id="closeNews">&times;</span>
-    <h2>📰 Latest Updates</h2>
-
-    <!-- Exemple de news -->
-    <article class="news-item">
-  <p class="news-date">03 Nov 2025</p>
-  <ul>
-    <li>🌟 Added <strong>Fuuka Yamagishi</strong> to All-Out Attack mode.</li>
-    <li>✨ Added <strong>Persona 5 Tactica</strong> characters (<strong>Erina</strong>, <strong>Toshiro</strong>).</li>
-    <li>🎲 Improved <strong>randomization logic</strong> in All-Out Attack to reduce target repetition.</li>
-    <li>⚡ Optimized <strong>All-Out Attack performance</strong> to minimize lag and memory usage (progressive loading, CDN WebP support).</li>
-    <li>🐞 Fixed <strong>Silhouette Mode</strong> image display issues.</li>
-    <li>⚙️ Fixed <strong>Emoji Mode</strong> daily reset not triggering correctly.</li>
-    <li>🖼️ Added new <strong>profile pictures</strong>: Chidori, Tae, and Maruki.</li>
-    <li>🎨 Minor <strong>UI and dark mode adjustments</strong> for smoother experience.</li>
-  </ul>
-</article>
-
-  </div>
-</div>
-
     
+    <!-- 🎨 Chibi decorations -->
+    <img src="img/Hamza_chibi.png" class="chibi-deco top-left" alt="Hamza">
+    <img src="img/Leo_chibi.png" class="chibi-deco bottom-right" alt="Leo">
+
+    <span class="close" id="closeNews">&times;</span>
+    
+    <h1 style="position: absolute; top: 55px; left: 50%; transform: translateX(-50%); text-align: center; margin: 20px 0; font-size: 2em;">Update History</h1>
+
+    <!-- Version 1.0 -->
+    <div class="version-item">
+        <div class="version-header">
+            <div>
+                <div class="version-title">🎮 Version 1.0</div>
+                <div class="version-date">29 Nov 2025</div>
+            </div>
+            <span class="version-arrow">▼</span>
+        </div>
+        <div class="version-content">
+            <ul>
+                <li>🎖️ <strong>NEW: Badge System!</strong> Unlock 19 unique achievements, including secret badges and event codes. Select up to 4 to showcase on your profile!</li>
+                <li>🖼️ <strong>NEW: Profile Sharing!</strong> Share your stats with custom backgrounds or Persona-themed wallpapers. Click badge notifications to see details!</li>
+                <li>🌟 Added <strong>Fuuka Yamagishi</strong> to All-Out Attack mode.</li>
+                <li>✨ Added <strong>Persona 5 Tactica</strong> characters (<strong>Erina</strong>, <strong>Toshiro</strong>).</li>
+                <li>🎲 Improved <strong>randomization logic</strong> in All-Out Attack to reduce target repetition.</li>
+                <li>⚡ Optimized <strong>All-Out Attack performance</strong> to minimize lag and memory usage (progressive loading, CDN WebP support).</li>
+                <li>🐞 Fixed <strong>Silhouette Mode</strong> image display issues.</li>
+                <li>🐞 Fixed <strong>Classic Mode</strong> Error on Yukino Mazuki Data (the opus was P2EIS instead of P2IS).</li>
+                <li>⚙️ Fixed <strong>Emoji Mode</strong> daily reset not triggering correctly.</li>
+                <li>🎵 Fixed song title typos: "Your Are Stronger" → "You Are Stronger" and "The Days when my mother was there" → "When Mother Was There".</li>
+                <li>🖼️ Added new <strong>profile pictures</strong>: Chidori, Tae, and Maruki.</li>
+                <li>⏱️ Fixed time tracking calculation.</li>
+                <li>🎨 Minor <strong>UI and dark mode adjustments</strong> for smoother experience.</li>
+            </ul>
+            <div class="pdf-container">
+              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn">
+                  See more (PDF)
+              </a>
+          </div>
+        </div>
+        
+    </div>
+
   </div>
 </div>
 
 <style>
 /* Bouton News */
 .news-btn {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;      
-  background: #eee;      /* clair par défaut */
-  color: #111;           /* texte sombre */
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  z-index: 1000;
-  font-size: 15px;
-  font-weight: bold;
-  transition: background 0.2s, transform 0.2s;
+position: fixed;
+bottom: 10px;
+left: 10px;      
+background: #eee;      /* clair par défaut */
+color: #111;           /* texte sombre */
+border: none;
+padding: 10px 18px;
+border-radius: 10px;
+cursor: pointer;
+z-index: 1000;
+font-size: 15px;
+font-weight: bold;
+transition: background 0.2s, transform 0.2s;
 }
 .news-btn:hover { 
-  background: #ddd;      /* hover plus foncé */
-  transform: scale(1.05);
+background: #ddd;      /* hover plus foncé */
+transform: scale(1.05);
 }
 
 /* Modal News */
 .news-modal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.7);
+display: none;
+position: fixed;
+z-index: 2000;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.7);
 }
 
 .news-modal-content {
+  
+  position: relative; /* Important pour que les chibi soient positionnés par rapport à la modal */
   background: #fff;
-  margin: 10% auto;
-  padding: 20px;
+  margin: 5% auto;
+  padding: 25px;
   border-radius: 12px;
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
-.news-item {
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #ddd;
+.news-modal-content h2 {
+margin-top: 0;
+color: #333;
 }
-.news-date {
-  margin: 0;
-  font-weight: bold;
-  font-size: 13px;
-  color: #444;
+
+/* Version Item */
+.version-item {
+margin-bottom: 15px;
+border: 1px solid #ddd;
+border-radius: 8px;
+overflow: hidden;
+background: #fafafa;
+}
+
+.version-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 15px;
+cursor: pointer;
+background: #f0f0f0;
+transition: background 0.2s;
+}
+
+.version-header:hover {
+background: #e8e8e8;
+}
+
+.version-title {
+font-weight: bold;
+font-size: 1.1em;
+color: #333;
+}
+
+.version-date {
+font-size: 0.9em;
+color: #666;
+margin-top: 4px;
+}
+
+.version-arrow {
+font-size: 1.2em;
+transition: transform 0.3s;
+color: #666;
+}
+
+.version-item.active .version-arrow {
+transform: rotate(180deg);
+}
+
+.version-content {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+padding: 0 15px;
+}
+
+.version-item.active .version-content {
+max-height: 1000px;
+padding: 15px;
+}
+
+.version-content ul {
+margin: 0;
+padding-left: 20px;
+}
+
+.version-content li {
+margin-bottom: 8px;
+line-height: 1.5;
 }
 
 /* Dark mode support */
 body.darkmode .news-modal-content {
-  background: #1e1e1e;
-  color: #eee;
+background: #1e1e1e;
+color: #eee;
 }
-body.darkmode .news-date { color: #bbb; }
+
+body.darkmode .news-modal-content h2 {
+color: #eee;
+}
+
+body.darkmode .version-item {
+background: #2a2a2a;
+border-color: #444;
+}
+
+body.darkmode .version-header {
+background: #252525;
+}
+
+body.darkmode .version-header:hover {
+background: #2f2f2f;
+}
+
+body.darkmode .version-title {
+color: #eee;
+}
+
+body.darkmode .version-date {
+color: #aaa;
+}
 
 /* Bouton close */
 .news-modal-content .close {
-  float: right;
-  font-size: 24px;
-  cursor: pointer;
+float: right;
+font-size: 28px;
+font-weight: bold;
+cursor: pointer;
+color: #666;
+transition: color 0.2s;
+}
+
+.news-modal-content .close:hover {
+color: #333;
+}
+
+body.darkmode .news-modal-content .close {
+color: #aaa;
+}
+
+body.darkmode .news-modal-content .close:hover {
+color: #fff;
 }
 
 /* Dark mode pour le bouton News */
 body.darkmode .news-btn {
-  background: #222;   /* sombre */
-  color: #fff;        /* texte clair */
+background: #222;   /* sombre */
+color: #fff;        /* texte clair */
 }
 body.darkmode .news-btn:hover {
-  background: #444;
+background: #444;
 }
 
+/* === ℹ️ BADGE AI INFO === */
+.badge-ai-info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin: 10px 0 20px 0;
+  cursor: help;
+}
+
+.info-icon {
+  font-size: 1.3em;
+  background: #3498db;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.badge-ai-info:hover .info-icon {
+  background: #2980b9;
+  transform: scale(1.1);
+}
+
+.info-tooltip {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  width: 320px;
+  font-size: 0.85em;
+  line-height: 1.5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.badge-ai-info:hover .info-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(5px);
+}
+
+.info-tooltip strong {
+  color: #3498db;
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.05em;
+}
+
+/* Dark mode support */
+body.darkmode .info-icon {
+  background: #2980b9;
+}
+
+body.darkmode .badge-ai-info:hover .info-icon {
+  background: #3498db;
+}
+
+body.darkmode .info-tooltip {
+  background: rgba(30, 30, 30, 0.98);
+  border: 1px solid #444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .info-tooltip {
+    left: auto;
+    right: 0;
+    width: 280px;
+    top: 40px;
+    transform: translateY(0);
+  }
+  
+  .badge-ai-info:hover .info-tooltip {
+    transform: translateY(5px) translateX(0);
+  }
+}
 
 </style>
 
 <script>
-  const newsModal = document.getElementById("newsModal");
-  const newsBtn = document.getElementById("newsBtn");
-  const closeNews = document.getElementById("closeNews");
+const newsModal = document.getElementById("newsModal");
+const newsBtn = document.getElementById("newsBtn");
+const closeNews = document.getElementById("closeNews");
 
-  newsBtn.onclick = () => newsModal.style.display = "block";
-  closeNews.onclick = () => newsModal.style.display = "none";
-  window.onclick = (e) => { if (e.target === newsModal) newsModal.style.display = "none"; };
+newsBtn.onclick = () => newsModal.style.display = "block";
+closeNews.onclick = () => newsModal.style.display = "none";
+window.onclick = (e) => { if (e.target === newsModal) newsModal.style.display = "none"; };
+
+// Gérer l'accordion des versions
+document.querySelectorAll('.version-header').forEach(header => {
+  header.addEventListener('click', () => {
+      const versionItem = header.parentElement;
+      versionItem.classList.toggle('active');
+  });
+});
 </script>
 
 
 <!-- Legal Modal -->
 <div id="legalModal" class="legal-modal" style="display: none;">
-  <div class="legal-content">
-    <span id="closeLegal" class="close">&times;</span>
-    <h2>📝 Legal Notice / Terms of Use</h2>
-    <p><strong>Last updated:</strong> July 2025</p>
+<div class="legal-content">
+  <span id="closeLegal" class="close">&times;</span>
+  <h2>📝 Legal Notice / Terms of Use</h2>
+  <p><strong>Last updated:</strong> July 2025</p>
 
-    <p>
-      This website ("<strong>Personadle</strong>") is a non-commercial fan project and tribute to the <em>Persona</em> franchise, created purely for educational and entertainment purposes.
-    </p>
+  <p>
+    This website ("<strong>Personadle</strong>") is a non-commercial fan project and tribute to the <em>Persona</em> franchise, created purely for educational and entertainment purposes.
+  </p>
 
-    <p>
-      All code and game logic are original and developed by <strong>Hamza</strong> & <strong>L2GENDAIRE</strong>.  
-      The project is entirely free of charge and released under the open-source <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
-    </p>
+  <p>
+    All code and game logic are original and developed by <strong>Hamza</strong> & <strong>L2GENDAIRE</strong>.  
+    The project is entirely free of charge and released under the open-source <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
+  </p>
 
-    <h3>🎭 Intellectual Property</h3>
-    <p>
-      This site is an unofficial fan creation and is not affiliated with or endorsed by ATLUS, SEGA, or any official Persona development team.<br>
-      All Persona characters, names, music, and visual assets remain the property of their respective rights holders:  
-      © ATLUS, © SEGA, © Shoji Meguro, © Lyn Inaizumi, © Lotus Juice, and others.
-    </p>
+  <h3>🎭 Intellectual Property</h3>
+  <p>
+    This site is an unofficial fan creation and is not affiliated with or endorsed by ATLUS, SEGA, or any official Persona development team.<br>
+    All Persona characters, names, music, and visual assets remain the property of their respective rights holders:  
+    © ATLUS, © SEGA, © Shoji Meguro, © Lyn Inaizumi, © Lotus Juice, and others.
+  </p>
 
-    <p>
-      Some UI components (such as button styles, interface layout, and animations) were custom-made by the Personadle team and are not extracted from any original game assets.
-    </p>
+  <p>
+    Some UI components (such as button styles, interface layout, and animations) were custom-made by the Personadle team and are not extracted from any original game assets.
+  </p>
 
-    <p>
-      The "Blind Test" mode features short audio excerpts used strictly for non-commercial, transformative fan purposes.  
-      Tracks are credited appropriately, and no full-length music is distributed. If any copyright holder requests removal or modification, we will comply promptly.
-    </p>
+  <p>
+    The "Blind Test" mode features short audio excerpts used strictly for non-commercial, transformative fan purposes.  
+    Tracks are credited appropriately, and no full-length music is distributed. If any copyright holder requests removal or modification, we will comply promptly.
+  </p>
 
-    <p>
-      No copyright infringement is intended. All content is used under the principles of fair use, where applicable, with no monetization involved.
-    </p>
+  <p>
+    No copyright infringement is intended. All content is used under the principles of fair use, where applicable, with no monetization involved.
+  </p>
 
-    <h3>🔐 Data & Privacy</h3>
-    <p>
-      <strong>Personadle</strong> does not collect, track, or store any personal data.  
-      All game progress is saved only in your browser via <code>localStorage</code>. No cookies, no analytics, no third-party tracking.
-    </p>
+  <h3>🔐 Data & Privacy</h3>
+  <p>
+    <strong>Personadle</strong> does not collect, track, or store any personal data.  
+    All game progress is saved only in your browser via <code>localStorage</code>. No cookies, no analytics, no third-party tracking.
+  </p>
 
-    <h3>🛠️ Open Source</h3>
-    <p>
-      The full project source code is publicly available under the MIT License.  
-      Contributions and forks are welcome, as long as the original authors are credited and no commercial use is made.
-    </p>
+  <h3>🛠️ Open Source</h3>
+  <p>
+    The full project source code is publicly available under the MIT License.  
+    Contributions and forks are welcome, as long as the original authors are credited and no commercial use is made.
+  </p>
 
-    <h3>💬 Credits & Thanks</h3>
-    <p>
-      Developed by <strong>Hamza</strong> & <strong>L2GENDAIRE</strong>.<br>
-      With gratitude to the GitHub community, Persona fans on Reddit, and all the supportive feedback from Discord developers ❤️
-    </p>
+  <h3>💬 Credits & Thanks</h3>
+  <p>
+    Developed by <strong>Hamza</strong> & <strong>L2GENDAIRE</strong>.<br>
+    With gratitude to the GitHub community, Persona fans on Reddit, and all the supportive feedback from Discord developers ❤️
+  </p>
 
-    <h3>📬 Contact</h3>
-    <p>
-      📧 Email: <a href="mailto:hamza.karrouchi.dev@gmail.com">hamza.karrouchi.dev@gmail.com</a><br>
-      🐙 GitHub: <a href="https://github.com/HamzaKarrouchi" target="_blank">GitHub.com</a>
-    </p>
-  </div>
+  <h3>📬 Contact</h3>
+  <p>
+    📧 Email: <a href="mailto:hamza.karrouchi.dev@gmail.com">hamza.karrouchi.dev@gmail.com</a><br>
+    🐙 GitHub: <a href="https://github.com/HamzaKarrouchi" target="_blank">GitHub.com</a>
+  </p>
+</div>
 </div>
 
 
 <script>
-  const legalModal = document.getElementById("legalModal");
-  const legalLink = document.getElementById("legalLink");
-  const closeLegal = document.getElementById("closeLegal");
+const legalModal = document.getElementById("legalModal");
+const legalLink = document.getElementById("legalLink");
+const closeLegal = document.getElementById("closeLegal");
 
-  legalLink.onclick = function (e) {
-    e.preventDefault();
-    legalModal.style.display = "block";
-  };
+legalLink.onclick = function (e) {
+  e.preventDefault();
+  legalModal.style.display = "block";
+};
 
-  closeLegal.onclick = function () {
+closeLegal.onclick = function () {
+  legalModal.style.display = "none";
+};
+
+window.onclick = function (event) {
+  if (event.target === legalModal) {
     legalModal.style.display = "none";
-  };
-
-  window.onclick = function (event) {
-    if (event.target === legalModal) {
-      legalModal.style.display = "none";
-    }
-  };
+  }
+};
 </script>
 
 <!-- 🕛 Daily Reset Button + Modal -->
 <button id="dailyInfoBtn" class="daily-btn">🕛 Daily Reset Info</button>
 
 <div id="dailyModal" class="daily-modal" style="display: none;">
-  <div class="daily-modal-content">
-    <span id="closeDaily" class="close">&times;</span>
-    <h2>🕛 Daily Reset</h2>
-    <p>
-      Each day at midnight (Paris time), a new challenge is available in each mode.<br>
-      Your progress resets, and you can try again with a brand-new Persona, song, or challenge!
-    </p>
-    <p class="countdown-text">Next reset in: <span id="dailyCountdown">--:--:--:--</span></p>
-  </div>
+<div class="daily-modal-content">
+  <span id="closeDaily" class="close">&times;</span>
+  <h2>🕛 Daily Reset</h2>
+  <p>
+    Each day at midnight (Paris time), a new challenge is available in each mode.<br>
+    Your progress resets, and you can try again with a brand-new Persona, song, or challenge!
+  </p>
+  <p class="countdown-text">Next reset in: <span id="dailyCountdown">--:--:--:--</span></p>
+</div>
 </div>
 
 <script>
-  const dailyModal = document.getElementById("dailyModal");
-  const dailyBtn = document.getElementById("dailyInfoBtn");
-  const closeDaily = document.getElementById("closeDaily");
-  const countdownEl = document.getElementById("dailyCountdown");
+const dailyModal = document.getElementById("dailyModal");
+const dailyBtn = document.getElementById("dailyInfoBtn");
+const closeDaily = document.getElementById("closeDaily");
+const countdownEl = document.getElementById("dailyCountdown");
 
-  dailyBtn.onclick = () => dailyModal.style.display = "block";
-  closeDaily.onclick = () => dailyModal.style.display = "none";
-  window.onclick = (e) => { if (e.target === dailyModal) dailyModal.style.display = "none"; };
+dailyBtn.onclick = () => dailyModal.style.display = "block";
+closeDaily.onclick = () => dailyModal.style.display = "none";
+window.onclick = (e) => { if (e.target === dailyModal) dailyModal.style.display = "none"; };
 
-  function updateCountdown() {
-    const now = new Date();
-    const parisTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-    const nextMidnight = new Date(parisTime);
-    nextMidnight.setHours(24, 0, 0, 0);
-    const diff = nextMidnight - parisTime;
+function updateCountdown() {
+  const now = new Date();
+  const parisTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  const nextMidnight = new Date(parisTime);
+  nextMidnight.setHours(24, 0, 0, 0);
+  const diff = nextMidnight - parisTime;
 
-    const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-    const ms = String(Math.floor((diff % 1000) / 10)).padStart(2, '0');
+  const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+  const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+  const ms = String(Math.floor((diff % 1000) / 10)).padStart(2, '0');
 
-    countdownEl.textContent = `${h}:${m}:${s}:${ms}`;
-    requestAnimationFrame(updateCountdown);
-  }
-  updateCountdown();
+  countdownEl.textContent = `${h}:${m}:${s}:${ms}`;
+  requestAnimationFrame(updateCountdown);
+}
+updateCountdown();
 
 
 </script>
 
 <!-- === Profile Modal === -->
 <div id="profileModal" class="modal hidden">
-  <div class="modal-content">
-    <span class="close" id="closeProfile">&times;</span>
-    <h2>🧑 My profil</h2>
-    <label for="pseudoInput">Pseudo :</label>
-    <input type="text" id="pseudoInput" />
+<div class="modal-content">
+  <span class="close" id="closeProfile">&times;</span>
+  <h2>🧑 My profil</h2>
+  <label for="pseudoInput">Pseudo :</label>
+  <input type="text" id="pseudoInput" />
 
-    <h3>Avatar :</h3>
-   <img id="avatarPreview" src="" alt="Avatar" class="avatar-preview"
-     style="border: 4px solid black; border-radius: 50%; width: 150px; height: auto;">
+  <h3>Avatar :</h3>
+ <img id="avatarPreview" src="" alt="Avatar" class="avatar-preview"
+   style="border: 4px solid black; border-radius: 50%; width: 150px; height: auto;">
 
-    <button id="editAvatarBtn">Change picture</button>
+  <button id="editAvatarBtn">Change picture</button>
 
-    <div style="margin-top: 12px; display: flex; align-items: right; gap: 10px;">
+  <div style="margin-top: 12px; display: flex; align-items: right; gap: 10px;">
 <label for="borderColorPicker" class="border-color-label">Border Color:</label>
-  <input type="color" id="borderColorPicker" style="width: 36px; height: 36px; padding: 0; border: none; background: none; cursor: pointer;">
+<input type="color" id="borderColorPicker" style="width: 36px; height: 36px; padding: 0; border: none; background: none; cursor: pointer;">
 
- <button 
-    id="saveAndRefreshBtn"
-    style="
-      background-color: #51ff00;
-      color: #111;
-      font-weight: bold;
-      border: none;
-      padding: 10px 18px;
-      font-size: 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 0 8px rgba(81, 255, 0, 0.5);
-      transition: all 0.2s ease;
-    "
-    onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 12px rgba(81, 255, 0, 0.8)'"
-    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 8px rgba(81, 255, 0, 0.5)'"
-  >
-    ✅ Save & Refresh
-  </button>
+<button 
+  id="saveAndRefreshBtn"
+  style="
+    background-color: #51ff00;
+    color: #111;
+    font-weight: bold;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(81, 255, 0, 0.5);
+    transition: all 0.2s ease;
+  "
+  onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 12px rgba(81, 255, 0, 0.8)'"
+  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 8px rgba(81, 255, 0, 0.5)'"
+>
+  ✅ Save & Refresh
+</button>
 </div>
 
 
-    <h3>Statistiques :</h3>
-    <div id="statsContainer"></div>
 
-    <h3>Export / Import</h3>
-    <button id="exportProfile">📤 Export</button>
-    <input type="file" id="importFileInput" />
-    <button id="importProfile">📥 Import</button>
 
-    <button id="resetProfile" style="background-color: #c0392b; color: white; margin-top: 10px;">
-  🔄 Reset Profile
+  <h3>Statistiques :</h3>
+  <div id="statsContainer"></div>
+  <!-- === BADGES SECTION === -->
+<section id="badgesSection">
+<h3>🏅 Badges</h3>
+
+<!-- Aperçu rapide (4 badges max) -->
+<div id="previewBadges" class="badge-preview"></div>
+
+<!-- Bouton pour ouvrir la modale complète -->
+<button id="openBadgesModal" class="btn">See All Badges</button>
+</section>
+
+<!-- === MODALE COMPLETE DES BADGES === -->
+<div id="badgesModal" class="hidden">
+<div class="badges-header">
+<h3>🎖️ All Badges</h3>
+<div style="display: flex; align-items: center; gap: 10px;">
+  <!-- ℹ️ Info badge AI -->
+  <div class="badge-ai-info">
+    <span class="info-icon">ℹ️</span>
+    <div class="info-tooltip-ai">
+      <strong>About Our Badges</strong><br>
+      Hey! Just wanted to be transparent – these badges were made with AI help. We're just students working on this passion project for free in our spare time, and honestly, we didn't have the budget or time to commission an artist. We absolutely respect human artists and would love to work with one someday if we get the chance! This was purely out of necessity, not preference. Thanks for understanding and for playing! ❤️
+    </div>
+  </div>
+  <button id="closeBadgesModal" class="close-btn">✖</button>
+</div>
+</div>
+
+<!-- 🔓 Compteur de badges -->
+<p id="badgesCounter" class="badges-counter">🔓 0 / 0 badges unlocked</p>
+
+<div id="badgesGrid" class="badges-grid"></div>
+
+</div>
+
+<!-- === EVENT CODE SECTION === -->
+<section id="eventCodeSection" style="margin-top: 20px; text-align: center;">
+<h3>🎟️ Event Code</h3>
+<p style="font-size: 0.9em; opacity: 0.8;">Enter a valid code to unlock an exclusive badge!</p>
+<input type="text" id="eventCodeInput" placeholder="Enter your code" style="padding: 8px; border-radius: 6px; border: 1px solid #aaa; width: 60%; max-width: 250px;">
+<button id="redeemEventCodeBtn" class="btn" style="margin-left: 8px;">✅ Redeem</button>
+<p id="eventCodeMessage" style="margin-top: 8px; font-size: 0.85em; color: #ccc;"></p>
+</section>
+
+
+
+
+
+  <h3>Export / Import</h3>
+  <button id="exportProfile">📤 Export</button>
+  <input type="file" id="importFileInput" />
+  <button id="importProfile">📥 Import</button>
+  <!-- === SHARE PROFILE SECTION === -->
+<section id="shareSection" style="text-align:center; margin-top:20px;">
+<button id="shareProfileBtn" class="btn">📤 Share My Profile</button>
+<p id="shareStatus" style="margin-top:5px; font-size:0.9em; opacity:0.8;"></p>
+</section>
+
+
+
+  <button id="resetProfile" style="background-color: #c0392b; color: white; margin-top: 10px;">
+🔄 Reset Profile
 </button>
 
-  </div>
+</div>
 </div>
 
 <!-- === Avatar Crop Modal === -->
 <div id="avatarCropModal" class="modal hidden">
-  <div class="modal-content">
-    <span class="close" id="closeCropper">&times;</span>
-    <h3>Choose your picture</h3>
-    <div id="avatarGrid"></div>
-    <canvas id="avatarCanvas" width="300" height="300"></canvas>
-    <div class="crop-controls">
-      <button id="zoomIn">🔍+</button>
-      <button id="zoomOut">🔍-</button>
-      <button id="confirmCrop">✅ Ok</button>
-    </div>
+<div class="modal-content">
+  <span class="close" id="closeCropper">&times;</span>
+  <h3>Choose your picture</h3>
+  <div id="avatarGrid"></div>
+  <canvas id="avatarCanvas" width="300" height="300"></canvas>
+  <div class="crop-controls">
+    <button id="zoomIn">🔍+</button>
+    <button id="zoomOut">🔍-</button>
+    <button id="confirmCrop">✅ Ok</button>
   </div>
 </div>
-<script src="./profile/profile.js"></script>
+</div>
+
+<!-- === SHARE PREVIEW MODAL === -->
+<!-- === SHARE PREVIEW MODAL (remplacer l'ancienne) === -->
+<div id="sharePreviewModal" class="modal hidden">
+<div class="modal-content share-preview">
+  <span id="closeSharePreview" class="close">&times;</span>
+  <h2 style="margin-bottom: 20px;">📸 Profile Preview</h2>
+
+  <!-- Sélecteur de background -->
+  <div id="backgroundSelector" style="margin-bottom: 20px; text-align: center;"></div>
+
+  <!-- Zone de prévisualisation -->
+  <div id="sharePreviewArea" class="share-preview-area">
+    <!-- le canvas généré apparaîtra ici -->
+  </div>
+
+  <!-- Boutons de partage -->
+  <div class="share-buttons">
+    <button id="downloadProfileBtn">💾 Download</button>
+    <button id="shareTwitterBtn">🐦 Share on X</button>
+    <button id="shareDiscordBtn">💬 Copy for Discord</button>
+    <button id="shareEmailBtn">✉️ Send by Email</button>
+  </div>
+</div>
+</div>
+
+<style>
+/* Modal share améliorée */
+.share-preview-area {
+display: flex;
+justify-content: center;
+align-items: center;
+margin: 20px 0;
+overflow: auto;
+max-height: 65vh;
+background: #0a0a0a;
+border-radius: 15px;
+padding: 20px;
+box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.share-buttons {
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+justify-content: center;
+margin-top: 20px;
+}
+
+.share-buttons button {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: #fff;
+border: none;
+padding: 12px 20px;
+border-radius: 10px;
+cursor: pointer;
+font-weight: bold;
+font-size: 0.95em;
+transition: all 0.3s ease;
+box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.share-buttons button:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.share-buttons button:active {
+transform: translateY(0);
+}
+
+/* Sélecteur de background */
+#backgroundSelector select {
+padding: 10px 15px;
+border-radius: 8px;
+background: #222;
+color: white;
+border: 2px solid #555;
+font-size: 1em;
+cursor: pointer;
+transition: border-color 0.2s;
+}
+
+#backgroundSelector select:hover {
+border-color: #888;
+}
+
+#backgroundSelector select:focus {
+outline: none;
+border-color: #667eea;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+.share-preview-area {
+  padding: 10px;
+}
+
+.share-buttons button {
+  font-size: 0.85em;
+  padding: 10px 16px;
+}
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script type="module" src="./profile/profile.js"></script>
 
 </body>
 </html>
