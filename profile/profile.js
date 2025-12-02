@@ -151,7 +151,7 @@ const avatarList = [
   "Yu2.jpg", "Yu.jpg", "Yosuke2.jpg", "Yosuke.jpg", "Chie2.jpg", "Chie.jpg", "Yukiko2.jpg", "Yukiko.jpg",
   "Kanji.avif", "Kanji.jpg", "Rise.jpg", "Rise.png", "Teddie2.jpg", "Teddie.jpg", "Naoto2.jpg", "Naoto.jpg", "Marie.jpg" , "Marie2.webp" ,"Nanako2.jpg", "Nanako.jpg",
   "margaret.jpg",
-  "Joker.jpg","ren_t.webp","Ann.jpg", "ANn.jpg", "Ryuji.jpg", "Ryuji.png", "Morgana.jpg", "Morgana.png", "Yusuke.jpg", "Yusuke.webp",
+  "Joker.jpg","ren_t.webp","Ann.jpg", "Ann_2.jpg", "Ryuji.jpg", "Ryuji.png", "Morgana.jpg", "Morgana.png", "Yusuke.jpg", "Yusuke.webp",
   "Makoto2.jpg", "Makoto.jpg","Futaba.jpg", "Futaba.webp","Haru.png", "Har.jpg",  "Akechi2.jpg", "Akechi.jpg", "Sumire2.jpg", "Sumire.jpg","Tae.jpg","Tae2.jpg","Caroline&justine.png","Lavenza.jpg",
 
   "Wonder.jpg", "wonder1.png", "wonder2.png","Lufel2.png", "Lufel.png","Arai2.png", "Arai.png","Shun2.png", "Shun.png",
