@@ -1,50 +1,155 @@
 import { personas as originalPersonas } from "./database/personas_allOut.js";
 import { portraitsMap } from "./database/portraitsMap.js";
 import { aoaCharacters } from "./database/aoaCharacters.js";
-// 🔥 Indexation rapide des personnages pour éviter les recherches O(n²)
-const AOA_BY_NAME = new Map(aoaCharacters.map(c => [c.nom, c]));
-
 import { updateProfileStats } from "../profile/profileStats.js";
 
+// 🔥 OPTIMISATION 1 : Cache unique pour les images
+const imageCache = new Map();
+const MAX_CACHE_SIZE = 20;
 
+// 🔥 OPTIMISATION 2 : Pool d'images pré-chargées
+let preloadQueue = [];
+let isPreloading = false;
 
-// 🌐 URL publique du bucket R2
+const AOA_BY_NAME = new Map(aoaCharacters.map(c => [c.nom, c]));
+
 const CDN_BASE_URL = "https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev/";
-
-// ⚙️ Forcer le cache navigateur (si CDN le permet)
-const CACHE_CONTROL = "public, max-age=86400"; // 24h
-
-// 🚀 Détection locale : si offline, bascule sur dossier local
+const CACHE_CONTROL = "public, max-age=86400";
 const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
 
-// 🔧 Fonction utilitaire unique et optimisée
 function cdn(subfolder, filename, ext = "webp") {
- if (IS_LOCAL) {
-  return `./database/allOutAttack/${encodeURIComponent(filename)}.${ext}`;
-}
-
-
-  // Version CDN avec paramètre de cache
+  if (IS_LOCAL) {
+    return `./database/allOutAttack/${encodeURIComponent(filename)}.${ext}`;
+  }
   const url = `${CDN_BASE_URL}${subfolder}/${encodeURIComponent(filename)}.${ext}`;
-  const params = new URLSearchParams({ cache: CACHE_CONTROL });
-  return `${url}?${params}`;
+  return `${url}?cache=${CACHE_CONTROL}`;
 }
 
-
-
-
-let activeOpusFilters = ["P3", "P5","P5X"]; // filtres actifs
+let activeOpusFilters = ["P3", "P5", "P5X"];
 let sessionStartTime = Date.now();
-
-
-const validOpus = {
-  P3: ["P3"],
-  P5: ["P5"],
-  P5X: ["P5X"],
-};
-
 const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
 
+let personas = [];
+let attempts = 0;
+let gameOver = false;
+let target = null;
+let lastFiveTargets = [];
+
+// 🔥 OPTIMISATION 3 : Gestion intelligente du cache d'images
+function addToImageCache(src, imgElement) {
+  if (imageCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = imageCache.keys().next().value;
+    const oldImg = imageCache.get(firstKey);
+    if (oldImg) oldImg.src = ''; // Libère la mémoire
+    imageCache.delete(firstKey);
+  }
+  imageCache.set(src, imgElement);
+}
+
+function getFromCache(src) {
+  return imageCache.get(src);
+}
+
+// 🔥 OPTIMISATION 4 : Préchargement intelligent avec priorité
+async function smartPreload(namesList, priority = 'low') {
+  if (isPreloading) return;
+  
+  isPreloading = true;
+  const limitedList = namesList.slice(0, 15); // Augmenté à 15 mais avec gestion intelligente
+  
+  for (const name of limitedList) {
+    const base = portraitsMap[name] || name.split(" ")[0];
+    const src = cdn("allOutAttack", base);
+    
+    // Skip si déjà en cache
+    if (getFromCache(src)) continue;
+    
+    const img = new Image();
+    img.loading = priority === 'high' ? 'eager' : 'lazy';
+    img.src = src;
+    
+    // Promesse qui ne bloque pas le reste
+    const loadPromise = new Promise((resolve) => {
+      img.onload = () => {
+        addToImageCache(src, img);
+        resolve();
+      };
+      img.onerror = () => resolve(); // Continue même en cas d'erreur
+    });
+    
+    if (priority === 'high') {
+      await loadPromise;
+    }
+    
+    // Délai adaptatif selon la priorité
+    await new Promise(r => setTimeout(r, priority === 'high' ? 30 : 100));
+  }
+  
+  isPreloading = false;
+}
+
+// 🔥 OPTIMISATION 5 : Chargement d'image avec gestion d'erreur robuste
+function loadImageSafely(gifElement, src, onLoadCallback) {
+  // Vérifie d'abord le cache
+  const cached = getFromCache(src);
+  if (cached && cached.complete) {
+    gifElement.src = src;
+    if (onLoadCallback) onLoadCallback();
+    return;
+  }
+  
+  // Charge avec timeout
+  const tempImg = new Image();
+  let timeoutId;
+  
+  const cleanup = () => {
+    clearTimeout(timeoutId);
+    tempImg.onload = null;
+    tempImg.onerror = null;
+  };
+  
+  tempImg.onload = () => {
+    cleanup();
+    addToImageCache(src, tempImg);
+    gifElement.src = src;
+    gifElement.style.opacity = "1";
+    if (onLoadCallback) onLoadCallback();
+  };
+  
+  tempImg.onerror = () => {
+    cleanup();
+    console.error(`Failed to load: ${src}`);
+    gifElement.src = "../img/loading.gif"; // Fallback
+  };
+  
+  // Timeout de 10 secondes
+  timeoutId = setTimeout(() => {
+    cleanup();
+    console.warn(`Timeout loading: ${src}`);
+    gifElement.src = "../img/loading.gif";
+  }, 10000);
+  
+  tempImg.src = src;
+}
+
+// 🔥 OPTIMISATION 6 : ShowLoading plus efficace
+function showLoading(gifElement) {
+  gifElement.style.filter = "none";
+  gifElement.style.opacity = "1";
+  
+  // Utilise une version en cache si disponible
+  const loadingCached = getFromCache("../img/loading.gif");
+  if (loadingCached) {
+    gifElement.src = "../img/loading.gif";
+  } else {
+    const loadingImg = new Image();
+    loadingImg.src = "../img/loading.gif";
+    loadingImg.onload = () => {
+      addToImageCache("../img/loading.gif", loadingImg);
+      gifElement.src = "../img/loading.gif";
+    };
+  }
+}
 
 function getFilteredPersonas() {
   const res = [];
@@ -52,7 +157,6 @@ function getFilteredPersonas() {
     const entry = AOA_BY_NAME.get(name);
     if (!entry) continue;
 
-    // ✅ test ultra rapide sans .some()
     for (let i = 0; i < entry.opus.length; i++) {
       if (activeOpusFilters.includes(entry.opus[i])) {
         res.push(name);
@@ -68,14 +172,6 @@ function getFilteredPersonas() {
   return res;
 }
 
-
-
-let personas = getFilteredPersonas();
-let attempts = 0;
-let gameOver = false;
-let target = null;
-let lastFiveTargets = [];
-
 function getBetterRandomCharacter() {
   const filteredPool = personas.filter(name => !lastFiveTargets.includes(name));
   const pool = filteredPool.length > 0 ? filteredPool : [...personas];
@@ -85,7 +181,6 @@ function getBetterRandomCharacter() {
     return null;
   }
 
-  // Utiliser Math.random() de base, qui est suffisant pour le jeu
   const index = Math.floor(Math.random() * pool.length);
   const selected = pool[index];
 
@@ -205,7 +300,7 @@ function removeFromAutocomplete(name) {
 }
 
 function showConfettiExplosion() {
-    new Audio('../assets/sound_effect/Victory_sound.mp3').play();
+  new Audio('../assets/sound_effect/Victory_sound.mp3').play();
 
   const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
   const numEmojisPerSide = 20;
@@ -264,29 +359,29 @@ function handleGuess() {
   updateGiveUpCounter();
 
   if (guess.toLowerCase() === target.toLowerCase()) {
-      checkAkechiBadge(target);
+    checkAkechiBadge(target);
     document.getElementById("aoaGif").style.filter = "none";
     showVictoryBox(target);
     showConfettiExplosion();
-revealNextLink({
-  prevHref: "../emojiMode/emojiMode.html",
-  nextHref: "../silhouetteMode/silhouette.html"
-});
+    revealNextLink({
+      prevHref: "../emojiMode/emojiMode.html",
+      nextHref: "../silhouetteMode/silhouette.html"
+    });
 
     gameOver = true;
     localStorage.setItem("aoaGameOver", "true");
     if (!localStorage.getItem(todayKey)) {
-  const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-  updateProfileStats({
-    result: "win",
-    mode: "All Out Attack",
-    timeSpent
-  });
-  localStorage.setItem(todayKey, "1");
-}
+      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+      updateProfileStats({
+        result: "win",
+        mode: "All Out Attack",
+        timeSpent
+      });
+      localStorage.setItem(todayKey, "1");
+    }
 
-localStorage.setItem("aoaTarget", target);
-localStorage.setItem("aoaAttempts", attempts);
+    localStorage.setItem("aoaTarget", target);
+    localStorage.setItem("aoaAttempts", attempts);
 
     disableInputs();
     return;
@@ -300,14 +395,13 @@ localStorage.setItem("aoaAttempts", attempts);
 
   input.value = "";
 }
-// === 🎭 DÉBLOCAGE DU BADGE AKECHI ===
+
 function checkAkechiBadge(characterName) {
   const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
   if (!profile) return;
 
   let shouldSave = false;
 
-  // Vérifier si c'est Crow
   if (characterName.toLowerCase().includes("crow") && characterName.toLowerCase().includes("akechi")) {
     if (!profile.foundCrow) {
       profile.foundCrow = true;
@@ -316,7 +410,6 @@ function checkAkechiBadge(characterName) {
     }
   }
 
-  // Vérifier si c'est Black Mask
   if (characterName.toLowerCase().includes("black mask") && characterName.toLowerCase().includes("akechi")) {
     if (!profile.foundBlackMask) {
       profile.foundBlackMask = true;
@@ -325,32 +418,29 @@ function checkAkechiBadge(characterName) {
     }
   }
 
-  // Si l'un des deux a été trouvé, sauvegarder
   if (shouldSave) {
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));
 
-    // Si les deux sont trouvés, ajouter une notification en attente
     if (profile.foundCrow && profile.foundBlackMask) {
       if (!profile.pendingBadgeNotifications) {
         profile.pendingBadgeNotifications = [];
       }
       
-      // Ajouter le badge seulement s'il n'est pas déjà débloqué
       if (!profile.badges?.includes("truth_duality")) {
         profile.badges = profile.badges || [];
         profile.badges.push("truth_duality");
         
-        // Ajouter à la liste des notifications en attente
         if (!profile.pendingBadgeNotifications.includes("truth_duality")) {
           profile.pendingBadgeNotifications.push("truth_duality");
         }
         
         localStorage.setItem("personaUserProfile", JSON.stringify(profile));
-        console.log("🎉 Truth & Duality badge unlocked! Notification pending...");
+        console.log("🎉 Truth & Duality badge unlocked!");
       }
     }
   }
 }
+
 function showVictoryBox(name) {
   const baseName = (portraitsMap[name] || name.split(" ")[0]).trim();
   const imgSrc = `./database/img/${baseName}_Battle.webp`;
@@ -378,50 +468,28 @@ function giveUp() {
   disableInputs();
   gameOver = true;
   if (!localStorage.getItem(todayKey)) {
-  const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-  updateProfileStats({
-    result: "giveup",
-    mode: "All Out Attack",
-    timeSpent
-  });
-  localStorage.setItem(todayKey, "1");
-  revealNextLink({
-  prevHref: "../emojiMode/emojiMode.html",
-  nextHref: "../silhouetteMode/silhouette.html"
-});
-
-}
+    const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+    updateProfileStats({
+      result: "giveup",
+      mode: "All Out Attack",
+      timeSpent
+    });
+    localStorage.setItem(todayKey, "1");
+    revealNextLink({
+      prevHref: "../emojiMode/emojiMode.html",
+      nextHref: "../silhouetteMode/silhouette.html"
+    });
+  }
 
   localStorage.setItem("aoaGameOver", "true");
-localStorage.setItem("aoaTarget", target);
-localStorage.setItem("aoaAttempts", attempts);
-
+  localStorage.setItem("aoaTarget", target);
+  localStorage.setItem("aoaAttempts", attempts);
 }
 
-async function preloadGifs(list) {
-  const limitedList = list.slice(0, 10); // précharge seulement les 10 premiers
-  for (const name of limitedList) {
-    const base = portraitsMap[name] || name.split(" ")[0];
-    const img = new Image();
-    img.loading = "lazy";
-    img.src = cdn("allOutAttack", base);
-    await new Promise(r => setTimeout(r, 50)); // petit délai non bloquant
-  }
-}
-
-function showLoading(gifElement) {
-  gifElement.style.filter = "none";       // ✅ enlève le blur inline
-  gifElement.style.opacity = "1";         // rétablit opacité normale
-  gifElement.src = "../img/loading.gif";  // affiche le gif
-}
-
-
-
-
-function resetGame(){
+// 🔥 OPTIMISATION 7 : resetGame simplifié
+function resetGame() {
   sessionStartTime = Date.now();
-  localStorage.removeItem(todayKey); // 👈 Permet d'enregistrer une nouvelle victoire/giveup dans la même journée
-
+  localStorage.removeItem(todayKey);
 
   const input = document.getElementById("textbar");
   const gifElement = document.getElementById("aoaGif");
@@ -432,32 +500,22 @@ function resetGame(){
   document.getElementById("victoryBox").style.display = "none";
 
   personas = getFilteredPersonas();
-const newTarget = getBetterRandomCharacter();
-if (!newTarget) return; // sécurité anti-erreur
-target = newTarget;
+  const newTarget = getBetterRandomCharacter();
+  if (!newTarget) return;
+  target = newTarget;
 
+  gifElement.style.filter = "none";
+  showLoading(gifElement);
 
-gifElement.style.filter = "none"; // ✅ retire tout blur avant le loading
-showLoading(gifElement);
+  const imageName = portraitsMap[target] || target.split(" ")[0];
+  const newSrc = cdn("allOutAttack", imageName);
 
-const imageName = portraitsMap[target] || target.split(" ")[0];
-const newSrc = cdn("allOutAttack", imageName);
+  loadImageSafely(gifElement, newSrc, () => {
+    gifElement.style.filter = "blur(20px)";
+  });
 
-// ⏳ charge la nouvelle image sans flash ni blur sur loading
-const tempImg = new Image();
-tempImg.src = newSrc;
-tempImg.onload = () => {
-  gifElement.src = newSrc;
-  gifElement.style.opacity = "1"; // revient à pleine opacité
-  gifElement.style.filter = "blur(20px)"; // flou uniquement sur l'image chargée
-};
-
-
-  // ⚡ Préchargement progressif après reset
-setTimeout(() => preloadGifs(personas), 500);
-
-
-  gifElement.style.filter = "blur(20px)";
+  // Préchargement intelligent en arrière-plan
+  setTimeout(() => smartPreload(personas, 'low'), 800);
 
   input.disabled = false;
   document.getElementById("guessButton").disabled = false;
@@ -470,24 +528,15 @@ setTimeout(() => preloadGifs(personas), 500);
   initializeAutocomplete(input, personas);
   updateGiveUpCounter();
 
-  // 🟢 Sauvegarde du nouvel état
   localStorage.setItem("aoaTarget", target);
   localStorage.setItem("aoaAttempts", attempts);
   localStorage.removeItem("aoaGameOver");
 
-const nav = document.getElementById("modeNavigationContainer");
-if (nav) {
-  nav.style.display = "none";
-  nav.classList.remove("reveal-style");
-}
-
-}
-
-
-function updateGiveUpButton() {
-  const giveUpButton = document.getElementById("giveUpButton");
-  giveUpButton.disabled = attempts < 5;
-  giveUpButton.style.cursor = attempts >= 5 ? "pointer" : "not-allowed";
+  const nav = document.getElementById("modeNavigationContainer");
+  if (nav) {
+    nav.style.display = "none";
+    nav.classList.remove("reveal-style");
+  }
 }
 
 function updateGiveUpCounter() {
@@ -512,40 +561,35 @@ function disableInputs() {
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
 }
 
+// 🔥 OPTIMISATION 8 : DOMContentLoaded optimisé
 document.addEventListener("DOMContentLoaded", () => {
-  
   applyDarkModeStyles();
   const textbar = document.getElementById("textbar");
-  // ✅ Étape 1 : Lire les filtres sauvegardés
-const savedFilters = JSON.parse(localStorage.getItem("filters_AllOutAttack"));
-if (Array.isArray(savedFilters)) {
-  activeOpusFilters = savedFilters;
-}
-
-// ✅ Étape 2 : Appliquer les états visuels aux boutons
-document.querySelectorAll(".filter-btn").forEach((btn) => {
-  const group = btn.dataset.opus;
-  if (activeOpusFilters.includes(group)) {
-    btn.classList.add("active");
-  } else {
-    btn.classList.remove("active");
+  
+  const savedFilters = JSON.parse(localStorage.getItem("filters_AllOutAttack"));
+  if (Array.isArray(savedFilters)) {
+    activeOpusFilters = savedFilters;
   }
-});
+
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    const group = btn.dataset.opus;
+    if (activeOpusFilters.includes(group)) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
 
   const guessButton = document.getElementById("guessButton");
   const gifElement = document.getElementById("aoaGif");
 
   personas = getFilteredPersonas();
-// ⏳ Préchargement différé pour ne pas bloquer l'UI
-setTimeout(() => preloadGifs(personas), 1000);
-
-
-
-
+  
+  // Préchargement différé avec priorité basse
+  setTimeout(() => smartPreload(personas, 'low'), 1500);
 
   initializeAutocomplete(textbar, personas);
 
-  // === ✅ Récupération du state
   const savedTarget = localStorage.getItem("aoaTarget");
   const savedAttempts = parseInt(localStorage.getItem("aoaAttempts")) || 0;
   const savedGameOver = localStorage.getItem("aoaGameOver") === "true";
@@ -556,19 +600,21 @@ setTimeout(() => preloadGifs(personas), 1000);
     gameOver = savedGameOver;
 
     const imageName = portraitsMap[target] || target.split(" ")[0];
-    gifElement.src = cdn("allOutAttack", imageName);
-    gifElement.style.filter = gameOver ? "none" : `blur(${Math.max(20 - attempts * 3, 0)}px)`;
+    const src = cdn("allOutAttack", imageName);
+    
+    loadImageSafely(gifElement, src, () => {
+      gifElement.style.filter = gameOver ? "none" : `blur(${Math.max(20 - attempts * 3, 0)}px)`;
+    });
 
     updateGiveUpCounter();
 
     if (gameOver) {
       showVictoryBox(target);
       disableInputs();
-revealNextLink({
-  prevHref: "../emojiMode/emojiMode.html",
-  nextHref: "../silhouetteMode/silhouette.html"
-});
-
+      revealNextLink({
+        prevHref: "../emojiMode/emojiMode.html",
+        nextHref: "../silhouetteMode/silhouette.html"
+      });
     }
 
     if (attempts >= 5) {
@@ -577,26 +623,20 @@ revealNextLink({
     }
 
   } else {
-    // 👇 Si aucune sauvegarde : partie normale
     target = getBetterRandomCharacter();
     const imageName = portraitsMap[target] || target.split(" ")[0];
-gifElement.style.filter = "none"; // retire le blur résiduel avant loading
-showLoading(gifElement);
+    gifElement.style.filter = "none";
+    showLoading(gifElement);
 
-const newSrc = cdn("allOutAttack", imageName);
-const tempImg = new Image();
-tempImg.src = newSrc;
-tempImg.onload = () => {
-  gifElement.src = newSrc;
-  gifElement.style.opacity = "1";
-  gifElement.style.filter = "blur(20px)";
-};
+    const newSrc = cdn("allOutAttack", imageName);
+    loadImageSafely(gifElement, newSrc, () => {
+      gifElement.style.filter = "blur(20px)";
+    });
 
     localStorage.setItem("aoaTarget", target);
     localStorage.setItem("aoaAttempts", 0);
   }
 
-  // === Écouteurs des boutons
   guessButton.addEventListener("click", handleGuess);
   document.getElementById("giveUpButton").addEventListener("click", giveUp);
   document.getElementById("resetButton").addEventListener("click", () => {
@@ -606,7 +646,6 @@ tempImg.onload = () => {
     resetGame();
   });
 
-  // === Modal règles
   const rulesModal = document.getElementById("rulesModal");
   const rulesButton = document.getElementById("rulesButton");
   const closeRulesBtn = rulesModal.querySelector(".close");
@@ -627,73 +666,45 @@ tempImg.onload = () => {
       document.body.classList.remove("modal-open");
     }
   });
+});
 
-  
-  });
 checkResetOnLoad();
 setupDailyReset();
 
-// === 🧠 Filtres dynamiques persistants et réactifs
+// === FILTRES DYNAMIQUES ===
 const filterButtons = document.querySelectorAll(".filter-btn");
 
-// 🔹 Étape 1 : Charger les filtres sauvegardés
-const savedFilters = JSON.parse(localStorage.getItem("filters_AllOutAttack"));
-if (Array.isArray(savedFilters) && savedFilters.length > 0) {
-  activeOpusFilters = savedFilters;
-}
-
-// 🔹 Étape 2 : Appliquer visuellement les filtres restaurés
-filterButtons.forEach((btn) => {
-  const group = btn.dataset.opus;
-  if (activeOpusFilters.includes(group)) {
-    btn.classList.add("active");
-  } else {
-    btn.classList.remove("active");
-  }
-});
-
-// 🔹 Étape 3 : Clic sur un filtre → mise à jour dynamique + sauvegarde
 filterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     const group = btn.dataset.opus;
     btn.classList.toggle("active");
 
-    // ✅ Met à jour les filtres actifs
     if (btn.classList.contains("active")) {
       if (!activeOpusFilters.includes(group)) activeOpusFilters.push(group);
     } else {
       activeOpusFilters = activeOpusFilters.filter(o => o !== group);
     }
 
-    // 💾 Sauvegarde immédiate
     localStorage.setItem("filters_AllOutAttack", JSON.stringify(activeOpusFilters));
 
-    // ⚙️ Recalcule le pool de personnages filtré
     personas = getFilteredPersonas();
 
-    // 🚫 Si plus aucun perso dispo, avertir et stopper
     if (personas.length === 0) {
       alert("Aucun personnage ne correspond à ces filtres !");
       return;
     }
 
-    // 🔄 Nouveau personnage aléatoire adapté aux filtres
     target = getBetterRandomCharacter();
     const imageName = portraitsMap[target] || target.split(" ")[0];
     const newSrc = cdn("allOutAttack", imageName);
 
     const gifElement = document.getElementById("aoaGif");
-    const tempImg = new Image();
     showLoading(gifElement);
-    tempImg.src = newSrc;
-
-    tempImg.onload = () => {
-      gifElement.src = newSrc;
-      gifElement.style.opacity = "1";
+    
+    loadImageSafely(gifElement, newSrc, () => {
       gifElement.style.filter = "blur(20px)";
-    };
+    });
 
-    // 🧹 Reset de la partie
     attempts = 0;
     document.getElementById("wrongGuessList").innerHTML = "";
     document.getElementById("victoryBox").style.display = "none";
@@ -702,13 +713,11 @@ filterButtons.forEach((btn) => {
     localStorage.removeItem("aoaGameOver");
     updateGiveUpCounter();
 
-    // 🧠 Réinitialise l’autocomplétion avec le nouveau pool
     const textbar = document.getElementById("textbar");
     initializeAutocomplete(textbar, personas);
     textbar.value = "";
     textbar.disabled = false;
 
-    // Désactive temporairement le bouton Give Up
     const giveUpButton = document.getElementById("giveUpButton");
     giveUpButton.disabled = true;
     giveUpButton.style.cursor = "not-allowed";
@@ -751,77 +760,6 @@ function applyDarkModeStyles() {
     victoryBox.style.border = "3px solid #4caf50";
   }
 }
-function debugAllOutAttack() {
-  console.log("===== 🛠️ DEBUG ALL OUT ATTACK MODE =====");
-
-  // Vérifie le nombre de personnages valides avec les filtres actuels
-  const filtered = getFilteredPersonas();
-  console.log(`🎯 Nombre de personas filtrés : ${filtered.length}`);
-  console.log("🎯 Personas filtrés :", filtered);
-
-  // Vérifie les noms présents dans originalPersonas mais absents de aoaCharacters
-  const missingFromAoa = originalPersonas.filter(n =>
-    !aoaCharacters.some(e => e.nom === n)
-  );
-  if (missingFromAoa.length > 0) {
-    console.warn("❌ Noms présents dans personas_allOut.js mais ABSENTS de aoaCharacters.js :", missingFromAoa);
-  } else {
-    console.log("✅ Tous les noms de personas_allOut sont présents dans aoaCharacters.");
-  }
-
-  // Vérifie les noms dans aoaCharacters absents de originalPersonas
-  const extraInAoa = aoaCharacters.filter(e =>
-    !originalPersonas.includes(e.nom)
-  );
-  if (extraInAoa.length > 0) {
-    console.warn("❌ Noms présents dans aoaCharacters.js mais NON listés dans personas_allOut.js :", extraInAoa.map(e => e.nom));
-  } else {
-    console.log("✅ Tous les noms de aoaCharacters sont listés dans personas_allOut.");
-  }
-
-  // Vérifie si les noms du pool filtré ont bien un mapping portraits
-  const notMapped = filtered.filter(name => !portraitsMap[name] && !name.includes("&"));
-  if (notMapped.length > 0) {
-    console.warn("⚠️ Noms SANS mapping explicite dans portraitsMap :", notMapped);
-  } else {
-    console.log("✅ Tous les noms du pool filtré ont un mapping dans portraitsMap (ou sont des cas spéciaux).");
-  }
-
-  // Vérifie que les GIFs All-Out Attack existent
-  const missingGifs = [];
-  filtered.forEach(name => {
-    const base = portraitsMap[name] || name.split(" ")[0];
-    const path = cdn("allOutAttack", base);
-
-    const img = new Image();
-    img.onload = () => {};
-    img.onerror = () => {
-      missingGifs.push({ name, path });
-      console.error(`❌ GIF introuvable : ${name} → ${path}`);
-    };
-    img.src = path;
-  });
-
-  // Affiche les infos du target actuel
-  if (target) {
-    console.log("🎯 Target actuel :", target);
-    const targetEntry = aoaCharacters.find(c => c.nom === target);
-    if (!targetEntry) {
-      console.error("❌ Target NON trouvé dans aoaCharacters.js :", target);
-    } else {
-      console.log("✅ Target trouvé dans aoaCharacters.js :", targetEntry);
-    }
-
-    const gifName = portraitsMap[target] || target.split(" ")[0];
-    const gifPath = cdn("allOutAttack", gifName);
-
-    console.log(`🎞️ Chemin GIF : ${gifPath}`);
-  } else {
-    console.warn("⚠️ Target non défini actuellement.");
-  }
-
-  console.log("===== ✅ DEBUG TERMINÉ =====");
-}
 
 function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
   const nav = document.getElementById("modeNavigationContainer");
@@ -851,7 +789,6 @@ function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
 }
 
 function setupDailyReset() {
-  // ✅ FIX : Utiliser la même méthode que pour Emoji
   const nowInParis = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
   const midnightParis = new Date(nowInParis);
   midnightParis.setHours(24, 0, 0, 0);
@@ -865,7 +802,7 @@ function setupDailyReset() {
     const resetBtn = document.getElementById("resetButton");
     if (resetBtn) resetBtn.click();
     else location.reload();
-  }, timeUntilMidnight + 1000); // ✅ 1000ms au lieu de 500ms
+  }, timeUntilMidnight + 1000);
 }
 
 function checkResetOnLoad() {
@@ -875,21 +812,16 @@ function checkResetOnLoad() {
   if (storedDate !== today) {
     console.log("📅 Nouvelle journée détectée → reset automatique (All Out)");
     
-    // ✅ NETTOYER TOUTES les clés du jeu AVANT de mettre à jour la date
     localStorage.removeItem("aoaTarget");
     localStorage.removeItem("aoaAttempts");
     localStorage.removeItem("aoaGameOver");
     
-    // Nettoie l'ancienne entrée stats
     if (storedDate) {
       const oldStatsKey = `statsLogged_AllOut_${storedDate}`;
       localStorage.removeItem(oldStatsKey);
     }
     
-    // ✅ Mettre à jour la date APRÈS le nettoyage
     localStorage.setItem("lastPlayedDate_AllOut", today);
-
-    // ✅ Recharger la page pour forcer un état propre
     location.reload();
   } else {
     console.log("📅 Même jour, aucune réinitialisation nécessaire (All Out)");

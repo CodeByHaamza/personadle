@@ -1697,7 +1697,7 @@ export const characters = [
   },
    {
     nom: "Izanami",
-    genre:  ["Male", "Demon"],
+    genre:  ["Male", "Female", "Entity"],
     age: "Unknown",
     arcane: ["NONE"],
     opus:["P4", "P4G"],
