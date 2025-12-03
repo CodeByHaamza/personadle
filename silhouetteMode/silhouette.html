@@ -236,6 +236,23 @@
     Personae Mode →
   </div>
 </div>
-
+<script>
+  // Son de hover pour tous les boutons link-wrapper
+  document.addEventListener("DOMContentLoaded", () => {
+    const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
+    
+    // Sélectionne tous les boutons avec effet hover
+    const buttons = document.querySelectorAll('.link-wrapper');
+    
+    buttons.forEach(button => {
+      button.addEventListener('mouseenter', () => {
+        // Clone le son pour permettre les survols rapides successifs
+        const sound = hoverSound.cloneNode();
+        sound.volume = 0.3; // Ajustez le volume si nécessaire (0.0 à 1.0)
+        sound.play().catch(e => console.log('Erreur audio hover:', e));
+      });
+    });
+  });
+</script>
 </body>
 </html>

@@ -452,6 +452,8 @@ function applyDarkModeStyles() {
 
 // === CONFETTIS ===
 function showConfettiExplosion() {
+      new Audio('../assets/sound_effect/Victory_sound.mp3').play();
+
   const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
   const numEmojis = 30;
 

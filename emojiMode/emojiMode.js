@@ -182,6 +182,8 @@ function removeFromAutocomplete(name) {
 
 // === CONFETTIS ===
 function showConfettiExplosion() {
+      new Audio('../assets/sound_effect/Victory_sound.mp3').play();
+
   const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
   const numEmojisPerSide = 20;
 
@@ -315,6 +317,9 @@ function enableGiveUpButton() {
 function resetGame() {
   // ⚠️ Ne PAS supprimer la clé de stats du jour: on garde l’anti-double comptage
   sessionStartTime = Date.now();
+
+    // ✅ AJOUTEZ CETTE LIGNE pour sauvegarder la date du reset
+  localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
 
   const displayZone = document.getElementById("emojiDisplay");
   const winMessage = document.getElementById("winMessage");
@@ -510,14 +515,23 @@ function checkResetOnLoad() {
   const todayParis = parisDateKey();
   const storedDate = localStorage.getItem("lastPlayedDate_Emoji");
 
-  if (storedDate !== todayParis) {
+  // ✅ Si pas de date stockée OU date différente → reset
+  if (!storedDate || storedDate !== todayParis) {
     console.log("📅 Nouvelle journée détectée → reset automatique (Emoji)");
-    // Nettoyage stats d’hier (si tu veux)
+    
+    // Nettoyage stats d'hier
     if (storedDate) {
       localStorage.removeItem(`statsLogged_${modeName}_${storedDate}`);
     }
+    
+    // Nettoyage des données de partie
+    localStorage.removeItem("targetEmoji");
+    localStorage.removeItem("attemptsEmoji");
+    localStorage.removeItem("emojiGameOver");
+    localStorage.removeItem("emojiForceReveal");
+    localStorage.removeItem("emojiWin");
+    
     localStorage.setItem("lastPlayedDate_Emoji", todayParis);
-
     resetGame();
     location.reload();
   } else {
@@ -617,18 +631,19 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Reset bouton
-  resetButton.addEventListener("click", () => {
-    localStorage.removeItem("targetEmoji");
-    localStorage.removeItem("attemptsEmoji");
-    localStorage.removeItem("emojiGameOver");
-    localStorage.removeItem("emojiForceReveal");
-    resetGame();
+ resetButton.addEventListener("click", () => {
+  localStorage.removeItem("targetEmoji");
+  localStorage.removeItem("attemptsEmoji");
+  localStorage.removeItem("emojiGameOver");
+  localStorage.removeItem("emojiForceReveal");
+  localStorage.removeItem("emojiWin");  // ✅ Ajoutez cette ligne aussi
+  resetGame();
 
-    revealNextLink({
-      prevHref: "../classiqueMode/classiqueMode.html",
-      nextHref: "../allOutAttackMode/allOutAttack.html"
-    });
+  revealNextLink({
+    prevHref: "../classiqueMode/classiqueMode.html",
+    nextHref: "../allOutAttackMode/allOutAttack.html"
   });
+});
 
   // Modale "Comment jouer"
   const rulesModal = document.getElementById("rulesModal");
@@ -656,3 +671,37 @@ document.addEventListener("DOMContentLoaded", () => {
   checkResetOnLoad();
   setupDailyReset();
 });
+
+// === FONCTIONS DE TEST (console) ===
+window.emojiDebug = {
+  // Voir la date actuelle et stockée
+  checkDates: () => {
+    console.log("📅 Date stockée:", localStorage.getItem("lastPlayedDate_Emoji"));
+    console.log("📅 Date actuelle Paris:", parisDateKey());
+    console.log("📅 Égales ?", localStorage.getItem("lastPlayedDate_Emoji") === parisDateKey());
+  },
+  
+  // Simuler hier (force reset au prochain reload)
+  simulateYesterday: () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = parisDateKey(yesterday);
+    localStorage.setItem("lastPlayedDate_Emoji", yesterdayStr);
+    console.log(`✅ Date forcée à hier: ${yesterdayStr}`);
+    console.log("🔄 Rechargez la page pour voir le reset");
+  },
+  
+  // Simuler une date spécifique
+  setDate: (dateStr) => {
+    localStorage.setItem("lastPlayedDate_Emoji", dateStr);
+    console.log(`✅ Date forcée à: ${dateStr}`);
+    console.log("🔄 Rechargez la page pour voir le reset");
+  },
+  
+  // Forcer le check maintenant
+  forceCheck: () => {
+    checkResetOnLoad();
+  }
+};
+
+console.log("🧪 Tests disponibles: emojiDebug.checkDates() | .simulateYesterday() | .setDate('2024-12-01') | .forceCheck()");
