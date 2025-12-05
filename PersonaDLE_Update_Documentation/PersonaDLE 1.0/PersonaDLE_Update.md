@@ -105,14 +105,15 @@ Choose from these iconic Persona locations:
 - **P3 Tartarus** - The twisted tower of shadows  
 - **P3 Water Theme** - Serene blue aesthetic from Persona 3  
 - **P4 TV World** - Step into the surreal television dimension  
+- **P4 Golden Style** - The vibrant golden aesthetic from Persona 4 Golden  
 - **P5 Mementos** - Navigate the twisted desires of humanity  
 - **P5 Phantom Thieves** - Stand with the legendary group  
-- **P5 Takemi Clinic** - Featuring everyone's favorite punk doctor (with and without Tae)  
+- **P5 Takemi Clinic** - Featuring everyone's favorite punk doctor  
+- **P5 Café Leblanc** - The cozy attic hideout where it all began  
 - **Christmas Special** - Festive seasonal theme  
 - **Protagonist Walls** - Featuring heroes from P1, P2, and more  
 
 **Pro tip:** Wallpapers can be changed anytime to match your mood or the season!
-
 ---
 
 \newpage
@@ -563,6 +564,22 @@ All Persona content is intellectual property of their respective copyright holde
 
 **If you enjoy PersonaDLE, please support the official Persona games by purchasing them from Atlus/SEGA!**
 
+
+
+---
+
+## A Note About AI-Assisted Assets
+
+**Transparency matters to us!**
+
+Hey! Just wanted to be transparent – the badges and some wallpapers were created with AI assistance. We're just students working on this passion project for free in our spare time, and honestly, we didn't have the budget or time to commission an artist. 
+
+We absolutely **respect human artists** and would love to work with one someday if we get the chance! This was purely out of necessity and practicality, not preference. 
+
+**If PersonaDLE ever generates revenue or gets support, hiring artists would be our priority.**
+
+Thanks for understanding and for playing! ❤️
+
 ---
 
 \newpage
@@ -586,9 +603,9 @@ This update represents months of work, late nights, and a whole lot of passion f
 
 ## Stay Connected
 
-- **Website:** [https://personadle.net/]  
-- **Discord:** [https://discord.gg/wpMdGGDp3y]  
-- **GitHub:** [https://github.com/HamzaKarrouchi/personadle]  
+- [**Website**](https://personadle.net/) 
+- [**Discord**](https://discord.gg/wpMdGGDp3y)  
+- [**GitHub**](https://github.com/HamzaKarrouchi/personadle)
 
 ---
 
