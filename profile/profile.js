@@ -338,7 +338,7 @@ const shareWallpapers = [
   { id: "p2_prota", name: "Persona 2 - Protagonist", src: "./profile/Wallpaper/P2_Prota_Wallpaper.png" },
   { id: "p3_tartarus", name: "Persona 3 - Tartarus", src: "./profile/Wallpaper/P3_Tartarus_Wallpaper.png" },
   { id: "p3_water", name: "Persona 3 - Water", src: "./profile/Wallpaper/P3_Water_Wallapaper.png" },
-  { id: "p4_tv", name: "Persona 4 - Golden Style", src: "./profile/Wallpaper/P4_Golden_Style.jpg" },
+  { id: "p4_golden", name: "Persona 4 - Golden Style", src: "./profile/Wallpaper/P4_Golden_Style.jpg" },
   { id: "p4_tv", name: "Persona 4 - TV World", src: "./profile/Wallpaper/P4_TV_World_Wallpaper.png" },
   { id: "p5_clinic", name: "Persona 5 - Clinic", src: "./profile/Wallpaper/P5_Clinique_Wallpaper.png" },
   { id: "p5_mementos", name: "Persona 5 - Mementos", src: "./profile/Wallpaper/P5_Memento_Wallpaper.png" },
