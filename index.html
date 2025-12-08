@@ -12,8 +12,8 @@
 
     
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./profile/badges/badges.css">
+    <link rel="stylesheet" href="./css/style.css?v=2">
+    <link rel="stylesheet" href="./profile/badges/badges.css?v=2">
     <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
 </head>
 <body>
@@ -196,6 +196,23 @@ body.darkmode .chibi-deco {
     
     <h1 style="position: absolute; top: 55px; left: 50%; transform: translateX(-50%); text-align: center; margin: 20px 0; font-size: 2em;">Update History</h1>
 
+
+
+    <!-- Version 1.01 (HOTFIX) -->
+    <div class="version-item hotfix-item">
+        <div class="version-header">
+            <div>
+                <div class="version-title">🔧 Version 1.01 <span class="hotfix-badge">HOTFIX</span></div>
+                <div class="version-date">08 Dec 2025</div>
+            </div>
+            <span class="version-arrow">▼</span>
+        </div>
+        <div class="version-content">
+            <ul>
+                <li>🐞 Fixed <strong>Persona 5 X characters</strong> not appearing correctly in Classic and Emoji modes.</li>
+            </ul>
+        </div>
+    </div>
     <!-- Version 1.0 -->
     <div class="version-item">
         <div class="version-header">
@@ -295,6 +312,23 @@ overflow: hidden;
 background: #fafafa;
 }
 
+/* Style spécial pour les HOTFIX (petites corrections) */
+.hotfix-item {
+border-left: 3px solid #f39c12;
+background: #fffef8;
+}
+
+.hotfix-badge {
+display: inline-block;
+background: #f39c12;
+color: white;
+font-size: 0.65em;
+padding: 2px 8px;
+border-radius: 4px;
+margin-left: 8px;
+font-weight: bold;
+}
+
 .version-header {
 display: flex;
 justify-content: space-between;
@@ -307,6 +341,14 @@ transition: background 0.2s;
 
 .version-header:hover {
 background: #e8e8e8;
+}
+
+.hotfix-item .version-header {
+background: #fff9e6;
+}
+
+.hotfix-item .version-header:hover {
+background: #fff4d6;
 }
 
 .version-title {
@@ -366,6 +408,19 @@ color: #eee;
 body.darkmode .version-item {
 background: #2a2a2a;
 border-color: #444;
+}
+
+body.darkmode .hotfix-item {
+background: #2d2a22;
+border-left-color: #f39c12;
+}
+
+body.darkmode .hotfix-item .version-header {
+background: #332e1a;
+}
+
+body.darkmode .hotfix-item .version-header:hover {
+background: #3d3520;
 }
 
 body.darkmode .version-header {
@@ -887,9 +942,9 @@ border-color: #667eea;
 }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js?v=2"></script>
 
-<script type="module" src="./profile/profile.js"></script>
+<script type="module" src="./profile/profile.js?v=2"></script>
 
 </body>
 </html>

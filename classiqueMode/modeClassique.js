@@ -19,10 +19,11 @@ const validOpus = {
   P2: ["P2IS", "P2EP"],
   P3: ["P3", "P3FES", "P3P"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"]
+  P5: ["P5", "P5R", "P5S", "P5T"],
+  P5X: ["P5X"]
 };
 
-let activeOpus = ["P1", "P2", "P3", "P4", "P5"];
+let activeOpus = ["P1", "P2", "P3", "P4", "P5", "P5X"];
 
 let daltonianMode = localStorage.getItem("daltonianMode") === "enabled";
 const daltonianToggle = document.getElementById("daltonianToggle");
