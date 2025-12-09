@@ -15,7 +15,7 @@ export const personas = [
   "Chord ( Ayaka Sakai )",
   "Closer ( Motoha Arai )",
   "Crow ( Goro Akechi )",
-  "Fleuret ( Ayaka Sakai )",
+  "Fleuret ( Seiji Shiratori )",
   "Fox ( Yusuke Kitagawa )",
   "Fuuka Yamagishi",
   "Howler ( Runa Dogenzaka )",
