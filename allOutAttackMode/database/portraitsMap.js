@@ -38,7 +38,7 @@ export const portraitsMap = {
     // P5X
   "Wonder ( Nagisa Kamishiro )": "Wonder",
   "Closer ( Motoha Arai )": "Closer",
-  "Fleuret ( Ayaka Sakai )": "Fleuret",
+  "Fleuret ( Seiji Shiratori )": "Fleuret",
   "Leon ( Leo Kamiyama )": "Leon",
   "Rin ( Yaoling Li )": "Rin",
   "Wind ( Riko Tanemura )": "Wind",

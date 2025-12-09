@@ -35,7 +35,7 @@ export const aoaCharacters = [
   { nom: "Wonder ( Nagisa Kamishiro )", gif: "Wonder", opus: ["P5X"] },
 { nom: "Chord ( Ayaka Sakai )", gif: "Chord", opus: ["P5X"] },
   { nom: "Closer ( Motoha Arai )", gif: "Closer", opus: ["P5X"] },
-  { nom: "Fleuret ( Ayaka Sakai )", gif: "Fleuret", opus: ["P5X"] },
+  { nom: "Fleuret ( Seiji Shiratori )", gif: "Fleuret", opus: ["P5X"] },
   { nom: "Leon ( Leo Kamiyama )", gif: "Leon", opus: ["P5X"] },
   { nom: "Rin ( Yaoling Li )", gif: "Rin", opus: ["P5X"] },
   { nom: "Wind ( Riko Tanemura )", gif: "Wind", opus: ["P5X"] },
