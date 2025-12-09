@@ -326,6 +326,18 @@ sessionStartTime = Date.now();     // Redémarre la session
     textbar.value = "";
     filterCharacterPool();
     gameOver = false;
+    // Réactivation des inputs
+    textbar.disabled = false;
+    
+    // Réactivation du bouton Submit
+    guessButton.style.pointerEvents = "auto";
+    guessButton.disabled = false;
+
+    // Réactivation du bouton Give Up (mais on le garde grisé tant que < 8 essais)
+    giveUpButton.style.pointerEvents = "auto"; // On remet les événements
+    giveUpButton.style.opacity = "1"; 
+    giveUpButton.disabled = true; // Logique interne
+    giveUpButton.style.cursor = "not-allowed"; // Curseur interdit visuellement
 
     const filteredCharacters = characters.filter(c => {
       const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
@@ -354,33 +366,47 @@ if (nav) {
     hintButton.style.cursor = "not-allowed";
   }
 });
-  giveUpButton.addEventListener("click", () => {
+// Dans modeClassique.js
+
+giveUpButton.addEventListener("click", () => {
+    // 🛑 AJOUT : Si le jeu est fini, on ne fait rien
+    if (gameOver) return;
+
+    // Si pas assez d'essais, on ne fait rien
     if (attempts < 8) return;
+
     if (target && target.nom) {
       checkGuess(target.nom, target, true);
     }
+    
+    // Désactivation visuelle et logique
     textbar.disabled = true;
-    guessButton.disabled = true;
-    giveUpButton.disabled = true;
+    guessButton.disabled = true; // Celui-ci marche si c'est une div gérée par le CSS ou JS
+    
+    // On désactive le clic sur le bouton Give Up
+    giveUpButton.style.pointerEvents = "none"; 
+    giveUpButton.style.opacity = "0.5"; // Optionnel : pour montrer qu'il est inactif
+
     gameOver = true;
+
     if (!history.includes(target.nom)) {
       history.push(target.nom);
       localStorage.setItem("guessHistory", JSON.stringify(history));
     }
+
     if (!statsAlreadyLogged) {
-  updateProfileStats({
-    result: "giveup",
-    mode: modeName,
-    sessionDuration: Date.now() - sessionStartTime
-  });
-  localStorage.setItem(todayKey, "true");
-}
+      updateProfileStats({
+        result: "giveup",
+        mode: modeName,
+        sessionDuration: Date.now() - sessionStartTime
+      });
+      localStorage.setItem(todayKey, "true");
+    }
 
     revealNextLink({
-  nextHref: "../emojiMode/emojiMode.html"
+      nextHref: "../emojiMode/emojiMode.html"
+    });
 });
-
-  });
 
   function updateCounters() {
     if (hintCounter) {
@@ -554,25 +580,33 @@ setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
     output.insertBefore(row, output.querySelector(".category-row")?.nextSibling);
     removeFromAutocomplete(guess.nom);
 
+    // Dans la fonction checkGuess...
+
     if (isWin) {
       textbar.disabled = true;
-      guessButton.disabled = true;
-      giveUpButton.disabled = true;
-      gameOver = true;
-      if (localStorage.getItem(todayKey) !== "true") {
-  updateProfileStats({
-    result: "win",
-    mode: modeName,
-    sessionDuration: Date.now() - sessionStartTime
-  });
-  localStorage.setItem(todayKey, "true");
+      
+      // Désactive le bouton Submit
+      guessButton.style.pointerEvents = "none";
+      
+      // 🛑 AJOUT : Désactive complètement le bouton Give Up
+      giveUpButton.style.pointerEvents = "none";
+      giveUpButton.style.opacity = "0.5";
 
-}
+      gameOver = true;
+      
+      if (localStorage.getItem(todayKey) !== "true") {
+        updateProfileStats({
+          result: "win",
+          mode: modeName,
+          sessionDuration: Date.now() - sessionStartTime
+        });
+        localStorage.setItem(todayKey, "true");
+      }
 
       showConfettiExplosion();
-revealNextLink({
-  nextHref: "../emojiMode/emojiMode.html"
-});
+      revealNextLink({
+        nextHref: "../emojiMode/emojiMode.html"
+      });
     }
   }
 
