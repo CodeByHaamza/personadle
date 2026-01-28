@@ -354,8 +354,9 @@ Make the game accessible for international Persona fans (EN/FR/JP).
       <sub>CSS Architecture & Responsive Design</sub><br>
       <sub>Modularization specialist</sub>
     </td>
+   </td>
     <td align="center" width="25%">
-      <img src="https://www.reddit.com/r/fireemblem/comments/iy9mwq/tatsuya_from_persona_2_portrait_found_on_fire/?size=80" width="100px;" alt="Dzulian"/><br>
+      <img src="https://i.pinimg.com/736x/db/c8/93/dbc8933b2e2b02ae9aca23fc78ea9107.jpg" width="100px;" alt="Dzulian"/><br>
       <sub><b>Dzulian</b></sub><br>
       <em>Creative Consultant & Data Specialist</em><br>
       <sub>Ideas development & P1/P2 accuracy</sub><br>
