@@ -382,7 +382,7 @@ Make the game accessible for international Persona fans (EN/FR/JP).
 ### Community
 - **Arati** ([@Arati](https://x.com/Arati)) - Community support and featuring PersonaDLE
 - **Discord Community** - Beta testing, bug reports, and endless feedback
-- **Reddit r/PERSoNA** - Support and suggestions
+- **Reddit r/persona4golden** - Support and suggestions
 
 ### Contributors & Development
 - **Damien ( Corbover )** - CSS architecture restructuring and modularization
