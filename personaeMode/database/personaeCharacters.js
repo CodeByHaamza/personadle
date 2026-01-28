@@ -13,9 +13,35 @@ export const personaeCharacters = [
     user: ["Kotone Shiomi"],
     opus: ["P3P"]
   },
+   {
+    persona: "Orpheus Picaro",
+    image: "Orpheus_Picaro",
+    user: ["Makoto Yuki","Aigis"],
+    opus: ["P3", "P3FES", "P3P","P3R"]
+  },
+  {
+    persona: "Orpheus Picaro ( Female )",
+    image: "OrpheusF_Picaro",
+    user: ["Kotone Shiomi"],
+    opus: ["P3P"]
+  },
+    {
+    persona: "Orpheus Telos",
+    image: "Orpheus_Telos",
+    user: ["Makoto Yuki", "Kotone Shiomi", "Aigis"],
+    opus: ["P3", "P3FES", "P3P", "P3R"]
+  },
+  
+
   {
     persona: "Thanatos",
     image: "Thanatos",
+    user: ["Makoto Yuki", "Kotone Shiomi"],
+    opus: ["P3", "P3FES", "P3P", "P3R"]
+  },
+  {
+    persona: "Thanatos Picaro",
+    image: "Thanatos_Picaro",
     user: ["Makoto Yuki", "Kotone Shiomi"],
     opus: ["P3", "P3FES", "P3P", "P3R"]
   },
@@ -24,6 +50,12 @@ export const personaeCharacters = [
     image: "Messiah",
     user: ["Makoto Yuki", "Kotone Shiomi"],
     opus: ["P3","P3FES", "P3P", "P3R"]
+  },
+  {
+    persona: "Messiah Picaro",
+    image: "Messiah_Picaro",
+    user: ["Makoto Yuki", "Kotone Shiomi"],
+    opus: ["P3", "P3FES", "P3P", "P3R"]
   },
   {
     persona: "Io",
@@ -104,6 +136,12 @@ export const personaeCharacters = [
     opus: ["P3","P3FES", "P3P", "P3R"]
   },
   {
+    persona: "Athena Picaros",
+    image: "Athena_Picaro",
+    user: ["Aigis"],
+    opus: ["P3","P3FES", "P3P", "P3R"]
+  },
+  {
     persona: "Cerberus",
     image: "Cerberus",
     user: ["Koromaru"],
@@ -153,8 +191,20 @@ export const personaeCharacters = [
     opus: ["P4", "P4G", "P4AU"]
   },
   {
+    persona: "Izanagi Picaro",
+    image: "Izanagi_Picaro",
+    user: ["Yu Narukami"],
+    opus: ["P4", "P4G", "P4AU"]
+  },
+  {
     persona: "Izanagi-no-Okami",
     image: "Izanagi-No-Okami",
+    user: ["Yu Narukami"],
+    opus: ["P4", "P4G", "P4AU"]
+  },
+  {
+    persona: "Izanagi-no-Okami Picaro",
+    image: "IzanagiNoOkami_Picaro",
     user: ["Yu Narukami"],
     opus: ["P4", "P4G", "P4AU"]
   },
@@ -291,8 +341,32 @@ export const personaeCharacters = [
     opus: ["P4", "P4G", "P4AU"]
   },
   {
+    persona: "Magatsu-Izanagi Picaro",
+    image: "Magatsu-Izanagi_Picaro",
+    user: ["Tohru Adachi"],
+    opus: ["P4", "P4G", "P4AU"]
+  },
+  {
+    persona: "Kaguya",
+    image: "Kaguya",
+    user: ["Marie"],
+    opus: ["P4G", "P4AU"]
+  },
+  {
+    persona: "Kaguya Picaro",
+    image: "Kaguya_Picaro",
+    user: ["Marie"],
+    opus: ["P4G", "P4AU"]
+  },
+  {
     persona: "Tsukuyomi",
     image: "Tsukuyomi",
+    user: ["Sho Minazuki"],
+    opus: ["P4AU"]
+  },
+  {
+    persona: "Tsukuyomi Picaro",
+    image: "Tsukuyomi_Picaro",
     user: ["Sho Minazuki"],
     opus: ["P4AU"]
   },
@@ -302,9 +376,21 @@ export const personaeCharacters = [
     user: ["Labrys"],
     opus: ["P4AU"]
   },
+   {
+    persona: "Ariadne Picaro",
+    image: "Ariadne_Picaro",
+    user: ["Labrys"],
+    opus: ["P4AU"]
+  },
   {
     persona: "Asterios",
     image: "Asterios",
+    user: ["Labrys"],
+    opus: ["P4AU"]
+  },
+  {
+    persona: "Asterios Picaro",
+    image: "Asterios_Picaro",
     user: ["Labrys"],
     opus: ["P4AU"]
   },
@@ -321,6 +407,12 @@ export const personaeCharacters = [
     image: "Satanael",
     user: ["Ren Amamiya"],
     opus: ["P5", "P5R"]
+  },
+  {
+  persona: "Raoul",
+    image: "Raoul",
+    user: ["Ren Amamiya"],
+    opus: ["P5R"]
   },
   {
     persona: "Captain Kidd",
@@ -511,6 +603,12 @@ export const personaeCharacters = [
     image: "Pandora",
     user: ["Sophia"],
     opus: ["P5S"]
+  },
+  {
+    persona: "Ernesto",
+    image: "Ernesto",
+    user: ["Erina"],
+    opus: ["P5T"]
   },
   {
   persona: "Jánošík",
@@ -761,10 +859,36 @@ export const personaeCharacters = [
     opus: ["P2EP"]
   },
   {
+    persona: "Helios",
+    image: "Helios",
+    user: ["Katsuya Suou"],
+    opus: ["P2IS", "P2EP"]
+  },
+  {
+    persona: "Hyperion",
+    image: "Hyperion",
+    user: ["Katsuya Suou"],
+    opus: ["P2IS", "P2EP"]
+  },
+  {
+    persona: "Callisto",
+    image: "Callisto",
+    user: ["Ulala Serizawa"],
+    opus: ["P2IS", "P2EP"]
+  },
+  {
+    persona: "Astria",
+    image: "Astria",
+    user: ["Ulala Serizawa"],
+    opus: ["P2IS", "P2EP"]
+  },
+  {
     persona: "Nyarlathotep",
     image: "Joker_Nyarlathotep",
     user: ["Joker"],
     opus: ["P2IS"]
-  }
+  },
+
+
 
 ];

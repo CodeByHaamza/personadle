@@ -9,6 +9,7 @@ export const personas = [
     "Shinjiro Aragaki",
     "Ken Amada",
     "Koromaru",
+    "Marie",
     "Fuuka Yamagishi",
     "Chidori Yoshino",
     "Takaya Sakaki",
@@ -73,6 +74,9 @@ export const personas = [
   "Jun Kurosu",
   "Eikichi Mishina",
   "Baofu",
+  "Katsuya Suou",
+  "Ulala Serizawa",
   "Joker",
+  "Erina",
 
 ];

@@ -11,7 +11,8 @@ const validOpus = {
   P3: ["P3", "P3P", "P3FES", "P3R"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
   P5: ["P5", "P5R", "P5S", "P5T"],
-  P5X: ["P5X"]
+  P5X: ["P5X"],
+  PQ: ["PQ", "PQ2"],
 
 };
 
@@ -134,51 +135,44 @@ function pickSong() {
 function showVictory(force = false) {
   gameOver = true;
   
+  // 1. Récupération du profil
+  let profile = JSON.parse(localStorage.getItem('personaUserProfile')) || {};
+  let hasChanges = false;
+
+  // Normalisation pour éviter les erreurs de majuscules/espaces
+  const currentTitle = target ? normalize(target.titre) : "";
+
   // ═══════════════════════════════════════════════════════════════════════
-  // 🎖️ VÉRIFICATION BADGE "BURN MY DREAD"
+  // 💀 BADGE: UNSOLVED CASE (Give Up sur Never More) - Adachi Win
   // ═══════════════════════════════════════════════════════════════════════
-  if (!force && target) {
-    console.log("🔍 Checking for Burn My Dread badge...");
-    console.log("Target title:", target.titre);
-    console.log("Normalized target:", normalize(target.titre));
-    
-    if (normalize(target.titre) === normalize("Burn My Dread")) {
-      console.log("✅ Burn My Dread found! Unlocking badge...");
-      
-      // Récupérer le profil
-      const profile = JSON.parse(localStorage.getItem('personaUserProfile')) || {};
-      console.log("Current profile foundBurnMyDread:", profile.foundBurnMyDread);
-      
-      if (!profile.foundBurnMyDread) {
-        // Marquer le badge comme débloqué
-        profile.foundBurnMyDread = true;
-        
-        // Ajouter à la file d'attente des notifications
-        if (!profile.pendingBadgeNotifications) {
-          profile.pendingBadgeNotifications = [];
-        }
-        
-        if (!profile.pendingBadgeNotifications.includes('burn_my_dread')) {
-          profile.pendingBadgeNotifications.push('burn_my_dread');
-          console.log("🔔 Badge ajouté à la file de notifications");
-        }
-        
-        // Sauvegarder
-        localStorage.setItem('personaUserProfile', JSON.stringify(profile));
-        console.log("💾 Profile saved with badge unlock");
-        
-      
-        
-      } else {
-        console.log("ℹ️ Badge already unlocked");
-      }
-    } else {
-      console.log("❌ Not Burn My Dread, skipping badge check");
+  // Si le joueur ABANDONNE (force = true) sur "Never More"
+  if (force && currentTitle === normalize("Never More")) {
+    if (!profile.lostToNeverMore) {
+      profile.lostToNeverMore = true;
+      hasChanges = true;
+      console.log("🌫️ Badge Trigger: The fog remains... (Adachi wins)");
     }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔥 BADGE: MEMENTO MORI (Trouver Burn My Dread)
+  // ═══════════════════════════════════════════════════════════════════════
+  // Si le joueur GAGNE (force = false) sur "Burn My Dread"
+  if (!force && currentTitle === normalize("Burn My Dread")) {
+    if (!profile.foundBurnMyDread) {
+      profile.foundBurnMyDread = true;
+      hasChanges = true;
+      console.log("🔥 Badge Trigger: Burn My Dread found!");
+    }
+  }
+
+  // Sauvegarde si on a débloqué un truc
+  if (hasChanges) {
+    localStorage.setItem('personaUserProfile', JSON.stringify(profile));
   }
   
   // ═══════════════════════════════════════════════════════════════════════
-  // 📊 MISE À JOUR DES STATISTIQUES
+  // 📊 MISE À JOUR DES STATISTIQUES (Reste inchangé)
   // ═══════════════════════════════════════════════════════════════════════
   if (!localStorage.getItem(todayKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
@@ -191,47 +185,52 @@ function showVictory(force = false) {
   }
 
   // ═══════════════════════════════════════════════════════════════════════
-  // 🎨 AFFICHAGE DE LA VICTOIRE
+  // 🏅 CHECK DES BADGES
   // ═══════════════════════════════════════════════════════════════════════
-  
-  // Désactiver les contrôles
+  import("../profile/badges/badgesManager.js").then(module => {
+    const currentProfile = JSON.parse(localStorage.getItem('personaUserProfile'));
+    module.checkBadges(currentProfile, (updatedProfile) => {
+      localStorage.setItem('personaUserProfile', JSON.stringify(updatedProfile));
+    });
+  }).catch(err => console.error("⚠️ Impossible de charger le BadgeManager", err));
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🎨 AFFICHAGE UI
+  // ═══════════════════════════════════════════════════════════════════════
   textbar.disabled = true;
   guessBtn.disabled = true;
   giveUpBtn.disabled = true;
 
-  // Image et titre
   victoryImage.src = `./database/img/${target.image}`;
   victoryImage.alt = target.titre;
   
-  // Ligne vocale (si présente)
   const vocal = target.vocalist?.trim();
   const vocalLine = vocal ? `<br>🧑‍🎤 Vocal: <strong>${vocal}</strong>` : "";
-
-  // Lien YouTube (si présent)
   const linkLine = target.lien
     ? `<br>🔗 <a href="${target.lien}" target="_blank" class="victory-link">Listen here</a>`
     : "";
 
-  // Message de victoire
+  // Message différent si on give up
   victoryText.innerHTML = force
     ? `💡 It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`
     : `🎉 Correct! It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`;
 
-  // Afficher la box de victoire
   victoryBox.style.display = "block";
   
-  // Scroll vers la victoire
   setTimeout(() => {
     victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
   }, 500);
 
-  // Confettis
-  showConfettiExplosion();
+  // Confettis seulement si on gagne (Adachi ne mérite pas de confettis)
+  if (!force) {
+    showConfettiExplosion();
+  } else {
+    // Optionnel : Tu pourrais jouer un son triste ou glitché ici pour l'ambiance Adachi
+    // new Audio('../assets/sound_effect/bad_ending.mp3').play(); 
+  }
   
-  // Sauvegarder l'état
   localStorage.setItem("musicGameOver", "true");
 
-  // Afficher le lien vers le mode suivant
   revealNextLink({
     prevHref: "../personaeMode/personae.html"
   });

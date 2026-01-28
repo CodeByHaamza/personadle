@@ -17,6 +17,7 @@ export const portraitsMapSilhouette = {
   "Fuuka Yamagishi": "Fuuka",
   "Goro Akechi": "Goro",
   "Haru Okumura": "Haru",
+  "Hatsune Miku": "Miku",
   "Hidetoshi Odagiri": "Hidetoshi",
   "Hifumi Togo": "Hifumi",
   "Hisano Kuroda": "Hisano",

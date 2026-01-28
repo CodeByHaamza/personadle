@@ -22,6 +22,7 @@ export const silhouetteCharacters = [
   { nom: "Fuuka Yamagishi", image: "Fuuka_silhouette", opus: ["P3"] },
   { nom: "Goro Akechi", image: "Goro_silhouette", opus: ["P5"] },
   { nom: "Haru Okumura", image: "Haru_silhouette", opus: ["P5"] },
+  { nom: "Hatsune Miku", image: "Hatsune_Miku_silhouette", opus: ["P4D"] },
   { nom: "Mamoru Hayase", image: "Hayase_silhouette", opus: ["P3"] },
   { nom: "Hidetoshi Odagiri", image: "Hidetoshi_silhouette", opus: ["P3"] },
   { nom: "Hifumi Togo", image: "Hifumi_silhouette", opus: ["P5"] },
@@ -134,12 +135,14 @@ export const silhouetteCharacters = [
   { nom: "Reiji Kido", image: "Reiji_Kido_silhouette", opus: ["P1"] },
 
   // === Persona 2 ===
-  { nom: "Tatsuya Suou", image: "Tatsuya_Suou_silhouette", opus: ["P2IS", "P2EP"] },
+  { nom: "Tatsuya Suou", image: "Tatsuya_silhouette", opus: ["P2IS", "P2EP"] },
   { nom: "Maya Amano", image: "Maya_Amano_silhouette", opus: ["P2IS", "P2EP"] },
   { nom: "Lisa Silverman", image: "Lisa_Silverman_silhouette", opus: ["P2IS"] },
   { nom: "Jun Kurosu", image: "Jun_Kurosu_silhouette", opus: ["P2IS"] },
   { nom: "Eikichi Mishina", image: "Eikichi_Mishina_silhouette", opus: ["P2IS"] },
   { nom: "Baofu", image: "Baofu_silhouette", opus: ["P2EP"] },
+  { nom: "Katsuya Suou", image: "Katsuya_silhouette", opus: ["P2IS", "P2EP"] },
+  { nom: "Ulala Serizawa", image: "Ulala_silhouette", opus: ["P2IS", "P2EP"] },
   { nom: "Joker", image: "Joker_silhouette", opus: ["P2IS"] },
 
 
@@ -149,5 +152,11 @@ export const silhouetteCharacters = [
 { nom: "Erina", image: "Erina_silhouette", opus: ["P5T"] },
 { nom: "Toshiro Kasukabe", image: "Toshiro_silhouette", opus: ["P5T"] },
 
-  
+// === Persona Q & Q2 ===
+
+{ nom: "Rei", image: "Rei_silhouette", opus: ["PQ"] },
+{ nom: "Zen", image: "Zen_silhouette", opus: ["PQ"] },
+{ nom: "Hikari", image: "Hikari_silhouette", opus: ["PQ2"] },
+{ nom: "Nagi", image: "Nagi_silhouette", opus: ["PQ2"] },
+
 ]; 

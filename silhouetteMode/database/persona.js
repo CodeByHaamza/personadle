@@ -25,6 +25,7 @@
     "Fuuka Yamagishi",
     "Goro Akechi",
     "Haru Okumura",
+    "Hatsune Miku",
     "Mamoru Hayase",
     "Hidetoshi Odagiri",
     "Hifumi Togo",
@@ -140,6 +141,8 @@
   "Jun Kurosu",
   "Eikichi Mishina",
   "Baofu",
+  "Katsuya Suou",
+  "Ulala Serizawa",
   "Joker",
   "Izanami",
 
@@ -147,4 +150,9 @@
   "Erina",
   "Toshiro Kasukabe",
 
+  // === Persona Q & Q2 ===
+"Rei",
+"Zen",
+"Hikari",
+"Nagi",
   ];

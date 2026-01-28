@@ -359,7 +359,7 @@ function handleGuess() {
   updateGiveUpCounter();
 
   if (guess.toLowerCase() === target.toLowerCase()) {
-    checkAkechiBadge(target);
+checkSpecialBadges(target);
     document.getElementById("aoaGif").style.filter = "none";
     showVictoryBox(target);
     showConfettiExplosion();
@@ -396,51 +396,91 @@ function handleGuess() {
   input.value = "";
 }
 
-function checkAkechiBadge(characterName) {
+
+function checkSpecialBadges(characterName) {
   const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
   if (!profile) return;
 
   let shouldSave = false;
+  const lowerName = characterName.toLowerCase();
 
-  if (characterName.toLowerCase().includes("crow") && characterName.toLowerCase().includes("akechi")) {
+  // ═════════════════════════════════════════════════════════════════════════
+  // 🎭 BADGE TRUTH & DUALITY (Crow & Black Mask)
+  // ═════════════════════════════════════════════════════════════════════════
+  if (lowerName.includes("crow") && lowerName.includes("akechi")) {
     if (!profile.foundCrow) {
       profile.foundCrow = true;
       shouldSave = true;
-      console.log("🎭 Crow (Goro Akechi) found!");
+      console.log("🎭 Crow found!");
     }
   }
 
-  if (characterName.toLowerCase().includes("black mask") && characterName.toLowerCase().includes("akechi")) {
+  if (lowerName.includes("black mask") && lowerName.includes("akechi")) {
     if (!profile.foundBlackMask) {
       profile.foundBlackMask = true;
       shouldSave = true;
-      console.log("🎭 Black Mask (Goro Akechi) found!");
+      console.log("🎭 Black Mask found!");
     }
   }
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // 🧧 BADGE CHINESE NEW YEAR (Wonder & Rin CNY)
+  // ═════════════════════════════════════════════════════════════════════════
+  if (lowerName.includes("wonder") && lowerName.includes("chinese")) {
+    if (!profile.foundWonderCNY) {
+      profile.foundWonderCNY = true;
+      shouldSave = true;
+      console.log("🧧 Wonder (CNY) found!");
+    }
+  }
+
+  if (lowerName.includes("rin") && lowerName.includes("chinese")) {
+    if (!profile.foundRinCNY) {
+      profile.foundRinCNY = true;
+      shouldSave = true;
+      console.log("🧧 Rin (CNY) found!");
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // 🤕 BADGE VELVET HEADACHE (Wonder Velvet & Twins)
+  // ═════════════════════════════════════════════════════════════════════════
+  if (lowerName.includes("wonder") && lowerName.includes("velvet")) {
+    if (!profile.foundWonderVelvet) {
+      profile.foundWonderVelvet = true;
+      shouldSave = true;
+      console.log("🤕 Wonder (Velvet) found!");
+    }
+  }
+
+  if (lowerName.includes("caroline") || lowerName.includes("justine")) {
+    if (!profile.foundTwins) {
+      profile.foundTwins = true;
+      shouldSave = true;
+      console.log("🤕 Twins (Caroline & Justine) found!");
+    }
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // 💾 SAUVEGARDE + VÉRIFICATION BADGES
+  // ═════════════════════════════════════════════════════════════════════════
   if (shouldSave) {
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));
-
-    if (profile.foundCrow && profile.foundBlackMask) {
-      if (!profile.pendingBadgeNotifications) {
-        profile.pendingBadgeNotifications = [];
+    console.log("💾 Profile saved with new flags");
+    
+    // Force la vérification immédiate des badges
+    setTimeout(() => {
+      if (window.forceCheckBadges) {
+        console.log("✅ Calling forceCheckBadges...");
+        window.forceCheckBadges(profile, (updatedProfile) => {
+          localStorage.setItem("personaUserProfile", JSON.stringify(updatedProfile));
+        });
+      } else {
+        console.error("❌ forceCheckBadges not found on window!");
       }
-      
-      if (!profile.badges?.includes("truth_duality")) {
-        profile.badges = profile.badges || [];
-        profile.badges.push("truth_duality");
-        
-        if (!profile.pendingBadgeNotifications.includes("truth_duality")) {
-          profile.pendingBadgeNotifications.push("truth_duality");
-        }
-        
-        localStorage.setItem("personaUserProfile", JSON.stringify(profile));
-        console.log("🎉 Truth & Duality badge unlocked!");
-      }
-    }
+    }, 100);
   }
 }
-
 function showVictoryBox(name) {
   const baseName = (portraitsMap[name] || name.split(" ")[0]).trim();
   const imgSrc = `./database/img/${baseName}_Battle.webp`;

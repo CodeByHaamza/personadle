@@ -88,6 +88,31 @@ export const badgesList = [
       return profile?.foundBurnMyDread === true;
     }
   },
+  {
+    id: "into_the_fog",
+    name: "Unsolved Case",
+    category: BADGE_CATEGORIES.ACHIEVEMENT, // On le passe en Achievement car il n'est plus secret
+    img: "./profile/badges/images/Badges_something_wrong.png",
+    condition: "Turn your back on the truth and let the fog settle over the final investigation",
+    description: "The train departs, but the mystery remains. You chose the path of ignorance, leaving the true culprit smiling in the shadows.",
+    secret: false, // 👁️ Visible : tout le monde sait comment l'avoir maintenant
+    check: (stats, profile) => {
+      return profile?.lostToNeverMore === true;
+    }
+  },
+  {
+    id: "velvet_headache",
+    name: "Velvet Headache",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: "./profile/badges/images/Badges_velvet_headache.png",
+    condition: "Find Wonder (Velvet) and Caroline & Justine in All-Out Attack",
+    description: "So loud... The sisters are fighting, and the guest has a migraine. You've witnessed the true chaos of the Velvet Room.",
+    secret: false, // Pas caché
+    check: (stats, profile) => {
+      // Vérifie si les deux drapeaux sont activés
+      return profile?.foundWonderVelvet === true && profile?.foundTwins === true;
+    }
+  },
 
   {
     id: "first_win",
@@ -114,6 +139,75 @@ export const badgesList = [
         return (stats?.modeCount?.Classic || 0) >= 15;
     }
 },
+{
+    id: "velvet_master",
+    name: "Velvet Master",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: "./profile/badges/images/Badges_Velvet_master.png",
+    condition: "Win 10 games in Personae mode",
+    description: "You have mastered the velvet room. Igor is pleased with your progress.",
+    secret: false,
+    check: (stats, profile) => {
+      // Vérifie 10 victoires spécifiquement dans le mode "Personae"
+      // Ton mapping indique: personae: "Personae"
+      return (stats?.modeCount?.Personae || 0) >= 10;
+    }
+  },
+  {
+    id: "chinese_new_year",
+    name: "Chinese New Year Achievement",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: "./profile/badges/images/Chinesse_new_year.png",
+    condition: "Find Wonder and Rin (CNY) in All-Out Attack",
+    description: "Celebration time! You discovered the festive versions of the Phantom Thieves.",
+    secret: false,
+    check: (stats, profile) => {
+      // Vérifie si les drapeaux sauvegardés par le mode All-Out Attack sont actifs
+      return profile?.foundWonderCNY === true && profile?.foundRinCNY === true;
+    }
+  },
+  
+  {
+    id: "twin_blade",
+    name: "Twin Blade",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: "./profile/badges/images/Badge_Twin_Blade.png", 
+    condition: "Find a Personae of Yosuke and Yusuke",
+    description: "Wind and Ice, blades crossed! You've identified the personas of the dual-wielding artists.",
+    secret: false,
+    check: (stats, profile) => {
+      // Vérifie si les drapeaux sauvegardés par le mode Personae sont actifs
+      return profile?.foundYosuke === true && profile?.foundYusuke === true;
+    }
+  },
+  {
+  id: "persona_q_explorer",
+  name: "Cinema Explorer",
+  category: BADGE_CATEGORIES.ACHIEVEMENT,
+  img: "./profile/badges/images/Badges_Persona_Q.webp",
+  condition: "Find all 4 Persona Q exclusive characters in Silhouette mode",
+  description: "You've ventured into the cinema's labyrinth and met its unique guardians. Rei, Zen, Hikari, and Nagi—all discovered in the shadows!",
+  secret: false,
+  check: (stats, profile) => {
+    const requiredCharacters = ["Rei", "Zen", "Hikari", "Nagi"];
+    const foundPQCharacters = profile?.foundPQCharacters || [];
+    return requiredCharacters.every(char => foundPQCharacters.includes(char));
+  }
+},
+
+  {
+    id: "crimson_legacy",
+    name: "Crimson Legacy",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: "./profile/badges/images/Badge_Picaro.png",
+    condition: "Find all 12 Picaro Personas",
+    description: "Awarded to the Trickster who recognizes the past painted in red. You identified the rebellious spirits of legends reborn.",
+    secret: true, // Ou true si tu veux que ce soit une surprise
+    check: (stats, profile) => {
+      // Vérifie si la liste 'picarosFound' dans le profil contient 12 éléments uniques
+      return profile?.picarosFound && profile.picarosFound.length >= 12;
+    }
+},
 
 {
     id: "rentree",
@@ -128,6 +222,7 @@ export const badgesList = [
     }
 },
 
+
 {
     id: "sport",
     name: "Athletic Spirit",
@@ -140,6 +235,9 @@ export const badgesList = [
         return profile.eventBadges?.sport === true;
     }
 },
+
+
+
 
   // ═════════════════════════════════════════════════════════════════════════
   // 👥 BADGES SOCIAUX (Social Badges)
@@ -191,6 +289,21 @@ export const badgesList = [
     eventEnd: "2026-01-07",
     check: (stats, profile) => {
       return profile?.eventCodes?.includes("NEWYEAR2026") || false;
+    }
+  },
+  {
+   id: "chinese_new_year_2026",
+    name: "Happy Chinese New Year 2026",
+    category: BADGE_CATEGORIES.EVENT,
+    img: "./profile/badges/images/Badges_Chiness_New_Year.webp",
+    condition: "Type the chinese new year code during the 2026 celebration",
+    description: "Ryuji & Wu Kong ready for the new year! May the year of the horse bring you strength and courage!",
+    secret: false,
+    eventCode: "CHINESNY2026",
+    eventStart: "2026-02-01",
+    eventEnd: "2026-03-01",
+    check: (stats, profile) => {
+      return profile?.eventCodes?.includes("CHINESNY2026") || false;
     }
   },
 
@@ -271,6 +384,19 @@ export const badgesList = [
       return profile?.eventCodes?.includes("ARATI") || false;
     }
   },
+  {
+    id: "dzulian",
+    name: "The First Contractor",
+    category: BADGE_CATEGORIES.SECRET,
+    img: "./profile/badges/images/Badge_Dzulian.png",
+    condition: "???",
+    description: "When the code couldn't reach the PS1 era, Dzulian descended with the ancient texts. Megami Ibunroku, IS, EP—the trinity preserved. The GOAT who bridged two generations of Persona.",
+    permanentCode: "DZULIAN",
+    secret: true,
+    check: (stats, profile) => {
+      return profile?.eventCodes?.includes("DZULIAN") || false;
+    }
+  },
 
   {
     id: "chef",
@@ -283,6 +409,32 @@ export const badgesList = [
     permanentCode: "GOURMET",
     check: (stats, profile) => {
       return profile?.eventCodes?.includes("GOURMET") || false;
+    }
+  },
+  {
+    id: "github_contributor",
+    name: "Phantom Coder",
+    category: BADGE_CATEGORIES.SECRET,
+    img: "./profile/badges/images/Badges_Github_Morgana.png",
+    condition: "???",
+    description: "You checked the source code! A true Phantom Thief always gathers intel first.",
+    secret: true,
+    check: (stats, profile) => {
+      // Ce badge se débloque si le flag 'visitedGithub' est à true dans le profil
+      return profile?.visitedGithub === true;
+    }
+  },
+  {
+    id: "lobster",
+    name: "Artistic Lobster",
+    category: BADGE_CATEGORIES.SECRET,
+    img: "./profile/badges/images/Badges_Lobster.png",
+    condition: "???",
+    description: "Magnificent! The contours, the form... This crustacean captures the very essence of beauty! I must paint this immediately!",
+    secret: true,
+    permanentCode: "LOBSTER",
+    check: (stats, profile) => {
+      return profile?.eventCodes?.includes("LOBSTER") || false;
     }
   },
 
@@ -330,6 +482,13 @@ export const eventCodes = {
     end: "2026-04-10",
     permanent: false 
   },
+  CHINESNY2026: { 
+    badgeId: "chinese_new_year_2026", 
+    start: "2026-02-01", 
+    end: "2026-03-01",
+    permanent: false 
+  },
+
 
   // Codes permanents (secrets)
   ALIBABA: { 
@@ -344,8 +503,16 @@ export const eventCodes = {
     badgeId: "arati", 
     permanent: true 
   },
+  DZULIAN: { 
+    badgeId: "dzulian", 
+    permanent: true 
+  },
   GOURMET: { 
     badgeId: "chef", 
+    permanent: true 
+  },
+  LOBSTER: { 
+    badgeId: "lobster", 
     permanent: true 
   },
 

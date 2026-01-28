@@ -63,6 +63,7 @@ export const portraitsMap = {
 "Izanami": "Izanami",
   "Erina": "Erina",
   "Toshiro Kasukabe": "Toshiro",
+  "Demon Painter": "DemonPainter",
   
 
 };

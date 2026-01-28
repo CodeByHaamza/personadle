@@ -1,14 +1,44 @@
-# Fichiers système (macOS, Windows)
+# Fichiers système
 .DS_Store
 Thumbs.db
 
-# PSD ou sources design
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sources design
 *.psd
 
-# Fichiers logs ou backup
+# Fichiers temporaires et backups
 *.log
-*.zip
+*.tmp
+*.bak
+*.backup*
+*.old
+*~
+*.swp
+*.swo
 
-# Cache éventuel navigateur ou éditeur
+# Archives
+*.zip
+*.rar
+*.7z
+
+# Cache
 .cache/
-.vscode/
+__pycache__/
+
+# Documentation - environnement Python
+PersonaDLE_Update_Documentation/*/venv/
+PersonaDLE_Update_Documentation/*/env/
+PersonaDLE_Update_Documentation/*/__pycache__/
+PersonaDLE_Update_Documentation/*/*.pyc
+
+# Documentation - fichiers générés (optionnel, décommente si nécessaire)
+# PersonaDLE_Update_Documentation/*/images_converted/
+
+# Node modules si tu utilises npm
+node_modules/

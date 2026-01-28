@@ -18,6 +18,7 @@ const validOpus = {
   P4: ["P4", "P4G", "P4AU", "P4D"],
   P5: ["P5", "P5R", "P5S", "P5T"],
   P5X: ["P5X"],
+  PQ: ["PQ", "PQ2"]
 };
 
 let activeFilters = ["P1", "P2", "P3", "P4", "P5", "P5X"];
@@ -279,33 +280,54 @@ function showVictory(force = false) {
   silhouetteBox.insertAdjacentElement("afterend", message);
 
   if (!force) {
-      if (!statsAlreadyLogged) {
-    updateProfileStats({
-      result: "win",
-      mode: modeName,
-      sessionDuration: Date.now() - sessionStartTime
-    });
-    localStorage.setItem(todayKey, "true");
+    if (!statsAlreadyLogged) {
+      updateProfileStats({
+        result: "win",
+        mode: modeName,
+        sessionDuration: Date.now() - sessionStartTime
+      });
+      localStorage.setItem(todayKey, "true");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+// 🎬 VÉRIFICATION BADGE "PERSONA Q EXPLORER"
+// ═══════════════════════════════════════════════════════════════════════
+const pqCharacters = ["Rei", "Zen", "Hikari", "Nagi"];
+
+if (pqCharacters.includes(target.nom)) {
+  console.log(`🎬 Persona Q character detected: ${target.nom}`);
+  
+  let profile = JSON.parse(localStorage.getItem("personaUserProfile")) || {};
+  
+  if (!profile.foundPQCharacters) {
+    profile.foundPQCharacters = [];
   }
+  
+  if (!profile.foundPQCharacters.includes(target.nom)) {
+    profile.foundPQCharacters.push(target.nom);
+    localStorage.setItem("personaUserProfile", JSON.stringify(profile));
+    console.log(`💾 Progress Update: ${profile.foundPQCharacters.length}/4 Persona Q characters found.`);
+  }
+}
 
     showConfettiExplosion();
-revealNextLink({
-  prevHref: "../allOutAttackMode/allOutAttack.html",
-  nextHref: "../personaeMode/personae.html"
-});
+    revealNextLink({
+      prevHref: "../allOutAttackMode/allOutAttack.html",
+      nextHref: "../personaeMode/personae.html"
+    });
+
     let winCount = localStorage.getItem("silhouetteWins") || 0;
     localStorage.setItem("silhouetteWins", parseInt(winCount) + 1);
   } else {
-revealNextLink({
-  prevHref: "../allOutAttackMode/allOutAttack.html",
-  nextHref: "../personaeMode/personae.html"
-});
+    revealNextLink({
+      prevHref: "../allOutAttackMode/allOutAttack.html",
+      nextHref: "../personaeMode/personae.html"
+    });
   }
 
   localStorage.setItem("silhouetteGameOver", "true");
   localStorage.setItem("silhouetteForceReveal", force);
 }
-
 
 // === ERREUR
 function showWrong(name) {

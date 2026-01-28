@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="./css/style.css?v=3">
     <link rel="stylesheet" href="./profile/badges/badges.css?v=3">
     <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
+    
 </head>
 <body>
 
@@ -104,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <div id="socialLinks" style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
-<a href="https://github.com/HamzaKarrouchi/personadle" target="_blank" title="GitHub">
+<a href="https://github.com/HamzaKarrouchi/personadle" target="_blank" title="GitHub" id="githubLink">
   <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
 </a>
 <a href="https://discord.gg/wpMdGGDp3y" target="_blank" title="Discord">
@@ -116,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </div>
 
 <footer>
-<p>personadle.net — 2025</p>
+<p>personadle.net — 2026</p>
 <p>
   Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders. 
   <a href="#" id="legalLink">Legal Notice</a> | 
@@ -196,7 +197,31 @@ body.darkmode .chibi-deco {
     
     <h1 style="position: absolute; top: 55px; left: 50%; transform: translateX(-50%); text-align: center; margin: 20px 0; font-size: 2em;">Update History</h1>
 
-
+<div class="version-item cny-theme">
+        <div class="version-header">
+            <div>
+                <div class="version-title">🧧 Version 1.1 - Chinese New Year Edition</div>
+                <div class="version-date">February 2026</div>
+            </div>
+            <span class="version-arrow">▼</span>
+        </div>
+        <div class="version-content">
+            <ul>
+                <li>🧧 <strong>Chinese New Year Event:</strong> Celebrate with exclusive <strong>Wonder & Rin (CNY)</strong> skins, a new wallpaper, and limited-time badges!</li>
+                <li>🎥 <strong>Persona Q Expansion:</strong> The Labyrinth opens! Added <strong>4 playable characters</strong> (Rei, Zen, Hikari, Nagi) and new soundtracks.</li>
+                <li>🎭 <strong>Personae Mode Update:</strong> Massive expansion with <strong>8 New Ultimate Personas</strong> and <strong>12 Picaro Variants</strong>.</li>
+                <li>🦋 <strong>Classic Content:</strong> Added 5 characters from <strong>Persona 1 & 2</strong> to Classic Mode (Nameless, Belladonna, Katsuya, Ulala...).</li>
+                <li>🖼️ <strong>Customization Overhaul:</strong> Added <strong>40+ new wallpapers</strong> across all games and a redesigned selection interface.</li>
+                <li>🎖️ <strong>New Badges:</strong> Unlock 7 new achievements including "Twin Blade", "Velvet Master", and the mysterious "Cinema Explorer".</li>
+                <li>🛠️ <strong>QoL Improvements:</strong> Redesigned filter buttons, added "Visual History" in Emoji Mode, and added Silhouette Mode characters.</li>
+            </ul>
+            <div class="pdf-container">
+              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn">
+                  See full Changelog (PDF)
+              </a>
+          </div>
+        </div>
+    </div>
  <!-- Version 1.02 (HOTFIX) -->
     <div class="version-item hotfix-item">
         <div class="version-header">
@@ -958,8 +983,7 @@ border-color: #667eea;
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js?v=3"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.4.5/gifshot.min.js?v=3"></script>
 <script type="module" src="./profile/profile.js?v=3"></script>
-
 </body>
 </html>

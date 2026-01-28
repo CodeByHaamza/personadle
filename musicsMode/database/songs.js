@@ -26,6 +26,15 @@ export const songs = [
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=djfP0FKXhqw"
   },
+   {
+    titre: "Arial Of The Soul",
+    fichier: "Aria_Of_The_Soul.mp3",
+    opus: ["P3","P3P","P3FES","P3R","P4","P4G","P5","P5R","P5S","P5X"],
+    image: "Velvet.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/oVAp5UDnsPI?si=lDGWK4ipT4ANZAWv"
+  },
   {
     titre: "Backside Of The TV",
     fichier: "Backside_Of_The_TV.mp3",
@@ -79,6 +88,16 @@ export const songs = [
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=t9TdQCdtUeo"
   },
+
+  {
+    titre: "Changing Me",
+    fichier: "Changing_me.mp3",
+    opus: ["PQ"],
+    image: "PQ.webp",
+    vocalist: "Yumi Kawamura and Shihoko Hirata",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=5Xuzg1EGRoA"
+  },
   {
     titre: "Colors Flying High",
     fichier: "Colors_Flying_High.mp3",
@@ -96,6 +115,15 @@ export const songs = [
     vocalist: "Lotus Juice , Azumi Takahashi",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=j9Sn1nFGQQ8"
+  },
+  {
+    titre: "colorful world",
+    fichier: "colorful_world.mp3",
+    opus: ["PQ2"],
+    image: "PQ2.webp",
+    vocalist: "Yumi Kawamura, Shihoko Hirata, Mayumi Fujita, and Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=eNr-V4yAQPY"
   },
   {
     titre: "Dance!",
@@ -141,6 +169,24 @@ export const songs = [
     vocalist: "Azumi Takahashi , Lotus Juice",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=dT5Ck6bXBu8"
+  },
+  {
+    titre: "Dream of Butterfly",
+    fichier: "Dream_of_Butterfly.mp3",
+    opus: ["P1"],
+    image: "P1.webp",
+    vocalist: "Shigeo Komori , Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=h891YNhtGx4"
+  },
+   {
+    titre: "Fatal Desire",
+    fichier: "Fatal_Desire.mp3",
+    opus: ["P5X"],
+    image: "P5X.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=GEI7G2BHURM"
   },
   {
     titre: "Full Moon Full Life",
@@ -197,6 +243,15 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=Cj-FrFI0qnM"
   },
   {
+    titre: "Last Strike",
+    fichier: "Last_Strike.mp3",
+    opus: ["P5X"],
+    image: "P5X.webp",
+    vocalist: "Lyn Inaizumi ",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=-l_D_I0ERUc"
+  },
+  {
     titre: "Last Surprise",
     fichier: "Last_Surprise.mp3",
     opus: ["P5"],
@@ -215,6 +270,15 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=C4nTv-pVk0k"
   },
   {
+    titre: "Let Butterflies Spread Until the Dawn",
+    fichier: "Let_Butterflies_Spread_Until_the_Dawn.mp3",
+    opus: ["P1"],
+    image: "P1.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=nuKpIDf4U_o"
+  },
+  {
     titre: "Life Will Change",
     fichier: "Life_Will_Change.mp3",
     opus: ["P5"],
@@ -222,6 +286,15 @@ export const songs = [
     vocalist: "Lyn Inaizumi , Benjamin Franklin",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=dsuJZx24V_A"
+  },
+  {
+    titre: "Maki",
+    fichier: "Maki.mp3",
+    opus: ["P1"],
+    image: "P1.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=C14kO178AUI"
   },
   {
     titre: "Mass Destruction",
@@ -249,6 +322,16 @@ export const songs = [
     vocalist: "",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=6UUlE-n_AFU"
+  },
+
+  {
+    titre: "Maze of Life",
+    fichier: "Maze_of_Life.mp3",
+    opus: ["PQ"],
+    image: "PQ.webp",
+    vocalist: "Yumi Kawamura and Shihoko Hirata",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=_2aH4fTeAjM"
   },
   {
     titre: "Never More",
@@ -287,6 +370,15 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=tiNAuVhBGd0"
   },
   {
+    titre: "Pull the Trigger",
+    fichier: "Pull_the_Trigger.mp3",
+    opus: ["PQ2"],
+    image: "PQ2.webp",
+    vocalist: "Mayumi Fujita , Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=ztRlRlyUGLM"
+  },
+  {
     titre: "Reach Out To The Truth",
     fichier: "Reach_Out_To_The_Truth.mp3",
     opus: ["P4"],
@@ -294,6 +386,25 @@ export const songs = [
     vocalist: "Shihoko Hirata",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=A9zlXUSuUeo"
+  },
+
+  {
+    titre: "Road Less Taken",
+    fichier: "Road_Less_Taken.mp3",
+    opus: ["PQ2"],
+    image: "PQ2.webp",
+    vocalist: "Yumi Kawamura, Shihoko Hirata, Mayumi Fujita, and Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=lGS9flfg8Vg"
+  },
+  {
+    titre: "Satomi Tadashi Pharmacy Theme",
+    fichier: "Satomi_Tadashi_Pharmacy_Theme.mp3",
+    opus: ["P1"],
+    image: "P1.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=ANkbtqAT7ho"
   },
   {
     titre: "Rivers In the Desert",
@@ -320,6 +431,15 @@ export const songs = [
     vocalist: "",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=c1OZfkbhLhM"
+  },
+  {
+    titre: "Seize the Light",
+    fichier: "Seize_the_Light.mp3",
+    opus: ["P5X"],
+    image: "P5X.webp",
+    vocalist: "Hurshi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=1nn5FlERxfc"
   },
   {
     titre: "Seven Sisters Theme",
@@ -395,6 +515,15 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=lk8BMgl9vp0"
   },
   {
+    titre: "The Battle for Everyone's Souls",
+    fichier: "The_Battle_for_Everyones_Souls.mp3",
+    opus: ["P3","P3P","P3FES","P3R"],
+    image: "Velvet.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/lbhz0O0dAyk?si=HONepfLJqNNBJI9i"
+  },
+  {
     titre: "When Mother Was There",
     fichier: "The_Days_When_My_Mother_Was_There.mp3",
     opus: ["P5"],
@@ -440,6 +569,15 @@ export const songs = [
     lien: "https://youtu.be/eAarVmqJwNw?si=AJ2hcr0ZDKqTqGvW"
   },
   {
+    titre: "Voice",
+    fichier: "Voice.mp3",
+    opus: ["P1"],
+    image: "P1.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=KkxMCWTFHtc"
+  },
+  {
     titre: "Wake Up, Get Up, Get Out There",
     fichier: "Wake_Up,_Get_Up,_Get_Out_There.mp3",
     opus: ["P5"],
@@ -474,6 +612,15 @@ export const songs = [
     vocalist: "Mayumi Fujita , Lotus Juice",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=-iy47Q--EbU"
+  },
+  {
+    titre: "Wonder Light",
+    fichier: "Wonder_Light.mp3",
+    opus: ["P5X"],
+    image: "P5X.webp",
+    vocalist: "Hurshi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=bBpGeZKG5nU"
   },
   {
     titre: "You Are Stronger",

@@ -1142,25 +1142,64 @@ body {
   opacity: 1;
 }
 
+/* Persona 1 - Violet mystique et ésotérique */
 .filter-p1 {
-  background-color: purple;
+  background: linear-gradient(135deg, #4B0082 0%, #8B00FF 50%, #9370DB 100%);
+  color: #FFFFFF;
+  border: 2px solid #2E0854;
+  box-shadow: 
+    0 0 12px rgba(139, 0, 255, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
 }
 
+/* Persona 2 (Innocent Sin & Eternal Punishment) - Orange feu et passion */
 .filter-p2 {
-  background-color: rgb(223, 155, 30);
+  background: linear-gradient(135deg, #FF6B00 0%, #DF9B1E 50%, #FFA500 100%);
+  color: #2C1810;
+  border: 2px solid #8B4000;
+  box-shadow: 
+    0 0 12px rgba(255, 107, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
 }
 
+/* Persona 3 - Bleu nuit et mélancolie */
 .filter-p3 {
-  background-color: #0074D9; /* Bleu */
+  background: linear-gradient(135deg, #001F5C 0%, #0074D9 50%, #4DA6FF 100%);
+  color: #FFFFFF;
+  border: 2px solid #001233;
+  box-shadow: 
+    0 0 12px rgba(0, 116, 217, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
+/* Persona 4 - Jaune lumineux et optimiste */
 .filter-p4 {
-  background-color: #FFDC00; /* Jaune */
-  color: #ffffff;
+  background: linear-gradient(135deg, #FFD700 0%, #FFDC00 50%, #FFF200 100%);
+  color: #2C2C2C;
+  border: 2px solid #B8860B;
+  box-shadow: 
+    0 0 12px rgba(255, 220, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6);
 }
 
+/* Persona 5 - Rouge rebelle et stylé */
 .filter-p5 {
-  background-color: #FF4136; /* Rouge Persona 5 */
+  background: linear-gradient(135deg, #CC0000 0%, #FF4136 50%, #FF6B6B 100%);
+  color: #FFFFFF;
+  border: 2px solid #8B0000;
+  box-shadow: 
+    0 0 12px rgba(255, 65, 54, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .filter-p5x {
@@ -1170,7 +1209,18 @@ body {
   box-shadow: 0 0 6px #ff003c80; /* Glow léger rouge néon */
 }
 
-
+/* Persona Q (1 & 2) - Style cartoonesque et aventure */
+.filter-pq {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+  color: #2C1810;
+  border: 3px solid #8B4513;
+  box-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+  position: relative;
+}
 /* Modale - verrouille le scroll en arrière-plan */
 body.modal-open {
   overflow: hidden;
@@ -2933,4 +2983,81 @@ body.darkmode .border-color-label {
   width: 100%;
   font-size: 11px;
   color: #bbb;
+}
+/* === 🧧 STYLE SPÉCIAL NOUVEL AN CHINOIS === */
+
+/* Bordure et fond global */
+.cny-theme {
+    border: 2px solid #c0392b !important; /* Rouge foncé */
+    background-color: #fff5f5; /* Fond très légèrement rosé */
+}
+
+/* L'en-tête (Header) */
+.cny-theme .version-header {
+    background: linear-gradient(135deg, #b71c1c 0%, #8e0000 100%); /* Dégradé rouge */
+    color: #f1c40f; /* Texte Doré */
+    border-bottom: 1px solid #d35400;
+}
+
+.cny-theme .version-title {
+    color: #f1c40f !important; /* Force le titre en doré */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Ombre pour lisibilité */
+}
+
+.cny-theme .version-date {
+    color: #ffecb3 !important; /* Date en or pâle */
+}
+
+.cny-theme .version-arrow {
+    color: #f1c40f !important;
+}
+
+/* Contenu interne */
+.cny-theme .version-content ul li strong {
+    color: #c0392b; /* Mots clés en rouge */
+}
+
+/* Bouton PDF spécial */
+.cny-btn {
+    background-color: #c0392b !important;
+    color: #fff !important;
+    border: 1px solid #a93226 !important;
+}
+.cny-btn:hover {
+    background-color: #a93226 !important;
+    box-shadow: 0 0 10px rgba(192, 57, 43, 0.4);
+}
+
+/* === DARK MODE SUPPORT === */
+body.darkmode .cny-theme {
+    background-color: #2c0b0b; /* Fond rouge très sombre */
+    border-color: #e74c3c !important;
+}
+
+body.darkmode .cny-theme .version-header {
+    background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+}
+
+body.darkmode .cny-theme .version-content ul li strong {
+    color: #ff6b6b; /* Rouge clair fluo pour le contraste */
+}
+/* === 🧧 FIX HOVER NOUVEL AN CHINOIS === */
+
+/* Au survol en mode clair : Rouge plus vif + Lueur dorée */
+.cny-theme .version-header:hover {
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%) !important;
+    box-shadow: inset 0 0 15px rgba(241, 196, 15, 0.3) !important; /* Lueur interne dorée */
+    transform: scale(1.01); /* Léger effet de pop */
+    transition: all 0.2s ease-in-out;
+}
+
+/* Au survol en DARK MODE : On reste sombre mais on illumine un peu */
+body.darkmode .cny-theme .version-header:hover {
+    background: linear-gradient(135deg, #9e1a1a 0%, #680505 100%) !important;
+    box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.15) !important;
+}
+
+/* Ajustement de la flèche au survol pour qu'elle bouge un peu */
+.cny-theme .version-header:hover .version-arrow {
+    transform: translateX(3px); /* Petite animation sympa */
 }

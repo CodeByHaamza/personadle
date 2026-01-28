@@ -37,10 +37,13 @@ export const portraitsMap = {
 
     // P5X
   "Wonder ( Nagisa Kamishiro )": "Wonder",
+  "Wonder Chinese New Year ( Nagisa Kamishiro )": "Wonder_ChineseNY",
+  "Wonder Velvet ( Nagisa Kamishiro )": "Wonder_Velvet",
   "Closer ( Motoha Arai )": "Closer",
   "Fleuret ( Seiji Shiratori )": "Fleuret",
   "Leon ( Leo Kamiyama )": "Leon",
   "Rin ( Yaoling Li )": "Rin",
+  "Rin Chinese New Year ( Yaoling Li )": "Rin_ChineseNY",
   "Wind ( Riko Tanemura )": "Wind",
   "Soy ( Shun Kano )": "Soy",
   "Moko ( Tomoko Noge )": "Moko",

@@ -26,6 +26,8 @@
     <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
     <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
     <button class="filter-btn filter-p5x active" data-opus="P5X">P5X</button>
+        <button class="filter-btn filter-pq active" data-opus="PQ">PQ</button>
+
   </div>
 
   <!-- Zone principale d'affichage des emojis et du titre -->
@@ -56,6 +58,8 @@
     <div id="emojiDisplay" style="margin-top: 20px;"></div>
     <p>Each try unlocks an emoji.</p>
   </div>
+
+
 
   <!-- Zone de victoire -->
   <div id="victoryBox" class="victory-box" style="display: none;">
@@ -146,7 +150,10 @@
 
     </div>
   </section>
-
+  <!-- Historique des mauvaises réponses -->
+<div style="margin-top: 30px;">
+  <div id="wrongGuessList"></div>
+</div>
   <!-- Rules Modal -->
  <!-- Rules Modal -->
 <div id="rulesModal" class="modal" style="display: none;">

@@ -118,6 +118,8 @@ export const personas = [
   "Jun Kurosu",
   "Eikichi Mishina",
   "Baofu",
+  "Katsuya Suou",
+  "Ulala Serizawa",
   "Joker",
   "Sophia",
   "Zenkichi Hasegawa",
@@ -157,6 +159,13 @@ export const personas = [
 "Izanami",
 "Erina",
 "Toshiro Kasukabe",
-
+"Philemon",
+"Nameless",
+"Belladonna",
+"Demon Painter",
+"Rei",
+"Zen",
+"Hikari",
+"Nagi",
 
 ];

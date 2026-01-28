@@ -239,6 +239,8 @@ for (let i = 0; i < personasList.length; i++) {
 }
 
 // === SHOW WIN / LOSE ===
+// === DANS modePersonae.js ===
+
 function showVictory(force = false, name = null) {
   gameOver = true;
   textbar.disabled = true;
@@ -249,34 +251,117 @@ function showVictory(force = false, name = null) {
   victoryImage.src = `../database/portraits/${portraitName}.webp`;
   victoryImage.alt = name;
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🎖️ VÉRIFICATION BADGE "TWIN BLADE" (Yosuke & Yusuke)
+  // ═══════════════════════════════════════════════════════════════════════
+  if (!force && target) {
+    console.log("🔍 Checking for Twin Blade badge components...");
+    
+    // On normalise pour éviter les soucis de majuscules/accents
+    // Fonction utilitaire simple si tu ne l'as pas importée, sinon utilise celle de ton projet
+    const normalize = (str) => str.toLowerCase().trim();
+    const targetName = normalize(target.persona);
+    
+    // Listes des Personas
+    const yosukePersonas = ["jiraiya", "susano-o", "takehaya susano-o"];
+    const yusukePersonas = ["goemon", "kamu susano-o", "gorokichi"];
+
+    let profileUpdated = false;
+    const profile = JSON.parse(localStorage.getItem('personaUserProfile')) || {};
+
+    // 1. Vérification Yosuke
+    if (yosukePersonas.includes(targetName)) {
+        console.log("⚔️ Found a Yosuke Persona!");
+        if (!profile.foundYosuke) {
+            profile.foundYosuke = true;
+            profileUpdated = true;
+        }
+    }
+
+    // 2. Vérification Yusuke
+    if (yusukePersonas.includes(targetName)) {
+        console.log("🎨 Found a Yusuke Persona!");
+        if (!profile.foundYusuke) {
+            profile.foundYusuke = true;
+            profileUpdated = true;
+        }
+    }
+
+    // Sauvegarde uniquement si on a trouvé quelque chose de nouveau
+    if (profileUpdated) {
+        localStorage.setItem('personaUserProfile', JSON.stringify(profile));
+        console.log("💾 Profile saved with Twin Blade flags updated.");
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🎭 VÉRIFICATION BADGE "CRIMSON LEGACY" (Picaros)
+  // ═══════════════════════════════════════════════════════════════════════
+  if (!force && target) {
+    const targetName = target.persona; // Nom exact (avec majuscules)
+    
+    // Détection simple : le mot "Picaro" est dans le nom (gère aussi "Picaros")
+    if (targetName.toLowerCase().includes("picaro")) {
+        console.log("🔴 Found a Picaro variant:", targetName);
+
+        let profile = JSON.parse(localStorage.getItem('personaUserProfile')) || {};
+        
+        // Initialiser le tableau si c'est le premier Picaro trouvé
+        if (!profile.picarosFound) {
+            profile.picarosFound = [];
+        }
+
+        // Si ce Picaro n'est pas déjà dans la liste, on l'ajoute
+        if (!profile.picarosFound.includes(targetName)) {
+            profile.picarosFound.push(targetName);
+            localStorage.setItem('personaUserProfile', JSON.stringify(profile));
+            console.log(`💾 Progress Update: ${profile.picarosFound.length}/12 Picaros found.`);
+        }
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🎨 AFFICHAGE (Suite normale de ta fonction)
+  // ═══════════════════════════════════════════════════════════════════════
+
   if (force) {
-victoryText.innerHTML = `❌ Too bad!&nbsp;<span class="user-name">${target.user}</span>'s Persona was&nbsp;<span class="persona-name">${target.persona}</span>.`;
+    victoryText.innerHTML = `❌ Too bad!&nbsp;<span class="user-name">${target.user}</span>'s Persona was&nbsp;<span class="persona-name">${target.persona}</span>.`;
     victoryText.className = "victory-message failure-text";
   } else {
-victoryText.innerHTML = `✅ Good Guess!&nbsp;<span class="persona-name">${target.persona}</span>&nbsp;is the Persona of&nbsp;<span class="user-name">${name}</span>!`;
+    victoryText.innerHTML = `✅ Good Guess!&nbsp;<span class="persona-name">${target.persona}</span>&nbsp;is the Persona of&nbsp;<span class="user-name">${name}</span>!`;
     victoryText.className = "victory-message success-text";
     showConfettiExplosion();
   }
-setTimeout(() => {
-  victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
-}, 500);
+
+  setTimeout(() => {
+    victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 500);
 
   victoryBox.style.display = "block";
   
-revealNextLink({
-  prevHref: "../silhouetteMode/silhouette.html",
-  nextHref: "../musicsMode/musics.html"
-});
+  revealNextLink({
+    prevHref: "../silhouetteMode/silhouette.html",
+    nextHref: "../musicsMode/musics.html"
+  });
 
-  // === Update stats si pas déjà enregistré aujourd'hui ===
+  // ═══════════════════════════════════════════════════════════════════════
+  // 📊 STATS (Méthode classique sans targetName car géré au-dessus)
+  // ═══════════════════════════════════════════════════════════════════════
   if (!localStorage.getItem(statsKey)) {
-    const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000); // en secondes
-    updateProfileStats({ result: "win", mode: "Personae", timeSpent: sessionDuration });
-    localStorage.removeItem("playerProfile"); // Nettoie pour ne pas impacter les autres
-
+    const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000); 
+    
+    // Note : Ici on remet l'appel classique puisque la logique badge est faite au-dessus
+    updateProfileStats({ 
+        result: "win", 
+        mode: "Personae", 
+        timeSpent: sessionDuration 
+    });
+    
+    localStorage.removeItem("playerProfile"); 
     localStorage.setItem(statsKey, "true");
   }  
-localStorage.setItem("personaeGameOver", "true");
+  
+  localStorage.setItem("personaeGameOver", "true");
 }
 
 function showWrong(name) {

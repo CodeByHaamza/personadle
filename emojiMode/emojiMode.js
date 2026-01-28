@@ -241,6 +241,7 @@ function checkEmojiGuess(name, forceReveal = false) {
   const victoryBox = document.getElementById("victoryBox");
   const victoryPortrait = document.getElementById("victoryPortrait");
   const textbar = document.getElementById("textbar");
+  const wrongList = document.getElementById("wrongGuessList"); // ✅ AJOUT
 
   const guess = characters.find(c => c.nom.toLowerCase() === name.toLowerCase());
   if (!guess) {
@@ -258,22 +259,18 @@ function checkEmojiGuess(name, forceReveal = false) {
       displayZone.appendChild(span);
     });
 
-    // Marqueurs de fin
     localStorage.setItem("emojiGameOver", "true");
     localStorage.setItem("emojiForceReveal", String(forceReveal));
 
-    // Portrait
     const imageName = portraitsMap[target.nom] || target.nom.split(" ")[0];
     const portraitName = encodeURIComponent(imageName);
     victoryPortrait.src = `../database/portraits/${portraitName}.webp`;
     victoryPortrait.alt = target.nom;
 
-    // Message
     winMessage.textContent = forceReveal
       ? `You gave up! The answer was: ${target.nom}`
       : `✅ Correct! It was ${target.nom}!`;
 
-    // UI fin de partie
     victoryBox.style.display = "flex";
     showConfettiExplosion();
     revealNextLink({
@@ -281,7 +278,6 @@ function checkEmojiGuess(name, forceReveal = false) {
       nextHref: "../allOutAttackMode/allOutAttack.html"
     });
 
-    // Stats (anti double comptage par clé du jour Paris)
     const todayKey = getTodayStatsKey();
     if (!localStorage.getItem(todayKey)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
@@ -299,6 +295,9 @@ function checkEmojiGuess(name, forceReveal = false) {
     gameOver = true;
     localStorage.setItem("emojiWin", "true");
   } else {
+    // ✅ AJOUT: Afficher le mauvais essai
+    showWrongGuess(guess.nom);
+    
     attempts++;
     localStorage.setItem("attemptsEmoji", attempts);
     updateEmojiHint();
@@ -309,6 +308,37 @@ function checkEmojiGuess(name, forceReveal = false) {
   removeFromAutocomplete(name);
 }
 
+// === AFFICHAGE MAUVAIS ESSAI ===
+function showWrongGuess(name) {
+  const wrongList = document.getElementById("wrongGuessList");
+  if (!wrongList) return;
+
+  const char = characters.find(c => c.nom.toLowerCase() === name.toLowerCase());
+  if (!char) return;
+
+  // Éviter les doublons
+  const existing = Array.from(wrongList.children).find(
+    el => el.querySelector('img')?.alt === name
+  );
+  if (existing) return;
+
+  const imageName = portraitsMap[char.nom] || char.nom.split(" ")[0];
+  const div = document.createElement("div");
+  div.className = "wrong-mini";
+
+  const img = document.createElement("img");
+  img.src = `../database/portraits/${imageName}.webp`;
+  img.alt = name;
+  img.onerror = () => {
+    img.src = '../database/portraits/unknown.webp';
+  };
+
+  div.appendChild(img);
+  wrongList.appendChild(div);
+  
+  setTimeout(() => div.classList.add("shake"), 50);
+}
+
 function enableGiveUpButton() {
   const giveUpButton = document.getElementById("giveUpButton");
   giveUpButton.disabled = false;
@@ -316,20 +346,22 @@ function enableGiveUpButton() {
 }
 
 function resetGame() {
-  // ⚠️ Ne PAS supprimer la clé de stats du jour: on garde l’anti-double comptage
-  sessionStartTime = Date.now();
+  const nav = document.getElementById("modeNavigationContainer");
+  if (nav) nav.style.display = "none";
 
-    // ✅ AJOUTEZ CETTE LIGNE pour sauvegarder la date du reset
+  sessionStartTime = Date.now();
   localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
 
   const displayZone = document.getElementById("emojiDisplay");
   const winMessage = document.getElementById("winMessage");
   const textbar = document.getElementById("textbar");
   const victoryBox = document.getElementById("victoryBox");
+  const wrongList = document.getElementById("wrongGuessList"); // ✅ AJOUT
 
   displayZone.innerHTML = "";
   winMessage.textContent = "";
   victoryBox.style.display = "none";
+  if (wrongList) wrongList.innerHTML = ""; // ✅ AJOUT - Nettoyer l'historique
 
   textbar.disabled = false;
   document.getElementById("guessButton").disabled = false;
@@ -337,13 +369,12 @@ function resetGame() {
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
   textbar.value = "";
 
-  // Pool filtré + liste de noms MUTABLE pour que l’autocomplete suive
   const pool = filterCharacterPool();
   personas.length = 0;
   personas.push(...pool.map(c => c.nom));
 
   gameOver = false;
-  attempts = 1; // garde ton UX: 1 emoji révélé dès le départ
+  attempts = 1;
 
   const filteredCharacters = pool;
   target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
@@ -353,11 +384,7 @@ function resetGame() {
   updateEmojiHint();
   updateCounters();
 
-  const nav = document.getElementById("modeNavigationContainer");
-  if (nav) {
-    nav.style.display = "none";
-    nav.classList.remove("reveal-style");
-  }
+  
 }
 
 
@@ -640,10 +667,7 @@ document.addEventListener("DOMContentLoaded", () => {
   localStorage.removeItem("emojiWin");  // ✅ Ajoutez cette ligne aussi
   resetGame();
 
-  revealNextLink({
-    prevHref: "../classiqueMode/classiqueMode.html",
-    nextHref: "../allOutAttackMode/allOutAttack.html"
-  });
+  
 });
 
   // Modale "Comment jouer"

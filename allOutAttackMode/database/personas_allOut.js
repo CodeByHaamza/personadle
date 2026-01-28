@@ -46,6 +46,7 @@ export const personas = [
   "Queen ( Makoto Niijima )",
   "Riddle ( Haruna Nishimori )",
   "Rin ( Yaoling Li )",
+  "Rin Chinese New Year ( Yaoling Li )",
   "Sepia ( Toshiya Sumi )",
   "Shinjiro Aragaki",
   "Skull ( Ryuji Sakamoto )",
@@ -55,6 +56,8 @@ export const personas = [
   "Vino ( Chizuko Nagao )",
   "Wind ( Riko Tanemura )",
   "Wonder ( Nagisa Kamishiro )",
+  "Wonder Chinese New Year ( Nagisa Kamishiro )",
+  "Wonder Velvet ( Nagisa Kamishiro )",
   "Yuki ( Yukimi Fujikawa )",
   "Yukari Takeba"
 ];
