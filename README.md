@@ -385,7 +385,7 @@ Make the game accessible for international Persona fans (EN/FR/JP).
 - **Reddit r/PERSoNA** - Support and suggestions
 
 ### Contributors & Development
-- **Damien Nouvellon** - CSS architecture restructuring and modularization
+- **Damien ( Corbover )** - CSS architecture restructuring and modularization
 - **Dzulian** - Creative ideas and data accuracy for classic Persona games (P1/P2)
 - All GitHub contributors who have helped improve the project
 
