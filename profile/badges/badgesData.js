@@ -399,6 +399,19 @@ export const badgesList = [
   },
 
   {
+    id: "hippocampus_reload",
+    name: "Hippocampus Reload",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: "./profile/badges/images/Badges_Zotomayo.webp",
+    condition: "Find the ZUTOMAYO x P3R Mashup in Music mode",
+    description: "Brainwaves synced! You found the chaotic mashup where growing pains meet mass destruction. The memory of this beat will never fade.",
+    secret: false,
+    check: (stats, profile) => {
+      return profile?.foundZutomayo === true;
+    }
+  },
+
+  {
     id: "chef",
     name: "Master Chef",
     category: BADGE_CATEGORIES.SECRET,

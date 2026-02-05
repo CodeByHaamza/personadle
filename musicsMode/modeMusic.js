@@ -145,7 +145,6 @@ function showVictory(force = false) {
   // ═══════════════════════════════════════════════════════════════════════
   // 💀 BADGE: UNSOLVED CASE (Give Up sur Never More) - Adachi Win
   // ═══════════════════════════════════════════════════════════════════════
-  // Si le joueur ABANDONNE (force = true) sur "Never More"
   if (force && currentTitle === normalize("Never More")) {
     if (!profile.lostToNeverMore) {
       profile.lostToNeverMore = true;
@@ -157,12 +156,23 @@ function showVictory(force = false) {
   // ═══════════════════════════════════════════════════════════════════════
   // 🔥 BADGE: MEMENTO MORI (Trouver Burn My Dread)
   // ═══════════════════════════════════════════════════════════════════════
-  // Si le joueur GAGNE (force = false) sur "Burn My Dread"
   if (!force && currentTitle === normalize("Burn My Dread")) {
     if (!profile.foundBurnMyDread) {
       profile.foundBurnMyDread = true;
       hasChanges = true;
       console.log("🔥 Badge Trigger: Burn My Dread found!");
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🌙 BADGE: HIPPOCAMPUS RELOAD (ZUTOMAYO)
+  // ═══════════════════════════════════════════════════════════════════════
+  // On vérifie si le titre contient "zutomayo" pour être sûr (plus safe que l'égalité stricte)
+  if (!force && currentTitle.includes("zutomayo")) {
+    if (!profile.foundZutomayo) {
+      profile.foundZutomayo = true;
+      hasChanges = true;
+      console.log("🌙 Badge Trigger: Zutomayo Found!");
     }
   }
 
@@ -172,7 +182,7 @@ function showVictory(force = false) {
   }
   
   // ═══════════════════════════════════════════════════════════════════════
-  // 📊 MISE À JOUR DES STATISTIQUES (Reste inchangé)
+  // 📊 MISE À JOUR DES STATISTIQUES
   // ═══════════════════════════════════════════════════════════════════════
   if (!localStorage.getItem(todayKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
@@ -221,12 +231,9 @@ function showVictory(force = false) {
     victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
   }, 500);
 
-  // Confettis seulement si on gagne (Adachi ne mérite pas de confettis)
+  // Confettis seulement si on gagne
   if (!force) {
     showConfettiExplosion();
-  } else {
-    // Optionnel : Tu pourrais jouer un son triste ou glitché ici pour l'ambiance Adachi
-    // new Audio('../assets/sound_effect/bad_ending.mp3').play(); 
   }
   
   localStorage.setItem("musicGameOver", "true");

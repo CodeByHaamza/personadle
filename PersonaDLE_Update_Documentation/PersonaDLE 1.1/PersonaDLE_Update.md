@@ -79,6 +79,42 @@ Two exclusive Chinese New Year character skins available during the event:
 
 \newpage
 
+# Special Event: P3R 2nd Anniversary
+
+![P3R x Zutomayo](../../profile/badges/images/Badges_Zotomayo.webp){ width=60% }
+
+**Celebrating 2 Years of Persona 3 Reload!**
+
+It has been two years since we returned to the Dark Hour. To celebrate this milestone, PersonaDLE is integrating the chaotic and stylish content from the **ZUTOMAYO (Zutto Mayonaka de Iinoni)** collaboration!
+
+Three exclusive additions are now available to mark this anniversary:
+
+### 1. New Special Track
+**Music Mode Expansion**
+The airwaves have been hijacked! The exclusive mashup track **"Mass Destruction - Reload (ZUTOMAYO Ver.)"** has been added to the Music Mode playlist.
+* *Featuring vocals by ACA-Ne and Lotus Juice.*
+
+### 2. New Achievement Badge
+**Hippocampus Reload**
+* **Condition:** Successfully identify the ZUTOMAYO track in Music Mode.
+* **Description:** "Brainwaves synced! You found the chaotic mashup where growing pains meet mass destruction."
+
+### 3. Exclusive Profile Picture
+**Makoto Yuki (Zutomayo Ver.)**
+
+![Yuki Zutomayo](../../img/avatar/Yuki_Zutomayo.jpeg){ width=15% }
+
+**Wear the chaos!**
+A unique avatar featuring the protagonist in the distinct ZUTOMAYO art style is now available.
+* **Availability:** Unlocked for everyone in Profile Settings.
+* **Style:** Based on the official collaboration MV art.
+
+> *"Baby, baby, baby! The memory of this beat will never fade..."*
+
+---
+
+\newpage
+
 # New Content
 
 ## Persona Q Expansion

@@ -33,6 +33,7 @@ export const musicTitles = [
   "Life Will Change",
   "Maki",
   "Mass Destruction",
+  "Mass Destruction - Reload (ZUTOMAYO Ver.)",
   "Map I",
   "Maya Theme",
   "Memories of You",

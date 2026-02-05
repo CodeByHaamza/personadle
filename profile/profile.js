@@ -186,7 +186,7 @@ document.getElementById("borderColorPicker").oninput = (e) => {
 const avatarList = [
   "Naoya.jpg", "Naoya1.jpg", "Yuka.webp", "Hidehiko.png", "Hidehiko.webp", "Inaba2.webp", "Inaba.webp", "Eriko.png",
   "Tatsuya2.jpg", "Tatsuya.jpg", "Lisa.jpeg", "Jun.jpg", "Ekichi2.jpeg", "Ekichi.jpeg", "Maya2.jpeg", "Maya.jpg",
-  "Yuki.jpeg", "yuki.jpg","Kotone2.jpeg", "Kotone.jpeg","Kotone3.jpeg","kotone_pdp.jpg","Aigis2.jpg", "Aigis.jpg", "Akihiko.jpg", "Mitsuru.jpg", "Mitsuru.webp",
+  "Yuki.jpeg", "yuki.jpg","Yuki_Zutomayo.jpeg","Kotone2.jpeg", "Kotone.jpeg","Kotone3.jpeg","kotone_pdp.jpg","Aigis2.jpg", "Aigis.jpg", "Akihiko.jpg", "Mitsuru.jpg", "Mitsuru.webp",
   "Junpei2.jpg", "Junpei.png", "Fuuka2.jpeg", "Fuuka.jpeg", "Ken.jpeg", "Koromaru2.jpg", "Koromaru.jpg", "Shinji.jpg", "Shinji.webp","Yukari2.jpg", "Yukari.jpg",
   "Metis.jpg", "Metis2.jpeg", "Elisabeth.jpeg", "Elisabeth2.jpeg","Chidori.jpg","Chidori2.jpg",
   "Yu2.jpg", "Yu.jpg", "Yosuke2.jpg", "Yosuke.jpg", "Chie2.jpg", "Chie.jpg", "Yukiko2.jpg", "Yukiko.jpg",

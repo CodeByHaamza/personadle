@@ -306,6 +306,15 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=S0GgBcNKK5g"
   },
   {
+    titre: "Mass Destruction - Reload (ZUTOMAYO Ver.)",
+    fichier: "Mass_Destruction_Zutomayo.mp3",
+    opus: ["P3R"],
+    image: "Zutomayo.jpg",
+    vocalist: "Lotus Juice , Yumi Kawamura , Zutomayo",
+    proprietaire: "ATLUS - ZUTOMAYO",
+    lien: "https://www.youtube.com/watch?v=3ytqnteXfjw"
+  },
+  {
     titre: "Map I",
     fichier: "Map_I.mp3",
     opus: ["P2EP"],
