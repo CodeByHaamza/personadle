@@ -1,69 +1,145 @@
+/**
+ * modeMusic.js — Music mode (Personadle).
+ *
+ * The player listens to a short audio clip and must identify the Persona song.
+ * Up to 3 wrong guesses are allowed; after that the "Give Up" button unlocks.
+ *
+ * Shared utilities are imported from js/gameCore.js.
+ * This file contains only Music-specific logic.
+ */
+
 // === IMPORTS ===
 import { songs as originalSongs } from "./database/songs.js";
-import { musicTitles } from "./database/musicTitles.js";
-import { updateProfileStats } from "../profile/profileStats.js";
+import { musicTitles }            from "./database/musicTitles.js";
+import { updateProfileStats }     from "../profile/profileStats.js";
+
+import {
+  normalize,
+  showConfettiExplosion,
+  revealNextLink,
+  setupRulesModal,
+  setupDailyReset,
+  checkResetOnLoad,
+} from "../js/gameCore.js";
 
 
-// === CONSTANTES ===
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Maps each top-level opus filter key to the actual game IDs it covers.
+ * Must stay in sync with the filter buttons in musics.html.
+ */
 const validOpus = {
-  P1: ["P1"],
-  P2: ["P2IS", "P2EP"],
-  P3: ["P3", "P3P", "P3FES", "P3R"],
-  P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"],
+  P1:  ["P1"],
+  P2:  ["P2IS", "P2EP"],
+  P3:  ["P3", "P3P", "P3FES", "P3R"],
+  P4:  ["P4", "P4G", "P4AU", "P4D"],
+  P5:  ["P5", "P5R", "P5S", "P5T"],
   P5X: ["P5X"],
-  PQ: ["PQ", "PQ2"],
-
+  PQ:  ["PQ", "PQ2"],
 };
 
-let activeFilters = ["P3", "P4", "P5", "P5X"];
-let filteredSongs = [];
-let target = null;
-let attempts = 0;
-const maxAttempts = 3;
-let gameOver = false;
-let sessionStartTime = Date.now();
-const todayKey = `statsLogged_Music_${new Date().toISOString().split("T")[0]}`;
+/** Maximum number of guesses before the "Give Up" button is enabled. */
+const MAX_ATTEMPTS = 3;
 
+/** Confetti emojis used in Music mode victory celebration. */
+const MUSIC_EMOJIS = ["🎵", "🎶", "🎉", "✨"];
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Currently active opus filters (persisted to localStorage). */
+let activeFilters = ["P3", "P4", "P5", "P5X"];
+
+/** Filtered song pool based on activeFilters. */
+let filteredSongs = [];
+
+/** The song to guess for this session. */
+let target = null;
+
+/** Number of guesses made so far. */
+let attempts = 0;
+
+/** Whether the game is over (win or give-up). */
+let gameOver = false;
+
+/** Timestamp when the game session started (for stats). */
+let sessionStartTime = Date.now();
+
+/**
+ * localStorage key used to prevent double-logging stats for the same day.
+ * Rebuilt each session so it always uses today's date.
+ */
+let todayKey = `statsLogged_Music_${new Date().toISOString().split("T")[0]}`;
+
+/** Rolling list of the last 5 target song titles (anti-repeat guard). */
 let lastFiveTargets = [];
+
+/** Titles already guessed in this session (hidden from autocomplete). */
 let triedTitles = [];
 
-let audioBox, audioPlayer, textbar, guessBtn, resetBtn, giveUpBtn, giveUpCounter, wrongList;
-let victoryBox, victoryImage, victoryText;
 
-// === DOMContentLoaded : toute l'init est ici
+// ─────────────────────────────────────────────────────────────────────────────
+// DOM REFERENCES (assigned in DOMContentLoaded)
+// ─────────────────────────────────────────────────────────────────────────────
+
+let audioBox, audioPlayer, textbar, guessBtn, resetBtn, giveUpBtn;
+let giveUpCounter, wrongList, victoryBox, victoryImage, victoryText;
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INITIALISATION
+// ─────────────────────────────────────────────────────────────────────────────
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Récupération des éléments HTML
-  textbar = document.getElementById("textbar");
-  audioBox = document.getElementById("audioBox");
-  audioPlayer = document.getElementById("audioPlayer");
-  guessBtn = document.getElementById("guessButton");
-  resetBtn = document.getElementById("resetButton");
-  giveUpBtn = document.getElementById("giveUpButton");
-  giveUpCounter = document.getElementById("giveUpCounter");
-  wrongList = document.getElementById("wrongGuessList");
-  victoryBox = document.getElementById("victoryBox");
-  victoryImage = document.getElementById("victoryImage");
-  victoryText = document.getElementById("victoryText");
 
-  // === Restauration de session
-  const savedTarget = localStorage.getItem("musicTarget");
-  const savedAttempts = localStorage.getItem("musicAttempts");
-  const savedGameOver = localStorage.getItem("musicGameOver");
-  const savedTriedTitles = localStorage.getItem("musicTriedTitles");
+  // ── DOM element references ─────────────────────────────────────────────────
+  textbar      = document.getElementById("textbar");
+  audioBox     = document.getElementById("audioBox");
+  audioPlayer  = document.getElementById("audioPlayer");
+  guessBtn     = document.getElementById("guessButton");
+  resetBtn     = document.getElementById("resetButton");
+  giveUpBtn    = document.getElementById("giveUpButton");
+  giveUpCounter = document.getElementById("giveUpCounter");
+  wrongList    = document.getElementById("wrongGuessList");
+  victoryBox   = document.getElementById("victoryBox");
+  victoryImage = document.getElementById("victoryImage");
+  victoryText  = document.getElementById("victoryText");
+
+  // ── Restore opus filters from localStorage ─────────────────────────────────
+  const storedFilters = localStorage.getItem("musicActiveFilters");
+  if (storedFilters) {
+    try {
+      const parsed = JSON.parse(storedFilters);
+      if (Array.isArray(parsed)) activeFilters = parsed;
+    } catch (e) {
+      console.warn("⚠️ Could not parse stored Music filters:", e);
+    }
+  }
+
+  // ── Restore session state ──────────────────────────────────────────────────
+  const savedTarget     = localStorage.getItem("musicTarget");
+  const savedAttempts   = localStorage.getItem("musicAttempts");
+  const savedGameOver   = localStorage.getItem("musicGameOver");
+  const savedTried      = localStorage.getItem("musicTriedTitles");
   const savedForceReveal = localStorage.getItem("musicForceReveal");
 
   if (savedTarget) {
-    target = JSON.parse(savedTarget);
-    attempts = savedAttempts ? parseInt(savedAttempts) : 0;
-    triedTitles = savedTriedTitles ? JSON.parse(savedTriedTitles) : [];
-    gameOver = savedGameOver === "true";
+    // Resume an in-progress or finished game
+    target     = JSON.parse(savedTarget);
+    attempts   = savedAttempts   ? parseInt(savedAttempts, 10) : 0;
+    triedTitles = savedTried     ? JSON.parse(savedTried)      : [];
+    gameOver   = savedGameOver === "true";
 
     audioPlayer.src = `./database/music/song/${target.fichier}`;
     audioPlayer.load();
 
-    giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
-    if (attempts >= maxAttempts) {
+    giveUpCounter.textContent = `(${attempts} / ${MAX_ATTEMPTS})`;
+    if (attempts >= MAX_ATTEMPTS) {
       giveUpBtn.disabled = false;
       giveUpCounter.classList.add("activated");
     }
@@ -75,36 +151,40 @@ document.addEventListener("DOMContentLoaded", () => {
     resetGame();
   }
 
-  // Setup UI
-  // ✅ Restauration des filtres depuis le localStorage
-const storedFilters = localStorage.getItem("musicActiveFilters");
-if (storedFilters) {
-  try {
-    const parsed = JSON.parse(storedFilters);
-    if (Array.isArray(parsed)) activeFilters = parsed;
-  } catch (e) {
-    console.warn("⚠️ Erreur lors de la lecture des filtres :", e);
-  }
-}
-
+  // ── UI wiring ──────────────────────────────────────────────────────────────
   setupFilterButtons();
   applyDarkModeStyles();
-  setupRulesModal();
+  setupRulesModal();                          // ← shared utility
 
   guessBtn.addEventListener("click", handleGuess);
   resetBtn.addEventListener("click", resetGame);
   giveUpBtn.addEventListener("click", giveUp);
 
-  initializeAutocomplete(textbar, musicTitles.sort((a, b) => a.localeCompare(b)));
-  checkResetOnLoad();
+  initializeAutocomplete(textbar);
 
-    setupDailyReset(); // 🕛 Auto-reset every midnight (Paris time)
+  // ── Daily reset checks ─────────────────────────────────────────────────────
+  checkResetOnLoad(                           // ← shared utility
+    "lastPlayedDate_Music",
+    "Music",
+    () => resetBtn.click()
+  );
 
+  setupDailyReset(() => {                     // ← shared utility
+    console.log("🔄 Auto-reset triggered at Paris midnight (Music)");
+    resetBtn ? resetBtn.click() : location.reload();
+  });
 });
 
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SONG POOL HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
 
-// === UTILS ===
+/**
+ * Returns songs whose opus belongs to at least one of the active filters.
+ *
+ * @returns {Object[]} Filtered array of song objects
+ */
 function getFilteredSongs() {
   const accepted = activeFilters.flatMap(o => validOpus[o]);
   return originalSongs.filter(song => {
@@ -113,13 +193,18 @@ function getFilteredSongs() {
   });
 }
 
+/**
+ * Picks a random song from the filtered pool, avoiding the last 5 targets.
+ * Saves the new target and resets the audio player.
+ */
 function pickSong() {
   filteredSongs = getFilteredSongs();
-  const pool = filteredSongs.filter(s => !lastFiveTargets.includes(s.titre));
+
+  // Avoid repeating the last 5 played songs
+  const pool    = filteredSongs.filter(s => !lastFiveTargets.includes(s.titre));
   const choices = pool.length > 0 ? pool : [...filteredSongs];
 
   target = choices[Math.floor(Math.random() * choices.length)];
-  localStorage.setItem("musicTarget", JSON.stringify(target));
 
   lastFiveTargets.push(target.titre);
   if (lastFiveTargets.length > 5) lastFiveTargets.shift();
@@ -127,24 +212,31 @@ function pickSong() {
   audioPlayer.src = `./database/music/song/${target.fichier}`;
   audioPlayer.load();
 
-  localStorage.setItem("musicTarget", JSON.stringify(target));
+  localStorage.setItem("musicTarget",   JSON.stringify(target));
   localStorage.setItem("musicAttempts", attempts);
   localStorage.setItem("musicGameOver", "false");
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VICTORY
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Ends the game, logs stats, checks badges, and shows the victory/reveal box.
+ *
+ * @param {boolean} [force=false] - true if triggered by "Give Up"
+ */
 function showVictory(force = false) {
   gameOver = true;
-  
-  // 1. Récupération du profil
-  let profile = JSON.parse(localStorage.getItem('personaUserProfile')) || {};
+
+  // ── Badge logic ────────────────────────────────────────────────────────────
+  let profile    = JSON.parse(localStorage.getItem("personaUserProfile")) || {};
   let hasChanges = false;
 
-  // Normalisation pour éviter les erreurs de majuscules/espaces
   const currentTitle = target ? normalize(target.titre) : "";
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 💀 BADGE: UNSOLVED CASE (Give Up sur Never More) - Adachi Win
-  // ═══════════════════════════════════════════════════════════════════════
+  // 💀 UNSOLVED CASE — Give Up on "Never More" (P4 final boss theme)
   if (force && currentTitle === normalize("Never More")) {
     if (!profile.lostToNeverMore) {
       profile.lostToNeverMore = true;
@@ -153,9 +245,7 @@ function showVictory(force = false) {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 🔥 BADGE: MEMENTO MORI (Trouver Burn My Dread)
-  // ═══════════════════════════════════════════════════════════════════════
+  // 🔥 MEMENTO MORI — Find "Burn My Dread" (P3 title theme)
   if (!force && currentTitle === normalize("Burn My Dread")) {
     if (!profile.foundBurnMyDread) {
       profile.foundBurnMyDread = true;
@@ -164,87 +254,94 @@ function showVictory(force = false) {
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 🌙 BADGE: HIPPOCAMPUS RELOAD (ZUTOMAYO)
-  // ═══════════════════════════════════════════════════════════════════════
-  // On vérifie si le titre contient "zutomayo" pour être sûr (plus safe que l'égalité stricte)
+  // 🌙 HIPPOCAMPUS RELOAD — Find the ZUTOMAYO collab track
   if (!force && currentTitle.includes("zutomayo")) {
     if (!profile.foundZutomayo) {
       profile.foundZutomayo = true;
       hasChanges = true;
-      console.log("🌙 Badge Trigger: Zutomayo Found!");
+      console.log("🌙 Badge Trigger: Zutomayo found!");
     }
   }
 
-  // Sauvegarde si on a débloqué un truc
   if (hasChanges) {
-    localStorage.setItem('personaUserProfile', JSON.stringify(profile));
+    localStorage.setItem("personaUserProfile", JSON.stringify(profile));
   }
-  
-  // ═══════════════════════════════════════════════════════════════════════
-  // 📊 MISE À JOUR DES STATISTIQUES
-  // ═══════════════════════════════════════════════════════════════════════
+
+  // ── Stats logging (once per day) ───────────────────────────────────────────
   if (!localStorage.getItem(todayKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({
-      result: force ? "giveup" : "win",
-      mode: "Music",
-      timeSpent
+      result:    force ? "giveup" : "win",
+      mode:      "Music",
+      timeSpent,
     });
     localStorage.setItem(todayKey, "1");
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 🏅 CHECK DES BADGES
-  // ═══════════════════════════════════════════════════════════════════════
-  import("../profile/badges/badgesManager.js").then(module => {
-    const currentProfile = JSON.parse(localStorage.getItem('personaUserProfile'));
-    module.checkBadges(currentProfile, (updatedProfile) => {
-      localStorage.setItem('personaUserProfile', JSON.stringify(updatedProfile));
-    });
-  }).catch(err => console.error("⚠️ Impossible de charger le BadgeManager", err));
+  // ── Dynamic badge check ────────────────────────────────────────────────────
+  import("../profile/badges/badgesManager.js")
+    .then(module => {
+      const currentProfile = JSON.parse(localStorage.getItem("personaUserProfile"));
+      module.checkBadges(currentProfile, updatedProfile => {
+        localStorage.setItem("personaUserProfile", JSON.stringify(updatedProfile));
+      });
+    })
+    .catch(err => console.error("⚠️ Could not load badgesManager:", err));
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 🎨 AFFICHAGE UI
-  // ═══════════════════════════════════════════════════════════════════════
-  textbar.disabled = true;
+  // ── UI ─────────────────────────────────────────────────────────────────────
+  textbar.disabled  = true;
   guessBtn.disabled = true;
   giveUpBtn.disabled = true;
 
   victoryImage.src = `./database/img/${target.image}`;
   victoryImage.alt = target.titre;
-  
-  const vocal = target.vocalist?.trim();
+
+  const vocal    = target.vocalist?.trim();
   const vocalLine = vocal ? `<br>🧑‍🎤 Vocal: <strong>${vocal}</strong>` : "";
-  const linkLine = target.lien
+  const linkLine  = target.lien
     ? `<br>🔗 <a href="${target.lien}" target="_blank" class="victory-link">Listen here</a>`
     : "";
 
-  // Message différent si on give up
   victoryText.innerHTML = force
     ? `💡 It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`
     : `🎉 Correct! It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`;
 
   victoryBox.style.display = "block";
-  
+
   setTimeout(() => {
     victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
   }, 500);
 
-  // Confettis seulement si on gagne
+  // Confetti only on a win (not give-up)
   if (!force) {
-    showConfettiExplosion();
+    showConfettiExplosion({                   // ← shared utility
+      emojiList:  MUSIC_EMOJIS,
+      count:      30,
+      spreadFrom: "bottom",
+    });
   }
-  
+
   localStorage.setItem("musicGameOver", "true");
 
-  revealNextLink({
-    prevHref: "../personaeMode/personae.html"
-  });
+  revealNextLink({ prevHref: "../personaeMode/personae.html" }); // ← shared utility
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WRONG GUESS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Shows a wrong-guess card below the input with the album art and song title.
+ * Music mode shows the full title (not just a portrait), so this is kept local
+ * rather than using the shared showWrongMini helper.
+ *
+ * @param {string} name - The song title that was guessed
+ */
 function showWrong(name) {
-  const match = originalSongs.find(song => song.titre.toLowerCase() === name.toLowerCase());
+  const match = originalSongs.find(
+    song => song.titre.toLowerCase() === name.toLowerCase()
+  );
 
   const div = document.createElement("div");
   div.className = "wrong-mini";
@@ -262,26 +359,36 @@ function showWrong(name) {
   setTimeout(() => div.classList.add("shake"), 50);
 }
 
-// === GAME LOGIC ===
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GAME LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Handles a guess submission.
+ * Increments the attempt counter, compares the guess to the target,
+ * and shows a win or wrong-answer card.
+ */
 function handleGuess() {
   if (gameOver) return;
-  const guess = textbar.value.trim();
-  if (!triedTitles.includes(guess)) triedTitles.push(guess);
 
+  const guess = textbar.value.trim();
   if (!guess) return;
 
+  if (!triedTitles.includes(guess)) triedTitles.push(guess);
+
   attempts++;
-  localStorage.setItem("musicAttempts", attempts);
-localStorage.setItem("musicTriedTitles", JSON.stringify(triedTitles));
+  localStorage.setItem("musicAttempts",    attempts);
+  localStorage.setItem("musicTriedTitles", JSON.stringify(triedTitles));
 
-  giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
+  giveUpCounter.textContent = `(${attempts} / ${MAX_ATTEMPTS})`;
 
-  if (attempts >= maxAttempts) {
+  if (attempts >= MAX_ATTEMPTS) {
     giveUpBtn.disabled = false;
     giveUpCounter.classList.add("activated");
   }
 
-if (normalize(guess) === normalize(target.titre)) {
+  if (normalize(guess) === normalize(target.titre)) {
     showVictory(false);
   } else {
     showWrong(guess);
@@ -290,56 +397,83 @@ if (normalize(guess) === normalize(target.titre)) {
   textbar.value = "";
 }
 
+/**
+ * Triggered when the player clicks "Give Up".
+ * Only allowed after MAX_ATTEMPTS wrong guesses.
+ */
 function giveUp() {
-  if (attempts < maxAttempts || gameOver) return;
+  if (attempts < MAX_ATTEMPTS || gameOver) return;
+
   gameOver = true;
   localStorage.setItem("musicForceReveal", "true");
+
+  // Log stats if not already done
   if (!localStorage.getItem(todayKey)) {
-  const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-  updateProfileStats({
-    result: "giveup",
-    mode: "Music",
-    timeSpent
-  });
-  localStorage.setItem(todayKey, "1");
-}
+    const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+    updateProfileStats({ result: "giveup", mode: "Music", timeSpent });
+    localStorage.setItem(todayKey, "1");
+  }
 
   showVictory(true);
 }
 
+/**
+ * Resets all state and starts a new round.
+ * Called on page load (no saved target), by filter changes, and by daily reset.
+ */
 function resetGame() {
+  // Clear all Music-mode localStorage keys
   localStorage.removeItem("musicTarget");
-localStorage.removeItem("musicAttempts");
-localStorage.removeItem("musicGameOver");
-localStorage.removeItem("musicTriedTitles");
-localStorage.removeItem("musicForceReveal");
-sessionStartTime = Date.now();
-localStorage.removeItem(todayKey);
+  localStorage.removeItem("musicAttempts");
+  localStorage.removeItem("musicGameOver");
+  localStorage.removeItem("musicTriedTitles");
+  localStorage.removeItem("musicForceReveal");
+  localStorage.removeItem(todayKey);
 
+  // Rebuild todayKey for the new session (in case day changed)
+  todayKey = `statsLogged_Music_${new Date().toISOString().split("T")[0]}`;
 
-  gameOver = false;
-  attempts = 0;
-  triedTitles = [];
+  // Reset in-memory state
+  gameOver          = false;
+  attempts          = 0;
+  triedTitles       = [];
+  sessionStartTime  = Date.now();
 
-  giveUpCounter.textContent = `(0 / ${maxAttempts})`;
+  // Reset UI
+  giveUpCounter.textContent = `(0 / ${MAX_ATTEMPTS})`;
   giveUpCounter.classList.remove("activated");
-  giveUpBtn.disabled = true;
-  textbar.disabled = false;
-  guessBtn.disabled = false;
+  giveUpBtn.disabled  = true;
+  textbar.disabled    = false;
+  guessBtn.disabled   = false;
   wrongList.innerHTML = "";
-  textbar.value = "";
+  textbar.value       = "";
   victoryBox.style.display = "none";
-  victoryText.innerHTML = "";
-  victoryImage.src = "";
-  pickSong();
-  // Cache le container des liens de navigation
-const navContainer = document.getElementById("modeNavigationContainer");
-if (navContainer) navContainer.style.display = "none";
+  victoryText.innerHTML    = "";
+  victoryImage.src         = "";
 
+  // Hide the between-modes navigation bar
+  const navContainer = document.getElementById("modeNavigationContainer");
+  if (navContainer) navContainer.style.display = "none";
+
+  pickSong();
 }
 
-// === AUTOCOMPLETE ===
-function initializeAutocomplete(input, titlesList) {
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTOCOMPLETE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Wires the song-title autocomplete dropdown to the given text input.
+ *
+ * Specific to Music mode because:
+ *  - It filters by `triedTitles` (already guessed) and active opus filters
+ *  - It renders album-art thumbnails instead of character portraits
+ *  - Clicking an option auto-submits the guess
+ *
+ * @param {HTMLInputElement} input - The search/guess text input
+ */
+function initializeAutocomplete(input) {
   let currentFocus = -1;
 
   input.addEventListener("input", function () {
@@ -347,38 +481,41 @@ function initializeAutocomplete(input, titlesList) {
     const val = this.value.trim();
     if (!val) return;
 
+    // Build dropdown container
     const list = document.createElement("DIV");
-    list.setAttribute("id", "autocomplete-list");
-    list.setAttribute("class", "autocomplete-items");
+    list.id        = "autocomplete-list";
+    list.className = "autocomplete-items";
     this.parentNode.appendChild(list);
 
-    const lowerVal = val.toLowerCase();
-const acceptedOpus = activeFilters.flatMap(o => validOpus[o]);
+    const lowerVal    = val.toLowerCase();
+    const acceptedOpus = activeFilters.flatMap(o => validOpus[o]);
 
-const matches = originalSongs
-  .filter(song => {
-    const songOpus = Array.isArray(song.opus) ? song.opus : [song.opus];
-    return (
-      song.titre.toLowerCase().includes(lowerVal) &&
-      !triedTitles.includes(song.titre) &&
-      songOpus.some(op => acceptedOpus.includes(op))
-    );
-  })
-  .map(song => song.titre);
+    // Filter songs by: partial title match, not already tried, active opus
+    const matches = originalSongs
+      .filter(song => {
+        const songOpus = Array.isArray(song.opus) ? song.opus : [song.opus];
+        return (
+          song.titre.toLowerCase().includes(lowerVal) &&
+          !triedTitles.includes(song.titre) &&
+          songOpus.some(op => acceptedOpus.includes(op))
+        );
+      })
+      .map(song => song.titre);
 
+    // Render one dropdown row per match (album thumbnail + title)
+    matches.forEach(nom => {
+      const songData  = originalSongs.find(s => s.titre === nom);
+      const imagePath = songData ? `./database/img/${songData.image}` : "";
 
-   matches.forEach(nom => {
-  const songData = originalSongs.find(s => s.titre === nom);
-  const imagePath = songData ? `./database/img/${songData.image}` : "";
+      const option = document.createElement("DIV");
+      option.className = "list-options";
+      option.innerHTML = `
+        <img src="${imagePath}" alt="${nom}" class="autocomplete-thumb">
+        <span class="codename">${nom}</span>
+        <input type="hidden" value="${nom.replace(/"/g, "&quot;").replace(/'/g, "&#39;")}">
+      `;
 
-  const option = document.createElement("DIV");
-  option.className = "list-options";
-  option.innerHTML = `
-    <img src="${imagePath}" alt="${nom}" class="autocomplete-thumb">
-    <span class="codename">${nom}</span>
-<input type="hidden" value="${nom.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">
-  `;
-
+      // Clicking an option fills the input and immediately submits the guess
       option.addEventListener("click", function () {
         input.value = this.querySelector("input").value;
         handleGuess();
@@ -391,6 +528,7 @@ const matches = originalSongs
     currentFocus = -1;
   });
 
+  // Keyboard navigation: ↑ ↓ to move, Enter to confirm
   input.addEventListener("keydown", function (e) {
     const items = document.querySelectorAll("#autocomplete-list .list-options");
     if (!items.length) return;
@@ -408,39 +546,51 @@ const matches = originalSongs
     }
   });
 
+  // Close the list when clicking outside of it
   document.addEventListener("click", function (e) {
     if (!e.target.closest("#autocomplete-list") && e.target !== input) {
       closeList();
     }
   });
 
+  /** Highlights the item at `currentFocus` and clears others. */
   function updateActive(items) {
     items.forEach(i => i.classList.remove("autocomplete-active"));
     if (currentFocus >= items.length) currentFocus = 0;
-    if (currentFocus < 0) currentFocus = items.length - 1;
+    if (currentFocus < 0)            currentFocus = items.length - 1;
     items[currentFocus].classList.add("autocomplete-active");
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
+  /** Removes all open autocomplete dropdowns from the DOM. */
   function closeList() {
-    const lists = document.getElementsByClassName("autocomplete-items");
-    for (let i = 0; i < lists.length; i++) {
-      lists[i].parentNode.removeChild(lists[i]);
-    }
+    document.querySelectorAll(".autocomplete-items").forEach(el => el.remove());
   }
 }
 
-// === UI SETUP ===
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTER BUTTONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Wires the opus filter buttons and syncs their visual state with `activeFilters`.
+ *
+ * NOTE: Music mode keeps its own filter setup (not the shared utility) because
+ * it mutates `activeFilters` directly (push/filter pattern) rather than
+ * rebuilding the array from DOM state. This matches Silhouette's approach.
+ */
 function setupFilterButtons() {
   const btns = document.querySelectorAll(".filter-btn");
 
   btns.forEach(btn => {
     const val = btn.dataset.opus;
+
+    // Sync visual state with restored filters
     if (activeFilters.includes(val)) btn.classList.add("active");
     else btn.classList.remove("active");
 
     btn.addEventListener("click", () => {
-      const val = btn.dataset.opus;
       btn.classList.toggle("active");
 
       if (btn.classList.contains("active")) {
@@ -455,15 +605,15 @@ function setupFilterButtons() {
   });
 }
 
-function setupRulesModal() {
-  const modal = document.getElementById("rulesModal");
-  const btn = document.getElementById("rulesButton");
-  const closeBtn = modal.querySelector(".close");
-  btn.addEventListener("click", () => modal.style.display = "block");
-  closeBtn.addEventListener("click", () => modal.style.display = "none");
-  window.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
-}
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DARK MODE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Applies extra dark-mode styling to the audio player box.
+ * Called once on load; the global CSS handles everything else.
+ */
 function applyDarkModeStyles() {
   if (!document.body.classList.contains("darkmode")) return;
   if (audioBox) {
@@ -472,111 +622,26 @@ function applyDarkModeStyles() {
   }
 }
 
-// === CONFETTIS ===
-function showConfettiExplosion() {
-      new Audio('../assets/sound_effect/Victory_sound.mp3').play();
 
-  const emojiList = ["🎵", "🎶", "🎉", "✨"];
-  const numEmojis = 30;
+// ─────────────────────────────────────────────────────────────────────────────
+// DEBUG
+// ─────────────────────────────────────────────────────────────────────────────
 
-  for (let i = 0; i < numEmojis; i++) {
-    const emoji = document.createElement("span");
-    emoji.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
-    emoji.classList.add("confetti-emoji");
-    emoji.style.left = Math.random() * 100 + "vw";
-    emoji.style.bottom = "0vh";
-    emoji.style.setProperty("--x-move", (Math.random() * 100 - 50) + "vw");
-    emoji.style.setProperty("--y-move", -(Math.random() * 50 + 30) + "vh");
-    emoji.style.setProperty("--rotate", Math.random() * 360 + "deg");
-    document.body.appendChild(emoji);
-    setTimeout(() => emoji.remove(), 1000);
-  }
-}
-
-function normalize(str) {
-  return str
-    .normalize("NFD") // Enlève les accents
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[’‘]/g, "'") // Remplace les apostrophes typographiques par la simple
-    .replace(/"/g, "") // (optionnel) supprime les guillemets
-    .trim()
-    .toLowerCase();
-}
-
-
-// === DEBUG ===
+/**
+ * Console utility: logs every title in musicTitles.js and flags any that
+ * are missing from songs.js. Useful for catching data inconsistencies.
+ *
+ * Usage (browser console): import('/musicsMode/modeMusic.js').then(m => m.debugAllMusic())
+ */
 export function debugAllMusic() {
   console.log("=== DEBUG MUSIC MODE ===");
   const errors = [];
-  const usableTitles = musicTitles.sort();
-  for (const name of usableTitles) {
+  for (const name of [...musicTitles].sort()) {
     const match = originalSongs.find(s => s.titre === name);
-    if (!match) errors.push(`❌ ${name} — Missing from songs.js`);
-    else console.log(`✅ OK: ${name}`);
+    if (!match) errors.push(`❌ ${name} — missing from songs.js`);
+    else        console.log(`✅ OK: ${name}`);
   }
   if (errors.length) console.log(errors.join("\n"));
-  else console.log("🎉 No missing titles!");
+  else               console.log("🎉 No missing titles!");
 }
 debugAllMusic();
-
-function revealNextLink({ prevHref = null, nextHref = null } = {}) {
-  const container = document.getElementById("modeNavigationContainer");
-  const prev = document.getElementById("prevModeButton");
-  const next = document.getElementById("nextModeButton");
-
-  if (prevHref) {
-    prev.style.visibility = "visible";
-    prev.onclick = () => (window.location.href = prevHref);
-  }
-
-  if (nextHref) {
-    next.style.visibility = "visible";
-    next.onclick = () => (window.location.href = nextHref);
-  }
-
-  container.style.display = "flex";
-
-  setTimeout(() => {
-    container.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, 1500);
-}
-
-function setupDailyReset() {
-  const parisOffset = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
-  const parisNow = new Date(parisOffset);
-  const tomorrow = new Date(parisNow);
-  tomorrow.setDate(parisNow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-
-  const timeUntilMidnight = tomorrow.getTime() - parisNow.getTime();
-
-  console.log(`🕛 Next auto-reset in ${Math.round(timeUntilMidnight / 60000)} minutes`);
-
-  setTimeout(() => {
-    console.log("🔄 Auto-reset triggered at Paris midnight");
-    const resetBtn = document.getElementById("resetButton");
-    if (resetBtn) resetBtn.click();
-    else location.reload(); // fallback
-  }, timeUntilMidnight + 500);
-}
-function checkResetOnLoad() {
-  const storedDate = localStorage.getItem("lastPlayedDate_Music");
-  const today = new Date().toISOString().split("T")[0];
-
-  if (storedDate !== today) {
-    console.log("📅 Nouvelle journée détectée → reset automatique (Music)");
-    localStorage.setItem("lastPlayedDate_Music", today);
-
-    // Nettoyage de l'entrée stats de la veille
-    if (storedDate) {
-      const oldStatsKey = `statsLogged_Music_${storedDate}`;
-      localStorage.removeItem(oldStatsKey);
-    }
-
-    const resetBtn = document.getElementById("resetButton");
-    if (resetBtn) resetBtn.click();
-    else location.reload();
-  } else {
-    console.log("📅 Même jour, aucune réinitialisation nécessaire (Music)");
-  }
-}

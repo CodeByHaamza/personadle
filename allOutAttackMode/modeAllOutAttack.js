@@ -1,46 +1,67 @@
+// === IMPORTS ===
 import { personas as originalPersonas } from "./database/personas_allOut.js";
 import { portraitsMap } from "./database/portraitsMap.js";
 import { aoaCharacters } from "./database/aoaCharacters.js";
 import { updateProfileStats } from "../profile/profileStats.js";
 
-// 🔥 OPTIMISATION 1 : Cache unique pour les images
+// Shared game utilities
+import {
+  showConfettiExplosion,
+  revealNextLink,
+  setupRulesModal,
+  setupDailyReset,
+  checkResetOnLoad,
+  setupFilterButtons,
+  showWrongMini,
+} from "../js/gameCore.js";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CDN / IMAGE LOADING CONFIGURATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** CloudFlare R2 CDN base URL for All-Out Attack GIFs. */
+const CDN_BASE_URL = "https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev/";
+const CACHE_CONTROL = "public, max-age=86400";
+
+/** True when running on localhost → use local files instead of CDN. */
+const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+
+/**
+ * Builds the URL for an All-Out Attack asset.
+ * Local: `./database/allOutAttack/<filename>.<ext>`
+ * Production: CDN URL with cache-control query param
+ *
+ * @param {string} subfolder - CDN subfolder (e.g. "allOutAttack")
+ * @param {string} filename  - Asset filename without extension
+ * @param {string} [ext="webp"]
+ * @returns {string}
+ */
+function cdn(subfolder, filename, ext = "webp") {
+  if (IS_LOCAL) return `./database/allOutAttack/${encodeURIComponent(filename)}.${ext}`;
+  return `${CDN_BASE_URL}${subfolder}/${encodeURIComponent(filename)}.${ext}?cache=${CACHE_CONTROL}`;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IMAGE CACHE & PRELOADING
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** LRU-like cache to avoid re-downloading GIFs. Max 20 entries. */
 const imageCache = new Map();
 const MAX_CACHE_SIZE = 20;
 
-// 🔥 OPTIMISATION 2 : Pool d'images pré-chargées
-let preloadQueue = [];
 let isPreloading = false;
 
-const AOA_BY_NAME = new Map(aoaCharacters.map(c => [c.nom, c]));
-
-const CDN_BASE_URL = "https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev/";
-const CACHE_CONTROL = "public, max-age=86400";
-const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-
-function cdn(subfolder, filename, ext = "webp") {
-  if (IS_LOCAL) {
-    return `./database/allOutAttack/${encodeURIComponent(filename)}.${ext}`;
-  }
-  const url = `${CDN_BASE_URL}${subfolder}/${encodeURIComponent(filename)}.${ext}`;
-  return `${url}?cache=${CACHE_CONTROL}`;
-}
-
-let activeOpusFilters = ["P3", "P5", "P5X"];
-let sessionStartTime = Date.now();
-const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
-
-let personas = [];
-let attempts = 0;
-let gameOver = false;
-let target = null;
-let lastFiveTargets = [];
-
-// 🔥 OPTIMISATION 3 : Gestion intelligente du cache d'images
+/**
+ * Adds an image to the cache, evicting the oldest entry when full.
+ * @param {string}     src
+ * @param {HTMLImageElement} imgElement
+ */
 function addToImageCache(src, imgElement) {
   if (imageCache.size >= MAX_CACHE_SIZE) {
     const firstKey = imageCache.keys().next().value;
-    const oldImg = imageCache.get(firstKey);
-    if (oldImg) oldImg.src = ''; // Libère la mémoire
+    const old = imageCache.get(firstKey);
+    if (old) old.src = ""; // free memory
     imageCache.delete(firstKey);
   }
   imageCache.set(src, imgElement);
@@ -50,181 +71,194 @@ function getFromCache(src) {
   return imageCache.get(src);
 }
 
-// 🔥 OPTIMISATION 4 : Préchargement intelligent avec priorité
-async function smartPreload(namesList, priority = 'low') {
+/**
+ * Preloads up to 15 character images in the background.
+ * High-priority loads await each image; low-priority loads are fire-and-forget.
+ *
+ * @param {string[]} namesList
+ * @param {"high"|"low"} [priority="low"]
+ */
+async function smartPreload(namesList, priority = "low") {
   if (isPreloading) return;
-  
   isPreloading = true;
-  const limitedList = namesList.slice(0, 15); // Augmenté à 15 mais avec gestion intelligente
-  
-  for (const name of limitedList) {
+
+  const limited = namesList.slice(0, 15);
+  for (const name of limited) {
     const base = portraitsMap[name] || name.split(" ")[0];
     const src = cdn("allOutAttack", base);
-    
-    // Skip si déjà en cache
     if (getFromCache(src)) continue;
-    
+
     const img = new Image();
-    img.loading = priority === 'high' ? 'eager' : 'lazy';
+    img.loading = priority === "high" ? "eager" : "lazy";
     img.src = src;
-    
-    // Promesse qui ne bloque pas le reste
-    const loadPromise = new Promise((resolve) => {
-      img.onload = () => {
-        addToImageCache(src, img);
-        resolve();
-      };
-      img.onerror = () => resolve(); // Continue même en cas d'erreur
+
+    const p = new Promise((resolve) => {
+      img.onload = () => { addToImageCache(src, img); resolve(); };
+      img.onerror = () => resolve();
     });
-    
-    if (priority === 'high') {
-      await loadPromise;
-    }
-    
-    // Délai adaptatif selon la priorité
-    await new Promise(r => setTimeout(r, priority === 'high' ? 30 : 100));
+
+    if (priority === "high") await p;
+    await new Promise((r) => setTimeout(r, priority === "high" ? 30 : 100));
   }
-  
+
   isPreloading = false;
 }
 
-// 🔥 OPTIMISATION 5 : Chargement d'image avec gestion d'erreur robuste
+/**
+ * Loads an image into `gifElement`, using the cache when available.
+ * Falls back to loading.gif after a 10-second timeout.
+ *
+ * @param {HTMLImageElement} gifElement
+ * @param {string}           src
+ * @param {Function}         [onLoadCallback]
+ */
 function loadImageSafely(gifElement, src, onLoadCallback) {
-  // Vérifie d'abord le cache
   const cached = getFromCache(src);
-  if (cached && cached.complete) {
+  if (cached?.complete) {
     gifElement.src = src;
-    if (onLoadCallback) onLoadCallback();
+    onLoadCallback?.();
     return;
   }
-  
-  // Charge avec timeout
+
   const tempImg = new Image();
   let timeoutId;
-  
+
   const cleanup = () => {
     clearTimeout(timeoutId);
     tempImg.onload = null;
     tempImg.onerror = null;
   };
-  
+
   tempImg.onload = () => {
     cleanup();
     addToImageCache(src, tempImg);
     gifElement.src = src;
     gifElement.style.opacity = "1";
-    if (onLoadCallback) onLoadCallback();
+    onLoadCallback?.();
   };
-  
+
   tempImg.onerror = () => {
     cleanup();
     console.error(`Failed to load: ${src}`);
-    gifElement.src = "../img/loading.gif"; // Fallback
+    gifElement.src = "../img/loading.gif";
   };
-  
-  // Timeout de 10 secondes
+
   timeoutId = setTimeout(() => {
     cleanup();
     console.warn(`Timeout loading: ${src}`);
     gifElement.src = "../img/loading.gif";
   }, 10000);
-  
+
   tempImg.src = src;
 }
 
-// 🔥 OPTIMISATION 6 : ShowLoading plus efficace
+/** Displays the loading placeholder, preferring the cached version. */
 function showLoading(gifElement) {
   gifElement.style.filter = "none";
   gifElement.style.opacity = "1";
-  
-  // Utilise une version en cache si disponible
-  const loadingCached = getFromCache("../img/loading.gif");
-  if (loadingCached) {
+  const cached = getFromCache("../img/loading.gif");
+  if (cached) {
     gifElement.src = "../img/loading.gif";
   } else {
-    const loadingImg = new Image();
-    loadingImg.src = "../img/loading.gif";
-    loadingImg.onload = () => {
-      addToImageCache("../img/loading.gif", loadingImg);
-      gifElement.src = "../img/loading.gif";
-    };
+    const img = new Image();
+    img.src = "../img/loading.gif";
+    img.onload = () => { addToImageCache("../img/loading.gif", img); gifElement.src = "../img/loading.gif"; };
   }
 }
 
+// Fast lookup map: character name → aoaCharacter object
+const AOA_BY_NAME = new Map(aoaCharacters.map((c) => [c.nom, c]));
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSTANTS & STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
+let sessionStartTime = Date.now();
+
+let activeOpusFilters = ["P3", "P5", "P5X"];
+let personas = [];      // mutable filtered list of character names
+let attempts = 0;
+let gameOver = false;
+let target = null;
+let lastFiveTargets = [];
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTER / CHARACTER POOL
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Returns the list of character names that belong to the active opus filters.
+ * Uses the fast AOA_BY_NAME lookup for O(1) access.
+ * @returns {string[]}
+ */
 function getFilteredPersonas() {
-  const res = [];
+  const result = [];
   for (const name of originalPersonas) {
     const entry = AOA_BY_NAME.get(name);
     if (!entry) continue;
-
-    for (let i = 0; i < entry.opus.length; i++) {
-      if (activeOpusFilters.includes(entry.opus[i])) {
-        res.push(name);
-        break;
-      }
-    }
+    if (entry.opus.some((op) => activeOpusFilters.includes(op))) result.push(name);
   }
-
-  if (res.length === 0) {
-    console.warn("⚠️ Aucun personnage filtré. activeOpusFilters =", activeOpusFilters);
-  }
-
-  return res;
+  if (!result.length) console.warn("⚠️ No characters match current filters:", activeOpusFilters);
+  return result;
 }
 
+/**
+ * Picks a random character from `personas`, avoiding the last 5 selections.
+ * @returns {string|null} Character name or null if pool is empty
+ */
 function getBetterRandomCharacter() {
-  const filteredPool = personas.filter(name => !lastFiveTargets.includes(name));
-  const pool = filteredPool.length > 0 ? filteredPool : [...personas];
+  const pool = personas.filter((n) => !lastFiveTargets.includes(n));
+  const choices = pool.length > 0 ? pool : [...personas];
+  if (!choices.length) { alert("No characters available with current filters."); return null; }
 
-  if (pool.length === 0) {
-    alert("Aucun personnage disponible avec les filtres actuels.");
-    return null;
-  }
-
-  const index = Math.floor(Math.random() * pool.length);
-  const selected = pool[index];
-
+  const selected = choices[Math.floor(Math.random() * choices.length)];
   lastFiveTargets.push(selected);
-  if (lastFiveTargets.length > 5) {
-    lastFiveTargets.shift();
-  }
-
+  if (lastFiveTargets.length > 5) lastFiveTargets.shift();
   return selected;
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTOCOMPLETE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Attaches an autocomplete dropdown showing character portraits and names.
+ * Supports codename + real-name display (e.g. "Crow (Akechi Goro)").
+ *
+ * @param {HTMLInputElement} element - The text input to enhance
+ * @param {string[]}         array  - Current list of guessable names
+ */
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
 
   element.addEventListener("input", function () {
     const val = this.value.trim();
     closeList(null, element);
-    if (!val) return false;
+    if (!val) return;
 
     const list = document.createElement("DIV");
     list.setAttribute("id", "autocomplete-list");
     list.setAttribute("class", "autocomplete-items");
     this.parentNode.appendChild(list);
 
+    const lowerVal = val.toLowerCase();
     const matches = [];
-
-    for (let i = 0; i < array.length; i++) {
-      const displayName = array[i];
-      const lowerName = displayName.toLowerCase();
-      const lowerVal = val.toLowerCase();
-
-      if (lowerName.includes(lowerVal)) {
-        const [firstName, lastName] = displayName.split(" ");
-        let priority = 3;
-        if (firstName?.toLowerCase().startsWith(lowerVal)) priority = 1;
-        else if (lastName?.toLowerCase().startsWith(lowerVal)) priority = 2;
-        matches.push({ name: displayName, priority });
-      }
+    for (const displayName of array) {
+      if (!displayName.toLowerCase().includes(lowerVal)) continue;
+      const [firstName, lastName] = displayName.split(" ");
+      let priority = 3;
+      if (firstName?.toLowerCase().startsWith(lowerVal)) priority = 1;
+      else if (lastName?.toLowerCase().startsWith(lowerVal)) priority = 2;
+      matches.push({ name: displayName, priority });
     }
 
     matches.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
 
-    matches.forEach((matchObj) => {
-      const displayName = matchObj.name;
+    matches.forEach(({ name: displayName }) => {
       const imageName = portraitsMap[displayName] || displayName.split(" ")[0];
       const portraitName = encodeURIComponent(imageName);
       const realName = displayName.includes("(") ? displayName.split("(")[1].replace(")", "") : "";
@@ -257,13 +291,9 @@ function initializeAutocomplete(element, array) {
     const items = document.querySelectorAll("#autocomplete-list .list-options");
     if (!items.length) return;
 
-    if (e.key === "ArrowDown") {
-      currentFocus++;
-      updateActive(items);
-    } else if (e.key === "ArrowUp") {
-      currentFocus--;
-      updateActive(items);
-    } else if (e.key === "Enter") {
+    if (e.key === "ArrowDown") { currentFocus++; updateActive(items); }
+    else if (e.key === "ArrowUp") { currentFocus--; updateActive(items); }
+    else if (e.key === "Enter") {
       e.preventDefault();
       if (currentFocus > -1) items[currentFocus].click();
       else items[0]?.click();
@@ -271,20 +301,14 @@ function initializeAutocomplete(element, array) {
   });
 
   function updateActive(items) {
-    removeActive(items);
+    for (let item of items) item.classList.remove("autocomplete-active");
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = items.length - 1;
     items[currentFocus].classList.add("autocomplete-active");
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
-  function removeActive(items) {
-    for (let item of items) item.classList.remove("autocomplete-active");
-  }
-
-  document.addEventListener("click", (e) => {
-    closeList(e.target, element);
-  });
+  document.addEventListener("click", (e) => closeList(e.target, element));
 }
 
 function closeList(e, inputElement) {
@@ -295,211 +319,68 @@ function closeList(e, inputElement) {
 }
 
 function removeFromAutocomplete(name) {
-  const index = personas.findIndex(n => n.toLowerCase() === name.toLowerCase());
-  if (index !== -1) personas.splice(index, 1);
+  const idx = personas.findIndex((n) => n.toLowerCase() === name.toLowerCase());
+  if (idx !== -1) personas.splice(idx, 1);
 }
 
-function showConfettiExplosion() {
-  new Audio('../assets/sound_effect/Victory_sound.mp3').play();
 
-  const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
-  const numEmojisPerSide = 20;
+// ─────────────────────────────────────────────────────────────────────────────
+// GAME FLOW
+// ─────────────────────────────────────────────────────────────────────────────
 
-  for (let i = 0; i < numEmojisPerSide * 2; i++) {
-    const emoji = document.createElement("span");
-    emoji.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
-    emoji.classList.add("confetti-emoji");
-
-    const isLeft = i < numEmojisPerSide;
-    emoji.style.left = isLeft ? "0vw" : "100vw";
-    emoji.style.bottom = "0vh";
-
-    const xTarget = isLeft ? Math.random() * 50 + 25 : -(Math.random() * 50 + 25);
-    const yTarget = -(Math.random() * 50 + 30);
-    const rotate = Math.random() * 360;
-
-    emoji.style.setProperty("--x-move", xTarget + "vw");
-    emoji.style.setProperty("--y-move", yTarget + "vh");
-    emoji.style.setProperty("--rotate", rotate + "deg");
-
-    document.body.appendChild(emoji);
-    setTimeout(() => emoji.remove(), 1000);
-  }
-}
-
-function showWrongFeedback(name) {
-  const imageName = portraitsMap[name] || name.split(" ")[0];
-  const listZone = document.getElementById("wrongGuessList");
-
-  const div = document.createElement("div");
-  div.className = "wrong-mini";
-
-  const img = document.createElement("img");
-  img.src = `./database/img/${imageName}.webp`;
-  img.alt = name;
-
-  div.appendChild(img);
-  listZone.appendChild(div);
-
-  setTimeout(() => {
-    div.classList.add("shake");
-  }, 50);
-}
-
+/**
+ * Processes one guess:
+ *  - Correct: removes blur, shows victory box, triggers badges/stats
+ *  - Wrong: increases blur slightly, shows wrong-guess portrait
+ */
 function handleGuess() {
   if (gameOver) return;
-
   const input = document.getElementById("textbar");
   const guess = input.value.trim();
   if (!guess) return;
 
   attempts++;
   localStorage.setItem("aoaAttempts", attempts);
-
   updateGiveUpCounter();
 
   if (guess.toLowerCase() === target.toLowerCase()) {
-checkSpecialBadges(target);
+    // ── Win ──────────────────────────────────────────────────────────────────
+    checkSpecialBadges(target);
     document.getElementById("aoaGif").style.filter = "none";
     showVictoryBox(target);
     showConfettiExplosion();
     revealNextLink({
       prevHref: "../emojiMode/emojiMode.html",
-      nextHref: "../silhouetteMode/silhouette.html"
+      nextHref: "../silhouetteMode/silhouette.html",
     });
-
     gameOver = true;
     localStorage.setItem("aoaGameOver", "true");
+
     if (!localStorage.getItem(todayKey)) {
-      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({
         result: "win",
         mode: "All Out Attack",
-        timeSpent
+        timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
       });
       localStorage.setItem(todayKey, "1");
     }
 
     localStorage.setItem("aoaTarget", target);
     localStorage.setItem("aoaAttempts", attempts);
-
     disableInputs();
-    return;
-  }
+  } else {
+    // ── Wrong guess ──────────────────────────────────────────────────────────
+    const imageName = portraitsMap[guess] || guess.split(" ")[0];
+    showWrongMini(`./database/img/${imageName}.webp`, guess, document.getElementById("wrongGuessList"));
+    removeFromAutocomplete(guess);
 
-  showWrongFeedback(guess);
-  removeFromAutocomplete(guess);
-
-  const blurLevel = Math.max(20 - attempts * 3, 0);
-  document.getElementById("aoaGif").style.filter = `blur(${blurLevel}px)`;
-
-  input.value = "";
-}
-
-
-function checkSpecialBadges(characterName) {
-  const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
-  if (!profile) return;
-
-  let shouldSave = false;
-  const lowerName = characterName.toLowerCase();
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // 🎭 BADGE TRUTH & DUALITY (Crow & Black Mask)
-  // ═════════════════════════════════════════════════════════════════════════
-  if (lowerName.includes("crow") && lowerName.includes("akechi")) {
-    if (!profile.foundCrow) {
-      profile.foundCrow = true;
-      shouldSave = true;
-      console.log("🎭 Crow found!");
-    }
-  }
-
-  if (lowerName.includes("black mask") && lowerName.includes("akechi")) {
-    if (!profile.foundBlackMask) {
-      profile.foundBlackMask = true;
-      shouldSave = true;
-      console.log("🎭 Black Mask found!");
-    }
-  }
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // 🧧 BADGE CHINESE NEW YEAR (Wonder & Rin CNY)
-  // ═════════════════════════════════════════════════════════════════════════
-  if (lowerName.includes("wonder") && lowerName.includes("chinese")) {
-    if (!profile.foundWonderCNY) {
-      profile.foundWonderCNY = true;
-      shouldSave = true;
-      console.log("🧧 Wonder (CNY) found!");
-    }
-  }
-
-  if (lowerName.includes("rin") && lowerName.includes("chinese")) {
-    if (!profile.foundRinCNY) {
-      profile.foundRinCNY = true;
-      shouldSave = true;
-      console.log("🧧 Rin (CNY) found!");
-    }
-  }
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // 🤕 BADGE VELVET HEADACHE (Wonder Velvet & Twins)
-  // ═════════════════════════════════════════════════════════════════════════
-  if (lowerName.includes("wonder") && lowerName.includes("velvet")) {
-    if (!profile.foundWonderVelvet) {
-      profile.foundWonderVelvet = true;
-      shouldSave = true;
-      console.log("🤕 Wonder (Velvet) found!");
-    }
-  }
-
-  if (lowerName.includes("caroline") || lowerName.includes("justine")) {
-    if (!profile.foundTwins) {
-      profile.foundTwins = true;
-      shouldSave = true;
-      console.log("🤕 Twins (Caroline & Justine) found!");
-    }
-  }
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // 💾 SAUVEGARDE + VÉRIFICATION BADGES
-  // ═════════════════════════════════════════════════════════════════════════
-  if (shouldSave) {
-    localStorage.setItem("personaUserProfile", JSON.stringify(profile));
-    console.log("💾 Profile saved with new flags");
-    
-    // Force la vérification immédiate des badges
-    setTimeout(() => {
-      if (window.forceCheckBadges) {
-        console.log("✅ Calling forceCheckBadges...");
-        window.forceCheckBadges(profile, (updatedProfile) => {
-          localStorage.setItem("personaUserProfile", JSON.stringify(updatedProfile));
-        });
-      } else {
-        console.error("❌ forceCheckBadges not found on window!");
-      }
-    }, 100);
+    const blurLevel = Math.max(20 - attempts * 3, 0);
+    document.getElementById("aoaGif").style.filter = `blur(${blurLevel}px)`;
+    input.value = "";
   }
 }
-function showVictoryBox(name) {
-  const baseName = (portraitsMap[name] || name.split(" ")[0]).trim();
-  const imgSrc = `./database/img/${baseName}_Battle.webp`;
 
-  const box = document.getElementById("victoryBox");
-  const img = document.getElementById("victoryImage");
-  const text = document.getElementById("victoryText");
-
-  img.src = imgSrc;
-  img.alt = name;
-  text.textContent = `🎉 You found ${name}!`;
-
-  box.style.display = "flex";
-
-  setTimeout(() => {
-    box.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, 300);
-}
-
+/** Give Up: reveals the GIF and shows the victory box as a defeat screen. */
 function giveUp() {
   if (attempts < 5 || gameOver) return;
   document.getElementById("aoaGif").style.filter = "none";
@@ -507,17 +388,17 @@ function giveUp() {
   showConfettiExplosion();
   disableInputs();
   gameOver = true;
+
   if (!localStorage.getItem(todayKey)) {
-    const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({
       result: "giveup",
       mode: "All Out Attack",
-      timeSpent
+      timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
     });
     localStorage.setItem(todayKey, "1");
     revealNextLink({
       prevHref: "../emojiMode/emojiMode.html",
-      nextHref: "../silhouetteMode/silhouette.html"
+      nextHref: "../silhouetteMode/silhouette.html",
     });
   }
 
@@ -526,14 +407,17 @@ function giveUp() {
   localStorage.setItem("aoaAttempts", attempts);
 }
 
-// 🔥 OPTIMISATION 7 : resetGame simplifié
+/**
+ * Resets the game state and loads a new character GIF.
+ * Called by the Replay button, daily reset, and filter changes.
+ */
 function resetGame() {
   sessionStartTime = Date.now();
   localStorage.removeItem(todayKey);
 
   const input = document.getElementById("textbar");
   const gifElement = document.getElementById("aoaGif");
-  const wrongList = document.getElementById("wrongGuessList");
+  const wrongListEl = document.getElementById("wrongGuessList");
 
   gameOver = false;
   attempts = 0;
@@ -549,21 +433,17 @@ function resetGame() {
 
   const imageName = portraitsMap[target] || target.split(" ")[0];
   const newSrc = cdn("allOutAttack", imageName);
+  loadImageSafely(gifElement, newSrc, () => { gifElement.style.filter = "blur(20px)"; });
 
-  loadImageSafely(gifElement, newSrc, () => {
-    gifElement.style.filter = "blur(20px)";
-  });
-
-  // Préchargement intelligent en arrière-plan
-  setTimeout(() => smartPreload(personas, 'low'), 800);
+  // Background preload of next characters
+  setTimeout(() => smartPreload(personas, "low"), 800);
 
   input.disabled = false;
+  input.value = "";
   document.getElementById("guessButton").disabled = false;
   document.getElementById("giveUpButton").disabled = true;
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
-  input.value = "";
-
-  if (wrongList) wrongList.innerHTML = "";
+  if (wrongListEl) wrongListEl.innerHTML = "";
 
   initializeAutocomplete(input, personas);
   updateGiveUpCounter();
@@ -573,24 +453,25 @@ function resetGame() {
   localStorage.removeItem("aoaGameOver");
 
   const nav = document.getElementById("modeNavigationContainer");
-  if (nav) {
-    nav.style.display = "none";
-    nav.classList.remove("reveal-style");
-  }
+  if (nav) { nav.style.display = "none"; nav.classList.remove("reveal-style"); }
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Updates the give-up counter display and enables/disables the button. */
 function updateGiveUpCounter() {
-  const giveUpCounter = document.getElementById("giveUpCounter");
-  const giveUpButton = document.getElementById("giveUpButton");
-
-  if (giveUpCounter) {
-    giveUpCounter.textContent = `(${attempts} / 5)`;
-    giveUpCounter.classList.toggle("activated", attempts >= 5);
+  const counter = document.getElementById("giveUpCounter");
+  const btn = document.getElementById("giveUpButton");
+  if (counter) {
+    counter.textContent = `(${attempts} / 5)`;
+    counter.classList.toggle("activated", attempts >= 5);
   }
-
-  if (giveUpButton) {
-    giveUpButton.disabled = attempts < 5;
-    giveUpButton.style.cursor = attempts >= 5 ? "pointer" : "not-allowed";
+  if (btn) {
+    btn.disabled = attempts < 5;
+    btn.style.cursor = attempts >= 5 ? "pointer" : "not-allowed";
   }
 }
 
@@ -601,168 +482,73 @@ function disableInputs() {
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
 }
 
-// 🔥 OPTIMISATION 8 : DOMContentLoaded optimisé
-document.addEventListener("DOMContentLoaded", () => {
-  applyDarkModeStyles();
-  const textbar = document.getElementById("textbar");
-  
-  const savedFilters = JSON.parse(localStorage.getItem("filters_AllOutAttack"));
-  if (Array.isArray(savedFilters)) {
-    activeOpusFilters = savedFilters;
+/**
+ * Fills and shows the victory box with the character's battle image.
+ * @param {string} name - Character name
+ */
+function showVictoryBox(name) {
+  const baseName = (portraitsMap[name] || name.split(" ")[0]).trim();
+  const box = document.getElementById("victoryBox");
+  const img = document.getElementById("victoryImage");
+  const text = document.getElementById("victoryText");
+
+  img.src = `./database/img/${baseName}_Battle.webp`;
+  img.alt = name;
+  text.textContent = `🎉 You found ${name}!`;
+  box.style.display = "flex";
+  setTimeout(() => box.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BADGE LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Checks whether `characterName` triggers any special AOA badges and updates
+ * the player profile in localStorage accordingly.
+ *
+ * Badges tracked here:
+ *  - Truth & Duality: Crow (Akechi) and Black Mask (Akechi)
+ *  - Chinese New Year: Wonder (CNY) and Rin (CNY)
+ *  - Velvet Headache: Wonder (Velvet) and Twins (Caroline & Justine)
+ *
+ * @param {string} characterName
+ */
+function checkSpecialBadges(characterName) {
+  const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
+  if (!profile) return;
+
+  let shouldSave = false;
+  const n = characterName.toLowerCase();
+
+  const check = (flag, condition) => {
+    if (condition && !profile[flag]) { profile[flag] = true; shouldSave = true; }
+  };
+
+  check("foundCrow",        n.includes("crow")    && n.includes("akechi"));
+  check("foundBlackMask",   n.includes("black mask") && n.includes("akechi"));
+  check("foundWonderCNY",   n.includes("wonder")  && n.includes("chinese"));
+  check("foundRinCNY",      n.includes("rin")     && n.includes("chinese"));
+  check("foundWonderVelvet",n.includes("wonder")  && n.includes("velvet"));
+  check("foundTwins",       n.includes("caroline") || n.includes("justine"));
+
+  if (shouldSave) {
+    localStorage.setItem("personaUserProfile", JSON.stringify(profile));
+    setTimeout(() => {
+      if (window.forceCheckBadges) {
+        window.forceCheckBadges(profile, (updated) => {
+          localStorage.setItem("personaUserProfile", JSON.stringify(updated));
+        });
+      }
+    }, 100);
   }
+}
 
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    const group = btn.dataset.opus;
-    if (activeOpusFilters.includes(group)) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
-  });
 
-  const guessButton = document.getElementById("guessButton");
-  const gifElement = document.getElementById("aoaGif");
-
-  personas = getFilteredPersonas();
-  
-  // Préchargement différé avec priorité basse
-  setTimeout(() => smartPreload(personas, 'low'), 1500);
-
-  initializeAutocomplete(textbar, personas);
-
-  const savedTarget = localStorage.getItem("aoaTarget");
-  const savedAttempts = parseInt(localStorage.getItem("aoaAttempts")) || 0;
-  const savedGameOver = localStorage.getItem("aoaGameOver") === "true";
-
-  if (savedTarget) {
-    target = savedTarget;
-    attempts = savedAttempts;
-    gameOver = savedGameOver;
-
-    const imageName = portraitsMap[target] || target.split(" ")[0];
-    const src = cdn("allOutAttack", imageName);
-    
-    loadImageSafely(gifElement, src, () => {
-      gifElement.style.filter = gameOver ? "none" : `blur(${Math.max(20 - attempts * 3, 0)}px)`;
-    });
-
-    updateGiveUpCounter();
-
-    if (gameOver) {
-      showVictoryBox(target);
-      disableInputs();
-      revealNextLink({
-        prevHref: "../emojiMode/emojiMode.html",
-        nextHref: "../silhouetteMode/silhouette.html"
-      });
-    }
-
-    if (attempts >= 5) {
-      document.getElementById("giveUpButton").disabled = false;
-      document.getElementById("giveUpButton").style.cursor = "pointer";
-    }
-
-  } else {
-    target = getBetterRandomCharacter();
-    const imageName = portraitsMap[target] || target.split(" ")[0];
-    gifElement.style.filter = "none";
-    showLoading(gifElement);
-
-    const newSrc = cdn("allOutAttack", imageName);
-    loadImageSafely(gifElement, newSrc, () => {
-      gifElement.style.filter = "blur(20px)";
-    });
-
-    localStorage.setItem("aoaTarget", target);
-    localStorage.setItem("aoaAttempts", 0);
-  }
-
-  guessButton.addEventListener("click", handleGuess);
-  document.getElementById("giveUpButton").addEventListener("click", giveUp);
-  document.getElementById("resetButton").addEventListener("click", () => {
-    localStorage.removeItem("aoaTarget");
-    localStorage.removeItem("aoaAttempts");
-    localStorage.removeItem("aoaGameOver");
-    resetGame();
-  });
-
-  const rulesModal = document.getElementById("rulesModal");
-  const rulesButton = document.getElementById("rulesButton");
-  const closeRulesBtn = rulesModal.querySelector(".close");
-
-  rulesButton.addEventListener("click", () => {
-    rulesModal.style.display = "block";
-    document.body.classList.add("modal-open");
-  });
-
-  closeRulesBtn.addEventListener("click", () => {
-    rulesModal.style.display = "none";
-    document.body.classList.remove("modal-open");
-  });
-
-  window.addEventListener("click", (e) => {
-    if (e.target === rulesModal) {
-      rulesModal.style.display = "none";
-      document.body.classList.remove("modal-open");
-    }
-  });
-});
-
-checkResetOnLoad();
-setupDailyReset();
-
-// === FILTRES DYNAMIQUES ===
-const filterButtons = document.querySelectorAll(".filter-btn");
-
-filterButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const group = btn.dataset.opus;
-    btn.classList.toggle("active");
-
-    if (btn.classList.contains("active")) {
-      if (!activeOpusFilters.includes(group)) activeOpusFilters.push(group);
-    } else {
-      activeOpusFilters = activeOpusFilters.filter(o => o !== group);
-    }
-
-    localStorage.setItem("filters_AllOutAttack", JSON.stringify(activeOpusFilters));
-
-    personas = getFilteredPersonas();
-
-    if (personas.length === 0) {
-      alert("Aucun personnage ne correspond à ces filtres !");
-      return;
-    }
-
-    target = getBetterRandomCharacter();
-    const imageName = portraitsMap[target] || target.split(" ")[0];
-    const newSrc = cdn("allOutAttack", imageName);
-
-    const gifElement = document.getElementById("aoaGif");
-    showLoading(gifElement);
-    
-    loadImageSafely(gifElement, newSrc, () => {
-      gifElement.style.filter = "blur(20px)";
-    });
-
-    attempts = 0;
-    document.getElementById("wrongGuessList").innerHTML = "";
-    document.getElementById("victoryBox").style.display = "none";
-    localStorage.setItem("aoaTarget", target);
-    localStorage.setItem("aoaAttempts", 0);
-    localStorage.removeItem("aoaGameOver");
-    updateGiveUpCounter();
-
-    const textbar = document.getElementById("textbar");
-    initializeAutocomplete(textbar, personas);
-    textbar.value = "";
-    textbar.disabled = false;
-
-    const giveUpButton = document.getElementById("giveUpButton");
-    giveUpButton.disabled = true;
-    giveUpButton.style.cursor = "not-allowed";
-  });
-});
+// ─────────────────────────────────────────────────────────────────────────────
+// DARK MODE (AOA-specific element)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function applyDarkModeStyles() {
   if (!document.body.classList.contains("darkmode")) return;
@@ -780,13 +566,6 @@ function applyDarkModeStyles() {
     textbar.style.border = "2px solid #666";
   }
 
-  const persoBox = document.querySelector(".personadle-box");
-  if (persoBox) {
-    persoBox.style.background = "rgba(10, 10, 10, 0.7)";
-    persoBox.style.color = "white";
-    persoBox.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
-  }
-
   const gifZone = document.querySelector(".aoa-gif-zone");
   if (gifZone) {
     gifZone.style.background = "rgba(20, 20, 20, 0.8)";
@@ -801,69 +580,120 @@ function applyDarkModeStyles() {
   }
 }
 
-function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
-  const nav = document.getElementById("modeNavigationContainer");
-  const nextButton = document.getElementById("nextModeButton");
-  const prevButton = document.getElementById("prevModeButton");
 
-  if (nextButton && nextHref) {
-    nextButton.onclick = () => (location.href = nextHref);
-  }
+// ─────────────────────────────────────────────────────────────────────────────
+// BOOTSTRAP — DOMContentLoaded
+// ─────────────────────────────────────────────────────────────────────────────
 
-  if (prevButton) {
-    if (prevHref) {
-      prevButton.style.visibility = "visible";
-      prevButton.onclick = () => (location.href = prevHref);
-    } else {
-      prevButton.style.visibility = "hidden";
-      prevButton.onclick = null;
+document.addEventListener("DOMContentLoaded", () => {
+  applyDarkModeStyles();
+  setupRulesModal();
+
+  const textbar = document.getElementById("textbar");
+  const gifElement = document.getElementById("aoaGif");
+  const guessButton = document.getElementById("guessButton");
+
+  // ── Restore saved filters ──
+  const savedFilters = JSON.parse(localStorage.getItem("filters_AllOutAttack"));
+  if (Array.isArray(savedFilters)) activeOpusFilters = savedFilters;
+
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.classList.toggle("active", activeOpusFilters.includes(btn.dataset.opus));
+  });
+
+  personas = getFilteredPersonas();
+  setTimeout(() => smartPreload(personas, "low"), 1500);
+  initializeAutocomplete(textbar, personas);
+
+  // ── Restore session ──
+  const savedTarget = localStorage.getItem("aoaTarget");
+  const savedAttempts = parseInt(localStorage.getItem("aoaAttempts")) || 0;
+  const savedGameOver = localStorage.getItem("aoaGameOver") === "true";
+
+  if (savedTarget) {
+    target = savedTarget;
+    attempts = savedAttempts;
+    gameOver = savedGameOver;
+
+    const imageName = portraitsMap[target] || target.split(" ")[0];
+    loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
+      gifElement.style.filter = gameOver ? "none" : `blur(${Math.max(20 - attempts * 3, 0)}px)`;
+    });
+
+    updateGiveUpCounter();
+
+    if (gameOver) {
+      showVictoryBox(target);
+      disableInputs();
+      revealNextLink({
+        prevHref: "../emojiMode/emojiMode.html",
+        nextHref: "../silhouetteMode/silhouette.html",
+      });
     }
+
+    if (attempts >= 5) {
+      document.getElementById("giveUpButton").disabled = false;
+      document.getElementById("giveUpButton").style.cursor = "pointer";
+    }
+  } else {
+    target = getBetterRandomCharacter();
+    const imageName = portraitsMap[target] || target.split(" ")[0];
+    gifElement.style.filter = "none";
+    showLoading(gifElement);
+    loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
+      gifElement.style.filter = "blur(20px)";
+    });
+    localStorage.setItem("aoaTarget", target);
+    localStorage.setItem("aoaAttempts", 0);
   }
 
-  if (nav) {
-    nav.style.display = "flex";
-    setTimeout(() => {
-      nav.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 1500);
-  }
-}
-
-function setupDailyReset() {
-  const nowInParis = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  const midnightParis = new Date(nowInParis);
-  midnightParis.setHours(24, 0, 0, 0);
-  
-  const timeUntilMidnight = midnightParis.getTime() - nowInParis.getTime();
-
-  console.log(`🕛 Next auto-reset in ${Math.round(timeUntilMidnight / 1000 / 60)} minutes (All Out)`);
-
-  setTimeout(() => {
-    console.log("🔄 Auto-reset triggered at Paris midnight (All Out)");
-    const resetBtn = document.getElementById("resetButton");
-    if (resetBtn) resetBtn.click();
-    else location.reload();
-  }, timeUntilMidnight + 1000);
-}
-
-function checkResetOnLoad() {
-  const storedDate = localStorage.getItem("lastPlayedDate_AllOut");
-  const today = new Date().toISOString().split("T")[0];
-
-  if (storedDate !== today) {
-    console.log("📅 Nouvelle journée détectée → reset automatique (All Out)");
-    
+  // ── Buttons ──
+  guessButton.addEventListener("click", handleGuess);
+  document.getElementById("giveUpButton").addEventListener("click", giveUp);
+  document.getElementById("resetButton").addEventListener("click", () => {
     localStorage.removeItem("aoaTarget");
     localStorage.removeItem("aoaAttempts");
     localStorage.removeItem("aoaGameOver");
-    
-    if (storedDate) {
-      const oldStatsKey = `statsLogged_AllOut_${storedDate}`;
-      localStorage.removeItem(oldStatsKey);
-    }
-    
-    localStorage.setItem("lastPlayedDate_AllOut", today);
+    resetGame();
+  });
+
+  // ── Filter buttons (shared utility) ──
+  setupFilterButtons("filters_AllOutAttack", (newFilters) => {
+    activeOpusFilters = newFilters;
+    personas = getFilteredPersonas();
+
+    if (!personas.length) { alert("No characters match these filters!"); return; }
+
+    target = getBetterRandomCharacter();
+    const imageName = portraitsMap[target] || target.split(" ")[0];
+    showLoading(gifElement);
+    loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
+      gifElement.style.filter = "blur(20px)";
+    });
+
+    attempts = 0;
+    document.getElementById("wrongGuessList").innerHTML = "";
+    document.getElementById("victoryBox").style.display = "none";
+    localStorage.setItem("aoaTarget", target);
+    localStorage.setItem("aoaAttempts", 0);
+    localStorage.removeItem("aoaGameOver");
+    updateGiveUpCounter();
+
+    textbar.value = "";
+    textbar.disabled = false;
+    document.getElementById("giveUpButton").disabled = true;
+    document.getElementById("giveUpButton").style.cursor = "not-allowed";
+    initializeAutocomplete(textbar, personas);
+  });
+
+  // ── Daily reset ──
+  checkResetOnLoad("lastPlayedDate_AllOut", "AllOut", () => {
+    localStorage.removeItem("aoaTarget");
+    localStorage.removeItem("aoaAttempts");
+    localStorage.removeItem("aoaGameOver");
     location.reload();
-  } else {
-    console.log("📅 Même jour, aucune réinitialisation nécessaire (All Out)");
-  }
-}
+  });
+  setupDailyReset(() => {
+    document.getElementById("resetButton")?.click() ?? location.reload();
+  });
+});

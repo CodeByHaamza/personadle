@@ -4,66 +4,85 @@ import { portraitsMap } from "../database/portraitsMap.js";
 import { characters } from "../database/characters_clean.js";
 import { updateProfileStats } from "../profile/profileStats.js";
 
+// Shared game utilities
+import {
+  parisDateKey,
+  msUntilNextParisMidnight,
+  showConfettiExplosion,
+  revealNextLink,
+  setupRulesModal,
+  setupDailyReset,
+  checkResetOnLoad,
+  setupFilterButtons,
+  showWrongMini,
+} from "../js/gameCore.js";
 
-// === CONSTANTES / HELPERS ===
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSTANTS & STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+const modeName = "Emoji";
+
+/** Map from filter button label to the actual opus codes in the database. */
 const validOpus = {
   P1: ["P1"],
   P2: ["P2IS", "P2EP"],
   P3: ["P3", "P3FES", "P3P"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
   P5: ["P5", "P5R", "P5S", "P5T"],
-  P5X: ["P5X"]
+  P5X: ["P5X"],
 };
 
-const modeName = "Emoji";
-
-// Date "YYYY-MM-DD" **en Europe/Paris** (DST safe)
-function parisDateKey(d = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/Paris",
-    year: "numeric", month: "2-digit", day: "2-digit"
-  }).format(d);
-}
-
-// Clé de stats du jour (toujours recalculée à la volée)
-function getTodayStatsKey() {
-  return `statsLogged_${modeName}_${parisDateKey()}`;
-}
-
-// Ms jusqu'au prochain minuit Paris (sans parser de string locale)
-function msUntilNextParisMidnight() {
-  const nowInParis = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  const midnightParis = new Date(nowInParis);
-  midnightParis.setHours(24, 0, 0, 0);
-  return midnightParis.getTime() - nowInParis.getTime();
-}
-
-// === ÉTAT ===
 let activeOpus = ["P1", "P2", "P3", "P4", "P5", "P5X"];
-let personas = [...originalPersonas];   // sera remplacé par la liste filtrée (noms)
-let gameOver = false;
 
+// Mutable list of names fed to the autocomplete (splice to remove guessed)
+let personas = [...originalPersonas];
+
+let gameOver = false;
 let sessionStartTime = Date.now();
 let attempts = 0;
 let target = null;
 
-// Pour éviter la multiplication des listeners sur l’autocomplete:
+// Guard against double-binding autocomplete listeners after filter changes
 let autocompleteBound = false;
 
+/** Returns today's stats key for this mode (recalculated fresh each time). */
+function getTodayStatsKey() {
+  return `statsLogged_${modeName}_${parisDateKey()}`;
+}
 
-// === POOL / FILTRES ===
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTER / CHARACTER POOL
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Returns the array of character objects that match the current opus filters.
+ * @returns {Object[]}
+ */
 function filterCharacterPool() {
-  const allValid = activeOpus.flatMap(o => validOpus[o]);
-  return characters.filter(c => {
+  const allValid = activeOpus.flatMap((o) => validOpus[o]);
+  return characters.filter((c) => {
     const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-    return charOpus.some(op => allValid.includes(op));
+    return charOpus.some((op) => allValid.includes(op));
   });
 }
 
 
-// === AUTOCOMPLETE ===
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTOCOMPLETE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Attaches an autocomplete dropdown to `element`.
+ * Re-attaching after a filter change replaces the element's listeners by
+ * cloning the node (avoids listener accumulation).
+ *
+ * @param {HTMLInputElement} element     - The text input to enhance
+ * @param {string[]}         sourceArray - Current list of guessable names
+ */
 function initializeAutocomplete(element, sourceArray) {
-  // Si déjà bind, on remplace l’input par un clone pour reset tous les listeners
+  // Reset listeners by replacing the element with a clean clone
   if (autocompleteBound) {
     const clone = element.cloneNode(true);
     element.parentNode.replaceChild(clone, element);
@@ -75,32 +94,31 @@ function initializeAutocomplete(element, sourceArray) {
   element.addEventListener("input", function () {
     const val = this.value.trim();
     closeList(null, element);
-    if (!val) return false;
+    if (!val) return;
 
     const list = document.createElement("DIV");
     list.setAttribute("id", "autocomplete-list");
     list.setAttribute("class", "autocomplete-items");
     this.parentNode.appendChild(list);
 
+    // Build sorted matches (first-name start > last-name start > contains)
     const matches = [];
     for (let i = 0; i < sourceArray.length; i++) {
       const displayName = sourceArray[i];
       const lowerName = displayName.toLowerCase();
       const lowerVal = val.toLowerCase();
+      if (!lowerName.includes(lowerVal)) continue;
 
-      if (lowerName.includes(lowerVal)) {
-        const [firstName, lastName] = displayName.split(" ");
-        let priority = 3;
-        if (firstName?.toLowerCase().startsWith(lowerVal)) priority = 1;
-        else if (lastName?.toLowerCase().startsWith(lowerVal)) priority = 2;
-        matches.push({ name: displayName, priority });
-      }
+      const [firstName, lastName] = displayName.split(" ");
+      let priority = 3;
+      if (firstName?.toLowerCase().startsWith(lowerVal)) priority = 1;
+      else if (lastName?.toLowerCase().startsWith(lowerVal)) priority = 2;
+      matches.push({ name: displayName, priority });
     }
 
     matches.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
 
-    matches.forEach((matchObj) => {
-      const displayName = matchObj.name;
+    matches.forEach(({ name: displayName }) => {
       const imageName = portraitsMap[displayName] || displayName.split(" ")[0];
       const portraitName = encodeURIComponent(imageName);
 
@@ -132,17 +150,14 @@ function initializeAutocomplete(element, sourceArray) {
     currentFocus = -1;
   });
 
+  // Keyboard navigation: ↑ ↓ to browse, Enter to confirm
   element.addEventListener("keydown", function (e) {
     const items = document.querySelectorAll("#autocomplete-list .list-options");
     if (!items.length) return;
 
-    if (e.key === "ArrowDown") {
-      currentFocus++;
-      updateActive(items);
-    } else if (e.key === "ArrowUp") {
-      currentFocus--;
-      updateActive(items);
-    } else if (e.key === "Enter") {
+    if (e.key === "ArrowDown") { currentFocus++; updateActive(items); }
+    else if (e.key === "ArrowUp") { currentFocus--; updateActive(items); }
+    else if (e.key === "Enter") {
       e.preventDefault();
       if (currentFocus > -1) items[currentFocus].click();
       else items[0]?.click();
@@ -161,10 +176,7 @@ function initializeAutocomplete(element, sourceArray) {
     for (let item of items) item.classList.remove("autocomplete-active");
   }
 
-  document.addEventListener("click", (e) => {
-    closeList(e.target, element);
-  });
-
+  document.addEventListener("click", (e) => closeList(e.target, element));
   autocompleteBound = true;
 }
 
@@ -175,49 +187,29 @@ function closeList(e, inputElement) {
   }
 }
 
+/**
+ * Removes a guessed name from the autocomplete pool (mutates in place so
+ * the autocomplete source array stays in sync without a rebind).
+ * @param {string} name
+ */
 function removeFromAutocomplete(name) {
-  const idx = personas.findIndex(n => n.toLowerCase() === name.toLowerCase());
-  if (idx !== -1) personas.splice(idx, 1); // on MUTATE pour que l’autocomplete suive sans rebind
+  const idx = personas.findIndex((n) => n.toLowerCase() === name.toLowerCase());
+  if (idx !== -1) personas.splice(idx, 1);
 }
 
 
-// === CONFETTIS ===
-function showConfettiExplosion() {
-        new Audio('../assets/sound_effect/Victory_sound.mp3').play();
+// ─────────────────────────────────────────────────────────────────────────────
+// UI HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
-  const numEmojisPerSide = 20;
-
-  for (let i = 0; i < numEmojisPerSide * 2; i++) {
-    const emoji = document.createElement("span");
-    emoji.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
-    emoji.classList.add("confetti-emoji");
-
-    const isLeft = i < numEmojisPerSide;
-    emoji.style.left = isLeft ? "0vw" : "100vw";
-    emoji.style.bottom = "0vh";
-
-    const xTarget = isLeft ? Math.random() * 50 + 25 : -(Math.random() * 50 + 25);
-    const yTarget = -(Math.random() * 50 + 30);
-    const rotate = Math.random() * 360;
-
-    emoji.style.setProperty("--x-move", xTarget + "vw");
-    emoji.style.setProperty("--y-move", yTarget + "vh");
-    emoji.style.setProperty("--rotate", rotate + "deg");
-
-    document.body.appendChild(emoji);
-    setTimeout(() => emoji.remove(), 1000);
-  }
-}
-
-
-// === UI / HINTS ===
+/**
+ * Reveals emoji hints one by one based on the number of attempts so far.
+ * Each incorrect guess unveils the next emoji in the sequence.
+ */
 function updateEmojiHint() {
   const displayZone = document.getElementById("emojiDisplay");
   displayZone.innerHTML = "";
-
-  const visibleEmojis = target.emoji.slice(0, attempts);
-  visibleEmojis.forEach(e => {
+  target.emoji.slice(0, attempts).forEach((e) => {
     const span = document.createElement("span");
     span.textContent = e;
     span.classList.add("emoji-unit");
@@ -225,6 +217,7 @@ function updateEmojiHint() {
   });
 }
 
+/** Updates the give-up counter display and activates it at the threshold. */
 function updateCounters() {
   const giveUpCounter = document.getElementById("giveUpCounter");
   if (giveUpCounter) {
@@ -233,26 +226,42 @@ function updateCounters() {
   }
 }
 
+function enableGiveUpButton() {
+  const btn = document.getElementById("giveUpButton");
+  if (btn) { btn.disabled = false; btn.style.cursor = "pointer"; }
+}
 
-// === GAME LOGIC ===
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GAME LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Validates a guess against the current target.
+ * On correct guess (or forceReveal): reveals all emojis, shows victory UI.
+ * On wrong guess: reveals one more emoji, increments attempt counter.
+ *
+ * @param {string}  name         - Guessed character name
+ * @param {boolean} [forceReveal=false] - True when Give Up is triggered
+ */
 function checkEmojiGuess(name, forceReveal = false) {
   const displayZone = document.getElementById("emojiDisplay");
   const winMessage = document.getElementById("winMessage");
   const victoryBox = document.getElementById("victoryBox");
   const victoryPortrait = document.getElementById("victoryPortrait");
   const textbar = document.getElementById("textbar");
-  const wrongList = document.getElementById("wrongGuessList"); // ✅ AJOUT
+  const wrongList = document.getElementById("wrongGuessList");
 
-  const guess = characters.find(c => c.nom.toLowerCase() === name.toLowerCase());
+  const guess = characters.find((c) => c.nom.toLowerCase() === name.toLowerCase());
   if (!guess) {
     winMessage.textContent = `"${name}" is not in the database.`;
     return;
   }
 
   if (guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal) {
-    // Révèle tous les émojis
+    // Reveal all emojis
     displayZone.innerHTML = "";
-    target.emoji.forEach(e => {
+    target.emoji.forEach((e) => {
       const span = document.createElement("span");
       span.textContent = e;
       span.classList.add("emoji-unit");
@@ -262,9 +271,9 @@ function checkEmojiGuess(name, forceReveal = false) {
     localStorage.setItem("emojiGameOver", "true");
     localStorage.setItem("emojiForceReveal", String(forceReveal));
 
+    // Show character portrait in victory box
     const imageName = portraitsMap[target.nom] || target.nom.split(" ")[0];
-    const portraitName = encodeURIComponent(imageName);
-    victoryPortrait.src = `../database/portraits/${portraitName}.webp`;
+    victoryPortrait.src = `../database/portraits/${encodeURIComponent(imageName)}.webp`;
     victoryPortrait.alt = target.nom;
 
     winMessage.textContent = forceReveal
@@ -275,16 +284,15 @@ function checkEmojiGuess(name, forceReveal = false) {
     showConfettiExplosion();
     revealNextLink({
       prevHref: "../classiqueMode/classiqueMode.html",
-      nextHref: "../allOutAttackMode/allOutAttack.html"
+      nextHref: "../allOutAttackMode/allOutAttack.html",
     });
 
     const todayKey = getTodayStatsKey();
     if (!localStorage.getItem(todayKey)) {
-      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({
         result: forceReveal ? "giveup" : "win",
         mode: modeName,
-        timeSpent
+        timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
       });
       localStorage.setItem(todayKey, "true");
     }
@@ -295,9 +303,13 @@ function checkEmojiGuess(name, forceReveal = false) {
     gameOver = true;
     localStorage.setItem("emojiWin", "true");
   } else {
-    // ✅ AJOUT: Afficher le mauvais essai
-    showWrongGuess(guess.nom);
-    
+    // Wrong guess: show mini portrait + increment
+    const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
+    showWrongMini(
+      `../database/portraits/${encodeURIComponent(imageName)}.webp`,
+      guess.nom,
+      wrongList
+    );
     attempts++;
     localStorage.setItem("attemptsEmoji", attempts);
     updateEmojiHint();
@@ -308,43 +320,15 @@ function checkEmojiGuess(name, forceReveal = false) {
   removeFromAutocomplete(name);
 }
 
-// === AFFICHAGE MAUVAIS ESSAI ===
-function showWrongGuess(name) {
-  const wrongList = document.getElementById("wrongGuessList");
-  if (!wrongList) return;
 
-  const char = characters.find(c => c.nom.toLowerCase() === name.toLowerCase());
-  if (!char) return;
+// ─────────────────────────────────────────────────────────────────────────────
+// RESET
+// ─────────────────────────────────────────────────────────────────────────────
 
-  // Éviter les doublons
-  const existing = Array.from(wrongList.children).find(
-    el => el.querySelector('img')?.alt === name
-  );
-  if (existing) return;
-
-  const imageName = portraitsMap[char.nom] || char.nom.split(" ")[0];
-  const div = document.createElement("div");
-  div.className = "wrong-mini";
-
-  const img = document.createElement("img");
-  img.src = `../database/portraits/${imageName}.webp`;
-  img.alt = name;
-  img.onerror = () => {
-    img.src = '../database/portraits/unknown.webp';
-  };
-
-  div.appendChild(img);
-  wrongList.appendChild(div);
-  
-  setTimeout(() => div.classList.add("shake"), 50);
-}
-
-function enableGiveUpButton() {
-  const giveUpButton = document.getElementById("giveUpButton");
-  giveUpButton.disabled = false;
-  giveUpButton.style.cursor = "pointer";
-}
-
+/**
+ * Clears all game state and picks a fresh target from the current filter pool.
+ * Called by the Replay button, daily reset, and filter changes.
+ */
 function resetGame() {
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) nav.style.display = "none";
@@ -352,43 +336,42 @@ function resetGame() {
   sessionStartTime = Date.now();
   localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
 
-  const displayZone = document.getElementById("emojiDisplay");
-  const winMessage = document.getElementById("winMessage");
+  document.getElementById("emojiDisplay").innerHTML = "";
+  document.getElementById("winMessage").textContent = "";
+  document.getElementById("victoryBox").style.display = "none";
+  const wrongList = document.getElementById("wrongGuessList");
+  if (wrongList) wrongList.innerHTML = "";
+
   const textbar = document.getElementById("textbar");
-  const victoryBox = document.getElementById("victoryBox");
-  const wrongList = document.getElementById("wrongGuessList"); // ✅ AJOUT
-
-  displayZone.innerHTML = "";
-  winMessage.textContent = "";
-  victoryBox.style.display = "none";
-  if (wrongList) wrongList.innerHTML = ""; // ✅ AJOUT - Nettoyer l'historique
-
   textbar.disabled = false;
+  textbar.value = "";
   document.getElementById("guessButton").disabled = false;
   document.getElementById("giveUpButton").disabled = true;
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
-  textbar.value = "";
 
   const pool = filterCharacterPool();
+  // Mutate the shared personas array so the autocomplete stays in sync
   personas.length = 0;
-  personas.push(...pool.map(c => c.nom));
+  personas.push(...pool.map((c) => c.nom));
 
   gameOver = false;
   attempts = 1;
-
-  const filteredCharacters = pool;
-  target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+  target = pool[Math.floor(Math.random() * pool.length)];
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
 
   updateEmojiHint();
   updateCounters();
-
-  
 }
 
 
-// === DARK MODE ===
+// ─────────────────────────────────────────────────────────────────────────────
+// DARK MODE (emoji-specific elements)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Applies inline dark-mode styles to elements specific to Emoji mode.
+ */
 function applyDarkModeStyles() {
   if (!document.body.classList.contains("darkmode")) return;
 
@@ -396,27 +379,6 @@ function applyDarkModeStyles() {
   if (emojiZone) {
     emojiZone.style.background = "rgba(20, 20, 20, 0.7)";
     emojiZone.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.2)";
-  }
-
-  const autocompleteList = document.getElementById("autocompleteList");
-  if (autocompleteList) {
-    autocompleteList.style.backgroundColor = "#222";
-    autocompleteList.style.color = "#fff";
-    autocompleteList.style.border = "2px solid #666";
-    autocompleteList.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
-  }
-
-  const persoBox = document.querySelector(".personadle-box");
-  if (persoBox) {
-    persoBox.style.background = "rgba(10, 10, 10, 0.7)";
-    persoBox.style.color = "white";
-    persoBox.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
-  }
-
-  const gifZone = document.querySelector(".aoa-gif-zone");
-  if (gifZone) {
-    gifZone.style.background = "rgba(20, 20, 20, 0.8)";
-    gifZone.style.borderColor = "#ffaaaa";
   }
 
   const victoryBox = document.getElementById("victoryBox");
@@ -428,222 +390,72 @@ function applyDarkModeStyles() {
 }
 
 
-// === DEBUG (optionnel inchangé) ===
-function debugCharactersFull() {
-  const allValid = activeOpus.flatMap(o => validOpus[o]);
-  const filtered = characters.filter(c => {
-    const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-    return charOpus.some(op => allValid.includes(op));
-  });
+// ─────────────────────────────────────────────────────────────────────────────
+// BOOTSTRAP — DOMContentLoaded
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const missingInPersonas = [];
-  const missingInPortraits = [];
-  const invalidEmojis = [];
-
-  console.log("=== DEBUG PERSONNAGES FILTRÉS ===");
-
-  filtered.forEach((char) => {
-    const name = char.nom;
-    const foundInPersonas = personas.includes(name);
-    const portraitKey = portraitsMap[name] || name.split(" ")[0];
-    const hasPortrait = !!portraitKey;
-    const hasEmoji = char.emoji !== undefined;
-    const validEmoji = Array.isArray(char.emoji) && char.emoji.length > 0;
-
-    let status = `✅ OK : ${name}`;
-
-    if (!foundInPersonas) {
-      status = `❌ Problème : ${name} → ❗ Absente de personas.js`;
-      missingInPersonas.push(name);
-    } else if (!hasPortrait) {
-      status = `❌ Problème : ${name} → ❗ Aucune correspondance dans portraitsMap.js`;
-      missingInPortraits.push(name);
-    } else if (!hasEmoji) {
-      status = `❌ Problème : ${name} → ❗ Pas de champ 'emoji' dans characters_clean.js`;
-      invalidEmojis.push(name);
-    } else if (!validEmoji) {
-      status = `❌ Problème : ${name} → ❗ Champ 'emoji' invalide (pas un tableau non vide)`;
-      invalidEmojis.push(name);
-    }
-
-    console.log(status);
-  });
-
-  console.log("\n=== RÉSUMÉ ===");
-  console.log(`🔍 Manquants dans personas.js : ${missingInPersonas.length}`);
-  console.log(`🖼️  Sans portrait valide : ${missingInPortraits.length}`);
-  console.log(`😶 Emoji absent/invalide : ${invalidEmojis.length}`);
-  if (missingInPersonas.length) console.log("→ À ajouter dans personas.js :", missingInPersonas);
-  if (missingInPortraits.length) console.log("→ À corriger portraitsMap.js :", missingInPortraits);
-  if (invalidEmojis.length) console.log("→ À corriger characters_clean.js :", invalidEmojis);
-  console.log("=== DEBUG TERMINÉ ===");
-}
-
-
-// === NAVIGATION ===
-function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
-  const nav = document.getElementById("modeNavigationContainer");
-  const nextButton = document.getElementById("nextModeButton");
-  const prevButton = document.getElementById("prevModeButton");
-
-  if (nextButton && nextHref) {
-    nextButton.onclick = () => (location.href = nextHref);
-  }
-
-  if (prevButton) {
-    if (prevHref) {
-      prevButton.style.visibility = "visible";
-      prevButton.onclick = () => (location.href = prevHref);
-    } else {
-      prevButton.style.visibility = "hidden";
-      prevButton.onclick = null;
-    }
-  }
-
-  if (nav) {
-    nav.style.display = "flex";
-    setTimeout(() => {
-      nav.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 1500);
-  }
-}
-
-
-// === DAILY RESET (Paris) ===
-function setupDailyReset() {
-  const fire = () => {
-    console.log("🔄 Auto-reset (minuit Paris)");
-    localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
-    resetGame();
-    location.reload(); // garde un état propre
-  };
-
-  const schedule = () => {
-    const ms = msUntilNextParisMidnight();
-    console.log(`🕛 Next auto-reset in ~${Math.round(ms / 60000)} minutes (Paris)`);
-    clearTimeout(window.__emojiResetTimer);
-    window.__emojiResetTimer = setTimeout(fire, ms + 500);
-  };
-
-  schedule();
-
-  // Si l’onglet revient après veille, on vérifie et on reprogramme
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      checkResetOnLoad();
-      schedule();
-    }
-  });
-  window.addEventListener("focus", () => {
-    checkResetOnLoad();
-  });
-}
-
-function checkResetOnLoad() {
-  const todayParis = parisDateKey();
-  const storedDate = localStorage.getItem("lastPlayedDate_Emoji");
-
-  // ✅ Si pas de date stockée OU date différente → reset
-  if (!storedDate || storedDate !== todayParis) {
-    console.log("📅 Nouvelle journée détectée → reset automatique (Emoji)");
-    
-    // Nettoyage stats d'hier
-    if (storedDate) {
-      localStorage.removeItem(`statsLogged_${modeName}_${storedDate}`);
-    }
-    
-    // Nettoyage des données de partie
-    localStorage.removeItem("targetEmoji");
-    localStorage.removeItem("attemptsEmoji");
-    localStorage.removeItem("emojiGameOver");
-    localStorage.removeItem("emojiForceReveal");
-    localStorage.removeItem("emojiWin");
-    
-    localStorage.setItem("lastPlayedDate_Emoji", todayParis);
-    resetGame();
-    location.reload();
-  } else {
-    console.log("📅 Même jour (Paris), aucune réinitialisation nécessaire (Emoji)");
-  }
-}
-
-
-// === BOOTSTRAP ===
 document.addEventListener("DOMContentLoaded", () => {
   applyDarkModeStyles();
+  setupRulesModal();
 
   const textbar = document.getElementById("textbar");
   const guessButton = document.getElementById("guessButton");
   const giveUpButton = document.getElementById("giveUpButton");
   const resetButton = document.getElementById("resetButton");
 
-  // === Gestion filtres ===
-  const filterButtons = document.querySelectorAll(".filter-btn");
-  // Restauration filtres
+  // ── Restore saved opus filters ──
   const savedFilters = (() => {
     try { return JSON.parse(localStorage.getItem("filters_Emoji")); } catch { return null; }
   })();
   if (Array.isArray(savedFilters)) activeOpus = savedFilters;
 
-  // État visuel
-  filterButtons.forEach(btn => {
-    const filter = btn.dataset.opus;
-    btn.classList.toggle("active", activeOpus.includes(filter));
+  // Apply visual state to filter buttons
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.classList.toggle("active", activeOpus.includes(btn.dataset.opus));
   });
 
-  // Pool + personas (MUTABLE)
+  // ── Build initial character pool ──
   const poolInit = filterCharacterPool();
-  personas = poolInit.map(c => c.nom); // on remplace le contenu juste pour le premier bind
-  // Important: l’autocomplete manipule "personas" par mutation ensuite
+  personas = poolInit.map((c) => c.nom);
 
-  // Cible / tentatives
-  target = JSON.parse(localStorage.getItem("targetEmoji")) || poolInit[Math.floor(Math.random() * poolInit.length)];
+  // ── Restore or create target / attempts ──
+  target =
+    JSON.parse(localStorage.getItem("targetEmoji")) ||
+    poolInit[Math.floor(Math.random() * poolInit.length)];
   attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
 
-  // Autocomplete (bind unique, ensuite on MUTATE personas)
+  // Bind autocomplete (single bind; personas mutated on wrong guess)
   initializeAutocomplete(textbar, personas);
 
-  // UI init
   updateEmojiHint();
   updateCounters();
   if (attempts >= 8) enableGiveUpButton();
 
-  // Restauration fin de partie
-  const emojiGameOver = localStorage.getItem("emojiGameOver") === "true";
-  const forceReveal = localStorage.getItem("emojiForceReveal") === "true";
-  if (emojiGameOver && target?.nom) {
-    checkEmojiGuess(target.nom, forceReveal);
+  // Restore finished game state
+  if (localStorage.getItem("emojiGameOver") === "true" && target?.nom) {
+    checkEmojiGuess(target.nom, localStorage.getItem("emojiForceReveal") === "true");
   }
 
-  // Listeners filtres
-  filterButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      btn.classList.toggle("active");
-      activeOpus = Array.from(filterButtons)
-        .filter(b => b.classList.contains("active"))
-        .map(b => b.dataset.opus);
+  // ── Filter button clicks (shared utility) ──
+  setupFilterButtons("filters_Emoji", (newFilters) => {
+    activeOpus = newFilters;
+    const filteredCharacters = filterCharacterPool();
+    personas.length = 0;
+    personas.push(...filteredCharacters.map((c) => c.nom));
 
-      localStorage.setItem("filters_Emoji", JSON.stringify(activeOpus));
-
-      // Recalcule pool + mutate personas (pas de rebind)
-      const filteredCharacters = filterCharacterPool();
-      personas.length = 0;
-      personas.push(...filteredCharacters.map(c => c.nom));
-
-      if (filteredCharacters.length > 0) {
-        target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
-        localStorage.setItem("targetEmoji", JSON.stringify(target));
-        attempts = 1;
-        localStorage.setItem("attemptsEmoji", attempts);
-        updateEmojiHint();
-        updateCounters();
-      }
-    });
+    if (filteredCharacters.length > 0) {
+      target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+      localStorage.setItem("targetEmoji", JSON.stringify(target));
+      attempts = 1;
+      localStorage.setItem("attemptsEmoji", attempts);
+      updateEmojiHint();
+      updateCounters();
+    }
   });
 
-  // Guess
+  // ── Guess button ──
   guessButton.addEventListener("click", () => {
     if (gameOver) return;
     const guess = textbar.value.trim();
@@ -652,81 +464,79 @@ document.addEventListener("DOMContentLoaded", () => {
     textbar.value = "";
   });
 
-  // Give up (seulement si 8 essais)
+  // ── Give Up button ──
   giveUpButton.addEventListener("click", () => {
-    if (attempts < 8) return;
-    if (!gameOver) checkEmojiGuess(target.nom, true);
+    if (attempts < 8 || gameOver) return;
+    checkEmojiGuess(target.nom, true);
   });
 
-  // Reset bouton
- resetButton.addEventListener("click", () => {
-  localStorage.removeItem("targetEmoji");
-  localStorage.removeItem("attemptsEmoji");
-  localStorage.removeItem("emojiGameOver");
-  localStorage.removeItem("emojiForceReveal");
-  localStorage.removeItem("emojiWin");  // ✅ Ajoutez cette ligne aussi
-  resetGame();
+  // ── Replay button ──
+  resetButton.addEventListener("click", () => {
+    localStorage.removeItem("targetEmoji");
+    localStorage.removeItem("attemptsEmoji");
+    localStorage.removeItem("emojiGameOver");
+    localStorage.removeItem("emojiForceReveal");
+    localStorage.removeItem("emojiWin");
+    resetGame();
+  });
 
-  
+  // ── Daily reset ──
+  checkResetOnLoad("lastPlayedDate_Emoji", "Emoji", () => {
+    localStorage.removeItem("targetEmoji");
+    localStorage.removeItem("attemptsEmoji");
+    localStorage.removeItem("emojiGameOver");
+    localStorage.removeItem("emojiForceReveal");
+    localStorage.removeItem("emojiWin");
+    resetGame();
+    location.reload();
+  });
+
+  // Emoji mode uses msUntilNextParisMidnight directly for a reschedulable reset
+  const scheduleDailyReset = () => {
+    const ms = msUntilNextParisMidnight();
+    console.log(`🕛 Next auto-reset in ~${Math.round(ms / 60000)} minutes (Paris)`);
+    clearTimeout(window.__emojiResetTimer);
+    window.__emojiResetTimer = setTimeout(() => {
+      console.log("🔄 Auto-reset triggered at Paris midnight (Emoji)");
+      localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
+      resetGame();
+      location.reload();
+    }, ms + 500);
+  };
+
+  scheduleDailyReset();
+
+  // Reschedule if the tab was in the background and wakes up on a new day
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) scheduleDailyReset();
+  });
+  window.addEventListener("focus", scheduleDailyReset);
 });
 
-  // Modale "Comment jouer"
-  const rulesModal = document.getElementById("rulesModal");
-  const rulesBtn = document.getElementById("rulesButton");
-  const closeBtn = rulesModal.querySelector(".close");
 
-  rulesBtn.addEventListener("click", () => {
-    rulesModal.style.display = "block";
-    document.body.classList.add("modal-open");
-  });
+// ─────────────────────────────────────────────────────────────────────────────
+// DEBUG CONSOLE TOOLS
+// ─────────────────────────────────────────────────────────────────────────────
 
-  closeBtn.addEventListener("click", () => {
-    rulesModal.style.display = "none";
-    document.body.classList.remove("modal-open");
-  });
-
-  window.addEventListener("click", (e) => {
-    if (e.target === rulesModal) {
-      rulesModal.style.display = "none";
-      document.body.classList.remove("modal-open");
-    }
-  });
-
-  // ✅ Daily reset (Paris) au chargement, pas besoin d’un clic
-  checkResetOnLoad();
-  setupDailyReset();
-});
-
-// === FONCTIONS DE TEST (console) ===
 window.emojiDebug = {
-  // Voir la date actuelle et stockée
+  /** Check stored vs current Paris date. */
   checkDates: () => {
-    console.log("📅 Date stockée:", localStorage.getItem("lastPlayedDate_Emoji"));
-    console.log("📅 Date actuelle Paris:", parisDateKey());
-    console.log("📅 Égales ?", localStorage.getItem("lastPlayedDate_Emoji") === parisDateKey());
+    console.log("📅 Stored:", localStorage.getItem("lastPlayedDate_Emoji"));
+    console.log("📅 Paris now:", parisDateKey());
   },
-  
-  // Simuler hier (force reset au prochain reload)
+  /** Force the stored date to yesterday so the next reload triggers a reset. */
   simulateYesterday: () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = parisDateKey(yesterday);
-    localStorage.setItem("lastPlayedDate_Emoji", yesterdayStr);
-    console.log(`✅ Date forcée à hier: ${yesterdayStr}`);
-    console.log("🔄 Rechargez la page pour voir le reset");
+    const str = parisDateKey(yesterday);
+    localStorage.setItem("lastPlayedDate_Emoji", str);
+    console.log(`✅ Date forced to yesterday: ${str} — reload to trigger reset`);
   },
-  
-  // Simuler une date spécifique
+  /** Manually set the stored date. */
   setDate: (dateStr) => {
     localStorage.setItem("lastPlayedDate_Emoji", dateStr);
-    console.log(`✅ Date forcée à: ${dateStr}`);
-    console.log("🔄 Rechargez la page pour voir le reset");
+    console.log(`✅ Date forced to: ${dateStr} — reload to trigger reset`);
   },
-  
-  // Forcer le check maintenant
-  forceCheck: () => {
-    checkResetOnLoad();
-  }
 };
 
-console.log("🧪 Tests disponibles: emojiDebug.checkDates() | .simulateYesterday() | .setDate('2024-12-01') | .forceCheck()");
+console.log("🧪 emojiDebug.checkDates() | .simulateYesterday() | .setDate('YYYY-MM-DD')");

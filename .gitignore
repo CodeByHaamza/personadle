@@ -1,44 +1,90 @@
-# Fichiers système
+# ─────────────────────────────────────────────────────────────────────────────
+# Système d'exploitation
+# ─────────────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Éditeurs
+# ─────────────────────────────────────────────────────────────────────────────
+# Éditeurs & IDE
+# ─────────────────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
 
-# Sources design
+# ─────────────────────────────────────────────────────────────────────────────
+# Sources design / fichiers de travail
+# ─────────────────────────────────────────────────────────────────────────────
 *.psd
+*.ai
+*.sketch
+*.fig
 
-# Fichiers temporaires et backups
+# ─────────────────────────────────────────────────────────────────────────────
+# Fichiers temporaires et sauvegardes automatiques
+# Les fichiers *.html.backup-* sont générés automatiquement par certains outils
+# ─────────────────────────────────────────────────────────────────────────────
 *.log
 *.tmp
 *.bak
-*.backup*
 *.old
-*~
-*.swp
-*.swo
+*.backup
+*.backup-*
+*-backup-*
 
+# ─────────────────────────────────────────────────────────────────────────────
 # Archives
+# ─────────────────────────────────────────────────────────────────────────────
 *.zip
 *.rar
 *.7z
+*.tar.gz
+*.tar
 
-# Cache
-.cache/
-__pycache__/
+# ─────────────────────────────────────────────────────────────────────────────
+# Variables d'environnement / secrets
+# Ne jamais versionner de clés API, mots de passe ou tokens
+# ─────────────────────────────────────────────────────────────────────────────
+.env
+.env.*
+.env.local
+.env.production
+secrets.js
+config.local.js
 
-# Documentation - environnement Python
-PersonaDLE_Update_Documentation/*/venv/
-PersonaDLE_Update_Documentation/*/env/
-PersonaDLE_Update_Documentation/*/__pycache__/
-PersonaDLE_Update_Documentation/*/*.pyc
-
-# Documentation - fichiers générés (optionnel, décommente si nécessaire)
-# PersonaDLE_Update_Documentation/*/images_converted/
-
-# Node modules si tu utilises npm
+# ─────────────────────────────────────────────────────────────────────────────
+# Node.js
+# ─────────────────────────────────────────────────────────────────────────────
 node_modules/
+dist/
+.cache/
+coverage/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Python (scripts de documentation et de conversion d'images)
+# ─────────────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+.venv/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Musiques (fichiers audio soumis au droit d'auteur — non versionnés)
+# Les fichiers .mp3 / .ogg / .flac dans la base de données du mode Musique
+# ne doivent pas être publiés sur un dépôt public.
+# ─────────────────────────────────────────────────────────────────────────────
+musicsMode/database/music/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Documentation interne (notes de mise à jour, images de travail)
+# Ce dossier contient des exports PDF et des captures de travail qui ne sont
+# pas nécessaires dans le dépôt public.
+# ─────────────────────────────────────────────────────────────────────────────
+PersonaDLE_Update_Documentation/

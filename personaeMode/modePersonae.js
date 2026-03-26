@@ -4,119 +4,75 @@ import { portraitsMapPersonae as portraitsMap } from "./database/portraitsMapPer
 import { personas } from "./database/persona.js";
 import { updateProfileStats } from "../profile/profileStats.js";
 
-// === CONSTANTES ===
+// Shared game utilities
+import {
+  showConfettiExplosion,
+  revealNextLink,
+  setupRulesModal,
+  setupDailyReset,
+  checkResetOnLoad,
+  setupFilterButtons,
+  showWrongMini,
+} from "../js/gameCore.js";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONSTANTS & STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Map from filter button label to actual opus codes. */
 const validOpus = {
   P2: ["P2IS", "P2EP"],
   P3: ["P3", "P3P", "P3FES"],
   P4: ["P4", "P4G", "P4AU", "P4D"],
   P5: ["P5", "P5R", "P5S", "P5T"],
-  P5X: ["P5X"]
+  P5X: ["P5X"],
 };
 
-let activeFilters = ["P2","P3", "P4", "P5", "P5X"]; 
+let activeFilters = ["P2", "P3", "P4", "P5", "P5X"];
 let filteredCharacters = [];
 let target = null;
 let attempts = 0;
-const maxAttempts = 3;
+const maxAttempts = 3; // Give Up unlocks after this many wrong guesses
 let gameOver = false;
 let lastFiveTargets = [];
 
-let victoryBox, victoryImage, victoryText;
-let textbar, guessBtn, resetBtn, giveUpBtn, giveUpCounter, wrongList, personaImg;
 let sessionStartTime = Date.now();
 const todayKey = new Date().toISOString().split("T")[0];
 const statsKey = `statsLogged_Personae_${todayKey}`;
-// 🩹 Si le profil est dans "personaUserProfile", copie-le dans "playerProfile"
+
+// DOM elements (assigned in DOMContentLoaded)
+let victoryBox, victoryImage, victoryText;
+let textbar, guessBtn, resetBtn, giveUpBtn, giveUpCounter, wrongList, personaImg;
+
+// Profile compatibility: copy personaUserProfile → playerProfile if needed
 if (!localStorage.getItem("playerProfile") && localStorage.getItem("personaUserProfile")) {
   localStorage.setItem("playerProfile", localStorage.getItem("personaUserProfile"));
 }
 
 
-// === INIT GLOBAL ===
-document.addEventListener("DOMContentLoaded", () => {
-  // Elements
-  textbar = document.getElementById("textbar");
-  personaImg = document.getElementById("personaImage");
-  guessBtn = document.getElementById("guessButton");
-  resetBtn = document.getElementById("resetButton");
-  giveUpBtn = document.getElementById("giveUpButton");
-  giveUpCounter = document.getElementById("giveUpCounter");
-  wrongList = document.getElementById("wrongGuessList");
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTER / CHARACTER POOL
+// ─────────────────────────────────────────────────────────────────────────────
 
-  victoryBox = document.getElementById("victoryBox");
-  victoryImage = document.getElementById("victoryImage");
-  victoryText = document.getElementById("victoryText");
-
-  // ✅ Restore filters from localStorage
-  const storedFilters = localStorage.getItem("personaeActiveFilters");
-  if (storedFilters) {
-    try {
-      const parsed = JSON.parse(storedFilters);
-      if (Array.isArray(parsed)) activeFilters = parsed;
-    } catch (e) {
-      console.warn("⚠️ Error reading stored filters:", e);
-    }
-  }
-
-  setupRulesModal();
-  setupFilterButtons(); // applique visuellement les bons filtres
-  applyDarkModeStyles();
-
-  guessBtn.addEventListener("click", handleGuess);
-  resetBtn.addEventListener("click", resetGame);
-  giveUpBtn.addEventListener("click", giveUp);
-
-  initializeAutocomplete(textbar, personas.sort((a, b) => a.localeCompare(b)));
-
-  // Restore session
-  const stored = localStorage.getItem("personaeTarget");
-  const storedAttempts = parseInt(localStorage.getItem("personaeAttempts")) || 0;
-  const storedGameOver = localStorage.getItem("personaeGameOver") === "true";
-
-  if (stored) {
-    try {
-      target = JSON.parse(stored);
-      filteredCharacters = getFilteredCharacters();
-      attempts = storedAttempts;
-      giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
-
-      personaImg.src = `./database/img/${target.image}.webp`;
-      personaImg.alt = target.persona;
-
-      if (attempts >= maxAttempts) {
-        giveUpBtn.disabled = false;
-        giveUpCounter.classList.add("activated");
-      }
-
-      if (storedGameOver) {
-        const force = localStorage.getItem("personaeForceReveal") === "true";
-        showVictory(force, force ? null : (Array.isArray(target.user) ? target.user[0] : target.user));
-      }
-
-    } catch (e) {
-      resetGame();
-    }
-  } else {
-    resetGame();
-  }
-  checkResetOnLoad();    // 🆕 Ajout ici
-    setupDailyReset(); // 🕛 Daily reset à minuit (heure de Paris)
-
-});
-
-
-// === UTILS ===
+/**
+ * Returns the subset of personae characters matching the active filters.
+ * @returns {Object[]}
+ */
 function getFilteredCharacters() {
-  const accepted = activeFilters.flatMap(o => validOpus[o]);
-  return originalCharacters.filter(c => {
+  const accepted = activeFilters.flatMap((o) => validOpus[o]);
+  return originalCharacters.filter((c) => {
     const op = Array.isArray(c.opus) ? c.opus : [c.opus];
-    return op.some(o => accepted.includes(o));
+    return op.some((o) => accepted.includes(o));
   });
 }
 
+/**
+ * Selects a random character from the filtered pool (avoiding recent targets)
+ * and loads their persona image.
+ */
 function pickCharacter() {
   filteredCharacters = getFilteredCharacters();
-  const pool = filteredCharacters.filter(c => !lastFiveTargets.includes(c.persona));
+  const pool = filteredCharacters.filter((c) => !lastFiveTargets.includes(c.persona));
   const choices = pool.length > 0 ? pool : [...filteredCharacters];
 
   target = choices[Math.floor(Math.random() * choices.length)];
@@ -131,7 +87,20 @@ function pickCharacter() {
   localStorage.setItem("personaeGameOver", "false");
 }
 
-// === AUTOCOMPLETE ===
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTOCOMPLETE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Attaches an autocomplete dropdown that:
+ *  - Filters out already-guessed characters (via `_guessed` flag)
+ *  - Filters by the active opus filters
+ *  - Prioritises first-name matches
+ *
+ * @param {HTMLInputElement} input        - The text input to enhance
+ * @param {string[]}         personasList - Sorted list of all guessable names
+ */
 function initializeAutocomplete(input, personasList) {
   let currentFocus = -1;
 
@@ -146,53 +115,46 @@ function initializeAutocomplete(input, personasList) {
     this.parentNode.appendChild(list);
 
     const lowerVal = val.toLowerCase();
+    const accepted = activeFilters.flatMap((o) => validOpus[o]);
     const matches = [];
 
-for (let i = 0; i < personasList.length; i++) {
-  const displayName = personasList[i];
-  const lowerName = displayName.toLowerCase();
-  const lowerVal = val.toLowerCase();
+    for (let i = 0; i < personasList.length; i++) {
+      const displayName = personasList[i];
+      const lowerName = displayName.toLowerCase();
+      const [firstName = "", lastName = ""] = lowerName.split(" ");
 
-  const [firstName = "", lastName = ""] = displayName.toLowerCase().split(" ");
+      const character = originalCharacters.find((c) => {
+        const users = Array.isArray(c.user) ? c.user : [c.user];
+        return users.some((u) => u.toLowerCase() === displayName.toLowerCase());
+      });
 
-  const character = originalCharacters.find(c => {
-    const users = Array.isArray(c.user) ? c.user : [c.user];
-    return users.some(u => u.toLowerCase() === displayName.toLowerCase());
-  });
+      // Skip guessed or filtered-out characters
+      if (!character || character._guessed) continue;
+      const opus = Array.isArray(character.opus) ? character.opus : [character.opus];
+      if (!opus.some((op) => accepted.includes(op))) continue;
 
-  if (!character || character._guessed) continue;
+      // Priority: first name start → last name / contains
+      if (firstName.startsWith(lowerVal)) {
+        matches.unshift(displayName);
+      } else if (lastName.startsWith(lowerVal) || lowerName.includes(lowerVal)) {
+        matches.push(displayName);
+      }
+    }
 
-  const accepted = activeFilters.flatMap(o => validOpus[o]);
-  const opus = Array.isArray(character.opus) ? character.opus : [character.opus];
-  if (!opus.some(op => accepted.includes(op))) continue;
-
-  // Si le prénom commence par ce que tape l'utilisateur → priorité
-  if (firstName.startsWith(lowerVal)) {
-    matches.unshift(displayName); // on met en haut
-  } else if (lastName.startsWith(lowerVal) || lowerName.includes(lowerVal)) {
-    matches.push(displayName); // on met en bas
-  }
-}
-
-
-    matches.forEach(nom => {
+    matches.forEach((nom) => {
       const imageName = portraitsMap[nom] || nom.split(" ")[0];
-      const portraitName = encodeURIComponent(imageName);
-
       const option = document.createElement("DIV");
       option.className = "list-options";
       option.innerHTML = `
-        <img src="../database/portraits/${portraitName}.webp" alt="${nom}">
+        <img src="../database/portraits/${encodeURIComponent(imageName)}.webp" alt="${nom}">
         <span class="codename">${nom}</span>
         <input type='hidden' value='${nom}'>
       `;
-
       option.addEventListener("click", function () {
         input.value = this.querySelector("input").value;
         handleGuess();
         closeList();
       });
-
       list.appendChild(option);
     });
 
@@ -203,27 +165,21 @@ for (let i = 0; i < personasList.length; i++) {
     const items = document.querySelectorAll("#autocomplete-list .list-options");
     if (!items.length) return;
 
-    if (e.key === "ArrowDown") {
-      currentFocus++;
-      updateActive(items);
-    } else if (e.key === "ArrowUp") {
-      currentFocus--;
-      updateActive(items);
-    } else if (e.key === "Enter") {
+    if (e.key === "ArrowDown") { currentFocus++; updateActive(items); }
+    else if (e.key === "ArrowUp") { currentFocus--; updateActive(items); }
+    else if (e.key === "Enter") {
       e.preventDefault();
       if (currentFocus > -1) items[currentFocus].click();
       else items[0]?.click();
     }
   });
 
-  document.addEventListener("click", function (e) {
-    if (!e.target.closest("#autocomplete-list") && e.target !== input) {
-      closeList();
-    }
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#autocomplete-list") && e.target !== input) closeList();
   });
 
   function updateActive(items) {
-    items.forEach(i => i.classList.remove("autocomplete-active"));
+    items.forEach((i) => i.classList.remove("autocomplete-active"));
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = items.length - 1;
     items[currentFocus].classList.add("autocomplete-active");
@@ -232,160 +188,132 @@ for (let i = 0; i < personasList.length; i++) {
 
   function closeList() {
     const lists = document.getElementsByClassName("autocomplete-items");
-    for (let i = 0; i < lists.length; i++) {
-      lists[i].parentNode.removeChild(lists[i]);
-    }
+    for (let i = 0; i < lists.length; i++) lists[i].parentNode.removeChild(lists[i]);
   }
 }
 
-// === SHOW WIN / LOSE ===
-// === DANS modePersonae.js ===
 
+// ─────────────────────────────────────────────────────────────────────────────
+// VICTORY / DEFEAT
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Ends the game and shows the result.
+ * On win: triggers confetti, logs stats, checks Twin Blade and Crimson Legacy badges.
+ * On force (Give Up): shows defeat message.
+ *
+ * @param {boolean} [force=false] - True when the player gives up
+ * @param {string}  [name=null]   - The correctly guessed character name
+ */
 function showVictory(force = false, name = null) {
   gameOver = true;
   textbar.disabled = true;
   guessBtn.disabled = true;
   giveUpBtn.disabled = true;
 
-  const portraitName = encodeURIComponent(portraitsMap[name] || name.split(" ")[0]);
-  victoryImage.src = `../database/portraits/${portraitName}.webp`;
-  victoryImage.alt = name;
+  // Show portrait of the winning/revealed character
+  if (name) {
+    const portraitName = encodeURIComponent(portraitsMap[name] || name.split(" ")[0]);
+    victoryImage.src = `../database/portraits/${portraitName}.webp`;
+    victoryImage.alt = name;
+  }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 🎖️ VÉRIFICATION BADGE "TWIN BLADE" (Yosuke & Yusuke)
-  // ═══════════════════════════════════════════════════════════════════════
   if (!force && target) {
-    console.log("🔍 Checking for Twin Blade badge components...");
-    
-    // On normalise pour éviter les soucis de majuscules/accents
-    // Fonction utilitaire simple si tu ne l'as pas importée, sinon utilise celle de ton projet
-    const normalize = (str) => str.toLowerCase().trim();
-    const targetName = normalize(target.persona);
-    
-    // Listes des Personas
+    // ── Badge: Twin Blade (Yosuke & Yusuke Personae) ──────────────────────
+    const norm = (s) => s.toLowerCase().trim();
+    const targetName = norm(target.persona);
     const yosukePersonas = ["jiraiya", "susano-o", "takehaya susano-o"];
     const yusukePersonas = ["goemon", "kamu susano-o", "gorokichi"];
 
+    const profile = JSON.parse(localStorage.getItem("personaUserProfile")) || {};
     let profileUpdated = false;
-    const profile = JSON.parse(localStorage.getItem('personaUserProfile')) || {};
 
-    // 1. Vérification Yosuke
-    if (yosukePersonas.includes(targetName)) {
-        console.log("⚔️ Found a Yosuke Persona!");
-        if (!profile.foundYosuke) {
-            profile.foundYosuke = true;
-            profileUpdated = true;
-        }
+    if (yosukePersonas.includes(targetName) && !profile.foundYosuke) {
+      profile.foundYosuke = true;
+      profileUpdated = true;
+    }
+    if (yusukePersonas.includes(targetName) && !profile.foundYusuke) {
+      profile.foundYusuke = true;
+      profileUpdated = true;
     }
 
-    // 2. Vérification Yusuke
-    if (yusukePersonas.includes(targetName)) {
-        console.log("🎨 Found a Yusuke Persona!");
-        if (!profile.foundYusuke) {
-            profile.foundYusuke = true;
-            profileUpdated = true;
-        }
+    // ── Badge: Crimson Legacy (Picaro variants) ────────────────────────────
+    if (target.persona.toLowerCase().includes("picaro")) {
+      if (!profile.picarosFound) profile.picarosFound = [];
+      if (!profile.picarosFound.includes(target.persona)) {
+        profile.picarosFound.push(target.persona);
+        profileUpdated = true;
+        console.log(`💾 Picaros: ${profile.picarosFound.length}/12`);
+      }
     }
 
-    // Sauvegarde uniquement si on a trouvé quelque chose de nouveau
     if (profileUpdated) {
-        localStorage.setItem('personaUserProfile', JSON.stringify(profile));
-        console.log("💾 Profile saved with Twin Blade flags updated.");
+      localStorage.setItem("personaUserProfile", JSON.stringify(profile));
     }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 🎭 VÉRIFICATION BADGE "CRIMSON LEGACY" (Picaros)
-  // ═══════════════════════════════════════════════════════════════════════
-  if (!force && target) {
-    const targetName = target.persona; // Nom exact (avec majuscules)
-    
-    // Détection simple : le mot "Picaro" est dans le nom (gère aussi "Picaros")
-    if (targetName.toLowerCase().includes("picaro")) {
-        console.log("🔴 Found a Picaro variant:", targetName);
-
-        let profile = JSON.parse(localStorage.getItem('personaUserProfile')) || {};
-        
-        // Initialiser le tableau si c'est le premier Picaro trouvé
-        if (!profile.picarosFound) {
-            profile.picarosFound = [];
-        }
-
-        // Si ce Picaro n'est pas déjà dans la liste, on l'ajoute
-        if (!profile.picarosFound.includes(targetName)) {
-            profile.picarosFound.push(targetName);
-            localStorage.setItem('personaUserProfile', JSON.stringify(profile));
-            console.log(`💾 Progress Update: ${profile.picarosFound.length}/12 Picaros found.`);
-        }
-    }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // 🎨 AFFICHAGE (Suite normale de ta fonction)
-  // ═══════════════════════════════════════════════════════════════════════
-
+  // ── Result display ────────────────────────────────────────────────────────
   if (force) {
     victoryText.innerHTML = `❌ Too bad!&nbsp;<span class="user-name">${target.user}</span>'s Persona was&nbsp;<span class="persona-name">${target.persona}</span>.`;
     victoryText.className = "victory-message failure-text";
   } else {
     victoryText.innerHTML = `✅ Good Guess!&nbsp;<span class="persona-name">${target.persona}</span>&nbsp;is the Persona of&nbsp;<span class="user-name">${name}</span>!`;
     victoryText.className = "victory-message success-text";
-    showConfettiExplosion();
+    showConfettiExplosion({ count: 30, spreadFrom: "bottom" });
   }
 
-  setTimeout(() => {
-    victoryBox.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, 500);
-
   victoryBox.style.display = "block";
-  
+  setTimeout(() => victoryBox.scrollIntoView({ behavior: "smooth", block: "center" }), 500);
+
   revealNextLink({
     prevHref: "../silhouetteMode/silhouette.html",
-    nextHref: "../musicsMode/musics.html"
+    nextHref: "../musicsMode/musics.html",
   });
 
-  // ═══════════════════════════════════════════════════════════════════════
-  // 📊 STATS (Méthode classique sans targetName car géré au-dessus)
-  // ═══════════════════════════════════════════════════════════════════════
+  // ── Stats ─────────────────────────────────────────────────────────────────
   if (!localStorage.getItem(statsKey)) {
-    const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000); 
-    
-    // Note : Ici on remet l'appel classique puisque la logique badge est faite au-dessus
-    updateProfileStats({ 
-        result: "win", 
-        mode: "Personae", 
-        timeSpent: sessionDuration 
+    updateProfileStats({
+      result: force ? "giveup" : "win",
+      mode: "Personae",
+      timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
     });
-    
-    localStorage.removeItem("playerProfile"); 
+    localStorage.removeItem("playerProfile");
     localStorage.setItem(statsKey, "true");
-  }  
-  
+  }
+
   localStorage.setItem("personaeGameOver", "true");
 }
 
+/**
+ * Appends a wrong-guess portrait to the wrong-guesses list.
+ * @param {string} name
+ */
 function showWrong(name) {
   const imageName = portraitsMap[name] || name.split(" ")[0];
-  const div = document.createElement("div");
-  div.className = "wrong-mini";
-  const img = document.createElement("img");
-  img.src = `../database/portraits/${imageName}.webp`;
-  img.alt = name;
-  div.appendChild(img);
-  wrongList.appendChild(div);
-  setTimeout(() => div.classList.add("shake"), 50);
+  showWrongMini(
+    `../database/portraits/${encodeURIComponent(imageName)}.webp`,
+    name,
+    wrongList
+  );
 }
 
-// === GAME LOGIC ===
-function handleGuess() {
 
-  
+// ─────────────────────────────────────────────────────────────────────────────
+// GAME FLOW
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Validates one guess:
+ *  - Correct: calls showVictory()
+ *  - Wrong: calls showWrong() and marks character as guessed in autocomplete
+ */
+function handleGuess() {
   if (gameOver) return;
   const guess = textbar.value.trim();
   if (!guess) return;
+
   attempts++;
   localStorage.setItem("personaeAttempts", attempts);
-
   giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
 
   if (attempts >= maxAttempts) {
@@ -394,58 +322,60 @@ function handleGuess() {
   }
 
   const users = Array.isArray(target.user) ? target.user : [target.user];
-  const found = users.some(u => u.toLowerCase() === guess.toLowerCase());
+  const found = users.some((u) => u.toLowerCase() === guess.toLowerCase());
 
-  if (found) showVictory(false, guess);
-  else showWrong(guess);
+  if (found) {
+    showVictory(false, guess);
+  } else {
+    showWrong(guess);
+  }
 
   textbar.value = "";
-  // Empêche ce personnage de réapparaître dans l'autocomplétion
-const guessedCharacter = originalCharacters.find(c => {
-  const users = Array.isArray(c.user) ? c.user : [c.user];
-  return users.some(u => u.toLowerCase() === guess.toLowerCase());
-});
-if (guessedCharacter) guessedCharacter._guessed = true;
 
-  textbar.dispatchEvent(new Event("input"));
+  // Mark guessed character so it disappears from autocomplete
+  const guessedChar = originalCharacters.find((c) => {
+    const u = Array.isArray(c.user) ? c.user : [c.user];
+    return u.some((u) => u.toLowerCase() === guess.toLowerCase());
+  });
+  if (guessedChar) guessedChar._guessed = true;
+  textbar.dispatchEvent(new Event("input")); // refresh autocomplete
 }
 
+/**
+ * Give Up: reveals the answer.
+ * Only active after `maxAttempts` wrong guesses.
+ */
 function giveUp() {
   if (attempts < maxAttempts || gameOver) return;
-
-  // Marque le jeu comme terminé
   gameOver = true;
 
-if (!localStorage.getItem(statsKey)) {
-  const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
-  updateProfileStats({ result: "giveup", mode: "Personae", timeSpent: sessionDuration }); // ✅ Correct
-  localStorage.removeItem("playerProfile"); // Nettoie pour ne pas impacter les autres
+  if (!localStorage.getItem(statsKey)) {
+    updateProfileStats({
+      result: "giveup",
+      mode: "Personae",
+      timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
+    });
+    localStorage.removeItem("playerProfile");
+    localStorage.setItem(statsKey, "true");
+  }
 
-  localStorage.setItem(statsKey, "true");
-}
-
-
-
-
-  // Enregistre l'état de fin dans le localStorage
   localStorage.setItem("personaeGameOver", "true");
   localStorage.setItem("personaeForceReveal", "true");
-
-  // Affiche la box de victoire (comme défaite)
   showVictory(true, Array.isArray(target.user) ? target.user[0] : target.user);
 }
 
-
-
+/**
+ * Resets all game state and picks a new character.
+ * Called by Replay button, daily reset, and filter changes.
+ */
 function resetGame() {
-    sessionStartTime = Date.now();
+  sessionStartTime = Date.now();
 
   localStorage.removeItem("personaeTarget");
-localStorage.removeItem("personaeAttempts");
-localStorage.removeItem("personaeGameOver");
-localStorage.removeItem("personaeForceReveal");
-localStorage.removeItem(statsKey); // autorise une nouvelle stat pour la journée
-
+  localStorage.removeItem("personaeAttempts");
+  localStorage.removeItem("personaeGameOver");
+  localStorage.removeItem("personaeForceReveal");
+  localStorage.removeItem(statsKey);
 
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) nav.style.display = "none";
@@ -456,17 +386,17 @@ localStorage.removeItem(statsKey); // autorise une nouvelle stat pour la journé
   giveUpCounter.classList.remove("activated");
   giveUpBtn.disabled = true;
   textbar.disabled = false;
+  textbar.value = "";
   guessBtn.disabled = false;
   wrongList.innerHTML = "";
-  textbar.value = "";
 
   victoryBox.style.display = "none";
   victoryText.innerHTML = "";
   victoryImage.src = "";
 
-  originalCharacters.forEach(c => c._guessed = false);
+  originalCharacters.forEach((c) => { c._guessed = false; });
 
-  // ✅ NE PAS re-piocher un perso si on en a déjà un en mémoire
+  // Restore stored target if available (avoids picking a new one on soft reset)
   const stored = localStorage.getItem("personaeTarget");
   if (stored) {
     try {
@@ -475,56 +405,17 @@ localStorage.removeItem(statsKey); // autorise une nouvelle stat pour la journé
       personaImg.alt = target.persona;
       return;
     } catch (e) {
-      console.warn("⚠️ Erreur en rechargeant le personnage : ", e);
+      console.warn("⚠️ Error reloading stored target:", e);
     }
   }
 
-  // Si rien dans le localStorage ou échec → on pioche un nouveau
   pickCharacter();
 }
 
 
-// === UI SETUP ===
-function setupFilterButtons() {
-  const btns = document.querySelectorAll(".filter-btn");
-
-  // ✅ Met à jour visuellement les boutons selon les filtres actifs
-  btns.forEach(btn => {
-    const val = btn.dataset.opus;
-    if (activeFilters.includes(val)) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
-  });
-
-  // ✅ Gestion du clic
-  btns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const val = btn.dataset.opus;
-      btn.classList.toggle("active");
-
-      if (btn.classList.contains("active")) {
-        if (!activeFilters.includes(val)) activeFilters.push(val);
-      } else {
-        activeFilters = activeFilters.filter(o => o !== val);
-      }
-
-      // ✅ Sauvegarde du filtre actif
-      localStorage.setItem("personaeActiveFilters", JSON.stringify(activeFilters));
-      resetGame();
-    });
-  });
-}
-
-function setupRulesModal() {
-  const modal = document.getElementById("rulesModal");
-  const btn = document.getElementById("rulesButton");
-  const closeBtn = modal.querySelector(".close");
-  btn.addEventListener("click", () => modal.style.display = "block");
-  closeBtn.addEventListener("click", () => modal.style.display = "none");
-  window.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// DARK MODE (personae-specific element)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function applyDarkModeStyles() {
   if (!document.body.classList.contains("darkmode")) return;
@@ -535,116 +426,111 @@ function applyDarkModeStyles() {
   }
 }
 
-// === CONFETTIS ===
-function showConfettiExplosion() {
-      new Audio('../assets/sound_effect/Victory_sound.mp3').play();
 
-  const emojiList = ["🎉", "🎊", "✨", "💥", "🌟"];
-  const numEmojis = 30;
+// ─────────────────────────────────────────────────────────────────────────────
+// BOOTSTRAP — DOMContentLoaded
+// ─────────────────────────────────────────────────────────────────────────────
 
-  for (let i = 0; i < numEmojis; i++) {
-    const emoji = document.createElement("span");
-    emoji.textContent = emojiList[Math.floor(Math.random() * emojiList.length)];
-    emoji.classList.add("confetti-emoji");
-    emoji.style.left = Math.random() * 100 + "vw";
-    emoji.style.bottom = "0vh";
-    emoji.style.setProperty("--x-move", (Math.random() * 100 - 50) + "vw");
-    emoji.style.setProperty("--y-move", -(Math.random() * 50 + 30) + "vh");
-    emoji.style.setProperty("--rotate", Math.random() * 360 + "deg");
-    document.body.appendChild(emoji);
-    setTimeout(() => emoji.remove(), 1000);
+document.addEventListener("DOMContentLoaded", () => {
+  // Assign DOM references
+  textbar = document.getElementById("textbar");
+  personaImg = document.getElementById("personaImage");
+  guessBtn = document.getElementById("guessButton");
+  resetBtn = document.getElementById("resetButton");
+  giveUpBtn = document.getElementById("giveUpButton");
+  giveUpCounter = document.getElementById("giveUpCounter");
+  wrongList = document.getElementById("wrongGuessList");
+  victoryBox = document.getElementById("victoryBox");
+  victoryImage = document.getElementById("victoryImage");
+  victoryText = document.getElementById("victoryText");
+
+  // ── Restore saved filters ──
+  try {
+    const stored = JSON.parse(localStorage.getItem("personaeActiveFilters"));
+    if (Array.isArray(stored)) activeFilters = stored;
+  } catch (e) {
+    console.warn("⚠️ Error reading stored filters:", e);
   }
-}
 
-// === DEBUG ===
+  setupRulesModal();
+  applyDarkModeStyles();
+
+  // ── Filter buttons (shared utility) ──
+  // Visual init first, then wire clicks
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.classList.toggle("active", activeFilters.includes(btn.dataset.opus));
+  });
+
+  setupFilterButtons("personaeActiveFilters", (newFilters) => {
+    activeFilters = newFilters;
+    resetGame();
+  });
+
+  guessBtn.addEventListener("click", handleGuess);
+  resetBtn.addEventListener("click", resetGame);
+  giveUpBtn.addEventListener("click", giveUp);
+
+  initializeAutocomplete(textbar, personas.sort((a, b) => a.localeCompare(b)));
+
+  // ── Restore session ──
+  const stored = localStorage.getItem("personaeTarget");
+  const storedAttempts = parseInt(localStorage.getItem("personaeAttempts")) || 0;
+  const storedGameOver = localStorage.getItem("personaeGameOver") === "true";
+
+  if (stored) {
+    try {
+      target = JSON.parse(stored);
+      filteredCharacters = getFilteredCharacters();
+      attempts = storedAttempts;
+      giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
+      personaImg.src = `./database/img/${target.image}.webp`;
+      personaImg.alt = target.persona;
+
+      if (attempts >= maxAttempts) {
+        giveUpBtn.disabled = false;
+        giveUpCounter.classList.add("activated");
+      }
+
+      if (storedGameOver) {
+        const force = localStorage.getItem("personaeForceReveal") === "true";
+        showVictory(force, force ? null : (Array.isArray(target.user) ? target.user[0] : target.user));
+      }
+    } catch (e) {
+      resetGame();
+    }
+  } else {
+    resetGame();
+  }
+
+  // ── Daily reset ──
+  checkResetOnLoad("lastPlayedDate_Personae", "Personae", () => {
+    resetBtn.click();
+  });
+  setupDailyReset(() => {
+    resetBtn?.click() ?? location.reload();
+  });
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEBUG (console only)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function debugAllPersonae() {
-  console.log("=== DÉBUT DU DEBUG PERSONAE MODE ===");
+  console.log("=== DEBUG PERSONAE MODE ===");
   const errors = [];
-  const usableNames = personas.sort();
-  for (const name of usableNames) {
-    const result = { nom: name, inMap: false, inUser: false };
-    const match = originalCharacters.find(c => {
-      const users = Array.isArray(c.user) ? c.user : [c.user];
-      return users.some(u => u === name);
+  for (const name of personas.sort()) {
+    const match = originalCharacters.find((c) => {
+      const u = Array.isArray(c.user) ? c.user : [c.user];
+      return u.some((u) => u === name);
     });
-    result.inUser = !!match;
-    if (!match) errors.push(`❌ ${name} — Absent dans personaeCharacters.js`);
-    const imageKey = portraitsMap[name];
-    result.inMap = !!imageKey;
-    if (!imageKey) errors.push(`❌ ${name} — Manque dans portraitsMapPersonae.js`);
-    if (result.inUser && result.inMap) console.log(`✅ OK : ${name}`);
+    if (!match) { errors.push(`❌ ${name} — Absent dans personaeCharacters.js`); continue; }
+    if (!portraitsMap[name]) errors.push(`❌ ${name} — Manque dans portraitsMapPersonae.js`);
+    else console.log(`✅ OK: ${name}`);
   }
   if (errors.length) console.log(errors.join("\n"));
-  else console.log("🎉 Aucune erreur détectée !");
-  console.log("=== FIN DU DEBUG ===");
+  else console.log("🎉 No errors!");
+  console.log("=== END DEBUG ===");
 }
-debugAllPersonae(); // 
-
-function revealNextLink({ nextHref = "", prevHref = "" } = {}) {
-  const nav = document.getElementById("modeNavigationContainer");
-  const nextButton = document.getElementById("nextModeButton");
-  const prevButton = document.getElementById("prevModeButton");
-
-  if (nextButton && nextHref) {
-    nextButton.onclick = () => (location.href = nextHref);
-  }
-
-  if (prevButton) {
-    if (prevHref) {
-      prevButton.style.visibility = "visible";
-      prevButton.onclick = () => (location.href = prevHref);
-    } else {
-      prevButton.style.visibility = "hidden";
-      prevButton.onclick = null;
-    }
-  }
-
-  if (nav) {
-    nav.style.display = "flex";
-    setTimeout(() => {
-      nav.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 1500);
-  }
-}
-
-function setupDailyReset() {
-  const parisOffset = new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" });
-    sessionStartTime = Date.now();
-
-  const parisNow = new Date(parisOffset);
-  const tomorrow = new Date(parisNow);
-  tomorrow.setDate(parisNow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-
-  const timeUntilMidnight = tomorrow.getTime() - parisNow.getTime();
-
-  console.log(`🕛 Next auto-reset in ${Math.round(timeUntilMidnight / 1000 / 60)} minutes`);
-
-  setTimeout(() => {
-    console.log("🔄 Auto-reset triggered at Paris midnight");
-    const resetBtn = document.getElementById("resetButton");
-    if (resetBtn) resetBtn.click();
-    else location.reload();
-  }, timeUntilMidnight + 500);
-}
-function checkResetOnLoad() {
-  const storedDate = localStorage.getItem("lastPlayedDate_Personae");
-  const today = new Date().toISOString().split("T")[0];
-
-  if (storedDate !== today) {
-    console.log("📅 Nouvelle journée détectée → reset automatique (Personae)");
-    localStorage.setItem("lastPlayedDate_Personae", today);
-
-    // Supprime aussi l'ancienne entrée stats du jour précédent
-    if (storedDate) {
-      const oldStatsKey = `statsLogged_Personae_${storedDate}`;
-      localStorage.removeItem(oldStatsKey);
-    }
-
-    const resetBtn = document.getElementById("resetButton");
-    if (resetBtn) resetBtn.click();
-    else location.reload(); // fallback si resetButton non présent
-  } else {
-    console.log("📅 Même jour, aucune réinitialisation nécessaire (Personae)");
-  }
-}
+// Auto-run in dev to catch data issues
+debugAllPersonae();
