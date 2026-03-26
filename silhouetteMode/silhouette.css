@@ -1,0 +1,161 @@
+/* =============================================================
+   silhouette.css — Styles exclusifs au Mode Silhouette
+   Contient : boîte silhouette, zoom, image silhouette,
+   niveaux de flou, mauvaises réponses style silhouette,
+   victoire dans la silhouette, animation d'apparition.
+   ============================================================= */
+
+
+/* =====================================================
+   1. BOÎTE SILHOUETTE
+   Conteneur carré centré affichant l'image en silhouette
+   noire, révélée progressivement.
+   ===================================================== */
+
+.silhouette-box {
+  width: 100%;
+  max-width: 600px;
+  height: 600px;
+  margin: 40px auto 20px auto;
+  /* Fond clair pour faire ressortir la silhouette noire */
+  background: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border: 4px solid #333;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s ease-in-out;
+}
+
+/* Fond sombre en dark mode pour garder la silhouette visible */
+.darkmode .silhouette-box {
+  background: #1f1f2f;
+  border-color: #ccc;
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.1);
+}
+
+/* Wrapper qui gère le zoom sans flash visuel */
+.zoom-wrapper {
+  /* Zoom par défaut au démarrage (gros plan) */
+  transform: scale(1.8);
+  transition: transform 0.4s ease;
+  display: inline-block;
+}
+
+/* Image silhouette : filtre noir, cachée tant que non chargée */
+#silhouetteImage {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  /* Applique la silhouette noire */
+  filter: brightness(0);
+  margin-bottom: 20px;
+  /* Cachée jusqu'au chargement complet */
+  visibility: hidden;
+  transition: filter 0.3s ease, visibility 0s;
+  animation: popInSilhouette 0.4s ease;
+}
+
+
+/* =====================================================
+   2. NIVEAUX DE FLOU PROGRESSIF
+   Appliqués comme classe CSS sur #silhouetteImage
+   par modeSilhouette.js à chaque mauvaise réponse.
+   ===================================================== */
+
+/* Niveau 0 : image très floue (début de partie) */
+.blur-level-0 { filter: blur(14px); }
+.blur-level-1 { filter: blur(12px); }
+.blur-level-2 { filter: blur(10px); }
+.blur-level-3 { filter: blur(8px); }
+.blur-level-4 { filter: blur(6px); }
+.blur-level-5 { filter: blur(3px); }
+/* Niveau 6 : image nette (révélation finale) */
+.blur-level-6 { filter: blur(0px); transition: filter 0.4s ease; }
+
+
+/* =====================================================
+   3. MAUVAISES RÉPONSES (style silhouette)
+   Affichées dans #wrongGuessList sous la zone de jeu.
+   Style différent du .wrong-mini global : fond sombre.
+   ===================================================== */
+
+.wrong-guess {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px auto;
+  padding: 6px 12px;
+  border-radius: 12px;
+  /* Fond très sombre pour le thème silhouette */
+  background-color: #330000;
+  color: white;
+  font-weight: bold;
+  max-width: 300px;
+  animation: shake 0.4s ease-in-out;
+}
+
+.wrong-guess img {
+  height: 48px;
+  border-radius: 8px;
+}
+
+
+/* =====================================================
+   4. BOÎTE DE VICTOIRE (contexte silhouette)
+   Surcharges spécifiques quand .victory-box est dans
+   la .silhouette-box.
+   ===================================================== */
+
+/* Cache l'image dans la victory-box (la silhouette suffit) */
+.silhouette-box .victory-box img {
+  display: none;
+}
+
+/* Victory-box réintégrée dans la boîte silhouette */
+.silhouette-box .victory-box {
+  margin-top: 20px;
+  background-color: #e6fbe6;
+  border: 3px solid #4caf50;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.2);
+  animation: fadeInVictory 0.3s ease-in-out;
+}
+
+/* Message de victoire dans la silhouette (vert foncé) */
+.silhouette-box .victory-message {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+/* Message de victoire générique hors silhouette-box */
+.victory-message {
+  margin-top: 12px;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #66ff66;
+  text-align: center;
+}
+
+
+/* =====================================================
+   5. ANIMATION D'APPARITION DE LA SILHOUETTE
+   ===================================================== */
+
+@keyframes popInSilhouette {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
