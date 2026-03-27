@@ -48,22 +48,45 @@
    3. RESPONSIVE — SPÉCIFIQUE EMOJI
    ===================================================== */
 
+/* -----------------------------------------------
+   TABLETTE (≤ 768px)
+   Emojis légèrement réduits, retour à la ligne autorisé
+   si plusieurs emojis sont révélés.
+----------------------------------------------- */
 @media (max-width: 768px) {
-  /* Emojis légèrement réduits sur tablette */
-  .emoji-unit {
-    font-size: 2.5rem;
-    margin: 0 6px;
+  /* Zone d'affichage : autorise le wrap des emojis */
+  #emojiDisplay {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px;
   }
 
+  .emoji-unit {
+    font-size: 2.5rem;
+    margin: 4px 6px;
+  }
+
+  /* Hover réduit sur tablette (doigt, pas souris) */
   .emoji-unit:hover {
     transform: scale(1.15);
   }
 }
 
+
+/* -----------------------------------------------
+   MOBILE (≤ 480px)
+   Emojis plus petits, espacement minimal.
+----------------------------------------------- */
 @media (max-width: 480px) {
-  /* Emojis encore plus petits sur mobile */
+  #emojiDisplay {
+    gap: 2px;
+    padding: 8px;
+  }
+
   .emoji-unit {
     font-size: 2rem;
-    margin: 0 4px;
+    margin: 2px 4px;
   }
 }

@@ -11,9 +11,11 @@ import {
   setupRulesModal,
   setupDailyReset,
   checkResetOnLoad,
-  setupFilterButtons,
   showWrongMini,
 } from "../js/gameCore.js";
+
+// Collapsible opus filter panel (shared across all modes)
+import { initFilterMenu } from "../js/filterMenu.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -21,18 +23,10 @@ import {
 
 const modeName = "Classic";
 
-/** Map from filter button label to the actual opus codes in the database. */
-const validOpus = {
-  P1: ["P1"],
-  P2: ["P2IS", "P2EP"],
-  P3: ["P3", "P3FES", "P3P"],
-  P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"],
-  P5X: ["P5X"],
-  PQ: ["PQ", "PQ2"],
-};
+/** All specific opus codes available in Classic mode. */
+const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P4D","P5","P5R","P5S","P5T","P5X","PQ","PQ2"];
 
-let activeOpus = ["P1", "P2", "P3", "P4", "P5", "P5X"];
+let activeOpus = [...ALL_OPUS];
 
 // Mutable list of names fed to the autocomplete (names are removed as guessed)
 let personas = [...originalPersonas];
@@ -60,8 +54,11 @@ let sessionStartTime = Date.now();
  */
 function initializeAutocomplete(element, array) {
   let currentFocus = -1;
+  let _debounceTimer = null;
 
   element.addEventListener("input", function () {
+    clearTimeout(_debounceTimer);
+    _debounceTimer = setTimeout(() => {
     const val = this.value.trim();
     closeList(null, element);
     if (!val) return;
@@ -122,6 +119,7 @@ function initializeAutocomplete(element, array) {
     });
 
     currentFocus = -1;
+    }, 120); // fin debounce
   });
 
   // Keyboard navigation: ↑ ↓ to browse, Enter to confirm
@@ -179,16 +177,22 @@ function removeFromAutocomplete(name) {
  * Also re-initialises the autocomplete listener on the text input.
  */
 function filterCharacterPool() {
-  const allValid = activeOpus.flatMap((o) => validOpus[o]);
+  // Exclure les noms déjà devinés pour que l'autocomplétion reste cohérente
+  const history    = JSON.parse(localStorage.getItem("guessHistory")) || [];
+  const guessedSet = new Set(history.map(n => n.toLowerCase()));
 
-  personas = originalPersonas.filter((name) => {
+  const filtered = originalPersonas.filter((name) => {
+    if (guessedSet.has(name.toLowerCase())) return false;
     const character = characters.find((c) => c.nom === name);
     if (!character || !character.opus) return false;
     const charOpus = Array.isArray(character.opus) ? character.opus : [character.opus];
-    return charOpus.some((op) => allValid.includes(op));
+    return charOpus.some((op) => activeOpus.includes(op));
   });
 
-  initializeAutocomplete(document.getElementById("textbar"), personas);
+  // Mutation en place — le listener autocomplete garde la même référence tableau
+  // (évite d'empiler de nouveaux listeners à chaque changement de filtre)
+  personas.length = 0;
+  personas.push(...filtered);
 }
 
 
@@ -251,11 +255,14 @@ function checkGuess(name, target, forceReveal = false) {
   row.appendChild(img);
 
   const keysToCompare = ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
+  // Labels affichés sur mobile via CSS ::before (data-label)
+  const keyLabels = { nom: "Name", genre: "Gender", age: "Age", personaUser: "P.User", persona: "Persona", arcane: "Arcana", opus: "Opus" };
   const isWin = guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal;
 
   keysToCompare.forEach((key, index) => {
     const cell = document.createElement("div");
     cell.classList.add("guess-cell");
+    cell.dataset.label = keyLabels[key] || key;  // Pour l'affichage mobile ::before
 
     const value = guess[key];
     const targetVal = target[key];
@@ -410,32 +417,28 @@ document.addEventListener("DOMContentLoaded", () => {
     daltonianToggle.textContent = `Daltonian Mode: ${daltonianMode ? "ON" : "OFF"}`;
   }
 
-  // ── Restore saved opus filters ──
-  const savedFilters = JSON.parse(localStorage.getItem("filters_Classic"));
-  if (Array.isArray(savedFilters)) activeOpus = savedFilters;
-
-  // Apply visual state to filter buttons
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.classList.toggle("active", activeOpus.includes(btn.dataset.opus));
-  });
-
-  // Wire filter button clicks (shared utility)
-  setupFilterButtons("filters_Classic", (newFilters) => {
-    activeOpus = newFilters;
+  // ── Filtre opus — panneau déroulant ──
+  const _filterApi = initFilterMenu("filters_Classic", ALL_OPUS, (newActive) => {
+    activeOpus = newActive;
     filterCharacterPool();
 
-    // Also pick a new target that matches the new filters
+    // Pick a new target from the updated filter set
     const filteredCharacters = characters.filter((c) => {
       const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-      return charOpus.some((op) => activeOpus.flatMap((o) => validOpus[o]).includes(op));
+      return charOpus.some((op) => activeOpus.includes(op));
     });
     if (filteredCharacters.length > 0) {
       target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
       localStorage.setItem("target", JSON.stringify(target));
     }
   });
+  // Synchronise activeOpus avec ce qu'initFilterMenu a chargé depuis localStorage
+  activeOpus = _filterApi.getActive();
 
   filterCharacterPool();
+  // Lié une seule fois — filterCharacterPool() mute `personas` en place,
+  // le listener voit toujours la liste à jour sans re-bind.
+  initializeAutocomplete(textbar, personas);
 
   // ── Restore session state ──
   let attempts = parseInt(localStorage.getItem("attempts")) || 0;
@@ -455,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!target) {
     const filteredCharacters = characters.filter((c) => {
       const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-      return charOpus.some((op) => activeOpus.flatMap((o) => validOpus[o]).includes(op));
+      return charOpus.some((op) => activeOpus.includes(op));
     });
     target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
     localStorage.setItem("target", JSON.stringify(target));
@@ -557,7 +560,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const filteredCharacters = characters.filter((c) => {
       const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-      return charOpus.some((op) => activeOpus.flatMap((o) => validOpus[o]).includes(op));
+      return charOpus.some((op) => activeOpus.includes(op));
     });
     target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
     localStorage.setItem("target", JSON.stringify(target));

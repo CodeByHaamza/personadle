@@ -159,3 +159,65 @@
     opacity: 1;
   }
 }
+
+
+/* =====================================================
+   6. RESPONSIVE — SPÉCIFIQUE SILHOUETTE
+   ===================================================== */
+
+/* -----------------------------------------------
+   TABLETTE (481px – 768px)
+   La boîte silhouette s'adapte à la largeur
+   disponible sans dépasser la hauteur de l'écran.
+----------------------------------------------- */
+@media (max-width: 768px) {
+  /* Hauteur adaptative : au lieu de 600px fixe,
+     on utilise min() pour ne jamais dépasser
+     65% de la largeur de l'écran (garde le ratio carré). */
+  .silhouette-box {
+    height: min(500px, 65vw);
+    max-width: 95%;
+    margin: 20px auto 15px auto;
+    padding: 15px;
+    border-radius: 14px;
+  }
+
+  /* Le zoom de départ légèrement réduit sur tablette */
+  .zoom-wrapper {
+    transform: scale(1.6);
+  }
+}
+
+
+/* -----------------------------------------------
+   MOBILE (≤ 480px)
+   Boîte carrée proportionnelle à la largeur de l'écran.
+   Plus compact, avec un zoom de départ réduit
+   pour que la silhouette tienne sur l'écran.
+----------------------------------------------- */
+@media (max-width: 480px) {
+  .silhouette-box {
+    height: min(340px, 80vw);   /* Quasi-carré sur mobile */
+    max-width: 92vw;
+    padding: 10px;
+    margin: 15px auto;
+    border-radius: 10px;
+    border-width: 3px;
+  }
+
+  /* Zoom initial réduit pour rester dans les limites de la boîte */
+  .zoom-wrapper {
+    transform: scale(1.4);
+  }
+
+  /* Mauvaises réponses : texte plus petit */
+  .wrong-guess {
+    max-width: 90%;
+    font-size: 13px;
+    padding: 5px 10px;
+  }
+
+  .wrong-guess img {
+    height: 40px;
+  }
+}

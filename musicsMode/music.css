@@ -101,3 +101,68 @@ body.music-mode.darkmode .victory-box {
   border-color: #ff66cc;
   box-shadow: 0 0 30px rgba(255, 102, 204, 0.6);
 }
+
+
+/* =====================================================
+   5. RESPONSIVE — SPÉCIFIQUE MUSIC MODE
+   ===================================================== */
+
+/* -----------------------------------------------
+   TABLETTE (≤ 768px)
+   Le wrapper audio prend plus de largeur.
+   La victoire musicale (grande image) est réduite.
+----------------------------------------------- */
+@media (max-width: 768px) {
+  /* Wrapper audio : s'étend à 90% de la largeur dispo */
+  .audio-wrapper {
+    width: 90%;
+    max-width: 400px;
+    padding: 16px 20px;
+    margin: 20px auto;
+  }
+
+  /* Lecteur audio : pleine largeur dans son wrapper */
+  audio {
+    width: 100%;
+    max-width: 280px;
+    margin: 12px auto;
+  }
+
+  /* Victoire musicale : image et boîte réduites */
+  body.music-mode .victory-box {
+    max-width: 95%;
+    padding: 20px 15px;
+  }
+
+  body.music-mode .victory-box img {
+    width: 200px;
+  }
+}
+
+
+/* -----------------------------------------------
+   MOBILE (≤ 480px)
+   Audio compact, image de victoire plus petite.
+   La bordure rose caractéristique est conservée.
+----------------------------------------------- */
+@media (max-width: 480px) {
+  .audio-wrapper {
+    width: 94%;
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+
+  audio {
+    max-width: 240px;
+    height: 36px;
+  }
+
+  /* Victoire : image encore plus petite sur mobile */
+  body.music-mode .victory-box img {
+    width: 160px;
+  }
+
+  body.music-mode .victory-box {
+    padding: 15px 10px;
+  }
+}

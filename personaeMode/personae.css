@@ -53,3 +53,47 @@
   color: #43a047;
   font-weight: bold;
 }
+
+
+/* =====================================================
+   3. RESPONSIVE — SPÉCIFIQUE PERSONAE
+   ===================================================== */
+
+/* -----------------------------------------------
+   TABLETTE (481px – 768px)
+   La boîte passe de 500px fixe à une valeur
+   min() qui s'adapte à la largeur de l'écran.
+----------------------------------------------- */
+@media (max-width: 768px) {
+  /* min(500px, 88vw) : 500px max, mais pas plus
+     que 88% de la largeur du viewport */
+  .persona-box {
+    width: min(440px, 88vw);
+    height: min(440px, 88vw);   /* Garde le format carré */
+    border-radius: 16px;
+    margin: 15px auto;
+  }
+}
+
+
+/* -----------------------------------------------
+   MOBILE (≤ 480px)
+   Boîte carrée qui utilise toute la largeur dispo.
+   Le style "Velvet Room" (rouge/fond sombre) est conservé.
+----------------------------------------------- */
+@media (max-width: 480px) {
+  .persona-box {
+    width: 90vw;               /* 90% de la largeur de l'écran */
+    height: 90vw;              /* Carré absolu */
+    border-radius: 12px;
+    border-width: 3px;
+    margin: 12px auto;
+    box-shadow: 0 0 14px rgba(255, 71, 87, 0.4);
+  }
+
+  /* L'image du Persona occupe mieux l'espace */
+  #personaImage {
+    max-width: 92%;
+    max-height: 92%;
+  }
+}

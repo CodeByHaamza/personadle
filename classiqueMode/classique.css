@@ -1,8 +1,10 @@
 /* =============================================================
    classique.css — Styles exclusifs au Mode Classique
+   Page : classiqueMode/classique.html
    Contient : boîte d'en-tête, grille de devinettes, cellules
    colorées, indice (quote), mode daltonien, autocomplete ul,
    dark mode spécifique classique, animations de grille.
+   Dépend de : global.css (reset, layout, .textbar-container…)
    ============================================================= */
 
 
@@ -41,6 +43,8 @@
 /* =====================================================
    2. INDICE (QUOTE HINT)
    Texte d'indice débloqué après 3 tentatives.
+   Rendu visible par le JS en retirant display:none
+   lorsque le seuil de mauvaises réponses est atteint.
    ===================================================== */
 
 #quoteHint {
@@ -63,6 +67,8 @@
    3. GRILLE DES DEVINETTES
    Affichée dans #output — chaque tentative crée
    une .guess-row avec une image et des .guess-cell.
+   La grille utilise CSS Grid avec 1 colonne image (100px)
+   + 7 colonnes de propriétés (140px chacune).
    ===================================================== */
 
 /* Conteneur principal des résultats */
@@ -97,7 +103,9 @@
   border: 2px solid #ccc;
 }
 
-/* Cellule d'un attribut (arcane, opus, etc.) */
+/* Cellule d'un attribut (arcane, opus, etc.)
+   Démarre en position rotateX(90deg) et bascule vers 0deg
+   via l'animation flipIn pour un effet "retournement de carte". */
 .guess-cell {
   width: 140px;
   height: 100px;
@@ -122,14 +130,18 @@
   box-sizing: border-box;
 }
 
-/* Délais d'animation pour chaque cellule (effet cascade) */
+/* Délais d'animation pour chaque cellule (effet cascade) :
+   les cellules se révèlent une à une de gauche à droite,
+   chacune avec 0.1s de délai supplémentaire. */
 .guess-cell:nth-child(2) { animation-delay: 0.1s; }
 .guess-cell:nth-child(3) { animation-delay: 0.2s; }
 .guess-cell:nth-child(4) { animation-delay: 0.3s; }
 .guess-cell:nth-child(5) { animation-delay: 0.4s; }
 .guess-cell:nth-child(6) { animation-delay: 0.5s; }
 
-/* En-tête des catégories (Nom, Genre, Âge…) */
+/* En-tête des catégories (Nom, Genre, Âge…)
+   Toujours visible au-dessus des .guess-row pour rappeler
+   à quel attribut correspond chaque colonne. */
 .category-row {
   display: grid;
   grid-template-columns: 100px repeat(7, 140px);
@@ -165,6 +177,9 @@
 /* =====================================================
    4. COULEURS DES CELLULES (feedback)
    Vert = correct, Jaune = partiel, Rouge = faux.
+   Ces classes sont appliquées dynamiquement par le JS
+   sur chaque .guess-cell en fonction de la comparaison
+   avec la réponse attendue.
    ===================================================== */
 
 /* Réponse correcte */
@@ -187,6 +202,8 @@
 /* =====================================================
    5. AUTOCOMPLÉTION (liste ul du mode classique)
    Positionnée sous le .textbar-container.
+   Le z-index élevé assure qu'elle passe par-dessus
+   les éléments suivants dans le DOM.
    ===================================================== */
 
 #autocompleteList {
@@ -210,6 +227,9 @@
 /* =====================================================
    6. TOOLTIP (info-bulles sur les cellules)
    Affichées au survol des cellules de la grille.
+   Technique CSS pure : .tooltip-text est invisible
+   par défaut (opacity:0, visibility:hidden) et devient
+   visible uniquement quand le parent .tooltip est survolé.
    ===================================================== */
 
 .tooltip {
@@ -218,6 +238,7 @@
   cursor: help;
 }
 
+/* Bulle de texte cachée par défaut */
 .tooltip .tooltip-text {
   visibility: hidden;
   width: max-content;
@@ -247,7 +268,7 @@
   opacity: 1;
 }
 
-/* Flèche pointant vers le bas */
+/* Flèche pointant vers le bas (triangle CSS via border trick) */
 .tooltip .tooltip-text::after {
   content: "";
   position: absolute;
@@ -263,7 +284,9 @@
 /* =====================================================
    7. MODE DALTONIEN
    Remplace les couleurs vert/jaune/rouge par des formes
-   neutres avec bordure grise.
+   neutres avec bordure grise, afin d'assurer l'accessibilité
+   pour les joueurs daltoniens. Les symboles data-label
+   fournissent alors le seul retour visuel de feedback.
    ===================================================== */
 
 /* Bouton de bascule daltonien (fixe, sous le dark mode toggle) */
@@ -283,17 +306,21 @@
   z-index: 10;
 }
 
+/* Survol : légèrement plus clair, bordure plus vive */
 #daltonianToggle:hover {
   background-color: #2e2e2e;
   border-color: #81c784;
 }
 
+/* Clic : légère compression pour retour tactile */
 #daltonianToggle:active {
   transform: scale(0.98);
   background-color: #3d3d3d;
 }
 
-/* En mode daltonien : cellules transparentes avec bordure + symboles */
+/* En mode daltonien : cellules transparentes avec bordure + symboles
+   Le !important est nécessaire pour surcharger les classes .correct /
+   .misplaced / .wrong qui définissent aussi background-color. */
 body.daltonian-mode .guess-cell.correct,
 body.daltonian-mode .guess-cell.misplaced,
 body.daltonian-mode .guess-cell.wrong {
@@ -306,6 +333,8 @@ body.daltonian-mode .guess-cell.wrong {
 /* =====================================================
    8. DARK MODE — SPÉCIFIQUE CLASSIQUE
    Grille, cellules, catégories et feedback en thème sombre.
+   Ces règles surchargent les valeurs claires définies
+   dans global.css et dans les sections 3–4 ci-dessus.
    ===================================================== */
 
 /* Ligne de résultat */
@@ -352,6 +381,9 @@ body.darkmode .counter.activated {
 
 /* =====================================================
    9. ANIMATION DE RÉVÉLATION (flip des cellules)
+   Chaque .guess-cell commence en rotateX(90deg) (de dos)
+   et pivote vers 0deg (face visible) avec un fondu,
+   donnant l'illusion d'une carte qui se retourne.
    ===================================================== */
 
 @keyframes flipIn {
@@ -364,78 +396,169 @@ body.darkmode .counter.activated {
    10. RESPONSIVE — SPÉCIFIQUE CLASSIQUE
    ===================================================== */
 
-@media (max-width: 768px) {
-  /* Grille en colonne sur mobile */
-  .guess-row {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 15px 10px;
-    width: 95%;
-    max-width: 350px;
-    margin: auto;
+/* -----------------------------------------------
+   TABLETTE (481px – 900px)
+   La grille reste horizontale mais devient scrollable.
+   Meilleure lisibilité que le collapse vertical.
+----------------------------------------------- */
+@media (min-width: 481px) and (max-width: 900px) {
+  /* Le conteneur #output autorise le scroll horizontal */
+  #output {
+    overflow-x: auto;
+    align-items: flex-start;
+    padding: 0 10px;
+    -webkit-overflow-scrolling: touch;    /* Scroll fluide sur iOS */
   }
 
-  /* Cache les en-têtes de catégories sur mobile */
+  /* Grille compactée mais encore horizontale */
+  .category-row,
+  .guess-row {
+    grid-template-columns: 80px repeat(7, 110px);
+    gap: 10px;
+    min-width: max-content;   /* Empêche la compression des colonnes */
+  }
+
+  /* Image légèrement réduite */
+  .guess-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Cellules compactées */
+  .guess-cell {
+    width: 110px;
+    height: 80px;
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  /* Indice */
+  #quoteHint {
+    max-width: 95%;
+    margin: 15px auto;
+    font-size: 15px;
+  }
+
+  /* Bouton daltonien sous le toggle dark mode */
+  #daltonianToggle {
+    top: 60px;
+    right: 10px;
+  }
+}
+
+
+/* -----------------------------------------------
+   MOBILE (≤ 480px)
+   Layout carte 2 colonnes : image à gauche (toute la
+   hauteur), propriétés empilées à droite.
+   Vraie adaptation, pas juste un rétrécissement.
+
+   Structure obtenue :
+   ┌──────────┬─────────────────────┐
+   │          │ ■ Name              │
+   │  [img]   │ ■ Gender            │
+   │          │ ■ Age               │
+   │          │ ■ Persona User      │
+   │          │ ■ Persona           │
+   │          │ ■ Arcana            │
+   │          │ ■ Opus              │
+   └──────────┴─────────────────────┘
+----------------------------------------------- */
+@media (max-width: 480px) {
+
+  /* Cache l'en-tête de catégories (labels affichés via ::before) */
   .category-row {
     display: none;
   }
 
-  /* Image du personnage agrandie */
+  /* Conteneur de scroll horizontal désactivé sur mobile */
+  #output {
+    overflow-x: visible;
+    padding: 0 5px;
+  }
+
+  /* ---- Grille 2 colonnes : image | cellules ---- */
+  .guess-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;   /* Colonne image fixe, reste fluide */
+    grid-template-rows: repeat(7, auto);
+    gap: 5px 8px;
+    padding: 12px 10px;
+    width: min(360px, 96vw);
+    max-width: 100%;
+    margin: 0 auto 14px auto;
+    background-color: rgba(255, 255, 255, 0.88);
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+  }
+
+  /* Image : colonne de gauche, s'étend sur toutes les rangées */
   .guess-image {
-    width: 120px;
-    height: 120px;
+    grid-column: 1;
+    grid-row: 1 / 8;         /* Span des 7 cellules de propriétés */
+    width: 72px;
+    height: auto;
+    min-height: 72px;
     align-self: center;
-    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    object-fit: contain;
+    background-color: white;
   }
 
-  /* Cellule en pleine largeur */
+  /* Cellules : colonne de droite, une par ligne */
   .guess-cell {
-    width: 100%;
-    height: 70px;
-    font-size: 12px;
-    padding: 5px;
+    grid-column: 2;
+    width: auto;
+    height: auto;
+    min-height: 36px;
+    font-size: 11px;
+    padding: 5px 8px 5px 32px;   /* Padding gauche pour le label ::before */
+    border-radius: 6px;
+    text-align: left;
     position: relative;
+    line-height: 1.3;
+    word-break: break-word;
+    box-sizing: border-box;
   }
 
-  /* Label de la catégorie en data-attribute sur mobile */
+  /* Label de catégorie via data-attribute (positionné en absolu à gauche)
+     Remplace visuellement la .category-row masquée sur mobile. */
   .guess-cell::before {
     content: attr(data-label);
     position: absolute;
-    top: 2px;
     left: 5px;
-    font-size: 10px;
-    opacity: 0.8;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px;
+    opacity: 0.75;
+    font-weight: normal;
+    white-space: nowrap;
+    max-width: 28px;
+    overflow: hidden;
+    line-height: 1.1;
   }
 
-  /* Indice textuel réduit */
+  /* Dark mode : row adaptée */
+  body.darkmode .guess-row {
+    background-color: rgba(30, 30, 30, 0.92);
+  }
+
+  /* Indice textuel */
   #quoteHint {
-    max-width: 95%;
-    margin: 15px auto;
-    padding: 10px 15px;
-    font-size: 15px;
+    max-width: 96%;
+    margin: 12px auto;
+    padding: 10px 14px;
+    font-size: 14px;
   }
 
-  /* Bouton daltonien repositionné */
+  /* Bouton daltonien */
   #daltonianToggle {
     top: 60px;
     right: 10px;
-    z-index: 1000;
-  }
-}
-
-@media (max-width: 480px) {
-  .guess-cell {
-    height: 60px;
     font-size: 11px;
-  }
-
-  .guess-cell::before {
-    font-size: 9px;
-  }
-
-  .guess-image {
-    width: 100px;
-    height: 100px;
+    padding: 5px 12px;
+    z-index: 1000;
   }
 }

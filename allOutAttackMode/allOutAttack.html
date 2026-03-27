@@ -8,6 +8,7 @@
   <!-- Styles & Icon -->
   <link rel="stylesheet" href="../css/global.css?v=3" />
   <link rel="stylesheet" href="./allOutAttack.css?v=3" />
+  <link rel="stylesheet" href="../css/filterMenu.css" />
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 </head>
 
@@ -21,10 +22,46 @@
 
 
   <!-- À insérer en haut à gauche de la page All-Out Attack -->
-<div class="filter-buttons">
-  <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
-  <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
-   <button class="filter-btn filter-p5x active" data-opus="P5X">P5X</button>
+<!-- =====================================================
+     FILTRE OPUS — Panneau déroulant
+     Bouton "FILTRES" (Persona style) ouvre/ferme le panneau.
+     Chaque logo de jeu est cliquable :
+       • P1, P5X, AoA-groups → filtre direct
+       • P2 → IS + EP auto-affichés
+       • P3/P4/P5/PQ → sous-opus déroulants au clic
+     Géré par js/filterMenu.js + css/filterMenu.css
+     ===================================================== -->
+<div class="filter-panel" id="filterPanel">
+  <button class="filter-toggle-btn" id="filterToggleBtn"
+          aria-expanded="false" aria-controls="filterDropdown">
+    <span class="filter-toggle-icon">⚙</span>
+    <span class="filter-toggle-text">FILTRES</span>
+    <span class="filter-toggle-arrow">▼</span>
+  </button>
+  <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
+
+    <!-- Persona 3 — filtre direct -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-p3 active"
+              data-opus="P3" aria-label="Persona 3">
+        <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="Persona 3" class="filter-logo">
+      </button>
+    </div>
+    <!-- Persona 5 — filtre direct -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-p5 active"
+              data-opus="P5" aria-label="Persona 5">
+        <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo">
+      </button>
+    </div>
+    <!-- Persona 5X — filtre direct -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-p5x active"
+              data-opus="P5X" aria-label="Persona 5X">
+        <img src="../img/logo_jeu/Persona_5_The_Phantom_X_Logo.png" alt="Persona 5X" class="filter-logo">
+      </button>
+    </div>
+  </div>
 </div>
 
 

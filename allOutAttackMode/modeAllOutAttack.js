@@ -11,9 +11,11 @@ import {
   setupRulesModal,
   setupDailyReset,
   checkResetOnLoad,
-  setupFilterButtons,
   showWrongMini,
 } from "../js/gameCore.js";
+
+// Collapsible opus filter panel (shared across all modes)
+import { initFilterMenu } from "../js/filterMenu.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CDN / IMAGE LOADING CONFIGURATION
@@ -177,7 +179,10 @@ const AOA_BY_NAME = new Map(aoaCharacters.map((c) => [c.nom, c]));
 const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
 let sessionStartTime = Date.now();
 
-let activeOpusFilters = ["P3", "P5", "P5X"];
+/** All specific opus codes available in AllOutAttack mode. */
+const ALL_OPUS = ["P3", "P5", "P5X"];
+
+let activeOpusFilters = [...ALL_OPUS];
 let personas = [];      // mutable filtered list of character names
 let attempts = 0;
 let gameOver = false;
@@ -593,13 +598,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const gifElement = document.getElementById("aoaGif");
   const guessButton = document.getElementById("guessButton");
 
-  // ── Restore saved filters ──
-  const savedFilters = JSON.parse(localStorage.getItem("filters_AllOutAttack"));
-  if (Array.isArray(savedFilters)) activeOpusFilters = savedFilters;
+  // ── Filtre opus — panneau déroulant ──
+  const _filterApi = initFilterMenu("filters_AllOutAttack", ALL_OPUS, (newActive) => {
+    activeOpusFilters = newActive;
+    personas = getFilteredPersonas();
 
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.classList.toggle("active", activeOpusFilters.includes(btn.dataset.opus));
+    if (!personas.length) { alert("No characters match these filters!"); return; }
+
+    target = getBetterRandomCharacter();
+    const imageName = portraitsMap[target] || target.split(" ")[0];
+    showLoading(gifElement);
+    loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
+      gifElement.style.filter = "blur(20px)";
+    });
+
+    attempts = 0;
+    document.getElementById("wrongGuessList").innerHTML = "";
+    document.getElementById("victoryBox").style.display = "none";
+    localStorage.setItem("aoaTarget", target);
+    localStorage.setItem("aoaAttempts", 0);
+    localStorage.removeItem("aoaGameOver");
+    updateGiveUpCounter();
+
+    textbar.value = "";
+    textbar.disabled = false;
+    document.getElementById("giveUpButton").disabled = true;
+    document.getElementById("giveUpButton").style.cursor = "not-allowed";
+    initializeAutocomplete(textbar, personas);
   });
+  activeOpusFilters = _filterApi.getActive();
 
   personas = getFilteredPersonas();
   setTimeout(() => smartPreload(personas, "low"), 1500);
@@ -655,35 +682,6 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("aoaAttempts");
     localStorage.removeItem("aoaGameOver");
     resetGame();
-  });
-
-  // ── Filter buttons (shared utility) ──
-  setupFilterButtons("filters_AllOutAttack", (newFilters) => {
-    activeOpusFilters = newFilters;
-    personas = getFilteredPersonas();
-
-    if (!personas.length) { alert("No characters match these filters!"); return; }
-
-    target = getBetterRandomCharacter();
-    const imageName = portraitsMap[target] || target.split(" ")[0];
-    showLoading(gifElement);
-    loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
-      gifElement.style.filter = "blur(20px)";
-    });
-
-    attempts = 0;
-    document.getElementById("wrongGuessList").innerHTML = "";
-    document.getElementById("victoryBox").style.display = "none";
-    localStorage.setItem("aoaTarget", target);
-    localStorage.setItem("aoaAttempts", 0);
-    localStorage.removeItem("aoaGameOver");
-    updateGiveUpCounter();
-
-    textbar.value = "";
-    textbar.disabled = false;
-    document.getElementById("giveUpButton").disabled = true;
-    document.getElementById("giveUpButton").style.cursor = "not-allowed";
-    initializeAutocomplete(textbar, personas);
   });
 
   // ── Daily reset ──

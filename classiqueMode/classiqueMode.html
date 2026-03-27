@@ -8,6 +8,7 @@
   <!-- Styles & Icon -->
   <link rel="stylesheet" href="../css/global.css?v=3" />
   <link rel="stylesheet" href="./classique.css?v=3" />
+  <link rel="stylesheet" href="../css/filterMenu.css" />
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 </head>
 
@@ -20,18 +21,154 @@
   </header>
 
   <!-- Boutons pour filtrer les personnages par opus (P3, P4, P5) -->
-  <div class="filter-buttons">
-    <!-- Filtres Persona 1 & 2 -->
-    <button class="filter-btn filter-p1 active" data-opus="P1">P1</button>
-    <button class="filter-btn filter-p2 active" data-opus="P2">P2</button>
-    <button class="filter-btn filter-p3 active" data-opus="P3">P3</button>
-    <button class="filter-btn filter-p4 active" data-opus="P4">P4</button>
-    <button class="filter-btn filter-p5 active" data-opus="P5">P5</button>
-    <button class="filter-btn filter-p5x active" data-opus="P5X">P5X</button>
-    <button class="filter-btn filter-pq active" data-opus="PQ">PQ</button>
+<!-- =====================================================
+     FILTRE OPUS — Panneau déroulant
+     Bouton "FILTRES" (Persona style) ouvre/ferme le panneau.
+     Chaque logo de jeu est cliquable :
+       • P1, P5X, AoA-groups → filtre direct
+       • P2 → IS + EP auto-affichés
+       • P3/P4/P5/PQ → sous-opus déroulants au clic
+     Géré par js/filterMenu.js + css/filterMenu.css
+     ===================================================== -->
+<div class="filter-panel" id="filterPanel">
+  <button class="filter-toggle-btn" id="filterToggleBtn"
+          aria-expanded="false" aria-controls="filterDropdown">
+    <span class="filter-toggle-icon">⚙</span>
+    <span class="filter-toggle-text">FILTRES</span>
+    <span class="filter-toggle-arrow">▼</span>
+  </button>
+  <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
 
-
+    <!-- Persona 1 — filtre direct -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-p1 active"
+              data-opus="P1" aria-label="Persona 1">
+        <img src="../img/logo_jeu/Persona_PSP_logo.png" alt="Persona 1" class="filter-logo">
+      </button>
+    </div>
+    <!-- Persona 2 — IS et EP toujours visibles (auto-expand) -->
+    <div class="filter-group">
+      <span class="filter-group-auto-label">Persona 2</span>
+      <div class="filter-sub-panel expanded" data-group-panel="P2">
+        <button class="filter-sub-btn filter-color-p2is active"
+                data-opus="P2IS" aria-label="P2 Innocent Sin">
+          <img src="../img/logo_jeu/Persona_2_IS_PSP_logo.png" alt="P2IS" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p2ep active"
+                data-opus="P2EP" aria-label="P2 Eternal Punishment">
+          <img src="../img/logo_jeu/Persona_2_EP_PSP_logo.png" alt="P2EP" class="filter-sub-logo">
+        </button>
+      </div>
+    </div>
+    <!-- Persona 3 — clic logo → sous-opus déroulants -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-p3 active"
+              data-opus-group="P3" data-opus-codes="P3,P3FES,P3P,P3R"
+              aria-expanded="false" aria-label="Persona 3">
+        <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="Persona 3" class="filter-logo">
+        <span class="filter-expand-arrow">▸</span>
+      </button>
+      <div class="filter-sub-panel" data-group-panel="P3">
+        <button class="filter-sub-btn filter-color-p3 active"
+                data-opus="P3" aria-label="Persona 3 / Reload">
+          <img src="../img/logo_jeu/Persona_3_Logo.webp" alt="P3" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p3fes active"
+                data-opus="P3FES" aria-label="Persona 3 FES">
+          <img src="../img/logo_jeu/Persona_3_FES_Logo.webp" alt="P3FES" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p3p active"
+                data-opus="P3P" aria-label="Persona 3 Portable">
+          <img src="../img/logo_jeu/Persona_3_Portable_Logo.webp" alt="P3P" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p3r active"
+                data-opus="P3R" aria-label="Persona 3 Reload">
+          <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="P3R" class="filter-sub-logo">
+        </button>
+      </div>
+    </div>
+    <!-- Persona 4 — clic logo → sous-opus déroulants -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-p4 active"
+              data-opus-group="P4" data-opus-codes="P4,P4G,P4AU,P4D"
+              aria-expanded="false" aria-label="Persona 4">
+        <img src="../img/logo_jeu/Persona_4_Logo.png" alt="Persona 4" class="filter-logo">
+        <span class="filter-expand-arrow">▸</span>
+      </button>
+      <div class="filter-sub-panel" data-group-panel="P4">
+        <button class="filter-sub-btn filter-color-p4 active"
+                data-opus="P4" aria-label="Persona 4">
+          <img src="../img/logo_jeu/Persona_4_Logo.png" alt="P4" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p4g active"
+                data-opus="P4G" aria-label="Persona 4 Golden">
+          <img src="../img/logo_jeu/Persona_4_Golden_logo.webp" alt="P4G" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p4au active"
+                data-opus="P4AU" aria-label="Persona 4 Arena Ultimax">
+          <img src="../img/logo_jeu/Persona_4_Arena_Ultimax_Logo.png" alt="P4AU" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p4d active"
+                data-opus="P4D" aria-label="Persona 4 Dancing All Night">
+          <img src="../img/logo_jeu/Persona_4_Dancing_All_Night_Logo.png" alt="P4D" class="filter-sub-logo">
+        </button>
+      </div>
+    </div>
+    <!-- Persona 5 — clic logo → sous-opus déroulants -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-p5 active"
+              data-opus-group="P5" data-opus-codes="P5,P5R,P5S,P5T"
+              aria-expanded="false" aria-label="Persona 5">
+        <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo">
+        <span class="filter-expand-arrow">▸</span>
+      </button>
+      <div class="filter-sub-panel" data-group-panel="P5">
+        <button class="filter-sub-btn filter-color-p5 active"
+                data-opus="P5" aria-label="Persona 5">
+          <img src="../img/logo_jeu/Persona_5_logo.png" alt="P5" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p5r active"
+                data-opus="P5R" aria-label="Persona 5 Royal">
+          <img src="../img/logo_jeu/Persona_5_Royal_Logo.png" alt="P5R" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p5s active"
+                data-opus="P5S" aria-label="Persona 5 Strikers">
+          <img src="../img/logo_jeu/Persona_5_Strikers.png" alt="P5S" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p5t active"
+                data-opus="P5T" aria-label="Persona 5 Tactica">
+          <img src="../img/logo_jeu/Persona_5_Tactica_Logo.png" alt="P5T" class="filter-sub-logo">
+        </button>
+      </div>
+    </div>
+    <!-- Persona 5X — filtre direct -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-p5x active"
+              data-opus="P5X" aria-label="Persona 5X">
+        <img src="../img/logo_jeu/Persona_5_The_Phantom_X_Logo.png" alt="Persona 5X" class="filter-logo">
+      </button>
+    </div>
+    <!-- Persona Q — clic logo → sous-opus déroulants -->
+    <div class="filter-group">
+      <button class="filter-main-btn filter-color-pq active"
+              data-opus-group="PQ" data-opus-codes="PQ,PQ2"
+              aria-expanded="false" aria-label="Persona Q">
+        <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="Persona Q" class="filter-logo">
+        <span class="filter-expand-arrow">▸</span>
+      </button>
+      <div class="filter-sub-panel" data-group-panel="PQ">
+        <button class="filter-sub-btn filter-color-pq active"
+                data-opus="PQ" aria-label="Persona Q">
+          <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="PQ" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-pq2 active"
+                data-opus="PQ2" aria-label="Persona Q2">
+          <img src="../img/logo_jeu/Persona_Q2_Logo.png" alt="PQ2" class="filter-sub-logo">
+        </button>
+      </div>
+    </div>
   </div>
+</div>
 
   <button id="daltonianToggle">Daltonian Mode: OFF</button>
 

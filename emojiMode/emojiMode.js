@@ -13,9 +13,11 @@ import {
   setupRulesModal,
   setupDailyReset,
   checkResetOnLoad,
-  setupFilterButtons,
   showWrongMini,
 } from "../js/gameCore.js";
+
+// Collapsible opus filter panel (shared across all modes)
+import { initFilterMenu } from "../js/filterMenu.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -23,17 +25,10 @@ import {
 
 const modeName = "Emoji";
 
-/** Map from filter button label to the actual opus codes in the database. */
-const validOpus = {
-  P1: ["P1"],
-  P2: ["P2IS", "P2EP"],
-  P3: ["P3", "P3FES", "P3P"],
-  P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"],
-  P5X: ["P5X"],
-};
+/** All specific opus codes available in Emoji mode. */
+const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P4D","P5","P5R","P5S","P5T","P5X","PQ","PQ2"];
 
-let activeOpus = ["P1", "P2", "P3", "P4", "P5", "P5X"];
+let activeOpus = [...ALL_OPUS];
 
 // Mutable list of names fed to the autocomplete (splice to remove guessed)
 let personas = [...originalPersonas];
@@ -61,10 +56,9 @@ function getTodayStatsKey() {
  * @returns {Object[]}
  */
 function filterCharacterPool() {
-  const allValid = activeOpus.flatMap((o) => validOpus[o]);
   return characters.filter((c) => {
     const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-    return charOpus.some((op) => allValid.includes(op));
+    return charOpus.some((op) => activeOpus.includes(op));
   });
 }
 
@@ -403,16 +397,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const giveUpButton = document.getElementById("giveUpButton");
   const resetButton = document.getElementById("resetButton");
 
-  // ── Restore saved opus filters ──
-  const savedFilters = (() => {
-    try { return JSON.parse(localStorage.getItem("filters_Emoji")); } catch { return null; }
-  })();
-  if (Array.isArray(savedFilters)) activeOpus = savedFilters;
+  // ── Filtre opus — panneau déroulant ──
+  const _filterApi = initFilterMenu("filters_Emoji", ALL_OPUS, (newActive) => {
+    activeOpus = newActive;
+    const filteredCharacters = filterCharacterPool();
+    personas.length = 0;
+    personas.push(...filteredCharacters.map((c) => c.nom));
 
-  // Apply visual state to filter buttons
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.classList.toggle("active", activeOpus.includes(btn.dataset.opus));
+    if (filteredCharacters.length > 0) {
+      target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+      localStorage.setItem("targetEmoji", JSON.stringify(target));
+      attempts = 1;
+      localStorage.setItem("attemptsEmoji", attempts);
+      updateEmojiHint();
+      updateCounters();
+    }
   });
+  activeOpus = _filterApi.getActive();
 
   // ── Build initial character pool ──
   const poolInit = filterCharacterPool();
@@ -437,23 +438,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (localStorage.getItem("emojiGameOver") === "true" && target?.nom) {
     checkEmojiGuess(target.nom, localStorage.getItem("emojiForceReveal") === "true");
   }
-
-  // ── Filter button clicks (shared utility) ──
-  setupFilterButtons("filters_Emoji", (newFilters) => {
-    activeOpus = newFilters;
-    const filteredCharacters = filterCharacterPool();
-    personas.length = 0;
-    personas.push(...filteredCharacters.map((c) => c.nom));
-
-    if (filteredCharacters.length > 0) {
-      target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
-      localStorage.setItem("targetEmoji", JSON.stringify(target));
-      attempts = 1;
-      localStorage.setItem("attemptsEmoji", attempts);
-      updateEmojiHint();
-      updateCounters();
-    }
-  });
 
   // ── Guess button ──
   guessButton.addEventListener("click", () => {
@@ -493,24 +477,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Emoji mode uses msUntilNextParisMidnight directly for a reschedulable reset
   const scheduleDailyReset = () => {
-    const ms = msUntilNextParisMidnight();
-    console.log(`🕛 Next auto-reset in ~${Math.round(ms / 60000)} minutes (Paris)`);
     clearTimeout(window.__emojiResetTimer);
     window.__emojiResetTimer = setTimeout(() => {
-      console.log("🔄 Auto-reset triggered at Paris midnight (Emoji)");
       localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
       resetGame();
       location.reload();
-    }, ms + 500);
+    }, msUntilNextParisMidnight() + 500);
   };
 
   scheduleDailyReset();
 
-  // Reschedule if the tab was in the background and wakes up on a new day
+  // Si l'onglet était en arrière-plan et qu'on revient sur un nouveau jour,
+  // reset immédiat. Sinon, reprogramme simplement l'alarme.
+  // NOTE : window "focus" supprimé — il se déclenche à chaque clic sur la page
+  // et provoquait des rechargements intempestifs.
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) scheduleDailyReset();
+    if (document.hidden) return;
+    const stored = localStorage.getItem("lastPlayedDate_Emoji");
+    if (stored && stored !== parisDateKey()) {
+      // Nouveau jour détecté pendant que l'onglet était en arrière-plan
+      localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
+      resetGame();
+      location.reload();
+    } else {
+      scheduleDailyReset();
+    }
   });
-  window.addEventListener("focus", scheduleDailyReset);
 });
 
 

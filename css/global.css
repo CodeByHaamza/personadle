@@ -21,18 +21,14 @@ html {
 body {
   margin: 0;
   padding: 0;
-  /* Fond d'écran Personadle fixe en arrière-plan */
-  background-image: url('../img/personadle_wallpaper.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
   font-family: Arial, sans-serif;
   /* Empêche le scroll horizontal sur mobile */
   overflow-x: hidden;
 }
 
-/* Pseudo-élément pour la transition douce du fond au changement de mode */
+/* Pseudo-élément pour la transition douce du fond au changement de mode.
+   position:fixed + z-index:-1 remplace background-attachment:fixed sur body,
+   évitant ainsi une double couche de repaint à chaque scroll. */
 body::before {
   content: "";
   position: fixed;
@@ -44,7 +40,6 @@ body::before {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
   z-index: -1;
   opacity: 1;
   transition: background-image 0.5s ease-in-out;
@@ -1238,13 +1233,43 @@ button,
    19. RESPONSIVE
    ===================================================== */
 
-/* --- Tablettes et petits écrans (≤ 768px) --- */
+/* -----------------------------------------------
+   GRANDE TABLETTE / PETIT DESKTOP (≤ 1024px)
+   Ajustements légers pour écrans intermédiaires
+----------------------------------------------- */
+@media (max-width: 1024px) {
+  /* Logo légèrement réduit */
+  #imgHomePage {
+    width: 80%;
+    max-width: 700px;
+  }
+
+  /* Autocomplete légèrement plus étroit */
+  .autocomplete-items {
+    width: 300px;
+  }
+}
+
+
+/* -----------------------------------------------
+   TABLETTE / MOBILE (≤ 768px)
+   Adaptations structurelles importantes :
+   - Filtres repositionnés dans le flux (plus d'absolu)
+   - Input row : le champ passe au-dessus des boutons
+   - Bouton Rules : réintégré dans le flux du header
+   - Autocomplete réduit
+   - Victoire, navigation, confettis adaptés
+----------------------------------------------- */
 @media (max-width: 768px) {
+
+  /* ---- Base body ---- */
+  /* padding-top: 55px = espace pour le .darkmode-toggle fixe (top: 10px ~44px de hauteur)
+     Empêche le logo et les filtres de passer sous le toggle en haut à droite. */
   body {
     background-attachment: scroll !important;
     background-size: cover !important;
     background-position: center top !important;
-    padding: 10px;
+    padding: 55px 10px 10px 10px;
   }
 
   body::before {
@@ -1253,7 +1278,7 @@ button,
     background-position: center top;
   }
 
-  /* Logo réduit */
+  /* ---- Logo ---- */
   #imgHomePage {
     width: 90%;
     max-width: 400px;
@@ -1261,42 +1286,112 @@ button,
     display: block;
   }
 
-  /* Textbar pleine largeur */
-  #textbar {
-    width: 80%;
-    max-width: 300px;
-    margin-right: 0;
+  /* ---- Filtres opus : sortent du positionnement absolu ----
+     Sur mobile les filtres s'insèrent dans le flux normal du
+     document, centrés sous le logo, pour éviter tout overlap.
+  ---------------------------------------------------------- */
+  .filter-buttons,
+  .filter-switches {
+    position: static;          /* Retire l'absolu du desktop */
+    display: flex;
+    flex-wrap: wrap;           /* Retour à la ligne si nécessaire */
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    margin: 8px auto 0;
+    max-width: 95%;
+    z-index: 100;
   }
 
-  /* Boutons d'action en pleine largeur */
-  #guessButton,
-  #resetButton,
-  #hintButton,
-  #giveUpButton {
-    width: 80%;
-    max-width: 250px;
-    padding: 12px 20px;
-    font-size: 16px;
+  /* Boutons filtres plus compacts */
+  .filter-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+    min-height: 36px;
   }
 
-  #resetButton {
-    margin-left: 0;
-    margin-top: 10px;
+  /* ---- Bouton Rules : réintégré dans le flux ----
+     Les boutons Rules ont un inline style "position: absolute"
+     que l'on neutralise ici pour les remettre en flux normal.
+  ----------------------------------------------- */
+  .emoji-hint-zone > div:first-child,
+  .personadle-box > div:first-child {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 8px auto;
   }
 
-  /* Zone d'input en colonne */
+  /* Taille de l'image Rules réduite sur mobile */
+  .rules-link-wrapper .img-wrapper img {
+    height: 60px !important;
+  }
+
+  /* ---- Zone titre des modes ---- */
+  .emoji-hint-zone {
+    padding: 20px 15px;
+    margin: 15px auto;
+    max-width: 95%;
+    overflow: visible;         /* Pour que le bouton Rules ne soit pas rogné */
+  }
+
+  /* ---- Zone d'input : reorganisation complète ----
+     Sur tablette : le champ texte remonte au-dessus
+     des boutons Replay/Submit qui restent côte à côte.
+  ------------------------------------------------- */
   .input-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     margin-top: 15px;
   }
 
-  /* Autocomplete adapté */
+  .input-row {
+    display: flex;
+    flex-wrap: wrap;           /* Autorise le retour à la ligne */
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: min(380px, 95vw);  /* Largeur max absolue adaptée à l'écran */
+  }
+
+  /* Champ texte : occupe toute la première "rangée" */
+  .textbar-container {
+    order: -1;                 /* Passe en premier visuellement */
+    flex: 0 0 100%;
+    max-width: 300px;
+    display: flex;
+    justify-content: center;
+  }
+
+  #textbar {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+
+  /* Boutons Replay et Submit restent côte à côte */
+  .button-left,
+  .button-right {
+    flex: 0 0 auto;
+    order: 0;
+  }
+
+  /* Taille des boutons image réduite */
+  #guessButton,
+  #resetButton {
+    height: 70px;
+    display: block;
+  }
+
+  /* ---- Autocomplete ---- */
   .autocomplete-items {
     width: 90%;
-    max-width: 320px;
+    max-width: 300px;
     max-height: 250px;
     left: 50%;
     transform: translateX(-50%);
@@ -1319,14 +1414,20 @@ button,
     font-size: 14px;
   }
 
-  /* Zone titre des modes */
-  .emoji-hint-zone {
-    padding: 20px 15px;
-    margin: 20px auto;
-    max-width: 95%;
+  /* ---- Hint / Give Up ---- */
+  .hint-giveup-row {
+    gap: 20px;
+    margin-top: 15px;
+    flex-wrap: wrap;
   }
 
-  /* Boîte de victoire */
+  /* Réduction des boutons Hint et Give Up */
+  .hint-block .img-wrapper img,
+  .giveup-block .img-wrapper img {
+    height: 70px !important;
+  }
+
+  /* ---- Boîte de victoire ---- */
   .victory-box {
     max-width: 95%;
     margin: 20px auto;
@@ -1341,49 +1442,136 @@ button,
     font-size: 1.2rem;
   }
 
-  /* Confettis plus petits */
+  /* ---- Boutons de navigation entre modes ---- */
+  .nav-button {
+    width: 160px;
+    font-size: 1.1em;
+    padding: 14px 18px;
+  }
+
+  .prev-mode { margin-left: 2%; }
+  .next-mode { margin-right: 2%; }
+
+  /* ---- Confettis ---- */
   .confetti-emoji {
     font-size: 1.8rem;
   }
 
-  /* Repositionnement du toggle dark mode */
+  /* ---- Toggle dark mode ---- */
   .darkmode-toggle {
     top: 10px;
     right: 10px;
     z-index: 1000;
   }
+}
 
-  /* Filtres en colonne sur mobile */
-  .filter-buttons,
-  .filter-switches {
-    top: 110px;
-    left: 10px;
+
+/* -----------------------------------------------
+   PETITS MOBILES (≤ 480px)
+   Compactage supplémentaire : labels cachés,
+   input en colonne stricte, boutons plus petits.
+----------------------------------------------- */
+@media (max-width: 480px) {
+  /* padding-top conservé pour le toggle dark mode, côtés réduits */
+  body { padding: 50px 5px 5px 5px; }
+
+  /* ---- Filtres encore plus compacts ---- */
+  .filter-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+    min-height: 32px;
+  }
+
+  /* ---- Input : empilage vertical complet ----
+     Sur très petit écran, tout est en colonne :
+     champ texte, puis Replay, puis Submit.
+  --------------------------------------------- */
+  .input-row {
     flex-direction: column;
+    align-items: center;
     gap: 8px;
-    z-index: 1000;
+    width: min(300px, 95vw);
+  }
+
+  .textbar-container {
+    order: 0;
+    flex: 0 0 auto;
+    max-width: 260px;
+    width: 100%;
+  }
+
+  #textbar {
+    width: 100%;
+    font-size: 14px;
+    padding: 9px 12px;
+  }
+
+  #guessButton,
+  #resetButton {
+    height: 60px;
+  }
+
+  /* ---- Toggle dark mode : label masqué ----
+     Sur mini mobile, le texte "Dark Mode" est caché
+     pour économiser de l'espace en haut à droite.
+  ----------------------------------------------- */
+  .label-text {
+    display: none;
+  }
+
+  .darkmode-toggle {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+
+  /* ---- Victoire ---- */
+  .victory-box img { width: 100px; }
+  .win-message     { font-size: 1.1rem; }
+
+  /* ---- Navigation modes ---- */
+  .nav-button {
+    width: 130px;
+    font-size: 1em;
+    padding: 12px 14px;
+  }
+
+  /* ---- Emoji-hint-zone ---- */
+  .emoji-hint-zone h2 {
+    font-size: 1.1rem;
   }
 }
 
-/* --- Petits mobiles (< 480px) --- */
-@media (max-width: 480px) {
-  body { padding: 5px; }
 
-  .victory-box img  { width: 100px; }
-  .win-message      { font-size: 1.1rem; }
-}
-
-/* --- Appareils tactiles (sans hover) --- */
+/* -----------------------------------------------
+   APPAREILS TACTILES (sans hover natif)
+   Zones de tap agrandies, hover effects désactivés
+----------------------------------------------- */
 @media (hover: none) and (pointer: coarse) {
+  /* Zones de tap minimum 44px pour tous les boutons */
   .gamemode-button,
   #guessButton,
   #hintButton,
   #resetButton,
-  #giveUpButton {
+  #giveUpButton,
+  .filter-btn {
     touch-action: manipulation;
+    min-height: 44px;
+  }
+
+  /* Désactive les effets hover non utilisables sur tactile */
+  .link-wrapper:hover {
+    transform: none;
+  }
+
+  .link-wrapper:hover .shape-wrapper {
+    display: none;
   }
 }
 
-/* --- Accessibilité : animation réduite --- */
+
+/* -----------------------------------------------
+   ACCESSIBILITÉ : MOUVEMENT RÉDUIT
+----------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

@@ -1,3 +1,31 @@
+<!-- =============================================================
+     index.html — Page d'accueil de Personadle
+     ─────────────────────────────────────────────────────────────
+     Structure :
+       1.  HEADER         Logo cliquable (retour accueil)
+       2.  PROFIL         Avatar, pseudo, bouton "My Account"
+       3.  TITRE          Sous-titre du sélecteur de modes
+       4.  BOUTONS MODES  6 boutons animés (P3/P4/P5/Shadow/Personae/Music)
+       5.  DARK MODE      Toggle fixe en haut à droite
+       6.  SCRIPT         Init dark mode via localStorage
+       7.  SOCIALS        Liens GitHub, Discord, Ko-fi
+       8.  FOOTER         Copyright, legal, suggestions
+       9.  NEWS BTN       Bouton fixe bas-gauche (popup updates)
+      10.  STYLE INLINE   Chibi deco + News modal + Daily modal styles
+      11.  NEWS MODAL     Popup historique des mises à jour (accordion)
+      12.  SCRIPT         Comportement News modal + accordion
+      13.  LEGAL MODAL    Mentions légales (fan project disclaimer)
+      14.  SCRIPT         Ouverture/fermeture de la modale légale
+      15.  DAILY MODAL    Info reset quotidien + countdown Paris
+      16.  SCRIPT         Countdown temps réel (requestAnimationFrame)
+      17.  PROFIL MODAL   Gestion avatar, pseudo, stats, badges
+      18.  SCRIPTS PROFIL Logique profil, badges, partage de stats
+     ─────────────────────────────────────────────────────────────
+     CSS chargés :
+       global.css  — styles partagés toutes pages
+       index.css   — styles exclusifs à cette page
+       badges.css  — styles du système de badges
+     ============================================================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,6 +57,12 @@
           <img src="./img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage">
       </a>
   </header>
+<!-- =====================================================
+     2. PROFIL UTILISATEUR
+     Affiche l'avatar et le pseudo si l'utilisateur a créé
+     un profil (localStorage). Sinon, éléments vides.
+     Le bouton "My Account" ouvre la modale profileModal.
+     ===================================================== -->
 <div id="profileWrapper" style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
 <div id="profileDisplay" style="position: relative; display: inline-block;">
   <img id="headerAvatar" src="" alt="Avatar" 
@@ -54,24 +88,159 @@
   
   <!-- Buttons for game modes -->
   <div id ="gameModeSelector">
-      <button class="gamemode-button" id="classicButton" onclick="location.href='./classiqueMode/classiqueMode.html'">
-          <img src="./img/classic_button_thanatos (1).png" alt="Classique Mode">
-      </button>
-      <button class="gamemode-button" id="EmojiButton" onclick="location.href='./emojiMode/emojiMode.html'">
-          <img src="./img/Emoji_button_final.png" alt="Emoji Mode">
-      </button>
-      <button class="gamemode-button" id="AllOutAttackButton" onclick="location.href='./allOutAttackMode/allOutAttack.html'">
-          <img src="./img/all-ou-attack_avec_masque (1).png" alt="All Out Attack Mode">
-      </button>
-      <button class="gamemode-button" id="shadowsButton" onclick="location.href='./silhouetteMode/silhouette.html'">
-          <img src="./img/Shadows_button_Velvet_room.png" alt="Shadows Mode">
-      </button>
-      <button class="gamemode-button" id="PersonaeButton" onclick="location.href='./personaeMode/personae.html'">
-          <img src="./img/personae button.png" alt="Persona Mode">
-          </button>
-         <button class="gamemode-button" id="MusicButton" onclick="location.href='./musicsMode/musics.html'">
-          <img src="./img/musicmode.png" alt="Persona Mode">
-          </button>
+      <button class="p3-container" id="classicButton" onclick="location.href='./classiqueMode/classiqueMode.html'">
+  
+  <!-- La lune de l'Heure Sombre -->
+  <div class="p3-moon"></div>
+  
+  <!-- Particules bleues (Style Persona 3 Reload) -->
+  <div class="p3-particle p3-p1"></div>
+  <div class="p3-particle p3-p2"></div>
+  <div class="p3-particle p3-p3"></div>
+  <div class="p3-particle p3-p4"></div>
+
+  <!-- Image principale (Thanatos et le texte) -->
+  <img src="./img/classic_button_thanatos (1).png" alt="Classique Mode" class="p3-main-img">
+
+</button>
+      <button id="EmojiButton" class="p4-container" onclick="location.href='./emojiMode/emojiMode.html'">
+  <!-- Décorations animées au survol -->
+  <div class="p4-rainbow"></div>
+  <div class="p4-flower flower-1">✿</div>
+  <div class="p4-flower flower-2">✨</div>
+  <div class="p4-flower flower-3">✿</div>
+  <!-- Image principale du bouton -->
+  <img src="./img/Emoji_button_final.png" alt="Mode Emoji" class="p4-main-img" />
+</button>
+      <button class="p5-container" id="AllOutAttackButton" onclick="location.href='./allOutAttackMode/allOutAttack.html'">
+  <!-- Couches d'animation arrière-plan -->
+  <div class="p5-background-layers">
+    <div class="p5-bg-jagged"></div>
+    <!-- 6 traînées de vitesse (parallelogrammes) -->
+    <div class="p5-speed-trails">
+      <div class="p5-trail trail-1"></div>
+      <div class="p5-trail trail-2"></div>
+      <div class="p5-trail trail-3"></div>
+      <div class="p5-trail trail-4"></div>
+      <div class="p5-trail trail-5"></div>
+      <div class="p5-trail trail-6"></div>
+    </div>
+    <!-- 8 étoiles qui pulsent — 3 variantes d'animation -->
+    <div class="p5-stars-burst-container">
+      <div class="p5-starburst sburst-1">✦</div>
+      <div class="p5-starburst sburst-2">✦</div>
+      <div class="p5-starburst sburst-3">★</div>
+      <div class="p5-starburst sburst-4">✦</div>
+      <div class="p5-starburst sburst-5">★</div>
+      <div class="p5-starburst sburst-6">✧</div>
+      <div class="p5-starburst sburst-7">✦</div>
+      <div class="p5-starburst sburst-8">✧</div>
+    </div>
+  </div>
+  <!-- Titre "ALL-OUT ATTACK" en 2 lignes stylisées -->
+  <div class="p5-main-content">
+    <div class="p5-title">
+      <div class="p5-line-1">ALL-OUT</div>
+      <div class="p5-line-2">ATTACK</div>
+    </div>
+  </div>
+  <!-- Image principale — visible par défaut, cachée puis révélée au survol -->
+  <img src="./img/all-ou-attack_avec_masque (1).png" alt="All Out Attack Mode" class="p5-main-img">
+</button>
+      <button class="dark-velvet-container" id="ShadowsButton" onclick="location.href='./silhouetteMode/silhouette.html'">
+  <!-- Fond dégradé violet Velvet Room + runes -->
+  <div class="shadow-bg-layers">
+    <div class="shadow-bg-gradient"></div>
+    <div class="shadow-runes-container">
+      <div class="shadow-rune rune-1">◆</div>
+      <div class="shadow-rune rune-2">◆</div>
+      <div class="shadow-rune rune-3">◇</div>
+      <div class="shadow-rune rune-4">◆</div>
+      <div class="shadow-rune rune-5">◇</div>
+      <div class="shadow-rune rune-6">◆</div>
+    </div>
+  </div>
+  <!-- 3 chaînes Velvet Room : angles différents, accrochage élastique -->
+  <div class="velvet-chains">
+    <div class="chain-1"></div>
+    <div class="chain-2"></div>
+    <div class="chain-3"></div>
+  </div>
+  <!-- Titre "SHADOW" -->
+  <div class="shadow-main-content">
+    <div class="shadow-line-1">SHADOWS</div>
+  </div>
+  <!-- Image visible par défaut, cachée au hover, révélée à la fin -->
+  <img src="./img/Shadows_button_Velvet_room.png" alt="Shadows Mode" class="shadow-main-img">
+</button>
+      <button class="personae-container" id="PersonaeButton" onclick="location.href='./personaeMode/personae.html'">
+
+  <!-- Fond Velvet Room (indigo/violet multicouche) -->
+  <div class="personae-bg"></div>
+
+  <!-- Orbe dorée atmosphérique derrière la carte -->
+  <div class="personae-card-halo"></div>
+
+  <!-- Carte de tarot — conteneur centré + wrapper animé + shimmer -->
+  <div class="personae-tarot-center">
+    <div class="personae-tarot-wrap">
+      <img src="./img/tarot.jpeg" alt="" class="personae-tarot-card" aria-hidden="true">
+      <!-- Bande lumineuse qui balaye la carte après le flip -->
+      <div class="personae-tarot-shine"></div>
+    </div>
+  </div>
+
+  <!-- Symboles d'arcane (chiffres romains + lune) aux 4 coins -->
+  <div class="personae-arcana-container">
+    <div class="personae-arcana arc-1">I</div>
+    <div class="personae-arcana arc-2">XI</div>
+    <div class="personae-arcana arc-3">☽</div>
+    <div class="personae-arcana arc-4">✦</div>
+    <div class="personae-arcana arc-5">XVI</div>
+    <div class="personae-arcana arc-6">✦</div>
+  </div>
+
+  <!-- Titre "PERSONA" qui monte du bas -->
+  <div class="personae-title-wrap">
+    <div class="personae-title">PERSONA</div>
+  </div>
+
+  <!-- Image visible par défaut, cachée au hover, révélée avec reflet doré -->
+  <img src="./img/personae button.png" alt="Persona Mode" class="personae-main-img">
+
+</button>
+         <button class="music-mode-btn" id="MusicButton" onclick="location.href='./musicsMode/musics.html'">
+  
+  <!-- Panneaux roses obliques — fond en cascade -->
+  <div class="music-bg-panels">
+    <div class="m-panel m-panel-1"></div>
+    <div class="m-panel m-panel-2"></div>
+    <div class="m-panel m-panel-3"></div>
+    <div class="m-panel m-panel-4"></div>
+    <div class="m-panel m-panel-5"></div>
+  </div>
+
+  <!-- Étoiles & notes musicales — 8 éléments, 3 variantes d'animation -->
+  <div class="music-stars-container">
+    <div class="m-star mstar-1">♪</div>
+    <div class="m-star mstar-2">✦</div>
+    <div class="m-star mstar-3">♫</div>
+    <div class="m-star mstar-4">★</div>
+    <div class="m-star mstar-5">♪</div>
+    <div class="m-star mstar-6">✧</div>
+    <div class="m-star mstar-7">♩</div>
+    <div class="m-star mstar-8">✦</div>
+  </div>
+
+  <!-- Image — visible par défaut, cachée au hover, révélée à la fin -->
+  <img src="./img/musicmode.png" alt="Music Mode" class="music-main-img">
+
+  <!-- Titre "MUSIC" — lettres animées en cascade, puis fade-out -->
+  <div class="music-title">
+    <span>M</span><span>U</span><span>S</span><span>I</span><span>C</span>
+  </div>
+
+</button>
   </div>
  
 <!-- Bouton Mode Sombre -->
@@ -105,6 +274,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+<!-- =====================================================
+     7. LIENS SOCIAUX
+     GitHub (code source), Discord (communauté), Ko-fi (soutien).
+     ===================================================== -->
 <div id="socialLinks" style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
 <a href="https://github.com/HamzaKarrouchi/personadle" target="_blank" title="GitHub" id="githubLink">
   <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
@@ -117,6 +290,10 @@ document.addEventListener("DOMContentLoaded", () => {
 </a>
 </div>
 
+<!-- =====================================================
+     8. FOOTER
+     Copyright et liens légaux + suggestions/bug report.
+     ===================================================== -->
 <footer>
 <p>personadle.net — 2026</p>
 <p>
@@ -129,7 +306,16 @@ document.addEventListener("DOMContentLoaded", () => {
 <!-- 🔔 News Popup -->
 <button id="newsBtn" class="news-btn">📰 News</button>
 
-<!-- Ajoute ce CSS dans la section <style> existante -->
+<!-- =====================================================
+     10. STYLES INLINE — Chibi deco + News modal
+     Scoped à index.html. Styles pour :
+       .chibi-deco          Images décoratives dans la modale News
+       .news-modal          Overlay de la modale News
+       .version-item        Entrées accordion du changelog
+       .hotfix-item/.badge  Variante visuelle pour les hotfix
+     NOTE : ces styles sont inline car liés aux composants
+     HTML injectés directement dans cette page.
+     ===================================================== -->
 <style>
 /* === 🎨 CHIBI DECORATIONS === */
 .chibi-deco {
@@ -186,7 +372,11 @@ body.darkmode .chibi-deco {
 }
 </style>
 
-<!-- Remplace ta modal News par ceci : -->
+<!-- =====================================================
+     11. MODALE NEWS — Historique des mises à jour
+     Accordion : chaque .version-item se déplie au clic
+     via .active qui déverrouille .version-content max-height.
+     ===================================================== -->
 <div id="newsModal" class="news-modal" style="display: none;">
   <div class="news-modal-content">
     
@@ -293,6 +483,12 @@ body.darkmode .chibi-deco {
   </div>
 </div>
 
+<!-- =====================================================
+     STYLES INLINE — Bouton News + Badge IA
+     Scoped à index.html. Styles pour :
+       .news-btn        Bouton fixe bas-gauche "News"
+       .badge-ai-info   Tooltip info sur les badges IA
+     ===================================================== -->
 <style>
 /* Bouton News */
 .news-btn {
@@ -512,6 +708,32 @@ body.darkmode .news-btn:hover {
 background: #444;
 }
 
+/* -----------------------------------------------
+   RESPONSIVE — Bouton News
+   Réduit sur tablette et mobile pour ne pas
+   masquer le footer ou d'autres éléments.
+   Symétrique avec .daily-btn (bas-droite).
+----------------------------------------------- */
+@media (max-width: 768px) {
+  .news-btn {
+    bottom: 10px;
+    left: 10px;
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-btn {
+    bottom: 8px;
+    left: 8px;
+    font-size: 11px;
+    padding: 5px 9px;
+    border-radius: 8px;
+  }
+}
+
 /* === ℹ️ BADGE AI INFO === */
 .badge-ai-info {
   position: relative;
@@ -606,6 +828,11 @@ body.darkmode .info-tooltip {
 
 
 
+<!-- =====================================================
+     12. SCRIPT — News modal + accordion
+     Gère : ouverture/fermeture de la modale News,
+     et le comportement accordion des .version-item.
+     ===================================================== -->
 <script>
 const newsModal = document.getElementById("newsModal");
 const newsBtn = document.getElementById("newsBtn");
@@ -688,6 +915,10 @@ document.querySelectorAll('.version-header').forEach(header => {
 </div>
 
 
+<!-- =====================================================
+     14. SCRIPT — Modale mentions légales
+     Ouvre au clic sur #legalLink, ferme sur close ou click hors.
+     ===================================================== -->
 <script>
 const legalModal = document.getElementById("legalModal");
 const legalLink = document.getElementById("legalLink");
@@ -724,6 +955,11 @@ window.onclick = function (event) {
 </div>
 </div>
 
+<!-- =====================================================
+     16. SCRIPT — Countdown Daily Reset
+     Calcule le temps restant avant minuit (Paris/Europe)
+     en temps réel via requestAnimationFrame (rafraîch. 60fps).
+     ===================================================== -->
 <script>
 const dailyModal = document.getElementById("dailyModal");
 const dailyBtn = document.getElementById("dailyInfoBtn");

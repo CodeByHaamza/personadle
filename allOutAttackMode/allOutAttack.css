@@ -64,3 +64,48 @@ body.darkmode .aoa-gif-zone {
   background: rgba(40, 40, 40, 0.85);
   border-color: #ff6a6a;
 }
+
+
+/* =====================================================
+   3. RESPONSIVE — SPÉCIFIQUE ALL-OUT ATTACK
+   ===================================================== */
+
+/* -----------------------------------------------
+   TABLETTE (≤ 768px)
+   La zone GIF s'adapte à la largeur disponible.
+----------------------------------------------- */
+@media (max-width: 768px) {
+  .aoa-gif-zone {
+    max-width: 95%;
+    margin: 20px auto;
+    padding: 15px;
+    border-radius: 12px;
+  }
+
+  /* Le GIF ne dépasse pas la largeur disponible */
+  #aoaGif {
+    max-width: 100%;
+    margin: 20px auto;
+  }
+}
+
+
+/* -----------------------------------------------
+   MOBILE (≤ 480px)
+   Zone compacte, padding réduit, coins arrondis.
+   L'effet de lueur rouge est conservé pour le style.
+----------------------------------------------- */
+@media (max-width: 480px) {
+  .aoa-gif-zone {
+    padding: 10px;
+    margin: 14px auto;
+    border-radius: 10px;
+    border-width: 2px;
+    max-width: 96vw;
+  }
+
+  #aoaGif {
+    margin: 12px auto;
+    border-radius: 10px;
+  }
+}

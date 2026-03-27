@@ -22,24 +22,16 @@ import {
   checkResetOnLoad,
 } from "../js/gameCore.js";
 
+// Collapsible opus filter panel (shared across all modes)
+import { initFilterMenu } from "../js/filterMenu.js";
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Maps each top-level opus filter key to the actual game IDs it covers.
- * Must stay in sync with the filter buttons in musics.html.
- */
-const validOpus = {
-  P1:  ["P1"],
-  P2:  ["P2IS", "P2EP"],
-  P3:  ["P3", "P3P", "P3FES", "P3R"],
-  P4:  ["P4", "P4G", "P4AU", "P4D"],
-  P5:  ["P5", "P5R", "P5S", "P5T"],
-  P5X: ["P5X"],
-  PQ:  ["PQ", "PQ2"],
-};
+/** All specific opus codes available in Music mode. */
+const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4D","P5","P5R","P5S","P5X","PQ","PQ2"];
 
 /** Maximum number of guesses before the "Give Up" button is enabled. */
 const MAX_ATTEMPTS = 3;
@@ -53,7 +45,7 @@ const MUSIC_EMOJIS = ["🎵", "🎶", "🎉", "✨"];
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Currently active opus filters (persisted to localStorage). */
-let activeFilters = ["P3", "P4", "P5", "P5X"];
+let activeFilters = [...ALL_OPUS];
 
 /** Filtered song pool based on activeFilters. */
 let filteredSongs = [];
@@ -110,17 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
   victoryImage = document.getElementById("victoryImage");
   victoryText  = document.getElementById("victoryText");
 
-  // ── Restore opus filters from localStorage ─────────────────────────────────
-  const storedFilters = localStorage.getItem("musicActiveFilters");
-  if (storedFilters) {
-    try {
-      const parsed = JSON.parse(storedFilters);
-      if (Array.isArray(parsed)) activeFilters = parsed;
-    } catch (e) {
-      console.warn("⚠️ Could not parse stored Music filters:", e);
-    }
-  }
-
   // ── Restore session state ──────────────────────────────────────────────────
   const savedTarget     = localStorage.getItem("musicTarget");
   const savedAttempts   = localStorage.getItem("musicAttempts");
@@ -151,8 +132,14 @@ document.addEventListener("DOMContentLoaded", () => {
     resetGame();
   }
 
+  // ── Filtre opus — panneau déroulant ──
+  const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) => {
+    activeFilters = newActive;
+    resetGame();
+  });
+  activeFilters = _filterApi.getActive();
+
   // ── UI wiring ──────────────────────────────────────────────────────────────
-  setupFilterButtons();
   applyDarkModeStyles();
   setupRulesModal();                          // ← shared utility
 
@@ -186,10 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
  * @returns {Object[]} Filtered array of song objects
  */
 function getFilteredSongs() {
-  const accepted = activeFilters.flatMap(o => validOpus[o]);
   return originalSongs.filter(song => {
     const ops = Array.isArray(song.opus) ? song.opus : [song.opus];
-    return ops.some(op => accepted.includes(op));
+    return ops.some(op => activeFilters.includes(op));
   });
 }
 
@@ -488,7 +474,7 @@ function initializeAutocomplete(input) {
     this.parentNode.appendChild(list);
 
     const lowerVal    = val.toLowerCase();
-    const acceptedOpus = activeFilters.flatMap(o => validOpus[o]);
+    const acceptedOpus = activeFilters;
 
     // Filter songs by: partial title match, not already tried, active opus
     const matches = originalSongs
@@ -566,43 +552,6 @@ function initializeAutocomplete(input) {
   function closeList() {
     document.querySelectorAll(".autocomplete-items").forEach(el => el.remove());
   }
-}
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FILTER BUTTONS
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Wires the opus filter buttons and syncs their visual state with `activeFilters`.
- *
- * NOTE: Music mode keeps its own filter setup (not the shared utility) because
- * it mutates `activeFilters` directly (push/filter pattern) rather than
- * rebuilding the array from DOM state. This matches Silhouette's approach.
- */
-function setupFilterButtons() {
-  const btns = document.querySelectorAll(".filter-btn");
-
-  btns.forEach(btn => {
-    const val = btn.dataset.opus;
-
-    // Sync visual state with restored filters
-    if (activeFilters.includes(val)) btn.classList.add("active");
-    else btn.classList.remove("active");
-
-    btn.addEventListener("click", () => {
-      btn.classList.toggle("active");
-
-      if (btn.classList.contains("active")) {
-        if (!activeFilters.includes(val)) activeFilters.push(val);
-      } else {
-        activeFilters = activeFilters.filter(o => o !== val);
-      }
-
-      localStorage.setItem("musicActiveFilters", JSON.stringify(activeFilters));
-      resetGame();
-    });
-  });
 }
 
 

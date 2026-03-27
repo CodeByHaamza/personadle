@@ -1,3 +1,20 @@
+/**
+ * modePersonae.js — Personae mode (Personadle).
+ *
+ * The player is shown an image of a Persona (the creature, not the wielder)
+ * and must guess which character from the franchise uses that Persona.
+ * Up to 3 wrong guesses are allowed; after that the "Give Up" button unlocks.
+ *
+ * Key features:
+ *  - Opus filter buttons let players restrict guesses to specific games
+ *  - Autocomplete filters out already-guessed names and out-of-scope characters
+ *  - Badge tracking for Twin Blade (Yosuke/Yusuke), Crimson Legacy (Picaro variants)
+ *  - Session state is persisted in localStorage so a refresh resumes the game
+ *
+ * Shared utilities are imported from js/gameCore.js.
+ * This file contains only Personae-mode-specific logic.
+ */
+
 // === IMPORTS ===
 import { personaeCharacters as originalCharacters } from "./database/personaeCharacters.js";
 import { portraitsMapPersonae as portraitsMap } from "./database/portraitsMapPersonae.js";
@@ -11,24 +28,20 @@ import {
   setupRulesModal,
   setupDailyReset,
   checkResetOnLoad,
-  setupFilterButtons,
   showWrongMini,
 } from "../js/gameCore.js";
+
+// Collapsible opus filter panel (shared across all modes)
+import { initFilterMenu } from "../js/filterMenu.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Map from filter button label to actual opus codes. */
-const validOpus = {
-  P2: ["P2IS", "P2EP"],
-  P3: ["P3", "P3P", "P3FES"],
-  P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"],
-  P5X: ["P5X"],
-};
+/** All specific opus codes available in Personae mode. */
+const ALL_OPUS = ["P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P5","P5R","P5S","P5T","P5X"];
 
-let activeFilters = ["P2", "P3", "P4", "P5", "P5X"];
+let activeFilters = [...ALL_OPUS];
 let filteredCharacters = [];
 let target = null;
 let attempts = 0;
@@ -59,10 +72,9 @@ if (!localStorage.getItem("playerProfile") && localStorage.getItem("personaUserP
  * @returns {Object[]}
  */
 function getFilteredCharacters() {
-  const accepted = activeFilters.flatMap((o) => validOpus[o]);
   return originalCharacters.filter((c) => {
     const op = Array.isArray(c.opus) ? c.opus : [c.opus];
-    return op.some((o) => accepted.includes(o));
+    return op.some((o) => activeFilters.includes(o));
   });
 }
 
@@ -115,7 +127,7 @@ function initializeAutocomplete(input, personasList) {
     this.parentNode.appendChild(list);
 
     const lowerVal = val.toLowerCase();
-    const accepted = activeFilters.flatMap((o) => validOpus[o]);
+    const accepted = activeFilters;
     const matches = [];
 
     for (let i = 0; i < personasList.length; i++) {
@@ -417,6 +429,10 @@ function resetGame() {
 // DARK MODE (personae-specific element)
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Applies inline dark-mode overrides to the persona image box.
+ * Called once on load; the global CSS handles the rest of dark-mode styling.
+ */
 function applyDarkModeStyles() {
   if (!document.body.classList.contains("darkmode")) return;
   const zone = document.querySelector(".persona-box");
@@ -444,27 +460,15 @@ document.addEventListener("DOMContentLoaded", () => {
   victoryImage = document.getElementById("victoryImage");
   victoryText = document.getElementById("victoryText");
 
-  // ── Restore saved filters ──
-  try {
-    const stored = JSON.parse(localStorage.getItem("personaeActiveFilters"));
-    if (Array.isArray(stored)) activeFilters = stored;
-  } catch (e) {
-    console.warn("⚠️ Error reading stored filters:", e);
-  }
-
   setupRulesModal();
   applyDarkModeStyles();
 
-  // ── Filter buttons (shared utility) ──
-  // Visual init first, then wire clicks
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    btn.classList.toggle("active", activeFilters.includes(btn.dataset.opus));
-  });
-
-  setupFilterButtons("personaeActiveFilters", (newFilters) => {
-    activeFilters = newFilters;
+  // ── Filtre opus — panneau déroulant ──
+  const _filterApi = initFilterMenu("personaeActiveFilters", ALL_OPUS, (newActive) => {
+    activeFilters = newActive;
     resetGame();
   });
+  activeFilters = _filterApi.getActive();
 
   guessBtn.addEventListener("click", handleGuess);
   resetBtn.addEventListener("click", resetGame);
@@ -516,6 +520,13 @@ document.addEventListener("DOMContentLoaded", () => {
 // DEBUG (console only)
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Console utility: verifies every name in persona.js has a matching entry in
+ * personaeCharacters.js and a portrait in portraitsMapPersonae.js.
+ * Logs missing entries to the console to help catch data inconsistencies early.
+ *
+ * Usage (browser console): import('/personaeMode/modePersonae.js').then(m => m.debugAllPersonae())
+ */
 export function debugAllPersonae() {
   console.log("=== DEBUG PERSONAE MODE ===");
   const errors = [];

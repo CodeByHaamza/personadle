@@ -14,6 +14,9 @@ import {
   showWrongMini,
 } from "../js/gameCore.js";
 
+// Collapsible opus filter panel (shared across all modes)
+import { initFilterMenu } from "../js/filterMenu.js";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -23,25 +26,10 @@ const todayKey = `statsLogged_${modeName}_${new Date().toISOString().split("T")[
 let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
 let sessionStartTime = Date.now();
 
-/** Map from filter button label to actual opus codes. */
-const validOpus = {
-  P1: ["P1"],
-  P2: ["P2IS", "P2EP"],
-  P3: ["P3", "P3P", "P3FES"],
-  P4: ["P4", "P4G", "P4AU", "P4D"],
-  P5: ["P5", "P5R", "P5S", "P5T"],
-  P5X: ["P5X"],
-  PQ: ["PQ", "PQ2"],
-};
+/** All specific opus codes available in Silhouette mode. */
+const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P4D","P5","P5R","P5S","P5T","P5X","PQ","PQ2"];
 
-// Restore saved filters from localStorage
-let activeFilters = ["P1", "P2", "P3", "P4", "P5", "P5X"];
-try {
-  const stored = JSON.parse(localStorage.getItem("silhouetteActiveFilters"));
-  if (Array.isArray(stored)) activeFilters = stored;
-} catch (e) {
-  console.warn("⚠️ Error reading silhouette filters:", e);
-}
+let activeFilters = [...ALL_OPUS];
 
 let filteredCharacters = [];
 let target = null;
@@ -82,10 +70,9 @@ silhouetteImg.style.transition = "none";
  * @returns {Object[]}
  */
 function getFilteredCharacters() {
-  const accepted = activeFilters.flatMap((o) => validOpus[o]);
   return originalCharacters.filter((c) => {
     const op = Array.isArray(c.opus) ? c.opus : [c.opus];
-    return op.some((o) => accepted.includes(o));
+    return op.some((o) => activeFilters.includes(o));
   });
 }
 
@@ -190,9 +177,7 @@ function initializeAutocomplete(input, personasList) {
         !character ||
         character._guessed ||
         !lowerName.includes(lowerVal) ||
-        !character.opus.some((o) =>
-          validOpus[activeFilters.find((f) => validOpus[f]?.includes(o))]
-        )
+        !character.opus.some((o) => activeFilters.includes(o))
       ) continue;
 
       const [firstName, lastName] = displayName.split(" ");
@@ -448,32 +433,6 @@ function resetGame() {
 // FILTER BUTTONS (silhouette-specific wiring)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Wires opus filter buttons.
- * In Silhouette mode, toggling a filter immediately triggers resetGame()
- * to pick a character from the new pool.
- */
-function setupFilterButtons() {
-  document.querySelectorAll(".filter-btn").forEach((btn) => {
-    const val = btn.dataset.opus;
-
-    // Restore visual state
-    btn.classList.toggle("active", activeFilters.includes(val));
-
-    btn.addEventListener("click", () => {
-      btn.classList.toggle("active");
-
-      if (btn.classList.contains("active")) {
-        if (!activeFilters.includes(val)) activeFilters.push(val);
-      } else {
-        activeFilters = activeFilters.filter((o) => o !== val);
-      }
-
-      localStorage.setItem("silhouetteActiveFilters", JSON.stringify(activeFilters));
-      resetGame();
-    });
-  });
-}
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -496,7 +455,12 @@ function applyDarkModeStyles() {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupRulesModal();
-  setupFilterButtons();
+  // ── Filtre opus — panneau déroulant ──
+  const _filterApi = initFilterMenu("silhouetteActiveFilters", ALL_OPUS, (newActive) => {
+    activeFilters = newActive;
+    resetGame();
+  });
+  activeFilters = _filterApi.getActive();
   applyDarkModeStyles();
 
   guessBtn.addEventListener("click", handleGuess);
@@ -573,7 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function debugAllSilhouettes() {
   console.log("🔍 === DEBUG SILHOUETTE MODE ===");
   const usableNames = [...personas].sort((a, b) => a.localeCompare(b));
-  const accepted = activeFilters.flatMap((o) => validOpus[o]);
+  const accepted = activeFilters;
   const foundInSilhouette = new Set(originalCharacters.map((c) => c.nom));
   const foundInMap = new Set(Object.keys(portraitsMap));
   const errors = [];
