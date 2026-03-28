@@ -115,8 +115,10 @@
       <button class="p5-container" id="AllOutAttackButton" onclick="location.href='./allOutAttackMode/allOutAttack.html'">
   <!-- Couches d'animation arrière-plan -->
   <div class="p5-background-layers">
+    <!-- Flash rouge instantané au hover -->
+    <div class="p5-impact-flash"></div>
     <div class="p5-bg-jagged"></div>
-    <!-- 6 traînées de vitesse (parallelogrammes) -->
+    <!-- 8 traînées de vitesse (parallelogrammes rouge/blanc) -->
     <div class="p5-speed-trails">
       <div class="p5-trail trail-1"></div>
       <div class="p5-trail trail-2"></div>
@@ -124,8 +126,10 @@
       <div class="p5-trail trail-4"></div>
       <div class="p5-trail trail-5"></div>
       <div class="p5-trail trail-6"></div>
+      <div class="p5-trail trail-7"></div>
+      <div class="p5-trail trail-8"></div>
     </div>
-    <!-- 8 étoiles qui pulsent — 3 variantes d'animation -->
+    <!-- 8 étoiles explosives P5 — 3 variantes d'animation -->
     <div class="p5-stars-burst-container">
       <div class="p5-starburst sburst-1">✦</div>
       <div class="p5-starburst sburst-2">✦</div>
@@ -137,14 +141,18 @@
       <div class="p5-starburst sburst-8">✧</div>
     </div>
   </div>
-  <!-- Titre "ALL-OUT ATTACK" en 2 lignes stylisées -->
+  <!-- Masque de Joker — surgit au centre, domine, puis s'efface avant l'image -->
+  <div class="p5-joker-mask">
+    <img src="./img/Masque_joker.png" alt="" class="p5-joker-img" aria-hidden="true">
+  </div>
+  <!-- Titre "ALL-OUT ATTACK" — crash vertical depuis les bords -->
   <div class="p5-main-content">
     <div class="p5-title">
       <div class="p5-line-1">ALL-OUT</div>
       <div class="p5-line-2">ATTACK</div>
     </div>
   </div>
-  <!-- Image principale — visible par défaut, cachée puis révélée au survol -->
+  <!-- Image principale — visible par défaut, cachée puis révélée après le masque -->
   <img src="./img/all-ou-attack_avec_masque (1).png" alt="All Out Attack Mode" class="p5-main-img">
 </button>
       <button class="dark-velvet-container" id="ShadowsButton" onclick="location.href='./silhouetteMode/silhouette.html'">

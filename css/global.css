@@ -9,6 +9,20 @@
 
 
 /* =====================================================
+   0. POLICES PERSONNALISÉES
+   ===================================================== */
+
+/* Persona 5 Menu Font — utilisée pour les titres des boutons de mode */
+@font-face {
+  font-family: 'Persona5';
+  src: url('../Persona5MenuFontPrototype-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* =====================================================
    1. BASE & BODY
    ===================================================== */
 
@@ -62,7 +76,8 @@ body.modal-open {
    ===================================================== */
 
 #imgHomePage {
-  width: 1200px;
+  /* min() évite tout overflow quel que soit le viewport (ex. 1025-1199px) */
+  width: min(1200px, 95vw);
   height: auto;
   transition: transform 0.3s ease-in-out;
   display: block;
@@ -1462,6 +1477,11 @@ button,
     top: 10px;
     right: 10px;
     z-index: 1000;
+  }
+
+  /* ---- Boutons link-wrapper (accueil) : espacement réduit ---- */
+  .link-wrapper {
+    margin: 0 8px;
   }
 }
 

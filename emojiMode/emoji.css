@@ -48,19 +48,24 @@
    3. RESPONSIVE — SPÉCIFIQUE EMOJI
    ===================================================== */
 
+/* Zone d'affichage : flex à toutes tailles pour un centrage correct */
+#emojiDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+}
+
 /* -----------------------------------------------
    TABLETTE (≤ 768px)
    Emojis légèrement réduits, retour à la ligne autorisé
    si plusieurs emojis sont révélés.
 ----------------------------------------------- */
 @media (max-width: 768px) {
-  /* Zone d'affichage : autorise le wrap des emojis */
+  /* Réduit l'espacement sur tablette */
   #emojiDisplay {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
     gap: 4px;
-    padding: 10px;
   }
 
   .emoji-unit {

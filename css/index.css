@@ -468,17 +468,20 @@
   }
 }
 /* =====================================================
-   BOUTON PERSONA 5 — Mode All-Out Attack
-   Comportement identique au bouton Emoji (P4) :
-   → Par défaut : image visible
-   → Hover : image disparaît IMMÉDIATEMENT (fill-mode:both sur 1er keyframe)
-             animation P5 complète se joue (fond, étoiles, polygones, titre)
-   → Fin de hover : image réapparaît doucement et fluidement
+   BOUTON ALL-OUT ATTACK — Animation cinématique Persona 5
+   Séquence complète au survol :
+   0.00s  Flash rouge couvre tout le bouton
+   0.00s  Fond chevrons P5 explose (rouge/noir)
+   0.02s  8 traînées rouge/blanc en rafale gauche→droite
+   0.08s  8 étoiles P5 explosives (3 variantes)
+   0.22s  Titre ALL-OUT / ATTACK s'écrase verticalement (impact)
+   0.42s  Masque de Joker surgit au centre (zoom + rebond élastique)
+   1.5s+  Masque s'efface, image principale remonte
    ===================================================== */
 
 /* --- Conteneur principal ---
-   Fond noir, bordure blanche + halo rouge au survol.
-   Overflow:hidden pour clipper toutes les animations.
+   Fond noir, bordure blanche + halo rouge intense au survol.
+   Overflow:hidden clipse toutes les animations.
 */
 .p5-container {
   position: relative;
@@ -492,7 +495,7 @@
   cursor: pointer;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
   padding: 0;
   margin: 20px auto;
   display: flex;
@@ -501,20 +504,18 @@
   will-change: transform;
 }
 
-/* Survol : halo rouge vif — signature Phantom Thieves */
+/* Halo rouge vif Phantom Thieves — transition ultra-rapide */
 .p5-container:hover {
-  box-shadow: 0 8px 30px rgba(255, 0, 0, 0.8);
-  border-color: rgba(255, 0, 0, 0.8);
+  box-shadow: 0 8px 40px rgba(255, 0, 0, 1), 0 0 20px rgba(255, 0, 0, 0.5);
+  border-color: #ff0000;
 }
 
 
 /* =====================================================
-   COUCHES D ARRIERE-PLAN (z-index 1)
-   Fond a motif, etoiles filantes, polygones rouges.
-   Toutes cachees par defaut — revelees quand l image disparait.
+   COUCHES D'ARRIÈRE-PLAN (z-index 1)
    ===================================================== */
 
-/* Conteneur global des couches d animation */
+/* Conteneur global des couches d'animation */
 .p5-background-layers {
   position: absolute;
   top: 0; left: 0;
@@ -523,28 +524,55 @@
   z-index: 1;
 }
 
-/* Fond a motif de chevrons (jagged lines P5)
-   Invisible au repos (opacity 0.15), plein au survol.
+/* Flash radial centré — projecteur rouge qui explose depuis le centre.
+   Plus cinématique qu'un simple full-cover.
+*/
+.p5-impact-flash {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse 90% 100% at 50% 50%,
+    rgba(220, 0, 0, 0.92) 0%,
+    rgba(160, 0, 0, 0.55) 40%,
+    transparent 75%
+  );
+  opacity: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.p5-container:hover .p5-impact-flash {
+  animation: p5ImpactFlash 0.30s ease-out 0s both;
+}
+
+/* Bandes diagonales sombres (style danger P5) + projecteur rouge central.
+   Remplace le motif de chevrons trop uniforme.
 */
 .p5-bg-jagged {
   width: 100%;
   height: 100%;
   background-image:
-    linear-gradient(45deg,  #cc0000 25%, transparent 25%, transparent 75%, #cc0000 75%),
-    linear-gradient(-45deg, #cc0000 25%, transparent 25%, transparent 75%, #cc0000 75%);
-  background-size: 20px 20px;
-  opacity: 0.15;
-  transition: opacity 0.4s ease;
+    radial-gradient(ellipse 72% 82% at 50% 50%, rgba(190, 0, 0, 0.55) 0%, transparent 65%),
+    repeating-linear-gradient(
+      -45deg,
+      #1e0000 0px,
+      #1e0000 18px,
+      #060606 18px,
+      #060606 36px
+    );
+  opacity: 0.12;
+  transition: opacity 0.04s ease;
 }
 
 .p5-container:hover .p5-bg-jagged {
-  opacity: 0.9;
-  transition: opacity 0.15s ease;        /* Plus rapide au survol */
+  opacity: 1.0;
+  transition: opacity 0.04s ease;
 }
 
-/* --- Trainées de vitesse gauche→droite ---
-   Paralléllogrammes en flèche qui sweepent rapidement.
-   6 trainées rouge/blanc, hauteurs et vitesses variées.
+/* --- Traînées de vitesse gauche→droite ---
+   8 paralléllogrammes rouge/blanc en rafale, plus épais et intenses.
 */
 .p5-speed-trails {
   position: absolute;
@@ -559,29 +587,33 @@
   left: 0;
   opacity: 0;
   transform: translateX(-115%);
-  clip-path: polygon(0 15%, 91% 15%, 100% 50%, 91% 85%, 0 85%);
+  clip-path: polygon(0 10%, 92% 10%, 100% 50%, 92% 90%, 0 90%);
 }
 
-/* 6 trainées avec hauteurs, largeurs et couleurs variées */
-.trail-1 { top: 0%;   height: 22%; width: 62%; background: rgba(204, 0, 0, 0.9); }
-.trail-2 { top: 17%;  height: 14%; width: 78%; background: rgba(255, 255, 255, 0.85); }
-.trail-3 { top: 30%;  height: 20%; width: 65%; background: rgba(204, 0, 0, 0.78); }
-.trail-4 { top: 49%;  height: 13%; width: 72%; background: rgba(255, 255, 255, 0.72); }
-.trail-5 { top: 62%;  height: 22%; width: 58%; background: rgba(204, 0, 0, 0.82); }
-.trail-6 { top: 82%;  height: 12%; width: 70%; background: rgba(255, 255, 255, 0.55); }
+/* 8 traînées — hauteurs, largeurs et couleurs variées */
+.trail-1 { top: 0%;  height: 16%; width: 75%; background: rgba(220, 0,   0,   1.00); }
+.trail-2 { top: 13%; height: 11%; width: 90%; background: rgba(255, 255, 255, 0.95); }
+.trail-3 { top: 23%; height: 17%; width: 72%; background: rgba(200, 0,   0,   0.90); }
+.trail-4 { top: 38%; height: 11%; width: 88%; background: rgba(255, 255, 255, 0.80); }
+.trail-5 { top: 48%; height: 18%; width: 70%; background: rgba(210, 0,   0,   0.92); }
+.trail-6 { top: 64%; height: 10%; width: 82%; background: rgba(255, 255, 255, 0.65); }
+.trail-7 { top: 73%; height: 16%; width: 68%; background: rgba(185, 0,   0,   0.85); }
+.trail-8 { top: 87%; height: 10%; width: 78%; background: rgba(255, 255, 255, 0.55); }
 
-/* Déclenchement en rafale au survol, délais très serrés */
-.p5-container:hover .trail-1 { animation: speedTrail 0.38s ease-out 0.00s forwards; }
-.p5-container:hover .trail-2 { animation: speedTrail 0.38s ease-out 0.04s forwards; }
-.p5-container:hover .trail-3 { animation: speedTrail 0.38s ease-out 0.08s forwards; }
-.p5-container:hover .trail-4 { animation: speedTrail 0.38s ease-out 0.11s forwards; }
-.p5-container:hover .trail-5 { animation: speedTrail 0.38s ease-out 0.14s forwards; }
-.p5-container:hover .trail-6 { animation: speedTrail 0.38s ease-out 0.18s forwards; }
+/* Rafale ultra-serrée : toutes les traînées défilent en 0.40s */
+.p5-container:hover .trail-1 { animation: speedTrail 0.35s ease-out 0.00s both; }
+.p5-container:hover .trail-2 { animation: speedTrail 0.35s ease-out 0.03s both; }
+.p5-container:hover .trail-3 { animation: speedTrail 0.35s ease-out 0.05s both; }
+.p5-container:hover .trail-4 { animation: speedTrail 0.35s ease-out 0.08s both; }
+.p5-container:hover .trail-5 { animation: speedTrail 0.35s ease-out 0.10s both; }
+.p5-container:hover .trail-6 { animation: speedTrail 0.35s ease-out 0.13s both; }
+.p5-container:hover .trail-7 { animation: speedTrail 0.35s ease-out 0.16s both; }
+.p5-container:hover .trail-8 { animation: speedTrail 0.35s ease-out 0.19s both; }
 
 
-/* --- Étoiles qui pulsent (out→in→out) ---
-   Caractères étoilés qui zooment depuis 0, pulsent fort, puis s'évaporent.
-   Positionnées autour du texte pour ne pas le couvrir.
+/* --- Étoiles explosives P5 ---
+   Zooment depuis 0, pulsent fort, puis s'évaporent en tournant.
+   3 variantes (Burst / Spin / Flash) pour plus de dynamisme.
 */
 .p5-stars-burst-container {
   position: absolute;
@@ -599,30 +631,73 @@
   line-height: 1;
 }
 
-.sburst-1 { top: 6%;     left: 8%;    font-size: 34px; color: #cc0000; text-shadow: 0 0 18px #ff4400, 0 0 35px #ff2200; }
-.sburst-2 { top: 52%;    left: 58%;   font-size: 24px; color: white;   text-shadow: 0 0 14px #ffffff, 0 0 28px #cc0000; }
-.sburst-3 { top: 4%;     right: 10%;  font-size: 42px; color: #cc0000; text-shadow: 0 0 22px #ff2200, 0 0 45px #ff0000; }
-.sburst-4 { bottom: 8%;  left: 22%;   font-size: 22px; color: white;   text-shadow: 0 0 12px #ffffff, 0 0 24px #cc0000; }
-.sburst-5 { top: 38%;    right: 5%;   font-size: 30px; color: #ff2200; text-shadow: 0 0 16px #ff4400, 0 0 32px #ff0000; }
-.sburst-6 { top: 22%;    left: 42%;   font-size: 16px; color: white;   text-shadow: 0 0 10px #ffffff, 0 0 22px #cc0000; }
-.sburst-7 { bottom: 14%; right: 16%;  font-size: 28px; color: #ff3300; text-shadow: 0 0 16px #ff5500, 0 0 32px #ff0000; }
-.sburst-8 { top: 62%;    left: 12%;   font-size: 20px; color: white;   text-shadow: 0 0 12px #ffffff, 0 0 22px #cc0000; }
+/* Plus grosses et plus lumineuses que l'ancienne version */
+.sburst-1 { top: 5%;     left: 5%;    font-size: 42px; color: #cc0000; text-shadow: 0 0 20px #ff4400, 0 0 40px #ff2200; }
+.sburst-2 { top: 50%;    left: 55%;   font-size: 28px; color: white;   text-shadow: 0 0 16px #ffffff, 0 0 32px #cc0000; }
+.sburst-3 { top: 3%;     right: 8%;   font-size: 50px; color: #cc0000; text-shadow: 0 0 24px #ff2200, 0 0 50px #ff0000; }
+.sburst-4 { bottom: 6%;  left: 18%;   font-size: 28px; color: white;   text-shadow: 0 0 14px #ffffff, 0 0 28px #cc0000; }
+.sburst-5 { top: 35%;    right: 4%;   font-size: 36px; color: #ff2200; text-shadow: 0 0 18px #ff4400, 0 0 36px #ff0000; }
+.sburst-6 { top: 20%;    left: 40%;   font-size: 20px; color: white;   text-shadow: 0 0 12px #ffffff, 0 0 24px #cc0000; }
+.sburst-7 { bottom: 12%; right: 12%;  font-size: 34px; color: #ff3300; text-shadow: 0 0 18px #ff5500, 0 0 36px #ff0000; }
+.sburst-8 { top: 60%;    left: 8%;    font-size: 26px; color: white;   text-shadow: 0 0 14px #ffffff, 0 0 26px #cc0000; }
 
-/* Déclenchement au survol — après les trainées — 3 variantes d'animation */
-.p5-container:hover .sburst-1 { animation: starBurst 0.70s ease-in-out 0.05s forwards; }
-.p5-container:hover .sburst-2 { animation: starSpin  0.75s ease-in-out 0.22s forwards; }
-.p5-container:hover .sburst-3 { animation: starFlash 0.55s ease-in-out 0.02s forwards; }
-.p5-container:hover .sburst-4 { animation: starSpin  0.68s ease-in-out 0.32s forwards; }
-.p5-container:hover .sburst-5 { animation: starBurst 0.72s ease-in-out 0.14s forwards; }
-.p5-container:hover .sburst-6 { animation: starFlash 0.50s ease-in-out 0.28s forwards; }
-.p5-container:hover .sburst-7 { animation: starBurst 0.80s ease-in-out 0.10s forwards; }
-.p5-container:hover .sburst-8 { animation: starSpin  0.65s ease-in-out 0.38s forwards; }
+/* Jaillissent juste après les traînées — 3 variantes */
+.p5-container:hover .sburst-1 { animation: starBurst 0.70s ease-in-out 0.06s forwards; }
+.p5-container:hover .sburst-2 { animation: starSpin  0.75s ease-in-out 0.20s forwards; }
+.p5-container:hover .sburst-3 { animation: starFlash 0.55s ease-in-out 0.03s forwards; }
+.p5-container:hover .sburst-4 { animation: starSpin  0.68s ease-in-out 0.28s forwards; }
+.p5-container:hover .sburst-5 { animation: starBurst 0.72s ease-in-out 0.12s forwards; }
+.p5-container:hover .sburst-6 { animation: starFlash 0.50s ease-in-out 0.24s forwards; }
+.p5-container:hover .sburst-7 { animation: starBurst 0.80s ease-in-out 0.08s forwards; }
+.p5-container:hover .sburst-8 { animation: starSpin  0.65s ease-in-out 0.35s forwards; }
 
 
 /* =====================================================
-   TITRE ALL-OUT-ATTACK (z-index 3)
-   Deux lignes stylisées italic gras, slide depuis côtés opposés.
-   "ALL-OUT" vient de gauche, "ATTACK" vient de droite.
+   MASQUE DE JOKER — z-index 15, au-dessus de tout
+   Chute depuis le haut du bouton → impact au centre (squash) →
+   rebond élastique → tient → s'efface doucement vers le bas.
+   ===================================================== */
+
+.p5-joker-mask {
+  position: absolute;
+  /* Centrage exact — ancre le centre du div au centre du conteneur */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Dimensions explicites pour que translate calcule juste */
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Masque grand — halo rouge, ombre portée */
+.p5-joker-img {
+  /* Pas de max-width en % (le % serait relatif à la div parente sans largeur fixe) */
+  height: 160px;
+  width: auto;
+  display: block;
+  filter:
+    drop-shadow(0 0 10px #ff0000)
+    drop-shadow(0 0 24px #ff4400)
+    drop-shadow(0 0 5px #000)
+    drop-shadow(0 3px 10px rgba(0, 0, 0, 0.9));
+}
+
+.p5-container:hover .p5-joker-mask {
+  animation: jokerReveal 2.0s ease-out 0.38s both;
+}
+
+
+
+/* =====================================================
+   TITRE ALL-OUT / ATTACK — z-index 10
+   Impact vertical : ALL-OUT crashe depuis le haut,
+   ATTACK crashe depuis le bas. Scale overshoot au contact.
    ===================================================== */
 
 .p5-main-content {
@@ -643,7 +718,7 @@
   gap: 0;
 }
 
-/* Base commune des deux lignes */
+/* Base commune */
 .p5-line-1, .p5-line-2 {
   display: block;
   font-family: 'Helvetica Neue', 'Arial Black', Arial, sans-serif;
@@ -653,39 +728,42 @@
   opacity: 0;
 }
 
-/* Ligne 1 "ALL-OUT" — blanc, taille medium, slide depuis gauche */
+/* "ALL-OUT" — blanc, police Persona 5, crash depuis le haut */
 .p5-line-1 {
-  font-size: 20px;
+  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 22px;
   color: white;
-  letter-spacing: 4px;
+  letter-spacing: 5px;
   text-shadow: 0 0 14px rgba(255, 0, 0, 0.95), 2px 2px 0 #000;
-  transform: translateX(-60px) skewX(-8deg);
+  transform: translateY(-40px) scale(1.4);
 }
 
-/* Ligne 2 "ATTACK" — rouge vif, grande et impactante, slide depuis droite */
+/* "ATTACK" — rouge vif, police Persona 5, très impactant */
 .p5-line-2 {
-  font-size: 40px;
+  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 46px;
   color: #cc0000;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   text-shadow:
     0 0 22px rgba(255, 0, 0, 1),
     3px 3px 0 #000,
     -2px -2px 0 #000;
-  transform: translateX(60px) skewX(-8deg);
+  transform: translateY(40px) scale(1.4);
 }
 
-/* Déclenchement au survol — slide in → tient → disparaît en sync avec le retour de l'image */
-.p5-container:hover .p5-line-1 { animation: slideInLeft  1.6s linear 0.20s forwards; }
-.p5-container:hover .p5-line-2 { animation: slideInRight 1.6s linear 0.28s forwards; }
+/* Crash vertical avec overshoot, tient, puis disparaît */
+.p5-container:hover .p5-line-1 { animation: p5TitleCrashTop 1.4s ease-out 0.22s both; }
+.p5-container:hover .p5-line-2 { animation: p5TitleCrashBot 1.4s ease-out 0.28s both; }
 
 
 /* =====================================================
-   IMAGE PRINCIPALE (z-index 2)
-   Même mécanique que le bouton Emoji (P4) :
-   Par défaut : opacity 1 (image visible)
-   Hover : animation-fill-mode:both => 1er keyframe (opacity:0)
-           appliqué IMMÉDIATEMENT => image disparaît
-   Fin du hover : image remonte doucement
+   IMAGE PRINCIPALE — z-index 2
+   Cachée immédiatement (fill-mode:both), révélée après le masque.
+   Invisible 0%→60%, puis remonte progressivement.
    ===================================================== */
 
 .p5-main-img {
@@ -697,76 +775,146 @@
 }
 
 .p5-container:hover .p5-main-img {
-  animation: p5Reveal 2s ease-out both;
+  animation: p5Reveal 2.5s ease-out both;
 }
 
 
 /* =====================================================
-   KEYFRAMES — Animations bouton P5 All-Out Attack
+   KEYFRAMES — Bouton All-Out Attack
    ===================================================== */
 
-/* Trainée de vitesse : sweep gauche→droite en paralléllogramme */
+/* Choc visuel initial — rouge plein puis transparent */
+@keyframes p5ImpactFlash {
+  0%   { opacity: 0.9; }
+  55%  { opacity: 0.4; }
+  100% { opacity: 0;   }
+}
+
+/* Traînée de vitesse : sweep gauche→droite en paralléllogramme */
 @keyframes speedTrail {
   0%   { opacity: 0;   transform: translateX(-115%); }
-  10%  { opacity: 0.9; }
-  88%  { opacity: 0.7; }
-  100% { opacity: 0;   transform: translateX(160%); }
+  8%   { opacity: 1;   }
+  85%  { opacity: 0.8; }
+  100% { opacity: 0;   transform: translateX(170%); }
 }
 
-/* Étoile variante 1 : zoom explosif puis expand et disparaît */
+/* Étoile variante 1 — zoom explosif puis expand et disparaît */
 @keyframes starBurst {
   0%   { opacity: 0;   transform: scale(0)   rotate(0deg);   }
-  20%  { opacity: 1;   transform: scale(1.6) rotate(12deg);  }
-  55%  { opacity: 0.9; transform: scale(1.2) rotate(8deg);   }
-  100% { opacity: 0;   transform: scale(2.2) rotate(30deg);  }
+  20%  { opacity: 1;   transform: scale(1.8) rotate(12deg);  }
+  55%  { opacity: 0.9; transform: scale(1.3) rotate(8deg);   }
+  100% { opacity: 0;   transform: scale(2.5) rotate(30deg);  }
 }
 
-/* Étoile variante 2 : apparaît en tournant puis tourne et s'évapore */
+/* Étoile variante 2 — apparaît en tournant puis s'évapore */
 @keyframes starSpin {
   0%   { opacity: 0;   transform: scale(0)   rotate(-60deg); }
-  18%  { opacity: 1;   transform: scale(1.5) rotate(0deg);   }
-  60%  { opacity: 0.9; transform: scale(1.2) rotate(25deg);  }
-  100% { opacity: 0;   transform: scale(1.8) rotate(90deg);  }
+  18%  { opacity: 1;   transform: scale(1.7) rotate(0deg);   }
+  60%  { opacity: 0.9; transform: scale(1.3) rotate(25deg);  }
+  100% { opacity: 0;   transform: scale(2.0) rotate(90deg);  }
 }
 
-/* Étoile variante 3 : double flash rapide — brille → s'assombrit → brille → disparaît */
+/* Étoile variante 3 — double flash percutant */
 @keyframes starFlash {
   0%   { opacity: 0;   transform: scale(0);   }
-  12%  { opacity: 1;   transform: scale(1.8); }
-  28%  { opacity: 0.2; transform: scale(1.2); }
-  50%  { opacity: 1;   transform: scale(1.6); }
-  75%  { opacity: 0.4; transform: scale(1.3); }
-  100% { opacity: 0;   transform: scale(2.0); }
+  12%  { opacity: 1;   transform: scale(2.0); }
+  28%  { opacity: 0.2; transform: scale(1.3); }
+  50%  { opacity: 1;   transform: scale(1.8); }
+  75%  { opacity: 0.4; transform: scale(1.5); }
+  100% { opacity: 0;   transform: scale(2.2); }
 }
 
-/* Ligne 1 "ALL-OUT" : slide depuis gauche, tient, puis disparaît progressivement */
-@keyframes slideInLeft {
-  0%   { opacity: 0; transform: translateX(-60px) skewX(-8deg); animation-timing-function: cubic-bezier(0.25, 1.2, 0.5, 1); }
-  22%  { opacity: 1; transform: translateX(0)     skewX(-8deg); animation-timing-function: linear; }
-  62%  { opacity: 1; transform: translateX(0)     skewX(-8deg); animation-timing-function: ease-in; }
-  100% { opacity: 0; transform: translateX(0)     skewX(-8deg); }
+/* Titre ligne 1 "ALL-OUT" — crash depuis le haut, rebond, tient, s'efface */
+@keyframes p5TitleCrashTop {
+  0%   { opacity: 0; transform: translateY(-40px) scale(1.4);
+         animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1); }
+  18%  { opacity: 1; transform: translateY(3px)   scale(0.95); }
+  28%  { opacity: 1; transform: translateY(0)     scale(1.0);
+         animation-timing-function: linear; }
+  62%  { opacity: 1; transform: translateY(0)     scale(1.0);
+         animation-timing-function: ease-in; }
+  100% { opacity: 0; transform: translateY(0)     scale(1.0); }
 }
 
-/* Ligne 2 "ATTACK" : slide depuis droite, tient, puis disparaît progressivement */
-@keyframes slideInRight {
-  0%   { opacity: 0; transform: translateX(60px)  skewX(-8deg); animation-timing-function: cubic-bezier(0.25, 1.2, 0.5, 1); }
-  22%  { opacity: 1; transform: translateX(0)     skewX(-8deg); animation-timing-function: linear; }
-  62%  { opacity: 1; transform: translateX(0)     skewX(-8deg); animation-timing-function: ease-in; }
-  100% { opacity: 0; transform: translateX(0)     skewX(-8deg); }
+/* Titre ligne 2 "ATTACK" — crash depuis le bas, rebond, tient, s'efface */
+@keyframes p5TitleCrashBot {
+  0%   { opacity: 0; transform: translateY(40px)  scale(1.4);
+         animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1); }
+  18%  { opacity: 1; transform: translateY(-3px)  scale(0.95); }
+  28%  { opacity: 1; transform: translateY(0)     scale(1.0);
+         animation-timing-function: linear; }
+  62%  { opacity: 1; transform: translateY(0)     scale(1.0);
+         animation-timing-function: ease-in; }
+  100% { opacity: 0; transform: translateY(0)     scale(1.0); }
 }
 
-/* Révélation image — fill-mode:both => opacity:0 IMMÉDIAT au hover.
-   Image invisible pendant 50% de la durée (1s), puis remonte.
-   0%–50%  : image cachée — trainées + étoiles + titre visibles
-   50%–78% : fondu progressif
-   78%–100%: finalisation stable
+/* Masque de Joker — matérialisation douce depuis le néant.
+   Pas de choc, pas d'impact : le masque se révèle progressivement
+   comme une invocation de fin d'animation, puis s'efface.
+   Le blur initial donne l'impression qu'il surgit de la brume rouge.
+*/
+@keyframes jokerReveal {
+  /* Invisible, légèrement flou, légèrement petit */
+  0%   {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.80);
+    filter: blur(6px) brightness(2.5)
+            drop-shadow(0 0 20px #ff0000) drop-shadow(0 0 40px #ff4400);
+  }
+  /* Commence à apparaître — toujours flou, brume rouge */
+  18%  {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.93);
+    filter: blur(2.5px) brightness(1.8)
+            drop-shadow(0 0 18px #ff0000) drop-shadow(0 0 36px #ff4400);
+  }
+  /* Net, pleine opacité — s'installe au centre avec léger overshoot */
+  35%  {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.04);
+    filter: blur(0) brightness(1.3)
+            drop-shadow(0 0 14px #ff0000) drop-shadow(0 0 28px #ff4400);
+  }
+  /* Position stable — halo rouge qui pulse doucement */
+  50%  {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.00);
+    filter: blur(0) brightness(1.1)
+            drop-shadow(0 0 18px #ff2200) drop-shadow(0 0 38px #ff5500);
+  }
+  68%  {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.00);
+    filter: blur(0) brightness(1.0)
+            drop-shadow(0 0 12px #ff0000) drop-shadow(0 0 26px #ff3300);
+  }
+  /* Disparaît dans la brume — effet symétrique à l'entrée */
+  88%  {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(0.94);
+    filter: blur(2px) brightness(0.8)
+            drop-shadow(0 0 8px #ff0000);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.82);
+    filter: blur(5px) brightness(0.3)
+            drop-shadow(0 0 4px #ff0000);
+  }
+}
+
+/* Révélation image — cachée pendant que le masque domine.
+   0%–60%  : image invisible (masque et animations visibles)
+   60%–82% : fondu progressif
+   82%–100%: image stable à pleine opacité
 */
 @keyframes p5Reveal {
-  0%   { opacity: 0;   transform: scale(0.98); }
-  50%  { opacity: 0;   transform: scale(0.98); }
-  78%  { opacity: 0.6; transform: scale(1);    }
+  0%   { opacity: 0;   transform: scale(0.97); }
+  60%  { opacity: 0;   transform: scale(0.97); }
+  82%  { opacity: 0.7; transform: scale(1);    }
   100% { opacity: 1;   transform: scale(1);    }
 }
+
 
 /* =====================================================
    RESPONSIVE — Bouton P5 All-Out Attack
@@ -777,8 +925,9 @@
   .p5-container { min-height: 70px; border-width: 2px; }
   .p5-line-1    { font-size: 16px; letter-spacing: 2px; }
   .p5-line-2    { font-size: 28px; letter-spacing: 1px; }
-  .sburst-1, .sburst-2, .sburst-4 { font-size: 22px; }
-  .sburst-3, .sburst-5 { font-size: 18px; }
+  .sburst-1, .sburst-2, .sburst-4 { font-size: 26px; }
+  .sburst-3, .sburst-5 { font-size: 22px; }
+  .p5-joker-img { height: 110px; }
 }
 
 /* Mobile (<=480px) */
@@ -786,10 +935,11 @@
   .p5-container { min-height: 60px; border-width: 1px; border-radius: 4px; }
   .p5-line-1    { font-size: 12px; letter-spacing: 1px; }
   .p5-line-2    { font-size: 22px; letter-spacing: 0.5px; }
-  .sburst-1, .sburst-2, .sburst-4 { font-size: 16px; }
-  .sburst-3, .sburst-5 { font-size: 14px; }
-  .trail-1, .trail-3, .trail-5 { height: 18%; }
-  .trail-2, .trail-4, .trail-6 { height: 12%; }
+  .sburst-1, .sburst-2, .sburst-4 { font-size: 20px; }
+  .sburst-3, .sburst-5 { font-size: 16px; }
+  .trail-1, .trail-3, .trail-5, .trail-7 { height: 14%; }
+  .trail-2, .trail-4, .trail-6, .trail-8 { height: 10%; }
+  .p5-joker-img { height: 76px; }
 }
 
 /* =====================================================

@@ -397,6 +397,41 @@ body.darkmode .counter.activated {
    ===================================================== */
 
 /* -----------------------------------------------
+   ÉCRANS INTERMÉDIAIRES (901px – 1024px)
+   La grille est légèrement compactée (7×120px = 840px
+   + 90px image = 930px total, tient dans 95vw).
+   Scroll horizontal activé si besoin.
+----------------------------------------------- */
+@media (min-width: 901px) and (max-width: 1024px) {
+  #output {
+    overflow-x: auto;
+    align-items: flex-start;
+    padding: 0 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .category-row,
+  .guess-row {
+    grid-template-columns: 90px repeat(7, 120px);
+    gap: 12px;
+    min-width: max-content;
+  }
+
+  .guess-image {
+    width: 90px;
+    height: 90px;
+  }
+
+  .guess-cell {
+    width: 120px;
+    height: 90px;
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+
+/* -----------------------------------------------
    TABLETTE (481px – 900px)
    La grille reste horizontale mais devient scrollable.
    Meilleure lisibilité que le collapse vertical.

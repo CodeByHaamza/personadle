@@ -970,23 +970,215 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
   color: rgba(180, 0, 18, 0.86);
 }
 
-/* Dark mode : le bouton est sur fond clair (boutons dark mode sont clairs)
-   → on inverse les couleurs pour qu'il reste lisible */
-.darkmode .filter-group-select-btn {
-  background: rgba(0, 0, 0, 0.06);
-  border-color: rgba(0, 0, 0, 0.12);
-  color: rgba(0, 0, 0, 0.52);
+/* Dark mode : les styles par jeu (section 14) prennent le relais —
+   aucun override générique ici pour ne pas écraser les couleurs de jeu. */
+
+
+/* =====================================================
+   14. BOUTONS "TOUT COCHER" — IDENTITÉ VISUELLE PAR JEU
+
+   Ces règles surchargent les styles génériques des
+   sections 12–13 (même spécificité, déclarées après).
+   P1 n'a pas de groupe (filtre direct → pas de bouton).
+
+   Structure CSS ciblée :
+     [data-group-panel="X"] .filter-group-select-btn
+   ===================================================== */
+
+/* Transitions étendues communes à tous les boutons stylisés */
+[data-group-panel] .filter-group-select-btn {
+  transition:
+    background   0.16s ease,
+    color        0.16s ease,
+    border-color 0.16s ease,
+    box-shadow   0.20s ease,
+    transform    0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.darkmode .filter-group-select-btn:hover {
-  background: rgba(0, 0, 0, 0.12);
-  color: rgba(0, 0, 0, 0.80);
-  border-color: rgba(0, 0, 0, 0.26);
+
+
+/* ── P2 — Sang et Ombres (Innocent Sin / Eternal Punishment) ─── */
+
+[data-group-panel="P2"] .filter-group-select-btn {
+  background: linear-gradient(135deg, rgba(65,5,15,0.90) 0%, rgba(30,0,32,0.90) 100%);
+  border: 1px solid rgba(195, 25, 50, 0.68);
+  color: rgba(255, 115, 110, 0.96);
+  box-shadow: 0 0 8px rgba(155, 0, 30, 0.32),
+              inset 0 0 10px rgba(90,0,10,0.18);
+  text-shadow: 0 0 9px rgba(200, 0, 40, 0.45);
 }
-.darkmode .filter-group-select-btn[data-state="select"] {
-  border-color: rgba(180, 0, 28, 0.30);
-  color: rgba(160, 0, 20, 0.65);
+[data-group-panel="P2"] .filter-group-select-btn:hover {
+  background: linear-gradient(135deg, rgba(100,5,20,0.95) 0%, rgba(50,0,52,0.95) 100%);
+  border-color: rgba(235, 40, 70, 0.92);
+  color: #ff8880;
+  box-shadow: 0 0 14px rgba(200, 0, 50, 0.52);
+  transform: scale(1.02);
 }
-.darkmode .filter-group-select-btn[data-state="select"]:hover {
-  border-color: rgba(200, 0, 28, 0.55);
-  color: rgba(180, 0, 18, 0.88);
+[data-group-panel="P2"] .filter-group-select-btn[data-state="select"] {
+  border-color: rgba(175, 0, 35, 0.75);
+  color: rgba(220, 60, 60, 0.72);
+}
+
+
+/* ── P3 — Minuit et Dark Hour (Persona 3) ──────────────────────── */
+
+[data-group-panel="P3"] .filter-group-select-btn {
+  background: linear-gradient(135deg, rgba(2,10,42,0.92) 0%, rgba(5,18,58,0.92) 100%);
+  border: 1px solid rgba(32, 131, 245, 0.58);
+  color: rgba(95, 172, 255, 0.94);
+  box-shadow: 0 0 8px rgba(32, 131, 245, 0.22);
+  text-shadow: 0 0 9px rgba(32, 131, 245, 0.38);
+}
+[data-group-panel="P3"] .filter-group-select-btn:hover {
+  background: linear-gradient(135deg, rgba(4,16,62,0.97) 0%, rgba(7,26,85,0.97) 100%);
+  border-color: rgba(32, 131, 245, 0.90);
+  color: #82c0ff;
+  box-shadow: 0 0 14px rgba(32, 131, 245, 0.48);
+  transform: scale(1.02);
+}
+[data-group-panel="P3"] .filter-group-select-btn[data-state="select"] {
+  border-color: rgba(32, 100, 200, 0.68);
+  color: rgba(60, 140, 230, 0.72);
+}
+
+
+/* ── P4 — Junes Pop / Soleil d'Inaba (Persona 4) ──────────────── */
+
+[data-group-panel="P4"] .filter-group-select-btn {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA200 100%);
+  border: 1.5px solid #FFBB00;
+  color: #5c3800;
+  font-weight: 900;
+  box-shadow: 0 2px 10px rgba(255, 215, 0, 0.50),
+              inset 0 1px 0 rgba(255,255,255,0.42);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.45);
+}
+[data-group-panel="P4"] .filter-group-select-btn:hover {
+  background: linear-gradient(135deg, #FFE034 0%, #FFB800 100%);
+  border-color: #FFD000;
+  color: #3d2500;
+  box-shadow: 0 3px 18px rgba(255, 215, 0, 0.75),
+              inset 0 1px 0 rgba(255,255,255,0.52);
+  transform: scale(1.06);
+}
+[data-group-panel="P4"] .filter-group-select-btn:active {
+  transform: scale(0.95);
+}
+[data-group-panel="P4"] .filter-group-select-btn[data-state="select"] {
+  background: linear-gradient(135deg, rgba(255,200,0,0.55) 0%, rgba(255,145,0,0.55) 100%);
+  border-color: rgba(200, 145, 0, 0.68);
+  color: #7a4c00;
+  box-shadow: 0 1px 6px rgba(255,185,0,0.22);
+  text-shadow: none;
+}
+
+
+/* ── P5 — Carte de Visite des Phantom Thieves (Persona 5) ─────── */
+
+[data-group-panel="P5"] .filter-group-select-btn {
+  background: linear-gradient(135deg, #0d0d0d 0%, #1e0000 100%);
+  border: 1px solid rgba(255, 65, 54, 0.72);
+  color: rgba(255, 105, 95, 0.96);
+  box-shadow: 0 0 9px rgba(255, 30, 20, 0.28),
+              inset 0 0 12px rgba(255,0,0,0.06);
+  text-shadow: 0 0 9px rgba(255, 60, 40, 0.42);
+}
+[data-group-panel="P5"] .filter-group-select-btn:hover {
+  background: linear-gradient(135deg, #160000 0%, #280000 100%);
+  border-color: rgba(255, 65, 54, 0.97);
+  color: #ff7060;
+  box-shadow: 0 0 16px rgba(255, 50, 30, 0.52);
+  transform: scale(1.02);
+}
+[data-group-panel="P5"] .filter-group-select-btn[data-state="select"] {
+  border-color: rgba(200, 0, 0, 0.72);
+  color: rgba(240, 60, 50, 0.72);
+}
+
+
+/* ── PQ — Aventure Dorée des Chibi (Persona Q) ────────────────── */
+
+[data-group-panel="PQ"] .filter-group-select-btn {
+  background: linear-gradient(135deg, rgba(48,30,0,0.92) 0%, rgba(68,46,0,0.92) 100%);
+  border: 1px solid rgba(255, 192, 0, 0.65);
+  color: rgba(255, 208, 55, 0.97);
+  box-shadow: 0 0 8px rgba(255, 180, 0, 0.30);
+  text-shadow: 0 0 9px rgba(255, 200, 0, 0.38);
+}
+[data-group-panel="PQ"] .filter-group-select-btn:hover {
+  background: linear-gradient(135deg, rgba(70,48,0,0.96) 0%, rgba(94,64,0,0.96) 100%);
+  border-color: rgba(255, 215, 0, 0.94);
+  color: #ffd700;
+  box-shadow: 0 0 16px rgba(255, 195, 0, 0.52);
+  transform: scale(1.03);
+}
+[data-group-panel="PQ"] .filter-group-select-btn[data-state="select"] {
+  border-color: rgba(200, 155, 0, 0.65);
+  color: rgba(220, 165, 0, 0.72);
+}
+
+
+/* ── Ajustements mode CLAIR — fonds colorés sur panneau blanc ─── */
+
+/* P2 et P5 : fond sombre bien visible sur panneau blanc → rien à changer.
+   P3 : fond bleu nuit → idem, fort contraste.
+   P4 / PQ : jaune/or sur blanc, parfait.
+   Seul ajustement utile : ombres légèrement renforcées pour l'ancrage visuel. */
+
+body:not(.darkmode) [data-group-panel="P4"] .filter-group-select-btn {
+  box-shadow: 0 3px 12px rgba(255, 215, 0, 0.55),
+              inset 0 1px 0 rgba(255,255,255,0.48),
+              0 1px 3px rgba(0,0,0,0.10);
+}
+body:not(.darkmode) [data-group-panel="P2"] .filter-group-select-btn {
+  box-shadow: 0 1px 8px rgba(155, 0, 30, 0.30),
+              0 1px 3px rgba(0,0,0,0.10);
+}
+body:not(.darkmode) [data-group-panel="P3"] .filter-group-select-btn {
+  box-shadow: 0 1px 8px rgba(32, 131, 245, 0.22),
+              0 1px 3px rgba(0,0,0,0.10);
+}
+body:not(.darkmode) [data-group-panel="P5"] .filter-group-select-btn {
+  box-shadow: 0 1px 8px rgba(255, 50, 40, 0.22),
+              0 1px 3px rgba(0,0,0,0.10);
+}
+body:not(.darkmode) [data-group-panel="PQ"] .filter-group-select-btn {
+  box-shadow: 0 1px 8px rgba(255, 180, 0, 0.28),
+              0 1px 3px rgba(0,0,0,0.10);
+}
+
+
+/* =====================================================
+   15. ANIMATIONS D'ENTRÉE — BOUTONS DE GROUPE
+   Déclenchées lorsque .expanded est ajouté au panneau
+   parent (clic sur le logo du jeu). Réutilisent les
+   keyframes de la section 11 (déjà définis par jeu).
+
+   Le bouton de groupe apparaît EN PREMIER (delay 0s),
+   les sous-boutons se décalent après lui (delay ≥ 0.06s).
+   ===================================================== */
+
+/* P2 auto-expand : visible dès l'ouverture du dropdown.
+   L'animation se joue au chargement (élément visible = ok). */
+[data-group-panel="P2"].expanded .filter-group-select-btn {
+  animation: p2DarkEmerge 0.62s ease both;
+}
+
+/* P3 — chute d'horloge : tombe depuis le haut */
+[data-group-panel="P3"].expanded .filter-group-select-btn {
+  animation: p3ClockDrop 0.40s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* P4 — pop solaire : même keyframe que les sous-boutons ! */
+[data-group-panel="P4"].expanded .filter-group-select-btn {
+  animation: p4SunBounce 0.48s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* P5 — glissement biais Phantom Thieves */
+[data-group-panel="P5"].expanded .filter-group-select-btn {
+  animation: p5PhantomSlide 0.34s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* PQ — pirouette chibi espiègle */
+[data-group-panel="PQ"].expanded .filter-group-select-btn {
+  animation: pqChibiPop 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
