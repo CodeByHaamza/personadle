@@ -223,23 +223,24 @@ function checkGuess(name, target, forceReveal = false) {
   const output = document.getElementById("output");
   const guess = characters.find((c) => c.nom.toLowerCase() === name.toLowerCase());
   if (!guess) {
-    output.innerHTML += `<p class="wrong">${name} does not exist in the database!</p>`;
+    output.innerHTML += `<p class="wrong">${(window.i18n || { t: (k, v) => k }).t('modes.classic.not_in_database', { name })}</p>`;
     return;
   }
 
   // Insert column headers on first guess
   if (!document.querySelector(".category-row")) {
+    const i = window.i18n || { t: (k) => k };
     const categoryRow = document.createElement("div");
     categoryRow.classList.add("category-row");
     categoryRow.innerHTML = `
       <div></div>
-      <div class="tooltip">Name<span class="tooltip-text">The full name of the character as known in the Persona universe.</span></div>
-      <div class="tooltip">Gender<span class="tooltip-text">Represents the character's identity or nature — can be Human, Artificial, Shadow, or Entity.</span></div>
-      <div class="tooltip">Age<span class="tooltip-text">Age range based on lore, from "< 15" to "40+", including unique entities like "80+".</span></div>
-      <div class="tooltip">Persona User / Shadow<span class="tooltip-text">Indicates if the character can summon a Persona or is a Shadow themselves.</span></div>
-      <div class="tooltip">Persona / Shadow<span class="tooltip-text">The specific Persona linked to the character — or their Shadow form if applicable.</span></div>
-      <div class="tooltip">Arcana<span class="tooltip-text">Their corresponding Tarot Arcana, which defines their symbolic and narrative role.</span></div>
-      <div class="tooltip">Opus<span class="tooltip-text">The game(s) in which this character appears: P3, P4G, P5, PQ2, P5T, etc.</span></div>`;
+      <div class="tooltip">${i.t('modes.classic.label_name')}<span class="tooltip-text">${i.t('modes.classic.tooltip_name')}</span></div>
+      <div class="tooltip">${i.t('modes.classic.label_gender')}<span class="tooltip-text">${i.t('modes.classic.tooltip_gender')}</span></div>
+      <div class="tooltip">${i.t('modes.classic.label_age')}<span class="tooltip-text">${i.t('modes.classic.tooltip_age')}</span></div>
+      <div class="tooltip">${i.t('modes.classic.label_persona_user')}<span class="tooltip-text">${i.t('modes.classic.tooltip_persona_user')}</span></div>
+      <div class="tooltip">${i.t('modes.classic.label_persona')}<span class="tooltip-text">${i.t('modes.classic.tooltip_persona')}</span></div>
+      <div class="tooltip">${i.t('modes.classic.label_arcana')}<span class="tooltip-text">${i.t('modes.classic.tooltip_arcana')}</span></div>
+      <div class="tooltip">${i.t('modes.classic.label_game')}<span class="tooltip-text">${i.t('modes.classic.tooltip_game')}</span></div>`;
     output.insertBefore(categoryRow, output.firstChild);
   }
 
@@ -255,8 +256,17 @@ function checkGuess(name, target, forceReveal = false) {
   row.appendChild(img);
 
   const keysToCompare = ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
+  const i18 = window.i18n || { t: (k) => k };
   // Labels affichés sur mobile via CSS ::before (data-label)
-  const keyLabels = { nom: "Name", genre: "Gender", age: "Age", personaUser: "P.User", persona: "Persona", arcane: "Arcana", opus: "Opus" };
+  const keyLabels = {
+    nom: i18.t('modes.classic.label_name'),
+    genre: i18.t('modes.classic.label_gender'),
+    age: i18.t('modes.classic.label_age'),
+    personaUser: i18.t('modes.classic.label_persona_user'),
+    persona: i18.t('modes.classic.label_persona'),
+    arcane: i18.t('modes.classic.label_arcana'),
+    opus: i18.t('modes.classic.label_game')
+  };
   const isWin = guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal;
 
   keysToCompare.forEach((key, index) => {
@@ -268,8 +278,21 @@ function checkGuess(name, target, forceReveal = false) {
     const targetVal = target[key];
     let displayValue;
 
+    // Traduit une valeur atomique (genre ou arcane) via i18n
+    const translateAtom = (ns, v) => {
+      const translated = i18.t(`data.${ns}.${v}`);
+      // Si la clé n'existe pas, t() retourne la clé brute → garder la valeur d'origine
+      return (translated === `data.${ns}.${v}`) ? v : translated;
+    };
+
     if (typeof value === "boolean") {
-      displayValue = value ? "Yes" : "No";
+      displayValue = value ? i18.t('ui.yes') : i18.t('ui.no');
+    } else if (key === 'genre') {
+      const vals = Array.isArray(value) ? value : [value];
+      displayValue = vals.map(v => translateAtom('genre', v)).join(", ");
+    } else if (key === 'arcane') {
+      const vals = Array.isArray(value) ? value : [value];
+      displayValue = vals.map(v => translateAtom('arcane', v)).join(", ");
     } else {
       displayValue = Array.isArray(value) ? value.join(", ") : value;
     }
@@ -397,7 +420,8 @@ function applyDarkModeStyles() {
 // BOOTSTRAP — DOMContentLoaded
 // ─────────────────────────────────────────────────────────────────────────────
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.__i18nReady) await window.__i18nReady;
   applyDarkModeStyles();
   setupRulesModal();
 

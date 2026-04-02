@@ -193,9 +193,9 @@
       </div>
     </div>
 
-    <h2 style="margin-top: 10px;">Which character do these emojis describe?</h2>
+    <h2 style="margin-top: 10px;" data-i18n="modes.emoji.title">Which character do these emojis describe?</h2>
     <div id="emojiDisplay" style="margin-top: 20px;"></div>
-    <p>Each try unlocks an emoji.</p>
+    <p data-i18n="modes.emoji.subtitle">Each try unlocks an emoji.</p>
   </div>
 
 
@@ -258,7 +258,7 @@
       <input
         type="text"
         id="textbar"
-        placeholder="Enter character name..."
+        placeholder="Enter character name..." data-i18n-placeholder="ui.input_placeholder"
         aria-label="Guess character name"
         autocomplete="off"
         autocorrect="off"
@@ -298,50 +298,97 @@
 <div id="rulesModal" class="modal" style="display: none;">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <h2>🔠 Emoji Mode Rules</h2>
+    <h2 data-i18n="modes.emoji.rules_title">🔠 Emoji Mode Rules</h2>
 
-   <p id="rulesText">
-  <strong>🎯 Goal:</strong><br>
-  Guess which Persona character is being described by a sequence of emojis 🤔📱.
+    <div data-i18n-block="en">
+      <p id="rulesText">
+        <strong>🎯 Goal:</strong><br>
+        Guess which Persona character is being described by a sequence of emojis 🤔📱.
 
-  <hr class="separator" />
+        <hr class="separator" />
 
-  <strong>🧠 How it works:</strong>
-  <ul>
-    <li>💬 You start with <strong>1 emoji</strong> to describe the character.</li>
-    <li>❌ Each wrong guess unlocks <strong>1 more emoji</strong>.</li>
-    <li>✅ Once you find the right character, the full emoji chain is revealed 🎉.</li>
-  </ul>
+        <strong>🧠 How it works:</strong>
+        <ul>
+          <li>💬 You start with <strong>1 emoji</strong> to describe the character.</li>
+          <li>❌ Each wrong guess unlocks <strong>1 more emoji</strong>.</li>
+          <li>✅ Once you find the right character, the full emoji chain is revealed 🎉.</li>
+        </ul>
 
-  <hr class="separator" />
+        <hr class="separator" />
 
-  <strong>💡 Tips:</strong>
-  <ul>
-    <li>🧩 Emojis may refer to: personality, arcana, story events, role, or weapon.</li>
-    <li>📘 Example: <code>🗡️⚡😐</code> might describe a serious Persona user with a sword and electric powers.</li>
-    <li>🔍 Try to guess based on context, not just literal emoji meanings!</li>
-  </ul>
+        <strong>💡 Tips:</strong>
+        <ul>
+          <li>🧩 Emojis may refer to: personality, arcana, story events, role, or weapon.</li>
+          <li>📘 Example: <code>🗡️⚡😐</code> might describe a serious Persona user with a sword and electric powers.</li>
+          <li>🔍 Try to guess based on context, not just literal emoji meanings!</li>
+        </ul>
 
-  <hr class="separator" />
+        <hr class="separator" />
 
-  <strong>🎮 Game flow:</strong>
-  <ul>
-    <li>⌨️ Type a character’s name and choose from the suggestions.</li>
-    <li>🔁 You have <strong>8 tries max</strong> to guess the correct answer.</li>
-    <li>🆘 You can press the <strong>Give Up</strong> button to reveal the answer (unlocked after 8 attempts).</li>
-  </ul>
+        <strong>🎮 Game flow:</strong>
+        <ul>
+          <li>⌨️ Type a character’s name and choose from the suggestions.</li>
+          <li>🔁 You have <strong>8 tries max</strong> to guess the correct answer.</li>
+          <li>🆘 You can press the <strong>Give Up</strong> button to reveal the answer (unlocked after 8 attempts).</li>
+        </ul>
 
-  <hr class="separator" />
+        <hr class="separator" />
 
-  <strong>🛡️ Spoiler protection:</strong>
-  <p>
-    🎮 Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>, <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>) to limit the characters drawn from specific games.<br>
-    🙈 This helps avoid spoilers if you haven’t played every game yet!
-  </p>
+        <strong>🛡️ Spoiler protection:</strong>
+        <p>
+          🎮 Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>, <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>) to limit the characters drawn from specific games.<br>
+          🙈 This helps avoid spoilers if you haven’t played every game yet!
+        </p>
 
-  <hr class="separator" />
-  <em>✨ Let your intuition guide you... and read between the emojis 🧠📲</em>
-</p>
+        <hr class="separator" />
+        <em>✨ Let your intuition guide you... and read between the emojis 🧠📲</em>
+      </p>
+    </div>
+
+    <div data-i18n-block="fr">
+      <p id="rulesText">
+        <strong>🎯 Objectif :</strong><br>
+        Devinez quel personnage Persona est décrit par une séquence d’emojis 🤔📱.
+
+        <hr class="separator" />
+
+        <strong>🧠 Comment ça marche :</strong>
+        <ul>
+          <li>💬 Vous démarrez avec <strong>1 emoji</strong> pour décrire le personnage.</li>
+          <li>❌ Chaque mauvaise réponse débloque <strong>1 emoji supplémentaire</strong>.</li>
+          <li>✅ Une fois le bon personnage trouvé, toute la chaîne d’emojis est révélée 🎉.</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>💡 Conseils :</strong>
+        <ul>
+          <li>🧩 Les emojis peuvent faire référence à : la personnalité, l’arcane, les événements de l’histoire, le rôle ou l’arme.</li>
+          <li>📘 Exemple : <code>🗡️⚡😐</code> pourrait décrire un personnage sérieux avec une épée et des pouvoirs électriques.</li>
+          <li>🔍 Essayez de deviner selon le contexte, pas seulement le sens littéral des emojis !</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>🎮 Déroulement :</strong>
+        <ul>
+          <li>⌨️ Tapez le nom d’un personnage et choisissez dans les suggestions.</li>
+          <li>🔁 Vous avez <strong>8 essais maximum</strong>.</li>
+          <li>🆘 Le bouton Abandonner se déverrouille après 8 tentatives.</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>🛡️ Protection anti-spoilers :</strong>
+        <p>
+          🎮 Utilisez les filtres pour limiter les personnages par jeu.<br>
+          🙈 Cela évite les spoilers si vous n’avez pas encore joué à tous les jeux !
+        </p>
+
+        <hr class="separator" />
+        <em>✨ Laissez votre intuition vous guider... et lisez entre les emojis 🧠📲</em>
+      </p>
+    </div>
 
   </div>
 </div>
@@ -352,7 +399,7 @@
     <input type="checkbox" id="darkModeToggle">
     <span class="slider round"></span>
   </label>
-  <span class="label-text">Dark Mode</span>
+  <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
 </div>
 
 <!-- Script intégré -->
@@ -380,6 +427,11 @@
 
 
   <!-- Script -->
+  <!-- i18n — init traductions au chargement -->
+<script type="module">
+import { initLang } from '../js/i18n.js';
+window.__i18nReady = initLang();
+</script>
   <script type="module" src="./emojiMode.js?v=3"></script>
 
   <div id="modeNavigationContainer" style="display: none; margin-top: 40px; justify-content: space-between; align-items: center;">
@@ -395,19 +447,21 @@
 </div>
 
 <script>
-  // Son de hover pour tous les boutons link-wrapper
+  // Son de hover — activé uniquement après la première interaction utilisateur
   document.addEventListener("DOMContentLoaded", () => {
     const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    
-    // Sélectionne tous les boutons avec effet hover
-    const buttons = document.querySelectorAll('.link-wrapper');
-    
-    buttons.forEach(button => {
+    let unlocked = false;
+
+    const unlock = () => { unlocked = true; };
+    document.addEventListener('click',   unlock, { once: true });
+    document.addEventListener('keydown', unlock, { once: true });
+
+    document.querySelectorAll('.link-wrapper').forEach(button => {
       button.addEventListener('mouseenter', () => {
-        // Clone le son pour permettre les survols rapides successifs
+        if (!unlocked) return;
         const sound = hoverSound.cloneNode();
-        sound.volume = 0.3; // Ajustez le volume si nécessaire (0.0 à 1.0)
-        sound.play().catch(e => console.log('Erreur audio hover:', e));
+        sound.volume = 0.3;
+        sound.play().catch(() => {});
       });
     });
   });

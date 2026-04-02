@@ -182,8 +182,8 @@
 
     <!-- Title -->
     <div style="color: white;">
-      <h1>🎵 Guess the Persona Song!</h1>
-      <p>Listen and type the correct music title 🎧</p>
+      <h1 data-i18n="modes.music.title">🎵 Guess the Persona Song!</h1>
+      <p data-i18n="modes.music.subtitle">Listen and type the correct music title 🎧</p>
     </div>
   </div>
 
@@ -191,49 +191,115 @@
   <div id="rulesModal" class="modal" style="display: none;">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>🎵 Music Mode — How to Play</h2>
-      <p id="rulesText">
-        <strong>🎯 Objective:</strong><br>
-        A music clip will play...<br>
-        Your mission? <strong>Identify the song title!</strong><br><br>
+      <h2 data-i18n="modes.music.rules_title">🎵 Music Mode — How to Play</h2>
 
-        <strong>💡 Tips:</strong>
-        <ul>
-          <li>Tracks are taken from the Persona 3, 4 and 5 series (including remakes/spin-offs).</li>
-          <li>Autocompletion helps you find the correct title.</li>
-          <li>You get 3 tries before the <strong>Give Up</strong> button becomes available.</li>
-        </ul>
+      <div data-i18n-block="en">
+        <p id="rulesText">
+          <strong>🎯 Objective:</strong><br>
+          A music clip will play...<br>
+          Your mission? <strong>Identify the song title!</strong><br><br>
 
-        <hr class="separator" />
+          <strong>💡 Tips:</strong>
+          <ul>
+            <li>Tracks are taken from the Persona series (including remakes and spin-offs).</li>
+            <li>Autocompletion helps you find the correct title.</li>
+            <li>You get 3 tries before the <strong>Give Up</strong> button becomes available.</li>
+          </ul>
 
-        <strong>🎮 Games Included:</strong>
-        <ul>
-          <li>Persona 1</li>
-          <li>Persona 2 ( Innocent Sin & Eternal Punishment )</li>
-          <li>Persona 3 / FES / Portable / Reload</li>
-          <li>Persona 4 / Golden / Arena / Dancing</li>
-          <li>Persona 5 / Royal / Strikers / Tactica</li>
-          <li>Persona 5: The Phantom X</li>
-        </ul>
+          <hr class="separator" />
 
-        <hr class="separator" />
+          <strong>🎮 Games Included:</strong>
+          <ul>
+            <li>Persona 1</li>
+            <li>Persona 2 (Innocent Sin &amp; Eternal Punishment)</li>
+            <li>Persona 3 / FES / Portable / Reload</li>
+            <li>Persona 4 / Golden / Arena / Dancing</li>
+            <li>Persona 5 / Royal / Strikers / Tactica</li>
+            <li>Persona 5: The Phantom X</li>
+          </ul>
 
-        <strong>📝 Disclaimer:</strong>
-        <ul>
-          <li>This is a fan project. All music rights belong to ATLUS and the original creators.</li>
-          <li>No commercial use. Please support the official soundtracks.</li>
-        </ul>
-      </p>
+          <hr class="separator" />
+
+          <strong>📝 Disclaimer:</strong>
+          <ul>
+            <li>This is a fan project. All music rights belong to ATLUS and the original creators.</li>
+            <li>No commercial use. Please support the official soundtracks.</li>
+          </ul>
+        </p>
+      </div>
+
+      <div data-i18n-block="fr">
+        <p id="rulesText">
+          <strong>🎯 Objectif :</strong><br>
+          Un extrait musical va jouer...<br>
+          Votre mission ? <strong>Identifiez le titre de la chanson !</strong><br><br>
+
+          <strong>💡 Conseils :</strong>
+          <ul>
+            <li>Les morceaux sont issus de la série Persona (remakes et spin-offs inclus).</li>
+            <li>L'autocomplétion vous aide à trouver le bon titre.</li>
+            <li>Vous avez 3 essais avant que le bouton Abandonner devienne disponible.</li>
+          </ul>
+
+          <hr class="separator" />
+
+          <strong>🎮 Jeux inclus :</strong>
+          <ul>
+            <li>Persona 1</li>
+            <li>Persona 2 (Innocent Sin &amp; Eternal Punishment)</li>
+            <li>Persona 3 / FES / Portable / Reload</li>
+            <li>Persona 4 / Golden / Arena / Dancing</li>
+            <li>Persona 5 / Royal / Strikers / Tactica</li>
+            <li>Persona 5 : The Phantom X</li>
+          </ul>
+
+          <hr class="separator" />
+
+          <strong>📝 Avertissement :</strong>
+          <ul>
+            <li>Ceci est un projet fan. Tous les droits musicaux appartiennent à ATLUS et aux créateurs originaux.</li>
+            <li>Aucune utilisation commerciale. Soutenez les bandes originales officielles.</li>
+          </ul>
+        </p>
+      </div>
+
     </div>
   </div>
 
-  <!-- Audio Player avec box stylisée -->
-<div class="audio-wrapper" id="audioBox">
-<audio id="audioPlayer" controls preload="none">
-    <source src="" type="audio/mp3">
-    Your browser does not support the audio element.
-  </audio>
-</div>
+  <!-- Audio Player — Persona 5 Custom Player -->
+  <div class="audio-wrapper" id="audioBox">
+    <!-- Élément natif caché — contrôlé par JS -->
+    <audio id="audioPlayer" preload="none">
+      <source src="" type="audio/mp3">
+    </audio>
+
+    <!-- Interface custom P5 -->
+    <div class="p5-player">
+      <!-- Coin décoratif + label + barres sonores -->
+      <div class="p5-player-header">
+        <span class="p5-player-label" data-i18n="ui.now_playing">♪ NOW PLAYING</span>
+        <div class="p5-sound-bars" id="p5SoundBars">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- Contrôles : play/pause + timeline -->
+      <div class="p5-player-controls">
+        <button class="p5-play-btn" id="p5PlayBtn" aria-label="Play / Pause">
+          <span id="p5PlayIcon">▶</span>
+        </button>
+        <div class="p5-timeline">
+          <div class="p5-progress" id="p5Progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="p5-progress-fill" id="p5ProgressFill"></div>
+          </div>
+          <div class="p5-time-row">
+            <span id="p5CurrentTime">0:00</span>
+            <span id="p5Duration">--:--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
   <!-- Victory Display -->
@@ -283,7 +349,7 @@
 
       <!-- Input Field -->
 <div class="autocomplete-wrapper" style="position: relative;">
-  <input type="text" id="textbar" placeholder="Guess the song..." />
+  <input type="text" id="textbar" placeholder="Guess the song..." data-i18n-placeholder="ui.music_input_placeholder" />
 </div>
 
       <!-- Submit Button -->
@@ -309,6 +375,11 @@
   <div id="wrongGuessList"></div>
 
   <!-- Game Script -->
+  <!-- i18n — init traductions au chargement -->
+<script type="module">
+import { initLang } from '../js/i18n.js';
+window.__i18nReady = initLang();
+</script>
   <script type="module" src="./modeMusic.js?v=3"></script>
 
   <!-- Dark Mode -->
@@ -317,7 +388,7 @@
       <input type="checkbox" id="darkModeToggle">
       <span class="slider round"></span>
     </label>
-    <span class="label-text">Dark Mode</span>
+    <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
   </div>
 
   <script>
@@ -353,19 +424,21 @@
   </div>
 </div>
 <script>
-  // Son de hover pour tous les boutons link-wrapper
+  // Son de hover — activé uniquement après la première interaction utilisateur
   document.addEventListener("DOMContentLoaded", () => {
     const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    
-    // Sélectionne tous les boutons avec effet hover
-    const buttons = document.querySelectorAll('.link-wrapper');
-    
-    buttons.forEach(button => {
+    let unlocked = false;
+
+    const unlock = () => { unlocked = true; };
+    document.addEventListener('click',   unlock, { once: true });
+    document.addEventListener('keydown', unlock, { once: true });
+
+    document.querySelectorAll('.link-wrapper').forEach(button => {
       button.addEventListener('mouseenter', () => {
-        // Clone le son pour permettre les survols rapides successifs
+        if (!unlocked) return;
         const sound = hoverSound.cloneNode();
-        sound.volume = 0.3; // Ajustez le volume si nécessaire (0.0 à 1.0)
-        sound.play().catch(e => console.log('Erreur audio hover:', e));
+        sound.volume = 0.3;
+        sound.play().catch(() => {});
       });
     });
   });

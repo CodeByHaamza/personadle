@@ -33,6 +33,35 @@ import { initFilterMenu } from "../js/filterMenu.js";
 /** All specific opus codes available in Music mode. */
 const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4D","P5","P5R","P5S","P5X","PQ","PQ2"];
 
+/**
+ * Color themes per Persona series.
+ * Each entry defines accent colors and glow rgba template ('{a}' = alpha).
+ * Applied to the audio player via CSS custom properties.
+ */
+const OPUS_THEMES = {
+  P1:    { accent: '#7c3aed', dark: '#5b21b6', light: '#a78bfa', glow: 'rgba(124,58,237,{a})'   },
+  P2IS:  { accent: '#ea580c', dark: '#c2410c', light: '#fb923c', glow: 'rgba(234,88,12,{a})'    },
+  P2EP:  { accent: '#8b5cf6', dark: '#7c3aed', light: '#c4b5fd', glow: 'rgba(139,92,246,{a})'   },
+  P3:    { accent: '#3b82f6', dark: '#1d4ed8', light: '#93c5fd', glow: 'rgba(59,130,246,{a})'   },
+  P3FES: { accent: '#3b82f6', dark: '#1d4ed8', light: '#93c5fd', glow: 'rgba(59,130,246,{a})'   },
+  // P3P — Makoto (bleu) + Kotone (rose) : bordure et bouton indigo, barre dégradée bleu→rose
+  P3P:   {
+    accent: '#818cf8', dark: '#3b82f6', light: '#f9a8d4', glow: 'rgba(129,140,248,{a})',
+    gradientFill: 'linear-gradient(90deg, #1d4ed8, #3b82f6 30%, #c084fc 65%, #ec4899)',
+  },
+  P3R:   { accent: '#3b82f6', dark: '#1d4ed8', light: '#93c5fd', glow: 'rgba(59,130,246,{a})'   },
+  P4:    { accent: '#eab308', dark: '#a16207', light: '#fde047', glow: 'rgba(234,179,8,{a})'    },
+  P4G:   { accent: '#eab308', dark: '#a16207', light: '#fde047', glow: 'rgba(234,179,8,{a})'    },
+  P4D:   { accent: '#eab308', dark: '#a16207', light: '#fde047', glow: 'rgba(234,179,8,{a})'    },
+  P5:    { accent: '#e63946', dark: '#c1121f', light: '#ff8fa3', glow: 'rgba(230,57,70,{a})'    },
+  P5R:   { accent: '#e63946', dark: '#c1121f', light: '#ff8fa3', glow: 'rgba(230,57,70,{a})'    },
+  P5S:   { accent: '#e63946', dark: '#c1121f', light: '#ff8fa3', glow: 'rgba(230,57,70,{a})'    },
+  // P5X (The Phantom X) — bordeaux/cramoisi, rouge sombre distinct du rouge vif P5
+  P5X:   { accent: '#c0193a', dark: '#5c0f1f', light: '#e63946', glow: 'rgba(192,25,58,{a})'    },
+  PQ:    { accent: '#f97316', dark: '#ea580c', light: '#fdba74', glow: 'rgba(249,115,22,{a})'   },
+  PQ2:   { accent: '#f97316', dark: '#ea580c', light: '#fdba74', glow: 'rgba(249,115,22,{a})'   },
+};
+
 /** Maximum number of guesses before the "Give Up" button is enabled. */
 const MAX_ATTEMPTS = 3;
 
@@ -87,7 +116,8 @@ let giveUpCounter, wrongList, victoryBox, victoryImage, victoryText;
 // INITIALISATION
 // ─────────────────────────────────────────────────────────────────────────────
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.__i18nReady) await window.__i18nReady;
 
   // ── DOM element references ─────────────────────────────────────────────────
   textbar      = document.getElementById("textbar");
@@ -119,6 +149,8 @@ document.addEventListener("DOMContentLoaded", () => {
     audioPlayer.src = `./database/music/song/${target.fichier}`;
     audioPlayer.load();
 
+    setPlayerTheme(target.opus);
+
     giveUpCounter.textContent = `(${attempts} / ${MAX_ATTEMPTS})`;
     if (attempts >= MAX_ATTEMPTS) {
       giveUpBtn.disabled = false;
@@ -141,6 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── UI wiring ──────────────────────────────────────────────────────────────
   applyDarkModeStyles();
+  initCustomPlayer();
   setupRulesModal();                          // ← shared utility
 
   guessBtn.addEventListener("click", handleGuess);
@@ -282,15 +315,16 @@ function showVictory(force = false) {
   victoryImage.src = `./database/img/${target.image}`;
   victoryImage.alt = target.titre;
 
+  const i18n      = window.i18n || { t: (k) => k };
   const vocal    = target.vocalist?.trim();
-  const vocalLine = vocal ? `<br>🧑‍🎤 Vocal: <strong>${vocal}</strong>` : "";
+  const vocalLine = vocal ? `<br>${i18n.t('modes.music.vocal_label', { name: vocal })}` : "";
   const linkLine  = target.lien
-    ? `<br>🔗 <a href="${target.lien}" target="_blank" class="victory-link">Listen here</a>`
+    ? `<br><a href="${target.lien}" target="_blank" class="victory-link">${i18n.t('modes.music.listen_link')}</a>`
     : "";
 
   victoryText.innerHTML = force
-    ? `💡 It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`
-    : `🎉 Correct! It was: <strong>${target.titre}</strong>${vocalLine}${linkLine}`;
+    ? `${i18n.t('modes.music.giveup_reveal', { title: target.titre })}${vocalLine}${linkLine}`
+    : `${i18n.t('modes.music.correct', { title: target.titre })}${vocalLine}${linkLine}`;
 
   victoryBox.style.display = "block";
 
@@ -441,7 +475,9 @@ function resetGame() {
   const navContainer = document.getElementById("modeNavigationContainer");
   if (navContainer) navContainer.style.display = "none";
 
+  resetPlayerVisuals();
   pickSong();
+  if (target) setPlayerTheme(target.opus);
 }
 
 
@@ -556,6 +592,139 @@ function initializeAutocomplete(input) {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CUSTOM AUDIO PLAYER
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Applies the color theme matching the song's opus to the audio player
+ * via CSS custom properties on the #audioBox element.
+ *
+ * In dark mode the CSS overrides these properties with cyan — no action needed.
+ *
+ * @param {string|string[]} opusArray - opus code(s) from the song object
+ */
+function setPlayerTheme(opusArray) {
+  if (!audioBox) return;
+  const ops   = Array.isArray(opusArray) ? opusArray : [opusArray];
+  const theme = ops.map(op => OPUS_THEMES[op]).find(Boolean) || OPUS_THEMES.P5;
+  const g     = (a) => theme.glow.replace('{a}', a);
+
+  audioBox.style.setProperty('--player-accent',            theme.accent);
+  audioBox.style.setProperty('--player-accent-dark',       theme.dark);
+  audioBox.style.setProperty('--player-accent-light',      theme.light);
+  audioBox.style.setProperty('--player-glow',              g('0.35'));
+  audioBox.style.setProperty('--player-glow-strong',       g('0.55'));
+  audioBox.style.setProperty('--player-glow-subtle',       g('0.04'));
+  audioBox.style.setProperty('--player-btn-glow',          g('0.70'));
+  audioBox.style.setProperty('--player-btn-glow-strong',   g('0.90'));
+  audioBox.style.setProperty('--player-btn-glow-max',      g('1.00'));
+
+  // Dégradé custom pour la barre (ex: P3P bleu→rose) — sinon dégradé mono-couleur standard
+  const fillGradient = theme.gradientFill
+    ?? `linear-gradient(90deg, var(--player-accent-dark), var(--player-accent) 70%, var(--player-accent-light))`;
+  audioBox.style.setProperty('--player-fill-gradient', fillGradient);
+}
+
+/**
+ * Resets the audio player visual state to its initial position.
+ * Called by resetGame() so the bar starts at 0 on a new round.
+ */
+function resetPlayerVisuals() {
+  const progressFill = document.getElementById('p5ProgressFill');
+  const curTimeEl    = document.getElementById('p5CurrentTime');
+  const durEl        = document.getElementById('p5Duration');
+  const soundBars    = document.getElementById('p5SoundBars');
+  const playIcon     = document.getElementById('p5PlayIcon');
+  const playBtn      = document.getElementById('p5PlayBtn');
+
+  if (audioPlayer) { audioPlayer.pause(); audioPlayer.currentTime = 0; }
+  if (progressFill) progressFill.style.width  = '0%';
+  if (curTimeEl)    curTimeEl.textContent      = '0:00';
+  if (durEl)        durEl.textContent          = '--:--';
+  if (soundBars)    soundBars.classList.remove('playing');
+  if (playIcon)     playIcon.textContent       = '▶';
+  if (playBtn)      { playBtn.classList.remove('playing'); playBtn.classList.add('idle'); }
+}
+
+/**
+ * Wires up the custom Persona-5-themed audio player controls.
+ * Works on top of the native <audio id="audioPlayer"> element.
+ */
+function initCustomPlayer() {
+  const playBtn      = document.getElementById('p5PlayBtn');
+  const playIcon     = document.getElementById('p5PlayIcon');
+  const progressEl   = document.getElementById('p5Progress');
+  const progressFill = document.getElementById('p5ProgressFill');
+  const soundBars    = document.getElementById('p5SoundBars');
+  const curTimeEl    = document.getElementById('p5CurrentTime');
+  const durEl        = document.getElementById('p5Duration');
+
+  if (!playBtn || !audioPlayer) return;
+
+  // Format seconds → "m:ss"
+  function fmt(s) {
+    if (!isFinite(s) || isNaN(s)) return '--:--';
+    const m   = Math.floor(s / 60);
+    const sec = String(Math.floor(s % 60)).padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  // Pulse animation on idle button, remove when playing
+  playBtn.classList.add('idle');
+
+  // ── Play / Pause ──────────────────────────────────────────────────────────
+  playBtn.addEventListener('click', () => {
+    if (audioPlayer.paused) {
+      audioPlayer.play().catch(() => {});
+    } else {
+      audioPlayer.pause();
+    }
+  });
+
+  audioPlayer.addEventListener('play', () => {
+    playIcon.textContent = '⏸';
+    playBtn.classList.remove('idle');
+    soundBars?.classList.add('playing');
+  });
+
+  audioPlayer.addEventListener('pause', () => {
+    playIcon.textContent = '▶';
+    playBtn.classList.add('idle');
+    soundBars?.classList.remove('playing');
+  });
+
+  audioPlayer.addEventListener('ended', () => {
+    playIcon.textContent = '▶';
+    playBtn.classList.add('idle');
+    soundBars?.classList.remove('playing');
+    if (progressFill) progressFill.style.width = '0%';
+    if (curTimeEl)    curTimeEl.textContent     = '0:00';
+  });
+
+  // ── Progress bar update ───────────────────────────────────────────────────
+  audioPlayer.addEventListener('timeupdate', () => {
+    if (!audioPlayer.duration) return;
+    const pct = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+    if (progressFill) progressFill.style.width  = `${pct}%`;
+    if (progressEl)   progressEl.setAttribute('aria-valuenow', Math.round(pct));
+    if (curTimeEl)    curTimeEl.textContent      = fmt(audioPlayer.currentTime);
+  });
+
+  audioPlayer.addEventListener('loadedmetadata', () => {
+    if (durEl) durEl.textContent = fmt(audioPlayer.duration);
+  });
+
+  // ── Seek on click ─────────────────────────────────────────────────────────
+  progressEl?.addEventListener('click', (e) => {
+    if (!audioPlayer.duration) return;
+    const rect = progressEl.getBoundingClientRect();
+    const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    audioPlayer.currentTime = pct * audioPlayer.duration;
+  });
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // DARK MODE
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -564,11 +733,8 @@ function initializeAutocomplete(input) {
  * Called once on load; the global CSS handles everything else.
  */
 function applyDarkModeStyles() {
-  if (!document.body.classList.contains("darkmode")) return;
-  if (audioBox) {
-    audioBox.style.backgroundColor = "#222";
-    audioBox.style.border = "3px solid #888";
-  }
+  // CSS handles all dark mode player styles via body.darkmode selectors.
+  // No inline overrides needed.
 }
 
 

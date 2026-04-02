@@ -160,8 +160,8 @@
 
     <!-- Titre central -->
     <div style="color: white;">
-      <h1>Guess the Persona User from their Personae!</h1>
-      <p>Type a name to start 💥</p>
+      <h1 data-i18n="modes.personae.title">Guess the Persona User from their Personae!</h1>
+      <p data-i18n="modes.personae.subtitle">Type a name to start 💥</p>
     </div>
   </div>
 
@@ -169,48 +169,96 @@
 <div id="rulesModal" class="modal" style="display: none;">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <h2>👥 Personae Mode — How to Play</h2>
-    <p id="rulesText">
-      <strong>🎯 Goal:</strong><br>
-      A mysterious Persona appears on screen...<br>
-      Your mission? <strong>Guess who it belongs to!</strong><br><br>
+    <h2 data-i18n="modes.personae.rules_title">👥 Personae Mode — How to Play</h2>
 
-      <hr class="separator" />
+    <div data-i18n-block="en">
+      <p id="rulesText">
+        <strong>🎯 Goal:</strong><br>
+        A mysterious Persona appears on screen...<br>
+        Your mission? <strong>Guess who it belongs to!</strong><br><br>
 
-      <strong>🧠 How it works:</strong>
-      <ul>
-        <li>🖼️ A Persona is displayed in full glory — observe its design, motifs, and overall style.</li>
-        <li>👤 Enter the name of the character you believe is the rightful user of that Persona.</li>
-        <li>✅ If you’re correct, the result is revealed and counted as a win!</li>
-      </ul>
+        <hr class="separator" />
 
-      <hr class="separator" />
+        <strong>🧠 How it works:</strong>
+        <ul>
+          <li>🖼️ A Persona is displayed in full glory — observe its design, motifs, and overall style.</li>
+          <li>👤 Enter the name of the character you believe is the rightful user of that Persona.</li>
+          <li>✅ If you’re correct, the result is revealed and counted as a win!</li>
+        </ul>
 
-      <strong>💡 Tips:</strong>
-      <ul>
-        <li>🎨 Persona designs often reflect their user's personality, backstory, or arcana.</li>
-        <li>🔄 Some Personae are shared by multiple characters — context is everything!</li>
-        <li>📖 Use your lore knowledge and visual intuition from Persona 2, 3, 4, and 5 (and spin-offs).</li>
-      </ul>
+        <hr class="separator" />
 
-      <hr class="separator" />
+        <strong>💡 Tips:</strong>
+        <ul>
+          <li>🎨 Persona designs often reflect their user’s personality, backstory, or arcana.</li>
+          <li>🔄 Some Personae are shared by multiple characters — context is everything!</li>
+          <li>📖 Use your lore knowledge and visual intuition from Persona 2, 3, 4, and 5 (and spin-offs).</li>
+        </ul>
 
-      <strong>❌ Give Up Mechanic:</strong>
-      <ul>
-        <li>🔁 After <strong>3 failed attempts</strong>, the <strong>Give Up</strong> button becomes available.</li>
-        <li>🆘 Clicking it will reveal the correct character — but it will count as a loss.</li>
-      </ul>
+        <hr class="separator" />
 
-      <hr class="separator" />
+        <strong>❌ Give Up Mechanic:</strong>
+        <ul>
+          <li>🔁 After <strong>3 failed attempts</strong>, the <strong>Give Up</strong> button becomes available.</li>
+          <li>🆘 Clicking it will reveal the correct character — but it will count as a loss.</li>
+        </ul>
 
-      <strong>🎮 Games Included:</strong>
-      <p>
-        Features Personae from <strong>Persona 2 ( Innocent Sin & Eternal Punishment ) , </strong><strong> Persona 3</strong>, <strong>Persona 4</strong>, <strong>Persona 5</strong>, <strong>Persona 5 The Phantom X</strong> and their respective spin-offs. Use filter buttons (P3 / P4 / P5 / P5X) to customize your experience.
+        <hr class="separator" />
+
+        <strong>🎮 Games Included:</strong>
+        <p>
+          Features Personae from <strong>Persona 2 (Innocent Sin &amp; Eternal Punishment)</strong>, <strong>Persona 3</strong>, <strong>Persona 4</strong>, <strong>Persona 5</strong>, <strong>Persona 5: The Phantom X</strong> and their respective spin-offs. Use filter buttons (P3 / P4 / P5 / P5X) to customize your experience.
+        </p>
+
+        <hr class="separator" />
+        <em>🔍 Trust your insight, rely on your memory, and prove your Persona mastery!</em>
       </p>
+    </div>
 
-      <hr class="separator" />
-      <em>🔍 Trust your insight, rely on your memory, and prove your Persona mastery!</em>
-    </p>
+    <div data-i18n-block="fr">
+      <p id="rulesText">
+        <strong>🎯 Objectif :</strong><br>
+        Un mystérieux Persona apparaît à l’écran...<br>
+        Votre mission ? <strong>Devinez à qui il appartient !</strong><br><br>
+
+        <hr class="separator" />
+
+        <strong>🧠 Comment ça marche :</strong>
+        <ul>
+          <li>🖼️ Un Persona est affiché — observez son design, ses motifs et son style.</li>
+          <li>👤 Entrez le nom du personnage que vous pensez être le véritable utilisateur.</li>
+          <li>✅ Si vous avez raison, le résultat est révélé et compte comme une victoire !</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>💡 Conseils :</strong>
+        <ul>
+          <li>🎨 Les designs des Personae reflètent souvent la personnalité, le passé ou l’arcane de leur utilisateur.</li>
+          <li>🔄 Certains Personae sont partagés par plusieurs personnages — le contexte est primordial !</li>
+          <li>📖 Utilisez vos connaissances de la lore de Persona 2, 3, 4, 5 et des spin-offs.</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>❌ Mécanisme d’abandon :</strong>
+        <ul>
+          <li>🔁 Après <strong>3 échecs</strong>, le bouton <strong>Abandonner</strong> devient disponible.</li>
+          <li>🆘 Cliquer dessus révèle le bon personnage — mais compte comme une défaite.</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>🎮 Jeux inclus :</strong>
+        <p>
+          Personae de <strong>P2 (IS &amp; EP)</strong>, <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong> et leurs spin-offs respectifs. Utilisez les filtres pour personnaliser votre expérience.
+        </p>
+
+        <hr class="separator" />
+        <em>🔍 Faites confiance à votre intuition, utilisez votre mémoire, et prouvez votre maîtrise des Persona !</em>
+      </p>
+    </div>
+
   </div>
 </div>
 
@@ -271,7 +319,7 @@
         <input
   type="text"
   id="textbar"
-  placeholder="Enter character name..."
+  placeholder="Enter character name..." data-i18n-placeholder="ui.input_placeholder"
   aria-label="Guess character name"
   autocomplete="off"
   autocorrect="off"
@@ -304,6 +352,11 @@
   <div id="wrongGuessList"></div>
 
   <!-- Script du jeu -->
+  <!-- i18n — init traductions au chargement -->
+<script type="module">
+import { initLang } from '../js/i18n.js';
+window.__i18nReady = initLang();
+</script>
   <script type="module" src="./modePersonae.js?v=3"></script>
 
   <!-- Dark Mode -->
@@ -312,7 +365,7 @@
       <input type="checkbox" id="darkModeToggle">
       <span class="slider round"></span>
     </label>
-    <span class="label-text">Dark Mode</span>
+    <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
   </div>
 
   <script>
@@ -345,19 +398,21 @@
   </div>
 </div>
 <script>
-  // Son de hover pour tous les boutons link-wrapper
+  // Son de hover — activé uniquement après la première interaction utilisateur
   document.addEventListener("DOMContentLoaded", () => {
     const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    
-    // Sélectionne tous les boutons avec effet hover
-    const buttons = document.querySelectorAll('.link-wrapper');
-    
-    buttons.forEach(button => {
+    let unlocked = false;
+
+    const unlock = () => { unlocked = true; };
+    document.addEventListener('click',   unlock, { once: true });
+    document.addEventListener('keydown', unlock, { once: true });
+
+    document.querySelectorAll('.link-wrapper').forEach(button => {
       button.addEventListener('mouseenter', () => {
-        // Clone le son pour permettre les survols rapides successifs
+        if (!unlocked) return;
         const sound = hoverSound.cloneNode();
-        sound.volume = 0.3; // Ajustez le volume si nécessaire (0.0 à 1.0)
-        sound.play().catch(e => console.log('Erreur audio hover:', e));
+        sound.volume = 0.3;
+        sound.play().catch(() => {});
       });
     });
   });

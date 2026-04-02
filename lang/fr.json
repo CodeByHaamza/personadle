@@ -1,0 +1,525 @@
+{
+  "ui": {
+    "submit": "Valider",
+    "giveup": "Abandonner",
+    "hint": "Indice",
+    "replay": "Rejouer",
+    "rules": "Règles",
+    "dark_mode": "Mode Sombre",
+    "my_account": "Mon Compte",
+    "filters": "FILTRES",
+    "select_all": "✓ Tout sélectionner",
+    "deselect_all": "✗ Tout désélectionner",
+    "input_placeholder": "Entrez un nom de personnage...",
+    "music_input_placeholder": "Devinez la musique...",
+    "daltonian_off": "Mode Daltonien : OFF",
+    "daltonian_on": "Mode Daltonien : ON",
+    "counter": "{{current}} / {{max}}",
+    "prev_mode": "← {{mode}}",
+    "next_mode": "{{mode}} →",
+    "yes": "Oui",
+    "no": "Non",
+    "now_playing": "♪ EN COURS"
+  },
+
+  "modes": {
+    "classic": {
+      "name": "Classique",
+      "title": "Devinez le personnage Persona du jour !",
+      "subtitle": "Tapez n'importe quel personnage pour commencer.",
+      "rules_title": "📋 Règles du Mode Classique",
+      "goal": "🎯 Objectif :",
+      "goal_text": "Devinez le personnage Persona du jour grâce à la déduction et aux indices 🧩🕵️.",
+      "how_it_works": "🧠 Comment ça marche :",
+      "rule_1": "Chaque tentative montre à quel point votre réponse se rapproche du personnage correct.",
+      "rule_2": "Une grille compare plusieurs attributs : jeu, genre, âge, arcane, etc.",
+      "rule_3": "🟩 Vert = correct, 🟨 Jaune = correspondance partielle, 🟥 Rouge = faux.",
+      "criteria": "📊 Critères comparés :",
+      "criteria_game": "🎮 Jeu – Dans quel jeu Persona apparaît ce personnage",
+      "criteria_gender": "⚧️ Genre – Humain, Shadow, Entité, etc.",
+      "criteria_age": "🎂 Âge – Tranche d'âge (ex : <15, 15–20, 40+)",
+      "criteria_persona_user": "💥 Utilisateur de Persona / Shadow – Peut-il invoquer un Persona ou est-il un Shadow ?",
+      "criteria_persona": "👺 Persona – Le Persona ou la forme Shadow spécifique",
+      "criteria_arcana": "🃏 Arcane – L'Arcane du Tarot (Fou, Magicien, etc.)",
+      "tips": "💡 Conseils :",
+      "tip_1": "🧠 Utilisez la déduction grâce aux indices colorés.",
+      "tip_2": "📈 Si l'âge n'est pas exact, une flèche ↑ ou ↓ apparaît.",
+      "tip_3": "🟨 Le jaune signifie une correspondance partielle (ex : même série mais jeu différent).",
+      "accessibility": "♿ Accessibilité :",
+      "daltonian_desc": "🌈 Mode Daltonien – Remplace le rouge/vert/jaune par des teintes adaptées et ajoute des symboles (✔, ▲, ✖) pour plus de clarté.",
+      "game_flow": "🎮 Déroulement :",
+      "flow_input": "⌨️ Tapez un nom et sélectionnez dans les suggestions.",
+      "flow_attempts": "🔁 Vous avez 8 tentatives maximum.",
+      "flow_hint": "💬 À 3 tentatives : 🔓 L'indice se déverrouille (affiche une citation).",
+      "flow_giveup": "❌ À 8 tentatives : 🔓 Abandonner se déverrouille (révèle la réponse).",
+      "spoiler_protection": "🛡️ Protection anti-spoilers :",
+      "spoiler_desc": "🕹️ Utilisez les filtres pour limiter les personnages par jeu.",
+      "spoiler_help": "👀 Cela évite les spoilers si vous n'avez pas encore joué à tous les jeux !",
+      "closing": "🎭 Pensez comme un Phantom Thief... et dévoilez la vérité !",
+      "not_in_database": "\"{{name}}\" n'existe pas dans la base de données !",
+      "label_name": "Nom",
+      "label_game": "Jeu",
+      "label_gender": "Genre",
+      "label_age": "Âge",
+      "label_persona_user": "Utilisateur Persona",
+      "label_persona": "Persona / Shadow",
+      "label_arcana": "Arcane",
+      "tooltip_name": "Le nom complet du personnage tel qu'il est connu dans l'univers Persona.",
+      "tooltip_game": "Le(s) jeu(x) dans lequel ce personnage apparaît : P3, P4G, P5, PQ2, etc.",
+      "tooltip_gender": "Représente l'identité du personnage — Humain, Artificiel, Shadow ou Entité.",
+      "tooltip_age": "Tranche d'âge de \"< 15\" à \"40+\", incluant des entités uniques comme \"80+\".",
+      "tooltip_persona_user": "Indique si le personnage peut invoquer un Persona ou est lui-même un Shadow.",
+      "tooltip_persona": "Le Persona spécifique lié au personnage — ou sa forme Shadow.",
+      "tooltip_arcana": "L'Arcane du Tarot qui définit son rôle symbolique et narratif."
+    },
+
+    "emoji": {
+      "name": "Emoji",
+      "title": "Quel personnage ces emojis décrivent-ils ?",
+      "subtitle": "Chaque essai débloque un emoji.",
+      "rules_title": "🔠 Règles du Mode Emoji",
+      "goal": "🎯 Objectif :",
+      "goal_text": "Devinez quel personnage Persona est décrit par une séquence d'emojis 🤔📱.",
+      "how_it_works": "🧠 Comment ça marche :",
+      "rule_1": "💬 Vous démarrez avec 1 emoji pour décrire le personnage.",
+      "rule_2": "❌ Chaque mauvaise réponse débloque 1 emoji supplémentaire.",
+      "rule_3": "✅ Une fois le bon personnage trouvé, toute la chaîne d'emojis est révélée 🎉.",
+      "tips": "💡 Conseils :",
+      "tip_1": "🧩 Les emojis peuvent faire référence à : la personnalité, l'arcane, les événements de l'histoire, le rôle ou l'arme.",
+      "tip_2": "📘 Exemple : 🗡️⚡😐 pourrait décrire un personnage sérieux avec une épée et des pouvoirs électriques.",
+      "tip_3": "🔍 Essayez de deviner selon le contexte, pas seulement le sens littéral des emojis !",
+      "game_flow": "🎮 Déroulement :",
+      "flow_input": "⌨️ Tapez le nom d'un personnage et choisissez dans les suggestions.",
+      "flow_attempts": "🔁 Vous avez 8 essais maximum.",
+      "flow_giveup": "🆘 Le bouton Abandonner se déverrouille après 8 tentatives.",
+      "spoiler_protection": "🛡️ Protection anti-spoilers :",
+      "spoiler_desc": "🎮 Utilisez les filtres pour limiter les personnages par jeu.",
+      "spoiler_help": "🙈 Cela évite les spoilers si vous n'avez pas encore joué à tous les jeux !",
+      "closing": "✨ Laissez votre intuition vous guider... et lisez entre les emojis 🧠📲",
+      "not_in_database": "\"{{name}}\" n'est pas dans la base de données.",
+      "correct": "✅ Correct ! C'était {{name}} !",
+      "giveup_reveal": "Vous avez abandonné ! La réponse était : {{name}}"
+    },
+
+    "silhouette": {
+      "name": "Silhouette",
+      "title": "Devinez le personnage Persona du jour d'après sa silhouette !",
+      "subtitle": "Tapez n'importe quel nom pour commencer 👤",
+      "rules_title": "🕶️ Mode Silhouette — Comment jouer",
+      "goal": "🎯 Objectif :",
+      "goal_intro": "Une silhouette mystérieuse se dresse devant vous...",
+      "goal_question": "Pouvez-vous identifier le personnage Persona uniquement à partir de sa silhouette noire ?",
+      "how_it_works": "👤 Comment ça marche :",
+      "rule_1": "🔍 Le jeu commence avec une silhouette très zoomée.",
+      "rule_2": "❌ Chaque mauvaise réponse dézoome l'image, révélant davantage du contour.",
+      "rule_3": "✅ Trouvez le bon nom, et le portrait complet est révélé !",
+      "tips": "💡 Conseils :",
+      "tip_1": "🧍 Faites attention à la pose, la coiffure, l'arme ou les accessoires de la silhouette.",
+      "tip_2": "👓 Certains personnages ont des postures distinctives — repérez-les !",
+      "tip_3": "🎮 Utilisez vos connaissances de tous les jeux Persona et leurs spin-offs.",
+      "giveup_mechanics": "📉 Mécanisme d'abandon :",
+      "giveup_unlock": "🆘 Le bouton Abandonner se déverrouille après 3 échecs.",
+      "giveup_penalty": "🙈 Vous verrez la réponse — mais cela compte comme une défaite !",
+      "games_included": "🎮 Jeux inclus :",
+      "games_list": "Personnages de Persona 1, 2 (IS & EP), 3, 4, 5 et P5 : The Phantom X, spin-offs inclus.",
+      "closing": "🧠 Observez les ombres, faites confiance à vos instincts, et devenez le détective de silhouettes ultime !",
+      "correct": "🎉 Vous avez trouvé {{name}} !",
+      "giveup_reveal": "❌ La réponse était {{name}}"
+    },
+
+    "alloutattack": {
+      "name": "All-Out Attack",
+      "title": "Devinez le personnage Persona du jour !",
+      "subtitle": "Tapez n'importe quel personnage pour commencer.",
+      "rules_title": "Règles du Mode All-Out Attack",
+      "goal": "🎯 Objectif :",
+      "goal_text": "Devinez le personnage Persona d'après son animation d'All-Out Attack.",
+      "gameplay": "💥 Gameplay :",
+      "gameplay_1": "Vous commencez avec un GIF d'All-Out Attack flou.",
+      "gameplay_2": "Chaque mauvaise réponse réduit le flou.",
+      "gameplay_3": "Essayez de deviner avec le moins de tentatives possible !",
+      "games_included": "🎮 Jeux inclus :",
+      "games_list": "Uniquement des personnages de Persona 3 Reload, Persona 5 / Royal et Persona 5 : The Phantom X.",
+      "giveup_mechanics": "📉 Option Abandonner :",
+      "giveup_unlock": "Après 5 mauvaises réponses, le bouton Abandonner s'active.",
+      "closing": "Laissez vos yeux s'adapter, concentrez vos instincts, et visez le coup critique !",
+      "no_characters": "Aucun personnage disponible avec les filtres actuels.",
+      "prev_mode": "← Mode Emoji",
+      "next_mode": "Mode Shadows →"
+    },
+
+    "personae": {
+      "name": "Personae",
+      "title": "Devinez l'utilisateur de Persona d'après ses Personae !",
+      "subtitle": "Tapez un nom pour commencer 💥",
+      "rules_title": "👥 Mode Personae — Comment jouer",
+      "goal": "🎯 Objectif :",
+      "goal_intro": "Un mystérieux Persona apparaît à l'écran...",
+      "goal_question": "Votre mission ? Devinez à qui il appartient !",
+      "how_it_works": "🧠 Comment ça marche :",
+      "rule_1": "🖼️ Un Persona est affiché — observez son design, ses motifs et son style.",
+      "rule_2": "👤 Entrez le nom du personnage que vous pensez être le véritable utilisateur.",
+      "rule_3": "✅ Si vous avez raison, le résultat est révélé et compte comme une victoire !",
+      "tips": "💡 Conseils :",
+      "tip_1": "🎨 Les designs des Personae reflètent souvent la personnalité, le passé ou l'arcane de leur utilisateur.",
+      "tip_2": "🔄 Certains Personae sont partagés par plusieurs personnages — le contexte est primordial !",
+      "tip_3": "📖 Utilisez vos connaissances de la lore de Persona 2, 3, 4, 5 et des spin-offs.",
+      "giveup_mechanics": "❌ Mécanisme d'abandon :",
+      "giveup_unlock": "🔁 Après 3 échecs, le bouton Abandonner devient disponible.",
+      "giveup_penalty": "🆘 Cliquer dessus révèle le bon personnage — mais compte comme une défaite.",
+      "games_included": "🎮 Jeux inclus :",
+      "games_list": "Personae de P2 (IS & EP), P3, P4, P5, P5X et leurs spin-offs respectifs.",
+      "closing": "🔍 Faites confiance à votre intuition, utilisez votre mémoire, et prouvez votre maîtrise des Persona !",
+      "correct": "✅ Bonne réponse ! Le Persona de {{name}} était {{persona}}.",
+      "giveup_reveal": "❌ Dommage ! Le Persona de {{name}} était {{persona}}.",
+      "prev_mode": "← Mode Shadows",
+      "next_mode": "Mode Musique →"
+    },
+
+    "music": {
+      "name": "Musique",
+      "title": "🎵 Devinez la musique Persona !",
+      "subtitle": "Écoutez et tapez le bon titre 🎧",
+      "rules_title": "🎵 Mode Musique — Comment jouer",
+      "goal": "🎯 Objectif :",
+      "goal_intro": "Un extrait musical va jouer...",
+      "goal_question": "Votre mission ? Identifiez le titre de la chanson !",
+      "tips": "💡 Conseils :",
+      "tip_1": "Les morceaux sont issus de la série Persona (remakes et spin-offs inclus).",
+      "tip_2": "L'autocomplétion vous aide à trouver le bon titre.",
+      "tip_3": "Vous avez 3 essais avant que le bouton Abandonner devienne disponible.",
+      "games_included": "🎮 Jeux inclus :",
+      "game_p1": "Persona 1",
+      "game_p2": "Persona 2 (Innocent Sin & Eternal Punishment)",
+      "game_p3": "Persona 3 / FES / Portable / Reload",
+      "game_p4": "Persona 4 / Golden / Arena / Dancing",
+      "game_p5": "Persona 5 / Royal / Strikers / Tactica",
+      "game_p5x": "Persona 5 : The Phantom X",
+      "disclaimer": "📝 Avertissement :",
+      "disclaimer_1": "Ceci est un projet fan. Tous les droits musicaux appartiennent à ATLUS et aux créateurs originaux.",
+      "disclaimer_2": "Aucune utilisation commerciale. Soutenez les bandes originales officielles.",
+      "correct": "🎉 Correct ! C'était : {{title}}",
+      "giveup_reveal": "💡 C'était : {{title}}",
+      "vocal_label": "🧑‍🎤 Voix : {{name}}",
+      "listen_link": "🔗 Écouter ici",
+      "prev_mode": "← Mode Personae"
+    }
+  },
+
+  "game": {
+    "next_reset": "Prochain personnage dans {{time}}",
+    "already_played": "Vous avez déjà joué aujourd'hui !",
+    "win_message": "Félicitations ! Trouvé en {{count}} tentative(s) !",
+    "giveup_confirm": "Êtes-vous sûr de vouloir abandonner ?",
+    "no_characters_filters": "Aucun personnage disponible avec les filtres actuels."
+  },
+
+  "profile": {
+    "title": "Mon Profil",
+    "pseudo_label": "Pseudo",
+    "avatar_label": "Avatar",
+    "stats_title": "Statistiques",
+    "badges_title": "Badges",
+    "wallpaper_label": "Fond d'écran",
+    "music_label": "Musique de profil",
+    "title_label": "Titre",
+    "stat_wins": "🏆 Victoires : {{count}}",
+    "stat_giveups": "🚫 Abandons : {{count}}",
+    "stat_games": "▶️ Parties jouées : {{count}}",
+    "stat_streak": "📆 Streak actuel : {{count}} jour(s)",
+    "stat_best_streak": "🔥 Meilleur Streak : {{count}}",
+    "stat_favorite": "🎮 Mode favori : {{mode}}",
+    "stat_time": "⏱️ Temps total : {{count}} min",
+    "stat_first_played": "📅 Première partie : {{date}}",
+    "stat_last_played": "📅 Dernière partie : {{date}}",
+    "reset_confirm": "⚠️ Cela effacera définitivement vos données de profil. Voulez-vous continuer ?",
+    "export": "Exporter le profil",
+    "import": "Importer un profil",
+    "delete_account": "Supprimer mon compte",
+    "no_badges": "Aucun badge sélectionné.",
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "social_link_rank": "Rang Social Link",
+    "friends": "Amis",
+    "add_friend": "Ajouter un ami",
+    "friend_code_label": "Votre code ami",
+    "leaderboard": "Classement",
+    "change_picture": "Changer la photo",
+    "border_color_label": "Couleur du contour",
+    "save_refresh": "Enregistrer",
+    "see_all_badges": "Voir tous les badges",
+    "all_badges_title": "Tous les badges",
+    "about_badges_title": "À propos des badges",
+    "about_badges_text": "Hey ! Juste pour être transparent – ces badges ont été créés avec de l'aide IA. Nous sommes de simples étudiants qui travaillons sur ce projet passion gratuitement sur notre temps libre, et nous n'avions pas le budget pour faire appel à un artiste. Nous respectons absolument les artistes humains et aimerions collaborer avec l'un d'eux si l'occasion se présente ! C'était purement par nécessité. Merci pour votre compréhension et pour jouer ! ❤️",
+    "event_code_title": "Code Événement",
+    "event_code_desc": "Entrez un code valide pour débloquer un badge exclusif !",
+    "export_import_title": "Exporter / Importer",
+    "share_btn": "Partager mon profil",
+    "reset_btn": "Réinitialiser le profil",
+    "badges_unlocked": "badges débloqués"
+  },
+
+  "badges": {
+    "notification_title": "🎖️ Badge débloqué !",
+    "no_badges_preview": "Aucun badge sélectionné.",
+    "event_code_placeholder": "Entrez un code événement...",
+    "event_code_submit": "Utiliser",
+    "event_code_success": "Code utilisé ! Badge débloqué.",
+    "event_code_error": "Code invalide ou déjà utilisé.",
+
+    "ace_detective": {
+      "name": "As Détective",
+      "condition": "Gagner 10 parties",
+      "description": "Vous avez prouvé votre valeur en tant que vrai détective. Rien n'échappe à votre œil acéré !"
+    },
+    "ace_defective": {
+      "name": "Mauvais Détective",
+      "condition": "Abandonner 10 fois",
+      "description": "Parfois les Shadows sont trop forts. Mais vous revenez toujours !"
+    },
+    "shadow_slayer": {
+      "name": "Chasseur de Shadows",
+      "condition": "Gagner 5 parties en mode Silhouette",
+      "description": "Vous voyez à travers l'obscurité. Même les Shadows ne peuvent pas se cacher de vous !"
+    },
+    "music_master": {
+      "name": "Maître de la Musique",
+      "condition": "Gagner 20 parties en mode Musique",
+      "description": "Vous ne l'aurez pas vu venir ! Un vrai connaisseur des légendaires bandes originales de Persona."
+    },
+    "burn_my_dread": {
+      "name": "Memento Mori",
+      "condition": "Trouver 'Burn My Dread' en mode Musique",
+      "description": "Trois âmes liées par le destin, pointant leurs choix comme des pistolets. Dans l'ombre de la mort, la vérité exige une gâchette."
+    },
+    "into_the_fog": {
+      "name": "Affaire Non Résolue",
+      "condition": "Tourner le dos à la vérité finale",
+      "description": "Le train part, mais le mystère demeure. Vous avez choisi le chemin de l'ignorance, laissant le vrai coupable sourire dans l'ombre."
+    },
+    "velvet_headache": {
+      "name": "Migraine Velours",
+      "condition": "Trouver Wonder (Velvet) et Caroline & Justine en All-Out Attack",
+      "description": "C'est trop bruyant... Les sœurs se disputent, et l'invité a la migraine. Vous avez été témoin du vrai chaos de la Velvet Room."
+    },
+    "first_win": {
+      "name": "Première Victoire",
+      "condition": "Gagner votre première partie",
+      "description": "Le premier pas de votre voyage en tant qu'utilisateur de Persona. Un Wild Card s'est éveillé en vous."
+    },
+    "echoes_of_past": {
+      "name": "Échos du Passé",
+      "condition": "Gagner 15 parties en mode Classique",
+      "description": "Vous avez marché sur le même chemin que Naoya, Tatsuya et Maya. L'héritage des premiers éveillés perdure à travers vous."
+    },
+    "velvet_master": {
+      "name": "Maître de la Velvet Room",
+      "condition": "Gagner 10 parties en mode Personae",
+      "description": "Vous avez maîtrisé la Velvet Room. Igor est satisfait de vos progrès."
+    },
+    "chinese_new_year": {
+      "name": "Nouvel An Chinois",
+      "condition": "Trouver Wonder et Rin (CNY) en All-Out Attack",
+      "description": "C'est la fête ! Vous avez découvert les versions festives des Phantom Thieves."
+    },
+    "twin_blade": {
+      "name": "Lames Jumelles",
+      "condition": "Trouver les Personae de Yosuke et Yusuke",
+      "description": "Vent et Glace, lames croisées ! Vous avez identifié les Personae des artistes au double maniement."
+    },
+    "cinema_explorer": {
+      "name": "Explorateur du Cinéma",
+      "condition": "Trouver les 4 personnages exclusifs Persona Q en mode Silhouette",
+      "description": "Vous avez exploré le labyrinthe du cinéma et rencontré ses gardiens uniques. Rei, Zen, Hikari et Nagi — tous découverts dans les ombres !"
+    },
+    "crimson_legacy": {
+      "name": "Héritage Cramoisi",
+      "condition": "Trouver les 12 Personae Picaro",
+      "description": "Décerné au Trickster qui reconnaît le passé peint en rouge. Vous avez identifié les esprits rebelles de légendes réincarnées."
+    },
+    "spring_awakening": {
+      "name": "Éveil du Printemps",
+      "condition": "Se connecter le 1er avril",
+      "description": "Les cerisiers fleurissent au début d'une nouvelle année scolaire. Vous êtes entré dans la Velvet Room le jour de la cérémonie d'ouverture japonaise."
+    },
+    "take_the_pose": {
+      "name": "Prends la Pose",
+      "condition": "Partager votre profil avec d'autres joueurs",
+      "description": "Frappez une pose ! Vous avez partagé votre aventure PersonaDLE avec le monde."
+    },
+    "christmas_2025": {
+      "name": "Noël 2025",
+      "condition": "Utiliser le code événement Noël 2025",
+      "description": "Fêtez les fêtes avec PersonaDLE ! Que votre nouvelle année soit pleine d'All-Out Attacks !"
+    },
+    "new_years_2026": {
+      "name": "Nouvel An 2026",
+      "condition": "Utiliser le code événement Nouvel An 2026",
+      "description": "Célébrez la nouvelle année avec style ! A une autre année à dévoiler la vérité."
+    },
+    "chinese_new_year_2026": {
+      "name": "Bonne Année Chinoise 2026",
+      "condition": "Utiliser le code du Nouvel An Chinois 2026",
+      "description": "Ryuji & Wu Kong prêts pour la nouvelle année ! Que l'année du cheval vous apporte force et courage !"
+    },
+    "valentine_2026": {
+      "name": "Saint-Valentin 2026",
+      "condition": "Utiliser le code événement Saint-Valentin 2026",
+      "description": "Un Social Link s'est approfondi ! L'amour est dans l'air, comme une romance au rang maximum."
+    },
+    "easter_2026": {
+      "name": "Pâques 2026",
+      "condition": "Utiliser le code événement Pâques 2026",
+      "description": "Cherchez les œufs de Pâques comme vous cherchez les Personae ! Le printemps apporte de nouveaux départs."
+    },
+    "phantom_coder": {
+      "name": "Fantôme Codeur",
+      "condition": "Cliquer sur le bouton GitHub",
+      "description": "Vous avez consulté le code source ! Un vrai Phantom Thief recueille toujours les informations en premier."
+    },
+    "true_hacker": {
+      "name": "Vrai Hacker",
+      "condition": "???",
+      "description": "Vous avez cracké le code ! Futaba serait fière de vos compétences en hacking."
+    },
+    "tae_takemi": {
+      "name": "Fan de Tae Takemi",
+      "condition": "???",
+      "description": "Soutenez votre médecin punk locale ! Le confident de la Mort récompense les fidèles."
+    },
+    "dzulian": {
+      "name": "Le Premier Contractant",
+      "condition": "???",
+      "description": "Quand le code ne pouvait pas atteindre l'ère PS1, Dzulian est descendu avec les textes anciens. Megami Ibunroku, IS, EP — la trinité préservée. Le GOAT qui a fait le pont entre deux générations de Persona."
+    },
+    "true_confidant": {
+      "name": "True Confidant",
+      "condition": "Atteindre le rang 10 du Social Link avec un ami",
+      "description": "Un lien indéfectible forgé à travers victoires et défaites partagées. Un badge pour deux — la preuve que votre amitié transcende le Metaverse."
+    }
+  },
+
+  "social_link": {
+    "rank_names": {
+      "1": "Inconnu",
+      "2": "Connaissance",
+      "3": "Compagnon",
+      "4": "Allié",
+      "5": "Confident",
+      "6": "Allié Fidèle",
+      "7": "Vrai Allié",
+      "8": "Lien",
+      "9": "Lien Indéfectible",
+      "10": "True Confidant"
+    },
+    "xp_label": "{{xp}} XP",
+    "rank_up": "Social Link monté en rang ! Vous êtes maintenant {{rank_name}} avec {{pseudo}}.",
+    "true_confidant_unlocked": "🎊 True Confidant ! Votre badge avec {{pseudo}} a été généré."
+  },
+
+  "auth": {
+    "login": "Connexion",
+    "register": "Créer un compte",
+    "email": "Email",
+    "password": "Mot de passe",
+    "pseudo": "Pseudo",
+    "import_json": "Importer mon profil existant (JSON)",
+    "error_email_taken": "Cet email est déjà utilisé.",
+    "error_pseudo_taken": "Ce pseudo est déjà pris.",
+    "error_wrong_credentials": "Email ou mot de passe incorrect.",
+    "error_generic": "Une erreur est survenue. Veuillez réessayer.",
+    "success_register": "Compte créé ! Bienvenue, {{pseudo}}.",
+    "success_login": "Bon retour, {{pseudo}} !",
+    "logout": "Déconnexion"
+  },
+
+  "leaderboard": {
+    "title": "Classement",
+    "tab_global": "Global",
+    "tab_classic": "Classique",
+    "tab_emoji": "Emoji",
+    "tab_silhouette": "Silhouette",
+    "tab_alloutattack": "All-Out Attack",
+    "tab_personae": "Personae",
+    "tab_music": "Musique",
+    "period_all_time": "Tout Temps",
+    "period_monthly": "Mensuel",
+    "period_weekly": "Hebdomadaire",
+    "rank_label": "#{{rank}}",
+    "score_label": "{{score}} victoires",
+    "your_rank": "Votre classement : #{{rank}}"
+  },
+
+  "index": {
+    "main_title": "Devinez le personnage Persona (Persona 1 à Persona 5)",
+    "update_history": "Historique des mises à jour",
+    "changelog_button": "Voir le Changelog complet",
+    "copyright": "personadle.net — 2026",
+    "disclaimer": "Personadle est un projet communautaire non-commercial. Il n'est pas affilié ni approuvé par les ayants droit.",
+    "legal_link": "Mentions légales",
+    "feedback_link": "📝 Suggestions & Rapport de bug",
+    "news_button": "📰 Actualités"
+  },
+
+  "data": {
+    "genre": {
+      "Male": "Masculin",
+      "Female": "Féminin",
+      "Human": "Humain",
+      "Entity": "Entité",
+      "Artificial": "Artificiel",
+      "Shadow": "Shadow",
+      "Animal": "Animal",
+      "Velvet": "Velvet",
+      "Vocaloid": "Vocaloid",
+      "Unknown": "Inconnu"
+    },
+    "arcane": {
+      "Aeon": "Éon",
+      "Apostle": "Apôtre",
+      "Chariot": "Chariot",
+      "Councillor": "Conseiller",
+      "Death": "Mort",
+      "Devil": "Diable",
+      "Emperor": "Empereur",
+      "Empress": "Impératrice",
+      "Faith": "Foi",
+      "Fool": "Fou",
+      "Fortune": "Fortune",
+      "Hanged": "Le Pendu",
+      "Hanged Man": "Le Pendu",
+      "Hermit": "Ermite",
+      "Hierophant": "Hiérophante",
+      "Hope": "Espoir",
+      "Hunger": "Faim",
+      "Jester": "Bouffon",
+      "Judgement": "Jugement",
+      "Judgment": "Jugement",
+      "Justice": "Justice",
+      "Lovers": "Amoureux",
+      "Magician": "Magicien",
+      "Moon": "Lune",
+      "NONE": "Aucun",
+      "None": "Aucun",
+      "Priestess": "Prêtresse",
+      "Star": "Étoile",
+      "Strength": "Force",
+      "Sun": "Soleil",
+      "Temperance": "Tempérance",
+      "Tower": "Tour",
+      "Universe": "Univers",
+      "World": "Monde"
+    }
+  },
+
+  "errors": {
+    "page_not_found_title": "404 - Velvet Room introuvable 🎭",
+    "page_not_found_message": "Vous vous êtes trop éloigné du Metaverse...",
+    "return_home": "Retour à Personadle",
+    "copyright_notice": "Contenu Persona © ATLUS / SEGA — Projet hommage des fans",
+    "no_characters": "Aucun personnage disponible après filtrage.",
+    "image_load_failed": "Échec du chargement : {{file}}",
+    "image_load_timeout": "Délai dépassé pour : {{file}}"
+  }
+}

@@ -39,9 +39,19 @@
 <meta property="og:image" content="https://www.personadle.com/img/Logo_PersonaDLE.png">
 
     
+    <!-- Google Fonts — typos du sélecteur de langue -->
+    <!-- Oswald : condensé + musclé → EN (Persona 5) -->
+    <!-- Playfair Display : élégant + serif italique → FR (Persona 3) -->
+    <!-- Abril Fatface : rond + expressif → ES (Persona 4) -->
+    <!-- Cinzel : classique gravé → DE (Persona 1) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+
     <!-- Styles & Icon -->
     <link rel="stylesheet" href="./css/global.css?v=3">
     <link rel="stylesheet" href="./css/index.css?v=3">
+    <link rel="stylesheet" href="./css/langSelector.css?v=3">
     <link rel="stylesheet" href="./profile/badges/badges.css?v=3">
     <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
     
@@ -74,16 +84,148 @@
   </span>
 </div>
 
-<button id="profileButton" class="profile-btn" style="margin-top: 10px;">👤 My Account</button>
+<button id="profileButton" class="profile-btn" style="margin-top: 10px;">👤 <span data-i18n="ui.my_account">My Account</span></button>
 
  
 </div>
 
 
+<!-- =====================================================
+     3. SÉLECTEUR DE LANGUE
+     Bouton fixe (top-left) qui ouvre un menu déroulant.
+     Chaque option a une typo unique + personnage Persona.
+     La langue choisie est sauvegardée dans localStorage.
+     ===================================================== -->
+<div id="langToggle">
+
+  <!-- Bouton déclencheur -->
+  <button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Change language">
+    <span class="lang-btn-globe">🌐</span>
+    <span id="langBtnLabel">EN</span>
+    <span class="lang-btn-chevron">▼</span>
+  </button>
+
+  <!-- Panneau déroulant -->
+  <div id="langDropdown" role="listbox" aria-label="Select language">
+
+    <!-- ENGLISH — Lisa Silverman + Ann Takamaki -->
+    <div class="lang-opt lang-opt--en" data-lang="en" role="option" tabindex="0" aria-label="English">
+      <span class="lang-opt-name">English</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char"
+           src="./assets/lang/Ann_takamaki_english.webp"
+           alt="Ann Takamaki"
+           loading="lazy">
+    </div>
+
+    <!-- FRANÇAIS — Bebe -->
+    <div class="lang-opt lang-opt--fr" data-lang="fr" role="option" tabindex="0" aria-label="Français">
+      <span class="lang-opt-name">Français</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char"
+           src="./assets/lang/Bebe_french.webp"
+           alt="Bebe"
+           loading="lazy">
+    </div>
+
+    <!-- ESPAÑOL — pas de perso pour l'instant -->
+    <div class="lang-opt lang-opt--es" data-lang="es" role="option" tabindex="0" aria-label="Español">
+      <span class="lang-opt-name">Español</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+    </div>
+
+    <!-- DEUTSCH — pas de perso pour l'instant -->
+    <div class="lang-opt lang-opt--de" data-lang="de" role="option" tabindex="0" aria-label="Deutsch">
+      <span class="lang-opt-name">Deutsch</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- =====================================================
+     SCRIPT — Sélecteur de langue
+     - Au chargement : lit localStorage 'lang' (défaut EN),
+       met à jour le label du bouton + marque .is-active
+     - Clic bouton : ouvre/ferme le dropdown
+     - Clic option : sélectionne la langue, ferme le menu
+     - Clic en dehors : ferme le dropdown
+     ===================================================== -->
+<script type="module">
+import { initLang, setLang } from './js/i18n.js';
+
+/* ── Labels du bouton ── */
+const LABELS = { en: 'EN', fr: 'FR', es: 'ES', de: 'DE' };
+
+function updateBtnLabel(lang) {
+  const el = document.getElementById('langBtnLabel');
+  if (el) el.textContent = LABELS[lang] || lang.toUpperCase();
+}
+
+function applyActive(lang) {
+  document.querySelectorAll('.lang-opt').forEach(opt => {
+    opt.classList.toggle('is-active', opt.dataset.lang === lang);
+  });
+  updateBtnLabel(lang);
+}
+
+function closeDropdown() {
+  document.getElementById('langToggle').classList.remove('open');
+  document.getElementById('langBtn').setAttribute('aria-expanded', 'false');
+}
+
+function openDropdown() {
+  document.getElementById('langToggle').classList.add('open');
+  document.getElementById('langBtn').setAttribute('aria-expanded', 'true');
+}
+
+function toggleDropdown() {
+  document.getElementById('langToggle').classList.contains('open')
+    ? closeDropdown()
+    : openDropdown();
+}
+
+/* ── Sélection d'une langue ──
+   1. setLang()   → charge le JSON + applique data-i18n sur la page
+   2. applyActive → met à jour le dropdown UI
+   3. closeDropdown → ferme le panneau                        */
+async function selectLang(lang) {
+  await setLang(lang);
+  applyActive(lang);
+  closeDropdown();
+}
+
+/* ── Init au chargement ──
+   Les modules sont différés par défaut (DOM prêt à l'exécution).
+   On wrap dans un async IIFE pour la compatibilité navigateur. */
+(async () => {
+  const lang = await initLang();   /* charge le JSON + applique data-i18n */
+  applyActive(lang);
+
+  document.getElementById('langBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    toggleDropdown();
+  });
+
+  document.querySelectorAll('.lang-opt').forEach(opt => {
+    opt.addEventListener('click', () => selectLang(opt.dataset.lang));
+    opt.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectLang(opt.dataset.lang);
+      }
+    });
+  });
+
+  document.addEventListener('click', () => closeDropdown());
+  document.getElementById('langDropdown').addEventListener('click', e => e.stopPropagation());
+})();
+</script>
+
 
   <!-- Titre principal -->
   <section class="title-wrapper">
-      <h1 class="gamemode-title">Try to guess the Persona character (Persona 1 to Persona 5)</h1>
+      <h1 class="gamemode-title" data-i18n="index.main_title">Try to guess the Persona character (Persona 1 to Persona 5)</h1>
   </section>
   
   <!-- Buttons for game modes -->
@@ -257,7 +399,7 @@
   <input type="checkbox" id="darkModeToggle">
   <span class="slider round"></span>
 </label>
-<span class="label-text">Dark Mode</span>
+<span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
 </div>
 
 <!-- Script intégré -->
@@ -303,16 +445,16 @@ document.addEventListener("DOMContentLoaded", () => {
      Copyright et liens légaux + suggestions/bug report.
      ===================================================== -->
 <footer>
-<p>personadle.net — 2026</p>
+<p data-i18n="index.copyright">personadle.net — 2026</p>
 <p>
-  Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders. 
-  <a href="#" id="legalLink">Legal Notice</a> | 
-  <a href="https://forms.gle/SJeKi7cyUjRyp1vX8" target="_blank">📝 Suggestions & Bug Report</a>
+  <span data-i18n="index.disclaimer">Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders.</span>
+  <a href="#" id="legalLink" data-i18n="index.legal_link">Legal Notice</a> |
+  <a href="https://forms.gle/SJeKi7cyUjRyp1vX8" target="_blank" data-i18n="index.feedback_link">📝 Suggestions & Bug Report</a>
 </p>
 </footer>
 
 <!-- 🔔 News Popup -->
-<button id="newsBtn" class="news-btn">📰 News</button>
+<button id="newsBtn" class="news-btn" data-i18n="index.news_button">📰 News</button>
 
 <!-- =====================================================
      10. STYLES INLINE — Chibi deco + News modal
@@ -394,7 +536,7 @@ body.darkmode .chibi-deco {
 
     <span class="close" id="closeNews">&times;</span>
     
-    <h1 style="position: absolute; top: 55px; left: 50%; transform: translateX(-50%); text-align: center; margin: 20px 0; font-size: 2em;">Update History</h1>
+    <h1 style="position: absolute; top: 55px; left: 50%; transform: translateX(-50%); text-align: center; margin: 20px 0; font-size: 2em;" data-i18n="index.update_history">Update History</h1>
 
 <div class="version-item cny-theme">
         <div class="version-header">
@@ -405,7 +547,8 @@ body.darkmode .chibi-deco {
             <span class="version-arrow">▼</span>
         </div>
         <div class="version-content">
-    <ul>
+    <div data-i18n-block="en">
+      <ul>
         <li>🧧 <strong>Chinese New Year Event:</strong> Celebrate with exclusive <strong>Wonder & Rin (CNY)</strong> skins, a new wallpaper, and limited-time badges!</li>
         <li>🌙 <strong>P3R 2nd Anniversary:</strong> Special <strong>ZUTOMAYO Collab</strong>! Added "Mass Destruction" mashup, exclusive PFP & "Hippocampus Reload" Badge.</li>
         <li>🎥 <strong>Persona Q Expansion:</strong> The Labyrinth opens! Added <strong>4 playable characters</strong> (Rei, Zen, Hikari, Nagi) and new soundtracks.</li>
@@ -414,11 +557,29 @@ body.darkmode .chibi-deco {
         <li>🖼️ <strong>Customization Overhaul:</strong> Added <strong>40+ new wallpapers</strong> across all games and a redesigned selection interface.</li>
         <li>🎖️ <strong>New Badges:</strong> Unlock 7 new achievements including "Twin Blade", "Velvet Master", and the mysterious "Cinema Explorer".</li>
         <li>🛠️ <strong>QoL Improvements:</strong> Redesigned filter buttons, added "Visual History" in Emoji Mode, and added Silhouette Mode characters.</li>
-    </ul>
-    <div class="pdf-container">
+      </ul>
+      <div class="pdf-container">
         <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn">
-            See full Changelog (PDF)
+          See full Changelog (PDF)
         </a>
+      </div>
+    </div>
+    <div data-i18n-block="fr">
+      <ul>
+        <li>🧧 <strong>Événement Nouvel An Chinois :</strong> Fêtez l'occasion avec les skins exclusifs <strong>Wonder & Rin (CNY)</strong>, un nouveau fond d'écran et des badges temporaires !</li>
+        <li>🌙 <strong>2e anniversaire de P3R :</strong> Collab spéciale <strong>ZUTOMAYO</strong> ! Ajout du mashup "Mass Destruction", PFP exclusif & badge "Hippocampus Reload".</li>
+        <li>🎥 <strong>Extension Persona Q :</strong> Le Labyrinthe ouvre ses portes ! Ajout de <strong>4 personnages jouables</strong> (Rei, Zen, Hikari, Nagi) et de nouvelles musiques.</li>
+        <li>🎭 <strong>Mise à jour du mode Personae :</strong> Expansion massive avec <strong>8 nouvelles Personas Ultimes</strong> et <strong>12 variantes Picaro</strong>.</li>
+        <li>🦋 <strong>Contenu Classique :</strong> Ajout de 5 personnages de <strong>Persona 1 & 2</strong> au mode Classique (Nameless, Belladonna, Katsuya, Ulala…).</li>
+        <li>🖼️ <strong>Personnalisation repensée :</strong> Ajout de <strong>40+ nouveaux fonds d'écran</strong> couvrant tous les jeux, et nouvelle interface de sélection.</li>
+        <li>🎖️ <strong>Nouveaux badges :</strong> Débloquez 7 nouveaux succès, dont "Twin Blade", "Velvet Master" et le mystérieux "Cinema Explorer".</li>
+        <li>🛠️ <strong>Améliorations QoL :</strong> Boutons de filtre repensés, ajout de l'"Historique visuel" en mode Emoji, et nouveaux personnages en mode Silhouette.</li>
+      </ul>
+      <div class="pdf-container">
+        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn">
+          Voir le Changelog complet (PDF)
+        </a>
+      </div>
     </div>
 </div>
     </div>
@@ -432,10 +593,20 @@ body.darkmode .chibi-deco {
             <span class="version-arrow">▼</span>
         </div>
         <div class="version-content">
+          <div data-i18n-block="en">
             <ul>
-<li>🐞 Fixed <strong>Fleuret's name</strong> displaying as "Ayaka Sakai" instead of "Seiji Shiratori" in All-Out Attack mode.</li>
-                <li>🐞 Fixed <strong>sound effects</strong> not working in Music mode.</li>
-                <li>🐞 Fixed <strong>Give Up button</strong> not being disabled in Classic mode after use.</li>            </ul>
+              <li>🐞 Fixed <strong>Fleuret's name</strong> displaying as "Ayaka Sakai" instead of "Seiji Shiratori" in All-Out Attack mode.</li>
+              <li>🐞 Fixed <strong>sound effects</strong> not working in Music mode.</li>
+              <li>🐞 Fixed <strong>Give Up button</strong> not being disabled in Classic mode after use.</li>
+            </ul>
+          </div>
+          <div data-i18n-block="fr">
+            <ul>
+              <li>🐞 Correction du <strong>nom de Fleuret</strong> affiché comme "Ayaka Sakai" au lieu de "Seiji Shiratori" dans le mode All-Out Attack.</li>
+              <li>🐞 Correction des <strong>effets sonores</strong> ne fonctionnant pas dans le mode Musique.</li>
+              <li>🐞 Correction du <strong>bouton Abandonner</strong> qui restait actif dans le mode Classique après utilisation.</li>
+            </ul>
+          </div>
         </div>
     </div>
     <!-- Version 1.01 (HOTFIX) -->
@@ -448,9 +619,16 @@ body.darkmode .chibi-deco {
             <span class="version-arrow">▼</span>
         </div>
         <div class="version-content">
+          <div data-i18n-block="en">
             <ul>
-                <li>🐞 Fixed <strong>Persona 5 X characters</strong> not appearing correctly in Classic and Emoji modes.</li>
+              <li>🐞 Fixed <strong>Persona 5 X characters</strong> not appearing correctly in Classic and Emoji modes.</li>
             </ul>
+          </div>
+          <div data-i18n-block="fr">
+            <ul>
+              <li>🐞 Correction des <strong>personnages de Persona 5 X</strong> qui ne s'affichaient pas correctement dans les modes Classique et Emoji.</li>
+            </ul>
+          </div>
         </div>
     </div>
     <!-- Version 1.0 -->
@@ -463,26 +641,51 @@ body.darkmode .chibi-deco {
             <span class="version-arrow">▼</span>
         </div>
         <div class="version-content">
+          <div data-i18n-block="en">
             <ul>
-                <li>🎖️ <strong>NEW: Badge System!</strong> Unlock 19 unique achievements, including secret badges and event codes. Select up to 4 to showcase on your profile!</li>
-                <li>🖼️ <strong>NEW: Profile Sharing!</strong> Share your stats with custom backgrounds or Persona-themed wallpapers. Click badge notifications to see details!</li>
-                <li>🔊 <strong>NEW: Sound Effects!</strong> Added victory sound when winning and hover sound effects on all interactive buttons across all game modes.</li>
-                <li>🌟 Added <strong>Fuuka Yamagishi</strong> to All-Out Attack mode.</li>
-                <li>✨ Added <strong>Persona 5 Tactica</strong> characters (<strong>Erina</strong>, <strong>Toshiro</strong>).</li>
-                <li>🎲 Improved <strong>randomization logic</strong> in All-Out Attack to reduce target repetition.</li>
-                <li>⚡ Optimized <strong>All-Out Attack performance</strong> to minimize lag and memory usage (progressive loading, CDN WebP support).</li>
-                <li>🐞 Fixed <strong>Silhouette Mode</strong> image display issues.</li>
-                <li>🐞 Fixed <strong>Classic Mode</strong> Error on Yukino Mazuki Data (the opus was P2EIS instead of P2IS).</li>
-                <li>⚙️ Fixed <strong>Emoji Mode</strong> daily reset not triggering correctly.</li>
-                <li>🎵 Fixed song title typos: "Your Are Stronger" → "You Are Stronger" and "The Days when my mother was there" → "When Mother Was There".</li>
-                <li>🖼️ Added new <strong>profile pictures</strong>: Chidori, Tae, and Maruki.</li>
-                <li>⏱️ Fixed time tracking calculation.</li>
-                <li>🎨 Minor <strong>UI and dark mode adjustments</strong> for smoother experience.</li>
+              <li>🎖️ <strong>NEW: Badge System!</strong> Unlock 19 unique achievements, including secret badges and event codes. Select up to 4 to showcase on your profile!</li>
+              <li>🖼️ <strong>NEW: Profile Sharing!</strong> Share your stats with custom backgrounds or Persona-themed wallpapers. Click badge notifications to see details!</li>
+              <li>🔊 <strong>NEW: Sound Effects!</strong> Added victory sound when winning and hover sound effects on all interactive buttons across all game modes.</li>
+              <li>🌟 Added <strong>Fuuka Yamagishi</strong> to All-Out Attack mode.</li>
+              <li>✨ Added <strong>Persona 5 Tactica</strong> characters (<strong>Erina</strong>, <strong>Toshiro</strong>).</li>
+              <li>🎲 Improved <strong>randomization logic</strong> in All-Out Attack to reduce target repetition.</li>
+              <li>⚡ Optimized <strong>All-Out Attack performance</strong> to minimize lag and memory usage (progressive loading, CDN WebP support).</li>
+              <li>🐞 Fixed <strong>Silhouette Mode</strong> image display issues.</li>
+              <li>🐞 Fixed <strong>Classic Mode</strong> Error on Yukino Mazuki Data (the opus was P2EIS instead of P2IS).</li>
+              <li>⚙️ Fixed <strong>Emoji Mode</strong> daily reset not triggering correctly.</li>
+              <li>🎵 Fixed song title typos: "Your Are Stronger" → "You Are Stronger" and "The Days when my mother was there" → "When Mother Was There".</li>
+              <li>🖼️ Added new <strong>profile pictures</strong>: Chidori, Tae, and Maruki.</li>
+              <li>⏱️ Fixed time tracking calculation.</li>
+              <li>🎨 Minor <strong>UI and dark mode adjustments</strong> for smoother experience.</li>
             </ul>
             <div class="pdf-container">
               <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn">
-                  See more (PDF)
+                See more (PDF)
               </a>
+            </div>
+          </div>
+          <div data-i18n-block="fr">
+            <ul>
+              <li>🎖️ <strong>NOUVEAU : Système de badges !</strong> Débloquez 19 succès uniques, dont des badges secrets et des codes événement. Sélectionnez-en jusqu'à 4 pour les afficher sur votre profil !</li>
+              <li>🖼️ <strong>NOUVEAU : Partage de profil !</strong> Partagez vos stats avec des fonds personnalisés ou des fonds Persona. Cliquez sur les notifications de badges pour voir les détails !</li>
+              <li>🔊 <strong>NOUVEAU : Effets sonores !</strong> Ajout d'un son de victoire et d'effets sonores au survol des boutons dans tous les modes de jeu.</li>
+              <li>🌟 Ajout de <strong>Fuuka Yamagishi</strong> dans le mode All-Out Attack.</li>
+              <li>✨ Ajout des personnages de <strong>Persona 5 Tactica</strong> (<strong>Erina</strong>, <strong>Toshiro</strong>).</li>
+              <li>🎲 Amélioration de la <strong>logique de randomisation</strong> en mode All-Out Attack pour réduire la répétition des cibles.</li>
+              <li>⚡ Optimisation des <strong>performances du mode All-Out Attack</strong> (chargement progressif, WebP CDN).</li>
+              <li>🐞 Correction des problèmes d'affichage en <strong>mode Silhouette</strong>.</li>
+              <li>🐞 Correction des données de Yukino Mazuki en <strong>mode Classique</strong> (opus P2EIS au lieu de P2IS).</li>
+              <li>⚙️ Correction du <strong>reset quotidien du mode Emoji</strong> qui ne se déclenchait pas correctement.</li>
+              <li>🎵 Correction de titres de chansons : "Your Are Stronger" → "You Are Stronger" et "The Days when my mother was there" → "When Mother Was There".</li>
+              <li>🖼️ Ajout de nouvelles <strong>photos de profil</strong> : Chidori, Tae et Maruki.</li>
+              <li>⏱️ Correction du calcul du <strong>suivi du temps de jeu</strong>.</li>
+              <li>🎨 Ajustements mineurs de <strong>l'UI et du mode sombre</strong> pour une expérience plus fluide.</li>
+            </ul>
+            <div class="pdf-container">
+              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn">
+                Voir plus (PDF)
+              </a>
+            </div>
           </div>
         </div>
         
@@ -1002,18 +1205,18 @@ updateCountdown();
 <div id="profileModal" class="modal hidden">
 <div class="modal-content">
   <span class="close" id="closeProfile">&times;</span>
-  <h2>🧑 My profil</h2>
-  <label for="pseudoInput">Pseudo :</label>
+  <h2>🧑 <span data-i18n="profile.title">My Profile</span></h2>
+  <label for="pseudoInput"><span data-i18n="profile.pseudo_label">Username</span> :</label>
   <input type="text" id="pseudoInput" />
 
-  <h3>Avatar :</h3>
+  <h3>🖼️ <span data-i18n="profile.avatar_label">Avatar</span></h3>
  <img id="avatarPreview" src="" alt="Avatar" class="avatar-preview"
    style="border: 4px solid black; border-radius: 50%; width: 150px; height: auto;">
 
-  <button id="editAvatarBtn">Change picture</button>
+  <button id="editAvatarBtn" data-i18n="profile.change_picture">Change picture</button>
 
   <div style="margin-top: 12px; display: flex; align-items: right; gap: 10px;">
-<label for="borderColorPicker" class="border-color-label">Border Color:</label>
+<label for="borderColorPicker" class="border-color-label" data-i18n="profile.border_color_label">Border Color</label>
 <input type="color" id="borderColorPicker" style="width: 36px; height: 36px; padding: 0; border: none; background: none; cursor: pointer;">
 
 <button 
@@ -1033,37 +1236,37 @@ updateCountdown();
   onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 12px rgba(81, 255, 0, 0.8)'"
   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 8px rgba(81, 255, 0, 0.5)'"
 >
-  ✅ Save & Refresh
+  ✅ <span data-i18n="profile.save_refresh">Save & Refresh</span>
 </button>
 </div>
 
 
 
 
-  <h3>Statistiques :</h3>
+  <h3>📊 <span data-i18n="profile.stats_title">Statistics</span></h3>
   <div id="statsContainer"></div>
   <!-- === BADGES SECTION === -->
 <section id="badgesSection">
-<h3>🏅 Badges</h3>
+<h3>🏅 <span data-i18n="profile.badges_title">Badges</span></h3>
 
 <!-- Aperçu rapide (4 badges max) -->
 <div id="previewBadges" class="badge-preview"></div>
 
 <!-- Bouton pour ouvrir la modale complète -->
-<button id="openBadgesModal" class="btn">See All Badges</button>
+<button id="openBadgesModal" class="btn" data-i18n="profile.see_all_badges">See All Badges</button>
 </section>
 
 <!-- === MODALE COMPLETE DES BADGES === -->
 <div id="badgesModal" class="hidden">
 <div class="badges-header">
-<h3>🎖️ All Badges</h3>
+<h3>🎖️ <span data-i18n="profile.all_badges_title">All Badges</span></h3>
 <div style="display: flex; align-items: center; gap: 10px;">
   <!-- ℹ️ Info badge AI -->
   <div class="badge-ai-info">
     <span class="info-icon">ℹ️</span>
     <div class="info-tooltip-ai">
-      <strong>About Our Badges</strong><br>
-      Hey! Just wanted to be transparent – these badges were made with AI help. We're just students working on this passion project for free in our spare time, and honestly, we didn't have the budget or time to commission an artist. We absolutely respect human artists and would love to work with one someday if we get the chance! This was purely out of necessity, not preference. Thanks for understanding and for playing! ❤️
+      <strong data-i18n="profile.about_badges_title">About Our Badges</strong><br>
+      <span data-i18n="profile.about_badges_text">Hey! Just wanted to be transparent – these badges were made with AI help. We're just students working on this passion project for free in our spare time, and honestly, we didn't have the budget or time to commission an artist. We absolutely respect human artists and would love to work with one someday if we get the chance! This was purely out of necessity, not preference. Thanks for understanding and for playing! ❤️</span>
     </div>
   </div>
   <button id="closeBadgesModal" class="close-btn">✖</button>
@@ -1079,10 +1282,10 @@ updateCountdown();
 
 <!-- === EVENT CODE SECTION === -->
 <section id="eventCodeSection" style="margin-top: 20px; text-align: center;">
-<h3>🎟️ Event Code</h3>
-<p style="font-size: 0.9em; opacity: 0.8;">Enter a valid code to unlock an exclusive badge!</p>
-<input type="text" id="eventCodeInput" placeholder="Enter your code" style="padding: 8px; border-radius: 6px; border: 1px solid #aaa; width: 60%; max-width: 250px;">
-<button id="redeemEventCodeBtn" class="btn" style="margin-left: 8px;">✅ Redeem</button>
+<h3>🎟️ <span data-i18n="profile.event_code_title">Event Code</span></h3>
+<p style="font-size: 0.9em; opacity: 0.8;" data-i18n="profile.event_code_desc">Enter a valid code to unlock an exclusive badge!</p>
+<input type="text" id="eventCodeInput" data-i18n-placeholder="badges.event_code_placeholder" placeholder="Enter event code..." style="padding: 8px; border-radius: 6px; border: 1px solid #aaa; width: 60%; max-width: 250px;">
+<button id="redeemEventCodeBtn" class="btn" style="margin-left: 8px;" data-i18n="badges.event_code_submit">Redeem</button>
 <p id="eventCodeMessage" style="margin-top: 8px; font-size: 0.85em; color: #ccc;"></p>
 </section>
 
@@ -1090,20 +1293,20 @@ updateCountdown();
 
 
 
-  <h3>Export / Import</h3>
-  <button id="exportProfile">📤 Export</button>
+  <h3 data-i18n="profile.export_import_title">Export / Import</h3>
+  <button id="exportProfile">📤 <span data-i18n="profile.export">Export Profile</span></button>
   <input type="file" id="importFileInput" />
-  <button id="importProfile">📥 Import</button>
+  <button id="importProfile">📥 <span data-i18n="profile.import">Import Profile</span></button>
   <!-- === SHARE PROFILE SECTION === -->
 <section id="shareSection" style="text-align:center; margin-top:20px;">
-<button id="shareProfileBtn" class="btn">📤 Share My Profile</button>
+<button id="shareProfileBtn" class="btn">📤 <span data-i18n="profile.share_btn">Share My Profile</span></button>
 <p id="shareStatus" style="margin-top:5px; font-size:0.9em; opacity:0.8;"></p>
 </section>
 
 
 
   <button id="resetProfile" style="background-color: #c0392b; color: white; margin-top: 10px;">
-🔄 Reset Profile
+🔄 <span data-i18n="profile.reset_btn">Reset Profile</span>
 </button>
 
 </div>

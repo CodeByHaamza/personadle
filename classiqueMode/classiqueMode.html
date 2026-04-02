@@ -177,73 +177,139 @@
 <div id="rulesModal" class="modal" style="display: none;">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <h2>📋 Classic Mode Rules</h2>
+    <h2 data-i18n="modes.classic.rules_title">📋 Classic Mode Rules</h2>
 
-    <p id="rulesText">
-  <strong>🎯 Goal:</strong><br>
-  Guess the Persona character of the day using deduction and clues 🧩🕵️.
+    <div data-i18n-block="en">
+      <p id="rulesText">
+        <strong>🎯 Goal:</strong><br>
+        Guess the Persona character of the day using deduction and clues 🧩🕵️.
 
-  <hr class="separator" />
+        <hr class="separator" />
 
-  <strong>🧠 How it works:</strong>
-  <ul>
-    <li>🔍 Each attempt shows how close your guess is to the correct character.</li>
-    <li>📊 A grid compares multiple attributes like name, gender, age, arcana, etc.</li>
-    <li>🟩 Green = correct, 🟨 Yellow = partial match, 🟥 Red = wrong.</li>
-  </ul>
+        <strong>🧠 How it works:</strong>
+        <ul>
+          <li>🔍 Each attempt shows how close your guess is to the correct character.</li>
+          <li>📊 A grid compares multiple attributes like name, gender, age, arcana, etc.</li>
+          <li>🟩 Green = correct, 🟨 Yellow = partial match, 🟥 Red = wrong.</li>
+        </ul>
 
-  <hr class="separator" />
+        <hr class="separator" />
 
-  <strong>📊 Criteria compared:</strong>
-  <ul>
-    <li>👤 <strong>Name</strong> – Exact match required</li>
-    <li>⚧️ <strong>Gender</strong> – Human, Shadow, Entity, etc.</li>
-    <li>🎂 <strong>Age</strong> – Range (e.g. &lt;15, 15–20, 40+)</li>
-    <li>💥 <strong>Persona User / Shadow</strong> – Can they use a Persona or are they a Shadow?</li>
-    <li>👺 <strong>Persona</strong> – The specific Persona or Shadow form</li>
-    <li>🃏 <strong>Arcana</strong> – Their Tarot Arcana (Fool, Magician, etc.)</li>
-    <li>🎮 <strong>Opus</strong> – Which Persona games they appear in</li>
-  </ul>
+        <strong>📊 Criteria compared:</strong>
+        <ul>
+          <li>👤 <strong>Name</strong> – Exact match required</li>
+          <li>⚧️ <strong>Gender</strong> – Human, Shadow, Entity, etc.</li>
+          <li>🎂 <strong>Age</strong> – Range (e.g. &lt;15, 15–20, 40+)</li>
+          <li>💥 <strong>Persona User / Shadow</strong> – Can they use a Persona or are they a Shadow?</li>
+          <li>👺 <strong>Persona</strong> – The specific Persona or Shadow form</li>
+          <li>🃏 <strong>Arcana</strong> – Their Tarot Arcana (Fool, Magician, etc.)</li>
+          <li>🎮 <strong>Opus</strong> – Which Persona games they appear in</li>
+        </ul>
 
-  <hr class="separator" />
+        <hr class="separator" />
 
-  <strong>💡 Tips:</strong>
-  <ul>
-    <li>🧠 Use deduction based on color-coded clues.</li>
-    <li>📈 If the age isn’t exact, an arrow ↑ or ↓ appears.</li>
-    <li>🟨 Yellow means partial match (e.g. some Arcana or one of several Opus).</li>
-  </ul>
+        <strong>💡 Tips:</strong>
+        <ul>
+          <li>🧠 Use deduction based on color-coded clues.</li>
+          <li>📈 If the age isn’t exact, an arrow ↑ or ↓ appears.</li>
+          <li>🟨 Yellow means partial match (e.g. some Arcana or one of several Opus).</li>
+        </ul>
 
-  <hr class="separator" />
+        <hr class="separator" />
 
-<strong>♿ Accessibility:</strong>
-<ul>
-  <li>🌈 <strong>Daltonian Mode</strong> – A toggleable option replaces red/green/yellow with colorblind-friendly shades <em>and</em> adds symbols (✔, ▲, ✖) for better clarity.</li>
-</ul>
+        <strong>♿ Accessibility:</strong>
+        <ul>
+          <li>🌈 <strong>Daltonian Mode</strong> – A toggleable option replaces red/green/yellow with colorblind-friendly shades <em>and</em> adds symbols (✔, ▲, ✖) for better clarity.</li>
+        </ul>
 
-<hr class="separator" />
+        <hr class="separator" />
 
-<strong>🎮 Game flow:</strong>
+        <strong>🎮 Game flow:</strong>
+        <ul>
+          <li>⌨️ Type a name and select from suggestions.</li>
+          <li>🔁 You have <strong>8 attempts</strong> max.</li>
+          <li>💬 At 3 attempts: 🔓 Hint button unlocks (displays a quote).</li>
+          <li>❌ At 8 attempts: 🔓 Give Up button unlocks (reveals the answer).</li>
+        </ul>
 
-  <ul>
-    <li>⌨️ Type a name and select from suggestions.</li>
-    <li>🔁 You have <strong>8 attempts</strong> max.</li>
-    <li>💬 At 3 attempts: 🔓 Hint button unlocks (displays a quote).</li>
-    <li>❌ At 8 attempts: 🔓 Give Up button unlocks (reveals the answer).</li>
-  </ul>
+        <hr class="separator" />
 
-  <hr class="separator" />
+        <strong>🛡️ Spoiler protection:</strong>
+        <p>
+          🕹️ Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>, <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>)
+          to limit characters by game.<br>
+          👀 This helps avoid spoilers if you haven’t played them all!
+        </p>
 
-  <strong>🛡️ Spoiler protection:</strong>
-  <p>
-    🕹️ Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>, <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>)
-    to limit characters by game.<br>
-    👀 This helps avoid spoilers if you haven’t played them all!
-  </p>
+        <hr class="separator" />
+        <em>🎭 Think like a Phantom Thief... and unveil the truth!</em>
+      </p>
+    </div>
 
-  <hr class="separator" />
-  <em>🎭 Think like a Phantom Thief... and unveil the truth!</em>
-</p>
+    <div data-i18n-block="fr">
+      <p id="rulesText">
+        <strong>🎯 Objectif :</strong><br>
+        Devinez le personnage Persona du jour grâce à la déduction et aux indices 🧩🕵️.
+
+        <hr class="separator" />
+
+        <strong>🧠 Comment ça marche :</strong>
+        <ul>
+          <li>Chaque tentative montre à quel point votre réponse se rapproche du personnage correct.</li>
+          <li>Une grille compare plusieurs attributs : jeu, genre, âge, arcane, etc.</li>
+          <li>🟩 Vert = correct, 🟨 Jaune = correspondance partielle, 🟥 Rouge = faux.</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>📊 Critères comparés :</strong>
+        <ul>
+          <li>⚧️ <strong>Genre</strong> – Humain, Shadow, Entité, etc.</li>
+          <li>🎂 <strong>Âge</strong> – Tranche d’âge (ex : &lt;15, 15–20, 40+)</li>
+          <li>💥 <strong>Utilisateur de Persona / Shadow</strong> – Peut-il invoquer un Persona ou est-il un Shadow ?</li>
+          <li>👺 <strong>Persona</strong> – Le Persona ou la forme Shadow spécifique</li>
+          <li>🃏 <strong>Arcane</strong> – L’Arcane du Tarot (Fou, Magicien, etc.)</li>
+          <li>🎮 <strong>Opus</strong> – Dans quel(s) jeu(x) Persona ce personnage apparaît</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>💡 Conseils :</strong>
+        <ul>
+          <li>🧠 Utilisez la déduction grâce aux indices colorés.</li>
+          <li>📈 Si l’âge n’est pas exact, une flèche ↑ ou ↓ apparaît.</li>
+          <li>🟨 Le jaune signifie une correspondance partielle (ex : même série mais jeu différent).</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>♿ Accessibilité :</strong>
+        <ul>
+          <li>🌈 <strong>Mode Daltonien</strong> – Remplace le rouge/vert/jaune par des teintes adaptées et ajoute des symboles (✔, ▲, ✖) pour plus de clarté.</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>🎮 Déroulement :</strong>
+        <ul>
+          <li>⌨️ Tapez un nom et sélectionnez dans les suggestions.</li>
+          <li>🔁 Vous avez <strong>8 tentatives</strong> maximum.</li>
+          <li>💬 À 3 tentatives : 🔓 L’indice se déverrouille (affiche une citation).</li>
+          <li>❌ À 8 tentatives : 🔓 Abandonner se déverrouille (révèle la réponse).</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>🛡️ Protection anti-spoilers :</strong>
+        <p>
+          🕹️ Utilisez les filtres pour limiter les personnages par jeu.<br>
+          👀 Cela évite les spoilers si vous n’avez pas encore joué à tous les jeux !
+        </p>
+
+        <hr class="separator" />
+        <em>🎭 Pensez comme un Phantom Thief... et dévoilez la vérité !</em>
+      </p>
+    </div>
 
   </div>
 </div>
@@ -274,9 +340,9 @@
       </div>
     </div>
 
-    <!-- Titre et texte d'introduction -->
-    <h1>Guess today’s Persona character!</h1>
-    <p>Type any character to start.</p>
+    <!-- Titre et texte d’introduction -->
+    <h1 data-i18n="modes.classic.title">Guess today’s Persona character!</h1>
+    <p data-i18n="modes.classic.subtitle">Type any character to start.</p>
   </div>
 
   <!-- Zone où s'affiche l'indice (citation) si débloqué -->
@@ -367,7 +433,7 @@
         <input
           type="text"
           id="textbar"
-          placeholder="Enter character name..."
+          placeholder="Enter character name..." data-i18n-placeholder="ui.input_placeholder"
           aria-label="Guess character name"
           autocomplete="off"
           autocorrect="off"
@@ -408,6 +474,11 @@
   <div id="output" style="margin-top: 30px;"></div>
 
   <!-- Script principal du mode classique -->
+  <!-- i18n — init traductions au chargement -->
+<script type="module">
+import { initLang } from '../js/i18n.js';
+window.__i18nReady = initLang();
+</script>
   <script type="module" src="./modeClassique.js?v=3"></script>
 
   <!-- Bouton Mode Sombre -->
@@ -416,7 +487,7 @@
     <input type="checkbox" id="darkModeToggle">
     <span class="slider round"></span>
   </label>
-  <span class="label-text">Dark Mode</span>
+  <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
 </div>
 
 <!-- Script intégré -->
@@ -453,19 +524,21 @@
 </div>
 
 <script>
-  // Son de hover pour tous les boutons link-wrapper
+  // Son de hover — activé uniquement après la première interaction utilisateur
   document.addEventListener("DOMContentLoaded", () => {
     const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    
-    // Sélectionne tous les boutons avec effet hover
-    const buttons = document.querySelectorAll('.link-wrapper');
-    
-    buttons.forEach(button => {
+    let unlocked = false;
+
+    const unlock = () => { unlocked = true; };
+    document.addEventListener('click',   unlock, { once: true });
+    document.addEventListener('keydown', unlock, { once: true });
+
+    document.querySelectorAll('.link-wrapper').forEach(button => {
       button.addEventListener('mouseenter', () => {
-        // Clone le son pour permettre les survols rapides successifs
+        if (!unlocked) return;
         const sound = hoverSound.cloneNode();
-        sound.volume = 0.3; // Ajustez le volume si nécessaire (0.0 à 1.0)
-        sound.play().catch(e => console.log('Erreur audio hover:', e));
+        sound.volume = 0.3;
+        sound.play().catch(() => {});
       });
     });
   });

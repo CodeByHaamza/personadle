@@ -248,7 +248,7 @@ function checkEmojiGuess(name, forceReveal = false) {
 
   const guess = characters.find((c) => c.nom.toLowerCase() === name.toLowerCase());
   if (!guess) {
-    winMessage.textContent = `"${name}" is not in the database.`;
+    winMessage.textContent = (window.i18n || { t: (k, v) => k }).t('modes.emoji.not_in_database', { name });
     return;
   }
 
@@ -271,8 +271,8 @@ function checkEmojiGuess(name, forceReveal = false) {
     victoryPortrait.alt = target.nom;
 
     winMessage.textContent = forceReveal
-      ? `You gave up! The answer was: ${target.nom}`
-      : `✅ Correct! It was ${target.nom}!`;
+      ? (window.i18n || { t: (k, v) => k }).t('modes.emoji.giveup_reveal', { name: target.nom })
+      : (window.i18n || { t: (k, v) => k }).t('modes.emoji.correct', { name: target.nom });
 
     victoryBox.style.display = "flex";
     showConfettiExplosion();
@@ -388,7 +388,8 @@ function applyDarkModeStyles() {
 // BOOTSTRAP — DOMContentLoaded
 // ─────────────────────────────────────────────────────────────────────────────
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.__i18nReady) await window.__i18nReady;
   applyDarkModeStyles();
   setupRulesModal();
 

@@ -1,75 +1,264 @@
 /* =============================================================
    music.css — Styles exclusifs au Mode Music
-   Contient : lecteur audio, wrapper audio, boîte de victoire
-   spéciale musique, dark mode audio, dark mode music victory.
+   Contient : lecteur audio custom P5, boîte de victoire,
+              dark mode, responsive.
+
+   Thèmes de couleur par série (variables CSS — modifiées par JS) :
+   P1→violet · P2IS→orange · P2EP→lavande · P3→bleu
+   P4→jaune-or · P5→rouge (défaut) · PQ→orange
    ============================================================= */
 
 
-/* =====================================================
-   1. LECTEUR AUDIO
-   Élément <audio> stylisé avec une lueur rouge/cyan
-   pour correspondre au thème Persona.
-   ===================================================== */
+/* ─── 1. AUDIO NATIF — caché, contrôlé via JS ─────────────── */
 
-audio {
-  width: 300px;
-  height: 40px;
-  outline: none;
-  border: none;
-  border-radius: 12px;
-  /* Lueur rouge et cyan — ambiance Phantom Thieves */
-  box-shadow: 0 0 12px rgba(255, 0, 0, 0.6), 0 0 6px rgba(0, 255, 255, 0.4);
-  transition: box-shadow 0.3s ease;
-  margin: 20px auto;
-  display: block;
-}
-
-/* Intensifie la lueur au survol */
-audio:hover {
-  box-shadow: 0 0 16px rgba(255, 0, 0, 0.8), 0 0 8px rgba(0, 255, 255, 0.5);
-}
+audio { display: none; }
 
 
-/* =====================================================
-   2. WRAPPER DU LECTEUR AUDIO
-   Encadré centré autour du <audio> avec fond clair
-   et bordure rouge.
-   ===================================================== */
+/* ─── 2. WRAPPER AUDIO ─────────────────────────────────────── */
 
+/*
+ * CSS custom properties — valeurs par défaut : thème Persona 5 (rouge).
+ * Remplacées par JS via setPlayerTheme() selon le jeu d'origine de la musique.
+ */
 .audio-wrapper {
-  background-color: #f4f4f4;
-  padding: 20px 30px;
-  border-radius: 16px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  --player-accent:           #e63946;
+  --player-accent-dark:      #c1121f;
+  --player-accent-light:     #ff8fa3;
+  --player-glow:             rgba(230, 57, 70, 0.35);
+  --player-glow-strong:      rgba(230, 57, 70, 0.55);
+  --player-glow-subtle:      rgba(230, 57, 70, 0.04);
+  --player-btn-glow:         rgba(230, 57, 70, 0.70);
+  --player-btn-glow-strong:  rgba(230, 57, 70, 0.90);
+  --player-btn-glow-max:     rgba(230, 57, 70, 1.00);
+
+  background: linear-gradient(150deg, #1a0505 0%, #0d0d0d 60%, #150a0a 100%);
+  border: 2px solid var(--player-accent);
+  border-radius: 6px 22px 6px 22px;   /* asymétrique — style P5 */
+  padding: 20px 24px 16px;
   width: fit-content;
+  min-width: 300px;
+  max-width: 480px;
   margin: 30px auto;
-  border: 2px solid #d62828;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  box-shadow:
+    0 0 24px var(--player-glow),
+    0 6px 40px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-/* Lueur cyan au survol du wrapper */
+/* Grille diagonale décorative P5 en fond */
+.audio-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    -50deg,
+    transparent,
+    transparent 12px,
+    var(--player-glow-subtle) 12px,
+    var(--player-glow-subtle) 13px
+  );
+  border-radius: inherit;
+}
+
 .audio-wrapper:hover {
-  border-color: #00ffff;
-  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  border-color: var(--player-accent-light);
+  box-shadow:
+    0 0 36px var(--player-glow-strong),
+    0 6px 50px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 
-/* =====================================================
-   3. BOÎTE DE VICTOIRE — SPÉCIALE MUSIC MODE
-   Plus grande et avec bordure rose pour correspondre
-   au thème musical.
-   body.music-mode est ajouté par musics.html au <body>.
-   ===================================================== */
+/* ─── 3. LECTEUR CUSTOM P5 ─────────────────────────────────── */
+
+.p5-player { position: relative; z-index: 1; }
+
+
+/* ── Coin coupé (signature P5) ── */
+.p5-player::before {
+  content: '';
+  position: absolute;
+  top: -20px; left: -24px;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 32px 32px 0 0;
+  border-color: var(--player-accent) transparent transparent transparent;
+  pointer-events: none;
+}
+
+
+/* ── En-tête : label + barres sonores ── */
+.p5-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.p5-player-label {
+  font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--player-accent);
+  user-select: none;
+}
+
+
+/* ── Barres sonores animées ── */
+.p5-sound-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+}
+
+.p5-sound-bars span {
+  display: block;
+  width: 4px;
+  min-height: 4px;
+  background: var(--player-accent);
+  border-radius: 2px 2px 0 0;
+  transition: height 0.15s ease;
+}
+
+/* Quand lecture en cours → animation par décalage */
+.p5-sound-bars.playing span:nth-child(1) { animation: p5bar 0.75s ease-in-out infinite; }
+.p5-sound-bars.playing span:nth-child(2) { animation: p5bar 0.55s ease-in-out 0.12s infinite; }
+.p5-sound-bars.playing span:nth-child(3) { animation: p5bar 0.90s ease-in-out 0.06s infinite; }
+.p5-sound-bars.playing span:nth-child(4) { animation: p5bar 0.65s ease-in-out 0.20s infinite; }
+.p5-sound-bars.playing span:nth-child(5) { animation: p5bar 1.00s ease-in-out 0.04s infinite; }
+
+@keyframes p5bar {
+  0%, 100% { height: 4px;  opacity: 0.6; }
+  50%       { height: 20px; opacity: 1;   }
+}
+
+
+/* ── Zone contrôles : bouton + timeline ── */
+.p5-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+
+/* ── Bouton Play / Pause ── */
+.p5-play-btn {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--player-accent);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 0 14px var(--player-btn-glow),
+    0 2px 8px rgba(0, 0, 0, 0.6);
+
+  transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+  user-select: none;
+}
+
+.p5-play-btn:hover {
+  background: var(--player-accent-dark);
+  transform: scale(1.1);
+  box-shadow:
+    0 0 24px var(--player-btn-glow-strong),
+    0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.p5-play-btn:active { transform: scale(0.94); }
+
+/* Légère animation de pulsation quand en pause */
+.p5-play-btn.idle {
+  animation: p5pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes p5pulse {
+  0%, 100% { box-shadow: 0 0 14px var(--player-btn-glow),     0 2px 8px  rgba(0,0,0,0.6); }
+  50%       { box-shadow: 0 0 28px var(--player-btn-glow-max), 0 2px 14px rgba(0,0,0,0.7); }
+}
+
+
+/* ── Timeline ── */
+.p5-timeline { flex: 1; }
+
+/* Barre de progression — piste cliquable */
+.p5-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
+}
+
+.p5-progress:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Remplissage coloré — dégradé standard ou custom (ex: P3P bleu→rose) */
+.p5-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--player-fill-gradient,
+    linear-gradient(90deg, var(--player-accent-dark), var(--player-accent) 70%, var(--player-accent-light)));
+  border-radius: 3px;
+  position: relative;
+  transition: width 0.15s linear;
+}
+
+/* Curseur blanc au bout de la barre */
+.p5-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--player-btn-glow-strong);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.p5-progress:hover .p5-progress-fill::after { opacity: 1; }
+
+/* Temps courant / durée */
+.p5-time-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 0.68rem;
+  font-family: 'Courier New', monospace;
+  color: rgba(255, 255, 255, 0.45);
+  user-select: none;
+}
+
+
+/* ─── 4. VICTOIRE — MUSIC MODE ──────────────────────────────── */
 
 body.music-mode .victory-box {
   max-width: 750px;
   padding: 30px 35px;
-  /* Bordure rose vif — style pop music */
   border: 4px solid #f5067d;
   box-shadow: 0 0 28px #f73093b9;
 }
 
-/* Image plus grande dans la victoire musicale */
 body.music-mode .victory-box img {
   width: 300px;
   height: auto;
@@ -78,24 +267,16 @@ body.music-mode .victory-box img {
 }
 
 
-/* =====================================================
-   4. DARK MODE — SPÉCIFIQUE MUSIC MODE
-   ===================================================== */
+/* ─── 5. DARK MODE ──────────────────────────────────────────── */
 
-/* Lecteur audio sur fond sombre avec lueur cyan */
-body.darkmode audio {
-  background-color: #111;
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5), 0 0 6px rgba(255, 0, 0, 0.3);
-}
-
-/* Wrapper audio en dark mode */
+/*
+ * En dark mode, les couleurs du lecteur suivent le thème de série (CSS variables).
+ * Seul le fond est légèrement plus sombre pour renforcer le contraste.
+ */
 body.darkmode .audio-wrapper {
-  background-color: #1b1b1b;
-  border-color: #00ffff;
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+  background: linear-gradient(150deg, #0c0c0c 0%, #080808 60%, #0c0c0c 100%);
 }
 
-/* Boîte de victoire en dark mode + music mode */
 body.music-mode.darkmode .victory-box {
   background-color: #2c1f2f;
   border-color: #ff66cc;
@@ -103,66 +284,34 @@ body.music-mode.darkmode .victory-box {
 }
 
 
-/* =====================================================
-   5. RESPONSIVE — SPÉCIFIQUE MUSIC MODE
-   ===================================================== */
+/* ─── 6. RESPONSIVE ─────────────────────────────────────────── */
 
-/* -----------------------------------------------
-   TABLETTE (≤ 768px)
-   Le wrapper audio prend plus de largeur.
-   La victoire musicale (grande image) est réduite.
------------------------------------------------ */
 @media (max-width: 768px) {
-  /* Wrapper audio : s'étend à 90% de la largeur dispo */
   .audio-wrapper {
     width: 90%;
     max-width: 400px;
-    padding: 16px 20px;
+    padding: 16px 18px 14px;
     margin: 20px auto;
+    min-width: unset;
   }
 
-  /* Lecteur audio : pleine largeur dans son wrapper */
-  audio {
-    width: 100%;
-    max-width: 280px;
-    margin: 12px auto;
-  }
+  .p5-play-btn { width: 42px; height: 42px; font-size: 1rem; }
 
-  /* Victoire musicale : image et boîte réduites */
-  body.music-mode .victory-box {
-    max-width: 95%;
-    padding: 20px 15px;
-  }
-
-  body.music-mode .victory-box img {
-    width: 200px;
-  }
+  body.music-mode .victory-box { max-width: 95%; padding: 20px 15px; }
+  body.music-mode .victory-box img { width: 200px; }
 }
 
-
-/* -----------------------------------------------
-   MOBILE (≤ 480px)
-   Audio compact, image de victoire plus petite.
-   La bordure rose caractéristique est conservée.
------------------------------------------------ */
 @media (max-width: 480px) {
   .audio-wrapper {
     width: 94%;
-    padding: 12px 14px;
-    border-radius: 12px;
+    padding: 14px 14px 12px;
+    border-radius: 4px 16px 4px 16px;
   }
 
-  audio {
-    max-width: 240px;
-    height: 36px;
-  }
+  .p5-player-label { font-size: 0.6rem; }
+  .p5-play-btn { width: 38px; height: 38px; font-size: 0.9rem; }
+  .p5-time-row { font-size: 0.62rem; }
 
-  /* Victoire : image encore plus petite sur mobile */
-  body.music-mode .victory-box img {
-    width: 160px;
-  }
-
-  body.music-mode .victory-box {
-    padding: 15px 10px;
-  }
+  body.music-mode .victory-box img { width: 160px; }
+  body.music-mode .victory-box { padding: 15px 10px; }
 }

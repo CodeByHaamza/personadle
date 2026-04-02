@@ -90,8 +90,8 @@
     </div>
     <!-- Contenu central -->
      <div style = "color: white;">
-    <h1>Guess today’s Persona character!</h1>
-    <p>Type any character to start.</p>
+    <h1 data-i18n="modes.alloutattack.title">Guess today’s Persona character!</h1>
+    <p data-i18n="modes.alloutattack.subtitle">Type any character to start.</p>
     </div>
   </div>
 
@@ -100,30 +100,60 @@
   <div id="rulesModal" class="modal" style="display: none;">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>All-Out Attack Mode Rules</h2>
-      <p id="rulesText">
-        <strong>🎯 Goal:</strong><br>
-        Guess the Persona character based on their All-Out Attack animation.
-        <hr class="separator" />
-        <strong>💥 Gameplay:</strong>
-        <ul>
-          <li>You start with a <strong>blurry All-Out Attack GIF</strong>.</li>
-          <li><strong>Each incorrect guess reduces the blur</strong>.</li>
-          <li>Try to guess with the fewest attempts possible!</li>
-        </ul>
-        <hr class="separator" />
-        <strong>🎮 Included games:</strong>
-        <ul>
-          <li>Only characters from <strong>Persona 3 Reload</strong> , <strong>Persona 5 / Royal</strong> and <strong>Persona 5 : The Phantom X</strong> are used.</li>
-        </ul>
-        <hr class="separator" />
-        <strong>📉 Give Up option:</strong>
-        <ul>
-          <li>After <strong>5 incorrect guesses</strong>, the <em>Give Up</em> button activates.</li>
-        </ul>
-        <hr class="separator" />
-        <em>Let your eyes adjust, focus your instincts, and go for the critical hit!</em>
-      </p>
+      <h2 data-i18n="modes.alloutattack.rules_title">All-Out Attack Mode Rules</h2>
+
+      <div data-i18n-block="en">
+        <p id="rulesText">
+          <strong>🎯 Goal:</strong><br>
+          Guess the Persona character based on their All-Out Attack animation.
+          <hr class="separator" />
+          <strong>💥 Gameplay:</strong>
+          <ul>
+            <li>You start with a <strong>blurry All-Out Attack GIF</strong>.</li>
+            <li><strong>Each incorrect guess reduces the blur</strong>.</li>
+            <li>Try to guess with the fewest attempts possible!</li>
+          </ul>
+          <hr class="separator" />
+          <strong>🎮 Included games:</strong>
+          <ul>
+            <li>Only characters from <strong>Persona 3 Reload</strong>, <strong>Persona 5 / Royal</strong> and <strong>Persona 5: The Phantom X</strong> are used.</li>
+          </ul>
+          <hr class="separator" />
+          <strong>📉 Give Up option:</strong>
+          <ul>
+            <li>After <strong>5 incorrect guesses</strong>, the <em>Give Up</em> button activates.</li>
+          </ul>
+          <hr class="separator" />
+          <em>Let your eyes adjust, focus your instincts, and go for the critical hit!</em>
+        </p>
+      </div>
+
+      <div data-i18n-block="fr">
+        <p id="rulesText">
+          <strong>🎯 Objectif :</strong><br>
+          Devinez le personnage Persona d'après son animation d'All-Out Attack.
+          <hr class="separator" />
+          <strong>💥 Gameplay :</strong>
+          <ul>
+            <li>Vous commencez avec un <strong>GIF d'All-Out Attack flou</strong>.</li>
+            <li><strong>Chaque mauvaise réponse réduit le flou</strong>.</li>
+            <li>Essayez de deviner avec le moins de tentatives possible !</li>
+          </ul>
+          <hr class="separator" />
+          <strong>🎮 Jeux inclus :</strong>
+          <ul>
+            <li>Uniquement des personnages de <strong>Persona 3 Reload</strong>, <strong>Persona 5 / Royal</strong> et <strong>Persona 5 : The Phantom X</strong>.</li>
+          </ul>
+          <hr class="separator" />
+          <strong>📉 Option Abandonner :</strong>
+          <ul>
+            <li>Après <strong>5 mauvaises réponses</strong>, le bouton <em>Abandonner</em> s'active.</li>
+          </ul>
+          <hr class="separator" />
+          <em>Laissez vos yeux s'adapter, concentrez vos instincts, et visez le coup critique !</em>
+        </p>
+      </div>
+
     </div>
   </div>
 
@@ -175,7 +205,7 @@
       <input
         type="text"
         id="textbar"
-        placeholder="Enter character name..."
+        placeholder="Enter character name..." data-i18n-placeholder="ui.input_placeholder"
         aria-label="Guess character name"
         autocomplete="off"
         autocorrect="off"
@@ -214,6 +244,11 @@
   <div id="wrongGuessList"></div>
 
   <!-- Script -->
+  <!-- i18n — init traductions au chargement -->
+<script type="module">
+import { initLang } from '../js/i18n.js';
+window.__i18nReady = initLang();
+</script>
   <script type="module" src="./modeAllOutAttack.js?v=3"></script>
 
   <!-- Bouton Mode Sombre -->
@@ -222,7 +257,7 @@
     <input type="checkbox" id="darkModeToggle">
     <span class="slider round"></span>
   </label>
-  <span class="label-text">Dark Mode</span>
+  <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
 </div>
 
 <!-- Script intégré -->
@@ -258,19 +293,21 @@
 </div>
 
 <script>
-  // Son de hover pour tous les boutons link-wrapper
+  // Son de hover — activé uniquement après la première interaction utilisateur
   document.addEventListener("DOMContentLoaded", () => {
     const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    
-    // Sélectionne tous les boutons avec effet hover
-    const buttons = document.querySelectorAll('.link-wrapper');
-    
-    buttons.forEach(button => {
+    let unlocked = false;
+
+    const unlock = () => { unlocked = true; };
+    document.addEventListener('click',   unlock, { once: true });
+    document.addEventListener('keydown', unlock, { once: true });
+
+    document.querySelectorAll('.link-wrapper').forEach(button => {
       button.addEventListener('mouseenter', () => {
-        // Clone le son pour permettre les survols rapides successifs
+        if (!unlocked) return;
         const sound = hoverSound.cloneNode();
-        sound.volume = 0.3; // Ajustez le volume si nécessaire (0.0 à 1.0)
-        sound.play().catch(e => console.log('Erreur audio hover:', e));
+        sound.volume = 0.3;
+        sound.play().catch(() => {});
       });
     });
   });

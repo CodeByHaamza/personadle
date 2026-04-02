@@ -190,8 +190,8 @@
 
     <!-- Titre central -->
     <div style="color: white;">
-      <h1>Guess today’s Persona character from their silhouette!</h1>
-      <p>Type any name to start 👤</p>
+      <h1 data-i18n="modes.silhouette.title">Guess today’s Persona character from their silhouette!</h1>
+      <p data-i18n="modes.silhouette.subtitle">Type any name to start 👤</p>
     </div>
   </div>
 
@@ -199,49 +199,98 @@
 <div id="rulesModal" class="modal" style="display: none;">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <h2>🕶️ Silhouette Mode — How to Play</h2>
-    <p id="rulesText">
-      <strong>🎯 Goal:</strong><br>
-      A shadowy figure stands before you...<br>
-      Can you identify the Persona character just from their <strong>black silhouette</strong>?
-      <br><br>
+    <h2 data-i18n="modes.silhouette.rules_title">🕶️ Silhouette Mode — How to Play</h2>
 
-      <hr class="separator" />
+    <div data-i18n-block="en">
+      <p id="rulesText">
+        <strong>🎯 Goal:</strong><br>
+        A shadowy figure stands before you...<br>
+        Can you identify the Persona character just from their <strong>black silhouette</strong>?
+        <br><br>
 
-      <strong>👤 How it works:</strong>
-      <ul>
-        <li>🔍 The game starts with a <strong>heavily zoomed-in silhouette</strong> of a character.</li>
-        <li>❌ Every wrong guess <strong>zooms the image out</strong>, revealing more of the outline.</li>
-        <li>✅ Find the right name, and the character’s full portrait is revealed!</li>
-      </ul>
+        <hr class="separator" />
 
-      <hr class="separator" />
+        <strong>👤 How it works:</strong>
+        <ul>
+          <li>🔍 The game starts with a <strong>heavily zoomed-in silhouette</strong> of a character.</li>
+          <li>❌ Every wrong guess <strong>zooms the image out</strong>, revealing more of the outline.</li>
+          <li>✅ Find the right name, and the character’s full portrait is revealed!</li>
+        </ul>
 
-      <strong>💡 Tips:</strong>
-      <ul>
-        <li>🧍 Pay attention to the silhouette’s <strong>pose, hairstyle, weapon, or accessories</strong>.</li>
-        <li>👓 Some characters have distinct stances or iconic features — spot them!</li>
-        <li>🎮 Use your knowledge from Persona 3, 4, and 5 (plus spin-offs).</li>
-      </ul>
+        <hr class="separator" />
 
-      <hr class="separator" />
+        <strong>💡 Tips:</strong>
+        <ul>
+          <li>🧍 Pay attention to the silhouette’s <strong>pose, hairstyle, weapon, or accessories</strong>.</li>
+          <li>👓 Some characters have distinct stances or iconic features — spot them!</li>
+          <li>🎮 Use your knowledge from Persona 3, 4, and 5 (plus spin-offs).</li>
+        </ul>
 
-      <strong>📉 Give Up Mechanic:</strong>
-      <ul>
-        <li>🆘 The <strong>Give Up</strong> button unlocks after <strong>3 failed attempts</strong>.</li>
-        <li>🙈 You’ll see the answer — but it counts as a loss!</li>
-      </ul>
+        <hr class="separator" />
 
-      <hr class="separator" />
+        <strong>📉 Give Up Mechanic:</strong>
+        <ul>
+          <li>🆘 The <strong>Give Up</strong> button unlocks after <strong>3 failed attempts</strong>.</li>
+          <li>🙈 You’ll see the answer — but it counts as a loss!</li>
+        </ul>
 
-      <strong>🎮 Games Included:</strong>
-      <p>
-        Characters come from <strong>Persona 1 , </strong><strong>Persona 2 ( IS & EP ) , </strong><strong>Persona 3</strong>, <strong>Persona 4</strong>,  <strong>Persona 5</strong> and <strong>Persona 5 The Phantom X</strong>  including related spin-offs. Use the filter buttons to narrow it down.
+        <hr class="separator" />
+
+        <strong>🎮 Games Included:</strong>
+        <p>
+          Characters come from <strong>Persona 1</strong>, <strong>Persona 2 (IS &amp; EP)</strong>, <strong>Persona 3</strong>, <strong>Persona 4</strong>, <strong>Persona 5</strong> and <strong>Persona 5: The Phantom X</strong> including related spin-offs. Use the filter buttons to narrow it down.
+        </p>
+
+        <hr class="separator" />
+        <em>🧠 Observe the shadows, trust your instincts, and become the ultimate silhouette detective!</em>
       </p>
+    </div>
 
-      <hr class="separator" />
-      <em>🧠 Observe the shadows, trust your instincts, and become the ultimate silhouette detective!</em>
-    </p>
+    <div data-i18n-block="fr">
+      <p id="rulesText">
+        <strong>🎯 Objectif :</strong><br>
+        Une silhouette mystérieuse se dresse devant vous...<br>
+        Pouvez-vous identifier le personnage Persona uniquement à partir de sa <strong>silhouette noire</strong> ?
+        <br><br>
+
+        <hr class="separator" />
+
+        <strong>👤 Comment ça marche :</strong>
+        <ul>
+          <li>🔍 Le jeu commence avec une silhouette <strong>très zoomée</strong> d’un personnage.</li>
+          <li>❌ Chaque mauvaise réponse <strong>dézoome l’image</strong>, révélant davantage du contour.</li>
+          <li>✅ Trouvez le bon nom, et le portrait complet est révélé !</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>💡 Conseils :</strong>
+        <ul>
+          <li>🧍 Faites attention à la pose, la coiffure, l’arme ou les accessoires de la silhouette.</li>
+          <li>👓 Certains personnages ont des postures distinctives — repérez-les !</li>
+          <li>🎮 Utilisez vos connaissances de tous les jeux Persona et leurs spin-offs.</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>📉 Mécanisme d’abandon :</strong>
+        <ul>
+          <li>🆘 Le bouton <strong>Abandonner</strong> se déverrouille après <strong>3 échecs</strong>.</li>
+          <li>🙈 Vous verrez la réponse — mais cela compte comme une défaite !</li>
+        </ul>
+
+        <hr class="separator" />
+
+        <strong>🎮 Jeux inclus :</strong>
+        <p>
+          Personnages de <strong>Persona 1</strong>, <strong>Persona 2 (IS &amp; EP)</strong>, <strong>Persona 3</strong>, <strong>Persona 4</strong>, <strong>Persona 5</strong> et <strong>P5 : The Phantom X</strong>, spin-offs inclus. Utilisez les filtres pour affiner.
+        </p>
+
+        <hr class="separator" />
+        <em>🧠 Observez les ombres, faites confiance à vos instincts, et devenez le détective de silhouettes ultime !</em>
+      </p>
+    </div>
+
   </div>
 </div>
 
@@ -297,7 +346,7 @@
 <input
   type="text"
   id="textbar"
-  placeholder="Enter character name..."
+  placeholder="Enter character name..." data-i18n-placeholder="ui.input_placeholder"
   aria-label="Guess character name"
   autocomplete="off"
   autocorrect="off"
@@ -338,6 +387,11 @@
   <div id="wrongGuessList"></div>
 
   <!-- Script du jeu -->
+  <!-- i18n — init traductions au chargement -->
+<script type="module">
+import { initLang } from '../js/i18n.js';
+window.__i18nReady = initLang();
+</script>
   <script type="module" src="./modeSilhouette.js?v=3"></script>
 
   <!-- Dark Mode -->
@@ -346,7 +400,7 @@
       <input type="checkbox" id="darkModeToggle">
       <span class="slider round"></span>
     </label>
-    <span class="label-text">Dark Mode</span>
+    <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
   </div>
 
   <script>
@@ -379,19 +433,21 @@
   </div>
 </div>
 <script>
-  // Son de hover pour tous les boutons link-wrapper
+  // Son de hover — activé uniquement après la première interaction utilisateur
   document.addEventListener("DOMContentLoaded", () => {
     const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    
-    // Sélectionne tous les boutons avec effet hover
-    const buttons = document.querySelectorAll('.link-wrapper');
-    
-    buttons.forEach(button => {
+    let unlocked = false;
+
+    const unlock = () => { unlocked = true; };
+    document.addEventListener('click',   unlock, { once: true });
+    document.addEventListener('keydown', unlock, { once: true });
+
+    document.querySelectorAll('.link-wrapper').forEach(button => {
       button.addEventListener('mouseenter', () => {
-        // Clone le son pour permettre les survols rapides successifs
+        if (!unlocked) return;
         const sound = hoverSound.cloneNode();
-        sound.volume = 0.3; // Ajustez le volume si nécessaire (0.0 à 1.0)
-        sound.play().catch(e => console.log('Erreur audio hover:', e));
+        sound.volume = 0.3;
+        sound.play().catch(() => {});
       });
     });
   });

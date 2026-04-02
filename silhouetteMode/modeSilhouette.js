@@ -276,8 +276,8 @@ function showVictory(force = false) {
   const message = document.createElement("div");
   message.className = "victory-box";
   message.innerHTML = force
-    ? `<span class="failure-text">❌ The answer was <strong>${target.nom}</strong></span>`
-    : `<span class="success-text">🎉 You found <strong>${target.nom}</strong>!</span>`;
+    ? `<span class="failure-text">${(window.i18n || { t: (k, v) => k }).t('modes.silhouette.giveup_reveal', { name: target.nom })}</span>`
+    : `<span class="success-text">${(window.i18n || { t: (k, v) => k }).t('modes.silhouette.correct', { name: target.nom })}</span>`;
   silhouetteBox.insertAdjacentElement("afterend", message);
 
   if (!force) {
@@ -453,7 +453,8 @@ function applyDarkModeStyles() {
 // BOOTSTRAP — DOMContentLoaded
 // ─────────────────────────────────────────────────────────────────────────────
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.__i18nReady) await window.__i18nReady;
   setupRulesModal();
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("silhouetteActiveFilters", ALL_OPUS, (newActive) => {

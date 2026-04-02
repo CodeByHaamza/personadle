@@ -125,18 +125,19 @@ function renderStats() {
   };
 
   const modeFav = s.favoriteMode ? (modeNames[s.favoriteMode] || s.favoriteMode) : "-";
-  
+  const i = window.i18n || { t: (k) => k };
+
   // 📊 Générer le HTML des stats
   statsContainer.innerHTML = `
-    <p>🏆 Wins: ${s.wins}</p>
-    <p>🚫 Give Ups: ${s.giveups}</p>
-    <p>▶️ Games Played: ${s.games}</p>
-    <p>📆 Current Streak: ${s.streak} day(s)</p>
-    <p>🔥 Best Streak: ${s.streakRecord}</p>
-    <p>🎮 Favorite Mode: ${modeFav}</p>
-    <p>⏱️ Total Time: ${s.totalTimeMinutes} min</p>
-    <p>📅 First Played: ${s.firstPlayed?.split("T")[0]}</p>
-    <p>📅 Last Played: ${s.lastPlayed?.split("T")[0] || "-"}</p>
+    <p>${i.t('profile.stat_wins',        { count: s.wins })}</p>
+    <p>${i.t('profile.stat_giveups',     { count: s.giveups })}</p>
+    <p>${i.t('profile.stat_games',       { count: s.games })}</p>
+    <p>${i.t('profile.stat_streak',      { count: s.streak })}</p>
+    <p>${i.t('profile.stat_best_streak', { count: s.streakRecord })}</p>
+    <p>${i.t('profile.stat_favorite',    { mode: modeFav })}</p>
+    <p>${i.t('profile.stat_time',        { count: s.totalTimeMinutes })}</p>
+    <p>${i.t('profile.stat_first_played',{ date: s.firstPlayed?.split("T")[0] || "-" })}</p>
+    <p>${i.t('profile.stat_last_played', { date: s.lastPlayed?.split("T")[0] || "-" })}</p>
   `;
 }
 
@@ -157,7 +158,8 @@ document.getElementById("saveAndRefreshBtn").onclick = () => {
 
 // 🗑️ Réinitialiser le profil complet
 document.getElementById("resetProfile").onclick = () => {
-  const confirmReset = confirm("⚠️ This will permanently erase your profile data. Do you want to continue?");
+  const i = window.i18n || { t: (k) => k };
+  const confirmReset = confirm(i.t('profile.reset_confirm'));
   if (confirmReset) {
     localStorage.removeItem("personaUserProfile");
     location.reload();

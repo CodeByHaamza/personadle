@@ -266,10 +266,12 @@ function showVictory(force = false, name = null) {
 
   // ── Result display ────────────────────────────────────────────────────────
   if (force) {
-    victoryText.innerHTML = `❌ Too bad!&nbsp;<span class="user-name">${target.user}</span>'s Persona was&nbsp;<span class="persona-name">${target.persona}</span>.`;
+    const i18n = window.i18n || { t: (k, v) => k };
+    victoryText.innerHTML = `<span class="failure-text">${i18n.t('modes.personae.giveup_reveal', { name: Array.isArray(target.user) ? target.user[0] : target.user, persona: target.persona })}</span>`;
     victoryText.className = "victory-message failure-text";
   } else {
-    victoryText.innerHTML = `✅ Good Guess!&nbsp;<span class="persona-name">${target.persona}</span>&nbsp;is the Persona of&nbsp;<span class="user-name">${name}</span>!`;
+    const i18n = window.i18n || { t: (k, v) => k };
+    victoryText.innerHTML = `<span class="success-text">${i18n.t('modes.personae.correct', { name, persona: target.persona })}</span>`;
     victoryText.className = "victory-message success-text";
     showConfettiExplosion({ count: 30, spreadFrom: "bottom" });
   }
@@ -447,7 +449,8 @@ function applyDarkModeStyles() {
 // BOOTSTRAP — DOMContentLoaded
 // ─────────────────────────────────────────────────────────────────────────────
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.__i18nReady) await window.__i18nReady;
   // Assign DOM references
   textbar = document.getElementById("textbar");
   personaImg = document.getElementById("personaImage");

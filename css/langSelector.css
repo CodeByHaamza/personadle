@@ -1,0 +1,310 @@
+/* =============================================================
+   langSelector.css — Bouton langue + menu déroulant
+   ─────────────────────────────────────────────────────────────
+   Structure :
+     #langToggle            → conteneur positionné (fixed top-left)
+     #langBtn               → bouton déclencheur
+       .lang-btn-globe      → icône globe
+       #langBtnLabel        → code langue courant (EN / FR…)
+       .lang-btn-chevron    → flèche ▼ qui pivote à l'ouverture
+     #langDropdown          → panneau déroulant
+       .lang-opt            → ligne d'une option
+       .lang-opt-name       → texte stylisé (typo spécifique)
+       .lang-opt-char       → image personnage (droite)
+       .lang-opt.is-active  → langue sélectionnée
+   ─────────────────────────────────────────────────────────────
+   Variantes :
+     .lang-opt--en → Oswald bold, P5 rouge
+     .lang-opt--fr → Playfair Display italic, P3 bleu
+     .lang-opt--es → Abril Fatface, P4 jaune
+     .lang-opt--de → Cinzel, P1 violet
+   ─────────────────────────────────────────────────────────────
+   Responsive :
+     ≤480px : personnages masqués, tailles réduites
+   ============================================================= */
+
+
+/* ─── Conteneur global (fixed top-left) ──────────────────── */
+
+#langToggle {
+  position: fixed;
+  top: 12px;
+  left: 14px;
+  z-index: 9999;
+
+  /* Référence pour le positionnement absolu du dropdown */
+  font-family: Arial, sans-serif;
+}
+
+
+/* ─── Bouton déclencheur ──────────────────────────────────── */
+
+#langBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 7px 12px;
+  border-radius: 14px;
+  border: none;
+
+  background: rgba(0, 0, 0, 0.72);
+  color: rgba(255, 255, 255, 0.92);
+
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+
+  transition: background 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+#langBtn:hover {
+  background: rgba(30, 30, 30, 0.88);
+}
+
+.lang-btn-globe {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.lang-btn-chevron {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  transition: transform 0.25s ease;
+  line-height: 1;
+}
+
+/* La flèche pivote quand le menu est ouvert */
+#langToggle.open .lang-btn-chevron {
+  transform: rotate(180deg);
+}
+
+
+/* ─── Panneau déroulant ───────────────────────────────────── */
+
+#langDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+
+  min-width: 230px;
+
+  background: rgba(8, 8, 18, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+
+  /* Caché par défaut : opacité + légère translation */
+  opacity: 0;
+  transform: translateY(-6px) scaleY(0.95);
+  transform-origin: top left;
+  pointer-events: none;
+
+  transition:
+    opacity   0.2s ease,
+    transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Ouvert : visible et interactif */
+#langToggle.open #langDropdown {
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  pointer-events: auto;
+}
+
+
+/* ─── Option de langue ────────────────────────────────────── */
+
+.lang-opt {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  /* Padding top uniquement — le char s'aligne en bas de la ligne */
+  padding: 8px 14px 0;
+  cursor: pointer;
+
+  border-left: 3px solid transparent;
+
+  transition:
+    background    0.15s ease,
+    border-color  0.15s ease;
+}
+
+/* Séparateur léger entre les options */
+.lang-opt + .lang-opt {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* La dernière option ferme le bas proprement */
+.lang-opt:last-child {
+  padding-bottom: 8px;
+}
+.lang-opt:last-child .lang-opt-name {
+  padding-bottom: 0;
+}
+
+
+/* ─── Texte de la langue ──────────────────────────────────── */
+
+.lang-opt-name {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.72);
+  user-select: none;
+  line-height: 1;
+
+  /* Espace en bas pour que le texte ne touche pas le char */
+  padding-bottom: 8px;
+
+  transition: color 0.15s ease;
+}
+
+.lang-opt:hover .lang-opt-name,
+.lang-opt.is-active .lang-opt-name {
+  color: #fff;
+}
+
+
+/* ─── Personnage décoratif (aligné bas-droite) ────────────── */
+
+.lang-opt-char {
+  height: 80px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+  pointer-events: none;
+  display: block;
+
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lang-opt:hover .lang-opt-char {
+  transform: translateY(-5px);
+}
+
+
+/* ─── Indicateur "actif" — point coloré à droite du texte ─── */
+
+.lang-opt-dot {
+  font-size: 0.5rem;
+  color: transparent;
+  flex-shrink: 0;
+  padding-bottom: 10px;
+  transition: color 0.15s ease;
+}
+
+.lang-opt.is-active .lang-opt-dot {
+  color: currentColor;
+}
+
+
+/* ─── Variante ENGLISH — Persona 5 : rouge vif, Oswald ───── */
+
+.lang-opt--en {
+  border-left-color: #c8102e;
+}
+
+.lang-opt--en .lang-opt-name {
+  font-family: 'Oswald', 'Impact', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.lang-opt--en:hover,
+.lang-opt--en.is-active {
+  background: rgba(200, 16, 46, 0.22);
+}
+
+.lang-opt--en.is-active .lang-opt-dot { color: #e8213e; }
+
+
+/* ─── Variante FRANÇAIS — Persona 3 : bleu, Playfair ─────── */
+
+.lang-opt--fr {
+  border-left-color: #3a7bd5;
+}
+
+.lang-opt--fr .lang-opt-name {
+  font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.lang-opt--fr:hover,
+.lang-opt--fr.is-active {
+  background: rgba(58, 123, 213, 0.22);
+}
+
+.lang-opt--fr.is-active .lang-opt-dot { color: #5a9bf5; }
+
+
+/* ─── Variante ESPAÑOL — Persona 4 : jaune, Abril Fatface ── */
+
+.lang-opt--es {
+  border-left-color: #f5c518;
+}
+
+.lang-opt--es .lang-opt-name {
+  font-family: 'Abril Fatface', 'Georgia', serif;
+  font-weight: 400;
+}
+
+.lang-opt--es:hover,
+.lang-opt--es.is-active {
+  background: rgba(245, 197, 24, 0.16);
+}
+
+.lang-opt--es.is-active .lang-opt-dot { color: #f5c518; }
+
+
+/* ─── Variante DEUTSCH — Persona 1 : violet, Cinzel ─────── */
+
+.lang-opt--de {
+  border-left-color: #9b59b6;
+}
+
+.lang-opt--de .lang-opt-name {
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-size: 1.25rem; /* Cinzel est plus large */
+}
+
+.lang-opt--de:hover,
+.lang-opt--de.is-active {
+  background: rgba(155, 89, 182, 0.20);
+}
+
+.lang-opt--de.is-active .lang-opt-dot { color: #be77e0; }
+
+
+/* ─── Responsive ≤480px ──────────────────────────────────── */
+
+@media (max-width: 480px) {
+  #langBtn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  #langDropdown {
+    min-width: 180px;
+  }
+
+  .lang-opt-name {
+    font-size: 1.25rem;
+  }
+
+  .lang-opt--de .lang-opt-name {
+    font-size: 1.05rem;
+  }
+
+  /* Personnages masqués sur mobile — trop encombrants */
+  .lang-opt-char {
+    display: none;
+  }
+}
