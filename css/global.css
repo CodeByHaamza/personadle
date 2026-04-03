@@ -1487,6 +1487,37 @@ button,
 
 
 /* -----------------------------------------------
+   MODALES — RESPONSIVE MOBILE
+   Sur petit écran les modales utilisent toute la
+   hauteur disponible et réduisent leur padding.
+----------------------------------------------- */
+@media (max-width: 768px) {
+  .modal-content {
+    margin: 2% auto;
+    padding: 22px 18px;
+    max-height: 92vh;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    margin: 1% auto;
+    padding: 18px 14px;
+    width: 95%;
+    max-height: 95vh;
+    border-radius: 10px;
+  }
+
+  .modal-content .close {
+    right: 10px;
+    top: 8px;
+    font-size: 20px;
+  }
+}
+
+
+/* -----------------------------------------------
    PETITS MOBILES (≤ 480px)
    Compactage supplémentaire : labels cachés,
    input en colonne stricte, boutons plus petits.

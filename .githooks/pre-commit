@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# =============================================================
+# pre-commit — Vérifications avant chaque commit
+#
+# Checks effectués :
+#   1. Cohérence des clés i18n (scripts/check-i18n.js)
+#   2. Présence de console.log dans les fichiers JS stagés
+#   3. Tests unitaires (npm test)
+# =============================================================
+
+set -e
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo ""
+echo "🔍  Pre-commit checks..."
+
+# ─────────────────────────────────────────────────────────
+# 1. Vérification i18n — cohérence des clés lang/
+# ─────────────────────────────────────────────────────────
+if command -v node &>/dev/null && [ -f "scripts/check-i18n.js" ]; then
+  echo "  ▸ i18n key check..."
+  if ! node scripts/check-i18n.js --silent 2>/dev/null; then
+    echo -e "${RED}✗ i18n check failed — run 'npm run i18n:check' for details${NC}"
+    exit 1
+  fi
+  echo -e "  ${GREEN}✓ i18n keys OK${NC}"
+fi
+
+# ─────────────────────────────────────────────────────────
+# 2. Détection de console.log oubliés dans les JS stagés
+#    (avertissement uniquement — ne bloque pas le commit)
+# ─────────────────────────────────────────────────────────
+STAGED_JS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.js$' | grep -v 'node_modules' | grep -v 'check-i18n' || true)
+if [ -n "$STAGED_JS" ]; then
+  CONSOLE_HITS=$(echo "$STAGED_JS" | xargs grep -n 'console\.log' 2>/dev/null || true)
+  if [ -n "$CONSOLE_HITS" ]; then
+    echo -e "${YELLOW}⚠  console.log found in staged files (warning only — commit not blocked):${NC}"
+    echo "$CONSOLE_HITS" | head -8 | sed 's/^/     /'
+  fi
+fi
+
+# ─────────────────────────────────────────────────────────
+# 3. Tests unitaires (Vitest)
+# ─────────────────────────────────────────────────────────
+if [ -f "package.json" ] && command -v npm &>/dev/null; then
+  echo "  ▸ Running tests..."
+  if ! npm test --silent 2>/dev/null; then
+    echo -e "${RED}✗ Tests failed — fix before committing${NC}"
+    exit 1
+  fi
+  echo -e "  ${GREEN}✓ Tests passed${NC}"
+fi
+
+echo -e "${GREEN}✅  All pre-commit checks passed${NC}"
+echo ""

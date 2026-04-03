@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "i18n:check": "node scripts/check-i18n.js"
+    "i18n:check": "node scripts/check-i18n.js",
+    "setup-hooks": "git config core.hooksPath .githooks && echo 'Git hooks activated (.githooks/)'"
   },
   "devDependencies": {
     "vitest": "^2.0.0",

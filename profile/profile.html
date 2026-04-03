@@ -1,0 +1,444 @@
+<!-- =============================================================
+     profile/profile.html — Page de profil dédiée PersonaDLE
+     ─────────────────────────────────────────────────────────────
+     Structure :
+       1.  HEADER PAGE     Titre "MY PROFILE" + toggle dark mode
+       2.  PANNEAU GAUCHE  Avatar, pseudo, couleur, boutons
+       3.  PANNEAU DROIT   Cards : stats, badges, codes, data, reset
+       4.  MODAL CROP      Sélection et recadrage de l'avatar
+       5.  MODAL BADGES    Grille complète des badges débloqués
+       6.  MODAL SHARE     Aperçu et téléchargement du profil
+       7.  SÉLECTEUR LANG  Bouton langue + dropdown
+       8.  SCRIPTS         i18n, dark mode, profile-page.js, bottomNav
+
+     CSS chargés :
+       ../css/global.css       — styles partagés toutes pages
+       ../css/langSelector.css — sélecteur de langue
+       ../css/bottomNav.css    — barre de navigation fixe
+       ./profile-page.css      — styles spécifiques à cette page
+       ./badges/badges.css     — système de badges
+
+     Liens relatifs (depuis profile/) :
+       Images  : ../img/
+       Assets  : ../assets/
+       JS util : ../js/
+     ============================================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — PersonaDLE</title>
+  <meta name="robots" content="noindex">
+
+  <!-- Google Fonts (mêmes que index.html) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/global.css?v=4">
+  <link rel="stylesheet" href="../css/langSelector.css?v=4">
+  <link rel="stylesheet" href="../css/bottomNav.css?v=1">
+  <link rel="stylesheet" href="./profile-page.css?v=1">
+  <link rel="stylesheet" href="./badges/badges.css?v=3">
+
+  <link rel="icon" type="image/gif" href="../img/persona_64x64.gif">
+
+  <!-- Initialisation dark mode AVANT rendu (évite le flash blanc) -->
+  <script>
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.documentElement.classList.add('darkmode');
+    }
+  </script>
+</head>
+<body>
+
+<!-- =====================================================
+     1. HEADER DE PAGE
+     Titre stylisé P5 + toggle dark mode
+     ===================================================== -->
+<header class="profile-page-header">
+  <h1 class="profile-page-title">
+    <span class="p5-diamond">◆</span>
+    <span data-i18n="profile.title">My Profile</span>
+    <span class="p5-diamond">◆</span>
+  </h1>
+</header>
+
+<!-- Toggle Dark Mode (repris de index.html) -->
+<div class="darkmode-toggle">
+  <label class="switch">
+    <input type="checkbox" id="darkModeToggle">
+    <span class="slider round"></span>
+  </label>
+  <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+</div>
+
+<!-- =====================================================
+     SÉLECTEUR DE LANGUE
+     Identique à index.html, chemins relatifs ajustés.
+     ===================================================== -->
+<div id="langToggle">
+  <button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Change language">
+    <span class="lang-btn-globe">🌐</span>
+    <span id="langBtnLabel">EN</span>
+    <span class="lang-btn-chevron">▼</span>
+  </button>
+
+  <div id="langDropdown" role="listbox" aria-label="Select language">
+    <div class="lang-opt lang-opt--en" data-lang="en" role="option" tabindex="0" aria-label="English">
+      <span class="lang-opt-name">English</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="../assets/lang/Ann_takamaki_english.webp" alt="Ann Takamaki" loading="lazy">
+    </div>
+    <div class="lang-opt lang-opt--fr" data-lang="fr" role="option" tabindex="0" aria-label="Français">
+      <span class="lang-opt-name">Français</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="../assets/lang/Bebe_french.webp" alt="Bebe" loading="lazy">
+    </div>
+    <div class="lang-opt lang-opt--es" data-lang="es" role="option" tabindex="0" aria-label="Español">
+      <span class="lang-opt-name">Español</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+    </div>
+    <div class="lang-opt lang-opt--de" data-lang="de" role="option" tabindex="0" aria-label="Deutsch">
+      <span class="lang-opt-name">Deutsch</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- =====================================================
+     2–3. CONTENU PRINCIPAL : PANNEAU GAUCHE + DROIT
+     ===================================================== -->
+<main class="profile-page">
+  <div class="profile-container">
+
+    <!-- ───────── PANNEAU GAUCHE ───────── -->
+    <aside class="profile-left animate-left">
+      <div class="avatar-card">
+
+        <!-- Avatar -->
+        <img id="pageAvatar"
+             src="../img/default_avatar.png"
+             alt="Profile avatar"
+             class="profile-avatar animate-pop">
+
+        <!-- Nom d'utilisateur -->
+        <h2 id="pageUsername" class="profile-username animate-top">Guest</h2>
+
+        <!-- Champ pseudo -->
+        <div class="pseudo-edit-row">
+          <label for="pseudoInput" data-i18n="profile.pseudo_label">Username</label>
+          <input type="text" id="pseudoInput" maxlength="30"
+                 data-i18n-placeholder="profile.pseudo_placeholder"
+                 placeholder="Enter username…">
+        </div>
+
+        <!-- Couleur de bordure -->
+        <div class="border-color-row">
+          <label for="borderColorPicker" data-i18n="profile.border_color_label">Border Color</label>
+          <input type="color" id="borderColorPicker" value="#000000">
+        </div>
+
+        <!-- Changer la photo -->
+        <button id="editAvatarBtn" class="btn-p5" data-i18n="profile.change_picture">
+          Change Picture
+        </button>
+
+        <!-- Sauvegarder -->
+        <button id="saveAndRefreshBtn" class="btn-p5 btn-success">
+          ✅ <span data-i18n="profile.save_refresh">Save</span>
+        </button>
+
+        <!-- Auth placeholder — sera rempli avec le backend v2.0 -->
+        <div class="auth-section">
+          <div class="auth-divider">Account</div>
+          <button class="btn-auth" disabled title="Coming with backend v2.0">
+            🔐 Sign In
+            <span class="coming-soon-tag">v2.0</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── Card : Profile Song ── -->
+      <div class="song-card" id="songCard"></div>
+
+    </aside>
+
+
+    <!-- ───────── PANNEAU DROIT ───────── -->
+    <section class="profile-right">
+
+      <!-- Card : Statistiques -->
+      <div class="profile-card animate-right" style="animation-delay: 0.08s">
+        <h3 class="card-title">
+          <span class="card-accent">◆</span>
+          <span data-i18n="profile.stats_title">Statistics</span>
+        </h3>
+        <!-- Rempli dynamiquement par profile-page.js → renderStats() -->
+        <div id="statsContainer" class="stats-grid"></div>
+      </div>
+
+      <!-- Card : Badges -->
+      <div class="profile-card animate-right" style="animation-delay: 0.16s">
+        <h3 class="card-title">
+          <span class="card-accent">◆</span>
+          <span data-i18n="profile.badges_title">Badges</span>
+        </h3>
+        <!-- Aperçu rapide (4 badges max) -->
+        <div id="previewBadges" class="badge-preview badge-preview-row"></div>
+        <button id="openBadgesModal" class="btn-secondary" data-i18n="profile.see_all_badges">
+          See All Badges
+        </button>
+      </div>
+
+      <!-- Card : Code événement -->
+      <div class="profile-card animate-right" style="animation-delay: 0.24s">
+        <h3 class="card-title">
+          <span class="card-accent">◆</span>
+          <span data-i18n="profile.event_code_title">Event Code</span>
+        </h3>
+        <p class="card-desc" data-i18n="profile.event_code_desc">
+          Enter a valid code to unlock an exclusive badge!
+        </p>
+        <div class="event-code-row">
+          <input type="text" id="eventCodeInput"
+                 data-i18n-placeholder="badges.event_code_placeholder"
+                 placeholder="Enter event code…">
+          <button id="redeemEventCodeBtn" class="btn-p5" data-i18n="badges.event_code_submit">
+            Redeem
+          </button>
+        </div>
+        <p id="eventCodeMessage" class="event-code-msg"></p>
+      </div>
+
+      <!-- Card : Export / Import / Share -->
+      <div class="profile-card animate-right" style="animation-delay: 0.32s">
+        <h3 class="card-title">
+          <span class="card-accent">◆</span>
+          <span data-i18n="profile.export_import_title">Data</span>
+        </h3>
+        <div class="io-buttons">
+          <button id="exportProfile" class="btn-p5">
+            📤 <span data-i18n="profile.export">Export</span>
+          </button>
+          <!-- Input fichier caché — déclenché par #importProfile -->
+          <input type="file" id="importFileInput" accept=".json" style="display: none;">
+          <button id="importProfile" class="btn-p5">
+            📥 <span data-i18n="profile.import">Import</span>
+          </button>
+          <button id="shareProfileBtn" class="btn-p5">
+            🔗 <span data-i18n="profile.share_btn">Share</span>
+          </button>
+        </div>
+        <p id="shareStatus" style="margin-top: 8px; font-size: 0.82em; opacity: 0.7;"></p>
+      </div>
+
+      <!-- Card : Zone dangereuse -->
+      <div class="profile-card profile-card--danger animate-right" style="animation-delay: 0.40s">
+        <button id="resetProfile" class="btn-danger">
+          🔄 <span data-i18n="profile.reset_btn">Reset Profile</span>
+        </button>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+
+<!-- =====================================================
+     4. MODALE CROP D'AVATAR
+     Même logique que l'ancienne modal dans index.html.
+     IDs identiques → profile-page.js peut cibler les mêmes.
+     ===================================================== -->
+<div id="avatarCropModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="closeCropper">&times;</span>
+    <h3>Choose your picture</h3>
+    <!-- Grille des avatars disponibles (générée par JS) -->
+    <div id="avatarGrid"></div>
+    <!-- Canvas de recadrage -->
+    <canvas id="avatarCanvas" width="300" height="300"></canvas>
+    <div class="crop-controls">
+      <button id="zoomIn">🔍+</button>
+      <button id="zoomOut">🔍-</button>
+      <button id="confirmCrop">✅ Ok</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =====================================================
+     5. MODALE COMPLÈTE DES BADGES
+     Superposition plein écran (gérée par badgesManager.js).
+     ===================================================== -->
+<div id="badgesModal" class="hidden">
+  <div class="badges-header">
+    <h3>🎖️ <span data-i18n="profile.all_badges_title">All Badges</span></h3>
+    <div style="display: flex; align-items: center; gap: 10px;">
+
+      <!-- Info transparence IA -->
+      <div class="badge-ai-info">
+        <span class="info-icon">ℹ️</span>
+        <div class="info-tooltip-ai">
+          <strong data-i18n="profile.about_badges_title">About Our Badges</strong><br>
+          <span data-i18n="profile.about_badges_text">
+            Hey! Just wanted to be transparent – these badges were made with AI help.
+            We're just students working on this passion project for free in our spare time,
+            and honestly, we didn't have the budget or time to commission an artist.
+            We absolutely respect human artists and would love to work with one someday
+            if we get the chance! This was purely out of necessity, not preference.
+            Thanks for understanding and for playing! ❤️
+          </span>
+        </div>
+      </div>
+
+      <button id="closeBadgesModal" class="close-btn">✖</button>
+    </div>
+  </div>
+
+  <!-- Compteur de badges débloqués -->
+  <p id="badgesCounter" class="badges-counter">🔓 0 / 0 badges unlocked</p>
+
+  <!-- Grille des badges (générée par badgesManager.js) -->
+  <div id="badgesGrid" class="badges-grid"></div>
+</div>
+
+
+<!-- =====================================================
+     6. MODALE PARTAGE DE PROFIL
+     Génère un aperçu canvas → téléchargement / partage.
+     ===================================================== -->
+<div id="sharePreviewModal" class="modal hidden">
+  <div class="modal-content share-preview">
+    <span id="closeSharePreview" class="close">&times;</span>
+    <h2>📸 Share Profile</h2>
+
+    <!-- Sélecteur de fond (onglets couleur / wallpaper) -->
+    <div id="backgroundSelector"></div>
+
+    <!-- Zone de prévisualisation -->
+    <div id="sharePreviewArea" class="share-preview-area"></div>
+
+    <!-- Boutons de partage -->
+    <div class="share-actions">
+      <button id="downloadProfileBtn" class="share-btn share-btn--download">💾 Download PNG</button>
+      <button id="shareTwitterBtn"    class="share-btn share-btn--twitter">𝕏 Share on X</button>
+      <button id="shareDiscordBtn"    class="share-btn share-btn--discord">💬 Copy for Discord</button>
+      <button id="shareEmailBtn"      class="share-btn share-btn--email">📧 Email</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =====================================================
+     7. SÉLECTEUR DE LANGUE (script)
+     Logique identique à index.html.
+     ===================================================== -->
+<script type="module">
+import { initLang, setLang } from '../js/i18n.js';
+
+const LABELS = { en: 'EN', fr: 'FR', es: 'ES', de: 'DE' };
+
+function updateBtnLabel(lang) {
+  const el = document.getElementById('langBtnLabel');
+  if (el) el.textContent = LABELS[lang] || lang.toUpperCase();
+}
+
+function applyActive(lang) {
+  document.querySelectorAll('.lang-opt').forEach(opt => {
+    opt.classList.toggle('is-active', opt.dataset.lang === lang);
+  });
+  updateBtnLabel(lang);
+}
+
+function closeDropdown() {
+  document.getElementById('langToggle').classList.remove('open');
+  document.getElementById('langBtn').setAttribute('aria-expanded', 'false');
+}
+
+function openDropdown() {
+  document.getElementById('langToggle').classList.add('open');
+  document.getElementById('langBtn').setAttribute('aria-expanded', 'true');
+}
+
+async function selectLang(lang) {
+  await setLang(lang);
+  applyActive(lang);
+  closeDropdown();
+}
+
+(async () => {
+  const lang = await initLang();
+  applyActive(lang);
+
+  document.getElementById('langBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('langToggle').classList.contains('open')
+      ? closeDropdown()
+      : openDropdown();
+  });
+
+  document.querySelectorAll('.lang-opt').forEach(opt => {
+    opt.addEventListener('click', () => selectLang(opt.dataset.lang));
+    opt.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectLang(opt.dataset.lang);
+      }
+    });
+  });
+
+  document.addEventListener('click', () => closeDropdown());
+  document.getElementById('langDropdown').addEventListener('click', e => e.stopPropagation());
+})();
+</script>
+
+
+<!-- =====================================================
+     8. SCRIPTS
+     Ordre important :
+       1. html2canvas (CDN) — génération de l'image de partage
+       2. profile-page.js  — logique du profil
+       3. bottomNav        — barre de nav
+       4. darkmode         — toggle
+     ===================================================== -->
+
+<!-- html2canvas : génération de l'image de partage -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<!-- Logique du profil (module ES6) -->
+<script type="module" src="./profile-page.js?v=2"></script>
+
+<!-- Barre de navigation + dark mode -->
+<script type="module">
+import { initBottomNav } from '../js/bottomNav.js';
+
+// ── Dark mode ──
+const toggle = document.getElementById('darkModeToggle');
+const saved  = localStorage.getItem('darkMode');
+
+if (saved === 'enabled') {
+  document.body.classList.add('darkmode');
+  toggle.checked = true;
+}
+
+toggle.addEventListener('change', () => {
+  if (toggle.checked) {
+    document.body.classList.add('darkmode');
+    localStorage.setItem('darkMode', 'enabled');
+  } else {
+    document.body.classList.remove('darkmode');
+    localStorage.setItem('darkMode', 'disabled');
+  }
+});
+
+// ── Bottom nav ──
+initBottomNav();
+</script>
+
+</body>
+</html>

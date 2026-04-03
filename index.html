@@ -52,7 +52,7 @@
     <link rel="stylesheet" href="./css/global.css?v=3">
     <link rel="stylesheet" href="./css/index.css?v=3">
     <link rel="stylesheet" href="./css/langSelector.css?v=3">
-    <link rel="stylesheet" href="./profile/badges/badges.css?v=3">
+    <link rel="stylesheet" href="./css/bottomNav.css?v=1">
     <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
     
 </head>
@@ -69,25 +69,10 @@
   </header>
 <!-- =====================================================
      2. PROFIL UTILISATEUR
-     Affiche l'avatar et le pseudo si l'utilisateur a créé
-     un profil (localStorage). Sinon, éléments vides.
-     Le bouton "My Account" ouvre la modale profileModal.
+     Le profil est désormais sur sa propre page dédiée :
+     profile/profile.html
+     Navigation via la barre bottom (icône Profile).
      ===================================================== -->
-<div id="profileWrapper" style="display: flex; flex-direction: column; align-items: center; margin-top: 20px;">
-<div id="profileDisplay" style="position: relative; display: inline-block;">
-  <img id="headerAvatar" src="" alt="Avatar" 
-   style="width: 172px; height: auto; border-radius: 50%; object-fit: cover; border: 4px solid black;">
-
-  <span id="headerPseudo"
-        style="position: absolute; bottom: 4px; left: 4px; font-weight: bold; font-size: 22px;
-               background: rgba(0, 0, 0, 0.65); color: white; padding: 1px 5px; border-radius: 6px;">
-  </span>
-</div>
-
-<button id="profileButton" class="profile-btn" style="margin-top: 10px;">👤 <span data-i18n="ui.my_account">My Account</span></button>
-
- 
-</div>
 
 
 <!-- =====================================================
@@ -1201,238 +1186,16 @@ updateCountdown();
 
 </script>
 
-<!-- === Profile Modal === -->
-<div id="profileModal" class="modal hidden">
-<div class="modal-content">
-  <span class="close" id="closeProfile">&times;</span>
-  <h2>🧑 <span data-i18n="profile.title">My Profile</span></h2>
-  <label for="pseudoInput"><span data-i18n="profile.pseudo_label">Username</span> :</label>
-  <input type="text" id="pseudoInput" />
 
-  <h3>🖼️ <span data-i18n="profile.avatar_label">Avatar</span></h3>
- <img id="avatarPreview" src="" alt="Avatar" class="avatar-preview"
-   style="border: 4px solid black; border-radius: 50%; width: 150px; height: auto;">
+<!-- =====================================================
+     BARRE DE NAVIGATION — Bottom Nav
+     Affiche Home | Ranking | Friends | Profile
+     Logique dans js/bottomNav.js
+     ===================================================== -->
+<script type="module">
+import { initBottomNav } from './js/bottomNav.js';
+initBottomNav();
+</script>
 
-  <button id="editAvatarBtn" data-i18n="profile.change_picture">Change picture</button>
-
-  <div style="margin-top: 12px; display: flex; align-items: right; gap: 10px;">
-<label for="borderColorPicker" class="border-color-label" data-i18n="profile.border_color_label">Border Color</label>
-<input type="color" id="borderColorPicker" style="width: 36px; height: 36px; padding: 0; border: none; background: none; cursor: pointer;">
-
-<button 
-  id="saveAndRefreshBtn"
-  style="
-    background-color: #51ff00;
-    color: #111;
-    font-weight: bold;
-    border: none;
-    padding: 10px 18px;
-    font-size: 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 0 8px rgba(81, 255, 0, 0.5);
-    transition: all 0.2s ease;
-  "
-  onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 12px rgba(81, 255, 0, 0.8)'"
-  onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 0 8px rgba(81, 255, 0, 0.5)'"
->
-  ✅ <span data-i18n="profile.save_refresh">Save & Refresh</span>
-</button>
-</div>
-
-
-
-
-  <h3>📊 <span data-i18n="profile.stats_title">Statistics</span></h3>
-  <div id="statsContainer"></div>
-  <!-- === BADGES SECTION === -->
-<section id="badgesSection">
-<h3>🏅 <span data-i18n="profile.badges_title">Badges</span></h3>
-
-<!-- Aperçu rapide (4 badges max) -->
-<div id="previewBadges" class="badge-preview"></div>
-
-<!-- Bouton pour ouvrir la modale complète -->
-<button id="openBadgesModal" class="btn" data-i18n="profile.see_all_badges">See All Badges</button>
-</section>
-
-<!-- === MODALE COMPLETE DES BADGES === -->
-<div id="badgesModal" class="hidden">
-<div class="badges-header">
-<h3>🎖️ <span data-i18n="profile.all_badges_title">All Badges</span></h3>
-<div style="display: flex; align-items: center; gap: 10px;">
-  <!-- ℹ️ Info badge AI -->
-  <div class="badge-ai-info">
-    <span class="info-icon">ℹ️</span>
-    <div class="info-tooltip-ai">
-      <strong data-i18n="profile.about_badges_title">About Our Badges</strong><br>
-      <span data-i18n="profile.about_badges_text">Hey! Just wanted to be transparent – these badges were made with AI help. We're just students working on this passion project for free in our spare time, and honestly, we didn't have the budget or time to commission an artist. We absolutely respect human artists and would love to work with one someday if we get the chance! This was purely out of necessity, not preference. Thanks for understanding and for playing! ❤️</span>
-    </div>
-  </div>
-  <button id="closeBadgesModal" class="close-btn">✖</button>
-</div>
-</div>
-
-<!-- 🔓 Compteur de badges -->
-<p id="badgesCounter" class="badges-counter">🔓 0 / 0 badges unlocked</p>
-
-<div id="badgesGrid" class="badges-grid"></div>
-
-</div>
-
-<!-- === EVENT CODE SECTION === -->
-<section id="eventCodeSection" style="margin-top: 20px; text-align: center;">
-<h3>🎟️ <span data-i18n="profile.event_code_title">Event Code</span></h3>
-<p style="font-size: 0.9em; opacity: 0.8;" data-i18n="profile.event_code_desc">Enter a valid code to unlock an exclusive badge!</p>
-<input type="text" id="eventCodeInput" data-i18n-placeholder="badges.event_code_placeholder" placeholder="Enter event code..." style="padding: 8px; border-radius: 6px; border: 1px solid #aaa; width: 60%; max-width: 250px;">
-<button id="redeemEventCodeBtn" class="btn" style="margin-left: 8px;" data-i18n="badges.event_code_submit">Redeem</button>
-<p id="eventCodeMessage" style="margin-top: 8px; font-size: 0.85em; color: #ccc;"></p>
-</section>
-
-
-
-
-
-  <h3 data-i18n="profile.export_import_title">Export / Import</h3>
-  <button id="exportProfile">📤 <span data-i18n="profile.export">Export Profile</span></button>
-  <input type="file" id="importFileInput" />
-  <button id="importProfile">📥 <span data-i18n="profile.import">Import Profile</span></button>
-  <!-- === SHARE PROFILE SECTION === -->
-<section id="shareSection" style="text-align:center; margin-top:20px;">
-<button id="shareProfileBtn" class="btn">📤 <span data-i18n="profile.share_btn">Share My Profile</span></button>
-<p id="shareStatus" style="margin-top:5px; font-size:0.9em; opacity:0.8;"></p>
-</section>
-
-
-
-  <button id="resetProfile" style="background-color: #c0392b; color: white; margin-top: 10px;">
-🔄 <span data-i18n="profile.reset_btn">Reset Profile</span>
-</button>
-
-</div>
-</div>
-
-<!-- === Avatar Crop Modal === -->
-<div id="avatarCropModal" class="modal hidden">
-<div class="modal-content">
-  <span class="close" id="closeCropper">&times;</span>
-  <h3>Choose your picture</h3>
-  <div id="avatarGrid"></div>
-  <canvas id="avatarCanvas" width="300" height="300"></canvas>
-  <div class="crop-controls">
-    <button id="zoomIn">🔍+</button>
-    <button id="zoomOut">🔍-</button>
-    <button id="confirmCrop">✅ Ok</button>
-  </div>
-</div>
-</div>
-
-<!-- === SHARE PREVIEW MODAL === -->
-<!-- === SHARE PREVIEW MODAL (remplacer l'ancienne) === -->
-<div id="sharePreviewModal" class="modal hidden">
-<div class="modal-content share-preview">
-  <span id="closeSharePreview" class="close">&times;</span>
-  <h2 style="margin-bottom: 20px;">📸 Profile Preview</h2>
-
-  <!-- Sélecteur de background -->
-  <div id="backgroundSelector" style="margin-bottom: 20px; text-align: center;"></div>
-
-  <!-- Zone de prévisualisation -->
-  <div id="sharePreviewArea" class="share-preview-area">
-    <!-- le canvas généré apparaîtra ici -->
-  </div>
-
-  <!-- Boutons de partage -->
-  <div class="share-buttons">
-    <button id="downloadProfileBtn">💾 Download</button>
-    <button id="shareTwitterBtn">🐦 Share on X</button>
-    <button id="shareDiscordBtn">💬 Copy for Discord</button>
-    <button id="shareEmailBtn">✉️ Send by Email</button>
-  </div>
-</div>
-</div>
-
-<style>
-/* Modal share améliorée */
-.share-preview-area {
-display: flex;
-justify-content: center;
-align-items: center;
-margin: 20px 0;
-overflow: auto;
-max-height: 65vh;
-background: #0a0a0a;
-border-radius: 15px;
-padding: 20px;
-box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-}
-
-.share-buttons {
-display: flex;
-flex-wrap: wrap;
-gap: 12px;
-justify-content: center;
-margin-top: 20px;
-}
-
-.share-buttons button {
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-color: #fff;
-border: none;
-padding: 12px 20px;
-border-radius: 10px;
-cursor: pointer;
-font-weight: bold;
-font-size: 0.95em;
-transition: all 0.3s ease;
-box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-.share-buttons button:hover {
-transform: translateY(-2px);
-box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-}
-
-.share-buttons button:active {
-transform: translateY(0);
-}
-
-/* Sélecteur de background */
-#backgroundSelector select {
-padding: 10px 15px;
-border-radius: 8px;
-background: #222;
-color: white;
-border: 2px solid #555;
-font-size: 1em;
-cursor: pointer;
-transition: border-color 0.2s;
-}
-
-#backgroundSelector select:hover {
-border-color: #888;
-}
-
-#backgroundSelector select:focus {
-outline: none;
-border-color: #667eea;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-.share-preview-area {
-  padding: 10px;
-}
-
-.share-buttons button {
-  font-size: 0.85em;
-  padding: 10px 16px;
-}
-}
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js?v=3"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.4.5/gifshot.min.js?v=3"></script>
-<script type="module" src="./profile/profile.js?v=3"></script>
 </body>
 </html>

@@ -211,7 +211,7 @@ function showBadgeNotification(badge) {
   notif.style.cursor = "pointer"; // 👈 Indique que c'est cliquable
   notif.innerHTML = `
     <div class="badge-notif-content">
-      <img src="${badge.img}" alt="${badge.name}" onerror="this.src='./profile/badges/images/default.png'">
+      <img src="${badge.img}" alt="${badge.name}" onerror="this.src=new URL('./images/default.png',import.meta.url).href">
       <div>
         <h4>🎖️ Badge Unlocked!</h4>
         <p><strong>${badge.name}</strong></p>
@@ -304,7 +304,7 @@ function renderBadgesPreview(profile) {
           title="${badge.name}"
           class="badge-preview-img" 
           data-badge-id="${badge.id}"
-          onerror="this.src='./profile/badges/images/default.png'"
+          onerror="this.src=new URL('./images/default.png',import.meta.url).href"
         >
       `)
       .join("");
@@ -356,7 +356,7 @@ function renderBadgesModal(profile, saveProfile) {
           <img 
             src="${badge.img}" 
             alt="${badge.name}"
-            onerror="this.src='./profile/badges/images/default.png'"
+            onerror="this.src=new URL('./images/default.png',import.meta.url).href"
           >
           <p>${badge.name}</p>
           ${isSelected ? '<span class="check-mark">✓</span>' : ""}

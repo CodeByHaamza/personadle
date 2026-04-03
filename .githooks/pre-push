@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# =============================================================
+# pre-push — Vérifications avant un git push
+#
+# Checks effectués :
+#   1. Tests unitaires complets (Vitest)
+#   2. Cohérence i18n
+#   3. Avertissement si push vers main sans PR
+# =============================================================
+
+set -e
+
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+REMOTE="$1"
+REMOTE_URL="$2"
+
+# Branche locale courante
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+echo ""
+echo "🚀  Pre-push checks (→ $REMOTE)..."
+
+# ─────────────────────────────────────────────────────────
+# 1. Tests unitaires — bloquant
+# ─────────────────────────────────────────────────────────
+if [ -f "package.json" ] && command -v npm &>/dev/null; then
+  echo "  ▸ Running full test suite..."
+  if ! npm test 2>/dev/null; then
+    echo -e "${RED}✗ Tests failed — push blocked${NC}"
+    exit 1
+  fi
+  echo -e "  ${GREEN}✓ Tests passed${NC}"
+fi
+
+# ─────────────────────────────────────────────────────────
+# 2. Cohérence i18n — bloquant
+# ─────────────────────────────────────────────────────────
+if command -v node &>/dev/null && [ -f "scripts/check-i18n.js" ]; then
+  echo "  ▸ i18n consistency check..."
+  if ! node scripts/check-i18n.js --silent 2>/dev/null; then
+    echo -e "${RED}✗ i18n mismatch detected — fix before pushing${NC}"
+    echo "  Run: npm run i18n:check"
+    exit 1
+  fi
+  echo -e "  ${GREEN}✓ i18n keys consistent${NC}"
+fi
+
+# ─────────────────────────────────────────────────────────
+# 3. Push direct vers main — avertissement (non bloquant)
+# ─────────────────────────────────────────────────────────
+if [ "$CURRENT_BRANCH" = "main" ]; then
+  echo -e "${YELLOW}⚠  Pushing directly to 'main'. Consider using a feature branch + PR.${NC}"
+fi
+
+echo -e "${GREEN}✅  Pre-push checks passed${NC}"
+echo ""

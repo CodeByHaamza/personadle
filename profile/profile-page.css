@@ -1,0 +1,1511 @@
+/* =============================================================
+   profile-page.css — Page de profil dédiée PersonaDLE
+   ─────────────────────────────────────────────────────────────
+   Style Persona 5 (léger) : rouge/noir, typographie bold, angles.
+
+   Structure :
+     1. HEADER DE PAGE         Titre "MY PROFILE"
+     2. LAYOUT PRINCIPAL       Split desktop / colonne mobile
+     3. PANNEAU GAUCHE         Avatar, pseudo, couleur, boutons
+     4. PANNEAU DROIT          Cards : stats, badges, codes, data
+     5. CARDS                  Conteneurs avec accent P5
+     6. STATS GRID             Grille de statistiques
+     7. BADGES PREVIEW         Rangée de badges sélectionnés
+     8. EVENT CODE             Input + bouton Redeem
+     9. IO BUTTONS             Export / Import / Share
+    10. AUTH PLACEHOLDER       Bouton "Sign In — Coming soon"
+    11. ANIMATIONS             Entrées CSS (slide, fade, stagger)
+    12. DARK MODE              Corps sombres, textes clairs
+    13. RESPONSIVE             Mobile 360px → tablette → desktop
+   ============================================================= */
+
+
+/* =====================================================
+   1. HEADER DE PAGE
+   ===================================================== */
+
+.profile-page-header {
+  text-align: center;
+  padding: 24px 20px 8px;
+  position: relative;
+}
+
+.profile-page-title {
+  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Losanges d'accent P5 */
+.p5-diamond {
+  color: #e63946;
+  font-size: 0.7em;
+  display: inline-block;
+  animation: diamondPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes diamondPulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.3); opacity: 0.7; }
+}
+
+/* Ligne décorative rouge sous le titre */
+.profile-page-header::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: #e63946;
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+
+/* =====================================================
+   2. LAYOUT PRINCIPAL
+   ===================================================== */
+
+.profile-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 16px 30px;
+}
+
+/* Desktop : side-by-side (1/3 gauche + 2/3 droite) */
+.profile-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+
+/* =====================================================
+   3. PANNEAU GAUCHE — Avatar, pseudo, options
+   ===================================================== */
+
+.profile-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 20px; /* Reste visible au scroll */
+}
+
+/* Carte avatar principale */
+.avatar-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 20px 24px;
+  text-align: center;
+  border: 2px solid #e8e8e8;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Barre rouge en haut de la carte avatar (style P5) */
+.avatar-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e63946 0%, #ff6b6b 50%, #e63946 100%);
+}
+
+/* Image avatar */
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #000;
+  display: block;
+  margin: 0 auto 14px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-avatar:hover {
+  box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.25);
+}
+
+/* Nom d'utilisateur */
+.profile-username {
+  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  margin: 0 0 14px;
+  color: #1a1a1a;
+  word-break: break-word;
+  text-transform: uppercase;
+}
+
+/* Ligne couleur de bordure */
+.border-color-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.border-color-row label {
+  font-size: 0.82em;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.border-color-row input[type="color"] {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  transition: border-color 0.2s;
+}
+
+.border-color-row input[type="color"]:hover {
+  border-color: #e63946;
+}
+
+/* Champ pseudo */
+.pseudo-edit-row {
+  margin-bottom: 16px;
+}
+
+.pseudo-edit-row label {
+  display: block;
+  font-size: 0.75em;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+
+.pseudo-edit-row input[type="text"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.92em;
+  background: #f8f8f8;
+  color: #1a1a1a;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.pseudo-edit-row input[type="text"]:focus {
+  outline: none;
+  border-color: #e63946;
+  background: #fff;
+}
+
+/* Boutons de la carte gauche */
+.btn-p5 {
+  display: inline-block;
+  background: #e63946;
+  color: #fff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 3px 10px rgba(230, 57, 70, 0.25);
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.btn-p5:hover {
+  background: #c1121f;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(230, 57, 70, 0.4);
+}
+
+.btn-p5:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(230, 57, 70, 0.3);
+}
+
+/* Variante succès (Save) */
+.btn-success {
+  background: #2a9d4a;
+  box-shadow: 0 3px 10px rgba(42, 157, 74, 0.25);
+}
+
+.btn-success:hover {
+  background: #218838;
+  box-shadow: 0 5px 14px rgba(42, 157, 74, 0.4);
+}
+
+/* Auth placeholder */
+.auth-section {
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.auth-divider {
+  text-align: center;
+  font-size: 0.7em;
+  color: #aaa;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.btn-auth {
+  width: 100%;
+  background: transparent;
+  border: 2px dashed #ccc;
+  color: #aaa;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.83em;
+  font-weight: 700;
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.coming-soon-tag {
+  font-size: 0.7em;
+  background: #e63946;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 10px;
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+
+
+/* =====================================================
+   4. PANNEAU DROIT — Cards de contenu
+   ===================================================== */
+
+.profile-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+
+/* =====================================================
+   5. CARDS
+   ===================================================== */
+
+.profile-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 22px;
+  border: 2px solid #e8e8e8;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Trait rouge vertical gauche (style P5) */
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 0;
+  width: 3px;
+  background: #e63946;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Titre de section */
+.card-title {
+  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-accent {
+  color: #e63946;
+  font-size: 0.7em;
+}
+
+/* Card danger (reset) */
+.profile-card--danger {
+  border-color: rgba(220, 53, 69, 0.3);
+  padding: 16px 22px;
+}
+
+.profile-card--danger::before {
+  background: #dc3545;
+}
+
+.btn-danger {
+  background: transparent;
+  color: #dc3545;
+  border: 2px solid #dc3545;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-danger:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+
+/* =====================================================
+   6. STATS GRID
+   ===================================================== */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Chaque item de stat */
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #eee;
+  /* Animation définie plus bas */
+}
+
+.stat-icon {
+  font-size: 1.3em;
+  flex-shrink: 0;
+}
+
+.stat-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stat-value {
+  font-size: 1.2em;
+  font-weight: 900;
+  color: #e63946;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.stat-label {
+  font-size: 0.7em;
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Stat "Favorite mode" prend toute la largeur */
+.stat-item--full {
+  grid-column: 1 / -1;
+}
+
+
+/* =====================================================
+   7. BADGES PREVIEW
+   ===================================================== */
+
+.badge-preview-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+/* Bouton "See All Badges" dans la card */
+.btn-secondary {
+  background: transparent;
+  color: #e63946;
+  border: 2px solid #e63946;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 0.82em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #e63946;
+  color: #fff;
+}
+
+
+/* =====================================================
+   8. EVENT CODE
+   ===================================================== */
+
+.card-desc {
+  font-size: 0.83em;
+  color: #888;
+  margin: -8px 0 14px;
+}
+
+.event-code-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.event-code-row input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.88em;
+  background: #f8f8f8;
+  color: #1a1a1a;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+
+.event-code-row input[type="text"]:focus {
+  outline: none;
+  border-color: #e63946;
+  background: #fff;
+}
+
+.event-code-row .btn-p5 {
+  width: auto;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+.event-code-msg {
+  font-size: 0.82em;
+  margin: 8px 0 0;
+  color: #888;
+  min-height: 18px;
+}
+
+
+/* =====================================================
+   9. IO BUTTONS (Export / Import / Share)
+   ===================================================== */
+
+.io-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.io-buttons .btn-p5 {
+  width: auto;
+  flex: 1;
+  margin-bottom: 0;
+  min-width: 80px;
+  font-size: 0.78em;
+  padding: 8px 10px;
+}
+
+
+/* =====================================================
+   11. ANIMATIONS D'ENTRÉE
+   ===================================================== */
+
+/* Fondu + glissement depuis la gauche */
+@keyframes slideFromLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Fondu + glissement depuis la droite */
+@keyframes slideFromRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Fondu + glissement depuis le haut */
+@keyframes slideFromTop {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Fondu + scale (avatar) */
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.82); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Fondu simple avec décalage (stat items) */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Panneau gauche : slide depuis la gauche */
+.animate-left {
+  animation: slideFromLeft 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Avatar pop */
+.animate-pop {
+  animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.05s;
+}
+
+/* Nom : depuis le haut */
+.animate-top {
+  animation: slideFromTop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.1s;
+}
+
+/* Cards du panneau droit : slide depuis la droite avec décalage */
+.animate-right {
+  animation: slideFromRight 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Les stat items ont un délai variable via --i (index CSS) */
+.stat-item {
+  animation: fadeSlideUp 0.35s ease both;
+}
+
+/* Délais stagger pour les stat items (définis inline via style) */
+/* Exemple : style="animation-delay: 0.15s" ajouté par profile-page.js */
+
+
+/* =====================================================
+   12. DARK MODE
+   ===================================================== */
+
+body.darkmode .profile-page-title {
+  color: #f0f0f0;
+}
+
+body.darkmode .profile-page-header::after {
+  background: #e63946;
+}
+
+/* Panneau gauche */
+body.darkmode .avatar-card {
+  background: #1a1a1a;
+  border-color: #2e2e2e;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.darkmode .profile-username {
+  color: #f0f0f0;
+}
+
+body.darkmode .border-color-row label {
+  color: #999;
+}
+
+body.darkmode .border-color-row input[type="color"] {
+  border-color: #3a3a3a;
+}
+
+body.darkmode .pseudo-edit-row label {
+  color: #777;
+}
+
+body.darkmode .pseudo-edit-row input[type="text"] {
+  background: #111;
+  border-color: #333;
+  color: #f0f0f0;
+}
+
+body.darkmode .pseudo-edit-row input[type="text"]:focus {
+  border-color: #e63946;
+  background: #1a1a1a;
+}
+
+body.darkmode .auth-section {
+  border-top-color: #2a2a2a;
+}
+
+body.darkmode .btn-auth {
+  border-color: #333;
+  color: #555;
+}
+
+/* Cards panneau droit */
+body.darkmode .profile-card {
+  background: #1a1a1a;
+  border-color: #2e2e2e;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+body.darkmode .card-title {
+  color: #f0f0f0;
+}
+
+body.darkmode .stat-item {
+  background: #111;
+  border-color: #2a2a2a;
+}
+
+body.darkmode .stat-value {
+  color: #ff6b6b;
+}
+
+body.darkmode .stat-label {
+  color: #666;
+}
+
+body.darkmode .event-code-row input[type="text"] {
+  background: #111;
+  border-color: #333;
+  color: #f0f0f0;
+}
+
+body.darkmode .event-code-row input[type="text"]:focus {
+  border-color: #e63946;
+  background: #1a1a1a;
+}
+
+body.darkmode .card-desc {
+  color: #666;
+}
+
+body.darkmode .event-code-msg {
+  color: #666;
+}
+
+body.darkmode .btn-secondary {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+body.darkmode .btn-secondary:hover {
+  background: #ff6b6b;
+  color: #111;
+}
+
+body.darkmode .profile-card--danger {
+  border-color: rgba(220, 53, 69, 0.25);
+}
+
+
+/* =====================================================
+   13. RESPONSIVE
+   ===================================================== */
+
+/* Tablette et mobile : colonne unique */
+@media (max-width: 768px) {
+  .profile-container {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-left {
+    position: static;
+  }
+
+  /* Cards : padding réduit pour gagner de l'espace */
+  .profile-card {
+    padding: 16px 18px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .io-buttons .btn-p5 {
+    flex: unset;
+    width: 100%;
+  }
+
+  /* Badges modal — grille plus compacte */
+  .badges-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+  }
+}
+
+/* Mobile étroit */
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 12px 10px 24px;
+  }
+
+  .profile-page-title {
+    font-size: 1.2rem;
+    gap: 8px;
+  }
+
+  /* Cards très compactes */
+  .profile-card {
+    padding: 14px 12px;
+  }
+
+  .card-title {
+    font-size: 0.86rem;
+    margin-bottom: 12px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .stat-item {
+    padding: 8px 10px;
+  }
+
+  .stat-value {
+    font-size: 1.05em;
+  }
+
+  .event-code-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .event-code-row .btn-p5 {
+    width: 100%;
+  }
+
+  .avatar-card {
+    padding: 20px 14px 18px;
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-username {
+    font-size: 1.15rem;
+  }
+
+  /* Badges preview dans la card */
+  .badge-preview-row {
+    gap: 8px;
+  }
+
+  /* Badges modal — colonne unique sur très petit mobile */
+  .badges-grid {
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    gap: 8px;
+  }
+
+  /* IO buttons déjà en colonne via 768px — s'assurer qu'ils ne débordent pas */
+  .io-buttons {
+    flex-direction: column;
+  }
+}
+
+/* Très petit mobile : 360px */
+@media (max-width: 360px) {
+  .profile-page {
+    padding: 10px 8px 20px;
+  }
+
+  .profile-card {
+    padding: 12px 10px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-avatar {
+    width: 88px;
+    height: 88px;
+  }
+
+  .profile-username {
+    font-size: 1rem;
+  }
+
+  .btn-p5, .btn-secondary, .btn-danger {
+    font-size: 0.78em;
+    padding: 8px 12px;
+  }
+}
+
+/* =====================================================
+   10b. SONG CARD — Sélecteur + lecteur de profil
+   ===================================================== */
+
+/* Même base visuelle que .avatar-card */
+.song-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 16px 14px;
+  border: 2px solid #e8e8e8;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Barre rouge en haut */
+.song-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e63946 0%, #ff6b6b 50%, #e63946 100%);
+  z-index: 1;
+}
+
+/* ── Sélecteur de song ── */
+
+/* Rangée : image preview + select + bouton */
+.song-picker {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+/* Miniature de l'opus — met à jour en live */
+.song-picker-img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #e63946;
+  flex-shrink: 0;
+  background: #111;
+  transition: border-color 0.2s;
+}
+
+/* Colonne droite : select + Set */
+.song-picker-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Select — style propre, sans emprunt à .share-select */
+.song-select {
+  width: 100%;
+  padding: 7px 26px 7px 9px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  background-color: #f8f8f8;
+  color: #1a1a1a;
+  font-size: 0.8em;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23e63946' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color 0.15s;
+  /* Hauteur max pour éviter que le sélecteur s'étire */
+  max-height: 36px;
+}
+
+.song-select:focus {
+  outline: none;
+  border-color: #e63946;
+  background-color: #fff;
+}
+
+/* Bouton Set — largeur pleine dans la colonne */
+.song-set-btn {
+  width: 100%;
+  margin-bottom: 0;
+  padding: 7px 10px;
+  font-size: 0.76em;
+}
+
+/* Hint quand aucune song n'est configurée */
+.song-empty-hint {
+  font-size: 0.75em;
+  color: #aaa;
+  text-align: center;
+  margin: 4px 0 0;
+  font-style: italic;
+}
+
+/* ── Mini-lecteur — layout vertical : artwork grand en haut, infos dessous ── */
+.song-player {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  transition: background 0.2s;
+}
+
+/* Artwork pleine largeur */
+.song-artwork {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 3px solid #e63946;
+  display: block;
+  box-shadow: 0 4px 16px rgba(230, 57, 70, 0.2);
+}
+
+/* Pulsation artwork quand en lecture */
+.song-player.playing .song-artwork {
+  animation: songArtPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes songArtPulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(230, 57, 70, 0.2); }
+  50%       { box-shadow: 0 4px 28px rgba(230, 57, 70, 0.55); }
+}
+
+/* Bloc infos sous l'image */
+.song-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* Titre centré */
+.song-title {
+  font-size: 0.83em;
+  font-weight: 800;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+/* Badge opus centré */
+.song-opus-badge {
+  display: block;
+  font-size: 0.64em;
+  font-weight: 700;
+  color: #fff;
+  background: #e63946;
+  padding: 2px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  margin: 0 auto 2px;
+}
+
+/* Bouton play + barre */
+.song-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.song-play-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #e63946;
+  color: #fff;
+  font-size: 0.75em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+  box-shadow: 0 3px 10px rgba(230, 57, 70, 0.35);
+}
+
+.song-play-btn:hover {
+  background: #c1121f;
+  transform: scale(1.08);
+}
+
+.song-play-btn:active {
+  transform: scale(0.93);
+}
+
+.song-progress-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.song-progress {
+  height: 5px;
+  background: #d8d8d8;
+  border-radius: 3px;
+  cursor: pointer;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+
+.song-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #e63946, #ff6b6b);
+  border-radius: 3px;
+  transition: width 0.15s linear;
+}
+
+.song-time-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62em;
+  color: #bbb;
+  font-weight: 600;
+}
+
+/* Bouton Remove */
+.song-action-row {
+  margin-top: 2px;
+}
+
+.song-btn-sm {
+  width: 100%;
+  padding: 6px 10px !important;
+  font-size: 0.72em !important;
+}
+
+/* ── Dark mode ── */
+body.darkmode .song-card {
+  background: #1a1a1a;
+  border-color: #2e2e2e;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.darkmode .song-picker-img {
+  border-color: #ff6b6b;
+}
+
+body.darkmode .song-select {
+  background-color: #111;
+  border-color: #333;
+  color: #f0f0f0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23ff6b6b' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
+}
+
+body.darkmode .song-select:focus {
+  border-color: #ff6b6b;
+  background-color: #1a1a1a;
+}
+
+body.darkmode .song-player {
+  background: #111;
+  border-color: #2a2a2a;
+}
+
+body.darkmode .song-title {
+  color: #f0f0f0;
+}
+
+body.darkmode .song-progress {
+  background: #2a2a2a;
+}
+
+body.darkmode .song-time-row {
+  color: #555;
+}
+
+body.darkmode .song-empty-hint {
+  color: #555;
+}
+
+/* ── Responsive song card ── */
+
+/* Tablette : picker légèrement agrandi (colonne unique = plus de place) */
+@media (max-width: 768px) {
+  .song-picker-img {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* Mobile : picker en colonne, image pleine largeur */
+@media (max-width: 480px) {
+  .song-picker {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .song-picker-img {
+    width: 100%;
+    height: 130px;
+    border-radius: 10px;
+  }
+
+  .song-picker-right {
+    width: 100%;
+  }
+}
+
+/* Très petit mobile */
+@media (max-width: 360px) {
+  .song-title {
+    font-size: 0.76em;
+  }
+}
+
+
+/* Desktop large : augmente la largeur du panneau gauche */
+@media (min-width: 1024px) {
+  .profile-container {
+    grid-template-columns: 320px 1fr;
+    gap: 28px;
+  }
+}
+
+
+/* =====================================================
+   14. SHARE MODAL — Interface de partage de profil
+   ===================================================== */
+
+/* Modale élargie pour contenir la preview + sélecteurs */
+#sharePreviewModal .modal-content {
+  max-width: 600px;
+  padding: 26px 24px 22px;
+}
+
+#sharePreviewModal h2 {
+  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  margin: 0 0 18px;
+}
+
+/* ── Onglets Color / Wallpaper ── */
+.share-tab-row {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #e63946;
+}
+
+.share-tab {
+  flex: 1;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  color: #e63946;
+  font-weight: 700;
+  font-size: 0.78em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.share-tab:hover {
+  background: rgba(230, 57, 70, 0.07);
+}
+
+.share-tab.active {
+  background: #e63946;
+  color: #fff;
+}
+
+/* ── Panels (color / wallpaper) ── */
+.share-panel {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.share-panel.active {
+  display: flex;
+}
+
+.share-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.share-selector-row label {
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+  white-space: nowrap;
+  min-width: 72px;
+}
+
+.share-select {
+  flex: 1;
+  padding: 7px 28px 7px 10px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  background: #f8f8f8;
+  color: #1a1a1a;
+  font-size: 0.83em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  /* flèche SVG custom */
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23e63946' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.share-select:focus {
+  outline: none;
+  border-color: #e63946;
+  background-color: #fff;
+}
+
+/*
+ * Zone de prévisualisation — format 9:16 portrait téléphone.
+ * Desktop : 260×462px  (260 × 16/9 = 462)
+ * La carte 390×693 est scalée à 0.6667 (260/390) pour remplir pile le cadre.
+ * La capture html2canvas utilise un clone off-screen à pleine résolution.
+ */
+.share-preview-area {
+  width: 260px;
+  height: 462px;
+  margin: 0 auto 16px;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  background: #0a0a0a;
+  box-shadow:
+    0 0 0 2px rgba(230, 57, 70, 0.25),
+    0 14px 48px rgba(0, 0, 0, 0.55);
+}
+
+.share-card-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.share-card-wrapper #shareCard {
+  transform: scale(0.6667); /* 260 / 390 */
+  transform-origin: top left;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+/* ── Boutons d'action ── */
+.share-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  font-size: 0.76em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.share-btn:active {
+  transform: scale(0.95);
+}
+
+/* Téléchargement — rouge P5, pleine largeur */
+.share-btn--download {
+  background: #e63946;
+  color: #fff;
+  grid-column: 1 / -1;
+  font-size: 0.84em;
+  padding: 13px 12px;
+  box-shadow: 0 3px 14px rgba(230, 57, 70, 0.35);
+}
+
+.share-btn--download:hover {
+  box-shadow: 0 5px 20px rgba(230, 57, 70, 0.55);
+}
+
+/* Twitter / X — noir */
+.share-btn--twitter {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.share-btn--twitter:hover {
+  opacity: 0.82;
+}
+
+/* Discord — bleu Discord */
+.share-btn--discord {
+  background: #5865F2;
+  color: #fff;
+  border-color: #5865F2;
+}
+
+.share-btn--discord:hover {
+  opacity: 0.88;
+}
+
+/* Email — outline rouge */
+.share-btn--email {
+  background: transparent;
+  color: #e63946;
+  border-color: #e63946;
+}
+
+.share-btn--email:hover {
+  background: #e63946;
+  color: #fff;
+}
+
+/* ── Dark mode share modal ── */
+body.darkmode #sharePreviewModal h2 {
+  color: #f0f0f0;
+}
+
+body.darkmode .share-tab-row {
+  border-color: #ff6b6b;
+}
+
+body.darkmode .share-tab {
+  color: #ff6b6b;
+}
+
+body.darkmode .share-tab.active {
+  background: #ff6b6b;
+  color: #111;
+}
+
+body.darkmode .share-selector-row label {
+  color: #666;
+}
+
+body.darkmode .share-select {
+  background-color: #1a1a1a;
+  border-color: #333;
+  color: #f0f0f0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23ff6b6b' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
+}
+
+body.darkmode .share-select:focus {
+  border-color: #ff6b6b;
+  background-color: #222;
+}
+
+body.darkmode .share-btn--email {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+body.darkmode .share-btn--email:hover {
+  background: #ff6b6b;
+  color: #111;
+}
+
+/* ── Responsive share modal ── */
+
+/* Tablette : preview identique (260px tient dans la modale 90%) */
+@media (max-width: 768px) {
+  #sharePreviewModal .modal-content {
+    padding: 22px 18px 18px;
+  }
+
+  .share-preview-area {
+    width: 240px;
+    height: 427px; /* 240 × 16/9 ≈ 426.7 */
+  }
+
+  .share-card-wrapper #shareCard {
+    transform: scale(0.6154); /* 240 / 390 */
+  }
+}
+
+/* Mobile : preview réduite, boutons en colonne */
+@media (max-width: 480px) {
+  #sharePreviewModal .modal-content {
+    padding: 18px 12px 16px;
+  }
+
+  .share-preview-area {
+    width: 220px;
+    height: 391px; /* 220 × 16/9 ≈ 391.1 */
+  }
+
+  .share-card-wrapper #shareCard {
+    transform: scale(0.5641); /* 220 / 390 */
+  }
+
+  .share-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .share-btn--download {
+    grid-column: auto;
+  }
+
+  .share-selector-row label {
+    min-width: 58px;
+    font-size: 0.7em;
+  }
+}
+
+/* Très petit mobile */
+@media (max-width: 360px) {
+  .share-preview-area {
+    width: 195px;
+    height: 347px; /* 195 × 16/9 ≈ 346.7 */
+  }
+
+  .share-card-wrapper #shareCard {
+    transform: scale(0.5); /* 195 / 390 */
+  }
+}

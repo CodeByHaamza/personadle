@@ -1,0 +1,249 @@
+/* =============================================================
+   bottomNav.css — Barre de navigation fixe en bas de l'écran
+   Partagée par index.html et profile/profile.html
+
+   Structure :
+     .bottom-nav       — conteneur fixe
+     .nav-item         — bouton/lien de navigation
+     .nav-item.active  — page courante
+     .nav-avatar       — avatar miniature dans l'icône Profile
+     .nav-toast        — notification "Coming soon"
+
+   Dark mode : body.darkmode .bottom-nav (fonds sombres)
+   Responsive : 320px → desktop
+   ============================================================= */
+
+
+/* =====================================================
+   1. CONTENEUR PRINCIPAL
+   ===================================================== */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+
+  /* Fond clair avec légère transparence + blur */
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  /* Bordure supérieure rouge Persona 5 */
+  border-top: 2px solid #e63946;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  /* Au-dessus de tout le contenu, sous les modales */
+  z-index: 500;
+
+  /* Ombre légère pour la profondeur */
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =====================================================
+   2. ITEMS DE NAVIGATION
+   ===================================================== */
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  /* Reset bouton */
+  text-decoration: none;
+  border: none;
+  background: none;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+
+  /* Taille et espacement */
+  padding: 6px 20px;
+  min-width: 64px;
+  border-radius: 10px;
+
+  /* Couleur inactive */
+  color: #999;
+
+  transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.nav-item:hover {
+  color: #e63946;
+  background: rgba(230, 57, 70, 0.08);
+}
+
+/* Page courante — accent rouge */
+.nav-item.active {
+  color: #e63946;
+}
+
+/* Animation légère au clic */
+.nav-item:active {
+  transform: scale(0.93);
+}
+
+
+/* =====================================================
+   3. ICÔNES SVG
+   ===================================================== */
+
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s ease;
+}
+
+/* Indicateur actif : trait rouge sous l'icône */
+.nav-item.active svg {
+  filter: drop-shadow(0 2px 4px rgba(230, 57, 70, 0.4));
+}
+
+
+/* =====================================================
+   4. LABEL TEXTE
+   ===================================================== */
+
+.nav-label {
+  font-size: 0.6em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+
+/* =====================================================
+   5. AVATAR MINIATURE (icône Profile personnalisée)
+   ===================================================== */
+
+.nav-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e63946;
+  /* Remplacement de l'icône SVG quand un avatar est défini */
+  display: block;
+}
+
+
+/* =====================================================
+   6. TOAST "COMING SOON"
+   ===================================================== */
+
+.nav-toast {
+  position: fixed;
+  /* Juste au-dessus de la nav bar */
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+
+  background: #1a1a1a;
+  color: #e63946;
+  border: 1px solid #e63946;
+
+  padding: 8px 22px;
+  border-radius: 20px;
+
+  font-size: 0.82em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+
+  /* Caché par défaut */
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 600;
+}
+
+.nav-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+/* =====================================================
+   7. ESPACE RÉSERVÉ EN BAS DU BODY
+   Évite que le contenu soit masqué derrière la barre fixe.
+   Ce CSS n'est chargé que sur les pages avec la bottom nav,
+   donc le padding ne s'applique qu'où il le faut.
+   62px (hauteur nav) + 16px marge = 78px
+   ===================================================== */
+
+body {
+  padding-bottom: 78px;
+}
+
+
+/* =====================================================
+   8. DARK MODE
+   ===================================================== */
+
+body.darkmode .bottom-nav {
+  background: rgba(12, 12, 12, 0.96);
+  border-top-color: #e63946;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.darkmode .nav-item {
+  color: #666;
+}
+
+body.darkmode .nav-item:hover {
+  color: #e63946;
+  background: rgba(230, 57, 70, 0.12);
+}
+
+body.darkmode .nav-item.active {
+  color: #e63946;
+}
+
+body.darkmode .nav-toast {
+  background: #111;
+  color: #e63946;
+  border-color: #e63946;
+  box-shadow: 0 0 12px rgba(230, 57, 70, 0.3);
+}
+
+
+/* =====================================================
+   9. RESPONSIVE
+   ===================================================== */
+
+/* Mobile très petit — labels plus petits */
+@media (max-width: 360px) {
+  .nav-item {
+    padding: 6px 12px;
+    min-width: 52px;
+  }
+
+  .nav-label {
+    font-size: 0.55em;
+  }
+
+  .nav-item svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Desktop — légère augmentation des zones cliquables */
+@media (min-width: 768px) {
+  .nav-item {
+    padding: 6px 28px;
+  }
+}

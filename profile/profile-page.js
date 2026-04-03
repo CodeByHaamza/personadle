@@ -1,0 +1,1262 @@
+/**
+ * profile-page.js — Logique de la page de profil dédiée
+ * ─────────────────────────────────────────────────────────
+ * Adapté depuis profile/profile.js pour fonctionner sur
+ * profile/profile.html (page autonome, pas une modale).
+ *
+ * Différences clés vs profile.js :
+ *   - Chemins images : ../img/ au lieu de ./img/
+ *   - Éléments DOM : pageAvatar, pageUsername (page) au lieu de headerAvatar, headerPseudo (modale)
+ *   - Pas de logique d'ouverture/fermeture de modale profil
+ *   - normalizeAvatarPath() pour la compatibilité avec les profils existants (./img/...)
+ *
+ * Fonctionnalités :
+ *   - Chargement et sauvegarde du profil depuis localStorage
+ *   - Sélection et recadrage d'avatar (canvas crop)
+ *   - Affichage des statistiques avec animation stagger
+ *   - Système de badges (délégué à badgesManager.js)
+ *   - Code événement (badge exclusif)
+ *   - Export / Import JSON
+ *   - Partage de profil (canvas → image téléchargeable)
+ *   - Réinitialisation du profil
+ */
+
+// ─────────────────────────────────────────────────────────
+// IMPORTS
+// ─────────────────────────────────────────────────────────
+
+import { initBadgesSystem, getBadgesForShare, markProfileAsShared } from './badges/badgesManager.js';
+import { songs as ALL_SONGS } from '../musicsMode/database/songs.js';
+
+
+// ─────────────────────────────────────────────────────────
+// VARIABLES GLOBALES
+// ─────────────────────────────────────────────────────────
+
+let profile = null;     // Objet profil utilisateur (localStorage)
+let zoom = 1;           // Niveau de zoom du canvas crop
+let offsetX = 0;        // Décalage horizontal du canvas
+let offsetY = 0;        // Décalage vertical du canvas
+let dragging = false;   // État du drag
+let startX = 0;         // Position X initiale du drag
+let startY = 0;         // Position Y initiale du drag
+let selectedAvatarSrc = ''; // Source de l'avatar sélectionné dans la grille
+
+let cropTarget = 'avatar'; // 'avatar' | 'song' — détermine où le crop est sauvegardé
+let _regenerateSharePreview = null; // Référence levée à generatePreview() dans setupShareProfile()
+let profileSongAudio = null; // Élément <audio> du profile song
+
+
+// ─────────────────────────────────────────────────────────
+// ÉLÉMENTS DOM
+// ─────────────────────────────────────────────────────────
+
+// Éléments principaux de la page
+const pageAvatar   = document.getElementById('pageAvatar');
+const pageUsername = document.getElementById('pageUsername');
+const pseudoInput  = document.getElementById('pseudoInput');
+
+// Boutons principaux
+const editAvatarBtn    = document.getElementById('editAvatarBtn');
+const saveRefreshBtn   = document.getElementById('saveAndRefreshBtn');
+const resetProfileBtn  = document.getElementById('resetProfile');
+const exportBtn        = document.getElementById('exportProfile');
+const importBtn        = document.getElementById('importProfile');
+const importFile       = document.getElementById('importFileInput');
+const borderColorPicker = document.getElementById('borderColorPicker');
+const statsContainer   = document.getElementById('statsContainer');
+
+// Modale crop
+const cropModal    = document.getElementById('avatarCropModal');
+const closeCropper = document.getElementById('closeCropper');
+const avatarGrid   = document.getElementById('avatarGrid');
+const canvas       = document.getElementById('avatarCanvas');
+const ctx          = canvas.getContext('2d');
+const zoomInBtn    = document.getElementById('zoomIn');
+const zoomOutBtn   = document.getElementById('zoomOut');
+const confirmCrop  = document.getElementById('confirmCrop');
+
+
+// ─────────────────────────────────────────────────────────
+// UTILITAIRE : NORMALISATION DES CHEMINS D'AVATAR
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Normalise un chemin d'avatar pour fonctionner depuis profile/.
+ * Convertit les anciens chemins ./img/... en ../img/...
+ * Les data URLs (base64) passent sans modification.
+ *
+ * @param {string|null} avatarPath - Chemin stocké dans localStorage
+ * @returns {string} Chemin résolu depuis profile/
+ */
+function normalizeAvatarPath(avatarPath) {
+  if (!avatarPath) return '../img/default_avatar.png';
+  // Data URL base64 — toujours valide, aucun ajustement nécessaire
+  if (avatarPath.startsWith('data:')) return avatarPath;
+  // Chemins déjà absolus ou root-relatifs
+  if (avatarPath.startsWith('/') || avatarPath.startsWith('http')) return avatarPath;
+  // Anciens chemins stockés depuis index.html (./img/...) → corriger pour profile/
+  return avatarPath.replace(/^\.\/img\//, '../img/');
+}
+
+
+// ─────────────────────────────────────────────────────────
+// INITIALISATION DU PROFIL
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Charge le profil depuis localStorage ou crée un profil vierge.
+ * Met à jour tous les éléments visuels de la page.
+ */
+function initProfile() {
+  const saved = localStorage.getItem('personaUserProfile');
+
+  if (saved) {
+    profile = JSON.parse(saved);
+  } else {
+    // Nouveau profil par défaut
+    profile = {
+      pseudo: '',
+      avatar: '',
+      avatarBorderColor: '#000000',
+      profileSong: null,
+      badges: [],
+      selectedBadges: [],
+      eventCodes: [],
+      stats: {
+        wins: 0,
+        giveups: 0,
+        games: 0,
+        modeCount: {},
+        streak: 0,
+        streakRecord: 0,
+        lastPlayed: null,
+        firstPlayed: new Date().toISOString(),
+        totalTimeMinutes: 0,
+        perfectWins: 0,
+      },
+    };
+    saveProfile();
+  }
+
+  // ── Affichage de l'avatar ──
+  const avatarSrc = normalizeAvatarPath(profile.avatar);
+  pageAvatar.src = avatarSrc;
+  pageAvatar.style.borderColor = profile.avatarBorderColor || '#000000';
+
+  // ── Pseudo ──
+  pageUsername.textContent = profile.pseudo || 'Guest';
+  pseudoInput.value = profile.pseudo || '';
+
+  // ── Couleur de bordure ──
+  borderColorPicker.value = profile.avatarBorderColor || '#000000';
+
+  // ── Statistiques ──
+  renderStats();
+}
+
+/**
+ * Sauvegarde le profil dans localStorage.
+ */
+function saveProfile() {
+  localStorage.setItem('personaUserProfile', JSON.stringify(profile));
+}
+
+
+// ─────────────────────────────────────────────────────────
+// AFFICHAGE DES STATISTIQUES
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Génère et injecte les blocs de statistiques dans #statsContainer.
+ * Chaque item reçoit un délai d'animation croissant (effet stagger).
+ */
+function renderStats() {
+  const s = profile.stats || {};
+  const i = window.i18n || { t: (k, v) => k };
+
+  // Noms affichables des modes
+  const modeNames = {
+    Classique: 'Classic', Emoji: 'Emoji', Silhouette: 'Silhouette',
+    AllOutAttack: 'All-Out Attack', Personae: 'Personae', Music: 'Music',
+  };
+  const modeFav = s.favoriteMode ? (modeNames[s.favoriteMode] || s.favoriteMode) : '—';
+
+  // Définition des stats à afficher
+  const stats = [
+    { icon: '🏆', value: s.wins || 0,            label: i.t('profile.stat_wins',        { count: s.wins || 0 }).replace(/\d+/,'').trim() || 'Wins' },
+    { icon: '🏳️', value: s.giveups || 0,         label: 'Give-ups' },
+    { icon: '🎮', value: s.games || 0,            label: 'Games Played' },
+    { icon: '🔥', value: s.streak || 0,           label: 'Current Streak' },
+    { icon: '⭐', value: s.streakRecord || 0,     label: 'Best Streak' },
+    { icon: '⏱️', value: `${s.totalTimeMinutes || 0} min`, label: 'Time Played' },
+    { icon: '🎯', value: modeFav,                 label: 'Fav Mode', full: true },
+    { icon: '📅', value: s.firstPlayed?.split('T')[0] || '—', label: 'First Played', full: true },
+  ];
+
+  statsContainer.innerHTML = stats.map((st, idx) => `
+    <div class="stat-item${st.full ? ' stat-item--full' : ''}"
+         style="animation-delay: ${0.1 + idx * 0.06}s">
+      <span class="stat-icon">${st.icon}</span>
+      <div class="stat-body">
+        <span class="stat-value">${st.value}</span>
+        <span class="stat-label">${st.label}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+
+// ─────────────────────────────────────────────────────────
+// GESTIONNAIRES D'ÉVÉNEMENTS — PROFIL
+// ─────────────────────────────────────────────────────────
+
+// Ouvrir la modale de crop (avatar)
+editAvatarBtn.onclick = () => {
+  cropTarget = 'avatar';
+  cropModal.classList.remove('hidden');
+};
+
+// Sauvegarder et rafraîchir
+saveRefreshBtn.onclick = () => {
+  saveProfile();
+  location.reload();
+};
+
+// Réinitialiser le profil
+resetProfileBtn.onclick = () => {
+  const i = window.i18n || { t: (k) => k };
+  if (confirm(i.t('profile.reset_confirm') || 'Reset your profile? This cannot be undone.')) {
+    localStorage.removeItem('personaUserProfile');
+    location.reload();
+  }
+};
+
+// Mise à jour du pseudo en temps réel
+pseudoInput.oninput = (e) => {
+  profile.pseudo = e.target.value;
+  pageUsername.textContent = profile.pseudo || 'Guest';
+  saveProfile();
+};
+
+// Changement de couleur de bordure
+borderColorPicker.oninput = (e) => {
+  profile.avatarBorderColor = e.target.value;
+  pageAvatar.style.borderColor = profile.avatarBorderColor;
+  saveProfile();
+  // Régénère la preview de partage si la modale est ouverte
+  const shareModal = document.getElementById('sharePreviewModal');
+  if (shareModal && !shareModal.classList.contains('hidden') && _regenerateSharePreview) {
+    _regenerateSharePreview();
+  }
+};
+
+
+// ─────────────────────────────────────────────────────────
+// GRILLE DES AVATARS
+// ─────────────────────────────────────────────────────────
+
+/** Liste complète des avatars disponibles */
+const avatarList = [
+  'Naoya.jpg', 'Naoya1.jpg', 'Yuka.webp', 'Hidehiko.png', 'Hidehiko.webp', 'Inaba2.webp', 'Inaba.webp', 'Eriko.png',
+  'Tatsuya2.jpg', 'Tatsuya.jpg', 'Lisa.jpeg', 'Jun.jpg', 'Ekichi2.jpeg', 'Ekichi.jpeg', 'Maya2.jpeg', 'Maya.jpg',
+  'Yuki.jpeg', 'yuki.jpg', 'Yuki_Zutomayo.jpeg', 'Kotone2.jpeg', 'Kotone.jpeg', 'Kotone3.jpeg', 'kotone_pdp.jpg',
+  'Aigis2.jpg', 'Aigis.jpg', 'Akihiko.jpg', 'Mitsuru.jpg', 'Mitsuru.webp',
+  'Junpei2.jpg', 'Junpei.png', 'Fuuka2.jpeg', 'Fuuka.jpeg', 'Ken.jpeg', 'Koromaru2.jpg', 'Koromaru.jpg',
+  'Shinji.jpg', 'Shinji.webp', 'Yukari2.jpg', 'Yukari.jpg',
+  'Metis.jpg', 'Metis2.jpeg', 'Elisabeth.jpeg', 'Elisabeth2.jpeg', 'Chidori.jpg', 'Chidori2.jpg',
+  'Yu2.jpg', 'Yu.jpg', 'Yosuke2.jpg', 'Yosuke.jpg', 'Chie2.jpg', 'Chie.jpg', 'Yukiko2.jpg', 'Yukiko.jpg',
+  'Kanji.avif', 'Kanji.jpg', 'Rise.jpg', 'Rise.png', 'Teddie2.jpg', 'Teddie.jpg', 'Naoto2.jpg', 'Naoto.jpg',
+  'Marie.jpg', 'Marie2.webp', 'Nanako2.jpg', 'Nanako.jpg', 'margaret.jpg',
+  'Joker.jpg', 'ren_t.webp', 'Ann.jpg', 'Ann_2.jpg', 'Ryuji.jpg', 'Ryuji.png', 'Morgana.jpg', 'Morgana.png',
+  'Yusuke.jpg', 'Yusuke.webp', 'Makoto2.jpg', 'Makoto.jpg', 'Futaba.jpg', 'Futaba.webp',
+  'Haru.png', 'Har.jpg', 'Akechi2.jpg', 'Akechi.jpg', 'Sumire2.jpg', 'Sumire.jpg',
+  'Tae.jpg', 'Tae2.jpg', 'Caroline&justine.png', 'Lavenza.jpg',
+  'Wonder.jpg', 'wonder1.png', 'wonder2.png', 'Lufel2.png', 'Lufel.png', 'Arai2.png', 'Arai.png',
+  'Shun2.png', 'Shun.png', 'Riko2.png', 'Riko.png', 'Kayo2.png', 'Kayo.png', 'Tomoko2.png', 'Tomoko.png',
+  'Yaoling2.png', 'Yaoling.png', 'YUI2.png', 'YUI.png',
+  'Yuki.gif', 'Yuki2.gif', 'pfp_makoto.gif', 'Yu.gif', 'Yu2.gif', 'Ren.gif', 'Ren2.gif',
+  'catlisabeth.gif', 'luix-dextructor-aigis.gif', 'Anniversary.gif', 'aigis.gif',
+  'Lavenza7.gif', 'Maruki.gif',
+];
+
+/**
+ * Construit la grille de sélection d'avatars dans la modale crop.
+ * Les chemins sont relatifs à profile/ (../img/avatar/).
+ */
+function initAvatarGrid() {
+  avatarGrid.innerHTML =
+    `<div class="avatar-none"
+          data-src="none"
+          style="display:flex;align-items:center;justify-content:center;
+                 background:#333;color:white;font-weight:bold;
+                 border-radius:8px;height:80px;cursor:pointer;">
+       NONE
+     </div>` +
+    avatarList.map(name =>
+      // data-src stocké avec le chemin depuis profile/ pour être valide depuis cette page
+      `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" loading="lazy" />`
+    ).join('');
+
+  // Clic sur une image → charger dans le canvas
+  avatarGrid.querySelectorAll('img').forEach(img => {
+    img.onclick = () => {
+      selectedAvatarSrc = img.dataset.src;
+      loadImageToCanvas(selectedAvatarSrc);
+    };
+  });
+
+  // Option NONE → vider l'avatar
+  const noneOption = avatarGrid.querySelector('.avatar-none');
+  if (noneOption) {
+    noneOption.onclick = () => {
+      selectedAvatarSrc = 'none';
+      profile.avatar = '';
+      pageAvatar.src = '../img/default_avatar.png';
+      saveProfile();
+      cropModal.classList.add('hidden');
+    };
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────
+// CANVAS CROP
+// ─────────────────────────────────────────────────────────
+
+let image = new Image();
+
+/**
+ * Charge une image dans le canvas de recadrage.
+ * @param {string} src - URL ou chemin de l'image
+ */
+function loadImageToCanvas(src) {
+  image.src = src;
+  image.onload = () => {
+    zoom = 1;
+    offsetX = 0;
+    offsetY = 0;
+    drawCanvas();
+  };
+}
+
+/** Redessine le canvas avec les transformations courantes. */
+function drawCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const w = image.width * zoom;
+  const h = image.height * zoom;
+  const x = canvas.width  / 2 - w / 2 + offsetX;
+  const y = canvas.height / 2 - h / 2 + offsetY;
+  ctx.drawImage(image, x, y, w, h);
+}
+
+// Fermer la modale crop
+closeCropper.onclick = () => cropModal.classList.add('hidden');
+
+// Drag sur le canvas (souris)
+canvas.onmousedown = (e) => { dragging = true; startX = e.offsetX; startY = e.offsetY; };
+canvas.onmouseup   = () => { dragging = false; };
+canvas.onmouseleave = () => { dragging = false; };
+canvas.onmousemove = (e) => {
+  if (!dragging) return;
+  offsetX += e.offsetX - startX;
+  offsetY += e.offsetY - startY;
+  startX = e.offsetX;
+  startY = e.offsetY;
+  drawCanvas();
+};
+
+// Drag sur le canvas (tactile)
+canvas.ontouchstart = (e) => {
+  const t = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  dragging = true;
+  startX = t.clientX - rect.left;
+  startY = t.clientY - rect.top;
+};
+canvas.ontouchend = () => { dragging = false; };
+canvas.ontouchmove = (e) => {
+  if (!dragging) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const tx = t.clientX - rect.left;
+  const ty = t.clientY - rect.top;
+  offsetX += tx - startX;
+  offsetY += ty - startY;
+  startX = tx;
+  startY = ty;
+  drawCanvas();
+};
+
+// Zoom
+zoomInBtn.onclick  = () => { zoom *= 1.1; drawCanvas(); };
+zoomOutBtn.onclick = () => { zoom /= 1.1; drawCanvas(); };
+
+// Confirmer le crop → route vers avatar ou song selon cropTarget
+confirmCrop.onclick = () => {
+  const result = selectedAvatarSrc.endsWith('.gif')
+    ? selectedAvatarSrc
+    : canvas.toDataURL('image/png');
+
+  if (cropTarget === 'song') {
+    if (profile.profileSong) {
+      profile.profileSong.customImage = result;
+      updateSongArtwork(result);
+      saveProfile();
+    }
+  } else {
+    profile.avatar = result;
+    pageAvatar.src = result;
+    saveProfile();
+  }
+  cropModal.classList.add('hidden');
+  cropTarget = 'avatar'; // reset systématique
+};
+
+
+// ─────────────────────────────────────────────────────────
+// EXPORT / IMPORT JSON
+// ─────────────────────────────────────────────────────────
+
+/** Exporte le profil complet en fichier JSON téléchargeable. */
+exportBtn.onclick = () => {
+  const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'personadle_profile.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+/** Ouvre le dialogue de sélection de fichier. */
+importBtn.onclick = () => importFile.click();
+
+/** Importe un profil depuis un fichier JSON. */
+importFile.onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const imported = JSON.parse(reader.result);
+      // Assurer la compatibilité avec les anciennes versions du profil
+      if (!imported.badges)        imported.badges = [];
+      if (!imported.selectedBadges) imported.selectedBadges = [];
+      if (!imported.eventCodes)    imported.eventCodes = [];
+      if (!imported.stats?.perfectWins) {
+        imported.stats = imported.stats || {};
+        imported.stats.perfectWins = 0;
+      }
+      profile = imported;
+      saveProfile();
+      location.reload();
+    } catch {
+      alert('❌ Invalid file! Please select a valid PersonaDLE profile (.json).');
+    }
+  };
+  reader.readAsText(file);
+};
+
+
+// ─────────────────────────────────────────────────────────
+// PARTAGE DE PROFIL
+// ─────────────────────────────────────────────────────────
+
+/** Arrière-plans disponibles pour la carte de partage */
+const shareBackgrounds = [
+  { id: 'velvet_room',   name: 'Velvet Room',   gradient: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)', pattern: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.05) 0%, transparent 50%)' },
+  { id: 'persona_red',   name: 'Persona Red',   gradient: 'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)', pattern: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)' },
+  { id: 'dark_hour',     name: 'Dark Hour',     gradient: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)', pattern: 'radial-gradient(circle at 80% 20%, rgba(46,204,113,0.1) 0%, transparent 50%)' },
+  { id: 'golden',        name: 'Golden',        gradient: 'linear-gradient(135deg, #f2994a 0%, #f2c94c 100%)', pattern: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)' },
+  { id: 'phantom_thief', name: 'Phantom Thief', gradient: 'linear-gradient(135deg, #000000 0%, #434343 50%, #e74c3c 100%)', pattern: 'repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(231,76,60,0.1) 20px, rgba(231,76,60,0.1) 40px)' },
+  { id: 'midnight_blue', name: 'Midnight Blue', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', pattern: 'radial-gradient(circle at 30% 70%, rgba(255,255,255,0.08) 0%, transparent 50%)' },
+  { id: 'metaverse',     name: 'Metaverse',     gradient: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)', pattern: 'repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(255,255,255,0.05) 15px, rgba(255,255,255,0.05) 30px)' },
+  { id: 'sunset',        name: 'Sunset',        gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', pattern: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 50%)' },
+];
+
+/** Papiers peints disponibles (organisés par jeu) */
+const shareWallpapers = {
+  none: [{ id: 'none', name: 'None', src: null }],
+  persona1: [
+    { id: 'p1_prota', name: 'Protagonist',   src: '../profile/Wallpaper/P1_Prota_Wallpaper.png' },
+    { id: 'p1_naoya', name: 'Naoya Toudou',  src: '../profile/Wallpaper/P1_Naoya.jpeg' },
+    { id: 'p1_maki',  name: 'Maki & Butterflies', src: '../profile/Wallpaper/P1_Maki_Butterflies.jpg' },
+    { id: 'p1_cast',  name: 'Full Cast',     src: '../profile/Wallpaper/P1_Cast.jpeg' },
+  ],
+  persona2: [
+    { id: 'p2_tatsuya',       name: 'Tatsuya Suou (IS)',    src: '../profile/Wallpaper/P2_Tatsuya_IS.jpeg' },
+    { id: 'p2_maya',          name: 'Maya Amano (EP)',       src: '../profile/Wallpaper/Persona_2_EP_maya.png' },
+    { id: 'p2_joker',         name: 'Joker',                 src: '../profile/Wallpaper/p2_Joker.jpg' },
+    { id: 'p2_prota_legacy',  name: 'Protagonists (Legacy)', src: '../profile/Wallpaper/P2_Prota_Wallpaper.png' },
+  ],
+  persona3: [
+    { id: 'p3_tartarus',     name: 'Tartarus',           src: '../profile/Wallpaper/P3_Tartarus_Wallpaper.png' },
+    { id: 'p3_water',        name: 'The Answer — Water', src: '../profile/Wallpaper/P3_Water_Wallapaper.png' },
+    { id: 'p3_portable',     name: 'Portable Edition',   src: '../profile/Wallpaper/Persona_3_portable.jpeg' },
+    { id: 'p3p_dual',        name: 'Dual Protagonists',  src: '../profile/Wallpaper/P3P_Makoto_&_Kotone.jpg' },
+    { id: 'p3_kotone_makoto',name: 'Kotone & Makoto',    src: '../profile/Wallpaper/Kotone_&_makoto.jpg' },
+    { id: 'p3_aigis_makoto', name: 'Aigis & Makoto',     src: '../profile/Wallpaper/Aigis_&_makoto.jpg' },
+    { id: 'p3_train',        name: 'Makoto & Aigis Train',src: '../profile/Wallpaper/P3_Makoto_Aigis_Train.jpeg' },
+  ],
+  persona4: [
+    { id: 'p4_golden',       name: 'Golden Edition',          src: '../profile/Wallpaper/P4_Golden_Style.jpg' },
+    { id: 'p4_tv',           name: 'TV World',                 src: '../profile/Wallpaper/P4_TV_World_Wallpaper.png' },
+    { id: 'p4_izanagi',      name: 'Izanagi',                  src: '../profile/Wallpaper/P4G_Izanagi.jpg' },
+    { id: 'p4_yu',           name: 'Yu Narukami',              src: '../profile/Wallpaper/Yu_Narukami.jpg' },
+    { id: 'p4_friends',      name: 'Friends Group',            src: '../profile/Wallpaper/Friends_groupe.jpg' },
+    { id: 'p4_team',         name: 'Investigation Team',       src: '../profile/Wallpaper/Investigation_Team.jpg' },
+    { id: 'p4_team_golden',  name: 'Investigation Team Golden',src: '../profile/Wallpaper/Investigation_Team_Golden.jpg' },
+    { id: 'p4_shadow_teddie',name: 'Shadow Teddie',            src: '../profile/Wallpaper/Shadow_Teddie_Shadow_World.jpg' },
+  ],
+  persona5: [
+    { id: 'p5_clinic',    name: 'Takemi Clinic',            src: '../profile/Wallpaper/P5_Clinique_Wallpaper.png' },
+    { id: 'p5_clinic_tae',name: 'Takemi Clinic (with Tae)', src: '../profile/Wallpaper/P5_Clinique_vTae_Wallpaper.png' },
+    { id: 'p5_mementos',  name: 'Mementos',                 src: '../profile/Wallpaper/P5_Memento_Wallpaper.png' },
+    { id: 'p5_leblanc',   name: 'Café Leblanc',             src: '../profile/Wallpaper/P5_Leblanc_Cafe_Wallapaper.png' },
+    { id: 'p5_phantom',   name: 'Phantom Thieves',          src: '../profile/Wallpaper/P5_Phantom_Thieves_Wallpaper.png' },
+    { id: 'p5_sophia',    name: 'Sophia (Strikers)',         src: '../profile/Wallpaper/Sophia_wallpaper.jpeg' },
+  ],
+  personaq: [
+    { id: 'pq_three', name: 'Three Protagonists', src: '../profile/Wallpaper/Pq_3_prota.png' },
+    { id: 'pq2',      name: 'Persona Q2',          src: '../profile/Wallpaper/PQ2.jpg' },
+  ],
+  other: [
+    { id: 'p3_three_prota', name: 'Three Protagonists', src: '../profile/Wallpaper/3_protagonist.jpeg' },
+    { id: 'velvet_room',    name: 'Velvet Room',         src: '../profile/Wallpaper/Velvet_Room_Wallpaper.png' },
+    { id: 'jack_frost',     name: 'Jack Frost',          src: '../profile/Wallpaper/Jack_frost.jpeg' },
+    { id: 'black_frost',    name: 'Black Frost',         src: '../profile/Wallpaper/Black_frost.jpeg' },
+    { id: 'christmas',      name: 'Christmas Special',   src: '../profile/Wallpaper/Christmas_Wallpaper.png' },
+    { id: 'cny',            name: 'Chinese New Year',    src: '../profile/Wallpaper/Wallpaper_chinesse.webp' },
+  ],
+};
+
+const wallpaperCategories = [
+  { id: 'none',     name: '❌ None' },
+  { id: 'persona1', name: '🔮 Persona 1' },
+  { id: 'persona2', name: '🌹 Persona 2' },
+  { id: 'persona3', name: '🌙 Persona 3' },
+  { id: 'persona4', name: '📺 Persona 4' },
+  { id: 'persona5', name: '🎭 Persona 5' },
+  { id: 'personaq', name: '🗺️ Persona Q' },
+  { id: 'other',    name: '✨ Extras' },
+];
+
+// ─────────────────────────────────────────────────────────
+// DIMENSIONS DE LA CARTE DE PARTAGE — format 9:16 portrait téléphone
+// ─────────────────────────────────────────────────────────
+const CARD_W = 390;
+const CARD_H = 693; // 390 × (16/9) ≈ 693
+
+/**
+ * Construit l'élément carte HTML au format 9:16 portrait.
+ * Retourne l'élément DOM (non encore inséré dans le document).
+ *
+ * @param {Object} bg - Arrière-plan couleur sélectionné
+ * @param {Object|null} wallpaper - Wallpaper sélectionné (ou null)
+ * @param {string} activeTab - 'color' | 'wallpaper'
+ * @returns {HTMLElement}
+ */
+function buildShareCard(bg, wallpaper, activeTab) {
+  const selectedBadges  = getBadgesForShare(profile);
+  const avatarForShare  = normalizeAvatarPath(profile.avatar);
+  const wallpaperActive = activeTab === 'wallpaper' && wallpaper?.src;
+
+  // ── Conteneur carte (9:16 portrait) ──
+  const card = document.createElement('div');
+  card.id = 'shareCard';
+  card.style.cssText = `
+    width:${CARD_W}px; height:${CARD_H}px;
+    border-radius:20px; overflow:hidden;
+    background:${bg.gradient};
+    color:white; text-align:center;
+    box-sizing:border-box; position:relative;
+    font-family:Arial,sans-serif;
+    flex-shrink:0;
+  `;
+
+  // ── Fond (wallpaper ou couleur) ──
+  if (wallpaperActive) {
+    if (wallpaper.src.endsWith('.gif')) {
+      // GIF : utiliser <img> (les CSS background ne jouent pas les GIFs dans html2canvas)
+      const wpImg = document.createElement('img');
+      wpImg.src = wallpaper.src;
+      wpImg.crossOrigin = 'anonymous';
+      wpImg.style.cssText = `
+        position:absolute;top:0;left:0;width:100%;height:100%;
+        object-fit:cover;pointer-events:none;
+      `;
+      card.appendChild(wpImg);
+    } else {
+      const wpDiv = document.createElement('div');
+      wpDiv.style.cssText = `
+        position:absolute;top:0;left:0;right:0;bottom:0;
+        background:url('${wallpaper.src}') center/cover no-repeat;
+        pointer-events:none;
+      `;
+      card.appendChild(wpDiv);
+    }
+
+    // Overlay sombre pour la lisibilité
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position:absolute;top:0;left:0;right:0;bottom:0;
+      background:linear-gradient(to bottom,rgba(0,0,0,0.25) 0%,rgba(0,0,0,0.65) 100%);
+      pointer-events:none;
+    `;
+    card.appendChild(overlay);
+  } else {
+    // Pattern décoratif sur fond couleur
+    const pattern = document.createElement('div');
+    pattern.style.cssText = `
+      position:absolute;top:0;left:0;right:0;bottom:0;
+      background:${bg.pattern};pointer-events:none;
+    `;
+    card.appendChild(pattern);
+  }
+
+  // ── Contenu (au-dessus du fond) ──
+  const content = document.createElement('div');
+  content.style.cssText = `
+    position:relative;z-index:1;
+    display:flex;flex-direction:column;align-items:center;
+    height:100%;padding:32px 20px 24px;box-sizing:border-box;
+  `;
+
+  content.innerHTML = `
+    <!-- Titre -->
+    <div style="margin-bottom:20px;">
+      <p style="margin:0;font-size:0.75em;letter-spacing:0.2em;text-transform:uppercase;
+                opacity:0.8;text-shadow:1px 1px 3px rgba(0,0,0,0.8);">PersonaDLE</p>
+      <h2 style="margin:4px 0 0;font-size:1.5em;font-weight:900;letter-spacing:0.08em;
+                 text-shadow:2px 2px 6px rgba(0,0,0,0.8);">PROFILE</h2>
+      <div style="width:40px;height:3px;background:#e63946;margin:8px auto 0;border-radius:2px;"></div>
+    </div>
+
+    <!-- Avatar -->
+    <div style="margin:8px 0 16px;">
+      <img src="${avatarForShare}" alt="Avatar" crossorigin="anonymous"
+           style="width:140px;height:140px;border-radius:50%;
+                  border:4px solid ${profile.avatarBorderColor || '#ffd700'};
+                  box-shadow:0 6px 20px rgba(0,0,0,0.7);
+                  object-fit:cover;">
+    </div>
+
+    <!-- Pseudo -->
+    <h3 style="margin:0 0 20px;font-size:1.6em;font-weight:900;
+               text-shadow:2px 2px 6px rgba(0,0,0,0.8);
+               max-width:340px;word-break:break-word;">
+      ${profile.pseudo || 'Guest Player'}
+    </h3>
+
+    <!-- Stats row -->
+    <div style="display:flex;justify-content:space-around;align-items:center;
+                width:100%;max-width:340px;
+                background:rgba(0,0,0,0.5);
+                padding:14px 8px;border-radius:14px;
+                backdrop-filter:blur(6px);
+                margin-bottom:20px;">
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:2em;font-weight:900;color:#ffd700;
+                    text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.stats?.wins || 0}</div>
+        <div style="font-size:0.72em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;">Wins</div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,0.25);"></div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:2em;font-weight:900;color:#ff6b6b;
+                    text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.stats?.streakRecord || 0}</div>
+        <div style="font-size:0.72em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;">Best Streak</div>
+      </div>
+      <div style="width:1px;height:36px;background:rgba(255,255,255,0.25);"></div>
+      <div style="text-align:center;flex:1;">
+        <div style="font-size:2em;font-weight:900;color:#4ecdc4;
+                    text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.badges?.length || 0}</div>
+        <div style="font-size:0.72em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;">Badges</div>
+      </div>
+    </div>
+
+    <!-- Badges sélectionnés -->
+    ${selectedBadges.length > 0 ? `
+      <div style="margin-bottom:16px;width:100%;">
+        <p style="margin:0 0 10px;font-size:0.8em;opacity:0.85;
+                  text-transform:uppercase;letter-spacing:0.1em;">🏅 Featured</p>
+        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+          ${selectedBadges.map(b => `
+            <div style="text-align:center;">
+              <img src="${b.img}" alt="${b.name}" crossorigin="anonymous"
+                   style="width:65px;height:65px;border-radius:10px;
+                          border:3px solid #ffd700;
+                          box-shadow:0 4px 10px rgba(0,0,0,0.6);">
+              <p style="margin:5px 0 0;font-size:0.62em;opacity:0.9;
+                         max-width:70px;word-break:break-word;">${b.name}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '<div style="flex:1;"></div>'}
+
+    <!-- Spacer flex -->
+    <div style="flex:1;min-height:8px;"></div>
+
+    <!-- Footer -->
+    <div style="padding-top:12px;border-top:1px solid rgba(255,255,255,0.2);
+                font-size:0.75em;opacity:0.65;letter-spacing:0.06em;">
+      <strong>personadle.net</strong> &nbsp;•&nbsp; ${new Date().getFullYear()}
+    </div>
+  `;
+
+  card.appendChild(content);
+  return card;
+}
+
+/**
+ * Configure la modale de partage de profil.
+ * Gère la sélection de fond, la génération canvas (PNG) et GIF animé.
+ */
+function setupShareProfile() {
+  const btn          = document.getElementById('shareProfileBtn');
+  const modal        = document.getElementById('sharePreviewModal');
+  const closeBtn     = document.getElementById('closeSharePreview');
+  const area         = document.getElementById('sharePreviewArea');
+  const downloadBtn  = document.getElementById('downloadProfileBtn');
+  const twitterBtn   = document.getElementById('shareTwitterBtn');
+  const discordBtn   = document.getElementById('shareDiscordBtn');
+  const emailBtn     = document.getElementById('shareEmailBtn');
+  const bgSelector   = document.getElementById('backgroundSelector');
+
+  if (!btn || !modal) return;
+
+  let selectedBg                = localStorage.getItem('profileShareBg')          || 'velvet_room';
+  let selectedWallpaperCategory = localStorage.getItem('profileShareWallpaperCat') || 'none';
+  let selectedWallpaper         = localStorage.getItem('profileShareWallpaper')    || 'none';
+  let activeTab = 'color';
+  let currentCard = null;
+
+  // ── Sélecteur de fond ──
+  if (bgSelector) {
+    bgSelector.innerHTML = `
+      <div class="share-tab-row">
+        <button id="tabColor" class="share-tab active">🎨 Color</button>
+        <button id="tabWallpaper" class="share-tab">🖼️ Wallpaper</button>
+      </div>
+      <div id="colorSelector" class="share-panel active">
+        <div class="share-selector-row">
+          <label>Background</label>
+          <select id="bgSelect" class="share-select">
+            ${shareBackgrounds.map(bg => `<option value="${bg.id}" ${bg.id === selectedBg ? 'selected' : ''}>${bg.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div id="wallpaperSelector" class="share-panel">
+        <div class="share-selector-row">
+          <label>Category</label>
+          <select id="wallpaperCategorySelect" class="share-select">
+            ${wallpaperCategories.map(cat => `<option value="${cat.id}" ${cat.id === selectedWallpaperCategory ? 'selected' : ''}>${cat.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="share-selector-row">
+          <label>Wallpaper</label>
+          <select id="wallpaperSelect" class="share-select"></select>
+        </div>
+      </div>
+    `;
+
+    const tabColor            = document.getElementById('tabColor');
+    const tabWallpaper        = document.getElementById('tabWallpaper');
+    const colorSelector       = document.getElementById('colorSelector');
+    const wallpaperSelector   = document.getElementById('wallpaperSelector');
+    const wallpaperCatSel     = document.getElementById('wallpaperCategorySelect');
+    const wallpaperSel        = document.getElementById('wallpaperSelect');
+
+    function updateWallpaperList() {
+      const wallpapers = shareWallpapers[wallpaperCatSel.value] || [];
+      wallpaperSel.innerHTML = wallpapers.map(wp =>
+        `<option value="${wp.id}" ${wp.id === selectedWallpaper ? 'selected' : ''}>${wp.name}</option>`
+      ).join('');
+      if (!wallpapers.find(w => w.id === selectedWallpaper)) {
+        selectedWallpaper = wallpapers[0]?.id || 'none';
+        wallpaperSel.value = selectedWallpaper;
+      }
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      tabColor.classList.toggle('active', tab === 'color');
+      tabWallpaper.classList.toggle('active', tab === 'wallpaper');
+      colorSelector.classList.toggle('active', tab === 'color');
+      wallpaperSelector.classList.toggle('active', tab === 'wallpaper');
+      if (tab === 'wallpaper') updateWallpaperList();
+      generatePreview();
+    }
+
+    tabColor.onclick    = () => switchTab('color');
+    tabWallpaper.onclick = () => switchTab('wallpaper');
+
+    document.getElementById('bgSelect').onchange = (e) => {
+      selectedBg = e.target.value;
+      localStorage.setItem('profileShareBg', selectedBg);
+      generatePreview();
+    };
+
+    wallpaperCatSel.onchange = (e) => {
+      selectedWallpaperCategory = e.target.value;
+      localStorage.setItem('profileShareWallpaperCat', selectedWallpaperCategory);
+      updateWallpaperList();
+      selectedWallpaper = wallpaperSel.value;
+      localStorage.setItem('profileShareWallpaper', selectedWallpaper);
+      generatePreview();
+    };
+
+    wallpaperSel.onchange = (e) => {
+      selectedWallpaper = e.target.value;
+      localStorage.setItem('profileShareWallpaper', selectedWallpaper);
+      generatePreview();
+    };
+
+    updateWallpaperList();
+  }
+
+  // Exposer generatePreview pour que borderColorPicker puisse la déclencher à la volée
+  _regenerateSharePreview = generatePreview;
+
+  btn.onclick = () => {
+    modal.classList.remove('hidden');
+    generatePreview();
+  };
+
+  // ── Génération de la prévisualisation ──
+  function generatePreview() {
+    const bg = shareBackgrounds.find(b => b.id === selectedBg) || shareBackgrounds[0];
+
+    let wallpaper = null;
+    if (activeTab === 'wallpaper') {
+      const catWps = shareWallpapers[selectedWallpaperCategory] || [];
+      wallpaper = catWps.find(w => w.id === selectedWallpaper) || null;
+    }
+
+    // Carte affichée dans la zone (scaled via CSS .share-card-wrapper)
+    currentCard = buildShareCard(bg, wallpaper, activeTab);
+    area.innerHTML = '';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'share-card-wrapper';
+    wrapper.appendChild(currentCard);
+    area.appendChild(wrapper);
+
+    // Clone hors-écran pour la capture html2canvas (résolution pleine — non affecté par le scale CSS)
+    const offscreen = buildShareCard(bg, wallpaper, activeTab);
+    offscreen.style.position = 'fixed';
+    offscreen.style.left = '-9999px';
+    offscreen.style.top = '0';
+    offscreen.style.zIndex = '-1';
+    document.body.appendChild(offscreen);
+
+    // Générer le PNG haute résolution (scale:2)
+    setTimeout(async () => {
+      const cvs    = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: null, logging: false, allowTaint: true });
+      document.body.removeChild(offscreen);
+      const dataUrl = cvs.toDataURL('image/png');
+
+      // Bouton PNG
+      downloadBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = `PersonaDLE_${profile.pseudo || 'Profile'}_${Date.now()}.png`;
+        a.click();
+        unlockPhotographerBadge();
+      };
+
+      // Partage Twitter
+      twitterBtn.onclick = () => {
+        const text = encodeURIComponent(`Check out my PersonaDLE profile! 🎭\n${profile.pseudo || 'Guest'} – ${profile.stats?.wins || 0} wins & ${profile.badges?.length || 0} badges 🏅\n\n#PersonaDLE #Persona`);
+        window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+        unlockPhotographerBadge();
+      };
+
+      // Copier pour Discord
+      discordBtn.onclick = async () => {
+        try {
+          const blob = await (await fetch(dataUrl)).blob();
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          alert('📋 Profile image copied! Paste it in Discord with Ctrl+V.');
+          unlockPhotographerBadge();
+        } catch {
+          alert('❌ Copy failed. Please download manually.');
+        }
+      };
+
+      // Email
+      emailBtn.onclick = () => {
+        const subject = encodeURIComponent('My PersonaDLE Profile');
+        const body    = encodeURIComponent(`Check out my PersonaDLE stats!\n\nWins: ${profile.stats?.wins || 0}\nBest Streak: ${profile.stats?.streakRecord || 0}\nBadges: ${profile.badges?.length || 0}\n\nPlay at: https://personadle.net`);
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        unlockPhotographerBadge();
+      };
+    }, 120);
+  }
+
+  closeBtn.onclick = () => modal.classList.add('hidden');
+}
+
+/**
+ * Débloque le badge "Photographer" lors du premier partage.
+ */
+function unlockPhotographerBadge() {
+  if (!profile.hasSharedProfile) {
+    profile.hasSharedProfile = true;
+    saveProfile();
+    import('./badges/badgesManager.js').then(module => {
+      if (module.forceCheckBadges) module.forceCheckBadges(profile, saveProfile);
+    });
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────
+// BADGES — ZOOM AU CLIC
+// ─────────────────────────────────────────────────────────
+
+/** Attache les click handlers sur les images de la prévisualisation badges. */
+function attachPreviewClicksToImages() {
+  const preview = document.getElementById('previewBadges');
+  if (!preview) return;
+
+  preview.querySelectorAll('.badge-preview-img').forEach(img => {
+    img.style.cursor = 'pointer';
+    img.onclick = (e) => {
+      e.stopPropagation();
+      const badgeId = img.dataset.badgeId;
+      import('./badges/badgesData.js').then(module => {
+        const badge = module.badgesList.find(b => b.id === badgeId);
+        if (badge) showBadgeZoom(badge);
+      });
+    };
+  });
+}
+
+/**
+ * Affiche une modale de zoom pour un badge.
+ * @param {Object} badge
+ */
+function showBadgeZoom(badge) {
+  const modal = document.createElement('div');
+  modal.className = 'badge-zoom-modal';
+  modal.innerHTML = `
+    <div class="badge-zoom-content">
+      <span class="badge-zoom-close">&times;</span>
+      <img src="${badge.img}" alt="${badge.name}">
+      <h3>${badge.name}</h3>
+      <p class="badge-condition">${badge.condition}</p>
+      ${badge.description ? `<p class="badge-description">${badge.description}</p>` : ''}
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener('click', e => {
+    if (e.target.classList.contains('badge-zoom-modal')) modal.remove();
+  });
+  modal.querySelector('.badge-zoom-close').onclick = () => modal.remove();
+  setTimeout(() => modal.classList.add('show'), 10);
+}
+
+
+// ─────────────────────────────────────────────────────────
+// PROFILE SONG — Sélecteur + mini-lecteur dans le panneau gauche
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Ordre d'affichage des opus dans le sélecteur de musique.
+ * Chaque entrée devient un <optgroup> dans le <select>.
+ */
+const SONG_OPUS_ORDER = [
+  'P1','P2IS','P2EP',
+  'P3','P3FES','P3P','P3R',
+  'P4','P4G','P4D',
+  'P5','P5R','P5S',
+  'P5X',
+  'PQ','PQ2',
+];
+
+const SONG_OPUS_LABELS = {
+  P1:    'Persona 1',
+  P2IS:  'Persona 2 — Innocent Sin',
+  P2EP:  'Persona 2 — Eternal Punishment',
+  P3:    'Persona 3',
+  P3FES: 'Persona 3 FES',
+  P3P:   'Persona 3 Portable',
+  P3R:   'Persona 3 Reload',
+  P4:    'Persona 4',
+  P4G:   'Persona 4 Golden',
+  P4D:   'Persona 4 Dancing All Night',
+  P5:    'Persona 5',
+  P5R:   'Persona 5 Royal',
+  P5S:   'Persona 5 Strikers',
+  P5X:   'Persona 5: The Phantom X',
+  PQ:    'Persona Q',
+  PQ2:   'Persona Q2',
+};
+
+/**
+ * Construit les groupes de chansons triés selon SONG_OPUS_ORDER.
+ * Chaque chanson est placée dans le groupe de son premier opus reconnu.
+ * À l'intérieur de chaque groupe, les titres sont triés alphabétiquement.
+ * @returns {Object} { opusCode: [song, ...] }
+ */
+function getSortedSongGroups() {
+  const groups = {};
+  SONG_OPUS_ORDER.forEach(op => { groups[op] = []; });
+
+  ALL_SONGS.forEach(song => {
+    const key = SONG_OPUS_ORDER.find(op => song.opus.includes(op)) || song.opus[0] || 'Other';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(song);
+  });
+
+  // Tri alphabétique dans chaque groupe
+  Object.values(groups).forEach(list => list.sort((a, b) => a.titre.localeCompare(b.titre)));
+  return groups;
+}
+
+/** Formate un nombre de secondes en "m:ss". */
+function formatSongTime(s) {
+  if (!isFinite(s) || s < 0) return '0:00';
+  const m   = Math.floor(s / 60);
+  const sec = Math.floor(s % 60).toString().padStart(2, '0');
+  return `${m}:${sec}`;
+}
+
+/** Met à jour la barre de progression et le temps courant du lecteur. */
+function updateSongProgress() {
+  if (!profileSongAudio) return;
+  const fill = document.getElementById('songProgressFill');
+  const cur  = document.getElementById('songCurrentTime');
+  const pct  = profileSongAudio.duration
+    ? (profileSongAudio.currentTime / profileSongAudio.duration) * 100
+    : 0;
+  if (fill) fill.style.width = `${pct}%`;
+  if (cur)  cur.textContent  = formatSongTime(profileSongAudio.currentTime);
+}
+
+/** Met à jour l'image de la song dans le lecteur (crop ou image opus). */
+function updateSongArtwork(src) {
+  const img = document.getElementById('songArtwork');
+  if (img) img.src = src;
+}
+
+/** Met à jour l'image de preview dans le sélecteur (live au changement du select). */
+function updatePickerPreview(fichier) {
+  const song = ALL_SONGS.find(s => s.fichier === fichier);
+  const img  = document.getElementById('songPickerImg');
+  if (img && song) img.src = `../musicsMode/database/img/${song.image}`;
+}
+
+/**
+ * (Re-)génère le HTML de la song card et ré-attache les handlers.
+ * Appelé au démarrage et à chaque changement de song sélectionnée.
+ */
+function renderSongCard() {
+  const card = document.getElementById('songCard');
+  if (!card) return;
+
+  const hasSong   = !!profile.profileSong?.fichier;
+  const groups    = getSortedSongGroups();
+  const savedFile = profile.profileSong?.fichier || null;
+
+  // Pas de pré-sélection dans le picker — l'option neutre "— Choose a song —" est active
+  // L'image reste vide tant que rien n'est choisi
+  const pickerImgSrc = '';
+
+  // Option neutre en tête — garantit que toute sélection déclenche un vrai `change`
+  const optionsHTML = `<option value="" disabled selected>— Choose a song —</option>` +
+    SONG_OPUS_ORDER
+      .filter(op => groups[op]?.length > 0)
+      .map(op =>
+        `<optgroup label="${SONG_OPUS_LABELS[op] || op}">${
+          groups[op].map(s =>
+            `<option value="${s.fichier}">${s.titre}</option>`
+          ).join('')
+        }</optgroup>`
+      ).join('');
+
+  card.innerHTML = `
+    <h3 class="card-title"><span class="card-accent">◆</span> Profile Song</h3>
+
+    ${hasSong ? `
+    <!-- Mini-lecteur actif — sélecteur masqué, image grande + infos dessous -->
+    <div id="songPlayerUI" class="song-player">
+      <img id="songArtwork" class="song-artwork" src="" alt="Song artwork" crossorigin="anonymous">
+      <div class="song-info">
+        <div id="songTitleEl" class="song-title"></div>
+        <div id="songOpusEl"  class="song-opus-badge"></div>
+        <div class="song-controls">
+          <button id="songPlayBtn" class="song-play-btn">▶</button>
+          <div class="song-progress-wrap">
+            <div id="songProgressBar" class="song-progress">
+              <div id="songProgressFill" class="song-progress-fill"></div>
+            </div>
+            <div class="song-time-row">
+              <span id="songCurrentTime">0:00</span>
+              <span id="songDuration">--:--</span>
+            </div>
+          </div>
+        </div>
+        <div class="song-action-row">
+          <button id="songRemoveBtn" class="btn-danger song-btn-sm">✕ Remove</button>
+        </div>
+      </div>
+    </div>
+    ` : `
+    <!-- Sélecteur — affiché uniquement quand aucune song n'est active -->
+    <div class="song-picker">
+      <img id="songPickerImg" class="song-picker-img"
+           src="${pickerImgSrc}" alt="Song preview">
+      <div class="song-picker-right">
+        <select id="songSelect" class="song-select">${optionsHTML}</select>
+        <p class="song-empty-hint">Select a song to set it as your profile music</p>
+      </div>
+    </div>
+    `}
+  `;
+
+  attachSongHandlers();
+  if (hasSong) initSongPlayer();
+}
+
+/** Attache les event handlers de la song card. */
+function attachSongHandlers() {
+  // ── Sélection directe : changer le select = définir la song immédiatement ──
+  document.getElementById('songSelect')?.addEventListener('change', (e) => {
+    const fichier = e.target.value;
+    if (!fichier) return; // option neutre "— Choose a song —"
+    const song = ALL_SONGS.find(s => s.fichier === fichier);
+    if (!song) return;
+
+    // Mettre à jour la preview image en temps réel
+    updatePickerPreview(fichier);
+
+    // Déclencher après un court délai pour laisser l'image se charger
+    if (profileSongAudio) {
+      profileSongAudio.pause();
+      profileSongAudio.currentTime = 0;
+    }
+
+    profile.profileSong = {
+      fichier:     song.fichier,
+      titre:       song.titre,
+      opus:        song.opus,
+      image:       song.image,
+      customImage: null,
+    };
+    saveProfile();
+    renderSongCard();
+  });
+
+  // ── Play / Pause ──
+  document.getElementById('songPlayBtn')?.addEventListener('click', () => {
+    if (!profileSongAudio) return;
+    if (profileSongAudio.paused) {
+      profileSongAudio.play().catch(() => {});
+    } else {
+      profileSongAudio.pause();
+    }
+  });
+
+  // ── Seek en cliquant sur la barre ──
+  document.getElementById('songProgressBar')?.addEventListener('click', (e) => {
+    if (!profileSongAudio?.duration) return;
+    profileSongAudio.currentTime =
+      (e.offsetX / e.currentTarget.offsetWidth) * profileSongAudio.duration;
+  });
+
+  // ── Supprimer la song ──
+  document.getElementById('songRemoveBtn')?.addEventListener('click', () => {
+    if (profileSongAudio) {
+      profileSongAudio.pause();
+      profileSongAudio.src = '';
+    }
+    delete profile.profileSong;
+    saveProfile();
+    renderSongCard();
+  });
+}
+
+/**
+ * Charge la song dans l'élément <audio> et configure tous les callbacks.
+ * L'autoplay démarre immédiatement si le navigateur le permet ;
+ * sinon il se déclenche au premier clic/touche de l'utilisateur.
+ */
+function initSongPlayer() {
+  const song = profile.profileSong;
+  if (!song?.fichier) return;
+
+  // Artwork du lecteur
+  const artSrc = song.customImage || `../musicsMode/database/img/${song.image}`;
+  updateSongArtwork(artSrc);
+
+  const titleEl = document.getElementById('songTitleEl');
+  const opusEl  = document.getElementById('songOpusEl');
+  if (titleEl) titleEl.textContent = song.titre;
+  if (opusEl)  opusEl.textContent  = song.opus[0] || '';
+
+  if (!profileSongAudio) profileSongAudio = new Audio();
+  profileSongAudio.src  = `../musicsMode/database/music/song/${song.fichier}`;
+  profileSongAudio.loop = true; // Lecture en boucle — fait partie du profil
+  profileSongAudio.load();
+
+  // ── Callbacks UI ──
+  profileSongAudio.ontimeupdate = updateSongProgress;
+
+  profileSongAudio.onloadedmetadata = () => {
+    const dur = document.getElementById('songDuration');
+    if (dur) dur.textContent = formatSongTime(profileSongAudio.duration);
+  };
+
+  profileSongAudio.onplay = () => {
+    const btn = document.getElementById('songPlayBtn');
+    if (btn) btn.textContent = '⏸';
+    document.getElementById('songPlayerUI')?.classList.add('playing');
+  };
+
+  profileSongAudio.onpause = () => {
+    const btn = document.getElementById('songPlayBtn');
+    if (btn) btn.textContent = '▶';
+    document.getElementById('songPlayerUI')?.classList.remove('playing');
+  };
+
+  // ── Autoplay avec fallback au premier geste utilisateur ──
+  profileSongAudio.play().catch(() => {
+    // Autoplay bloqué — on attend la première interaction
+    const unlock = () => {
+      profileSongAudio.play().catch(() => {});
+    };
+    document.addEventListener('click',   unlock, { once: true });
+    document.addEventListener('keydown', unlock, { once: true });
+  });
+}
+
+/** Initialise le système de profile song (appelé au DOMContentLoaded). */
+function setupSongPicker() {
+  if (!profileSongAudio) profileSongAudio = new Audio();
+  renderSongCard();
+}
+
+
+// ─────────────────────────────────────────────────────────
+// INITIALISATION GLOBALE
+// ─────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Charger le profil et initialiser l'UI
+  initProfile();
+  initAvatarGrid();
+  setupShareProfile();
+  setupSongPicker();
+
+  // 2. Système de badges
+  initBadgesSystem(profile, saveProfile);
+});
+
+// Attacher les handlers de zoom badges après leur rendu
+window.addEventListener('badgesRendered', () => {
+  attachPreviewClicksToImages();
+});
