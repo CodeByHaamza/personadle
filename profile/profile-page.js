@@ -286,21 +286,16 @@ const avatarList = [
  */
 function initAvatarGrid() {
   avatarGrid.innerHTML =
-    `<div class="avatar-none"
-          data-src="none"
-          style="display:flex;align-items:center;justify-content:center;
-                 background:#333;color:white;font-weight:bold;
-                 border-radius:8px;height:80px;cursor:pointer;">
-       NONE
-     </div>` +
+    `<div class="avatar-none" data-src="none">NONE</div>` +
     avatarList.map(name =>
-      // data-src stocké avec le chemin depuis profile/ pour être valide depuis cette page
       `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" loading="lazy" />`
     ).join('');
 
-  // Clic sur une image → charger dans le canvas
+  // Clic sur une image → charger dans le canvas + marquer comme sélectionnée
   avatarGrid.querySelectorAll('img').forEach(img => {
     img.onclick = () => {
+      avatarGrid.querySelectorAll('img').forEach(i => i.classList.remove('selected'));
+      img.classList.add('selected');
       selectedAvatarSrc = img.dataset.src;
       loadImageToCanvas(selectedAvatarSrc);
     };
@@ -1062,9 +1057,8 @@ function renderSongCard() {
   const groups    = getSortedSongGroups();
   const savedFile = profile.profileSong?.fichier || null;
 
-  // Pas de pré-sélection dans le picker — l'option neutre "— Choose a song —" est active
-  // L'image reste vide tant que rien n'est choisi
-  const pickerImgSrc = '';
+  // Placeholder musique : note SVG sur fond sombre P5
+  const pickerImgSrc = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%231a1a1a'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23e63946'%3E%E2%99%AA%3C/text%3E%3C/svg%3E`;
 
   // Option neutre en tête — garantit que toute sélection déclenche un vrai `change`
   const optionsHTML = `<option value="" disabled selected>— Choose a song —</option>` +

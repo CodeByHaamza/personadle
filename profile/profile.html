@@ -251,22 +251,40 @@
 
 <!-- =====================================================
      4. MODALE CROP D'AVATAR
-     Même logique que l'ancienne modal dans index.html.
      IDs identiques → profile-page.js peut cibler les mêmes.
      ===================================================== -->
 <div id="avatarCropModal" class="modal hidden">
-  <div class="modal-content">
-    <span class="close" id="closeCropper">&times;</span>
-    <h3>Choose your picture</h3>
-    <!-- Grille des avatars disponibles (générée par JS) -->
-    <div id="avatarGrid"></div>
-    <!-- Canvas de recadrage -->
-    <canvas id="avatarCanvas" width="300" height="300"></canvas>
-    <div class="crop-controls">
-      <button id="zoomIn">🔍+</button>
-      <button id="zoomOut">🔍-</button>
-      <button id="confirmCrop">✅ Ok</button>
+  <div class="modal-content crop-modal-content">
+
+    <!-- En-tête P5 -->
+    <div class="crop-modal-header">
+      <h3 class="crop-modal-title">
+        <span class="card-accent">◆</span> Choose your avatar
+      </h3>
+      <span class="close" id="closeCropper">&times;</span>
     </div>
+
+    <!-- Section 1 : Grille de sélection -->
+    <div class="crop-section">
+      <p class="crop-section-label">1 — Select an image</p>
+      <div id="avatarGrid" class="crop-avatar-grid"></div>
+    </div>
+
+    <!-- Section 2 : Canvas + contrôles -->
+    <div class="crop-section">
+      <p class="crop-section-label">2 — Adjust &amp; confirm</p>
+      <div class="crop-canvas-wrap">
+        <canvas id="avatarCanvas" width="300" height="300"></canvas>
+        <p class="crop-canvas-hint">Drag to reposition · Scroll to zoom</p>
+      </div>
+      <div class="crop-controls">
+        <button id="zoomOut" class="crop-zoom-btn" title="Zoom out">−</button>
+        <span class="crop-zoom-label">Zoom</span>
+        <button id="zoomIn"  class="crop-zoom-btn" title="Zoom in">+</button>
+        <button id="confirmCrop" class="btn-p5 crop-confirm-btn">✓ Apply</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
