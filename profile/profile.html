@@ -45,11 +45,35 @@
 
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif">
 
-  <!-- Initialisation dark mode AVANT rendu (évite le flash blanc) -->
+  <!-- Initialisation dark mode + thème AVANT rendu (évite le flash de couleur) -->
   <script>
     if (localStorage.getItem('darkMode') === 'enabled') {
       document.documentElement.classList.add('darkmode');
     }
+    // Application anticipée du thème UI pour éviter le flash rouge → couleur choisie
+    try {
+      var _p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+      var _themes = {
+        all_out:            { a: '#E63946', h: '#C1121F', l: '#FF9999', r: '230, 57, 70'   },
+        velvet_room:        { a: '#1B3A8A', h: '#162E72', l: '#60A5FA', r: '27, 58, 138'   },
+        dark_hour:          { a: '#00B4D8', h: '#0077B6', l: '#48CAE4', r: '0, 180, 216'   },
+        pink_ribbon:        { a: '#E8739A', h: '#D0507A', l: '#F9A8D4', r: '232, 115, 154' },
+        midnight_channel:   { a: '#EAB308', h: '#CA8A04', l: '#FEF08A', r: '234, 179, 8'   },
+        demon_palace:       { a: '#9333EA', h: '#7E22CE', l: '#D8B4FE', r: '147, 51, 234'  },
+        eternal_punishment: { a: '#4F46E5', h: '#4338CA', l: '#A5B4FC', r: '79, 70, 229'   },
+        golden_labyrinth:   { a: '#F97316', h: '#EA6C12', l: '#FDBA74', r: '249, 115, 22'  },
+      };
+      var _t = _themes[_p.profileTheme];
+      if (_t) {
+        var s = document.documentElement.style;
+        s.setProperty('--accent', _t.a);
+        s.setProperty('--accent-hover', _t.h);
+        s.setProperty('--accent-light', _t.l);
+        s.setProperty('--accent-rgb', _t.r);
+      } else if (_p.profileTheme === 'custom' && _p.profileCustomColor) {
+        document.documentElement.style.setProperty('--accent', _p.profileCustomColor);
+      }
+    } catch(e) {}
   </script>
 </head>
 <body>
@@ -119,27 +143,29 @@
     <aside class="profile-left animate-left">
       <div class="avatar-card">
 
-        <!-- Avatar -->
-        <img id="pageAvatar"
-             src="../img/default_avatar.png"
-             alt="Profile avatar"
-             class="profile-avatar animate-pop">
+        <!-- Hero : avatar + username + pseudo (horizontal sur mobile) -->
+        <div class="avatar-card-hero">
 
-        <!-- Nom d'utilisateur -->
-        <h2 id="pageUsername" class="profile-username animate-top">Guest</h2>
+          <!-- Avatar -->
+          <img id="pageAvatar"
+               src="../img/default_avatar.png"
+               alt="Profile avatar"
+               class="profile-avatar animate-pop">
 
-        <!-- Champ pseudo -->
-        <div class="pseudo-edit-row">
-          <label for="pseudoInput" data-i18n="profile.pseudo_label">Username</label>
-          <input type="text" id="pseudoInput" maxlength="30"
-                 data-i18n-placeholder="profile.pseudo_placeholder"
-                 placeholder="Enter username…">
-        </div>
+          <!-- Infos textuelles -->
+          <div class="avatar-card-info">
+            <!-- Nom d'utilisateur -->
+            <h2 id="pageUsername" class="profile-username animate-top">Guest</h2>
 
-        <!-- Couleur de bordure -->
-        <div class="border-color-row">
-          <label for="borderColorPicker" data-i18n="profile.border_color_label">Border Color</label>
-          <input type="color" id="borderColorPicker" value="#000000">
+            <!-- Champ pseudo -->
+            <div class="pseudo-edit-row">
+              <label for="pseudoInput" data-i18n="profile.pseudo_label">Username</label>
+              <input type="text" id="pseudoInput" maxlength="30"
+                     data-i18n-placeholder="profile.pseudo_placeholder"
+                     placeholder="Enter username…">
+            </div>
+          </div>
+
         </div>
 
         <!-- Changer la photo -->
@@ -163,6 +189,47 @@
 
       </div>
 
+      <!-- ── Card : Personnalisation (couleurs + thème) ── -->
+      <div class="perso-card">
+
+        <!-- En-tête collapsible -->
+        <button class="perso-toggle" id="persoToggle"
+                aria-expanded="true" aria-controls="persoBody">
+          <span class="card-accent perso-toggle-diamond">◆</span>
+          <span data-i18n="profile.customization_title">Customization</span>
+          <span class="perso-chevron" aria-hidden="true">▼</span>
+        </button>
+
+        <!-- Corps -->
+        <div class="perso-body" id="persoBody">
+
+          <!-- Section 1 : couleur du contour avatar -->
+          <div class="perso-section">
+            <label class="perso-section-label"
+                   data-i18n="profile.border_color_label">Avatar Border</label>
+            <div class="perso-color-chip">
+              <span class="perso-color-dot" id="borderColorDot"></span>
+              <span class="perso-color-hex" id="borderColorHex">#000000</span>
+              <input type="color" id="borderColorPicker"
+                     class="perso-color-input" value="#000000">
+            </div>
+          </div>
+
+          <!-- Section 2 : thème de l'interface -->
+          <div class="perso-section">
+            <label class="perso-section-label"
+                   data-i18n="profile.theme_label">Interface Theme</label>
+            <div class="theme-swatches" id="themeSwatches"></div>
+            <div id="customThemeRow" class="custom-theme-row hidden">
+              <label for="customThemeColor"
+                     data-i18n="profile.theme_custom">Custom color</label>
+              <input type="color" id="customThemeColor" value="#e63946">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- ── Card : Profile Song ── -->
       <div class="song-card" id="songCard"></div>
 
@@ -180,6 +247,8 @@
         </h3>
         <!-- Rempli dynamiquement par profile-page.js → renderStats() -->
         <div id="statsContainer" class="stats-grid"></div>
+        <!-- Rempli dynamiquement par profile-page.js → renderModeStats() -->
+        <div id="modeStatsContainer" class="mode-stats"></div>
       </div>
 
       <!-- Card : Badges -->

@@ -34,7 +34,13 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   const normalizedMode = validModes[mode.toLowerCase()] || mode;
   stats.modeCount = stats.modeCount || {};
   stats.modeCount[normalizedMode] = (stats.modeCount[normalizedMode] || 0) + 1;
-  
+
+  // Victoires par mode
+  if (result === "win") {
+    stats.modeWins = stats.modeWins || {};
+    stats.modeWins[normalizedMode] = (stats.modeWins[normalizedMode] || 0) + 1;
+  }
+
   const mostPlayed = Object.entries(stats.modeCount).sort((a, b) => b[1] - a[1]);
   if (mostPlayed.length > 0) stats.favoriteMode = mostPlayed[0][0];
   

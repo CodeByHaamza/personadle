@@ -65,6 +65,17 @@ body.darkmode::before {
   background-image: url('../img/personadle_wallpaper_dark.jpg');
 }
 
+/* Fond adapté format portrait sur mobile */
+@media (max-width: 768px) {
+  body::before {
+    background-image: url('../img/personadle_wallpaper_phone.jpeg');
+  }
+
+  body.darkmode::before {
+    background-image: url('../img/personadle_wallpaper_dark_phone.jpeg');
+  }
+}
+
 /* Bloque le scroll de la page quand une modale est ouverte */
 body.modal-open {
   overflow: hidden;

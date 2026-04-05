@@ -30,6 +30,148 @@ import { songs as ALL_SONGS } from '../musicsMode/database/songs.js';
 
 
 // ─────────────────────────────────────────────────────────
+// THÈMES UI
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Définitions des thèmes de couleur de l'interface.
+ * Les valeurs sont appliquées via les CSS variables --accent, --accent-hover,
+ * --accent-light et --accent-rgb sur document.documentElement.
+ */
+const THEMES = [
+  // ── Persona 5 ──────────────────────────────────────────
+  { id: 'all_out',            accent: '#E63946', hover: '#C1121F', light: '#FF9999', rgb: '230, 57, 70',   label: 'All-Out Attack'      },
+  // ── Velvet Room (bleu nuit d'Igor) ─────────────────────
+  { id: 'velvet_room',        accent: '#1B3A8A', hover: '#162E72', light: '#60A5FA', rgb: '27, 58, 138',   label: 'Velvet Room'         },
+  // ── Persona 3 (Dark Hour / Tartarus) ───────────────────
+  { id: 'dark_hour',          accent: '#00B4D8', hover: '#0077B6', light: '#48CAE4', rgb: '0, 180, 216',   label: 'Dark Hour'           },
+  // ── Persona 3 Portable (FeMC, rose doux) ───────────────
+  { id: 'pink_ribbon',        accent: '#E8739A', hover: '#D0507A', light: '#F9A8D4', rgb: '232, 115, 154', label: 'Pink Ribbon'         },
+  // ── Persona 4 (Midnight Channel, or TV World) ──────────
+  { id: 'midnight_channel',   accent: '#EAB308', hover: '#CA8A04', light: '#FEF08A', rgb: '234, 179, 8',   label: 'Midnight Channel'    },
+  // ── Persona 1 (violet mystique, Demon Palace) ──────────
+  { id: 'demon_palace',       accent: '#9333EA', hover: '#7E22CE', light: '#D8B4FE', rgb: '147, 51, 234',  label: 'Demon Palace'        },
+  // ── Persona 2 EP (Eternal Punishment, indigo) ──────────
+  { id: 'eternal_punishment', accent: '#4F46E5', hover: '#4338CA', light: '#A5B4FC', rgb: '79, 70, 229',   label: 'Eternal Punishment'  },
+  // ── Persona Q (labyrinthe doré, orange vif) ────────────
+  { id: 'golden_labyrinth',   accent: '#F97316', hover: '#EA6C12', light: '#FDBA74', rgb: '249, 115, 22',  label: 'Golden Labyrinth'    },
+  // ── Couleur libre ──────────────────────────────────────
+  { id: 'custom',             accent: null,      hover: null,      light: null,      rgb: null,            label: null                  },
+];
+
+/** Convertit un hex en "r, g, b" pour rgba(). */
+function hexToRgb(hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return m ? `${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}` : '0, 0, 0';
+}
+
+/** Éclaircit ou assombrit une couleur hex d'un delta (-255 → 255). */
+function adjustHex(hex, delta) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.max(0, (n >> 16) + delta));
+  const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + delta));
+  const b = Math.min(255, Math.max(0, (n & 0xff) + delta));
+  return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+
+/**
+ * Applique un thème en injectant les variables CSS sur <html>.
+ * @param {string} themeId  - ID du thème (voir THEMES)
+ * @param {string} [customColor] - Couleur hex si themeId === 'custom'
+ */
+function applyTheme(themeId, customColor) {
+  const root  = document.documentElement;
+  const theme = THEMES.find(t => t.id === themeId);
+  if (!theme) return;
+
+  let accent, hover, light, rgb;
+
+  if (themeId === 'custom' && customColor) {
+    accent = customColor;
+    hover  = adjustHex(customColor, -35);
+    light  = adjustHex(customColor, 45);
+    rgb    = hexToRgb(customColor);
+  } else if (theme.accent) {
+    ({ accent, hover, light, rgb } = theme);
+  } else {
+    return; // custom sans couleur définie
+  }
+
+  root.style.setProperty('--accent',       accent);
+  root.style.setProperty('--accent-hover', hover);
+  root.style.setProperty('--accent-light', light);
+  root.style.setProperty('--accent-rgb',   rgb);
+}
+
+/**
+ * Construit et injecte le sélecteur de thèmes dans #themeSwatches.
+ * À rappeler après chaque changement pour mettre à jour l'état actif.
+ */
+function renderThemePicker() {
+  const container = document.getElementById('themeSwatches');
+  if (!container) return;
+
+  const i           = window.i18n || { t: k => k };
+  const currentId   = profile.profileTheme || 'all_out';
+  const customLabel = i.t('profile.theme_custom') || 'Custom color';
+
+  container.innerHTML = THEMES.map(t => {
+    const isCustom = t.id === 'custom';
+    const isActive = t.id === currentId;
+    const label    = isCustom ? customLabel : t.label;
+    const style    = isCustom ? '' : `background:${t.accent};`;
+    const cls      = `theme-swatch${isActive ? ' active' : ''}${isCustom ? ' theme-swatch--rainbow' : ''}`;
+
+    return `
+      <button class="${cls}" data-theme="${t.id}" style="${style}" title="${label}" aria-label="${label}">
+        <span class="theme-swatch-label">${label}</span>
+      </button>`;
+  }).join('');
+
+  // Afficher/masquer la rangée de couleur custom
+  const customRow = document.getElementById('customThemeRow');
+  if (customRow) {
+    customRow.classList.toggle('hidden', currentId !== 'custom');
+    const picker = document.getElementById('customThemeColor');
+    if (picker && profile.profileCustomColor) {
+      picker.value = profile.profileCustomColor;
+    }
+  }
+
+  // Handlers swatches
+  container.querySelectorAll('.theme-swatch').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.theme;
+      profile.profileTheme = id;
+
+      if (id === 'custom') {
+        const color = profile.profileCustomColor || '#e63946';
+        applyTheme('custom', color);
+      } else {
+        applyTheme(id);
+      }
+
+      saveProfile();
+      renderThemePicker();
+
+      // Régénère la preview de partage si la modale est ouverte
+      const shareModal = document.getElementById('sharePreviewModal');
+      if (shareModal && !shareModal.classList.contains('hidden') && _regenerateSharePreview) {
+        _regenerateSharePreview();
+      }
+    });
+  });
+
+  // Handler couleur custom
+  document.getElementById('customThemeColor')?.addEventListener('input', e => {
+    profile.profileCustomColor = e.target.value;
+    applyTheme('custom', e.target.value);
+    saveProfile();
+  });
+}
+
+
+// ─────────────────────────────────────────────────────────
 // VARIABLES GLOBALES
 // ─────────────────────────────────────────────────────────
 
@@ -119,6 +261,8 @@ function initProfile() {
       pseudo: '',
       avatar: '',
       avatarBorderColor: '#000000',
+      profileTheme: 'all_out',
+      profileCustomColor: '#e63946',
       profileSong: null,
       badges: [],
       selectedBadges: [],
@@ -139,6 +283,14 @@ function initProfile() {
     saveProfile();
   }
 
+  // ── Thème UI ──
+  // Assure la compatibilité avec les anciens profils sans ces champs
+  if (!profile.profileTheme)      profile.profileTheme = 'all_out';
+  if (!profile.profileCustomColor) profile.profileCustomColor = '#e63946';
+
+  const themeId = profile.profileTheme;
+  applyTheme(themeId, themeId === 'custom' ? profile.profileCustomColor : undefined);
+
   // ── Affichage de l'avatar ──
   const avatarSrc = normalizeAvatarPath(profile.avatar);
   pageAvatar.src = avatarSrc;
@@ -150,6 +302,7 @@ function initProfile() {
 
   // ── Couleur de bordure ──
   borderColorPicker.value = profile.avatarBorderColor || '#000000';
+  updateBorderPreview(profile.avatarBorderColor || '#000000');
 
   // ── Statistiques ──
   renderStats();
@@ -168,42 +321,157 @@ function saveProfile() {
 // ─────────────────────────────────────────────────────────
 
 /**
+ * Retourne le tier visuel du streak (0-5).
+ * 0 = aucun, 1 = 1-2j, 2 = 3-6j, 3 = 7-13j, 4 = 14-29j, 5 = 30j+
+ */
+function getStreakTier(streak) {
+  if (streak >= 30) return 5;
+  if (streak >= 14) return 4;
+  if (streak >= 7)  return 3;
+  if (streak >= 3)  return 2;
+  if (streak >= 1)  return 1;
+  return 0;
+}
+
+/**
+ * Construit le HTML de l'item streak avec effets visuels progressifs.
+ * @param {number} streak - Valeur du streak actuel
+ * @param {string} label  - Label traduit
+ * @param {string} delay  - Valeur de animation-delay (ex: "0.22s")
+ */
+function buildStreakItem(streak, label, delay) {
+  const tier = getStreakTier(streak);
+
+  // Flammes latérales selon le tier
+  const flameL = (n) => `<span class="streak-side-flame" aria-hidden="true">🔥</span>`.repeat(n);
+  const flameR = (n) => `<span class="streak-side-flame streak-side-flame--r" aria-hidden="true">🔥</span>`.repeat(n);
+
+  let leftDeco  = '';
+  let rightDeco = '';
+  let iconSize  = '1.3em';
+  let fullWidth = tier >= 5;
+
+  if (tier === 3) { leftDeco = flameL(1);  iconSize = '1.5em'; }
+  if (tier === 4) { leftDeco = flameL(2);  rightDeco = flameR(1); iconSize = '1.7em'; }
+  if (tier === 5) {
+    leftDeco  = `<span class="streak-crown" aria-hidden="true">👑</span>${flameL(1)}`;
+    rightDeco = flameR(1);
+    iconSize  = '1.9em';
+    label     = `🔥 ${label} 🔥`;
+  }
+
+  const classes = [
+    'stat-item', 'stat-streak',
+    `stat-streak-t${tier}`,
+    fullWidth ? 'stat-item--full' : '',
+  ].filter(Boolean).join(' ');
+
+  return `
+    <div class="${classes}" style="animation-delay:${delay}">
+      ${leftDeco}
+      <span class="stat-icon" style="font-size:${iconSize}">🔥</span>
+      <div class="stat-body">
+        <span class="stat-value">${streak}</span>
+        <span class="stat-label">${label}</span>
+      </div>
+      ${rightDeco}
+    </div>`;
+}
+
+/**
  * Génère et injecte les blocs de statistiques dans #statsContainer.
- * Chaque item reçoit un délai d'animation croissant (effet stagger).
  */
 function renderStats() {
   const s = profile.stats || {};
   const i = window.i18n || { t: (k, v) => k };
 
-  // Noms affichables des modes
   const modeNames = {
     Classique: 'Classic', Emoji: 'Emoji', Silhouette: 'Silhouette',
     AllOutAttack: 'All-Out Attack', Personae: 'Personae', Music: 'Music',
   };
   const modeFav = s.favoriteMode ? (modeNames[s.favoriteMode] || s.favoriteMode) : '—';
 
-  // Définition des stats à afficher
+  // Stats standard (hors streak)
   const stats = [
-    { icon: '🏆', value: s.wins || 0,            label: i.t('profile.stat_wins',        { count: s.wins || 0 }).replace(/\d+/,'').trim() || 'Wins' },
-    { icon: '🏳️', value: s.giveups || 0,         label: 'Give-ups' },
-    { icon: '🎮', value: s.games || 0,            label: 'Games Played' },
-    { icon: '🔥', value: s.streak || 0,           label: 'Current Streak' },
-    { icon: '⭐', value: s.streakRecord || 0,     label: 'Best Streak' },
-    { icon: '⏱️', value: `${s.totalTimeMinutes || 0} min`, label: 'Time Played' },
-    { icon: '🎯', value: modeFav,                 label: 'Fav Mode', full: true },
-    { icon: '📅', value: s.firstPlayed?.split('T')[0] || '—', label: 'First Played', full: true },
+    { icon: '🏆', value: s.wins || 0,                           label: 'Wins'         },
+    { icon: '🏳️', value: s.giveups || 0,                       label: 'Give-ups'     },
+    { icon: '🎮', value: s.games || 0,                          label: 'Games Played' },
+    { icon: '⭐', value: s.streakRecord || 0,                   label: 'Best Streak'  },
+    { icon: '⏱️', value: `${s.totalTimeMinutes || 0} min`,     label: 'Time Played'  },
+    { icon: '📅', value: s.firstPlayed?.split('T')[0] || '—',  label: 'First Played', full: true },
+    { icon: '🎯', value: modeFav,                               label: 'Fav Mode',     full: true },
   ];
 
-  statsContainer.innerHTML = stats.map((st, idx) => `
+  const streakHTML  = buildStreakItem(s.streak || 0, 'Current Streak', '0.22s');
+  const regularHTML = stats.map((st, idx) => `
     <div class="stat-item${st.full ? ' stat-item--full' : ''}"
-         style="animation-delay: ${0.1 + idx * 0.06}s">
+         style="animation-delay:${0.1 + idx * 0.06}s">
       <span class="stat-icon">${st.icon}</span>
       <div class="stat-body">
         <span class="stat-value">${st.value}</span>
         <span class="stat-label">${st.label}</span>
       </div>
+    </div>`).join('');
+
+  statsContainer.innerHTML = regularHTML + streakHTML;
+}
+
+/** Icônes et couleurs par mode */
+const MODE_META = {
+  Classic:      { icon: '🔤', color: '#E63946' },
+  Emoji:        { icon: '😄', color: '#F97316' },
+  Silhouette:   { icon: '👤', color: '#6366F1' },
+  AllOutAttack: { icon: '⚔️', color: '#DC2626' },
+  Personae:     { icon: '✨', color: '#9333EA' },
+  Music:        { icon: '🎵', color: '#0EA5E9' },
+};
+
+/**
+ * Génère la section "Mode Breakdown" dans #modeStatsContainer.
+ * Affiche jeux joués + victoires + barre proportionnelle par mode.
+ */
+function renderModeStats() {
+  const container = document.getElementById('modeStatsContainer');
+  if (!container) return;
+
+  const s = profile.stats || {};
+  const counts = s.modeCount || {};
+  const wins   = s.modeWins  || {};
+
+  const modes = Object.keys(MODE_META);
+  const maxCount = Math.max(...modes.map(m => counts[m] || 0), 1);
+
+  // Masquer la section si aucune donnée
+  if (maxCount === 0) { container.innerHTML = ''; return; }
+
+  const rows = modes.map(mode => {
+    const meta  = MODE_META[mode];
+    const count = counts[mode] || 0;
+    const win   = wins[mode]   || 0;
+    const pct   = Math.round((count / maxCount) * 100);
+    const rate  = count > 0 ? Math.round((win / count) * 100) : 0;
+
+    return `
+      <div class="mode-stat-row${count === 0 ? ' mode-stat-row--empty' : ''}">
+        <span class="mode-stat-icon">${meta.icon}</span>
+        <span class="mode-stat-name">${mode === 'AllOutAttack' ? 'All-Out' : mode}</span>
+        <div class="mode-stat-bar-wrap">
+          <div class="mode-stat-bar"
+               style="width:${pct}%;background:${meta.color}"></div>
+        </div>
+        <span class="mode-stat-right">
+          <span class="mode-stat-count">${count}</span>
+          ${count > 0 ? `<span class="mode-stat-rate">${rate}%</span>` : ''}
+        </span>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="mode-stats-header">
+      <span>Mode</span>
+      <span>Games / Win %</span>
     </div>
-  `).join('');
+    <div class="mode-stats-list">${rows}</div>`;
 }
 
 
@@ -243,6 +511,7 @@ pseudoInput.oninput = (e) => {
 borderColorPicker.oninput = (e) => {
   profile.avatarBorderColor = e.target.value;
   pageAvatar.style.borderColor = profile.avatarBorderColor;
+  updateBorderPreview(e.target.value);
   saveProfile();
   // Régénère la preview de partage si la modale est ouverte
   const shareModal = document.getElementById('sharePreviewModal');
@@ -250,6 +519,42 @@ borderColorPicker.oninput = (e) => {
     _regenerateSharePreview();
   }
 };
+
+/**
+ * Met à jour le dot de prévisualisation et la valeur hex
+ * dans le chip couleur de la perso-card.
+ * @param {string} color - Valeur hex (ex. "#1a2b3c")
+ */
+function updateBorderPreview(color) {
+  const dot = document.getElementById('borderColorDot');
+  const hex = document.getElementById('borderColorHex');
+  if (dot) dot.style.background = color;
+  if (hex) hex.textContent = color.toUpperCase();
+}
+
+/**
+ * Gère le toggle collapse/expand de la perso-card.
+ * L'état est persisté dans localStorage.
+ */
+function setupPersoCard() {
+  const btn  = document.getElementById('persoToggle');
+  const body = document.getElementById('persoBody');
+  if (!btn || !body) return;
+
+  // Restaurer l'état sauvegardé (ouvert par défaut)
+  const saved    = localStorage.getItem('persoCardExpanded');
+  const expanded = saved === null ? true : saved === 'true';
+
+  btn.setAttribute('aria-expanded', String(expanded));
+  if (!expanded) body.classList.add('perso-body--collapsed');
+
+  btn.addEventListener('click', () => {
+    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!isExpanded));
+    body.classList.toggle('perso-body--collapsed', isExpanded);
+    localStorage.setItem('persoCardExpanded', String(!isExpanded));
+  });
+}
 
 
 // ─────────────────────────────────────────────────────────
@@ -1242,6 +1547,9 @@ function setupSongPicker() {
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Charger le profil et initialiser l'UI
   initProfile();
+  renderModeStats();
+  renderThemePicker();
+  setupPersoCard();
   initAvatarGrid();
   setupShareProfile();
   setupSongPicker();
