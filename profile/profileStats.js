@@ -1,18 +1,9 @@
 export function updateProfileStats({ result, mode, timeSpent = 0 }) {
-  console.log("🎯 CALL updateProfileStats()");
-  console.log("➡️ result:", result);
-  console.log("➡️ mode:", mode);
-  console.log("➡️ timeSpent (seconds):", timeSpent);
-  
   const savedProfile = localStorage.getItem("personaUserProfile");
-  if (!savedProfile) {
-    console.warn("⚠️ Aucun profil trouvé dans localStorage.");
-    return;
-  }
-  
+  if (!savedProfile) return;
+
   const profile = JSON.parse(savedProfile);
   const stats = profile.stats || {};
-  console.log("📄 Profil actuel:", profile);
   
   // Incrémente parties jouées
   stats.games = (stats.games || 0) + 1;
@@ -67,11 +58,7 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   const timeInMinutes = Math.round(timeSpent / 60);
   stats.totalTimeMinutes = (stats.totalTimeMinutes || 0) + timeInMinutes;
   
-  console.log(`⏱️ Time spent: ${timeSpent}s = ${timeInMinutes} min`);
-  console.log(`📊 Total time: ${stats.totalTimeMinutes} min`);
-  
   // Mise à jour et sauvegarde finale
   profile.stats = stats;
-  console.log("✅ Profil mis à jour:", profile);
   localStorage.setItem("personaUserProfile", JSON.stringify(profile));
 }

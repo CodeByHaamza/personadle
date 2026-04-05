@@ -156,13 +156,17 @@ CREATE INDEX idx_game_sessions_target    ON game_sessions(mode, played_date, tar
 -- =============================================================================
 -- 7. DAILY_TARGETS — Cible du jour par mode (générée côté serveur)
 -- =============================================================================
+-- Cible personnalisée par joueur (seed déterministe user_id + date)
+-- Lazy generation : créée au premier appel du joueur ce jour-là
 CREATE TABLE daily_targets (
+    user_id         BIGINT UNSIGNED     NOT NULL,
     mode            VARCHAR(30)         NOT NULL,
     target_date     DATE                NOT NULL,
     target_name     VARCHAR(200)        NOT NULL,
     target_data     JSON,
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (mode, target_date)
+    PRIMARY KEY (user_id, mode, target_date),
+    CONSTRAINT fk_dt_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -441,6 +445,32 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- =============================================================================
+-- 17. WALLPAPERS — Catalogue des fonds d'écran
+-- =============================================================================
+-- Les fichiers image restent des assets statiques.
+-- Cette table référence uniquement les IDs et leurs conditions de déblocage.
+CREATE TABLE wallpapers (
+    id                  VARCHAR(64)         NOT NULL PRIMARY KEY,   -- ex: "p5_velvet_room"
+    game                VARCHAR(16),                                -- P1, P3, P4, P5, PQ…
+    is_default          BOOLEAN             NOT NULL DEFAULT FALSE, -- TRUE = disponible sans déblocage
+    unlock_condition    VARCHAR(255)        NULL                    -- NULL si is_default = TRUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+-- 18. USER_WALLPAPERS — Wallpapers débloqués par utilisateur
+-- =============================================================================
+-- Ne contient QUE les wallpapers débloqués (pas les defaults).
+-- Côté API : wallpapers disponibles = is_default=TRUE + user_wallpapers de l'user
+CREATE TABLE user_wallpapers (
+    user_id             BIGINT UNSIGNED     NOT NULL,
+    wallpaper_id        VARCHAR(64)         NOT NULL,
+    unlocked_at         TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, wallpaper_id),
+    CONSTRAINT fk_uw_user      FOREIGN KEY (user_id)      REFERENCES users(id)      ON DELETE CASCADE,
+    CONSTRAINT fk_uw_wallpaper FOREIGN KEY (wallpaper_id) REFERENCES wallpapers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- =============================================================================
