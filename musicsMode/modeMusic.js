@@ -20,6 +20,8 @@ import {
   setupRulesModal,
   setupDailyReset,
   checkResetOnLoad,
+  buildGameSession,
+  savePendingSession,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -288,12 +290,13 @@ function showVictory(force = false) {
 
   // ── Stats logging (once per day) ───────────────────────────────────────────
   if (!localStorage.getItem(todayKey)) {
+    const result    = force ? "giveup" : "win";
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-    updateProfileStats({
-      result:    force ? "giveup" : "win",
-      mode:      "Music",
-      timeSpent,
-    });
+    updateProfileStats({ result, mode: "Music", timeSpent });
+    savePendingSession(buildGameSession({
+      mode: "Music", targetName: target.titre, result,
+      attempts, timeMs: timeSpent * 1000,
+    }));
     localStorage.setItem(todayKey, "1");
   }
 
@@ -431,6 +434,10 @@ function giveUp() {
   if (!localStorage.getItem(todayKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result: "giveup", mode: "Music", timeSpent });
+    savePendingSession(buildGameSession({
+      mode: "Music", targetName: target.titre, result: "giveup",
+      attempts, timeMs: timeSpent * 1000,
+    }));
     localStorage.setItem(todayKey, "1");
   }
 

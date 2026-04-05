@@ -29,6 +29,8 @@ import {
   setupDailyReset,
   checkResetOnLoad,
   showWrongMini,
+  buildGameSession,
+  savePendingSession,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -286,11 +288,14 @@ function showVictory(force = false, name = null) {
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   if (!localStorage.getItem(statsKey)) {
-    updateProfileStats({
-      result: force ? "giveup" : "win",
+    const result    = force ? "giveup" : "win";
+    const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+    updateProfileStats({ result, mode: "Personae", timeSpent });
+    savePendingSession(buildGameSession({
       mode: "Personae",
-      timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
-    });
+      targetName: Array.isArray(target.user) ? target.user[0] : target.user,
+      result, attempts, timeMs: timeSpent * 1000,
+    }));
     localStorage.removeItem("playerProfile");
     localStorage.setItem(statsKey, "true");
   }
@@ -364,11 +369,13 @@ function giveUp() {
   gameOver = true;
 
   if (!localStorage.getItem(statsKey)) {
-    updateProfileStats({
-      result: "giveup",
+    const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+    updateProfileStats({ result: "giveup", mode: "Personae", timeSpent });
+    savePendingSession(buildGameSession({
       mode: "Personae",
-      timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
-    });
+      targetName: Array.isArray(target.user) ? target.user[0] : target.user,
+      result: "giveup", attempts, timeMs: timeSpent * 1000,
+    }));
     localStorage.removeItem("playerProfile");
     localStorage.setItem(statsKey, "true");
   }

@@ -12,6 +12,8 @@ import {
   setupDailyReset,
   checkResetOnLoad,
   showWrongMini,
+  buildGameSession,
+  savePendingSession,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -368,11 +370,12 @@ function checkGuess(name, target, forceReveal = false) {
     gameOver = true;
 
     if (!statsAlreadyLogged) {
-      updateProfileStats({
-        result: "win",
-        mode: modeName,
-        sessionDuration: Date.now() - sessionStartTime,
-      });
+      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+      updateProfileStats({ result: "win", mode: modeName, timeSpent });
+      savePendingSession(buildGameSession({
+        mode: modeName, targetName: target.nom, result: "win",
+        attempts, timeMs: timeSpent * 1000, filters: activeOpus,
+      }));
       localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
     }
@@ -529,11 +532,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (!statsAlreadyLogged) {
-      updateProfileStats({
-        result: "giveup",
-        mode: modeName,
-        sessionDuration: Date.now() - sessionStartTime,
-      });
+      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+      updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
+      savePendingSession(buildGameSession({
+        mode: modeName, targetName: target.nom, result: "giveup",
+        attempts, timeMs: timeSpent * 1000, filters: activeOpus,
+      }));
       localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
     }

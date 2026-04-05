@@ -428,15 +428,25 @@
     "register": "Créer un compte",
     "email": "Email",
     "password": "Mot de passe",
+    "password_confirm": "Confirmer le mot de passe",
     "pseudo": "Pseudo",
     "import_json": "Importer mon profil existant (JSON)",
+    "no_account": "Pas encore de compte ?",
+    "has_account": "Déjà un compte ?",
     "error_email_taken": "Cet email est déjà utilisé.",
     "error_pseudo_taken": "Ce pseudo est déjà pris.",
     "error_wrong_credentials": "Email ou mot de passe incorrect.",
+    "error_passwords_mismatch": "Les mots de passe ne correspondent pas.",
     "error_generic": "Une erreur est survenue. Veuillez réessayer.",
+    "error_backend_offline": "Backend pas encore disponible. Arrive en v2.0 !",
     "success_register": "Compte créé ! Bienvenue, {{pseudo}}.",
     "success_login": "Bon retour, {{pseudo}} !",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "migrate_title": "Synchroniser avec le compte",
+    "migrate_desc": "Importe ta progression locale (stats, badges, avatar) vers ton compte cloud. Ne peut être fait qu'une seule fois.",
+    "migrate_btn": "Importer le profil local",
+    "migrate_success": "✅ Profil importé avec succès !",
+    "migrate_already_done": "Ton profil est déjà synchronisé."
   },
 
   "leaderboard": {
@@ -464,7 +474,7 @@
     "disclaimer": "Personadle est un projet communautaire non-commercial. Il n'est pas affilié ni approuvé par les ayants droit.",
     "legal_link": "Mentions légales",
     "feedback_link": "📝 Suggestions & Rapport de bug",
-    "news_button": "📰 Actualités"
+    "news_button": "📰 Nouveautés"
   },
 
   "data": {

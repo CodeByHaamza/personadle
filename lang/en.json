@@ -428,15 +428,25 @@
     "register": "Create account",
     "email": "Email",
     "password": "Password",
+    "password_confirm": "Confirm password",
     "pseudo": "Username",
     "import_json": "Import my existing profile (JSON)",
+    "no_account": "No account yet?",
+    "has_account": "Already have an account?",
     "error_email_taken": "This email is already in use.",
     "error_pseudo_taken": "This username is already taken.",
     "error_wrong_credentials": "Incorrect email or password.",
+    "error_passwords_mismatch": "Passwords do not match.",
     "error_generic": "An error occurred. Please try again.",
+    "error_backend_offline": "Backend not yet available. Coming in v2.0!",
     "success_register": "Account created! Welcome, {{pseudo}}.",
     "success_login": "Welcome back, {{pseudo}}!",
-    "logout": "Log out"
+    "logout": "Log out",
+    "migrate_title": "Sync to account",
+    "migrate_desc": "Import your local progress (stats, badges, avatar) to your cloud account. This can only be done once.",
+    "migrate_btn": "Import local profile",
+    "migrate_success": "✅ Profile imported successfully!",
+    "migrate_already_done": "Your profile is already synced."
   },
 
   "leaderboard": {

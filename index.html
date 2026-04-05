@@ -452,58 +452,27 @@ document.addEventListener("DOMContentLoaded", () => {
      HTML injectés directement dans cette page.
      ===================================================== -->
 <style>
-/* === 🎨 CHIBI DECORATIONS === */
+/* === 🎨 CHIBI DECORATIONS (dans .news-modal-bar) === */
 .chibi-deco {
-  position: relative;
-  width: 120px;
+  width: 55px;
   height: auto;
-  pointer-events: none; /* Ne bloque pas les clics */
-  z-index: 10;
+  pointer-events: none;
+  flex-shrink: 0;
   opacity: 0;
   animation: chibi-appear 0.5s ease-out 0.3s forwards;
 }
 
-.chibi-deco.top-left {
-  top: -10px;
-  left: -10px;
-}
-
-.chibi-deco.bottom-right {
-  top: -10px;
-  right: -440px;
-}
-
-/* Animation d'apparition */
 @keyframes chibi-appear {
-  from {
-    opacity: 0;
-    transform: scale(0.8) rotate(-10deg);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
+  from { opacity: 0; transform: scale(0.8) rotate(-10deg); }
+  to   { opacity: 1; transform: scale(1)   rotate(0deg);   }
 }
 
-/* Ajuster la modal pour permettre les positions absolues */
-
-
-/* Dark mode */
 body.darkmode .chibi-deco {
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-}
-
-/* Responsive - masquer sur petit écran */
-@media (max-width: 768px) {
-  .chibi-deco {
-    width: 80px; /* Plus petit sur mobile */
-  }
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.25));
 }
 
 @media (max-width: 480px) {
-  .chibi-deco {
-    display: none; /* Cache complètement sur très petit écran */
-  }
+  .chibi-deco { display: none; }
 }
 </style>
 
@@ -514,14 +483,17 @@ body.darkmode .chibi-deco {
      ===================================================== -->
 <div id="newsModal" class="news-modal" style="display: none;">
   <div class="news-modal-content">
-    
-    <!-- 🎨 Chibi decorations -->
-    <img src="img/Hamza_chibi.png" class="chibi-deco top-left" alt="Hamza">
-    <img src="img/Leo_chibi.png" class="chibi-deco bottom-right" alt="Leo">
 
-    <span class="close" id="closeNews">&times;</span>
-    
-    <h1 style="position: absolute; top: 55px; left: 50%; transform: translateX(-50%); text-align: center; margin: 20px 0; font-size: 2em;" data-i18n="index.update_history">Update History</h1>
+    <!-- ── Barre fixe : titre + chibis + bouton close ── -->
+    <div class="news-modal-bar">
+      <img src="img/Hamza_chibi.png" class="chibi-deco" alt="Hamza">
+      <h2 data-i18n="index.update_history">Update History</h2>
+      <img src="img/Leo_chibi.png" class="chibi-deco" alt="Leo">
+      <span class="news-close" id="closeNews" role="button" aria-label="Close">&times;</span>
+    </div>
+
+    <!-- ── Corps scrollable : accordion ── -->
+    <div class="news-modal-body">
 
 <div class="version-item cny-theme">
         <div class="version-header">
@@ -676,8 +648,9 @@ body.darkmode .chibi-deco {
         
     </div>
 
-  </div>
-</div>
+    </div><!-- /.news-modal-body -->
+  </div><!-- /.news-modal-content -->
+</div><!-- /#newsModal -->
 
 <!-- =====================================================
      STYLES INLINE — Bouton News + Badge IA
@@ -720,16 +693,56 @@ background: rgba(0,0,0,0.7);
 }
 
 .news-modal-content {
-  
-  position: relative; /* Important pour que les chibi soient positionnés par rapport à la modal */
+  display: flex;
+  flex-direction: column;
   background: #fff;
   margin: 5% auto;
-  padding: 25px;
+  padding: 0;
   border-radius: 12px;
   width: 90%;
   max-width: 700px;
   max-height: 80vh;
+  overflow: hidden; /* le scroll est sur .news-modal-body */
+}
+
+/* ── Barre fixe en haut de la modale ── */
+.news-modal-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+  border-radius: 12px 12px 0 0;
+  background: #fff;
+}
+
+.news-modal-bar h2 {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 1.35em;
+  color: #333;
+}
+
+/* Bouton close dans la barre */
+.news-close {
+  font-size: 26px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+  padding: 0 4px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+.news-close:hover { color: #333; }
+
+/* Corps scrollable */
+.news-modal-body {
   overflow-y: auto;
+  padding: 20px;
+  flex: 1;
 }
 
 .news-modal-content h2 {
@@ -829,15 +842,8 @@ margin-bottom: 8px;
 line-height: 1.5;
 }
 
-/* Dark mode support */
-body.darkmode .news-modal-content {
-background: #1e1e1e;
-color: #eee;
-}
-
-body.darkmode .news-modal-content h2 {
-color: #eee;
-}
+/* Dark mode — corps scrollable */
+body.darkmode .news-modal-body { color: #eee; }
 
 body.darkmode .version-item {
 background: #2a2a2a;
@@ -873,27 +879,12 @@ body.darkmode .version-date {
 color: #aaa;
 }
 
-/* Bouton close */
-.news-modal-content .close {
-float: right;
-font-size: 28px;
-font-weight: bold;
-cursor: pointer;
-color: #666;
-transition: color 0.2s;
-}
-
-.news-modal-content .close:hover {
-color: #333;
-}
-
-body.darkmode .news-modal-content .close {
-color: #aaa;
-}
-
-body.darkmode .news-modal-content .close:hover {
-color: #fff;
-}
+/* Dark mode — modale */
+body.darkmode .news-modal-content { background: #1e1e1e; }
+body.darkmode .news-modal-bar     { background: #1e1e1e; border-color: #333; }
+body.darkmode .news-modal-bar h2  { color: #eee; }
+body.darkmode .news-close         { color: #aaa; }
+body.darkmode .news-close:hover   { color: #fff; }
 
 /* Dark mode pour le bouton News */
 body.darkmode .news-btn {

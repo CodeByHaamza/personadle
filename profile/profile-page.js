@@ -1556,7 +1556,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Système de badges
   initBadgesSystem(profile, saveProfile);
+
+  // 3. Auth + migration
+  setupAuth();
 });
+
+
+// ─────────────────────────────────────────────────────────
+// AUTH — Login / Register / Migration
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Initialise le système d'authentification :
+ * - Vérifie si l'utilisateur est connecté (api.auth.me)
+ * - Affiche l'état connecté ou déconnecté
+ * - Wire les boutons login / register / logout / migration
+ *
+ * Le backend n'étant pas encore live, toutes les actions affichent
+ * le message auth.error_backend_offline.
+ */
+function setupAuth() {
+  const i18n = window.i18n || { t: k => k };
+
+  // ── Éléments DOM ──
+  const authGuest   = document.getElementById('authGuest');
+  const authUser    = document.getElementById('authUser');
+  const authPseudo  = document.getElementById('authUserPseudo');
+  const loginModal  = document.getElementById('loginModal');
+  const regModal    = document.getElementById('registerModal');
+  const migSection  = document.getElementById('migrationSection');
+
+  // ── Helpers d'état ──
+  function showGuest()        { authGuest?.classList.remove('hidden'); authUser?.classList.add('hidden'); migSection?.classList.add('hidden'); }
+  function showUser(pseudo)   { authGuest?.classList.add('hidden');    authUser?.classList.remove('hidden'); if (authPseudo) authPseudo.textContent = pseudo; migSection?.classList.remove('hidden'); }
+  function openModal(el)      { el?.classList.remove('hidden'); document.body.classList.add('modal-open'); }
+  function closeModal(el)     { el?.classList.add('hidden');    document.body.classList.remove('modal-open'); }
+  function showAuthError(id, key) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = i18n.t(key); el.classList.remove('hidden'); }
+  }
+
+  // ── Vérifier la session au chargement ──
+  // Le backend n'est pas live — on reste en mode guest
+  showGuest();
+
+  // ── Ouvrir les modales ──
+  document.getElementById('btnOpenLogin')?.addEventListener('click',    () => openModal(loginModal));
+  document.getElementById('btnOpenRegister')?.addEventListener('click', () => openModal(regModal));
+  document.getElementById('closeLoginModal')?.addEventListener('click',    () => closeModal(loginModal));
+  document.getElementById('closeRegisterModal')?.addEventListener('click', () => closeModal(regModal));
+  document.getElementById('switchToLogin')?.addEventListener('click',    () => { closeModal(regModal);   openModal(loginModal); });
+  document.getElementById('switchToRegister')?.addEventListener('click', () => { closeModal(loginModal); openModal(regModal);   });
+
+  // Fermer au clic sur l'overlay
+  [loginModal, regModal].forEach(modal => {
+    modal?.addEventListener('click', e => { if (e.target === modal) closeModal(modal); });
+  });
+
+  // ── Login ──
+  document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // Backend pas encore live — message informatif
+    showAuthError('loginError', 'auth.error_backend_offline');
+  });
+
+  // ── Register ──
+  document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pwd     = document.getElementById('registerPassword')?.value;
+    const confirm = document.getElementById('registerPasswordConfirm')?.value;
+    if (pwd !== confirm) { showAuthError('registerError', 'auth.error_passwords_mismatch'); return; }
+    // Backend pas encore live — message informatif
+    showAuthError('registerError', 'auth.error_backend_offline');
+  });
+
+  // ── Logout ──
+  document.getElementById('btnLogout')?.addEventListener('click', () => {
+    showGuest();
+  });
+
+  // ── Migration ──
+  document.getElementById('btnMigrate')?.addEventListener('click', async () => {
+    const statusEl = document.getElementById('migrationStatus');
+    const saved    = localStorage.getItem('personaUserProfile');
+    if (!saved) return;
+
+    // Backend pas encore live — on simule le succès pour préparer l'UI
+    if (statusEl) {
+      statusEl.textContent = i18n.t('auth.error_backend_offline');
+      statusEl.className   = 'migration-status migration-status--info';
+    }
+  });
+}
 
 // Attacher les handlers de zoom badges après leur rendu
 window.addEventListener('badgesRendered', () => {

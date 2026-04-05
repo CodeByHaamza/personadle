@@ -12,6 +12,8 @@ import {
   setupDailyReset,
   checkResetOnLoad,
   showWrongMini,
+  buildGameSession,
+  savePendingSession,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -362,11 +364,12 @@ function handleGuess() {
     localStorage.setItem("aoaGameOver", "true");
 
     if (!localStorage.getItem(todayKey)) {
-      updateProfileStats({
-        result: "win",
-        mode: "All Out Attack",
-        timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
-      });
+      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+      updateProfileStats({ result: "win", mode: "All Out Attack", timeSpent });
+      savePendingSession(buildGameSession({
+        mode: "AllOutAttack", targetName: target, result: "win",
+        attempts, timeMs: timeSpent * 1000,
+      }));
       localStorage.setItem(todayKey, "1");
     }
 
@@ -396,11 +399,12 @@ function giveUp() {
   gameOver = true;
 
   if (!localStorage.getItem(todayKey)) {
-    updateProfileStats({
-      result: "giveup",
-      mode: "All Out Attack",
-      timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
-    });
+    const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+    updateProfileStats({ result: "giveup", mode: "All Out Attack", timeSpent });
+    savePendingSession(buildGameSession({
+      mode: "AllOutAttack", targetName: target, result: "giveup",
+      attempts, timeMs: timeSpent * 1000,
+    }));
     localStorage.setItem(todayKey, "1");
     revealNextLink({
       prevHref: "../emojiMode/emojiMode.html",

@@ -15,6 +15,8 @@
  *   checkResetOnLoad(...)       → resets the game if a new day has started
  *   setupFilterButtons(...)     → wires opus filter-button click events
  *   showWrongMini(...)          → appends a shaking wrong-guess portrait
+ *   buildGameSession(opts)      → builds a standardised session object for the backend
+ *   savePendingSession(session) → stores a session in localStorage for later sync
  */
 
 
@@ -347,4 +349,47 @@ export function showWrongMini(
 
   // Small delay so the element is in the DOM before the class triggers CSS
   setTimeout(() => div.classList.add("shake"), 50);
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GAME SESSION — Backend sync preparation
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Builds a standardised game session object ready to be POST-ed to /api/sessions.
+ * Call this at the end of each game (win or giveup).
+ *
+ * @param {object}   opts
+ * @param {string}   opts.mode       - Mode name: 'Classic'|'Emoji'|'Silhouette'|'AllOutAttack'|'Personae'|'Music'
+ * @param {string}   opts.targetName - The character/track that was to be guessed
+ * @param {string}   opts.result     - 'win' | 'giveup'
+ * @param {number}   opts.attempts   - Number of attempts made
+ * @param {number}   opts.timeMs     - Time spent in milliseconds
+ * @param {string[]} [opts.filters]  - Active opus filters at the time of the game
+ * @returns {{ mode, played_date, target_name, result, attempts, time_ms, active_filters }}
+ */
+export function buildGameSession({ mode, targetName, result, attempts, timeMs = 0, filters = [] }) {
+  return {
+    mode,
+    played_date:    parisDateKey(),
+    target_name:    targetName,
+    result,
+    attempts,
+    time_ms:        Math.round(timeMs),
+    active_filters: filters,
+  };
+}
+
+/**
+ * Stores a game session in localStorage under the 'pendingSessions' key.
+ * When the user creates an account and the backend is live, these sessions
+ * will be synced via api.stats.syncPending().
+ *
+ * @param {ReturnType<typeof buildGameSession>} session
+ */
+export function savePendingSession(session) {
+  const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
+  pending.push(session);
+  localStorage.setItem('pendingSessions', JSON.stringify(pending));
 }

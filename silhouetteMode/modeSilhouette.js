@@ -12,6 +12,8 @@ import {
   setupDailyReset,
   checkResetOnLoad,
   showWrongMini,
+  buildGameSession,
+  savePendingSession,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -282,11 +284,12 @@ function showVictory(force = false) {
 
   if (!force) {
     if (!statsAlreadyLogged) {
-      updateProfileStats({
-        result: "win",
-        mode: modeName,
-        sessionDuration: Date.now() - sessionStartTime,
-      });
+      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+      updateProfileStats({ result: "win", mode: modeName, timeSpent });
+      savePendingSession(buildGameSession({
+        mode: modeName, targetName: target.nom, result: "win",
+        attempts, timeMs: timeSpent * 1000,
+      }));
       localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
     }
@@ -388,11 +391,12 @@ function giveUp() {
   showVictory(true);
 
   if (!statsAlreadyLogged) {
-    updateProfileStats({
-      result: "giveup",
-      mode: modeName,
-      sessionDuration: Date.now() - sessionStartTime,
-    });
+    const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+    updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
+    savePendingSession(buildGameSession({
+      mode: modeName, targetName: target.nom, result: "giveup",
+      attempts, timeMs: timeSpent * 1000,
+    }));
     localStorage.setItem(todayKey, "true");
     statsAlreadyLogged = true;
   }

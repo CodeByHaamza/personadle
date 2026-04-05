@@ -14,6 +14,8 @@ import {
   setupDailyReset,
   checkResetOnLoad,
   showWrongMini,
+  buildGameSession,
+  savePendingSession,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -283,11 +285,13 @@ function checkEmojiGuess(name, forceReveal = false) {
 
     const todayKey = getTodayStatsKey();
     if (!localStorage.getItem(todayKey)) {
-      updateProfileStats({
-        result: forceReveal ? "giveup" : "win",
-        mode: modeName,
-        timeSpent: Math.floor((Date.now() - sessionStartTime) / 1000),
-      });
+      const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
+      const result    = forceReveal ? "giveup" : "win";
+      updateProfileStats({ result, mode: modeName, timeSpent });
+      savePendingSession(buildGameSession({
+        mode: modeName, targetName: target.nom, result,
+        attempts, timeMs: timeSpent * 1000,
+      }));
       localStorage.setItem(todayKey, "true");
     }
 

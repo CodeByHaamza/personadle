@@ -178,13 +178,30 @@
           ✅ <span data-i18n="profile.save_refresh">Save</span>
         </button>
 
-        <!-- Auth placeholder — sera rempli avec le backend v2.0 -->
-        <div class="auth-section">
-          <div class="auth-divider">Account</div>
-          <button class="btn-auth" disabled title="Coming with backend v2.0">
-            🔐 Sign In
-            <span class="coming-soon-tag">v2.0</span>
-          </button>
+        <!-- ── Section Auth ── -->
+        <div class="auth-section" id="authSection">
+          <div class="auth-divider">
+            <span class="card-accent">◆</span>
+            <span data-i18n="ui.my_account">My Account</span>
+          </div>
+          <!-- État : non connecté -->
+          <div id="authGuest" class="auth-guest">
+            <button id="btnOpenLogin" class="btn-auth btn-auth--login">
+              🔐 <span data-i18n="auth.login">Log in</span>
+            </button>
+            <button id="btnOpenRegister" class="btn-auth btn-auth--register">
+              ✨ <span data-i18n="auth.register">Create account</span>
+            </button>
+          </div>
+          <!-- État : connecté (masqué par défaut) -->
+          <div id="authUser" class="auth-user hidden">
+            <p class="auth-welcome">
+              👋 <span id="authUserPseudo"></span>
+            </p>
+            <button id="btnLogout" class="btn-auth btn-auth--logout">
+              <span data-i18n="auth.logout">Log out</span>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -304,6 +321,21 @@
           </button>
         </div>
         <p id="shareStatus" style="margin-top: 8px; font-size: 0.82em; opacity: 0.7;"></p>
+
+        <!-- ── Migration cloud (visible uniquement si connecté) ── -->
+        <div id="migrationSection" class="migration-section hidden">
+          <div class="migration-divider">
+            <span class="card-accent">◆</span>
+            <span data-i18n="auth.migrate_title">Sync to account</span>
+          </div>
+          <p class="migration-desc" data-i18n="auth.migrate_desc">
+            Import your local data to your cloud account.
+          </p>
+          <button id="btnMigrate" class="btn-p5 btn-migrate">
+            ☁️ <span data-i18n="auth.migrate_btn">Import local profile</span>
+          </button>
+          <p id="migrationStatus" class="migration-status"></p>
+        </div>
       </div>
 
       <!-- Card : Zone dangereuse -->
@@ -526,6 +558,93 @@ toggle.addEventListener('change', () => {
 // ── Bottom nav ──
 initBottomNav();
 </script>
+
+
+<!-- =====================================================
+     5. MODALES AUTH — Login / Register
+     Branchées sur api.auth.* (js/api.js).
+     Désactivées tant que le backend n'est pas live.
+     ===================================================== -->
+
+<!-- ── Modale Login ── -->
+<div id="loginModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="modal-content auth-modal-content">
+    <div class="crop-modal-header">
+      <h3 class="crop-modal-title" id="loginTitle">
+        <span class="card-accent">◆</span>
+        <span data-i18n="auth.login">Log in</span>
+      </h3>
+      <span class="close" id="closeLoginModal" role="button">&times;</span>
+    </div>
+
+    <form id="loginForm" class="auth-form" novalidate>
+      <div class="auth-field">
+        <label for="loginEmail" data-i18n="auth.email">Email</label>
+        <input type="email" id="loginEmail" autocomplete="email" required
+               data-i18n-placeholder="auth.email">
+      </div>
+      <div class="auth-field">
+        <label for="loginPassword" data-i18n="auth.password">Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required
+               data-i18n-placeholder="auth.password">
+      </div>
+      <p id="loginError" class="auth-error hidden"></p>
+      <button type="submit" class="btn-p5 btn-auth-submit">
+        🔐 <span data-i18n="auth.login">Log in</span>
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      <span data-i18n="auth.no_account">No account yet?</span>
+      <button id="switchToRegister" class="auth-switch-btn" data-i18n="auth.register">Create account</button>
+    </p>
+  </div>
+</div>
+
+<!-- ── Modale Register ── -->
+<div id="registerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="registerTitle">
+  <div class="modal-content auth-modal-content">
+    <div class="crop-modal-header">
+      <h3 class="crop-modal-title" id="registerTitle">
+        <span class="card-accent">◆</span>
+        <span data-i18n="auth.register">Create account</span>
+      </h3>
+      <span class="close" id="closeRegisterModal" role="button">&times;</span>
+    </div>
+
+    <form id="registerForm" class="auth-form" novalidate>
+      <div class="auth-field">
+        <label for="registerEmail" data-i18n="auth.email">Email</label>
+        <input type="email" id="registerEmail" autocomplete="email" required
+               data-i18n-placeholder="auth.email">
+      </div>
+      <div class="auth-field">
+        <label for="registerPseudo" data-i18n="auth.pseudo">Username</label>
+        <input type="text" id="registerPseudo" maxlength="30" required
+               data-i18n-placeholder="auth.pseudo">
+      </div>
+      <div class="auth-field">
+        <label for="registerPassword" data-i18n="auth.password">Password</label>
+        <input type="password" id="registerPassword" autocomplete="new-password"
+               minlength="8" required data-i18n-placeholder="auth.password">
+      </div>
+      <div class="auth-field">
+        <label for="registerPasswordConfirm" data-i18n="auth.password_confirm">Confirm password</label>
+        <input type="password" id="registerPasswordConfirm" autocomplete="new-password"
+               required data-i18n-placeholder="auth.password_confirm">
+      </div>
+      <p id="registerError" class="auth-error hidden"></p>
+      <button type="submit" class="btn-p5 btn-auth-submit">
+        ✨ <span data-i18n="auth.register">Create account</span>
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      <span data-i18n="auth.has_account">Already have an account?</span>
+      <button id="switchToLogin" class="auth-switch-btn" data-i18n="auth.login">Log in</button>
+    </p>
+  </div>
+</div>
 
 </body>
 </html>
