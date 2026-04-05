@@ -143,6 +143,8 @@
       "giveup_mechanics": "📉 Option Abandonner :",
       "giveup_unlock": "Après 5 mauvaises réponses, le bouton Abandonner s'active.",
       "closing": "Laissez vos yeux s'adapter, concentrez vos instincts, et visez le coup critique !",
+      "correct": "🎉 Tu as trouvé {{name}} !",
+      "giveup_reveal": "❌ Tu as abandonné ! La réponse était : {{name}}",
       "no_characters": "Aucun personnage disponible avec les filtres actuels.",
       "prev_mode": "← Mode Emoji",
       "next_mode": "Mode Shadows →"

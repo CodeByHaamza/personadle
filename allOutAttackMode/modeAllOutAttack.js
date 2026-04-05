@@ -389,7 +389,8 @@ function handleGuess() {
 function giveUp() {
   if (attempts < 5 || gameOver) return;
   document.getElementById("aoaGif").style.filter = "none";
-  showVictoryBox(target);
+  localStorage.setItem("aoaForceReveal", "true");
+  showVictoryBox(target, true);
   showConfettiExplosion();
   disableInputs();
   gameOver = true;
@@ -491,15 +492,18 @@ function disableInputs() {
  * Fills and shows the victory box with the character's battle image.
  * @param {string} name - Character name
  */
-function showVictoryBox(name) {
+function showVictoryBox(name, force = false) {
   const baseName = (portraitsMap[name] || name.split(" ")[0]).trim();
-  const box = document.getElementById("victoryBox");
-  const img = document.getElementById("victoryImage");
+  const box  = document.getElementById("victoryBox");
+  const img  = document.getElementById("victoryImage");
   const text = document.getElementById("victoryText");
+  const i18n = window.i18n || { t: (k) => k };
 
   img.src = `./database/img/${baseName}_Battle.webp`;
   img.alt = name;
-  text.textContent = `🎉 You found ${name}!`;
+  text.textContent = force
+    ? i18n.t('modes.alloutattack.giveup_reveal', { name })
+    : i18n.t('modes.alloutattack.correct',       { name });
   box.style.display = "flex";
   setTimeout(() => box.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
 }
@@ -651,7 +655,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateGiveUpCounter();
 
     if (gameOver) {
-      showVictoryBox(target);
+      const wasGiveup = localStorage.getItem("aoaForceReveal") === "true";
+      showVictoryBox(target, wasGiveup);
       disableInputs();
       revealNextLink({
         prevHref: "../emojiMode/emojiMode.html",

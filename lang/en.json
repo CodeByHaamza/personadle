@@ -143,6 +143,8 @@
       "giveup_mechanics": "📉 Give Up option:",
       "giveup_unlock": "After 5 incorrect guesses, the Give Up button activates.",
       "closing": "Let your eyes adjust, focus your instincts, and go for the critical hit!",
+      "correct": "🎉 You found {{name}}!",
+      "giveup_reveal": "❌ You gave up! The answer was: {{name}}",
       "no_characters": "No characters available with current filters.",
       "prev_mode": "← Emoji Mode",
       "next_mode": "Shadows Mode →"

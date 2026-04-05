@@ -438,7 +438,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Daltonian toggle label
   const daltonianToggle = document.getElementById("daltonianToggle");
   if (daltonianToggle) {
-    daltonianToggle.textContent = `Daltonian Mode: ${daltonianMode ? "ON" : "OFF"}`;
+    daltonianToggle.textContent = (window.i18n || { t: k => k }).t(daltonianMode ? 'ui.daltonian_on' : 'ui.daltonian_off');
   }
 
   // ── Filtre opus — panneau déroulant ──
@@ -597,7 +597,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   daltonianToggle?.addEventListener("click", () => {
     daltonianMode = !daltonianMode;
     localStorage.setItem("daltonianMode", daltonianMode ? "enabled" : "disabled");
-    daltonianToggle.textContent = `Daltonian Mode: ${daltonianMode ? "ON" : "OFF"}`;
+    daltonianToggle.textContent = (window.i18n || { t: k => k }).t(daltonianMode ? 'ui.daltonian_on' : 'ui.daltonian_off');
     location.reload();
   });
 
