@@ -23,7 +23,7 @@
 
 const STORAGE_KEY  = 'lang';
 const DEFAULT_LANG = 'en';
-const SUPPORTED    = ['en', 'fr', 'es', 'de'];
+const SUPPORTED    = ['en', 'fr', 'es', 'de', 'it'];
 
 /** Traductions actives (objet aplati : "ui.submit" → "Submit") */
 let _flat    = {};

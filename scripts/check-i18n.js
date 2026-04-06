@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LANG_DIR  = path.join(__dirname, '..', 'lang');
 const BASE_LANG  = 'en';
-const TARGET_LANGS = ['fr', 'es', 'de'];
+const TARGET_LANGS = ['fr', 'es', 'de', 'it'];
 
 // Aplatit un objet JSON imbriqué en clés pointées
 // { modes: { classic: { title: "..." } } } → ["modes.classic.title"]
