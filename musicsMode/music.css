@@ -314,4 +314,11 @@ body.music-mode.darkmode .victory-box {
 
   body.music-mode .victory-box img { width: 160px; }
   body.music-mode .victory-box { padding: 15px 10px; }
+
+  /* Réduit le gap de la rangée Replay|Input|Submit sur mobile */
+  .input-wrapper > div {
+    gap: 8px;
+    width: min(340px, 95vw);
+    box-sizing: border-box;
+  }
 }

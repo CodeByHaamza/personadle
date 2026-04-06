@@ -454,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <style>
 /* === 🎨 CHIBI DECORATIONS (dans .news-modal-bar) === */
 .chibi-deco {
-  width: 55px;
+  width: 105px;
   height: auto;
   pointer-events: none;
   flex-shrink: 0;
@@ -1186,6 +1186,16 @@ updateCountdown();
 <script type="module">
 import { initBottomNav } from './js/bottomNav.js';
 initBottomNav();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.warn('[SW] Registration failed:', err);
+    });
+  });
+}
 </script>
 
 </body>

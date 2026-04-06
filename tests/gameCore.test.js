@@ -19,6 +19,8 @@ import {
   checkResetOnLoad,
   setupFilterButtons,
   showWrongMini,
+  buildGameSession,
+  savePendingSession,
 } from "../js/gameCore.js";
 
 
@@ -510,5 +512,125 @@ describe("showWrongMini", () => {
 
   it("is a no-op when wrongListEl is null", () => {
     expect(() => showWrongMini("/img/char.webp", "Joker", null)).not.toThrow();
+  });
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// buildGameSession
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("buildGameSession", () => {
+  it("returns an object with the expected shape", () => {
+    const session = buildGameSession({
+      mode:       "Classic",
+      targetName: "Joker",
+      result:     "win",
+      attempts:   2,
+      timeMs:     15000,
+      filters:    ["P5"],
+    });
+
+    expect(session).toMatchObject({
+      mode:           "Classic",
+      target_name:    "Joker",
+      result:         "win",
+      attempts:       2,
+      time_ms:        15000,
+      active_filters: ["P5"],
+    });
+  });
+
+  it("includes a played_date matching YYYY-MM-DD", () => {
+    const session = buildGameSession({
+      mode: "Emoji", targetName: "Ryuji", result: "giveup", attempts: 6,
+    });
+    expect(session.played_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("defaults timeMs to 0 and filters to [] when omitted", () => {
+    const session = buildGameSession({
+      mode: "Music", targetName: "Burn My Dread", result: "win", attempts: 1,
+    });
+    expect(session.time_ms).toBe(0);
+    expect(session.active_filters).toEqual([]);
+  });
+
+  it("rounds timeMs to the nearest integer", () => {
+    const session = buildGameSession({
+      mode: "Classic", targetName: "Joker", result: "win", attempts: 1, timeMs: 1234.7,
+    });
+    expect(session.time_ms).toBe(1235);
+  });
+
+  it("preserves the exact mode string passed in", () => {
+    const session = buildGameSession({
+      mode: "AllOutAttack", targetName: "Makoto", result: "win", attempts: 3,
+    });
+    expect(session.mode).toBe("AllOutAttack");
+  });
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// savePendingSession
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("savePendingSession", () => {
+  beforeEach(clearStorage);
+
+  it("stores a session in localStorage under 'pendingSessions'", () => {
+    const session = buildGameSession({
+      mode: "Classic", targetName: "Joker", result: "win", attempts: 1,
+    });
+    savePendingSession(session);
+
+    const stored = JSON.parse(localStorage.getItem("pendingSessions"));
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatchObject({ mode: "Classic", target_name: "Joker" });
+  });
+
+  it("creates the array from scratch when pendingSessions is not yet set", () => {
+    expect(localStorage.getItem("pendingSessions")).toBeNull();
+
+    savePendingSession(buildGameSession({
+      mode: "Music", targetName: "test", result: "win", attempts: 1,
+    }));
+
+    const stored = JSON.parse(localStorage.getItem("pendingSessions"));
+    expect(Array.isArray(stored)).toBe(true);
+    expect(stored).toHaveLength(1);
+  });
+
+  it("appends to the existing queue on subsequent calls", () => {
+    const s1 = buildGameSession({ mode: "Classic", targetName: "Joker",  result: "win",    attempts: 1 });
+    const s2 = buildGameSession({ mode: "Emoji",   targetName: "Ryuji",  result: "giveup", attempts: 6 });
+    const s3 = buildGameSession({ mode: "Music",   targetName: "P4 OST", result: "win",    attempts: 2 });
+
+    savePendingSession(s1);
+    savePendingSession(s2);
+    savePendingSession(s3);
+
+    const stored = JSON.parse(localStorage.getItem("pendingSessions"));
+    expect(stored).toHaveLength(3);
+    expect(stored[1].mode).toBe("Emoji");
+    expect(stored[2].mode).toBe("Music");
+  });
+
+  it("preserves existing sessions already in localStorage", () => {
+    // Pre-populate queue with one session
+    const existing = buildGameSession({
+      mode: "Silhouette", targetName: "Aigis", result: "win", attempts: 4,
+    });
+    localStorage.setItem("pendingSessions", JSON.stringify([existing]));
+
+    savePendingSession(buildGameSession({
+      mode: "Classic", targetName: "Joker", result: "win", attempts: 1,
+    }));
+
+    const stored = JSON.parse(localStorage.getItem("pendingSessions"));
+    expect(stored).toHaveLength(2);
+    expect(stored[0].mode).toBe("Silhouette");
+    expect(stored[1].mode).toBe("Classic");
   });
 });
