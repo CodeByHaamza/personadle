@@ -433,6 +433,37 @@ function handleSearchInput(value) {
 }
 
 // ─────────────────────────────────────────────────────────
+// ADD BY CODE
+// ─────────────────────────────────────────────────────────
+
+async function handleAddByCode() {
+  const input = document.getElementById('addByCodeInput');
+  const msg   = document.getElementById('addByCodeMsg');
+  const btn   = document.getElementById('addByCodeBtn');
+  if (!input || !msg || !btn) return;
+
+  const code = input.value.trim().toUpperCase();
+  if (!code) return;
+
+  btn.disabled = true;
+  msg.className = 'fr-add-code-msg hidden';
+
+  try {
+    await window._personadleApi.friends.request(code);
+    state.sentCodes.add(code);
+    msg.textContent = t('friends.add_success') || 'Friend request sent!';
+    msg.className = 'fr-add-code-msg fr-add-code-msg--success';
+    input.value = '';
+    await loadBrowse(state.browseQuery, state.browsePage);
+  } catch (err) {
+    msg.textContent = err.message || t('friends.error_send') || 'Could not send friend request.';
+    msg.className = 'fr-add-code-msg fr-add-code-msg--error';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ─────────────────────────────────────────────────────────
 // 9. DÉLÉGATION D'ÉVÉNEMENTS
 // ─────────────────────────────────────────────────────────
 
@@ -491,6 +522,12 @@ function attachListeners() {
       await removeFriend(parseInt(removeBtn.dataset.fid, 10));
       return;
     }
+  });
+
+  // ── Add by code ───────────────────────────────────────
+  document.getElementById('addByCodeBtn')?.addEventListener('click', handleAddByCode);
+  document.getElementById('addByCodeInput')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleAddByCode();
   });
 }
 
