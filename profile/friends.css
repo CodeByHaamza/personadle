@@ -235,8 +235,9 @@
   pointer-events: none;
 }
 
-.fr-dot--online  { background: var(--fr-green); }
-.fr-dot--offline { background: #c0c0c0; }
+.fr-dot--online   { background: var(--fr-green); }
+.fr-dot--offline  { background: #c0c0c0; }
+.fr-dot--unknown  { background: #888; opacity: 0.45; }
 
 .fr-entry-info {
   flex: 1;
@@ -573,8 +574,9 @@
 .darkmode .fr-tag--pending { color: #fbbf24; }
 .darkmode .fr-tag--self    { color: #9ca3af; }
 
-.darkmode .fr-dot         { border-color: var(--fr-surface); }
+.darkmode .fr-dot          { border-color: var(--fr-surface); }
 .darkmode .fr-dot--offline { background: #444; }
+.darkmode .fr-dot--unknown { background: #555; }
 .darkmode .fr-add-code-input {
   background: var(--fr-surface-alt);
   border-color: #444;

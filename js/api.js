@@ -13,20 +13,32 @@
  *   - En dev : BASE_URL = 'http://localhost:8000/api'
  *   - En prod : BASE_URL = 'https://personadle.net/api'
  *
- * Statut v2.0 : les endpoints sont définis mais le backend n'est pas encore déployé.
- * Les appels échoueront avec une ApiError jusqu'à la mise en ligne du serveur Laravel.
+ * Statut v2.0 : backend PHP opérationnel en local (Apache + MySQL via setup.sh).
+ * Déploiement Hostinger à venir — les appels vers personadle.net échoueront jusqu'à la mise en prod.
  */
 
 // ─────────────────────────────────────────────────────────
 // CONFIGURATION
 // ─────────────────────────────────────────────────────────
 
-const IS_DEV  = window.location.hostname === 'localhost'
-             || window.location.hostname === '127.0.0.1';
+// Détecte tout environnement local : file://, localhost, 127.0.0.1, LAN (192.168.x, 10.x)
+const IS_DEV = (
+  window.location.hostname === ''          ||   // file://
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '0.0.0.0'   ||
+  /^192\.168\./.test(window.location.hostname) ||
+  /^10\./.test(window.location.hostname)
+);
 
-const BASE_URL = IS_DEV
-  ? 'http://localhost:8000/api'
-  : 'https://personadle.net/api';
+// Local Apache : projet servi depuis /personadle/ (symlink via setup.sh)
+// Docker       : projet servi depuis / (DocumentRoot = /var/www/html)
+// Prod         : Hostinger, projet à la racine du domaine
+// → On détecte si le pathname commence par /personadle/ pour le préfixer.
+const _pathPrefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+const BASE_URL = window.location.hostname === 'personadle.net'
+  ? 'https://personadle.net/api'
+  : `${window.location.protocol}//${window.location.host}${_pathPrefix}/api`;
 
 
 // ─────────────────────────────────────────────────────────
@@ -160,11 +172,10 @@ export const api = {
     }),
 
     /**
-     * Importe un profil JSON localStorage dans le compte cloud.
-     * Appelé une seule fois à la création de compte (migration).
-     * @param {object} profileJson - Contenu de l'export JSON localStorage
+     * Migre le profil localStorage vers le compte cloud (appelé une seule fois au register).
+     * @param {{ profile: object|null, pendingSessions: object[] }} payload
      */
-    migrate: (profileJson) => post('/user/migrate', { profile: profileJson }),
+    migrate: (payload) => post('/user/migrate', payload),
 
     /**
      * Récupère les wallpapers disponibles pour l'utilisateur :
@@ -226,40 +237,81 @@ export const api = {
     get: (mode, userId) => get(`/daily/${mode}/${userId}`),
   },
 
+  // ── Profil public ─────────────────────────────────────
+  publicProfile: {
+    /**
+     * Récupère le profil public d'un joueur par friend_code ou pseudo.
+     * @param {{ code?: string, pseudo?: string }} params
+     */
+    get: ({ code, pseudo }) => {
+      const q = code ? `code=${encodeURIComponent(code)}` : `pseudo=${encodeURIComponent(pseudo)}`;
+      return get(`/user/public?${q}`);
+    },
+
+    /**
+     * Recherche des joueurs par pseudo (LIKE) ou friend_code (exact).
+     * @param {string} query - Texte de recherche (min 2 caractères)
+     */
+    search: (query) => get(`/user/search?q=${encodeURIComponent(query)}`),
+
+    /**
+     * Liste tous les joueurs (pour la page Browse Players / Friends).
+     * Si connecté, inclut le statut de friendship pour chaque joueur.
+     * @param {{ q?: string, limit?: number, offset?: number }} params
+     */
+    list: ({ q = '', limit = 30, offset = 0 } = {}) =>
+      get(`/user/list?q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}`),
+  },
+
+  // ── Stats communautaires post-partie ─────────────────
+  communityStats: {
+    /**
+     * Récupère le % de joueurs ayant trouvé la cible du jour dans un mode donné.
+     * @param {{ mode: string, date: string, target: string }} params
+     *   mode   : identifiant lowercase du mode (ex: 'classic', 'music')
+     *   date   : date YYYY-MM-DD (Paris time)
+     *   target : nom exact du personnage/musique cible
+     */
+    get: ({ mode, date, target }) =>
+      get(`/community-stats?mode=${encodeURIComponent(mode)}&date=${encodeURIComponent(date)}&target=${encodeURIComponent(target)}`),
+  },
+
   // ── Leaderboard ───────────────────────────────────────
   leaderboard: {
     /**
      * Récupère un classement.
-     * @param {string} mode    - 'global' | 'Classic' | 'Emoji' | …
-     * @param {string} period  - 'weekly' | 'monthly' | 'alltime'
-     * @param {number} [page]  - Pagination (default: 1)
+     * @param {{ mode?, period?, metric?, limit?, offset? }} params
+     *   mode   : 'all' | 'classic' | 'emoji' | 'silhouette' | 'alloutattack' | 'personae' | 'music'
+     *   period : 'day' | 'week' | 'month' | 'ever'
+     *   metric : 'wins' | 'winrate' | 'streak' | 'perfect' | 'games'
      */
-    get: (mode, period, page = 1) =>
-      get(`/leaderboard?mode=${mode}&period=${period}&page=${page}`),
+    get: ({ mode = 'all', period = 'ever', metric = 'wins', limit = 50, offset = 0 } = {}) =>
+      get(`/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}`),
   },
 
   // ── Amis ──────────────────────────────────────────────
   friends: {
-    /**
-     * Récupère la liste d'amis + demandes en attente.
-     * @param {number} userId
-     */
-    list: (userId) => get(`/user/${userId}/friends`),
+    /** Récupère la liste d'amis + demandes en attente de l'utilisateur connecté. */
+    list: () => get('/friends'),
 
     /**
-     * Envoie une demande d'ami (par pseudo ou friend_code).
-     * @param {{ pseudo?: string, friend_code?: string }} data
+     * Envoie une demande d'ami par friend_code.
+     * @param {string} friendCode - Code de 8 caractères
      */
-    request: (data) => post('/friends/request', data),
+    request: (friendCode) => post('/friends', { friend_code: friendCode }),
 
     /**
-     * Accepte une demande d'ami.
+     * Accepte ou refuse une demande reçue.
      * @param {number} friendshipId
+     * @param {'accept'|'decline'} action
      */
-    accept: (friendshipId) => post(`/friends/${friendshipId}/accept`, {}),
+    respond: (friendshipId, action) => apiCall(`/friends/${friendshipId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ action }),
+    }),
 
     /**
-     * Refuse ou supprime un ami.
+     * Supprime un ami ou retire une demande envoyée.
      * @param {number} friendshipId
      */
     remove: (friendshipId) => apiCall(`/friends/${friendshipId}`, { method: 'DELETE' }),
@@ -296,3 +348,7 @@ export const api = {
     redeem: (code) => post('/badges/redeem', { code }),
   },
 };
+
+// Exposer l'API globalement pour que gameCore.js puisse l'utiliser
+// sans créer de dépendance d'import circulaire.
+window._personadleApi = api;

@@ -31,8 +31,17 @@
  */
 function getCurrentPage() {
   const path = window.location.pathname;
-  if (path.includes('/profile/profile')) return 'profile';
+  if (path.includes('/profile/profile'))     return 'profile';
+  if (path.includes('/profile/friends'))     return 'friends';
+  if (path.includes('/profile/leaderboard')) return 'leaderboard';
   if (path.endsWith('/index.html') || path.endsWith('/') || path.endsWith('personadle')) return 'home';
+  // Modes de jeu (pages dans un sous-dossier)
+  if (path.includes('/classiqueMode/')  ||
+      path.includes('/emojiMode/')      ||
+      path.includes('/silhouetteMode/') ||
+      path.includes('/allOutAttackMode/') ||
+      path.includes('/personaeMode/')   ||
+      path.includes('/musicsMode/'))    return 'game';
   return 'other';
 }
 
@@ -52,8 +61,9 @@ function getProfileAvatar(currentPage) {
     // Les data URLs (base64) sont toujours valides
     if (p.avatar.startsWith('data:')) return p.avatar;
 
-    // Normalise les chemins relatifs ./img/... selon la position de la page
-    if (currentPage === 'profile') {
+    // Normalise les chemins relatifs ./img/... pour toutes les pages en sous-dossier
+    const isSubdir = ['profile', 'friends', 'leaderboard', 'game'].includes(currentPage);
+    if (isSubdir) {
       return p.avatar.replace(/^\.\/img\//, '../img/');
     }
     return p.avatar;
@@ -65,14 +75,31 @@ function getProfileAvatar(currentPage) {
 /**
  * Calcule les hrefs relatifs selon la page courante.
  * @param {string} currentPage
- * @returns {{ home: string, profile: string }}
+ * @returns {{ home: string, profile: string, friends: string, leaderboard: string }}
  */
 function buildHrefs(currentPage) {
-  if (currentPage === 'profile') {
-    return { home: '../index.html', profile: './profile.html' };
-  }
-  // Par défaut : depuis la racine ou un mode de jeu au même niveau que index
-  return { home: './index.html', profile: './profile/profile.html' };
+  const isProfile  = currentPage === 'profile';
+  const isFriends  = currentPage === 'friends';
+  const isLeader   = currentPage === 'leaderboard';
+
+  // Compute base from the actual URL path so pages inside any subdirectory
+  // always resolve links correctly, regardless of currentPage value.
+  const p = window.location.pathname;
+  const isSubpath =
+    p.includes('/profile/')        ||
+    p.includes('/classiqueMode/')  ||
+    p.includes('/emojiMode/')      ||
+    p.includes('/silhouetteMode/') ||
+    p.includes('/allOutAttackMode/')||
+    p.includes('/personaeMode/')   ||
+    p.includes('/musicsMode/');
+  const base = isSubpath ? '../' : './';
+  return {
+    home:        `${base}index.html`,
+    profile:     isProfile  ? './profile.html'           : `${base}profile/profile.html`,
+    friends:     isFriends  ? './friends.html'           : `${base}profile/friends.html`,
+    leaderboard: isLeader   ? './leaderboard.html'       : `${base}profile/leaderboard.html`,
+  };
 }
 
 
@@ -141,24 +168,24 @@ function buildNavHTML(currentPage, avatar, hrefs) {
         <span class="nav-label">Home</span>
       </a>
 
-      <!-- ② RANKING (coming soon) -->
-      <button class="nav-item"
-              id="navRanking"
-              type="button"
-              aria-label="Ranking — Coming soon">
+      <!-- ② RANKING -->
+      <a class="nav-item ${currentPage === 'leaderboard' ? 'active' : ''}"
+         href="${hrefs.leaderboard}"
+         aria-label="Leaderboard"
+         aria-current="${currentPage === 'leaderboard' ? 'page' : 'false'}">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="3"  y="12" width="4" height="9" rx="1"/>
           <rect x="10" y="7"  width="4" height="14" rx="1"/>
           <rect x="17" y="3"  width="4" height="18" rx="1"/>
         </svg>
         <span class="nav-label">Ranking</span>
-      </button>
+      </a>
 
-      <!-- ③ FRIENDS (coming soon) -->
-      <button class="nav-item"
-              id="navFriends"
-              type="button"
-              aria-label="Friends — Coming soon">
+      <!-- ③ FRIENDS -->
+      <a class="nav-item ${currentPage === 'friends' ? 'active' : ''}"
+         href="${hrefs.friends}"
+         aria-label="Friends"
+         aria-current="${currentPage === 'friends' ? 'page' : 'false'}">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="9"  cy="8" r="3"/>
           <path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/>
@@ -166,7 +193,7 @@ function buildNavHTML(currentPage, avatar, hrefs) {
           <path d="M22 20c0-2.8-2.2-5-5-5"/>
         </svg>
         <span class="nav-label">Friends</span>
-      </button>
+      </a>
 
       <!-- ④ PROFILE -->
       <a class="nav-item ${currentPage === 'profile' ? 'active' : ''}"
@@ -198,12 +225,5 @@ export function initBottomNav() {
   // Injecte la nav juste avant </body>
   document.body.insertAdjacentHTML('beforeend', buildNavHTML(currentPage, avatar, hrefs));
 
-  // Gestionnaires "coming soon"
-  document.getElementById('navRanking').addEventListener('click', () => {
-    showToast('Ranking — Coming soon 🔜');
-  });
-
-  document.getElementById('navFriends').addEventListener('click', () => {
-    showToast('Friends — Coming soon 🔜');
-  });
+  // Ranking et Friends sont maintenant de vraies pages — plus de toast
 }

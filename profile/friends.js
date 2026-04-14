@@ -36,12 +36,12 @@ function avatarSrc(avatarData) {
   return avatarData || '../img/default_avatar.png';
 }
 
-/** Renders avatar wrapped in .fr-avatar-wrap with an optional online dot. */
+/** Renders avatar wrapped in .fr-avatar-wrap with an online/offline/unknown dot. */
 function avatarHTML(pseudo, avatarData, borderColor = '#ffffff', lastSeen = null) {
   const online = isOnline(lastSeen);
-  const dot = lastSeen !== null
-    ? `<span class="fr-dot ${online ? 'fr-dot--online' : 'fr-dot--offline'}"></span>`
-    : '';
+  // Always show dot: green = online (<30min), orange = offline, grey = never seen (null)
+  const dotClass = lastSeen === null ? 'fr-dot--unknown' : (online ? 'fr-dot--online' : 'fr-dot--offline');
+  const dot = `<span class="fr-dot ${dotClass}"></span>`;
   return `<div class="fr-avatar-wrap">
     <img class="fr-avatar"
          src="${esc(avatarSrc(avatarData))}"

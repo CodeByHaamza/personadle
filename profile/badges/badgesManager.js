@@ -2,7 +2,7 @@
 // 🎖️ PERSONADLE - GESTIONNAIRE DE BADGES
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { badgesList, eventCodes, isEventCodeValid, getBadgeById } from "./badgesData.js";
+import { badgesList, BADGE_CATEGORIES, eventCodes, isEventCodeValid, getBadgeById } from "./badgesData.js";
 
 // ───────────────────────────────────────────────────────────────────────────
 // 🔧 CONSTANTES
@@ -10,6 +10,87 @@ import { badgesList, eventCodes, isEventCodeValid, getBadgeById } from "./badges
 const MAX_SELECTED_BADGES = 4;
 const NOTIFICATION_DURATION = 4000;
 const MESSAGE_DISPLAY_DURATION = 3000;
+
+// ───────────────────────────────────────────────────────────────────────────
+// 🔔 FILE DE NOTIFICATIONS (sequential queue)
+// ───────────────────────────────────────────────────────────────────────────
+const _notifQueue = [];
+let   _notifBusy  = false;
+
+/** Ajoute un badge à la file et démarre la lecture si elle est libre. */
+function queueNotification(badge) {
+  _notifQueue.push(badge);
+  if (!_notifBusy) _drainNotifQueue();
+}
+
+/** Lit la file une notification à la fois. */
+function _drainNotifQueue() {
+  if (_notifQueue.length === 0) { _notifBusy = false; return; }
+  _notifBusy = true;
+  const badge = _notifQueue.shift();
+  _showBadgeNotificationImmediate(badge, () => _drainNotifQueue());
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// 🌐 HELPERS I18N
+// ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * Retourne le nom traduit d'un badge selon la langue active.
+ * Priorité : lang JSON → fallback sur badge.name (EN hardcodé).
+ */
+function getBadgeName(badge) {
+  const t = window.i18n?.t;
+  if (t) {
+    const translated = t(`badges.${badge.id}.name`);
+    // t() retourne la clé brute si introuvable — on vérifie
+    if (translated && !translated.startsWith('badges.')) return translated;
+  }
+  return badge.name;
+}
+
+/**
+ * Retourne la description traduite d'un badge.
+ */
+function getBadgeDescription(badge) {
+  const t = window.i18n?.t;
+  if (t) {
+    const translated = t(`badges.${badge.id}.description`);
+    if (translated && !translated.startsWith('badges.')) return translated;
+  }
+  return badge.description || '';
+}
+
+/**
+ * Retourne la condition traduite d'un badge.
+ * Si secret et verrouillé, retourne "???".
+ */
+function getBadgeCondition(badge, isUnlocked) {
+  if (badge.secret && !isUnlocked) return '???';
+  const t = window.i18n?.t;
+  if (t) {
+    const translated = t(`badges.${badge.id}.condition`);
+    if (translated && !translated.startsWith('badges.')) return translated;
+  }
+  return badge.condition;
+}
+
+// Labels des catégories (traduits dynamiquement)
+const CATEGORY_LABELS = {
+  [BADGE_CATEGORIES.ACHIEVEMENT]: { icon: '🏆', key: 'badges.category_achievement', fallback: 'Achievements' },
+  [BADGE_CATEGORIES.EVENT]:       { icon: '🎟️', key: 'badges.category_event',       fallback: 'Events'       },
+  [BADGE_CATEGORIES.SECRET]:      { icon: '🔒', key: 'badges.category_secret',      fallback: 'Secrets'      },
+  [BADGE_CATEGORIES.SOCIAL]:      { icon: '👥', key: 'badges.category_social',      fallback: 'Social'       },
+};
+
+function getCategoryLabel(category) {
+  const meta = CATEGORY_LABELS[category];
+  if (!meta) return category;
+  const t = window.i18n?.t;
+  const label = t ? t(meta.key) : null;
+  const name = (label && !label.startsWith('badges.')) ? label : meta.fallback;
+  return `${meta.icon} ${name}`;
+}
 
 // ───────────────────────────────────────────────────────────────────────────
 // 🎯 INITIALISATION DU SYSTÈME
@@ -198,43 +279,55 @@ export function unlockBadge(profile, saveProfile, badgeId) {
 // ───────────────────────────────────────────────────────────────────────────
 
 /**
- * Affiche une notification de déblocage de badge
- * @param {Object} badge - Le badge débloqué
- */
-/**
- * Affiche une notification de déblocage de badge
+ * Affiche une notification de déblocage de badge (via la file — ne se superpose pas).
  * @param {Object} badge - Le badge débloqué
  */
 function showBadgeNotification(badge) {
+  queueNotification(badge);
+}
+
+/**
+ * Affiche immédiatement une notification ; appelle `onDone` une fois terminée.
+ * Appelée exclusivement par _drainNotifQueue().
+ */
+function _showBadgeNotificationImmediate(badge, onDone) {
   const notif = document.createElement("div");
   notif.className = "badge-notification";
-  notif.style.cursor = "pointer"; // 👈 Indique que c'est cliquable
+  notif.style.cursor = "pointer";
+  const notifTitle = window.i18n?.t('badges.notification_title') || '🎖️ Badge Unlocked!';
+  const name = getBadgeName(badge);
+  const desc = getBadgeDescription(badge);
+
   notif.innerHTML = `
     <div class="badge-notif-content">
-      <img src="${badge.img}" alt="${badge.name}" onerror="this.src=new URL('./images/default.png',import.meta.url).href">
+      <img src="${badge.img}" alt="${name}" onerror="this.src=new URL('./images/default.png',import.meta.url).href">
       <div>
-        <h4>🎖️ Badge Unlocked!</h4>
-        <p><strong>${badge.name}</strong></p>
-        <small>${badge.description}</small>
+        <h4>${notifTitle}</h4>
+        <p><strong>${name}</strong></p>
+        <small>${desc}</small>
       </div>
     </div>
   `;
-  
+
   document.body.appendChild(notif);
 
-  // 👆 ÉVÉNEMENT CLICK POUR OUVRIR LA PREVIEW
+  // Click : ferme immédiatement et passe à la suivante
   notif.onclick = () => {
-    notif.remove(); // Fermer la notification
-    showBadgeZoom(badge); // Ouvrir la preview
+    notif.remove();
+    showBadgeZoom(badge);
+    onDone();
   };
 
   // Animation d'entrée
   setTimeout(() => notif.classList.add("show"), 100);
-  
-  // Animation de sortie
+
+  // Animation de sortie → puis callback pour la suivante
   setTimeout(() => {
     notif.classList.remove("show");
-    setTimeout(() => notif.remove(), 300);
+    setTimeout(() => {
+      notif.remove();
+      onDone();
+    }, 300);
   }, NOTIFICATION_DURATION);
 }
 
@@ -246,13 +339,17 @@ function showBadgeZoom(badge) {
   const modal = document.createElement("div");
   modal.className = "badge-zoom-modal";
 
+  const zName = getBadgeName(badge);
+  const zDesc = getBadgeDescription(badge);
+  const zCond = getBadgeCondition(badge, true); // dans le zoom on montre toujours la condition
+
   modal.innerHTML = `
     <div class="badge-zoom-content">
       <span class="badge-zoom-close">&times;</span>
-      <img src="${badge.img}" alt="${badge.name}">
-      <h3>${badge.name}</h3>
-      <p class="badge-condition">${badge.condition}</p>
-      ${badge.description ? `<p class="badge-description">${badge.description}</p>` : ''}
+      <img src="${badge.img}" alt="${zName}">
+      <h3>${zName}</h3>
+      <p class="badge-condition">${zCond}</p>
+      ${zDesc ? `<p class="badge-description">${zDesc}</p>` : ''}
     </div>
   `;
 
@@ -324,7 +421,7 @@ function renderBadgesPreview(profile) {
  * @param {Object} profile - Le profil utilisateur
  * @param {Function} saveProfile - Fonction de sauvegarde
  */
-function renderBadgesModal(profile, saveProfile) {
+export function renderBadgesModal(profile, saveProfile) {
   const grid = document.getElementById("badgesGrid");
   const counter = document.getElementById("badgesCounter");
   const openBtn = document.getElementById("openBadgesModal");
@@ -336,39 +433,75 @@ function renderBadgesModal(profile, saveProfile) {
     return;
   }
 
-  // Filtrer les badges : masquer les secrets non débloqués
-  const visibleBadges = badgesList.filter(
-    (badge) => !badge.secret || profile.badges.includes(badge.id)
-  );
+  // Regrouper les badges par catégorie (secrets non débloqués masqués)
+  const categoryOrder = [
+    BADGE_CATEGORIES.ACHIEVEMENT,
+    BADGE_CATEGORIES.EVENT,
+    BADGE_CATEGORIES.SOCIAL,
+    BADGE_CATEGORIES.SECRET,
+  ];
 
-  // Générer la grille de badges
-  grid.innerHTML = visibleBadges
-    .map((badge) => {
-      const isUnlocked = profile.badges.includes(badge.id);
-      const isSelected = profile.selectedBadges.includes(badge.id);
-      
-      return `
-        <div 
-          class="badge-item ${!isUnlocked ? "locked" : ""} ${isSelected ? "selected" : ""}" 
-          data-id="${badge.id}" 
-          data-unlocked="${isUnlocked}"
-        >
-          <img 
-            src="${badge.img}" 
-            alt="${badge.name}"
-            onerror="this.src=new URL('./images/default.png',import.meta.url).href"
-          >
-          <p>${badge.name}</p>
-          ${isSelected ? '<span class="check-mark">✓</span>' : ""}
-          <div class="badge-tooltip">
-            ${isUnlocked ? "🔓" : "🔒"} <strong>${badge.name}</strong><br>
-            <span>${badge.secret && !isUnlocked ? "???" : badge.condition}</span><br>
-            <small style="opacity:0.8;">${badge.description}</small>
-          </div>
+  const grouped = {};
+  categoryOrder.forEach(cat => { grouped[cat] = []; });
+
+  badgesList.forEach(badge => {
+    // Masquer les secrets non débloqués
+    if (badge.secret && !profile.badges.includes(badge.id)) return;
+    const cat = badge.category || BADGE_CATEGORIES.ACHIEVEMENT;
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(badge);
+  });
+
+  // Générer le HTML par sections
+  let html = '';
+  categoryOrder.forEach(cat => {
+    const badges = grouped[cat];
+    if (!badges || badges.length === 0) return;
+
+    const unlockedInCat = badges.filter(b => profile.badges.includes(b.id)).length;
+    const catLabel = getCategoryLabel(cat);
+
+    html += `
+      <div class="badges-category-section" data-category="${cat}">
+        <div class="badges-category-header">
+          <span class="badges-category-title">${catLabel}</span>
+          <span class="badges-category-count">${unlockedInCat}/${badges.length}</span>
         </div>
-      `;
-    })
-    .join("");
+        <div class="badges-grid">
+          ${badges.map(badge => {
+            const isUnlocked = profile.badges.includes(badge.id);
+            const isSelected = profile.selectedBadges.includes(badge.id);
+            const name = getBadgeName(badge);
+            const desc = getBadgeDescription(badge);
+            const cond = getBadgeCondition(badge, isUnlocked);
+
+            return `
+              <div
+                class="badge-item ${!isUnlocked ? "locked" : ""} ${isSelected ? "selected" : ""}"
+                data-id="${badge.id}"
+                data-unlocked="${isUnlocked}"
+              >
+                <img
+                  src="${badge.img}"
+                  alt="${name}"
+                  onerror="this.src=new URL('./images/default.png',import.meta.url).href"
+                >
+                <p>${name}</p>
+                ${isSelected ? '<span class="check-mark">✓</span>' : ''}
+                <div class="badge-tooltip">
+                  ${isUnlocked ? '🔓' : '🔒'} <strong>${name}</strong><br>
+                  <span>${cond}</span><br>
+                  <small style="opacity:0.8;">${desc}</small>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  grid.innerHTML = html;
 
   // Mettre à jour le compteur
   updateBadgeCounter(profile, counter);
@@ -397,8 +530,13 @@ function updateBadgeCounter(profile, counter) {
   const unlockedBadges = profile.badges.length;
   const percentage = Math.round((unlockedBadges / totalBadges) * 100);
 
+  const t = window.i18n?.t;
+  const unlockedLabel = (t && !t('profile.badges_unlocked').startsWith('profile.'))
+    ? t('profile.badges_unlocked')
+    : 'badges unlocked';
+
   counter.innerHTML = `
-    🔓 <strong>${unlockedBadges} / ${totalBadges}</strong> badges unlocked 
+    🔓 <strong>${unlockedBadges} / ${totalBadges}</strong> ${unlockedLabel}
     <span style="opacity:0.7;">(${percentage}%)</span>
   `;
 }

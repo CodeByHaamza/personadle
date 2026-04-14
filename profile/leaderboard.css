@@ -164,10 +164,10 @@
    ===================================================== */
 
 .lb-table-card {
-  background: #fff;
+  background: linear-gradient(180deg, #13131f 0%, #1a1a2e 100%);
   border-radius: var(--lb-radius);
-  border: 1.5px solid var(--lb-border);
-  box-shadow: var(--lb-shadow);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
   overflow: hidden;
   position: relative;
 }
@@ -177,7 +177,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--lb-accent) 0%, var(--lb-accent-light) 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--lb-accent) 30%, var(--lb-accent-light) 60%, transparent 100%);
   z-index: 1;
 }
 
@@ -187,7 +187,7 @@
 
 .lb-loading {
   text-align: center;
-  color: #bbb;
+  color: rgba(255,255,255,0.25);
   font-size: 0.85rem;
   padding: 48px 0;
   margin: 0;
@@ -199,13 +199,13 @@
 
 .lb-my-rank {
   padding: 12px 20px;
-  background: linear-gradient(90deg, rgba(var(--lb-accent-rgb), 0.07) 0%, transparent 100%);
-  border-bottom: 1px solid var(--lb-border);
+  background: linear-gradient(90deg, rgba(var(--lb-accent-rgb), 0.12) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 0.82rem;
-  color: #555;
+  color: rgba(255,255,255,0.6);
 }
 
 .lb-my-rank__rank {
@@ -300,7 +300,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 4px;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   border-left: 3px solid transparent;
   border-radius: 4px;
   transition: background 0.12s, transform 0.1s, border-left-color 0.15s;
@@ -312,7 +312,7 @@
 .lb-row:last-child { border-bottom: none; }
 
 .lb-row--n:hover {
-  background: rgba(var(--lb-accent-rgb), 0.03);
+  background: rgba(var(--lb-accent-rgb), 0.07);
   border-left-color: var(--lb-accent);
   transform: translateX(3px);
 }
@@ -324,13 +324,13 @@
   font-weight: 700;
   min-width: 36px;
   text-align: center;
-  color: #d0d0d0;
+  color: rgba(255,255,255,0.25);
   flex-shrink: 0;
 }
 
 /* Mise en avant du joueur connecté */
 .lb-row--me {
-  background: rgba(var(--lb-accent-rgb), 0.04) !important;
+  background: rgba(var(--lb-accent-rgb), 0.08) !important;
   border-left-color: var(--lb-accent) !important;
 }
 
@@ -348,9 +348,9 @@
   height: 38px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e0e0e0;
+  border: 2px solid rgba(255,255,255,0.15);
   flex-shrink: 0;
-  background: #f0f0f0;
+  background: rgba(255,255,255,0.06);
   transition: transform 0.15s;
 }
 
@@ -367,7 +367,7 @@
 .lb-pseudo {
   font-weight: 700;
   font-size: 0.88rem;
-  color: #1a1a1a;
+  color: rgba(255,255,255,0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -375,7 +375,7 @@
 
 .lb-sub {
   font-size: 0.7rem;
-  color: #c0c0c0;
+  color: rgba(255,255,255,0.3);
   margin-top: 1px;
   letter-spacing: 0.02em;
 }
@@ -385,7 +385,7 @@
   font-family: 'Oswald', 'Arial Black', Arial, monospace;
   font-size: 1rem;
   font-weight: 700;
-  color: #2a2a2a;
+  color: rgba(255,255,255,0.85);
   white-space: nowrap;
   flex-shrink: 0;
   min-width: 50px;
@@ -397,13 +397,13 @@
   font-size: 0.75rem;
   font-weight: 700;
   font-family: inherit;
-  color: #ccc;
+  color: rgba(255,255,255,0.3);
   text-decoration: none;
   flex-shrink: 0;
   padding: 4px 9px;
   border-radius: 8px;
-  border: 1px solid #eee;
-  background: #fafafa;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
   transition: color 0.15s, background 0.15s, border-color 0.15s;
   white-space: nowrap;
 }
@@ -422,7 +422,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #e0e0e0;
+  color: rgba(255,255,255,0.2);
   font-size: 0.65rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -436,7 +436,7 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #e8e8e8, transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
 }
 
 /* =====================================================
@@ -480,10 +480,10 @@
    10. DARK MODE
    ===================================================== */
 
+/* Table card et rows : déjà sombres en light mode — dark mode les assombrit encore un peu */
 .darkmode .lb-table-card {
-  background: #1a1a1a;
-  border-color: #2a2a2a;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  background: linear-gradient(180deg, #0d0d18 0%, #111122 100%);
+  border-color: rgba(255,255,255,0.04);
 }
 
 /* Filter card : reste sombre en dark mode (déjà sombre en light mode) */
@@ -492,11 +492,7 @@
   border-color: rgba(255,255,255,0.04);
 }
 
-.darkmode .lb-row { border-color: #242424; }
-
-.darkmode .lb-row--n:hover {
-  background: rgba(var(--lb-accent-rgb), 0.06);
-}
+.darkmode .lb-row { border-color: rgba(255,255,255,0.04); }
 
 /* Top 3 dark mode */
 .darkmode .lb-row--1 {
@@ -515,48 +511,20 @@
   border-color: rgba(205,127,50,0.38);
 }
 
-.darkmode .lb-row--me {
-  background: rgba(var(--lb-accent-rgb), 0.08) !important;
-}
-
-.darkmode .lb-pseudo  { color: #f0f0f0; }
-.darkmode .lb-sub     { color: #484848; }
-.darkmode .lb-score   { color: #e8e8e8; }
-
-.darkmode .lb-row--1 .lb-score { color: var(--lb-gold); }
-.darkmode .lb-row--2 .lb-score { color: var(--lb-silver); }
-.darkmode .lb-row--3 .lb-score { color: var(--lb-bronze); }
-
-.darkmode .lb-rank { color: #383838; }
-
-.darkmode .lb-avatar { border-color: #333; background: #2a2a2a; }
-
 .darkmode .lb-my-rank {
   background: linear-gradient(90deg, rgba(var(--lb-accent-rgb), 0.1) 0%, transparent 100%);
-  border-color: #252525;
-  color: #888;
+  border-color: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.5);
 }
 
-.darkmode .lb-pagination { border-color: #242424; }
-.darkmode .lb-page-info  { color: #555; }
-.darkmode .btn-action    { background: #262626; color: #ccc; border-color: #383838; }
-.darkmode .btn-action:hover { background: #303030; }
+.darkmode .lb-pagination { border-color: rgba(255,255,255,0.05); }
+.darkmode .lb-page-info  { color: rgba(255,255,255,0.3); }
+.darkmode .btn-action    { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.1); }
+.darkmode .btn-action:hover { background: rgba(255,255,255,0.1); }
 
-.darkmode .lb-profile-link {
-  color: #555;
-  background: #1e1e1e;
-  border-color: #303030;
-}
-
-.darkmode .lb-profile-link:hover {
-  color: #fff;
-  background: var(--lb-accent);
-  border-color: var(--lb-accent);
-}
-
-.darkmode .lb-podium-divider { color: #2a2a2a; }
+.darkmode .lb-podium-divider { color: rgba(255,255,255,0.1); }
 .darkmode .lb-podium-divider::before,
-.darkmode .lb-podium-divider::after { background: linear-gradient(90deg, transparent, #2a2a2a, transparent); }
+.darkmode .lb-podium-divider::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
 
 /* =====================================================
    11. ÉTAT VIDE / ERREUR
@@ -580,19 +548,19 @@
 
 .lb-empty__text {
   font-size: 0.85rem;
-  color: #bbb;
+  color: rgba(255,255,255,0.4);
   font-weight: 600;
   margin: 0;
 }
 
 .lb-empty__sub {
   font-size: 0.75rem;
-  color: #d0d0d0;
+  color: rgba(255,255,255,0.25);
   margin: 0;
 }
 
-.darkmode .lb-empty__text { color: #484848; }
-.darkmode .lb-empty__sub  { color: #383838; }
+.darkmode .lb-empty__text { color: rgba(255,255,255,0.25); }
+.darkmode .lb-empty__sub  { color: rgba(255,255,255,0.15); }
 
 /* =====================================================
    12. FILTER NOTE
@@ -603,12 +571,13 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 9px 14px;
-  background: rgba(230, 57, 70, 0.05);
-  border: 1px solid rgba(230, 57, 70, 0.12);
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #111118 0%, #1a1a28 100%);
+  border: 1px solid rgba(230, 57, 70, 0.3);
   border-radius: 10px;
   font-size: 0.76rem;
-  min-height: 36px;
+  min-height: 38px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
 }
 
 .lb-fn-chips {
@@ -618,7 +587,7 @@
 }
 
 .lb-fn-chip {
-  background: rgba(230, 57, 70, 0.1);
+  background: rgba(230, 57, 70, 0.18);
   color: var(--lb-accent);
   padding: 2px 9px;
   border-radius: 100px;
@@ -627,27 +596,29 @@
   letter-spacing: 0.05em;
   font-size: 0.73rem;
   text-transform: uppercase;
+  border: 1px solid rgba(230, 57, 70, 0.25);
 }
 
 .lb-fn-sep {
-  color: #999;
+  color: rgba(255,255,255,0.3);
   font-size: 0.7rem;
 }
 
 .lb-fn-note {
-  color: #aaa;
+  color: rgba(255,255,255,0.45);
   font-size: 0.72rem;
   font-style: italic;
   flex: 1;
 }
 
+/* Filter note reste sombre en dark mode (déjà sombre en light mode) */
 .darkmode .lb-filter-note {
-  background: rgba(230, 57, 70, 0.07);
-  border-color: rgba(230, 57, 70, 0.16);
+  background: linear-gradient(135deg, #0d0d12 0%, #131320 100%);
+  border-color: rgba(230, 57, 70, 0.25);
 }
 
-.darkmode .lb-fn-note  { color: #555; }
-.darkmode .lb-fn-sep   { color: #444; }
+.darkmode .lb-fn-note  { color: rgba(255,255,255,0.3); }
+.darkmode .lb-fn-sep   { color: rgba(255,255,255,0.2); }
 
 /* =====================================================
    13. RESPONSIVE

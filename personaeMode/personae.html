@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../css/global.css?v=3" />
   <link rel="stylesheet" href="./personae.css?v=3" />
   <link rel="stylesheet" href="../css/filterMenu.css" />
+  <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 </head>
 
@@ -277,8 +278,8 @@
   <div class="giveup-block" style="display: flex; justify-content: center; margin-top: 20px; gap: 12px;">
     <div class="link-wrapper" id="giveUpButton">
       <div class="img-wrapper">
-        <img class="normal" src="../assets/buttons/Give-up_button.webp" alt="Give Up" style="height: 90px;">
-        <img class="active" src="../assets/buttons/Give-up_button_rouge.webp" alt="Give Up" style="height: 90px;">
+        <img class="normal" src="../assets/buttons/EN/Give-up_Button.webp" alt="Give Up" style="height: 90px;">
+        <img class="active" src="../assets/buttons/EN/Give-up_Button_Rouge.webp" alt="Give Up" style="height: 90px;">
       </div>
       <div class="shape-wrapper">
         <div class="shape red-fill jelly">
@@ -299,8 +300,8 @@
       <!-- Replay -->
       <div class="link-wrapper" id="resetButton">
         <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/Replay_button.webp" alt="Replay" style="height: 90px;">
-          <img class="active" src="../assets/buttons/Replay_button_rouge.webp" alt="Replay" style="height: 90px;">
+          <img class="normal" src="../assets/buttons/EN/Replay_Button.webp" alt="Replay" style="height: 90px;">
+          <img class="active" src="../assets/buttons/EN/Replay_Button_Rouge.webp" alt="Replay" style="height: 90px;">
         </div>
         <div class="shape-wrapper">
           <div class="shape red-fill jelly">
@@ -330,8 +331,8 @@
       <!-- Submit -->
       <div class="link-wrapper" id="guessButton">
         <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/Submit_button.webp" alt="Submit" style="height: 90px;">
-          <img class="active" src="../assets/buttons/Submit_button_rouge.webp" alt="Submit" style="height: 90px;">
+          <img class="normal" src="../assets/buttons/EN/Submit_Button.webp" alt="Submit" style="height: 90px;">
+          <img class="active" src="../assets/buttons/EN/Submit_Button_Rouge.webp" alt="Submit" style="height: 90px;">
         </div>
         <div class="shape-wrapper">
           <div class="shape red-fill jelly">
@@ -418,12 +419,27 @@ window.__i18nReady = initLang();
   });
 </script>
 
+<!-- Bottom nav -->
+<script type="module">
+import { initBottomNav } from '../js/bottomNav.js';
+initBottomNav();
+</script>
+
+<!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
+<script type="module">
+import { initAuth } from '../js/auth.js';
+initAuth().catch(() => {}); // fire-and-forget : le mode fonctionne même sans backend
+</script>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('../sw.js').catch(err => {
       console.warn('[SW] Registration failed:', err);
     });
+  });
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'SW_UPDATED') { window.location.reload(); }
   });
 }
 </script>
