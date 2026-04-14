@@ -337,6 +337,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.__i18nReady) await window.__i18nReady;
 
   attachFilterListeners();
-  renderFilterNote();
-  loadLeaderboard();
+  loadLeaderboard(); // calls renderFilterNote() internally
 });
