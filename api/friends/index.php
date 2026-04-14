@@ -42,13 +42,15 @@ $pdo    = pdo();
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($method === 'GET') {
     // Amis acceptés (relation dans les deux sens)
+    // NOTE: PDO with ATTR_EMULATE_PREPARES=false (MySQL native prepares) does not allow
+    // reusing the same named parameter. Each occurrence needs a unique name.
     $stmt = $pdo->prepare("
         SELECT
             f.id AS friendship_id,
             f.status,
             f.created_at,
-            CASE WHEN f.requester_id = :me THEN f.addressee_id ELSE f.requester_id END AS friend_id,
-            CASE WHEN f.requester_id = :me THEN 'sent' ELSE 'received' END             AS direction,
+            CASE WHEN f.requester_id = :me1 THEN f.addressee_id ELSE f.requester_id END AS friend_id,
+            CASE WHEN f.requester_id = :me2 THEN 'sent' ELSE 'received' END             AS direction,
             u.pseudo,
             u.friend_code,
             u.last_login_at,
@@ -56,14 +58,20 @@ if ($method === 'GET') {
             p.avatar_border_color,
             p.selected_badges
         FROM friendships f
-        JOIN users u ON u.id = CASE WHEN f.requester_id = :me THEN f.addressee_id ELSE f.requester_id END
+        JOIN users u ON u.id = CASE WHEN f.requester_id = :me3 THEN f.addressee_id ELSE f.requester_id END
         LEFT JOIN profiles p ON p.user_id = u.id
-        WHERE (f.requester_id = :me OR f.addressee_id = :me)
+        WHERE (f.requester_id = :me4 OR f.addressee_id = :me5)
           AND f.status IN ('accepted', 'pending')
           AND u.is_deleted = 0
         ORDER BY f.status DESC, f.created_at DESC
     ");
-    $stmt->execute([':me' => $authId]);
+    $stmt->execute([
+        ':me1' => $authId,
+        ':me2' => $authId,
+        ':me3' => $authId,
+        ':me4' => $authId,
+        ':me5' => $authId,
+    ]);
     $rows = $stmt->fetchAll();
 
     $friends  = [];

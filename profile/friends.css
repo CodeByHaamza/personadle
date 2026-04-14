@@ -117,6 +117,15 @@
   background: var(--fr-accent-light);
 }
 
+/* Bouton "+ Add" inline dans la barre de recherche */
+.fr-search-add-btn {
+  padding: 5px 12px;
+  font-size: 0.72rem;
+  border-radius: 100px;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
 /* ──────────────────────────────────────────────────────────
    4. CARDS
    ────────────────────────────────────────────────────────── */
@@ -437,52 +446,8 @@
 }
 
 /* ──────────────────────────────────────────────────────────
-   10. ADD BY CODE
+   10. ADD BY CODE (message feedback sous la barre de recherche)
    ────────────────────────────────────────────────────────── */
-.fr-add-code-wrap {
-  background: var(--fr-surface);
-  border-radius: var(--fr-radius);
-  border: 1.5px solid var(--fr-border);
-  box-shadow: var(--fr-shadow);
-  padding: 14px 16px;
-}
-
-.fr-add-code-label {
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--fr-text-muted);
-  margin: 0 0 8px;
-}
-
-.fr-add-code-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.fr-add-code-input {
-  flex: 1;
-  border: 1.5px solid var(--fr-border);
-  border-radius: 10px;
-  padding: 9px 14px;
-  font-size: 0.88rem;
-  font-family: monospace;
-  background: var(--fr-surface);
-  color: var(--fr-text);
-  outline: none;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.fr-add-code-input:focus {
-  border-color: var(--fr-accent);
-  box-shadow: 0 0 0 3px var(--fr-accent-light);
-}
-
 .fr-add-code-msg {
   font-size: 0.78rem;
   margin: 7px 0 0;
@@ -577,11 +542,6 @@
 .darkmode .fr-dot          { border-color: var(--fr-surface); }
 .darkmode .fr-dot--offline { background: #444; }
 .darkmode .fr-dot--unknown { background: #555; }
-.darkmode .fr-add-code-input {
-  background: var(--fr-surface-alt);
-  border-color: #444;
-  color: var(--fr-text);
-}
 
 /* ──────────────────────────────────────────────────────────
    12. RESPONSIVE
@@ -615,7 +575,5 @@
 
   .fr-search-input { font-size: 0.85rem; }
 
-  .fr-add-code-wrap { padding: 12px 12px; }
-  .fr-add-code-input { font-size: 0.82rem; padding: 8px 10px; }
   .fr-dot { width: 10px; height: 10px; }
 }

@@ -58,7 +58,7 @@
 <!-- ── Connecté ── -->
 <main id="friendsConnected" class="fr-page hidden">
 
-  <!-- Barre de recherche globale -->
+  <!-- Barre de recherche — search players OR add by friend code (8-char alphanumeric) -->
   <div class="fr-search-wrap">
     <div class="fr-search-box">
       <span class="fr-search-icon">🔍</span>
@@ -67,27 +67,13 @@
              class="fr-search-input"
              maxlength="60"
              autocomplete="off"
+             spellcheck="false"
              data-i18n-placeholder="friends.search_placeholder"
              placeholder="Search by name or friend code…">
-      <button id="browseSearchClear" class="fr-search-clear hidden" title="Clear">✕</button>
-    </div>
-  </div>
-
-  <!-- Add friend by code -->
-  <div class="fr-add-code-wrap" id="addByCodeSection">
-    <p class="fr-add-code-label" data-i18n="friends.add_by_code_label">Add by Friend Code</p>
-    <div class="fr-add-code-row">
-      <input type="text"
-             id="addByCodeInput"
-             class="fr-add-code-input"
-             maxlength="8"
-             autocomplete="off"
-             spellcheck="false"
-             data-i18n-placeholder="friends.add_by_code_placeholder"
-             placeholder="Friend code…">
-      <button id="addByCodeBtn" class="fr-btn fr-btn--add">
+      <button id="browseSearchAddBtn" class="fr-btn fr-btn--add fr-search-add-btn hidden" title="Send friend request">
         <span data-i18n="friends.add_btn">Add</span>
       </button>
+      <button id="browseSearchClear" class="fr-search-clear hidden" title="Clear">✕</button>
     </div>
     <p id="addByCodeMsg" class="fr-add-code-msg hidden"></p>
   </div>

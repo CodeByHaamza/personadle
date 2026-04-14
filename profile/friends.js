@@ -418,34 +418,50 @@ async function removeFriend(friendshipId) {
 }
 
 // ─────────────────────────────────────────────────────────
-// 8. RECHERCHE + PAGINATION
+// 8. RECHERCHE + ADD BY CODE (barre unifiée)
 // ─────────────────────────────────────────────────────────
 
+/** Pattern d'un friend code valide : exactement 8 chars alphanumériques. */
+const CODE_RE = /^[A-Z0-9]{8}$/;
+
+/**
+ * Gère la saisie dans la barre de recherche unifiée.
+ * Si la valeur est un friend code (8 chars alnum), on affiche le bouton "+ Add".
+ * Sinon on lance la recherche de joueurs.
+ */
 function handleSearchInput(value) {
   clearTimeout(searchTimer);
 
   const clearBtn = document.getElementById('browseSearchClear');
-  if (clearBtn) clearBtn.classList.toggle('hidden', !value.length);
+  const addBtn   = document.getElementById('browseSearchAddBtn');
+  const msg      = document.getElementById('addByCodeMsg');
+
+  const trimmed = value.trim();
+  const isCode  = CODE_RE.test(trimmed.toUpperCase());
+
+  if (clearBtn) clearBtn.classList.toggle('hidden', !trimmed.length);
+  if (addBtn)   addBtn.classList.toggle('hidden', !isCode);
+  // Effacer le message de résultat précédent dès que l'utilisateur retape
+  if (msg && trimmed.length > 0) { msg.className = 'fr-add-code-msg hidden'; }
 
   searchTimer = setTimeout(() => {
-    loadBrowse(value.trim(), 0);
+    loadBrowse(trimmed, 0);
   }, 350);
 }
 
-// ─────────────────────────────────────────────────────────
-// ADD BY CODE
-// ─────────────────────────────────────────────────────────
-
+/**
+ * Envoie une demande d'ami depuis la barre unifiée (quand c'est un code détecté).
+ */
 async function handleAddByCode() {
-  const input = document.getElementById('addByCodeInput');
-  const msg   = document.getElementById('addByCodeMsg');
-  const btn   = document.getElementById('addByCodeBtn');
-  if (!input || !msg || !btn) return;
+  const input  = document.getElementById('browseSearch');
+  const msg    = document.getElementById('addByCodeMsg');
+  const addBtn = document.getElementById('browseSearchAddBtn');
+  if (!input || !msg || !addBtn) return;
 
   const code = input.value.trim().toUpperCase();
-  if (!code) return;
+  if (!CODE_RE.test(code)) return;
 
-  btn.disabled = true;
+  addBtn.disabled = true;
   msg.className = 'fr-add-code-msg hidden';
 
   try {
@@ -454,12 +470,14 @@ async function handleAddByCode() {
     msg.textContent = t('friends.add_success') || 'Friend request sent!';
     msg.className = 'fr-add-code-msg fr-add-code-msg--success';
     input.value = '';
+    addBtn.classList.add('hidden');
+    document.getElementById('browseSearchClear')?.classList.add('hidden');
     await loadBrowse(state.browseQuery, state.browsePage);
   } catch (err) {
     msg.textContent = err.message || t('friends.error_send') || 'Could not send friend request.';
     msg.className = 'fr-add-code-msg fr-add-code-msg--error';
   } finally {
-    btn.disabled = false;
+    addBtn.disabled = false;
   }
 }
 
@@ -468,16 +486,29 @@ async function handleAddByCode() {
 // ─────────────────────────────────────────────────────────
 
 function attachListeners() {
-  // ── Recherche browse ──────────────────────────────────
+  // ── Barre de recherche unifiée (search + add by code) ──
   const searchInput = document.getElementById('browseSearch');
   const clearBtn    = document.getElementById('browseSearchClear');
+  const addBtn      = document.getElementById('browseSearchAddBtn');
 
   searchInput?.addEventListener('input', e => handleSearchInput(e.target.value));
 
   clearBtn?.addEventListener('click', () => {
     if (searchInput) searchInput.value = '';
     clearBtn.classList.add('hidden');
+    addBtn?.classList.add('hidden');
+    const msg = document.getElementById('addByCodeMsg');
+    if (msg) msg.className = 'fr-add-code-msg hidden';
     loadBrowse('', 0);
+  });
+
+  addBtn?.addEventListener('click', handleAddByCode);
+
+  // Touche Entrée quand le bouton Add est visible → déclencher l'ajout
+  searchInput?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && addBtn && !addBtn.classList.contains('hidden')) {
+      handleAddByCode();
+    }
   });
 
   // ── Pagination browse ─────────────────────────────────
@@ -493,10 +524,10 @@ function attachListeners() {
   // ── Délégation globale (boutons dynamiques) ───────────
   document.addEventListener('click', async e => {
     // + Add
-    const addBtn = e.target.closest('.js-add');
-    if (addBtn) {
-      addBtn.disabled = true;
-      await sendFriendRequest(addBtn.dataset.code, addBtn.dataset.id);
+    const addEntryBtn = e.target.closest('.js-add');
+    if (addEntryBtn) {
+      addEntryBtn.disabled = true;
+      await sendFriendRequest(addEntryBtn.dataset.code, addEntryBtn.dataset.id);
       return;
     }
 
@@ -522,12 +553,6 @@ function attachListeners() {
       await removeFriend(parseInt(removeBtn.dataset.fid, 10));
       return;
     }
-  });
-
-  // ── Add by code ───────────────────────────────────────
-  document.getElementById('addByCodeBtn')?.addEventListener('click', handleAddByCode);
-  document.getElementById('addByCodeInput')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') handleAddByCode();
   });
 }
 
