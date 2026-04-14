@@ -25,8 +25,34 @@
 // IMPORTS
 // ─────────────────────────────────────────────────────────
 
-import { initBadgesSystem, getBadgesForShare, markProfileAsShared } from './badges/badgesManager.js';
+import { initBadgesSystem, renderBadgesModal, getBadgesForShare, markProfileAsShared } from './badges/badgesManager.js';
 import { songs as ALL_SONGS } from '../musicsMode/database/songs.js';
+
+
+// ─────────────────────────────────────────────────────────
+// ⏱️ FORMAT TEMPS JOUÉ
+// Convertit des minutes en une chaîne lisible selon la durée.
+// ─────────────────────────────────────────────────────────
+function formatPlayTime(totalMinutes) {
+  const lang = localStorage.getItem('lang') || 'en';
+  const U = {
+    en: { min:'min', h:'h', day:['day','days'], week:['week','weeks'], month:['month','months'], year:['year','years'] },
+    fr: { min:'min', h:'h', day:['jour','jours'], week:['semaine','semaines'], month:['mois','mois'], year:['an','ans'] },
+    es: { min:'min', h:'h', day:['día','días'], week:['semana','semanas'], month:['mes','meses'], year:['año','años'] },
+    de: { min:'Min.', h:'Std.', day:['Tag','Tage'], week:['Woche','Wochen'], month:['Monat','Monate'], year:['Jahr','Jahre'] },
+    it: { min:'min', h:'h', day:['giorno','giorni'], week:['settimana','settimane'], month:['mese','mesi'], year:['anno','anni'] },
+  };
+  const u = U[lang] || U.en;
+  const p = (n, [s, pl]) => `${n} ${n <= 1 ? s : pl}`;
+  const m = Math.max(0, Math.round(totalMinutes));
+  const PER_DAY = 1440, PER_WEEK = 10080, PER_MONTH = 43200, PER_YEAR = 525600;
+  if (m < PER_DAY)   return `${m} ${u.min}`;
+  if (m < PER_WEEK)  { const d = Math.floor(m/PER_DAY),  h = Math.floor((m%PER_DAY)/60);  return h  ? `${p(d,u.day)} ${h}${u.h}`         : p(d,u.day);   }
+  if (m < PER_MONTH) { const w = Math.floor(m/PER_WEEK), d = Math.floor((m%PER_WEEK)/PER_DAY);   return d  ? `${p(w,u.week)} ${p(d,u.day)}`   : p(w,u.week);  }
+  if (m < PER_YEAR)  { const mo= Math.floor(m/PER_MONTH),w = Math.floor((m%PER_MONTH)/PER_WEEK); return w  ? `${p(mo,u.month)} ${p(w,u.week)}` : p(mo,u.month);}
+  const yr = Math.floor(m/PER_YEAR), mo = Math.floor((m%PER_YEAR)/PER_MONTH);
+  return mo ? `${p(yr,u.year)} ${p(mo,u.month)}` : p(yr,u.year);
+}
 
 
 // ─────────────────────────────────────────────────────────
@@ -317,6 +343,70 @@ function saveProfile() {
 
 
 // ─────────────────────────────────────────────────────────
+// SYNC STATS DEPUIS LE BACKEND
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Récupère les stats depuis le backend et écrase les valeurs localStorage.
+ * Appelé une fois après auth-ready si l'utilisateur est connecté.
+ * En cas d'erreur (offline, serveur), les stats localStorage sont conservées.
+ *
+ * @param {number} userId - ID de l'utilisateur connecté
+ */
+async function syncStatsFromBackend(userId) {
+  const api = window._personadleApi;
+  if (!api) return;
+
+  // Mapping API (lowercase) → localStorage (PascalCase)
+  const modeKeyMap = {
+    classic:      'Classic',
+    emoji:        'Emoji',
+    silhouette:   'Silhouette',
+    alloutattack: 'AllOutAttack',
+    personae:     'Personae',
+    music:        'Music',
+  };
+
+  try {
+    const { stats } = await api.stats.get(userId);
+    const g = stats.global;
+
+    // Écraser les stats globales
+    profile.stats.wins             = g.total_wins;
+    profile.stats.giveups          = g.total_giveups;
+    profile.stats.games            = g.total_games;
+    profile.stats.streakRecord     = g.best_streak;
+    profile.stats.totalTimeMinutes = Math.round(g.total_time_ms / 60000);
+    profile.stats.perfectWins      = g.total_perfect_wins;
+
+    // Streak courant = max des streaks actifs par mode
+    profile.stats.streak = Math.max(0, ...stats.by_mode.map(m => m.streak ?? 0));
+
+    // Stats par mode
+    profile.stats.modeCount = {};
+    profile.stats.modeWins  = {};
+    stats.by_mode.forEach(m => {
+      const key = modeKeyMap[m.mode];
+      if (key) {
+        profile.stats.modeCount[key] = m.games;
+        profile.stats.modeWins[key]  = m.wins;
+      }
+    });
+
+    // Mode favori = celui avec le plus de parties
+    const fav = stats.by_mode.reduce((best, m) => (!best || m.games > best.games) ? m : best, null);
+    if (fav) profile.stats.favoriteMode = modeKeyMap[fav.mode] ?? fav.mode;
+
+    saveProfile();
+    renderStats();
+    renderModeStats();
+  } catch {
+    // Offline ou erreur serveur — conserver les stats localStorage
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────
 // AFFICHAGE DES STATISTIQUES
 // ─────────────────────────────────────────────────────────
 
@@ -397,7 +487,7 @@ function renderStats() {
     { icon: '🏳️', value: s.giveups || 0,                       label: 'Give-ups'     },
     { icon: '🎮', value: s.games || 0,                          label: 'Games Played' },
     { icon: '⭐', value: s.streakRecord || 0,                   label: 'Best Streak'  },
-    { icon: '⏱️', value: `${s.totalTimeMinutes || 0} min`,     label: 'Time Played'  },
+    { icon: '⏱️', value: formatPlayTime(s.totalTimeMinutes || 0), label: 'Time Played'  },
     { icon: '📅', value: s.firstPlayed?.split('T')[0] || '—',  label: 'First Played', full: true },
     { icon: '🎯', value: modeFav,                               label: 'Fav Mode',     full: true },
   ];
@@ -1239,15 +1329,26 @@ function attachPreviewClicksToImages() {
  * @param {Object} badge
  */
 function showBadgeZoom(badge) {
+  // Helpers i18n — même logique que getBadgeName/Description dans badgesManager.js
+  const _t = window.i18n?.t;
+  const _tr = (key, fallback) => {
+    if (!_t) return fallback;
+    const v = _t(key);
+    return (v && !v.startsWith('badges.')) ? v : fallback;
+  };
+  const name = _tr(`badges.${badge.id}.name`,        badge.name);
+  const cond = _tr(`badges.${badge.id}.condition`,   badge.condition);
+  const desc = _tr(`badges.${badge.id}.description`, badge.description || '');
+
   const modal = document.createElement('div');
   modal.className = 'badge-zoom-modal';
   modal.innerHTML = `
     <div class="badge-zoom-content">
       <span class="badge-zoom-close">&times;</span>
-      <img src="${badge.img}" alt="${badge.name}">
-      <h3>${badge.name}</h3>
-      <p class="badge-condition">${badge.condition}</p>
-      ${badge.description ? `<p class="badge-description">${badge.description}</p>` : ''}
+      <img src="${badge.img}" alt="${name}">
+      <h3>${name}</h3>
+      <p class="badge-condition">${cond}</p>
+      ${desc ? `<p class="badge-description">${desc}</p>` : ''}
     </div>
   `;
   document.body.appendChild(modal);
@@ -1359,6 +1460,8 @@ function renderSongCard() {
   if (!card) return;
 
   const hasSong   = !!profile.profileSong?.fichier;
+  // Sur son propre profil la card est toujours visible (le picker sert à choisir).
+  card.classList.remove('hidden');
   const groups    = getSortedSongGroups();
   const savedFile = profile.profileSong?.fichier || null;
 
@@ -1545,9 +1648,18 @@ function setupSongPicker() {
 // ─────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  // En mode "view" (?view=CODE), profile-view.js gère tout — on ne touche pas au DOM
+  if (new URLSearchParams(window.location.search).get('view')) return;
+
   // 1. Charger le profil et initialiser l'UI
   initProfile();
   renderModeStats();
+
+  // 1b. Si l'utilisateur est connecté, écraser les stats localStorage par les données cloud.
+  //     _authResolved est vrai à ce point (auth-ready dispatche AVANT DOMContentLoaded).
+  if (window._authResolved && window._currentUser?.id) {
+    syncStatsFromBackend(window._currentUser.id).catch(() => {});
+  }
   renderThemePicker();
   setupPersoCard();
   initAvatarGrid();
@@ -1557,97 +1669,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. Système de badges
   initBadgesSystem(profile, saveProfile);
 
-  // 3. Auth + migration
-  setupAuth();
+  // 3. Auth — initAuth() est appelé depuis profile.html (bloc <script type="module">)
+  //    setupAuth() supprimé : redondant et en conflit avec initAuth() de js/auth.js
+
+  // 4. Re-render stats + badges à chaque changement de langue (et au chargement initial)
+  //    Listener permanent : capte init + chaque setLang() depuis le sélecteur
+  window.addEventListener('personadle:i18n-ready', () => {
+    renderStats();
+    renderBadgesModal(profile, saveProfile);
+  });
+
+  // Race-condition : si initLang() s'est terminé avant ce listener, l'event est déjà parti
+  if (window.i18nIsReady) {
+    renderStats();
+    renderBadgesModal(profile, saveProfile);
+  }
 });
 
-
-// ─────────────────────────────────────────────────────────
-// AUTH — Login / Register / Migration
-// ─────────────────────────────────────────────────────────
-
-/**
- * Initialise le système d'authentification :
- * - Vérifie si l'utilisateur est connecté (api.auth.me)
- * - Affiche l'état connecté ou déconnecté
- * - Wire les boutons login / register / logout / migration
- *
- * Le backend n'étant pas encore live, toutes les actions affichent
- * le message auth.error_backend_offline.
- */
-function setupAuth() {
-  const i18n = window.i18n || { t: k => k };
-
-  // ── Éléments DOM ──
-  const authGuest   = document.getElementById('authGuest');
-  const authUser    = document.getElementById('authUser');
-  const authPseudo  = document.getElementById('authUserPseudo');
-  const loginModal  = document.getElementById('loginModal');
-  const regModal    = document.getElementById('registerModal');
-  const migSection  = document.getElementById('migrationSection');
-
-  // ── Helpers d'état ──
-  function showGuest()        { authGuest?.classList.remove('hidden'); authUser?.classList.add('hidden'); migSection?.classList.add('hidden'); }
-  function showUser(pseudo)   { authGuest?.classList.add('hidden');    authUser?.classList.remove('hidden'); if (authPseudo) authPseudo.textContent = pseudo; migSection?.classList.remove('hidden'); }
-  function openModal(el)      { el?.classList.remove('hidden'); document.body.classList.add('modal-open'); }
-  function closeModal(el)     { el?.classList.add('hidden');    document.body.classList.remove('modal-open'); }
-  function showAuthError(id, key) {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = i18n.t(key); el.classList.remove('hidden'); }
-  }
-
-  // ── Vérifier la session au chargement ──
-  // Le backend n'est pas live — on reste en mode guest
-  showGuest();
-
-  // ── Ouvrir les modales ──
-  document.getElementById('btnOpenLogin')?.addEventListener('click',    () => openModal(loginModal));
-  document.getElementById('btnOpenRegister')?.addEventListener('click', () => openModal(regModal));
-  document.getElementById('closeLoginModal')?.addEventListener('click',    () => closeModal(loginModal));
-  document.getElementById('closeRegisterModal')?.addEventListener('click', () => closeModal(regModal));
-  document.getElementById('switchToLogin')?.addEventListener('click',    () => { closeModal(regModal);   openModal(loginModal); });
-  document.getElementById('switchToRegister')?.addEventListener('click', () => { closeModal(loginModal); openModal(regModal);   });
-
-  // Fermer au clic sur l'overlay
-  [loginModal, regModal].forEach(modal => {
-    modal?.addEventListener('click', e => { if (e.target === modal) closeModal(modal); });
-  });
-
-  // ── Login ──
-  document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    // Backend pas encore live — message informatif
-    showAuthError('loginError', 'auth.error_backend_offline');
-  });
-
-  // ── Register ──
-  document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const pwd     = document.getElementById('registerPassword')?.value;
-    const confirm = document.getElementById('registerPasswordConfirm')?.value;
-    if (pwd !== confirm) { showAuthError('registerError', 'auth.error_passwords_mismatch'); return; }
-    // Backend pas encore live — message informatif
-    showAuthError('registerError', 'auth.error_backend_offline');
-  });
-
-  // ── Logout ──
-  document.getElementById('btnLogout')?.addEventListener('click', () => {
-    showGuest();
-  });
-
-  // ── Migration ──
-  document.getElementById('btnMigrate')?.addEventListener('click', async () => {
-    const statusEl = document.getElementById('migrationStatus');
-    const saved    = localStorage.getItem('personaUserProfile');
-    if (!saved) return;
-
-    // Backend pas encore live — on simule le succès pour préparer l'UI
-    if (statusEl) {
-      statusEl.textContent = i18n.t('auth.error_backend_offline');
-      statusEl.className   = 'migration-status migration-status--info';
-    }
-  });
-}
 
 // Attacher les handlers de zoom badges après leur rendu
 window.addEventListener('badgesRendered', () => {

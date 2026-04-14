@@ -50,30 +50,35 @@
     if (localStorage.getItem('darkMode') === 'enabled') {
       document.documentElement.classList.add('darkmode');
     }
-    // Application anticipée du thème UI pour éviter le flash rouge → couleur choisie
-    try {
-      var _p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
-      var _themes = {
-        all_out:            { a: '#E63946', h: '#C1121F', l: '#FF9999', r: '230, 57, 70'   },
-        velvet_room:        { a: '#1B3A8A', h: '#162E72', l: '#60A5FA', r: '27, 58, 138'   },
-        dark_hour:          { a: '#00B4D8', h: '#0077B6', l: '#48CAE4', r: '0, 180, 216'   },
-        pink_ribbon:        { a: '#E8739A', h: '#D0507A', l: '#F9A8D4', r: '232, 115, 154' },
-        midnight_channel:   { a: '#EAB308', h: '#CA8A04', l: '#FEF08A', r: '234, 179, 8'   },
-        demon_palace:       { a: '#9333EA', h: '#7E22CE', l: '#D8B4FE', r: '147, 51, 234'  },
-        eternal_punishment: { a: '#4F46E5', h: '#4338CA', l: '#A5B4FC', r: '79, 70, 229'   },
-        golden_labyrinth:   { a: '#F97316', h: '#EA6C12', l: '#FDBA74', r: '249, 115, 22'  },
-      };
-      var _t = _themes[_p.profileTheme];
-      if (_t) {
-        var s = document.documentElement.style;
-        s.setProperty('--accent', _t.a);
-        s.setProperty('--accent-hover', _t.h);
-        s.setProperty('--accent-light', _t.l);
-        s.setProperty('--accent-rgb', _t.r);
-      } else if (_p.profileTheme === 'custom' && _p.profileCustomColor) {
-        document.documentElement.style.setProperty('--accent', _p.profileCustomColor);
-      }
-    } catch(e) {}
+    // En mode vue (?view=), le thème sera appliqué par profile-view.js
+    // d'après le profil du joueur consulté — ne pas appliquer le thème local.
+    var _isViewMode = new URLSearchParams(window.location.search).has('view');
+    if (!_isViewMode) {
+      // Application anticipée du thème UI pour éviter le flash rouge → couleur choisie
+      try {
+        var _p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+        var _themes = {
+          all_out:            { a: '#E63946', h: '#C1121F', l: '#FF9999', r: '230, 57, 70'   },
+          velvet_room:        { a: '#1B3A8A', h: '#162E72', l: '#60A5FA', r: '27, 58, 138'   },
+          dark_hour:          { a: '#00B4D8', h: '#0077B6', l: '#48CAE4', r: '0, 180, 216'   },
+          pink_ribbon:        { a: '#E8739A', h: '#D0507A', l: '#F9A8D4', r: '232, 115, 154' },
+          midnight_channel:   { a: '#EAB308', h: '#CA8A04', l: '#FEF08A', r: '234, 179, 8'   },
+          demon_palace:       { a: '#9333EA', h: '#7E22CE', l: '#D8B4FE', r: '147, 51, 234'  },
+          eternal_punishment: { a: '#4F46E5', h: '#4338CA', l: '#A5B4FC', r: '79, 70, 229'   },
+          golden_labyrinth:   { a: '#F97316', h: '#EA6C12', l: '#FDBA74', r: '249, 115, 22'  },
+        };
+        var _t = _themes[_p.profileTheme];
+        if (_t) {
+          var s = document.documentElement.style;
+          s.setProperty('--accent', _t.a);
+          s.setProperty('--accent-hover', _t.h);
+          s.setProperty('--accent-light', _t.l);
+          s.setProperty('--accent-rgb', _t.r);
+        } else if (_p.profileTheme === 'custom' && _p.profileCustomColor) {
+          document.documentElement.style.setProperty('--accent', _p.profileCustomColor);
+        }
+      } catch(e) {}
+    }
   </script>
 </head>
 <body>
@@ -114,7 +119,7 @@
     <div class="lang-opt lang-opt--en" data-lang="en" role="option" tabindex="0" aria-label="English">
       <span class="lang-opt-name">English</span>
       <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char" src="../assets/lang/Ann_takamaki_english.webp" alt="Ann Takamaki" loading="lazy">
+      <img class="lang-opt-char" src="../assets/lang/Lisa_Silverman_english.webp" alt="Lisa Silverman" loading="lazy">
     </div>
     <div class="lang-opt lang-opt--fr" data-lang="fr" role="option" tabindex="0" aria-label="Français">
       <span class="lang-opt-name">Français</span>
@@ -124,14 +129,17 @@
     <div class="lang-opt lang-opt--es" data-lang="es" role="option" tabindex="0" aria-label="Español">
       <span class="lang-opt-name">Español</span>
       <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="../assets/lang/Morgana_Spanish.webp" alt="Morgana" loading="lazy">
     </div>
     <div class="lang-opt lang-opt--de" data-lang="de" role="option" tabindex="0" aria-label="Deutsch">
       <span class="lang-opt-name">Deutsch</span>
       <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="../assets/lang/Hulkenberg_german.webp" alt="Hulkenberg" loading="lazy">
     </div>
     <div class="lang-opt lang-opt--it" data-lang="it" role="option" tabindex="0" aria-label="Italiano">
       <span class="lang-opt-name">Italiano</span>
       <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="../assets/lang/Caesar_italian.webp" alt="Caesar" loading="lazy">
     </div>
   </div>
 </div>
@@ -189,20 +197,20 @@
             <span data-i18n="ui.my_account">My Account</span>
           </div>
           <!-- État : non connecté -->
-          <div id="authGuest" class="auth-guest">
-            <button id="btnOpenLogin" class="btn-auth btn-auth--login">
+          <div id="authGuest" data-auth="anonymous" class="auth-guest">
+            <button id="btnOpenLogin" data-open-modal="loginModal" class="btn-auth btn-auth--login">
               🔐 <span data-i18n="auth.login">Log in</span>
             </button>
-            <button id="btnOpenRegister" class="btn-auth btn-auth--register">
+            <button id="btnOpenRegister" data-open-modal="registerModal" class="btn-auth btn-auth--register">
               ✨ <span data-i18n="auth.register">Create account</span>
             </button>
           </div>
-          <!-- État : connecté (masqué par défaut) -->
-          <div id="authUser" class="auth-user hidden">
+          <!-- État : connecté -->
+          <div id="authUser" data-auth="connected" class="auth-user" style="display:none">
             <p class="auth-welcome">
-              👋 <span id="authUserPseudo"></span>
+              👋 <span data-auth-field="pseudo" id="authUserPseudo"></span>
             </p>
-            <button id="btnLogout" class="btn-auth btn-auth--logout">
+            <button data-action="logout" id="btnLogout" class="btn-auth btn-auth--logout">
               <span data-i18n="auth.logout">Log out</span>
             </button>
           </div>
@@ -252,7 +260,8 @@
       </div>
 
       <!-- ── Card : Profile Song ── -->
-      <div class="song-card" id="songCard"></div>
+      <!-- Masquée par défaut, affichée par renderSongCard() / renderViewSongCard() -->
+      <div class="song-card hidden" id="songCard"></div>
 
     </aside>
 
@@ -492,11 +501,16 @@ async function selectLang(lang) {
   await setLang(lang);
   applyActive(lang);
   closeDropdown();
+  // Re-rend stats + badges dans la langue choisie
+  window.dispatchEvent(new CustomEvent('personadle:i18n-ready'));
 }
 
 (async () => {
   const lang = await initLang();
   applyActive(lang);
+  // Flag lisible en cas de race condition (event déjà parti avant que le listener soit prêt)
+  window.i18nIsReady = true;
+  window.dispatchEvent(new CustomEvent('personadle:i18n-ready'));
 
   document.getElementById('langBtn').addEventListener('click', e => {
     e.stopPropagation();
@@ -533,8 +547,55 @@ async function selectLang(lang) {
 <!-- html2canvas : génération de l'image de partage -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-<!-- Logique du profil (module ES6) -->
-<script type="module" src="./profile-page.js?v=2"></script>
+<!-- ── Auth FIRST : doit s'exécuter avant profile-page.js pour que
+     window._currentUser soit défini quand profile-page.js en a besoin.
+     Le top-level await bloque le DOMContentLoaded jusqu'à ce que initAuth()
+     soit terminé — garantit l'ordre correct. -->
+<script type="module">
+import { initAuth } from '../js/auth.js';
+await initAuth();
+// Signal : auth est résolue, les autres modules peuvent lire window._currentUser
+window._authResolved = true;
+window.dispatchEvent(new CustomEvent('personadle:auth-ready'));
+</script>
+
+<!-- Logique du profil (module ES6) — chargé APRÈS initAuth() -->
+<script type="module" src="./profile-page.js?v=3"></script>
+
+<!-- Bouton migration manuelle localStorage → cloud -->
+<script type="module">
+// Bouton migration manuelle (visible si connecté et pas encore migré)
+const btnMigrate = document.getElementById('btnMigrate');
+if (btnMigrate) {
+  btnMigrate.addEventListener('click', async () => {
+    const status = document.getElementById('migrationStatus');
+    btnMigrate.disabled = true;
+
+    const profileRaw  = localStorage.getItem('personaUserProfile');
+    const sessionsRaw = localStorage.getItem('pendingSessions');
+
+    try {
+      const { user } = await window._personadleApi.auth.me();
+      if (!user) { if (status) status.textContent = '❌ Not logged in.'; return; }
+
+      const result = await window._personadleApi.user.migrate({
+        profile:         profileRaw  ? JSON.parse(profileRaw)  : null,
+        pendingSessions: sessionsRaw ? JSON.parse(sessionsRaw) : [],
+      });
+
+      localStorage.removeItem('pendingSessions');
+      localStorage.setItem('migratedToCloud', 'true');
+
+      if (status) status.textContent =
+        `✅ ${result.migrated_sessions} session(s) imported, ${result.skipped_sessions} skipped.`;
+    } catch (e) {
+      if (status) status.textContent = '❌ ' + e.message;
+    } finally {
+      btnMigrate.disabled = false;
+    }
+  });
+}
+</script>
 
 <!-- Barre de navigation + dark mode -->
 <script type="module">
@@ -650,11 +711,22 @@ initBottomNav();
   </div>
 </div>
 
+<!-- Mode lecture seule : activé quand ?view=FRIENDCODE est dans l'URL -->
+<script type="module" src="./profile-view.js?v=3"></script>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('../sw.js').catch(err => {
       console.warn('[SW] Registration failed:', err);
+    });
+
+    // Quand le SW se met à jour, recharger la page automatiquement
+    // pour servir les nouveaux assets sans Ctrl+Shift+R.
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data?.type === 'SW_UPDATED') {
+        window.location.reload();
+      }
     });
   });
 }
