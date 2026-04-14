@@ -17,7 +17,7 @@
  * ────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION = 'personadle-v1';
+const CACHE_VERSION = 'personadle-v11';
 
 /**
  * Assets à pré-cacher lors de l'installation.
@@ -77,6 +77,17 @@ const PRECACHE_URLS = [
   '/profile/profile.js',
   '/profile/profileStats.js',
 
+  /* Pages amis & leaderboard */
+  '/profile/friends.html',
+  '/profile/friends.css',
+  '/profile/friends.js',
+  '/profile/leaderboard.html',
+  '/profile/leaderboard.css',
+  '/profile/leaderboard.js',
+
+  /* JS partagé auth */
+  '/js/auth.js',
+
   /* Sons */
   '/assets/sound_effect/Victory_sound.mp3',
   '/assets/sound_effect/Select_sound.mp3',
@@ -125,7 +136,15 @@ self.addEventListener('activate', (event) => {
             return caches.delete(key);
           })
       )
-    ).then(() => self.clients.claim())
+    ).then(() => {
+      // Prendre le contrôle immédiatement de tous les onglets ouverts
+      return self.clients.claim();
+    }).then(() => {
+      // Notifier tous les clients qu'un nouveau SW est actif → ils peuvent se recharger
+      return self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => client.postMessage({ type: 'SW_UPDATED', version: CACHE_VERSION }));
+      });
+    })
   );
 });
 
@@ -166,7 +185,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* ── 4. Tous les autres assets (CSS, JS, images, sons) → cache-first ── */
+  /* ── 4. JS & CSS → stale-while-revalidate ──
+     Sert immédiatement depuis le cache (rapide) ET met à jour en fond.
+     Garantit que la prochaine visite aura la dernière version.
+     Plus sûr que cache-first qui peut bloquer les mises à jour en dev. */
+  if (request.destination === 'script' || request.destination === 'style') {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  /* ── 5. Images & sons → cache-first (rarement modifiés) ── */
   event.respondWith(cacheFirst(request));
 });
 
