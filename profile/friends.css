@@ -12,9 +12,10 @@
      7. TAGS & BADGES
      8. EMPTY / LOADING
      9. PAGINATION
-    10. GUEST CARD
-    11. DARK MODE
-    12. RESPONSIVE
+    10. ADD BY CODE
+    11. GUEST CARD
+    12. DARK MODE
+    13. RESPONSIVE
    ============================================================= */
 
 /* ──────────────────────────────────────────────────────────
@@ -435,7 +436,7 @@
 }
 
 /* ──────────────────────────────────────────────────────────
-   10.5. ADD BY CODE
+   10. ADD BY CODE
    ────────────────────────────────────────────────────────── */
 .fr-add-code-wrap {
   background: var(--fr-surface);
