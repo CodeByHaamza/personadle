@@ -1,0 +1,700 @@
+/* =============================================================
+   leaderboard.css — Page de classement PersonaDLE v2
+   ─────────────────────────────────────────────────────────────
+   Design inspiré de l'interface Persona 5 :
+   - Filtres sombres, dramatiques, avec icônes par mode
+   - Top 3 avec effet podium coloré et brillance
+   - Lignes épurées avec hover fluide
+   - Scores grands et lisibles (Oswald)
+   ============================================================= */
+
+:root {
+  --lb-gold:         #f0b429;
+  --lb-gold-bg:      rgba(240, 180, 41, 0.12);
+  --lb-silver:       #b0c4d4;
+  --lb-silver-bg:    rgba(176, 196, 212, 0.1);
+  --lb-bronze:       #cd7f32;
+  --lb-bronze-bg:    rgba(205, 127, 50, 0.1);
+  --lb-border:       #ebebeb;
+  --lb-radius:       16px;
+  --lb-shadow:       0 4px 24px rgba(0,0,0,0.08);
+  --lb-accent:       var(--accent, #e63946);
+  --lb-accent-light: var(--accent-light, #ff9999);
+  --lb-accent-rgb:   var(--accent-rgb, 230, 57, 70);
+}
+
+/* =====================================================
+   1. LAYOUT
+   ===================================================== */
+
+.leaderboard-page {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 20px 16px 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* =====================================================
+   2. FILTER CARD — Sombre, style Persona
+   ===================================================== */
+
+.lb-filters-card {
+  background: linear-gradient(160deg, #111118 0%, #1a1a28 100%);
+  border-radius: var(--lb-radius);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.05);
+  padding: 20px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Barre d'accent en haut */
+.lb-filters-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--lb-accent) 30%, var(--lb-accent-light) 60%, transparent 100%);
+}
+
+/* En-tête des filtres "◆ Rankings ◆" */
+.lb-filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.lb-filters-title {
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+
+.lb-filters-diamond {
+  color: var(--lb-accent);
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+.lb-filter-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lb-filter-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  padding-top: 7px;
+  min-width: 44px;
+  flex-shrink: 0;
+}
+
+/* =====================================================
+   3. PILLS — style P5 sur fond sombre
+   ===================================================== */
+
+.lb-filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lb-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.55);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, transform 0.1s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.lb-pill:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.85);
+  transform: translateY(-1px);
+}
+
+.lb-pill.active {
+  background: var(--lb-accent);
+  border-color: var(--lb-accent);
+  color: #fff;
+  box-shadow: 0 2px 14px rgba(var(--lb-accent-rgb), 0.45);
+}
+
+/* Pills mode : icône un peu plus grande */
+.lb-filter-pills--modes .lb-pill {
+  padding: 7px 13px;
+}
+
+.lb-pill-icon {
+  font-size: 1em;
+  line-height: 1;
+}
+
+.lb-pill-text {
+  font-size: 0.74rem;
+}
+
+/* =====================================================
+   4. TABLE CARD
+   ===================================================== */
+
+.lb-table-card {
+  background: #fff;
+  border-radius: var(--lb-radius);
+  border: 1.5px solid var(--lb-border);
+  box-shadow: var(--lb-shadow);
+  overflow: hidden;
+  position: relative;
+}
+
+.lb-table-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--lb-accent) 0%, var(--lb-accent-light) 100%);
+  z-index: 1;
+}
+
+.lb-body {
+  padding: 10px 16px 16px;
+}
+
+.lb-loading {
+  text-align: center;
+  color: #bbb;
+  font-size: 0.85rem;
+  padding: 48px 0;
+  margin: 0;
+}
+
+/* =====================================================
+   5. MY RANK BANNER
+   ===================================================== */
+
+.lb-my-rank {
+  padding: 12px 20px;
+  background: linear-gradient(90deg, rgba(var(--lb-accent-rgb), 0.07) 0%, transparent 100%);
+  border-bottom: 1px solid var(--lb-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.lb-my-rank__rank {
+  font-family: 'Oswald', 'Arial Black', sans-serif;
+  font-weight: 700;
+  color: var(--lb-accent);
+  font-size: 1.1rem;
+  min-width: 36px;
+  text-align: center;
+}
+
+.lb-my-rank.hidden { display: none; }
+
+/* =====================================================
+   6. TOP 3 PODIUM — cartes brillantes
+   ===================================================== */
+
+/* Rang 1 — Or : carte pleine avec glow */
+.lb-row--1 {
+  background: linear-gradient(135deg, rgba(240,180,41,0.13) 0%, rgba(240,180,41,0.04) 100%);
+  border: 1.5px solid rgba(240,180,41,0.45);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(240,180,41,0.15), inset 0 1px 0 rgba(240,180,41,0.2);
+  margin: 10px 0 6px;
+  padding: 14px 10px;
+  position: relative;
+}
+
+/* Étincelle subtile sur le rang 1 */
+.lb-row--1::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+/* Rang 2 — Argent */
+.lb-row--2 {
+  background: linear-gradient(135deg, rgba(176,196,212,0.12) 0%, rgba(176,196,212,0.03) 100%);
+  border: 1.5px solid rgba(176,196,212,0.4);
+  border-radius: 10px;
+  box-shadow: 0 3px 14px rgba(176,196,212,0.12);
+  margin: 4px 0;
+  padding: 12px 10px;
+}
+
+/* Rang 3 — Bronze */
+.lb-row--3 {
+  background: linear-gradient(135deg, rgba(205,127,50,0.1) 0%, rgba(205,127,50,0.03) 100%);
+  border: 1.5px solid rgba(205,127,50,0.35);
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(205,127,50,0.1);
+  margin: 4px 0 10px;
+  padding: 11px 10px;
+}
+
+/* Rangs top 3 — rank emoji plus grands */
+.lb-row--1 .lb-rank { color: var(--lb-gold);   font-size: 1.5rem; text-shadow: 0 0 12px rgba(240,180,41,0.5); }
+.lb-row--2 .lb-rank { color: var(--lb-silver); font-size: 1.25rem; }
+.lb-row--3 .lb-rank { color: var(--lb-bronze); font-size: 1.1rem; }
+
+/* Avatars top 3 — plus grands */
+.lb-row--1 .lb-avatar { width: 52px; height: 52px; border-color: var(--lb-gold);   border-width: 2.5px; box-shadow: 0 0 0 3px rgba(240,180,41,0.2); }
+.lb-row--2 .lb-avatar { width: 46px; height: 46px; border-color: var(--lb-silver); border-width: 2px; }
+.lb-row--3 .lb-avatar { width: 42px; height: 42px; border-color: var(--lb-bronze); border-width: 2px; }
+
+/* Scores top 3 */
+.lb-row--1 .lb-score { color: var(--lb-gold);   font-size: 1.3rem; text-shadow: 0 0 8px rgba(240,180,41,0.3); }
+.lb-row--2 .lb-score { color: var(--lb-silver); font-size: 1.1rem; }
+.lb-row--3 .lb-score { color: var(--lb-bronze); font-size: 1rem; }
+
+/* Pseudo rang 1 légèrement plus grand */
+.lb-row--1 .lb-pseudo { font-size: 0.96rem; font-weight: 800; }
+
+/* Hover top 3 */
+.lb-row--1:hover,
+.lb-row--2:hover,
+.lb-row--3:hover {
+  filter: brightness(0.95);
+  transform: translateX(2px);
+}
+
+/* =====================================================
+   7. LEADERBOARD ROWS — lignes régulières
+   ===================================================== */
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid #f5f5f5;
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  transition: background 0.12s, transform 0.1s, border-left-color 0.15s;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.lb-row:last-child { border-bottom: none; }
+
+.lb-row--n:hover {
+  background: rgba(var(--lb-accent-rgb), 0.03);
+  border-left-color: var(--lb-accent);
+  transform: translateX(3px);
+}
+
+/* Rang */
+.lb-rank {
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  min-width: 36px;
+  text-align: center;
+  color: #d0d0d0;
+  flex-shrink: 0;
+}
+
+/* Mise en avant du joueur connecté */
+.lb-row--me {
+  background: rgba(var(--lb-accent-rgb), 0.04) !important;
+  border-left-color: var(--lb-accent) !important;
+}
+
+.lb-row--me .lb-pseudo::after {
+  content: ' ◀';
+  font-size: 0.62em;
+  color: var(--lb-accent);
+  font-weight: 800;
+  margin-left: 2px;
+}
+
+/* Avatar */
+.lb-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+  flex-shrink: 0;
+  background: #f0f0f0;
+  transition: transform 0.15s;
+}
+
+.lb-row:hover .lb-avatar {
+  transform: scale(1.06);
+}
+
+/* Info */
+.lb-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.lb-pseudo {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lb-sub {
+  font-size: 0.7rem;
+  color: #c0c0c0;
+  margin-top: 1px;
+  letter-spacing: 0.02em;
+}
+
+/* Score */
+.lb-score {
+  font-family: 'Oswald', 'Arial Black', Arial, monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2a2a2a;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* Lien profil */
+.lb-profile-link {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #ccc;
+  text-decoration: none;
+  flex-shrink: 0;
+  padding: 4px 9px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  background: #fafafa;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.lb-profile-link:hover {
+  color: #fff;
+  background: var(--lb-accent);
+  border-color: var(--lb-accent);
+}
+
+/* =====================================================
+   8. SÉPARATEUR PODIUM
+   ===================================================== */
+
+.lb-podium-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #e0e0e0;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 0 6px;
+  user-select: none;
+  font-weight: 600;
+}
+
+.lb-podium-divider::before,
+.lb-podium-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e8e8e8, transparent);
+}
+
+/* =====================================================
+   9. PAGINATION
+   ===================================================== */
+
+.lb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--lb-border);
+}
+
+.lb-pagination.hidden { display: none; }
+
+.lb-page-info {
+  font-size: 0.8rem;
+  color: #aaa;
+  font-weight: 600;
+}
+
+.btn-action {
+  padding: 7px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  background: #f4f4f4;
+  color: #444;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-action:hover { background: #eaeaea; border-color: #ccc; }
+.btn-action:disabled { opacity: 0.35; cursor: default; }
+
+/* =====================================================
+   10. DARK MODE
+   ===================================================== */
+
+.darkmode .lb-table-card {
+  background: #1a1a1a;
+  border-color: #2a2a2a;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+/* Filter card : reste sombre en dark mode (déjà sombre en light mode) */
+.darkmode .lb-filters-card {
+  background: linear-gradient(160deg, #0d0d12 0%, #131320 100%);
+  border-color: rgba(255,255,255,0.04);
+}
+
+.darkmode .lb-row { border-color: #242424; }
+
+.darkmode .lb-row--n:hover {
+  background: rgba(var(--lb-accent-rgb), 0.06);
+}
+
+/* Top 3 dark mode */
+.darkmode .lb-row--1 {
+  background: linear-gradient(135deg, rgba(240,180,41,0.16) 0%, rgba(240,180,41,0.05) 100%);
+  border-color: rgba(240,180,41,0.5);
+  box-shadow: 0 4px 20px rgba(240,180,41,0.2), inset 0 1px 0 rgba(240,180,41,0.15);
+}
+
+.darkmode .lb-row--2 {
+  background: linear-gradient(135deg, rgba(176,196,212,0.14) 0%, rgba(176,196,212,0.04) 100%);
+  border-color: rgba(176,196,212,0.4);
+}
+
+.darkmode .lb-row--3 {
+  background: linear-gradient(135deg, rgba(205,127,50,0.12) 0%, rgba(205,127,50,0.04) 100%);
+  border-color: rgba(205,127,50,0.38);
+}
+
+.darkmode .lb-row--me {
+  background: rgba(var(--lb-accent-rgb), 0.08) !important;
+}
+
+.darkmode .lb-pseudo  { color: #f0f0f0; }
+.darkmode .lb-sub     { color: #484848; }
+.darkmode .lb-score   { color: #e8e8e8; }
+
+.darkmode .lb-row--1 .lb-score { color: var(--lb-gold); }
+.darkmode .lb-row--2 .lb-score { color: var(--lb-silver); }
+.darkmode .lb-row--3 .lb-score { color: var(--lb-bronze); }
+
+.darkmode .lb-rank { color: #383838; }
+
+.darkmode .lb-avatar { border-color: #333; background: #2a2a2a; }
+
+.darkmode .lb-my-rank {
+  background: linear-gradient(90deg, rgba(var(--lb-accent-rgb), 0.1) 0%, transparent 100%);
+  border-color: #252525;
+  color: #888;
+}
+
+.darkmode .lb-pagination { border-color: #242424; }
+.darkmode .lb-page-info  { color: #555; }
+.darkmode .btn-action    { background: #262626; color: #ccc; border-color: #383838; }
+.darkmode .btn-action:hover { background: #303030; }
+
+.darkmode .lb-profile-link {
+  color: #555;
+  background: #1e1e1e;
+  border-color: #303030;
+}
+
+.darkmode .lb-profile-link:hover {
+  color: #fff;
+  background: var(--lb-accent);
+  border-color: var(--lb-accent);
+}
+
+.darkmode .lb-podium-divider { color: #2a2a2a; }
+.darkmode .lb-podium-divider::before,
+.darkmode .lb-podium-divider::after { background: linear-gradient(90deg, transparent, #2a2a2a, transparent); }
+
+/* =====================================================
+   11. ÉTAT VIDE / ERREUR
+   ===================================================== */
+
+/* Utilisé quand le classement ne contient aucune entrée
+   ou en cas d'erreur réseau — distinct du spinner de chargement. */
+.lb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 52px 24px;
+  text-align: center;
+}
+
+.lb-empty__icon {
+  font-size: 2.4rem;
+  opacity: 0.35;
+}
+
+.lb-empty__text {
+  font-size: 0.85rem;
+  color: #bbb;
+  font-weight: 600;
+  margin: 0;
+}
+
+.lb-empty__sub {
+  font-size: 0.75rem;
+  color: #d0d0d0;
+  margin: 0;
+}
+
+.darkmode .lb-empty__text { color: #484848; }
+.darkmode .lb-empty__sub  { color: #383838; }
+
+/* =====================================================
+   13. FILTER NOTE
+   ===================================================== */
+
+.lb-filter-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 14px;
+  background: rgba(230, 57, 70, 0.05);
+  border: 1px solid rgba(230, 57, 70, 0.12);
+  border-radius: 10px;
+  font-size: 0.76rem;
+  min-height: 36px;
+}
+
+.lb-fn-chips {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lb-fn-chip {
+  background: rgba(230, 57, 70, 0.1);
+  color: var(--lb-accent);
+  padding: 2px 9px;
+  border-radius: 100px;
+  font-weight: 700;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.05em;
+  font-size: 0.73rem;
+  text-transform: uppercase;
+}
+
+.lb-fn-sep {
+  color: #999;
+  font-size: 0.7rem;
+}
+
+.lb-fn-note {
+  color: #aaa;
+  font-size: 0.72rem;
+  font-style: italic;
+  flex: 1;
+}
+
+.darkmode .lb-filter-note {
+  background: rgba(230, 57, 70, 0.07);
+  border-color: rgba(230, 57, 70, 0.16);
+}
+
+.darkmode .lb-fn-note  { color: #555; }
+.darkmode .lb-fn-sep   { color: #444; }
+
+/* =====================================================
+   12. RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 480px) {
+  .leaderboard-page {
+    padding: 12px 10px 110px;
+    gap: 12px;
+  }
+
+  .lb-filters-card { padding: 16px 14px 14px; gap: 12px; }
+  .lb-filter-group { gap: 8px; }
+  .lb-filter-label { min-width: 38px; font-size: 0.6rem; }
+
+  .lb-pill { padding: 5px 9px; font-size: 0.7rem; }
+  .lb-filter-pills--modes .lb-pill { padding: 6px 10px; }
+  .lb-pill-text { display: none; }
+  .lb-pill-icon { font-size: 1.1em; }
+  /* Sur mobile : mode pills = icônes seules */
+  .lb-filter-pills--modes .lb-pill.active .lb-pill-text { display: inline; }
+  /* Mode pills: horizontal scroll instead of wrap */
+  .lb-filter-pills--modes {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 3px;
+  }
+  .lb-filter-pills--modes::-webkit-scrollbar { display: none; }
+  .lb-filter-pills--modes .lb-pill { scroll-snap-align: start; flex-shrink: 0; }
+
+  .lb-body { padding: 6px 10px 12px; }
+
+  .lb-rank { min-width: 30px; font-size: 0.85rem; }
+
+  .lb-row--1 .lb-avatar { width: 44px; height: 44px; }
+  .lb-row--2 .lb-avatar { width: 40px; height: 40px; }
+  .lb-row--3 .lb-avatar { width: 38px; height: 38px; }
+  .lb-avatar { width: 34px; height: 34px; }
+
+  .lb-pseudo { font-size: 0.83rem; }
+  .lb-score  { font-size: 0.88rem; min-width: 40px; }
+
+  .lb-profile-link { padding: 3px 8px; font-size: 0.72rem; }
+
+  .lb-row--1 { padding: 12px 8px; }
+  .lb-row--2, .lb-row--3 { padding: 10px 8px; }
+}
