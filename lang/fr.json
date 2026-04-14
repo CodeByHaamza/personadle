@@ -19,9 +19,13 @@
     "next_mode": "{{mode}} →",
     "yes": "Oui",
     "no": "Non",
-    "now_playing": "♪ EN COURS"
+    "now_playing": "♪ EN COURS",
+    "loading": "Chargement…",
+    "offline": "Hors ligne",
+    "prev": "← Préc.",
+    "next": "Suivant →",
+    "back_my_profile": "Mon profil"
   },
-
   "modes": {
     "classic": {
       "name": "Classique",
@@ -72,7 +76,6 @@
       "tooltip_persona": "Le Persona spécifique lié au personnage — ou sa forme Shadow.",
       "tooltip_arcana": "L'Arcane du Tarot qui définit son rôle symbolique et narratif."
     },
-
     "emoji": {
       "name": "Emoji",
       "title": "Quel personnage ces emojis décrivent-ils ?",
@@ -100,7 +103,6 @@
       "correct": "✅ Correct ! C'était {{name}} !",
       "giveup_reveal": "Vous avez abandonné ! La réponse était : {{name}}"
     },
-
     "silhouette": {
       "name": "Silhouette",
       "title": "Devinez le personnage Persona du jour d'après sa silhouette !",
@@ -126,7 +128,6 @@
       "correct": "🎉 Vous avez trouvé {{name}} !",
       "giveup_reveal": "❌ La réponse était {{name}}"
     },
-
     "alloutattack": {
       "name": "All-Out Attack",
       "title": "Devinez le personnage Persona du jour !",
@@ -149,7 +150,6 @@
       "prev_mode": "← Mode Emoji",
       "next_mode": "Mode Shadows →"
     },
-
     "personae": {
       "name": "Personae",
       "title": "Devinez l'utilisateur de Persona d'après ses Personae !",
@@ -177,7 +177,6 @@
       "prev_mode": "← Mode Shadows",
       "next_mode": "Mode Musique →"
     },
-
     "music": {
       "name": "Musique",
       "title": "🎵 Devinez la musique Persona !",
@@ -207,15 +206,14 @@
       "prev_mode": "← Mode Personae"
     }
   },
-
   "game": {
     "next_reset": "Prochain personnage dans {{time}}",
     "already_played": "Vous avez déjà joué aujourd'hui !",
     "win_message": "Félicitations ! Trouvé en {{count}} tentative(s) !",
     "giveup_confirm": "Êtes-vous sûr de vouloir abandonner ?",
-    "no_characters_filters": "Aucun personnage disponible avec les filtres actuels."
+    "no_characters_filters": "Aucun personnage disponible avec les filtres actuels.",
+    "community_stats": "{{percent}}% des {{total}} joueurs ont trouvé ça aujourd'hui !"
   },
-
   "profile": {
     "title": "Mon Profil",
     "pseudo_label": "Pseudo",
@@ -231,7 +229,7 @@
     "stat_streak": "📆 Streak actuel : {{count}} jour(s)",
     "stat_best_streak": "🔥 Meilleur Streak : {{count}}",
     "stat_favorite": "🎮 Mode favori : {{mode}}",
-    "stat_time": "⏱️ Temps total : {{count}} min",
+    "stat_time": "⏱️ Temps total : {{value}}",
     "stat_first_played": "📅 Première partie : {{date}}",
     "stat_last_played": "📅 Dernière partie : {{date}}",
     "reset_confirm": "⚠️ Cela effacera définitivement vos données de profil. Voulez-vous continuer ?",
@@ -264,22 +262,24 @@
     "reset_btn": "Réinitialiser le profil",
     "badges_unlocked": "badges débloqués"
   },
-
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",
     "no_badges_preview": "Aucun badge sélectionné.",
+    "category_achievement": "Réussites",
+    "category_event": "Événements",
+    "category_secret": "Secrets",
+    "category_social": "Social",
     "event_code_placeholder": "Entrez un code événement...",
     "event_code_submit": "Utiliser",
     "event_code_success": "Code utilisé ! Badge débloqué.",
     "event_code_error": "Code invalide ou déjà utilisé.",
-
     "ace_detective": {
       "name": "As Détective",
       "condition": "Gagner 10 parties",
       "description": "Vous avez prouvé votre valeur en tant que vrai détective. Rien n'échappe à votre œil acéré !"
     },
     "ace_defective": {
-      "name": "Mauvais Détective",
+      "name": "Détective Raté",
       "condition": "Abandonner 10 fois",
       "description": "Parfois les Shadows sont trop forts. Mais vous revenez toujours !"
     },
@@ -304,7 +304,7 @@
       "description": "Le train part, mais le mystère demeure. Vous avez choisi le chemin de l'ignorance, laissant le vrai coupable sourire dans l'ombre."
     },
     "velvet_headache": {
-      "name": "Migraine Velours",
+      "name": "Migraine de Velours",
       "condition": "Trouver Wonder (Velvet) et Caroline & Justine en All-Out Attack",
       "description": "C'est trop bruyant... Les sœurs se disputent, et l'invité a la migraine. Vous avez été témoin du vrai chaos de la Velvet Room."
     },
@@ -313,7 +313,7 @@
       "condition": "Gagner votre première partie",
       "description": "Le premier pas de votre voyage en tant qu'utilisateur de Persona. Un Wild Card s'est éveillé en vous."
     },
-    "echoes_of_past": {
+    "p1_p2_fan": {
       "name": "Échos du Passé",
       "condition": "Gagner 15 parties en mode Classique",
       "description": "Vous avez marché sur le même chemin que Naoya, Tatsuya et Maya. L'héritage des premiers éveillés perdure à travers vous."
@@ -333,7 +333,7 @@
       "condition": "Trouver les Personae de Yosuke et Yusuke",
       "description": "Vent et Glace, lames croisées ! Vous avez identifié les Personae des artistes au double maniement."
     },
-    "cinema_explorer": {
+    "persona_q_explorer": {
       "name": "Explorateur du Cinéma",
       "condition": "Trouver les 4 personnages exclusifs Persona Q en mode Silhouette",
       "description": "Vous avez exploré le labyrinthe du cinéma et rencontré ses gardiens uniques. Rei, Zen, Hikari et Nagi — tous découverts dans les ombres !"
@@ -343,7 +343,7 @@
       "condition": "Trouver les 12 Personae Picaro",
       "description": "Décerné au Trickster qui reconnaît le passé peint en rouge. Vous avez identifié les esprits rebelles de légendes réincarnées."
     },
-    "spring_awakening": {
+    "rentree": {
       "name": "Éveil du Printemps",
       "condition": "Se connecter le 1er avril",
       "description": "Les cerisiers fleurissent au début d'une nouvelle année scolaire. Vous êtes entré dans la Velvet Room le jour de la cérémonie d'ouverture japonaise."
@@ -378,7 +378,7 @@
       "condition": "Utiliser le code événement Pâques 2026",
       "description": "Cherchez les œufs de Pâques comme vous cherchez les Personae ! Le printemps apporte de nouveaux départs."
     },
-    "phantom_coder": {
+    "github_contributor": {
       "name": "Fantôme Codeur",
       "condition": "Cliquer sur le bouton GitHub",
       "description": "Vous avez consulté le code source ! Un vrai Phantom Thief recueille toujours les informations en premier."
@@ -402,9 +402,38 @@
       "name": "True Confidant",
       "condition": "Atteindre le rang 10 du Social Link avec un ami",
       "description": "Un lien indéfectible forgé à travers victoires et défaites partagées. Un badge pour deux — la preuve que votre amitié transcende le Metaverse."
+    },
+    "sport": {
+      "name": "Esprit Sportif",
+      "condition": "Entrer le code 'SPORT' entre le 6 avril et le 1er mai 2025",
+      "description": "À l'image des équipes de Gekkoukan, Yasogami et Shujin, tu as répondu à l'appel en cette Journée Internationale du Sport !"
+    },
+    "arati": {
+      "name": "Bénédiction d'Arati",
+      "condition": "???",
+      "description": "Reconnu par un vrai créateur de contenu Persona ! Tu fais désormais partie de la communauté."
+    },
+    "chef": {
+      "name": "Chef Cuisinier",
+      "condition": "???",
+      "description": "Le curry de Sojiro, la cuisine de Nanako... Tu sais apprécier les arts culinaires les plus fins de Persona !"
+    },
+    "lobster": {
+      "name": "Homard Artistique",
+      "condition": "???",
+      "description": "Magnifique ! Les contours, la forme... Ce crustacé capture l'essence même de la beauté ! Je dois peindre ça immédiatement !"
+    },
+    "hippocampus_reload": {
+      "name": "Hippocampus Reload",
+      "condition": "Trouver le Mashup ZUTOMAYO x P3R en mode Musique",
+      "description": "Ondes cérébrales synchronisées ! Tu as trouvé le mashup chaotique où les douleurs de la croissance rencontrent la destruction de masse. La mémoire de ce beat ne s'effacera jamais."
+    },
+    "truth_duality": {
+      "name": "Les Deux Visages",
+      "condition": "Trouver Crow et Black Mask en mode All-Out Attack",
+      "description": "Les deux faces d'une même pièce. Le garçon souriant et le masque noir... Les deux visages de la justice révélés."
     }
   },
-
   "social_link": {
     "rank_names": {
       "1": "Inconnu",
@@ -422,7 +451,6 @@
     "rank_up": "Social Link monté en rang ! Vous êtes maintenant {{rank_name}} avec {{pseudo}}.",
     "true_confidant_unlocked": "🎊 True Confidant ! Votre badge avec {{pseudo}} a été généré."
   },
-
   "auth": {
     "login": "Connexion",
     "register": "Créer un compte",
@@ -448,7 +476,6 @@
     "migrate_success": "✅ Profil importé avec succès !",
     "migrate_already_done": "Ton profil est déjà synchronisé."
   },
-
   "leaderboard": {
     "title": "Classement",
     "tab_global": "Global",
@@ -463,9 +490,63 @@
     "period_weekly": "Hebdomadaire",
     "rank_label": "#{{rank}}",
     "score_label": "{{score}} victoires",
-    "your_rank": "Votre classement : #{{rank}}"
+    "your_rank": "Votre classement",
+    "filter_mode": "Mode",
+    "filter_period": "Période",
+    "filter_metric": "Métrique",
+    "period_ever": "Tout temps",
+    "period_month": "Mois",
+    "period_week": "Semaine",
+    "period_day": "Aujourd'hui",
+    "metric_wins": "Victoires",
+    "metric_winrate": "Taux de victoire",
+    "metric_streak": "Meilleure série",
+    "metric_perfect": "Parfait",
+    "metric_games": "Parties",
+    "no_entries": "Aucune entrée pour cette période.",
+    "no_entries_sub": "Joue quelques parties pour apparaître ici !",
+    "others": "Autres",
+    "error": "Impossible de charger le classement.",
+    "filters_title": "Classements",
+    "filter_note": "Les filtres d'opus ne sont pas pris en compte.",
+    "filter_all_modes": "Tous les modes"
   },
-
+  "friends": {
+    "title": "Amis",
+    "search_title": "Trouver un joueur",
+    "search_placeholder": "Rechercher par pseudo ou code ami…",
+    "search_btn": "Rechercher",
+    "pending_title": "Demandes en attente",
+    "list_title": "Mes amis",
+    "no_pending": "Aucune demande en attente.",
+    "no_friends": "Pas encore d'amis. Cherchez des joueurs ci-dessus !",
+    "no_results": "Aucun joueur trouvé.",
+    "search_error": "Recherche échouée. Réessayez.",
+    "login_required": "Connectez-vous pour ajouter des amis et voir leurs profils.",
+    "view_profile": "Voir le profil",
+    "add_friend": "+ Ajouter",
+    "remove_friend": "Retirer",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "request_sent": "Demande envoyée",
+    "thats_you": "C'est vous",
+    "confirm_remove": "Retirer cet ami ?",
+    "error_send": "Impossible d'envoyer la demande d'ami.",
+    "error_respond": "Impossible de traiter cette demande.",
+    "error_remove": "Impossible de retirer l'ami.",
+    "add_by_code_label": "Ajouter par code ami",
+    "add_by_code_placeholder": "Code ami…",
+    "add_btn": "Ajouter",
+    "add_success": "Demande envoyée !",
+    "last_seen_just_now": "à l'instant",
+    "last_seen_minutes": "il y a {{n}}min",
+    "last_seen_hours": "il y a {{n}}h",
+    "last_seen_days": "il y a {{n}}j",
+    "last_seen_long_ago": "il y a longtemps",
+    "no_users": "Aucun joueur pour l'instant.",
+    "browse_title": "Parcourir les joueurs",
+    "load_error": "Impossible de charger les joueurs."
+  },
   "index": {
     "main_title": "Devinez le personnage Persona (Persona 1 à Persona 5)",
     "update_history": "Historique des mises à jour",
@@ -476,7 +557,6 @@
     "feedback_link": "📝 Suggestions & Rapport de bug",
     "news_button": "📰 Nouveautés"
   },
-
   "data": {
     "genre": {
       "Male": "Masculin",
@@ -527,7 +607,6 @@
       "World": "Monde"
     }
   },
-
   "errors": {
     "page_not_found_title": "404 - Velvet Room introuvable 🎭",
     "page_not_found_message": "Vous vous êtes trop éloigné du Metaverse...",

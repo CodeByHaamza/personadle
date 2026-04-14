@@ -19,9 +19,13 @@
     "next_mode": "{{mode}} →",
     "yes": "Yes",
     "no": "No",
-    "now_playing": "♪ NOW PLAYING"
+    "now_playing": "♪ NOW PLAYING",
+    "loading": "Loading…",
+    "offline": "Offline",
+    "prev": "← Prev",
+    "next": "Next →",
+    "back_my_profile": "My profile"
   },
-
   "modes": {
     "classic": {
       "name": "Classic",
@@ -72,7 +76,6 @@
       "tooltip_persona": "The specific Persona linked to the character — or their Shadow form.",
       "tooltip_arcana": "Their Tarot Arcana, which defines their symbolic and narrative role."
     },
-
     "emoji": {
       "name": "Emoji",
       "title": "Which character do these emojis describe?",
@@ -100,7 +103,6 @@
       "correct": "✅ Correct! It was {{name}}!",
       "giveup_reveal": "You gave up! The answer was: {{name}}"
     },
-
     "silhouette": {
       "name": "Silhouette",
       "title": "Guess today's Persona character from their silhouette!",
@@ -126,7 +128,6 @@
       "correct": "🎉 You found {{name}}!",
       "giveup_reveal": "❌ The answer was {{name}}"
     },
-
     "alloutattack": {
       "name": "All-Out Attack",
       "title": "Guess today's Persona character!",
@@ -149,7 +150,6 @@
       "prev_mode": "← Emoji Mode",
       "next_mode": "Shadows Mode →"
     },
-
     "personae": {
       "name": "Personae",
       "title": "Guess the Persona User from their Personae!",
@@ -177,7 +177,6 @@
       "prev_mode": "← Shadows Mode",
       "next_mode": "Music Mode →"
     },
-
     "music": {
       "name": "Music",
       "title": "🎵 Guess the Persona Song!",
@@ -207,15 +206,14 @@
       "prev_mode": "← Personae Mode"
     }
   },
-
   "game": {
     "next_reset": "Next character in {{time}}",
     "already_played": "You already played today!",
     "win_message": "Congratulations! Found in {{count}} attempt(s)!",
     "giveup_confirm": "Are you sure you want to give up?",
-    "no_characters_filters": "No characters available with the current filters."
+    "no_characters_filters": "No characters available with the current filters.",
+    "community_stats": "{{percent}}% of {{total}} players found this today!"
   },
-
   "profile": {
     "title": "My Profile",
     "pseudo_label": "Username",
@@ -231,7 +229,7 @@
     "stat_streak": "📆 Current Streak: {{count}} day(s)",
     "stat_best_streak": "🔥 Best Streak: {{count}}",
     "stat_favorite": "🎮 Favorite Mode: {{mode}}",
-    "stat_time": "⏱️ Total Time: {{count}} min",
+    "stat_time": "⏱️ Total Time: {{value}}",
     "stat_first_played": "📅 First Played: {{date}}",
     "stat_last_played": "📅 Last Played: {{date}}",
     "reset_confirm": "⚠️ This will permanently erase your profile data. Do you want to continue?",
@@ -264,15 +262,17 @@
     "reset_btn": "Reset Profile",
     "badges_unlocked": "badges unlocked"
   },
-
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",
     "no_badges_preview": "No badges selected yet.",
+    "category_achievement": "Achievements",
+    "category_event": "Events",
+    "category_secret": "Secrets",
+    "category_social": "Social",
     "event_code_placeholder": "Enter event code...",
     "event_code_submit": "Redeem",
     "event_code_success": "Code redeemed! Badge unlocked.",
     "event_code_error": "Invalid or already used code.",
-
     "ace_detective": {
       "name": "Ace Detective",
       "condition": "Win 10 games",
@@ -313,7 +313,7 @@
       "condition": "Win your first game",
       "description": "The first step on your journey as a Persona user. A wild card has awakened within you."
     },
-    "echoes_of_past": {
+    "p1_p2_fan": {
       "name": "Echoes of the Past",
       "condition": "Win 15 games in Classic mode",
       "description": "You've walked the same path as Naoya, Tatsuya, and Maya. The legacy of the first awakened lives on through you."
@@ -333,7 +333,7 @@
       "condition": "Find the Personae of Yosuke and Yusuke",
       "description": "Wind and Ice, blades crossed! You've identified the personas of the dual-wielding artists."
     },
-    "cinema_explorer": {
+    "persona_q_explorer": {
       "name": "Cinema Explorer",
       "condition": "Find all 4 Persona Q exclusive characters in Silhouette mode",
       "description": "You've ventured into the cinema's labyrinth and met its unique guardians. Rei, Zen, Hikari, and Nagi — all discovered in the shadows!"
@@ -343,7 +343,7 @@
       "condition": "Find all 12 Picaro Personas",
       "description": "Awarded to the Trickster who recognizes the past painted in red. You identified the rebellious spirits of legends reborn."
     },
-    "spring_awakening": {
+    "rentree": {
       "name": "Spring Awakening",
       "condition": "Log in on April 1st",
       "description": "Cherry blossoms bloom as a new school year begins. You've entered the Velvet Room on Japan's opening ceremony day."
@@ -378,7 +378,7 @@
       "condition": "Redeem the Easter 2026 event code",
       "description": "Hunt for easter eggs like you hunt for Personas! Spring brings new beginnings."
     },
-    "phantom_coder": {
+    "github_contributor": {
       "name": "Phantom Coder",
       "condition": "Click on the GitHub button",
       "description": "You checked the source code! A true Phantom Thief always gathers intel first."
@@ -402,9 +402,38 @@
       "name": "True Confidant",
       "condition": "Reach Social Link Rank 10 with a friend",
       "description": "An unbreakable bond forged through shared victories and defeats. A badge for two — proof that your friendship transcends the Metaverse."
+    },
+    "sport": {
+      "name": "Athletic Spirit",
+      "condition": "Redeem code 'SPORT' between April 6th and May 1st, 2025",
+      "description": "Like the sports teams of Gekkoukan, Yasogami, and Shujin, you've answered the call on International Sports Day!"
+    },
+    "arati": {
+      "name": "Arati's Blessing",
+      "condition": "???",
+      "description": "Recognized by a true Persona content creator! You're part of the community now."
+    },
+    "chef": {
+      "name": "Master Chef",
+      "condition": "???",
+      "description": "Sojiro's curry, Nanako's cooking... You appreciate the finer culinary arts of Persona!"
+    },
+    "lobster": {
+      "name": "Artistic Lobster",
+      "condition": "???",
+      "description": "Magnificent! The contours, the form... This crustacean captures the very essence of beauty! I must paint this immediately!"
+    },
+    "hippocampus_reload": {
+      "name": "Hippocampus Reload",
+      "condition": "Find the ZUTOMAYO x P3R Mashup in Music mode",
+      "description": "Brainwaves synced! You found the chaotic mashup where growing pains meet mass destruction. The memory of this beat will never fade."
+    },
+    "truth_duality": {
+      "name": "Truth & Duality",
+      "condition": "Find both Crow and Black Mask in All-Out Attack mode",
+      "description": "Two sides of the same coin. The pleasant boy and the black mask... Both faces of justice revealed."
     }
   },
-
   "social_link": {
     "rank_names": {
       "1": "Stranger",
@@ -422,7 +451,6 @@
     "rank_up": "Social Link ranked up! You are now {{rank_name}} with {{pseudo}}.",
     "true_confidant_unlocked": "🎊 True Confidant! Your badge with {{pseudo}} has been generated."
   },
-
   "auth": {
     "login": "Log in",
     "register": "Create account",
@@ -448,7 +476,6 @@
     "migrate_success": "✅ Profile imported successfully!",
     "migrate_already_done": "Your profile is already synced."
   },
-
   "leaderboard": {
     "title": "Leaderboard",
     "tab_global": "Global",
@@ -463,9 +490,63 @@
     "period_weekly": "Weekly",
     "rank_label": "#{{rank}}",
     "score_label": "{{score}} wins",
-    "your_rank": "Your rank: #{{rank}}"
+    "your_rank": "Your rank",
+    "filter_mode": "Mode",
+    "filter_period": "Period",
+    "filter_metric": "Metric",
+    "period_ever": "All time",
+    "period_month": "Month",
+    "period_week": "Week",
+    "period_day": "Today",
+    "metric_wins": "Wins",
+    "metric_winrate": "Win rate",
+    "metric_streak": "Best streak",
+    "metric_perfect": "Perfect",
+    "metric_games": "Games",
+    "no_entries": "No entries for this period.",
+    "no_entries_sub": "Play some games to appear here!",
+    "others": "Others",
+    "error": "Could not load leaderboard.",
+    "filters_title": "Rankings",
+    "filter_note": "Opus filters are not factored in.",
+    "filter_all_modes": "All modes"
   },
-
+  "friends": {
+    "title": "Friends",
+    "search_title": "Find a Player",
+    "search_placeholder": "Search by name or friend code…",
+    "search_btn": "Search",
+    "pending_title": "Pending Requests",
+    "list_title": "My Friends",
+    "no_pending": "No pending requests.",
+    "no_friends": "No friends yet. Search for players above!",
+    "no_results": "No players found.",
+    "search_error": "Search failed. Try again.",
+    "login_required": "Log in to add friends and see their profiles.",
+    "view_profile": "View profile",
+    "add_friend": "+ Add",
+    "remove_friend": "Remove",
+    "accept": "Accept",
+    "decline": "Decline",
+    "request_sent": "Request sent",
+    "thats_you": "That's you",
+    "confirm_remove": "Remove this friend?",
+    "error_send": "Could not send friend request.",
+    "error_respond": "Could not process this request.",
+    "error_remove": "Could not remove friend.",
+    "add_by_code_label": "Add by Friend Code",
+    "add_by_code_placeholder": "Friend code…",
+    "add_btn": "Add",
+    "add_success": "Friend request sent!",
+    "last_seen_just_now": "just now",
+    "last_seen_minutes": "{{n}}m ago",
+    "last_seen_hours": "{{n}}h ago",
+    "last_seen_days": "{{n}}d ago",
+    "last_seen_long_ago": "a while ago",
+    "no_users": "No players yet.",
+    "browse_title": "Browse Players",
+    "load_error": "Could not load players."
+  },
   "index": {
     "main_title": "Try to guess the Persona character (Persona 1 to Persona 5)",
     "update_history": "Update History",
@@ -476,7 +557,6 @@
     "feedback_link": "📝 Suggestions & Bug Report",
     "news_button": "📰 News"
   },
-
   "data": {
     "genre": {
       "Male": "Male",
@@ -527,7 +607,6 @@
       "World": "World"
     }
   },
-
   "errors": {
     "page_not_found_title": "404 - Velvet Room not found 🎭",
     "page_not_found_message": "You wandered too far from the Metaverse...",

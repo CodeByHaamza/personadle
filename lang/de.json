@@ -19,9 +19,13 @@
     "next_mode": "{{mode}} →",
     "yes": "Ja",
     "no": "Nein",
-    "now_playing": "♪ LÄUFT JETZT"
+    "now_playing": "♪ LÄUFT JETZT",
+    "loading": "Laden…",
+    "offline": "Offline",
+    "prev": "← Zurück",
+    "next": "Weiter →",
+    "back_my_profile": "Mein Profil"
   },
-
   "modes": {
     "classic": {
       "name": "Klassisch",
@@ -72,7 +76,6 @@
       "tooltip_persona": "Die spezifische Persona, die mit dem Charakter verbunden ist — oder seine Schattenform.",
       "tooltip_arcana": "Seine Tarot-Arcana, die seine symbolische und narrative Rolle definiert."
     },
-
     "emoji": {
       "name": "Emoji",
       "title": "Welchen Charakter beschreiben diese Emojis?",
@@ -100,7 +103,6 @@
       "correct": "✅ Richtig! Es war {{name}}!",
       "giveup_reveal": "Du hast aufgegeben! Die Antwort war: {{name}}"
     },
-
     "silhouette": {
       "name": "Silhouette",
       "title": "Errate den heutigen Persona-Charakter anhand seiner Silhouette!",
@@ -126,7 +128,6 @@
       "correct": "🎉 Du hast {{name}} gefunden!",
       "giveup_reveal": "❌ Die Antwort war {{name}}"
     },
-
     "alloutattack": {
       "name": "All-Out Attack",
       "title": "Errate den heutigen Persona-Charakter!",
@@ -149,7 +150,6 @@
       "prev_mode": "← Emoji-Modus",
       "next_mode": "Schatten-Modus →"
     },
-
     "personae": {
       "name": "Personae",
       "title": "Errate den Persona-Nutzer anhand ihrer Personae!",
@@ -177,7 +177,6 @@
       "prev_mode": "← Schatten-Modus",
       "next_mode": "Musik-Modus →"
     },
-
     "music": {
       "name": "Musik",
       "title": "🎵 Errate den Persona-Song!",
@@ -207,15 +206,14 @@
       "prev_mode": "← Personae-Modus"
     }
   },
-
   "game": {
     "next_reset": "Nächster Charakter in {{time}}",
     "already_played": "Du hast heute schon gespielt!",
     "win_message": "Glückwunsch! Gefunden in {{count}} Versuch(en)!",
     "giveup_confirm": "Bist du sicher, dass du aufgeben willst?",
-    "no_characters_filters": "Keine Charaktere mit den aktuellen Filtern verfügbar."
+    "no_characters_filters": "Keine Charaktere mit den aktuellen Filtern verfügbar.",
+    "community_stats": "{{percent}}% von {{total}} Spielern haben es heute gefunden!"
   },
-
   "profile": {
     "title": "Mein Profil",
     "pseudo_label": "Benutzername",
@@ -231,7 +229,7 @@
     "stat_streak": "📆 Aktuelle Streak: {{count}} Tag(e)",
     "stat_best_streak": "🔥 Beste Streak: {{count}}",
     "stat_favorite": "🎮 Lieblings-Modus: {{mode}}",
-    "stat_time": "⏱️ Gesamtzeit: {{count}} Min",
+    "stat_time": "⏱️ Gesamtzeit: {{value}}",
     "stat_first_played": "📅 Zuerst gespielt: {{date}}",
     "stat_last_played": "📅 Zuletzt gespielt: {{date}}",
     "reset_confirm": "⚠️ Dies löscht deine Profildaten dauerhaft. Möchtest du fortfahren?",
@@ -264,15 +262,17 @@
     "reset_btn": "Profil zurücksetzen",
     "badges_unlocked": "Abzeichen freigeschaltet"
   },
-
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",
     "no_badges_preview": "Noch keine Abzeichen ausgewählt.",
+    "category_achievement": "Errungenschaften",
+    "category_event": "Events",
+    "category_secret": "Geheimnisse",
+    "category_social": "Sozial",
     "event_code_placeholder": "Event-Code eingeben...",
     "event_code_submit": "Einlösen",
     "event_code_success": "Code eingelöst! Abzeichen freigeschaltet.",
     "event_code_error": "Ungültiger oder bereits verwendeter Code.",
-
     "ace_detective": {
       "name": "Ass-Detektiv",
       "condition": "Gewinne 10 Spiele",
@@ -313,7 +313,7 @@
       "condition": "Gewinne dein erstes Spiel",
       "description": "Der erste Schritt auf deiner Reise als Persona-Nutzer. Ein Wildcard hat sich in dir erweckt."
     },
-    "echoes_of_past": {
+    "p1_p2_fan": {
       "name": "Echos der Vergangenheit",
       "condition": "Gewinne 15 Spiele im Klassischen Modus",
       "description": "Du bist denselben Weg gegangen wie Naoya, Tatsuya und Maya. Das Vermächtnis der ersten Erweckten lebt durch dich weiter."
@@ -333,7 +333,7 @@
       "condition": "Finde die Personae von Yosuke und Yusuke",
       "description": "Wind und Eis, gekreuzte Klingen! Du hast die Personae der doppelt bewaffneten Künstler identifiziert."
     },
-    "cinema_explorer": {
+    "persona_q_explorer": {
       "name": "Kino-Entdecker",
       "condition": "Finde alle 4 Persona Q exklusiven Charaktere im Silhouetten-Modus",
       "description": "Du bist ins Labyrinth des Kinos vorgedrungen und hast seine einzigartigen Wächter kennengelernt. Rei, Zen, Hikari und Nagi — alle in den Schatten entdeckt!"
@@ -343,7 +343,7 @@
       "condition": "Finde alle 12 Picaro Personae",
       "description": "Verliehen an den Trickster, der die in Rot gemalte Vergangenheit erkennt. Du hast die rebellischen Geister wiedergeborener Legenden identifiziert."
     },
-    "spring_awakening": {
+    "rentree": {
       "name": "Frühlingserwachen",
       "condition": "Melde dich am 1. April an",
       "description": "Kirschblüten erblühen, während ein neues Schuljahr beginnt. Du hast den Velvet Room am Tag der japanischen Eröffnungszeremonie betreten."
@@ -378,7 +378,7 @@
       "condition": "Löse den Oster-Event-Code 2026 ein",
       "description": "Suche Ostereier wie du nach Personae suchst! Der Frühling bringt neue Anfänge."
     },
-    "phantom_coder": {
+    "github_contributor": {
       "name": "Phantom Coder",
       "condition": "Klicke auf den GitHub-Button",
       "description": "Du hast den Quellcode überprüft! Ein echter Phantom Thief sammelt immer zuerst Informationen."
@@ -402,9 +402,38 @@
       "name": "True Confidant",
       "condition": "Erreiche Social Link Rang 10 mit einem Freund",
       "description": "Ein unzerbrechliches Band, geschmiedet durch gemeinsame Siege und Niederlagen. Ein Abzeichen für zwei — Beweis, dass deine Freundschaft das Metaverse übersteigt."
+    },
+    "sport": {
+      "name": "Sportgeist",
+      "condition": "Gib den Code 'SPORT' zwischen dem 6. April und dem 1. Mai 2025 ein",
+      "description": "Wie die Sportteams von Gekkoukan, Yasogami und Shujin hast du den Ruf am Internationalen Sporttag beantwortet!"
+    },
+    "arati": {
+      "name": "Aratis Segen",
+      "condition": "???",
+      "description": "Von einem echten Persona-Content-Creator erkannt! Du bist jetzt Teil der Community."
+    },
+    "chef": {
+      "name": "Meisterkoch",
+      "condition": "???",
+      "description": "Sojiros Curry, Nanakos Kochen... Du weißt die feinsten kulinarischen Künste von Persona zu schätzen!"
+    },
+    "lobster": {
+      "name": "Künstlerischer Hummer",
+      "condition": "???",
+      "description": "Wunderschön! Die Konturen, die Form... Dieser Krebs fängt das Wesen der Schönheit selbst ein! Ich muss das sofort malen!"
+    },
+    "hippocampus_reload": {
+      "name": "Hippocampus Reload",
+      "condition": "Finde den ZUTOMAYO x P3R Mashup im Musik-Modus",
+      "description": "Gehirnwellen synchronisiert! Du hast den chaotischen Mashup gefunden, in dem Wachstumsschmerzen auf Massenvernichtung treffen. Die Erinnerung an diesen Beat wird niemals verblassen."
+    },
+    "truth_duality": {
+      "name": "Wahrheit & Dualität",
+      "condition": "Finde sowohl Crow als auch Black Mask im All-Out Attack-Modus",
+      "description": "Zwei Seiten derselben Münze. Der freundliche Junge und die schwarze Maske... Beide Gesichter der Gerechtigkeit enthüllt."
     }
   },
-
   "social_link": {
     "rank_names": {
       "1": "Fremder",
@@ -422,7 +451,6 @@
     "rank_up": "Social Link aufgestiegen! Du bist jetzt {{rank_name}} mit {{pseudo}}.",
     "true_confidant_unlocked": "🎊 True Confidant! Dein Abzeichen mit {{pseudo}} wurde generiert."
   },
-
   "auth": {
     "login": "Anmelden",
     "register": "Konto erstellen",
@@ -448,7 +476,6 @@
     "migrate_success": "✅ Profil erfolgreich importiert!",
     "migrate_already_done": "Dein Profil ist bereits synchronisiert."
   },
-
   "leaderboard": {
     "title": "Rangliste",
     "tab_global": "Global",
@@ -463,9 +490,63 @@
     "period_weekly": "Wöchentlich",
     "rank_label": "#{{rank}}",
     "score_label": "{{score}} Siege",
-    "your_rank": "Dein Rang: #{{rank}}"
+    "your_rank": "Dein Rang",
+    "filter_mode": "Modus",
+    "filter_period": "Zeitraum",
+    "filter_metric": "Metrik",
+    "period_ever": "Alle Zeiten",
+    "period_month": "Monat",
+    "period_week": "Woche",
+    "period_day": "Heute",
+    "metric_wins": "Siege",
+    "metric_winrate": "Siegrate",
+    "metric_streak": "Beste Serie",
+    "metric_perfect": "Perfekt",
+    "metric_games": "Spiele",
+    "no_entries": "Keine Einträge für diesen Zeitraum.",
+    "no_entries_sub": "Spiel ein paar Runden, um hier zu erscheinen!",
+    "others": "Andere",
+    "error": "Bestenliste konnte nicht geladen werden.",
+    "filters_title": "Ranglisten",
+    "filter_note": "Opus-Filter werden nicht berücksichtigt.",
+    "filter_all_modes": "Alle Modi"
   },
-
+  "friends": {
+    "title": "Freunde",
+    "search_title": "Spieler finden",
+    "search_placeholder": "Nach Name oder Freundescode suchen…",
+    "search_btn": "Suchen",
+    "pending_title": "Ausstehende Anfragen",
+    "list_title": "Meine Freunde",
+    "no_pending": "Keine ausstehenden Anfragen.",
+    "no_friends": "Noch keine Freunde. Suche oben nach Spielern!",
+    "no_results": "Keine Spieler gefunden.",
+    "search_error": "Suche fehlgeschlagen. Erneut versuchen.",
+    "login_required": "Melde dich an, um Freunde hinzuzufügen und ihre Profile zu sehen.",
+    "view_profile": "Profil anzeigen",
+    "add_friend": "+ Hinzufügen",
+    "remove_friend": "Entfernen",
+    "accept": "Akzeptieren",
+    "decline": "Ablehnen",
+    "request_sent": "Anfrage gesendet",
+    "thats_you": "Das bist du",
+    "confirm_remove": "Diesen Freund entfernen?",
+    "error_send": "Freundschaftsanfrage konnte nicht gesendet werden.",
+    "error_respond": "Diese Anfrage konnte nicht bearbeitet werden.",
+    "error_remove": "Freund konnte nicht entfernt werden.",
+    "add_by_code_label": "Per Code hinzufügen",
+    "add_by_code_placeholder": "Freundescode…",
+    "add_btn": "Hinzufügen",
+    "add_success": "Anfrage gesendet!",
+    "last_seen_just_now": "gerade eben",
+    "last_seen_minutes": "vor {{n}} Min",
+    "last_seen_hours": "vor {{n}} Std",
+    "last_seen_days": "vor {{n}} Tagen",
+    "last_seen_long_ago": "vor langer Zeit",
+    "no_users": "Noch keine Spieler.",
+    "browse_title": "Spieler durchsuchen",
+    "load_error": "Spieler konnten nicht geladen werden."
+  },
   "index": {
     "main_title": "Versuche, den Persona-Charakter zu erraten (Persona 1 bis Persona 5)",
     "update_history": "Update-Verlauf",
@@ -476,7 +557,6 @@
     "feedback_link": "📝 Vorschläge & Fehlerbericht",
     "news_button": "📰 Neuigkeiten"
   },
-
   "data": {
     "genre": {
       "Male": "Männlich",
@@ -527,7 +607,6 @@
       "World": "World"
     }
   },
-
   "errors": {
     "page_not_found_title": "404 - Velvet Room nicht gefunden 🎭",
     "page_not_found_message": "Du bist zu weit vom Metaverse abgewandert...",
