@@ -24,7 +24,8 @@
     "offline": "Hors ligne",
     "prev": "← Préc.",
     "next": "Suivant →",
-    "back_my_profile": "Mon profil"
+    "back_my_profile": "Mon profil",
+    "close": "Fermer"
   },
   "modes": {
     "classic": {
@@ -549,7 +550,23 @@
     "cc_wants_confidant": "veut devenir votre Confident.",
     "cc_accept_social_link": "Accepter ce Social Link ?",
     "cc_yes": "OUI",
-    "cc_no": "NON"
+    "cc_no": "NON",
+    "messages_title": "Messages & Défis",
+    "sent_to": "À",
+    "mark_read": "✓ Marquer comme lu",
+    "challenge_beat": "Battre",
+    "challenge_accept": "⚔ Accepter",
+    "challenge_decline": "✕"
+  },
+  "challenge": {
+    "challenge_friend": "Défier un Ami",
+    "select_friend": "Choisir un ami à défier",
+    "send": "Envoyer",
+    "banner_title": "⚔ Défi en cours",
+    "banner_beat": "Battre",
+    "accept": "⚔ Accepter",
+    "decline": "✕ Refuser",
+    "already_sent": "Déjà envoyé aujourd'hui"
   },
   "settings": {
     "title": "Paramètres",
@@ -632,11 +649,11 @@
     "image_load_timeout": "Délai dépassé pour : {{file}}"
   },
   "social": {
-    "action_visit":   "👁 Visiter +5 XP",
-    "action_score":   "📊 Partager score +10 XP",
+    "action_visit": "👁 Visiter +5 XP",
+    "action_score": "📊 Partager score +10 XP",
     "action_compare": "⚖ Comparer stats +10 XP",
-    "done_today":     "Déjà fait aujourd'hui",
-    "rank_up":        "🎉 Social Link — Rang {{rank}} : {{name}}",
-    "max_rank":       "✨ MAX — True Confidant"
+    "done_today": "Déjà fait aujourd'hui",
+    "rank_up": "🎉 Social Link — Rang {{rank}} : {{name}}",
+    "max_rank": "✨ MAX — True Confidant"
   }
 }

@@ -20,7 +20,7 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| B1 | Schéma BDD 16 tables (MySQL/MariaDB) | ✅ | `sql/bdd_mysql.sql` |
+| B1 | Schéma BDD 19 tables (MySQL/MariaDB) | ✅ | `sql/bdd_mysql.sql` — wallpapers + messages + procédures SQL |
 | B2 | API auth — register, login, logout, me | ✅ | Sessions PHP httpOnly |
 | B3 | API sessions — POST /api/sessions + streaks | ✅ | Calcul streak côté serveur |
 | B4 | API user — GET/PATCH/DELETE + stats + migrate | ✅ | Migration localStorage→BDD |
@@ -44,11 +44,11 @@
 | A3 | Recherche de joueurs | ✅ | Par pseudo, paginée |
 | A4 | Add by friend code (inline) | ✅ | Sans rechargement de page |
 | A5 | Suppression d'ami | ✅ | DELETE /api/friends/:id |
-| A6 | Social Link — XP + rangs 1-10 | 📋 | Voir spec CLAUDE.md §5.9 |
-| A7 | Interactions mutuelles (2× XP) | 📋 | Partage streak, défi, visite... |
+| A6 | Social Link — XP + rangs 1-10 | ✅ | XP, jauge, toast rang-up, flamme |
+| A7 | Interactions mutuelles (2× XP) | ✅ | Anti-spam, procédure SQL |
 | A8 | True Confidant Badge (rang 10) | 📋 | Badge avatars fusionnés |
 | A9 | Comparaison stats côte à côte | 📋 | Sur la page Friends |
-| A10 | Défis entre amis | 📋 | Envoyer/relever un défi quotidien |
+| A10 | Défis entre amis | ✅ | Bandeau + bouton post-victoire 6 modes |
 
 ---
 
@@ -114,9 +114,9 @@
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
 | Q1 | 120 tests unitaires Vitest (tous passants) | ✅ | `npm test` |
-| Q2 | i18n complet EN/FR/ES/DE/IT (511 clés) | ✅ | `npm run i18n:check` |
-| Q3 | Service Worker auto-reload (plus de Ctrl+Shift+R) | ✅ | Listener `SW_UPDATED` sur toutes les pages |
-| Q4 | Offline-first (fallback gracieux) | ✅ | SW v12 |
+| Q2 | i18n complet EN/FR/ES/DE/IT (545 clés) | ✅ | `npm run i18n:check` |
+| Q3 | Service Worker — JS/CSS network-first (plus de Ctrl+Shift+R) | ✅ | SW v16 |
+| Q4 | Offline-first (fallback gracieux) | ✅ | SW v16 |
 | Q5 | BASE_URL API auto-détecté (Apache local + Docker) | ✅ | Détection `pathname.startsWith('/personadle/')` |
 | Q6 | Audit responsive complet | 📋 | 360px → 1440px |
 | Q7 | Tests E2E (Playwright ou Cypress) | 💡 | Post-v2.0 |

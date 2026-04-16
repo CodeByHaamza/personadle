@@ -4,21 +4,27 @@
    dark mode spécifique AOA.
    ============================================================= */
 
-/* ── Persona 5 Font (AoA-specific uses) ─────────────────── */
-/* La déclaration @font-face est dans global.css             */
+/* ── Persona 5 Font — uniquement sur le titre flash victoire ── */
+/* La déclaration @font-face est dans global.css               */
 
-/* Texte de victoire / défaite — style Persona */
-#victoryText {
+/* Titre "ALL OUT ATTACK!" dans la victoryBox */
+.aoa-victory-banner {
   font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
-  font-size: clamp(1rem, 2.5vw, 1.4rem);
-  letter-spacing: 0.05em;
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: #ff2222;
+  text-shadow:
+    0 0 10px rgba(255, 34, 34, 0.8),
+    2px 2px 0 #000;
+  margin: 0 0 8px;
+  animation: aoaBannerPulse 0.6s ease-out forwards;
 }
 
-/* Titre du mode (dans la zone hint) */
-.emoji-hint-zone h1 {
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
-  letter-spacing: 0.08em;
+@keyframes aoaBannerPulse {
+  0%   { transform: scale(1.3); opacity: 0; }
+  60%  { transform: scale(0.95); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 

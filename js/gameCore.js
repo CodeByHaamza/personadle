@@ -547,26 +547,18 @@ export function showChallengeButton(mode, score) {
   const nav = document.getElementById('modeNavigationContainer');
   if (!nav || document.getElementById('challengeFriendBtn')) return;
 
-  const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
+  const t    = (key, fb) => window.i18n?.t?.(key) ?? fb;
   const date = parisDateKey();
 
   const btn = document.createElement('button');
   btn.id        = 'challengeFriendBtn';
   btn.className = 'btn-challenge';
-  btn.style.cssText = [
-    'margin-top:10px', 'padding:8px 18px', 'background:#22c55e', 'color:#fff',
-    'border:none', 'border-radius:8px', 'font-weight:700', 'cursor:pointer',
-    'font-family:inherit', 'font-size:0.82rem', 'display:block', 'width:100%',
-  ].join(';');
-  btn.textContent = `⚔ ${t('challenge.challenge_friend', 'Challenge a Friend')}`;
+  btn.innerHTML = `<span>⚔</span><span>${t('challenge.challenge_friend', 'Challenge a Friend')}</span>`;
 
   // Insérer entre prevMode et nextMode
   const nextBtn = document.getElementById('nextModeButton');
-  if (nextBtn) {
-    nav.insertBefore(btn, nextBtn);
-  } else {
-    nav.appendChild(btn);
-  }
+  if (nextBtn) nav.insertBefore(btn, nextBtn);
+  else         nav.appendChild(btn);
 
   btn.addEventListener('click', () => _showChallengeModal(mode, score, date));
 }
@@ -582,24 +574,17 @@ function _showChallengeModal(mode, score, date) {
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 
   const modal = document.createElement('div');
-  modal.id = 'challengeModal';
-  modal.style.cssText = [
-    'position:fixed', 'inset:0', 'z-index:8500', 'display:flex',
-    'align-items:center', 'justify-content:center', 'background:rgba(0,0,0,0.6)',
-  ].join(';');
+  modal.id        = 'challengeModal';
+  modal.className = 'challenge-overlay';
   modal.innerHTML = `
-    <div style="background:var(--bg-page,#fff);border-radius:14px;padding:24px;
-                width:min(340px,90vw);display:flex;flex-direction:column;gap:14px;">
-      <h3 style="margin:0;font-family:'Oswald',Arial,sans-serif;font-size:1rem;
-                 text-transform:uppercase;letter-spacing:0.08em;">
-        ⚔ ${t('challenge.select_friend', 'Select a friend to challenge')}
-      </h3>
-      <div id="challengeFriendList"
-           style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;">
-        <p style="color:#888;font-size:0.85rem;">${t('ui.loading', 'Loading…')}</p>
+    <div class="challenge-card">
+      <div class="challenge-card__header">
+        <h3>⚔ ${t('challenge.select_friend', 'Select a friend to challenge')}</h3>
       </div>
-      <button id="challengeModalClose"
-              style="padding:8px;background:#eee;border:none;border-radius:8px;cursor:pointer;">
+      <div id="challengeFriendList" class="challenge-card__list">
+        <p class="challenge-card__empty">${t('ui.loading', 'Loading…')}</p>
+      </div>
+      <button id="challengeModalClose" class="challenge-card__close">
         ${t('ui.close', 'Close')}
       </button>
     </div>
@@ -611,25 +596,23 @@ function _showChallengeModal(mode, score, date) {
 
   // Charger la liste d'amis
   api.friends.list().then(data => {
-    const friends = data.friends ?? [];
+    const friends = (data.friends ?? []).filter(f => f.status === 'accepted');
     const listEl  = document.getElementById('challengeFriendList');
     if (!listEl) return;
 
     if (!friends.length) {
-      listEl.innerHTML = `<p style="color:#888;font-size:0.82rem;">${t('friends.no_friends', 'No friends yet.')}</p>`;
+      listEl.innerHTML = `<p class="challenge-card__empty">${t('friends.no_friends', 'No friends yet.')}</p>`;
       return;
     }
 
     listEl.innerHTML = friends.map(f => `
-      <div style="display:flex;align-items:center;gap:10px;padding:8px;
-                  border-radius:8px;background:#f5f5f5;border:1px solid #eee;">
-        <img src="${esc(f.avatar_data) || '../img/default_avatar.png'}"
-             style="width:32px;height:32px;border-radius:50%;object-fit:cover;"
-             onerror="this.src='../img/default_avatar.png'">
-        <span style="flex:1;font-size:0.85rem;font-weight:600;">${esc(f.pseudo)}</span>
-        <button data-fid="${f.friend_id}" data-pseudo="${esc(f.pseudo)}" class="js-send-challenge"
-                style="padding:5px 12px;background:#22c55e;color:#fff;border:none;
-                       border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:700;">
+      <div class="challenge-friend-row">
+        <img class="challenge-friend-row__avatar"
+             src="${esc(f.avatar_data) || '../img/default_avatar.png'}"
+             onerror="this.src='../img/default_avatar.png'"
+             alt="${esc(f.pseudo)}">
+        <span class="challenge-friend-row__pseudo">${esc(f.pseudo)}</span>
+        <button data-fid="${f.friend_id}" class="challenge-friend-row__send js-send-challenge">
           ${t('challenge.send', 'Send')}
         </button>
       </div>
@@ -647,8 +630,8 @@ function _showChallengeModal(mode, score, date) {
             challenge_score: score,
             challenge_date:  date,
           });
-          sendBtn.textContent   = '✓ Sent!';
-          sendBtn.style.background = '#888';
+          sendBtn.textContent = '✓ Sent!';
+          sendBtn.classList.add('sent');
 
           // XP Social Link : action 'challenge'
           if (api.socialLink) {
@@ -666,6 +649,6 @@ function _showChallengeModal(mode, score, date) {
     });
   }).catch(() => {
     const listEl = document.getElementById('challengeFriendList');
-    if (listEl) listEl.innerHTML = `<p style="color:#888;font-size:0.82rem;">Could not load friends.</p>`;
+    if (listEl) listEl.innerHTML = `<p class="challenge-card__empty">Could not load friends.</p>`;
   });
 }

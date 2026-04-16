@@ -24,7 +24,8 @@
     "offline": "Sin conexión",
     "prev": "← Anterior",
     "next": "Siguiente →",
-    "back_my_profile": "Mi perfil"
+    "back_my_profile": "Mi perfil",
+    "close": "Cerrar"
   },
   "modes": {
     "classic": {
@@ -549,7 +550,23 @@
     "cc_wants_confidant": "quiere ser tu Confidente.",
     "cc_accept_social_link": "¿Aceptar este Social Link?",
     "cc_yes": "SÍ",
-    "cc_no": "NO"
+    "cc_no": "NO",
+    "messages_title": "Mensajes & Desafíos",
+    "sent_to": "Para",
+    "mark_read": "✓ Marcar como leído",
+    "challenge_beat": "Superar",
+    "challenge_accept": "⚔ Aceptar",
+    "challenge_decline": "✕"
+  },
+  "challenge": {
+    "challenge_friend": "Desafiar a un Amigo",
+    "select_friend": "Selecciona un amigo para desafiar",
+    "send": "Enviar",
+    "banner_title": "⚔ Desafío activo",
+    "banner_beat": "Superar",
+    "accept": "⚔ Aceptar",
+    "decline": "✕ Rechazar",
+    "already_sent": "Ya enviado hoy"
   },
   "settings": {
     "title": "Ajustes",
@@ -632,11 +649,11 @@
     "image_load_timeout": "Tiempo de espera agotado al cargar: {{file}}"
   },
   "social": {
-    "action_visit":   "👁 Visitar +5 XP",
-    "action_score":   "📊 Compartir puntuación +10 XP",
+    "action_visit": "👁 Visitar +5 XP",
+    "action_score": "📊 Compartir puntuación +10 XP",
     "action_compare": "⚖ Comparar estadísticas +10 XP",
-    "done_today":     "Ya hecho hoy",
-    "rank_up":        "🎉 Social Link — Rango {{rank}}: {{name}}",
-    "max_rank":       "✨ MÁX — True Confidant"
+    "done_today": "Ya hecho hoy",
+    "rank_up": "🎉 Social Link — Rango {{rank}}: {{name}}",
+    "max_rank": "✨ MÁX — True Confidant"
   }
 }
