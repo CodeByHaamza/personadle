@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="../css/global.css?v=4">
   <link rel="stylesheet" href="../css/langSelector.css?v=4">
   <link rel="stylesheet" href="../css/bottomNav.css?v=1">
+  <link rel="stylesheet" href="../css/calling-card.css">
   <link rel="stylesheet" href="./profile-page.css?v=1">
   <link rel="stylesheet" href="./friends.css?v=3">
 
@@ -143,6 +144,18 @@ initAuth().catch(() => {});
 
 <!-- Logique Friends -->
 <script type="module" src="./friends.js?v=3"></script>
+
+<!-- Notifications (calling card désactivée sur cette page) -->
+<script type="module">
+import { initNotifications } from '../js/notifications.js';
+
+let waited = 0;
+while (!window._currentUser && !window._authResolved && waited < 2000) {
+  await new Promise(r => setTimeout(r, 100));
+  waited += 100;
+}
+if (window._currentUser) initNotifications();
+</script>
 
 <!-- Dark mode + bottom nav -->
 <script type="module">

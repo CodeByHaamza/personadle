@@ -40,6 +40,8 @@
   <link rel="stylesheet" href="../css/global.css?v=4">
   <link rel="stylesheet" href="../css/langSelector.css?v=4">
   <link rel="stylesheet" href="../css/bottomNav.css?v=1">
+  <link rel="stylesheet" href="../css/calling-card.css">
+  <link rel="stylesheet" href="../css/settings-modal.css">
   <link rel="stylesheet" href="./profile-page.css?v=1">
   <link rel="stylesheet" href="./badges/badges.css?v=3">
 
@@ -93,6 +95,7 @@
     <span data-i18n="profile.title">My Profile</span>
     <span class="p5-diamond">◆</span>
   </h1>
+  <button id="settingsBtn" class="profile-settings-btn" title="Settings" aria-label="Settings">⚙</button>
 </header>
 
 <!-- Toggle Dark Mode (repris de index.html) -->
@@ -594,6 +597,22 @@ if (btnMigrate) {
       btnMigrate.disabled = false;
     }
   });
+}
+</script>
+
+<!-- Notifications + Settings (appeler après auth) -->
+<script type="module">
+import { initNotifications } from '../js/notifications.js';
+import { initSettingsModal }  from '../js/settings-modal.js';
+
+let waited = 0;
+while (!window._currentUser && !window._authResolved && waited < 2000) {
+  await new Promise(r => setTimeout(r, 100));
+  waited += 100;
+}
+if (window._currentUser) {
+  initNotifications();
+  initSettingsModal(window._currentUser.id);
 }
 </script>
 

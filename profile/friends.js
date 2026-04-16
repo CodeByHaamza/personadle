@@ -313,6 +313,11 @@ async function loadFriends() {
     state.sentCodes = new Set(
       state.pending.filter(p => p.direction === 'sent').map(p => p.friend_code)
     );
+
+    // Marquer les demandes reçues comme vues (l'utilisateur les voit maintenant)
+    if (state.pending.some(p => p.direction === 'received')) {
+      api.notifications.markSeen().catch(() => {});
+    }
   } catch {
     state.friends = [];
     state.pending = [];
