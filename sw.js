@@ -17,7 +17,7 @@
  * ────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION = 'personadle-v15';
+const CACHE_VERSION = 'personadle-v16';
 
 /**
  * Assets à pré-cacher lors de l'installation.
@@ -185,12 +185,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  /* ── 4. JS & CSS → stale-while-revalidate ──
-     Sert immédiatement depuis le cache (rapide) ET met à jour en fond.
-     Garantit que la prochaine visite aura la dernière version.
-     Plus sûr que cache-first qui peut bloquer les mises à jour en dev. */
+  /* ── 4. JS & CSS → network-first ──
+     Toujours chercher la version fraîche sur le réseau, fallback cache si offline.
+     Évite d'avoir à faire Ctrl+Shift+R après chaque déploiement. */
   if (request.destination === 'script' || request.destination === 'style') {
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(networkFirstWithFallback(request));
     return;
   }
 
