@@ -1,0 +1,154 @@
+/* settings-modal.css — Modal paramètres joueur */
+
+#settingsModal {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+#settingsModal.sm--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.sm-panel {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-page, #fff);
+  border-radius: 18px;
+  padding: 28px 28px 24px;
+  width: min(400px, 92vw);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.sm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sm-title {
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-main, #1a1a1a);
+  margin: 0;
+}
+
+.sm-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text-muted, #888);
+  line-height: 1;
+  padding: 4px;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+}
+.sm-close:hover { color: var(--accent, #e63946); background: var(--accent-light, rgba(230,57,70,0.1)); }
+
+.sm-section-title {
+  font-family: 'Oswald', Arial, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted, #888);
+  margin: 0 0 12px;
+}
+
+.sm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border, #eee);
+}
+.sm-row:last-child { border-bottom: none; }
+
+.sm-label {
+  font-size: 0.88rem;
+  color: var(--text-main, #1a1a1a);
+}
+
+/* Toggle switch (réutilise le style global .switch) */
+.sm-toggle { flex-shrink: 0; }
+
+/* Volume slider */
+.sm-volume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sm-volume-row input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent, #e63946);
+  cursor: pointer;
+}
+
+.sm-volume-val {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--text-muted, #888);
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Bouton save */
+.sm-save {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 0;
+  background: var(--accent, #e63946);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Oswald', Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.sm-save:hover { background: #c1121f; }
+.sm-save:active { transform: scale(0.98); }
+.sm-save:disabled { opacity: 0.6; cursor: default; }
+
+.sm-save-status {
+  font-size: 0.78rem;
+  color: #22c55e;
+  text-align: center;
+  min-height: 18px;
+}
+
+/* Dark mode */
+.darkmode .sm-panel {
+  background: #1a1a1a;
+  border: 1px solid #333;
+}
+.darkmode .sm-row { border-color: #333; }
