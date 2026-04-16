@@ -1,0 +1,56 @@
+/* challenge-banner.css — Bandeau rappel défi actif en haut des pages de jeu */
+#challengeBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  position: relative;
+  z-index: 100;
+  animation: bannerSlideIn 0.4s ease-out;
+}
+
+@keyframes bannerSlideIn {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0);      opacity: 1; }
+}
+
+.cb-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.cb-text { flex: 1; min-width: 0; }
+
+.cb-pseudo {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.cb-score {
+  font-size: 0.72rem;
+  opacity: 0.88;
+}
+
+.cb-dismiss {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cb-dismiss:hover { background: rgba(255,255,255,0.35); }
