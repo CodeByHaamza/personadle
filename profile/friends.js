@@ -20,7 +20,7 @@
  *   - window.__i18nReady     (injecté par i18n.js)
  */
 
-import { addFlameIfPlayedToday } from '../js/social-link.js';
+import { addFlameIfPlayedToday, gainSocialLinkXp } from '../js/social-link.js';
 
 // ─────────────────────────────────────────────────────────
 // 1. UTILITAIRES
@@ -495,6 +495,97 @@ async function handleAddByCode() {
 }
 
 // ─────────────────────────────────────────────────────────
+// 8b. MESSAGERIE
+// ─────────────────────────────────────────────────────────
+
+async function loadMessages() {
+  const api     = window._personadleApi;
+  const list    = document.getElementById('messagesList');
+  const section = document.getElementById('messagesSection');
+  if (!api || !list || !section) return;
+
+  try {
+    const data = await api.messages.list({ limit: 30 });
+    const msgs = data.messages ?? [];
+
+    const unreadCnt = msgs.filter(
+      m => m.status === 'unread' && m.receiver_id === window._currentUser?.id
+    ).length;
+    const unreadEl = document.getElementById('unreadCount');
+    if (unreadEl) {
+      unreadEl.textContent = unreadCnt;
+      unreadEl.classList.toggle('hidden', unreadCnt === 0);
+    }
+
+    if (!msgs.length) {
+      section.classList.add('hidden');
+      return;
+    }
+    section.classList.remove('hidden');
+    list.innerHTML = msgs.map(renderMessage).join('');
+  } catch {
+    section.classList.add('hidden');
+  }
+}
+
+function renderMessage(msg) {
+  const isReceived  = msg.receiver_id === window._currentUser?.id;
+  const fromPseudo  = msg.sender.pseudo;
+  const time        = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const isChallenge = msg.type === 'challenge';
+  const isUnread    = msg.status === 'unread' && isReceived;
+
+  let content = '';
+  let actions  = '';
+
+  if (isChallenge) {
+    content = `
+      <span class="fr-msg-challenge-info">
+        🎮 ${esc(msg.challenge_mode?.toUpperCase() ?? '')} · ${t('friends.challenge_beat') || 'Beat'} ${msg.challenge_score} pts · ${msg.challenge_date ?? ''}
+      </span>`;
+    if (isReceived && msg.status === 'unread') {
+      actions = `
+        <button class="fr-btn fr-btn--accept js-accept-challenge"
+                data-mid="${msg.id}"
+                data-mode="${esc(msg.challenge_mode ?? '')}"
+                data-date="${esc(msg.challenge_date ?? '')}"
+                data-score="${msg.challenge_score}"
+                data-senderid="${msg.sender_id}">
+          ${t('friends.challenge_accept') || '⚔ Accept'}
+        </button>
+        <button class="fr-btn fr-btn--danger js-decline-msg" data-mid="${msg.id}">
+          ${t('friends.challenge_decline') || '✕'}
+        </button>`;
+    }
+  } else {
+    content = `<span class="fr-msg-content">${esc(msg.content ?? '')}</span>`;
+    if (isUnread) {
+      actions = `<button class="fr-btn fr-btn--view js-mark-read" data-mid="${msg.id}" style="font-size:0.68rem;">
+        ${t('friends.mark_read') || '✓ Mark read'}
+      </button>`;
+    }
+  }
+
+  return `
+    <div class="fr-msg ${isChallenge ? 'fr-msg--challenge' : ''} ${isUnread ? 'fr-msg--unread' : ''}"
+         data-mid="${msg.id}">
+      <div class="fr-msg-body">
+        <div class="fr-msg-meta">
+          ${isReceived
+            ? `<b>${esc(fromPseudo)}</b> · ${time}`
+            : `${t('friends.sent_to') || 'To'} <b>${esc(msg.receiver.pseudo)}</b> · ${time}`}
+          <span style="margin-left:6px;font-size:0.65rem;background:var(--fr-surface-alt);padding:1px 5px;border-radius:4px;">
+            ${esc(msg.status)}
+          </span>
+        </div>
+        ${content}
+        ${actions ? `<div class="fr-msg-actions">${actions}</div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────────────────
 // 9. DÉLÉGATION D'ÉVÉNEMENTS
 // ─────────────────────────────────────────────────────────
 
@@ -566,6 +657,32 @@ function attachListeners() {
       await removeFriend(parseInt(removeBtn.dataset.fid, 10));
       return;
     }
+
+    // ── Messages : Accept challenge ───────────────────────
+    const acceptChallenge = e.target.closest('.js-accept-challenge');
+    if (acceptChallenge) {
+      const mid      = parseInt(acceptChallenge.dataset.mid);
+      const mode     = acceptChallenge.dataset.mode;
+      const date     = acceptChallenge.dataset.date;
+      const score    = parseInt(acceptChallenge.dataset.score);
+      const senderId = parseInt(acceptChallenge.dataset.senderid);
+      acceptChallenge.disabled = true;
+      await window._personadleApi?.messages.updateStatus(mid, 'accepted').catch(() => {});
+      localStorage.setItem('activeChallenge', JSON.stringify({ msgId: mid, mode, date, score, senderId }));
+      // XP Social Link : challenge accepté
+      if (senderId) gainSocialLinkXp(senderId, 'challenge').catch(() => {});
+      await loadMessages();
+      return;
+    }
+
+    // ── Messages : Mark read / Decline ────────────────────
+    const markReadBtn = e.target.closest('.js-mark-read, .js-decline-msg');
+    if (markReadBtn) {
+      const mid = parseInt(markReadBtn.dataset.mid);
+      await window._personadleApi?.messages.updateStatus(mid, 'read').catch(() => {});
+      await loadMessages();
+      return;
+    }
   });
 }
 
@@ -593,10 +710,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     attachListeners();
 
-    // Charger les deux sections en parallèle
+    // Charger les trois sections en parallèle
     await Promise.all([
       loadFriends(),
       loadBrowse('', 0),
+      loadMessages(),
     ]);
   } else {
     connected?.classList.add('hidden');

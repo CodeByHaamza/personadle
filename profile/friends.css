@@ -577,3 +577,51 @@
 
   .fr-dot { width: 10px; height: 10px; }
 }
+
+/* ── Messages & Défis ──────────────────────────────── */
+.fr-messages-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.fr-msg {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--fr-surface-alt);
+  border: 1px solid var(--fr-border);
+  transition: background 0.15s;
+}
+
+.fr-msg--unread    { border-left: 3px solid var(--fr-accent); }
+.fr-msg--challenge { border-left: 3px solid var(--fr-green, #22c55e); }
+
+.fr-msg-body { flex: 1; min-width: 0; }
+
+.fr-msg-meta {
+  font-size: 0.68rem;
+  color: var(--fr-text-muted);
+  margin-bottom: 4px;
+}
+
+.fr-msg-content {
+  font-size: 0.83rem;
+  color: var(--fr-text);
+  word-break: break-word;
+}
+
+.fr-msg-challenge-info {
+  font-size: 0.78rem;
+  font-family: monospace;
+  color: var(--fr-green, #22c55e);
+  margin-top: 4px;
+}
+
+.fr-msg-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
