@@ -103,7 +103,7 @@
 
 /* ── Texte verso de la carte ─────────────────────────── */
 .cc-pseudo {
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: 'Persona5', 'Oswald', 'Arial Black', Arial, sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: #e63946;
@@ -138,7 +138,7 @@
   border-radius: 6px;
   font-size: 0.82rem;
   font-weight: 700;
-  font-family: 'Oswald', Arial, sans-serif;
+  font-family: 'Persona5', 'Oswald', Arial, sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;

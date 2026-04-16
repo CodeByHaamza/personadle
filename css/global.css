@@ -12,10 +12,10 @@
    0. POLICES PERSONNALISÉES
    ===================================================== */
 
-/* Persona 5 Menu Font — utilisée pour les titres des boutons de mode */
+/* Persona 5 Font — utilisée pour les titres Persona-style */
 @font-face {
   font-family: 'Persona5';
-  src: url('../Persona5MenuFontPrototype-Regular.ttf') format('truetype');
+  src: url('../font/Persona5Font.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -887,6 +887,16 @@ input:checked + .slider.red    { background-color: #FF4136; }
 
 .victory-link:hover {
   color: #ffd700;
+}
+
+/* Statistique communautaire post-partie ("X% of N players found this today") */
+.community-stats {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  opacity: 0.75;
+  font-style: italic;
+  text-align: center;
+  color: inherit;
 }
 
 

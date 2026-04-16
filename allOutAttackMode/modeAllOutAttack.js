@@ -198,7 +198,7 @@ const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
 let sessionStartTime = Date.now();
 
 /** All specific opus codes available in AllOutAttack mode. */
-const ALL_OPUS = ["P3", "P5", "P5X"];
+const ALL_OPUS = ["P3", "P3FES", "P3P", "P5", "P5R", "P5X"];
 
 let activeOpusFilters = [...ALL_OPUS];
 let personas = [];      // mutable filtered list of character names

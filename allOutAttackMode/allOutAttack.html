@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="../css/filterMenu.css" />
   <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
   <link rel="stylesheet" href="../css/calling-card.css" />
+  <link rel="stylesheet" href="../css/challenge-banner.css">
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 </head>
 
@@ -42,19 +43,47 @@
   </button>
   <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
 
-    <!-- Persona 3 — filtre direct -->
+    <!-- Persona 3 — clic logo → sous-opus déroulants -->
     <div class="filter-group">
       <button class="filter-main-btn filter-color-p3 active"
-              data-opus="P3" aria-label="Persona 3">
+              data-opus-group="P3" data-opus-codes="P3,P3FES,P3P"
+              aria-expanded="false" aria-label="Persona 3">
         <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="Persona 3" class="filter-logo">
+        <span class="filter-expand-arrow">▸</span>
       </button>
+      <div class="filter-sub-panel" data-group-panel="P3">
+        <button class="filter-sub-btn filter-color-p3 active"
+                data-opus="P3" aria-label="Persona 3 / Reload">
+          <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="P3" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p3fes active"
+                data-opus="P3FES" aria-label="Persona 3 FES">
+          <img src="../img/logo_jeu/Persona_3_FES_Logo.webp" alt="P3FES" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p3p active"
+                data-opus="P3P" aria-label="Persona 3 Portable">
+          <img src="../img/logo_jeu/Persona_3_Portable_Logo.webp" alt="P3P" class="filter-sub-logo">
+        </button>
+      </div>
     </div>
-    <!-- Persona 5 — filtre direct -->
+    <!-- Persona 5 — clic logo → sous-opus déroulants -->
     <div class="filter-group">
       <button class="filter-main-btn filter-color-p5 active"
-              data-opus="P5" aria-label="Persona 5">
+              data-opus-group="P5" data-opus-codes="P5,P5R"
+              aria-expanded="false" aria-label="Persona 5">
         <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo">
+        <span class="filter-expand-arrow">▸</span>
       </button>
+      <div class="filter-sub-panel" data-group-panel="P5">
+        <button class="filter-sub-btn filter-color-p5 active"
+                data-opus="P5" aria-label="Persona 5">
+          <img src="../img/logo_jeu/Persona_5_logo.png" alt="P5" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p5r active"
+                data-opus="P5R" aria-label="Persona 5 Royal">
+          <img src="../img/logo_jeu/Persona_5_Royal_Logo.png" alt="P5R" class="filter-sub-logo">
+        </button>
+      </div>
     </div>
     <!-- Persona 5X — filtre direct -->
     <div class="filter-group">
@@ -336,6 +365,10 @@ while (!window._currentUser && !window._authResolved && waited < 2000) {
   waited += 100;
 }
 if (window._currentUser) initNotifications();
+</script>
+<script type="module">
+import { initChallengeBanner } from '../js/challenge-banner.js';
+initChallengeBanner('alloutattack');
 </script>
 
 <script>

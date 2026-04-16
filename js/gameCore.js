@@ -17,6 +17,9 @@
  *   showWrongMini(...)          → appends a shaking wrong-guess portrait
  *   buildGameSession(opts)      → builds a standardised session object for the backend
  *   savePendingSession(session) → stores a session in localStorage for later sync
+ *   getPlayerSeedId()           → stable per-player seed ID (user_id or anon UUID)
+ *   getDailyTarget(pool, mode)  → deterministic per-player daily pick via FNV-1a seeded RNG
+ *   showCommunityStats(mode, t) → injects "X% of players found this today" in victory box
  */
 
 
@@ -382,14 +385,287 @@ export function buildGameSession({ mode, targetName, result, attempts, timeMs = 
 }
 
 /**
- * Stores a game session in localStorage under the 'pendingSessions' key.
- * When the user creates an account and the backend is live, these sessions
- * will be synced via api.stats.syncPending().
+ * Saves a completed game session.
+ *
+ * If the user is connected (window._personadleApi available + session active),
+ * the session is posted directly to the backend.
+ * On failure (offline, server error), it falls back to localStorage so it
+ * can be synced later via api.stats.syncPending().
+ *
+ * If the user is not connected, the session is queued in localStorage only.
+ *
+ * After saving, shows community stats in the victory box (if the backend is reachable).
  *
  * @param {ReturnType<typeof buildGameSession>} session
  */
-export function savePendingSession(session) {
-  const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
-  pending.push(session);
-  localStorage.setItem('pendingSessions', JSON.stringify(pending));
+export async function savePendingSession(session) {
+  const api = window._personadleApi;
+
+  if (api) {
+    try {
+      await api.stats.postSession(session);
+      // Success — also sync any previously queued offline sessions
+      await api.stats.syncPending();
+    } catch {
+      // Offline or server error — fall through to localStorage queue
+      const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
+      pending.push(session);
+      localStorage.setItem('pendingSessions', JSON.stringify(pending));
+    }
+  } else {
+    const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
+    pending.push(session);
+    localStorage.setItem('pendingSessions', JSON.stringify(pending));
+  }
+
+  // Always try to show community stats (silent fail if offline)
+  showCommunityStats(session.mode, session.target_name);
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DAILY TARGET — Deterministic seeded RNG (FNV-1a 32-bit)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Returns a stable player-specific seed ID used to personalise the daily target.
+ *
+ * Priority order:
+ *   1. Logged-in user → their numeric user_id (set in localStorage by auth.js)
+ *   2. Anonymous → a random UUID generated once and stored as 'anonPlayerId'
+ *
+ * This ensures:
+ *   - Every player gets their own unique daily character (not the same as everyone else)
+ *   - The pick is stable: reloading the page gives the same character
+ *   - On login the player seamlessly switches to their account-based seed
+ *
+ * @returns {string}
+ */
+export function getPlayerSeedId() {
+  const uid = localStorage.getItem('playerUserId');
+  if (uid) return uid;
+
+  let anonId = localStorage.getItem('anonPlayerId');
+  if (!anonId) {
+    // Generate a random UUID v4-like identifier (crypto.randomUUID when available)
+    anonId = typeof crypto?.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    localStorage.setItem('anonPlayerId', anonId);
+  }
+  return anonId;
+}
+
+/**
+ * Returns a deterministic daily target from a pool using a player+date+mode seed.
+ * Each player gets their own unique character for a given day and mode.
+ *
+ * Algorithm: FNV-1a 32-bit hash of "${seedId}|${date}|${mode}" modulo pool.length.
+ * Stable across reloads for the same player — changes only if seedId, date or mode changes.
+ *
+ * @param {Array}  pool            - Array of items to pick from (objects or strings)
+ * @param {string} mode            - Mode identifier (e.g. 'Classic', 'Music')
+ * @param {string} [date]          - YYYY-MM-DD date key (default: today Paris time)
+ * @param {string} [seedId]        - Player seed ID (default: getPlayerSeedId())
+ * @returns {*} The selected item, or null if pool is empty
+ */
+export function getDailyTarget(pool, mode, date = parisDateKey(), seedId = getPlayerSeedId()) {
+  if (!pool || pool.length === 0) return null;
+  // Debug override: debugTarget_<mode> in localStorage (set via debug panel)
+  try {
+    const override = localStorage.getItem(`debugTarget_${mode}`);
+    if (override && pool.includes(override)) return override;
+  } catch (_) { /* ignore */ }
+  const str = `${seedId}|${date}|${mode}`;
+  let h = 2166136261 >>> 0; // FNV-1a offset basis (32-bit)
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return pool[h % pool.length];
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMMUNITY STATS — "X% of players found this today"
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Fetches and injects the "X% of N players found this today" stat into the
+ * victory box. Called automatically by savePendingSession() after each game.
+ *
+ * Silent no-op if: offline, API unavailable, or fewer than 2 total plays.
+ *
+ * @param {string} mode       - Mode string as stored in game_sessions (e.g. 'Classic')
+ * @param {string} targetName - The character/song name that was the answer
+ */
+export async function showCommunityStats(mode, targetName) {
+  const api = window._personadleApi;
+  if (!api?.communityStats) return;
+
+  try {
+    const data = await api.communityStats.get({
+      mode: mode.toLowerCase(),
+      date: parisDateKey(),
+      target: targetName,
+    });
+    // Skip if too few data points (e.g. first player of the day)
+    if (!data?.total || data.total < 2) return;
+
+    const victoryBox = document.getElementById('victoryBox') || document.querySelector('.victory-box');
+    if (!victoryBox) return;
+
+    let el = victoryBox.querySelector('.community-stats');
+    if (!el) {
+      el = document.createElement('p');
+      el.className = 'community-stats';
+      victoryBox.appendChild(el);
+    }
+
+    const i18n = window.i18n || { t: (k) => k };
+    el.textContent = i18n.t('game.community_stats', { percent: data.percent, total: data.total });
+  } catch {
+    // Offline or API not available — silent fail
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHALLENGE BUTTON — "Challenge a friend" post-victoire
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Injecte le bouton "Challenge a Friend" dans le modeNavigationContainer
+ * après une victoire. Ne fait rien si l'utilisateur n'est pas connecté.
+ *
+ * @param {string} mode   - Mode lowercase ('classic', 'emoji', etc.)
+ * @param {number} score  - Score à battre (tentatives ou secondes selon le mode)
+ */
+export function showChallengeButton(mode, score) {
+  if (!window._currentUser) return;
+
+  const nav = document.getElementById('modeNavigationContainer');
+  if (!nav || document.getElementById('challengeFriendBtn')) return;
+
+  const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
+  const date = parisDateKey();
+
+  const btn = document.createElement('button');
+  btn.id        = 'challengeFriendBtn';
+  btn.className = 'btn-challenge';
+  btn.style.cssText = [
+    'margin-top:10px', 'padding:8px 18px', 'background:#22c55e', 'color:#fff',
+    'border:none', 'border-radius:8px', 'font-weight:700', 'cursor:pointer',
+    'font-family:inherit', 'font-size:0.82rem', 'display:block', 'width:100%',
+  ].join(';');
+  btn.textContent = `⚔ ${t('challenge.challenge_friend', 'Challenge a Friend')}`;
+
+  // Insérer entre prevMode et nextMode
+  const nextBtn = document.getElementById('nextModeButton');
+  if (nextBtn) {
+    nav.insertBefore(btn, nextBtn);
+  } else {
+    nav.appendChild(btn);
+  }
+
+  btn.addEventListener('click', () => _showChallengeModal(mode, score, date));
+}
+
+function _showChallengeModal(mode, score, date) {
+  const api = window._personadleApi;
+  if (!api || !window._currentUser) return;
+
+  document.getElementById('challengeModal')?.remove();
+
+  const t   = (key, fb) => window.i18n?.t?.(key) ?? fb;
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+
+  const modal = document.createElement('div');
+  modal.id = 'challengeModal';
+  modal.style.cssText = [
+    'position:fixed', 'inset:0', 'z-index:8500', 'display:flex',
+    'align-items:center', 'justify-content:center', 'background:rgba(0,0,0,0.6)',
+  ].join(';');
+  modal.innerHTML = `
+    <div style="background:var(--bg-page,#fff);border-radius:14px;padding:24px;
+                width:min(340px,90vw);display:flex;flex-direction:column;gap:14px;">
+      <h3 style="margin:0;font-family:'Oswald',Arial,sans-serif;font-size:1rem;
+                 text-transform:uppercase;letter-spacing:0.08em;">
+        ⚔ ${t('challenge.select_friend', 'Select a friend to challenge')}
+      </h3>
+      <div id="challengeFriendList"
+           style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;">
+        <p style="color:#888;font-size:0.85rem;">${t('ui.loading', 'Loading…')}</p>
+      </div>
+      <button id="challengeModalClose"
+              style="padding:8px;background:#eee;border:none;border-radius:8px;cursor:pointer;">
+        ${t('ui.close', 'Close')}
+      </button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.getElementById('challengeModalClose').addEventListener('click', () => modal.remove());
+
+  // Charger la liste d'amis
+  api.friends.list().then(data => {
+    const friends = data.friends ?? [];
+    const listEl  = document.getElementById('challengeFriendList');
+    if (!listEl) return;
+
+    if (!friends.length) {
+      listEl.innerHTML = `<p style="color:#888;font-size:0.82rem;">${t('friends.no_friends', 'No friends yet.')}</p>`;
+      return;
+    }
+
+    listEl.innerHTML = friends.map(f => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px;
+                  border-radius:8px;background:#f5f5f5;border:1px solid #eee;">
+        <img src="${esc(f.avatar_data) || '../img/default_avatar.png'}"
+             style="width:32px;height:32px;border-radius:50%;object-fit:cover;"
+             onerror="this.src='../img/default_avatar.png'">
+        <span style="flex:1;font-size:0.85rem;font-weight:600;">${esc(f.pseudo)}</span>
+        <button data-fid="${f.friend_id}" data-pseudo="${esc(f.pseudo)}" class="js-send-challenge"
+                style="padding:5px 12px;background:#22c55e;color:#fff;border:none;
+                       border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:700;">
+          ${t('challenge.send', 'Send')}
+        </button>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.js-send-challenge').forEach(sendBtn => {
+      sendBtn.addEventListener('click', async () => {
+        sendBtn.disabled = true;
+        const friendId = parseInt(sendBtn.dataset.fid);
+        try {
+          await api.messages.send({
+            receiver_id:     friendId,
+            type:            'challenge',
+            challenge_mode:  mode,
+            challenge_score: score,
+            challenge_date:  date,
+          });
+          sendBtn.textContent   = '✓ Sent!';
+          sendBtn.style.background = '#888';
+
+          // XP Social Link : action 'challenge'
+          if (api.socialLink) {
+            api.socialLink.getByFriend(friendId)
+              .then(d => api.socialLink.interact(d.link_id, 'challenge'))
+              .catch(() => {});
+          }
+        } catch (err) {
+          sendBtn.disabled = false;
+          sendBtn.textContent = err?.status === 409
+            ? t('challenge.already_sent', 'Already sent today')
+            : '✕ Error';
+        }
+      });
+    });
+  }).catch(() => {
+    const listEl = document.getElementById('challengeFriendList');
+    if (listEl) listEl.innerHTML = `<p style="color:#888;font-size:0.82rem;">Could not load friends.</p>`;
+  });
 }

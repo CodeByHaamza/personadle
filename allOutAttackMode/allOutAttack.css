@@ -4,6 +4,23 @@
    dark mode spécifique AOA.
    ============================================================= */
 
+/* ── Persona 5 Font (AoA-specific uses) ─────────────────── */
+/* La déclaration @font-face est dans global.css             */
+
+/* Texte de victoire / défaite — style Persona */
+#victoryText {
+  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Titre du mode (dans la zone hint) */
+.emoji-hint-zone h1 {
+  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  letter-spacing: 0.08em;
+}
+
 
 /* =====================================================
    1. ZONE D'AFFICHAGE DU GIF ALL-OUT ATTACK
