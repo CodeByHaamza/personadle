@@ -186,12 +186,15 @@ function buildNavHTML(currentPage, avatar, hrefs) {
          href="${hrefs.friends}"
          aria-label="Friends"
          aria-current="${currentPage === 'friends' ? 'page' : 'false'}">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="9"  cy="8" r="3"/>
-          <path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/>
-          <circle cx="17" cy="8" r="2.5"/>
-          <path d="M22 20c0-2.8-2.2-5-5-5"/>
-        </svg>
+        <div class="nav-icon-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="9"  cy="8" r="3"/>
+            <path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/>
+            <circle cx="17" cy="8" r="2.5"/>
+            <path d="M22 20c0-2.8-2.2-5-5-5"/>
+          </svg>
+          <span id="navFriendsBadge" class="nav-badge hidden" aria-live="polite"></span>
+        </div>
         <span class="nav-label">Friends</span>
       </a>
 
