@@ -1,0 +1,197 @@
+/* calling-card.css — Animation demande d'ami style Persona 5 */
+
+#cc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+#cc-overlay.cc--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cc-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+/* ── Scène 3D ─────────────────────────────────────────── */
+.cc-scene {
+  perspective: 1200px;
+  z-index: 1;
+  position: relative;
+}
+
+.cc-card {
+  width: 280px;
+  height: 400px;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: ccSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+}
+
+.cc-card.cc-card--flip {
+  animation: ccSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+             ccFlip     0.6s ease-in-out 0.7s forwards;
+}
+
+.cc-card-front,
+.cc-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.cc-card-front { transform: rotateY(0deg); }
+.cc-card-back  { transform: rotateY(180deg); }
+
+.cc-card-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cc-card-back {
+  background: #0a0a0a;
+  border: 2.5px solid #e63946;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+/* ── Anneaux d'impact ─────────────────────────────────── */
+.cc-rings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid #e63946;
+  animation: ccRing 0.9s ease-out forwards;
+  opacity: 0;
+}
+
+.cc-ring:nth-child(1) { width: 70px;  height: 70px;  animation-delay: 0.65s; }
+.cc-ring:nth-child(2) { width: 130px; height: 130px; animation-delay: 0.75s; border-color: #1a1a1a; border-width: 5px; }
+.cc-ring:nth-child(3) { width: 200px; height: 200px; animation-delay: 0.85s; }
+.cc-ring:nth-child(4) { width: 280px; height: 280px; animation-delay: 0.95s; border-color: #1a1a1a; border-width: 2px; }
+.cc-ring:nth-child(5) { width: 360px; height: 360px; animation-delay: 1.05s; }
+
+/* ── Texte verso de la carte ─────────────────────────── */
+.cc-pseudo {
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e63946;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.cc-message {
+  font-size: 0.88rem;
+  color: #f0f0f0;
+  margin: 0;
+}
+
+.cc-sub {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0;
+  font-style: italic;
+}
+
+.cc-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.cc-btn {
+  padding: 9px 22px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: 'Oswald', Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+}
+.cc-btn:active { transform: scale(0.95); }
+
+.cc-btn--yes { background: #e63946; color: #fff; }
+.cc-btn--yes:hover { background: #c1121f; }
+
+.cc-btn--no  { background: #2a2a2a; color: #999; border: 1px solid #444; }
+.cc-btn--no:hover  { background: #3a3a3a; color: #fff; }
+
+/* ── Bouton fermer ────────────────────────────────────── */
+.cc-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  z-index: 10001;
+  transition: background 0.15s;
+  pointer-events: auto;
+}
+.cc-close:hover { background: rgba(255, 255, 255, 0.22); }
+
+/* ── Keyframes ────────────────────────────────────────── */
+@keyframes ccSlideIn {
+  from {
+    transform: translateX(260px) translateY(-260px) rotate(18deg) scale(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ccFlip {
+  from { transform: rotateY(0deg); }
+  to   { transform: rotateY(180deg); }
+}
+
+@keyframes ccRing {
+  0%   { transform: scale(0.1); opacity: 0.85; }
+  100% { transform: scale(1.8); opacity: 0;    }
+}
