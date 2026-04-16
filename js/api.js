@@ -367,17 +367,26 @@ export const api = {
   // ── Social Link ───────────────────────────────────────
   socialLink: {
     /**
-     * Récupère les données du Social Link entre l'utilisateur et un ami.
+     * Récupère les infos du Social Link par son id.
      * @param {number} linkId
      */
     get: (linkId) => get(`/social-links/${linkId}`),
 
     /**
-     * Enregistre une interaction (visite de profil, partage de streak…).
-     * @param {number} linkId
-     * @param {{ action_type: string }} data
+     * Récupère (ou crée) le Social Link entre l'utilisateur connecté et un ami.
+     * Retourne { link_id }.
+     * @param {number} friendId  - user_id de l'ami
      */
-    interact: (linkId, data) => post(`/social-links/${linkId}/interact`, data),
+    getByFriend: (friendId) => get(`/social-links/by-friend/${friendId}`),
+
+    /**
+     * Enregistre une interaction (visite de profil, partage streak…).
+     * @param {number} linkId
+     * @param {string} actionType  'visit_profile'|'share_streak'|'share_score'|
+     *                              'play_same_day'|'compare_stats'|'challenge'
+     */
+    interact: (linkId, actionType) =>
+      post(`/social-links/${linkId}/interact`, { action_type: actionType }),
   },
 
   // ── Badges ────────────────────────────────────────────
