@@ -317,6 +317,53 @@ export const api = {
     remove: (friendshipId) => apiCall(`/friends/${friendshipId}`, { method: 'DELETE' }),
   },
 
+  // ── Notifications ─────────────────────────────────────
+  notifications: {
+    /**
+     * Retourne le nombre de demandes d'ami non vues.
+     * @returns {Promise<{ friend_requests: number }>}
+     */
+    get: () => get('/notifications'),
+
+    /**
+     * Marque toutes les demandes en attente comme vues.
+     */
+    markSeen: () => apiCall('/notifications', { method: 'PATCH', body: '{}' }),
+  },
+
+  // ── Messages & Défis ──────────────────────────────────
+  messages: {
+    /**
+     * Liste les messages de l'utilisateur connecté.
+     * @param {{ type?: string, status?: string, limit?: number, offset?: number }} params
+     */
+    list: ({ type = '', status = '', limit = 20, offset = 0 } = {}) =>
+      get(`/messages?type=${type}&status=${status}&limit=${limit}&offset=${offset}`),
+
+    /**
+     * Envoie un message ou un défi à un ami.
+     * @param {{ receiver_id: number, type: 'message'|'challenge', content?: string,
+     *           challenge_mode?: string, challenge_score?: number, challenge_date?: string }} data
+     */
+    send: (data) => post('/messages', data),
+
+    /**
+     * Marque un message comme lu / accepté.
+     * @param {number} msgId
+     * @param {'read'|'accepted'} status
+     */
+    updateStatus: (msgId, status) => apiCall(`/messages/${msgId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }),
+
+    /**
+     * Supprime un message.
+     * @param {number} msgId
+     */
+    delete: (msgId) => apiCall(`/messages/${msgId}`, { method: 'DELETE' }),
+  },
+
   // ── Social Link ───────────────────────────────────────
   socialLink: {
     /**
