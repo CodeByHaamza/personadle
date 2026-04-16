@@ -26,7 +26,7 @@
     .panel h2 { font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 14px; color: var(--red); }
     .row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
     .row label { font-size: 0.8rem; color: var(--muted); min-width: 90px; }
-    .row select, .row input[type="text"] {
+    .row select, .row input[type="text"], .row input[type="email"], .row input[type="password"] {
       flex: 1; background: #222; border: 1px solid var(--border); color: var(--text);
       padding: 5px 8px; border-radius: 5px; font-size: 0.82rem; min-width: 0;
     }
@@ -35,6 +35,7 @@
       font-weight: 700; cursor: pointer; transition: opacity 0.15s;
     }
     button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-red    { background: var(--red);    color: #fff; }
     .btn-green  { background: var(--green);  color: #fff; }
     .btn-yellow { background: var(--yellow); color: #000; }
@@ -43,62 +44,114 @@
     .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
     .badge-active   { background: #1b4332; color: #4caf50; }
     .badge-inactive { background: #3a0a0a; color: #e63946; }
-    #toast { position: fixed; bottom: 20px; right: 20px; background: #222; border: 1px solid var(--green); color: var(--green); padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; display: none; z-index: 9999; }
+    .badge-pending  { background: #3a2f00; color: #f0b429; }
+    #toast { position: fixed; bottom: 20px; right: 20px; background: #222; border: 1px solid var(--green); color: var(--green); padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; display: none; z-index: 9999; max-width: 320px; }
     .state-row { font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
     .state-row span { color: var(--text); font-weight: 600; }
     .divider { border-top: 1px solid var(--border); margin: 12px 0; }
-    #friendsList { max-height: 160px; overflow-y: auto; }
-    .fr-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+    .scrollbox { max-height: 220px; overflow-y: auto; }
+    .fr-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid var(--border); gap: 6px;
+    }
     .fr-item:last-child { border-bottom: none; }
+    .fr-item .fr-info { font-size: 0.8rem; flex: 1; min-width: 0; }
+    .fr-item .fr-name { font-weight: 600; color: var(--text); }
+    .fr-item .fr-code { color: var(--muted); font-size: 0.72rem; }
+    .fr-actions { display: flex; gap: 4px; flex-shrink: 0; }
     .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .mode-block { background: #1a1a1a; border-radius: 6px; padding: 10px; }
     .mode-block h3 { font-size: 0.78rem; color: var(--muted); margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.05em; }
     .mode-block .target { font-size: 0.82rem; color: var(--yellow); margin-bottom: 6px; word-break: break-all; }
     .home-link { display: inline-block; margin-bottom: 20px; color: var(--red); text-decoration: none; font-size: 0.85rem; font-weight: 700; }
     .home-link:hover { text-decoration: underline; }
+    .search-result {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+      background: #1a1a1a; border-radius: 6px; margin-bottom: 4px; cursor: default;
+    }
+    .search-result .sr-pseudo { font-size: 0.82rem; font-weight: 600; flex: 1; }
+    .search-result .sr-code   { font-size: 0.72rem; color: var(--muted); }
+    .avatar-mini {
+      width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
+      background: #333; flex-shrink: 0; border: 1px solid #444;
+    }
+    .error-msg { color: var(--red); font-size: 0.78rem; margin-top: 4px; }
+    .success-msg { color: var(--green); font-size: 0.78rem; margin-top: 4px; }
   </style>
 </head>
 <body>
 
 <a class="home-link" href="./index.html">← Retour à l'accueil</a>
 <h1>DEBUG PANEL</h1>
-<p class="subtitle">Panneau de test — PersonaDLE dev tools. Manipule le localStorage et l'état du jeu.</p>
+<p class="subtitle">Panneau de test — PersonaDLE dev tools. Auth réelle, amis réels, état du jeu.</p>
 
 <div class="panels">
 
-  <!-- ── Auth / Identité ─────────────────────────────────────── -->
+  <!-- ── Auth / Connexion réelle ────────────────────────────── -->
   <div class="panel">
-    <h2>Identité (Auth)</h2>
-    <div class="state-row">État actuel :
-      <span id="authStatus">—</span>
+    <h2>Connexion (API réelle)</h2>
+    <div class="state-row">
+      Statut : <span id="authStatus"><span class="badge badge-inactive">Non connecté</span></span>
+    </div>
+    <div id="authUserInfo" style="display:none;margin-bottom:10px;">
+      <div class="state-row">Pseudo : <span id="authPseudo">—</span></div>
+      <div class="state-row">ID : <span id="authId">—</span></div>
+      <div class="state-row">Friend code : <span id="authCode">—</span></div>
+      <div class="state-row">Email : <span id="authEmail">—</span></div>
     </div>
     <div class="divider"></div>
     <div class="row">
-      <label>Pseudo</label>
-      <input type="text" id="dbgPseudo" placeholder="Hamza" value="DebugUser" />
-    </div>
-    <div class="row">
-      <label>User ID</label>
-      <input type="text" id="dbgUserId" placeholder="1" value="999" />
-    </div>
-    <div class="row">
-      <label>Friend code</label>
-      <input type="text" id="dbgFriendCode" placeholder="ABC123" value="DBG001" />
-    </div>
-    <div class="row">
       <label>Email</label>
-      <input type="text" id="dbgEmail" placeholder="test@test.com" value="debug@personadle.net" />
+      <input type="email" id="loginEmail" placeholder="hamza@example.com" />
     </div>
     <div class="row">
-      <button class="btn-green" onclick="simulateLogin()">Simuler connexion</button>
-      <button class="btn-red"   onclick="logoutDebug()">Se déconnecter</button>
+      <label>Mot de passe</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" />
+    </div>
+    <div id="loginError" class="error-msg" style="display:none;"></div>
+    <div class="row">
+      <button class="btn-green" id="btnLogin" onclick="doLogin()">Se connecter</button>
+      <button class="btn-red"   id="btnLogout" onclick="doLogout()" style="display:none;">Se déconnecter</button>
+    </div>
+  </div>
+
+  <!-- ── Amis (API réelle) ──────────────────────────────────── -->
+  <div class="panel" style="grid-column: span 2;">
+    <h2>Amis — API réelle</h2>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;">
+      Connectez-vous d'abord. Les actions appellent directement <code>/api/friends</code>.
+    </p>
+
+    <!-- Recherche + envoi demande -->
+    <div class="row">
+      <label>Rechercher</label>
+      <input type="text" id="friendSearch" placeholder="pseudo ou friend_code (8 cars)" />
+      <button class="btn-blue" onclick="searchUsers()">Chercher</button>
+    </div>
+    <div id="searchResults" class="scrollbox" style="margin-bottom:12px;"></div>
+
+    <div class="divider"></div>
+
+    <!-- Demandes reçues en attente -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <strong style="font-size:0.82rem;">Demandes reçues</strong>
+      <button class="btn-ghost" style="padding:3px 10px;font-size:0.72rem;" onclick="loadFriends()">↺ Rafraîchir</button>
+    </div>
+    <div id="pendingList" class="scrollbox" style="margin-bottom:12px;">
+      <span style="color:var(--muted);font-size:0.78rem;">Connectez-vous pour voir les demandes.</span>
+    </div>
+
+    <!-- Amis acceptés -->
+    <strong style="font-size:0.82rem;">Amis acceptés</strong>
+    <div id="acceptedList" class="scrollbox" style="margin-top:8px;">
+      <span style="color:var(--muted);font-size:0.78rem;">Connectez-vous pour voir vos amis.</span>
     </div>
   </div>
 
   <!-- ── Cibles du jour ─────────────────────────────────────── -->
   <div class="panel">
     <h2>Cible du jour (par mode)</h2>
-    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Écrase le personnage du jour. Recharge la page du mode après avoir appliqué.</p>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Écrase le personnage du jour via <code>debugTarget_&lt;mode&gt;</code>. Recharge la page du mode après.</p>
     <div class="mode-grid" id="modeGrid"></div>
     <div class="divider"></div>
     <div class="row">
@@ -109,7 +162,7 @@
   <!-- ── État du jeu ────────────────────────────────────────── -->
   <div class="panel">
     <h2>État du jeu</h2>
-    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Remet à zéro le localStorage pour le mode choisi (comme si la journée recommençait).</p>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Remet à zéro le localStorage pour le mode choisi.</p>
     <div class="row">
       <label>Mode</label>
       <select id="resetModeSelect">
@@ -124,43 +177,16 @@
     </div>
     <div class="row">
       <button class="btn-red" onclick="resetAllModes()">Reset TOUS les modes</button>
-      <button class="btn-ghost" onclick="refreshGameState()">Rafraîchir l'état</button>
+      <button class="btn-ghost" onclick="refreshGameState()">Rafraîchir</button>
     </div>
     <div class="divider"></div>
-    <div id="gameStateDisplay" style="font-size:0.78rem;color:var(--muted);">Cliquez "Rafraîchir" pour voir l'état.</div>
-  </div>
-
-  <!-- ── Amis simulés ───────────────────────────────────────── -->
-  <div class="panel">
-    <h2>Amis simulés</h2>
-    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Injecte de faux amis dans le cache localStorage pour tester la page Friends sans API.</p>
-    <div class="row">
-      <label>Pseudo</label>
-      <input type="text" id="fakeFriendPseudo" placeholder="Ryuji" value="RyujiDebug" />
-    </div>
-    <div class="row">
-      <label>Friend code</label>
-      <input type="text" id="fakeFriendCode" placeholder="XYZ999" value="XYZ999" />
-    </div>
-    <div class="row">
-      <label>Status</label>
-      <select id="fakeFriendStatus">
-        <option value="accepted">accepted</option>
-        <option value="pending">pending (reçue)</option>
-        <option value="pending_sent">pending (envoyée)</option>
-      </select>
-    </div>
-    <div class="row">
-      <button class="btn-green" onclick="addFakeFriend()">Ajouter</button>
-      <button class="btn-red"   onclick="clearFakeFriends()">Tout effacer</button>
-    </div>
-    <div id="friendsList"></div>
+    <div id="gameStateDisplay" style="font-size:0.78rem;color:var(--muted);">Cliquez "Rafraîchir".</div>
   </div>
 
   <!-- ── Social Link ────────────────────────────────────────── -->
   <div class="panel">
-    <h2>Social Link</h2>
-    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Force un rank/XP de Social Link pour un user ID (stocké localement, lu par social-link.js).</p>
+    <h2>Social Link (debug override)</h2>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:10px;">Force un rank/XP affiché localement (sans appel API).</p>
     <div class="row">
       <label>Friend ID</label>
       <input type="text" id="slFriendId" placeholder="2" value="2" />
@@ -180,6 +206,26 @@
     <div id="slDisplay" style="font-size:0.78rem;margin-top:8px;"></div>
   </div>
 
+  <!-- ── Stats ─────────────────────────────────────────────── -->
+  <div class="panel">
+    <h2>Stats (localStorage)</h2>
+    <div id="statsDisplay" style="font-size:0.78rem;color:var(--muted);">Chargement…</div>
+    <div class="divider"></div>
+    <div class="row">
+      <label>Mode</label>
+      <select id="statsMode">
+        <option>Classic</option><option>Emoji</option><option>AllOutAttack</option>
+        <option>Silhouette</option><option>Personae</option><option>Music</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>Wins +</label>
+      <input type="text" id="statsWinDelta" value="1" style="width:50px;flex:none;" />
+      <button class="btn-green" onclick="addWin()">+Win</button>
+      <button class="btn-red"   onclick="resetStats()">Reset stats mode</button>
+    </div>
+  </div>
+
   <!-- ── Profil local ───────────────────────────────────────── -->
   <div class="panel">
     <h2>Profil localStorage</h2>
@@ -196,31 +242,11 @@
       <button class="btn-ghost" onclick="refreshProfile()">Rafraîchir</button>
     </div>
     <div class="row">
-      <button class="btn-red" onclick="clearAllStorage()">⚠ CLEAR TOUT le localStorage</button>
+      <button class="btn-red" onclick="clearAllStorage()">⚠ CLEAR tout le localStorage</button>
     </div>
   </div>
 
-  <!-- ── Stats ─────────────────────────────────────────────── -->
-  <div class="panel">
-    <h2>Stats rapides</h2>
-    <div id="statsDisplay" style="font-size:0.78rem;color:var(--muted);">Chargement…</div>
-    <div class="divider"></div>
-    <div class="row">
-      <label>Mode</label>
-      <select id="statsMode">
-        <option>Classic</option><option>Emoji</option><option>AllOutAttack</option>
-        <option>Silhouette</option><option>Personae</option><option>Music</option>
-      </select>
-    </div>
-    <div class="row">
-      <label>Wins +</label>
-      <input type="text" id="statsWinDelta" value="1" style="width:60px;flex:none;" />
-      <button class="btn-green" onclick="addWin()">+Win</button>
-      <button class="btn-red"   onclick="resetStats()">Reset stats mode</button>
-    </div>
-  </div>
-
-  <!-- ── Clés localStorage brutes ───────────────────────────── -->
+  <!-- ── localStorage brut ─────────────────────────────────── -->
   <div class="panel" style="grid-column: 1 / -1;">
     <h2>localStorage — toutes les clés</h2>
     <div class="row">
@@ -235,66 +261,244 @@
 <div id="toast">✔ Action effectuée</div>
 
 <script type="module">
+import { api }         from './js/api.js';
 import { aoaCharacters } from './allOutAttackMode/database/aoaCharacters.js';
 import { characters }    from './database/characters_clean.js';
 import { personas as musicsPersonas } from './database/personas.js';
 
-// ── Helpers ─────────────────────────────────────────────────────────────
-function toast(msg = 'Done') {
+// ── Helpers ──────────────────────────────────────────────────────────────
+function toast(msg = 'Done', isError = false) {
   const t = document.getElementById('toast');
-  t.textContent = '✔ ' + msg;
+  t.textContent = (isError ? '✗ ' : '✔ ') + msg;
+  t.style.borderColor = isError ? 'var(--red)' : 'var(--green)';
+  t.style.color       = isError ? 'var(--red)' : 'var(--green)';
   t.style.display = 'block';
   clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, 2200);
+  window._toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3000);
 }
 
-function ls(key, val) {
-  if (val === undefined) return localStorage.getItem(key);
-  if (val === null) localStorage.removeItem(key);
-  else localStorage.setItem(key, JSON.stringify(val));
-}
 function lsRaw(key, val) {
   if (val === null) localStorage.removeItem(key);
   else localStorage.setItem(key, val);
 }
+function lsJson(key, val) {
+  if (val === null) localStorage.removeItem(key);
+  else localStorage.setItem(key, JSON.stringify(val));
+}
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-// ── Auth ─────────────────────────────────────────────────────────────────
-window.simulateLogin = function() {
-  const user = {
-    id:          parseInt(document.getElementById('dbgUserId').value) || 999,
-    pseudo:      document.getElementById('dbgPseudo').value || 'DebugUser',
-    email:       document.getElementById('dbgEmail').value || 'debug@personadle.net',
-    friend_code: document.getElementById('dbgFriendCode').value || 'DBG001',
-    lang:        'fr',
-    created_at:  new Date().toISOString(),
-  };
-  ls('debugSimUser', user);
-  window._currentUser = user;
-  refreshAuthStatus();
-  toast('Connexion simulée — window._currentUser défini');
+function avatarImg(avatarData, size = 30) {
+  if (!avatarData) return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#333;display:inline-block;"></div>`;
+  return `<img class="avatar-mini" src="${escHtml(avatarData)}" style="width:${size}px;height:${size}px;" />`;
+}
+
+// ── AUTH (API réelle) ─────────────────────────────────────────────────────
+let _currentUser = null;
+
+async function refreshAuthStatus() {
+  try {
+    const data = await api.auth.me();
+    _currentUser = data?.user ?? data ?? null;
+  } catch (_) {
+    _currentUser = null;
+  }
+  _renderAuthUI();
+}
+
+function _renderAuthUI() {
+  const u = _currentUser;
+  window._currentUser = u; // expose pour les autres modules
+  if (u) {
+    document.getElementById('authStatus').innerHTML = `<span class="badge badge-active">Connecté</span>`;
+    document.getElementById('authId').textContent     = u.id;
+    document.getElementById('authPseudo').textContent = u.pseudo;
+    document.getElementById('authCode').textContent   = u.friend_code ?? '—';
+    document.getElementById('authEmail').textContent  = u.email ?? '—';
+    document.getElementById('authUserInfo').style.display = '';
+    document.getElementById('btnLogin').style.display  = 'none';
+    document.getElementById('btnLogout').style.display = '';
+    // Reload friends panel
+    loadFriends();
+  } else {
+    document.getElementById('authStatus').innerHTML = `<span class="badge badge-inactive">Non connecté</span>`;
+    document.getElementById('authUserInfo').style.display = 'none';
+    document.getElementById('btnLogin').style.display  = '';
+    document.getElementById('btnLogout').style.display = 'none';
+    document.getElementById('pendingList').innerHTML  = `<span style="color:var(--muted);font-size:0.78rem;">Connectez-vous pour voir les demandes.</span>`;
+    document.getElementById('acceptedList').innerHTML = `<span style="color:var(--muted);font-size:0.78rem;">Connectez-vous pour voir vos amis.</span>`;
+  }
+}
+
+window.doLogin = async function() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl    = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'Email et mot de passe requis.'; errEl.style.display = ''; return; }
+  try {
+    document.getElementById('btnLogin').disabled = true;
+    const res = await api.auth.login({ email, password });
+    _currentUser = res.user ?? res ?? null;
+    await refreshAuthStatus();
+    toast(`Connecté en tant que ${_currentUser?.pseudo}`);
+  } catch (err) {
+    errEl.textContent = err.message || 'Identifiants incorrects.';
+    errEl.style.display = '';
+    toast('Échec connexion', true);
+  } finally {
+    document.getElementById('btnLogin').disabled = false;
+  }
 };
 
-window.logoutDebug = function() {
-  ls('debugSimUser', null);
+window.doLogout = async function() {
+  try {
+    await api.auth.logout();
+  } catch (_) {}
+  _currentUser = null;
   window._currentUser = null;
-  refreshAuthStatus();
+  _renderAuthUI();
   toast('Déconnecté');
 };
 
-function refreshAuthStatus() {
-  const u = window._currentUser || (() => { try { return JSON.parse(ls('debugSimUser')); } catch { return null; } })();
-  document.getElementById('authStatus').innerHTML = u
-    ? `<span class="badge badge-active">Connecté</span> ${u.pseudo} (id=${u.id}, code=${u.friend_code})`
-    : `<span class="badge badge-inactive">Non connecté</span>`;
+// ── AMIS (API réelle) ─────────────────────────────────────────────────────
+window.loadFriends = async function() {
+  if (!_currentUser) return;
+  try {
+    const data = await api.friends.list();
+    const all = data.friends ?? data ?? [];
+    const pending  = all.filter(f => f.status === 'pending' && f.direction === 'received');
+    const accepted = all.filter(f => f.status === 'accepted');
+    const sentPend = all.filter(f => f.status === 'pending' && f.direction === 'sent');
+
+    _renderPending(pending);
+    _renderAccepted(accepted, sentPend);
+  } catch (err) {
+    toast('Erreur chargement amis : ' + err.message, true);
+  }
+};
+
+function _renderPending(list) {
+  const el = document.getElementById('pendingList');
+  if (!list.length) { el.innerHTML = `<span style="color:var(--muted);font-size:0.78rem;">Aucune demande reçue.</span>`; return; }
+  el.innerHTML = list.map(f => `
+    <div class="fr-item">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+        ${avatarImg(f.avatar_data)}
+        <div class="fr-info">
+          <div class="fr-name">${escHtml(f.pseudo)}</div>
+          <div class="fr-code">${escHtml(f.friend_code)} · id=${f.friend_id}</div>
+        </div>
+      </div>
+      <div class="fr-actions">
+        <button class="btn-green" style="padding:3px 10px;font-size:0.72rem;" onclick="respondFriend(${f.friendship_id},'accept')">✓ Accepter</button>
+        <button class="btn-red"   style="padding:3px 10px;font-size:0.72rem;" onclick="respondFriend(${f.friendship_id},'decline')">✗ Refuser</button>
+      </div>
+    </div>
+  `).join('');
 }
 
-// Restore simulated user on load
-try {
-  const saved = JSON.parse(ls('debugSimUser'));
-  if (saved) window._currentUser = saved;
-} catch (_) {}
+function _renderAccepted(accepted, sentPend) {
+  const el = document.getElementById('acceptedList');
+  const rows = [];
+  accepted.forEach(f => {
+    rows.push(`
+      <div class="fr-item">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+          ${avatarImg(f.avatar_data)}
+          <div class="fr-info">
+            <div class="fr-name">${escHtml(f.pseudo)} <span class="badge badge-active">ami</span></div>
+            <div class="fr-code">${escHtml(f.friend_code)} · SL rank ${f.social_link_rank ?? '?'}</div>
+          </div>
+        </div>
+        <div class="fr-actions">
+          <button class="btn-ghost" style="padding:3px 10px;font-size:0.72rem;" onclick="removeFriend(${f.friendship_id},'${escHtml(f.pseudo)}')">Retirer</button>
+        </div>
+      </div>
+    `);
+  });
+  sentPend.forEach(f => {
+    rows.push(`
+      <div class="fr-item">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+          ${avatarImg(f.avatar_data)}
+          <div class="fr-info">
+            <div class="fr-name">${escHtml(f.pseudo)} <span class="badge badge-pending">envoyée</span></div>
+            <div class="fr-code">${escHtml(f.friend_code)}</div>
+          </div>
+        </div>
+        <div class="fr-actions">
+          <button class="btn-red" style="padding:3px 10px;font-size:0.72rem;" onclick="removeFriend(${f.friendship_id},'${escHtml(f.pseudo)}')">Annuler</button>
+        </div>
+      </div>
+    `);
+  });
+  el.innerHTML = rows.length ? rows.join('') : `<span style="color:var(--muted);font-size:0.78rem;">Aucun ami accepté.</span>`;
+}
 
-// ── Mode targets ─────────────────────────────────────────────────────────
+window.searchUsers = async function() {
+  const q   = document.getElementById('friendSearch').value.trim();
+  const box = document.getElementById('searchResults');
+  if (q.length < 2) { box.innerHTML = `<span class="error-msg">Minimum 2 caractères.</span>`; return; }
+  try {
+    box.innerHTML = `<span style="color:var(--muted);font-size:0.78rem;">Recherche…</span>`;
+    const data    = await api.user.search(q);
+    const results = data.results ?? [];
+    if (!results.length) { box.innerHTML = `<span style="color:var(--muted);font-size:0.78rem;">Aucun utilisateur trouvé.</span>`; return; }
+    box.innerHTML = results.map(u => `
+      <div class="search-result">
+        ${avatarImg(u.avatar_data)}
+        <div style="flex:1;min-width:0;">
+          <div class="sr-pseudo">${escHtml(u.pseudo)}</div>
+          <div class="sr-code">${escHtml(u.friend_code)} · id=${u.id}</div>
+        </div>
+        <button class="btn-green" style="padding:3px 10px;font-size:0.72rem;" onclick="sendRequest('${escHtml(u.friend_code)}','${escHtml(u.pseudo)}',this)">+ Ajouter</button>
+      </div>
+    `).join('');
+  } catch (err) {
+    box.innerHTML = `<span class="error-msg">${escHtml(err.message)}</span>`;
+  }
+};
+
+window.sendRequest = async function(friendCode, pseudo, btn) {
+  if (!_currentUser) { toast('Connectez-vous d\'abord', true); return; }
+  btn.disabled = true;
+  try {
+    await api.friends.request(friendCode);
+    btn.textContent = '✓ Envoyé';
+    btn.className = 'btn-ghost';
+    toast(`Demande envoyée à ${pseudo}`);
+    loadFriends();
+  } catch (err) {
+    btn.disabled = false;
+    const msg = err.status === 409 ? 'Déjà ami ou demande existante' : err.message;
+    toast(msg, true);
+  }
+};
+
+window.respondFriend = async function(friendshipId, action) {
+  try {
+    await api.friends.respond(friendshipId, action);
+    toast(action === 'accept' ? 'Demande acceptée' : 'Demande refusée');
+    loadFriends();
+  } catch (err) {
+    toast(err.message, true);
+  }
+};
+
+window.removeFriend = async function(friendshipId, pseudo) {
+  if (!confirm(`Retirer ${pseudo} ?`)) return;
+  try {
+    await api.friends.remove(friendshipId);
+    toast(`${pseudo} retiré`);
+    loadFriends();
+  } catch (err) {
+    toast(err.message, true);
+  }
+};
+
+// ── MODE TARGETS ──────────────────────────────────────────────────────────
 const MODES = [
   { key: 'Classic',      label: 'Classic',      pool: () => characters.map(c => c.nom) },
   { key: 'Emoji',        label: 'Emoji',        pool: () => characters.map(c => c.nom) },
@@ -308,17 +512,17 @@ function buildModeGrid() {
   const grid = document.getElementById('modeGrid');
   grid.innerHTML = '';
   MODES.forEach(m => {
-    const override = ls(`debugTarget_${m.key}`);
+    const override = localStorage.getItem(`debugTarget_${m.key}`);
+    const pool = m.pool ? m.pool() : [];
+    const options = pool.map(n => `<option value="${escHtml(n)}"${n === override ? ' selected' : ''}>${escHtml(n)}</option>`).join('');
     const block = document.createElement('div');
     block.className = 'mode-block';
-    const pool = m.pool ? m.pool() : [];
-    const options = pool.map(n => `<option value="${n.replace(/"/g,'&quot;')}"${n === override ? ' selected' : ''}>${n}</option>`).join('');
     block.innerHTML = `
       <h3>${m.label}</h3>
-      <div class="target">${override ? '🎯 ' + override : '(aléatoire du jour)'}</div>
+      <div class="target">${override ? '🎯 ' + escHtml(override) : '(aléatoire du jour)'}</div>
       ${pool.length ? `<select id="sel_${m.key}" style="width:100%;background:#222;border:1px solid #333;color:#e0e0e0;padding:4px;border-radius:4px;font-size:0.75rem;margin-bottom:6px;">
         <option value="">— aléatoire —</option>${options}
-      </select>` : `<div style="font-size:0.75rem;color:#888;margin-bottom:6px;">Pool non dispo ici</div>`}
+      </select>` : `<div style="font-size:0.75rem;color:#888;margin-bottom:6px;">Pool non dispo</div>`}
       <button class="btn-yellow" style="font-size:0.72rem;padding:4px 10px;" onclick="applyTarget('${m.key}')">Appliquer</button>
       ${override ? `<button class="btn-ghost" style="font-size:0.72rem;padding:4px 10px;margin-left:4px;" onclick="clearTarget('${m.key}')">✕</button>` : ''}
     `;
@@ -328,8 +532,7 @@ function buildModeGrid() {
 
 window.applyTarget = function(modeKey) {
   const sel = document.getElementById(`sel_${modeKey}`);
-  if (!sel) return;
-  const val = sel.value;
+  const val = sel?.value || '';
   if (val) lsRaw(`debugTarget_${modeKey}`, val);
   else lsRaw(`debugTarget_${modeKey}`, null);
   buildModeGrid();
@@ -345,10 +548,10 @@ window.clearTarget = function(modeKey) {
 window.clearAllTargets = function() {
   MODES.forEach(m => lsRaw(`debugTarget_${m.key}`, null));
   buildModeGrid();
-  toast('Tous les overrides de cible effacés');
+  toast('Tous les overrides effacés');
 };
 
-// ── Game state ────────────────────────────────────────────────────────────
+// ── GAME STATE ────────────────────────────────────────────────────────────
 const MODE_KEYS = {
   Classic:      ['classiqueGameOver','classiqueAttempts','lastPlayedDate_Classic'],
   Emoji:        ['emojiGameOver','emojiAttempts','emojiForceReveal','lastPlayedDate_Emoji'],
@@ -357,112 +560,66 @@ const MODE_KEYS = {
   Personae:     ['personaeGameOver','personaeAttempts','personaeForceReveal','lastPlayedDate_Personae'],
   Music:        ['musicGameOver','musicAttempts','lastPlayedDate_Music'],
 };
-const STATS_PREFIXES = ['statsLogged_Classic_','statsLogged_Emoji_','statsLogged_AllOut_','statsLogged_Silhouette_','statsLogged_Personae_','statsLogged_Music_'];
 
 window.resetMode = function() {
   const mode = document.getElementById('resetModeSelect').value;
-  const keys = MODE_KEYS[mode] || [];
   const today = new Date().toISOString().split('T')[0];
-  keys.forEach(k => lsRaw(k, null));
+  (MODE_KEYS[mode] || []).forEach(k => lsRaw(k, null));
   lsRaw(`statsLogged_${mode === 'AllOutAttack' ? 'AllOut' : mode}_${today}`, null);
   refreshGameState();
   toast(`${mode} remis à zéro`);
 };
 
 window.resetAllModes = function() {
-  Object.values(MODE_KEYS).flat().forEach(k => lsRaw(k, null));
   const today = new Date().toISOString().split('T')[0];
-  STATS_PREFIXES.forEach(p => lsRaw(p + today, null));
+  Object.entries(MODE_KEYS).forEach(([mode, keys]) => {
+    keys.forEach(k => lsRaw(k, null));
+    lsRaw(`statsLogged_${mode === 'AllOutAttack' ? 'AllOut' : mode}_${today}`, null);
+  });
   refreshGameState();
   toast('Tous les modes remis à zéro');
 };
 
 window.refreshGameState = function() {
   const today = new Date().toISOString().split('T')[0];
-  const lines = Object.entries(MODE_KEYS).map(([mode, keys]) => {
-    const gameOver = keys.filter(k => k.includes('GameOver')).map(k => {
+  const html = Object.entries(MODE_KEYS).map(([mode, keys]) => {
+    const go = keys.filter(k => k.includes('GameOver')).map(k => {
       const v = localStorage.getItem(k);
       return v ? `<span style="color:var(--red)">${k}=${v}</span>` : null;
     }).filter(Boolean).join(' ');
-    const attempts = keys.filter(k => k.includes('Attempts') || k.includes('attempts')).map(k => {
-      const v = localStorage.getItem(k);
-      return v ? `attempts=${v}` : null;
+    const att = keys.filter(k => k.toLowerCase().includes('attempts')).map(k => {
+      const v = localStorage.getItem(k); return v ? `attempts=${v}` : null;
     }).filter(Boolean).join(' ');
     const statsKey = `statsLogged_${mode === 'AllOutAttack' ? 'AllOut' : mode}_${today}`;
-    const statsLogged = localStorage.getItem(statsKey) ? `<span style="color:var(--green)">stats✔</span>` : '';
-    return `<div class="state-row"><span style="color:var(--blue);min-width:110px;display:inline-block">${mode}</span> ${gameOver || '<span style="color:var(--green)">en cours</span>'} ${attempts} ${statsLogged}</div>`;
+    const logged = localStorage.getItem(statsKey) ? `<span style="color:var(--green)">stats✔</span>` : '';
+    return `<div class="state-row"><span style="color:var(--blue);min-width:110px;display:inline-block">${mode}</span> ${go || '<span style="color:var(--green)">en cours</span>'} ${att} ${logged}</div>`;
   }).join('');
-  document.getElementById('gameStateDisplay').innerHTML = lines;
+  document.getElementById('gameStateDisplay').innerHTML = html;
 };
 
-// ── Fake friends ──────────────────────────────────────────────────────────
-function getFakeFriends() {
-  try { return JSON.parse(localStorage.getItem('debugFakeFriends') || '[]'); }
-  catch { return []; }
-}
-
-window.addFakeFriend = function() {
-  const friends = getFakeFriends();
-  const pseudo  = document.getElementById('fakeFriendPseudo').value.trim() || 'FakeUser';
-  const code    = document.getElementById('fakeFriendCode').value.trim()   || 'XXX000';
-  const status  = document.getElementById('fakeFriendStatus').value;
-  const id      = Date.now();
-  friends.push({ id, pseudo, friend_code: code, status, avatar_data: null, last_seen_at: new Date().toISOString() });
-  localStorage.setItem('debugFakeFriends', JSON.stringify(friends));
-  renderFriendsList();
-  toast(`Ami "${pseudo}" ajouté`);
-};
-
-window.removeFakeFriend = function(id) {
-  const friends = getFakeFriends().filter(f => f.id !== id);
-  localStorage.setItem('debugFakeFriends', JSON.stringify(friends));
-  renderFriendsList();
-};
-
-window.clearFakeFriends = function() {
-  localStorage.removeItem('debugFakeFriends');
-  renderFriendsList();
-  toast('Faux amis effacés');
-};
-
-function renderFriendsList() {
-  const friends = getFakeFriends();
-  const el = document.getElementById('friendsList');
-  if (!friends.length) { el.innerHTML = '<div style="font-size:0.78rem;color:var(--muted);">Aucun faux ami</div>'; return; }
-  el.innerHTML = friends.map(f => `
-    <div class="fr-item">
-      <span>${f.pseudo} <span style="color:var(--muted)">(${f.friend_code})</span> <span class="badge ${f.status === 'accepted' ? 'badge-active' : 'badge-inactive'}">${f.status}</span></span>
-      <button class="btn-red" style="padding:2px 8px;font-size:0.7rem;" onclick="removeFakeFriend(${f.id})">✕</button>
-    </div>
-  `).join('');
-}
-
-// ── Social Link ───────────────────────────────────────────────────────────
+// ── SOCIAL LINK (override local) ──────────────────────────────────────────
 window.setSocialLink = function() {
   const friendId = document.getElementById('slFriendId').value.trim();
-  const rank     = parseInt(document.getElementById('slRank').value) || 1;
-  const xp       = parseInt(document.getElementById('slXp').value)   || 0;
+  const rank = parseInt(document.getElementById('slRank').value) || 1;
+  const xp   = parseInt(document.getElementById('slXp').value)   || 0;
   if (!friendId) return;
-  const key  = `debugSL_${friendId}`;
-  lsRaw(key, JSON.stringify({ rank, xp, friendId }));
+  localStorage.setItem(`debugSL_${friendId}`, JSON.stringify({ rank, xp, friendId }));
   renderSlDisplay();
   toast(`SL friend ${friendId} → Rank ${rank}, XP ${xp}`);
 };
-
 window.clearSocialLinks = function() {
   Object.keys(localStorage).filter(k => k.startsWith('debugSL_')).forEach(k => localStorage.removeItem(k));
   renderSlDisplay();
   toast('Social Links debug effacés');
 };
-
 function renderSlDisplay() {
   const items = Object.keys(localStorage).filter(k => k.startsWith('debugSL_'));
   document.getElementById('slDisplay').innerHTML = items.length
-    ? items.map(k => { try { const d = JSON.parse(localStorage.getItem(k)); return `<div>Friend ${d.friendId}: Rank <b>${d.rank}</b>, XP <b>${d.xp}</b></div>`; } catch { return ''; } }).join('')
+    ? items.map(k => { try { const d = JSON.parse(localStorage.getItem(k)); return `<div>Friend ${d.friendId}: <b>Rank ${d.rank}</b>, XP ${d.xp}</div>`; } catch { return ''; } }).join('')
     : '<span style="color:var(--muted)">Aucun override SL</span>';
 }
 
-// ── Profil local ──────────────────────────────────────────────────────────
+// ── PROFIL LOCAL ──────────────────────────────────────────────────────────
 window.setLocalPseudo = function() {
   const p = document.getElementById('localPseudo').value.trim();
   if (!p) return;
@@ -472,14 +629,12 @@ window.setLocalPseudo = function() {
   refreshProfile();
   toast(`Pseudo local → "${p}"`);
 };
-
 window.refreshProfile = function() {
   const profile = (() => { try { return JSON.parse(localStorage.getItem('personaUserProfile') || '{}'); } catch { return {}; } })();
   document.getElementById('profilePseudo').textContent = profile.pseudo || '—';
   document.getElementById('profileAvatar').textContent = profile.avatar ? 'Présent (base64)' : '—';
   document.getElementById('profileDark').textContent   = localStorage.getItem('darkMode') || '—';
 };
-
 window.clearAllStorage = function() {
   if (!confirm('⚠ Effacer TOUT le localStorage ? Toutes les données locales seront perdues.')) return;
   localStorage.clear();
@@ -487,75 +642,73 @@ window.clearAllStorage = function() {
   setTimeout(() => location.reload(), 500);
 };
 
-// ── Stats ─────────────────────────────────────────────────────────────────
+// ── STATS ─────────────────────────────────────────────────────────────────
 window.addWin = function() {
   const mode  = document.getElementById('statsMode').value;
   const delta = parseInt(document.getElementById('statsWinDelta').value) || 1;
   const key   = `personaStats_${mode}`;
   const stats = (() => { try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; } })();
-  stats.wins = (stats.wins || 0) + delta;
+  stats.wins  = (stats.wins || 0) + delta;
   stats.games = (stats.games || 0) + delta;
   localStorage.setItem(key, JSON.stringify(stats));
   loadStats();
   toast(`${mode} wins +${delta} → ${stats.wins}`);
 };
-
 window.resetStats = function() {
-  const mode = document.getElementById('statsMode').value;
-  localStorage.removeItem(`personaStats_${mode}`);
+  localStorage.removeItem(`personaStats_${document.getElementById('statsMode').value}`);
   loadStats();
-  toast(`Stats ${mode} effacées`);
+  toast('Stats effacées');
 };
-
 function loadStats() {
-  const lines = ['Classic','Emoji','AllOutAttack','Silhouette','Personae','Music'].map(m => {
+  const html = ['Classic','Emoji','AllOutAttack','Silhouette','Personae','Music'].map(m => {
     const s = (() => { try { return JSON.parse(localStorage.getItem(`personaStats_${m}`) || '{}'); } catch { return {}; } })();
     return `<div class="state-row"><span style="color:var(--blue);min-width:110px;display:inline-block">${m}</span> wins=${s.wins||0} games=${s.games||0} streak=${s.streak||0}</div>`;
   }).join('');
-  document.getElementById('statsDisplay').innerHTML = lines || '<span style="color:var(--muted)">Aucune stat</span>';
+  document.getElementById('statsDisplay').innerHTML = html;
 }
 
-// ── localStorage table ────────────────────────────────────────────────────
+// ── LOCALSTORAGE TABLE ────────────────────────────────────────────────────
 window.renderLsTable = function() {
   const filter  = (document.getElementById('lsSearch').value || '').toLowerCase();
   const entries = Object.keys(localStorage).filter(k => k.toLowerCase().includes(filter)).sort();
   if (!entries.length) { document.getElementById('lsTable').innerHTML = '<span style="color:var(--muted)">Aucune clé trouvée</span>'; return; }
-  document.getElementById('lsTable').innerHTML = `
-    <table style="width:100%;border-collapse:collapse;">
-      <thead><tr>
-        <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #333;color:var(--muted)">Clé</th>
-        <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #333;color:var(--muted)">Valeur</th>
-        <th style="padding:4px 6px;border-bottom:1px solid #333;"></th>
-      </tr></thead>
-      <tbody>${entries.map(k => {
-        let v = localStorage.getItem(k) || '';
-        const display = v.length > 80 ? v.slice(0, 80) + '…' : v;
-        return `<tr>
-          <td style="padding:3px 6px;color:var(--yellow);vertical-align:top;">${escHtml(k)}</td>
-          <td style="padding:3px 6px;word-break:break-all;max-width:260px;">${escHtml(display)}</td>
-          <td style="padding:3px 6px;"><button class="btn-red" style="padding:2px 7px;font-size:0.68rem;" onclick="lsDelete('${escHtml(k)}')">✕</button></td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>`;
+  document.getElementById('lsTable').innerHTML = `<table style="width:100%;border-collapse:collapse;">
+    <thead><tr>
+      <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #333;color:var(--muted)">Clé</th>
+      <th style="text-align:left;padding:4px 6px;border-bottom:1px solid #333;color:var(--muted)">Valeur</th>
+      <th></th>
+    </tr></thead>
+    <tbody>${entries.map(k => {
+      const v = localStorage.getItem(k) || '';
+      return `<tr>
+        <td style="padding:3px 6px;color:var(--yellow);vertical-align:top;">${escHtml(k)}</td>
+        <td style="padding:3px 6px;word-break:break-all;max-width:260px;">${escHtml(v.length > 80 ? v.slice(0,80)+'…' : v)}</td>
+        <td style="padding:3px 6px;"><button class="btn-red" style="padding:2px 7px;font-size:0.68rem;" onclick="lsDelete('${escHtml(k)}')">✕</button></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
 };
-
 window.lsDelete = function(key) {
   localStorage.removeItem(key);
   renderLsTable();
   toast(`"${key}" supprimé`);
 };
 
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// ── Init ──────────────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────────────
 refreshAuthStatus();
 buildModeGrid();
-renderFriendsList();
 renderSlDisplay();
 refreshProfile();
 refreshGameState();
 loadStats();
 renderLsTable();
+
+// Recherche sur Entrée
+document.getElementById('friendSearch').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchUsers();
+});
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
 </script>
 
 </body>
