@@ -28,6 +28,9 @@
 import { initBadgesSystem, renderBadgesModal, getBadgesForShare, markProfileAsShared } from './badges/badgesManager.js';
 import { songs as ALL_SONGS } from '../musicsMode/database/songs.js';
 
+// Exposer les songs pour d'autres modules (notifications.js, social-link.js…)
+window._profileSongs = ALL_SONGS;
+
 
 // ─────────────────────────────────────────────────────────
 // ⏱️ FORMAT TEMPS JOUÉ

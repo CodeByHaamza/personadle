@@ -545,7 +545,22 @@
     "last_seen_long_ago": "molto tempo fa",
     "no_users": "Nessun giocatore ancora.",
     "browse_title": "Sfoglia giocatori",
-    "load_error": "Impossibile caricare i giocatori."
+    "load_error": "Impossibile caricare i giocatori.",
+    "cc_wants_confidant": "vuole essere il tuo Confidente.",
+    "cc_accept_social_link": "Accettare questo Social Link?",
+    "cc_yes": "SÌ",
+    "cc_no": "NO"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "sound": "Suono",
+    "sound_enabled": "Abilita suono",
+    "sound_volume": "Volume",
+    "animations": "Animazioni",
+    "anim_victory": "Animazioni di vittoria",
+    "anim_friend_request": "Animazione richiesta di amicizia",
+    "save": "Salva",
+    "saved": "✓ Salvato!"
   },
   "index": {
     "main_title": "Prova a indovinare il personaggio di Persona (da Persona 1 a Persona 5)",

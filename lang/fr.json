@@ -545,7 +545,22 @@
     "last_seen_long_ago": "il y a longtemps",
     "no_users": "Aucun joueur pour l'instant.",
     "browse_title": "Parcourir les joueurs",
-    "load_error": "Impossible de charger les joueurs."
+    "load_error": "Impossible de charger les joueurs.",
+    "cc_wants_confidant": "veut devenir votre Confident.",
+    "cc_accept_social_link": "Accepter ce Social Link ?",
+    "cc_yes": "OUI",
+    "cc_no": "NON"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "sound": "Son",
+    "sound_enabled": "Activer le son",
+    "sound_volume": "Volume",
+    "animations": "Animations",
+    "anim_victory": "Animations de victoire",
+    "anim_friend_request": "Animation demande d'ami",
+    "save": "Sauvegarder",
+    "saved": "✓ Sauvegardé !"
   },
   "index": {
     "main_title": "Devinez le personnage Persona (Persona 1 à Persona 5)",

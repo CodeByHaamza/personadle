@@ -545,7 +545,22 @@
     "last_seen_long_ago": "vor langer Zeit",
     "no_users": "Noch keine Spieler.",
     "browse_title": "Spieler durchsuchen",
-    "load_error": "Spieler konnten nicht geladen werden."
+    "load_error": "Spieler konnten nicht geladen werden.",
+    "cc_wants_confidant": "möchte dein Vertrauter sein.",
+    "cc_accept_social_link": "Diesen Social Link annehmen?",
+    "cc_yes": "JA",
+    "cc_no": "NEIN"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "sound": "Sound",
+    "sound_enabled": "Sound aktivieren",
+    "sound_volume": "Lautstärke",
+    "animations": "Animationen",
+    "anim_victory": "Siegesanimationen",
+    "anim_friend_request": "Freundschaftsanfrage-Animation",
+    "save": "Speichern",
+    "saved": "✓ Gespeichert!"
   },
   "index": {
     "main_title": "Versuche, den Persona-Charakter zu erraten (Persona 1 bis Persona 5)",

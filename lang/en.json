@@ -545,7 +545,22 @@
     "last_seen_long_ago": "a while ago",
     "no_users": "No players yet.",
     "browse_title": "Browse Players",
-    "load_error": "Could not load players."
+    "load_error": "Could not load players.",
+    "cc_wants_confidant": "wants to be your Confidant.",
+    "cc_accept_social_link": "Accept this Social Link?",
+    "cc_yes": "YES",
+    "cc_no": "NO"
+  },
+  "settings": {
+    "title": "Settings",
+    "sound": "Sound",
+    "sound_enabled": "Enable sound",
+    "sound_volume": "Volume",
+    "animations": "Animations",
+    "anim_victory": "Victory animations",
+    "anim_friend_request": "Friend request animation",
+    "save": "Save",
+    "saved": "✓ Saved!"
   },
   "index": {
     "main_title": "Try to guess the Persona character (Persona 1 to Persona 5)",
