@@ -1,0 +1,117 @@
+/* social-link.css — Jauge XP + Flamme quotidienne */
+
+/* ── Flamme quotidienne (liste d'amis) ───────────────── */
+.fr-flame {
+  font-size: 0.9em;
+  cursor: default;
+  animation: flamePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes flamePulse {
+  0%, 100% { transform: scale(1);    }
+  50%       { transform: scale(1.18); }
+}
+
+/* ── Jauge Social Link (profil d'un ami) ─────────────── */
+.sl-gauge-wrap {
+  padding: 14px 16px;
+  background: var(--surface, #fff);
+  border: 1.5px solid var(--border, #ececec);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sl-gauge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sl-rank-name {
+  font-family: 'Oswald', Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent, #e63946);
+}
+
+.sl-rank-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: monospace;
+  background: var(--accent, #e63946);
+  color: #fff;
+  border-radius: 100px;
+  padding: 2px 8px;
+}
+
+.sl-xp-label {
+  font-size: 0.7rem;
+  color: var(--text-muted, #888);
+}
+
+/* Barre de progression */
+.sl-bar-bg {
+  height: 8px;
+  background: var(--border, #eee);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.sl-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent, #e63946), #ff6b6b);
+  border-radius: 100px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 4px;
+}
+
+/* Actions disponibles */
+.sl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.sl-action-btn {
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1.5px solid var(--accent, #e63946);
+  background: transparent;
+  color: var(--accent, #e63946);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+.sl-action-btn:hover {
+  background: var(--accent, #e63946);
+  color: #fff;
+}
+.sl-action-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Rang 10 — True Confidant */
+.sl-rank-10 .sl-bar-fill {
+  background: linear-gradient(90deg, #e63946, #ffd700);
+}
+.sl-rank-10 .sl-rank-name {
+  color: #ffd700;
+}
+
+/* Dark mode */
+.darkmode .sl-gauge-wrap {
+  background: #1a1a1a;
+  border-color: #333;
+}
+.darkmode .sl-bar-bg { background: #333; }
