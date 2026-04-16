@@ -449,6 +449,32 @@ CREATE VIEW v_social_links AS
 
 
 -- =============================================================================
+-- 17. WALLPAPERS — Catalogue des fonds d'écran
+-- =============================================================================
+-- Les fichiers image restent des assets statiques.
+-- Cette table référence uniquement les IDs et leurs conditions de déblocage.
+CREATE TABLE wallpapers (
+    id                  VARCHAR(64)         NOT NULL PRIMARY KEY,   -- ex: "p5_velvet_room"
+    game                VARCHAR(16),                                -- P1, P3, P4, P5, PQ…
+    is_default          TINYINT(1)          NOT NULL DEFAULT 0,    -- 1 = disponible sans déblocage
+    unlock_condition    VARCHAR(255)        NULL                    -- NULL si is_default = 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+-- 18. USER_WALLPAPERS — Wallpapers débloqués par utilisateur
+-- =============================================================================
+-- Ne contient QUE les wallpapers débloqués (pas les defaults).
+-- Côté API : wallpapers disponibles = is_default=1 + user_wallpapers de l'user
+CREATE TABLE user_wallpapers (
+    user_id             BIGINT UNSIGNED     NOT NULL,
+    wallpaper_id        VARCHAR(64)         NOT NULL,
+    unlocked_at         TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, wallpaper_id),
+    CONSTRAINT fk_uw_user      FOREIGN KEY (user_id)      REFERENCES users(id)      ON DELETE CASCADE,
+    CONSTRAINT fk_uw_wallpaper FOREIGN KEY (wallpaper_id) REFERENCES wallpapers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
 -- 19. MESSAGES — Messages et défis entre amis
 -- =============================================================================
 CREATE TABLE messages (
@@ -468,5 +494,80 @@ CREATE TABLE messages (
 
 CREATE INDEX idx_messages_receiver ON messages(receiver_id, status, created_at DESC);
 CREATE INDEX idx_messages_sender   ON messages(sender_id);
+
+
+-- =============================================================================
+-- FONCTIONS / PROCÉDURES STOCKÉES
+-- =============================================================================
+
+DELIMITER //
+
+-- Fonction : obtenir ou créer le social_link entre deux utilisateurs
+-- Convention : user_a_id = LEAST(id1, id2), user_b_id = GREATEST(id1, id2)
+CREATE FUNCTION get_or_create_social_link(id1 BIGINT UNSIGNED, id2 BIGINT UNSIGNED)
+RETURNS BIGINT UNSIGNED
+DETERMINISTIC
+MODIFIES SQL DATA
+BEGIN
+    DECLARE a_id    BIGINT UNSIGNED;
+    DECLARE b_id    BIGINT UNSIGNED;
+    DECLARE link_id BIGINT UNSIGNED DEFAULT NULL;
+
+    SET a_id = LEAST(id1, id2);
+    SET b_id = GREATEST(id1, id2);
+
+    SELECT id INTO link_id
+    FROM social_links
+    WHERE user_a_id = a_id AND user_b_id = b_id
+    LIMIT 1;
+
+    IF link_id IS NULL THEN
+        INSERT INTO social_links (user_a_id, user_b_id) VALUES (a_id, b_id);
+        SET link_id = LAST_INSERT_ID();
+    END IF;
+
+    RETURN link_id;
+END //
+
+
+-- Procédure : ajouter de l'XP et mettre à jour le rang si nécessaire
+-- Utilisation : CALL add_social_link_xp(link_id, xp_amount, @new_xp, @new_rank, @ranked_up);
+CREATE PROCEDURE add_social_link_xp(
+    IN  p_link_id    BIGINT UNSIGNED,
+    IN  p_xp_amount  INT,
+    OUT p_new_xp     INT,
+    OUT p_new_rank   INT,
+    OUT p_ranked_up  TINYINT(1)
+)
+BEGIN
+    DECLARE v_current_xp   INT;
+    DECLARE v_current_rank INT;
+    DECLARE v_updated_xp   INT;
+    DECLARE v_updated_rank INT;
+
+    SELECT xp, `rank` INTO v_current_xp, v_current_rank
+    FROM social_links WHERE id = p_link_id;
+
+    SET v_updated_xp = v_current_xp + p_xp_amount;
+
+    SELECT MAX(r.`rank`) INTO v_updated_rank
+    FROM social_link_ranks r
+    WHERE r.xp_required <= v_updated_xp;
+
+    IF v_updated_rank IS NULL THEN SET v_updated_rank = 1; END IF;
+
+    SET p_ranked_up = IF(v_updated_rank > v_current_rank, 1, 0);
+
+    UPDATE social_links
+    SET xp = v_updated_xp,
+        `rank` = v_updated_rank,
+        last_interaction_at = NOW()
+    WHERE id = p_link_id;
+
+    SET p_new_xp   = v_updated_xp;
+    SET p_new_rank = v_updated_rank;
+END //
+
+DELIMITER ;
 
 SET FOREIGN_KEY_CHECKS = 1;
