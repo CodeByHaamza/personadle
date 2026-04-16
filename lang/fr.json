@@ -630,5 +630,13 @@
     "no_characters": "Aucun personnage disponible après filtrage.",
     "image_load_failed": "Échec du chargement : {{file}}",
     "image_load_timeout": "Délai dépassé pour : {{file}}"
+  },
+  "social": {
+    "action_visit":   "👁 Visiter +5 XP",
+    "action_score":   "📊 Partager score +10 XP",
+    "action_compare": "⚖ Comparer stats +10 XP",
+    "done_today":     "Déjà fait aujourd'hui",
+    "rank_up":        "🎉 Social Link — Rang {{rank}} : {{name}}",
+    "max_rank":       "✨ MAX — True Confidant"
   }
 }

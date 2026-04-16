@@ -630,5 +630,13 @@
     "no_characters": "No characters available after filtering.",
     "image_load_failed": "Failed to load: {{file}}",
     "image_load_timeout": "Timeout loading: {{file}}"
+  },
+  "social": {
+    "action_visit":   "👁 Visit +5 XP",
+    "action_score":   "📊 Share score +10 XP",
+    "action_compare": "⚖ Compare stats +10 XP",
+    "done_today":     "Done today",
+    "rank_up":        "🎉 Social Link — Rank {{rank}}: {{name}}",
+    "max_rank":       "✨ MAX — True Confidant"
   }
 }

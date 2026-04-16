@@ -20,6 +20,8 @@
  *   - window.__i18nReady     (injecté par i18n.js)
  */
 
+import { addFlameIfPlayedToday } from '../js/social-link.js';
+
 // ─────────────────────────────────────────────────────────
 // 1. UTILITAIRES
 // ─────────────────────────────────────────────────────────
@@ -221,7 +223,7 @@ function renderFriendEntry(entry) {
     <div class="fr-entry" data-fid="${esc(String(friendship_id))}">
       ${avatarHTML(pseudo, avatar_data, avatar_border_color, last_seen_at)}
       <div class="fr-entry-info">
-        <div class="fr-entry-pseudo">${esc(pseudo)}</div>
+        <div class="fr-entry-pseudo" id="pseudo-${friendship_id}">${esc(pseudo)}<span id="flame-${friendship_id}"></span></div>
         <div class="fr-entry-code">
           🔑 ${esc(friend_code)}
           ${lastSeenText ? `<span class="fr-last-seen">· ${esc(lastSeenText)}</span>` : ''}
@@ -325,6 +327,12 @@ async function loadFriends() {
 
   renderFriendsList();
   renderPendingSection();
+
+  // Ajouter la flamme 🔥 si on a interagi ensemble aujourd'hui
+  state.friends.forEach(f => {
+    const el = document.getElementById(`flame-${f.friendship_id}`);
+    if (el) addFlameIfPlayedToday(f, el.parentElement);
+  });
 }
 
 /**

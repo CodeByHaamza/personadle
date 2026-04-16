@@ -1,3 +1,5 @@
+import { renderSocialLinkGauge, gainSocialLinkXp } from '../js/social-link.js';
+
 /**
  * profile/profile-view.js — Mode consultation du profil d'un autre joueur
  * ─────────────────────────────────────────────────────────────────────────────
@@ -660,6 +662,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Song player (async, non-bloquant) — toujours appelé ; cache la card si pas de music
   renderViewSongCard(profile.profile_music_id ?? null);
+
+  // Social Link gauge — uniquement si l'utilisateur est connecté et consulte le profil d'un autre
+  const gaugeContainer = document.getElementById('socialLinkGaugeContainer');
+  if (gaugeContainer && window._currentUser && user.id !== window._currentUser.id) {
+    gaugeContainer.classList.remove('hidden');
+    renderSocialLinkGauge(user.id, gaugeContainer);
+    // XP pour visite de profil (fire-and-forget)
+    gainSocialLinkXp(user.id, 'visit_profile').catch(() => {});
+  }
 });
 
 } // fin if (viewParam)

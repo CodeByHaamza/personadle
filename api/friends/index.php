@@ -56,10 +56,16 @@ if ($method === 'GET') {
             u.last_login_at,
             p.avatar_data,
             p.avatar_border_color,
-            p.selected_badges
+            p.selected_badges,
+            sl.id                   AS social_link_id,
+            sl.`rank`               AS social_link_rank,
+            sl.xp                   AS social_link_xp,
+            sl.last_interaction_at  AS social_link_last_interaction
         FROM friendships f
         JOIN users u ON u.id = CASE WHEN f.requester_id = :me3 THEN f.addressee_id ELSE f.requester_id END
         LEFT JOIN profiles p ON p.user_id = u.id
+        LEFT JOIN social_links sl
+               ON sl.id = get_or_create_social_link(LEAST(:me6, u.id), GREATEST(:me7, u.id))
         WHERE (f.requester_id = :me4 OR f.addressee_id = :me5)
           AND f.status IN ('accepted', 'pending')
           AND u.is_deleted = 0
@@ -71,6 +77,8 @@ if ($method === 'GET') {
         ':me3' => $authId,
         ':me4' => $authId,
         ':me5' => $authId,
+        ':me6' => $authId,
+        ':me7' => $authId,
     ]);
     $rows = $stmt->fetchAll();
 
@@ -79,16 +87,20 @@ if ($method === 'GET') {
 
     foreach ($rows as $r) {
         $entry = [
-            'friendship_id'       => (int) $r['friendship_id'],
-            'friend_id'           => (int) $r['friend_id'],
-            'pseudo'              => $r['pseudo'],
-            'friend_code'         => $r['friend_code'],
-            'avatar_data'         => $r['avatar_data'],
-            'avatar_border_color' => $r['avatar_border_color'] ?? '#ffffff',
-            'selected_badges'     => json_decode($r['selected_badges'] ?? 'null') ?? [],
-            'last_seen_at'        => $r['last_login_at'],
-            'created_at'          => $r['created_at'],
-            'direction'           => $r['direction'],
+            'friendship_id'                => (int) $r['friendship_id'],
+            'friend_id'                    => (int) $r['friend_id'],
+            'pseudo'                       => $r['pseudo'],
+            'friend_code'                  => $r['friend_code'],
+            'avatar_data'                  => $r['avatar_data'],
+            'avatar_border_color'          => $r['avatar_border_color'] ?? '#ffffff',
+            'selected_badges'              => json_decode($r['selected_badges'] ?? 'null') ?? [],
+            'last_seen_at'                 => $r['last_login_at'],
+            'created_at'                   => $r['created_at'],
+            'direction'                    => $r['direction'],
+            'social_link_id'               => $r['social_link_id'] ? (int) $r['social_link_id'] : null,
+            'social_link_rank'             => $r['social_link_rank'] ? (int) $r['social_link_rank'] : 1,
+            'social_link_xp'               => $r['social_link_xp'] ? (int) $r['social_link_xp'] : 0,
+            'social_link_last_interaction' => $r['social_link_last_interaction'],
         ];
 
         if ($r['status'] === 'accepted') {
