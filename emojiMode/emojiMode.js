@@ -16,6 +16,8 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
+  getDailyTarget,
+  showChallengeButton,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -282,6 +284,7 @@ function checkEmojiGuess(name, forceReveal = false) {
       prevHref: "../classiqueMode/classiqueMode.html",
       nextHref: "../allOutAttackMode/allOutAttack.html",
     });
+    if (!forceReveal) showChallengeButton('emoji', attempts);
 
     const todayKey = getTodayStatsKey();
     if (!localStorage.getItem(todayKey)) {
@@ -405,18 +408,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("filters_Emoji", ALL_OPUS, (newActive) => {
     activeOpus = newActive;
+    // Only update autocomplete pool — daily target stays fixed for the day
     const filteredCharacters = filterCharacterPool();
     personas.length = 0;
     personas.push(...filteredCharacters.map((c) => c.nom));
-
-    if (filteredCharacters.length > 0) {
-      target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
-      localStorage.setItem("targetEmoji", JSON.stringify(target));
-      attempts = 1;
-      localStorage.setItem("attemptsEmoji", attempts);
-      updateEmojiHint();
-      updateCounters();
-    }
   });
   activeOpus = _filterApi.getActive();
 
@@ -425,9 +420,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   personas = poolInit.map((c) => c.nom);
 
   // ── Restore or create target / attempts ──
+  // Daily target uses seeded RNG so all players get the same character today.
+  // Pool is all characters with emoji data (regardless of active opus filters).
+  const ALL_EMOJI_CHARS = characters.filter((c) => c.emoji);
   target =
     JSON.parse(localStorage.getItem("targetEmoji")) ||
-    poolInit[Math.floor(Math.random() * poolInit.length)];
+    getDailyTarget(ALL_EMOJI_CHARS, 'Emoji');
   attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);

@@ -14,6 +14,8 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
+  getDailyTarget,
+  showChallengeButton,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -99,12 +101,8 @@ function pickCharacter() {
     return;
   }
 
-  const pool = filteredCharacters.filter((c) => !lastFiveTargets.includes(c.nom));
-  const choices = pool.length > 0 ? pool : [...filteredCharacters];
-  target = choices[Math.floor(Math.random() * choices.length)];
-
-  lastFiveTargets.push(target.nom);
-  if (lastFiveTargets.length > 5) lastFiveTargets.shift();
+  // Seeded daily target from full pool — same character for all players today
+  target = getDailyTarget(originalCharacters, 'Silhouette');
 
   currentZoom = 1.8;
 
@@ -307,6 +305,7 @@ function showVictory(force = false) {
     }
 
     showConfettiExplosion();
+    showChallengeButton('silhouette', attempts);
     let winCount = parseInt(localStorage.getItem("silhouetteWins") || "0");
     localStorage.setItem("silhouetteWins", winCount + 1);
   }

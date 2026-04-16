@@ -31,6 +31,8 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
+  getDailyTarget,
+  showChallengeButton,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -81,17 +83,15 @@ function getFilteredCharacters() {
 }
 
 /**
- * Selects a random character from the filtered pool (avoiding recent targets)
- * and loads their persona image.
+ * Picks the daily target and loads their persona image.
+ * Uses seeded RNG from the full unfiltered pool so all players get the same
+ * persona today regardless of their opus filter settings.
  */
 function pickCharacter() {
   filteredCharacters = getFilteredCharacters();
-  const pool = filteredCharacters.filter((c) => !lastFiveTargets.includes(c.persona));
-  const choices = pool.length > 0 ? pool : [...filteredCharacters];
 
-  target = choices[Math.floor(Math.random() * choices.length)];
-  lastFiveTargets.push(target.persona);
-  if (lastFiveTargets.length > 5) lastFiveTargets.shift();
+  // Seeded daily target from full pool
+  target = getDailyTarget(originalCharacters, 'Personae');
 
   personaImg.src = `./database/img/${target.image}.webp`;
   personaImg.alt = target.persona;
@@ -285,6 +285,7 @@ function showVictory(force = false, name = null) {
     prevHref: "../silhouetteMode/silhouette.html",
     nextHref: "../musicsMode/musics.html",
   });
+  if (!force) showChallengeButton('personae', attempts);
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   if (!localStorage.getItem(statsKey)) {

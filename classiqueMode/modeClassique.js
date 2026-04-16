@@ -14,6 +14,8 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
+  getDailyTarget,
+  showChallengeButton,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -382,6 +384,7 @@ function checkGuess(name, target, forceReveal = false) {
 
     showConfettiExplosion();
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+    showChallengeButton('classic', attempts);
   }
 }
 
@@ -447,17 +450,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("filters_Classic", ALL_OPUS, (newActive) => {
     activeOpus = newActive;
+    // Only update autocomplete pool — daily target stays fixed for the day
     filterCharacterPool();
-
-    // Pick a new target from the updated filter set
-    const filteredCharacters = characters.filter((c) => {
-      const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-      return charOpus.some((op) => activeOpus.includes(op));
-    });
-    if (filteredCharacters.length > 0) {
-      target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
-      localStorage.setItem("target", JSON.stringify(target));
-    }
   });
   // Synchronise activeOpus avec ce qu'initFilterMenu a chargé depuis localStorage
   activeOpus = _filterApi.getActive();
@@ -481,13 +475,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
   }
 
-  // Pick a new target if none stored
+  // Pick daily target if none stored (seeded RNG — same character for all players today)
   if (!target) {
-    const filteredCharacters = characters.filter((c) => {
-      const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-      return charOpus.some((op) => activeOpus.includes(op));
-    });
-    target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+    target = getDailyTarget(characters, 'Classic');
     localStorage.setItem("target", JSON.stringify(target));
   }
 
@@ -586,11 +576,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     filterCharacterPool();
 
-    const filteredCharacters = characters.filter((c) => {
-      const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-      return charOpus.some((op) => activeOpus.includes(op));
-    });
-    target = filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)];
+    // Restore daily target (seeded RNG — same character for all players today)
+    target = getDailyTarget(characters, 'Classic');
     localStorage.setItem("target", JSON.stringify(target));
 
     const nav = document.getElementById("modeNavigationContainer");

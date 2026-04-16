@@ -17,7 +17,7 @@
  * ────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION = 'personadle-v13';
+const CACHE_VERSION = 'personadle-v14';
 
 /**
  * Assets à pré-cacher lors de l'installation.

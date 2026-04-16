@@ -14,6 +14,8 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
+  getDailyTarget,
+  showChallengeButton,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -27,13 +29,27 @@ import { initFilterMenu } from "../js/filterMenu.js";
 const CDN_BASE_URL = "https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev/";
 const CACHE_CONTROL = "public, max-age=86400";
 
-/** True when running on localhost → use local files instead of CDN. */
-const IS_LOCAL = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+/**
+ * True when running in a local environment (file://, localhost, 127.0.0.1,
+ * 0.0.0.0, or any private network IP 192.168.x.x / 10.x.x.x).
+ * → Assets served from ./database/allOutAttack/ instead of the CDN.
+ */
+const IS_LOCAL = (() => {
+  const h = location.hostname;
+  return (
+    h === "" ||                        // file:// protocol
+    h === "localhost" ||
+    h === "127.0.0.1" ||
+    h === "0.0.0.0" ||
+    /^192\.168\./.test(h) ||           // LAN (Live Server on local IP)
+    /^10\./.test(h)                    // LAN (corporate / VPN)
+  );
+})();
 
 /**
  * Builds the URL for an All-Out Attack asset.
  * Local: `./database/allOutAttack/<filename>.<ext>`
- * Production: CDN URL with cache-control query param
+ * Production: CDN Cloudflare R2
  *
  * @param {string} subfolder - CDN subfolder (e.g. "allOutAttack")
  * @param {string} filename  - Asset filename without extension
@@ -213,18 +229,17 @@ function getFilteredPersonas() {
 }
 
 /**
- * Picks a random character from `personas`, avoiding the last 5 selections.
+ * Returns the deterministic daily character for All-Out Attack.
+ * Uses seeded RNG from the full unfiltered pool so all players get the same
+ * character today regardless of their opus filter settings.
  * @returns {string|null} Character name or null if pool is empty
  */
 function getBetterRandomCharacter() {
-  const pool = personas.filter((n) => !lastFiveTargets.includes(n));
-  const choices = pool.length > 0 ? pool : [...personas];
-  if (!choices.length) { alert("No characters available with current filters."); return null; }
-
-  const selected = choices[Math.floor(Math.random() * choices.length)];
-  lastFiveTargets.push(selected);
-  if (lastFiveTargets.length > 5) lastFiveTargets.shift();
-  return selected;
+  if (!originalPersonas.length) {
+    alert((window.i18n || { t: (k) => k }).t('modes.allOutAttack.no_characters'));
+    return null;
+  }
+  return getDailyTarget(originalPersonas, 'AllOutAttack');
 }
 
 
@@ -360,6 +375,7 @@ function handleGuess() {
       prevHref: "../emojiMode/emojiMode.html",
       nextHref: "../silhouetteMode/silhouette.html",
     });
+    showChallengeButton('alloutattack', attempts);
     gameOver = true;
     localStorage.setItem("aoaGameOver", "true");
 
@@ -612,7 +628,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     activeOpusFilters = newActive;
     personas = getFilteredPersonas();
 
-    if (!personas.length) { alert("No characters match these filters!"); return; }
+    if (!personas.length) { alert((window.i18n || { t: (k) => k }).t('game.no_characters_filters')); return; }
 
     target = getBetterRandomCharacter();
     const imageName = portraitsMap[target] || target.split(" ")[0];

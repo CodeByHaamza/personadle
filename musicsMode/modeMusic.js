@@ -22,6 +22,8 @@ import {
   checkResetOnLoad,
   buildGameSession,
   savePendingSession,
+  getDailyTarget,
+  showChallengeButton,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -215,20 +217,15 @@ function getFilteredSongs() {
 }
 
 /**
- * Picks a random song from the filtered pool, avoiding the last 5 targets.
- * Saves the new target and resets the audio player.
+ * Picks the daily song target and resets the audio player.
+ * Uses seeded RNG from the full song pool so all players get the same song
+ * today regardless of their opus filter settings.
  */
 function pickSong() {
   filteredSongs = getFilteredSongs();
 
-  // Avoid repeating the last 5 played songs
-  const pool    = filteredSongs.filter(s => !lastFiveTargets.includes(s.titre));
-  const choices = pool.length > 0 ? pool : [...filteredSongs];
-
-  target = choices[Math.floor(Math.random() * choices.length)];
-
-  lastFiveTargets.push(target.titre);
-  if (lastFiveTargets.length > 5) lastFiveTargets.shift();
+  // Seeded daily target from full pool
+  target = getDailyTarget(originalSongs, 'Music');
 
   audioPlayer.src = `./database/music/song/${target.fichier}`;
   audioPlayer.load();
@@ -342,6 +339,7 @@ function showVictory(force = false) {
       count:      30,
       spreadFrom: "bottom",
     });
+    showChallengeButton('music', attempts);
   }
 
   localStorage.setItem("musicGameOver", "true");
