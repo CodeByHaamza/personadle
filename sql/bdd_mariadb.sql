@@ -27,13 +27,16 @@ CREATE TABLE users (
     lang            VARCHAR(5)          NOT NULL DEFAULT 'fr',
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_login_at   TIMESTAMP           NULL,
-    is_deleted      TINYINT(1)          NOT NULL DEFAULT 0,
-    deleted_at      TIMESTAMP           NULL
+    is_deleted          TINYINT(1)          NOT NULL DEFAULT 0,
+    deleted_at          TIMESTAMP           NULL,
+    remember_me_hash    VARCHAR(64)         NULL,
+    remember_me_expires DATETIME            NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE INDEX idx_users_pseudo ON users(pseudo);
-CREATE INDEX idx_users_email  ON users(email);
-CREATE INDEX idx_users_code   ON users(friend_code);
+CREATE INDEX idx_users_pseudo    ON users(pseudo);
+CREATE INDEX idx_users_email     ON users(email);
+CREATE INDEX idx_users_code      ON users(friend_code);
+CREATE INDEX idx_remember_me     ON users(remember_me_hash);
 
 
 -- =============================================================================
@@ -82,6 +85,7 @@ CREATE TABLE profiles (
     profile_music_id    VARCHAR(100),
     selected_badges     JSON,
     equipped_title_id   BIGINT UNSIGNED     NULL,
+    settings            JSON                NULL,
     updated_at          TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP
                                             ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_profiles_user
@@ -208,6 +212,7 @@ CREATE TABLE friendships (
     status          VARCHAR(15)         NOT NULL DEFAULT 'pending',
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
     accepted_at     TIMESTAMP           NULL,
+    seen_at         TIMESTAMP           NULL,
     UNIQUE KEY uq_friendship (requester_id, addressee_id),
     CONSTRAINT chk_no_self_friend CHECK (requester_id <> addressee_id),
     CONSTRAINT fk_fr_requester FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -471,6 +476,27 @@ CREATE TABLE user_wallpapers (
     CONSTRAINT fk_uw_user      FOREIGN KEY (user_id)      REFERENCES users(id)      ON DELETE CASCADE,
     CONSTRAINT fk_uw_wallpaper FOREIGN KEY (wallpaper_id) REFERENCES wallpapers(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
+-- 19. MESSAGES — Messages et défis entre amis
+-- =============================================================================
+CREATE TABLE messages (
+    id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    sender_id       BIGINT UNSIGNED NOT NULL,
+    receiver_id     BIGINT UNSIGNED NOT NULL,
+    type            VARCHAR(20)     NOT NULL DEFAULT 'message',
+    content         TEXT            NULL,
+    challenge_mode  VARCHAR(30)     NULL,
+    challenge_score INT             NULL,
+    challenge_date  DATE            NULL,
+    status          VARCHAR(20)     NOT NULL DEFAULT 'unread',
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_msg_sender   FOREIGN KEY (sender_id)   REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_msg_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_messages_receiver ON messages(receiver_id, status, created_at DESC);
+CREATE INDEX idx_messages_sender   ON messages(sender_id);
 
 SET FOREIGN_KEY_CHECKS = 1;
 -- =============================================================================

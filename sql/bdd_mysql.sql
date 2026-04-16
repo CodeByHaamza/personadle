@@ -1,0 +1,472 @@
+-- =============================================================================
+-- PersonaDLE — Schéma MySQL 8.0
+-- =============================================================================
+-- Adapté depuis bdd.sql (PostgreSQL) pour MySQL 8.0.
+-- Changements principaux :
+--   BIGSERIAL    → BIGINT UNSIGNED AUTO_INCREMENT
+--   BOOLEAN      → TINYINT(1)
+--   DEFAULT NOW()→ DEFAULT CURRENT_TIMESTAMP
+--   Inline FK    → FOREIGN KEY (...) REFERENCES ...
+--   TEXT (avatar)→ MEDIUMTEXT (base64 peut dépasser 64 Ko)
+-- =============================================================================
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Drop dans l'ordre inverse des dépendances
+DROP VIEW  IF EXISTS v_social_links;
+DROP VIEW  IF EXISTS v_global_stats;
+DROP VIEW  IF EXISTS v_friends;
+DROP TABLE IF EXISTS deletion_requests;
+DROP TABLE IF EXISTS leaderboard_cache;
+DROP TABLE IF EXISTS social_link_badges;
+DROP TABLE IF EXISTS social_link_interactions;
+DROP TABLE IF EXISTS social_links;
+DROP TABLE IF EXISTS social_link_ranks;
+DROP TABLE IF EXISTS friendships;
+DROP TABLE IF EXISTS event_codes_redeemed;
+DROP TABLE IF EXISTS badges_unlocked;
+DROP TABLE IF EXISTS daily_targets;
+DROP TABLE IF EXISTS game_sessions;
+DROP TABLE IF EXISTS user_stats;
+DROP TABLE IF EXISTS user_titles;
+DROP TABLE IF EXISTS profiles;
+DROP TABLE IF EXISTS titles;
+DROP TABLE IF EXISTS users;
+
+
+-- =============================================================================
+-- 1. USERS
+-- =============================================================================
+CREATE TABLE users (
+    id                   BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    email                VARCHAR(255)     NOT NULL,
+    pseudo               VARCHAR(50)      NOT NULL,
+    password_hash        VARCHAR(255)     NOT NULL,
+    friend_code          CHAR(8)          NOT NULL,
+    lang                 VARCHAR(5)       NOT NULL DEFAULT 'en',
+    created_at           TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_login_at        TIMESTAMP        NULL,
+    is_deleted           TINYINT(1)       NOT NULL DEFAULT 0,
+    deleted_at           TIMESTAMP        NULL,
+    -- Remember-me token (SHA-256 hash of the raw token stored in the browser cookie).
+    -- Allows automatic re-login across browser restarts without relying solely on
+    -- PHP session files, which shared hosts may garbage-collect aggressively.
+    remember_me_hash     VARCHAR(64)      NULL,
+    remember_me_expires  DATETIME         NULL,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_email           (email),
+    UNIQUE KEY uq_pseudo          (pseudo),
+    UNIQUE KEY uq_friend_code     (friend_code),
+    INDEX      idx_remember_me    (remember_me_hash)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_users_pseudo ON users(pseudo);
+
+
+-- =============================================================================
+-- 2. TITLES — Titres/rangs débloquables
+--    Créé avant profiles (profiles y fait référence via equipped_title_id)
+-- =============================================================================
+CREATE TABLE titles (
+    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    slug            VARCHAR(100)     NOT NULL,
+
+    name_en         VARCHAR(100),
+    name_fr         VARCHAR(100),
+    name_es         VARCHAR(100),
+    name_de         VARCHAR(100),
+    name_it         VARCHAR(100),
+    name_jp         VARCHAR(100),
+
+    description_en  TEXT,
+    description_fr  TEXT,
+    description_es  TEXT,
+    description_de  TEXT,
+    description_it  TEXT,
+    description_jp  TEXT,
+
+    condition_type  VARCHAR(50),
+    -- 'wins_total' | 'streak_record' | 'mode_wins' | 'perfect_wins'
+    -- 'social_link_rank_10' | 'badges_count' | 'manual'
+
+    condition_mode  VARCHAR(30),
+    -- NULL = global, sinon: 'classic' | 'emoji' | 'silhouette' | 'alloutattack' | 'personae' | 'music'
+
+    condition_value INT,
+    rarity          VARCHAR(20)      NOT NULL DEFAULT 'common',
+    -- 'common' | 'rare' | 'epic' | 'legendary'
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_slug (slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed : titres de base
+INSERT INTO titles (slug, name_en, name_fr, name_es, name_de, name_it, condition_type, condition_value, rarity) VALUES
+('first_steps',       'First Steps',       'Premiers Pas',      'Primeros Pasos',    'Erste Schritte',     'Primi Passi',        'wins_total',          1,   'common'),
+('phantom_thief',     'Phantom Thief',     'Voleur Fantôme',    'Ladrón Fantasma',   'Phantom Dieb',       'Ladro Fantasma',     'wins_total',          10,  'common'),
+('wild_card',         'Wild Card',         'Wild Card',         'Comodín',           'Wildcard',           'Wild Card',          'wins_total',          50,  'rare'),
+('velvet_apprentice', 'Velvet Apprentice', 'Apprenti Velours',  'Aprendiz Velvet',   'Samt-Lehrling',      'Apprendista Velvet', 'wins_total',          100, 'rare'),
+('ace_detective',     'Ace Detective',     'As Détective',      'Detective As',      'Meisterdetektiv',    'Detective Asso',     'streak_record',       7,   'epic'),
+('true_wild_card',    'True Wild Card',    'Vrai Wild Card',    'Comodín Verdadero', 'Wahre Wildcard',     'Vero Wild Card',     'wins_total',          200, 'legendary'),
+('music_master',      'Music Master',      'Maître Musique',    'Maestro Musical',   'Musikmeister',       'Maestro Musicale',   'mode_wins',           20,  'rare'),
+('silhouette_pro',    'Silhouette Pro',    'Pro Silhouette',    'Pro Silueta',       'Silhouetten-Profi',  'Pro Silhouette',     'mode_wins',           15,  'rare'),
+('confidant',         'True Confidant',    'Confident',         'Confidente',        'Vertrauter',         'Confidente',         'social_link_rank_10', 1,   'legendary'),
+('perfectionist',     'Perfectionist',     'Perfectionniste',   'Perfeccionista',    'Perfektionist',      'Perfezionista',      'perfect_wins',        10,  'epic');
+
+
+-- =============================================================================
+-- 3. PROFILES
+-- =============================================================================
+CREATE TABLE profiles (
+    user_id             BIGINT UNSIGNED  NOT NULL,
+    avatar_data         MEDIUMTEXT,                       -- base64 (canvas crop)
+    avatar_border_color VARCHAR(7)       NOT NULL DEFAULT '#ffffff',
+    wallpaper_id        VARCHAR(100),
+    profile_music_id    VARCHAR(100),
+    selected_badges     JSON,                             -- max 4 badge IDs
+    equipped_title_id   BIGINT UNSIGNED  NULL,
+    settings            JSON             NULL,
+    updated_at          TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                                  ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (user_id),
+    FOREIGN KEY (user_id)           REFERENCES users(id)  ON DELETE CASCADE,
+    FOREIGN KEY (equipped_title_id) REFERENCES titles(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================================================
+-- 4. USER_TITLES — Titres débloqués par utilisateur
+-- =============================================================================
+CREATE TABLE user_titles (
+    id          BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id     BIGINT UNSIGNED  NOT NULL,
+    title_id    BIGINT UNSIGNED  NOT NULL,
+    unlocked_at TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_title (user_id, title_id),
+    FOREIGN KEY (user_id)  REFERENCES users(id)  ON DELETE CASCADE,
+    FOREIGN KEY (title_id) REFERENCES titles(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_user_titles_user ON user_titles(user_id);
+
+
+-- =============================================================================
+-- 5. USER_STATS — Statistiques par mode et par joueur
+-- =============================================================================
+CREATE TABLE user_stats (
+    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id         BIGINT UNSIGNED  NOT NULL,
+    mode            VARCHAR(30)      NOT NULL,
+    -- 'classic' | 'emoji' | 'silhouette' | 'alloutattack' | 'personae' | 'music'
+
+    wins            INT              NOT NULL DEFAULT 0,
+    giveups         INT              NOT NULL DEFAULT 0,
+    games           INT              NOT NULL DEFAULT 0,
+    streak          INT              NOT NULL DEFAULT 0,
+    streak_record   INT              NOT NULL DEFAULT 0,
+    perfect_wins    INT              NOT NULL DEFAULT 0,
+    total_time_ms   BIGINT           NOT NULL DEFAULT 0,
+    last_played_at  TIMESTAMP        NULL,
+    first_played_at TIMESTAMP        NULL,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_mode (user_id, mode),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_user_stats_user ON user_stats(user_id);
+CREATE INDEX idx_user_stats_mode ON user_stats(mode, wins DESC);
+
+
+-- =============================================================================
+-- 6. GAME_SESSIONS — Historique de chaque partie jouée
+-- =============================================================================
+CREATE TABLE game_sessions (
+    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id         BIGINT UNSIGNED  NOT NULL,
+    mode            VARCHAR(30)      NOT NULL,
+    played_date     DATE             NOT NULL,   -- date Paris (Europe/Paris)
+    target_name     VARCHAR(200)     NOT NULL,
+    result          VARCHAR(10)      NOT NULL,   -- 'win' | 'giveup'
+    attempts        INT              NOT NULL,
+    time_ms         INT,
+    active_filters  JSON,                        -- ["P3","P5","P5R"]
+    created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_game_sessions_user_mode ON game_sessions(user_id, mode);
+CREATE INDEX idx_game_sessions_date      ON game_sessions(played_date);
+CREATE INDEX idx_game_sessions_target    ON game_sessions(mode, played_date, target_name);
+
+
+-- =============================================================================
+-- 7. DAILY_TARGETS — Personnage/musique du jour par mode (serveur)
+-- =============================================================================
+CREATE TABLE daily_targets (
+    mode            VARCHAR(30)      NOT NULL,
+    target_date     DATE             NOT NULL,
+    target_name     VARCHAR(200)     NOT NULL,
+    target_data     JSON,
+    created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (mode, target_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================================================
+-- 8. BADGES_UNLOCKED
+-- =============================================================================
+CREATE TABLE badges_unlocked (
+    id          BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id     BIGINT UNSIGNED  NOT NULL,
+    badge_id    VARCHAR(100)     NOT NULL,   -- correspond aux IDs dans badgesData.js
+    unlocked_at TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_badge (user_id, badge_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_badges_user ON badges_unlocked(user_id);
+
+
+-- =============================================================================
+-- 9. EVENT_CODES_REDEEMED
+-- =============================================================================
+CREATE TABLE event_codes_redeemed (
+    id          BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id     BIGINT UNSIGNED  NOT NULL,
+    code        VARCHAR(50)      NOT NULL,
+    redeemed_at TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_code (user_id, code),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================================================
+-- 10. FRIENDSHIPS
+-- =============================================================================
+CREATE TABLE friendships (
+    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    requester_id    BIGINT UNSIGNED  NOT NULL,
+    addressee_id    BIGINT UNSIGNED  NOT NULL,
+    status          VARCHAR(15)      NOT NULL DEFAULT 'pending',
+    -- 'pending' | 'accepted' | 'blocked'
+    created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    accepted_at     TIMESTAMP        NULL,
+    seen_at         TIMESTAMP        NULL,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_friendship (requester_id, addressee_id),
+    CONSTRAINT chk_not_self CHECK (requester_id != addressee_id),
+    FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (addressee_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_friendships_requester ON friendships(requester_id, status);
+CREATE INDEX idx_friendships_addressee ON friendships(addressee_id, status);
+
+
+-- =============================================================================
+-- 11. SOCIAL_LINK_RANKS — Seuils XP et noms des rangs
+-- =============================================================================
+CREATE TABLE social_link_ranks (
+    `rank`      INT         NOT NULL,
+    name_en     VARCHAR(50),
+    name_fr     VARCHAR(50),
+    name_es     VARCHAR(50),
+    name_de     VARCHAR(50),
+    name_it     VARCHAR(50),
+    name_jp     VARCHAR(50),
+    xp_required INT         NOT NULL,
+    reward_en   TEXT,
+
+    PRIMARY KEY (`rank`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO social_link_ranks (`rank`, name_en, name_fr, name_es, name_de, name_it, xp_required, reward_en) VALUES
+(1,  'Stranger',           'Inconnu',            'Desconocido',         'Unbekannter',          'Sconosciuto',         0,    'Friendship begins'),
+(2,  'Acquaintance',       'Connaissance',        'Conocido',            'Bekannter',            'Conoscente',          100,  'Can compare stats'),
+(3,  'Companion',          'Compagnon',           'Compañero',           'Gefährte',             'Compagno',            250,  'Can share daily scores'),
+(4,  'Ally',               'Allié',               'Aliado',              'Verbündeter',          'Alleato',             450,  'Can send challenges'),
+(5,  'Confidant',          'Confident',           'Confidente',          'Vertrauter',           'Confidente',          700,  'Shared streak counter unlocked'),
+(6,  'Trusted Ally',       'Allié Fidèle',        'Aliado de Confianza', 'Treuer Verbündeter',   'Alleato Fidato',      1000, 'Profile visits give bonus XP'),
+(7,  'True Ally',          'Vrai Allié',          'Verdadero Aliado',    'Wahrer Verbündeter',   'Vero Alleato',        1350, 'Streak sharing gives double XP'),
+(8,  'Bond',               'Lien',                'Vínculo',             'Verbindung',           'Legame',              1750, 'Special profile frame unlocked'),
+(9,  'Unbreakable Bond',   'Lien Indestructible', 'Vínculo Inquebrantable','Unzerbrechliche Verbindung','Legame Indistruttibile',2200,'Almost there…'),
+(10, 'True Confidant',     'True Confidant',      'Verdadero Confidente','Wahrer Vertrauter',    'Vero Confidente',     2700, 'True Confidant badge generated with both avatars');
+
+
+-- =============================================================================
+-- 12. SOCIAL_LINKS — Rang Social Link entre deux amis (symétrique)
+--     Convention: user_a_id = MIN(id_a, id_b) — garantit l'unicité
+-- =============================================================================
+CREATE TABLE social_links (
+    id                  BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_a_id           BIGINT UNSIGNED  NOT NULL,   -- toujours < user_b_id
+    user_b_id           BIGINT UNSIGNED  NOT NULL,
+    `rank`              INT              NOT NULL DEFAULT 1,
+    xp                  INT              NOT NULL DEFAULT 0,
+    badge_generated     TINYINT(1)       NOT NULL DEFAULT 0,
+    created_at          TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_interaction_at TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                                  ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_social_link (user_a_id, user_b_id),
+    CONSTRAINT chk_sl_order   CHECK (user_a_id < user_b_id),
+    CONSTRAINT chk_sl_rank    CHECK (`rank` >= 1 AND `rank` <= 10),
+    FOREIGN KEY (user_a_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_b_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_social_links_a ON social_links(user_a_id);
+CREATE INDEX idx_social_links_b ON social_links(user_b_id);
+
+
+-- =============================================================================
+-- 13. SOCIAL_LINK_INTERACTIONS — Log des actions XP
+-- =============================================================================
+CREATE TABLE social_link_interactions (
+    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    social_link_id  BIGINT UNSIGNED  NOT NULL,
+    initiator_id    BIGINT UNSIGNED  NOT NULL,
+    action_type     VARCHAR(50)      NOT NULL,
+    -- 'share_streak' | 'share_score' | 'visit_profile'
+    -- 'play_same_day' | 'compare_stats' | 'send_challenge'
+    xp_gained       INT              NOT NULL,
+    is_mutual       TINYINT(1)       NOT NULL DEFAULT 0,
+    created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (social_link_id) REFERENCES social_links(id) ON DELETE CASCADE,
+    FOREIGN KEY (initiator_id)   REFERENCES users(id)        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_sli_social_link ON social_link_interactions(social_link_id);
+CREATE INDEX idx_sli_date        ON social_link_interactions(created_at);
+CREATE INDEX idx_sli_initiator   ON social_link_interactions(initiator_id);
+
+
+-- =============================================================================
+-- 14. SOCIAL_LINK_BADGES — Badge True Confidant (rang 10)
+-- =============================================================================
+CREATE TABLE social_link_badges (
+    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    social_link_id  BIGINT UNSIGNED  NOT NULL,
+    user_a_avatar   MEDIUMTEXT,       -- snapshot base64 au moment du rang 10
+    user_b_avatar   MEDIUMTEXT,
+    user_a_pseudo   VARCHAR(50)      NOT NULL,
+    user_b_pseudo   VARCHAR(50)      NOT NULL,
+    generated_at    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_slb_link (social_link_id),
+    FOREIGN KEY (social_link_id) REFERENCES social_links(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================================================
+-- 15. LEADERBOARD_CACHE — Classements précalculés (recalcul périodique)
+-- =============================================================================
+CREATE TABLE leaderboard_cache (
+    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id         BIGINT UNSIGNED  NOT NULL,
+    mode            VARCHAR(30)      NOT NULL,   -- 'global' ou nom de mode
+    period          VARCHAR(15)      NOT NULL,   -- 'all_time' | 'monthly' | 'weekly'
+    period_start    DATE,                        -- NULL pour all_time
+    score           INT              NOT NULL,
+    rank_position   INT,
+    updated_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
+                                              ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_leaderboard (user_id, mode, period, period_start),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_leaderboard_ranking ON leaderboard_cache(mode, period, period_start, score DESC);
+
+
+-- =============================================================================
+-- 16. DELETION_REQUESTS — Log RGPD
+-- =============================================================================
+CREATE TABLE deletion_requests (
+    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id         BIGINT UNSIGNED  NOT NULL,
+    -- Pas de FK : l'utilisateur peut déjà être supprimé (log de traçabilité)
+    requested_at    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    processed_at    TIMESTAMP        NULL,
+    deletion_type   VARCHAR(20)      NOT NULL DEFAULT 'full',
+
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================================================
+-- VUES
+-- =============================================================================
+
+-- Amis d'un utilisateur (dans les deux sens)
+CREATE VIEW v_friends AS
+    SELECT f.id, f.requester_id AS user_id, f.addressee_id AS friend_id, f.status, f.accepted_at
+    FROM friendships f WHERE f.status = 'accepted'
+    UNION ALL
+    SELECT f.id, f.addressee_id AS user_id, f.requester_id AS friend_id, f.status, f.accepted_at
+    FROM friendships f WHERE f.status = 'accepted';
+
+-- Stats globales (tous modes) par joueur
+CREATE VIEW v_global_stats AS
+    SELECT user_id,
+           SUM(wins)          AS total_wins,
+           SUM(giveups)       AS total_giveups,
+           SUM(games)         AS total_games,
+           MAX(streak_record) AS best_streak,
+           SUM(perfect_wins)  AS total_perfect_wins,
+           SUM(total_time_ms) AS total_time_ms
+    FROM user_stats
+    GROUP BY user_id;
+
+-- Social Links d'un utilisateur (dans les deux sens)
+CREATE VIEW v_social_links AS
+    SELECT sl.id, sl.user_a_id AS user_id, sl.user_b_id AS friend_id,
+           sl.`rank`, sl.xp, sl.badge_generated, sl.created_at, sl.last_interaction_at
+    FROM social_links sl
+    UNION ALL
+    SELECT sl.id, sl.user_b_id AS user_id, sl.user_a_id AS friend_id,
+           sl.`rank`, sl.xp, sl.badge_generated, sl.created_at, sl.last_interaction_at
+    FROM social_links sl;
+
+
+-- =============================================================================
+-- 19. MESSAGES — Messages et défis entre amis
+-- =============================================================================
+CREATE TABLE messages (
+    id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    sender_id       BIGINT UNSIGNED NOT NULL,
+    receiver_id     BIGINT UNSIGNED NOT NULL,
+    type            VARCHAR(20)     NOT NULL DEFAULT 'message',
+    content         TEXT            NULL,
+    challenge_mode  VARCHAR(30)     NULL,
+    challenge_score INT             NULL,
+    challenge_date  DATE            NULL,
+    status          VARCHAR(20)     NOT NULL DEFAULT 'unread',
+    created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_msg_sender   FOREIGN KEY (sender_id)   REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_msg_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_messages_receiver ON messages(receiver_id, status, created_at DESC);
+CREATE INDEX idx_messages_sender   ON messages(sender_id);
+
+SET FOREIGN_KEY_CHECKS = 1;
