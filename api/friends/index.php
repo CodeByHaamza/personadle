@@ -65,7 +65,8 @@ if ($method === 'GET') {
         JOIN users u ON u.id = CASE WHEN f.requester_id = :me3 THEN f.addressee_id ELSE f.requester_id END
         LEFT JOIN profiles p ON p.user_id = u.id
         LEFT JOIN social_links sl
-               ON sl.id = get_or_create_social_link(LEAST(:me6, u.id), GREATEST(:me7, u.id))
+               ON sl.user_a_id = LEAST(:me6, u.id)
+              AND sl.user_b_id = GREATEST(:me7, u.id)
         WHERE (f.requester_id = :me4 OR f.addressee_id = :me5)
           AND f.status IN ('accepted', 'pending')
           AND u.is_deleted = 0

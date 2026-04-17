@@ -58,7 +58,7 @@
 }
 
 .profile-page-title {
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
   font-size: clamp(1.4rem, 4vw, 2.2rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -192,7 +192,7 @@
 
 /* Nom d'utilisateur */
 .profile-username {
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
   font-size: 1.4rem;
   font-weight: 900;
   letter-spacing: 0.05em;
@@ -360,7 +360,7 @@
 
 /* Titre de section */
 .card-title {
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
   font-size: 0.95rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1069,7 +1069,7 @@ body.darkmode .profile-card--danger {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
   font-size: 0.86rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1895,7 +1895,7 @@ body.darkmode .song-empty-hint {
 }
 
 #sharePreviewModal h2 {
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
   font-size: 1rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2223,7 +2223,7 @@ body.darkmode .share-btn--email:hover {
 }
 
 .crop-modal-title {
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
   font-size: 0.88rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;

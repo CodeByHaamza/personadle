@@ -611,7 +611,10 @@ function _showChallengeModal(mode, score, date) {
              src="${esc(f.avatar_data) || '../img/default_avatar.png'}"
              onerror="this.src='../img/default_avatar.png'"
              alt="${esc(f.pseudo)}">
-        <span class="challenge-friend-row__pseudo">${esc(f.pseudo)}</span>
+        <div class="challenge-friend-row__info">
+          <div class="challenge-friend-row__pseudo">${esc(f.pseudo)}</div>
+          <div class="challenge-friend-row__code">${esc(f.friend_code)}</div>
+        </div>
         <button data-fid="${f.friend_id}" class="challenge-friend-row__send js-send-challenge">
           ${t('challenge.send', 'Send')}
         </button>

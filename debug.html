@@ -623,7 +623,7 @@ window.searchUsers = async function() {
   if (q.length < 2) { box.innerHTML = `<p class="error-msg">Minimum 2 caractères.</p>`; return; }
   box.innerHTML = `<p class="muted-info">Recherche…</p>`;
   try {
-    const d = await api.user.search(q);
+    const d = await api.publicProfile.search(q);
     const results = d.results ?? [];
     if (!results.length) { box.innerHTML = `<p class="muted-info">Aucun résultat.</p>`; return; }
     box.innerHTML = results.map(u => `

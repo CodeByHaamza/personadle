@@ -1721,97 +1721,119 @@ body.darkmode .btn-challenge {
   text-transform: uppercase;
 }
 
-/* ── Liste d'amis ── */
+/* ── Liste d'amis (scrollable, style leaderboard) ── */
 .challenge-card__list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 14px;
-  max-height: 280px;
+  padding: 8px 0;
+  max-height: 300px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #cc0000 #111;
 }
 .challenge-card__empty {
-  color: #888;
+  color: rgba(255,255,255,0.3);
   font-size: 0.85rem;
   text-align: center;
-  padding: 10px 0;
+  padding: 24px 16px;
 }
 
-/* ── Ligne ami ── */
+/* ── Ligne ami — exactement style lb-row ── */
 .challenge-friend-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  background: #262626;
-  border: 1px solid #333;
-  border-radius: 8px;
-  transition: background 0.1s;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-left: 3px solid transparent;
+  transition: background 0.12s, border-left-color 0.15s, transform 0.1s;
+  cursor: default;
 }
+.challenge-friend-row:last-child { border-bottom: none; }
 .challenge-friend-row:hover {
-  background: #2e2e2e;
+  background: rgba(204,0,0,0.08);
+  border-left-color: #cc0000;
+  transform: translateX(2px);
 }
 .challenge-friend-row__avatar {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #444;
+  border: 2px solid rgba(255,255,255,0.15);
   flex-shrink: 0;
+  background: rgba(255,255,255,0.06);
+  transition: transform 0.15s;
+}
+.challenge-friend-row:hover .challenge-friend-row__avatar {
+  transform: scale(1.06);
+}
+.challenge-friend-row__info {
+  flex: 1;
+  min-width: 0;
 }
 .challenge-friend-row__pseudo {
-  flex: 1;
-  color: #eee;
+  font-weight: 700;
   font-size: 0.88rem;
-  font-weight: 600;
+  color: rgba(255,255,255,0.9);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.challenge-friend-row__code {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.3);
+  font-family: monospace;
+  margin-top: 1px;
+}
 .challenge-friend-row__send {
   padding: 5px 14px;
-  background: #22c55e;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.4);
+  border-radius: 100px;
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .challenge-friend-row__send:hover:not(:disabled) {
-  background: #16a34a;
+  background: #22c55e;
+  color: #fff;
+  border-color: #22c55e;
 }
 .challenge-friend-row__send:disabled {
-  background: #555;
+  color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
   cursor: default;
-  opacity: 0.75;
 }
 .challenge-friend-row__send.sent {
-  background: #555;
+  color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
 }
 
 /* ── Bouton Fermer ── */
 .challenge-card__close {
-  margin: 0 14px 14px;
+  margin: 8px 16px 14px;
   padding: 9px;
-  background: #2a2a2a;
-  color: #aaa;
-  border: 1px solid #444;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   transition: background 0.12s, color 0.12s;
 }
 .challenge-card__close:hover {
-  background: #333;
-  color: #fff;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
 }
 
 
