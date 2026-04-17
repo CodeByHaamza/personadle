@@ -33,9 +33,12 @@ function esc(str) {
   })[c]);
 }
 
-/** URL de l'avatar (fallback si absent). */
+/** URL de l'avatar — normalise les chemins relatifs, fallback si absent. */
 function avatarSrc(avatarData) {
-  return avatarData || '../img/default_avatar.png';
+  if (!avatarData) return '../img/default_avatar.png';
+  if (avatarData.startsWith('data:')) return avatarData;
+  // Normalize old "./img/..." paths from localStorage/DB → "../img/..."
+  return avatarData.replace(/^\.\//, '../');
 }
 
 /** Renders avatar wrapped in .fr-avatar-wrap with an online/offline/unknown dot. */

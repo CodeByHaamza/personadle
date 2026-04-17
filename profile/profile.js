@@ -119,6 +119,11 @@ function initProfile() {
   if (saved) {
     // ✅ Charger le profil existant
     profile = JSON.parse(saved);
+    // Normalize old avatar paths "./img/..." → "../img/..."
+    if (profile.avatar && profile.avatar.startsWith('./')) {
+      profile.avatar = profile.avatar.replace(/^\.\//, '../');
+      saveProfile();
+    }
   } else {
     // 🆕 Créer un nouveau profil par défaut
     profile = {
@@ -148,7 +153,7 @@ function initProfile() {
   pseudoInput.value = profile.pseudo;
   
   // 🖼️ Mettre à jour l'avatar (image par défaut si aucun)
-  avatarPreview.src = profile.avatar || "./img/default_avatar.png";
+  avatarPreview.src = profile.avatar || "../img/default_avatar.png";
   
   // 🎨 Mettre à jour la couleur de bordure
   document.getElementById("headerAvatar").style.borderColor = profile.avatarBorderColor;
@@ -158,7 +163,7 @@ function initProfile() {
   // 👤 Afficher le profil dans le header si au moins pseudo ou avatar
   if (profile.pseudo || profile.avatar) {
     document.getElementById("profileDisplay").style.display = "block";
-    document.getElementById("headerAvatar").src = profile.avatar || "./img/default_avatar.png";
+    document.getElementById("headerAvatar").src = profile.avatar || "../img/default_avatar.png";
     document.getElementById("headerPseudo").textContent = profile.pseudo || "Guest";
   } else {
     document.getElementById("profileDisplay").style.display = "none";
@@ -279,7 +284,7 @@ function initAvatarGrid() {
       NONE
     </div>` +
     avatarList.map(name =>
-      `<img src="./img/avatar/${name}" data-src="./img/avatar/${name}" />`
+      `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" />`
     ).join("");
 
   // 🖼️ Ajouter le listener click sur chaque image
@@ -296,8 +301,8 @@ function initAvatarGrid() {
     noneOption.onclick = () => {
       selectedAvatarSrc = "none";
       profile.avatar = "";
-      avatarPreview.src = "./img/default_avatar.png";
-      document.getElementById("headerAvatar").src = "./img/default_avatar.png";
+      avatarPreview.src = "../img/default_avatar.png";
+      document.getElementById("headerAvatar").src = "../img/default_avatar.png";
       saveProfile();
       cropModal.classList.add("hidden");
     };
