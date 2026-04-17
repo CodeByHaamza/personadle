@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="../css/filterMenu.css" />
   <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
   <link rel="stylesheet" href="../css/calling-card.css" />
+  <link rel="stylesheet" href="../css/challenge-banner.css">
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 </head>
 
@@ -478,18 +479,19 @@ initBottomNav();
 <!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
 <script type="module">
 import { initAuth } from '../js/auth.js';
-initAuth().catch(() => {}); // fire-and-forget : le mode fonctionne même sans backend
+window._authReady = initAuth();
+window._authReady.catch(() => {}); // le mode fonctionne même sans backend
 </script>
 
 <!-- Notifications calling card -->
 <script type="module">
 import { initNotifications } from '../js/notifications.js';
-let waited = 0;
-while (!window._currentUser && !window._authResolved && waited < 2000) {
-  await new Promise(r => setTimeout(r, 100));
-  waited += 100;
-}
+if (window._authReady) await window._authReady;
 if (window._currentUser) initNotifications();
+</script>
+<script type="module">
+import { initChallengeBanner } from '../js/challenge-banner.js';
+initChallengeBanner('emoji');
 </script>
 
 <script>

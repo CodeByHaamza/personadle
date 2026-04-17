@@ -694,12 +694,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Attendre i18n
   if (window.__i18nReady) await window.__i18nReady;
 
-  // Attendre auth (max 2 s)
-  let waited = 0;
-  while (!window._currentUser && !window._authResolved && waited < 2000) {
-    await new Promise(r => setTimeout(r, 100));
-    waited += 100;
-  }
+  if (window._authReady) await window._authReady;
 
   const connected = document.getElementById('friendsConnected');
   const guest     = document.getElementById('friendsGuest');

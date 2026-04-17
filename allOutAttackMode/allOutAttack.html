@@ -354,17 +354,14 @@ initBottomNav();
 <!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
 <script type="module">
 import { initAuth } from '../js/auth.js';
-initAuth().catch(() => {}); // fire-and-forget : le mode fonctionne même sans backend
+window._authReady = initAuth();
+window._authReady.catch(() => {}); // le mode fonctionne même sans backend
 </script>
 
 <!-- Notifications calling card -->
 <script type="module">
 import { initNotifications } from '../js/notifications.js';
-let waited = 0;
-while (!window._currentUser && !window._authResolved && waited < 2000) {
-  await new Promise(r => setTimeout(r, 100));
-  waited += 100;
-}
+if (window._authReady) await window._authReady;
 if (window._currentUser) initNotifications();
 </script>
 <script type="module">

@@ -560,7 +560,8 @@ async function selectLang(lang) {
      soit terminé — garantit l'ordre correct. -->
 <script type="module">
 import { initAuth } from '../js/auth.js';
-await initAuth();
+window._authReady = initAuth();
+await window._authReady;
 // Signal : auth est résolue, les autres modules peuvent lire window._currentUser
 window._authResolved = true;
 window.dispatchEvent(new CustomEvent('personadle:auth-ready'));
@@ -609,11 +610,7 @@ if (btnMigrate) {
 import { initNotifications } from '../js/notifications.js';
 import { initSettingsModal }  from '../js/settings-modal.js';
 
-let waited = 0;
-while (!window._currentUser && !window._authResolved && waited < 2000) {
-  await new Promise(r => setTimeout(r, 100));
-  waited += 100;
-}
+if (window._authReady) await window._authReady;
 if (window._currentUser) {
   initNotifications();
   initSettingsModal(window._currentUser.id);
