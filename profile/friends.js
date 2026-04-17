@@ -104,6 +104,7 @@ let state = {
 };
 
 let searchTimer = null;
+let _pollInterval = null;
 
 // ─────────────────────────────────────────────────────────
 // 3. RENDU — BROWSE PLAYERS
@@ -323,7 +324,8 @@ async function loadFriends() {
     if (state.pending.some(p => p.direction === 'received')) {
       api.notifications.markSeen().catch(() => {});
     }
-  } catch {
+  } catch (err) {
+    console.error('[Friends] loadFriends failed:', err?.status, err?.message, err);
     state.friends = [];
     state.pending = [];
   }
@@ -395,6 +397,7 @@ async function sendFriendRequest(friendCode, targetId) {
       }
     }
   } catch (err) {
+    console.error('[Friends] sendFriendRequest failed:', err?.status, err?.message, err?.data);
     alert(err.message || t('friends.error_send') || 'Could not send friend request.');
   }
 }
@@ -530,6 +533,27 @@ async function loadMessages() {
     section.classList.add('hidden');
   }
 }
+
+// ─────────────────────────────────────────────────────────
+// 8c. POLLING TEMPS RÉEL
+// ─────────────────────────────────────────────────────────
+
+function startPolling() {
+  if (_pollInterval) return;
+  _pollInterval = setInterval(async () => {
+    if (window._currentUser) await loadFriends();
+  }, 30_000);
+}
+
+function stopPolling() {
+  clearInterval(_pollInterval);
+  _pollInterval = null;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) stopPolling();
+  else if (window._currentUser) startPolling();
+});
 
 function renderMessage(msg) {
   const isReceived  = msg.receiver_id === window._currentUser?.id;
@@ -714,6 +738,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       loadBrowse('', 0),
       loadMessages(),
     ]);
+
+    startPolling();
   } else {
     connected?.classList.add('hidden');
     guest?.classList.remove('hidden');
