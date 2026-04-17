@@ -596,14 +596,21 @@
 }
 
 .fr-msg--unread    { border-left: 3px solid var(--fr-accent); }
-.fr-msg--challenge { border-left: 3px solid var(--fr-green, #22c55e); }
+.fr-msg--challenge {
+  border-left: 3px solid var(--fr-green, #22c55e);
+  background: rgba(34, 197, 94, 0.04);
+}
 
 .fr-msg-body { flex: 1; min-width: 0; }
 
 .fr-msg-meta {
   font-size: 0.68rem;
   color: var(--fr-text-muted);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .fr-msg-content {
@@ -613,15 +620,44 @@
 }
 
 .fr-msg-challenge-info {
-  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
   font-family: monospace;
-  color: var(--fr-green, #22c55e);
-  margin-top: 4px;
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-radius: 8px;
+  padding: 5px 10px;
+  margin: 6px 0 4px;
+  flex-wrap: wrap;
 }
 
 .fr-msg-actions {
   display: flex;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
+
+/* Bouton Accept challenge */
+.fr-btn--accept {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.fr-btn--accept:hover { background: rgba(34, 197, 94, 0.22); transform: scale(1.02); }
+
+/* Dark mode — messages */
+.darkmode .fr-msg--challenge      { background: rgba(34, 197, 94, 0.06); }
+.darkmode .fr-msg-challenge-info  { color: #4ade80; background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); }
+.darkmode .fr-btn--accept         { background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(74,222,128,0.25); }
