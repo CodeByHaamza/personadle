@@ -396,7 +396,13 @@ confirmCrop.onclick = () => {
  * Exporte le profil en fichier JSON
  */
 exportBtn.onclick = () => {
-  const blob = new Blob([JSON.stringify(profile)], { type: "application/json" });
+  const exportData = { ...profile };
+  // Normalize avatar path pour la portabilité : ../img/ → ./img/
+  // (format canonique de l'export, indépendant de la page courante)
+  if (exportData.avatar && !exportData.avatar.startsWith('data:')) {
+    exportData.avatar = exportData.avatar.replace(/^\.\.\//, './');
+  }
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "personadle_profile.json";
