@@ -260,7 +260,7 @@ export function setupDailyReset(onReset) {
  */
 export function checkResetOnLoad(lastPlayedKey, statsModeKey, onReset) {
   const storedDate = localStorage.getItem(lastPlayedKey);
-  const today = new Date().toISOString().split("T")[0];
+  const today = parisDateKey();
 
   if (storedDate !== today) {
     console.log(`📅 New day detected → auto-reset (${statsModeKey})`);
@@ -406,8 +406,9 @@ export async function savePendingSession(session) {
       await api.stats.postSession(session);
       // Success — also sync any previously queued offline sessions
       await api.stats.syncPending();
-    } catch {
-      // Offline or server error — fall through to localStorage queue
+    } catch (err) {
+      if (err?.status === 409) return; // Session already recorded (e.g. challenge replay)
+      // Offline or other server error — queue to localStorage for later sync
       const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
       pending.push(session);
       localStorage.setItem('pendingSessions', JSON.stringify(pending));
@@ -531,6 +532,26 @@ export async function showCommunityStats(mode, targetName) {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Filter storage keys per mode — single source of truth (also exported for friends.js)
+export const FILTER_STORAGE_KEYS = {
+  classic:      'filters_Classic',
+  emoji:        'filters_Emoji',
+  silhouette:   'silhouetteActiveFilters',
+  alloutattack: 'filters_AllOutAttack',
+  personae:     'personaeActiveFilters',
+  music:        'musicActiveFilters',
+};
+const _FILTER_STORAGE_KEY = FILTER_STORAGE_KEYS;
+
+/** Returns the currently active opus filters for a given mode (array of strings). */
+function _getActiveFilters(mode) {
+  const key = _FILTER_STORAGE_KEY[mode?.toLowerCase()];
+  if (!key) return [];
+  try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+  catch { return []; }
+}
+
 // CHALLENGE BUTTON — "Challenge a friend" post-victoire
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -560,10 +581,10 @@ export function showChallengeButton(mode, score) {
   if (nextBtn) nav.insertBefore(btn, nextBtn);
   else         nav.appendChild(btn);
 
-  btn.addEventListener('click', () => _showChallengeModal(mode, score, date));
+  btn.addEventListener('click', () => _showChallengeModal(mode, score, date, _getActiveFilters(mode)));
 }
 
-function _showChallengeModal(mode, score, date) {
+function _showChallengeModal(mode, score, date, activeFilters = []) {
   const api = window._personadleApi;
   if (!api || !window._currentUser) return;
 
@@ -578,25 +599,23 @@ function _showChallengeModal(mode, score, date) {
   modal.className = 'challenge-overlay';
   modal.innerHTML = `
     <div class="challenge-card">
-      <div class="challenge-card__header">
-        <h3>⚔ ${t('challenge.select_friend', 'Select a friend to challenge')}</h3>
-      </div>
       <div id="challengeFriendList" class="challenge-card__list">
         <p class="challenge-card__empty">${t('ui.loading', 'Loading…')}</p>
       </div>
-      <button id="challengeModalClose" class="challenge-card__close">
-        ${t('ui.close', 'Close')}
-      </button>
+      <div class="challenge-card__footer">
+        <span class="challenge-card__footer-label">⚔ ${t('challenge.select_friend', 'Challenge a friend')}</span>
+        <button id="challengeModalClose" class="challenge-card__footer-close" aria-label="Close">✕</button>
+      </div>
     </div>
   `;
   document.body.appendChild(modal);
 
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  document.getElementById('challengeModalClose').addEventListener('click', () => modal.remove());
+  modal.querySelector('#challengeModalClose').addEventListener('click', () => modal.remove());
 
   // Charger la liste d'amis
   api.friends.list().then(data => {
-    const friends = (data.friends ?? []).filter(f => f.status === 'accepted');
+    const friends = data.friends ?? [];
     const listEl  = document.getElementById('challengeFriendList');
     if (!listEl) return;
 
@@ -627,20 +646,19 @@ function _showChallengeModal(mode, score, date) {
         const friendId = parseInt(sendBtn.dataset.fid);
         try {
           await api.messages.send({
-            receiver_id:     friendId,
-            type:            'challenge',
-            challenge_mode:  mode,
-            challenge_score: score,
-            challenge_date:  date,
+            receiver_id:      friendId,
+            type:             'challenge',
+            challenge_mode:   mode,
+            challenge_score:  score,
+            challenge_date:   date,
+            challenge_filters: JSON.stringify(activeFilters),
           });
           sendBtn.textContent = '✓ Sent!';
           sendBtn.classList.add('sent');
 
           // XP Social Link : action 'challenge'
           if (api.socialLink) {
-            api.socialLink.getByFriend(friendId)
-              .then(d => api.socialLink.interact(d.link_id, 'challenge'))
-              .catch(() => {});
+            api.socialLink.interactByFriend(friendId, 'challenge').catch(() => {});
           }
         } catch (err) {
           sendBtn.disabled = false;

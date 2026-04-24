@@ -42,13 +42,18 @@ export async function getSocialLinkData(friendId) {
 
 /**
  * Déclenche une interaction XP et retourne le résultat.
+ * Utilise l'endpoint unifié by-friend/interact — 1 round-trip au lieu de 2.
  * @param {number} friendId
  * @param {string} actionType
- * @returns {Promise<{ xp_gained, is_mutual, new_xp, new_rank, ranked_up }>}
+ * @returns {Promise<{ link_id, xp_gained, is_mutual, new_xp, new_rank, ranked_up }>}
  */
 export async function gainSocialLinkXp(friendId, actionType) {
-  const linkId = await getLinkId(friendId);
-  return window._personadleApi.socialLink.interact(linkId, actionType);
+  const api = window._personadleApi;
+  if (!api) throw new Error('API not available');
+  const result = await api.socialLink.interactByFriend(friendId, actionType);
+  // Mettre à jour le cache linkId si retourné
+  if (result?.link_id) _linkCache.set(friendId, result.link_id);
+  return result;
 }
 
 /**
