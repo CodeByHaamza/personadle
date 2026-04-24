@@ -120,6 +120,7 @@ $friend = loadUserStats($pdo, $friendId);
 // ── Award XP (only if not on cooldown) ───────────────────────────────────────
 $xpGained = 0;
 if (!$onCooldown) {
+    // Check mutuality BEFORE opening the transaction (read-only, no locking needed)
     $stmtMutual = $pdo->prepare(
         "SELECT id FROM social_link_interactions
          WHERE social_link_id = ?
@@ -133,20 +134,15 @@ if (!$onCooldown) {
 
     $xpGained = $isMutual ? 20 : 10;
 
-    $pdo->prepare(
-        "INSERT INTO social_link_interactions
-         (social_link_id, initiator_id, action_type, xp_gained, is_mutual)
-         VALUES (?, ?, 'compare_stats', ?, ?)"
-    )->execute([$linkId, $authId, $xpGained, $isMutual ? 1 : 0]);
-
-    // Use addSocialLinkXp-style update: read current xp, compute new rank
-    $stmtXp = $pdo->prepare('SELECT xp, `rank` FROM social_links WHERE id = ? LIMIT 1 FOR UPDATE');
-    // Note: FOR UPDATE requires a transaction — use a simple transaction here
+    // All writes go inside a single transaction so INSERT + UPDATE are atomic.
+    // FOR UPDATE now runs inside the transaction — the row lock is effective.
+    // $cooldownUntil is only set on successful commit so the client can retry on failure.
     $pdo->beginTransaction();
     try {
+        $stmtXp = $pdo->prepare('SELECT xp, `rank` FROM social_links WHERE id = ? LIMIT 1 FOR UPDATE');
         $stmtXp->execute([$linkId]);
-        $sl     = $stmtXp->fetch();
-        $newXp  = ((int) ($sl['xp'] ?? 0)) + $xpGained;
+        $sl    = $stmtXp->fetch();
+        $newXp = ((int) ($sl['xp'] ?? 0)) + $xpGained;
 
         $stmtRank = $pdo->prepare(
             'SELECT MAX(`rank`) AS new_rank FROM social_link_ranks WHERE xp_required <= ?'
@@ -154,20 +150,28 @@ if (!$onCooldown) {
         $stmtRank->execute([$newXp]);
         $newRank = max(1, (int) ($stmtRank->fetchColumn() ?: 1));
 
+        $pdo->prepare(
+            "INSERT INTO social_link_interactions
+             (social_link_id, initiator_id, action_type, xp_gained, is_mutual)
+             VALUES (?, ?, 'compare_stats', ?, ?)"
+        )->execute([$linkId, $authId, $xpGained, $isMutual ? 1 : 0]);
+
         $pdo->prepare('UPDATE social_links SET xp = ?, `rank` = ?, last_interaction_at = NOW() WHERE id = ?')
             ->execute([$newXp, $newRank, $linkId]);
 
         $pdo->commit();
+
+        // Only mark the cooldown after a successful commit — client can retry on failure
+        $cooldownUntil = (new DateTime('now', new DateTimeZone('UTC')))
+            ->modify("+{$cooldownHours} hours")
+            ->format(DateTime::ATOM);
     } catch (Throwable $e) {
         $pdo->rollBack();
         error_log('[compare XP] ' . $e->getMessage());
-        // Non-fatal: comparison data is still returned even if XP fails
+        // Non-fatal: comparison data is still returned even if XP fails.
+        // $cooldownUntil stays null so the client can retry.
         $xpGained = 0;
     }
-
-    $cooldownUntil = (new DateTime('now', new DateTimeZone('UTC')))
-        ->modify("+{$cooldownHours} hours")
-        ->format(DateTime::ATOM);
 }
 
 jsonSuccess([
