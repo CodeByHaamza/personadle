@@ -213,17 +213,17 @@ export const api = {
       const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
       if (!pending.length) return;
 
+      const remaining = [];
       for (const session of pending) {
         try {
           await api.stats.postSession(session);
         } catch (e) {
-          // En cas d'échec partiel, on laisse les sessions en localStorage
+          if (e?.status === 409) continue; // already recorded server-side, discard
+          remaining.push(session); // network/server error — keep for later
           console.warn('⚠️ Session sync failed:', e.message);
-          return;
         }
       }
-      // Toutes les sessions envoyées — vider la queue
-      localStorage.removeItem('pendingSessions');
+      localStorage.setItem('pendingSessions', JSON.stringify(remaining));
     },
   },
 
@@ -298,7 +298,7 @@ export const api = {
      * Envoie une demande d'ami par friend_code.
      * @param {string} friendCode - Code de 8 caractères
      */
-    request: (friendCode) => post('/friends', { friend_code: friendCode }),
+    request: (friendCode) => post('/friends/', { friend_code: friendCode }),
 
     /**
      * Accepte ou refuse une demande reçue.
@@ -345,7 +345,7 @@ export const api = {
      * @param {{ receiver_id: number, type: 'message'|'challenge', content?: string,
      *           challenge_mode?: string, challenge_score?: number, challenge_date?: string }} data
      */
-    send: (data) => post('/messages', data),
+    send: (data) => post('/messages/', data),
 
     /**
      * Marque un message comme lu / accepté.
@@ -387,6 +387,15 @@ export const api = {
      */
     interact: (linkId, actionType) =>
       post(`/social-links/${linkId}/interact`, { action_type: actionType }),
+
+    /**
+     * Crée/résout le Social Link avec un ami et enregistre une interaction.
+     * Remplace getByFriend() + interact() — 1 requête au lieu de 2.
+     * @param {number} friendId
+     * @param {string} actionType
+     */
+    interactByFriend: (friendId, actionType) =>
+      post(`/social-links/by-friend/${friendId}/interact`, { action_type: actionType }),
   },
 
   // ── Badges ────────────────────────────────────────────
