@@ -37,12 +37,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&display=swap" rel="stylesheet">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="../css/global.css?v=4">
+  <link rel="stylesheet" href="../css/global.css?v=6">
   <link rel="stylesheet" href="../css/langSelector.css?v=4">
   <link rel="stylesheet" href="../css/bottomNav.css?v=1">
-  <link rel="stylesheet" href="../css/calling-card.css">
+  <link rel="stylesheet" href="../css/calling-card.css?v=2">
+  <link rel="stylesheet" href="../css/challenge-notif.css">
+  <link rel="stylesheet" href="../css/challenge-result.css">
   <link rel="stylesheet" href="../css/settings-modal.css">
   <link rel="stylesheet" href="../css/social-link.css">
+  <link rel="stylesheet" href="../css/stats-compare.css">
   <link rel="stylesheet" href="./profile-page.css?v=1">
   <link rel="stylesheet" href="./badges/badges.css?v=3">
 
@@ -338,6 +341,9 @@
           </button>
           <button id="shareProfileBtn" class="btn-p5">
             🔗 <span data-i18n="profile.share_btn">Share</span>
+          </button>
+          <button id="copyProfileLinkBtn" class="btn-p5" style="display:none;">
+            📎 <span data-i18n="profile.copy_link">Copy link</span>
           </button>
         </div>
         <p id="shareStatus" style="margin-top: 8px; font-size: 0.82em; opacity: 0.7;"></p>
@@ -664,9 +670,9 @@ initBottomNav();
 
     <form id="loginForm" class="auth-form" novalidate>
       <div class="auth-field">
-        <label for="loginEmail" data-i18n="auth.email">Email</label>
-        <input type="email" id="loginEmail" autocomplete="email" required
-               data-i18n-placeholder="auth.email">
+        <label for="loginEmail" data-i18n="auth.email_or_pseudo">Email or Username</label>
+        <input type="text" id="loginEmail" autocomplete="username" required
+               data-i18n-placeholder="auth.email_or_pseudo_placeholder">
       </div>
       <div class="auth-field">
         <label for="loginPassword" data-i18n="auth.password">Password</label>
@@ -730,6 +736,12 @@ initBottomNav();
     </p>
   </div>
 </div>
+
+<!-- Expose openCompareOverlay globally for profile-view.js -->
+<script type="module">
+  import { openCompareOverlay } from '../js/stats-compare.js';
+  window._openCompareOverlay = openCompareOverlay;
+</script>
 
 <!-- Mode lecture seule : activé quand ?view=FRIENDCODE est dans l'URL -->
 <script type="module" src="./profile-view.js?v=3"></script>

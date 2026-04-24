@@ -36,10 +36,34 @@ const PROFILE_THEMES = {
   golden_labyrinth:   { accent: '#F97316', hover: '#EA6C12', light: '#FDBA74', rgb: '249, 115, 22'  },
 };
 
+function _hexToRgb(hex) {
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return m ? `${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}` : '0, 0, 0';
+}
+function _adjustHex(hex, delta) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.max(0, (n >> 16) + delta));
+  const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + delta));
+  const b = Math.min(255, Math.max(0, (n & 0xff) + delta));
+  return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+
 function applyViewTheme(wallpaperId) {
+  if (!wallpaperId) return;
+  const root = document.documentElement;
+
+  if (wallpaperId.startsWith('custom:')) {
+    const hex = wallpaperId.slice(7);
+    if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
+    root.style.setProperty('--accent',       hex);
+    root.style.setProperty('--accent-hover', _adjustHex(hex, -35));
+    root.style.setProperty('--accent-light', _adjustHex(hex, 45));
+    root.style.setProperty('--accent-rgb',   _hexToRgb(hex));
+    return;
+  }
+
   const theme = PROFILE_THEMES[wallpaperId];
   if (!theme) return;
-  const root = document.documentElement;
   root.style.setProperty('--accent',       theme.accent);
   root.style.setProperty('--accent-hover', theme.hover);
   root.style.setProperty('--accent-light', theme.light);
@@ -237,7 +261,12 @@ function buildViewingBanner(pseudo, friendCode, friendshipStatus) {
   let friendBtn = '';
   if (window._currentUser) {
     if (friendshipStatus === 'accepted') {
-      friendBtn = `<span class="vb-friend-status vb-friend-status--ok">✓ ${t('friends.already_friends') || 'Friends'}</span>`;
+      friendBtn = `
+        <span class="vb-friend-status vb-friend-status--ok">✓ ${t('friends.already_friends') || 'Friends'}</span>
+        <button id="vbCompareBtn" class="vb-friend-btn vb-compare-btn" data-fid="">
+          ${t('compare.btn') || '⚖ Compare Stats'}
+        </button>
+      `;
     } else if (friendshipStatus === 'pending_sent') {
       friendBtn = `<span class="vb-friend-status vb-friend-status--pending">${t('friends.request_sent') || 'Request sent'}</span>`;
     } else if (friendshipStatus === 'pending_received') {
@@ -249,12 +278,12 @@ function buildViewingBanner(pseudo, friendCode, friendshipStatus) {
 
   banner.innerHTML = `
     <span class="vb-eye">👁</span>
-    <span class="vb-text">
-      ${t('profile.viewing_profile') || 'Viewing'} <strong>${escapeHtml(pseudo)}</strong>
-    </span>
-    <span class="vb-code">${escapeHtml(friendCode)}</span>
+    <div class="vb-text">
+      <span class="vb-pseudo">${escapeHtml(pseudo)}</span>
+      <span class="vb-code">${escapeHtml(friendCode)}</span>
+    </div>
     ${friendBtn}
-    <a href="profile.html" class="vb-back">← ${t('ui.back_my_profile') || 'My profile'}</a>
+    <a href="profile.html" class="vb-back">← ${t('ui.back_my_profile') || t('ui.back') || 'My Profile'}</a>
   `;
   return banner;
 }
@@ -292,6 +321,16 @@ function attachBannerActions(friendCode) {
       } catch {
         acceptBtn.disabled    = false;
         acceptBtn.textContent = t('friends.accept') || 'Accept';
+      }
+    });
+  }
+
+  const compareBtn = document.getElementById('vbCompareBtn');
+  if (compareBtn) {
+    compareBtn.addEventListener('click', () => {
+      const friendId = parseInt(compareBtn.dataset.fid, 10);
+      if (friendId && window._openCompareOverlay) {
+        window._openCompareOverlay(friendId);
       }
     });
   }
@@ -388,10 +427,15 @@ function populatePublicProfile(data) {
   // ── Avatar — supporte les GIFs animés ──
   const avatarEl = document.getElementById('pageAvatar');
   if (avatarEl) {
-    avatarEl.src = profile.avatar_data || '../img/default_avatar.png';
+    // Normalize old "./img/..." paths (stored from root context) to "../img/..."
+    // (profile-view runs from profile/, so one level up is needed)
+    let rawAvatar = profile.avatar_data ?? '';
+    if (rawAvatar && !rawAvatar.startsWith('data:') && !rawAvatar.startsWith('/') && !rawAvatar.startsWith('http')) {
+      rawAvatar = rawAvatar.replace(/^\.\//, '../');
+    }
+    avatarEl.src = rawAvatar || '../img/default_avatar.png';
     avatarEl.style.borderColor = profile.avatar_border_color || '#ffffff';
     avatarEl.onerror = () => { avatarEl.src = '../img/default_avatar.png'; };
-    // Les GIFs (.gif / data:image/gif) sont animés nativement par le navigateur
   }
 
   // ── Pseudo ──
@@ -414,7 +458,7 @@ function populatePublicProfile(data) {
     if (rawDate) {
       const joinEl = document.createElement('p');
       joinEl.className   = 'profile-join-date';
-      joinEl.textContent = `Since ${new Date(rawDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}`;
+      joinEl.textContent = `${t('profile.since') || 'Since'} ${new Date(rawDate).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}`;
       infoContainer.appendChild(joinEl);
     }
     const codeEl = document.createElement('p');
@@ -429,13 +473,13 @@ function populatePublicProfile(data) {
     const firstPlayedStr = (user.first_game_date || user.created_at || '').slice(0, 10) || '—';
 
     const items = [
-      { icon: '🏆', value: stats.total_wins  ?? 0,        label: 'Wins'         },
-      { icon: '🏳️', value: totalGiveups,                   label: 'Give-ups'     },
-      { icon: '🎮', value: stats.total_games ?? 0,         label: 'Games Played' },
-      { icon: '⭐', value: stats.best_streak ?? 0,         label: 'Best Streak'  },
-      { icon: '⏱️', value: formatPlayTime(totalTimeMinutes), label: 'Time Played' },
-      { icon: '📅', value: firstPlayedStr,                  label: 'First Played', full: true },
-      { icon: '🎯', value: favModeLabel,                    label: 'Fav Mode',     full: true },
+      { icon: '🏆', value: stats.total_wins  ?? 0,          label: t('profile.stat_wins_label')           || 'Wins'         },
+      { icon: '🏳️', value: totalGiveups,                     label: t('profile.stat_giveups_label')        || 'Give-ups'     },
+      { icon: '🎮', value: stats.total_games ?? 0,           label: t('profile.stat_games_label')          || 'Games Played' },
+      { icon: '⭐', value: stats.best_streak ?? 0,           label: t('profile.stat_best_streak_label')    || 'Best Streak'  },
+      { icon: '⏱️', value: formatPlayTime(totalTimeMinutes), label: t('profile.stat_time_label')           || 'Time Played'  },
+      { icon: '📅', value: firstPlayedStr,                   label: t('profile.stat_first_played_label')   || 'First Played', full: true },
+      { icon: '🎯', value: favModeLabel,                     label: t('profile.stat_fav_mode_label')       || 'Fav Mode',     full: true },
     ];
 
     const regularHTML = items.map((st, idx) => `
@@ -448,7 +492,7 @@ function populatePublicProfile(data) {
         </div>
       </div>`).join('');
 
-    const streakHTML = buildStreakItem(currentStreak, 'Current Streak', '0.5s');
+    const streakHTML = buildStreakItem(currentStreak, t('profile.stat_current_streak_label') || 'Current Streak', '0.5s');
     statsContainer.innerHTML = regularHTML + streakHTML;
   }
 
@@ -479,8 +523,8 @@ function populatePublicProfile(data) {
 
       modeContainer.innerHTML = `
         <div class="mode-stats-header">
-          <span>Mode</span>
-          <span>Games / Win %</span>
+          <span>${t('profile.mode_col_mode') || 'Mode'}</span>
+          <span>${t('profile.mode_col_games') || 'Games / Win %'}</span>
         </div>
         <div class="mode-stats-list">${rows}</div>`;
     }
@@ -525,7 +569,7 @@ async function renderViewSongCard(profileMusicId) {
   // HTML identique à renderSongCard() dans profile-page.js (sans les boutons d'action)
   songCard.classList.remove('hidden');
   songCard.innerHTML = `
-    <h3 class="card-title"><span class="card-accent">◆</span> Profile Song</h3>
+    <h3 class="card-title"><span class="card-accent">◆</span> ${t('profile.song_title') || 'Profile Song'}</h3>
     <div id="viewSongPlayerUI" class="song-player">
       <img id="viewSongArtwork"
            class="song-artwork"
@@ -654,6 +698,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Bandeau "Viewing X"
   const header = document.querySelector('.profile-page-header');
   const banner = buildViewingBanner(user.pseudo, user.friend_code, friendshipStatus);
+  const compareBtn = banner.querySelector('#vbCompareBtn');
+  if (compareBtn) compareBtn.dataset.fid = user.id;
   header?.insertAdjacentElement('afterend', banner);
   attachBannerActions(user.friend_code);
 

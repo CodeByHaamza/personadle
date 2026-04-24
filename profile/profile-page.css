@@ -1989,6 +1989,122 @@ body.darkmode .song-empty-hint {
   background-color: #fff;
 }
 
+/* ── Section style texte ── */
+.share-text-divider {
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #888;
+  margin: 14px 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.share-text-style {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Rangée de swatches couleurs */
+.share-color-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.share-color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+  flex-shrink: 0;
+}
+
+.share-color-swatch:hover {
+  transform: scale(1.18);
+}
+
+.share-color-swatch.active {
+  border-color: var(--accent);
+  border-width: 3px;
+  transform: scale(1.12);
+}
+
+.share-color-picker {
+  width: 32px;
+  height: 26px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1px 2px;
+  cursor: pointer;
+  background: none;
+  flex-shrink: 0;
+}
+
+/* Boutons de taille S / M / L / XL */
+.share-size-row {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.share-size-btn {
+  flex: 1;
+  padding: 5px 0;
+  border-radius: 7px;
+  border: 2px solid #e0e0e0;
+  background: #f8f8f8;
+  color: #555;
+  font-size: 0.78em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.share-size-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.share-size-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Dark mode */
+body.darkmode .share-text-divider {
+  color: #777;
+  border-top-color: rgba(255,255,255,0.08);
+}
+
+body.darkmode .share-color-swatch {
+  border-color: rgba(255,255,255,0.18);
+}
+
+body.darkmode .share-size-btn {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #ccc;
+}
+
+body.darkmode .share-size-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+body.darkmode .share-color-picker {
+  border-color: #444;
+}
+
 /*
  * Zone de prévisualisation — format 9:16 portrait téléphone.
  * Desktop : 260×462px  (260 × 16/9 = 462)
@@ -2674,61 +2790,119 @@ body.darkmode .crop-zoom-label { color: #444; }
    VIEWING BANNER (profile-view.js)
    ═══════════════════════════════════════════════════════════ */
 
+/* ── Bandeau "Viewing profile of X" ── */
 .viewing-banner {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.1), transparent);
-  border-left: 3px solid var(--accent);
-  padding: 10px 20px;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(230, 57, 70, 0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 16px auto;
+  max-width: 680px;
   font-size: 0.88rem;
   flex-wrap: wrap;
+  gap: 10px;
+  backdrop-filter: blur(6px);
 }
-.vb-eye  { font-size: 1.1rem; flex-shrink: 0; }
-.vb-text { flex: 1; min-width: 120px; }
+
+body:not(.darkmode) .viewing-banner {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(230, 57, 70, 0.18);
+}
+
+.vb-eye { font-size: 1rem; flex-shrink: 0; color: var(--accent); }
+
+.vb-text {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vb-pseudo {
+  font-family: 'Oswald', Arial, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary, #f0f0f0);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body:not(.darkmode) .vb-pseudo { color: #111; }
+
 .vb-code {
-  font-family: monospace;
-  font-size: 0.76rem;
-  opacity: 0.55;
-  background: rgba(0,0,0,0.07);
-  padding: 2px 7px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.68rem;
+  color: #888;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 1px 6px;
   border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+  letter-spacing: 0.06em;
 }
+
+body.darkmode .vb-code { background: rgba(255, 255, 255, 0.08); }
+
 .vb-back {
   color: var(--accent);
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   white-space: nowrap;
+  padding: 4px 10px;
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  border-radius: 6px;
+  transition: background 0.15s;
 }
-.vb-back:hover { text-decoration: underline; }
+.vb-back:hover {
+  background: rgba(230, 57, 70, 0.1);
+  text-decoration: none;
+}
 
-/* Bouton Add Friend dans le bandeau */
+/* ── Bouton Add Friend dans le bandeau ── */
 .vb-friend-btn {
   background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 5px 14px;
+  border-radius: 8px;
+  padding: 6px 16px;
   font-size: 0.82rem;
   font-weight: 700;
+  font-family: 'Oswald', Arial, sans-serif;
+  letter-spacing: 0.06em;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
 }
-.vb-friend-btn:hover { background: var(--accent-hover); }
-.vb-friend-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.vb-friend-btn--accept { background: #16a34a; }
+.vb-friend-btn:hover    { background: var(--accent-hover); transform: scale(1.03); }
+.vb-friend-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.vb-friend-btn--accept  { background: #16a34a; }
 .vb-friend-btn--accept:hover { background: #15803d; }
+.vb-compare-btn {
+  background: rgba(230, 57, 70, 0.15);
+  border: 1px solid rgba(230, 57, 70, 0.4);
+}
+.vb-compare-btn:hover {
+  background: rgba(230, 57, 70, 0.28);
+}
 
 .vb-friend-status {
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 8px;
   white-space: nowrap;
+  letter-spacing: 0.03em;
 }
-.vb-friend-status--ok      { background: rgba(22,163,74,0.12); color: #16a34a; }
-.vb-friend-status--pending { background: rgba(0,0,0,0.06);     color: #888; }
+.vb-friend-status--ok      { background: rgba(22,163,74,0.15); color: #16a34a; border: 1px solid rgba(22,163,74,0.3); }
+.vb-friend-status--pending { background: rgba(120,120,120,0.1); color: #888; border: 1px solid rgba(120,120,120,0.2); }
 
 /* ═══════════════════════════════════════════════════════════
    ERREUR PROFIL INTROUVABLE
