@@ -384,20 +384,21 @@ CREATE TABLE social_link_badges (
 CREATE TABLE leaderboard_cache (
     id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
     user_id         BIGINT UNSIGNED  NOT NULL,
-    mode            VARCHAR(30)      NOT NULL,   -- 'global' ou nom de mode
-    period          VARCHAR(15)      NOT NULL,   -- 'all_time' | 'monthly' | 'weekly'
-    period_start    DATE,                        -- NULL pour all_time
-    score           INT              NOT NULL,
+    mode            VARCHAR(30)      NOT NULL,   -- 'all' ou nom de mode
+    period          VARCHAR(15)      NOT NULL,   -- 'day' | 'week' | 'month' | 'ever'
+    metric          VARCHAR(20)      NOT NULL DEFAULT 'wins',  -- 'wins' | 'winrate' | 'streak' | 'perfect' | 'games'
+    period_start    DATETIME,                    -- '2000-01-01 00:00:00' pour 'ever'
+    score           DECIMAL(8,1)     NOT NULL,
     rank_position   INT,
     updated_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
                                               ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    UNIQUE KEY uq_leaderboard (user_id, mode, period, period_start),
+    UNIQUE KEY uq_leaderboard (user_id, mode, period, metric, period_start),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE INDEX idx_leaderboard_ranking ON leaderboard_cache(mode, period, period_start, score DESC);
+CREATE INDEX idx_leaderboard_ranking ON leaderboard_cache(mode, period, metric, period_start, score DESC);
 
 
 -- =============================================================================
