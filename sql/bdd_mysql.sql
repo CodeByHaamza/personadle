@@ -54,6 +54,8 @@ CREATE TABLE users (
     -- PHP session files, which shared hosts may garbage-collect aggressively.
     remember_me_hash     VARCHAR(64)      NULL,
     remember_me_expires  DATETIME         NULL,
+    -- Vaut 1 après le premier import JSON (une seule migration autorisée par compte)
+    has_migrated         TINYINT(1)       NOT NULL DEFAULT 0,
 
     PRIMARY KEY (id),
     UNIQUE KEY uq_email           (email),
@@ -483,17 +485,19 @@ CREATE TABLE messages (
     receiver_id     BIGINT UNSIGNED NOT NULL,
     type            VARCHAR(20)     NOT NULL DEFAULT 'message',
     content         TEXT            NULL,
-    challenge_mode  VARCHAR(30)     NULL,
-    challenge_score INT             NULL,
-    challenge_date  DATE            NULL,
-    status          VARCHAR(20)     NOT NULL DEFAULT 'unread',
+    challenge_mode    VARCHAR(30)     NULL,
+    challenge_score   INT             NULL,
+    challenge_date    DATE            NULL,
+    challenge_filters TEXT            NULL,
+    status            VARCHAR(20)     NOT NULL DEFAULT 'unread',
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_msg_sender   FOREIGN KEY (sender_id)   REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_msg_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE INDEX idx_messages_receiver ON messages(receiver_id, status, created_at DESC);
-CREATE INDEX idx_messages_sender   ON messages(sender_id);
+CREATE INDEX idx_messages_receiver    ON messages(receiver_id, status, created_at DESC);
+CREATE INDEX idx_messages_sender      ON messages(sender_id);
+CREATE INDEX idx_messages_sender_type ON messages(sender_id, type, status, created_at DESC);
 
 
 -- =============================================================================
