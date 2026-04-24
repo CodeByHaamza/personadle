@@ -25,7 +25,9 @@
     "prev": "← Préc.",
     "next": "Suivant →",
     "back_my_profile": "Mon profil",
-    "close": "Fermer"
+    "close": "Fermer",
+    "back": "Retour",
+    "dismiss": "Fermer"
   },
   "modes": {
     "classic": {
@@ -236,6 +238,7 @@
     "reset_confirm": "⚠️ Cela effacera définitivement vos données de profil. Voulez-vous continuer ?",
     "export": "Exporter le profil",
     "import": "Importer un profil",
+    "import_already_done": "Vous avez déjà importé un profil JSON. Un seul import est autorisé par compte.",
     "delete_account": "Supprimer mon compte",
     "no_badges": "Aucun badge sélectionné.",
     "save": "Sauvegarder",
@@ -260,8 +263,22 @@
     "event_code_desc": "Entrez un code valide pour débloquer un badge exclusif !",
     "export_import_title": "Exporter / Importer",
     "share_btn": "Partager mon profil",
+    "copy_link": "Copier le lien",
+    "link_copied": "Lien copié !",
     "reset_btn": "Réinitialiser le profil",
-    "badges_unlocked": "badges débloqués"
+    "badges_unlocked": "badges débloqués",
+    "stat_wins_label": "Victoires",
+    "stat_giveups_label": "Abandons",
+    "stat_games_label": "Parties jouées",
+    "stat_best_streak_label": "Meilleure série",
+    "stat_time_label": "Temps joué",
+    "stat_first_played_label": "Première partie",
+    "stat_fav_mode_label": "Mode favori",
+    "stat_current_streak_label": "Série actuelle",
+    "mode_col_mode": "Mode",
+    "mode_col_games": "Parties / Win %",
+    "song_title": "Chanson de profil",
+    "since": "Depuis"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",
@@ -456,6 +473,8 @@
     "login": "Connexion",
     "register": "Créer un compte",
     "email": "Email",
+    "email_or_pseudo": "Email ou pseudo",
+    "email_or_pseudo_placeholder": "Email ou pseudo…",
     "password": "Mot de passe",
     "password_confirm": "Confirmer le mot de passe",
     "pseudo": "Pseudo",
@@ -547,7 +566,7 @@
     "no_users": "Aucun joueur pour l'instant.",
     "browse_title": "Parcourir les joueurs",
     "load_error": "Impossible de charger les joueurs.",
-    "cc_wants_confidant": "veut devenir votre Confident.",
+    "cc_wants_confidant": "vous a demandé en ami.",
     "cc_accept_social_link": "Accepter ce Social Link ?",
     "cc_yes": "OUI",
     "cc_no": "NON",
@@ -555,8 +574,22 @@
     "sent_to": "À",
     "mark_read": "✓ Marquer comme lu",
     "challenge_beat": "Battre",
+    "challenge_beaten": "Défi réussi !",
+    "challenge_failed": "Défi échoué",
     "challenge_accept": "⚔ Accepter",
-    "challenge_decline": "✕"
+    "challenge_decline": "✕",
+    "friend": "Ami",
+    "pending": "En attente",
+    "declined_request": "a refusé votre demande d'ami.",
+    "already_friends": "Déjà amis",
+    "status_unread": "Nouveau",
+    "status_read": "Lu",
+    "status_accepted": "En cours",
+    "status_beaten": "Réussi",
+    "status_expired": "Expiré",
+    "msg_clear": "Vider les résolus",
+    "msg_empty": "Aucun message pour l'instant.",
+    "delete_msg": "Supprimer"
   },
   "challenge": {
     "challenge_friend": "Défier un Ami",
@@ -566,7 +599,26 @@
     "banner_beat": "Battre",
     "accept": "⚔ Accepter",
     "decline": "✕ Refuser",
-    "already_sent": "Déjà envoyé aujourd'hui"
+    "already_sent": "Déjà envoyé aujourd'hui",
+    "active_challenge": "Défi",
+    "notif_challenges_you": "vous lance un défi !",
+    "notif_beat": "Battre",
+    "notif_attempts": "tentative(s)"
+  },
+  "challenge_result": {
+    "title_win": "BRAVO !",
+    "title_fail": "DOMMAGE...",
+    "modal_win": "Défi Réussi !",
+    "modal_fail": "Défi Échoué",
+    "sender_title_win": "BRAVO !",
+    "sender_title_fail": "DOMMAGE...",
+    "sender_modal_win": "Défi Relevé !",
+    "sender_modal_fail": "Pas encore relevé...",
+    "my_score": "Vos tentatives",
+    "to_beat": "Score à battre",
+    "social_link": "Social Link",
+    "xp_gained": "+{{xp}} XP Social Link",
+    "close": "Retour à l'accueil"
   },
   "settings": {
     "title": "Paramètres",
@@ -655,5 +707,56 @@
     "done_today": "Déjà fait aujourd'hui",
     "rank_up": "🎉 Social Link — Rang {{rank}} : {{name}}",
     "max_rank": "✨ MAX — True Confidant"
+  },
+  "compare": {
+    "title": "Comparaison de stats",
+    "btn": "⚖ Comparer les stats",
+    "cooldown": "Tu pourras comparer dans {{time}}",
+    "xp_gained": "+{{xp}} XP Social Link",
+    "loading": "Chargement…",
+    "wins": "Victoires",
+    "winrate": "Taux de victoire",
+    "streak": "Meilleure série",
+    "perfect": "Sans fautes",
+    "games": "Parties",
+    "close": "Fermer",
+    "radar_title": "Détail par mode",
+    "conclusion": {
+      "overall_win":  ["Tes stats parlent d'elles-mêmes. {{friend}} aurait besoin d'un second éveil pour t'atteindre.", "Le Wild Card a parlé — {{friend}} n'était pas à la hauteur.", "Même Igor serait impressionné. Ton bilan écrase celui de {{friend}}."],
+      "overall_lose": ["{{friend}} porte cette amitié. Il est temps de renverser la situation.", "Si c'était une évaluation Salle de Velours, {{friend}} vient de débloquer un Persona rang 10… pas toi.", "Morgana serait déçu. Mais bon — il y a toujours demain."],
+      "equal":        ["Deux Wild Cards. Deux destins. L'écart est infime — rivalité confirmée.", "Toi et {{friend}} êtes statistiquement identiques. L'univers tremble.", "C'est moins une comparaison qu'un miroir. Déconcertant."],
+      "streak_win":   ["Ta série rivalise avec le dévouement de Joker aux Voleurs Fantômes.", "{{friend}} n'a pas ta constance. Loin de là."],
+      "streak_lose":  ["La série de {{friend}} fait passer la tienne pour un run tutoriel.", "La constance est une vertu. {{friend}} l'a maîtrisée. Toi… tu apprends."],
+      "perfect_win":  ["Sans fautes ? Tu les chasses. {{friend}} cherche encore comment.", "Pas d'erreurs, pas de compromis. Ton record parle."],
+      "perfect_lose": ["{{friend}} ne devine pas — il sait. À chaque fois.", "Les victoires parfaites se méritent. {{friend}} en a beaucoup mérité."],
+      "mode_win": {
+        "classic":      ["Le mode Classique, c'est ton terrain. Tu y es une légende.", "Ton Compendium est vaste. Celui de {{friend}} a besoin de travail."],
+        "emoji":        ["Le mode Emoji ? Tu les lis comme une partition. {{friend}} décode encore.", "Les symboles te parlent. {{friend}} apprend encore l'alphabet."],
+        "silhouette":   ["Tu vois l'ombre et tu connais l'âme. {{friend}} plisse encore les yeux.", "Les silhouettes ne te trompent pas. Elles trompent apparemment {{friend}}."],
+        "alloutattack": ["L'All-Out Attack, c'est ton domaine. {{friend}} n'avait aucune chance.", "Tu sens l'ivresse de chaque All-Out Attack. {{friend}} sent la défaite."],
+        "personae":     ["Les archives de la Salle de Velours s'inclinent devant toi. {{friend}} parcourt encore.", "Les Personas sont ta seconde langue. {{friend}} est au chapitre un."],
+        "music":        ["Tes oreilles sont accordées à la Salle de Velours. {{friend}} zappe la BO.", "L'œuvre de Shoji Meguro vit à travers toi. {{friend}} joue en sourdine."]
+      },
+      "mode_lose": {
+        "classic":      ["{{friend}} connaît ces personnages par cœur. Peut-être rejouer les jeux ?", "Mode Classique : {{friend}} 1 — Toi 0. Le Compendium pleure."],
+        "emoji":        ["{{friend}} lit les emojis comme un Wild Card lit les Arcanes. Toi, tu apprends.", "Les symboles restent flous pour toi. {{friend}} les a déjà résolus."],
+        "silhouette":   ["Les ombres te trompent. {{friend}} les traverse sans effort.", "{{friend}} repère la silhouette avant que tu aies chargé la page."],
+        "alloutattack": ["{{friend}} domine la scène All-Out Attack. C'est toi qui te fais balayer.", "Tu encaisses l'All-Out Attack de {{friend}}. Ça fait mal."],
+        "personae":     ["L'accès de {{friend}} à la Salle de Velours est Gold. Le tien est Économie.", "{{friend}} nomme les Personas dans son sommeil. Toi tu lis encore."],
+        "music":        ["La musique ? {{friend}} entend des choses que tu ne comprendras jamais.", "Shoji Meguro choisirait {{friend}} plutôt que toi. La musique n'est pas ton fort."]
+      },
+      "rare": [
+        "Même Nyx reconnaîtrait ce bilan. Respect.",
+        "Le pouvoir de l'Arcane Univers coule en {{winner}}. C'était prédestiné.",
+        "Un lien se mesure non pas au temps, mais aux défaites. Méditez-les tous les deux.",
+        "Méfie-toi de celui qui a éveillé tous les Personas — dans cette amitié, c'est {{winner}}.",
+        "Le Wild Card choisit : Croissance ou Stagnation. {{loser}} a mal choisi.",
+        "Igor murmure : 'Ton potentiel est… prometteur.' Il regardait {{winner}}.",
+        "Certains appellent ça de la chance. La Salle de Velours appelle ça le destin. {{winner}} était choisi.",
+        "Tu as affronté ton Ombre. {{loser}} n'a pas encore accepté la sienne.",
+        "Le Midnight Channel ne ment jamais. Il a montré {{winner}} en tête.",
+        "Chie mangerait toute la viande et surpasserait quand même {{loser}}."
+      ]
+    }
   }
 }

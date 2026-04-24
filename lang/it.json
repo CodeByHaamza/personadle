@@ -25,7 +25,9 @@
     "prev": "← Prec.",
     "next": "Avanti →",
     "back_my_profile": "Il mio profilo",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "back": "Indietro",
+    "dismiss": "Chiudi"
   },
   "modes": {
     "classic": {
@@ -236,6 +238,7 @@
     "reset_confirm": "⚠️ Questo eliminerà definitivamente i dati del tuo profilo. Vuoi continuare?",
     "export": "Esporta profilo",
     "import": "Importa profilo",
+    "import_already_done": "Hai già importato un profilo JSON. È consentita una sola importazione per account.",
     "delete_account": "Elimina il mio account",
     "no_badges": "Nessun badge selezionato ancora.",
     "save": "Salva",
@@ -260,8 +263,22 @@
     "event_code_desc": "Inserisci un codice valido per sbloccare un badge esclusivo!",
     "export_import_title": "Esporta / Importa",
     "share_btn": "Condividi il mio profilo",
+    "copy_link": "Copia link",
+    "link_copied": "Link copiato!",
     "reset_btn": "Reimposta profilo",
-    "badges_unlocked": "badge sbloccati"
+    "badges_unlocked": "badge sbloccati",
+    "stat_wins_label": "Vittorie",
+    "stat_giveups_label": "Abbandoni",
+    "stat_games_label": "Partite giocate",
+    "stat_best_streak_label": "Serie migliore",
+    "stat_time_label": "Tempo giocato",
+    "stat_first_played_label": "Prima partita",
+    "stat_fav_mode_label": "Modalità preferita",
+    "stat_current_streak_label": "Serie attuale",
+    "mode_col_mode": "Modalità",
+    "mode_col_games": "Partite / Win %",
+    "song_title": "Canzone del profilo",
+    "since": "Da"
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",
@@ -456,6 +473,8 @@
     "login": "Accedi",
     "register": "Crea account",
     "email": "Email",
+    "email_or_pseudo": "Email o nome utente",
+    "email_or_pseudo_placeholder": "Email o nome utente…",
     "password": "Password",
     "password_confirm": "Conferma password",
     "pseudo": "Nome utente",
@@ -547,7 +566,7 @@
     "no_users": "Nessun giocatore ancora.",
     "browse_title": "Sfoglia giocatori",
     "load_error": "Impossibile caricare i giocatori.",
-    "cc_wants_confidant": "vuole essere il tuo Confidente.",
+    "cc_wants_confidant": "ti ha inviato una richiesta di amicizia.",
     "cc_accept_social_link": "Accettare questo Social Link?",
     "cc_yes": "SÌ",
     "cc_no": "NO",
@@ -555,8 +574,22 @@
     "sent_to": "A",
     "mark_read": "✓ Segna come letto",
     "challenge_beat": "Battere",
+    "challenge_beaten": "Sfida superata!",
+    "challenge_failed": "Sfida fallita",
     "challenge_accept": "⚔ Accetta",
-    "challenge_decline": "✕"
+    "challenge_decline": "✕",
+    "friend": "Amico",
+    "pending": "In attesa",
+    "declined_request": "ha rifiutato la tua richiesta di amicizia.",
+    "already_friends": "Già amici",
+    "status_unread": "Nuovo",
+    "status_read": "Letto",
+    "status_accepted": "In corso",
+    "status_beaten": "Superato",
+    "status_expired": "Scaduto",
+    "msg_clear": "Svuota risolti",
+    "msg_empty": "Nessun messaggio.",
+    "delete_msg": "Elimina"
   },
   "challenge": {
     "challenge_friend": "Sfida un Amico",
@@ -566,7 +599,26 @@
     "banner_beat": "Battere",
     "accept": "⚔ Accetta",
     "decline": "✕ Rifiuta",
-    "already_sent": "Già inviato oggi"
+    "already_sent": "Già inviato oggi",
+    "active_challenge": "Sfida",
+    "notif_challenges_you": "ti sfida!",
+    "notif_beat": "Battere",
+    "notif_attempts": "tentativo/i"
+  },
+  "challenge_result": {
+    "title_win": "BRAVO!",
+    "title_fail": "PECCATO...",
+    "modal_win": "Sfida Superata!",
+    "modal_fail": "Sfida Fallita",
+    "sender_title_win": "BRAVO!",
+    "sender_title_fail": "PECCATO...",
+    "sender_modal_win": "Sfida Completata!",
+    "sender_modal_fail": "Non ancora superata...",
+    "my_score": "I tuoi tentativi",
+    "to_beat": "Punteggio da battere",
+    "social_link": "Social Link",
+    "xp_gained": "+{{xp}} XP Social Link",
+    "close": "Torna alla Home"
   },
   "settings": {
     "title": "Impostazioni",
@@ -655,5 +707,56 @@
     "done_today": "Già fatto oggi",
     "rank_up": "🎉 Social Link — Grado {{rank}}: {{name}}",
     "max_rank": "✨ MAX — True Confidant"
+  },
+  "compare": {
+    "title": "Confronto statistiche",
+    "btn": "⚖ Confronta stats",
+    "cooldown": "Potrai confrontare tra {{time}}",
+    "xp_gained": "+{{xp}} XP Social Link",
+    "loading": "Caricamento…",
+    "wins": "Vittorie",
+    "winrate": "Percentuale vittorie",
+    "streak": "Serie migliore",
+    "perfect": "Vittorie perfette",
+    "games": "Partite",
+    "close": "Chiudi",
+    "radar_title": "Dettaglio per modalità",
+    "conclusion": {
+      "overall_win":  ["Le tue statistiche parlano da sole. {{friend}} avrebbe bisogno di un secondo risveglio.", "Il Wild Card ha parlato — {{friend}} non era mai alla tua altezza.", "Persino Igor sarebbe impressionato. Il tuo record supera di gran lunga quello di {{friend}}."],
+      "overall_lose": ["{{friend}} regge questa amicizia. È ora di cambiare copione.", "In una valutazione della Velvet Room, {{friend}} ha appena sbloccato un Persona rango 10… tu no.", "Morgana sarebbe deluso. Ma hey — c'è sempre un domani."],
+      "equal":        ["Due Wild Card. Due destini. Il divario è minimo — rivalità confermata.", "Tu e {{friend}} siete statisticamente identici. L'universo ha paura.", "Questo è meno un confronto e più uno specchio. Sconcertante."],
+      "streak_win":   ["La tua serie rivaleggia con la dedizione di Joker ai Phantom Thieves.", "{{friend}} non ha raggiunto la tua costanza. Nemmeno vicino."],
+      "streak_lose":  ["La serie di {{friend}} fa sembrare la tua un tutorial.", "La costanza è una virtù. {{friend}} l'ha padroneggiata. Tu… stai imparando."],
+      "perfect_win":  ["Vittorie perfette? Le cacci. {{friend}} sta ancora capendo come.", "Nessun errore, nessun compromesso. Il tuo record parla chiaro."],
+      "perfect_lose": ["{{friend}} non indovina — sa. Ogni volta.", "Le vittorie perfette si guadagnano. {{friend}} ne ha guadagnate molte."],
+      "mode_win": {
+        "classic":      ["La modalità Classic è il tuo territorio. Sei una leggenda lì.", "La tua conoscenza del Compendio è vasta. Quella di {{friend}} ha bisogno di lavoro."],
+        "emoji":        ["Modalità Emoji? Li leggi come spartiti. {{friend}} sta ancora decifrando.", "I simboli ti parlano. {{friend}} sta ancora imparando l'alfabeto."],
+        "silhouette":   ["Vedi l'ombra e conosci l'anima. {{friend}} sta ancora strizzando gli occhi.", "Le sagome non ti ingannano. Ingannano apparentemente {{friend}}."],
+        "alloutattack": ["L'All-Out Attack è il tuo dominio. {{friend}} non ha mai avuto chance.", "Senti il brivido di ogni All-Out Attack. {{friend}} sente la sconfitta."],
+        "personae":     ["Gli archivi della Velvet Room si piegano alla tua volontà. {{friend}} sta ancora sfogliando.", "I Persona sono la tua seconda lingua. {{friend}} è ancora al capitolo uno."],
+        "music":        ["Le tue orecchie sono sintonizzate sulla Velvet Room. {{friend}} salta chiaramente la colonna sonora.", "L'eredità di Shoji Meguro vive attraverso di te. {{friend}} gioca in muto."]
+      },
+      "mode_lose": {
+        "classic":      ["{{friend}} conosce questi personaggi a memoria. Forse rigioca i titoli?", "Modalità Classic: {{friend}} 1 — Tu 0. Il Compendio piange."],
+        "emoji":        ["{{friend}} legge emoji come un Wild Card legge Arcani. Tu stai ancora imparando.", "I simboli ti sono poco chiari. {{friend}} li ha già risolti."],
+        "silhouette":   ["Le ombre ti ingannano. {{friend}} le attraversa senza sforzo.", "{{friend}} individua la sagoma prima che tu carichi la pagina."],
+        "alloutattack": ["{{friend}} domina la scena All-Out Attack. Sei tu a essere spazzato via.", "Incassi l'All-Out Attack di {{friend}}. Fa male."],
+        "personae":     ["L'accesso di {{friend}} alla Velvet Room è Gold. Il tuo è Economy.", "{{friend}} nomina i Persona nel sonno. Tu stai ancora leggendo il Compendio."],
+        "music":        ["Musica? {{friend}} sente cose che non capirai mai.", "Shoji Meguro sceglierebbe {{friend}} su di te. La musica non è il tuo forte."]
+      },
+      "rare": [
+        "Persino Nyx riconoscerebbe questo record. Rispetto.",
+        "Il potere dell'Arcano Universo scorre in {{winner}}. Era predestinato.",
+        "Un legame si misura non nel tempo, ma nelle sconfitte. Studiatele entrambe.",
+        "Attenti a chi ha risvegliato tutti i Persona — in questa amicizia, è {{winner}}.",
+        "Il Wild Card sceglie: Crescita o Stagnazione. {{loser}} ha scelto male.",
+        "Igor sussurra: 'Il tuo potenziale è… promettente.' Guardava {{winner}}.",
+        "Alcuni lo chiamano fortuna. La Velvet Room lo chiama destino. {{winner}} era stato scelto.",
+        "Hai affrontato la tua Ombra. {{loser}} non ha ancora accettato la propria.",
+        "Il Midnight Channel non mente mai. Ha mostrato {{winner}} in cima.",
+        "Chie mangerebbe tutta la carne e supererebbe comunque {{loser}}."
+      ]
+    }
   }
 }
