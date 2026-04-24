@@ -46,6 +46,7 @@ export async function getSocialLinkData(friendId) {
  * @param {number} friendId
  * @param {string} actionType
  * @returns {Promise<{ link_id, xp_gained, is_mutual, new_xp, new_rank, ranked_up }>}
+ * @throws {Error} on API unavailable or HTTP error (409 Already done today, 403 Not friends)
  */
 export async function gainSocialLinkXp(friendId, actionType) {
   const api = window._personadleApi;

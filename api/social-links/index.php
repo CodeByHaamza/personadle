@@ -22,7 +22,7 @@ require_once __DIR__ . '/../bootstrap.php';
  */
 function addSocialLinkXp(PDO $pdo, int $linkId, int $xpAmount): array
 {
-    $stmt = $pdo->prepare('SELECT xp, `rank` FROM social_links WHERE id = ? LIMIT 1');
+    $stmt = $pdo->prepare('SELECT xp, `rank` FROM social_links WHERE id = ? LIMIT 1 FOR UPDATE');
     $stmt->execute([$linkId]);
     $sl = $stmt->fetch();
 
@@ -95,23 +95,36 @@ if ($method === 'POST' && $slIdx !== false
     $actionType = trim($data['action_type'] ?? '');
     if (!isset(XP_TABLE[$actionType])) jsonError('Invalid action_type', 400);
 
-    // get_or_create via ordre canonique
-    $aId = min($authId, $friendId);
-    $bId = max($authId, $friendId);
-    $stmt = $pdo->prepare('SELECT id FROM social_links WHERE user_a_id = ? AND user_b_id = ? LIMIT 1');
-    $stmt->execute([$aId, $bId]);
-    $existing = $stmt->fetch();
-    if ($existing) {
-        $linkId = (int) $existing['id'];
-    } else {
-        $pdo->prepare('INSERT INTO social_links (user_a_id, user_b_id) VALUES (?, ?)')->execute([$aId, $bId]);
-        $linkId = (int) $pdo->lastInsertId();
-    }
+    // Friendship guard : vérifier que les deux utilisateurs sont amis
+    $stmtFriend = $pdo->prepare(
+        "SELECT id FROM friendships
+         WHERE status = 'accepted'
+           AND ((requester_id = ? AND addressee_id = ?)
+             OR (requester_id = ? AND addressee_id = ?))
+         LIMIT 1"
+    );
+    $stmtFriend->execute([$authId, $friendId, $friendId, $authId]);
+    if (!$stmtFriend->fetch()) jsonError('Not friends', 403);
 
-    $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    $result = [];
+    $pdo->beginTransaction();
+    try {
+        // get_or_create via ordre canonique
+        $aId = min($authId, $friendId);
+        $bId = max($authId, $friendId);
+        $stmt = $pdo->prepare('SELECT id FROM social_links WHERE user_a_id = ? AND user_b_id = ? LIMIT 1');
+        $stmt->execute([$aId, $bId]);
+        $existing = $stmt->fetch();
+        if ($existing) {
+            $linkId = (int) $existing['id'];
+        } else {
+            $pdo->prepare('INSERT INTO social_links (user_a_id, user_b_id) VALUES (?, ?)')->execute([$aId, $bId]);
+            $linkId = (int) $pdo->lastInsertId();
+        }
 
-    // Anti-spam : 1 action par jour
-    if ($actionType !== 'play_same_day') {
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        // Anti-spam : 1 action par jour (toutes actions, y compris play_same_day)
         $stmtCheck = $pdo->prepare("
             SELECT id FROM social_link_interactions
             WHERE social_link_id = ? AND initiator_id = ? AND action_type = ?
@@ -120,24 +133,22 @@ if ($method === 'POST' && $slIdx !== false
         ");
         $stmtCheck->execute([$linkId, $authId, $actionType, $today]);
         if ($stmtCheck->fetch()) {
+            $pdo->rollBack();
             jsonError('Already performed this action today', 409);
         }
-    }
 
-    // Vérifier si l'autre a déjà fait la même action aujourd'hui → mutuel
-    $stmtOther = $pdo->prepare("
-        SELECT id FROM social_link_interactions
-        WHERE social_link_id = ? AND initiator_id = ? AND action_type = ?
-          AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
-        LIMIT 1
-    ");
-    $stmtOther->execute([$linkId, $friendId, $actionType, $today]);
-    $isMutual = $actionType === 'play_same_day' ? true : (bool) $stmtOther->fetch();
+        // Vérifier si l'autre a déjà fait la même action aujourd'hui → mutuel
+        $stmtOther = $pdo->prepare("
+            SELECT id FROM social_link_interactions
+            WHERE social_link_id = ? AND initiator_id = ? AND action_type = ?
+              AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
+            LIMIT 1
+        ");
+        $stmtOther->execute([$linkId, $friendId, $actionType, $today]);
+        $isMutual = $actionType === 'play_same_day' ? true : (bool) $stmtOther->fetch();
 
-    $xpGained = $isMutual ? XP_TABLE[$actionType]['mutual'] : XP_TABLE[$actionType]['solo'];
+        $xpGained = $isMutual ? XP_TABLE[$actionType]['mutual'] : XP_TABLE[$actionType]['solo'];
 
-    $pdo->beginTransaction();
-    try {
         $pdo->prepare("
             INSERT INTO social_link_interactions (social_link_id, initiator_id, action_type, xp_gained, is_mutual)
             VALUES (?, ?, ?, ?, ?)
@@ -257,20 +268,18 @@ if ($method === 'POST' && $subAction === 'interact') {
 
     $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
 
-    // Anti-spam : vérifier si déjà fait aujourd'hui (sauf play_same_day)
-    if ($actionType !== 'play_same_day') {
-        $stmtCheck = $pdo->prepare("
-            SELECT id FROM social_link_interactions
-            WHERE social_link_id = ?
-              AND initiator_id   = ?
-              AND action_type    = ?
-              AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
-            LIMIT 1
-        ");
-        $stmtCheck->execute([$linkId, $authId, $actionType, $today]);
-        if ($stmtCheck->fetch()) {
-            jsonError('Already performed this action today', 409);
-        }
+    // Anti-spam : vérifier si déjà fait aujourd'hui (toutes actions, y compris play_same_day)
+    $stmtCheck = $pdo->prepare("
+        SELECT id FROM social_link_interactions
+        WHERE social_link_id = ?
+          AND initiator_id   = ?
+          AND action_type    = ?
+          AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
+        LIMIT 1
+    ");
+    $stmtCheck->execute([$linkId, $authId, $actionType, $today]);
+    if ($stmtCheck->fetch()) {
+        jsonError('Already performed this action today', 409);
     }
 
     // Vérifier si l'autre ami a fait la même action aujourd'hui → mutuel
@@ -291,6 +300,7 @@ if ($method === 'POST' && $subAction === 'interact') {
 
     $xpGained = $isMutual ? XP_TABLE[$actionType]['mutual'] : XP_TABLE[$actionType]['solo'];
 
+    $result = [];
     $pdo->beginTransaction();
     try {
         // Logger l'interaction
