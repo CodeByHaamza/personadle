@@ -189,6 +189,14 @@ export const api = {
      * @param {number} userId
      */
     delete: (userId) => apiCall(`/user/${userId}`, { method: 'DELETE' }),
+
+    /**
+     * Compares stats between the logged-in user and a friend.
+     * Handles 72h cooldown per pair and awards Social Link XP.
+     * @param {number} friendId
+     * @returns {Promise<{ me, friend, on_cooldown, cooldown_until, xp_gained }>}
+     */
+    compare: (friendId) => get(`/user/compare?friend_id=${friendId}`),
   },
 
   // ── Statistiques & sessions de jeu ───────────────────
