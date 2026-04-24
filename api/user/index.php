@@ -51,25 +51,39 @@ $pdo    = pdo();
 if ($method === 'GET') {
     $authId = requireAuth();
 
-    // Pour l'instant : lecture de son propre profil seulement.
-    // Post-v2.0 : profil public d'un ami accessible avec champs restreints.
+    // Autre utilisateur → profil public restreint (pseudo + avatar seulement)
     if ($userId !== $authId) {
-        jsonError('Forbidden', 403);
+        $stmt = $pdo->prepare(
+            'SELECT u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color
+             FROM users u
+             LEFT JOIN profiles p ON p.user_id = u.id
+             WHERE u.id = ? AND u.is_deleted = 0
+             LIMIT 1'
+        );
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        if (!$row) jsonError('User not found', 404);
+        jsonSuccess([
+            'pseudo'              => $row['pseudo'],
+            'friend_code'         => $row['friend_code'],
+            'avatar_data'         => $row['avatar_data'],
+            'avatar_border_color' => $row['avatar_border_color'] ?? '#ffffff',
+        ]);
     }
 
     // Récupérer l'utilisateur
-    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, has_migrated FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user) jsonError('User not found', 404);
 
     // Récupérer le profil
-    $stmt = $pdo->prepare('SELECT * FROM profiles WHERE user_id = ?');
+    $stmt = $pdo->prepare('SELECT user_id, avatar_data, avatar_border_color, wallpaper_id, profile_music_id, selected_badges, equipped_title_id, settings FROM profiles WHERE user_id = ?');
     $stmt->execute([$userId]);
     $profile = $stmt->fetch() ?: [];
 
     // Récupérer les stats (tous modes)
-    $stmt = $pdo->prepare('SELECT * FROM user_stats WHERE user_id = ? ORDER BY mode');
+    $stmt = $pdo->prepare('SELECT mode, wins, giveups, games, streak, streak_record, perfect_wins, total_time_ms FROM user_stats WHERE user_id = ? ORDER BY mode');
     $stmt->execute([$userId]);
     $stats = $stmt->fetchAll();
 

@@ -25,20 +25,18 @@ $pdo = pdo();
  */
 function meResponse(PDO $pdo, array $user): never
 {
-    $stmt = $pdo->prepare('SELECT settings FROM profiles WHERE user_id = ? LIMIT 1');
-    $stmt->execute([(int) $user['id']]);
-    $profileRow = $stmt->fetch();
+    $profileRow = fetchProfile($pdo, (int) $user['id']);
     $settings   = json_decode($profileRow['settings'] ?? 'null', true) ?? [];
 
     jsonSuccess([
-        'user'     => formatUser($user),
+        'user'     => formatUser($user, $profileRow),
         'settings' => $settings,
     ]);
 }
 
 // ── 1. Session PHP active (cas normal) ──────────────────────────────────────
 if (!empty($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, has_migrated FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([(int) $_SESSION['user_id']]);
     $user = $stmt->fetch();
 
@@ -68,7 +66,7 @@ try {
     $hashedToken = hash('sha256', $rawToken);
 
     $stmt = $pdo->prepare('
-        SELECT * FROM users
+        SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, has_migrated FROM users
         WHERE remember_me_hash = ?
           AND remember_me_expires > NOW()
           AND is_deleted = 0
