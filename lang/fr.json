@@ -27,7 +27,8 @@
     "back_my_profile": "Mon profil",
     "close": "Fermer",
     "back": "Retour",
-    "dismiss": "Fermer"
+    "dismiss": "Fermer",
+    "error": "Une erreur est survenue."
   },
   "modes": {
     "classic": {
@@ -450,7 +451,36 @@
       "name": "Les Deux Visages",
       "condition": "Trouver Crow et Black Mask en mode All-Out Attack",
       "description": "Les deux faces d'une même pièce. Le garçon souriant et le masque noir... Les deux visages de la justice révélés."
-    }
+    },
+    "one_shot": { "name": "Critical Strike", "condition": "Deviner au premier essai", "description": "Pourquoi perdre du temps avec la stratégie quand on peut frapper directement ? Décerné pour une première tentative parfaite." },
+    "aoa_vision": { "name": "Piercing the Fog", "condition": "Deviner l'All-Out Attack au premier essai", "description": "La vérité était voilée dans un lourd brouillard, mais tu l'as percé du premier regard." },
+    "emoji_decoder": { "name": "Emoji Decoder", "condition": "Gagner 10 parties en mode Emoji", "description": "Le Metaverse parle sans mots. Avec une finesse royale, tu as percé le code de l'âme numérique." },
+    "navigator": { "name": "Eye of the Navigator", "condition": "Utiliser l'indice 50 fois en mode Classique", "description": "Cinquante anomalies scannées et déchiffrées. Aucune vérité ne peut se cacher de ton radar." },
+    "velvet_regular": { "name": "Velvet Regular", "condition": "Jouer 50 jours uniques", "description": "Cinquante jours entre l'esprit et la matière. Le maître de ces lieux reconnaît désormais tes pas." },
+    "strega": { "name": "Apostles of the Fall", "condition": "Trouver Hypnos, Moros et Médée en mode Personae", "description": "Pourquoi combattre l'inévitable ? Nous sommes les metteurs en scène de ta magnifique destruction." },
+    "twin_fist": { "name": "Twin Fist", "condition": "Trouver les personas de Makoto Nijima et Akihiko + leurs All-Out Attacks", "description": "Force nucléaire et éclair crépitant ! Tu as identifié le duo de bagarreurs qui dirigent avec leurs poings." },
+    "twin_spear": { "name": "Twin Spear", "condition": "Trouver les personas de Kotone et Ken + leurs All-Out Attacks", "description": "L'un cherche la vengeance par la lumière, l'autre dirige avec une lame dansante." },
+    "tradition_modernite": { "name": "Chronological Convergence", "condition": "Trouver les personas de Naoto et Futaba + leurs musiques", "description": "Deux esprits, séparés d'un siècle, désormais synchronisés. La tradition et l'innovation ne font qu'un." },
+    "shapeshifter": { "name": "The Formless Soul", "condition": "Deviner le même personnage dans 3 modes différents", "description": "Un masque peut changer, la scène peut basculer, mais le vrai soi reste constant." },
+    "ideal_reality": { "name": "Gentle Illusion", "condition": "Abandonner quand la cible est 'Our Light' en mode Musique", "description": "Pourquoi lutter pour atteindre la lumière quand le bonheur peut t'être offert ?" },
+    "for_real": { "name": "For Real", "condition": "Trouver l'All-Out Attack de Ryuji et sa persona", "description": "YEAH ! Tu as trouvé le Phantom Thief le plus passionné !" },
+    "night_owl": { "name": "Phantom of the Night", "condition": "Jouer entre minuit et 5h (heure de Paris)", "description": "Les vrais voleurs opèrent sous le couvert de l'obscurité. Le monde cognitif est à toi." },
+    "nyx_hour": { "name": "Nyx Hour", "condition": "Jouer entre minuit et 0h30 (heure de Paris)", "description": "L'horloge sonne minuit, mais demain n'arrive jamais. Tu as été témoin de l'arrivée de la fin." },
+    "stylist": { "name": "Breathtaking Aesthetics", "condition": "Personnaliser avatar + couleur UI + 1 badge + musique de profil", "description": "Quelle passion ! Tu as refusé la médiocrité d'un profil par défaut pour forger un chef-d'œuvre visuel." },
+    "pyro_spark": { "name": "The Ignition", "condition": "Atteindre une série de 7 jours", "description": "Un petit scintillement dans le noir. Pendant sept jours, tu as gardé la flamme en vie." },
+    "raphael": { "name": "The Divine Blaze", "condition": "Atteindre une série de 30 jours", "description": "Trente jours. Le scintillement est devenu un enfer rugissant." },
+    "surt": { "name": "Ragnarök's Dawn", "condition": "Atteindre une série de 90 jours", "description": "Quatre-vingt-dix jours d'une persistance absolue et implacable." },
+    "lucifer": { "name": "Crest of the Morning Star", "condition": "Atteindre une série de 120 jours", "description": "Cent vingt levers de soleil. Au-delà des feux de la destruction se trouve la clarté aveuglante." },
+    "helel": { "name": "The Eternal Zenith", "condition": "Atteindre une série de 365 jours", "description": "Au-delà de la rébellion, au-delà de la ruine, se trouve la grâce pure de la première étoile." },
+    "reborn_phoenix": { "name": "Phoenix Reborn", "condition": "Restaurer ta série après l'avoir perdue", "description": "Tu as refusé de laisser les ténèbres réclamer ton héritage. Des cendres, tu t'élances vers une nouvelle aube." },
+    "best_bro": { "name": "Best Bro", "condition": "Avoir 2 amis ou plus", "description": "Les liens d'amitié transcendent le temps et le destin. Tu as trouvé tes alliés." },
+    "data_mining": { "name": "Data Mining", "condition": "Visiter 5 profils d'utilisateurs différents", "description": "Analyse de la compétition ou recherche de nouveaux liens ? Tu as scruté l'âme de cinq utilisateurs." },
+    "leblanc_meeting": { "name": "Leblanc Meeting", "condition": "3 amis ou plus connectés le même jour que toi", "description": "Âmes synchronisées ! Même le plus occupé des Phantom Thieves a besoin d'une pause café." },
+    "golden_week": { "name": "Golden Week", "condition": "Se connecter entre le 29 avril et le 5 mai", "description": "Même les chercheurs de vérité ont besoin d'une pause. Tu as passé les vacances dorées à forger des liens." },
+    "tanabata": { "name": "Tanabata", "condition": "Se connecter le 7 juillet", "description": "Les étoiles s'alignent pour une seule nuit. Ton vœu a été consigné dans les archives célestes." },
+    "promised_day": { "name": "The Promised Day", "condition": "Jouer le 31 décembre ET le 1er janvier", "description": "L'horloge sonne les douze coups de l'année mourante. Tu as fait face au seuil de la nouvelle aube." },
+    "hifumi_archives": { "name": "The Grandmaster's Tome", "condition": "???", "description": "Un vrai tacticien étudie le plateau avant de frapper. Tu as découvert les rapports cachés." },
+    "report": { "name": "The Priestess's Audit", "condition": "???", "description": "Channeling la sagesse méticuleuse de la Prêtresse, tu as documenté les anomalies." }
   },
   "social_link": {
     "rank_names": {
@@ -529,7 +559,12 @@
     "error": "Impossible de charger le classement.",
     "filters_title": "Classements",
     "filter_note": "Les filtres d'opus ne sont pas pris en compte.",
-    "filter_all_modes": "Tous les modes"
+    "filter_all_modes": "Tous les modes",
+    "filter_scope": "Portée",
+    "scope_global": "Global",
+    "scope_friends": "Amis",
+    "login_for_friends": "Connecte-toi pour voir le classement de tes amis.",
+    "no_friends": "Aucun de tes amis n'apparaît encore dans ce classement."
   },
   "friends": {
     "title": "Amis",
@@ -720,43 +755,6 @@
     "perfect": "Sans fautes",
     "games": "Parties",
     "close": "Fermer",
-    "radar_title": "Détail par mode",
-    "conclusion": {
-      "overall_win":  ["Tes stats parlent d'elles-mêmes. {{friend}} aurait besoin d'un second éveil pour t'atteindre.", "Le Wild Card a parlé — {{friend}} n'était pas à la hauteur.", "Même Igor serait impressionné. Ton bilan écrase celui de {{friend}}."],
-      "overall_lose": ["{{friend}} porte cette amitié. Il est temps de renverser la situation.", "Si c'était une évaluation Salle de Velours, {{friend}} vient de débloquer un Persona rang 10… pas toi.", "Morgana serait déçu. Mais bon — il y a toujours demain."],
-      "equal":        ["Deux Wild Cards. Deux destins. L'écart est infime — rivalité confirmée.", "Toi et {{friend}} êtes statistiquement identiques. L'univers tremble.", "C'est moins une comparaison qu'un miroir. Déconcertant."],
-      "streak_win":   ["Ta série rivalise avec le dévouement de Joker aux Voleurs Fantômes.", "{{friend}} n'a pas ta constance. Loin de là."],
-      "streak_lose":  ["La série de {{friend}} fait passer la tienne pour un run tutoriel.", "La constance est une vertu. {{friend}} l'a maîtrisée. Toi… tu apprends."],
-      "perfect_win":  ["Sans fautes ? Tu les chasses. {{friend}} cherche encore comment.", "Pas d'erreurs, pas de compromis. Ton record parle."],
-      "perfect_lose": ["{{friend}} ne devine pas — il sait. À chaque fois.", "Les victoires parfaites se méritent. {{friend}} en a beaucoup mérité."],
-      "mode_win": {
-        "classic":      ["Le mode Classique, c'est ton terrain. Tu y es une légende.", "Ton Compendium est vaste. Celui de {{friend}} a besoin de travail."],
-        "emoji":        ["Le mode Emoji ? Tu les lis comme une partition. {{friend}} décode encore.", "Les symboles te parlent. {{friend}} apprend encore l'alphabet."],
-        "silhouette":   ["Tu vois l'ombre et tu connais l'âme. {{friend}} plisse encore les yeux.", "Les silhouettes ne te trompent pas. Elles trompent apparemment {{friend}}."],
-        "alloutattack": ["L'All-Out Attack, c'est ton domaine. {{friend}} n'avait aucune chance.", "Tu sens l'ivresse de chaque All-Out Attack. {{friend}} sent la défaite."],
-        "personae":     ["Les archives de la Salle de Velours s'inclinent devant toi. {{friend}} parcourt encore.", "Les Personas sont ta seconde langue. {{friend}} est au chapitre un."],
-        "music":        ["Tes oreilles sont accordées à la Salle de Velours. {{friend}} zappe la BO.", "L'œuvre de Shoji Meguro vit à travers toi. {{friend}} joue en sourdine."]
-      },
-      "mode_lose": {
-        "classic":      ["{{friend}} connaît ces personnages par cœur. Peut-être rejouer les jeux ?", "Mode Classique : {{friend}} 1 — Toi 0. Le Compendium pleure."],
-        "emoji":        ["{{friend}} lit les emojis comme un Wild Card lit les Arcanes. Toi, tu apprends.", "Les symboles restent flous pour toi. {{friend}} les a déjà résolus."],
-        "silhouette":   ["Les ombres te trompent. {{friend}} les traverse sans effort.", "{{friend}} repère la silhouette avant que tu aies chargé la page."],
-        "alloutattack": ["{{friend}} domine la scène All-Out Attack. C'est toi qui te fais balayer.", "Tu encaisses l'All-Out Attack de {{friend}}. Ça fait mal."],
-        "personae":     ["L'accès de {{friend}} à la Salle de Velours est Gold. Le tien est Économie.", "{{friend}} nomme les Personas dans son sommeil. Toi tu lis encore."],
-        "music":        ["La musique ? {{friend}} entend des choses que tu ne comprendras jamais.", "Shoji Meguro choisirait {{friend}} plutôt que toi. La musique n'est pas ton fort."]
-      },
-      "rare": [
-        "Même Nyx reconnaîtrait ce bilan. Respect.",
-        "Le pouvoir de l'Arcane Univers coule en {{winner}}. C'était prédestiné.",
-        "Un lien se mesure non pas au temps, mais aux défaites. Méditez-les tous les deux.",
-        "Méfie-toi de celui qui a éveillé tous les Personas — dans cette amitié, c'est {{winner}}.",
-        "Le Wild Card choisit : Croissance ou Stagnation. {{loser}} a mal choisi.",
-        "Igor murmure : 'Ton potentiel est… prometteur.' Il regardait {{winner}}.",
-        "Certains appellent ça de la chance. La Salle de Velours appelle ça le destin. {{winner}} était choisi.",
-        "Tu as affronté ton Ombre. {{loser}} n'a pas encore accepté la sienne.",
-        "Le Midnight Channel ne ment jamais. Il a montré {{winner}} en tête.",
-        "Chie mangerait toute la viande et surpasserait quand même {{loser}}."
-      ]
-    }
+    "radar_title": "Détail par mode"
   }
 }

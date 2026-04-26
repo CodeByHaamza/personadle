@@ -16,16 +16,19 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  showCommunityStats,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { checkChallengeCompletion } from "../js/challenge-result.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const modeName = "Shadow";
+const modeName = "silhouette";
 const todayKey = `statsLogged_${modeName}_${new Date().toISOString().split("T")[0]}`;
 let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
 let sessionStartTime = Date.now();
@@ -94,15 +97,16 @@ function applyZoom(zoomFactor) {
  * Picks a random character (avoiding the last 5) and loads their silhouette.
  * Uses a token to cancel in-flight loads if pickCharacter() is called again.
  */
-function pickCharacter() {
+function pickCharacter(random = false) {
   filteredCharacters = getFilteredCharacters();
   if (filteredCharacters.length === 0) {
     console.error("❌ No characters available after filtering.");
     return;
   }
 
-  // Seeded daily target from full pool — same character for all players today
-  target = getDailyTarget(originalCharacters, 'Silhouette');
+  target = random
+    ? filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)]
+    : getDailyTarget(originalCharacters, 'Silhouette');
 
   currentZoom = 1.8;
 
@@ -304,12 +308,23 @@ function showVictory(force = false) {
       }
     }
 
+    // 🎭 SHAPESHIFTER — track character per mode
+    if (target.nom) {
+      const cmap = JSON.parse(localStorage.getItem("characterModeMap") || "{}");
+      if (!cmap[target.nom]) cmap[target.nom] = [];
+      if (!cmap[target.nom].includes("silhouette")) cmap[target.nom].push("silhouette");
+      localStorage.setItem("characterModeMap", JSON.stringify(cmap));
+    }
+
+    trackUniqueDay();
     showConfettiExplosion();
     showChallengeButton('silhouette', attempts);
     let winCount = parseInt(localStorage.getItem("silhouetteWins") || "0");
     localStorage.setItem("silhouetteWins", winCount + 1);
   }
 
+  checkChallengeCompletion('silhouette', attempts, !force);
+  showCommunityStats(modeName, target.nom);
   revealNextLink({
     prevHref: "../allOutAttackMode/allOutAttack.html",
     nextHref: "../personaeMode/personae.html",
@@ -405,7 +420,7 @@ function giveUp() {
  * Resets all game state and picks a new character.
  * Called by the Replay button and the daily reset.
  */
-function resetGame() {
+function resetGame(random = false) {
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) nav.style.display = "none";
 
@@ -428,7 +443,7 @@ function resetGame() {
   // Reset _guessed flags so all characters are available again
   originalCharacters.forEach((c) => { c._guessed = false; });
 
-  pickCharacter();
+  pickCharacter(random);
 }
 
 
@@ -477,7 +492,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(todayKey);
     statsAlreadyLogged = false;
     sessionStartTime = Date.now();
-    resetGame();
+    resetGame(true);
   });
 
   // Bind autocomplete to the sorted persona name list

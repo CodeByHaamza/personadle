@@ -46,7 +46,8 @@
   <link rel="stylesheet" href="../css/settings-modal.css">
   <link rel="stylesheet" href="../css/social-link.css">
   <link rel="stylesheet" href="../css/stats-compare.css">
-  <link rel="stylesheet" href="./profile-page.css?v=1">
+  <link rel="stylesheet" href="../css/wallpaper-notification.css">
+  <link rel="stylesheet" href="./profile-page.css?v=2">
   <link rel="stylesheet" href="./badges/badges.css?v=3">
 
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif">
@@ -362,6 +363,25 @@
           </button>
           <p id="migrationStatus" class="migration-status"></p>
         </div>
+      </div>
+
+      <!-- Card : Wallpapers débloquables -->
+      <div class="profile-card animate-right" style="animation-delay: 0.36s" id="unlockableWallpapersCard">
+        <h3 class="card-title">
+          <span class="card-accent">◆</span>
+          <span>🖼️ Unlockable Wallpapers</span>
+        </h3>
+        <div id="unlockableWallpaperGrid"></div>
+      </div>
+
+      <!-- Card : Calling Cards (Titres visuels) -->
+      <div class="profile-card animate-right" style="animation-delay: 0.38s" id="titlesCard">
+        <h3 class="card-title">
+          <span class="card-accent">◆</span>
+          <span>🎴 Calling Cards</span>
+        </h3>
+        <div id="equippedTitleBanner" style="display:none; margin-bottom:12px;"></div>
+        <div id="titlesGrid" class="titles-grid"></div>
       </div>
 
       <!-- Card : Zone dangereuse -->

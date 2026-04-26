@@ -16,10 +16,12 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  showCommunityStats,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { checkChallengeCompletion } from "../js/challenge-result.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CDN / IMAGE LOADING CONFIGURATION
@@ -234,10 +236,13 @@ function getFilteredPersonas() {
  * character today regardless of their opus filter settings.
  * @returns {string|null} Character name or null if pool is empty
  */
-function getBetterRandomCharacter() {
+function getBetterRandomCharacter(random = false) {
   if (!originalPersonas.length) {
-    alert((window.i18n || { t: (k) => k }).t('modes.allOutAttack.no_characters'));
+    alert((window.i18n || { t: (k) => k }).t('modes.alloutattack.no_characters'));
     return null;
+  }
+  if (random && personas.length) {
+    return personas[Math.floor(Math.random() * personas.length)];
   }
   return getDailyTarget(originalPersonas, 'AllOutAttack');
 }
@@ -376,6 +381,8 @@ function handleGuess() {
       nextHref: "../silhouetteMode/silhouette.html",
     });
     showChallengeButton('alloutattack', attempts);
+    checkChallengeCompletion('alloutattack', attempts, true);
+    showCommunityStats('alloutattack', target);
     gameOver = true;
     localStorage.setItem("aoaGameOver", "true");
 
@@ -387,6 +394,15 @@ function handleGuess() {
         attempts, timeMs: timeSpent * 1000,
       }));
       localStorage.setItem(todayKey, "1");
+
+      // aoa_vision : victoire au 1er essai
+      if (attempts === 1) {
+        const _pa = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+        if (!_pa.hasWonAOAFirstTry) {
+          _pa.hasWonAOAFirstTry = true;
+          localStorage.setItem('personaUserProfile', JSON.stringify(_pa));
+        }
+      }
     }
 
     localStorage.setItem("aoaTarget", target);
@@ -428,6 +444,8 @@ function giveUp() {
     });
   }
 
+  checkChallengeCompletion('alloutattack', attempts, false);
+  showCommunityStats('alloutattack', target);
   localStorage.setItem("aoaGameOver", "true");
   localStorage.setItem("aoaTarget", target);
   localStorage.setItem("aoaAttempts", attempts);
@@ -437,7 +455,7 @@ function giveUp() {
  * Resets the game state and loads a new character GIF.
  * Called by the Replay button, daily reset, and filter changes.
  */
-function resetGame() {
+function resetGame(random = false) {
   sessionStartTime = Date.now();
   localStorage.removeItem(todayKey);
 
@@ -450,7 +468,7 @@ function resetGame() {
   document.getElementById("victoryBox").style.display = "none";
 
   personas = getFilteredPersonas();
-  const newTarget = getBetterRandomCharacter();
+  const newTarget = getBetterRandomCharacter(random);
   if (!newTarget) return;
   target = newTarget;
 
@@ -561,6 +579,29 @@ function checkSpecialBadges(characterName) {
   check("foundRinCNY",      n.includes("rin")     && n.includes("chinese"));
   check("foundWonderVelvet",n.includes("wonder")  && n.includes("velvet"));
   check("foundTwins",       n.includes("caroline") || n.includes("justine"));
+
+  // ── Nouveaux flags v2.1 ───────────────────────────────────────────────
+  // Twin Fist AOA
+  check("foundMakotoNijimaAOA", n.includes("makoto nijima") || n.includes("queen"));
+  check("foundAkihikoAOA",      n.includes("akihiko sanada"));
+
+  // Twin Spear AOA
+  check("foundKotoneAOA", n.includes("kotone") || n.includes("female protagonist"));
+  check("foundKenAOA",    n.includes("ken amada"));
+
+  // For Real AOA (Ryuji)
+  check("foundRyujiAOA",  n.includes("ryuji sakamoto") || (n.includes("skull") && !n.includes("caroline")));
+
+  // aoa_vision : victoire au 1er essai
+  // (attempts est une variable locale du contexte d'appel, pas disponible ici — géré via profile.hasWonAOAFirstTry dans checkGuess)
+
+  // characterModeMap
+  if (!profile.characterModeMap) profile.characterModeMap = {};
+  if (!profile.characterModeMap[characterName]) profile.characterModeMap[characterName] = [];
+  if (!profile.characterModeMap[characterName].includes('alloutattack')) {
+    profile.characterModeMap[characterName].push('alloutattack');
+    shouldSave = true;
+  }
 
   if (shouldSave) {
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));
@@ -707,7 +748,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("aoaTarget");
     localStorage.removeItem("aoaAttempts");
     localStorage.removeItem("aoaGameOver");
-    resetGame();
+    resetGame(true);
   });
 
   // ── Daily reset ──

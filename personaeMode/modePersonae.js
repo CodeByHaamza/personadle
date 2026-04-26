@@ -33,10 +33,12 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  showCommunityStats,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { checkChallengeCompletion } from "../js/challenge-result.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -87,11 +89,12 @@ function getFilteredCharacters() {
  * Uses seeded RNG from the full unfiltered pool so all players get the same
  * persona today regardless of their opus filter settings.
  */
-function pickCharacter() {
+function pickCharacter(random = false) {
   filteredCharacters = getFilteredCharacters();
 
-  // Seeded daily target from full pool
-  target = getDailyTarget(originalCharacters, 'Personae');
+  target = random && filteredCharacters.length
+    ? filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)]
+    : getDailyTarget(originalCharacters, 'Personae');
 
   personaImg.src = `./database/img/${target.image}.webp`;
   personaImg.alt = target.persona;
@@ -261,6 +264,41 @@ function showVictory(force = false, name = null) {
       }
     }
 
+    // ── Nouveaux flags badges v2.1 ────────────────────────────────────────
+    // Strega personas
+    if (['Hypnos'].includes(target.persona) && !profile.foundHypnos)     { profile.foundHypnos = true; profileUpdated = true; }
+    if (['Moros'].includes(target.persona) && !profile.foundMoros)        { profile.foundMoros  = true; profileUpdated = true; }
+    if (['Medea'].includes(target.persona) && !profile.foundMedea)        { profile.foundMedea  = true; profileUpdated = true; }
+
+    // Twin Fist (Makoto Nijima = Johanna/Anat, Akihiko = Polydeuces/Caesar)
+    if (['Johanna','Anat'].includes(target.persona) && !profile.foundMakotoNijima)
+      { profile.foundMakotoNijima = true; profileUpdated = true; }
+    if (['Polydeuces','Caesar'].includes(target.persona) && !profile.foundAkihiko)
+      { profile.foundAkihiko = true; profileUpdated = true; }
+
+    // Twin Spear (Kotone = Orpheus F / Thanatos F, Ken = Kala-Nemi)
+    if (['Orpheus F','Thanatos F','Orpheus Telos F'].includes(target.persona) && !profile.foundKotone)
+      { profile.foundKotone = true; profileUpdated = true; }
+    if (['Kala-Nemi'].includes(target.persona) && !profile.foundKen)
+      { profile.foundKen = true; profileUpdated = true; }
+
+    // Tradition & Modernité
+    if (['Sukuna-Hikona','Yamato-Takeru'].includes(target.persona) && !profile.foundNaotoPersona)
+      { profile.foundNaotoPersona = true; profileUpdated = true; }
+    if (['Necronomicon','Prometheus'].includes(target.persona) && !profile.foundFutabaPersona)
+      { profile.foundFutabaPersona = true; profileUpdated = true; }
+
+    // For Real (Ryuji)
+    if (['Captain Kidd','Seiten Taisei'].includes(target.persona) && !profile.foundRyujiPersona)
+      { profile.foundRyujiPersona = true; profileUpdated = true; }
+
+    // characterModeMap
+    if (!profile.characterModeMap) profile.characterModeMap = {};
+    const _charName = Array.isArray(target.user) ? target.user[0] : target.user;
+    if (!profile.characterModeMap[_charName]) profile.characterModeMap[_charName] = [];
+    if (!profile.characterModeMap[_charName].includes('personae'))
+      { profile.characterModeMap[_charName].push('personae'); profileUpdated = true; }
+
     if (profileUpdated) {
       localStorage.setItem("personaUserProfile", JSON.stringify(profile));
     }
@@ -286,6 +324,8 @@ function showVictory(force = false, name = null) {
     nextHref: "../musicsMode/musics.html",
   });
   if (!force) showChallengeButton('personae', attempts);
+  checkChallengeCompletion('personae', attempts, !force);
+  showCommunityStats('personae', Array.isArray(target.user) ? target.user[0] : target.user);
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   if (!localStorage.getItem(statsKey)) {
@@ -390,7 +430,7 @@ function giveUp() {
  * Resets all game state and picks a new character.
  * Called by Replay button, daily reset, and filter changes.
  */
-function resetGame() {
+function resetGame(random = false) {
   sessionStartTime = Date.now();
 
   localStorage.removeItem("personaeTarget");
@@ -418,20 +458,7 @@ function resetGame() {
 
   originalCharacters.forEach((c) => { c._guessed = false; });
 
-  // Restore stored target if available (avoids picking a new one on soft reset)
-  const stored = localStorage.getItem("personaeTarget");
-  if (stored) {
-    try {
-      target = JSON.parse(stored);
-      personaImg.src = `./database/img/${target.image}.webp`;
-      personaImg.alt = target.persona;
-      return;
-    } catch (e) {
-      console.warn("⚠️ Error reloading stored target:", e);
-    }
-  }
-
-  pickCharacter();
+  pickCharacter(random);
 }
 
 
@@ -482,7 +509,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   activeFilters = _filterApi.getActive();
 
   guessBtn.addEventListener("click", handleGuess);
-  resetBtn.addEventListener("click", resetGame);
+  resetBtn.addEventListener("click", () => resetGame(true));
   giveUpBtn.addEventListener("click", giveUp);
 
   initializeAutocomplete(textbar, personas.sort((a, b) => a.localeCompare(b)));

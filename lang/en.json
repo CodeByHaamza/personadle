@@ -27,6 +27,7 @@
     "back_my_profile": "My profile",
     "back": "Back",
     "dismiss": "Dismiss",
+    "error": "An error occurred.",
     "close": "Close"
   },
   "modes": {
@@ -450,6 +451,151 @@
       "name": "Truth & Duality",
       "condition": "Find both Crow and Black Mask in All-Out Attack mode",
       "description": "Two sides of the same coin. The pleasant boy and the black mask... Both faces of justice revealed."
+    },
+    "one_shot": {
+      "name": "Critical Strike",
+      "condition": "Guess correctly on the very first try",
+      "description": "Why waste time with strategy when you can just smash through? Awarded for a flawless first guess, striking the truth with the raw, unstoppable force of a one-hit KO."
+    },
+    "aoa_vision": {
+      "name": "Piercing the Fog",
+      "condition": "Guess the All-Out Attack on the very first try",
+      "description": "The truth was shrouded in heavy fog, yet you didn't even need glasses to see the big picture. Awarded for instantly recognizing the All-Out Attack through the blinding static."
+    },
+    "emoji_decoder": {
+      "name": "Emoji Decoder",
+      "condition": "Win 10 games in Emoji mode",
+      "description": "The Metaverse speaks a wordless language, a cacophony of cryptic symbols. With royal finesse, you deciphered the code of the digital soul."
+    },
+    "navigator": {
+      "name": "Eye of the Navigator",
+      "condition": "Use the hint 50 times in Classic mode",
+      "description": "Fifty anomalies scanned and deciphered. No truth can hide from your radar."
+    },
+    "velvet_regular": {
+      "name": "Velvet Regular",
+      "condition": "Play on 50 unique days",
+      "description": "Fifty days between mind and matter. The master of this room now recognizes your footsteps."
+    },
+    "strega": {
+      "name": "Apostles of the Fall",
+      "condition": "Find Hypnos (Takaya), Moros (Jin) and Medea (Chidori) in Personae mode",
+      "description": "Why fight the inevitable? The world is a stage for the final act. We are simply the directors of your beautiful destruction."
+    },
+    "twin_fist": {
+      "name": "Twin Fist",
+      "condition": "Find Makoto Nijima's and Akihiko's personas in Personae mode AND their All-Out Attacks",
+      "description": "Nuclear force and crackling lightning! You've identified the personas of the two fiercest brawlers who lead with their knuckles."
+    },
+    "twin_spear": {
+      "name": "Twin Spear",
+      "condition": "Find Kotone's and Ken's personas in Personae mode AND their All-Out Attacks",
+      "description": "One seeks vengeance through light, the other leads with a dancing blade. You've found the spear-wielding duo of the Moonlight Bridge."
+    },
+    "tradition_modernite": {
+      "name": "Chronological Convergence",
+      "condition": "Find Naoto's & Futaba's personas + 'Secret Base' & 'When Mother Was There' in Music mode",
+      "description": "Two minds, a century apart, now perfectly synchronized in the infinite search for truth. Tradition and innovation are one."
+    },
+    "shapeshifter": {
+      "name": "The Formless Soul",
+      "condition": "Guess the same character in 3 different modes (cumulative)",
+      "description": "A mask may change, and the stage may shift, but the true self remains constant. Awarded to those who can pierce the cognitive distortions and recognize a single soul across three different realities."
+    },
+    "ideal_reality": {
+      "name": "Gentle Illusion",
+      "condition": "Give up when the target is 'Our Light' in Music mode",
+      "description": "Why struggle to reach the light when happiness can be given to you? You laid down your rebellious soul to embrace a painless, perfect dream."
+    },
+    "for_real": {
+      "name": "For Real",
+      "condition": "Find Ryuji's All-Out Attack in AOA mode and his persona in Personae mode",
+      "description": "YEAH! That's what I'm talking about! You found the most passionate Phantom Thief — both his Persona and his signature All-Out Attack!"
+    },
+    "night_owl": {
+      "name": "Phantom of the Night",
+      "condition": "Play between midnight and 5 AM (Paris time)",
+      "description": "True thieves operate under the cover of darkness. The cognitive world is yours."
+    },
+    "nyx_hour": {
+      "name": "Nyx Hour",
+      "condition": "Play between midnight and 12:30 AM (Paris time)",
+      "description": "The clock strikes twelve, but tomorrow never comes. You have witnessed the arrival of the end."
+    },
+    "stylist": {
+      "name": "Breathtaking Aesthetics",
+      "condition": "Customize your profile: avatar + UI color + 1 badge selected + profile music",
+      "description": "Such passion! Such composition! You refused the mediocrity of a default profile to forge a visual masterpiece that moves the very soul."
+    },
+    "pyro_spark": {
+      "name": "The Ignition",
+      "condition": "Reach a 7-day streak",
+      "description": "A tiny flicker in the dark. For seven days, you've kept the flame alive. The first step towards a scorching resolve."
+    },
+    "raphael": {
+      "name": "The Divine Blaze",
+      "condition": "Reach a 30-day streak",
+      "description": "Thirty days. The flicker has ascended into a roaring inferno. Your resolve now burns with a heat that even the abyss cannot cool."
+    },
+    "surt": {
+      "name": "Ragnarök's Dawn",
+      "condition": "Reach a 90-day streak",
+      "description": "Ninety days of absolute, unrelenting persistence. You have summoned the world-ending fire of Surt. The old world of hesitation has been incinerated."
+    },
+    "lucifer": {
+      "name": "Crest of the Morning Star",
+      "condition": "Reach a 120-day streak",
+      "description": "One hundred and twenty sunrises. Beyond the fires of destruction lies the blinding clarity of the Morning Star. You have seized ultimate dominion over time itself."
+    },
+    "helel": {
+      "name": "The Eternal Zenith",
+      "condition": "Reach a 365-day streak",
+      "description": "Beyond rebellion, beyond ruin, lies the pure grace of the first star. You have walked the path for a year, reaching a state of perfection that even the gods envy."
+    },
+    "reborn_phoenix": {
+      "name": "Phoenix Reborn",
+      "condition": "Restore your streak after losing it (grace period)",
+      "description": "A momentary lapse in the flow of time! You refused to let the darkness claim your legacy. From the scattered ashes of yesterday, you soar toward a new dawn."
+    },
+    "best_bro": {
+      "name": "Best Bro",
+      "condition": "Have 2 or more friends",
+      "description": "The bonds of friendship transcend time and fate. You've found your allies in the velvet web of connections."
+    },
+    "data_mining": {
+      "name": "Data Mining",
+      "condition": "Visit 5 different user profiles",
+      "description": "Analyzing the competition or seeking new bonds? You've peered into the souls of five different users."
+    },
+    "leblanc_meeting": {
+      "name": "Leblanc Meeting",
+      "condition": "3 or more friends logged in the same day as you",
+      "description": "Synchronized souls! You and your closest allies have converged. Even the busiest Phantom Thief needs a coffee break."
+    },
+    "golden_week": {
+      "name": "Golden Week",
+      "condition": "Log in between April 29 and May 5",
+      "description": "Even truth-seekers need a break. You spent the golden holidays forging bonds under the evening sun."
+    },
+    "tanabata": {
+      "name": "Tanabata",
+      "condition": "Log in on July 7th",
+      "description": "The stars align for a single night. Your wish has been recorded in the celestial archives of the Sea of Souls."
+    },
+    "promised_day": {
+      "name": "The Promised Day",
+      "condition": "Play on December 31st AND January 1st",
+      "description": "The clock strikes twelve on the dying year. You faced the threshold of the new dawn without blinking."
+    },
+    "hifumi_archives": {
+      "name": "The Grandmaster's Tome",
+      "condition": "???",
+      "description": "A true tactician studies the board before striking. You've uncovered the hidden reports."
+    },
+    "report": {
+      "name": "The Priestess's Audit",
+      "condition": "???",
+      "description": "Channeling the meticulous wisdom of the High Priestess, you've documented the anomalies. Awarded to those who bear the heavy burden of paperwork to keep the system's chaos in check."
     }
   },
   "social_link": {
@@ -529,7 +675,12 @@
     "error": "Could not load leaderboard.",
     "filters_title": "Rankings",
     "filter_note": "Opus filters are not factored in.",
-    "filter_all_modes": "All modes"
+    "filter_all_modes": "All modes",
+    "filter_scope": "Scope",
+    "scope_global": "Global",
+    "scope_friends": "Friends",
+    "login_for_friends": "Log in to see your friends leaderboard.",
+    "no_friends": "None of your friends appear in this ranking yet."
   },
   "friends": {
     "title": "Friends",
@@ -686,12 +837,12 @@
     "notif_attempts": "attempt(s)"
   },
   "challenge_result": {
-    "title_win": "BRAVO !",
-    "title_fail": "DOMMAGE...",
+    "title_win": "WELL DONE!",
+    "title_fail": "TOO BAD...",
     "modal_win": "Challenge Beaten!",
     "modal_fail": "Challenge Failed",
-    "sender_title_win": "BRAVO !",
-    "sender_title_fail": "DOMMAGE...",
+    "sender_title_win": "WELL DONE!",
+    "sender_title_fail": "NOT BEATEN...",
     "sender_modal_win": "Challenge Completed!",
     "sender_modal_fail": "Not Beaten...",
     "my_score": "Your attempts",
@@ -720,43 +871,6 @@
     "perfect": "Perfect Wins",
     "games": "Games",
     "close": "Close",
-    "radar_title": "Mode Breakdown",
-    "conclusion": {
-      "overall_win":  ["Your stats speak for themselves. {{friend}} would need a second awakening to match your level.", "The Wild Card has spoken — {{friend}} was never a match.", "Even Igor would be impressed. Your record towers over {{friend}}'s."],
-      "overall_lose": ["{{friend}} carries this friendship. Time to flip the script.", "If this were a Velvet Room assessment, {{friend}} just unlocked a Rank 10 Persona… and you didn't.", "Morgana would be disappointed. But hey — there's always tomorrow."],
-      "equal":        ["Two Wild Cards. Two destinies. The gap is razor-thin — rivalry confirmed.", "You and {{friend}} are statistically identical. The universe is afraid.", "This is less a comparison and more a mirror. Uncanny."],
-      "streak_win":   ["Your streak rivals Joker's dedication to the Phantom Thieves.", "{{friend}} hasn't matched your consistency. Not even close."],
-      "streak_lose":  ["{{friend}}'s streak makes yours look like a tutorial run.", "Consistency is a virtue. {{friend}} has mastered it. You… are learning."],
-      "perfect_win":  ["Perfect wins? You hunt them. {{friend}} is still figuring out how.", "No mistakes, no compromises. Your record speaks volumes."],
-      "perfect_lose": ["{{friend}} doesn't guess — they know. Every single time.", "Perfect wins are earned, not given. {{friend}} has earned many."],
-      "mode_win": {
-        "classic":      ["Classic mode is where legends are born — and you are one.", "Your Compendium knowledge is vast. {{friend}}'s needs work."],
-        "emoji":        ["Emoji mode? You read them like sheet music. {{friend}} is still decoding.", "The symbols speak to you. {{friend}} is still learning the alphabet."],
-        "silhouette":   ["You see the shadow and know the soul. {{friend}} is still squinting.", "Shadows don't fool you. They apparently fool {{friend}}."],
-        "alloutattack": ["All-Out Attack is your domain. {{friend}} never stood a chance.", "You feel the rush of every All-Out Attack. {{friend}} feels the defeat."],
-        "personae":     ["The Velvet Room archives bend to your will. {{friend}} is still browsing.", "Personas are your second language. {{friend}} is still on chapter one."],
-        "music":        ["Your ears are tuned to the Velvet Room. {{friend}} clearly skips the soundtrack.", "Shoji Meguro's legacy lives through you. {{friend}} plays on mute."]
-      },
-      "mode_lose": {
-        "classic":      ["{{friend}} knows these characters inside out. Maybe replay the games?", "Classic mode: {{friend}} 1 — You 0. The Compendium weeps."],
-        "emoji":        ["{{friend}} reads emojis like a Wild Card reads Arcanas. You're still learning.", "The symbols are unclear to you. {{friend}} has already solved them."],
-        "silhouette":   ["Shadows deceive you. {{friend}} sees right through them.", "{{friend}} spots the silhouette before you even load the page."],
-        "alloutattack": ["{{friend}} dominates the All-Out Attack stage. You're the one getting swept.", "You're on the receiving end of {{friend}}'s All-Out Attack. Ouch."],
-        "personae":     ["{{friend}}'s Velvet Room access is clearly Gold. Yours is Economy.", "{{friend}} names Personas in their sleep. You're still reading the Compendium."],
-        "music":        ["Music? {{friend}} hears things you'll never understand.", "Shoji Meguro would choose {{friend}} over you. Music is not your forte."]
-      },
-      "rare": [
-        "Even Nyx would acknowledge this record. Respect.",
-        "The power of the Universe Arcana flows through {{winner}}. It was predetermined.",
-        "A bond is measured not in time, but in losses. Study them both.",
-        "Beware the one who has awakened to all Personas — in this friendship, that's {{winner}}.",
-        "The Wild Card chooses: Growth or Stagnation. {{loser}} has chosen poorly.",
-        "Igor whispers: 'Your potential is… promising.' He was looking at {{winner}}.",
-        "Some call it luck. The Velvet Room calls it destiny. {{winner}} was chosen.",
-        "You have faced your Shadow. {{loser}} has yet to accept theirs.",
-        "The Midnight Channel never lies. It showed {{winner}} on top.",
-        "Chie would eat all the meat and still outperform {{loser}}."
-      ]
-    }
+    "radar_title": "Mode Breakdown"
   }
 }

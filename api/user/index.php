@@ -72,7 +72,7 @@ if ($method === 'GET') {
     }
 
     // Récupérer l'utilisateur
-    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, has_migrated FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user) jsonError('User not found', 404);
@@ -92,6 +92,16 @@ if ($method === 'GET') {
     $stmt->execute([$userId]);
     $badges = $stmt->fetchAll();
 
+    // Récupérer les wallpapers débloqués
+    $stmt = $pdo->prepare('SELECT wallpaper_id FROM user_wallpapers WHERE user_id = ?');
+    $stmt->execute([$userId]);
+    $unlockedWallpapers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    // Récupérer les titres débloqués
+    $stmt = $pdo->prepare('SELECT t.slug, ut.unlocked_at FROM user_titles ut JOIN titles t ON t.id = ut.title_id WHERE ut.user_id = ? ORDER BY ut.unlocked_at');
+    $stmt->execute([$userId]);
+    $unlockedTitles = $stmt->fetchAll();
+
     jsonSuccess([
         'user'    => formatUser($user),
         'profile' => [
@@ -108,6 +118,11 @@ if ($method === 'GET') {
             'badge_id'    => $b['badge_id'],
             'unlocked_at' => $b['unlocked_at'],
         ], $badges),
+        'unlocked_wallpapers' => $unlockedWallpapers,
+        'unlocked_titles'     => array_map(fn($t) => [
+            'slug'        => $t['slug'],
+            'unlocked_at' => $t['unlocked_at'],
+        ], $unlockedTitles),
     ]);
 }
 

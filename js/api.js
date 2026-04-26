@@ -221,13 +221,22 @@ export const api = {
       const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
       if (!pending.length) return;
 
+      // Normalize legacy mode names stored before the server enum was finalised
+      const _modeAlias = { shadow: 'silhouette', classic: 'classic' };
+      const normalize = s => {
+        const m = (s.mode ?? '').toLowerCase();
+        return { ...s, mode: _modeAlias[m] ?? m };
+      };
+
       const remaining = [];
-      for (const session of pending) {
+      for (const raw of pending) {
+        const session = normalize(raw);
         try {
           await api.stats.postSession(session);
         } catch (e) {
           if (e?.status === 409) continue; // already recorded server-side, discard
-          remaining.push(session); // network/server error — keep for later
+          if (e?.status === 400) continue; // permanently invalid data — discard silently
+          remaining.push(raw); // network/server error — keep for later
           console.warn('⚠️ Session sync failed:', e.message);
         }
       }
@@ -293,8 +302,8 @@ export const api = {
      *   period : 'day' | 'week' | 'month' | 'ever'
      *   metric : 'wins' | 'winrate' | 'streak' | 'perfect' | 'games'
      */
-    get: ({ mode = 'all', period = 'ever', metric = 'wins', limit = 50, offset = 0 } = {}) =>
-      get(`/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}`),
+    get: ({ mode = 'all', period = 'ever', metric = 'wins', limit = 50, offset = 0, friends_only = 0 } = {}) =>
+      get(`/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}&friends_only=${friends_only}`),
   },
 
   // ── Amis ──────────────────────────────────────────────
@@ -419,6 +428,30 @@ export const api = {
      * @param {string} code
      */
     redeem: (code) => post('/badges/redeem', { code }),
+
+    /**
+     * Persiste le déblocage d'un badge côté serveur (fire-and-forget).
+     * @param {string} badgeId
+     */
+    unlock: (badgeId) => post('/badges/unlock', { badge_id: badgeId }),
+  },
+
+  // ── Wallpapers ────────────────────────────────────────
+  wallpapers: {
+    /**
+     * Persiste le déblocage d'un wallpaper côté serveur (fire-and-forget).
+     * @param {string} wallpaperId
+     */
+    unlock: (wallpaperId) => post('/wallpapers/unlock', { wallpaper_id: wallpaperId }),
+  },
+
+  // ── Titles ────────────────────────────────────────────
+  titles: {
+    /**
+     * Persiste le déblocage d'un titre côté serveur (fire-and-forget).
+     * @param {string} titleSlug
+     */
+    unlock: (titleSlug) => post('/titles/unlock', { title_slug: titleSlug }),
   },
 };
 

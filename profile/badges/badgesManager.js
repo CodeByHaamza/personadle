@@ -103,26 +103,123 @@ function getCategoryLabel(category) {
  */
 export function initBadgesSystem(profile, saveProfile) {
   console.log("🎖️ Initializing badges system...");
-  
+
   initializeProfileBadgesData(profile);
-  
+
   // 🎊 VÉRIFIER LES ÉVÉNEMENTS DU JOUR EN PREMIER
   checkEventBadges(profile, saveProfile);
-  
+
   // Vérifier et débloquer les badges
   checkAndUnlockBadges(profile, saveProfile);
-  
+
   // 🔔 VÉRIFIER LES NOTIFICATIONS EN DERNIER (après que les badges soient ajoutés)
   checkPendingBadgeNotifications(profile, saveProfile);
-  
+
+  // Sync backend (fire-and-forget)
+  syncBadgesWithBackend(profile, saveProfile);
+  checkSocialBadges(profile, saveProfile);
+
   // Rendre l'interface
   renderBadgesPreview(profile);
   renderBadgesModal(profile, saveProfile);
-  
+
   // Configurer le système de codes
   setupEventCodeRedeem(profile, saveProfile);
-  
+
   console.log("✅ Badges system initialized!");
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// 🔁 SYNC BACKEND
+// ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * Réconcilie les badges local ↔ backend.
+ * - Badges backend absents du local → ajoutés + notification
+ * - Badges local absents du backend → push via api.badges.unlock()
+ */
+async function syncBadgesWithBackend(profile, saveProfile) {
+  const user = window._currentUser;
+  const api  = window._personadleApi;
+  if (!user || !api) return;
+
+  try {
+    const res = await fetch(
+      `${window.location.pathname.startsWith('/personadle/') ? '/personadle' : ''}/api/user/${user.id}`,
+      { credentials: 'include' }
+    ).then(r => r.json());
+
+    const backendIds = (res?.data?.badges || []).map(b => b.badge_id);
+    const localIds   = profile.badges || [];
+
+    // Backend → local (badges débloqués sur un autre appareil)
+    const toAddLocally = backendIds.filter(id => !localIds.includes(id));
+    if (toAddLocally.length) {
+      profile.badges = [...localIds, ...toAddLocally];
+      saveProfile();
+      toAddLocally.forEach(id => {
+        const badge = getBadgeById(id);
+        if (badge) queueNotification(badge);
+      });
+    }
+
+    // Local → backend
+    const toSyncUp = localIds.filter(id => !backendIds.includes(id));
+    for (const id of toSyncUp) {
+      await api.badges.unlock(id).catch(() => {});
+    }
+  } catch (e) {
+    console.warn('⚠️ Badge sync failed (offline?):', e.message);
+  }
+}
+
+/**
+ * Vérifie les badges sociaux nécessitant des données backend.
+ * Appelée depuis initBadgesSystem si l'utilisateur est connecté.
+ */
+export async function checkSocialBadges(profile, saveProfile) {
+  const user = window._currentUser;
+  if (!user) return;
+
+  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+
+  try {
+    const friendsRes = await fetch(`${_prefix}/api/friends`, { credentials: 'include' })
+      .then(r => r.json());
+    const friends    = friendsRes?.data?.friends || [];
+    const friendCount = friends.length;
+
+    // Best Bro : 2+ amis
+    if (friendCount >= 2 && !profile.hasTwoFriends) {
+      profile.hasTwoFriends = true;
+      saveProfile();
+    }
+
+    // Leblanc Meeting : 3+ amis vus aujourd'hui
+    const today = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris' })
+      .format(new Date()).split('/').reverse().join('-');
+    const onlineToday = friends.filter(f => f.last_seen_at?.startsWith(today));
+    if (onlineToday.length >= 3 && !profile.leblanc3FriendsDay) {
+      profile.leblanc3FriendsDay = today;
+      saveProfile();
+    }
+  } catch (e) {
+    console.warn('⚠️ Social badge check failed:', e.message);
+  }
+}
+
+/**
+ * Incrémente uniqueDaysPlayed si aujourd'hui n'a pas encore été compté.
+ */
+export function trackUniqueDay(profile, saveProfile) {
+  const today = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris' })
+    .format(new Date()).split('/').reverse().join('-');
+  if (!profile.uniqueDaysSet) profile.uniqueDaysSet = [];
+  if (!profile.uniqueDaysSet.includes(today)) {
+    profile.uniqueDaysSet.push(today);
+    profile.uniqueDaysPlayed = profile.uniqueDaysSet.length;
+    saveProfile();
+  }
 }
 
 /**
@@ -170,6 +267,64 @@ function initializeProfileBadgesData(profile) {
     profile.eventBadges = {};
     console.log("📦 Created profile.eventBadges object");
   }
+
+  // ── Nouveaux flags v2.1 ──────────────────────────────────────────────────
+  if (profile.classicHintsUsed === undefined)    profile.classicHintsUsed    = 0;
+  if (profile.uniqueDaysPlayed === undefined)     profile.uniqueDaysPlayed    = 0;
+  if (!profile.uniqueDaysSet)                     profile.uniqueDaysSet       = [];
+  if (!profile.characterModeMap)                  profile.characterModeMap    = {};
+
+  // Strega
+  if (profile.foundHypnos === undefined)          profile.foundHypnos         = false;
+  if (profile.foundMoros === undefined)           profile.foundMoros          = false;
+  if (profile.foundMedea === undefined)           profile.foundMedea          = false;
+
+  // Twin Fist
+  if (profile.foundMakotoNijima === undefined)    profile.foundMakotoNijima   = false;
+  if (profile.foundMakotoNijimaAOA === undefined) profile.foundMakotoNijimaAOA = false;
+  if (profile.foundAkihiko === undefined)         profile.foundAkihiko        = false;
+  if (profile.foundAkihikoAOA === undefined)      profile.foundAkihikoAOA     = false;
+
+  // Twin Spear
+  if (profile.foundKotone === undefined)          profile.foundKotone         = false;
+  if (profile.foundKotoneAOA === undefined)       profile.foundKotoneAOA      = false;
+  if (profile.foundKen === undefined)             profile.foundKen            = false;
+  if (profile.foundKenAOA === undefined)          profile.foundKenAOA         = false;
+
+  // Tradition & Modernité
+  if (profile.foundNaotoPersona === undefined)    profile.foundNaotoPersona   = false;
+  if (profile.foundFutabaPersona === undefined)   profile.foundFutabaPersona  = false;
+  if (profile.foundSecretBase === undefined)      profile.foundSecretBase     = false;
+  if (profile.foundWhenMotherWasThere === undefined) profile.foundWhenMotherWasThere = false;
+
+  // Music
+  if (profile.gaveUpOnOurLight === undefined)     profile.gaveUpOnOurLight    = false;
+
+  // For Real (Ryuji)
+  if (profile.foundRyujiAOA === undefined)        profile.foundRyujiAOA       = false;
+  if (profile.foundRyujiPersona === undefined)    profile.foundRyujiPersona   = false;
+
+  // Sociaux
+  if (!profile.visitedProfileIds)                 profile.visitedProfileIds   = [];
+  if (profile.leblanc3FriendsDay === undefined)   profile.leblanc3FriendsDay  = null;
+  if (profile.hasTwoFriends === undefined)        profile.hasTwoFriends       = false;
+
+  // Événements
+  if (profile.playedDec31 === undefined)          profile.playedDec31         = false;
+  if (profile.playedJan1 === undefined)           profile.playedJan1          = false;
+
+  // Gameplay
+  if (profile.hasWonFirstTry === undefined)       profile.hasWonFirstTry      = false;
+  if (profile.hasWonAOAFirstTry === undefined)    profile.hasWonAOAFirstTry   = false;
+  if (profile.playedAtNight === undefined)        profile.playedAtNight       = false;
+  if (profile.playedAtNyxHour === undefined)      profile.playedAtNyxHour     = false;
+
+  // Secrets
+  if (profile.hifumiArchivesRead === undefined)   profile.hifumiArchivesRead  = false;
+  if (profile.reportSubmitted === undefined)      profile.reportSubmitted     = false;
+
+  // Streak restore
+  if (profile.streakRestorationUsed === undefined) profile.streakRestorationUsed = false;
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -216,7 +371,8 @@ function checkAndUnlockBadges(profile, saveProfile) {
     newlyUnlocked.forEach((badge, index) => {
       setTimeout(() => {
         showBadgeNotification(badge);
-      }, index * 500); // Décalage de 500ms entre chaque notification
+      }, index * 500);
+      window._personadleApi?.badges?.unlock(badge.id).catch(() => {});
     });
   }
 }
@@ -270,7 +426,8 @@ export function unlockBadge(profile, saveProfile, badgeId) {
   profile.badges.push(badgeId);
   saveProfile();
   showBadgeNotification(badge);
-  
+  window._personadleApi?.badges?.unlock(badgeId).catch(() => {});
+
   return true;
 }
 
@@ -892,15 +1049,47 @@ export function checkEventBadges() {
     console.log("🌸 Event detected: Japanese School Year Start (April 1st)");
     profile.eventBadges.rentree = true;
     hasChanges = true;
-    
-    // Ajouter à la file de notifications
     if (!profile.pendingBadgeNotifications.includes('rentree')) {
       profile.pendingBadgeNotifications.push('rentree');
-      console.log("🔔 Badge 'Spring Awakening' added to notifications queue");
     }
   }
-  
-  
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🌟 GOLDEN WEEK (29 avril – 5 mai)
+  // ═══════════════════════════════════════════════════════════════════════
+  if (!profile.eventBadges.golden_week) {
+    const isGW = (month === 4 && day >= 29) || (month === 5 && day <= 5);
+    if (isGW) {
+      profile.eventBadges.golden_week = true;
+      hasChanges = true;
+      if (!profile.pendingBadgeNotifications.includes('golden_week'))
+        profile.pendingBadgeNotifications.push('golden_week');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🎋 TANABATA (7 juillet)
+  // ═══════════════════════════════════════════════════════════════════════
+  if (!profile.eventBadges.tanabata && month === 7 && day === 7) {
+    profile.eventBadges.tanabata = true;
+    hasChanges = true;
+    if (!profile.pendingBadgeNotifications.includes('tanabata'))
+      profile.pendingBadgeNotifications.push('tanabata');
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🌑 PROMISED DAY (31 déc + 1er jan, les deux requis)
+  // ═══════════════════════════════════════════════════════════════════════
+  if (!profile.eventBadges.promised_day) {
+    if (month === 12 && day === 31) { profile.playedDec31 = true; hasChanges = true; }
+    if (month === 1  && day === 1)  { profile.playedJan1  = true; hasChanges = true; }
+    if (profile.playedDec31 && profile.playedJan1) {
+      profile.eventBadges.promised_day = true;
+      if (!profile.pendingBadgeNotifications.includes('promised_day'))
+        profile.pendingBadgeNotifications.push('promised_day');
+    }
+  }
+
   // Sauvegarder si des changements ont été détectés
   if (hasChanges) {
     localStorage.setItem('personaUserProfile', JSON.stringify(profile));

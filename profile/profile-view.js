@@ -89,8 +89,10 @@ function escapeHtml(str) {
   })[c]);
 }
 
-function t(key) {
-  return window.i18n?.t?.(key) ?? key;
+function t(key, fallback) {
+  // window.i18n.t returns the key string when not found, so check r !== key
+  const r = window.i18n?.t?.(key);
+  return (r != null && r !== key) ? r : (fallback ?? key);
 }
 
 /** Formate "m:ss" depuis des secondes. */
@@ -264,7 +266,7 @@ function buildViewingBanner(pseudo, friendCode, friendshipStatus) {
       friendBtn = `
         <span class="vb-friend-status vb-friend-status--ok">✓ ${t('friends.already_friends') || 'Friends'}</span>
         <button id="vbCompareBtn" class="vb-friend-btn vb-compare-btn" data-fid="">
-          ${t('compare.btn') || '⚖ Compare Stats'}
+          ${t('compare.btn', '⚖ Compare Stats')}
         </button>
       `;
     } else if (friendshipStatus === 'pending_sent') {
@@ -714,8 +716,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (gaugeContainer && window._currentUser && user.id !== window._currentUser.id) {
     gaugeContainer.classList.remove('hidden');
     renderSocialLinkGauge(user.id, gaugeContainer);
-    // XP pour visite de profil (fire-and-forget)
-    gainSocialLinkXp(user.id, 'visit_profile').catch(() => {});
+    // XP pour visite de profil — awarded once per day server-side (409 on repeat)
+    gainSocialLinkXp(user.id, 'visit_profile')
+      .then(res => {
+        if (res?.ranked_up) {
+          window._showSocialLinkRankUp?.(res.new_rank, null);
+        }
+        // Refresh gauge so visit_profile shows as "Done today"
+        if (res?.xp_gained > 0) {
+          setTimeout(() => renderSocialLinkGauge(user.id, gaugeContainer), 800);
+        }
+      })
+      .catch(() => {});
+
+    // 🔍 DATA MINING badge — track unique profiles visited
+    const visitedSet = new Set(JSON.parse(localStorage.getItem("visitedProfileIds") || "[]"));
+    visitedSet.add(String(user.id));
+    localStorage.setItem("visitedProfileIds", JSON.stringify([...visitedSet]));
+    const localProfile = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+    // Keep profile.visitedProfileIds in sync so badgesData.js check() can read it
+    localProfile.visitedProfileIds = [...visitedSet];
+    localStorage.setItem("personaUserProfile", JSON.stringify(localProfile));
+    if (visitedSet.size >= 5) {
+      import('./badges/badgesManager.js').then(m => {
+        const p = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+        m.checkBadges(p, updated => localStorage.setItem("personaUserProfile", JSON.stringify(updated)));
+      }).catch(() => {});
+    }
   }
 });
 

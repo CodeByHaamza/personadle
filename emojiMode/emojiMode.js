@@ -18,10 +18,13 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  showCommunityStats,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { checkChallengeCompletion } from "../js/challenge-result.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -285,6 +288,18 @@ function checkEmojiGuess(name, forceReveal = false) {
       nextHref: "../allOutAttackMode/allOutAttack.html",
     });
     if (!forceReveal) showChallengeButton('emoji', attempts);
+    checkChallengeCompletion('emoji', attempts, !forceReveal);
+    showCommunityStats(modeName, target.nom);
+
+    // 🎭 SHAPESHIFTER — track character per mode
+    if (!forceReveal && target.nom) {
+      const cmap = JSON.parse(localStorage.getItem("characterModeMap") || "{}");
+      if (!cmap[target.nom]) cmap[target.nom] = [];
+      if (!cmap[target.nom].includes("emoji")) cmap[target.nom].push("emoji");
+      localStorage.setItem("characterModeMap", JSON.stringify(cmap));
+    }
+
+    if (!forceReveal) trackUniqueDay();
 
     const todayKey = getTodayStatsKey();
     if (!localStorage.getItem(todayKey)) {
@@ -475,7 +490,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("emojiForceReveal");
     localStorage.removeItem("emojiWin");
     resetGame();
-    location.reload();
   });
 
   // Emoji mode uses msUntilNextParisMidnight directly for a reschedulable reset

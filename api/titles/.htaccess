@@ -1,0 +1,8 @@
+Options -Indexes
+
+RewriteEngine On
+
+# POST /api/titles/unlock
+RewriteRule ^unlock$    index.php   [L,QSA]
+# GET /api/titles
+RewriteRule ^$          index.php   [L,QSA]

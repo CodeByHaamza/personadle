@@ -6,6 +6,7 @@ import { updateProfileStats } from "../profile/profileStats.js";
 
 // Shared game utilities (confetti, navigation, modal, daily reset, filters)
 import {
+  parisDateKey,
   showConfettiExplosion,
   revealNextLink,
   setupRulesModal,
@@ -16,10 +17,13 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  showCommunityStats,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { checkChallengeCompletion } from "../js/challenge-result.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -37,9 +41,10 @@ let personas = [...originalPersonas];
 
 let gameOver = false;
 let daltonianMode = localStorage.getItem("daltonianMode") === "enabled";
+let attempts = parseInt(localStorage.getItem("attempts")) || 0;
 
 // Stats / session tracking
-const todayKey = `statsLogged_${modeName}_${new Date().toISOString().split("T")[0]}`;
+const todayKey = `statsLogged_${modeName}_${parisDateKey()}`;
 let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
 let sessionStartTime = Date.now();
 
@@ -365,13 +370,14 @@ function checkGuess(name, target, forceReveal = false) {
     const guessButton = document.getElementById("guessButton");
     const giveUpButton = document.getElementById("giveUpButton");
 
+    const wasFresh = !gameOver;
     textbar.disabled = true;
     guessButton.style.pointerEvents = "none";
     giveUpButton.style.pointerEvents = "none";
     giveUpButton.style.opacity = "0.5";
     gameOver = true;
 
-    if (!statsAlreadyLogged) {
+    if (wasFresh && !statsAlreadyLogged) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(buildGameSession({
@@ -380,11 +386,41 @@ function checkGuess(name, target, forceReveal = false) {
       }));
       localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
+
+      // ── Badge flags ──────────────────────────────────────────────────────
+      const _pr = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+
+      // one_shot : victoire en 1 essai
+      if (attempts === 1 && !_pr.hasWonFirstTry) _pr.hasWonFirstTry = true;
+
+      // night_owl / nyx_hour : heure Paris
+      const _now = new Date();
+      const _hour = parseInt(
+        new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: 'numeric', hour12: false })
+          .format(_now), 10
+      );
+      if (_hour >= 0 && _hour < 5) _pr.playedAtNight = true;
+      if (_hour === 0 && _now.getMinutes() < 30) _pr.playedAtNyxHour = true;
+
+      // shapeshifter : characterModeMap
+      if (!_pr.characterModeMap) _pr.characterModeMap = {};
+      const _tName = target.nom;
+      if (!_pr.characterModeMap[_tName]) _pr.characterModeMap[_tName] = [];
+      if (!_pr.characterModeMap[_tName].includes('classic'))
+        _pr.characterModeMap[_tName].push('classic');
+
+      localStorage.setItem('personaUserProfile', JSON.stringify(_pr));
+      trackUniqueDay(_pr, () => localStorage.setItem('personaUserProfile', JSON.stringify(_pr)));
     }
 
-    showConfettiExplosion();
-    revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
-    showChallengeButton('classic', attempts);
+    if (wasFresh) {
+      showConfettiExplosion();
+      revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+      showChallengeButton('classic', attempts);
+      checkChallengeCompletion('classic', attempts, true);
+      showCommunityStats(modeName, target.nom);
+      document.getElementById('victoryBox').style.display = 'block';
+    }
   }
 }
 
@@ -462,7 +498,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeAutocomplete(textbar, personas);
 
   // ── Restore session state ──
-  let attempts = parseInt(localStorage.getItem("attempts")) || 0;
+  attempts = parseInt(localStorage.getItem("attempts")) || 0;
   let target = JSON.parse(localStorage.getItem("target"));
   let history = JSON.parse(localStorage.getItem("guessHistory")) || [];
 
@@ -473,6 +509,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     guessButton.disabled = true;
     giveUpButton.disabled = true;
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+    document.getElementById('victoryBox').style.display = 'block';
   }
 
   // Pick daily target if none stored (seeded RNG — same character for all players today)
@@ -532,7 +569,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       statsAlreadyLogged = true;
     }
 
+    checkChallengeCompletion('classic', attempts, false);
+    showCommunityStats(modeName, target.nom);
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+    document.getElementById('victoryBox').style.display = 'block';
   });
 
   // ── Hint button (available after 3 attempts) ──
@@ -543,6 +583,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       quoteHint.style.display = "block";
       hintButton.disabled = true;
       hintButton.style.cursor = "not-allowed";
+      // Badge Navigator : compteur d'indices
+      const _ph = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+      _ph.classicHintsUsed = (_ph.classicHintsUsed || 0) + 1;
+      localStorage.setItem('personaUserProfile', JSON.stringify(_ph));
     }
   });
 
@@ -576,8 +620,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     filterCharacterPool();
 
-    // Restore daily target (seeded RNG — same character for all players today)
-    target = getDailyTarget(characters, 'Classic');
+    // Pick a random character from the filtered pool
+    target = characters[Math.floor(Math.random() * characters.length)];
     localStorage.setItem("target", JSON.stringify(target));
 
     const nav = document.getElementById("modeNavigationContainer");

@@ -49,11 +49,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&family=Special+Elite&display=swap" rel="stylesheet">
 
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="./css/global.css?v=3">
+    <link rel="stylesheet" href="./css/global.css?v=6">
     <link rel="stylesheet" href="./css/index.css?v=3">
     <link rel="stylesheet" href="./css/langSelector.css?v=3">
     <link rel="stylesheet" href="./css/bottomNav.css?v=1">
-    <link rel="stylesheet" href="./css/calling-card.css">
+    <link rel="stylesheet" href="./css/calling-card.css?v=2">
+    <link rel="stylesheet" href="./css/challenge-notif.css">
+    <link rel="stylesheet" href="./css/challenge-result.css">
     <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
     
 </head>
@@ -453,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <p>
   <span data-i18n="index.disclaimer">Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders.</span>
   <a href="#" id="legalLink" data-i18n="index.legal_link">Legal Notice</a> |
-  <a href="https://forms.gle/SJeKi7cyUjRyp1vX8" target="_blank" data-i18n="index.feedback_link">📝 Suggestions & Bug Report</a> |
+  <a href="https://forms.gle/SJeKi7cyUjRyp1vX8" target="_blank" data-i18n="index.feedback_link" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.reportSubmitted){p.reportSubmitted=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">📝 Suggestions & Bug Report</a> |
   <a href="./debug.html" style="color:#555;font-size:0.7rem;" title="Dev tools">⚙ dev</a>
 </p>
 </footer>
@@ -536,7 +538,7 @@ body.darkmode .chibi-deco {
         <li>🛠️ <strong>QoL Improvements:</strong> Redesigned filter buttons, added "Visual History" in Emoji Mode, and added Silhouette Mode characters.</li>
       </ul>
       <div class="pdf-container">
-        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn">
+        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
           See full Changelog (PDF)
         </a>
       </div>
@@ -553,7 +555,7 @@ body.darkmode .chibi-deco {
         <li>🛠️ <strong>Améliorations QoL :</strong> Boutons de filtre repensés, ajout de l'"Historique visuel" en mode Emoji, et nouveaux personnages en mode Silhouette.</li>
       </ul>
       <div class="pdf-container">
-        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn">
+        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
           Voir le Changelog complet (PDF)
         </a>
       </div>
@@ -636,7 +638,7 @@ body.darkmode .chibi-deco {
               <li>🎨 Minor <strong>UI and dark mode adjustments</strong> for smoother experience.</li>
             </ul>
             <div class="pdf-container">
-              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn">
+              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
                 See more (PDF)
               </a>
             </div>
@@ -659,7 +661,7 @@ body.darkmode .chibi-deco {
               <li>🎨 Ajustements mineurs de <strong>l'UI et du mode sombre</strong> pour une expérience plus fluide.</li>
             </ul>
             <div class="pdf-container">
-              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn">
+              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
                 Voir plus (PDF)
               </a>
             </div>

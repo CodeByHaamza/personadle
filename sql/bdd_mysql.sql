@@ -74,6 +74,7 @@ CREATE INDEX idx_users_pseudo ON users(pseudo);
 CREATE TABLE titles (
     id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
     slug            VARCHAR(100)     NOT NULL,
+    image_path      VARCHAR(150)     NULL,       -- chemin du banner visuel 16:4
 
     name_en         VARCHAR(100),
     name_fr         VARCHAR(100),
@@ -91,7 +92,9 @@ CREATE TABLE titles (
 
     condition_type  VARCHAR(50),
     -- 'wins_total' | 'streak_record' | 'mode_wins' | 'perfect_wins'
-    -- 'social_link_rank_10' | 'badges_count' | 'manual'
+    -- 'social_link_rank_10' | 'badges_count' | 'unique_days' | 'friends_count'
+    -- 'giveups_total' | 'all_modes_won' | 'leaderboard_top' | 'weekly_clean_modes'
+    -- 'classic_p1_wins' | 'emoji_p2_wins' | 'manual'
 
     condition_mode  VARCHAR(30),
     -- NULL = global, sinon: 'classic' | 'emoji' | 'silhouette' | 'alloutattack' | 'personae' | 'music'
@@ -104,18 +107,19 @@ CREATE TABLE titles (
     UNIQUE KEY uq_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Seed : titres de base
-INSERT INTO titles (slug, name_en, name_fr, name_es, name_de, name_it, condition_type, condition_value, rarity) VALUES
-('first_steps',       'First Steps',       'Premiers Pas',      'Primeros Pasos',    'Erste Schritte',     'Primi Passi',        'wins_total',          1,   'common'),
-('phantom_thief',     'Phantom Thief',     'Voleur Fantôme',    'Ladrón Fantasma',   'Phantom Dieb',       'Ladro Fantasma',     'wins_total',          10,  'common'),
-('wild_card',         'Wild Card',         'Wild Card',         'Comodín',           'Wildcard',           'Wild Card',          'wins_total',          50,  'rare'),
-('velvet_apprentice', 'Velvet Apprentice', 'Apprenti Velours',  'Aprendiz Velvet',   'Samt-Lehrling',      'Apprendista Velvet', 'wins_total',          100, 'rare'),
-('ace_detective',     'Ace Detective',     'As Détective',      'Detective As',      'Meisterdetektiv',    'Detective Asso',     'streak_record',       7,   'epic'),
-('true_wild_card',    'True Wild Card',    'Vrai Wild Card',    'Comodín Verdadero', 'Wahre Wildcard',     'Vero Wild Card',     'wins_total',          200, 'legendary'),
-('music_master',      'Music Master',      'Maître Musique',    'Maestro Musical',   'Musikmeister',       'Maestro Musicale',   'mode_wins',           20,  'rare'),
-('silhouette_pro',    'Silhouette Pro',    'Pro Silhouette',    'Pro Silueta',       'Silhouetten-Profi',  'Pro Silhouette',     'mode_wins',           15,  'rare'),
-('confidant',         'True Confidant',    'Confident',         'Confidente',        'Vertrauter',         'Confidente',         'social_link_rank_10', 1,   'legendary'),
-('perfectionist',     'Perfectionist',     'Perfectionniste',   'Perfeccionista',    'Perfektionist',      'Perfezionista',      'perfect_wins',        10,  'epic');
+-- Seed : 11 titres visuels (calling cards)
+INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_it, condition_type, condition_value, rarity) VALUES
+('velvet_room_thou_art_i',    'profile/titles/velvet_room_thou_art_i.webp',    'Thou Art I',             'Thou Art I',              'Thou Art I',            'Thou Art I',           'Thou Art I',          'badges_count',        20,  'legendary'),
+('joker_looking_cool',        'profile/titles/joker_looking_cool.webp',        'Looking Cool',           'Looking Cool',            'Looking Cool',          'Looking Cool',         'Looking Cool',        'leaderboard_top',     100, 'legendary'),
+('makoto_yuki_memento_mori',  'profile/titles/makoto_yuki_memento_mori.webp',  'Memento Mori',           'Memento Mori',            'Memento Mori',          'Memento Mori',         'Memento Mori',        'unique_days',         100, 'epic'),
+('aigis_i_am_not_afraid',     'profile/titles/aigis_i_am_not_afraid.webp',     'I Am Not Afraid',        'Je N''Ai Pas Peur',       'No Tengo Miedo',        'Ich Habe Keine Angst', 'Non Ho Paura',        'mode_wins',           50,  'rare'),
+('akechi_pancakes',           'profile/titles/akechi_pancakes.webp',           'Pancakes?',              'Pancakes ?',              '¿Panqueques?',          'Pfannkuchen?',         'Pancakes?',           'weekly_clean_modes',  3,   'epic'),
+('yosuke_ride_the_wind',      'profile/titles/yosuke_ride_the_wind.webp',      'Ride the Wind',          'Chevauche le Vent',       'Cabalga el Viento',     'Reite den Wind',       'Cavalca il Vento',    'friends_count',       5,   'rare'),
+('adachi_boring_isnt_it',     'profile/titles/adachi_boring_isnt_it.webp',     'Boring, Isn''t It?',     'Ennuyeux, N''est-ce Pas ?','¿Aburrido, Verdad?',   'Langweilig, Oder?',    'Noioso, Vero?',       'giveups_total',       50,  'common'),
+('marie_i_remembered',        'profile/titles/marie_i_remembered.webp',        'I Remembered',           'Je Me Suis Souvenu',      'Lo Recordé',            'Ich Erinnerte Mich',   'Mi Sono Ricordato',   'badges_count',        15,  'rare'),
+('yu_reach_out_to_the_truth', 'profile/titles/yu_reach_out_to_the_truth.webp', 'Reach Out to the Truth', 'Toucher la Vérité',       'Alcanza la Verdad',     'Greife nach der Wahrheit','Raggiungi la Verita','all_modes_won',     1,   'epic'),
+('naoya_first_awakening',     'profile/titles/naoya_first_awakening.webp',     'The First Awakening',    'Le Premier Éveil',        'El Primer Despertar',   'Das Erste Erwachen',   'Il Primo Risveglio',  'classic_p1_wins',     15,  'rare'),
+('maya_always_be_positive',   'profile/titles/maya_always_be_positive.webp',   'Always Be Positive',     'Toujours Positif',        'Siempre Positivo',      'Immer Positiv',        'Sempre Positivo',     'emoji_p2_wins',       10,  'common');
 
 
 -- =============================================================================

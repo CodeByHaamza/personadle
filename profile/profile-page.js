@@ -182,6 +182,10 @@ function renderThemePicker() {
 
       saveProfile();
       renderThemePicker();
+      const wid = id === 'custom'
+        ? `custom:${profile.profileCustomColor || '#e63946'}`
+        : id;
+      saveProfileToCloud({ wallpaper_id: wid });
 
       // Régénère la preview de partage si la modale est ouverte
       const shareModal = document.getElementById('sharePreviewModal');
@@ -196,6 +200,7 @@ function renderThemePicker() {
     profile.profileCustomColor = e.target.value;
     applyTheme('custom', e.target.value);
     saveProfile();
+    saveProfileToCloud({ wallpaper_id: `custom:${e.target.value}` });
   });
 }
 
@@ -342,6 +347,57 @@ function initProfile() {
  */
 function saveProfile() {
   localStorage.setItem('personaUserProfile', JSON.stringify(profile));
+}
+
+/**
+ * Envoie les champs de profil modifiés vers le backend (PATCH /api/user/:id).
+ * Fire-and-forget — une erreur réseau ne bloque pas l'UI locale.
+ * @param {object} fields - Champs à synchroniser (avatar_data, avatar_border_color, selected_badges…)
+ */
+async function saveProfileToCloud(fields) {
+  if (!window._currentUser?.id) return;
+  const api = window._personadleApi;
+  if (!api) return;
+  try {
+    await api.user.update(window._currentUser.id, fields);
+  } catch (e) {
+    console.warn('[Profile] Cloud sync failed:', e.message);
+  }
+}
+
+/**
+ * Sync initial complet localStorage → cloud au moment du login.
+ * Envoie avatar, bordure, wallpaper, musique et badges en une seule requête PATCH.
+ * Fire-and-forget — n'écrase que les champs non-null si le profil localStorage existe.
+ */
+async function syncProfileToCloud() {
+  if (!window._currentUser?.id || !window._personadleApi) return;
+  if (!profile) return;
+  const fields = {
+    avatar_border_color: profile.avatarBorderColor || '#ffffff',
+    wallpaper_id:        profile.profileTheme === 'custom'
+                           ? `custom:${profile.profileCustomColor || '#e63946'}`
+                           : (profile.profileTheme || 'all_out'),
+    profile_music_id:    profile.profileSong?.fichier || null,
+    selected_badges:     profile.selectedBadges || [],
+  };
+  if (profile.avatar) {
+    fields.avatar_data = profile.avatar;
+  }
+  try {
+    await window._personadleApi.user.update(window._currentUser.id, fields);
+  } catch (e) {
+    console.warn('[Profile] Initial sync to cloud failed:', e.message);
+  }
+}
+
+/**
+ * saveProfile + sync cloud pour les badges sélectionnés.
+ * Passé comme callback aux fonctions de badgesManager qui modifient selectedBadges.
+ */
+function saveProfileAndSyncBadges() {
+  saveProfile();
+  saveProfileToCloud({ selected_badges: profile.selectedBadges || [] });
 }
 
 
@@ -612,6 +668,10 @@ borderColorPicker.oninput = (e) => {
     _regenerateSharePreview();
   }
 };
+// onchange = fin du glissement → envoie la couleur finale au cloud (évite spam API)
+borderColorPicker.onchange = (e) => {
+  saveProfileToCloud({ avatar_border_color: e.target.value });
+};
 
 /**
  * Met à jour le dot de prévisualisation et la valeur hex
@@ -707,6 +767,7 @@ function initAvatarGrid() {
       profile.avatar = '';
       pageAvatar.src = '../img/default_avatar.png';
       saveProfile();
+      saveProfileToCloud({ avatar_data: null });
       cropModal.classList.add('hidden');
     };
   }
@@ -802,6 +863,7 @@ confirmCrop.onclick = () => {
     profile.avatar = result;
     pageAvatar.src = result;
     saveProfile();
+    saveProfileToCloud({ avatar_data: result });
   }
   cropModal.classList.add('hidden');
   cropTarget = 'avatar'; // reset systématique
@@ -822,16 +884,31 @@ exportBtn.onclick = () => {
   URL.revokeObjectURL(a.href);
 };
 
+/** Cache le bouton import si le compte a déjà effectué une migration JSON. */
+function _updateImportBtnVisibility() {
+  if (!importBtn) return;
+  const hasMigrated = window._currentUser?.has_migrated;
+  if (hasMigrated) {
+    importBtn.style.display = 'none';
+    importFile.style.display = 'none';
+  } else {
+    importBtn.style.display = '';
+  }
+}
+
 /** Ouvre le dialogue de sélection de fichier. */
-importBtn.onclick = () => importFile.click();
+importBtn.onclick = () => {
+  if (window._currentUser?.has_migrated) return;
+  importFile.click();
+};
 
 /** Importe un profil depuis un fichier JSON. */
-importFile.onchange = (e) => {
+importFile.onchange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try {
       const imported = JSON.parse(reader.result);
       // Assurer la compatibilité avec les anciennes versions du profil
@@ -842,6 +919,28 @@ importFile.onchange = (e) => {
         imported.stats = imported.stats || {};
         imported.stats.perfectWins = 0;
       }
+
+      // Si connecté : envoyer la migration à l'API (max 1 par compte)
+      const api = window._personadleApi;
+      if (api && window._currentUser?.id) {
+        try {
+          const payload = {
+            profile:         imported,
+            pendingSessions: [],
+          };
+          await api.user.migrate(payload);
+          // Marquer localement pour cacher le bouton sans rechargement
+          window._currentUser.has_migrated = true;
+          _updateImportBtnVisibility();
+        } catch (err) {
+          if (err?.status === 409 || (typeof err?.message === 'string' && err.message.includes('409'))) {
+            alert(window.i18n?.t?.('profile.import_already_done', 'You have already imported a JSON profile. Only one import is allowed per account.'));
+            return;
+          }
+          // Erreur réseau non-fatale : on continue avec la sauvegarde locale
+        }
+      }
+
       profile = imported;
       saveProfile();
       location.reload();
@@ -942,6 +1041,34 @@ const wallpaperCategories = [
 const CARD_W = 390;
 const CARD_H = 693; // 390 × (16/9) ≈ 693
 
+/** Options de police disponibles dans le style du texte de partage. */
+const TEXT_FONTS = [
+  { id: 'arial',     name: 'Arial',        value: 'Arial, sans-serif' },
+  { id: 'arialblk',  name: 'Arial Black',  value: '"Arial Black", Impact, sans-serif' },
+  { id: 'impact',    name: 'Impact',        value: 'Impact, "Arial Black", sans-serif' },
+  { id: 'georgia',   name: 'Georgia',       value: 'Georgia, serif' },
+  { id: 'courier',   name: 'Courier',       value: '"Courier New", Courier, monospace' },
+  { id: 'persona5',  name: 'Persona 5',     value: 'Persona5, "Arial Black", sans-serif' },
+];
+
+/** Preset couleurs de texte + blanc par défaut. */
+const TEXT_COLOR_PRESETS = [
+  { id: 'white',  value: '#ffffff', label: 'White'  },
+  { id: 'gold',   value: '#ffd700', label: 'Gold'   },
+  { id: 'red',    value: '#ff4444', label: 'Red'    },
+  { id: 'cyan',   value: '#4ecdc4', label: 'Cyan'   },
+  { id: 'black',  value: '#111111', label: 'Black'  },
+  { id: 'custom', value: null,      label: 'Custom' },
+];
+
+/** Tailles de texte disponibles (multiplicateur appliqué aux em de base). */
+const TEXT_SIZES = [
+  { id: 'small',  label: 'S', scale: 0.78 },
+  { id: 'medium', label: 'M', scale: 1.00 },
+  { id: 'large',  label: 'L', scale: 1.25 },
+  { id: 'xl',     label: 'XL', scale: 1.55 },
+];
+
 /**
  * Construit l'élément carte HTML au format 9:16 portrait.
  * Retourne l'élément DOM (non encore inséré dans le document).
@@ -949,9 +1076,13 @@ const CARD_H = 693; // 390 × (16/9) ≈ 693
  * @param {Object} bg - Arrière-plan couleur sélectionné
  * @param {Object|null} wallpaper - Wallpaper sélectionné (ou null)
  * @param {string} activeTab - 'color' | 'wallpaper'
+ * @param {{ font: string, color: string, scale: number }} [textStyle] - Style texte optionnel
  * @returns {HTMLElement}
  */
-function buildShareCard(bg, wallpaper, activeTab) {
+function buildShareCard(bg, wallpaper, activeTab, textStyle) {
+  const txtFont  = textStyle?.font  || 'Arial, sans-serif';
+  const txtColor = textStyle?.color || '#ffffff';
+  const txtScale = textStyle?.scale ?? 1;
   const selectedBadges  = getBadgesForShare(profile);
   const avatarForShare  = normalizeAvatarPath(profile.avatar);
   const wallpaperActive = activeTab === 'wallpaper' && wallpaper?.src;
@@ -963,9 +1094,9 @@ function buildShareCard(bg, wallpaper, activeTab) {
     width:${CARD_W}px; height:${CARD_H}px;
     border-radius:20px; overflow:hidden;
     background:${bg.gradient};
-    color:white; text-align:center;
+    color:${txtColor}; text-align:center;
     box-sizing:border-box; position:relative;
-    font-family:Arial,sans-serif;
+    font-family:${txtFont};
     flex-shrink:0;
   `;
 
@@ -1017,13 +1148,14 @@ function buildShareCard(bg, wallpaper, activeTab) {
     height:100%;padding:32px 20px 24px;box-sizing:border-box;
   `;
 
+  const s = txtScale;
   content.innerHTML = `
     <!-- Titre -->
     <div style="margin-bottom:20px;">
-      <p style="margin:0;font-size:0.75em;letter-spacing:0.2em;text-transform:uppercase;
-                opacity:0.8;text-shadow:1px 1px 3px rgba(0,0,0,0.8);">PersonaDLE</p>
-      <h2 style="margin:4px 0 0;font-size:1.5em;font-weight:900;letter-spacing:0.08em;
-                 text-shadow:2px 2px 6px rgba(0,0,0,0.8);">PROFILE</h2>
+      <p style="margin:0;font-size:${(0.75*s).toFixed(2)}em;letter-spacing:0.2em;text-transform:uppercase;
+                color:${txtColor};opacity:0.8;text-shadow:1px 1px 3px rgba(0,0,0,0.8);">PersonaDLE</p>
+      <h2 style="margin:4px 0 0;font-size:${(1.5*s).toFixed(2)}em;font-weight:900;letter-spacing:0.08em;
+                 color:${txtColor};text-shadow:2px 2px 6px rgba(0,0,0,0.8);">PROFILE</h2>
       <div style="width:40px;height:3px;background:#e63946;margin:8px auto 0;border-radius:2px;"></div>
     </div>
 
@@ -1037,8 +1169,8 @@ function buildShareCard(bg, wallpaper, activeTab) {
     </div>
 
     <!-- Pseudo -->
-    <h3 style="margin:0 0 20px;font-size:1.6em;font-weight:900;
-               text-shadow:2px 2px 6px rgba(0,0,0,0.8);
+    <h3 style="margin:0 0 20px;font-size:${(1.6*s).toFixed(2)}em;font-weight:900;
+               color:${txtColor};text-shadow:2px 2px 6px rgba(0,0,0,0.8);
                max-width:340px;word-break:break-word;">
       ${profile.pseudo || 'Guest Player'}
     </h3>
@@ -1051,21 +1183,21 @@ function buildShareCard(bg, wallpaper, activeTab) {
                 backdrop-filter:blur(6px);
                 margin-bottom:20px;">
       <div style="text-align:center;flex:1;">
-        <div style="font-size:2em;font-weight:900;color:#ffd700;
+        <div style="font-size:${(2*s).toFixed(2)}em;font-weight:900;color:#ffd700;
                     text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.stats?.wins || 0}</div>
-        <div style="font-size:0.72em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;">Wins</div>
+        <div style="font-size:${(0.72*s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Wins</div>
       </div>
       <div style="width:1px;height:36px;background:rgba(255,255,255,0.25);"></div>
       <div style="text-align:center;flex:1;">
-        <div style="font-size:2em;font-weight:900;color:#ff6b6b;
+        <div style="font-size:${(2*s).toFixed(2)}em;font-weight:900;color:#ff6b6b;
                     text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.stats?.streakRecord || 0}</div>
-        <div style="font-size:0.72em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;">Best Streak</div>
+        <div style="font-size:${(0.72*s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Best Streak</div>
       </div>
       <div style="width:1px;height:36px;background:rgba(255,255,255,0.25);"></div>
       <div style="text-align:center;flex:1;">
-        <div style="font-size:2em;font-weight:900;color:#4ecdc4;
+        <div style="font-size:${(2*s).toFixed(2)}em;font-weight:900;color:#4ecdc4;
                     text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.badges?.length || 0}</div>
-        <div style="font-size:0.72em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;">Badges</div>
+        <div style="font-size:${(0.72*s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Badges</div>
       </div>
     </div>
 
@@ -1073,7 +1205,7 @@ function buildShareCard(bg, wallpaper, activeTab) {
     ${selectedBadges.length > 0 ? `
       <div style="margin-bottom:16px;width:100%;">
         <p style="margin:0 0 10px;font-size:0.8em;opacity:0.85;
-                  text-transform:uppercase;letter-spacing:0.1em;">🏅 Featured</p>
+                  color:${txtColor};text-transform:uppercase;letter-spacing:0.1em;">🏅 Featured</p>
         <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
           ${selectedBadges.map(b => `
             <div style="text-align:center;">
@@ -1081,7 +1213,7 @@ function buildShareCard(bg, wallpaper, activeTab) {
                    style="width:65px;height:65px;border-radius:10px;
                           border:3px solid #ffd700;
                           box-shadow:0 4px 10px rgba(0,0,0,0.6);">
-              <p style="margin:5px 0 0;font-size:0.62em;opacity:0.9;
+              <p style="margin:5px 0 0;font-size:0.62em;opacity:0.9;color:${txtColor};
                          max-width:70px;word-break:break-word;">${b.name}</p>
             </div>
           `).join('')}
@@ -1094,7 +1226,7 @@ function buildShareCard(bg, wallpaper, activeTab) {
 
     <!-- Footer -->
     <div style="padding-top:12px;border-top:1px solid rgba(255,255,255,0.2);
-                font-size:0.75em;opacity:0.65;letter-spacing:0.06em;">
+                font-size:0.75em;opacity:0.65;letter-spacing:0.06em;color:${txtColor};">
       <strong>personadle.net</strong> &nbsp;•&nbsp; ${new Date().getFullYear()}
     </div>
   `;
@@ -1123,6 +1255,9 @@ function setupShareProfile() {
   let selectedBg                = localStorage.getItem('profileShareBg')          || 'velvet_room';
   let selectedWallpaperCategory = localStorage.getItem('profileShareWallpaperCat') || 'none';
   let selectedWallpaper         = localStorage.getItem('profileShareWallpaper')    || 'none';
+  let selectedFont              = 'arial';
+  let selectedColor             = localStorage.getItem('profileShareColor')         || '#ffffff';
+  let selectedSize              = localStorage.getItem('profileShareSize')          || 'medium';
   let activeTab = 'color';
   let currentCard = null;
 
@@ -1151,6 +1286,38 @@ function setupShareProfile() {
         <div class="share-selector-row">
           <label>Wallpaper</label>
           <select id="wallpaperSelect" class="share-select"></select>
+        </div>
+      </div>
+
+      <!-- ── Séparateur style texte ── -->
+      <div class="share-text-divider">✏️ Text style</div>
+      <div class="share-text-style">
+        <div class="share-selector-row">
+          <label>Font</label>
+          <select id="textFontSelect" class="share-select">
+            ${TEXT_FONTS.map(f => `<option value="${f.id}" ${f.id === selectedFont ? 'selected' : ''}>${f.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="share-selector-row">
+          <label>Color</label>
+          <div class="share-color-row">
+            ${TEXT_COLOR_PRESETS.filter(p => p.id !== 'custom').map(p => `
+              <button class="share-color-swatch ${selectedColor === p.value ? 'active' : ''}"
+                      data-color="${p.value}" title="${p.label}"
+                      style="background:${p.value};"></button>
+            `).join('')}
+            <input type="color" id="textColorPicker" value="${selectedColor}"
+                   title="Custom color" class="share-color-picker">
+          </div>
+        </div>
+        <div class="share-selector-row">
+          <label>Size</label>
+          <div class="share-size-row">
+            ${TEXT_SIZES.map(sz => `
+              <button class="share-size-btn ${selectedSize === sz.id ? 'active' : ''}"
+                      data-size="${sz.id}">${sz.label}</button>
+            `).join('')}
+          </div>
         </div>
       </div>
     `;
@@ -1208,6 +1375,41 @@ function setupShareProfile() {
     };
 
     updateWallpaperList();
+
+    // ── Contrôles style texte ──
+    document.getElementById('textFontSelect').onchange = (e) => {
+      selectedFont = e.target.value;
+      generatePreview();
+    };
+
+    bgSelector.querySelectorAll('.share-color-swatch').forEach(swatch => {
+      swatch.onclick = () => {
+        selectedColor = swatch.dataset.color;
+        localStorage.setItem('profileShareColor', selectedColor);
+        document.getElementById('textColorPicker').value = selectedColor;
+        bgSelector.querySelectorAll('.share-color-swatch').forEach(s => s.classList.remove('active'));
+        swatch.classList.add('active');
+        generatePreview();
+      };
+    });
+
+    const colorPicker = document.getElementById('textColorPicker');
+    colorPicker.oninput = (e) => {
+      selectedColor = e.target.value;
+      localStorage.setItem('profileShareColor', selectedColor);
+      bgSelector.querySelectorAll('.share-color-swatch').forEach(s => s.classList.remove('active'));
+      generatePreview();
+    };
+
+    bgSelector.querySelectorAll('.share-size-btn').forEach(sizeBtn => {
+      sizeBtn.onclick = () => {
+        selectedSize = sizeBtn.dataset.size;
+        localStorage.setItem('profileShareSize', selectedSize);
+        bgSelector.querySelectorAll('.share-size-btn').forEach(s => s.classList.remove('active'));
+        sizeBtn.classList.add('active');
+        generatePreview();
+      };
+    });
   }
 
   // Exposer generatePreview pour que borderColorPicker puisse la déclencher à la volée
@@ -1228,8 +1430,12 @@ function setupShareProfile() {
       wallpaper = catWps.find(w => w.id === selectedWallpaper) || null;
     }
 
+    const fontDef  = TEXT_FONTS.find(f => f.id === selectedFont) || TEXT_FONTS[0];
+    const sizeDef  = TEXT_SIZES.find(s => s.id === selectedSize) || TEXT_SIZES[1];
+    const textStyle = { font: fontDef.value, color: selectedColor, scale: sizeDef.scale };
+
     // Carte affichée dans la zone (scaled via CSS .share-card-wrapper)
-    currentCard = buildShareCard(bg, wallpaper, activeTab);
+    currentCard = buildShareCard(bg, wallpaper, activeTab, textStyle);
     area.innerHTML = '';
     const wrapper = document.createElement('div');
     wrapper.className = 'share-card-wrapper';
@@ -1237,7 +1443,7 @@ function setupShareProfile() {
     area.appendChild(wrapper);
 
     // Clone hors-écran pour la capture html2canvas (résolution pleine — non affecté par le scale CSS)
-    const offscreen = buildShareCard(bg, wallpaper, activeTab);
+    const offscreen = buildShareCard(bg, wallpaper, activeTab, textStyle);
     offscreen.style.position = 'fixed';
     offscreen.style.left = '-9999px';
     offscreen.style.top = '0';
@@ -1289,6 +1495,44 @@ function setupShareProfile() {
   }
 
   closeBtn.onclick = () => modal.classList.add('hidden');
+}
+
+/**
+ * Bouton "Copy profile link" — copie l'URL du profil public dans le presse-papier.
+ * Visible uniquement si l'utilisateur est connecté (friend_code requis).
+ */
+function setupCopyProfileLink() {
+  const btn    = document.getElementById('copyProfileLinkBtn');
+  const status = document.getElementById('shareStatus');
+  if (!btn) return;
+
+  // Afficher le bouton uniquement si l'user est connecté
+  function _show() {
+    const code = window._currentUser?.friend_code;
+    if (code) btn.style.display = '';
+  }
+  _show();
+  window.addEventListener('personadle:auth-ready', _show);
+
+  btn.addEventListener('click', async () => {
+    const code = window._currentUser?.friend_code;
+    if (!code) return;
+
+    const base = window.location.origin + window.location.pathname.replace(/\/profile\.html$/, '');
+    const url  = `${base}/profile.html?view=${encodeURIComponent(code)}`;
+    const i18n = window.i18n || { t: (k, fb) => fb };
+
+    try {
+      await navigator.clipboard.writeText(url);
+      if (status) {
+        status.textContent = i18n.t('profile.link_copied', 'Link copied!');
+        setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+      }
+    } catch {
+      // Fallback : prompt pour copier manuellement
+      window.prompt(i18n.t('profile.copy_link', 'Copy link') + ':', url);
+    }
+  });
 }
 
 /**
@@ -1554,6 +1798,7 @@ function attachSongHandlers() {
     };
     saveProfile();
     renderSongCard();
+    saveProfileToCloud({ profile_music_id: song.fichier });
   });
 
   // ── Play / Pause ──
@@ -1582,6 +1827,7 @@ function attachSongHandlers() {
     delete profile.profileSong;
     saveProfile();
     renderSongCard();
+    saveProfileToCloud({ profile_music_id: null });
   });
 }
 
@@ -1662,15 +1908,24 @@ document.addEventListener('DOMContentLoaded', () => {
   //     _authResolved est vrai à ce point (auth-ready dispatche AVANT DOMContentLoaded).
   if (window._authResolved && window._currentUser?.id) {
     syncStatsFromBackend(window._currentUser.id).catch(() => {});
+    syncProfileToCloud().catch(() => {});
   }
+
+  // Cacher le bouton import si le compte a déjà effectué une migration JSON
+  _updateImportBtnVisibility();
   renderThemePicker();
   setupPersoCard();
   initAvatarGrid();
   setupShareProfile();
+  setupCopyProfileLink();
   setupSongPicker();
 
   // 2. Système de badges
-  initBadgesSystem(profile, saveProfile);
+  initBadgesSystem(profile, saveProfileAndSyncBadges);
+
+  // 2b. Wallpapers débloquables + Titres (fire-and-forget async)
+  initUnlockableWallpapers().catch(() => {});
+  if (window._currentUser) initTitlesSection().catch(() => {});
 
   // 3. Auth — initAuth() est appelé depuis profile.html (bloc <script type="module">)
   //    setupAuth() supprimé : redondant et en conflit avec initAuth() de js/auth.js
@@ -1679,13 +1934,13 @@ document.addEventListener('DOMContentLoaded', () => {
   //    Listener permanent : capte init + chaque setLang() depuis le sélecteur
   window.addEventListener('personadle:i18n-ready', () => {
     renderStats();
-    renderBadgesModal(profile, saveProfile);
+    renderBadgesModal(profile, saveProfileAndSyncBadges);
   });
 
   // Race-condition : si initLang() s'est terminé avant ce listener, l'event est déjà parti
   if (window.i18nIsReady) {
     renderStats();
-    renderBadgesModal(profile, saveProfile);
+    renderBadgesModal(profile, saveProfileAndSyncBadges);
   }
 });
 
@@ -1694,3 +1949,247 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('badgesRendered', () => {
   attachPreviewClicksToImages();
 });
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🖼️ WALLPAPERS DÉBLOQUABLES
+// ═══════════════════════════════════════════════════════════════════════════
+
+const UNLOCKABLE_WALLPAPERS = [
+  {
+    id: 'kamoshida_palace',
+    name: "Kamoshida's Palace",
+    src: '../profile/Wallpaper/unlockable/kamoshida_palace.webp',
+    condition: 'Play at least 1 game in each of the 6 modes',
+    check: (p, stats) => Object.keys(stats?.modeCount || {}).length >= 6,
+  },
+  {
+    id: 'madarame_wallpaper',
+    name: "Madarame's Palace",
+    src: '../profile/Wallpaper/unlockable/madarame_wallpaper.webp',
+    condition: 'Set a custom avatar AND have at least 1 friend',
+    check: (p, stats, friendCount) => !!p?.avatarData && friendCount >= 1,
+  },
+  {
+    id: 'yukiko_dungeons',
+    name: "Yukiko's Dungeons",
+    src: '../profile/Wallpaper/unlockable/yukiko_dungeons.webp',
+    condition: 'Play 3 consecutive days with P4 filter active',
+    check: (p) => (p?.p4ConsecutiveDays || 0) >= 3,
+  },
+  {
+    id: 'kanji_dungeons',
+    name: "Kanji's Dungeons",
+    src: '../profile/Wallpaper/unlockable/kanji_dungeons.webp',
+    condition: 'Send a challenge to a friend and have them accept it',
+    check: (p) => p?.challengeAcceptedByFriend === true,
+  },
+  {
+    id: 'rise_dungeons',
+    name: "Rise's Dungeons",
+    src: '../profile/Wallpaper/unlockable/rise_dungeons.webp',
+    condition: 'Play 30 total games in Music mode',
+    check: (p, stats) => (stats?.modeCount?.Music || 0) >= 30,
+  },
+  {
+    id: 'mitsuo_dungeons',
+    name: "Mitsuo's Dungeons",
+    src: '../profile/Wallpaper/unlockable/mitsuo_dungeons.webp',
+    condition: 'Complete 75 total games across all modes',
+    check: (p, stats) => Object.values(stats?.modeCount || {}).reduce((a, b) => a + b, 0) >= 75,
+  },
+  {
+    id: 'dark_shopping_district',
+    name: 'Dark Shopping District',
+    src: '../profile/Wallpaper/unlockable/dark_shopping_district.webp',
+    condition: 'Have a Social Link at rank 5 or higher',
+    check: (p) => (p?.bestSocialLinkRank || 0) >= 5,
+  },
+];
+
+async function checkAndUnlockWallpapers(p, stats, friendCount) {
+  if (!p.unlockedWallpapers) p.unlockedWallpapers = [];
+  const newUnlocks = [];
+  for (const wp of UNLOCKABLE_WALLPAPERS) {
+    if (p.unlockedWallpapers.includes(wp.id)) continue;
+    if (wp.check(p, stats, friendCount)) {
+      p.unlockedWallpapers.push(wp.id);
+      newUnlocks.push(wp);
+      window._personadleApi?.wallpapers?.unlock(wp.id).catch(() => {});
+    }
+  }
+  if (newUnlocks.length) {
+    saveProfile();
+    newUnlocks.forEach(wp => showWallpaperNotification(wp));
+  }
+  renderUnlockableWallpaperGallery(p);
+}
+
+function renderUnlockableWallpaperGallery(p) {
+  const container = document.getElementById('unlockableWallpaperGrid');
+  if (!container) return;
+  const unlocked = p.unlockedWallpapers || [];
+  container.innerHTML = UNLOCKABLE_WALLPAPERS.map(wp => {
+    const isUnlocked = unlocked.includes(wp.id);
+    return `
+      <div class="unlockable-wp-item ${isUnlocked ? 'unlocked' : 'locked'}"
+           data-id="${wp.id}" title="${isUnlocked ? wp.name : wp.condition}">
+        <img src="${wp.src}" alt="${wp.name}" loading="lazy">
+        ${!isUnlocked ? `<div class="wp-lock-overlay">🔒<span class="wp-lock-cond">${wp.condition}</span></div>` : ''}
+        ${isUnlocked ? `<span class="wp-unlocked-label">✓ ${wp.name}</span>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function showWallpaperNotification(wp) {
+  const notif = document.createElement('div');
+  notif.className = 'wallpaper-notif';
+  notif.innerHTML = `
+    <img class="wallpaper-notif-thumb" src="${wp.src}" alt="${wp.name}">
+    <div class="wallpaper-notif-text">
+      <div class="wallpaper-notif-title">🖼️ Wallpaper Unlocked!</div>
+      <div class="wallpaper-notif-name">${wp.name}</div>
+    </div>
+  `;
+  document.body.appendChild(notif);
+  notif.onclick = () => notif.remove();
+  setTimeout(() => notif.classList.add('show'), 80);
+  setTimeout(() => {
+    notif.classList.remove('show');
+    setTimeout(() => notif.remove(), 500);
+  }, 4000);
+}
+
+async function initUnlockableWallpapers() {
+  const stats = profile.stats || {};
+  let friendCount = 0;
+  if (window._currentUser) {
+    try {
+      const res = await fetch(
+        `${window.location.pathname.startsWith('/personadle/') ? '/personadle' : ''}/api/friends`,
+        { credentials: 'include' }
+      ).then(r => r.json());
+      friendCount = (res?.data?.friends || []).length;
+    } catch (_) {}
+  }
+
+  // Sync backend → local
+  if (window._currentUser) {
+    try {
+      const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+      const res = await fetch(`${_prefix}/api/user/${window._currentUser.id}`, { credentials: 'include' })
+        .then(r => r.json());
+      const backendWp = res?.data?.unlocked_wallpapers || [];
+      if (!profile.unlockedWallpapers) profile.unlockedWallpapers = [];
+      const newFromBackend = backendWp.filter(id => !profile.unlockedWallpapers.includes(id));
+      if (newFromBackend.length) {
+        profile.unlockedWallpapers.push(...newFromBackend);
+        saveProfile();
+      }
+    } catch (_) {}
+  }
+
+  checkAndUnlockWallpapers(profile, stats, friendCount);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎴 TITRES VISUELS (CALLING CARDS)
+// ═══════════════════════════════════════════════════════════════════════════
+
+let _titlesData = [];
+
+async function initTitlesSection() {
+  const lang = window.i18n?.getCurrentLang?.() || 'en';
+  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+  try {
+    const res = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: 'include' });
+    const json = await res.json();
+    _titlesData = json?.data || [];
+  } catch (_) { _titlesData = []; }
+
+  await checkAndUnlockTitles();
+  renderTitlesSection();
+}
+
+async function checkAndUnlockTitles() {
+  const stats      = profile.stats || {};
+  const badges     = profile.badges || [];
+  const giveups    = Object.values(stats.modeGiveups || {}).reduce((a, b) => a + b, 0);
+  const allModesWon = ['Classic','Emoji','Silhouette','AllOutAttack','Personae','Music']
+    .every(m => (stats.modeWins?.[m] || 0) >= 1);
+
+  let friendCount = 0;
+  if (window._currentUser) {
+    try {
+      const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+      const res = await fetch(`${_prefix}/api/friends`, { credentials: 'include' }).then(r => r.json());
+      friendCount = (res?.data?.friends || []).length;
+    } catch (_) {}
+  }
+
+  for (const title of _titlesData) {
+    if (title.is_unlocked) continue;
+    let met = false;
+    switch (title.condition_type) {
+      case 'badges_count':       met = badges.length >= title.condition_value; break;
+      case 'unique_days':        met = (profile.uniqueDaysPlayed || 0) >= title.condition_value; break;
+      case 'mode_wins':          met = (stats.modeWins?.Classic || 0) >= title.condition_value; break;
+      case 'friends_count':      met = friendCount >= title.condition_value; break;
+      case 'giveups_total':      met = giveups >= title.condition_value; break;
+      case 'all_modes_won':      met = allModesWon; break;
+      case 'classic_p1_wins':    met = (profile.classicP1Wins || 0) >= title.condition_value; break;
+      case 'emoji_p2_wins':      met = (profile.emojiP2Wins || 0) >= title.condition_value; break;
+      case 'leaderboard_top':    met = (profile.bestLeaderboardRank || 9999) <= title.condition_value; break;
+      case 'weekly_clean_modes': met = (profile.weeklyCleanWinModes || 0) >= title.condition_value; break;
+    }
+    if (met) {
+      title.is_unlocked = 1;
+      window._personadleApi?.titles?.unlock(title.id).catch(() => {});
+    }
+  }
+}
+
+function renderTitlesSection() {
+  const container = document.getElementById('titlesGrid');
+  if (!container) return;
+
+  const equippedId = profile.equippedTitleId || null;
+
+  const titleImgPath = (t) => t.image_path || `profile/titles/${t.slug}.webp`;
+
+  container.innerHTML = _titlesData.map(t => {
+    const isUnlocked = !!t.is_unlocked;
+    const isEquipped = t.id === equippedId;
+    return `
+      <div class="title-card ${isUnlocked ? 'unlocked' : 'locked'} ${isEquipped ? 'equipped' : ''}"
+           data-title-id="${t.id}" data-unlocked="${isUnlocked}">
+        <img src="/${titleImgPath(t)}" alt="${t.name}" loading="lazy">
+        ${!isUnlocked ? '<div class="title-lock-overlay">🔒</div>' : ''}
+        ${isEquipped ? '<div class="title-equipped-badge">✓ Equipped</div>' : ''}
+      </div>
+    `;
+  }).join('');
+
+  const banner = document.getElementById('equippedTitleBanner');
+  if (banner) {
+    const eq = _titlesData.find(t => t.id === equippedId);
+    if (eq) {
+      banner.innerHTML = `<img src="/${titleImgPath(eq)}" alt="${eq.name}" class="equipped-title-img">`;
+      banner.style.display = 'block';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  container.querySelectorAll('.title-card.unlocked').forEach(el => {
+    el.onclick = () => {
+      const titleId = parseInt(el.dataset.titleId, 10);
+      profile.equippedTitleId = (equippedId === titleId) ? null : titleId;
+      saveProfile();
+      saveProfileToCloud({ equipped_title_id: profile.equippedTitleId });
+      renderTitlesSection();
+    };
+  });
+}

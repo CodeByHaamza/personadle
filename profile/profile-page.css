@@ -2883,11 +2883,20 @@ body.darkmode .vb-code { background: rgba(255, 255, 255, 0.08); }
 .vb-friend-btn--accept  { background: #16a34a; }
 .vb-friend-btn--accept:hover { background: #15803d; }
 .vb-compare-btn {
-  background: rgba(230, 57, 70, 0.15);
-  border: 1px solid rgba(230, 57, 70, 0.4);
+  background: transparent;
+  border: 2px solid #e63946;
+  color: #e63946;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+  box-shadow: 0 0 0 rgba(230, 57, 70, 0);
 }
 .vb-compare-btn:hover {
-  background: rgba(230, 57, 70, 0.28);
+  background: #e63946;
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 3px 14px rgba(230, 57, 70, 0.45);
+}
+.vb-compare-btn:active {
+  transform: scale(0.97);
 }
 
 .vb-friend-status {
@@ -3053,3 +3062,136 @@ body.darkmode .vb-code { background: rgba(255, 255, 255, 0.08); }
 }
 .mode-stat-wins   { font-weight: 700; color: var(--accent); font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; }
 .mode-stat-streak { font-size: 0.75rem; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🖼️ Wallpapers débloquables
+   ═══════════════════════════════════════════════════════════════════════════ */
+#unlockableWallpaperGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.unlockable-wp-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  cursor: default;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.unlockable-wp-item.unlocked { border-color: var(--accent); cursor: pointer; }
+
+.unlockable-wp-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.unlockable-wp-item.locked img { filter: brightness(0.3) blur(2px); }
+
+.wp-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #fff;
+  gap: 6px;
+}
+
+.wp-lock-cond {
+  font-size: 0.62rem;
+  text-align: center;
+  padding: 0 8px;
+  opacity: 0.85;
+  line-height: 1.3;
+}
+
+.wp-unlocked-label {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.6);
+  color: #ffd700;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  #unlockableWallpaperGrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎴 Calling Cards (Titres visuels)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.titles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.title-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16/4;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.title-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.title-card.locked img { filter: brightness(0.25) blur(1px); }
+
+.title-card.locked { cursor: not-allowed; }
+
+.title-card.unlocked:hover { border-color: var(--accent); transform: scale(1.02); }
+
+.title-card.equipped { border-color: #ffd700; box-shadow: 0 0 12px rgba(255,215,0,0.5); }
+
+.title-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: rgba(255,255,255,0.7);
+}
+
+.title-equipped-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 8px;
+  background: rgba(0,0,0,0.7);
+  color: #ffd700;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.equipped-title-img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .titles-grid { grid-template-columns: 1fr; }
+}

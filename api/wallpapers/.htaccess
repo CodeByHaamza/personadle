@@ -1,0 +1,6 @@
+Options -Indexes
+
+RewriteEngine On
+
+# POST /api/wallpapers/unlock
+RewriteRule ^unlock$    index.php   [L,QSA]

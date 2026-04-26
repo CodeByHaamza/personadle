@@ -24,10 +24,13 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  showCommunityStats,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { checkChallengeCompletion } from "../js/challenge-result.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -181,7 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupRulesModal();                          // ← shared utility
 
   guessBtn.addEventListener("click", handleGuess);
-  resetBtn.addEventListener("click", resetGame);
+  resetBtn.addEventListener("click", () => resetGame(true));
   giveUpBtn.addEventListener("click", giveUp);
 
   initializeAutocomplete(textbar);
@@ -221,11 +224,12 @@ function getFilteredSongs() {
  * Uses seeded RNG from the full song pool so all players get the same song
  * today regardless of their opus filter settings.
  */
-function pickSong() {
+function pickSong(random = false) {
   filteredSongs = getFilteredSongs();
 
-  // Seeded daily target from full pool
-  target = getDailyTarget(originalSongs, 'Music');
+  target = random && filteredSongs.length
+    ? filteredSongs[Math.floor(Math.random() * filteredSongs.length)]
+    : getDailyTarget(originalSongs, 'Music');
 
   audioPlayer.src = `./database/music/song/${target.fichier}`;
   audioPlayer.load();
@@ -280,6 +284,48 @@ function showVictory(force = false) {
       console.log("🌙 Badge Trigger: Zutomayo found!");
     }
   }
+
+  // 🌊 OUR LIGHT — Give up on the P3R ending theme
+  const titleRaw = (target?.titre || "").toLowerCase();
+  if (force && titleRaw.includes("our light") && !profile.gaveUpOnOurLight) {
+    profile.gaveUpOnOurLight = true;
+    hasChanges = true;
+    console.log("🌊 Badge Trigger: Our Light — gave up");
+  }
+
+  // 🏠 SECRET BASE — Find the P4 Dojima/Nanako theme
+  if (!force && titleRaw.includes("secret base") && !profile.foundSecretBase) {
+    profile.foundSecretBase = true;
+    hasChanges = true;
+    console.log("🏠 Badge Trigger: Secret Base found!");
+  }
+
+  // 🎬 WHEN MOTHER WAS THERE — Find "Kimi no Kioku" / "Memories of You"
+  if (!force && (titleRaw.includes("when mother was there") || titleRaw.includes("kimi no kioku") || titleRaw.includes("memories of you")) && !profile.foundWhenMotherWasThere) {
+    profile.foundWhenMotherWasThere = true;
+    hasChanges = true;
+    console.log("🎬 Badge Trigger: When Mother Was There found!");
+  }
+
+  // 🌙 NIGHT OWL / NYX HOUR flags (shared with other modes)
+  const nowHour = new Date().getHours();
+  if (nowHour >= 23 || nowHour < 1) {
+    if (!profile.playedAtNight) { profile.playedAtNight = true; hasChanges = true; }
+  }
+  if (nowHour === 0) {
+    if (!profile.playedAtNyxHour) { profile.playedAtNyxHour = true; hasChanges = true; }
+  }
+
+  // 🎭 SHAPESHIFTER — track character-per-mode (music targets may have a character field)
+  if (target?.character) {
+    const cmap = JSON.parse(localStorage.getItem("characterModeMap") || "{}");
+    const char = target.character;
+    if (!cmap[char]) cmap[char] = [];
+    if (!cmap[char].includes("music")) cmap[char].push("music");
+    localStorage.setItem("characterModeMap", JSON.stringify(cmap));
+  }
+
+  trackUniqueDay();
 
   if (hasChanges) {
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));
@@ -341,6 +387,8 @@ function showVictory(force = false) {
     });
     showChallengeButton('music', attempts);
   }
+  checkChallengeCompletion('music', attempts, !force);
+  showCommunityStats('music', target.titre);
 
   localStorage.setItem("musicGameOver", "true");
 
@@ -446,7 +494,7 @@ function giveUp() {
  * Resets all state and starts a new round.
  * Called on page load (no saved target), by filter changes, and by daily reset.
  */
-function resetGame() {
+function resetGame(random = false) {
   // Clear all Music-mode localStorage keys
   localStorage.removeItem("musicTarget");
   localStorage.removeItem("musicAttempts");
@@ -481,7 +529,7 @@ function resetGame() {
   if (navContainer) navContainer.style.display = "none";
 
   resetPlayerVisuals();
-  pickSong();
+  pickSong(random);
   if (target) setPlayerTheme(target.opus);
 }
 
