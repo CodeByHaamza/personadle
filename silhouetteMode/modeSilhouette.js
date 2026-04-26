@@ -316,7 +316,8 @@ function showVictory(force = false) {
       localStorage.setItem("characterModeMap", JSON.stringify(cmap));
     }
 
-    trackUniqueDay();
+    const _pSil = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+    trackUniqueDay(_pSil, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pSil)));
     showConfettiExplosion();
     showChallengeButton('silhouette', attempts);
     let winCount = parseInt(localStorage.getItem("silhouetteWins") || "0");

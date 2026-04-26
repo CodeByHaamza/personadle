@@ -1329,6 +1329,22 @@ function setupShareProfile() {
     const wallpaperCatSel     = document.getElementById('wallpaperCategorySelect');
     const wallpaperSel        = document.getElementById('wallpaperSelect');
 
+    // Inject unlockable category if user has any unlocked wallpapers
+    const _unlockedIds = new Set(JSON.parse(localStorage.getItem("visitedProfileIds") ? "[]" : "[]"));
+    const _profileForWp = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+    const _unlockedWpIds = new Set(_profileForWp.unlockedWallpapers || []);
+    const _unlockedWps = UNLOCKABLE_WALLPAPERS.filter(wp => _unlockedWpIds.has(wp.id));
+    if (_unlockedWps.length > 0) {
+      shareWallpapers['unlockables'] = _unlockedWps;
+      if (!wallpaperCategories.find(c => c.id === 'unlockables')) {
+        wallpaperCategories.push({ id: 'unlockables', name: '🏆 Unlockables' });
+      }
+      // Re-render category select to include unlockables
+      wallpaperCatSel.innerHTML = wallpaperCategories.map(cat =>
+        `<option value="${cat.id}" ${cat.id === selectedWallpaperCategory ? 'selected' : ''}>${cat.name}</option>`
+      ).join('');
+    }
+
     function updateWallpaperList() {
       const wallpapers = shareWallpapers[wallpaperCatSel.value] || [];
       wallpaperSel.innerHTML = wallpapers.map(wp =>
@@ -1925,7 +1941,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2b. Wallpapers débloquables + Titres (fire-and-forget async)
   initUnlockableWallpapers().catch(() => {});
-  if (window._currentUser) initTitlesSection().catch(() => {});
+  initTitlesSection().catch(() => {});
 
   // 3. Auth — initAuth() est appelé depuis profile.html (bloc <script type="module">)
   //    setupAuth() supprimé : redondant et en conflit avec initAuth() de js/auth.js
@@ -2129,10 +2145,16 @@ async function checkAndUnlockTitles() {
     } catch (_) {}
   }
 
+  const totalWins = Object.values(stats.modeWins || {}).reduce((a, b) => a + b, 0);
+  const streakRecord = stats.streakRecord || 0;
+
   for (const title of _titlesData) {
     if (title.is_unlocked) continue;
     let met = false;
     switch (title.condition_type) {
+      case 'wins_total':         met = totalWins >= title.condition_value; break;
+      case 'wins_mode':          met = Object.values(stats.modeWins || {}).some(w => w >= title.condition_value); break;
+      case 'streak_record':      met = streakRecord >= title.condition_value; break;
       case 'badges_count':       met = badges.length >= title.condition_value; break;
       case 'unique_days':        met = (profile.uniqueDaysPlayed || 0) >= title.condition_value; break;
       case 'mode_wins':          met = (stats.modeWins?.Classic || 0) >= title.condition_value; break;

@@ -325,7 +325,7 @@ function showVictory(force = false) {
     localStorage.setItem("characterModeMap", JSON.stringify(cmap));
   }
 
-  trackUniqueDay();
+  trackUniqueDay(profile, () => localStorage.setItem("personaUserProfile", JSON.stringify(profile)));
 
   if (hasChanges) {
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));

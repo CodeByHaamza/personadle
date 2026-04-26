@@ -299,7 +299,10 @@ function checkEmojiGuess(name, forceReveal = false) {
       localStorage.setItem("characterModeMap", JSON.stringify(cmap));
     }
 
-    if (!forceReveal) trackUniqueDay();
+    if (!forceReveal) {
+      const _pEmo = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+      trackUniqueDay(_pEmo, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pEmo)));
+    }
 
     const todayKey = getTodayStatsKey();
     if (!localStorage.getItem(todayKey)) {
