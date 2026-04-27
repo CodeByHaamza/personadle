@@ -2103,16 +2103,37 @@ async function initUnlockableWallpapers() {
 // 🎴 TITRES VISUELS (CALLING CARDS)
 // ═══════════════════════════════════════════════════════════════════════════
 
-let _titlesData = [];
+// Local title definitions — always available, API enriches with user's unlock status
+const TITLES_LOCAL = [
+  { slug: 'velvet_room_thou_art_i',    name: 'Thou Art I',              rarity: 'legendary', condition_type: 'badges_count',       condition_value: 20  },
+  { slug: 'joker_looking_cool',        name: 'Looking Cool',            rarity: 'legendary', condition_type: 'leaderboard_top',    condition_value: 100 },
+  { slug: 'makoto_yuki_memento_mori',  name: 'Memento Mori',            rarity: 'epic',      condition_type: 'unique_days',        condition_value: 100 },
+  { slug: 'akechi_pancakes',           name: 'Pancakes?',               rarity: 'epic',      condition_type: 'weekly_clean_modes', condition_value: 3   },
+  { slug: 'yu_reach_out_to_the_truth', name: 'Reach Out to the Truth',  rarity: 'epic',      condition_type: 'all_modes_won',      condition_value: 1   },
+  { slug: 'aigis_i_am_not_afraid',     name: 'I Am Not Afraid',         rarity: 'rare',      condition_type: 'mode_wins',          condition_value: 50  },
+  { slug: 'marie_i_remembered',        name: 'I Remembered',            rarity: 'rare',      condition_type: 'badges_count',       condition_value: 15  },
+  { slug: 'yosuke_ride_the_wind',      name: 'Ride the Wind',           rarity: 'rare',      condition_type: 'friends_count',      condition_value: 5   },
+  { slug: 'naoya_first_awakening',     name: 'The First Awakening',     rarity: 'rare',      condition_type: 'classic_p1_wins',    condition_value: 15  },
+  { slug: 'adachi_boring_isnt_it',     name: "Boring, Isn't It?",       rarity: 'common',    condition_type: 'giveups_total',      condition_value: 50  },
+  { slug: 'maya_always_be_positive',   name: 'Always Be Positive',      rarity: 'common',    condition_type: 'emoji_p2_wins',      condition_value: 10  },
+];
+
+let _titlesData = TITLES_LOCAL.map(t => ({ ...t, id: null, is_unlocked: 0, image_path: `profile/titles/${t.slug}.webp` }));
 
 async function initTitlesSection() {
-  const lang = window.i18n?.getCurrentLang?.() || 'en';
+  const lang    = window.i18n?.getCurrentLang?.() || 'en';
   const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
   try {
-    const res = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: 'include' });
+    const res  = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: 'include' });
     const json = await res.json();
-    _titlesData = json?.data || [];
-  } catch (_) { _titlesData = []; }
+    if (Array.isArray(json?.data) && json.data.length > 0) {
+      // Merge API data (has id + is_unlocked + translated name) with local image_path
+      _titlesData = json.data.map(t => ({
+        ...t,
+        image_path: t.image_path || `profile/titles/${t.slug}.webp`,
+      }));
+    }
+  } catch (_) { /* offline / not logged in → use local data */ }
 
   await checkAndUnlockTitles();
   renderTitlesSection();
@@ -2190,28 +2211,31 @@ function _showTitleNotification(title) {
 function _titleConditionText(t) {
   const v = t.condition_value;
   switch (t.condition_type) {
-    case 'wins_total':          return `Win ${v} total game${v !== 1 ? 's' : ''}`;
-    case 'wins_mode':           return `Win ${v} games in any single mode`;
-    case 'mode_wins':           return `Win ${v} Classic game${v !== 1 ? 's' : ''}`;
-    case 'streak_record':       return `Reach a ${v}-day streak record`;
-    case 'badges_count':        return `Unlock ${v} badge${v !== 1 ? 's' : ''}`;
-    case 'unique_days':         return `Play on ${v} different days`;
-    case 'friends_count':       return `Have ${v} friend${v !== 1 ? 's' : ''}`;
-    case 'giveups_total':       return `Give up ${v} time${v !== 1 ? 's' : ''}`;
-    case 'all_modes_won':       return `Win at least once in all 6 modes`;
-    case 'classic_p1_wins':     return `Win ${v} P1 game${v !== 1 ? 's' : ''} in Classic`;
-    case 'emoji_p2_wins':       return `Win ${v} P2 game${v !== 1 ? 's' : ''} in Emoji`;
-    case 'leaderboard_top':     return `Reach top ${v} on the leaderboard`;
-    case 'weekly_clean_modes':  return `Win all modes in one week without giving up`;
-    default:                    return t.condition_type || '???';
+    case 'wins_total':         return `Win ${v} total games`;
+    case 'wins_mode':          return `Win ${v} games in any single mode`;
+    case 'mode_wins':          return `Win ${v} Classic games`;
+    case 'streak_record':      return `Reach a ${v}-day streak record`;
+    case 'badges_count':       return `Unlock ${v} badges`;
+    case 'unique_days':        return `Play on ${v} different days`;
+    case 'friends_count':      return `Have ${v} friends`;
+    case 'giveups_total':      return `Give up ${v} times`;
+    case 'all_modes_won':      return `Win at least once in all 6 modes`;
+    case 'classic_p1_wins':    return `Win ${v} Classic games with P1 filter`;
+    case 'emoji_p2_wins':      return `Win ${v} Emoji games with P2 filter`;
+    case 'leaderboard_top':    return `Reach top ${v} on the leaderboard`;
+    case 'weekly_clean_modes': return `Win all modes in one week without giving up`;
+    default:                   return t.condition_type || '???';
   }
 }
 
-const RARITY_ICON = { common: '⬜', rare: '🟦', epic: '🟣', legendary: '🟡' };
-
 function renderTitlesSection() {
-  const equippedId = profile.equippedTitleId || null;
-  const eq = _titlesData.find(t => t.id === equippedId);
+  // Identify the equipped title — match by id (API) or slug (local fallback)
+  const equippedId   = profile.equippedTitleId   || null;
+  const equippedSlug = profile.equippedTitleSlug || null;
+  const eq = _titlesData.find(t =>
+    (equippedId && t.id && t.id === equippedId) ||
+    (equippedSlug && t.slug === equippedSlug)
+  );
 
   // ── Text under avatar/username ─────────────────────────────────────────────
   const titleText = document.getElementById('equippedTitleText');
@@ -2225,49 +2249,25 @@ function renderTitlesSection() {
     }
   }
 
-  // ── Preview line in Titles card ────────────────────────────────────────────
-  const preview = document.getElementById('titlesPreview');
-  if (preview) {
-    const unlockedCount = _titlesData.filter(t => t.is_unlocked).length;
-    if (eq) {
-      const rarityColors = { rare: '#60a5fa', epic: '#c084fc', legendary: '#fbbf24', common: 'rgba(255,255,255,0.7)' };
-      preview.innerHTML = `
-        <span class="titles-preview-equipped" style="color:${rarityColors[eq.rarity] || 'inherit'}">
-          ${RARITY_ICON[eq.rarity] || '⬜'} ${eq.name}
-        </span>
-        <span style="color:rgba(255,255,255,0.4);font-size:.75rem;margin-left:6px;">equipped</span>
-      `;
-    } else {
-      preview.innerHTML = `<span>${unlockedCount} title${unlockedCount !== 1 ? 's' : ''} unlocked</span>`;
-    }
-  }
-
-  // ── Modal counter ──────────────────────────────────────────────────────────
-  const counter = document.getElementById('titlesCounter');
-  if (counter) {
-    const total    = _titlesData.length;
-    const unlocked = _titlesData.filter(t => t.is_unlocked).length;
-    counter.textContent = `🔓 ${unlocked} / ${total} titles unlocked`;
-  }
-
-  // ── Modal grid ────────────────────────────────────────────────────────────
+  // ── Modal grid — calling card images ──────────────────────────────────────
   const grid = document.getElementById('titlesModalGrid');
   if (!grid) return;
 
+  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+
   grid.innerHTML = _titlesData.map(t => {
     const isUnlocked = !!t.is_unlocked;
-    const isEquipped = t.id === equippedId;
-    const cond = _titleConditionText(t);
-    const icon = RARITY_ICON[t.rarity] || '⬜';
+    const isEquipped = eq?.slug === t.slug;
+    const cond       = _titleConditionText(t);
+    const imgSrc     = `${_prefix}/${t.image_path || `profile/titles/${t.slug}.webp`}`;
     return `
       <div class="title-item ${isUnlocked ? 'unlocked' : 'locked'} ${isEquipped ? 'equipped' : ''}"
-           data-title-id="${t.id}" data-unlocked="${isUnlocked}">
+           data-slug="${t.slug}" data-id="${t.id ?? ''}" data-unlocked="${isUnlocked}">
+        <img src="${imgSrc}" alt="${t.name}" loading="lazy">
         ${isEquipped ? '<span class="title-equipped-check">✓</span>' : ''}
-        <span class="title-item-icon">${isUnlocked ? icon : '🔒'}</span>
-        <span class="title-item-name" data-rarity="${t.rarity || 'common'}">${t.name}</span>
-        <span class="title-rarity-tag" data-rarity="${t.rarity || 'common'}">${t.rarity || 'common'}</span>
         <div class="title-tooltip">
           <strong>${t.name}</strong>
+          <span class="title-rarity-tag" data-rarity="${t.rarity || 'common'}">${t.rarity || 'common'}</span><br>
           <span class="tt-condition">${isUnlocked ? '🔓 ' : '🔒 '}${cond}</span>
         </div>
       </div>
@@ -2276,17 +2276,20 @@ function renderTitlesSection() {
 
   grid.querySelectorAll('.title-item.unlocked').forEach(el => {
     el.onclick = () => {
-      const titleId = parseInt(el.dataset.titleId, 10);
-      profile.equippedTitleId = (equippedId === titleId) ? null : titleId;
+      const slug    = el.dataset.slug;
+      const titleId = el.dataset.id ? parseInt(el.dataset.id, 10) : null;
+      const alreadyEquipped = eq?.slug === slug;
+      profile.equippedTitleId   = alreadyEquipped ? null : titleId;
+      profile.equippedTitleSlug = alreadyEquipped ? null : slug;
       saveProfile();
-      saveProfileToCloud({ equipped_title_id: profile.equippedTitleId });
+      saveProfileToCloud({ equipped_title_id: profile.equippedTitleId || null });
       renderTitlesSection();
     };
   });
 
   // ── Modal open/close (idempotent) ─────────────────────────────────────────
-  const modal   = document.getElementById('titlesModal');
-  const openBtn = document.getElementById('openTitlesModal');
+  const modal    = document.getElementById('titlesModal');
+  const openBtn  = document.getElementById('openTitlesModal');
   const closeBtn = document.getElementById('closeTitlesModal');
 
   if (openBtn && !openBtn._titlesModalBound) {
