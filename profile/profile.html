@@ -368,23 +368,14 @@
         </div>
       </div>
 
-      <!-- Card : Wallpapers débloquables -->
-      <div class="profile-card animate-right" style="animation-delay: 0.36s" id="unlockableWallpapersCard">
+      <!-- Card : Titres -->
+      <div class="profile-card animate-right" style="animation-delay: 0.36s" id="titlesCard">
         <h3 class="card-title">
           <span class="card-accent">◆</span>
-          <span>🖼️ Unlockable Wallpapers</span>
+          <span>🏅 Titles</span>
         </h3>
-        <div id="unlockableWallpaperGrid"></div>
-      </div>
-
-      <!-- Card : Calling Cards (Titres visuels) -->
-      <div class="profile-card animate-right" style="animation-delay: 0.38s" id="titlesCard">
-        <h3 class="card-title">
-          <span class="card-accent">◆</span>
-          <span>🎴 Calling Cards</span>
-        </h3>
-        <div id="equippedTitleBanner" style="display:none; margin-bottom:12px;"></div>
-        <div id="titlesGrid" class="titles-grid"></div>
+        <div id="titlesPreview" class="titles-preview"></div>
+        <button id="openTitlesModal" class="btn-secondary">See All Titles</button>
       </div>
 
       <!-- Card : Zone dangereuse -->
@@ -477,7 +468,21 @@
 
 
 <!-- =====================================================
-     6. MODALE PARTAGE DE PROFIL
+     6. MODALE TITRES
+     Sélection / équipement de titres (comme les badges).
+     ===================================================== -->
+<div id="titlesModal" class="hidden">
+  <div class="badges-header">
+    <h3>🏅 Titles</h3>
+    <button id="closeTitlesModal" class="close-btn">✖</button>
+  </div>
+  <p id="titlesCounter" class="badges-counter">🔓 0 / 0 titles unlocked</p>
+  <div id="titlesModalGrid" class="titles-modal-grid"></div>
+</div>
+
+
+<!-- =====================================================
+     7. MODALE PARTAGE DE PROFIL
      Génère un aperçu canvas → téléchargement / partage.
      ===================================================== -->
 <div id="sharePreviewModal" class="modal hidden">

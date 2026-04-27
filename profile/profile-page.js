@@ -2045,24 +2045,6 @@ async function checkAndUnlockWallpapers(p, stats, friendCount) {
     saveProfile();
     newUnlocks.forEach(wp => showWallpaperNotification(wp));
   }
-  renderUnlockableWallpaperGallery(p);
-}
-
-function renderUnlockableWallpaperGallery(p) {
-  const container = document.getElementById('unlockableWallpaperGrid');
-  if (!container) return;
-  const unlocked = p.unlockedWallpapers || [];
-  container.innerHTML = UNLOCKABLE_WALLPAPERS.map(wp => {
-    const isUnlocked = unlocked.includes(wp.id);
-    return `
-      <div class="unlockable-wp-item ${isUnlocked ? 'unlocked' : 'locked'}"
-           data-id="${wp.id}" title="${isUnlocked ? wp.name : wp.condition}">
-        <img src="${wp.src}" alt="${wp.name}" loading="lazy">
-        ${!isUnlocked ? `<div class="wp-lock-overlay">🔒<span class="wp-lock-cond">${wp.condition}</span></div>` : ''}
-        ${isUnlocked ? `<span class="wp-unlocked-label">✓ ${wp.name}</span>` : ''}
-      </div>
-    `;
-  }).join('');
 }
 
 function showWallpaperNotification(wp) {
@@ -2204,39 +2186,32 @@ function _showTitleNotification(title) {
   }, 4500);
 }
 
-function renderTitlesSection() {
-  const container = document.getElementById('titlesGrid');
-  if (!container) return;
-
-  const equippedId = profile.equippedTitleId || null;
-
-  const titleImgPath = (t) => t.image_path || `profile/titles/${t.slug}.webp`;
-
-  container.innerHTML = _titlesData.map(t => {
-    const isUnlocked = !!t.is_unlocked;
-    const isEquipped = t.id === equippedId;
-    return `
-      <div class="title-card ${isUnlocked ? 'unlocked' : 'locked'} ${isEquipped ? 'equipped' : ''}"
-           data-title-id="${t.id}" data-unlocked="${isUnlocked}">
-        <img src="/${titleImgPath(t)}" alt="${t.name}" loading="lazy">
-        ${!isUnlocked ? '<div class="title-lock-overlay">🔒</div>' : ''}
-        ${isEquipped ? '<div class="title-equipped-badge">✓ Equipped</div>' : ''}
-      </div>
-    `;
-  }).join('');
-
-  const eq = _titlesData.find(t => t.id === equippedId);
-
-  // ── Banner in titles section ───────────────────────────────────────────────
-  const banner = document.getElementById('equippedTitleBanner');
-  if (banner) {
-    if (eq) {
-      banner.innerHTML = `<img src="/${titleImgPath(eq)}" alt="${eq.name}" class="equipped-title-img">`;
-      banner.style.display = 'block';
-    } else {
-      banner.style.display = 'none';
-    }
+/** Human-readable condition text from API fields. */
+function _titleConditionText(t) {
+  const v = t.condition_value;
+  switch (t.condition_type) {
+    case 'wins_total':          return `Win ${v} total game${v !== 1 ? 's' : ''}`;
+    case 'wins_mode':           return `Win ${v} games in any single mode`;
+    case 'mode_wins':           return `Win ${v} Classic game${v !== 1 ? 's' : ''}`;
+    case 'streak_record':       return `Reach a ${v}-day streak record`;
+    case 'badges_count':        return `Unlock ${v} badge${v !== 1 ? 's' : ''}`;
+    case 'unique_days':         return `Play on ${v} different days`;
+    case 'friends_count':       return `Have ${v} friend${v !== 1 ? 's' : ''}`;
+    case 'giveups_total':       return `Give up ${v} time${v !== 1 ? 's' : ''}`;
+    case 'all_modes_won':       return `Win at least once in all 6 modes`;
+    case 'classic_p1_wins':     return `Win ${v} P1 game${v !== 1 ? 's' : ''} in Classic`;
+    case 'emoji_p2_wins':       return `Win ${v} P2 game${v !== 1 ? 's' : ''} in Emoji`;
+    case 'leaderboard_top':     return `Reach top ${v} on the leaderboard`;
+    case 'weekly_clean_modes':  return `Win all modes in one week without giving up`;
+    default:                    return t.condition_type || '???';
   }
+}
+
+const RARITY_ICON = { common: '⬜', rare: '🟦', epic: '🟣', legendary: '🟡' };
+
+function renderTitlesSection() {
+  const equippedId = profile.equippedTitleId || null;
+  const eq = _titlesData.find(t => t.id === equippedId);
 
   // ── Text under avatar/username ─────────────────────────────────────────────
   const titleText = document.getElementById('equippedTitleText');
@@ -2250,7 +2225,56 @@ function renderTitlesSection() {
     }
   }
 
-  container.querySelectorAll('.title-card.unlocked').forEach(el => {
+  // ── Preview line in Titles card ────────────────────────────────────────────
+  const preview = document.getElementById('titlesPreview');
+  if (preview) {
+    const unlockedCount = _titlesData.filter(t => t.is_unlocked).length;
+    if (eq) {
+      const rarityColors = { rare: '#60a5fa', epic: '#c084fc', legendary: '#fbbf24', common: 'rgba(255,255,255,0.7)' };
+      preview.innerHTML = `
+        <span class="titles-preview-equipped" style="color:${rarityColors[eq.rarity] || 'inherit'}">
+          ${RARITY_ICON[eq.rarity] || '⬜'} ${eq.name}
+        </span>
+        <span style="color:rgba(255,255,255,0.4);font-size:.75rem;margin-left:6px;">equipped</span>
+      `;
+    } else {
+      preview.innerHTML = `<span>${unlockedCount} title${unlockedCount !== 1 ? 's' : ''} unlocked</span>`;
+    }
+  }
+
+  // ── Modal counter ──────────────────────────────────────────────────────────
+  const counter = document.getElementById('titlesCounter');
+  if (counter) {
+    const total    = _titlesData.length;
+    const unlocked = _titlesData.filter(t => t.is_unlocked).length;
+    counter.textContent = `🔓 ${unlocked} / ${total} titles unlocked`;
+  }
+
+  // ── Modal grid ────────────────────────────────────────────────────────────
+  const grid = document.getElementById('titlesModalGrid');
+  if (!grid) return;
+
+  grid.innerHTML = _titlesData.map(t => {
+    const isUnlocked = !!t.is_unlocked;
+    const isEquipped = t.id === equippedId;
+    const cond = _titleConditionText(t);
+    const icon = RARITY_ICON[t.rarity] || '⬜';
+    return `
+      <div class="title-item ${isUnlocked ? 'unlocked' : 'locked'} ${isEquipped ? 'equipped' : ''}"
+           data-title-id="${t.id}" data-unlocked="${isUnlocked}">
+        ${isEquipped ? '<span class="title-equipped-check">✓</span>' : ''}
+        <span class="title-item-icon">${isUnlocked ? icon : '🔒'}</span>
+        <span class="title-item-name" data-rarity="${t.rarity || 'common'}">${t.name}</span>
+        <span class="title-rarity-tag" data-rarity="${t.rarity || 'common'}">${t.rarity || 'common'}</span>
+        <div class="title-tooltip">
+          <strong>${t.name}</strong>
+          <span class="tt-condition">${isUnlocked ? '🔓 ' : '🔒 '}${cond}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.title-item.unlocked').forEach(el => {
     el.onclick = () => {
       const titleId = parseInt(el.dataset.titleId, 10);
       profile.equippedTitleId = (equippedId === titleId) ? null : titleId;
@@ -2259,4 +2283,17 @@ function renderTitlesSection() {
       renderTitlesSection();
     };
   });
+
+  // ── Modal open/close (idempotent) ─────────────────────────────────────────
+  const modal   = document.getElementById('titlesModal');
+  const openBtn = document.getElementById('openTitlesModal');
+  const closeBtn = document.getElementById('closeTitlesModal');
+
+  if (openBtn && !openBtn._titlesModalBound) {
+    openBtn._titlesModalBound = true;
+    openBtn.onclick = () => modal?.classList.remove('hidden');
+    closeBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal?.classList.add('hidden'); });
+    modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+  }
 }
