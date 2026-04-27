@@ -1079,7 +1079,7 @@ const TEXT_SIZES = [
  * @param {{ font: string, color: string, scale: number }} [textStyle] - Style texte optionnel
  * @returns {HTMLElement}
  */
-function buildShareCard(bg, wallpaper, activeTab, textStyle) {
+function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) {
   const txtFont  = textStyle?.font  || 'Arial, sans-serif';
   const txtColor = textStyle?.color || '#ffffff';
   const txtScale = textStyle?.scale ?? 1;
@@ -1175,14 +1175,19 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle) {
       ${profile.pseudo || 'Guest Player'}
     </h3>
     ${(() => {
+      if (titleOptions.include === false) return '';
       const eq = (typeof _titlesData !== 'undefined' && _titlesData) ? _titlesData.find(t =>
         (profile.equippedTitleId && t.id && t.id === profile.equippedTitleId) ||
         (profile.equippedTitleSlug && t.slug === profile.equippedTitleSlug)
       ) : null;
       if (!eq) return '';
-      const rarityColors = { rare: '#3b82f6', epic: '#9333ea', legendary: '#f59e0b', common: 'rgba(255,255,255,0.7)' };
-      const c = rarityColors[eq.rarity] || 'rgba(255,255,255,0.7)';
-      return `<p style="margin:0 0 16px;font-size:${(0.72*s).toFixed(2)}em;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${c};text-shadow:1px 1px 4px rgba(0,0,0,0.8);">${eq.name}</p>`;
+      const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+      const imgSrc  = `${_prefix}/${eq.image_path || `profile/titles/${eq.slug}.webp`}`;
+      const szMap   = { small: 150, medium: 220, large: 300 };
+      const w = szMap[titleOptions.size] || 220;
+      return `<img src="${imgSrc}" alt="${eq.name}" crossorigin="anonymous"
+        style="width:${w}px;border-radius:8px;display:block;margin:0 auto 14px;
+               box-shadow:0 3px 14px rgba(0,0,0,0.6);">`;
     })()}
 
     <!-- Stats row -->
@@ -1268,6 +1273,8 @@ function setupShareProfile() {
   let selectedFont              = 'arial';
   let selectedColor             = localStorage.getItem('profileShareColor')         || '#ffffff';
   let selectedSize              = localStorage.getItem('profileShareSize')          || 'medium';
+  let titleIncluded = localStorage.getItem('profileShareTitleInclude') !== 'false';
+  let titleSize     = localStorage.getItem('profileShareTitleSize')    || 'medium';
   let activeTab = 'color';
   let currentCard = null;
 
@@ -1327,6 +1334,26 @@ function setupShareProfile() {
               <button class="share-size-btn ${selectedSize === sz.id ? 'active' : ''}"
                       data-size="${sz.id}">${sz.label}</button>
             `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Section Titre visuel ── -->
+      <div class="share-text-divider">🏅 Title card</div>
+      <div class="share-text-style">
+        <div class="share-selector-row">
+          <label>Show title</label>
+          <label class="share-toggle">
+            <input type="checkbox" id="titleIncludeToggle" ${titleIncluded ? 'checked' : ''}>
+            <span class="share-toggle-slider"></span>
+          </label>
+        </div>
+        <div class="share-selector-row" id="titleSizeRow" style="${titleIncluded ? '' : 'opacity:.4;pointer-events:none;'}">
+          <label>Size</label>
+          <div class="share-size-row">
+            <button class="share-size-btn ${titleSize === 'small'  ? 'active' : ''}" data-title-size="small">S</button>
+            <button class="share-size-btn ${titleSize === 'medium' ? 'active' : ''}" data-title-size="medium">M</button>
+            <button class="share-size-btn ${titleSize === 'large'  ? 'active' : ''}" data-title-size="large">L</button>
           </div>
         </div>
       </div>
@@ -1427,12 +1454,36 @@ function setupShareProfile() {
       generatePreview();
     };
 
-    bgSelector.querySelectorAll('.share-size-btn').forEach(sizeBtn => {
+    bgSelector.querySelectorAll('.share-size-btn[data-size]').forEach(sizeBtn => {
       sizeBtn.onclick = () => {
         selectedSize = sizeBtn.dataset.size;
         localStorage.setItem('profileShareSize', selectedSize);
-        bgSelector.querySelectorAll('.share-size-btn').forEach(s => s.classList.remove('active'));
+        bgSelector.querySelectorAll('.share-size-btn[data-size]').forEach(s => s.classList.remove('active'));
         sizeBtn.classList.add('active');
+        generatePreview();
+      };
+    });
+
+    // ── Contrôles titre visuel ──
+    const titleToggle  = document.getElementById('titleIncludeToggle');
+    const titleSizeRow = document.getElementById('titleSizeRow');
+    if (titleToggle) {
+      titleToggle.onchange = () => {
+        titleIncluded = titleToggle.checked;
+        localStorage.setItem('profileShareTitleInclude', titleIncluded);
+        if (titleSizeRow) {
+          titleSizeRow.style.opacity        = titleIncluded ? '' : '0.4';
+          titleSizeRow.style.pointerEvents  = titleIncluded ? '' : 'none';
+        }
+        generatePreview();
+      };
+    }
+    bgSelector.querySelectorAll('.share-size-btn[data-title-size]').forEach(btn => {
+      btn.onclick = () => {
+        titleSize = btn.dataset.titleSize;
+        localStorage.setItem('profileShareTitleSize', titleSize);
+        bgSelector.querySelectorAll('.share-size-btn[data-title-size]').forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
         generatePreview();
       };
     });
@@ -1456,12 +1507,13 @@ function setupShareProfile() {
       wallpaper = catWps.find(w => w.id === selectedWallpaper) || null;
     }
 
-    const fontDef  = TEXT_FONTS.find(f => f.id === selectedFont) || TEXT_FONTS[0];
-    const sizeDef  = TEXT_SIZES.find(s => s.id === selectedSize) || TEXT_SIZES[1];
-    const textStyle = { font: fontDef.value, color: selectedColor, scale: sizeDef.scale };
+    const fontDef    = TEXT_FONTS.find(f => f.id === selectedFont) || TEXT_FONTS[0];
+    const sizeDef    = TEXT_SIZES.find(s => s.id === selectedSize) || TEXT_SIZES[1];
+    const textStyle  = { font: fontDef.value, color: selectedColor, scale: sizeDef.scale };
+    const titleOpts  = { include: titleIncluded, size: titleSize };
 
     // Carte affichée dans la zone (scaled via CSS .share-card-wrapper)
-    currentCard = buildShareCard(bg, wallpaper, activeTab, textStyle);
+    currentCard = buildShareCard(bg, wallpaper, activeTab, textStyle, titleOpts);
     area.innerHTML = '';
     const wrapper = document.createElement('div');
     wrapper.className = 'share-card-wrapper';
@@ -1469,7 +1521,7 @@ function setupShareProfile() {
     area.appendChild(wrapper);
 
     // Clone hors-écran pour la capture html2canvas (résolution pleine — non affecté par le scale CSS)
-    const offscreen = buildShareCard(bg, wallpaper, activeTab, textStyle);
+    const offscreen = buildShareCard(bg, wallpaper, activeTab, textStyle, titleOpts);
     offscreen.style.position = 'fixed';
     offscreen.style.left = '-9999px';
     offscreen.style.top = '0';
