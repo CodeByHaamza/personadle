@@ -3218,7 +3218,7 @@ body.darkmode .vb-code { background: rgba(255, 255, 255, 0.08); }
 
 .titles-modal-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 14px;
   margin-top: 14px;
 }
@@ -3229,7 +3229,7 @@ body.darkmode .vb-code { background: rgba(255, 255, 255, 0.08); }
   border: 2px solid rgba(255,255,255,0.08);
   overflow: hidden;
   cursor: default;
-  aspect-ratio: 4 / 1;
+  aspect-ratio: 16 / 9;
   transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
   background: #111;
 }
