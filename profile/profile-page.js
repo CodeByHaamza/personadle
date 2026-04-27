@@ -1175,7 +1175,10 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle) {
       ${profile.pseudo || 'Guest Player'}
     </h3>
     ${(() => {
-      const eq = (typeof _titlesData !== 'undefined' && _titlesData) ? _titlesData.find(t => t.id === (profile.equippedTitleId || null)) : null;
+      const eq = (typeof _titlesData !== 'undefined' && _titlesData) ? _titlesData.find(t =>
+        (profile.equippedTitleId && t.id && t.id === profile.equippedTitleId) ||
+        (profile.equippedTitleSlug && t.slug === profile.equippedTitleSlug)
+      ) : null;
       if (!eq) return '';
       const rarityColors = { rare: '#3b82f6', epic: '#9333ea', legendary: '#f59e0b', common: 'rgba(255,255,255,0.7)' };
       const c = rarityColors[eq.rarity] || 'rgba(255,255,255,0.7)';
@@ -2118,7 +2121,13 @@ const TITLES_LOCAL = [
   { slug: 'maya_always_be_positive',   name: 'Always Be Positive',      rarity: 'common',    condition_type: 'emoji_p2_wins',      condition_value: 10  },
 ];
 
-let _titlesData = TITLES_LOCAL.map(t => ({ ...t, id: null, is_unlocked: 0, image_path: `profile/titles/${t.slug}.webp` }));
+let _titlesData = TITLES_LOCAL.map(t => ({
+  ...t,
+  id: null,
+  // Mark as unlocked if already persisted in profile
+  is_unlocked: (profile.unlockedTitles || []).includes(t.slug) ? 1 : 0,
+  image_path: `profile/titles/${t.slug}.webp`,
+}));
 
 async function initTitlesSection() {
   const lang    = window.i18n?.getCurrentLang?.() || 'en';
@@ -2178,33 +2187,68 @@ async function checkAndUnlockTitles() {
     }
     if (met) {
       title.is_unlocked = 1;
-      _showTitleNotification(title);
+      if (!profile.unlockedTitles) profile.unlockedTitles = [];
+      if (!profile.unlockedTitles.includes(title.slug)) {
+        profile.unlockedTitles.push(title.slug);
+        saveProfile();
+        _showTitleNotification(title);
+      }
       window._personadleApi?.titles?.unlock(title.id).catch(() => {});
     }
   }
 }
 
 function _showTitleNotification(title) {
+  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+  const imgSrc  = `${_prefix}/${title.image_path || `profile/titles/${title.slug}.webp`}`;
+  const cond    = _titleConditionText(title);
+
   const notif = document.createElement('div');
-  notif.className = 'badge-notification';
-  notif.style.cursor = 'pointer';
+  notif.className = 'title-notification';
   notif.innerHTML = `
-    <div class="badge-notif-content">
-      <div style="font-size:1.8rem;line-height:1;">🏅</div>
-      <div>
-        <h4>${window.i18n?.t?.('badges.notification_title_unlocked') || '🏅 Title Unlocked!'}</h4>
-        <p><strong>${title.name}</strong></p>
-        <small style="opacity:.7;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;">${title.rarity}</small>
-      </div>
+    <div class="title-notif-header">🏅 Title Unlocked!</div>
+    <img class="title-notif-img" src="${imgSrc}" alt="${title.name}">
+    <div class="title-notif-footer">
+      <strong>${title.name}</strong>
+      <span class="title-rarity-tag" data-rarity="${title.rarity}">${title.rarity}</span>
     </div>
   `;
+
   document.body.appendChild(notif);
-  notif.onclick = () => notif.remove();
+
+  notif.onclick = () => {
+    notif.remove();
+    _showTitleZoom(title);
+  };
+
   setTimeout(() => notif.classList.add('show'), 80);
   setTimeout(() => {
     notif.classList.remove('show');
-    setTimeout(() => notif.remove(), 500);
-  }, 4500);
+    setTimeout(() => notif.remove(), 400);
+  }, 5000);
+}
+
+function _showTitleZoom(title) {
+  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+  const imgSrc  = `${_prefix}/${title.image_path || `profile/titles/${title.slug}.webp`}`;
+  const cond    = _titleConditionText(title);
+
+  const modal = document.createElement('div');
+  modal.className = 'badge-zoom-modal title-zoom-modal';
+  modal.innerHTML = `
+    <div class="badge-zoom-content title-zoom-content">
+      <span class="badge-zoom-close">&times;</span>
+      <img src="${imgSrc}" alt="${title.name}" style="width:100%;border-radius:10px;display:block;margin-bottom:14px;">
+      <h3 style="margin:0 0 6px;color:#ffd700;">${title.name}</h3>
+      <span class="title-rarity-tag" data-rarity="${title.rarity}" style="font-size:.7rem;">${title.rarity}</span>
+      <p class="badge-condition" style="margin-top:10px;opacity:.85;">${cond}</p>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  modal.querySelector('.badge-zoom-close').onclick = () => modal.remove();
+  setTimeout(() => modal.classList.add('show'), 10);
 }
 
 /** Human-readable condition text from API fields. */
@@ -2237,15 +2281,17 @@ function renderTitlesSection() {
     (equippedSlug && t.slug === equippedSlug)
   );
 
-  // ── Text under avatar/username ─────────────────────────────────────────────
-  const titleText = document.getElementById('equippedTitleText');
-  if (titleText) {
+  // ── Calling card image under avatar/username ──────────────────────────────
+  const _prefix2  = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+  const titleImg  = document.getElementById('equippedTitleImg');
+  if (titleImg) {
     if (eq) {
-      titleText.textContent    = eq.name;
-      titleText.dataset.rarity = eq.rarity || 'common';
-      titleText.style.display  = 'block';
+      const src = `${_prefix2}/${eq.image_path || `profile/titles/${eq.slug}.webp`}`;
+      titleImg.src          = src;
+      titleImg.dataset.rarity = eq.rarity || 'common';
+      titleImg.style.display  = 'block';
     } else {
-      titleText.style.display = 'none';
+      titleImg.style.display = 'none';
     }
   }
 
