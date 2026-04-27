@@ -1951,6 +1951,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2b. Wallpapers débloquables + Titres (fire-and-forget async)
   initUnlockableWallpapers().catch(() => {});
+  _bindTitlesModal();          // binding immédiat — indépendant de l'API
   initTitlesSection().catch(() => {});
 
   // 3. Auth — initAuth() est appelé depuis profile.html (bloc <script type="module">)
@@ -2358,16 +2359,16 @@ function renderTitlesSection() {
     };
   });
 
-  // ── Modal open/close (idempotent) ─────────────────────────────────────────
+}
+
+function _bindTitlesModal() {
   const modal    = document.getElementById('titlesModal');
   const openBtn  = document.getElementById('openTitlesModal');
   const closeBtn = document.getElementById('closeTitlesModal');
+  if (!modal || !openBtn) return;
 
-  if (openBtn && !openBtn._titlesModalBound) {
-    openBtn._titlesModalBound = true;
-    openBtn.onclick = () => modal?.classList.remove('hidden');
-    closeBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal?.classList.add('hidden'); });
-    modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
-  }
+  openBtn.onclick = () => modal.classList.remove('hidden');
+  closeBtn?.addEventListener('click', () => modal.classList.add('hidden'));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.classList.add('hidden'); });
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
 }

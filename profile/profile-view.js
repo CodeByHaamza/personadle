@@ -474,6 +474,17 @@ function populatePublicProfile(data) {
     }
   }
 
+  // ── Wallpapers débloquables — état vide si le joueur n'en a pas ──
+  const wpGrid = document.getElementById('unlockableWallpaperGrid');
+  if (wpGrid) {
+    const unlockedWps = profile.unlocked_wallpapers ?? [];
+    if (unlockedWps.length === 0) {
+      wpGrid.innerHTML = `<p class="view-empty-state">🔒 Nothing to see here… yet.</p>`;
+    } else {
+      wpGrid.innerHTML = `<p class="view-empty-state" style="opacity:.7;">🖼️ ${unlockedWps.length} wallpaper${unlockedWps.length > 1 ? 's' : ''} unlocked</p>`;
+    }
+  }
+
   // ── Date d'inscription + code ami ──
   const infoContainer = usernameEl?.closest('.avatar-card-info');
   if (infoContainer) {

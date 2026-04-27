@@ -3335,6 +3335,15 @@ body.darkmode .vb-code { background: rgba(255, 255, 255, 0.08); }
 
 body.darkmode #titlesModal { background: rgba(10,10,10,0.99); }
 
+.view-empty-state {
+  font-size: 0.82rem;
+  opacity: 0.5;
+  font-style: italic;
+  text-align: center;
+  padding: 12px 0;
+  margin: 0;
+}
+
 /* ── Title unlock notification (slides in from right) ────────────── */
 .title-notification {
   position: fixed;
