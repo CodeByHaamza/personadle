@@ -2033,6 +2033,23 @@ const UNLOCKABLE_WALLPAPERS = [
   },
 ];
 
+function renderUnlockableWallpaperGallery(p) {
+  const container = document.getElementById('unlockableWallpaperGrid');
+  if (!container) return;
+  const unlocked = p.unlockedWallpapers || [];
+  container.innerHTML = UNLOCKABLE_WALLPAPERS.map(wp => {
+    const isUnlocked = unlocked.includes(wp.id);
+    return `
+      <div class="unlockable-wp-item ${isUnlocked ? 'unlocked' : 'locked'}"
+           data-id="${wp.id}" title="${isUnlocked ? wp.name : wp.condition}">
+        <img src="${wp.src}" alt="${wp.name}" loading="lazy">
+        ${!isUnlocked ? `<div class="wp-lock-overlay">🔒<span class="wp-lock-cond">${wp.condition}</span></div>` : ''}
+        ${isUnlocked ? `<span class="wp-unlocked-label">✓ ${wp.name}</span>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
 async function checkAndUnlockWallpapers(p, stats, friendCount) {
   if (!p.unlockedWallpapers) p.unlockedWallpapers = [];
   const newUnlocks = [];
@@ -2099,6 +2116,7 @@ async function initUnlockableWallpapers() {
   }
 
   checkAndUnlockWallpapers(profile, stats, friendCount);
+  renderUnlockableWallpaperGallery(profile);
 }
 
 
@@ -2320,16 +2338,23 @@ function renderTitlesSection() {
     `;
   }).join('');
 
-  grid.querySelectorAll('.title-item.unlocked').forEach(el => {
+  grid.querySelectorAll('.title-item').forEach(el => {
     el.onclick = () => {
-      const slug    = el.dataset.slug;
-      const titleId = el.dataset.id ? parseInt(el.dataset.id, 10) : null;
-      const alreadyEquipped = eq?.slug === slug;
-      profile.equippedTitleId   = alreadyEquipped ? null : titleId;
-      profile.equippedTitleSlug = alreadyEquipped ? null : slug;
-      saveProfile();
-      saveProfileToCloud({ equipped_title_id: profile.equippedTitleId || null });
-      renderTitlesSection();
+      const slug      = el.dataset.slug;
+      const titleId   = el.dataset.id ? parseInt(el.dataset.id, 10) : null;
+      const titleObj  = _titlesData.find(t => t.slug === slug);
+      const isUnlocked = el.dataset.unlocked === 'true';
+
+      if (isUnlocked) {
+        const alreadyEquipped = eq?.slug === slug;
+        profile.equippedTitleId   = alreadyEquipped ? null : titleId;
+        profile.equippedTitleSlug = alreadyEquipped ? null : slug;
+        saveProfile();
+        saveProfileToCloud({ equipped_title_id: profile.equippedTitleId || null });
+        renderTitlesSection();
+      } else if (titleObj) {
+        _showTitleZoom(titleObj);
+      }
     };
   });
 
