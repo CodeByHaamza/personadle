@@ -78,6 +78,7 @@ function getBadgeCondition(badge, isUnlocked) {
 // Labels des catégories (traduits dynamiquement)
 const CATEGORY_LABELS = {
   [BADGE_CATEGORIES.ACHIEVEMENT]: { icon: '🏆', key: 'badges.category_achievement', fallback: 'Achievements' },
+  [BADGE_CATEGORIES.STREAK]:      { icon: '🔥', key: 'badges.category_streak',      fallback: 'Streaks'      },
   [BADGE_CATEGORIES.EVENT]:       { icon: '🎟️', key: 'badges.category_event',       fallback: 'Events'       },
   [BADGE_CATEGORIES.SECRET]:      { icon: '🔒', key: 'badges.category_secret',      fallback: 'Secrets'      },
   [BADGE_CATEGORIES.SOCIAL]:      { icon: '👥', key: 'badges.category_social',      fallback: 'Social'       },
@@ -593,6 +594,7 @@ export function renderBadgesModal(profile, saveProfile) {
   // Regrouper les badges par catégorie (secrets non débloqués masqués)
   const categoryOrder = [
     BADGE_CATEGORIES.ACHIEVEMENT,
+    BADGE_CATEGORIES.STREAK,
     BADGE_CATEGORIES.EVENT,
     BADGE_CATEGORIES.SOCIAL,
     BADGE_CATEGORIES.SECRET,
@@ -1103,12 +1105,25 @@ export function checkEventBadges() {
  */
 export function initEventBadgesCheck() {
   console.log("🎊 Initializing event badges check...");
-  
+
   // Vérifier immédiatement au chargement
   checkEventBadges();
-  
+
   // Vérifier toutes les heures (au cas où l'utilisateur reste longtemps sur la page)
   setInterval(checkEventBadges, 60 * 60 * 1000); // 1 heure = 3600000 ms
-  
+
   console.log("✅ Event badges check initialized");
+}
+
+/**
+ * Lightweight badge check for game mode pages.
+ * Reads profile from localStorage, evaluates all badge conditions,
+ * shows unlock notifications. Does NOT render the profile page UI.
+ * Call this after setting badge flags in a game mode's win/giveup handler.
+ */
+export function checkBadgesAfterGame() {
+  const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+  if (!p.badges) p.badges = [];
+  const save = () => localStorage.setItem('personaUserProfile', JSON.stringify(p));
+  checkAndUnlockBadges(p, save);
 }

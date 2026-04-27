@@ -14,6 +14,7 @@ const BADGE_IMG_BASE = new URL('./images/', import.meta.url).href;
 // ───────────────────────────────────────────────────────────────────────────
 export const BADGE_CATEGORIES = {
   ACHIEVEMENT: "achievement",    // Badges de statistiques
+  STREAK:      "streak",         // Badges de streak quotidienne
   EVENT: "event",                // Badges d'événements temporaires
   SECRET: "secret",              // Badges secrets (codes permanents)
   SOCIAL: "social"               // Badges sociaux (partage, etc.)
@@ -628,7 +629,7 @@ export const badgesList = [
     name: 'Breathtaking Aesthetics',
     category: BADGE_CATEGORIES.ACHIEVEMENT,
     img: BADGE_IMG_BASE + 'Badge_stylist.webp',
-    condition: 'Customize your profile: avatar + UI color + 1 badge selected + profile music',
+    condition: 'Customize your profile: avatar + UI color + profile music + equipped title',
     description: "Such passion! Such composition! You refused the mediocrity of a default profile to forge a visual masterpiece that moves the very soul.",
     secret: false,
     check: (stats, profile) =>
@@ -637,15 +638,15 @@ export const badgesList = [
         (profile?.profileTheme && profile.profileTheme !== 'all_out' && profile.profileTheme !== '') ||
         (profile?.avatarBorderColor && profile.avatarBorderColor !== '#000000' && profile.avatarBorderColor !== '#ffffff')
       ) &&
-      (profile?.selectedBadges?.length || 0) >= 1 &&
-      !!(profile?.profileSong?.fichier),
+      !!(profile?.profileSong?.fichier) &&
+      !!(profile?.equippedTitleSlug || profile?.equippedTitleId),
   },
 
   // ── Streak badges ────────────────────────────────────────────────────────
   {
     id: 'pyro_spark',
     name: 'The Ignition',
-    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    category: BADGE_CATEGORIES.STREAK,
     img: BADGE_IMG_BASE + 'Badge_Pyro_Spark.webp',
     condition: 'Reach a 7-day streak',
     description: "A tiny flicker in the dark. For seven days, you've kept the flame alive. The first step towards a scorching resolve.",
@@ -655,7 +656,7 @@ export const badgesList = [
   {
     id: 'raphael',
     name: 'The Divine Blaze',
-    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    category: BADGE_CATEGORIES.STREAK,
     img: BADGE_IMG_BASE + 'Badge_Raphael.webp',
     condition: 'Reach a 30-day streak',
     description: "Thirty days. The flicker has ascended into a roaring inferno. Your resolve now burns with a heat that even the abyss cannot cool.",
@@ -665,7 +666,7 @@ export const badgesList = [
   {
     id: 'surt',
     name: "Ragnarök's Dawn",
-    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    category: BADGE_CATEGORIES.STREAK,
     img: BADGE_IMG_BASE + 'Badge_Surt.webp',
     condition: 'Reach a 90-day streak',
     description: "Ninety days of absolute, unrelenting persistence. You have summoned the world-ending fire of Surt. The old world of hesitation has been incinerated.",
@@ -675,7 +676,7 @@ export const badgesList = [
   {
     id: 'lucifer',
     name: 'Crest of the Morning Star',
-    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    category: BADGE_CATEGORIES.STREAK,
     img: BADGE_IMG_BASE + 'Badge_Lucifer.webp',
     condition: 'Reach a 120-day streak',
     description: "One hundred and twenty sunrises. Beyond the fires of destruction lies the blinding clarity of the Morning Star. You have seized ultimate dominion over time itself.",
@@ -685,7 +686,7 @@ export const badgesList = [
   {
     id: 'helel',
     name: 'The Eternal Zenith',
-    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    category: BADGE_CATEGORIES.STREAK,
     img: BADGE_IMG_BASE + 'Badge_Helel.webp',
     condition: 'Reach a 365-day streak',
     description: "Beyond rebellion, beyond ruin, lies the pure grace of the first star. You have walked the path for a year, reaching a state of perfection that even the gods envy.",
@@ -695,7 +696,7 @@ export const badgesList = [
   {
     id: 'reborn_phoenix',
     name: 'Phoenix Reborn',
-    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    category: BADGE_CATEGORIES.STREAK,
     img: BADGE_IMG_BASE + 'Badge_Reborn_Phenix.webp',
     condition: 'Restore your streak after losing it (grace period)',
     description: "A momentary lapse in the flow of time! You refused to let the darkness claim your legacy. From the scattered ashes of yesterday, you soar toward a new dawn.",

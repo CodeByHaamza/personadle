@@ -217,6 +217,22 @@ const VIEW_MODE_META = {
   music:        { icon: '🎵', color: '#0EA5E9', label: 'Music'         },
 };
 
+// Fallback name→slug si l'API ne retourne pas le slug
+const _TITLE_SLUG_MAP = {
+  'Thou Art I':             'velvet_room_thou_art_i',
+  'Looking Cool':           'joker_looking_cool',
+  'Memento Mori':           'makoto_yuki_memento_mori',
+  "Pancakes?":              'akechi_pancakes',
+  'Reach Out to the Truth': 'yu_reach_out_to_the_truth',
+  'I Am Not Afraid':        'aigis_i_am_not_afraid',
+  'I Remembered':           'marie_i_remembered',
+  'Ride the Wind':          'yosuke_ride_the_wind',
+  'The First Awakening':    'naoya_first_awakening',
+  "Boring, Isn't It?":     'adachi_boring_isnt_it',
+  'Always Be Positive':     'maya_always_be_positive',
+};
+function _titleNameToSlug(name) { return _TITLE_SLUG_MAP[name] || null; }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MASQUAGE MODE READ-ONLY
 // ─────────────────────────────────────────────────────────────────────────────
@@ -230,6 +246,7 @@ function activateReadOnlyMode() {
   hide(document.querySelector('.pseudo-edit-row'));
   hide(document.querySelector('.perso-card'));
   hide(document.getElementById('openBadgesModal'));
+  hide(document.getElementById('openTitlesModal'));
 
   // Masquer les cartes d'action (export, import, share, reset, event code)
   document.querySelectorAll('.profile-card').forEach(card => {
@@ -444,13 +461,17 @@ function populatePublicProfile(data) {
   const usernameEl = document.getElementById('pageUsername');
   if (usernameEl) usernameEl.textContent = user.pseudo;
 
-  // ── Titre équipé ──
+  // ── Titre équipé — calling card image ──
   if (equipped_title) {
-    const titleEl = document.createElement('p');
-    titleEl.className      = 'profile-equipped-title';
-    titleEl.textContent    = equipped_title.name;
-    titleEl.dataset.rarity = equipped_title.rarity;
-    usernameEl?.insertAdjacentElement('afterend', titleEl);
+    const slug = equipped_title.slug || _titleNameToSlug(equipped_title.name);
+    if (slug) {
+      const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+      const titleImg = document.getElementById('equippedTitleImg');
+      if (titleImg) {
+        titleImg.src   = `${_prefix}/profile/titles/${slug}.webp`;
+        titleImg.style.display = 'block';
+      }
+    }
   }
 
   // ── Date d'inscription + code ami ──
