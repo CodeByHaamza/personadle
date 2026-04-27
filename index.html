@@ -1224,6 +1224,13 @@ if (window._authReady) await window._authReady;
 if (window._currentUser) initNotifications();
 </script>
 
+<script type="module">
+import { checkBadgesAfterGame } from './profile/badges/badgesManager.js';
+// Fire badge/title checks on the home page so any unlocks gained
+// during the session are surfaced here too.
+document.addEventListener('DOMContentLoaded', () => checkBadgesAfterGame());
+</script>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

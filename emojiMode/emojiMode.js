@@ -24,7 +24,7 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { trackUniqueDay } from "../profile/badges/badgesManager.js";
+import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -321,6 +321,7 @@ function checkEmojiGuess(name, forceReveal = false) {
     document.getElementById("giveUpButton").disabled = true;
     gameOver = true;
     localStorage.setItem("emojiWin", "true");
+    checkBadgesAfterGame();
   } else {
     // Wrong guess: show mini portrait + increment
     const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];

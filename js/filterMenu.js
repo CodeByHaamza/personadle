@@ -42,16 +42,26 @@ function _migrate(saved, allOpus) {
 
   const result = [];
   for (const code of saved) {
-    if (LEGACY_EXPAND[code]) {
-      // Ancien code large → expand en sous-codes présents dans allOpus
-      result.push(...LEGACY_EXPAND[code].filter(c => allOpus.includes(c)));
+    const children = LEGACY_EXPAND[code];
+    if (children) {
+      // Only treat as legacy broad code if none of its children are already
+      // in the saved array (new format stores precise codes like ["P5","P5R"]).
+      // Detect new-format: if any CHILD (other than the parent code itself) is in saved,
+      // this is the new precise format. Otherwise it's the old broad-code format.
+      const alreadyPrecise = children.some(c => c !== code && saved.includes(c));
+      if (alreadyPrecise) {
+        // New format: "P5" is a precise base-game entry alongside "P5R" etc.
+        if (allOpus.includes(code)) result.push(code);
+      } else {
+        // Old format: "P5" meaning "all P5 games" → expand to all children
+        result.push(...children.filter(c => allOpus.includes(c)));
+      }
     } else if (allOpus.includes(code)) {
-      // Code déjà précis → conserver
+      // Already a precise code with no expansion entry
       result.push(code);
     }
-    // Codes inconnus (ex P3R absent de la BDD) → ignorer
+    // Unknown codes → ignore
   }
-  // Dédupliquer
   return result.length > 0 ? [...new Set(result)] : null;
 }
 
@@ -283,7 +293,9 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     // Bouton global tout-cocher / tout-décocher
     if (selectAllBtn) {
       const allActive = allOpus.every((o) => activeOpus.includes(o));
-      selectAllBtn.textContent = allActive ? "✗ Tout décocher" : "✓ Tout cocher";
+      selectAllBtn.textContent = allActive
+        ? (window.i18n?.t?.('ui.deselect_all') || '✗ Deselect all')
+        : (window.i18n?.t?.('ui.select_all')   || '✓ Select all');
       selectAllBtn.dataset.state = allActive ? "deselect" : "select";
     }
 
@@ -291,7 +303,9 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     document.querySelectorAll(".filter-group-select-btn[data-group-codes]").forEach((btn) => {
       const codes    = btn.dataset.groupCodes.split(",");
       const allActive = codes.every(c => activeOpus.includes(c));
-      btn.textContent  = allActive ? "✗ Tout décocher" : "✓ Tout cocher";
+      btn.textContent  = allActive
+        ? (window.i18n?.t?.('ui.deselect_all') || '✗ Deselect all')
+        : (window.i18n?.t?.('ui.select_all')   || '✓ Select all');
       btn.dataset.state = allActive ? "deselect" : "select";
     });
   }

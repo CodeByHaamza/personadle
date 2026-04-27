@@ -22,7 +22,7 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { trackUniqueDay } from "../profile/badges/badgesManager.js";
+import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -333,6 +333,7 @@ function showVictory(force = false) {
 
   localStorage.setItem("silhouetteGameOver", "true");
   localStorage.setItem("silhouetteForceReveal", String(force));
+  checkBadgesAfterGame();
 }
 
 

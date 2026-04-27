@@ -1169,11 +1169,18 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle) {
     </div>
 
     <!-- Pseudo -->
-    <h3 style="margin:0 0 20px;font-size:${(1.6*s).toFixed(2)}em;font-weight:900;
+    <h3 style="margin:0 0 4px;font-size:${(1.6*s).toFixed(2)}em;font-weight:900;
                color:${txtColor};text-shadow:2px 2px 6px rgba(0,0,0,0.8);
                max-width:340px;word-break:break-word;">
       ${profile.pseudo || 'Guest Player'}
     </h3>
+    ${(() => {
+      const eq = (typeof _titlesData !== 'undefined' && _titlesData) ? _titlesData.find(t => t.id === (profile.equippedTitleId || null)) : null;
+      if (!eq) return '';
+      const rarityColors = { rare: '#3b82f6', epic: '#9333ea', legendary: '#f59e0b', common: 'rgba(255,255,255,0.7)' };
+      const c = rarityColors[eq.rarity] || 'rgba(255,255,255,0.7)';
+      return `<p style="margin:0 0 16px;font-size:${(0.72*s).toFixed(2)}em;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${c};text-shadow:1px 1px 4px rgba(0,0,0,0.8);">${eq.name}</p>`;
+    })()}
 
     <!-- Stats row -->
     <div style="display:flex;justify-content:space-around;align-items:center;
@@ -2168,9 +2175,33 @@ async function checkAndUnlockTitles() {
     }
     if (met) {
       title.is_unlocked = 1;
+      _showTitleNotification(title);
       window._personadleApi?.titles?.unlock(title.id).catch(() => {});
     }
   }
+}
+
+function _showTitleNotification(title) {
+  const notif = document.createElement('div');
+  notif.className = 'badge-notification';
+  notif.style.cursor = 'pointer';
+  notif.innerHTML = `
+    <div class="badge-notif-content">
+      <div style="font-size:1.8rem;line-height:1;">🏅</div>
+      <div>
+        <h4>${window.i18n?.t?.('badges.notification_title_unlocked') || '🏅 Title Unlocked!'}</h4>
+        <p><strong>${title.name}</strong></p>
+        <small style="opacity:.7;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;">${title.rarity}</small>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(notif);
+  notif.onclick = () => notif.remove();
+  setTimeout(() => notif.classList.add('show'), 80);
+  setTimeout(() => {
+    notif.classList.remove('show');
+    setTimeout(() => notif.remove(), 500);
+  }, 4500);
 }
 
 function renderTitlesSection() {
@@ -2194,14 +2225,28 @@ function renderTitlesSection() {
     `;
   }).join('');
 
+  const eq = _titlesData.find(t => t.id === equippedId);
+
+  // ── Banner in titles section ───────────────────────────────────────────────
   const banner = document.getElementById('equippedTitleBanner');
   if (banner) {
-    const eq = _titlesData.find(t => t.id === equippedId);
     if (eq) {
       banner.innerHTML = `<img src="/${titleImgPath(eq)}" alt="${eq.name}" class="equipped-title-img">`;
       banner.style.display = 'block';
     } else {
       banner.style.display = 'none';
+    }
+  }
+
+  // ── Text under avatar/username ─────────────────────────────────────────────
+  const titleText = document.getElementById('equippedTitleText');
+  if (titleText) {
+    if (eq) {
+      titleText.textContent    = eq.name;
+      titleText.dataset.rarity = eq.rarity || 'common';
+      titleText.style.display  = 'block';
+    } else {
+      titleText.style.display = 'none';
     }
   }
 

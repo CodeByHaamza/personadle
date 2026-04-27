@@ -633,7 +633,10 @@ export const badgesList = [
     secret: false,
     check: (stats, profile) =>
       !!profile?.avatarData &&
-      !!(profile?.profileTheme && profile.profileTheme !== 'default' && profile.profileTheme !== '') &&
+      !!(
+        (profile?.profileTheme && profile.profileTheme !== 'all_out' && profile.profileTheme !== '') ||
+        (profile?.avatarBorderColor && profile.avatarBorderColor !== '#000000' && profile.avatarBorderColor !== '#ffffff')
+      ) &&
       (profile?.selectedBadges?.length || 0) >= 1 &&
       !!(profile?.profileSong?.fichier),
   },

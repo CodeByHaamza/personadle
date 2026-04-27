@@ -30,7 +30,7 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { trackUniqueDay } from "../profile/badges/badgesManager.js";
+import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -343,15 +343,7 @@ function showVictory(force = false) {
     localStorage.setItem(todayKey, "1");
   }
 
-  // ── Dynamic badge check ────────────────────────────────────────────────────
-  import("../profile/badges/badgesManager.js")
-    .then(module => {
-      const currentProfile = JSON.parse(localStorage.getItem("personaUserProfile"));
-      module.checkBadges(currentProfile, updatedProfile => {
-        localStorage.setItem("personaUserProfile", JSON.stringify(updatedProfile));
-      });
-    })
-    .catch(err => console.error("⚠️ Could not load badgesManager:", err));
+  checkBadgesAfterGame();
 
   // ── UI ─────────────────────────────────────────────────────────────────────
   textbar.disabled  = true;

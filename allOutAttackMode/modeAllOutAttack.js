@@ -22,6 +22,7 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
+import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CDN / IMAGE LOADING CONFIGURATION
@@ -174,17 +175,16 @@ function loadImageSafely(gifElement, src, onLoadCallback) {
   tempImg.src = src;
 }
 
-/** Displays the loading placeholder, preferring the cached version. */
+/** Displays the loading placeholder. Always sets src synchronously to avoid race conditions. */
 function showLoading(gifElement) {
   gifElement.style.filter = "none";
   gifElement.style.opacity = "1";
-  const cached = getFromCache("../img/loading.gif");
-  if (cached) {
-    gifElement.src = "../img/loading.gif";
-  } else {
+  gifElement.src = "../img/loading.gif";
+  // Warm the JS cache without touching gifElement asynchronously
+  if (!getFromCache("../img/loading.gif")) {
     const img = new Image();
+    img.onload = () => addToImageCache("../img/loading.gif", img);
     img.src = "../img/loading.gif";
-    img.onload = () => { addToImageCache("../img/loading.gif", img); gifElement.src = "../img/loading.gif"; };
   }
 }
 
@@ -407,6 +407,7 @@ function handleGuess() {
 
     localStorage.setItem("aoaTarget", target);
     localStorage.setItem("aoaAttempts", attempts);
+    checkBadgesAfterGame();
     disableInputs();
   } else {
     // ── Wrong guess ──────────────────────────────────────────────────────────
@@ -449,6 +450,7 @@ function giveUp() {
   localStorage.setItem("aoaGameOver", "true");
   localStorage.setItem("aoaTarget", target);
   localStorage.setItem("aoaAttempts", attempts);
+  checkBadgesAfterGame();
 }
 
 /**
@@ -748,7 +750,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("aoaTarget");
     localStorage.removeItem("aoaAttempts");
     localStorage.removeItem("aoaGameOver");
-    resetGame(true);
+    localStorage.removeItem("aoaForceReveal");
+    resetGame();
   });
 
   // ── Daily reset ──
