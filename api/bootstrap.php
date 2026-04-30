@@ -162,6 +162,24 @@ function requireAuth(): int
 }
 
 /**
+ * Vérifie que l'utilisateur connecté est admin (is_admin = 1 en BDD).
+ * Retourne 403 sinon.
+ *
+ * @return int user_id
+ */
+function requireAdmin(): int
+{
+    $uid = requireAuth();
+    $stmt = pdo()->prepare('SELECT is_admin FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt->execute([$uid]);
+    $row = $stmt->fetch();
+    if (!$row || !(bool)$row['is_admin']) {
+        jsonError('Forbidden — admin only', 403);
+    }
+    return $uid;
+}
+
+/**
  * Lit et désérialise le corps JSON de la requête.
  * Termine avec 400 si le JSON est invalide ou absent.
  *
@@ -221,13 +239,14 @@ function formatUser(array $row, array $profile = []): array
         'avatar_data'         =>        $profile['avatar_data']         ?? null,
         'avatar_border_color' =>        $profile['avatar_border_color'] ?? '#ffffff',
         'has_migrated'        => (bool) ($row['has_migrated']           ?? false),
+        'is_admin'            => (bool) ($row['is_admin']               ?? false),
     ];
 }
 
 /** Fetches the profiles row for a user and returns it (empty array if none). */
 function fetchProfile(PDO $pdo, int $userId): array
 {
-    $s = $pdo->prepare('SELECT user_id, avatar_data, avatar_border_color, wallpaper_id, profile_music_id, selected_badges, equipped_title_id, theme_id, settings FROM profiles WHERE user_id = ? LIMIT 1');
+    $s = $pdo->prepare('SELECT user_id, avatar_data, avatar_border_color, wallpaper_id, profile_music_id, selected_badges, equipped_title_id, settings FROM profiles WHERE user_id = ? LIMIT 1');
     $s->execute([$userId]);
     return $s->fetch(PDO::FETCH_ASSOC) ?: [];
 }

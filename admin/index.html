@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PersonaDLE Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ── Loading screen ──────────────────────────────────────────── -->
+<div id="admin-loading" class="admin-loading">
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- ── Main app (hidden until auth checked) ───────────────────── -->
+<div id="admin-app" class="hidden">
+
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="admin-header-left">
+      <span class="admin-logo">⚡ PERSONADLE ADMIN</span>
+    </div>
+    <div class="admin-header-right">
+      <span id="admin-username"></span>
+      <button id="admin-logout" class="btn-secondary btn-small">Logout</button>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <nav>
+        <button class="sidebar-item active" data-section="users">👥 Users</button>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="admin-main">
+
+      <!-- Users list section -->
+      <section id="section-users" class="admin-section">
+        <div class="admin-search-bar">
+          <input type="text" id="user-search" placeholder="Search pseudo, email, friend code…" autocomplete="off">
+        </div>
+        <div id="users-grid" class="users-grid"></div>
+        <div id="users-pagination" class="pagination"></div>
+      </section>
+
+      <!-- User detail panel (hidden by default) -->
+      <section id="user-detail" class="user-detail hidden">
+
+        <div class="user-detail-header">
+          <button id="back-to-list" class="btn-secondary">← Back</button>
+          <div class="user-detail-identity">
+            <div id="detail-avatar" class="detail-avatar"></div>
+            <div>
+              <h2 id="detail-pseudo"></h2>
+              <p id="detail-email"></p>
+              <p id="detail-info"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="user-detail-tabs">
+          <button class="detail-tab active" data-tab="profile">Profil</button>
+          <button class="detail-tab" data-tab="badges">Badges</button>
+          <button class="detail-tab" data-tab="wallpapers">Wallpapers</button>
+          <button class="detail-tab" data-tab="titles">Titres</button>
+          <button class="detail-tab" data-tab="stats">Stats</button>
+          <button class="detail-tab" data-tab="friends">Amis</button>
+          <button class="detail-tab" data-tab="social">Social Links</button>
+        </div>
+
+        <div id="user-detail-content" class="user-detail-content"></div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FAB — pending gifts -->
+  <button id="pending-fab" class="pending-fab hidden">
+    ⚡ Appliquer les dons (<span id="pending-count">0</span>)
+  </button>
+
+</div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
