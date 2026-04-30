@@ -228,5 +228,35 @@ export function initBottomNav() {
   // Injecte la nav juste avant </body>
   document.body.insertAdjacentHTML('beforeend', buildNavHTML(currentPage, avatar, hrefs));
 
-  // Ranking et Friends sont maintenant de vraies pages — plus de toast
+  // ── Badge admin ────────────────────────────────────────────────────────────
+  // Injecte un lien "⚡ Admin" en haut à droite si l'utilisateur est admin.
+  // Calcule le bon chemin relatif selon la profondeur de la page courante.
+  const _injectAdminBadge = () => {
+    if (!window._currentUser?.is_admin) return;
+    if (document.getElementById('admin-badge')) return; // déjà présent
+    const isSubpath = window.location.pathname.includes('/profile/') ||
+                      window.location.pathname.includes('/classiqueMode/') ||
+                      window.location.pathname.includes('/emojiMode/') ||
+                      window.location.pathname.includes('/silhouetteMode/') ||
+                      window.location.pathname.includes('/allOutAttackMode/') ||
+                      window.location.pathname.includes('/personaeMode/') ||
+                      window.location.pathname.includes('/musicsMode/');
+    const href  = isSubpath ? '../admin/' : './admin/';
+    const badge = document.createElement('a');
+    badge.id        = 'admin-badge';
+    badge.href      = href;
+    badge.className = 'admin-badge';
+    badge.textContent = '⚡ Admin';
+    document.body.appendChild(badge);
+  };
+
+  const _removeAdminBadge = () => document.getElementById('admin-badge')?.remove();
+
+  // Cas 1 : auth déjà résolue au moment de l'init (ex: profile.html avec top-level await)
+  if (window._currentUser?.is_admin) _injectAdminBadge();
+
+  // Cas 2 : auth se résout plus tard (ex: index.html sans top-level await)
+  window.addEventListener('personadle:auth-ready',  _injectAdminBadge);
+  window.addEventListener('personadle:auth-login',  _injectAdminBadge);
+  window.addEventListener('personadle:auth-logout', _removeAdminBadge);
 }

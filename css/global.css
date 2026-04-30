@@ -1869,6 +1869,192 @@ body.darkmode {
 
 
 /* -----------------------------------------------
+   SOCIAL LINK — RANK-UP ANIMATION (Persona-style)
+----------------------------------------------- */
+#sl-rankup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: none;
+  transition: background 0.35s ease;
+  overflow: hidden;
+}
+#sl-rankup-overlay.sl-ru--in {
+  background: rgba(0, 0, 0, 0.93);
+  pointer-events: all;
+}
+#sl-rankup-overlay.sl-ru--out {
+  background: rgba(0, 0, 0, 0) !important;
+  pointer-events: none;
+}
+
+.sl-ru-slash {
+  position: absolute;
+  width: 130%;
+  height: 160px;
+  background: linear-gradient(90deg, #c1121f 0%, #e63946 50%, #c1121f 100%);
+  transform: rotate(-7deg) translateX(-120%);
+  top: calc(50% - 80px);
+  transition: transform 0s;
+  box-shadow: 0 8px 40px rgba(230, 57, 70, 0.5);
+}
+#sl-rankup-overlay.sl-ru--in .sl-ru-slash {
+  transform: rotate(-7deg) translateX(-10%);
+  transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+#sl-rankup-overlay.sl-ru--out .sl-ru-slash {
+  transform: rotate(-7deg) translateX(120%);
+  transition: transform 0.35s cubic-bezier(0.55, 0.06, 0.68, 0.19) 0.05s;
+}
+
+.sl-ru-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: 'Oswald', 'Persona5', Arial, sans-serif;
+  opacity: 0;
+  transform: scale(0.55) translateY(20px);
+  transition: opacity 0s, transform 0s;
+  user-select: none;
+}
+#sl-rankup-overlay.sl-ru--in .sl-ru-content {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition: opacity 0.28s ease 0.32s,
+              transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.32s;
+}
+#sl-rankup-overlay.sl-ru--out .sl-ru-content {
+  opacity: 0;
+  transform: scale(1.15) translateY(-10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.sl-ru-subtitle {
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.sl-ru-rank-num {
+  font-size: clamp(3rem, 12vw, 5.5rem);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(230, 57, 70, 0.9), 0 2px 8px rgba(0,0,0,0.6);
+}
+.sl-ru-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+.sl-ru-name {
+  font-size: clamp(1.1rem, 4vw, 1.8rem);
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+.sl-ru-hint {
+  margin-top: 28px;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  animation: sl-ru-blink 1.5s ease-in-out infinite 1.5s;
+  opacity: 0;
+}
+@keyframes sl-ru-blink {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.7; }
+}
+#sl-rankup-overlay.sl-ru--in .sl-ru-hint {
+  opacity: 0.3;
+}
+
+/* Sparkle particles */
+.sl-ru-sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.sl-ru-spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ffd700;
+  opacity: 0;
+}
+#sl-rankup-overlay.sl-ru--in .sl-ru-spark {
+  animation: sl-ru-spark-fly 1.2s ease-out forwards;
+}
+@keyframes sl-ru-spark-fly {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: var(--tx, translate(60px, -80px)) scale(0); }
+}
+
+/* -----------------------------------------------
+   BADGE NOTIFICATION — disponible sur toutes les pages
+----------------------------------------------- */
+.badge-notification {
+  position: fixed;
+  top: -200px;
+  right: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 99999;
+  min-width: 300px;
+  max-width: 360px;
+  transition: top 0.5s ease;
+  border: 2px solid #ffd700;
+  cursor: pointer;
+}
+.badge-notification.show {
+  top: 20px;
+}
+.badge-notif-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.badge-notif-content img {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  border: 2px solid #ffd700;
+  flex-shrink: 0;
+}
+.badge-notif-content h4 {
+  margin: 0 0 4px;
+  color: #ffd700;
+  font-size: 1em;
+}
+.badge-notif-content p {
+  margin: 0;
+  font-weight: bold;
+  font-size: 0.95em;
+  color: #fff;
+}
+.badge-notif-content small {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.82em;
+}
+
+/* -----------------------------------------------
    ACCESSIBILITÉ : MOUVEMENT RÉDUIT
 ----------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
@@ -1883,4 +2069,28 @@ body.darkmode {
   .emoji-unit:hover {
     transform: none;
   }
+}
+
+/* ── Admin badge — visible uniquement pour les admins ── */
+.admin-badge {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 9000;
+  background: linear-gradient(135deg, #e63946, #b01020);
+  color: #fff;
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-family: Oswald, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 14px rgba(230, 57, 70, 0.55);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.admin-badge:hover {
+  box-shadow: 0 4px 22px rgba(230, 57, 70, 0.8);
+  transform: translateY(-1px);
 }
