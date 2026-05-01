@@ -228,12 +228,12 @@ export function initBottomNav() {
   // Injecte la nav juste avant </body>
   document.body.insertAdjacentHTML('beforeend', buildNavHTML(currentPage, avatar, hrefs));
 
-  // ── Badge admin ────────────────────────────────────────────────────────────
-  // Injecte un lien "⚡ Admin" en haut à droite si l'utilisateur est admin.
-  // Calcule le bon chemin relatif selon la profondeur de la page courante.
-  const _injectAdminBadge = () => {
+  // ── Item Admin dans la nav ─────────────────────────────────────────────────
+  // Ajoute un 5e item "⚡ Admin" dans la bottomNav après résolution de l'auth.
+  const _addAdminNavItem = () => {
     if (!window._currentUser?.is_admin) return;
-    if (document.getElementById('admin-badge')) return; // déjà présent
+    if (document.getElementById('nav-admin-item')) return;
+
     const isSubpath = window.location.pathname.includes('/profile/') ||
                       window.location.pathname.includes('/classiqueMode/') ||
                       window.location.pathname.includes('/emojiMode/') ||
@@ -241,22 +241,58 @@ export function initBottomNav() {
                       window.location.pathname.includes('/allOutAttackMode/') ||
                       window.location.pathname.includes('/personaeMode/') ||
                       window.location.pathname.includes('/musicsMode/');
-    const href  = isSubpath ? '../admin/' : './admin/';
-    const badge = document.createElement('a');
-    badge.id        = 'admin-badge';
-    badge.href      = href;
-    badge.className = 'admin-badge';
-    badge.textContent = '⚡ Admin';
-    document.body.appendChild(badge);
+    const href = isSubpath ? '../admin/' : './admin/';
+
+    const item = document.createElement('a');
+    item.id        = 'nav-admin-item';
+    item.className = 'nav-item nav-item--admin';
+    item.href      = href;
+    item.setAttribute('aria-label', 'Admin Panel');
+    item.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+        <path d="M9 12l2 2 4-4" stroke-width="2" fill="none"/>
+      </svg>
+      <span class="nav-label">Admin</span>
+    `;
+
+    document.querySelector('.bottom-nav')?.appendChild(item);
   };
 
-  const _removeAdminBadge = () => document.getElementById('admin-badge')?.remove();
+  const _removeAdminNavItem = () => document.getElementById('nav-admin-item')?.remove();
 
-  // Cas 1 : auth déjà résolue au moment de l'init (ex: profile.html avec top-level await)
-  if (window._currentUser?.is_admin) _injectAdminBadge();
+  // Cas 1 : auth déjà résolue au moment de l'init (profile.html avec top-level await)
+  if (window._currentUser?.is_admin) _addAdminNavItem();
 
-  // Cas 2 : auth se résout plus tard (ex: index.html sans top-level await)
-  window.addEventListener('personadle:auth-ready',  _injectAdminBadge);
-  window.addEventListener('personadle:auth-login',  _injectAdminBadge);
-  window.addEventListener('personadle:auth-logout', _removeAdminBadge);
+  // Cas 2 : auth se résout plus tard (index.html) ou login manuel
+  window.addEventListener('personadle:auth-ready',  _addAdminNavItem);
+  window.addEventListener('personadle:auth-login',  _addAdminNavItem);
+  window.addEventListener('personadle:auth-logout', _removeAdminNavItem);
+}
+
+/**
+ * Met à jour l'avatar dans la bottomNav après un cloud sync.
+ * À appeler après pullProfileFromCloud() sur les pages où initBottomNav() a déjà tourné.
+ */
+export function updateNavAvatar() {
+  try {
+    const p      = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+    const avatar = p.avatar || null;
+    const navLink = document.querySelector('a[aria-label="My profile"]');
+    if (!avatar || !navLink) return;
+
+    let img = navLink.querySelector('.nav-avatar');
+    if (!img) {
+      // Pas encore d'img — remplacer le SVG générique
+      img = document.createElement('img');
+      img.className = 'nav-avatar';
+      img.alt       = 'Profile avatar';
+      img.loading   = 'lazy';
+      const svgEl = navLink.querySelector('svg');
+      if (svgEl) svgEl.replaceWith(img);
+      else       navLink.insertBefore(img, navLink.firstChild);
+    }
+    // Toujours mettre à jour le src (couvre les changements d'avatar)
+    if (img.src !== avatar) img.src = avatar;
+  } catch { /* silencieux */ }
 }

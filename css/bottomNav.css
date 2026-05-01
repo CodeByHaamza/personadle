@@ -285,3 +285,17 @@ body.darkmode .nav-toast {
     padding: 6px 28px;
   }
 }
+
+/* ── Item admin (5e item, visible uniquement aux admins) ── */
+.nav-item--admin {
+  color: #e63946;
+}
+.nav-item--admin svg {
+  stroke: #e63946;
+  fill: rgba(230, 57, 70, 0.15);
+}
+.nav-item--admin:hover,
+.nav-item--admin:hover svg {
+  color: #ff6b77;
+  stroke: #ff6b77;
+}

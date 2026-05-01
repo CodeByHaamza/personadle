@@ -1224,30 +1224,19 @@ initBottomNav();
 import { initNotifications }    from './js/notifications.js';
 import { checkStreakRecovery }   from './js/streak-recovery.js';
 import { pullProfileFromCloud, pushLangToCloud } from './js/cloud-sync.js';
+import { updateNavAvatar }       from './js/bottomNav.js';
 
 if (window._authReady) await window._authReady;
 
-// Signal auth-ready pour les modules qui écoutent (ex: bottomNav admin badge)
+// Signal auth-ready pour les modules qui écoutent (ex: bottomNav admin item)
 window.dispatchEvent(new CustomEvent('personadle:auth-ready'));
 
 if (window._currentUser) {
   // Sync complet cloud → local dès la connexion
   await pullProfileFromCloud();
 
-  // Mettre à jour l'avatar de la bottomNav si le cloud sync a apporté un avatar
-  // (initBottomNav() s'exécute avant le sync, donc le DOM peut être sans avatar)
-  try {
-    const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
-    if (p.avatar) {
-      const navIcon = document.querySelector('a[aria-label="My profile"]');
-      if (navIcon && !navIcon.querySelector('.nav-avatar')) {
-        const svgEl = navIcon.querySelector('svg');
-        if (svgEl) svgEl.replaceWith(Object.assign(document.createElement('img'), {
-          className: 'nav-avatar', src: p.avatar, alt: 'Profile avatar', loading: 'lazy'
-        }));
-      }
-    }
-  } catch { /* silencieux */ }
+  // Mettre à jour l'avatar dans la bottomNav (initBottomNav tourne avant le cloud sync)
+  updateNavAvatar();
 
   // Hook : chaque changement de langue est poussé vers le backend
   window._onLangChange = pushLangToCloud;
