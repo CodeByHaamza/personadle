@@ -37,18 +37,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&display=swap" rel="stylesheet">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="../css/global.css?v=6">
+  <link rel="stylesheet" href="../css/global.css?v=9">
   <link rel="stylesheet" href="../css/langSelector.css?v=4">
   <link rel="stylesheet" href="../css/bottomNav.css?v=1">
   <link rel="stylesheet" href="../css/calling-card.css?v=2">
   <link rel="stylesheet" href="../css/challenge-notif.css">
   <link rel="stylesheet" href="../css/challenge-result.css">
   <link rel="stylesheet" href="../css/settings-modal.css">
+  <link rel="stylesheet" href="../css/streak-recovery.css">
+  <link rel="stylesheet" href="../css/tv-friend-anim.css">
+  <link rel="stylesheet" href="../css/p3-evoker-anim.css">
+  <link rel="stylesheet" href="../css/divine-gift.css">
   <link rel="stylesheet" href="../css/social-link.css">
   <link rel="stylesheet" href="../css/stats-compare.css">
   <link rel="stylesheet" href="../css/wallpaper-notification.css">
-  <link rel="stylesheet" href="./profile-page.css?v=2">
-  <link rel="stylesheet" href="./badges/badges.css?v=3">
+  <link rel="stylesheet" href="./profile-page.css?v=4">
+  <link rel="stylesheet" href="./badges/badges.css?v=4">
 
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif">
 
@@ -100,16 +104,17 @@
     <span data-i18n="profile.title">My Profile</span>
     <span class="p5-diamond">◆</span>
   </h1>
-  <button id="settingsBtn" class="profile-settings-btn" title="Settings" aria-label="Settings">⚙</button>
 </header>
 
-<!-- Toggle Dark Mode (repris de index.html) -->
+<!-- Toggle Dark Mode + bouton Settings -->
 <div class="darkmode-toggle">
   <label class="switch">
     <input type="checkbox" id="darkModeToggle">
     <span class="slider round"></span>
   </label>
   <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+  <span class="dm-sep"></span>
+  <button id="settingsBtn" class="profile-settings-btn" title="Settings" aria-label="Settings">⚙</button>
 </div>
 
 <!-- =====================================================
@@ -341,11 +346,6 @@
           <button id="exportProfile" class="btn-p5">
             📤 <span data-i18n="profile.export">Export</span>
           </button>
-          <!-- Input fichier caché — déclenché par #importProfile -->
-          <input type="file" id="importFileInput" accept=".json" style="display: none;">
-          <button id="importProfile" class="btn-p5">
-            📥 <span data-i18n="profile.import">Import</span>
-          </button>
           <button id="shareProfileBtn" class="btn-p5">
             🔗 <span data-i18n="profile.share_btn">Share</span>
           </button>
@@ -354,21 +354,6 @@
           </button>
         </div>
         <p id="shareStatus" style="margin-top: 8px; font-size: 0.82em; opacity: 0.7;"></p>
-
-        <!-- ── Migration cloud (visible uniquement si connecté) ── -->
-        <div id="migrationSection" class="migration-section hidden">
-          <div class="migration-divider">
-            <span class="card-accent">◆</span>
-            <span data-i18n="auth.migrate_title">Sync to account</span>
-          </div>
-          <p class="migration-desc" data-i18n="auth.migrate_desc">
-            Import your local data to your cloud account.
-          </p>
-          <button id="btnMigrate" class="btn-p5 btn-migrate">
-            ☁️ <span data-i18n="auth.migrate_btn">Import local profile</span>
-          </button>
-          <p id="migrationStatus" class="migration-status"></p>
-        </div>
       </div>
 
 
@@ -465,6 +450,11 @@
   <!-- Compteur de badges débloqués -->
   <p id="badgesCounter" class="badges-counter">🔓 0 / 0 badges unlocked</p>
 
+  <!-- Recherche -->
+  <div class="badges-search-wrap">
+    <input type="text" id="badgesSearch" class="badges-search-input" placeholder="🔍 Search badges…">
+  </div>
+
   <!-- Grille des badges (générée par badgesManager.js) -->
   <div id="badgesGrid" class="badges-grid"></div>
 </div>
@@ -474,12 +464,13 @@
      6. MODALE TITRES
      Sélection / équipement de titres (comme les badges).
      ===================================================== -->
-<div id="titlesModal" class="hidden">
-  <div class="badges-header">
-    <h3>🏅 Titles</h3>
-    <button id="closeTitlesModal" class="close-btn">✖</button>
+<div id="titlesModalOverlay" class="titles-overlay hidden"></div>
+<div id="titlesModal" class="titles-modal hidden" role="dialog" aria-modal="true">
+  <div class="titles-modal-header">
+    <h3 class="titles-modal-title">🏅 Titles</h3>
+    <button id="closeTitlesModal" class="titles-modal-close">✖</button>
   </div>
-  <div id="titlesModalGrid" class="titles-modal-grid"></div>
+  <div id="titlesModalGrid" class="titles-grid-modal"></div>
 </div>
 
 
@@ -604,42 +595,7 @@ window.dispatchEvent(new CustomEvent('personadle:auth-ready'));
 </script>
 
 <!-- Logique du profil (module ES6) — chargé APRÈS initAuth() -->
-<script type="module" src="./profile-page.js?v=3"></script>
-
-<!-- Bouton migration manuelle localStorage → cloud -->
-<script type="module">
-// Bouton migration manuelle (visible si connecté et pas encore migré)
-const btnMigrate = document.getElementById('btnMigrate');
-if (btnMigrate) {
-  btnMigrate.addEventListener('click', async () => {
-    const status = document.getElementById('migrationStatus');
-    btnMigrate.disabled = true;
-
-    const profileRaw  = localStorage.getItem('personaUserProfile');
-    const sessionsRaw = localStorage.getItem('pendingSessions');
-
-    try {
-      const { user } = await window._personadleApi.auth.me();
-      if (!user) { if (status) status.textContent = '❌ Not logged in.'; return; }
-
-      const result = await window._personadleApi.user.migrate({
-        profile:         profileRaw  ? JSON.parse(profileRaw)  : null,
-        pendingSessions: sessionsRaw ? JSON.parse(sessionsRaw) : [],
-      });
-
-      localStorage.removeItem('pendingSessions');
-      localStorage.setItem('migratedToCloud', 'true');
-
-      if (status) status.textContent =
-        `✅ ${result.migrated_sessions} session(s) imported, ${result.skipped_sessions} skipped.`;
-    } catch (e) {
-      if (status) status.textContent = '❌ ' + e.message;
-    } finally {
-      btnMigrate.disabled = false;
-    }
-  });
-}
-</script>
+<script type="module" src="./profile-page.js?v=20"></script>
 
 <!-- Notifications + Settings (appeler après auth) -->
 <script type="module">
@@ -650,6 +606,38 @@ if (window._authReady) await window._authReady;
 if (window._currentUser) {
   initNotifications();
   initSettingsModal(window._currentUser.id);
+}
+</script>
+
+<!-- Cadeaux admin : affiche l'animation divine si de nouveaux items ont été débloqués -->
+<script type="module">
+import { showGiftsFromIds } from '../js/divine-gift.js';
+
+const _giftTitle = () => {
+  const t = k => { const v = window.i18n?.t?.(k); return (v && v !== k) ? v : null; };
+  return t('ui.admin_gift_received') || '🎁 Cadeau reçu !';
+};
+
+async function _showPendingDivineGifts(items) {
+  if (!items?.length) return;
+  localStorage.removeItem('_pendingDivineGifts');
+  await showGiftsFromIds(items, _giftTitle());
+}
+
+window.addEventListener('personadle:gifts-received', (e) => {
+  _showPendingDivineGifts(e.detail?.items);
+});
+
+const _checkOnLoad = () => {
+  try {
+    const pending = JSON.parse(localStorage.getItem('_pendingDivineGifts') || '[]');
+    if (pending.length) _showPendingDivineGifts(pending);
+  } catch {}
+};
+if (window._authResolved) {
+  _checkOnLoad();
+} else {
+  window.addEventListener('personadle:auth-ready', _checkOnLoad, { once: true });
 }
 </script>
 
@@ -742,7 +730,7 @@ initBottomNav();
       <div class="auth-field">
         <label for="registerPseudo" data-i18n="auth.pseudo">Username</label>
         <input type="text" id="registerPseudo" maxlength="30" required
-               data-i18n-placeholder="auth.pseudo">
+               autocomplete="username" data-i18n-placeholder="auth.pseudo">
       </div>
       <div class="auth-field">
         <label for="registerPassword" data-i18n="auth.password">Password</label>
@@ -758,6 +746,10 @@ initBottomNav();
       <button type="submit" class="btn-p5 btn-auth-submit">
         ✨ <span data-i18n="auth.register">Create account</span>
       </button>
+      <p class="auth-privacy-note">
+        <span data-i18n="auth.privacy_notice">By creating an account, you agree to our</span>
+        <a href="../privacy.html" data-i18n="auth.privacy_link">Privacy Policy</a>.
+      </p>
     </form>
 
     <p class="auth-switch">
@@ -774,7 +766,7 @@ initBottomNav();
 </script>
 
 <!-- Mode lecture seule : activé quand ?view=FRIENDCODE est dans l'URL -->
-<script type="module" src="./profile-view.js?v=3"></script>
+<script type="module" src="./profile-view.js?v=5"></script>
 
 <script>
 if ('serviceWorker' in navigator) {

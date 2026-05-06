@@ -139,35 +139,53 @@ export function initBadgesSystem(profile, saveProfile) {
  * - Badges backend absents du local → ajoutés + notification
  * - Badges local absents du backend → push via api.badges.unlock()
  */
-async function syncBadgesWithBackend(profile, saveProfile) {
+export async function syncBadgesWithBackend(profile, saveProfile) {
   const user = window._currentUser;
   const api  = window._personadleApi;
   if (!user || !api) return;
 
-  try {
-    const res = await fetch(
-      `${window.location.pathname.startsWith('/personadle/') ? '/personadle' : ''}/api/user/${user.id}`,
-      { credentials: 'include' }
-    ).then(r => r.json());
+  // Sécurité anti-import : si le profil local appartient à un autre compte,
+  // on ne pousse rien vers le backend (seul le pull cloud est autorisé).
+  const ownProfile = !profile._accountId || String(profile._accountId) === String(user.id);
 
-    const backendIds = (res?.data?.badges || []).map(b => b.badge_id);
+  try {
+    const catalog    = await api.badges.catalog();
+    const backendIds = catalog.filter(b => Number(b.is_unlocked) === 1).map(b => b.slug);
     const localIds   = profile.badges || [];
 
-    // Backend → local (badges débloqués sur un autre appareil)
+    // Backend → local (badges débloqués sur un autre appareil ou directement en BDD)
     const toAddLocally = backendIds.filter(id => !localIds.includes(id));
     if (toAddLocally.length) {
       profile.badges = [...localIds, ...toAddLocally];
       saveProfile();
-      toAddLocally.forEach(id => {
-        const badge = getBadgeById(id);
-        if (badge) queueNotification(badge);
-      });
+
+      // Animer uniquement les badges jamais montrés sur cet appareil
+      // (_seenBadgeAnimIds persiste en dehors du profil, résiste aux resets de profil)
+      let seenAnims = [];
+      try { seenAnims = JSON.parse(localStorage.getItem('_seenBadgeAnimIds') || '[]'); } catch {}
+      const toAnimate = toAddLocally.filter(id => !seenAnims.includes(id));
+      if (toAnimate.length) {
+        seenAnims.push(...toAnimate);
+        localStorage.setItem('_seenBadgeAnimIds', JSON.stringify(seenAnims));
+        toAnimate.forEach(id => {
+          const badge = getBadgeById(id);
+          if (badge) queueNotification(badge);
+        });
+      }
+
+      // Re-render : renderBadgesModal était déjà appelé avant la fin de ce fetch async
+      renderBadgesPreview(profile);
+      renderBadgesModal(profile, saveProfile);
     }
 
-    // Local → backend
-    const toSyncUp = localIds.filter(id => !backendIds.includes(id));
-    for (const id of toSyncUp) {
-      await api.badges.unlock(id).catch(() => {});
+    // Local → backend (bloqué si le profil vient d'un autre compte)
+    if (ownProfile) {
+      const toSyncUp = localIds.filter(id => !backendIds.includes(id));
+      for (const id of toSyncUp) {
+        await api.badges.unlock(id).catch(() => {});
+      }
+    } else {
+      console.warn('[badges] sync local→backend bloqué : profil importé depuis un autre compte');
     }
   } catch (e) {
     console.warn('⚠️ Badge sync failed (offline?):', e.message);
@@ -187,7 +205,7 @@ export async function checkSocialBadges(profile, saveProfile) {
   try {
     const friendsRes = await fetch(`${_prefix}/api/friends`, { credentials: 'include' })
       .then(r => r.json());
-    const friends    = friendsRes?.data?.friends || [];
+    const friends    = friendsRes?.friends || [];
     const friendCount = friends.length;
 
     // Best Bro : 2+ amis
@@ -367,14 +385,21 @@ function checkAndUnlockBadges(profile, saveProfile) {
   if (newlyUnlocked.length > 0) {
     saveProfile();
     console.log(`✅ ${newlyUnlocked.length} new badge(s) unlocked!`);
-    
-    // Afficher les notifications
-    newlyUnlocked.forEach((badge, index) => {
-      setTimeout(() => {
-        showBadgeNotification(badge);
-      }, index * 500);
+
+    // Afficher les notifications uniquement pour les badges jamais montrés
+    let seenAnims = [];
+    try { seenAnims = JSON.parse(localStorage.getItem('_seenBadgeAnimIds') || '[]'); } catch {}
+    let delay = 0;
+    newlyUnlocked.forEach(badge => {
+      if (!seenAnims.includes(badge.id)) {
+        seenAnims.push(badge.id);
+        const d = delay;
+        setTimeout(() => showBadgeNotification(badge), d);
+        delay += 500;
+      }
       window._personadleApi?.badges?.unlock(badge.id).catch(() => {});
     });
+    localStorage.setItem('_seenBadgeAnimIds', JSON.stringify(seenAnims));
   }
 }
 
@@ -388,16 +413,25 @@ function checkPendingBadgeNotifications(profile, saveProfile) {
     return;
   }
 
-  console.log("🔔 Pending badge notifications found:", profile.pendingBadgeNotifications);
+  // Filtrer les badges dont l'animation a déjà été montrée (clé indépendante du profil)
+  let seenAnims = [];
+  try { seenAnims = JSON.parse(localStorage.getItem('_seenBadgeAnimIds') || '[]'); } catch {}
 
-  profile.pendingBadgeNotifications.forEach((badgeId, index) => {
+  const toNotify = profile.pendingBadgeNotifications.filter(id => !seenAnims.includes(id));
+  console.log('🔔 Pending badge notifications:', profile.pendingBadgeNotifications, '→ to show:', toNotify);
+
+  let delay = 0;
+  toNotify.forEach(badgeId => {
     const badge = getBadgeById(badgeId);
     if (badge) {
-      setTimeout(() => {
-        showBadgeNotification(badge);
-      }, index * 500); // Décalage de 500ms entre chaque notification
+      seenAnims.push(badgeId);
+      const d = delay;
+      setTimeout(() => showBadgeNotification(badge), d);
+      delay += 500;
     }
   });
+
+  if (toNotify.length) localStorage.setItem('_seenBadgeAnimIds', JSON.stringify(seenAnims));
 
   // Vider la liste des notifications en attente
   profile.pendingBadgeNotifications = [];
@@ -452,7 +486,9 @@ function _showBadgeNotificationImmediate(badge, onDone) {
   const notif = document.createElement("div");
   notif.className = "badge-notification";
   notif.style.cursor = "pointer";
-  const notifTitle = window.i18n?.t('badges.notification_title') || '🎖️ Badge Unlocked!';
+  const _k = 'badges.notification_title';
+  const _r = window.i18n?.t?.(_k);
+  const notifTitle = (_r && _r !== _k) ? _r : '🎖️ Badge Unlocked!';
   const name = getBadgeName(badge);
   const desc = getBadgeDescription(badge);
 
@@ -537,7 +573,7 @@ function showBadgeZoom(badge) {
  * Affiche la prévisualisation des badges sélectionnés
  * @param {Object} profile - Le profil utilisateur
  */
-function renderBadgesPreview(profile) {
+export function renderBadgesPreview(profile) {
   const preview = document.getElementById("previewBadges");
   if (!preview) {
     console.warn("⚠️ previewBadges element not found");
@@ -622,10 +658,14 @@ export function renderBadgesModal(profile, saveProfile) {
 
     html += `
       <div class="badges-category-section" data-category="${cat}">
-        <div class="badges-category-header">
+        <button class="badges-category-header" aria-expanded="true">
           <span class="badges-category-title">${catLabel}</span>
-          <span class="badges-category-count">${unlockedInCat}/${badges.length}</span>
-        </div>
+          <span class="badges-category-right">
+            <span class="badges-category-count">${unlockedInCat}/${badges.length}</span>
+            <span class="badges-category-chevron" aria-hidden="true">▼</span>
+          </span>
+        </button>
+        <div class="badges-grid-wrap">
         <div class="badges-grid">
           ${badges.map(badge => {
             const isUnlocked = profile.badges.includes(badge.id);
@@ -656,6 +696,7 @@ export function renderBadgesModal(profile, saveProfile) {
             `;
           }).join('')}
         </div>
+        </div>
       </div>
     `;
   });
@@ -670,6 +711,12 @@ export function renderBadgesModal(profile, saveProfile) {
 
   // Configurer l'ouverture/fermeture de la modal
   setupModalControls(openBtn, closeBtn, modal);
+
+  // Catégories collapsibles
+  setupCategoryCollapse(grid);
+
+  // Recherche en temps réel
+  setupBadgesSearch(grid);
 
   // Ajuster les tooltips après le rendu
   setTimeout(() => adjustTooltipPositions(), 100);
@@ -723,6 +770,40 @@ function attachBadgeClickEvents(profile, saveProfile, grid) {
       }
     };
   });
+}
+
+function setupCategoryCollapse(grid) {
+  grid.querySelectorAll('.badges-category-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const section = header.closest('.badges-category-section');
+      const isCollapsed = section.classList.toggle('collapsed');
+      header.setAttribute('aria-expanded', String(!isCollapsed));
+    });
+  });
+}
+
+function setupBadgesSearch(grid) {
+  const input = document.getElementById('badgesSearch');
+  if (!input) return;
+  input.value = '';
+  input.oninput = () => {
+    const q = input.value.toLowerCase().trim();
+    grid.querySelectorAll('.badges-category-section').forEach(section => {
+      let anyVisible = false;
+      section.querySelectorAll('.badge-item').forEach(item => {
+        const name = (item.querySelector('p')?.textContent || '').toLowerCase();
+        const show = !q || name.includes(q);
+        item.style.display = show ? '' : 'none';
+        if (show) anyVisible = true;
+      });
+      section.style.display = anyVisible ? '' : 'none';
+      // Auto-expand sections that have matching results
+      if (q && anyVisible) {
+        section.classList.remove('collapsed');
+        section.querySelector('.badges-category-header')?.setAttribute('aria-expanded', 'true');
+      }
+    });
+  };
 }
 
 /**
@@ -1021,29 +1102,46 @@ export function forceCheckBadges(profile, saveProfile) {
 /**
  * Vérifie et débloque automatiquement les badges événementiels selon la date
  */
-export function checkEventBadges() {
-  const profile = JSON.parse(localStorage.getItem('personaUserProfile'));
-  
+export function checkEventBadges(inMemoryProfile) {
+  // Quand appelée depuis initBadgesSystem, on reçoit le profil en mémoire et on le
+  // modifie directement — sinon la sauvegarde ultérieure écraserait nos changements.
+  // Quand appelée de manière autonome (intervalle horaire), on lit/écrit localStorage.
+  const standalone = !inMemoryProfile || typeof inMemoryProfile !== 'object';
+  const profile = standalone
+    ? JSON.parse(localStorage.getItem('personaUserProfile'))
+    : inMemoryProfile;
+
   if (!profile) {
     console.warn("⚠️ No profile found, skipping event badges check");
     return;
   }
-  
+
   // Initialiser les propriétés si nécessaire
   if (!profile.eventBadges) {
     profile.eventBadges = {};
   }
-  
+
   if (!profile.pendingBadgeNotifications) {
     profile.pendingBadgeNotifications = [];
   }
-  
+
   const today = new Date();
   const month = today.getMonth() + 1; // 1 = janvier, 4 = avril
   const day = today.getDate();
-  
+
+  // _seenBadgeAnimIds persiste indépendamment du profil — résiste aux re-logins
+  let seenAnims = [];
+  try { seenAnims = JSON.parse(localStorage.getItem('_seenBadgeAnimIds') || '[]'); } catch {}
+
+  // Helper : ajoute à pending uniquement si jamais montré
+  const _queueEvent = (id) => {
+    if (!seenAnims.includes(id) && !profile.pendingBadgeNotifications.includes(id)) {
+      profile.pendingBadgeNotifications.push(id);
+    }
+  };
+
   let hasChanges = false;
-  
+
   // ═══════════════════════════════════════════════════════════════════════
   // 🌸 BADGE RENTRÉE (1er avril - Rentrée scolaire japonaise)
   // ═══════════════════════════════════════════════════════════════════════
@@ -1051,9 +1149,7 @@ export function checkEventBadges() {
     console.log("🌸 Event detected: Japanese School Year Start (April 1st)");
     profile.eventBadges.rentree = true;
     hasChanges = true;
-    if (!profile.pendingBadgeNotifications.includes('rentree')) {
-      profile.pendingBadgeNotifications.push('rentree');
-    }
+    _queueEvent('rentree');
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -1064,8 +1160,7 @@ export function checkEventBadges() {
     if (isGW) {
       profile.eventBadges.golden_week = true;
       hasChanges = true;
-      if (!profile.pendingBadgeNotifications.includes('golden_week'))
-        profile.pendingBadgeNotifications.push('golden_week');
+      _queueEvent('golden_week');
     }
   }
 
@@ -1075,8 +1170,7 @@ export function checkEventBadges() {
   if (!profile.eventBadges.tanabata && month === 7 && day === 7) {
     profile.eventBadges.tanabata = true;
     hasChanges = true;
-    if (!profile.pendingBadgeNotifications.includes('tanabata'))
-      profile.pendingBadgeNotifications.push('tanabata');
+    _queueEvent('tanabata');
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -1087,13 +1181,12 @@ export function checkEventBadges() {
     if (month === 1  && day === 1)  { profile.playedJan1  = true; hasChanges = true; }
     if (profile.playedDec31 && profile.playedJan1) {
       profile.eventBadges.promised_day = true;
-      if (!profile.pendingBadgeNotifications.includes('promised_day'))
-        profile.pendingBadgeNotifications.push('promised_day');
+      _queueEvent('promised_day');
     }
   }
 
-  // Sauvegarder si des changements ont été détectés
-  if (hasChanges) {
+  // Sauvegarder si mode autonome (intervalle) — en mode inline, le caller sauvegarde
+  if (hasChanges && standalone) {
     localStorage.setItem('personaUserProfile', JSON.stringify(profile));
     console.log("💾 Event badges saved to profile");
   }
@@ -1127,3 +1220,6 @@ export function checkBadgesAfterGame() {
   const save = () => localStorage.setItem('personaUserProfile', JSON.stringify(p));
   checkAndUnlockBadges(p, save);
 }
+
+// Unlock reborn_phoenix when streak-recovery fires, regardless of which page is loaded
+window.addEventListener('personadle:streak-recovered', () => checkBadgesAfterGame());

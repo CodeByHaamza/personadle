@@ -49,7 +49,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&family=Special+Elite&display=swap" rel="stylesheet">
 
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="./css/global.css?v=6">
+    <link rel="stylesheet" href="./css/global.css?v=9">
     <link rel="stylesheet" href="./css/index.css?v=3">
     <link rel="stylesheet" href="./css/langSelector.css?v=3">
     <link rel="stylesheet" href="./css/bottomNav.css?v=1">
@@ -58,6 +58,8 @@
     <link rel="stylesheet" href="./css/challenge-result.css">
     <link rel="stylesheet" href="./css/streak-recovery.css">
     <link rel="stylesheet" href="./css/tv-friend-anim.css">
+    <link rel="stylesheet" href="./css/p3-evoker-anim.css">
+    <link rel="stylesheet" href="./css/divine-gift.css">
     <link rel="stylesheet" href="./profile/badges/badges.css">
     <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
     
@@ -457,7 +459,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <p data-i18n="index.copyright">personadle.net — 2026</p>
 <p>
   <span data-i18n="index.disclaimer">Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders.</span>
-  <a href="#" id="legalLink" data-i18n="index.legal_link">Legal Notice</a> |
+  <a href="./privacy.html" data-i18n="index.legal_link">Privacy &amp; Legal</a> |
   <a href="https://forms.gle/SJeKi7cyUjRyp1vX8" target="_blank" data-i18n="index.feedback_link" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.reportSubmitted){p.reportSubmitted=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">📝 Suggestions & Bug Report</a> |
   <a href="./debug.html" style="color:#555;font-size:0.7rem;" title="Dev tools">⚙ dev</a>
 </p>
@@ -1064,93 +1066,6 @@ document.querySelectorAll('.version-header').forEach(header => {
 </script>
 
 
-<!-- Legal Modal -->
-<div id="legalModal" class="legal-modal" style="display: none;">
-<div class="legal-content">
-  <span id="closeLegal" class="close">&times;</span>
-  <h2>📝 Legal Notice / Terms of Use</h2>
-  <p><strong>Last updated:</strong> July 2025</p>
-
-  <p>
-    This website ("<strong>Personadle</strong>") is a non-commercial fan project and tribute to the <em>Persona</em> franchise, created purely for educational and entertainment purposes.
-  </p>
-
-  <p>
-    All code and game logic are original and developed by <strong>Hamza</strong> & <strong>L2GENDAIRE</strong>.  
-    The project is entirely free of charge and released under the open-source <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.
-  </p>
-
-  <h3>🎭 Intellectual Property</h3>
-  <p>
-    This site is an unofficial fan creation and is not affiliated with or endorsed by ATLUS, SEGA, or any official Persona development team.<br>
-    All Persona characters, names, music, and visual assets remain the property of their respective rights holders:  
-    © ATLUS, © SEGA, © Shoji Meguro, © Lyn Inaizumi, © Lotus Juice, and others.
-  </p>
-
-  <p>
-    Some UI components (such as button styles, interface layout, and animations) were custom-made by the Personadle team and are not extracted from any original game assets.
-  </p>
-
-  <p>
-    The "Blind Test" mode features short audio excerpts used strictly for non-commercial, transformative fan purposes.  
-    Tracks are credited appropriately, and no full-length music is distributed. If any copyright holder requests removal or modification, we will comply promptly.
-  </p>
-
-  <p>
-    No copyright infringement is intended. All content is used under the principles of fair use, where applicable, with no monetization involved.
-  </p>
-
-  <h3>🔐 Data & Privacy</h3>
-  <p>
-    <strong>Personadle</strong> does not collect, track, or store any personal data.  
-    All game progress is saved only in your browser via <code>localStorage</code>. No cookies, no analytics, no third-party tracking.
-  </p>
-
-  <h3>🛠️ Open Source</h3>
-  <p>
-    The full project source code is publicly available under the MIT License.  
-    Contributions and forks are welcome, as long as the original authors are credited and no commercial use is made.
-  </p>
-
-  <h3>💬 Credits & Thanks</h3>
-  <p>
-    Developed by <strong>Hamza</strong> & <strong>L2GENDAIRE</strong>.<br>
-    With gratitude to the GitHub community, Persona fans on Reddit, and all the supportive feedback from Discord developers ❤️
-  </p>
-
-  <h3>📬 Contact</h3>
-  <p>
-    📧 Email: <a href="mailto:hamza.karrouchi.dev@gmail.com">hamza.karrouchi.dev@gmail.com</a><br>
-    🐙 GitHub: <a href="https://github.com/HamzaKarrouchi" target="_blank">GitHub.com</a>
-  </p>
-</div>
-</div>
-
-
-<!-- =====================================================
-     14. SCRIPT — Modale mentions légales
-     Ouvre au clic sur #legalLink, ferme sur close ou click hors.
-     ===================================================== -->
-<script>
-const legalModal = document.getElementById("legalModal");
-const legalLink = document.getElementById("legalLink");
-const closeLegal = document.getElementById("closeLegal");
-
-legalLink.onclick = function (e) {
-  e.preventDefault();
-  legalModal.style.display = "block";
-};
-
-closeLegal.onclick = function () {
-  legalModal.style.display = "none";
-};
-
-window.onclick = function (event) {
-  if (event.target === legalModal) {
-    legalModal.style.display = "none";
-  }
-};
-</script>
 
 <!-- 🕛 Daily Reset Button + Modal -->
 <button id="dailyInfoBtn" class="daily-btn">🕛 Daily Reset Info</button>
@@ -1251,6 +1166,41 @@ import { checkBadgesAfterGame } from './profile/badges/badgesManager.js';
 // Fire badge/title checks on the home page so any unlocks gained
 // during the session are surfaced here too.
 document.addEventListener('DOMContentLoaded', () => checkBadgesAfterGame());
+</script>
+
+<!-- Cadeaux admin : affiche l'animation divine si de nouveaux items ont été débloqués -->
+<script type="module">
+import { showGiftsFromIds } from './js/divine-gift.js';
+
+const _giftTitle = () => {
+  const t = k => { const v = window.i18n?.t?.(k); return (v && v !== k) ? v : null; };
+  return t('ui.admin_gift_received') || '🎁 Cadeau reçu !';
+};
+
+// Affiche les gifts et vide la file persistante
+async function _showPendingDivineGifts(items) {
+  if (!items?.length) return;
+  localStorage.removeItem('_pendingDivineGifts');
+  await showGiftsFromIds(items, _giftTitle());
+}
+
+// Réception en temps réel (même session)
+window.addEventListener('personadle:gifts-received', (e) => {
+  _showPendingDivineGifts(e.detail?.items);
+});
+
+// Vérification au chargement (gifts reçus pendant une autre page / session)
+const _checkOnLoad = () => {
+  try {
+    const pending = JSON.parse(localStorage.getItem('_pendingDivineGifts') || '[]');
+    if (pending.length) _showPendingDivineGifts(pending);
+  } catch {}
+};
+if (window._authResolved) {
+  _checkOnLoad();
+} else {
+  window.addEventListener('personadle:auth-ready', _checkOnLoad, { once: true });
+}
 </script>
 
 <script>

@@ -25,8 +25,10 @@
 // IMPORTS
 // ─────────────────────────────────────────────────────────
 
-import { initBadgesSystem, renderBadgesModal, getBadgesForShare, markProfileAsShared } from './badges/badgesManager.js';
+import { initBadgesSystem, syncBadgesWithBackend, renderBadgesModal, renderBadgesPreview, getBadgesForShare, markProfileAsShared } from './badges/badgesManager.js';
 import { songs as ALL_SONGS } from '../musicsMode/database/songs.js';
+import { canRecover, showStreakRecoveryMenu } from '../js/streak-recovery.js';
+import { pullProfileFromCloud, pushLangToCloud } from '../js/cloud-sync.js';
 
 // Exposer les songs pour d'autres modules (notifications.js, social-link.js…)
 window._profileSongs = ALL_SONGS;
@@ -182,6 +184,7 @@ function renderThemePicker() {
 
       saveProfile();
       renderThemePicker();
+      markDirty();
       const wid = id === 'custom'
         ? `custom:${profile.profileCustomColor || '#e63946'}`
         : id;
@@ -200,6 +203,7 @@ function renderThemePicker() {
     profile.profileCustomColor = e.target.value;
     applyTheme('custom', e.target.value);
     saveProfile();
+    markDirty();
     saveProfileToCloud({ wallpaper_id: `custom:${e.target.value}` });
   });
 }
@@ -235,10 +239,25 @@ const pseudoInput  = document.getElementById('pseudoInput');
 // Boutons principaux
 const editAvatarBtn    = document.getElementById('editAvatarBtn');
 const saveRefreshBtn   = document.getElementById('saveAndRefreshBtn');
-const resetProfileBtn  = document.getElementById('resetProfile');
-const exportBtn        = document.getElementById('exportProfile');
-const importBtn        = document.getElementById('importProfile');
-const importFile       = document.getElementById('importFileInput');
+
+// ── Dirty-state : bouton visible uniquement si un changement utilisateur est détecté ──
+let _profileDirty = false;
+
+function markDirty() {
+  if (_profileDirty) return;
+  _profileDirty = true;
+  saveRefreshBtn.innerHTML = '💾 <span>Save changes</span>';
+  saveRefreshBtn.classList.add('btn-dirty');
+}
+
+function markClean() {
+  _profileDirty = false;
+  saveRefreshBtn.classList.add('btn-saving');
+  saveRefreshBtn.innerHTML = '✅ <span>Saved!</span>';
+  setTimeout(() => saveRefreshBtn.classList.remove('btn-dirty', 'btn-saving'), 1300);
+}
+const resetProfileBtn   = document.getElementById('resetProfile');
+const exportBtn         = document.getElementById('exportProfile');
 const borderColorPicker = document.getElementById('borderColorPicker');
 const statsContainer   = document.getElementById('statsContainer');
 
@@ -374,20 +393,24 @@ async function syncProfileToCloud() {
   if (!window._currentUser?.id || !window._personadleApi) return;
   if (!profile) return;
   const fields = {
+    pseudo:              profile.pseudo || null,
+    lang:                localStorage.getItem('lang') || 'en',
     avatar_border_color: profile.avatarBorderColor || '#ffffff',
     wallpaper_id:        profile.profileTheme === 'custom'
                            ? `custom:${profile.profileCustomColor || '#e63946'}`
                            : (profile.profileTheme || 'all_out'),
-    profile_music_id:    profile.profileSong?.fichier || null,
+    profile_music_id:    profile.profileSong?.fichier || profile.profileMusicId || null,
     selected_badges:     profile.selectedBadges || [],
+    equipped_title_id:   profile.equippedTitleId || null,
   };
-  if (profile.avatar) {
-    fields.avatar_data = profile.avatar;
-  }
+  if (profile.avatar) fields.avatar_data = profile.avatar;
+  // Sync des settings (son, animations…) — stockés dans personaSettings
+  const settings = JSON.parse(localStorage.getItem('personaSettings') || '{}');
+  if (Object.keys(settings).length) fields.settings = settings;
   try {
     await window._personadleApi.user.update(window._currentUser.id, fields);
   } catch (e) {
-    console.warn('[Profile] Initial sync to cloud failed:', e.message);
+    console.warn('[Profile] Sync to cloud failed:', e.message);
   }
 }
 
@@ -462,6 +485,83 @@ async function syncStatsFromBackend(userId) {
   } catch {
     // Offline ou erreur serveur — conserver les stats localStorage
   }
+}
+
+
+/**
+ * Re-rend toute l'UI à partir du profil localStorage (après un pull cloud).
+ * Appelée par window._onCloudSync et pullProfileFromCloud().then().
+ */
+function _applyCloudToUI() {
+  // Relire le profil mis à jour par cloud-sync
+  const saved = localStorage.getItem('personaUserProfile');
+  if (!saved) return;
+  try { profile = JSON.parse(saved); } catch { return; }
+
+  // ── Identité ──────────────────────────────────────────────
+  if (pageUsername) pageUsername.textContent = profile.pseudo || profile.username || 'Guest';
+  if (pseudoInput)  pseudoInput.value        = profile.pseudo || profile.username || '';
+
+  // ── Avatar ────────────────────────────────────────────────
+  if (pageAvatar) {
+    pageAvatar.src              = normalizeAvatarPath(profile.avatar);
+    pageAvatar.style.borderColor = profile.avatarBorderColor || '#000000';
+  }
+  if (borderColorPicker) borderColorPicker.value = profile.avatarBorderColor || '#000000';
+
+  // ── Thème ─────────────────────────────────────────────────
+  const themeId = profile.profileTheme || 'all_out';
+  applyTheme(themeId, themeId === 'custom' ? profile.profileCustomColor : undefined);
+  renderThemePicker();
+
+  // ── Stats ─────────────────────────────────────────────────
+  renderStats();
+  renderModeStats();
+
+  // ── Musique de profil ─────────────────────────────────────
+  // profileMusicId = valeur cloud (undefined = pas encore sync, null = pas de song, string = fichier)
+  // profileSong    = objet complet résolu localement
+  // Règle : le cloud gagne toujours quand profileMusicId est défini.
+  const cloudId  = profile.profileMusicId; // undefined | null | string
+  const localId  = profile.profileSong?.fichier ?? null;
+
+  if (cloudId !== undefined) {
+    // On a une info cloud — elle prime sur le local
+    if (cloudId && cloudId !== localId) {
+      const resolved = ALL_SONGS.find(s => s.fichier === cloudId);
+      if (resolved) {
+        profile.profileSong    = resolved;
+        profile.profileMusicId = cloudId;
+        saveProfile();
+      }
+    } else if (!cloudId && localId) {
+      // Le cloud n'a plus de song — on efface le local
+      delete profile.profileSong;
+      profile.profileMusicId = null;
+      saveProfile();
+    }
+  } else if (localId && !profile.profileSong?.titre) {
+    // Pas encore sync depuis le cloud, mais référence locale orpheline — on résout
+    const resolved = ALL_SONGS.find(s => s.fichier === localId);
+    if (resolved) { profile.profileSong = resolved; saveProfile(); }
+  }
+  renderSongCard?.();
+
+  // ── Badges ────────────────────────────────────────────────
+  renderBadgesPreview(profile);
+  renderBadgesModal(profile, saveProfile);
+
+  // ── Wallpapers débloquables ───────────────────────────────
+  // Re-render la galerie avec l'état cloud (unlockedWallpapers mis à jour par pullProfileFromCloud)
+  renderUnlockableWallpaperGallery(profile);
+
+  // ── Titres ────────────────────────────────────────────────
+  _refreshTitlesUnlockState();
+  _resolveEquippedTitle();
+  renderTitlesSection?.();
+
+  // Vérifier si de nouveaux titres ont été débloqués (fire-and-forget)
+  checkAndUnlockTitles?.().catch(() => {});
 }
 
 
@@ -563,6 +663,20 @@ function renderStats() {
     </div>`).join('');
 
   statsContainer.innerHTML = regularHTML + streakHTML;
+
+  // Bouton "Restaurer" si la streak a été brisée et qu'une récupération est disponible
+  if ((s.streak || 0) === 0 || (s.streak || 0) === 1) {
+    if (canRecover()) {
+      const streakEl = statsContainer.querySelector('.stat-streak');
+      if (streakEl) {
+        const btn = document.createElement('button');
+        btn.className   = 'sr-restore-btn';
+        btn.textContent = '🔥 Restore';
+        btn.addEventListener('click', () => showStreakRecoveryMenu());
+        streakEl.querySelector('.stat-body')?.appendChild(btn);
+      }
+    }
+  }
 }
 
 /** Icônes et couleurs par mode */
@@ -635,9 +749,15 @@ editAvatarBtn.onclick = () => {
 };
 
 // Sauvegarder et rafraîchir
-saveRefreshBtn.onclick = () => {
+saveRefreshBtn.onclick = async () => {
+  if (!_profileDirty) return;
+  saveRefreshBtn.classList.add('btn-saving');
+  saveRefreshBtn.innerHTML = '⏳ <span>Saving…</span>';
   saveProfile();
-  location.reload();
+  await syncProfileToCloud().catch(() => {});
+  markClean();
+  // Soft-refresh : pull le cloud et re-applique l'UI sans rechargement de page
+  pullProfileFromCloud().then(_applyCloudToUI).catch(() => {});
 };
 
 // Réinitialiser le profil
@@ -649,11 +769,17 @@ resetProfileBtn.onclick = () => {
   }
 };
 
-// Mise à jour du pseudo en temps réel
+// Mise à jour du pseudo en temps réel + sync cloud déboncée (500ms)
+let _pseudoSyncTimer = null;
 pseudoInput.oninput = (e) => {
   profile.pseudo = e.target.value;
   pageUsername.textContent = profile.pseudo || 'Guest';
   saveProfile();
+  markDirty();
+  clearTimeout(_pseudoSyncTimer);
+  _pseudoSyncTimer = setTimeout(() => {
+    saveProfileToCloud({ pseudo: profile.pseudo || null });
+  }, 500);
 };
 
 // Changement de couleur de bordure
@@ -662,6 +788,7 @@ borderColorPicker.oninput = (e) => {
   pageAvatar.style.borderColor = profile.avatarBorderColor;
   updateBorderPreview(e.target.value);
   saveProfile();
+  markDirty();
   // Régénère la preview de partage si la modale est ouverte
   const shareModal = document.getElementById('sharePreviewModal');
   if (shareModal && !shareModal.classList.contains('hidden') && _regenerateSharePreview) {
@@ -863,6 +990,7 @@ confirmCrop.onclick = () => {
     profile.avatar = result;
     pageAvatar.src = result;
     saveProfile();
+    markDirty();
     saveProfileToCloud({ avatar_data: result });
   }
   cropModal.classList.add('hidden');
@@ -876,7 +1004,13 @@ confirmCrop.onclick = () => {
 
 /** Exporte le profil complet en fichier JSON téléchargeable. */
 exportBtn.onclick = () => {
-  const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
+  const exportData = {
+    ...profile,
+    // Jeton de liaison au compte — empêche l'import du JSON sur un autre compte
+    _accountId:  window._currentUser?.id ?? profile._accountId ?? null,
+    _exportedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'personadle_profile.json';
@@ -884,72 +1018,6 @@ exportBtn.onclick = () => {
   URL.revokeObjectURL(a.href);
 };
 
-/** Cache le bouton import si le compte a déjà effectué une migration JSON. */
-function _updateImportBtnVisibility() {
-  if (!importBtn) return;
-  const hasMigrated = window._currentUser?.has_migrated;
-  if (hasMigrated) {
-    importBtn.style.display = 'none';
-    importFile.style.display = 'none';
-  } else {
-    importBtn.style.display = '';
-  }
-}
-
-/** Ouvre le dialogue de sélection de fichier. */
-importBtn.onclick = () => {
-  if (window._currentUser?.has_migrated) return;
-  importFile.click();
-};
-
-/** Importe un profil depuis un fichier JSON. */
-importFile.onchange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async () => {
-    try {
-      const imported = JSON.parse(reader.result);
-      // Assurer la compatibilité avec les anciennes versions du profil
-      if (!imported.badges)        imported.badges = [];
-      if (!imported.selectedBadges) imported.selectedBadges = [];
-      if (!imported.eventCodes)    imported.eventCodes = [];
-      if (!imported.stats?.perfectWins) {
-        imported.stats = imported.stats || {};
-        imported.stats.perfectWins = 0;
-      }
-
-      // Si connecté : envoyer la migration à l'API (max 1 par compte)
-      const api = window._personadleApi;
-      if (api && window._currentUser?.id) {
-        try {
-          const payload = {
-            profile:         imported,
-            pendingSessions: [],
-          };
-          await api.user.migrate(payload);
-          // Marquer localement pour cacher le bouton sans rechargement
-          window._currentUser.has_migrated = true;
-          _updateImportBtnVisibility();
-        } catch (err) {
-          if (err?.status === 409 || (typeof err?.message === 'string' && err.message.includes('409'))) {
-            alert(window.i18n?.t?.('profile.import_already_done', 'You have already imported a JSON profile. Only one import is allowed per account.'));
-            return;
-          }
-          // Erreur réseau non-fatale : on continue avec la sauvegarde locale
-        }
-      }
-
-      profile = imported;
-      saveProfile();
-      location.reload();
-    } catch {
-      alert('❌ Invalid file! Please select a valid PersonaDLE profile (.json).');
-    }
-  };
-  reader.readAsText(file);
-};
 
 
 // ─────────────────────────────────────────────────────────
@@ -1182,7 +1250,7 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
       ) : null;
       if (!eq) return '';
       const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-      const imgSrc  = `${_prefix}/${eq.image_path || `profile/titles/${eq.slug}.webp`}`;
+      const imgSrc  = `${_prefix}/profile/${eq.image_path || `titles/${eq.slug}.webp`}`;
       const szMap   = { small: 150, medium: 220, large: 300 };
       const w = szMap[titleOptions.size] || 220;
       return `<img src="${imgSrc}" alt="${eq.name}" crossorigin="anonymous"
@@ -1876,6 +1944,7 @@ function attachSongHandlers() {
     };
     saveProfile();
     renderSongCard();
+    markDirty();
     saveProfileToCloud({ profile_music_id: song.fichier });
   });
 
@@ -1905,6 +1974,7 @@ function attachSongHandlers() {
     delete profile.profileSong;
     saveProfile();
     renderSongCard();
+    markDirty();
     saveProfileToCloud({ profile_music_id: null });
   });
 }
@@ -1966,6 +2036,8 @@ function initSongPlayer() {
 /** Initialise le système de profile song (appelé au DOMContentLoaded). */
 function setupSongPicker() {
   if (!profileSongAudio) profileSongAudio = new Audio();
+  // renderSongCard() appelé par _applyCloudToUI() après le cloud pull —
+  // évite d'afficher un picker vide avant que profile.profileSong soit résolu.
   renderSongCard();
 }
 
@@ -1982,15 +2054,59 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfile();
   renderModeStats();
 
-  // 1b. Si l'utilisateur est connecté, écraser les stats localStorage par les données cloud.
-  //     _authResolved est vrai à ce point (auth-ready dispatche AVANT DOMContentLoaded).
-  if (window._authResolved && window._currentUser?.id) {
-    syncStatsFromBackend(window._currentUser.id).catch(() => {});
-    syncProfileToCloud().catch(() => {});
+  // 1b. Sync complet cloud → local (le backend est la source de vérité).
+  // Chaîne : pull → apply UI → re-init titres avec session valide → sync badges local→back.
+  // Dual approach : immédiat si auth déjà résolue, sinon event listener.
+  const _fullCloudSync = async () => {
+    if (!window._currentUser?.id) return;
+    try {
+      await pullProfileFromCloud();
+      _applyCloudToUI();
+      // Re-fetcher /api/titles avec session valide → is_unlocked correct par user
+      await initTitlesSection();
+      // Pousser les badges locaux manquants vers le backend (local → cloud)
+      await syncBadgesWithBackend(profile, saveProfileAndSyncBadges);
+    } catch (_) {}
+    window._onLangChange = pushLangToCloud;
+  };
+  if (window._authResolved) {
+    _fullCloudSync();
+  } else {
+    window.addEventListener('personadle:auth-ready', _fullCloudSync, { once: true });
   }
 
-  // Cacher le bouton import si le compte a déjà effectué une migration JSON
-  _updateImportBtnVisibility();
+  // Ré-sync complet au login/register (sans rechargement de page)
+  window.addEventListener('personadle:auth-login', () => _fullCloudSync());
+
+  // Reset profil au logout (sans rechargement de page)
+  window.addEventListener('personadle:auth-logout', () => {
+    // Arrêter la musique si elle joue
+    if (profileSongAudio) { profileSongAudio.pause(); profileSongAudio.src = ''; }
+    // localStorage déjà vidé par auth.js — initProfile() crée un profil vierge
+    initProfile();
+    renderThemePicker();
+    renderModeStats();
+    renderSongCard?.();
+    renderUnlockableWallpaperGallery(profile);
+    renderBadgesPreview(profile);
+    renderBadgesModal(profile, saveProfile);
+    _titlesData.forEach(t => { t.is_unlocked = 0; });
+    renderTitlesSection?.();
+  });
+
+  // Sync périodique toutes les 3 min + à chaque retour sur l'onglet (pull + apply seulement)
+  const _periodicSync = () => {
+    if (!window._currentUser?.id) return;
+    pullProfileFromCloud().then(_applyCloudToUI).catch(() => {});
+  };
+  setInterval(_periodicSync, 3 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') _periodicSync();
+  });
+
+  // Callback appelé par cloud-sync.js après chaque pull périodique
+  window._onCloudSync = () => _applyCloudToUI();
+
   renderThemePicker();
   setupPersoCard();
   initAvatarGrid();
@@ -2001,10 +2117,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. Système de badges
   initBadgesSystem(profile, saveProfileAndSyncBadges);
 
-  // 2b. Wallpapers débloquables + Titres (fire-and-forget async)
+  // 2b. Wallpapers débloquables + Titres
+  // _bindTitlesModal() : rendu immédiat depuis localStorage (avant auth/cloud)
+  // initTitlesSection() : appelé dans _fullCloudSync après auth → is_unlocked correct depuis l'API
   initUnlockableWallpapers().catch(() => {});
-  _bindTitlesModal();          // binding immédiat — indépendant de l'API
-  initTitlesSection().catch(() => {});
+  _bindTitlesModal();
 
   // 3. Auth — initAuth() est appelé depuis profile.html (bloc <script type="module">)
   //    setupAuth() supprimé : redondant et en conflit avec initAuth() de js/auth.js
@@ -2148,7 +2265,7 @@ async function initUnlockableWallpapers() {
         `${window.location.pathname.startsWith('/personadle/') ? '/personadle' : ''}/api/friends`,
         { credentials: 'include' }
       ).then(r => r.json());
-      friendCount = (res?.data?.friends || []).length;
+      friendCount = (res?.friends || []).length;
     } catch (_) {}
   }
 
@@ -2158,7 +2275,7 @@ async function initUnlockableWallpapers() {
       const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
       const res = await fetch(`${_prefix}/api/user/${window._currentUser.id}`, { credentials: 'include' })
         .then(r => r.json());
-      const backendWp = res?.data?.unlocked_wallpapers || [];
+      const backendWp = res?.unlocked_wallpapers || [];
       if (!profile.unlockedWallpapers) profile.unlockedWallpapers = [];
       const newFromBackend = backendWp.filter(id => !profile.unlockedWallpapers.includes(id));
       if (newFromBackend.length) {
@@ -2192,29 +2309,89 @@ const TITLES_LOCAL = [
   { slug: 'maya_always_be_positive',   name: 'Always Be Positive',      rarity: 'common',    condition_type: 'emoji_p2_wins',      condition_value: 10  },
 ];
 
+// Chemin relatif à profile.html → toujours correct quelle que soit la config serveur
 let _titlesData = TITLES_LOCAL.map(t => ({
   ...t,
   id: null,
-  // Mark as unlocked if already persisted in profile
-  is_unlocked: (profile.unlockedTitles || []).includes(t.slug) ? 1 : 0,
-  image_path: `profile/titles/${t.slug}.webp`,
+  is_unlocked: 0,  // recalculé au render depuis profile réel
+  image_path: `titles/${t.slug}.webp`,
 }));
+
+/**
+ * Sync _titlesData.is_unlocked depuis profile.unlockedTitles (localStorage).
+ * À appeler après chaque cloud pull ou modification de profile.unlockedTitles.
+ */
+function _refreshTitlesUnlockState() {
+  const unlocked = new Set(profile.unlockedTitles || []);
+  for (const t of _titlesData) {
+    // On ne rétrograde jamais : si déjà marqué unlocked (ex: par l'API), on garde
+    if (!t.is_unlocked) t.is_unlocked = unlocked.has(t.slug) ? 1 : 0;
+  }
+}
+
+/**
+ * Résout la correspondance ID ↔ slug du titre équipé.
+ * - cloud donne equipped_title_id (int) → on cherche le slug dans _titlesData
+ * - local peut avoir seulement le slug → on cherche l'id pour pousser vers cloud
+ */
+function _resolveEquippedTitle() {
+  const eId   = profile.equippedTitleId   ?? null;
+  const eSlug = profile.equippedTitleSlug ?? null;
+
+  if (eId && !eSlug) {
+    const match = _titlesData.find(t => t.id === eId);
+    if (match) {
+      profile.equippedTitleSlug = match.slug;
+      saveProfile();
+    }
+  } else if (!eId && eSlug) {
+    const match = _titlesData.find(t => t.slug === eSlug);
+    if (match?.id) {
+      profile.equippedTitleId = match.id;
+      saveProfile();
+      saveProfileToCloud({ equipped_title_id: match.id });
+    }
+  }
+}
 
 async function initTitlesSection() {
   const lang    = window.i18n?.getCurrentLang?.() || 'en';
   const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-  try {
-    const res  = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: 'include' });
-    const json = await res.json();
-    if (Array.isArray(json?.data) && json.data.length > 0) {
-      // Merge API data (has id + is_unlocked + translated name) with local image_path
-      _titlesData = json.data.map(t => ({
-        ...t,
-        image_path: t.image_path || `profile/titles/${t.slug}.webp`,
-      }));
-    }
-  } catch (_) { /* offline / not logged in → use local data */ }
 
+  // 1. Charger les titres depuis l'API :
+  //    - vrais IDs (pour les appels unlock)
+  //    - noms localisés (depuis la BDD)
+  //    - is_unlocked PER-USER (la source de vérité la plus fiable)
+  try {
+    const res       = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: 'include' });
+    const json      = await res.json();
+    const apiTitles = Array.isArray(json) ? json : [];
+    if (apiTitles.length > 0) {
+      const bySlug = {};
+      for (const t of apiTitles) bySlug[t.slug] = t;
+
+      _titlesData = _titlesData.map(t => {
+        const api = bySlug[t.slug];
+        if (!api) return t;
+        return {
+          ...t,
+          id:          api.id  ?? t.id,
+          name:        api.name || t.name,
+          // On garde le chemin local relatif (titles/slug.webp depuis profile/)
+          // Le chemin DB (profile/titles/...) est réservé à profile-view.js
+          is_unlocked: api.is_unlocked ? 1 : 0,
+        };
+      });
+    }
+  } catch (_) {}
+
+  // 2. Fusionner avec localStorage (titres débloqués offline ou sur un autre appareil)
+  _refreshTitlesUnlockState();
+
+  // 3. Résoudre ID ↔ slug du titre équipé (cloud-sync donne les deux désormais)
+  _resolveEquippedTitle();
+
+  // 4. Vérifier les conditions et déverouiller les nouveaux titres mérités
   await checkAndUnlockTitles();
   renderTitlesSection();
 }
@@ -2231,7 +2408,7 @@ async function checkAndUnlockTitles() {
     try {
       const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
       const res = await fetch(`${_prefix}/api/friends`, { credentials: 'include' }).then(r => r.json());
-      friendCount = (res?.data?.friends || []).length;
+      friendCount = (res?.friends || []).length;
     } catch (_) {}
   }
 
@@ -2263,15 +2440,15 @@ async function checkAndUnlockTitles() {
         profile.unlockedTitles.push(title.slug);
         saveProfile();
         _showTitleNotification(title);
+        // Persister en BDD — on envoie le slug (l'id peut être null si l'API n'a pas répondu)
+        window._personadleApi?.titles?.unlock(title.slug).catch(() => {});
       }
-      window._personadleApi?.titles?.unlock(title.id).catch(() => {});
     }
   }
 }
 
 function _showTitleNotification(title) {
-  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-  const imgSrc  = `${_prefix}/${title.image_path || `profile/titles/${title.slug}.webp`}`;
+  const imgSrc = title.image_path || `titles/${title.slug}.webp`;
   const cond    = _titleConditionText(title);
 
   const notif = document.createElement('div');
@@ -2300,8 +2477,7 @@ function _showTitleNotification(title) {
 }
 
 function _showTitleZoom(title) {
-  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-  const imgSrc  = `${_prefix}/${title.image_path || `profile/titles/${title.slug}.webp`}`;
+  const imgSrc = title.image_path || `titles/${title.slug}.webp`;
   const cond    = _titleConditionText(title);
 
   const modal = document.createElement('div');
@@ -2344,83 +2520,102 @@ function _titleConditionText(t) {
 }
 
 function renderTitlesSection() {
-  // Identify the equipped title — match by id (API) or slug (local fallback)
+  // ── Calling card image sous avatar/pseudo ─────────────────────────────────
   const equippedId   = profile.equippedTitleId   || null;
   const equippedSlug = profile.equippedTitleSlug || null;
   const eq = _titlesData.find(t =>
     (equippedId && t.id && t.id === equippedId) ||
     (equippedSlug && t.slug === equippedSlug)
   );
-
-  // ── Calling card image under avatar/username ──────────────────────────────
-  const _prefix2  = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-  const titleImg  = document.getElementById('equippedTitleImg');
+  const titleImg = document.getElementById('equippedTitleImg');
   if (titleImg) {
     if (eq) {
-      const src = `${_prefix2}/${eq.image_path || `profile/titles/${eq.slug}.webp`}`;
-      titleImg.src          = src;
+      titleImg.src            = eq.image_path || `titles/${eq.slug}.webp`;
       titleImg.dataset.rarity = eq.rarity || 'common';
       titleImg.style.display  = 'block';
     } else {
       titleImg.style.display = 'none';
     }
   }
-
-  // ── Modal grid — calling card images ──────────────────────────────────────
-  const grid = document.getElementById('titlesModalGrid');
-  if (!grid) return;
-
-  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-
-  grid.innerHTML = _titlesData.map(t => {
-    const isUnlocked = !!t.is_unlocked;
-    const isEquipped = eq?.slug === t.slug;
-    const cond       = _titleConditionText(t);
-    const imgSrc     = `${_prefix}/${t.image_path || `profile/titles/${t.slug}.webp`}`;
-    return `
-      <div class="title-item ${isUnlocked ? 'unlocked' : 'locked'} ${isEquipped ? 'equipped' : ''}"
-           data-slug="${t.slug}" data-id="${t.id ?? ''}" data-unlocked="${isUnlocked}">
-        <img src="${imgSrc}" alt="${t.name}" loading="lazy">
-        ${isEquipped ? '<span class="title-equipped-check">✓</span>' : ''}
-        <div class="title-tooltip">
-          <strong>${t.name}</strong>
-          <span class="title-rarity-tag" data-rarity="${t.rarity || 'common'}">${t.rarity || 'common'}</span><br>
-          <span class="tt-condition">${isUnlocked ? '🔓 ' : '🔒 '}${cond}</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  grid.querySelectorAll('.title-item').forEach(el => {
-    el.onclick = () => {
-      const slug      = el.dataset.slug;
-      const titleId   = el.dataset.id ? parseInt(el.dataset.id, 10) : null;
-      const titleObj  = _titlesData.find(t => t.slug === slug);
-      const isUnlocked = el.dataset.unlocked === 'true';
-
-      if (isUnlocked) {
-        const alreadyEquipped = eq?.slug === slug;
-        profile.equippedTitleId   = alreadyEquipped ? null : titleId;
-        profile.equippedTitleSlug = alreadyEquipped ? null : slug;
-        saveProfile();
-        saveProfileToCloud({ equipped_title_id: profile.equippedTitleId || null });
-        renderTitlesSection();
-      } else if (titleObj) {
-        _showTitleZoom(titleObj);
-      }
-    };
-  });
-
+  // ── Grille modale ─────────────────────────────────────────────────────────
+  _renderTitlesGrid();
 }
 
 function _bindTitlesModal() {
   const modal    = document.getElementById('titlesModal');
+  const overlay  = document.getElementById('titlesModalOverlay');
   const openBtn  = document.getElementById('openTitlesModal');
   const closeBtn = document.getElementById('closeTitlesModal');
   if (!modal || !openBtn) return;
 
-  openBtn.onclick = () => modal.classList.remove('hidden');
-  closeBtn?.addEventListener('click', () => modal.classList.add('hidden'));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.classList.add('hidden'); });
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+  _renderTitlesGrid();
+
+  const open = () => {
+    modal.classList.remove('hidden');
+    if (overlay) overlay.classList.remove('hidden');
+  };
+  const close = () => {
+    modal.classList.add('hidden');
+    if (overlay) overlay.classList.add('hidden');
+  };
+
+  // addEventListener au lieu de onclick (plus fiable)
+  openBtn.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  overlay?.addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+}
+
+// Render séparé sans dépendance à l'état du modal
+function _renderTitlesGrid() {
+  const grid = document.getElementById('titlesModalGrid');
+  if (!grid) return;
+
+  // Source de vérité combinée : localStorage.unlockedTitles OU _titlesData.is_unlocked (depuis API)
+  const unlockedSlugs = new Set(profile?.unlockedTitles || []);
+  const equippedSlug  = profile?.equippedTitleSlug || null;
+  const equippedId    = profile?.equippedTitleId   || null;
+
+  grid.innerHTML = (_titlesData || []).map(t => {
+    const isUnlocked = unlockedSlugs.has(t.slug) || !!t.is_unlocked;
+    const isEquipped = (equippedSlug && equippedSlug === t.slug) ||
+                       (equippedId && t.id && equippedId === t.id);
+    const imgSrc = t.image_path || `titles/${t.slug}.webp`;
+    return `
+      <div class="tm-card ${isUnlocked ? 'tm-unlocked' : 'tm-locked'} ${isEquipped ? 'tm-equipped' : ''}"
+           data-slug="${t.slug}" data-id="${t.id ?? ''}" data-unlocked="${isUnlocked}">
+        <div class="tm-img-wrap">
+          <img src="${imgSrc}" alt="${t.name}" loading="lazy">
+          ${!isUnlocked ? '<span class="tm-lock">🔒</span>' : ''}
+          ${isEquipped ? '<span class="tm-badge-equipped">✓ Equipped</span>' : ''}
+        </div>
+        <div class="tm-info">
+          <strong class="tm-name">${t.name}</strong>
+          <span class="tm-rarity" data-rarity="${t.rarity || 'common'}">${t.rarity || 'common'}</span>
+          <span class="tm-cond">${isUnlocked ? '🔓' : '🔒'} ${_titleConditionText(t)}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Délégation d'événements — un seul listener sur le conteneur, pas un par carte
+  grid.onclick = (e) => {
+    const card = e.target.closest('.tm-card');
+    if (!card) return;
+    const slug       = card.dataset.slug;
+    const titleId    = card.dataset.id ? parseInt(card.dataset.id, 10) : null;
+    const isUnlocked = card.dataset.unlocked === 'true';
+    if (isUnlocked) {
+      const currentEquipped = profile?.equippedTitleSlug;
+      const alreadyEquipped = currentEquipped === slug;
+      profile.equippedTitleSlug = alreadyEquipped ? null : slug;
+      profile.equippedTitleId   = alreadyEquipped ? null : titleId;
+      saveProfile();
+      markDirty();
+      saveProfileToCloud({ equipped_title_id: profile.equippedTitleId ?? null });
+      renderTitlesSection();  // re-render image + grille
+    } else {
+      const titleObj = (_titlesData || []).find(t => t.slug === slug);
+      if (titleObj) _showTitleZoom(titleObj);
+    }
+  };
 }
