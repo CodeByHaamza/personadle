@@ -157,15 +157,16 @@ function initializeAutocomplete(input, personasList) {
       const opus = Array.isArray(character.opus) ? character.opus : [character.opus];
       if (!opus.some((op) => accepted.includes(op))) continue;
 
-      // Priority: first name start → last name / contains
-      if (firstName.startsWith(lowerVal)) {
-        matches.unshift(displayName);
-      } else if (lastName.startsWith(lowerVal) || lowerName.includes(lowerVal)) {
-        matches.push(displayName);
-      }
+      let priority = 3;
+      if (firstName.startsWith(lowerVal)) priority = 1;
+      else if (lastName.startsWith(lowerVal)) priority = 2;
+      else if (!lowerName.includes(lowerVal)) continue;
+      matches.push({ name: displayName, priority });
     }
 
-    matches.forEach((nom) => {
+    matches.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
+
+    matches.forEach(({ name: nom }) => {
       const imageName = portraitsMap[nom] || nom.split(" ")[0];
       const option = document.createElement("DIV");
       option.className = "list-options";
