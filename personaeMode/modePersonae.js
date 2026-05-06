@@ -93,9 +93,15 @@ function getFilteredCharacters() {
 function pickCharacter(random = false) {
   filteredCharacters = getFilteredCharacters();
 
-  target = random && filteredCharacters.length
-    ? filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)]
-    : getDailyTarget(originalCharacters, 'Personae');
+  if (random && filteredCharacters.length) {
+    const _prev = target;
+    const _candidates = filteredCharacters.length > 1 && _prev
+      ? filteredCharacters.filter(c => c.persona !== _prev.persona)
+      : filteredCharacters;
+    target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
+  } else {
+    target = getDailyTarget(originalCharacters, 'Personae');
+  }
 
   personaImg.src = `./database/img/${target.image}.webp`;
   personaImg.alt = target.persona;
