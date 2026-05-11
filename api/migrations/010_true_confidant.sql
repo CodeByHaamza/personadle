@@ -1,10 +1,8 @@
--- migration_010_true_confidant.sql
--- True Confidant Badge : configs par joueur + flag badge_prompt dans notifs
---
--- Compatible: MySQL 8.0 (local dev) + MariaDB 10.6+ (Hostinger prod)
--- NOTE: ADD COLUMN IF NOT EXISTS is NOT supported on MySQL 8.0 — the
---       is_badge_prompt column addition is wrapped in a procedure so the
---       migration is safely idempotent on both engines.
+-- =============================================================================
+-- 010_true_confidant.sql — True Confidant Badge
+-- Requires MariaDB 10.2+ or MySQL 8.0+ (ADD COLUMN IF NOT EXISTS = MariaDB ext.)
+-- Run via SSH MariaDB CLI on Hostinger.
+-- =============================================================================
 
 -- 1. New table: per-player badge half configurations
 CREATE TABLE IF NOT EXISTS social_link_badge_configs (
@@ -27,24 +25,6 @@ CREATE TABLE IF NOT EXISTS social_link_badge_configs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 2. Add badge_prompt flag to rank-up notifs table (idempotent via procedure)
-DROP PROCEDURE IF EXISTS _add_badge_prompt_col;
-
-DELIMITER $$
-CREATE PROCEDURE _add_badge_prompt_col()
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE()
-          AND TABLE_NAME   = 'social_link_rankup_notifs'
-          AND COLUMN_NAME  = 'is_badge_prompt'
-    ) THEN
-        ALTER TABLE social_link_rankup_notifs
-            ADD COLUMN is_badge_prompt TINYINT(1) NOT NULL DEFAULT 0;
-    END IF;
-END$$
-DELIMITER ;
-
-CALL _add_badge_prompt_col();
-DROP PROCEDURE IF EXISTS _add_badge_prompt_col;
+-- 2. Add badge_prompt flag to rank-up notifs (MariaDB IF NOT EXISTS syntax)
+ALTER TABLE social_link_rankup_notifs
+    ADD COLUMN IF NOT EXISTS is_badge_prompt TINYINT(1) NOT NULL DEFAULT 0;
