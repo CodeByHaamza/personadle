@@ -177,12 +177,6 @@ export const api = {
      */
     migrate: (payload) => post('/user/migrate', payload),
 
-    /**
-     * Récupère les wallpapers disponibles pour l'utilisateur :
-     * ceux marqués is_default + ceux débloqués.
-     * @param {number} userId
-     */
-    wallpapers: (userId) => get(`/user/${userId}/wallpapers`),
 
     /**
      * Supprime le compte (soft delete RGPD — hard delete différé J+30).
@@ -413,15 +407,32 @@ export const api = {
      */
     interactByFriend: (friendId, actionType) =>
       post(`/social-links/by-friend/${friendId}/interact`, { action_type: actionType }),
+
+    /** Récupère les rank-up notifs en attente pour l'utilisateur connecté. */
+    getRankUpNotifs: (lang = 'en') => get(`/social-links/rankup-notifs?lang=${lang}`),
+
+    /** État du badge True Confidant avec un ami. */
+    getBadgeStatus: (friendId) => get(`/social-links/badge-status?friend_id=${friendId}`),
+
+    /** Sauvegarder/soumettre la config de sa moitié. submit=true pour valider. */
+    saveBadgeConfig: (friendId, config) =>
+      post(`/social-links/badge-config`, { friend_id: friendId, ...config }),
+
+    /** Enregistre le badge final (après Canvas) pour les deux joueurs. */
+    saveBadgeFinal: (friendId) =>
+      post(`/social-links/badge-final`, { friend_id: friendId }),
+
+    /** Configs des deux moitiés pour le rendu Canvas. */
+    getBadgeData: (linkId) => get(`/social-links/${linkId}/badge`),
   },
 
   // ── Badges ────────────────────────────────────────────
   badges: {
     /**
-     * Récupère les badges débloqués d'un utilisateur.
-     * @param {number} userId
+     * Catalogue complet avec is_unlocked pour l'utilisateur courant.
+     * @param {string} [lang] - 'fr'|'es'|'de'|'it' pour nom localisé (défaut: 'en')
      */
-    get: (userId) => get(`/user/${userId}/badges`),
+    catalog: (lang) => get(`/badges${lang ? '?lang=' + encodeURIComponent(lang) : ''}`),
 
     /**
      * Rachète un code événement.
@@ -438,6 +449,11 @@ export const api = {
 
   // ── Wallpapers ────────────────────────────────────────
   wallpapers: {
+    /**
+     * Catalogue complet avec is_unlocked pour l'utilisateur courant.
+     */
+    catalog: () => get('/wallpapers'),
+
     /**
      * Persiste le déblocage d'un wallpaper côté serveur (fire-and-forget).
      * @param {string} wallpaperId
