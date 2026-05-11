@@ -13,11 +13,12 @@ const BADGE_IMG_BASE = new URL('./images/', import.meta.url).href;
 // 📊 CATÉGORIES DE BADGES
 // ───────────────────────────────────────────────────────────────────────────
 export const BADGE_CATEGORIES = {
-  ACHIEVEMENT: "achievement",    // Badges de statistiques
-  STREAK:      "streak",         // Badges de streak quotidienne
-  EVENT: "event",                // Badges d'événements temporaires
-  SECRET: "secret",              // Badges secrets (codes permanents)
-  SOCIAL: "social"               // Badges sociaux (partage, etc.)
+  ACHIEVEMENT:    "achievement",    // Badges de statistiques
+  STREAK:         "streak",         // Badges de streak quotidienne
+  EVENT:          "event",          // Badges d'événements temporaires
+  SECRET:         "secret",         // Badges secrets (codes permanents)
+  SOCIAL:         "social",         // Badges sociaux (partage, etc.)
+  TRUE_CONFIDANT: "true_confidant", // Badge généré dynamiquement au rang 10 Social Link
 };
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -539,24 +540,22 @@ export const badgesList = [
     name: 'Twin Fist',
     category: BADGE_CATEGORIES.ACHIEVEMENT,
     img: BADGE_IMG_BASE + 'Badge_Twin_Fist.webp',
-    condition: "Find Makoto Nijima's and Akihiko's personas in Personae mode AND their All-Out Attacks",
+    condition: "Find a Persona of Makoto Nijima and Akihiko in Personae mode",
     description: "Nuclear force and crackling lightning! You've identified the personas of the two fiercest brawlers who lead with their knuckles.",
     secret: false,
     check: (stats, profile) =>
-      profile?.foundMakotoNijima === true && profile?.foundMakotoNijimaAOA === true &&
-      profile?.foundAkihiko === true      && profile?.foundAkihikoAOA === true,
+      profile?.foundMakotoNijima === true && profile?.foundAkihiko === true,
   },
   {
     id: 'twin_spear',
     name: 'Twin Spear',
     category: BADGE_CATEGORIES.ACHIEVEMENT,
     img: BADGE_IMG_BASE + 'Badge_Twin_Spear.webp',
-    condition: "Find Kotone's and Ken's personas in Personae mode AND their All-Out Attacks",
+    condition: "Find a Persona of Kotone and Ken in Personae mode",
     description: "One seeks vengeance through light, the other leads with a dancing blade. You've found the spear-wielding duo of the Moonlight Bridge.",
     secret: false,
     check: (stats, profile) =>
-      profile?.foundKotone === true && profile?.foundKotoneAOA === true &&
-      profile?.foundKen === true    && profile?.foundKenAOA === true,
+      profile?.foundKotone === true && profile?.foundKen === true,
   },
   {
     id: 'tradition_modernite',
@@ -633,7 +632,7 @@ export const badgesList = [
     description: "Such passion! Such composition! You refused the mediocrity of a default profile to forge a visual masterpiece that moves the very soul.",
     secret: false,
     check: (stats, profile) =>
-      !!profile?.avatarData &&
+      !!profile?.avatar &&
       !!(
         (profile?.profileTheme && profile.profileTheme !== 'all_out' && profile.profileTheme !== '') ||
         (profile?.avatarBorderColor && profile.avatarBorderColor !== '#000000' && profile.avatarBorderColor !== '#ffffff')
