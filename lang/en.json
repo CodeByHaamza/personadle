@@ -28,6 +28,8 @@
     "back": "Back",
     "dismiss": "Dismiss",
     "error": "An error occurred.",
+    "admin_gift_received": "🎁 Gift received!",
+    "tap_continue": "Tap to continue",
     "close": "Close"
   },
   "modes": {
@@ -485,12 +487,12 @@
     },
     "twin_fist": {
       "name": "Twin Fist",
-      "condition": "Find Makoto Nijima's and Akihiko's personas in Personae mode AND their All-Out Attacks",
+      "condition": "Find a Persona of Makoto Nijima and Akihiko in Personae mode",
       "description": "Nuclear force and crackling lightning! You've identified the personas of the two fiercest brawlers who lead with their knuckles."
     },
     "twin_spear": {
       "name": "Twin Spear",
-      "condition": "Find Kotone's and Ken's personas in Personae mode AND their All-Out Attacks",
+      "condition": "Find a Persona of Kotone and Ken in Personae mode",
       "description": "One seeks vengeance through light, the other leads with a dancing blade. You've found the spear-wielding duo of the Moonlight Bridge."
     },
     "tradition_modernite": {
@@ -614,7 +616,26 @@
     },
     "xp_label": "{{xp}} XP",
     "rank_up": "Social Link ranked up! You are now {{rank_name}} with {{pseudo}}.",
-    "true_confidant_unlocked": "🎊 True Confidant! Your badge with {{pseudo}} has been generated."
+    "true_confidant_unlocked": "🎊 True Confidant! Your badge with {{pseudo}} has been generated.",
+    "true_confidant_waiting": "Waiting for {{pseudo}}…",
+    "true_confidant_create_btn": "✨ Create our badge",
+    "true_confidant_editor_title": "True Confidant Badge",
+    "true_confidant_editor_subtitle": "Customize your half — {{pseudo}}'s half is on the other side.",
+    "true_confidant_your_half": "Your half",
+    "true_confidant_avatar_label": "Avatar",
+    "true_confidant_zoom_label": "Zoom",
+    "true_confidant_ring_label": "Ring color",
+    "true_confidant_bg_label": "Background",
+    "true_confidant_overlay_label": "Effect",
+    "true_confidant_overlay_none": "None",
+    "true_confidant_overlay_glow": "Glow",
+    "true_confidant_overlay_shadow": "Shadow",
+    "true_confidant_submit_btn": "Validate my half",
+    "true_confidant_modify_confirm": "Modifying will re-notify {{pseudo}}. Continue?",
+    "true_confidant_pending_label": "Pending",
+    "true_confidant_category": "True Confidant",
+    "true_confidant_bond_text": "A true and powerful bond forged between {{a}} and {{b}}.",
+    "true_confidant_anim_text": "An unbreakable bond has been forged between {{a}} and {{b}}."
   },
   "auth": {
     "login": "Log in",
@@ -641,7 +662,9 @@
     "migrate_desc": "Import your local progress (stats, badges, avatar) to your cloud account. This can only be done once.",
     "migrate_btn": "Import local profile",
     "migrate_success": "✅ Profile imported successfully!",
-    "migrate_already_done": "Your profile is already synced."
+    "migrate_already_done": "Your profile is already synced.",
+    "privacy_notice": "By creating an account, you agree to our",
+    "privacy_link": "Privacy Policy"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -751,6 +774,10 @@
     "animations": "Animations",
     "anim_victory": "Victory animations",
     "anim_friend_request": "Friend request animation",
+    "anim_fr_style": "Style",
+    "anim_style_cc": "Calling Card",
+    "anim_style_tv": "P4 TV",
+    "anim_style_p3": "P3 Evoker",
     "save": "Save",
     "saved": "✓ Saved!"
   },
@@ -760,9 +787,17 @@
     "changelog_button": "See full Changelog",
     "copyright": "personadle.net — 2026",
     "disclaimer": "Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders.",
-    "legal_link": "Legal Notice",
+    "legal_link": "Privacy & Legal",
     "feedback_link": "📝 Suggestions & Bug Report",
-    "news_button": "📰 News"
+    "news_button": "📰 News",
+    "daily_btn": "🕛 Daily Reset",
+    "daily_title": "🕛 Daily Reset",
+    "daily_subtitle": "New challenges every day at midnight (Paris time)",
+    "daily_desc": "Each of the 6 modes resets with a brand-new target. Streaks, stats & progress carry over!",
+    "daily_countdown_label": "Next reset in",
+    "daily_hours": "hours",
+    "daily_min": "min",
+    "daily_sec": "sec"
   },
   "data": {
     "genre": {
@@ -873,5 +908,50 @@
     "games": "Games",
     "close": "Close",
     "radar_title": "Mode Breakdown"
+  },
+  "privacy": {
+    "page_title": "Privacy & Legal",
+    "tagline": "We keep it honest.",
+    "last_updated": "Last updated: May 2026",
+    "intro": "PersonaDLE is a free fan-made guessing game. Here's everything you need to know about your data — no lawyer-speak.",
+    "collected_title": "What we collect",
+    "collected_email": "Your email address — to create and secure your account",
+    "collected_pseudo": "A username of your choice — displayed on your profile",
+    "collected_stats": "Your game statistics — wins, streaks, attempts, time played",
+    "collected_avatar": "An avatar image — only if you choose to upload one",
+    "collected_prefs": "Your preferences — language, dark mode, theme, badges",
+    "never_title": "What we never do",
+    "never_sell": "Sell your data — ever",
+    "never_ads": "Use it for advertising or profiling",
+    "never_share": "Share it with third parties",
+    "never_money": "Monetize anything — PersonaDLE is and will always be free",
+    "security_title": "Security",
+    "security_bcrypt": "Passwords are hashed with bcrypt — we literally cannot read them.",
+    "security_cookie": "Sessions use a single secure, httpOnly cookie — no tracking.",
+    "security_https": "The site runs on HTTPS in production.",
+    "retention_title": "Data retention",
+    "retention_body": "Your data is kept as long as your account is active. You can delete your account at any time from your profile page — this triggers immediate anonymization followed by permanent deletion within 30 days.",
+    "rights_title": "Your rights (GDPR)",
+    "rights_access": "Right of access — request a copy of your data",
+    "rights_rectify": "Right to rectification — update your profile directly in the app",
+    "rights_delete": "Right to deletion — use the \"Delete my account\" button in your profile",
+    "rights_portability": "Right to portability — export your data with the \"Export\" button",
+    "cookies_title": "Cookies",
+    "cookies_body": "We use exactly one cookie: a technical session cookie (httpOnly, secure), strictly necessary for authentication. No advertising cookies, no analytics, no third-party scripts.",
+    "contact_title": "Contact",
+    "contact_body": "For any questions about your data or to exercise your rights:",
+    "legal_title": "Legal Notice",
+    "legal_publisher_label": "Publisher",
+    "legal_publisher_value": "Hamza Karrouchi — individual developer, France",
+    "legal_host_label": "Hosting",
+    "legal_host_value": "Hostinger International Ltd., 61 Lordou Vironos Street, 6023 Larnaca, Cyprus",
+    "legal_disclaimer": "PersonaDLE is an unofficial, non-commercial fan project. It is not affiliated with, endorsed by, or sponsored by ATLUS, SEGA, or any related entity. All Persona trademarks, characters, music, and visual assets belong to their respective rights holders. The game and source code are distributed under the MIT License.",
+    "legal_opensource": "Source code available on GitHub under the MIT License.",
+    "badge_free": "🎮 100% Free",
+    "badge_gdpr": "🇪🇺 GDPR",
+    "badge_noads": "🚫 No Ads",
+    "badge_open": "📖 Open Source",
+    "char_sae_tooltip": "⚖️ OBJECTION!\nNo data sold.\nNOT. EVER. 🐻",
+    "char_zenkichi_tooltip": "🔐 Your rights are\nsecured, Phantom Thief."
   }
 }
