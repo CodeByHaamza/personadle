@@ -364,29 +364,30 @@ async function _handleSubmit(modal) {
   btn.disabled    = true;
   btn.textContent = '…';
 
+  // Capturer l'état AVANT tout appel qui pourrait modifier _editorState
+  const friendId     = s.friendId;
+  const friendPseudo = s.friendPseudo || '?';
+  const friendAvatar = s.friendAvatar || null;
+
   try {
     const api  = window._personadleApi;
-    const data = await api.socialLink.saveBadgeConfig(s.friendId, { ...s.config, submit: true });
+    const data = await api.socialLink.saveBadgeConfig(friendId, { ...s.config, submit: true });
+
+    const me      = window._currentUser;
+    const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
+    const myAvatar = me?.avatar_data || profile.avatar_data || null;
 
     if (data.both_submitted) {
-      // Les deux ont soumis → fermer l'éditeur et lancer l'animation
       _closeEditor();
-      const me      = window._currentUser;
-      const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
       showConfidantAnimation(
-        me?.pseudo || 'You',
-        s.friendPseudo,
-        profile.avatar_data || null,
-        s.friendAvatar || null,
-        async () => { await api.socialLink.saveBadgeFinal(s.friendId); }
+        me?.pseudo || 'You', friendPseudo,
+        myAvatar, friendAvatar,
+        async () => { await api.socialLink.saveBadgeFinal(friendId).catch(() => {}); }
       );
     } else {
-      // En attente de l'ami → fermer l'éditeur, toast + polling s'occupera du reste
       _closeEditor();
-      const waitMsg = _t('social_link.true_confidant_waiting', { pseudo: s.friendPseudo }, `Waiting for ${s.friendPseudo}…`);
-      if (typeof window.showToast === 'function') {
-        window.showToast(waitMsg);
-      }
+      const waitMsg = _t('social_link.true_confidant_waiting', { pseudo: friendPseudo }, `Waiting for ${friendPseudo}…`);
+      if (typeof window.showToast === 'function') window.showToast(waitMsg);
     }
   } catch (err) {
     // 409 = badge déjà généré (l'ami a soumis entre-temps) → traiter comme both_submitted
@@ -394,13 +395,12 @@ async function _handleSubmit(modal) {
       _closeEditor();
       const me      = window._currentUser;
       const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
-      const api     = window._personadleApi;
+      const myAvatar = me?.avatar_data || profile.avatar_data || null;
+      const api      = window._personadleApi;
       showConfidantAnimation(
-        me?.pseudo || 'You',
-        _editorState?.friendPseudo || '',
-        profile.avatar_data || null,
-        _editorState?.friendAvatar || null,
-        async () => { await api?.socialLink.saveBadgeFinal(_editorState?.friendId).catch(() => {}); }
+        me?.pseudo || 'You', friendPseudo,
+        myAvatar, friendAvatar,
+        async () => { await api?.socialLink.saveBadgeFinal(friendId).catch(() => {}); }
       );
       return;
     }
@@ -413,16 +413,11 @@ async function _handleSubmit(modal) {
 // ─────────────────────────────────────────────────────────────────
 // ANIMATION DE GÉNÉRATION
 // ─────────────────────────────────────────────────────────────────
-/**
- * Joue l'animation complète de génération du badge.
- * @param {string} pseudoA
- * @param {string} pseudoB
- * @param {string|null} avatarA  base64
- * @param {string|null} avatarB  base64
- * @param {function} onComplete  appelé après animation (pour sauver en BDD)
- */
 export function showConfidantAnimation(pseudoA, pseudoB, avatarA, avatarB, onComplete) {
   if (document.getElementById('tcb-anim')) return;
+
+  const pA = pseudoA || 'You';
+  const pB = pseudoB || '?';
 
   const overlay     = document.createElement('div');
   overlay.id        = 'tcb-anim';
@@ -430,34 +425,39 @@ export function showConfidantAnimation(pseudoA, pseudoB, avatarA, avatarB, onCom
   overlay.innerHTML = `
     <canvas id="tcb-anim-canvas" class="tcb-anim-canvas"></canvas>
     <div class="tcb-anim-text" id="tcb-anim-text"></div>
-    <canvas id="tcb-anim-badge" class="tcb-anim-badge" width="200" height="200" style="opacity:0"></canvas>
+    <div class="tcb-anim-reveal" id="tcb-anim-reveal">
+      <canvas id="tcb-anim-badge" class="tcb-anim-badge" width="240" height="240"></canvas>
+      <div class="tcb-anim-bond-names">${pA} ⛓ ${pB}</div>
+      <p class="tcb-anim-bond-title">True Confidant</p>
+      <p class="tcb-anim-tap">${_t('ui.tap_to_continue', {}, 'Tap to continue')}</p>
+    </div>
   `;
   document.body.appendChild(overlay);
 
-  const text        = overlay.querySelector('#tcb-anim-text');
-  const animCanvas  = overlay.querySelector('#tcb-anim-canvas');
-  const badgeCanvas = overlay.querySelector('#tcb-anim-badge');
+  const text       = overlay.querySelector('#tcb-anim-text');
+  const animCanvas = overlay.querySelector('#tcb-anim-canvas');
   animCanvas.width  = window.innerWidth;
   animCanvas.height = window.innerHeight;
 
-  const fullMsg = _t('social_link.true_confidant_anim_text', { a: pseudoA, b: pseudoB },
-    `An unbreakable bond has been forged between ${pseudoA} and ${pseudoB}.`);
+  const fullMsg = _t('social_link.true_confidant_anim_text', { a: pA, b: pB },
+    `An unbreakable bond has been forged between ${pA} and ${pB}.`);
 
-  // Phase 1 : typewriter (0–3s)
+  // Phase 1 : typewriter (4s)
   let charIdx = 0;
   const typeInterval = setInterval(() => {
     text.textContent = fullMsg.slice(0, ++charIdx);
     if (charIdx >= fullMsg.length) clearInterval(typeInterval);
-  }, 3000 / fullMsg.length);
+  }, 4000 / fullMsg.length);
 
-  // Phase 2 : orbites avec traînées (après 3.2s)
+  // Phase 2 : orbites chaotiques (après 4.2s)
   setTimeout(() => {
-    text.style.opacity = '0';
-    _runOrbitAnimation(animCanvas, avatarA, avatarB, badgeCanvas, pseudoA, pseudoB, onComplete, overlay);
-  }, 3200);
+    text.style.transition = 'opacity 0.5s';
+    text.style.opacity    = '0';
+    _runOrbitAnimation(animCanvas, avatarA, avatarB, overlay, pA, pB, onComplete);
+  }, 4200);
 }
 
-function _runOrbitAnimation(canvas, avatarA, avatarB, badgeCanvas, pseudoA, pseudoB, onComplete, overlay) {
+function _runOrbitAnimation(canvas, avatarA, avatarB, overlay, pseudoA, pseudoB, onComplete) {
   const ctx = canvas.getContext('2d');
   const w   = canvas.width;
   const h   = canvas.height;
@@ -468,45 +468,42 @@ function _runOrbitAnimation(canvas, avatarA, avatarB, badgeCanvas, pseudoA, pseu
   const imgB = new Image(); imgB.src = avatarB || '';
 
   let t       = 0;
-  let phase   = 'orbit';
   let crashed = false;
 
-  const RADIUS    = Math.min(w, h) * 0.28;
-  const BALL_SIZE = Math.min(w, h) * 0.12;
-
-  const trailA = [];
-  const trailB = [];
-  const MAX_TRAIL = 30;
+  // Rayon large pour couvrir l'écran, boules bien visibles
+  const RADIUS    = Math.min(w, h) * 0.42;
+  const BALL_SIZE = Math.min(w, h) * 0.09;
+  const trailA = [], trailB = [];
+  const MAX_TRAIL = 45;
 
   function tick() {
-    if (phase === 'done') return;
-    t += 0.04;
+    if (crashed) return;
+    t += 0.025; // vitesse lente pour animation plus longue
 
-    // Spirale vers le centre
-    const spiral = Math.max(0, 1 - t / 6);
-    const r      = RADIUS * spiral;
-    const ax     = cx + r * Math.cos(t * 1.7);
-    const ay     = cy + r * Math.sin(t * 1.3);
-    const bx     = cx + r * Math.cos(t * 1.7 + Math.PI);
-    const by     = cy + r * Math.sin(t * 1.3 + Math.PI);
+    // Spirale qui prend ~7s avant convergence au centre
+    const spiral = Math.max(0, 1 - t / 17);
+    const r = RADIUS * spiral;
+
+    // Chemins de Lissajous avec perturbations → vole "de partout"
+    const ax = cx + r * Math.cos(t * 1.4 + Math.sin(t * 0.31) * 0.7);
+    const ay = cy + r * 0.8 * Math.sin(t * 1.1 + Math.cos(t * 0.19) * 0.6);
+    const bx = cx + r * Math.cos(t * 1.4 + Math.PI + Math.sin(t * 0.27) * 0.7);
+    const by = cy + r * 0.8 * Math.sin(t * 1.1 + Math.PI + Math.cos(t * 0.23) * 0.6);
 
     trailA.push({ x: ax, y: ay }); if (trailA.length > MAX_TRAIL) trailA.shift();
     trailB.push({ x: bx, y: by }); if (trailB.length > MAX_TRAIL) trailB.shift();
 
-    // Clear semi-transparent → effet traîné persistant
-    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillStyle = 'rgba(0,0,0,0.14)';
     ctx.fillRect(0, 0, w, h);
 
     _drawTrail(ctx, trailA, '#f5c842');
     _drawTrail(ctx, trailB, '#c084fc');
-
     _drawAvatarCircle(ctx, ax, ay, BALL_SIZE, imgA, '#f5c842');
     _drawAvatarCircle(ctx, bx, by, BALL_SIZE, imgB, '#c084fc');
 
-    if (!crashed && Math.hypot(ax - bx, ay - by) < BALL_SIZE * 1.5) {
+    if (Math.hypot(ax - bx, ay - by) < BALL_SIZE * 1.4) {
       crashed = true;
-      phase   = 'crash';
-      _doCrash(ctx, cx, cy, w, h, badgeCanvas, pseudoA, pseudoB, onComplete, overlay);
+      _doCrash(ctx, cx, cy, w, h, overlay, avatarA, avatarB, pseudoA, pseudoB, onComplete);
       return;
     }
 
@@ -515,23 +512,22 @@ function _runOrbitAnimation(canvas, avatarA, avatarB, badgeCanvas, pseudoA, pseu
 
   let loaded = 0;
   const tryStart = () => { if (++loaded >= 2) requestAnimationFrame(tick); };
-
   if (!avatarA && !avatarB) { tryStart(); tryStart(); }
-  else if (!avatarA) { tryStart(); if (imgB.complete) tryStart(); else imgB.onload = tryStart; }
-  else if (!avatarB) { if (imgA.complete) tryStart(); else imgA.onload = tryStart; tryStart(); }
+  else if (!avatarA) { tryStart(); imgB.complete ? tryStart() : (imgB.onload = tryStart); }
+  else if (!avatarB) { imgA.complete ? tryStart() : (imgA.onload = tryStart); tryStart(); }
   else {
-    if (imgA.complete) tryStart(); else imgA.onload = tryStart;
-    if (imgB.complete) tryStart(); else imgB.onload = tryStart;
+    imgA.complete ? tryStart() : (imgA.onload = tryStart);
+    imgB.complete ? tryStart() : (imgB.onload = tryStart);
   }
 }
 
 function _drawTrail(ctx, trail, color) {
   trail.forEach((p, i) => {
-    const alpha = (i / trail.length) * 0.6;
-    const size  = 6 * (i / trail.length);
+    const a = (i / trail.length) * 0.65;
+    const s = 8 * (i / trail.length);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, Math.max(0.5, size), 0, Math.PI * 2);
-    ctx.globalAlpha = alpha;
+    ctx.arc(p.x, p.y, Math.max(0.5, s), 0, Math.PI * 2);
+    ctx.globalAlpha = a;
     ctx.fillStyle   = color;
     ctx.fill();
     ctx.globalAlpha = 1;
@@ -550,38 +546,64 @@ function _drawAvatarCircle(ctx, x, y, size, img, ringColor) {
     ctx.fill();
   }
   ctx.restore();
+  // Anneau brillant
   ctx.beginPath();
   ctx.arc(x, y, size, 0, Math.PI * 2);
   ctx.strokeStyle = ringColor;
-  ctx.lineWidth   = 3;
+  ctx.lineWidth   = 4;
+  ctx.shadowColor = ringColor;
+  ctx.shadowBlur  = 12;
   ctx.stroke();
+  ctx.shadowBlur  = 0;
 }
 
-function _doCrash(ctx, cx, cy, w, h, badgeCanvas, pseudoA, pseudoB, onComplete, overlay) {
-  let flashAlpha = 1;
+function _doCrash(ctx, cx, cy, w, h, overlay, avatarA, avatarB, pseudoA, pseudoB, onComplete) {
+  // Pré-rendre le badge sur le canvas de révélation pendant le flash
+  const badgeCanvas = overlay.querySelector('#tcb-anim-badge');
+  if (badgeCanvas) {
+    badgeCanvas.width  = 240;
+    badgeCanvas.height = 240;
+    // Utiliser les vraies pdp avec glow
+    const leftCfg  = { avatar_data: avatarA, crop_x: 0, crop_y: 0, crop_scale: 1.1,
+                       ring_color: '#f5c842', bg_color: '#1a0a2e', overlay: 'glow' };
+    const rightCfg = { avatar_data: avatarB, crop_x: 0, crop_y: 0, crop_scale: 1.1,
+                       ring_color: '#c084fc', bg_color: '#1a0a2e', overlay: 'glow' };
+    renderConfidantBadgeCanvas(badgeCanvas, leftCfg, rightCfg, false);
+  }
+
+  // Flash doré
+  let flashAlpha = 1.2;
   const flashInt = setInterval(() => {
-    ctx.fillStyle = `rgba(255, 220, 80, ${flashAlpha})`;
+    ctx.fillStyle = `rgba(255, 220, 80, ${Math.min(1, flashAlpha)})`;
     ctx.fillRect(0, 0, w, h);
-    flashAlpha -= 0.08;
+    flashAlpha -= 0.05;
     if (flashAlpha <= 0) {
       clearInterval(flashInt);
-      _revealBadge(badgeCanvas, pseudoA, pseudoB, onComplete, overlay);
+      _revealBadge(overlay, onComplete);
     }
-  }, 30);
+  }, 25);
 }
 
-function _revealBadge(badgeCanvas, pseudoA, pseudoB, onComplete, overlay) {
-  badgeCanvas.style.transition = 'opacity 1.2s ease, transform 1.2s ease';
-  badgeCanvas.style.opacity    = '1';
-  badgeCanvas.style.transform  = 'scale(1)';
+function _revealBadge(overlay, onComplete) {
+  const reveal = overlay.querySelector('#tcb-anim-reveal');
+  if (!reveal) return;
 
-  if (onComplete) onComplete();
+  // Sauvegarder en BDD en parallèle
+  if (onComplete) onComplete().catch(() => {});
 
-  setTimeout(() => {
-    overlay.style.transition = 'opacity 0.8s';
+  // Révéler le bloc badge+noms
+  reveal.style.opacity = '1';
+
+  // Clic pour fermer
+  const dismiss = () => {
+    overlay.style.transition = 'opacity 0.6s';
     overlay.style.opacity    = '0';
-    setTimeout(() => overlay.remove(), 800);
-  }, 4000);
+    setTimeout(() => overlay.remove(), 600);
+  };
+  overlay.addEventListener('click', dismiss, { once: true });
+
+  // Fermeture auto après 12s
+  setTimeout(dismiss, 12000);
 }
 
 // ── Bridges globaux (pour accès depuis profile-view.js sans import ES6) ──────

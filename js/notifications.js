@@ -19,7 +19,8 @@ const SEEN_CHALLENGE_NOTIF  = 'seenChallengeNotifIds';
 const SEEN_RANKUP_KEY       = 'seenSLRankUpIds';
 // Set en mémoire (session uniquement) : évite de rejouer l'anim deux fois dans la même session
 // sans bloquer les sessions suivantes (la notif est consommée côté API de toute façon)
-const _seenBadgePromptIds = new Set();
+const _seenBadgePromptIds  = new Set();
+const _seenBadgeCompleteIds = new Set(); // évite double-anim dans la même session
 
 let _pollTimer = null;
 
@@ -332,17 +333,16 @@ async function _checkBadgeCompletion() {
       if (status.badge_data) continue; // déjà enregistré en BDD
 
       // Les deux ont soumis mais le badge final n'est pas encore en BDD → déclencher l'animation
-      const seenKey = `tcb_anim_done_${friend.user_id}`;
-      if (localStorage.getItem(seenKey)) continue;
-      localStorage.setItem(seenKey, '1');
+      if (_seenBadgeCompleteIds.has(friend.user_id)) continue;
+      _seenBadgeCompleteIds.add(friend.user_id);
 
       const me      = window._currentUser;
       const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
       showConfidantAnimation(
         me?.pseudo || 'You',
-        friend.pseudo,
-        profile.avatar_data || null,
-        friend.avatar_data  || null,
+        friend.pseudo || '?',
+        me?.avatar_data || profile.avatar_data || null,
+        friend.avatar_data || null,
         async () => { await api.socialLink.saveBadgeFinal(friend.user_id).catch(() => {}); }
       );
       return; // une animation à la fois

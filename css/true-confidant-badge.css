@@ -223,12 +223,62 @@
   transition: opacity 0.8s;
 }
 
-.tcb-anim-badge {
+/* Bloc révélation : badge + noms + titre */
+.tcb-anim-reveal {
   position: absolute;
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  text-align: center;
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.tcb-anim-badge {
+  width: 240px;
+  height: 240px;
   border-radius: 50%;
-  transform: scale(0.3);
-  box-shadow: 0 0 60px #f5c84266;
+  display: block;
+  box-shadow: 0 0 60px #f5c84299, 0 0 120px #f5c84244;
+  animation: tcb-badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tcb-badge-pulse {
+  0%, 100% { box-shadow: 0 0 60px #f5c84299, 0 0 120px #f5c84244; }
+  50%       { box-shadow: 0 0 90px #f5c842cc, 0 0 160px #f5c84266; }
+}
+
+.tcb-anim-bond-names {
+  color: #f5c842;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  font-weight: bold;
+  text-shadow: 0 0 16px #f5c84299;
+  letter-spacing: 0.05em;
+}
+
+.tcb-anim-bond-title {
+  color: #c084fc;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px #c084fc88;
+  margin: 0;
+}
+
+.tcb-anim-tap {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.72rem;
+  margin: 8px 0 0;
+  animation: tcb-blink 1.8s ease-in-out infinite;
+}
+
+@keyframes tcb-blink {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.9; }
 }
 
 /* ── Badge button in profile viewer ────────────────────────────── */
