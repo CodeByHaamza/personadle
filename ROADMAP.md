@@ -20,18 +20,22 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| B1 | Schéma BDD 19 tables (MySQL/MariaDB) | ✅ | `sql/bdd_mysql.sql` — wallpapers + messages + procédures SQL |
-| B2 | API auth — register, login, logout, me | ✅ | Sessions PHP httpOnly |
+| B1 | Schéma BDD 20 tables (MySQL/MariaDB) | ✅ | `sql/bdd_mysql.sql` + migrations 001→009 |
+| B2 | API auth — register, login, logout, me | ✅ | Sessions PHP httpOnly, `is_admin` dans réponse |
 | B3 | API sessions — POST /api/sessions + streaks | ✅ | Calcul streak côté serveur |
 | B4 | API user — GET/PATCH/DELETE + stats + migrate | ✅ | Migration localStorage→BDD |
 | B5 | Sync offline-first (`savePendingSession`) | ✅ | Fallback localStorage si offline |
 | B6 | RGPD — soft delete + anonymisation | ✅ | `is_deleted`, `deletion_requests` |
 | B7 | API amis — GET/POST/PATCH/DELETE | ✅ | `api/friends/index.php` |
 | B8 | API leaderboard — par mode/période/métrique | ✅ | `api/leaderboard/index.php` |
-| B9 | Déploiement MariaDB chez Hostinger | 📋 | — |
-| B10 | Cron `daily_targets` — personnage du jour serveur | 📋 | Remplace RNG client |
-| B11 | Cron `leaderboard_cache` — recalcul périodique | 📋 | Optimise les requêtes classement |
-| B12 | RGPD — hard delete J+30 (cron) | 📋 | — |
+| B9 | Déploiement MariaDB chez Hostinger | ✅ | 20 tables + seeds + procédure `gain_social_link_xp` importés via SSH MariaDB CLI |
+| B10 | Cloud sync source-of-truth (`cloud-sync.js`) | ✅ | `pullProfileFromCloud()` — backend écrase tout le localStorage |
+| B11 | Cron `leaderboard_cache` — recalcul périodique | ✅ | `api/cron/leaderboard.php` — scores depuis `game_sessions` filtrés par période |
+| B12 | RGPD — hard delete J+30 (cron côté serveur) | ✅ | `api/cron/hard-delete.php` — DELETE CASCADE + log `processed_at` |
+| B13 | API streak recovery (`recover-streak.php`) | ✅ | `POST /api/user/recover-streak` |
+| B14 | API Social Link rang-up notifs | ✅ | Table `social_link_rankup_notifs` (migration 009), `GET /api/social-links/rankup-notifs` |
+| B15 | API Admin — gestion comptes, badges, stats | ✅ | `api/admin/` — users, user_badges, user_wallpapers, user_titles, user_stats, social_links |
+| B16 | CI/CD GitHub Actions → Hostinger | 📋 | Deploy automatique sur push `main` |
 
 ---
 
@@ -41,14 +45,19 @@
 |---|---------------|--------|-------|
 | A1 | Envoi / acceptation / refus de demande d'ami | ✅ | Via friend_code |
 | A2 | Liste d'amis avec dots online/offline | ✅ | `last_login_at` < 30min |
-| A3 | Recherche de joueurs | ✅ | Par pseudo, paginée |
-| A4 | Add by friend code (inline) | ✅ | Sans rechargement de page |
+| A3 | Recherche de joueurs (pseudo/code) | ✅ | Paginée |
+| A4 | Add by friend code (inline, sans rechargement) | ✅ | — |
 | A5 | Suppression d'ami | ✅ | DELETE /api/friends/:id |
-| A6 | Social Link — XP + rangs 1-10 | ✅ | XP, jauge, toast rang-up, flamme |
-| A7 | Interactions mutuelles (2× XP) | ✅ | Anti-spam, procédure SQL |
-| A8 | True Confidant Badge (rang 10) | 📋 | Badge avatars fusionnés |
-| A9 | Comparaison stats côte à côte | 📋 | Sur la page Friends |
-| A10 | Défis entre amis | ✅ | Bandeau + bouton post-victoire 6 modes |
+| A6 | Social Link — XP + rangs 1-10 | ✅ | XP, jauge, flamme, toast rang-up |
+| A7 | Interactions mutuelles (2× XP), anti-spam | ✅ | Procédure SQL |
+| A8 | True Confidant Badge (rang 10) | ✅ | Badge avec les 2 avatars côte à côte, généré dynamiquement |
+| A9 | Comparaison stats côte à côte | ✅ | Overlay radar + phrases Persona i18n (`database/compare-phrases.js`) |
+| A10 | Défis entre amis (6 modes, filtres, anti-doublon) | ✅ | Bandeau + bouton post-victoire, give-up = défaite |
+| A11 | Sélecteur style animation demandes d'amis | ✅ | 🃏 Calling Card / 📺 P4 TV / 🔫 P3 Evoker |
+| A12 | Animation TV Persona 4 — demandes d'amis | ✅ | CSS pur, CRT noise canvas, burst avatar, idle glow |
+| A13 | Streak recovery — menu Jack Frost | ✅ | Cooldown 2 mois, sync BDD, badge `reborn_phoenix` |
+| A14 | Animation Evoker Persona 3 — demandes d'amis | ✅ | `js/p3-evoker-anim.js` + `css/p3-evoker-anim.css` |
+| A15 | Social Link rank-up animation pour les 2 joueurs | ✅ | Backend notifs + polling `notifications.js`, guard `seen_at` |
 
 ---
 
@@ -56,14 +65,14 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| L1 | Classement global + par mode | ✅ | 7 modes |
-| L2 | Périodes : ever / month / week / day | ✅ | Requêtes directes user_stats |
+| L1 | Classement global + par mode (7 modes) | ✅ | — |
+| L2 | Périodes : ever / month / week / day | ✅ | Requêtes directes `user_stats` / `game_sessions` |
 | L3 | Métriques : wins / winrate / streak / perfect / games | ✅ | — |
 | L4 | Bandeau "Mon classement" | ✅ | `my_rank` dans réponse API |
-| L5 | Filter note (chips actifs) | ✅ | — |
+| L5 | Chips filtres actifs | ✅ | — |
 | L6 | Pagination 50 par page | ✅ | — |
-| L7 | Classement entre amis uniquement | 📋 | Filtrer sur ses amis |
-| L8 | Cron cache (optimisation J+) | 📋 | Table `leaderboard_cache` |
+| L7 | Classement entre amis uniquement | ✅ | Toggle Global / Friends, filtre SQL |
+| L8 | Cron cache (optimisation perf) | ✅ | `api/cron/leaderboard.php` — voir B11 |
 
 ---
 
@@ -71,14 +80,18 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| P1 | Profil local (avatar, badges, stats) | ✅ | localStorage |
+| P1 | Page profil dédiée (avatar, badges, stats, thèmes) | ✅ | `profile/profile.html` + `profile-page.js` |
 | P2 | Migration localStorage → cloud | ✅ | `migrate.php`, idempotent |
-| P3 | Page profil publique | 📋 | Accessible via `?view=FRIENDCODE` |
-| P4 | Titres / rangs joueur | 📋 | Voir CLAUDE.md §5.10 |
-| P5 | Badges → backend (anti-triche) | 📋 | Unlock vérifié côté serveur |
-| P6 | Wallpapers → backend | 📋 | Même logique que badges |
-| P7 | Musique de profil | 📋 | Jouée sur la page profil |
-| P8 | Page Admin — modération & stats globales | 📋 | Voir section Admin ci-dessous |
+| P3 | Stats communautaires post-partie | ✅ | `showCommunityStats()` dans les 6 modes, `api/community-stats.php` |
+| P4 | Social Link rank-up animation — tiers 1→10 | ✅ | Tier1/2/3/rank10, typewriter, phrases multilingues, avatars |
+| P5 | Page de profil consultable (vue publique) | ✅ | `profile-view.js` — thème, musique, Add Friend, Compare, jauge SL |
+| P6 | Titres / rangs joueur | ✅ | Catalogue BDD, `GET /api/titles`, unlock + équipement frontend (migration 006) |
+| P7 | Badges → backend | ✅ | 60 badges, `GET /api/badges`, unlock validé contre catalogue (migration 007) |
+| P8 | Wallpapers → backend | ✅ | 7 wallpapers, `GET /api/wallpapers`, FK fonctionnelle (migration 007) |
+| P9 | Musique de profil | ✅ | Sélecteur + prévisualisation + lecture sur profil perso et public |
+| P10 | Animation cadeaux admin (divine gift) | ✅ | `js/divine-gift.js` + `css/divine-gift.css`, déduplication `_announcedGiftIds` |
+| P11 | Bouton Settings ⚙ intégré à la pill dark mode | ✅ | Plus de superposition sur la page profil |
+| P12 | Page de profil partageable (image exportable) | ✅ | `html2canvas` → PNG, 8 thèmes + 25 wallpapers, Download / X / Discord / Email |
 
 ---
 
@@ -86,12 +99,32 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| AD1 | Dashboard admin (`/admin`) | 📋 | Accès restreint (rôle admin) |
-| AD2 | Statistiques globales (DAU, parties/jour, taux victoire) | 📋 | Agrégats depuis `game_sessions` |
-| AD3 | Gestion des comptes (recherche, soft-delete manuel) | 📋 | — |
-| AD4 | Gestion des codes événement | 📋 | CRUD `event_codes` + stats usage |
-| AD5 | Annonce / bannière in-game | 📋 | Pour patch notes ou événements |
-| AD6 | Modération des pseudos | 📋 | Blocage / renommage forcé |
+| AD1 | Dashboard admin (`/admin`) | ✅ | Layout 2 panneaux, accès restreint `is_admin` |
+| AD2 | Statistiques globales (DAU, parties/jour, taux victoire) | ✅ | Agrégats depuis `game_sessions` + `users` |
+| AD3 | Gestion des comptes (recherche, édition, soft-delete) | ✅ | `api/admin/users.php` + `user.php` |
+| AD4 | Attribution badges / wallpapers / titres à un user | ✅ | Grille visuelle, clic → queue → FAB apply, toasts |
+| AD5 | Édition stats manuelles (streak, wins…) | ✅ | `api/admin/user_stats.php` |
+| AD6 | Gestion Social Links depuis admin | ✅ | `api/admin/social_links.php` |
+| AD7 | Annonce / bannière in-game | 📋 | Pour patch notes ou événements ponctuels |
+| AD8 | Gestion des codes événement (CRUD + stats usage) | 📋 | Actuellement gérés en dur dans `badgesData.js` |
+| AD9 | Modération des pseudos (blocage / renommage forcé) | 📋 | — |
+
+---
+
+## Corrections & Qualité (session mai 2026)
+
+| # | Fix | Statut | Notes |
+|---|-----|--------|-------|
+| FQ1 | Badge Golden Week rejoué à chaque chargement | ✅ | `checkEventBadges` mutait localStorage mais pas le profil en mémoire → `saveProfile()` l'effaçait |
+| FQ2 | `syncBadgesWithBackend` réanimait des badges connus après logout | ✅ | `_seenBadgeAnimIds` localStorage key (hors profil, survit aux resets) |
+| FQ3 | Animation cadeau admin rejouée pour des items déjà possédés | ✅ | `_announcedGiftIds` dans `cloud-sync.js` |
+| FQ4 | Social Link rank-up visible uniquement chez le déclencheur | ✅ | Backend `social_link_rankup_notifs` + polling bidirectionnel |
+| FQ5 | Avatar ami absent dans l'animation rank-up | ✅ | `_normalizeSrc()` unifié + `profile.avatar_data` (pas `user.avatar_data`) |
+| FQ6 | Badge `one_shot` jamais déclenché (Emoji/Silhouette/Personae/Music) | ✅ | `hasWonFirstTry` ajouté dans les 4 modes manquants — Classic l'avait déjà |
+| FQ7 | Auto-replay absent sur changement de filtre (Classic + Emoji) | ✅ | Classic : `resetButton.click()` ; Emoji : `resetGame()` dans `onFilterChange` |
+| FQ8 | Animation défi rejouée après changement de compte | ✅ | `localStorage.removeItem('_crInitDone')` dans `auth.js` au login et register |
+| FQ9 | `default_avatar.png` 404 depuis `index.html` | ✅ | `_imgBase()` ajouté dans `challenge-result.js` — même pattern que les autres modules |
+| FQ10 | Streak gelée à 0 sans accès au menu Jack Frost | ✅ | Clic sur `.stat-streak` quand `streak===0 && canRecover()` → `showStreakRecoveryMenu()` |
 
 ---
 
@@ -99,13 +132,23 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| C1 | Personnages P5X (nouveaux) | 💡 | À valider selon sortie du jeu |
+| C1 | Personnages P5X (nouveaux) | 💡 | À valider selon avancement du jeu |
 | C2 | Nouveaux opus P1 / P2 EP | 💡 | Données manquantes |
-| C3 | Mode Quotes — deviner le perso depuis une réplique | 💡 | `database/quotes.js` déjà structuré |
-| C4 | Mode Daily Challenge — limite de tentatives globale | 💡 | Classement distinct |
-| C5 | Nouvelles musiques P5X / P3R | 📋 | À sourcer |
-| C6 | Portraits manquants (Amenosagiri, Nyx…) | 🚧 | Fichiers présents, mapping à faire |
-| C7 | Traductions JP | 📋 | Post-v2.0, relecture native requise |
+| C3 | Mode Quotes — deviner le perso depuis une réplique | 💡 | `database/quotes.js` déjà structuré (EN uniquement) |
+| C4 | Mode Daily Challenge — limite globale de tentatives | 💡 | Classement distinct |
+| C5 | Nouvelles musiques P5X / P3R | 📋 | À sourcer et intégrer dans `musicsMode` |
+| C6 | Portraits manquants (Amenosagiri, Nyx…) | ✅ | 168 mappings complets dans `portraitsMap.js` — tous les personnages couverts |
+
+---
+
+## UX & Pages Annexes
+
+| # | Fonctionnalité | Statut | Notes |
+|---|---------------|--------|-------|
+| U1 | Section News / Patch Notes in-game | 📋 | Bannière ou modal changelog depuis l'index |
+| U2 | Page Confidentialité (`/privacy.html`) | ✅ | `privacy.html` + `privacy.css` + i18n 5 langues, lien footer + formulaire inscription |
+| U3 | FAQ (accordion sur index ou page dédiée) | 💡 | — |
+| U4 | Partage de score / streak sur réseaux sociaux | 💡 | Image canvas générée côté client |
 
 ---
 
@@ -113,11 +156,11 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| Q1 | 120 tests unitaires Vitest (tous passants) | ✅ | `npm test` |
-| Q2 | i18n complet EN/FR/ES/DE/IT (545 clés) | ✅ | `npm run i18n:check` |
-| Q3 | Service Worker — JS/CSS network-first (plus de Ctrl+Shift+R) | ✅ | SW v16 |
-| Q4 | Offline-first (fallback gracieux) | ✅ | SW v16 |
-| Q5 | BASE_URL API auto-détecté (Apache local + Docker) | ✅ | Détection `pathname.startsWith('/personadle/')` |
-| Q6 | Audit responsive complet | 📋 | 360px → 1440px |
-| Q7 | Tests E2E (Playwright ou Cypress) | 💡 | Post-v2.0 |
-| Q8 | CI/CD (GitHub Actions → Hostinger) | 📋 | Deploy automatique sur push `main` |
+| Q1 | Tests unitaires Vitest (120 tests passants) | ✅ | `npm test` |
+| Q2 | i18n EN/FR/ES/DE/IT (760 clés + phrases compare) | ✅ | `npm run i18n:check` |
+| Q3 | Service Worker — network-first JS/CSS | ✅ | SW v72, précache 40+ assets |
+| Q4 | Offline-first (fallback gracieux) | ✅ | SW + `savePendingSession` |
+| Q5 | BASE_URL API auto-détecté (Apache local + prod) | ✅ | `pathname.startsWith('/personadle/')` |
+| Q6 | Audit responsive complet (360px → 1440px) | ✅ | Tous les modes + profil + leaderboard + friends + admin couverts (3 breakpoints chacun) |
+| Q7 | Tests E2E (Playwright ou Cypress) | 📋 | Avant déploiement final |
+| Q8 | CI/CD GitHub Actions → Hostinger | 📋 | Déploiement automatique sur push `main` |
