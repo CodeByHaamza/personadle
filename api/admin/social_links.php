@@ -187,6 +187,17 @@ if ($method === 'PATCH') {
     $pdo->prepare('UPDATE social_links SET ' . implode(', ', $fields) . ' WHERE id = ?')
         ->execute($params);
 
+    // Si le rang a augmenté → insérer des notifs pour les deux joueurs afin de déclencher l'animation rank-up côté client
+    if (isset($rank) && $rank > (int) $link['rank']) {
+        $isBadgePrompt = ($rank === 10) ? 1 : 0;
+        $notifStmt = $pdo->prepare(
+            'INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank, is_badge_prompt)
+             VALUES (?, ?, ?, ?)'
+        );
+        $notifStmt->execute([(int) $link['user_a_id'], (int) $link['user_b_id'], $rank, $isBadgePrompt]);
+        $notifStmt->execute([(int) $link['user_b_id'], (int) $link['user_a_id'], $rank, $isBadgePrompt]);
+    }
+
     jsonSuccess(['success' => true]);
 }
 
