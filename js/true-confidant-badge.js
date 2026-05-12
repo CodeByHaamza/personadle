@@ -369,27 +369,23 @@ async function _handleSubmit(modal) {
     const data = await api.socialLink.saveBadgeConfig(s.friendId, { ...s.config, submit: true });
 
     if (data.both_submitted) {
+      // Les deux ont soumis → fermer l'éditeur et lancer l'animation
       _closeEditor();
-      const me          = window._currentUser;
-      const profile     = JSON.parse(localStorage.getItem('personaProfile') || '{}');
-      const friendProfile = await api.user.getPublic(s.friendId).catch(() => ({}));
+      const me      = window._currentUser;
+      const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
       showConfidantAnimation(
         me?.pseudo || 'You',
         s.friendPseudo,
         profile.avatar_data || null,
-        friendProfile.avatar_data || s.friendAvatar || null,
+        s.friendAvatar || null,
         async () => { await api.socialLink.saveBadgeFinal(s.friendId); }
       );
     } else {
-      btn.disabled    = false;
-      btn.textContent = _t('social_link.true_confidant_submit_btn', {}, 'Validate my half');
-      s.alreadySubmitted = true;
-      const existing = modal.querySelector('.tcb-wait-msg');
-      if (!existing) {
-        const msg = document.createElement('p');
-        msg.className   = 'tcb-wait-msg';
-        msg.textContent = _t('social_link.true_confidant_waiting', { pseudo: s.friendPseudo }, `Waiting for ${s.friendPseudo}…`);
-        btn.insertAdjacentElement('afterend', msg);
+      // En attente de l'ami → fermer l'éditeur, toast + polling s'occupera du reste
+      _closeEditor();
+      const waitMsg = _t('social_link.true_confidant_waiting', { pseudo: s.friendPseudo }, `Waiting for ${s.friendPseudo}…`);
+      if (typeof window.showToast === 'function') {
+        window.showToast(waitMsg);
       }
     }
   } catch (err) {

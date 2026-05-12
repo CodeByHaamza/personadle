@@ -61,12 +61,17 @@ function getProfileAvatar(currentPage) {
     // Les data URLs (base64) sont toujours valides
     if (p.avatar.startsWith('data:')) return p.avatar;
 
-    // Normalise les chemins relatifs ./img/... pour toutes les pages en sous-dossier
+    // Normalise le chemin selon la profondeur de la page :
+    // - sous-dossier (/profile/, /classiqueMode/, …) → préfixe = ../
+    // - racine (index.html, /)                       → préfixe = ./
     const isSubdir = ['profile', 'friends', 'leaderboard', 'game'].includes(currentPage);
     if (isSubdir) {
+      // ../img/ reste ../img/ ; ./img/ → ../img/
       return p.avatar.replace(/^\.\/img\//, '../img/');
+    } else {
+      // ./img/ reste ./img/ ; ../img/ → ./img/ (depuis la racine ../img/ est hors projet)
+      return p.avatar.replace(/^\.\.\/img\//, './img/');
     }
-    return p.avatar;
   } catch {
     return null;
   }
@@ -224,6 +229,7 @@ export function initBottomNav() {
   const currentPage = getCurrentPage();
   const avatar      = getProfileAvatar(currentPage);
   const hrefs       = buildHrefs(currentPage);
+  window.showToast  = showToast;
 
   // Injecte la nav juste avant </body>
   document.body.insertAdjacentHTML('beforeend', buildNavHTML(currentPage, avatar, hrefs));
@@ -276,10 +282,26 @@ export function initBottomNav() {
  */
 export function updateNavAvatar() {
   try {
-    const p      = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
-    const avatar = p.avatar || null;
+    const p       = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+    let   avatar  = p.avatar || null;
     const navLink = document.querySelector('a[aria-label="My profile"]');
     if (!avatar || !navLink) return;
+
+    // Normalise les chemins relatifs selon la profondeur de la page courante
+    if (!avatar.startsWith('data:')) {
+      const path      = window.location.pathname;
+      const isSubpath =
+        path.includes('/profile/')         ||
+        path.includes('/classiqueMode/')   ||
+        path.includes('/emojiMode/')       ||
+        path.includes('/silhouetteMode/')  ||
+        path.includes('/allOutAttackMode/')||
+        path.includes('/personaeMode/')    ||
+        path.includes('/musicsMode/');
+      avatar = isSubpath
+        ? avatar.replace(/^\.\/img\//, '../img/')
+        : avatar.replace(/^\.\.\/img\//, './img/');
+    }
 
     let img = navLink.querySelector('.nav-avatar');
     if (!img) {
