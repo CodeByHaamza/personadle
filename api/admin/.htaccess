@@ -23,5 +23,8 @@ RewriteRule ^users/[0-9]+$              user.php [L,QSA]
 # /api/admin/users                      → users.php
 RewriteRule ^users$                     users.php [L,QSA]
 
-# /api/admin/social-links/7             → social_links.php
+# /api/admin/social-links               → social_links.php (liste)
+RewriteRule ^social-links$              social_links.php [L,QSA]
+
+# /api/admin/social-links/7             → social_links.php (détail/patch/delete)
 RewriteRule ^social-links/[0-9]+$       social_links.php [L,QSA]

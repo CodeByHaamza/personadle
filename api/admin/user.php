@@ -97,15 +97,20 @@ if ($method === 'GET') {
     // Social Links
     $stmt = $pdo->prepare(
         'SELECT sl.id,
+                sl.user_a_id,
+                sl.user_b_id,
                 CASE WHEN sl.user_a_id = ? THEN sl.user_b_id ELSE sl.user_a_id END AS other_user_id,
                 u.pseudo,
-                sl.rank,
-                sl.xp
+                sl.`rank`,
+                sl.xp,
+                sl.badge_generated,
+                sl.last_interaction_at,
+                (SELECT COUNT(*) FROM social_link_interactions sli WHERE sli.social_link_id = sl.id) AS interaction_count
          FROM social_links sl
          JOIN users u ON u.id = CASE WHEN sl.user_a_id = ? THEN sl.user_b_id ELSE sl.user_a_id END
          WHERE (sl.user_a_id = ? OR sl.user_b_id = ?)
            AND u.is_deleted = 0
-         ORDER BY sl.rank DESC, sl.xp DESC'
+         ORDER BY sl.`rank` DESC, sl.xp DESC'
     );
     $stmt->execute([$userId, $userId, $userId, $userId]);
     $socialLinks = $stmt->fetchAll();
@@ -146,11 +151,16 @@ if ($method === 'GET') {
             'created_at'    => $f['created_at'],
         ], $friends),
         'social_links' => array_map(fn($sl) => [
-            'id'            => (int) $sl['id'],
-            'other_user_id' => (int) $sl['other_user_id'],
-            'pseudo'        => $sl['pseudo'],
-            'rank'          => (int) $sl['rank'],
-            'xp'            => (int) $sl['xp'],
+            'id'                => (int)  $sl['id'],
+            'user_a_id'         => (int)  $sl['user_a_id'],
+            'user_b_id'         => (int)  $sl['user_b_id'],
+            'other_user_id'     => (int)  $sl['other_user_id'],
+            'pseudo'            =>        $sl['pseudo'],
+            'rank'              => (int)  $sl['rank'],
+            'xp'                => (int)  $sl['xp'],
+            'badge_generated'   => (bool) $sl['badge_generated'],
+            'last_interaction_at' =>      $sl['last_interaction_at'],
+            'interaction_count' => (int)  $sl['interaction_count'],
         ], $socialLinks),
     ]);
 }
@@ -223,6 +233,12 @@ if ($method === 'PATCH') {
         }
         $profFields[] = 'avatar_border_color = ?';
         $profParams[] = $color;
+    }
+
+    // reset_avatar — efface avatar_data (remet l'avatar par défaut)
+    if (!empty($data['reset_avatar'])) {
+        $profFields[] = 'avatar_data = ?';
+        $profParams[] = null;
     }
 
     if (empty($userFields) && empty($profFields)) {

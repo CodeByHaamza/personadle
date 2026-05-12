@@ -1,43 +1,39 @@
 /**
  * admin/admin.js — PersonaDLE Admin Panel
  * ─────────────────────────────────────────────────────────────────────────────
- * Panneau d'administration frontend.
- * Fonctionnalités :
- *   - Liste des utilisateurs avec recherche et pagination
- *   - Vue détaillée par user : profil, badges, wallpapers, titres, stats, amis, social links
- *   - Système de "dons en attente" (pendingGifts) pour grouper les modifications
- *   - Animation divine lors de l'application des dons
+ * Layout : left panel = user list (always visible), right panel = user detail.
+ * Features : profile edit, avatar reset, badges/wallpapers/titles/stats/friends/
+ *            social links management, pending gifts queue, divine gift animation.
  *
- * Accès : réservé aux admins (window._currentUser.is_admin === true)
+ * Access : admin only (window._currentUser.is_admin === true)
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { initAuth } from '../js/auth.js';
+import { initAuth }               from '../js/auth.js';
+import { showDivineGiftAnimation } from '../js/divine-gift.js';
 
 // ── State ──────────────────────────────────────────────────────────────────
 let _users        = [];
 let _selectedUser = null;
-let _userDetail   = null;   // données complètes du user sélectionné
+let _userDetail   = null;
 let _currentPage  = 1;
 let _searchQuery  = '';
 let _activeTab    = 'profile';
-let pendingGifts  = [];     // file d'attente des dons à appliquer
+let pendingGifts  = [];
 
-// Catalogues chargés une seule fois au démarrage
 let _badgesCatalog     = [];
 let _wallpapersCatalog = [];
 let _titlesCatalog     = [];
 
+// ── Path prefix (handles /personadle/ local dev vs / in prod) ─────────────
+const _pathPrefix = window.location.pathname.startsWith('/personadle') ? '/personadle' : '';
+
 // ── API Helper ─────────────────────────────────────────────────────────────
 const api = {
-  get:    (url)       => fetch(url, { credentials: 'include' })
-                           .then(r => r.json()),
-  post:   (url, body) => fetch(url, { method: 'POST',   credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-                           .then(r => r.json()),
-  patch:  (url, body) => fetch(url, { method: 'PATCH',  credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-                           .then(r => r.json()),
-  delete: (url)       => fetch(url, { method: 'DELETE', credentials: 'include' })
-                           .then(r => r.json()),
+  get:    url         => fetch(_pathPrefix + url, { credentials: 'include' }).then(r => r.json()),
+  post:   (url, body) => fetch(_pathPrefix + url, { method: 'POST',   credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json()),
+  patch:  (url, body) => fetch(_pathPrefix + url, { method: 'PATCH',  credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json()),
+  delete: url         => fetch(_pathPrefix + url, { method: 'DELETE', credentials: 'include' }).then(r => r.json()),
 };
 
 // ── Init ───────────────────────────────────────────────────────────────────
@@ -45,8 +41,7 @@ async function init() {
   await initAuth();
 
   if (!window._currentUser?.is_admin) {
-    // Non admin ou non connecté → redirect accueil
-    window.location.href = '/';
+    window.location.href = _pathPrefix + '/';
     return;
   }
 
@@ -54,7 +49,6 @@ async function init() {
   document.getElementById('admin-app').classList.remove('hidden');
   document.getElementById('admin-username').textContent = window._currentUser.pseudo;
 
-  // Charger les catalogues en parallèle avant d'afficher quoi que ce soit
   await Promise.all([
     loadBadgesCatalog(),
     loadWallpapersCatalog(),
@@ -65,15 +59,56 @@ async function init() {
   await loadUsers();
 }
 
-// ── Event setup ────────────────────────────────────────────────────────────
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 250);
+  }, 3200);
+}
+
+// ── Mobile aside ───────────────────────────────────────────────────────────
+function openAside() {
+  document.getElementById('admin-aside').classList.add('open');
+  document.getElementById('aside-overlay').classList.add('show');
+  document.getElementById('aside-toggle').classList.add('open');
+}
+function closeAside() {
+  document.getElementById('admin-aside').classList.remove('open');
+  document.getElementById('aside-overlay').classList.remove('show');
+  document.getElementById('aside-toggle').classList.remove('open');
+}
+
+// ── Events ─────────────────────────────────────────────────────────────────
 function setupEvents() {
+  // Home button
+  document.getElementById('btn-home').href = _pathPrefix + '/';
+
   // Logout
   document.getElementById('admin-logout').onclick = async () => {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    window.location.href = '/';
+    await fetch(_pathPrefix + '/api/auth/logout', { method: 'POST', credentials: 'include' });
+    window.location.href = _pathPrefix + '/';
   };
 
-  // Recherche avec debounce 300ms
+  // Mobile aside toggle
+  document.getElementById('aside-toggle').onclick = () =>
+    document.getElementById('admin-aside').classList.contains('open') ? closeAside() : openAside();
+  document.getElementById('aside-overlay').onclick = closeAside;
+
+  // Back button (mobile)
+  document.getElementById('detail-back').onclick = () => {
+    document.getElementById('user-detail').classList.add('hidden');
+    document.getElementById('empty-state').classList.remove('hidden');
+    openAside();
+  };
+
+  // Search
   let searchTimer;
   document.getElementById('user-search').addEventListener('input', e => {
     clearTimeout(searchTimer);
@@ -84,53 +119,57 @@ function setupEvents() {
     }, 300);
   });
 
-  // Retour à la liste
-  document.getElementById('back-to-list').onclick = () => showUsersList();
-
-  // Tabs
   document.querySelectorAll('.detail-tab').forEach(btn => {
     btn.onclick = () => switchTab(btn.dataset.tab);
   });
 
-  // FAB appliquer les dons
   document.getElementById('pending-fab').onclick = applyPendingGifts;
 }
 
 // ── Users List ─────────────────────────────────────────────────────────────
 async function loadUsers() {
-  const data = await api.get(`/api/admin/users?q=${encodeURIComponent(_searchQuery)}&page=${_currentPage}&limit=20`);
+  const data = await api.get(`/api/admin/users?q=${encodeURIComponent(_searchQuery)}&page=${_currentPage}&limit=25`);
   _users = data.users || [];
-  renderUsersGrid(_users);
-  renderPagination(data.total || 0, data.page || 1, data.limit || 20);
+
+  const countEl = document.getElementById('admin-user-count');
+  if (countEl) countEl.textContent = data.total ?? _users.length;
+
+  renderUsersList(_users);
+  renderPagination(data.total || 0, data.page || 1, data.limit || 25);
 }
 
-function renderUsersGrid(users) {
-  const grid = document.getElementById('users-grid');
+function renderUsersList(users) {
+  const list = document.getElementById('users-list');
+
   if (!users.length) {
-    grid.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;padding:20px 0">No users found.</p>';
+    list.innerHTML = '<div style="padding:20px 16px;font-size:13px;color:var(--text-muted);text-align:center">No users found.</div>';
     return;
   }
 
-  grid.innerHTML = users.map(u => `
-    <div class="user-card" data-id="${u.id}">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-        ${u.avatar_data
-          ? `<img src="${u.avatar_data}" class="user-card-avatar" style="border:2px solid ${escHtml(u.avatar_border_color || '#ffffff')}">`
-          : `<div class="user-card-avatar" style="background:var(--bg);border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>`}
-        <div>
-          <strong style="font-size:15px">${escHtml(u.pseudo)}</strong>
-          ${u.is_admin ? '<span style="color:var(--red);font-size:11px;margin-left:6px;font-family:Oswald,sans-serif">ADMIN</span>' : ''}
-          <div style="font-size:12px;color:var(--text-muted)">${escHtml(u.email)}</div>
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--text-muted)">
-        Code: ${escHtml(u.friend_code || '—')} · ${(u.lang || 'en').toUpperCase()} · ${new Date(u.created_at).toLocaleDateString()}
-      </div>
-    </div>
-  `).join('');
+  list.innerHTML = users.map(u => {
+    const borderColor = escHtml(u.avatar_border_color || '#888');
+    const avatarHtml  = u.avatar_data
+      ? `<img class="user-row-avatar" src="${escHtml(u.avatar_data)}" alt="" style="border-color:${borderColor}">`
+      : `<div class="user-row-avatar-ph">👤</div>`;
+    const dateStr = new Date(u.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
 
-  grid.querySelectorAll('.user-card').forEach(card => {
-    card.onclick = () => openUserDetail(+card.dataset.id);
+    return `
+      <div class="user-row ${_selectedUser === u.id ? 'active' : ''}" data-id="${u.id}">
+        ${avatarHtml}
+        <div class="user-row-info">
+          <div class="user-row-top">
+            <span class="user-row-pseudo">${escHtml(u.pseudo)}</span>
+            ${u.is_admin ? '<span class="user-row-admin-dot" title="Admin"></span>' : ''}
+          </div>
+          <div class="user-row-email">${escHtml(u.email)}</div>
+        </div>
+        <span class="user-row-date">${dateStr}</span>
+      </div>
+    `;
+  }).join('');
+
+  list.querySelectorAll('.user-row').forEach(row => {
+    row.onclick = () => openUserDetail(+row.dataset.id);
   });
 }
 
@@ -139,50 +178,85 @@ function renderPagination(total, page, limit) {
   const el    = document.getElementById('users-pagination');
   if (pages <= 1) { el.innerHTML = ''; return; }
 
-  el.innerHTML = Array.from({ length: pages }, (_, i) => i + 1).map(p =>
-    `<button class="page-btn ${p === page ? 'active' : ''}" data-page="${p}">${p}</button>`
-  ).join('');
+  const start = Math.max(1, page - 2);
+  const end   = Math.min(pages, page + 2);
+  let html    = '';
 
-  el.querySelectorAll('.page-btn').forEach(btn => {
+  if (start > 1) html += `<button class="page-btn" data-page="1">1</button>`;
+  if (start > 2) html += `<span class="page-btn pagination-sep">…</span>`;
+  for (let p = start; p <= end; p++) {
+    html += `<button class="page-btn ${p === page ? 'active' : ''}" data-page="${p}">${p}</button>`;
+  }
+  if (end < pages - 1) html += `<span class="page-btn pagination-sep">…</span>`;
+  if (end < pages)     html += `<button class="page-btn" data-page="${pages}">${pages}</button>`;
+
+  el.innerHTML = html;
+  el.querySelectorAll('.page-btn[data-page]').forEach(btn => {
     btn.onclick = () => { _currentPage = +btn.dataset.page; loadUsers(); };
   });
 }
 
 // ── User Detail ────────────────────────────────────────────────────────────
 async function openUserDetail(userId) {
-  document.getElementById('section-users').classList.add('hidden');
+  // Highlight selected row
+  document.querySelectorAll('.user-row').forEach(r => r.classList.toggle('active', +r.dataset.id === userId));
+
+  // On mobile, close the aside drawer and show the detail panel
+  if (window.innerWidth <= 768) closeAside();
+
+  document.getElementById('empty-state').classList.add('hidden');
   document.getElementById('user-detail').classList.remove('hidden');
 
-  // Afficher un spinner dans le contenu en attendant
-  document.getElementById('user-detail-content').innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+  document.getElementById('user-detail-content').innerHTML =
+    '<div style="padding:48px;text-align:center;color:var(--text-muted)">Chargement…</div>';
 
   const data    = await api.get(`/api/admin/users/${userId}`);
   _selectedUser = userId;
   _userDetail   = data;
 
-  // ── Header ──
-  const u = data.user;
-  const p = data.profile;
-
-  document.getElementById('detail-pseudo').textContent = u.pseudo + (u.is_admin ? ' ⚡' : '');
-  document.getElementById('detail-email').textContent  = u.email;
-  document.getElementById('detail-info').textContent   = `ID: ${u.id} · ${u.friend_code || '—'} · Joined ${new Date(u.created_at).toLocaleDateString()}`;
-
-  const avatarEl = document.getElementById('detail-avatar');
-  avatarEl.innerHTML = p?.avatar_data
-    ? `<img src="${p.avatar_data}" style="width:64px;height:64px;border-radius:50%;border:3px solid ${escHtml(p.avatar_border_color || '#ffffff')}">`
-    : '<div style="width:64px;height:64px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:28px">👤</div>';
-
+  renderDetailHeader(data);
+  renderDetailQuickStats(data);
   switchTab('profile');
 }
 
-function showUsersList() {
-  _selectedUser = null;
-  _userDetail   = null;
-  pendingGifts  = [];
-  updateFab();
-  document.getElementById('user-detail').classList.add('hidden');
-  document.getElementById('section-users').classList.remove('hidden');
+function renderDetailHeader(data) {
+  const u = data.user;
+  const p = data.profile;
+
+  // Admin badge
+  document.getElementById('detail-admin-badge').classList.toggle('hidden', !u.is_admin);
+
+  document.getElementById('detail-pseudo').textContent = u.pseudo;
+  document.getElementById('detail-email').textContent  = u.email;
+
+  const lastSeen = u.last_login_at
+    ? `Last seen ${new Date(u.last_login_at).toLocaleDateString()}`
+    : 'Never logged in';
+  document.getElementById('detail-info').textContent =
+    `ID: ${u.id} · Code: ${u.friend_code || '—'} · ${(u.lang || 'en').toUpperCase()} · Joined ${new Date(u.created_at).toLocaleDateString()} · ${lastSeen}`;
+
+  // Avatar
+  const avatarEl    = document.getElementById('detail-avatar');
+  const borderColor = escHtml(p?.avatar_border_color || '#ffffff');
+  avatarEl.innerHTML = p?.avatar_data
+    ? `<img src="${escHtml(p.avatar_data)}" alt="Avatar" style="border:3px solid ${borderColor}">`
+    : '<div class="avatar-ph">👤</div>';
+}
+
+function renderDetailQuickStats(data) {
+  const totalWins  = (data.stats || []).reduce((s, r) => s + (r.wins  || 0), 0);
+  const totalGames = (data.stats || []).reduce((s, r) => s + (r.games || 0), 0);
+  const badges     = (data.badges || []).length;
+  const friends    = (data.friends || []).filter(f => f.status === 'accepted').length;
+  const social     = (data.social_links || []).length;
+
+  document.getElementById('detail-quick-stats').innerHTML = `
+    <div class="stat-tile"><div class="stat-tile-value">${totalWins}</div><div class="stat-tile-label">Wins</div></div>
+    <div class="stat-tile"><div class="stat-tile-value">${totalGames}</div><div class="stat-tile-label">Games</div></div>
+    <div class="stat-tile"><div class="stat-tile-value">${badges}</div><div class="stat-tile-label">Badges</div></div>
+    <div class="stat-tile"><div class="stat-tile-value">${friends}</div><div class="stat-tile-label">Friends</div></div>
+    <div class="stat-tile"><div class="stat-tile-value">${social}</div><div class="stat-tile-label">S.Links</div></div>
+  `;
 }
 
 function switchTab(tab) {
@@ -210,7 +284,7 @@ function renderTabProfile(d) {
 
   document.getElementById('user-detail-content').innerHTML = `
     <div class="tab-section">
-      <h3>Informations</h3>
+      <h3>Informations du compte</h3>
       <div class="form-grid">
         <label>Pseudo
           <input id="edit-pseudo" type="text" value="${escHtml(u.pseudo)}">
@@ -227,22 +301,30 @@ function renderTabProfile(d) {
           <input id="edit-border" type="color" value="${escHtml(p?.avatar_border_color || '#ffffff')}">
         </label>
       </div>
-      <label style="display:flex;align-items:center;gap:10px;margin:16px 0;cursor:pointer">
+      <div class="admin-toggle-row">
         <input id="edit-admin" type="checkbox" ${u.is_admin ? 'checked' : ''}>
-        <span>Administrateur</span>
-      </label>
-      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-        <button class="btn-primary" id="save-profile-btn">Sauvegarder</button>
-        <button class="btn-danger"  id="delete-user-btn">Supprimer le compte</button>
+        <span>Compte administrateur</span>
+        ${u.is_admin ? '<span style="font-size:11px;color:var(--red)">⚡ Décocher pour révoquer les droits admin</span>' : ''}
       </div>
-      <div id="profile-save-msg" style="margin-top:10px;font-size:13px"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn-primary" id="save-profile-btn">💾 Sauvegarder</button>
+        <button class="btn-secondary" id="reset-avatar-btn">🔄 Reset avatar</button>
+      </div>
+    </div>
+
+    <div class="danger-zone">
+      <div class="danger-zone-title">⚠️ Zone dangereuse</div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
+        Suppression définitive et irréversible de toutes les données.
+      </p>
+      <button class="btn-danger" id="delete-user-btn">🗑️ Supprimer le compte</button>
     </div>
   `;
 
+  // ── Save profile ──────────────────────────────────────────────────────────
   document.getElementById('save-profile-btn').onclick = async () => {
-    const msg = document.getElementById('profile-save-msg');
-    msg.textContent = 'Sauvegarde…';
-    msg.style.color = 'var(--text-muted)';
+    const btn = document.getElementById('save-profile-btn');
+    btn.disabled = true; btn.textContent = '…';
 
     const res = await api.patch(`/api/admin/users/${_selectedUser}`, {
       pseudo:              document.getElementById('edit-pseudo').value.trim(),
@@ -252,22 +334,59 @@ function renderTabProfile(d) {
       is_admin:            document.getElementById('edit-admin').checked,
     });
 
+    btn.disabled = false; btn.textContent = '💾 Sauvegarder';
+
     if (res.error) {
-      msg.textContent = '❌ ' + res.error;
-      msg.style.color = 'var(--red)';
+      toast('❌ ' + res.error, 'error');
     } else {
-      msg.textContent = '✅ Sauvegardé';
-      msg.style.color = '#4ade80';
-      // Mettre à jour l'état local
-      _userDetail.user = { ..._userDetail.user, ...res.user };
-      document.getElementById('detail-pseudo').textContent = _userDetail.user.pseudo + (_userDetail.user.is_admin ? ' ⚡' : '');
+      toast('✅ Profil sauvegardé', 'success');
+      _userDetail.user    = { ..._userDetail.user, ...res.user };
+      _userDetail.profile = { ..._userDetail.profile, avatar_border_color: document.getElementById('edit-border').value };
+      renderDetailHeader(_userDetail);
+
+      // Sync user row in list
+      const row = document.querySelector(`.user-row[data-id="${_selectedUser}"]`);
+      if (row) {
+        const pseudoEl = row.querySelector('.user-row-pseudo');
+        if (pseudoEl) pseudoEl.textContent = _userDetail.user.pseudo;
+        const dotEl = row.querySelector('.user-row-admin-dot');
+        if (_userDetail.user.is_admin && !dotEl) {
+          row.querySelector('.user-row-top')?.insertAdjacentHTML('beforeend', '<span class="user-row-admin-dot"></span>');
+        } else if (!_userDetail.user.is_admin && dotEl) {
+          dotEl.remove();
+        }
+      }
     }
   };
 
+  // ── Reset avatar ──────────────────────────────────────────────────────────
+  document.getElementById('reset-avatar-btn').onclick = async () => {
+    if (!confirm(`Réinitialiser l'avatar de ${u.pseudo} ?`)) return;
+    const res = await api.patch(`/api/admin/users/${_selectedUser}`, { reset_avatar: true });
+    if (res.error) {
+      toast('❌ ' + res.error, 'error');
+    } else {
+      toast('✅ Avatar réinitialisé', 'success');
+      _userDetail.profile.avatar_data = null;
+      renderDetailHeader(_userDetail);
+      const row = document.querySelector(`.user-row[data-id="${_selectedUser}"]`);
+      if (row) {
+        const imgEl = row.querySelector('.user-row-avatar');
+        if (imgEl) imgEl.outerHTML = '<div class="user-row-avatar-ph">👤</div>';
+      }
+    }
+  };
+
+  // ── Delete account ────────────────────────────────────────────────────────
   document.getElementById('delete-user-btn').onclick = async () => {
-    if (!confirm(`Supprimer DÉFINITIVEMENT le compte de ${u.pseudo} ?\n\nCette action est irréversible.`)) return;
+    if (!confirm(`Supprimer DÉFINITIVEMENT le compte de "${u.pseudo}" ?\n\nToutes ses données seront perdues. Cette action est irréversible.`)) return;
     await api.delete(`/api/admin/users/${_selectedUser}`);
-    showUsersList();
+    document.getElementById('user-detail').classList.add('hidden');
+    document.getElementById('empty-state').classList.remove('hidden');
+    _selectedUser = null;
+    _userDetail   = null;
+    pendingGifts  = [];
+    updateFab();
     loadUsers();
   };
 }
@@ -276,39 +395,56 @@ function renderTabProfile(d) {
 function renderTabBadges(d) {
   const unlockedSlugs = new Set(d.badges || []);
 
+  // Group catalog by category
+  const categories = {};
+  _badgesCatalog.forEach(badge => {
+    const cat = badge.category || 'Other';
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(badge);
+  });
+
+  let sectionsHtml = '';
+  Object.keys(categories).sort().forEach(cat => {
+    const badges    = categories[cat];
+    const catUnlock = badges.filter(b => unlockedSlugs.has(b.slug)).length;
+
+    sectionsHtml += `<div class="badges-category">
+      <div class="badges-category-header">${escHtml(cat)} — ${catUnlock}/${badges.length}</div>
+      <div class="badges-grid">
+        ${badges.map(badge => {
+          const isUnlocked    = unlockedSlugs.has(badge.slug);
+          const pendingAdd    = pendingGifts.some(g => g.type === 'badge' && g.id === badge.slug && g.action === 'add');
+          const pendingRemove = pendingGifts.some(g => g.type === 'badge' && g.id === badge.slug && g.action === 'remove');
+
+          let cls = 'badge-item';
+          if (isUnlocked && !pendingRemove) cls += ' unlocked';
+          if (pendingAdd)    cls += ' pending-add';
+          if (pendingRemove) cls += ' pending-remove';
+
+          return `
+            <div class="${cls}" data-slug="${escHtml(badge.slug)}"
+                 title="${escHtml(badge.name_en)}\nRarity: ${badge.rarity}">
+              <img src="${_pathPrefix}/${escHtml(badge.image_path || '')}" alt="${escHtml(badge.name_en)}" loading="lazy" onerror="this.style.opacity=0.2">
+              <span class="badge-label">${escHtml(badge.name_en)}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+
   document.getElementById('user-detail-content').innerHTML = `
     <div class="tab-section">
-      <h3>Badges (${unlockedSlugs.size} / ${_badgesCatalog.length} débloqués)</h3>
-      <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
-        Cliquer sur un badge pour l'ajouter/retirer de la file d'attente.
-        Appliquer via le bouton ⚡ en bas à droite.
-      </p>
-      <div class="badges-grid" id="badges-grid"></div>
+      <h3>Badges — ${unlockedSlugs.size} / ${_badgesCatalog.length} débloqués</h3>
+      <div class="tab-note">
+        🔴 Débloqué · 🟡 En attente d'ajout · Grisé = en attente de retrait<br>
+        Cliquer pour basculer l'état. Appliquer via le bouton ⚡ en bas à droite.
+      </div>
+      ${sectionsHtml || '<p style="color:var(--text-muted)">Catalogue vide.</p>'}
     </div>
   `;
 
-  const grid = document.getElementById('badges-grid');
-  grid.innerHTML = _badgesCatalog.map(badge => {
-    const isUnlocked    = unlockedSlugs.has(badge.slug);
-    const pendingAdd    = pendingGifts.some(g => g.type === 'badge' && g.id === badge.slug && g.action === 'add');
-    const pendingRemove = pendingGifts.some(g => g.type === 'badge' && g.id === badge.slug && g.action === 'remove');
-
-    let cls = 'badge-item';
-    if (isUnlocked && !pendingRemove) cls += ' unlocked';
-    if (pendingAdd)    cls += ' pending-add';
-    if (pendingRemove) cls += ' pending-remove';
-
-    return `
-      <div class="${cls}" data-slug="${escHtml(badge.slug)}"
-           title="${escHtml(badge.name_en)}\n${escHtml(badge.category || '')} · ${badge.rarity}">
-        <img src="/${escHtml(badge.image_path || '')}" alt="${escHtml(badge.name_en)}" loading="lazy" onerror="this.style.opacity=0.3">
-        <span class="badge-label">${escHtml(badge.name_en)}</span>
-        <span class="rarity-${badge.rarity}" style="font-size:9px">${badge.rarity}</span>
-      </div>
-    `;
-  }).join('');
-
-  grid.querySelectorAll('.badge-item').forEach(item => {
+  document.querySelectorAll('.badge-item').forEach(item => {
     item.onclick = () => toggleBadgePending(item.dataset.slug, unlockedSlugs, d);
   });
 }
@@ -317,24 +453,17 @@ function toggleBadgePending(slug, unlockedSlugs, d) {
   const badge = _badgesCatalog.find(b => b.slug === slug);
   if (!badge) return;
 
-  const existingAdd    = pendingGifts.findIndex(g => g.type === 'badge' && g.id === slug && g.action === 'add');
-  const existingRemove = pendingGifts.findIndex(g => g.type === 'badge' && g.id === slug && g.action === 'remove');
-  const isUnlocked     = unlockedSlugs.has(slug);
+  const existingAdd = pendingGifts.findIndex(g => g.type === 'badge' && g.id === slug && g.action === 'add');
+  const existingRem = pendingGifts.findIndex(g => g.type === 'badge' && g.id === slug && g.action === 'remove');
 
-  if (!isUnlocked) {
-    // Pas débloqué → mise en file d'ajout (ou annulation)
-    if (existingAdd >= 0) {
-      pendingGifts.splice(existingAdd, 1);
-    } else {
-      pendingGifts.push({ type: 'badge', action: 'add', id: slug, label: badge.name_en, img: '/' + badge.image_path });
-    }
+  if (!unlockedSlugs.has(slug)) {
+    existingAdd >= 0
+      ? pendingGifts.splice(existingAdd, 1)
+      : pendingGifts.push({ type: 'badge', action: 'add', id: slug, label: badge.name_en, img: _pathPrefix + '/' + badge.image_path });
   } else {
-    // Déjà débloqué → mise en file de retrait (ou annulation)
-    if (existingRemove >= 0) {
-      pendingGifts.splice(existingRemove, 1);
-    } else {
-      pendingGifts.push({ type: 'badge', action: 'remove', id: slug, label: badge.name_en, img: '/' + badge.image_path });
-    }
+    existingRem >= 0
+      ? pendingGifts.splice(existingRem, 1)
+      : pendingGifts.push({ type: 'badge', action: 'remove', id: slug, label: badge.name_en, img: _pathPrefix + '/' + badge.image_path });
   }
 
   updateFab();
@@ -347,23 +476,21 @@ function renderTabWallpapers(d) {
 
   document.getElementById('user-detail-content').innerHTML = `
     <div class="tab-section">
-      <h3>Wallpapers</h3>
-      <p style="color:var(--text-muted);font-size:12px;margin-bottom:12px">
-        Les wallpapers par défaut ne sont pas affichés. Cliquer pour ajouter/retirer.
-      </p>
-      <div class="wallpapers-grid" id="wallpapers-grid"></div>
+      <h3>Wallpapers — ${unlockedIds.size} / ${_wallpapersCatalog.length} débloqués</h3>
+      <div class="tab-note">
+        🔴 Débloqué · 🟡 En attente d'ajout · Grisé = en attente de retrait<br>
+        Cliquer pour basculer l'état. Appliquer via le bouton ⚡ en bas à droite.
+      </div>
+      <div class="wallpapers-grid" id="wallpapers-grid">
+        ${!_wallpapersCatalog.length ? '<p style="color:var(--text-muted)">Catalogue vide — rechargement en cours…</p>' : ''}
+      </div>
     </div>
   `;
 
-  const grid     = document.getElementById('wallpapers-grid');
-  const unlockable = _wallpapersCatalog.filter(w => !w.is_default);
+  if (!_wallpapersCatalog.length) return;
 
-  if (!unlockable.length) {
-    grid.innerHTML = '<p style="color:var(--text-muted)">Aucun wallpaper débloquable.</p>';
-    return;
-  }
-
-  grid.innerHTML = unlockable.map(w => {
+  const grid = document.getElementById('wallpapers-grid');
+  grid.innerHTML = _wallpapersCatalog.map(w => {
     const wid           = String(w.id);
     const isUnlocked    = unlockedIds.has(wid);
     const pendingAdd    = pendingGifts.some(g => g.type === 'wallpaper' && String(g.id) === wid && g.action === 'add');
@@ -376,7 +503,7 @@ function renderTabWallpapers(d) {
 
     return `
       <div class="${cls}" data-id="${w.id}" title="${escHtml(w.name)}">
-        <img src="/${escHtml(w.image_path || '')}" alt="${escHtml(w.name)}" loading="lazy" onerror="this.src=''">
+        <img src="${_pathPrefix}/${escHtml(w.image_path || '')}" alt="${escHtml(w.name)}" loading="lazy">
         <span>${escHtml(w.name)}</span>
       </div>
     `;
@@ -398,11 +525,11 @@ function toggleWallpaperPending(wid, unlockedIds, d) {
   if (!isUnlocked) {
     existingAdd >= 0
       ? pendingGifts.splice(existingAdd, 1)
-      : pendingGifts.push({ type: 'wallpaper', action: 'add', id: wid, label: wall.name, img: '/' + wall.image_path });
+      : pendingGifts.push({ type: 'wallpaper', action: 'add', id: wid, label: wall.name, img: _pathPrefix + '/' + wall.image_path });
   } else {
     existingRem >= 0
       ? pendingGifts.splice(existingRem, 1)
-      : pendingGifts.push({ type: 'wallpaper', action: 'remove', id: wid, label: wall.name, img: '/' + wall.image_path });
+      : pendingGifts.push({ type: 'wallpaper', action: 'remove', id: wid, label: wall.name, img: _pathPrefix + '/' + wall.image_path });
   }
 
   updateFab();
@@ -416,64 +543,61 @@ function renderTabTitles(d) {
 
   document.getElementById('user-detail-content').innerHTML = `
     <div class="tab-section">
-      <h3>Titres</h3>
-      <div style="margin-bottom:20px;padding:14px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <label style="font-size:13px;color:var(--text-muted)">Titre équipé :</label>
-        <select id="equip-title-select" style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:6px 12px;border-radius:6px;font-size:13px;outline:none">
-          <option value="">— aucun —</option>
-          ${(d.titles || []).map(t => `<option value="${t.id}" ${equipped == t.id ? 'selected' : ''}>${escHtml(t.name_en)}</option>`).join('')}
-        </select>
-        <button class="btn-secondary" id="equip-title-btn">Équiper</button>
-        <span id="equip-title-msg" style="font-size:12px"></span>
+      <h3>Titres — ${unlockedIds.size} / ${_titlesCatalog.length} débloqués</h3>
+      <div class="tab-note">
+        🔴 Débloqué · 🟡 En attente d'ajout · Grisé = en attente de retrait<br>
+        Cliquer pour basculer l'état. Appliquer via le bouton ⚡ en bas à droite.
       </div>
-      <div class="titles-list" id="titles-list"></div>
+      <div class="titles-grid">
+        ${_titlesCatalog.map(t => {
+          const isUnlocked = unlockedIds.has(t.id);
+          const pendingAdd = pendingGifts.some(g => g.type === 'title' && g.id === t.id && g.action === 'add');
+          const pendingRem = pendingGifts.some(g => g.type === 'title' && g.id === t.id && g.action === 'remove');
+          const isEquipped = equipped == t.id;
+
+          let cls = 'title-card';
+          if (isUnlocked && !pendingRem) cls += ' unlocked';
+          if (pendingAdd) cls += ' pending-add';
+          if (pendingRem) cls += ' pending-remove';
+
+          return `
+            <div class="${cls}" data-id="${t.id}">
+              ${t.image_path
+                ? `<img class="title-card-img" src="${_pathPrefix}/${escHtml(t.image_path)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+                : `<div class="title-card-img-ph rarity-${t.rarity}">👑</div>`}
+              <div class="title-card-rarity rarity-${t.rarity}">${t.rarity.toUpperCase()}</div>
+              <div class="title-card-name">${escHtml(t.name_en)}</div>
+              ${isEquipped ? '<div class="title-card-equipped">⚡ équipé</div>' : ''}
+              ${pendingAdd ? '<div class="title-card-status pending">+ ajout</div>' : ''}
+              ${pendingRem ? '<div class="title-card-status remove">− retrait</div>' : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="titles-equip-section">
+        <span style="font-size:12px;color:var(--text-muted)">Équiper :</span>
+        <select id="equip-title-select" style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:5px 10px;border-radius:6px;font-size:12px;outline:none;flex:1;max-width:260px">
+          <option value="">— aucun —</option>
+          ${(d.titles || []).map(t => `<option value="${t.id}" ${equipped == t.id ? 'selected' : ''}>${escHtml(t.name_en)} [${t.rarity}]</option>`).join('')}
+        </select>
+        <button class="btn-primary btn-small" id="equip-title-btn">Équiper</button>
+      </div>
     </div>
   `;
 
   document.getElementById('equip-title-btn').onclick = async () => {
     const val = document.getElementById('equip-title-select').value;
-    const msg = document.getElementById('equip-title-msg');
     const res = await api.patch(`/api/admin/users/${_selectedUser}/titles/equip`, { title_id: val ? +val : null });
     if (res.error) {
-      msg.textContent = '❌ ' + res.error;
-      msg.style.color = 'var(--red)';
+      toast('❌ ' + res.error, 'error');
     } else {
-      msg.textContent = '✅ Équipé';
-      msg.style.color = '#4ade80';
+      toast('✅ Titre équipé', 'success');
       _userDetail.profile = { ..._userDetail.profile, equipped_title_id: val ? +val : null };
-      setTimeout(() => { msg.textContent = ''; }, 2500);
     }
   };
 
-  const list = document.getElementById('titles-list');
-  list.innerHTML = _titlesCatalog.map(t => {
-    const isUnlocked = unlockedIds.has(t.id);
-    const pendingAdd = pendingGifts.some(g => g.type === 'title' && g.id === t.id && g.action === 'add');
-    const pendingRem = pendingGifts.some(g => g.type === 'title' && g.id === t.id && g.action === 'remove');
-
-    const isEquipped = equipped == t.id;
-    let cls = 'title-item';
-    if (isUnlocked && !pendingRem) cls += ' unlocked';
-    if (pendingAdd) cls += ' pending-add';
-    if (pendingRem) cls += ' pending-remove';
-
-    return `
-      <div class="${cls}" data-id="${t.id}"
-           style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;margin-bottom:6px;background:var(--bg3);cursor:pointer">
-        <div>
-          <span class="rarity-${t.rarity}">[${t.rarity.toUpperCase()}]</span>
-          <strong style="margin-left:8px">${escHtml(t.name_en)}</strong>
-          ${t.slug ? `<span style="font-size:11px;color:var(--text-muted);margin-left:8px">${escHtml(t.slug)}</span>` : ''}
-          ${isEquipped ? '<span style="font-size:11px;color:var(--gold);margin-left:8px">⚡ équipé</span>' : ''}
-        </div>
-        <span style="font-size:20px">
-          ${pendingRem ? '🗑️' : pendingAdd ? '⏳' : isUnlocked ? '✅' : '➕'}
-        </span>
-      </div>
-    `;
-  }).join('');
-
-  list.querySelectorAll('.title-item').forEach(item => {
+  document.querySelectorAll('.title-card').forEach(item => {
     item.onclick = () => toggleTitlePending(+item.dataset.id, unlockedIds, d);
   });
 }
@@ -482,11 +606,10 @@ function toggleTitlePending(tid, unlockedIds, d) {
   const title = _titlesCatalog.find(t => t.id === tid);
   if (!title) return;
 
-  const isUnlocked  = unlockedIds.has(tid);
   const existingAdd = pendingGifts.findIndex(g => g.type === 'title' && g.id === tid && g.action === 'add');
   const existingRem = pendingGifts.findIndex(g => g.type === 'title' && g.id === tid && g.action === 'remove');
 
-  if (!isUnlocked) {
+  if (!unlockedIds.has(tid)) {
     existingAdd >= 0
       ? pendingGifts.splice(existingAdd, 1)
       : pendingGifts.push({ type: 'title', action: 'add', id: tid, label: title.name_en });
@@ -502,13 +625,15 @@ function toggleTitlePending(tid, unlockedIds, d) {
 
 // ── Tab: Stats ─────────────────────────────────────────────────────────────
 function renderTabStats(d) {
-  const modes    = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+  const modes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+  const labels = { classic: '🃏 Classic', emoji: '😀 Emoji', silhouette: '👤 Silhouette', alloutattack: '💥 All-Out', personae: '🎭 Personae', music: '🎵 Music' };
   const statsMap = {};
   (d.stats || []).forEach(s => { statsMap[s.mode] = s; });
 
   document.getElementById('user-detail-content').innerHTML = `
     <div class="tab-section">
       <h3>Statistiques par mode</h3>
+      <div class="tab-note">Modifier les valeurs puis cliquer Save sur chaque ligne.</div>
       <div style="overflow-x:auto">
         <table class="stats-table">
           <thead>
@@ -520,21 +645,21 @@ function renderTabStats(d) {
               <th>Streak</th>
               <th>Streak Max</th>
               <th>Perfect</th>
-              <th>Action</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             ${modes.map(mode => {
-              const s = statsMap[mode] || { wins: 0, giveups: 0, games: 0, streak: 0, streak_record: 0, perfect_wins: 0, total_time_ms: 0 };
+              const s = statsMap[mode] || { wins: 0, giveups: 0, games: 0, streak: 0, streak_record: 0, perfect_wins: 0 };
               return `<tr data-mode="${mode}">
-                <td><strong style="font-family:Oswald,sans-serif;text-transform:capitalize">${mode}</strong></td>
+                <td><strong style="font-family:Oswald,sans-serif;font-size:13px">${labels[mode]}</strong></td>
                 <td><input type="number" min="0" class="stat-input" data-field="wins"          value="${s.wins}"></td>
                 <td><input type="number" min="0" class="stat-input" data-field="giveups"       value="${s.giveups}"></td>
                 <td><input type="number" min="0" class="stat-input" data-field="games"         value="${s.games}"></td>
                 <td><input type="number" min="0" class="stat-input" data-field="streak"        value="${s.streak}"></td>
                 <td><input type="number" min="0" class="stat-input" data-field="streak_record" value="${s.streak_record}"></td>
                 <td><input type="number" min="0" class="stat-input" data-field="perfect_wins"  value="${s.perfect_wins}"></td>
-                <td><button class="btn-secondary save-stats-btn">Save</button></td>
+                <td><button class="btn-secondary btn-small save-stats-btn">Save</button></td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -545,25 +670,25 @@ function renderTabStats(d) {
 
   document.querySelectorAll('.save-stats-btn').forEach(btn => {
     btn.onclick = async () => {
-      const row  = btn.closest('tr');
-      const mode = row.dataset.mode;
+      const row     = btn.closest('tr');
+      const mode    = row.dataset.mode;
       const payload = {};
       row.querySelectorAll('.stat-input').forEach(inp => { payload[inp.dataset.field] = +inp.value; });
 
       btn.textContent = '…';
       btn.disabled    = true;
-
       const res = await api.patch(`/api/admin/users/${_selectedUser}/stats`, { mode, ...payload });
-
       btn.disabled    = false;
-      btn.textContent = res.error ? '❌' : '✅';
-      setTimeout(() => { btn.textContent = 'Save'; }, 2000);
+      btn.textContent = 'Save';
 
-      // Mettre à jour userDetail en mémoire
-      if (!res.error) {
+      if (res.error) {
+        toast('❌ Stats — ' + res.error, 'error');
+      } else {
+        toast('✅ Stats ' + labels[mode] + ' sauvegardées', 'success');
         const idx = (_userDetail.stats || []).findIndex(s => s.mode === mode);
         if (idx >= 0) _userDetail.stats[idx] = { ..._userDetail.stats[idx], mode, ...payload };
         else          _userDetail.stats = [...(_userDetail.stats || []), { mode, ...payload }];
+        renderDetailQuickStats(_userDetail);
       }
     };
   });
@@ -571,38 +696,48 @@ function renderTabStats(d) {
 
 // ── Tab: Friends ───────────────────────────────────────────────────────────
 function renderTabFriends(d) {
-  const friends = d.friends || [];
+  const friends  = d.friends || [];
+  const accepted = friends.filter(f => f.status === 'accepted');
+  const pending  = friends.filter(f => f.status === 'pending');
+
+  const friendRowHtml = f => `
+    <div class="friend-row" data-fid="${f.friendship_id}">
+      ${f.avatar_data
+        ? `<img src="${escHtml(f.avatar_data)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`
+        : '<div style="width:38px;height:38px;border-radius:50%;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">👤</div>'}
+      <div style="flex:1;min-width:0">
+        <strong style="font-size:13px">${escHtml(f.pseudo)}</strong>
+        <div style="font-size:11px;color:var(--text-muted)">
+          ${f.status === 'pending' ? '⏳ En attente' : '✅ Ami'} · ID ${f.user_id} · ${new Date(f.created_at).toLocaleDateString()}
+        </div>
+      </div>
+      <button class="btn-danger btn-small remove-friend-btn" data-fid="${f.friendship_id}">🗑️</button>
+    </div>
+  `;
 
   document.getElementById('user-detail-content').innerHTML = `
     <div class="tab-section">
-      <h3>Amis (${friends.length})</h3>
-      <div id="friends-list">
-        ${friends.length === 0
-          ? '<p style="color:var(--text-muted)">Aucun ami.</p>'
-          : friends.map(f => `
-              <div class="friend-row" data-fid="${f.friendship_id}"
-                   style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:var(--bg3);margin-bottom:8px">
-                ${f.avatar_data
-                  ? `<img src="${f.avatar_data}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">`
-                  : '<div style="width:36px;height:36px;border-radius:50%;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center">👤</div>'}
-                <div style="flex:1;min-width:0">
-                  <strong>${escHtml(f.pseudo)}</strong>
-                  <div style="font-size:11px;color:var(--text-muted)">${escHtml(f.status)} · ID utilisateur: ${f.user_id}</div>
-                </div>
-                <button class="btn-danger btn-small remove-friend-btn" data-fid="${f.friendship_id}" title="Supprimer cette amitié">🗑️</button>
-              </div>
-            `).join('')}
-      </div>
+      <h3>Amis — ${accepted.length} amis · ${pending.length} en attente</h3>
+      ${!friends.length
+        ? '<p style="color:var(--text-muted)">Aucune relation d\'amitié.</p>'
+        : accepted.map(friendRowHtml).join('') +
+          (pending.length
+            ? `<div style="margin:14px 0 8px;font-size:11px;color:var(--text-muted);font-family:Oswald,sans-serif;text-transform:uppercase;letter-spacing:1px">En attente</div>` +
+              pending.map(friendRowHtml).join('')
+            : '')
+      }
     </div>
   `;
 
   document.querySelectorAll('.remove-friend-btn').forEach(btn => {
     btn.onclick = async () => {
-      if (!confirm('Supprimer cette amitié ?')) return;
-      const res = await api.delete(`/api/admin/users/${_selectedUser}/friends/${btn.dataset.fid}`);
+      if (!confirm('Supprimer cette relation d\'amitié ?')) return;
+      const fid = btn.dataset.fid;
+      const res = await api.delete(`/api/admin/users/${_selectedUser}/friends/${fid}`);
       if (!res.error) {
         btn.closest('.friend-row').remove();
-        _userDetail.friends = _userDetail.friends.filter(f => String(f.friendship_id) !== String(btn.dataset.fid));
+        _userDetail.friends = _userDetail.friends.filter(f => String(f.friendship_id) !== String(fid));
+        renderDetailQuickStats(_userDetail);
       }
     };
   });
@@ -610,246 +745,217 @@ function renderTabFriends(d) {
 
 // ── Tab: Social Links ──────────────────────────────────────────────────────
 function renderTabSocial(d) {
-  const links = d.social_links || [];
+  const links     = d.social_links || [];
+  const rankNames = ['','Stranger','Acquaintance','Companion','Ally','Confidant','Trusted Ally','True Ally','Bond','Unbreakable Bond','True Confidant'];
+  const rankColor = r => r >= 10 ? 'legendary' : r >= 7 ? 'epic' : r >= 4 ? 'rare' : 'common';
 
   document.getElementById('user-detail-content').innerHTML = `
     <div class="tab-section">
-      <h3>Social Links (${links.length})</h3>
-      ${links.length === 0
-        ? '<p style="color:var(--text-muted)">Aucun Social Link.</p>'
+      <h3>Social Links — ${links.length} relation${links.length !== 1 ? 's' : ''}</h3>
+      ${!links.length
+        ? '<p style="color:var(--text-muted)">Aucun Social Link pour cet utilisateur.</p>'
         : `<div style="overflow-x:auto">
-            <table class="stats-table" style="width:100%">
+            <table class="stats-table">
               <thead>
                 <tr>
                   <th>Ami</th>
-                  <th>Rang actuel</th>
-                  <th>XP actuel</th>
+                  <th>Rang</th>
+                  <th>XP</th>
+                  <th>Interactions</th>
+                  <th>Badge TC</th>
+                  <th>Dernier contact</th>
                   <th>Nouveau rang</th>
                   <th>Nouvel XP</th>
-                  <th>Action</th>
+                  <th style="min-width:160px"></th>
                 </tr>
               </thead>
               <tbody>
                 ${links.map(sl => `
-                  <tr data-slid="${sl.id}">
-                    <td><strong>${escHtml(sl.pseudo)}</strong></td>
-                    <td>${sl.rank}</td>
-                    <td>${sl.xp}</td>
+                  <tr data-slid="${sl.id}" data-badge="${sl.badge_generated ? '1' : '0'}">
                     <td>
-                      <select class="sl-rank-input"
-                              style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:5px 8px;border-radius:4px;font-size:13px">
-                        ${[1,2,3,4,5,6,7,8,9,10].map(r => `<option value="${r}" ${r === sl.rank ? 'selected' : ''}>${r}</option>`).join('')}
+                      <strong style="font-size:13px">${escHtml(sl.pseudo)}</strong><br>
+                      <span style="font-size:10px;color:var(--text-muted)">#${sl.other_user_id}</span>
+                    </td>
+                    <td>
+                      <span class="rarity-${rankColor(sl.rank)}">${sl.rank}</span><br>
+                      <span style="font-size:10px;color:var(--text-muted)">${rankNames[sl.rank] || ''}</span>
+                    </td>
+                    <td>${sl.xp.toLocaleString()}</td>
+                    <td style="text-align:center">${sl.interaction_count}</td>
+                    <td style="text-align:center">
+                      ${sl.badge_generated
+                        ? '<span style="color:#f5c842;font-size:16px" title="Badge généré">⛓</span>'
+                        : sl.rank >= 10
+                          ? '<span style="color:#888;font-size:13px" title="En attente">⌛</span>'
+                          : '—'}
+                    </td>
+                    <td style="font-size:11px;color:var(--text-muted)">
+                      ${sl.last_interaction_at ? new Date(sl.last_interaction_at).toLocaleDateString('fr-FR') : '—'}
+                    </td>
+                    <td>
+                      <select class="sl-rank-input" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px;font-size:12px;outline:none">
+                        ${[1,2,3,4,5,6,7,8,9,10].map(r => `<option value="${r}" ${r === sl.rank ? 'selected' : ''}>${r} – ${rankNames[r]}</option>`).join('')}
                       </select>
                     </td>
                     <td>
                       <input type="number" class="sl-xp-input" min="0" value="${sl.xp}"
-                             style="width:80px;background:transparent;border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:13px;outline:none">
+                             style="width:80px;background:transparent;border:1px solid var(--border);color:var(--text);padding:4px 7px;border-radius:4px;font-size:12px;outline:none">
                     </td>
-                    <td><button class="btn-secondary save-sl-btn">Save</button></td>
+                    <td>
+                      <div style="display:flex;gap:4px;flex-wrap:wrap">
+                        <button class="btn-secondary btn-small save-sl-btn">Save</button>
+                        ${sl.badge_generated
+                          ? '<button class="btn-secondary btn-small reset-badge-btn" title="Réinitialiser le badge TC" style="color:#f5c842">⛓ Reset</button>'
+                          : ''}
+                        <button class="btn-secondary btn-small delete-sl-btn" style="color:#ef4444" title="Supprimer ce Social Link">✕</button>
+                      </div>
+                    </td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
-          </div>`}
+          </div>`
+      }
     </div>
   `;
 
+  // ── Save (rank + xp) ──────────────────────────────────────────────────────
   document.querySelectorAll('.save-sl-btn').forEach(btn => {
     btn.onclick = async () => {
       const row  = btn.closest('tr');
       const slId = row.dataset.slid;
       const rank = +row.querySelector('.sl-rank-input').value;
       const xp   = +row.querySelector('.sl-xp-input').value;
-
-      btn.textContent = '…';
-      btn.disabled    = true;
-
+      btn.textContent = '…'; btn.disabled = true;
       const res = await api.patch(`/api/admin/social-links/${slId}`, { rank, xp });
+      btn.disabled = false; btn.textContent = 'Save';
+      if (res.error) {
+        toast('❌ Social Link — ' + res.error, 'error');
+      } else {
+        toast('✅ Social Link mis à jour', 'success');
+        const sl = _userDetail.social_links.find(s => String(s.id) === String(slId));
+        if (sl) { sl.rank = rank; sl.xp = xp; }
+      }
+    };
+  });
 
-      btn.disabled    = false;
-      btn.textContent = res.error ? '❌' : '✅';
-      setTimeout(() => { btn.textContent = 'Save'; }, 2000);
+  // ── Reset badge True Confidant ────────────────────────────────────────────
+  document.querySelectorAll('.reset-badge-btn').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('Réinitialiser le badge True Confidant pour ce lien ?\nLes configs et le badge généré seront supprimés.')) return;
+      const slId = btn.closest('tr').dataset.slid;
+      btn.textContent = '…'; btn.disabled = true;
+      const res = await api.patch(`/api/admin/social-links/${slId}`, { badge_generated: false });
+      if (res.error) {
+        toast('❌ ' + res.error, 'error');
+        btn.disabled = false; btn.textContent = '⛓ Reset';
+      } else {
+        toast('✅ Badge TC réinitialisé', 'success');
+        const sl = _userDetail.social_links.find(s => String(s.id) === String(slId));
+        if (sl) sl.badge_generated = false;
+        renderTabSocial(_userDetail);
+      }
+    };
+  });
+
+  // ── Delete social link ────────────────────────────────────────────────────
+  document.querySelectorAll('.delete-sl-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const row   = btn.closest('tr');
+      const slId  = row.dataset.slid;
+      const pseudo = row.querySelector('strong')?.textContent || '?';
+      if (!confirm(`Supprimer définitivement le Social Link avec ${pseudo} ?\nCette action est irréversible (interactions, badge, notifs supprimés).`)) return;
+      btn.textContent = '…'; btn.disabled = true;
+      const res = await api.delete(`/api/admin/social-links/${slId}`);
+      if (res.error) {
+        toast('❌ ' + res.error, 'error');
+        btn.disabled = false; btn.textContent = '✕';
+      } else {
+        toast('✅ Social Link supprimé', 'success');
+        _userDetail.social_links = _userDetail.social_links.filter(s => String(s.id) !== String(slId));
+        renderTabSocial(_userDetail);
+      }
     };
   });
 }
 
 // ── Pending Gifts Queue ────────────────────────────────────────────────────
 function updateFab() {
-  const fab   = document.getElementById('pending-fab');
-  const count = pendingGifts.length;
-  document.getElementById('pending-count').textContent = count;
+  const fab     = document.getElementById('pending-fab');
+  const countEl = document.getElementById('pending-count');
+  const count   = pendingGifts.length;
+  if (countEl) countEl.textContent = count;
   fab.classList.toggle('hidden', count === 0);
 }
 
 async function applyPendingGifts() {
   if (!pendingGifts.length || !_selectedUser) return;
 
-  const fab = document.getElementById('pending-fab');
-  fab.disabled    = true;
-  fab.textContent = 'Application…';
+  const fab    = document.getElementById('pending-fab');
+  fab.disabled = true;
+  fab.textContent = '⚡ Application…';
 
-  const toAdd = pendingGifts.filter(g => g.action === 'add');
-
-  // Exécuter tous les appels API en parallèle
   const results = await Promise.allSettled(pendingGifts.map(gift => {
-    if (gift.type === 'badge') {
+    if (gift.type === 'badge')
       return gift.action === 'add'
-        ? api.post(`/api/admin/users/${_selectedUser}/badges`, { slug: gift.id })
+        ? api.post(`/api/admin/users/${_selectedUser}/badges`,     { slug: gift.id })
         : api.delete(`/api/admin/users/${_selectedUser}/badges/${gift.id}`);
-    }
-    if (gift.type === 'wallpaper') {
+    if (gift.type === 'wallpaper')
       return gift.action === 'add'
         ? api.post(`/api/admin/users/${_selectedUser}/wallpapers`, { wallpaper_id: gift.id })
         : api.delete(`/api/admin/users/${_selectedUser}/wallpapers/${gift.id}`);
-    }
-    if (gift.type === 'title') {
+    if (gift.type === 'title')
       return gift.action === 'add'
-        ? api.post(`/api/admin/users/${_selectedUser}/titles`, { title_id: gift.id })
+        ? api.post(`/api/admin/users/${_selectedUser}/titles`,     { title_id: gift.id })
         : api.delete(`/api/admin/users/${_selectedUser}/titles/${gift.id}`);
-    }
     return Promise.resolve({ ok: true });
   }));
 
-  const hasError = results.some(r => r.status === 'rejected' || r.value?.error);
-
-  // Rafraîchir les données du user depuis l'API
+  // Refresh user detail from server
   _userDetail = await api.get(`/api/admin/users/${_selectedUser}`);
+  renderDetailHeader(_userDetail);
+  renderDetailQuickStats(_userDetail);
 
-  // Animation divine si au moins un ajout réussi
-  if (!hasError && toAdd.length > 0) {
-    showDivineGiftAnimation(toAdd);
-  }
+  // Show animation for any successful adds (partial success is fine)
+  const successfulAdds = pendingGifts.filter((g, i) =>
+    g.action === 'add' && results[i]?.status === 'fulfilled' && !results[i].value?.error
+  );
+  if (successfulAdds.length > 0) showDivineGiftAnimation(successfulAdds, 'The Admin has spoken…');
 
   pendingGifts = [];
+  fab.disabled = false;
+  fab.innerHTML = '⚡ Appliquer les dons (<span id="pending-count">0</span>)';
   updateFab();
 
-  fab.disabled  = false;
-  // Remettre le contenu HTML original du FAB
-  fab.innerHTML = '⚡ Appliquer les dons (<span id="pending-count">0</span>)';
-
-  // Re-render le tab actif pour refléter le nouvel état
   switchTab(_activeTab);
-}
-
-// ── Divine Gift Animation ──────────────────────────────────────────────────
-function showDivineGiftAnimation(items) {
-  const overlay = document.createElement('div');
-  overlay.className = 'divine-overlay';
-
-  overlay.innerHTML = `
-    <canvas class="divine-particles-canvas"></canvas>
-    <div class="divine-content" style="position:relative;z-index:2;text-align:center;padding:20px">
-      <div class="divine-title">The Admin has spoken…</div>
-      <div class="divine-cards">
-        ${items.map((item, i) => `
-          <div class="divine-card" style="animation-delay:${i * 120}ms">
-            ${item.img
-              ? `<img src="${item.img}" alt="${escHtml(item.label)}" onerror="this.style.display='none'">`
-              : `<div class="divine-card-icon">👑</div>`}
-            <span>${escHtml(item.label)}</span>
-            <div class="card-type">${getTypeLabel(item.type)}</div>
-          </div>
-        `).join('')}
-      </div>
-      <div class="divine-dismiss-hint">— Cliquer pour fermer —</div>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  // Canvas particles
-  startParticles(overlay.querySelector('.divine-particles-canvas'));
-
-  // Fade in
-  requestAnimationFrame(() => overlay.classList.add('show'));
-
-  const dismiss = () => {
-    overlay.classList.add('exit');
-    setTimeout(() => overlay.remove(), 500);
-  };
-
-  overlay.addEventListener('click', dismiss);
-  // Auto-dismiss après 4 secondes
-  setTimeout(dismiss, 4000);
-}
-
-// ── Canvas particles (dorées) ──────────────────────────────────────────────
-function startParticles(canvas) {
-  if (!canvas) return;
-
-  const ctx        = canvas.getContext('2d');
-  canvas.width     = window.innerWidth;
-  canvas.height    = window.innerHeight;
-
-  const particles = Array.from({ length: 70 }, () => ({
-    x:     Math.random() * canvas.width,
-    y:     Math.random() * -300,
-    vy:    1.5 + Math.random() * 3,
-    vx:    (Math.random() - 0.5) * 1.8,
-    size:  1.5 + Math.random() * 3.5,
-    alpha: 0.6 + Math.random() * 0.4,
-    color: Math.random() > 0.4 ? '#ffd700' : (Math.random() > 0.5 ? '#fff8dc' : '#fffacd'),
-  }));
-
-  let running = true;
-
-  function draw() {
-    if (!running) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach(p => {
-      p.y     += p.vy;
-      p.x     += p.vx;
-      p.alpha -= 0.0025;
-
-      ctx.globalAlpha = Math.max(0, p.alpha);
-      ctx.fillStyle   = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Respawn si hors écran ou transparent
-      if (p.y > canvas.height || p.alpha <= 0) {
-        p.y     = -10;
-        p.x     = Math.random() * canvas.width;
-        p.alpha = 0.6 + Math.random() * 0.4;
-      }
-    });
-
-    requestAnimationFrame(draw);
-  }
-
-  draw();
-  // Arrêter le canvas après la durée de l'overlay
-  setTimeout(() => { running = false; }, 5000);
 }
 
 // ── Catalog Loaders ────────────────────────────────────────────────────────
 async function loadBadgesCatalog() {
   try {
     const data     = await api.get('/api/badges');
-    _badgesCatalog = data.badges || [];
-  } catch (e) {
-    console.error('[Admin] Failed to load badges catalog', e);
-  }
+    // /api/badges returns a raw array (no wrapper key)
+    _badgesCatalog = Array.isArray(data) ? data : (data.badges || []);
+    // Normalize field: API returns `name`, admin UI expects `name_en`
+    _badgesCatalog = _badgesCatalog.map(b => ({ ...b, name_en: b.name_en || b.name || b.slug }));
+  } catch (e) { console.error('[Admin] badges catalog failed', e); }
 }
 
 async function loadWallpapersCatalog() {
   try {
     const data         = await api.get('/api/wallpapers');
-    _wallpapersCatalog = data.wallpapers || [];
-  } catch (e) {
-    console.error('[Admin] Failed to load wallpapers catalog', e);
-  }
+    // /api/wallpapers returns a raw array (no wrapper key)
+    _wallpapersCatalog = Array.isArray(data) ? data : (data.wallpapers || []);
+  } catch (e) { console.error('[Admin] wallpapers catalog failed', e); }
 }
 
 async function loadTitlesCatalog() {
   try {
     const data     = await api.get('/api/titles');
-    _titlesCatalog = data.titles || [];
-  } catch (e) {
-    console.error('[Admin] Failed to load titles catalog', e);
-  }
+    // /api/titles returns a raw array (no wrapper key); field is `name` not `name_en`
+    const raw      = Array.isArray(data) ? data : (data.titles || []);
+    _titlesCatalog = raw.map(t => ({ ...t, name_en: t.name_en || t.name || t.slug }));
+  } catch (e) { console.error('[Admin] titles catalog failed', e); }
 }
 
 // ── Utilities ──────────────────────────────────────────────────────────────
