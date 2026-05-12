@@ -87,7 +87,7 @@ if ($method === 'GET' && $slIdx !== false && ($parts[$slIdx + 1] ?? '') === 'ran
     if (!in_array($lang, ['en','fr','es','de','it'])) $lang = 'en';
 
     $stmt = $pdo->prepare("
-        SELECT rn.id, rn.new_rank,
+        SELECT rn.id, rn.new_rank, rn.is_badge_prompt,
                u.id AS partner_id, u.pseudo AS partner_pseudo,
                p.avatar_data AS partner_avatar,
                slr.name_{$lang} AS rank_name,
