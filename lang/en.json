@@ -618,6 +618,7 @@
     "rank_up": "Social Link ranked up! You are now {{rank_name}} with {{pseudo}}.",
     "true_confidant_unlocked": "🎊 True Confidant! Your badge with {{pseudo}} has been generated.",
     "true_confidant_waiting": "Waiting for {{pseudo}}…",
+    "true_confidant_no_avatar": "No avatar — set one on your profile first.",
     "true_confidant_create_btn": "✨ Create our badge",
     "true_confidant_editor_title": "True Confidant Badge",
     "true_confidant_editor_subtitle": "Customize your half — {{pseudo}}'s half is on the other side.",

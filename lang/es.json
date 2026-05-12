@@ -502,6 +502,7 @@
     "rank_up": "¡Social Link subió de rango! Ahora eres {{rank_name}} con {{pseudo}}.",
     "true_confidant_unlocked": "🎊 ¡True Confidant! Tu insignia con {{pseudo}} ha sido generada.",
     "true_confidant_waiting": "Esperando a {{pseudo}}…",
+    "true_confidant_no_avatar": "Sin avatar — configura uno en tu perfil primero.",
     "true_confidant_create_btn": "✨ Crear nuestra insignia",
     "true_confidant_editor_title": "Insignia True Confidant",
     "true_confidant_editor_subtitle": "Personaliza tu mitad — la mitad de {{pseudo}} está al otro lado.",

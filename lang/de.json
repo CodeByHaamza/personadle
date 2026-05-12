@@ -502,6 +502,7 @@
     "rank_up": "Social Link aufgestiegen! Du bist jetzt {{rank_name}} mit {{pseudo}}.",
     "true_confidant_unlocked": "🎊 True Confidant! Dein Abzeichen mit {{pseudo}} wurde generiert.",
     "true_confidant_waiting": "Warte auf {{pseudo}}…",
+    "true_confidant_no_avatar": "Kein Avatar — lege zuerst einen auf deinem Profil fest.",
     "true_confidant_create_btn": "✨ Unser Abzeichen erstellen",
     "true_confidant_editor_title": "True Confidant Abzeichen",
     "true_confidant_editor_subtitle": "Passe deine Hälfte an — {{pseudo}}s Hälfte ist auf der anderen Seite.",

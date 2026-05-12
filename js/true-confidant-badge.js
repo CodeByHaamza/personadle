@@ -317,31 +317,20 @@ function _bindEditorEvents(modal) {
 }
 
 function _buildAvatarList(container, modal) {
-  const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
-  const avatars = [];
-  if (profile.avatar_data) avatars.push({ src: profile.avatar_data, label: 'Profile' });
-  for (let i = 0; i < 5; i++) {
-    const saved = localStorage.getItem(`savedAvatar_${i}`);
-    if (saved) avatars.push({ src: saved, label: `Saved ${i + 1}` });
-  }
-  if (!avatars.length) {
-    container.innerHTML = `<span class="tcb-no-avatar">No saved avatars found</span>`;
+  const profile   = JSON.parse(localStorage.getItem('personaProfile') || '{}');
+  const avatarSrc = window._currentUser?.avatar_data || profile.avatar_data || null;
+
+  if (!avatarSrc) {
+    container.innerHTML = `<span class="tcb-no-avatar">${_t('social_link.true_confidant_no_avatar', {}, 'No avatar — set one on your profile first.')}</span>`;
     return;
   }
-  container.innerHTML = avatars.map((a, i) =>
-    `<img src="${a.src}" class="tcb-avatar-thumb${i === 0 && !_editorState.config.avatar_data ? ' tcb-avatar-thumb--active' : ''}" data-idx="${i}" title="${a.label}" alt="${a.label}">`
-  ).join('');
-  if (!_editorState.config.avatar_data && avatars.length) {
-    _editorState.config.avatar_data = avatars[0].src;
+
+  if (!_editorState.config.avatar_data) {
+    _editorState.config.avatar_data = avatarSrc;
   }
-  container.querySelectorAll('.tcb-avatar-thumb').forEach((img, i) => {
-    img.addEventListener('click', () => {
-      container.querySelectorAll('.tcb-avatar-thumb').forEach(t => t.classList.remove('tcb-avatar-thumb--active'));
-      img.classList.add('tcb-avatar-thumb--active');
-      _editorState.config.avatar_data = avatars[i].src;
-      _refreshPreview(modal);
-    });
-  });
+
+  container.innerHTML =
+    `<img src="${avatarSrc}" class="tcb-avatar-thumb tcb-avatar-thumb--active" alt="avatar">`;
 }
 
 function _refreshPreview(modal) {
