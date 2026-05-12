@@ -1,0 +1,246 @@
+/* css/true-confidant-badge.css — True Confidant Badge éditeur + animation */
+
+/* ── Modal overlay ─────────────────────────────────────────────── */
+.tcb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9100;
+  padding: 1rem;
+}
+
+.tcb-modal {
+  background: #0f0f1a;
+  border: 1px solid #f5c84255;
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  color: #e0e0e0;
+}
+
+.tcb-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.tcb-close:hover { color: #fff; }
+
+.tcb-title {
+  font-size: 1.2rem;
+  color: #f5c842;
+  text-align: center;
+  margin: 0 0 0.25rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.tcb-subtitle {
+  font-size: 0.8rem;
+  color: #aaa;
+  text-align: center;
+  margin: 0 0 1rem;
+}
+
+/* ── Canvas preview ─────────────────────────────────────────────── */
+.tcb-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 0.4rem;
+}
+
+.tcb-canvas {
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 0 24px #f5c84233;
+}
+.tcb-canvas:active { cursor: grabbing; }
+
+.tcb-preview-hint {
+  font-size: 0.72rem;
+  color: #888;
+  margin: 0;
+}
+
+/* ── Controls ───────────────────────────────────────────────────── */
+.tcb-controls {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tcb-label {
+  font-size: 0.78rem;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.tcb-range {
+  width: 100%;
+  accent-color: #f5c842;
+}
+
+.tcb-color {
+  width: 48px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+}
+
+.tcb-select {
+  background: #1a1a2e;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* ── Avatar list ────────────────────────────────────────────────── */
+.tcb-avatar-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tcb-avatar-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #444;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.tcb-avatar-thumb:hover { border-color: #f5c842; transform: scale(1.08); }
+.tcb-avatar-thumb--active { border-color: #f5c842; box-shadow: 0 0 8px #f5c84266; }
+
+.tcb-no-avatar { font-size: 0.8rem; color: #666; }
+
+/* ── Submit ─────────────────────────────────────────────────────── */
+.tcb-submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #f5c842, #e8a000);
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #0f0f1a;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.tcb-submit-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.tcb-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.tcb-friend-ready {
+  text-align: center;
+  color: #4ade80;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+}
+
+.tcb-wait-msg {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.82rem;
+  margin: 0.5rem 0 0;
+}
+
+/* ── Badge fantôme dans la catégorie ────────────────────────────── */
+.tcb-phantom-badge {
+  position: relative;
+  cursor: pointer;
+}
+
+.tcb-phantom-badge canvas {
+  display: block;
+  border-radius: 50%;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.tcb-phantom-badge:hover canvas { opacity: 1; transform: scale(1.06); }
+
+.tcb-phantom-label {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  color: #f5c842;
+  white-space: nowrap;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ── Animation overlay ──────────────────────────────────────────── */
+.tcb-anim-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tcb-anim-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.tcb-anim-text {
+  position: relative;
+  z-index: 2;
+  color: #f5c842;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  text-align: center;
+  max-width: 600px;
+  padding: 0 1.5rem;
+  font-style: italic;
+  letter-spacing: 0.5px;
+  line-height: 1.6;
+  text-shadow: 0 0 20px #f5c84288;
+  transition: opacity 0.8s;
+}
+
+.tcb-anim-badge {
+  position: absolute;
+  z-index: 3;
+  border-radius: 50%;
+  transform: scale(0.3);
+  box-shadow: 0 0 60px #f5c84266;
+}
+
+/* ── Badge button in profile viewer ────────────────────────────── */
+.vb-badge-btn {
+  background: linear-gradient(135deg, #f5c842, #e8a000);
+  color: #0f0f1a;
+  font-weight: bold;
+}
+.vb-badge-btn:hover { opacity: 0.9; }
+
+@media (max-width: 480px) {
+  .tcb-modal { padding: 1rem; }
+  .tcb-controls { grid-template-columns: 1fr; }
+  .tcb-label { margin-top: 0.25rem; }
+}
