@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { badgesList, BADGE_CATEGORIES, eventCodes, isEventCodeValid, getBadgeById } from "./badgesData.js";
+import { renderConfidantBadgeCanvas, openBadgeEditor } from '../../js/true-confidant-badge.js';
 
 // ───────────────────────────────────────────────────────────────────────────
 // 🔧 CONSTANTES
@@ -77,11 +78,12 @@ function getBadgeCondition(badge, isUnlocked) {
 
 // Labels des catégories (traduits dynamiquement)
 const CATEGORY_LABELS = {
-  [BADGE_CATEGORIES.ACHIEVEMENT]: { icon: '🏆', key: 'badges.category_achievement', fallback: 'Achievements' },
-  [BADGE_CATEGORIES.STREAK]:      { icon: '🔥', key: 'badges.category_streak',      fallback: 'Streaks'      },
-  [BADGE_CATEGORIES.EVENT]:       { icon: '🎟️', key: 'badges.category_event',       fallback: 'Events'       },
-  [BADGE_CATEGORIES.SECRET]:      { icon: '🔒', key: 'badges.category_secret',      fallback: 'Secrets'      },
-  [BADGE_CATEGORIES.SOCIAL]:      { icon: '👥', key: 'badges.category_social',      fallback: 'Social'       },
+  [BADGE_CATEGORIES.ACHIEVEMENT]:    { icon: '🏆', key: 'badges.category_achievement',   fallback: 'Achievements'   },
+  [BADGE_CATEGORIES.STREAK]:         { icon: '🔥', key: 'badges.category_streak',         fallback: 'Streaks'        },
+  [BADGE_CATEGORIES.EVENT]:          { icon: '🎟️', key: 'badges.category_event',          fallback: 'Events'         },
+  [BADGE_CATEGORIES.SECRET]:         { icon: '🔒', key: 'badges.category_secret',         fallback: 'Secrets'        },
+  [BADGE_CATEGORIES.SOCIAL]:         { icon: '👥', key: 'badges.category_social',         fallback: 'Social'         },
+  [BADGE_CATEGORIES.TRUE_CONFIDANT]: { icon: '⛓',  key: 'badges.true_confidant_category', fallback: 'True Confidant' },
 };
 
 function getCategoryLabel(category) {
@@ -634,6 +636,7 @@ export function renderBadgesModal(profile, saveProfile) {
     BADGE_CATEGORIES.EVENT,
     BADGE_CATEGORIES.SOCIAL,
     BADGE_CATEGORIES.SECRET,
+    BADGE_CATEGORIES.TRUE_CONFIDANT,
   ];
 
   const grouped = {};
@@ -701,7 +704,28 @@ export function renderBadgesModal(profile, saveProfile) {
     `;
   });
 
+  // Ajouter la section True Confidant (toujours présente, chargée async)
+  html += `
+    <div class="badges-category-section" data-category="${BADGE_CATEGORIES.TRUE_CONFIDANT}">
+      <button class="badges-category-header" aria-expanded="true">
+        <span class="badges-category-title">${getCategoryLabel(BADGE_CATEGORIES.TRUE_CONFIDANT)}</span>
+        <span class="badges-category-right">
+          <span class="badges-category-count">0/0</span>
+          <span class="badges-category-chevron" aria-hidden="true">▼</span>
+        </span>
+      </button>
+      <div class="badges-grid-wrap">
+        <div class="badges-grid"></div>
+      </div>
+    </div>
+  `;
+
   grid.innerHTML = html;
+
+  // Charger les badges True Confidant (async, après le rendu initial)
+  if (window._currentUser && window._personadleApi) {
+    _loadConfidantBadges(grid, profile);
+  }
 
   // Mettre à jour le compteur
   updateBadgeCounter(profile, counter);
@@ -1219,6 +1243,80 @@ export function checkBadgesAfterGame() {
   if (!p.badges) p.badges = [];
   const save = () => localStorage.setItem('personaUserProfile', JSON.stringify(p));
   checkAndUnlockBadges(p, save);
+}
+
+async function _loadConfidantBadges(grid, profile) {
+  const section = grid.querySelector(`[data-category="${BADGE_CATEGORIES.TRUE_CONFIDANT}"]`);
+  if (!section) return;
+  const badgesGrid = section.querySelector('.badges-grid');
+  if (!badgesGrid) return;
+
+  try {
+    const api         = window._personadleApi;
+    const friendsData = await api.friends.list();
+    const friends     = friendsData.friends ?? [];
+
+    for (const friend of friends) {
+      const status = await api.socialLink.getBadgeStatus(friend.user_id).catch(() => null);
+      if (!status || status.status === 'none') continue;
+
+      const wrap     = document.createElement('div');
+      wrap.className = 'badge-item tcb-phantom-badge';
+      const canvas   = document.createElement('canvas');
+      canvas.width   = 80;
+      canvas.height  = 80;
+      wrap.appendChild(canvas);
+
+      const label     = document.createElement('span');
+      label.className = 'tcb-phantom-label';
+
+      if (status.status === 'complete' && status.badge_data) {
+        const bd = status.badge_data;
+        const leftCfg  = { avatar_data: bd.is_user_a ? bd.user_a_avatar : bd.user_b_avatar, crop_x: 0, crop_y: 0, crop_scale: 1, ring_color: '#f5c842', overlay: 'none' };
+        const rightCfg = { avatar_data: bd.is_user_a ? bd.user_b_avatar : bd.user_a_avatar, crop_x: 0, crop_y: 0, crop_scale: 1, ring_color: '#f5c842', overlay: 'none' };
+        renderConfidantBadgeCanvas(canvas, leftCfg, rightCfg, false);
+        label.textContent = friend.pseudo;
+        wrap.title = `True Confidant — ${friend.pseudo}`;
+      } else {
+        const meIsLeft   = window._currentUser?.id < friend.user_id;
+        const yourConfig = status.your_config ? { ...status.your_config, avatar_data: profile.avatar_data || null } : null;
+        const friendCfg  = status.friend_submitted ? { avatar_data: friend.avatar_data || null, crop_x: 0, crop_y: 0, crop_scale: 1, ring_color: '#888', overlay: 'none' } : null;
+
+        renderConfidantBadgeCanvas(
+          canvas,
+          meIsLeft ? yourConfig : friendCfg,
+          meIsLeft ? friendCfg  : yourConfig,
+          !status.friend_submitted
+        );
+        label.textContent = `⌛ ${friend.pseudo}`;
+        wrap.title = `Waiting for ${friend.pseudo}`;
+
+        wrap.addEventListener('click', () => {
+          openBadgeEditor(
+            friend.user_id,
+            friend.pseudo,
+            friend.avatar_data || null,
+            meIsLeft ? 'left' : 'right',
+            status.your_config,
+            status.friend_submitted
+          );
+        });
+      }
+
+      wrap.appendChild(label);
+      badgesGrid.appendChild(wrap);
+    }
+
+    // Mettre à jour le compteur de la catégorie
+    const countEl = section.querySelector('.badges-category-count');
+    if (countEl) {
+      const total    = badgesGrid.querySelectorAll('.badge-item').length;
+      const unlocked = badgesGrid.querySelectorAll('.badge-item:not(.tcb-phantom-badge)').length;
+      countEl.textContent = `${unlocked}/${total}`;
+    }
+  } catch {
+    // Silencieux — offline ou non connecté
+  }
 }
 
 // Unlock reborn_phoenix when streak-recovery fires, regardless of which page is loaded

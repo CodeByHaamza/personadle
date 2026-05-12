@@ -285,6 +285,9 @@ function buildViewingBanner(pseudo, friendCode, friendshipStatus) {
         <button id="vbCompareBtn" class="vb-friend-btn vb-compare-btn" data-fid="">
           ${t('compare.btn', '⚖ Compare Stats')}
         </button>
+        <button id="vbBadgeBtn" class="vb-friend-btn vb-badge-btn" data-fid="" data-pseudo="" style="display:none">
+          ${t('badges.true_confidant_create_btn') || '✨ Create our badge'}
+        </button>
       `;
     } else if (friendshipStatus === 'pending_sent') {
       friendBtn = `<span class="vb-friend-status vb-friend-status--pending">${t('friends.request_sent') || 'Request sent'}</span>`;
@@ -352,6 +355,33 @@ function attachBannerActions(friendCode) {
         window._openCompareOverlay(friendId);
       }
     });
+  }
+
+  const badgeBtn = document.getElementById('vbBadgeBtn');
+  if (badgeBtn && window._currentUser && window._personadleApi) {
+    const viewedUserId = parseInt(badgeBtn.dataset.fid || '0', 10);
+    if (viewedUserId > 0) {
+      window._personadleApi.socialLink.getBadgeStatus(viewedUserId)
+        .then(status => {
+          if (!status || status.status === 'none') return;
+          badgeBtn.style.display = '';
+          badgeBtn.addEventListener('click', () => {
+            const me       = window._currentUser;
+            const meIsLeft = me.id < viewedUserId;
+            if (window._openConfidantBadgeEditor) {
+              window._openConfidantBadgeEditor(
+                viewedUserId,
+                badgeBtn.dataset.pseudo || '?',
+                null,
+                meIsLeft ? 'left' : 'right',
+                status.your_config,
+                status.friend_submitted
+              );
+            }
+          });
+        })
+        .catch(() => {});
+    }
   }
 }
 
@@ -433,7 +463,7 @@ function renderViewBadges(profile, unlockedBadges) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function populatePublicProfile(data) {
-  const { user, profile, stats, badges, equipped_title } = data;
+  const { user, profile, stats, badges, equipped_title, unlocked_wallpapers = [] } = data;
   const byMode = stats.by_mode ?? [];
 
   // ── Agrégats calculés côté client (manquants dans l'API) ──
@@ -463,12 +493,20 @@ function populatePublicProfile(data) {
 
   // ── Titre équipé — calling card image ──
   if (equipped_title) {
-    const slug = equipped_title.slug || _titleNameToSlug(equipped_title.name);
-    if (slug) {
-      const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-      const titleImg = document.getElementById('equippedTitleImg');
-      if (titleImg) {
-        titleImg.src   = `${_prefix}/profile/titles/${slug}.webp`;
+    const _prefix  = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+    const titleImg = document.getElementById('equippedTitleImg');
+    if (titleImg) {
+      let src = null;
+      if (equipped_title.image_path) {
+        // image_path in DB: "profile/titles/velvet_room_thou_art_i.webp"
+        src = `${_prefix}/${equipped_title.image_path}`;
+      } else {
+        // fallback: try name→slug map (old filenames), then DB slug
+        const slug = _titleNameToSlug(equipped_title.name) || equipped_title.slug;
+        if (slug) src = `${_prefix}/profile/titles/${slug}.webp`;
+      }
+      if (src) {
+        titleImg.src = src;
         titleImg.style.display = 'block';
       }
     }
@@ -477,7 +515,7 @@ function populatePublicProfile(data) {
   // ── Wallpapers débloquables — état vide si le joueur n'en a pas ──
   const wpGrid = document.getElementById('unlockableWallpaperGrid');
   if (wpGrid) {
-    const unlockedWps = profile.unlocked_wallpapers ?? [];
+    const unlockedWps = unlocked_wallpapers;
     if (unlockedWps.length === 0) {
       wpGrid.innerHTML = `<p class="view-empty-state">🔒 Nothing to see here… yet.</p>`;
     } else {
@@ -734,6 +772,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const banner = buildViewingBanner(user.pseudo, user.friend_code, friendshipStatus);
   const compareBtn = banner.querySelector('#vbCompareBtn');
   if (compareBtn) compareBtn.dataset.fid = user.id;
+  const badgeBtnEl = banner.querySelector('#vbBadgeBtn');
+  if (badgeBtnEl) { badgeBtnEl.dataset.fid = user.id; badgeBtnEl.dataset.pseudo = user.pseudo; }
   header?.insertAdjacentElement('afterend', banner);
   attachBannerActions(user.friend_code);
 
@@ -752,7 +792,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     gainSocialLinkXp(user.id, 'visit_profile')
       .then(res => {
         if (res?.ranked_up) {
-          window._showSocialLinkRankUp?.(res.new_rank, null);
+          window._showSocialLinkRankUp?.(res.new_rank, null, {
+            friendAvatar: profile.avatar_data,
+            friendPseudo: user.pseudo,
+          });
         }
         // Refresh gauge so visit_profile shows as "Done today"
         if (res?.xp_gained > 0) {

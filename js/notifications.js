@@ -6,12 +6,18 @@
  */
 
 import { queueCallingCards }       from './calling-card.js';
+import { queueTvAnimations }        from './tv-friend-anim.js';
+import { queueEvokerAnimations }    from './p3-evoker-anim.js';
 import { showSenderChallengeResult } from './challenge-result.js';
 import { queueChallengeNotifs }      from './challenge-notif.js';
+import { showSocialLinkRankUp }      from './social-link.js';
+import { showConfidantAnimation, openBadgeEditor } from './true-confidant-badge.js';
 
 const SEEN_KEY              = 'ccShownFriendshipIds';
 const SEEN_CHALLENGE_KEY    = 'seenChallengeResults';
 const SEEN_CHALLENGE_NOTIF  = 'seenChallengeNotifIds';
+const SEEN_RANKUP_KEY       = 'seenSLRankUpIds';
+const SEEN_BADGE_PROMPT_KEY = 'seenBadgePromptIds';
 
 let _pollTimer = null;
 
@@ -63,11 +69,19 @@ async function _check() {
       const unseen = pending.filter(r => !_isSeenLocally(r.friendship_id));
       if (unseen.length > 0) {
         unseen.forEach(r => _markSeenLocally(r.friendship_id));
-        queueCallingCards(unseen.map(r => ({
+        const mapped = unseen.map(r => ({
           pseudo:        r.pseudo,
           friendship_id: r.friendship_id,
           avatar_data:   r.avatar_data ?? null,
-        })));
+        }));
+        const _style = _getAnimStyle();
+        if (_style === 'persona4_tv') {
+          queueTvAnimations(mapped);
+        } else if (_style === 'persona3_evoker') {
+          queueEvokerAnimations(mapped);
+        } else {
+          queueCallingCards(mapped);
+        }
       }
     }
 
@@ -81,6 +95,8 @@ async function _check() {
         await _checkPendingChallenges(allMsgs);
       }
     }
+
+    await _checkRankUpNotifs();
   } catch {
     // Offline ou non connecté — silencieux
   }
@@ -200,6 +216,16 @@ function _isAnimFriendRequestEnabled() {
   } catch { return true; }
 }
 
+/** Retourne 'calling_card' (défaut), 'persona4_tv' ou 'persona3_evoker'. */
+function _getAnimStyle() {
+  try {
+    const s = JSON.parse(localStorage.getItem('personaSettings') || '{}');
+    const v = s.anim_friend_request_style;
+    if (v === 'persona4_tv' || v === 'persona3_evoker') return v;
+    return 'calling_card';
+  } catch { return 'calling_card'; }
+}
+
 function _syncSettingsToLocal() {
   const settings = window._currentUser?.settings;
   if (settings && typeof settings === 'object') {
@@ -232,4 +258,100 @@ function _markSeenLocally(friendshipId) {
 /** Appelé quand l'utilisateur visite la page friends — reset les IDs vus. */
 function _clearSeenIds() {
   localStorage.removeItem(SEEN_KEY);
+}
+
+// ── Social Link rank-up notifications (partenaire) ─────────────────────────
+
+async function _checkRankUpNotifs() {
+  const me = window._currentUser;
+  if (!me?.id) return;
+  try {
+    const lang  = document.documentElement.lang || 'en';
+    const data  = await window._personadleApi.socialLink.getRankUpNotifs(lang);
+    const notifs = data.notifs ?? [];
+    if (!notifs.length) return;
+
+    const n = notifs[0];
+
+    if (n.is_badge_prompt) {
+      // Rang 10 → ouvrir l'éditeur de badge (une seule fois par partenaire)
+      const seenIds = _getSeenBadgePromptIds();
+      const key     = `${n.partner_id}`;
+      if (!seenIds.includes(key)) {
+        seenIds.push(key);
+        localStorage.setItem(SEEN_BADGE_PROMPT_KEY, JSON.stringify(seenIds.slice(-20)));
+        // Afficher d'abord l'animation rank-up, puis ouvrir l'éditeur
+        setTimeout(async () => {
+          showSocialLinkRankUp(n.new_rank, n.rank_names, {
+            friendAvatar: n.partner_avatar,
+            friendPseudo: n.partner_pseudo,
+          });
+          // Attendre la fin de l'animation rank-up (~8.5s) puis ouvrir l'éditeur
+          setTimeout(async () => {
+            const status = await window._personadleApi.socialLink
+              .getBadgeStatus(n.partner_id).catch(() => null);
+            if (!status || status.status === 'complete') return;
+            const meIsLeft = me.id < n.partner_id;
+            openBadgeEditor(
+              n.partner_id,
+              n.partner_pseudo,
+              n.partner_avatar || null,
+              meIsLeft ? 'left' : 'right',
+              status.your_config,
+              status.friend_submitted
+            );
+          }, 9000);
+        }, 800);
+      }
+    } else {
+      setTimeout(() => {
+        showSocialLinkRankUp(n.new_rank, n.rank_names, {
+          friendAvatar: n.partner_avatar,
+          friendPseudo: n.partner_pseudo,
+        });
+      }, 800);
+    }
+
+    // Vérifier si un badge est maintenant complet (les deux ont soumis)
+    await _checkBadgeCompletion();
+  } catch {
+    // Silencieux
+  }
+}
+
+function _getSeenBadgePromptIds() {
+  try { return JSON.parse(localStorage.getItem(SEEN_BADGE_PROMPT_KEY) || '[]'); }
+  catch { return []; }
+}
+
+async function _checkBadgeCompletion() {
+  const api = window._personadleApi;
+  if (!api) return;
+  try {
+    const friendsData = await api.friends.list();
+    const friends     = friendsData.friends ?? [];
+    for (const friend of friends) {
+      const status = await api.socialLink.getBadgeStatus(friend.user_id).catch(() => null);
+      if (!status || status.status !== 'complete') continue;
+      if (status.badge_data) continue; // déjà enregistré en BDD
+
+      // Les deux ont soumis mais le badge final n'est pas encore en BDD → déclencher l'animation
+      const seenKey = `tcb_anim_done_${friend.user_id}`;
+      if (localStorage.getItem(seenKey)) continue;
+      localStorage.setItem(seenKey, '1');
+
+      const me      = window._currentUser;
+      const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
+      showConfidantAnimation(
+        me?.pseudo || 'You',
+        friend.pseudo,
+        profile.avatar_data || null,
+        friend.avatar_data  || null,
+        async () => { await api.socialLink.saveBadgeFinal(friend.user_id).catch(() => {}); }
+      );
+      return; // une animation à la fois
+    }
+  } catch {
+    // Silencieux
+  }
 }

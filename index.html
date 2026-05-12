@@ -60,6 +60,7 @@
     <link rel="stylesheet" href="./css/tv-friend-anim.css">
     <link rel="stylesheet" href="./css/p3-evoker-anim.css">
     <link rel="stylesheet" href="./css/divine-gift.css">
+    <link rel="stylesheet" href="./css/true-confidant-badge.css">
     <link rel="stylesheet" href="./profile/badges/badges.css">
     <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
     
@@ -481,7 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <style>
 /* === 🎨 CHIBI DECORATIONS (dans .news-modal-bar) === */
 .chibi-deco {
-  width: 105px;
+  width: 130px;
   height: auto;
   pointer-events: none;
   flex-shrink: 0;
@@ -737,7 +738,7 @@ background: rgba(0,0,0,0.7);
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px;
+  padding: 6px 20px;
   border-bottom: 1px solid #ddd;
   flex-shrink: 0;
   border-radius: 12px 12px 0 0;
@@ -1054,7 +1055,7 @@ const closeNews = document.getElementById("closeNews");
 
 newsBtn.onclick = () => newsModal.style.display = "block";
 closeNews.onclick = () => newsModal.style.display = "none";
-window.onclick = (e) => { if (e.target === newsModal) newsModal.style.display = "none"; };
+window.addEventListener('click', (e) => { if (e.target === newsModal) newsModal.style.display = "none"; });
 
 // Gérer l'accordion des versions
 document.querySelectorAll('.version-header').forEach(header => {
@@ -1068,34 +1069,61 @@ document.querySelectorAll('.version-header').forEach(header => {
 
 
 <!-- 🕛 Daily Reset Button + Modal -->
-<button id="dailyInfoBtn" class="daily-btn">🕛 Daily Reset Info</button>
+<button id="dailyInfoBtn" class="daily-btn" data-i18n="index.daily_btn">🕛 Daily Reset</button>
 
 <div id="dailyModal" class="daily-modal" style="display: none;">
 <div class="daily-modal-content">
+  <h2 class="daily-title" data-i18n="index.daily_title">🕛 Daily Reset</h2>
   <span id="closeDaily" class="close">&times;</span>
-  <h2>🕛 Daily Reset</h2>
-  <p>
-    Each day at midnight (Paris time), a new challenge is available in each mode.<br>
-    Your progress resets, and you can try again with a brand-new Persona, song, or challenge!
-  </p>
-  <p class="countdown-text">Next reset in: <span id="dailyCountdown">--:--:--:--</span></p>
+
+  <div class="daily-top-bar">
+    <div class="daily-chibi-wrap">
+      <div class="daily-zzzs" aria-hidden="true">
+        <span>z</span>
+        <span>Z</span>
+        <span>Z</span>
+      </div>
+      <img src="./img/Chibi_Damien.webp" alt="Chibi Damien" class="daily-chibi">
+    </div>
+    <p class="daily-subtitle" data-i18n="index.daily_subtitle">New challenges every day at midnight (Paris time)</p>
+  </div>
+
+  <p class="daily-desc" data-i18n="index.daily_desc">Each of the 6 modes resets with a brand-new target. Streaks, stats &amp; progress carry over!</p>
+
+  <div class="daily-countdown-wrap">
+    <p class="countdown-label" data-i18n="index.daily_countdown_label">Next reset in</p>
+    <div class="countdown-display">
+      <div class="countdown-unit">
+        <span id="cntH">--</span>
+        <small data-i18n="index.daily_hours">hours</small>
+      </div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit">
+        <span id="cntM">--</span>
+        <small data-i18n="index.daily_min">min</small>
+      </div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit">
+        <span id="cntS">--</span>
+        <small data-i18n="index.daily_sec">sec</small>
+      </div>
+    </div>
+  </div>
 </div>
 </div>
 
 <!-- =====================================================
      16. SCRIPT — Countdown Daily Reset
-     Calcule le temps restant avant minuit (Paris/Europe)
-     en temps réel via requestAnimationFrame (rafraîch. 60fps).
+     Calcule le temps restant avant minuit (Paris/Europe).
      ===================================================== -->
 <script>
 const dailyModal = document.getElementById("dailyModal");
 const dailyBtn = document.getElementById("dailyInfoBtn");
 const closeDaily = document.getElementById("closeDaily");
-const countdownEl = document.getElementById("dailyCountdown");
 
 dailyBtn.onclick = () => dailyModal.style.display = "block";
 closeDaily.onclick = () => dailyModal.style.display = "none";
-window.onclick = (e) => { if (e.target === dailyModal) dailyModal.style.display = "none"; };
+window.addEventListener('click', (e) => { if (e.target === dailyModal) dailyModal.style.display = "none"; });
 
 function updateCountdown() {
   const now = new Date();
@@ -1104,13 +1132,10 @@ function updateCountdown() {
   nextMidnight.setHours(24, 0, 0, 0);
   const diff = nextMidnight - parisTime;
 
-  const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
-  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-  const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-  const ms = String(Math.floor((diff % 1000) / 10)).padStart(2, '0');
-
-  countdownEl.textContent = `${h}:${m}:${s}:${ms}`;
-  requestAnimationFrame(updateCountdown);
+  document.getElementById("cntH").textContent = String(Math.floor(diff / 3600000)).padStart(2, '0');
+  document.getElementById("cntM").textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+  document.getElementById("cntS").textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+  setTimeout(updateCountdown, 1000);
 }
 updateCountdown();
 

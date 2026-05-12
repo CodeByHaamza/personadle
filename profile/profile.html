@@ -50,6 +50,7 @@
   <link rel="stylesheet" href="../css/divine-gift.css">
   <link rel="stylesheet" href="../css/social-link.css">
   <link rel="stylesheet" href="../css/stats-compare.css">
+  <link rel="stylesheet" href="../css/true-confidant-badge.css">
   <link rel="stylesheet" href="../css/wallpaper-notification.css">
   <link rel="stylesheet" href="./profile-page.css?v=4">
   <link rel="stylesheet" href="./badges/badges.css?v=4">
@@ -741,6 +742,10 @@ initBottomNav();
         <label for="registerPasswordConfirm" data-i18n="auth.password_confirm">Confirm password</label>
         <input type="password" id="registerPasswordConfirm" autocomplete="new-password"
                required data-i18n-placeholder="auth.password_confirm">
+      </div>
+      <div class="auth-field auth-field--import">
+        <label for="registerImportJson" data-i18n="auth.import_json">Import my existing profile (JSON)</label>
+        <input type="file" id="registerImportJson" accept=".json" class="auth-import-input">
       </div>
       <p id="registerError" class="auth-error hidden"></p>
       <button type="submit" class="btn-p5 btn-auth-submit">
