@@ -1271,13 +1271,20 @@ async function _loadConfidantBadges(grid, profile) {
       label.className = 'tcb-phantom-label';
 
       if (status.status === 'complete' && status.badge_data) {
+        // Badge entièrement généré — afficher le rendu final
         const bd = status.badge_data;
         const leftCfg  = { avatar_data: bd.is_user_a ? bd.user_a_avatar : bd.user_b_avatar, crop_x: 0, crop_y: 0, crop_scale: 1, ring_color: '#f5c842', overlay: 'none' };
         const rightCfg = { avatar_data: bd.is_user_a ? bd.user_b_avatar : bd.user_a_avatar, crop_x: 0, crop_y: 0, crop_scale: 1, ring_color: '#f5c842', overlay: 'none' };
         renderConfidantBadgeCanvas(canvas, leftCfg, rightCfg, false);
         label.textContent = friend.pseudo;
         wrap.title = `True Confidant — ${friend.pseudo}`;
+      } else if (status.status === 'complete') {
+        // badge_generated=1 mais badge_data pas encore en BDD (saveBadgeFinal en cours)
+        renderConfidantBadgeCanvas(canvas, null, null, false);
+        label.textContent = `✨ ${friend.pseudo}`;
+        wrap.title = `True Confidant generating… — ${friend.pseudo}`;
       } else {
+        // En attente — un des deux n'a pas encore soumis sa config
         const meIsLeft   = window._currentUser?.id < friend.user_id;
         const yourConfig = status.your_config ? { ...status.your_config, avatar_data: profile.avatar_data || null } : null;
         const friendCfg  = status.friend_submitted ? { avatar_data: friend.avatar_data || null, crop_x: 0, crop_y: 0, crop_scale: 1, ring_color: '#888', overlay: 'none' } : null;

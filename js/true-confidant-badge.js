@@ -389,6 +389,21 @@ async function _handleSubmit(modal) {
       }
     }
   } catch (err) {
+    // 409 = badge déjà généré (l'ami a soumis entre-temps) → traiter comme both_submitted
+    if (err.status === 409 || err.message?.includes('already generated')) {
+      _closeEditor();
+      const me      = window._currentUser;
+      const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
+      const api     = window._personadleApi;
+      showConfidantAnimation(
+        me?.pseudo || 'You',
+        _editorState?.friendPseudo || '',
+        profile.avatar_data || null,
+        _editorState?.friendAvatar || null,
+        async () => { await api?.socialLink.saveBadgeFinal(_editorState?.friendId).catch(() => {}); }
+      );
+      return;
+    }
     btn.disabled    = false;
     btn.textContent = _t('social_link.true_confidant_submit_btn', {}, 'Validate my half');
     alert(err.message || 'Error saving badge config.');
