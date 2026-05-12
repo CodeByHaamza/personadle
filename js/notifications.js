@@ -17,7 +17,9 @@ const SEEN_KEY              = 'ccShownFriendshipIds';
 const SEEN_CHALLENGE_KEY    = 'seenChallengeResults';
 const SEEN_CHALLENGE_NOTIF  = 'seenChallengeNotifIds';
 const SEEN_RANKUP_KEY       = 'seenSLRankUpIds';
-const SEEN_BADGE_PROMPT_KEY = 'seenBadgePromptIds';
+// Set en mémoire (session uniquement) : évite de rejouer l'anim deux fois dans la même session
+// sans bloquer les sessions suivantes (la notif est consommée côté API de toute façon)
+const _seenBadgePromptIds = new Set();
 
 let _pollTimer = null;
 
@@ -274,12 +276,10 @@ async function _checkRankUpNotifs() {
     const n = notifs[0];
 
     if (n.is_badge_prompt) {
-      // Rang 10 → ouvrir l'éditeur de badge (une seule fois par partenaire)
-      const seenIds = _getSeenBadgePromptIds();
-      const key     = `${n.partner_id}`;
-      if (!seenIds.includes(key)) {
-        seenIds.push(key);
-        localStorage.setItem(SEEN_BADGE_PROMPT_KEY, JSON.stringify(seenIds.slice(-20)));
+      // Rang 10 → ouvrir l'éditeur de badge (une seule fois par session, notif déjà consommée côté API)
+      const key = `${n.partner_id}`;
+      if (!_seenBadgePromptIds.has(key)) {
+        _seenBadgePromptIds.add(key);
         // Afficher d'abord l'animation rank-up, puis ouvrir l'éditeur
         setTimeout(async () => {
           showSocialLinkRankUp(n.new_rank, n.rank_names, {
@@ -319,10 +319,6 @@ async function _checkRankUpNotifs() {
   }
 }
 
-function _getSeenBadgePromptIds() {
-  try { return JSON.parse(localStorage.getItem(SEEN_BADGE_PROMPT_KEY) || '[]'); }
-  catch { return []; }
-}
 
 async function _checkBadgeCompletion() {
   const api = window._personadleApi;

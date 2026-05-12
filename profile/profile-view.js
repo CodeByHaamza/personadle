@@ -286,7 +286,7 @@ function buildViewingBanner(pseudo, friendCode, friendshipStatus) {
           ${t('compare.btn', '⚖ Compare Stats')}
         </button>
         <button id="vbBadgeBtn" class="vb-friend-btn vb-badge-btn" data-fid="" data-pseudo="" style="display:none">
-          ${t('badges.true_confidant_create_btn') || '✨ Create our badge'}
+          ${t('social_link.true_confidant_create_btn') || '✨ Create our badge'}
         </button>
       `;
     } else if (friendshipStatus === 'pending_sent') {

@@ -208,37 +208,37 @@ function _buildEditorHTML(friendPseudo, yourSide, existingConfig, friendSubmitte
   return `
   <div class="tcb-modal">
     <button class="tcb-close" aria-label="close">✕</button>
-    <h2 class="tcb-title">${_t('badges.true_confidant_editor_title', {}, 'True Confidant Badge')}</h2>
-    <p class="tcb-subtitle">${_t('badges.true_confidant_editor_subtitle', { pseudo: friendPseudo }, '')}</p>
+    <h2 class="tcb-title">${_t('social_link.true_confidant_editor_title', {}, 'True Confidant Badge')}</h2>
+    <p class="tcb-subtitle">${_t('social_link.true_confidant_editor_subtitle', { pseudo: friendPseudo }, '')}</p>
 
     <div class="tcb-preview-wrap">
       <canvas id="tcb-canvas" width="${SIZE}" height="${SIZE}" class="tcb-canvas"></canvas>
-      <p class="tcb-preview-hint">↔ ${_t('badges.true_confidant_your_half', {}, 'Your half')}</p>
+      <p class="tcb-preview-hint">↔ ${_t('social_link.true_confidant_your_half', {}, 'Your half')}</p>
     </div>
 
     <div class="tcb-controls">
-      <label class="tcb-label">${_t('badges.true_confidant_avatar_label', {}, 'Avatar')}</label>
+      <label class="tcb-label">${_t('social_link.true_confidant_avatar_label', {}, 'Avatar')}</label>
       <div class="tcb-avatar-list" id="tcb-avatar-list"></div>
 
-      <label class="tcb-label">${_t('badges.true_confidant_zoom_label', {}, 'Zoom')}</label>
+      <label class="tcb-label">${_t('social_link.true_confidant_zoom_label', {}, 'Zoom')}</label>
       <input type="range" id="tcb-zoom" class="tcb-range" min="0.3" max="3" step="0.05" value="${_editorState.config.crop_scale}">
 
-      <label class="tcb-label">${_t('badges.true_confidant_ring_label', {}, 'Ring color')}</label>
+      <label class="tcb-label">${_t('social_link.true_confidant_ring_label', {}, 'Ring color')}</label>
       <input type="color" id="tcb-ring" class="tcb-color" value="${_editorState.config.ring_color}">
 
-      <label class="tcb-label">${_t('badges.true_confidant_bg_label', {}, 'Background')}</label>
+      <label class="tcb-label">${_t('social_link.true_confidant_bg_label', {}, 'Background')}</label>
       <input type="color" id="tcb-bg" class="tcb-color" value="${_editorState.config.bg_color || '#1a1a2e'}">
 
-      <label class="tcb-label">${_t('badges.true_confidant_overlay_label', {}, 'Effect')}</label>
+      <label class="tcb-label">${_t('social_link.true_confidant_overlay_label', {}, 'Effect')}</label>
       <select id="tcb-overlay" class="tcb-select">
-        <option value="none"   ${_editorState.config.overlay === 'none'   ? 'selected' : ''}>${_t('badges.true_confidant_overlay_none',   {}, 'None')}</option>
-        <option value="glow"   ${_editorState.config.overlay === 'glow'   ? 'selected' : ''}>${_t('badges.true_confidant_overlay_glow',   {}, 'Glow')}</option>
-        <option value="shadow" ${_editorState.config.overlay === 'shadow' ? 'selected' : ''}>${_t('badges.true_confidant_overlay_shadow', {}, 'Shadow')}</option>
+        <option value="none"   ${_editorState.config.overlay === 'none'   ? 'selected' : ''}>${_t('social_link.true_confidant_overlay_none',   {}, 'None')}</option>
+        <option value="glow"   ${_editorState.config.overlay === 'glow'   ? 'selected' : ''}>${_t('social_link.true_confidant_overlay_glow',   {}, 'Glow')}</option>
+        <option value="shadow" ${_editorState.config.overlay === 'shadow' ? 'selected' : ''}>${_t('social_link.true_confidant_overlay_shadow', {}, 'Shadow')}</option>
       </select>
     </div>
 
     <button id="tcb-submit" class="tcb-submit-btn">
-      ${_t('badges.true_confidant_submit_btn', {}, 'Validate my half')}
+      ${_t('social_link.true_confidant_submit_btn', {}, 'Validate my half')}
     </button>
     ${friendSubmitted ? `<p class="tcb-friend-ready">✓ ${friendPseudo} is ready!</p>` : ''}
   </div>`;
@@ -367,7 +367,7 @@ async function _handleSubmit(modal) {
   if (!s.config.avatar_data) { alert('Please select an avatar first.'); return; }
 
   if (s.alreadySubmitted) {
-    const msg = _t('badges.true_confidant_modify_confirm', { pseudo: s.friendPseudo }, `Modify will re-notify ${s.friendPseudo}. Continue?`);
+    const msg = _t('social_link.true_confidant_modify_confirm', { pseudo: s.friendPseudo }, `Modify will re-notify ${s.friendPseudo}. Continue?`);
     if (!confirm(msg)) return;
   }
 
@@ -393,19 +393,19 @@ async function _handleSubmit(modal) {
       );
     } else {
       btn.disabled    = false;
-      btn.textContent = _t('badges.true_confidant_submit_btn', {}, 'Validate my half');
+      btn.textContent = _t('social_link.true_confidant_submit_btn', {}, 'Validate my half');
       s.alreadySubmitted = true;
       const existing = modal.querySelector('.tcb-wait-msg');
       if (!existing) {
         const msg = document.createElement('p');
         msg.className   = 'tcb-wait-msg';
-        msg.textContent = _t('badges.true_confidant_waiting', { pseudo: s.friendPseudo }, `Waiting for ${s.friendPseudo}…`);
+        msg.textContent = _t('social_link.true_confidant_waiting', { pseudo: s.friendPseudo }, `Waiting for ${s.friendPseudo}…`);
         btn.insertAdjacentElement('afterend', msg);
       }
     }
   } catch (err) {
     btn.disabled    = false;
-    btn.textContent = _t('badges.true_confidant_submit_btn', {}, 'Validate my half');
+    btn.textContent = _t('social_link.true_confidant_submit_btn', {}, 'Validate my half');
     alert(err.message || 'Error saving badge config.');
   }
 }
@@ -440,7 +440,7 @@ export function showConfidantAnimation(pseudoA, pseudoB, avatarA, avatarB, onCom
   animCanvas.width  = window.innerWidth;
   animCanvas.height = window.innerHeight;
 
-  const fullMsg = _t('badges.true_confidant_anim_text', { a: pseudoA, b: pseudoB },
+  const fullMsg = _t('social_link.true_confidant_anim_text', { a: pseudoA, b: pseudoB },
     `An unbreakable bond has been forged between ${pseudoA} and ${pseudoB}.`);
 
   // Phase 1 : typewriter (0–3s)
