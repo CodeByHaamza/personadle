@@ -2,7 +2,7 @@
 /**
  * GET    /api/admin/social-links         → liste paginée de tous les social links
  * GET    /api/admin/social-links/:id     → détail d'un social link
- * PATCH  /api/admin/social-links/:id     → modifier xp, rank, badge_generated
+ * PATCH  /api/admin/social-links/:id     → modifier xp, rank
  * DELETE /api/admin/social-links/:id     → supprimer un social link (cascade)
  *
  * Accès : admin uniquement (requireAdmin()).
@@ -60,7 +60,7 @@ if ($method === 'GET' && $linkId === 0) {
 
     $listStmt = $pdo->prepare(
         "SELECT sl.id, sl.user_a_id, sl.user_b_id, sl.`rank`, sl.xp,
-                sl.badge_generated, sl.last_interaction_at,
+                sl.last_interaction_at,
                 ua.pseudo AS pseudo_a,
                 ub.pseudo AS pseudo_b,
                 (SELECT COUNT(*) FROM social_link_interactions sli WHERE sli.social_link_id = sl.id) AS interaction_count
@@ -86,7 +86,6 @@ if ($method === 'GET' && $linkId === 0) {
             'pseudo_b'            =>        $sl['pseudo_b'],
             'rank'                => (int)  $sl['rank'],
             'xp'                  => (int)  $sl['xp'],
-            'badge_generated'     => (bool) $sl['badge_generated'],
             'last_interaction_at' =>        $sl['last_interaction_at'],
             'interaction_count'   => (int)  $sl['interaction_count'],
         ], $rows),
@@ -99,7 +98,7 @@ if ($linkId <= 0) jsonError('Invalid social link id', 400);
 // Charger le social link
 $stmt = $pdo->prepare(
     'SELECT sl.id, sl.user_a_id, sl.user_b_id, sl.`rank`, sl.xp,
-            sl.badge_generated, sl.last_interaction_at,
+            sl.last_interaction_at,
             ua.pseudo AS pseudo_a,
             ub.pseudo AS pseudo_b,
             (SELECT COUNT(*) FROM social_link_interactions sli WHERE sli.social_link_id = sl.id) AS interaction_count
@@ -135,7 +134,6 @@ if ($method === 'GET') {
         'pseudo_b'            =>        $link['pseudo_b'],
         'rank'                => (int)  $link['rank'],
         'xp'                  => (int)  $link['xp'],
-        'badge_generated'     => (bool) $link['badge_generated'],
         'last_interaction_at' =>        $link['last_interaction_at'],
         'interaction_count'   => (int)  $link['interaction_count'],
         'badge_configs'       => array_map(fn($c) => [
@@ -149,8 +147,8 @@ if ($method === 'GET') {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PATCH /api/admin/social-links/:id — modifier xp, rank, badge_generated
-// Body : { "xp": 500, "rank": 5, "badge_generated": false }
+// PATCH /api/admin/social-links/:id — modifier xp, rank
+// Body : { "xp": 500, "rank": 5 }
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($method === 'PATCH') {
     $data   = getJsonBody();
@@ -171,17 +169,7 @@ if ($method === 'PATCH') {
         $params[] = $rank;
     }
 
-    if (array_key_exists('badge_generated', $data)) {
-        $fields[] = 'badge_generated = ?';
-        $params[] = $data['badge_generated'] ? 1 : 0;
-        // Si reset du badge → supprimer aussi les configs et le badge final
-        if (!$data['badge_generated']) {
-            $pdo->prepare('DELETE FROM social_link_badge_configs WHERE social_link_id = ?')->execute([$linkId]);
-            $pdo->prepare('DELETE FROM social_link_badges WHERE social_link_id = ?')->execute([$linkId]);
-        }
-    }
-
-    if (empty($fields)) jsonError('No valid fields provided (xp, rank, badge_generated)', 400);
+    if (empty($fields)) jsonError('No valid fields provided (xp, rank)', 400);
 
     $params[] = $linkId;
     $pdo->prepare('UPDATE social_links SET ' . implode(', ', $fields) . ' WHERE id = ?')

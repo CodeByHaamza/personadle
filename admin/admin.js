@@ -124,6 +124,14 @@ function setupEvents() {
   });
 
   document.getElementById('pending-fab').onclick = applyPendingGifts;
+
+  // Event Codes panel
+  document.getElementById('btn-codes').onclick = () => {
+    document.getElementById('empty-state').classList.add('hidden');
+    document.getElementById('user-detail').classList.add('hidden');
+    document.getElementById('codes-panel').classList.remove('hidden');
+    renderEventCodes();
+  };
 }
 
 // ── Users List ─────────────────────────────────────────────────────────────
@@ -205,6 +213,7 @@ async function openUserDetail(userId) {
   if (window.innerWidth <= 768) closeAside();
 
   document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('codes-panel').classList.add('hidden');
   document.getElementById('user-detail').classList.remove('hidden');
 
   document.getElementById('user-detail-content').innerHTML =
@@ -312,6 +321,33 @@ function renderTabProfile(d) {
       </div>
     </div>
 
+    <div class="tab-section moderation-section">
+      <h3>🛡️ Modération</h3>
+      <div class="moderation-grid">
+        <div class="mod-item">
+          <div class="mod-item-label">
+            <span>🔒 Verrouiller le pseudo</span>
+            <small>L'utilisateur ne pourra plus changer son pseudo</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="mod-pseudo-locked" ${u.pseudo_locked ? 'checked' : ''}>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="mod-item mod-item--ban">
+          <div class="mod-item-label">
+            <span>🚫 Bannir le compte</span>
+            <small>Empêche toute connexion. La session active reste ouverte jusqu'au prochain chargement.</small>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="mod-is-banned" ${u.is_banned ? 'checked' : ''}>
+            <span class="toggle-slider toggle-slider--red"></span>
+          </label>
+        </div>
+      </div>
+      <button class="btn-secondary" id="save-mod-btn" style="margin-top:10px">💾 Appliquer modération</button>
+    </div>
+
     <div class="danger-zone">
       <div class="danger-zone-title">⚠️ Zone dangereuse</div>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">
@@ -374,6 +410,25 @@ function renderTabProfile(d) {
         const imgEl = row.querySelector('.user-row-avatar');
         if (imgEl) imgEl.outerHTML = '<div class="user-row-avatar-ph">👤</div>';
       }
+    }
+  };
+
+  // ── Moderation ────────────────────────────────────────────────────────────
+  document.getElementById('save-mod-btn').onclick = async () => {
+    const btn        = document.getElementById('save-mod-btn');
+    const isBanned   = document.getElementById('mod-is-banned').checked;
+    const pseudoLock = document.getElementById('mod-pseudo-locked').checked;
+    btn.disabled     = true; btn.textContent = '…';
+    const res = await api.patch(`/api/admin/users/${_selectedUser}`, {
+      is_banned:     isBanned,
+      pseudo_locked: pseudoLock,
+    });
+    btn.disabled = false; btn.textContent = '💾 Appliquer modération';
+    if (res.error) {
+      toast('❌ ' + res.error, 'error');
+    } else {
+      _userDetail.user = { ..._userDetail.user, ...res.user };
+      toast(isBanned ? '🚫 Compte banni' : (pseudoLock ? '🔒 Pseudo verrouillé' : '✅ Modération mise à jour'), isBanned ? 'error' : 'success');
     }
   };
 
@@ -762,7 +817,6 @@ function renderTabSocial(d) {
                   <th>Rang</th>
                   <th>XP</th>
                   <th>Interactions</th>
-                  <th>Badge TC</th>
                   <th>Dernier contact</th>
                   <th>Nouveau rang</th>
                   <th>Nouvel XP</th>
@@ -771,7 +825,7 @@ function renderTabSocial(d) {
               </thead>
               <tbody>
                 ${links.map(sl => `
-                  <tr data-slid="${sl.id}" data-badge="${sl.badge_generated ? '1' : '0'}">
+                  <tr data-slid="${sl.id}">
                     <td>
                       <strong style="font-size:13px">${escHtml(sl.pseudo)}</strong><br>
                       <span style="font-size:10px;color:var(--text-muted)">#${sl.other_user_id}</span>
@@ -782,13 +836,6 @@ function renderTabSocial(d) {
                     </td>
                     <td>${sl.xp.toLocaleString()}</td>
                     <td style="text-align:center">${sl.interaction_count}</td>
-                    <td style="text-align:center">
-                      ${sl.badge_generated
-                        ? '<span style="color:#f5c842;font-size:16px" title="Badge généré">⛓</span>'
-                        : sl.rank >= 10
-                          ? '<span style="color:#888;font-size:13px" title="En attente">⌛</span>'
-                          : '—'}
-                    </td>
                     <td style="font-size:11px;color:var(--text-muted)">
                       ${sl.last_interaction_at ? new Date(sl.last_interaction_at).toLocaleDateString('fr-FR') : '—'}
                     </td>
@@ -804,9 +851,6 @@ function renderTabSocial(d) {
                     <td>
                       <div style="display:flex;gap:4px;flex-wrap:wrap">
                         <button class="btn-secondary btn-small save-sl-btn">Save</button>
-                        ${sl.badge_generated
-                          ? '<button class="btn-secondary btn-small reset-badge-btn" title="Réinitialiser le badge TC" style="color:#f5c842">⛓ Reset</button>'
-                          : ''}
                         <button class="btn-secondary btn-small delete-sl-btn" style="color:#ef4444" title="Supprimer ce Social Link">✕</button>
                       </div>
                     </td>
@@ -835,25 +879,6 @@ function renderTabSocial(d) {
         toast('✅ Social Link mis à jour', 'success');
         const sl = _userDetail.social_links.find(s => String(s.id) === String(slId));
         if (sl) { sl.rank = rank; sl.xp = xp; }
-      }
-    };
-  });
-
-  // ── Reset badge True Confidant ────────────────────────────────────────────
-  document.querySelectorAll('.reset-badge-btn').forEach(btn => {
-    btn.onclick = async () => {
-      if (!confirm('Réinitialiser le badge True Confidant pour ce lien ?\nLes configs et le badge généré seront supprimés.')) return;
-      const slId = btn.closest('tr').dataset.slid;
-      btn.textContent = '…'; btn.disabled = true;
-      const res = await api.patch(`/api/admin/social-links/${slId}`, { badge_generated: false });
-      if (res.error) {
-        toast('❌ ' + res.error, 'error');
-        btn.disabled = false; btn.textContent = '⛓ Reset';
-      } else {
-        toast('✅ Badge TC réinitialisé', 'success');
-        const sl = _userDetail.social_links.find(s => String(s.id) === String(slId));
-        if (sl) sl.badge_generated = false;
-        renderTabSocial(_userDetail);
       }
     };
   });
@@ -969,6 +994,141 @@ function escHtml(str) {
 
 function getTypeLabel(type) {
   return { badge: 'Badge', wallpaper: 'Wallpaper', title: 'Titre', stats: 'Stats' }[type] || type;
+}
+
+// ── Event Codes ────────────────────────────────────────────────────────────
+async function renderEventCodes() {
+  const el = document.getElementById('codes-panel-content');
+  el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+
+  let codes = [];
+  try {
+    const res = await api.get('/api/admin/event_codes');
+    codes = Array.isArray(res) ? res : (res.data ?? []);
+  } catch (e) {
+    el.innerHTML = '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des codes.</div>';
+    return;
+  }
+
+  const now = new Date().toISOString().slice(0, 10);
+
+  const rows = codes.map(c => {
+    const active = c.is_active
+      ? (c.is_permanent || (c.start_date <= now && c.end_date >= now)
+          ? '<span class="code-status code-status--active">✅ Actif</span>'
+          : '<span class="code-status code-status--expired">📅 Expiré</span>')
+      : '<span class="code-status code-status--inactive">⛔ Inactif</span>';
+
+    const dates = c.is_permanent ? '<em>Permanent</em>' : `${c.start_date ?? '?'} → ${c.end_date ?? '?'}`;
+
+    return `<tr class="code-row">
+      <td><code class="code-pill">${escHtml(c.code)}</code></td>
+      <td>${escHtml(c.badge_id)}</td>
+      <td>${dates}</td>
+      <td>${active}</td>
+      <td><strong>${c.redemption_count ?? 0}</strong></td>
+      <td>${escHtml(c.description || '—')}</td>
+      <td class="code-actions">
+        <button class="btn-sm btn-secondary" data-code="${escHtml(c.code)}" data-active="${c.is_active ? 1 : 0}" data-action="toggle">
+          ${c.is_active ? 'Désactiver' : 'Activer'}
+        </button>
+        <button class="btn-sm btn-danger" data-code="${escHtml(c.code)}" data-action="delete">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div style="padding:1.5rem">
+      <h2 style="margin:0 0 1rem;color:var(--accent)">🎟️ Codes événement</h2>
+
+      <div class="codes-table-wrap">
+        <table class="codes-table">
+          <thead>
+            <tr>
+              <th>Code</th><th>Badge</th><th>Dates</th><th>Statut</th><th>Utilisations</th><th>Description</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Aucun code</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <div class="code-create-form">
+        <h3>Créer un code</h3>
+        <div class="form-grid">
+          <label>Code (majuscules, chiffres, _)
+            <input id="new-code" type="text" placeholder="EX: PERSONA2027" maxlength="50">
+          </label>
+          <label>Badge ID
+            <input id="new-badge-id" type="text" placeholder="slug_du_badge" maxlength="100">
+          </label>
+          <label>Description
+            <input id="new-description" type="text" placeholder="Optionnel" maxlength="255">
+          </label>
+        </div>
+        <div class="admin-toggle-row" style="margin:8px 0">
+          <input type="checkbox" id="new-permanent">
+          <span>Code permanent (pas de dates)</span>
+        </div>
+        <div id="date-fields" class="form-grid">
+          <label>Date début
+            <input id="new-start" type="date">
+          </label>
+          <label>Date fin
+            <input id="new-end" type="date">
+          </label>
+        </div>
+        <button class="btn-primary" id="create-code-btn" style="margin-top:10px">➕ Créer le code</button>
+      </div>
+    </div>
+  `;
+
+  // Toggle date fields visibility
+  document.getElementById('new-permanent').addEventListener('change', e => {
+    document.getElementById('date-fields').style.display = e.target.checked ? 'none' : '';
+  });
+
+  // Toggle active / inactive
+  el.querySelectorAll('[data-action="toggle"]').forEach(btn => {
+    btn.onclick = async () => {
+      const code   = btn.dataset.code;
+      const active = btn.dataset.active === '1';
+      btn.disabled = true;
+      const res = await api.patch(`/api/admin/event_codes/${encodeURIComponent(code)}`, { is_active: !active });
+      if (res.error) { toast('❌ ' + res.error, 'error'); btn.disabled = false; }
+      else           { toast(`✅ Code ${active ? 'désactivé' : 'activé'}`, 'success'); renderEventCodes(); }
+    };
+  });
+
+  // Delete
+  el.querySelectorAll('[data-action="delete"]').forEach(btn => {
+    btn.onclick = async () => {
+      const code = btn.dataset.code;
+      if (!confirm(`Supprimer le code "${code}" ?`)) return;
+      btn.disabled = true;
+      const res = await api.delete(`/api/admin/event_codes/${encodeURIComponent(code)}`);
+      if (res.error) { toast('❌ ' + res.error, 'error'); btn.disabled = false; }
+      else           { toast('🗑️ Code supprimé', 'success'); renderEventCodes(); }
+    };
+  });
+
+  // Create
+  document.getElementById('create-code-btn').onclick = async () => {
+    const btn        = document.getElementById('create-code-btn');
+    const isPerm     = document.getElementById('new-permanent').checked;
+    btn.disabled     = true; btn.textContent = '…';
+    const res = await api.post('/api/admin/event_codes', {
+      code:         document.getElementById('new-code').value.trim(),
+      badge_id:     document.getElementById('new-badge-id').value.trim(),
+      description:  document.getElementById('new-description').value.trim(),
+      is_permanent: isPerm,
+      is_active:    true,
+      start_date:   isPerm ? null : document.getElementById('new-start').value,
+      end_date:     isPerm ? null : document.getElementById('new-end').value,
+    });
+    btn.disabled = false; btn.textContent = '➕ Créer le code';
+    if (res.error) toast('❌ ' + res.error, 'error');
+    else           { toast('✅ Code créé', 'success'); renderEventCodes(); }
+  };
 }
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
