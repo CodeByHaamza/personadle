@@ -410,9 +410,6 @@ export const api = {
 
     /** Récupère les rank-up notifs en attente pour l'utilisateur connecté. */
     getRankUpNotifs: (lang = 'en') => get(`/social-links/rankup-notifs?lang=${lang}`),
-
-    /** Configs des deux moitiés pour le rendu Canvas. */
-    getBadgeData: (linkId) => get(`/social-links/${linkId}/badge`),
   },
 
   // ── Badges ────────────────────────────────────────────
