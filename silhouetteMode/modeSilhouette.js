@@ -104,9 +104,15 @@ function pickCharacter(random = false) {
     return;
   }
 
-  target = random
-    ? filteredCharacters[Math.floor(Math.random() * filteredCharacters.length)]
-    : getDailyTarget(originalCharacters, 'Silhouette');
+  if (random) {
+    const _prev = target;
+    const _candidates = filteredCharacters.length > 1 && _prev
+      ? filteredCharacters.filter(c => c.nom !== _prev.nom)
+      : filteredCharacters;
+    target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
+  } else {
+    target = getDailyTarget(originalCharacters, 'Silhouette');
+  }
 
   currentZoom = 1.8;
 
@@ -317,6 +323,10 @@ function showVictory(force = false) {
     }
 
     const _pSil = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+    if (attempts === 0 && !_pSil.hasWonFirstTry) {
+      _pSil.hasWonFirstTry = true;
+      localStorage.setItem("personaUserProfile", JSON.stringify(_pSil));
+    }
     trackUniqueDay(_pSil, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pSil)));
     showConfettiExplosion();
     showChallengeButton('silhouette', attempts);
@@ -479,6 +489,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("silhouetteActiveFilters", ALL_OPUS, (newActive) => {
     activeFilters = newActive;
+    if (newActive.length === 0) return;
     resetGame();
   });
   activeFilters = _filterApi.getActive();

@@ -212,9 +212,9 @@
 
 /* Logo image */
 .filter-logo {
-  height: 50px;
+  height: 68px;
   width: auto;
-  max-width: 165px;
+  max-width: 180px;
   object-fit: contain;
   pointer-events: none;
   transition: opacity 0.2s ease, filter 0.2s ease;
@@ -292,7 +292,7 @@
 
 /* État ouvert / auto-expand (P2) */
 .filter-sub-panel.expanded {
-  max-height: 200px;
+  max-height: 380px;
   opacity:    1;
   padding: 4px 0 3px 6px;
 }
@@ -341,9 +341,9 @@
 
 /* Logo image */
 .filter-sub-logo {
-  height: 38px;
+  height: 50px;
   width: auto;
-  max-width: 105px;
+  max-width: 120px;
   object-fit: contain;
   pointer-events: none;
   display: block;
@@ -514,6 +514,76 @@
 
 
 /* =====================================================
+   7b. TOOLTIPS — Nom du jeu au survol (couleur par opus)
+   Utilise content: attr(aria-label) pour afficher
+   le nom du jeu depuis l'attribut existant.
+   ===================================================== */
+
+.filter-main-btn::after,
+.filter-sub-btn::after {
+  content: attr(aria-label);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background: rgba(8, 4, 12, 0.96);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 9px;
+  font-weight: 900;
+  font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 4px;
+  white-space: nowrap;
+  border: 1.5px solid rgba(200, 0, 40, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 300;
+}
+
+.filter-main-btn:hover::after,
+.filter-sub-btn:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Couleurs tooltip par jeu */
+.filter-main-btn.filter-color-p1::after,
+.filter-sub-btn.filter-color-p1::after    { border-color: rgba(139,0,255,0.65); color: #c898ff; }
+
+.filter-main-btn.filter-color-p2::after,
+.filter-sub-btn.filter-color-p2is::after,
+.filter-sub-btn.filter-color-p2ep::after  { border-color: rgba(200,40,20,0.65); color: #ff9984; }
+
+.filter-main-btn.filter-color-p3::after,
+.filter-sub-btn.filter-color-p3::after,
+.filter-sub-btn.filter-color-p3fes::after,
+.filter-sub-btn.filter-color-p3p::after,
+.filter-sub-btn.filter-color-p3r::after   { border-color: rgba(32,131,245,0.65); color: #88c4ff; }
+
+.filter-main-btn.filter-color-p4::after,
+.filter-sub-btn.filter-color-p4::after,
+.filter-sub-btn.filter-color-p4g::after,
+.filter-sub-btn.filter-color-p4au::after,
+.filter-sub-btn.filter-color-p4d::after   { border-color: rgba(255,215,0,0.65); color: #ffe050; }
+
+.filter-main-btn.filter-color-p5::after,
+.filter-sub-btn.filter-color-p5::after,
+.filter-sub-btn.filter-color-p5r::after,
+.filter-sub-btn.filter-color-p5s::after,
+.filter-sub-btn.filter-color-p5t::after   { border-color: rgba(255,65,54,0.65); color: #ff9088; }
+
+.filter-main-btn.filter-color-p5x::after,
+.filter-sub-btn.filter-color-p5x::after   { border-color: rgba(255,0,60,0.70); color: #ff709a; }
+
+.filter-main-btn.filter-color-pq::after,
+.filter-sub-btn.filter-color-pq::after,
+.filter-sub-btn.filter-color-pq2::after   { border-color: rgba(255,215,0,0.55); color: #ffe870; }
+
+
+/* =====================================================
    8. RESPONSIVE
    ===================================================== */
 
@@ -525,8 +595,8 @@
     letter-spacing: 1.5px;
   }
 
-  .filter-logo     { height: 38px; max-width: 130px; }
-  .filter-sub-logo { height: 30px; max-width:  80px; }
+  .filter-logo     { height: 52px; max-width: 130px; }
+  .filter-sub-logo { height: 40px; max-width:  80px; }
 
   .filter-dropdown { min-width: 185px; }
 
@@ -559,8 +629,8 @@
   /* Masque le texte "FILTRES", garde l'icône + flèche */
   .filter-toggle-text { display: none; }
 
-  .filter-logo     { height: 30px; max-width: 110px; }
-  .filter-sub-logo { height: 22px; max-width:  65px; }
+  .filter-logo     { height: 44px; max-width: 110px; }
+  .filter-sub-logo { height: 32px; max-width:  65px; }
 
   .filter-dropdown {
     min-width: 158px;
@@ -682,13 +752,13 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
 }
 
 /* ── Fonds clairs teintés — boutons principaux (dark mode) ── */
-.darkmode .filter-main-btn.filter-color-p1  { background: rgba(242, 232, 255, 0.92); }
-.darkmode .filter-main-btn.filter-color-p2  { background: rgba(255, 235, 228, 0.92); }
-.darkmode .filter-main-btn.filter-color-p3  { background: rgba(225, 240, 255, 0.92); }
-.darkmode .filter-main-btn.filter-color-p4  { background: rgba(255, 253, 218, 0.92); }
-.darkmode .filter-main-btn.filter-color-p5  { background: rgba(255, 228, 228, 0.92); }
-.darkmode .filter-main-btn.filter-color-p5x { background: rgba(255, 220, 232, 0.92); }
-.darkmode .filter-main-btn.filter-color-pq  { background: rgba(255, 252, 218, 0.92); }
+.darkmode .filter-main-btn.filter-color-p1  { background: rgba(200, 165, 255, 0.84); }
+.darkmode .filter-main-btn.filter-color-p2  { background: rgba(255, 195, 178, 0.84); }
+.darkmode .filter-main-btn.filter-color-p3  { background: rgba(168, 212, 255, 0.84); }
+.darkmode .filter-main-btn.filter-color-p4  { background: rgba(255, 246, 158, 0.84); }
+.darkmode .filter-main-btn.filter-color-p5  { background: rgba(255, 182, 178, 0.84); }
+.darkmode .filter-main-btn.filter-color-p5x { background: rgba(255, 172, 200, 0.84); }
+.darkmode .filter-main-btn.filter-color-pq  { background: rgba(255, 242, 148, 0.84); }
 
 /* Inactive : logo légèrement atténué */
 .darkmode .filter-main-btn:not(.active) .filter-logo {
@@ -697,36 +767,36 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
 }
 
 /* ── Fonds clairs teintés — sous-boutons (dark mode) ──────── */
-.darkmode .filter-sub-btn.filter-color-p1    { background: rgba(240, 228, 255, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p2is  { background: rgba(255, 230, 225, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p2ep  { background: rgba(238, 228, 255, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p3    { background: rgba(222, 238, 255, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p3fes { background: rgba(215, 232, 255, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p3r   { background: rgba(210, 245, 255, 0.92); }
+.darkmode .filter-sub-btn.filter-color-p1    { background: rgba(200, 165, 255, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p2is  { background: rgba(255, 185, 172, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p2ep  { background: rgba(220, 185, 255, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p3    { background: rgba(168, 212, 255, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p3fes { background: rgba(155, 200, 255, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p3r   { background: rgba(148, 232, 255, 0.84); }
 
 /* P3P : fond dégradé clair bleu→rose en dark mode */
 .darkmode .filter-sub-btn.filter-color-p3p {
   background:
-    linear-gradient(rgba(225, 235, 255, 0.92), rgba(252, 225, 248, 0.92)) padding-box,
+    linear-gradient(rgba(215, 225, 255, 0.84), rgba(248, 210, 248, 0.84)) padding-box,
     linear-gradient(135deg, #2083f5 0%, #ff6eb0 100%) border-box;
 }
 .darkmode .filter-sub-btn.filter-color-p3p:not(.active) {
   background:
-    linear-gradient(rgba(225, 235, 255, 0.92), rgba(252, 225, 248, 0.92)) padding-box,
+    linear-gradient(rgba(215, 225, 255, 0.84), rgba(248, 210, 248, 0.84)) padding-box,
     linear-gradient(135deg, rgba(32,131,245,0.5) 0%, rgba(255,110,176,0.5) 100%) border-box;
 }
 
-.darkmode .filter-sub-btn.filter-color-p4    { background: rgba(255, 250, 210, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p4g   { background: rgba(255, 248, 200, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p4au  { background: rgba(255, 242, 218, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p4d   { background: rgba(255, 228, 245, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p5    { background: rgba(255, 225, 225, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p5r   { background: rgba(255, 218, 218, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p5s   { background: rgba(255, 238, 222, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p5t   { background: rgba(255, 225, 228, 0.92); }
-.darkmode .filter-sub-btn.filter-color-p5x   { background: rgba(255, 218, 235, 0.92); }
-.darkmode .filter-sub-btn.filter-color-pq    { background: rgba(255, 250, 215, 0.92); }
-.darkmode .filter-sub-btn.filter-color-pq2   { background: rgba(255, 252, 205, 0.92); }
+.darkmode .filter-sub-btn.filter-color-p4    { background: rgba(255, 246, 158, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p4g   { background: rgba(255, 238, 138, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p4au  { background: rgba(255, 228, 168, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p4d   { background: rgba(255, 205, 235, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p5    { background: rgba(255, 182, 178, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p5r   { background: rgba(255, 168, 168, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p5s   { background: rgba(255, 210, 178, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p5t   { background: rgba(255, 182, 182, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p5x   { background: rgba(255, 172, 200, 0.84); }
+.darkmode .filter-sub-btn.filter-color-pq    { background: rgba(255, 242, 148, 0.84); }
+.darkmode .filter-sub-btn.filter-color-pq2   { background: rgba(255, 248, 130, 0.84); }
 
 
 /* =====================================================
@@ -1181,4 +1251,20 @@ body:not(.darkmode) [data-group-panel="PQ"] .filter-group-select-btn {
 /* PQ — pirouette chibi espiègle */
 [data-group-panel="PQ"].expanded .filter-group-select-btn {
   animation: pqChibiPop 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Bandeau "aucun filtre sélectionné" ──────────────────────────
+   Affiché sous le bouton toggle quand activeOpus est vide.
+   Injecté dynamiquement par filterMenu.js. */
+.filter-empty-warning {
+  margin-top: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #f87171;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.01em;
 }

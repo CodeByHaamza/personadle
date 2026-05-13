@@ -129,7 +129,8 @@ async function smartPreload(namesList, priority = "low") {
 
 /**
  * Loads an image into `gifElement`, using the cache when available.
- * Falls back to loading.gif after a 10-second timeout.
+ * Shows loading.gif only when the image isn't already cached.
+ * Falls back to loading.gif after a 5-second timeout.
  *
  * @param {HTMLImageElement} gifElement
  * @param {string}           src
@@ -142,6 +143,9 @@ function loadImageSafely(gifElement, src, onLoadCallback) {
     onLoadCallback?.();
     return;
   }
+
+  // Only show loading placeholder when we actually have to wait for a network load
+  showLoading(gifElement);
 
   const tempImg = new Image();
   let timeoutId;
@@ -170,7 +174,7 @@ function loadImageSafely(gifElement, src, onLoadCallback) {
     cleanup();
     console.warn(`Timeout loading: ${src}`);
     gifElement.src = "../img/loading.gif";
-  }, 10000);
+  }, 5000);
 
   tempImg.src = src;
 }
@@ -242,9 +246,18 @@ function getBetterRandomCharacter(random = false) {
     return null;
   }
   if (random && personas.length) {
-    return personas[Math.floor(Math.random() * personas.length)];
+    const _candidates = personas.length > 1 && target
+      ? personas.filter(n => n !== target)
+      : personas;
+    return _candidates[Math.floor(Math.random() * _candidates.length)] || personas[0];
   }
-  return getDailyTarget(originalPersonas, 'AllOutAttack');
+  // Daily target depuis le pool complet — mais si le filtre actif l'exclut,
+  // utiliser un daily depuis la liste filtrée pour rester jouable.
+  const daily = getDailyTarget(originalPersonas, 'AllOutAttack');
+  if (personas.length && !personas.includes(daily)) {
+    return getDailyTarget(personas, 'AllOutAttack');
+  }
+  return daily;
 }
 
 
@@ -252,14 +265,24 @@ function getBetterRandomCharacter(random = false) {
 // AUTOCOMPLETE
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Shared array reference read by the input handler — updated on every call so
+// filter changes and resets are reflected without re-attaching listeners.
+let _acCurrentArray = [];
+
 /**
- * Attaches an autocomplete dropdown showing character portraits and names.
- * Supports codename + real-name display (e.g. "Crow (Akechi Goro)").
+ * Updates the autocomplete candidate list and attaches listeners to the element
+ * once. Subsequent calls only refresh the candidate array, preventing duplicate
+ * listener stacking on replay/filter-change.
  *
  * @param {HTMLInputElement} element - The text input to enhance
  * @param {string[]}         array  - Current list of guessable names
  */
 function initializeAutocomplete(element, array) {
+  _acCurrentArray = array;
+
+  if (element._acInitDone) return;
+  element._acInitDone = true;
+
   let currentFocus = -1;
 
   element.addEventListener("input", function () {
@@ -274,7 +297,7 @@ function initializeAutocomplete(element, array) {
 
     const lowerVal = val.toLowerCase();
     const matches = [];
-    for (const displayName of array) {
+    for (const displayName of _acCurrentArray) {
       if (!displayName.toLowerCase().includes(lowerVal)) continue;
       const [firstName, lastName] = displayName.split(" ");
       let priority = 3;
@@ -475,7 +498,6 @@ function resetGame(random = false) {
   target = newTarget;
 
   gifElement.style.filter = "none";
-  showLoading(gifElement);
 
   const imageName = portraitsMap[target] || target.split(" ")[0];
   const newSrc = cdn("allOutAttack", imageName);
@@ -669,13 +691,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("filters_AllOutAttack", ALL_OPUS, (newActive) => {
     activeOpusFilters = newActive;
+    if (newActive.length === 0) return;
     personas = getFilteredPersonas();
 
-    if (!personas.length) { alert((window.i18n || { t: (k) => k }).t('game.no_characters_filters')); return; }
+    if (!personas.length) return;
 
     target = getBetterRandomCharacter();
     const imageName = portraitsMap[target] || target.split(" ")[0];
-    showLoading(gifElement);
+    gifElement.style.filter = "none";
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
       gifElement.style.filter = "blur(20px)";
     });
@@ -735,7 +758,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     target = getBetterRandomCharacter();
     const imageName = portraitsMap[target] || target.split(" ")[0];
     gifElement.style.filter = "none";
-    showLoading(gifElement);
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
       gifElement.style.filter = "blur(20px)";
     });
@@ -751,7 +773,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("aoaAttempts");
     localStorage.removeItem("aoaGameOver");
     localStorage.removeItem("aoaForceReveal");
-    resetGame();
+    resetGame(true);  // true = random character, pas le daily
   });
 
   // ── Daily reset ──

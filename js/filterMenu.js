@@ -39,6 +39,7 @@ const LEGACY_EXPAND = {
  */
 function _migrate(saved, allOpus) {
   if (!Array.isArray(saved)) return null;
+  if (saved.length === 0) return []; // preserve "all deselected" state
 
   const result = [];
   for (const code of saved) {
@@ -129,6 +130,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
       const allActive = allOpus.every((o) => activeOpus.includes(o));
       activeOpus = allActive ? [] : [...allOpus];
       _syncUI();
+      _updateEmptyWarning();
       _save();
       onFilterChange([...activeOpus]);
     });
@@ -169,6 +171,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
         codes.forEach(c => { if (!activeOpus.includes(c)) activeOpus.push(c); });
       }
       _syncUI();
+      _updateEmptyWarning();
       _save();
       onFilterChange([...activeOpus]);
     });
@@ -260,6 +263,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
       activeOpus.push(opus);
     }
     _syncUI();
+    _updateEmptyWarning();
     _save();
     onFilterChange([...activeOpus]);
   }
@@ -317,8 +321,30 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     } catch (_) { /* quota dépassé → silencieux */ }
   }
 
+  /* ── Bandeau "aucun filtre" injecté dans #filterPanel ─────────── */
+  const filterPanel = document.getElementById("filterPanel");
+  let emptyWarning = null;
+  if (filterPanel) {
+    emptyWarning = document.createElement("div");
+    emptyWarning.className = "filter-empty-warning";
+    filterPanel.appendChild(emptyWarning);
+  }
+
+  function _updateEmptyWarning() {
+    if (!emptyWarning) return;
+    const isEmpty = activeOpus.length === 0;
+    emptyWarning.hidden = !isEmpty;
+    if (isEmpty) {
+      const msg = window.i18n?.t?.('game.no_characters_filters');
+      emptyWarning.textContent = (msg && msg !== 'game.no_characters_filters')
+        ? msg
+        : '⚠ No results — select at least one filter.';
+    }
+  }
+
   /* ── Init UI (sans déclencher le callback) ────────────────────── */
   _syncUI();
+  _updateEmptyWarning();
 
   /* ── API retournée ──────────────────────────────────────────── */
   return {

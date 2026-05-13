@@ -87,8 +87,9 @@ function getFilteredCharacters() {
 
 /**
  * Picks the daily target and loads their persona image.
- * Uses seeded RNG from the full unfiltered pool so all players get the same
- * persona today regardless of their opus filter settings.
+ * Uses seeded RNG from the full unfiltered pool by default; falls back to a
+ * seeded pick from the filtered pool if the daily character isn't in the
+ * active filters (so P4-only players never see a P5 character).
  */
 function pickCharacter(random = false) {
   filteredCharacters = getFilteredCharacters();
@@ -100,7 +101,12 @@ function pickCharacter(random = false) {
       : filteredCharacters;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
   } else {
-    target = getDailyTarget(originalCharacters, 'Personae');
+    const daily = getDailyTarget(originalCharacters, 'Personae');
+    if (filteredCharacters.length && !filteredCharacters.some(c => c.persona === daily.persona)) {
+      target = getDailyTarget(filteredCharacters, 'Personae');
+    } else {
+      target = daily;
+    }
   }
 
   personaImg.src = `./database/img/${target.image}.webp`;
@@ -284,8 +290,8 @@ function showVictory(force = false, name = null) {
     if (['Polydeuces','Caesar'].includes(target.persona) && !profile.foundAkihiko)
       { profile.foundAkihiko = true; profileUpdated = true; }
 
-    // Twin Spear (Kotone = Orpheus F / Thanatos F, Ken = Kala-Nemi)
-    if (['Orpheus F','Thanatos F','Orpheus Telos F'].includes(target.persona) && !profile.foundKotone)
+    // Twin Spear (Kotone = Orpheus Female variants, Ken = Kala-Nemi)
+    if (['Orpheus ( Female )','Orpheus Picaro ( Female )','Orpheus Telos','Thanatos','Thanatos Picaro'].includes(target.persona) && !profile.foundKotone)
       { profile.foundKotone = true; profileUpdated = true; }
     if (['Kala-Nemi'].includes(target.persona) && !profile.foundKen)
       { profile.foundKen = true; profileUpdated = true; }
@@ -306,6 +312,11 @@ function showVictory(force = false, name = null) {
     if (!profile.characterModeMap[_charName]) profile.characterModeMap[_charName] = [];
     if (!profile.characterModeMap[_charName].includes('personae'))
       { profile.characterModeMap[_charName].push('personae'); profileUpdated = true; }
+
+    if (attempts === 0 && !profile.hasWonFirstTry) {
+      profile.hasWonFirstTry = true;
+      profileUpdated = true;
+    }
 
     if (profileUpdated) {
       localStorage.setItem("personaUserProfile", JSON.stringify(profile));
@@ -513,6 +524,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("personaeActiveFilters", ALL_OPUS, (newActive) => {
     activeFilters = newActive;
+    if (newActive.length === 0) return;
     resetGame();
   });
   activeFilters = _filterApi.getActive();

@@ -301,6 +301,10 @@ function checkEmojiGuess(name, forceReveal = false) {
 
     if (!forceReveal) {
       const _pEmo = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+      if (attempts === 1 && !_pEmo.hasWonFirstTry) {
+        _pEmo.hasWonFirstTry = true;
+        localStorage.setItem("personaUserProfile", JSON.stringify(_pEmo));
+      }
       trackUniqueDay(_pEmo, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pEmo)));
     }
 
@@ -376,8 +380,12 @@ function resetGame() {
 
   gameOver = false;
   attempts = 1;
-  target = pool[Math.floor(Math.random() * pool.length)];
-  localStorage.setItem("targetEmoji", JSON.stringify(target));
+  const _prevEmoji = target;
+  const _emojiCandidates = pool.length > 1 && _prevEmoji
+    ? pool.filter(c => c.nom !== _prevEmoji.nom)
+    : pool;
+  target = _emojiCandidates[Math.floor(Math.random() * _emojiCandidates.length)] || pool[0];
+  if (target) localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
 
   updateEmojiHint();
@@ -427,10 +435,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("filters_Emoji", ALL_OPUS, (newActive) => {
     activeOpus = newActive;
-    // Only update autocomplete pool — daily target stays fixed for the day
-    const filteredCharacters = filterCharacterPool();
-    personas.length = 0;
-    personas.push(...filteredCharacters.map((c) => c.nom));
+    if (newActive.length === 0) return;
+    resetGame();
   });
   activeOpus = _filterApi.getActive();
 
@@ -442,9 +448,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Daily target uses seeded RNG so all players get the same character today.
   // Pool is all characters with emoji data (regardless of active opus filters).
   const ALL_EMOJI_CHARS = characters.filter((c) => c.emoji);
-  target =
-    JSON.parse(localStorage.getItem("targetEmoji")) ||
-    getDailyTarget(ALL_EMOJI_CHARS, 'Emoji');
+  const _rawEmoji = localStorage.getItem("targetEmoji");
+  let _savedEmoji = null;
+  try {
+    if (_rawEmoji && _rawEmoji !== 'undefined') _savedEmoji = JSON.parse(_rawEmoji);
+  } catch {}
+  target = _savedEmoji || getDailyTarget(ALL_EMOJI_CHARS, 'Emoji');
   attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);

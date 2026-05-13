@@ -23,7 +23,7 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { trackUniqueDay } from "../profile/badges/badgesManager.js";
+import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -411,6 +411,7 @@ function checkGuess(name, target, forceReveal = false) {
 
       localStorage.setItem('personaUserProfile', JSON.stringify(_pr));
       trackUniqueDay(_pr, () => localStorage.setItem('personaUserProfile', JSON.stringify(_pr)));
+      checkBadgesAfterGame();
     }
 
     if (wasFresh) {
@@ -486,8 +487,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("filters_Classic", ALL_OPUS, (newActive) => {
     activeOpus = newActive;
-    // Only update autocomplete pool — daily target stays fixed for the day
-    filterCharacterPool();
+    if (newActive.length === 0) return;
+    resetButton.click();
   });
   // Synchronise activeOpus avec ce qu'initFilterMenu a chargé depuis localStorage
   activeOpus = _filterApi.getActive();
@@ -620,8 +621,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     filterCharacterPool();
 
-    // Pick a random character from the filtered pool
-    target = characters[Math.floor(Math.random() * characters.length)];
+    // Pick from the filtered pool, never the same character twice in a row
+    const _filteredPool = characters.filter(c => personas.includes(c.nom));
+    const _prevTarget = target;
+    const _candidates = _filteredPool.length > 1 && _prevTarget
+      ? _filteredPool.filter(c => c.nom !== _prevTarget.nom)
+      : _filteredPool;
+    target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
     localStorage.setItem("target", JSON.stringify(target));
 
     const nav = document.getElementById("modeNavigationContainer");

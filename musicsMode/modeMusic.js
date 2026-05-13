@@ -38,7 +38,7 @@ import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesMa
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** All specific opus codes available in Music mode. */
-const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4D","P5","P5R","P5S","P5X","PQ","PQ2"];
+const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P4D","P5","P5R","P5S","P5T","P5X","PQ","PQ2"];
 
 /**
  * Color themes per Persona series.
@@ -59,10 +59,12 @@ const OPUS_THEMES = {
   P3R:   { accent: '#3b82f6', dark: '#1d4ed8', light: '#93c5fd', glow: 'rgba(59,130,246,{a})'   },
   P4:    { accent: '#eab308', dark: '#a16207', light: '#fde047', glow: 'rgba(234,179,8,{a})'    },
   P4G:   { accent: '#eab308', dark: '#a16207', light: '#fde047', glow: 'rgba(234,179,8,{a})'    },
+  P4AU:  { accent: '#eab308', dark: '#a16207', light: '#fde047', glow: 'rgba(234,179,8,{a})'    },
   P4D:   { accent: '#eab308', dark: '#a16207', light: '#fde047', glow: 'rgba(234,179,8,{a})'    },
   P5:    { accent: '#e63946', dark: '#c1121f', light: '#ff8fa3', glow: 'rgba(230,57,70,{a})'    },
   P5R:   { accent: '#e63946', dark: '#c1121f', light: '#ff8fa3', glow: 'rgba(230,57,70,{a})'    },
   P5S:   { accent: '#e63946', dark: '#c1121f', light: '#ff8fa3', glow: 'rgba(230,57,70,{a})'    },
+  P5T:   { accent: '#e63946', dark: '#c1121f', light: '#ff8fa3', glow: 'rgba(230,57,70,{a})'    },
   // P5X (The Phantom X) — bordeaux/cramoisi, rouge sombre distinct du rouge vif P5
   P5X:   { accent: '#c0193a', dark: '#5c0f1f', light: '#e63946', glow: 'rgba(192,25,58,{a})'    },
   PQ:    { accent: '#f97316', dark: '#ea580c', light: '#fdba74', glow: 'rgba(249,115,22,{a})'   },
@@ -174,6 +176,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) => {
     activeFilters = newActive;
+    if (newActive.length === 0) return;
     resetGame();
   });
   activeFilters = _filterApi.getActive();
@@ -227,9 +230,15 @@ function getFilteredSongs() {
 function pickSong(random = false) {
   filteredSongs = getFilteredSongs();
 
-  target = random && filteredSongs.length
-    ? filteredSongs[Math.floor(Math.random() * filteredSongs.length)]
-    : getDailyTarget(originalSongs, 'Music');
+  if (random && filteredSongs.length) {
+    const _prev = target;
+    const _candidates = filteredSongs.length > 1 && _prev
+      ? filteredSongs.filter(s => s.titre !== _prev?.titre)
+      : filteredSongs;
+    target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredSongs[0];
+  } else {
+    target = getDailyTarget(originalSongs, 'Music');
+  }
 
   audioPlayer.src = `./database/music/song/${target.fichier}`;
   audioPlayer.load();
@@ -305,6 +314,12 @@ function showVictory(force = false) {
     profile.foundWhenMotherWasThere = true;
     hasChanges = true;
     console.log("🎬 Badge Trigger: When Mother Was There found!");
+  }
+
+  // 🎯 ONE SHOT — first-try win
+  if (!force && attempts === 0 && !profile.hasWonFirstTry) {
+    profile.hasWonFirstTry = true;
+    hasChanges = true;
   }
 
   // 🌙 NIGHT OWL / NYX HOUR flags (shared with other modes)
