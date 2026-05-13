@@ -1,0 +1,104 @@
+name: CD — Deploy to Hostinger
+
+# Déclenchement MANUEL uniquement — jamais automatique sur push.
+# Pour activer : aller dans GitHub → Actions → "CD — Deploy to Hostinger" → Run workflow.
+#
+# Secrets requis (GitHub → Settings → Secrets → Actions) :
+#   HOSTINGER_SSH_KEY   — clé privée SSH (cat ~/.ssh/id_rsa | pbcopy)
+#   HOSTINGER_USER      — u870779941
+#   HOSTINGER_HOST      — fr-int-web2056 (ou IP du serveur)
+#   HOSTINGER_PATH      — ~/domains/personadle.net/public_html
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (simulation sans déploiement réel)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+
+  # ── Étape 1 : CI complet avant tout déploiement ─────────────────────────────
+  ci-checks:
+    name: CI checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests (Vitest)
+        run: npm test
+
+      - name: Check i18n key consistency
+        run: npm run i18n:check
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Check PHP syntax
+        run: |
+          errors=$(find api/ -name "*.php" -exec php -l {} \; | grep "Parse error" || true)
+          if [ -n "$errors" ]; then
+            echo "$errors"
+            exit 1
+          fi
+
+  # ── Étape 2 : Déploiement rsync vers Hostinger ──────────────────────────────
+  deploy:
+    name: Deploy via rsync
+    runs-on: ubuntu-latest
+    needs: ci-checks   # Ne tourne que si les CI checks passent
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy via rsync
+        run: |
+          RSYNC_OPTS="-avz --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='api/config.php' \
+            --exclude='api/config.example.php' \
+            --exclude='.env' \
+            --exclude='*.log' \
+            --exclude='tests/' \
+            --exclude='scripts/'"
+
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            RSYNC_OPTS="$RSYNC_OPTS --dry-run"
+            echo "DRY RUN — aucun fichier ne sera modifié sur le serveur"
+          fi
+
+          rsync $RSYNC_OPTS \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # ── Job 1 : Tests JavaScript + vérification i18n ────────────────────────────
+  test-js:
+    name: JS Tests & i18n check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests (Vitest)
+        run: npm test
+
+      - name: Check i18n key consistency
+        run: npm run i18n:check
+
+  # ── Job 2 : Lint PHP syntaxique ─────────────────────────────────────────────
+  lint-php:
+    name: PHP Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Check PHP syntax (all .php files)
+        run: |
+          errors=$(find api/ -name "*.php" -exec php -l {} \; | grep "Parse error" || true)
+          if [ -n "$errors" ]; then
+            echo "$errors"
+            exit 1
+          fi
+          echo "No PHP syntax errors found."
