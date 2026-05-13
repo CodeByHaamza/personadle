@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) => {
     activeFilters = newActive;
     if (newActive.length === 0) return;
-    resetGame();
+    resetGame(true);
   });
   activeFilters = _filterApi.getActive();
 
