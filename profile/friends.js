@@ -20,7 +20,8 @@
  *   - window.__i18nReady     (injecté par i18n.js)
  */
 
-import { addFlameIfPlayedToday, gainSocialLinkXp } from '../js/social-link.js';
+import { addFlameIfPlayedToday, gainSocialLinkXp, applyRank10Effect } from '../js/social-link.js';
+import { FILTER_STORAGE_KEYS } from '../js/gameCore.js';
 
 // ─────────────────────────────────────────────────────────
 // 1. UTILITAIRES
@@ -63,6 +64,13 @@ function t(key, vars = {}) {
   return window.i18n?.t?.(key, vars) ?? key;
 }
 
+/** Traduit une clé i18n avec un vrai fallback string (détecte quand i18n retourne la clé brute). */
+function tf(key, fallback) {
+  if (!window.i18n?.t) return fallback;
+  const r = window.i18n.t(key);
+  return (r && r !== key) ? r : fallback;
+}
+
 /** Returns true if lastSeen ISO string is within the last 30 minutes. */
 function isOnline(lastSeen) {
   if (!lastSeen) return false;
@@ -89,6 +97,19 @@ function formatLastSeen(isoDate) {
 // ─────────────────────────────────────────────────────────
 
 const PAGE_SIZE = 20;
+
+// localStorage keys to clear when accepting a challenge (forces fresh game)
+const MODE_STATE_KEYS = {
+  classic:      ['target', 'attempts', 'guessHistory'],
+  emoji:        ['targetEmoji', 'attemptsEmoji', 'emojiGameOver', 'emojiForceReveal', 'emojiWin'],
+  silhouette:   ['silhouetteTarget', 'silhouetteAttempts', 'silhouetteGameOver', 'silhouetteForceReveal'],
+  alloutattack: ['aoaTarget', 'aoaAttempts', 'aoaGameOver', 'aoaForceReveal'],
+  personae:     ['personaeTarget', 'personaeAttempts', 'personaeGameOver', 'personaeForceReveal'],
+  music:        ['musicTarget', 'musicAttempts', 'musicGameOver', 'musicTriedTitles', 'musicForceReveal'],
+};
+
+// localStorage keys where each mode stores its active opus filters
+const MODE_FILTER_KEY = FILTER_STORAGE_KEYS;
 
 let state = {
   // Données de l'API friends.list()
@@ -221,10 +242,10 @@ function renderBrowsePagination() {
 // ─────────────────────────────────────────────────────────
 
 function renderFriendEntry(entry) {
-  const { friendship_id, pseudo, friend_code, avatar_data, avatar_border_color, last_seen_at } = entry;
+  const { friendship_id, pseudo, friend_code, avatar_data, avatar_border_color, last_seen_at, social_link_rank = 1 } = entry;
   const lastSeenText = formatLastSeen(last_seen_at);
   return `
-    <div class="fr-entry" data-fid="${esc(String(friendship_id))}">
+    <div class="fr-entry" data-fid="${esc(String(friendship_id))}" data-rank="${social_link_rank}">
       ${avatarHTML(pseudo, avatar_data, avatar_border_color, last_seen_at)}
       <div class="fr-entry-info">
         <div class="fr-entry-pseudo" id="pseudo-${friendship_id}">${esc(pseudo)}<span id="flame-${friendship_id}"></span></div>
@@ -254,6 +275,15 @@ function renderFriendsList() {
     list.innerHTML = state.friends.map(renderFriendEntry).join('');
   }
   if (countEl) countEl.textContent = state.friends.length;
+
+  // Effet True Confidant pour les amis rang 10
+  list.querySelectorAll('.fr-entry[data-rank="10"]').forEach((entry, idx) => {
+    applyRank10Effect(
+      entry.querySelector('.fr-avatar'),
+      entry.querySelector('.fr-entry-pseudo'),
+      idx * 150
+    );
+  });
 }
 
 // ─────────────────────────────────────────────────────────
@@ -555,61 +585,147 @@ document.addEventListener('visibilitychange', () => {
   else if (window._currentUser) startPolling();
 });
 
+const MODE_ICON = {
+  classic: '🧩', emoji: '🎭', silhouette: '👤',
+  alloutattack: '⚔️', personae: '🌟', music: '🎵',
+};
+
+function formatMsgDate(iso) {
+  const d = new Date(iso);
+  const today = new Date();
+  return d.toDateString() === today.toDateString()
+    ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+}
+
+function renderStatusBadge(status) {
+  const map = {
+    unread:   { label: tf('friends.status_unread',   'New'),         cls: 'fr-status--new'     },
+    read:     { label: tf('friends.status_read',     'Read'),        cls: 'fr-status--read'    },
+    accepted: { label: tf('friends.status_accepted', 'In progress'), cls: 'fr-status--active'  },
+    beaten:   { label: tf('friends.status_beaten',   'Beaten'),      cls: 'fr-status--beaten'  },
+    expired:  { label: tf('friends.status_expired',  'Expired'),     cls: 'fr-status--expired' },
+  };
+  const s = map[status] ?? { label: esc(status), cls: '' };
+  return `<span class="fr-status ${s.cls}">${esc(s.label)}</span>`;
+}
+
 function renderMessage(msg) {
   const isReceived  = msg.receiver_id === window._currentUser?.id;
-  const fromPseudo  = msg.sender.pseudo;
-  const time        = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const fromPseudo  = isReceived ? msg.sender.pseudo : msg.receiver.pseudo;
+  const fromAvatar  = isReceived ? msg.sender.avatar : msg.receiver.avatar;
+  const time        = formatMsgDate(msg.created_at);
   const isChallenge = msg.type === 'challenge';
   const isUnread    = msg.status === 'unread' && isReceived;
+
+  const direction = isReceived
+    ? `<b>${esc(fromPseudo)}</b>`
+    : `${t('friends.sent_to', 'To')} <b>${esc(msg.receiver.pseudo)}</b>`;
 
   let content = '';
   let actions  = '';
 
-  if (isChallenge) {
-    content = `
-      <span class="fr-msg-challenge-info">
-        🎮 ${esc(msg.challenge_mode?.toUpperCase() ?? '')} · ${t('friends.challenge_beat') || 'Beat'} ${msg.challenge_score} pts · ${msg.challenge_date ?? ''}
-      </span>`;
-    if (isReceived && msg.status === 'unread') {
-      actions = `
-        <button class="fr-btn fr-btn--accept js-accept-challenge"
-                data-mid="${msg.id}"
-                data-mode="${esc(msg.challenge_mode ?? '')}"
-                data-date="${esc(msg.challenge_date ?? '')}"
-                data-score="${msg.challenge_score}"
-                data-senderid="${msg.sender_id}">
-          ${t('friends.challenge_accept') || '⚔ Accept'}
-        </button>
-        <button class="fr-btn fr-btn--danger js-decline-msg" data-mid="${msg.id}">
-          ${t('friends.challenge_decline') || '✕'}
-        </button>`;
+  if (msg.type === 'friend_declined') {
+    content = `<span class="fr-msg-declined">✗ <b>${esc(msg.sender.pseudo)}</b> ${t('friends.declined_request', 'declined your friend request.')}</span>`;
+    if (isUnread) {
+      actions = `<button class="fr-btn fr-btn--view js-mark-read" data-mid="${msg.id}">${t('friends.mark_read', '✓ Mark read')}</button>`;
+    }
+  } else if (isChallenge) {
+    const modeKey   = (msg.challenge_mode ?? '').toLowerCase();
+    const modeIcon  = MODE_ICON[modeKey] ?? '🎮';
+    const modeName  = esc((msg.challenge_mode ?? '').toUpperCase());
+    const dateLabel = msg.challenge_date ?? '';
+    const score     = msg.challenge_score ?? '?';
+
+    if (msg.status === 'beaten') {
+      content = `
+        <div class="fr-challenge-card fr-challenge-card--won">
+          <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
+          <span class="fr-challenge-outcome">🏆 ${t('friends.challenge_beaten', 'Challenge beaten!')}</span>
+          <span class="fr-challenge-date">${esc(dateLabel)}</span>
+        </div>`;
+    } else if (msg.status === 'expired') {
+      content = `
+        <div class="fr-challenge-card fr-challenge-card--lost">
+          <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
+          <span class="fr-challenge-outcome">✗ ${t('friends.challenge_failed', 'Challenge failed')}</span>
+          <span class="fr-challenge-date">${esc(dateLabel)}</span>
+        </div>`;
+    } else {
+      content = `
+        <div class="fr-challenge-card">
+          <div class="fr-challenge-header">
+            <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
+            <span class="fr-challenge-date">${esc(dateLabel)}</span>
+          </div>
+          <span class="fr-challenge-score">${t('friends.challenge_beat', 'Beat')} <b>${score}</b> attempts</span>
+        </div>`;
+      if (isReceived && msg.status === 'unread') {
+        actions = `
+          <button class="fr-btn fr-btn--accept js-accept-challenge"
+                  data-mid="${msg.id}"
+                  data-mode="${esc(msg.challenge_mode ?? '')}"
+                  data-date="${esc(msg.challenge_date ?? '')}"
+                  data-score="${msg.challenge_score}"
+                  data-senderid="${msg.sender_id}"
+                  data-filters="${esc(msg.challenge_filters ?? '[]')}">
+            ${t('friends.challenge_accept', '⚔ Accept')}
+          </button>
+          <button class="fr-btn fr-btn--danger js-decline-msg" data-mid="${msg.id}">
+            ${t('friends.challenge_decline', '✕')}
+          </button>`;
+      }
     }
   } else {
     content = `<span class="fr-msg-content">${esc(msg.content ?? '')}</span>`;
     if (isUnread) {
-      actions = `<button class="fr-btn fr-btn--view js-mark-read" data-mid="${msg.id}" style="font-size:0.68rem;">
-        ${t('friends.mark_read') || '✓ Mark read'}
-      </button>`;
+      actions = `<button class="fr-btn fr-btn--view js-mark-read" data-mid="${msg.id}">${t('friends.mark_read', '✓ Mark read')}</button>`;
     }
   }
 
   return `
     <div class="fr-msg ${isChallenge ? 'fr-msg--challenge' : ''} ${isUnread ? 'fr-msg--unread' : ''}"
-         data-mid="${msg.id}">
+         data-mid="${msg.id}" data-status="${esc(msg.status)}">
+      <img class="fr-msg-avatar"
+           src="${esc(avatarSrc(fromAvatar))}"
+           alt="${esc(fromPseudo)}"
+           onerror="this.src='../img/default_avatar.png'">
       <div class="fr-msg-body">
         <div class="fr-msg-meta">
-          ${isReceived
-            ? `<b>${esc(fromPseudo)}</b> · ${time}`
-            : `${t('friends.sent_to') || 'To'} <b>${esc(msg.receiver.pseudo)}</b> · ${time}`}
-          <span style="margin-left:6px;font-size:0.65rem;background:var(--fr-surface-alt);padding:1px 5px;border-radius:4px;">
-            ${esc(msg.status)}
-          </span>
+          ${direction}
+          <span class="fr-msg-time">· ${esc(time)}</span>
+          ${renderStatusBadge(msg.status)}
+          <button class="fr-msg-delete js-delete-msg"
+                  data-mid="${msg.id}"
+                  title="${t('friends.delete_msg', 'Delete')}">🗑</button>
         </div>
         ${content}
         ${actions ? `<div class="fr-msg-actions">${actions}</div>` : ''}
       </div>
     </div>
   `;
+}
+
+async function clearReadMessages() {
+  const api = window._personadleApi;
+  const resolved = ['read', 'beaten', 'expired'];
+  const els = [...document.querySelectorAll('.fr-msg[data-mid][data-status]')]
+    .filter(el => resolved.includes(el.dataset.status));
+  if (!els.length) return;
+
+  // Optimistic: remove from DOM immediately, then fire API deletes in background
+  const ids = els.map(el => +el.dataset.mid);
+  els.forEach(el => el.remove());
+
+  if (api) {
+    await Promise.all(ids.map(id => api.messages.delete(id).catch(() => {})));
+  }
+
+  const list = document.getElementById('messagesList');
+  if (list && !list.querySelector('.fr-msg')) {
+    list.innerHTML = `<p class="fr-empty">${t('friends.msg_empty', 'No messages yet.')}</p>`;
+    document.getElementById('messagesSection')?.classList.add('hidden');
+  }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -688,16 +804,42 @@ function attachListeners() {
     // ── Messages : Accept challenge ───────────────────────
     const acceptChallenge = e.target.closest('.js-accept-challenge');
     if (acceptChallenge) {
-      const mid      = parseInt(acceptChallenge.dataset.mid);
-      const mode     = acceptChallenge.dataset.mode;
-      const date     = acceptChallenge.dataset.date;
-      const score    = parseInt(acceptChallenge.dataset.score);
-      const senderId = parseInt(acceptChallenge.dataset.senderid);
+      const mid            = parseInt(acceptChallenge.dataset.mid);
+      const mode           = acceptChallenge.dataset.mode?.toLowerCase();
+      const date           = acceptChallenge.dataset.date;
+      const score          = parseInt(acceptChallenge.dataset.score);
+      const senderId       = parseInt(acceptChallenge.dataset.senderid);
+      const challengeFilters = acceptChallenge.dataset.filters ?? '[]';
       acceptChallenge.disabled = true;
       await window._personadleApi?.messages.updateStatus(mid, 'accepted').catch(() => {});
-      localStorage.setItem('activeChallenge', JSON.stringify({ msgId: mid, mode, date, score, senderId }));
+
+      // Clear this mode's game state so the player starts fresh
+      (MODE_STATE_KEYS[mode] ?? []).forEach(k => localStorage.removeItem(k));
+
+      // Backup current filters, then apply sender's challenge filters
+      const filterKey      = MODE_FILTER_KEY[mode] ?? null;
+      const originalFilters = filterKey ? (localStorage.getItem(filterKey) ?? '[]') : null;
+      if (filterKey && challengeFilters && challengeFilters !== '[]') {
+        localStorage.setItem(filterKey, challengeFilters);
+      }
+
+      localStorage.setItem('activeChallenge', JSON.stringify({
+        msgId: mid, mode, date, score, senderId,
+        filterKey, originalFilters,
+      }));
+
       // XP Social Link : challenge accepté
       if (senderId) gainSocialLinkXp(senderId, 'challenge').catch(() => {});
+      const modePageMap = {
+        classic:     '../classiqueMode/classiqueMode.html',
+        emoji:       '../emojiMode/emojiMode.html',
+        silhouette:  '../silhouetteMode/silhouette.html',
+        alloutattack:'../allOutAttackMode/allOutAttack.html',
+        personae:    '../personaeMode/personae.html',
+        music:       '../musicsMode/musics.html',
+      };
+      const dest = modePageMap[mode?.toLowerCase()];
+      if (dest) { window.location.href = dest; return; }
       await loadMessages();
       return;
     }
@@ -710,7 +852,24 @@ function attachListeners() {
       await loadMessages();
       return;
     }
+
+    // ── Messages : Delete individual ──────────────────────
+    const deleteBtn = e.target.closest('.js-delete-msg');
+    if (deleteBtn) {
+      const mid = parseInt(deleteBtn.dataset.mid);
+      await window._personadleApi?.messages.delete(mid).catch(() => {});
+      deleteBtn.closest('.fr-msg')?.remove();
+      const list = document.getElementById('messagesList');
+      if (list && !list.querySelector('.fr-msg')) {
+        list.innerHTML = `<p class="fr-empty">${t('friends.msg_empty', 'No messages yet.')}</p>`;
+        document.getElementById('messagesSection')?.classList.add('hidden');
+      }
+      return;
+    }
   });
+
+  // ── Vider les messages résolus ────────────────────────
+  document.getElementById('clearMsgsBtn')?.addEventListener('click', clearReadMessages);
 }
 
 // ─────────────────────────────────────────────────────────
