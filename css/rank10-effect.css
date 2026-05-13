@@ -1,0 +1,89 @@
+/* ─── Rang 10 — Effet True Confidant ──────────────────────────────────────── */
+
+/* Marqueur permanent : halo doré pulsant autour de l'avatar */
+.rank10-avatar {
+  box-shadow:
+    0 0 0 2px #f0b840,
+    0 0 12px 4px rgba(240, 184, 64, 0.5);
+  animation: rank10Pulse 2s ease-in-out infinite;
+}
+
+@keyframes rank10Pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px #f0b840,
+      0 0 12px 4px rgba(240, 184, 64, 0.5);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px #f5d070,
+      0 0 22px 8px rgba(240, 184, 64, 0.75);
+  }
+}
+
+/* Marqueur permanent : icône ✦ dorée à côté du pseudo */
+.rank10-icon {
+  color: #f0b840;
+  font-size: 0.85em;
+  margin-left: 5px;
+  text-shadow: 0 0 8px rgba(240, 184, 64, 0.8);
+  vertical-align: middle;
+  pointer-events: none;
+}
+
+/* Particule de burst */
+.rank10-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f0b840;
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  opacity: 1;
+  animation: rank10Burst 0.85s ease-out forwards;
+  --angle: calc(var(--i, 0) * 45deg);
+}
+
+@keyframes rank10Burst {
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(44px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Label typewriter "✦ True Confidant" */
+.rank10-label {
+  position: absolute;
+  bottom: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  color: #f0b840;
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 8px rgba(240, 184, 64, 0.8);
+  pointer-events: none;
+  animation: rank10Typewriter 1.1s steps(16) 0.6s forwards;
+}
+
+@keyframes rank10Typewriter {
+  from { width: 0; }
+  to   { width: 120px; }
+}
+
+.rank10-label--out {
+  animation: rank10FadeOut 0.55s ease forwards !important;
+}
+
+@keyframes rank10FadeOut {
+  to { opacity: 0; }
+}
