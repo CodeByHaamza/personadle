@@ -1,6 +1,7 @@
 name: CD — Deploy to Hostinger
 
 # Déclenchement MANUEL uniquement — jamais automatique sur push.
+# À ne lancer QUE depuis la branche main (après merge de develop → main).
 # Pour activer : aller dans GitHub → Actions → "CD — Deploy to Hostinger" → Run workflow.
 #
 # Secrets requis (GitHub → Settings → Secrets → Actions) :
