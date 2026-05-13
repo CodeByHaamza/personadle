@@ -116,16 +116,6 @@ if (!$link) jsonError('Social link not found', 404);
 // GET /api/admin/social-links/:id
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($method === 'GET') {
-    // Récupérer les configs badge si elles existent
-    $cfgStmt = $pdo->prepare(
-        'SELECT slbc.user_id, u.pseudo, slbc.ring_color, slbc.overlay, slbc.submitted_at
-         FROM social_link_badge_configs slbc
-         JOIN users u ON u.id = slbc.user_id
-         WHERE slbc.social_link_id = ?'
-    );
-    $cfgStmt->execute([$linkId]);
-    $configs = $cfgStmt->fetchAll();
-
     jsonSuccess([
         'id'                  => (int)  $link['id'],
         'user_a_id'           => (int)  $link['user_a_id'],
@@ -136,13 +126,6 @@ if ($method === 'GET') {
         'xp'                  => (int)  $link['xp'],
         'last_interaction_at' =>        $link['last_interaction_at'],
         'interaction_count'   => (int)  $link['interaction_count'],
-        'badge_configs'       => array_map(fn($c) => [
-            'user_id'      => (int) $c['user_id'],
-            'pseudo'       =>       $c['pseudo'],
-            'ring_color'   =>       $c['ring_color'],
-            'overlay'      =>       $c['overlay'],
-            'submitted_at' =>       $c['submitted_at'],
-        ], $configs),
     ]);
 }
 
@@ -177,13 +160,12 @@ if ($method === 'PATCH') {
 
     // Si le rang a augmenté → insérer des notifs pour les deux joueurs afin de déclencher l'animation rank-up côté client
     if (isset($rank) && $rank > (int) $link['rank']) {
-        $isBadgePrompt = ($rank === 10) ? 1 : 0;
         $notifStmt = $pdo->prepare(
-            'INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank, is_badge_prompt)
-             VALUES (?, ?, ?, ?)'
+            'INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank)
+             VALUES (?, ?, ?)'
         );
-        $notifStmt->execute([(int) $link['user_a_id'], (int) $link['user_b_id'], $rank, $isBadgePrompt]);
-        $notifStmt->execute([(int) $link['user_b_id'], (int) $link['user_a_id'], $rank, $isBadgePrompt]);
+        $notifStmt->execute([(int) $link['user_a_id'], (int) $link['user_b_id'], $rank]);
+        $notifStmt->execute([(int) $link['user_b_id'], (int) $link['user_a_id'], $rank]);
     }
 
     jsonSuccess(['success' => true]);
@@ -191,7 +173,7 @@ if ($method === 'PATCH') {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // DELETE /api/admin/social-links/:id — supprimer définitivement le social link
-// Supprime en cascade : configs badge, badge final, notifs, interactions
+// Supprime en cascade : notifs, interactions (FK ON DELETE CASCADE)
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($method === 'DELETE') {
     // Les FK avec ON DELETE CASCADE gèrent la plupart des tables liées.
