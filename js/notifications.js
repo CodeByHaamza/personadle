@@ -11,16 +11,11 @@ import { queueEvokerAnimations }    from './p3-evoker-anim.js';
 import { showSenderChallengeResult } from './challenge-result.js';
 import { queueChallengeNotifs }      from './challenge-notif.js';
 import { showSocialLinkRankUp }      from './social-link.js';
-import { showConfidantAnimation, openBadgeEditor } from './true-confidant-badge.js';
 
 const SEEN_KEY              = 'ccShownFriendshipIds';
 const SEEN_CHALLENGE_KEY    = 'seenChallengeResults';
 const SEEN_CHALLENGE_NOTIF  = 'seenChallengeNotifIds';
 const SEEN_RANKUP_KEY       = 'seenSLRankUpIds';
-// Set en mémoire (session uniquement) : évite de rejouer l'anim deux fois dans la même session
-// sans bloquer les sessions suivantes (la notif est consommée côté API de toute façon)
-const _seenBadgePromptIds  = new Set();
-const _seenBadgeCompleteIds = new Set(); // évite double-anim dans la même session
 
 let _pollTimer = null;
 
@@ -276,77 +271,13 @@ async function _checkRankUpNotifs() {
 
     const n = notifs[0];
 
-    if (n.is_badge_prompt) {
-      // Rang 10 → ouvrir l'éditeur de badge (une seule fois par session, notif déjà consommée côté API)
-      const key = `${n.partner_id}`;
-      if (!_seenBadgePromptIds.has(key)) {
-        _seenBadgePromptIds.add(key);
-        // Afficher d'abord l'animation rank-up, puis ouvrir l'éditeur
-        setTimeout(async () => {
-          showSocialLinkRankUp(n.new_rank, n.rank_names, {
-            friendAvatar: n.partner_avatar,
-            friendPseudo: n.partner_pseudo,
-          });
-          // Attendre la fin de l'animation rank-up (~8.5s) puis ouvrir l'éditeur
-          setTimeout(async () => {
-            const status = await window._personadleApi.socialLink
-              .getBadgeStatus(n.partner_id).catch(() => null);
-            if (!status || status.status === 'complete') return;
-            const meIsLeft = me.id < n.partner_id;
-            openBadgeEditor(
-              n.partner_id,
-              n.partner_pseudo,
-              n.partner_avatar || null,
-              meIsLeft ? 'left' : 'right',
-              status.your_config,
-              status.friend_submitted
-            );
-          }, 9000);
-        }, 800);
-      }
-    } else {
-      setTimeout(() => {
-        showSocialLinkRankUp(n.new_rank, n.rank_names, {
-          friendAvatar: n.partner_avatar,
-          friendPseudo: n.partner_pseudo,
-        });
-      }, 800);
-    }
+    setTimeout(() => {
+      showSocialLinkRankUp(n.new_rank, n.rank_names, {
+        friendAvatar: n.partner_avatar,
+        friendPseudo: n.partner_pseudo,
+      });
+    }, 800);
 
-    // Vérifier si un badge est maintenant complet (les deux ont soumis)
-    await _checkBadgeCompletion();
-  } catch {
-    // Silencieux
-  }
-}
-
-
-async function _checkBadgeCompletion() {
-  const api = window._personadleApi;
-  if (!api) return;
-  try {
-    const friendsData = await api.friends.list();
-    const friends     = friendsData.friends ?? [];
-    for (const friend of friends) {
-      const status = await api.socialLink.getBadgeStatus(friend.user_id).catch(() => null);
-      if (!status || status.status !== 'complete') continue;
-      if (status.badge_data) continue; // déjà enregistré en BDD
-
-      // Les deux ont soumis mais le badge final n'est pas encore en BDD → déclencher l'animation
-      if (_seenBadgeCompleteIds.has(friend.user_id)) continue;
-      _seenBadgeCompleteIds.add(friend.user_id);
-
-      const me      = window._currentUser;
-      const profile = JSON.parse(localStorage.getItem('personaProfile') || '{}');
-      showConfidantAnimation(
-        me?.pseudo || 'You',
-        friend.pseudo || '?',
-        me?.avatar_data || profile.avatar_data || null,
-        friend.avatar_data || null,
-        async () => { await api.socialLink.saveBadgeFinal(friend.user_id).catch(() => {}); }
-      );
-      return; // une animation à la fois
-    }
   } catch {
     // Silencieux
   }
