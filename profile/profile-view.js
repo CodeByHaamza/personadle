@@ -285,9 +285,6 @@ function buildViewingBanner(pseudo, friendCode, friendshipStatus) {
         <button id="vbCompareBtn" class="vb-friend-btn vb-compare-btn" data-fid="">
           ${t('compare.btn', '⚖ Compare Stats')}
         </button>
-        <button id="vbBadgeBtn" class="vb-friend-btn vb-badge-btn" data-fid="" data-pseudo="" style="display:none">
-          ${t('social_link.true_confidant_create_btn') || '✨ Create our badge'}
-        </button>
       `;
     } else if (friendshipStatus === 'pending_sent') {
       friendBtn = `<span class="vb-friend-status vb-friend-status--pending">${t('friends.request_sent') || 'Request sent'}</span>`;
@@ -357,32 +354,6 @@ function attachBannerActions(friendCode) {
     });
   }
 
-  const badgeBtn = document.getElementById('vbBadgeBtn');
-  if (badgeBtn && window._currentUser && window._personadleApi) {
-    const viewedUserId = parseInt(badgeBtn.dataset.fid || '0', 10);
-    if (viewedUserId > 0) {
-      window._personadleApi.socialLink.getBadgeStatus(viewedUserId)
-        .then(status => {
-          if (!status || status.status === 'none') return;
-          badgeBtn.style.display = '';
-          badgeBtn.addEventListener('click', () => {
-            const me       = window._currentUser;
-            const meIsLeft = me.id < viewedUserId;
-            if (window._openConfidantBadgeEditor) {
-              window._openConfidantBadgeEditor(
-                viewedUserId,
-                badgeBtn.dataset.pseudo || '?',
-                null,
-                meIsLeft ? 'left' : 'right',
-                status.your_config,
-                status.friend_submitted
-              );
-            }
-          });
-        })
-        .catch(() => {});
-    }
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -420,39 +391,38 @@ function renderViewBadges(profile, unlockedBadges) {
     return;
   }
 
-  const doRender = () => {
+  const doRender = async () => {
     if (!_badgesList) return;
+    previewEl.innerHTML = '';
 
-    previewEl.innerHTML = selectedIds
-      .map(id => _badgesList.find(b => b.id === id))
-      .filter(Boolean)
-      .map(b => `
-        <div class="badge-preview-item" title="${escapeHtml(b.name)}">
-          <img class="badge-preview-img"
-               src="${escapeHtml(b.img)}"
-               alt="${escapeHtml(b.name)}"
-               loading="lazy"
-               data-badge-id="${escapeHtml(b.id)}"
-               style="cursor:pointer">
-        </div>
-      `).join('');
-
-    // Click-to-zoom — identique à attachPreviewClicksToImages() dans profile-page.js
-    previewEl.querySelectorAll('.badge-preview-img').forEach(img => {
+    for (const id of selectedIds) {
+      // ── Regular badge ─────────────────────────────────────────────
+      const badge = _badgesList.find(b => b.id === id);
+      if (!badge) continue;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'badge-preview-item';
+      wrapper.title = escapeHtml(badge.name);
+      const img = document.createElement('img');
+      img.className = 'badge-preview-img';
+      img.src = escapeHtml(badge.img);
+      img.alt = escapeHtml(badge.name);
+      img.loading = 'lazy';
+      img.dataset.badgeId = escapeHtml(badge.id);
+      img.style.cursor = 'pointer';
       img.addEventListener('click', e => {
         e.stopPropagation();
-        const badge = _badgesList.find(b => b.id === img.dataset.badgeId);
-        if (badge) showBadgeZoom(badge);
+        showBadgeZoom(badge);
       });
-    });
+      wrapper.appendChild(img);
+      previewEl.appendChild(wrapper);
+    }
   };
 
   if (_badgesList) {
-    doRender();
+    doRender().catch(() => {});
   } else {
-    // Import dynamique peut ne pas encore être résolu
     const interval = setInterval(() => {
-      if (_badgesList) { clearInterval(interval); doRender(); }
+      if (_badgesList) { clearInterval(interval); doRender().catch(() => {}); }
     }, 100);
     setTimeout(() => clearInterval(interval), 5000);
   }
@@ -772,8 +742,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const banner = buildViewingBanner(user.pseudo, user.friend_code, friendshipStatus);
   const compareBtn = banner.querySelector('#vbCompareBtn');
   if (compareBtn) compareBtn.dataset.fid = user.id;
-  const badgeBtnEl = banner.querySelector('#vbBadgeBtn');
-  if (badgeBtnEl) { badgeBtnEl.dataset.fid = user.id; badgeBtnEl.dataset.pseudo = user.pseudo; }
   header?.insertAdjacentElement('afterend', banner);
   attachBannerActions(user.friend_code);
 
