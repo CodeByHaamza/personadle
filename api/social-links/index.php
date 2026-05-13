@@ -87,7 +87,7 @@ if ($method === 'GET' && $slIdx !== false && ($parts[$slIdx + 1] ?? '') === 'ran
     if (!in_array($lang, ['en','fr','es','de','it'])) $lang = 'en';
 
     $stmt = $pdo->prepare("
-        SELECT rn.id, rn.new_rank, rn.is_badge_prompt,
+        SELECT rn.id, rn.new_rank,
                u.id AS partner_id, u.pseudo AS partner_pseudo,
                p.avatar_data AS partner_avatar,
                slr.name_{$lang} AS rank_name,
@@ -113,7 +113,6 @@ if ($method === 'GET' && $slIdx !== false && ($parts[$slIdx + 1] ?? '') === 'ran
         'partner_id'     => (int) $n['partner_id'],
         'partner_pseudo' => $n['partner_pseudo'],
         'partner_avatar' => $n['partner_avatar'],
-        'is_badge_prompt'=> (bool) $n['is_badge_prompt'],
         'rank_names'     => [
             'en' => $n['name_en'],
             'fr' => $n['name_fr'],
@@ -211,17 +210,10 @@ if ($method === 'POST' && $slIdx !== false
 
         // Notifier l'autre joueur si le rang a monté (il verra l'animation au prochain poll)
         if ($result['ranked_up']) {
-            $isBadgePrompt = $result['rank'] === 10 ? 1 : 0;
             $pdo->prepare("
-                INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank, is_badge_prompt)
-                VALUES (?, ?, ?, ?)
-            ")->execute([$friendId, $authId, $result['rank'], $isBadgePrompt]);
-            if ($isBadgePrompt) {
-                $pdo->prepare("
-                    INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank, is_badge_prompt)
-                    VALUES (?, ?, ?, 1)
-                ")->execute([$authId, $friendId, 10]);
-            }
+                INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank)
+                VALUES (?, ?, ?)
+            ")->execute([$friendId, $authId, $result['rank']]);
         }
 
         $pdo->commit();
@@ -238,236 +230,6 @@ if ($method === 'POST' && $slIdx !== false
         'new_xp'    => (int) ($result['xp']       ?? 0),
         'new_rank'  => (int) ($result['rank']      ?? 1),
         'ranked_up' => (bool) ($result['ranked_up'] ?? false),
-    ]);
-}
-
-// ── GET /api/social-links/badge-status ───────────────────────────────────────
-if ($method === 'GET' && $slIdx !== false && ($parts[$slIdx + 1] ?? '') === 'badge-status') {
-    $friendId = (int) ($_GET['friend_id'] ?? 0);
-    if ($friendId <= 0) jsonError('Missing friend_id', 400);
-
-    $aId = min($authId, $friendId);
-    $bId = max($authId, $friendId);
-    $stmt = $pdo->prepare('SELECT id, `rank`, badge_generated FROM social_links WHERE user_a_id = ? AND user_b_id = ? LIMIT 1');
-    $stmt->execute([$aId, $bId]);
-    $link = $stmt->fetch();
-
-    if (!$link || (int)$link['rank'] < 10) {
-        jsonSuccess(['status' => 'none', 'your_config' => null, 'friend_submitted' => false, 'badge_data' => null]);
-    }
-
-    if ((int)$link['badge_generated'] === 1) {
-        $stmt2 = $pdo->prepare('SELECT * FROM social_link_badges WHERE social_link_id = ? LIMIT 1');
-        $stmt2->execute([$link['id']]);
-        $badge = $stmt2->fetch();
-        $isUserA = $aId === $authId;
-        jsonSuccess([
-            'status'          => 'complete',
-            'your_config'     => null,
-            'friend_submitted'=> true,
-            'badge_data'      => $badge ? [
-                'user_a_avatar' => $badge['user_a_avatar'],
-                'user_b_avatar' => $badge['user_b_avatar'],
-                'user_a_pseudo' => $badge['user_a_pseudo'],
-                'user_b_pseudo' => $badge['user_b_pseudo'],
-                'is_user_a'     => $isUserA,
-            ] : null,
-        ]);
-    }
-
-    $stmt3 = $pdo->prepare('SELECT * FROM social_link_badge_configs WHERE social_link_id = ?');
-    $stmt3->execute([$link['id']]);
-    $configs = $stmt3->fetchAll();
-    $yourConfig      = null;
-    $friendSubmitted = false;
-    foreach ($configs as $cfg) {
-        if ((int)$cfg['user_id'] === $authId) {
-            $yourConfig = [
-                'crop_x'     => (float)$cfg['crop_x'],
-                'crop_y'     => (float)$cfg['crop_y'],
-                'crop_scale' => (float)$cfg['crop_scale'],
-                'ring_color' => $cfg['ring_color'],
-                'bg_color'   => $cfg['bg_color'],
-                'overlay'    => $cfg['overlay'],
-                'submitted'  => $cfg['submitted_at'] !== null,
-            ];
-        } else {
-            $friendSubmitted = $cfg['submitted_at'] !== null;
-        }
-    }
-
-    $yourSubmitted = $yourConfig['submitted'] ?? false;
-    if ($yourSubmitted && $friendSubmitted) {
-        $status = 'complete';
-    } elseif ($yourSubmitted) {
-        $status = 'pending_theirs';
-    } elseif ($friendSubmitted) {
-        $status = 'pending_yours';
-    } else {
-        $status = 'pending_none';
-    }
-
-    jsonSuccess([
-        'status'           => $status,
-        'your_config'      => $yourConfig,
-        'friend_submitted' => $friendSubmitted,
-        'badge_data'       => null,
-    ]);
-}
-
-// ── POST /api/social-links/badge-config ──────────────────────────────────────
-if ($method === 'POST' && $slIdx !== false && ($parts[$slIdx + 1] ?? '') === 'badge-config') {
-    $data     = getJsonBody();
-    $friendId = (int) ($data['friend_id'] ?? 0);
-    if ($friendId <= 0) jsonError('Missing friend_id', 400);
-
-    $stmtF = $pdo->prepare("SELECT id FROM friendships WHERE status='accepted' AND ((requester_id=? AND addressee_id=?) OR (requester_id=? AND addressee_id=?)) LIMIT 1");
-    $stmtF->execute([$authId, $friendId, $friendId, $authId]);
-    if (!$stmtF->fetch()) jsonError('Not friends', 403);
-
-    $aId = min($authId, $friendId);
-    $bId = max($authId, $friendId);
-    $stmt = $pdo->prepare('SELECT id, `rank`, badge_generated FROM social_links WHERE user_a_id = ? AND user_b_id = ? LIMIT 1');
-    $stmt->execute([$aId, $bId]);
-    $link = $stmt->fetch();
-    if (!$link || (int)$link['rank'] < 10) jsonError('Social Link not at rank 10', 403);
-    if ((int)$link['badge_generated'] === 1) jsonError('Badge already generated', 409);
-
-    $linkId    = (int)$link['id'];
-    $avatarData = $data['avatar_data'] ?? null;
-    $cropX     = (float)($data['crop_x']     ?? 0);
-    $cropY     = (float)($data['crop_y']     ?? 0);
-    $cropScale = max(0.5, min(5.0, (float)($data['crop_scale'] ?? 1)));
-    $ringColor = preg_match('/^#[0-9a-fA-F]{6}$/', $data['ring_color'] ?? '') ? $data['ring_color'] : '#f5c842';
-    $bgColor   = preg_match('/^#[0-9a-fA-F]{6}$/', $data['bg_color']   ?? '') ? $data['bg_color']   : null;
-    $overlay   = in_array($data['overlay'] ?? '', ['none','glow','shadow']) ? $data['overlay'] : 'none';
-    $submit    = !empty($data['submit']);
-
-    $bothSubmitted = false;
-    $pdo->beginTransaction();
-    try {
-        $pdo->prepare("
-            INSERT INTO social_link_badge_configs
-                (social_link_id, user_id, avatar_data, crop_x, crop_y, crop_scale, ring_color, bg_color, overlay, submitted_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                avatar_data  = VALUES(avatar_data),
-                crop_x       = VALUES(crop_x),
-                crop_y       = VALUES(crop_y),
-                crop_scale   = VALUES(crop_scale),
-                ring_color   = VALUES(ring_color),
-                bg_color     = VALUES(bg_color),
-                overlay      = VALUES(overlay),
-                submitted_at = VALUES(submitted_at),
-                updated_at   = NOW()
-        ")->execute([
-            $linkId, $authId, $avatarData,
-            $cropX, $cropY, $cropScale,
-            $ringColor, $bgColor, $overlay,
-            $submit ? date('Y-m-d H:i:s') : null,
-        ]);
-
-        if ($submit) {
-            $stmt2 = $pdo->prepare('SELECT submitted_at FROM social_link_badge_configs WHERE social_link_id = ?');
-            $stmt2->execute([$linkId]);
-            $allConfigs = $stmt2->fetchAll();
-            $bothSubmitted = count($allConfigs) === 2
-                && array_reduce($allConfigs, fn($c, $r) => $c && $r['submitted_at'] !== null, true);
-            if ($bothSubmitted) {
-                $pdo->prepare('UPDATE social_links SET badge_generated = 1 WHERE id = ?')->execute([$linkId]);
-            }
-        }
-
-        $pdo->commit();
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        error_log('[badge-config] ' . $e->getMessage());
-        jsonError('Failed to save badge config', 500);
-    }
-
-    jsonSuccess(['ok' => true, 'both_submitted' => $bothSubmitted]);
-}
-
-// ── POST /api/social-links/badge-final ───────────────────────────────────────
-if ($method === 'POST' && $slIdx !== false && ($parts[$slIdx + 1] ?? '') === 'badge-final') {
-    $data     = getJsonBody();
-    $friendId = (int)($data['friend_id'] ?? 0);
-    if ($friendId <= 0) jsonError('Missing friend_id', 400);
-
-    $aId = min($authId, $friendId);
-    $bId = max($authId, $friendId);
-    $stmt = $pdo->prepare('
-        SELECT sl.id, sl.badge_generated, sl.user_a_id,
-               u_a.pseudo AS pseudo_a, u_b.pseudo AS pseudo_b
-        FROM social_links sl
-        JOIN users u_a ON u_a.id = sl.user_a_id
-        JOIN users u_b ON u_b.id = sl.user_b_id
-        WHERE sl.user_a_id = ? AND sl.user_b_id = ? LIMIT 1
-    ');
-    $stmt->execute([$aId, $bId]);
-    $link = $stmt->fetch();
-    if (!$link || (int)$link['badge_generated'] !== 1) jsonError('Badge not ready', 403);
-
-    $stmt2 = $pdo->prepare('SELECT user_id, avatar_data FROM social_link_badge_configs WHERE social_link_id = ?');
-    $stmt2->execute([$link['id']]);
-    $configs = $stmt2->fetchAll();
-    $aAvatar = null;
-    $bAvatar = null;
-    foreach ($configs as $c) {
-        if ((int)$c['user_id'] === $aId) $aAvatar = $c['avatar_data'];
-        else $bAvatar = $c['avatar_data'];
-    }
-
-    $pdo->prepare("
-        INSERT INTO social_link_badges (social_link_id, user_a_avatar, user_b_avatar, user_a_pseudo, user_b_pseudo)
-        VALUES (?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-            user_a_avatar = VALUES(user_a_avatar),
-            user_b_avatar = VALUES(user_b_avatar),
-            generated_at  = NOW()
-    ")->execute([$link['id'], $aAvatar, $bAvatar, $link['pseudo_a'], $link['pseudo_b']]);
-
-    foreach ([$aId, $bId] as $uid) {
-        $pdo->prepare("
-            INSERT IGNORE INTO badges_unlocked (user_id, badge_id, unlocked_at)
-            SELECT ?, id, NOW() FROM badges WHERE slug = 'true_confidant' LIMIT 1
-        ")->execute([$uid]);
-    }
-
-    jsonSuccess(['ok' => true]);
-}
-
-// ── GET /api/social-links/:linkId/badge ──────────────────────────────────────
-if ($method === 'GET' && $slIdx !== false
-    && ctype_digit((string)($parts[$slIdx + 1] ?? ''))
-    && ($parts[$slIdx + 2] ?? '') === 'badge'
-) {
-    $targetLinkId = (int)$parts[$slIdx + 1];
-    $stmt = $pdo->prepare('SELECT id, user_a_id, user_b_id, badge_generated FROM social_links WHERE id = ? AND (user_a_id = ? OR user_b_id = ?) LIMIT 1');
-    $stmt->execute([$targetLinkId, $authId, $authId]);
-    $link = $stmt->fetch();
-    if (!$link) jsonError('Not found', 404);
-
-    $stmt2 = $pdo->prepare('SELECT user_id, avatar_data, crop_x, crop_y, crop_scale, ring_color, bg_color, overlay, submitted_at FROM social_link_badge_configs WHERE social_link_id = ?');
-    $stmt2->execute([$targetLinkId]);
-    $configs = $stmt2->fetchAll();
-
-    jsonSuccess([
-        'link_id'         => $targetLinkId,
-        'badge_generated' => (bool)$link['badge_generated'],
-        'is_user_a'       => (int)$link['user_a_id'] === $authId,
-        'configs'         => array_map(fn($c) => [
-            'user_id'    => (int)$c['user_id'],
-            'is_me'      => (int)$c['user_id'] === $authId,
-            'avatar_data'=> $c['avatar_data'],
-            'crop_x'     => (float)$c['crop_x'],
-            'crop_y'     => (float)$c['crop_y'],
-            'crop_scale' => (float)$c['crop_scale'],
-            'ring_color' => $c['ring_color'],
-            'bg_color'   => $c['bg_color'],
-            'overlay'    => $c['overlay'],
-            'submitted'  => $c['submitted_at'] !== null,
-        ], $configs),
     ]);
 }
 
@@ -622,17 +384,10 @@ if ($method === 'POST' && $subAction === 'interact') {
 
         // Notifier l'autre joueur si le rang a monté (il verra l'animation au prochain poll)
         if ($result['ranked_up']) {
-            $isBadgePrompt = $result['rank'] === 10 ? 1 : 0;
             $pdo->prepare("
-                INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank, is_badge_prompt)
-                VALUES (?, ?, ?, ?)
-            ")->execute([$otherId, $authId, $result['rank'], $isBadgePrompt]);
-            if ($isBadgePrompt) {
-                $pdo->prepare("
-                    INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank, is_badge_prompt)
-                    VALUES (?, ?, ?, 1)
-                ")->execute([$authId, $otherId, 10]);
-            }
+                INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank)
+                VALUES (?, ?, ?)
+            ")->execute([$otherId, $authId, $result['rank']]);
         }
 
         $pdo->commit();
