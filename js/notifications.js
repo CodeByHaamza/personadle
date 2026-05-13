@@ -15,7 +15,6 @@ import { showSocialLinkRankUp }      from './social-link.js';
 const SEEN_KEY              = 'ccShownFriendshipIds';
 const SEEN_CHALLENGE_KEY    = 'seenChallengeResults';
 const SEEN_CHALLENGE_NOTIF  = 'seenChallengeNotifIds';
-const SEEN_RANKUP_KEY       = 'seenSLRankUpIds';
 
 let _pollTimer = null;
 
