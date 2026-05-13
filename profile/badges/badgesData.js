@@ -18,7 +18,6 @@ export const BADGE_CATEGORIES = {
   EVENT:          "event",          // Badges d'événements temporaires
   SECRET:         "secret",         // Badges secrets (codes permanents)
   SOCIAL:         "social",         // Badges sociaux (partage, etc.)
-  TRUE_CONFIDANT: "true_confidant", // Badge généré dynamiquement au rang 10 Social Link
 };
 
 // ───────────────────────────────────────────────────────────────────────────
