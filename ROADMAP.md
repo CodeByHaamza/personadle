@@ -35,7 +35,7 @@
 | B13 | API streak recovery (`recover-streak.php`) | ✅ | `POST /api/user/recover-streak` |
 | B14 | API Social Link rang-up notifs | ✅ | Table `social_link_rankup_notifs` (migration 009), `GET /api/social-links/rankup-notifs` |
 | B15 | API Admin — gestion comptes, badges, stats | ✅ | `api/admin/` — users, user_badges, user_wallpapers, user_titles, user_stats, social_links |
-| B16 | CI/CD GitHub Actions → Hostinger | 📋 | Deploy automatique sur push `main` |
+| B16 | CI/CD GitHub Actions | 📋 | Voir Q8 + Q9 dans section Qualité & DevEx |
 
 ---
 
@@ -50,7 +50,7 @@
 | A5 | Suppression d'ami | ✅ | DELETE /api/friends/:id |
 | A6 | Social Link — XP + rangs 1-10 | ✅ | XP, jauge, flamme, toast rang-up |
 | A7 | Interactions mutuelles (2× XP), anti-spam | ✅ | Procédure SQL |
-| A8 | True Confidant Badge (rang 10) | ✅ | Badge avec les 2 avatars côte à côte, généré dynamiquement |
+| A8 | Effet rang 10 — True Confidant | ✅ | Badge canvas supprimé — remplacé par halo doré + icône ✦ + animation burst/typewriter sur profil et liste amis (`css/rank10-effect.css`, `js/social-link.js`) |
 | A9 | Comparaison stats côte à côte | ✅ | Overlay radar + phrases Persona i18n (`database/compare-phrases.js`) |
 | A10 | Défis entre amis (6 modes, filtres, anti-doublon) | ✅ | Bandeau + bouton post-victoire, give-up = défaite |
 | A11 | Sélecteur style animation demandes d'amis | ✅ | 🃏 Calling Card / 📺 P4 TV / 🔫 P3 Evoker |
@@ -106,8 +106,8 @@
 | AD5 | Édition stats manuelles (streak, wins…) | ✅ | `api/admin/user_stats.php` |
 | AD6 | Gestion Social Links depuis admin | ✅ | `api/admin/social_links.php` |
 | AD7 | Annonce / bannière in-game | 📋 | Pour patch notes ou événements ponctuels |
-| AD8 | Gestion des codes événement (CRUD + stats usage) | 📋 | Actuellement gérés en dur dans `badgesData.js` |
-| AD9 | Modération des pseudos (blocage / renommage forcé) | 📋 | — |
+| AD8 | Gestion des codes événement (CRUD + stats usage) | ✅ | Table `event_codes` (migration 011), `api/admin/event_codes.php`, bouton 🎟️ Codes dans admin |
+| AD9 | Modération des pseudos (bannissement + verrou pseudo) | ✅ | Colonnes `is_banned`/`pseudo_locked` (migration 011), section Modération dans tab Profil admin, login vérifie `is_banned`, API user vérifie `pseudo_locked` |
 
 ---
 
@@ -163,4 +163,5 @@
 | Q5 | BASE_URL API auto-détecté (Apache local + prod) | ✅ | `pathname.startsWith('/personadle/')` |
 | Q6 | Audit responsive complet (360px → 1440px) | ✅ | Tous les modes + profil + leaderboard + friends + admin couverts (3 breakpoints chacun) |
 | Q7 | Tests E2E (Playwright ou Cypress) | 📋 | Avant déploiement final |
-| Q8 | CI/CD GitHub Actions → Hostinger | 📋 | Déploiement automatique sur push `main` |
+| Q8 | CI — GitHub Actions | 📋 | **À faire plus tard** — pipeline sur chaque push : `npm test` (Vitest) + `npm run i18n:check` + `php -l` syntaxe PHP. Pas de prérequis git. |
+| Q9 | CD — Deploy automatique → Hostinger | 📋 | **À faire plus tard, après Q8** — rsync via SSH ou `git pull` webhook. Prérequis : adopter workflow feature branches → `develop` → `main` = prod. Stocker clé SSH dans GitHub Secrets. |
