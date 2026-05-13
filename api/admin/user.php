@@ -28,7 +28,7 @@ if ($userId <= 0) jsonError('Invalid user id', 400);
 if ($method === 'GET') {
     // Utilisateur
     $stmt = $pdo->prepare(
-        'SELECT id, email, pseudo, lang, friend_code, is_admin, created_at, last_login_at
+        'SELECT id, email, pseudo, lang, friend_code, is_admin, is_banned, pseudo_locked, created_at, last_login_at
          FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1'
     );
     $stmt->execute([$userId]);
@@ -103,7 +103,6 @@ if ($method === 'GET') {
                 u.pseudo,
                 sl.`rank`,
                 sl.xp,
-                sl.badge_generated,
                 sl.last_interaction_at,
                 (SELECT COUNT(*) FROM social_link_interactions sli WHERE sli.social_link_id = sl.id) AS interaction_count
          FROM social_links sl
@@ -123,6 +122,8 @@ if ($method === 'GET') {
             'lang'          =>        $user['lang'],
             'friend_code'   =>        $user['friend_code'],
             'is_admin'      => (bool) $user['is_admin'],
+            'is_banned'     => (bool) ($user['is_banned']      ?? false),
+            'pseudo_locked' => (bool) ($user['pseudo_locked']  ?? false),
             'created_at'    =>        $user['created_at'],
             'last_login_at' =>        $user['last_login_at'],
         ],
@@ -158,7 +159,6 @@ if ($method === 'GET') {
             'pseudo'            =>        $sl['pseudo'],
             'rank'              => (int)  $sl['rank'],
             'xp'                => (int)  $sl['xp'],
-            'badge_generated'   => (bool) $sl['badge_generated'],
             'last_interaction_at' =>      $sl['last_interaction_at'],
             'interaction_count' => (int)  $sl['interaction_count'],
         ], $socialLinks),
@@ -225,6 +225,18 @@ if ($method === 'PATCH') {
         $userParams[] = (int) (bool) $data['is_admin'];
     }
 
+    // is_banned
+    if (array_key_exists('is_banned', $data)) {
+        $userFields[] = 'is_banned = ?';
+        $userParams[] = (int) (bool) $data['is_banned'];
+    }
+
+    // pseudo_locked
+    if (array_key_exists('pseudo_locked', $data)) {
+        $userFields[] = 'pseudo_locked = ?';
+        $userParams[] = (int) (bool) $data['pseudo_locked'];
+    }
+
     // avatar_border_color (dans profiles)
     if (array_key_exists('avatar_border_color', $data)) {
         $color = trim((string) $data['avatar_border_color']);
@@ -266,7 +278,7 @@ if ($method === 'PATCH') {
 
     // Retourner l'utilisateur mis à jour
     $stmt = $pdo->prepare(
-        'SELECT id, email, pseudo, lang, friend_code, is_admin, created_at, last_login_at
+        'SELECT id, email, pseudo, lang, friend_code, is_admin, is_banned, pseudo_locked, created_at, last_login_at
          FROM users WHERE id = ? LIMIT 1'
     );
     $stmt->execute([$userId]);
@@ -280,6 +292,8 @@ if ($method === 'PATCH') {
             'lang'          =>        $updated['lang'],
             'friend_code'   =>        $updated['friend_code'],
             'is_admin'      => (bool) $updated['is_admin'],
+            'is_banned'     => (bool) ($updated['is_banned']     ?? false),
+            'pseudo_locked' => (bool) ($updated['pseudo_locked'] ?? false),
             'created_at'    =>        $updated['created_at'],
             'last_login_at' =>        $updated['last_login_at'],
         ],

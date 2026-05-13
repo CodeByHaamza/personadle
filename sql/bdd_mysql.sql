@@ -19,14 +19,13 @@ DROP VIEW  IF EXISTS v_global_stats;
 DROP VIEW  IF EXISTS v_friends;
 DROP TABLE IF EXISTS deletion_requests;
 DROP TABLE IF EXISTS leaderboard_cache;
-DROP TABLE IF EXISTS social_link_badges;
 DROP TABLE IF EXISTS social_link_interactions;
 DROP TABLE IF EXISTS social_links;
 DROP TABLE IF EXISTS social_link_ranks;
 DROP TABLE IF EXISTS friendships;
 DROP TABLE IF EXISTS event_codes_redeemed;
 DROP TABLE IF EXISTS badges_unlocked;
-DROP TABLE IF EXISTS daily_targets;
+DROP TABLE IF EXISTS badges;
 DROP TABLE IF EXISTS game_sessions;
 DROP TABLE IF EXISTS user_stats;
 DROP TABLE IF EXISTS user_titles;
@@ -94,7 +93,7 @@ CREATE TABLE titles (
     -- 'wins_total' | 'streak_record' | 'mode_wins' | 'perfect_wins'
     -- 'social_link_rank_10' | 'badges_count' | 'unique_days' | 'friends_count'
     -- 'giveups_total' | 'all_modes_won' | 'leaderboard_top' | 'weekly_clean_modes'
-    -- 'classic_p1_wins' | 'emoji_p2_wins' | 'manual'
+    -- 'classic_p1_wins' | 'emoji_p2_wins' | 'joker_profile' | 'manual'
 
     condition_mode  VARCHAR(30),
     -- NULL = global, sinon: 'classic' | 'emoji' | 'silhouette' | 'alloutattack' | 'personae' | 'music'
@@ -110,7 +109,7 @@ CREATE TABLE titles (
 -- Seed : 11 titres visuels (calling cards)
 INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_it, condition_type, condition_value, rarity) VALUES
 ('velvet_room_thou_art_i',    'profile/titles/velvet_room_thou_art_i.webp',    'Thou Art I',             'Thou Art I',              'Thou Art I',            'Thou Art I',           'Thou Art I',          'badges_count',        20,  'legendary'),
-('joker_looking_cool',        'profile/titles/joker_looking_cool.webp',        'Looking Cool',           'Looking Cool',            'Looking Cool',          'Looking Cool',         'Looking Cool',        'leaderboard_top',     100, 'legendary'),
+('joker_looking_cool',        'profile/titles/joker_looking_cool.webp',        'Looking Cool',           'Looking Cool',            'Looking Cool',          'Looking Cool',         'Looking Cool',        'joker_profile',       0,   'legendary'),
 ('makoto_yuki_memento_mori',  'profile/titles/makoto_yuki_memento_mori.webp',  'Memento Mori',           'Memento Mori',            'Memento Mori',          'Memento Mori',         'Memento Mori',        'unique_days',         100, 'epic'),
 ('aigis_i_am_not_afraid',     'profile/titles/aigis_i_am_not_afraid.webp',     'I Am Not Afraid',        'Je N''Ai Pas Peur',       'No Tengo Miedo',        'Ich Habe Keine Angst', 'Non Ho Paura',        'mode_wins',           50,  'rare'),
 ('akechi_pancakes',           'profile/titles/akechi_pancakes.webp',           'Pancakes?',              'Pancakes ?',              '¿Panqueques?',          'Pfannkuchen?',         'Pancakes?',           'weekly_clean_modes',  3,   'epic'),
@@ -214,21 +213,24 @@ CREATE INDEX idx_game_sessions_target    ON game_sessions(mode, played_date, tar
 
 
 -- =============================================================================
--- 7. DAILY_TARGETS — Personnage/musique du jour par mode (serveur)
+-- 7. BADGES — Catalogue des badges (source de vérité)
 -- =============================================================================
-CREATE TABLE daily_targets (
-    mode            VARCHAR(30)      NOT NULL,
-    target_date     DATE             NOT NULL,
-    target_name     VARCHAR(200)     NOT NULL,
-    target_data     JSON,
-    created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (mode, target_date)
+CREATE TABLE badges (
+    slug            VARCHAR(100)    NOT NULL PRIMARY KEY,
+    name_en         VARCHAR(200)    NOT NULL,
+    name_fr         VARCHAR(200)    NOT NULL DEFAULT '',
+    name_es         VARCHAR(200)    NOT NULL DEFAULT '',
+    name_de         VARCHAR(200)    NOT NULL DEFAULT '',
+    name_it         VARCHAR(200)    NOT NULL DEFAULT '',
+    category        ENUM('achievement','streak','event','secret','social') NOT NULL DEFAULT 'achievement',
+    rarity          ENUM('common','rare','epic','legendary') NOT NULL DEFAULT 'common',
+    image_path      VARCHAR(255)    NOT NULL DEFAULT '',
+    condition_en    VARCHAR(500)    NOT NULL DEFAULT '',
+    is_secret       TINYINT(1)      NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 -- =============================================================================
--- 8. BADGES_UNLOCKED
+-- 9. BADGES_UNLOCKED
 -- =============================================================================
 CREATE TABLE badges_unlocked (
     id          BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
@@ -323,7 +325,6 @@ CREATE TABLE social_links (
     user_b_id           BIGINT UNSIGNED  NOT NULL,
     `rank`              INT              NOT NULL DEFAULT 1,
     xp                  INT              NOT NULL DEFAULT 0,
-    badge_generated     TINYINT(1)       NOT NULL DEFAULT 0,
     created_at          TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_interaction_at TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
                                                   ON UPDATE CURRENT_TIMESTAMP,
@@ -365,21 +366,9 @@ CREATE INDEX idx_sli_initiator   ON social_link_interactions(initiator_id);
 
 
 -- =============================================================================
--- 14. SOCIAL_LINK_BADGES — Badge True Confidant (rang 10)
+-- 14. (removed: SOCIAL_LINK_BADGES — Badge True Confidant replaced by rank10-effect)
 -- =============================================================================
-CREATE TABLE social_link_badges (
-    id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
-    social_link_id  BIGINT UNSIGNED  NOT NULL,
-    user_a_avatar   MEDIUMTEXT,       -- snapshot base64 au moment du rang 10
-    user_b_avatar   MEDIUMTEXT,
-    user_a_pseudo   VARCHAR(50)      NOT NULL,
-    user_b_pseudo   VARCHAR(50)      NOT NULL,
-    generated_at    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (id),
-    UNIQUE KEY uq_slb_link (social_link_id),
-    FOREIGN KEY (social_link_id) REFERENCES social_links(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- CREATE TABLE social_link_badges was here; removed in migration 012_remove_tcb
 
 
 -- =============================================================================
@@ -447,11 +436,11 @@ CREATE VIEW v_global_stats AS
 -- Social Links d'un utilisateur (dans les deux sens)
 CREATE VIEW v_social_links AS
     SELECT sl.id, sl.user_a_id AS user_id, sl.user_b_id AS friend_id,
-           sl.`rank`, sl.xp, sl.badge_generated, sl.created_at, sl.last_interaction_at
+           sl.`rank`, sl.xp, sl.created_at, sl.last_interaction_at
     FROM social_links sl
     UNION ALL
     SELECT sl.id, sl.user_b_id AS user_id, sl.user_a_id AS friend_id,
-           sl.`rank`, sl.xp, sl.badge_generated, sl.created_at, sl.last_interaction_at
+           sl.`rank`, sl.xp, sl.created_at, sl.last_interaction_at
     FROM social_links sl;
 
 
@@ -461,10 +450,12 @@ CREATE VIEW v_social_links AS
 -- Les fichiers image restent des assets statiques.
 -- Cette table référence uniquement les IDs et leurs conditions de déblocage.
 CREATE TABLE wallpapers (
-    id                  VARCHAR(64)         NOT NULL PRIMARY KEY,   -- ex: "p5_velvet_room"
-    game                VARCHAR(16),                                -- P1, P3, P4, P5, PQ…
-    is_default          TINYINT(1)          NOT NULL DEFAULT 0,    -- 1 = disponible sans déblocage
-    unlock_condition    VARCHAR(255)        NULL                    -- NULL si is_default = 1
+    id                  VARCHAR(64)         NOT NULL PRIMARY KEY,
+    name                VARCHAR(200)        NOT NULL DEFAULT '',
+    game                VARCHAR(16),
+    is_default          TINYINT(1)          NOT NULL DEFAULT 0,
+    unlock_condition    VARCHAR(255)        NULL,
+    image_path          VARCHAR(255)        NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================================================

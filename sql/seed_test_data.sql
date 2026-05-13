@@ -24,7 +24,6 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- Nettoyage des données de test (ne touche PAS au schéma ni aux titles)
 DELETE FROM social_link_interactions;
-DELETE FROM social_link_badges;
 DELETE FROM social_links;
 DELETE FROM friendships;
 DELETE FROM badges_unlocked;

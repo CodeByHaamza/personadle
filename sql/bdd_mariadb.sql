@@ -233,7 +233,6 @@ CREATE TABLE social_links (
     user_b_id           BIGINT UNSIGNED     NOT NULL,
     rank                INT                 NOT NULL DEFAULT 1,
     xp                  INT                 NOT NULL DEFAULT 0,
-    badge_generated     TINYINT(1)          NOT NULL DEFAULT 0,
     created_at          TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_interaction_at TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP
                                             ON UPDATE CURRENT_TIMESTAMP,
@@ -296,19 +295,8 @@ CREATE INDEX idx_sli_initiator   ON social_link_interactions(initiator_id);
 
 
 -- =============================================================================
--- 14. SOCIAL_LINK_BADGES — Badge True Confidant (rang 10)
+-- 14. (removed: SOCIAL_LINK_BADGES — replaced by rank10-effect, see migration 012_remove_tcb)
 -- =============================================================================
-CREATE TABLE social_link_badges (
-    id              BIGINT UNSIGNED     NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    social_link_id  BIGINT UNSIGNED     NOT NULL UNIQUE,
-    user_a_avatar   LONGTEXT,
-    user_b_avatar   LONGTEXT,
-    user_a_pseudo   VARCHAR(50)         NOT NULL,
-    user_b_pseudo   VARCHAR(50)         NOT NULL,
-    generated_at    TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_slb_link FOREIGN KEY (social_link_id) REFERENCES social_links(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 -- =============================================================================
 -- 15. LEADERBOARD_CACHE — Cache classements
@@ -370,11 +358,11 @@ GROUP BY user_id;
 -- Vue : Social Links dans les deux sens
 CREATE OR REPLACE VIEW v_social_links AS
 SELECT sl.id, sl.user_a_id AS user_id, sl.user_b_id AS friend_id,
-       sl.rank, sl.xp, sl.badge_generated, sl.created_at, sl.last_interaction_at
+       sl.rank, sl.xp, sl.created_at, sl.last_interaction_at
 FROM social_links sl
 UNION ALL
 SELECT sl.id, sl.user_b_id AS user_id, sl.user_a_id AS friend_id,
-       sl.rank, sl.xp, sl.badge_generated, sl.created_at, sl.last_interaction_at
+       sl.rank, sl.xp, sl.created_at, sl.last_interaction_at
 FROM social_links sl;
 
 

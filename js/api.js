@@ -411,17 +411,6 @@ export const api = {
     /** Récupère les rank-up notifs en attente pour l'utilisateur connecté. */
     getRankUpNotifs: (lang = 'en') => get(`/social-links/rankup-notifs?lang=${lang}`),
 
-    /** État du badge True Confidant avec un ami. */
-    getBadgeStatus: (friendId) => get(`/social-links/badge-status?friend_id=${friendId}`),
-
-    /** Sauvegarder/soumettre la config de sa moitié. submit=true pour valider. */
-    saveBadgeConfig: (friendId, config) =>
-      post(`/social-links/badge-config`, { friend_id: friendId, ...config }),
-
-    /** Enregistre le badge final (après Canvas) pour les deux joueurs. */
-    saveBadgeFinal: (friendId) =>
-      post(`/social-links/badge-final`, { friend_id: friendId }),
-
     /** Configs des deux moitiés pour le rendu Canvas. */
     getBadgeData: (linkId) => get(`/social-links/${linkId}/badge`),
   },

@@ -253,10 +253,8 @@ SELECT
     gs.target_name,
     gs.result,
     gs.attempts,
-    gs.time_ms,
-    dt.target_data  -- snapshot complet du personnage
+    gs.time_ms
 FROM game_sessions gs
-LEFT JOIN daily_targets dt ON dt.mode = gs.mode AND dt.target_date = gs.played_date
 WHERE gs.user_id = 1
 ORDER BY gs.played_date DESC
 LIMIT 30;
@@ -264,50 +262,7 @@ LIMIT 30;
 
 ---
 
-## 6. `daily_targets` — Le personnage du jour (côté serveur)
-
-**Pourquoi :** Même si on ne fait pas d'anti-triche, stocker le personnage du jour côté serveur permet :
-- L'historique exact (quel perso chaque jour)
-- Les stats globales sans avoir à recalculer
-- Le replay feature
-
-```
-mode       │ target_date │ target_name    │ target_data (JSON)
-───────────┼─────────────┼────────────────┼────────────────────────────────────────────
-classic    │ 2026-03-30  │ Ryuji Sakamoto │ {"nom":"Ryuji","genre":"M","age":16,...}
-music      │ 2026-03-30  │ Last Surprise  │ {"titre":"Last Surprise","opus":"P5",...}
-silhouette │ 2026-03-30  │ Aigis          │ {"nom":"Aigis","image":"Aigis.webp",...}
-```
-
-**Génération du target du jour (PHP — script cron à minuit Paris) :**
-
-```php
-// Appelé chaque jour à 00:00 Europe/Paris via cron
-function generateDailyTargets(PDO $pdo): void {
-    $today = (new DateTimeImmutable('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
-    $modes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
-
-    foreach ($modes as $mode) {
-        // Vérifier si déjà généré
-        $check = $pdo->prepare("SELECT 1 FROM daily_targets WHERE mode = ? AND target_date = ?");
-        $check->execute([$mode, $today]);
-        if ($check->fetch()) continue;
-
-        // Sélection basée sur seed déterministe (même logique que parisDateKey() côté client)
-        $target = selectDailyTargetForMode($mode, $today);
-
-        $stmt = $pdo->prepare("
-            INSERT INTO daily_targets (mode, target_date, target_name, target_data)
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->execute([$mode, $today, $target['nom'], json_encode($target)]);
-    }
-}
-```
-
----
-
-## 7. `friendships` — Demandes et relations d'amitié
+## 6. `friendships` — Demandes et relations d'amitié
 
 **Pourquoi :** Gérer les états d'une relation (en attente → acceptée → bloquée). Séparé de `social_links` car une amitié peut exister sans Social Link (à l'acceptation, le Social Link est créé automatiquement).
 
@@ -357,18 +312,18 @@ ORDER BY sl.rank DESC, sl.xp DESC;
 
 ## 8. `social_links` — Le rang Social Link entre deux amis
 
-**Pourquoi :** C'est la feature la plus originale du projet — un système de progression de relation inspiré directement des jeux Persona. Plus deux joueurs interagissent, plus leur rang monte. Au rang 10, un badge unique est généré avec les deux avatars.
+**Pourquoi :** C'est la feature la plus originale du projet — un système de progression de relation inspiré directement des jeux Persona. Plus deux joueurs interagissent, plus leur rang monte. Au rang 10, un effet visuel spécial est déclenché (rank10-effect).
 
 **Convention d'unicité :**
 `user_a_id` = TOUJOURS le plus petit des deux IDs. `user_b_id` = le plus grand.
 Ainsi, HamzaK (id=1) et L2GENDAIRE (id=2) auront toujours `(user_a_id=1, user_b_id=2)` — jamais `(2, 1)`.
 
 ```
-id │ user_a_id │ user_b_id │ rank │ xp   │ badge_generated │ last_interaction_at
-───┼───────────┼───────────┼──────┼──────┼─────────────────┼────────────────────
-1  │     1     │     2     │   7  │ 1420 │ false           │ 2026-03-29 22:14:00
-2  │     1     │     3     │   3  │ 280  │ false           │ 2026-03-15 18:30:00
-3  │     2     │     3     │   5  │ 710  │ false           │ 2026-03-27 20:00:00
+id │ user_a_id │ user_b_id │ rank │ xp   │ last_interaction_at
+───┼───────────┼───────────┼──────┼──────┼────────────────────
+1  │     1     │     2     │   7  │ 1420 │ 2026-03-29 22:14:00
+2  │     1     │     3     │   3  │ 280  │ 2026-03-15 18:30:00
+3  │     2     │     3     │   5  │ 710  │ 2026-03-27 20:00:00
 ```
 
 **Lecture :**
@@ -409,80 +364,6 @@ Si les deux jouent chaque jour (play_same_day = 20 XP/jour):
 
 Si en plus ils s'envoient leurs scores (share_score mutuel = 20 XP/j):
 → 1280 / 40 = 32 jours
-```
-
----
-
-## 9. `social_link_badges` — Le badge True Confidant
-
-**Pourquoi :** Quand deux joueurs atteignent le rang 10, un badge unique est généré avec les avatars des deux joueurs côte à côte. Ce badge est stocké ici pour que les deux joueurs puissent l'afficher sur leur profil.
-
-```
-id │ social_link_id │ user_a_pseudo │ user_b_pseudo │ generated_at
-───┼────────────────┼───────────────┼───────────────┼────────────────────
-1  │       5        │ HamzaK        │ L2GENDAIRE    │ 2026-06-15 23:59:00
-```
-
-**Visuellement :**
-
-```
-┌──────────────────────────────────────────────────┐
-│  ✦ TRUE CONFIDANT ✦                              │
-│                                                   │
-│   ┌──────┐              ┌──────┐                 │
-│   │ 👤   │      ❤️       │  👤  │                 │
-│   │HamzaK│              │L2GEN │                 │
-│   └──────┘              └──────┘                 │
-│                                                   │
-│   "The bond between two Phantom Thieves"          │
-└──────────────────────────────────────────────────┘
-    → Badge affiché dans la collection des deux joueurs
-    → Slug unique: "confidant_1_2" (lié au social_link_id)
-```
-
-**Génération PHP :**
-
-```php
-function generateTrueConfidantBadge(PDO $pdo, int $socialLinkId): void {
-    // Vérifier que rang 10 est atteint et badge pas encore généré
-    $stmt = $pdo->prepare("SELECT * FROM social_links WHERE id = ? AND rank = 10 AND badge_generated = FALSE");
-    $stmt->execute([$socialLinkId]);
-    $link = $stmt->fetch();
-    if (!$link) return;
-
-    // Récupérer les avatars et pseudos des deux joueurs
-    $stmt = $pdo->prepare("
-        SELECT u.pseudo, p.avatar_data
-        FROM users u JOIN profiles p ON p.user_id = u.id
-        WHERE u.id IN (?, ?)
-    ");
-    $stmt->execute([$link['user_a_id'], $link['user_b_id']]);
-    $players = $stmt->fetchAll();
-
-    // Insérer le badge
-    $insert = $pdo->prepare("
-        INSERT INTO social_link_badges
-            (social_link_id, user_a_avatar, user_b_avatar, user_a_pseudo, user_b_pseudo)
-        VALUES (?, ?, ?, ?, ?)
-    ");
-    $insert->execute([
-        $socialLinkId,
-        $players[0]['avatar_data'],
-        $players[1]['avatar_data'],
-        $players[0]['pseudo'],
-        $players[1]['pseudo']
-    ]);
-
-    // Marquer comme généré
-    $pdo->prepare("UPDATE social_links SET badge_generated = TRUE WHERE id = ?")->execute([$socialLinkId]);
-
-    // Débloquer le badge dans badges_unlocked pour les deux joueurs
-    $badgeId = 'confidant_' . $link['user_a_id'] . '_' . $link['user_b_id'];
-    foreach ([$link['user_a_id'], $link['user_b_id']] as $uid) {
-        $pdo->prepare("INSERT INTO badges_unlocked (user_id, badge_id) VALUES (?, ?) ON CONFLICT DO NOTHING")
-            ->execute([$uid, $badgeId]);
-    }
-}
 ```
 
 ---

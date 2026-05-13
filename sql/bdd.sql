@@ -16,8 +16,7 @@
 -- 11. social_links         → dépend de users (via friendships)
 -- 12. social_link_ranks    → aucune dépendance
 -- 13. social_link_interactions → dépend de social_links, users
--- 14. social_link_badges   → dépend de social_links
--- 15. leaderboard_cache    → dépend de users
+-- 14. leaderboard_cache    → dépend de users
 -- 16. deletion_requests    → dépend de users (soft ref)
 -- =============================================================================
 
@@ -293,8 +292,6 @@ CREATE TABLE social_links (
 
     rank                INT         NOT NULL DEFAULT 1,
     xp                  INT         NOT NULL DEFAULT 0,
-    badge_generated     BOOLEAN     NOT NULL DEFAULT FALSE,
-    -- Passe à TRUE quand rang 10 atteint et badge True Confidant créé
 
     created_at          TIMESTAMP   NOT NULL DEFAULT NOW(),
     last_interaction_at TIMESTAMP   NOT NULL DEFAULT NOW(),
@@ -372,21 +369,8 @@ CREATE INDEX idx_sli_initiator   ON social_link_interactions(initiator_id);
 
 
 -- =============================================================================
--- 14. SOCIAL_LINK_BADGES — Badge True Confidant (rang 10)
---     Snapshot des avatars et pseudos au moment de la génération
+-- 14. (removed: SOCIAL_LINK_BADGES — replaced by rank10-effect, see migration 012_remove_tcb)
 -- =============================================================================
-CREATE TABLE social_link_badges (
-    id              BIGSERIAL   PRIMARY KEY,
-    social_link_id  BIGINT      NOT NULL UNIQUE REFERENCES social_links(id) ON DELETE CASCADE,
-
-    user_a_avatar   TEXT,       -- base64 de l'avatar de user_a au moment du rang 10
-    user_b_avatar   TEXT,       -- base64 de l'avatar de user_b
-    user_a_pseudo   VARCHAR(50) NOT NULL,
-    user_b_pseudo   VARCHAR(50) NOT NULL,
-
-    generated_at    TIMESTAMP   NOT NULL DEFAULT NOW()
-);
-
 
 -- =============================================================================
 -- 15. LEADERBOARD_CACHE — Cache des classements (recalculé périodiquement)
@@ -481,7 +465,6 @@ SELECT
     sl.user_b_id    AS friend_id,
     sl.rank,
     sl.xp,
-    sl.badge_generated,
     sl.created_at,
     sl.last_interaction_at
 FROM social_links sl
@@ -494,7 +477,6 @@ SELECT
     sl.user_a_id    AS friend_id,
     sl.rank,
     sl.xp,
-    sl.badge_generated,
     sl.created_at,
     sl.last_interaction_at
 FROM social_links sl;
