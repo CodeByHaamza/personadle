@@ -1,4 +1,4 @@
-import { renderSocialLinkGauge, gainSocialLinkXp } from '../js/social-link.js';
+import { renderSocialLinkGauge, gainSocialLinkXp, getSocialLinkData, applyRank10Effect } from '../js/social-link.js';
 
 /**
  * profile/profile-view.js — Mode consultation du profil d'un autre joueur
@@ -756,6 +756,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (gaugeContainer && window._currentUser && user.id !== window._currentUser.id) {
     gaugeContainer.classList.remove('hidden');
     renderSocialLinkGauge(user.id, gaugeContainer);
+    // Effet visuel rang 10 — True Confidant
+    getSocialLinkData(user.id).then(data => {
+      if ((data?.rank ?? 0) >= 10) {
+        applyRank10Effect(
+          document.getElementById('pageAvatar'),
+          document.getElementById('pageUsername')
+        );
+      }
+    }).catch(() => {});
     // XP pour visite de profil — awarded once per day server-side (409 on repeat)
     gainSocialLinkXp(user.id, 'visit_profile')
       .then(res => {
