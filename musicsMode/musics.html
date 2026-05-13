@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Personadle - Music Mode</title>
-  <link rel="stylesheet" href="../css/global.css?v=3" />
+  <link rel="stylesheet" href="../css/global.css?v=9" />
   <link rel="stylesheet" href="./music.css?v=3" />
-  <link rel="stylesheet" href="../css/filterMenu.css" />
+  <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
   <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
-  <link rel="stylesheet" href="../css/calling-card.css" />
+  <link rel="stylesheet" href="../css/calling-card.css?v=2" />
   <link rel="stylesheet" href="../css/challenge-banner.css">
+  <link rel="stylesheet" href="../css/challenge-result.css">
   <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 </head>
 
@@ -91,7 +92,7 @@
     <!-- Persona 4 — clic logo → sous-opus déroulants -->
     <div class="filter-group">
       <button class="filter-main-btn filter-color-p4 active"
-              data-opus-group="P4" data-opus-codes="P4,P4G,P4D"
+              data-opus-group="P4" data-opus-codes="P4,P4G,P4AU,P4D"
               aria-expanded="false" aria-label="Persona 4">
         <img src="../img/logo_jeu/Persona_4_Logo.png" alt="Persona 4" class="filter-logo">
         <span class="filter-expand-arrow">▸</span>
@@ -105,6 +106,10 @@
                 data-opus="P4G" aria-label="Persona 4 Golden">
           <img src="../img/logo_jeu/Persona_4_Golden_logo.webp" alt="P4G" class="filter-sub-logo">
         </button>
+        <button class="filter-sub-btn filter-color-p4au active"
+                data-opus="P4AU" aria-label="Persona 4 Arena Ultimax">
+          <img src="../img/logo_jeu/Persona_4_Arena_Ultimax_Logo.png" alt="P4AU" class="filter-sub-logo">
+        </button>
         <button class="filter-sub-btn filter-color-p4d active"
                 data-opus="P4D" aria-label="Persona 4 Dancing All Night">
           <img src="../img/logo_jeu/Persona_4_Dancing_All_Night_Logo.png" alt="P4D" class="filter-sub-logo">
@@ -114,7 +119,7 @@
     <!-- Persona 5 — clic logo → sous-opus déroulants -->
     <div class="filter-group">
       <button class="filter-main-btn filter-color-p5 active"
-              data-opus-group="P5" data-opus-codes="P5,P5R,P5S"
+              data-opus-group="P5" data-opus-codes="P5,P5R,P5S,P5T"
               aria-expanded="false" aria-label="Persona 5">
         <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo">
         <span class="filter-expand-arrow">▸</span>
@@ -131,6 +136,10 @@
         <button class="filter-sub-btn filter-color-p5s active"
                 data-opus="P5S" aria-label="Persona 5 Strikers">
           <img src="../img/logo_jeu/Persona_5_Strikers.png" alt="P5S" class="filter-sub-logo">
+        </button>
+        <button class="filter-sub-btn filter-color-p5t active"
+                data-opus="P5T" aria-label="Persona 5 Tactica">
+          <img src="../img/logo_jeu/Persona_5_Tactica_Logo.png" alt="P5T" class="filter-sub-logo">
         </button>
       </div>
     </div>

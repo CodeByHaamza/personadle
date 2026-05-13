@@ -648,5 +648,122 @@ export const songs = [
     vocalist: "Shihoko Hirata",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=YfP1gGsfIjk"
+  },
+  {
+    titre: "Danger Zone",
+    fichier: "Danger_Zone.mp3",
+    opus: ["P3P"],
+    image: "P3P.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=cwABWVby-Xw"
+  },
+  {
+    titre: "Time",
+    fichier: "Time.mp3",
+    opus: ["P3P"],
+    image: "P3P.webp",
+    vocalist: "Mayumi Fujita",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=PipVytST5ak"
+  },
+  {
+    titre: "Want to Be Close -Reload-",
+    fichier: "Want_To_Be_Close_Reload.mp3",
+    opus: ["P3R"],
+    image: "P3R.webp",
+    vocalist: "Azumi Takahashi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=WQcWyVkhgcE"
+  },
+  {
+    titre: "A Fool or Clown?",
+    fichier: "A_Fool_or_Clown.mp3",
+    opus: ["P4AU"],
+    image: "P4AU.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=p5-3EQ0itcY"
+  },
+  {
+    titre: "Best Friends",
+    fichier: "Best_Friends.mp3",
+    opus: ["P4AU"],
+    image: "P4AU.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=uKuPK-HS1ro"
+  },
+  {
+    titre: "Break Out Of...",
+    fichier: "Break_Out_Of.mp3",
+    opus: ["P4AU"],
+    image: "P4AU.webp",
+    vocalist: "Shihoko Hirata , Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=PM5L9Zyk3UQ"
+  },
+  {
+    titre: "I'll Face Myself -Battle-",
+    fichier: "Ill_Face_Myself.mp3",
+    opus: ["P4G"],
+    image: "P4G.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=7S2w0qIykdI"
+  },
+  {
+    titre: "Throw Away Your Mask",
+    fichier: "Throw_Away_Your_Mask.mp3",
+    opus: ["P5R"],
+    image: "P5R.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=WzDTqGfyFB0"
+  },
+  {
+    titre: "Axe to Grind",
+    fichier: "Axe_to_Grind.mp3",
+    opus: ["P5S"],
+    image: "P5S.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=KWfm8uxn9ao"
+  },
+  {
+    titre: "Counter Strike",
+    fichier: "Counter_Strike.mp3",
+    opus: ["P5S"],
+    image: "P5S.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=MdabXlguFpA"
+  },
+  {
+    titre: "Got Your Tail",
+    fichier: "Got_Your_Tail.mp3",
+    opus: ["P5T"],
+    image: "P5T.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=oVa7SIbzerE"
+  },
+  {
+    titre: "Revolution is a Blade",
+    fichier: "Revolution_is_a_Blade.mp3",
+    opus: ["P5T"],
+    image: "P5T.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=ji6bvyvtZJw"
+  },
+  {
+    titre: "Truth or Dare",
+    fichier: "Truth_or_Dare.mp3",
+    opus: ["P5T"],
+    image: "P5T.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=AFhxdC4CVrc"
   }
 ];
