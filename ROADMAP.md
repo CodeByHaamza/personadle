@@ -35,7 +35,7 @@
 | B13 | API streak recovery (`recover-streak.php`) | ✅ | `POST /api/user/recover-streak` |
 | B14 | API Social Link rang-up notifs | ✅ | Table `social_link_rankup_notifs` (migration 009), `GET /api/social-links/rankup-notifs` |
 | B15 | API Admin — gestion comptes, badges, stats | ✅ | `api/admin/` — users, user_badges, user_wallpapers, user_titles, user_stats, social_links |
-| B16 | CI/CD GitHub Actions | 📋 | Voir Q8 + Q9 dans section Qualité & DevEx |
+| B16 | CI/CD GitHub Actions | ✅ | Voir Q8 + Q9 dans section Qualité & DevEx |
 
 ---
 
@@ -163,5 +163,5 @@
 | Q5 | BASE_URL API auto-détecté (Apache local + prod) | ✅ | `pathname.startsWith('/personadle/')` |
 | Q6 | Audit responsive complet (360px → 1440px) | ✅ | Tous les modes + profil + leaderboard + friends + admin couverts (3 breakpoints chacun) |
 | Q7 | Couverture de tests étendue (4 suites Vitest) | ✅ | `gameCore.test.js` (172) + `backend.test.js` (18) + `i18n.test.js` + `profileStats.test.js` — 190 tests passants |
-| Q8 | CI — GitHub Actions | 📋 | **À faire plus tard** — pipeline sur chaque push : `npm test` (Vitest) + `npm run i18n:check` + `php -l` syntaxe PHP. Pas de prérequis git. |
-| Q9 | CD — Deploy automatique → Hostinger | 📋 | **À faire plus tard, après Q8** — rsync via SSH ou `git pull` webhook. Prérequis : adopter workflow feature branches → `develop` → `main` = prod. Stocker clé SSH dans GitHub Secrets. |
+| Q8 | CI — GitHub Actions | ✅ | `.github/workflows/ci.yml` — `npm test` + `npm run i18n:check` + `php -l` sur push develop/main + PRs vers develop/main |
+| Q9 | CD — Deploy automatique → Hostinger | ✅ | `.github/workflows/cd.yml` — rsync SSH manuel depuis main uniquement (workflow_dispatch + dry-run option) |

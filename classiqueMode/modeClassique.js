@@ -694,31 +694,3 @@ function enableGiveUpButton() {
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DEBUG (console only — not exposed in production UI)
-// ─────────────────────────────────────────────────────────────────────────────
-
-function debugModeClassique() {
-  console.log("=== 🛠 DEBUG PERSONAS CLASSIQUE ===");
-  const namesSeen = new Set();
-  const duplicates = [];
-  const notInCharacters = [];
-
-  personas.forEach((name) => {
-    if (namesSeen.has(name)) duplicates.push(name);
-    else namesSeen.add(name);
-  });
-
-  if (duplicates.length) console.warn(`❌ Doublons (${duplicates.length}):`, duplicates);
-  else console.log("✅ Aucun doublon dans personas.js");
-
-  personas.forEach((name) => {
-    if (!characters.find((c) => c.nom === name)) notInCharacters.push(name);
-  });
-
-  if (notInCharacters.length)
-    console.error(`❌ ${notInCharacters.length} noms absents de characters:`, notInCharacters);
-  else console.log("✅ Tous les noms sont présents dans characters");
-
-  console.log("=== ✅ FIN DEBUG CLASSIQUE ===");
-}

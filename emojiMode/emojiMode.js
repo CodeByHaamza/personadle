@@ -539,29 +539,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DEBUG CONSOLE TOOLS
-// ─────────────────────────────────────────────────────────────────────────────
-
-window.emojiDebug = {
-  /** Check stored vs current Paris date. */
-  checkDates: () => {
-    console.log("📅 Stored:", localStorage.getItem("lastPlayedDate_Emoji"));
-    console.log("📅 Paris now:", parisDateKey());
-  },
-  /** Force the stored date to yesterday so the next reload triggers a reset. */
-  simulateYesterday: () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const str = parisDateKey(yesterday);
-    localStorage.setItem("lastPlayedDate_Emoji", str);
-    console.log(`✅ Date forced to yesterday: ${str} — reload to trigger reset`);
-  },
-  /** Manually set the stored date. */
-  setDate: (dateStr) => {
-    localStorage.setItem("lastPlayedDate_Emoji", dateStr);
-    console.log(`✅ Date forced to: ${dateStr} — reload to trigger reset`);
-  },
-};
-
-console.log("🧪 emojiDebug.checkDates() | .simulateYesterday() | .setDate('YYYY-MM-DD')");
