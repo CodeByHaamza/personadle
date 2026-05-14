@@ -1,0 +1,196 @@
+/* ═══════════════════════════════════════════════════════
+   streak-recovery.css — Menu de récupération de streak Jack Frost
+   ═══════════════════════════════════════════════════════ */
+
+#streak-recovery-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#streak-recovery-overlay.sr--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+#streak-recovery-overlay.sr--exit {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.sr-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 40, 80, 0.55);
+  backdrop-filter: blur(5px);
+}
+
+/* ── Panel ────────────────────────────────────────────── */
+.sr-menu {
+  position: relative;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 36px 28px 26px;
+  width: min(360px, 90vw);
+  text-align: center;
+  overflow: hidden;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.35),
+    0 0 0 3px #bde3ff,
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  transform: translateY(32px) scale(0.92);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#streak-recovery-overlay.sr--visible .sr-menu {
+  transform: translateY(0) scale(1);
+}
+
+/* ── Snowflakes ───────────────────────────────────────── */
+.sr-snowflakes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.sr-snowflake {
+  position: absolute;
+  top: -24px;
+  color: #7ec8f7;
+  animation: sr-fall linear infinite;
+  user-select: none;
+}
+@keyframes sr-fall {
+  0%   { transform: translateY(0)    rotate(0deg);   opacity: 0.8; }
+  80%  { opacity: 0.6; }
+  100% { transform: translateY(440px) rotate(360deg); opacity: 0;   }
+}
+
+/* ── Jack Frost ───────────────────────────────────────── */
+.sr-jack-wrap {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 6px;
+}
+.sr-jack-img {
+  width: 110px;
+  height: auto;
+  animation: sr-shiver 0.11s ease-in-out infinite alternate;
+  filter: drop-shadow(0 6px 18px rgba(80, 180, 255, 0.55));
+}
+@keyframes sr-shiver {
+  from { transform: rotate(-2.8deg) translateX(-2px) translateY(0); }
+  to   { transform: rotate(2.8deg)  translateX(2px)  translateY(-1px); }
+}
+
+/* ── Text ─────────────────────────────────────────────── */
+.sr-title {
+  position: relative;
+  z-index: 1;
+  color: #1a3a6c;
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+.sr-subtitle {
+  position: relative;
+  z-index: 1;
+  color: #333;
+  font-size: 0.98rem;
+  margin: 0 0 4px;
+}
+.sr-subtitle strong { color: #e05a00; }
+.sr-desc {
+  position: relative;
+  z-index: 1;
+  color: #777;
+  font-size: 0.8rem;
+  margin: 0 0 22px;
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+.sr-buttons {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sr-btn-recover {
+  background: linear-gradient(135deg, #ff8c00 0%, #ff3d00 100%);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 15px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 18px rgba(255, 80, 0, 0.45);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.sr-btn-recover:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 28px rgba(255, 60, 0, 0.6);
+}
+.sr-btn-cancel {
+  background: none;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 10px;
+  color: #999;
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+.sr-btn-cancel:hover { border-color: #bbb; color: #555; }
+
+/* ── Embrase (fire animation on recover) ─────────────── */
+.sr-menu.sr--embrase {
+  animation: sr-embrase 1.7s ease-in forwards;
+}
+@keyframes sr-embrase {
+  0%   { background: #fff;    box-shadow: 0 24px 64px rgba(0,0,0,0.35), 0 0 0 3px #bde3ff; }
+  15%  { background: #fff8e8; box-shadow: 0 0 40px 8px  rgba(255,160,0,0.25); }
+  35%  { background: #ffe8c0; box-shadow: 0 0 70px 20px rgba(255,100,0,0.45); }
+  60%  { background: #ffb347; box-shadow: 0 0 110px 35px rgba(255,50,0,0.65); }
+  85%  { background: #ff6600; box-shadow: 0 0 150px 55px rgba(255,0,0,0.85); }
+  100% { background: #ff3300; box-shadow: 0 0 200px 80px rgba(220,0,0,1);    opacity: 0; }
+}
+.sr-menu.sr--embrase .sr-jack-img {
+  animation: sr-melt 1.7s ease-in forwards;
+}
+@keyframes sr-melt {
+  0%   { filter: drop-shadow(0 6px 18px rgba(80,180,255,0.55)); }
+  25%  { filter: drop-shadow(0 6px 20px rgba(255,150,0,0.8)) brightness(1.3); }
+  70%  { transform: scale(1.4) translateY(-15px); filter: brightness(2.5) saturate(2); }
+  100% { transform: scale(1.8) translateY(-30px); opacity: 0; filter: brightness(4); }
+}
+.sr-menu.sr--embrase .sr-snowflake { animation-play-state: paused; opacity: 0; }
+.sr-menu.sr--embrase .sr-btn-recover,
+.sr-menu.sr--embrase .sr-btn-cancel { opacity: 0; transition: opacity 0.2s; }
+
+/* ── Restore button in profile (near streak) ─────────── */
+.sr-restore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1.5px solid #ff6b00;
+  border-radius: 10px;
+  padding: 3px 9px;
+  font-size: 0.75rem;
+  color: #ff6b00;
+  cursor: pointer;
+  font-weight: 700;
+  margin-left: 8px;
+  vertical-align: middle;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.sr-restore-btn:hover { background: #ff6b00; color: #fff; }

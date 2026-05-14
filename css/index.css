@@ -5,6 +5,16 @@
    thème Nouvel An Chinois, bouton PDF/updates, share card.
    ============================================================= */
 
+/* Override bottomNav.css body padding-bottom — on index.html the footer
+   fills the remaining space itself, so body padding is not needed. */
+body {
+  padding-bottom: 0 !important;
+}
+
+footer {
+  padding-bottom: 82px; /* fills the 62px bottom-nav area + breathing room */
+}
+
 
 /* =====================================================
    1. TITRE ET WRAPPER
@@ -2186,27 +2196,35 @@ body.darkmode .border-color-label {
    7. MODALE DAILY (compte à rebours jusqu'au prochain jour)
    ===================================================== */
 
-/* Bouton fixe en bas à droite */
+/* Bouton fixe en bas à droite — discret, symétrique avec .news-btn */
 .daily-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #111;
-  color: white;
-  padding: 10px 20px;
-  border: 2px solid #ff0040;
+  bottom: 10px;
+  right: 10px;
+  background: #eee;
+  color: #111;
+  border: none;
+  padding: 10px 18px;
   border-radius: 10px;
-  font-weight: bold;
   cursor: pointer;
   z-index: 1000;
-  transition: background 0.3s, color 0.3s;
+  font-size: 15px;
+  font-weight: bold;
+  transition: background 0.2s, transform 0.2s;
 }
 
-/* Apparence en mode clair */
-body:not(.darkmode) .daily-btn {
-  background-color: #f0f0f0;
-  color: #111;
-  border: 2px solid #cc0033;
+.daily-btn:hover {
+  background: #ddd;
+  transform: scale(1.05);
+}
+
+body.darkmode .daily-btn {
+  background: #2a2a2a;
+  color: #eee;
+}
+
+body.darkmode .daily-btn:hover {
+  background: #333;
 }
 
 /* Overlay de la modale daily */
@@ -2222,44 +2240,225 @@ body:not(.darkmode) .daily-btn {
 
 /* Boîte de contenu */
 .daily-modal-content {
-  margin: 10% auto;
-  padding: 20px;
-  width: 80%;
-  max-width: 500px;
-  border-radius: 12px;
+  position: relative;
+  margin: 6% auto;
+  padding: 0;
+  width: 90%;
+  max-width: 560px;
+  border-radius: 18px;
   text-align: center;
   border: 3px solid;
+  overflow: visible; /* allow Z letters to overflow above the modal */
   transition: all 0.3s;
+  animation: dailyPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dailyPop {
+  from { opacity: 0; transform: scale(0.88) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
 }
 
 /* Mode sombre */
 body.darkmode .daily-modal-content {
-  background-color: #1c1c1c;
-  color: white;
+  background-color: #1a1a1a;
+  color: #f0f0f0;
   border-color: #ff0040;
 }
 
 /* Mode clair */
 body:not(.darkmode) .daily-modal-content {
-  background-color: #ffffff;
+  background-color: #fff;
   color: #111;
   border-color: #cc0033;
 }
 
-/* Bouton de fermeture de la modale daily */
-.daily-modal .close {
-  float: right;
-  font-size: 28px;
-  cursor: pointer;
-  color: inherit;
+/* Titre centré en haut du modal */
+.daily-title {
+  text-align: center;
+  margin: 0;
+  padding: 18px 48px 0 48px; /* symétrique — bouton × absolu ne pousse plus le texte */
+  font-size: 1.35em;
+  font-weight: 900;
+  letter-spacing: 0.5px;
 }
 
-/* Compte à rebours en police monospace */
-#dailyCountdown {
-  font-family: monospace;
-  font-size: 1.5em;
-  font-weight: bold;
+/* Bouton de fermeture */
+.daily-modal .close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.5;
+  z-index: 20;
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  user-select: none;
+}
+.daily-modal .close:hover {
+  opacity: 1;
+  transform: rotate(90deg) scale(1.25);
+}
+
+/* ── Top bar: chibi centré + subtitle en dessous ────── */
+.daily-top-bar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px 16px 20px;
+  border-bottom: 2px solid rgba(204, 0, 51, 0.25);
+  overflow: visible;
+}
+
+body.darkmode .daily-top-bar {
+  border-bottom-color: rgba(255, 0, 64, 0.25);
+}
+
+/* Chibi Damien wrapper — overflow visible so Z letters float above */
+.daily-chibi-wrap {
+  position: relative;
+  width: 240px;
+  overflow: visible;
+}
+
+.daily-chibi {
+  width: 240px;
+  height: auto;
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: default;
+}
+
+.daily-chibi-wrap:hover .daily-chibi {
+  transform: rotate(-4deg) scale(1.05);
+}
+
+/* Z letters — face est à ~35 % du haut de l'image (1195×896 → rendu ~180px de haut)
+   top ≈ 55px pour centrer sur la zone du visage */
+.daily-zzzs {
+  position: absolute;
+  top: 50px;
+  left: 60%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.daily-zzzs span {
+  display: block;
+  opacity: 0;
+  font-weight: 900;
+  font-style: italic;
   color: #00cc66;
+  line-height: 1;
+}
+
+/* z small → Z medium → Z large */
+.daily-zzzs span:nth-child(1) { font-size: 0.9em;  margin-left: 0;   }
+.daily-zzzs span:nth-child(2) { font-size: 1.2em;  margin-left: 10px; }
+.daily-zzzs span:nth-child(3) { font-size: 1.6em;  margin-left: 22px; }
+
+.daily-chibi-wrap:hover .daily-zzzs span:nth-child(1) {
+  animation: sleepZ 2s ease-out 0s infinite;
+}
+.daily-chibi-wrap:hover .daily-zzzs span:nth-child(2) {
+  animation: sleepZ 2s ease-out 0.5s infinite;
+}
+.daily-chibi-wrap:hover .daily-zzzs span:nth-child(3) {
+  animation: sleepZ 2s ease-out 1s infinite;
+}
+
+/* Voyage de ~170px : reste visible dans le modal jusqu'aux 85 %,
+   puis sort au-dessus de la bordure sur les 15 % finaux */
+@keyframes sleepZ {
+  0%   { opacity: 0;   transform: translate(0,   5px)   scale(0.5);  }
+  12%  { opacity: 1;   transform: translate(0,   0)     scale(1);    }
+  84%  { opacity: 0.8; transform: translate(12px, -120px) scale(1.15); }
+  100% { opacity: 0;   transform: translate(20px, -175px) scale(1.3); }
+}
+
+/* Subtitle centré sous le chibi */
+.daily-subtitle {
+  margin: 0;
+  text-align: center;
+  font-size: 0.88em;
+  font-style: italic;
+  opacity: 0.65;
+  line-height: 1.5;
+  max-width: 380px;
+}
+
+/* ── Description ────────────────────────────────────── */
+.daily-desc {
+  margin: 0;
+  padding: 14px 20px;
+  font-size: 0.85em;
+  opacity: 0.7;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+/* ── Countdown ──────────────────────────────────────── */
+.daily-countdown-wrap {
+  padding: 18px 20px 22px;
+}
+
+.countdown-label {
+  margin: 0 0 12px;
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.45;
+}
+
+.countdown-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 78px;
+  padding: 14px 16px 10px;
+  border-radius: 14px;
+  background: rgba(0, 204, 102, 0.1);
+  border: 1px solid rgba(0, 204, 102, 0.3);
+}
+
+.countdown-unit span {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2.6em;
+  font-weight: 900;
+  color: #00cc66;
+  line-height: 1;
+  min-width: 2ch;
+  text-align: center;
+}
+
+.countdown-unit small {
+  font-size: 0.62em;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  opacity: 0.5;
+  margin-top: 6px;
+}
+
+.countdown-sep {
+  font-size: 2em;
+  font-weight: 900;
+  color: #00cc66;
+  opacity: 0.5;
+  margin-bottom: 18px;
+  user-select: none;
 }
 
 
@@ -2378,7 +2577,143 @@ body.darkmode .cny-theme .version-header:hover {
 
 
 /* =====================================================
-   10. RESPONSIVE — SPÉCIFIQUE INDEX
+   10. THÈME v2.0 — Major Update (Sophia / Backend)
+   ===================================================== */
+
+.v2-theme {
+  border: 2px solid #ff6b35 !important;
+  background-color: #fff8f5;
+}
+
+.v2-theme .version-header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 60%, #1a1a40 100%);
+  border-bottom: 2px solid #ff6b35;
+  position: relative;
+  overflow: hidden;
+  padding: 15px;        /* même padding que les autres headers */
+  z-index: 0;           /* crée un stacking context isolé pour les enfants */
+}
+
+/* Conteneur orbs — absolu, z-index 0 = derrière le texte (z-index 1+) */
+.v2-orbs-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.v2-orb {
+  position: absolute;
+  border-radius: 50%;
+  animation: v2OrbPop 3.5s ease-in-out infinite;
+}
+
+@keyframes v2OrbPop {
+  0%   { transform: scale(0);    opacity: 0;    }
+  18%  { transform: scale(1.35); opacity: 0.88; }
+  50%  { transform: scale(1);    opacity: 0.65; }
+  82%  { transform: scale(0.75); opacity: 0.28; }
+  100% { transform: scale(0);    opacity: 0;    }
+}
+
+.v2-orb:nth-child(1)  { width:16px; height:16px; top:20%; left:5%;   background:#ff6b35; animation-delay:0s;    animation-duration:3.6s; }
+.v2-orb:nth-child(2)  { width:9px;  height:9px;  top:68%; left:14%;  background:#ffffff; animation-delay:0.8s;  animation-duration:2.9s; }
+.v2-orb:nth-child(3)  { width:20px; height:20px; top:28%; left:73%;  background:#ff8c42; animation-delay:1.4s;  animation-duration:4.1s; }
+.v2-orb:nth-child(4)  { width:7px;  height:7px;  top:12%; left:50%;  background:#ffffff; animation-delay:2.1s;  animation-duration:3.0s; }
+.v2-orb:nth-child(5)  { width:13px; height:13px; top:76%; left:83%;  background:#ff6b35; animation-delay:0.4s;  animation-duration:3.8s; }
+.v2-orb:nth-child(6)  { width:11px; height:11px; top:52%; left:38%;  background:#ffbb99; animation-delay:1.7s;  animation-duration:2.6s; }
+.v2-orb:nth-child(7)  { width:18px; height:18px; top:18%; left:88%;  background:#ff6b35; animation-delay:2.8s;  animation-duration:4.3s; }
+.v2-orb:nth-child(8)  { width:6px;  height:6px;  top:84%; left:58%;  background:#ffffff; animation-delay:1.1s;  animation-duration:3.3s; }
+.v2-orb:nth-child(9)  { width:10px; height:10px; top:60%; left:93%;  background:#ffa566; animation-delay:0.6s;  animation-duration:3.1s; }
+.v2-orb:nth-child(10) { width:8px;  height:8px;  top:40%; left:22%;  background:#ffffff; animation-delay:3.2s;  animation-duration:2.7s; }
+
+/* Contenu gauche de l'en-tête : Sophia + titre */
+.v2-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;   /* au-dessus des orbs (z-index: 0) */
+}
+
+.v2-sophia {
+  width: 38px;          /* taille alignée sur la hauteur de texte standard */
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #ff6b35;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.v2-theme .version-title {
+  color: #ffffff !important;
+  text-shadow: 0 0 14px rgba(255, 107, 53, 0.5);
+}
+
+.v2-theme .version-date {
+  color: #ffba99 !important;
+}
+
+.v2-theme .version-arrow {
+  color: #ff6b35 !important;
+  position: relative;
+  z-index: 1;   /* au-dessus des orbs */
+}
+
+/* Mots-clés en orange dans le contenu */
+.v2-theme .version-content ul li strong {
+  color: #d95a1a;
+}
+
+/* Bouton PDF v2 */
+.v2-btn {
+  background: linear-gradient(135deg, #ff6b35 0%, #e84e0f 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 2px 2px 0px #7a2000, 0 4px 14px rgba(255, 107, 53, 0.35) !important;
+}
+.v2-btn:hover {
+  background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%) !important;
+  box-shadow: 2px 2px 0px #7a2000, 0 6px 20px rgba(255, 107, 53, 0.55) !important;
+  transform: translateY(-2px);
+}
+
+/* Hover header */
+.v2-theme .version-header:hover {
+  background: linear-gradient(135deg, #1e1e38 0%, #1a4080 60%, #1e1e48 100%) !important;
+  box-shadow: inset 0 0 22px rgba(255, 107, 53, 0.18) !important;
+  transition: all 0.22s ease-in-out;
+}
+.v2-theme .version-header:hover .version-arrow {
+  transform: translateX(3px);
+}
+
+/* max-height plus grande pour le contenu v2 */
+.v2-theme.active .version-content {
+  max-height: 2200px;
+}
+
+/* Dark mode */
+body.darkmode .v2-theme {
+  background-color: #1c0d05;
+  border-color: #ff6b35 !important;
+}
+body.darkmode .v2-theme .version-header {
+  background: linear-gradient(135deg, #0d0d1c 0%, #071830 60%, #0d0d20 100%);
+}
+body.darkmode .v2-theme .version-content ul li strong {
+  color: #ff8c5a;
+}
+body.darkmode .v2-theme .version-header:hover {
+  background: linear-gradient(135deg, #111128 0%, #0e2540 60%, #111128 100%) !important;
+  box-shadow: inset 0 0 14px rgba(255, 107, 53, 0.12) !important;
+}
+
+
+/* =====================================================
+   11. RESPONSIVE — SPÉCIFIQUE INDEX
    ===================================================== */
 
 /* -----------------------------------------------
@@ -2422,8 +2757,8 @@ body.darkmode .cny-theme .version-header:hover {
 
   /* Daily : compacté, aligné visuellement avec News */
   .daily-btn {
-    bottom: 10px;
-    right: 10px;
+    bottom: 8px;
+    right: 8px;
     font-size: 13px;
     padding: 7px 12px;
   }

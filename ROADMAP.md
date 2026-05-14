@@ -105,7 +105,7 @@
 | AD4 | Attribution badges / wallpapers / titres à un user | ✅ | Grille visuelle, clic → queue → FAB apply, toasts |
 | AD5 | Édition stats manuelles (streak, wins…) | ✅ | `api/admin/user_stats.php` |
 | AD6 | Gestion Social Links depuis admin | ✅ | `api/admin/social_links.php` |
-| AD7 | Annonce / bannière in-game | 📋 | Pour patch notes ou événements ponctuels |
+| AD7 | Annonce / bannière in-game | ✅ | Modale News dans `index.html` — bannière v2.0 (thème Sophia, orbs animés, lien changelog) |
 | AD8 | Gestion des codes événement (CRUD + stats usage) | ✅ | Table `event_codes` (migration 011), `api/admin/event_codes.php`, bouton 🎟️ Codes dans admin |
 | AD9 | Modération des pseudos (bannissement + verrou pseudo) | ✅ | Colonnes `is_banned`/`pseudo_locked` (migration 011), section Modération dans tab Profil admin, login vérifie `is_banned`, API user vérifie `pseudo_locked` |
 
@@ -145,7 +145,7 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| U1 | Section News / Patch Notes in-game | 📋 | Bannière ou modal changelog depuis l'index |
+| U1 | Section News / Patch Notes in-game | ✅ | Bannière v2.0 dans la modale News (`index.html`) — thème Sophia, orbs animés orange/blanc, lien changelog HTML |
 | U2 | Page Confidentialité (`/privacy.html`) | ✅ | `privacy.html` + `privacy.css` + i18n 5 langues, lien footer + formulaire inscription |
 | U3 | FAQ (accordion sur index ou page dédiée) | 💡 | — |
 | U4 | Partage de score / streak sur réseaux sociaux | 💡 | Image canvas générée côté client |
@@ -156,12 +156,12 @@
 
 | # | Fonctionnalité | Statut | Notes |
 |---|---------------|--------|-------|
-| Q1 | Tests unitaires Vitest (120 tests passants) | ✅ | `npm test` |
+| Q1 | Tests unitaires Vitest (190 tests passants) | ✅ | `npm test` |
 | Q2 | i18n EN/FR/ES/DE/IT (760 clés + phrases compare) | ✅ | `npm run i18n:check` |
 | Q3 | Service Worker — network-first JS/CSS | ✅ | SW v72, précache 40+ assets |
 | Q4 | Offline-first (fallback gracieux) | ✅ | SW + `savePendingSession` |
 | Q5 | BASE_URL API auto-détecté (Apache local + prod) | ✅ | `pathname.startsWith('/personadle/')` |
 | Q6 | Audit responsive complet (360px → 1440px) | ✅ | Tous les modes + profil + leaderboard + friends + admin couverts (3 breakpoints chacun) |
-| Q7 | Tests E2E (Playwright ou Cypress) | 📋 | Avant déploiement final |
+| Q7 | Couverture de tests étendue (4 suites Vitest) | ✅ | `gameCore.test.js` (172) + `backend.test.js` (18) + `i18n.test.js` + `profileStats.test.js` — 190 tests passants |
 | Q8 | CI — GitHub Actions | 📋 | **À faire plus tard** — pipeline sur chaque push : `npm test` (Vitest) + `npm run i18n:check` + `php -l` syntaxe PHP. Pas de prérequis git. |
 | Q9 | CD — Deploy automatique → Hostinger | 📋 | **À faire plus tard, après Q8** — rsync via SSH ou `git pull` webhook. Prérequis : adopter workflow feature branches → `develop` → `main` = prod. Stocker clé SSH dans GitHub Secrets. |

@@ -1,4 +1,10 @@
-# js/ — Utilitaires partagés
+<div align="center">
+
+# ⚙️ Utilitaires partagés
+
+> **Le cœur logique de tous les modes — dates DST-safe, confettis, filtres, sessions cloud.**
+
+</div>
 
 Ce dossier contient le **cœur logique commun** à tous les modes de jeu de Personadle.
 

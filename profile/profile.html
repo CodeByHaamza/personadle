@@ -408,9 +408,9 @@
         <p class="crop-canvas-hint">Drag to reposition · Scroll to zoom</p>
       </div>
       <div class="crop-controls">
-        <button id="zoomOut" class="crop-zoom-btn" title="Zoom out">−</button>
+        <button id="zoomOut" class="crop-zoom-btn" title="Zoom out" aria-label="Zoom out">−</button>
         <span class="crop-zoom-label">Zoom</span>
-        <button id="zoomIn"  class="crop-zoom-btn" title="Zoom in">+</button>
+        <button id="zoomIn"  class="crop-zoom-btn" title="Zoom in" aria-label="Zoom in">+</button>
         <button id="confirmCrop" class="btn-p5 crop-confirm-btn">✓ Apply</button>
       </div>
     </div>
@@ -444,7 +444,7 @@
         </div>
       </div>
 
-      <button id="closeBadgesModal" class="close-btn">✖</button>
+      <button id="closeBadgesModal" class="close-btn" aria-label="Close badges">✖</button>
     </div>
   </div>
 
@@ -453,7 +453,7 @@
 
   <!-- Recherche -->
   <div class="badges-search-wrap">
-    <input type="text" id="badgesSearch" class="badges-search-input" placeholder="🔍 Search badges…">
+    <input type="text" id="badgesSearch" class="badges-search-input" placeholder="🔍 Search badges…" aria-label="Search badges">
   </div>
 
   <!-- Grille des badges (générée par badgesManager.js) -->
@@ -469,7 +469,7 @@
 <div id="titlesModal" class="titles-modal hidden" role="dialog" aria-modal="true">
   <div class="titles-modal-header">
     <h3 class="titles-modal-title">🏅 Titles</h3>
-    <button id="closeTitlesModal" class="titles-modal-close">✖</button>
+    <button id="closeTitlesModal" class="titles-modal-close" aria-label="Close titles">✖</button>
   </div>
   <div id="titlesModalGrid" class="titles-grid-modal"></div>
 </div>

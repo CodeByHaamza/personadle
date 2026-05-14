@@ -283,6 +283,31 @@
 .lang-opt--de.is-active .lang-opt-dot { color: #be77e0; }
 
 
+/* ─── Variante ITALIANO — Persona 2 : vert olive, Special Elite ─── */
+/* Police : Special Elite évoque le rétro des machines à écrire,     */
+/* dans l'esprit polar/années 90 de Persona 2 : Innocent Sin.        */
+/* Couleur : vert kaki — hommage à l'esthétique sombre de P2.        */
+/* (font chargée via index.html avec les autres Google Fonts)        */
+
+.lang-opt--it {
+  border-left-color: #6d8b4e;
+}
+
+.lang-opt--it .lang-opt-name {
+  font-family: 'Special Elite', 'Courier New', 'Courier', monospace;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-size: 1.35rem;
+}
+
+.lang-opt--it:hover,
+.lang-opt--it.is-active {
+  background: rgba(109, 139, 78, 0.20);
+}
+
+.lang-opt--it.is-active .lang-opt-dot { color: #8fb96a; }
+
+
 /* ─── Responsive ≤480px ──────────────────────────────────── */
 
 @media (max-width: 480px) {

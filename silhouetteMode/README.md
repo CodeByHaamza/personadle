@@ -1,21 +1,83 @@
-# silhouetteMode/ — Mode Silhouette
+<div align="center">
 
-Le mode Silhouette affiche le **portrait d'un personnage en silhouette noire**. Chaque bonne réponse révèle progressivement l'image originale. Le joueur doit identifier le personnage avant que l'image ne soit entièrement révélée.
+# 🌑 Silhouette Mode
 
-![Aperçu du mode Silhouette](../img/preview/preview_shadow.png)
+<img src="../img/preview/preview_shadow.png" alt="Aperçu du mode Silhouette" width="700">
+
+> **Un personnage se cache dans l'ombre. Sauras-tu le reconnaître avant qu'il soit trop tard ?**
+
+</div>
 
 ---
 
-## Principe du jeu
+## 🎮 Principe du jeu
 
-1. Un portrait de personnage est affiché entièrement masqué (silhouette noire).
-2. À chaque mauvaise réponse, une partie de l'image est révélée (zoom out progressif).
+1. Un portrait est affiché entièrement masqué — **silhouette noire totale**.
+2. À chaque mauvaise réponse, l'image se révèle progressivement (zoom out + luminosité augmente).
 3. Le joueur peut deviner à tout moment ; plus il attend, plus la révélation est grande.
-4. Après un certain nombre d'essais, un bouton **Abandonner** se déverrouille.
+4. Après un certain nombre d'essais, le bouton **Abandonner** se déverrouille.
 
 ---
 
-## Structure du dossier
+## 👁️ De l'ombre à la lumière
+
+La même image — deux états. À gauche, ce que voit le joueur. À droite, la révélation.
+
+<table align="center">
+  <tr>
+    <th align="center" width="50%">🌑 Silhouette initiale</th>
+    <th align="center" width="50%">✅ Portrait révélé</th>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="database/img/Ren_silhouette.webp" style="filter: brightness(0)" width="220" alt="Ren — silhouette">
+      <br><sub>Ren Amamiya (Joker) — P5R</sub>
+    </td>
+    <td align="center">
+      <img src="database/img/Ren_silhouette.webp" width="220" alt="Ren révélé">
+      <br><sub>Ren Amamiya (Joker) — P5R</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="database/img/Nagisa_silhouette.webp" style="filter: brightness(0)" width="220" alt="Ann — silhouette">
+      <br><sub>Nagisa Kaneshiro (Wonder) — P5X</sub>
+    </td>
+    <td align="center">
+      <img src="database/img/Nagisa_silhouette.webp" width="220" alt="Ann révélée">
+      <br><sub>Nagisa Kaneshiro (Wonder) — P5X</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="database/img/Yuki_silhouette.webp" style="filter: brightness(0)" width="220" alt="Joker — silhouette">
+      <br><sub>Makoto Yuki — P3R</sub>
+    </td>
+    <td align="center">
+      <img src="database/img/Yuki_silhouette.webp" width="220" alt="Joker révélé">
+      <br><sub>Makoto Yuki — P3R</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 📊 Progression de révélation
+
+Chaque mauvaise réponse dévoile davantage le portrait :
+
+| Essais | État de l'image |
+|--------|-----------------|
+| 0 | ⬛⬛⬛⬛⬛ Silhouette totale — `brightness(0)` |
+| 1 | 🟫⬛⬛⬛⬛ Légère lueur — zoom réduit |
+| 2 | 🟧⬛⬛⬛⬛ Contours visibles |
+| 3 | 🟨🟨⬛⬛⬛ Couleurs partielles |
+| 4 | 🟩🟩🟩⬛⬛ Presque révélé |
+| 5+ | 🟩🟩🟩🟩🟩 Révélation complète — `brightness(1)` |
+
+---
+
+## 🏗️ Structure du dossier
 
 ```
 silhouetteMode/
@@ -26,33 +88,37 @@ silhouetteMode/
     ├── silhouetteCharacters.js  ← liste des personnages disponibles dans ce mode
     ├── portraitsMapSilhouette.js ← correspondance nom → chemin portrait
     ├── persona.js               ← données personas pour le filtre PQ
-    └── img/                     ← images des portraits (dossier local)
+    └── img/                     ← portraits silhouette (WebP)
 ```
 
 ---
 
-## `silhouette.html`
+## 🖼️ `silhouette.html`
 
 Éléments HTML notables :
-- `#silhouetteContainer` — div contenant l'image avec `filter: brightness(0)` CSS
-- `#textbar` — champ de saisie avec autocomplete
-- `#guessButton` / `#giveUpButton` — actions principales
-- `#wrongGuessList` — liste des mauvaises réponses
-- `#victoryBox` — révélation finale avec portrait en couleur
+
+| Élément | Rôle |
+|---------|------|
+| `#silhouetteContainer` | Div contenant l'image avec `filter: brightness(0)` CSS |
+| `#textbar` | Champ de saisie avec autocomplete |
+| `#guessButton` / `#giveUpButton` | Actions principales |
+| `#wrongGuessList` | Liste des mauvaises réponses |
+| `#victoryBox` | Révélation finale avec portrait en couleur |
 
 ---
 
-## `silhouette.css`
+## 🎨 `silhouette.css`
 
-Contient les styles spécifiques à l'effet silhouette :
-- `filter: brightness(0)` sur l'image → silhouette noire complète
-- `filter: brightness(1)` → révélation progressive via JavaScript
-- Gestion du zoom avec `transform: scale()`
-- Transition CSS douce entre les niveaux de révélation
+Styles spécifiques à l'effet silhouette :
+
+- `filter: brightness(0)` → silhouette noire complète (état initial)
+- `filter: brightness(1)` → révélation progressive pilotée par JavaScript
+- `transform: scale()` → gestion du zoom par niveau d'essai
+- Transition CSS douce entre chaque niveau de révélation
 
 ---
 
-## `modeSilhouette.js`
+## 🔧 `modeSilhouette.js`
 
 Importe depuis `../js/gameCore.js` :
 - `showConfettiExplosion` (style `"sides"`)
@@ -74,13 +140,13 @@ Importe depuis `../js/gameCore.js` :
 | `resetGame()` | Remet à zéro l'état et choisit un nouveau personnage |
 | `initializeAutocomplete()` | Dropdown avec filtre `_guessed` (personnages déjà proposés masqués) |
 
-### Badge PQ
+### 🏅 Badge PQ
 
-Le mode Silhouette vérifie si le personnage deviné est lié à **Persona Q** et débloque le badge correspondant dans le profil.
+Le mode Silhouette vérifie si le personnage deviné est lié à **Persona Q** et débloque le badge correspondant dans le profil utilisateur.
 
 ---
 
-## `database/` (local)
+## 🗄️ `database/` (local)
 
 Ce mode possède sa propre base de données locale séparée de la base globale `database/`, car les personnages disponibles sont un sous-ensemble avec des portraits spécifiques aux silhouettes.
 
@@ -89,11 +155,11 @@ Ce mode possède sa propre base de données locale séparée de la base globale 
 | `silhouetteCharacters.js` | Tableau des personnages jouables en mode Silhouette |
 | `portraitsMapSilhouette.js` | Correspondance nom → chemin vers le portrait |
 | `persona.js` | Données des Personas (utilisées pour la vérification du badge PQ) |
-| `img/` | Portraits spécifiques au mode Silhouette |
+| `img/` | Portraits spécifiques au mode Silhouette (WebP, fond transparent) |
 
 ---
 
-## localStorage utilisé
+## 💾 localStorage utilisé
 
 | Clé | Contenu |
 |-----|---------|

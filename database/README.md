@@ -1,4 +1,10 @@
-# database/ — Base de données des personnages (Mode Classique)
+<div align="center">
+
+# 🗄️ Base de données personnages
+
+> **200+ personnages de P1 à P5X — organisés par opus, avec portraits, emojis et citations.**
+
+</div>
 
 Ce dossier contient les données des personnages utilisés dans le **mode Classique** ainsi que les portraits associés.
 Les autres modes possèdent leur propre sous-dossier `database/` dans leur répertoire.

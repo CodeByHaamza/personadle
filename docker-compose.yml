@@ -1,0 +1,95 @@
+# docker-compose.yml — PersonaDLE local development stack
+#
+# Usage :
+#   docker compose up -d          # démarrer (premier lancement : construit les images)
+#   docker compose down           # arrêter
+#   docker compose down -v        # arrêter + supprimer le volume BDD (reset complet)
+#   docker compose logs -f php    # logs Apache/PHP en temps réel
+#
+# Ce que ça fournit :
+#   • MariaDB 10.6 avec le schéma complet + seed (social_link_ranks, titles)
+#   • PHP 8.3 + Apache avec mod_rewrite et les extensions requises
+#   • PhpMyAdmin pour inspecter la BDD sans ligne de commande
+#
+# Accès :
+#   Site     → http://localhost:8080
+#   PhpMyAdmin → http://localhost:8081  (user: personadle_usr / pass: devpassword)
+#
+# Variables d'environnement :
+#   Copiez .env.example en .env pour surcharger les valeurs par défaut.
+
+services:
+
+  # ── MariaDB 10.6 ────────────────────────────────────────────────────────────
+  db:
+    image: mariadb:10.6
+    container_name: personadle_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE:      ${MYSQL_DATABASE:-personadle_db}
+      MYSQL_USER:          ${MYSQL_USER:-personadle_usr}
+      MYSQL_PASSWORD:      ${MYSQL_PASSWORD:-devpassword}
+    volumes:
+      # Persistance des données entre redémarrages
+      - db_data:/var/lib/mysql
+      # Scripts SQL exécutés automatiquement au premier démarrage (ordre alphabétique).
+      # 01_ = schéma complet (tables, index, contraintes, seed titles + social_link_ranks)
+      # 02_ = données de test optionnelles (voir docker/mysql/init/)
+      - ./sql/bdd_mysql.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./docker/mysql/init/02_seed_test.sql:/docker-entrypoint-initdb.d/02_seed_test.sql:ro
+    ports:
+      # Exposé sur 3307 pour ne pas entrer en conflit avec un MySQL local
+      - "${DB_EXPOSE_PORT:-3307}:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── PHP 8.3 + Apache ────────────────────────────────────────────────────────
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: personadle_php
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Ces variables sont lues par api/config.docker.php (monté via bind mount)
+      DB_HOST:     db
+      DB_PORT:     3306
+      DB_NAME:     ${MYSQL_DATABASE:-personadle_db}
+      DB_USER:     ${MYSQL_USER:-personadle_usr}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-devpassword}
+      APP_ENV:     local
+    volumes:
+      # Code source monté en lecture-écriture (hot-reload sans rebuild)
+      - .:/var/www/html
+      # Config PHP surchargeant les valeurs par défaut
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/personadle.ini:ro
+    ports:
+      - "${APP_PORT:-8080}:80"
+
+  # ── PhpMyAdmin ──────────────────────────────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: personadle_pma
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST:     db
+      PMA_PORT:     3306
+      PMA_USER:     ${MYSQL_USER:-personadle_usr}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:-devpassword}
+    ports:
+      - "${PMA_PORT:-8081}:80"
+
+volumes:
+  db_data:
+    name: personadle_db_data

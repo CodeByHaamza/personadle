@@ -1,0 +1,375 @@
+<!-- =============================================================
+     faq.html — Foire Aux Questions / Frequently Asked Questions
+     Accessible depuis le footer de toutes les pages.
+     ============================================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — PersonaDLE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./css/global.css?v=9">
+  <link rel="stylesheet" href="./css/langSelector.css?v=4">
+  <link rel="stylesheet" href="./css/bottomNav.css?v=1">
+  <link rel="stylesheet" href="./css/faq.css?v=1">
+
+  <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
+
+  <script>
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      document.documentElement.classList.add('darkmode');
+    }
+  </script>
+</head>
+<body>
+
+<!-- Mascotte Jack Frost -->
+<div class="faq-mascot" aria-hidden="true">
+  <div class="faq-mascot-bubble" data-i18n="faq.mascot_bubble">Any questions?<br>Hee-ho!</div>
+  <img src="./img/jack-frost-persona.gif" alt="Jack Frost" width="90">
+</div>
+
+<!-- Toggle Dark Mode -->
+<div class="darkmode-toggle">
+  <label class="switch">
+    <input type="checkbox" id="darkModeToggle">
+    <span class="slider round"></span>
+  </label>
+  <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+</div>
+
+<!-- Sélecteur de langue -->
+<div id="langToggle">
+  <button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Change language">
+    <span class="lang-btn-globe">🌐</span>
+    <span id="langBtnLabel">EN</span>
+    <span class="lang-btn-chevron">▼</span>
+  </button>
+  <div id="langDropdown" role="listbox" aria-label="Select language">
+    <div class="lang-opt lang-opt--en" data-lang="en" role="option" tabindex="0" aria-label="English">
+      <span class="lang-opt-name">English</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="./assets/lang/Lisa_Silverman_english.webp" alt="Lisa Silverman" loading="lazy">
+    </div>
+    <div class="lang-opt lang-opt--fr" data-lang="fr" role="option" tabindex="0" aria-label="Français">
+      <span class="lang-opt-name">Français</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="./assets/lang/Bebe_french.webp" alt="Bebe" loading="lazy">
+    </div>
+    <div class="lang-opt lang-opt--es" data-lang="es" role="option" tabindex="0" aria-label="Español">
+      <span class="lang-opt-name">Español</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="./assets/lang/Morgana_Spanish.webp" alt="Morgana" loading="lazy">
+    </div>
+    <div class="lang-opt lang-opt--de" data-lang="de" role="option" tabindex="0" aria-label="Deutsch">
+      <span class="lang-opt-name">Deutsch</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="./assets/lang/Hulkenberg_german.webp" alt="Hulkenberg" loading="lazy">
+    </div>
+    <div class="lang-opt lang-opt--it" data-lang="it" role="option" tabindex="0" aria-label="Italiano">
+      <span class="lang-opt-name">Italiano</span>
+      <span class="lang-opt-dot" aria-hidden="true">◆</span>
+      <img class="lang-opt-char" src="./assets/lang/Caesar_italian.webp" alt="Caesar" loading="lazy">
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="faq-page-header">
+  <h1 class="faq-page-title">
+    <span class="p5-diamond">◆</span>
+    <span data-i18n="faq.page_title">FAQ</span>
+    <span class="p5-diamond">◆</span>
+  </h1>
+  <p class="faq-page-subtitle" data-i18n="faq.page_subtitle">Frequently Asked Questions</p>
+</header>
+
+<!-- Content -->
+<main class="faq-wrap">
+
+  <!-- ── 🎮 The Game ───────────────────────────────────────── -->
+  <h2 class="faq-category" data-i18n="faq.cat_game">🎮 The Game</h2>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q1">What is PersonaDLE?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a1">PersonaDLE is a free daily fan-made guessing game based on the Persona RPG series (P1 → P5X). Every day, a new character, Persona or music track is chosen — you have a limited number of attempts to find it across 6 different game modes.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q2">Which Persona games are included?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a2">Characters and content from Persona 1, 2, 3 (+ FES, Portable, Reload), 4 (+ Golden, Arena Ultimax), 5 (+ Royal, Strikers, Tactica), and Persona 5X. Coverage grows with each new release.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q3">How often does the game reset?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a3">Every day at midnight Paris time. Each of the 6 modes resets independently with a fresh target.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q4">Is PersonaDLE free?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a4">100% free, forever. No ads, no in-app purchases. If you enjoy the game, Ko-fi donations help cover server costs — but they are never required.</p>
+    </div>
+  </div>
+
+  <!-- ── 🕹️ Gameplay ──────────────────────────────────────── -->
+  <h2 class="faq-category" data-i18n="faq.cat_gameplay">🕹️ Gameplay</h2>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q5">How many game modes are there?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a5">6 modes — Classic (Wordle-style attribute grid), Emoji (decode emoji clues), Silhouette (progressive image reveal), All-Out Attack (animated GIF), Personae (guess from the Persona, not the character), and Music (short audio excerpt).</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q6">How does Classic mode work?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a6">Type a character name. After each guess, a grid shows 7 attributes: game of origin, role, age, Arcana, weapon, affiliation, and height. Green = exact match, yellow = close, red = wrong — identical logic to Wordle.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q7">What is a streak?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a7">Your streak counts consecutive days you have won in a given mode. Miss a day or tap Give Up and it resets to 0. The Streak Recovery feature (Jack Frost menu on your profile) lets you restore it once every 2 months.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q8">How do filters work?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a8">The filter panel lets you restrict the character pool to specific Persona entries (P3, P4, P5 and their sub-titles). Your selection is saved between sessions and applies across all 6 modes.</p>
+    </div>
+  </div>
+
+  <!-- ── 👤 Account & Profile ──────────────────────────────── -->
+  <h2 class="faq-category" data-i18n="faq.cat_account">👤 Account &amp; Profile</h2>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q9">Do I need an account to play?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a9">No. You can play anonymously — all progress is stored locally in your browser. Creating a free account unlocks cloud sync, friends, leaderboard rankings, challenges, and the Social Link system.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q10">Can I play offline?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a10">Yes. The game has a service worker that caches all assets. Sessions played offline are automatically synced to the server when you reconnect.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q11">How do I transfer my progress to an account?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a11">After signing up, go to your Profile and tap Migrate. Your local stats, streaks and unlocks will be imported. The migration is safe and can be run multiple times without duplicating data.</p>
+    </div>
+  </div>
+
+  <!-- ── 👥 Community ──────────────────────────────────────── -->
+  <h2 class="faq-category" data-i18n="faq.cat_community">👥 Community</h2>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q12">Is there a Discord server?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a12">Yes! Join our community to chat with other fans, share your scores and follow development.</p>
+      <a href="https://discord.gg/wpMdGGDp3y" target="_blank" rel="noopener" class="faq-discord-btn">
+        <span data-i18n="faq.a12_link">Join the Discord →</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q13">How do I report a bug or suggest a character?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a13">Join the Discord and use the dedicated channels for bug reports and suggestions. You can also use the feedback form in the footer of every page.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q14">What is the Social Link system?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a14">Inspired by the Persona games, Social Links track the bond between you and each friend. Mutual interactions (profile visits, challenges, stat comparisons) earn XP and raise your rank from 1 — Stranger to 10 — True Confidant. Reaching rank 10 unlocks a special golden halo effect.</p>
+    </div>
+  </div>
+
+  <!-- ── 👋 The Team ───────────────────────────────────────── -->
+  <h2 class="faq-category" data-i18n="faq.cat_team">👋 The Team</h2>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q15">Who created PersonaDLE?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a15">PersonaDLE was built by a small team of Persona fans:</p>
+      <ul class="faq-team">
+        <li><strong>Hamza</strong> — <span data-i18n="faq.team_hamza_role">Founder &amp; Lead Dev — game logic, backend, animations</span></li>
+        <li><strong>Léo (L2GENDAIRE)</strong> — <span data-i18n="faq.team_leo_role">Data &amp; Design — character database, portraits, layouts</span></li>
+        <li><strong>Damien (Corbover)</strong> — <span data-i18n="faq.team_damien_role">Front-End — CSS architecture, responsive design</span></li>
+        <li><strong>Dzulian</strong> — <span data-i18n="faq.team_dzulian_role">Creative Consultant — P1/P2 accuracy, classic trilogy expertise</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-question">
+      <span data-i18n="faq.q16">Is PersonaDLE affiliated with Atlus or SEGA?</span>
+      <span class="faq-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="faq-answer">
+      <p data-i18n="faq.a16">No. PersonaDLE is an independent, non-commercial fan project. All Persona characters, music and artwork belong to their respective rights holders (Atlus, SEGA). This is a love letter to the series — nothing more.</p>
+    </div>
+  </div>
+
+  <!-- Back -->
+  <div class="faq-back">
+    <a href="./index.html" class="btn-p5" data-i18n="ui.back">← Back</a>
+  </div>
+
+</main>
+
+<!-- Bottom Nav -->
+<div id="bottomNav"></div>
+
+<!-- Scripts -->
+<script type="module">
+  import { initLang, setLang } from './js/i18n.js';
+  import { initBottomNav } from './js/bottomNav.js';
+
+  /* ── Dark mode toggle ── */
+  const toggle = document.getElementById('darkModeToggle');
+  if (localStorage.getItem('darkMode') === 'enabled') {
+    document.body.classList.add('darkmode');
+    toggle.checked = true;
+  }
+  toggle.addEventListener('change', () => {
+    const enabled = toggle.checked;
+    document.documentElement.classList.toggle('darkmode', enabled);
+    document.body.classList.toggle('darkmode', enabled);
+    localStorage.setItem('darkMode', enabled ? 'enabled' : 'disabled');
+  });
+
+  /* ── FAQ accordion ── */
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-question').addEventListener('click', () => {
+      item.classList.toggle('open');
+    });
+  });
+
+  /* ── Lang selector ── */
+  const LABELS = { en: 'EN', fr: 'FR', es: 'ES', de: 'DE', it: 'IT' };
+
+  function updateBtnLabel(lang) {
+    const el = document.getElementById('langBtnLabel');
+    if (el) el.textContent = LABELS[lang] || lang.toUpperCase();
+  }
+
+  function applyActive(lang) {
+    document.querySelectorAll('.lang-opt').forEach(opt =>
+      opt.classList.toggle('is-active', opt.dataset.lang === lang)
+    );
+    updateBtnLabel(lang);
+  }
+
+  function closeDropdown() {
+    document.getElementById('langToggle').classList.remove('open');
+    document.getElementById('langBtn').setAttribute('aria-expanded', 'false');
+  }
+
+  async function selectLang(lang) {
+    await setLang(lang);
+    applyActive(lang);
+    closeDropdown();
+  }
+
+  (async () => {
+    const lang = await initLang();
+    applyActive(lang);
+
+    document.getElementById('langBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      document.getElementById('langToggle').classList.contains('open')
+        ? closeDropdown()
+        : (document.getElementById('langToggle').classList.add('open'),
+           document.getElementById('langBtn').setAttribute('aria-expanded', 'true'));
+    });
+
+    document.querySelectorAll('.lang-opt').forEach(opt => {
+      opt.addEventListener('click', () => selectLang(opt.dataset.lang));
+      opt.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectLang(opt.dataset.lang); }
+      });
+    });
+
+    document.addEventListener('click', () => closeDropdown());
+    document.getElementById('langDropdown').addEventListener('click', e => e.stopPropagation());
+  })();
+
+  initBottomNav();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
+
+</body>
+</html>

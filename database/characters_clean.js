@@ -1,20 +1,301 @@
-export const characters = [ 
-  
-  // Persona 3
+export const characters = [
+
+  // ============================================================
+  // 🎮 PERSONA 1 — P1
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
   {
-  nom: "Kenji Tomochika",
-  genre: ["Male", "Human"],
-  age: "15-20",
-  arcane: ["Magician"],
-  opus:["P3", "P3FES", "P3P","P3R"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["🧑","💔","🍕"],
-  quote: "I've been doing some thinking after everything that went down. When Emiri left, I was sad, sure. But on top of that, I felt... really dumb. Did I really love Emiri, or did I just love the idea of dating a teacher. I thought about it a lot. ...... But I couldn't figure it out. What I did figure out is... you're a true friend."
+    nom: "Naoya Todou",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Emperor"],
+    opus: ["P1"],
+    personaUser: true,
+    persona: "Seimen Kongou",
+    emoji: ["🧑‍🎓", "🌀", "🔥"],
+    quote: "As for his fate... That's for you to decide."
+  },
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  {
+    nom: "Maki Sonomura",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["Priestess"],
+    opus: ["P1", "P2IS"],
+    personaUser: true,
+    persona: "Maso",
+    emoji: ["🪞", "🌫️", "💊"],
+    quote: "Thank you. I hope you'll still think about me at least once in a while. Goodbye. I love you."
   },
   {
+    nom: "Masao Inaba",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Chariot"],
+    opus: ["P1",],
+    personaUser: true,
+    persona: "Ogun",
+    emoji: ["🏥", "🤡", "❤"],
+    quote: "The spoiled son of Inaba Dry Cleaning's owners. Earnest and excitable."
+  },
+  {
+    nom: "Kei Nanjo",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Hierophant"],
+    opus: ["P1", "P2EP"],
+    personaUser: true,
+    persona: "Aizen Myouou",
+    emoji: ["1", "💵", "👓"],
+    quote: "Heir to the Nanjo Group. An utter pragmatist and skeptic."
+  },
+  {
+    nom: "Yukino Mayuzumi",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["Empress"],
+    opus: ["P1", "P2IS"],
+    personaUser: true,
+    persona: "Vesta",
+    emoji: ["🤬", "🏍", "📷"],
+    quote: "The hell did you just say...? YOU PIECE OF SHIT!"
+  },
+  {
+    nom: "Hidehiko Uesugi",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Justice"],
+    opus: ["P1", "P2EP"],
+    personaUser: true,
+    persona: "Nemhain",
+    emoji: ["🔴", "😎", "♠"],
+    quote: "Craves attention and doesn't take things very seriously."
+  },
+  {
+    nom: "Eriko Kirishima",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["Judgement"],
+    opus: ["P1", "P2EP"],
+    personaUser: true,
+    persona: "Nike",
+    emoji: ["🎭", "🏆", "🧙‍♀️"],
+    quote: "I am an angelic bringer of victory! From now on, you have my protection!"
+  },
+  {
+    nom: "Yuka Ayase",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["Magician"],
+    opus: ["P1",],
+    personaUser: true,
+    persona: "Houri",
+    emoji: ["🎢", "👩‍👧‍👦", "💅"],
+    quote: "Like, Persona!"
+  },
+  {
+    nom: "Reiji Kido",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Devil", "Death"],
+    opus: ["P1", "P2EP"],
+    personaUser: true,
+    persona: "Bres",
+    emoji: ["✖", "💪", "🇺🇸"],
+    quote: "A quiet loner who transferred to St. Hermelin High six months ago."
+  },
+
+
+  // ============================================================
+  // 🎮 PERSONA 2 — P2IS / P2EP
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
+  {
+    nom: "Tatsuya Suou",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Sun"],
+    opus: ["P2IS", "P2EP"],
+    personaUser: true,
+    persona: "Vulcanus",
+    emoji: ["🔥", "🎸", "🤐"],
+    quote: "That's right... I remember now... A sin that must not exist... How do I atone...?"
+  },
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  {
+    nom: "Maya Amano",
+    genre: ["Human", "Female"],
+    age: "21-40",
+    arcane: ["Moon"],
+    opus: ["P2IS", "P2EP"],
+    personaUser: true,
+    persona: "Maia",
+    emoji: ["📝", "🌕", "😊"],
+    quote: "Let's think positive!"
+  },
+  {
+    nom: "Lisa Silverman",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["Lovers"],
+    opus: ["P2IS"],
+    personaUser: true,
+    persona: "Eros",
+    emoji: ["💃", "🇭🇰", "🎤"],
+    quote: "Chinyan... Remember me, no matter what...! I love you..."
+  },
+  {
+    nom: "Jun Kurosu",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Fortune"],
+    opus: ["P2IS"],
+    personaUser: true,
+    persona: "Hermes",
+    emoji: ["🃏", "🌒", "🌹"],
+    quote: "People often compare their goals to the stars. They shine brightly even after the sun goes down... fixed stars in a dark expanse."
+  },
+  {
+    nom: "Eikichi Mishina",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Emperor"],
+    opus: ["P2IS"],
+    personaUser: true,
+    persona: "Rhadamanthus",
+    emoji: ["🎤", "💀", "🎸"],
+    quote: "Call me the 'Death Boss' — I may look flashy, but I fight for my friends."
+  },
+  {
+    nom: "Baofu",
+    genre: ["Human", "Male"],
+    age: "21-40",
+    arcane: ["Hanged Man"],
+    opus: ["P2EP"],
+    personaUser: true,
+    persona: "Odysseus",
+    emoji: ["🕶️", "📞", "🕷️"],
+    quote: "How I chose to live has nothing to do with you...If you want sympathy, ask someone else..."
+  },
+  {
+    nom: "Ulala Serizawa",
+    genre: ["Human", "Female"],
+    age: "21-40",
+    arcane: ["Star"],
+    opus: ["P2IS", "P2EP"],
+    personaUser: true,
+    persona: "Callisto",
+    emoji: ["🥊", "🍷", "💔"],
+    quote: "I'm sick of bad men and bad luck. Time to punch my way out of this!"
+  },
+  {
+    nom: "Katsuya Suou",
+    genre: ["Human", "Male"],
+    age: "21-40",
+    arcane: ["Justice"],
+    opus: ["P2IS", "P2EP"],
+    personaUser: true,
+    persona: "Helios",
+    emoji: ["👮‍♂️", "🍰", "⚖️"],
+    quote: "Don't be absurd...The only officer to see him was me. I WILL be the one to arrest him."
+  },
+
+  // ── Antagoniste(s) ────────────────────────────────────────────
+  {
+    nom: "Joker",
+    genre: ["Entity", "Male"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P2IS"],
+    personaUser: true,
+    persona: "Nyarlathotep",
+    emoji: ["🎭", "🃏", "📞"],
+    quote: "Pathetic, misguided humans, obey me! Only I can lead you, the ignorant! If you will not obey, then you will DIE!"
+  },
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  {
+    nom: "Philemon",
+    genre: ["Entity", "Male"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P1", "P2IS", "P2EP"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🦋", "🎭", "🤵‍♂️"],
+    quote: "I am you. You are me... I shall always watch over you from within. Farewell..."
+  },
+  {
+    nom: "Nameless",
+    genre: ["Velvet", "Male"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P1", "P2IS", "P2EP"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🎹", "👓", "🤵‍♂️"],
+    quote: "A pianist who opens the shuttered doors of one's soul..."
+  },
+  {
+    nom: "Belladonna",
+    genre: ["Velvet", "Female"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P1", "P2IS", "P2EP"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🎶", " 🗣️", "🤵‍♀️"],
+    quote: "My duty is♪ To calm the hearts of visitors♪ For this, I must hear my heart's music♪ Though my ears♪ Block out the world's sounds♪ Your words reach me quite clearly♪"
+  },
+  {
+    nom: "Demon Painter",
+    genre: ["Velvet", "Male"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P2IS", "P2EP"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🖌️ ", " 🗣️", "🕶️"],
+    quote: "I express my emotions through my art. I'm not much for chatting... But I think I can make an exception for you."
+  },
+
+
+  // ============================================================
+  // 🎮 PERSONA 3 — P3 / P3FES / P3P / P3R
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
+  {
+    nom: "Makoto Yuki",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Fool", "Death", "Judgement", "Universe"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: true,
+    persona: "Orpheus",
+    emoji: ["🎧","🌙","♂️"],
+    quote: "Time never waits. It delivers all equally to the same end. You, who wish to safeguard the future, however limited it may be... You will be given one year; go forth without falter, with your heart as your guide..."
+  },
+  {
+    nom: "Kotone Shiomi",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["Fool", "Death", "Judgement", "Universe"],
+    opus: ["P3P", "PQ2"],
+    personaUser: true,
+    persona: "Orpheus",
+    emoji: ["🎧","🌙","♀️"],
+    quote: "Time never waits. It delivers all equally to the same end. You, who wish to safeguard the future, however limited it may be... You will be given one year; go forth without falter, with your heart as your guide..."
+  },
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  {
     nom: "Junpei Iori",
-    genre:  ["Male", "Human"],
+    genre: ["Male", "Human"],
     age: "15-20",
     arcane: ["Magician"],
     opus:["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
@@ -22,61 +303,6 @@ export const characters = [
     persona: "Hermes",
     emoji: ["⚾","🎮","🪽"],
     quote: "Ya know, I don't think it's completely hit me yet... It's just all so hard to believe... But, that doesn't mean we should just sit around and wait for it to happen. You're pretty cool, man. That thing was inside you for ten years, and you harnessed its power and made it your own..."
-  },
- {
-    nom: "Fuuka Yamagishi",
-    genre: ["Human", "Female"],
-    age:  "15-20",
-    arcane: ["Priestess"],
-    opus:  ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
-    personaUser: true,
-    persona: "Lucia",
-    emoji: ["💻","📚","📡"],
-    quote: "I guess there is something I want after all... It makes me happy to see everyone else happy too. So, I want us all to remain friends. The power to connect people, even when they're apart... My Persona has given me this amazing gift."
-  },
-  {
-    nom: "Mitsuru Kirijo",
-    genre: ["Human", "Female"],
-    age: "15-20",
-    arcane: ["Empress"],
-    opus:  ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
-    personaUser: true,
-    persona: "Penthesilea",
-    emoji: ["🏍️","🤺","❄️"],
-    quote: "I remember... Yes... With my father's death, I lost my purpose in life... But now I have something to live for. No longer will I run from the future! I will face it head on, carrying out my father's will! I am resolved and without reservation. I owe it all to my invaluable friends... And we have promised to never lose hope, no matter what tomorrow may bring."
-  },
-  {
-    nom: "Hidetoshi Odagiri",
-    genre: ["Human", "Male"],
-    age: "15-20",
-    arcane: ["Emperor"],
-    opus:  ["P3", "P3FES", "P3P","P3R"],
-    personaUser: false,
-    persona: "NONE",
-    emoji: ["🏫","👔","💼"],
-    quote: "The system only works if you have people's trust, and trust is not something you force them to feel."
-  },
-  {
-    nom: "Bunkichi",
-    genre: ["Human", "Male"],
-    age: "80+",
-    arcane: ["Hierophant"],
-    opus:  ["P3", "P3FES", "P3P","P3R"],
-    personaUser: false,
-    persona: "NONE",
-    emoji: ["👓", "📚", "🌳"],
-    quote: "...Recently, I went to visit the persimmon tree, and I met a student on my way back. He told me that the school is planning to build a new addition. It would be selfish of an old man like me to deprie those young people of new learning opportunities... I think it'd make our son happy, too, since he was a teacher. Helping those kids is more important than hanging on to his memory."
-  },
-  {
-    nom: "Mitsuko",
-    genre: ["Human", "Female"],
-    age:"80+",
-    arcane: ["Hierophant"],
-    opus:  ["P3", "P3FES", "P3P","P3R"],
-    personaUser: false,
-    persona: "NONE",
-    emoji: ["🧶","📚","🍂"],
-    quote: "...Recently, I went to visit the persimmon tree, and I met a student on my way back. He told me that the school is planning to build a new addition. It would be selfish of an old man like me to deprie those young people of new learning opportunities... I think it'd make our son happy, too, since he was a teacher. Helping those kids is more important than hanging on to his memory."
   },
   {
     nom: "Yukari Takeba",
@@ -88,6 +314,232 @@ export const characters = [
     persona: "Io",
     emoji: ["🏹","👩‍🎤","❤️"],
     quote: "He was involved in dangerous work, but in the end, he fought to make things right. He believed the Shadows needed to be stopped, even if it meant losing his life. That's why I choose to fight. I'm going to destroy the Dark Hour and finish what my dad started. That's all I can do. That we can do. Right, Mitsuru-senpai?"
+  },
+  {
+    nom: "Fuuka Yamagishi",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["Priestess"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: true,
+    persona: "Lucia",
+    emoji: ["💻","📚","📡"],
+    quote: "I guess there is something I want after all... It makes me happy to see everyone else happy too. So, I want us all to remain friends. The power to connect people, even when they're apart... My Persona has given me this amazing gift."
+  },
+  {
+    nom: "Mitsuru Kirijo",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["Empress"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: true,
+    persona: "Penthesilea",
+    emoji: ["🏍️","🤺","❄️"],
+    quote: "I remember... Yes... With my father's death, I lost my purpose in life... But now I have something to live for. No longer will I run from the future! I will face it head on, carrying out my father's will! I am resolved and without reservation. I owe it all to my invaluable friends... And we have promised to never lose hope, no matter what tomorrow may bring."
+  },
+  {
+    nom: "Akihiko Sanada",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Star"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: true,
+    persona: "Polydeuces",
+    emoji: ["🥊", "💪", "🏅"],
+    quote: "I was too obsessed with power. Ever since I lost Miki, that's all I've cared about. I thought that if I was strong enough, I could protect anyone. But I was wrong... And now you're gone too... I'm such an idiot. In battle, there's always a chance of dying... I knew that! But I was so focused on fighting that I didn't notice anything else! It didn't matter how tough I was! Look what happened!"
+  },
+  {
+    nom: "Aigis",
+    genre: ["Artificial", "Female"],
+    age: "< 15",
+    arcane: ["Aeon"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: true,
+    persona: "Palladion",
+    emoji: ["🤖", "💔", "💡"],
+    quote: "Everyone... I realize now that I have friends as well. You don't have to save the world to find meaning in life... Sometimes, all you need is something simple, like someone to take care of. I'll keep on living no matter what, so that I can protect you..."
+  },
+  {
+    nom: "Ken Amada",
+    genre: ["Human", "Male"],
+    age: "< 15",
+    arcane: ["Justice"],
+    opus:["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: true,
+    persona: "Nemesis",
+    emoji: ["🧒","🐶","💔"],
+    quote: "I've known it all along; I've just been lying to myself... I was consumed by hatred... I couldn't face the thought of being alone... But... that's exactly what happened... All this time, I've just been running away... ...... I've made up my mind... Shinjiro-san... I'll see it through to the end. So you don't need to worry."
+  },
+  {
+    nom: "Koromaru",
+    genre: ["Animal", "Male"],
+    age: "Unknown",
+    arcane: ["Strength"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: true,
+    persona: "Cerberus",
+    emoji: ["⛩️", "🐾", "🐕"],
+    quote: "Woof! Woof woof! Arf! Arf!"
+  },
+  {
+    nom: "Shinjiro Aragaki",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Moon"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: true,
+    persona: "Castor",
+    emoji: ["🪓", "💉", "🩸"],
+    quote: "Heh... Why the long face? Isn't this... what you wanted? It's alright... give yourself time... Let your anger be your strength. You're still just a kid, Ken... You got your whole life ahead of you... So don't waste it... Make it your own... Okay?"
+  },
+  {
+    nom: "Metis",
+    genre: ["Artificial", "Female"],
+    age: "< 15",
+    arcane: ["NONE"],
+    opus: ["P3FES"],
+    personaUser: true,
+    persona: "Psyche",
+    emoji: ["🤖", "💙", "🔧"],
+    quote: "I went to see you so I could save you, but I ended up causing the power to awaken... That's why I made up my mind. I'd do anything to protect you. Even... even if it meant you'd hate me for it... You're all I have in the world..."
+  },
+
+  // ── Antagoniste(s) ────────────────────────────────────────────
+  {
+    nom: "Nyx",
+    genre: ["Entity"],
+    age: "Unknown",
+    arcane: ["Death"],
+    opus: ["P3", "P3FES", "P3P", "P3R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🌕", "💀", "🥚"],
+    quote: "That was my name for a time... I didn't mind it. I am merely a harbinger of the Fall... Although, Nyx and myself are now one and the same."
+  },
+  {
+    nom: "Ryoji Mochizuki",
+    genre: ["Entity", "Male"],
+    age: "15-20",
+    arcane: ["Death"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
+    personaUser: true,
+    persona: "Thanatos",
+    emoji: ["🕺", "🎉", "💀"],
+    quote: "So... you understand. I think that looking to the future is a great way to live. But, that doesn't mean that other ways of living are wrong. No one knows which road leads to happiness."
+  },
+  {
+    nom: "Takaya Sakaki",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
+    personaUser: true,
+    persona: "Hypnos",
+    emoji: ["🕊️", "🔫", "🩸"],
+    quote: "My life was stolen from me... And in its place, I was given a power I never asked for... And so, I learned that the future is only a delusion. Only by striving to live every moment to its fullest can the soul truly be satisfied. That is why we welcome this glorious revelation, to shine a light upon this darkened world!"
+  },
+  {
+    nom: "Jin Shirato",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
+    personaUser: true,
+    persona: "Moros",
+    emoji: ["🧠", "💻", "🕶️"],
+    quote: "Takaya saved me from it all... He said, 'Don't let the past control you, and don't look to the future; simply live in the moment... To be honest, I don't even care about Kirijo anymore. But, Takaya's wish... must be... fulfilled...!"
+  },
+  {
+    nom: "Chidori Yoshino",
+    genre: ["Human", "Female"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
+    personaUser: true,
+    persona: "Medea",
+    emoji: ["✏️", "👗", "💔"],
+    quote: "What I fear most isn't death. What I fear most is... ...attachment. Once I become attached to something, I fear that I will lose it. That's why we only live for the moment... But you... you brought me pain... Pain that I didn't want... Pain that I never asked for... When I'm with you, Junpei, I fear everything... I fear loss... I fear death... I fear that my time with you will end... That's why I..."
+  },
+  {
+    nom: "Shuji Ikutsuki",
+    genre: ["Human", "Male"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["📚", "😄", "🔪"],
+    quote: "Would you believe me if I said that a day consists of more than 24 hours?"
+  },
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  {
+    nom: "Elizabeth",
+    genre: ["Velvet", "Female"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🧢", "🛝", "📖"],
+    quote: "Well then, a song to celebrate my victory... Veeelvet, oh velvet..."
+  },
+  {
+    nom: "Theodore",
+    genre: ["Velvet", "Male"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P3P","PQ","PQ2"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🎩", "📚", "🔮"],
+    quote: "The story has reached its climax. I regret... That this moment must end"
+  },
+
+  // ── Social Link ───────────────────────────────────────────────
+  {
+    nom: "Kenji Tomochika",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["Magician"],
+    opus:["P3", "P3FES", "P3P","P3R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🧑","💔","🍕"],
+    quote: "I've been doing some thinking after everything that went down. When Emiri left, I was sad, sure. But on top of that, I felt... really dumb. Did I really love Emiri, or did I just love the idea of dating a teacher. I thought about it a lot. ...... But I couldn't figure it out. What I did figure out is... you're a true friend."
+  },
+  {
+    nom: "Hidetoshi Odagiri",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Emperor"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🏫","👔","💼"],
+    quote: "The system only works if you have people's trust, and trust is not something you force them to feel."
+  },
+  {
+    nom: "Bunkichi",
+    genre: ["Human", "Male"],
+    age: "80+",
+    arcane: ["Hierophant"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["👓", "📚", "🌳"],
+    quote: "...Recently, I went to visit the persimmon tree, and I met a student on my way back. He told me that the school is planning to build a new addition. It would be selfish of an old man like me to deprie those young people of new learning opportunities... I think it'd make our son happy, too, since he was a teacher. Helping those kids is more important than hanging on to his memory."
+  },
+  {
+    nom: "Mitsuko",
+    genre: ["Human", "Female"],
+    age:"80+",
+    arcane: ["Hierophant"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🧶","📚","🍂"],
+    quote: "...Recently, I went to visit the persimmon tree, and I met a student on my way back. He told me that the school is planning to build a new addition. It would be selfish of an old man like me to deprie those young people of new learning opportunities... I think it'd make our son happy, too, since he was a teacher. Helping those kids is more important than hanging on to his memory."
   },
   {
     nom: "Kazushi Miyamoto",
@@ -123,22 +575,11 @@ export const characters = [
     quote: "Normally, I'm quiet and timid, but when it comes to something I care about, then I become aggressive."
   },
   {
-    nom: "Ken Amada",
-    genre: ["Human", "Male"],
-    age: "< 15",
-    arcane: ["Justice"],
-    opus:["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
-    personaUser: true,
-    persona: "Nemesis",
-    emoji: ["🧒","🐶","💔"],
-    quote: "I've known it all along; I've just been lying to myself... I was consumed by hatred... I couldn't face the thought of being alone... But... that's exactly what happened... All this time, I've just been running away... ...... I've made up my mind... Shinjiro-san... I'll see it through to the end. So you don't need to worry."
-  },
-  {
     nom: "Maya",
     genre: ["Human", "Female"],
     age: "21-40",
     arcane: ["Hermit"],
-    opus:  ["P3", "P3FES", "P3P","P3R"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
     personaUser: false,
     persona: "NONE",
     emoji: ["👩‍💻", "🕹️", "🎮"],
@@ -149,7 +590,7 @@ export const characters = [
     genre: ["Human", "Female"],
     age: "15-20",
     arcane: ["Hermit"],
-    opus:  ["P3P"],
+    opus: ["P3P"],
     personaUser: false,
     persona: "NONE",
     emoji: ["🧑‍🏫", "🎨", "🌸"],
@@ -167,17 +608,6 @@ export const characters = [
     quote: "I have my own dreams too, you know! Ugh, I can't stand it anymore!"
   },
   {
-    nom: "Ryoji Mochizuki",
-    genre: ["Entity", "Male"],
-    age: "15-20",
-    arcane: ["Death"],
-    opus: ["P3", "P3FES", "P3P","P3R"],
-    personaUser: true,
-    persona: "Thanatos",
-    emoji: ["🕺", "🎉", "💀"],
-    quote: "So... you understand. I think that looking to the future is a great way to live. But, that doesn't mean that other ways of living are wrong. No one knows which road leads to happiness."
-  },
-  {
     nom: "Yuko Nishiwaki",
     genre: ["Human", "Female"],
     age: "15-20",
@@ -189,17 +619,6 @@ export const characters = [
     quote: "I learned a lot from those kids. When I first started coaching them. I was thinking about how I would teach my own kids one day... an I didn't have the slightest clue. Well, that all changed. If you hadn't been there with me, I'm not sure if I would've been able to coach those kids. And I would have never thought about my future, either. ...So, thank you."
   },
   {
-    nom: "Koromaru",
-    genre: ["Animal", "Male"],
-    age: "Unknown",
-    arcane: ["Strength"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
-    personaUser: true,
-    persona: "Cerberus",
-    emoji: ["⛩️", "🐾", "🐕"],
-    quote: "Woof! Woof woof! Arf! Arf!"
-  },
-  {
     nom: "Maiko Oohashi",
     genre: ["Human", "Female"],
     age: "< 15",
@@ -209,17 +628,6 @@ export const characters = [
     persona: "NONE",
     emoji: ["🍭", "👧", "🎀"],
     quote: "I think that should go for friends like you and me, too. So, I don't have to be sad... I think family is important. Do you think I'll have a family of my own one day?"
-  },
-  {
-    nom: "Pharos",
-    genre: ["Entity", "Male"],
-    age: "Unknown",
-    arcane: ["Death"],
-    opus: ["P3", "P3FES", "P3P","P3R"],
-    personaUser: false,
-    persona: "NONE",
-    emoji: ["🌙", "👼", "💫"],
-    quote: "No one can escape time, it delivers us all to the same end. You can't plug your ears and cover your eyes."
   },
   {
     nom: "Bebe",
@@ -266,17 +674,6 @@ export const characters = [
     quote: "You helped me realize a lot of stuff, y'know? I always blamed school or my family for everything. I didn't want to face the fact that I was responsible... I really lucked out, y'know? If we hadn't met, I'd still be a jerk. I won't forget you."
   },
   {
-    nom: "Akihiko Sanada",
-    genre: ["Human", "Male"],
-    age: "15-20",
-    arcane: ["Star"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
-    personaUser: true,
-    persona: "Polydeuces",
-    emoji: ["🥊", "💪", "🏅"],
-    quote: "I was too obsessed with power. Ever since I lost Miki, that's all I've cared about. I thought that if I was strong enough, I could protect anyone. But I was wrong... And now you're gone too... I'm such an idiot. In battle, there's always a chance of dying... I knew that! But I was so focused on fighting that I didn't notice anything else! It didn't matter how tough I was! Look what happened!"
-  },
-  {
     nom: "Nozomi Suemitsu",
     genre: ["Human", "Male"],
     age: "15-20",
@@ -286,17 +683,6 @@ export const characters = [
     persona: "NONE",
     emoji: ["🍱", "🍜", "💼"],
     quote: "I feel like I've been a fake all this time... But, I will become the true Gourmet King one day! I will become a food critic. It will be my job to eat... And I will master it! Then, once I die and go to the afterlife, I can face my brother... And he'll be impressed by the fact that I was able to master something, all by myself!"
-  },
-  {
-    nom: "Shinjiro Aragaki",
-    genre: ["Human", "Male"],
-    age: "15-20",
-    arcane: ["Moon"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
-    personaUser: true,
-    persona: "Castor",
-    emoji: ["🪓", "💉", "🩸"],
-    quote: "Heh... Why the long face? Isn't this... what you wanted? It's alright... give yourself time... Let your anger be your strength. You're still just a kid, Ken... You got your whole life ahead of you... So don't waste it... Make it your own... Okay?"
   },
   {
     nom: "Akinari Kamiki",
@@ -309,719 +695,126 @@ export const characters = [
     emoji: ["📖", "💔", "✨"],
     quote: "Because... the meaning of my life is not something I should worry about. It's really what others think of my life or what I was able to do for them. So... for me, or you, or anyone... the meaning of our lives is something that we make but don't see. People can't survive without help from others. ...We all depend on one another."
   },
+
+  // ── Autres ────────────────────────────────────────────────────
   {
-    nom: "Aigis",
-    genre: ["Artificial", "Female"],
-    age: "< 15",
-    arcane: ["Aeon"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
-    personaUser: true,
-    persona: "Palladion",
-    emoji: ["🤖", "💔", "💡"],
-    quote: "Everyone... I realize now that I have friends as well. You don't have to save the world to find meaning in life... Sometimes, all you need is something simple, like someone to take care of. I'll keep on living no matter what, so that I can protect you..."
-  },
-  {
-    nom: "Kotone Shiomi",
-    genre: ["Human", "Female"],
-    age: "15-20",
-    arcane: ["Fool", "Death", "Judgement", "Universe"],
-    opus: ["P3P", "PQ2"],
-    personaUser: true,
-    persona: "Orpheus",
-    emoji: ["🎧","🌙","♀️"],
-    quote: "Time never waits. It delivers all equally to the same end. You, who wish to safeguard the future, however limited it may be... You will be given one year; go forth without falter, with your heart as your guide..."
-  },
-  {
-    nom: "Elizabeth",
-    genre: ["Velvet", "Female"],
+    nom: "Pharos",
+    genre: ["Entity", "Male"],
     age: "Unknown",
-    arcane: ["NONE"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    arcane: ["Death"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
     personaUser: false,
     persona: "NONE",
-    emoji: ["🧢", "🛝", "📖"],
-    quote: "Well then, a song to celebrate my victory... Veeelvet, oh velvet..."
+    emoji: ["🌙", "👼", "💫"],
+    quote: "No one can escape time, it delivers us all to the same end. You can't plug your ears and cover your eyes."
   },
   {
-    nom: "Makoto Yuki",
+    nom: "Mr. Edogawa",
     genre: ["Human", "Male"],
-    age: "15-20",
-    arcane: ["Fool", "Death", "Judgement", "Universe"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
-    personaUser: true,
-    persona: "Orpheus",
-    emoji: ["🎧","🌙","♂️"],
-    quote: "Time never waits. It delivers all equally to the same end. You, who wish to safeguard the future, however limited it may be... You will be given one year; go forth without falter, with your heart as your guide..."
-  },
-  {
-    nom: "Theodore",
-    genre: ["Velvet", "Male"],
-    age: "Unknown",
+    age: "40+",
     arcane: ["NONE"],
-    opus: ["P3P","PQ","PQ2"],
+    opus: ["P3", "P3FES", "P3P","P3R"],
     personaUser: false,
     persona: "NONE",
-    emoji: ["🎩", "📚", "🔮"],
-    quote: "The story has reached its climax. I regret... That this moment must end"
-  },
-  
-  
-  // Persona 4
-  {
-  nom: "Yu Narukami",
-  genre: ["Human","Male"],
-  age: "15-20",
-  arcane: ["Fool", "Judgment", "World"],
-  opus: ["P4", "P4G", "P4AU", "PQ","PQ2"],
-  personaUser: true,
-  persona: "Izanagi",
-  emoji: ["😐", "🗡️", "⚡"],
-  quote: "People can do it. As long as they open their eyes and look around, they'll see it. They'll see the truth! If there is a fog, they just have to embrace the truth to get rid of it! This is what's right, and this is the path I choose to follow!"
-  },
-  {
-  nom: "Ai Ebihara",
-  genre: ["Human","Female"],
-  age: "15-20",
-  arcane: ["Moon"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["💅", "💔", "😤"],
-  quote: "I've carried that thing around ever since I decided to change who I was. I could check myself whenever I wanted, to make sure I was still pretty all the time... But now... I don't need it. From now on, people like you will be my mirror. I'll look for my reflection in you, so that I'll never forget who I am. I won't be able to lie to myself anymore... Thank you. Your eyes taught me how to do that."
-  },
-  {
-  nom: "Ayane Matsunaga",
-  genre: ["Human","Female"],
-  age: "15-20",
-  arcane: ["Sun"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["🌱", "🎺", "😖"],
-  quote: "I've been keeping a lot of... unpleasant emotions buried inside. In fact, the real me can be pretty selfish. I want people to notice me, but I never make the first move. Selfish, right?"
-  },
-  {
-  nom: "Chie Satonaka",
-  genre: ["Human","Female"],
-  age: "15-20",
-  arcane: ["Chariot"],
-  opus: ["P4", "P4G", "P4AU", "PQ", "PQ2"],
-  personaUser: true,
-  persona: "Tomoe",
-  emoji: ["🤩", "🍖", "🥋"],
-  quote: "...I think this 'power' of mine is what I wanted all along. The power to protect everyone... I understand now. I'm not supposed to use it to become more self-reliant... I'm supposed to use this power to protect people... Yukiko, my friends, my family, this town.. and you."
-  },
-  {
-  nom: "Daisuke Nagase",
-  genre: ["Human","Male"],
-  age: "15-20",
-  arcane: ["Strength"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😅", "💪", "⚽"],
-  quote: "I kept pretending that I was trying my hardest... But the truth is, I was hardly trying. If I managed to do well playing at half my potential, nobody really cared that I wasn't taking it seriously. And if I wasn't doing so hot, I had a copout. All I had to do was say I wasn't trying. I was scared of the possibility that things could go wrong, even when I gave it my all. Because if that happened... I would have felt like I had no business even being here... Haha... Pretty lame, huh?"
-  },
-  {
-  nom: "Eri Minami",
-  genre: ["Human","Female"],
-  age: "21-40",
-  arcane: ["Temperance"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😔", "📖", "👩‍👦"],
-  quote: "I wasn't even trying to see him for myself. Maybe I was just afraid of facing him."
-  },
-  {
-  nom: "Fox",
-  genre: ["Animal"],
-  age: "Unknown",
-  arcane: ["Hermit"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["🙏", "🎴", "🦊"],
-  quote: "*Yip*"
-  },
-  {
-  nom: "Hisano Kuroda",
-  genre: ["Human","Female"],
-  age: "80+",
-  arcane: ["Death"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["💔", "💀", "👵"],
-  quote: "Live a long and full life. That is the greatest thing you can do for your beloved."
-  },
-  {
-  nom: "Kanji Tatsumi",
-  genre: ["Human","Male"],
-  age: "15-20",
-  arcane: ["Emperor"],
-  opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
-  personaUser: true,
-  persona: "Take-Mikazuchi",
-  emoji: ["💢", "🚴‍♂️", "🧵"],
-  quote: "I get it now... This is what he was talking about... I've just been throwin' in the towel all this time. Of course no one could understand me... I been keepin' my distance outta fear. So I decided that I'd do things my way, no matter how tough, but... It ain't just about hanging out with guys who understand you and telling the rest to get bent... You gotta make an effort if you want people to understand you. I wasn't even trying."
-  },
-  {
-  nom: "Kou Ichijo",
-  genre: ["Human","Male"],
-  age: "15-20",
-  arcane: ["Strength"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😎", "🎭", "🏀"],
-  quote: "I thought I had it all figured out, but I just didn't get it. Y'know, it's really the people around me who've shaped who I am. I bought into the same crap artists are always writing or singing about. They're trying to 'find themselves.' So I thought I knew all about how to 'find yourself.' I thought I got it. But... Really getting it is totally different. I mean, really finding yourself."
-  },
-  {
-  nom: "Margaret",
-  genre: ["Velvet","Female"],
-  age: "Unknown",
-  arcane: ["Empress"],
-  opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["📖", "✨", "😏"],
-  quote: "Truth is a thing which only appears to those who have observed, considered, and made a choice. At the end of the path you chose lies the truth... Believe in it, and continue without faltering."
-  },
-  {
-  nom: "Marie",
-  genre: ["Entity","Velvet","Female"],
-  age: "15-20",
-  arcane: ["Aeon"],
-  opus: ["P4G", "P4AU","PQ","PQ2"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["🧢", "📝", "🌧️"],
-  quote: "There are things that you can't do by yourself, but can do with others... That's true. You gave me a new memory. You taught me that I don't need to be worried. ...I wouldn't have been able to do that on my own. I only realized that because of you."
-  },
-  {
-  nom: "Nanako Dojima",
-  genre: ["Human","Female"],
-  age: "< 15",
-  arcane: ["Justice"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😊", "🧃", "🎶"],
-  quote: "Every day's great at your Junes!"
-  },
-  {
-  nom: "Naoki Konishi",
-  genre: ["Human","Male"],
-  age: "15-20",
-  arcane: ["Hanged Man"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😞", "🛒", "🥀"],
-  quote: "There's a river separating us... Sis is gone, and I'm still here. Sis has crossed on over to the other bank, and I'm still on this one... No matter how much I cry or piss my pants, I know Sis isn't coming back..."
-  },
-  {
-  nom: "Ryotaro Dojima",
-  genre:["Human","Male"],
-  age: "40+",
-  arcane: ["Hierophant"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😓", "🕵️‍♂️", "🚬"],
-  quote: "This town is my town. It's the place where you and Nanako live. That's why I'm gonna live on, protecting this place. As a detective... as a father."
-  },
-  {
-  nom: "Sayako Uehara",
-  genre: ["Human","Female"],
-  age: "21-40",
-  arcane: ["Devil"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😏", "🏥", "🍶"],
-  quote: "So... I'm going. I'm going to find that path I gave up on. I thought I couldn't do it... But, I will walk that road. I'm going to be my own guide. Thinking, walking, taking responsibility for myself... Once I've done all that, I think I can finally say that I've truly lived."
-  },
-  {
-  nom: "Shu Nakajima",
-  genre: ["Human","Male"],
-  age: "< 15",
-  arcane: ["Tower"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😠", "📚", "🎓"],
-  quote: "I'm going to be my own guide. Thinking, walking, taking responsibility for myself..."
-  },
-  {
-  nom: "Yumi Ozawa",
-  genre: ["Human","Female"],
-  age: "15-20",
-  arcane: ["Sun"],
-  opus: ["P4", "P4G"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["😭", "🎭", "💔"],
-  quote: "Dad... Thank you for bringing me... into this world..."
-  },
-  {
-  nom: "Naoto Shirogane",
-  genre:["Human","Female"],
-  age: "15-20",
-  arcane: ["Fortune"],
-  opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
-  personaUser: true,
-  persona: "Sukuna-Hikona",
-  emoji: ["🔫", "🔍", "🕵️‍♂️"],
-  quote: "The title of detective became a burden to me... I thought I had no other aspects apart from detective self. But you and the others gave me a reason to be, as neither adult nor man... So, I... I was able to face myself as myself. Before the detective, before the child, before the woman. By spending time with you all, I change, day by day. It frightened me before... But now... With everyone... With you, I can proudly proclaim that I am myself. Nothing more, but nothing less."
-  },
-  {
-  nom: "Rise Kujikawa",
-  genre: ["Human","Female"],
-  age: "15-20",
-  arcane: ["Lovers"],
-  opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
-  personaUser: true,
-  persona: "Himiko",
-  emoji: ["😜", "💕", "🎤"],
-  quote: "Senpai... I won't make the same mistake. There's no such thing as a me who isn't me. So I won't run away... I won't try to be someone I'm not. There's a lot of Rises inside me... I won't try to change them. Instead... I'll let people know that those Rises exist... That's the me I want to be."
-  },
-  {
-  nom: "Teddie",
-  genre: ["Shadow","Animal","Male"],
-  age: "Unknown",
-  arcane: ["Star"],
-  opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
-  personaUser: true,
-  persona: "Kintoki-Douji",
-  emoji: ["🤣", "❄️", "🧸"],
-  quote: "Doesn't matter how far apart we are. The bonds we've made will remain strong. Everyone's hearts is connected to the people they know and trust. It's those bonds that let us all search for our purpose in life. As long as it's a purpose that you believe in, there will always be someone who could help you fulfill it. You, me, and everyone else, there are no barriers. Our hearts are one. Right, Sensei?"
-  },
-  {
-  nom: "Tohru Adachi",
-  genre: ["Human","Male"],
-  age: "21-40",
-  arcane: ["Hunger", "Jester"],
-  opus: ["P4", "P4G", "P4AU"],
-  personaUser: true,
-  persona: "Magatsu-Izanagi",
-  emoji: ["🥬", "🔫", "😈"],
-  quote: "Let's be honest. There's nothing great about the real world, is there? It's just dull and annoying as hell. No one accepts that's the way things are... They're just stuck with it because they can't deny it, either. Those who actually succeed in life... They just happen to be born with the magic ticket called talent. If you don't have it, you can either accept or deny that fact until you die. That's your only choice. Once you realize that, all you have left in life is despair. The ultimate game over. Wouldn't it be better if that kind of reality was wiped away?"
-  },
-  {
-  nom: "Yosuke Hanamura",
-  genre: ["Human","Male"],
-  age: "15-20",
-  arcane: ["Magician"],
-  opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
-  personaUser: true,
-  persona: "Jiraya",
-  emoji: ["🗑️", "🎧", "🚲"],
-  quote: "Is Saki-senpai watching us...? Is she smiling at us? Senpai... I'm going to live. Without lying to myself, without deceiving myself... Days like today, days like before when I did nothing... They're all important days... They're all days you didn't live to see... I'm going to live them here."
-  },
-  {
-  nom: "Yukiko Amagi",
-  genre: ["Human","Female"],
-  age: "15-20",
-  arcane: ["Priestess"],
-  opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
-  personaUser: true,
-  persona: "Konohana Sakuya",
-  emoji: ["😳", "🔥", "🏯"],
-  quote: "I wanted to become completely self-sufficient. But I think I was being presumptuous. I have the inn, I have my family, I have the waitresses and chefs... I am who I am now because I was raised by such a kind group... When I think of it that way, my problems aren't just my own. That's why... I'm going to stay here. By my own will."
+    emoji: ["🧙‍♂️", "👨‍🏫", "💤"],
+    quote: "Today, we'll be discussing the summoning of demons... which, of course, is strictly forbidden by school regulations."
   },
 
-  // Persona 5
+
+  // ============================================================
+  // 🎮 PERSONA 4 — P4 / P4G / P4AU
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
   {
-    nom: "Ren Amamiya",
+    nom: "Yu Narukami",
     genre: ["Human","Male"],
     age: "15-20",
-    arcane: ["Fool","World"],
-    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    arcane: ["Fool", "Judgment", "World"],
+    opus: ["P4", "P4G", "P4AU", "PQ","PQ2"],
     personaUser: true,
-    persona: "Arsène",
-    emoji: ["🎭", "🃏", "💥"],
-    quote: "...You are held captive. A prisoner of fate to a future that has been sealed in advance. This is truly an unjust game... Your chances of winning are almost none. But if my voice is reaching you, there may yet be a possibility open to you... ...I beg you. Please overcome this game... and save the world... The key to victory lies within the memories of your bonds—the truth that you and your friends grasped. It all began that day... when the game was started half a year ago... For the sake of your world's future... as well as your own... you must remember..."
-    },
-    {
-      nom: "Morgana",
-      genre: ["Animal","Shadow"],
-      age: "Unknown",
-      arcane: ["Magician"],
-      opus: ["P5","P5R","P5S","P5T","PQ2"],
-      personaUser: true,
-      persona: "Zoro",
-      emoji: ["✨", "💎", "🐱"],
-      quote: "Remember... There's no such thing as the 'real' world. What each person sees and feels-- Those are what shape reality. This is what gives the world infinite potential. Even if you feel that only darkness lies ahead... As long as you hold hands together... See it through as one... ...the world will never end! The world exists within all of you...!"
-    },
-    {
-      nom: "Ryuji Sakamoto",
-      genre: ["Human","Male"],
-      age: "15-20",
-      arcane: ["Chariot"],
-      opus: ["P5","P5R","P5S","P5T","PQ2"],
-      personaUser: true,
-      persona: "Captain Kidd",
-      emoji: ["⚡", "🏃‍♂️", "🏴‍☠️"],
-      quote: "I get it now... We're doin' this to make sure people don't gotta go through the same crap we did. It doesn't matter if they think we're just or not. We gotta do what we believe in! Heh, and it's not like people think much of me anyways. I'm gonna dash through this the only way I know how!"
-    },
-    {
-      nom: "Ann Takamaki",
-      genre: ["Human","Female"],
-      age: "15-20",
-      arcane: ["Lovers"],
-      opus: ["P5","P5R","P5S","P5T","PQ2"],
-      personaUser: true,
-      persona: "Carmen",
-      emoji: ["😻", "🔥", "👗"],
-      quote: "...You're right. I could never abandon her. If I whine like this now, I'd just be betraying Shiho... ...No, I'd be betraying myself! I could never forget how I felt that day. I... I never want anyone to have to go through what I did!"
-    },
-    {
-      nom: "Yusuke Kitagawa",
-      genre: ["Human","Male"],
-      age: "15-20",
-      arcane: ["Emperor"],
-      opus: ["P5","P5R","P5S","P5T","PQ2"],
-      personaUser: true,
-      persona: "Goemon",
-      emoji: ["🦊", "🎨", "🖌️"],
-      quote: "...Very well! Just as art is meant to break boundaries, people should be saved even if they frown upon it. I won't allow the justice I believe in to be shaken any further...!"
-    },
-    {
-      nom: "Makoto Niijima",
-      genre: ["Human","Female"],
-      age: "15-20",
-      arcane: ["Priestess"],
-      opus: ["P5","P5R","P5S","P5T","PQ2"],
-      personaUser: true,
-      persona: "Joanna",
-      emoji: ["🏍️", "📚", "👊"],
-      quote: "I've realized that sometimes, pushing forward is the only way to survive. I won't let anyone control my life ever again. I'll make my own decisions — for my own future."
-},
-    {
-      nom: "Takuto Maruki",
-      genre: ["Human","Male"],
-      age: "21-40",
-      arcane: ["Councillor"],
-      opus: ["P5R"],
-      personaUser: true,
-      persona: "Azathoth",
-      emoji: ["🧠", "💭", "🍬"],
-      quote: "It's true that I turned my back on the original reality... But where's the harm in that!? When it grows to be too much, too painful... Every person deserves to escape that! In all honesty, it's best for a person's growth when they tackle their own hardships... But reality doesn't always make that so feasible! No matter how much you try, or work for so long, the smallest injustice can wipe it all out, leave you with nothing... Don't you, of all people, understand that!?"
-    },
-    {
-      nom: "Tae Takemi",
-      genre: ["Human","Female"],
-      age: "21-40",
-      arcane: ["Death"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🖤", "⚕️", "💉"],
-      quote: "I don't want the general public to know about my original medicines. So you're strictly prohibited from disclosing what happens here to anyone... Understood?"
-    },
-    {
-      nom: "Ichiko Ohya",
-      genre: ["Human","Female"],
-      age: "21-40",
-      arcane: ["Devil"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🖤", "🍺", "📰"],
-      quote: "Hey, how 'bout we do this... You supply me with info on the Phantom Thieves... And I'll write articles based on what you tell me about them. You know, the Phantom Thieves who you love oh-so-much... Deal?"
-    },
-    {
-      nom: "Haru Okumura",
-      genre: ["Human","Female"],
-      age: "15-20",
-      arcane: ["Empress"],
-      opus: ["P5","P5R","P5S","P5T","PQ2"],
-      personaUser: true,
-      persona: "Milady",
-      emoji: ["☕", "🪓", "💎"],
-      quote: "...I won't give up anymore. Just as I betrayed my distorted father before, I will betray my boring former self now!"
-    },
-    {
-      nom: "Sumire Yoshizawa",
-      genre: ["Human","Female"],
-      age: "15-20",
-      arcane: ["Faith"],
-      opus: ["P5R","P5T"],
-      personaUser: true,
-      persona: "Cendrillon",
-      emoji: ["✨", "🎀", "🤸‍♀️"],
-      quote: "Some people want to run from their pain and cling to some other version of reality... Like I used to. But the knowledge I gained through that pain, and my desire to move on... Those are even more precious to me! And I won't let anyone take them from me again!"
-    },
-    {
-      nom: "Kasumi Yoshizawa",
-      genre: ["Human","Female"],
-      age: "15-20",
-      arcane: ["None"],
-      opus: ["P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🎀", "🕊️", "🌸"],
-      quote: "I wanted to reach the top... but I was never alone. Sumire, live your life fully — not as me, but as you."
-    }
-    ,
-    
-    {
-      nom: "Chihaya Mifune",
-      genre: ["Human","Female"],
-      age: "21-40",
-      arcane: ["Fortune"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["✨", "💫", "🔮"],
-      quote: "Whaaaaaat!? The sequence of arcana has completely changed! 'Death' has moved far off into the future... But there's no way that could've happened... without you breaking the law. I mean, how could an ordinary high school student change the course of fate...? ...Fine. I'm just going to have to verify your power. The very power that reversed my tarot card prediction! Oh, I know... I'll read your fortune! Please, I beg you... I need to know if fate truly can be changed..."
-    },
-    {
-      nom: "Munehisa Iwai",
-      genre: ["Human","Male"],
-      age: "40+",
-      arcane: ["Hanged"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🎧", "🧢", "🔫"],
-      quote: "You help me out with my 'business'... Smugglin' goods, destroyin' evidence... And as a reward, I'll introduce you to the 'special menu,' with good prices for a punk like you. ...Whaddaya say? Not bad, huh?"
-    },
-    {
-      nom: "Futaba Sakura",
-      genre: ["Human","Female"],
-      age: "15-20",
-      arcane: ["Hermit"],
-      opus: ["P5","P5R","P5S","P5T","PQ2"],
-      personaUser: true,
-      persona: "Necronomicon",
-      emoji: ["💻", "🛸", "👩‍💻"],
-      quote: "...I don't want to run away from this. I ran from my mom's death for so long... I misunderstood it... Everything was just too painful for me to handle. But... I never want to be left in the dark again! ...That's probably why my Persona is a little bit special. Because I want to learn the truth. That's how I really feel! Well, I've come this far... I'll follow you wherever you go, on my own two feet!"
-    },
-    {
-      nom: "Sojiro Sakura",
-      genre: ["Human","Male"],
-      age: "40+",
-      arcane: ["Hierophant"],
-      opus:["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["💭", "🌸", "☕"],
-      quote: "I was such a fool... My whole life, I've taken the easy way out to avoid these kinds of conflicts. I didn't stand up for Wakaba when I knew something was off... and I didn't stand up for you either. Instead, I went on and on about how you can't fight back against the laws of our society... How you should just accept the hand you're dealt in life... But those were mere excuses I made to keep myself in line. They gave me the easy way out I wanted so badly...Maybe instead of all that coffee crap, I should've been teaching you not to make the same mistakes I did. There I go, ranting again. But... I feel like I managed to put a lot behind me today. ...Thanks, for making me realize what's really important in life."
-    },
-    {
-      nom: "Goro Akechi",
-      genre: ["Human","Male"],
-      age: "15-20",
-      arcane: ["Justice"],
-      opus: ["P5","P5R","P5T","PQ2"],
-      personaUser: true,
-      persona: "Robin Hood",
-      emoji: ["🎩", "🔪", "🕵️‍♂️"],
-      quote: "Why am I inferior to you...!? I was extremely particular about my life, my grades, my public image, so someone would want me around! I am an ace detective... a celebrity! But you... You're just some criminal trash living in an attic! So how!? How does someone like you have things I don't!? How can such a worthless piece of trash be more special than me!?"
-    },
-    {
-      nom: "Yuuki Mishima",
-      genre: ["Human","Male"],
-      age: "15-20",
-      arcane: ["Moon"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["📣", "🌙", "📱"],
-      quote: "Take it down, Phantom Thieves! Come on, why do you think they've risked their lives all this time!? Dammit, you guys! Snap out of it! When will you stop running from the truth!? Phantom Thieves, can you hear us!?"
-    },
-    {
-      nom: "Hifumi Togo",
-      genre: ["Human","Female"],
-      age: "15-20",
-      arcane: ["Star"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["💡", "⛩️", "♟️"],
-      quote: "I feel... a gambler's spirit emanating from you."
-    },
-    {
-      nom: "Toranosuke Yoshida",
-      genre:["Human","Male"],
-      age: "40+",
-      arcane: ["Sun"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["📚", "🏛️", "🎤"],
-      quote: "The most important part about giving a good speech is believing in yourself... ...Perhaps one day... I will believe in myself... again. Very well. If learning how to give a great speech is what you seek, then I'd be happy to instruct you. In exchange, I would like for you to continue assisting me."
-    },
-    {
-      nom: "Sadayo Kawakami",
-      genre:["Human","Female"],
-      age: "21-40",
-      arcane: ["Temperance"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🍵", "🧹", "📚"],
-      quote: "The way you opposed Mr. Kamoshida, I'd say that you're earnest and have a strong sense of justice. That being said... you called a maid service and requested me?"
-    },
-    {
-      nom: "Shinya Oda",
-      genre: ["Human","Male"],
-      age: "< 15",
-      arcane: ["Tower"],
-      opus: ["P5","P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🔫", "🎮", "👾"],
-      quote: "I wish I was able to talk with them--or something-though... But you fulfilled your part of the deal, so I'll teach you how to shoot."
-    },
-    {
-      nom: "Caroline",
-      genre: ["Velvet","Female"],
-      age: "Unknown",
-      arcane: ["Strength"],
-      opus: ["P5","P5R","PQ2"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["💢", "🔒", "👮‍♀️"],
-      quote: "Listen up, Inmate! You may think you're getting stronger, but don't get ahead of yourself! Your rehabilitation is far from over, and we won't tolerate any slacking. Justine and I will be keeping a close eye on you, so don't you dare disappoint us! The strength of your heart is what will determine your fate… So prove to us that you're worthy of standing before our master!"
-    },
-    {
-      nom: "Justine",
-      genre: ["Velvet","Female"],
-      age: "Unknown",
-      arcane: ["Strength"],
-      opus: ["P5","P5R","PQ2"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["📖", "🔐", "🧘‍♀️"],
-      quote: "Inmate, you're not doing enough to atone for your crimes. If you truly desire to change your fate, you will need to push yourself further. We can see your potential, but you are still weak. So, prove to us that you can grow stronger! You might think you're gaining strength from all the battles, but there's more to it than that. Your true strength lies in your heart and mind, not just your Persona."
-    },
-    {
-      nom: "Lavenza",
-      genre: ["Velvet","Female"],
-      age: "Unknown",
-      arcane: ["Strength"],
-      opus: ["P5","P5R","P5T","P5S"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["👑", "🔐", "👯‍♀️"],
-      quote: "I... am Lavenza. The true form of the twins. All of the memories and experiences I have accumulated as Caroline and Justine... they are now part of me. You have proven yourself worthy, and I am here to support you in your final trial. We have seen your growth, and though the road ahead will be difficult, I will stand by your side. Your heart is the key to your fate. It is not about the choices you make, but the resolve you hold in your heart. Do not falter, and remember, the strength you've gained is more than just physical."
-    },
-    {
-      nom: "Igor",
-      genre: ["Velvet", "Male"],
-      age: "Unknown",
-      arcane: ["Fool"],
-      opus: ["P1", "P2IS", "P2EP", "P3", "P3FES", "P3P", "P4", "P4G", "P4AU", "P5", "P5R","P3R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🔮", "🗝️", "👃"],
-      quote: "Welcome to the Velvet Room."
-    },
-    {
-      nom: "Sae Niijima",
-      genre: ["Human","Female"],
-      age: "21-40",
-      arcane: ["Judgement"],
-      opus: ["P5","P5R","P5S"],
-      personaUser: true,
-      persona: "Leviathan",
-      emoji: ["🔎", "⚖️", "👩‍⚖️"],
-      quote: "Still, I'm glad I was able to save you in court. I've never felt so happy in my entire life. I'm not quite sure how to put it, but... saving your future meant more to me than my own career. I feel like you even taught me how to live."
-    },
-    {
-      nom: "Kinshiro Morooka",
-      genre: ["Human","Male"],
-      age: "40+",
-      arcane: ["NONE"],
-      opus: ["P4","P4G"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["😡", "🦷", "👨‍🏫"],
-      quote: "Now listen up! This town is miles away from your big city of perverts and assholes, in more ways than one. You better not even think of getting involved with the girls here, let alone abusing them! But what do I know... it's not like the old days. Even here, kids grow up so damn fast. Every time I turn my back, you're fooling around on those damn phones, checking your life-journals and your my-places..."
-    },
-    {
-      nom: "Noriko Kashiwagi",
-      genre: ["Human","Female"],
-      age: "40+",
-      arcane: ["NONE"],
-      opus: ["P4","P4G"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🥵", "💄", "👩‍🏫"],
-      quote: "Oh, and one more thing. That idol in our first-year class... Ms. Kujikawa, was it? In person, she's nothing like she seems on TV, so don't get your hopes up, mmkay? What's so great about an idol anyway, right class? She's just a piece of inexperienced jailbait."
-    },
-    {
-      nom: "Hanako Ohtani",
-      genre: ["Human","Female"],
-      age: "15-20",
-      arcane: ["NONE"],
-      opus: ["P4","P4G"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🍰", "🙄", "🛵"],
-      quote: "The best girls don't go steady for nothing, you know? You need to make an effort."
-    },
-    {
-      nom: "Mitsuo Kubo",
-      genre: ["Human","Male"],
-      age: "15-20",
-      arcane: ["NONE"],
-      opus: ["P4","P4G"],
-      personaUser: true,
-      persona: "Mitsuo the Hero",
-      emoji: ["😐", "🔪", "👾"],
-      quote: "What...? What's that supposed to mean!? I'm... I'm not nothing..."
-    },
-    {
-      nom: "Mr. Edogawa",
-      genre: ["Human","Male"],
-      age: "40+",
-      arcane: ["NONE"],
-      opus:  ["P3", "P3FES", "P3P","P3R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🧙‍♂️", "👨‍🏫", "💤"],
-      quote: "Today, we’ll be discussing the summoning of demons... which, of course, is strictly forbidden by school regulations."
-    },
-    {
-      nom: "Jose",
-      genre: ["Entity","Male"],
-      age: "Unknown",
-      arcane: ["NONE"],
-      opus: ["P5R"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🚗", "🌻", "🌠"],
-      quote: "Good job!"
-    },
+    persona: "Izanagi",
+    emoji: ["😐", "🗡️", "⚡"],
+    quote: "People can do it. As long as they open their eyes and look around, they'll see it. They'll see the truth! If there is a fog, they just have to embrace the truth to get rid of it! This is what's right, and this is the path I choose to follow!"
+  },
 
-
-
-{
-    nom: "Metis",
-    genre: ["Artificial", "Female"],
-    age: "< 15",
-    arcane: ["NONE"],
-    opus:  ["P3FES"],
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  {
+    nom: "Yosuke Hanamura",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Magician"],
+    opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
     personaUser: true,
-    persona: "Psyche",
-    emoji: ["🤖", "💙", "🔧"],
-    quote: "I went to see you so I could save you, but I ended up causing the power to awaken... That's why I made up my mind. I'd do anything to protect you. Even... even if it meant you'd hate me for it... You're all I have in the world..."
+    persona: "Jiraya",
+    emoji: ["🗑️", "🎧", "🚲"],
+    quote: "Is Saki-senpai watching us...? Is she smiling at us? Senpai... I'm going to live. Without lying to myself, without deceiving myself... Days like today, days like before when I did nothing... They're all important days... They're all days you didn't live to see... I'm going to live them here."
   },
   {
-    nom: "Sho Minazuki",
-    genre: ["Human", "Male"],
+    nom: "Chie Satonaka",
+    genre: ["Human","Female"],
     age: "15-20",
-    arcane: ["Sun", "Moon"],
-    opus: ["P4AU"],
+    arcane: ["Chariot"],
+    opus: ["P4", "P4G", "P4AU", "PQ", "PQ2"],
     personaUser: true,
-    persona: "Tsukiyomi",
-    emoji: ["🗡️", "😠", "🧠"],
-    quote: "This red fog's the end of your everyday peace. I'd kill to murder you all... Just joking! C'mon, laugh!"
+    persona: "Tomoe",
+    emoji: ["🤩", "🍖", "🥋"],
+    quote: "...I think this 'power' of mine is what I wanted all along. The power to protect everyone... I understand now. I'm not supposed to use it to become more self-reliant... I'm supposed to use this power to protect people... Yukiko, my friends, my family, this town.. and you."
+  },
+  {
+    nom: "Yukiko Amagi",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Priestess"],
+    opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
+    personaUser: true,
+    persona: "Konohana Sakuya",
+    emoji: ["😳", "🔥", "🏯"],
+    quote: "I wanted to become completely self-sufficient. But I think I was being presumptuous. I have the inn, I have my family, I have the waitresses and chefs... I am who I am now because I was raised by such a kind group... When I think of it that way, my problems aren't just my own. That's why... I'm going to stay here. By my own will."
+  },
+  {
+    nom: "Kanji Tatsumi",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Emperor"],
+    opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
+    personaUser: true,
+    persona: "Take-Mikazuchi",
+    emoji: ["💢", "🚴‍♂️", "🧵"],
+    quote: "I get it now... This is what he was talking about... I've just been throwin' in the towel all this time. Of course no one could understand me... I been keepin' my distance outta fear. So I decided that I'd do things my way, no matter how tough, but... It ain't just about hanging out with guys who understand you and telling the rest to get bent... You gotta make an effort if you want people to understand you. I wasn't even trying."
+  },
+  {
+    nom: "Rise Kujikawa",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Lovers"],
+    opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
+    personaUser: true,
+    persona: "Himiko",
+    emoji: ["😜", "💕", "🎤"],
+    quote: "Senpai... I won't make the same mistake. There's no such thing as a me who isn't me. So I won't run away... I won't try to be someone I'm not. There's a lot of Rises inside me... I won't try to change them. Instead... I'll let people know that those Rises exist... That's the me I want to be."
+  },
+  {
+    nom: "Teddie",
+    genre: ["Shadow","Animal","Male"],
+    age: "Unknown",
+    arcane: ["Star"],
+    opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
+    personaUser: true,
+    persona: "Kintoki-Douji",
+    emoji: ["🤣", "❄️", "🧸"],
+    quote: "Doesn't matter how far apart we are. The bonds we've made will remain strong. Everyone's hearts is connected to the people they know and trust. It's those bonds that let us all search for our purpose in life. As long as it's a purpose that you believe in, there will always be someone who could help you fulfill it. You, me, and everyone else, there are no barriers. Our hearts are one. Right, Sensei?"
+  },
+  {
+    nom: "Naoto Shirogane",
+    genre:["Human","Female"],
+    age: "15-20",
+    arcane: ["Fortune"],
+    opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
+    personaUser: true,
+    persona: "Sukuna-Hikona",
+    emoji: ["🔫", "🔍", "🕵️‍♂️"],
+    quote: "The title of detective became a burden to me... I thought I had no other aspects apart from detective self. But you and the others gave me a reason to be, as neither adult nor man... So, I... I was able to face myself as myself. Before the detective, before the child, before the woman. By spending time with you all, I change, day by day. It frightened me before... But now... With everyone... With you, I can proudly proclaim that I am myself. Nothing more, but nothing less."
   },
   {
     nom: "Labrys",
@@ -1034,692 +827,22 @@ export const characters = [
     emoji: ["🪓", "🤖", "💔"],
     quote: "You know why I won? 'Cause I'm the student council president, and you're not! Heheh, just kidding!"
   },
+
+  // ── Antagoniste(s) ────────────────────────────────────────────
   {
-      nom: "Suguru Kamoshida",
-      genre: ["Human", "Male"],
-      age: "21-40",
-      arcane: ["NONE"],
-      opus: ["P5","P5R"],
-      personaUser: true,
-      persona: "Asmodeus",
-      emoji: ["👑", "👨‍🏫", "🏐"],
-      quote: "People around me were the ones who kept it secret. Adults who want to share in my accomplishments, students who have the drive to become winners... they willingly protect it so we all may profit from it."
-    },{
-      nom: "Kunikazu Okumura",
-      genre: ["Human", "Male"],
-      age: "40+",
-      arcane: ["NONE"],
-      opus: ["P5","P5R"],
-      personaUser: true,
-      persona: "Mammon",
-      emoji: ["👔", "🍔", "👨‍🏭"],
-      quote: "I've received a calling card from the Phantom Thieves. I need you to send it over to the police. Don't make me repeat myself. Give it to the police. That's an order. These scoundrels have threatened me. Aren't the police supposed to side with law-abiding citizens?"
-    },{
-      nom: "Masayoshi Shido",
-      genre: ["Human", "Male"],
-      age: "40+",
-      arcane: ["NONE"],
-      opus: ["P5","P5R"],
-      personaUser: true,
-      persona: "Samael",
-      emoji: ["🛳️", "🎤", "👔"],
-      quote: "Sacrifices are inevitable in the path of reform. I only require that the foolish entrust themselves to their superiors. I shall guide them."
-    },
-
-    {
-        nom: "Ichiryusai Madarame",
-        genre:  ["Human", "Male"],
-        age: "40+",
-        arcane: ["NONE"],
-        opus: ["P5","P5R"],
-        personaUser: true,
-        persona: "Azazel",
-        emoji: ["🏚️", "👘", "🖼️"],
-        quote: "You all know too much. You'll forever rue the day you dared defy me."
-      },
-
-      {
-        nom: "Junya Kaneshiro",
-        genre: ["Human", "Male"],
-        age: "40+",
-        arcane: ["NONE"],
-        opus: ["P5","P5R"],
-        personaUser: true,
-        persona: "Bael",
-        emoji: ["👺", "🪰", "🤑"],
-        quote: "Don't make me laugh. I feed on dumbshits like you. There's not a snowball's chance in hell that a bright future lies ahead for you!"
-      },
-     
-      {
-        nom: "Jin Shirato",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus: ["P3", "P3FES", "P3P","P3R"],
-        personaUser: true,
-        persona: "Moros",
-        emoji: ["🧠", "💻", "🕶️"],
-        quote: "Takaya saved me from it all... He said, 'Don't let the past control you, and don't look to the future; simply live in the moment... To be honest, I don't even care about Kirijo anymore. But, Takaya's wish... must be... fulfilled...!"
-      },
-
-      {
-        nom: "Shuji Ikutsuki",
-        genre: ["Human", "Male"],
-        age: "21-40",
-        arcane: ["NONE"],
-        opus: ["P3", "P3FES", "P3P","P3R"],
-        personaUser: false,
-        persona: "NONE",
-        emoji: ["📚", "😄", "🔪"],
-        quote: "Would you believe me if I said that a day consists of more than 24 hours?"
-      },
-
-      {
-        nom: "Chidori Yoshino",
-        genre:  ["Human", "Female"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus: ["P3", "P3FES", "P3P","P3R"],
-        personaUser: true,
-        persona: "Medea",
-        emoji: ["✏️", "👗", "💔"],
-        quote: "What I fear most isn't death. What I fear most is... ...attachment. Once I become attached to something, I fear that I will lose it. That's why we only live for the moment... But you... you brought me pain... Pain that I didn't want... Pain that I never asked for... When I'm with you, Junpei, I fear everything... I fear loss... I fear death... I fear that my time with you will end... That's why I..."
-      },
-
-      {
-        nom: "Takaya Sakaki",
-        genre:  ["Human", "Male"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus: ["P3", "P3FES", "P3P","P3R"],
-        personaUser: true,
-        persona: "Hypnos",
-        emoji: ["🕊️", "🔫", "🩸"],
-        quote: "My life was stolen from me... And in its place, I was given a power I never asked for... And so, I learned that the future is only a delusion. Only by striving to live every moment to its fullest can the soul truly be satisfied. That is why we welcome this glorious revelation, to shine a light upon this darkened world!"
-      },
-        
-      {
-        nom: "Hatsune Miku",
-        genre: ["Vocaloid", "Female"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus: ["P4D"],
-        personaUser: false,
-        persona: "NONE",
-        emoji: ["👔", "💎", "🎤"],
-        quote: "I'm the number one princess in the world."
-      },
-      //Persona 1
-      {
-        nom: "Naoya Todou",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["Emperor"],
-        opus: ["P1"],
-        personaUser: true,
-        persona: "Seimen Kongou",
-        emoji: ["🧑‍🎓", "🌀", "🔥"],
-        quote: "As for his fate... That's for you to decide."
-      },
-      {
-        nom: "Maki Sonomura",
-        genre: ["Human", "Female"],
-        age: "15-20",
-        arcane: ["Priestess"],
-        opus: ["P1", "P2IS"],
-        personaUser: true,
-        persona: "Maso",
-        emoji: ["🪞", "🌫️", "💊"],
-        quote: "Thank you. I hope you'll still think about me at least once in a while. Goodbye. I love you."
-      },
-      {
-        nom: "Masao Inaba",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["Chariot"],
-        opus: ["P1",],
-        personaUser: true,
-        persona: "Ogun",
-        emoji: ["🏥", "🤡", "❤"],
-        quote: "The spoiled son of Inaba Dry Cleaning's owners. Earnest and excitable."
-      },
-      {
-        nom: "Kei Nanjo",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["Hierophant"],
-        opus: ["P1", "P2EP"],
-        personaUser: true,
-        persona: "Aizen Myouou",
-        emoji: ["1", "💵", "👓"],
-        quote: "Heir to the Nanjo Group. An utter pragmatist and skeptic."
-      },
-      {
-        nom: "Yukino Mayuzumi",
-        genre: ["Human", "Female"],
-        age: "15-20",
-        arcane: ["Empress"],
-        opus: ["P1", "P2IS"],
-        personaUser: true,
-        persona: "Vesta",
-        emoji: ["🤬", "🏍", "📷"],
-        quote: "The hell did you just say...? YOU PIECE OF SHIT!"
-      },
-      {
-        nom: "Hidehiko Uesugi",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["Justice"],
-        opus: ["P1", "P2EP"],
-        personaUser: true,
-        persona: "Nemhain",
-        emoji: ["🔴", "😎", "♠"],
-        quote: "Craves attention and doesn't take things very seriously."
-      },
-      {
-        nom: "Eriko Kirishima",
-        genre: ["Human", "Female"],
-        age: "15-20",
-        arcane: ["Judgement"],
-        opus: ["P1", "P2EP"],
-        personaUser: true,
-        persona: "Nike",
-        emoji: ["🎭", "🏆", "🧙‍♀️"],
-        quote: "I am an angelic bringer of victory! From now on, you have my protection!"
-      },
-      {
-        nom: "Yuka Ayase",
-        genre: ["Human", "Female"],
-        age: "15-20",
-        arcane: ["Magician"],
-        opus: ["P1",],
-        personaUser: true,
-        persona: "Houri",
-        emoji: ["🎢", "👩‍👧‍👦", "💅"],
-        quote: "Like, Persona!"
-      },
-      {
-        nom: "Reiji Kido",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["Devil", "Death"],
-        opus: ["P1", "P2EP"],
-        personaUser: true,
-        persona: "Bres",
-        emoji: ["✖", "💪", "🇺🇸"],
-        quote: "A quiet loner who transferred to St. Hermelin High six months ago."
-      },
-         //Persona 2
-
-      {
-        nom: "Tatsuya Suou",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["Sun"],
-        opus: ["P2IS", "P2EP"],
-        personaUser: true,
-        persona: "Vulcanus",
-        emoji: ["🔥", "🎸", "🤐"],
-        quote: "That's right... I remember now... A sin that must not exist... How do I atone...?"
-      },
-      {
-        nom: "Maya Amano",
-        genre: ["Human", "Female"],
-        age: "21-40",
-        arcane: ["Moon"],
-        opus: ["P2IS", "P2EP"],
-        personaUser: true,
-        persona: "Maia",
-        emoji: ["📝", "🌕", "😊"],
-        quote: "Let's think positive!"
-      },
-      {
-        nom: "Lisa Silverman",
-        genre: ["Human", "Female"],
-        age: "15-20",
-        arcane: ["Lovers"],
-        opus: ["P2IS"],
-        personaUser: true,
-        persona: "Eros",
-        emoji: ["💃", "🇭🇰", "🎤"],
-        quote: "Chinyan... Remember me, no matter what...! I love you..."
-      },
-      {
-        nom: "Jun Kurosu",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["Fortune"],
-        opus: ["P2IS"],
-        personaUser: true,
-        persona: "Hermes",
-        emoji: ["🃏", "🌒", "🌹"],
-        quote: "People often compare their goals to the stars. They shine brightly even after the sun goes down... fixed stars in a dark expanse."
-      },
-      {
-        nom: "Eikichi Mishina",
-        genre: ["Human", "Male"],
-        age: "15-20",
-        arcane: ["Emperor"],
-        opus: ["P2IS"],
-        personaUser: true,
-        persona: "Rhadamanthus",
-        emoji: ["🎤", "💀", "🎸"],
-        quote: "Call me the ‘Death Boss’ — I may look flashy, but I fight for my friends."
-      },
-      {
-        nom: "Baofu",
-        genre: ["Human", "Male"],
-        age: "21-40",
-        arcane: ["Hanged Man"],
-        opus: ["P2EP"],
-        personaUser: true,
-        persona: "Odysseus",
-        emoji: ["🕶️", "📞", "🕷️"],
-        quote: "How I chose to live has nothing to do with you...If you want sympathy, ask someone else..."
-      },
-       {
-  nom: "Ulala Serizawa",
-  genre: ["Human", "Female"],
-  age: "21-40",
-  arcane: ["Star"],
-  opus: ["P2IS", "P2EP"],
-  personaUser: true,
-  persona: "Callisto",
-  emoji: ["🥊", "🍷", "💔"],
-  quote: "I'm sick of bad men and bad luck. Time to punch my way out of this!"
-},
-       {
-        nom: "Katsuya Suou",
-        genre: ["Human", "Male"],
-        age: "21-40",
-        arcane: ["Justice"],
-        opus: ["P2IS", "P2EP"],
-        personaUser: true,
-        persona: "Helios",
-        emoji: ["👮‍♂️", "🍰", "⚖️"],
-        quote: "Don't be absurd...The only officer to see him was me. I WILL be the one to arrest him."
-      },
-      {
-        nom: "Joker",
-        genre: ["Entity", "Male"],
-        age: "Unknown",
-        arcane: ["NONE"],
-        opus: ["P2IS"],
-        personaUser: true,
-        persona: "Nyarlathotep",
-        emoji: ["🎭", "🃏", "📞"],
-        quote: "Pathetic, misguided humans, obey me! Only I can lead you, the ignorant! If you will not obey, then you will DIE!"
-      },
-      {
-  nom: "Sophia",
-  genre: ["Artificial","Female"],
-  age: "< 15",
-  arcane: ["Hope"],
-  opus: ["P5S"],
-  personaUser: true,
-  persona: "Pithos",
-  emoji: ["🤖", "🪀", "❤️"],
-  quote: "The power... to change... I've got it now... That's what a heart is!"
-  },
-  {
-  nom: "Zenkichi Hasegawa",
-  genre: ["Human","Male"],
-  age: "21-40",
-  arcane: ["Apostle"],
-  opus: ["P5S"],
-  personaUser: true,
-  persona: "Valjean",
-  emoji: ["🕴️", "🐺", "🔫"],
-  quote: "I may not be a hero, and I sure as hell don't deserve any awards... But at least I know what makes a person evil. Evil only cares about itself. It's the mark of a man who would bring another to ruin and dare not show remorse. I will never let people like that go free. And I'll give everything I have to bring them down!"
-  },
-  
-   // Persona 5 X
-    {
-        nom: "Nagisa Kamishiro",
-        genre: ["Male", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Jánošík",
-        emoji: ["🎭","🗡","⚫"],
-        quote: ""
-    } ,
-    {
-        nom: "Lufel",
-        genre: ["Male", "Animal"],
-        age: "Unknown",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Rob Roy",
-        emoji: ["👓","🔥","🦉"],
-        quote: "This is a new one, luck is on your side today."
-    },
-    {
-        nom: "Motoha Arai",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Awilda",
-        emoji: ["⚾","⚡","🏃‍♀️"],
-        quote: "With this power! I can send Kiuchi flying and avenge Tomoko... Get ready for a double play!"
-    },
-    {
-        nom: "Shun Kano",
-        genre: ["Male", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Mandrin",
-        emoji: ["🪓","🔵","🤠"],
-        quote: "Well now, I think I get the picture. This is a stick-up! Go, Mandrin!"
-    },
-    {
-        nom: "Riko Tanemura",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Chiyome",
-        emoji: ["🌂","👘","🎐"],
-        quote: ""
-        },
-    {
-        nom: "Shoki Ikenami",
-        genre: ["Male", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Ghino",
-        emoji: ["🗡","🎭","🤴"],
-        quote: "Grazie!"
-    },
-    {
-        nom: "Seiji Shiratori",
-        genre: ["Male", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Leucothea",
-        emoji: ["👔","⚫","🤺"],
-        quote: ""
-    },
-    {
-        nom: "Kotone Montagne",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Terpsichore",
-        emoji: ["💃","🏔","🧊"],
-        quote: "Merci!"
-    },
-    {
-        nom: "Yukimi Fujikawa",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Styx",
-        emoji: ["👘","🟣","👩‍💼"],
-        quote: ""
-    },
-    {
-        nom: "Tomoko Noge",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Prosymna",
-        emoji: ["⚾","🍳","🟣"],
-        quote: ""
-    },
-    {
-        nom: "Leo Kamiyama",
-        genre: ["Male", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Erytheia",
-        emoji: ["🤖","🟢","👨‍🎤"],
-        quote: ""
-    },
-    {
-        nom: "Yaoling Li",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Meng Po",
-        emoji: ["☕","🏮","🥘"],
-        quote: ""
-    },
-    {
-        nom: "Kiyoshi Kurotani",
-        genre: ["Male", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Syke",
-        emoji: ["🗡","⚪","👔"],
-        quote: ""
-    },
-    {
-        nom: "Kayo Tomiyama",
-        genre: ["Female", "Human"],
-        age: "40+",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Cleodora",
-        emoji: ["🍤","🤳","👱‍♀️"],
-        quote: ""
-    },
-    {
-        nom: "Miyu Sahara",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Nemertes",
-        emoji: ["🍟","🛥","👩‍🦳"],
-        quote: ""
-    },
-    {
-        nom: "Toshiya Sumi",
-        genre: ["Male", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Gorgyra",
-        emoji: ["🎩","🦯","⚫"],
-        quote: ""
-    },
-    {
-        nom: "Haruna Nishimori",
-        genre: ["Female", "Human"],
-        age: "< 15",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Daeira",
-        emoji: ["⚙","🟤","⛏"],
-        quote: ""
-    },
-    {
-        nom: "YUI",
-        genre: ["Female", "Artificial"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Apseudes",
-        emoji: ["👗","🤖","🔵"],
-        quote: ""
-    },
-    {
-        nom: "Minami Miyashita",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Thalia",
-        emoji: ["❤","🌿","👩‍⚕️"],
-        quote: ""
-    },
-    {
-        nom: "Chizuko Nagao",
-        genre: ["Female", "Human"],
-        age: "80+",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Ampelos",
-        emoji: ["🐟","🏴‍☠️","👵"],
-        quote: ""
-    },
-    {
-        nom: "Yumi Shiina",
-        genre: ["Female", "Human"],
-        age: "21-40",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Urania",
-        emoji: ["🌙","🟢","🧝‍♀️"],
-        quote: ""
-    },
-    {
-        nom: "Ayaka Sakai",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Calliope",
-        emoji: ["🐈","🎸","👩‍🎤"],
-        quote: ""
-    },
-    {
-        nom: "Kira Kitazato",
-        genre: ["Male", "Human"],
-        age: "21-40",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Harpyia",
-        emoji: ["💉","🐦","👨‍⚕️"],
-        quote: ""
-    },
-    {
-        nom: "Masaki Ashiya",
-        genre: ["Male", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Amalthea",
-        emoji: ["🗡","🟣","💐"],
-        quote: ""
-    },
-    {
-        nom: "Runa Dogenzaka",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Aura",
-        emoji: ["🍜","⚡","🐕"],
-        quote: ""
-    },
-    {
-        nom: "Mio Natsukawa",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Minthe",
-        emoji: ["💧","🐍","👩‍🚒"],
-        quote: ""
-    },
-    {
-        nom: "Mayumi Hashimoto",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Pitys",
-        emoji: ["📹","🚗","🏁"],
-        quote: ""
-    },
-    {
-        nom: "Manaka Nagao",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Euterpe",
-        emoji: ["👼","👩‍🎤","🦽"],
-        quote: ""
-    },
-    {
-        nom: "Ichigo Shikano",
-        genre: ["Female", "Human"],
-        age: "15-20",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "Thelxiepeia",
-        emoji: ["🖤","💀","😏"],
-        quote: ""
-    },
-        {
-        nom: "Merope",
-        genre: ["Female", "Velvet"],
-        age: "Unknown",
-        arcane: ["NONE"],
-        opus:["P5X"],
-        personaUser: true,
-        persona: "NONE",
-        emoji: ["✨","📖","👩‍🎤"],
-        quote: ""
-    },
-
-
-  {
-    nom: "Taro Namatame",
-    genre:  ["Male", "Human"],
+    nom: "Tohru Adachi",
+    genre: ["Human","Male"],
     age: "21-40",
-    arcane: ["NONE"],
-    opus:["P4", "P4G"],
+    arcane: ["Hunger", "Jester"],
+    opus: ["P4", "P4G", "P4AU"],
     personaUser: true,
-    persona: "Kunino-sagiri",
-    emoji: ["💍","🚚","📺"],
-    quote: "I can't let her end up like Mayumi and the other girl...this time, I'm gonna do something..."
+    persona: "Magatsu-Izanagi",
+    emoji: ["🥬", "🔫", "😈"],
+    quote: "Let's be honest. There's nothing great about the real world, is there? It's just dull and annoying as hell. No one accepts that's the way things are... They're just stuck with it because they can't deny it, either. Those who actually succeed in life... They just happen to be born with the magic ticket called talent. If you don't have it, you can either accept or deny that fact until you die. That's your only choice. Once you realize that, all you have left in life is despair. The ultimate game over. Wouldn't it be better if that kind of reality was wiped away?"
   },
-   {
+  {
     nom: "Izanami",
-    genre:  ["Male", "Female", "Entity"],
+    genre: ["Male", "Female", "Entity"],
     age: "Unknown",
     arcane: ["NONE"],
     opus:["P4", "P4G"],
@@ -1728,124 +851,1111 @@ export const characters = [
     emoji: ["💀","👹","⛽"],
     quote: "Knowledge of the truth is not everything. Yet drunk with truth, you exceeded your role and became too involved... Now, learn for yourselves whose wrath you have brought down!"
   },
+  {
+    nom: "Ameno-sagiri",
+    genre: ["Entity"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🌫️", "👁️", "🪞"],
+    quote: "Humans fail to see things as they truly are. They choose to see only what they wish. I acted only in support for this. A world filled with desires... viewed through a window, from which one sees what one wishes to see... Humans departed from reality at their own volition, craving more false images."
+  },
+  {
+    nom: "Sho Minazuki",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["Sun", "Moon"],
+    opus: ["P4AU"],
+    personaUser: true,
+    persona: "Tsukiyomi",
+    emoji: ["🗡️", "😠", "🧠"],
+    quote: "This red fog's the end of your everyday peace. I'd kill to murder you all... Just joking! C'mon, laugh!"
+  },
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  {
+    nom: "Margaret",
+    genre: ["Velvet","Female"],
+    age: "Unknown",
+    arcane: ["Empress"],
+    opus: ["P4", "P4G", "P4AU","PQ","PQ2"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["📖", "✨", "😏"],
+    quote: "Truth is a thing which only appears to those who have observed, considered, and made a choice. At the end of the path you chose lies the truth... Believe in it, and continue without faltering."
+  },
+  {
+    nom: "Marie",
+    genre: ["Entity","Velvet","Female"],
+    age: "15-20",
+    arcane: ["Aeon"],
+    opus: ["P4G", "P4AU","PQ","PQ2"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🧢", "📝", "🌧️"],
+    quote: "There are things that you can't do by yourself, but can do with others... That's true. You gave me a new memory. You taught me that I don't need to be worried. ...I wouldn't have been able to do that on my own. I only realized that because of you."
+  },
+
+  // ── Social Link ───────────────────────────────────────────────
+  {
+    nom: "Ai Ebihara",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Moon"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["💅", "💔", "😤"],
+    quote: "I've carried that thing around ever since I decided to change who I was. I could check myself whenever I wanted, to make sure I was still pretty all the time... But now... I don't need it. From now on, people like you will be my mirror. I'll look for my reflection in you, so that I'll never forget who I am. I won't be able to lie to myself anymore... Thank you. Your eyes taught me how to do that."
+  },
+  {
+    nom: "Ayane Matsunaga",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Sun"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🌱", "🎺", "😖"],
+    quote: "I've been keeping a lot of... unpleasant emotions buried inside. In fact, the real me can be pretty selfish. I want people to notice me, but I never make the first move. Selfish, right?"
+  },
+  {
+    nom: "Daisuke Nagase",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Strength"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😅", "💪", "⚽"],
+    quote: "I kept pretending that I was trying my hardest... But the truth is, I was hardly trying. If I managed to do well playing at half my potential, nobody really cared that I wasn't taking it seriously. And if I wasn't doing so hot, I had a copout. All I had to do was say I wasn't trying. I was scared of the possibility that things could go wrong, even when I gave it my all. Because if that happened... I would have felt like I had no business even being here... Haha... Pretty lame, huh?"
+  },
+  {
+    nom: "Eri Minami",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["Temperance"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😔", "📖", "👩‍👦"],
+    quote: "I wasn't even trying to see him for myself. Maybe I was just afraid of facing him."
+  },
+  {
+    nom: "Fox",
+    genre: ["Animal"],
+    age: "Unknown",
+    arcane: ["Hermit"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🙏", "🎴", "🦊"],
+    quote: "*Yip*"
+  },
+  {
+    nom: "Hisano Kuroda",
+    genre: ["Human","Female"],
+    age: "80+",
+    arcane: ["Death"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["💔", "💀", "👵"],
+    quote: "Live a long and full life. That is the greatest thing you can do for your beloved."
+  },
+  {
+    nom: "Kou Ichijo",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Strength"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😎", "🎭", "🏀"],
+    quote: "I thought I had it all figured out, but I just didn't get it. Y'know, it's really the people around me who've shaped who I am. I bought into the same crap artists are always writing or singing about. They're trying to 'find themselves.' So I thought I knew all about how to 'find yourself.' I thought I got it. But... Really getting it is totally different. I mean, really finding yourself."
+  },
+  {
+    nom: "Nanako Dojima",
+    genre: ["Human","Female"],
+    age: "< 15",
+    arcane: ["Justice"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😊", "🧃", "🎶"],
+    quote: "Every day's great at your Junes!"
+  },
+  {
+    nom: "Naoki Konishi",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Hanged Man"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😞", "🛒", "🥀"],
+    quote: "There's a river separating us... Sis is gone, and I'm still here. Sis has crossed on over to the other bank, and I'm still on this one... No matter how much I cry or piss my pants, I know Sis isn't coming back..."
+  },
+  {
+    nom: "Ryotaro Dojima",
+    genre:["Human","Male"],
+    age: "40+",
+    arcane: ["Hierophant"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😓", "🕵️‍♂️", "🚬"],
+    quote: "This town is my town. It's the place where you and Nanako live. That's why I'm gonna live on, protecting this place. As a detective... as a father."
+  },
+  {
+    nom: "Sayako Uehara",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["Devil"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😏", "🏥", "🍶"],
+    quote: "So... I'm going. I'm going to find that path I gave up on. I thought I couldn't do it... But, I will walk that road. I'm going to be my own guide. Thinking, walking, taking responsibility for myself... Once I've done all that, I think I can finally say that I've truly lived."
+  },
+  {
+    nom: "Shu Nakajima",
+    genre: ["Human","Male"],
+    age: "< 15",
+    arcane: ["Tower"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😠", "📚", "🎓"],
+    quote: "I'm going to be my own guide. Thinking, walking, taking responsibility for myself..."
+  },
+  {
+    nom: "Yumi Ozawa",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Sun"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😭", "🎭", "💔"],
+    quote: "Dad... Thank you for bringing me... into this world..."
+  },
+
+  // ── Autres ────────────────────────────────────────────────────
+  {
+    nom: "Taro Namatame",
+    genre: ["Male", "Human"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus:["P4", "P4G"],
+    personaUser: true,
+    persona: "Kunino-sagiri",
+    emoji: ["💍","🚚","📺"],
+    quote: "I can't let her end up like Mayumi and the other girl...this time, I'm gonna do something..."
+  },
+  {
+    nom: "Kinshiro Morooka",
+    genre: ["Human","Male"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P4","P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["😡", "🦷", "👨‍🏫"],
+    quote: "Now listen up! This town is miles away from your big city of perverts and assholes, in more ways than one. You better not even think of getting involved with the girls here, let alone abusing them! But what do I know... it's not like the old days. Even here, kids grow up so damn fast. Every time I turn my back, you're fooling around on those damn phones, checking your life-journals and your my-places..."
+  },
+  {
+    nom: "Noriko Kashiwagi",
+    genre: ["Human","Female"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P4","P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🥵", "💄", "👩‍🏫"],
+    quote: "Oh, and one more thing. That idol in our first-year class... Ms. Kujikawa, was it? In person, she's nothing like she seems on TV, so don't get your hopes up, mmkay? What's so great about an idol anyway, right class? She's just a piece of inexperienced jailbait."
+  },
+  {
+    nom: "Hanako Ohtani",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P4","P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🍰", "🙄", "🛵"],
+    quote: "The best girls don't go steady for nothing, you know? You need to make an effort."
+  },
+  {
+    nom: "Mitsuo Kubo",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P4","P4G"],
+    personaUser: true,
+    persona: "Mitsuo the Hero",
+    emoji: ["😐", "🔪", "👾"],
+    quote: "What...? What's that supposed to mean!? I'm... I'm not nothing..."
+  },
 
 
-  // Persona 5 Tactica exclusifs
-{
-  nom: "Erina",
-  genre: ["Human","Female"],
-  age: "15-20",
-  arcane: ["NONE"],
-  opus: ["P5T"],
-  personaUser: true,
-  persona: "Ernesto",
-  emoji: ["🎀", "⚔️", "🔥"],
-  quote: "I'm scared we're entering a world where corruption is free to flourish... And, even worse... I'm scared of becoming someone who's okay with that. So I fight because I refuse to give up and turn a blind eye to the injustices in my world."
-},
-{
-  nom: "Toshiro Kasukabe",
-  genre: ["Human","Male"],
-  age: "21-40",
-  arcane: ["NONE"],
-  opus: ["P5T"],
-  personaUser: true,
-  persona: "Ernesto",
-  emoji: ["🧑‍💼", "📜", "🕊️"],
-  quote: "You can't stop us. The rebellion is here. The rebellion... within my heart!"
-},
-{
-      nom: "Philemon",
-      genre: ["Entity", "Male"],
-      age: "Unknown",
-      arcane: ["NONE"],
-      opus: ["P1", "P2IS", "P2EP"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🦋", "🎭", "🤵‍♂️"],
-      quote: "I am you. You are me... I shall always watch over you from within. Farewell..."
-    },
-    {
-      nom: "Nameless",
-      genre: ["Velvet", "Male"],
-      age: "Unknown",
-      arcane: ["NONE"],
-      opus: ["P1", "P2IS", "P2EP"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🎹", "👓", "🤵‍♂️"], 
-      quote: "A pianist who opens the shuttered doors of one's soul..."
-    },
-    {
-      nom: "Belladonna",
-      genre: ["Velvet", "Female"],
-      age: "Unknown",
-      arcane: ["NONE"],
-      opus: ["P1", "P2IS", "P2EP"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🎶", " 🗣️", "🤵‍♀️"], 
-      quote: "My duty is♪ To calm the hearts of visitors♪ For this, I must hear my heart's music♪ Though my ears♪ Block out the world's sounds♪ Your words reach me quite clearly♪"
-    },
-      {
-      nom: "Demon Painter",
-      genre: ["Velvet", "Male"],
-      age: "Unknown",
-      arcane: ["NONE"],
-      opus: ["P2IS", "P2EP"],
-      personaUser: false,
-      persona: "NONE",
-      emoji: ["🖌️ ", " 🗣️", "🕶️"], 
-      quote: "I express my emotions through my art. I'm not much for chatting... But I think I can make an exception for you."
-    },
-  
-      // Persona Q and Q2
-   {
-  nom: "Rei",
-  genre: ["Human", "Female"],
-  age: "Unknown",
-  arcane: ["NONE"],
-  opus: ["PQ"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["🌼", "🌭", "⚰️"], 
-  quote: "As long as it has a flavor, I love every kind of food!"
-},
+  // ============================================================
+  // 🎮 PERSONA 5 — P5 / P5R / P5S
+  // ============================================================
 
-{
-  nom: "Zen",
-  genre: ["Human","Male"],
-  age: "Unknown",
-  arcane: ["NONE"],
-  opus: ["PQ"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["🏹", "🖤", "🧊"], 
-  quote: "To live is the duty of those who are given life..."
-},
+  // ── Protagoniste(s) ──────────────────────────────────────────
+  {
+    nom: "Ren Amamiya",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Fool","World"],
+    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    personaUser: true,
+    persona: "Arsène",
+    emoji: ["🎭", "🃏", "💥"],
+    quote: "...You are held captive. A prisoner of fate to a future that has been sealed in advance. This is truly an unjust game... Your chances of winning are almost none. But if my voice is reaching you, there may yet be a possibility open to you... ...I beg you. Please overcome this game... and save the world... The key to victory lies within the memories of your bonds—the truth that you and your friends grasped. It all began that day... when the game was started half a year ago... For the sake of your world's future... as well as your own... you must remember..."
+  },
 
-{
-  nom: "Hikari",
-  genre: ["Human", "Female"],
-  age: "Unknown",
-  arcane: ["NONE"],
-  opus: ["PQ2"],
-  personaUser: false,
-  persona: "NONE",
-  emoji: ["🍿", "🎞️", "🎬"], 
-  quote: "I'm not going to be dependent on you. I'll seize my happiness on my own!"
-},
-{
-  nom: "Nagi",
-  genre: ["Female"],
-  age: "Unknown",
-  arcane: ["NONE"],
-  opus: ["PQ2"],
-  personaUser: true,
-  persona: "Enlil",
-  emoji: ["🌺", "🎞️", "🤺"], 
-  quote: "Oh, ah...I apologize for being so forward. It's truly fabulous that the doors are open - However, I've grown concerned. Hikari-san, when you return to reality, you may end up facing the same hardships as before..."
-}
-  ];
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  {
+    nom: "Morgana",
+    genre: ["Animal","Shadow"],
+    age: "Unknown",
+    arcane: ["Magician"],
+    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    personaUser: true,
+    persona: "Zoro",
+    emoji: ["✨", "💎", "🐱"],
+    quote: "Remember... There's no such thing as the 'real' world. What each person sees and feels-- Those are what shape reality. This is what gives the world infinite potential. Even if you feel that only darkness lies ahead... As long as you hold hands together... See it through as one... ...the world will never end! The world exists within all of you...!"
+  },
+  {
+    nom: "Ryuji Sakamoto",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Chariot"],
+    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    personaUser: true,
+    persona: "Captain Kidd",
+    emoji: ["⚡", "🏃‍♂️", "🏴‍☠️"],
+    quote: "I get it now... We're doin' this to make sure people don't gotta go through the same crap we did. It doesn't matter if they think we're just or not. We gotta do what we believe in! Heh, and it's not like people think much of me anyways. I'm gonna dash through this the only way I know how!"
+  },
+  {
+    nom: "Ann Takamaki",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Lovers"],
+    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    personaUser: true,
+    persona: "Carmen",
+    emoji: ["😻", "🔥", "👗"],
+    quote: "...You're right. I could never abandon her. If I whine like this now, I'd just be betraying Shiho... ...No, I'd be betraying myself! I could never forget how I felt that day. I... I never want anyone to have to go through what I did!"
+  },
+  {
+    nom: "Yusuke Kitagawa",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Emperor"],
+    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    personaUser: true,
+    persona: "Goemon",
+    emoji: ["🦊", "🎨", "🖌️"],
+    quote: "...Very well! Just as art is meant to break boundaries, people should be saved even if they frown upon it. I won't allow the justice I believe in to be shaken any further...!"
+  },
+  {
+    nom: "Makoto Niijima",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Priestess"],
+    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    personaUser: true,
+    persona: "Joanna",
+    emoji: ["🏍️", "📚", "👊"],
+    quote: "I've realized that sometimes, pushing forward is the only way to survive. I won't let anyone control my life ever again. I'll make my own decisions — for my own future."
+  },
+  {
+    nom: "Futaba Sakura",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Hermit"],
+    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    personaUser: true,
+    persona: "Necronomicon",
+    emoji: ["💻", "🛸", "👩‍💻"],
+    quote: "...I don't want to run away from this. I ran from my mom's death for so long... I misunderstood it... Everything was just too painful for me to handle. But... I never want to be left in the dark again! ...That's probably why my Persona is a little bit special. Because I want to learn the truth. That's how I really feel! Well, I've come this far... I'll follow you wherever you go, on my own two feet!"
+  },
+  {
+    nom: "Haru Okumura",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Empress"],
+    opus: ["P5","P5R","P5S","P5T","PQ2"],
+    personaUser: true,
+    persona: "Milady",
+    emoji: ["☕", "🪓", "💎"],
+    quote: "...I won't give up anymore. Just as I betrayed my distorted father before, I will betray my boring former self now!"
+  },
+  {
+    nom: "Goro Akechi",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Justice"],
+    opus: ["P5","P5R","P5T","PQ2"],
+    personaUser: true,
+    persona: "Robin Hood",
+    emoji: ["🎩", "🔪", "🕵️‍♂️"],
+    quote: "Why am I inferior to you...!? I was extremely particular about my life, my grades, my public image, so someone would want me around! I am an ace detective... a celebrity! But you... You're just some criminal trash living in an attic! So how!? How does someone like you have things I don't!? How can such a worthless piece of trash be more special than me!?"
+  },
+  {
+    nom: "Sumire Yoshizawa",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Faith"],
+    opus: ["P5R","P5T"],
+    personaUser: true,
+    persona: "Cendrillon",
+    emoji: ["✨", "🎀", "🤸‍♀️"],
+    quote: "Some people want to run from their pain and cling to some other version of reality... Like I used to. But the knowledge I gained through that pain, and my desire to move on... Those are even more precious to me! And I won't let anyone take them from me again!"
+  },
+  {
+    nom: "Sae Niijima",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["Judgement"],
+    opus: ["P5","P5R","P5S"],
+    personaUser: true,
+    persona: "Leviathan",
+    emoji: ["🔎", "⚖️", "👩‍⚖️"],
+    quote: "Still, I'm glad I was able to save you in court. I've never felt so happy in my entire life. I'm not quite sure how to put it, but... saving your future meant more to me than my own career. I feel like you even taught me how to live."
+  },
+
+  {
+    nom: "Sophia",
+    genre: ["Artificial","Female"],
+    age: "< 15",
+    arcane: ["Hope"],
+    opus: ["P5S"],
+    personaUser: true,
+    persona: "Pithos",
+    emoji: ["🤖", "🪀", "❤️"],
+    quote: "The power... to change... I've got it now... That's what a heart is!"
+  },
+  {
+    nom: "Zenkichi Hasegawa",
+    genre: ["Human","Male"],
+    age: "21-40",
+    arcane: ["Apostle"],
+    opus: ["P5S"],
+    personaUser: true,
+    persona: "Valjean",
+    emoji: ["🕴️", "🐺", "🔫"],
+    quote: "I may not be a hero, and I sure as hell don't deserve any awards... But at least I know what makes a person evil. Evil only cares about itself. It's the mark of a man who would bring another to ruin and dare not show remorse. I will never let people like that go free. And I'll give everything I have to bring them down!"
+  },
+
+  // ── Antagoniste(s) ────────────────────────────────────────────
+  {
+    nom: "Yaldabaoth",
+    genre: ["Entity"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P5", "P5R","P5S"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🏆", "⛓️", "⚖️"],
+    quote: "I know you heard the voices of the suffering when you were in the Desires. Attaining the ultimate answer without suffering the lashes doled out by doubt and regret...That is humanity's true Desire."
+  },
+  {
+    nom: "Suguru Kamoshida",
+    genre: ["Human", "Male"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P5","P5R"],
+    personaUser: true,
+    persona: "Asmodeus",
+    emoji: ["👑", "👨‍🏫", "🏐"],
+    quote: "People around me were the ones who kept it secret. Adults who want to share in my accomplishments, students who have the drive to become winners... they willingly protect it so we all may profit from it."
+  },
+  {
+    nom: "Ichiryusai Madarame",
+    genre: ["Human", "Male"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P5","P5R"],
+    personaUser: true,
+    persona: "Azazel",
+    emoji: ["🏚️", "👘", "🖼️"],
+    quote: "You all know too much. You'll forever rue the day you dared defy me."
+  },
+  {
+    nom: "Junya Kaneshiro",
+    genre: ["Human", "Male"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P5","P5R"],
+    personaUser: true,
+    persona: "Bael",
+    emoji: ["👺", "🪰", "🤑"],
+    quote: "Don't make me laugh. I feed on dumbshits like you. There's not a snowball's chance in hell that a bright future lies ahead for you!"
+  },
+  {
+    nom: "Kunikazu Okumura",
+    genre: ["Human", "Male"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P5","P5R"],
+    personaUser: true,
+    persona: "Mammon",
+    emoji: ["👔", "🍔", "👨‍🏭"],
+    quote: "I've received a calling card from the Phantom Thieves. I need you to send it over to the police. Don't make me repeat myself. Give it to the police. That's an order. These scoundrels have threatened me. Aren't the police supposed to side with law-abiding citizens?"
+  },
+  {
+    nom: "Masayoshi Shido",
+    genre: ["Human", "Male"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P5","P5R"],
+    personaUser: true,
+    persona: "Samael",
+    emoji: ["🛳️", "🎤", "👔"],
+    quote: "Sacrifices are inevitable in the path of reform. I only require that the foolish entrust themselves to their superiors. I shall guide them."
+  },
+  {
+    nom: "Takuto Maruki",
+    genre: ["Human","Male"],
+    age: "21-40",
+    arcane: ["Councillor"],
+    opus: ["P5R"],
+    personaUser: true,
+    persona: "Azathoth",
+    emoji: ["🧠", "💭", "🍬"],
+    quote: "It's true that I turned my back on the original reality... But where's the harm in that!? When it grows to be too much, too painful... Every person deserves to escape that! In all honesty, it's best for a person's growth when they tackle their own hardships... But reality doesn't always make that so feasible! No matter how much you try, or work for so long, the smallest injustice can wipe it all out, leave you with nothing... Don't you, of all people, understand that!?"
+  },
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  {
+    nom: "Caroline",
+    genre: ["Velvet","Female"],
+    age: "Unknown",
+    arcane: ["Strength"],
+    opus: ["P5","P5R","PQ2"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["💢", "🔒", "👮‍♀️"],
+    quote: "Listen up, Inmate! You may think you're getting stronger, but don't get ahead of yourself! Your rehabilitation is far from over, and we won't tolerate any slacking. Justine and I will be keeping a close eye on you, so don't you dare disappoint us! The strength of your heart is what will determine your fate… So prove to us that you're worthy of standing before our master!"
+  },
+  {
+    nom: "Justine",
+    genre: ["Velvet","Female"],
+    age: "Unknown",
+    arcane: ["Strength"],
+    opus: ["P5","P5R","PQ2"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["📖", "🔐", "🧘‍♀️"],
+    quote: "Inmate, you're not doing enough to atone for your crimes. If you truly desire to change your fate, you will need to push yourself further. We can see your potential, but you are still weak. So, prove to us that you can grow stronger! You might think you're gaining strength from all the battles, but there's more to it than that. Your true strength lies in your heart and mind, not just your Persona."
+  },
+  {
+    nom: "Lavenza",
+    genre: ["Velvet","Female"],
+    age: "Unknown",
+    arcane: ["Strength"],
+    opus: ["P5","P5R","P5T","P5S"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["👑", "🔐", "👯‍♀️"],
+    quote: "I... am Lavenza. The true form of the twins. All of the memories and experiences I have accumulated as Caroline and Justine... they are now part of me. You have proven yourself worthy, and I am here to support you in your final trial. We have seen your growth, and though the road ahead will be difficult, I will stand by your side. Your heart is the key to your fate. It is not about the choices you make, but the resolve you hold in your heart. Do not falter, and remember, the strength you've gained is more than just physical."
+  },
+
+  // ── Social Link / Confidants ──────────────────────────────────
+  {
+    nom: "Tae Takemi",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["Death"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🖤", "⚕️", "💉"],
+    quote: "I don't want the general public to know about my original medicines. So you're strictly prohibited from disclosing what happens here to anyone... Understood?"
+  },
+  {
+    nom: "Ichiko Ohya",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["Devil"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🖤", "🍺", "📰"],
+    quote: "Hey, how 'bout we do this... You supply me with info on the Phantom Thieves... And I'll write articles based on what you tell me about them. You know, the Phantom Thieves who you love oh-so-much... Deal?"
+  },
+  {
+    nom: "Chihaya Mifune",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["Fortune"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["✨", "💫", "🔮"],
+    quote: "Whaaaaaat!? The sequence of arcana has completely changed! 'Death' has moved far off into the future... But there's no way that could've happened... without you breaking the law. I mean, how could an ordinary high school student change the course of fate...? ...Fine. I'm just going to have to verify your power. The very power that reversed my tarot card prediction! Oh, I know... I'll read your fortune! Please, I beg you... I need to know if fate truly can be changed..."
+  },
+  {
+    nom: "Munehisa Iwai",
+    genre: ["Human","Male"],
+    age: "40+",
+    arcane: ["Hanged"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🎧", "🧢", "🔫"],
+    quote: "You help me out with my 'business'... Smugglin' goods, destroyin' evidence... And as a reward, I'll introduce you to the 'special menu,' with good prices for a punk like you. ...Whaddaya say? Not bad, huh?"
+  },
+  {
+    nom: "Sojiro Sakura",
+    genre: ["Human","Male"],
+    age: "40+",
+    arcane: ["Hierophant"],
+    opus:["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["💭", "🌸", "☕"],
+    quote: "I was such a fool... My whole life, I've taken the easy way out to avoid these kinds of conflicts. I didn't stand up for Wakaba when I knew something was off... and I didn't stand up for you either. Instead, I went on and on about how you can't fight back against the laws of our society... How you should just accept the hand you're dealt in life... But those were mere excuses I made to keep myself in line. They gave me the easy way out I wanted so badly...Maybe instead of all that coffee crap, I should've been teaching you not to make the same mistakes I did. There I go, ranting again. But... I feel like I managed to put a lot behind me today. ...Thanks, for making me realize what's really important in life."
+  },
+  {
+    nom: "Yuuki Mishima",
+    genre: ["Human","Male"],
+    age: "15-20",
+    arcane: ["Moon"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["📣", "🌙", "📱"],
+    quote: "Take it down, Phantom Thieves! Come on, why do you think they've risked their lives all this time!? Dammit, you guys! Snap out of it! When will you stop running from the truth!? Phantom Thieves, can you hear us!?"
+  },
+  {
+    nom: "Hifumi Togo",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["Star"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["💡", "⛩️", "♟️"],
+    quote: "I feel... a gambler's spirit emanating from you."
+  },
+  {
+    nom: "Toranosuke Yoshida",
+    genre:["Human","Male"],
+    age: "40+",
+    arcane: ["Sun"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["📚", "🏛️", "🎤"],
+    quote: "The most important part about giving a good speech is believing in yourself... ...Perhaps one day... I will believe in myself... again. Very well. If learning how to give a great speech is what you seek, then I'd be happy to instruct you. In exchange, I would like for you to continue assisting me."
+  },
+  {
+    nom: "Sadayo Kawakami",
+    genre:["Human","Female"],
+    age: "21-40",
+    arcane: ["Temperance"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🍵", "🧹", "📚"],
+    quote: "The way you opposed Mr. Kamoshida, I'd say that you're earnest and have a strong sense of justice. That being said... you called a maid service and requested me?"
+  },
+  {
+    nom: "Shinya Oda",
+    genre: ["Human","Male"],
+    age: "< 15",
+    arcane: ["Tower"],
+    opus: ["P5","P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🔫", "🎮", "👾"],
+    quote: "I wish I was able to talk with them--or something-though... But you fulfilled your part of the deal, so I'll teach you how to shoot."
+  },
+
+  // ── Autres ────────────────────────────────────────────────────
+  {
+    nom: "Kasumi Yoshizawa",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["None"],
+    opus: ["P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🎀", "🕊️", "🌸"],
+    quote: "I wanted to reach the top... but I was never alone. Sumire, live your life fully — not as me, but as you."
+  },
+  {
+    nom: "Jose",
+    genre: ["Entity","Male"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🚗", "🌻", "🌠"],
+    quote: "Good job!"
+  },
 
 
+  // ============================================================
+  // 🎮 PERSONA 5 TACTICA — P5T
+  // ============================================================
 
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  {
+    nom: "Erina",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P5T"],
+    personaUser: true,
+    persona: "Ernesto",
+    emoji: ["🎀", "⚔️", "🔥"],
+    quote: "I'm scared we're entering a world where corruption is free to flourish... And, even worse... I'm scared of becoming someone who's okay with that. So I fight because I refuse to give up and turn a blind eye to the injustices in my world."
+  },
+  {
+    nom: "Toshiro Kasukabe",
+    genre: ["Human","Male"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P5T"],
+    personaUser: true,
+    persona: "Ernesto",
+    emoji: ["🧑‍💼", "📜", "🕊️"],
+    quote: "You can't stop us. The rebellion is here. The rebellion... within my heart!"
+  },
+
+
+  // ============================================================
+  // 🎮 PERSONA 5 X — P5X
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
+  {
+    nom: "Nagisa Kamishiro",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Jánošík",
+    emoji: ["🎭","🗡","⚫"],
+    quote: ""
+  },
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  {
+    nom: "Lufel",
+    genre: ["Male", "Animal"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Rob Roy",
+    emoji: ["👓","🔥","🦉"],
+    quote: "This is a new one, luck is on your side today."
+  },
+  {
+    nom: "Motoha Arai",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Awilda",
+    emoji: ["⚾","⚡","🏃‍♀️"],
+    quote: "With this power! I can send Kiuchi flying and avenge Tomoko... Get ready for a double play!"
+  },
+  {
+    nom: "Shun Kano",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Mandrin",
+    emoji: ["🪓","🔵","🤠"],
+    quote: "Well now, I think I get the picture. This is a stick-up! Go, Mandrin!"
+  },
+  {
+    nom: "Riko Tanemura",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Chiyome",
+    emoji: ["🌂","👘","🎐"],
+    quote: ""
+  },
+  {
+    nom: "Shoki Ikenami",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Ghino",
+    emoji: ["🗡","🎭","🤴"],
+    quote: "Grazie!"
+  },
+  {
+    nom: "Seiji Shiratori",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Leucothea",
+    emoji: ["👔","⚫","🤺"],
+    quote: ""
+  },
+  {
+    nom: "Kotone Montagne",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Terpsichore",
+    emoji: ["💃","🏔","🧊"],
+    quote: "Merci!"
+  },
+  {
+    nom: "Yukimi Fujikawa",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Styx",
+    emoji: ["👘","🟣","👩‍💼"],
+    quote: ""
+  },
+  {
+    nom: "Tomoko Noge",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Prosymna",
+    emoji: ["⚾","🍳","🟣"],
+    quote: ""
+  },
+  {
+    nom: "Leo Kamiyama",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Erytheia",
+    emoji: ["🤖","🟢","👨‍🎤"],
+    quote: ""
+  },
+  {
+    nom: "Yaoling Li",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Meng Po",
+    emoji: ["☕","🏮","🥘"],
+    quote: ""
+  },
+  {
+    nom: "Kiyoshi Kurotani",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Syke",
+    emoji: ["🗡","⚪","👔"],
+    quote: ""
+  },
+  {
+    nom: "Kayo Tomiyama",
+    genre: ["Female", "Human"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Cleodora",
+    emoji: ["🍤","🤳","👱‍♀️"],
+    quote: ""
+  },
+  {
+    nom: "Miyu Sahara",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Nemertes",
+    emoji: ["🍟","🛥","👩‍🦳"],
+    quote: ""
+  },
+  {
+    nom: "Toshiya Sumi",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Gorgyra",
+    emoji: ["🎩","🦯","⚫"],
+    quote: ""
+  },
+  {
+    nom: "Haruna Nishimori",
+    genre: ["Female", "Human"],
+    age: "< 15",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Daeira",
+    emoji: ["⚙","🟤","⛏"],
+    quote: ""
+  },
+  {
+    nom: "YUI",
+    genre: ["Female", "Artificial"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Apseudes",
+    emoji: ["👗","🤖","🔵"],
+    quote: ""
+  },
+  {
+    nom: "Minami Miyashita",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Thalia",
+    emoji: ["❤","🌿","👩‍⚕️"],
+    quote: ""
+  },
+  {
+    nom: "Chizuko Nagao",
+    genre: ["Female", "Human"],
+    age: "80+",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Ampelos",
+    emoji: ["🐟","🏴‍☠️","👵"],
+    quote: ""
+  },
+  {
+    nom: "Yumi Shiina",
+    genre: ["Female", "Human"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Urania",
+    emoji: ["🌙","🟢","🧝‍♀️"],
+    quote: ""
+  },
+  {
+    nom: "Ayaka Sakai",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Calliope",
+    emoji: ["🐈","🎸","👩‍🎤"],
+    quote: ""
+  },
+  {
+    nom: "Kira Kitazato",
+    genre: ["Male", "Human"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Harpyia",
+    emoji: ["💉","🐦","👨‍⚕️"],
+    quote: ""
+  },
+  {
+    nom: "Masaki Ashiya",
+    genre: ["Male", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Amalthea",
+    emoji: ["🗡","🟣","💐"],
+    quote: ""
+  },
+  {
+    nom: "Runa Dogenzaka",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Aura",
+    emoji: ["🍜","⚡","🐕"],
+    quote: ""
+  },
+  {
+    nom: "Mio Natsukawa",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Minthe",
+    emoji: ["💧","🐍","👩‍🚒"],
+    quote: ""
+  },
+  {
+    nom: "Mayumi Hashimoto",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Pitys",
+    emoji: ["📹","🚗","🏁"],
+    quote: ""
+  },
+  {
+    nom: "Manaka Nagao",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Euterpe",
+    emoji: ["👼","👩‍🎤","🦽"],
+    quote: ""
+  },
+  {
+    nom: "Ichigo Shikano",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Thelxiepeia",
+    emoji: ["🖤","💀","😏"],
+    quote: ""
+  },
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  {
+    nom: "Merope",
+    genre: ["Female", "Velvet"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "NONE",
+    emoji: ["✨","📖","👩‍🎤"],
+    quote: ""
+  },
+
+
+  // ============================================================
+  // 🎮 PERSONA Q & Q2 — PQ / PQ2
+  // ============================================================
+
+  // ── Protagoniste(s) / Personnages originaux ───────────────────
+  {
+    nom: "Rei",
+    genre: ["Human", "Female"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["PQ"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🌼", "🌭", "⚰️"],
+    quote: "As long as it has a flavor, I love every kind of food!"
+  },
+  {
+    nom: "Zen",
+    genre: ["Human","Male"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["PQ"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🏹", "🖤", "🧊"],
+    quote: "To live is the duty of those who are given life..."
+  },
+  {
+    nom: "Hikari",
+    genre: ["Human", "Female"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["PQ2"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🍿", "🎞️", "🎬"],
+    quote: "I'm not going to be dependent on you. I'll seize my happiness on my own!"
+  },
+  {
+    nom: "Nagi",
+    genre: ["Female"],
+    age: "Unknown",
+    arcane: ["NONE"],
+    opus: ["PQ2"],
+    personaUser: true,
+    persona: "Enlil",
+    emoji: ["🌺", "🎞️", "🤺"],
+    quote: "Oh, ah...I apologize for being so forward. It's truly fabulous that the doors are open - However, I've grown concerned. Hikari-san, when you return to reality, you may end up facing the same hardships as before..."
+  },
+
+
+  // ============================================================
+  // 🎮 Velvet Room (cross-série) — P1 → P5R
+  // ============================================================
+
+  {
+    nom: "Igor",
+    genre: ["Velvet", "Male"],
+    age: "Unknown",
+    arcane: ["Fool"],
+    opus: ["P1", "P2IS", "P2EP", "P3", "P3FES", "P3P", "P4", "P4G", "P4AU", "P5", "P5R","P3R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🔮", "🗝️", "👃"],
+    quote: "Welcome to the Velvet Room."
+  },
+
+
+  // ============================================================
+  // 🎮 Crossover / Spin-offs
+  // ============================================================
+
+  {
+    nom: "Hatsune Miku",
+    genre: ["Vocaloid", "Female"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P4D"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["👔", "💎", "🎤"],
+    quote: "I'm the number one princess in the world."
+  },
+
+];

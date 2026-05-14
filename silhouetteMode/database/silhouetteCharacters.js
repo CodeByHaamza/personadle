@@ -148,6 +148,10 @@ export const silhouetteCharacters = [
 
     { nom: "Izanami", image: "Izanami_shilouette", opus: ["P4"] },
 
+  // === Entités / Boss finaux ===
+  { nom: "Nyx", image: "Nyx_silhouette", opus: ["P3", "P3FES", "P3P", "P3R"] },
+  { nom: "Yaldabaoth", image: "Yaldabaoth_silhouette", opus: ["P5", "P5R"] },
+
     // === Persona 5 Tactica ===
 { nom: "Erina", image: "Erina_silhouette", opus: ["P5T"] },
 { nom: "Toshiro Kasukabe", image: "Toshiro_silhouette", opus: ["P5T"] },

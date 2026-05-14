@@ -18,8 +18,8 @@ export function initChallengeBanner(currentMode) {
   try { challenge = JSON.parse(raw); }
   catch { localStorage.removeItem('activeChallenge'); return; }
 
-  // Vérifier que c'est pour aujourd'hui
-  const today = new Date().toISOString().slice(0, 10);
+  // Vérifier que c'est pour aujourd'hui (heure Paris, cohérent avec le reset quotidien)
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(new Date());
   if (challenge.date && challenge.date !== today) {
     localStorage.removeItem('activeChallenge');
     return;
@@ -34,23 +34,24 @@ export function initChallengeBanner(currentMode) {
 function _injectBanner({ msgId, mode, score }) {
   if (document.getElementById('challengeBanner')) return;
 
-  const t = (key, fb) => window.i18n?.t?.(key) || fb;
+  const tf = (key, fb) => {
+    if (!window.i18n?.t) return fb;
+    const r = window.i18n.t(key);
+    return (r && r !== key) ? r : fb;
+  };
 
   const banner = document.createElement('div');
   banner.id = 'challengeBanner';
   banner.innerHTML = `
-    <img class="cb-avatar" src="${_defaultAvatar()}" alt="challenger" id="cbAvatar">
+    <img class="cb-avatar" src="${_defaultAvatar()}" alt="" id="cbAvatar">
     <div class="cb-text">
-      <div class="cb-pseudo" id="cbPseudo">${t('challenge.banner_title', '⚔ Active Challenge')}</div>
-      <div class="cb-score">
-        ${t('challenge.banner_beat', 'Beat')} <strong>${score} pts</strong>
-        — ${(mode || '').toUpperCase()}
-      </div>
+      <div class="cb-pseudo" id="cbPseudo">⚔ ${tf('challenge.active_challenge', 'Challenge')}</div>
+      <div class="cb-score" id="cbScore">${tf('challenge.banner_beat', 'Beat')} <strong>${score}</strong> — ${(mode || '').toUpperCase()}</div>
     </div>
-    <button class="cb-dismiss" id="cbDismiss" title="Dismiss">✕</button>
+    <button class="cb-dismiss" id="cbDismiss" title="${tf('ui.dismiss', '✕')}">✕</button>
   `;
 
-  document.body.insertBefore(banner, document.body.firstChild);
+  document.body.appendChild(banner);
 
   // Charger les infos de l'adversaire en arrière-plan
   if (msgId) _loadChallengerInfo(msgId);

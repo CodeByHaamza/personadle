@@ -16,6 +16,12 @@ const SEEN_KEY              = 'ccShownFriendshipIds';
 const SEEN_CHALLENGE_KEY    = 'seenChallengeResults';
 const SEEN_CHALLENGE_NOTIF  = 'seenChallengeNotifIds';
 
+/** How far back (ms) to look for challenge results to notify about (48 hours). */
+const CHALLENGE_RESULT_CUTOFF_MS = 48 * 60 * 60 * 1000;
+
+/** Notification polling interval (ms). */
+const POLL_INTERVAL_MS = 60_000;
+
 let _pollTimer = null;
 
 /**
@@ -31,7 +37,7 @@ export async function initNotifications() {
   await _check();
 
   // Poll toutes les 60 secondes
-  _pollTimer = setInterval(_check, 60_000);
+  _pollTimer = setInterval(_check, POLL_INTERVAL_MS);
 
   // Sur la page friends : marquer comme vus (localStorage) pour ne pas re-déclencher
   if (_isOnFriendsPage()) {
@@ -84,7 +90,7 @@ async function _check() {
 
     // Un seul fetch pour les deux fonctions challenge
     if (!_isOnGamePage()) {
-      const cutoff  = Date.now() - 48 * 60 * 60 * 1000;
+      const cutoff  = Date.now() - CHALLENGE_RESULT_CUTOFF_MS;
       const msgData = await api.messages.list({ type: 'challenge', limit: 30 });
       const allMsgs = msgData.messages ?? [];
       await _checkChallengeResults(allMsgs, cutoff);
@@ -113,10 +119,11 @@ async function _checkChallengeResults(msgs, cutoff) {
     // On first run, mark all existing resolved challenges as already seen
     // (prevents flooding animation for old history on first login)
     const seenIds = _getSeenChallengeIds();
-    if (!localStorage.getItem('_crInitDone')) {
+    const _crKey = `_crInitDone_${me.id}`;
+    if (!localStorage.getItem(_crKey)) {
       filtered.forEach(m => { if (!seenIds.includes(m.id)) seenIds.push(m.id); });
       localStorage.setItem(SEEN_CHALLENGE_KEY, JSON.stringify(seenIds.slice(-100)));
-      localStorage.setItem('_crInitDone', '1');
+      localStorage.setItem(_crKey, '1');
       return;
     }
 

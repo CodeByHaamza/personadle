@@ -593,6 +593,14 @@ input:checked + .slider.red    { background-color: #FF4136; }
   background-color: #7b8383 !important;
 }
 
+/* Real name displayed under a codename in autocomplete suggestions */
+.realname {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
+  line-height: 1.1;
+}
+
 
 /* =====================================================
    8. COMPTEURS D'ESSAIS (Hint / Give Up)
@@ -1027,14 +1035,24 @@ footer {
   text-align: center;
   padding: 15px;
   font-size: 14px;
-  position: relative;
-  bottom: 0;
   width: 100%;
   font-family: Arial, sans-serif;
+  box-sizing: border-box;
 }
 
 footer p {
   margin: 5px 0;
+}
+
+footer a {
+  color: #bbb;
+}
+footer a:visited {
+  color: #bbb;
+}
+footer a:hover {
+  color: #fff;
+  text-decoration: underline;
 }
 
 
@@ -1623,38 +1641,61 @@ button,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   margin-top: 8px;
-  padding: 7px 18px;
-  background: transparent;
-  color: rgba(200, 0, 0, 0.8);
-  border: 1.5px solid rgba(200, 0, 0, 0.35);
+  padding: 9px 22px;
+  background: linear-gradient(135deg, #c00 0%, #e63946 100%);
+  color: #fff;
+  border: 2px solid transparent;
   border-radius: 100px;
   font-family: inherit;
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
   position: relative;
+  box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.55),
+              0 3px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease,
+              background 0.2s ease;
+  animation: challengeIdle 2.8s ease-in-out infinite;
 }
+
+/* Icône épée — légère rotation au repos pour l'effet "prêt au combat" */
+.btn-challenge > span:first-child {
+  display: inline-block;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes challengeIdle {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(230, 57, 70, 0.55), 0 3px 12px rgba(0,0,0,0.25); }
+  50%       { box-shadow: 0 0 0 7px rgba(230, 57, 70, 0),   0 3px 16px rgba(0,0,0,0.3);  }
+}
+
 .btn-challenge:hover {
-  background: rgba(200, 0, 0, 0.08);
-  border-color: rgba(200, 0, 0, 0.6);
-  color: #cc0000;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #a00 0%, #c1121f 100%);
+  transform: scale(1.07) translateY(-2px);
+  box-shadow: 0 0 18px rgba(230, 57, 70, 0.65),
+              0 6px 20px rgba(0, 0, 0, 0.35);
+  animation: none;
+}
+.btn-challenge:hover > span:first-child {
+  transform: rotate(-20deg) scale(1.25);
 }
 .btn-challenge:active {
-  transform: translateY(0);
+  transform: scale(0.96) translateY(0);
+  box-shadow: 0 0 8px rgba(230, 57, 70, 0.4), 0 2px 6px rgba(0,0,0,0.2);
 }
+
 body.darkmode .btn-challenge {
-  color: rgba(255, 80, 80, 0.75);
-  border-color: rgba(255, 80, 80, 0.28);
+  background: linear-gradient(135deg, #c00 0%, #e63946 100%);
+  box-shadow: 0 0 0 0 rgba(255, 80, 80, 0.5), 0 3px 14px rgba(0,0,0,0.5);
 }
 body.darkmode .btn-challenge:hover {
-  background: rgba(255, 60, 60, 0.1);
-  border-color: rgba(255, 80, 80, 0.55);
-  color: #ff5555;
+  background: linear-gradient(135deg, #e63946 0%, #ff5555 100%);
+  box-shadow: 0 0 22px rgba(255, 80, 80, 0.6), 0 6px 22px rgba(0,0,0,0.5);
 }
 
 /* ── Overlay de la modale ── */

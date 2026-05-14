@@ -1,0 +1,313 @@
+/* p3-evoker-anim.css — Animation "Evoker" style Persona 3
+   ───────────────────────────────────────────────────────────
+   Palette : bleu nuit (#0d1633), bleu électrique (#60b8ff), blanc
+   Séquence :
+     0s      — backdrop + avatar sombre apparaît
+     0.5s    — Evoker fait son entrée avec spin 720°
+     1.8s    — TIR : flash blanc, avatar révélé + impact, éclats gauche
+     2.3s    — panneau bleu foncé + boutons
+   ─────────────────────────────────────────────────────────── */
+
+#p3e-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#p3e-overlay.p3e--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.p3e-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 22, 0);
+  transition: background 0.35s ease 0.1s;
+}
+
+#p3e-overlay.p3e--visible .p3e-backdrop {
+  background: rgba(5, 8, 22, 0.93);
+}
+
+/* ── Scène ───────────────────────────────────────────── */
+
+.p3e-scene {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Avatar ──────────────────────────────────────────── */
+
+.p3e-avatar-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: -10px;
+  z-index: 3;
+}
+
+.p3e-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #1e3a6e;
+  box-shadow: 0 0 0 3px rgba(96, 184, 255, 0.25), 0 0 40px rgba(0, 0, 0, 0.9);
+  filter: grayscale(100%) brightness(0.08) contrast(1.6);
+  animation: p3e-avatar-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  display: block;
+}
+
+@keyframes p3e-avatar-in {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Révélation couleur + secousse d'impact */
+.p3e--fired .p3e-avatar {
+  animation: p3e-avatar-reveal 1.0s ease-out forwards;
+}
+
+@keyframes p3e-avatar-reveal {
+  0%   { filter: grayscale(100%) brightness(0.08); transform: translate(0, 0) scale(1); }
+  7%   { filter: grayscale(0%) brightness(3.5) contrast(2.2); transform: translate(-11px, -3px) scale(1.06); }
+  16%  { filter: grayscale(0%) brightness(1.8) contrast(1.4); transform: translate(8px, 1px) scale(0.97); }
+  28%  { filter: grayscale(0%) brightness(1.2); transform: translate(-5px, -1px) scale(1); }
+  42%  { filter: grayscale(0%) brightness(1.05); transform: translate(3px, 0); }
+  62%  { filter: grayscale(0%) brightness(1); transform: translate(-1px, 0); }
+  100% { filter: grayscale(0%) brightness(1); transform: translate(0, 0); }
+}
+
+/* ── Evoker ──────────────────────────────────────────── */
+
+.p3e-evoker-wrap {
+  position: absolute;
+  right: -90px;
+  top: 50%;
+  font-size: 34px;
+  line-height: 1;
+  opacity: 0;
+  /* Apparaît à 0.5s, vise d'ici 1.8s (durée 1.3s) */
+  animation: p3e-evoker-appear 1.3s ease forwards 0.5s;
+  transform-origin: right center;
+}
+
+/* Phases :
+   0–35%  : spin 720° + scale-in spectaculaire
+   35–52% : rebond, échelle normale
+   52–72% : commence à viser (rotation vers le haut)
+   72–100%: tenu en position de visée à la tempe */
+@keyframes p3e-evoker-appear {
+  0%   { opacity: 0; transform: translateY(-50%) translateX(22px) scale(0.2) rotate(720deg); }
+  35%  { opacity: 1; transform: translateY(-50%) translateX(-5px) scale(1.4) rotate(0deg); }
+  52%  { opacity: 1; transform: translateY(-50%) translateX(0)    scale(1)   rotate(0deg); }
+  72%  { opacity: 1; transform: translateY(-65%) translateX(0)    scale(1)   rotate(-18deg); }
+  88%  { opacity: 1; transform: translateY(-72%) translateX(-7px) scale(1)   rotate(-28deg); }
+  100% { opacity: 1; transform: translateY(-72%) translateX(-7px) scale(1)   rotate(-28deg); }
+}
+
+/* Recul de l'arme après le tir */
+.p3e--fired .p3e-evoker-wrap {
+  animation: p3e-evoker-recoil 0.38s ease-out forwards;
+}
+
+@keyframes p3e-evoker-recoil {
+  0%   { opacity: 1;   transform: translateY(-72%) translateX(-7px)  scale(1)    rotate(-28deg); }
+  28%  { opacity: 1;   transform: translateY(-72%) translateX(15px)  scale(1.08) rotate(-13deg); }
+  100% { opacity: 0.5; transform: translateY(-72%) translateX(2px)   scale(0.93) rotate(-28deg); }
+}
+
+/* ── Flash blanc au tir ──────────────────────────────── */
+
+.p3e-flash {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  pointer-events: none;
+  z-index: 9997;
+  opacity: 0;
+}
+
+.p3e--fired .p3e-flash {
+  animation: p3e-flash-bang 0.38s ease-out forwards;
+}
+
+@keyframes p3e-flash-bang {
+  0%   { opacity: 0.92; }
+  100% { opacity: 0; }
+}
+
+/* ── Éclats bleus (partent vers la gauche) ───────────── */
+
+.p3e-shards-wrap {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.p3e-shard {
+  position: absolute;
+  opacity: 0;
+  border-radius: 2px;
+  transform: translate(-50%, -50%) scale(0);
+}
+
+/* Éclats bleu clair qui se dispersent */
+.p3e-shard--1 { width: 6px;  height: 26px; background: #60b8ff; }
+.p3e-shard--2 { width: 5px;  height: 18px; background: #93d0ff; }
+.p3e-shard--3 { width: 8px;  height: 15px; background: #3aa0e8; }
+.p3e-shard--4 { width: 4px;  height: 13px; background: #60b8ff; }
+.p3e-shard--5 { width: 7px;  height: 22px; background: #b3e0ff; }
+.p3e-shard--6 { width: 4px;  height: 11px; background: #3aa0e8; }
+
+.p3e--fired .p3e-shard {
+  animation: p3e-shard-burst 0.88s ease-out forwards;
+}
+
+/* Direction : majoritairement vers la gauche (côté de "sortie" du tir) */
+.p3e--fired .p3e-shard--1 { --dx: -158px; --dy: -72px;  --rot: -42deg; animation-delay: 0s; }
+.p3e--fired .p3e-shard--2 { --dx: -195px; --dy: -28px;  --rot:  32deg; animation-delay: 0.03s; }
+.p3e--fired .p3e-shard--3 { --dx: -135px; --dy:  85px;  --rot: -58deg; animation-delay: 0.05s; }
+.p3e--fired .p3e-shard--4 { --dx: -178px; --dy: -115px; --rot:  22deg; animation-delay: 0.01s; }
+.p3e--fired .p3e-shard--5 { --dx: -230px; --dy:  -8px;  --rot: -22deg; animation-delay: 0.07s; }
+.p3e--fired .p3e-shard--6 { --dx: -108px; --dy:  108px; --rot:  52deg; animation-delay: 0.04s; }
+
+@keyframes p3e-shard-burst {
+  0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  38%  { opacity: 1; }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+
+/* ── Panneau bleu foncé central ─────────────────────── */
+
+.p3e-panel {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(160deg, #0d1633 0%, #09102a 60%, #060b1a 100%);
+  border: 1px solid rgba(96, 184, 255, 0.22);
+  /* Bord haut irrégulier façon éclat */
+  clip-path: polygon(0% 14%, 9% 0%, 88% 6%, 100% 0%, 100% 100%, 0% 100%);
+  width: min(260px, 80vw);
+  padding: 22px 20px 18px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(96, 184, 255, 0.1);
+}
+
+.p3e-panel--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.p3e-pseudo {
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #60b8ff;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0 0 6px;
+  line-height: 1.2;
+  word-break: break-word;
+  text-shadow: 0 0 18px rgba(96, 184, 255, 0.55);
+}
+
+.p3e-msg {
+  font-size: 0.88rem;
+  color: rgba(220, 235, 255, 0.88);
+  margin: 0;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── Boutons (sous la pdp, dans la zone de jeu) ───────── */
+
+.p3e-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  z-index: 4;
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.p3e-actions--visible { opacity: 1; }
+
+.p3e-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  font-family: 'Oswald', Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+}
+
+.p3e-btn:active { transform: scale(0.95); }
+
+.p3e-btn--yes {
+  background: #2a6bbf;
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(42, 107, 191, 0.5);
+}
+.p3e-btn--yes:hover { background: #1a5aad; }
+
+.p3e-btn--no {
+  background: #151a2a;
+  color: #8899bb;
+  border: 1px solid #263252;
+}
+.p3e-btn--no:hover { background: #1e2540; color: #aabbd0; }
+
+/* ── Bouton fermer ───────────────────────────────────── */
+
+.p3e-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  z-index: 10001;
+  pointer-events: auto;
+  transition: background 0.15s;
+  opacity: 0;
+  animation: p3e-fade-btn 0.2s ease 0.9s forwards;
+}
+
+.p3e-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+@keyframes p3e-fade-btn {
+  to { opacity: 1; }
+}

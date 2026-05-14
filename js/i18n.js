@@ -106,6 +106,70 @@ function applyToDOM() {
 }
 
 
+/* ─── Boutons localisés ────────────────────────────────── */
+
+/**
+ * Chemins relatifs à assets/buttons/ pour chaque langue.
+ * n = image normale, a = image active (rouge = survol/appui).
+ */
+var _btnBase = new URL('../assets/buttons/', import.meta.url).href;
+
+var _BUTTON_CFG = {
+  en: {
+    hint:   { n: 'EN/Hint_Button.webp',       a: 'EN/Hint_Button_Rouge.webp'      },
+    giveUp: { n: 'EN/Give-up_Button.webp',    a: 'EN/Give-up_Button_Rouge.webp'   },
+    reset:  { n: 'EN/Replay_Button.webp',     a: 'EN/Replay_Button_Rouge.webp'    },
+    guess:  { n: 'EN/Submit_Button.webp',     a: 'EN/Submit_Button_Rouge.webp'    },
+  },
+  fr: {
+    hint:   { n: 'FR/Indice_Button.webp',           a: 'FR/Indice_Button_Rouge.webp'          },
+    giveUp: { n: 'FR/Abandonner_Button.webp',       a: 'FR/Abandonner_Button_Rouge.webp'      },
+    reset:  { n: 'FR/Rejouer_Button.webp',          a: 'FR/Rejouer_Button_Rouge.webp'         },
+    guess:  { n: 'FR/Valider_Button.webp',          a: 'FR/Valider_Button_Rouge.webp'         },
+  },
+  es: {
+    hint:   { n: 'ES/Pista_Button.webp',            a: 'ES/Pista_Button_Rouge.webp'           },
+    giveUp: { n: 'ES/Abandonar_Button.webp',        a: 'ES/Abandonar_Button_Rouge.webp'       },
+    reset:  { n: 'ES/Volver_a_jugar_Button.webp',   a: 'ES/Volver_a_jugar_Button_Rouge.webp'  },
+    guess:  { n: 'ES/Confirmar_Button.webp',        a: 'ES/Confirmar_Button_Rouge.webp'       },
+  },
+  de: {
+    hint:   { n: 'DE/Tipp_Button.webp',             a: 'DE/Tipp_Button_Rouge.webp'            },
+    giveUp: { n: 'DE/Aufgeben_Button.webp',         a: 'DE/Aufgeben_Button_Rouge.webp'        },
+    reset:  { n: 'DE/Erneut_spielen_Button.webp',   a: 'DE/Erneut_spielen_Button_Rouge.webp'  },
+    guess:  { n: 'DE/Senden_Button.webp',           a: 'DE/Senden_Button_Rouge.webp'          },
+  },
+  it: {
+    hint:   { n: 'IT/Suggerimento_Button.webp',     a: 'IT/Suggerimento_Button_Rouge.webp'    },
+    giveUp: { n: 'IT/Abbandona_Button.webp',        a: 'IT/Abbandona_Button_Rouge.webp'       },
+    reset:  { n: 'IT/Rigioca_Button.webp',          a: 'IT/Rigioca_Button_Rouge.webp'         },
+    guess:  { n: 'IT/Conferma_Button.webp',         a: 'IT/Conferma_Button_Rouge.webp'        },
+  },
+};
+
+/**
+ * Met à jour les images des boutons Hint / Give-Up / Replay / Submit
+ * pour la langue active. Sans effet si les éléments sont absents (ex: index.html).
+ */
+function updateLangButtons(lang) {
+  var cfg = _BUTTON_CFG[lang] || _BUTTON_CFG['en'];
+  var map = {
+    hintButton:   cfg.hint,
+    giveUpButton: cfg.giveUp,
+    resetButton:  cfg.reset,
+    guessButton:  cfg.guess,
+  };
+  Object.keys(map).forEach(function (id) {
+    var wrapper = document.getElementById(id);
+    if (!wrapper) return;
+    var normal = wrapper.querySelector('.img-wrapper img.normal');
+    var active = wrapper.querySelector('.img-wrapper img.active');
+    if (normal) normal.src = _btnBase + map[id].n;
+    if (active) active.src = _btnBase + map[id].a;
+  });
+}
+
+
 /* ─── API publique ─────────────────────────────────────── */
 
 /**
@@ -166,6 +230,9 @@ export async function setLang(lang) {
   localStorage.setItem(STORAGE_KEY, requested);
   document.documentElement.lang = lang;
   applyToDOM();
+  updateLangButtons(lang);
+  // Push lang change to backend (hook défini par cloud-sync.js)
+  window._onLangChange?.(requested);
 }
 
 /**

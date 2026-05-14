@@ -85,10 +85,11 @@ if ($method === 'GET') {
         'receiver_id'     => (int) $m['receiver_id'],
         'type'            => $m['type'],
         'content'         => $m['content'],
-        'challenge_mode'  => $m['challenge_mode'],
-        'challenge_score' => $m['challenge_score'] ? (int) $m['challenge_score'] : null,
-        'challenge_date'  => $m['challenge_date'],
-        'status'          => $m['status'],
+        'challenge_mode'    => $m['challenge_mode'],
+        'challenge_score'   => $m['challenge_score'] ? (int) $m['challenge_score'] : null,
+        'challenge_date'    => $m['challenge_date'],
+        'challenge_filters' => isset($m['challenge_filters']) ? $m['challenge_filters'] : null,
+        'status'            => $m['status'],
         'created_at'      => $m['created_at'],
         'sender'   => ['pseudo' => $m['sender_pseudo'],   'avatar' => $m['sender_avatar']],
         'receiver' => ['pseudo' => $m['receiver_pseudo'], 'avatar' => $m['receiver_avatar']],
@@ -131,7 +132,9 @@ if ($method === 'POST') {
     }
 
     if ($type === 'challenge') {
-        $mode  = substr(trim($data['challenge_mode'] ?? ''), 0, 30);
+        $validModes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+        $mode = trim($data['challenge_mode'] ?? '');
+        if (!in_array($mode, $validModes, true)) jsonError('Invalid challenge_mode', 400);
         $score = (int) ($data['challenge_score'] ?? 0);
         $date  = trim($data['challenge_date'] ?? '');
 
@@ -140,24 +143,36 @@ if ($method === 'POST') {
             $date = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
         }
 
-        // Un seul défi actif par mode et par jour entre deux amis
+        // Un seul défi actif par jour entre deux amis (peu importe le mode)
         $stmtExisting = $pdo->prepare("
             SELECT id FROM messages
             WHERE ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?))
               AND type = 'challenge'
-              AND challenge_mode = ?
               AND challenge_date = ?
               AND status IN ('unread', 'accepted')
             LIMIT 1
         ");
-        $stmtExisting->execute([$authId, $receiverId, $receiverId, $authId, $mode, $date]);
-        if ($stmtExisting->fetch()) jsonError('A challenge for this mode already exists today', 409);
+        $stmtExisting->execute([$authId, $receiverId, $receiverId, $authId, $date]);
+        if ($stmtExisting->fetch()) jsonError('A challenge already exists today for this friend', 409);
 
-        $pdo->prepare("
-            INSERT INTO messages
-                (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date)
-            VALUES (?, ?, 'challenge', ?, ?, ?)
-        ")->execute([$authId, $receiverId, $mode, $score, $date]);
+        // challenge_filters is optional — gracefully ignored if column doesn't exist yet
+        $rawFilters  = trim($data['challenge_filters'] ?? '');
+        $filtersJson = $rawFilters ? $rawFilters : null;
+
+        try {
+            $pdo->prepare("
+                INSERT INTO messages
+                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters)
+                VALUES (?, ?, 'challenge', ?, ?, ?, ?)
+            ")->execute([$authId, $receiverId, $mode, $score, $date, $filtersJson]);
+        } catch (PDOException $e) {
+            // Fallback if challenge_filters column doesn't exist yet (migration not run)
+            $pdo->prepare("
+                INSERT INTO messages
+                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date)
+                VALUES (?, ?, 'challenge', ?, ?, ?)
+            ")->execute([$authId, $receiverId, $mode, $score, $date]);
+        }
 
         // XP Social Link : action 'challenge' (15 XP solo)
         try {
@@ -187,10 +202,18 @@ if ($method === 'PATCH') {
     $allowed = ['read', 'accepted', 'beaten', 'expired'];
     if (!in_array($status, $allowed, true)) jsonError('Invalid status');
 
-    $stmt = $pdo->prepare(
-        'SELECT * FROM messages WHERE id = ? AND (receiver_id = ? OR sender_id = ?) LIMIT 1'
-    );
-    $stmt->execute([$msgId, $authId, $authId]);
+    // 'beaten' : seul le receiver peut marquer le défi comme relevé
+    if ($status === 'beaten') {
+        $stmt = $pdo->prepare(
+            'SELECT * FROM messages WHERE id = ? AND receiver_id = ? LIMIT 1'
+        );
+        $stmt->execute([$msgId, $authId]);
+    } else {
+        $stmt = $pdo->prepare(
+            'SELECT * FROM messages WHERE id = ? AND (receiver_id = ? OR sender_id = ?) LIMIT 1'
+        );
+        $stmt->execute([$msgId, $authId, $authId]);
+    }
     $msg = $stmt->fetch();
     if (!$msg) jsonError('Message not found or unauthorized', 404);
 

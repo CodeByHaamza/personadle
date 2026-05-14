@@ -1,0 +1,242 @@
+/* challenge-notif.css — Animation notification de défi entrant (style Persona 5) */
+
+#cn-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#cn-overlay.cn--visible {
+  pointer-events: auto;
+}
+
+.cn-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.2s ease 0.15s;
+}
+
+#cn-overlay.cn--visible .cn-backdrop {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+/* ── Anneaux — z-index 1 → DERRIÈRE la scène (z-index 2) ── */
+.cn-rings {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cn-ring {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  animation: cnRing 0.72s ease-out forwards;
+}
+
+.cn-ring:nth-child(1) {
+  width: 200px; height: 200px;
+  border: 13px solid #e63946;
+  animation-delay: 0.18s;
+}
+.cn-ring:nth-child(2) {
+  width: 360px; height: 360px;
+  border: 15px solid #0d0d0d;
+  box-shadow: 0 0 0 5px #e63946;
+  animation-delay: 0.26s;
+}
+.cn-ring:nth-child(3) {
+  width: 560px; height: 560px;
+  border: 13px solid #e63946;
+  animation-delay: 0.34s;
+}
+.cn-ring:nth-child(4) {
+  width: 780px; height: 780px;
+  border: 11px solid #0d0d0d;
+  box-shadow: 0 0 0 4px #e63946;
+  animation-delay: 0.42s;
+}
+
+@keyframes cnRing {
+  0%   { transform: translate(-50%, -50%) scale(0.04); opacity: 1; }
+  55%  { opacity: 0.85; }
+  100% { transform: translate(-50%, -50%) scale(1);    opacity: 0; }
+}
+
+/* ── Flash rouge à l'impact ──────────────────────────────── */
+.cn-flash {
+  position: fixed;
+  inset: 0;
+  background: #e63946;
+  pointer-events: none;
+  z-index: 9997;
+  opacity: 0;
+  animation: cnFlash 0.22s ease-out 0.17s forwards;
+}
+
+@keyframes cnFlash {
+  0%   { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+/* ── Scène — z-index 2, devant les anneaux ───────────────── */
+.cn-scene {
+  z-index: 2;
+  position: relative;
+}
+
+/* ── Carte ───────────────────────────────────────────────── */
+.cn-card {
+  width: 300px;
+  background: #0a0a0a;
+  border: 2.5px solid #e63946;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 22px;
+  text-align: center;
+  animation: cnSlideIn 0.38s cubic-bezier(0.08, 0, 0.32, 0) forwards;
+  will-change: transform;
+}
+
+/* ── Bouton fermer — HAUT GAUCHE ──────────────────────────── */
+.cn-close {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  z-index: 10001;
+  transition: background 0.15s;
+  pointer-events: auto;
+  opacity: 0;
+  animation: cnFadeIn 0.2s ease 0.48s forwards;
+}
+.cn-close:hover { background: rgba(255, 255, 255, 0.22); }
+
+/* ── Avatar expéditeur ───────────────────────────────────── */
+.cn-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid #e63946;
+  box-shadow: 0 0 14px rgba(230, 57, 70, 0.45);
+  flex-shrink: 0;
+}
+
+/* ── Pseudo ──────────────────────────────────────────────── */
+.cn-pseudo {
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #e63946;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
+  max-width: 240px;
+}
+
+/* ── Message ─────────────────────────────────────────────── */
+.cn-message {
+  font-size: 0.85rem;
+  color: #f0f0f0;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Badge mode ──────────────────────────────────────────── */
+.cn-mode-badge {
+  background: #1a1a1a;
+  border: 1px solid #e63946;
+  border-radius: 20px;
+  padding: 4px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e63946;
+  font-family: 'Oswald', Arial, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── Score à battre ──────────────────────────────────────── */
+.cn-score {
+  font-size: 0.83rem;
+  color: #bbb;
+  margin: 0;
+}
+.cn-score strong {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+/* ── Séparateur ──────────────────────────────────────────── */
+.cn-divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid #2a2a2a;
+  margin: 2px 0;
+}
+
+/* ── Boutons Accepter / Refuser ──────────────────────────── */
+.cn-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.cn-btn {
+  flex: 1;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Oswald', Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+}
+.cn-btn:active { transform: scale(0.95); }
+
+.cn-btn--accept { background: #e63946; color: #fff; }
+.cn-btn--accept:hover { background: #c1121f; }
+
+.cn-btn--refuse { background: #2a2a2a; color: #888; border: 1px solid #3a3a3a; }
+.cn-btn--refuse:hover { background: #333; color: #ccc; }
+
+/* ── Keyframes ───────────────────────────────────────────── */
+@keyframes cnSlideIn {
+  0%   { transform: translateX(115vw); }
+  82%  { transform: translateX(-12px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes cnFadeIn {
+  to { opacity: 1; }
+}

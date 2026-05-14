@@ -53,8 +53,15 @@ desktop.ini
 .env.*
 .env.local
 .env.production
+!.env.example
 secrets.js
 config.local.js
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Backend PHP — credentials locaux (ne jamais committer)
+# ─────────────────────────────────────────────────────────────────────────────
+api/config.php
+.hostinger
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Bot Alibaba — script interne, token d'accès confidentiel
@@ -94,3 +101,24 @@ musicsMode/database/music/
 # pas nécessaires dans le dépôt public.
 # ─────────────────────────────────────────────────────────────────────────────
 PersonaDLE_Update_Documentation/
+!PersonaDLE_Update_Documentation/PersonaDLE 2.0/TEST_PLAN.md
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Graphify — graphe de connaissance généré automatiquement
+# Régénéré via `graphify claude install` + `/graphify` — inutile de versionner.
+# ─────────────────────────────────────────────────────────────────────────────
+graphify-out/
+.graphify_python
+.graphifyignore
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Outils de développement personnel (Claude Code, Superpowers)
+# ─────────────────────────────────────────────────────────────────────────────
+.claude/
+.superpowers/
+docs/superpowers/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Données personnelles de test
+# ─────────────────────────────────────────────────────────────────────────────
+personadle_profile.json

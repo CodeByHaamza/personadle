@@ -31,6 +31,12 @@ import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesMa
 
 const modeName = "Classic";
 
+/** Minimum attempts before the Hint button activates. */
+const HINT_THRESHOLD = 3;
+
+/** Minimum attempts before the Give-Up button activates. */
+const GIVE_UP_THRESHOLD = 8;
+
 /** All specific opus codes available in Classic mode. */
 const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P4D","P5","P5R","P5S","P5T","P5X","PQ","PQ2"];
 
@@ -322,7 +328,7 @@ function checkGuess(name, target, forceReveal = false) {
       }
     } else if (typeof value === "boolean" || typeof targetVal === "boolean") {
       cell.classList.add(value === targetVal ? "correct" : "wrong");
-      displayValue = value ? "Yes" : "No";
+      displayValue = value ? i18.t('ui.yes') : i18.t('ui.no');
     } else if (Array.isArray(targetVal)) {
       const guessArr = Array.isArray(value) ? value : [value];
       const intersection = guessArr.filter((v) => targetVal.includes(v));
@@ -523,8 +529,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   history.forEach((name) => checkGuess(name, target));
 
   updateCounters();
-  if (attempts >= 3) enableHintButton();
-  if (attempts >= 8) enableGiveUpButton();
+  if (attempts >= HINT_THRESHOLD) enableHintButton();
+  if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
 
   // ── Guess button ──
   guessButton.addEventListener("click", () => {
@@ -536,15 +542,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     history.push(guessName);
     localStorage.setItem("guessHistory", JSON.stringify(history));
     updateCounters();
-    if (attempts >= 3) enableHintButton();
-    if (attempts >= 8) enableGiveUpButton();
+    if (attempts >= HINT_THRESHOLD) enableHintButton();
+    if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
     checkGuess(guessName, target);
     textbar.value = "";
   });
 
-  // ── Give Up button (available after 8 attempts) ──
+  // ── Give Up button (available after GIVE_UP_THRESHOLD attempts) ──
   giveUpButton.addEventListener("click", () => {
-    if (gameOver || attempts < 8) return;
+    if (gameOver || attempts < GIVE_UP_THRESHOLD) return;
 
     if (target?.nom) checkGuess(target.nom, target, true);
 
@@ -576,9 +582,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById('victoryBox').style.display = 'block';
   });
 
-  // ── Hint button (available after 3 attempts) ──
+  // ── Hint button (available after HINT_THRESHOLD attempts) ──
   hintButton.addEventListener("click", () => {
-    if (attempts < 3) return;
+    if (attempts < HINT_THRESHOLD) return;
     if (target?.quote) {
       quoteHint.textContent = target.quote;
       quoteHint.style.display = "block";
@@ -615,8 +621,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     giveUpButton.style.cursor = "not-allowed";
     giveUpButton.style.pointerEvents = "auto";
     giveUpButton.style.opacity = "1";
-    giveUpCounter.textContent = "(0 / 8)";
-    hintCounter.textContent = "(0 / 3)";
+    giveUpCounter.textContent = `(0 / ${GIVE_UP_THRESHOLD})`;
+    hintCounter.textContent = `(0 / ${HINT_THRESHOLD})`;
     gameOver = false;
 
     filterCharacterPool();
@@ -662,12 +668,12 @@ function updateCounters() {
   const attempts = parseInt(localStorage.getItem("attempts")) || 0;
 
   if (hintCounter) {
-    hintCounter.textContent = `(${attempts} / 3)`;
-    hintCounter.classList.toggle("activated", attempts >= 3);
+    hintCounter.textContent = `(${attempts} / ${HINT_THRESHOLD})`;
+    hintCounter.classList.toggle("activated", attempts >= HINT_THRESHOLD);
   }
   if (giveUpCounter) {
-    giveUpCounter.textContent = `(${attempts} / 8)`;
-    giveUpCounter.classList.toggle("activated", attempts >= 8);
+    giveUpCounter.textContent = `(${attempts} / ${GIVE_UP_THRESHOLD})`;
+    giveUpCounter.classList.toggle("activated", attempts >= GIVE_UP_THRESHOLD);
   }
 }
 

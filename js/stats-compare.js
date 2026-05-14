@@ -5,6 +5,8 @@
  *   openCompareOverlay(friendId)  — opens the overlay for a given friend
  */
 
+import { COMPARE_PHRASES } from '../database/compare-phrases.js';
+
 const MODES = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
 const MODE_LABELS = {
   classic:      'Classic',
@@ -24,7 +26,7 @@ const COLOR_FRIEND = '#4488ff';
 
 export async function openCompareOverlay(friendId) {
   const api = window._personadleApi;
-  const t   = (k, fb) => window.i18n?.t?.(k) ?? fb;
+  const t   = (k, fb) => { const r = window.i18n?.t?.(k); return (r != null && r !== k) ? r : (fb ?? k); };
 
   document.getElementById('sc-overlay')?.remove();
 
@@ -143,7 +145,7 @@ function _populate(overlay, data, t) {
     overlay.querySelector('#sc-stats').classList.add('sc-stats--visible');
   }, 850);
   setTimeout(() => {
-    const phrase = _pickConclusion(me, friend, t);
+    const phrase = _pickConclusion(me, friend);
     overlay.querySelector('#sc-conclusion-text').innerHTML = phrase;
     overlay.querySelector('#sc-conclusion').classList.add('sc-conclusion--visible');
   }, 1100);
@@ -160,6 +162,14 @@ function _populate(overlay, data, t) {
       cdEl.classList.add('sc-cooldown--visible');
     }
     overlay.querySelector('.sc-close').classList.add('sc-close--visible');
+
+    // Rank-up animation fires after the overlay has fully settled
+    if (data.ranked_up) {
+      setTimeout(() => window._showSocialLinkRankUp?.(data.new_rank, null, {
+        friendAvatar: data.friend?.avatar_data,
+        friendPseudo: data.friend?.pseudo,
+      }), 700);
+    }
   }, 1300);
 }
 
@@ -296,30 +306,26 @@ function _drawRadar(canvas, meByMode, friendByMode) {
 // CONCLUSION PHRASES
 // ─────────────────────────────────────────────────────────────────────────────
 
-function _pickConclusion(me, friend, t) {
-  const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+function _pickConclusion(me, friend) {
+  const lang   = document.documentElement.lang || 'en';
+  const p      = COMPARE_PHRASES[lang] ?? COMPARE_PHRASES.en;
+  const rand   = (arr) => Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : '';
+  const myWr   = _globalWr(me);
+  const frWr   = _globalWr(friend);
+  const winner = myWr >= frWr ? me.pseudo : friend.pseudo;
+  const loser  = myWr >= frWr ? friend.pseudo : me.pseudo;
 
-  if (Math.random() < 0.12) {
-    const rares = t('compare.conclusion.rare', null);
-    if (Array.isArray(rares)) {
-      const myWr   = _globalWr(me);
-      const frWr   = _globalWr(friend);
-      const winner = myWr >= frWr ? me.pseudo : friend.pseudo;
-      const loser  = myWr >= frWr ? friend.pseudo : me.pseudo;
-      return _interpolate(rand(rares), me.pseudo, friend.pseudo, winner, loser);
-    }
+  if (Math.random() < 0.12 && p.rare?.length) {
+    return _interpolate(rand(p.rare), me.pseudo, friend.pseudo, winner, loser);
   }
 
-  const myWr = _globalWr(me);
-  const frWr = _globalWr(friend);
-  const gap  = myWr - frWr;
-
+  const gap = myWr - frWr;
   let phrase;
 
   if (Math.abs(gap) <= 5) {
-    phrase = rand(t('compare.conclusion.equal', ['You are equals.']));
+    phrase = rand(p.equal);
   } else if (gap > 5) {
-    phrase = rand(t('compare.conclusion.overall_win', ['You win!']));
+    phrase = rand(p.overall_win);
   } else {
     let worstMode = null, biggestGap = 0;
     MODES.forEach(mode => {
@@ -330,18 +336,17 @@ function _pickConclusion(me, friend, t) {
       const d     = frWrM - myWrM;
       if (d > biggestGap) { biggestGap = d; worstMode = mode; }
     });
-    if (worstMode && biggestGap > 0.15) {
-      const arr = t(`compare.conclusion.mode_lose.${worstMode}`, null);
-      phrase = Array.isArray(arr) ? rand(arr) : rand(t('compare.conclusion.overall_lose', ['You lose!']));
+    if (worstMode && biggestGap > 0.15 && p.mode_lose?.[worstMode]?.length) {
+      phrase = rand(p.mode_lose[worstMode]);
     } else {
-      phrase = rand(t('compare.conclusion.overall_lose', ['You lose!']));
+      phrase = rand(p.overall_lose);
     }
   }
 
   if (me.best_streak - friend.best_streak > 5 && Math.random() < 0.4) {
-    phrase = rand(t('compare.conclusion.streak_win', ['Your streak is better.']));
+    phrase = rand(p.streak_win);
   } else if (friend.best_streak - me.best_streak > 5 && Math.random() < 0.4) {
-    phrase = rand(t('compare.conclusion.streak_lose', ['Their streak is better.']));
+    phrase = rand(p.streak_lose);
   }
 
   return _interpolate(phrase, me.pseudo, friend.pseudo, me.pseudo, friend.pseudo);

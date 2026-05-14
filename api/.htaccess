@@ -1,0 +1,19 @@
+# Désactiver le listing de répertoire
+Options -Indexes
+
+# Bloquer l'accès direct aux fichiers internes (config, bootstrap)
+<FilesMatch "^(config|bootstrap)\.php$">
+    Require all denied
+</FilesMatch>
+
+# URL rewriting — supprimer l'extension .php
+RewriteEngine On
+
+# Laisser passer les fichiers et dossiers existants tels quels
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Si un fichier .php correspondant existe, réécrire vers lui
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+)$ $1.php [L,QSA]

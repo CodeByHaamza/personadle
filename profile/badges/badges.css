@@ -80,15 +80,181 @@
   font-size: 1.1em;
   color: #2ecc71;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
-/* === 🎖️ GRILLE BADGES === */
+.badges-search-wrap {
+  margin-bottom: 16px;
+}
+
+.badges-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  font-family: inherit;
+}
+
+.badges-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+  font-style: italic;
+}
+
+.badges-search-input:focus {
+  border-color: var(--accent, #e63946);
+  background: rgba(255,255,255,0.11);
+}
+
+/* === 📂 SECTIONS PAR CATÉGORIE === */
+
+/* Conteneur principal — remplace la grille plate */
+#badgesGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.badges-category-section {
+  /* chaque section a sa propre grille interne */
+}
+
+.badges-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 0;
+  border-radius: 10px;
+  background: rgba(255, 215, 0, 0.08);
+  border-left: 4px solid #ffd700;
+  cursor: pointer;
+  user-select: none;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.badges-category-header:hover {
+  background: rgba(255, 215, 0, 0.14);
+}
+
+.badges-category-title {
+  font-size: 1.05em;
+  font-weight: bold;
+  color: #ffd700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badges-category-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badges-category-count {
+  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.badges-category-chevron {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Collapsed state */
+.badges-category-section.collapsed .badges-category-chevron {
+  transform: rotate(-90deg);
+}
+
+/* Wrap for the slide animation */
+.badges-grid-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+  opacity: 1;
+}
+
+.badges-category-section.collapsed .badges-grid-wrap {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+/* Couleurs par catégorie */
+.badges-category-section[data-category="streak"] .badges-category-header {
+  border-left-color: #f97316;
+  background: rgba(249, 115, 22, 0.08);
+}
+.badges-category-section[data-category="streak"] .badges-category-header:hover {
+  background: rgba(249, 115, 22, 0.14);
+}
+.badges-category-section[data-category="streak"] .badges-category-title { color: #f97316; }
+
+.badges-category-section[data-category="event"] .badges-category-header {
+  border-left-color: #e67e22;
+  background: rgba(230, 126, 34, 0.08);
+}
+.badges-category-section[data-category="event"] .badges-category-header:hover {
+  background: rgba(230, 126, 34, 0.14);
+}
+.badges-category-section[data-category="event"] .badges-category-title { color: #e67e22; }
+
+.badges-category-section[data-category="secret"] .badges-category-header {
+  border-left-color: #e74c3c;
+  background: rgba(231, 76, 60, 0.08);
+}
+.badges-category-section[data-category="secret"] .badges-category-header:hover {
+  background: rgba(231, 76, 60, 0.14);
+}
+.badges-category-section[data-category="secret"] .badges-category-title { color: #e74c3c; }
+
+.badges-category-section[data-category="social"] .badges-category-header {
+  border-left-color: #2ecc71;
+  background: rgba(46, 204, 113, 0.08);
+}
+.badges-category-section[data-category="social"] .badges-category-header:hover {
+  background: rgba(46, 204, 113, 0.14);
+}
+.badges-category-section[data-category="social"] .badges-category-title { color: #2ecc71; }
+
+/* Light mode overrides */
+body:not(.darkmode) .badges-category-header { background: rgba(0, 0, 0, 0.04); }
+body:not(.darkmode) .badges-category-title { color: #b8860b; }
+body:not(.darkmode) .badges-category-count { color: #555; background: rgba(0,0,0,0.07); }
+body:not(.darkmode) .badges-category-chevron { color: rgba(0,0,0,0.4); }
+body:not(.darkmode) .badges-search-input { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.2); color: #111; }
+body:not(.darkmode) .badges-search-input::placeholder { color: rgba(0,0,0,0.4); }
+
+body:not(.darkmode) .badges-category-section[data-category="event"]  .badges-category-title { color: #c0650a; }
+body:not(.darkmode) .badges-category-section[data-category="secret"] .badges-category-title { color: #c0392b; }
+body:not(.darkmode) .badges-category-section[data-category="social"] .badges-category-title { color: #27ae60; }
+body:not(.darkmode) .badges-category-section[data-category="streak"] .badges-category-title { color: #c2620d; }
+
+/* === 🎖️ GRILLE BADGES (à l'intérieur de chaque section) === */
 .badges-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 15px;
-  padding: 10px 15px;
+  padding: 12px 4px 8px;
+  min-height: 0; /* requis pour l'animation grid-template-rows */
 }
 
 .badge-item {

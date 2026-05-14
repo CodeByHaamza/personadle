@@ -49,19 +49,22 @@ $offset = max(0,          (int) ($_GET['offset'] ?? 0));
 // Utilisateur connecté (pour son rang personnel)
 $myId = (int) ($_SESSION['user_id'] ?? 0);
 
+// Filtre amis (ignoré si non authentifié)
+$friendsOnly = (bool) ($_GET['friends_only'] ?? 0) && $myId > 0;
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CAS : EVER — lecture directe sur user_stats (rapide, précis)
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($period === 'ever') {
-    buildEverLeaderboard($pdo, $mode, $metric, $limit, $offset, $myId);
+    buildEverLeaderboard($pdo, $mode, $metric, $limit, $offset, $myId, $friendsOnly);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CAS : day / week / month — lecture depuis leaderboard_cache (cron horaire)
 // Fallback sur game_sessions si le cache est vide.
 // ═══════════════════════════════════════════════════════════════════════════════
-buildPeriodLeaderboard($pdo, $mode, $period, $metric, $limit, $offset, $myId);
+buildPeriodLeaderboard($pdo, $mode, $period, $metric, $limit, $offset, $myId, $friendsOnly);
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -69,10 +72,41 @@ buildPeriodLeaderboard($pdo, $mode, $period, $metric, $limit, $offset, $myId);
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Retourne la liste des IDs amis acceptés + $myId lui-même.
+ * Résultat déjà casté en int — utilisable directement dans IN (...).
+ */
+function getFriendIds(PDO $pdo, int $myId): array
+{
+    // Positional params — MySQL PDO ne supporte pas les named params répétés.
+    $stmt = $pdo->prepare("
+        SELECT CASE WHEN requester_id = ? THEN addressee_id ELSE requester_id END AS fid
+        FROM friendships
+        WHERE (requester_id = ? OR addressee_id = ?)
+          AND status = 'accepted'
+    ");
+    $stmt->execute([$myId, $myId, $myId]);
+    $ids   = array_map('intval', array_column($stmt->fetchAll(), 'fid'));
+    $ids[] = $myId;
+    return array_unique($ids);
+}
+
+/**
+ * Construit la clause SQL "AND u.id IN (...)" pour le filtre amis.
+ * Retourne '' si $friendsOnly est false, ou __EMPTY__ si l'utilisateur n'a aucun ami.
+ */
+function buildFriendsClause(PDO $pdo, bool $friendsOnly, int $myId): string
+{
+    if (!$friendsOnly || !$myId) return '';
+    $ids = getFriendIds($pdo, $myId);
+    if (empty($ids)) return '__EMPTY__';
+    return 'AND u.id IN (' . implode(',', $ids) . ')';
+}
+
+/**
  * Leaderboard "ever" depuis user_stats.
  * Agrège plusieurs modes si mode === 'all'.
  */
-function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit, int $offset, int $myId): never
+function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false): never
 {
     // Construction du SELECT selon la métrique
     switch ($metric) {
@@ -111,6 +145,12 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
     // Filtre mode
     $modeFilter = $mode === 'all' ? '' : 'AND us.mode = ' . $pdo->quote($mode);
 
+    // Filtre amis
+    $friendsFilter = buildFriendsClause($pdo, $friendsOnly, $myId);
+    if ($friendsFilter === '__EMPTY__') {
+        formatAndSend($pdo, [], $metric, $myId, $mode, 'ever', $limit, $offset, 0);
+    }
+
     $sql = "
         SELECT
             u.id,
@@ -126,6 +166,7 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
         LEFT JOIN profiles p ON p.user_id = u.id
         WHERE u.is_deleted = 0
         {$modeFilter}
+        {$friendsFilter}
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
         HAVING score IS NOT NULL AND score > 0
         ORDER BY score {$orderDir}, u.pseudo ASC
@@ -143,6 +184,7 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
             JOIN user_stats us ON us.user_id = u.id
             WHERE u.is_deleted = 0
             {$modeFilter}
+            {$friendsFilter}
             GROUP BY u.id
             HAVING score IS NOT NULL AND score > 0
         ) cnt
@@ -158,7 +200,7 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
  * Fallback transparent sur game_sessions si le cache est vide (premier démarrage
  * ou cron pas encore exécuté).
  */
-function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $metric, int $limit, int $offset, int $myId): never
+function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false): never
 {
     // ── Tentative lecture depuis leaderboard_cache ────────────────────────────
     $cacheStmt = $pdo->prepare("
@@ -183,13 +225,13 @@ function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $
     $cacheRows = $cacheStmt->fetchAll();
 
     if (!empty($cacheRows)) {
-        // Cache disponible — compter le total pour la pagination
-        $countStmt = $pdo->prepare("
-            SELECT COUNT(*) FROM leaderboard_cache
-            WHERE mode = :mode AND period = :period AND metric = :metric
-        ");
-        $countStmt->execute([':mode' => $mode, ':period' => $period, ':metric' => $metric]);
-        $total = (int) $countStmt->fetchColumn();
+        // Filtre amis sur les résultats du cache (post-filtrage en PHP, cache pas conçu pour ça)
+        if ($friendsOnly && $myId) {
+            $friendIds = getFriendIds($pdo, $myId);
+            $cacheRows = array_values(array_filter($cacheRows, fn($r) => in_array((int)$r['user_id'], $friendIds, true)));
+        }
+        $total = count($cacheRows);
+        $cacheRows = array_slice($cacheRows, $offset, $limit);
 
         // Reformater pour correspondre à la structure attendue par formatAndSend
         $rows = array_map(function ($r) {
@@ -210,14 +252,14 @@ function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $
 
     // ── Fallback : calcul live depuis game_sessions ───────────────────────────
     // (utilisé si le cron n'a pas encore tourné — ex: premier démarrage)
-    buildPeriodLeaderboardLive($pdo, $mode, $period, $metric, $limit, $offset, $myId);
+    buildPeriodLeaderboardLive($pdo, $mode, $period, $metric, $limit, $offset, $myId, $friendsOnly);
 }
 
 /**
  * Fallback : calcul leaderboard day/week/month directement sur game_sessions.
  * Utilisé quand leaderboard_cache est vide (cron pas encore exécuté).
  */
-function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, string $metric, int $limit, int $offset, int $myId): never
+function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false): never
 {
     // Calcul de la date de début de la fenêtre (Paris time)
     $tz  = new DateTimeZone('Europe/Paris');
@@ -238,7 +280,11 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
             jsonError('Unknown period', 400);
     }
 
-    $modeFilter = $mode === 'all' ? '' : 'AND gs.mode = ' . $pdo->quote($mode);
+    $modeFilter    = $mode === 'all' ? '' : 'AND gs.mode = ' . $pdo->quote($mode);
+    $friendsFilter = buildFriendsClause($pdo, $friendsOnly, $myId);
+    if ($friendsFilter === '__EMPTY__') {
+        formatAndSend($pdo, [], $metric, $myId, $mode, $period, $limit, $offset, 0);
+    }
 
     switch ($metric) {
         case 'wins':
@@ -277,6 +323,7 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
         WHERE gs.played_date >= ?
           AND u.is_deleted = 0
           {$modeFilter}
+          {$friendsFilter}
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
         HAVING score IS NOT NULL AND score > 0
         ORDER BY score DESC, u.pseudo ASC
@@ -296,6 +343,7 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
             WHERE gs.played_date >= ?
               AND u.is_deleted = 0
               {$modeFilter}
+              {$friendsFilter}
             GROUP BY u.id
             HAVING score IS NOT NULL AND score > 0
         ) cnt
@@ -326,17 +374,21 @@ function formatAndSend(PDO $pdo, array $rows, string $metric, int $myId, string 
             $myRank = ['rank' => $rank, 'score' => $score];
         }
 
-        $entries[] = [
+        $entry = [
             'rank'                => $rank,
             'user_id'             => (int) $r['id'],
             'pseudo'              => $r['pseudo'],
-            'friend_code'         => $r['friend_code'],
             'avatar_data'         => $r['avatar_data'],
             'avatar_border_color' => $r['avatar_border_color'] ?? '#ffffff',
             'selected_badges'     => json_decode($r['selected_badges'] ?? 'null') ?? [],
             'score'               => $score,
             'total_games'         => $r['total_games'] !== null ? (int) $r['total_games'] : null,
         ];
+        // friend_code is only exposed to authenticated users (prevents scraping)
+        if ($myId) {
+            $entry['friend_code'] = $r['friend_code'];
+        }
+        $entries[] = $entry;
     }
 
     jsonSuccess([

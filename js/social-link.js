@@ -18,7 +18,10 @@
 const _linkCache = new Map();
 
 /** Traduit une clé i18n ou renvoie le fallback. */
-function t(key, fallback) { return window.i18n?.t?.(key) ?? fallback; }
+function t(key, fallback) {
+  const v = window.i18n?.t?.(key);
+  return (v != null && v !== key) ? v : fallback;
+}
 
 // Rank names hardcoded (fixed game constants from social_link_ranks table)
 const _RANK_NAMES_EN = [

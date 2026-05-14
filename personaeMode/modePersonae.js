@@ -602,5 +602,3 @@ export function debugAllPersonae() {
   else console.log("🎉 No errors!");
   console.log("=== END DEBUG ===");
 }
-// Auto-run in dev to catch data issues
-debugAllPersonae();

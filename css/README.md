@@ -1,4 +1,10 @@
-# css/ — Architecture des styles
+<div align="center">
+
+# 🎨 Architecture des styles
+
+> **Global d'abord, local ensuite. Dark mode, responsive, animations — tout commence ici.**
+
+</div>
 
 Ce dossier contient les feuilles de style globales de Personadle.
 Chaque mode de jeu possède en plus son propre CSS local dans son dossier.

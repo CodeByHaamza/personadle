@@ -100,6 +100,18 @@
   cursor: default;
   pointer-events: none;
 }
+.sl-action-btn--locked {
+  opacity: 0.45;
+  cursor: default;
+  filter: grayscale(0.4);
+  border-style: dashed;
+}
+.sl-action-btn--locked:hover {
+  background: transparent;
+  color: var(--accent, #e63946);
+  transform: none;
+  opacity: 0.55;
+}
 
 /* Rang 10 — True Confidant */
 .sl-rank-10 .sl-bar-fill {

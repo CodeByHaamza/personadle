@@ -128,6 +128,11 @@ export const portraitsMapSilhouette = {
    "Maya Amano": "Maya_A",
    "Joker": "JOKER",
    "Izanami": "Izanami",
+
+  // Entités / Boss finaux
+  "Nyx": "Nyx",
+  "Yaldabaoth": "Yaldabaoth",
+
   "Erina": "Erina",
   "Toshiro Kasukabe": "Toshiro",
 

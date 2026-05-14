@@ -1,4 +1,10 @@
-# assets/ — Ressources visuelles et sonores
+<div align="center">
+
+# 🖼️ Assets
+
+> **Sons, boutons localisés, icônes — les ressources partagées de l'interface.**
+
+</div>
 
 Ce dossier contient les **ressources statiques partagées** entre toutes les pages : boutons d'interface, icônes de réseaux sociaux et effets sonores.
 

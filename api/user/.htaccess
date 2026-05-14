@@ -1,0 +1,27 @@
+Options -Indexes
+
+RewriteEngine On
+
+# /api/user/42/stats   → stats.php
+RewriteRule ^[0-9]+/stats$   stats.php   [L,QSA]
+
+# /api/user/migrate    → migrate.php
+RewriteRule ^migrate$        migrate.php [L,QSA]
+
+# /api/user/public     → public.php  (GET par friend_code ou pseudo — public)
+RewriteRule ^public$         public.php  [L,QSA]
+
+# /api/user/search     → search.php  (GET ?q= — recherche pseudo/code)
+RewriteRule ^search$         search.php  [L,QSA]
+
+# /api/user/list       → list.php   (GET ?q=&limit=&offset= — browse all players)
+RewriteRule ^list$           list.php    [L,QSA]
+
+# /api/user/compare    → compare.php  (GET ?friend_id= — stats comparison + XP)
+RewriteRule ^compare$        compare.php [L,QSA]
+
+# /api/user/recover-streak → recover-streak.php (POST — restauration streak Jack Frost)
+RewriteRule ^recover-streak$ recover-streak.php [L,QSA]
+
+# /api/user/42         → index.php  (GET, PATCH, DELETE)
+RewriteRule ^[0-9]+$         index.php   [L,QSA]

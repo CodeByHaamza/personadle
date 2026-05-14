@@ -83,29 +83,35 @@
   50%       { transform: scale(1.3); opacity: 0.7; }
 }
 
-/* ── Bouton Settings ⚙ dans le header ── */
+/* ── Séparateur vertical dans .darkmode-toggle ── */
+.dm-sep {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.25);
+  flex-shrink: 0;
+}
+
+/* ── Bouton Settings ⚙ dans .darkmode-toggle ── */
 .profile-settings-btn {
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  transform: translateY(-50%);
   background: none;
-  border: 1.5px solid var(--border, #ececec);
+  border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 1.1rem;
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
   cursor: pointer;
-  color: var(--text-muted, #888);
-  transition: color 0.15s, background 0.15s, transform 0.2s;
+  color: rgba(255,255,255,0.8);
+  transition: color 0.15s, transform 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
 }
 .profile-settings-btn:hover {
-  color: var(--accent, #e63946);
-  background: rgba(230, 57, 70, 0.1);
-  transform: translateY(-50%) rotate(30deg);
+  color: #fff;
+  transform: rotate(30deg);
 }
 
 /* Ligne décorative rouge sous le titre */
@@ -274,6 +280,43 @@
 .btn-success:hover {
   background: #218838;
   box-shadow: 0 5px 14px rgba(42, 157, 74, 0.4);
+}
+
+/* ── Save button — caché par défaut, visible uniquement si changements détectés ── */
+#saveAndRefreshBtn {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transition:
+    max-height  0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity     0.3s ease 0.05s,
+    padding     0.3s ease,
+    margin      0.3s ease;
+}
+
+#saveAndRefreshBtn.btn-dirty {
+  max-height: 60px;
+  padding: 9px 18px;
+  margin-bottom: 8px;
+  opacity: 1;
+  pointer-events: auto;
+  animation: saveDirtyGlow 2.5s ease-in-out infinite;
+}
+
+#saveAndRefreshBtn.btn-saving {
+  animation: none;
+  pointer-events: none;
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@keyframes saveDirtyGlow {
+  0%, 100% { box-shadow: 0 3px 10px rgba(42, 157, 74, 0.3); }
+  50%      { box-shadow: 0 0 0 3px rgba(42, 157, 74, 0.25), 0 0 22px rgba(42, 157, 74, 0.65); }
 }
 
 /* Auth placeholder */
@@ -2731,6 +2774,21 @@ body.darkmode .crop-zoom-label { color: #444; }
 }
 .auth-field input:focus { border-color: var(--accent); }
 
+.auth-field--import {
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: 2px dashed rgba(var(--accent-rgb), 0.25);
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), 0.03);
+}
+.auth-import-input {
+  border: none !important;
+  background: none !important;
+  padding: 4px 0 0 !important;
+  font-size: 0.88em;
+  cursor: pointer;
+}
+
 .auth-error {
   margin: 0;
   padding: 8px 12px;
@@ -2962,7 +3020,7 @@ body.darkmode .vb-code { background: rgba(255, 255, 255, 0.08); }
   max-width: 280px;
   border-radius: 8px;
   display: block;
-  margin: 6px auto 0;
+  margin: 6px auto 16px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.5);
 }
 
@@ -3158,211 +3216,205 @@ body.darkmode .vb-code { background: rgba(255, 255, 255, 0.08); }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🎴 Calling Cards (Titres visuels)
+   🏅 TITLES MODAL — classes préfixées tm- pour éviter tout conflit
    ═══════════════════════════════════════════════════════════════════════════ */
-.titles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
-}
 
-.title-card {
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  aspect-ratio: 16/4;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: border-color 0.2s, transform 0.15s;
-}
-
-.title-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.title-card.locked img { filter: brightness(0.25) blur(1px); }
-
-.title-card.locked { cursor: not-allowed; }
-
-.title-card.unlocked:hover { border-color: var(--accent); transform: scale(1.02); }
-
-.title-card.equipped { border-color: #ffd700; box-shadow: 0 0 12px rgba(255,215,0,0.5); }
-
-.title-lock-overlay {
-  position: absolute;
+/* Overlay — sélecteurs ID + classe pour compatibilité toutes versions HTML */
+.titles-overlay,
+#titlesModalOverlay {
+  position: fixed;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  color: rgba(255,255,255,0.7);
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
 }
+.titles-overlay.hidden,
+#titlesModalOverlay.hidden { display: none; }
 
-.title-equipped-badge {
-  position: absolute;
-  bottom: 4px;
-  right: 8px;
-  background: rgba(0,0,0,0.7);
-  color: #ffd700;
-  font-size: 0.65rem;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.equipped-title-img {
-  width: 100%;
-  border-radius: 8px;
-  display: block;
-}
-
-@media (max-width: 480px) {
-  .titles-grid { grid-template-columns: 1fr; }
-}
-
-/* ── Titles Modal ────────────────────────────────────────────────────────── */
+/* Boîte modale — sélecteurs ID + classe pour compatibilité toutes versions HTML */
+.titles-modal,
 #titlesModal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(20, 20, 20, 0.98);
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-  max-width: 900px;
-  width: 92%;
+  z-index: 10000;
+  width: 90%;
+  max-width: 880px;
   max-height: 82vh;
   overflow-y: auto;
   overflow-x: hidden;
-  z-index: 10000;
+  background: rgba(20, 20, 20, 0.98);
   border: 2px solid #444;
+  border-radius: 20px;
+  padding: 28px 28px 32px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+  color: #fff;
+  font-family: inherit;
 }
-
+.titles-modal.hidden,
 #titlesModal.hidden { display: none; }
 
-/* ── Titles modal — image-based calling card grid ────────────────── */
+/* En-tête de la modale */
+.titles-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.titles-modal-title {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #ffd700;
+}
+.titles-modal-close {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.titles-modal-close:hover { background: #e74c3c; }
 
-.titles-modal-grid {
+/* Grille des cartes */
+.titles-grid-modal {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 16px;
-  margin-top: 14px;
 }
 
-.title-item {
+/* ── Carte individuelle ── */
+.tm-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(40, 40, 40, 0.9);
   border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.08);
+  border: 2px solid rgba(255, 255, 255, 0.07);
   overflow: hidden;
-  cursor: default;
-  aspect-ratio: 16 / 9;
-  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-  background: #111;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.tm-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
-.title-item img {
+/* Image 16:9 */
+.tm-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #0a0a0a;
+  flex-shrink: 0;
+}
+.tm-img-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: filter 0.2s, opacity 0.2s;
-  border-radius: 10px;
+  transition: filter 0.25s;
 }
 
-.title-item.locked img {
-  filter: grayscale(1) brightness(0.35);
+/* État verrouillé */
+.tm-card.tm-locked .tm-img-wrap img {
+  filter: grayscale(1) brightness(0.25);
+}
+.tm-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  pointer-events: none;
 }
 
-.title-item.unlocked {
-  cursor: pointer;
-}
-
-.title-item.unlocked:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255,255,255,0.35);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-}
-
-.title-item.equipped {
+/* Titre équipé */
+.tm-card.tm-equipped {
   border-color: #ffd700;
-  box-shadow: 0 0 18px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
 }
-
-.title-equipped-check {
+.tm-badge-equipped {
   position: absolute;
   top: 7px;
-  right: 9px;
-  color: #ffd700;
-  font-size: 1.1rem;
+  right: 8px;
+  background: #ffd700;
+  color: #000;
+  font-size: 0.6rem;
   font-weight: 900;
-  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+  padding: 3px 8px;
+  border-radius: 999px;
   z-index: 2;
+  pointer-events: none;
 }
 
-/* Rarity tag — used inside tooltip only */
-.title-rarity-tag {
-  font-size: 0.58rem;
+/* Zone texte sous l'image */
+.tm-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 12px 12px;
+}
+.tm-name {
+  font-size: 0.87rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+}
+.tm-cond {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.4;
+}
+
+/* Pastille rareté */
+.tm-rarity {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.57rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   padding: 2px 7px;
   border-radius: 999px;
   background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.55);
+}
+.tm-rarity[data-rarity="rare"]      { background: rgba(96,165,250,0.2);  color: #60a5fa; }
+.tm-rarity[data-rarity="epic"]      { background: rgba(192,132,252,0.2); color: #c084fc; }
+.tm-rarity[data-rarity="legendary"] { background: rgba(251,191,36,0.2);  color: #fbbf24; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .titles-grid-modal { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .titles-modal { padding: 18px 14px 22px; }
+}
+@media (max-width: 380px) {
+  .titles-grid-modal { grid-template-columns: 1fr; }
 }
 
-.title-rarity-tag[data-rarity="rare"]      { background: rgba(96,165,250,0.2); color: #60a5fa; }
-.title-rarity-tag[data-rarity="epic"]      { background: rgba(192,132,252,0.2); color: #c084fc; }
-.title-rarity-tag[data-rarity="legendary"]{ background: rgba(251,191,36,0.2);  color: #fbbf24; }
-
-/* Hover tooltip (name + condition) */
-.title-tooltip {
-  visibility: hidden;
-  opacity: 0;
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(15, 15, 15, 0.97);
-  border: 1px solid #555;
-  border-radius: 10px;
-  padding: 10px 12px;
-  width: 200px;
-  z-index: 200;
-  pointer-events: none;
-  transition: opacity 0.15s;
-  text-align: left;
-  font-size: 0.78rem;
-  line-height: 1.5;
-}
-
-.title-item:hover .title-tooltip {
-  visibility: visible;
-  opacity: 1;
-}
-
-.title-tooltip strong { color: #ffd700; display: block; margin-bottom: 4px; }
-.title-tooltip .tt-condition { color: rgba(255,255,255,0.8); }
-
-/* Preview block in the card */
-.titles-preview {
-  min-height: 28px;
-  margin-bottom: 10px;
-  font-size: 0.82rem;
-  color: rgba(255,255,255,0.6);
-}
-
-.titles-preview-equipped {
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  font-size: 0.82rem;
-}
-
-body.darkmode #titlesModal { background: rgba(10,10,10,0.99); }
+/* ── Alias pour compatibilité cache SW (anciennes classes) ── */
+.title-item { display: flex; flex-direction: column; background: rgba(40,40,40,0.9);
+  border-radius: 12px; border: 2px solid rgba(255,255,255,0.07); overflow: hidden;
+  cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+.title-item:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.22); }
+.title-img-wrap { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: #0a0a0a; }
+.title-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.title-item.locked .title-img-wrap img { filter: grayscale(1) brightness(0.25); }
+.title-item.equipped { border-color: #ffd700; box-shadow: 0 0 16px rgba(255,215,0,0.4); }
+.title-card-info { display: flex; flex-direction: column; gap: 5px; padding: 10px 12px 12px; }
+.title-card-name { font-size: 0.87rem; font-weight: 700; color: #fff; }
+.title-card-cond { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
 
 .view-empty-state {
   font-size: 0.82rem;

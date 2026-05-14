@@ -819,4 +819,3 @@ export function debugAllMusic() {
   if (errors.length) console.log(errors.join("\n"));
   else               console.log("🎉 No missing titles!");
 }
-debugAllMusic();

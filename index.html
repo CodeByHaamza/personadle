@@ -448,7 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
   <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
 </a>
 <a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
-  <img src="./assets/buttons/kofi.svg" alt="Twitter" width="30" height="30" />
+  <img src="./assets/buttons/kofi.svg" alt="Ko-fi" width="30" height="30" />
 </a>
 </div>
 
@@ -461,6 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <p>
   <span data-i18n="index.disclaimer">Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders.</span>
   <a href="./privacy.html" data-i18n="index.legal_link">Privacy &amp; Legal</a> |
+  <a href="./faq.html" data-i18n="faq.footer_link">FAQ</a> |
   <a href="https://forms.gle/SJeKi7cyUjRyp1vX8" target="_blank" data-i18n="index.feedback_link" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.reportSubmitted){p.reportSubmitted=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">📝 Suggestions & Bug Report</a>
 </p>
 </footer>
@@ -521,6 +522,82 @@ body.darkmode .chibi-deco {
 
     <!-- ── Corps scrollable : accordion ── -->
     <div class="news-modal-body">
+
+<!-- ── Version 2.0 — Major Update ── -->
+<div class="version-item v2-theme">
+  <div class="version-header">
+
+    <!-- Orbs animés (arrière-plan, ne bloquent pas le texte) -->
+    <div class="v2-orbs-bg" aria-hidden="true">
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+      <span class="v2-orb"></span>
+    </div>
+
+    <!-- Icône Sophia + titre -->
+    <div class="v2-header-inner">
+      <img src="img/Sophia_icon.webp" class="v2-sophia" alt="Sophia">
+      <div>
+        <div class="version-title">🚀 Version 2.0 — Major Update</div>
+        <div class="version-date">May 2026</div>
+      </div>
+    </div>
+
+    <span class="version-arrow">▼</span>
+  </div>
+
+  <div class="version-content">
+
+    <!-- EN -->
+    <div data-i18n-block="en">
+      <ul>
+        <li>☁️ <strong>Full Backend:</strong> PHP 8.3 + MariaDB — 20-table schema, REST API, offline-first cloud sync with auto-retry.</li>
+        <li>👥 <strong>Friends & Social Link:</strong> Friend system with search, requests &amp; online status. Social Link ranks 1-10 (Stranger → True Confidant) with XP, mutual bonuses, and golden halo effect at rank 10.</li>
+        <li>⚔️ <strong>Daily Challenges:</strong> Challenge friends to any mode — receive a banner in-game, compare results, earn Social Link XP.</li>
+        <li>🏆 <strong>Leaderboard:</strong> Rankings by mode, period (week / month / all-time) and metric — Global or Friends scope, with your personal rank always visible.</li>
+        <li>🎖️ <strong>60+ Badges & Titles:</strong> Server-side unlock verification, event codes, 4 rarity tiers. Equip one title under your pseudo.</li>
+        <li>🔔 <strong>Notifications:</strong> Challenge results, rank-ups, friend requests — with 3 animation styles (Calling Card 🃏 · P4 TV 📺 · P3 Evoker 🔫).</li>
+        <li>🖼️ <strong>Profile Card Export:</strong> Share a PNG of your profile — 8 themes, 25 wallpapers, one click to X / Discord / Email.</li>
+        <li>🌐 <strong>5 Languages:</strong> EN · FR · ES · DE · IT — 760 keys each, auto-detected from your browser.</li>
+        <li>🛡️ <strong>Admin Panel:</strong> User moderation (ban, lock), event codes CRUD, stats dashboard.</li>
+      </ul>
+      <div class="pdf-container">
+        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html" target="_blank" class="see-more-btn v2-btn">
+          See full Changelog
+        </a>
+      </div>
+    </div>
+
+    <!-- FR -->
+    <div data-i18n-block="fr">
+      <ul>
+        <li>☁️ <strong>Backend complet :</strong> PHP 8.3 + MariaDB — schéma 20 tables, API REST, sync cloud offline-first avec réessai automatique.</li>
+        <li>👥 <strong>Amis & Social Link :</strong> Système d'amis avec recherche, demandes &amp; statut en ligne. Social Link rangs 1-10 (Stranger → True Confidant) avec XP, bonus mutuels et halo doré au rang 10.</li>
+        <li>⚔️ <strong>Défis quotidiens :</strong> Défie tes amis dans n'importe quel mode — bandeau actif en jeu, comparaison des résultats, XP Social Link.</li>
+        <li>🏆 <strong>Classements :</strong> Rankings par mode, période (semaine / mois / all-time) et métrique — scope Global ou Amis, avec ta position toujours affichée.</li>
+        <li>🎖️ <strong>60+ Badges & Titres :</strong> Déblocage vérifié côté serveur, codes événement, 4 niveaux de rareté. Équipe un titre sous ton pseudo.</li>
+        <li>🔔 <strong>Notifications :</strong> Résultats de défis, rang-ups, demandes d'amis — avec 3 styles d'animation (Calling Card 🃏 · TV P4 📺 · Evoker P3 🔫).</li>
+        <li>🖼️ <strong>Export Carte Profil :</strong> Partage un PNG de ton profil — 8 thèmes, 25 fonds d'écran, en un clic vers X / Discord / Email.</li>
+        <li>🌐 <strong>5 Langues :</strong> EN · FR · ES · DE · IT — 760 clés chacune, détectées automatiquement depuis ton navigateur.</li>
+        <li>🛡️ <strong>Panneau Admin :</strong> Modération utilisateurs (ban, verrou pseudo), CRUD codes événement, tableau de bord stats.</li>
+      </ul>
+      <div class="pdf-container">
+        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html" target="_blank" class="see-more-btn v2-btn">
+          Voir le Changelog complet
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- ── /Version 2.0 ── -->
 
 <div class="version-item cny-theme">
         <div class="version-header">

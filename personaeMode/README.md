@@ -1,8 +1,12 @@
-# personaeMode/ — Mode Personae
+<div align="center">
 
-Le mode Personae propose de **deviner une Persona** (l'esprit invoqué par les protagonistes) plutôt qu'un personnage humain. Le joueur voit l'image de la Persona et doit la reconnaître.
+# 🃏 Mode Personae
 
-![Aperçu du mode Personae](../img/preview/preview_personae.png)
+<img src="../img/preview/preview_personae.png" alt="Aperçu du mode Personae" width="700">
+
+> **Ce n'est pas le joueur qu'on cherche — c'est l'entité qu'il invoque.**
+
+</div>
 
 ---
 
@@ -13,6 +17,43 @@ Le mode Personae propose de **deviner une Persona** (l'esprit invoqué par les p
 3. Pas de tableau de comparaison — la mécanique est proche du mode Silhouette mais sans le masquage.
 4. Après 3 mauvaises réponses, le bouton **Abandonner** se déverrouille.
 5. Les **Personas Picaro** (variantes noires exclusives aux jeux crossover) sont incluses.
+
+---
+
+## 🃏 Personas vs Personnages — quelle différence ?
+
+Dans la saga Persona, chaque protagoniste invoque une entité spirituelle appelée **Persona** — une manifestation de sa psyché, souvent inspirée de la mythologie ou du folklore mondial.
+
+| | Personnage | Persona |
+|---|---|---|
+| **Exemple** | Ryuji Sakamoto | Captain Kidd |
+| **Ce qu'il est** | Un humain du groupe | L'esprit invoqué par Ryuji |
+| **Mode concerné** | Mode Classique, Emoji, Silhouette | **Mode Personae** |
+| **Identificateur** | Nom, arcane, rôle, âge… | Artwork officiel de l'entité |
+
+> En mode Personae, on cherche **l'entité**, pas son porteur. Captain Kidd est la bonne réponse, pas Ryuji.
+
+---
+
+## 🖤 Personas Picaro — les variantes corrompues
+
+Les **Personas Picaro** sont des versions sombres et altérées de Personas iconiques, apparues dans les jeux crossover (*Persona Q2*, *Persona 5 Royal*). Elles se distinguent par leur palette de couleurs inversée ou noircie.
+
+| Persona Picaro | Persona d'origine | Porteur d'origine |
+|---|---|---|
+| Arsène Picaro | Arsène | Joker *(P5R)* |
+| Orpheus Picaro | Orpheus | Makoto Yuki *(P3)* |
+| Izanagi Picaro | Izanagi | Yu Narukami *(P4G)* |
+| Kaguya Picaro | Kaguya | Kasumi Yoshizawa *(P5R)* |
+| Ariadne Picaro | Ariadne | Rei *(PQ)* |
+| Asterios Picaro | Asterios | Kou *(PQ)* |
+| Athena Picaro | Athena | Aigis *(P3)* |
+| Messiah Picaro | Messiah | Makoto Yuki *(P3)* |
+| Thanatos Picaro | Thanatos | Makoto Yuki *(P3)* |
+| Magatsu-Izanagi Picaro | Magatsu-Izanagi | Adachi *(P4G)* |
+| Tsukuyomi Picaro | Tsukuyomi | Marie *(P4G)* |
+
+> **Astuce** : Les Picaro partagent la silhouette de leur Persona d'origine mais avec des couleurs inversées. Chercher la forme, pas la couleur.
 
 ---
 
@@ -27,7 +68,7 @@ personaeMode/
     ├── personaeCharacters.js    ← liste des Personas disponibles
     ├── persona.js               ← données complètes des Personas
     ├── portraitsMapPersonae.js  ← correspondance nom → image
-    └── img/                     ← artworks des Personas
+    └── img/                     ← artworks des Personas (WebP optimisé)
 ```
 
 ---

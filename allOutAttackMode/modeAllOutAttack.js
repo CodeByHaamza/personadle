@@ -174,7 +174,7 @@ function loadImageSafely(gifElement, src, onLoadCallback) {
     cleanup();
     console.warn(`Timeout loading: ${src}`);
     gifElement.src = "../img/loading.gif";
-  }, 5000);
+  }, IMAGE_LOAD_TIMEOUT_MS);
 
   tempImg.src = src;
 }
@@ -202,6 +202,18 @@ const AOA_BY_NAME = new Map(aoaCharacters.map((c) => [c.nom, c]));
 
 const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
 let sessionStartTime = Date.now();
+
+/** Minimum attempts before the Give-Up button activates. */
+const GIVE_UP_THRESHOLD = 5;
+
+/** Initial CSS blur level (px) applied to the All-Out Attack GIF. */
+const INITIAL_BLUR = 20;
+
+/** Blur decreases by this amount per wrong guess (px). */
+const BLUR_STEP = 3;
+
+/** Timeout (ms) before giving up on a slow image load. */
+const IMAGE_LOAD_TIMEOUT_MS = 5000;
 
 /** All specific opus codes available in AllOutAttack mode. */
 const ALL_OPUS = ["P3", "P3FES", "P3P", "P5", "P5R", "P5X"];
@@ -438,7 +450,7 @@ function handleGuess() {
     showWrongMini(`./database/img/${imageName}.webp`, guess, document.getElementById("wrongGuessList"));
     removeFromAutocomplete(guess);
 
-    const blurLevel = Math.max(20 - attempts * 3, 0);
+    const blurLevel = Math.max(INITIAL_BLUR - attempts * BLUR_STEP, 0);
     document.getElementById("aoaGif").style.filter = `blur(${blurLevel}px)`;
     input.value = "";
   }
@@ -446,7 +458,7 @@ function handleGuess() {
 
 /** Give Up: reveals the GIF and shows the victory box as a defeat screen. */
 function giveUp() {
-  if (attempts < 5 || gameOver) return;
+  if (attempts < GIVE_UP_THRESHOLD || gameOver) return;
   document.getElementById("aoaGif").style.filter = "none";
   localStorage.setItem("aoaForceReveal", "true");
   showVictoryBox(target, true);
@@ -501,7 +513,7 @@ function resetGame(random = false) {
 
   const imageName = portraitsMap[target] || target.split(" ")[0];
   const newSrc = cdn("allOutAttack", imageName);
-  loadImageSafely(gifElement, newSrc, () => { gifElement.style.filter = "blur(20px)"; });
+  loadImageSafely(gifElement, newSrc, () => { gifElement.style.filter = `blur(${INITIAL_BLUR}px)`; });
 
   // Background preload of next characters
   setTimeout(() => smartPreload(personas, "low"), 800);
@@ -534,12 +546,12 @@ function updateGiveUpCounter() {
   const counter = document.getElementById("giveUpCounter");
   const btn = document.getElementById("giveUpButton");
   if (counter) {
-    counter.textContent = `(${attempts} / 5)`;
-    counter.classList.toggle("activated", attempts >= 5);
+    counter.textContent = `(${attempts} / ${GIVE_UP_THRESHOLD})`;
+    counter.classList.toggle("activated", attempts >= GIVE_UP_THRESHOLD);
   }
   if (btn) {
-    btn.disabled = attempts < 5;
-    btn.style.cursor = attempts >= 5 ? "pointer" : "not-allowed";
+    btn.disabled = attempts < GIVE_UP_THRESHOLD;
+    btn.style.cursor = attempts >= GIVE_UP_THRESHOLD ? "pointer" : "not-allowed";
   }
 }
 
@@ -700,7 +712,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const imageName = portraitsMap[target] || target.split(" ")[0];
     gifElement.style.filter = "none";
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
-      gifElement.style.filter = "blur(20px)";
+      gifElement.style.filter = `blur(${INITIAL_BLUR}px)`;
     });
 
     attempts = 0;
@@ -735,7 +747,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const imageName = portraitsMap[target] || target.split(" ")[0];
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
-      gifElement.style.filter = gameOver ? "none" : `blur(${Math.max(20 - attempts * 3, 0)}px)`;
+      gifElement.style.filter = gameOver ? "none" : `blur(${Math.max(INITIAL_BLUR - attempts * BLUR_STEP, 0)}px)`;
     });
 
     updateGiveUpCounter();
@@ -750,7 +762,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    if (attempts >= 5) {
+    if (attempts >= GIVE_UP_THRESHOLD) {
       document.getElementById("giveUpButton").disabled = false;
       document.getElementById("giveUpButton").style.cursor = "pointer";
     }
@@ -759,7 +771,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const imageName = portraitsMap[target] || target.split(" ")[0];
     gifElement.style.filter = "none";
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
-      gifElement.style.filter = "blur(20px)";
+      gifElement.style.filter = `blur(${INITIAL_BLUR}px)`;
     });
     localStorage.setItem("aoaTarget", target);
     localStorage.setItem("aoaAttempts", 0);

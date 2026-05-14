@@ -664,17 +664,18 @@ function renderStats() {
 
   statsContainer.innerHTML = regularHTML + streakHTML;
 
-  // Bouton "Restaurer" si la streak a été brisée et qu'une récupération est disponible
-  if ((s.streak || 0) === 0 || (s.streak || 0) === 1) {
-    if (canRecover()) {
-      const streakEl = statsContainer.querySelector('.stat-streak');
-      if (streakEl) {
-        const btn = document.createElement('button');
-        btn.className   = 'sr-restore-btn';
-        btn.textContent = '🔥 Restore';
-        btn.addEventListener('click', () => showStreakRecoveryMenu());
-        streakEl.querySelector('.stat-body')?.appendChild(btn);
-      }
+  // Streak à 0 : rendre l'élément cliquable pour ouvrir Jack Frost si récupération disponible
+  if ((s.streak || 0) === 0 && canRecover()) {
+    const streakEl = statsContainer.querySelector('.stat-streak');
+    if (streakEl) {
+      streakEl.style.cursor = 'pointer';
+      streakEl.title = '🔥 Click to restore your streak';
+      streakEl.addEventListener('click', () => showStreakRecoveryMenu());
+      const btn = document.createElement('button');
+      btn.className   = 'sr-restore-btn';
+      btn.textContent = '🔥 Restore';
+      btn.addEventListener('click', (e) => { e.stopPropagation(); showStreakRecoveryMenu(); });
+      streakEl.querySelector('.stat-body')?.appendChild(btn);
     }
   }
 }
@@ -2164,7 +2165,7 @@ const UNLOCKABLE_WALLPAPERS = [
     name: "Madarame's Palace",
     src: '../profile/Wallpaper/unlockable/madarame_wallpaper.webp',
     condition: 'Set a custom avatar AND have at least 1 friend',
-    check: (p, stats, friendCount) => !!p?.avatarData && friendCount >= 1,
+    check: (p, stats, friendCount) => !!p?.avatar && friendCount >= 1,
   },
   {
     id: 'yukiko_dungeons',
@@ -2297,7 +2298,7 @@ async function initUnlockableWallpapers() {
 // Local title definitions — always available, API enriches with user's unlock status
 const TITLES_LOCAL = [
   { slug: 'velvet_room_thou_art_i',    name: 'Thou Art I',              rarity: 'legendary', condition_type: 'badges_count',       condition_value: 20  },
-  { slug: 'joker_looking_cool',        name: 'Looking Cool',            rarity: 'legendary', condition_type: 'leaderboard_top',    condition_value: 100 },
+  { slug: 'joker_looking_cool',        name: 'Looking Cool',            rarity: 'legendary', condition_type: 'joker_profile',      condition_value: 0,   is_hidden: true },
   { slug: 'makoto_yuki_memento_mori',  name: 'Memento Mori',            rarity: 'epic',      condition_type: 'unique_days',        condition_value: 100 },
   { slug: 'akechi_pancakes',           name: 'Pancakes?',               rarity: 'epic',      condition_type: 'weekly_clean_modes', condition_value: 3   },
   { slug: 'yu_reach_out_to_the_truth', name: 'Reach Out to the Truth',  rarity: 'epic',      condition_type: 'all_modes_won',      condition_value: 1   },
@@ -2432,6 +2433,12 @@ async function checkAndUnlockTitles() {
       case 'emoji_p2_wins':      met = (profile.emojiP2Wins || 0) >= title.condition_value; break;
       case 'leaderboard_top':    met = (profile.bestLeaderboardRank || 9999) <= title.condition_value; break;
       case 'weekly_clean_modes': met = (profile.weeklyCleanWinModes || 0) >= title.condition_value; break;
+      case 'joker_profile': {
+        const _jokerSongs = ['Last_Surprise.mp3','Take_Over.mp3','Wake_Up,_Get_Up,_Get_Out_There.mp3','No_More_What_Ifs.mp3'];
+        const _song = profile.profileSong?.fichier || profile.profileMusicId || '';
+        met = profile.profileTheme === 'all_out' && _jokerSongs.includes(_song);
+        break;
+      }
     }
     if (met) {
       title.is_unlocked = 1;
@@ -2515,6 +2522,7 @@ function _titleConditionText(t) {
     case 'emoji_p2_wins':      return `Win ${v} Emoji games with P2 filter`;
     case 'leaderboard_top':    return `Reach top ${v} on the leaderboard`;
     case 'weekly_clean_modes': return `Win all modes in one week without giving up`;
+    case 'joker_profile':      return `Equip the All-Out Attack theme with a P5 signature track`;
     default:                   return t.condition_type || '???';
   }
 }
@@ -2576,7 +2584,7 @@ function _renderTitlesGrid() {
   const equippedSlug  = profile?.equippedTitleSlug || null;
   const equippedId    = profile?.equippedTitleId   || null;
 
-  grid.innerHTML = (_titlesData || []).map(t => {
+  grid.innerHTML = (_titlesData || []).filter(t => !t.is_hidden || unlockedSlugs.has(t.slug) || !!t.is_unlocked).map(t => {
     const isUnlocked = unlockedSlugs.has(t.slug) || !!t.is_unlocked;
     const isEquipped = (equippedSlug && equippedSlug === t.slug) ||
                        (equippedId && t.id && equippedId === t.id);

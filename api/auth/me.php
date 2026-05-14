@@ -36,7 +36,7 @@ function meResponse(PDO $pdo, array $user): never
 
 // ── 1. Session PHP active (cas normal) ──────────────────────────────────────
 if (!empty($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, has_migrated FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, is_admin, is_banned FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([(int) $_SESSION['user_id']]);
     $user = $stmt->fetch();
 
@@ -44,6 +44,11 @@ if (!empty($_SESSION['user_id'])) {
         // Session orpheline (compte supprimé entre-temps) — nettoyer
         session_destroy();
         jsonSuccess(['user' => null]);
+    }
+
+    if (!empty($user['is_banned'])) {
+        session_destroy();
+        jsonSuccess(['user' => null, 'banned' => true]);
     }
 
     meResponse($pdo, $user);
@@ -66,7 +71,7 @@ try {
     $hashedToken = hash('sha256', $rawToken);
 
     $stmt = $pdo->prepare('
-        SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, has_migrated FROM users
+        SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, is_admin, is_banned FROM users
         WHERE remember_me_hash = ?
           AND remember_me_expires > NOW()
           AND is_deleted = 0
@@ -85,6 +90,17 @@ try {
             'samesite' => 'Lax',
         ]);
         jsonSuccess(['user' => null]);
+    }
+
+    if (!empty($user['is_banned'])) {
+        setcookie('remember_me', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => APP_ENV === 'production',
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        jsonSuccess(['user' => null, 'banned' => true]);
     }
 
     // Token valide → recréer la session PHP + rotation du token (évite la réutilisation)

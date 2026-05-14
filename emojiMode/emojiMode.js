@@ -32,6 +32,9 @@ import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesMa
 
 const modeName = "Emoji";
 
+/** Minimum attempts before the Give-Up button activates. */
+const GIVE_UP_THRESHOLD = 8;
+
 /** All specific opus codes available in Emoji mode. */
 const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P4D","P5","P5R","P5S","P5T","P5X","PQ","PQ2"];
 
@@ -222,8 +225,8 @@ function updateEmojiHint() {
 function updateCounters() {
   const giveUpCounter = document.getElementById("giveUpCounter");
   if (giveUpCounter) {
-    giveUpCounter.textContent = `(${attempts} / 8)`;
-    giveUpCounter.classList.toggle("activated", attempts >= 8);
+    giveUpCounter.textContent = `(${attempts} / ${GIVE_UP_THRESHOLD})`;
+    giveUpCounter.classList.toggle("activated", attempts >= GIVE_UP_THRESHOLD);
   }
 }
 
@@ -338,7 +341,7 @@ function checkEmojiGuess(name, forceReveal = false) {
     localStorage.setItem("attemptsEmoji", attempts);
     updateEmojiHint();
     updateCounters();
-    if (attempts >= 8) enableGiveUpButton();
+    if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
   }
 
   removeFromAutocomplete(name);
@@ -463,7 +466,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   updateEmojiHint();
   updateCounters();
-  if (attempts >= 8) enableGiveUpButton();
+  if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
 
   // Restore finished game state
   if (localStorage.getItem("emojiGameOver") === "true" && target?.nom) {
@@ -481,7 +484,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Give Up button ──
   giveUpButton.addEventListener("click", () => {
-    if (attempts < 8 || gameOver) return;
+    if (attempts < GIVE_UP_THRESHOLD || gameOver) return;
     checkEmojiGuess(target.nom, true);
   });
 

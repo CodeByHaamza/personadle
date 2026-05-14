@@ -10,10 +10,11 @@
  */
 
 const DEFAULTS = {
-  sound_enabled:       true,
-  sound_volume:        1.0,
-  anim_victory:        true,
-  anim_friend_request: true,
+  sound_enabled:              true,
+  sound_volume:               1.0,
+  anim_victory:               true,
+  anim_friend_request:        true,
+  anim_friend_request_style:  'calling_card',
 };
 
 let _userId = null;
@@ -29,8 +30,9 @@ export function openSettingsModal() {
 export function initSettingsModal(userId) {
   _userId = userId;
   const btn = document.getElementById('settingsBtn');
-  if (btn) {
+  if (btn && !btn._settingsListenerBound) {
     btn.addEventListener('click', openSettingsModal);
+    btn._settingsListenerBound = true;
   }
 }
 
@@ -89,6 +91,20 @@ function _ensureModal() {
             <span class="slider round"></span>
           </label>
         </div>
+        <div class="sm-row sm-style-row" id="smStyleRow">
+          <span class="sm-label sm-label-sub">${t('settings.anim_fr_style', 'Style')}</span>
+          <div class="sm-style-btns">
+            <button type="button" class="sm-style-btn" data-style="calling_card" id="smStyleCC">
+              🃏 ${t('settings.anim_style_cc', 'Calling Card')}
+            </button>
+            <button type="button" class="sm-style-btn" data-style="persona4_tv" id="smStyleTV">
+              📺 ${t('settings.anim_style_tv', 'P4 TV')}
+            </button>
+            <button type="button" class="sm-style-btn" data-style="persona3_evoker" id="smStyleP3">
+              🔫 ${t('settings.anim_style_p3', 'P3 Evoker')}
+            </button>
+          </div>
+        </div>
       </div>
 
       <button class="sm-save" id="smSave">${t('settings.save', 'Save')}</button>
@@ -100,6 +116,19 @@ function _ensureModal() {
   // Volume display
   el.querySelector('#smSoundVolume').addEventListener('input', e => {
     el.querySelector('#smVolumeVal').textContent = `${Math.round(e.target.value * 100)}%`;
+  });
+
+  // Style selector buttons
+  el.querySelectorAll('.sm-style-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      el.querySelectorAll('.sm-style-btn').forEach(b => b.classList.remove('sm-style-btn--active'));
+      btn.classList.add('sm-style-btn--active');
+    });
+  });
+
+  // Afficher/masquer le sélecteur de style selon l'état du toggle
+  el.querySelector('#smAnimFriendRequest').addEventListener('change', e => {
+    el.querySelector('#smStyleRow').style.display = e.target.checked ? '' : 'none';
   });
 
   // Fermer
@@ -114,9 +143,17 @@ function _loadIntoForm(s) {
   document.getElementById('smSoundEnabled').checked      = s.sound_enabled        ?? true;
   document.getElementById('smSoundVolume').value         = s.sound_volume          ?? 1.0;
   document.getElementById('smAnimVictory').checked       = s.anim_victory          ?? true;
-  document.getElementById('smAnimFriendRequest').checked = s.anim_friend_request   ?? true;
   document.getElementById('smVolumeVal').textContent =
     `${Math.round((s.sound_volume ?? 1.0) * 100)}%`;
+
+  const animOn = s.anim_friend_request ?? true;
+  document.getElementById('smAnimFriendRequest').checked = animOn;
+  document.getElementById('smStyleRow').style.display = animOn ? '' : 'none';
+
+  const style = s.anim_friend_request_style ?? 'calling_card';
+  document.querySelectorAll('.sm-style-btn').forEach(b => {
+    b.classList.toggle('sm-style-btn--active', b.dataset.style === style);
+  });
 }
 
 function _readSettings() {
@@ -129,11 +166,13 @@ async function _save() {
   const btn    = document.getElementById('smSave');
   const status = document.getElementById('smStatus');
 
+  const activeStyleBtn = document.querySelector('.sm-style-btn--active');
   const newSettings = {
-    sound_enabled:       document.getElementById('smSoundEnabled').checked,
-    sound_volume:        parseFloat(document.getElementById('smSoundVolume').value),
-    anim_victory:        document.getElementById('smAnimVictory').checked,
-    anim_friend_request: document.getElementById('smAnimFriendRequest').checked,
+    sound_enabled:              document.getElementById('smSoundEnabled').checked,
+    sound_volume:               parseFloat(document.getElementById('smSoundVolume').value),
+    anim_victory:               document.getElementById('smAnimVictory').checked,
+    anim_friend_request:        document.getElementById('smAnimFriendRequest').checked,
+    anim_friend_request_style:  activeStyleBtn?.dataset.style ?? 'calling_card',
   };
 
   btn.disabled = true;

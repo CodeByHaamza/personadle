@@ -48,6 +48,20 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
     if (lastPlayed === yDate) {
       stats.streak = (stats.streak || 0) + 1;
     } else {
+      // Streak brisée — sauvegarder pour permettre la récupération via Jack Frost
+      const broken = stats.streak || 0;
+      if (broken > 1) {
+        try {
+          const rec = JSON.parse(localStorage.getItem('streakRecovery') || '{}');
+          // Ne pas écraser si déjà enregistrée et non consommée
+          if (!rec.previousStreak || rec.previousStreak === 0) {
+            rec.previousStreak = broken;
+            rec.brokenDate = today;
+            rec.shown = false;
+            localStorage.setItem('streakRecovery', JSON.stringify(rec));
+          }
+        } catch (_) {}
+      }
       stats.streak = 1;
     }
     

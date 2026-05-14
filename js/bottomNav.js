@@ -89,21 +89,26 @@ function buildHrefs(currentPage) {
 
   // Compute base from the actual URL path so pages inside any subdirectory
   // always resolve links correctly, regardless of currentPage value.
+  // profile/friends/ and profile/leaderboard/ are 2 levels deep → need ../../
   const p = window.location.pathname;
-  const isSubpath =
+  const isDeepSubpath =
+    p.includes('/profile/friends/')     ||
+    p.includes('/profile/leaderboard/');
+  const isSubpath = !isDeepSubpath && (
     p.includes('/profile/')        ||
     p.includes('/classiqueMode/')  ||
     p.includes('/emojiMode/')      ||
     p.includes('/silhouetteMode/') ||
     p.includes('/allOutAttackMode/')||
     p.includes('/personaeMode/')   ||
-    p.includes('/musicsMode/');
-  const base = isSubpath ? '../' : './';
+    p.includes('/musicsMode/')
+  );
+  const base = isDeepSubpath ? '../../' : (isSubpath ? '../' : './');
   return {
     home:        `${base}index.html`,
     profile:     isProfile  ? './profile.html'           : `${base}profile/profile.html`,
-    friends:     isFriends  ? './friends.html'           : `${base}profile/friends.html`,
-    leaderboard: isLeader   ? './leaderboard.html'       : `${base}profile/leaderboard.html`,
+    friends:     isFriends  ? './friends.html'           : `${base}profile/friends/friends.html`,
+    leaderboard: isLeader   ? './leaderboard.html'       : `${base}profile/leaderboard/leaderboard.html`,
   };
 }
 

@@ -1,0 +1,573 @@
+/* =============================================================
+   privacy.css — Page Confidentialité & Mentions Légales
+   ============================================================= */
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.privacy-page-header {
+  text-align: center;
+  padding: 58px 20px 0; /* 58px = espace sous le .darkmode-toggle fixe */
+  position: relative;
+}
+
+.privacy-page-header::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--accent, #e63946);
+  margin: 12px auto 0;
+  border-radius: 2px;
+}
+
+.privacy-page-title {
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.p5-diamond {
+  color: var(--accent, #e63946);
+  font-size: 0.7em;
+  display: inline-block;
+  animation: privDiamondPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes privDiamondPulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.3); opacity: 0.7; }
+}
+
+.darkmode .privacy-page-title {
+  color: #f0f0f0;
+}
+
+/* ── Layout principal ─────────────────────────────────────── */
+
+.privacy-main {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 20px 20px 120px;
+}
+
+/* ── Intro wrap ───────────────────────────────────────────── */
+
+.privacy-intro-wrap {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 14px;
+  padding: 20px 24px 4px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.darkmode .privacy-intro-wrap {
+  background: rgba(18, 18, 18, 0.9);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+.privacy-tagline {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent, #e63946);
+  margin: 0 0 8px;
+  letter-spacing: 0.02em;
+}
+
+.privacy-intro {
+  text-align: center;
+  color: var(--text-muted, #555);
+  font-size: 0.97rem;
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+.darkmode .privacy-intro {
+  color: #bbb;
+}
+
+/* ── Badges ───────────────────────────────────────────────── */
+
+.privacy-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.privacy-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+.privacy-badge--free    { background: #e8f5e9; color: #2e7d32; border: 1.5px solid #a5d6a7; }
+.privacy-badge--gdpr    { background: #e3f0fb; color: #1255a0; border: 1.5px solid #90caf9; }
+.privacy-badge--noads   { background: #fdecea; color: #c62828; border: 1.5px solid #ef9a9a; }
+.privacy-badge--open    { background: #f5f5f5;  color: #424242; border: 1.5px solid #bdbdbd; }
+
+.darkmode .privacy-badge--free  { background: rgba(76,175,80,0.22);  color: #81c784; border-color: rgba(76,175,80,0.45); }
+.darkmode .privacy-badge--gdpr  { background: rgba(25,118,210,0.22); color: #64b5f6; border-color: rgba(25,118,210,0.45); }
+.darkmode .privacy-badge--noads { background: rgba(230,57,70,0.22);  color: #ef9a9a; border-color: rgba(230,57,70,0.45); }
+.darkmode .privacy-badge--open  { background: rgba(255,255,255,0.09); color: #bdbdbd; border-color: rgba(255,255,255,0.2); }
+
+/* ── Cards ────────────────────────────────────────────────── */
+
+.privacy-card {
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  border-left: 4px solid var(--accent, #e63946);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: box-shadow 0.2s;
+}
+
+.privacy-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.privacy-card--safe {
+  border-left-color: #4caf50;
+}
+
+.privacy-card--security {
+  border-left-color: #1976d2;
+}
+
+.privacy-card--legal {
+  border-left-color: #9c27b0;
+  background: var(--card-bg-alt, #fafafa);
+}
+
+.privacy-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--text, #111);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.privacy-card p {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--text-secondary, #444);
+  font-size: 0.92rem;
+}
+
+/* ── Lists ────────────────────────────────────────────────── */
+
+.privacy-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.privacy-card__list li {
+  font-size: 0.91rem;
+  color: var(--text-secondary, #444);
+  line-height: 1.5;
+  padding-left: 4px;
+}
+
+/* "What we never do" list — red crosses */
+.privacy-card__list--check li::before {
+  content: '✕ ';
+  color: #e53935;
+  font-weight: 700;
+}
+
+/* Security list — lock icons */
+.privacy-card__list--lock li::before {
+  content: '✓ ';
+  color: #1976d2;
+  font-weight: 700;
+}
+
+/* ── Two-column row ───────────────────────────────────────── */
+
+.privacy-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.privacy-row .privacy-card {
+  margin-bottom: 0;
+}
+
+/* ── Email link ───────────────────────────────────────────── */
+
+.privacy-email-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--accent, #e63946);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--accent, #e63946);
+  transition: opacity 0.15s;
+}
+
+.privacy-email-link:hover {
+  opacity: 0.7;
+}
+
+/* ── Legal section ────────────────────────────────────────── */
+
+.privacy-legal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 8px;
+}
+
+.privacy-legal-row {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.privacy-legal-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9c27b0;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.privacy-legal-value {
+  font-size: 0.88rem;
+  color: var(--text-secondary, #444);
+  text-decoration: none;
+}
+
+a.privacy-legal-value:hover {
+  color: var(--accent, #e63946);
+}
+
+.privacy-legal-disclaimer {
+  font-size: 0.82rem;
+  color: var(--text-muted, #888);
+  line-height: 1.6;
+  margin: 0 0 10px;
+  font-style: italic;
+}
+
+.privacy-legal-opensource {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #555);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.privacy-gh-link {
+  font-weight: 700;
+  color: var(--accent, #e63946);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.privacy-gh-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Footer elements ──────────────────────────────────────── */
+
+.privacy-last-updated {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted, #aaa);
+  margin: 24px 0 16px;
+}
+
+.privacy-back {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* ── Dark mode ────────────────────────────────────────────── */
+
+.darkmode .privacy-card {
+  background: var(--card-bg, #1e1e1e);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.darkmode .privacy-card--legal {
+  background: var(--card-bg-alt, #252525);
+}
+
+.darkmode .privacy-card__title {
+  color: var(--text, #f0f0f0);
+}
+
+.darkmode .privacy-card p,
+.darkmode .privacy-card__list li {
+  color: var(--text-secondary, #ccc);
+}
+
+.darkmode .privacy-legal-grid {
+  background: rgba(255,255,255,0.05);
+}
+
+.darkmode .privacy-legal-value {
+  color: #ccc;
+}
+
+.darkmode .privacy-legal-disclaimer {
+  color: #888;
+}
+
+/* ── Character art ────────────────────────────────────────── */
+
+body {
+  position: relative;
+}
+
+.privacy-char-wrap {
+  position: absolute;
+  z-index: 2;
+  pointer-events: auto;
+  user-select: none;
+  cursor: pointer;
+}
+
+/* ── Sae + Teddie — haut droite ──────────────────────────── */
+.privacy-char-wrap--top-right {
+  right: 18px;
+  top: 0;
+  animation: charSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
+             charFloat 6s ease-in-out 1.4s infinite;
+  transform-origin: top right;
+}
+
+/* ── Zenkichi + Toshiro — bas gauche ────────────────────── */
+.privacy-char-wrap--bottom-left {
+  left: 18px;
+  bottom: 360px;
+  animation: charRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both,
+             charFloat 5.5s ease-in-out 1.7s infinite;
+  transform-origin: bottom left;
+}
+
+/* ── Entrées ─────────────────────────────────────────────── */
+@keyframes charSlideIn {
+  from { opacity: 0; transform: translateX(50px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes charRise {
+  from { opacity: 0; transform: translateY(50px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Idle — flottement discret ──────────────────────────── */
+@keyframes charFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+
+/* ── Images personnages ──────────────────────────────────── */
+.privacy-char-wrap img:not(.privacy-tarot-img) {
+  display: block;
+  pointer-events: none;
+  transition: transform 0.4s ease, filter 0.4s ease;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+}
+
+.privacy-char-wrap--top-right img:not(.privacy-tarot-img) {
+  height: min(440px, 40vh);
+  width: auto;
+  transform-origin: top right;
+}
+
+.privacy-char-wrap--bottom-left img:not(.privacy-tarot-img) {
+  height: min(480px, 44vh);
+  width: auto;
+  transform-origin: bottom left;
+}
+
+/* Hover image — subtil, laisse la carte tarot dominer */
+.privacy-char-wrap:hover img:not(.privacy-tarot-img) {
+  transform: scale(1.02) translateY(-3px);
+  filter: drop-shadow(0 10px 26px rgba(0,0,0,0.42));
+}
+
+/* ── Cartes Tarot ─────────────────────────────────────────── */
+
+.privacy-tarot-wrap {
+  position: absolute;
+  width: 115px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.privacy-tarot-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 10px 36px rgba(0,0,0,0.7),
+              0 0 28px rgba(100,60,180,0.28);
+}
+
+/* Texte en surimpression sur la carte */
+.privacy-tarot-text {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: rgba(6, 3, 16, 0.83);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: 0.05em;
+  white-space: pre-line;
+  padding: 12px 10px;
+  opacity: 0;
+}
+
+/* ── Sae : Justice — RETOURNEMENT DE CARTE ───────────────────
+   La carte surgit de côté (vue par la tranche) et se retourne
+   pour révéler l'image, puis le texte apparaît en surimpression */
+
+.privacy-char-wrap--top-right .privacy-tarot-wrap {
+  right: calc(100% + 20px);
+  bottom: 70px;
+  opacity: 0;
+  transform: perspective(560px) rotateY(-88deg);
+  transform-origin: right center;
+  transition:
+    opacity  0.12s ease,
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.privacy-char-wrap--top-right:hover .privacy-tarot-wrap {
+  opacity: 1;
+  transform: perspective(560px) rotateY(0deg);
+}
+
+.privacy-char-wrap--top-right .privacy-tarot-text {
+  transition: opacity 0.38s ease 0.52s;
+}
+
+.privacy-char-wrap--top-right:hover .privacy-tarot-text {
+  opacity: 1;
+}
+
+/* ── Zenkichi : Jugement — EXPLOSION CÉLESTE ─────────────────
+   La carte jaillit du néant (éclair blanc, agrandie) et s'abat
+   comme un jugement divin qui tombe du ciel                    */
+
+.privacy-char-wrap--bottom-left .privacy-tarot-wrap {
+  left: calc(100% + 20px);
+  top: 55px;
+  opacity: 0;
+  transform: scale(2.2);
+  filter: brightness(5) saturate(0);
+  transition:
+    opacity   0.18s ease,
+    transform 0.58s cubic-bezier(0.16, 1, 0.3, 1),
+    filter    0.58s ease;
+}
+
+.privacy-char-wrap--bottom-left:hover .privacy-tarot-wrap {
+  opacity: 1;
+  transform: scale(1);
+  filter: brightness(1) saturate(1);
+}
+
+.privacy-char-wrap--bottom-left .privacy-tarot-text {
+  transition: opacity 0.32s ease 0.42s;
+}
+
+.privacy-char-wrap--bottom-left:hover .privacy-tarot-text {
+  opacity: 1;
+}
+
+/* Masquer sur écrans trop étroits */
+@media (max-width: 1080px) {
+  .privacy-char-wrap { display: none; }
+}
+
+/* ── Auth form — lien confidentialité ─────────────────────── */
+
+.auth-privacy-note {
+  font-size: 0.78rem;
+  color: var(--text-muted, #888);
+  text-align: center;
+  margin: 10px 0 0;
+  line-height: 1.5;
+}
+
+.auth-privacy-note a {
+  color: var(--accent, #e63946);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-privacy-note a:hover {
+  text-decoration: underline;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .privacy-row {
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-card {
+    padding: 16px 18px;
+  }
+
+  .privacy-legal-label {
+    min-width: 70px;
+  }
+}
+
+@media (max-width: 480px) {
+  .privacy-main {
+    padding: 16px 14px 100px;
+  }
+
+  .privacy-badges {
+    gap: 6px;
+  }
+
+  .privacy-badge {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+  }
+}

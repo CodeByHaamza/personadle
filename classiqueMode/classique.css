@@ -217,7 +217,7 @@
   border: 1px solid #ccc;
   border-top: none;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-  z-index: 5;
+  z-index: 600; /* au-dessus de .bottom-nav (z-index 500) */
   list-style: none;
   padding: 0;
   margin: 0;
