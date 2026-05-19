@@ -291,7 +291,6 @@ function showVictory(force = false, name = null) {
       if (!profile.picarosFound.includes(target.persona)) {
         profile.picarosFound.push(target.persona);
         profileUpdated = true;
-        console.log(`💾 Picaros: ${profile.picarosFound.length}/12`);
       }
     }
 
@@ -636,31 +635,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DEBUG (console only)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Console utility: verifies every name in persona.js has a matching entry in
- * personaeCharacters.js and a portrait in portraitsMapPersonae.js.
- * Logs missing entries to the console to help catch data inconsistencies early.
- *
- * Usage (browser console): import('/personaeMode/modePersonae.js').then(m => m.debugAllPersonae())
- */
-export function debugAllPersonae() {
-  console.log("=== DEBUG PERSONAE MODE ===");
-  const errors = [];
-  for (const name of personas.sort()) {
-    const match = originalCharacters.find((c) => {
-      const u = Array.isArray(c.user) ? c.user : [c.user];
-      return u.some((u) => u === name);
-    });
-    if (!match) {
-      errors.push(`❌ ${name} — Absent dans personaeCharacters.js`);
-      continue;
-    }
-    if (!portraitsMap[name]) errors.push(`❌ ${name} — Manque dans portraitsMapPersonae.js`);
-    else console.log(`✅ OK: ${name}`);
-  }
-  if (errors.length) console.log(errors.join("\n"));
-  else console.log("🎉 No errors!");
-  console.log("=== END DEBUG ===");
-}
