@@ -1,0 +1,27 @@
+node_modules/
+dist/
+coverage/
+
+# Large data files — don't reformat
+database/characters_clean.js
+database/personas.js
+database/portraitsMap.js
+database/quotes.js
+musicsMode/database/
+
+# SQL files
+sql/
+
+# Documentation
+PersonaDLE_Update_Documentation/
+
+# Generated / third-party
+assets/
+
+# Auto-generated knowledge graph
+graphify-out/
+
+# Internal dev tools (Claude Code, Superpowers)
+.claude/
+.superpowers/
+docs/superpowers/

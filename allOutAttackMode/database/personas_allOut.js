@@ -59,5 +59,5 @@ export const personas = [
   "Wonder Chinese New Year ( Nagisa Kamishiro )",
   "Wonder Velvet ( Nagisa Kamishiro )",
   "Yuki ( Yukimi Fujikawa )",
-  "Yukari Takeba"
+  "Yukari Takeba",
 ];

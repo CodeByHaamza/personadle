@@ -41,9 +41,8 @@ $pdo    = pdo();
 // GET /api/friends — liste amis + demandes reçues + demandes envoyées
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($method === 'GET') {
-    // Amis acceptés (relation dans les deux sens)
-    // NOTE: PDO with ATTR_EMULATE_PREPARES=false (MySQL native prepares) does not allow
-    // reusing the same named parameter. Each occurrence needs a unique name.
+    // ── Étape 1 : récupérer amis + demandes (sans social_links pour robustesse)
+    // NOTE: PDO with ATTR_EMULATE_PREPARES=false does not allow reusing named params.
     $stmt = $pdo->prepare("
         SELECT
             f.id AS friendship_id,
@@ -56,17 +55,10 @@ if ($method === 'GET') {
             u.last_login_at,
             p.avatar_data,
             p.avatar_border_color,
-            p.selected_badges,
-            sl.id                   AS social_link_id,
-            sl.`rank`               AS social_link_rank,
-            sl.xp                   AS social_link_xp,
-            sl.last_interaction_at  AS social_link_last_interaction
+            p.selected_badges
         FROM friendships f
         JOIN users u ON u.id = CASE WHEN f.requester_id = :me3 THEN f.addressee_id ELSE f.requester_id END
         LEFT JOIN profiles p ON p.user_id = u.id
-        LEFT JOIN social_links sl
-               ON sl.user_a_id = LEAST(:me6, u.id)
-              AND sl.user_b_id = GREATEST(:me7, u.id)
         WHERE (f.requester_id = :me4 OR f.addressee_id = :me5)
           AND f.status IN ('accepted', 'pending')
           AND u.is_deleted = 0
@@ -78,8 +70,6 @@ if ($method === 'GET') {
         ':me3' => $authId,
         ':me4' => $authId,
         ':me5' => $authId,
-        ':me6' => $authId,
-        ':me7' => $authId,
     ]);
     $rows = $stmt->fetchAll();
 
@@ -98,16 +88,61 @@ if ($method === 'GET') {
             'last_seen_at'                 => $r['last_login_at'],
             'created_at'                   => $r['created_at'],
             'direction'                    => $r['direction'],
-            'social_link_id'               => $r['social_link_id'] ? (int) $r['social_link_id'] : null,
-            'social_link_rank'             => $r['social_link_rank'] ? (int) $r['social_link_rank'] : 1,
-            'social_link_xp'               => $r['social_link_xp'] ? (int) $r['social_link_xp'] : 0,
-            'social_link_last_interaction' => $r['social_link_last_interaction'],
+            // Social link defaults — enrichis par l'étape 2 si disponible
+            'social_link_id'               => null,
+            'social_link_rank'             => 1,
+            'social_link_xp'               => 0,
+            'social_link_last_interaction' => null,
         ];
 
         if ($r['status'] === 'accepted') {
             $friends[] = $entry;
         } else {
             $pending[] = $entry;
+        }
+    }
+
+    // ── Étape 2 : enrichir avec social_links (optionnel — ne plante pas si absent)
+    if (!empty($friends)) {
+        $friendIds = array_column($friends, 'friend_id');
+        try {
+            $placeholders = implode(',', array_fill(0, count($friendIds), '?'));
+            $slStmt = $pdo->prepare("
+                SELECT
+                    sl.id,
+                    sl.user_a_id,
+                    sl.user_b_id,
+                    sl.`rank`,
+                    sl.xp,
+                    sl.last_interaction_at
+                FROM social_links sl
+                WHERE (sl.user_a_id = ? AND sl.user_b_id IN ($placeholders))
+                   OR (sl.user_b_id = ? AND sl.user_a_id IN ($placeholders))
+            ");
+            $params = array_merge([$authId], $friendIds, [$authId], $friendIds);
+            $slStmt->execute($params);
+            $slRows = $slStmt->fetchAll();
+
+            // Indexer par friend_id pour lookup O(1)
+            $slByFriend = [];
+            foreach ($slRows as $sl) {
+                $friendId = ($sl['user_a_id'] === $authId) ? $sl['user_b_id'] : $sl['user_a_id'];
+                $slByFriend[(int) $friendId] = $sl;
+            }
+
+            foreach ($friends as &$f) {
+                $sl = $slByFriend[$f['friend_id']] ?? null;
+                if ($sl) {
+                    $f['social_link_id']               = (int) $sl['id'];
+                    $f['social_link_rank']             = (int) $sl['rank'];
+                    $f['social_link_xp']               = (int) $sl['xp'];
+                    $f['social_link_last_interaction'] = $sl['last_interaction_at'];
+                }
+            }
+            unset($f);
+        } catch (PDOException $e) {
+            // social_links table indisponible — on retourne quand même la liste sans XP
+            error_log('[Friends GET] social_links enrichment failed: ' . $e->getMessage());
         }
     }
 
@@ -202,8 +237,27 @@ if ($method === 'PATCH') {
             ->execute([$friendshipId]);
         jsonSuccess(['friendship_id' => $friendshipId, 'status' => 'accepted']);
     } else {
-        // Refuser = supprimer la demande proprement
+        // Récupérer le demandeur avant de supprimer (pour lui notifier)
+        $reqRow = $pdo->prepare('SELECT requester_id FROM friendships WHERE id = ? LIMIT 1');
+        $reqRow->execute([$friendshipId]);
+        $reqData = $reqRow->fetch();
+
+        // Supprimer la demande
         $pdo->prepare('DELETE FROM friendships WHERE id = ?')->execute([$friendshipId]);
+
+        // Notifier le demandeur via un message système
+        if ($reqData && (int) $reqData['requester_id'] !== $authId) {
+            try {
+                $pdo->prepare(
+                    "INSERT INTO messages (sender_id, receiver_id, type, content, status, created_at)
+                     VALUES (?, ?, 'friend_declined', '', 'unread', NOW())"
+                )->execute([$authId, (int) $reqData['requester_id']]);
+            } catch (PDOException $e) {
+                // Non-bloquant — ne pas faire échouer la réponse
+                error_log('[Friends PATCH] decline message insert failed: ' . $e->getMessage());
+            }
+        }
+
         jsonSuccess(['friendship_id' => $friendshipId, 'status' => 'declined']);
     }
 }

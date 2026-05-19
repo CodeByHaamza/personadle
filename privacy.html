@@ -1,0 +1,462 @@
+<!-- =============================================================
+     privacy.html — Politique de confidentialité & Mentions légales
+     Accessible depuis le footer de toutes les pages.
+     ============================================================= -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy & Legal — PersonaDLE</title>
+    <meta name="robots" content="noindex" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Cinzel:wght@600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./css/global.css?v=9" />
+    <link rel="stylesheet" href="./css/langSelector.css?v=4" />
+    <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="./privacy.css?v=8" />
+
+    <link rel="icon" type="image/gif" href="./img/persona_64x64.gif" />
+
+    <script>
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.documentElement.classList.add("darkmode");
+      }
+    </script>
+  </head>
+  <body>
+    <!-- Art décoratif : personnages Persona sur les bords de la page -->
+    <div class="privacy-char-wrap privacy-char-wrap--top-right" aria-hidden="true">
+      <img src="./img/Sae_judge_teddie.webp" alt="" loading="eager" />
+      <div class="privacy-tarot-wrap">
+        <img class="privacy-tarot-img" src="./img/Justice.webp" alt="Justice Arcana" />
+        <div class="privacy-tarot-text" data-i18n="privacy.char_sae_tooltip">
+          ⚖️ OBJECTION! No data sold. NOT. EVER. 🐻
+        </div>
+      </div>
+    </div>
+    <div class="privacy-char-wrap privacy-char-wrap--bottom-left" aria-hidden="true">
+      <img src="./img/Zenkichi_toshiro_law_balance.webp" alt="" loading="lazy" />
+      <div class="privacy-tarot-wrap">
+        <img class="privacy-tarot-img" src="./img/Judgement.webp" alt="Judgement Arcana" />
+        <div class="privacy-tarot-text" data-i18n="privacy.char_zenkichi_tooltip">
+          🔐 Your rights are secured, Phantom Thief.
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================
+     HEADER
+     ===================================================== -->
+    <header class="privacy-page-header">
+      <h1 class="privacy-page-title">
+        <span class="p5-diamond">◆</span>
+        <span data-i18n="privacy.page_title">Privacy &amp; Legal</span>
+        <span class="p5-diamond">◆</span>
+      </h1>
+    </header>
+
+    <!-- Toggle Dark Mode -->
+    <div class="darkmode-toggle">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+    </div>
+
+    <!-- Sélecteur de langue -->
+    <div id="langToggle">
+      <button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Change language">
+        <span class="lang-btn-globe">🌐</span>
+        <span id="langBtnLabel">EN</span>
+        <span class="lang-btn-chevron">▼</span>
+      </button>
+      <div id="langDropdown" role="listbox" aria-label="Select language">
+        <div
+          class="lang-opt lang-opt--en"
+          data-lang="en"
+          role="option"
+          tabindex="0"
+          aria-label="English"
+        >
+          <span class="lang-opt-name">English</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Lisa_Silverman_english.webp"
+            alt="Lisa Silverman"
+            loading="lazy"
+          />
+        </div>
+        <div
+          class="lang-opt lang-opt--fr"
+          data-lang="fr"
+          role="option"
+          tabindex="0"
+          aria-label="Français"
+        >
+          <span class="lang-opt-name">Français</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Bebe_french.webp"
+            alt="Bebe"
+            loading="lazy"
+          />
+        </div>
+        <div
+          class="lang-opt lang-opt--es"
+          data-lang="es"
+          role="option"
+          tabindex="0"
+          aria-label="Español"
+        >
+          <span class="lang-opt-name">Español</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Morgana_Spanish.webp"
+            alt="Morgana"
+            loading="lazy"
+          />
+        </div>
+        <div
+          class="lang-opt lang-opt--de"
+          data-lang="de"
+          role="option"
+          tabindex="0"
+          aria-label="Deutsch"
+        >
+          <span class="lang-opt-name">Deutsch</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Hulkenberg_german.webp"
+            alt="Hulkenberg"
+            loading="lazy"
+          />
+        </div>
+        <div
+          class="lang-opt lang-opt--it"
+          data-lang="it"
+          role="option"
+          tabindex="0"
+          aria-label="Italiano"
+        >
+          <span class="lang-opt-name">Italiano</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Caesar_italian.webp"
+            alt="Caesar"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================
+     CONTENU PRINCIPAL
+     ===================================================== -->
+    <main class="privacy-main">
+      <!-- Intro -->
+      <div class="privacy-intro-wrap">
+        <p class="privacy-tagline" data-i18n="privacy.tagline">We keep it honest.</p>
+        <p class="privacy-intro" data-i18n="privacy.intro">
+          PersonaDLE is a free fan-made guessing game. Here's everything you need to know about your
+          data — no lawyer-speak.
+        </p>
+
+        <!-- Badges -->
+        <div class="privacy-badges">
+          <span class="privacy-badge privacy-badge--free" data-i18n="privacy.badge_free"
+            >🎮 100% Free</span
+          >
+          <span class="privacy-badge privacy-badge--gdpr" data-i18n="privacy.badge_gdpr"
+            >🇪🇺 GDPR</span
+          >
+          <span class="privacy-badge privacy-badge--noads" data-i18n="privacy.badge_noads"
+            >🚫 No Ads</span
+          >
+          <span class="privacy-badge privacy-badge--open" data-i18n="privacy.badge_open"
+            >📖 Open Source</span
+          >
+        </div>
+      </div>
+
+      <!-- Section: What we collect -->
+      <section class="privacy-card">
+        <h2 class="privacy-card__title">
+          📋 <span data-i18n="privacy.collected_title">What we collect</span>
+        </h2>
+        <ul class="privacy-card__list">
+          <li>
+            📧
+            <span data-i18n="privacy.collected_email"
+              >Your email address — to create and secure your account</span
+            >
+          </li>
+          <li>
+            👤
+            <span data-i18n="privacy.collected_pseudo"
+              >A username of your choice — displayed on your profile</span
+            >
+          </li>
+          <li>
+            📊
+            <span data-i18n="privacy.collected_stats"
+              >Your game statistics — wins, streaks, attempts, time played</span
+            >
+          </li>
+          <li>
+            🖼️
+            <span data-i18n="privacy.collected_avatar"
+              >An avatar image — only if you choose to upload one</span
+            >
+          </li>
+          <li>
+            ⚙️
+            <span data-i18n="privacy.collected_prefs"
+              >Your preferences — language, dark mode, theme, badges</span
+            >
+          </li>
+        </ul>
+      </section>
+
+      <!-- Section: What we never do -->
+      <section class="privacy-card privacy-card--safe">
+        <h2 class="privacy-card__title">
+          🚫 <span data-i18n="privacy.never_title">What we never do</span>
+        </h2>
+        <ul class="privacy-card__list privacy-card__list--check">
+          <li data-i18n="privacy.never_sell">Sell your data — ever</li>
+          <li data-i18n="privacy.never_ads">Use it for advertising or profiling</li>
+          <li data-i18n="privacy.never_share">Share it with third parties</li>
+          <li data-i18n="privacy.never_money">
+            Monetize anything — PersonaDLE is and will always be free
+          </li>
+        </ul>
+      </section>
+
+      <!-- Section: Security -->
+      <section class="privacy-card privacy-card--security">
+        <h2 class="privacy-card__title">
+          🔐 <span data-i18n="privacy.security_title">Security</span>
+        </h2>
+        <ul class="privacy-card__list privacy-card__list--lock">
+          <li data-i18n="privacy.security_bcrypt">
+            Passwords are hashed with bcrypt — we literally cannot read them.
+          </li>
+          <li data-i18n="privacy.security_cookie">
+            Sessions use a single secure, httpOnly cookie — no tracking.
+          </li>
+          <li data-i18n="privacy.security_https">The site runs on HTTPS in production.</li>
+        </ul>
+      </section>
+
+      <!-- Two-column row: Retention + Rights -->
+      <div class="privacy-row">
+        <section class="privacy-card">
+          <h2 class="privacy-card__title">
+            ⏳ <span data-i18n="privacy.retention_title">Data retention</span>
+          </h2>
+          <p data-i18n="privacy.retention_body">
+            Your data is kept as long as your account is active. You can delete your account at any
+            time from your profile page — this triggers immediate anonymization followed by
+            permanent deletion within 30 days.
+          </p>
+        </section>
+
+        <section class="privacy-card">
+          <h2 class="privacy-card__title">
+            ⚖️ <span data-i18n="privacy.rights_title">Your rights (GDPR)</span>
+          </h2>
+          <ul class="privacy-card__list">
+            <li data-i18n="privacy.rights_access">Right of access — request a copy of your data</li>
+            <li data-i18n="privacy.rights_rectify">
+              Right to rectification — update your profile directly in the app
+            </li>
+            <li data-i18n="privacy.rights_delete">
+              Right to deletion — use the "Delete my account" button in your profile
+            </li>
+            <li data-i18n="privacy.rights_portability">
+              Right to portability — export your data with the "Export" button
+            </li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- Section: Cookies -->
+      <section class="privacy-card">
+        <h2 class="privacy-card__title">
+          🍪 <span data-i18n="privacy.cookies_title">Cookies</span>
+        </h2>
+        <p data-i18n="privacy.cookies_body">
+          We use exactly one cookie: a technical session cookie (httpOnly, secure), strictly
+          necessary for authentication. No advertising cookies, no analytics, no third-party
+          scripts.
+        </p>
+      </section>
+
+      <!-- Section: Contact -->
+      <section class="privacy-card">
+        <h2 class="privacy-card__title">
+          ✉️ <span data-i18n="privacy.contact_title">Contact</span>
+        </h2>
+        <p data-i18n="privacy.contact_body">
+          For any questions about your data or to exercise your rights:
+        </p>
+        <a href="mailto:hamza.karrouchi.dev@gmail.com" class="privacy-email-link">
+          📧 hamza.karrouchi.dev@gmail.com
+        </a>
+      </section>
+
+      <!-- Section: Legal Notice -->
+      <section class="privacy-card privacy-card--legal">
+        <h2 class="privacy-card__title">
+          📜 <span data-i18n="privacy.legal_title">Legal Notice</span>
+        </h2>
+        <div class="privacy-legal-grid">
+          <div class="privacy-legal-row">
+            <span class="privacy-legal-label" data-i18n="privacy.legal_publisher_label"
+              >Publisher</span
+            >
+            <span class="privacy-legal-value" data-i18n="privacy.legal_publisher_value"
+              >Hamza Karrouchi — individual developer, France</span
+            >
+          </div>
+          <div class="privacy-legal-row">
+            <span class="privacy-legal-label" data-i18n="privacy.contact_title">Contact</span>
+            <a href="mailto:hamza.karrouchi.dev@gmail.com" class="privacy-legal-value"
+              >hamza.karrouchi.dev@gmail.com</a
+            >
+          </div>
+          <div class="privacy-legal-row">
+            <span class="privacy-legal-label" data-i18n="privacy.legal_host_label">Hosting</span>
+            <span class="privacy-legal-value" data-i18n="privacy.legal_host_value"
+              >Hostinger International Ltd., 61 Lordou Vironos Street, 6023 Larnaca, Cyprus</span
+            >
+          </div>
+        </div>
+        <p class="privacy-legal-disclaimer" data-i18n="privacy.legal_disclaimer">
+          PersonaDLE is an unofficial, non-commercial fan project. It is not affiliated with,
+          endorsed by, or sponsored by ATLUS, SEGA, or any related entity. All Persona trademarks,
+          characters, music, and visual assets belong to their respective rights holders. The game
+          and source code are distributed under the MIT License.
+        </p>
+        <p class="privacy-legal-opensource">
+          <span data-i18n="privacy.legal_opensource"
+            >Source code available on GitHub under the MIT License.</span
+          >
+          <a
+            href="https://github.com/HamzaKarrouchi/personadle"
+            target="_blank"
+            rel="noopener"
+            class="privacy-gh-link"
+            >→ GitHub</a
+          >
+        </p>
+      </section>
+
+      <p class="privacy-last-updated" data-i18n="privacy.last_updated">Last updated: May 2026</p>
+
+      <!-- Back link -->
+      <div class="privacy-back">
+        <a href="./index.html" class="btn-p5" data-i18n="ui.back">← Back</a>
+      </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <div id="bottomNav"></div>
+
+    <!-- Scripts -->
+    <script type="module">
+      import { initLang, setLang } from "./js/i18n.js";
+      import { initBottomNav } from "./js/bottomNav.js";
+
+      /* ── Dark mode toggle ── */
+      const toggle = document.getElementById("darkModeToggle");
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("darkmode");
+        toggle.checked = true;
+      }
+      toggle.addEventListener("change", () => {
+        const enabled = toggle.checked;
+        document.documentElement.classList.toggle("darkmode", enabled);
+        document.body.classList.toggle("darkmode", enabled);
+        localStorage.setItem("darkMode", enabled ? "enabled" : "disabled");
+      });
+
+      /* ── Lang selector ── */
+      const LABELS = { en: "EN", fr: "FR", es: "ES", de: "DE", it: "IT" };
+
+      function updateBtnLabel(lang) {
+        const el = document.getElementById("langBtnLabel");
+        if (el) el.textContent = LABELS[lang] || lang.toUpperCase();
+      }
+
+      function applyActive(lang) {
+        document
+          .querySelectorAll(".lang-opt")
+          .forEach((opt) => opt.classList.toggle("is-active", opt.dataset.lang === lang));
+        updateBtnLabel(lang);
+      }
+
+      function closeDropdown() {
+        document.getElementById("langToggle").classList.remove("open");
+        document.getElementById("langBtn").setAttribute("aria-expanded", "false");
+      }
+
+      async function selectLang(lang) {
+        await setLang(lang);
+        applyActive(lang);
+        closeDropdown();
+      }
+
+      (async () => {
+        const lang = await initLang();
+        applyActive(lang);
+
+        document.getElementById("langBtn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          document.getElementById("langToggle").classList.contains("open")
+            ? closeDropdown()
+            : (document.getElementById("langToggle").classList.add("open"),
+              document.getElementById("langBtn").setAttribute("aria-expanded", "true"));
+        });
+
+        document.querySelectorAll(".lang-opt").forEach((opt) => {
+          opt.addEventListener("click", () => selectLang(opt.dataset.lang));
+          opt.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              selectLang(opt.dataset.lang);
+            }
+          });
+        });
+
+        document.addEventListener("click", () => closeDropdown());
+        document
+          .getElementById("langDropdown")
+          .addEventListener("click", (e) => e.stopPropagation());
+      })();
+
+      initBottomNav();
+    </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

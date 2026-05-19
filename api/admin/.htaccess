@@ -28,3 +28,9 @@ RewriteRule ^social-links$              social_links.php [L,QSA]
 
 # /api/admin/social-links/7             → social_links.php (détail/patch/delete)
 RewriteRule ^social-links/[0-9]+$       social_links.php [L,QSA]
+
+# /api/admin/event_codes                → event_codes.php (liste / créer)
+RewriteRule ^event_codes$               event_codes.php [L,QSA]
+
+# /api/admin/event_codes/MYCODE         → event_codes.php (patch / delete)
+RewriteRule ^event_codes/(.+)$          event_codes.php [L,QSA]

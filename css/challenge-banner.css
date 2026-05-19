@@ -1,56 +1,117 @@
-/* challenge-banner.css — Bandeau rappel défi actif en haut des pages de jeu */
+/* challenge-banner.css — Indicateur défi actif (pill flottant, discret) */
+
 #challengeBanner {
+  position: fixed;
+  bottom: 80px; /* au-dessus de la bottom nav */
+  right: 16px;
+  z-index: 9000;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  position: relative;
-  z-index: 100;
-  animation: bannerSlideIn 0.4s ease-out;
+  gap: 8px;
+  padding: 8px 12px 8px 8px;
+  background: rgba(15, 15, 15, 0.92);
+  border: 1px solid rgba(230, 57, 70, 0.5);
+  border-radius: 32px;
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(230, 57, 70, 0.15);
+  cursor: default;
+  animation: cbSlideIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  max-width: 240px;
 }
 
-@keyframes bannerSlideIn {
-  from { transform: translateY(-100%); opacity: 0; }
-  to   { transform: translateY(0);      opacity: 1; }
+@keyframes cbSlideIn {
+  from {
+    transform: translateY(20px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
+/* ── Avatar ── */
 .cb-avatar {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.6);
+  border: 2px solid #e63946;
   object-fit: cover;
   flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(230, 57, 70, 0.45);
 }
 
-.cb-text { flex: 1; min-width: 0; }
+/* ── Texte ── */
+.cb-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
 
 .cb-pseudo {
+  font-size: 0.75rem;
   font-weight: 700;
-  font-size: 0.85rem;
+  color: #f0f0f0;
+  font-family: "Oswald", Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cb-score {
-  font-size: 0.72rem;
-  opacity: 0.88;
+  font-size: 0.65rem;
+  color: #e63946;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* ── Icône défi ── */
+.cb-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* ── Bouton dismiss ── */
 .cb-dismiss {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.08);
   border: none;
-  color: #fff;
+  color: #888;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 0.55rem;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  line-height: 1;
 }
-.cb-dismiss:hover { background: rgba(255,255,255,0.35); }
+.cb-dismiss:hover {
+  background: rgba(230, 57, 70, 0.25);
+  color: #e63946;
+}
+
+/* ── Dark mode ── */
+body.darkmode #challengeBanner {
+  background: rgba(8, 8, 8, 0.95);
+  border-color: rgba(230, 57, 70, 0.6);
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  #challengeBanner {
+    bottom: 70px;
+    right: 10px;
+    max-width: 200px;
+  }
+}

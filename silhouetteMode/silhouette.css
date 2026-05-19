@@ -5,7 +5,6 @@
    victoire dans la silhouette, animation d'apparition.
    ============================================================= */
 
-
 /* =====================================================
    1. BOÎTE SILHOUETTE
    Conteneur carré centré affichant l'image en silhouette
@@ -56,10 +55,11 @@
   margin-bottom: 20px;
   /* Cachée jusqu'au chargement complet */
   visibility: hidden;
-  transition: filter 0.3s ease, visibility 0s;
+  transition:
+    filter 0.3s ease,
+    visibility 0s;
   animation: popInSilhouette 0.4s ease;
 }
-
 
 /* =====================================================
    2. NIVEAUX DE FLOU PROGRESSIF
@@ -68,15 +68,29 @@
    ===================================================== */
 
 /* Niveau 0 : image très floue (début de partie) */
-.blur-level-0 { filter: blur(14px); }
-.blur-level-1 { filter: blur(12px); }
-.blur-level-2 { filter: blur(10px); }
-.blur-level-3 { filter: blur(8px); }
-.blur-level-4 { filter: blur(6px); }
-.blur-level-5 { filter: blur(3px); }
+.blur-level-0 {
+  filter: blur(14px);
+}
+.blur-level-1 {
+  filter: blur(12px);
+}
+.blur-level-2 {
+  filter: blur(10px);
+}
+.blur-level-3 {
+  filter: blur(8px);
+}
+.blur-level-4 {
+  filter: blur(6px);
+}
+.blur-level-5 {
+  filter: blur(3px);
+}
 /* Niveau 6 : image nette (révélation finale) */
-.blur-level-6 { filter: blur(0px); transition: filter 0.4s ease; }
-
+.blur-level-6 {
+  filter: blur(0px);
+  transition: filter 0.4s ease;
+}
 
 /* =====================================================
    3. MAUVAISES RÉPONSES (style silhouette)
@@ -103,7 +117,6 @@
   height: 48px;
   border-radius: 8px;
 }
-
 
 /* =====================================================
    4. BOÎTE DE VICTOIRE (contexte silhouette)
@@ -144,7 +157,6 @@
   text-align: center;
 }
 
-
 /* =====================================================
    5. ANIMATION D'APPARITION DE LA SILHOUETTE
    ===================================================== */
@@ -159,7 +171,6 @@
     opacity: 1;
   }
 }
-
 
 /* =====================================================
    6. RESPONSIVE — SPÉCIFIQUE SILHOUETTE
@@ -188,7 +199,6 @@
   }
 }
 
-
 /* -----------------------------------------------
    MOBILE (≤ 480px)
    Boîte carrée proportionnelle à la largeur de l'écran.
@@ -197,7 +207,7 @@
 ----------------------------------------------- */
 @media (max-width: 480px) {
   .silhouette-box {
-    height: min(340px, 80vw);   /* Quasi-carré sur mobile */
+    height: min(340px, 80vw); /* Quasi-carré sur mobile */
     max-width: 92vw;
     padding: 10px;
     margin: 15px auto;
@@ -233,7 +243,7 @@
   }
 
   #textbar {
-    min-width: 0 !important;   /* Annule le min-width:240px inline */
-    flex: 1 1 120px;           /* Peut rétrécir librement, s'étend si possible */
+    min-width: 0 !important; /* Annule le min-width:240px inline */
+    flex: 1 1 120px; /* Peut rétrécir librement, s'étend si possible */
   }
 }

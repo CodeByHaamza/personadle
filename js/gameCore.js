@@ -22,7 +22,6 @@
  *   showCommunityStats(mode, t) → injects "X% of players found this today" in victory box
  */
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // DATE UTILITIES (Paris / Europe timezone, DST-safe)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -50,14 +49,11 @@ export function parisDateKey(d = new Date()) {
  * @returns {number} Milliseconds until 00:00:00 Paris time
  */
 export function msUntilNextParisMidnight() {
-  const nowInParis = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" })
-  );
+  const nowInParis = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
   const midnight = new Date(nowInParis);
   midnight.setHours(24, 0, 0, 0);
   return midnight.getTime() - nowInParis.getTime();
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STRING UTILITY
@@ -75,14 +71,13 @@ export function msUntilNextParisMidnight() {
  */
 export function normalize(str) {
   return str
-    .normalize("NFD")                     // decompose accented chars
-    .replace(/[\u0300-\u036f]/g, "")      // strip combining diacritics
-    .replace(/[\u2018\u2019]/g, "'")      // unify curly apostrophes → straight
-    .replace(/"/g, "")                    // remove double quotes
+    .normalize("NFD") // decompose accented chars
+    .replace(/[\u0300-\u036f]/g, "") // strip combining diacritics
+    .replace(/[\u2018\u2019]/g, "'") // unify curly apostrophes → straight
+    .replace(/"/g, "") // remove double quotes
     .trim()
     .toLowerCase();
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFETTI / VICTORY CELEBRATION
@@ -124,17 +119,12 @@ export function showConfettiExplosion({
       // Bilateral: first half from left, second half from right
       const isLeft = i < count / 2;
       emoji.style.left = isLeft ? "0vw" : "100vw";
-      const xTarget = isLeft
-        ? Math.random() * 50 + 25
-        : -(Math.random() * 50 + 25);
+      const xTarget = isLeft ? Math.random() * 50 + 25 : -(Math.random() * 50 + 25);
       emoji.style.setProperty("--x-move", xTarget + "vw");
     } else {
       // Bottom: random horizontal origin
       emoji.style.left = Math.random() * 100 + "vw";
-      emoji.style.setProperty(
-        "--x-move",
-        (Math.random() * 100 - 50) + "vw"
-      );
+      emoji.style.setProperty("--x-move", Math.random() * 100 - 50 + "vw");
     }
 
     emoji.style.setProperty("--y-move", -(Math.random() * 50 + 30) + "vh");
@@ -144,7 +134,6 @@ export function showConfettiExplosion({
     setTimeout(() => emoji.remove(), 1000);
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MODE NAVIGATION
@@ -190,7 +179,6 @@ export function revealNextLink({ nextHref = "", prevHref = null } = {}) {
   }
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // RULES MODAL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -227,7 +215,6 @@ export function setupRulesModal() {
     if (e.target === modal) close();
   });
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DAILY RESET SCHEDULING
@@ -277,7 +264,6 @@ export function checkResetOnLoad(lastPlayedKey, statsModeKey, onReset) {
   }
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // OPUS FILTER BUTTONS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -304,16 +290,15 @@ export function setupFilterButtons(storageKey, onFilterChange) {
     btn.addEventListener("click", () => {
       btn.classList.toggle("active");
 
-      const activeFilters = Array.from(
-        document.querySelectorAll(".filter-btn.active")
-      ).map((b) => b.dataset.opus);
+      const activeFilters = Array.from(document.querySelectorAll(".filter-btn.active")).map(
+        (b) => b.dataset.opus
+      );
 
       localStorage.setItem(storageKey, JSON.stringify(activeFilters));
       onFilterChange(activeFilters);
     });
   });
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WRONG GUESS MINI PORTRAIT
@@ -345,7 +330,9 @@ export function showWrongMini(
   const img = document.createElement("img");
   img.src = imageSrc;
   img.alt = altText;
-  img.onerror = () => { img.src = fallbackSrc; };
+  img.onerror = () => {
+    img.src = fallbackSrc;
+  };
 
   div.appendChild(img);
   wrongListEl.appendChild(div);
@@ -353,7 +340,6 @@ export function showWrongMini(
   // Small delay so the element is in the DOM before the class triggers CSS
   setTimeout(() => div.classList.add("shake"), 50);
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME SESSION — Backend sync preparation
@@ -375,11 +361,11 @@ export function showWrongMini(
 export function buildGameSession({ mode, targetName, result, attempts, timeMs = 0, filters = [] }) {
   return {
     mode,
-    played_date:    parisDateKey(),
-    target_name:    targetName,
+    played_date: parisDateKey(),
+    target_name: targetName,
     result,
     attempts,
-    time_ms:        Math.round(timeMs),
+    time_ms: Math.round(timeMs),
     active_filters: filters,
   };
 }
@@ -409,20 +395,19 @@ export async function savePendingSession(session) {
     } catch (err) {
       if (err?.status === 409) return; // Session already recorded (e.g. challenge replay)
       // Offline or other server error — queue to localStorage for later sync
-      const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
+      const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
       pending.push(session);
-      localStorage.setItem('pendingSessions', JSON.stringify(pending));
+      localStorage.setItem("pendingSessions", JSON.stringify(pending));
     }
   } else {
-    const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
+    const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
     pending.push(session);
-    localStorage.setItem('pendingSessions', JSON.stringify(pending));
+    localStorage.setItem("pendingSessions", JSON.stringify(pending));
   }
 
   // Always try to show community stats (silent fail if offline)
   showCommunityStats(session.mode, session.target_name);
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DAILY TARGET — Deterministic seeded RNG (FNV-1a 32-bit)
@@ -443,16 +428,17 @@ export async function savePendingSession(session) {
  * @returns {string}
  */
 export function getPlayerSeedId() {
-  const uid = localStorage.getItem('playerUserId');
+  const uid = localStorage.getItem("playerUserId");
   if (uid) return uid;
 
-  let anonId = localStorage.getItem('anonPlayerId');
+  let anonId = localStorage.getItem("anonPlayerId");
   if (!anonId) {
     // Generate a random UUID v4-like identifier (crypto.randomUUID when available)
-    anonId = typeof crypto?.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-    localStorage.setItem('anonPlayerId', anonId);
+    anonId =
+      typeof crypto?.randomUUID === "function"
+        ? crypto.randomUUID()
+        : Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+    localStorage.setItem("anonPlayerId", anonId);
   }
   return anonId;
 }
@@ -476,7 +462,9 @@ export function getDailyTarget(pool, mode, date = parisDateKey(), seedId = getPl
   try {
     const override = localStorage.getItem(`debugTarget_${mode}`);
     if (override && pool.includes(override)) return override;
-  } catch (_) { /* ignore */ }
+  } catch (_) {
+    /* ignore */
+  }
   const str = `${seedId}|${date}|${mode}`;
   let h = 2166136261 >>> 0; // FNV-1a offset basis (32-bit)
   for (let i = 0; i < str.length; i++) {
@@ -485,7 +473,6 @@ export function getDailyTarget(pool, mode, date = parisDateKey(), seedId = getPl
   }
   return pool[h % pool.length];
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMMUNITY STATS — "X% of players found this today"
@@ -513,34 +500,34 @@ export async function showCommunityStats(mode, targetName) {
     // Skip if too few data points (e.g. first player of the day)
     if (!data?.total || data.total < 2) return;
 
-    const victoryBox = document.getElementById('victoryBox') || document.querySelector('.victory-box');
+    const victoryBox =
+      document.getElementById("victoryBox") || document.querySelector(".victory-box");
     if (!victoryBox) return;
 
-    let el = victoryBox.querySelector('.community-stats');
+    let el = victoryBox.querySelector(".community-stats");
     if (!el) {
-      el = document.createElement('p');
-      el.className = 'community-stats';
+      el = document.createElement("p");
+      el.className = "community-stats";
       victoryBox.appendChild(el);
     }
 
     const i18n = window.i18n || { t: (k) => k };
-    el.textContent = i18n.t('game.community_stats', { percent: data.percent, total: data.total });
+    el.textContent = i18n.t("game.community_stats", { percent: data.percent, total: data.total });
   } catch {
     // Offline or API not available — silent fail
   }
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────────────────────
 // Filter storage keys per mode — single source of truth (also exported for friends.js)
 export const FILTER_STORAGE_KEYS = {
-  classic:      'filters_Classic',
-  emoji:        'filters_Emoji',
-  silhouette:   'silhouetteActiveFilters',
-  alloutattack: 'filters_AllOutAttack',
-  personae:     'personaeActiveFilters',
-  music:        'musicActiveFilters',
+  classic: "filters_Classic",
+  emoji: "filters_Emoji",
+  silhouette: "silhouetteActiveFilters",
+  alloutattack: "filters_AllOutAttack",
+  personae: "personaeActiveFilters",
+  music: "musicActiveFilters",
 };
 const _FILTER_STORAGE_KEY = FILTER_STORAGE_KEYS;
 
@@ -548,8 +535,11 @@ const _FILTER_STORAGE_KEY = FILTER_STORAGE_KEYS;
 function _getActiveFilters(mode) {
   const key = _FILTER_STORAGE_KEY[mode?.toLowerCase()];
   if (!key) return [];
-  try { return JSON.parse(localStorage.getItem(key) || '[]'); }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  } catch {
+    return [];
+  }
 }
 
 // CHALLENGE BUTTON — "Challenge a friend" post-victoire
@@ -565,69 +555,80 @@ function _getActiveFilters(mode) {
 export function showChallengeButton(mode, score) {
   if (!window._currentUser) return;
 
-  const nav = document.getElementById('modeNavigationContainer');
-  if (!nav || document.getElementById('challengeFriendBtn')) return;
+  const nav = document.getElementById("modeNavigationContainer");
+  if (!nav || document.getElementById("challengeFriendBtn")) return;
 
-  const t    = (key, fb) => window.i18n?.t?.(key) ?? fb;
+  const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
   const date = parisDateKey();
 
-  const btn = document.createElement('button');
-  btn.id        = 'challengeFriendBtn';
-  btn.className = 'btn-challenge';
-  btn.innerHTML = `<span>⚔</span><span>${t('challenge.challenge_friend', 'Challenge a Friend')}</span>`;
+  const btn = document.createElement("button");
+  btn.id = "challengeFriendBtn";
+  btn.className = "btn-challenge";
+  btn.innerHTML = `<span>⚔</span><span>${t("challenge.challenge_friend", "Challenge a Friend")}</span>`;
 
   // Insérer entre prevMode et nextMode
-  const nextBtn = document.getElementById('nextModeButton');
+  const nextBtn = document.getElementById("nextModeButton");
   if (nextBtn) nav.insertBefore(btn, nextBtn);
-  else         nav.appendChild(btn);
+  else nav.appendChild(btn);
 
-  btn.addEventListener('click', () => _showChallengeModal(mode, score, date, _getActiveFilters(mode)));
+  btn.addEventListener("click", () =>
+    _showChallengeModal(mode, score, date, _getActiveFilters(mode))
+  );
 }
 
 function _showChallengeModal(mode, score, date, activeFilters = []) {
   const api = window._personadleApi;
   if (!api || !window._currentUser) return;
 
-  document.getElementById('challengeModal')?.remove();
+  document.getElementById("challengeModal")?.remove();
 
-  const t   = (key, fb) => window.i18n?.t?.(key) ?? fb;
-  const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
+  const esc = (s) =>
+    String(s ?? "").replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+    );
 
-  const modal = document.createElement('div');
-  modal.id        = 'challengeModal';
-  modal.className = 'challenge-overlay';
+  const modal = document.createElement("div");
+  modal.id = "challengeModal";
+  modal.className = "challenge-overlay";
   modal.innerHTML = `
     <div class="challenge-card">
       <div id="challengeFriendList" class="challenge-card__list">
-        <p class="challenge-card__empty">${t('ui.loading', 'Loading…')}</p>
+        <p class="challenge-card__empty">${t("ui.loading", "Loading…")}</p>
       </div>
       <div class="challenge-card__footer">
-        <span class="challenge-card__footer-label">⚔ ${t('challenge.select_friend', 'Challenge a friend')}</span>
+        <span class="challenge-card__footer-label">⚔ ${t("challenge.select_friend", "Challenge a friend")}</span>
         <button id="challengeModalClose" class="challenge-card__footer-close" aria-label="Close">✕</button>
       </div>
     </div>
   `;
   document.body.appendChild(modal);
 
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  modal.querySelector('#challengeModalClose').addEventListener('click', () => modal.remove());
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
+  modal.querySelector("#challengeModalClose").addEventListener("click", () => modal.remove());
 
   // Charger la liste d'amis
-  api.friends.list().then(data => {
-    const friends = data.friends ?? [];
-    const listEl  = document.getElementById('challengeFriendList');
-    if (!listEl) return;
+  api.friends
+    .list()
+    .then((data) => {
+      const friends = data.friends ?? [];
+      const listEl = document.getElementById("challengeFriendList");
+      if (!listEl) return;
 
-    if (!friends.length) {
-      listEl.innerHTML = `<p class="challenge-card__empty">${t('friends.no_friends', 'No friends yet.')}</p>`;
-      return;
-    }
+      if (!friends.length) {
+        listEl.innerHTML = `<p class="challenge-card__empty">${t("friends.no_friends", "No friends yet.")}</p>`;
+        return;
+      }
 
-    listEl.innerHTML = friends.map(f => `
+      listEl.innerHTML = friends
+        .map(
+          (f) => `
       <div class="challenge-friend-row">
         <img class="challenge-friend-row__avatar"
-             src="${esc(f.avatar_data) || '../img/default_avatar.png'}"
+             src="${esc(f.avatar_data) || "../img/default_avatar.png"}"
              onerror="this.src='../img/default_avatar.png'"
              alt="${esc(f.pseudo)}">
         <div class="challenge-friend-row__info">
@@ -635,41 +636,43 @@ function _showChallengeModal(mode, score, date, activeFilters = []) {
           <div class="challenge-friend-row__code">${esc(f.friend_code)}</div>
         </div>
         <button data-fid="${f.friend_id}" class="challenge-friend-row__send js-send-challenge">
-          ${t('challenge.send', 'Send')}
+          ${t("challenge.send", "Send")}
         </button>
       </div>
-    `).join('');
+    `
+        )
+        .join("");
 
-    listEl.querySelectorAll('.js-send-challenge').forEach(sendBtn => {
-      sendBtn.addEventListener('click', async () => {
-        sendBtn.disabled = true;
-        const friendId = parseInt(sendBtn.dataset.fid);
-        try {
-          await api.messages.send({
-            receiver_id:      friendId,
-            type:             'challenge',
-            challenge_mode:   mode,
-            challenge_score:  score,
-            challenge_date:   date,
-            challenge_filters: JSON.stringify(activeFilters),
-          });
-          sendBtn.textContent = '✓ Sent!';
-          sendBtn.classList.add('sent');
+      listEl.querySelectorAll(".js-send-challenge").forEach((sendBtn) => {
+        sendBtn.addEventListener("click", async () => {
+          sendBtn.disabled = true;
+          const friendId = parseInt(sendBtn.dataset.fid);
+          try {
+            await api.messages.send({
+              receiver_id: friendId,
+              type: "challenge",
+              challenge_mode: mode,
+              challenge_score: score,
+              challenge_date: date,
+              challenge_filters: JSON.stringify(activeFilters),
+            });
+            sendBtn.textContent = "✓ Sent!";
+            sendBtn.classList.add("sent");
 
-          // XP Social Link : action 'challenge'
-          if (api.socialLink) {
-            api.socialLink.interactByFriend(friendId, 'challenge').catch(() => {});
+            // XP Social Link : action 'challenge'
+            if (api.socialLink) {
+              api.socialLink.interactByFriend(friendId, "challenge").catch(() => {});
+            }
+          } catch (err) {
+            sendBtn.disabled = false;
+            sendBtn.textContent =
+              err?.status === 409 ? t("challenge.already_sent", "Already sent today") : "✕ Error";
           }
-        } catch (err) {
-          sendBtn.disabled = false;
-          sendBtn.textContent = err?.status === 409
-            ? t('challenge.already_sent', 'Already sent today')
-            : '✕ Error';
-        }
+        });
       });
+    })
+    .catch(() => {
+      const listEl = document.getElementById("challengeFriendList");
+      if (listEl) listEl.innerHTML = `<p class="challenge-card__empty">Could not load friends.</p>`;
     });
-  }).catch(() => {
-    const listEl = document.getElementById('challengeFriendList');
-    if (listEl) listEl.innerHTML = `<p class="challenge-card__empty">Could not load friends.</p>`;
-  });
 }

@@ -34,15 +34,34 @@ let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
 let sessionStartTime = Date.now();
 
 /** All specific opus codes available in Silhouette mode. */
-const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P4D","P5","P5R","P5S","P5T","P5X","PQ","PQ2"];
+const ALL_OPUS = [
+  "P1",
+  "P2IS",
+  "P2EP",
+  "P3",
+  "P3FES",
+  "P3P",
+  "P3R",
+  "P4",
+  "P4G",
+  "P4AU",
+  "P4D",
+  "P5",
+  "P5R",
+  "P5S",
+  "P5T",
+  "P5X",
+  "PQ",
+  "PQ2",
+];
 
 let activeFilters = [...ALL_OPUS];
 
 let filteredCharacters = [];
 let target = null;
 let attempts = 0;
-const maxAttempts = 5;    // Give Up unlocks after this many wrong guesses
-let currentZoom = 1.8;    // Initial zoom level (decreases on each wrong guess)
+const maxAttempts = 5; // Give Up unlocks after this many wrong guesses
+let currentZoom = 1.8; // Initial zoom level (decreases on each wrong guess)
 const maxZoomOut = 1;
 let gameOver = false;
 let currentPickToken = 0; // Anti-race-condition token for image preloading
@@ -67,7 +86,6 @@ silhouetteImg.style.visibility = "hidden";
 silhouetteImg.style.transform = `scale(${currentZoom})`;
 silhouetteImg.style.transition = "none";
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER / CHARACTER POOL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,7 +100,6 @@ function getFilteredCharacters() {
     return op.some((o) => activeFilters.includes(o));
   });
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SILHOUETTE IMAGE HELPERS
@@ -106,12 +123,13 @@ function pickCharacter(random = false) {
 
   if (random) {
     const _prev = target;
-    const _candidates = filteredCharacters.length > 1 && _prev
-      ? filteredCharacters.filter(c => c.nom !== _prev.nom)
-      : filteredCharacters;
+    const _candidates =
+      filteredCharacters.length > 1 && _prev
+        ? filteredCharacters.filter((c) => c.nom !== _prev.nom)
+        : filteredCharacters;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
   } else {
-    target = getDailyTarget(originalCharacters, 'Silhouette');
+    target = getDailyTarget(originalCharacters, "Silhouette");
   }
 
   currentZoom = 1.8;
@@ -143,7 +161,6 @@ function pickCharacter(random = false) {
   localStorage.setItem("silhouetteAttempts", attempts);
   localStorage.setItem("silhouetteGameOver", "false");
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTOCOMPLETE
@@ -188,7 +205,8 @@ function initializeAutocomplete(input, personasList) {
         character._guessed ||
         !lowerName.includes(lowerVal) ||
         !character.opus.some((o) => activeFilters.includes(o))
-      ) continue;
+      )
+        continue;
 
       const [firstName, lastName] = displayName.split(" ");
       let priority = 3;
@@ -232,9 +250,13 @@ function initializeAutocomplete(input, personasList) {
     const items = document.querySelectorAll("#autocomplete-list .list-options");
     if (!items.length) return;
 
-    if (e.key === "ArrowDown") { currentFocus++; updateActive(items); }
-    else if (e.key === "ArrowUp") { currentFocus--; updateActive(items); }
-    else if (e.key === "Enter") {
+    if (e.key === "ArrowDown") {
+      currentFocus++;
+      updateActive(items);
+    } else if (e.key === "ArrowUp") {
+      currentFocus--;
+      updateActive(items);
+    } else if (e.key === "Enter") {
       e.preventDefault();
       if (currentFocus > -1) items[currentFocus].click();
       else items[0]?.click();
@@ -258,7 +280,6 @@ function initializeAutocomplete(input, personasList) {
     for (let i = 0; i < lists.length; i++) lists[i].parentNode.removeChild(lists[i]);
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VICTORY / DEFEAT
@@ -286,18 +307,23 @@ function showVictory(force = false) {
   const message = document.createElement("div");
   message.className = "victory-box";
   message.innerHTML = force
-    ? `<span class="failure-text">${(window.i18n || { t: (k, v) => k }).t('modes.silhouette.giveup_reveal', { name: target.nom })}</span>`
-    : `<span class="success-text">${(window.i18n || { t: (k, v) => k }).t('modes.silhouette.correct', { name: target.nom })}</span>`;
+    ? `<span class="failure-text">${(window.i18n || { t: (k, v) => k }).t("modes.silhouette.giveup_reveal", { name: target.nom })}</span>`
+    : `<span class="success-text">${(window.i18n || { t: (k, v) => k }).t("modes.silhouette.correct", { name: target.nom })}</span>`;
   silhouetteBox.insertAdjacentElement("afterend", message);
 
   if (!force) {
     if (!statsAlreadyLogged) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({ result: "win", mode: modeName, timeSpent });
-      savePendingSession(buildGameSession({
-        mode: modeName, targetName: target.nom, result: "win",
-        attempts, timeMs: timeSpent * 1000,
-      }));
+      savePendingSession(
+        buildGameSession({
+          mode: modeName,
+          targetName: target.nom,
+          result: "win",
+          attempts,
+          timeMs: timeSpent * 1000,
+        })
+      );
       localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
     }
@@ -329,12 +355,12 @@ function showVictory(force = false) {
     }
     trackUniqueDay(_pSil, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pSil)));
     showConfettiExplosion();
-    showChallengeButton('silhouette', attempts);
+    showChallengeButton("silhouette", attempts);
     let winCount = parseInt(localStorage.getItem("silhouetteWins") || "0");
     localStorage.setItem("silhouetteWins", winCount + 1);
   }
 
-  checkChallengeCompletion('silhouette', attempts, !force);
+  checkChallengeCompletion("silhouette", attempts, !force);
   showCommunityStats(modeName, target.nom);
   revealNextLink({
     prevHref: "../allOutAttackMode/allOutAttack.html",
@@ -345,7 +371,6 @@ function showVictory(force = false) {
   localStorage.setItem("silhouetteForceReveal", String(force));
   checkBadgesAfterGame();
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WRONG GUESS
@@ -361,13 +386,8 @@ function showWrong(name) {
   char._guessed = true;
 
   const imageName = portraitsMap[char.nom] || char.nom.split(" ")[0];
-  showWrongMini(
-    `../database/portraits/${encodeURIComponent(imageName)}.webp`,
-    char.nom,
-    wrongList
-  );
+  showWrongMini(`../database/portraits/${encodeURIComponent(imageName)}.webp`, char.nom, wrongList);
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME FLOW
@@ -419,10 +439,15 @@ function giveUp() {
   if (!statsAlreadyLogged) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
-    savePendingSession(buildGameSession({
-      mode: modeName, targetName: target.nom, result: "giveup",
-      attempts, timeMs: timeSpent * 1000,
-    }));
+    savePendingSession(
+      buildGameSession({
+        mode: modeName,
+        targetName: target.nom,
+        result: "giveup",
+        attempts,
+        timeMs: timeSpent * 1000,
+      })
+    );
     localStorage.setItem(todayKey, "true");
     statsAlreadyLogged = true;
   }
@@ -453,17 +478,16 @@ function resetGame(random = false) {
   document.querySelectorAll(".victory-message, .victory-box").forEach((e) => e.remove());
 
   // Reset _guessed flags so all characters are available again
-  originalCharacters.forEach((c) => { c._guessed = false; });
+  originalCharacters.forEach((c) => {
+    c._guessed = false;
+  });
 
   pickCharacter(random);
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER BUTTONS (silhouette-specific wiring)
 // ─────────────────────────────────────────────────────────────────────────────
-
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DARK MODE (silhouette-specific element)
@@ -477,7 +501,6 @@ function applyDarkModeStyles() {
     zone.style.border = "3px solid #888";
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BOOTSTRAP — DOMContentLoaded
@@ -509,7 +532,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Bind autocomplete to the sorted persona name list
-  initializeAutocomplete(textbar, personas.sort((a, b) => a.localeCompare(b)));
+  initializeAutocomplete(
+    textbar,
+    personas.sort((a, b) => a.localeCompare(b))
+  );
 
   // ── Restore session ──
   const stored = localStorage.getItem("silhouetteTarget");
@@ -561,7 +587,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // DEBUG (console only)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -575,10 +600,18 @@ function debugAllSilhouettes() {
   const errors = [];
 
   for (const name of usableNames) {
-    if (!foundInSilhouette.has(name)) { errors.push(`❌ ${name} — Not in silhouetteCharacters.js`); continue; }
-    if (!foundInMap.has(name)) { errors.push(`❌ ${name} — Missing portrait in portraitsMapSilhouette`); continue; }
+    if (!foundInSilhouette.has(name)) {
+      errors.push(`❌ ${name} — Not in silhouetteCharacters.js`);
+      continue;
+    }
+    if (!foundInMap.has(name)) {
+      errors.push(`❌ ${name} — Missing portrait in portraitsMapSilhouette`);
+      continue;
+    }
     const char = originalCharacters.find((c) => c.nom === name);
-    const passes = (Array.isArray(char.opus) ? char.opus : [char.opus]).some((o) => accepted.includes(o));
+    const passes = (Array.isArray(char.opus) ? char.opus : [char.opus]).some((o) =>
+      accepted.includes(o)
+    );
     if (!passes) console.warn(`⚠️ ${name} — Does not match active filters`);
     else console.log(`✅ ${name}`);
   }

@@ -1,4 +1,10 @@
-# lang/ — Fichiers de traduction (i18n)
+<div align="center">
+
+# 🌐 Traductions i18n
+
+> **Cinq langues. Une seule source de vérité : `en.json`.**
+
+</div>
 
 Contient les traductions de toute l'interface de PersonaDLE.
 
@@ -6,13 +12,13 @@ Contient les traductions de toute l'interface de PersonaDLE.
 
 ## Fichiers
 
-| Fichier | Langue | Statut |
-| --- | --- | --- |
-| `en.json` | Anglais | ✅ Complet — **source de vérité** |
-| `fr.json` | Français | ✅ Complet |
-| `es.json` | Espagnol | 🔜 À créer |
-| `de.json` | Allemand | 🔜 À créer |
-| `jp.json` | Japonais | ⏳ Post-v1.2 |
+| Fichier   | Langue   | Statut                            |
+| --------- | -------- | --------------------------------- |
+| `en.json` | Anglais  | ✅ Complet — **source de vérité** |
+| `fr.json` | Français | ✅ Complet                        |
+| `es.json` | Espagnol | 🔜 À créer                        |
+| `de.json` | Allemand | 🔜 À créer                        |
+| `jp.json` | Japonais | ⏳ Post-v1.2                      |
 
 > `en.json` est toujours la référence. En cas de clé manquante dans une autre langue, le système affiche la version anglaise.
 

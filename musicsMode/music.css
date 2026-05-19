@@ -8,11 +8,11 @@
    P4→jaune-or · P5→rouge (défaut) · PQ→orange
    ============================================================= */
 
-
 /* ─── 1. AUDIO NATIF — caché, contrôlé via JS ─────────────── */
 
-audio { display: none; }
-
+audio {
+  display: none;
+}
 
 /* ─── 2. WRAPPER AUDIO ─────────────────────────────────────── */
 
@@ -21,19 +21,19 @@ audio { display: none; }
  * Remplacées par JS via setPlayerTheme() selon le jeu d'origine de la musique.
  */
 .audio-wrapper {
-  --player-accent:           #e63946;
-  --player-accent-dark:      #c1121f;
-  --player-accent-light:     #ff8fa3;
-  --player-glow:             rgba(230, 57, 70, 0.35);
-  --player-glow-strong:      rgba(230, 57, 70, 0.55);
-  --player-glow-subtle:      rgba(230, 57, 70, 0.04);
-  --player-btn-glow:         rgba(230, 57, 70, 0.70);
-  --player-btn-glow-strong:  rgba(230, 57, 70, 0.90);
-  --player-btn-glow-max:     rgba(230, 57, 70, 1.00);
+  --player-accent: #e63946;
+  --player-accent-dark: #c1121f;
+  --player-accent-light: #ff8fa3;
+  --player-glow: rgba(230, 57, 70, 0.35);
+  --player-glow-strong: rgba(230, 57, 70, 0.55);
+  --player-glow-subtle: rgba(230, 57, 70, 0.04);
+  --player-btn-glow: rgba(230, 57, 70, 0.7);
+  --player-btn-glow-strong: rgba(230, 57, 70, 0.9);
+  --player-btn-glow-max: rgba(230, 57, 70, 1);
 
   background: linear-gradient(150deg, #1a0505 0%, #0d0d0d 60%, #150a0a 100%);
   border: 2px solid var(--player-accent);
-  border-radius: 6px 22px 6px 22px;   /* asymétrique — style P5 */
+  border-radius: 6px 22px 6px 22px; /* asymétrique — style P5 */
   padding: 20px 24px 16px;
   width: fit-content;
   min-width: 300px;
@@ -47,12 +47,14 @@ audio { display: none; }
     0 6px 40px rgba(0, 0, 0, 0.85),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 /* Grille diagonale décorative P5 en fond */
 .audio-wrapper::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -74,24 +76,26 @@ audio { display: none; }
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-
 /* ─── 3. LECTEUR CUSTOM P5 ─────────────────────────────────── */
 
-.p5-player { position: relative; z-index: 1; }
-
+.p5-player {
+  position: relative;
+  z-index: 1;
+}
 
 /* ── Coin coupé (signature P5) ── */
 .p5-player::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: -20px; left: -24px;
-  width: 0; height: 0;
+  top: -20px;
+  left: -24px;
+  width: 0;
+  height: 0;
   border-style: solid;
   border-width: 32px 32px 0 0;
   border-color: var(--player-accent) transparent transparent transparent;
   pointer-events: none;
 }
-
 
 /* ── En-tête : label + barres sonores ── */
 .p5-player-header {
@@ -102,7 +106,7 @@ audio { display: none; }
 }
 
 .p5-player-label {
-  font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif;
+  font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -110,7 +114,6 @@ audio { display: none; }
   color: var(--player-accent);
   user-select: none;
 }
-
 
 /* ── Barres sonores animées ── */
 .p5-sound-bars {
@@ -130,17 +133,33 @@ audio { display: none; }
 }
 
 /* Quand lecture en cours → animation par décalage */
-.p5-sound-bars.playing span:nth-child(1) { animation: p5bar 0.75s ease-in-out infinite; }
-.p5-sound-bars.playing span:nth-child(2) { animation: p5bar 0.55s ease-in-out 0.12s infinite; }
-.p5-sound-bars.playing span:nth-child(3) { animation: p5bar 0.90s ease-in-out 0.06s infinite; }
-.p5-sound-bars.playing span:nth-child(4) { animation: p5bar 0.65s ease-in-out 0.20s infinite; }
-.p5-sound-bars.playing span:nth-child(5) { animation: p5bar 1.00s ease-in-out 0.04s infinite; }
-
-@keyframes p5bar {
-  0%, 100% { height: 4px;  opacity: 0.6; }
-  50%       { height: 20px; opacity: 1;   }
+.p5-sound-bars.playing span:nth-child(1) {
+  animation: p5bar 0.75s ease-in-out infinite;
+}
+.p5-sound-bars.playing span:nth-child(2) {
+  animation: p5bar 0.55s ease-in-out 0.12s infinite;
+}
+.p5-sound-bars.playing span:nth-child(3) {
+  animation: p5bar 0.9s ease-in-out 0.06s infinite;
+}
+.p5-sound-bars.playing span:nth-child(4) {
+  animation: p5bar 0.65s ease-in-out 0.2s infinite;
+}
+.p5-sound-bars.playing span:nth-child(5) {
+  animation: p5bar 1s ease-in-out 0.04s infinite;
 }
 
+@keyframes p5bar {
+  0%,
+  100% {
+    height: 4px;
+    opacity: 0.6;
+  }
+  50% {
+    height: 20px;
+    opacity: 1;
+  }
+}
 
 /* ── Zone contrôles : bouton + timeline ── */
 .p5-player-controls {
@@ -148,7 +167,6 @@ audio { display: none; }
   align-items: center;
   gap: 14px;
 }
-
 
 /* ── Bouton Play / Pause ── */
 .p5-play-btn {
@@ -169,7 +187,10 @@ audio { display: none; }
     0 0 14px var(--player-btn-glow),
     0 2px 8px rgba(0, 0, 0, 0.6);
 
-  transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.12s,
+    box-shadow 0.2s;
   user-select: none;
 }
 
@@ -181,7 +202,9 @@ audio { display: none; }
     0 2px 12px rgba(0, 0, 0, 0.7);
 }
 
-.p5-play-btn:active { transform: scale(0.94); }
+.p5-play-btn:active {
+  transform: scale(0.94);
+}
 
 /* Légère animation de pulsation quand en pause */
 .p5-play-btn.idle {
@@ -189,13 +212,23 @@ audio { display: none; }
 }
 
 @keyframes p5pulse {
-  0%, 100% { box-shadow: 0 0 14px var(--player-btn-glow),     0 2px 8px  rgba(0,0,0,0.6); }
-  50%       { box-shadow: 0 0 28px var(--player-btn-glow-max), 0 2px 14px rgba(0,0,0,0.7); }
+  0%,
+  100% {
+    box-shadow:
+      0 0 14px var(--player-btn-glow),
+      0 2px 8px rgba(0, 0, 0, 0.6);
+  }
+  50% {
+    box-shadow:
+      0 0 28px var(--player-btn-glow-max),
+      0 2px 14px rgba(0, 0, 0, 0.7);
+  }
 }
 
-
 /* ── Timeline ── */
-.p5-timeline { flex: 1; }
+.p5-timeline {
+  flex: 1;
+}
 
 /* Barre de progression — piste cliquable */
 .p5-progress {
@@ -207,14 +240,23 @@ audio { display: none; }
   overflow: visible;
 }
 
-.p5-progress:hover { background: rgba(255, 255, 255, 0.2); }
+.p5-progress:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 /* Remplissage coloré — dégradé standard ou custom (ex: P3P bleu→rose) */
 .p5-progress-fill {
   height: 100%;
   width: 0%;
-  background: var(--player-fill-gradient,
-    linear-gradient(90deg, var(--player-accent-dark), var(--player-accent) 70%, var(--player-accent-light)));
+  background: var(
+    --player-fill-gradient,
+    linear-gradient(
+      90deg,
+      var(--player-accent-dark),
+      var(--player-accent) 70%,
+      var(--player-accent-light)
+    )
+  );
   border-radius: 3px;
   position: relative;
   transition: width 0.15s linear;
@@ -222,7 +264,7 @@ audio { display: none; }
 
 /* Curseur blanc au bout de la barre */
 .p5-progress-fill::after {
-  content: '';
+  content: "";
   position: absolute;
   right: -5px;
   top: 50%;
@@ -236,7 +278,9 @@ audio { display: none; }
   transition: opacity 0.2s;
 }
 
-.p5-progress:hover .p5-progress-fill::after { opacity: 1; }
+.p5-progress:hover .p5-progress-fill::after {
+  opacity: 1;
+}
 
 /* Temps courant / durée */
 .p5-time-row {
@@ -244,11 +288,10 @@ audio { display: none; }
   justify-content: space-between;
   margin-top: 5px;
   font-size: 0.68rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: rgba(255, 255, 255, 0.45);
   user-select: none;
 }
-
 
 /* ─── 4. VICTOIRE — MUSIC MODE ──────────────────────────────── */
 
@@ -266,7 +309,6 @@ body.music-mode .victory-box img {
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-
 /* ─── 5. DARK MODE ──────────────────────────────────────────── */
 
 /*
@@ -283,7 +325,6 @@ body.music-mode.darkmode .victory-box {
   box-shadow: 0 0 30px rgba(255, 102, 204, 0.6);
 }
 
-
 /* ─── 6. RESPONSIVE ─────────────────────────────────────────── */
 
 @media (max-width: 768px) {
@@ -295,10 +336,19 @@ body.music-mode.darkmode .victory-box {
     min-width: unset;
   }
 
-  .p5-play-btn { width: 42px; height: 42px; font-size: 1rem; }
+  .p5-play-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 1rem;
+  }
 
-  body.music-mode .victory-box { max-width: 95%; padding: 20px 15px; }
-  body.music-mode .victory-box img { width: 200px; }
+  body.music-mode .victory-box {
+    max-width: 95%;
+    padding: 20px 15px;
+  }
+  body.music-mode .victory-box img {
+    width: 200px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -308,12 +358,24 @@ body.music-mode.darkmode .victory-box {
     border-radius: 4px 16px 4px 16px;
   }
 
-  .p5-player-label { font-size: 0.6rem; }
-  .p5-play-btn { width: 38px; height: 38px; font-size: 0.9rem; }
-  .p5-time-row { font-size: 0.62rem; }
+  .p5-player-label {
+    font-size: 0.6rem;
+  }
+  .p5-play-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 0.9rem;
+  }
+  .p5-time-row {
+    font-size: 0.62rem;
+  }
 
-  body.music-mode .victory-box img { width: 160px; }
-  body.music-mode .victory-box { padding: 15px 10px; }
+  body.music-mode .victory-box img {
+    width: 160px;
+  }
+  body.music-mode .victory-box {
+    padding: 15px 10px;
+  }
 
   /* Réduit le gap de la rangée Replay|Input|Submit sur mobile */
   .input-wrapper > div {

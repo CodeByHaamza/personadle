@@ -455,35 +455,151 @@
       "condition": "Encuentra tanto a Crow como a Black Mask en modo All-Out Attack",
       "description": "Dos caras de la misma moneda. El chico agradable y la máscara negra... Ambas caras de la justicia reveladas."
     },
-    "one_shot": { "name": "Critical Strike", "condition": "Adivina correctamente en el primer intento", "description": "¿Por qué perder el tiempo con la estrategia cuando puedes golpear directamente?" },
-    "aoa_vision": { "name": "Piercing the Fog", "condition": "Adivina el All-Out Attack en el primer intento", "description": "La verdad estaba velada en una niebla espesa, pero la viste de un vistazo." },
-    "emoji_decoder": { "name": "Emoji Decoder", "condition": "Gana 10 partidas en modo Emoji", "description": "El Metaverso habla sin palabras. Con fineza real, descifraste el código del alma digital." },
-    "navigator": { "name": "Eye of the Navigator", "condition": "Usa la pista 50 veces en modo Clásico", "description": "Cincuenta anomalías escaneadas y descifradas. Ninguna verdad puede esconderse de tu radar." },
-    "velvet_regular": { "name": "Velvet Regular", "condition": "Jugar en 50 días únicos", "description": "Cincuenta días entre mente y materia. El maestro de esta sala ya reconoce tus pasos." },
-    "strega": { "name": "Apostles of the Fall", "condition": "Encontrar Hypnos, Moros y Medea en modo Personae", "description": "¿Por qué luchar contra lo inevitable? Somos simplemente los directores de tu hermosa destrucción." },
-    "twin_fist": { "name": "Twin Fist", "condition": "Encontrar una Persona de Makoto Nijima y Akihiko en modo Personae", "description": "¡Fuerza nuclear y relámpago! Has identificado a los dos peleadores más feroces." },
-    "twin_spear": { "name": "Twin Spear", "condition": "Encontrar una Persona de Kotone y Ken en modo Personae", "description": "Uno busca venganza a través de la luz, el otro lidera con una hoja danzante." },
-    "tradition_modernite": { "name": "Chronological Convergence", "condition": "Encontrar las personas de Naoto y Futaba + sus músicas", "description": "Dos mentes, separadas un siglo, ahora perfectamente sincronizadas. Tradición e innovación son uno." },
-    "shapeshifter": { "name": "The Formless Soul", "condition": "Adivinar el mismo personaje en 3 modos diferentes", "description": "Una máscara puede cambiar, el escenario puede cambiar, pero el verdadero yo permanece constante." },
-    "ideal_reality": { "name": "Gentle Illusion", "condition": "Abandonar cuando el objetivo es 'Our Light' en modo Música", "description": "¿Por qué luchar por alcanzar la luz cuando la felicidad puede darte?" },
-    "for_real": { "name": "For Real", "condition": "Encontrar el All-Out Attack de Ryuji y su persona", "description": "¡YEAH! ¡Encontraste al Phantom Thief más apasionado!" },
-    "night_owl": { "name": "Phantom of the Night", "condition": "Jugar entre medianoche y las 5 AM (hora de París)", "description": "Los verdaderos ladrones operan bajo el manto de la oscuridad." },
-    "nyx_hour": { "name": "Nyx Hour", "condition": "Jugar entre medianoche y las 0:30 AM (hora de París)", "description": "El reloj marca las doce, pero mañana nunca llega." },
-    "stylist": { "name": "Breathtaking Aesthetics", "condition": "Personalizar avatar + color UI + 1 insignia + música de perfil", "description": "¡Qué pasión! ¡Te negaste a la mediocridad de un perfil predeterminado!" },
-    "pyro_spark": { "name": "The Ignition", "condition": "Alcanzar una racha de 7 días", "description": "Un pequeño destello en la oscuridad. Durante siete días, mantuviste la llama viva." },
-    "raphael": { "name": "The Divine Blaze", "condition": "Alcanzar una racha de 30 días", "description": "Treinta días. El destello se ha convertido en un infierno rugiente." },
-    "surt": { "name": "Ragnarök's Dawn", "condition": "Alcanzar una racha de 90 días", "description": "Noventa días de persistencia absoluta e implacable." },
-    "lucifer": { "name": "Crest of the Morning Star", "condition": "Alcanzar una racha de 120 días", "description": "Ciento veinte amaneceres. Más allá de los fuegos de la destrucción." },
-    "helel": { "name": "The Eternal Zenith", "condition": "Alcanzar una racha de 365 días", "description": "Más allá de la rebelión, más allá de la ruina, se encuentra la gracia pura de la primera estrella." },
-    "reborn_phoenix": { "name": "Phoenix Reborn", "condition": "Restaurar tu racha después de perderla", "description": "¡Te negaste a dejar que la oscuridad reclamara tu legado!" },
-    "best_bro": { "name": "Best Bro", "condition": "Tener 2 o más amigos", "description": "Los lazos de amistad trascienden el tiempo y el destino." },
-    "data_mining": { "name": "Data Mining", "condition": "Visitar 5 perfiles de usuario diferentes", "description": "¿Analizando la competencia o buscando nuevos lazos? Has escudriñado el alma de cinco usuarios." },
-    "leblanc_meeting": { "name": "Leblanc Meeting", "condition": "3 o más amigos conectados el mismo día que tú", "description": "¡Almas sincronizadas! ¡Hasta el Phantom Thief más ocupado necesita un descanso!" },
-    "golden_week": { "name": "Golden Week", "condition": "Conectarse entre el 29 de abril y el 5 de mayo", "description": "Incluso los buscadores de la verdad necesitan un descanso." },
-    "tanabata": { "name": "Tanabata", "condition": "Conectarse el 7 de julio", "description": "Las estrellas se alinean por una sola noche. Tu deseo ha sido registrado." },
-    "promised_day": { "name": "The Promised Day", "condition": "Jugar el 31 de diciembre Y el 1 de enero", "description": "El reloj da las doce del año moribundo. Te enfrentaste al umbral del nuevo amanecer." },
-    "hifumi_archives": { "name": "The Grandmaster's Tome", "condition": "???", "description": "Un verdadero táctico estudia el tablero antes de golpear." },
-    "report": { "name": "The Priestess's Audit", "condition": "???", "description": "Canalizando la sabiduría meticulosa de la Sacerdotisa, has documentado las anomalías." }
+    "one_shot": {
+      "name": "Critical Strike",
+      "condition": "Adivina correctamente en el primer intento",
+      "description": "¿Por qué perder el tiempo con la estrategia cuando puedes golpear directamente?"
+    },
+    "aoa_vision": {
+      "name": "Piercing the Fog",
+      "condition": "Adivina el All-Out Attack en el primer intento",
+      "description": "La verdad estaba velada en una niebla espesa, pero la viste de un vistazo."
+    },
+    "emoji_decoder": {
+      "name": "Emoji Decoder",
+      "condition": "Gana 10 partidas en modo Emoji",
+      "description": "El Metaverso habla sin palabras. Con fineza real, descifraste el código del alma digital."
+    },
+    "navigator": {
+      "name": "Eye of the Navigator",
+      "condition": "Usa la pista 50 veces en modo Clásico",
+      "description": "Cincuenta anomalías escaneadas y descifradas. Ninguna verdad puede esconderse de tu radar."
+    },
+    "velvet_regular": {
+      "name": "Velvet Regular",
+      "condition": "Jugar en 50 días únicos",
+      "description": "Cincuenta días entre mente y materia. El maestro de esta sala ya reconoce tus pasos."
+    },
+    "strega": {
+      "name": "Apostles of the Fall",
+      "condition": "Encontrar Hypnos, Moros y Medea en modo Personae",
+      "description": "¿Por qué luchar contra lo inevitable? Somos simplemente los directores de tu hermosa destrucción."
+    },
+    "twin_fist": {
+      "name": "Twin Fist",
+      "condition": "Encontrar una Persona de Makoto Nijima y Akihiko en modo Personae",
+      "description": "¡Fuerza nuclear y relámpago! Has identificado a los dos peleadores más feroces."
+    },
+    "twin_spear": {
+      "name": "Twin Spear",
+      "condition": "Encontrar una Persona de Kotone y Ken en modo Personae",
+      "description": "Uno busca venganza a través de la luz, el otro lidera con una hoja danzante."
+    },
+    "tradition_modernite": {
+      "name": "Chronological Convergence",
+      "condition": "Encontrar las personas de Naoto y Futaba + sus músicas",
+      "description": "Dos mentes, separadas un siglo, ahora perfectamente sincronizadas. Tradición e innovación son uno."
+    },
+    "shapeshifter": {
+      "name": "The Formless Soul",
+      "condition": "Adivinar el mismo personaje en 3 modos diferentes",
+      "description": "Una máscara puede cambiar, el escenario puede cambiar, pero el verdadero yo permanece constante."
+    },
+    "ideal_reality": {
+      "name": "Gentle Illusion",
+      "condition": "Abandonar cuando el objetivo es 'Our Light' en modo Música",
+      "description": "¿Por qué luchar por alcanzar la luz cuando la felicidad puede darte?"
+    },
+    "for_real": {
+      "name": "For Real",
+      "condition": "Encontrar el All-Out Attack de Ryuji y su persona",
+      "description": "¡YEAH! ¡Encontraste al Phantom Thief más apasionado!"
+    },
+    "night_owl": {
+      "name": "Phantom of the Night",
+      "condition": "Jugar entre medianoche y las 5 AM (hora de París)",
+      "description": "Los verdaderos ladrones operan bajo el manto de la oscuridad."
+    },
+    "nyx_hour": {
+      "name": "Nyx Hour",
+      "condition": "Jugar entre medianoche y las 0:30 AM (hora de París)",
+      "description": "El reloj marca las doce, pero mañana nunca llega."
+    },
+    "stylist": {
+      "name": "Breathtaking Aesthetics",
+      "condition": "Personalizar avatar + color UI + 1 insignia + música de perfil",
+      "description": "¡Qué pasión! ¡Te negaste a la mediocridad de un perfil predeterminado!"
+    },
+    "pyro_spark": {
+      "name": "The Ignition",
+      "condition": "Alcanzar una racha de 7 días",
+      "description": "Un pequeño destello en la oscuridad. Durante siete días, mantuviste la llama viva."
+    },
+    "raphael": {
+      "name": "The Divine Blaze",
+      "condition": "Alcanzar una racha de 30 días",
+      "description": "Treinta días. El destello se ha convertido en un infierno rugiente."
+    },
+    "surt": {
+      "name": "Ragnarök's Dawn",
+      "condition": "Alcanzar una racha de 90 días",
+      "description": "Noventa días de persistencia absoluta e implacable."
+    },
+    "lucifer": {
+      "name": "Crest of the Morning Star",
+      "condition": "Alcanzar una racha de 120 días",
+      "description": "Ciento veinte amaneceres. Más allá de los fuegos de la destrucción."
+    },
+    "helel": {
+      "name": "The Eternal Zenith",
+      "condition": "Alcanzar una racha de 365 días",
+      "description": "Más allá de la rebelión, más allá de la ruina, se encuentra la gracia pura de la primera estrella."
+    },
+    "reborn_phoenix": {
+      "name": "Phoenix Reborn",
+      "condition": "Restaurar tu racha después de perderla",
+      "description": "¡Te negaste a dejar que la oscuridad reclamara tu legado!"
+    },
+    "best_bro": {
+      "name": "Best Bro",
+      "condition": "Tener 2 o más amigos",
+      "description": "Los lazos de amistad trascienden el tiempo y el destino."
+    },
+    "data_mining": {
+      "name": "Data Mining",
+      "condition": "Visitar 5 perfiles de usuario diferentes",
+      "description": "¿Analizando la competencia o buscando nuevos lazos? Has escudriñado el alma de cinco usuarios."
+    },
+    "leblanc_meeting": {
+      "name": "Leblanc Meeting",
+      "condition": "3 o más amigos conectados el mismo día que tú",
+      "description": "¡Almas sincronizadas! ¡Hasta el Phantom Thief más ocupado necesita un descanso!"
+    },
+    "golden_week": {
+      "name": "Golden Week",
+      "condition": "Conectarse entre el 29 de abril y el 5 de mayo",
+      "description": "Incluso los buscadores de la verdad necesitan un descanso."
+    },
+    "tanabata": {
+      "name": "Tanabata",
+      "condition": "Conectarse el 7 de julio",
+      "description": "Las estrellas se alinean por una sola noche. Tu deseo ha sido registrado."
+    },
+    "promised_day": {
+      "name": "The Promised Day",
+      "condition": "Jugar el 31 de diciembre Y el 1 de enero",
+      "description": "El reloj da las doce del año moribundo. Te enfrentaste al umbral del nuevo amanecer."
+    },
+    "hifumi_archives": {
+      "name": "The Grandmaster's Tome",
+      "condition": "???",
+      "description": "Un verdadero táctico estudia el tablero antes de golpear."
+    },
+    "report": {
+      "name": "The Priestess's Audit",
+      "condition": "???",
+      "description": "Canalizando la sabiduría meticulosa de la Sacerdotisa, has documentado las anomalías."
+    }
   },
   "social_link": {
     "rank_names": {
@@ -827,7 +943,7 @@
     "contact_body": "Para cualquier pregunta sobre tus datos o para ejercer tus derechos:",
     "legal_title": "Aviso Legal",
     "legal_publisher_label": "Editor",
-    "legal_publisher_value": "Hamza Karrouchi — desarrollador individual, Francia",
+    "legal_publisher_value": "Hamza — desarrollador individual, Francia",
     "legal_host_label": "Alojamiento",
     "legal_host_value": "Hostinger International Ltd., 61 Lordou Vironos Street, 6023 Larnaca, Chipre",
     "legal_disclaimer": "PersonaDLE es un proyecto fan no oficial y sin fines comerciales. No está afiliado, respaldado ni patrocinado por ATLUS, SEGA ni ninguna entidad relacionada. Todas las marcas, personajes, música y elementos visuales de Persona pertenecen a sus respectivos propietarios. El juego y el código fuente se distribuyen bajo la licencia MIT.",
@@ -838,5 +954,53 @@
     "badge_open": "📖 Código Abierto",
     "char_sae_tooltip": "⚖️ ¡OBJECIÓN!\nNo se venden datos.\nJAMÁS. 🐻",
     "char_zenkichi_tooltip": "🔐 Tus derechos están\nprotegidos, Phantom Thief."
+  },
+  "faq": {
+    "page_title": "FAQ",
+    "page_subtitle": "Preguntas Frecuentes",
+    "mascot_bubble": "¿Preguntas?\n¡Hee-ho!",
+    "cat_game": "🎮 El Juego",
+    "cat_gameplay": "🕹️ Jugabilidad",
+    "cat_account": "👤 Cuenta & Perfil",
+    "cat_community": "👥 Comunidad",
+    "cat_team": "👋 El Equipo",
+    "q1": "¿Qué es PersonaDLE?",
+    "a1": "PersonaDLE es un juego de adivinanzas diario fan-made gratuito, basado en la saga RPG Persona (P1 → P5X). Cada día se elige un nuevo personaje, Persona o pista musical — tienes un número limitado de intentos para encontrarlo en 6 modos de juego diferentes.",
+    "q2": "¿Qué juegos de Persona están incluidos?",
+    "a2": "Personajes y contenido de Persona 1, 2, 3 (+ FES, Portable, Reload), 4 (+ Golden, Arena Ultimax), 5 (+ Royal, Strikers, Tactica) y Persona 5X. La cobertura crece con cada nuevo lanzamiento.",
+    "q3": "¿Con qué frecuencia se reinicia el juego?",
+    "a3": "Cada día a medianoche hora de París. Cada uno de los 6 modos se reinicia de forma independiente con un nuevo objetivo.",
+    "q4": "¿Es PersonaDLE gratuito?",
+    "a4": "100% gratuito, para siempre. Sin anuncios, sin compras. Si disfrutas del juego, las donaciones en Ko-fi ayudan a mantener el servidor — pero nunca son obligatorias.",
+    "q5": "¿Cuántos modos de juego hay?",
+    "a5": "6 modos — Clásico (cuadrícula de atributos estilo Wordle), Emoji (descifra pistas en emojis), Silueta (revelación progresiva de imagen), All-Out Attack (GIF animado), Personae (adivina por la Persona, no el personaje) y Música (fragmento de audio).",
+    "q6": "¿Cómo funciona el modo Clásico?",
+    "a6": "Escribe el nombre de un personaje. Tras cada intento, una cuadrícula muestra 7 atributos: juego de origen, rol, edad, Arcana, arma, afiliación y altura. Verde = correcto, amarillo = cerca, rojo = incorrecto — igual que Wordle.",
+    "q7": "¿Qué es una racha?",
+    "a7": "Tu racha cuenta los días consecutivos que has ganado en un modo. Falla un día o pulsa Give Up y se reinicia a 0. La función Streak Recovery (menú Jack Frost en tu perfil) te permite restaurarla una vez cada 2 meses.",
+    "q8": "¿Cómo funcionan los filtros?",
+    "a8": "El panel de filtros te permite restringir el pool de personajes a entregas específicas de Persona (P3, P4, P5 y sus subtítulos). Tu selección se guarda entre sesiones y aplica en los 6 modos.",
+    "q9": "¿Necesito una cuenta para jugar?",
+    "a9": "No. Puedes jugar de forma anónima — todo el progreso se almacena localmente en tu navegador. Crear una cuenta gratuita desbloquea la sincronización en la nube, amigos, clasificaciones, desafíos y el sistema de Social Link.",
+    "q10": "¿Puedo jugar sin conexión?",
+    "a10": "Sí. El juego tiene un service worker que almacena en caché todos los assets. Las partidas jugadas sin conexión se sincronizan automáticamente con el servidor al reconectar.",
+    "q11": "¿Cómo transfiero mi progreso a una cuenta?",
+    "a11": "Tras registrarte, ve a tu Perfil y pulsa Migrar. Tus estadísticas, rachas y desbloqueos locales se importarán. La migración es segura y se puede ejecutar varias veces sin duplicar datos.",
+    "q12": "¿Hay un servidor de Discord?",
+    "a12": "¡Sí! Únete a nuestra comunidad para chatear con otros fans, compartir puntuaciones y seguir el desarrollo.",
+    "a12_link": "Unirse al Discord →",
+    "q13": "¿Cómo reporto un bug o sugiero un personaje?",
+    "a13": "Únete al Discord y usa los canales dedicados para reportar bugs y hacer sugerencias. También puedes usar el formulario de feedback en el footer de cada página.",
+    "q14": "¿Qué es el sistema Social Link?",
+    "a14": "Inspirado en los juegos de Persona, los Social Links siguen el vínculo entre tú y cada amigo. Las interacciones mutuas (visitas de perfil, desafíos, comparaciones de estadísticas) otorgan XP y suben tu rango del 1 — Desconocido al 10 — True Confidant. Llegar al rango 10 desbloquea un efecto de halo dorado especial.",
+    "q15": "¿Quién creó PersonaDLE?",
+    "a15": "PersonaDLE fue creado por Hamza. Colaboradores talentosos se unieron para dar forma al proyecto:",
+    "team_hamza_role": "Fundador y Lead Dev — lógica del juego, backend, animaciones",
+    "team_leo_role": "Datos y Diseño — base de datos de personajes, retratos, maquetación",
+    "team_damien_role": "Front-End — arquitectura CSS, diseño responsive",
+    "team_dzulian_role": "Consultor Creativo — precisión P1/P2, experiencia en la trilogía clásica",
+    "q16": "¿Está PersonaDLE afiliado con Atlus o SEGA?",
+    "a16": "No. PersonaDLE es un proyecto de fans independiente y no comercial. Todos los personajes, música e ilustraciones de Persona pertenecen a sus respectivos titulares de derechos (Atlus, SEGA). Es una carta de amor a la saga — nada más.",
+    "footer_link": "FAQ"
   }
 }

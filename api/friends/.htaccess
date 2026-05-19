@@ -1,0 +1,9 @@
+Options -Indexes
+
+RewriteEngine On
+
+# /api/friends/42  → index.php (PATCH, DELETE avec id)
+RewriteRule ^[0-9]+$   index.php   [L,QSA]
+
+# /api/friends     → index.php (GET liste, POST demande)
+RewriteRule ^$         index.php   [L,QSA]

@@ -1,29 +1,34 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personadle - Music Mode</title>
-  <link rel="stylesheet" href="../css/global.css?v=9" />
-  <link rel="stylesheet" href="./music.css?v=3" />
-  <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
-  <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
-  <link rel="stylesheet" href="../css/calling-card.css?v=2" />
-  <link rel="stylesheet" href="../css/challenge-banner.css">
-  <link rel="stylesheet" href="../css/challenge-result.css">
-  <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personadle - Music Mode</title>
+    <link rel="stylesheet" href="../css/global.css?v=9" />
+    <link rel="stylesheet" href="./music.css?v=3" />
+    <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
+    <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="../css/calling-card.css?v=2" />
+    <link rel="stylesheet" href="../css/challenge-banner.css" />
+    <link rel="stylesheet" href="../css/challenge-result.css" />
+    <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
+  </head>
 
-<body>
-  <!-- Logo -->
-  <header id="homepage">
-    <a href="../index.html">
-      <img src="../img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage" />
-    </a>
-  </header>
+  <body>
+    <!-- Logo -->
+    <header id="homepage">
+      <a href="../index.html">
+        <img
+          src="../img/Logo_PersonaDLE.png"
+          alt="PersonaDLE Logo"
+          class="logo_HomePage"
+          id="imgHomePage"
+        />
+      </a>
+    </header>
 
-  <!-- Filter Buttons -->
-<!-- =====================================================
+    <!-- Filter Buttons -->
+    <!-- =====================================================
      FILTRE OPUS — Panneau déroulant
      Bouton "FILTRES" (Persona style) ouvre/ferme le panneau.
      Chaque logo de jeu est cliquable :
@@ -32,466 +37,680 @@
        • P3/P4/P5/PQ → sous-opus déroulants au clic
      Géré par js/filterMenu.js + css/filterMenu.css
      ===================================================== -->
-<div class="filter-panel" id="filterPanel">
-  <button class="filter-toggle-btn" id="filterToggleBtn"
-          aria-expanded="false" aria-controls="filterDropdown">
-    <span class="filter-toggle-icon">⚙</span>
-    <span class="filter-toggle-text">FILTRES</span>
-    <span class="filter-toggle-arrow">▼</span>
-  </button>
-  <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
+    <div class="filter-panel" id="filterPanel">
+      <button
+        class="filter-toggle-btn"
+        id="filterToggleBtn"
+        aria-expanded="false"
+        aria-controls="filterDropdown"
+      >
+        <span class="filter-toggle-icon">⚙</span>
+        <span class="filter-toggle-text">FILTRES</span>
+        <span class="filter-toggle-arrow">▼</span>
+      </button>
+      <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
+        <!-- Persona 1 — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p1 active"
+            data-opus="P1"
+            aria-label="Persona 1"
+          >
+            <img src="../img/logo_jeu/Persona_PSP_logo.png" alt="Persona 1" class="filter-logo" />
+          </button>
+        </div>
+        <!-- Persona 2 — IS et EP toujours visibles (auto-expand) -->
+        <div class="filter-group">
+          <span class="filter-group-auto-label">Persona 2</span>
+          <div class="filter-sub-panel expanded" data-group-panel="P2">
+            <button
+              class="filter-sub-btn filter-color-p2is active"
+              data-opus="P2IS"
+              aria-label="P2 Innocent Sin"
+            >
+              <img
+                src="../img/logo_jeu/Persona_2_IS_PSP_logo.png"
+                alt="P2IS"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p2ep active"
+              data-opus="P2EP"
+              aria-label="P2 Eternal Punishment"
+            >
+              <img
+                src="../img/logo_jeu/Persona_2_EP_PSP_logo.png"
+                alt="P2EP"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 3 — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p3 active"
+            data-opus-group="P3"
+            data-opus-codes="P3,P3FES,P3P,P3R"
+            aria-expanded="false"
+            aria-label="Persona 3"
+          >
+            <img
+              src="../img/logo_jeu/Persona_3_Reload_logo.png"
+              alt="Persona 3"
+              class="filter-logo"
+            />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="P3">
+            <button
+              class="filter-sub-btn filter-color-p3 active"
+              data-opus="P3"
+              aria-label="Persona 3"
+            >
+              <img src="../img/logo_jeu/Persona_3_Logo.webp" alt="P3" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p3fes active"
+              data-opus="P3FES"
+              aria-label="Persona 3 FES"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_FES_Logo.webp"
+                alt="P3FES"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p3p active"
+              data-opus="P3P"
+              aria-label="Persona 3 Portable"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_Portable_Logo.webp"
+                alt="P3P"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p3 active"
+              data-opus="P3R"
+              aria-label="Persona 3 Reload"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_Reload_logo.png"
+                alt="P3R"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 4 — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p4 active"
+            data-opus-group="P4"
+            data-opus-codes="P4,P4G,P4AU,P4D"
+            aria-expanded="false"
+            aria-label="Persona 4"
+          >
+            <img src="../img/logo_jeu/Persona_4_Logo.png" alt="Persona 4" class="filter-logo" />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="P4">
+            <button
+              class="filter-sub-btn filter-color-p4 active"
+              data-opus="P4"
+              aria-label="Persona 4"
+            >
+              <img src="../img/logo_jeu/Persona_4_Logo.png" alt="P4" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p4g active"
+              data-opus="P4G"
+              aria-label="Persona 4 Golden"
+            >
+              <img
+                src="../img/logo_jeu/Persona_4_Golden_logo.webp"
+                alt="P4G"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p4au active"
+              data-opus="P4AU"
+              aria-label="Persona 4 Arena Ultimax"
+            >
+              <img
+                src="../img/logo_jeu/Persona_4_Arena_Ultimax_Logo.png"
+                alt="P4AU"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p4d active"
+              data-opus="P4D"
+              aria-label="Persona 4 Dancing All Night"
+            >
+              <img
+                src="../img/logo_jeu/Persona_4_Dancing_All_Night_Logo.png"
+                alt="P4D"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 5 — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p5 active"
+            data-opus-group="P5"
+            data-opus-codes="P5,P5R,P5S,P5T"
+            aria-expanded="false"
+            aria-label="Persona 5"
+          >
+            <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo" />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="P5">
+            <button
+              class="filter-sub-btn filter-color-p5 active"
+              data-opus="P5"
+              aria-label="Persona 5"
+            >
+              <img src="../img/logo_jeu/Persona_5_logo.png" alt="P5" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p5r active"
+              data-opus="P5R"
+              aria-label="Persona 5 Royal"
+            >
+              <img
+                src="../img/logo_jeu/Persona_5_Royal_Logo.png"
+                alt="P5R"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p5s active"
+              data-opus="P5S"
+              aria-label="Persona 5 Strikers"
+            >
+              <img src="../img/logo_jeu/Persona_5_Strikers.png" alt="P5S" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p5t active"
+              data-opus="P5T"
+              aria-label="Persona 5 Tactica"
+            >
+              <img
+                src="../img/logo_jeu/Persona_5_Tactica_Logo.png"
+                alt="P5T"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 5X — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p5x active"
+            data-opus="P5X"
+            aria-label="Persona 5X"
+          >
+            <img
+              src="../img/logo_jeu/Persona_5_The_Phantom_X_Logo.png"
+              alt="Persona 5X"
+              class="filter-logo"
+            />
+          </button>
+        </div>
+        <!-- Persona Q — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-pq active"
+            data-opus-group="PQ"
+            data-opus-codes="PQ,PQ2"
+            aria-expanded="false"
+            aria-label="Persona Q"
+          >
+            <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="Persona Q" class="filter-logo" />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="PQ">
+            <button
+              class="filter-sub-btn filter-color-pq active"
+              data-opus="PQ"
+              aria-label="Persona Q"
+            >
+              <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="PQ" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-pq2 active"
+              data-opus="PQ2"
+              aria-label="Persona Q2"
+            >
+              <img src="../img/logo_jeu/Persona_Q2_Logo.png" alt="PQ2" class="filter-sub-logo" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- Persona 1 — filtre direct -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p1 active"
-              data-opus="P1" aria-label="Persona 1">
-        <img src="../img/logo_jeu/Persona_PSP_logo.png" alt="Persona 1" class="filter-logo">
-      </button>
-    </div>
-    <!-- Persona 2 — IS et EP toujours visibles (auto-expand) -->
-    <div class="filter-group">
-      <span class="filter-group-auto-label">Persona 2</span>
-      <div class="filter-sub-panel expanded" data-group-panel="P2">
-        <button class="filter-sub-btn filter-color-p2is active"
-                data-opus="P2IS" aria-label="P2 Innocent Sin">
-          <img src="../img/logo_jeu/Persona_2_IS_PSP_logo.png" alt="P2IS" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p2ep active"
-                data-opus="P2EP" aria-label="P2 Eternal Punishment">
-          <img src="../img/logo_jeu/Persona_2_EP_PSP_logo.png" alt="P2EP" class="filter-sub-logo">
-        </button>
+    <!-- Audio + Rules Button -->
+    <div class="emoji-hint-zone" style="position: relative">
+      <!-- Rules Button -->
+      <div style="position: absolute; top: -40px; right: -80px">
+        <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+          <div class="img-wrapper">
+            <img
+              class="normal"
+              src="../assets/buttons/point_interrogation.webp"
+              alt="Rules"
+              style="height: 100px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/point_interrogation.webp"
+              alt="Rules"
+              style="height: 80px"
+            />
+          </div>
+          <div class="shape-wrapper">
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45" />
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35" />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- Persona 3 — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p3 active"
-              data-opus-group="P3" data-opus-codes="P3,P3FES,P3P,P3R"
-              aria-expanded="false" aria-label="Persona 3">
-        <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="Persona 3" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="P3">
-        <button class="filter-sub-btn filter-color-p3 active"
-                data-opus="P3" aria-label="Persona 3">
-          <img src="../img/logo_jeu/Persona_3_Logo.webp" alt="P3" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p3fes active"
-                data-opus="P3FES" aria-label="Persona 3 FES">
-          <img src="../img/logo_jeu/Persona_3_FES_Logo.webp" alt="P3FES" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p3p active"
-                data-opus="P3P" aria-label="Persona 3 Portable">
-          <img src="../img/logo_jeu/Persona_3_Portable_Logo.webp" alt="P3P" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p3 active"
-                data-opus="P3R" aria-label="Persona 3 Reload">
-          <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="P3R" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-    <!-- Persona 4 — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p4 active"
-              data-opus-group="P4" data-opus-codes="P4,P4G,P4AU,P4D"
-              aria-expanded="false" aria-label="Persona 4">
-        <img src="../img/logo_jeu/Persona_4_Logo.png" alt="Persona 4" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="P4">
-        <button class="filter-sub-btn filter-color-p4 active"
-                data-opus="P4" aria-label="Persona 4">
-          <img src="../img/logo_jeu/Persona_4_Logo.png" alt="P4" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p4g active"
-                data-opus="P4G" aria-label="Persona 4 Golden">
-          <img src="../img/logo_jeu/Persona_4_Golden_logo.webp" alt="P4G" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p4au active"
-                data-opus="P4AU" aria-label="Persona 4 Arena Ultimax">
-          <img src="../img/logo_jeu/Persona_4_Arena_Ultimax_Logo.png" alt="P4AU" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p4d active"
-                data-opus="P4D" aria-label="Persona 4 Dancing All Night">
-          <img src="../img/logo_jeu/Persona_4_Dancing_All_Night_Logo.png" alt="P4D" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-    <!-- Persona 5 — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p5 active"
-              data-opus-group="P5" data-opus-codes="P5,P5R,P5S,P5T"
-              aria-expanded="false" aria-label="Persona 5">
-        <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="P5">
-        <button class="filter-sub-btn filter-color-p5 active"
-                data-opus="P5" aria-label="Persona 5">
-          <img src="../img/logo_jeu/Persona_5_logo.png" alt="P5" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p5r active"
-                data-opus="P5R" aria-label="Persona 5 Royal">
-          <img src="../img/logo_jeu/Persona_5_Royal_Logo.png" alt="P5R" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p5s active"
-                data-opus="P5S" aria-label="Persona 5 Strikers">
-          <img src="../img/logo_jeu/Persona_5_Strikers.png" alt="P5S" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p5t active"
-                data-opus="P5T" aria-label="Persona 5 Tactica">
-          <img src="../img/logo_jeu/Persona_5_Tactica_Logo.png" alt="P5T" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-    <!-- Persona 5X — filtre direct -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p5x active"
-              data-opus="P5X" aria-label="Persona 5X">
-        <img src="../img/logo_jeu/Persona_5_The_Phantom_X_Logo.png" alt="Persona 5X" class="filter-logo">
-      </button>
-    </div>
-    <!-- Persona Q — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-pq active"
-              data-opus-group="PQ" data-opus-codes="PQ,PQ2"
-              aria-expanded="false" aria-label="Persona Q">
-        <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="Persona Q" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="PQ">
-        <button class="filter-sub-btn filter-color-pq active"
-                data-opus="PQ" aria-label="Persona Q">
-          <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="PQ" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-pq2 active"
-                data-opus="PQ2" aria-label="Persona Q2">
-          <img src="../img/logo_jeu/Persona_Q2_Logo.png" alt="PQ2" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
-  <!-- Audio + Rules Button -->
-  <div class="emoji-hint-zone" style="position: relative;">
-    <!-- Rules Button -->
-    <div style="position: absolute; top: -40px; right: -80px;">
-      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+      <!-- Title -->
+      <div style="color: white">
+        <h1 data-i18n="modes.music.title">🎵 Guess the Persona Song!</h1>
+        <p data-i18n="modes.music.subtitle">Listen and type the correct music title 🎧</p>
+      </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div id="rulesModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 data-i18n="modes.music.rules_title">🎵 Music Mode — How to Play</h2>
+
+        <div data-i18n-block="en">
+          <div id="rulesText">
+            <strong>🎯 Objective:</strong><br />
+            A music clip will play...<br />
+            Your mission? <strong>Identify the song title!</strong><br /><br />
+
+            <strong>💡 Tips:</strong>
+            <ul>
+              <li>Tracks are taken from the Persona series (including remakes and spin-offs).</li>
+              <li>Autocompletion helps you find the correct title.</li>
+              <li>You get 3 tries before the <strong>Give Up</strong> button becomes available.</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>🎮 Games Included:</strong>
+            <ul>
+              <li>Persona 1</li>
+              <li>Persona 2 (Innocent Sin &amp; Eternal Punishment)</li>
+              <li>Persona 3 / FES / Portable / Reload</li>
+              <li>Persona 4 / Golden / Arena / Dancing</li>
+              <li>Persona 5 / Royal / Strikers / Tactica</li>
+              <li>Persona 5: The Phantom X</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>📝 Disclaimer:</strong>
+            <ul>
+              <li>
+                This is a fan project. All music rights belong to ATLUS and the original creators.
+              </li>
+              <li>No commercial use. Please support the official soundtracks.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div data-i18n-block="fr">
+          <div id="rulesText">
+            <strong>🎯 Objectif :</strong><br />
+            Un extrait musical va jouer...<br />
+            Votre mission ? <strong>Identifiez le titre de la chanson !</strong><br /><br />
+
+            <strong>💡 Conseils :</strong>
+            <ul>
+              <li>Les morceaux sont issus de la série Persona (remakes et spin-offs inclus).</li>
+              <li>L'autocomplétion vous aide à trouver le bon titre.</li>
+              <li>Vous avez 3 essais avant que le bouton Abandonner devienne disponible.</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>🎮 Jeux inclus :</strong>
+            <ul>
+              <li>Persona 1</li>
+              <li>Persona 2 (Innocent Sin &amp; Eternal Punishment)</li>
+              <li>Persona 3 / FES / Portable / Reload</li>
+              <li>Persona 4 / Golden / Arena / Dancing</li>
+              <li>Persona 5 / Royal / Strikers / Tactica</li>
+              <li>Persona 5 : The Phantom X</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>📝 Avertissement :</strong>
+            <ul>
+              <li>
+                Ceci est un projet fan. Tous les droits musicaux appartiennent à ATLUS et aux
+                créateurs originaux.
+              </li>
+              <li>Aucune utilisation commerciale. Soutenez les bandes originales officielles.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio Player — Persona 5 Custom Player -->
+    <div class="audio-wrapper" id="audioBox">
+      <!-- Élément natif caché — contrôlé par JS -->
+      <audio id="audioPlayer" preload="none">
+        <source src="" type="audio/mp3" />
+      </audio>
+
+      <!-- Interface custom P5 -->
+      <div class="p5-player">
+        <!-- Coin décoratif + label + barres sonores -->
+        <div class="p5-player-header">
+          <span class="p5-player-label" data-i18n="ui.now_playing">♪ NOW PLAYING</span>
+          <div class="p5-sound-bars" id="p5SoundBars">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Contrôles : play/pause + timeline -->
+        <div class="p5-player-controls">
+          <button class="p5-play-btn" id="p5PlayBtn" aria-label="Play / Pause">
+            <span id="p5PlayIcon">▶</span>
+          </button>
+          <div class="p5-timeline">
+            <div
+              class="p5-progress"
+              id="p5Progress"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div class="p5-progress-fill" id="p5ProgressFill"></div>
+            </div>
+            <div class="p5-time-row">
+              <span id="p5CurrentTime">0:00</span>
+              <span id="p5Duration">--:--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Victory Display -->
+    <div id="victoryBox" class="victory-box" style="display: none">
+      <img id="victoryImage" src="" alt="Music image" />
+      <div id="victoryText" class="victory-message"></div>
+    </div>
+
+    <!-- Give Up Button -->
+    <div
+      class="giveup-block"
+      style="display: flex; justify-content: center; margin-top: 20px; gap: 12px"
+    >
+      <div class="link-wrapper" id="giveUpButton">
         <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
-          <img class="active" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 80px;">
+          <img
+            class="normal"
+            src="../assets/buttons/EN/Give-up_Button.webp"
+            alt="Give Up"
+            style="height: 90px"
+          />
+          <img
+            class="active"
+            src="../assets/buttons/EN/Give-up_Button_Rouge.webp"
+            alt="Give Up"
+            style="height: 90px"
+          />
         </div>
         <div class="shape-wrapper">
           <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/></svg>
+            <svg viewBox="0 0 108.1 47">
+              <polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40" />
+            </svg>
           </div>
           <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/></svg>
+            <svg viewBox="0 0 108.1 47">
+              <polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38" />
+            </svg>
           </div>
         </div>
       </div>
+      <span id="giveUpCounter" class="counter">(0 / 3)</span>
     </div>
 
-    <!-- Title -->
-    <div style="color: white;">
-      <h1 data-i18n="modes.music.title">🎵 Guess the Persona Song!</h1>
-      <p data-i18n="modes.music.subtitle">Listen and type the correct music title 🎧</p>
+    <!-- Input + Buttons -->
+    <section class="input-wrapper" style="margin-top: 30px; display: flex; justify-content: center">
+      <div
+        style="
+          display: flex;
+          gap: 20px;
+          align-items: center;
+          flex-wrap: wrap;
+          justify-content: center;
+        "
+      >
+        <!-- Replay Button -->
+        <div class="link-wrapper" id="resetButton">
+          <div class="img-wrapper">
+            <img
+              class="normal"
+              src="../assets/buttons/EN/Replay_Button.webp"
+              alt="Replay"
+              style="height: 90px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/EN/Replay_Button_Rouge.webp"
+              alt="Replay"
+              style="height: 90px"
+            />
+          </div>
+          <div class="shape-wrapper">
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42" />
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Field -->
+        <div class="autocomplete-wrapper" style="position: relative">
+          <input
+            type="text"
+            id="textbar"
+            placeholder="Guess the song..."
+            data-i18n-placeholder="ui.music_input_placeholder"
+            aria-label="Guess the song title"
+          />
+        </div>
+
+        <!-- Submit Button -->
+        <div class="link-wrapper" id="guessButton">
+          <div class="img-wrapper">
+            <img
+              class="normal"
+              src="../assets/buttons/EN/Submit_Button.webp"
+              alt="Submit"
+              style="height: 90px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/EN/Submit_Button_Rouge.webp"
+              alt="Submit"
+              style="height: 90px"
+            />
+          </div>
+          <div class="shape-wrapper">
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#FF0000" points="12,5 108,0 98,35 10,40" />
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Wrong Guesses -->
+    <div id="wrongGuessList"></div>
+
+    <!-- Game Script -->
+    <!-- i18n — init traductions au chargement -->
+    <script type="module">
+      import { initLang } from "../js/i18n.js";
+      window.__i18nReady = initLang();
+    </script>
+    <script type="module" src="./modeMusic.js?v=3"></script>
+
+    <!-- Dark Mode -->
+    <div class="darkmode-toggle">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
     </div>
-  </div>
 
-  <!-- Rules Modal -->
-  <div id="rulesModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2 data-i18n="modes.music.rules_title">🎵 Music Mode — How to Play</h2>
-
-      <div data-i18n-block="en">
-        <p id="rulesText">
-          <strong>🎯 Objective:</strong><br>
-          A music clip will play...<br>
-          Your mission? <strong>Identify the song title!</strong><br><br>
-
-          <strong>💡 Tips:</strong>
-          <ul>
-            <li>Tracks are taken from the Persona series (including remakes and spin-offs).</li>
-            <li>Autocompletion helps you find the correct title.</li>
-            <li>You get 3 tries before the <strong>Give Up</strong> button becomes available.</li>
-          </ul>
-
-          <hr class="separator" />
-
-          <strong>🎮 Games Included:</strong>
-          <ul>
-            <li>Persona 1</li>
-            <li>Persona 2 (Innocent Sin &amp; Eternal Punishment)</li>
-            <li>Persona 3 / FES / Portable / Reload</li>
-            <li>Persona 4 / Golden / Arena / Dancing</li>
-            <li>Persona 5 / Royal / Strikers / Tactica</li>
-            <li>Persona 5: The Phantom X</li>
-          </ul>
-
-          <hr class="separator" />
-
-          <strong>📝 Disclaimer:</strong>
-          <ul>
-            <li>This is a fan project. All music rights belong to ATLUS and the original creators.</li>
-            <li>No commercial use. Please support the official soundtracks.</li>
-          </ul>
-        </p>
-      </div>
-
-      <div data-i18n-block="fr">
-        <p id="rulesText">
-          <strong>🎯 Objectif :</strong><br>
-          Un extrait musical va jouer...<br>
-          Votre mission ? <strong>Identifiez le titre de la chanson !</strong><br><br>
-
-          <strong>💡 Conseils :</strong>
-          <ul>
-            <li>Les morceaux sont issus de la série Persona (remakes et spin-offs inclus).</li>
-            <li>L'autocomplétion vous aide à trouver le bon titre.</li>
-            <li>Vous avez 3 essais avant que le bouton Abandonner devienne disponible.</li>
-          </ul>
-
-          <hr class="separator" />
-
-          <strong>🎮 Jeux inclus :</strong>
-          <ul>
-            <li>Persona 1</li>
-            <li>Persona 2 (Innocent Sin &amp; Eternal Punishment)</li>
-            <li>Persona 3 / FES / Portable / Reload</li>
-            <li>Persona 4 / Golden / Arena / Dancing</li>
-            <li>Persona 5 / Royal / Strikers / Tactica</li>
-            <li>Persona 5 : The Phantom X</li>
-          </ul>
-
-          <hr class="separator" />
-
-          <strong>📝 Avertissement :</strong>
-          <ul>
-            <li>Ceci est un projet fan. Tous les droits musicaux appartiennent à ATLUS et aux créateurs originaux.</li>
-            <li>Aucune utilisation commerciale. Soutenez les bandes originales officielles.</li>
-          </ul>
-        </p>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Audio Player — Persona 5 Custom Player -->
-  <div class="audio-wrapper" id="audioBox">
-    <!-- Élément natif caché — contrôlé par JS -->
-    <audio id="audioPlayer" preload="none">
-      <source src="" type="audio/mp3">
-    </audio>
-
-    <!-- Interface custom P5 -->
-    <div class="p5-player">
-      <!-- Coin décoratif + label + barres sonores -->
-      <div class="p5-player-header">
-        <span class="p5-player-label" data-i18n="ui.now_playing">♪ NOW PLAYING</span>
-        <div class="p5-sound-bars" id="p5SoundBars">
-          <span></span><span></span><span></span><span></span><span></span>
-        </div>
-      </div>
-
-      <!-- Contrôles : play/pause + timeline -->
-      <div class="p5-player-controls">
-        <button class="p5-play-btn" id="p5PlayBtn" aria-label="Play / Pause">
-          <span id="p5PlayIcon">▶</span>
-        </button>
-        <div class="p5-timeline">
-          <div class="p5-progress" id="p5Progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-            <div class="p5-progress-fill" id="p5ProgressFill"></div>
-          </div>
-          <div class="p5-time-row">
-            <span id="p5CurrentTime">0:00</span>
-            <span id="p5Duration">--:--</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- Victory Display -->
-  <div id="victoryBox" class="victory-box" style="display: none;">
-    <img id="victoryImage" src="" alt="Music image">
-    <div id="victoryText" class="victory-message"></div>
-  </div>
-
-  <!-- Give Up Button -->
-  <div class="giveup-block" style="display: flex; justify-content: center; margin-top: 20px; gap: 12px;">
-    <div class="link-wrapper" id="giveUpButton">
-      <div class="img-wrapper">
-        <img class="normal" src="../assets/buttons/EN/Give-up_Button.webp" alt="Give Up" style="height: 90px;">
-        <img class="active" src="../assets/buttons/EN/Give-up_Button_Rouge.webp" alt="Give Up" style="height: 90px;">
-      </div>
-      <div class="shape-wrapper">
-        <div class="shape red-fill jelly">
-          <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40"/></svg>
-        </div>
-        <div class="shape cyan-fill jelly">
-          <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38"/></svg>
-        </div>
-      </div>
-    </div>
-    <span id="giveUpCounter" class="counter">(0 / 3)</span>
-  </div>
-
-  <!-- Input + Buttons -->
-  <section class="input-wrapper" style="margin-top: 30px; display: flex; justify-content: center;">
-    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center;">
-
-      <!-- Replay Button -->
-      <div class="link-wrapper" id="resetButton">
-        <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/EN/Replay_Button.webp" alt="Replay" style="height: 90px;">
-          <img class="active" src="../assets/buttons/EN/Replay_Button_Rouge.webp" alt="Replay" style="height: 90px;">
-        </div>
-        <div class="shape-wrapper">
-          <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42"/></svg>
-          </div>
-          <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35"/></svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Input Field -->
-<div class="autocomplete-wrapper" style="position: relative;">
-  <input type="text" id="textbar" placeholder="Guess the song..." data-i18n-placeholder="ui.music_input_placeholder" />
-</div>
-
-      <!-- Submit Button -->
-      <div class="link-wrapper" id="guessButton">
-        <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/EN/Submit_Button.webp" alt="Submit" style="height: 90px;">
-          <img class="active" src="../assets/buttons/EN/Submit_Button_Rouge.webp" alt="Submit" style="height: 90px;">
-        </div>
-        <div class="shape-wrapper">
-          <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="12,5 108,0 98,35 10,40"/></svg>
-          </div>
-          <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38"/></svg>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Wrong Guesses -->
-  <div id="wrongGuessList"></div>
-
-  <!-- Game Script -->
-  <!-- i18n — init traductions au chargement -->
-<script type="module">
-import { initLang } from '../js/i18n.js';
-window.__i18nReady = initLang();
-</script>
-  <script type="module" src="./modeMusic.js?v=3"></script>
-
-  <!-- Dark Mode -->
-  <div class="darkmode-toggle">
-    <label class="switch">
-      <input type="checkbox" id="darkModeToggle">
-      <span class="slider round"></span>
-    </label>
-    <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
-  </div>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const toggle = document.getElementById("darkModeToggle");
-      const savedMode = localStorage.getItem("darkMode");
-      if (savedMode === "enabled") {
-        document.body.classList.add("darkmode");
-        toggle.checked = true;
-      }
-      toggle.addEventListener("change", () => {
-        if (toggle.checked) {
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggle = document.getElementById("darkModeToggle");
+        const savedMode = localStorage.getItem("darkMode");
+        if (savedMode === "enabled") {
           document.body.classList.add("darkmode");
-          localStorage.setItem("darkMode", "enabled");
-        } else {
-          document.body.classList.remove("darkmode");
-          localStorage.setItem("darkMode", "disabled");
+          toggle.checked = true;
         }
+        toggle.addEventListener("change", () => {
+          if (toggle.checked) {
+            document.body.classList.add("darkmode");
+            localStorage.setItem("darkMode", "enabled");
+          } else {
+            document.body.classList.remove("darkmode");
+            localStorage.setItem("darkMode", "disabled");
+          }
+        });
       });
-    });
 
-    // Ajoute la classe "music-mode" uniquement pour ce mode
-  document.body.classList.add("music-mode");
-  </script>
+      // Ajoute la classe "music-mode" uniquement pour ce mode
+      document.body.classList.add("music-mode");
+    </script>
 
-  <!-- 🔁 Mode Navigation -->
-<div id="modeNavigationContainer" style="display: none; margin-top: 40px; margin-bottom: 40px; justify-content: space-between; align-items: center;">
-  <div id="prevModeButton" class="nav-button prev-mode" style="visibility: hidden;">
-    ← Personae Mode
-  </div>
-  <div id="nextModeButton" class="nav-button next-mode" style="visibility: hidden;">
-    <!-- Pas de mode suivant -->
-  </div>
-</div>
-<script>
-  // Son de hover — activé uniquement après la première interaction utilisateur
-  document.addEventListener("DOMContentLoaded", () => {
-    const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    let unlocked = false;
+    <!-- 🔁 Mode Navigation -->
+    <div
+      id="modeNavigationContainer"
+      style="
+        display: none;
+        margin-top: 40px;
+        margin-bottom: 40px;
+        justify-content: space-between;
+        align-items: center;
+      "
+    >
+      <div id="prevModeButton" class="nav-button prev-mode" style="visibility: hidden">
+        ← Personae Mode
+      </div>
+      <div id="nextModeButton" class="nav-button next-mode" style="visibility: hidden">
+        <!-- Pas de mode suivant -->
+      </div>
+    </div>
+    <script>
+      // Son de hover — activé uniquement après la première interaction utilisateur
+      document.addEventListener("DOMContentLoaded", () => {
+        const hoverSound = new Audio("../assets/sound_effect/Select_sound.mp3");
+        let unlocked = false;
 
-    const unlock = () => { unlocked = true; };
-    document.addEventListener('click',   unlock, { once: true });
-    document.addEventListener('keydown', unlock, { once: true });
+        const unlock = () => {
+          unlocked = true;
+        };
+        document.addEventListener("click", unlock, { once: true });
+        document.addEventListener("keydown", unlock, { once: true });
 
-    document.querySelectorAll('.link-wrapper').forEach(button => {
-      button.addEventListener('mouseenter', () => {
-        if (!unlocked) return;
-        const sound = hoverSound.cloneNode();
-        sound.volume = 0.3;
-        sound.play().catch(() => {});
+        document.querySelectorAll(".link-wrapper").forEach((button) => {
+          button.addEventListener("mouseenter", () => {
+            if (!unlocked) return;
+            const sound = hoverSound.cloneNode();
+            sound.volume = 0.3;
+            sound.play().catch(() => {});
+          });
+        });
       });
-    });
-  });
-</script>
+    </script>
 
-<!-- Bottom nav -->
-<script type="module">
-import { initBottomNav } from '../js/bottomNav.js';
-initBottomNav();
-</script>
+    <!-- Bottom nav -->
+    <script type="module">
+      import { initBottomNav } from "../js/bottomNav.js";
+      initBottomNav();
+    </script>
 
-<!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
-<script type="module">
-import { initAuth } from '../js/auth.js';
-window._authReady = initAuth();
-window._authReady.catch(() => {}); // le mode fonctionne même sans backend
-</script>
+    <!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
+    <script type="module">
+      import { initAuth } from "../js/auth.js";
+      window._authReady = initAuth();
+      window._authReady.catch(() => {}); // le mode fonctionne même sans backend
+    </script>
 
-<!-- Notifications calling card -->
-<script type="module">
-import { initNotifications } from '../js/notifications.js';
-if (window._authReady) await window._authReady;
-if (window._currentUser) initNotifications();
-</script>
-<script type="module">
-import { initChallengeBanner } from '../js/challenge-banner.js';
-initChallengeBanner('music');
-</script>
+    <!-- Notifications calling card -->
+    <script type="module">
+      import { initNotifications } from "../js/notifications.js";
+      if (window._authReady) await window._authReady;
+      if (window._currentUser) initNotifications();
+    </script>
+    <script type="module">
+      import { initChallengeBanner } from "../js/challenge-banner.js";
+      initChallengeBanner("music");
+    </script>
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('../sw.js').catch(err => {
-      console.warn('[SW] Registration failed:', err);
-    });
-  });
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data?.type === 'SW_UPDATED') { window.location.reload(); }
-  });
-}
-</script>
-
-</body>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("../sw.js").catch((err) => {
+            console.warn("[SW] Registration failed:", err);
+          });
+        });
+        navigator.serviceWorker.addEventListener("message", (event) => {
+          if (event.data?.type === "SW_UPDATED") {
+            window.location.reload();
+          }
+        });
+      }
+    </script>
+  </body>
 </html>

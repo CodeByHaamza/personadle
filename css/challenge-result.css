@@ -1,0 +1,341 @@
+/* challenge-result.css — Animation résultat de défi entre amis */
+
+/* ── Overlay principal ─────────────────────────────────────────────── */
+#cr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.45s ease;
+  overflow: hidden;
+  padding: 20px;
+}
+#cr-overlay.cr--visible {
+  background: rgba(0, 0, 0, 0.92);
+}
+
+/* ── BRAVO / DOMMAGE — tombe du haut ──────────────────────────────── */
+.cr-bravo {
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-weight: 900;
+  color: #e63946;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  text-shadow: 0 0 20px rgba(230, 57, 70, 0.6);
+  margin-bottom: 32px;
+  transform: translateY(-140px);
+  opacity: 0;
+  animation: crBravoFall 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) 0.35s forwards;
+}
+.cr-bravo--fail {
+  color: #888;
+  text-shadow: 0 0 12px rgba(136, 136, 136, 0.4);
+}
+
+@keyframes crBravoFall {
+  from {
+    transform: translateY(-140px);
+    opacity: 0;
+  }
+  85% {
+    transform: translateY(10px);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ── Scène avatars + fil ───────────────────────────────────────────── */
+.cr-scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  min-height: 140px;
+}
+
+/* ── Blocs avatar ──────────────────────────────────────────────────── */
+.cr-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  opacity: 0;
+}
+.cr-avatar-wrap--left {
+  transform: translateX(-180px);
+  animation: crSlideFromLeft 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) 0.95s forwards;
+}
+.cr-avatar-wrap--right {
+  transform: translateX(180px);
+  animation: crSlideFromRight 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) 0.95s forwards;
+}
+
+@keyframes crSlideFromLeft {
+  from {
+    transform: translateX(-180px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes crSlideFromRight {
+  from {
+    transform: translateX(180px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.cr-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  /* border-color and box-shadow set inline from real profile colors */
+  border: 3px solid #e63946;
+  box-shadow: 0 0 14px rgba(230, 57, 70, 0.45);
+}
+.cr-pseudo {
+  color: #f0f0f0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: "Oswald", Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  max-width: 100px;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* ── Fil + cœur ────────────────────────────────────────────────────── */
+.cr-wire-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.cr-wire-svg {
+  width: 100%;
+  max-width: 200px;
+  height: 60px;
+  overflow: visible;
+}
+.cr-wire-path {
+  fill: none;
+  stroke: #e63946;
+  stroke-width: 2;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: crWireDraw 0.9s ease 1.6s forwards;
+}
+.cr-wire-path--fail {
+  stroke: #555;
+}
+
+@keyframes crWireDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.cr-heart {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  line-height: 1;
+  animation: crHeartPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 2.6s forwards;
+  z-index: 2;
+}
+.cr-heart--glow {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  animation:
+    crHeartPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 2.6s forwards,
+    crHeartPulse 1.2s ease 3.2s infinite;
+}
+
+/* Fail heart: pops in red, drains to black, falls */
+.cr-heart--fall {
+  animation: crHeartFall 2s cubic-bezier(0.4, 0, 0.6, 1) 2.6s forwards;
+}
+
+@keyframes crHeartPop {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes crHeartPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 215, 0, 1));
+  }
+}
+
+/* Red → darkens → falls as black heart */
+@keyframes crHeartFall {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    filter: none;
+    opacity: 1;
+  }
+  22% {
+    transform: translate(-50%, -50%) scale(1.15);
+    filter: none;
+    opacity: 1;
+  }
+  38% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: none;
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-50%, -48%) scale(1);
+    filter: brightness(0.4) saturate(0);
+    opacity: 1;
+  }
+  78% {
+    transform: translate(-50%, -35%) scale(0.9);
+    filter: brightness(0) saturate(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, 70px) scale(0.55);
+    filter: brightness(0) saturate(0);
+    opacity: 0;
+  }
+}
+
+/* ── Modale recap ──────────────────────────────────────────────────── */
+.cr-modal {
+  background: #0c0c0c;
+  border: 2px solid #e63946;
+  border-radius: 14px;
+  padding: 22px 28px;
+  margin-top: 28px;
+  text-align: center;
+  opacity: 0;
+  animation: crFadeIn 0.35s ease 3.1s forwards;
+  max-width: 360px;
+  width: 100%;
+}
+.cr-modal--fail {
+  border-color: #555;
+  animation-delay: 4.3s; /* after fall animation completes (2.6 + 2s) */
+}
+
+@keyframes crFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.cr-modal-title {
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 1.05rem;
+  color: #e63946;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+.cr-modal-title--fail {
+  color: #888;
+}
+
+.cr-modal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ccc;
+  font-size: 0.84rem;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.cr-modal-row:last-of-type {
+  border-bottom: none;
+}
+
+.cr-modal-row span:last-child {
+  font-weight: 700;
+  color: #f0f0f0;
+}
+.cr-modal-row span.cr-val--good {
+  color: #4caf50;
+}
+.cr-modal-row span.cr-val--bad {
+  color: #e63946;
+}
+
+.cr-modal-xp {
+  color: #ffd700;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 14px;
+  letter-spacing: 0.05em;
+}
+
+.cr-close-btn {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 11px;
+  background: #e63946;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cr-close-btn:hover {
+  background: #c1121f;
+}
+.cr-close-btn--fail {
+  background: #555;
+}
+.cr-close-btn--fail:hover {
+  background: #444;
+}
+
+/* ── Mobile ────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .cr-avatar {
+    width: 68px;
+    height: 68px;
+  }
+  .cr-wire-svg {
+    height: 44px;
+  }
+  .cr-modal {
+    padding: 18px 16px;
+  }
+}

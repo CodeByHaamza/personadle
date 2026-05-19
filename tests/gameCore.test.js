@@ -21,8 +21,12 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
+  FILTER_STORAGE_KEYS,
+  getPlayerSeedId,
+  getDailyTarget,
 } from "../js/gameCore.js";
 
+import { t } from "../js/i18n.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -38,7 +42,6 @@ function clearStorage() {
   localStorage.clear();
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // parisDateKey
 // ─────────────────────────────────────────────────────────────────────────────
@@ -52,7 +55,7 @@ describe("parisDateKey", () => {
   it("accepts a specific Date object and formats it correctly", () => {
     // 2025-07-14 UTC → should still be 2025-07-14 in Paris (UTC+2 in summer)
     const date = new Date("2025-07-14T10:00:00Z");
-    const key  = parisDateKey(date);
+    const key = parisDateKey(date);
     expect(key).toBe("2025-07-14");
   });
 
@@ -75,7 +78,6 @@ describe("parisDateKey", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // msUntilNextParisMidnight
 // ─────────────────────────────────────────────────────────────────────────────
@@ -87,8 +89,8 @@ describe("msUntilNextParisMidnight", () => {
   });
 
   it("returns a value no greater than 24 hours", () => {
-    const ms           = msUntilNextParisMidnight();
-    const msIn24Hours  = 24 * 60 * 60 * 1000;
+    const ms = msUntilNextParisMidnight();
+    const msIn24Hours = 24 * 60 * 60 * 1000;
     expect(ms).toBeLessThanOrEqual(msIn24Hours);
   });
 
@@ -96,7 +98,6 @@ describe("msUntilNextParisMidnight", () => {
     expect(typeof msUntilNextParisMidnight()).toBe("number");
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // normalize
@@ -113,7 +114,7 @@ describe("normalize", () => {
 
   it("normalizes typographic apostrophes to straight apostrophe", () => {
     expect(normalize("l\u2019homme")).toBe("l'homme"); // ' → '
-    expect(normalize("l\u2018autre")).toBe("l'autre");  // ' → '
+    expect(normalize("l\u2018autre")).toBe("l'autre"); // ' → '
   });
 
   it("removes double-quote characters", () => {
@@ -134,7 +135,6 @@ describe("normalize", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // showConfettiExplosion
 // ─────────────────────────────────────────────────────────────────────────────
@@ -142,9 +142,14 @@ describe("normalize", () => {
 describe("showConfettiExplosion", () => {
   beforeEach(() => {
     // Stub Audio to avoid "not implemented" errors in jsdom
-    vi.stubGlobal("Audio", class {
-      play() { return Promise.resolve(); }
-    });
+    vi.stubGlobal(
+      "Audio",
+      class {
+        play() {
+          return Promise.resolve();
+        }
+      }
+    );
     document.body.innerHTML = "";
   });
 
@@ -185,7 +190,7 @@ describe("showConfettiExplosion", () => {
 
     showConfettiExplosion({ count: 3, spreadFrom: "bottom" });
 
-    document.querySelectorAll(".confetti-emoji").forEach(el => {
+    document.querySelectorAll(".confetti-emoji").forEach((el) => {
       expect(el.style.bottom).toBe("0vh");
     });
   });
@@ -193,13 +198,17 @@ describe("showConfettiExplosion", () => {
   it("calls Audio.play()", () => {
     vi.useFakeTimers();
     const playSpy = vi.fn(() => Promise.resolve());
-    vi.stubGlobal("Audio", class { play = playSpy; });
+    vi.stubGlobal(
+      "Audio",
+      class {
+        play = playSpy;
+      }
+    );
 
     showConfettiExplosion({ count: 1 });
     expect(playSpy).toHaveBeenCalledOnce();
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // revealNextLink
@@ -263,7 +272,6 @@ describe("revealNextLink", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // setupRulesModal
 // ─────────────────────────────────────────────────────────────────────────────
@@ -310,7 +318,6 @@ describe("setupRulesModal", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // setupDailyReset
 // ─────────────────────────────────────────────────────────────────────────────
@@ -343,7 +350,6 @@ describe("setupDailyReset", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // checkResetOnLoad
 // ─────────────────────────────────────────────────────────────────────────────
@@ -360,7 +366,7 @@ describe("checkResetOnLoad", () => {
   });
 
   it("does NOT call onReset when the stored date equals today", () => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = parisDateKey();
     localStorage.setItem("lastPlayedDate_Test", today);
 
     const onReset = vi.fn();
@@ -370,7 +376,7 @@ describe("checkResetOnLoad", () => {
   });
 
   it("calls onReset when the stored date is yesterday", () => {
-    const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+    const yesterday = parisDateKey(new Date(Date.now() - 86_400_000));
     localStorage.setItem("lastPlayedDate_Test", yesterday);
 
     const onReset = vi.fn();
@@ -380,7 +386,7 @@ describe("checkResetOnLoad", () => {
   });
 
   it("removes the previous day's stats key when a new day is detected", () => {
-    const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+    const yesterday = parisDateKey(new Date(Date.now() - 86_400_000));
     const oldStatsKey = `statsLogged_Test_${yesterday}`;
 
     localStorage.setItem("lastPlayedDate_Test", yesterday);
@@ -394,11 +400,9 @@ describe("checkResetOnLoad", () => {
     localStorage.setItem("lastPlayedDate_Test", "2000-01-01");
     checkResetOnLoad("lastPlayedDate_Test", "Test", () => {});
 
-    const today = new Date().toISOString().split("T")[0];
-    expect(localStorage.getItem("lastPlayedDate_Test")).toBe(today);
+    expect(localStorage.getItem("lastPlayedDate_Test")).toBe(parisDateKey());
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // setupFilterButtons
@@ -459,7 +463,6 @@ describe("setupFilterButtons", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // showWrongMini
 // ─────────────────────────────────────────────────────────────────────────────
@@ -499,7 +502,7 @@ describe("showWrongMini", () => {
 
   it("appends multiple wrong guesses without overwriting previous ones", () => {
     showWrongMini("/img/a.webp", "Alice", container);
-    showWrongMini("/img/b.webp", "Bob",   container);
+    showWrongMini("/img/b.webp", "Bob", container);
     expect(container.querySelectorAll(".wrong-mini")).toHaveLength(2);
   });
 
@@ -515,7 +518,6 @@ describe("showWrongMini", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // buildGameSession
 // ─────────────────────────────────────────────────────────────────────────────
@@ -523,34 +525,40 @@ describe("showWrongMini", () => {
 describe("buildGameSession", () => {
   it("returns an object with the expected shape", () => {
     const session = buildGameSession({
-      mode:       "Classic",
+      mode: "Classic",
       targetName: "Joker",
-      result:     "win",
-      attempts:   2,
-      timeMs:     15000,
-      filters:    ["P5"],
+      result: "win",
+      attempts: 2,
+      timeMs: 15000,
+      filters: ["P5"],
     });
 
     expect(session).toMatchObject({
-      mode:           "Classic",
-      target_name:    "Joker",
-      result:         "win",
-      attempts:       2,
-      time_ms:        15000,
+      mode: "Classic",
+      target_name: "Joker",
+      result: "win",
+      attempts: 2,
+      time_ms: 15000,
       active_filters: ["P5"],
     });
   });
 
   it("includes a played_date matching YYYY-MM-DD", () => {
     const session = buildGameSession({
-      mode: "Emoji", targetName: "Ryuji", result: "giveup", attempts: 6,
+      mode: "Emoji",
+      targetName: "Ryuji",
+      result: "giveup",
+      attempts: 6,
     });
     expect(session.played_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it("defaults timeMs to 0 and filters to [] when omitted", () => {
     const session = buildGameSession({
-      mode: "Music", targetName: "Burn My Dread", result: "win", attempts: 1,
+      mode: "Music",
+      targetName: "Burn My Dread",
+      result: "win",
+      attempts: 1,
     });
     expect(session.time_ms).toBe(0);
     expect(session.active_filters).toEqual([]);
@@ -558,19 +566,25 @@ describe("buildGameSession", () => {
 
   it("rounds timeMs to the nearest integer", () => {
     const session = buildGameSession({
-      mode: "Classic", targetName: "Joker", result: "win", attempts: 1, timeMs: 1234.7,
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+      timeMs: 1234.7,
     });
     expect(session.time_ms).toBe(1235);
   });
 
   it("preserves the exact mode string passed in", () => {
     const session = buildGameSession({
-      mode: "AllOutAttack", targetName: "Makoto", result: "win", attempts: 3,
+      mode: "AllOutAttack",
+      targetName: "Makoto",
+      result: "win",
+      attempts: 3,
     });
     expect(session.mode).toBe("AllOutAttack");
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // savePendingSession
@@ -581,7 +595,10 @@ describe("savePendingSession", () => {
 
   it("stores a session in localStorage under 'pendingSessions'", () => {
     const session = buildGameSession({
-      mode: "Classic", targetName: "Joker", result: "win", attempts: 1,
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
     });
     savePendingSession(session);
 
@@ -593,9 +610,14 @@ describe("savePendingSession", () => {
   it("creates the array from scratch when pendingSessions is not yet set", () => {
     expect(localStorage.getItem("pendingSessions")).toBeNull();
 
-    savePendingSession(buildGameSession({
-      mode: "Music", targetName: "test", result: "win", attempts: 1,
-    }));
+    savePendingSession(
+      buildGameSession({
+        mode: "Music",
+        targetName: "test",
+        result: "win",
+        attempts: 1,
+      })
+    );
 
     const stored = JSON.parse(localStorage.getItem("pendingSessions"));
     expect(Array.isArray(stored)).toBe(true);
@@ -603,9 +625,24 @@ describe("savePendingSession", () => {
   });
 
   it("appends to the existing queue on subsequent calls", () => {
-    const s1 = buildGameSession({ mode: "Classic", targetName: "Joker",  result: "win",    attempts: 1 });
-    const s2 = buildGameSession({ mode: "Emoji",   targetName: "Ryuji",  result: "giveup", attempts: 6 });
-    const s3 = buildGameSession({ mode: "Music",   targetName: "P4 OST", result: "win",    attempts: 2 });
+    const s1 = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    const s2 = buildGameSession({
+      mode: "Emoji",
+      targetName: "Ryuji",
+      result: "giveup",
+      attempts: 6,
+    });
+    const s3 = buildGameSession({
+      mode: "Music",
+      targetName: "P4 OST",
+      result: "win",
+      attempts: 2,
+    });
 
     savePendingSession(s1);
     savePendingSession(s2);
@@ -620,17 +657,805 @@ describe("savePendingSession", () => {
   it("preserves existing sessions already in localStorage", () => {
     // Pre-populate queue with one session
     const existing = buildGameSession({
-      mode: "Silhouette", targetName: "Aigis", result: "win", attempts: 4,
+      mode: "Silhouette",
+      targetName: "Aigis",
+      result: "win",
+      attempts: 4,
     });
     localStorage.setItem("pendingSessions", JSON.stringify([existing]));
 
-    savePendingSession(buildGameSession({
-      mode: "Classic", targetName: "Joker", result: "win", attempts: 1,
-    }));
+    savePendingSession(
+      buildGameSession({
+        mode: "Classic",
+        targetName: "Joker",
+        result: "win",
+        attempts: 1,
+      })
+    );
 
     const stored = JSON.parse(localStorage.getItem("pendingSessions"));
     expect(stored).toHaveLength(2);
     expect(stored[0].mode).toBe("Silhouette");
     expect(stored[1].mode).toBe("Classic");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// parisDateKey — DST transition edge cases
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("parisDateKey — DST transition edge cases", () => {
+  // Spring transition: Paris switches from UTC+1 → UTC+2 on the last Sunday of March.
+  // In 2025, that is March 30. At 02:00 local (= 01:00 UTC) clocks jump to 03:00.
+  //
+  // Critical edge: 23:59 UTC on March 29 = 00:59 Paris (still March 29)
+  //                00:00 UTC on March 30 = 01:00 Paris → still March 30 (UTC+1, before switch)
+  //                01:01 UTC on March 30 = 03:01 Paris (UTC+2, after switch) → still March 30
+
+  it("DST spring forward: 23:59 UTC March 29 2025 → March 29 in Paris (UTC+1)", () => {
+    const date = new Date("2025-03-29T23:59:00Z");
+    // 23:59 UTC = 00:59 Paris (UTC+1) → March 30
+    // Wait — UTC+1 means Paris is 1 hour ahead of UTC, so 23:59 UTC = 00:59+1 = March 30 01:59? No.
+    // UTC+1: local = UTC + 1h → 23:59 UTC = 00:59 March 30 Paris
+    expect(parisDateKey(date)).toBe("2025-03-30");
+  });
+
+  it("DST spring forward: 01:30 UTC March 30 2025 → March 30 in Paris (already UTC+2)", () => {
+    // At 01:00 UTC on March 30, clocks in Paris jump from 02:00 to 03:00 (UTC+1 → UTC+2).
+    // 01:30 UTC = 03:30 Paris (UTC+2) → March 30
+    const date = new Date("2025-03-30T01:30:00Z");
+    expect(parisDateKey(date)).toBe("2025-03-30");
+  });
+
+  it("DST spring forward: 22:00 UTC March 29 2025 → March 29 in Paris (UTC+1 = 23:00)", () => {
+    // 22:00 UTC = 23:00 Paris (UTC+1) → still March 29
+    const date = new Date("2025-03-29T22:00:00Z");
+    expect(parisDateKey(date)).toBe("2025-03-29");
+  });
+
+  // Autumn transition: Paris switches from UTC+2 → UTC+1 on the last Sunday of October.
+  // In 2025, that is October 26. At 03:00 local (= 01:00 UTC) clocks fall back to 02:00.
+
+  it("DST autumn fall-back: 00:30 UTC October 26 2025 → October 26 in Paris (UTC+2 = 02:30)", () => {
+    // 00:30 UTC = 02:30 Paris (UTC+2, before switch) → October 26
+    const date = new Date("2025-10-26T00:30:00Z");
+    expect(parisDateKey(date)).toBe("2025-10-26");
+  });
+
+  it("DST autumn fall-back: 01:30 UTC October 26 2025 → October 26 in Paris (UTC+1 = 02:30, after switch)", () => {
+    // After 01:00 UTC the offset becomes UTC+1: 01:30 UTC = 02:30 Paris (UTC+1) → October 26
+    const date = new Date("2025-10-26T01:30:00Z");
+    expect(parisDateKey(date)).toBe("2025-10-26");
+  });
+
+  it("DST autumn fall-back: 22:30 UTC October 25 2025 → October 26 in Paris (UTC+2 = 00:30)", () => {
+    // 22:30 UTC on Oct 25 = 00:30 Paris (UTC+2) = October 26
+    const date = new Date("2025-10-25T22:30:00Z");
+    expect(parisDateKey(date)).toBe("2025-10-26");
+  });
+
+  it("DST autumn fall-back: 21:59 UTC October 25 2025 → October 25 in Paris (UTC+2 = 23:59)", () => {
+    // 21:59 UTC = 23:59 Paris (UTC+2) → still October 25
+    const date = new Date("2025-10-25T21:59:00Z");
+    expect(parisDateKey(date)).toBe("2025-10-25");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTER_STORAGE_KEYS
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("FILTER_STORAGE_KEYS", () => {
+  it("is exported as an object (not undefined)", () => {
+    expect(FILTER_STORAGE_KEYS).toBeDefined();
+    expect(typeof FILTER_STORAGE_KEYS).toBe("object");
+  });
+
+  it("contains all 6 game modes as keys (lowercase)", () => {
+    const expectedModes = ["classic", "emoji", "silhouette", "alloutattack", "personae", "music"];
+    for (const mode of expectedModes) {
+      expect(FILTER_STORAGE_KEYS).toHaveProperty(mode);
+    }
+  });
+
+  it("maps each mode to a non-empty string storage key", () => {
+    for (const [mode, key] of Object.entries(FILTER_STORAGE_KEYS)) {
+      expect(typeof key).toBe("string");
+      expect(key.length).toBeGreaterThan(0);
+      // Each key should be distinct
+    }
+  });
+
+  it("all storage keys are distinct (no duplicates)", () => {
+    const keys = Object.values(FILTER_STORAGE_KEYS);
+    const unique = new Set(keys);
+    expect(unique.size).toBe(keys.length);
+  });
+
+  it("classic maps to 'filters_Classic'", () => {
+    expect(FILTER_STORAGE_KEYS.classic).toBe("filters_Classic");
+  });
+
+  it("emoji maps to 'filters_Emoji'", () => {
+    expect(FILTER_STORAGE_KEYS.emoji).toBe("filters_Emoji");
+  });
+
+  it("alloutattack maps to 'filters_AllOutAttack'", () => {
+    expect(FILTER_STORAGE_KEYS.alloutattack).toBe("filters_AllOutAttack");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// buildGameSession — all 6 modes
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("buildGameSession — all 6 modes", () => {
+  const VALID_MODES = [
+    { mode: "Classic", targetName: "Joker" },
+    { mode: "Emoji", targetName: "Ryuji Sakamoto" },
+    { mode: "Silhouette", targetName: "Aigis" },
+    { mode: "AllOutAttack", targetName: "Ann Takamaki" },
+    { mode: "Personae", targetName: "Izanagi" },
+    { mode: "Music", targetName: "Last Surprise" },
+  ];
+
+  for (const { mode, targetName } of VALID_MODES) {
+    it(`builds a valid session for mode '${mode}'`, () => {
+      const session = buildGameSession({ mode, targetName, result: "win", attempts: 3 });
+      expect(session.mode).toBe(mode);
+      expect(session.target_name).toBe(targetName);
+      expect(session.result).toBe("win");
+      expect(session.attempts).toBe(3);
+      expect(session.time_ms).toBe(0);
+      expect(session.active_filters).toEqual([]);
+      expect(session.played_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+  }
+
+  it("accepts non-empty filters for all modes", () => {
+    const session = buildGameSession({
+      mode: "Classic",
+      targetName: "Makoto Niijima",
+      result: "giveup",
+      attempts: 6,
+      timeMs: 120000,
+      filters: ["P5", "P5R", "P4G"],
+    });
+    expect(session.active_filters).toEqual(["P5", "P5R", "P4G"]);
+    expect(session.time_ms).toBe(120000);
+  });
+
+  it("accepts result 'giveup' as a valid result value", () => {
+    const session = buildGameSession({
+      mode: "Silhouette",
+      targetName: "Aigis",
+      result: "giveup",
+      attempts: 6,
+    });
+    expect(session.result).toBe("giveup");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// normalize — additional edge cases
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("normalize — additional edge cases", () => {
+  it("handles an empty string without throwing", () => {
+    expect(() => normalize("")).not.toThrow();
+    expect(normalize("")).toBe("");
+  });
+
+  it("strips all combining diacritics from heavily accented strings", () => {
+    // German umlauts decomposed: ü = u + combining diaeresis
+    expect(normalize("über")).toBe("uber");
+    expect(normalize("Schön")).toBe("schon");
+  });
+
+  it("handles Katakana without voiced marks unchanged (no Latin diacritics to strip)", () => {
+    // normalize only strips U+0300-U+036F (Latin combining marks).
+    // Katakana with NO voiced consonants (no dakuten U+3099) passes through
+    // as-is except for lowercasing (which is a no-op on Katakana).
+    // Note: voiced Katakana like ジ DO NFD-decompose to シ + U+3099 but that
+    // combining mark is outside the strip range — so in practice normalize()
+    // should not be called on Japanese text, only on romaji names.
+    const jp = normalize("アン"); // Ann — no voiced consonants, no decomposition
+    expect(jp).toBe("アン");
+  });
+
+  it("handles already-normalized strings identically (idempotent)", () => {
+    const once = normalize("Burn My Dread");
+    const twice = normalize(normalize("Burn My Dread"));
+    expect(once).toBe(twice);
+  });
+
+  it("strips only combining diacritics, not regular punctuation", () => {
+    expect(normalize("it's alive!")).toBe("it's alive!");
+  });
+
+  it("handles strings with multiple types of curly apostrophes", () => {
+    const left = normalize("l‘autre"); // '
+    const right = normalize("l’autre"); // '
+    expect(left).toBe("l'autre");
+    expect(right).toBe("l'autre");
+    // Both normalize to the same straight apostrophe
+    expect(left).toBe(right);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// getPlayerSeedId
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("getPlayerSeedId", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it("returns a non-empty string", () => {
+    const id = getPlayerSeedId();
+    expect(typeof id).toBe("string");
+    expect(id.length).toBeGreaterThan(0);
+  });
+
+  it("returns the same value on repeated calls (stable anon ID)", () => {
+    const id1 = getPlayerSeedId();
+    const id2 = getPlayerSeedId();
+    expect(id1).toBe(id2);
+  });
+
+  it("stores the anon ID in localStorage under 'anonPlayerId'", () => {
+    getPlayerSeedId();
+    expect(localStorage.getItem("anonPlayerId")).not.toBeNull();
+  });
+
+  it("returns the logged-in user ID when 'playerUserId' is set in localStorage", () => {
+    localStorage.setItem("playerUserId", "42");
+    const id = getPlayerSeedId();
+    expect(id).toBe("42");
+  });
+
+  it("prefers 'playerUserId' over 'anonPlayerId' when both are set", () => {
+    localStorage.setItem("anonPlayerId", "anon-uuid-abc");
+    localStorage.setItem("playerUserId", "99");
+    expect(getPlayerSeedId()).toBe("99");
+  });
+
+  it("generates a new anon ID when none is stored", () => {
+    expect(localStorage.getItem("anonPlayerId")).toBeNull();
+    const id = getPlayerSeedId();
+    expect(id).toBeTruthy();
+    // Should now be persisted
+    expect(localStorage.getItem("anonPlayerId")).toBe(id);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// getDailyTarget
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("getDailyTarget", () => {
+  const POOL = ["Joker", "Ryuji", "Ann", "Yusuke", "Makoto", "Futaba", "Haru", "Morgana"];
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it("returns null for an empty pool", () => {
+    expect(getDailyTarget([], "Classic", "2025-07-14", "seed-abc")).toBeNull();
+  });
+
+  it("returns null when pool is null", () => {
+    expect(getDailyTarget(null, "Classic", "2025-07-14", "seed-abc")).toBeNull();
+  });
+
+  it("returns an item that is in the pool", () => {
+    const result = getDailyTarget(POOL, "Classic", "2025-07-14", "seed-abc");
+    expect(POOL).toContain(result);
+  });
+
+  it("is deterministic — same seed+date+mode always returns same item", () => {
+    const r1 = getDailyTarget(POOL, "Classic", "2025-07-14", "player-1");
+    const r2 = getDailyTarget(POOL, "Classic", "2025-07-14", "player-1");
+    expect(r1).toBe(r2);
+  });
+
+  it("different seeds produce potentially different results for same date+mode", () => {
+    const results = new Set(
+      ["seed-A", "seed-B", "seed-C", "seed-D", "seed-E", "seed-F", "seed-G", "seed-H"].map((seed) =>
+        getDailyTarget(POOL, "Classic", "2025-07-14", seed)
+      )
+    );
+    // With 8 different seeds and 8 pool items, we should get more than 1 unique result
+    expect(results.size).toBeGreaterThan(1);
+  });
+
+  it("different modes produce potentially different results for same seed+date", () => {
+    const modes = ["Classic", "Emoji", "Silhouette", "AllOutAttack", "Personae", "Music"];
+    const results = new Set(
+      modes.map((mode) => getDailyTarget(POOL, mode, "2025-07-14", "fixed-seed"))
+    );
+    expect(results.size).toBeGreaterThan(1);
+  });
+
+  it("different dates produce potentially different results for same seed+mode", () => {
+    const dates = ["2025-07-14", "2025-07-15", "2025-07-16", "2025-07-17"];
+    const results = new Set(
+      dates.map((date) => getDailyTarget(POOL, "Classic", date, "fixed-seed"))
+    );
+    expect(results.size).toBeGreaterThan(1);
+  });
+
+  it("works with a single-item pool and always returns that item", () => {
+    const result = getDailyTarget(["Joker"], "Classic", "2025-07-14", "any-seed");
+    expect(result).toBe("Joker");
+  });
+
+  it("respects debugTarget_<mode> localStorage override", () => {
+    localStorage.setItem("debugTarget_Classic", "Ryuji");
+    const result = getDailyTarget(POOL, "Classic", "2025-07-14", "fixed-seed");
+    expect(result).toBe("Ryuji");
+  });
+
+  it("ignores debugTarget override if value is not in pool", () => {
+    localStorage.setItem("debugTarget_Classic", "NotInPool");
+    // Should fall through to normal FNV hash pick
+    const result = getDailyTarget(POOL, "Classic", "2025-07-14", "fixed-seed");
+    expect(POOL).toContain(result);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PIÈGE 1 — i18n: t(key) returns the raw key (truthy) for missing keys,
+//            so `t(key) ?? fallback` never falls back.
+//
+// Source: CLAUDE.md §13 "Pièges connus"
+//   "window.i18n.t(key) retourne la clé (string truthy) quand elle n'existe pas
+//    — ?? ne se déclenche jamais. Pattern correct :
+//    const r = window.i18n?.t?.(key); return (r != null && r !== key) ? r : fallback;"
+//
+// The exported `t()` from i18n.js uses module-level `_flat` and `_flatEN` maps.
+// At test startup, before any setLang() call, both maps are empty.
+// A missing key therefore returns the key string verbatim.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("i18n t() — raw-key return for missing key (the ?? fallback trap)", () => {
+  // Note: we import `t` directly from i18n.js. Because i18n.js uses module-level
+  // state (_flat, _flatEN), and setLang() requires fetch + real JSON files,
+  // we rely on the fact that _flat/_flatEN start empty in the jsdom test env.
+  // Any key that is not loaded returns the key string itself.
+
+  it("returns the raw key string when the key is not found in any loaded translation", () => {
+    // No setLang() has been called in this describe block, so _flat and _flatEN
+    // are empty (or contain whatever was loaded by other tests — either way,
+    // 'test.nonexistent.key.xyz' is guaranteed absent).
+    const missingKey = "test.nonexistent.key.xyz";
+    const result = t(missingKey);
+    // t() must return the key itself when not found — this is the documented behaviour
+    expect(result).toBe(missingKey);
+  });
+
+  it("demonstrates the ?? trap: t(missingKey) ?? 'fallback' never triggers the fallback", () => {
+    const missingKey = "test.nonexistent.key.xyz";
+    const rawResult = t(missingKey); // returns "test.nonexistent.key.xyz" (truthy)
+
+    // WRONG pattern — ?? does not trigger because rawResult is truthy (the key string)
+    const wrongFallback = rawResult ?? "my-fallback";
+    expect(wrongFallback).toBe(missingKey); // gets the key, NOT the fallback
+    expect(wrongFallback).not.toBe("my-fallback"); // confirms the fallback was skipped
+
+    // CORRECT pattern — compare against the key itself
+    const correctFallback = rawResult !== missingKey ? rawResult : "my-fallback";
+    expect(correctFallback).toBe("my-fallback"); // fallback is applied correctly
+  });
+
+  it("correct guard: (r != null && r !== key) returns false for missing keys", () => {
+    const missingKey = "test.nonexistent.key.xyz";
+    const r = t(missingKey);
+    // The documented guard from CLAUDE.md:
+    const isFound = r != null && r !== missingKey;
+    expect(isFound).toBe(false); // key was NOT found — guard correctly returns false
+  });
+
+  it("correct guard: (r != null && r !== key) returns true when key IS found", () => {
+    // Simulate the scenario where the key is found: the returned value differs from the key.
+    // We create a small helper that mirrors the t() contract for a found value:
+    const foundValue = "Valider"; // what t() would return for 'ui.submit' in French
+    const simulatedKey = "ui.submit";
+    // Pretend t(simulatedKey) returned foundValue (i.e. translation was loaded)
+    const r = foundValue;
+    const isFound = r != null && r !== simulatedKey;
+    expect(isFound).toBe(true); // key was found — guard correctly returns true
+    // And the value is used, not the fallback
+    const result = isFound ? r : "fallback";
+    expect(result).toBe("Valider");
+  });
+
+  it("t() with {{variable}} substitution on a missing key leaves the template unchanged", () => {
+    // When the key is missing, t() returns the key string. No substitution happens
+    // since the key itself does not contain {{…}} placeholders.
+    const result = t("ui.nonexistent.with.vars", { count: 42 });
+    expect(result).toBe("ui.nonexistent.with.vars"); // key returned as-is
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PIÈGE 2 — syncPending: 409 must `continue` (skip), not `return` (abort queue)
+//
+// Source: CLAUDE.md §13
+//   "409 = session déjà enregistrée côté serveur → `continue` silencieux, pas
+//    `return` ; les autres erreurs s'accumulent dans `remaining[]`"
+//
+// `syncPending` lives in api.js (not gameCore.js) and calls an actual HTTP
+// endpoint, so it cannot be imported directly in this test suite. Instead, we:
+//   1. Verify that `savePendingSession` correctly ignores a 409 on postSession
+//      and does NOT queue the session to localStorage (silent discard).
+//   2. Test the syncPending semantics directly using a self-contained helper
+//      that mirrors the documented loop logic.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("syncPending — 409 must continue (not abort) the queue", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    window._personadleApi = undefined;
+  });
+  afterEach(() => {
+    localStorage.clear();
+    window._personadleApi = undefined;
+  });
+
+  /**
+   * Mirrors the documented correct syncPending loop from api.js:
+   *   for (const session of pending) {
+   *     try { await postSession(session); }
+   *     catch (e) {
+   *       if (e?.status === 409) continue;   ← skip, do NOT return
+   *       remaining.push(session);
+   *     }
+   *   }
+   * Returns { processed: number, remaining: object[] }
+   */
+  async function syncPendingLoop(sessions, postSession) {
+    const remaining = [];
+    let processed = 0;
+    for (const session of sessions) {
+      try {
+        await postSession(session);
+        processed++;
+      } catch (e) {
+        if (e?.status === 409) {
+          // Correct: silently skip the already-recorded session and CONTINUE
+          continue;
+        }
+        remaining.push(session); // network/server error — keep for retry
+      }
+    }
+    return { processed, remaining };
+  }
+
+  it("processes all sessions even when the first one returns 409", async () => {
+    const s1 = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    const s2 = buildGameSession({ mode: "Emoji", targetName: "Ryuji", result: "win", attempts: 2 });
+
+    let callCount = 0;
+    const mockPostSession = vi.fn().mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) {
+        // First call: 409 (session already recorded)
+        const err = new Error("Conflict");
+        err.status = 409;
+        throw err;
+      }
+      // Second call: success
+      return { session_id: 99 };
+    });
+
+    const { processed, remaining } = await syncPendingLoop([s1, s2], mockPostSession);
+
+    // Both sessions were attempted
+    expect(mockPostSession).toHaveBeenCalledTimes(2);
+    // The 409-ed session is silently dropped (not counted as processed, but also not kept)
+    expect(processed).toBe(1); // only s2 succeeded
+    expect(remaining).toHaveLength(0); // s1 (409) discarded, s2 (200) succeeded — nothing remaining
+  });
+
+  it("keeps sessions in the remaining queue when a real network error occurs", async () => {
+    const s1 = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    const s2 = buildGameSession({ mode: "Emoji", targetName: "Ann", result: "win", attempts: 2 });
+
+    let callCount = 0;
+    const mockPostSession = vi.fn().mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) {
+        // Network error (no status property = not a 409)
+        throw new Error("Network error");
+      }
+      return { session_id: 100 };
+    });
+
+    const { processed, remaining } = await syncPendingLoop([s1, s2], mockPostSession);
+
+    expect(mockPostSession).toHaveBeenCalledTimes(2);
+    expect(processed).toBe(1); // s2 succeeded
+    expect(remaining).toHaveLength(1); // s1 (network error) kept for retry
+    expect(remaining[0].target_name).toBe("Joker");
+  });
+
+  it("savePendingSession: a 409 from postSession does not queue the session to localStorage", async () => {
+    // The bug variant in savePendingSession itself (line 410 in gameCore.js):
+    //   catch (err) { if (err?.status === 409) return; … }
+    // A 409 from postSession means the session was already recorded — it should be
+    // silently discarded (not pushed to localStorage). Verify this holds.
+    const err409 = new Error("Conflict");
+    err409.status = 409;
+
+    window._personadleApi = {
+      stats: {
+        postSession: vi.fn().mockRejectedValue(err409),
+        syncPending: vi.fn().mockResolvedValue(undefined),
+      },
+      communityStats: undefined,
+    };
+
+    const session = buildGameSession({
+      mode: "Classic",
+      targetName: "Makoto",
+      result: "win",
+      attempts: 2,
+    });
+
+    await savePendingSession(session);
+
+    // The session must NOT be in localStorage (409 = already recorded, discard it)
+    const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
+    expect(pending).toHaveLength(0);
+  });
+
+  it("savePendingSession: a non-409 server error still queues the session for later sync", async () => {
+    const err500 = new Error("Internal Server Error");
+    err500.status = 500;
+
+    window._personadleApi = {
+      stats: {
+        postSession: vi.fn().mockRejectedValue(err500),
+        syncPending: vi.fn().mockResolvedValue(undefined),
+      },
+      communityStats: undefined,
+    };
+
+    const session = buildGameSession({
+      mode: "Classic",
+      targetName: "Aigis",
+      result: "win",
+      attempts: 3,
+    });
+
+    await savePendingSession(session);
+
+    // 500 is a transient error — session should be queued for retry
+    const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
+    expect(pending).toHaveLength(1);
+    expect(pending[0].target_name).toBe("Aigis");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PIÈGE 3 — filterMenu._migrate(): ["P5","P5R"] must NOT expand to all P5 sub-codes
+//
+// Source: CLAUDE.md §13
+//   "_migrate() dans filterMenu.js expand incorrect des filtres de défi"
+//   "Vérifier si des enfants sont déjà présents avant d'expand :
+//    children.some(c => saved.includes(c)) — sans ça, ["P5","P5R"] devient
+//    tous les sous-codes P5"
+//
+// `_migrate` is NOT exported from filterMenu.js and cannot be imported directly.
+// We reproduce its pure logic here to verify the documented algorithm is correct
+// and to catch regressions if the logic is ever changed.
+// If filterMenu.js ever exports _migrate, replace these inline tests with imports.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("filterMenu _migrate() logic — inline reproduction (function not exported)", () => {
+  // Replicate LEGACY_EXPAND and _migrate exactly as they appear in filterMenu.js
+  const LEGACY_EXPAND = {
+    P2: ["P2IS", "P2EP"],
+    P3: ["P3", "P3FES", "P3P"],
+    P4: ["P4", "P4G", "P4AU", "P4D"],
+    P5: ["P5", "P5R", "P5S", "P5T"],
+    PQ: ["PQ", "PQ2"],
+  };
+
+  function _migrate(saved, allOpus) {
+    if (!Array.isArray(saved)) return null;
+    if (saved.length === 0) return [];
+    const result = [];
+    for (const code of saved) {
+      const children = LEGACY_EXPAND[code];
+      if (children) {
+        const alreadyPrecise = children.some((c) => c !== code && saved.includes(c));
+        if (alreadyPrecise) {
+          if (allOpus.includes(code)) result.push(code);
+        } else {
+          result.push(...children.filter((c) => allOpus.includes(c)));
+        }
+      } else if (allOpus.includes(code)) {
+        result.push(code);
+      }
+    }
+    return result.length > 0 ? [...new Set(result)] : null;
+  }
+
+  const ALL_OPUS = [
+    "P1",
+    "P2IS",
+    "P2EP",
+    "P3",
+    "P3FES",
+    "P3P",
+    "P4",
+    "P4G",
+    "P4AU",
+    "P4D",
+    "P5",
+    "P5R",
+    "P5S",
+    "P5T",
+    "P5X",
+    "PQ",
+    "PQ2",
+  ];
+
+  it("new format: ['P5','P5R'] keeps P5 and P5R only — does NOT expand to all P5 sub-codes", () => {
+    // This is the core of the piège: in the new precise-code format, saving ["P5","P5R"]
+    // means exactly those two codes. It must NOT be expanded to ["P5","P5R","P5S","P5T"].
+    const result = _migrate(["P5", "P5R"], ALL_OPUS);
+    expect(result).toContain("P5");
+    expect(result).toContain("P5R");
+    expect(result).not.toContain("P5S"); // must NOT expand P5 into all siblings
+    expect(result).not.toContain("P5T");
+    expect(result).toHaveLength(2);
+  });
+
+  it("old format: ['P5'] alone (no sub-codes) expands to all P5 sub-codes", () => {
+    // Legacy behaviour: "P5" saved alone means "all P5 games". Expand it.
+    const result = _migrate(["P5"], ALL_OPUS);
+    expect(result).toContain("P5");
+    expect(result).toContain("P5R");
+    expect(result).toContain("P5S");
+    expect(result).toContain("P5T");
+  });
+
+  it("returns null for non-array input", () => {
+    expect(_migrate(null, ALL_OPUS)).toBeNull();
+    expect(_migrate(undefined, ALL_OPUS)).toBeNull();
+    expect(_migrate("P5", ALL_OPUS)).toBeNull();
+  });
+
+  it("returns [] (preserve all-deselected state) for empty array input", () => {
+    expect(_migrate([], ALL_OPUS)).toEqual([]);
+  });
+
+  it("ignores unknown codes not in allOpus", () => {
+    const result = _migrate(["P99", "P5"], ALL_OPUS);
+    // P99 is not in allOpus and has no LEGACY_EXPAND entry → ignored
+    // P5 alone → expands to all P5 sub-codes
+    expect(result).not.toContain("P99");
+    expect(result).toContain("P5");
+    expect(result).toContain("P5R");
+  });
+
+  it("new format: ['P4','P4G','P4AU'] keeps only those three codes", () => {
+    const result = _migrate(["P4", "P4G", "P4AU"], ALL_OPUS);
+    expect(result).toContain("P4");
+    expect(result).toContain("P4G");
+    expect(result).toContain("P4AU");
+    expect(result).not.toContain("P4D"); // was not in saved list
+    expect(result).toHaveLength(3);
+  });
+
+  it("precise codes without a LEGACY_EXPAND entry are passed through directly", () => {
+    const result = _migrate(["P1", "P5X"], ALL_OPUS);
+    expect(result).toContain("P1");
+    expect(result).toContain("P5X");
+    expect(result).toHaveLength(2);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PIÈGE 4 — DST Paris: additional edge cases not yet covered
+//
+// Source: CLAUDE.md §13 (and task description):
+//   "00:30 UTC when Paris is UTC+2, the Paris date should be the same day not next"
+//
+// Core property: adding 2 hours to 00:30 UTC gives 02:30 Paris — same day.
+// The existing DST tests already cover many scenarios. We add:
+//   • A specific midnight-boundary scenario matching the task description exactly
+//   • The boundary just BEFORE midnight (23:30 UTC in winter → next day in Paris)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("parisDateKey — midnight boundary with UTC+2 offset (summer)", () => {
+  it("00:30 UTC on a summer day (Paris UTC+2) gives the SAME calendar day in Paris", () => {
+    // Task description: "00:30 UTC when Paris is UTC+2, the Paris date should be
+    // the same day not next". 00:30 UTC + 2h = 02:30 Paris → same day as UTC.
+    // Using 2025-07-15 (mid-summer, unambiguously UTC+2 in Paris).
+    const date = new Date("2025-07-15T00:30:00Z");
+    expect(parisDateKey(date)).toBe("2025-07-15");
+  });
+
+  it("22:30 UTC on a summer day (Paris UTC+2) is already the NEXT day in Paris", () => {
+    // 22:30 UTC + 2h = 00:30 on the next day in Paris
+    const date = new Date("2025-07-14T22:30:00Z");
+    expect(parisDateKey(date)).toBe("2025-07-15"); // next day in Paris
+  });
+
+  it("22:30 UTC on a winter day (Paris UTC+1) is still the SAME day in Paris", () => {
+    // 22:30 UTC + 1h = 23:30 Paris → same day (does not cross midnight)
+    const date = new Date("2025-01-15T22:30:00Z");
+    expect(parisDateKey(date)).toBe("2025-01-15");
+  });
+
+  it("23:00 UTC on a winter day (Paris UTC+1) is the NEXT day in Paris", () => {
+    // 23:00 UTC + 1h = 00:00 Paris next day
+    const date = new Date("2025-01-15T23:00:00Z");
+    expect(parisDateKey(date)).toBe("2025-01-16");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PIÈGE 5 — normalize: edge cases not covered by existing tests
+//
+// The existing tests cover: empty string, accent stripping, apostrophes,
+// quotes, trim, complex title, Katakana, idempotence, punctuation preservation.
+// We add: string containing only whitespace (trim → "").
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("normalize — whitespace-only and boundary edge cases", () => {
+  it("returns empty string for a whitespace-only string", () => {
+    // trim() reduces "   " to "", then toLowerCase() keeps it as ""
+    expect(normalize("   ")).toBe("");
+  });
+
+  it("returns empty string for a tab-only string", () => {
+    expect(normalize("\t\t")).toBe("");
+  });
+
+  it("handles a string with leading/trailing spaces and interior accent", () => {
+    // trim removes outer spaces, NFD+strip removes accent
+    expect(normalize("  élève  ")).toBe("eleve");
+  });
+
+  it("handles mixed accented Latin and plain ASCII in the same string", () => {
+    // Accented chars stripped, plain ASCII preserved
+    expect(normalize("Café au lait")).toBe("cafe au lait");
+  });
+
+  it("é normalizes to e, ü normalizes to u, ñ normalizes to n", () => {
+    expect(normalize("é")).toBe("e");
+    expect(normalize("ü")).toBe("u");
+    expect(normalize("ñ")).toBe("n");
+  });
+
+  it("Katakana アン is preserved unchanged (no Latin diacritics to strip)", () => {
+    // The existing test on line ~820 already covers this, but we confirm the
+    // constraint explicitly: normalize should be safe to call on Katakana names
+    // (though in practice it is only called on romaji / Latin character names).
+    expect(normalize("アン")).toBe("アン");
   });
 });

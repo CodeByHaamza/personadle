@@ -22,24 +22,23 @@
 // ─────────────────────────────────────────────────────────
 
 // Détecte tout environnement local : file://, localhost, 127.0.0.1, LAN (192.168.x, 10.x)
-const IS_DEV = (
-  window.location.hostname === ''          ||   // file://
-  window.location.hostname === 'localhost' ||
-  window.location.hostname === '127.0.0.1' ||
-  window.location.hostname === '0.0.0.0'   ||
+const IS_DEV =
+  window.location.hostname === "" || // file://
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname === "0.0.0.0" ||
   /^192\.168\./.test(window.location.hostname) ||
-  /^10\./.test(window.location.hostname)
-);
+  /^10\./.test(window.location.hostname);
 
 // Local Apache : projet servi depuis /personadle/ (symlink via setup.sh)
 // Docker       : projet servi depuis / (DocumentRoot = /var/www/html)
 // Prod         : Hostinger, projet à la racine du domaine
 // → On détecte si le pathname commence par /personadle/ pour le préfixer.
-const _pathPrefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-const BASE_URL = window.location.hostname === 'personadle.net'
-  ? 'https://personadle.net/api'
-  : `${window.location.protocol}//${window.location.host}${_pathPrefix}/api`;
-
+const _pathPrefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
+const BASE_URL =
+  window.location.hostname === "personadle.net"
+    ? "https://personadle.net/api"
+    : `${window.location.protocol}//${window.location.host}${_pathPrefix}/api`;
 
 // ─────────────────────────────────────────────────────────
 // ERREUR API
@@ -53,12 +52,11 @@ export class ApiError extends Error {
    */
   constructor(status, message, data = null) {
     super(message);
-    this.name    = 'ApiError';
-    this.status  = status;
-    this.data    = data;
+    this.name = "ApiError";
+    this.status = status;
+    this.data = data;
   }
 }
-
 
 // ─────────────────────────────────────────────────────────
 // WRAPPER FETCH
@@ -78,11 +76,11 @@ async function apiCall(endpoint, opts = {}) {
   const url = `${BASE_URL}${endpoint}`;
 
   const response = await fetch(url, {
-    credentials: 'include',  // envoie les cookies de session PHP
+    credentials: "include", // envoie les cookies de session PHP
     ...opts,
     headers: {
-      'Content-Type': 'application/json',
-      'Accept':       'application/json',
+      "Content-Type": "application/json",
+      Accept: "application/json",
       ...opts.headers,
     },
   });
@@ -109,7 +107,7 @@ async function apiCall(endpoint, opts = {}) {
  */
 function post(endpoint, data) {
   return apiCall(endpoint, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify(data),
   });
 }
@@ -119,38 +117,36 @@ function post(endpoint, data) {
  * @param {string} endpoint
  */
 function get(endpoint) {
-  return apiCall(endpoint, { method: 'GET' });
+  return apiCall(endpoint, { method: "GET" });
 }
-
 
 // ─────────────────────────────────────────────────────────
 // ENDPOINTS ORGANISÉS PAR DOMAINE
 // ─────────────────────────────────────────────────────────
 
 export const api = {
-
   // ── Auth ──────────────────────────────────────────────
   auth: {
     /**
      * Crée un compte.
      * @param {{ email: string, pseudo: string, password: string, lang?: string }} data
      */
-    register: (data) => post('/auth/register', data),
+    register: (data) => post("/auth/register", data),
 
     /**
      * Connecte l'utilisateur (session PHP httpOnly).
      * @param {{ email: string, password: string }} data
      */
-    login: (data) => post('/auth/login', data),
+    login: (data) => post("/auth/login", data),
 
     /** Déconnecte l'utilisateur (détruit la session serveur). */
-    logout: () => post('/auth/logout', {}),
+    logout: () => post("/auth/logout", {}),
 
     /**
      * Retourne le profil de l'utilisateur connecté, ou null si non connecté.
      * À appeler au chargement de page pour restaurer l'état de connexion.
      */
-    me: () => get('/auth/me'),
+    me: () => get("/auth/me"),
   },
 
   // ── Utilisateur & profil ──────────────────────────────
@@ -166,23 +162,23 @@ export const api = {
      * @param {number} userId
      * @param {object} data
      */
-    update: (userId, data) => apiCall(`/user/${userId}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+    update: (userId, data) =>
+      apiCall(`/user/${userId}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
 
     /**
      * Migre le profil localStorage vers le compte cloud (appelé une seule fois au register).
      * @param {{ profile: object|null, pendingSessions: object[] }} payload
      */
-    migrate: (payload) => post('/user/migrate', payload),
-
+    migrate: (payload) => post("/user/migrate", payload),
 
     /**
      * Supprime le compte (soft delete RGPD — hard delete différé J+30).
      * @param {number} userId
      */
-    delete: (userId) => apiCall(`/user/${userId}`, { method: 'DELETE' }),
+    delete: (userId) => apiCall(`/user/${userId}`, { method: "DELETE" }),
 
     /**
      * Compares stats between the logged-in user and a friend.
@@ -205,20 +201,20 @@ export const api = {
      * Enregistre une session de jeu terminée côté serveur.
      * @param {object} session - Objet buildGameSession()
      */
-    postSession: (session) => post('/sessions', session),
+    postSession: (session) => post("/sessions", session),
 
     /**
      * Synchronise les sessions en attente stockées dans localStorage.
      * À appeler après une reconnexion ou au chargement si l'user est connecté.
      */
     syncPending: async () => {
-      const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
+      const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
       if (!pending.length) return;
 
       // Normalize legacy mode names stored before the server enum was finalised
-      const _modeAlias = { shadow: 'silhouette', classic: 'classic' };
-      const normalize = s => {
-        const m = (s.mode ?? '').toLowerCase();
+      const _modeAlias = { shadow: "silhouette", classic: "classic" };
+      const normalize = (s) => {
+        const m = (s.mode ?? "").toLowerCase();
         return { ...s, mode: _modeAlias[m] ?? m };
       };
 
@@ -231,10 +227,10 @@ export const api = {
           if (e?.status === 409) continue; // already recorded server-side, discard
           if (e?.status === 400) continue; // permanently invalid data — discard silently
           remaining.push(raw); // network/server error — keep for later
-          console.warn('⚠️ Session sync failed:', e.message);
+          console.warn("⚠️ Session sync failed:", e.message);
         }
       }
-      localStorage.setItem('pendingSessions', JSON.stringify(remaining));
+      localStorage.setItem("pendingSessions", JSON.stringify(remaining));
     },
   },
 
@@ -270,7 +266,7 @@ export const api = {
      * Si connecté, inclut le statut de friendship pour chaque joueur.
      * @param {{ q?: string, limit?: number, offset?: number }} params
      */
-    list: ({ q = '', limit = 30, offset = 0 } = {}) =>
+    list: ({ q = "", limit = 30, offset = 0 } = {}) =>
       get(`/user/list?q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}`),
   },
 
@@ -284,7 +280,9 @@ export const api = {
      *   target : nom exact du personnage/musique cible
      */
     get: ({ mode, date, target }) =>
-      get(`/community-stats?mode=${encodeURIComponent(mode)}&date=${encodeURIComponent(date)}&target=${encodeURIComponent(target)}`),
+      get(
+        `/community-stats?mode=${encodeURIComponent(mode)}&date=${encodeURIComponent(date)}&target=${encodeURIComponent(target)}`
+      ),
   },
 
   // ── Leaderboard ───────────────────────────────────────
@@ -296,36 +294,46 @@ export const api = {
      *   period : 'day' | 'week' | 'month' | 'ever'
      *   metric : 'wins' | 'winrate' | 'streak' | 'perfect' | 'games'
      */
-    get: ({ mode = 'all', period = 'ever', metric = 'wins', limit = 50, offset = 0, friends_only = 0 } = {}) =>
-      get(`/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}&friends_only=${friends_only}`),
+    get: ({
+      mode = "all",
+      period = "ever",
+      metric = "wins",
+      limit = 50,
+      offset = 0,
+      friends_only = 0,
+    } = {}) =>
+      get(
+        `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}&friends_only=${friends_only}`
+      ),
   },
 
   // ── Amis ──────────────────────────────────────────────
   friends: {
     /** Récupère la liste d'amis + demandes en attente de l'utilisateur connecté. */
-    list: () => get('/friends'),
+    list: () => get("/friends"),
 
     /**
      * Envoie une demande d'ami par friend_code.
      * @param {string} friendCode - Code de 8 caractères
      */
-    request: (friendCode) => post('/friends/', { friend_code: friendCode }),
+    request: (friendCode) => post("/friends/", { friend_code: friendCode }),
 
     /**
      * Accepte ou refuse une demande reçue.
      * @param {number} friendshipId
      * @param {'accept'|'decline'} action
      */
-    respond: (friendshipId, action) => apiCall(`/friends/${friendshipId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ action }),
-    }),
+    respond: (friendshipId, action) =>
+      apiCall(`/friends/${friendshipId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ action }),
+      }),
 
     /**
      * Supprime un ami ou retire une demande envoyée.
      * @param {number} friendshipId
      */
-    remove: (friendshipId) => apiCall(`/friends/${friendshipId}`, { method: 'DELETE' }),
+    remove: (friendshipId) => apiCall(`/friends/${friendshipId}`, { method: "DELETE" }),
   },
 
   // ── Notifications ─────────────────────────────────────
@@ -334,12 +342,12 @@ export const api = {
      * Retourne le nombre de demandes d'ami non vues.
      * @returns {Promise<{ friend_requests: number }>}
      */
-    get: () => get('/notifications'),
+    get: () => get("/notifications"),
 
     /**
      * Marque toutes les demandes en attente comme vues.
      */
-    markSeen: () => apiCall('/notifications', { method: 'PATCH', body: '{}' }),
+    markSeen: () => apiCall("/notifications", { method: "PATCH", body: "{}" }),
   },
 
   // ── Messages & Défis ──────────────────────────────────
@@ -348,7 +356,7 @@ export const api = {
      * Liste les messages de l'utilisateur connecté.
      * @param {{ type?: string, status?: string, limit?: number, offset?: number }} params
      */
-    list: ({ type = '', status = '', limit = 20, offset = 0 } = {}) =>
+    list: ({ type = "", status = "", limit = 20, offset = 0 } = {}) =>
       get(`/messages?type=${type}&status=${status}&limit=${limit}&offset=${offset}`),
 
     /**
@@ -356,23 +364,24 @@ export const api = {
      * @param {{ receiver_id: number, type: 'message'|'challenge', content?: string,
      *           challenge_mode?: string, challenge_score?: number, challenge_date?: string }} data
      */
-    send: (data) => post('/messages/', data),
+    send: (data) => post("/messages/", data),
 
     /**
      * Marque un message comme lu / accepté.
      * @param {number} msgId
      * @param {'read'|'accepted'} status
      */
-    updateStatus: (msgId, status) => apiCall(`/messages/${msgId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    }),
+    updateStatus: (msgId, status) =>
+      apiCall(`/messages/${msgId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }),
 
     /**
      * Supprime un message.
      * @param {number} msgId
      */
-    delete: (msgId) => apiCall(`/messages/${msgId}`, { method: 'DELETE' }),
+    delete: (msgId) => apiCall(`/messages/${msgId}`, { method: "DELETE" }),
   },
 
   // ── Social Link ───────────────────────────────────────
@@ -409,7 +418,7 @@ export const api = {
       post(`/social-links/by-friend/${friendId}/interact`, { action_type: actionType }),
 
     /** Récupère les rank-up notifs en attente pour l'utilisateur connecté. */
-    getRankUpNotifs: (lang = 'en') => get(`/social-links/rankup-notifs?lang=${lang}`),
+    getRankUpNotifs: (lang = "en") => get(`/social-links/rankup-notifs?lang=${lang}`),
   },
 
   // ── Badges ────────────────────────────────────────────
@@ -418,19 +427,19 @@ export const api = {
      * Catalogue complet avec is_unlocked pour l'utilisateur courant.
      * @param {string} [lang] - 'fr'|'es'|'de'|'it' pour nom localisé (défaut: 'en')
      */
-    catalog: (lang) => get(`/badges${lang ? '?lang=' + encodeURIComponent(lang) : ''}`),
+    catalog: (lang) => get(`/badges${lang ? "?lang=" + encodeURIComponent(lang) : ""}`),
 
     /**
      * Rachète un code événement.
      * @param {string} code
      */
-    redeem: (code) => post('/badges/redeem', { code }),
+    redeem: (code) => post("/badges/redeem", { code }),
 
     /**
      * Persiste le déblocage d'un badge côté serveur (fire-and-forget).
      * @param {string} badgeId
      */
-    unlock: (badgeId) => post('/badges/unlock', { badge_id: badgeId }),
+    unlock: (badgeId) => post("/badges/unlock", { badge_id: badgeId }),
   },
 
   // ── Wallpapers ────────────────────────────────────────
@@ -438,13 +447,13 @@ export const api = {
     /**
      * Catalogue complet avec is_unlocked pour l'utilisateur courant.
      */
-    catalog: () => get('/wallpapers'),
+    catalog: () => get("/wallpapers"),
 
     /**
      * Persiste le déblocage d'un wallpaper côté serveur (fire-and-forget).
      * @param {string} wallpaperId
      */
-    unlock: (wallpaperId) => post('/wallpapers/unlock', { wallpaper_id: wallpaperId }),
+    unlock: (wallpaperId) => post("/wallpapers/unlock", { wallpaper_id: wallpaperId }),
   },
 
   // ── Titles ────────────────────────────────────────────
@@ -453,7 +462,7 @@ export const api = {
      * Persiste le déblocage d'un titre côté serveur (fire-and-forget).
      * @param {string} titleSlug
      */
-    unlock: (titleSlug) => post('/titles/unlock', { title_slug: titleSlug }),
+    unlock: (titleSlug) => post("/titles/unlock", { title_slug: titleSlug }),
   },
 };
 

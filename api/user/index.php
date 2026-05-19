@@ -102,16 +102,25 @@ if ($method === 'GET') {
     $stmt->execute([$userId]);
     $unlockedTitles = $stmt->fetchAll();
 
+    // Résoudre le slug du titre équipé (évite un aller-retour supplémentaire côté JS)
+    $equippedTitleSlug = null;
+    if (!empty($profile['equipped_title_id'])) {
+        $s = $pdo->prepare('SELECT slug FROM titles WHERE id = ? LIMIT 1');
+        $s->execute([$profile['equipped_title_id']]);
+        $equippedTitleSlug = $s->fetchColumn() ?: null;
+    }
+
     jsonSuccess([
         'user'    => formatUser($user),
         'profile' => [
-            'avatar_data'        => $profile['avatar_data']        ?? null,
-            'avatar_border_color'=> $profile['avatar_border_color'] ?? '#ffffff',
-            'wallpaper_id'       => $profile['wallpaper_id']        ?? null,
-            'profile_music_id'   => $profile['profile_music_id']    ?? null,
-            'selected_badges'    => json_decode($profile['selected_badges'] ?? 'null') ?? [],
-            'equipped_title_id'  => $profile['equipped_title_id']   ?? null,
-            'settings'           => json_decode($profile['settings']  ?? 'null', true) ?? [],
+            'avatar_data'         => $profile['avatar_data']        ?? null,
+            'avatar_border_color' => $profile['avatar_border_color'] ?? '#ffffff',
+            'wallpaper_id'        => $profile['wallpaper_id']        ?? null,
+            'profile_music_id'    => $profile['profile_music_id']    ?? null,
+            'selected_badges'     => json_decode($profile['selected_badges'] ?? 'null') ?? [],
+            'equipped_title_id'   => $profile['equipped_title_id']   ?? null,
+            'equipped_title_slug' => $equippedTitleSlug,
+            'settings'            => json_decode($profile['settings']  ?? 'null', true) ?? [],
         ],
         'stats'   => $stats,
         'badges'  => array_map(fn($b) => [
@@ -149,6 +158,13 @@ if ($method === 'PATCH') {
 
     // pseudo
     if (array_key_exists('pseudo', $data)) {
+        // Vérifier le verrou pseudo (défini par un admin)
+        $lockCheck = $pdo->prepare('SELECT pseudo_locked FROM users WHERE id = ? LIMIT 1');
+        $lockCheck->execute([$userId]);
+        $lockRow = $lockCheck->fetch();
+        if (!empty($lockRow['pseudo_locked'])) {
+            jsonError('Username is locked and cannot be changed.', 403);
+        }
         $pseudo = trim($data['pseudo']);
         if (strlen($pseudo) < 3 || strlen($pseudo) > 50) {
             jsonError('Username must be 3–50 characters');
@@ -175,11 +191,14 @@ if ($method === 'PATCH') {
         $userParams[] = $lang;
     }
 
-    // avatar_data (base64 ou null — on ne valide pas le contenu, juste la taille)
+    // avatar_data (base64 PNG/JPEG/WebP ou null — taille + préfixe validés)
     if (array_key_exists('avatar_data', $data)) {
         $avatar = $data['avatar_data'];
         if ($avatar !== null && strlen($avatar) > 2_000_000) {
             jsonError('Avatar too large (max 2 MB base64)');
+        }
+        if ($avatar !== null && !preg_match('/^data:image\/(jpeg|png|webp);base64,/', $avatar)) {
+            jsonError('Invalid avatar format', 400);
         }
         $profileFields[] = 'avatar_data = ?';
         $profileParams[] = $avatar;
@@ -197,8 +216,14 @@ if ($method === 'PATCH') {
 
     // wallpaper_id
     if (array_key_exists('wallpaper_id', $data)) {
+        $wid = $data['wallpaper_id'] ? substr(trim($data['wallpaper_id']), 0, 100) : null;
+        if ($wid !== null) {
+            $owns = $pdo->prepare('SELECT 1 FROM user_wallpapers WHERE user_id = ? AND wallpaper_id = ? LIMIT 1');
+            $owns->execute([$userId, $wid]);
+            if (!$owns->fetch()) jsonError('Wallpaper not unlocked', 403);
+        }
         $profileFields[] = 'wallpaper_id = ?';
-        $profileParams[] = $data['wallpaper_id'] ? substr($data['wallpaper_id'], 0, 100) : null;
+        $profileParams[] = $wid;
     }
 
     // profile_music_id
@@ -210,6 +235,11 @@ if ($method === 'PATCH') {
     // selected_badges (max 4 IDs)
     if (array_key_exists('selected_badges', $data)) {
         $sel = array_values(array_slice((array) $data['selected_badges'], 0, 4));
+        foreach ($sel as $bid) {
+            if (!is_string($bid) || !preg_match('/^[a-z0-9_\-]{1,100}$/', $bid)) {
+                jsonError('Invalid badge id in selected_badges', 400);
+            }
+        }
         $profileFields[] = 'selected_badges = ?';
         $profileParams[] = json_encode($sel);
     }
@@ -217,6 +247,11 @@ if ($method === 'PATCH') {
     // equipped_title_id
     if (array_key_exists('equipped_title_id', $data)) {
         $titleId = $data['equipped_title_id'] ? (int) $data['equipped_title_id'] : null;
+        if ($titleId !== null) {
+            $owns = $pdo->prepare('SELECT 1 FROM user_titles WHERE user_id = ? AND title_id = ? LIMIT 1');
+            $owns->execute([$userId, $titleId]);
+            if (!$owns->fetch()) jsonError('Title not unlocked', 403);
+        }
         $profileFields[] = 'equipped_title_id = ?';
         $profileParams[] = $titleId;
     }

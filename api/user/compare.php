@@ -156,11 +156,13 @@ if (!$onCooldown) {
              VALUES (?, ?, 'compare_stats', ?, ?)"
         )->execute([$linkId, $authId, $xpGained, $isMutual ? 1 : 0]);
 
+        $oldRank = (int) ($sl['rank'] ?? 1);
         $pdo->prepare('UPDATE social_links SET xp = ?, `rank` = ?, last_interaction_at = NOW() WHERE id = ?')
             ->execute([$newXp, $newRank, $linkId]);
 
         $pdo->commit();
 
+        $rankedUp = $newRank > $oldRank;
         // Only mark the cooldown after a successful commit — client can retry on failure
         $cooldownUntil = (new DateTime('now', new DateTimeZone('UTC')))
             ->modify("+{$cooldownHours} hours")
@@ -171,6 +173,8 @@ if (!$onCooldown) {
         // Non-fatal: comparison data is still returned even if XP fails.
         // $cooldownUntil stays null so the client can retry.
         $xpGained = 0;
+        $newRank  = 0;
+        $rankedUp = false;
     }
 }
 
@@ -180,4 +184,6 @@ jsonSuccess([
     'on_cooldown'    => $onCooldown,
     'cooldown_until' => $cooldownUntil,
     'xp_gained'      => $xpGained,
+    'ranked_up'      => $rankedUp ?? false,
+    'new_rank'       => $newRank  ?? 0,
 ]);

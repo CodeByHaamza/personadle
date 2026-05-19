@@ -25,40 +25,96 @@
 // IMPORTS
 // ─────────────────────────────────────────────────────────
 
-import { initBadgesSystem, syncBadgesWithBackend, renderBadgesModal, renderBadgesPreview, getBadgesForShare, markProfileAsShared } from './badges/badgesManager.js';
-import { songs as ALL_SONGS } from '../musicsMode/database/songs.js';
-import { canRecover, showStreakRecoveryMenu } from '../js/streak-recovery.js';
-import { pullProfileFromCloud, pushLangToCloud } from '../js/cloud-sync.js';
+import {
+  initBadgesSystem,
+  syncBadgesWithBackend,
+  renderBadgesModal,
+  renderBadgesPreview,
+  getBadgesForShare,
+  markProfileAsShared,
+} from "./badges/badgesManager.js";
+import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
+import { canRecover, showStreakRecoveryMenu } from "../js/streak-recovery.js";
+import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 
 // Exposer les songs pour d'autres modules (notifications.js, social-link.js…)
 window._profileSongs = ALL_SONGS;
-
 
 // ─────────────────────────────────────────────────────────
 // ⏱️ FORMAT TEMPS JOUÉ
 // Convertit des minutes en une chaîne lisible selon la durée.
 // ─────────────────────────────────────────────────────────
 function formatPlayTime(totalMinutes) {
-  const lang = localStorage.getItem('lang') || 'en';
+  const lang = localStorage.getItem("lang") || "en";
   const U = {
-    en: { min:'min', h:'h', day:['day','days'], week:['week','weeks'], month:['month','months'], year:['year','years'] },
-    fr: { min:'min', h:'h', day:['jour','jours'], week:['semaine','semaines'], month:['mois','mois'], year:['an','ans'] },
-    es: { min:'min', h:'h', day:['día','días'], week:['semana','semanas'], month:['mes','meses'], year:['año','años'] },
-    de: { min:'Min.', h:'Std.', day:['Tag','Tage'], week:['Woche','Wochen'], month:['Monat','Monate'], year:['Jahr','Jahre'] },
-    it: { min:'min', h:'h', day:['giorno','giorni'], week:['settimana','settimane'], month:['mese','mesi'], year:['anno','anni'] },
+    en: {
+      min: "min",
+      h: "h",
+      day: ["day", "days"],
+      week: ["week", "weeks"],
+      month: ["month", "months"],
+      year: ["year", "years"],
+    },
+    fr: {
+      min: "min",
+      h: "h",
+      day: ["jour", "jours"],
+      week: ["semaine", "semaines"],
+      month: ["mois", "mois"],
+      year: ["an", "ans"],
+    },
+    es: {
+      min: "min",
+      h: "h",
+      day: ["día", "días"],
+      week: ["semana", "semanas"],
+      month: ["mes", "meses"],
+      year: ["año", "años"],
+    },
+    de: {
+      min: "Min.",
+      h: "Std.",
+      day: ["Tag", "Tage"],
+      week: ["Woche", "Wochen"],
+      month: ["Monat", "Monate"],
+      year: ["Jahr", "Jahre"],
+    },
+    it: {
+      min: "min",
+      h: "h",
+      day: ["giorno", "giorni"],
+      week: ["settimana", "settimane"],
+      month: ["mese", "mesi"],
+      year: ["anno", "anni"],
+    },
   };
   const u = U[lang] || U.en;
   const p = (n, [s, pl]) => `${n} ${n <= 1 ? s : pl}`;
   const m = Math.max(0, Math.round(totalMinutes));
-  const PER_DAY = 1440, PER_WEEK = 10080, PER_MONTH = 43200, PER_YEAR = 525600;
-  if (m < PER_DAY)   return `${m} ${u.min}`;
-  if (m < PER_WEEK)  { const d = Math.floor(m/PER_DAY),  h = Math.floor((m%PER_DAY)/60);  return h  ? `${p(d,u.day)} ${h}${u.h}`         : p(d,u.day);   }
-  if (m < PER_MONTH) { const w = Math.floor(m/PER_WEEK), d = Math.floor((m%PER_WEEK)/PER_DAY);   return d  ? `${p(w,u.week)} ${p(d,u.day)}`   : p(w,u.week);  }
-  if (m < PER_YEAR)  { const mo= Math.floor(m/PER_MONTH),w = Math.floor((m%PER_MONTH)/PER_WEEK); return w  ? `${p(mo,u.month)} ${p(w,u.week)}` : p(mo,u.month);}
-  const yr = Math.floor(m/PER_YEAR), mo = Math.floor((m%PER_YEAR)/PER_MONTH);
-  return mo ? `${p(yr,u.year)} ${p(mo,u.month)}` : p(yr,u.year);
+  const PER_DAY = 1440,
+    PER_WEEK = 10080,
+    PER_MONTH = 43200,
+    PER_YEAR = 525600;
+  if (m < PER_DAY) return `${m} ${u.min}`;
+  if (m < PER_WEEK) {
+    const d = Math.floor(m / PER_DAY),
+      h = Math.floor((m % PER_DAY) / 60);
+    return h ? `${p(d, u.day)} ${h}${u.h}` : p(d, u.day);
+  }
+  if (m < PER_MONTH) {
+    const w = Math.floor(m / PER_WEEK),
+      d = Math.floor((m % PER_WEEK) / PER_DAY);
+    return d ? `${p(w, u.week)} ${p(d, u.day)}` : p(w, u.week);
+  }
+  if (m < PER_YEAR) {
+    const mo = Math.floor(m / PER_MONTH),
+      w = Math.floor((m % PER_MONTH) / PER_WEEK);
+    return w ? `${p(mo, u.month)} ${p(w, u.week)}` : p(mo, u.month);
+  }
+  const yr = Math.floor(m / PER_YEAR),
+    mo = Math.floor((m % PER_YEAR) / PER_MONTH);
+  return mo ? `${p(yr, u.year)} ${p(mo, u.month)}` : p(yr, u.year);
 }
-
 
 // ─────────────────────────────────────────────────────────
 // THÈMES UI
@@ -71,38 +127,94 @@ function formatPlayTime(totalMinutes) {
  */
 const THEMES = [
   // ── Persona 5 ──────────────────────────────────────────
-  { id: 'all_out',            accent: '#E63946', hover: '#C1121F', light: '#FF9999', rgb: '230, 57, 70',   label: 'All-Out Attack'      },
+  {
+    id: "all_out",
+    accent: "#E63946",
+    hover: "#C1121F",
+    light: "#FF9999",
+    rgb: "230, 57, 70",
+    label: "All-Out Attack",
+  },
   // ── Velvet Room (bleu nuit d'Igor) ─────────────────────
-  { id: 'velvet_room',        accent: '#1B3A8A', hover: '#162E72', light: '#60A5FA', rgb: '27, 58, 138',   label: 'Velvet Room'         },
+  {
+    id: "velvet_room",
+    accent: "#1B3A8A",
+    hover: "#162E72",
+    light: "#60A5FA",
+    rgb: "27, 58, 138",
+    label: "Velvet Room",
+  },
   // ── Persona 3 (Dark Hour / Tartarus) ───────────────────
-  { id: 'dark_hour',          accent: '#00B4D8', hover: '#0077B6', light: '#48CAE4', rgb: '0, 180, 216',   label: 'Dark Hour'           },
+  {
+    id: "dark_hour",
+    accent: "#00B4D8",
+    hover: "#0077B6",
+    light: "#48CAE4",
+    rgb: "0, 180, 216",
+    label: "Dark Hour",
+  },
   // ── Persona 3 Portable (FeMC, rose doux) ───────────────
-  { id: 'pink_ribbon',        accent: '#E8739A', hover: '#D0507A', light: '#F9A8D4', rgb: '232, 115, 154', label: 'Pink Ribbon'         },
+  {
+    id: "pink_ribbon",
+    accent: "#E8739A",
+    hover: "#D0507A",
+    light: "#F9A8D4",
+    rgb: "232, 115, 154",
+    label: "Pink Ribbon",
+  },
   // ── Persona 4 (Midnight Channel, or TV World) ──────────
-  { id: 'midnight_channel',   accent: '#EAB308', hover: '#CA8A04', light: '#FEF08A', rgb: '234, 179, 8',   label: 'Midnight Channel'    },
+  {
+    id: "midnight_channel",
+    accent: "#EAB308",
+    hover: "#CA8A04",
+    light: "#FEF08A",
+    rgb: "234, 179, 8",
+    label: "Midnight Channel",
+  },
   // ── Persona 1 (violet mystique, Demon Palace) ──────────
-  { id: 'demon_palace',       accent: '#9333EA', hover: '#7E22CE', light: '#D8B4FE', rgb: '147, 51, 234',  label: 'Demon Palace'        },
+  {
+    id: "demon_palace",
+    accent: "#9333EA",
+    hover: "#7E22CE",
+    light: "#D8B4FE",
+    rgb: "147, 51, 234",
+    label: "Demon Palace",
+  },
   // ── Persona 2 EP (Eternal Punishment, indigo) ──────────
-  { id: 'eternal_punishment', accent: '#4F46E5', hover: '#4338CA', light: '#A5B4FC', rgb: '79, 70, 229',   label: 'Eternal Punishment'  },
+  {
+    id: "eternal_punishment",
+    accent: "#4F46E5",
+    hover: "#4338CA",
+    light: "#A5B4FC",
+    rgb: "79, 70, 229",
+    label: "Eternal Punishment",
+  },
   // ── Persona Q (labyrinthe doré, orange vif) ────────────
-  { id: 'golden_labyrinth',   accent: '#F97316', hover: '#EA6C12', light: '#FDBA74', rgb: '249, 115, 22',  label: 'Golden Labyrinth'    },
+  {
+    id: "golden_labyrinth",
+    accent: "#F97316",
+    hover: "#EA6C12",
+    light: "#FDBA74",
+    rgb: "249, 115, 22",
+    label: "Golden Labyrinth",
+  },
   // ── Couleur libre ──────────────────────────────────────
-  { id: 'custom',             accent: null,      hover: null,      light: null,      rgb: null,            label: null                  },
+  { id: "custom", accent: null, hover: null, light: null, rgb: null, label: null },
 ];
 
 /** Convertit un hex en "r, g, b" pour rgba(). */
 function hexToRgb(hex) {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return m ? `${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}` : '0, 0, 0';
+  return m ? `${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}` : "0, 0, 0";
 }
 
 /** Éclaircit ou assombrit une couleur hex d'un delta (-255 → 255). */
 function adjustHex(hex, delta) {
-  const n = parseInt(hex.replace('#', ''), 16);
+  const n = parseInt(hex.replace("#", ""), 16);
   const r = Math.min(255, Math.max(0, (n >> 16) + delta));
   const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + delta));
   const b = Math.min(255, Math.max(0, (n & 0xff) + delta));
-  return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+  return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
 }
 
 /**
@@ -111,27 +223,27 @@ function adjustHex(hex, delta) {
  * @param {string} [customColor] - Couleur hex si themeId === 'custom'
  */
 function applyTheme(themeId, customColor) {
-  const root  = document.documentElement;
-  const theme = THEMES.find(t => t.id === themeId);
+  const root = document.documentElement;
+  const theme = THEMES.find((t) => t.id === themeId);
   if (!theme) return;
 
   let accent, hover, light, rgb;
 
-  if (themeId === 'custom' && customColor) {
+  if (themeId === "custom" && customColor) {
     accent = customColor;
-    hover  = adjustHex(customColor, -35);
-    light  = adjustHex(customColor, 45);
-    rgb    = hexToRgb(customColor);
+    hover = adjustHex(customColor, -35);
+    light = adjustHex(customColor, 45);
+    rgb = hexToRgb(customColor);
   } else if (theme.accent) {
     ({ accent, hover, light, rgb } = theme);
   } else {
     return; // custom sans couleur définie
   }
 
-  root.style.setProperty('--accent',       accent);
-  root.style.setProperty('--accent-hover', hover);
-  root.style.setProperty('--accent-light', light);
-  root.style.setProperty('--accent-rgb',   rgb);
+  root.style.setProperty("--accent", accent);
+  root.style.setProperty("--accent-hover", hover);
+  root.style.setProperty("--accent-light", light);
+  root.style.setProperty("--accent-rgb", rgb);
 }
 
 /**
@@ -139,45 +251,45 @@ function applyTheme(themeId, customColor) {
  * À rappeler après chaque changement pour mettre à jour l'état actif.
  */
 function renderThemePicker() {
-  const container = document.getElementById('themeSwatches');
+  const container = document.getElementById("themeSwatches");
   if (!container) return;
 
-  const i           = window.i18n || { t: k => k };
-  const currentId   = profile.profileTheme || 'all_out';
-  const customLabel = i.t('profile.theme_custom') || 'Custom color';
+  const i = window.i18n || { t: (k) => k };
+  const currentId = profile.profileTheme || "all_out";
+  const customLabel = i.t("profile.theme_custom") || "Custom color";
 
-  container.innerHTML = THEMES.map(t => {
-    const isCustom = t.id === 'custom';
+  container.innerHTML = THEMES.map((t) => {
+    const isCustom = t.id === "custom";
     const isActive = t.id === currentId;
-    const label    = isCustom ? customLabel : t.label;
-    const style    = isCustom ? '' : `background:${t.accent};`;
-    const cls      = `theme-swatch${isActive ? ' active' : ''}${isCustom ? ' theme-swatch--rainbow' : ''}`;
+    const label = isCustom ? customLabel : t.label;
+    const style = isCustom ? "" : `background:${t.accent};`;
+    const cls = `theme-swatch${isActive ? " active" : ""}${isCustom ? " theme-swatch--rainbow" : ""}`;
 
     return `
       <button class="${cls}" data-theme="${t.id}" style="${style}" title="${label}" aria-label="${label}">
         <span class="theme-swatch-label">${label}</span>
       </button>`;
-  }).join('');
+  }).join("");
 
   // Afficher/masquer la rangée de couleur custom
-  const customRow = document.getElementById('customThemeRow');
+  const customRow = document.getElementById("customThemeRow");
   if (customRow) {
-    customRow.classList.toggle('hidden', currentId !== 'custom');
-    const picker = document.getElementById('customThemeColor');
+    customRow.classList.toggle("hidden", currentId !== "custom");
+    const picker = document.getElementById("customThemeColor");
     if (picker && profile.profileCustomColor) {
       picker.value = profile.profileCustomColor;
     }
   }
 
   // Handlers swatches
-  container.querySelectorAll('.theme-swatch').forEach(btn => {
-    btn.addEventListener('click', () => {
+  container.querySelectorAll(".theme-swatch").forEach((btn) => {
+    btn.addEventListener("click", () => {
       const id = btn.dataset.theme;
       profile.profileTheme = id;
 
-      if (id === 'custom') {
-        const color = profile.profileCustomColor || '#e63946';
-        applyTheme('custom', color);
+      if (id === "custom") {
+        const color = profile.profileCustomColor || "#e63946";
+        applyTheme("custom", color);
       } else {
         applyTheme(id);
       }
@@ -185,60 +297,56 @@ function renderThemePicker() {
       saveProfile();
       renderThemePicker();
       markDirty();
-      const wid = id === 'custom'
-        ? `custom:${profile.profileCustomColor || '#e63946'}`
-        : id;
+      const wid = id === "custom" ? `custom:${profile.profileCustomColor || "#e63946"}` : id;
       saveProfileToCloud({ wallpaper_id: wid });
 
       // Régénère la preview de partage si la modale est ouverte
-      const shareModal = document.getElementById('sharePreviewModal');
-      if (shareModal && !shareModal.classList.contains('hidden') && _regenerateSharePreview) {
+      const shareModal = document.getElementById("sharePreviewModal");
+      if (shareModal && !shareModal.classList.contains("hidden") && _regenerateSharePreview) {
         _regenerateSharePreview();
       }
     });
   });
 
   // Handler couleur custom
-  document.getElementById('customThemeColor')?.addEventListener('input', e => {
+  document.getElementById("customThemeColor")?.addEventListener("input", (e) => {
     profile.profileCustomColor = e.target.value;
-    applyTheme('custom', e.target.value);
+    applyTheme("custom", e.target.value);
     saveProfile();
     markDirty();
     saveProfileToCloud({ wallpaper_id: `custom:${e.target.value}` });
   });
 }
 
-
 // ─────────────────────────────────────────────────────────
 // VARIABLES GLOBALES
 // ─────────────────────────────────────────────────────────
 
-let profile = null;     // Objet profil utilisateur (localStorage)
-let zoom = 1;           // Niveau de zoom du canvas crop
-let offsetX = 0;        // Décalage horizontal du canvas
-let offsetY = 0;        // Décalage vertical du canvas
-let dragging = false;   // État du drag
-let startX = 0;         // Position X initiale du drag
-let startY = 0;         // Position Y initiale du drag
-let selectedAvatarSrc = ''; // Source de l'avatar sélectionné dans la grille
+let profile = null; // Objet profil utilisateur (localStorage)
+let zoom = 1; // Niveau de zoom du canvas crop
+let offsetX = 0; // Décalage horizontal du canvas
+let offsetY = 0; // Décalage vertical du canvas
+let dragging = false; // État du drag
+let startX = 0; // Position X initiale du drag
+let startY = 0; // Position Y initiale du drag
+let selectedAvatarSrc = ""; // Source de l'avatar sélectionné dans la grille
 
-let cropTarget = 'avatar'; // 'avatar' | 'song' — détermine où le crop est sauvegardé
+let cropTarget = "avatar"; // 'avatar' | 'song' — détermine où le crop est sauvegardé
 let _regenerateSharePreview = null; // Référence levée à generatePreview() dans setupShareProfile()
 let profileSongAudio = null; // Élément <audio> du profile song
-
 
 // ─────────────────────────────────────────────────────────
 // ÉLÉMENTS DOM
 // ─────────────────────────────────────────────────────────
 
 // Éléments principaux de la page
-const pageAvatar   = document.getElementById('pageAvatar');
-const pageUsername = document.getElementById('pageUsername');
-const pseudoInput  = document.getElementById('pseudoInput');
+const pageAvatar = document.getElementById("pageAvatar");
+const pageUsername = document.getElementById("pageUsername");
+const pseudoInput = document.getElementById("pseudoInput");
 
 // Boutons principaux
-const editAvatarBtn    = document.getElementById('editAvatarBtn');
-const saveRefreshBtn   = document.getElementById('saveAndRefreshBtn');
+const editAvatarBtn = document.getElementById("editAvatarBtn");
+const saveRefreshBtn = document.getElementById("saveAndRefreshBtn");
 
 // ── Dirty-state : bouton visible uniquement si un changement utilisateur est détecté ──
 let _profileDirty = false;
@@ -246,31 +354,30 @@ let _profileDirty = false;
 function markDirty() {
   if (_profileDirty) return;
   _profileDirty = true;
-  saveRefreshBtn.innerHTML = '💾 <span>Save changes</span>';
-  saveRefreshBtn.classList.add('btn-dirty');
+  saveRefreshBtn.innerHTML = "💾 <span>Save changes</span>";
+  saveRefreshBtn.classList.add("btn-dirty");
 }
 
 function markClean() {
   _profileDirty = false;
-  saveRefreshBtn.classList.add('btn-saving');
-  saveRefreshBtn.innerHTML = '✅ <span>Saved!</span>';
-  setTimeout(() => saveRefreshBtn.classList.remove('btn-dirty', 'btn-saving'), 1300);
+  saveRefreshBtn.classList.add("btn-saving");
+  saveRefreshBtn.innerHTML = "✅ <span>Saved!</span>";
+  setTimeout(() => saveRefreshBtn.classList.remove("btn-dirty", "btn-saving"), 1300);
 }
-const resetProfileBtn   = document.getElementById('resetProfile');
-const exportBtn         = document.getElementById('exportProfile');
-const borderColorPicker = document.getElementById('borderColorPicker');
-const statsContainer   = document.getElementById('statsContainer');
+const resetProfileBtn = document.getElementById("resetProfile");
+const exportBtn = document.getElementById("exportProfile");
+const borderColorPicker = document.getElementById("borderColorPicker");
+const statsContainer = document.getElementById("statsContainer");
 
 // Modale crop
-const cropModal    = document.getElementById('avatarCropModal');
-const closeCropper = document.getElementById('closeCropper');
-const avatarGrid   = document.getElementById('avatarGrid');
-const canvas       = document.getElementById('avatarCanvas');
-const ctx          = canvas.getContext('2d');
-const zoomInBtn    = document.getElementById('zoomIn');
-const zoomOutBtn   = document.getElementById('zoomOut');
-const confirmCrop  = document.getElementById('confirmCrop');
-
+const cropModal = document.getElementById("avatarCropModal");
+const closeCropper = document.getElementById("closeCropper");
+const avatarGrid = document.getElementById("avatarGrid");
+const canvas = document.getElementById("avatarCanvas");
+const ctx = canvas.getContext("2d");
+const zoomInBtn = document.getElementById("zoomIn");
+const zoomOutBtn = document.getElementById("zoomOut");
+const confirmCrop = document.getElementById("confirmCrop");
 
 // ─────────────────────────────────────────────────────────
 // UTILITAIRE : NORMALISATION DES CHEMINS D'AVATAR
@@ -285,15 +392,14 @@ const confirmCrop  = document.getElementById('confirmCrop');
  * @returns {string} Chemin résolu depuis profile/
  */
 function normalizeAvatarPath(avatarPath) {
-  if (!avatarPath) return '../img/default_avatar.png';
+  if (!avatarPath) return "../img/default_avatar.png";
   // Data URL base64 — toujours valide, aucun ajustement nécessaire
-  if (avatarPath.startsWith('data:')) return avatarPath;
+  if (avatarPath.startsWith("data:")) return avatarPath;
   // Chemins déjà absolus ou root-relatifs
-  if (avatarPath.startsWith('/') || avatarPath.startsWith('http')) return avatarPath;
+  if (avatarPath.startsWith("/") || avatarPath.startsWith("http")) return avatarPath;
   // Anciens chemins stockés depuis index.html (./img/...) → corriger pour profile/
-  return avatarPath.replace(/^\.\/img\//, '../img/');
+  return avatarPath.replace(/^\.\/img\//, "../img/");
 }
-
 
 // ─────────────────────────────────────────────────────────
 // INITIALISATION DU PROFIL
@@ -304,18 +410,18 @@ function normalizeAvatarPath(avatarPath) {
  * Met à jour tous les éléments visuels de la page.
  */
 function initProfile() {
-  const saved = localStorage.getItem('personaUserProfile');
+  const saved = localStorage.getItem("personaUserProfile");
 
   if (saved) {
     profile = JSON.parse(saved);
   } else {
     // Nouveau profil par défaut
     profile = {
-      pseudo: '',
-      avatar: '',
-      avatarBorderColor: '#000000',
-      profileTheme: 'all_out',
-      profileCustomColor: '#e63946',
+      pseudo: "",
+      avatar: "",
+      avatarBorderColor: "#000000",
+      profileTheme: "all_out",
+      profileCustomColor: "#e63946",
       profileSong: null,
       badges: [],
       selectedBadges: [],
@@ -338,24 +444,24 @@ function initProfile() {
 
   // ── Thème UI ──
   // Assure la compatibilité avec les anciens profils sans ces champs
-  if (!profile.profileTheme)      profile.profileTheme = 'all_out';
-  if (!profile.profileCustomColor) profile.profileCustomColor = '#e63946';
+  if (!profile.profileTheme) profile.profileTheme = "all_out";
+  if (!profile.profileCustomColor) profile.profileCustomColor = "#e63946";
 
   const themeId = profile.profileTheme;
-  applyTheme(themeId, themeId === 'custom' ? profile.profileCustomColor : undefined);
+  applyTheme(themeId, themeId === "custom" ? profile.profileCustomColor : undefined);
 
   // ── Affichage de l'avatar ──
   const avatarSrc = normalizeAvatarPath(profile.avatar);
   pageAvatar.src = avatarSrc;
-  pageAvatar.style.borderColor = profile.avatarBorderColor || '#000000';
+  pageAvatar.style.borderColor = profile.avatarBorderColor || "#000000";
 
   // ── Pseudo ──
-  pageUsername.textContent = profile.pseudo || 'Guest';
-  pseudoInput.value = profile.pseudo || '';
+  pageUsername.textContent = profile.pseudo || "Guest";
+  pseudoInput.value = profile.pseudo || "";
 
   // ── Couleur de bordure ──
-  borderColorPicker.value = profile.avatarBorderColor || '#000000';
-  updateBorderPreview(profile.avatarBorderColor || '#000000');
+  borderColorPicker.value = profile.avatarBorderColor || "#000000";
+  updateBorderPreview(profile.avatarBorderColor || "#000000");
 
   // ── Statistiques ──
   renderStats();
@@ -365,7 +471,7 @@ function initProfile() {
  * Sauvegarde le profil dans localStorage.
  */
 function saveProfile() {
-  localStorage.setItem('personaUserProfile', JSON.stringify(profile));
+  localStorage.setItem("personaUserProfile", JSON.stringify(profile));
 }
 
 /**
@@ -380,7 +486,7 @@ async function saveProfileToCloud(fields) {
   try {
     await api.user.update(window._currentUser.id, fields);
   } catch (e) {
-    console.warn('[Profile] Cloud sync failed:', e.message);
+    console.warn("[Profile] Cloud sync failed:", e.message);
   }
 }
 
@@ -393,24 +499,25 @@ async function syncProfileToCloud() {
   if (!window._currentUser?.id || !window._personadleApi) return;
   if (!profile) return;
   const fields = {
-    pseudo:              profile.pseudo || null,
-    lang:                localStorage.getItem('lang') || 'en',
-    avatar_border_color: profile.avatarBorderColor || '#ffffff',
-    wallpaper_id:        profile.profileTheme === 'custom'
-                           ? `custom:${profile.profileCustomColor || '#e63946'}`
-                           : (profile.profileTheme || 'all_out'),
-    profile_music_id:    profile.profileSong?.fichier || profile.profileMusicId || null,
-    selected_badges:     profile.selectedBadges || [],
-    equipped_title_id:   profile.equippedTitleId || null,
+    pseudo: profile.pseudo || null,
+    lang: localStorage.getItem("lang") || "en",
+    avatar_border_color: profile.avatarBorderColor || "#ffffff",
+    wallpaper_id:
+      profile.profileTheme === "custom"
+        ? `custom:${profile.profileCustomColor || "#e63946"}`
+        : profile.profileTheme || "all_out",
+    profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
+    selected_badges: profile.selectedBadges || [],
+    equipped_title_id: profile.equippedTitleId || null,
   };
   if (profile.avatar) fields.avatar_data = profile.avatar;
   // Sync des settings (son, animations…) — stockés dans personaSettings
-  const settings = JSON.parse(localStorage.getItem('personaSettings') || '{}');
+  const settings = JSON.parse(localStorage.getItem("personaSettings") || "{}");
   if (Object.keys(settings).length) fields.settings = settings;
   try {
     await window._personadleApi.user.update(window._currentUser.id, fields);
   } catch (e) {
-    console.warn('[Profile] Sync to cloud failed:', e.message);
+    console.warn("[Profile] Sync to cloud failed:", e.message);
   }
 }
 
@@ -422,7 +529,6 @@ function saveProfileAndSyncBadges() {
   saveProfile();
   saveProfileToCloud({ selected_badges: profile.selectedBadges || [] });
 }
-
 
 // ─────────────────────────────────────────────────────────
 // SYNC STATS DEPUIS LE BACKEND
@@ -441,12 +547,12 @@ async function syncStatsFromBackend(userId) {
 
   // Mapping API (lowercase) → localStorage (PascalCase)
   const modeKeyMap = {
-    classic:      'Classic',
-    emoji:        'Emoji',
-    silhouette:   'Silhouette',
-    alloutattack: 'AllOutAttack',
-    personae:     'Personae',
-    music:        'Music',
+    classic: "Classic",
+    emoji: "Emoji",
+    silhouette: "Silhouette",
+    alloutattack: "AllOutAttack",
+    personae: "Personae",
+    music: "Music",
   };
 
   try {
@@ -454,29 +560,29 @@ async function syncStatsFromBackend(userId) {
     const g = stats.global;
 
     // Écraser les stats globales
-    profile.stats.wins             = g.total_wins;
-    profile.stats.giveups          = g.total_giveups;
-    profile.stats.games            = g.total_games;
-    profile.stats.streakRecord     = g.best_streak;
+    profile.stats.wins = g.total_wins;
+    profile.stats.giveups = g.total_giveups;
+    profile.stats.games = g.total_games;
+    profile.stats.streakRecord = g.best_streak;
     profile.stats.totalTimeMinutes = Math.round(g.total_time_ms / 60000);
-    profile.stats.perfectWins      = g.total_perfect_wins;
+    profile.stats.perfectWins = g.total_perfect_wins;
 
     // Streak courant = max des streaks actifs par mode
-    profile.stats.streak = Math.max(0, ...stats.by_mode.map(m => m.streak ?? 0));
+    profile.stats.streak = Math.max(0, ...stats.by_mode.map((m) => m.streak ?? 0));
 
     // Stats par mode
     profile.stats.modeCount = {};
-    profile.stats.modeWins  = {};
-    stats.by_mode.forEach(m => {
+    profile.stats.modeWins = {};
+    stats.by_mode.forEach((m) => {
       const key = modeKeyMap[m.mode];
       if (key) {
         profile.stats.modeCount[key] = m.games;
-        profile.stats.modeWins[key]  = m.wins;
+        profile.stats.modeWins[key] = m.wins;
       }
     });
 
     // Mode favori = celui avec le plus de parties
-    const fav = stats.by_mode.reduce((best, m) => (!best || m.games > best.games) ? m : best, null);
+    const fav = stats.by_mode.reduce((best, m) => (!best || m.games > best.games ? m : best), null);
     if (fav) profile.stats.favoriteMode = modeKeyMap[fav.mode] ?? fav.mode;
 
     saveProfile();
@@ -487,31 +593,34 @@ async function syncStatsFromBackend(userId) {
   }
 }
 
-
 /**
  * Re-rend toute l'UI à partir du profil localStorage (après un pull cloud).
  * Appelée par window._onCloudSync et pullProfileFromCloud().then().
  */
 function _applyCloudToUI() {
   // Relire le profil mis à jour par cloud-sync
-  const saved = localStorage.getItem('personaUserProfile');
+  const saved = localStorage.getItem("personaUserProfile");
   if (!saved) return;
-  try { profile = JSON.parse(saved); } catch { return; }
+  try {
+    profile = JSON.parse(saved);
+  } catch {
+    return;
+  }
 
   // ── Identité ──────────────────────────────────────────────
-  if (pageUsername) pageUsername.textContent = profile.pseudo || profile.username || 'Guest';
-  if (pseudoInput)  pseudoInput.value        = profile.pseudo || profile.username || '';
+  if (pageUsername) pageUsername.textContent = profile.pseudo || profile.username || "Guest";
+  if (pseudoInput) pseudoInput.value = profile.pseudo || profile.username || "";
 
   // ── Avatar ────────────────────────────────────────────────
   if (pageAvatar) {
-    pageAvatar.src              = normalizeAvatarPath(profile.avatar);
-    pageAvatar.style.borderColor = profile.avatarBorderColor || '#000000';
+    pageAvatar.src = normalizeAvatarPath(profile.avatar);
+    pageAvatar.style.borderColor = profile.avatarBorderColor || "#000000";
   }
-  if (borderColorPicker) borderColorPicker.value = profile.avatarBorderColor || '#000000';
+  if (borderColorPicker) borderColorPicker.value = profile.avatarBorderColor || "#000000";
 
   // ── Thème ─────────────────────────────────────────────────
-  const themeId = profile.profileTheme || 'all_out';
-  applyTheme(themeId, themeId === 'custom' ? profile.profileCustomColor : undefined);
+  const themeId = profile.profileTheme || "all_out";
+  applyTheme(themeId, themeId === "custom" ? profile.profileCustomColor : undefined);
   renderThemePicker();
 
   // ── Stats ─────────────────────────────────────────────────
@@ -522,15 +631,15 @@ function _applyCloudToUI() {
   // profileMusicId = valeur cloud (undefined = pas encore sync, null = pas de song, string = fichier)
   // profileSong    = objet complet résolu localement
   // Règle : le cloud gagne toujours quand profileMusicId est défini.
-  const cloudId  = profile.profileMusicId; // undefined | null | string
-  const localId  = profile.profileSong?.fichier ?? null;
+  const cloudId = profile.profileMusicId; // undefined | null | string
+  const localId = profile.profileSong?.fichier ?? null;
 
   if (cloudId !== undefined) {
     // On a une info cloud — elle prime sur le local
     if (cloudId && cloudId !== localId) {
-      const resolved = ALL_SONGS.find(s => s.fichier === cloudId);
+      const resolved = ALL_SONGS.find((s) => s.fichier === cloudId);
       if (resolved) {
-        profile.profileSong    = resolved;
+        profile.profileSong = resolved;
         profile.profileMusicId = cloudId;
         saveProfile();
       }
@@ -542,8 +651,11 @@ function _applyCloudToUI() {
     }
   } else if (localId && !profile.profileSong?.titre) {
     // Pas encore sync depuis le cloud, mais référence locale orpheline — on résout
-    const resolved = ALL_SONGS.find(s => s.fichier === localId);
-    if (resolved) { profile.profileSong = resolved; saveProfile(); }
+    const resolved = ALL_SONGS.find((s) => s.fichier === localId);
+    if (resolved) {
+      profile.profileSong = resolved;
+      saveProfile();
+    }
   }
   renderSongCard?.();
 
@@ -564,7 +676,6 @@ function _applyCloudToUI() {
   checkAndUnlockTitles?.().catch(() => {});
 }
 
-
 // ─────────────────────────────────────────────────────────
 // AFFICHAGE DES STATISTIQUES
 // ─────────────────────────────────────────────────────────
@@ -576,9 +687,9 @@ function _applyCloudToUI() {
 function getStreakTier(streak) {
   if (streak >= 30) return 5;
   if (streak >= 14) return 4;
-  if (streak >= 7)  return 3;
-  if (streak >= 3)  return 2;
-  if (streak >= 1)  return 1;
+  if (streak >= 7) return 3;
+  if (streak >= 3) return 2;
+  if (streak >= 1) return 1;
   return 0;
 }
 
@@ -593,27 +704,38 @@ function buildStreakItem(streak, label, delay) {
 
   // Flammes latérales selon le tier
   const flameL = (n) => `<span class="streak-side-flame" aria-hidden="true">🔥</span>`.repeat(n);
-  const flameR = (n) => `<span class="streak-side-flame streak-side-flame--r" aria-hidden="true">🔥</span>`.repeat(n);
+  const flameR = (n) =>
+    `<span class="streak-side-flame streak-side-flame--r" aria-hidden="true">🔥</span>`.repeat(n);
 
-  let leftDeco  = '';
-  let rightDeco = '';
-  let iconSize  = '1.3em';
+  let leftDeco = "";
+  let rightDeco = "";
+  let iconSize = "1.3em";
   let fullWidth = tier >= 5;
 
-  if (tier === 3) { leftDeco = flameL(1);  iconSize = '1.5em'; }
-  if (tier === 4) { leftDeco = flameL(2);  rightDeco = flameR(1); iconSize = '1.7em'; }
-  if (tier === 5) {
-    leftDeco  = `<span class="streak-crown" aria-hidden="true">👑</span>${flameL(1)}`;
+  if (tier === 3) {
+    leftDeco = flameL(1);
+    iconSize = "1.5em";
+  }
+  if (tier === 4) {
+    leftDeco = flameL(2);
     rightDeco = flameR(1);
-    iconSize  = '1.9em';
-    label     = `🔥 ${label} 🔥`;
+    iconSize = "1.7em";
+  }
+  if (tier === 5) {
+    leftDeco = `<span class="streak-crown" aria-hidden="true">👑</span>${flameL(1)}`;
+    rightDeco = flameR(1);
+    iconSize = "1.9em";
+    label = `🔥 ${label} 🔥`;
   }
 
   const classes = [
-    'stat-item', 'stat-streak',
+    "stat-item",
+    "stat-streak",
     `stat-streak-t${tier}`,
-    fullWidth ? 'stat-item--full' : '',
-  ].filter(Boolean).join(' ');
+    fullWidth ? "stat-item--full" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return `
     <div class="${classes}" style="animation-delay:${delay}">
@@ -635,58 +757,70 @@ function renderStats() {
   const i = window.i18n || { t: (k, v) => k };
 
   const modeNames = {
-    Classique: 'Classic', Emoji: 'Emoji', Silhouette: 'Silhouette',
-    AllOutAttack: 'All-Out Attack', Personae: 'Personae', Music: 'Music',
+    Classique: "Classic",
+    Emoji: "Emoji",
+    Silhouette: "Silhouette",
+    AllOutAttack: "All-Out Attack",
+    Personae: "Personae",
+    Music: "Music",
   };
-  const modeFav = s.favoriteMode ? (modeNames[s.favoriteMode] || s.favoriteMode) : '—';
+  const modeFav = s.favoriteMode ? modeNames[s.favoriteMode] || s.favoriteMode : "—";
 
   // Stats standard (hors streak)
   const stats = [
-    { icon: '🏆', value: s.wins || 0,                           label: 'Wins'         },
-    { icon: '🏳️', value: s.giveups || 0,                       label: 'Give-ups'     },
-    { icon: '🎮', value: s.games || 0,                          label: 'Games Played' },
-    { icon: '⭐', value: s.streakRecord || 0,                   label: 'Best Streak'  },
-    { icon: '⏱️', value: formatPlayTime(s.totalTimeMinutes || 0), label: 'Time Played'  },
-    { icon: '📅', value: s.firstPlayed?.split('T')[0] || '—',  label: 'First Played', full: true },
-    { icon: '🎯', value: modeFav,                               label: 'Fav Mode',     full: true },
+    { icon: "🏆", value: s.wins || 0, label: "Wins" },
+    { icon: "🏳️", value: s.giveups || 0, label: "Give-ups" },
+    { icon: "🎮", value: s.games || 0, label: "Games Played" },
+    { icon: "⭐", value: s.streakRecord || 0, label: "Best Streak" },
+    { icon: "⏱️", value: formatPlayTime(s.totalTimeMinutes || 0), label: "Time Played" },
+    { icon: "📅", value: s.firstPlayed?.split("T")[0] || "—", label: "First Played", full: true },
+    { icon: "🎯", value: modeFav, label: "Fav Mode", full: true },
   ];
 
-  const streakHTML  = buildStreakItem(s.streak || 0, 'Current Streak', '0.22s');
-  const regularHTML = stats.map((st, idx) => `
-    <div class="stat-item${st.full ? ' stat-item--full' : ''}"
+  const streakHTML = buildStreakItem(s.streak || 0, "Current Streak", "0.22s");
+  const regularHTML = stats
+    .map(
+      (st, idx) => `
+    <div class="stat-item${st.full ? " stat-item--full" : ""}"
          style="animation-delay:${0.1 + idx * 0.06}s">
       <span class="stat-icon">${st.icon}</span>
       <div class="stat-body">
         <span class="stat-value">${st.value}</span>
         <span class="stat-label">${st.label}</span>
       </div>
-    </div>`).join('');
+    </div>`
+    )
+    .join("");
 
   statsContainer.innerHTML = regularHTML + streakHTML;
 
-  // Bouton "Restaurer" si la streak a été brisée et qu'une récupération est disponible
-  if ((s.streak || 0) === 0 || (s.streak || 0) === 1) {
-    if (canRecover()) {
-      const streakEl = statsContainer.querySelector('.stat-streak');
-      if (streakEl) {
-        const btn = document.createElement('button');
-        btn.className   = 'sr-restore-btn';
-        btn.textContent = '🔥 Restore';
-        btn.addEventListener('click', () => showStreakRecoveryMenu());
-        streakEl.querySelector('.stat-body')?.appendChild(btn);
-      }
+  // Streak à 0 : rendre l'élément cliquable pour ouvrir Jack Frost si récupération disponible
+  if ((s.streak || 0) === 0 && canRecover()) {
+    const streakEl = statsContainer.querySelector(".stat-streak");
+    if (streakEl) {
+      streakEl.style.cursor = "pointer";
+      streakEl.title = "🔥 Click to restore your streak";
+      streakEl.addEventListener("click", () => showStreakRecoveryMenu());
+      const btn = document.createElement("button");
+      btn.className = "sr-restore-btn";
+      btn.textContent = "🔥 Restore";
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showStreakRecoveryMenu();
+      });
+      streakEl.querySelector(".stat-body")?.appendChild(btn);
     }
   }
 }
 
 /** Icônes et couleurs par mode */
 const MODE_META = {
-  Classic:      { icon: '🔤', color: '#E63946' },
-  Emoji:        { icon: '😄', color: '#F97316' },
-  Silhouette:   { icon: '👤', color: '#6366F1' },
-  AllOutAttack: { icon: '⚔️', color: '#DC2626' },
-  Personae:     { icon: '✨', color: '#9333EA' },
-  Music:        { icon: '🎵', color: '#0EA5E9' },
+  Classic: { icon: "🔤", color: "#E63946" },
+  Emoji: { icon: "😄", color: "#F97316" },
+  Silhouette: { icon: "👤", color: "#6366F1" },
+  AllOutAttack: { icon: "⚔️", color: "#DC2626" },
+  Personae: { icon: "✨", color: "#9333EA" },
+  Music: { icon: "🎵", color: "#0EA5E9" },
 };
 
 /**
@@ -694,40 +828,45 @@ const MODE_META = {
  * Affiche jeux joués + victoires + barre proportionnelle par mode.
  */
 function renderModeStats() {
-  const container = document.getElementById('modeStatsContainer');
+  const container = document.getElementById("modeStatsContainer");
   if (!container) return;
 
   const s = profile.stats || {};
   const counts = s.modeCount || {};
-  const wins   = s.modeWins  || {};
+  const wins = s.modeWins || {};
 
   const modes = Object.keys(MODE_META);
-  const maxCount = Math.max(...modes.map(m => counts[m] || 0), 1);
+  const maxCount = Math.max(...modes.map((m) => counts[m] || 0), 1);
 
   // Masquer la section si aucune donnée
-  if (maxCount === 0) { container.innerHTML = ''; return; }
+  if (maxCount === 0) {
+    container.innerHTML = "";
+    return;
+  }
 
-  const rows = modes.map(mode => {
-    const meta  = MODE_META[mode];
-    const count = counts[mode] || 0;
-    const win   = wins[mode]   || 0;
-    const pct   = Math.round((count / maxCount) * 100);
-    const rate  = count > 0 ? Math.round((win / count) * 100) : 0;
+  const rows = modes
+    .map((mode) => {
+      const meta = MODE_META[mode];
+      const count = counts[mode] || 0;
+      const win = wins[mode] || 0;
+      const pct = Math.round((count / maxCount) * 100);
+      const rate = count > 0 ? Math.round((win / count) * 100) : 0;
 
-    return `
-      <div class="mode-stat-row${count === 0 ? ' mode-stat-row--empty' : ''}">
+      return `
+      <div class="mode-stat-row${count === 0 ? " mode-stat-row--empty" : ""}">
         <span class="mode-stat-icon">${meta.icon}</span>
-        <span class="mode-stat-name">${mode === 'AllOutAttack' ? 'All-Out' : mode}</span>
+        <span class="mode-stat-name">${mode === "AllOutAttack" ? "All-Out" : mode}</span>
         <div class="mode-stat-bar-wrap">
           <div class="mode-stat-bar"
                style="width:${pct}%;background:${meta.color}"></div>
         </div>
         <span class="mode-stat-right">
           <span class="mode-stat-count">${count}</span>
-          ${count > 0 ? `<span class="mode-stat-rate">${rate}%</span>` : ''}
+          ${count > 0 ? `<span class="mode-stat-rate">${rate}%</span>` : ""}
         </span>
       </div>`;
-  }).join('');
+    })
+    .join("");
 
   container.innerHTML = `
     <div class="mode-stats-header">
@@ -737,34 +876,35 @@ function renderModeStats() {
     <div class="mode-stats-list">${rows}</div>`;
 }
 
-
 // ─────────────────────────────────────────────────────────
 // GESTIONNAIRES D'ÉVÉNEMENTS — PROFIL
 // ─────────────────────────────────────────────────────────
 
 // Ouvrir la modale de crop (avatar)
 editAvatarBtn.onclick = () => {
-  cropTarget = 'avatar';
-  cropModal.classList.remove('hidden');
+  cropTarget = "avatar";
+  cropModal.classList.remove("hidden");
 };
 
 // Sauvegarder et rafraîchir
 saveRefreshBtn.onclick = async () => {
   if (!_profileDirty) return;
-  saveRefreshBtn.classList.add('btn-saving');
-  saveRefreshBtn.innerHTML = '⏳ <span>Saving…</span>';
+  saveRefreshBtn.classList.add("btn-saving");
+  saveRefreshBtn.innerHTML = "⏳ <span>Saving…</span>";
   saveProfile();
   await syncProfileToCloud().catch(() => {});
   markClean();
   // Soft-refresh : pull le cloud et re-applique l'UI sans rechargement de page
-  pullProfileFromCloud().then(_applyCloudToUI).catch(() => {});
+  pullProfileFromCloud()
+    .then(_applyCloudToUI)
+    .catch(() => {});
 };
 
 // Réinitialiser le profil
 resetProfileBtn.onclick = () => {
   const i = window.i18n || { t: (k) => k };
-  if (confirm(i.t('profile.reset_confirm') || 'Reset your profile? This cannot be undone.')) {
-    localStorage.removeItem('personaUserProfile');
+  if (confirm(i.t("profile.reset_confirm") || "Reset your profile? This cannot be undone.")) {
+    localStorage.removeItem("personaUserProfile");
     location.reload();
   }
 };
@@ -773,7 +913,7 @@ resetProfileBtn.onclick = () => {
 let _pseudoSyncTimer = null;
 pseudoInput.oninput = (e) => {
   profile.pseudo = e.target.value;
-  pageUsername.textContent = profile.pseudo || 'Guest';
+  pageUsername.textContent = profile.pseudo || "Guest";
   saveProfile();
   markDirty();
   clearTimeout(_pseudoSyncTimer);
@@ -790,8 +930,8 @@ borderColorPicker.oninput = (e) => {
   saveProfile();
   markDirty();
   // Régénère la preview de partage si la modale est ouverte
-  const shareModal = document.getElementById('sharePreviewModal');
-  if (shareModal && !shareModal.classList.contains('hidden') && _regenerateSharePreview) {
+  const shareModal = document.getElementById("sharePreviewModal");
+  if (shareModal && !shareModal.classList.contains("hidden") && _regenerateSharePreview) {
     _regenerateSharePreview();
   }
 };
@@ -806,8 +946,8 @@ borderColorPicker.onchange = (e) => {
  * @param {string} color - Valeur hex (ex. "#1a2b3c")
  */
 function updateBorderPreview(color) {
-  const dot = document.getElementById('borderColorDot');
-  const hex = document.getElementById('borderColorHex');
+  const dot = document.getElementById("borderColorDot");
+  const hex = document.getElementById("borderColorHex");
   if (dot) dot.style.background = color;
   if (hex) hex.textContent = color.toUpperCase();
 }
@@ -817,25 +957,24 @@ function updateBorderPreview(color) {
  * L'état est persisté dans localStorage.
  */
 function setupPersoCard() {
-  const btn  = document.getElementById('persoToggle');
-  const body = document.getElementById('persoBody');
+  const btn = document.getElementById("persoToggle");
+  const body = document.getElementById("persoBody");
   if (!btn || !body) return;
 
   // Restaurer l'état sauvegardé (ouvert par défaut)
-  const saved    = localStorage.getItem('persoCardExpanded');
-  const expanded = saved === null ? true : saved === 'true';
+  const saved = localStorage.getItem("persoCardExpanded");
+  const expanded = saved === null ? true : saved === "true";
 
-  btn.setAttribute('aria-expanded', String(expanded));
-  if (!expanded) body.classList.add('perso-body--collapsed');
+  btn.setAttribute("aria-expanded", String(expanded));
+  if (!expanded) body.classList.add("perso-body--collapsed");
 
-  btn.addEventListener('click', () => {
-    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-    btn.setAttribute('aria-expanded', String(!isExpanded));
-    body.classList.toggle('perso-body--collapsed', isExpanded);
-    localStorage.setItem('persoCardExpanded', String(!isExpanded));
+  btn.addEventListener("click", () => {
+    const isExpanded = btn.getAttribute("aria-expanded") === "true";
+    btn.setAttribute("aria-expanded", String(!isExpanded));
+    body.classList.toggle("perso-body--collapsed", isExpanded);
+    localStorage.setItem("persoCardExpanded", String(!isExpanded));
   });
 }
-
 
 // ─────────────────────────────────────────────────────────
 // GRILLE DES AVATARS
@@ -843,26 +982,128 @@ function setupPersoCard() {
 
 /** Liste complète des avatars disponibles */
 const avatarList = [
-  'Naoya.jpg', 'Naoya1.jpg', 'Yuka.webp', 'Hidehiko.png', 'Hidehiko.webp', 'Inaba2.webp', 'Inaba.webp', 'Eriko.png',
-  'Tatsuya2.jpg', 'Tatsuya.jpg', 'Lisa.jpeg', 'Jun.jpg', 'Ekichi2.jpeg', 'Ekichi.jpeg', 'Maya2.jpeg', 'Maya.jpg',
-  'Yuki.jpeg', 'yuki.jpg', 'Yuki_Zutomayo.jpeg', 'Kotone2.jpeg', 'Kotone.jpeg', 'Kotone3.jpeg', 'kotone_pdp.jpg',
-  'Aigis2.jpg', 'Aigis.jpg', 'Akihiko.jpg', 'Mitsuru.jpg', 'Mitsuru.webp',
-  'Junpei2.jpg', 'Junpei.png', 'Fuuka2.jpeg', 'Fuuka.jpeg', 'Ken.jpeg', 'Koromaru2.jpg', 'Koromaru.jpg',
-  'Shinji.jpg', 'Shinji.webp', 'Yukari2.jpg', 'Yukari.jpg',
-  'Metis.jpg', 'Metis2.jpeg', 'Elisabeth.jpeg', 'Elisabeth2.jpeg', 'Chidori.jpg', 'Chidori2.jpg',
-  'Yu2.jpg', 'Yu.jpg', 'Yosuke2.jpg', 'Yosuke.jpg', 'Chie2.jpg', 'Chie.jpg', 'Yukiko2.jpg', 'Yukiko.jpg',
-  'Kanji.avif', 'Kanji.jpg', 'Rise.jpg', 'Rise.png', 'Teddie2.jpg', 'Teddie.jpg', 'Naoto2.jpg', 'Naoto.jpg',
-  'Marie.jpg', 'Marie2.webp', 'Nanako2.jpg', 'Nanako.jpg', 'margaret.jpg',
-  'Joker.jpg', 'ren_t.webp', 'Ann.jpg', 'Ann_2.jpg', 'Ryuji.jpg', 'Ryuji.png', 'Morgana.jpg', 'Morgana.png',
-  'Yusuke.jpg', 'Yusuke.webp', 'Makoto2.jpg', 'Makoto.jpg', 'Futaba.jpg', 'Futaba.webp',
-  'Haru.png', 'Har.jpg', 'Akechi2.jpg', 'Akechi.jpg', 'Sumire2.jpg', 'Sumire.jpg',
-  'Tae.jpg', 'Tae2.jpg', 'Caroline&justine.png', 'Lavenza.jpg',
-  'Wonder.jpg', 'wonder1.png', 'wonder2.png', 'Lufel2.png', 'Lufel.png', 'Arai2.png', 'Arai.png',
-  'Shun2.png', 'Shun.png', 'Riko2.png', 'Riko.png', 'Kayo2.png', 'Kayo.png', 'Tomoko2.png', 'Tomoko.png',
-  'Yaoling2.png', 'Yaoling.png', 'YUI2.png', 'YUI.png',
-  'Yuki.gif', 'Yuki2.gif', 'pfp_makoto.gif', 'Yu.gif', 'Yu2.gif', 'Ren.gif', 'Ren2.gif',
-  'catlisabeth.gif', 'luix-dextructor-aigis.gif', 'Anniversary.gif', 'aigis.gif',
-  'Lavenza7.gif', 'Maruki.gif',
+  "Naoya.jpg",
+  "Naoya1.jpg",
+  "Yuka.webp",
+  "Hidehiko.png",
+  "Hidehiko.webp",
+  "Inaba2.webp",
+  "Inaba.webp",
+  "Eriko.png",
+  "Tatsuya2.jpg",
+  "Tatsuya.jpg",
+  "Lisa.jpeg",
+  "Jun.jpg",
+  "Ekichi2.jpeg",
+  "Ekichi.jpeg",
+  "Maya2.jpeg",
+  "Maya.jpg",
+  "Yuki.jpeg",
+  "yuki.jpg",
+  "Yuki_Zutomayo.jpeg",
+  "Kotone2.jpeg",
+  "Kotone.jpeg",
+  "Kotone3.jpeg",
+  "kotone_pdp.jpg",
+  "Aigis2.jpg",
+  "Aigis.jpg",
+  "Akihiko.jpg",
+  "Mitsuru.jpg",
+  "Mitsuru.webp",
+  "Junpei2.jpg",
+  "Junpei.png",
+  "Fuuka2.jpeg",
+  "Fuuka.jpeg",
+  "Ken.jpeg",
+  "Koromaru2.jpg",
+  "Koromaru.jpg",
+  "Shinji.jpg",
+  "Shinji.webp",
+  "Yukari2.jpg",
+  "Yukari.jpg",
+  "Metis.jpg",
+  "Metis2.jpeg",
+  "Elisabeth.jpeg",
+  "Elisabeth2.jpeg",
+  "Chidori.jpg",
+  "Chidori2.jpg",
+  "Yu2.jpg",
+  "Yu.jpg",
+  "Yosuke2.jpg",
+  "Yosuke.jpg",
+  "Chie2.jpg",
+  "Chie.jpg",
+  "Yukiko2.jpg",
+  "Yukiko.jpg",
+  "Kanji.avif",
+  "Kanji.jpg",
+  "Rise.jpg",
+  "Rise.png",
+  "Teddie2.jpg",
+  "Teddie.jpg",
+  "Naoto2.jpg",
+  "Naoto.jpg",
+  "Marie.jpg",
+  "Marie2.webp",
+  "Nanako2.jpg",
+  "Nanako.jpg",
+  "margaret.jpg",
+  "Joker.jpg",
+  "ren_t.webp",
+  "Ann.jpg",
+  "Ann_2.jpg",
+  "Ryuji.jpg",
+  "Ryuji.png",
+  "Morgana.jpg",
+  "Morgana.png",
+  "Yusuke.jpg",
+  "Yusuke.webp",
+  "Makoto2.jpg",
+  "Makoto.jpg",
+  "Futaba.jpg",
+  "Futaba.webp",
+  "Haru.png",
+  "Har.jpg",
+  "Akechi2.jpg",
+  "Akechi.jpg",
+  "Sumire2.jpg",
+  "Sumire.jpg",
+  "Tae.jpg",
+  "Tae2.jpg",
+  "Caroline&justine.png",
+  "Lavenza.jpg",
+  "Wonder.jpg",
+  "wonder1.png",
+  "wonder2.png",
+  "Lufel2.png",
+  "Lufel.png",
+  "Arai2.png",
+  "Arai.png",
+  "Shun2.png",
+  "Shun.png",
+  "Riko2.png",
+  "Riko.png",
+  "Kayo2.png",
+  "Kayo.png",
+  "Tomoko2.png",
+  "Tomoko.png",
+  "Yaoling2.png",
+  "Yaoling.png",
+  "YUI2.png",
+  "YUI.png",
+  "Yuki.gif",
+  "Yuki2.gif",
+  "pfp_makoto.gif",
+  "Yu.gif",
+  "Yu2.gif",
+  "Ren.gif",
+  "Ren2.gif",
+  "catlisabeth.gif",
+  "luix-dextructor-aigis.gif",
+  "Anniversary.gif",
+  "aigis.gif",
+  "Lavenza7.gif",
+  "Maruki.gif",
 ];
 
 /**
@@ -872,34 +1113,36 @@ const avatarList = [
 function initAvatarGrid() {
   avatarGrid.innerHTML =
     `<div class="avatar-none" data-src="none">NONE</div>` +
-    avatarList.map(name =>
-      `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" loading="lazy" />`
-    ).join('');
+    avatarList
+      .map(
+        (name) =>
+          `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" loading="lazy" />`
+      )
+      .join("");
 
   // Clic sur une image → charger dans le canvas + marquer comme sélectionnée
-  avatarGrid.querySelectorAll('img').forEach(img => {
+  avatarGrid.querySelectorAll("img").forEach((img) => {
     img.onclick = () => {
-      avatarGrid.querySelectorAll('img').forEach(i => i.classList.remove('selected'));
-      img.classList.add('selected');
+      avatarGrid.querySelectorAll("img").forEach((i) => i.classList.remove("selected"));
+      img.classList.add("selected");
       selectedAvatarSrc = img.dataset.src;
       loadImageToCanvas(selectedAvatarSrc);
     };
   });
 
   // Option NONE → vider l'avatar
-  const noneOption = avatarGrid.querySelector('.avatar-none');
+  const noneOption = avatarGrid.querySelector(".avatar-none");
   if (noneOption) {
     noneOption.onclick = () => {
-      selectedAvatarSrc = 'none';
-      profile.avatar = '';
-      pageAvatar.src = '../img/default_avatar.png';
+      selectedAvatarSrc = "none";
+      profile.avatar = "";
+      pageAvatar.src = "../img/default_avatar.png";
       saveProfile();
       saveProfileToCloud({ avatar_data: null });
-      cropModal.classList.add('hidden');
+      cropModal.classList.add("hidden");
     };
   }
 }
-
 
 // ─────────────────────────────────────────────────────────
 // CANVAS CROP
@@ -926,18 +1169,26 @@ function drawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const w = image.width * zoom;
   const h = image.height * zoom;
-  const x = canvas.width  / 2 - w / 2 + offsetX;
+  const x = canvas.width / 2 - w / 2 + offsetX;
   const y = canvas.height / 2 - h / 2 + offsetY;
   ctx.drawImage(image, x, y, w, h);
 }
 
 // Fermer la modale crop
-closeCropper.onclick = () => cropModal.classList.add('hidden');
+closeCropper.onclick = () => cropModal.classList.add("hidden");
 
 // Drag sur le canvas (souris)
-canvas.onmousedown = (e) => { dragging = true; startX = e.offsetX; startY = e.offsetY; };
-canvas.onmouseup   = () => { dragging = false; };
-canvas.onmouseleave = () => { dragging = false; };
+canvas.onmousedown = (e) => {
+  dragging = true;
+  startX = e.offsetX;
+  startY = e.offsetY;
+};
+canvas.onmouseup = () => {
+  dragging = false;
+};
+canvas.onmouseleave = () => {
+  dragging = false;
+};
 canvas.onmousemove = (e) => {
   if (!dragging) return;
   offsetX += e.offsetX - startX;
@@ -955,7 +1206,9 @@ canvas.ontouchstart = (e) => {
   startX = t.clientX - rect.left;
   startY = t.clientY - rect.top;
 };
-canvas.ontouchend = () => { dragging = false; };
+canvas.ontouchend = () => {
+  dragging = false;
+};
 canvas.ontouchmove = (e) => {
   if (!dragging) return;
   e.preventDefault();
@@ -971,16 +1224,22 @@ canvas.ontouchmove = (e) => {
 };
 
 // Zoom
-zoomInBtn.onclick  = () => { zoom *= 1.1; drawCanvas(); };
-zoomOutBtn.onclick = () => { zoom /= 1.1; drawCanvas(); };
+zoomInBtn.onclick = () => {
+  zoom *= 1.1;
+  drawCanvas();
+};
+zoomOutBtn.onclick = () => {
+  zoom /= 1.1;
+  drawCanvas();
+};
 
 // Confirmer le crop → route vers avatar ou song selon cropTarget
 confirmCrop.onclick = () => {
-  const result = selectedAvatarSrc.endsWith('.gif')
+  const result = selectedAvatarSrc.endsWith(".gif")
     ? selectedAvatarSrc
-    : canvas.toDataURL('image/png');
+    : canvas.toDataURL("image/png");
 
-  if (cropTarget === 'song') {
+  if (cropTarget === "song") {
     if (profile.profileSong) {
       profile.profileSong.customImage = result;
       updateSongArtwork(result);
@@ -993,10 +1252,9 @@ confirmCrop.onclick = () => {
     markDirty();
     saveProfileToCloud({ avatar_data: result });
   }
-  cropModal.classList.add('hidden');
-  cropTarget = 'avatar'; // reset systématique
+  cropModal.classList.add("hidden");
+  cropTarget = "avatar"; // reset systématique
 };
-
 
 // ─────────────────────────────────────────────────────────
 // EXPORT / IMPORT JSON
@@ -1007,18 +1265,16 @@ exportBtn.onclick = () => {
   const exportData = {
     ...profile,
     // Jeton de liaison au compte — empêche l'import du JSON sur un autre compte
-    _accountId:  window._currentUser?.id ?? profile._accountId ?? null,
+    _accountId: window._currentUser?.id ?? profile._accountId ?? null,
     _exportedAt: new Date().toISOString(),
   };
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = 'personadle_profile.json';
+  a.download = "personadle_profile.json";
   a.click();
   URL.revokeObjectURL(a.href);
 };
-
-
 
 // ─────────────────────────────────────────────────────────
 // PARTAGE DE PROFIL
@@ -1026,81 +1282,200 @@ exportBtn.onclick = () => {
 
 /** Arrière-plans disponibles pour la carte de partage */
 const shareBackgrounds = [
-  { id: 'velvet_room',   name: 'Velvet Room',   gradient: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)', pattern: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.05) 0%, transparent 50%)' },
-  { id: 'persona_red',   name: 'Persona Red',   gradient: 'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)', pattern: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)' },
-  { id: 'dark_hour',     name: 'Dark Hour',     gradient: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)', pattern: 'radial-gradient(circle at 80% 20%, rgba(46,204,113,0.1) 0%, transparent 50%)' },
-  { id: 'golden',        name: 'Golden',        gradient: 'linear-gradient(135deg, #f2994a 0%, #f2c94c 100%)', pattern: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)' },
-  { id: 'phantom_thief', name: 'Phantom Thief', gradient: 'linear-gradient(135deg, #000000 0%, #434343 50%, #e74c3c 100%)', pattern: 'repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(231,76,60,0.1) 20px, rgba(231,76,60,0.1) 40px)' },
-  { id: 'midnight_blue', name: 'Midnight Blue', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', pattern: 'radial-gradient(circle at 30% 70%, rgba(255,255,255,0.08) 0%, transparent 50%)' },
-  { id: 'metaverse',     name: 'Metaverse',     gradient: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)', pattern: 'repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(255,255,255,0.05) 15px, rgba(255,255,255,0.05) 30px)' },
-  { id: 'sunset',        name: 'Sunset',        gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', pattern: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 50%)' },
+  {
+    id: "velvet_room",
+    name: "Velvet Room",
+    gradient: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)",
+    pattern: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.05) 0%, transparent 50%)",
+  },
+  {
+    id: "persona_red",
+    name: "Persona Red",
+    gradient: "linear-gradient(135deg, #ff0844 0%, #ffb199 100%)",
+    pattern:
+      "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)",
+  },
+  {
+    id: "dark_hour",
+    name: "Dark Hour",
+    gradient: "linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)",
+    pattern: "radial-gradient(circle at 80% 20%, rgba(46,204,113,0.1) 0%, transparent 50%)",
+  },
+  {
+    id: "golden",
+    name: "Golden",
+    gradient: "linear-gradient(135deg, #f2994a 0%, #f2c94c 100%)",
+    pattern: "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)",
+  },
+  {
+    id: "phantom_thief",
+    name: "Phantom Thief",
+    gradient: "linear-gradient(135deg, #000000 0%, #434343 50%, #e74c3c 100%)",
+    pattern:
+      "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(231,76,60,0.1) 20px, rgba(231,76,60,0.1) 40px)",
+  },
+  {
+    id: "midnight_blue",
+    name: "Midnight Blue",
+    gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    pattern: "radial-gradient(circle at 30% 70%, rgba(255,255,255,0.08) 0%, transparent 50%)",
+  },
+  {
+    id: "metaverse",
+    name: "Metaverse",
+    gradient: "linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)",
+    pattern:
+      "repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(255,255,255,0.05) 15px, rgba(255,255,255,0.05) 30px)",
+  },
+  {
+    id: "sunset",
+    name: "Sunset",
+    gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+    pattern: "radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1) 0%, transparent 50%)",
+  },
 ];
 
 /** Papiers peints disponibles (organisés par jeu) */
 const shareWallpapers = {
-  none: [{ id: 'none', name: 'None', src: null }],
+  none: [{ id: "none", name: "None", src: null }],
   persona1: [
-    { id: 'p1_prota', name: 'Protagonist',   src: '../profile/Wallpaper/P1_Prota_Wallpaper.png' },
-    { id: 'p1_naoya', name: 'Naoya Toudou',  src: '../profile/Wallpaper/P1_Naoya.jpeg' },
-    { id: 'p1_maki',  name: 'Maki & Butterflies', src: '../profile/Wallpaper/P1_Maki_Butterflies.jpg' },
-    { id: 'p1_cast',  name: 'Full Cast',     src: '../profile/Wallpaper/P1_Cast.jpeg' },
+    { id: "p1_prota", name: "Protagonist", src: "../profile/Wallpaper/P1_Prota_Wallpaper.png" },
+    { id: "p1_naoya", name: "Naoya Toudou", src: "../profile/Wallpaper/P1_Naoya.jpeg" },
+    {
+      id: "p1_maki",
+      name: "Maki & Butterflies",
+      src: "../profile/Wallpaper/P1_Maki_Butterflies.jpg",
+    },
+    { id: "p1_cast", name: "Full Cast", src: "../profile/Wallpaper/P1_Cast.jpeg" },
   ],
   persona2: [
-    { id: 'p2_tatsuya',       name: 'Tatsuya Suou (IS)',    src: '../profile/Wallpaper/P2_Tatsuya_IS.jpeg' },
-    { id: 'p2_maya',          name: 'Maya Amano (EP)',       src: '../profile/Wallpaper/Persona_2_EP_maya.png' },
-    { id: 'p2_joker',         name: 'Joker',                 src: '../profile/Wallpaper/p2_Joker.jpg' },
-    { id: 'p2_prota_legacy',  name: 'Protagonists (Legacy)', src: '../profile/Wallpaper/P2_Prota_Wallpaper.png' },
+    { id: "p2_tatsuya", name: "Tatsuya Suou (IS)", src: "../profile/Wallpaper/P2_Tatsuya_IS.jpeg" },
+    { id: "p2_maya", name: "Maya Amano (EP)", src: "../profile/Wallpaper/Persona_2_EP_maya.png" },
+    { id: "p2_joker", name: "Joker", src: "../profile/Wallpaper/p2_Joker.jpg" },
+    {
+      id: "p2_prota_legacy",
+      name: "Protagonists (Legacy)",
+      src: "../profile/Wallpaper/P2_Prota_Wallpaper.png",
+    },
   ],
   persona3: [
-    { id: 'p3_tartarus',     name: 'Tartarus',           src: '../profile/Wallpaper/P3_Tartarus_Wallpaper.png' },
-    { id: 'p3_water',        name: 'The Answer — Water', src: '../profile/Wallpaper/P3_Water_Wallapaper.png' },
-    { id: 'p3_portable',     name: 'Portable Edition',   src: '../profile/Wallpaper/Persona_3_portable.jpeg' },
-    { id: 'p3p_dual',        name: 'Dual Protagonists',  src: '../profile/Wallpaper/P3P_Makoto_&_Kotone.jpg' },
-    { id: 'p3_kotone_makoto',name: 'Kotone & Makoto',    src: '../profile/Wallpaper/Kotone_&_makoto.jpg' },
-    { id: 'p3_aigis_makoto', name: 'Aigis & Makoto',     src: '../profile/Wallpaper/Aigis_&_makoto.jpg' },
-    { id: 'p3_train',        name: 'Makoto & Aigis Train',src: '../profile/Wallpaper/P3_Makoto_Aigis_Train.jpeg' },
+    { id: "p3_tartarus", name: "Tartarus", src: "../profile/Wallpaper/P3_Tartarus_Wallpaper.png" },
+    {
+      id: "p3_water",
+      name: "The Answer — Water",
+      src: "../profile/Wallpaper/P3_Water_Wallapaper.png",
+    },
+    {
+      id: "p3_portable",
+      name: "Portable Edition",
+      src: "../profile/Wallpaper/Persona_3_portable.jpeg",
+    },
+    {
+      id: "p3p_dual",
+      name: "Dual Protagonists",
+      src: "../profile/Wallpaper/P3P_Makoto_&_Kotone.jpg",
+    },
+    {
+      id: "p3_kotone_makoto",
+      name: "Kotone & Makoto",
+      src: "../profile/Wallpaper/Kotone_&_makoto.jpg",
+    },
+    {
+      id: "p3_aigis_makoto",
+      name: "Aigis & Makoto",
+      src: "../profile/Wallpaper/Aigis_&_makoto.jpg",
+    },
+    {
+      id: "p3_train",
+      name: "Makoto & Aigis Train",
+      src: "../profile/Wallpaper/P3_Makoto_Aigis_Train.jpeg",
+    },
   ],
   persona4: [
-    { id: 'p4_golden',       name: 'Golden Edition',          src: '../profile/Wallpaper/P4_Golden_Style.jpg' },
-    { id: 'p4_tv',           name: 'TV World',                 src: '../profile/Wallpaper/P4_TV_World_Wallpaper.png' },
-    { id: 'p4_izanagi',      name: 'Izanagi',                  src: '../profile/Wallpaper/P4G_Izanagi.jpg' },
-    { id: 'p4_yu',           name: 'Yu Narukami',              src: '../profile/Wallpaper/Yu_Narukami.jpg' },
-    { id: 'p4_friends',      name: 'Friends Group',            src: '../profile/Wallpaper/Friends_groupe.jpg' },
-    { id: 'p4_team',         name: 'Investigation Team',       src: '../profile/Wallpaper/Investigation_Team.jpg' },
-    { id: 'p4_team_golden',  name: 'Investigation Team Golden',src: '../profile/Wallpaper/Investigation_Team_Golden.jpg' },
-    { id: 'p4_shadow_teddie',name: 'Shadow Teddie',            src: '../profile/Wallpaper/Shadow_Teddie_Shadow_World.jpg' },
+    { id: "p4_golden", name: "Golden Edition", src: "../profile/Wallpaper/P4_Golden_Style.jpg" },
+    { id: "p4_tv", name: "TV World", src: "../profile/Wallpaper/P4_TV_World_Wallpaper.png" },
+    { id: "p4_izanagi", name: "Izanagi", src: "../profile/Wallpaper/P4G_Izanagi.jpg" },
+    { id: "p4_yu", name: "Yu Narukami", src: "../profile/Wallpaper/Yu_Narukami.jpg" },
+    { id: "p4_friends", name: "Friends Group", src: "../profile/Wallpaper/Friends_groupe.jpg" },
+    {
+      id: "p4_team",
+      name: "Investigation Team",
+      src: "../profile/Wallpaper/Investigation_Team.jpg",
+    },
+    {
+      id: "p4_team_golden",
+      name: "Investigation Team Golden",
+      src: "../profile/Wallpaper/Investigation_Team_Golden.jpg",
+    },
+    {
+      id: "p4_shadow_teddie",
+      name: "Shadow Teddie",
+      src: "../profile/Wallpaper/Shadow_Teddie_Shadow_World.jpg",
+    },
   ],
   persona5: [
-    { id: 'p5_clinic',    name: 'Takemi Clinic',            src: '../profile/Wallpaper/P5_Clinique_Wallpaper.png' },
-    { id: 'p5_clinic_tae',name: 'Takemi Clinic (with Tae)', src: '../profile/Wallpaper/P5_Clinique_vTae_Wallpaper.png' },
-    { id: 'p5_mementos',  name: 'Mementos',                 src: '../profile/Wallpaper/P5_Memento_Wallpaper.png' },
-    { id: 'p5_leblanc',   name: 'Café Leblanc',             src: '../profile/Wallpaper/P5_Leblanc_Cafe_Wallapaper.png' },
-    { id: 'p5_phantom',   name: 'Phantom Thieves',          src: '../profile/Wallpaper/P5_Phantom_Thieves_Wallpaper.png' },
-    { id: 'p5_sophia',    name: 'Sophia (Strikers)',         src: '../profile/Wallpaper/Sophia_wallpaper.jpeg' },
+    {
+      id: "p5_clinic",
+      name: "Takemi Clinic",
+      src: "../profile/Wallpaper/P5_Clinique_Wallpaper.png",
+    },
+    {
+      id: "p5_clinic_tae",
+      name: "Takemi Clinic (with Tae)",
+      src: "../profile/Wallpaper/P5_Clinique_vTae_Wallpaper.png",
+    },
+    { id: "p5_mementos", name: "Mementos", src: "../profile/Wallpaper/P5_Memento_Wallpaper.png" },
+    {
+      id: "p5_leblanc",
+      name: "Café Leblanc",
+      src: "../profile/Wallpaper/P5_Leblanc_Cafe_Wallapaper.png",
+    },
+    {
+      id: "p5_phantom",
+      name: "Phantom Thieves",
+      src: "../profile/Wallpaper/P5_Phantom_Thieves_Wallpaper.png",
+    },
+    {
+      id: "p5_sophia",
+      name: "Sophia (Strikers)",
+      src: "../profile/Wallpaper/Sophia_wallpaper.jpeg",
+    },
   ],
   personaq: [
-    { id: 'pq_three', name: 'Three Protagonists', src: '../profile/Wallpaper/Pq_3_prota.png' },
-    { id: 'pq2',      name: 'Persona Q2',          src: '../profile/Wallpaper/PQ2.jpg' },
+    { id: "pq_three", name: "Three Protagonists", src: "../profile/Wallpaper/Pq_3_prota.png" },
+    { id: "pq2", name: "Persona Q2", src: "../profile/Wallpaper/PQ2.jpg" },
   ],
   other: [
-    { id: 'p3_three_prota', name: 'Three Protagonists', src: '../profile/Wallpaper/3_protagonist.jpeg' },
-    { id: 'velvet_room',    name: 'Velvet Room',         src: '../profile/Wallpaper/Velvet_Room_Wallpaper.png' },
-    { id: 'jack_frost',     name: 'Jack Frost',          src: '../profile/Wallpaper/Jack_frost.jpeg' },
-    { id: 'black_frost',    name: 'Black Frost',         src: '../profile/Wallpaper/Black_frost.jpeg' },
-    { id: 'christmas',      name: 'Christmas Special',   src: '../profile/Wallpaper/Christmas_Wallpaper.png' },
-    { id: 'cny',            name: 'Chinese New Year',    src: '../profile/Wallpaper/Wallpaper_chinesse.webp' },
+    {
+      id: "p3_three_prota",
+      name: "Three Protagonists",
+      src: "../profile/Wallpaper/3_protagonist.jpeg",
+    },
+    {
+      id: "velvet_room",
+      name: "Velvet Room",
+      src: "../profile/Wallpaper/Velvet_Room_Wallpaper.png",
+    },
+    { id: "jack_frost", name: "Jack Frost", src: "../profile/Wallpaper/Jack_frost.jpeg" },
+    { id: "black_frost", name: "Black Frost", src: "../profile/Wallpaper/Black_frost.jpeg" },
+    {
+      id: "christmas",
+      name: "Christmas Special",
+      src: "../profile/Wallpaper/Christmas_Wallpaper.png",
+    },
+    { id: "cny", name: "Chinese New Year", src: "../profile/Wallpaper/Wallpaper_chinesse.webp" },
   ],
 };
 
 const wallpaperCategories = [
-  { id: 'none',     name: '❌ None' },
-  { id: 'persona1', name: '🔮 Persona 1' },
-  { id: 'persona2', name: '🌹 Persona 2' },
-  { id: 'persona3', name: '🌙 Persona 3' },
-  { id: 'persona4', name: '📺 Persona 4' },
-  { id: 'persona5', name: '🎭 Persona 5' },
-  { id: 'personaq', name: '🗺️ Persona Q' },
-  { id: 'other',    name: '✨ Extras' },
+  { id: "none", name: "❌ None" },
+  { id: "persona1", name: "🔮 Persona 1" },
+  { id: "persona2", name: "🌹 Persona 2" },
+  { id: "persona3", name: "🌙 Persona 3" },
+  { id: "persona4", name: "📺 Persona 4" },
+  { id: "persona5", name: "🎭 Persona 5" },
+  { id: "personaq", name: "🗺️ Persona Q" },
+  { id: "other", name: "✨ Extras" },
 ];
 
 // ─────────────────────────────────────────────────────────
@@ -1111,30 +1486,30 @@ const CARD_H = 693; // 390 × (16/9) ≈ 693
 
 /** Options de police disponibles dans le style du texte de partage. */
 const TEXT_FONTS = [
-  { id: 'arial',     name: 'Arial',        value: 'Arial, sans-serif' },
-  { id: 'arialblk',  name: 'Arial Black',  value: '"Arial Black", Impact, sans-serif' },
-  { id: 'impact',    name: 'Impact',        value: 'Impact, "Arial Black", sans-serif' },
-  { id: 'georgia',   name: 'Georgia',       value: 'Georgia, serif' },
-  { id: 'courier',   name: 'Courier',       value: '"Courier New", Courier, monospace' },
-  { id: 'persona5',  name: 'Persona 5',     value: 'Persona5, "Arial Black", sans-serif' },
+  { id: "arial", name: "Arial", value: "Arial, sans-serif" },
+  { id: "arialblk", name: "Arial Black", value: '"Arial Black", Impact, sans-serif' },
+  { id: "impact", name: "Impact", value: 'Impact, "Arial Black", sans-serif' },
+  { id: "georgia", name: "Georgia", value: "Georgia, serif" },
+  { id: "courier", name: "Courier", value: '"Courier New", Courier, monospace' },
+  { id: "persona5", name: "Persona 5", value: 'Persona5, "Arial Black", sans-serif' },
 ];
 
 /** Preset couleurs de texte + blanc par défaut. */
 const TEXT_COLOR_PRESETS = [
-  { id: 'white',  value: '#ffffff', label: 'White'  },
-  { id: 'gold',   value: '#ffd700', label: 'Gold'   },
-  { id: 'red',    value: '#ff4444', label: 'Red'    },
-  { id: 'cyan',   value: '#4ecdc4', label: 'Cyan'   },
-  { id: 'black',  value: '#111111', label: 'Black'  },
-  { id: 'custom', value: null,      label: 'Custom' },
+  { id: "white", value: "#ffffff", label: "White" },
+  { id: "gold", value: "#ffd700", label: "Gold" },
+  { id: "red", value: "#ff4444", label: "Red" },
+  { id: "cyan", value: "#4ecdc4", label: "Cyan" },
+  { id: "black", value: "#111111", label: "Black" },
+  { id: "custom", value: null, label: "Custom" },
 ];
 
 /** Tailles de texte disponibles (multiplicateur appliqué aux em de base). */
 const TEXT_SIZES = [
-  { id: 'small',  label: 'S', scale: 0.78 },
-  { id: 'medium', label: 'M', scale: 1.00 },
-  { id: 'large',  label: 'L', scale: 1.25 },
-  { id: 'xl',     label: 'XL', scale: 1.55 },
+  { id: "small", label: "S", scale: 0.78 },
+  { id: "medium", label: "M", scale: 1.0 },
+  { id: "large", label: "L", scale: 1.25 },
+  { id: "xl", label: "XL", scale: 1.55 },
 ];
 
 /**
@@ -1148,16 +1523,16 @@ const TEXT_SIZES = [
  * @returns {HTMLElement}
  */
 function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) {
-  const txtFont  = textStyle?.font  || 'Arial, sans-serif';
-  const txtColor = textStyle?.color || '#ffffff';
+  const txtFont = textStyle?.font || "Arial, sans-serif";
+  const txtColor = textStyle?.color || "#ffffff";
   const txtScale = textStyle?.scale ?? 1;
-  const selectedBadges  = getBadgesForShare(profile);
-  const avatarForShare  = normalizeAvatarPath(profile.avatar);
-  const wallpaperActive = activeTab === 'wallpaper' && wallpaper?.src;
+  const selectedBadges = getBadgesForShare(profile);
+  const avatarForShare = normalizeAvatarPath(profile.avatar);
+  const wallpaperActive = activeTab === "wallpaper" && wallpaper?.src;
 
   // ── Conteneur carte (9:16 portrait) ──
-  const card = document.createElement('div');
-  card.id = 'shareCard';
+  const card = document.createElement("div");
+  card.id = "shareCard";
   card.style.cssText = `
     width:${CARD_W}px; height:${CARD_H}px;
     border-radius:20px; overflow:hidden;
@@ -1170,18 +1545,18 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
 
   // ── Fond (wallpaper ou couleur) ──
   if (wallpaperActive) {
-    if (wallpaper.src.endsWith('.gif')) {
+    if (wallpaper.src.endsWith(".gif")) {
       // GIF : utiliser <img> (les CSS background ne jouent pas les GIFs dans html2canvas)
-      const wpImg = document.createElement('img');
+      const wpImg = document.createElement("img");
       wpImg.src = wallpaper.src;
-      wpImg.crossOrigin = 'anonymous';
+      wpImg.crossOrigin = "anonymous";
       wpImg.style.cssText = `
         position:absolute;top:0;left:0;width:100%;height:100%;
         object-fit:cover;pointer-events:none;
       `;
       card.appendChild(wpImg);
     } else {
-      const wpDiv = document.createElement('div');
+      const wpDiv = document.createElement("div");
       wpDiv.style.cssText = `
         position:absolute;top:0;left:0;right:0;bottom:0;
         background:url('${wallpaper.src}') center/cover no-repeat;
@@ -1191,7 +1566,7 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
     }
 
     // Overlay sombre pour la lisibilité
-    const overlay = document.createElement('div');
+    const overlay = document.createElement("div");
     overlay.style.cssText = `
       position:absolute;top:0;left:0;right:0;bottom:0;
       background:linear-gradient(to bottom,rgba(0,0,0,0.25) 0%,rgba(0,0,0,0.65) 100%);
@@ -1200,7 +1575,7 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
     card.appendChild(overlay);
   } else {
     // Pattern décoratif sur fond couleur
-    const pattern = document.createElement('div');
+    const pattern = document.createElement("div");
     pattern.style.cssText = `
       position:absolute;top:0;left:0;right:0;bottom:0;
       background:${bg.pattern};pointer-events:none;
@@ -1209,7 +1584,7 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
   }
 
   // ── Contenu (au-dessus du fond) ──
-  const content = document.createElement('div');
+  const content = document.createElement("div");
   content.style.cssText = `
     position:relative;z-index:1;
     display:flex;flex-direction:column;align-items:center;
@@ -1220,9 +1595,9 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
   content.innerHTML = `
     <!-- Titre -->
     <div style="margin-bottom:20px;">
-      <p style="margin:0;font-size:${(0.75*s).toFixed(2)}em;letter-spacing:0.2em;text-transform:uppercase;
+      <p style="margin:0;font-size:${(0.75 * s).toFixed(2)}em;letter-spacing:0.2em;text-transform:uppercase;
                 color:${txtColor};opacity:0.8;text-shadow:1px 1px 3px rgba(0,0,0,0.8);">PersonaDLE</p>
-      <h2 style="margin:4px 0 0;font-size:${(1.5*s).toFixed(2)}em;font-weight:900;letter-spacing:0.08em;
+      <h2 style="margin:4px 0 0;font-size:${(1.5 * s).toFixed(2)}em;font-weight:900;letter-spacing:0.08em;
                  color:${txtColor};text-shadow:2px 2px 6px rgba(0,0,0,0.8);">PROFILE</h2>
       <div style="width:40px;height:3px;background:#e63946;margin:8px auto 0;border-radius:2px;"></div>
     </div>
@@ -1231,27 +1606,31 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
     <div style="margin:8px 0 16px;">
       <img src="${avatarForShare}" alt="Avatar" crossorigin="anonymous"
            style="width:140px;height:140px;border-radius:50%;
-                  border:4px solid ${profile.avatarBorderColor || '#ffd700'};
+                  border:4px solid ${profile.avatarBorderColor || "#ffd700"};
                   box-shadow:0 6px 20px rgba(0,0,0,0.7);
                   object-fit:cover;">
     </div>
 
     <!-- Pseudo -->
-    <h3 style="margin:0 0 4px;font-size:${(1.6*s).toFixed(2)}em;font-weight:900;
+    <h3 style="margin:0 0 4px;font-size:${(1.6 * s).toFixed(2)}em;font-weight:900;
                color:${txtColor};text-shadow:2px 2px 6px rgba(0,0,0,0.8);
                max-width:340px;word-break:break-word;">
-      ${profile.pseudo || 'Guest Player'}
+      ${profile.pseudo || "Guest Player"}
     </h3>
     ${(() => {
-      if (titleOptions.include === false) return '';
-      const eq = (typeof _titlesData !== 'undefined' && _titlesData) ? _titlesData.find(t =>
-        (profile.equippedTitleId && t.id && t.id === profile.equippedTitleId) ||
-        (profile.equippedTitleSlug && t.slug === profile.equippedTitleSlug)
-      ) : null;
-      if (!eq) return '';
-      const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-      const imgSrc  = `${_prefix}/profile/${eq.image_path || `titles/${eq.slug}.webp`}`;
-      const szMap   = { small: 150, medium: 220, large: 300 };
+      if (titleOptions.include === false) return "";
+      const eq =
+        typeof _titlesData !== "undefined" && _titlesData
+          ? _titlesData.find(
+              (t) =>
+                (profile.equippedTitleId && t.id && t.id === profile.equippedTitleId) ||
+                (profile.equippedTitleSlug && t.slug === profile.equippedTitleSlug)
+            )
+          : null;
+      if (!eq) return "";
+      const _prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
+      const imgSrc = `${_prefix}/profile/${eq.image_path || `titles/${eq.slug}.webp`}`;
+      const szMap = { small: 150, medium: 220, large: 300 };
       const w = szMap[titleOptions.size] || 220;
       return `<img src="${imgSrc}" alt="${eq.name}" crossorigin="anonymous"
         style="width:${w}px;border-radius:8px;display:block;margin:0 auto 14px;
@@ -1266,31 +1645,35 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
                 backdrop-filter:blur(6px);
                 margin-bottom:20px;">
       <div style="text-align:center;flex:1;">
-        <div style="font-size:${(2*s).toFixed(2)}em;font-weight:900;color:#ffd700;
+        <div style="font-size:${(2 * s).toFixed(2)}em;font-weight:900;color:#ffd700;
                     text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.stats?.wins || 0}</div>
-        <div style="font-size:${(0.72*s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Wins</div>
+        <div style="font-size:${(0.72 * s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Wins</div>
       </div>
       <div style="width:1px;height:36px;background:rgba(255,255,255,0.25);"></div>
       <div style="text-align:center;flex:1;">
-        <div style="font-size:${(2*s).toFixed(2)}em;font-weight:900;color:#ff6b6b;
+        <div style="font-size:${(2 * s).toFixed(2)}em;font-weight:900;color:#ff6b6b;
                     text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.stats?.streakRecord || 0}</div>
-        <div style="font-size:${(0.72*s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Best Streak</div>
+        <div style="font-size:${(0.72 * s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Best Streak</div>
       </div>
       <div style="width:1px;height:36px;background:rgba(255,255,255,0.25);"></div>
       <div style="text-align:center;flex:1;">
-        <div style="font-size:${(2*s).toFixed(2)}em;font-weight:900;color:#4ecdc4;
+        <div style="font-size:${(2 * s).toFixed(2)}em;font-weight:900;color:#4ecdc4;
                     text-shadow:2px 2px 4px rgba(0,0,0,0.8);">${profile.badges?.length || 0}</div>
-        <div style="font-size:${(0.72*s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Badges</div>
+        <div style="font-size:${(0.72 * s).toFixed(2)}em;opacity:0.85;margin-top:3px;letter-spacing:0.06em;text-transform:uppercase;color:${txtColor};">Badges</div>
       </div>
     </div>
 
     <!-- Badges sélectionnés -->
-    ${selectedBadges.length > 0 ? `
+    ${
+      selectedBadges.length > 0
+        ? `
       <div style="margin-bottom:16px;width:100%;">
         <p style="margin:0 0 10px;font-size:0.8em;opacity:0.85;
                   color:${txtColor};text-transform:uppercase;letter-spacing:0.1em;">🏅 Featured</p>
         <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
-          ${selectedBadges.map(b => `
+          ${selectedBadges
+            .map(
+              (b) => `
             <div style="text-align:center;">
               <img src="${b.img}" alt="${b.name}" crossorigin="anonymous"
                    style="width:65px;height:65px;border-radius:10px;
@@ -1299,10 +1682,14 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
               <p style="margin:5px 0 0;font-size:0.62em;opacity:0.9;color:${txtColor};
                          max-width:70px;word-break:break-word;">${b.name}</p>
             </div>
-          `).join('')}
+          `
+            )
+            .join("")}
         </div>
       </div>
-    ` : '<div style="flex:1;"></div>'}
+    `
+        : '<div style="flex:1;"></div>'
+    }
 
     <!-- Spacer flex -->
     <div style="flex:1;min-height:8px;"></div>
@@ -1323,27 +1710,27 @@ function buildShareCard(bg, wallpaper, activeTab, textStyle, titleOptions = {}) 
  * Gère la sélection de fond, la génération canvas (PNG) et GIF animé.
  */
 function setupShareProfile() {
-  const btn          = document.getElementById('shareProfileBtn');
-  const modal        = document.getElementById('sharePreviewModal');
-  const closeBtn     = document.getElementById('closeSharePreview');
-  const area         = document.getElementById('sharePreviewArea');
-  const downloadBtn  = document.getElementById('downloadProfileBtn');
-  const twitterBtn   = document.getElementById('shareTwitterBtn');
-  const discordBtn   = document.getElementById('shareDiscordBtn');
-  const emailBtn     = document.getElementById('shareEmailBtn');
-  const bgSelector   = document.getElementById('backgroundSelector');
+  const btn = document.getElementById("shareProfileBtn");
+  const modal = document.getElementById("sharePreviewModal");
+  const closeBtn = document.getElementById("closeSharePreview");
+  const area = document.getElementById("sharePreviewArea");
+  const downloadBtn = document.getElementById("downloadProfileBtn");
+  const twitterBtn = document.getElementById("shareTwitterBtn");
+  const discordBtn = document.getElementById("shareDiscordBtn");
+  const emailBtn = document.getElementById("shareEmailBtn");
+  const bgSelector = document.getElementById("backgroundSelector");
 
   if (!btn || !modal) return;
 
-  let selectedBg                = localStorage.getItem('profileShareBg')          || 'velvet_room';
-  let selectedWallpaperCategory = localStorage.getItem('profileShareWallpaperCat') || 'none';
-  let selectedWallpaper         = localStorage.getItem('profileShareWallpaper')    || 'none';
-  let selectedFont              = 'arial';
-  let selectedColor             = localStorage.getItem('profileShareColor')         || '#ffffff';
-  let selectedSize              = localStorage.getItem('profileShareSize')          || 'medium';
-  let titleIncluded = localStorage.getItem('profileShareTitleInclude') !== 'false';
-  let titleSize     = localStorage.getItem('profileShareTitleSize')    || 'medium';
-  let activeTab = 'color';
+  let selectedBg = localStorage.getItem("profileShareBg") || "velvet_room";
+  let selectedWallpaperCategory = localStorage.getItem("profileShareWallpaperCat") || "none";
+  let selectedWallpaper = localStorage.getItem("profileShareWallpaper") || "none";
+  let selectedFont = "arial";
+  let selectedColor = localStorage.getItem("profileShareColor") || "#ffffff";
+  let selectedSize = localStorage.getItem("profileShareSize") || "medium";
+  let titleIncluded = localStorage.getItem("profileShareTitleInclude") !== "false";
+  let titleSize = localStorage.getItem("profileShareTitleSize") || "medium";
+  let activeTab = "color";
   let currentCard = null;
 
   // ── Sélecteur de fond ──
@@ -1357,7 +1744,7 @@ function setupShareProfile() {
         <div class="share-selector-row">
           <label>Background</label>
           <select id="bgSelect" class="share-select">
-            ${shareBackgrounds.map(bg => `<option value="${bg.id}" ${bg.id === selectedBg ? 'selected' : ''}>${bg.name}</option>`).join('')}
+            ${shareBackgrounds.map((bg) => `<option value="${bg.id}" ${bg.id === selectedBg ? "selected" : ""}>${bg.name}</option>`).join("")}
           </select>
         </div>
       </div>
@@ -1365,7 +1752,7 @@ function setupShareProfile() {
         <div class="share-selector-row">
           <label>Category</label>
           <select id="wallpaperCategorySelect" class="share-select">
-            ${wallpaperCategories.map(cat => `<option value="${cat.id}" ${cat.id === selectedWallpaperCategory ? 'selected' : ''}>${cat.name}</option>`).join('')}
+            ${wallpaperCategories.map((cat) => `<option value="${cat.id}" ${cat.id === selectedWallpaperCategory ? "selected" : ""}>${cat.name}</option>`).join("")}
           </select>
         </div>
         <div class="share-selector-row">
@@ -1380,17 +1767,21 @@ function setupShareProfile() {
         <div class="share-selector-row">
           <label>Font</label>
           <select id="textFontSelect" class="share-select">
-            ${TEXT_FONTS.map(f => `<option value="${f.id}" ${f.id === selectedFont ? 'selected' : ''}>${f.name}</option>`).join('')}
+            ${TEXT_FONTS.map((f) => `<option value="${f.id}" ${f.id === selectedFont ? "selected" : ""}>${f.name}</option>`).join("")}
           </select>
         </div>
         <div class="share-selector-row">
           <label>Color</label>
           <div class="share-color-row">
-            ${TEXT_COLOR_PRESETS.filter(p => p.id !== 'custom').map(p => `
-              <button class="share-color-swatch ${selectedColor === p.value ? 'active' : ''}"
+            ${TEXT_COLOR_PRESETS.filter((p) => p.id !== "custom")
+              .map(
+                (p) => `
+              <button class="share-color-swatch ${selectedColor === p.value ? "active" : ""}"
                       data-color="${p.value}" title="${p.label}"
                       style="background:${p.value};"></button>
-            `).join('')}
+            `
+              )
+              .join("")}
             <input type="color" id="textColorPicker" value="${selectedColor}"
                    title="Custom color" class="share-color-picker">
           </div>
@@ -1398,10 +1789,12 @@ function setupShareProfile() {
         <div class="share-selector-row">
           <label>Size</label>
           <div class="share-size-row">
-            ${TEXT_SIZES.map(sz => `
-              <button class="share-size-btn ${selectedSize === sz.id ? 'active' : ''}"
+            ${TEXT_SIZES.map(
+              (sz) => `
+              <button class="share-size-btn ${selectedSize === sz.id ? "active" : ""}"
                       data-size="${sz.id}">${sz.label}</button>
-            `).join('')}
+            `
+            ).join("")}
           </div>
         </div>
       </div>
@@ -1412,146 +1805,162 @@ function setupShareProfile() {
         <div class="share-selector-row">
           <label>Show title</label>
           <label class="share-toggle">
-            <input type="checkbox" id="titleIncludeToggle" ${titleIncluded ? 'checked' : ''}>
+            <input type="checkbox" id="titleIncludeToggle" ${titleIncluded ? "checked" : ""}>
             <span class="share-toggle-slider"></span>
           </label>
         </div>
-        <div class="share-selector-row" id="titleSizeRow" style="${titleIncluded ? '' : 'opacity:.4;pointer-events:none;'}">
+        <div class="share-selector-row" id="titleSizeRow" style="${titleIncluded ? "" : "opacity:.4;pointer-events:none;"}">
           <label>Size</label>
           <div class="share-size-row">
-            <button class="share-size-btn ${titleSize === 'small'  ? 'active' : ''}" data-title-size="small">S</button>
-            <button class="share-size-btn ${titleSize === 'medium' ? 'active' : ''}" data-title-size="medium">M</button>
-            <button class="share-size-btn ${titleSize === 'large'  ? 'active' : ''}" data-title-size="large">L</button>
+            <button class="share-size-btn ${titleSize === "small" ? "active" : ""}" data-title-size="small">S</button>
+            <button class="share-size-btn ${titleSize === "medium" ? "active" : ""}" data-title-size="medium">M</button>
+            <button class="share-size-btn ${titleSize === "large" ? "active" : ""}" data-title-size="large">L</button>
           </div>
         </div>
       </div>
     `;
 
-    const tabColor            = document.getElementById('tabColor');
-    const tabWallpaper        = document.getElementById('tabWallpaper');
-    const colorSelector       = document.getElementById('colorSelector');
-    const wallpaperSelector   = document.getElementById('wallpaperSelector');
-    const wallpaperCatSel     = document.getElementById('wallpaperCategorySelect');
-    const wallpaperSel        = document.getElementById('wallpaperSelect');
+    const tabColor = document.getElementById("tabColor");
+    const tabWallpaper = document.getElementById("tabWallpaper");
+    const colorSelector = document.getElementById("colorSelector");
+    const wallpaperSelector = document.getElementById("wallpaperSelector");
+    const wallpaperCatSel = document.getElementById("wallpaperCategorySelect");
+    const wallpaperSel = document.getElementById("wallpaperSelect");
 
     // Inject unlockable category if user has any unlocked wallpapers
-    const _unlockedIds = new Set(JSON.parse(localStorage.getItem("visitedProfileIds") ? "[]" : "[]"));
+    const _unlockedIds = new Set(
+      JSON.parse(localStorage.getItem("visitedProfileIds") ? "[]" : "[]")
+    );
     const _profileForWp = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
     const _unlockedWpIds = new Set(_profileForWp.unlockedWallpapers || []);
-    const _unlockedWps = UNLOCKABLE_WALLPAPERS.filter(wp => _unlockedWpIds.has(wp.id));
+    const _unlockedWps = UNLOCKABLE_WALLPAPERS.filter((wp) => _unlockedWpIds.has(wp.id));
     if (_unlockedWps.length > 0) {
-      shareWallpapers['unlockables'] = _unlockedWps;
-      if (!wallpaperCategories.find(c => c.id === 'unlockables')) {
-        wallpaperCategories.push({ id: 'unlockables', name: '🏆 Unlockables' });
+      shareWallpapers["unlockables"] = _unlockedWps;
+      if (!wallpaperCategories.find((c) => c.id === "unlockables")) {
+        wallpaperCategories.push({ id: "unlockables", name: "🏆 Unlockables" });
       }
       // Re-render category select to include unlockables
-      wallpaperCatSel.innerHTML = wallpaperCategories.map(cat =>
-        `<option value="${cat.id}" ${cat.id === selectedWallpaperCategory ? 'selected' : ''}>${cat.name}</option>`
-      ).join('');
+      wallpaperCatSel.innerHTML = wallpaperCategories
+        .map(
+          (cat) =>
+            `<option value="${cat.id}" ${cat.id === selectedWallpaperCategory ? "selected" : ""}>${cat.name}</option>`
+        )
+        .join("");
     }
 
     function updateWallpaperList() {
       const wallpapers = shareWallpapers[wallpaperCatSel.value] || [];
-      wallpaperSel.innerHTML = wallpapers.map(wp =>
-        `<option value="${wp.id}" ${wp.id === selectedWallpaper ? 'selected' : ''}>${wp.name}</option>`
-      ).join('');
-      if (!wallpapers.find(w => w.id === selectedWallpaper)) {
-        selectedWallpaper = wallpapers[0]?.id || 'none';
+      wallpaperSel.innerHTML = wallpapers
+        .map(
+          (wp) =>
+            `<option value="${wp.id}" ${wp.id === selectedWallpaper ? "selected" : ""}>${wp.name}</option>`
+        )
+        .join("");
+      if (!wallpapers.find((w) => w.id === selectedWallpaper)) {
+        selectedWallpaper = wallpapers[0]?.id || "none";
         wallpaperSel.value = selectedWallpaper;
       }
     }
 
     function switchTab(tab) {
       activeTab = tab;
-      tabColor.classList.toggle('active', tab === 'color');
-      tabWallpaper.classList.toggle('active', tab === 'wallpaper');
-      colorSelector.classList.toggle('active', tab === 'color');
-      wallpaperSelector.classList.toggle('active', tab === 'wallpaper');
-      if (tab === 'wallpaper') updateWallpaperList();
+      tabColor.classList.toggle("active", tab === "color");
+      tabWallpaper.classList.toggle("active", tab === "wallpaper");
+      colorSelector.classList.toggle("active", tab === "color");
+      wallpaperSelector.classList.toggle("active", tab === "wallpaper");
+      if (tab === "wallpaper") updateWallpaperList();
       generatePreview();
     }
 
-    tabColor.onclick    = () => switchTab('color');
-    tabWallpaper.onclick = () => switchTab('wallpaper');
+    tabColor.onclick = () => switchTab("color");
+    tabWallpaper.onclick = () => switchTab("wallpaper");
 
-    document.getElementById('bgSelect').onchange = (e) => {
+    document.getElementById("bgSelect").onchange = (e) => {
       selectedBg = e.target.value;
-      localStorage.setItem('profileShareBg', selectedBg);
+      localStorage.setItem("profileShareBg", selectedBg);
       generatePreview();
     };
 
     wallpaperCatSel.onchange = (e) => {
       selectedWallpaperCategory = e.target.value;
-      localStorage.setItem('profileShareWallpaperCat', selectedWallpaperCategory);
+      localStorage.setItem("profileShareWallpaperCat", selectedWallpaperCategory);
       updateWallpaperList();
       selectedWallpaper = wallpaperSel.value;
-      localStorage.setItem('profileShareWallpaper', selectedWallpaper);
+      localStorage.setItem("profileShareWallpaper", selectedWallpaper);
       generatePreview();
     };
 
     wallpaperSel.onchange = (e) => {
       selectedWallpaper = e.target.value;
-      localStorage.setItem('profileShareWallpaper', selectedWallpaper);
+      localStorage.setItem("profileShareWallpaper", selectedWallpaper);
       generatePreview();
     };
 
     updateWallpaperList();
 
     // ── Contrôles style texte ──
-    document.getElementById('textFontSelect').onchange = (e) => {
+    document.getElementById("textFontSelect").onchange = (e) => {
       selectedFont = e.target.value;
       generatePreview();
     };
 
-    bgSelector.querySelectorAll('.share-color-swatch').forEach(swatch => {
+    bgSelector.querySelectorAll(".share-color-swatch").forEach((swatch) => {
       swatch.onclick = () => {
         selectedColor = swatch.dataset.color;
-        localStorage.setItem('profileShareColor', selectedColor);
-        document.getElementById('textColorPicker').value = selectedColor;
-        bgSelector.querySelectorAll('.share-color-swatch').forEach(s => s.classList.remove('active'));
-        swatch.classList.add('active');
+        localStorage.setItem("profileShareColor", selectedColor);
+        document.getElementById("textColorPicker").value = selectedColor;
+        bgSelector
+          .querySelectorAll(".share-color-swatch")
+          .forEach((s) => s.classList.remove("active"));
+        swatch.classList.add("active");
         generatePreview();
       };
     });
 
-    const colorPicker = document.getElementById('textColorPicker');
+    const colorPicker = document.getElementById("textColorPicker");
     colorPicker.oninput = (e) => {
       selectedColor = e.target.value;
-      localStorage.setItem('profileShareColor', selectedColor);
-      bgSelector.querySelectorAll('.share-color-swatch').forEach(s => s.classList.remove('active'));
+      localStorage.setItem("profileShareColor", selectedColor);
+      bgSelector
+        .querySelectorAll(".share-color-swatch")
+        .forEach((s) => s.classList.remove("active"));
       generatePreview();
     };
 
-    bgSelector.querySelectorAll('.share-size-btn[data-size]').forEach(sizeBtn => {
+    bgSelector.querySelectorAll(".share-size-btn[data-size]").forEach((sizeBtn) => {
       sizeBtn.onclick = () => {
         selectedSize = sizeBtn.dataset.size;
-        localStorage.setItem('profileShareSize', selectedSize);
-        bgSelector.querySelectorAll('.share-size-btn[data-size]').forEach(s => s.classList.remove('active'));
-        sizeBtn.classList.add('active');
+        localStorage.setItem("profileShareSize", selectedSize);
+        bgSelector
+          .querySelectorAll(".share-size-btn[data-size]")
+          .forEach((s) => s.classList.remove("active"));
+        sizeBtn.classList.add("active");
         generatePreview();
       };
     });
 
     // ── Contrôles titre visuel ──
-    const titleToggle  = document.getElementById('titleIncludeToggle');
-    const titleSizeRow = document.getElementById('titleSizeRow');
+    const titleToggle = document.getElementById("titleIncludeToggle");
+    const titleSizeRow = document.getElementById("titleSizeRow");
     if (titleToggle) {
       titleToggle.onchange = () => {
         titleIncluded = titleToggle.checked;
-        localStorage.setItem('profileShareTitleInclude', titleIncluded);
+        localStorage.setItem("profileShareTitleInclude", titleIncluded);
         if (titleSizeRow) {
-          titleSizeRow.style.opacity        = titleIncluded ? '' : '0.4';
-          titleSizeRow.style.pointerEvents  = titleIncluded ? '' : 'none';
+          titleSizeRow.style.opacity = titleIncluded ? "" : "0.4";
+          titleSizeRow.style.pointerEvents = titleIncluded ? "" : "none";
         }
         generatePreview();
       };
     }
-    bgSelector.querySelectorAll('.share-size-btn[data-title-size]').forEach(btn => {
+    bgSelector.querySelectorAll(".share-size-btn[data-title-size]").forEach((btn) => {
       btn.onclick = () => {
         titleSize = btn.dataset.titleSize;
-        localStorage.setItem('profileShareTitleSize', titleSize);
-        bgSelector.querySelectorAll('.share-size-btn[data-title-size]').forEach(s => s.classList.remove('active'));
-        btn.classList.add('active');
+        localStorage.setItem("profileShareTitleSize", titleSize);
+        bgSelector
+          .querySelectorAll(".share-size-btn[data-title-size]")
+          .forEach((s) => s.classList.remove("active"));
+        btn.classList.add("active");
         generatePreview();
       };
     });
@@ -1561,60 +1970,68 @@ function setupShareProfile() {
   _regenerateSharePreview = generatePreview;
 
   btn.onclick = () => {
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden");
     generatePreview();
   };
 
   // ── Génération de la prévisualisation ──
   function generatePreview() {
-    const bg = shareBackgrounds.find(b => b.id === selectedBg) || shareBackgrounds[0];
+    const bg = shareBackgrounds.find((b) => b.id === selectedBg) || shareBackgrounds[0];
 
     let wallpaper = null;
-    if (activeTab === 'wallpaper') {
+    if (activeTab === "wallpaper") {
       const catWps = shareWallpapers[selectedWallpaperCategory] || [];
-      wallpaper = catWps.find(w => w.id === selectedWallpaper) || null;
+      wallpaper = catWps.find((w) => w.id === selectedWallpaper) || null;
     }
 
-    const fontDef    = TEXT_FONTS.find(f => f.id === selectedFont) || TEXT_FONTS[0];
-    const sizeDef    = TEXT_SIZES.find(s => s.id === selectedSize) || TEXT_SIZES[1];
-    const textStyle  = { font: fontDef.value, color: selectedColor, scale: sizeDef.scale };
-    const titleOpts  = { include: titleIncluded, size: titleSize };
+    const fontDef = TEXT_FONTS.find((f) => f.id === selectedFont) || TEXT_FONTS[0];
+    const sizeDef = TEXT_SIZES.find((s) => s.id === selectedSize) || TEXT_SIZES[1];
+    const textStyle = { font: fontDef.value, color: selectedColor, scale: sizeDef.scale };
+    const titleOpts = { include: titleIncluded, size: titleSize };
 
     // Carte affichée dans la zone (scaled via CSS .share-card-wrapper)
     currentCard = buildShareCard(bg, wallpaper, activeTab, textStyle, titleOpts);
-    area.innerHTML = '';
-    const wrapper = document.createElement('div');
-    wrapper.className = 'share-card-wrapper';
+    area.innerHTML = "";
+    const wrapper = document.createElement("div");
+    wrapper.className = "share-card-wrapper";
     wrapper.appendChild(currentCard);
     area.appendChild(wrapper);
 
     // Clone hors-écran pour la capture html2canvas (résolution pleine — non affecté par le scale CSS)
     const offscreen = buildShareCard(bg, wallpaper, activeTab, textStyle, titleOpts);
-    offscreen.style.position = 'fixed';
-    offscreen.style.left = '-9999px';
-    offscreen.style.top = '0';
-    offscreen.style.zIndex = '-1';
+    offscreen.style.position = "fixed";
+    offscreen.style.left = "-9999px";
+    offscreen.style.top = "0";
+    offscreen.style.zIndex = "-1";
     document.body.appendChild(offscreen);
 
     // Générer le PNG haute résolution (scale:2)
     setTimeout(async () => {
-      const cvs    = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: null, logging: false, allowTaint: true });
+      const cvs = await html2canvas(offscreen, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
+        logging: false,
+        allowTaint: true,
+      });
       document.body.removeChild(offscreen);
-      const dataUrl = cvs.toDataURL('image/png');
+      const dataUrl = cvs.toDataURL("image/png");
 
       // Bouton PNG
       downloadBtn.onclick = () => {
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = dataUrl;
-        a.download = `PersonaDLE_${profile.pseudo || 'Profile'}_${Date.now()}.png`;
+        a.download = `PersonaDLE_${profile.pseudo || "Profile"}_${Date.now()}.png`;
         a.click();
         unlockPhotographerBadge();
       };
 
       // Partage Twitter
       twitterBtn.onclick = () => {
-        const text = encodeURIComponent(`Check out my PersonaDLE profile! 🎭\n${profile.pseudo || 'Guest'} – ${profile.stats?.wins || 0} wins & ${profile.badges?.length || 0} badges 🏅\n\n#PersonaDLE #Persona`);
-        window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+        const text = encodeURIComponent(
+          `Check out my PersonaDLE profile! 🎭\n${profile.pseudo || "Guest"} – ${profile.stats?.wins || 0} wins & ${profile.badges?.length || 0} badges 🏅\n\n#PersonaDLE #Persona`
+        );
+        window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
         unlockPhotographerBadge();
       };
 
@@ -1622,25 +2039,27 @@ function setupShareProfile() {
       discordBtn.onclick = async () => {
         try {
           const blob = await (await fetch(dataUrl)).blob();
-          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-          alert('📋 Profile image copied! Paste it in Discord with Ctrl+V.');
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+          alert("📋 Profile image copied! Paste it in Discord with Ctrl+V.");
           unlockPhotographerBadge();
         } catch {
-          alert('❌ Copy failed. Please download manually.');
+          alert("❌ Copy failed. Please download manually.");
         }
       };
 
       // Email
       emailBtn.onclick = () => {
-        const subject = encodeURIComponent('My PersonaDLE Profile');
-        const body    = encodeURIComponent(`Check out my PersonaDLE stats!\n\nWins: ${profile.stats?.wins || 0}\nBest Streak: ${profile.stats?.streakRecord || 0}\nBadges: ${profile.badges?.length || 0}\n\nPlay at: https://personadle.net`);
+        const subject = encodeURIComponent("My PersonaDLE Profile");
+        const body = encodeURIComponent(
+          `Check out my PersonaDLE stats!\n\nWins: ${profile.stats?.wins || 0}\nBest Streak: ${profile.stats?.streakRecord || 0}\nBadges: ${profile.badges?.length || 0}\n\nPlay at: https://personadle.net`
+        );
         window.location.href = `mailto:?subject=${subject}&body=${body}`;
         unlockPhotographerBadge();
       };
     }, 120);
   }
 
-  closeBtn.onclick = () => modal.classList.add('hidden');
+  closeBtn.onclick = () => modal.classList.add("hidden");
 }
 
 /**
@@ -1648,35 +2067,37 @@ function setupShareProfile() {
  * Visible uniquement si l'utilisateur est connecté (friend_code requis).
  */
 function setupCopyProfileLink() {
-  const btn    = document.getElementById('copyProfileLinkBtn');
-  const status = document.getElementById('shareStatus');
+  const btn = document.getElementById("copyProfileLinkBtn");
+  const status = document.getElementById("shareStatus");
   if (!btn) return;
 
   // Afficher le bouton uniquement si l'user est connecté
   function _show() {
     const code = window._currentUser?.friend_code;
-    if (code) btn.style.display = '';
+    if (code) btn.style.display = "";
   }
   _show();
-  window.addEventListener('personadle:auth-ready', _show);
+  window.addEventListener("personadle:auth-ready", _show);
 
-  btn.addEventListener('click', async () => {
+  btn.addEventListener("click", async () => {
     const code = window._currentUser?.friend_code;
     if (!code) return;
 
-    const base = window.location.origin + window.location.pathname.replace(/\/profile\.html$/, '');
-    const url  = `${base}/profile.html?view=${encodeURIComponent(code)}`;
+    const base = window.location.origin + window.location.pathname.replace(/\/profile\.html$/, "");
+    const url = `${base}/profile.html?view=${encodeURIComponent(code)}`;
     const i18n = window.i18n || { t: (k, fb) => fb };
 
     try {
       await navigator.clipboard.writeText(url);
       if (status) {
-        status.textContent = i18n.t('profile.link_copied', 'Link copied!');
-        setTimeout(() => { if (status) status.textContent = ''; }, 3000);
+        status.textContent = i18n.t("profile.link_copied", "Link copied!");
+        setTimeout(() => {
+          if (status) status.textContent = "";
+        }, 3000);
       }
     } catch {
       // Fallback : prompt pour copier manuellement
-      window.prompt(i18n.t('profile.copy_link', 'Copy link') + ':', url);
+      window.prompt(i18n.t("profile.copy_link", "Copy link") + ":", url);
     }
   });
 }
@@ -1688,12 +2109,11 @@ function unlockPhotographerBadge() {
   if (!profile.hasSharedProfile) {
     profile.hasSharedProfile = true;
     saveProfile();
-    import('./badges/badgesManager.js').then(module => {
+    import("./badges/badgesManager.js").then((module) => {
       if (module.forceCheckBadges) module.forceCheckBadges(profile, saveProfile);
     });
   }
 }
-
 
 // ─────────────────────────────────────────────────────────
 // BADGES — ZOOM AU CLIC
@@ -1701,16 +2121,16 @@ function unlockPhotographerBadge() {
 
 /** Attache les click handlers sur les images de la prévisualisation badges. */
 function attachPreviewClicksToImages() {
-  const preview = document.getElementById('previewBadges');
+  const preview = document.getElementById("previewBadges");
   if (!preview) return;
 
-  preview.querySelectorAll('.badge-preview-img').forEach(img => {
-    img.style.cursor = 'pointer';
+  preview.querySelectorAll(".badge-preview-img").forEach((img) => {
+    img.style.cursor = "pointer";
     img.onclick = (e) => {
       e.stopPropagation();
       const badgeId = img.dataset.badgeId;
-      import('./badges/badgesData.js').then(module => {
-        const badge = module.badgesList.find(b => b.id === badgeId);
+      import("./badges/badgesData.js").then((module) => {
+        const badge = module.badgesList.find((b) => b.id === badgeId);
         if (badge) showBadgeZoom(badge);
       });
     };
@@ -1727,32 +2147,31 @@ function showBadgeZoom(badge) {
   const _tr = (key, fallback) => {
     if (!_t) return fallback;
     const v = _t(key);
-    return (v && !v.startsWith('badges.')) ? v : fallback;
+    return v && !v.startsWith("badges.") ? v : fallback;
   };
-  const name = _tr(`badges.${badge.id}.name`,        badge.name);
-  const cond = _tr(`badges.${badge.id}.condition`,   badge.condition);
-  const desc = _tr(`badges.${badge.id}.description`, badge.description || '');
+  const name = _tr(`badges.${badge.id}.name`, badge.name);
+  const cond = _tr(`badges.${badge.id}.condition`, badge.condition);
+  const desc = _tr(`badges.${badge.id}.description`, badge.description || "");
 
-  const modal = document.createElement('div');
-  modal.className = 'badge-zoom-modal';
+  const modal = document.createElement("div");
+  modal.className = "badge-zoom-modal";
   modal.innerHTML = `
     <div class="badge-zoom-content">
       <span class="badge-zoom-close">&times;</span>
       <img src="${badge.img}" alt="${name}">
       <h3>${name}</h3>
       <p class="badge-condition">${cond}</p>
-      ${desc ? `<p class="badge-description">${desc}</p>` : ''}
+      ${desc ? `<p class="badge-description">${desc}</p>` : ""}
     </div>
   `;
   document.body.appendChild(modal);
 
-  modal.addEventListener('click', e => {
-    if (e.target.classList.contains('badge-zoom-modal')) modal.remove();
+  modal.addEventListener("click", (e) => {
+    if (e.target.classList.contains("badge-zoom-modal")) modal.remove();
   });
-  modal.querySelector('.badge-zoom-close').onclick = () => modal.remove();
-  setTimeout(() => modal.classList.add('show'), 10);
+  modal.querySelector(".badge-zoom-close").onclick = () => modal.remove();
+  setTimeout(() => modal.classList.add("show"), 10);
 }
-
 
 // ─────────────────────────────────────────────────────────
 // PROFILE SONG — Sélecteur + mini-lecteur dans le panneau gauche
@@ -1763,31 +2182,41 @@ function showBadgeZoom(badge) {
  * Chaque entrée devient un <optgroup> dans le <select>.
  */
 const SONG_OPUS_ORDER = [
-  'P1','P2IS','P2EP',
-  'P3','P3FES','P3P','P3R',
-  'P4','P4G','P4D',
-  'P5','P5R','P5S',
-  'P5X',
-  'PQ','PQ2',
+  "P1",
+  "P2IS",
+  "P2EP",
+  "P3",
+  "P3FES",
+  "P3P",
+  "P3R",
+  "P4",
+  "P4G",
+  "P4D",
+  "P5",
+  "P5R",
+  "P5S",
+  "P5X",
+  "PQ",
+  "PQ2",
 ];
 
 const SONG_OPUS_LABELS = {
-  P1:    'Persona 1',
-  P2IS:  'Persona 2 — Innocent Sin',
-  P2EP:  'Persona 2 — Eternal Punishment',
-  P3:    'Persona 3',
-  P3FES: 'Persona 3 FES',
-  P3P:   'Persona 3 Portable',
-  P3R:   'Persona 3 Reload',
-  P4:    'Persona 4',
-  P4G:   'Persona 4 Golden',
-  P4D:   'Persona 4 Dancing All Night',
-  P5:    'Persona 5',
-  P5R:   'Persona 5 Royal',
-  P5S:   'Persona 5 Strikers',
-  P5X:   'Persona 5: The Phantom X',
-  PQ:    'Persona Q',
-  PQ2:   'Persona Q2',
+  P1: "Persona 1",
+  P2IS: "Persona 2 — Innocent Sin",
+  P2EP: "Persona 2 — Eternal Punishment",
+  P3: "Persona 3",
+  P3FES: "Persona 3 FES",
+  P3P: "Persona 3 Portable",
+  P3R: "Persona 3 Reload",
+  P4: "Persona 4",
+  P4G: "Persona 4 Golden",
+  P4D: "Persona 4 Dancing All Night",
+  P5: "Persona 5",
+  P5R: "Persona 5 Royal",
+  P5S: "Persona 5 Strikers",
+  P5X: "Persona 5: The Phantom X",
+  PQ: "Persona Q",
+  PQ2: "Persona Q2",
 };
 
 /**
@@ -1798,49 +2227,53 @@ const SONG_OPUS_LABELS = {
  */
 function getSortedSongGroups() {
   const groups = {};
-  SONG_OPUS_ORDER.forEach(op => { groups[op] = []; });
+  SONG_OPUS_ORDER.forEach((op) => {
+    groups[op] = [];
+  });
 
-  ALL_SONGS.forEach(song => {
-    const key = SONG_OPUS_ORDER.find(op => song.opus.includes(op)) || song.opus[0] || 'Other';
+  ALL_SONGS.forEach((song) => {
+    const key = SONG_OPUS_ORDER.find((op) => song.opus.includes(op)) || song.opus[0] || "Other";
     if (!groups[key]) groups[key] = [];
     groups[key].push(song);
   });
 
   // Tri alphabétique dans chaque groupe
-  Object.values(groups).forEach(list => list.sort((a, b) => a.titre.localeCompare(b.titre)));
+  Object.values(groups).forEach((list) => list.sort((a, b) => a.titre.localeCompare(b.titre)));
   return groups;
 }
 
 /** Formate un nombre de secondes en "m:ss". */
 function formatSongTime(s) {
-  if (!isFinite(s) || s < 0) return '0:00';
-  const m   = Math.floor(s / 60);
-  const sec = Math.floor(s % 60).toString().padStart(2, '0');
+  if (!isFinite(s) || s < 0) return "0:00";
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60)
+    .toString()
+    .padStart(2, "0");
   return `${m}:${sec}`;
 }
 
 /** Met à jour la barre de progression et le temps courant du lecteur. */
 function updateSongProgress() {
   if (!profileSongAudio) return;
-  const fill = document.getElementById('songProgressFill');
-  const cur  = document.getElementById('songCurrentTime');
-  const pct  = profileSongAudio.duration
+  const fill = document.getElementById("songProgressFill");
+  const cur = document.getElementById("songCurrentTime");
+  const pct = profileSongAudio.duration
     ? (profileSongAudio.currentTime / profileSongAudio.duration) * 100
     : 0;
   if (fill) fill.style.width = `${pct}%`;
-  if (cur)  cur.textContent  = formatSongTime(profileSongAudio.currentTime);
+  if (cur) cur.textContent = formatSongTime(profileSongAudio.currentTime);
 }
 
 /** Met à jour l'image de la song dans le lecteur (crop ou image opus). */
 function updateSongArtwork(src) {
-  const img = document.getElementById('songArtwork');
+  const img = document.getElementById("songArtwork");
   if (img) img.src = src;
 }
 
 /** Met à jour l'image de preview dans le sélecteur (live au changement du select). */
 function updatePickerPreview(fichier) {
-  const song = ALL_SONGS.find(s => s.fichier === fichier);
-  const img  = document.getElementById('songPickerImg');
+  const song = ALL_SONGS.find((s) => s.fichier === fichier);
+  const img = document.getElementById("songPickerImg");
   if (img && song) img.src = `../musicsMode/database/img/${song.image}`;
 }
 
@@ -1849,34 +2282,36 @@ function updatePickerPreview(fichier) {
  * Appelé au démarrage et à chaque changement de song sélectionnée.
  */
 function renderSongCard() {
-  const card = document.getElementById('songCard');
+  const card = document.getElementById("songCard");
   if (!card) return;
 
-  const hasSong   = !!profile.profileSong?.fichier;
+  const hasSong = !!profile.profileSong?.fichier;
   // Sur son propre profil la card est toujours visible (le picker sert à choisir).
-  card.classList.remove('hidden');
-  const groups    = getSortedSongGroups();
+  card.classList.remove("hidden");
+  const groups = getSortedSongGroups();
   const savedFile = profile.profileSong?.fichier || null;
 
   // Placeholder musique : note SVG sur fond sombre P5
   const pickerImgSrc = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%231a1a1a'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23e63946'%3E%E2%99%AA%3C/text%3E%3C/svg%3E`;
 
   // Option neutre en tête — garantit que toute sélection déclenche un vrai `change`
-  const optionsHTML = `<option value="" disabled selected>— Choose a song —</option>` +
-    SONG_OPUS_ORDER
-      .filter(op => groups[op]?.length > 0)
-      .map(op =>
-        `<optgroup label="${SONG_OPUS_LABELS[op] || op}">${
-          groups[op].map(s =>
-            `<option value="${s.fichier}">${s.titre}</option>`
-          ).join('')
-        }</optgroup>`
-      ).join('');
+  const optionsHTML =
+    `<option value="" disabled selected>— Choose a song —</option>` +
+    SONG_OPUS_ORDER.filter((op) => groups[op]?.length > 0)
+      .map(
+        (op) =>
+          `<optgroup label="${SONG_OPUS_LABELS[op] || op}">${groups[op]
+            .map((s) => `<option value="${s.fichier}">${s.titre}</option>`)
+            .join("")}</optgroup>`
+      )
+      .join("");
 
   card.innerHTML = `
     <h3 class="card-title"><span class="card-accent">◆</span> Profile Song</h3>
 
-    ${hasSong ? `
+    ${
+      hasSong
+        ? `
     <!-- Mini-lecteur actif — sélecteur masqué, image grande + infos dessous -->
     <div id="songPlayerUI" class="song-player">
       <img id="songArtwork" class="song-artwork" src="" alt="Song artwork" crossorigin="anonymous">
@@ -1900,7 +2335,8 @@ function renderSongCard() {
         </div>
       </div>
     </div>
-    ` : `
+    `
+        : `
     <!-- Sélecteur — affiché uniquement quand aucune song n'est active -->
     <div class="song-picker">
       <img id="songPickerImg" class="song-picker-img"
@@ -1910,7 +2346,8 @@ function renderSongCard() {
         <p class="song-empty-hint">Select a song to set it as your profile music</p>
       </div>
     </div>
-    `}
+    `
+    }
   `;
 
   attachSongHandlers();
@@ -1920,10 +2357,10 @@ function renderSongCard() {
 /** Attache les event handlers de la song card. */
 function attachSongHandlers() {
   // ── Sélection directe : changer le select = définir la song immédiatement ──
-  document.getElementById('songSelect')?.addEventListener('change', (e) => {
+  document.getElementById("songSelect")?.addEventListener("change", (e) => {
     const fichier = e.target.value;
     if (!fichier) return; // option neutre "— Choose a song —"
-    const song = ALL_SONGS.find(s => s.fichier === fichier);
+    const song = ALL_SONGS.find((s) => s.fichier === fichier);
     if (!song) return;
 
     // Mettre à jour la preview image en temps réel
@@ -1936,10 +2373,10 @@ function attachSongHandlers() {
     }
 
     profile.profileSong = {
-      fichier:     song.fichier,
-      titre:       song.titre,
-      opus:        song.opus,
-      image:       song.image,
+      fichier: song.fichier,
+      titre: song.titre,
+      opus: song.opus,
+      image: song.image,
       customImage: null,
     };
     saveProfile();
@@ -1949,7 +2386,7 @@ function attachSongHandlers() {
   });
 
   // ── Play / Pause ──
-  document.getElementById('songPlayBtn')?.addEventListener('click', () => {
+  document.getElementById("songPlayBtn")?.addEventListener("click", () => {
     if (!profileSongAudio) return;
     if (profileSongAudio.paused) {
       profileSongAudio.play().catch(() => {});
@@ -1959,17 +2396,17 @@ function attachSongHandlers() {
   });
 
   // ── Seek en cliquant sur la barre ──
-  document.getElementById('songProgressBar')?.addEventListener('click', (e) => {
+  document.getElementById("songProgressBar")?.addEventListener("click", (e) => {
     if (!profileSongAudio?.duration) return;
     profileSongAudio.currentTime =
       (e.offsetX / e.currentTarget.offsetWidth) * profileSongAudio.duration;
   });
 
   // ── Supprimer la song ──
-  document.getElementById('songRemoveBtn')?.addEventListener('click', () => {
+  document.getElementById("songRemoveBtn")?.addEventListener("click", () => {
     if (profileSongAudio) {
       profileSongAudio.pause();
-      profileSongAudio.src = '';
+      profileSongAudio.src = "";
     }
     delete profile.profileSong;
     saveProfile();
@@ -1992,13 +2429,13 @@ function initSongPlayer() {
   const artSrc = song.customImage || `../musicsMode/database/img/${song.image}`;
   updateSongArtwork(artSrc);
 
-  const titleEl = document.getElementById('songTitleEl');
-  const opusEl  = document.getElementById('songOpusEl');
+  const titleEl = document.getElementById("songTitleEl");
+  const opusEl = document.getElementById("songOpusEl");
   if (titleEl) titleEl.textContent = song.titre;
-  if (opusEl)  opusEl.textContent  = song.opus[0] || '';
+  if (opusEl) opusEl.textContent = song.opus[0] || "";
 
   if (!profileSongAudio) profileSongAudio = new Audio();
-  profileSongAudio.src  = `../musicsMode/database/music/song/${song.fichier}`;
+  profileSongAudio.src = `../musicsMode/database/music/song/${song.fichier}`;
   profileSongAudio.loop = true; // Lecture en boucle — fait partie du profil
   profileSongAudio.load();
 
@@ -2006,20 +2443,20 @@ function initSongPlayer() {
   profileSongAudio.ontimeupdate = updateSongProgress;
 
   profileSongAudio.onloadedmetadata = () => {
-    const dur = document.getElementById('songDuration');
+    const dur = document.getElementById("songDuration");
     if (dur) dur.textContent = formatSongTime(profileSongAudio.duration);
   };
 
   profileSongAudio.onplay = () => {
-    const btn = document.getElementById('songPlayBtn');
-    if (btn) btn.textContent = '⏸';
-    document.getElementById('songPlayerUI')?.classList.add('playing');
+    const btn = document.getElementById("songPlayBtn");
+    if (btn) btn.textContent = "⏸";
+    document.getElementById("songPlayerUI")?.classList.add("playing");
   };
 
   profileSongAudio.onpause = () => {
-    const btn = document.getElementById('songPlayBtn');
-    if (btn) btn.textContent = '▶';
-    document.getElementById('songPlayerUI')?.classList.remove('playing');
+    const btn = document.getElementById("songPlayBtn");
+    if (btn) btn.textContent = "▶";
+    document.getElementById("songPlayerUI")?.classList.remove("playing");
   };
 
   // ── Autoplay avec fallback au premier geste utilisateur ──
@@ -2028,8 +2465,8 @@ function initSongPlayer() {
     const unlock = () => {
       profileSongAudio.play().catch(() => {});
     };
-    document.addEventListener('click',   unlock, { once: true });
-    document.addEventListener('keydown', unlock, { once: true });
+    document.addEventListener("click", unlock, { once: true });
+    document.addEventListener("keydown", unlock, { once: true });
   });
 }
 
@@ -2041,14 +2478,13 @@ function setupSongPicker() {
   renderSongCard();
 }
 
-
 // ─────────────────────────────────────────────────────────
 // INITIALISATION GLOBALE
 // ─────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   // En mode "view" (?view=CODE), profile-view.js gère tout — on ne touche pas au DOM
-  if (new URLSearchParams(window.location.search).get('view')) return;
+  if (new URLSearchParams(window.location.search).get("view")) return;
 
   // 1. Charger le profil et initialiser l'UI
   initProfile();
@@ -2072,16 +2508,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window._authResolved) {
     _fullCloudSync();
   } else {
-    window.addEventListener('personadle:auth-ready', _fullCloudSync, { once: true });
+    window.addEventListener("personadle:auth-ready", _fullCloudSync, { once: true });
   }
 
   // Ré-sync complet au login/register (sans rechargement de page)
-  window.addEventListener('personadle:auth-login', () => _fullCloudSync());
+  window.addEventListener("personadle:auth-login", () => _fullCloudSync());
 
   // Reset profil au logout (sans rechargement de page)
-  window.addEventListener('personadle:auth-logout', () => {
+  window.addEventListener("personadle:auth-logout", () => {
     // Arrêter la musique si elle joue
-    if (profileSongAudio) { profileSongAudio.pause(); profileSongAudio.src = ''; }
+    if (profileSongAudio) {
+      profileSongAudio.pause();
+      profileSongAudio.src = "";
+    }
     // localStorage déjà vidé par auth.js — initProfile() crée un profil vierge
     initProfile();
     renderThemePicker();
@@ -2090,18 +2529,22 @@ document.addEventListener('DOMContentLoaded', () => {
     renderUnlockableWallpaperGallery(profile);
     renderBadgesPreview(profile);
     renderBadgesModal(profile, saveProfile);
-    _titlesData.forEach(t => { t.is_unlocked = 0; });
+    _titlesData.forEach((t) => {
+      t.is_unlocked = 0;
+    });
     renderTitlesSection?.();
   });
 
   // Sync périodique toutes les 3 min + à chaque retour sur l'onglet (pull + apply seulement)
   const _periodicSync = () => {
     if (!window._currentUser?.id) return;
-    pullProfileFromCloud().then(_applyCloudToUI).catch(() => {});
+    pullProfileFromCloud()
+      .then(_applyCloudToUI)
+      .catch(() => {});
   };
   setInterval(_periodicSync, 3 * 60 * 1000);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') _periodicSync();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") _periodicSync();
   });
 
   // Callback appelé par cloud-sync.js après chaque pull périodique
@@ -2128,7 +2571,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Re-render stats + badges à chaque changement de langue (et au chargement initial)
   //    Listener permanent : capte init + chaque setLang() depuis le sélecteur
-  window.addEventListener('personadle:i18n-ready', () => {
+  window.addEventListener("personadle:i18n-ready", () => {
     renderStats();
     renderBadgesModal(profile, saveProfileAndSyncBadges);
   });
@@ -2140,12 +2583,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
 // Attacher les handlers de zoom badges après leur rendu
-window.addEventListener('badgesRendered', () => {
+window.addEventListener("badgesRendered", () => {
   attachPreviewClicksToImages();
 });
-
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🖼️ WALLPAPERS DÉBLOQUABLES
@@ -2153,71 +2594,71 @@ window.addEventListener('badgesRendered', () => {
 
 const UNLOCKABLE_WALLPAPERS = [
   {
-    id: 'kamoshida_palace',
+    id: "kamoshida_palace",
     name: "Kamoshida's Palace",
-    src: '../profile/Wallpaper/unlockable/kamoshida_palace.webp',
-    condition: 'Play at least 1 game in each of the 6 modes',
+    src: "../profile/Wallpaper/unlockable/kamoshida_palace.webp",
+    condition: "Play at least 1 game in each of the 6 modes",
     check: (p, stats) => Object.keys(stats?.modeCount || {}).length >= 6,
   },
   {
-    id: 'madarame_wallpaper',
+    id: "madarame_wallpaper",
     name: "Madarame's Palace",
-    src: '../profile/Wallpaper/unlockable/madarame_wallpaper.webp',
-    condition: 'Set a custom avatar AND have at least 1 friend',
-    check: (p, stats, friendCount) => !!p?.avatarData && friendCount >= 1,
+    src: "../profile/Wallpaper/unlockable/madarame_wallpaper.webp",
+    condition: "Set a custom avatar AND have at least 1 friend",
+    check: (p, stats, friendCount) => !!p?.avatar && friendCount >= 1,
   },
   {
-    id: 'yukiko_dungeons',
+    id: "yukiko_dungeons",
     name: "Yukiko's Dungeons",
-    src: '../profile/Wallpaper/unlockable/yukiko_dungeons.webp',
-    condition: 'Play 3 consecutive days with P4 filter active',
+    src: "../profile/Wallpaper/unlockable/yukiko_dungeons.webp",
+    condition: "Play 3 consecutive days with P4 filter active",
     check: (p) => (p?.p4ConsecutiveDays || 0) >= 3,
   },
   {
-    id: 'kanji_dungeons',
+    id: "kanji_dungeons",
     name: "Kanji's Dungeons",
-    src: '../profile/Wallpaper/unlockable/kanji_dungeons.webp',
-    condition: 'Send a challenge to a friend and have them accept it',
+    src: "../profile/Wallpaper/unlockable/kanji_dungeons.webp",
+    condition: "Send a challenge to a friend and have them accept it",
     check: (p) => p?.challengeAcceptedByFriend === true,
   },
   {
-    id: 'rise_dungeons',
+    id: "rise_dungeons",
     name: "Rise's Dungeons",
-    src: '../profile/Wallpaper/unlockable/rise_dungeons.webp',
-    condition: 'Play 30 total games in Music mode',
+    src: "../profile/Wallpaper/unlockable/rise_dungeons.webp",
+    condition: "Play 30 total games in Music mode",
     check: (p, stats) => (stats?.modeCount?.Music || 0) >= 30,
   },
   {
-    id: 'mitsuo_dungeons',
+    id: "mitsuo_dungeons",
     name: "Mitsuo's Dungeons",
-    src: '../profile/Wallpaper/unlockable/mitsuo_dungeons.webp',
-    condition: 'Complete 75 total games across all modes',
+    src: "../profile/Wallpaper/unlockable/mitsuo_dungeons.webp",
+    condition: "Complete 75 total games across all modes",
     check: (p, stats) => Object.values(stats?.modeCount || {}).reduce((a, b) => a + b, 0) >= 75,
   },
   {
-    id: 'dark_shopping_district',
-    name: 'Dark Shopping District',
-    src: '../profile/Wallpaper/unlockable/dark_shopping_district.webp',
-    condition: 'Have a Social Link at rank 5 or higher',
+    id: "dark_shopping_district",
+    name: "Dark Shopping District",
+    src: "../profile/Wallpaper/unlockable/dark_shopping_district.webp",
+    condition: "Have a Social Link at rank 5 or higher",
     check: (p) => (p?.bestSocialLinkRank || 0) >= 5,
   },
 ];
 
 function renderUnlockableWallpaperGallery(p) {
-  const container = document.getElementById('unlockableWallpaperGrid');
+  const container = document.getElementById("unlockableWallpaperGrid");
   if (!container) return;
   const unlocked = p.unlockedWallpapers || [];
-  container.innerHTML = UNLOCKABLE_WALLPAPERS.map(wp => {
+  container.innerHTML = UNLOCKABLE_WALLPAPERS.map((wp) => {
     const isUnlocked = unlocked.includes(wp.id);
     return `
-      <div class="unlockable-wp-item ${isUnlocked ? 'unlocked' : 'locked'}"
+      <div class="unlockable-wp-item ${isUnlocked ? "unlocked" : "locked"}"
            data-id="${wp.id}" title="${isUnlocked ? wp.name : wp.condition}">
         <img src="${wp.src}" alt="${wp.name}" loading="lazy">
-        ${!isUnlocked ? `<div class="wp-lock-overlay">🔒<span class="wp-lock-cond">${wp.condition}</span></div>` : ''}
-        ${isUnlocked ? `<span class="wp-unlocked-label">✓ ${wp.name}</span>` : ''}
+        ${!isUnlocked ? `<div class="wp-lock-overlay">🔒<span class="wp-lock-cond">${wp.condition}</span></div>` : ""}
+        ${isUnlocked ? `<span class="wp-unlocked-label">✓ ${wp.name}</span>` : ""}
       </div>
     `;
-  }).join('');
+  }).join("");
 }
 
 async function checkAndUnlockWallpapers(p, stats, friendCount) {
@@ -2233,13 +2674,13 @@ async function checkAndUnlockWallpapers(p, stats, friendCount) {
   }
   if (newUnlocks.length) {
     saveProfile();
-    newUnlocks.forEach(wp => showWallpaperNotification(wp));
+    newUnlocks.forEach((wp) => showWallpaperNotification(wp));
   }
 }
 
 function showWallpaperNotification(wp) {
-  const notif = document.createElement('div');
-  notif.className = 'wallpaper-notif';
+  const notif = document.createElement("div");
+  notif.className = "wallpaper-notif";
   notif.innerHTML = `
     <img class="wallpaper-notif-thumb" src="${wp.src}" alt="${wp.name}">
     <div class="wallpaper-notif-text">
@@ -2249,9 +2690,9 @@ function showWallpaperNotification(wp) {
   `;
   document.body.appendChild(notif);
   notif.onclick = () => notif.remove();
-  setTimeout(() => notif.classList.add('show'), 80);
+  setTimeout(() => notif.classList.add("show"), 80);
   setTimeout(() => {
-    notif.classList.remove('show');
+    notif.classList.remove("show");
     setTimeout(() => notif.remove(), 500);
   }, 4000);
 }
@@ -2262,9 +2703,9 @@ async function initUnlockableWallpapers() {
   if (window._currentUser) {
     try {
       const res = await fetch(
-        `${window.location.pathname.startsWith('/personadle/') ? '/personadle' : ''}/api/friends`,
-        { credentials: 'include' }
-      ).then(r => r.json());
+        `${window.location.pathname.startsWith("/personadle/") ? "/personadle" : ""}/api/friends`,
+        { credentials: "include" }
+      ).then((r) => r.json());
       friendCount = (res?.friends || []).length;
     } catch (_) {}
   }
@@ -2272,12 +2713,13 @@ async function initUnlockableWallpapers() {
   // Sync backend → local
   if (window._currentUser) {
     try {
-      const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-      const res = await fetch(`${_prefix}/api/user/${window._currentUser.id}`, { credentials: 'include' })
-        .then(r => r.json());
+      const _prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
+      const res = await fetch(`${_prefix}/api/user/${window._currentUser.id}`, {
+        credentials: "include",
+      }).then((r) => r.json());
       const backendWp = res?.unlocked_wallpapers || [];
       if (!profile.unlockedWallpapers) profile.unlockedWallpapers = [];
-      const newFromBackend = backendWp.filter(id => !profile.unlockedWallpapers.includes(id));
+      const newFromBackend = backendWp.filter((id) => !profile.unlockedWallpapers.includes(id));
       if (newFromBackend.length) {
         profile.unlockedWallpapers.push(...newFromBackend);
         saveProfile();
@@ -2289,31 +2731,97 @@ async function initUnlockableWallpapers() {
   renderUnlockableWallpaperGallery(profile);
 }
 
-
 // ═══════════════════════════════════════════════════════════════════════════
 // 🎴 TITRES VISUELS (CALLING CARDS)
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Local title definitions — always available, API enriches with user's unlock status
 const TITLES_LOCAL = [
-  { slug: 'velvet_room_thou_art_i',    name: 'Thou Art I',              rarity: 'legendary', condition_type: 'badges_count',       condition_value: 20  },
-  { slug: 'joker_looking_cool',        name: 'Looking Cool',            rarity: 'legendary', condition_type: 'leaderboard_top',    condition_value: 100 },
-  { slug: 'makoto_yuki_memento_mori',  name: 'Memento Mori',            rarity: 'epic',      condition_type: 'unique_days',        condition_value: 100 },
-  { slug: 'akechi_pancakes',           name: 'Pancakes?',               rarity: 'epic',      condition_type: 'weekly_clean_modes', condition_value: 3   },
-  { slug: 'yu_reach_out_to_the_truth', name: 'Reach Out to the Truth',  rarity: 'epic',      condition_type: 'all_modes_won',      condition_value: 1   },
-  { slug: 'aigis_i_am_not_afraid',     name: 'I Am Not Afraid',         rarity: 'rare',      condition_type: 'mode_wins',          condition_value: 50  },
-  { slug: 'marie_i_remembered',        name: 'I Remembered',            rarity: 'rare',      condition_type: 'badges_count',       condition_value: 15  },
-  { slug: 'yosuke_ride_the_wind',      name: 'Ride the Wind',           rarity: 'rare',      condition_type: 'friends_count',      condition_value: 5   },
-  { slug: 'naoya_first_awakening',     name: 'The First Awakening',     rarity: 'rare',      condition_type: 'classic_p1_wins',    condition_value: 15  },
-  { slug: 'adachi_boring_isnt_it',     name: "Boring, Isn't It?",       rarity: 'common',    condition_type: 'giveups_total',      condition_value: 50  },
-  { slug: 'maya_always_be_positive',   name: 'Always Be Positive',      rarity: 'common',    condition_type: 'emoji_p2_wins',      condition_value: 10  },
+  {
+    slug: "velvet_room_thou_art_i",
+    name: "Thou Art I",
+    rarity: "legendary",
+    condition_type: "badges_count",
+    condition_value: 20,
+  },
+  {
+    slug: "joker_looking_cool",
+    name: "Looking Cool",
+    rarity: "legendary",
+    condition_type: "joker_profile",
+    condition_value: 0,
+    is_hidden: true,
+  },
+  {
+    slug: "makoto_yuki_memento_mori",
+    name: "Memento Mori",
+    rarity: "epic",
+    condition_type: "unique_days",
+    condition_value: 100,
+  },
+  {
+    slug: "akechi_pancakes",
+    name: "Pancakes?",
+    rarity: "epic",
+    condition_type: "weekly_clean_modes",
+    condition_value: 3,
+  },
+  {
+    slug: "yu_reach_out_to_the_truth",
+    name: "Reach Out to the Truth",
+    rarity: "epic",
+    condition_type: "all_modes_won",
+    condition_value: 1,
+  },
+  {
+    slug: "aigis_i_am_not_afraid",
+    name: "I Am Not Afraid",
+    rarity: "rare",
+    condition_type: "mode_wins",
+    condition_value: 50,
+  },
+  {
+    slug: "marie_i_remembered",
+    name: "I Remembered",
+    rarity: "rare",
+    condition_type: "badges_count",
+    condition_value: 15,
+  },
+  {
+    slug: "yosuke_ride_the_wind",
+    name: "Ride the Wind",
+    rarity: "rare",
+    condition_type: "friends_count",
+    condition_value: 5,
+  },
+  {
+    slug: "naoya_first_awakening",
+    name: "The First Awakening",
+    rarity: "rare",
+    condition_type: "classic_p1_wins",
+    condition_value: 15,
+  },
+  {
+    slug: "adachi_boring_isnt_it",
+    name: "Boring, Isn't It?",
+    rarity: "common",
+    condition_type: "giveups_total",
+    condition_value: 50,
+  },
+  {
+    slug: "maya_always_be_positive",
+    name: "Always Be Positive",
+    rarity: "common",
+    condition_type: "emoji_p2_wins",
+    condition_value: 10,
+  },
 ];
 
 // Chemin relatif à profile.html → toujours correct quelle que soit la config serveur
-let _titlesData = TITLES_LOCAL.map(t => ({
+let _titlesData = TITLES_LOCAL.map((t) => ({
   ...t,
   id: null,
-  is_unlocked: 0,  // recalculé au render depuis profile réel
+  is_unlocked: 0, // recalculé au render depuis profile réel
   image_path: `titles/${t.slug}.webp`,
 }));
 
@@ -2335,17 +2843,17 @@ function _refreshTitlesUnlockState() {
  * - local peut avoir seulement le slug → on cherche l'id pour pousser vers cloud
  */
 function _resolveEquippedTitle() {
-  const eId   = profile.equippedTitleId   ?? null;
+  const eId = profile.equippedTitleId ?? null;
   const eSlug = profile.equippedTitleSlug ?? null;
 
   if (eId && !eSlug) {
-    const match = _titlesData.find(t => t.id === eId);
+    const match = _titlesData.find((t) => t.id === eId);
     if (match) {
       profile.equippedTitleSlug = match.slug;
       saveProfile();
     }
   } else if (!eId && eSlug) {
-    const match = _titlesData.find(t => t.slug === eSlug);
+    const match = _titlesData.find((t) => t.slug === eSlug);
     if (match?.id) {
       profile.equippedTitleId = match.id;
       saveProfile();
@@ -2355,28 +2863,28 @@ function _resolveEquippedTitle() {
 }
 
 async function initTitlesSection() {
-  const lang    = window.i18n?.getCurrentLang?.() || 'en';
-  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+  const lang = window.i18n?.getCurrentLang?.() || "en";
+  const _prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
 
   // 1. Charger les titres depuis l'API :
   //    - vrais IDs (pour les appels unlock)
   //    - noms localisés (depuis la BDD)
   //    - is_unlocked PER-USER (la source de vérité la plus fiable)
   try {
-    const res       = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: 'include' });
-    const json      = await res.json();
+    const res = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: "include" });
+    const json = await res.json();
     const apiTitles = Array.isArray(json) ? json : [];
     if (apiTitles.length > 0) {
       const bySlug = {};
       for (const t of apiTitles) bySlug[t.slug] = t;
 
-      _titlesData = _titlesData.map(t => {
+      _titlesData = _titlesData.map((t) => {
         const api = bySlug[t.slug];
         if (!api) return t;
         return {
           ...t,
-          id:          api.id  ?? t.id,
-          name:        api.name || t.name,
+          id: api.id ?? t.id,
+          name: api.name || t.name,
           // On garde le chemin local relatif (titles/slug.webp depuis profile/)
           // Le chemin DB (profile/titles/...) est réservé à profile-view.js
           is_unlocked: api.is_unlocked ? 1 : 0,
@@ -2397,17 +2905,20 @@ async function initTitlesSection() {
 }
 
 async function checkAndUnlockTitles() {
-  const stats      = profile.stats || {};
-  const badges     = profile.badges || [];
-  const giveups    = Object.values(stats.modeGiveups || {}).reduce((a, b) => a + b, 0);
-  const allModesWon = ['Classic','Emoji','Silhouette','AllOutAttack','Personae','Music']
-    .every(m => (stats.modeWins?.[m] || 0) >= 1);
+  const stats = profile.stats || {};
+  const badges = profile.badges || [];
+  const giveups = Object.values(stats.modeGiveups || {}).reduce((a, b) => a + b, 0);
+  const allModesWon = ["Classic", "Emoji", "Silhouette", "AllOutAttack", "Personae", "Music"].every(
+    (m) => (stats.modeWins?.[m] || 0) >= 1
+  );
 
   let friendCount = 0;
   if (window._currentUser) {
     try {
-      const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
-      const res = await fetch(`${_prefix}/api/friends`, { credentials: 'include' }).then(r => r.json());
+      const _prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
+      const res = await fetch(`${_prefix}/api/friends`, { credentials: "include" }).then((r) =>
+        r.json()
+      );
       friendCount = (res?.friends || []).length;
     } catch (_) {}
   }
@@ -2419,19 +2930,56 @@ async function checkAndUnlockTitles() {
     if (title.is_unlocked) continue;
     let met = false;
     switch (title.condition_type) {
-      case 'wins_total':         met = totalWins >= title.condition_value; break;
-      case 'wins_mode':          met = Object.values(stats.modeWins || {}).some(w => w >= title.condition_value); break;
-      case 'streak_record':      met = streakRecord >= title.condition_value; break;
-      case 'badges_count':       met = badges.length >= title.condition_value; break;
-      case 'unique_days':        met = (profile.uniqueDaysPlayed || 0) >= title.condition_value; break;
-      case 'mode_wins':          met = (stats.modeWins?.Classic || 0) >= title.condition_value; break;
-      case 'friends_count':      met = friendCount >= title.condition_value; break;
-      case 'giveups_total':      met = giveups >= title.condition_value; break;
-      case 'all_modes_won':      met = allModesWon; break;
-      case 'classic_p1_wins':    met = (profile.classicP1Wins || 0) >= title.condition_value; break;
-      case 'emoji_p2_wins':      met = (profile.emojiP2Wins || 0) >= title.condition_value; break;
-      case 'leaderboard_top':    met = (profile.bestLeaderboardRank || 9999) <= title.condition_value; break;
-      case 'weekly_clean_modes': met = (profile.weeklyCleanWinModes || 0) >= title.condition_value; break;
+      case "wins_total":
+        met = totalWins >= title.condition_value;
+        break;
+      case "wins_mode":
+        met = Object.values(stats.modeWins || {}).some((w) => w >= title.condition_value);
+        break;
+      case "streak_record":
+        met = streakRecord >= title.condition_value;
+        break;
+      case "badges_count":
+        met = badges.length >= title.condition_value;
+        break;
+      case "unique_days":
+        met = (profile.uniqueDaysPlayed || 0) >= title.condition_value;
+        break;
+      case "mode_wins":
+        met = (stats.modeWins?.Classic || 0) >= title.condition_value;
+        break;
+      case "friends_count":
+        met = friendCount >= title.condition_value;
+        break;
+      case "giveups_total":
+        met = giveups >= title.condition_value;
+        break;
+      case "all_modes_won":
+        met = allModesWon;
+        break;
+      case "classic_p1_wins":
+        met = (profile.classicP1Wins || 0) >= title.condition_value;
+        break;
+      case "emoji_p2_wins":
+        met = (profile.emojiP2Wins || 0) >= title.condition_value;
+        break;
+      case "leaderboard_top":
+        met = (profile.bestLeaderboardRank || 9999) <= title.condition_value;
+        break;
+      case "weekly_clean_modes":
+        met = (profile.weeklyCleanWinModes || 0) >= title.condition_value;
+        break;
+      case "joker_profile": {
+        const _jokerSongs = [
+          "Last_Surprise.mp3",
+          "Take_Over.mp3",
+          "Wake_Up,_Get_Up,_Get_Out_There.mp3",
+          "No_More_What_Ifs.mp3",
+        ];
+        const _song = profile.profileSong?.fichier || profile.profileMusicId || "";
+        met = profile.profileTheme === "all_out" && _jokerSongs.includes(_song);
+        break;
+      }
     }
     if (met) {
       title.is_unlocked = 1;
@@ -2449,10 +2997,10 @@ async function checkAndUnlockTitles() {
 
 function _showTitleNotification(title) {
   const imgSrc = title.image_path || `titles/${title.slug}.webp`;
-  const cond    = _titleConditionText(title);
+  const cond = _titleConditionText(title);
 
-  const notif = document.createElement('div');
-  notif.className = 'title-notification';
+  const notif = document.createElement("div");
+  notif.className = "title-notification";
   notif.innerHTML = `
     <div class="title-notif-header">🏅 Title Unlocked!</div>
     <img class="title-notif-img" src="${imgSrc}" alt="${title.name}">
@@ -2469,19 +3017,19 @@ function _showTitleNotification(title) {
     _showTitleZoom(title);
   };
 
-  setTimeout(() => notif.classList.add('show'), 80);
+  setTimeout(() => notif.classList.add("show"), 80);
   setTimeout(() => {
-    notif.classList.remove('show');
+    notif.classList.remove("show");
     setTimeout(() => notif.remove(), 400);
   }, 5000);
 }
 
 function _showTitleZoom(title) {
   const imgSrc = title.image_path || `titles/${title.slug}.webp`;
-  const cond    = _titleConditionText(title);
+  const cond = _titleConditionText(title);
 
-  const modal = document.createElement('div');
-  modal.className = 'badge-zoom-modal title-zoom-modal';
+  const modal = document.createElement("div");
+  modal.className = "badge-zoom-modal title-zoom-modal";
   modal.innerHTML = `
     <div class="badge-zoom-content title-zoom-content">
       <span class="badge-zoom-close">&times;</span>
@@ -2493,48 +3041,65 @@ function _showTitleZoom(title) {
   `;
 
   document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  modal.querySelector('.badge-zoom-close').onclick = () => modal.remove();
-  setTimeout(() => modal.classList.add('show'), 10);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.remove();
+  });
+  modal.querySelector(".badge-zoom-close").onclick = () => modal.remove();
+  setTimeout(() => modal.classList.add("show"), 10);
 }
 
 /** Human-readable condition text from API fields. */
 function _titleConditionText(t) {
   const v = t.condition_value;
   switch (t.condition_type) {
-    case 'wins_total':         return `Win ${v} total games`;
-    case 'wins_mode':          return `Win ${v} games in any single mode`;
-    case 'mode_wins':          return `Win ${v} Classic games`;
-    case 'streak_record':      return `Reach a ${v}-day streak record`;
-    case 'badges_count':       return `Unlock ${v} badges`;
-    case 'unique_days':        return `Play on ${v} different days`;
-    case 'friends_count':      return `Have ${v} friends`;
-    case 'giveups_total':      return `Give up ${v} times`;
-    case 'all_modes_won':      return `Win at least once in all 6 modes`;
-    case 'classic_p1_wins':    return `Win ${v} Classic games with P1 filter`;
-    case 'emoji_p2_wins':      return `Win ${v} Emoji games with P2 filter`;
-    case 'leaderboard_top':    return `Reach top ${v} on the leaderboard`;
-    case 'weekly_clean_modes': return `Win all modes in one week without giving up`;
-    default:                   return t.condition_type || '???';
+    case "wins_total":
+      return `Win ${v} total games`;
+    case "wins_mode":
+      return `Win ${v} games in any single mode`;
+    case "mode_wins":
+      return `Win ${v} Classic games`;
+    case "streak_record":
+      return `Reach a ${v}-day streak record`;
+    case "badges_count":
+      return `Unlock ${v} badges`;
+    case "unique_days":
+      return `Play on ${v} different days`;
+    case "friends_count":
+      return `Have ${v} friends`;
+    case "giveups_total":
+      return `Give up ${v} times`;
+    case "all_modes_won":
+      return `Win at least once in all 6 modes`;
+    case "classic_p1_wins":
+      return `Win ${v} Classic games with P1 filter`;
+    case "emoji_p2_wins":
+      return `Win ${v} Emoji games with P2 filter`;
+    case "leaderboard_top":
+      return `Reach top ${v} on the leaderboard`;
+    case "weekly_clean_modes":
+      return `Win all modes in one week without giving up`;
+    case "joker_profile":
+      return `Equip the All-Out Attack theme with a P5 signature track`;
+    default:
+      return t.condition_type || "???";
   }
 }
 
 function renderTitlesSection() {
   // ── Calling card image sous avatar/pseudo ─────────────────────────────────
-  const equippedId   = profile.equippedTitleId   || null;
+  const equippedId = profile.equippedTitleId || null;
   const equippedSlug = profile.equippedTitleSlug || null;
-  const eq = _titlesData.find(t =>
-    (equippedId && t.id && t.id === equippedId) ||
-    (equippedSlug && t.slug === equippedSlug)
+  const eq = _titlesData.find(
+    (t) => (equippedId && t.id && t.id === equippedId) || (equippedSlug && t.slug === equippedSlug)
   );
-  const titleImg = document.getElementById('equippedTitleImg');
+  const titleImg = document.getElementById("equippedTitleImg");
   if (titleImg) {
     if (eq) {
-      titleImg.src            = eq.image_path || `titles/${eq.slug}.webp`;
-      titleImg.dataset.rarity = eq.rarity || 'common';
-      titleImg.style.display  = 'block';
+      titleImg.src = eq.image_path || `titles/${eq.slug}.webp`;
+      titleImg.dataset.rarity = eq.rarity || "common";
+      titleImg.style.display = "block";
     } else {
-      titleImg.style.display = 'none';
+      titleImg.style.display = "none";
     }
   }
   // ── Grille modale ─────────────────────────────────────────────────────────
@@ -2542,79 +3107,84 @@ function renderTitlesSection() {
 }
 
 function _bindTitlesModal() {
-  const modal    = document.getElementById('titlesModal');
-  const overlay  = document.getElementById('titlesModalOverlay');
-  const openBtn  = document.getElementById('openTitlesModal');
-  const closeBtn = document.getElementById('closeTitlesModal');
+  const modal = document.getElementById("titlesModal");
+  const overlay = document.getElementById("titlesModalOverlay");
+  const openBtn = document.getElementById("openTitlesModal");
+  const closeBtn = document.getElementById("closeTitlesModal");
   if (!modal || !openBtn) return;
 
   _renderTitlesGrid();
 
   const open = () => {
-    modal.classList.remove('hidden');
-    if (overlay) overlay.classList.remove('hidden');
+    modal.classList.remove("hidden");
+    if (overlay) overlay.classList.remove("hidden");
   };
   const close = () => {
-    modal.classList.add('hidden');
-    if (overlay) overlay.classList.add('hidden');
+    modal.classList.add("hidden");
+    if (overlay) overlay.classList.add("hidden");
   };
 
   // addEventListener au lieu de onclick (plus fiable)
-  openBtn.addEventListener('click', open);
-  closeBtn?.addEventListener('click', close);
-  overlay?.addEventListener('click', close);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  openBtn.addEventListener("click", open);
+  closeBtn?.addEventListener("click", close);
+  overlay?.addEventListener("click", close);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
 }
 
 // Render séparé sans dépendance à l'état du modal
 function _renderTitlesGrid() {
-  const grid = document.getElementById('titlesModalGrid');
+  const grid = document.getElementById("titlesModalGrid");
   if (!grid) return;
 
   // Source de vérité combinée : localStorage.unlockedTitles OU _titlesData.is_unlocked (depuis API)
   const unlockedSlugs = new Set(profile?.unlockedTitles || []);
-  const equippedSlug  = profile?.equippedTitleSlug || null;
-  const equippedId    = profile?.equippedTitleId   || null;
+  const equippedSlug = profile?.equippedTitleSlug || null;
+  const equippedId = profile?.equippedTitleId || null;
 
-  grid.innerHTML = (_titlesData || []).map(t => {
-    const isUnlocked = unlockedSlugs.has(t.slug) || !!t.is_unlocked;
-    const isEquipped = (equippedSlug && equippedSlug === t.slug) ||
-                       (equippedId && t.id && equippedId === t.id);
-    const imgSrc = t.image_path || `titles/${t.slug}.webp`;
-    return `
-      <div class="tm-card ${isUnlocked ? 'tm-unlocked' : 'tm-locked'} ${isEquipped ? 'tm-equipped' : ''}"
-           data-slug="${t.slug}" data-id="${t.id ?? ''}" data-unlocked="${isUnlocked}">
+  grid.innerHTML = (_titlesData || [])
+    .filter((t) => !t.is_hidden || unlockedSlugs.has(t.slug) || !!t.is_unlocked)
+    .map((t) => {
+      const isUnlocked = unlockedSlugs.has(t.slug) || !!t.is_unlocked;
+      const isEquipped =
+        (equippedSlug && equippedSlug === t.slug) || (equippedId && t.id && equippedId === t.id);
+      const imgSrc = t.image_path || `titles/${t.slug}.webp`;
+      return `
+      <div class="tm-card ${isUnlocked ? "tm-unlocked" : "tm-locked"} ${isEquipped ? "tm-equipped" : ""}"
+           data-slug="${t.slug}" data-id="${t.id ?? ""}" data-unlocked="${isUnlocked}">
         <div class="tm-img-wrap">
           <img src="${imgSrc}" alt="${t.name}" loading="lazy">
-          ${!isUnlocked ? '<span class="tm-lock">🔒</span>' : ''}
-          ${isEquipped ? '<span class="tm-badge-equipped">✓ Equipped</span>' : ''}
+          ${!isUnlocked ? '<span class="tm-lock">🔒</span>' : ""}
+          ${isEquipped ? '<span class="tm-badge-equipped">✓ Equipped</span>' : ""}
         </div>
         <div class="tm-info">
           <strong class="tm-name">${t.name}</strong>
-          <span class="tm-rarity" data-rarity="${t.rarity || 'common'}">${t.rarity || 'common'}</span>
-          <span class="tm-cond">${isUnlocked ? '🔓' : '🔒'} ${_titleConditionText(t)}</span>
+          <span class="tm-rarity" data-rarity="${t.rarity || "common"}">${t.rarity || "common"}</span>
+          <span class="tm-cond">${isUnlocked ? "🔓" : "🔒"} ${_titleConditionText(t)}</span>
         </div>
       </div>`;
-  }).join('');
+    })
+    .join("");
 
   // Délégation d'événements — un seul listener sur le conteneur, pas un par carte
   grid.onclick = (e) => {
-    const card = e.target.closest('.tm-card');
+    const card = e.target.closest(".tm-card");
     if (!card) return;
-    const slug       = card.dataset.slug;
-    const titleId    = card.dataset.id ? parseInt(card.dataset.id, 10) : null;
-    const isUnlocked = card.dataset.unlocked === 'true';
+    const slug = card.dataset.slug;
+    const titleId = card.dataset.id ? parseInt(card.dataset.id, 10) : null;
+    const isUnlocked = card.dataset.unlocked === "true";
     if (isUnlocked) {
       const currentEquipped = profile?.equippedTitleSlug;
       const alreadyEquipped = currentEquipped === slug;
       profile.equippedTitleSlug = alreadyEquipped ? null : slug;
-      profile.equippedTitleId   = alreadyEquipped ? null : titleId;
+      profile.equippedTitleId = alreadyEquipped ? null : titleId;
       saveProfile();
       markDirty();
       saveProfileToCloud({ equipped_title_id: profile.equippedTitleId ?? null });
-      renderTitlesSection();  // re-render image + grille
+      renderTitlesSection(); // re-render image + grille
     } else {
-      const titleObj = (_titlesData || []).find(t => t.slug === slug);
+      const titleObj = (_titlesData || []).find((t) => t.slug === slug);
       if (titleObj) _showTitleZoom(titleObj);
     }
   };

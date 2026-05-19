@@ -9,7 +9,8 @@
 }
 
 @keyframes rank10Pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow:
       0 0 0 2px #f0b840,
       0 0 12px 4px rgba(240, 184, 64, 0.5);
@@ -76,8 +77,12 @@
 }
 
 @keyframes rank10Typewriter {
-  from { width: 0; }
-  to   { width: 120px; }
+  from {
+    width: 0;
+  }
+  to {
+    width: 120px;
+  }
 }
 
 .rank10-label--out {
@@ -85,5 +90,7 @@
 }
 
 @keyframes rank10FadeOut {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }

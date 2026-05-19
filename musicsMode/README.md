@@ -1,8 +1,12 @@
-# musicsMode/ — Mode Musique
+<div align="center">
 
-Le mode Musique propose d'**identifier une chanson de la saga Persona** à partir d'un court extrait audio. C'est un mode qui récompense les fans connaissant bien les bandes-originales iconiques de la série.
+# 🎵 Mode Musique
 
-![Aperçu du mode Musique](../img/preview/preview_music.png)
+<img src="../img/preview/preview_music.png" alt="Aperçu du mode Musique" width="700">
+
+> **Reconnais l'extrait. Les fans purs et durs seulement.**
+
+</div>
 
 ---
 
@@ -15,6 +19,79 @@ Le mode Musique propose d'**identifier une chanson de la saga Persona** à parti
 
 ---
 
+## 🎵 Catalogue — 85 titres répartis par opus
+
+<table>
+  <thead>
+    <tr>
+      <th>Opus</th>
+      <th>Pochette</th>
+      <th>Jeux couverts</th>
+      <th>Titres</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>P1</strong></td>
+      <td><img src="database/img/P1.webp" alt="P1" width="60"/></td>
+      <td>Persona 1</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <td><strong>P2</strong></td>
+      <td><img src="database/img/P2IS.webp" alt="P2IS" width="60"/> <img src="database/img/P2EP.webp" alt="P2EP" width="60"/></td>
+      <td>Persona 2 IS · EP</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td><strong>P3</strong></td>
+      <td><img src="database/img/P3.webp" alt="P3" width="60"/> <img src="database/img/P3FES.webp" alt="P3FES" width="60"/> <img src="database/img/P3P.webp" alt="P3P" width="60"/> <img src="database/img/P3R.webp" alt="P3R" width="60"/></td>
+      <td>P3 · P3 FES · P3P · P3 Reload</td>
+      <td>27</td>
+    </tr>
+    <tr>
+      <td><strong>P4</strong></td>
+      <td><img src="database/img/P4.webp" alt="P4" width="60"/> <img src="database/img/P4G.webp" alt="P4G" width="60"/> <img src="database/img/P4AU.webp" alt="P4AU" width="60"/> <img src="database/img/P4D.webp" alt="P4D" width="60"/></td>
+      <td>P4 · P4 Golden · P4 Arena Ultimax · P4 Dancing</td>
+      <td>21</td>
+    </tr>
+    <tr>
+      <td><strong>P5</strong></td>
+      <td><img src="database/img/P5.webp" alt="P5" width="60"/> <img src="database/img/P5R.webp" alt="P5R" width="60"/> <img src="database/img/P5S.webp" alt="P5S" width="60"/> <img src="database/img/P5T.webp" alt="P5T" width="60"/></td>
+      <td>P5 · P5 Royal · P5 Strikers · P5 Tactica</td>
+      <td>25</td>
+    </tr>
+    <tr>
+      <td><strong>P5X</strong></td>
+      <td><img src="database/img/P5X.webp" alt="P5X" width="60"/></td>
+      <td>Persona 5: The Phantom X</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <td><strong>PQ / PQ2</strong></td>
+      <td><img src="database/img/PQ.webp" alt="PQ" width="60"/> <img src="database/img/PQ2.webp" alt="PQ2" width="60"/></td>
+      <td>Persona Q · Persona Q2</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <td><strong>Velvet Room</strong></td>
+      <td><img src="database/img/Velvet.webp" alt="Velvet" width="60"/></td>
+      <td>Aria of the Soul (toutes versions)</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td><strong>Collab ZUTOMAYO</strong></td>
+      <td><img src="database/img/Zutomayo.jpg" alt="Zutomayo" width="60"/></td>
+      <td>P3 Reload × ZUTOMAYO</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+
+> **Note** : Certaines chansons appartiennent à plusieurs opus (ex. _Aria of the Soul_ couvre P3→P5X) ; les totaux par opus reflètent le filtre actif, pas des entrées dupliquées.
+
+---
+
 ## Structure du dossier
 
 ```
@@ -23,14 +100,18 @@ musicsMode/
 ├── music.css                 ← styles spécifiques (lecteur audio)
 ├── modeMusic.js              ← logique du jeu (module ES6)
 └── database/
-    ├── songs.js                ← base de données complète des chansons
+    ├── songs.js                ← base de données complète des chansons (85 titres)
     ├── musicTitles.js          ← liste des titres (pour l'autocomplete)
     ├── img/                    ← pochettes d'album par jeu
-    │   ├── P3.webp
-    │   ├── P4G.webp
-    │   ├── P5R.webp
-    │   ├── Zutomayo.jpg        ← pochette spéciale collab ZUTOMAYO
-    │   └── ...
+    │   ├── P1.webp
+    │   ├── P2IS.webp / P2EP.webp
+    │   ├── P3.webp / P3FES.webp / P3P.webp / P3R.webp
+    │   ├── P4.webp / P4G.webp / P4AU.webp / P4D.webp
+    │   ├── P5.webp / P5R.webp / P5S.webp / P5T.webp
+    │   ├── P5X.webp
+    │   ├── PQ.webp / PQ2.webp
+    │   ├── Velvet.webp
+    │   └── Zutomayo.jpg        ← pochette spéciale collab ZUTOMAYO
     └── music/                  ← fichiers audio (⚠️ non versionnés, voir .gitignore)
 ```
 
@@ -43,7 +124,7 @@ musicsMode/
 ```js
 {
   titre:    "Rivers in the Desert",   // Titre de la chanson
-  opus:     "P5R",                    // Jeu d'origine
+  opus:     ["P5R"],                  // Jeu(x) d'origine (tableau)
   fichier:  "rivers_in_the_desert.mp3", // Fichier dans database/music/
   image:    "P5R.webp",               // Pochette dans database/img/
   vocalist: "Lyn Inaizumi",           // Chanteur(se) (optionnel)
@@ -53,21 +134,22 @@ musicsMode/
 
 ### Filtres disponibles
 
-| Filtre | Jeux couverts |
-|--------|---------------|
-| P1 | Persona 1 |
-| P2 | Persona 2 IS + EP |
-| P3 | P3, P3 FES, P3P, **P3 Reload** |
-| P4 | P4, P4 Golden, P4 Arena Ultimax, P4 Dancing |
-| P5 | P5, P5 Royal, P5 Strikers, P5 Tactica |
-| P5X | Persona 5: The Phantom X |
-| PQ | Persona Q + Q2 |
+| Filtre | Jeux couverts                               |
+| ------ | ------------------------------------------- |
+| P1     | Persona 1                                   |
+| P2     | Persona 2 IS + EP                           |
+| P3     | P3, P3 FES, P3P, P3 Reload                  |
+| P4     | P4, P4 Golden, P4 Arena Ultimax, P4 Dancing |
+| P5     | P5, P5 Royal, P5 Strikers, P5 Tactica       |
+| P5X    | Persona 5: The Phantom X                    |
+| PQ     | Persona Q + Q2                              |
 
 ---
 
 ## `modeMusic.js`
 
 Importe depuis `../js/gameCore.js` :
+
 - `normalize` — comparaison des titres sans accents ni casse
 - `showConfettiExplosion` — `{ emojiList: ["🎵","🎶","🎉","✨"], count: 30, spreadFrom: "bottom" }`
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
@@ -76,54 +158,43 @@ Importe depuis `../js/gameCore.js` :
 
 ### Badges débloquables
 
-| Badge | Condition |
-|-------|-----------|
-| ![Badge Burn My Dread](../profile/badges/images/Badges_Burn_My_Dread_Silver.png) | Trouver "Burn My Dread" (thème titre de P3) |
-| ![Badge Zutomayo](../profile/badges/images/Badges_Zotomayo.webp) | Trouver la chanson de la collaboration ZUTOMAYO × P3R |
-| Unsolved Case (Adachi gagne) | Abandonner sur "Never More" (thème de fin de P4) |
+| Badge                                                                            | Condition                                             |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| ![Badge Burn My Dread](../profile/badges/images/Badges_Burn_My_Dread_Silver.png) | Trouver "Burn My Dread" (thème titre de P3)           |
+| ![Badge Zutomayo](../profile/badges/images/Badges_Zotomayo.webp)                 | Trouver la chanson de la collaboration ZUTOMAYO × P3R |
+| Unsolved Case (Adachi gagne)                                                     | Abandonner sur "Never More" (thème de fin de P4)      |
 
 ### Fonctions spécifiques
 
-| Fonction | Description |
-|----------|-------------|
-| `getFilteredSongs()` | Retourne les chansons selon les filtres actifs |
-| `pickSong()` | Sélectionne aléatoirement une chanson (anti-répétition sur 5 dernières) |
-| `showVictory(force?)` | Victoire ou révélation avec badges, stats, confettis |
-| `showWrong(name)` | Affiche la pochette + titre de la mauvaise réponse |
-| `handleGuess()` | Vérifie la saisie avec `normalize()` |
-| `giveUp()` | Abandonne après 3 essais |
-| `resetGame()` | Remet à zéro et choisit une nouvelle chanson |
-| `initializeAutocomplete()` | Dropdown avec pochettes, filtré par opus + chansons déjà proposées |
-| `applyDarkModeStyles()` | Fond sombre et bordure sur le lecteur audio |
+| Fonction                   | Description                                                             |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `getFilteredSongs()`       | Retourne les chansons selon les filtres actifs                          |
+| `pickSong()`               | Sélectionne aléatoirement une chanson (anti-répétition sur 5 dernières) |
+| `showVictory(force?)`      | Victoire ou révélation avec badges, stats, confettis                    |
+| `showWrong(name)`          | Affiche la pochette + titre de la mauvaise réponse                      |
+| `handleGuess()`            | Vérifie la saisie avec `normalize()`                                    |
+| `giveUp()`                 | Abandonne après 3 essais                                                |
+| `resetGame()`              | Remet à zéro et choisit une nouvelle chanson                            |
+| `initializeAutocomplete()` | Dropdown avec pochettes, filtré par opus + chansons déjà proposées      |
+| `applyDarkModeStyles()`    | Fond sombre et bordure sur le lecteur audio                             |
 
 ### Debug
 
 ```js
 // Dans la console du navigateur :
-debugAllMusic()   // Vérifie que tous les titres de musicTitles.js existent dans songs.js
+debugAllMusic(); // Vérifie que tous les titres de musicTitles.js existent dans songs.js
 ```
-
----
-
-## Illustration des pochettes
-
-| Jeu | Pochette |
-|-----|----------|
-| Persona 3 | ![P3](database/img/P3.webp) |
-| Persona 4 Golden | ![P4G](database/img/P4G.webp) |
-| Persona 5 Royal | ![P5R](database/img/P5R.webp) |
-| Collab ZUTOMAYO | ![Zutomayo](database/img/Zutomayo.jpg) |
 
 ---
 
 ## localStorage utilisé
 
-| Clé | Contenu |
-|-----|---------|
-| `musicTarget` | Chanson cible (JSON) |
-| `musicAttempts` | Nombre d'essais |
-| `musicGameOver` | `"true"` si partie terminée |
-| `musicTriedTitles` | Titres déjà proposés (JSON array) |
-| `musicForceReveal` | `"true"` si abandon déclenché |
-| `musicActiveFilters` | Filtres opus actifs |
-| `lastPlayedDate_Music` | Date de la dernière partie |
+| Clé                    | Contenu                           |
+| ---------------------- | --------------------------------- |
+| `musicTarget`          | Chanson cible (JSON)              |
+| `musicAttempts`        | Nombre d'essais                   |
+| `musicGameOver`        | `"true"` si partie terminée       |
+| `musicTriedTitles`     | Titres déjà proposés (JSON array) |
+| `musicForceReveal`     | `"true"` si abandon déclenché     |
+| `musicActiveFilters`   | Filtres opus actifs               |
+| `lastPlayedDate_Music` | Date de la dernière partie        |

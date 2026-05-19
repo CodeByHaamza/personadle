@@ -14,6 +14,24 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+$rlIp       = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+$rlKey      = sys_get_temp_dir() . '/rl_' . md5('personadle_auth_' . $rlIp . basename(__FILE__)) . '.json';
+$rlData     = file_exists($rlKey) ? json_decode(file_get_contents($rlKey), true) : null;
+$rlNow      = time();
+$rlWindow   = 15 * 60;
+$rlMaxTries = 5;
+
+if ($rlData && ($rlNow - $rlData['window_start']) < $rlWindow) {
+    if ($rlData['attempts'] >= $rlMaxTries) {
+        jsonError('Too many attempts. Please try again later.', 429);
+    }
+    $rlData['attempts']++;
+} else {
+    $rlData = ['attempts' => 1, 'window_start' => $rlNow];
+}
+file_put_contents($rlKey, json_encode($rlData), LOCK_EX);
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);
 }
@@ -32,7 +50,7 @@ $pdo = pdo();
 
 // Cherche par email en premier, puis par pseudo
 $stmt = $pdo->prepare('
-    SELECT id, email, pseudo, password_hash, lang, friend_code, created_at, last_login_at, has_migrated
+    SELECT id, email, pseudo, password_hash, lang, friend_code, created_at, last_login_at, is_admin, is_banned
     FROM users
     WHERE (email = ? OR pseudo = ?) AND is_deleted = 0
     LIMIT 1
@@ -47,10 +65,16 @@ if (!$user || !password_verify($password, $hash)) {
     jsonError('Invalid email or password', 401);
 }
 
+// Compte banni
+if (!empty($user['is_banned'])) {
+    jsonError('Account banned. Contact support if you think this is an error.', 403);
+}
+
 // Mettre à jour la date de dernière connexion
 $pdo->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')
     ->execute([$user['id']]);
 
+session_regenerate_id(true);
 $_SESSION['user_id'] = (int) $user['id'];
 
 // ── Remember-me token ────────────────────────────────────────────────────────

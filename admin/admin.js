@@ -9,31 +9,44 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-import { initAuth }               from '../js/auth.js';
-import { showDivineGiftAnimation } from '../js/divine-gift.js';
+import { initAuth } from "../js/auth.js";
+import { showDivineGiftAnimation } from "../js/divine-gift.js";
 
 // ── State ──────────────────────────────────────────────────────────────────
-let _users        = [];
+let _users = [];
 let _selectedUser = null;
-let _userDetail   = null;
-let _currentPage  = 1;
-let _searchQuery  = '';
-let _activeTab    = 'profile';
-let pendingGifts  = [];
+let _userDetail = null;
+let _currentPage = 1;
+let _searchQuery = "";
+let _activeTab = "profile";
+let pendingGifts = [];
 
-let _badgesCatalog     = [];
+let _badgesCatalog = [];
 let _wallpapersCatalog = [];
-let _titlesCatalog     = [];
+let _titlesCatalog = [];
 
 // ── Path prefix (handles /personadle/ local dev vs / in prod) ─────────────
-const _pathPrefix = window.location.pathname.startsWith('/personadle') ? '/personadle' : '';
+const _pathPrefix = window.location.pathname.startsWith("/personadle") ? "/personadle" : "";
 
 // ── API Helper ─────────────────────────────────────────────────────────────
 const api = {
-  get:    url         => fetch(_pathPrefix + url, { credentials: 'include' }).then(r => r.json()),
-  post:   (url, body) => fetch(_pathPrefix + url, { method: 'POST',   credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json()),
-  patch:  (url, body) => fetch(_pathPrefix + url, { method: 'PATCH',  credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json()),
-  delete: url         => fetch(_pathPrefix + url, { method: 'DELETE', credentials: 'include' }).then(r => r.json()),
+  get: (url) => fetch(_pathPrefix + url, { credentials: "include" }).then((r) => r.json()),
+  post: (url, body) =>
+    fetch(_pathPrefix + url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then((r) => r.json()),
+  patch: (url, body) =>
+    fetch(_pathPrefix + url, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then((r) => r.json()),
+  delete: (url) =>
+    fetch(_pathPrefix + url, { method: "DELETE", credentials: "include" }).then((r) => r.json()),
 };
 
 // ── Init ───────────────────────────────────────────────────────────────────
@@ -41,76 +54,72 @@ async function init() {
   await initAuth();
 
   if (!window._currentUser?.is_admin) {
-    window.location.href = _pathPrefix + '/';
+    window.location.href = _pathPrefix + "/";
     return;
   }
 
-  document.getElementById('admin-loading').classList.add('hidden');
-  document.getElementById('admin-app').classList.remove('hidden');
-  document.getElementById('admin-username').textContent = window._currentUser.pseudo;
+  document.getElementById("admin-loading").classList.add("hidden");
+  document.getElementById("admin-app").classList.remove("hidden");
+  document.getElementById("admin-username").textContent = window._currentUser.pseudo;
 
-  await Promise.all([
-    loadBadgesCatalog(),
-    loadWallpapersCatalog(),
-    loadTitlesCatalog(),
-  ]);
+  await Promise.all([loadBadgesCatalog(), loadWallpapersCatalog(), loadTitlesCatalog()]);
 
   setupEvents();
   await loadUsers();
 }
 
 // ── Toast ──────────────────────────────────────────────────────────────────
-function toast(msg, type = 'info') {
-  const container = document.getElementById('toast-container');
-  const el = document.createElement('div');
+function toast(msg, type = "info") {
+  const container = document.getElementById("toast-container");
+  const el = document.createElement("div");
   el.className = `toast ${type}`;
   el.textContent = msg;
   container.appendChild(el);
-  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("show")));
   setTimeout(() => {
-    el.classList.remove('show');
+    el.classList.remove("show");
     setTimeout(() => el.remove(), 250);
   }, 3200);
 }
 
 // ── Mobile aside ───────────────────────────────────────────────────────────
 function openAside() {
-  document.getElementById('admin-aside').classList.add('open');
-  document.getElementById('aside-overlay').classList.add('show');
-  document.getElementById('aside-toggle').classList.add('open');
+  document.getElementById("admin-aside").classList.add("open");
+  document.getElementById("aside-overlay").classList.add("show");
+  document.getElementById("aside-toggle").classList.add("open");
 }
 function closeAside() {
-  document.getElementById('admin-aside').classList.remove('open');
-  document.getElementById('aside-overlay').classList.remove('show');
-  document.getElementById('aside-toggle').classList.remove('open');
+  document.getElementById("admin-aside").classList.remove("open");
+  document.getElementById("aside-overlay").classList.remove("show");
+  document.getElementById("aside-toggle").classList.remove("open");
 }
 
 // ── Events ─────────────────────────────────────────────────────────────────
 function setupEvents() {
   // Home button
-  document.getElementById('btn-home').href = _pathPrefix + '/';
+  document.getElementById("btn-home").href = _pathPrefix + "/";
 
   // Logout
-  document.getElementById('admin-logout').onclick = async () => {
-    await fetch(_pathPrefix + '/api/auth/logout', { method: 'POST', credentials: 'include' });
-    window.location.href = _pathPrefix + '/';
+  document.getElementById("admin-logout").onclick = async () => {
+    await fetch(_pathPrefix + "/api/auth/logout", { method: "POST", credentials: "include" });
+    window.location.href = _pathPrefix + "/";
   };
 
   // Mobile aside toggle
-  document.getElementById('aside-toggle').onclick = () =>
-    document.getElementById('admin-aside').classList.contains('open') ? closeAside() : openAside();
-  document.getElementById('aside-overlay').onclick = closeAside;
+  document.getElementById("aside-toggle").onclick = () =>
+    document.getElementById("admin-aside").classList.contains("open") ? closeAside() : openAside();
+  document.getElementById("aside-overlay").onclick = closeAside;
 
   // Back button (mobile)
-  document.getElementById('detail-back').onclick = () => {
-    document.getElementById('user-detail').classList.add('hidden');
-    document.getElementById('empty-state').classList.remove('hidden');
+  document.getElementById("detail-back").onclick = () => {
+    document.getElementById("user-detail").classList.add("hidden");
+    document.getElementById("empty-state").classList.remove("hidden");
     openAside();
   };
 
   // Search
   let searchTimer;
-  document.getElementById('user-search').addEventListener('input', e => {
+  document.getElementById("user-search").addEventListener("input", (e) => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
       _searchQuery = e.target.value.trim();
@@ -119,27 +128,29 @@ function setupEvents() {
     }, 300);
   });
 
-  document.querySelectorAll('.detail-tab').forEach(btn => {
+  document.querySelectorAll(".detail-tab").forEach((btn) => {
     btn.onclick = () => switchTab(btn.dataset.tab);
   });
 
-  document.getElementById('pending-fab').onclick = applyPendingGifts;
+  document.getElementById("pending-fab").onclick = applyPendingGifts;
 
   // Event Codes panel
-  document.getElementById('btn-codes').onclick = () => {
-    document.getElementById('empty-state').classList.add('hidden');
-    document.getElementById('user-detail').classList.add('hidden');
-    document.getElementById('codes-panel').classList.remove('hidden');
+  document.getElementById("btn-codes").onclick = () => {
+    document.getElementById("empty-state").classList.add("hidden");
+    document.getElementById("user-detail").classList.add("hidden");
+    document.getElementById("codes-panel").classList.remove("hidden");
     renderEventCodes();
   };
 }
 
 // ── Users List ─────────────────────────────────────────────────────────────
 async function loadUsers() {
-  const data = await api.get(`/api/admin/users?q=${encodeURIComponent(_searchQuery)}&page=${_currentPage}&limit=25`);
+  const data = await api.get(
+    `/api/admin/users?q=${encodeURIComponent(_searchQuery)}&page=${_currentPage}&limit=25`
+  );
   _users = data.users || [];
 
-  const countEl = document.getElementById('admin-user-count');
+  const countEl = document.getElementById("admin-user-count");
   if (countEl) countEl.textContent = data.total ?? _users.length;
 
   renderUsersList(_users);
@@ -147,85 +158,100 @@ async function loadUsers() {
 }
 
 function renderUsersList(users) {
-  const list = document.getElementById('users-list');
+  const list = document.getElementById("users-list");
 
   if (!users.length) {
-    list.innerHTML = '<div style="padding:20px 16px;font-size:13px;color:var(--text-muted);text-align:center">No users found.</div>';
+    list.innerHTML =
+      '<div style="padding:20px 16px;font-size:13px;color:var(--text-muted);text-align:center">No users found.</div>';
     return;
   }
 
-  list.innerHTML = users.map(u => {
-    const borderColor = escHtml(u.avatar_border_color || '#888');
-    const avatarHtml  = u.avatar_data
-      ? `<img class="user-row-avatar" src="${escHtml(u.avatar_data)}" alt="" style="border-color:${borderColor}">`
-      : `<div class="user-row-avatar-ph">👤</div>`;
-    const dateStr = new Date(u.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+  list.innerHTML = users
+    .map((u) => {
+      const borderColor = escHtml(u.avatar_border_color || "#888");
+      const avatarHtml = u.avatar_data
+        ? `<img class="user-row-avatar" src="${escHtml(u.avatar_data)}" alt="" style="border-color:${borderColor}">`
+        : `<div class="user-row-avatar-ph">👤</div>`;
+      const dateStr = new Date(u.created_at).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "2-digit",
+      });
 
-    return `
-      <div class="user-row ${_selectedUser === u.id ? 'active' : ''}" data-id="${u.id}">
+      return `
+      <div class="user-row ${_selectedUser === u.id ? "active" : ""}" data-id="${u.id}">
         ${avatarHtml}
         <div class="user-row-info">
           <div class="user-row-top">
             <span class="user-row-pseudo">${escHtml(u.pseudo)}</span>
-            ${u.is_admin ? '<span class="user-row-admin-dot" title="Admin"></span>' : ''}
+            ${u.is_admin ? '<span class="user-row-admin-dot" title="Admin"></span>' : ""}
           </div>
           <div class="user-row-email">${escHtml(u.email)}</div>
         </div>
         <span class="user-row-date">${dateStr}</span>
       </div>
     `;
-  }).join('');
+    })
+    .join("");
 
-  list.querySelectorAll('.user-row').forEach(row => {
+  list.querySelectorAll(".user-row").forEach((row) => {
     row.onclick = () => openUserDetail(+row.dataset.id);
   });
 }
 
 function renderPagination(total, page, limit) {
   const pages = Math.ceil(total / limit);
-  const el    = document.getElementById('users-pagination');
-  if (pages <= 1) { el.innerHTML = ''; return; }
+  const el = document.getElementById("users-pagination");
+  if (pages <= 1) {
+    el.innerHTML = "";
+    return;
+  }
 
   const start = Math.max(1, page - 2);
-  const end   = Math.min(pages, page + 2);
-  let html    = '';
+  const end = Math.min(pages, page + 2);
+  let html = "";
 
   if (start > 1) html += `<button class="page-btn" data-page="1">1</button>`;
   if (start > 2) html += `<span class="page-btn pagination-sep">…</span>`;
   for (let p = start; p <= end; p++) {
-    html += `<button class="page-btn ${p === page ? 'active' : ''}" data-page="${p}">${p}</button>`;
+    html += `<button class="page-btn ${p === page ? "active" : ""}" data-page="${p}">${p}</button>`;
   }
   if (end < pages - 1) html += `<span class="page-btn pagination-sep">…</span>`;
-  if (end < pages)     html += `<button class="page-btn" data-page="${pages}">${pages}</button>`;
+  if (end < pages) html += `<button class="page-btn" data-page="${pages}">${pages}</button>`;
 
   el.innerHTML = html;
-  el.querySelectorAll('.page-btn[data-page]').forEach(btn => {
-    btn.onclick = () => { _currentPage = +btn.dataset.page; loadUsers(); };
+  el.querySelectorAll(".page-btn[data-page]").forEach((btn) => {
+    btn.onclick = () => {
+      _currentPage = +btn.dataset.page;
+      loadUsers();
+    };
   });
 }
 
 // ── User Detail ────────────────────────────────────────────────────────────
 async function openUserDetail(userId) {
   // Highlight selected row
-  document.querySelectorAll('.user-row').forEach(r => r.classList.toggle('active', +r.dataset.id === userId));
+  document
+    .querySelectorAll(".user-row")
+    .forEach((r) => r.classList.toggle("active", +r.dataset.id === userId));
 
   // On mobile, close the aside drawer and show the detail panel
   if (window.innerWidth <= 768) closeAside();
 
-  document.getElementById('empty-state').classList.add('hidden');
-  document.getElementById('codes-panel').classList.add('hidden');
-  document.getElementById('user-detail').classList.remove('hidden');
+  document.getElementById("empty-state").classList.add("hidden");
+  document.getElementById("codes-panel").classList.add("hidden");
+  document.getElementById("user-detail").classList.remove("hidden");
 
-  document.getElementById('user-detail-content').innerHTML =
+  document.getElementById("user-detail-content").innerHTML =
     '<div style="padding:48px;text-align:center;color:var(--text-muted)">Chargement…</div>';
 
-  const data    = await api.get(`/api/admin/users/${userId}`);
+  const data = await api.get(`/api/admin/users/${userId}`);
   _selectedUser = userId;
-  _userDetail   = data;
+  _userDetail = data;
 
   renderDetailHeader(data);
   renderDetailQuickStats(data);
-  switchTab('profile');
+  switchTab("profile");
 }
 
 function renderDetailHeader(data) {
@@ -233,33 +259,33 @@ function renderDetailHeader(data) {
   const p = data.profile;
 
   // Admin badge
-  document.getElementById('detail-admin-badge').classList.toggle('hidden', !u.is_admin);
+  document.getElementById("detail-admin-badge").classList.toggle("hidden", !u.is_admin);
 
-  document.getElementById('detail-pseudo').textContent = u.pseudo;
-  document.getElementById('detail-email').textContent  = u.email;
+  document.getElementById("detail-pseudo").textContent = u.pseudo;
+  document.getElementById("detail-email").textContent = u.email;
 
   const lastSeen = u.last_login_at
     ? `Last seen ${new Date(u.last_login_at).toLocaleDateString()}`
-    : 'Never logged in';
-  document.getElementById('detail-info').textContent =
-    `ID: ${u.id} · Code: ${u.friend_code || '—'} · ${(u.lang || 'en').toUpperCase()} · Joined ${new Date(u.created_at).toLocaleDateString()} · ${lastSeen}`;
+    : "Never logged in";
+  document.getElementById("detail-info").textContent =
+    `ID: ${u.id} · Code: ${u.friend_code || "—"} · ${(u.lang || "en").toUpperCase()} · Joined ${new Date(u.created_at).toLocaleDateString()} · ${lastSeen}`;
 
   // Avatar
-  const avatarEl    = document.getElementById('detail-avatar');
-  const borderColor = escHtml(p?.avatar_border_color || '#ffffff');
+  const avatarEl = document.getElementById("detail-avatar");
+  const borderColor = escHtml(p?.avatar_border_color || "#ffffff");
   avatarEl.innerHTML = p?.avatar_data
     ? `<img src="${escHtml(p.avatar_data)}" alt="Avatar" style="border:3px solid ${borderColor}">`
     : '<div class="avatar-ph">👤</div>';
 }
 
 function renderDetailQuickStats(data) {
-  const totalWins  = (data.stats || []).reduce((s, r) => s + (r.wins  || 0), 0);
+  const totalWins = (data.stats || []).reduce((s, r) => s + (r.wins || 0), 0);
   const totalGames = (data.stats || []).reduce((s, r) => s + (r.games || 0), 0);
-  const badges     = (data.badges || []).length;
-  const friends    = (data.friends || []).filter(f => f.status === 'accepted').length;
-  const social     = (data.social_links || []).length;
+  const badges = (data.badges || []).length;
+  const friends = (data.friends || []).filter((f) => f.status === "accepted").length;
+  const social = (data.social_links || []).length;
 
-  document.getElementById('detail-quick-stats').innerHTML = `
+  document.getElementById("detail-quick-stats").innerHTML = `
     <div class="stat-tile"><div class="stat-tile-value">${totalWins}</div><div class="stat-tile-label">Wins</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${totalGames}</div><div class="stat-tile-label">Games</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${badges}</div><div class="stat-tile-label">Badges</div></div>
@@ -270,19 +296,35 @@ function renderDetailQuickStats(data) {
 
 function switchTab(tab) {
   _activeTab = tab;
-  document.querySelectorAll('.detail-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document
+    .querySelectorAll(".detail-tab")
+    .forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
 
   const d = _userDetail;
   if (!d) return;
 
   switch (tab) {
-    case 'profile':    renderTabProfile(d);    break;
-    case 'badges':     renderTabBadges(d);     break;
-    case 'wallpapers': renderTabWallpapers(d); break;
-    case 'titles':     renderTabTitles(d);     break;
-    case 'stats':      renderTabStats(d);      break;
-    case 'friends':    renderTabFriends(d);    break;
-    case 'social':     renderTabSocial(d);     break;
+    case "profile":
+      renderTabProfile(d);
+      break;
+    case "badges":
+      renderTabBadges(d);
+      break;
+    case "wallpapers":
+      renderTabWallpapers(d);
+      break;
+    case "titles":
+      renderTabTitles(d);
+      break;
+    case "stats":
+      renderTabStats(d);
+      break;
+    case "friends":
+      renderTabFriends(d);
+      break;
+    case "social":
+      renderTabSocial(d);
+      break;
   }
 }
 
@@ -291,7 +333,7 @@ function renderTabProfile(d) {
   const u = d.user;
   const p = d.profile;
 
-  document.getElementById('user-detail-content').innerHTML = `
+  document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
       <h3>Informations du compte</h3>
       <div class="form-grid">
@@ -303,17 +345,17 @@ function renderTabProfile(d) {
         </label>
         <label>Langue
           <select id="edit-lang">
-            ${['en','fr','es','de','it'].map(l => `<option ${u.lang === l ? 'selected' : ''}>${l}</option>`).join('')}
+            ${["en", "fr", "es", "de", "it"].map((l) => `<option ${u.lang === l ? "selected" : ""}>${l}</option>`).join("")}
           </select>
         </label>
         <label>Couleur bordure avatar
-          <input id="edit-border" type="color" value="${escHtml(p?.avatar_border_color || '#ffffff')}">
+          <input id="edit-border" type="color" value="${escHtml(p?.avatar_border_color || "#ffffff")}">
         </label>
       </div>
       <div class="admin-toggle-row">
-        <input id="edit-admin" type="checkbox" ${u.is_admin ? 'checked' : ''}>
+        <input id="edit-admin" type="checkbox" ${u.is_admin ? "checked" : ""}>
         <span>Compte administrateur</span>
-        ${u.is_admin ? '<span style="font-size:11px;color:var(--red)">⚡ Décocher pour révoquer les droits admin</span>' : ''}
+        ${u.is_admin ? '<span style="font-size:11px;color:var(--red)">⚡ Décocher pour révoquer les droits admin</span>' : ""}
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn-primary" id="save-profile-btn">💾 Sauvegarder</button>
@@ -330,7 +372,7 @@ function renderTabProfile(d) {
             <small>L'utilisateur ne pourra plus changer son pseudo</small>
           </div>
           <label class="toggle-switch">
-            <input type="checkbox" id="mod-pseudo-locked" ${u.pseudo_locked ? 'checked' : ''}>
+            <input type="checkbox" id="mod-pseudo-locked" ${u.pseudo_locked ? "checked" : ""}>
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -340,7 +382,7 @@ function renderTabProfile(d) {
             <small>Empêche toute connexion. La session active reste ouverte jusqu'au prochain chargement.</small>
           </div>
           <label class="toggle-switch">
-            <input type="checkbox" id="mod-is-banned" ${u.is_banned ? 'checked' : ''}>
+            <input type="checkbox" id="mod-is-banned" ${u.is_banned ? "checked" : ""}>
             <span class="toggle-slider toggle-slider--red"></span>
           </label>
         </div>
@@ -358,36 +400,43 @@ function renderTabProfile(d) {
   `;
 
   // ── Save profile ──────────────────────────────────────────────────────────
-  document.getElementById('save-profile-btn').onclick = async () => {
-    const btn = document.getElementById('save-profile-btn');
-    btn.disabled = true; btn.textContent = '…';
+  document.getElementById("save-profile-btn").onclick = async () => {
+    const btn = document.getElementById("save-profile-btn");
+    btn.disabled = true;
+    btn.textContent = "…";
 
     const res = await api.patch(`/api/admin/users/${_selectedUser}`, {
-      pseudo:              document.getElementById('edit-pseudo').value.trim(),
-      email:               document.getElementById('edit-email').value.trim(),
-      lang:                document.getElementById('edit-lang').value,
-      avatar_border_color: document.getElementById('edit-border').value,
-      is_admin:            document.getElementById('edit-admin').checked,
+      pseudo: document.getElementById("edit-pseudo").value.trim(),
+      email: document.getElementById("edit-email").value.trim(),
+      lang: document.getElementById("edit-lang").value,
+      avatar_border_color: document.getElementById("edit-border").value,
+      is_admin: document.getElementById("edit-admin").checked,
     });
 
-    btn.disabled = false; btn.textContent = '💾 Sauvegarder';
+    btn.disabled = false;
+    btn.textContent = "💾 Sauvegarder";
 
     if (res.error) {
-      toast('❌ ' + res.error, 'error');
+      toast("❌ " + res.error, "error");
     } else {
-      toast('✅ Profil sauvegardé', 'success');
-      _userDetail.user    = { ..._userDetail.user, ...res.user };
-      _userDetail.profile = { ..._userDetail.profile, avatar_border_color: document.getElementById('edit-border').value };
+      toast("✅ Profil sauvegardé", "success");
+      _userDetail.user = { ..._userDetail.user, ...res.user };
+      _userDetail.profile = {
+        ..._userDetail.profile,
+        avatar_border_color: document.getElementById("edit-border").value,
+      };
       renderDetailHeader(_userDetail);
 
       // Sync user row in list
       const row = document.querySelector(`.user-row[data-id="${_selectedUser}"]`);
       if (row) {
-        const pseudoEl = row.querySelector('.user-row-pseudo');
+        const pseudoEl = row.querySelector(".user-row-pseudo");
         if (pseudoEl) pseudoEl.textContent = _userDetail.user.pseudo;
-        const dotEl = row.querySelector('.user-row-admin-dot');
+        const dotEl = row.querySelector(".user-row-admin-dot");
         if (_userDetail.user.is_admin && !dotEl) {
-          row.querySelector('.user-row-top')?.insertAdjacentHTML('beforeend', '<span class="user-row-admin-dot"></span>');
+          row
+            .querySelector(".user-row-top")
+            ?.insertAdjacentHTML("beforeend", '<span class="user-row-admin-dot"></span>');
         } else if (!_userDetail.user.is_admin && dotEl) {
           dotEl.remove();
         }
@@ -396,51 +445,65 @@ function renderTabProfile(d) {
   };
 
   // ── Reset avatar ──────────────────────────────────────────────────────────
-  document.getElementById('reset-avatar-btn').onclick = async () => {
+  document.getElementById("reset-avatar-btn").onclick = async () => {
     if (!confirm(`Réinitialiser l'avatar de ${u.pseudo} ?`)) return;
     const res = await api.patch(`/api/admin/users/${_selectedUser}`, { reset_avatar: true });
     if (res.error) {
-      toast('❌ ' + res.error, 'error');
+      toast("❌ " + res.error, "error");
     } else {
-      toast('✅ Avatar réinitialisé', 'success');
+      toast("✅ Avatar réinitialisé", "success");
       _userDetail.profile.avatar_data = null;
       renderDetailHeader(_userDetail);
       const row = document.querySelector(`.user-row[data-id="${_selectedUser}"]`);
       if (row) {
-        const imgEl = row.querySelector('.user-row-avatar');
+        const imgEl = row.querySelector(".user-row-avatar");
         if (imgEl) imgEl.outerHTML = '<div class="user-row-avatar-ph">👤</div>';
       }
     }
   };
 
   // ── Moderation ────────────────────────────────────────────────────────────
-  document.getElementById('save-mod-btn').onclick = async () => {
-    const btn        = document.getElementById('save-mod-btn');
-    const isBanned   = document.getElementById('mod-is-banned').checked;
-    const pseudoLock = document.getElementById('mod-pseudo-locked').checked;
-    btn.disabled     = true; btn.textContent = '…';
+  document.getElementById("save-mod-btn").onclick = async () => {
+    const btn = document.getElementById("save-mod-btn");
+    const isBanned = document.getElementById("mod-is-banned").checked;
+    const pseudoLock = document.getElementById("mod-pseudo-locked").checked;
+    btn.disabled = true;
+    btn.textContent = "…";
     const res = await api.patch(`/api/admin/users/${_selectedUser}`, {
-      is_banned:     isBanned,
+      is_banned: isBanned,
       pseudo_locked: pseudoLock,
     });
-    btn.disabled = false; btn.textContent = '💾 Appliquer modération';
+    btn.disabled = false;
+    btn.textContent = "💾 Appliquer modération";
     if (res.error) {
-      toast('❌ ' + res.error, 'error');
+      toast("❌ " + res.error, "error");
     } else {
       _userDetail.user = { ..._userDetail.user, ...res.user };
-      toast(isBanned ? '🚫 Compte banni' : (pseudoLock ? '🔒 Pseudo verrouillé' : '✅ Modération mise à jour'), isBanned ? 'error' : 'success');
+      toast(
+        isBanned
+          ? "🚫 Compte banni"
+          : pseudoLock
+            ? "🔒 Pseudo verrouillé"
+            : "✅ Modération mise à jour",
+        isBanned ? "error" : "success"
+      );
     }
   };
 
   // ── Delete account ────────────────────────────────────────────────────────
-  document.getElementById('delete-user-btn').onclick = async () => {
-    if (!confirm(`Supprimer DÉFINITIVEMENT le compte de "${u.pseudo}" ?\n\nToutes ses données seront perdues. Cette action est irréversible.`)) return;
+  document.getElementById("delete-user-btn").onclick = async () => {
+    if (
+      !confirm(
+        `Supprimer DÉFINITIVEMENT le compte de "${u.pseudo}" ?\n\nToutes ses données seront perdues. Cette action est irréversible.`
+      )
+    )
+      return;
     await api.delete(`/api/admin/users/${_selectedUser}`);
-    document.getElementById('user-detail').classList.add('hidden');
-    document.getElementById('empty-state').classList.remove('hidden');
+    document.getElementById("user-detail").classList.add("hidden");
+    document.getElementById("empty-state").classList.remove("hidden");
     _selectedUser = null;
-    _userDetail   = null;
-    pendingGifts  = [];
+    _userDetail = null;
+    pendingGifts = [];
     updateFab();
     loadUsers();
   };
@@ -452,43 +515,51 @@ function renderTabBadges(d) {
 
   // Group catalog by category
   const categories = {};
-  _badgesCatalog.forEach(badge => {
-    const cat = badge.category || 'Other';
+  _badgesCatalog.forEach((badge) => {
+    const cat = badge.category || "Other";
     if (!categories[cat]) categories[cat] = [];
     categories[cat].push(badge);
   });
 
-  let sectionsHtml = '';
-  Object.keys(categories).sort().forEach(cat => {
-    const badges    = categories[cat];
-    const catUnlock = badges.filter(b => unlockedSlugs.has(b.slug)).length;
+  let sectionsHtml = "";
+  Object.keys(categories)
+    .sort()
+    .forEach((cat) => {
+      const badges = categories[cat];
+      const catUnlock = badges.filter((b) => unlockedSlugs.has(b.slug)).length;
 
-    sectionsHtml += `<div class="badges-category">
+      sectionsHtml += `<div class="badges-category">
       <div class="badges-category-header">${escHtml(cat)} — ${catUnlock}/${badges.length}</div>
       <div class="badges-grid">
-        ${badges.map(badge => {
-          const isUnlocked    = unlockedSlugs.has(badge.slug);
-          const pendingAdd    = pendingGifts.some(g => g.type === 'badge' && g.id === badge.slug && g.action === 'add');
-          const pendingRemove = pendingGifts.some(g => g.type === 'badge' && g.id === badge.slug && g.action === 'remove');
+        ${badges
+          .map((badge) => {
+            const isUnlocked = unlockedSlugs.has(badge.slug);
+            const pendingAdd = pendingGifts.some(
+              (g) => g.type === "badge" && g.id === badge.slug && g.action === "add"
+            );
+            const pendingRemove = pendingGifts.some(
+              (g) => g.type === "badge" && g.id === badge.slug && g.action === "remove"
+            );
 
-          let cls = 'badge-item';
-          if (isUnlocked && !pendingRemove) cls += ' unlocked';
-          if (pendingAdd)    cls += ' pending-add';
-          if (pendingRemove) cls += ' pending-remove';
+            let cls = "badge-item";
+            if (isUnlocked && !pendingRemove) cls += " unlocked";
+            if (pendingAdd) cls += " pending-add";
+            if (pendingRemove) cls += " pending-remove";
 
-          return `
+            return `
             <div class="${cls}" data-slug="${escHtml(badge.slug)}"
                  title="${escHtml(badge.name_en)}\nRarity: ${badge.rarity}">
-              <img src="${_pathPrefix}/${escHtml(badge.image_path || '')}" alt="${escHtml(badge.name_en)}" loading="lazy" onerror="this.style.opacity=0.2">
+              <img src="${_pathPrefix}/${escHtml(badge.image_path || "")}" alt="${escHtml(badge.name_en)}" loading="lazy" onerror="this.style.opacity=0.2">
               <span class="badge-label">${escHtml(badge.name_en)}</span>
             </div>
           `;
-        }).join('')}
+          })
+          .join("")}
       </div>
     </div>`;
-  });
+    });
 
-  document.getElementById('user-detail-content').innerHTML = `
+  document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
       <h3>Badges — ${unlockedSlugs.size} / ${_badgesCatalog.length} débloqués</h3>
       <div class="tab-note">
@@ -499,26 +570,42 @@ function renderTabBadges(d) {
     </div>
   `;
 
-  document.querySelectorAll('.badge-item').forEach(item => {
+  document.querySelectorAll(".badge-item").forEach((item) => {
     item.onclick = () => toggleBadgePending(item.dataset.slug, unlockedSlugs, d);
   });
 }
 
 function toggleBadgePending(slug, unlockedSlugs, d) {
-  const badge = _badgesCatalog.find(b => b.slug === slug);
+  const badge = _badgesCatalog.find((b) => b.slug === slug);
   if (!badge) return;
 
-  const existingAdd = pendingGifts.findIndex(g => g.type === 'badge' && g.id === slug && g.action === 'add');
-  const existingRem = pendingGifts.findIndex(g => g.type === 'badge' && g.id === slug && g.action === 'remove');
+  const existingAdd = pendingGifts.findIndex(
+    (g) => g.type === "badge" && g.id === slug && g.action === "add"
+  );
+  const existingRem = pendingGifts.findIndex(
+    (g) => g.type === "badge" && g.id === slug && g.action === "remove"
+  );
 
   if (!unlockedSlugs.has(slug)) {
     existingAdd >= 0
       ? pendingGifts.splice(existingAdd, 1)
-      : pendingGifts.push({ type: 'badge', action: 'add', id: slug, label: badge.name_en, img: _pathPrefix + '/' + badge.image_path });
+      : pendingGifts.push({
+          type: "badge",
+          action: "add",
+          id: slug,
+          label: badge.name_en,
+          img: _pathPrefix + "/" + badge.image_path,
+        });
   } else {
     existingRem >= 0
       ? pendingGifts.splice(existingRem, 1)
-      : pendingGifts.push({ type: 'badge', action: 'remove', id: slug, label: badge.name_en, img: _pathPrefix + '/' + badge.image_path });
+      : pendingGifts.push({
+          type: "badge",
+          action: "remove",
+          id: slug,
+          label: badge.name_en,
+          img: _pathPrefix + "/" + badge.image_path,
+        });
   }
 
   updateFab();
@@ -527,9 +614,9 @@ function toggleBadgePending(slug, unlockedSlugs, d) {
 
 // ── Tab: Wallpapers ────────────────────────────────────────────────────────
 function renderTabWallpapers(d) {
-  const unlockedIds = new Set((d.wallpapers || []).map(id => String(id)));
+  const unlockedIds = new Set((d.wallpapers || []).map((id) => String(id)));
 
-  document.getElementById('user-detail-content').innerHTML = `
+  document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
       <h3>Wallpapers — ${unlockedIds.size} / ${_wallpapersCatalog.length} débloqués</h3>
       <div class="tab-note">
@@ -537,54 +624,76 @@ function renderTabWallpapers(d) {
         Cliquer pour basculer l'état. Appliquer via le bouton ⚡ en bas à droite.
       </div>
       <div class="wallpapers-grid" id="wallpapers-grid">
-        ${!_wallpapersCatalog.length ? '<p style="color:var(--text-muted)">Catalogue vide — rechargement en cours…</p>' : ''}
+        ${!_wallpapersCatalog.length ? '<p style="color:var(--text-muted)">Catalogue vide — rechargement en cours…</p>' : ""}
       </div>
     </div>
   `;
 
   if (!_wallpapersCatalog.length) return;
 
-  const grid = document.getElementById('wallpapers-grid');
-  grid.innerHTML = _wallpapersCatalog.map(w => {
-    const wid           = String(w.id);
-    const isUnlocked    = unlockedIds.has(wid);
-    const pendingAdd    = pendingGifts.some(g => g.type === 'wallpaper' && String(g.id) === wid && g.action === 'add');
-    const pendingRemove = pendingGifts.some(g => g.type === 'wallpaper' && String(g.id) === wid && g.action === 'remove');
+  const grid = document.getElementById("wallpapers-grid");
+  grid.innerHTML = _wallpapersCatalog
+    .map((w) => {
+      const wid = String(w.id);
+      const isUnlocked = unlockedIds.has(wid);
+      const pendingAdd = pendingGifts.some(
+        (g) => g.type === "wallpaper" && String(g.id) === wid && g.action === "add"
+      );
+      const pendingRemove = pendingGifts.some(
+        (g) => g.type === "wallpaper" && String(g.id) === wid && g.action === "remove"
+      );
 
-    let cls = 'wallpaper-item';
-    if (isUnlocked && !pendingRemove) cls += ' unlocked';
-    if (pendingAdd)    cls += ' pending-add';
-    if (pendingRemove) cls += ' pending-remove';
+      let cls = "wallpaper-item";
+      if (isUnlocked && !pendingRemove) cls += " unlocked";
+      if (pendingAdd) cls += " pending-add";
+      if (pendingRemove) cls += " pending-remove";
 
-    return `
+      return `
       <div class="${cls}" data-id="${w.id}" title="${escHtml(w.name)}">
-        <img src="${_pathPrefix}/${escHtml(w.image_path || '')}" alt="${escHtml(w.name)}" loading="lazy">
+        <img src="${_pathPrefix}/${escHtml(w.image_path || "")}" alt="${escHtml(w.name)}" loading="lazy">
         <span>${escHtml(w.name)}</span>
       </div>
     `;
-  }).join('');
+    })
+    .join("");
 
-  grid.querySelectorAll('.wallpaper-item').forEach(item => {
+  grid.querySelectorAll(".wallpaper-item").forEach((item) => {
     item.onclick = () => toggleWallpaperPending(item.dataset.id, unlockedIds, d);
   });
 }
 
 function toggleWallpaperPending(wid, unlockedIds, d) {
-  const wall = _wallpapersCatalog.find(w => String(w.id) === String(wid));
+  const wall = _wallpapersCatalog.find((w) => String(w.id) === String(wid));
   if (!wall) return;
 
-  const isUnlocked  = unlockedIds.has(String(wid));
-  const existingAdd = pendingGifts.findIndex(g => g.type === 'wallpaper' && String(g.id) === String(wid) && g.action === 'add');
-  const existingRem = pendingGifts.findIndex(g => g.type === 'wallpaper' && String(g.id) === String(wid) && g.action === 'remove');
+  const isUnlocked = unlockedIds.has(String(wid));
+  const existingAdd = pendingGifts.findIndex(
+    (g) => g.type === "wallpaper" && String(g.id) === String(wid) && g.action === "add"
+  );
+  const existingRem = pendingGifts.findIndex(
+    (g) => g.type === "wallpaper" && String(g.id) === String(wid) && g.action === "remove"
+  );
 
   if (!isUnlocked) {
     existingAdd >= 0
       ? pendingGifts.splice(existingAdd, 1)
-      : pendingGifts.push({ type: 'wallpaper', action: 'add', id: wid, label: wall.name, img: _pathPrefix + '/' + wall.image_path });
+      : pendingGifts.push({
+          type: "wallpaper",
+          action: "add",
+          id: wid,
+          label: wall.name,
+          img: _pathPrefix + "/" + wall.image_path,
+        });
   } else {
     existingRem >= 0
       ? pendingGifts.splice(existingRem, 1)
-      : pendingGifts.push({ type: 'wallpaper', action: 'remove', id: wid, label: wall.name, img: _pathPrefix + '/' + wall.image_path });
+      : pendingGifts.push({
+          type: "wallpaper",
+          action: "remove",
+          id: wid,
+          label: wall.name,
+          img: _pathPrefix + "/" + wall.image_path,
+        });
   }
 
   updateFab();
@@ -593,10 +702,10 @@ function toggleWallpaperPending(wid, unlockedIds, d) {
 
 // ── Tab: Titles ────────────────────────────────────────────────────────────
 function renderTabTitles(d) {
-  const unlockedIds = new Set((d.titles || []).map(t => t.id));
-  const equipped    = d.profile?.equipped_title_id;
+  const unlockedIds = new Set((d.titles || []).map((t) => t.id));
+  const equipped = d.profile?.equipped_title_id;
 
-  document.getElementById('user-detail-content').innerHTML = `
+  document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
       <h3>Titres — ${unlockedIds.size} / ${_titlesCatalog.length} débloqués</h3>
       <div class="tab-note">
@@ -604,74 +713,88 @@ function renderTabTitles(d) {
         Cliquer pour basculer l'état. Appliquer via le bouton ⚡ en bas à droite.
       </div>
       <div class="titles-grid">
-        ${_titlesCatalog.map(t => {
-          const isUnlocked = unlockedIds.has(t.id);
-          const pendingAdd = pendingGifts.some(g => g.type === 'title' && g.id === t.id && g.action === 'add');
-          const pendingRem = pendingGifts.some(g => g.type === 'title' && g.id === t.id && g.action === 'remove');
-          const isEquipped = equipped == t.id;
+        ${_titlesCatalog
+          .map((t) => {
+            const isUnlocked = unlockedIds.has(t.id);
+            const pendingAdd = pendingGifts.some(
+              (g) => g.type === "title" && g.id === t.id && g.action === "add"
+            );
+            const pendingRem = pendingGifts.some(
+              (g) => g.type === "title" && g.id === t.id && g.action === "remove"
+            );
+            const isEquipped = equipped == t.id;
 
-          let cls = 'title-card';
-          if (isUnlocked && !pendingRem) cls += ' unlocked';
-          if (pendingAdd) cls += ' pending-add';
-          if (pendingRem) cls += ' pending-remove';
+            let cls = "title-card";
+            if (isUnlocked && !pendingRem) cls += " unlocked";
+            if (pendingAdd) cls += " pending-add";
+            if (pendingRem) cls += " pending-remove";
 
-          return `
+            return `
             <div class="${cls}" data-id="${t.id}">
-              ${t.image_path
-                ? `<img class="title-card-img" src="${_pathPrefix}/${escHtml(t.image_path)}" alt="" loading="lazy" onerror="this.style.display='none'">`
-                : `<div class="title-card-img-ph rarity-${t.rarity}">👑</div>`}
+              ${
+                t.image_path
+                  ? `<img class="title-card-img" src="${_pathPrefix}/${escHtml(t.image_path)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+                  : `<div class="title-card-img-ph rarity-${t.rarity}">👑</div>`
+              }
               <div class="title-card-rarity rarity-${t.rarity}">${t.rarity.toUpperCase()}</div>
               <div class="title-card-name">${escHtml(t.name_en)}</div>
-              ${isEquipped ? '<div class="title-card-equipped">⚡ équipé</div>' : ''}
-              ${pendingAdd ? '<div class="title-card-status pending">+ ajout</div>' : ''}
-              ${pendingRem ? '<div class="title-card-status remove">− retrait</div>' : ''}
+              ${isEquipped ? '<div class="title-card-equipped">⚡ équipé</div>' : ""}
+              ${pendingAdd ? '<div class="title-card-status pending">+ ajout</div>' : ""}
+              ${pendingRem ? '<div class="title-card-status remove">− retrait</div>' : ""}
             </div>
           `;
-        }).join('')}
+          })
+          .join("")}
       </div>
 
       <div class="titles-equip-section">
         <span style="font-size:12px;color:var(--text-muted)">Équiper :</span>
         <select id="equip-title-select" style="background:var(--bg2);color:var(--text);border:1px solid var(--border);padding:5px 10px;border-radius:6px;font-size:12px;outline:none;flex:1;max-width:260px">
           <option value="">— aucun —</option>
-          ${(d.titles || []).map(t => `<option value="${t.id}" ${equipped == t.id ? 'selected' : ''}>${escHtml(t.name_en)} [${t.rarity}]</option>`).join('')}
+          ${(d.titles || []).map((t) => `<option value="${t.id}" ${equipped == t.id ? "selected" : ""}>${escHtml(t.name_en)} [${t.rarity}]</option>`).join("")}
         </select>
         <button class="btn-primary btn-small" id="equip-title-btn">Équiper</button>
       </div>
     </div>
   `;
 
-  document.getElementById('equip-title-btn').onclick = async () => {
-    const val = document.getElementById('equip-title-select').value;
-    const res = await api.patch(`/api/admin/users/${_selectedUser}/titles/equip`, { title_id: val ? +val : null });
+  document.getElementById("equip-title-btn").onclick = async () => {
+    const val = document.getElementById("equip-title-select").value;
+    const res = await api.patch(`/api/admin/users/${_selectedUser}/titles/equip`, {
+      title_id: val ? +val : null,
+    });
     if (res.error) {
-      toast('❌ ' + res.error, 'error');
+      toast("❌ " + res.error, "error");
     } else {
-      toast('✅ Titre équipé', 'success');
+      toast("✅ Titre équipé", "success");
       _userDetail.profile = { ..._userDetail.profile, equipped_title_id: val ? +val : null };
     }
   };
 
-  document.querySelectorAll('.title-card').forEach(item => {
+  document.querySelectorAll(".title-card").forEach((item) => {
     item.onclick = () => toggleTitlePending(+item.dataset.id, unlockedIds, d);
   });
 }
 
 function toggleTitlePending(tid, unlockedIds, d) {
-  const title = _titlesCatalog.find(t => t.id === tid);
+  const title = _titlesCatalog.find((t) => t.id === tid);
   if (!title) return;
 
-  const existingAdd = pendingGifts.findIndex(g => g.type === 'title' && g.id === tid && g.action === 'add');
-  const existingRem = pendingGifts.findIndex(g => g.type === 'title' && g.id === tid && g.action === 'remove');
+  const existingAdd = pendingGifts.findIndex(
+    (g) => g.type === "title" && g.id === tid && g.action === "add"
+  );
+  const existingRem = pendingGifts.findIndex(
+    (g) => g.type === "title" && g.id === tid && g.action === "remove"
+  );
 
   if (!unlockedIds.has(tid)) {
     existingAdd >= 0
       ? pendingGifts.splice(existingAdd, 1)
-      : pendingGifts.push({ type: 'title', action: 'add', id: tid, label: title.name_en });
+      : pendingGifts.push({ type: "title", action: "add", id: tid, label: title.name_en });
   } else {
     existingRem >= 0
       ? pendingGifts.splice(existingRem, 1)
-      : pendingGifts.push({ type: 'title', action: 'remove', id: tid, label: title.name_en });
+      : pendingGifts.push({ type: "title", action: "remove", id: tid, label: title.name_en });
   }
 
   updateFab();
@@ -680,12 +803,21 @@ function toggleTitlePending(tid, unlockedIds, d) {
 
 // ── Tab: Stats ─────────────────────────────────────────────────────────────
 function renderTabStats(d) {
-  const modes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
-  const labels = { classic: '🃏 Classic', emoji: '😀 Emoji', silhouette: '👤 Silhouette', alloutattack: '💥 All-Out', personae: '🎭 Personae', music: '🎵 Music' };
+  const modes = ["classic", "emoji", "silhouette", "alloutattack", "personae", "music"];
+  const labels = {
+    classic: "🃏 Classic",
+    emoji: "😀 Emoji",
+    silhouette: "👤 Silhouette",
+    alloutattack: "💥 All-Out",
+    personae: "🎭 Personae",
+    music: "🎵 Music",
+  };
   const statsMap = {};
-  (d.stats || []).forEach(s => { statsMap[s.mode] = s; });
+  (d.stats || []).forEach((s) => {
+    statsMap[s.mode] = s;
+  });
 
-  document.getElementById('user-detail-content').innerHTML = `
+  document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
       <h3>Statistiques par mode</h3>
       <div class="tab-note">Modifier les valeurs puis cliquer Save sur chaque ligne.</div>
@@ -704,9 +836,17 @@ function renderTabStats(d) {
             </tr>
           </thead>
           <tbody>
-            ${modes.map(mode => {
-              const s = statsMap[mode] || { wins: 0, giveups: 0, games: 0, streak: 0, streak_record: 0, perfect_wins: 0 };
-              return `<tr data-mode="${mode}">
+            ${modes
+              .map((mode) => {
+                const s = statsMap[mode] || {
+                  wins: 0,
+                  giveups: 0,
+                  games: 0,
+                  streak: 0,
+                  streak_record: 0,
+                  perfect_wins: 0,
+                };
+                return `<tr data-mode="${mode}">
                 <td><strong style="font-family:Oswald,sans-serif;font-size:13px">${labels[mode]}</strong></td>
                 <td><input type="number" min="0" class="stat-input" data-field="wins"          value="${s.wins}"></td>
                 <td><input type="number" min="0" class="stat-input" data-field="giveups"       value="${s.giveups}"></td>
@@ -716,33 +856,36 @@ function renderTabStats(d) {
                 <td><input type="number" min="0" class="stat-input" data-field="perfect_wins"  value="${s.perfect_wins}"></td>
                 <td><button class="btn-secondary btn-small save-stats-btn">Save</button></td>
               </tr>`;
-            }).join('')}
+              })
+              .join("")}
           </tbody>
         </table>
       </div>
     </div>
   `;
 
-  document.querySelectorAll('.save-stats-btn').forEach(btn => {
+  document.querySelectorAll(".save-stats-btn").forEach((btn) => {
     btn.onclick = async () => {
-      const row     = btn.closest('tr');
-      const mode    = row.dataset.mode;
+      const row = btn.closest("tr");
+      const mode = row.dataset.mode;
       const payload = {};
-      row.querySelectorAll('.stat-input').forEach(inp => { payload[inp.dataset.field] = +inp.value; });
+      row.querySelectorAll(".stat-input").forEach((inp) => {
+        payload[inp.dataset.field] = +inp.value;
+      });
 
-      btn.textContent = '…';
-      btn.disabled    = true;
+      btn.textContent = "…";
+      btn.disabled = true;
       const res = await api.patch(`/api/admin/users/${_selectedUser}/stats`, { mode, ...payload });
-      btn.disabled    = false;
-      btn.textContent = 'Save';
+      btn.disabled = false;
+      btn.textContent = "Save";
 
       if (res.error) {
-        toast('❌ Stats — ' + res.error, 'error');
+        toast("❌ Stats — " + res.error, "error");
       } else {
-        toast('✅ Stats ' + labels[mode] + ' sauvegardées', 'success');
-        const idx = (_userDetail.stats || []).findIndex(s => s.mode === mode);
+        toast("✅ Stats " + labels[mode] + " sauvegardées", "success");
+        const idx = (_userDetail.stats || []).findIndex((s) => s.mode === mode);
         if (idx >= 0) _userDetail.stats[idx] = { ..._userDetail.stats[idx], mode, ...payload };
-        else          _userDetail.stats = [...(_userDetail.stats || []), { mode, ...payload }];
+        else _userDetail.stats = [...(_userDetail.stats || []), { mode, ...payload }];
         renderDetailQuickStats(_userDetail);
       }
     };
@@ -751,47 +894,52 @@ function renderTabStats(d) {
 
 // ── Tab: Friends ───────────────────────────────────────────────────────────
 function renderTabFriends(d) {
-  const friends  = d.friends || [];
-  const accepted = friends.filter(f => f.status === 'accepted');
-  const pending  = friends.filter(f => f.status === 'pending');
+  const friends = d.friends || [];
+  const accepted = friends.filter((f) => f.status === "accepted");
+  const pending = friends.filter((f) => f.status === "pending");
 
-  const friendRowHtml = f => `
+  const friendRowHtml = (f) => `
     <div class="friend-row" data-fid="${f.friendship_id}">
-      ${f.avatar_data
-        ? `<img src="${escHtml(f.avatar_data)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`
-        : '<div style="width:38px;height:38px;border-radius:50%;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">👤</div>'}
+      ${
+        f.avatar_data
+          ? `<img src="${escHtml(f.avatar_data)}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0">`
+          : '<div style="width:38px;height:38px;border-radius:50%;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px">👤</div>'
+      }
       <div style="flex:1;min-width:0">
         <strong style="font-size:13px">${escHtml(f.pseudo)}</strong>
         <div style="font-size:11px;color:var(--text-muted)">
-          ${f.status === 'pending' ? '⏳ En attente' : '✅ Ami'} · ID ${f.user_id} · ${new Date(f.created_at).toLocaleDateString()}
+          ${f.status === "pending" ? "⏳ En attente" : "✅ Ami"} · ID ${f.user_id} · ${new Date(f.created_at).toLocaleDateString()}
         </div>
       </div>
       <button class="btn-danger btn-small remove-friend-btn" data-fid="${f.friendship_id}">🗑️</button>
     </div>
   `;
 
-  document.getElementById('user-detail-content').innerHTML = `
+  document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
       <h3>Amis — ${accepted.length} amis · ${pending.length} en attente</h3>
-      ${!friends.length
-        ? '<p style="color:var(--text-muted)">Aucune relation d\'amitié.</p>'
-        : accepted.map(friendRowHtml).join('') +
-          (pending.length
-            ? `<div style="margin:14px 0 8px;font-size:11px;color:var(--text-muted);font-family:Oswald,sans-serif;text-transform:uppercase;letter-spacing:1px">En attente</div>` +
-              pending.map(friendRowHtml).join('')
-            : '')
+      ${
+        !friends.length
+          ? '<p style="color:var(--text-muted)">Aucune relation d\'amitié.</p>'
+          : accepted.map(friendRowHtml).join("") +
+            (pending.length
+              ? `<div style="margin:14px 0 8px;font-size:11px;color:var(--text-muted);font-family:Oswald,sans-serif;text-transform:uppercase;letter-spacing:1px">En attente</div>` +
+                pending.map(friendRowHtml).join("")
+              : "")
       }
     </div>
   `;
 
-  document.querySelectorAll('.remove-friend-btn').forEach(btn => {
+  document.querySelectorAll(".remove-friend-btn").forEach((btn) => {
     btn.onclick = async () => {
-      if (!confirm('Supprimer cette relation d\'amitié ?')) return;
+      if (!confirm("Supprimer cette relation d'amitié ?")) return;
       const fid = btn.dataset.fid;
       const res = await api.delete(`/api/admin/users/${_selectedUser}/friends/${fid}`);
       if (!res.error) {
-        btn.closest('.friend-row').remove();
-        _userDetail.friends = _userDetail.friends.filter(f => String(f.friendship_id) !== String(fid));
+        btn.closest(".friend-row").remove();
+        _userDetail.friends = _userDetail.friends.filter(
+          (f) => String(f.friendship_id) !== String(fid)
+        );
         renderDetailQuickStats(_userDetail);
       }
     };
@@ -800,16 +948,29 @@ function renderTabFriends(d) {
 
 // ── Tab: Social Links ──────────────────────────────────────────────────────
 function renderTabSocial(d) {
-  const links     = d.social_links || [];
-  const rankNames = ['','Stranger','Acquaintance','Companion','Ally','Confidant','Trusted Ally','True Ally','Bond','Unbreakable Bond','True Confidant'];
-  const rankColor = r => r >= 10 ? 'legendary' : r >= 7 ? 'epic' : r >= 4 ? 'rare' : 'common';
+  const links = d.social_links || [];
+  const rankNames = [
+    "",
+    "Stranger",
+    "Acquaintance",
+    "Companion",
+    "Ally",
+    "Confidant",
+    "Trusted Ally",
+    "True Ally",
+    "Bond",
+    "Unbreakable Bond",
+    "True Confidant",
+  ];
+  const rankColor = (r) => (r >= 10 ? "legendary" : r >= 7 ? "epic" : r >= 4 ? "rare" : "common");
 
-  document.getElementById('user-detail-content').innerHTML = `
+  document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
-      <h3>Social Links — ${links.length} relation${links.length !== 1 ? 's' : ''}</h3>
-      ${!links.length
-        ? '<p style="color:var(--text-muted)">Aucun Social Link pour cet utilisateur.</p>'
-        : `<div style="overflow-x:auto">
+      <h3>Social Links — ${links.length} relation${links.length !== 1 ? "s" : ""}</h3>
+      ${
+        !links.length
+          ? '<p style="color:var(--text-muted)">Aucun Social Link pour cet utilisateur.</p>'
+          : `<div style="overflow-x:auto">
             <table class="stats-table">
               <thead>
                 <tr>
@@ -824,7 +985,9 @@ function renderTabSocial(d) {
                 </tr>
               </thead>
               <tbody>
-                ${links.map(sl => `
+                ${links
+                  .map(
+                    (sl) => `
                   <tr data-slid="${sl.id}">
                     <td>
                       <strong style="font-size:13px">${escHtml(sl.pseudo)}</strong><br>
@@ -832,16 +995,16 @@ function renderTabSocial(d) {
                     </td>
                     <td>
                       <span class="rarity-${rankColor(sl.rank)}">${sl.rank}</span><br>
-                      <span style="font-size:10px;color:var(--text-muted)">${rankNames[sl.rank] || ''}</span>
+                      <span style="font-size:10px;color:var(--text-muted)">${rankNames[sl.rank] || ""}</span>
                     </td>
                     <td>${sl.xp.toLocaleString()}</td>
                     <td style="text-align:center">${sl.interaction_count}</td>
                     <td style="font-size:11px;color:var(--text-muted)">
-                      ${sl.last_interaction_at ? new Date(sl.last_interaction_at).toLocaleDateString('fr-FR') : '—'}
+                      ${sl.last_interaction_at ? new Date(sl.last_interaction_at).toLocaleDateString("fr-FR") : "—"}
                     </td>
                     <td>
                       <select class="sl-rank-input" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px;font-size:12px;outline:none">
-                        ${[1,2,3,4,5,6,7,8,9,10].map(r => `<option value="${r}" ${r === sl.rank ? 'selected' : ''}>${r} – ${rankNames[r]}</option>`).join('')}
+                        ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((r) => `<option value="${r}" ${r === sl.rank ? "selected" : ""}>${r} – ${rankNames[r]}</option>`).join("")}
                       </select>
                     </td>
                     <td>
@@ -855,7 +1018,9 @@ function renderTabSocial(d) {
                       </div>
                     </td>
                   </tr>
-                `).join('')}
+                `
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>`
@@ -864,40 +1029,54 @@ function renderTabSocial(d) {
   `;
 
   // ── Save (rank + xp) ──────────────────────────────────────────────────────
-  document.querySelectorAll('.save-sl-btn').forEach(btn => {
+  document.querySelectorAll(".save-sl-btn").forEach((btn) => {
     btn.onclick = async () => {
-      const row  = btn.closest('tr');
+      const row = btn.closest("tr");
       const slId = row.dataset.slid;
-      const rank = +row.querySelector('.sl-rank-input').value;
-      const xp   = +row.querySelector('.sl-xp-input').value;
-      btn.textContent = '…'; btn.disabled = true;
+      const rank = +row.querySelector(".sl-rank-input").value;
+      const xp = +row.querySelector(".sl-xp-input").value;
+      btn.textContent = "…";
+      btn.disabled = true;
       const res = await api.patch(`/api/admin/social-links/${slId}`, { rank, xp });
-      btn.disabled = false; btn.textContent = 'Save';
+      btn.disabled = false;
+      btn.textContent = "Save";
       if (res.error) {
-        toast('❌ Social Link — ' + res.error, 'error');
+        toast("❌ Social Link — " + res.error, "error");
       } else {
-        toast('✅ Social Link mis à jour', 'success');
-        const sl = _userDetail.social_links.find(s => String(s.id) === String(slId));
-        if (sl) { sl.rank = rank; sl.xp = xp; }
+        toast("✅ Social Link mis à jour", "success");
+        const sl = _userDetail.social_links.find((s) => String(s.id) === String(slId));
+        if (sl) {
+          sl.rank = rank;
+          sl.xp = xp;
+        }
       }
     };
   });
 
   // ── Delete social link ────────────────────────────────────────────────────
-  document.querySelectorAll('.delete-sl-btn').forEach(btn => {
+  document.querySelectorAll(".delete-sl-btn").forEach((btn) => {
     btn.onclick = async () => {
-      const row   = btn.closest('tr');
-      const slId  = row.dataset.slid;
-      const pseudo = row.querySelector('strong')?.textContent || '?';
-      if (!confirm(`Supprimer définitivement le Social Link avec ${pseudo} ?\nCette action est irréversible (interactions, badge, notifs supprimés).`)) return;
-      btn.textContent = '…'; btn.disabled = true;
+      const row = btn.closest("tr");
+      const slId = row.dataset.slid;
+      const pseudo = row.querySelector("strong")?.textContent || "?";
+      if (
+        !confirm(
+          `Supprimer définitivement le Social Link avec ${pseudo} ?\nCette action est irréversible (interactions, badge, notifs supprimés).`
+        )
+      )
+        return;
+      btn.textContent = "…";
+      btn.disabled = true;
       const res = await api.delete(`/api/admin/social-links/${slId}`);
       if (res.error) {
-        toast('❌ ' + res.error, 'error');
-        btn.disabled = false; btn.textContent = '✕';
+        toast("❌ " + res.error, "error");
+        btn.disabled = false;
+        btn.textContent = "✕";
       } else {
-        toast('✅ Social Link supprimé', 'success');
-        _userDetail.social_links = _userDetail.social_links.filter(s => String(s.id) !== String(slId));
+        toast("✅ Social Link supprimé", "success");
+        _userDetail.social_links = _userDetail.social_links.filter(
+          (s) => String(s.id) !== String(slId)
+        );
         renderTabSocial(_userDetail);
       }
     };
@@ -906,35 +1085,37 @@ function renderTabSocial(d) {
 
 // ── Pending Gifts Queue ────────────────────────────────────────────────────
 function updateFab() {
-  const fab     = document.getElementById('pending-fab');
-  const countEl = document.getElementById('pending-count');
-  const count   = pendingGifts.length;
+  const fab = document.getElementById("pending-fab");
+  const countEl = document.getElementById("pending-count");
+  const count = pendingGifts.length;
   if (countEl) countEl.textContent = count;
-  fab.classList.toggle('hidden', count === 0);
+  fab.classList.toggle("hidden", count === 0);
 }
 
 async function applyPendingGifts() {
   if (!pendingGifts.length || !_selectedUser) return;
 
-  const fab    = document.getElementById('pending-fab');
+  const fab = document.getElementById("pending-fab");
   fab.disabled = true;
-  fab.textContent = '⚡ Application…';
+  fab.textContent = "⚡ Application…";
 
-  const results = await Promise.allSettled(pendingGifts.map(gift => {
-    if (gift.type === 'badge')
-      return gift.action === 'add'
-        ? api.post(`/api/admin/users/${_selectedUser}/badges`,     { slug: gift.id })
-        : api.delete(`/api/admin/users/${_selectedUser}/badges/${gift.id}`);
-    if (gift.type === 'wallpaper')
-      return gift.action === 'add'
-        ? api.post(`/api/admin/users/${_selectedUser}/wallpapers`, { wallpaper_id: gift.id })
-        : api.delete(`/api/admin/users/${_selectedUser}/wallpapers/${gift.id}`);
-    if (gift.type === 'title')
-      return gift.action === 'add'
-        ? api.post(`/api/admin/users/${_selectedUser}/titles`,     { title_id: gift.id })
-        : api.delete(`/api/admin/users/${_selectedUser}/titles/${gift.id}`);
-    return Promise.resolve({ ok: true });
-  }));
+  const results = await Promise.allSettled(
+    pendingGifts.map((gift) => {
+      if (gift.type === "badge")
+        return gift.action === "add"
+          ? api.post(`/api/admin/users/${_selectedUser}/badges`, { slug: gift.id })
+          : api.delete(`/api/admin/users/${_selectedUser}/badges/${gift.id}`);
+      if (gift.type === "wallpaper")
+        return gift.action === "add"
+          ? api.post(`/api/admin/users/${_selectedUser}/wallpapers`, { wallpaper_id: gift.id })
+          : api.delete(`/api/admin/users/${_selectedUser}/wallpapers/${gift.id}`);
+      if (gift.type === "title")
+        return gift.action === "add"
+          ? api.post(`/api/admin/users/${_selectedUser}/titles`, { title_id: gift.id })
+          : api.delete(`/api/admin/users/${_selectedUser}/titles/${gift.id}`);
+      return Promise.resolve({ ok: true });
+    })
+  );
 
   // Refresh user detail from server
   _userDetail = await api.get(`/api/admin/users/${_selectedUser}`);
@@ -942,10 +1123,10 @@ async function applyPendingGifts() {
   renderDetailQuickStats(_userDetail);
 
   // Show animation for any successful adds (partial success is fine)
-  const successfulAdds = pendingGifts.filter((g, i) =>
-    g.action === 'add' && results[i]?.status === 'fulfilled' && !results[i].value?.error
+  const successfulAdds = pendingGifts.filter(
+    (g, i) => g.action === "add" && results[i]?.status === "fulfilled" && !results[i].value?.error
   );
-  if (successfulAdds.length > 0) showDivineGiftAnimation(successfulAdds, 'The Admin has spoken…');
+  if (successfulAdds.length > 0) showDivineGiftAnimation(successfulAdds, "The Admin has spoken…");
 
   pendingGifts = [];
   fab.disabled = false;
@@ -958,84 +1139,96 @@ async function applyPendingGifts() {
 // ── Catalog Loaders ────────────────────────────────────────────────────────
 async function loadBadgesCatalog() {
   try {
-    const data     = await api.get('/api/badges');
+    const data = await api.get("/api/badges");
     // /api/badges returns a raw array (no wrapper key)
-    _badgesCatalog = Array.isArray(data) ? data : (data.badges || []);
+    _badgesCatalog = Array.isArray(data) ? data : data.badges || [];
     // Normalize field: API returns `name`, admin UI expects `name_en`
-    _badgesCatalog = _badgesCatalog.map(b => ({ ...b, name_en: b.name_en || b.name || b.slug }));
-  } catch (e) { console.error('[Admin] badges catalog failed', e); }
+    _badgesCatalog = _badgesCatalog.map((b) => ({ ...b, name_en: b.name_en || b.name || b.slug }));
+  } catch (e) {
+    console.error("[Admin] badges catalog failed", e);
+  }
 }
 
 async function loadWallpapersCatalog() {
   try {
-    const data         = await api.get('/api/wallpapers');
+    const data = await api.get("/api/wallpapers");
     // /api/wallpapers returns a raw array (no wrapper key)
-    _wallpapersCatalog = Array.isArray(data) ? data : (data.wallpapers || []);
-  } catch (e) { console.error('[Admin] wallpapers catalog failed', e); }
+    _wallpapersCatalog = Array.isArray(data) ? data : data.wallpapers || [];
+  } catch (e) {
+    console.error("[Admin] wallpapers catalog failed", e);
+  }
 }
 
 async function loadTitlesCatalog() {
   try {
-    const data     = await api.get('/api/titles');
+    const data = await api.get("/api/titles");
     // /api/titles returns a raw array (no wrapper key); field is `name` not `name_en`
-    const raw      = Array.isArray(data) ? data : (data.titles || []);
-    _titlesCatalog = raw.map(t => ({ ...t, name_en: t.name_en || t.name || t.slug }));
-  } catch (e) { console.error('[Admin] titles catalog failed', e); }
+    const raw = Array.isArray(data) ? data : data.titles || [];
+    _titlesCatalog = raw.map((t) => ({ ...t, name_en: t.name_en || t.name || t.slug }));
+  } catch (e) {
+    console.error("[Admin] titles catalog failed", e);
+  }
 }
 
 // ── Utilities ──────────────────────────────────────────────────────────────
 function escHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function getTypeLabel(type) {
-  return { badge: 'Badge', wallpaper: 'Wallpaper', title: 'Titre', stats: 'Stats' }[type] || type;
+  return { badge: "Badge", wallpaper: "Wallpaper", title: "Titre", stats: "Stats" }[type] || type;
 }
 
 // ── Event Codes ────────────────────────────────────────────────────────────
 async function renderEventCodes() {
-  const el = document.getElementById('codes-panel-content');
-  el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+  const el = document.getElementById("codes-panel-content");
+  el.innerHTML =
+    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
 
   let codes = [];
   try {
-    const res = await api.get('/api/admin/event_codes');
+    const res = await api.get("/api/admin/event_codes");
     codes = Array.isArray(res) ? res : (res.data ?? []);
   } catch (e) {
-    el.innerHTML = '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des codes.</div>';
+    el.innerHTML =
+      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des codes.</div>';
     return;
   }
 
   const now = new Date().toISOString().slice(0, 10);
 
-  const rows = codes.map(c => {
-    const active = c.is_active
-      ? (c.is_permanent || (c.start_date <= now && c.end_date >= now)
+  const rows = codes
+    .map((c) => {
+      const active = c.is_active
+        ? c.is_permanent || (c.start_date <= now && c.end_date >= now)
           ? '<span class="code-status code-status--active">✅ Actif</span>'
-          : '<span class="code-status code-status--expired">📅 Expiré</span>')
-      : '<span class="code-status code-status--inactive">⛔ Inactif</span>';
+          : '<span class="code-status code-status--expired">📅 Expiré</span>'
+        : '<span class="code-status code-status--inactive">⛔ Inactif</span>';
 
-    const dates = c.is_permanent ? '<em>Permanent</em>' : `${c.start_date ?? '?'} → ${c.end_date ?? '?'}`;
+      const dates = c.is_permanent
+        ? "<em>Permanent</em>"
+        : `${c.start_date ?? "?"} → ${c.end_date ?? "?"}`;
 
-    return `<tr class="code-row">
+      return `<tr class="code-row">
       <td><code class="code-pill">${escHtml(c.code)}</code></td>
       <td>${escHtml(c.badge_id)}</td>
       <td>${dates}</td>
       <td>${active}</td>
       <td><strong>${c.redemption_count ?? 0}</strong></td>
-      <td>${escHtml(c.description || '—')}</td>
+      <td>${escHtml(c.description || "—")}</td>
       <td class="code-actions">
         <button class="btn-sm btn-secondary" data-code="${escHtml(c.code)}" data-active="${c.is_active ? 1 : 0}" data-action="toggle">
-          ${c.is_active ? 'Désactiver' : 'Activer'}
+          ${c.is_active ? "Désactiver" : "Activer"}
         </button>
         <button class="btn-sm btn-danger" data-code="${escHtml(c.code)}" data-action="delete">🗑️</button>
       </td>
     </tr>`;
-  }).join('');
+    })
+    .join("");
 
   el.innerHTML = `
     <div style="padding:1.5rem">
@@ -1083,51 +1276,68 @@ async function renderEventCodes() {
   `;
 
   // Toggle date fields visibility
-  document.getElementById('new-permanent').addEventListener('change', e => {
-    document.getElementById('date-fields').style.display = e.target.checked ? 'none' : '';
+  document.getElementById("new-permanent").addEventListener("change", (e) => {
+    document.getElementById("date-fields").style.display = e.target.checked ? "none" : "";
   });
 
   // Toggle active / inactive
-  el.querySelectorAll('[data-action="toggle"]').forEach(btn => {
+  el.querySelectorAll('[data-action="toggle"]').forEach((btn) => {
     btn.onclick = async () => {
-      const code   = btn.dataset.code;
-      const active = btn.dataset.active === '1';
+      const code = btn.dataset.code;
+      const active = btn.dataset.active === "1";
       btn.disabled = true;
-      const res = await api.patch(`/api/admin/event_codes/${encodeURIComponent(code)}`, { is_active: !active });
-      if (res.error) { toast('❌ ' + res.error, 'error'); btn.disabled = false; }
-      else           { toast(`✅ Code ${active ? 'désactivé' : 'activé'}`, 'success'); renderEventCodes(); }
+      const res = await api.patch(`/api/admin/event_codes/${encodeURIComponent(code)}`, {
+        is_active: !active,
+      });
+      if (res.error) {
+        toast("❌ " + res.error, "error");
+        btn.disabled = false;
+      } else {
+        toast(`✅ Code ${active ? "désactivé" : "activé"}`, "success");
+        renderEventCodes();
+      }
     };
   });
 
   // Delete
-  el.querySelectorAll('[data-action="delete"]').forEach(btn => {
+  el.querySelectorAll('[data-action="delete"]').forEach((btn) => {
     btn.onclick = async () => {
       const code = btn.dataset.code;
       if (!confirm(`Supprimer le code "${code}" ?`)) return;
       btn.disabled = true;
       const res = await api.delete(`/api/admin/event_codes/${encodeURIComponent(code)}`);
-      if (res.error) { toast('❌ ' + res.error, 'error'); btn.disabled = false; }
-      else           { toast('🗑️ Code supprimé', 'success'); renderEventCodes(); }
+      if (res.error) {
+        toast("❌ " + res.error, "error");
+        btn.disabled = false;
+      } else {
+        toast("🗑️ Code supprimé", "success");
+        renderEventCodes();
+      }
     };
   });
 
   // Create
-  document.getElementById('create-code-btn').onclick = async () => {
-    const btn        = document.getElementById('create-code-btn');
-    const isPerm     = document.getElementById('new-permanent').checked;
-    btn.disabled     = true; btn.textContent = '…';
-    const res = await api.post('/api/admin/event_codes', {
-      code:         document.getElementById('new-code').value.trim(),
-      badge_id:     document.getElementById('new-badge-id').value.trim(),
-      description:  document.getElementById('new-description').value.trim(),
+  document.getElementById("create-code-btn").onclick = async () => {
+    const btn = document.getElementById("create-code-btn");
+    const isPerm = document.getElementById("new-permanent").checked;
+    btn.disabled = true;
+    btn.textContent = "…";
+    const res = await api.post("/api/admin/event_codes", {
+      code: document.getElementById("new-code").value.trim(),
+      badge_id: document.getElementById("new-badge-id").value.trim(),
+      description: document.getElementById("new-description").value.trim(),
       is_permanent: isPerm,
-      is_active:    true,
-      start_date:   isPerm ? null : document.getElementById('new-start').value,
-      end_date:     isPerm ? null : document.getElementById('new-end').value,
+      is_active: true,
+      start_date: isPerm ? null : document.getElementById("new-start").value,
+      end_date: isPerm ? null : document.getElementById("new-end").value,
     });
-    btn.disabled = false; btn.textContent = '➕ Créer le code';
-    if (res.error) toast('❌ ' + res.error, 'error');
-    else           { toast('✅ Code créé', 'success'); renderEventCodes(); }
+    btn.disabled = false;
+    btn.textContent = "➕ Créer le code";
+    if (res.error) toast("❌ " + res.error, "error");
+    else {
+      toast("✅ Code créé", "success");
+      renderEventCodes();
+    }
   };
 }
 

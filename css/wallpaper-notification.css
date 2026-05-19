@@ -8,17 +8,19 @@
   background: linear-gradient(135deg, #1a0a00 0%, #3d1e00 50%, #1a0a00 100%);
   border: 2px solid #c8960c;
   border-radius: 10px;
-  box-shadow: 0 4px 24px rgba(200,150,12,0.4);
+  box-shadow: 0 4px 24px rgba(200, 150, 12, 0.4);
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 12px 18px;
   z-index: 9999;
-  transition: bottom 0.45s cubic-bezier(0.34,1.56,0.64,1);
+  transition: bottom 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
   cursor: pointer;
 }
 
-.wallpaper-notif.show { bottom: 24px; }
+.wallpaper-notif.show {
+  bottom: 24px;
+}
 
 .wallpaper-notif-thumb {
   width: 80px;
@@ -29,7 +31,10 @@
   flex-shrink: 0;
 }
 
-.wallpaper-notif-text { flex: 1; min-width: 0; }
+.wallpaper-notif-text {
+  flex: 1;
+  min-width: 0;
+}
 
 .wallpaper-notif-title {
   font-size: 0.72rem;
@@ -49,6 +54,12 @@
 }
 
 @media (max-width: 480px) {
-  .wallpaper-notif { width: 92vw; padding: 10px 12px; }
-  .wallpaper-notif-thumb { width: 60px; height: 34px; }
+  .wallpaper-notif {
+    width: 92vw;
+    padding: 10px 12px;
+  }
+  .wallpaper-notif-thumb {
+    width: 60px;
+    height: 34px;
+  }
 }

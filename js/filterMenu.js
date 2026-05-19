@@ -21,11 +21,11 @@
    Quand l'utilisateur a sauvegardé "P3" dans l'ancien format,
    on l'étend automatiquement en ["P3", "P3FES", "P3P"]. */
 const LEGACY_EXPAND = {
-  P2:  ["P2IS",  "P2EP"],
-  P3:  ["P3",    "P3FES", "P3P"],
-  P4:  ["P4",    "P4G",   "P4AU", "P4D"],
-  P5:  ["P5",    "P5R",   "P5S",  "P5T"],
-  PQ:  ["PQ",   "PQ2"],
+  P2: ["P2IS", "P2EP"],
+  P3: ["P3", "P3FES", "P3P"],
+  P4: ["P4", "P4G", "P4AU", "P4D"],
+  P5: ["P5", "P5R", "P5S", "P5T"],
+  PQ: ["PQ", "PQ2"],
 };
 
 /**
@@ -49,13 +49,13 @@ function _migrate(saved, allOpus) {
       // in the saved array (new format stores precise codes like ["P5","P5R"]).
       // Detect new-format: if any CHILD (other than the parent code itself) is in saved,
       // this is the new precise format. Otherwise it's the old broad-code format.
-      const alreadyPrecise = children.some(c => c !== code && saved.includes(c));
+      const alreadyPrecise = children.some((c) => c !== code && saved.includes(c));
       if (alreadyPrecise) {
         // New format: "P5" is a precise base-game entry alongside "P5R" etc.
         if (allOpus.includes(code)) result.push(code);
       } else {
         // Old format: "P5" meaning "all P5 games" → expand to all children
-        result.push(...children.filter(c => allOpus.includes(c)));
+        result.push(...children.filter((c) => allOpus.includes(c)));
       }
     } else if (allOpus.includes(code)) {
       // Already a precise code with no expansion entry
@@ -65,7 +65,6 @@ function _migrate(saved, allOpus) {
   }
   return result.length > 0 ? [...new Set(result)] : null;
 }
-
 
 /* =============================================================
    INIT — Point d'entrée principal
@@ -88,21 +87,21 @@ function _migrate(saved, allOpus) {
  * @returns {{ getActive: () => string[] }}
  */
 export function initFilterMenu(storageKey, allOpus, onFilterChange) {
-
   /* ── 1. Chargement + migration depuis localStorage ─────────── */
   let stored = null;
   try {
     stored = JSON.parse(localStorage.getItem(storageKey));
-  } catch (_) { /* localStorage indisponible → on ignore */ }
+  } catch (_) {
+    /* localStorage indisponible → on ignore */
+  }
 
   const migrated = _migrate(stored, allOpus);
   let activeOpus = migrated ?? [...allOpus]; // défaut : tout actif
   let selectAllBtn = null;
 
-
   /* ── 2. Bouton toggle global ────────────────────────────────── */
   const toggleBtn = document.getElementById("filterToggleBtn");
-  const dropdown  = document.getElementById("filterDropdown");
+  const dropdown = document.getElementById("filterDropdown");
 
   toggleBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -111,7 +110,6 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     toggleBtn.setAttribute("aria-expanded", String(isOpen));
     dropdown.setAttribute("aria-hidden", String(!isOpen));
   });
-
 
   /* ── 2b. Bouton "Tout cocher / Tout décocher" ──────────────── */
   /*
@@ -136,7 +134,6 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     });
   }
 
-
   /* ── 2c. Boutons "Tout cocher" par groupe de sous-opus ─────── */
   /*
      Injectés en tête de chaque .filter-sub-panel (P2, P3, P4, P5, PQ…).
@@ -144,31 +141,37 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
      Utile pour activer/désactiver rapidement un jeu complet et ses spin-offs.
   */
   document.querySelectorAll("[data-group-panel]").forEach((subPanel) => {
-    const group   = subPanel.dataset.groupPanel;
+    const group = subPanel.dataset.groupPanel;
     const mainBtn = document.querySelector(`[data-opus-group="${group}"]`);
 
     // Codes pour le groupe : lus depuis data-opus-codes du bouton principal,
     // ou depuis les sous-boutons directs (cas P2 auto-expand sans main-btn)
     const codes = mainBtn
-      ? (mainBtn.dataset.opusCodes ?? "").split(",").map(s => s.trim()).filter(c => allOpus.includes(c))
+      ? (mainBtn.dataset.opusCodes ?? "")
+          .split(",")
+          .map((s) => s.trim())
+          .filter((c) => allOpus.includes(c))
       : Array.from(subPanel.querySelectorAll(".filter-sub-btn[data-opus]"))
-              .map(b => b.dataset.opus).filter(c => allOpus.includes(c));
+          .map((b) => b.dataset.opus)
+          .filter((c) => allOpus.includes(c));
 
     if (codes.length === 0) return;
 
     const groupBtn = document.createElement("button");
-    groupBtn.type  = "button";
-    groupBtn.className      = "filter-group-select-btn";
+    groupBtn.type = "button";
+    groupBtn.className = "filter-group-select-btn";
     groupBtn.dataset.groupCodes = codes.join(",");
     subPanel.prepend(groupBtn);
 
     groupBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const allGroupActive = codes.every(c => activeOpus.includes(c));
+      const allGroupActive = codes.every((c) => activeOpus.includes(c));
       if (allGroupActive) {
-        activeOpus = activeOpus.filter(c => !codes.includes(c));
+        activeOpus = activeOpus.filter((c) => !codes.includes(c));
       } else {
-        codes.forEach(c => { if (!activeOpus.includes(c)) activeOpus.push(c); });
+        codes.forEach((c) => {
+          if (!activeOpus.includes(c)) activeOpus.push(c);
+        });
       }
       _syncUI();
       _updateEmptyWarning();
@@ -176,7 +179,6 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
       onFilterChange([...activeOpus]);
     });
   });
-
 
   /* ── 3. Fermeture au clic en dehors du panneau ──────────────── */
   document.addEventListener("click", (e) => {
@@ -198,7 +200,6 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     dropdown?.setAttribute("aria-hidden", "true");
   }
 
-
   /* ── 4. Boutons logos principaux (expand/collapse groupe) ───── */
   /*
      Sélecteur : .filter-main-btn[data-opus-group]
@@ -209,7 +210,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
      Active si au moins un sous-code est actif (visuel seulement).
   */
   document.querySelectorAll(".filter-main-btn[data-opus-group]").forEach((btn) => {
-    const group    = btn.dataset.opusGroup;
+    const group = btn.dataset.opusGroup;
     const subPanel = document.querySelector(`[data-group-panel="${group}"]`);
 
     btn.addEventListener("click", (e) => {
@@ -219,7 +220,6 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
       btn.setAttribute("aria-expanded", String(!!isExpanded));
     });
   });
-
 
   /* ── 5. Boutons directs (P1, P5X — pas de sous-opus) ────────── */
   /*
@@ -236,7 +236,6 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     });
   });
 
-
   /* ── 6. Boutons sous-filtres individuels ────────────────────── */
   /*
      Sélecteur : .filter-sub-btn[data-opus]
@@ -252,13 +251,12 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     });
   });
 
-
   /* ── Helpers ─────────────────────────────────────────────────── */
 
   /** Active ou désactive un code opus et notifie le mode. */
   function _toggleCode(opus) {
     if (activeOpus.includes(opus)) {
-      activeOpus = activeOpus.filter(o => o !== opus);
+      activeOpus = activeOpus.filter((o) => o !== opus);
     } else {
       activeOpus.push(opus);
     }
@@ -283,33 +281,40 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     });
 
     // Boutons directs
-    document.querySelectorAll(".filter-main-btn[data-opus]:not([data-opus-group])").forEach((btn) => {
-      btn.classList.toggle("active", activeOpus.includes(btn.dataset.opus));
-    });
+    document
+      .querySelectorAll(".filter-main-btn[data-opus]:not([data-opus-group])")
+      .forEach((btn) => {
+        btn.classList.toggle("active", activeOpus.includes(btn.dataset.opus));
+      });
 
     // Boutons groupe : active si au moins un de leurs codes est actif
     document.querySelectorAll(".filter-main-btn[data-opus-group]").forEach((btn) => {
       const codes = (btn.dataset.opusCodes ?? "")
-        .split(",").map(s => s.trim()).filter(Boolean);
-      btn.classList.toggle("active", codes.some(c => activeOpus.includes(c)));
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      btn.classList.toggle(
+        "active",
+        codes.some((c) => activeOpus.includes(c))
+      );
     });
 
     // Bouton global tout-cocher / tout-décocher
     if (selectAllBtn) {
       const allActive = allOpus.every((o) => activeOpus.includes(o));
       selectAllBtn.textContent = allActive
-        ? (window.i18n?.t?.('ui.deselect_all') || '✗ Deselect all')
-        : (window.i18n?.t?.('ui.select_all')   || '✓ Select all');
+        ? window.i18n?.t?.("ui.deselect_all") || "✗ Deselect all"
+        : window.i18n?.t?.("ui.select_all") || "✓ Select all";
       selectAllBtn.dataset.state = allActive ? "deselect" : "select";
     }
 
     // Boutons tout-cocher par groupe
     document.querySelectorAll(".filter-group-select-btn[data-group-codes]").forEach((btn) => {
-      const codes    = btn.dataset.groupCodes.split(",");
-      const allActive = codes.every(c => activeOpus.includes(c));
-      btn.textContent  = allActive
-        ? (window.i18n?.t?.('ui.deselect_all') || '✗ Deselect all')
-        : (window.i18n?.t?.('ui.select_all')   || '✓ Select all');
+      const codes = btn.dataset.groupCodes.split(",");
+      const allActive = codes.every((c) => activeOpus.includes(c));
+      btn.textContent = allActive
+        ? window.i18n?.t?.("ui.deselect_all") || "✗ Deselect all"
+        : window.i18n?.t?.("ui.select_all") || "✓ Select all";
       btn.dataset.state = allActive ? "deselect" : "select";
     });
   }
@@ -318,7 +323,9 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
   function _save() {
     try {
       localStorage.setItem(storageKey, JSON.stringify(activeOpus));
-    } catch (_) { /* quota dépassé → silencieux */ }
+    } catch (_) {
+      /* quota dépassé → silencieux */
+    }
   }
 
   /* ── Bandeau "aucun filtre" injecté dans #filterPanel ─────────── */
@@ -335,10 +342,11 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     const isEmpty = activeOpus.length === 0;
     emptyWarning.hidden = !isEmpty;
     if (isEmpty) {
-      const msg = window.i18n?.t?.('game.no_characters_filters');
-      emptyWarning.textContent = (msg && msg !== 'game.no_characters_filters')
-        ? msg
-        : '⚠ No results — select at least one filter.';
+      const msg = window.i18n?.t?.("game.no_characters_filters");
+      emptyWarning.textContent =
+        msg && msg !== "game.no_characters_filters"
+          ? msg
+          : "⚠ No results — select at least one filter.";
     }
   }
 

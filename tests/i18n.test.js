@@ -13,27 +13,24 @@ import { t, setLang, getCurrentLang, initLang } from "../js/i18n.js";
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const MOCK_EN = {
-  ui:      { submit: "Submit", title: "PersonaDLE" },
-  game:    { win_message: "Found in {{count}} attempt(s)!", multi: "{{a}} and {{b}}" },
+  ui: { submit: "Submit", title: "PersonaDLE" },
+  game: { win_message: "Found in {{count}} attempt(s)!", multi: "{{a}} and {{b}}" },
   only_en: { exclusive: "English only" },
 };
 
 const MOCK_FR = {
-  ui:   { submit: "Valider", title: "PersonaDLE" },
+  ui: { submit: "Valider", title: "PersonaDLE" },
   game: { win_message: "Trouvé en {{count}} essai(s) !" },
   // only_en is intentionally absent → must fallback to EN
 };
 
 function makeFetchStub() {
   return vi.fn(async (url) => {
-    if (url.includes("en.json"))
-      return { ok: true, json: async () => MOCK_EN };
-    if (url.includes("fr.json"))
-      return { ok: true, json: async () => MOCK_FR };
+    if (url.includes("en.json")) return { ok: true, json: async () => MOCK_EN };
+    if (url.includes("fr.json")) return { ok: true, json: async () => MOCK_FR };
     return { ok: false, status: 404, json: async () => ({}) };
   });
 }
-
 
 // ─── Suite ────────────────────────────────────────────────────────────────────
 
@@ -51,7 +48,6 @@ describe("i18n", () => {
   afterAll(() => {
     vi.unstubAllGlobals();
   });
-
 
   // ── t() ────────────────────────────────────────────────────────────────────
 
@@ -81,7 +77,6 @@ describe("i18n", () => {
     });
   });
 
-
   // ── getCurrentLang() ───────────────────────────────────────────────────────
 
   describe("getCurrentLang()", () => {
@@ -100,7 +95,6 @@ describe("i18n", () => {
       expect(getCurrentLang()).toBe("en");
     });
   });
-
 
   // ── setLang() ──────────────────────────────────────────────────────────────
 
@@ -154,7 +148,6 @@ describe("i18n", () => {
       expect(frBlock.style.display).toBe("");
     });
   });
-
 
   // ── initLang() ─────────────────────────────────────────────────────────────
 

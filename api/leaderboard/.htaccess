@@ -1,0 +1,6 @@
+Options -Indexes
+
+RewriteEngine On
+
+# /api/leaderboard → index.php
+RewriteRule ^$   index.php   [L,QSA]

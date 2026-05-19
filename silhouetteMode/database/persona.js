@@ -1,132 +1,18 @@
-  /**
-   * A list of character names used for silhouette mode autocompletion.
-   */
-  export const personas = [
-    "Tohru Adachi",
-    "Ai Ebihara",
-    "Aigis",
-    "Akihiko Sanada",
-    "Ann Takamaki",
-    "Ayane Matsunaga",
-    "Bebe",
-    "Bunkichi",
-    "Caroline & Justine",
-    "Chidori Yoshino",
-    "Chie Satonaka",
-    "Chihaya Mifune",
-    "Chihiro Fushimi",
-    "Daisuke Nagase",
-    "Ryotaro Dojima",
-    "Mr. Edogawa",
-    "Elizabeth",
-    "Eri Minami",
-    "Fox",
-    "Futaba Sakura",
-    "Fuuka Yamagishi",
-    "Goro Akechi",
-    "Haru Okumura",
-    "Hatsune Miku",
-    "Mamoru Hayase",
-    "Hidetoshi Odagiri",
-    "Hifumi Togo",
-    "Hisano Kuroda",
-    "Ichiko Ohya",
-    "Igor",
-    "Shuji Ikutsuki",
-    "Munehisa Iwai",
-    "Jin Shirato",
-    "Jose",
-    "Junpei Iori",
-    "Kanji Tatsumi",
-    "Kazushi Miyamoto",
-    "Keisuke Hiraga",
-    "Ken Amada",
-    "Kenji Tomochika",
-    "Koromaru",
-    "Kotone Shiomi",
-    "Kou Ichijo",
-    "Labrys",
-    "Lavenza",
-    "Maiko Oohashi",
-    "Makoto Niijima",
-    "Margaret",
-    "Marie",
-    "Maya",
-    "Metis",
-    "Yuuki Mishima",
-    "Mitsuko",
-    "Mitsuru Kirijo",
-    "Morgana",
-    "Mutatsu",
-    "Nanako Dojima",
-    "Naoki Konishi",
-    "Naoto Shirogane",
-    "Nozomi Suemitsu",
-    "Pharos",
-    "Ren Amamiya",
-    "Rio Iwasaki",
-    "Rise Kujikawa",
-    "Ryoji Mochizuki",
-    "Ryuji Sakamoto",
-    "Sadayo Kawakami",
-    "Sae Niijima",
-    "Saori Hasegawa",
-    "Sayako Uehara",
-    "Shinjiro Aragaki",
-    "Shinya Oda",
-    "Sho Minazuki",
-    "Shu Nakajima",
-    "Sojiro Sakura",
-    "Sumire Yoshizawa",
-    "Tae Takemi",
-    "Takaya Sakaki",
-    "Takuto Maruki",
-    "Teddie",
-    "Theodore",
-    "Toranosuke Yoshida",
-    "Yosuke Hanamura",
-    "Yu Narukami",
-    "Yukari Takeba",
-    "Makoto Yuki",
-    "Yukiko Amagi",
-    "Yumi Ozawa",
-    "Yusuke Kitagawa",
-    "Sophia",
-    "Zenkichi Hasegawa",
-    "Nagisa Kamishiro",
-    "Lufel",
-    "Motoha Arai",
-    "Shun Kano",
-    "Riko Tanemura",
-    "Shoki Ikenami",
-    "Seiji Shiratori",
-    "Kotone Montagne",
-    "Yukimi Fujikawa",
-    "Tomoko Noge",
-    "Leo Kamiyama",
-    "Yaoling Li",
-    "Kiyoshi Kurotani",
-    "Kayo Tomiyama",
-    "Miyu Sahara",
-    "Toshiya Sumi",
-    "Haruna Nishimori",
-    "YUI",
-    "Minami Miyashita",
-    "Chizuko Nagao",
-    "Yumi Shiina",
-    "Ayaka Sakai",
-    "Kira Kitazato",
-    "Masaki Ashiya",
-    "Runa Dogenzaka",
-    "Mio Natsukawa",
-    "Mayumi Hashimoto",
-    "Manaka Nagao",
-    "Ichigo Shikano",
-    "Merope",
+/**
+ * silhouetteMode/database/persona.js
+ * Liste de noms pour l'autocomplétion du mode Silhouette.
+ * Organisée par jeu puis par rôle — même structure que characters_clean.js.
+ * Sous-ensemble du mode Classique : seuls les personnages avec portrait silhouette disponible.
+ */
+export const personas = [
+  // ============================================================
+  // 🎮 PERSONA 1 — P1
+  // ============================================================
 
-  // === Persona 1 & 2 ===
-
+  // ── Protagoniste(s) ──────────────────────────────────────────
   "Naoya Todou",
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
   "Maki Sonomura",
   "Masao Inaba",
   "Kei Nanjo",
@@ -135,24 +21,233 @@
   "Eriko Kirishima",
   "Yuka Ayase",
   "Reiji Kido",
+
+  // ============================================================
+  // 🎮 PERSONA 2 — P2IS / P2EP
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
   "Tatsuya Suou",
+
+  // ── Équipe proche — Innocent Sin ─────────────────────────────
   "Maya Amano",
   "Lisa Silverman",
   "Jun Kurosu",
   "Eikichi Mishina",
-  "Baofu",
-  "Katsuya Suou",
-  "Ulala Serizawa",
-  "Joker",
-  "Izanami",
 
-  // === Persona 5 Tactica ===
+  // ── Équipe proche — Eternal Punishment ───────────────────────
+  "Baofu",
+  "Ulala Serizawa",
+  "Katsuya Suou",
+
+  // ── Antagoniste(s) ────────────────────────────────────────────
+  "Joker",
+
+  // ============================================================
+  // 🎮 PERSONA 3 — P3 / P3FES / P3P / P3R
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
+  "Makoto Yuki",
+  "Kotone Shiomi",
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  "Junpei Iori",
+  "Yukari Takeba",
+  "Fuuka Yamagishi",
+  "Mitsuru Kirijo",
+  "Akihiko Sanada",
+  "Aigis",
+  "Ken Amada",
+  "Koromaru",
+  "Shinjiro Aragaki",
+  "Metis",
+
+  // ── Antagoniste(s) ────────────────────────────────────────────
+  "Nyx",
+  "Ryoji Mochizuki",
+  "Takaya Sakaki",
+  "Jin Shirato",
+  "Chidori Yoshino",
+  "Shuji Ikutsuki",
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  "Elizabeth",
+  "Theodore",
+
+  // ── Social Link ───────────────────────────────────────────────
+  "Kenji Tomochika",
+  "Hidetoshi Odagiri",
+  "Bunkichi",
+  "Mitsuko",
+  "Kazushi Miyamoto",
+  "Rio Iwasaki",
+  "Chihiro Fushimi",
+  "Maya",
+  "Saori Hasegawa",
+  "Keisuke Hiraga",
+  "Maiko Oohashi",
+  "Bebe",
+  "Mutatsu",
+  "Mamoru Hayase",
+  "Nozomi Suemitsu",
+
+  // ── Autres ────────────────────────────────────────────────────
+  "Pharos",
+  "Mr. Edogawa",
+
+  // ============================================================
+  // 🎮 PERSONA 4 — P4 / P4G / P4AU
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
+  "Yu Narukami",
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  "Yosuke Hanamura",
+  "Chie Satonaka",
+  "Yukiko Amagi",
+  "Kanji Tatsumi",
+  "Rise Kujikawa",
+  "Teddie",
+  "Naoto Shirogane",
+
+  // ── Antagoniste(s) ────────────────────────────────────────────
+  "Labrys",
+  "Tohru Adachi",
+  "Izanami",
+  "Sho Minazuki",
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  "Margaret",
+  "Marie",
+
+  // ── Social Link ───────────────────────────────────────────────
+  "Ai Ebihara",
+  "Ayane Matsunaga",
+  "Daisuke Nagase",
+  "Eri Minami",
+  "Fox",
+  "Hisano Kuroda",
+  "Kou Ichijo",
+  "Nanako Dojima",
+  "Naoki Konishi",
+  "Ryotaro Dojima",
+  "Sayako Uehara",
+  "Shu Nakajima",
+  "Yumi Ozawa",
+
+  // ============================================================
+  // 🎮 PERSONA 5 — P5 / P5R / P5S
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
+  "Ren Amamiya",
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  "Morgana",
+  "Ryuji Sakamoto",
+  "Ann Takamaki",
+  "Yusuke Kitagawa",
+  "Makoto Niijima",
+  "Futaba Sakura",
+  "Haru Okumura",
+  "Goro Akechi",
+  "Sumire Yoshizawa",
+  "Sae Niijima",
+  "Sophia",
+  "Zenkichi Hasegawa",
+
+  // ── Antagoniste(s) ────────────────────────────────────────────
+  "Yaldabaoth",
+  "Takuto Maruki",
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  "Caroline & Justine",
+  "Lavenza",
+
+  // ── Social Link / Confidants ──────────────────────────────────
+  "Tae Takemi",
+  "Ichiko Ohya",
+  "Chihaya Mifune",
+  "Munehisa Iwai",
+  "Sojiro Sakura",
+  "Yuuki Mishima",
+  "Hifumi Togo",
+  "Toranosuke Yoshida",
+  "Sadayo Kawakami",
+  "Shinya Oda",
+
+  // ── Autres ────────────────────────────────────────────────────
+  "Jose",
+
+  // ============================================================
+  // 🎮 PERSONA 5 TACTICA — P5T
+  // ============================================================
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
   "Erina",
   "Toshiro Kasukabe",
 
-  // === Persona Q & Q2 ===
-"Rei",
-"Zen",
-"Hikari",
-"Nagi",
-  ];
+  // ============================================================
+  // 🎮 PERSONA 5 X — P5X
+  // ============================================================
+
+  // ── Protagoniste(s) ──────────────────────────────────────────
+  "Nagisa Kamishiro",
+
+  // ── Équipe proche (jouable) ───────────────────────────────────
+  "Lufel",
+  "Motoha Arai",
+  "Shun Kano",
+  "Riko Tanemura",
+  "Shoki Ikenami",
+  "Seiji Shiratori",
+  "Kotone Montagne",
+  "Yukimi Fujikawa",
+  "Tomoko Noge",
+  "Leo Kamiyama",
+  "Yaoling Li",
+  "Kiyoshi Kurotani",
+  "Kayo Tomiyama",
+  "Miyu Sahara",
+  "Toshiya Sumi",
+  "Haruna Nishimori",
+  "YUI",
+  "Minami Miyashita",
+  "Chizuko Nagao",
+  "Yumi Shiina",
+  "Ayaka Sakai",
+  "Kira Kitazato",
+  "Masaki Ashiya",
+  "Runa Dogenzaka",
+  "Mio Natsukawa",
+  "Mayumi Hashimoto",
+  "Manaka Nagao",
+  "Ichigo Shikano",
+
+  // ── Velvet Room ───────────────────────────────────────────────
+  "Merope",
+
+  // ============================================================
+  // 🎮 PERSONA Q & Q2 — PQ / PQ2
+  // ============================================================
+
+  // ── Personnages originaux ─────────────────────────────────────
+  "Rei",
+  "Zen",
+  "Hikari",
+  "Nagi",
+
+  // ============================================================
+  // 🎮 Velvet Room (cross-série) — P1 → P5R
+  // ============================================================
+
+  "Igor",
+
+  // ============================================================
+  // 🎮 Crossover / Spin-offs
+  // ============================================================
+
+  "Hatsune Miku",
+];

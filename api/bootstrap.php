@@ -43,6 +43,7 @@ $allowedOrigins = [
     'http://localhost:5173',     // Vite dev server
     'http://127.0.0.1:5173',
     'https://personadle.net',
+    'https://www.personadle.net',
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -59,6 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
+
+// ── Security headers ─────────────────────────────────────────────────────────
+// Envoyés sur toutes les réponses (après CORS pour ne pas interférer).
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
 
 // ── Session sécurisée ────────────────────────────────────────────────────────
 // Durée de vie : 30 jours (persistent login, comme tout site moderne).

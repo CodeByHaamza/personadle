@@ -7,20 +7,18 @@
    responsive partagé.
    ============================================================= */
 
-
 /* =====================================================
    0. POLICES PERSONNALISÉES
    ===================================================== */
 
 /* Persona 5 Font — utilisée pour les titres Persona-style */
 @font-face {
-  font-family: 'Persona5';
-  src: url('../font/Persona5Font.ttf') format('truetype');
+  font-family: "Persona5";
+  src: url("../font/Persona5Font.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
-
 
 /* =====================================================
    1. BASE & BODY
@@ -50,7 +48,7 @@ body::before {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-image: url('../img/personadle_wallpaper.jpg');
+  background-image: url("../img/personadle_wallpaper.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -62,17 +60,17 @@ body::before {
 
 /* Fond sombre spécifique au dark mode */
 body.darkmode::before {
-  background-image: url('../img/personadle_wallpaper_dark.jpg');
+  background-image: url("../img/personadle_wallpaper_dark.jpg");
 }
 
 /* Fond adapté format portrait sur mobile */
 @media (max-width: 768px) {
   body::before {
-    background-image: url('../img/personadle_wallpaper_phone.jpeg');
+    background-image: url("../img/personadle_wallpaper_phone.jpeg");
   }
 
   body.darkmode::before {
-    background-image: url('../img/personadle_wallpaper_dark_phone.jpeg');
+    background-image: url("../img/personadle_wallpaper_dark_phone.jpeg");
   }
 }
 
@@ -80,7 +78,6 @@ body.darkmode::before {
 body.modal-open {
   overflow: hidden;
 }
-
 
 /* =====================================================
    2. LOGO DE LA PAGE D'ACCUEIL
@@ -99,7 +96,6 @@ body.modal-open {
   /* Légère mise à l'échelle au survol du logo */
   transform: scale(1.1);
 }
-
 
 /* =====================================================
    3. SYSTÈME DE BOUTONS LINK-WRAPPER
@@ -255,7 +251,6 @@ body.modal-open {
   transition: none;
 }
 
-
 /* =====================================================
    4. TOGGLE MODE SOMBRE
    Bouton fixe en haut à droite pour basculer le thème.
@@ -323,9 +318,15 @@ body.modal-open {
 }
 
 /* Variantes de couleur pour d'autres toggles filtres */
-input:checked + .slider.blue   { background-color: #0074D9; }
-input:checked + .slider.yellow { background-color: #FFDC00; }
-input:checked + .slider.red    { background-color: #FF4136; }
+input:checked + .slider.blue {
+  background-color: #0074d9;
+}
+input:checked + .slider.yellow {
+  background-color: #ffdc00;
+}
+input:checked + .slider.red {
+  background-color: #ff4136;
+}
 
 .slider.round {
   border-radius: 30px;
@@ -333,12 +334,11 @@ input:checked + .slider.red    { background-color: #FF4136; }
 
 /* Libellé à droite du toggle */
 .label-text {
-  font-family: 'Arial Black', sans-serif;
+  font-family: "Arial Black", sans-serif;
   color: white;
   text-shadow: 1px 1px 2px black;
   font-size: 0.9rem;
 }
-
 
 /* =====================================================
    5. BOUTONS FILTRES OPUS (P1 à PQ)
@@ -373,7 +373,7 @@ input:checked + .slider.red    { background-color: #FF4136; }
   font-weight: bold;
   color: white;
   cursor: pointer;
-  font-family: 'Arial Black', sans-serif;
+  font-family: "Arial Black", sans-serif;
   text-shadow: 1px 1px 2px black;
   transition: 0.2s;
   opacity: 0.8;
@@ -386,56 +386,68 @@ input:checked + .slider.red    { background-color: #FF4136; }
 
 /* Filtre actif : halo blanc + noir */
 .filter-btn.active {
-  box-shadow: 0 0 0 3px white, 0 0 0 5px black;
+  box-shadow:
+    0 0 0 3px white,
+    0 0 0 5px black;
   opacity: 1;
 }
 
 /* Persona 1 — Violet mystique et ésotérique */
 .filter-p1 {
-  background: linear-gradient(135deg, #4B0082 0%, #8B00FF 50%, #9370DB 100%);
-  color: #FFFFFF;
-  border: 2px solid #2E0854;
-  box-shadow: 0 0 12px rgba(139, 0, 255, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #4b0082 0%, #8b00ff 50%, #9370db 100%);
+  color: #ffffff;
+  border: 2px solid #2e0854;
+  box-shadow:
+    0 0 12px rgba(139, 0, 255, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
   font-weight: bold;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 /* Persona 2 — Orange feu et passion */
 .filter-p2 {
-  background: linear-gradient(135deg, #FF6B00 0%, #DF9B1E 50%, #FFA500 100%);
-  color: #2C1810;
-  border: 2px solid #8B4000;
-  box-shadow: 0 0 12px rgba(255, 107, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #ff6b00 0%, #df9b1e 50%, #ffa500 100%);
+  color: #2c1810;
+  border: 2px solid #8b4000;
+  box-shadow:
+    0 0 12px rgba(255, 107, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 /* Persona 3 — Bleu nuit et mélancolie */
 .filter-p3 {
-  background: linear-gradient(135deg, #001F5C 0%, #0074D9 50%, #4DA6FF 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, #001f5c 0%, #0074d9 50%, #4da6ff 100%);
+  color: #ffffff;
   border: 2px solid #001233;
-  box-shadow: 0 0 12px rgba(0, 116, 217, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 0 12px rgba(0, 116, 217, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
   font-weight: bold;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 /* Persona 4 — Jaune lumineux et optimiste */
 .filter-p4 {
-  background: linear-gradient(135deg, #FFD700 0%, #FFDC00 50%, #FFF200 100%);
-  color: #2C2C2C;
-  border: 2px solid #B8860B;
-  box-shadow: 0 0 12px rgba(255, 220, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #ffd700 0%, #ffdc00 50%, #fff200 100%);
+  color: #2c2c2c;
+  border: 2px solid #b8860b;
+  box-shadow:
+    0 0 12px rgba(255, 220, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.6);
 }
 
 /* Persona 5 — Rouge rebelle et stylé */
 .filter-p5 {
-  background: linear-gradient(135deg, #CC0000 0%, #FF4136 50%, #FF6B6B 100%);
-  color: #FFFFFF;
-  border: 2px solid #8B0000;
-  box-shadow: 0 0 12px rgba(255, 65, 54, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #cc0000 0%, #ff4136 50%, #ff6b6b 100%);
+  color: #ffffff;
+  border: 2px solid #8b0000;
+  box-shadow:
+    0 0 12px rgba(255, 65, 54, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2);
   font-weight: bold;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
@@ -450,15 +462,16 @@ input:checked + .slider.red    { background-color: #FF4136; }
 
 /* Persona Q — Or aventure cartoonesque */
 .filter-pq {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
-  color: #2C1810;
-  border: 3px solid #8B4513;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 50%, #ff8c00 100%);
+  color: #2c1810;
+  border: 3px solid #8b4513;
+  box-shadow:
+    0 0 10px rgba(255, 215, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
   position: relative;
 }
-
 
 /* =====================================================
    6. CHAMP DE SAISIE ET ZONE D'INPUT
@@ -522,7 +535,6 @@ input:checked + .slider.red    { background-color: #FF4136; }
   margin-left: 16px;
 }
 
-
 /* =====================================================
    7. AUTOCOMPLÉTION
    Dropdown de suggestions de noms de personnages.
@@ -543,7 +555,7 @@ input:checked + .slider.red    { background-color: #FF4136; }
   width: 340px;
   max-height: 320px;
   overflow-y: auto;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 
 /* Chaque option de l'autocomplétion */
@@ -593,6 +605,13 @@ input:checked + .slider.red    { background-color: #FF4136; }
   background-color: #7b8383 !important;
 }
 
+/* Real name displayed under a codename in autocomplete suggestions */
+.realname {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
+  line-height: 1.1;
+}
 
 /* =====================================================
    8. COMPTEURS D'ESSAIS (Hint / Give Up)
@@ -630,7 +649,9 @@ input:checked + .slider.red    { background-color: #FF4136; }
   font-weight: bold;
   font-family: "Segoe UI", sans-serif;
   box-shadow: 0 0 6px rgba(255, 193, 7, 0.5);
-  transition: transform 0.2s ease, background-color 0.3s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.3s ease;
 }
 
 /* Compteur activé (max d'essais atteint) */
@@ -639,7 +660,6 @@ input:checked + .slider.red    { background-color: #FF4136; }
   color: black;
   transform: scale(1.05);
 }
-
 
 /* =====================================================
    9. MODALES
@@ -680,7 +700,7 @@ input:checked + .slider.red    { background-color: #FF4136; }
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -771,7 +791,6 @@ input:checked + .slider.red    { background-color: #FF4136; }
   margin-top: 20px;
 }
 
-
 /* =====================================================
    10. ZONE TITRE DES MODES (emoji-hint-zone)
    Boîte bleue dégradée utilisée comme en-tête dans tous
@@ -800,7 +819,6 @@ input:checked + .slider.red    { background-color: #FF4136; }
   margin-top: 10px;
 }
 
-
 /* =====================================================
    11. BOÎTE DE VICTOIRE
    Affichée quand le joueur trouve la bonne réponse.
@@ -818,7 +836,7 @@ input:checked + .slider.red    { background-color: #FF4136; }
   background-color: #e7e7e7;
   border: 3px solid #000000;
   box-shadow: 0 0 18px #147501bb;
-  font-family: 'Arial Black', Impact, sans-serif;
+  font-family: "Arial Black", Impact, sans-serif;
   text-align: center;
   animation: pulseWin 0.5s ease-in-out;
 }
@@ -846,7 +864,9 @@ input:checked + .slider.red    { background-color: #FF4136; }
   color: rgb(255, 255, 255);
   font-size: 1.1rem;
   line-height: 1.4;
-  text-shadow: 1px 1px 0 #000, 2px 2px 0 #857679;
+  text-shadow:
+    1px 1px 0 #000,
+    2px 2px 0 #857679;
 }
 
 /* Nom du Persona dans le message de victoire */
@@ -854,7 +874,9 @@ input:checked + .slider.red    { background-color: #FF4136; }
   color: #e53935;
   letter-spacing: 1.2px;
   font-weight: bold;
-  text-shadow: 0 0 4px #fcfcfc, 0 0 8px #b71c1c;
+  text-shadow:
+    0 0 4px #fcfcfc,
+    0 0 8px #b71c1c;
   animation: appear-glow 0.8s ease forwards;
   opacity: 0;
 }
@@ -864,7 +886,9 @@ input:checked + .slider.red    { background-color: #FF4136; }
   color: #3498db;
   letter-spacing: 1px;
   font-weight: bold;
-  text-shadow: 0 0 4px #ffffff, 0 0 6px #2c3e50;
+  text-shadow:
+    0 0 4px #ffffff,
+    0 0 6px #2c3e50;
 }
 
 /* Marges pour les noms */
@@ -898,7 +922,6 @@ input:checked + .slider.red    { background-color: #FF4136; }
   text-align: center;
   color: inherit;
 }
-
 
 /* =====================================================
    12. LISTE DES MAUVAISES RÉPONSES
@@ -952,7 +975,6 @@ input:checked + .slider.red    { background-color: #FF4136; }
   animation: shake 0.5s;
 }
 
-
 /* =====================================================
    13. NAVIGATION ENTRE MODES
    Boutons "Mode précédent" et "Mode suivant" affichés
@@ -1001,7 +1023,6 @@ input:checked + .slider.red    { background-color: #FF4136; }
   box-shadow: 0 0 18px #f0c60c;
 }
 
-
 /* =====================================================
    14. CONFETTIS DE VICTOIRE
    Emojis animés en diagonale lors d'une victoire.
@@ -1016,7 +1037,6 @@ input:checked + .slider.red    { background-color: #FF4136; }
   transform: translate(0, 0);
 }
 
-
 /* =====================================================
    15. FOOTER
    ===================================================== */
@@ -1027,16 +1047,25 @@ footer {
   text-align: center;
   padding: 15px;
   font-size: 14px;
-  position: relative;
-  bottom: 0;
   width: 100%;
   font-family: Arial, sans-serif;
+  box-sizing: border-box;
 }
 
 footer p {
   margin: 5px 0;
 }
 
+footer a {
+  color: #bbb;
+}
+footer a:visited {
+  color: #bbb;
+}
+footer a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
 
 /* =====================================================
    16. KEYFRAMES / ANIMATIONS GLOBALES
@@ -1044,46 +1073,73 @@ footer p {
 
 /* Tilt + bounce de l'image active au survol des boutons */
 @keyframes tiltBounce {
-  0%   { transform: scale(1)    rotate(-7deg); }
-  50%  { transform: scale(1.5)  rotate(-7deg); }
-  100% { transform: scale(1.15) rotate(-7deg); }
+  0% {
+    transform: scale(1) rotate(-7deg);
+  }
+  50% {
+    transform: scale(1.5) rotate(-7deg);
+  }
+  100% {
+    transform: scale(1.15) rotate(-7deg);
+  }
 }
 
 @keyframes tiltBounceAlt {
-  0%   { transform: scale(1)    rotate(7deg); }
-  50%  { transform: scale(1.5)  rotate(7deg); }
-  100% { transform: scale(1.15) rotate(7deg); }
+  0% {
+    transform: scale(1) rotate(7deg);
+  }
+  50% {
+    transform: scale(1.5) rotate(7deg);
+  }
+  100% {
+    transform: scale(1.15) rotate(7deg);
+  }
 }
 
 /* Oscillation jelly des formes SVG décoratives */
 @keyframes jelly {
   0% {
-    transform: scale(1.05, 1) skewX(8deg) translateY(1px)
-               rotateX(10deg) rotateY(5deg) rotateZ(-5deg);
+    transform: scale(1.05, 1) skewX(8deg) translateY(1px) rotateX(10deg) rotateY(5deg)
+      rotateZ(-5deg);
   }
   50% {
-    transform: scale(1.05, 1.05) skewX(-5deg) translateY(-1px)
-               translateZ(-10px);
+    transform: scale(1.05, 1.05) skewX(-5deg) translateY(-1px) translateZ(-10px);
   }
   100% {
-    transform: scale(1.05, 1) skewX(8deg) translateY(1px)
-               rotateX(-10deg) rotateY(-5deg) rotateZ(-5deg);
+    transform: scale(1.05, 1) skewX(8deg) translateY(1px) rotateX(-10deg) rotateY(-5deg)
+      rotateZ(-5deg);
   }
 }
 
 /* Secouement horizontal lors d'une erreur */
 @keyframes shake {
-  0%   { transform: translateX(0); }
-  25%  { transform: translateX(-5px); }
-  50%  { transform: translateX(5px); }
-  75%  { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 /* Apparition en fondu (wrong-mini, etc.) */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Explosion diagonale des confettis de victoire */
@@ -1100,27 +1156,48 @@ footer p {
 
 /* Pulsation d'entrée de la victory-box */
 @keyframes pulseWin {
-  0%   { transform: scale(0.95); opacity: 0.2; }
-  100% { transform: scale(1);    opacity: 1; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Apparition progressive du nom du Persona */
 @keyframes appear-glow {
-  to { opacity: 1; }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Lueur animée sur les noms (usage futur / décoratif) */
 @keyframes glow {
-  from { text-shadow: 0 0 4px #8e44ad, 0 0 10px #8e44ad; }
-  to   { text-shadow: 0 0 6px #9b59b6, 0 0 14px #9b59b6; }
+  from {
+    text-shadow:
+      0 0 4px #8e44ad,
+      0 0 10px #8e44ad;
+  }
+  to {
+    text-shadow:
+      0 0 6px #9b59b6,
+      0 0 14px #9b59b6;
+  }
 }
 
 /* Apparition de la victory-box (silhouette) */
 @keyframes fadeInVictory {
-  from { opacity: 0; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
-
 
 /* =====================================================
    17. DARK MODE — OVERRIDES GLOBAUX
@@ -1189,11 +1266,19 @@ body.darkmode .modal-content strong {
   color: #c1c1c1;
 }
 
-body.darkmode .modal-content ul  { color: #dddddd; }
-body.darkmode .modal-content p   { color: #cccccc; }
+body.darkmode .modal-content ul {
+  color: #dddddd;
+}
+body.darkmode .modal-content p {
+  color: #cccccc;
+}
 
-body.darkmode .modal .close      { color: #aaa; }
-body.darkmode .modal .close:hover { color: #fff; }
+body.darkmode .modal .close {
+  color: #aaa;
+}
+body.darkmode .modal .close:hover {
+  color: #fff;
+}
 
 /* Force le blanc pour les strong dans les règles */
 body.darkmode #rulesText strong {
@@ -1211,15 +1296,21 @@ body.darkmode .victory-box {
 /* Messages de victoire */
 body.darkmode .victory-message {
   color: #ffffff;
-  text-shadow: 1px 1px 0 #000, 2px 2px 3px #888;
+  text-shadow:
+    1px 1px 0 #000,
+    2px 2px 3px #888;
 }
 
 body.darkmode .persona-name {
-  text-shadow: 0 0 4px #ffffff00, 0 0 8px #630000;
+  text-shadow:
+    0 0 4px #ffffff00,
+    0 0 8px #630000;
 }
 
 body.darkmode .user-name {
-  text-shadow: 0 0 4px #d0d0d000, 0 0 8px #001727;
+  text-shadow:
+    0 0 4px #d0d0d000,
+    0 0 8px #001727;
 }
 
 /* Navigation entre modes */
@@ -1252,7 +1343,6 @@ body.darkmode .next-mode:hover {
   box-shadow: 0 0 18px #f0c60c;
 }
 
-
 /* =====================================================
    18. TAILLES MINIMALES (accessibilité tactile)
    ===================================================== */
@@ -1263,7 +1353,6 @@ button,
   min-height: 48px;
   padding: 12px 20px;
 }
-
 
 /* =====================================================
    19. RESPONSIVE
@@ -1286,7 +1375,6 @@ button,
   }
 }
 
-
 /* -----------------------------------------------
    TABLETTE / MOBILE (≤ 768px)
    Adaptations structurelles importantes :
@@ -1297,7 +1385,6 @@ button,
    - Victoire, navigation, confettis adaptés
 ----------------------------------------------- */
 @media (max-width: 768px) {
-
   /* ---- Base body ---- */
   /* padding-top: 55px = espace pour le .darkmode-toggle fixe (top: 10px ~44px de hauteur)
      Empêche le logo et les filtres de passer sous le toggle en haut à droite. */
@@ -1328,9 +1415,9 @@ button,
   ---------------------------------------------------------- */
   .filter-buttons,
   .filter-switches {
-    position: static;          /* Retire l'absolu du desktop */
+    position: static; /* Retire l'absolu du desktop */
     display: flex;
-    flex-wrap: wrap;           /* Retour à la ligne si nécessaire */
+    flex-wrap: wrap; /* Retour à la ligne si nécessaire */
     justify-content: center;
     gap: 6px;
     padding: 8px 10px;
@@ -1370,7 +1457,7 @@ button,
     padding: 20px 15px;
     margin: 15px auto;
     max-width: 95%;
-    overflow: visible;         /* Pour que le bouton Rules ne soit pas rogné */
+    overflow: visible; /* Pour que le bouton Rules ne soit pas rogné */
   }
 
   /* ---- Zone d'input : reorganisation complète ----
@@ -1387,16 +1474,16 @@ button,
 
   .input-row {
     display: flex;
-    flex-wrap: wrap;           /* Autorise le retour à la ligne */
+    flex-wrap: wrap; /* Autorise le retour à la ligne */
     justify-content: center;
     align-items: center;
     gap: 10px;
-    width: min(380px, 95vw);  /* Largeur max absolue adaptée à l'écran */
+    width: min(380px, 95vw); /* Largeur max absolue adaptée à l'écran */
   }
 
   /* Champ texte : occupe toute la première "rangée" */
   .textbar-container {
-    order: -1;                 /* Passe en premier visuellement */
+    order: -1; /* Passe en premier visuellement */
     flex: 0 0 100%;
     max-width: 300px;
     display: flex;
@@ -1485,8 +1572,12 @@ button,
     padding: 14px 18px;
   }
 
-  .prev-mode { margin-left: 2%; }
-  .next-mode { margin-right: 2%; }
+  .prev-mode {
+    margin-left: 2%;
+  }
+  .next-mode {
+    margin-right: 2%;
+  }
 
   /* ---- Confettis ---- */
   .confetti-emoji {
@@ -1505,7 +1596,6 @@ button,
     margin: 0 8px;
   }
 }
-
 
 /* -----------------------------------------------
    MODALES — RESPONSIVE MOBILE
@@ -1537,7 +1627,6 @@ button,
   }
 }
 
-
 /* -----------------------------------------------
    PETITS MOBILES (≤ 480px)
    Compactage supplémentaire : labels cachés,
@@ -1545,7 +1634,9 @@ button,
 ----------------------------------------------- */
 @media (max-width: 480px) {
   /* padding-top conservé pour le toggle dark mode, côtés réduits */
-  body { padding: 50px 5px 5px 5px; }
+  body {
+    padding: 50px 5px 5px 5px;
+  }
 
   /* ---- Filtres encore plus compacts ---- */
   .filter-btn {
@@ -1597,8 +1688,12 @@ button,
   }
 
   /* ---- Victoire ---- */
-  .victory-box img { width: 100px; }
-  .win-message     { font-size: 1.1rem; }
+  .victory-box img {
+    width: 100px;
+  }
+  .win-message {
+    font-size: 1.1rem;
+  }
 
   /* ---- Navigation modes ---- */
   .nav-button {
@@ -1613,7 +1708,6 @@ button,
   }
 }
 
-
 /* =============================================================================
    CHALLENGE A FRIEND — bouton + modale
    ============================================================================= */
@@ -1623,38 +1717,79 @@ button,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   margin-top: 8px;
-  padding: 7px 18px;
-  background: transparent;
-  color: rgba(200, 0, 0, 0.8);
-  border: 1.5px solid rgba(200, 0, 0, 0.35);
+  padding: 9px 22px;
+  background: linear-gradient(135deg, #c00 0%, #e63946 100%);
+  color: #fff;
+  border: 2px solid transparent;
   border-radius: 100px;
   font-family: inherit;
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
   position: relative;
+  box-shadow:
+    0 0 0 0 rgba(230, 57, 70, 0.55),
+    0 3px 12px rgba(0, 0, 0, 0.25);
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+  animation: challengeIdle 2.8s ease-in-out infinite;
 }
+
+/* Icône épée — légère rotation au repos pour l'effet "prêt au combat" */
+.btn-challenge > span:first-child {
+  display: inline-block;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes challengeIdle {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(230, 57, 70, 0.55),
+      0 3px 12px rgba(0, 0, 0, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 0 7px rgba(230, 57, 70, 0),
+      0 3px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
 .btn-challenge:hover {
-  background: rgba(200, 0, 0, 0.08);
-  border-color: rgba(200, 0, 0, 0.6);
-  color: #cc0000;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #a00 0%, #c1121f 100%);
+  transform: scale(1.07) translateY(-2px);
+  box-shadow:
+    0 0 18px rgba(230, 57, 70, 0.65),
+    0 6px 20px rgba(0, 0, 0, 0.35);
+  animation: none;
+}
+.btn-challenge:hover > span:first-child {
+  transform: rotate(-20deg) scale(1.25);
 }
 .btn-challenge:active {
-  transform: translateY(0);
+  transform: scale(0.96) translateY(0);
+  box-shadow:
+    0 0 8px rgba(230, 57, 70, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.2);
 }
+
 body.darkmode .btn-challenge {
-  color: rgba(255, 80, 80, 0.75);
-  border-color: rgba(255, 80, 80, 0.28);
+  background: linear-gradient(135deg, #c00 0%, #e63946 100%);
+  box-shadow:
+    0 0 0 0 rgba(255, 80, 80, 0.5),
+    0 3px 14px rgba(0, 0, 0, 0.5);
 }
 body.darkmode .btn-challenge:hover {
-  background: rgba(255, 60, 60, 0.1);
-  border-color: rgba(255, 80, 80, 0.55);
-  color: #ff5555;
+  background: linear-gradient(135deg, #e63946 0%, #ff5555 100%);
+  box-shadow:
+    0 0 22px rgba(255, 80, 80, 0.6),
+    0 6px 22px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Overlay de la modale ── */
@@ -1670,8 +1805,12 @@ body.darkmode .btn-challenge:hover {
   animation: fadeInOverlay 0.15s ease;
 }
 @keyframes fadeInOverlay {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ── Carte modale ── */
@@ -1688,29 +1827,35 @@ body.darkmode .btn-challenge:hover {
   animation: slideUpCard 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @keyframes slideUpCard {
-  from { transform: translateY(20px) scale(0.97); opacity: 0; }
-  to   { transform: translateY(0) scale(1); opacity: 1; }
+  from {
+    transform: translateY(20px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 /* Variables CSS pour les deux modes */
 :root {
-  --challenge-bg:          #ffffff;
-  --challenge-header-bg:   rgba(200, 0, 0, 0.06);
+  --challenge-bg: #ffffff;
+  --challenge-header-bg: rgba(200, 0, 0, 0.06);
   --challenge-header-text: #b00000;
-  --challenge-border:      rgba(200, 0, 0, 0.15);
-  --challenge-row-hover:   rgba(200, 0, 0, 0.04);
-  --challenge-text:        #1a1a1a;
-  --challenge-text-muted:  #666;
+  --challenge-border: rgba(200, 0, 0, 0.15);
+  --challenge-row-hover: rgba(200, 0, 0, 0.04);
+  --challenge-text: #1a1a1a;
+  --challenge-text-muted: #666;
 }
 
 body.darkmode {
-  --challenge-bg:          #181818;
-  --challenge-header-bg:   rgba(220, 0, 0, 0.1);
+  --challenge-bg: #181818;
+  --challenge-header-bg: rgba(220, 0, 0, 0.1);
   --challenge-header-text: #ff6060;
-  --challenge-border:      rgba(220, 0, 0, 0.2);
-  --challenge-row-hover:   rgba(220, 0, 0, 0.07);
-  --challenge-text:        #f0f0f0;
-  --challenge-text-muted:  #999;
+  --challenge-border: rgba(220, 0, 0, 0.2);
+  --challenge-row-hover: rgba(220, 0, 0, 0.07);
+  --challenge-text: #f0f0f0;
+  --challenge-text-muted: #999;
 }
 
 /* ── Pied de la modale ── */
@@ -1735,7 +1880,9 @@ body.darkmode {
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 4px;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 .challenge-card__footer-close:hover {
   background: var(--challenge-row-hover);
@@ -1767,10 +1914,15 @@ body.darkmode {
   padding: 10px 16px;
   border-bottom: 1px solid var(--challenge-border);
   border-left: 3px solid transparent;
-  transition: background 0.12s, border-left-color 0.15s, transform 0.1s;
+  transition:
+    background 0.12s,
+    border-left-color 0.15s,
+    transform 0.1s;
   cursor: default;
 }
-.challenge-friend-row:last-child { border-bottom: none; }
+.challenge-friend-row:last-child {
+  border-bottom: none;
+}
 .challenge-friend-row:hover {
   background: var(--challenge-row-hover);
   border-left-color: rgba(200, 0, 0, 0.5);
@@ -1809,16 +1961,19 @@ body.darkmode {
 }
 .challenge-friend-row__send {
   padding: 5px 14px;
-  background: rgba(34,197,94,0.15);
+  background: rgba(34, 197, 94, 0.15);
   color: #22c55e;
-  border: 1px solid rgba(34,197,94,0.4);
+  border: 1px solid rgba(34, 197, 94, 0.4);
   border-radius: 100px;
   cursor: pointer;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
   flex-shrink: 0;
   white-space: nowrap;
 }
@@ -1828,18 +1983,16 @@ body.darkmode {
   border-color: #22c55e;
 }
 .challenge-friend-row__send:disabled {
-  color: rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.1);
+  color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
   cursor: default;
 }
 .challenge-friend-row__send.sent {
-  color: rgba(255,255,255,0.3);
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.1);
+  color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
 }
-
-
 
 /* -----------------------------------------------
    APPAREILS TACTILES (sans hover natif)
@@ -1867,7 +2020,6 @@ body.darkmode {
   }
 }
 
-
 /* -----------------------------------------------
    SOCIAL LINK — RANK-UP ANIMATION (Persona-style)
 ----------------------------------------------- */
@@ -1890,7 +2042,9 @@ body.darkmode {
   padding: 16px;
   box-sizing: border-box;
 }
-#sl-rankup-overlay.sl-ru--in  { pointer-events: all; }
+#sl-rankup-overlay.sl-ru--in {
+  pointer-events: all;
+}
 
 /* Backdrop */
 .sl-ru-backdrop {
@@ -1899,27 +2053,47 @@ body.darkmode {
   background: rgba(0, 0, 12, 0);
   transition: background 0.42s ease;
 }
-#sl-rankup-overlay.sl-ru--in  .sl-ru-backdrop { background: rgba(0, 0, 12, 0.96); }
-#sl-rankup-overlay.sl-ru--out .sl-ru-backdrop { background: rgba(0, 0, 12, 0); transition: background 0.35s ease 0.12s; }
+#sl-rankup-overlay.sl-ru--in .sl-ru-backdrop {
+  background: rgba(0, 0, 12, 0.96);
+}
+#sl-rankup-overlay.sl-ru--out .sl-ru-backdrop {
+  background: rgba(0, 0, 12, 0);
+  transition: background 0.35s ease 0.12s;
+}
 
 /* Background ambient glow */
 .sl-ru-glow {
   position: absolute;
-  width: 560px; height: 560px;
+  width: 560px;
+  height: 560px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(230,57,70,0.12) 0%, rgba(255,150,0,0.07) 45%, transparent 70%);
-  top: 50%; left: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(230, 57, 70, 0.12) 0%,
+    rgba(255, 150, 0, 0.07) 45%,
+    transparent 70%
+  );
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%) scale(0);
   transition: transform 0.6s ease 0.3s;
   pointer-events: none;
 }
-#sl-rankup-overlay.sl-ru--in .sl-ru-glow { transform: translate(-50%, -50%) scale(1); }
+#sl-rankup-overlay.sl-ru--in .sl-ru-glow {
+  transform: translate(-50%, -50%) scale(1);
+}
 
 /* Floating sparkle field */
-.sl-ru-sparkle-field { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.sl-ru-sparkle-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
 .sl-ru-sparkle {
   position: absolute;
-  width: 3px; height: 3px;
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
   background: #ffd700;
   opacity: 0;
@@ -1928,9 +2102,18 @@ body.darkmode {
   animation: sl-ru-sparkle-drift 3.2s ease-out forwards;
 }
 @keyframes sl-ru-sparkle-drift {
-  0%   { opacity: 0;   transform: scale(0); }
-  12%  { opacity: 0.9; transform: scale(1); }
-  100% { opacity: 0;   transform: var(--spark-tx, translate(50px, -130px)) scale(0.15); }
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  12% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: var(--spark-tx, translate(50px, -130px)) scale(0.15);
+  }
 }
 
 /* ── SCENE: two avatar nodes + beam ───────────────── */
@@ -1952,20 +2135,30 @@ body.darkmode {
   transform: scale(0.25);
 }
 #sl-rankup-overlay.sl-ru--in .sl-ru-node--me {
-  opacity: 1; transform: scale(1);
-  transition: opacity 0.32s ease 0.38s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.38s;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.32s ease 0.38s,
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.38s;
 }
 #sl-rankup-overlay.sl-ru--in .sl-ru-node--friend {
-  opacity: 1; transform: scale(1);
-  transition: opacity 0.32s ease 0.54s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.54s;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.32s ease 0.54s,
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.54s;
 }
 #sl-rankup-overlay.sl-ru--out .sl-ru-node {
-  opacity: 0; transform: scale(0.7);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .sl-ru-node-img {
-  width: 66px; height: 66px;
+  width: 66px;
+  height: 66px;
   border-radius: 50%;
   object-fit: contain;
   background: #0e0e0e;
@@ -1973,8 +2166,18 @@ body.darkmode {
   position: relative;
   z-index: 1;
 }
-.sl-ru-node--me     .sl-ru-node-img { border: 3px solid #e63946; box-shadow: 0 0 14px rgba(230,57,70,0.6), 0 0 34px rgba(230,57,70,0.2); }
-.sl-ru-node--friend .sl-ru-node-img { border: 3px solid #ffd700; box-shadow: 0 0 14px rgba(255,215,0,0.6), 0 0 34px rgba(255,215,0,0.2); }
+.sl-ru-node--me .sl-ru-node-img {
+  border: 3px solid #e63946;
+  box-shadow:
+    0 0 14px rgba(230, 57, 70, 0.6),
+    0 0 34px rgba(230, 57, 70, 0.2);
+}
+.sl-ru-node--friend .sl-ru-node-img {
+  border: 3px solid #ffd700;
+  box-shadow:
+    0 0 14px rgba(255, 215, 0, 0.6),
+    0 0 34px rgba(255, 215, 0, 0.2);
+}
 
 .sl-ru-node-ring {
   position: absolute;
@@ -1985,14 +2188,24 @@ body.darkmode {
   transform: scale(1);
   pointer-events: none;
 }
-.sl-ru-node--me     .sl-ru-node-ring { border-color: #e63946; }
-.sl-ru-node--friend .sl-ru-node-ring { border-color: #ffd700; }
+.sl-ru-node--me .sl-ru-node-ring {
+  border-color: #e63946;
+}
+.sl-ru-node--friend .sl-ru-node-ring {
+  border-color: #ffd700;
+}
 #sl-rankup-overlay.sl-ru--in .sl-ru-node-ring {
   animation: sl-ru-ring-pulse 2.2s ease-out infinite 1.1s;
 }
 @keyframes sl-ru-ring-pulse {
-  0%   { transform: scale(1);    opacity: 0.65; }
-  100% { transform: scale(1.65); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+  }
 }
 
 /* ── Beam ──────────────────────────────────────────── */
@@ -2006,61 +2219,102 @@ body.darkmode {
 }
 .sl-ru-beam-track {
   position: absolute;
-  left: 0; right: 0;
+  left: 0;
+  right: 0;
   top: 50%;
   height: 1px;
-  background: rgba(255,255,255,0.07);
+  background: rgba(255, 255, 255, 0.07);
   transform: translateY(-50%);
 }
 .sl-ru-beam-fill {
   position: absolute;
-  left: 0; top: 50%;
+  left: 0;
+  top: 50%;
   height: 3px;
   width: 0%;
   transform: translateY(-50%);
   background: linear-gradient(90deg, #e63946 0%, #ff7700 45%, #ffd700 100%);
   border-radius: 2px;
-  box-shadow: 0 0 8px rgba(255,180,0,0.75), 0 0 22px rgba(255,100,0,0.35);
+  box-shadow:
+    0 0 8px rgba(255, 180, 0, 0.75),
+    0 0 22px rgba(255, 100, 0, 0.35);
   transition: width 0.78s cubic-bezier(0.4, 0, 0.2, 1) 0.78s;
 }
-#sl-rankup-overlay.sl-ru--in .sl-ru-beam-fill { width: 100%; }
+#sl-rankup-overlay.sl-ru--in .sl-ru-beam-fill {
+  width: 100%;
+}
 
 /* Central diamond marker */
 .sl-ru-beam-center {
   position: absolute;
-  left: 50%; top: 50%;
+  left: 50%;
+  top: 50%;
   transform: translate(-50%, -50%) scale(0) rotate(0deg);
   font-size: 1rem;
   color: #ffd700;
-  text-shadow: 0 0 10px rgba(255,215,0,0.95), 0 0 26px rgba(255,215,0,0.5);
+  text-shadow:
+    0 0 10px rgba(255, 215, 0, 0.95),
+    0 0 26px rgba(255, 215, 0, 0.5);
   z-index: 2;
   line-height: 1;
   transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 1.4s;
 }
-#sl-rankup-overlay.sl-ru--in  .sl-ru-beam-center { transform: translate(-50%, -50%) scale(1.15) rotate(45deg); }
-#sl-rankup-overlay.sl-ru--out .sl-ru-beam-center { transform: translate(-50%, -50%) scale(0); transition: transform 0.2s ease; }
+#sl-rankup-overlay.sl-ru--in .sl-ru-beam-center {
+  transform: translate(-50%, -50%) scale(1.15) rotate(45deg);
+}
+#sl-rankup-overlay.sl-ru--out .sl-ru-beam-center {
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.2s ease;
+}
 
 /* Traveling dots */
 .sl-ru-dot {
   position: absolute;
   top: 50%;
-  width: 7px; height: 7px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
   left: 0;
 }
-.sl-ru-dot--1 { background: #ffd700; }
-.sl-ru-dot--2 { background: #ff8800; }
-.sl-ru-dot--3 { background: #fff; }
-#sl-rankup-overlay.sl-ru--in .sl-ru-dot--1 { animation: sl-ru-dot-travel 1.5s ease-in-out infinite 1.7s; }
-#sl-rankup-overlay.sl-ru--in .sl-ru-dot--2 { animation: sl-ru-dot-travel 1.5s ease-in-out infinite 2.1s; }
-#sl-rankup-overlay.sl-ru--in .sl-ru-dot--3 { animation: sl-ru-dot-travel 1.5s ease-in-out infinite 2.5s; }
+.sl-ru-dot--1 {
+  background: #ffd700;
+}
+.sl-ru-dot--2 {
+  background: #ff8800;
+}
+.sl-ru-dot--3 {
+  background: #fff;
+}
+#sl-rankup-overlay.sl-ru--in .sl-ru-dot--1 {
+  animation: sl-ru-dot-travel 1.5s ease-in-out infinite 1.7s;
+}
+#sl-rankup-overlay.sl-ru--in .sl-ru-dot--2 {
+  animation: sl-ru-dot-travel 1.5s ease-in-out infinite 2.1s;
+}
+#sl-rankup-overlay.sl-ru--in .sl-ru-dot--3 {
+  animation: sl-ru-dot-travel 1.5s ease-in-out infinite 2.5s;
+}
 @keyframes sl-ru-dot-travel {
-  0%   { left: 0%;   opacity: 0; transform: translate(-50%,-50%) scale(0.3); }
-  8%   {             opacity: 1; transform: translate(-50%,-50%) scale(1); }
-  92%  {             opacity: 1; transform: translate(-50%,-50%) scale(1); }
-  100% { left: 100%; opacity: 0; transform: translate(-50%,-50%) scale(0.3); }
+  0% {
+    left: 0%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  8% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  92% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
 }
 
 /* ── Rank card ─────────────────────────────────────── */
@@ -2068,24 +2322,30 @@ body.darkmode {
   position: relative;
   z-index: 2;
   text-align: center;
-  font-family: 'Oswald', 'Persona5', Arial, sans-serif;
+  font-family: "Oswald", "Persona5", Arial, sans-serif;
   opacity: 0;
   transform: translateY(20px);
   user-select: none;
 }
 #sl-rankup-overlay.sl-ru--in .sl-ru-card {
-  opacity: 1; transform: translateY(0);
-  transition: opacity 0.3s ease 0.88s, transform 0.48s cubic-bezier(0.34, 1.56, 0.64, 1) 0.88s;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.3s ease 0.88s,
+    transform 0.48s cubic-bezier(0.34, 1.56, 0.64, 1) 0.88s;
 }
 #sl-rankup-overlay.sl-ru--out .sl-ru-card {
-  opacity: 0; transform: translateY(-12px);
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  opacity: 0;
+  transform: translateY(-12px);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
 }
 
 .sl-ru-card-title {
   font-size: 0.62rem;
   letter-spacing: 0.44em;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   margin-bottom: 8px;
 }
@@ -2095,15 +2355,20 @@ body.darkmode {
   color: #fff;
   letter-spacing: 0.06em;
   line-height: 1;
-  text-shadow: 0 0 36px rgba(230,57,70,0.85), 0 2px 6px rgba(0,0,0,0.7);
+  text-shadow:
+    0 0 36px rgba(230, 57, 70, 0.85),
+    0 2px 6px rgba(0, 0, 0, 0.7);
 }
 .sl-ru-rank-num strong {
   color: #e63946;
-  text-shadow: 0 0 38px rgba(230,57,70,1), 0 0 64px rgba(230,57,70,0.45);
+  text-shadow:
+    0 0 38px rgba(230, 57, 70, 1),
+    0 0 64px rgba(230, 57, 70, 0.45);
 }
 .sl-ru-separator {
-  width: 56px; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.55), transparent);
+  width: 56px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.55), transparent);
   margin: 10px auto 9px;
 }
 .sl-ru-name {
@@ -2112,14 +2377,14 @@ body.darkmode {
   color: #ffd700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  text-shadow: 0 0 18px rgba(255,215,0,0.5);
+  text-shadow: 0 0 18px rgba(255, 215, 0, 0.5);
   margin-bottom: 18px;
 }
 .sl-ru-phrase {
-  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
   font-style: italic;
   font-size: clamp(0.82rem, 2.3vw, 1rem);
-  color: rgba(255,255,255,0.72);
+  color: rgba(255, 255, 255, 0.72);
   letter-spacing: 0.03em;
   min-height: 1.45em;
   margin: 0 auto 22px;
@@ -2128,18 +2393,23 @@ body.darkmode {
 }
 /* Blinking cursor while typing */
 .sl-ru-phrase.sl-ru-typing::after {
-  content: '▌';
-  color: rgba(255,255,255,0.55);
+  content: "▌";
+  color: rgba(255, 255, 255, 0.55);
   animation: sl-ru-cursor 0.65s step-end infinite;
 }
 @keyframes sl-ru-cursor {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 .sl-ru-hint {
   font-size: 0.56rem;
   letter-spacing: 0.22em;
-  color: rgba(255,255,255,0.22);
+  color: rgba(255, 255, 255, 0.22);
   text-transform: uppercase;
   opacity: 0;
 }
@@ -2147,8 +2417,13 @@ body.darkmode {
   animation: sl-ru-hint-blink 1.7s ease-in-out infinite 2.4s;
 }
 @keyframes sl-ru-hint-blink {
-  0%, 100% { opacity: 0.22; }
-  50%       { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -2157,36 +2432,61 @@ body.darkmode {
 
 /* ── TIER 2 (ranks 4-6) — stronger glow, thicker beam ── */
 #sl-rankup-overlay.sl-ru--tier2 .sl-ru-glow {
-  width: 680px; height: 680px;
-  background: radial-gradient(circle, rgba(230,57,70,0.2) 0%, rgba(255,150,0,0.13) 45%, transparent 70%);
+  width: 680px;
+  height: 680px;
+  background: radial-gradient(
+    circle,
+    rgba(230, 57, 70, 0.2) 0%,
+    rgba(255, 150, 0, 0.13) 45%,
+    transparent 70%
+  );
 }
 #sl-rankup-overlay.sl-ru--tier2 .sl-ru-beam-fill {
   height: 4px;
-  box-shadow: 0 0 14px rgba(255,180,0,0.9), 0 0 36px rgba(255,100,0,0.55);
+  box-shadow:
+    0 0 14px rgba(255, 180, 0, 0.9),
+    0 0 36px rgba(255, 100, 0, 0.55);
 }
 #sl-rankup-overlay.sl-ru--tier2 .sl-ru-node-ring {
   animation-duration: 1.8s;
 }
 #sl-rankup-overlay.sl-ru--tier2 .sl-ru-rank-num {
-  text-shadow: 0 0 48px rgba(230,57,70,1), 0 2px 6px rgba(0,0,0,0.7);
+  text-shadow:
+    0 0 48px rgba(230, 57, 70, 1),
+    0 2px 6px rgba(0, 0, 0, 0.7);
 }
 
 /* ── TIER 3 (ranks 7-9) — gold shift, pulsing beam, double rings ── */
 #sl-rankup-overlay.sl-ru--tier3 .sl-ru-glow {
-  width: 820px; height: 820px;
-  background: radial-gradient(circle, rgba(255,200,0,0.22) 0%, rgba(230,57,70,0.16) 42%, transparent 68%);
+  width: 820px;
+  height: 820px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 200, 0, 0.22) 0%,
+    rgba(230, 57, 70, 0.16) 42%,
+    transparent 68%
+  );
 }
 #sl-rankup-overlay.sl-ru--tier3 .sl-ru-beam-fill {
   height: 5px;
   background: linear-gradient(90deg, #ff7700 0%, #ffd700 50%, #fff7a0 100%);
-  box-shadow: 0 0 18px rgba(255,215,0,1), 0 0 44px rgba(255,180,0,0.65);
+  box-shadow:
+    0 0 18px rgba(255, 215, 0, 1),
+    0 0 44px rgba(255, 180, 0, 0.65);
 }
 #sl-rankup-overlay.sl-ru--tier3.sl-ru--in .sl-ru-beam-fill {
   animation: sl-ru-beam-pulse 1s ease-in-out infinite 1.7s;
 }
 @keyframes sl-ru-beam-pulse {
-  0%, 100% { box-shadow: 0 0 12px rgba(255,215,0,0.7); }
-  50%       { box-shadow: 0 0 28px rgba(255,215,0,1), 0 0 56px rgba(255,180,0,0.8); }
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.7);
+  }
+  50% {
+    box-shadow:
+      0 0 28px rgba(255, 215, 0, 1),
+      0 0 56px rgba(255, 180, 0, 0.8);
+  }
 }
 #sl-rankup-overlay.sl-ru--tier3 .sl-ru-node-ring {
   animation-duration: 1.4s;
@@ -2199,15 +2499,27 @@ body.darkmode {
 #sl-rankup-overlay.sl-ru--tier3.sl-ru--in .sl-ru-node-ring--outer {
   animation: sl-ru-ring-pulse 2s ease-out infinite 1.35s;
 }
-#sl-rankup-overlay.sl-ru--tier3 .sl-ru-node--me     .sl-ru-node-img { box-shadow: 0 0 20px rgba(230,57,70,0.85), 0 0 50px rgba(230,57,70,0.3); }
-#sl-rankup-overlay.sl-ru--tier3 .sl-ru-node--friend .sl-ru-node-img { box-shadow: 0 0 20px rgba(255,215,0,0.85), 0 0 50px rgba(255,215,0,0.3); }
+#sl-rankup-overlay.sl-ru--tier3 .sl-ru-node--me .sl-ru-node-img {
+  box-shadow:
+    0 0 20px rgba(230, 57, 70, 0.85),
+    0 0 50px rgba(230, 57, 70, 0.3);
+}
+#sl-rankup-overlay.sl-ru--tier3 .sl-ru-node--friend .sl-ru-node-img {
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.85),
+    0 0 50px rgba(255, 215, 0, 0.3);
+}
 #sl-rankup-overlay.sl-ru--tier3 .sl-ru-rank-num strong {
   color: #ffd700;
-  text-shadow: 0 0 42px rgba(255,215,0,1), 0 0 72px rgba(255,215,0,0.5);
+  text-shadow:
+    0 0 42px rgba(255, 215, 0, 1),
+    0 0 72px rgba(255, 215, 0, 0.5);
 }
 #sl-rankup-overlay.sl-ru--tier3 .sl-ru-beam-center {
   font-size: 1.2rem;
-  text-shadow: 0 0 14px rgba(255,215,0,1), 0 0 30px rgba(255,215,0,0.6);
+  text-shadow:
+    0 0 14px rgba(255, 215, 0, 1),
+    0 0 30px rgba(255, 215, 0, 0.6);
 }
 
 /* ── RANK 10 — True Confidant : full gold spectacle ── */
@@ -2223,44 +2535,82 @@ body.darkmode {
   animation: sl-ru-gold-flash-anim 0.5s ease-out 0.28s forwards;
 }
 @keyframes sl-ru-gold-flash-anim {
-  0%   { opacity: 0.55; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 #sl-rankup-overlay.sl-ru--rank10 .sl-ru-glow {
-  width: 1000px; height: 1000px;
-  background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,120,0,0.18) 38%, rgba(230,57,70,0.1) 60%, transparent 75%);
+  width: 1000px;
+  height: 1000px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 215, 0, 0.3) 0%,
+    rgba(255, 120, 0, 0.18) 38%,
+    rgba(230, 57, 70, 0.1) 60%,
+    transparent 75%
+  );
   animation: sl-ru-glow-breathe 2.2s ease-in-out infinite 1.8s;
 }
 @keyframes sl-ru-glow-breathe {
-  0%, 100% { transform: translate(-50%,-50%) scale(1); }
-  50%       { transform: translate(-50%,-50%) scale(1.12); }
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.12);
+  }
 }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-backdrop { background: rgba(0, 0, 4, 0.97); }
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-backdrop {
+  background: rgba(0, 0, 4, 0.97);
+}
 
 /* Beam — full gold, thick, always-pulsing */
 #sl-rankup-overlay.sl-ru--rank10 .sl-ru-beam-fill {
   height: 6px;
   background: linear-gradient(90deg, #e63946 0%, #ff8800 30%, #ffd700 60%, #fffbe0 100%);
-  box-shadow: 0 0 22px rgba(255,215,0,1), 0 0 60px rgba(255,180,0,0.8), 0 0 100px rgba(255,150,0,0.4);
+  box-shadow:
+    0 0 22px rgba(255, 215, 0, 1),
+    0 0 60px rgba(255, 180, 0, 0.8),
+    0 0 100px rgba(255, 150, 0, 0.4);
 }
 #sl-rankup-overlay.sl-ru--rank10.sl-ru--in .sl-ru-beam-fill {
   animation: sl-ru-beam-pulse10 0.8s ease-in-out infinite 1.6s;
 }
 @keyframes sl-ru-beam-pulse10 {
-  0%, 100% { box-shadow: 0 0 16px rgba(255,215,0,0.8); filter: brightness(1); }
-  50%       { box-shadow: 0 0 36px rgba(255,215,0,1), 0 0 80px rgba(255,200,0,0.9); filter: brightness(1.25); }
+  0%,
+  100% {
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.8);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow:
+      0 0 36px rgba(255, 215, 0, 1),
+      0 0 80px rgba(255, 200, 0, 0.9);
+    filter: brightness(1.25);
+  }
 }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-beam-track { background: rgba(255,215,0,0.12); }
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-beam-track {
+  background: rgba(255, 215, 0, 0.12);
+}
 #sl-rankup-overlay.sl-ru--rank10 .sl-ru-beam-center {
   font-size: 1.4rem;
   color: #fff7a0;
-  text-shadow: 0 0 18px rgba(255,215,0,1), 0 0 40px rgba(255,215,0,0.8);
+  text-shadow:
+    0 0 18px rgba(255, 215, 0, 1),
+    0 0 40px rgba(255, 215, 0, 0.8);
   animation: sl-ru-diamond-spin 3s linear infinite 2s;
 }
 @keyframes sl-ru-diamond-spin {
-  from { transform: translate(-50%,-50%) scale(1.15) rotate(45deg); }
-  to   { transform: translate(-50%,-50%) scale(1.15) rotate(405deg); }
+  from {
+    transform: translate(-50%, -50%) scale(1.15) rotate(45deg);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.15) rotate(405deg);
+  }
 }
 /* Override beam-center entry so spin starts from the right base */
 #sl-rankup-overlay.sl-ru--rank10.sl-ru--in .sl-ru-beam-center {
@@ -2268,13 +2618,17 @@ body.darkmode {
 }
 
 /* Avatar nodes — gold border for friend, both glow intensely */
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-node--me     .sl-ru-node-img {
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-node--me .sl-ru-node-img {
   border-color: #ffd700;
-  box-shadow: 0 0 24px rgba(255,215,0,0.9), 0 0 60px rgba(255,215,0,0.4);
+  box-shadow:
+    0 0 24px rgba(255, 215, 0, 0.9),
+    0 0 60px rgba(255, 215, 0, 0.4);
 }
 #sl-rankup-overlay.sl-ru--rank10 .sl-ru-node--friend .sl-ru-node-img {
   border-color: #ffd700;
-  box-shadow: 0 0 24px rgba(255,215,0,0.9), 0 0 60px rgba(255,215,0,0.4);
+  box-shadow:
+    0 0 24px rgba(255, 215, 0, 0.9),
+    0 0 60px rgba(255, 215, 0, 0.4);
 }
 #sl-rankup-overlay.sl-ru--rank10 .sl-ru-node-ring {
   border-color: #ffd700 !important;
@@ -2282,7 +2636,7 @@ body.darkmode {
 }
 #sl-rankup-overlay.sl-ru--rank10 .sl-ru-node-ring--outer {
   inset: -18px;
-  border-color: rgba(255,215,0,0.5) !important;
+  border-color: rgba(255, 215, 0, 0.5) !important;
   animation-duration: 1.9s;
   animation-delay: 1.45s;
 }
@@ -2291,19 +2645,44 @@ body.darkmode {
 }
 
 /* Rank card — full gold palette */
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-card-title { color: rgba(255,215,0,0.55); }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-rank-num { color: #ffd700; text-shadow: 0 0 48px rgba(255,215,0,1), 0 2px 8px rgba(0,0,0,0.7); }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-rank-num strong { color: #fff7a0; text-shadow: 0 0 52px rgba(255,255,200,1), 0 0 88px rgba(255,215,0,0.7); }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-separator { background: linear-gradient(90deg, transparent, rgba(255,215,0,0.8), transparent); width: 80px; }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-name { color: #fff7a0; text-shadow: 0 0 24px rgba(255,215,0,0.8); font-size: clamp(1.1rem, 4vw, 1.75rem); }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-phrase { color: rgba(255,240,180,0.85); }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-hint { color: rgba(255,215,0,0.35); }
-#sl-rankup-overlay.sl-ru--rank10 .sl-ru-phrase.sl-ru-typing::after { color: rgba(255,215,0,0.7); }
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-card-title {
+  color: rgba(255, 215, 0, 0.55);
+}
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-rank-num {
+  color: #ffd700;
+  text-shadow:
+    0 0 48px rgba(255, 215, 0, 1),
+    0 2px 8px rgba(0, 0, 0, 0.7);
+}
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-rank-num strong {
+  color: #fff7a0;
+  text-shadow:
+    0 0 52px rgba(255, 255, 200, 1),
+    0 0 88px rgba(255, 215, 0, 0.7);
+}
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-separator {
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.8), transparent);
+  width: 80px;
+}
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-name {
+  color: #fff7a0;
+  text-shadow: 0 0 24px rgba(255, 215, 0, 0.8);
+  font-size: clamp(1.1rem, 4vw, 1.75rem);
+}
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-phrase {
+  color: rgba(255, 240, 180, 0.85);
+}
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-hint {
+  color: rgba(255, 215, 0, 0.35);
+}
+#sl-rankup-overlay.sl-ru--rank10 .sl-ru-phrase.sl-ru-typing::after {
+  color: rgba(255, 215, 0, 0.7);
+}
 
 /* Extra dots (rank10 only) */
 #sl-rankup-overlay.sl-ru--rank10.sl-ru--in .sl-ru-dot--4 {
   background: #fff7a0;
-  animation: sl-ru-dot-travel 1.5s ease-in-out infinite 2.0s;
+  animation: sl-ru-dot-travel 1.5s ease-in-out infinite 2s;
 }
 #sl-rankup-overlay.sl-ru--rank10.sl-ru--in .sl-ru-dot--5 {
   background: #ffd700;
@@ -2320,7 +2699,7 @@ body.darkmode {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   z-index: 99999;
   min-width: 300px;
   max-width: 360px;
@@ -2355,16 +2734,18 @@ body.darkmode {
   color: #fff;
 }
 .badge-notif-content small {
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.82em;
 }
 
 /* Badge zoom modal — accessible depuis toutes les pages (modes de jeu inclus) */
 .badge-zoom-modal {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.92);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.92);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2373,16 +2754,18 @@ body.darkmode {
   transition: opacity 0.3s ease;
   backdrop-filter: blur(5px);
 }
-.badge-zoom-modal.show { opacity: 1; }
+.badge-zoom-modal.show {
+  opacity: 1;
+}
 
 .badge-zoom-content {
   position: relative;
   text-align: center;
   padding: 40px;
-  background: rgba(20,20,20,0.98);
+  background: rgba(20, 20, 20, 0.98);
   border-radius: 25px;
   border: 3px solid #ffd700;
-  box-shadow: 0 0 50px rgba(255,215,0,0.6);
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
   max-width: 550px;
   width: 90%;
   animation: zoomPopup 0.25s ease forwards;
@@ -2390,17 +2773,18 @@ body.darkmode {
   opacity: 0;
 }
 .badge-zoom-content img {
-  width: 280px; height: 280px;
+  width: 280px;
+  height: 280px;
   border-radius: 20px;
   margin-bottom: 25px;
-  box-shadow: 0 10px 35px rgba(0,0,0,0.6);
-  border: 2px solid rgba(255,215,0,0.3);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 215, 0, 0.3);
 }
 .badge-zoom-content h3 {
   color: #ffd700;
   font-size: 2.2em;
   margin: 15px 0 10px;
-  text-shadow: 2px 2px 6px rgba(0,0,0,0.8);
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
   font-weight: bold;
 }
 .badge-zoom-content .badge-condition {
@@ -2409,12 +2793,12 @@ body.darkmode {
   font-weight: bold;
   margin: 12px 0;
   padding: 8px 16px;
-  background: rgba(46,204,113,0.15);
+  background: rgba(46, 204, 113, 0.15);
   border-radius: 10px;
   display: inline-block;
 }
 .badge-zoom-content .badge-description {
-  color: rgba(255,255,255,0.9);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1.15em;
   line-height: 1.7;
   margin: 20px auto;
@@ -2425,26 +2809,31 @@ body.darkmode {
 }
 .badge-zoom-close {
   position: absolute;
-  top: 15px; right: 20px;
+  top: 15px;
+  right: 20px;
   font-size: 2.2em;
   color: white;
   cursor: pointer;
   transition: all 0.2s;
   line-height: 1;
-  width: 35px; height: 35px;
+  width: 35px;
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 .badge-zoom-close:hover {
   color: #e74c3c;
-  background: rgba(231,76,60,0.2);
+  background: rgba(231, 76, 60, 0.2);
   transform: rotate(90deg);
 }
 @keyframes zoomPopup {
-  to { transform: scale(1); opacity: 1; }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* =====================================================
@@ -2454,8 +2843,14 @@ body.darkmode {
    ===================================================== */
 
 @keyframes rulesModalIn {
-  from { opacity: 0; transform: translateY(18px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ── Overlay : fond non-scrollable ─────────────────────── */
@@ -2470,7 +2865,9 @@ body.darkmode {
   color: #1e1e1e;
   border: none;
   border-radius: 14px;
-  box-shadow: 0 28px 70px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.07);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.18),
+    0 4px 16px rgba(0, 0, 0, 0.07);
   max-width: 920px;
   width: 96%;
   max-height: 88vh;
@@ -2479,11 +2876,18 @@ body.darkmode {
   overflow-x: hidden;
   animation: rulesModalIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
   scrollbar-width: thin;
-  scrollbar-color: rgba(180,0,0,0.16) transparent;
+  scrollbar-color: rgba(180, 0, 0, 0.16) transparent;
 }
-#rulesModal .modal-content::-webkit-scrollbar       { width: 3px; }
-#rulesModal .modal-content::-webkit-scrollbar-track { background: transparent; }
-#rulesModal .modal-content::-webkit-scrollbar-thumb { background: rgba(180,0,0,0.16); border-radius: 3px; }
+#rulesModal .modal-content::-webkit-scrollbar {
+  width: 3px;
+}
+#rulesModal .modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+#rulesModal .modal-content::-webkit-scrollbar-thumb {
+  background: rgba(180, 0, 0, 0.16);
+  border-radius: 3px;
+}
 
 /* ── Header gradient Persona ───────────────────────────── */
 #rulesModal .modal-content h2 {
@@ -2494,7 +2898,7 @@ body.darkmode {
   padding: 15px 52px 15px 22px;
   background: linear-gradient(120deg, #c80000 0%, #7a0000 100%);
   color: #fff;
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -2505,9 +2909,9 @@ body.darkmode {
   border-radius: 14px 14px 0 0;
 }
 #rulesModal .modal-content h2::before {
-  content: '◆';
+  content: "◆";
   font-size: 0.5em;
-  opacity: 0.60;
+  opacity: 0.6;
   flex-shrink: 0;
 }
 
@@ -2516,12 +2920,14 @@ body.darkmode {
   position: absolute;
   top: 12px;
   right: 18px;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255, 255, 255, 0.45);
   font-size: 22px;
   float: none;
   z-index: 11;
   line-height: 1;
-  transition: color 0.15s, transform 0.15s;
+  transition:
+    color 0.15s,
+    transform 0.15s;
 }
 #rulesModal .modal-content .close:hover {
   color: #fff;
@@ -2536,14 +2942,14 @@ body.darkmode {
 /* ── Séparateurs : discrets ─────────────────────────────── */
 #rulesModal hr.separator {
   border: none;
-  border-top: 1px solid rgba(0,0,0,0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   margin: 8px 0;
 }
 
 /* ── En-têtes de section : typographiques, sans boîte ────── */
 #rulesModal strong {
   display: block;
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -2551,7 +2957,7 @@ body.darkmode {
   color: #c00;
   margin: 10px 0 4px;
   padding: 0 0 4px 0;
-  border-bottom: 1px solid rgba(204,0,0,0.18);
+  border-bottom: 1px solid rgba(204, 0, 0, 0.18);
   background: none;
 }
 
@@ -2590,11 +2996,11 @@ body.darkmode {
   border-radius: 0;
 }
 #rulesModal ul li::before {
-  content: '›';
+  content: "›";
   position: absolute;
   left: 4px;
   top: 3px;
-  color: rgba(204,0,0,0.45);
+  color: rgba(204, 0, 0, 0.45);
   font-size: 1rem;
   line-height: 1.52;
   font-weight: 700;
@@ -2614,7 +3020,7 @@ body.darkmode {
   display: block;
   text-align: center;
   font-size: 0.8rem;
-  color: rgba(0,0,0,0.28);
+  color: rgba(0, 0, 0, 0.28);
   margin-top: 10px;
   font-style: italic;
   letter-spacing: 0.05em;
@@ -2641,14 +3047,20 @@ body.darkmode {
     border-radius: 12px 12px 0 0;
     margin: auto auto 0;
   }
-  #rulesModal.modal { align-items: flex-end; }
+  #rulesModal.modal {
+    align-items: flex-end;
+  }
   #rulesModal .modal-content h2 {
     border-radius: 12px 12px 0 0;
     font-size: 0.85rem;
     padding: 13px 48px 13px 18px;
   }
-  #rulesModal [data-i18n-block] { padding: 12px 16px 16px; }
-  #rulesModal ul li { font-size: 0.83rem; }
+  #rulesModal [data-i18n-block] {
+    padding: 12px 16px 16px;
+  }
+  #rulesModal ul li {
+    font-size: 0.83rem;
+  }
 }
 
 /* ══ DARK MODE ════════════════════════════════════════════ */
@@ -2656,38 +3068,54 @@ body.darkmode {
 body.darkmode #rulesModal .modal-content {
   background: #13131a;
   color: #ddd;
-  box-shadow: 0 28px 70px rgba(0,0,0,0.75), 0 4px 16px rgba(0,0,0,0.50);
-  scrollbar-color: rgba(210,40,50,0.24) transparent;
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.75),
+    0 4px 16px rgba(0, 0, 0, 0.5);
+  scrollbar-color: rgba(210, 40, 50, 0.24) transparent;
 }
 body.darkmode #rulesModal .modal-content::-webkit-scrollbar-thumb {
-  background: rgba(210,40,50,0.24);
+  background: rgba(210, 40, 50, 0.24);
 }
 
 body.darkmode #rulesModal .modal-content h2 {
   background: linear-gradient(120deg, #960010 0%, #480006 100%);
 }
 
-body.darkmode #rulesModal .modal-content .close { color: rgba(255,255,255,0.35); }
-body.darkmode #rulesModal .modal-content .close:hover { color: #fff; }
+body.darkmode #rulesModal .modal-content .close {
+  color: rgba(255, 255, 255, 0.35);
+}
+body.darkmode #rulesModal .modal-content .close:hover {
+  color: #fff;
+}
 
-body.darkmode #rulesModal hr.separator { border-top-color: rgba(255,255,255,0.06); }
+body.darkmode #rulesModal hr.separator {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
 
 body.darkmode #rulesModal strong {
   color: #f05050;
-  border-bottom-color: rgba(220,50,50,0.20);
+  border-bottom-color: rgba(220, 50, 50, 0.2);
 }
 
-body.darkmode #rulesModal ul li strong { color: #ddd; }
+body.darkmode #rulesModal ul li strong {
+  color: #ddd;
+}
 
 body.darkmode #rulesModal ul li {
   color: #bbb;
 }
-body.darkmode #rulesModal ul li::before { color: rgba(220,70,70,0.50); }
+body.darkmode #rulesModal ul li::before {
+  color: rgba(220, 70, 70, 0.5);
+}
 
 body.darkmode #rulesModal p,
-body.darkmode #rulesModal #rulesText { color: #999; }
+body.darkmode #rulesModal #rulesText {
+  color: #999;
+}
 
-body.darkmode #rulesModal em { color: rgba(255,255,255,0.22); }
+body.darkmode #rulesModal em {
+  color: rgba(255, 255, 255, 0.22);
+}
 
 /* -----------------------------------------------
    ACCESSIBILITÉ : MOUVEMENT RÉDUIT
@@ -2705,4 +3133,3 @@ body.darkmode #rulesModal em { color: rgba(255,255,255,0.22); }
     transform: none;
   }
 }
-

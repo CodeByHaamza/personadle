@@ -4,18 +4,18 @@
  */
 export const portraitsMap = {
   // P3
-  "Aigis": "Aigis",
+  Aigis: "Aigis",
   "Akihiko Sanada": "Akihiko",
   "Junpei Iori": "Junpei",
   "Ken Amada": "Ken",
   "Kotone Shiomi": "Kotone",
-  "Koromaru": "Koromaru",
-  "Lavenza": "Lavenza",
+  Koromaru: "Koromaru",
+  Lavenza: "Lavenza",
   "Makoto Yuki": "Yuki",
   "Mitsuru Kirijo": "Mitsuru",
   "Shinjiro Aragaki": "Shinjiro",
   "Yukari Takeba": "Yukari",
-  "Metis": "Metis",
+  Metis: "Metis",
   "Aigis ( P3FES )": "Aigis_FES",
   "Fuuka Yamagishi": "Fuuka",
 
@@ -35,7 +35,7 @@ export const portraitsMap = {
   // Velvet Room
   "Caroline & Justine": "Caroline_and_Justine",
 
-    // P5X
+  // P5X
   "Wonder ( Nagisa Kamishiro )": "Wonder",
   "Wonder Chinese New Year ( Nagisa Kamishiro )": "Wonder_ChineseNY",
   "Wonder Velvet ( Nagisa Kamishiro )": "Wonder_Velvet",
@@ -68,5 +68,4 @@ export const portraitsMap = {
   "Vino ( Chizuko Nagao )": "Vino",
   "Luce ( Shoki Ikenami )": "Luce",
   "Berry ( Ichigo Shikano )": "Berry",
-
 };

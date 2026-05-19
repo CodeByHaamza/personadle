@@ -4,7 +4,6 @@
    classes de victoire spécifiques (failure-text, success-text).
    ============================================================= */
 
-
 /* =====================================================
    1. BOÎTE D'AFFICHAGE DU PERSONA
    Cadre rouge sombre présentant l'image du Persona
@@ -35,7 +34,6 @@
   transition: transform 0.3s ease;
 }
 
-
 /* =====================================================
    2. CLASSES DE RÉSULTAT (créées dynamiquement par JS)
    Appliquées sur des divs .victory-message dans
@@ -54,7 +52,6 @@
   font-weight: bold;
 }
 
-
 /* =====================================================
    3. RESPONSIVE — SPÉCIFIQUE PERSONAE
    ===================================================== */
@@ -69,12 +66,11 @@
      que 88% de la largeur du viewport */
   .persona-box {
     width: min(440px, 88vw);
-    height: min(440px, 88vw);   /* Garde le format carré */
+    height: min(440px, 88vw); /* Garde le format carré */
     border-radius: 16px;
     margin: 15px auto;
   }
 }
-
 
 /* -----------------------------------------------
    MOBILE (≤ 480px)
@@ -83,8 +79,8 @@
 ----------------------------------------------- */
 @media (max-width: 480px) {
   .persona-box {
-    width: 90vw;               /* 90% de la largeur de l'écran */
-    height: 90vw;              /* Carré absolu */
+    width: 90vw; /* 90% de la largeur de l'écran */
+    height: 90vw; /* Carré absolu */
     border-radius: 12px;
     border-width: 3px;
     margin: 12px auto;
@@ -107,7 +103,7 @@
   }
 
   #textbar {
-    min-width: 0 !important;   /* Annule le min-width:240px inline */
+    min-width: 0 !important; /* Annule le min-width:240px inline */
     flex: 1 1 120px;
   }
 }

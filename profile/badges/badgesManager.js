@@ -2,7 +2,13 @@
 // 🎖️ PERSONADLE - GESTIONNAIRE DE BADGES
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { badgesList, BADGE_CATEGORIES, eventCodes, isEventCodeValid, getBadgeById } from "./badgesData.js";
+import {
+  badgesList,
+  BADGE_CATEGORIES,
+  eventCodes,
+  isEventCodeValid,
+  getBadgeById,
+} from "./badgesData.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
 let _lastSaveProfile = () => {};
 
@@ -17,7 +23,7 @@ const MESSAGE_DISPLAY_DURATION = 3000;
 // 🔔 FILE DE NOTIFICATIONS (sequential queue)
 // ───────────────────────────────────────────────────────────────────────────
 const _notifQueue = [];
-let   _notifBusy  = false;
+let _notifBusy = false;
 
 /** Ajoute un badge à la file et démarre la lecture si elle est libre. */
 function queueNotification(badge) {
@@ -27,7 +33,10 @@ function queueNotification(badge) {
 
 /** Lit la file une notification à la fois. */
 function _drainNotifQueue() {
-  if (_notifQueue.length === 0) { _notifBusy = false; return; }
+  if (_notifQueue.length === 0) {
+    _notifBusy = false;
+    return;
+  }
   _notifBusy = true;
   const badge = _notifQueue.shift();
   _showBadgeNotificationImmediate(badge, () => _drainNotifQueue());
@@ -46,7 +55,7 @@ function getBadgeName(badge) {
   if (t) {
     const translated = t(`badges.${badge.id}.name`);
     // t() retourne la clé brute si introuvable — on vérifie
-    if (translated && !translated.startsWith('badges.')) return translated;
+    if (translated && !translated.startsWith("badges.")) return translated;
   }
   return badge.name;
 }
@@ -58,9 +67,9 @@ function getBadgeDescription(badge) {
   const t = window.i18n?.t;
   if (t) {
     const translated = t(`badges.${badge.id}.description`);
-    if (translated && !translated.startsWith('badges.')) return translated;
+    if (translated && !translated.startsWith("badges.")) return translated;
   }
-  return badge.description || '';
+  return badge.description || "";
 }
 
 /**
@@ -68,22 +77,26 @@ function getBadgeDescription(badge) {
  * Si secret et verrouillé, retourne "???".
  */
 function getBadgeCondition(badge, isUnlocked) {
-  if (badge.secret && !isUnlocked) return '???';
+  if (badge.secret && !isUnlocked) return "???";
   const t = window.i18n?.t;
   if (t) {
     const translated = t(`badges.${badge.id}.condition`);
-    if (translated && !translated.startsWith('badges.')) return translated;
+    if (translated && !translated.startsWith("badges.")) return translated;
   }
   return badge.condition;
 }
 
 // Labels des catégories (traduits dynamiquement)
 const CATEGORY_LABELS = {
-  [BADGE_CATEGORIES.ACHIEVEMENT]:    { icon: '🏆', key: 'badges.category_achievement',   fallback: 'Achievements'   },
-  [BADGE_CATEGORIES.STREAK]:         { icon: '🔥', key: 'badges.category_streak',         fallback: 'Streaks'        },
-  [BADGE_CATEGORIES.EVENT]:          { icon: '🎟️', key: 'badges.category_event',          fallback: 'Events'         },
-  [BADGE_CATEGORIES.SECRET]:         { icon: '🔒', key: 'badges.category_secret',         fallback: 'Secrets'        },
-  [BADGE_CATEGORIES.SOCIAL]:         { icon: '👥', key: 'badges.category_social',         fallback: 'Social'         },
+  [BADGE_CATEGORIES.ACHIEVEMENT]: {
+    icon: "🏆",
+    key: "badges.category_achievement",
+    fallback: "Achievements",
+  },
+  [BADGE_CATEGORIES.STREAK]: { icon: "🔥", key: "badges.category_streak", fallback: "Streaks" },
+  [BADGE_CATEGORIES.EVENT]: { icon: "🎟️", key: "badges.category_event", fallback: "Events" },
+  [BADGE_CATEGORIES.SECRET]: { icon: "🔒", key: "badges.category_secret", fallback: "Secrets" },
+  [BADGE_CATEGORIES.SOCIAL]: { icon: "👥", key: "badges.category_social", fallback: "Social" },
 };
 
 function getCategoryLabel(category) {
@@ -91,7 +104,7 @@ function getCategoryLabel(category) {
   if (!meta) return category;
   const t = window.i18n?.t;
   const label = t ? t(meta.key) : null;
-  const name = (label && !label.startsWith('badges.')) ? label : meta.fallback;
+  const name = label && !label.startsWith("badges.") ? label : meta.fallback;
   return `${meta.icon} ${name}`;
 }
 
@@ -143,7 +156,7 @@ export function initBadgesSystem(profile, saveProfile) {
  */
 export async function syncBadgesWithBackend(profile, saveProfile) {
   const user = window._currentUser;
-  const api  = window._personadleApi;
+  const api = window._personadleApi;
   if (!user || !api) return;
 
   // Sécurité anti-import : si le profil local appartient à un autre compte,
@@ -151,12 +164,12 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
   const ownProfile = !profile._accountId || String(profile._accountId) === String(user.id);
 
   try {
-    const catalog    = await api.badges.catalog();
-    const backendIds = catalog.filter(b => Number(b.is_unlocked) === 1).map(b => b.slug);
-    const localIds   = profile.badges || [];
+    const catalog = await api.badges.catalog();
+    const backendIds = catalog.filter((b) => Number(b.is_unlocked) === 1).map((b) => b.slug);
+    const localIds = profile.badges || [];
 
     // Backend → local (badges débloqués sur un autre appareil ou directement en BDD)
-    const toAddLocally = backendIds.filter(id => !localIds.includes(id));
+    const toAddLocally = backendIds.filter((id) => !localIds.includes(id));
     if (toAddLocally.length) {
       profile.badges = [...localIds, ...toAddLocally];
       saveProfile();
@@ -164,12 +177,14 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
       // Animer uniquement les badges jamais montrés sur cet appareil
       // (_seenBadgeAnimIds persiste en dehors du profil, résiste aux resets de profil)
       let seenAnims = [];
-      try { seenAnims = JSON.parse(localStorage.getItem('_seenBadgeAnimIds') || '[]'); } catch {}
-      const toAnimate = toAddLocally.filter(id => !seenAnims.includes(id));
+      try {
+        seenAnims = JSON.parse(localStorage.getItem("_seenBadgeAnimIds") || "[]");
+      } catch {}
+      const toAnimate = toAddLocally.filter((id) => !seenAnims.includes(id));
       if (toAnimate.length) {
         seenAnims.push(...toAnimate);
-        localStorage.setItem('_seenBadgeAnimIds', JSON.stringify(seenAnims));
-        toAnimate.forEach(id => {
+        localStorage.setItem("_seenBadgeAnimIds", JSON.stringify(seenAnims));
+        toAnimate.forEach((id) => {
           const badge = getBadgeById(id);
           if (badge) queueNotification(badge);
         });
@@ -182,15 +197,15 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
 
     // Local → backend (bloqué si le profil vient d'un autre compte)
     if (ownProfile) {
-      const toSyncUp = localIds.filter(id => !backendIds.includes(id));
+      const toSyncUp = localIds.filter((id) => !backendIds.includes(id));
       for (const id of toSyncUp) {
         await api.badges.unlock(id).catch(() => {});
       }
     } else {
-      console.warn('[badges] sync local→backend bloqué : profil importé depuis un autre compte');
+      console.warn("[badges] sync local→backend bloqué : profil importé depuis un autre compte");
     }
   } catch (e) {
-    console.warn('⚠️ Badge sync failed (offline?):', e.message);
+    console.warn("⚠️ Badge sync failed (offline?):", e.message);
   }
 }
 
@@ -202,12 +217,13 @@ export async function checkSocialBadges(profile, saveProfile) {
   const user = window._currentUser;
   if (!user) return;
 
-  const _prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+  const _prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
 
   try {
-    const friendsRes = await fetch(`${_prefix}/api/friends`, { credentials: 'include' })
-      .then(r => r.json());
-    const friends    = friendsRes?.friends || [];
+    const friendsRes = await fetch(`${_prefix}/api/friends`, { credentials: "include" }).then((r) =>
+      r.json()
+    );
+    const friends = friendsRes?.friends || [];
     const friendCount = friends.length;
 
     // Best Bro : 2+ amis
@@ -217,15 +233,18 @@ export async function checkSocialBadges(profile, saveProfile) {
     }
 
     // Leblanc Meeting : 3+ amis vus aujourd'hui
-    const today = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris' })
-      .format(new Date()).split('/').reverse().join('-');
-    const onlineToday = friends.filter(f => f.last_seen_at?.startsWith(today));
+    const today = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris" })
+      .format(new Date())
+      .split("/")
+      .reverse()
+      .join("-");
+    const onlineToday = friends.filter((f) => f.last_seen_at?.startsWith(today));
     if (onlineToday.length >= 3 && !profile.leblanc3FriendsDay) {
       profile.leblanc3FriendsDay = today;
       saveProfile();
     }
   } catch (e) {
-    console.warn('⚠️ Social badge check failed:', e.message);
+    console.warn("⚠️ Social badge check failed:", e.message);
   }
 }
 
@@ -233,8 +252,11 @@ export async function checkSocialBadges(profile, saveProfile) {
  * Incrémente uniqueDaysPlayed si aujourd'hui n'a pas encore été compté.
  */
 export function trackUniqueDay(profile, saveProfile) {
-  const today = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris' })
-    .format(new Date()).split('/').reverse().join('-');
+  const today = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris" })
+    .format(new Date())
+    .split("/")
+    .reverse()
+    .join("-");
   if (!profile.uniqueDaysSet) profile.uniqueDaysSet = [];
   if (!profile.uniqueDaysSet.includes(today)) {
     profile.uniqueDaysSet.push(today);
@@ -252,37 +274,37 @@ function initializeProfileBadgesData(profile) {
     profile.badges = [];
     console.log("📦 Created profile.badges array");
   }
-  
+
   if (!profile.selectedBadges) {
     profile.selectedBadges = [];
     console.log("📦 Created profile.selectedBadges array");
   }
-  
+
   if (!profile.eventCodes) {
     profile.eventCodes = [];
     console.log("📦 Created profile.eventCodes array");
   }
-  
+
   if (!profile.foundBurnMyDread) {
     profile.foundBurnMyDread = false;
   }
-  
+
   if (!profile.hasSharedProfile) {
     profile.hasSharedProfile = false;
   }
-  
+
   if (!profile.foundCrow) {
     profile.foundCrow = false;
   }
-  
+
   if (!profile.foundBlackMask) {
     profile.foundBlackMask = false;
   }
-  
+
   if (!profile.pendingBadgeNotifications) {
     profile.pendingBadgeNotifications = [];
   }
-  
+
   // 🎊 Badges événementiels
   if (!profile.eventBadges) {
     profile.eventBadges = {};
@@ -290,59 +312,59 @@ function initializeProfileBadgesData(profile) {
   }
 
   // ── Nouveaux flags v2.1 ──────────────────────────────────────────────────
-  if (profile.classicHintsUsed === undefined)    profile.classicHintsUsed    = 0;
-  if (profile.uniqueDaysPlayed === undefined)     profile.uniqueDaysPlayed    = 0;
-  if (!profile.uniqueDaysSet)                     profile.uniqueDaysSet       = [];
-  if (!profile.characterModeMap)                  profile.characterModeMap    = {};
+  if (profile.classicHintsUsed === undefined) profile.classicHintsUsed = 0;
+  if (profile.uniqueDaysPlayed === undefined) profile.uniqueDaysPlayed = 0;
+  if (!profile.uniqueDaysSet) profile.uniqueDaysSet = [];
+  if (!profile.characterModeMap) profile.characterModeMap = {};
 
   // Strega
-  if (profile.foundHypnos === undefined)          profile.foundHypnos         = false;
-  if (profile.foundMoros === undefined)           profile.foundMoros          = false;
-  if (profile.foundMedea === undefined)           profile.foundMedea          = false;
+  if (profile.foundHypnos === undefined) profile.foundHypnos = false;
+  if (profile.foundMoros === undefined) profile.foundMoros = false;
+  if (profile.foundMedea === undefined) profile.foundMedea = false;
 
   // Twin Fist
-  if (profile.foundMakotoNijima === undefined)    profile.foundMakotoNijima   = false;
+  if (profile.foundMakotoNijima === undefined) profile.foundMakotoNijima = false;
   if (profile.foundMakotoNijimaAOA === undefined) profile.foundMakotoNijimaAOA = false;
-  if (profile.foundAkihiko === undefined)         profile.foundAkihiko        = false;
-  if (profile.foundAkihikoAOA === undefined)      profile.foundAkihikoAOA     = false;
+  if (profile.foundAkihiko === undefined) profile.foundAkihiko = false;
+  if (profile.foundAkihikoAOA === undefined) profile.foundAkihikoAOA = false;
 
   // Twin Spear
-  if (profile.foundKotone === undefined)          profile.foundKotone         = false;
-  if (profile.foundKotoneAOA === undefined)       profile.foundKotoneAOA      = false;
-  if (profile.foundKen === undefined)             profile.foundKen            = false;
-  if (profile.foundKenAOA === undefined)          profile.foundKenAOA         = false;
+  if (profile.foundKotone === undefined) profile.foundKotone = false;
+  if (profile.foundKotoneAOA === undefined) profile.foundKotoneAOA = false;
+  if (profile.foundKen === undefined) profile.foundKen = false;
+  if (profile.foundKenAOA === undefined) profile.foundKenAOA = false;
 
   // Tradition & Modernité
-  if (profile.foundNaotoPersona === undefined)    profile.foundNaotoPersona   = false;
-  if (profile.foundFutabaPersona === undefined)   profile.foundFutabaPersona  = false;
-  if (profile.foundSecretBase === undefined)      profile.foundSecretBase     = false;
+  if (profile.foundNaotoPersona === undefined) profile.foundNaotoPersona = false;
+  if (profile.foundFutabaPersona === undefined) profile.foundFutabaPersona = false;
+  if (profile.foundSecretBase === undefined) profile.foundSecretBase = false;
   if (profile.foundWhenMotherWasThere === undefined) profile.foundWhenMotherWasThere = false;
 
   // Music
-  if (profile.gaveUpOnOurLight === undefined)     profile.gaveUpOnOurLight    = false;
+  if (profile.gaveUpOnOurLight === undefined) profile.gaveUpOnOurLight = false;
 
   // For Real (Ryuji)
-  if (profile.foundRyujiAOA === undefined)        profile.foundRyujiAOA       = false;
-  if (profile.foundRyujiPersona === undefined)    profile.foundRyujiPersona   = false;
+  if (profile.foundRyujiAOA === undefined) profile.foundRyujiAOA = false;
+  if (profile.foundRyujiPersona === undefined) profile.foundRyujiPersona = false;
 
   // Sociaux
-  if (!profile.visitedProfileIds)                 profile.visitedProfileIds   = [];
-  if (profile.leblanc3FriendsDay === undefined)   profile.leblanc3FriendsDay  = null;
-  if (profile.hasTwoFriends === undefined)        profile.hasTwoFriends       = false;
+  if (!profile.visitedProfileIds) profile.visitedProfileIds = [];
+  if (profile.leblanc3FriendsDay === undefined) profile.leblanc3FriendsDay = null;
+  if (profile.hasTwoFriends === undefined) profile.hasTwoFriends = false;
 
   // Événements
-  if (profile.playedDec31 === undefined)          profile.playedDec31         = false;
-  if (profile.playedJan1 === undefined)           profile.playedJan1          = false;
+  if (profile.playedDec31 === undefined) profile.playedDec31 = false;
+  if (profile.playedJan1 === undefined) profile.playedJan1 = false;
 
   // Gameplay
-  if (profile.hasWonFirstTry === undefined)       profile.hasWonFirstTry      = false;
-  if (profile.hasWonAOAFirstTry === undefined)    profile.hasWonAOAFirstTry   = false;
-  if (profile.playedAtNight === undefined)        profile.playedAtNight       = false;
-  if (profile.playedAtNyxHour === undefined)      profile.playedAtNyxHour     = false;
+  if (profile.hasWonFirstTry === undefined) profile.hasWonFirstTry = false;
+  if (profile.hasWonAOAFirstTry === undefined) profile.hasWonAOAFirstTry = false;
+  if (profile.playedAtNight === undefined) profile.playedAtNight = false;
+  if (profile.playedAtNyxHour === undefined) profile.playedAtNyxHour = false;
 
   // Secrets
-  if (profile.hifumiArchivesRead === undefined)   profile.hifumiArchivesRead  = false;
-  if (profile.reportSubmitted === undefined)      profile.reportSubmitted     = false;
+  if (profile.hifumiArchivesRead === undefined) profile.hifumiArchivesRead = false;
+  if (profile.reportSubmitted === undefined) profile.reportSubmitted = false;
 
   // Streak restore
   if (profile.streakRestorationUsed === undefined) profile.streakRestorationUsed = false;
@@ -359,7 +381,7 @@ function initializeProfileBadgesData(profile) {
  */
 function checkAndUnlockBadges(profile, saveProfile) {
   console.log("🔍 Checking badges...");
-  
+
   const stats = profile.stats || {};
   const newlyUnlocked = [];
 
@@ -372,7 +394,7 @@ function checkAndUnlockBadges(profile, saveProfile) {
     try {
       // Vérifier la condition de déblocage
       const isUnlocked = badge.check(stats, profile);
-      
+
       if (isUnlocked) {
         console.log(`🎉 Badge unlocked: ${badge.name} (${badge.id})`);
         profile.badges.push(badge.id);
@@ -390,9 +412,11 @@ function checkAndUnlockBadges(profile, saveProfile) {
 
     // Afficher les notifications uniquement pour les badges jamais montrés
     let seenAnims = [];
-    try { seenAnims = JSON.parse(localStorage.getItem('_seenBadgeAnimIds') || '[]'); } catch {}
+    try {
+      seenAnims = JSON.parse(localStorage.getItem("_seenBadgeAnimIds") || "[]");
+    } catch {}
     let delay = 0;
-    newlyUnlocked.forEach(badge => {
+    newlyUnlocked.forEach((badge) => {
       if (!seenAnims.includes(badge.id)) {
         seenAnims.push(badge.id);
         const d = delay;
@@ -401,7 +425,7 @@ function checkAndUnlockBadges(profile, saveProfile) {
       }
       window._personadleApi?.badges?.unlock(badge.id).catch(() => {});
     });
-    localStorage.setItem('_seenBadgeAnimIds', JSON.stringify(seenAnims));
+    localStorage.setItem("_seenBadgeAnimIds", JSON.stringify(seenAnims));
   }
 }
 
@@ -417,13 +441,20 @@ function checkPendingBadgeNotifications(profile, saveProfile) {
 
   // Filtrer les badges dont l'animation a déjà été montrée (clé indépendante du profil)
   let seenAnims = [];
-  try { seenAnims = JSON.parse(localStorage.getItem('_seenBadgeAnimIds') || '[]'); } catch {}
+  try {
+    seenAnims = JSON.parse(localStorage.getItem("_seenBadgeAnimIds") || "[]");
+  } catch {}
 
-  const toNotify = profile.pendingBadgeNotifications.filter(id => !seenAnims.includes(id));
-  console.log('🔔 Pending badge notifications:', profile.pendingBadgeNotifications, '→ to show:', toNotify);
+  const toNotify = profile.pendingBadgeNotifications.filter((id) => !seenAnims.includes(id));
+  console.log(
+    "🔔 Pending badge notifications:",
+    profile.pendingBadgeNotifications,
+    "→ to show:",
+    toNotify
+  );
 
   let delay = 0;
-  toNotify.forEach(badgeId => {
+  toNotify.forEach((badgeId) => {
     const badge = getBadgeById(badgeId);
     if (badge) {
       seenAnims.push(badgeId);
@@ -433,7 +464,7 @@ function checkPendingBadgeNotifications(profile, saveProfile) {
     }
   });
 
-  if (toNotify.length) localStorage.setItem('_seenBadgeAnimIds', JSON.stringify(seenAnims));
+  if (toNotify.length) localStorage.setItem("_seenBadgeAnimIds", JSON.stringify(seenAnims));
 
   // Vider la liste des notifications en attente
   profile.pendingBadgeNotifications = [];
@@ -488,9 +519,9 @@ function _showBadgeNotificationImmediate(badge, onDone) {
   const notif = document.createElement("div");
   notif.className = "badge-notification";
   notif.style.cursor = "pointer";
-  const _k = 'badges.notification_title';
+  const _k = "badges.notification_title";
   const _r = window.i18n?.t?.(_k);
-  const notifTitle = (_r && _r !== _k) ? _r : '🎖️ Badge Unlocked!';
+  const notifTitle = _r && _r !== _k ? _r : "🎖️ Badge Unlocked!";
   const name = getBadgeName(badge);
   const desc = getBadgeDescription(badge);
 
@@ -545,7 +576,7 @@ function showBadgeZoom(badge) {
       <img src="${badge.img}" alt="${zName}">
       <h3>${zName}</h3>
       <p class="badge-condition">${zCond}</p>
-      ${zDesc ? `<p class="badge-description">${zDesc}</p>` : ''}
+      ${zDesc ? `<p class="badge-description">${zDesc}</p>` : ""}
     </div>
   `;
 
@@ -565,8 +596,6 @@ function showBadgeZoom(badge) {
   setTimeout(() => modal.classList.add("show"), 10);
 }
 
-
-
 // ───────────────────────────────────────────────────────────────────────────
 // 🏅 PRÉVISUALISATION DES BADGES (4 badges max)
 // ───────────────────────────────────────────────────────────────────────────
@@ -580,29 +609,31 @@ export function renderBadgesPreview(profile) {
   if (!preview) return;
 
   const ids = profile.selectedBadges || [];
-  preview.innerHTML = '';
+  preview.innerHTML = "";
 
   if (ids.length === 0) {
     preview.innerHTML = `<p style="opacity:0.6; text-align:center;">No badges selected yet.</p>`;
-    window.dispatchEvent(new CustomEvent('badgesRendered'));
+    window.dispatchEvent(new CustomEvent("badgesRendered"));
     return;
   }
 
-  ids.forEach(id => {
+  ids.forEach((id) => {
     const strId = String(id);
-    const badge = badgesList.find(b => b.id === id);
+    const badge = badgesList.find((b) => b.id === id);
     if (!badge) return;
-    const img = document.createElement('img');
-    img.src           = badge.img;
-    img.alt           = badge.name;
-    img.title         = badge.name;
-    img.className     = 'badge-preview-img';
+    const img = document.createElement("img");
+    img.src = badge.img;
+    img.alt = badge.name;
+    img.title = badge.name;
+    img.className = "badge-preview-img";
     img.dataset.badgeId = strId;
-    img.onerror       = () => { img.src = new URL('./images/default.png', import.meta.url).href; };
+    img.onerror = () => {
+      img.src = new URL("./images/default.png", import.meta.url).href;
+    };
     preview.appendChild(img);
   });
 
-  window.dispatchEvent(new CustomEvent('badgesRendered'));
+  window.dispatchEvent(new CustomEvent("badgesRendered"));
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -637,9 +668,11 @@ export function renderBadgesModal(profile, saveProfile) {
   ];
 
   const grouped = {};
-  categoryOrder.forEach(cat => { grouped[cat] = []; });
+  categoryOrder.forEach((cat) => {
+    grouped[cat] = [];
+  });
 
-  badgesList.forEach(badge => {
+  badgesList.forEach((badge) => {
     // Masquer les secrets non débloqués
     if (badge.secret && !profile.badges.includes(badge.id)) return;
     const cat = badge.category || BADGE_CATEGORIES.ACHIEVEMENT;
@@ -648,12 +681,12 @@ export function renderBadgesModal(profile, saveProfile) {
   });
 
   // Générer le HTML par sections
-  let html = '';
-  categoryOrder.forEach(cat => {
+  let html = "";
+  categoryOrder.forEach((cat) => {
     const badges = grouped[cat];
     if (!badges || badges.length === 0) return;
 
-    const unlockedInCat = badges.filter(b => profile.badges.includes(b.id)).length;
+    const unlockedInCat = badges.filter((b) => profile.badges.includes(b.id)).length;
     const catLabel = getCategoryLabel(cat);
 
     html += `
@@ -667,14 +700,15 @@ export function renderBadgesModal(profile, saveProfile) {
         </button>
         <div class="badges-grid-wrap">
         <div class="badges-grid">
-          ${badges.map(badge => {
-            const isUnlocked = profile.badges.includes(badge.id);
-            const isSelected = profile.selectedBadges.includes(badge.id);
-            const name = getBadgeName(badge);
-            const desc = getBadgeDescription(badge);
-            const cond = getBadgeCondition(badge, isUnlocked);
+          ${badges
+            .map((badge) => {
+              const isUnlocked = profile.badges.includes(badge.id);
+              const isSelected = profile.selectedBadges.includes(badge.id);
+              const name = getBadgeName(badge);
+              const desc = getBadgeDescription(badge);
+              const cond = getBadgeCondition(badge, isUnlocked);
 
-            return `
+              return `
               <div
                 class="badge-item ${!isUnlocked ? "locked" : ""} ${isSelected ? "selected" : ""}"
                 data-id="${badge.id}"
@@ -686,15 +720,16 @@ export function renderBadgesModal(profile, saveProfile) {
                   onerror="this.src=new URL('./images/default.png',import.meta.url).href"
                 >
                 <p>${name}</p>
-                ${isSelected ? '<span class="check-mark">✓</span>' : ''}
+                ${isSelected ? '<span class="check-mark">✓</span>' : ""}
                 <div class="badge-tooltip">
-                  ${isUnlocked ? '🔓' : '🔒'} <strong>${name}</strong><br>
+                  ${isUnlocked ? "🔓" : "🔒"} <strong>${name}</strong><br>
                   <span>${cond}</span><br>
                   <small style="opacity:0.8;">${desc}</small>
                 </div>
               </div>
             `;
-          }).join('')}
+            })
+            .join("")}
         </div>
         </div>
       </div>
@@ -737,9 +772,10 @@ function updateBadgeCounter(profile, counter) {
   const percentage = Math.round((unlockedBadges / totalBadges) * 100);
 
   const t = window.i18n?.t;
-  const unlockedLabel = (t && !t('profile.badges_unlocked').startsWith('profile.'))
-    ? t('profile.badges_unlocked')
-    : 'badges unlocked';
+  const unlockedLabel =
+    t && !t("profile.badges_unlocked").startsWith("profile.")
+      ? t("profile.badges_unlocked")
+      : "badges unlocked";
 
   counter.innerHTML = `
     🔓 <strong>${unlockedBadges} / ${totalBadges}</strong> ${unlockedLabel}
@@ -773,34 +809,34 @@ function attachBadgeClickEvents(profile, saveProfile, grid) {
 }
 
 function setupCategoryCollapse(grid) {
-  grid.querySelectorAll('.badges-category-header').forEach(header => {
-    header.addEventListener('click', () => {
-      const section = header.closest('.badges-category-section');
-      const isCollapsed = section.classList.toggle('collapsed');
-      header.setAttribute('aria-expanded', String(!isCollapsed));
+  grid.querySelectorAll(".badges-category-header").forEach((header) => {
+    header.addEventListener("click", () => {
+      const section = header.closest(".badges-category-section");
+      const isCollapsed = section.classList.toggle("collapsed");
+      header.setAttribute("aria-expanded", String(!isCollapsed));
     });
   });
 }
 
 function setupBadgesSearch(grid) {
-  const input = document.getElementById('badgesSearch');
+  const input = document.getElementById("badgesSearch");
   if (!input) return;
-  input.value = '';
+  input.value = "";
   input.oninput = () => {
     const q = input.value.toLowerCase().trim();
-    grid.querySelectorAll('.badges-category-section').forEach(section => {
+    grid.querySelectorAll(".badges-category-section").forEach((section) => {
       let anyVisible = false;
-      section.querySelectorAll('.badge-item').forEach(item => {
-        const name = (item.querySelector('p')?.textContent || '').toLowerCase();
+      section.querySelectorAll(".badge-item").forEach((item) => {
+        const name = (item.querySelector("p")?.textContent || "").toLowerCase();
         const show = !q || name.includes(q);
-        item.style.display = show ? '' : 'none';
+        item.style.display = show ? "" : "none";
         if (show) anyVisible = true;
       });
-      section.style.display = anyVisible ? '' : 'none';
+      section.style.display = anyVisible ? "" : "none";
       // Auto-expand sections that have matching results
       if (q && anyVisible) {
-        section.classList.remove('collapsed');
-        section.querySelector('.badges-category-header')?.setAttribute('aria-expanded', 'true');
+        section.classList.remove("collapsed");
+        section.querySelector(".badges-category-header")?.setAttribute("aria-expanded", "true");
       }
     });
   };
@@ -850,7 +886,7 @@ function adjustTooltipPositions() {
 
     item.addEventListener("mouseenter", function adjustOnHover() {
       const modalRect = modal.getBoundingClientRect();
-      
+
       setTimeout(() => {
         const tooltipRect = tooltip.getBoundingClientRect();
 
@@ -901,7 +937,7 @@ function toggleBadgeSelection(profile, saveProfile, badgeId) {
       showSelectionLimitAlert();
       return;
     }
-    
+
     // Sélectionner
     profile.selectedBadges.push(badgeId);
     console.log(`➕ Badge selected: ${badgeId}`);
@@ -925,9 +961,9 @@ function showSelectionLimitAlert() {
       <small>Deselect one first.</small>
     </div>
   `;
-  
+
   document.body.appendChild(alertDiv);
-  
+
   setTimeout(() => alertDiv.classList.add("show"), 100);
   setTimeout(() => {
     alertDiv.classList.remove("show");
@@ -955,14 +991,14 @@ function setupEventCodeRedeem(profile, saveProfile) {
   }
 
   btn.onclick = () => handleEventCodeSubmit(profile, saveProfile, input, msg);
-  
+
   // Permettre l'envoi avec Enter
   input.onkeypress = (e) => {
     if (e.key === "Enter") {
       handleEventCodeSubmit(profile, saveProfile, input, msg);
     }
   };
-  
+
   console.log("✅ Event code system initialized");
 }
 
@@ -975,7 +1011,7 @@ function setupEventCodeRedeem(profile, saveProfile) {
  */
 function handleEventCodeSubmit(profile, saveProfile, input, msg) {
   const code = input.value.trim().toUpperCase();
-  
+
   // Vérifier que le code n'est pas vide
   if (!code) {
     showCodeMessage(msg, "⚠️ Please enter a code first!", "warning");
@@ -1020,7 +1056,7 @@ function handleEventCodeSubmit(profile, saveProfile, input, msg) {
   saveProfile();
   renderBadgesModal(profile, saveProfile);
   renderBadgesPreview(profile);
-  
+
   input.value = "";
   showCodeMessage(msg, "🎉 Badge unlocked successfully!", "success");
 }
@@ -1037,7 +1073,7 @@ function showCodeMessage(element, text, type) {
   const colors = {
     error: "#e74c3c",
     success: "#2ecc71",
-    warning: "#f39c12"
+    warning: "#f39c12",
   };
 
   element.textContent = text;
@@ -1063,9 +1099,9 @@ function showCodeMessage(element, text, type) {
  */
 export function getBadgesForShare(profile) {
   const result = [];
-  for (const id of (profile.selectedBadges || [])) {
+  for (const id of profile.selectedBadges || []) {
     if (result.length >= MAX_SELECTED_BADGES) break;
-    const badge = badgesList.find(b => b.id === id);
+    const badge = badgesList.find((b) => b.id === id);
     if (badge) result.push(badge);
   }
   return result;
@@ -1081,7 +1117,7 @@ export function markProfileAsShared(profile, saveProfile) {
     profile.hasSharedProfile = true;
     console.log("📸 Profile marked as shared!");
     saveProfile();
-    
+
     // Vérifier et débloquer les badges
     checkAndUnlockBadges(profile, saveProfile);
   }
@@ -1110,9 +1146,9 @@ export function checkEventBadges(inMemoryProfile) {
   // Quand appelée depuis initBadgesSystem, on reçoit le profil en mémoire et on le
   // modifie directement — sinon la sauvegarde ultérieure écraserait nos changements.
   // Quand appelée de manière autonome (intervalle horaire), on lit/écrit localStorage.
-  const standalone = !inMemoryProfile || typeof inMemoryProfile !== 'object';
+  const standalone = !inMemoryProfile || typeof inMemoryProfile !== "object";
   const profile = standalone
-    ? JSON.parse(localStorage.getItem('personaUserProfile'))
+    ? JSON.parse(localStorage.getItem("personaUserProfile"))
     : inMemoryProfile;
 
   if (!profile) {
@@ -1135,7 +1171,9 @@ export function checkEventBadges(inMemoryProfile) {
 
   // _seenBadgeAnimIds persiste indépendamment du profil — résiste aux re-logins
   let seenAnims = [];
-  try { seenAnims = JSON.parse(localStorage.getItem('_seenBadgeAnimIds') || '[]'); } catch {}
+  try {
+    seenAnims = JSON.parse(localStorage.getItem("_seenBadgeAnimIds") || "[]");
+  } catch {}
 
   // Helper : ajoute à pending uniquement si jamais montré
   const _queueEvent = (id) => {
@@ -1153,7 +1191,7 @@ export function checkEventBadges(inMemoryProfile) {
     console.log("🌸 Event detected: Japanese School Year Start (April 1st)");
     profile.eventBadges.rentree = true;
     hasChanges = true;
-    _queueEvent('rentree');
+    _queueEvent("rentree");
   }
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -1164,7 +1202,7 @@ export function checkEventBadges(inMemoryProfile) {
     if (isGW) {
       profile.eventBadges.golden_week = true;
       hasChanges = true;
-      _queueEvent('golden_week');
+      _queueEvent("golden_week");
     }
   }
 
@@ -1174,24 +1212,30 @@ export function checkEventBadges(inMemoryProfile) {
   if (!profile.eventBadges.tanabata && month === 7 && day === 7) {
     profile.eventBadges.tanabata = true;
     hasChanges = true;
-    _queueEvent('tanabata');
+    _queueEvent("tanabata");
   }
 
   // ═══════════════════════════════════════════════════════════════════════
   // 🌑 PROMISED DAY (31 déc + 1er jan, les deux requis)
   // ═══════════════════════════════════════════════════════════════════════
   if (!profile.eventBadges.promised_day) {
-    if (month === 12 && day === 31) { profile.playedDec31 = true; hasChanges = true; }
-    if (month === 1  && day === 1)  { profile.playedJan1  = true; hasChanges = true; }
+    if (month === 12 && day === 31) {
+      profile.playedDec31 = true;
+      hasChanges = true;
+    }
+    if (month === 1 && day === 1) {
+      profile.playedJan1 = true;
+      hasChanges = true;
+    }
     if (profile.playedDec31 && profile.playedJan1) {
       profile.eventBadges.promised_day = true;
-      _queueEvent('promised_day');
+      _queueEvent("promised_day");
     }
   }
 
   // Sauvegarder si mode autonome (intervalle) — en mode inline, le caller sauvegarde
   if (hasChanges && standalone) {
-    localStorage.setItem('personaUserProfile', JSON.stringify(profile));
+    localStorage.setItem("personaUserProfile", JSON.stringify(profile));
     console.log("💾 Event badges saved to profile");
   }
 }
@@ -1219,11 +1263,11 @@ export function initEventBadgesCheck() {
  * Call this after setting badge flags in a game mode's win/giveup handler.
  */
 export function checkBadgesAfterGame() {
-  const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+  const p = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
   if (!p.badges) p.badges = [];
-  const save = () => localStorage.setItem('personaUserProfile', JSON.stringify(p));
+  const save = () => localStorage.setItem("personaUserProfile", JSON.stringify(p));
   checkAndUnlockBadges(p, save);
 }
 
 // Unlock reborn_phoenix when streak-recovery fires, regardless of which page is loaded
-window.addEventListener('personadle:streak-recovered', () => checkBadgesAfterGame());
+window.addEventListener("personadle:streak-recovered", () => checkBadgesAfterGame());

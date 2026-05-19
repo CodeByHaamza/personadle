@@ -7,6 +7,9 @@
  *
  * Fréquence recommandée : toutes les heures.
  * Sécurité : clé secrète (hash_equals), aucune info sensible en réponse.
+ *
+ * Note : 'ever' est exclu — l'API lit directement user_stats (temps réel,
+ * pas de cache). Seuls day/week/month sont alimentés ici.
  */
 
 require_once __DIR__ . '/../bootstrap.php';
@@ -26,11 +29,11 @@ $now   = new DateTime('now', $paris);
 
 $modes = ['all', 'classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
 
+// 'ever' exclu : l'API le calcule live depuis user_stats, jamais depuis le cache.
 $periods = [
-    'day'   => (clone $now)->setTime(0, 0, 0)->format('Y-m-d H:i:s'),
-    'week'  => (clone $now)->modify('monday this week')->setTime(0, 0, 0)->format('Y-m-d H:i:s'),
-    'month' => (clone $now)->modify('first day of this month')->setTime(0, 0, 0)->format('Y-m-d H:i:s'),
-    'ever'  => '2000-01-01 00:00:00',
+    'day'   => (clone $now)->setTime(0, 0, 0)->format('Y-m-d'),
+    'week'  => (clone $now)->modify('monday this week')->setTime(0, 0, 0)->format('Y-m-d'),
+    'month' => (clone $now)->modify('first day of this month')->setTime(0, 0, 0)->format('Y-m-d'),
 ];
 
 $metrics = ['wins', 'winrate', 'streak', 'perfect', 'games'];
@@ -38,8 +41,22 @@ $metrics = ['wins', 'winrate', 'streak', 'perfect', 'games'];
 $processed = 0;
 $errors    = [];
 
+$cleanStmt = $pdo->prepare("
+    DELETE FROM leaderboard_cache
+    WHERE mode = ? AND period = ? AND period_start != ?
+");
+
 foreach ($modes as $mode) {
     foreach ($periods as $period => $periodStart) {
+        // Purger les entrées des périodes précédentes (ex: semaine passée).
+        // L'API ne filtre pas sur period_start — sans ce nettoyage, d'anciens
+        // rangs s'accumulent et faussent les résultats.
+        try {
+            $cleanStmt->execute([$mode, $period, $periodStart . ' 00:00:00']);
+        } catch (Throwable $e) {
+            $errors[] = "cleanup $mode/$period: " . $e->getMessage();
+        }
+
         foreach ($metrics as $metric) {
             try {
                 _recalculate($pdo, $mode, $period, $periodStart, $metric);
@@ -61,54 +78,51 @@ jsonSuccess([
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-function _recalculate(PDO $pdo, string $mode, string $period, string $periodStart, string $metric): void {
-    $modeFilter = ($mode === 'all') ? '' : 'AND us.mode = :mode';
+/**
+ * Recalcule et met à jour leaderboard_cache pour un combo (mode, period, metric).
+ *
+ * Utilise game_sessions filtré par period_start — les scores reflètent
+ * l'activité réelle de la période (jour/semaine/mois en cours), pas les
+ * totaux cumulatifs de user_stats.
+ *
+ * 'streak' sur une période courte = nb de victoires (approximation identique
+ * au fallback live dans buildPeriodLeaderboardLive).
+ */
+function _recalculate(PDO $pdo, string $mode, string $period, string $periodStart, string $metric): void
+{
+    $modeFilter = ($mode === 'all') ? '' : 'AND gs.mode = :mode';
 
-    $orderBy = match ($metric) {
-        'wins'    => 'total_wins DESC',
-        'winrate' => 'winrate DESC',
-        'streak'  => 'best_streak DESC',
-        'perfect' => 'total_perfect DESC',
-        'games'   => 'total_games DESC',
-        default   => 'total_wins DESC',
+    $scoreExpr = match ($metric) {
+        'wins'    => "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)",
+        'winrate' => "IF(COUNT(*) >= 5, ROUND(SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END) / COUNT(*) * 100, 1), NULL)",
+        'streak'  => "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)",
+        'perfect' => "SUM(CASE WHEN gs.result = 'win' AND gs.attempts = 1 THEN 1 ELSE 0 END)",
+        'games'   => 'COUNT(*)',
+        default   => "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)",
     };
 
     $sql = "
         SELECT
-            us.user_id,
-            SUM(us.wins)          AS total_wins,
-            SUM(us.games)         AS total_games,
-            SUM(us.perfect_wins)  AS total_perfect,
-            MAX(us.streak_record) AS best_streak,
-            CASE
-                WHEN SUM(us.games) > 0
-                THEN ROUND(SUM(us.wins) / SUM(us.games) * 100, 1)
-                ELSE 0
-            END AS winrate
-        FROM user_stats us
-        JOIN users u ON u.id = us.user_id AND u.is_deleted = 0
-        WHERE 1=1 $modeFilter
-        GROUP BY us.user_id
-        HAVING total_games > 0
-        ORDER BY $orderBy
+            gs.user_id,
+            ({$scoreExpr}) AS score
+        FROM game_sessions gs
+        JOIN users u ON u.id = gs.user_id AND u.is_deleted = 0
+        WHERE gs.played_date >= :period_start
+        {$modeFilter}
+        GROUP BY gs.user_id
+        HAVING score IS NOT NULL AND score > 0
+        ORDER BY score DESC
         LIMIT 500
     ";
 
-    $params = [];
+    $params = [':period_start' => $periodStart];
     if ($mode !== 'all') $params[':mode'] = $mode;
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $rows = $stmt->fetchAll();
 
-    $scoreField = match ($metric) {
-        'wins'    => 'total_wins',
-        'winrate' => 'winrate',
-        'streak'  => 'best_streak',
-        'perfect' => 'total_perfect',
-        'games'   => 'total_games',
-        default   => 'total_wins',
-    };
+    $periodStartDt = $periodStart . ' 00:00:00';
 
     $upsert = $pdo->prepare("
         INSERT INTO leaderboard_cache
@@ -127,9 +141,9 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
             ':mode'         => $mode,
             ':period'       => $period,
             ':metric'       => $metric,
-            ':score'        => $row[$scoreField],
+            ':score'        => $row['score'],
             ':rank'         => $i + 1,
-            ':period_start' => $periodStart,
+            ':period_start' => $periodStartDt,
         ]);
     }
 }

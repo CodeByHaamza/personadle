@@ -2,5 +2,7 @@ Options -Indexes
 
 RewriteEngine On
 
+# GET /api/wallpapers
+RewriteRule ^$          index.php   [L,QSA]
 # POST /api/wallpapers/unlock
 RewriteRule ^unlock$    index.php   [L,QSA]

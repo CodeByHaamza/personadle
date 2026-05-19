@@ -32,8 +32,30 @@ import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesMa
 
 const modeName = "Emoji";
 
+/** Minimum attempts before the Give-Up button activates. */
+const GIVE_UP_THRESHOLD = 8;
+
 /** All specific opus codes available in Emoji mode. */
-const ALL_OPUS = ["P1","P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P4D","P5","P5R","P5S","P5T","P5X","PQ","PQ2"];
+const ALL_OPUS = [
+  "P1",
+  "P2IS",
+  "P2EP",
+  "P3",
+  "P3FES",
+  "P3P",
+  "P3R",
+  "P4",
+  "P4G",
+  "P4AU",
+  "P4D",
+  "P5",
+  "P5R",
+  "P5S",
+  "P5T",
+  "P5X",
+  "PQ",
+  "PQ2",
+];
 
 let activeOpus = [...ALL_OPUS];
 
@@ -53,7 +75,6 @@ function getTodayStatsKey() {
   return `statsLogged_${modeName}_${parisDateKey()}`;
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER / CHARACTER POOL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -68,7 +89,6 @@ function filterCharacterPool() {
     return charOpus.some((op) => activeOpus.includes(op));
   });
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTOCOMPLETE
@@ -156,9 +176,13 @@ function initializeAutocomplete(element, sourceArray) {
     const items = document.querySelectorAll("#autocomplete-list .list-options");
     if (!items.length) return;
 
-    if (e.key === "ArrowDown") { currentFocus++; updateActive(items); }
-    else if (e.key === "ArrowUp") { currentFocus--; updateActive(items); }
-    else if (e.key === "Enter") {
+    if (e.key === "ArrowDown") {
+      currentFocus++;
+      updateActive(items);
+    } else if (e.key === "ArrowUp") {
+      currentFocus--;
+      updateActive(items);
+    } else if (e.key === "Enter") {
       e.preventDefault();
       if (currentFocus > -1) items[currentFocus].click();
       else items[0]?.click();
@@ -198,7 +222,6 @@ function removeFromAutocomplete(name) {
   if (idx !== -1) personas.splice(idx, 1);
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // UI HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -222,16 +245,18 @@ function updateEmojiHint() {
 function updateCounters() {
   const giveUpCounter = document.getElementById("giveUpCounter");
   if (giveUpCounter) {
-    giveUpCounter.textContent = `(${attempts} / 8)`;
-    giveUpCounter.classList.toggle("activated", attempts >= 8);
+    giveUpCounter.textContent = `(${attempts} / ${GIVE_UP_THRESHOLD})`;
+    giveUpCounter.classList.toggle("activated", attempts >= GIVE_UP_THRESHOLD);
   }
 }
 
 function enableGiveUpButton() {
   const btn = document.getElementById("giveUpButton");
-  if (btn) { btn.disabled = false; btn.style.cursor = "pointer"; }
+  if (btn) {
+    btn.disabled = false;
+    btn.style.cursor = "pointer";
+  }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME LOGIC
@@ -255,7 +280,9 @@ function checkEmojiGuess(name, forceReveal = false) {
 
   const guess = characters.find((c) => c.nom.toLowerCase() === name.toLowerCase());
   if (!guess) {
-    winMessage.textContent = (window.i18n || { t: (k, v) => k }).t('modes.emoji.not_in_database', { name });
+    winMessage.textContent = (window.i18n || { t: (k, v) => k }).t("modes.emoji.not_in_database", {
+      name,
+    });
     return;
   }
 
@@ -278,8 +305,8 @@ function checkEmojiGuess(name, forceReveal = false) {
     victoryPortrait.alt = target.nom;
 
     winMessage.textContent = forceReveal
-      ? (window.i18n || { t: (k, v) => k }).t('modes.emoji.giveup_reveal', { name: target.nom })
-      : (window.i18n || { t: (k, v) => k }).t('modes.emoji.correct', { name: target.nom });
+      ? (window.i18n || { t: (k, v) => k }).t("modes.emoji.giveup_reveal", { name: target.nom })
+      : (window.i18n || { t: (k, v) => k }).t("modes.emoji.correct", { name: target.nom });
 
     victoryBox.style.display = "flex";
     showConfettiExplosion();
@@ -287,8 +314,8 @@ function checkEmojiGuess(name, forceReveal = false) {
       prevHref: "../classiqueMode/classiqueMode.html",
       nextHref: "../allOutAttackMode/allOutAttack.html",
     });
-    if (!forceReveal) showChallengeButton('emoji', attempts);
-    checkChallengeCompletion('emoji', attempts, !forceReveal);
+    if (!forceReveal) showChallengeButton("emoji", attempts);
+    checkChallengeCompletion("emoji", attempts, !forceReveal);
     showCommunityStats(modeName, target.nom);
 
     // 🎭 SHAPESHIFTER — track character per mode
@@ -305,18 +332,25 @@ function checkEmojiGuess(name, forceReveal = false) {
         _pEmo.hasWonFirstTry = true;
         localStorage.setItem("personaUserProfile", JSON.stringify(_pEmo));
       }
-      trackUniqueDay(_pEmo, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pEmo)));
+      trackUniqueDay(_pEmo, () =>
+        localStorage.setItem("personaUserProfile", JSON.stringify(_pEmo))
+      );
     }
 
     const todayKey = getTodayStatsKey();
     if (!localStorage.getItem(todayKey)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-      const result    = forceReveal ? "giveup" : "win";
+      const result = forceReveal ? "giveup" : "win";
       updateProfileStats({ result, mode: modeName, timeSpent });
-      savePendingSession(buildGameSession({
-        mode: modeName, targetName: target.nom, result,
-        attempts, timeMs: timeSpent * 1000,
-      }));
+      savePendingSession(
+        buildGameSession({
+          mode: modeName,
+          targetName: target.nom,
+          result,
+          attempts,
+          timeMs: timeSpent * 1000,
+        })
+      );
       localStorage.setItem(todayKey, "true");
     }
 
@@ -338,12 +372,11 @@ function checkEmojiGuess(name, forceReveal = false) {
     localStorage.setItem("attemptsEmoji", attempts);
     updateEmojiHint();
     updateCounters();
-    if (attempts >= 8) enableGiveUpButton();
+    if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
   }
 
   removeFromAutocomplete(name);
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // RESET
@@ -381,9 +414,8 @@ function resetGame() {
   gameOver = false;
   attempts = 1;
   const _prevEmoji = target;
-  const _emojiCandidates = pool.length > 1 && _prevEmoji
-    ? pool.filter(c => c.nom !== _prevEmoji.nom)
-    : pool;
+  const _emojiCandidates =
+    pool.length > 1 && _prevEmoji ? pool.filter((c) => c.nom !== _prevEmoji.nom) : pool;
   target = _emojiCandidates[Math.floor(Math.random() * _emojiCandidates.length)] || pool[0];
   if (target) localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
@@ -391,7 +423,6 @@ function resetGame() {
   updateEmojiHint();
   updateCounters();
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DARK MODE (emoji-specific elements)
@@ -416,7 +447,6 @@ function applyDarkModeStyles() {
     victoryBox.style.border = "3px solid #4caf50";
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BOOTSTRAP — DOMContentLoaded
@@ -451,9 +481,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const _rawEmoji = localStorage.getItem("targetEmoji");
   let _savedEmoji = null;
   try {
-    if (_rawEmoji && _rawEmoji !== 'undefined') _savedEmoji = JSON.parse(_rawEmoji);
+    if (_rawEmoji && _rawEmoji !== "undefined") _savedEmoji = JSON.parse(_rawEmoji);
   } catch {}
-  target = _savedEmoji || getDailyTarget(ALL_EMOJI_CHARS, 'Emoji');
+  target = _savedEmoji || getDailyTarget(ALL_EMOJI_CHARS, "Emoji");
   attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
@@ -463,7 +493,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   updateEmojiHint();
   updateCounters();
-  if (attempts >= 8) enableGiveUpButton();
+  if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
 
   // Restore finished game state
   if (localStorage.getItem("emojiGameOver") === "true" && target?.nom) {
@@ -481,7 +511,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Give Up button ──
   giveUpButton.addEventListener("click", () => {
-    if (attempts < 8 || gameOver) return;
+    if (attempts < GIVE_UP_THRESHOLD || gameOver) return;
     checkEmojiGuess(target.nom, true);
   });
 
@@ -534,31 +564,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 });
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DEBUG CONSOLE TOOLS
-// ─────────────────────────────────────────────────────────────────────────────
-
-window.emojiDebug = {
-  /** Check stored vs current Paris date. */
-  checkDates: () => {
-    console.log("📅 Stored:", localStorage.getItem("lastPlayedDate_Emoji"));
-    console.log("📅 Paris now:", parisDateKey());
-  },
-  /** Force the stored date to yesterday so the next reload triggers a reset. */
-  simulateYesterday: () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const str = parisDateKey(yesterday);
-    localStorage.setItem("lastPlayedDate_Emoji", str);
-    console.log(`✅ Date forced to yesterday: ${str} — reload to trigger reset`);
-  },
-  /** Manually set the stored date. */
-  setDate: (dateStr) => {
-    localStorage.setItem("lastPlayedDate_Emoji", dateStr);
-    console.log(`✅ Date forced to: ${dateStr} — reload to trigger reset`);
-  },
-};
-
-console.log("🧪 emojiDebug.checkDates() | .simulateYesterday() | .setDate('YYYY-MM-DD')");

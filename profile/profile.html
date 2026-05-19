@@ -23,554 +23,646 @@
        Assets  : ../assets/
        JS util : ../js/
      ============================================================= -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Profile — PersonaDLE</title>
-  <meta name="robots" content="noindex">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile — PersonaDLE</title>
+    <meta name="robots" content="noindex" />
 
-  <!-- Google Fonts (mêmes que index.html) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+    <!-- Google Fonts (mêmes que index.html) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="../css/global.css?v=9">
-  <link rel="stylesheet" href="../css/langSelector.css?v=4">
-  <link rel="stylesheet" href="../css/bottomNav.css?v=1">
-  <link rel="stylesheet" href="../css/calling-card.css?v=2">
-  <link rel="stylesheet" href="../css/challenge-notif.css">
-  <link rel="stylesheet" href="../css/challenge-result.css">
-  <link rel="stylesheet" href="../css/settings-modal.css">
-  <link rel="stylesheet" href="../css/streak-recovery.css">
-  <link rel="stylesheet" href="../css/tv-friend-anim.css">
-  <link rel="stylesheet" href="../css/p3-evoker-anim.css">
-  <link rel="stylesheet" href="../css/divine-gift.css">
-  <link rel="stylesheet" href="../css/social-link.css">
-  <link rel="stylesheet" href="../css/stats-compare.css">
-  <link rel="stylesheet" href="../css/rank10-effect.css">
-  <link rel="stylesheet" href="../css/wallpaper-notification.css">
-  <link rel="stylesheet" href="./profile-page.css?v=4">
-  <link rel="stylesheet" href="./badges/badges.css?v=4">
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/global.css?v=9" />
+    <link rel="stylesheet" href="../css/langSelector.css?v=4" />
+    <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="../css/calling-card.css?v=2" />
+    <link rel="stylesheet" href="../css/challenge-notif.css" />
+    <link rel="stylesheet" href="../css/challenge-result.css" />
+    <link rel="stylesheet" href="../css/settings-modal.css" />
+    <link rel="stylesheet" href="../css/streak-recovery.css" />
+    <link rel="stylesheet" href="../css/tv-friend-anim.css" />
+    <link rel="stylesheet" href="../css/p3-evoker-anim.css" />
+    <link rel="stylesheet" href="../css/divine-gift.css" />
+    <link rel="stylesheet" href="../css/social-link.css" />
+    <link rel="stylesheet" href="../css/stats-compare.css" />
+    <link rel="stylesheet" href="../css/rank10-effect.css" />
+    <link rel="stylesheet" href="../css/wallpaper-notification.css" />
+    <link rel="stylesheet" href="./profile-page.css?v=4" />
+    <link rel="stylesheet" href="./badges/badges.css?v=4" />
 
-  <link rel="icon" type="image/gif" href="../img/persona_64x64.gif">
+    <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 
-  <!-- Initialisation dark mode + thème AVANT rendu (évite le flash de couleur) -->
-  <script>
-    if (localStorage.getItem('darkMode') === 'enabled') {
-      document.documentElement.classList.add('darkmode');
-    }
-    // En mode vue (?view=), le thème sera appliqué par profile-view.js
-    // d'après le profil du joueur consulté — ne pas appliquer le thème local.
-    var _isViewMode = new URLSearchParams(window.location.search).has('view');
-    if (!_isViewMode) {
-      // Application anticipée du thème UI pour éviter le flash rouge → couleur choisie
-      try {
-        var _p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
-        var _themes = {
-          all_out:            { a: '#E63946', h: '#C1121F', l: '#FF9999', r: '230, 57, 70'   },
-          velvet_room:        { a: '#1B3A8A', h: '#162E72', l: '#60A5FA', r: '27, 58, 138'   },
-          dark_hour:          { a: '#00B4D8', h: '#0077B6', l: '#48CAE4', r: '0, 180, 216'   },
-          pink_ribbon:        { a: '#E8739A', h: '#D0507A', l: '#F9A8D4', r: '232, 115, 154' },
-          midnight_channel:   { a: '#EAB308', h: '#CA8A04', l: '#FEF08A', r: '234, 179, 8'   },
-          demon_palace:       { a: '#9333EA', h: '#7E22CE', l: '#D8B4FE', r: '147, 51, 234'  },
-          eternal_punishment: { a: '#4F46E5', h: '#4338CA', l: '#A5B4FC', r: '79, 70, 229'   },
-          golden_labyrinth:   { a: '#F97316', h: '#EA6C12', l: '#FDBA74', r: '249, 115, 22'  },
-        };
-        var _t = _themes[_p.profileTheme];
-        if (_t) {
-          var s = document.documentElement.style;
-          s.setProperty('--accent', _t.a);
-          s.setProperty('--accent-hover', _t.h);
-          s.setProperty('--accent-light', _t.l);
-          s.setProperty('--accent-rgb', _t.r);
-        } else if (_p.profileTheme === 'custom' && _p.profileCustomColor) {
-          document.documentElement.style.setProperty('--accent', _p.profileCustomColor);
-        }
-      } catch(e) {}
-    }
-  </script>
-</head>
-<body>
-
-<!-- =====================================================
+    <!-- Initialisation dark mode + thème AVANT rendu (évite le flash de couleur) -->
+    <script>
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.documentElement.classList.add("darkmode");
+      }
+      // En mode vue (?view=), le thème sera appliqué par profile-view.js
+      // d'après le profil du joueur consulté — ne pas appliquer le thème local.
+      var _isViewMode = new URLSearchParams(window.location.search).has("view");
+      if (!_isViewMode) {
+        // Application anticipée du thème UI pour éviter le flash rouge → couleur choisie
+        try {
+          var _p = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+          var _themes = {
+            all_out: { a: "#E63946", h: "#C1121F", l: "#FF9999", r: "230, 57, 70" },
+            velvet_room: { a: "#1B3A8A", h: "#162E72", l: "#60A5FA", r: "27, 58, 138" },
+            dark_hour: { a: "#00B4D8", h: "#0077B6", l: "#48CAE4", r: "0, 180, 216" },
+            pink_ribbon: { a: "#E8739A", h: "#D0507A", l: "#F9A8D4", r: "232, 115, 154" },
+            midnight_channel: { a: "#EAB308", h: "#CA8A04", l: "#FEF08A", r: "234, 179, 8" },
+            demon_palace: { a: "#9333EA", h: "#7E22CE", l: "#D8B4FE", r: "147, 51, 234" },
+            eternal_punishment: { a: "#4F46E5", h: "#4338CA", l: "#A5B4FC", r: "79, 70, 229" },
+            golden_labyrinth: { a: "#F97316", h: "#EA6C12", l: "#FDBA74", r: "249, 115, 22" },
+          };
+          var _t = _themes[_p.profileTheme];
+          if (_t) {
+            var s = document.documentElement.style;
+            s.setProperty("--accent", _t.a);
+            s.setProperty("--accent-hover", _t.h);
+            s.setProperty("--accent-light", _t.l);
+            s.setProperty("--accent-rgb", _t.r);
+          } else if (_p.profileTheme === "custom" && _p.profileCustomColor) {
+            document.documentElement.style.setProperty("--accent", _p.profileCustomColor);
+          }
+        } catch (e) {}
+      }
+    </script>
+  </head>
+  <body>
+    <!-- =====================================================
      1. HEADER DE PAGE
      Titre stylisé P5 + toggle dark mode
      ===================================================== -->
-<header class="profile-page-header">
-  <h1 class="profile-page-title">
-    <span class="p5-diamond">◆</span>
-    <span data-i18n="profile.title">My Profile</span>
-    <span class="p5-diamond">◆</span>
-  </h1>
-</header>
+    <header class="profile-page-header">
+      <h1 class="profile-page-title">
+        <span class="p5-diamond">◆</span>
+        <span data-i18n="profile.title">My Profile</span>
+        <span class="p5-diamond">◆</span>
+      </h1>
+    </header>
 
-<!-- Toggle Dark Mode + bouton Settings -->
-<div class="darkmode-toggle">
-  <label class="switch">
-    <input type="checkbox" id="darkModeToggle">
-    <span class="slider round"></span>
-  </label>
-  <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
-  <span class="dm-sep"></span>
-  <button id="settingsBtn" class="profile-settings-btn" title="Settings" aria-label="Settings">⚙</button>
-</div>
+    <!-- Toggle Dark Mode + bouton Settings -->
+    <div class="darkmode-toggle">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+      <span class="dm-sep"></span>
+      <button id="settingsBtn" class="profile-settings-btn" title="Settings" aria-label="Settings">
+        ⚙
+      </button>
+    </div>
 
-<!-- =====================================================
+    <!-- =====================================================
      SÉLECTEUR DE LANGUE
      Identique à index.html, chemins relatifs ajustés.
      ===================================================== -->
-<div id="langToggle">
-  <button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Change language">
-    <span class="lang-btn-globe">🌐</span>
-    <span id="langBtnLabel">EN</span>
-    <span class="lang-btn-chevron">▼</span>
-  </button>
+    <div id="langToggle">
+      <button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Change language">
+        <span class="lang-btn-globe">🌐</span>
+        <span id="langBtnLabel">EN</span>
+        <span class="lang-btn-chevron">▼</span>
+      </button>
 
-  <div id="langDropdown" role="listbox" aria-label="Select language">
-    <div class="lang-opt lang-opt--en" data-lang="en" role="option" tabindex="0" aria-label="English">
-      <span class="lang-opt-name">English</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char" src="../assets/lang/Lisa_Silverman_english.webp" alt="Lisa Silverman" loading="lazy">
+      <div id="langDropdown" role="listbox" aria-label="Select language">
+        <div
+          class="lang-opt lang-opt--en"
+          data-lang="en"
+          role="option"
+          tabindex="0"
+          aria-label="English"
+        >
+          <span class="lang-opt-name">English</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="../assets/lang/Lisa_Silverman_english.webp"
+            alt="Lisa Silverman"
+            loading="lazy"
+          />
+        </div>
+        <div
+          class="lang-opt lang-opt--fr"
+          data-lang="fr"
+          role="option"
+          tabindex="0"
+          aria-label="Français"
+        >
+          <span class="lang-opt-name">Français</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="../assets/lang/Bebe_french.webp"
+            alt="Bebe"
+            loading="lazy"
+          />
+        </div>
+        <div
+          class="lang-opt lang-opt--es"
+          data-lang="es"
+          role="option"
+          tabindex="0"
+          aria-label="Español"
+        >
+          <span class="lang-opt-name">Español</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="../assets/lang/Morgana_Spanish.webp"
+            alt="Morgana"
+            loading="lazy"
+          />
+        </div>
+        <div
+          class="lang-opt lang-opt--de"
+          data-lang="de"
+          role="option"
+          tabindex="0"
+          aria-label="Deutsch"
+        >
+          <span class="lang-opt-name">Deutsch</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="../assets/lang/Hulkenberg_german.webp"
+            alt="Hulkenberg"
+            loading="lazy"
+          />
+        </div>
+        <div
+          class="lang-opt lang-opt--it"
+          data-lang="it"
+          role="option"
+          tabindex="0"
+          aria-label="Italiano"
+        >
+          <span class="lang-opt-name">Italiano</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="../assets/lang/Caesar_italian.webp"
+            alt="Caesar"
+            loading="lazy"
+          />
+        </div>
+      </div>
     </div>
-    <div class="lang-opt lang-opt--fr" data-lang="fr" role="option" tabindex="0" aria-label="Français">
-      <span class="lang-opt-name">Français</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char" src="../assets/lang/Bebe_french.webp" alt="Bebe" loading="lazy">
-    </div>
-    <div class="lang-opt lang-opt--es" data-lang="es" role="option" tabindex="0" aria-label="Español">
-      <span class="lang-opt-name">Español</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char" src="../assets/lang/Morgana_Spanish.webp" alt="Morgana" loading="lazy">
-    </div>
-    <div class="lang-opt lang-opt--de" data-lang="de" role="option" tabindex="0" aria-label="Deutsch">
-      <span class="lang-opt-name">Deutsch</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char" src="../assets/lang/Hulkenberg_german.webp" alt="Hulkenberg" loading="lazy">
-    </div>
-    <div class="lang-opt lang-opt--it" data-lang="it" role="option" tabindex="0" aria-label="Italiano">
-      <span class="lang-opt-name">Italiano</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char" src="../assets/lang/Caesar_italian.webp" alt="Caesar" loading="lazy">
-    </div>
-  </div>
-</div>
 
-
-<!-- =====================================================
+    <!-- =====================================================
      2–3. CONTENU PRINCIPAL : PANNEAU GAUCHE + DROIT
      ===================================================== -->
-<main class="profile-page">
-  <div class="profile-container">
+    <main class="profile-page">
+      <div class="profile-container">
+        <!-- ───────── PANNEAU GAUCHE ───────── -->
+        <aside class="profile-left animate-left">
+          <div class="avatar-card">
+            <!-- Hero : avatar + username + pseudo (horizontal sur mobile) -->
+            <div class="avatar-card-hero">
+              <!-- Avatar -->
+              <img
+                id="pageAvatar"
+                src="../img/default_avatar.png"
+                alt="Profile avatar"
+                class="profile-avatar animate-pop"
+              />
 
-    <!-- ───────── PANNEAU GAUCHE ───────── -->
-    <aside class="profile-left animate-left">
-      <div class="avatar-card">
+              <!-- Infos textuelles -->
+              <div class="avatar-card-info">
+                <!-- Nom d'utilisateur -->
+                <h2 id="pageUsername" class="profile-username animate-top">Guest</h2>
 
-        <!-- Hero : avatar + username + pseudo (horizontal sur mobile) -->
-        <div class="avatar-card-hero">
+                <!-- Titre équipé (affiché sous le pseudo) -->
+                <img
+                  id="equippedTitleImg"
+                  class="profile-equipped-title-img"
+                  style="display: none"
+                  alt="Equipped title"
+                />
 
-          <!-- Avatar -->
-          <img id="pageAvatar"
-               src="../img/default_avatar.png"
-               alt="Profile avatar"
-               class="profile-avatar animate-pop">
+                <!-- Champ pseudo -->
+                <div class="pseudo-edit-row">
+                  <label for="pseudoInput" data-i18n="profile.pseudo_label">Username</label>
+                  <input
+                    type="text"
+                    id="pseudoInput"
+                    maxlength="30"
+                    data-i18n-placeholder="profile.pseudo_placeholder"
+                    placeholder="Enter username…"
+                  />
+                </div>
+              </div>
+            </div>
 
-          <!-- Infos textuelles -->
-          <div class="avatar-card-info">
-            <!-- Nom d'utilisateur -->
-            <h2 id="pageUsername" class="profile-username animate-top">Guest</h2>
+            <!-- Changer la photo -->
+            <button id="editAvatarBtn" class="btn-p5" data-i18n="profile.change_picture">
+              Change Picture
+            </button>
 
-            <!-- Titre équipé (affiché sous le pseudo) -->
-            <img id="equippedTitleImg" class="profile-equipped-title-img" style="display:none;" alt="Equipped title">
+            <!-- Titres -->
+            <button id="openTitlesModal" class="btn-p5">🏅 Titles</button>
 
-            <!-- Champ pseudo -->
-            <div class="pseudo-edit-row">
-              <label for="pseudoInput" data-i18n="profile.pseudo_label">Username</label>
-              <input type="text" id="pseudoInput" maxlength="30"
-                     data-i18n-placeholder="profile.pseudo_placeholder"
-                     placeholder="Enter username…">
+            <!-- Sauvegarder -->
+            <button id="saveAndRefreshBtn" class="btn-p5 btn-success">
+              ✅ <span data-i18n="profile.save_refresh">Save</span>
+            </button>
+
+            <!-- ── Section Auth ── -->
+            <div class="auth-section" id="authSection">
+              <div class="auth-divider">
+                <span class="card-accent">◆</span>
+                <span data-i18n="ui.my_account">My Account</span>
+              </div>
+              <!-- État : non connecté -->
+              <div id="authGuest" data-auth="anonymous" class="auth-guest">
+                <button
+                  id="btnOpenLogin"
+                  data-open-modal="loginModal"
+                  class="btn-auth btn-auth--login"
+                >
+                  🔐 <span data-i18n="auth.login">Log in</span>
+                </button>
+                <button
+                  id="btnOpenRegister"
+                  data-open-modal="registerModal"
+                  class="btn-auth btn-auth--register"
+                >
+                  ✨ <span data-i18n="auth.register">Create account</span>
+                </button>
+              </div>
+              <!-- État : connecté -->
+              <div id="authUser" data-auth="connected" class="auth-user" style="display: none">
+                <p class="auth-welcome">
+                  👋 <span data-auth-field="pseudo" id="authUserPseudo"></span>
+                </p>
+                <button data-action="logout" id="btnLogout" class="btn-auth btn-auth--logout">
+                  <span data-i18n="auth.logout">Log out</span>
+                </button>
+              </div>
             </div>
           </div>
 
-        </div>
-
-        <!-- Changer la photo -->
-        <button id="editAvatarBtn" class="btn-p5" data-i18n="profile.change_picture">
-          Change Picture
-        </button>
-
-        <!-- Titres -->
-        <button id="openTitlesModal" class="btn-p5">🏅 Titles</button>
-
-        <!-- Sauvegarder -->
-        <button id="saveAndRefreshBtn" class="btn-p5 btn-success">
-          ✅ <span data-i18n="profile.save_refresh">Save</span>
-        </button>
-
-        <!-- ── Section Auth ── -->
-        <div class="auth-section" id="authSection">
-          <div class="auth-divider">
-            <span class="card-accent">◆</span>
-            <span data-i18n="ui.my_account">My Account</span>
-          </div>
-          <!-- État : non connecté -->
-          <div id="authGuest" data-auth="anonymous" class="auth-guest">
-            <button id="btnOpenLogin" data-open-modal="loginModal" class="btn-auth btn-auth--login">
-              🔐 <span data-i18n="auth.login">Log in</span>
+          <!-- ── Card : Personnalisation (couleurs + thème) ── -->
+          <div class="perso-card">
+            <!-- En-tête collapsible -->
+            <button
+              class="perso-toggle"
+              id="persoToggle"
+              aria-expanded="true"
+              aria-controls="persoBody"
+            >
+              <span class="card-accent perso-toggle-diamond">◆</span>
+              <span data-i18n="profile.customization_title">Customization</span>
+              <span class="perso-chevron" aria-hidden="true">▼</span>
             </button>
-            <button id="btnOpenRegister" data-open-modal="registerModal" class="btn-auth btn-auth--register">
-              ✨ <span data-i18n="auth.register">Create account</span>
+
+            <!-- Corps -->
+            <div class="perso-body" id="persoBody">
+              <!-- Section 1 : couleur du contour avatar -->
+              <div class="perso-section">
+                <label class="perso-section-label" data-i18n="profile.border_color_label"
+                  >Avatar Border</label
+                >
+                <div class="perso-color-chip">
+                  <span class="perso-color-dot" id="borderColorDot"></span>
+                  <span class="perso-color-hex" id="borderColorHex">#000000</span>
+                  <input
+                    type="color"
+                    id="borderColorPicker"
+                    class="perso-color-input"
+                    value="#000000"
+                  />
+                </div>
+              </div>
+
+              <!-- Section 2 : thème de l'interface -->
+              <div class="perso-section">
+                <label class="perso-section-label" data-i18n="profile.theme_label"
+                  >Interface Theme</label
+                >
+                <div class="theme-swatches" id="themeSwatches"></div>
+                <div id="customThemeRow" class="custom-theme-row hidden">
+                  <label for="customThemeColor" data-i18n="profile.theme_custom"
+                    >Custom color</label
+                  >
+                  <input type="color" id="customThemeColor" value="#e63946" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Card : Profile Song ── -->
+          <!-- Masquée par défaut, affichée par renderSongCard() / renderViewSongCard() -->
+          <div class="song-card hidden" id="songCard"></div>
+
+          <!-- ── Social Link gauge (affiché uniquement en mode ?view=) ── -->
+          <div id="socialLinkGaugeContainer" class="hidden"></div>
+        </aside>
+
+        <!-- ───────── PANNEAU DROIT ───────── -->
+        <section class="profile-right">
+          <!-- Card : Statistiques -->
+          <div class="profile-card animate-right" style="animation-delay: 0.08s">
+            <h3 class="card-title">
+              <span class="card-accent">◆</span>
+              <span data-i18n="profile.stats_title">Statistics</span>
+            </h3>
+            <!-- Rempli dynamiquement par profile-page.js → renderStats() -->
+            <div id="statsContainer" class="stats-grid"></div>
+            <!-- Rempli dynamiquement par profile-page.js → renderModeStats() -->
+            <div id="modeStatsContainer" class="mode-stats"></div>
+          </div>
+
+          <!-- Card : Badges -->
+          <div class="profile-card animate-right" style="animation-delay: 0.16s">
+            <h3 class="card-title">
+              <span class="card-accent">◆</span>
+              <span data-i18n="profile.badges_title">Badges</span>
+            </h3>
+            <!-- Aperçu rapide (4 badges max) -->
+            <div id="previewBadges" class="badge-preview badge-preview-row"></div>
+            <button id="openBadgesModal" class="btn-secondary" data-i18n="profile.see_all_badges">
+              See All Badges
             </button>
           </div>
-          <!-- État : connecté -->
-          <div id="authUser" data-auth="connected" class="auth-user" style="display:none">
-            <p class="auth-welcome">
-              👋 <span data-auth-field="pseudo" id="authUserPseudo"></span>
+
+          <!-- Card : Code événement -->
+          <div class="profile-card animate-right" style="animation-delay: 0.24s">
+            <h3 class="card-title">
+              <span class="card-accent">◆</span>
+              <span data-i18n="profile.event_code_title">Event Code</span>
+            </h3>
+            <p class="card-desc" data-i18n="profile.event_code_desc">
+              Enter a valid code to unlock an exclusive badge!
             </p>
-            <button data-action="logout" id="btnLogout" class="btn-auth btn-auth--logout">
-              <span data-i18n="auth.logout">Log out</span>
+            <div class="event-code-row">
+              <input
+                type="text"
+                id="eventCodeInput"
+                data-i18n-placeholder="badges.event_code_placeholder"
+                placeholder="Enter event code…"
+              />
+              <button id="redeemEventCodeBtn" class="btn-p5" data-i18n="badges.event_code_submit">
+                Redeem
+              </button>
+            </div>
+            <p id="eventCodeMessage" class="event-code-msg"></p>
+          </div>
+
+          <!-- Card : Export / Import / Share -->
+          <div class="profile-card animate-right" style="animation-delay: 0.32s">
+            <h3 class="card-title">
+              <span class="card-accent">◆</span>
+              <span data-i18n="profile.export_import_title">Data</span>
+            </h3>
+            <div class="io-buttons">
+              <button id="exportProfile" class="btn-p5">
+                📤 <span data-i18n="profile.export">Export</span>
+              </button>
+              <button id="shareProfileBtn" class="btn-p5">
+                🔗 <span data-i18n="profile.share_btn">Share</span>
+              </button>
+              <button id="copyProfileLinkBtn" class="btn-p5" style="display: none">
+                📎 <span data-i18n="profile.copy_link">Copy link</span>
+              </button>
+            </div>
+            <p id="shareStatus" style="margin-top: 8px; font-size: 0.82em; opacity: 0.7"></p>
+          </div>
+
+          <!-- Card : Wallpapers débloquables -->
+          <div
+            class="profile-card animate-right"
+            style="animation-delay: 0.38s"
+            id="unlockableWallpapersCard"
+          >
+            <h3 class="card-title">
+              <span class="card-accent">◆</span>
+              <span>🖼️ Unlockable Wallpapers</span>
+            </h3>
+            <div id="unlockableWallpaperGrid"></div>
+          </div>
+
+          <!-- Card : Zone dangereuse -->
+          <div
+            class="profile-card profile-card--danger animate-right"
+            style="animation-delay: 0.4s"
+          >
+            <button id="resetProfile" class="btn-danger">
+              🔄 <span data-i18n="profile.reset_btn">Reset Profile</span>
             </button>
           </div>
-        </div>
-
+        </section>
       </div>
+    </main>
 
-      <!-- ── Card : Personnalisation (couleurs + thème) ── -->
-      <div class="perso-card">
-
-        <!-- En-tête collapsible -->
-        <button class="perso-toggle" id="persoToggle"
-                aria-expanded="true" aria-controls="persoBody">
-          <span class="card-accent perso-toggle-diamond">◆</span>
-          <span data-i18n="profile.customization_title">Customization</span>
-          <span class="perso-chevron" aria-hidden="true">▼</span>
-        </button>
-
-        <!-- Corps -->
-        <div class="perso-body" id="persoBody">
-
-          <!-- Section 1 : couleur du contour avatar -->
-          <div class="perso-section">
-            <label class="perso-section-label"
-                   data-i18n="profile.border_color_label">Avatar Border</label>
-            <div class="perso-color-chip">
-              <span class="perso-color-dot" id="borderColorDot"></span>
-              <span class="perso-color-hex" id="borderColorHex">#000000</span>
-              <input type="color" id="borderColorPicker"
-                     class="perso-color-input" value="#000000">
-            </div>
-          </div>
-
-          <!-- Section 2 : thème de l'interface -->
-          <div class="perso-section">
-            <label class="perso-section-label"
-                   data-i18n="profile.theme_label">Interface Theme</label>
-            <div class="theme-swatches" id="themeSwatches"></div>
-            <div id="customThemeRow" class="custom-theme-row hidden">
-              <label for="customThemeColor"
-                     data-i18n="profile.theme_custom">Custom color</label>
-              <input type="color" id="customThemeColor" value="#e63946">
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ── Card : Profile Song ── -->
-      <!-- Masquée par défaut, affichée par renderSongCard() / renderViewSongCard() -->
-      <div class="song-card hidden" id="songCard"></div>
-
-      <!-- ── Social Link gauge (affiché uniquement en mode ?view=) ── -->
-      <div id="socialLinkGaugeContainer" class="hidden"></div>
-
-    </aside>
-
-
-    <!-- ───────── PANNEAU DROIT ───────── -->
-    <section class="profile-right">
-
-      <!-- Card : Statistiques -->
-      <div class="profile-card animate-right" style="animation-delay: 0.08s">
-        <h3 class="card-title">
-          <span class="card-accent">◆</span>
-          <span data-i18n="profile.stats_title">Statistics</span>
-        </h3>
-        <!-- Rempli dynamiquement par profile-page.js → renderStats() -->
-        <div id="statsContainer" class="stats-grid"></div>
-        <!-- Rempli dynamiquement par profile-page.js → renderModeStats() -->
-        <div id="modeStatsContainer" class="mode-stats"></div>
-      </div>
-
-      <!-- Card : Badges -->
-      <div class="profile-card animate-right" style="animation-delay: 0.16s">
-        <h3 class="card-title">
-          <span class="card-accent">◆</span>
-          <span data-i18n="profile.badges_title">Badges</span>
-        </h3>
-        <!-- Aperçu rapide (4 badges max) -->
-        <div id="previewBadges" class="badge-preview badge-preview-row"></div>
-        <button id="openBadgesModal" class="btn-secondary" data-i18n="profile.see_all_badges">
-          See All Badges
-        </button>
-      </div>
-
-      <!-- Card : Code événement -->
-      <div class="profile-card animate-right" style="animation-delay: 0.24s">
-        <h3 class="card-title">
-          <span class="card-accent">◆</span>
-          <span data-i18n="profile.event_code_title">Event Code</span>
-        </h3>
-        <p class="card-desc" data-i18n="profile.event_code_desc">
-          Enter a valid code to unlock an exclusive badge!
-        </p>
-        <div class="event-code-row">
-          <input type="text" id="eventCodeInput"
-                 data-i18n-placeholder="badges.event_code_placeholder"
-                 placeholder="Enter event code…">
-          <button id="redeemEventCodeBtn" class="btn-p5" data-i18n="badges.event_code_submit">
-            Redeem
-          </button>
-        </div>
-        <p id="eventCodeMessage" class="event-code-msg"></p>
-      </div>
-
-      <!-- Card : Export / Import / Share -->
-      <div class="profile-card animate-right" style="animation-delay: 0.32s">
-        <h3 class="card-title">
-          <span class="card-accent">◆</span>
-          <span data-i18n="profile.export_import_title">Data</span>
-        </h3>
-        <div class="io-buttons">
-          <button id="exportProfile" class="btn-p5">
-            📤 <span data-i18n="profile.export">Export</span>
-          </button>
-          <button id="shareProfileBtn" class="btn-p5">
-            🔗 <span data-i18n="profile.share_btn">Share</span>
-          </button>
-          <button id="copyProfileLinkBtn" class="btn-p5" style="display:none;">
-            📎 <span data-i18n="profile.copy_link">Copy link</span>
-          </button>
-        </div>
-        <p id="shareStatus" style="margin-top: 8px; font-size: 0.82em; opacity: 0.7;"></p>
-      </div>
-
-
-      <!-- Card : Wallpapers débloquables -->
-      <div class="profile-card animate-right" style="animation-delay: 0.38s" id="unlockableWallpapersCard">
-        <h3 class="card-title">
-          <span class="card-accent">◆</span>
-          <span>🖼️ Unlockable Wallpapers</span>
-        </h3>
-        <div id="unlockableWallpaperGrid"></div>
-      </div>
-
-      <!-- Card : Zone dangereuse -->
-      <div class="profile-card profile-card--danger animate-right" style="animation-delay: 0.40s">
-        <button id="resetProfile" class="btn-danger">
-          🔄 <span data-i18n="profile.reset_btn">Reset Profile</span>
-        </button>
-      </div>
-
-    </section>
-  </div>
-</main>
-
-
-<!-- =====================================================
+    <!-- =====================================================
      4. MODALE CROP D'AVATAR
      IDs identiques → profile-page.js peut cibler les mêmes.
      ===================================================== -->
-<div id="avatarCropModal" class="modal hidden">
-  <div class="modal-content crop-modal-content">
+    <div id="avatarCropModal" class="modal hidden">
+      <div class="modal-content crop-modal-content">
+        <!-- En-tête P5 -->
+        <div class="crop-modal-header">
+          <h3 class="crop-modal-title"><span class="card-accent">◆</span> Choose your avatar</h3>
+          <span class="close" id="closeCropper">&times;</span>
+        </div>
 
-    <!-- En-tête P5 -->
-    <div class="crop-modal-header">
-      <h3 class="crop-modal-title">
-        <span class="card-accent">◆</span> Choose your avatar
-      </h3>
-      <span class="close" id="closeCropper">&times;</span>
-    </div>
+        <!-- Section 1 : Grille de sélection -->
+        <div class="crop-section">
+          <p class="crop-section-label">1 — Select an image</p>
+          <div id="avatarGrid" class="crop-avatar-grid"></div>
+        </div>
 
-    <!-- Section 1 : Grille de sélection -->
-    <div class="crop-section">
-      <p class="crop-section-label">1 — Select an image</p>
-      <div id="avatarGrid" class="crop-avatar-grid"></div>
-    </div>
-
-    <!-- Section 2 : Canvas + contrôles -->
-    <div class="crop-section">
-      <p class="crop-section-label">2 — Adjust &amp; confirm</p>
-      <div class="crop-canvas-wrap">
-        <canvas id="avatarCanvas" width="300" height="300"></canvas>
-        <p class="crop-canvas-hint">Drag to reposition · Scroll to zoom</p>
+        <!-- Section 2 : Canvas + contrôles -->
+        <div class="crop-section">
+          <p class="crop-section-label">2 — Adjust &amp; confirm</p>
+          <div class="crop-canvas-wrap">
+            <canvas id="avatarCanvas" width="300" height="300"></canvas>
+            <p class="crop-canvas-hint">Drag to reposition · Scroll to zoom</p>
+          </div>
+          <div class="crop-controls">
+            <button id="zoomOut" class="crop-zoom-btn" title="Zoom out" aria-label="Zoom out">
+              −
+            </button>
+            <span class="crop-zoom-label">Zoom</span>
+            <button id="zoomIn" class="crop-zoom-btn" title="Zoom in" aria-label="Zoom in">
+              +
+            </button>
+            <button id="confirmCrop" class="btn-p5 crop-confirm-btn">✓ Apply</button>
+          </div>
+        </div>
       </div>
-      <div class="crop-controls">
-        <button id="zoomOut" class="crop-zoom-btn" title="Zoom out">−</button>
-        <span class="crop-zoom-label">Zoom</span>
-        <button id="zoomIn"  class="crop-zoom-btn" title="Zoom in">+</button>
-        <button id="confirmCrop" class="btn-p5 crop-confirm-btn">✓ Apply</button>
-      </div>
     </div>
 
-  </div>
-</div>
-
-
-<!-- =====================================================
+    <!-- =====================================================
      5. MODALE COMPLÈTE DES BADGES
      Superposition plein écran (gérée par badgesManager.js).
      ===================================================== -->
-<div id="badgesModal" class="hidden">
-  <div class="badges-header">
-    <h3>🎖️ <span data-i18n="profile.all_badges_title">All Badges</span></h3>
-    <div style="display: flex; align-items: center; gap: 10px;">
+    <div id="badgesModal" class="hidden">
+      <div class="badges-header">
+        <h3>🎖️ <span data-i18n="profile.all_badges_title">All Badges</span></h3>
+        <div style="display: flex; align-items: center; gap: 10px">
+          <!-- Info transparence IA -->
+          <div class="badge-ai-info">
+            <span class="info-icon">ℹ️</span>
+            <div class="info-tooltip-ai">
+              <strong data-i18n="profile.about_badges_title">About Our Badges</strong><br />
+              <span data-i18n="profile.about_badges_text">
+                Hey! Just wanted to be transparent – these badges were made with AI help. We're just
+                students working on this passion project for free in our spare time, and honestly,
+                we didn't have the budget or time to commission an artist. We absolutely respect
+                human artists and would love to work with one someday if we get the chance! This was
+                purely out of necessity, not preference. Thanks for understanding and for playing!
+                ❤️
+              </span>
+            </div>
+          </div>
 
-      <!-- Info transparence IA -->
-      <div class="badge-ai-info">
-        <span class="info-icon">ℹ️</span>
-        <div class="info-tooltip-ai">
-          <strong data-i18n="profile.about_badges_title">About Our Badges</strong><br>
-          <span data-i18n="profile.about_badges_text">
-            Hey! Just wanted to be transparent – these badges were made with AI help.
-            We're just students working on this passion project for free in our spare time,
-            and honestly, we didn't have the budget or time to commission an artist.
-            We absolutely respect human artists and would love to work with one someday
-            if we get the chance! This was purely out of necessity, not preference.
-            Thanks for understanding and for playing! ❤️
-          </span>
+          <button id="closeBadgesModal" class="close-btn" aria-label="Close badges">✖</button>
         </div>
       </div>
 
-      <button id="closeBadgesModal" class="close-btn">✖</button>
+      <!-- Compteur de badges débloqués -->
+      <p id="badgesCounter" class="badges-counter">🔓 0 / 0 badges unlocked</p>
+
+      <!-- Recherche -->
+      <div class="badges-search-wrap">
+        <input
+          type="text"
+          id="badgesSearch"
+          class="badges-search-input"
+          placeholder="🔍 Search badges…"
+          aria-label="Search badges"
+        />
+      </div>
+
+      <!-- Grille des badges (générée par badgesManager.js) -->
+      <div id="badgesGrid" class="badges-grid"></div>
     </div>
-  </div>
 
-  <!-- Compteur de badges débloqués -->
-  <p id="badgesCounter" class="badges-counter">🔓 0 / 0 badges unlocked</p>
-
-  <!-- Recherche -->
-  <div class="badges-search-wrap">
-    <input type="text" id="badgesSearch" class="badges-search-input" placeholder="🔍 Search badges…">
-  </div>
-
-  <!-- Grille des badges (générée par badgesManager.js) -->
-  <div id="badgesGrid" class="badges-grid"></div>
-</div>
-
-
-<!-- =====================================================
+    <!-- =====================================================
      6. MODALE TITRES
      Sélection / équipement de titres (comme les badges).
      ===================================================== -->
-<div id="titlesModalOverlay" class="titles-overlay hidden"></div>
-<div id="titlesModal" class="titles-modal hidden" role="dialog" aria-modal="true">
-  <div class="titles-modal-header">
-    <h3 class="titles-modal-title">🏅 Titles</h3>
-    <button id="closeTitlesModal" class="titles-modal-close">✖</button>
-  </div>
-  <div id="titlesModalGrid" class="titles-grid-modal"></div>
-</div>
+    <div id="titlesModalOverlay" class="titles-overlay hidden"></div>
+    <div id="titlesModal" class="titles-modal hidden" role="dialog" aria-modal="true">
+      <div class="titles-modal-header">
+        <h3 class="titles-modal-title">🏅 Titles</h3>
+        <button id="closeTitlesModal" class="titles-modal-close" aria-label="Close titles">
+          ✖
+        </button>
+      </div>
+      <div id="titlesModalGrid" class="titles-grid-modal"></div>
+    </div>
 
-
-<!-- =====================================================
+    <!-- =====================================================
      7. MODALE PARTAGE DE PROFIL
      Génère un aperçu canvas → téléchargement / partage.
      ===================================================== -->
-<div id="sharePreviewModal" class="modal hidden">
-  <div class="modal-content share-preview">
-    <span id="closeSharePreview" class="close">&times;</span>
-    <h2>📸 Share Profile</h2>
+    <div id="sharePreviewModal" class="modal hidden">
+      <div class="modal-content share-preview">
+        <span id="closeSharePreview" class="close">&times;</span>
+        <h2>📸 Share Profile</h2>
 
-    <!-- Sélecteur de fond (onglets couleur / wallpaper) -->
-    <div id="backgroundSelector"></div>
+        <!-- Sélecteur de fond (onglets couleur / wallpaper) -->
+        <div id="backgroundSelector"></div>
 
-    <!-- Zone de prévisualisation -->
-    <div id="sharePreviewArea" class="share-preview-area"></div>
+        <!-- Zone de prévisualisation -->
+        <div id="sharePreviewArea" class="share-preview-area"></div>
 
-    <!-- Boutons de partage -->
-    <div class="share-actions">
-      <button id="downloadProfileBtn" class="share-btn share-btn--download">💾 Download PNG</button>
-      <button id="shareTwitterBtn"    class="share-btn share-btn--twitter">𝕏 Share on X</button>
-      <button id="shareDiscordBtn"    class="share-btn share-btn--discord">💬 Copy for Discord</button>
-      <button id="shareEmailBtn"      class="share-btn share-btn--email">📧 Email</button>
+        <!-- Boutons de partage -->
+        <div class="share-actions">
+          <button id="downloadProfileBtn" class="share-btn share-btn--download">
+            💾 Download PNG
+          </button>
+          <button id="shareTwitterBtn" class="share-btn share-btn--twitter">𝕏 Share on X</button>
+          <button id="shareDiscordBtn" class="share-btn share-btn--discord">
+            💬 Copy for Discord
+          </button>
+          <button id="shareEmailBtn" class="share-btn share-btn--email">📧 Email</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-
-<!-- =====================================================
+    <!-- =====================================================
      7. SÉLECTEUR DE LANGUE (script)
      Logique identique à index.html.
      ===================================================== -->
-<script type="module">
-import { initLang, setLang } from '../js/i18n.js';
+    <script type="module">
+      import { initLang, setLang } from "../js/i18n.js";
 
-const LABELS = { en: 'EN', fr: 'FR', es: 'ES', de: 'DE', it: 'IT' };
+      const LABELS = { en: "EN", fr: "FR", es: "ES", de: "DE", it: "IT" };
 
-function updateBtnLabel(lang) {
-  const el = document.getElementById('langBtnLabel');
-  if (el) el.textContent = LABELS[lang] || lang.toUpperCase();
-}
-
-function applyActive(lang) {
-  document.querySelectorAll('.lang-opt').forEach(opt => {
-    opt.classList.toggle('is-active', opt.dataset.lang === lang);
-  });
-  updateBtnLabel(lang);
-}
-
-function closeDropdown() {
-  document.getElementById('langToggle').classList.remove('open');
-  document.getElementById('langBtn').setAttribute('aria-expanded', 'false');
-}
-
-function openDropdown() {
-  document.getElementById('langToggle').classList.add('open');
-  document.getElementById('langBtn').setAttribute('aria-expanded', 'true');
-}
-
-async function selectLang(lang) {
-  await setLang(lang);
-  applyActive(lang);
-  closeDropdown();
-  // Re-rend stats + badges dans la langue choisie
-  window.dispatchEvent(new CustomEvent('personadle:i18n-ready'));
-}
-
-(async () => {
-  const lang = await initLang();
-  applyActive(lang);
-  // Flag lisible en cas de race condition (event déjà parti avant que le listener soit prêt)
-  window.i18nIsReady = true;
-  window.dispatchEvent(new CustomEvent('personadle:i18n-ready'));
-
-  document.getElementById('langBtn').addEventListener('click', e => {
-    e.stopPropagation();
-    document.getElementById('langToggle').classList.contains('open')
-      ? closeDropdown()
-      : openDropdown();
-  });
-
-  document.querySelectorAll('.lang-opt').forEach(opt => {
-    opt.addEventListener('click', () => selectLang(opt.dataset.lang));
-    opt.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        selectLang(opt.dataset.lang);
+      function updateBtnLabel(lang) {
+        const el = document.getElementById("langBtnLabel");
+        if (el) el.textContent = LABELS[lang] || lang.toUpperCase();
       }
-    });
-  });
 
-  document.addEventListener('click', () => closeDropdown());
-  document.getElementById('langDropdown').addEventListener('click', e => e.stopPropagation());
-})();
-</script>
+      function applyActive(lang) {
+        document.querySelectorAll(".lang-opt").forEach((opt) => {
+          opt.classList.toggle("is-active", opt.dataset.lang === lang);
+        });
+        updateBtnLabel(lang);
+      }
 
+      function closeDropdown() {
+        document.getElementById("langToggle").classList.remove("open");
+        document.getElementById("langBtn").setAttribute("aria-expanded", "false");
+      }
 
-<!-- =====================================================
+      function openDropdown() {
+        document.getElementById("langToggle").classList.add("open");
+        document.getElementById("langBtn").setAttribute("aria-expanded", "true");
+      }
+
+      async function selectLang(lang) {
+        await setLang(lang);
+        applyActive(lang);
+        closeDropdown();
+        // Re-rend stats + badges dans la langue choisie
+        window.dispatchEvent(new CustomEvent("personadle:i18n-ready"));
+      }
+
+      (async () => {
+        const lang = await initLang();
+        applyActive(lang);
+        // Flag lisible en cas de race condition (event déjà parti avant que le listener soit prêt)
+        window.i18nIsReady = true;
+        window.dispatchEvent(new CustomEvent("personadle:i18n-ready"));
+
+        document.getElementById("langBtn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          document.getElementById("langToggle").classList.contains("open")
+            ? closeDropdown()
+            : openDropdown();
+        });
+
+        document.querySelectorAll(".lang-opt").forEach((opt) => {
+          opt.addEventListener("click", () => selectLang(opt.dataset.lang));
+          opt.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              selectLang(opt.dataset.lang);
+            }
+          });
+        });
+
+        document.addEventListener("click", () => closeDropdown());
+        document
+          .getElementById("langDropdown")
+          .addEventListener("click", (e) => e.stopPropagation());
+      })();
+    </script>
+
+    <!-- =====================================================
      8. SCRIPTS
      Ordre important :
        1. html2canvas (CDN) — génération de l'image de partage
@@ -579,217 +671,268 @@ async function selectLang(lang) {
        4. darkmode         — toggle
      ===================================================== -->
 
-<!-- html2canvas : génération de l'image de partage -->
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- html2canvas : génération de l'image de partage -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-<!-- ── Auth FIRST : doit s'exécuter avant profile-page.js pour que
+    <!-- ── Auth FIRST : doit s'exécuter avant profile-page.js pour que
      window._currentUser soit défini quand profile-page.js en a besoin.
      Le top-level await bloque le DOMContentLoaded jusqu'à ce que initAuth()
      soit terminé — garantit l'ordre correct. -->
-<script type="module">
-import { initAuth } from '../js/auth.js';
-window._authReady = initAuth();
-await window._authReady;
-// Signal : auth est résolue, les autres modules peuvent lire window._currentUser
-window._authResolved = true;
-window.dispatchEvent(new CustomEvent('personadle:auth-ready'));
-</script>
+    <script type="module">
+      import { initAuth } from "../js/auth.js";
+      window._authReady = initAuth();
+      await window._authReady;
+      // Signal : auth est résolue, les autres modules peuvent lire window._currentUser
+      window._authResolved = true;
+      window.dispatchEvent(new CustomEvent("personadle:auth-ready"));
+    </script>
 
-<!-- Logique du profil (module ES6) — chargé APRÈS initAuth() -->
-<script type="module" src="./profile-page.js?v=20"></script>
+    <!-- Logique du profil (module ES6) — chargé APRÈS initAuth() -->
+    <script type="module" src="./profile-page.js?v=20"></script>
 
-<!-- Notifications + Settings (appeler après auth) -->
-<script type="module">
-import { initNotifications } from '../js/notifications.js';
-import { initSettingsModal }  from '../js/settings-modal.js';
+    <!-- Notifications + Settings (appeler après auth) -->
+    <script type="module">
+      import { initNotifications } from "../js/notifications.js";
+      import { initSettingsModal } from "../js/settings-modal.js";
 
-if (window._authReady) await window._authReady;
-if (window._currentUser) {
-  initNotifications();
-  initSettingsModal(window._currentUser.id);
-}
-</script>
+      if (window._authReady) await window._authReady;
+      if (window._currentUser) {
+        initNotifications();
+        initSettingsModal(window._currentUser.id);
+      }
+    </script>
 
-<!-- Cadeaux admin : affiche l'animation divine si de nouveaux items ont été débloqués -->
-<script type="module">
-import { showGiftsFromIds } from '../js/divine-gift.js';
+    <!-- Cadeaux admin : affiche l'animation divine si de nouveaux items ont été débloqués -->
+    <script type="module">
+      import { showGiftsFromIds } from "../js/divine-gift.js";
 
-const _giftTitle = () => {
-  const t = k => { const v = window.i18n?.t?.(k); return (v && v !== k) ? v : null; };
-  return t('ui.admin_gift_received') || '🎁 Cadeau reçu !';
-};
+      const _giftTitle = () => {
+        const t = (k) => {
+          const v = window.i18n?.t?.(k);
+          return v && v !== k ? v : null;
+        };
+        return t("ui.admin_gift_received") || "🎁 Cadeau reçu !";
+      };
 
-async function _showPendingDivineGifts(items) {
-  if (!items?.length) return;
-  localStorage.removeItem('_pendingDivineGifts');
-  await showGiftsFromIds(items, _giftTitle());
-}
+      async function _showPendingDivineGifts(items) {
+        if (!items?.length) return;
+        localStorage.removeItem("_pendingDivineGifts");
+        await showGiftsFromIds(items, _giftTitle());
+      }
 
-window.addEventListener('personadle:gifts-received', (e) => {
-  _showPendingDivineGifts(e.detail?.items);
-});
+      window.addEventListener("personadle:gifts-received", (e) => {
+        _showPendingDivineGifts(e.detail?.items);
+      });
 
-const _checkOnLoad = () => {
-  try {
-    const pending = JSON.parse(localStorage.getItem('_pendingDivineGifts') || '[]');
-    if (pending.length) _showPendingDivineGifts(pending);
-  } catch {}
-};
-if (window._authResolved) {
-  _checkOnLoad();
-} else {
-  window.addEventListener('personadle:auth-ready', _checkOnLoad, { once: true });
-}
-</script>
+      const _checkOnLoad = () => {
+        try {
+          const pending = JSON.parse(localStorage.getItem("_pendingDivineGifts") || "[]");
+          if (pending.length) _showPendingDivineGifts(pending);
+        } catch {}
+      };
+      if (window._authResolved) {
+        _checkOnLoad();
+      } else {
+        window.addEventListener("personadle:auth-ready", _checkOnLoad, { once: true });
+      }
+    </script>
 
-<!-- Barre de navigation + dark mode -->
-<script type="module">
-import { initBottomNav } from '../js/bottomNav.js';
+    <!-- Barre de navigation + dark mode -->
+    <script type="module">
+      import { initBottomNav } from "../js/bottomNav.js";
 
-// ── Dark mode ──
-const toggle = document.getElementById('darkModeToggle');
-const saved  = localStorage.getItem('darkMode');
+      // ── Dark mode ──
+      const toggle = document.getElementById("darkModeToggle");
+      const saved = localStorage.getItem("darkMode");
 
-if (saved === 'enabled') {
-  document.body.classList.add('darkmode');
-  toggle.checked = true;
-}
+      if (saved === "enabled") {
+        document.body.classList.add("darkmode");
+        toggle.checked = true;
+      }
 
-toggle.addEventListener('change', () => {
-  if (toggle.checked) {
-    document.body.classList.add('darkmode');
-    localStorage.setItem('darkMode', 'enabled');
-  } else {
-    document.body.classList.remove('darkmode');
-    localStorage.setItem('darkMode', 'disabled');
-  }
-});
+      toggle.addEventListener("change", () => {
+        if (toggle.checked) {
+          document.body.classList.add("darkmode");
+          localStorage.setItem("darkMode", "enabled");
+        } else {
+          document.body.classList.remove("darkmode");
+          localStorage.setItem("darkMode", "disabled");
+        }
+      });
 
-// ── Bottom nav ──
-initBottomNav();
-</script>
+      // ── Bottom nav ──
+      initBottomNav();
+    </script>
 
-
-<!-- =====================================================
+    <!-- =====================================================
      5. MODALES AUTH — Login / Register
      Branchées sur api.auth.* (js/api.js).
      Désactivées tant que le backend n'est pas live.
      ===================================================== -->
 
-<!-- ── Modale Login ── -->
-<div id="loginModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-  <div class="modal-content auth-modal-content">
-    <div class="crop-modal-header">
-      <h3 class="crop-modal-title" id="loginTitle">
-        <span class="card-accent">◆</span>
-        <span data-i18n="auth.login">Log in</span>
-      </h3>
-      <span class="close" id="closeLoginModal" role="button">&times;</span>
+    <!-- ── Modale Login ── -->
+    <div
+      id="loginModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="loginTitle"
+    >
+      <div class="modal-content auth-modal-content">
+        <div class="crop-modal-header">
+          <h3 class="crop-modal-title" id="loginTitle">
+            <span class="card-accent">◆</span>
+            <span data-i18n="auth.login">Log in</span>
+          </h3>
+          <span class="close" id="closeLoginModal" role="button">&times;</span>
+        </div>
+
+        <form id="loginForm" class="auth-form" novalidate>
+          <div class="auth-field">
+            <label for="loginEmail" data-i18n="auth.email_or_pseudo">Email or Username</label>
+            <input
+              type="text"
+              id="loginEmail"
+              autocomplete="username"
+              required
+              data-i18n-placeholder="auth.email_or_pseudo_placeholder"
+            />
+          </div>
+          <div class="auth-field">
+            <label for="loginPassword" data-i18n="auth.password">Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              autocomplete="current-password"
+              required
+              data-i18n-placeholder="auth.password"
+            />
+          </div>
+          <p id="loginError" class="auth-error hidden"></p>
+          <button type="submit" class="btn-p5 btn-auth-submit">
+            🔐 <span data-i18n="auth.login">Log in</span>
+          </button>
+        </form>
+
+        <p class="auth-switch">
+          <span data-i18n="auth.no_account">No account yet?</span>
+          <button id="switchToRegister" class="auth-switch-btn" data-i18n="auth.register">
+            Create account
+          </button>
+        </p>
+      </div>
     </div>
 
-    <form id="loginForm" class="auth-form" novalidate>
-      <div class="auth-field">
-        <label for="loginEmail" data-i18n="auth.email_or_pseudo">Email or Username</label>
-        <input type="text" id="loginEmail" autocomplete="username" required
-               data-i18n-placeholder="auth.email_or_pseudo_placeholder">
-      </div>
-      <div class="auth-field">
-        <label for="loginPassword" data-i18n="auth.password">Password</label>
-        <input type="password" id="loginPassword" autocomplete="current-password" required
-               data-i18n-placeholder="auth.password">
-      </div>
-      <p id="loginError" class="auth-error hidden"></p>
-      <button type="submit" class="btn-p5 btn-auth-submit">
-        🔐 <span data-i18n="auth.login">Log in</span>
-      </button>
-    </form>
+    <!-- ── Modale Register ── -->
+    <div
+      id="registerModal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="registerTitle"
+    >
+      <div class="modal-content auth-modal-content">
+        <div class="crop-modal-header">
+          <h3 class="crop-modal-title" id="registerTitle">
+            <span class="card-accent">◆</span>
+            <span data-i18n="auth.register">Create account</span>
+          </h3>
+          <span class="close" id="closeRegisterModal" role="button">&times;</span>
+        </div>
 
-    <p class="auth-switch">
-      <span data-i18n="auth.no_account">No account yet?</span>
-      <button id="switchToRegister" class="auth-switch-btn" data-i18n="auth.register">Create account</button>
-    </p>
-  </div>
-</div>
+        <form id="registerForm" class="auth-form" novalidate>
+          <div class="auth-field">
+            <label for="registerEmail" data-i18n="auth.email">Email</label>
+            <input
+              type="email"
+              id="registerEmail"
+              autocomplete="email"
+              required
+              data-i18n-placeholder="auth.email"
+            />
+          </div>
+          <div class="auth-field">
+            <label for="registerPseudo" data-i18n="auth.pseudo">Username</label>
+            <input
+              type="text"
+              id="registerPseudo"
+              maxlength="30"
+              required
+              autocomplete="username"
+              data-i18n-placeholder="auth.pseudo"
+            />
+          </div>
+          <div class="auth-field">
+            <label for="registerPassword" data-i18n="auth.password">Password</label>
+            <input
+              type="password"
+              id="registerPassword"
+              autocomplete="new-password"
+              minlength="8"
+              required
+              data-i18n-placeholder="auth.password"
+            />
+          </div>
+          <div class="auth-field">
+            <label for="registerPasswordConfirm" data-i18n="auth.password_confirm"
+              >Confirm password</label
+            >
+            <input
+              type="password"
+              id="registerPasswordConfirm"
+              autocomplete="new-password"
+              required
+              data-i18n-placeholder="auth.password_confirm"
+            />
+          </div>
+          <div class="auth-field auth-field--import">
+            <label for="registerImportJson" data-i18n="auth.import_json"
+              >Import my existing profile (JSON)</label
+            >
+            <input type="file" id="registerImportJson" accept=".json" class="auth-import-input" />
+          </div>
+          <p id="registerError" class="auth-error hidden"></p>
+          <button type="submit" class="btn-p5 btn-auth-submit">
+            ✨ <span data-i18n="auth.register">Create account</span>
+          </button>
+          <p class="auth-privacy-note">
+            <span data-i18n="auth.privacy_notice">By creating an account, you agree to our</span>
+            <a href="../privacy.html" data-i18n="auth.privacy_link">Privacy Policy</a>.
+          </p>
+        </form>
 
-<!-- ── Modale Register ── -->
-<div id="registerModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="registerTitle">
-  <div class="modal-content auth-modal-content">
-    <div class="crop-modal-header">
-      <h3 class="crop-modal-title" id="registerTitle">
-        <span class="card-accent">◆</span>
-        <span data-i18n="auth.register">Create account</span>
-      </h3>
-      <span class="close" id="closeRegisterModal" role="button">&times;</span>
+        <p class="auth-switch">
+          <span data-i18n="auth.has_account">Already have an account?</span>
+          <button id="switchToLogin" class="auth-switch-btn" data-i18n="auth.login">Log in</button>
+        </p>
+      </div>
     </div>
 
-    <form id="registerForm" class="auth-form" novalidate>
-      <div class="auth-field">
-        <label for="registerEmail" data-i18n="auth.email">Email</label>
-        <input type="email" id="registerEmail" autocomplete="email" required
-               data-i18n-placeholder="auth.email">
-      </div>
-      <div class="auth-field">
-        <label for="registerPseudo" data-i18n="auth.pseudo">Username</label>
-        <input type="text" id="registerPseudo" maxlength="30" required
-               autocomplete="username" data-i18n-placeholder="auth.pseudo">
-      </div>
-      <div class="auth-field">
-        <label for="registerPassword" data-i18n="auth.password">Password</label>
-        <input type="password" id="registerPassword" autocomplete="new-password"
-               minlength="8" required data-i18n-placeholder="auth.password">
-      </div>
-      <div class="auth-field">
-        <label for="registerPasswordConfirm" data-i18n="auth.password_confirm">Confirm password</label>
-        <input type="password" id="registerPasswordConfirm" autocomplete="new-password"
-               required data-i18n-placeholder="auth.password_confirm">
-      </div>
-      <div class="auth-field auth-field--import">
-        <label for="registerImportJson" data-i18n="auth.import_json">Import my existing profile (JSON)</label>
-        <input type="file" id="registerImportJson" accept=".json" class="auth-import-input">
-      </div>
-      <p id="registerError" class="auth-error hidden"></p>
-      <button type="submit" class="btn-p5 btn-auth-submit">
-        ✨ <span data-i18n="auth.register">Create account</span>
-      </button>
-      <p class="auth-privacy-note">
-        <span data-i18n="auth.privacy_notice">By creating an account, you agree to our</span>
-        <a href="../privacy.html" data-i18n="auth.privacy_link">Privacy Policy</a>.
-      </p>
-    </form>
+    <!-- Expose openCompareOverlay globally for profile-view.js -->
+    <script type="module">
+      import { openCompareOverlay } from "../js/stats-compare.js";
+      window._openCompareOverlay = openCompareOverlay;
+    </script>
 
-    <p class="auth-switch">
-      <span data-i18n="auth.has_account">Already have an account?</span>
-      <button id="switchToLogin" class="auth-switch-btn" data-i18n="auth.login">Log in</button>
-    </p>
-  </div>
-</div>
+    <!-- Mode lecture seule : activé quand ?view=FRIENDCODE est dans l'URL -->
+    <script type="module" src="./profile-view.js?v=5"></script>
 
-<!-- Expose openCompareOverlay globally for profile-view.js -->
-<script type="module">
-  import { openCompareOverlay } from '../js/stats-compare.js';
-  window._openCompareOverlay = openCompareOverlay;
-</script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("../sw.js").catch((err) => {
+            console.warn("[SW] Registration failed:", err);
+          });
 
-<!-- Mode lecture seule : activé quand ?view=FRIENDCODE est dans l'URL -->
-<script type="module" src="./profile-view.js?v=5"></script>
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('../sw.js').catch(err => {
-      console.warn('[SW] Registration failed:', err);
-    });
-
-    // Quand le SW se met à jour, recharger la page automatiquement
-    // pour servir les nouveaux assets sans Ctrl+Shift+R.
-    navigator.serviceWorker.addEventListener('message', (event) => {
-      if (event.data?.type === 'SW_UPDATED') {
-        window.location.reload();
+          // Quand le SW se met à jour, recharger la page automatiquement
+          // pour servir les nouveaux assets sans Ctrl+Shift+R.
+          navigator.serviceWorker.addEventListener("message", (event) => {
+            if (event.data?.type === "SW_UPDATED") {
+              window.location.reload();
+            }
+          });
+        });
       }
-    });
-  });
-}
-</script>
-
-</body>
+    </script>
+  </body>
 </html>

@@ -1,0 +1,535 @@
+/* ═══════════════════════════════════════════════════════
+   tv-friend-anim.css — Animation TV Persona 4 demande d'ami
+   ═══════════════════════════════════════════════════════ */
+
+#tv-anim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+#tv-anim-overlay.tv--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+#tv-anim-overlay.tv--exit {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.tv-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 10, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+/* ── Stage ────────────────────────────────────────────── */
+.tv-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+/* ── TV wrap + pop-in ─────────────────────────────────── */
+.tv-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: tv-pop-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes tv-pop-in {
+  from {
+    transform: scale(0.1) translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   CSS TV — Persona 4 style CRT
+   ══════════════════════════════════════════════════════ */
+
+/* ── Antennes ─────────────────────────────────────────── */
+.tv-antennas {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-bottom: -4px;
+  position: relative;
+  z-index: 0;
+}
+.tv-antenna {
+  width: 5px;
+  height: 52px;
+  background: linear-gradient(180deg, #888 0%, #aaa 50%, #777 100%);
+  border-radius: 3px 3px 0 0;
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+.tv-antenna--l {
+  transform: rotate(-22deg);
+  transform-origin: bottom center;
+}
+.tv-antenna--r {
+  transform: rotate(22deg);
+  transform-origin: bottom center;
+}
+.tv-antenna::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: -3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #bbb, #666);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Corps principal ──────────────────────────────────── */
+.tv-body {
+  position: relative;
+  isolation: isolate;
+  width: min(290px, 74vw);
+  background: linear-gradient(160deg, #ddd0aa 0%, #c8b888 40%, #b8a870 100%);
+  border-radius: 22px 22px 16px 16px;
+  padding: 16px 18px 14px;
+  box-shadow:
+    /* Highlight haut-gauche */
+    -2px -2px 0 rgba(255, 255, 255, 0.55),
+    /* Ombre droite + bas (effet 3D) */ 5px 5px 0 #8a7448,
+    4px 4px 0 #9c8558,
+    /* Ombre portée */ 0 22px 55px rgba(0, 0, 0, 0.65),
+    0 8px 20px rgba(0, 0, 0, 0.4);
+  /* Bande décorative jaune P4 */
+  outline: 3px solid #c4a840;
+  outline-offset: -6px;
+}
+
+/* Trait décoratif jaune P4 sur le dessus */
+.tv-body::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 18px;
+  right: 18px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffcc00 20%, #ffcc00 80%, transparent);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+/* ── Panneau d'écran ──────────────────────────────────── */
+.tv-screen-bezel {
+  background: linear-gradient(160deg, #111 0%, #1c1c1c 100%);
+  border-radius: 10px 10px 8px 8px;
+  padding: 9px;
+  box-shadow:
+    inset 0 2px 10px rgba(0, 0, 0, 0.9),
+    inset 0 -1px 4px rgba(255, 255, 255, 0.04),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Écran ────────────────────────────────────────────── */
+.tv-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #080808;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+/* Reflet sur l'écran */
+.tv-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 30%,
+    transparent 60%
+  );
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* ── Blurred fill (fond flouté = rempli tous les bords) ── */
+.tv-avatar-bg {
+  position: absolute;
+  inset: -12%;
+  width: 124%;
+  height: 124%;
+  object-fit: cover;
+  filter: blur(16px) grayscale(100%) brightness(0.22);
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+.tv-noise {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  opacity: 0.88;
+  transition: opacity 0.4s;
+  z-index: 2;
+}
+
+.tv-avatar {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* contain = pas de zoom, on voit le visage entier ; le fond flouté remplit les bords */
+  object-fit: contain;
+  object-position: center center;
+  filter: grayscale(100%) brightness(0.3) contrast(1.2);
+  opacity: 0;
+  animation: tv-avatar-reveal 2.4s ease forwards;
+  animation-delay: 0.5s;
+  z-index: 3;
+  transition:
+    opacity 0.4s ease,
+    filter 0.4s ease;
+}
+@keyframes tv-avatar-reveal {
+  0% {
+    opacity: 0;
+    filter: grayscale(100%) brightness(0.15) contrast(1.3);
+  }
+  25% {
+    opacity: 0.35;
+    filter: grayscale(100%) brightness(0.4) contrast(1.15);
+  }
+  60% {
+    opacity: 0.65;
+    filter: grayscale(80%) brightness(0.65) contrast(1.05);
+  }
+  100% {
+    opacity: 0.88;
+    filter: grayscale(15%) brightness(0.92) contrast(1);
+  }
+}
+/* Fade out quand l'avatar burst hors de la TV */
+.tv-avatar.tv--screen-fade {
+  animation: none;
+  opacity: 0 !important;
+  filter: grayscale(100%) brightness(0) !important;
+}
+
+/* ── TV flash on burst ────────────────────────────────── */
+.tv-screen.tv--flash-screen {
+  animation: tv-screen-flash 0.35s ease forwards;
+}
+@keyframes tv-screen-flash {
+  0% {
+    background: #fffde0;
+  }
+  100% {
+    background: #080808;
+  }
+}
+
+/* ── Panneau bas (boutons + marque) ───────────────────── */
+.tv-bottom-panel {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 11px;
+  padding: 0 4px;
+}
+
+/* Boutons rotatifs */
+.tv-knobs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tv-knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #c8a050, #6a4e1a);
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+/* Repère du bouton */
+.tv-knob::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 1px;
+}
+
+/* Zone centrale : marque + grille */
+.tv-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+}
+
+.tv-brand {
+  font-size: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  color: #ffcc00;
+  text-shadow:
+    0 0 8px rgba(255, 204, 0, 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.6);
+  font-family: "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+.tv-speaker-grille {
+  display: grid;
+  grid-template-columns: repeat(7, 5px);
+  gap: 3px;
+}
+.tv-speaker-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #9a8050;
+  box-shadow:
+    inset 0 1px 1px rgba(0, 0, 0, 0.4),
+    0 0.5px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Indicateur LED */
+.tv-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow:
+    0 0 6px #22c55e,
+    0 0 12px rgba(34, 197, 94, 0.4);
+  animation: tv-led-pulse 2s ease-in-out infinite;
+  margin-top: 2px;
+}
+@keyframes tv-led-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ── Pieds ────────────────────────────────────────────── */
+.tv-feet {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.tv-foot {
+  width: 32px;
+  height: 14px;
+  background: linear-gradient(180deg, #a08858 0%, #7a6030 100%);
+  border-radius: 0 0 8px 8px;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    2px 0 0 #6a5020;
+  clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+}
+
+/* ── Burst avatar (sort de l'écran) ──────────────────────
+   Positionné en dehors de .tv-body pour ne jamais être
+   clipé par isolation/overflow. Parent = .tv-wrap.
+   L'avatar démarre au centre de l'écran TV (≈ 40% du haut
+   de .tv-wrap) et monte jusqu'à la zone au-dessus de la TV.
+   animation-fill-mode: forwards → reste visible jusqu'au clic.
+   ─────────────────────────────────────────────────────── */
+.tv-burst-wrap {
+  position: absolute;
+  /* Centré horizontalement sur .tv-wrap */
+  left: 0;
+  right: 0;
+  /* On part du centre de l'écran ≈ 35% depuis le top de .tv-wrap
+     (antennes ~50px + body padding + bezel + demi-écran) */
+  top: 35%;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 20; /* au-dessus de .tv-body (isolation) et des antennes */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.tv-burst-avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  box-shadow:
+    0 0 0 4px #ffcc00,
+    0 0 28px rgba(255, 204, 0, 0.5),
+    0 10px 40px rgba(0, 0, 0, 0.65);
+  object-fit: contain;
+  background: #111;
+  /* Démarre invisible au centre de l'écran */
+  transform: scale(0) translateY(0);
+  opacity: 0;
+}
+.tv-burst-avatar.tv--burst {
+  /* forwards = reste dans l'état final après la fin de l'animation */
+  animation: tv-burst-out 0.62s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s forwards;
+}
+@keyframes tv-burst-out {
+  0% {
+    transform: scale(0) translateY(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.35) translateY(-100px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.1) translateY(-88px);
+    opacity: 1;
+  }
+}
+/* Pulse discret pendant l'attente de l'interaction */
+.tv-burst-avatar.tv--burst.tv--waiting {
+  animation:
+    tv-burst-out 0.62s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s forwards,
+    tv-burst-idle 2.2s ease-in-out 0.8s infinite;
+}
+@keyframes tv-burst-idle {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px #ffcc00,
+      0 0 28px rgba(255, 204, 0, 0.5),
+      0 10px 40px rgba(0, 0, 0, 0.65);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px #ffcc00,
+      0 0 50px rgba(255, 204, 0, 0.85),
+      0 10px 50px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* ── Texte ────────────────────────────────────────────── */
+.tv-text {
+  position: relative;
+  z-index: 6;
+  text-align: center;
+  color: #fff;
+  /* Le texte apparaît sous le burst avatar qui monte de ~70px */
+  margin-top: 70px;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+.tv-text.tv--text-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.tv-pseudo {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #ffcc00;
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.8),
+    0 0 28px rgba(255, 204, 0, 0.5);
+  letter-spacing: 0.02em;
+}
+.tv-msg {
+  display: block;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 6px 0 16px;
+  font-style: italic;
+}
+.tv-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.tv-btn {
+  border: none;
+  border-radius: 22px;
+  padding: 10px 24px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    filter 0.15s;
+}
+.tv-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+.tv-btn-accept {
+  background: #ffcc00;
+  color: #1a1a00;
+  box-shadow: 0 4px 14px rgba(255, 204, 0, 0.45);
+}
+.tv-btn-dismiss {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+}
+
+/* ── Particles ────────────────────────────────────────── */
+.tv-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100002;
+  overflow: hidden;
+}
+.tv-particle {
+  position: fixed;
+  transform: translate(-50%, -50%) scale(0);
+  animation: tv-particle-burst 0.75s ease-out forwards;
+  font-style: normal;
+  line-height: 1;
+}
+@keyframes tv-particle-burst {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--rot));
+    opacity: 0;
+  }
+}

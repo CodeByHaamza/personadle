@@ -7,7 +7,6 @@
    Dépend de : global.css (reset, layout, .textbar-container…)
    ============================================================= */
 
-
 /* =====================================================
    1. BOÎTE D'EN-TÊTE DU MODE CLASSIQUE
    Encadré bleu avec le titre et l'instruction.
@@ -39,7 +38,6 @@
   color: #e0e0e0;
 }
 
-
 /* =====================================================
    2. INDICE (QUOTE HINT)
    Texte d'indice débloqué après 3 tentatives.
@@ -61,7 +59,6 @@
   /* Caché par défaut, affiché par le JS */
   display: none;
 }
-
 
 /* =====================================================
    3. GRILLE DES DEVINETTES
@@ -113,7 +110,7 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   font-size: 15px;
   color: white;
   border-radius: 10px;
@@ -133,11 +130,21 @@
 /* Délais d'animation pour chaque cellule (effet cascade) :
    les cellules se révèlent une à une de gauche à droite,
    chacune avec 0.1s de délai supplémentaire. */
-.guess-cell:nth-child(2) { animation-delay: 0.1s; }
-.guess-cell:nth-child(3) { animation-delay: 0.2s; }
-.guess-cell:nth-child(4) { animation-delay: 0.3s; }
-.guess-cell:nth-child(5) { animation-delay: 0.4s; }
-.guess-cell:nth-child(6) { animation-delay: 0.5s; }
+.guess-cell:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.guess-cell:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.guess-cell:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.guess-cell:nth-child(5) {
+  animation-delay: 0.4s;
+}
+.guess-cell:nth-child(6) {
+  animation-delay: 0.5s;
+}
 
 /* En-tête des catégories (Nom, Genre, Âge…)
    Toujours visible au-dessus des .guess-row pour rappeler
@@ -173,7 +180,6 @@
   line-height: 1.1;
 }
 
-
 /* =====================================================
    4. COULEURS DES CELLULES (feedback)
    Vert = correct, Jaune = partiel, Rouge = faux.
@@ -198,7 +204,6 @@
   background-color: #e74c3c;
 }
 
-
 /* =====================================================
    5. AUTOCOMPLÉTION (liste ul du mode classique)
    Positionnée sous le .textbar-container.
@@ -217,12 +222,11 @@
   border: 1px solid #ccc;
   border-top: none;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
-  z-index: 5;
+  z-index: 600; /* au-dessus de .bottom-nav (z-index 500) */
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 
 /* =====================================================
    6. TOOLTIP (info-bulles sur les cellules)
@@ -280,7 +284,6 @@
   border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
 }
 
-
 /* =====================================================
    7. MODE DALTONIEN
    Remplace les couleurs vert/jaune/rouge par des formes
@@ -329,7 +332,6 @@ body.daltonian-mode .guess-cell.wrong {
   border: 2px solid gray;
 }
 
-
 /* =====================================================
    8. DARK MODE — SPÉCIFIQUE CLASSIQUE
    Grille, cellules, catégories et feedback en thème sombre.
@@ -365,9 +367,17 @@ body.darkmode .category-row {
 }
 
 /* Les couleurs de feedback restent identiques en dark mode */
-body.darkmode .correct    { background-color: #2ecc71; }
-body.darkmode .misplaced  { background-color: #f1c40f; color: black; }
-body.darkmode .wrong      { background-color: #e74c3c; color: white; }
+body.darkmode .correct {
+  background-color: #2ecc71;
+}
+body.darkmode .misplaced {
+  background-color: #f1c40f;
+  color: black;
+}
+body.darkmode .wrong {
+  background-color: #e74c3c;
+  color: white;
+}
 
 /* Compteur activé en dark mode */
 body.darkmode .counter.activated {
@@ -378,7 +388,6 @@ body.darkmode .counter.activated {
   transform: scale(1.05);
 }
 
-
 /* =====================================================
    9. ANIMATION DE RÉVÉLATION (flip des cellules)
    Chaque .guess-cell commence en rotateX(90deg) (de dos)
@@ -387,10 +396,15 @@ body.darkmode .counter.activated {
    ===================================================== */
 
 @keyframes flipIn {
-  0%   { transform: rotateX(90deg); opacity: 0; }
-  100% { transform: rotateX(0);     opacity: 1; }
+  0% {
+    transform: rotateX(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotateX(0);
+    opacity: 1;
+  }
 }
-
 
 /* =====================================================
    10. RESPONSIVE — SPÉCIFIQUE CLASSIQUE
@@ -430,7 +444,6 @@ body.darkmode .counter.activated {
   }
 }
 
-
 /* -----------------------------------------------
    TABLETTE (481px – 900px)
    La grille reste horizontale mais devient scrollable.
@@ -442,7 +455,7 @@ body.darkmode .counter.activated {
     overflow-x: auto;
     align-items: flex-start;
     padding: 0 10px;
-    -webkit-overflow-scrolling: touch;    /* Scroll fluide sur iOS */
+    -webkit-overflow-scrolling: touch; /* Scroll fluide sur iOS */
   }
 
   /* Grille compactée mais encore horizontale */
@@ -450,7 +463,7 @@ body.darkmode .counter.activated {
   .guess-row {
     grid-template-columns: 80px repeat(7, 110px);
     gap: 10px;
-    min-width: max-content;   /* Empêche la compression des colonnes */
+    min-width: max-content; /* Empêche la compression des colonnes */
   }
 
   /* Image légèrement réduite */
@@ -481,7 +494,6 @@ body.darkmode .counter.activated {
   }
 }
 
-
 /* -----------------------------------------------
    MOBILE (≤ 480px)
    Layout carte 2 colonnes : image à gauche (toute la
@@ -500,7 +512,6 @@ body.darkmode .counter.activated {
    └──────────┴─────────────────────┘
 ----------------------------------------------- */
 @media (max-width: 480px) {
-
   /* Cache l'en-tête de catégories (labels affichés via ::before) */
   .category-row {
     display: none;
@@ -515,7 +526,7 @@ body.darkmode .counter.activated {
   /* ---- Grille 2 colonnes : image | cellules ---- */
   .guess-row {
     display: grid;
-    grid-template-columns: 80px 1fr;   /* Colonne image fixe, reste fluide */
+    grid-template-columns: 80px 1fr; /* Colonne image fixe, reste fluide */
     grid-template-rows: repeat(7, auto);
     gap: 5px 8px;
     padding: 12px 10px;
@@ -531,7 +542,7 @@ body.darkmode .counter.activated {
   /* Image : colonne de gauche, s'étend sur toutes les rangées */
   .guess-image {
     grid-column: 1;
-    grid-row: 1 / 8;         /* Span des 7 cellules de propriétés */
+    grid-row: 1 / 8; /* Span des 7 cellules de propriétés */
     width: 72px;
     height: auto;
     min-height: 72px;
@@ -549,7 +560,7 @@ body.darkmode .counter.activated {
     height: auto;
     min-height: 36px;
     font-size: 11px;
-    padding: 5px 8px 5px 32px;   /* Padding gauche pour le label ::before */
+    padding: 5px 8px 5px 32px; /* Padding gauche pour le label ::before */
     border-radius: 6px;
     text-align: left;
     position: relative;

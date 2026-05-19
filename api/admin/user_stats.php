@@ -40,7 +40,7 @@ if (!in_array($mode, $validModes, true)) {
     jsonError('Invalid mode. Valid values: ' . implode(', ', $validModes), 400);
 }
 
-$intFields = ['wins', 'giveups', 'games', 'streak', 'streak_record', 'perfect_wins', 'total_time_ms'];
+$intFields = ['wins', 'giveups', 'games', 'streak', 'streak_record', 'perfect_wins'];
 $values    = [];
 
 foreach ($intFields as $field) {
@@ -48,10 +48,20 @@ foreach ($intFields as $field) {
         jsonError("Missing required field: {$field}", 400);
     }
     $val = (int) $data[$field];
-    if ($val < 0) {
-        jsonError("Field {$field} must be >= 0", 400);
-    }
+    if ($val < 0) jsonError("Field {$field} must be >= 0", 400);
     $values[$field] = $val;
+}
+
+// total_time_ms est optionnel — on garde la valeur existante si non fourni
+if (array_key_exists('total_time_ms', $data)) {
+    $val = (int) $data['total_time_ms'];
+    if ($val < 0) jsonError("Field total_time_ms must be >= 0", 400);
+    $values['total_time_ms'] = $val;
+} else {
+    $existing = $pdo->prepare('SELECT total_time_ms FROM user_stats WHERE user_id = ? AND mode = ? LIMIT 1');
+    $existing->execute([$userId, $mode]);
+    $row = $existing->fetch();
+    $values['total_time_ms'] = $row ? (int) $row['total_time_ms'] : 0;
 }
 
 // ── UPSERT ────────────────────────────────────────────────────────────────────
