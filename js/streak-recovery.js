@@ -9,17 +9,20 @@
  * Déclenchement : premier chargement du jour si la streak a été brisée.
  */
 
-const RECOVERY_KEY  = 'streakRecovery';
+const RECOVERY_KEY = "streakRecovery";
 const TWO_MONTHS_MS = 60 * 24 * 60 * 60 * 1000; // 60 jours en ms
 
 function _imgBase() {
   const p = window.location.pathname;
-  return p.startsWith('/personadle/') ? '/personadle/img/' : '/img/';
+  return p.startsWith("/personadle/") ? "/personadle/img/" : "/img/";
 }
 
 function _getRecovery() {
-  try { return JSON.parse(localStorage.getItem(RECOVERY_KEY) || '{}'); }
-  catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(RECOVERY_KEY) || "{}");
+  } catch {
+    return {};
+  }
 }
 
 function _saveRecovery(r) {
@@ -31,7 +34,7 @@ export function canRecover() {
   const r = _getRecovery();
   if (!r.previousStreak || r.previousStreak <= 1) return false;
   if (!r.lastUsed) return true;
-  return (Date.now() - new Date(r.lastUsed).getTime()) >= TWO_MONTHS_MS;
+  return Date.now() - new Date(r.lastUsed).getTime() >= TWO_MONTHS_MS;
 }
 
 /**
@@ -59,10 +62,10 @@ export function showStreakRecoveryMenu(previousStreak) {
   }
   if (!previousStreak) return;
 
-  document.getElementById('streak-recovery-overlay')?.remove();
+  document.getElementById("streak-recovery-overlay")?.remove();
 
-  const overlay = document.createElement('div');
-  overlay.id = 'streak-recovery-overlay';
+  const overlay = document.createElement("div");
+  overlay.id = "streak-recovery-overlay";
   overlay.innerHTML = `
     <div class="sr-backdrop" id="sr-backdrop"></div>
     <div class="sr-menu" id="sr-menu">
@@ -82,43 +85,45 @@ export function showStreakRecoveryMenu(previousStreak) {
 
   document.body.appendChild(overlay);
   _spawnSnowflakes();
-  requestAnimationFrame(() => overlay.classList.add('sr--visible'));
+  requestAnimationFrame(() => overlay.classList.add("sr--visible"));
 
-  overlay.querySelector('#sr-btn-recover').addEventListener('click', () => _recover(previousStreak, overlay));
-  overlay.querySelector('#sr-btn-cancel').addEventListener('click',  () => _close(overlay));
-  overlay.querySelector('#sr-backdrop').addEventListener('click',    () => _close(overlay));
+  overlay
+    .querySelector("#sr-btn-recover")
+    .addEventListener("click", () => _recover(previousStreak, overlay));
+  overlay.querySelector("#sr-btn-cancel").addEventListener("click", () => _close(overlay));
+  overlay.querySelector("#sr-backdrop").addEventListener("click", () => _close(overlay));
 }
 
 function _spawnSnowflakes() {
-  const container = document.getElementById('sr-snowflakes');
+  const container = document.getElementById("sr-snowflakes");
   if (!container) return;
-  const chars = ['❄', '❅', '❆'];
+  const chars = ["❄", "❅", "❆"];
   for (let i = 0; i < 22; i++) {
-    const el = document.createElement('span');
-    el.className   = 'sr-snowflake';
+    const el = document.createElement("span");
+    el.className = "sr-snowflake";
     el.textContent = chars[i % 3];
-    el.style.left             = `${Math.random() * 100}%`;
-    el.style.fontSize         = `${9 + Math.random() * 14}px`;
+    el.style.left = `${Math.random() * 100}%`;
+    el.style.fontSize = `${9 + Math.random() * 14}px`;
     el.style.animationDuration = `${2.2 + Math.random() * 2.8}s`;
-    el.style.animationDelay   = `${-Math.random() * 4}s`;
+    el.style.animationDelay = `${-Math.random() * 4}s`;
     container.appendChild(el);
   }
 }
 
 function _recover(previousStreak, overlay) {
-  const menu = document.getElementById('sr-menu');
-  if (menu) menu.classList.add('sr--embrase');
+  const menu = document.getElementById("sr-menu");
+  if (menu) menu.classList.add("sr--embrase");
 
   // 1. Restaurer la streak en localStorage + marquer la recovery pour le badge reborn_phoenix
   try {
-    const profile = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+    const profile = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
     if (profile.stats) {
-      profile.stats.streak       = previousStreak;
+      profile.stats.streak = previousStreak;
       profile.stats.streakRecord = Math.max(profile.stats.streakRecord || 0, previousStreak);
     }
     profile.streakRestorationUsed = true;
-    localStorage.setItem('personaUserProfile', JSON.stringify(profile));
-    window.dispatchEvent(new CustomEvent('personadle:streak-recovered'));
+    localStorage.setItem("personaUserProfile", JSON.stringify(profile));
+    window.dispatchEvent(new CustomEvent("personadle:streak-recovered"));
   } catch (_) {}
 
   // 2. Sync vers le backend (fire-and-forget)
@@ -126,7 +131,7 @@ function _recover(previousStreak, overlay) {
 
   // 3. Enregistrer la récupération (date + consommer le crédit)
   const r = _getRecovery();
-  r.lastUsed       = new Date().toISOString().split('T')[0];
+  r.lastUsed = new Date().toISOString().split("T")[0];
   r.previousStreak = 0;
   _saveRecovery(r);
 
@@ -134,18 +139,18 @@ function _recover(previousStreak, overlay) {
 }
 
 function _syncRecoveryToBackend(previousStreak) {
-  const prefix = window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+  const prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
   fetch(`${prefix}/api/user/recover-streak`, {
-    method:      'POST',
-    credentials: 'include',
-    headers:     { 'Content-Type': 'application/json' },
-    body:        JSON.stringify({ previous_streak: previousStreak }),
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ previous_streak: previousStreak }),
   }).catch(() => {}); // Silencieux si offline
 }
 
 function _close(overlay) {
-  if (!overlay) overlay = document.getElementById('streak-recovery-overlay');
+  if (!overlay) overlay = document.getElementById("streak-recovery-overlay");
   if (!overlay) return;
-  overlay.classList.add('sr--exit');
+  overlay.classList.add("sr--exit");
   setTimeout(() => overlay.remove(), 420);
 }

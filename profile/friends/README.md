@@ -21,17 +21,18 @@ profile/friends/
 
 ## Fonctionnalités
 
-| Feature | Description |
-|---------|-------------|
-| Recherche | Par pseudo ou code ami (8 caractères alphanumériques) |
-| Demandes | Envoyer, accepter, refuser, supprimer |
-| Messagerie & Défis | Défis quotidiens par mode, résolution auto |
-| Browse Players | Liste de tous les joueurs inscrits, paginée |
-| Social Link | Visite de profil déclenche automatiquement l'XP Social Link |
+| Feature            | Description                                                 |
+| ------------------ | ----------------------------------------------------------- |
+| Recherche          | Par pseudo ou code ami (8 caractères alphanumériques)       |
+| Demandes           | Envoyer, accepter, refuser, supprimer                       |
+| Messagerie & Défis | Défis quotidiens par mode, résolution auto                  |
+| Browse Players     | Liste de tous les joueurs inscrits, paginée                 |
+| Social Link        | Visite de profil déclenche automatiquement l'XP Social Link |
 
 ## Chemins relatifs
 
 Depuis `profile/friends/`, les ressources partagées sont à deux niveaux :
+
 - CSS global : `../../css/`
 - JS partagé : `../../js/`
 - Styles profil : `../profile-page.css`

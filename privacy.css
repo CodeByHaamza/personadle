@@ -11,7 +11,7 @@
 }
 
 .privacy-page-header::after {
-  content: '';
+  content: "";
   display: block;
   width: 60px;
   height: 3px;
@@ -21,7 +21,7 @@
 }
 
 .privacy-page-title {
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: clamp(1.4rem, 4vw, 2.2rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -41,8 +41,15 @@
 }
 
 @keyframes privDiamondPulse {
-  0%, 100% { transform: scale(1);    opacity: 1; }
-  50%       { transform: scale(1.3); opacity: 0.7; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
 }
 
 .darkmode .privacy-page-title {
@@ -66,12 +73,12 @@
   margin-bottom: 16px;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .darkmode .privacy-intro-wrap {
   background: rgba(18, 18, 18, 0.9);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .privacy-tagline {
@@ -113,15 +120,47 @@
   letter-spacing: 0.04em;
 }
 
-.privacy-badge--free    { background: #e8f5e9; color: #2e7d32; border: 1.5px solid #a5d6a7; }
-.privacy-badge--gdpr    { background: #e3f0fb; color: #1255a0; border: 1.5px solid #90caf9; }
-.privacy-badge--noads   { background: #fdecea; color: #c62828; border: 1.5px solid #ef9a9a; }
-.privacy-badge--open    { background: #f5f5f5;  color: #424242; border: 1.5px solid #bdbdbd; }
+.privacy-badge--free {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1.5px solid #a5d6a7;
+}
+.privacy-badge--gdpr {
+  background: #e3f0fb;
+  color: #1255a0;
+  border: 1.5px solid #90caf9;
+}
+.privacy-badge--noads {
+  background: #fdecea;
+  color: #c62828;
+  border: 1.5px solid #ef9a9a;
+}
+.privacy-badge--open {
+  background: #f5f5f5;
+  color: #424242;
+  border: 1.5px solid #bdbdbd;
+}
 
-.darkmode .privacy-badge--free  { background: rgba(76,175,80,0.22);  color: #81c784; border-color: rgba(76,175,80,0.45); }
-.darkmode .privacy-badge--gdpr  { background: rgba(25,118,210,0.22); color: #64b5f6; border-color: rgba(25,118,210,0.45); }
-.darkmode .privacy-badge--noads { background: rgba(230,57,70,0.22);  color: #ef9a9a; border-color: rgba(230,57,70,0.45); }
-.darkmode .privacy-badge--open  { background: rgba(255,255,255,0.09); color: #bdbdbd; border-color: rgba(255,255,255,0.2); }
+.darkmode .privacy-badge--free {
+  background: rgba(76, 175, 80, 0.22);
+  color: #81c784;
+  border-color: rgba(76, 175, 80, 0.45);
+}
+.darkmode .privacy-badge--gdpr {
+  background: rgba(25, 118, 210, 0.22);
+  color: #64b5f6;
+  border-color: rgba(25, 118, 210, 0.45);
+}
+.darkmode .privacy-badge--noads {
+  background: rgba(230, 57, 70, 0.22);
+  color: #ef9a9a;
+  border-color: rgba(230, 57, 70, 0.45);
+}
+.darkmode .privacy-badge--open {
+  background: rgba(255, 255, 255, 0.09);
+  color: #bdbdbd;
+  border-color: rgba(255, 255, 255, 0.2);
+}
 
 /* ── Cards ────────────────────────────────────────────────── */
 
@@ -131,12 +170,12 @@
   border-left: 4px solid var(--accent, #e63946);
   padding: 20px 24px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   transition: box-shadow 0.2s;
 }
 
 .privacy-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .privacy-card--safe {
@@ -189,14 +228,14 @@
 
 /* "What we never do" list — red crosses */
 .privacy-card__list--check li::before {
-  content: '✕ ';
+  content: "✕ ";
   color: #e53935;
   font-weight: 700;
 }
 
 /* Security list — lock icons */
 .privacy-card__list--lock li::before {
-  content: '✓ ';
+  content: "✓ ";
   color: #1976d2;
   font-weight: 700;
 }
@@ -239,7 +278,7 @@
   gap: 10px;
   margin-bottom: 16px;
   padding: 14px 16px;
-  background: rgba(0,0,0,0.03);
+  background: rgba(0, 0, 0, 0.03);
   border-radius: 8px;
 }
 
@@ -316,7 +355,7 @@ a.privacy-legal-value:hover {
 
 .darkmode .privacy-card {
   background: var(--card-bg, #1e1e1e);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .darkmode .privacy-card--legal {
@@ -333,7 +372,7 @@ a.privacy-legal-value:hover {
 }
 
 .darkmode .privacy-legal-grid {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .darkmode .privacy-legal-value {
@@ -362,8 +401,9 @@ body {
 .privacy-char-wrap--top-right {
   right: 18px;
   top: 0;
-  animation: charSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
-             charFloat 6s ease-in-out 1.4s infinite;
+  animation:
+    charSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both,
+    charFloat 6s ease-in-out 1.4s infinite;
   transform-origin: top right;
 }
 
@@ -371,34 +411,54 @@ body {
 .privacy-char-wrap--bottom-left {
   left: 18px;
   bottom: 360px;
-  animation: charRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both,
-             charFloat 5.5s ease-in-out 1.7s infinite;
+  animation:
+    charRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both,
+    charFloat 5.5s ease-in-out 1.7s infinite;
   transform-origin: bottom left;
 }
 
 /* ── Entrées ─────────────────────────────────────────────── */
 @keyframes charSlideIn {
-  from { opacity: 0; transform: translateX(50px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes charRise {
-  from { opacity: 0; transform: translateY(50px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Idle — flottement discret ──────────────────────────── */
 @keyframes charFloat {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-5px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 /* ── Images personnages ──────────────────────────────────── */
 .privacy-char-wrap img:not(.privacy-tarot-img) {
   display: block;
   pointer-events: none;
-  transition: transform 0.4s ease, filter 0.4s ease;
-  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+  transition:
+    transform 0.4s ease,
+    filter 0.4s ease;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
 }
 
 .privacy-char-wrap--top-right img:not(.privacy-tarot-img) {
@@ -416,7 +476,7 @@ body {
 /* Hover image — subtil, laisse la carte tarot dominer */
 .privacy-char-wrap:hover img:not(.privacy-tarot-img) {
   transform: scale(1.02) translateY(-3px);
-  filter: drop-shadow(0 10px 26px rgba(0,0,0,0.42));
+  filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.42));
 }
 
 /* ── Cartes Tarot ─────────────────────────────────────────── */
@@ -433,8 +493,9 @@ body {
   height: auto;
   display: block;
   border-radius: 8px;
-  box-shadow: 0 10px 36px rgba(0,0,0,0.7),
-              0 0 28px rgba(100,60,180,0.28);
+  box-shadow:
+    0 10px 36px rgba(0, 0, 0, 0.7),
+    0 0 28px rgba(100, 60, 180, 0.28);
 }
 
 /* Texte en surimpression sur la carte */
@@ -448,7 +509,7 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   line-height: 1.55;
@@ -469,7 +530,7 @@ body {
   transform: perspective(560px) rotateY(-88deg);
   transform-origin: right center;
   transition:
-    opacity  0.12s ease,
+    opacity 0.12s ease,
     transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -497,9 +558,9 @@ body {
   transform: scale(2.2);
   filter: brightness(5) saturate(0);
   transition:
-    opacity   0.18s ease,
+    opacity 0.18s ease,
     transform 0.58s cubic-bezier(0.16, 1, 0.3, 1),
-    filter    0.58s ease;
+    filter 0.58s ease;
 }
 
 .privacy-char-wrap--bottom-left:hover .privacy-tarot-wrap {
@@ -518,7 +579,9 @@ body {
 
 /* Masquer sur écrans trop étroits */
 @media (max-width: 1080px) {
-  .privacy-char-wrap { display: none; }
+  .privacy-char-wrap {
+    display: none;
+  }
 }
 
 /* ── Auth form — lien confidentialité ─────────────────────── */

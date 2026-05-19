@@ -20,7 +20,7 @@
 
 /* ── BRAVO / DOMMAGE — tombe du haut ──────────────────────────────── */
 .cr-bravo {
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: clamp(2.2rem, 7vw, 4rem);
   font-weight: 900;
   color: #e63946;
@@ -38,9 +38,18 @@
 }
 
 @keyframes crBravoFall {
-  from { transform: translateY(-140px); opacity: 0; }
-  85%  { transform: translateY(10px); opacity: 1; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(-140px);
+    opacity: 0;
+  }
+  85% {
+    transform: translateY(10px);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* ── Scène avatars + fil ───────────────────────────────────────────── */
@@ -74,12 +83,24 @@
 }
 
 @keyframes crSlideFromLeft {
-  from { transform: translateX(-180px); opacity: 0; }
-  to   { transform: translateX(0);      opacity: 1; }
+  from {
+    transform: translateX(-180px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 @keyframes crSlideFromRight {
-  from { transform: translateX(180px); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
+  from {
+    transform: translateX(180px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .cr-avatar {
@@ -95,7 +116,7 @@
   color: #f0f0f0;
   font-size: 0.82rem;
   font-weight: 700;
-  font-family: 'Oswald', Arial, sans-serif;
+  font-family: "Oswald", Arial, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   max-width: 100px;
@@ -132,7 +153,9 @@
 }
 
 @keyframes crWireDraw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .cr-heart {
@@ -146,8 +169,9 @@
 }
 .cr-heart--glow {
   filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
-  animation: crHeartPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 2.6s forwards,
-             crHeartPulse 1.2s ease 3.2s infinite;
+  animation:
+    crHeartPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 2.6s forwards,
+    crHeartPulse 1.2s ease 3.2s infinite;
 }
 
 /* Fail heart: pops in red, drains to black, falls */
@@ -156,22 +180,55 @@
 }
 
 @keyframes crHeartPop {
-  from { transform: translate(-50%, -50%) scale(0); }
-  to   { transform: translate(-50%, -50%) scale(1); }
+  from {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 @keyframes crHeartPulse {
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)); }
-  50%       { filter: drop-shadow(0 0 16px rgba(255, 215, 0, 1)); }
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 215, 0, 1));
+  }
 }
 
 /* Red → darkens → falls as black heart */
 @keyframes crHeartFall {
-  0%   { transform: translate(-50%, -50%) scale(0);   filter: none;                        opacity: 1; }
-  22%  { transform: translate(-50%, -50%) scale(1.15);filter: none;                        opacity: 1; }
-  38%  { transform: translate(-50%, -50%) scale(1);   filter: none;                        opacity: 1; }
-  60%  { transform: translate(-50%, -48%) scale(1);   filter: brightness(0.4) saturate(0); opacity: 1; }
-  78%  { transform: translate(-50%, -35%) scale(0.9); filter: brightness(0)   saturate(0); opacity: 0.8; }
-  100% { transform: translate(-50%, 70px) scale(0.55);filter: brightness(0)   saturate(0); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    filter: none;
+    opacity: 1;
+  }
+  22% {
+    transform: translate(-50%, -50%) scale(1.15);
+    filter: none;
+    opacity: 1;
+  }
+  38% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: none;
+    opacity: 1;
+  }
+  60% {
+    transform: translate(-50%, -48%) scale(1);
+    filter: brightness(0.4) saturate(0);
+    opacity: 1;
+  }
+  78% {
+    transform: translate(-50%, -35%) scale(0.9);
+    filter: brightness(0) saturate(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, 70px) scale(0.55);
+    filter: brightness(0) saturate(0);
+    opacity: 0;
+  }
 }
 
 /* ── Modale recap ──────────────────────────────────────────────────── */
@@ -193,18 +250,22 @@
 }
 
 @keyframes crFadeIn {
-  to { opacity: 1; }
+  to {
+    opacity: 1;
+  }
 }
 
 .cr-modal-title {
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: 1.05rem;
   color: #e63946;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 14px;
 }
-.cr-modal-title--fail { color: #888; }
+.cr-modal-title--fail {
+  color: #888;
+}
 
 .cr-modal-row {
   display: flex;
@@ -215,14 +276,20 @@
   padding: 5px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-.cr-modal-row:last-of-type { border-bottom: none; }
+.cr-modal-row:last-of-type {
+  border-bottom: none;
+}
 
 .cr-modal-row span:last-child {
   font-weight: 700;
   color: #f0f0f0;
 }
-.cr-modal-row span.cr-val--good { color: #4caf50; }
-.cr-modal-row span.cr-val--bad  { color: #e63946; }
+.cr-modal-row span.cr-val--good {
+  color: #4caf50;
+}
+.cr-modal-row span.cr-val--bad {
+  color: #e63946;
+}
 
 .cr-modal-xp {
   color: #ffd700;
@@ -241,7 +308,7 @@
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -249,13 +316,26 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.cr-close-btn:hover { background: #c1121f; }
-.cr-close-btn--fail { background: #555; }
-.cr-close-btn--fail:hover { background: #444; }
+.cr-close-btn:hover {
+  background: #c1121f;
+}
+.cr-close-btn--fail {
+  background: #555;
+}
+.cr-close-btn--fail:hover {
+  background: #444;
+}
 
 /* ── Mobile ────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .cr-avatar { width: 68px; height: 68px; }
-  .cr-wire-svg { height: 44px; }
-  .cr-modal { padding: 18px 16px; }
+  .cr-avatar {
+    width: 68px;
+    height: 68px;
+  }
+  .cr-wire-svg {
+    height: 44px;
+  }
+  .cr-modal {
+    padding: 18px 16px;
+  }
 }

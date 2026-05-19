@@ -2,7 +2,11 @@
 // Gestion complète du profil utilisateur, avatar, partage et badges
 
 // === IMPORTS (EN HAUT !) ===
-import { initBadgesSystem, getBadgesForShare, markProfileAsShared } from "./badges/badgesManager.js";
+import {
+  initBadgesSystem,
+  getBadgesForShare,
+  markProfileAsShared,
+} from "./badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────
 // ⏱️ FORMAT TEMPS JOUÉ
@@ -15,36 +19,61 @@ import { initBadgesSystem, getBadgesForShare, markProfileAsShared } from "./badg
 //   ≥ 1 an    → X an(s) Y mois
 // ─────────────────────────────────────────────────────────────
 function formatPlayTime(totalMinutes) {
-  const lang = localStorage.getItem('lang') || 'en';
+  const lang = localStorage.getItem("lang") || "en";
 
   // Vocabulaire par langue — [singulier, pluriel]
   const U = {
-    en: { min: 'min', h: 'h',
-      day: ['day', 'days'], week: ['week', 'weeks'],
-      month: ['month', 'months'], year: ['year', 'years'] },
-    fr: { min: 'min', h: 'h',
-      day: ['jour', 'jours'], week: ['semaine', 'semaines'],
-      month: ['mois', 'mois'], year: ['an', 'ans'] },
-    es: { min: 'min', h: 'h',
-      day: ['día', 'días'], week: ['semana', 'semanas'],
-      month: ['mes', 'meses'], year: ['año', 'años'] },
-    de: { min: 'Min.', h: 'Std.',
-      day: ['Tag', 'Tage'], week: ['Woche', 'Wochen'],
-      month: ['Monat', 'Monate'], year: ['Jahr', 'Jahre'] },
-    it: { min: 'min', h: 'h',
-      day: ['giorno', 'giorni'], week: ['settimana', 'settimane'],
-      month: ['mese', 'mesi'], year: ['anno', 'anni'] },
+    en: {
+      min: "min",
+      h: "h",
+      day: ["day", "days"],
+      week: ["week", "weeks"],
+      month: ["month", "months"],
+      year: ["year", "years"],
+    },
+    fr: {
+      min: "min",
+      h: "h",
+      day: ["jour", "jours"],
+      week: ["semaine", "semaines"],
+      month: ["mois", "mois"],
+      year: ["an", "ans"],
+    },
+    es: {
+      min: "min",
+      h: "h",
+      day: ["día", "días"],
+      week: ["semana", "semanas"],
+      month: ["mes", "meses"],
+      year: ["año", "años"],
+    },
+    de: {
+      min: "Min.",
+      h: "Std.",
+      day: ["Tag", "Tage"],
+      week: ["Woche", "Wochen"],
+      month: ["Monat", "Monate"],
+      year: ["Jahr", "Jahre"],
+    },
+    it: {
+      min: "min",
+      h: "h",
+      day: ["giorno", "giorni"],
+      week: ["settimana", "settimane"],
+      month: ["mese", "mesi"],
+      year: ["anno", "anni"],
+    },
   };
   const u = U[lang] || U.en;
 
   // Helper : "N unité(s)"
   const p = (n, [sing, plur]) => `${n} ${n <= 1 ? sing : plur}`;
 
-  const PER_HOUR  = 60;
-  const PER_DAY   = PER_HOUR * 24;        // 1 440
-  const PER_WEEK  = PER_DAY  * 7;         // 10 080
-  const PER_MONTH = PER_DAY  * 30;        // 43 200
-  const PER_YEAR  = PER_DAY  * 365;       // 525 600
+  const PER_HOUR = 60;
+  const PER_DAY = PER_HOUR * 24; // 1 440
+  const PER_WEEK = PER_DAY * 7; // 10 080
+  const PER_MONTH = PER_DAY * 30; // 43 200
+  const PER_YEAR = PER_DAY * 365; // 525 600
 
   const m = Math.max(0, Math.round(totalMinutes));
 
@@ -52,21 +81,21 @@ function formatPlayTime(totalMinutes) {
     return `${m} ${u.min}`;
   }
   if (m < PER_WEEK) {
-    const days  = Math.floor(m / PER_DAY);
+    const days = Math.floor(m / PER_DAY);
     const hours = Math.floor((m % PER_DAY) / PER_HOUR);
     return hours > 0 ? `${p(days, u.day)} ${hours}${u.h}` : p(days, u.day);
   }
   if (m < PER_MONTH) {
     const weeks = Math.floor(m / PER_WEEK);
-    const days  = Math.floor((m % PER_WEEK) / PER_DAY);
+    const days = Math.floor((m % PER_WEEK) / PER_DAY);
     return days > 0 ? `${p(weeks, u.week)} ${p(days, u.day)}` : p(weeks, u.week);
   }
   if (m < PER_YEAR) {
     const months = Math.floor(m / PER_MONTH);
-    const weeks  = Math.floor((m % PER_MONTH) / PER_WEEK);
+    const weeks = Math.floor((m % PER_MONTH) / PER_WEEK);
     return weeks > 0 ? `${p(months, u.month)} ${p(weeks, u.week)}` : p(months, u.month);
   }
-  const years  = Math.floor(m / PER_YEAR);
+  const years = Math.floor(m / PER_YEAR);
   const months = Math.floor((m % PER_YEAR) / PER_MONTH);
   return months > 0 ? `${p(years, u.year)} ${p(months, u.month)}` : p(years, u.year);
 }
@@ -115,13 +144,13 @@ const confirmCrop = document.getElementById("confirmCrop");
  */
 function initProfile() {
   const saved = localStorage.getItem("personaUserProfile");
-  
+
   if (saved) {
     // ✅ Charger le profil existant
     profile = JSON.parse(saved);
     // Normalize old avatar paths "./img/..." → "../img/..."
-    if (profile.avatar && profile.avatar.startsWith('./')) {
-      profile.avatar = profile.avatar.replace(/^\.\//, '../');
+    if (profile.avatar && profile.avatar.startsWith("./")) {
+      profile.avatar = profile.avatar.replace(/^\.\//, "../");
       saveProfile();
     }
   } else {
@@ -151,10 +180,10 @@ function initProfile() {
 
   // 🎨 Mettre à jour l'affichage du pseudo
   pseudoInput.value = profile.pseudo;
-  
+
   // 🖼️ Mettre à jour l'avatar (image par défaut si aucun)
   avatarPreview.src = profile.avatar || "../img/default_avatar.png";
-  
+
   // 🎨 Mettre à jour la couleur de bordure
   document.getElementById("headerAvatar").style.borderColor = profile.avatarBorderColor;
   avatarPreview.style.borderColor = profile.avatarBorderColor;
@@ -185,7 +214,7 @@ function saveProfile() {
  */
 function renderStats() {
   const s = profile.stats;
-  
+
   // Dictionnaire de conversion des noms de modes
   const modeNames = {
     Classique: "Classic",
@@ -196,20 +225,20 @@ function renderStats() {
     Music: "Music",
   };
 
-  const modeFav = s.favoriteMode ? (modeNames[s.favoriteMode] || s.favoriteMode) : "-";
+  const modeFav = s.favoriteMode ? modeNames[s.favoriteMode] || s.favoriteMode : "-";
   const i = window.i18n || { t: (k) => k };
 
   // 📊 Générer le HTML des stats
   statsContainer.innerHTML = `
-    <p>${i.t('profile.stat_wins',        { count: s.wins })}</p>
-    <p>${i.t('profile.stat_giveups',     { count: s.giveups })}</p>
-    <p>${i.t('profile.stat_games',       { count: s.games })}</p>
-    <p>${i.t('profile.stat_streak',      { count: s.streak })}</p>
-    <p>${i.t('profile.stat_best_streak', { count: s.streakRecord })}</p>
-    <p>${i.t('profile.stat_favorite',    { mode: modeFav })}</p>
-    <p>${i.t('profile.stat_time',        { value: formatPlayTime(s.totalTimeMinutes || 0) })}</p>
-    <p>${i.t('profile.stat_first_played',{ date: s.firstPlayed?.split("T")[0] || "-" })}</p>
-    <p>${i.t('profile.stat_last_played', { date: s.lastPlayed?.split("T")[0] || "-" })}</p>
+    <p>${i.t("profile.stat_wins", { count: s.wins })}</p>
+    <p>${i.t("profile.stat_giveups", { count: s.giveups })}</p>
+    <p>${i.t("profile.stat_games", { count: s.games })}</p>
+    <p>${i.t("profile.stat_streak", { count: s.streak })}</p>
+    <p>${i.t("profile.stat_best_streak", { count: s.streakRecord })}</p>
+    <p>${i.t("profile.stat_favorite", { mode: modeFav })}</p>
+    <p>${i.t("profile.stat_time", { value: formatPlayTime(s.totalTimeMinutes || 0) })}</p>
+    <p>${i.t("profile.stat_first_played", { date: s.firstPlayed?.split("T")[0] || "-" })}</p>
+    <p>${i.t("profile.stat_last_played", { date: s.lastPlayed?.split("T")[0] || "-" })}</p>
   `;
 }
 
@@ -231,7 +260,7 @@ document.getElementById("saveAndRefreshBtn").onclick = () => {
 // 🗑️ Réinitialiser le profil complet
 document.getElementById("resetProfile").onclick = () => {
   const i = window.i18n || { t: (k) => k };
-  const confirmReset = confirm(i.t('profile.reset_confirm'));
+  const confirmReset = confirm(i.t("profile.reset_confirm"));
   if (confirmReset) {
     localStorage.removeItem("personaUserProfile");
     location.reload();
@@ -258,20 +287,128 @@ document.getElementById("borderColorPicker").oninput = (e) => {
 
 // === LISTE DES AVATARS DISPONIBLES ===
 const avatarList = [
-  "Naoya.jpg", "Naoya1.jpg", "Yuka.webp", "Hidehiko.png", "Hidehiko.webp", "Inaba2.webp", "Inaba.webp", "Eriko.png",
-  "Tatsuya2.jpg", "Tatsuya.jpg", "Lisa.jpeg", "Jun.jpg", "Ekichi2.jpeg", "Ekichi.jpeg", "Maya2.jpeg", "Maya.jpg",
-  "Yuki.jpeg", "yuki.jpg","Yuki_Zutomayo.jpeg","Kotone2.jpeg", "Kotone.jpeg","Kotone3.jpeg","kotone_pdp.jpg","Aigis2.jpg", "Aigis.jpg", "Akihiko.jpg", "Mitsuru.jpg", "Mitsuru.webp",
-  "Junpei2.jpg", "Junpei.png", "Fuuka2.jpeg", "Fuuka.jpeg", "Ken.jpeg", "Koromaru2.jpg", "Koromaru.jpg", "Shinji.jpg", "Shinji.webp","Yukari2.jpg", "Yukari.jpg",
-  "Metis.jpg", "Metis2.jpeg", "Elisabeth.jpeg", "Elisabeth2.jpeg","Chidori.jpg","Chidori2.jpg",
-  "Yu2.jpg", "Yu.jpg", "Yosuke2.jpg", "Yosuke.jpg", "Chie2.jpg", "Chie.jpg", "Yukiko2.jpg", "Yukiko.jpg",
-  "Kanji.avif", "Kanji.jpg", "Rise.jpg", "Rise.png", "Teddie2.jpg", "Teddie.jpg", "Naoto2.jpg", "Naoto.jpg", "Marie.jpg" , "Marie2.webp" ,"Nanako2.jpg", "Nanako.jpg",
+  "Naoya.jpg",
+  "Naoya1.jpg",
+  "Yuka.webp",
+  "Hidehiko.png",
+  "Hidehiko.webp",
+  "Inaba2.webp",
+  "Inaba.webp",
+  "Eriko.png",
+  "Tatsuya2.jpg",
+  "Tatsuya.jpg",
+  "Lisa.jpeg",
+  "Jun.jpg",
+  "Ekichi2.jpeg",
+  "Ekichi.jpeg",
+  "Maya2.jpeg",
+  "Maya.jpg",
+  "Yuki.jpeg",
+  "yuki.jpg",
+  "Yuki_Zutomayo.jpeg",
+  "Kotone2.jpeg",
+  "Kotone.jpeg",
+  "Kotone3.jpeg",
+  "kotone_pdp.jpg",
+  "Aigis2.jpg",
+  "Aigis.jpg",
+  "Akihiko.jpg",
+  "Mitsuru.jpg",
+  "Mitsuru.webp",
+  "Junpei2.jpg",
+  "Junpei.png",
+  "Fuuka2.jpeg",
+  "Fuuka.jpeg",
+  "Ken.jpeg",
+  "Koromaru2.jpg",
+  "Koromaru.jpg",
+  "Shinji.jpg",
+  "Shinji.webp",
+  "Yukari2.jpg",
+  "Yukari.jpg",
+  "Metis.jpg",
+  "Metis2.jpeg",
+  "Elisabeth.jpeg",
+  "Elisabeth2.jpeg",
+  "Chidori.jpg",
+  "Chidori2.jpg",
+  "Yu2.jpg",
+  "Yu.jpg",
+  "Yosuke2.jpg",
+  "Yosuke.jpg",
+  "Chie2.jpg",
+  "Chie.jpg",
+  "Yukiko2.jpg",
+  "Yukiko.jpg",
+  "Kanji.avif",
+  "Kanji.jpg",
+  "Rise.jpg",
+  "Rise.png",
+  "Teddie2.jpg",
+  "Teddie.jpg",
+  "Naoto2.jpg",
+  "Naoto.jpg",
+  "Marie.jpg",
+  "Marie2.webp",
+  "Nanako2.jpg",
+  "Nanako.jpg",
   "margaret.jpg",
-  "Joker.jpg","ren_t.webp","Ann.jpg", "Ann_2.jpg", "Ryuji.jpg", "Ryuji.png", "Morgana.jpg", "Morgana.png", "Yusuke.jpg", "Yusuke.webp",
-  "Makoto2.jpg", "Makoto.jpg","Futaba.jpg", "Futaba.webp","Haru.png", "Har.jpg",  "Akechi2.jpg", "Akechi.jpg", "Sumire2.jpg", "Sumire.jpg","Tae.jpg","Tae2.jpg","Caroline&justine.png","Lavenza.jpg",
-  "Wonder.jpg", "wonder1.png", "wonder2.png","Lufel2.png", "Lufel.png","Arai2.png", "Arai.png","Shun2.png", "Shun.png",
-  "Riko2.png", "Riko.png","Kayo2.png", "Kayo.png", "Tomoko2.png", "Tomoko.png", 
-  "Yaoling2.png", "Yaoling.png", "YUI2.png", "YUI.png",
-  "Yuki.gif","Yuki2.gif","pfp_makoto.gif", "Yu.gif","Yu2.gif", "Ren.gif","Ren2.gif","catlisabeth.gif","luix-dextructor-aigis.gif","Anniversary.gif","aigis.gif","Lavenza7.gif","Maruki.gif",
+  "Joker.jpg",
+  "ren_t.webp",
+  "Ann.jpg",
+  "Ann_2.jpg",
+  "Ryuji.jpg",
+  "Ryuji.png",
+  "Morgana.jpg",
+  "Morgana.png",
+  "Yusuke.jpg",
+  "Yusuke.webp",
+  "Makoto2.jpg",
+  "Makoto.jpg",
+  "Futaba.jpg",
+  "Futaba.webp",
+  "Haru.png",
+  "Har.jpg",
+  "Akechi2.jpg",
+  "Akechi.jpg",
+  "Sumire2.jpg",
+  "Sumire.jpg",
+  "Tae.jpg",
+  "Tae2.jpg",
+  "Caroline&justine.png",
+  "Lavenza.jpg",
+  "Wonder.jpg",
+  "wonder1.png",
+  "wonder2.png",
+  "Lufel2.png",
+  "Lufel.png",
+  "Arai2.png",
+  "Arai.png",
+  "Shun2.png",
+  "Shun.png",
+  "Riko2.png",
+  "Riko.png",
+  "Kayo2.png",
+  "Kayo.png",
+  "Tomoko2.png",
+  "Tomoko.png",
+  "Yaoling2.png",
+  "Yaoling.png",
+  "YUI2.png",
+  "YUI.png",
+  "Yuki.gif",
+  "Yuki2.gif",
+  "pfp_makoto.gif",
+  "Yu.gif",
+  "Yu2.gif",
+  "Ren.gif",
+  "Ren2.gif",
+  "catlisabeth.gif",
+  "luix-dextructor-aigis.gif",
+  "Anniversary.gif",
+  "aigis.gif",
+  "Lavenza7.gif",
+  "Maruki.gif",
 ];
 
 /**
@@ -283,12 +420,12 @@ function initAvatarGrid() {
     `<div class="avatar-none" data-src="none" style="display: flex; align-items: center; justify-content: center; background: #333; color: white; font-weight: bold; border-radius: 8px; height: 80px; cursor: pointer;">
       NONE
     </div>` +
-    avatarList.map(name =>
-      `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" />`
-    ).join("");
+    avatarList
+      .map((name) => `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" />`)
+      .join("");
 
   // 🖼️ Ajouter le listener click sur chaque image
-  avatarGrid.querySelectorAll("img").forEach(img => {
+  avatarGrid.querySelectorAll("img").forEach((img) => {
     img.onclick = () => {
       selectedAvatarSrc = img.dataset.src;
       loadImageToCanvas(selectedAvatarSrc); // Charger et afficher dans le canvas
@@ -347,8 +484,8 @@ canvas.onmousedown = (e) => {
   startY = e.offsetY;
 };
 
-canvas.onmouseup = () => dragging = false;
-canvas.onmouseleave = () => dragging = false;
+canvas.onmouseup = () => (dragging = false);
+canvas.onmouseleave = () => (dragging = false);
 
 canvas.onmousemove = (e) => {
   if (!dragging) return;
@@ -399,8 +536,8 @@ exportBtn.onclick = () => {
   const exportData = { ...profile };
   // Normalize avatar path pour la portabilité : ../img/ → ./img/
   // (format canonique de l'export, indépendant de la page courante)
-  if (exportData.avatar && !exportData.avatar.startsWith('data:')) {
-    exportData.avatar = exportData.avatar.replace(/^\.\.\//, './');
+  if (exportData.avatar && !exportData.avatar.startsWith("data:")) {
+    exportData.avatar = exportData.avatar.replace(/^\.\.\//, "./");
   }
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
@@ -420,18 +557,18 @@ importBtn.onclick = () => importFile.click();
 importFile.onchange = (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  
+
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const imported = JSON.parse(reader.result);
-      
+
       // ✅ Assurer la compatibilité avec les anciennes versions
       if (!imported.badges) imported.badges = [];
       if (!imported.selectedBadges) imported.selectedBadges = [];
       if (!imported.eventCodes) imported.eventCodes = [];
       if (!imported.stats.perfectWins) imported.stats.perfectWins = 0;
-      
+
       profile = imported;
       saveProfile();
       location.reload();
@@ -454,7 +591,8 @@ const shareBackgrounds = [
     id: "persona_red",
     name: "Persona Red",
     gradient: "linear-gradient(135deg, #ff0844 0%, #ffb199 100%)",
-    pattern: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)",
+    pattern:
+      "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)",
   },
   {
     id: "dark_hour",
@@ -472,7 +610,8 @@ const shareBackgrounds = [
     id: "phantom_thief",
     name: "Phantom Thief",
     gradient: "linear-gradient(135deg, #000000 0%, #434343 50%, #e74c3c 100%)",
-    pattern: "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(231, 76, 60, 0.1) 20px, rgba(231, 76, 60, 0.1) 40px)",
+    pattern:
+      "repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(231, 76, 60, 0.1) 20px, rgba(231, 76, 60, 0.1) 40px)",
   },
   {
     id: "midnight_blue",
@@ -484,7 +623,8 @@ const shareBackgrounds = [
     id: "metaverse",
     name: "Metaverse",
     gradient: "linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)",
-    pattern: "repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(255,255,255,0.05) 15px, rgba(255,255,255,0.05) 30px)",
+    pattern:
+      "repeating-linear-gradient(0deg, transparent, transparent 15px, rgba(255,255,255,0.05) 15px, rgba(255,255,255,0.05) 30px)",
   },
   {
     id: "sunset",
@@ -496,29 +636,59 @@ const shareBackgrounds = [
 
 // === 🖼️ PAPIERS PEINTS DISPONIBLES (ORGANISÉS PAR JEU) ===
 const shareWallpapers = {
-  none: [
-    { id: "none", name: "None", src: null }
-  ],
+  none: [{ id: "none", name: "None", src: null }],
   persona1: [
     { id: "p1_prota", name: "Protagonist", src: "./profile/Wallpaper/P1_Prota_Wallpaper.png" },
     { id: "p1_naoya", name: "Naoya Toudou", src: "./profile/Wallpaper/P1_Naoya.jpeg" },
-    { id: "p1_maki", name: "Maki & Butterflies", src: "./profile/Wallpaper/P1_Maki_Butterflies.jpg" },
-    { id: "p1_cast", name: "Full Cast", src: "./profile/Wallpaper/P1_Cast.jpeg" }
+    {
+      id: "p1_maki",
+      name: "Maki & Butterflies",
+      src: "./profile/Wallpaper/P1_Maki_Butterflies.jpg",
+    },
+    { id: "p1_cast", name: "Full Cast", src: "./profile/Wallpaper/P1_Cast.jpeg" },
   ],
   persona2: [
     { id: "p2_tatsuya", name: "Tatsuya Suou (IS)", src: "./profile/Wallpaper/P2_Tatsuya_IS.jpeg" },
     { id: "p2_maya", name: "Maya Amano (EP)", src: "./profile/Wallpaper/Persona_2_EP_maya.png" },
     { id: "p2_joker", name: "Joker", src: "./profile/Wallpaper/p2_Joker.jpg" },
-    { id: "p2_prota_legacy", name: "Protagonists (Legacy)", src: "./profile/Wallpaper/P2_Prota_Wallpaper.png" }
+    {
+      id: "p2_prota_legacy",
+      name: "Protagonists (Legacy)",
+      src: "./profile/Wallpaper/P2_Prota_Wallpaper.png",
+    },
   ],
   persona3: [
     { id: "p3_tartarus", name: "Tartarus", src: "./profile/Wallpaper/P3_Tartarus_Wallpaper.png" },
-    { id: "p3_water", name: "The Answer - Water", src: "./profile/Wallpaper/P3_Water_Wallapaper.png" },
-    { id: "p3_portable", name: "Portable Edition", src: "./profile/Wallpaper/Persona_3_portable.jpeg" },
-    { id: "p3p_dual", name: "Dual Protagonists", src: "./profile/Wallpaper/P3P_Makoto_&_Kotone.jpg" },
-    { id: "p3_kotone_makoto", name: "Kotone & Makoto", src: "./profile/Wallpaper/Kotone_&_makoto.jpg" },
-    { id: "p3_aigis_makoto", name: "Aigis & Makoto", src: "./profile/Wallpaper/Aigis_&_makoto.jpg" },
-    { id: "p3_train", name: "Makoto & Aigis Train", src: "./profile/Wallpaper/P3_Makoto_Aigis_Train.jpeg" },
+    {
+      id: "p3_water",
+      name: "The Answer - Water",
+      src: "./profile/Wallpaper/P3_Water_Wallapaper.png",
+    },
+    {
+      id: "p3_portable",
+      name: "Portable Edition",
+      src: "./profile/Wallpaper/Persona_3_portable.jpeg",
+    },
+    {
+      id: "p3p_dual",
+      name: "Dual Protagonists",
+      src: "./profile/Wallpaper/P3P_Makoto_&_Kotone.jpg",
+    },
+    {
+      id: "p3_kotone_makoto",
+      name: "Kotone & Makoto",
+      src: "./profile/Wallpaper/Kotone_&_makoto.jpg",
+    },
+    {
+      id: "p3_aigis_makoto",
+      name: "Aigis & Makoto",
+      src: "./profile/Wallpaper/Aigis_&_makoto.jpg",
+    },
+    {
+      id: "p3_train",
+      name: "Makoto & Aigis Train",
+      src: "./profile/Wallpaper/P3_Makoto_Aigis_Train.jpeg",
+    },
   ],
   persona4: [
     { id: "p4_golden", name: "Golden Edition", src: "./profile/Wallpaper/P4_Golden_Style.jpg" },
@@ -526,30 +696,74 @@ const shareWallpapers = {
     { id: "p4_izanagi", name: "Izanagi", src: "./profile/Wallpaper/P4G_Izanagi.jpg" },
     { id: "p4_yu", name: "Yu Narukami", src: "./profile/Wallpaper/Yu_Narukami.jpg" },
     { id: "p4_friends", name: "Friends Group", src: "./profile/Wallpaper/Friends_groupe.jpg" },
-    { id: "p4_team", name: "Investigation Team", src: "./profile/Wallpaper/Investigation_Team.jpg" },
-    { id: "p4_team_golden", name: "Investigation Team Golden", src: "./profile/Wallpaper/Investigation_Team_Golden.jpg" },
-    { id: "p4_shadow_teddie", name: "Shadow Teddie", src: "./profile/Wallpaper/Shadow_Teddie_Shadow_World.jpg" }
+    {
+      id: "p4_team",
+      name: "Investigation Team",
+      src: "./profile/Wallpaper/Investigation_Team.jpg",
+    },
+    {
+      id: "p4_team_golden",
+      name: "Investigation Team Golden",
+      src: "./profile/Wallpaper/Investigation_Team_Golden.jpg",
+    },
+    {
+      id: "p4_shadow_teddie",
+      name: "Shadow Teddie",
+      src: "./profile/Wallpaper/Shadow_Teddie_Shadow_World.jpg",
+    },
   ],
   persona5: [
-    { id: "p5_clinic", name: "Takemi Clinic", src: "./profile/Wallpaper/P5_Clinique_Wallpaper.png" },
-    { id: "p5_clinic_tae", name: "Takemi Clinic (with Tae)", src: "./profile/Wallpaper/P5_Clinique_vTae_Wallpaper.png" },
+    {
+      id: "p5_clinic",
+      name: "Takemi Clinic",
+      src: "./profile/Wallpaper/P5_Clinique_Wallpaper.png",
+    },
+    {
+      id: "p5_clinic_tae",
+      name: "Takemi Clinic (with Tae)",
+      src: "./profile/Wallpaper/P5_Clinique_vTae_Wallpaper.png",
+    },
     { id: "p5_mementos", name: "Mementos", src: "./profile/Wallpaper/P5_Memento_Wallpaper.png" },
-    { id: "p5_leblanc", name: "Café Leblanc", src: "./profile/Wallpaper/P5_Leblanc_Cafe_Wallapaper.png" },
-    { id: "p5_phantom", name: "Phantom Thieves", src: "./profile/Wallpaper/P5_Phantom_Thieves_Wallpaper.png" },
-    { id: "p5_sophia", name: "Sophia (Strikers)", src: "./profile/Wallpaper/Sophia_wallpaper.jpeg" }
+    {
+      id: "p5_leblanc",
+      name: "Café Leblanc",
+      src: "./profile/Wallpaper/P5_Leblanc_Cafe_Wallapaper.png",
+    },
+    {
+      id: "p5_phantom",
+      name: "Phantom Thieves",
+      src: "./profile/Wallpaper/P5_Phantom_Thieves_Wallpaper.png",
+    },
+    {
+      id: "p5_sophia",
+      name: "Sophia (Strikers)",
+      src: "./profile/Wallpaper/Sophia_wallpaper.jpeg",
+    },
   ],
   personaq: [
     { id: "pq_three", name: "Three Protagonists", src: "./profile/Wallpaper/Pq_3_prota.png" },
-    { id: "pq2", name: "Persona Q2", src: "./profile/Wallpaper/PQ2.jpg" }
+    { id: "pq2", name: "Persona Q2", src: "./profile/Wallpaper/PQ2.jpg" },
   ],
   other: [
-    { id: "p3_three_prota", name: "Three Protagonists", src: "./profile/Wallpaper/3_protagonist.jpeg" },
-    { id: "velvet_room", name: "Velvet Room", src: "./profile/Wallpaper/Velvet_Room_Wallpaper.png" },
+    {
+      id: "p3_three_prota",
+      name: "Three Protagonists",
+      src: "./profile/Wallpaper/3_protagonist.jpeg",
+    },
+    {
+      id: "velvet_room",
+      name: "Velvet Room",
+      src: "./profile/Wallpaper/Velvet_Room_Wallpaper.png",
+    },
     { id: "jack_frost", name: "Jack Frost", src: "./profile/Wallpaper/Jack_frost.jpeg" },
     { id: "black_frost", name: "Black Frost", src: "./profile/Wallpaper/Black_frost.jpeg" },
-    { id: "christmas", name: "Christmas Special", src: "./profile/Wallpaper/Christmas_Wallpaper.png" },
-    { id: "cny", name: "Chinese New Year", src: "./profile/Wallpaper/Wallpaper_chinesse.webp" }
-  ]
+    {
+      id: "christmas",
+      name: "Christmas Special",
+      src: "./profile/Wallpaper/Christmas_Wallpaper.png",
+    },
+    { id: "cny", name: "Chinese New Year", src: "./profile/Wallpaper/Wallpaper_chinesse.webp" },
+  ],
 };
 
 // 📚 Catégories de papiers peints (pour les dropdowns)
@@ -561,7 +775,7 @@ const wallpaperCategories = [
   { id: "persona4", name: "📺 Persona 4" },
   { id: "persona5", name: "🎭 Persona 5" },
   { id: "personaq", name: "🗺️ Persona Q" },
-  { id: "other", name: "✨ Extras" }
+  { id: "other", name: "✨ Extras" },
 ];
 
 // === 📤 PARTAGE DE PROFIL ===
@@ -602,18 +816,24 @@ function setupShareProfile() {
       <div id="colorSelector" style="display: block; text-align: center;">
         <label for="bgSelect" style="font-weight: bold; margin-right: 10px; color: inherit;">Background:</label>
         <select id="bgSelect" style="padding: 8px; border-radius: 6px; background: #222; color: white; border: 1px solid #555; cursor: pointer;">
-          ${shareBackgrounds.map(bg => 
-            `<option value="${bg.id}" ${bg.id === selectedBg ? 'selected' : ''}>${bg.name}</option>`
-          ).join('')}
+          ${shareBackgrounds
+            .map(
+              (bg) =>
+                `<option value="${bg.id}" ${bg.id === selectedBg ? "selected" : ""}>${bg.name}</option>`
+            )
+            .join("")}
         </select>
       </div>
       
       <div id="wallpaperSelector" style="display: none; text-align: center;">
         <label for="wallpaperCategorySelect" style="font-weight: bold; margin-right: 10px; color: inherit;">Game:</label>
         <select id="wallpaperCategorySelect" style="padding: 8px; border-radius: 6px; background: #222; color: white; border: 1px solid #555; cursor: pointer; margin-bottom: 10px;">
-          ${wallpaperCategories.map(cat => 
-            `<option value="${cat.id}" ${cat.id === selectedWallpaperCategory ? 'selected' : ''}>${cat.name}</option>`
-          ).join('')}
+          ${wallpaperCategories
+            .map(
+              (cat) =>
+                `<option value="${cat.id}" ${cat.id === selectedWallpaperCategory ? "selected" : ""}>${cat.name}</option>`
+            )
+            .join("")}
         </select>
         
         <div style="margin-top: 10px;">
@@ -637,13 +857,16 @@ function setupShareProfile() {
     function updateWallpaperList() {
       const category = wallpaperCategorySelect.value;
       const wallpapers = shareWallpapers[category] || [];
-      
-      wallpaperSelect.innerHTML = wallpapers.map(wp => 
-        `<option value="${wp.id}" ${wp.id === selectedWallpaper ? 'selected' : ''}>${wp.name}</option>`
-      ).join('');
-      
+
+      wallpaperSelect.innerHTML = wallpapers
+        .map(
+          (wp) =>
+            `<option value="${wp.id}" ${wp.id === selectedWallpaper ? "selected" : ""}>${wp.name}</option>`
+        )
+        .join("");
+
       // Si le wallpaper n'existe pas dans la nouvelle catégorie, prendre le premier
-      if (!wallpapers.find(w => w.id === selectedWallpaper)) {
+      if (!wallpapers.find((w) => w.id === selectedWallpaper)) {
         selectedWallpaper = wallpapers[0]?.id || "none";
         wallpaperSelect.value = selectedWallpaper;
       }
@@ -722,12 +945,12 @@ function setupShareProfile() {
    */
   function generatePreview() {
     const selectedBadges = getBadgesForShare(profile);
-    const bg = shareBackgrounds.find(b => b.id === selectedBg) || shareBackgrounds[0];
-    
+    const bg = shareBackgrounds.find((b) => b.id === selectedBg) || shareBackgrounds[0];
+
     // Trouver le wallpaper dans la bonne catégorie
     let wallpaper = null;
     for (let category in shareWallpapers) {
-      const found = shareWallpapers[category].find(w => w.id === selectedWallpaper);
+      const found = shareWallpapers[category].find((w) => w.id === selectedWallpaper);
       if (found) {
         wallpaper = found;
         break;
@@ -836,20 +1059,28 @@ function setupShareProfile() {
       </div>
       
       <!-- 🏅 Badges sélectionnés -->
-      ${selectedBadges.length > 0 ? `
+      ${
+        selectedBadges.length > 0
+          ? `
         <div style="margin-top: 30px;">
           <h4 style="font-size: 1.3em; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">🏅 Featured Badges</h4>
           <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-            ${selectedBadges.map(b => `
+            ${selectedBadges
+              .map(
+                (b) => `
               <div style="text-align: center;">
                 <img src="${b.img}" alt="${b.name}" 
                      style="width: 80px; height: 80px; border-radius: 12px; border: 3px solid #ffd700; box-shadow: 0 4px 12px rgba(0,0,0,0.6);">
                 <p style="margin: 8px 0 0 0; font-size: 0.75em; opacity: 0.9; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">${b.name}</p>
               </div>
-            `).join("")}
+            `
+              )
+              .join("")}
           </div>
         </div>
-      ` : `<div style="margin-top: 30px; opacity: 0.6;"><p style="font-size: 0.9em;">No badges selected yet</p></div>`}
+      `
+          : `<div style="margin-top: 30px; opacity: 0.6;"><p style="font-size: 0.9em;">No badges selected yet</p></div>`
+      }
       
       <!-- 🔗 Footer -->
       <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.85em; opacity: 0.8;">
@@ -864,28 +1095,30 @@ function setupShareProfile() {
 
     // ⏳ Attendre un peu puis convertir en image
     setTimeout(async () => {
-      const canvas = await html2canvas(card, { 
-        scale: 2, 
-        useCORS: true, 
-        backgroundColor: null, 
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null,
         logging: false,
-        allowTaint: true
+        allowTaint: true,
       });
-      
+
       const dataUrl = canvas.toDataURL("image/png");
 
       // 💾 Bouton télécharger
       downloadBtn.onclick = () => {
         const a = document.createElement("a");
         a.href = dataUrl;
-        a.download = `PersonaDLE_${profile.pseudo || 'Profile'}_${Date.now()}.png`;
+        a.download = `PersonaDLE_${profile.pseudo || "Profile"}_${Date.now()}.png`;
         a.click();
         unlockPhotographerBadge();
       };
 
       // 🐦 Partager sur Twitter
       twitterBtn.onclick = () => {
-        const text = encodeURIComponent(`Check out my PersonaDLE profile! 🎭\n${profile.pseudo || 'Guest'} – ${profile.stats.wins || 0} wins & ${profile.badges?.length || 0} badges 🏅\n\n#PersonaDLE #Persona`);
+        const text = encodeURIComponent(
+          `Check out my PersonaDLE profile! 🎭\n${profile.pseudo || "Guest"} – ${profile.stats.wins || 0} wins & ${profile.badges?.length || 0} badges 🏅\n\n#PersonaDLE #Persona`
+        );
         window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
         unlockPhotographerBadge();
       };
@@ -894,7 +1127,7 @@ function setupShareProfile() {
       discordBtn.onclick = async () => {
         try {
           const blob = await (await fetch(dataUrl)).blob();
-          await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
           alert("📋 Profile image copied! Paste it in Discord with Ctrl+V.");
           unlockPhotographerBadge();
         } catch {
@@ -905,7 +1138,9 @@ function setupShareProfile() {
       // 📧 Partager par email
       emailBtn.onclick = () => {
         const subject = encodeURIComponent("My PersonaDLE Profile");
-        const body = encodeURIComponent(`Check out my PersonaDLE stats!\n\nWins: ${profile.stats.wins || 0}\nBest Streak: ${profile.stats.streakRecord || 0}\nBadges: ${profile.badges?.length || 0}\n\nPlay at: https://personadle.net`);
+        const body = encodeURIComponent(
+          `Check out my PersonaDLE stats!\n\nWins: ${profile.stats.wins || 0}\nBest Streak: ${profile.stats.streakRecord || 0}\nBadges: ${profile.badges?.length || 0}\n\nPlay at: https://personadle.net`
+        );
         window.location.href = `mailto:?subject=${subject}&body=${body}`;
         unlockPhotographerBadge();
       };
@@ -923,9 +1158,9 @@ function unlockPhotographerBadge() {
   if (!profile.hasSharedProfile) {
     profile.hasSharedProfile = true;
     saveProfile();
-    
+
     // 🔄 Vérifier immédiatement les badges
-    import("./badges/badgesManager.js").then(module => {
+    import("./badges/badgesManager.js").then((module) => {
       module.forceCheckBadges(profile, saveProfile);
     });
   }
@@ -939,13 +1174,13 @@ function unlockPhotographerBadge() {
 function attachPreviewClicksToImages() {
   const preview = document.getElementById("previewBadges");
   if (!preview) return;
-  
+
   preview.querySelectorAll(".badge-preview-img").forEach((img) => {
     img.style.cursor = "pointer";
     img.onclick = (e) => {
       e.stopPropagation();
       const badgeId = img.dataset.badgeId;
-      
+
       // Charger dynamiquement les données de badges
       import("./badges/badgesData.js").then((module) => {
         const badge = module.badgesList.find((b) => b.id === badgeId);
@@ -969,7 +1204,7 @@ function showBadgeZoom(badge) {
       <img src="${badge.img}" alt="${badge.name}">
       <h3>${badge.name}</h3>
       <p class="badge-condition">${badge.condition}</p>
-      ${badge.description ? `<p class="badge-description">${badge.description}</p>` : ''}
+      ${badge.description ? `<p class="badge-description">${badge.description}</p>` : ""}
     </div>
   `;
 
@@ -996,28 +1231,28 @@ document.addEventListener("DOMContentLoaded", () => {
   initProfile();
   initAvatarGrid();
   setupShareProfile();
-  
+
   // 2️⃣ Lancer le système de badges
   initBadgesSystem(profile, saveProfile);
 
   // === 🐈 SECRET: Débloquer un badge en visitant GitHub ===
   const githubBtn = document.getElementById("githubLink");
-  
+
   if (githubBtn) {
     githubBtn.addEventListener("click", () => {
       // On ne bloque pas le clic, le lien s'ouvre normalement
-      
+
       if (!profile.visitedGithub) {
         console.log("🐈 Morgana: Looking cool Joker! GitHub visited.");
-        
+
         // 1. Marquer comme visité
         profile.visitedGithub = true;
-        
+
         // 2. Sauvegarder
         saveProfile();
 
         // 3. Vérifier immédiatement les badges
-        import("./badges/badgesManager.js").then(module => {
+        import("./badges/badgesManager.js").then((module) => {
           if (module.forceCheckBadges) {
             module.forceCheckBadges(profile, saveProfile);
           }
@@ -1028,6 +1263,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ✅ Écouter quand les badges sont rendus pour attacher les click handlers
-window.addEventListener('badgesRendered', () => {
+window.addEventListener("badgesRendered", () => {
   attachPreviewClicksToImages();
 });

@@ -30,30 +30,30 @@ Route : `/admin/` (protégé côté serveur, redirection si non-admin)
 
 ## Onglets
 
-| Onglet | Description |
-|--------|-------------|
-| 📊 **Dashboard** | Stats globales — comptes actifs, parties du jour, activité récente |
-| 👥 **Users** | Liste paginée avec recherche, filtre bannis / normaux |
-| 👤 **User Detail** | Profil complet — stats, badges, titres, wallpapers, amis d'un utilisateur |
-| 🎖️ **Badges** | Attribution ou révocation manuelle de badges |
-| 🎟️ **Event Codes** | Créer un code, fixer un quota et une date d'expiration, voir les redemptions |
-| 🔒 **Modération** | Bannir / débannir un compte, verrouiller / déverrouiller un pseudo |
-| 🔗 **Social Links** | Inspection des relations et rangs entre joueurs |
+| Onglet              | Description                                                                  |
+| ------------------- | ---------------------------------------------------------------------------- |
+| 📊 **Dashboard**    | Stats globales — comptes actifs, parties du jour, activité récente           |
+| 👥 **Users**        | Liste paginée avec recherche, filtre bannis / normaux                        |
+| 👤 **User Detail**  | Profil complet — stats, badges, titres, wallpapers, amis d'un utilisateur    |
+| 🎖️ **Badges**       | Attribution ou révocation manuelle de badges                                 |
+| 🎟️ **Event Codes**  | Créer un code, fixer un quota et une date d'expiration, voir les redemptions |
+| 🔒 **Modération**   | Bannir / débannir un compte, verrouiller / déverrouiller un pseudo           |
+| 🔗 **Social Links** | Inspection des relations et rangs entre joueurs                              |
 
 ---
 
 ## Actions disponibles
 
-| Action | Effet en BDD |
-|--------|-------------|
-| Ban | `users.is_banned = 1` — connexion bloquée immédiatement |
-| Unban | `users.is_banned = 0` |
-| Lock pseudo | `users.pseudo_locked = 1` — le joueur ne peut plus modifier son pseudo |
-| Give badge | `INSERT IGNORE INTO badges_unlocked` |
-| Give wallpaper | Insert dans la table d'ownership wallpapers |
-| Give title | `INSERT INTO user_titles` |
-| Create event code | Insert dans `event_codes` (code, badge_id, quota, expires_at) |
-| Expire event code | `UPDATE event_codes SET expires_at = NOW()` |
+| Action            | Effet en BDD                                                           |
+| ----------------- | ---------------------------------------------------------------------- |
+| Ban               | `users.is_banned = 1` — connexion bloquée immédiatement                |
+| Unban             | `users.is_banned = 0`                                                  |
+| Lock pseudo       | `users.pseudo_locked = 1` — le joueur ne peut plus modifier son pseudo |
+| Give badge        | `INSERT IGNORE INTO badges_unlocked`                                   |
+| Give wallpaper    | Insert dans la table d'ownership wallpapers                            |
+| Give title        | `INSERT INTO user_titles`                                              |
+| Create event code | Insert dans `event_codes` (code, badge_id, quota, expires_at)          |
+| Expire event code | `UPDATE event_codes SET expires_at = NOW()`                            |
 
 ---
 

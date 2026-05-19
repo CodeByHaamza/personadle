@@ -13,15 +13,23 @@
   border: 1px solid rgba(230, 57, 70, 0.5);
   border-radius: 32px;
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(230, 57, 70, 0.15);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(230, 57, 70, 0.15);
   cursor: default;
   animation: cbSlideIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
   max-width: 240px;
 }
 
 @keyframes cbSlideIn {
-  from { transform: translateY(20px) scale(0.9); opacity: 0; }
-  to   { transform: translateY(0)    scale(1);   opacity: 1; }
+  from {
+    transform: translateY(20px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── Avatar ── */
@@ -46,7 +54,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   color: #f0f0f0;
-  font-family: 'Oswald', Arial, sans-serif;
+  font-family: "Oswald", Arial, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -83,7 +91,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   line-height: 1;
 }
 .cb-dismiss:hover {

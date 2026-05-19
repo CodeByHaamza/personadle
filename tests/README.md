@@ -35,31 +35,31 @@ npm run test:watch
 
 ## Configuration
 
-| Fichier | Rôle |
-|---------|------|
-| `package.json` | Définit les scripts `test` et `test:watch`, déclare Vitest comme dépendance |
+| Fichier            | Rôle                                                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `package.json`     | Définit les scripts `test` et `test:watch`, déclare Vitest comme dépendance                                                         |
 | `vitest.config.js` | Configure l'environnement **jsdom** (simule `window`, `document`, `localStorage`) et les globals (`describe`, `it`, `expect`, `vi`) |
 
 ---
 
 ## Couverture — `gameCore.test.js` (172 tests)
 
-| Fonction testée | Cas | Ce qui est vérifié |
-|-----------------|:---:|--------------------|
-| `parisDateKey` | 5 | Format YYYY-MM-DD, heure d'été, heure d'hiver, dates consécutives |
-| `msUntilNextParisMidnight` | 3 | Valeur positive, ≤ 24h, type number |
-| `normalize` | 7 | Minuscules, accents, apostrophes typographiques, guillemets, espaces |
-| `showConfettiExplosion` | 5 | Nombre d'éléments créés, suppression après 1s, Audio.play() |
-| `revealNextLink` | 5 | Display flex, onclick wired, scroll après 1,5s |
-| `setupRulesModal` | 4 | Ouverture, fermeture ×, fermeture backdrop, no-op si absent |
-| `setupDailyReset` | 3 | Timer retourné, pas d'appel immédiat, appel après 24h |
-| `checkResetOnLoad` | 5 | Reset si nouveau jour, pas de reset si même jour, nettoyage stats veille |
-| `setupFilterButtons` | 4 | Callback appelé, tableau des actifs, localStorage, toggle class |
-| `showWrongMini` | 6 | Élément ajouté, src/alt, shake, multiple ajouts, fallback erreur |
-| Streaks & stats | 22 | Calcul streak, streak record, perfect wins, giveups, playtime |
-| Filtres & normalisation | 18 | FILTER_STORAGE_KEYS, migration filtres, cas edge DST |
-| `buildGameSession` | 12 | Structure payload, modes, filtres actifs, offline flag |
-| Autres utilitaires | 73 | getRandomIndex, LRU cache, date edge cases, i18n fallback… |
+| Fonction testée            | Cas | Ce qui est vérifié                                                       |
+| -------------------------- | :-: | ------------------------------------------------------------------------ |
+| `parisDateKey`             |  5  | Format YYYY-MM-DD, heure d'été, heure d'hiver, dates consécutives        |
+| `msUntilNextParisMidnight` |  3  | Valeur positive, ≤ 24h, type number                                      |
+| `normalize`                |  7  | Minuscules, accents, apostrophes typographiques, guillemets, espaces     |
+| `showConfettiExplosion`    |  5  | Nombre d'éléments créés, suppression après 1s, Audio.play()              |
+| `revealNextLink`           |  5  | Display flex, onclick wired, scroll après 1,5s                           |
+| `setupRulesModal`          |  4  | Ouverture, fermeture ×, fermeture backdrop, no-op si absent              |
+| `setupDailyReset`          |  3  | Timer retourné, pas d'appel immédiat, appel après 24h                    |
+| `checkResetOnLoad`         |  5  | Reset si nouveau jour, pas de reset si même jour, nettoyage stats veille |
+| `setupFilterButtons`       |  4  | Callback appelé, tableau des actifs, localStorage, toggle class          |
+| `showWrongMini`            |  6  | Élément ajouté, src/alt, shake, multiple ajouts, fallback erreur         |
+| Streaks & stats            | 22  | Calcul streak, streak record, perfect wins, giveups, playtime            |
+| Filtres & normalisation    | 18  | FILTER_STORAGE_KEYS, migration filtres, cas edge DST                     |
+| `buildGameSession`         | 12  | Structure payload, modes, filtres actifs, offline flag                   |
+| Autres utilitaires         | 73  | getRandomIndex, LRU cache, date edge cases, i18n fallback…               |
 
 **Total : 172 tests — 172 passants ✅**
 
@@ -67,11 +67,11 @@ npm run test:watch
 
 ## Couverture — `backend.test.js` (18 tests)
 
-| Suite | Cas | Ce qui est vérifié |
-|-------|:---:|--------------------|
-| `buildGameSession` | 6 | Payload correct, mode normalisé, filtres sérialisés |
-| `savePendingSession` | 7 | Envoi API, fallback localStorage si offline, retry à la reconnexion, 409 silencieux |
-| Auth UI DOM | 5 | Login, register, logout — événements `personadle:auth-login` / `personadle:auth-logout` |
+| Suite                | Cas | Ce qui est vérifié                                                                      |
+| -------------------- | :-: | --------------------------------------------------------------------------------------- |
+| `buildGameSession`   |  6  | Payload correct, mode normalisé, filtres sérialisés                                     |
+| `savePendingSession` |  7  | Envoi API, fallback localStorage si offline, retry à la reconnexion, 409 silencieux     |
+| Auth UI DOM          |  5  | Login, register, logout — événements `personadle:auth-login` / `personadle:auth-logout` |
 
 **Total : 18 tests — 18 passants ✅**
 

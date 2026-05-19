@@ -45,32 +45,44 @@
 }
 
 .cn-ring:nth-child(1) {
-  width: 200px; height: 200px;
+  width: 200px;
+  height: 200px;
   border: 13px solid #e63946;
   animation-delay: 0.18s;
 }
 .cn-ring:nth-child(2) {
-  width: 360px; height: 360px;
+  width: 360px;
+  height: 360px;
   border: 15px solid #0d0d0d;
   box-shadow: 0 0 0 5px #e63946;
   animation-delay: 0.26s;
 }
 .cn-ring:nth-child(3) {
-  width: 560px; height: 560px;
+  width: 560px;
+  height: 560px;
   border: 13px solid #e63946;
   animation-delay: 0.34s;
 }
 .cn-ring:nth-child(4) {
-  width: 780px; height: 780px;
+  width: 780px;
+  height: 780px;
   border: 11px solid #0d0d0d;
   box-shadow: 0 0 0 4px #e63946;
   animation-delay: 0.42s;
 }
 
 @keyframes cnRing {
-  0%   { transform: translate(-50%, -50%) scale(0.04); opacity: 1; }
-  55%  { opacity: 0.85; }
-  100% { transform: translate(-50%, -50%) scale(1);    opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.04);
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
 }
 
 /* ── Flash rouge à l'impact ──────────────────────────────── */
@@ -85,8 +97,12 @@
 }
 
 @keyframes cnFlash {
-  0%   { opacity: 0.55; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* ── Scène — z-index 2, devant les anneaux ───────────────── */
@@ -133,7 +149,9 @@
   opacity: 0;
   animation: cnFadeIn 0.2s ease 0.48s forwards;
 }
-.cn-close:hover { background: rgba(255, 255, 255, 0.22); }
+.cn-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
 
 /* ── Avatar expéditeur ───────────────────────────────────── */
 .cn-avatar {
@@ -148,7 +166,7 @@
 
 /* ── Pseudo ──────────────────────────────────────────────── */
 .cn-pseudo {
-  font-family: 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: 1.3rem;
   font-weight: 700;
   color: #e63946;
@@ -177,7 +195,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   color: #e63946;
-  font-family: 'Oswald', Arial, sans-serif;
+  font-family: "Oswald", Arial, sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -216,27 +234,51 @@
   border-radius: 6px;
   font-size: 0.8rem;
   font-weight: 700;
-  font-family: 'Oswald', Arial, sans-serif;
+  font-family: "Oswald", Arial, sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.1s, background 0.15s;
+  transition:
+    transform 0.1s,
+    background 0.15s;
 }
-.cn-btn:active { transform: scale(0.95); }
+.cn-btn:active {
+  transform: scale(0.95);
+}
 
-.cn-btn--accept { background: #e63946; color: #fff; }
-.cn-btn--accept:hover { background: #c1121f; }
+.cn-btn--accept {
+  background: #e63946;
+  color: #fff;
+}
+.cn-btn--accept:hover {
+  background: #c1121f;
+}
 
-.cn-btn--refuse { background: #2a2a2a; color: #888; border: 1px solid #3a3a3a; }
-.cn-btn--refuse:hover { background: #333; color: #ccc; }
+.cn-btn--refuse {
+  background: #2a2a2a;
+  color: #888;
+  border: 1px solid #3a3a3a;
+}
+.cn-btn--refuse:hover {
+  background: #333;
+  color: #ccc;
+}
 
 /* ── Keyframes ───────────────────────────────────────────── */
 @keyframes cnSlideIn {
-  0%   { transform: translateX(115vw); }
-  82%  { transform: translateX(-12px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(115vw);
+  }
+  82% {
+    transform: translateX(-12px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 @keyframes cnFadeIn {
-  to { opacity: 1; }
+  to {
+    opacity: 1;
+  }
 }

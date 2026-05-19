@@ -4,14 +4,14 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
 
   const profile = JSON.parse(savedProfile);
   const stats = profile.stats || {};
-  
+
   // Incrémente parties jouées
   stats.games = (stats.games || 0) + 1;
-  
+
   // Incrémente victoires ou abandons
   if (result === "win") stats.wins = (stats.wins || 0) + 1;
   if (result === "giveup") stats.giveups = (stats.giveups || 0) + 1;
-  
+
   // Gestion du mode favori
   const validModes = {
     classique: "Classic",
@@ -21,7 +21,7 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
     personae: "Personae",
     music: "Music",
   };
-  
+
   const normalizedMode = validModes[mode.toLowerCase()] || mode;
   stats.modeCount = stats.modeCount || {};
   stats.modeCount[normalizedMode] = (stats.modeCount[normalizedMode] || 0) + 1;
@@ -34,17 +34,17 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
 
   const mostPlayed = Object.entries(stats.modeCount).sort((a, b) => b[1] - a[1]);
   if (mostPlayed.length > 0) stats.favoriteMode = mostPlayed[0][0];
-  
+
   // Gestion du streak quotidien
   const today = new Date().toISOString().split("T")[0];
   const lastPlayed = stats.lastPlayed?.split("T")[0];
   stats.lastPlayed = new Date().toISOString();
-  
+
   if (!lastPlayed || lastPlayed !== today) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yDate = yesterday.toISOString().split("T")[0];
-    
+
     if (lastPlayed === yDate) {
       stats.streak = (stats.streak || 0) + 1;
     } else {
@@ -52,26 +52,26 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
       const broken = stats.streak || 0;
       if (broken > 1) {
         try {
-          const rec = JSON.parse(localStorage.getItem('streakRecovery') || '{}');
+          const rec = JSON.parse(localStorage.getItem("streakRecovery") || "{}");
           // Ne pas écraser si déjà enregistrée et non consommée
           if (!rec.previousStreak || rec.previousStreak === 0) {
             rec.previousStreak = broken;
             rec.brokenDate = today;
             rec.shown = false;
-            localStorage.setItem('streakRecovery', JSON.stringify(rec));
+            localStorage.setItem("streakRecovery", JSON.stringify(rec));
           }
         } catch (_) {}
       }
       stats.streak = 1;
     }
-    
+
     stats.streakRecord = Math.max(stats.streakRecord || 0, stats.streak);
   }
-  
+
   // ✅ CORRECTION : Conversion de secondes en minutes
   const timeInMinutes = Math.round(timeSpent / 60);
   stats.totalTimeMinutes = (stats.totalTimeMinutes || 0) + timeInMinutes;
-  
+
   // Mise à jour et sauvegarde finale
   profile.stats = stats;
   localStorage.setItem("personaUserProfile", JSON.stringify(profile));

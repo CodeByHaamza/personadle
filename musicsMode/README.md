@@ -88,7 +88,7 @@
   </tbody>
 </table>
 
-> **Note** : Certaines chansons appartiennent à plusieurs opus (ex. *Aria of the Soul* couvre P3→P5X) ; les totaux par opus reflètent le filtre actif, pas des entrées dupliquées.
+> **Note** : Certaines chansons appartiennent à plusieurs opus (ex. _Aria of the Soul_ couvre P3→P5X) ; les totaux par opus reflètent le filtre actif, pas des entrées dupliquées.
 
 ---
 
@@ -134,21 +134,22 @@ musicsMode/
 
 ### Filtres disponibles
 
-| Filtre | Jeux couverts |
-|--------|---------------|
-| P1 | Persona 1 |
-| P2 | Persona 2 IS + EP |
-| P3 | P3, P3 FES, P3P, P3 Reload |
-| P4 | P4, P4 Golden, P4 Arena Ultimax, P4 Dancing |
-| P5 | P5, P5 Royal, P5 Strikers, P5 Tactica |
-| P5X | Persona 5: The Phantom X |
-| PQ | Persona Q + Q2 |
+| Filtre | Jeux couverts                               |
+| ------ | ------------------------------------------- |
+| P1     | Persona 1                                   |
+| P2     | Persona 2 IS + EP                           |
+| P3     | P3, P3 FES, P3P, P3 Reload                  |
+| P4     | P4, P4 Golden, P4 Arena Ultimax, P4 Dancing |
+| P5     | P5, P5 Royal, P5 Strikers, P5 Tactica       |
+| P5X    | Persona 5: The Phantom X                    |
+| PQ     | Persona Q + Q2                              |
 
 ---
 
 ## `modeMusic.js`
 
 Importe depuis `../js/gameCore.js` :
+
 - `normalize` — comparaison des titres sans accents ni casse
 - `showConfettiExplosion` — `{ emojiList: ["🎵","🎶","🎉","✨"], count: 30, spreadFrom: "bottom" }`
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
@@ -157,43 +158,43 @@ Importe depuis `../js/gameCore.js` :
 
 ### Badges débloquables
 
-| Badge | Condition |
-|-------|-----------|
-| ![Badge Burn My Dread](../profile/badges/images/Badges_Burn_My_Dread_Silver.png) | Trouver "Burn My Dread" (thème titre de P3) |
-| ![Badge Zutomayo](../profile/badges/images/Badges_Zotomayo.webp) | Trouver la chanson de la collaboration ZUTOMAYO × P3R |
-| Unsolved Case (Adachi gagne) | Abandonner sur "Never More" (thème de fin de P4) |
+| Badge                                                                            | Condition                                             |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| ![Badge Burn My Dread](../profile/badges/images/Badges_Burn_My_Dread_Silver.png) | Trouver "Burn My Dread" (thème titre de P3)           |
+| ![Badge Zutomayo](../profile/badges/images/Badges_Zotomayo.webp)                 | Trouver la chanson de la collaboration ZUTOMAYO × P3R |
+| Unsolved Case (Adachi gagne)                                                     | Abandonner sur "Never More" (thème de fin de P4)      |
 
 ### Fonctions spécifiques
 
-| Fonction | Description |
-|----------|-------------|
-| `getFilteredSongs()` | Retourne les chansons selon les filtres actifs |
-| `pickSong()` | Sélectionne aléatoirement une chanson (anti-répétition sur 5 dernières) |
-| `showVictory(force?)` | Victoire ou révélation avec badges, stats, confettis |
-| `showWrong(name)` | Affiche la pochette + titre de la mauvaise réponse |
-| `handleGuess()` | Vérifie la saisie avec `normalize()` |
-| `giveUp()` | Abandonne après 3 essais |
-| `resetGame()` | Remet à zéro et choisit une nouvelle chanson |
-| `initializeAutocomplete()` | Dropdown avec pochettes, filtré par opus + chansons déjà proposées |
-| `applyDarkModeStyles()` | Fond sombre et bordure sur le lecteur audio |
+| Fonction                   | Description                                                             |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `getFilteredSongs()`       | Retourne les chansons selon les filtres actifs                          |
+| `pickSong()`               | Sélectionne aléatoirement une chanson (anti-répétition sur 5 dernières) |
+| `showVictory(force?)`      | Victoire ou révélation avec badges, stats, confettis                    |
+| `showWrong(name)`          | Affiche la pochette + titre de la mauvaise réponse                      |
+| `handleGuess()`            | Vérifie la saisie avec `normalize()`                                    |
+| `giveUp()`                 | Abandonne après 3 essais                                                |
+| `resetGame()`              | Remet à zéro et choisit une nouvelle chanson                            |
+| `initializeAutocomplete()` | Dropdown avec pochettes, filtré par opus + chansons déjà proposées      |
+| `applyDarkModeStyles()`    | Fond sombre et bordure sur le lecteur audio                             |
 
 ### Debug
 
 ```js
 // Dans la console du navigateur :
-debugAllMusic()   // Vérifie que tous les titres de musicTitles.js existent dans songs.js
+debugAllMusic(); // Vérifie que tous les titres de musicTitles.js existent dans songs.js
 ```
 
 ---
 
 ## localStorage utilisé
 
-| Clé | Contenu |
-|-----|---------|
-| `musicTarget` | Chanson cible (JSON) |
-| `musicAttempts` | Nombre d'essais |
-| `musicGameOver` | `"true"` si partie terminée |
-| `musicTriedTitles` | Titres déjà proposés (JSON array) |
-| `musicForceReveal` | `"true"` si abandon déclenché |
-| `musicActiveFilters` | Filtres opus actifs |
-| `lastPlayedDate_Music` | Date de la dernière partie |
+| Clé                    | Contenu                           |
+| ---------------------- | --------------------------------- |
+| `musicTarget`          | Chanson cible (JSON)              |
+| `musicAttempts`        | Nombre d'essais                   |
+| `musicGameOver`        | `"true"` si partie terminée       |
+| `musicTriedTitles`     | Titres déjà proposés (JSON array) |
+| `musicForceReveal`     | `"true"` si abandon déclenché     |
+| `musicActiveFilters`   | Filtres opus actifs               |
+| `lastPlayedDate_Music` | Date de la dernière partie        |

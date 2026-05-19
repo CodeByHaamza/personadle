@@ -10,38 +10,47 @@
  * dans les notifications et est visible depuis la page Amis.
  */
 
-import { FILTER_STORAGE_KEYS } from './gameCore.js';
-import { gainSocialLinkXp }    from './social-link.js';
+import { FILTER_STORAGE_KEYS } from "./gameCore.js";
+import { gainSocialLinkXp } from "./social-link.js";
 
 const _queue = [];
-let   _busy  = false;
+let _busy = false;
 
 const MODE_STATE_KEYS = {
-  classic:      ['target', 'attempts', 'guessHistory'],
-  emoji:        ['targetEmoji', 'attemptsEmoji', 'emojiGameOver', 'emojiForceReveal', 'emojiWin'],
-  silhouette:   ['silhouetteTarget', 'silhouetteAttempts', 'silhouetteGameOver', 'silhouetteForceReveal'],
-  alloutattack: ['aoaTarget', 'aoaAttempts', 'aoaGameOver', 'aoaForceReveal'],
-  personae:     ['personaeTarget', 'personaeAttempts', 'personaeGameOver', 'personaeForceReveal'],
-  music:        ['musicTarget', 'musicAttempts', 'musicGameOver', 'musicTriedTitles', 'musicForceReveal'],
+  classic: ["target", "attempts", "guessHistory"],
+  emoji: ["targetEmoji", "attemptsEmoji", "emojiGameOver", "emojiForceReveal", "emojiWin"],
+  silhouette: [
+    "silhouetteTarget",
+    "silhouetteAttempts",
+    "silhouetteGameOver",
+    "silhouetteForceReveal",
+  ],
+  alloutattack: ["aoaTarget", "aoaAttempts", "aoaGameOver", "aoaForceReveal"],
+  personae: ["personaeTarget", "personaeAttempts", "personaeGameOver", "personaeForceReveal"],
+  music: ["musicTarget", "musicAttempts", "musicGameOver", "musicTriedTitles", "musicForceReveal"],
 };
 
 const MODE_PAGE = {
-  classic:      '/classiqueMode/classiqueMode.html',
-  emoji:        '/emojiMode/emojiMode.html',
-  silhouette:   '/silhouetteMode/silhouette.html',
-  alloutattack: '/allOutAttackMode/allOutAttack.html',
-  personae:     '/personaeMode/personae.html',
-  music:        '/musicsMode/musics.html',
+  classic: "/classiqueMode/classiqueMode.html",
+  emoji: "/emojiMode/emojiMode.html",
+  silhouette: "/silhouetteMode/silhouette.html",
+  alloutattack: "/allOutAttackMode/allOutAttack.html",
+  personae: "/personaeMode/personae.html",
+  music: "/musicsMode/musics.html",
 };
 
 const MODE_ICONS = {
-  classic: '🃏', emoji: '😊', silhouette: '👤',
-  alloutattack: '💥', personae: '👺', music: '🎵',
+  classic: "🃏",
+  emoji: "😊",
+  silhouette: "👤",
+  alloutattack: "💥",
+  personae: "👺",
+  music: "🎵",
 };
 
 /** Racine du site (vide en prod, '/personadle' en dev sous-dossier). */
 function _siteBase() {
-  return window.location.pathname.startsWith('/personadle/') ? '/personadle' : '';
+  return window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
 }
 
 function _imgBase() {
@@ -49,15 +58,16 @@ function _imgBase() {
 }
 
 function _esc(str) {
-  return String(str ?? '').replace(/[&<>"']/g, c =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+  return String(str ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
   );
 }
 
 function _avatarSrc(data) {
   if (!data) return `${_imgBase()}default_avatar.png`;
-  if (data.startsWith('data:')) return data;
-  const base = _imgBase().replace(/img\/$/, '');
+  if (data.startsWith("data:")) return data;
+  const base = _imgBase().replace(/img\/$/, "");
   return data.replace(/^\.\//, base);
 }
 
@@ -76,20 +86,32 @@ export function queueChallengeNotifs(challenges) {
 }
 
 function _showNext() {
-  if (!_queue.length) { _busy = false; return; }
+  if (!_queue.length) {
+    _busy = false;
+    return;
+  }
   _busy = true;
   _render(_queue.shift());
 }
 
-function _render({ id, senderPseudo, senderAvatar, mode, score, date, senderId, challengeFilters }) {
-  document.getElementById('cn-overlay')?.remove();
+function _render({
+  id,
+  senderPseudo,
+  senderAvatar,
+  mode,
+  score,
+  date,
+  senderId,
+  challengeFilters,
+}) {
+  document.getElementById("cn-overlay")?.remove();
 
-  const modeKey  = (mode ?? '').toLowerCase();
-  const modeIcon = MODE_ICONS[modeKey] ?? '⚔';
-  const modeName = modeKey === 'alloutattack' ? 'ALL-OUT ATTACK' : (mode ?? '').toUpperCase();
+  const modeKey = (mode ?? "").toLowerCase();
+  const modeIcon = MODE_ICONS[modeKey] ?? "⚔";
+  const modeName = modeKey === "alloutattack" ? "ALL-OUT ATTACK" : (mode ?? "").toUpperCase();
 
-  const overlay = document.createElement('div');
-  overlay.id = 'cn-overlay';
+  const overlay = document.createElement("div");
+  overlay.id = "cn-overlay";
   overlay.innerHTML = `
     <div class="cn-backdrop"></div>
     <button class="cn-close" aria-label="Close">✕</button>
@@ -107,20 +129,20 @@ function _render({ id, senderPseudo, senderAvatar, mode, score, date, senderId, 
              alt="${_esc(senderPseudo)}"
              onerror="this.src='${_imgBase()}default_avatar.png'">
         <p class="cn-pseudo">${_esc(senderPseudo)}</p>
-        <p class="cn-message">${_t('challenge.notif_challenges_you', 'vous lance un défi !')}</p>
+        <p class="cn-message">${_t("challenge.notif_challenges_you", "vous lance un défi !")}</p>
         <hr class="cn-divider">
         <div class="cn-mode-badge">${modeIcon} ${_esc(modeName)}</div>
         <p class="cn-score">
-          ${_t('challenge.notif_beat', 'Battre')} :
+          ${_t("challenge.notif_beat", "Battre")} :
           <strong>${score}</strong>
-          ${_t('challenge.notif_attempts', 'tentative(s)')}
+          ${_t("challenge.notif_attempts", "tentative(s)")}
         </p>
         <div class="cn-buttons">
           <button class="cn-btn cn-btn--accept">
-            ⚔ ${_t('friends.challenge_accept', 'Accepter')}
+            ⚔ ${_t("friends.challenge_accept", "Accepter")}
           </button>
           <button class="cn-btn cn-btn--refuse">
-            ${_t('friends.challenge_decline', 'Refuser')}
+            ${_t("friends.challenge_decline", "Refuser")}
           </button>
         </div>
       </div>
@@ -128,28 +150,36 @@ function _render({ id, senderPseudo, senderAvatar, mode, score, date, senderId, 
   `;
 
   document.body.appendChild(overlay);
-  requestAnimationFrame(() => overlay.classList.add('cn--visible'));
+  requestAnimationFrame(() => overlay.classList.add("cn--visible"));
 
   // ── Accepter : pose localStorage + XP + redirect ────────
-  overlay.querySelector('.cn-btn--accept').addEventListener('click', async () => {
+  overlay.querySelector(".cn-btn--accept").addEventListener("click", async () => {
     const api = window._personadleApi;
-    await api?.messages.updateStatus(id, 'accepted').catch(() => {});
+    await api?.messages.updateStatus(id, "accepted").catch(() => {});
 
-    (MODE_STATE_KEYS[modeKey] ?? []).forEach(k => localStorage.removeItem(k));
+    (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
 
-    const filterKey      = FILTER_STORAGE_KEYS[modeKey] ?? null;
-    const originalFilters = filterKey ? (localStorage.getItem(filterKey) ?? '[]') : null;
-    const filters = challengeFilters && challengeFilters !== '[]' ? challengeFilters : null;
+    const filterKey = FILTER_STORAGE_KEYS[modeKey] ?? null;
+    const originalFilters = filterKey ? (localStorage.getItem(filterKey) ?? "[]") : null;
+    const filters = challengeFilters && challengeFilters !== "[]" ? challengeFilters : null;
     if (filterKey && filters) localStorage.setItem(filterKey, filters);
 
-    localStorage.setItem('activeChallenge', JSON.stringify({
-      msgId: id, mode: modeKey, date, score, senderId,
-      filterKey, originalFilters,
-    }));
+    localStorage.setItem(
+      "activeChallenge",
+      JSON.stringify({
+        msgId: id,
+        mode: modeKey,
+        date,
+        score,
+        senderId,
+        filterKey,
+        originalFilters,
+      })
+    );
 
-    if (senderId) gainSocialLinkXp(senderId, 'challenge').catch(() => {});
+    if (senderId) gainSocialLinkXp(senderId, "challenge").catch(() => {});
 
-    const dest = `${_siteBase()}${MODE_PAGE[modeKey] ?? ''}`;
+    const dest = `${_siteBase()}${MODE_PAGE[modeKey] ?? ""}`;
     if (dest && dest !== _siteBase()) {
       window.location.href = dest;
       return;
@@ -158,14 +188,14 @@ function _render({ id, senderPseudo, senderAvatar, mode, score, date, senderId, 
   });
 
   // ── Refuser : marque comme lu côté API + ferme ───────────
-  overlay.querySelector('.cn-btn--refuse').addEventListener('click', async () => {
-    await window._personadleApi?.messages.updateStatus(id, 'read').catch(() => {});
+  overlay.querySelector(".cn-btn--refuse").addEventListener("click", async () => {
+    await window._personadleApi?.messages.updateStatus(id, "read").catch(() => {});
     _closeOverlay(overlay);
   });
 
   // ── Croix : ferme seulement l'animation ─────────────────
   // Le message reste "unread" dans l'API → visible depuis la page Amis.
-  overlay.querySelector('.cn-close').addEventListener('click', () => {
+  overlay.querySelector(".cn-close").addEventListener("click", () => {
     _queue.length = 0;
     _busy = false;
     _fadeOut(overlay, null);
@@ -173,9 +203,12 @@ function _render({ id, senderPseudo, senderAvatar, mode, score, date, senderId, 
 }
 
 function _fadeOut(overlay, onDone) {
-  const scene = overlay.querySelector('.cn-scene');
-  if (scene) { scene.style.transition = 'opacity 0.22s ease'; scene.style.opacity = '0'; }
-  overlay.querySelector('.cn-backdrop').style.background = 'rgba(0,0,0,0)';
+  const scene = overlay.querySelector(".cn-scene");
+  if (scene) {
+    scene.style.transition = "opacity 0.22s ease";
+    scene.style.opacity = "0";
+  }
+  overlay.querySelector(".cn-backdrop").style.background = "rgba(0,0,0,0)";
   setTimeout(() => {
     overlay.remove();
     if (onDone) onDone();

@@ -22,23 +22,23 @@ profile/badges/
 
 ## Catégories
 
-| Catégorie | Description | Exemples |
-|-----------|-------------|---------|
-| 🏆 **Achievement** | Performance en jeu | First Win, One Shot, Night Owl, Ace Detective |
-| 🎉 **Event** | Badges saisonniers ou codes limités | Christmas 2025, New Year 2026, Tanabata, St-Valentin |
-| 🔒 **Secret** | Conditions cachées non documentées | Helel, Lucifer, Truth Duality, Strega |
-| 👥 **Social** | Interactions avec d'autres joueurs | Best Bro, True Hacker, Leblanc Meeting |
+| Catégorie          | Description                         | Exemples                                             |
+| ------------------ | ----------------------------------- | ---------------------------------------------------- |
+| 🏆 **Achievement** | Performance en jeu                  | First Win, One Shot, Night Owl, Ace Detective        |
+| 🎉 **Event**       | Badges saisonniers ou codes limités | Christmas 2025, New Year 2026, Tanabata, St-Valentin |
+| 🔒 **Secret**      | Conditions cachées non documentées  | Helel, Lucifer, Truth Duality, Strega                |
+| 👥 **Social**      | Interactions avec d'autres joueurs  | Best Bro, True Hacker, Leblanc Meeting               |
 
 ---
 
 ## Raretés
 
-| Rareté | Couleur | Condition type |
-|--------|---------|---------------|
-| **Common** | Gris | Accessible rapidement |
-| **Rare** | Bleu | Demande un effort notable |
-| **Epic** | Violet | Condition difficile ou cachée |
-| **Legendary** | Or | Extrêmement rare, souvent secret |
+| Rareté        | Couleur | Condition type                   |
+| ------------- | ------- | -------------------------------- |
+| **Common**    | Gris    | Accessible rapidement            |
+| **Rare**      | Bleu    | Demande un effort notable        |
+| **Epic**      | Violet  | Condition difficile ou cachée    |
+| **Legendary** | Or      | Extrêmement rare, souvent secret |
 
 ---
 
@@ -83,8 +83,8 @@ Après validation : `INSERT IGNORE INTO badges_unlocked` + `INSERT INTO event_co
 Le joueur peut épingler jusqu'à **4 badges** sur son profil public (`profiles.selected_badges`).
 
 ```js
-badgesManager.renderBadgesPreview();  // 4 slots sur la page profil
-badgesManager.renderBadgesModal();    // grille complète dans la modale
+badgesManager.renderBadgesPreview(); // 4 slots sur la page profil
+badgesManager.renderBadgesModal(); // grille complète dans la modale
 ```
 
 > ⚠️ Race condition connue et résolue : `syncBadgesWithBackend()` est async fire-and-forget.
@@ -95,6 +95,7 @@ badgesManager.renderBadgesModal();    // grille complète dans la modale
 ## Chemins relatifs
 
 Depuis `profile/badges/`, les ressources partagées sont à deux niveaux :
+
 - CSS global : `../../css/`
 - JS partagé : `../../js/`
 - Styles profil : `../profile-page.css`

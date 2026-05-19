@@ -46,7 +46,22 @@ import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** All specific opus codes available in Personae mode. */
-const ALL_OPUS = ["P2IS","P2EP","P3","P3FES","P3P","P3R","P4","P4G","P4AU","P5","P5R","P5S","P5T","P5X"];
+const ALL_OPUS = [
+  "P2IS",
+  "P2EP",
+  "P3",
+  "P3FES",
+  "P3P",
+  "P3R",
+  "P4",
+  "P4G",
+  "P4AU",
+  "P5",
+  "P5R",
+  "P5S",
+  "P5T",
+  "P5X",
+];
 
 let activeFilters = [...ALL_OPUS];
 let filteredCharacters = [];
@@ -68,7 +83,6 @@ let textbar, guessBtn, resetBtn, giveUpBtn, giveUpCounter, wrongList, personaImg
 if (!localStorage.getItem("playerProfile") && localStorage.getItem("personaUserProfile")) {
   localStorage.setItem("playerProfile", localStorage.getItem("personaUserProfile"));
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER / CHARACTER POOL
@@ -96,14 +110,15 @@ function pickCharacter(random = false) {
 
   if (random && filteredCharacters.length) {
     const _prev = target;
-    const _candidates = filteredCharacters.length > 1 && _prev
-      ? filteredCharacters.filter(c => c.persona !== _prev.persona)
-      : filteredCharacters;
+    const _candidates =
+      filteredCharacters.length > 1 && _prev
+        ? filteredCharacters.filter((c) => c.persona !== _prev.persona)
+        : filteredCharacters;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
   } else {
-    const daily = getDailyTarget(originalCharacters, 'Personae');
-    if (filteredCharacters.length && !filteredCharacters.some(c => c.persona === daily.persona)) {
-      target = getDailyTarget(filteredCharacters, 'Personae');
+    const daily = getDailyTarget(originalCharacters, "Personae");
+    if (filteredCharacters.length && !filteredCharacters.some((c) => c.persona === daily.persona)) {
+      target = getDailyTarget(filteredCharacters, "Personae");
     } else {
       target = daily;
     }
@@ -116,7 +131,6 @@ function pickCharacter(random = false) {
   localStorage.setItem("personaeAttempts", attempts);
   localStorage.setItem("personaeGameOver", "false");
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTOCOMPLETE
@@ -196,9 +210,13 @@ function initializeAutocomplete(input, personasList) {
     const items = document.querySelectorAll("#autocomplete-list .list-options");
     if (!items.length) return;
 
-    if (e.key === "ArrowDown") { currentFocus++; updateActive(items); }
-    else if (e.key === "ArrowUp") { currentFocus--; updateActive(items); }
-    else if (e.key === "Enter") {
+    if (e.key === "ArrowDown") {
+      currentFocus++;
+      updateActive(items);
+    } else if (e.key === "ArrowUp") {
+      currentFocus--;
+      updateActive(items);
+    } else if (e.key === "Enter") {
       e.preventDefault();
       if (currentFocus > -1) items[currentFocus].click();
       else items[0]?.click();
@@ -222,7 +240,6 @@ function initializeAutocomplete(input, personasList) {
     for (let i = 0; i < lists.length; i++) lists[i].parentNode.removeChild(lists[i]);
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // VICTORY / DEFEAT
@@ -280,38 +297,72 @@ function showVictory(force = false, name = null) {
 
     // ── Nouveaux flags badges v2.1 ────────────────────────────────────────
     // Strega personas
-    if (['Hypnos'].includes(target.persona) && !profile.foundHypnos)     { profile.foundHypnos = true; profileUpdated = true; }
-    if (['Moros'].includes(target.persona) && !profile.foundMoros)        { profile.foundMoros  = true; profileUpdated = true; }
-    if (['Medea'].includes(target.persona) && !profile.foundMedea)        { profile.foundMedea  = true; profileUpdated = true; }
+    if (["Hypnos"].includes(target.persona) && !profile.foundHypnos) {
+      profile.foundHypnos = true;
+      profileUpdated = true;
+    }
+    if (["Moros"].includes(target.persona) && !profile.foundMoros) {
+      profile.foundMoros = true;
+      profileUpdated = true;
+    }
+    if (["Medea"].includes(target.persona) && !profile.foundMedea) {
+      profile.foundMedea = true;
+      profileUpdated = true;
+    }
 
     // Twin Fist (Makoto Nijima = Johanna/Anat, Akihiko = Polydeuces/Caesar)
-    if (['Johanna','Anat'].includes(target.persona) && !profile.foundMakotoNijima)
-      { profile.foundMakotoNijima = true; profileUpdated = true; }
-    if (['Polydeuces','Caesar'].includes(target.persona) && !profile.foundAkihiko)
-      { profile.foundAkihiko = true; profileUpdated = true; }
+    if (["Johanna", "Anat"].includes(target.persona) && !profile.foundMakotoNijima) {
+      profile.foundMakotoNijima = true;
+      profileUpdated = true;
+    }
+    if (["Polydeuces", "Caesar"].includes(target.persona) && !profile.foundAkihiko) {
+      profile.foundAkihiko = true;
+      profileUpdated = true;
+    }
 
     // Twin Spear (Kotone = Orpheus Female variants, Ken = Kala-Nemi)
-    if (['Orpheus ( Female )','Orpheus Picaro ( Female )','Orpheus Telos','Thanatos','Thanatos Picaro'].includes(target.persona) && !profile.foundKotone)
-      { profile.foundKotone = true; profileUpdated = true; }
-    if (['Kala-Nemi'].includes(target.persona) && !profile.foundKen)
-      { profile.foundKen = true; profileUpdated = true; }
+    if (
+      [
+        "Orpheus ( Female )",
+        "Orpheus Picaro ( Female )",
+        "Orpheus Telos",
+        "Thanatos",
+        "Thanatos Picaro",
+      ].includes(target.persona) &&
+      !profile.foundKotone
+    ) {
+      profile.foundKotone = true;
+      profileUpdated = true;
+    }
+    if (["Kala-Nemi"].includes(target.persona) && !profile.foundKen) {
+      profile.foundKen = true;
+      profileUpdated = true;
+    }
 
     // Tradition & Modernité
-    if (['Sukuna-Hikona','Yamato-Takeru'].includes(target.persona) && !profile.foundNaotoPersona)
-      { profile.foundNaotoPersona = true; profileUpdated = true; }
-    if (['Necronomicon','Prometheus'].includes(target.persona) && !profile.foundFutabaPersona)
-      { profile.foundFutabaPersona = true; profileUpdated = true; }
+    if (["Sukuna-Hikona", "Yamato-Takeru"].includes(target.persona) && !profile.foundNaotoPersona) {
+      profile.foundNaotoPersona = true;
+      profileUpdated = true;
+    }
+    if (["Necronomicon", "Prometheus"].includes(target.persona) && !profile.foundFutabaPersona) {
+      profile.foundFutabaPersona = true;
+      profileUpdated = true;
+    }
 
     // For Real (Ryuji)
-    if (['Captain Kidd','Seiten Taisei'].includes(target.persona) && !profile.foundRyujiPersona)
-      { profile.foundRyujiPersona = true; profileUpdated = true; }
+    if (["Captain Kidd", "Seiten Taisei"].includes(target.persona) && !profile.foundRyujiPersona) {
+      profile.foundRyujiPersona = true;
+      profileUpdated = true;
+    }
 
     // characterModeMap
     if (!profile.characterModeMap) profile.characterModeMap = {};
     const _charName = Array.isArray(target.user) ? target.user[0] : target.user;
     if (!profile.characterModeMap[_charName]) profile.characterModeMap[_charName] = [];
-    if (!profile.characterModeMap[_charName].includes('personae'))
-      { profile.characterModeMap[_charName].push('personae'); profileUpdated = true; }
+    if (!profile.characterModeMap[_charName].includes("personae")) {
+      profile.characterModeMap[_charName].push("personae");
+      profileUpdated = true;
+    }
 
     if (attempts === 0 && !profile.hasWonFirstTry) {
       profile.hasWonFirstTry = true;
@@ -326,11 +377,11 @@ function showVictory(force = false, name = null) {
   // ── Result display ────────────────────────────────────────────────────────
   if (force) {
     const i18n = window.i18n || { t: (k, v) => k };
-    victoryText.innerHTML = `<span class="failure-text">${i18n.t('modes.personae.giveup_reveal', { name: Array.isArray(target.user) ? target.user[0] : target.user, persona: target.persona })}</span>`;
+    victoryText.innerHTML = `<span class="failure-text">${i18n.t("modes.personae.giveup_reveal", { name: Array.isArray(target.user) ? target.user[0] : target.user, persona: target.persona })}</span>`;
     victoryText.className = "victory-message failure-text";
   } else {
     const i18n = window.i18n || { t: (k, v) => k };
-    victoryText.innerHTML = `<span class="success-text">${i18n.t('modes.personae.correct', { name, persona: target.persona })}</span>`;
+    victoryText.innerHTML = `<span class="success-text">${i18n.t("modes.personae.correct", { name, persona: target.persona })}</span>`;
     victoryText.className = "victory-message success-text";
     showConfettiExplosion({ count: 30, spreadFrom: "bottom" });
   }
@@ -342,20 +393,24 @@ function showVictory(force = false, name = null) {
     prevHref: "../silhouetteMode/silhouette.html",
     nextHref: "../musicsMode/musics.html",
   });
-  if (!force) showChallengeButton('personae', attempts);
-  checkChallengeCompletion('personae', attempts, !force);
-  showCommunityStats('personae', Array.isArray(target.user) ? target.user[0] : target.user);
+  if (!force) showChallengeButton("personae", attempts);
+  checkChallengeCompletion("personae", attempts, !force);
+  showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   if (!localStorage.getItem(statsKey)) {
-    const result    = force ? "giveup" : "win";
+    const result = force ? "giveup" : "win";
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result, mode: "Personae", timeSpent });
-    savePendingSession(buildGameSession({
-      mode: "Personae",
-      targetName: Array.isArray(target.user) ? target.user[0] : target.user,
-      result, attempts, timeMs: timeSpent * 1000,
-    }));
+    savePendingSession(
+      buildGameSession({
+        mode: "Personae",
+        targetName: Array.isArray(target.user) ? target.user[0] : target.user,
+        result,
+        attempts,
+        timeMs: timeSpent * 1000,
+      })
+    );
     localStorage.removeItem("playerProfile");
     localStorage.setItem(statsKey, "true");
   }
@@ -370,13 +425,8 @@ function showVictory(force = false, name = null) {
  */
 function showWrong(name) {
   const imageName = portraitsMap[name] || name.split(" ")[0];
-  showWrongMini(
-    `../database/portraits/${encodeURIComponent(imageName)}.webp`,
-    name,
-    wrongList
-  );
+  showWrongMini(`../database/portraits/${encodeURIComponent(imageName)}.webp`, name, wrongList);
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME FLOW
@@ -432,11 +482,15 @@ function giveUp() {
   if (!localStorage.getItem(statsKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result: "giveup", mode: "Personae", timeSpent });
-    savePendingSession(buildGameSession({
-      mode: "Personae",
-      targetName: Array.isArray(target.user) ? target.user[0] : target.user,
-      result: "giveup", attempts, timeMs: timeSpent * 1000,
-    }));
+    savePendingSession(
+      buildGameSession({
+        mode: "Personae",
+        targetName: Array.isArray(target.user) ? target.user[0] : target.user,
+        result: "giveup",
+        attempts,
+        timeMs: timeSpent * 1000,
+      })
+    );
     localStorage.removeItem("playerProfile");
     localStorage.setItem(statsKey, "true");
   }
@@ -476,11 +530,12 @@ function resetGame(random = false) {
   victoryText.innerHTML = "";
   victoryImage.src = "";
 
-  originalCharacters.forEach((c) => { c._guessed = false; });
+  originalCharacters.forEach((c) => {
+    c._guessed = false;
+  });
 
   pickCharacter(random);
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DARK MODE (personae-specific element)
@@ -498,7 +553,6 @@ function applyDarkModeStyles() {
     zone.style.border = "3px solid #888";
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BOOTSTRAP — DOMContentLoaded
@@ -533,7 +587,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   resetBtn.addEventListener("click", () => resetGame(true));
   giveUpBtn.addEventListener("click", giveUp);
 
-  initializeAutocomplete(textbar, personas.sort((a, b) => a.localeCompare(b)));
+  initializeAutocomplete(
+    textbar,
+    personas.sort((a, b) => a.localeCompare(b))
+  );
 
   // ── Restore session ──
   const stored = localStorage.getItem("personaeTarget");
@@ -556,7 +613,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (storedGameOver) {
         const force = localStorage.getItem("personaeForceReveal") === "true";
-        showVictory(force, force ? null : (Array.isArray(target.user) ? target.user[0] : target.user));
+        showVictory(
+          force,
+          force ? null : Array.isArray(target.user) ? target.user[0] : target.user
+        );
       }
     } catch (e) {
       resetGame();
@@ -573,7 +633,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     resetBtn?.click() ?? location.reload();
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DEBUG (console only)
@@ -594,7 +653,10 @@ export function debugAllPersonae() {
       const u = Array.isArray(c.user) ? c.user : [c.user];
       return u.some((u) => u === name);
     });
-    if (!match) { errors.push(`❌ ${name} — Absent dans personaeCharacters.js`); continue; }
+    if (!match) {
+      errors.push(`❌ ${name} — Absent dans personaeCharacters.js`);
+      continue;
+    }
     if (!portraitsMap[name]) errors.push(`❌ ${name} — Manque dans portraitsMapPersonae.js`);
     else console.log(`✅ OK: ${name}`);
   }

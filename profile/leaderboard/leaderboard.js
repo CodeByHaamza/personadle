@@ -23,11 +23,11 @@ const PAGE_SIZE = 50;
 // ─────────────────────────────────────────────────────────
 
 const filters = {
-  mode:        'all',
-  period:      'ever',
-  metric:      'wins',
+  mode: "all",
+  period: "ever",
+  metric: "wins",
   friendsOnly: false,
-  offset:      0,
+  offset: 0,
 };
 
 // ─────────────────────────────────────────────────────────
@@ -35,22 +35,30 @@ const filters = {
 // ─────────────────────────────────────────────────────────
 
 function esc(str) {
-  return String(str ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  })[c]);
+  return String(str ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[c]
+  );
 }
 
 function t(key) {
   const val = window.i18n?.t?.(key);
-  return (val != null && val !== key) ? val : '';
+  return val != null && val !== key ? val : "";
 }
 
 /** Formate la valeur de score selon la métrique courante. */
 function formatScore(entry) {
   switch (filters.metric) {
-    case 'winrate':
+    case "winrate":
       return `${entry.score ?? 0}%`;
-    case 'streak':
+    case "streak":
       return `🔥 ${entry.score ?? 0}`;
     default:
       return String(entry.score ?? 0);
@@ -60,51 +68,51 @@ function formatScore(entry) {
 /** Label de la métrique courante (pour la sous-info). */
 function metricLabel() {
   const labels = {
-    wins:    t('leaderboard.metric_wins')    || 'wins',
-    winrate: t('leaderboard.metric_winrate') || 'win rate',
-    streak:  t('leaderboard.metric_streak')  || 'best streak',
-    perfect: t('leaderboard.metric_perfect') || 'perfect wins',
-    games:   t('leaderboard.metric_games')   || 'games',
+    wins: t("leaderboard.metric_wins") || "wins",
+    winrate: t("leaderboard.metric_winrate") || "win rate",
+    streak: t("leaderboard.metric_streak") || "best streak",
+    perfect: t("leaderboard.metric_perfect") || "perfect wins",
+    games: t("leaderboard.metric_games") || "games",
   };
   return labels[filters.metric] ?? filters.metric;
 }
 
 /** Renders the active filter summary banner below the filter card. */
 function renderFilterNote() {
-  const el = document.getElementById('lbFilterNote');
+  const el = document.getElementById("lbFilterNote");
   if (!el) return;
 
   const modeLabels = {
-    all:          t('leaderboard.filter_all_modes') || 'All modes',
-    classic:      'Classic',
-    emoji:        'Emoji',
-    silhouette:   'Silhouette',
-    alloutattack: 'All-Out Attack',
-    personae:     'Personae',
-    music:        'Music',
+    all: t("leaderboard.filter_all_modes") || "All modes",
+    classic: "Classic",
+    emoji: "Emoji",
+    silhouette: "Silhouette",
+    alloutattack: "All-Out Attack",
+    personae: "Personae",
+    music: "Music",
   };
   const periodLabels = {
-    ever:  t('leaderboard.period_ever')  || 'All time',
-    month: t('leaderboard.period_month') || 'This month',
-    week:  t('leaderboard.period_week')  || 'This week',
-    day:   t('leaderboard.period_day')   || 'Today',
+    ever: t("leaderboard.period_ever") || "All time",
+    month: t("leaderboard.period_month") || "This month",
+    week: t("leaderboard.period_week") || "This week",
+    day: t("leaderboard.period_day") || "Today",
   };
   const metricLabels = {
-    wins:    t('leaderboard.metric_wins')    || 'Wins',
-    winrate: t('leaderboard.metric_winrate') || 'Win rate',
-    streak:  t('leaderboard.metric_streak')  || 'Best streak',
-    perfect: t('leaderboard.metric_perfect') || 'Perfect',
-    games:   t('leaderboard.metric_games')   || 'Games',
+    wins: t("leaderboard.metric_wins") || "Wins",
+    winrate: t("leaderboard.metric_winrate") || "Win rate",
+    streak: t("leaderboard.metric_streak") || "Best streak",
+    perfect: t("leaderboard.metric_perfect") || "Perfect",
+    games: t("leaderboard.metric_games") || "Games",
   };
 
-  const mode   = esc(modeLabels[filters.mode]    ?? filters.mode);
+  const mode = esc(modeLabels[filters.mode] ?? filters.mode);
   const period = esc(periodLabels[filters.period] ?? filters.period);
   const metric = esc(metricLabels[filters.metric] ?? filters.metric);
-  const note   = esc(t('leaderboard.filter_note') || 'Opus filters are not factored in.');
+  const note = esc(t("leaderboard.filter_note") || "Opus filters are not factored in.");
 
   const friendsChip = filters.friendsOnly
-    ? `<span class="lb-fn-sep">·</span><span class="lb-fn-chip lb-fn-chip--friends">👥 ${esc(t('leaderboard.scope_friends') || 'Friends')}</span>`
-    : '';
+    ? `<span class="lb-fn-sep">·</span><span class="lb-fn-chip lb-fn-chip--friends">👥 ${esc(t("leaderboard.scope_friends") || "Friends")}</span>`
+    : "";
 
   el.innerHTML = `
     <span class="lb-fn-chips">
@@ -129,22 +137,23 @@ function renderFilterNote() {
  * @param {number|null} myId - ID de l'utilisateur connecté (pour mise en avant)
  */
 function renderRow(entry, myId) {
-  const rank        = entry.rank ?? (filters.offset + 1);
-  const isMe        = myId && entry.user_id === myId;
-  const rankEmoji   = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : String(rank);
-  const href        = isMe ? 'profile.html' : `profile.html?view=${esc(entry.friend_code)}`;
+  const rank = entry.rank ?? filters.offset + 1;
+  const isMe = myId && entry.user_id === myId;
+  const rankEmoji = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : String(rank);
+  const href = isMe ? "profile.html" : `profile.html?view=${esc(entry.friend_code)}`;
   // Couleur de bordure personnelle (sauf top 3 qui ont leurs couleurs podium en CSS)
-  const borderStyle = rank > 3 && entry.avatar_border_color
-    ? `style="border-color:${esc(entry.avatar_border_color)}"`
-    : '';
+  const borderStyle =
+    rank > 3 && entry.avatar_border_color
+      ? `style="border-color:${esc(entry.avatar_border_color)}"`
+      : "";
 
   return `
-    <a class="lb-row lb-row--${rank <= 3 ? rank : 'n'} ${isMe ? 'lb-row--me' : ''}"
+    <a class="lb-row lb-row--${rank <= 3 ? rank : "n"} ${isMe ? "lb-row--me" : ""}"
        href="${href}"
-       title="${t('friends.view_profile') || 'View profile'}">
+       title="${t("friends.view_profile") || "View profile"}">
       <span class="lb-rank">${rankEmoji}</span>
       <img class="lb-avatar"
-           src="${esc(entry.avatar_data || '../img/default_avatar.png')}"
+           src="${esc(entry.avatar_data || "../img/default_avatar.png")}"
            alt="${esc(entry.pseudo)}"
            loading="lazy"
            ${borderStyle}
@@ -161,48 +170,48 @@ function renderRow(entry, myId) {
 
 /** Met à jour le bandeau "Mon classement". */
 function renderMyRank(myRank) {
-  const banner = document.getElementById('myRankBanner');
+  const banner = document.getElementById("myRankBanner");
   if (!banner) return;
 
   if (!myRank || !myRank.rank) {
-    banner.classList.add('hidden');
+    banner.classList.add("hidden");
     return;
   }
 
   banner.innerHTML = `
     <span class="lb-my-rank__rank">#${myRank.rank}</span>
-    <span>${t('leaderboard.your_rank') || 'Your rank'} — <strong>${esc(formatScore(myRank))}</strong> ${metricLabel()}</span>
+    <span>${t("leaderboard.your_rank") || "Your rank"} — <strong>${esc(formatScore(myRank))}</strong> ${metricLabel()}</span>
   `;
-  banner.classList.remove('hidden');
+  banner.classList.remove("hidden");
 }
 
 /** Affiche le corps du leaderboard. */
 function renderLeaderboard(data) {
-  const body    = document.getElementById('leaderboardBody');
-  const myId    = window._currentUser?.id ?? null;
+  const body = document.getElementById("leaderboardBody");
+  const myId = window._currentUser?.id ?? null;
   const entries = data.entries ?? [];
 
   if (!entries.length) {
     const emptyText = filters.friendsOnly
-      ? (t('leaderboard.no_friends') || 'None of your friends appear in this ranking yet.')
-      : (t('leaderboard.no_entries') || 'No entries for this period.');
+      ? t("leaderboard.no_friends") || "None of your friends appear in this ranking yet."
+      : t("leaderboard.no_entries") || "No entries for this period.";
     const emptySub = filters.friendsOnly
-      ? ''
-      : `<p class="lb-empty__sub">${t('leaderboard.no_entries_sub') || 'Play some games to appear here!'}</p>`;
+      ? ""
+      : `<p class="lb-empty__sub">${t("leaderboard.no_entries_sub") || "Play some games to appear here!"}</p>`;
     body.innerHTML = `
       <div class="lb-empty">
-        <span class="lb-empty__icon">${filters.friendsOnly ? '👥' : '📊'}</span>
+        <span class="lb-empty__icon">${filters.friendsOnly ? "👥" : "📊"}</span>
         <p class="lb-empty__text">${emptyText}</p>
         ${emptySub}
       </div>`;
     return;
   }
 
-  let html = '';
+  let html = "";
   entries.forEach((entry, i) => {
     // Séparateur après le podium
     if (i === 3 && filters.offset === 0) {
-      html += `<div class="lb-podium-divider">── ${t('leaderboard.others') || 'Others'} ──</div>`;
+      html += `<div class="lb-podium-divider">── ${t("leaderboard.others") || "Others"} ──</div>`;
     }
     html += renderRow(entry, myId);
   });
@@ -215,20 +224,20 @@ function renderLeaderboard(data) {
 
 /** Met à jour la pagination. */
 function renderPagination(total) {
-  const paginationEl = document.getElementById('lbPagination');
-  const pageInfoEl   = document.getElementById('lbPageInfo');
-  const prevBtn      = document.getElementById('lbPrevBtn');
-  const nextBtn      = document.getElementById('lbNextBtn');
+  const paginationEl = document.getElementById("lbPagination");
+  const pageInfoEl = document.getElementById("lbPageInfo");
+  const prevBtn = document.getElementById("lbPrevBtn");
+  const nextBtn = document.getElementById("lbNextBtn");
 
   if (total <= PAGE_SIZE) {
-    paginationEl?.classList.add('hidden');
+    paginationEl?.classList.add("hidden");
     return;
   }
 
-  paginationEl?.classList.remove('hidden');
+  paginationEl?.classList.remove("hidden");
 
   const currentPage = Math.floor(filters.offset / PAGE_SIZE) + 1;
-  const totalPages  = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   if (pageInfoEl) {
     pageInfoEl.textContent = `${currentPage} / ${totalPages}`;
@@ -243,36 +252,38 @@ function renderPagination(total) {
 // ─────────────────────────────────────────────────────────
 
 async function loadLeaderboard() {
-  const api  = window._personadleApi;
-  const body = document.getElementById('leaderboardBody');
+  const api = window._personadleApi;
+  const body = document.getElementById("leaderboardBody");
 
   if (filters.friendsOnly && !window._currentUser) {
     renderFilterNote();
-    if (body) body.innerHTML = `
+    if (body)
+      body.innerHTML = `
       <div class="lb-empty">
         <span class="lb-empty__icon">🔒</span>
-        <p class="lb-empty__text">${t('leaderboard.login_for_friends') || 'Log in to see your friends leaderboard.'}</p>
+        <p class="lb-empty__text">${t("leaderboard.login_for_friends") || "Log in to see your friends leaderboard."}</p>
       </div>`;
-    document.getElementById('myRankBanner')?.classList.add('hidden');
-    document.getElementById('lbPagination')?.classList.add('hidden');
+    document.getElementById("myRankBanner")?.classList.add("hidden");
+    document.getElementById("lbPagination")?.classList.add("hidden");
     return;
   }
 
   if (!api) {
-    if (body) body.innerHTML = `<p class="lb-loading">${t('ui.offline') || 'Offline — leaderboard unavailable.'}</p>`;
+    if (body)
+      body.innerHTML = `<p class="lb-loading">${t("ui.offline") || "Offline — leaderboard unavailable."}</p>`;
     return;
   }
 
-  if (body) body.innerHTML = `<p class="lb-loading">${t('ui.loading') || 'Loading…'}</p>`;
+  if (body) body.innerHTML = `<p class="lb-loading">${t("ui.loading") || "Loading…"}</p>`;
   renderFilterNote();
 
   try {
     const data = await api.leaderboard.get({
-      mode:         filters.mode,
-      period:       filters.period,
-      metric:       filters.metric,
-      limit:        PAGE_SIZE,
-      offset:       filters.offset,
+      mode: filters.mode,
+      period: filters.period,
+      metric: filters.metric,
+      limit: PAGE_SIZE,
+      offset: filters.offset,
       friends_only: filters.friendsOnly ? 1 : 0,
     });
 
@@ -280,9 +291,10 @@ async function loadLeaderboard() {
     renderPagination(data.count ?? 0);
   } catch (err) {
     if (body) {
-      const msg = err.status === 0
-        ? (t('ui.offline') || 'Offline — leaderboard unavailable.')
-        : (t('leaderboard.error') || 'Could not load leaderboard.');
+      const msg =
+        err.status === 0
+          ? t("ui.offline") || "Offline — leaderboard unavailable."
+          : t("leaderboard.error") || "Could not load leaderboard.";
       body.innerHTML = `
         <div class="lb-empty">
           <span class="lb-empty__icon">⚠️</span>
@@ -302,28 +314,28 @@ async function loadLeaderboard() {
  * @param {string} value        - Valeur sélectionnée
  */
 function activatePill(groupEl, value) {
-  groupEl.querySelectorAll('.lb-pill').forEach(pill => {
-    pill.classList.toggle('active', pill.dataset.value === value);
+  groupEl.querySelectorAll(".lb-pill").forEach((pill) => {
+    pill.classList.toggle("active", pill.dataset.value === value);
   });
 }
 
 /** Attache les listeners sur les groupes de filtres. */
 function attachFilterListeners() {
-  const modeGroup   = document.getElementById('modeFilter');
-  const periodGroup = document.getElementById('periodFilter');
-  const metricGroup = document.getElementById('metricFilter');
+  const modeGroup = document.getElementById("modeFilter");
+  const periodGroup = document.getElementById("periodFilter");
+  const metricGroup = document.getElementById("metricFilter");
 
-  modeGroup?.addEventListener('click', e => {
-    const pill = e.target.closest('.lb-pill');
+  modeGroup?.addEventListener("click", (e) => {
+    const pill = e.target.closest(".lb-pill");
     if (!pill) return;
-    filters.mode   = pill.dataset.value;
+    filters.mode = pill.dataset.value;
     filters.offset = 0;
     activatePill(modeGroup, filters.mode);
     loadLeaderboard();
   });
 
-  periodGroup?.addEventListener('click', e => {
-    const pill = e.target.closest('.lb-pill');
+  periodGroup?.addEventListener("click", (e) => {
+    const pill = e.target.closest(".lb-pill");
     if (!pill) return;
     filters.period = pill.dataset.value;
     filters.offset = 0;
@@ -331,8 +343,8 @@ function attachFilterListeners() {
     loadLeaderboard();
   });
 
-  metricGroup?.addEventListener('click', e => {
-    const pill = e.target.closest('.lb-pill');
+  metricGroup?.addEventListener("click", (e) => {
+    const pill = e.target.closest(".lb-pill");
     if (!pill) return;
     filters.metric = pill.dataset.value;
     filters.offset = 0;
@@ -340,27 +352,27 @@ function attachFilterListeners() {
     loadLeaderboard();
   });
 
-  document.getElementById('scopeFilter')?.addEventListener('click', e => {
-    const pill = e.target.closest('.lb-pill');
+  document.getElementById("scopeFilter")?.addEventListener("click", (e) => {
+    const pill = e.target.closest(".lb-pill");
     if (!pill) return;
-    filters.friendsOnly = pill.dataset.value === 'friends';
-    filters.offset      = 0;
-    activatePill(document.getElementById('scopeFilter'), pill.dataset.value);
+    filters.friendsOnly = pill.dataset.value === "friends";
+    filters.offset = 0;
+    activatePill(document.getElementById("scopeFilter"), pill.dataset.value);
     loadLeaderboard();
   });
 
   // Pagination
-  document.getElementById('lbPrevBtn')?.addEventListener('click', () => {
+  document.getElementById("lbPrevBtn")?.addEventListener("click", () => {
     if (filters.offset === 0) return;
     filters.offset = Math.max(0, filters.offset - PAGE_SIZE);
     loadLeaderboard();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
-  document.getElementById('lbNextBtn')?.addEventListener('click', () => {
+  document.getElementById("lbNextBtn")?.addEventListener("click", () => {
     filters.offset += PAGE_SIZE;
     loadLeaderboard();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
 }
 
@@ -368,7 +380,7 @@ function attachFilterListeners() {
 // POINT D'ENTRÉE
 // ─────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   if (window.__i18nReady) await window.__i18nReady;
 
   attachFilterListeners();

@@ -119,21 +119,27 @@ Perfect for both long-time fans and newcomers to the series!
 ## 🎯 Game Modes
 
 ### 🔍 Classic Mode
+
 Compare character traits—Arcana, gender, age, game, Persona, etc.—with color-coded feedback (colorblind-friendly mode available). Each guess brings you closer!
 
 ### 😀 Emoji Mode
+
 Decode a series of emojis that gradually appear. Use logic (and creativity) to link them to a character.
 
 ### ⚔️ All-Out Attack Mode
+
 A blurred battle animation reveals step by step. Identify the pose, costume, or attack pattern!
 
 ### 🖤 Shadow Mode
+
 A dark silhouette zooms out with each wrong guess. Test your visual memory!
 
 ### 👤 Personae Mode
+
 Identify which character uses a specific Persona. Perfect for Velvet Room veterans!
 
 ### 🎵 Music Mode
+
 Listen to short music clips and identify the character or theme. True fans will excel here!
 
 <details>
@@ -164,32 +170,38 @@ Listen to short music clips and identify the character or theme. True fans will 
 <summary><b>🚀 v2.0 - May 2026 (Latest)</b></summary>
 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
+
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
 - 20-table relational schema, 190+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
+
 - Friend system: search by pseudo or friend code, accept/decline, online status
 - **Social Link** system — ranks 1-10 (Stranger → True Confidant), XP gained via real interactions
 - True Confidant effect: pulsing golden halo + burst animation on rank 10
 - Friend request animations: Persona 4 TV style, Persona 3 Evoker style, Calling Card style
 
 ### 🏆 Leaderboard & Challenges
+
 - Leaderboard by mode × period (weekly / monthly / all-time), Global or Friends scope
 - Daily challenges between friends — send, accept, compare results
 - Notifications for challenge results and rank-ups
 
 ### 🎨 Profile Overhaul
+
 - **Profile card export**: PNG image, 8 themes, 25 wallpapers, one-click share on X / Discord / Email
 - Profile music: choose a Persona track that plays when friends visit your profile
 - 60+ badges (server-side unlock verification), titles/ranks, event codes
 
 ### 🌐 Internationalisation
+
 - 5 languages: EN · FR · ES · DE · IT (760 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
 ### 🛡️ Admin Panel
+
 - User moderation (ban accounts, lock pseudos)
 - Event codes CRUD (create, distribute, expire)
 - Stats dashboard per user
@@ -200,40 +212,47 @@ Listen to short music clips and identify the character or theme. True fans will 
 <summary><b>🎊 v1.1 - February 2026</b></summary>
 
 ### 🧧 Chinese New Year Event
+
 - **Limited-time All-Out Attack skins** celebrating the Lunar New Year
 - **Exclusive seasonal wallpaper** and event badges
 - Special rewards for discovering festive characters
 
 ### 🎭 Personae Mode - Expansion
+
 - **8+ new ultimate personas** from P2, P3, P4G, P5R, and P5 Tactica
 - **12 Picaro variants** - corrupted DLC personas join the roster
 - Complete persona collection spanning the entire series
 
 ### 👤 New Characters
+
 - Added **Persona 2 EP characters** to Classic, Emoji, and Silhouette modes
 - Added **Velvet Room attendants** Belladonna and Demon Painter
 - New **All-Out Attack skin** for Wonder
 - Special guest appearance in Silhouette Mode
 
 ### 🎵 Music Mode Expansion
+
 - **Persona 1 classics** make their debut
 - **Persona 5X tracks** from the mobile spinoff
 - **Persona Q & Q2 favorites** added to the jukebox
 - Enhanced **Velvet Room collection** with multiple Aria of the Soul versions
 
 ### 🖼️ Profile Sharing
+
 - **37 total wallpapers** now available across all Persona games
 - New additions from P1, P2, P3, P4, P5, and Q series
 - Iconic locations, character moments, and crossover artwork
 - Seasonal and special event wallpapers
 
 ### 🎖️ Badge Collection
+
 - **5+ new badges** added with hidden unlock conditions
 - Achievement badges for character discoveries
 - Secret badges for dedicated fans
 - Event-exclusive badges with limited-time codes
 
 ### 🎨 UI & Polish
+
 - Redesigned filter buttons and wallpaper selection interface
 - **Emoji Mode improvement**: Error history now shows character portraits
 - Consistent navigation across all game modes
@@ -247,34 +266,40 @@ Listen to short music clips and identify the character or theme. True fans will 
 <summary><b>🎄 v1.0 - December 2025</b></summary>
 
 ### 🎖️ Badge System
+
 - **19 unique badges** across 4 categories: Achievement, Event, Secret, and Social
 - **Track your progress** with badge counter (e.g., "12/19 unlocked")
 - **Showcase up to 4 badges** on your profile
 - Unlock through gameplay, seasonal events, or hidden secrets!
 
 ### 🖼️ Profile Sharing
+
 - **11+ custom wallpapers** featuring iconic Persona locations
 - Share your stats, badges, and achievements
 - Download as image or share directly on social media
 - Customize with profile pictures including new additions: Chidori, Tae, and Maruki
 
 ### 🔊 Sound Effects
+
 - Victory celebration sound on wins
 - Hover feedback on all interactive buttons
 - Enhanced immersion across all game modes
 
 ### 🌟 New Content
+
 - Added **Fuuka Yamagishi** to All-Out Attack mode
 - Added **Persona 5 Tactica characters**: Erina and Toshiro Kasukabe
 - Complete character data for all modes
 
 ### ⚡ Performance & Improvements
+
 - **All-Out Attack overhaul**: 66% faster load times, 40% less memory usage
 - Progressive image loading with WebP format via CDN
 - Smarter randomization to reduce character repetition
 - Smoother experience on all devices
 
 ### 🐞 Bug Fixes
+
 - Fixed Silhouette Mode image display issues
 - Fixed Emoji Mode daily reset not triggering correctly
 - Fixed Classic Mode data error (Yukino Mayuzumi opus)
@@ -296,6 +321,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 6. Use **Replay** to try again or **Give Up** to see the answer
 
 ### Features:
+
 - ✅ Smart autocompletion with character portraits
 - ✅ Persistent game filters (P1 to P5X)
 - ✅ Keyboard-friendly interface
@@ -339,15 +365,16 @@ npm test       → run all tests
 
 ### Browser Compatibility
 
-| Browser | Version | Status |
-|---------|---------|--------|
+| Browser | Version | Status                          |
+| ------- | ------- | ------------------------------- |
 | Chrome  | 90+     | ✅ Supported (Best performance) |
-| Firefox | 88+     | ✅ Supported |
-| Safari  | 14+     | ✅ Supported (iOS 14+) |
-| Edge    | 90+     | ✅ Supported |
-| Opera   | 76+     | ✅ Supported |
+| Firefox | 88+     | ✅ Supported                    |
+| Safari  | 14+     | ✅ Supported (iOS 14+)          |
+| Edge    | 90+     | ✅ Supported                    |
+| Opera   | 76+     | ✅ Supported                    |
 
 **Requirements:**
+
 - JavaScript enabled
 - LocalStorage enabled
 - 1280x720+ resolution recommended
@@ -373,30 +400,30 @@ Track your journey with comprehensive stats:
 
 ## 🗺️ Roadmap
 
-| Feature | Status | Contributor |
-|---------|--------|-------------|
-| All 6 Game Modes | ✅ Done | Hamza & Léo |
-| Badge System (60+ badges) | ✅ Done | Hamza |
-| Profile Sharing & Wallpapers | ✅ Done | Hamza |
-| Sound Effects | ✅ Done | Hamza |
-| Local Profiles & Stats | ✅ Done | Hamza |
-| Colorblind Mode | ✅ Done | Hamza |
-| Daily Reset System | ✅ Done | Hamza |
-| Filter Persistence | ✅ Done | Hamza |
-| Persona-style SVG UI | ✅ Done | Hamza |
-| Full Responsive Layout | ✅ Done | Damien & Hamza |
-| PHP Backend + MariaDB | ✅ Done | Hamza |
-| Cloud Sync (offline-first) | ✅ Done | Hamza |
-| Friends System + Social Link | ✅ Done | Hamza |
-| Leaderboard (mode/period) | ✅ Done | Hamza |
-| Daily Challenges | ✅ Done | Hamza |
-| Multi-language (EN/FR/ES/DE/IT) | ✅ Done | Hamza |
-| Profile Music | ✅ Done | Hamza |
-| Profile Card Export (PNG) | ✅ Done | Hamza |
-| Admin Panel | ✅ Done | Hamza |
-| 190 Unit Tests | ✅ Done | Hamza |
-| Mobile App (PWA) | 🔜 Planned | - |
-| Japanese (JP) translation | 🔜 Post-v2.0 | - |
+| Feature                         | Status       | Contributor    |
+| ------------------------------- | ------------ | -------------- |
+| All 6 Game Modes                | ✅ Done      | Hamza & Léo    |
+| Badge System (60+ badges)       | ✅ Done      | Hamza          |
+| Profile Sharing & Wallpapers    | ✅ Done      | Hamza          |
+| Sound Effects                   | ✅ Done      | Hamza          |
+| Local Profiles & Stats          | ✅ Done      | Hamza          |
+| Colorblind Mode                 | ✅ Done      | Hamza          |
+| Daily Reset System              | ✅ Done      | Hamza          |
+| Filter Persistence              | ✅ Done      | Hamza          |
+| Persona-style SVG UI            | ✅ Done      | Hamza          |
+| Full Responsive Layout          | ✅ Done      | Damien & Hamza |
+| PHP Backend + MariaDB           | ✅ Done      | Hamza          |
+| Cloud Sync (offline-first)      | ✅ Done      | Hamza          |
+| Friends System + Social Link    | ✅ Done      | Hamza          |
+| Leaderboard (mode/period)       | ✅ Done      | Hamza          |
+| Daily Challenges                | ✅ Done      | Hamza          |
+| Multi-language (EN/FR/ES/DE/IT) | ✅ Done      | Hamza          |
+| Profile Music                   | ✅ Done      | Hamza          |
+| Profile Card Export (PNG)       | ✅ Done      | Hamza          |
+| Admin Panel                     | ✅ Done      | Hamza          |
+| 190 Unit Tests                  | ✅ Done      | Hamza          |
+| Mobile App (PWA)                | 🔜 Planned   | -              |
+| Japanese (JP) translation       | 🔜 Post-v2.0 | -              |
 
 ---
 
@@ -440,6 +467,7 @@ Track your journey with comprehensive stats:
 ### 🌟 Special Thanks
 
 **Active Contributors:**
+
 - **Damien Nouvellon** - CSS restructuring and modularization for improved maintainability and responsive design preparation
 - **Dzulian** - Creative ideas and data accuracy for Persona 1 & 2 (Megami Ibunroku, IS, EP)
 
@@ -448,20 +476,24 @@ Track your journey with comprehensive stats:
 ## 🙏 Acknowledgments
 
 ### Inspiration
-- **[Smashdle](https://smashdle.net/)** by *Pimeko* - Original concept inspiration
+
+- **[Smashdle](https://smashdle.net/)** by _Pimeko_ - Original concept inspiration
 - **[Pokedle](https://github.com/maxm33/pokedle)** - Codebase reference
 
 ### Community
+
 - **Arati** ([@Arati](https://x.com/Arati)) - Community support and featuring PersonaDLE
 - **Discord Community** - Beta testing, bug reports, and endless feedback
 - **Reddit r/persona4golden** - Support and suggestions
 
 ### Contributors & Development
+
 - **Damien ( Corbover )** - CSS architecture restructuring and modularization
 - **Dzulian** - Creative ideas and data accuracy for classic Persona games (P1/P2)
 - All GitHub contributors who have helped improve the project
 
 ### Resources
+
 - **[Megami Tensei Wiki](https://megamitensei.fandom.com/)** - Character data and lore
 - **Atlus/SEGA** - For creating the incredible Persona universe
 - **Shoji Meguro** - For the unforgettable music
@@ -525,6 +557,7 @@ npm run i18n:check
 We're always looking for passionate contributors! Whether you're a developer, designer, or just a Persona fan with ideas, feel free to reach out.
 
 **Current Focus Areas:**
+
 - New game mode ideas
 - Performance optimization
 - Accessibility improvements

@@ -1,31 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personadle - Classic</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personadle - Classic</title>
 
-  <!-- Styles & Icon -->
-  <link rel="stylesheet" href="../css/global.css?v=9" />
-  <link rel="stylesheet" href="./classique.css?v=3" />
-  <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
-  <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
-  <link rel="stylesheet" href="../css/calling-card.css?v=2" />
-  <link rel="stylesheet" href="../css/challenge-banner.css">
-  <link rel="stylesheet" href="../css/challenge-result.css">
-  <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
-</head>
+    <!-- Styles & Icon -->
+    <link rel="stylesheet" href="../css/global.css?v=9" />
+    <link rel="stylesheet" href="./classique.css?v=3" />
+    <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
+    <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="../css/calling-card.css?v=2" />
+    <link rel="stylesheet" href="../css/challenge-banner.css" />
+    <link rel="stylesheet" href="../css/challenge-result.css" />
+    <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
+  </head>
 
-<body>
-  <!-- Logo en haut de la page, cliquable pour revenir à l'accueil -->
-  <header id="homepage">
-    <a href="../index.html">
-      <img src="../img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage" />
-    </a>
-  </header>
+  <body>
+    <!-- Logo en haut de la page, cliquable pour revenir à l'accueil -->
+    <header id="homepage">
+      <a href="../index.html">
+        <img
+          src="../img/Logo_PersonaDLE.png"
+          alt="PersonaDLE Logo"
+          class="logo_HomePage"
+          id="imgHomePage"
+        />
+      </a>
+    </header>
 
-  <!-- Boutons pour filtrer les personnages par opus (P3, P4, P5) -->
-<!-- =====================================================
+    <!-- Boutons pour filtrer les personnages par opus (P3, P4, P5) -->
+    <!-- =====================================================
      FILTRE OPUS — Panneau déroulant
      Bouton "FILTRES" (Persona style) ouvre/ferme le panneau.
      Chaque logo de jeu est cliquable :
@@ -34,557 +39,754 @@
        • P3/P4/P5/PQ → sous-opus déroulants au clic
      Géré par js/filterMenu.js + css/filterMenu.css
      ===================================================== -->
-<div class="filter-panel" id="filterPanel">
-  <button class="filter-toggle-btn" id="filterToggleBtn"
-          aria-expanded="false" aria-controls="filterDropdown">
-    <span class="filter-toggle-icon">⚙</span>
-    <span class="filter-toggle-text">FILTRES</span>
-    <span class="filter-toggle-arrow">▼</span>
-  </button>
-  <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
-
-    <!-- Persona 1 — filtre direct -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p1 active"
-              data-opus="P1" aria-label="Persona 1">
-        <img src="../img/logo_jeu/Persona_PSP_logo.png" alt="Persona 1" class="filter-logo">
+    <div class="filter-panel" id="filterPanel">
+      <button
+        class="filter-toggle-btn"
+        id="filterToggleBtn"
+        aria-expanded="false"
+        aria-controls="filterDropdown"
+      >
+        <span class="filter-toggle-icon">⚙</span>
+        <span class="filter-toggle-text">FILTRES</span>
+        <span class="filter-toggle-arrow">▼</span>
       </button>
-    </div>
-    <!-- Persona 2 — IS et EP toujours visibles (auto-expand) -->
-    <div class="filter-group">
-      <span class="filter-group-auto-label">Persona 2</span>
-      <div class="filter-sub-panel expanded" data-group-panel="P2">
-        <button class="filter-sub-btn filter-color-p2is active"
-                data-opus="P2IS" aria-label="P2 Innocent Sin">
-          <img src="../img/logo_jeu/Persona_2_IS_PSP_logo.png" alt="P2IS" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p2ep active"
-                data-opus="P2EP" aria-label="P2 Eternal Punishment">
-          <img src="../img/logo_jeu/Persona_2_EP_PSP_logo.png" alt="P2EP" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-    <!-- Persona 3 — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p3 active"
-              data-opus-group="P3" data-opus-codes="P3,P3FES,P3P,P3R"
-              aria-expanded="false" aria-label="Persona 3">
-        <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="Persona 3" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="P3">
-        <button class="filter-sub-btn filter-color-p3 active"
-                data-opus="P3" aria-label="Persona 3 / Reload">
-          <img src="../img/logo_jeu/Persona_3_Logo.webp" alt="P3" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p3fes active"
-                data-opus="P3FES" aria-label="Persona 3 FES">
-          <img src="../img/logo_jeu/Persona_3_FES_Logo.webp" alt="P3FES" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p3p active"
-                data-opus="P3P" aria-label="Persona 3 Portable">
-          <img src="../img/logo_jeu/Persona_3_Portable_Logo.webp" alt="P3P" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p3r active"
-                data-opus="P3R" aria-label="Persona 3 Reload">
-          <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="P3R" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-    <!-- Persona 4 — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p4 active"
-              data-opus-group="P4" data-opus-codes="P4,P4G,P4AU,P4D"
-              aria-expanded="false" aria-label="Persona 4">
-        <img src="../img/logo_jeu/Persona_4_Logo.png" alt="Persona 4" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="P4">
-        <button class="filter-sub-btn filter-color-p4 active"
-                data-opus="P4" aria-label="Persona 4">
-          <img src="../img/logo_jeu/Persona_4_Logo.png" alt="P4" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p4g active"
-                data-opus="P4G" aria-label="Persona 4 Golden">
-          <img src="../img/logo_jeu/Persona_4_Golden_logo.webp" alt="P4G" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p4au active"
-                data-opus="P4AU" aria-label="Persona 4 Arena Ultimax">
-          <img src="../img/logo_jeu/Persona_4_Arena_Ultimax_Logo.png" alt="P4AU" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p4d active"
-                data-opus="P4D" aria-label="Persona 4 Dancing All Night">
-          <img src="../img/logo_jeu/Persona_4_Dancing_All_Night_Logo.png" alt="P4D" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-    <!-- Persona 5 — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p5 active"
-              data-opus-group="P5" data-opus-codes="P5,P5R,P5S,P5T"
-              aria-expanded="false" aria-label="Persona 5">
-        <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="P5">
-        <button class="filter-sub-btn filter-color-p5 active"
-                data-opus="P5" aria-label="Persona 5">
-          <img src="../img/logo_jeu/Persona_5_logo.png" alt="P5" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p5r active"
-                data-opus="P5R" aria-label="Persona 5 Royal">
-          <img src="../img/logo_jeu/Persona_5_Royal_Logo.png" alt="P5R" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p5s active"
-                data-opus="P5S" aria-label="Persona 5 Strikers">
-          <img src="../img/logo_jeu/Persona_5_Strikers.png" alt="P5S" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p5t active"
-                data-opus="P5T" aria-label="Persona 5 Tactica">
-          <img src="../img/logo_jeu/Persona_5_Tactica_Logo.png" alt="P5T" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-    <!-- Persona 5X — filtre direct -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p5x active"
-              data-opus="P5X" aria-label="Persona 5X">
-        <img src="../img/logo_jeu/Persona_5_The_Phantom_X_Logo.png" alt="Persona 5X" class="filter-logo">
-      </button>
-    </div>
-    <!-- Persona Q — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-pq active"
-              data-opus-group="PQ" data-opus-codes="PQ,PQ2"
-              aria-expanded="false" aria-label="Persona Q">
-        <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="Persona Q" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="PQ">
-        <button class="filter-sub-btn filter-color-pq active"
-                data-opus="PQ" aria-label="Persona Q">
-          <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="PQ" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-pq2 active"
-                data-opus="PQ2" aria-label="Persona Q2">
-          <img src="../img/logo_jeu/Persona_Q2_Logo.png" alt="PQ2" class="filter-sub-logo">
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-  <button id="daltonianToggle">Daltonian Mode: OFF</button>
-
-  <!-- Fenêtre modale affichant les règles du mode classique -->
-  <!-- Fenêtre modale affichant les règles du mode classique -->
-<div id="rulesModal" class="modal" style="display: none;">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2 data-i18n="modes.classic.rules_title">📋 Classic Mode Rules</h2>
-
-    <div data-i18n-block="en">
-      <p id="rulesText">
-        <strong>🎯 Goal:</strong><br>
-        Guess the Persona character of the day using deduction and clues 🧩🕵️.
-
-        <hr class="separator" />
-
-        <strong>🧠 How it works:</strong>
-        <ul>
-          <li>🔍 Each attempt shows how close your guess is to the correct character.</li>
-          <li>📊 A grid compares multiple attributes like name, gender, age, arcana, etc.</li>
-          <li>🟩 Green = correct, 🟨 Yellow = partial match, 🟥 Red = wrong.</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>📊 Criteria compared:</strong>
-        <ul>
-          <li>👤 <strong>Name</strong> – Exact match required</li>
-          <li>⚧️ <strong>Gender</strong> – Human, Shadow, Entity, etc.</li>
-          <li>🎂 <strong>Age</strong> – Range (e.g. &lt;15, 15–20, 40+)</li>
-          <li>💥 <strong>Persona User / Shadow</strong> – Can they use a Persona or are they a Shadow?</li>
-          <li>👺 <strong>Persona</strong> – The specific Persona or Shadow form</li>
-          <li>🃏 <strong>Arcana</strong> – Their Tarot Arcana (Fool, Magician, etc.)</li>
-          <li>🎮 <strong>Opus</strong> – Which Persona games they appear in</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>💡 Tips:</strong>
-        <ul>
-          <li>🧠 Use deduction based on color-coded clues.</li>
-          <li>📈 If the age isn’t exact, an arrow ↑ or ↓ appears.</li>
-          <li>🟨 Yellow means partial match (e.g. some Arcana or one of several Opus).</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>♿ Accessibility:</strong>
-        <ul>
-          <li>🌈 <strong>Daltonian Mode</strong> – A toggleable option replaces red/green/yellow with colorblind-friendly shades <em>and</em> adds symbols (✔, ▲, ✖) for better clarity.</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>🎮 Game flow:</strong>
-        <ul>
-          <li>⌨️ Type a name and select from suggestions.</li>
-          <li>🔁 You have <strong>8 attempts</strong> max.</li>
-          <li>💬 At 3 attempts: 🔓 Hint button unlocks (displays a quote).</li>
-          <li>❌ At 8 attempts: 🔓 Give Up button unlocks (reveals the answer).</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>🛡️ Spoiler protection:</strong>
-        <p>
-          🕹️ Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>, <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>)
-          to limit characters by game.<br>
-          👀 This helps avoid spoilers if you haven’t played them all!
-        </p>
-
-        <hr class="separator" />
-        <em>🎭 Think like a Phantom Thief... and unveil the truth!</em>
-      </p>
-    </div>
-
-    <div data-i18n-block="fr">
-      <p id="rulesText">
-        <strong>🎯 Objectif :</strong><br>
-        Devinez le personnage Persona du jour grâce à la déduction et aux indices 🧩🕵️.
-
-        <hr class="separator" />
-
-        <strong>🧠 Comment ça marche :</strong>
-        <ul>
-          <li>Chaque tentative montre à quel point votre réponse se rapproche du personnage correct.</li>
-          <li>Une grille compare plusieurs attributs : jeu, genre, âge, arcane, etc.</li>
-          <li>🟩 Vert = correct, 🟨 Jaune = correspondance partielle, 🟥 Rouge = faux.</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>📊 Critères comparés :</strong>
-        <ul>
-          <li>⚧️ <strong>Genre</strong> – Humain, Shadow, Entité, etc.</li>
-          <li>🎂 <strong>Âge</strong> – Tranche d’âge (ex : &lt;15, 15–20, 40+)</li>
-          <li>💥 <strong>Utilisateur de Persona / Shadow</strong> – Peut-il invoquer un Persona ou est-il un Shadow ?</li>
-          <li>👺 <strong>Persona</strong> – Le Persona ou la forme Shadow spécifique</li>
-          <li>🃏 <strong>Arcane</strong> – L’Arcane du Tarot (Fou, Magicien, etc.)</li>
-          <li>🎮 <strong>Opus</strong> – Dans quel(s) jeu(x) Persona ce personnage apparaît</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>💡 Conseils :</strong>
-        <ul>
-          <li>🧠 Utilisez la déduction grâce aux indices colorés.</li>
-          <li>📈 Si l’âge n’est pas exact, une flèche ↑ ou ↓ apparaît.</li>
-          <li>🟨 Le jaune signifie une correspondance partielle (ex : même série mais jeu différent).</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>♿ Accessibilité :</strong>
-        <ul>
-          <li>🌈 <strong>Mode Daltonien</strong> – Remplace le rouge/vert/jaune par des teintes adaptées et ajoute des symboles (✔, ▲, ✖) pour plus de clarté.</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>🎮 Déroulement :</strong>
-        <ul>
-          <li>⌨️ Tapez un nom et sélectionnez dans les suggestions.</li>
-          <li>🔁 Vous avez <strong>8 tentatives</strong> maximum.</li>
-          <li>💬 À 3 tentatives : 🔓 L’indice se déverrouille (affiche une citation).</li>
-          <li>❌ À 8 tentatives : 🔓 Abandonner se déverrouille (révèle la réponse).</li>
-        </ul>
-
-        <hr class="separator" />
-
-        <strong>🛡️ Protection anti-spoilers :</strong>
-        <p>
-          🕹️ Utilisez les filtres pour limiter les personnages par jeu.<br>
-          👀 Cela évite les spoilers si vous n’avez pas encore joué à tous les jeux !
-        </p>
-
-        <hr class="separator" />
-        <em>🎭 Pensez comme un Phantom Thief... et dévoilez la vérité !</em>
-      </p>
-    </div>
-
-  </div>
-</div>
-
-
-  <!-- Boîte de présentation principale avec bouton pour afficher les règles -->
-  <div class="personadle-box">
-    <!-- Bouton image pour ouvrir la modale des règles (en haut à droite) -->
-    <div style="position: absolute; top: -40px; right: -95px;">
-      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button">
-        <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
-          <img class="active" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
+      <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
+        <!-- Persona 1 — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p1 active"
+            data-opus="P1"
+            aria-label="Persona 1"
+          >
+            <img src="../img/logo_jeu/Persona_PSP_logo.png" alt="Persona 1" class="filter-logo" />
+          </button>
         </div>
-        <div class="shape-wrapper">
-          <!-- Formes SVG décoratives -->
-          <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-              <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/>
-            </svg>
+        <!-- Persona 2 — IS et EP toujours visibles (auto-expand) -->
+        <div class="filter-group">
+          <span class="filter-group-auto-label">Persona 2</span>
+          <div class="filter-sub-panel expanded" data-group-panel="P2">
+            <button
+              class="filter-sub-btn filter-color-p2is active"
+              data-opus="P2IS"
+              aria-label="P2 Innocent Sin"
+            >
+              <img
+                src="../img/logo_jeu/Persona_2_IS_PSP_logo.png"
+                alt="P2IS"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p2ep active"
+              data-opus="P2EP"
+              aria-label="P2 Eternal Punishment"
+            >
+              <img
+                src="../img/logo_jeu/Persona_2_EP_PSP_logo.png"
+                alt="P2EP"
+                class="filter-sub-logo"
+              />
+            </button>
           </div>
-          <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-              <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/>
-            </svg>
+        </div>
+        <!-- Persona 3 — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p3 active"
+            data-opus-group="P3"
+            data-opus-codes="P3,P3FES,P3P,P3R"
+            aria-expanded="false"
+            aria-label="Persona 3"
+          >
+            <img
+              src="../img/logo_jeu/Persona_3_Reload_logo.png"
+              alt="Persona 3"
+              class="filter-logo"
+            />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="P3">
+            <button
+              class="filter-sub-btn filter-color-p3 active"
+              data-opus="P3"
+              aria-label="Persona 3 / Reload"
+            >
+              <img src="../img/logo_jeu/Persona_3_Logo.webp" alt="P3" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p3fes active"
+              data-opus="P3FES"
+              aria-label="Persona 3 FES"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_FES_Logo.webp"
+                alt="P3FES"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p3p active"
+              data-opus="P3P"
+              aria-label="Persona 3 Portable"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_Portable_Logo.webp"
+                alt="P3P"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p3r active"
+              data-opus="P3R"
+              aria-label="Persona 3 Reload"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_Reload_logo.png"
+                alt="P3R"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 4 — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p4 active"
+            data-opus-group="P4"
+            data-opus-codes="P4,P4G,P4AU,P4D"
+            aria-expanded="false"
+            aria-label="Persona 4"
+          >
+            <img src="../img/logo_jeu/Persona_4_Logo.png" alt="Persona 4" class="filter-logo" />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="P4">
+            <button
+              class="filter-sub-btn filter-color-p4 active"
+              data-opus="P4"
+              aria-label="Persona 4"
+            >
+              <img src="../img/logo_jeu/Persona_4_Logo.png" alt="P4" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p4g active"
+              data-opus="P4G"
+              aria-label="Persona 4 Golden"
+            >
+              <img
+                src="../img/logo_jeu/Persona_4_Golden_logo.webp"
+                alt="P4G"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p4au active"
+              data-opus="P4AU"
+              aria-label="Persona 4 Arena Ultimax"
+            >
+              <img
+                src="../img/logo_jeu/Persona_4_Arena_Ultimax_Logo.png"
+                alt="P4AU"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p4d active"
+              data-opus="P4D"
+              aria-label="Persona 4 Dancing All Night"
+            >
+              <img
+                src="../img/logo_jeu/Persona_4_Dancing_All_Night_Logo.png"
+                alt="P4D"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 5 — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p5 active"
+            data-opus-group="P5"
+            data-opus-codes="P5,P5R,P5S,P5T"
+            aria-expanded="false"
+            aria-label="Persona 5"
+          >
+            <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo" />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="P5">
+            <button
+              class="filter-sub-btn filter-color-p5 active"
+              data-opus="P5"
+              aria-label="Persona 5"
+            >
+              <img src="../img/logo_jeu/Persona_5_logo.png" alt="P5" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p5r active"
+              data-opus="P5R"
+              aria-label="Persona 5 Royal"
+            >
+              <img
+                src="../img/logo_jeu/Persona_5_Royal_Logo.png"
+                alt="P5R"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p5s active"
+              data-opus="P5S"
+              aria-label="Persona 5 Strikers"
+            >
+              <img src="../img/logo_jeu/Persona_5_Strikers.png" alt="P5S" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p5t active"
+              data-opus="P5T"
+              aria-label="Persona 5 Tactica"
+            >
+              <img
+                src="../img/logo_jeu/Persona_5_Tactica_Logo.png"
+                alt="P5T"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 5X — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p5x active"
+            data-opus="P5X"
+            aria-label="Persona 5X"
+          >
+            <img
+              src="../img/logo_jeu/Persona_5_The_Phantom_X_Logo.png"
+              alt="Persona 5X"
+              class="filter-logo"
+            />
+          </button>
+        </div>
+        <!-- Persona Q — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-pq active"
+            data-opus-group="PQ"
+            data-opus-codes="PQ,PQ2"
+            aria-expanded="false"
+            aria-label="Persona Q"
+          >
+            <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="Persona Q" class="filter-logo" />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="PQ">
+            <button
+              class="filter-sub-btn filter-color-pq active"
+              data-opus="PQ"
+              aria-label="Persona Q"
+            >
+              <img src="../img/logo_jeu/Persona_Q_Logo.png" alt="PQ" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-pq2 active"
+              data-opus="PQ2"
+              aria-label="Persona Q2"
+            >
+              <img src="../img/logo_jeu/Persona_Q2_Logo.png" alt="PQ2" class="filter-sub-logo" />
+            </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Titre et texte d’introduction -->
-    <h1 data-i18n="modes.classic.title">Guess today’s Persona character!</h1>
-    <p data-i18n="modes.classic.subtitle">Type any character to start.</p>
-  </div>
+    <button id="daltonianToggle">Daltonian Mode: OFF</button>
 
-  <!-- Zone où s'affiche l'indice (citation) si débloqué -->
-  <p id="quoteHint" style="display:none;"></p>
+    <!-- Fenêtre modale affichant les règles du mode classique -->
+    <!-- Fenêtre modale affichant les règles du mode classique -->
+    <div id="rulesModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 data-i18n="modes.classic.rules_title">📋 Classic Mode Rules</h2>
 
-  <!-- Ligne contenant les boutons Hint et Give Up -->
-  <div class="hint-giveup-row">
-    <!-- Bloc pour demander un indice -->
-    <div class="hint-block">
-      <div class="link-wrapper" id="hintButton">
-        <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/EN/Hint_Button.webp" alt="Hint" style="height: 100px;">
-          <img class="active" src="../assets/buttons/EN/Hint_Button_Rouge.webp" alt="Hint" style="height: 100px;">
-        </div>
-        <div class="shape-wrapper">
-          <!-- Formes SVG décoratives -->
-          <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-              <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/>
-            </svg>
+        <div data-i18n-block="en">
+          <div id="rulesText">
+            <strong>🎯 Goal:</strong><br />
+            Guess the Persona character of the day using deduction and clues 🧩🕵️.
+
+            <hr class="separator" />
+
+            <strong>🧠 How it works:</strong>
+            <ul>
+              <li>🔍 Each attempt shows how close your guess is to the correct character.</li>
+              <li>📊 A grid compares multiple attributes like name, gender, age, arcana, etc.</li>
+              <li>🟩 Green = correct, 🟨 Yellow = partial match, 🟥 Red = wrong.</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>📊 Criteria compared:</strong>
+            <ul>
+              <li>👤 <strong>Name</strong> – Exact match required</li>
+              <li>⚧️ <strong>Gender</strong> – Human, Shadow, Entity, etc.</li>
+              <li>🎂 <strong>Age</strong> – Range (e.g. &lt;15, 15–20, 40+)</li>
+              <li>
+                💥 <strong>Persona User / Shadow</strong> – Can they use a Persona or are they a
+                Shadow?
+              </li>
+              <li>👺 <strong>Persona</strong> – The specific Persona or Shadow form</li>
+              <li>🃏 <strong>Arcana</strong> – Their Tarot Arcana (Fool, Magician, etc.)</li>
+              <li>🎮 <strong>Opus</strong> – Which Persona games they appear in</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>💡 Tips:</strong>
+            <ul>
+              <li>🧠 Use deduction based on color-coded clues.</li>
+              <li>📈 If the age isn’t exact, an arrow ↑ or ↓ appears.</li>
+              <li>🟨 Yellow means partial match (e.g. some Arcana or one of several Opus).</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>♿ Accessibility:</strong>
+            <ul>
+              <li>
+                🌈 <strong>Daltonian Mode</strong> – A toggleable option replaces red/green/yellow
+                with colorblind-friendly shades <em>and</em> adds symbols (✔, ▲, ✖) for better
+                clarity.
+              </li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>🎮 Game flow:</strong>
+            <ul>
+              <li>⌨️ Type a name and select from suggestions.</li>
+              <li>🔁 You have <strong>8 attempts</strong> max.</li>
+              <li>💬 At 3 attempts: 🔓 Hint button unlocks (displays a quote).</li>
+              <li>❌ At 8 attempts: 🔓 Give Up button unlocks (reveals the answer).</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>🛡️ Spoiler protection:</strong>
+            <p>
+              🕹️ Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>,
+              <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>)
+              to limit characters by game.<br />
+              👀 This helps avoid spoilers if you haven’t played them all!
+            </p>
+
+            <hr class="separator" />
+            <em>🎭 Think like a Phantom Thief... and unveil the truth!</em>
           </div>
-          <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-              <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/>
-            </svg>
+        </div>
+
+        <div data-i18n-block="fr">
+          <div id="rulesText">
+            <strong>🎯 Objectif :</strong><br />
+            Devinez le personnage Persona du jour grâce à la déduction et aux indices 🧩🕵️.
+
+            <hr class="separator" />
+
+            <strong>🧠 Comment ça marche :</strong>
+            <ul>
+              <li>
+                Chaque tentative montre à quel point votre réponse se rapproche du personnage
+                correct.
+              </li>
+              <li>Une grille compare plusieurs attributs : jeu, genre, âge, arcane, etc.</li>
+              <li>🟩 Vert = correct, 🟨 Jaune = correspondance partielle, 🟥 Rouge = faux.</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>📊 Critères comparés :</strong>
+            <ul>
+              <li>⚧️ <strong>Genre</strong> – Humain, Shadow, Entité, etc.</li>
+              <li>🎂 <strong>Âge</strong> – Tranche d’âge (ex : &lt;15, 15–20, 40+)</li>
+              <li>
+                💥 <strong>Utilisateur de Persona / Shadow</strong> – Peut-il invoquer un Persona ou
+                est-il un Shadow ?
+              </li>
+              <li>👺 <strong>Persona</strong> – Le Persona ou la forme Shadow spécifique</li>
+              <li>🃏 <strong>Arcane</strong> – L’Arcane du Tarot (Fou, Magicien, etc.)</li>
+              <li>🎮 <strong>Opus</strong> – Dans quel(s) jeu(x) Persona ce personnage apparaît</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>💡 Conseils :</strong>
+            <ul>
+              <li>🧠 Utilisez la déduction grâce aux indices colorés.</li>
+              <li>📈 Si l’âge n’est pas exact, une flèche ↑ ou ↓ apparaît.</li>
+              <li>
+                🟨 Le jaune signifie une correspondance partielle (ex : même série mais jeu
+                différent).
+              </li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>♿ Accessibilité :</strong>
+            <ul>
+              <li>
+                🌈 <strong>Mode Daltonien</strong> – Remplace le rouge/vert/jaune par des teintes
+                adaptées et ajoute des symboles (✔, ▲, ✖) pour plus de clarté.
+              </li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>🎮 Déroulement :</strong>
+            <ul>
+              <li>⌨️ Tapez un nom et sélectionnez dans les suggestions.</li>
+              <li>🔁 Vous avez <strong>8 tentatives</strong> maximum.</li>
+              <li>💬 À 3 tentatives : 🔓 L’indice se déverrouille (affiche une citation).</li>
+              <li>❌ À 8 tentatives : 🔓 Abandonner se déverrouille (révèle la réponse).</li>
+            </ul>
+
+            <hr class="separator" />
+
+            <strong>🛡️ Protection anti-spoilers :</strong>
+            <p>
+              🕹️ Utilisez les filtres pour limiter les personnages par jeu.<br />
+              👀 Cela évite les spoilers si vous n’avez pas encore joué à tous les jeux !
+            </p>
+
+            <hr class="separator" />
+            <em>🎭 Pensez comme un Phantom Thief... et dévoilez la vérité !</em>
           </div>
         </div>
       </div>
-      <!-- Compteur d'indices utilisés -->
-      <span id="hintCounter" class="counter">(0 / 3)</span>
     </div>
 
-    <!-- Bloc pour abandonner et révéler la réponse -->
-    <div class="giveup-block">
-      <div class="link-wrapper" id="giveUpButton">
-        <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/EN/Give-up_Button.webp" alt="Give Up" style="height: 100px;">
-          <img class="active" src="../assets/buttons/EN/Give-up_Button_Rouge.webp" alt="Give Up" style="height: 100px;">
-        </div>
-        <div class="shape-wrapper">
-          <!-- Formes SVG décoratives -->
-          <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-              <polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40"/>
-            </svg>
-          </div>
-          <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-              <polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-      <!-- Compteur d'abandons -->
-      <span id="giveUpCounter" class="counter">(0 / 3)</span>
-    </div>
-  </div>
-
-  <!-- Section pour la saisie de la réponse et les boutons associés -->
-  <section class="input-wrapper">
-    <div class="input-row">
-
-      <!-- Bouton pour recommencer la partie (à gauche) -->
-      <div class="button-left">
-        <div class="link-wrapper" id="resetButton">
+    <!-- Boîte de présentation principale avec bouton pour afficher les règles -->
+    <div class="personadle-box">
+      <!-- Bouton image pour ouvrir la modale des règles (en haut à droite) -->
+      <div style="position: absolute; top: -40px; right: -95px">
+        <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button">
           <div class="img-wrapper">
-            <img class="normal" src="../assets/buttons/EN/Replay_Button.webp" alt="Replay" style="height: 90px;">
-            <img class="active" src="../assets/buttons/EN/Replay_Button_Rouge.webp" alt="Replay" style="height: 90px;">
+            <img
+              class="normal"
+              src="../assets/buttons/point_interrogation.webp"
+              alt="Rules"
+              style="height: 100px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/point_interrogation.webp"
+              alt="Rules"
+              style="height: 100px"
+            />
           </div>
           <div class="shape-wrapper">
             <!-- Formes SVG décoratives -->
             <div class="shape red-fill jelly">
               <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-                <polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42"/>
+                <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45" />
               </svg>
             </div>
             <div class="shape cyan-fill jelly">
               <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-                <polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35"/>
+                <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35" />
               </svg>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Champ de saisie du nom du personnage (au centre) -->
-      <div class="textbar-container">
-        <input
-          type="text"
-          id="textbar"
-          placeholder="Enter character name..." data-i18n-placeholder="ui.input_placeholder"
-          aria-label="Guess character name"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-        />
-      </div>
+      <!-- Titre et texte d’introduction -->
+      <h1 data-i18n="modes.classic.title">Guess today’s Persona character!</h1>
+      <p data-i18n="modes.classic.subtitle">Type any character to start.</p>
+    </div>
 
-      <!-- Bouton pour valider la réponse (à droite) -->
-      <div class="button-right">
-        <div class="link-wrapper" id="guessButton">
+    <!-- Zone où s'affiche l'indice (citation) si débloqué -->
+    <p id="quoteHint" style="display: none"></p>
+
+    <!-- Ligne contenant les boutons Hint et Give Up -->
+    <div class="hint-giveup-row">
+      <!-- Bloc pour demander un indice -->
+      <div class="hint-block">
+        <div class="link-wrapper" id="hintButton">
           <div class="img-wrapper">
-            <img class="normal" src="../assets/buttons/EN/Submit_Button.webp" alt="Submit" style="height: 90px;">
-            <img class="active" src="../assets/buttons/EN/Submit_Button_Rouge.webp" alt="Submit" style="height: 90px;">
+            <img
+              class="normal"
+              src="../assets/buttons/EN/Hint_Button.webp"
+              alt="Hint"
+              style="height: 100px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/EN/Hint_Button_Rouge.webp"
+              alt="Hint"
+              style="height: 100px"
+            />
           </div>
           <div class="shape-wrapper">
             <!-- Formes SVG décoratives -->
             <div class="shape red-fill jelly">
               <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-                <polygon fill="#FF0000" points="12,5 108,0 98,35 10,40"/>
+                <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45" />
               </svg>
             </div>
             <div class="shape cyan-fill jelly">
               <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-                <polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38"/>
+                <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35" />
               </svg>
             </div>
           </div>
         </div>
+        <!-- Compteur d'indices utilisés -->
+        <span id="hintCounter" class="counter">(0 / 3)</span>
+      </div>
+
+      <!-- Bloc pour abandonner et révéler la réponse -->
+      <div class="giveup-block">
+        <div class="link-wrapper" id="giveUpButton">
+          <div class="img-wrapper">
+            <img
+              class="normal"
+              src="../assets/buttons/EN/Give-up_Button.webp"
+              alt="Give Up"
+              style="height: 100px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/EN/Give-up_Button_Rouge.webp"
+              alt="Give Up"
+              style="height: 100px"
+            />
+          </div>
+          <div class="shape-wrapper">
+            <!-- Formes SVG décoratives -->
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                <polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40" />
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                <polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38" />
+              </svg>
+            </div>
+          </div>
+        </div>
+        <!-- Compteur d'abandons -->
+        <span id="giveUpCounter" class="counter">(0 / 3)</span>
       </div>
     </div>
 
-    <!-- Liste déroulante pour l'autocomplétion des noms -->
-    <ul id="autocompleteList" class="autocomplete-items" style="margin-top: 10px;"></ul>
-  </section>
+    <!-- Section pour la saisie de la réponse et les boutons associés -->
+    <section class="input-wrapper">
+      <div class="input-row">
+        <!-- Bouton pour recommencer la partie (à gauche) -->
+        <div class="button-left">
+          <div class="link-wrapper" id="resetButton">
+            <div class="img-wrapper">
+              <img
+                class="normal"
+                src="../assets/buttons/EN/Replay_Button.webp"
+                alt="Replay"
+                style="height: 90px"
+              />
+              <img
+                class="active"
+                src="../assets/buttons/EN/Replay_Button_Rouge.webp"
+                alt="Replay"
+                style="height: 90px"
+              />
+            </div>
+            <div class="shape-wrapper">
+              <!-- Formes SVG décoratives -->
+              <div class="shape red-fill jelly">
+                <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                  <polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42" />
+                </svg>
+              </div>
+              <div class="shape cyan-fill jelly">
+                <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                  <polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <!-- Zone d'affichage des résultats des tentatives -->
-  <div id="output" style="margin-top: 30px;"></div>
-  <div id="victoryBox" style="display:none;"></div>
+        <!-- Champ de saisie du nom du personnage (au centre) -->
+        <div class="textbar-container">
+          <input
+            type="text"
+            id="textbar"
+            placeholder="Enter character name..."
+            data-i18n-placeholder="ui.input_placeholder"
+            aria-label="Guess character name"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+        </div>
 
-  <!-- Script principal du mode classique -->
-  <!-- i18n — init traductions au chargement -->
-<script type="module">
-import { initLang } from '../js/i18n.js';
-window.__i18nReady = initLang();
-</script>
-  <script type="module" src="./modeClassique.js?v=3"></script>
+        <!-- Bouton pour valider la réponse (à droite) -->
+        <div class="button-right">
+          <div class="link-wrapper" id="guessButton">
+            <div class="img-wrapper">
+              <img
+                class="normal"
+                src="../assets/buttons/EN/Submit_Button.webp"
+                alt="Submit"
+                style="height: 90px"
+              />
+              <img
+                class="active"
+                src="../assets/buttons/EN/Submit_Button_Rouge.webp"
+                alt="Submit"
+                style="height: 90px"
+              />
+            </div>
+            <div class="shape-wrapper">
+              <!-- Formes SVG décoratives -->
+              <div class="shape red-fill jelly">
+                <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                  <polygon fill="#FF0000" points="12,5 108,0 98,35 10,40" />
+                </svg>
+              </div>
+              <div class="shape cyan-fill jelly">
+                <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                  <polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <!-- Bouton Mode Sombre -->
-<div class="darkmode-toggle">
-  <label class="switch">
-    <input type="checkbox" id="darkModeToggle">
-    <span class="slider round"></span>
-  </label>
-  <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
-</div>
+      <!-- Liste déroulante pour l'autocomplétion des noms -->
+      <ul id="autocompleteList" class="autocomplete-items" style="margin-top: 10px"></ul>
+    </section>
 
-<!-- Script intégré -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const toggle = document.getElementById("darkModeToggle");
-    const savedMode = localStorage.getItem("darkMode");
-    if (savedMode === "enabled") {
-      document.body.classList.add("darkmode");
-      toggle.checked = true;
-    }
+    <!-- Zone d'affichage des résultats des tentatives -->
+    <div id="output" style="margin-top: 30px"></div>
+    <div id="victoryBox" style="display: none"></div>
 
-    toggle.addEventListener("change", () => {
-      if (toggle.checked) {
-        document.body.classList.add("darkmode");
-        localStorage.setItem("darkMode", "enabled");
-      } else {
-        document.body.classList.remove("darkmode");
-        localStorage.setItem("darkMode", "disabled");
-      }
-    });
-  });
-</script>
+    <!-- Script principal du mode classique -->
+    <!-- i18n — init traductions au chargement -->
+    <script type="module">
+      import { initLang } from "../js/i18n.js";
+      window.__i18nReady = initLang();
+    </script>
+    <script type="module" src="./modeClassique.js?v=3"></script>
 
+    <!-- Bouton Mode Sombre -->
+    <div class="darkmode-toggle">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+    </div>
 
+    <!-- Script intégré -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggle = document.getElementById("darkModeToggle");
+        const savedMode = localStorage.getItem("darkMode");
+        if (savedMode === "enabled") {
+          document.body.classList.add("darkmode");
+          toggle.checked = true;
+        }
 
-<div id="modeNavigationContainer" style="display: none; margin-top: 40px; margin-bottom: 40px; justify-content: space-between; align-items: center;">
-  <div id="prevModeButton" class="nav-button prev-mode" style="visibility: hidden;">
-    ← Mode Précédent
-  </div>
-  <div id="nextModeButton" class="nav-button next-mode">
-    Emoji Mode →
-  </div>
-</div>
-
-<script>
-  // Son de hover — activé uniquement après la première interaction utilisateur
-  document.addEventListener("DOMContentLoaded", () => {
-    const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    let unlocked = false;
-
-    const unlock = () => { unlocked = true; };
-    document.addEventListener('click',   unlock, { once: true });
-    document.addEventListener('keydown', unlock, { once: true });
-
-    document.querySelectorAll('.link-wrapper').forEach(button => {
-      button.addEventListener('mouseenter', () => {
-        if (!unlocked) return;
-        const sound = hoverSound.cloneNode();
-        sound.volume = 0.3;
-        sound.play().catch(() => {});
+        toggle.addEventListener("change", () => {
+          if (toggle.checked) {
+            document.body.classList.add("darkmode");
+            localStorage.setItem("darkMode", "enabled");
+          } else {
+            document.body.classList.remove("darkmode");
+            localStorage.setItem("darkMode", "disabled");
+          }
+        });
       });
-    });
-  });
-</script>
+    </script>
 
-<!-- Bottom nav -->
-<script type="module">
-import { initBottomNav } from '../js/bottomNav.js';
-initBottomNav();
-</script>
+    <div
+      id="modeNavigationContainer"
+      style="
+        display: none;
+        margin-top: 40px;
+        margin-bottom: 40px;
+        justify-content: space-between;
+        align-items: center;
+      "
+    >
+      <div id="prevModeButton" class="nav-button prev-mode" style="visibility: hidden">
+        ← Mode Précédent
+      </div>
+      <div id="nextModeButton" class="nav-button next-mode">Emoji Mode →</div>
+    </div>
 
-<!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
-<script type="module">
-import { initAuth } from '../js/auth.js';
-window._authReady = initAuth();
-window._authReady.catch(() => {}); // le mode fonctionne même sans backend
-</script>
+    <script>
+      // Son de hover — activé uniquement après la première interaction utilisateur
+      document.addEventListener("DOMContentLoaded", () => {
+        const hoverSound = new Audio("../assets/sound_effect/Select_sound.mp3");
+        let unlocked = false;
 
-<!-- Notifications calling card -->
-<script type="module">
-import { initNotifications } from '../js/notifications.js';
-if (window._authReady) await window._authReady;
-if (window._currentUser) initNotifications();
-</script>
-<script type="module">
-import { initChallengeBanner } from '../js/challenge-banner.js';
-initChallengeBanner('classic');
-</script>
+        const unlock = () => {
+          unlocked = true;
+        };
+        document.addEventListener("click", unlock, { once: true });
+        document.addEventListener("keydown", unlock, { once: true });
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('../sw.js').catch(err => {
-      console.warn('[SW] Registration failed:', err);
-    });
-  });
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data?.type === 'SW_UPDATED') { window.location.reload(); }
-  });
-}
-</script>
+        document.querySelectorAll(".link-wrapper").forEach((button) => {
+          button.addEventListener("mouseenter", () => {
+            if (!unlocked) return;
+            const sound = hoverSound.cloneNode();
+            sound.volume = 0.3;
+            sound.play().catch(() => {});
+          });
+        });
+      });
+    </script>
 
-</body>
+    <!-- Bottom nav -->
+    <script type="module">
+      import { initBottomNav } from "../js/bottomNav.js";
+      initBottomNav();
+    </script>
+
+    <!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
+    <script type="module">
+      import { initAuth } from "../js/auth.js";
+      window._authReady = initAuth();
+      window._authReady.catch(() => {}); // le mode fonctionne même sans backend
+    </script>
+
+    <!-- Notifications calling card -->
+    <script type="module">
+      import { initNotifications } from "../js/notifications.js";
+      if (window._authReady) await window._authReady;
+      if (window._currentUser) initNotifications();
+    </script>
+    <script type="module">
+      import { initChallengeBanner } from "../js/challenge-banner.js";
+      initChallengeBanner("classic");
+    </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("../sw.js").catch((err) => {
+            console.warn("[SW] Registration failed:", err);
+          });
+        });
+        navigator.serviceWorker.addEventListener("message", (event) => {
+          if (event.data?.type === "SW_UPDATED") {
+            window.location.reload();
+          }
+        });
+      }
+    </script>
+  </body>
 </html>

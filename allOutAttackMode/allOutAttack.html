@@ -1,32 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personadle - All Out Attack</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personadle - All Out Attack</title>
 
-  <!-- Styles & Icon -->
-  <link rel="stylesheet" href="../css/global.css?v=9" />
-  <link rel="stylesheet" href="./allOutAttack.css?v=3" />
-  <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
-  <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
-  <link rel="stylesheet" href="../css/calling-card.css?v=2" />
-  <link rel="stylesheet" href="../css/challenge-banner.css">
-  <link rel="stylesheet" href="../css/challenge-result.css">
-  <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
-</head>
+    <!-- Styles & Icon -->
+    <link rel="stylesheet" href="../css/global.css?v=9" />
+    <link rel="stylesheet" href="./allOutAttack.css?v=3" />
+    <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
+    <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="../css/calling-card.css?v=2" />
+    <link rel="stylesheet" href="../css/challenge-banner.css" />
+    <link rel="stylesheet" href="../css/challenge-result.css" />
+    <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
+  </head>
 
-<body>
-  <!-- Logo -->
-  <header id="homepage">
-    <a href="../index.html">
-      <img src="../img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage" />
-    </a>
-  </header>
+  <body>
+    <!-- Logo -->
+    <header id="homepage">
+      <a href="../index.html">
+        <img
+          src="../img/Logo_PersonaDLE.png"
+          alt="PersonaDLE Logo"
+          class="logo_HomePage"
+          id="imgHomePage"
+        />
+      </a>
+    </header>
 
-
-  <!-- À insérer en haut à gauche de la page All-Out Attack -->
-<!-- =====================================================
+    <!-- À insérer en haut à gauche de la page All-Out Attack -->
+    <!-- =====================================================
      FILTRE OPUS — Panneau déroulant
      Bouton "FILTRES" (Persona style) ouvre/ferme le panneau.
      Chaque logo de jeu est cliquable :
@@ -35,353 +39,486 @@
        • P3/P4/P5/PQ → sous-opus déroulants au clic
      Géré par js/filterMenu.js + css/filterMenu.css
      ===================================================== -->
-<div class="filter-panel" id="filterPanel">
-  <button class="filter-toggle-btn" id="filterToggleBtn"
-          aria-expanded="false" aria-controls="filterDropdown">
-    <span class="filter-toggle-icon">⚙</span>
-    <span class="filter-toggle-text">FILTRES</span>
-    <span class="filter-toggle-arrow">▼</span>
-  </button>
-  <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
-
-    <!-- Persona 3 — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p3 active"
-              data-opus-group="P3" data-opus-codes="P3,P3FES,P3P"
-              aria-expanded="false" aria-label="Persona 3">
-        <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="Persona 3" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
+    <div class="filter-panel" id="filterPanel">
+      <button
+        class="filter-toggle-btn"
+        id="filterToggleBtn"
+        aria-expanded="false"
+        aria-controls="filterDropdown"
+      >
+        <span class="filter-toggle-icon">⚙</span>
+        <span class="filter-toggle-text">FILTRES</span>
+        <span class="filter-toggle-arrow">▼</span>
       </button>
-      <div class="filter-sub-panel" data-group-panel="P3">
-        <button class="filter-sub-btn filter-color-p3 active"
-                data-opus="P3" aria-label="Persona 3 / Reload">
-          <img src="../img/logo_jeu/Persona_3_Reload_logo.png" alt="P3" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p3fes active"
-                data-opus="P3FES" aria-label="Persona 3 FES">
-          <img src="../img/logo_jeu/Persona_3_FES_Logo.webp" alt="P3FES" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p3p active"
-                data-opus="P3P" aria-label="Persona 3 Portable">
-          <img src="../img/logo_jeu/Persona_3_Portable_Logo.webp" alt="P3P" class="filter-sub-logo">
-        </button>
+      <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
+        <!-- Persona 3 — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p3 active"
+            data-opus-group="P3"
+            data-opus-codes="P3,P3FES,P3P"
+            aria-expanded="false"
+            aria-label="Persona 3"
+          >
+            <img
+              src="../img/logo_jeu/Persona_3_Reload_logo.png"
+              alt="Persona 3"
+              class="filter-logo"
+            />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="P3">
+            <button
+              class="filter-sub-btn filter-color-p3 active"
+              data-opus="P3"
+              aria-label="Persona 3 / Reload"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_Reload_logo.png"
+                alt="P3"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p3fes active"
+              data-opus="P3FES"
+              aria-label="Persona 3 FES"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_FES_Logo.webp"
+                alt="P3FES"
+                class="filter-sub-logo"
+              />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p3p active"
+              data-opus="P3P"
+              aria-label="Persona 3 Portable"
+            >
+              <img
+                src="../img/logo_jeu/Persona_3_Portable_Logo.webp"
+                alt="P3P"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 5 — clic logo → sous-opus déroulants -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p5 active"
+            data-opus-group="P5"
+            data-opus-codes="P5,P5R"
+            aria-expanded="false"
+            aria-label="Persona 5"
+          >
+            <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo" />
+            <span class="filter-expand-arrow">▸</span>
+          </button>
+          <div class="filter-sub-panel" data-group-panel="P5">
+            <button
+              class="filter-sub-btn filter-color-p5 active"
+              data-opus="P5"
+              aria-label="Persona 5"
+            >
+              <img src="../img/logo_jeu/Persona_5_logo.png" alt="P5" class="filter-sub-logo" />
+            </button>
+            <button
+              class="filter-sub-btn filter-color-p5r active"
+              data-opus="P5R"
+              aria-label="Persona 5 Royal"
+            >
+              <img
+                src="../img/logo_jeu/Persona_5_Royal_Logo.png"
+                alt="P5R"
+                class="filter-sub-logo"
+              />
+            </button>
+          </div>
+        </div>
+        <!-- Persona 5X — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p5x active"
+            data-opus="P5X"
+            aria-label="Persona 5X"
+          >
+            <img
+              src="../img/logo_jeu/Persona_5_The_Phantom_X_Logo.png"
+              alt="Persona 5X"
+              class="filter-logo"
+            />
+          </button>
+        </div>
       </div>
     </div>
-    <!-- Persona 5 — clic logo → sous-opus déroulants -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p5 active"
-              data-opus-group="P5" data-opus-codes="P5,P5R"
-              aria-expanded="false" aria-label="Persona 5">
-        <img src="../img/logo_jeu/Persona_5_logo.png" alt="Persona 5" class="filter-logo">
-        <span class="filter-expand-arrow">▸</span>
-      </button>
-      <div class="filter-sub-panel" data-group-panel="P5">
-        <button class="filter-sub-btn filter-color-p5 active"
-                data-opus="P5" aria-label="Persona 5">
-          <img src="../img/logo_jeu/Persona_5_logo.png" alt="P5" class="filter-sub-logo">
-        </button>
-        <button class="filter-sub-btn filter-color-p5r active"
-                data-opus="P5R" aria-label="Persona 5 Royal">
-          <img src="../img/logo_jeu/Persona_5_Royal_Logo.png" alt="P5R" class="filter-sub-logo">
-        </button>
+
+    <!-- Zone principale d'affichage des emojis et du titre -->
+    <div class="emoji-hint-zone" style="position: relative">
+      <!-- Bouton pour afficher les règles (en haut à droite) -->
+      <div style="position: absolute; top: -40px; right: -80px">
+        <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+          <div class="img-wrapper">
+            <img
+              class="normal"
+              src="../assets/buttons/point_interrogation.webp"
+              alt="Rules"
+              style="height: 100px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/point_interrogation.webp"
+              alt="Rules"
+              style="height: 80px"
+            />
+          </div>
+          <div class="shape-wrapper">
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45" />
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
+                <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Contenu central -->
+      <div style="color: white">
+        <h1 data-i18n="modes.alloutattack.title">Guess today’s Persona character!</h1>
+        <p data-i18n="modes.alloutattack.subtitle">Type any character to start.</p>
       </div>
     </div>
-    <!-- Persona 5X — filtre direct -->
-    <div class="filter-group">
-      <button class="filter-main-btn filter-color-p5x active"
-              data-opus="P5X" aria-label="Persona 5X">
-        <img src="../img/logo_jeu/Persona_5_The_Phantom_X_Logo.png" alt="Persona 5X" class="filter-logo">
-      </button>
+
+    <!-- Modal Règles -->
+    <div id="rulesModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 data-i18n="modes.alloutattack.rules_title">All-Out Attack Mode Rules</h2>
+
+        <div data-i18n-block="en">
+          <div id="rulesText">
+            <strong>🎯 Goal:</strong><br />
+            Guess the Persona character based on their All-Out Attack animation.
+            <hr class="separator" />
+            <strong>💥 Gameplay:</strong>
+            <ul>
+              <li>You start with a <strong>blurry All-Out Attack GIF</strong>.</li>
+              <li><strong>Each incorrect guess reduces the blur</strong>.</li>
+              <li>Try to guess with the fewest attempts possible!</li>
+            </ul>
+            <hr class="separator" />
+            <strong>🎮 Included games:</strong>
+            <ul>
+              <li>
+                Only characters from <strong>Persona 3 Reload</strong>,
+                <strong>Persona 5 / Royal</strong> and <strong>Persona 5: The Phantom X</strong> are
+                used.
+              </li>
+            </ul>
+            <hr class="separator" />
+            <strong>📉 Give Up option:</strong>
+            <ul>
+              <li>
+                After <strong>5 incorrect guesses</strong>, the <em>Give Up</em> button activates.
+              </li>
+            </ul>
+            <hr class="separator" />
+            <em>Let your eyes adjust, focus your instincts, and go for the critical hit!</em>
+          </div>
+        </div>
+
+        <div data-i18n-block="fr">
+          <div id="rulesText">
+            <strong>🎯 Objectif :</strong><br />
+            Devinez le personnage Persona d'après son animation d'All-Out Attack.
+            <hr class="separator" />
+            <strong>💥 Gameplay :</strong>
+            <ul>
+              <li>Vous commencez avec un <strong>GIF d'All-Out Attack flou</strong>.</li>
+              <li><strong>Chaque mauvaise réponse réduit le flou</strong>.</li>
+              <li>Essayez de deviner avec le moins de tentatives possible !</li>
+            </ul>
+            <hr class="separator" />
+            <strong>🎮 Jeux inclus :</strong>
+            <ul>
+              <li>
+                Uniquement des personnages de <strong>Persona 3 Reload</strong>,
+                <strong>Persona 5 / Royal</strong> et <strong>Persona 5 : The Phantom X</strong>.
+              </li>
+            </ul>
+            <hr class="separator" />
+            <strong>📉 Option Abandonner :</strong>
+            <ul>
+              <li>
+                Après <strong>5 mauvaises réponses</strong>, le bouton <em>Abandonner</em> s'active.
+              </li>
+            </ul>
+            <hr class="separator" />
+            <em
+              >Laissez vos yeux s'adapter, concentrez vos instincts, et visez le coup critique !</em
+            >
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
+    <!-- Zone GIF -->
+    <div class="aoa-gif-zone">
+      <img id="aoaGif" alt="All-Out Attack" />
+    </div>
 
-   <!-- Zone principale d'affichage des emojis et du titre -->
-  <div class="emoji-hint-zone" style="position: relative;">
-    <!-- Bouton pour afficher les règles (en haut à droite) -->
-    <div style="position: absolute; top: -40px; right: -80px;">
-      <div class="link-wrapper rules-link-wrapper" id="rulesButton" role="button" tabindex="0">
+    <!-- Give Up -->
+    <div
+      class="giveup-block"
+      style="display: flex; justify-content: center; margin-top: 20px; gap: 12px"
+    >
+      <div class="link-wrapper" id="giveUpButton">
         <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 100px;">
-          <img class="active" src="../assets/buttons/point_interrogation.webp" alt="Rules" style="height: 80px;">
+          <img
+            class="normal"
+            src="../assets/buttons/EN/Give-up_Button.webp"
+            alt="Give Up"
+            style="height: 90px"
+          />
+          <img
+            class="active"
+            src="../assets/buttons/EN/Give-up_Button_Rouge.webp"
+            alt="Give Up"
+            style="height: 90px"
+          />
         </div>
         <div class="shape-wrapper">
           <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-              <polygon fill="#FF0000" points="20,5 105,0 90,32 10,45"/>
+            <svg viewBox="0 0 108.1 47">
+              <polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40" />
             </svg>
           </div>
           <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47" preserveAspectRatio="none">
-              <polygon fill="#00FFFF" points="0,10 100,5 80,40 5,35"/>
+            <svg viewBox="0 0 108.1 47">
+              <polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38" />
             </svg>
           </div>
         </div>
       </div>
+      <span id="giveUpCounter" class="counter">(0 / 5)</span>
     </div>
-    <!-- Contenu central -->
-     <div style = "color: white;">
-    <h1 data-i18n="modes.alloutattack.title">Guess today’s Persona character!</h1>
-    <p data-i18n="modes.alloutattack.subtitle">Type any character to start.</p>
-    </div>
-  </div>
 
-  
-  <!-- Modal Règles -->
-  <div id="rulesModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2 data-i18n="modes.alloutattack.rules_title">All-Out Attack Mode Rules</h2>
-
-      <div data-i18n-block="en">
-        <p id="rulesText">
-          <strong>🎯 Goal:</strong><br>
-          Guess the Persona character based on their All-Out Attack animation.
-          <hr class="separator" />
-          <strong>💥 Gameplay:</strong>
-          <ul>
-            <li>You start with a <strong>blurry All-Out Attack GIF</strong>.</li>
-            <li><strong>Each incorrect guess reduces the blur</strong>.</li>
-            <li>Try to guess with the fewest attempts possible!</li>
-          </ul>
-          <hr class="separator" />
-          <strong>🎮 Included games:</strong>
-          <ul>
-            <li>Only characters from <strong>Persona 3 Reload</strong>, <strong>Persona 5 / Royal</strong> and <strong>Persona 5: The Phantom X</strong> are used.</li>
-          </ul>
-          <hr class="separator" />
-          <strong>📉 Give Up option:</strong>
-          <ul>
-            <li>After <strong>5 incorrect guesses</strong>, the <em>Give Up</em> button activates.</li>
-          </ul>
-          <hr class="separator" />
-          <em>Let your eyes adjust, focus your instincts, and go for the critical hit!</em>
-        </p>
-      </div>
-
-      <div data-i18n-block="fr">
-        <p id="rulesText">
-          <strong>🎯 Objectif :</strong><br>
-          Devinez le personnage Persona d'après son animation d'All-Out Attack.
-          <hr class="separator" />
-          <strong>💥 Gameplay :</strong>
-          <ul>
-            <li>Vous commencez avec un <strong>GIF d'All-Out Attack flou</strong>.</li>
-            <li><strong>Chaque mauvaise réponse réduit le flou</strong>.</li>
-            <li>Essayez de deviner avec le moins de tentatives possible !</li>
-          </ul>
-          <hr class="separator" />
-          <strong>🎮 Jeux inclus :</strong>
-          <ul>
-            <li>Uniquement des personnages de <strong>Persona 3 Reload</strong>, <strong>Persona 5 / Royal</strong> et <strong>Persona 5 : The Phantom X</strong>.</li>
-          </ul>
-          <hr class="separator" />
-          <strong>📉 Option Abandonner :</strong>
-          <ul>
-            <li>Après <strong>5 mauvaises réponses</strong>, le bouton <em>Abandonner</em> s'active.</li>
-          </ul>
-          <hr class="separator" />
-          <em>Laissez vos yeux s'adapter, concentrez vos instincts, et visez le coup critique !</em>
-        </p>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Zone GIF -->
-  <div class="aoa-gif-zone">
-    <img id="aoaGif" alt="All-Out Attack" />
-  </div>
-
-  <!-- Give Up -->
-  <div class="giveup-block" style="display: flex; justify-content: center; margin-top: 20px; gap: 12px;">
-    <div class="link-wrapper" id="giveUpButton">
-      <div class="img-wrapper">
-        <img class="normal" src="../assets/buttons/EN/Give-up_Button.webp" alt="Give Up" style="height: 90px;">
-        <img class="active" src="../assets/buttons/EN/Give-up_Button_Rouge.webp" alt="Give Up" style="height: 90px;">
-      </div>
-      <div class="shape-wrapper">
-        <div class="shape red-fill jelly">
-          <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="15,10 108.1,0 90,30 5,40"/></svg>
-        </div>
-        <div class="shape cyan-fill jelly">
-          <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="10,15 100,5 70,42 20,38"/></svg>
-        </div>
-      </div>
-    </div>
-    <span id="giveUpCounter" class="counter">(0 / 5)</span>
-  </div>
-
-  <!-- Zone d’input + boutons -->
-  <section class="input-wrapper" style="margin-top: 30px; display: flex; justify-content: center;">
-    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center;">
-
-      <!-- Replay -->
-      <div class="link-wrapper" id="resetButton">
-        <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/EN/Replay_Button.webp" alt="Replay" style="height: 90px;">
-          <img class="active" src="../assets/buttons/EN/Replay_Button_Rouge.webp" alt="Replay" style="height: 90px;">
-        </div>
-        <div class="shape-wrapper">
-          <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42"/></svg>
+    <!-- Zone d’input + boutons -->
+    <section class="input-wrapper" style="margin-top: 30px; display: flex; justify-content: center">
+      <div
+        style="
+          display: flex;
+          gap: 20px;
+          align-items: center;
+          flex-wrap: wrap;
+          justify-content: center;
+        "
+      >
+        <!-- Replay -->
+        <div class="link-wrapper" id="resetButton">
+          <div class="img-wrapper">
+            <img
+              class="normal"
+              src="../assets/buttons/EN/Replay_Button.webp"
+              alt="Replay"
+              style="height: 90px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/EN/Replay_Button_Rouge.webp"
+              alt="Replay"
+              style="height: 90px"
+            />
           </div>
-          <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35"/></svg>
+          <div class="shape-wrapper">
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#FF0000" points="18,8 108.1,0 95,28 12,42" />
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#00FFFF" points="8,10 95,2 75,44 15,35" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <input
+          type="text"
+          id="textbar"
+          placeholder="Enter character name..."
+          data-i18n-placeholder="ui.input_placeholder"
+          aria-label="Guess character name"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+
+        <!-- Submit -->
+        <div class="link-wrapper" id="guessButton">
+          <div class="img-wrapper">
+            <img
+              class="normal"
+              src="../assets/buttons/EN/Submit_Button.webp"
+              alt="Submit"
+              style="height: 90px"
+            />
+            <img
+              class="active"
+              src="../assets/buttons/EN/Submit_Button_Rouge.webp"
+              alt="Submit"
+              style="height: 90px"
+            />
+          </div>
+          <div class="shape-wrapper">
+            <div class="shape red-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#FF0000" points="12,5 108,0 98,35 10,40" />
+              </svg>
+            </div>
+            <div class="shape cyan-fill jelly">
+              <svg viewBox="0 0 108.1 47">
+                <polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38" />
+              </svg>
+            </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Input -->
-      <input
-        type="text"
-        id="textbar"
-        placeholder="Enter character name..." data-i18n-placeholder="ui.input_placeholder"
-        aria-label="Guess character name"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-      />
-
-      <!-- Submit -->
-      <div class="link-wrapper" id="guessButton">
-        <div class="img-wrapper">
-          <img class="normal" src="../assets/buttons/EN/Submit_Button.webp" alt="Submit" style="height: 90px;">
-          <img class="active" src="../assets/buttons/EN/Submit_Button_Rouge.webp" alt="Submit" style="height: 90px;">
-        </div>
-        <div class="shape-wrapper">
-          <div class="shape red-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#FF0000" points="12,5 108,0 98,35 10,40"/></svg>
-          </div>
-          <div class="shape cyan-fill jelly">
-            <svg viewBox="0 0 108.1 47"><polygon fill="#00FFFF" points="5,10 105,3 80,45 18,38"/></svg>
-          </div>
-        </div>
-      </div>
-
+    <!-- Victoire -->
+    <div id="victoryBox" class="victory-box" style="display: none">
+      <p class="aoa-victory-banner">ALL OUT ATTACK!</p>
+      <img id="victoryImage" src="" alt="Victory Character" />
+      <p class="win-message" id="victoryText"></p>
     </div>
-  </section>
 
-  
+    <!-- Résultats -->
+    <div id="wrongGuessList"></div>
 
-  <!-- Victoire -->
-  <div id="victoryBox" class="victory-box" style="display: none;">
-    <p class="aoa-victory-banner">ALL OUT ATTACK!</p>
-    <img id="victoryImage" src="" alt="Victory Character">
-    <p class="win-message" id="victoryText"></p>
-  </div>
+    <!-- Script -->
+    <!-- i18n — init traductions au chargement -->
+    <script type="module">
+      import { initLang } from "../js/i18n.js";
+      window.__i18nReady = initLang();
+    </script>
+    <script type="module" src="./modeAllOutAttack.js?v=4"></script>
 
-  <!-- Résultats -->
-  <div id="wrongGuessList"></div>
+    <!-- Bouton Mode Sombre -->
+    <div class="darkmode-toggle">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+    </div>
 
-  <!-- Script -->
-  <!-- i18n — init traductions au chargement -->
-<script type="module">
-import { initLang } from '../js/i18n.js';
-window.__i18nReady = initLang();
-</script>
-  <script type="module" src="./modeAllOutAttack.js?v=4"></script>
+    <!-- Script intégré -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggle = document.getElementById("darkModeToggle");
+        const savedMode = localStorage.getItem("darkMode");
+        if (savedMode === "enabled") {
+          document.body.classList.add("darkmode");
+          toggle.checked = true;
+        }
 
-  <!-- Bouton Mode Sombre -->
-<div class="darkmode-toggle">
-  <label class="switch">
-    <input type="checkbox" id="darkModeToggle">
-    <span class="slider round"></span>
-  </label>
-  <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
-</div>
-
-<!-- Script intégré -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const toggle = document.getElementById("darkModeToggle");
-    const savedMode = localStorage.getItem("darkMode");
-    if (savedMode === "enabled") {
-      document.body.classList.add("darkmode");
-      toggle.checked = true;
-    }
-
-    toggle.addEventListener("change", () => {
-      if (toggle.checked) {
-        document.body.classList.add("darkmode");
-        localStorage.setItem("darkMode", "enabled");
-      } else {
-        document.body.classList.remove("darkmode");
-        localStorage.setItem("darkMode", "disabled");
-      }
-    });
-  });
-</script>
-
-<!-- 🔁 Mode Navigation -->
-<div id="modeNavigationContainer" style="display: none; margin-top: 40px; margin-bottom: 40px; justify-content: space-between; align-items: center;">
-  <div id="prevModeButton" class="nav-button prev-mode" style="visibility: hidden;">
-    ← Emoji Mode
-  </div>
-  <div id="nextModeButton" class="nav-button next-mode">
-    Shadows Mode →
-  </div>
-</div>
-
-<script>
-  // Son de hover — activé uniquement après la première interaction utilisateur
-  document.addEventListener("DOMContentLoaded", () => {
-    const hoverSound = new Audio('../assets/sound_effect/Select_sound.mp3');
-    let unlocked = false;
-
-    const unlock = () => { unlocked = true; };
-    document.addEventListener('click',   unlock, { once: true });
-    document.addEventListener('keydown', unlock, { once: true });
-
-    document.querySelectorAll('.link-wrapper').forEach(button => {
-      button.addEventListener('mouseenter', () => {
-        if (!unlocked) return;
-        const sound = hoverSound.cloneNode();
-        sound.volume = 0.3;
-        sound.play().catch(() => {});
+        toggle.addEventListener("change", () => {
+          if (toggle.checked) {
+            document.body.classList.add("darkmode");
+            localStorage.setItem("darkMode", "enabled");
+          } else {
+            document.body.classList.remove("darkmode");
+            localStorage.setItem("darkMode", "disabled");
+          }
+        });
       });
-    });
-  });
-</script>
+    </script>
 
-<!-- Bottom nav -->
-<script type="module">
-import { initBottomNav } from '../js/bottomNav.js';
-initBottomNav();
-</script>
+    <!-- 🔁 Mode Navigation -->
+    <div
+      id="modeNavigationContainer"
+      style="
+        display: none;
+        margin-top: 40px;
+        margin-bottom: 40px;
+        justify-content: space-between;
+        align-items: center;
+      "
+    >
+      <div id="prevModeButton" class="nav-button prev-mode" style="visibility: hidden">
+        ← Emoji Mode
+      </div>
+      <div id="nextModeButton" class="nav-button next-mode">Shadows Mode →</div>
+    </div>
 
-<!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
-<script type="module">
-import { initAuth } from '../js/auth.js';
-window._authReady = initAuth();
-window._authReady.catch(() => {}); // le mode fonctionne même sans backend
-</script>
+    <script>
+      // Son de hover — activé uniquement après la première interaction utilisateur
+      document.addEventListener("DOMContentLoaded", () => {
+        const hoverSound = new Audio("../assets/sound_effect/Select_sound.mp3");
+        let unlocked = false;
 
-<!-- Notifications calling card -->
-<script type="module">
-import { initNotifications } from '../js/notifications.js';
-if (window._authReady) await window._authReady;
-if (window._currentUser) initNotifications();
-</script>
-<script type="module">
-import { initChallengeBanner } from '../js/challenge-banner.js';
-initChallengeBanner('alloutattack');
-</script>
+        const unlock = () => {
+          unlocked = true;
+        };
+        document.addEventListener("click", unlock, { once: true });
+        document.addEventListener("keydown", unlock, { once: true });
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('../sw.js').catch(err => {
-      console.warn('[SW] Registration failed:', err);
-    });
-  });
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data?.type === 'SW_UPDATED') { window.location.reload(); }
-  });
-}
-</script>
+        document.querySelectorAll(".link-wrapper").forEach((button) => {
+          button.addEventListener("mouseenter", () => {
+            if (!unlocked) return;
+            const sound = hoverSound.cloneNode();
+            sound.volume = 0.3;
+            sound.play().catch(() => {});
+          });
+        });
+      });
+    </script>
 
-</body>
+    <!-- Bottom nav -->
+    <script type="module">
+      import { initBottomNav } from "../js/bottomNav.js";
+      initBottomNav();
+    </script>
+
+    <!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
+    <script type="module">
+      import { initAuth } from "../js/auth.js";
+      window._authReady = initAuth();
+      window._authReady.catch(() => {}); // le mode fonctionne même sans backend
+    </script>
+
+    <!-- Notifications calling card -->
+    <script type="module">
+      import { initNotifications } from "../js/notifications.js";
+      if (window._authReady) await window._authReady;
+      if (window._currentUser) initNotifications();
+    </script>
+    <script type="module">
+      import { initChallengeBanner } from "../js/challenge-banner.js";
+      initChallengeBanner("alloutattack");
+    </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("../sw.js").catch((err) => {
+            console.warn("[SW] Registration failed:", err);
+          });
+        });
+        navigator.serviceWorker.addEventListener("message", (event) => {
+          if (event.data?.type === "SW_UPDATED") {
+            window.location.reload();
+          }
+        });
+      }
+    </script>
+  </body>
 </html>

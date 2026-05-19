@@ -21,12 +21,12 @@ profile/leaderboard/
 
 ## Filtres disponibles
 
-| Filtre | Options |
-|--------|---------|
-| **Scope** | Global · Friends only |
-| **Mode** | All · Classic · Emoji · Silhouette · All-Out · Personae · Music |
-| **Période** | All time · Month · Week · Today |
-| **Métrique** | Wins · Win rate · Best streak · Perfect · Games played |
+| Filtre       | Options                                                         |
+| ------------ | --------------------------------------------------------------- |
+| **Scope**    | Global · Friends only                                           |
+| **Mode**     | All · Classic · Emoji · Silhouette · All-Out · Personae · Music |
+| **Période**  | All time · Month · Week · Today                                 |
+| **Métrique** | Wins · Win rate · Best streak · Perfect · Games played          |
 
 ## API
 
@@ -37,6 +37,7 @@ Retourne `{ rows: [...], my_rank: { rank, score } }` — le rang personnel est t
 ## Chemins relatifs
 
 Depuis `profile/leaderboard/`, les ressources partagées sont à deux niveaux :
+
 - CSS global : `../../css/`
 - JS partagé : `../../js/`
 - Styles profil : `../profile-page.css`

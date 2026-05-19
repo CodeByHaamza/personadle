@@ -13,7 +13,6 @@
    Responsive : 320px → desktop
    ============================================================= */
 
-
 /* =====================================================
    1. CONTENEUR PRINCIPAL
    ===================================================== */
@@ -44,7 +43,6 @@
   box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.08);
 }
 
-
 /* =====================================================
    2. ITEMS DE NAVIGATION
    ===================================================== */
@@ -71,7 +69,10 @@
   /* Couleur inactive */
   color: #999;
 
-  transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    transform 0.15s ease;
 }
 
 .nav-item:hover {
@@ -88,7 +89,6 @@
 .nav-item:active {
   transform: scale(0.93);
 }
-
 
 /* =====================================================
    3. ICÔNES SVG
@@ -109,7 +109,6 @@
 .nav-item.active svg {
   filter: drop-shadow(0 2px 4px rgba(230, 57, 70, 0.4));
 }
-
 
 /* =====================================================
    4. BADGE NOTIFICATION (icône Friends)
@@ -144,10 +143,13 @@
 }
 
 @keyframes navBadgePop {
-  from { transform: scale(0); }
-  to   { transform: scale(1); }
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
 }
-
 
 /* =====================================================
    5. LABEL TEXTE
@@ -160,7 +162,6 @@
   text-transform: uppercase;
   line-height: 1;
 }
-
 
 /* =====================================================
    5. AVATAR MINIATURE (icône Profile personnalisée)
@@ -175,7 +176,6 @@
   /* Remplacement de l'icône SVG quand un avatar est défini */
   display: block;
 }
-
 
 /* =====================================================
    6. TOAST "COMING SOON"
@@ -204,7 +204,9 @@
   opacity: 0;
   pointer-events: none;
 
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
   z-index: 600;
 }
 
@@ -212,7 +214,6 @@
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-
 
 /* =====================================================
    7. ESPACE RÉSERVÉ EN BAS DU BODY
@@ -225,7 +226,6 @@
 body {
   padding-bottom: 78px;
 }
-
 
 /* =====================================================
    8. DARK MODE
@@ -256,7 +256,6 @@ body.darkmode .nav-toast {
   border-color: #e63946;
   box-shadow: 0 0 12px rgba(230, 57, 70, 0.3);
 }
-
 
 /* =====================================================
    9. RESPONSIVE

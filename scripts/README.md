@@ -29,11 +29,11 @@ npm run i18n:check
 
 ### Ce que ça vérifie
 
-| Vérification | Description |
-|-------------|-------------|
+| Vérification        | Description                                                  |
+| ------------------- | ------------------------------------------------------------ |
 | **Clés manquantes** | Présentes dans `en.json` mais absentes dans une autre langue |
-| **Clés en surplus** | Présentes dans une traduction mais absentes de `en.json` |
-| **JSON invalide** | Fichier malformé ou vide |
+| **Clés en surplus** | Présentes dans une traduction mais absentes de `en.json`     |
+| **JSON invalide**   | Fichier malformé ou vide                                     |
 
 ### Exemple de sortie
 

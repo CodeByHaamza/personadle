@@ -41,9 +41,10 @@ Dans hPanel → **Bases de données** → **Bases de données MySQL** :
 1. Créer une base de données → noter le nom (ex: `u123456_personadle`)
 2. Créer un utilisateur DB → noter login + mot de passe
 3. Associer l'utilisateur à la base avec les droits : `SELECT, INSERT, UPDATE, DELETE`  
-   *(pas ALTER — même principe qu'en local)*
+   _(pas ALTER — même principe qu'en local)_
 
 Dans hPanel → **Hébergement** → **SSL** :
+
 - Activer Let's Encrypt sur `personadle.net` et `www.personadle.net`
 
 ---
@@ -124,7 +125,7 @@ define('CRON_SECRET', 'COLLER_LE_SECRET_GENERE_A_ETAPE_1');
 
 Dans hPanel → **PhpMyAdmin** → sélectionner ta base → onglet **Importer** :
 
-1. Sélectionner le fichier `sql/hostinger_full.sql` *(depuis ton poste local)*
+1. Sélectionner le fichier `sql/hostinger_full.sql` _(depuis ton poste local)_
 2. Format : SQL → **Exécuter**
 
 Ce fichier contient : schéma complet (20 tables) + seeds badges + seeds wallpapers + Social Link ranks + titres.
@@ -144,9 +145,9 @@ UPDATE users SET is_admin = 1 WHERE pseudo = 'TonPseudo';
 
 Dans hPanel → **Avancé** → **Tâches Cron** :
 
-| Fréquence | Commande |
-|---|---|
-| **Toutes les heures** | `wget -qO- "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" > /dev/null 2>&1` |
+| Fréquence               | Commande                                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| **Toutes les heures**   | `wget -qO- "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" > /dev/null 2>&1` |
 | **1× par jour à 03:00** | `wget -qO- "https://personadle.net/api/cron/hard-delete.php?key=TON_SECRET" > /dev/null 2>&1` |
 
 Remplace `TON_SECRET` par la valeur de `CRON_SECRET` de ton `config.php`.
@@ -182,15 +183,15 @@ curl -s "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" | pytho
 
 ## Dépannage courant
 
-| Symptôme | Cause probable | Solution |
-|---|---|---|
-| API retourne du HTML au lieu de JSON | `.htaccess` non pris en compte | Vérifier `AllowOverride All` dans hPanel |
-| `500 Internal Server Error` sur `/api/*` | `config.php` manquant ou mauvais credentials | Vérifier le fichier, tester la connexion DB |
-| Cookies de session perdus après quelques minutes | `gc_maxlifetime` trop court côté Hostinger | Vérifier `php.ini` Hostinger, le remember-me token compense |
-| CORS bloqué depuis le navigateur | Origine non whitelistée | Vérifier `bootstrap.php` → `$allowedOrigins` |
-| Avatars trop lourds refusés | `post_max_size` trop petit | hPanel → PHP → `post_max_size = 16M`, `upload_max_filesize = 16M` |
-| Images/assets cassés | Chemin relatif incorrect | Vérifier que le projet est à la racine de `public_html/`, pas dans un sous-dossier |
-| `mod_rewrite` non actif | Module Apache désactivé | hPanel → PHP/Apache → activer `mod_rewrite` |
+| Symptôme                                         | Cause probable                               | Solution                                                                           |
+| ------------------------------------------------ | -------------------------------------------- | ---------------------------------------------------------------------------------- |
+| API retourne du HTML au lieu de JSON             | `.htaccess` non pris en compte               | Vérifier `AllowOverride All` dans hPanel                                           |
+| `500 Internal Server Error` sur `/api/*`         | `config.php` manquant ou mauvais credentials | Vérifier le fichier, tester la connexion DB                                        |
+| Cookies de session perdus après quelques minutes | `gc_maxlifetime` trop court côté Hostinger   | Vérifier `php.ini` Hostinger, le remember-me token compense                        |
+| CORS bloqué depuis le navigateur                 | Origine non whitelistée                      | Vérifier `bootstrap.php` → `$allowedOrigins`                                       |
+| Avatars trop lourds refusés                      | `post_max_size` trop petit                   | hPanel → PHP → `post_max_size = 16M`, `upload_max_filesize = 16M`                  |
+| Images/assets cassés                             | Chemin relatif incorrect                     | Vérifier que le projet est à la racine de `public_html/`, pas dans un sous-dossier |
+| `mod_rewrite` non actif                          | Module Apache désactivé                      | hPanel → PHP/Apache → activer `mod_rewrite`                                        |
 
 ---
 

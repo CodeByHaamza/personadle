@@ -9,25 +9,26 @@
  */
 
 const _queue = [];
-let   _busy  = false;
-let   _noiseRaf = null;
+let _busy = false;
+let _noiseRaf = null;
 
 function _imgBase() {
   const p = window.location.pathname;
-  const prefix = p.startsWith('/personadle/') ? '/personadle' : '';
+  const prefix = p.startsWith("/personadle/") ? "/personadle" : "";
   return `${prefix}/img/`;
 }
 
 function _esc(str) {
-  return String(str ?? '').replace(/[&<>"']/g, c =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+  return String(str ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
   );
 }
 
 function _avatarSrc(data) {
   if (!data) return `${_imgBase()}default_avatar.png`;
-  if (data.startsWith('data:')) return data;
-  const base = _imgBase().replace(/img\/$/, '');
+  if (data.startsWith("data:")) return data;
+  const base = _imgBase().replace(/img\/$/, "");
   return data.replace(/^\.\.\//, base).replace(/^\.\//, base);
 }
 
@@ -42,27 +43,30 @@ export function queueTvAnimations(requests) {
 }
 
 function _showNext() {
-  if (!_queue.length) { _busy = false; return; }
+  if (!_queue.length) {
+    _busy = false;
+    return;
+  }
   _busy = true;
   _render(_queue.shift());
 }
 
 function _render({ pseudo, friendship_id, avatar_data }) {
-  document.getElementById('tv-anim-overlay')?.remove();
+  document.getElementById("tv-anim-overlay")?.remove();
   _stopNoise();
 
   const t = (key, fallback) => {
     const v = window.i18n?.t?.(key);
-    return (v && v !== key) ? v : fallback;
+    return v && v !== key ? v : fallback;
   };
 
   const avatarSrc = _avatarSrc(avatar_data);
 
   // Speaker dots (7×2 grid)
-  const dots = Array(14).fill('<div class="tv-speaker-dot"></div>').join('');
+  const dots = Array(14).fill('<div class="tv-speaker-dot"></div>').join("");
 
-  const overlay = document.createElement('div');
-  overlay.id = 'tv-anim-overlay';
+  const overlay = document.createElement("div");
+  overlay.id = "tv-anim-overlay";
   overlay.innerHTML = `
     <div class="tv-backdrop"></div>
     <div class="tv-stage">
@@ -127,13 +131,13 @@ function _render({ pseudo, friendship_id, avatar_data }) {
       <!-- Texte + boutons — toujours dans le flux, en dessous du burst -->
       <div class="tv-text" id="tv-text">
         <span class="tv-pseudo">${_esc(pseudo)}</span>
-        <span class="tv-msg">${t('friends.tv_wants_confidant', 'wants to be your Confidant.')}</span>
+        <span class="tv-msg">${t("friends.tv_wants_confidant", "wants to be your Confidant.")}</span>
         <div class="tv-actions">
           <button class="tv-btn tv-btn-accept"  data-fid="${friendship_id}">
-            ${t('friends.cc_yes', 'Accept')}
+            ${t("friends.cc_yes", "Accept")}
           </button>
           <button class="tv-btn tv-btn-dismiss" data-fid="${friendship_id}">
-            ${t('friends.cc_no', 'Not now')}
+            ${t("friends.cc_no", "Not now")}
           </button>
         </div>
       </div>
@@ -144,27 +148,27 @@ function _render({ pseudo, friendship_id, avatar_data }) {
   document.body.appendChild(overlay);
 
   // Canvas noise
-  const canvas = overlay.querySelector('#tv-noise-canvas');
+  const canvas = overlay.querySelector("#tv-noise-canvas");
   _startNoise(canvas);
 
-  requestAnimationFrame(() => overlay.classList.add('tv--visible'));
+  requestAnimationFrame(() => overlay.classList.add("tv--visible"));
 
   // Burst après 2.5s
   setTimeout(() => _triggerBurst(overlay), 2500);
 
-  overlay.querySelector('.tv-btn-accept').addEventListener('click', async e => {
+  overlay.querySelector(".tv-btn-accept").addEventListener("click", async (e) => {
     const fid = parseInt(e.currentTarget.dataset.fid, 10);
-    await window._personadleApi?.friends.respond(fid, 'accept').catch(() => {});
+    await window._personadleApi?.friends.respond(fid, "accept").catch(() => {});
     _close(overlay);
   });
 
-  overlay.querySelector('.tv-btn-dismiss').addEventListener('click', async e => {
+  overlay.querySelector(".tv-btn-dismiss").addEventListener("click", async (e) => {
     const fid = parseInt(e.currentTarget.dataset.fid, 10);
-    await window._personadleApi?.friends.respond(fid, 'decline').catch(() => {});
+    await window._personadleApi?.friends.respond(fid, "decline").catch(() => {});
     _close(overlay);
   });
 
-  overlay.querySelector('.tv-backdrop').addEventListener('click', () => {
+  overlay.querySelector(".tv-backdrop").addEventListener("click", () => {
     _queue.length = 0;
     _busy = false;
     _close(overlay);
@@ -176,18 +180,18 @@ function _render({ pseudo, friendship_id, avatar_data }) {
 function _startNoise(canvas) {
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   // Résolution basse intentionnelle (effet pixel)
-  canvas.width  = 64;
+  canvas.width = 64;
   canvas.height = 48;
 
   function _frame() {
     const img = ctx.createImageData(canvas.width, canvas.height);
-    const d   = img.data;
+    const d = img.data;
     for (let i = 0; i < d.length; i += 4) {
       const v = Math.random() > 0.5 ? 255 : 0;
-      d[i] = d[i+1] = d[i+2] = v;
-      d[i+3] = 220;
+      d[i] = d[i + 1] = d[i + 2] = v;
+      d[i + 3] = 220;
     }
     ctx.putImageData(img, 0, 0);
     _noiseRaf = requestAnimationFrame(_frame);
@@ -207,35 +211,35 @@ function _stopNoise() {
 function _triggerBurst(overlay) {
   _stopNoise();
 
-  const screen    = overlay.querySelector('.tv-screen');
-  const screenAvat = overlay.querySelector('.tv-avatar');
-  const burstAvat = overlay.querySelector('#tv-burst-avatar');
-  const noise     = overlay.querySelector('.tv-noise');
-  const textEl    = overlay.querySelector('#tv-text');
-  const particles = overlay.querySelector('#tv-particles');
+  const screen = overlay.querySelector(".tv-screen");
+  const screenAvat = overlay.querySelector(".tv-avatar");
+  const burstAvat = overlay.querySelector("#tv-burst-avatar");
+  const noise = overlay.querySelector(".tv-noise");
+  const textEl = overlay.querySelector("#tv-text");
+  const particles = overlay.querySelector("#tv-particles");
 
   // Fade out noise
-  if (noise) noise.style.opacity = '0';
+  if (noise) noise.style.opacity = "0";
 
   // Flash screen
-  if (screen) screen.classList.add('tv--flash-screen');
+  if (screen) screen.classList.add("tv--flash-screen");
 
   // Fade screen avatar to black when burst triggers
-  if (screenAvat) screenAvat.classList.add('tv--screen-fade');
+  if (screenAvat) screenAvat.classList.add("tv--screen-fade");
 
   // Particle origin = center of the burst wrap
-  const burstWrap = overlay.querySelector('.tv-burst-wrap');
+  const burstWrap = overlay.querySelector(".tv-burst-wrap");
   const rect = burstWrap
     ? burstWrap.getBoundingClientRect()
     : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
-  const originX = rect.left + rect.width  / 2;
-  const originY = rect.top  + rect.height / 2;
+  const originX = rect.left + rect.width / 2;
+  const originY = rect.top + rect.height / 2;
 
   // Burst avatar out of TV
   if (burstAvat) {
-    burstAvat.classList.add('tv--burst');
+    burstAvat.classList.add("tv--burst");
     // After burst lands (~700ms), add idle glow pulse — signals "waiting for your choice"
-    setTimeout(() => burstAvat.classList.add('tv--waiting'), 700);
+    setTimeout(() => burstAvat.classList.add("tv--waiting"), 700);
   }
 
   // Particles around burst origin
@@ -243,33 +247,42 @@ function _triggerBurst(overlay) {
 
   // Show text below burst
   setTimeout(() => {
-    if (textEl) textEl.classList.add('tv--text-visible');
+    if (textEl) textEl.classList.add("tv--text-visible");
   }, 380);
 }
 
 // ── Particles ────────────────────────────────────────────────
 
-const _SHAPES = ['⭐', '✿', '●', '★', '✦', '◆'];
-const _COLORS = ['#ff0055', '#ffcc00', '#00ccff', '#ff6600', '#cc00ff', '#00ff88', '#ffee00', '#ff3399'];
+const _SHAPES = ["⭐", "✿", "●", "★", "✦", "◆"];
+const _COLORS = [
+  "#ff0055",
+  "#ffcc00",
+  "#00ccff",
+  "#ff6600",
+  "#cc00ff",
+  "#00ff88",
+  "#ffee00",
+  "#ff3399",
+];
 
 function _spawnParticles(container, originX, originY) {
   if (!container) return;
 
   const count = 28;
   for (let i = 0; i < count; i++) {
-    const el = document.createElement('span');
-    el.className  = 'tv-particle';
+    const el = document.createElement("span");
+    el.className = "tv-particle";
     el.textContent = _SHAPES[i % _SHAPES.length];
 
-    const angle  = (i / count) * 360 + Math.random() * (360 / count);
-    const dist   = 80 + Math.random() * 160;
-    const rad    = (angle * Math.PI) / 180;
-    const dx     = Math.cos(rad) * dist;
-    const dy     = Math.sin(rad) * dist;
-    const rot    = (Math.random() - 0.5) * 720;
-    const size   = 10 + Math.random() * 18;
-    const delay  = Math.random() * 0.15;
-    const color  = _COLORS[Math.floor(Math.random() * _COLORS.length)];
+    const angle = (i / count) * 360 + Math.random() * (360 / count);
+    const dist = 80 + Math.random() * 160;
+    const rad = (angle * Math.PI) / 180;
+    const dx = Math.cos(rad) * dist;
+    const dy = Math.sin(rad) * dist;
+    const rot = (Math.random() - 0.5) * 720;
+    const size = 10 + Math.random() * 18;
+    const delay = Math.random() * 0.15;
+    const color = _COLORS[Math.floor(Math.random() * _COLORS.length)];
 
     el.style.cssText = `
       left: ${originX}px;
@@ -286,16 +299,19 @@ function _spawnParticles(container, originX, originY) {
   }
 
   // Nettoyage après la fin de l'animation
-  setTimeout(() => container.innerHTML = '', 900);
+  setTimeout(() => (container.innerHTML = ""), 900);
 }
 
 // ── Close ────────────────────────────────────────────────────
 
 function _close(overlay) {
   _stopNoise();
-  if (!overlay) overlay = document.getElementById('tv-anim-overlay');
-  if (!overlay) { _showNext(); return; }
-  overlay.classList.add('tv--exit');
+  if (!overlay) overlay = document.getElementById("tv-anim-overlay");
+  if (!overlay) {
+    _showNext();
+    return;
+  }
+  overlay.classList.add("tv--exit");
   setTimeout(() => {
     overlay.remove();
     _showNext();

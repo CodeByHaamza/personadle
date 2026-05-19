@@ -5,7 +5,6 @@
  * Sous-ensemble du mode Classique : seuls les personnages avec portrait silhouette disponible.
  */
 export const personas = [
-
   // ============================================================
   // 🎮 PERSONA 1 — P1
   // ============================================================
@@ -251,5 +250,4 @@ export const personas = [
   // ============================================================
 
   "Hatsune Miku",
-
 ];

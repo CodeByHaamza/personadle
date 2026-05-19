@@ -95,66 +95,66 @@ api/
 
 ### Auth
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `POST` | `/api/auth/register` | Inscription — email + pseudo + mot de passe (bcrypt) |
-| `POST` | `/api/auth/login` | Connexion — session PHP httpOnly |
-| `POST` | `/api/auth/logout` | Déconnexion — destruction session |
-| `GET`  | `/api/auth/me` | Profil courant (requiert session active) |
+| Méthode | Endpoint             | Description                                          |
+| ------- | -------------------- | ---------------------------------------------------- |
+| `POST`  | `/api/auth/register` | Inscription — email + pseudo + mot de passe (bcrypt) |
+| `POST`  | `/api/auth/login`    | Connexion — session PHP httpOnly                     |
+| `POST`  | `/api/auth/logout`   | Déconnexion — destruction session                    |
+| `GET`   | `/api/auth/me`       | Profil courant (requiert session active)             |
 
 ### Sessions & Stats communautaires
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `POST` | `/api/sessions` | Enregistrer une partie — calcule streaks, incrémente user_stats |
-| `GET`  | `/api/community-stats` | % joueurs ayant trouvé le personnage du jour |
+| Méthode | Endpoint               | Description                                                     |
+| ------- | ---------------------- | --------------------------------------------------------------- |
+| `POST`  | `/api/sessions`        | Enregistrer une partie — calcule streaks, incrémente user_stats |
+| `GET`   | `/api/community-stats` | % joueurs ayant trouvé le personnage du jour                    |
 
 ### Utilisateur
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET`    | `/api/user/:id` | Profil complet (soi-même) ou public restreint (tiers) |
-| `PATCH`  | `/api/user/:id` | Modifier pseudo, avatar, wallpaper, musique, titre… |
-| `DELETE` | `/api/user/:id` | Soft delete + anonymisation RGPD immédiate |
-| `GET`    | `/api/user/:id/stats` | Stats par mode (wins, streak, perfect, games) |
-| `POST`   | `/api/user/:id/migrate` | Importer localStorage → BDD (idempotent) |
-| `GET`    | `/api/user/:id/compare?with=` | Comparaison stats + XP Social Link avec un ami |
-| `POST`   | `/api/user/:id/recover-streak` | Restaurer une streak perdue (cooldown 2 mois) |
-| `GET`    | `/api/user/list` | Liste paginée de tous les joueurs |
-| `GET`    | `/api/user/search?q=` | Recherche par pseudo ou code ami |
-| `GET`    | `/api/user/:id/public` | Profil public (pseudo, avatar, border, badges, titre) |
+| Méthode  | Endpoint                       | Description                                           |
+| -------- | ------------------------------ | ----------------------------------------------------- |
+| `GET`    | `/api/user/:id`                | Profil complet (soi-même) ou public restreint (tiers) |
+| `PATCH`  | `/api/user/:id`                | Modifier pseudo, avatar, wallpaper, musique, titre…   |
+| `DELETE` | `/api/user/:id`                | Soft delete + anonymisation RGPD immédiate            |
+| `GET`    | `/api/user/:id/stats`          | Stats par mode (wins, streak, perfect, games)         |
+| `POST`   | `/api/user/:id/migrate`        | Importer localStorage → BDD (idempotent)              |
+| `GET`    | `/api/user/:id/compare?with=`  | Comparaison stats + XP Social Link avec un ami        |
+| `POST`   | `/api/user/:id/recover-streak` | Restaurer une streak perdue (cooldown 2 mois)         |
+| `GET`    | `/api/user/list`               | Liste paginée de tous les joueurs                     |
+| `GET`    | `/api/user/search?q=`          | Recherche par pseudo ou code ami                      |
+| `GET`    | `/api/user/:id/public`         | Profil public (pseudo, avatar, border, badges, titre) |
 
 ### Amis
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET`    | `/api/friends` | Liste d'amis avec statut online |
-| `POST`   | `/api/friends` | Envoyer une demande d'ami |
+| Méthode  | Endpoint           | Description                     |
+| -------- | ------------------ | ------------------------------- |
+| `GET`    | `/api/friends`     | Liste d'amis avec statut online |
+| `POST`   | `/api/friends`     | Envoyer une demande d'ami       |
 | `PATCH`  | `/api/friends/:id` | Accepter ou refuser une demande |
-| `DELETE` | `/api/friends/:id` | Supprimer un ami |
+| `DELETE` | `/api/friends/:id` | Supprimer un ami                |
 
 ### Messages & Défis
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET`    | `/api/messages` | Liste des messages et défis reçus |
-| `POST`   | `/api/messages` | Envoyer un défi quotidien (mode + filtres) |
-| `PATCH`  | `/api/messages/:id` | Marquer comme lu / résolu |
-| `DELETE` | `/api/messages/:id` | Supprimer un message |
+| Méthode  | Endpoint            | Description                                |
+| -------- | ------------------- | ------------------------------------------ |
+| `GET`    | `/api/messages`     | Liste des messages et défis reçus          |
+| `POST`   | `/api/messages`     | Envoyer un défi quotidien (mode + filtres) |
+| `PATCH`  | `/api/messages/:id` | Marquer comme lu / résolu                  |
+| `DELETE` | `/api/messages/:id` | Supprimer un message                       |
 
 ### Social Link
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET`  | `/api/social-links` | Tous les Social Links de l'utilisateur courant |
-| `GET`  | `/api/social-links?friend_id=` | Social Link avec un ami spécifique |
-| `POST` | `/api/social-links/interact` | Gagner de l'XP (action type, mutuel ×2) |
+| Méthode | Endpoint                       | Description                                    |
+| ------- | ------------------------------ | ---------------------------------------------- |
+| `GET`   | `/api/social-links`            | Tous les Social Links de l'utilisateur courant |
+| `GET`   | `/api/social-links?friend_id=` | Social Link avec un ami spécifique             |
+| `POST`  | `/api/social-links/interact`   | Gagner de l'XP (action type, mutuel ×2)        |
 
 ### Leaderboard
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/api/leaderboard` | Classement filtré, ma position incluse |
+| Méthode | Endpoint           | Description                            |
+| ------- | ------------------ | -------------------------------------- |
+| `GET`   | `/api/leaderboard` | Classement filtré, ma position incluse |
 
 Paramètres : `mode` · `period` (alltime / month / week / today) · `metric` (wins / win_rate / streak / perfect / games) · `scope` (global / friends) · `page`
 
@@ -162,27 +162,27 @@ Réponse : `{ rows: [...], my_rank: { rank, score } }`
 
 ### Badges, Wallpapers, Titres
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET`  | `/api/badges` | Catalogue complet (60 badges) + déblocages utilisateur |
-| `POST` | `/api/badges/redeem` | Echanger un code événement → débloquer un badge |
-| `GET`  | `/api/wallpapers` | Catalogue wallpapers disponibles |
-| `GET`  | `/api/titles` | Catalogue titres |
-| `POST` | `/api/titles/unlock` | Débloquer un titre (conditions vérifiées côté serveur) |
+| Méthode | Endpoint             | Description                                            |
+| ------- | -------------------- | ------------------------------------------------------ |
+| `GET`   | `/api/badges`        | Catalogue complet (60 badges) + déblocages utilisateur |
+| `POST`  | `/api/badges/redeem` | Echanger un code événement → débloquer un badge        |
+| `GET`   | `/api/wallpapers`    | Catalogue wallpapers disponibles                       |
+| `GET`   | `/api/titles`        | Catalogue titres                                       |
+| `POST`  | `/api/titles/unlock` | Débloquer un titre (conditions vérifiées côté serveur) |
 
-### Admin *(is_admin = 1 requis)*
+### Admin _(is_admin = 1 requis)_
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| `GET`         | `/api/admin/users` | Liste paginée avec stats et statut |
-| `GET / PATCH` | `/api/admin/user/:id` | Voir / modifier un compte (ban, pseudo_locked) |
-| `GET`         | `/api/admin/user/:id/stats` | Stats détaillées par mode |
-| `*`           | `/api/admin/user/:id/badges` | Attribution / révocation de badges |
-| `*`           | `/api/admin/user/:id/titles` | Attribution / révocation de titres |
-| `*`           | `/api/admin/user/:id/wallpapers` | Attribution / révocation de wallpapers |
-| `GET`         | `/api/admin/user/:id/friends` | Liste des amis d'un utilisateur |
-| `GET`         | `/api/admin/social-links` | Vue d'ensemble des Social Links |
-| `*`           | `/api/admin/event-codes` | CRUD codes événement (créer, expirer, stats redemption) |
+| Méthode       | Endpoint                         | Description                                             |
+| ------------- | -------------------------------- | ------------------------------------------------------- |
+| `GET`         | `/api/admin/users`               | Liste paginée avec stats et statut                      |
+| `GET / PATCH` | `/api/admin/user/:id`            | Voir / modifier un compte (ban, pseudo_locked)          |
+| `GET`         | `/api/admin/user/:id/stats`      | Stats détaillées par mode                               |
+| `*`           | `/api/admin/user/:id/badges`     | Attribution / révocation de badges                      |
+| `*`           | `/api/admin/user/:id/titles`     | Attribution / révocation de titres                      |
+| `*`           | `/api/admin/user/:id/wallpapers` | Attribution / révocation de wallpapers                  |
+| `GET`         | `/api/admin/user/:id/friends`    | Liste des amis d'un utilisateur                         |
+| `GET`         | `/api/admin/social-links`        | Vue d'ensemble des Social Links                         |
+| `*`           | `/api/admin/event-codes`         | CRUD codes événement (créer, expirer, stats redemption) |
 
 ---
 
@@ -228,19 +228,21 @@ define('ADMIN_SECRET', 'your_cron_secret');
 Les migrations sont des fichiers SQL numérotés dans `migrations/`. Elles sont **incrémentales**.
 
 > ⚠️ Pour les procédures stockées MariaDB : ne pas utiliser phpMyAdmin. Utiliser le CLI :
+>
 > ```bash
 > mysql -u user -p db --delimiter='$$' < migrations/xxx.sql
 > ```
+>
 > phpMyAdmin ne gère pas `DELIMITER` et échoue silencieusement.
 
 ---
 
 ## Cron
 
-| Script | Fréquence recommandée | Rôle |
-|--------|-----------------------|------|
-| `cron/leaderboard.php` | Toutes les heures | Recalcul `leaderboard_cache` (mode × période × métrique) |
-| `cron/hard-delete.php` | Quotidien à 3h | Suppression définitive comptes RGPD après J+30 |
+| Script                 | Fréquence recommandée | Rôle                                                     |
+| ---------------------- | --------------------- | -------------------------------------------------------- |
+| `cron/leaderboard.php` | Toutes les heures     | Recalcul `leaderboard_cache` (mode × période × métrique) |
+| `cron/hard-delete.php` | Quotidien à 3h        | Suppression définitive comptes RGPD après J+30           |
 
 Appel sécurisé par `ADMIN_SECRET` dans le header ou en paramètre GET.
 

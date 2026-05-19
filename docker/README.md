@@ -12,11 +12,11 @@ Ce dossier contient la configuration Docker pour lancer l'environnement de déve
 
 ## Ce que Docker fournit
 
-| Service | Image | Port local | Description |
-|---|---|---|---|
-| `php` | PHP 8.3 + Apache | `http://localhost:8080` | Le site complet + API REST |
-| `db` | MariaDB 10.6 | `localhost:3307` | Base de données (même version qu'en prod Hostinger) |
-| `phpmyadmin` | phpMyAdmin 5 | `http://localhost:8081` | Interface graphique pour la BDD |
+| Service      | Image            | Port local              | Description                                         |
+| ------------ | ---------------- | ----------------------- | --------------------------------------------------- |
+| `php`        | PHP 8.3 + Apache | `http://localhost:8080` | Le site complet + API REST                          |
+| `db`         | MariaDB 10.6     | `localhost:3307`        | Base de données (même version qu'en prod Hostinger) |
+| `phpmyadmin` | phpMyAdmin 5     | `http://localhost:8081` | Interface graphique pour la BDD                     |
 
 Le schéma BDD (`sql/bdd_mysql.sql`) est appliqué **automatiquement** au premier démarrage — tables, index, contraintes, et seed de données (titres, rangs Social Link, compte de test).
 
@@ -28,6 +28,7 @@ Le schéma BDD (`sql/bdd_mysql.sql`) est appliqué **automatiquement** au premie
 - Git (pour cloner le repo)
 
 Vérifier que Docker tourne :
+
 ```bash
 docker --version        # Docker version 24+
 docker compose version  # Docker Compose version 2+
@@ -54,6 +55,7 @@ docker compose ps
 ```
 
 Accès :
+
 - **Site** → [http://localhost:8080](http://localhost:8080)
 - **PhpMyAdmin** → [http://localhost:8081](http://localhost:8081)
 
@@ -63,11 +65,11 @@ Accès :
 
 Un compte développeur est créé automatiquement au premier démarrage :
 
-| Champ | Valeur |
-|---|---|
-| Email | `dev@personadle.local` |
-| Mot de passe | `devpassword123` |
-| Pseudo | `DevJoker` |
+| Champ        | Valeur                 |
+| ------------ | ---------------------- |
+| Email        | `dev@personadle.local` |
+| Mot de passe | `devpassword123`       |
+| Pseudo       | `DevJoker`             |
 
 ---
 
@@ -118,12 +120,12 @@ docker compose up -d
 
 Le fichier `.env` (copié depuis `.env.example`) contrôle les credentials et les ports. Il est dans `.gitignore` — ne jamais le committer.
 
-| Variable | Défaut | Description |
-|---|---|---|
-| `MYSQL_PASSWORD` | `devpassword` | Mot de passe BDD |
-| `APP_PORT` | `8080` | Port du site |
-| `PMA_PORT` | `8081` | Port PhpMyAdmin |
-| `DB_EXPOSE_PORT` | `3307` | Port MariaDB exposé sur l'hôte |
+| Variable         | Défaut        | Description                    |
+| ---------------- | ------------- | ------------------------------ |
+| `MYSQL_PASSWORD` | `devpassword` | Mot de passe BDD               |
+| `APP_PORT`       | `8080`        | Port du site                   |
+| `PMA_PORT`       | `8081`        | Port PhpMyAdmin                |
+| `DB_EXPOSE_PORT` | `3307`        | Port MariaDB exposé sur l'hôte |
 
 ---
 
@@ -162,6 +164,7 @@ Accès : [http://localhost:8081](http://localhost:8081)
 ## Problèmes courants
 
 **Le port 8080 est déjà utilisé**
+
 ```bash
 # Dans .env, changer APP_PORT
 APP_PORT=8090
@@ -169,6 +172,7 @@ docker compose up -d
 ```
 
 **Les containers démarrent mais la BDD n'est pas accessible**
+
 ```bash
 # Vérifier que le container db est healthy
 docker compose ps
@@ -177,6 +181,7 @@ docker compose ps
 
 **Modifications PHP non visibles**
 Les fichiers sont montés en bind-mount — toute modification est visible immédiatement sans rebuild. Si le cache opcache pose problème :
+
 ```bash
 docker compose exec php kill -USR2 1
 ```

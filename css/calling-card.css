@@ -45,8 +45,8 @@
 .cc-card.cc-card--flip {
   animation:
     ccSlideIn 0.38s cubic-bezier(0.08, 0, 0.32, 0) forwards,
-    ccThump   0.18s ease-out 0.38s forwards,
-    ccFlip    0.65s cubic-bezier(0.45, 0, 0.55, 1) 1.1s forwards;
+    ccThump 0.18s ease-out 0.38s forwards,
+    ccFlip 0.65s cubic-bezier(0.45, 0, 0.55, 1) 1.1s forwards;
 }
 
 .cc-card-front,
@@ -59,8 +59,12 @@
   overflow: hidden;
 }
 
-.cc-card-front { transform: rotateY(0deg); }
-.cc-card-back  { transform: rotateY(180deg); }
+.cc-card-front {
+  transform: rotateY(0deg);
+}
+.cc-card-back {
+  transform: rotateY(180deg);
+}
 
 .cc-card-front img {
   width: 100%;
@@ -105,43 +109,57 @@
 
 /* 6 anneaux alternant rouge/noir, tailles croissantes, délais échelonnés */
 .cc-ring:nth-child(1) {
-  width: 160px; height: 160px;
+  width: 160px;
+  height: 160px;
   border: 13px solid #e63946;
   animation-delay: 0.26s;
 }
 .cc-ring:nth-child(2) {
-  width: 280px; height: 280px;
+  width: 280px;
+  height: 280px;
   border: 15px solid #0d0d0d;
   box-shadow: 0 0 0 5px #e63946;
   animation-delay: 0.32s;
 }
 .cc-ring:nth-child(3) {
-  width: 420px; height: 420px;
+  width: 420px;
+  height: 420px;
   border: 13px solid #e63946;
   animation-delay: 0.38s;
 }
 .cc-ring:nth-child(4) {
-  width: 580px; height: 580px;
+  width: 580px;
+  height: 580px;
   border: 14px solid #0d0d0d;
   box-shadow: 0 0 0 5px #e63946;
   animation-delay: 0.44s;
 }
 .cc-ring:nth-child(5) {
-  width: 760px; height: 760px;
+  width: 760px;
+  height: 760px;
   border: 11px solid #e63946;
-  animation-delay: 0.50s;
+  animation-delay: 0.5s;
 }
 .cc-ring:nth-child(6) {
-  width: 960px; height: 960px;
+  width: 960px;
+  height: 960px;
   border: 9px solid #0d0d0d;
   box-shadow: 0 0 0 4px #e63946;
   animation-delay: 0.56s;
 }
 
 @keyframes ccRing {
-  0%   { transform: translate(-50%, -50%) scale(0.04); opacity: 1; }
-  55%  { opacity: 0.85; }
-  100% { transform: translate(-50%, -50%) scale(1);    opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.04);
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
 }
 
 /* ── Flash rouge à l'impact ───────────────────────────── */
@@ -156,8 +174,12 @@
 }
 
 @keyframes ccFlash {
-  0%   { opacity: 0.6; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* ── Avatar ami au verso de la carte ─────────────────── */
@@ -174,7 +196,7 @@
 
 /* ── Texte verso de la carte ─────────────────────────── */
 .cc-pseudo {
-  font-family: 'Persona5', 'Oswald', 'Arial Black', Arial, sans-serif;
+  font-family: "Persona5", "Oswald", "Arial Black", Arial, sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
   color: #e63946;
@@ -212,19 +234,35 @@
   border-radius: 6px;
   font-size: 0.82rem;
   font-weight: 700;
-  font-family: 'Persona5', 'Oswald', Arial, sans-serif;
+  font-family: "Persona5", "Oswald", Arial, sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.1s, background 0.15s;
+  transition:
+    transform 0.1s,
+    background 0.15s;
 }
-.cc-btn:active { transform: scale(0.95); }
+.cc-btn:active {
+  transform: scale(0.95);
+}
 
-.cc-btn--yes { background: #e63946; color: #fff; }
-.cc-btn--yes:hover { background: #c1121f; }
+.cc-btn--yes {
+  background: #e63946;
+  color: #fff;
+}
+.cc-btn--yes:hover {
+  background: #c1121f;
+}
 
-.cc-btn--no  { background: #2a2a2a; color: #999; border: 1px solid #444; }
-.cc-btn--no:hover  { background: #3a3a3a; color: #fff; }
+.cc-btn--no {
+  background: #2a2a2a;
+  color: #999;
+  border: 1px solid #444;
+}
+.cc-btn--no:hover {
+  background: #3a3a3a;
+  color: #fff;
+}
 
 /* ── Bouton fermer ────────────────────────────────────── */
 .cc-close {
@@ -248,30 +286,50 @@
   opacity: 0;
   animation: ccFadeIn 0.2s ease 0.55s forwards;
 }
-.cc-close:hover { background: rgba(255, 255, 255, 0.22); }
+.cc-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
 
 /* ── Keyframes principaux ─────────────────────────────── */
 
 /* Slide horizontal brutal depuis la droite */
 @keyframes ccSlideIn {
-  0%   { transform: translateX(115vw); }
-  82%  { transform: translateX(-16px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(115vw);
+  }
+  82% {
+    transform: translateX(-16px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 /* Micro-rebond à l'impact */
 @keyframes ccThump {
-  0%   { transform: translateX(0) scale(1); }
-  45%  { transform: translateX(0) scale(1.05); }
-  100% { transform: translateX(0) scale(1); }
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  45% {
+    transform: translateX(0) scale(1.05);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
 }
 
 /* Retournement 3D horizontal */
 @keyframes ccFlip {
-  from { transform: rotateY(0deg); }
-  to   { transform: rotateY(180deg); }
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(180deg);
+  }
 }
 
 @keyframes ccFadeIn {
-  to { opacity: 1; }
+  to {
+    opacity: 1;
+  }
 }

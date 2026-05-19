@@ -1,115 +1,116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PersonaDLE Admin</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
-</head>
-<body>
-
-<div id="admin-loading" class="admin-loading">
-  <div class="loading-spinner"></div>
-</div>
-
-<div id="admin-app" class="hidden">
-
-  <!-- ── Header ─────────────────────────────────────────────── -->
-  <header class="admin-header">
-    <div class="admin-header-left">
-      <button id="aside-toggle" class="btn-menu" aria-label="Toggle user list">
-        <span></span><span></span><span></span>
-      </button>
-      <span class="admin-logo">⚡ ADMIN</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PersonaDLE Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Oswald:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <div id="admin-loading" class="admin-loading">
+      <div class="loading-spinner"></div>
     </div>
-    <div class="admin-header-right">
-      <a id="btn-home" class="btn-home">🏠 Accueil</a>
-      <button id="btn-codes" class="btn-codes">🎟️ Codes</button>
-      <span id="admin-username" class="admin-username-pill"></span>
-      <button id="admin-logout" class="btn-logout">Logout</button>
-    </div>
-  </header>
 
-  <!-- ── Aside overlay (mobile) ────────────────────────────── -->
-  <div id="aside-overlay" class="aside-overlay"></div>
+    <div id="admin-app" class="hidden">
+      <!-- ── Header ─────────────────────────────────────────────── -->
+      <header class="admin-header">
+        <div class="admin-header-left">
+          <button id="aside-toggle" class="btn-menu" aria-label="Toggle user list">
+            <span></span><span></span><span></span>
+          </button>
+          <span class="admin-logo">⚡ ADMIN</span>
+        </div>
+        <div class="admin-header-right">
+          <a id="btn-home" class="btn-home">🏠 Accueil</a>
+          <button id="btn-codes" class="btn-codes">🎟️ Codes</button>
+          <span id="admin-username" class="admin-username-pill"></span>
+          <button id="admin-logout" class="btn-logout">Logout</button>
+        </div>
+      </header>
 
-  <!-- ── Toast container ───────────────────────────────────── -->
-  <div id="toast-container" class="toast-container"></div>
+      <!-- ── Aside overlay (mobile) ────────────────────────────── -->
+      <div id="aside-overlay" class="aside-overlay"></div>
 
-  <!-- ── Two-panel layout ───────────────────────────────────── -->
-  <div class="admin-layout">
+      <!-- ── Toast container ───────────────────────────────────── -->
+      <div id="toast-container" class="toast-container"></div>
 
-    <!-- Left: user list -->
-    <aside class="admin-aside" id="admin-aside">
-      <div class="aside-header">
-        <span class="aside-title">Users</span>
-        <span id="admin-user-count" class="user-count-badge">—</span>
-      </div>
-      <div class="aside-search">
-        <input type="text" id="user-search" placeholder="Search pseudo, email, code…" autocomplete="off" aria-label="Search users by pseudo, email, or friend code">
-      </div>
-      <div id="users-list" class="users-list"></div>
-      <div id="users-pagination" class="pagination"></div>
-    </aside>
-
-    <!-- Right: detail panel -->
-    <main class="admin-main">
-
-      <div id="empty-state" class="empty-state">
-        <div class="empty-icon">⚡</div>
-        <p class="empty-title">Select a user</p>
-        <p class="empty-sub">Choose a user from the list to manage their account</p>
-      </div>
-
-      <!-- ── Event Codes panel (global, not per-user) ──── -->
-      <section id="codes-panel" class="user-detail hidden">
-        <div id="codes-panel-content"></div>
-      </section>
-
-      <section id="user-detail" class="user-detail hidden">
-
-        <button id="detail-back" class="btn-detail-back">← Users</button>
-
-        <div class="detail-header">
-          <div id="detail-avatar" class="detail-avatar-wrap"></div>
-          <div class="detail-header-info">
-            <div class="detail-name-row">
-              <h2 id="detail-pseudo"></h2>
-              <span id="detail-admin-badge" class="admin-pill hidden">⚡ ADMIN</span>
-            </div>
-            <p id="detail-email"></p>
-            <p id="detail-info"></p>
+      <!-- ── Two-panel layout ───────────────────────────────────── -->
+      <div class="admin-layout">
+        <!-- Left: user list -->
+        <aside class="admin-aside" id="admin-aside">
+          <div class="aside-header">
+            <span class="aside-title">Users</span>
+            <span id="admin-user-count" class="user-count-badge">—</span>
           </div>
-          <div id="detail-quick-stats" class="detail-quick-stats"></div>
-        </div>
+          <div class="aside-search">
+            <input
+              type="text"
+              id="user-search"
+              placeholder="Search pseudo, email, code…"
+              autocomplete="off"
+              aria-label="Search users by pseudo, email, or friend code"
+            />
+          </div>
+          <div id="users-list" class="users-list"></div>
+          <div id="users-pagination" class="pagination"></div>
+        </aside>
 
-        <div class="user-detail-tabs">
-          <button class="detail-tab active" data-tab="profile">👤 Profil</button>
-          <button class="detail-tab" data-tab="badges">🏅 Badges</button>
-          <button class="detail-tab" data-tab="wallpapers">🖼️ Walls</button>
-          <button class="detail-tab" data-tab="titles">👑 Titres</button>
-          <button class="detail-tab" data-tab="stats">📊 Stats</button>
-          <button class="detail-tab" data-tab="friends">👫 Amis</button>
-          <button class="detail-tab" data-tab="social">🔗 Social</button>
-        </div>
+        <!-- Right: detail panel -->
+        <main class="admin-main">
+          <div id="empty-state" class="empty-state">
+            <div class="empty-icon">⚡</div>
+            <p class="empty-title">Select a user</p>
+            <p class="empty-sub">Choose a user from the list to manage their account</p>
+          </div>
 
-        <div id="user-detail-content" class="user-detail-content"></div>
+          <!-- ── Event Codes panel (global, not per-user) ──── -->
+          <section id="codes-panel" class="user-detail hidden">
+            <div id="codes-panel-content"></div>
+          </section>
 
-      </section>
+          <section id="user-detail" class="user-detail hidden">
+            <button id="detail-back" class="btn-detail-back">← Users</button>
 
-    </main>
-  </div>
+            <div class="detail-header">
+              <div id="detail-avatar" class="detail-avatar-wrap"></div>
+              <div class="detail-header-info">
+                <div class="detail-name-row">
+                  <h2 id="detail-pseudo"></h2>
+                  <span id="detail-admin-badge" class="admin-pill hidden">⚡ ADMIN</span>
+                </div>
+                <p id="detail-email"></p>
+                <p id="detail-info"></p>
+              </div>
+              <div id="detail-quick-stats" class="detail-quick-stats"></div>
+            </div>
 
-  <!-- ── FAB ────────────────────────────────────────────────── -->
-  <button id="pending-fab" class="pending-fab hidden">
-    ⚡ Appliquer (<span id="pending-count">0</span>)
-  </button>
+            <div class="user-detail-tabs">
+              <button class="detail-tab active" data-tab="profile">👤 Profil</button>
+              <button class="detail-tab" data-tab="badges">🏅 Badges</button>
+              <button class="detail-tab" data-tab="wallpapers">🖼️ Walls</button>
+              <button class="detail-tab" data-tab="titles">👑 Titres</button>
+              <button class="detail-tab" data-tab="stats">📊 Stats</button>
+              <button class="detail-tab" data-tab="friends">👫 Amis</button>
+              <button class="detail-tab" data-tab="social">🔗 Social</button>
+            </div>
 
-</div>
+            <div id="user-detail-content" class="user-detail-content"></div>
+          </section>
+        </main>
+      </div>
 
-<script type="module" src="admin.js"></script>
-</body>
+      <!-- ── FAB ────────────────────────────────────────────────── -->
+      <button id="pending-fab" class="pending-fab hidden">
+        ⚡ Appliquer (<span id="pending-count">0</span>)
+      </button>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+  </body>
 </html>

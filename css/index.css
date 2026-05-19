@@ -15,7 +15,6 @@ footer {
   padding-bottom: 82px; /* fills the 62px bottom-nav area + breathing room */
 }
 
-
 /* =====================================================
    1. TITRE ET WRAPPER
    ===================================================== */
@@ -24,7 +23,7 @@ footer {
 #title {
   display: inline-block;
   color: #51ff00;
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
   font-size: 30px;
   padding: 10px 20px;
   border-radius: 10px;
@@ -39,19 +38,20 @@ footer {
 .gamemode-title {
   text-align: center;
   color: white;
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
   font-size: 36px;
   border: 4px solid rgb(202, 202, 202);
   padding: 15px 30px;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.6);
   box-shadow: 0 0 15px rgba(8, 8, 8, 0.7);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   display: block;
   width: fit-content;
   margin: 30px auto;
 }
-
 
 /* =====================================================
    2. BOUTONS DE SÉLECTION DE MODE DE JEU
@@ -66,7 +66,9 @@ footer {
   padding: 0;
   background: none;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   display: block;
   margin: 20px auto;
 }
@@ -77,7 +79,9 @@ footer {
   display: block;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 /* =====================================================
@@ -108,7 +112,9 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  transition:
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
 }
 
 /* Halo bleu au survol */
@@ -134,7 +140,9 @@ footer {
   opacity: 0;
   z-index: 1;
   filter: blur(8px);
-  transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1s ease;
+  transition:
+    transform 1.2s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 1s ease;
 }
 
 .p3-container:hover .p3-moon {
@@ -151,30 +159,62 @@ footer {
   width: 3px;
   height: 25px;
   background-color: #2083f5;
-  box-shadow: 0 0 10px #2083f5, 0 0 20px #00e5ff;
+  box-shadow:
+    0 0 10px #2083f5,
+    0 0 20px #00e5ff;
   border-radius: 50px;
   opacity: 0;
   z-index: 2;
 }
 
-.p3-p1 { left: 15%; }
-.p3-p2 { left: 45%; height: 15px; }
-.p3-p3 { left: 75%; height: 35px; }
-.p3-p4 { left: 90%; }
+.p3-p1 {
+  left: 15%;
+}
+.p3-p2 {
+  left: 45%;
+  height: 15px;
+}
+.p3-p3 {
+  left: 75%;
+  height: 35px;
+}
+.p3-p4 {
+  left: 90%;
+}
 
 .p3-container:hover .p3-particle {
   animation: floatUp 1s ease-in-out infinite;
 }
 
-.p3-container:hover .p3-p1 { animation-delay: 0s;   animation-duration: 1.2s; }
-.p3-container:hover .p3-p2 { animation-delay: 0.3s; animation-duration: 0.9s; }
-.p3-container:hover .p3-p3 { animation-delay: 0.1s; animation-duration: 1.5s; }
-.p3-container:hover .p3-p4 { animation-delay: 0.5s; animation-duration: 1.1s; }
+.p3-container:hover .p3-p1 {
+  animation-delay: 0s;
+  animation-duration: 1.2s;
+}
+.p3-container:hover .p3-p2 {
+  animation-delay: 0.3s;
+  animation-duration: 0.9s;
+}
+.p3-container:hover .p3-p3 {
+  animation-delay: 0.1s;
+  animation-duration: 1.5s;
+}
+.p3-container:hover .p3-p4 {
+  animation-delay: 0.5s;
+  animation-duration: 1.1s;
+}
 
 @keyframes floatUp {
-  0%   { transform: translateY(0) scaleY(1);         opacity: 0; }
-  30%  { opacity: 1; }
-  100% { transform: translateY(-150px) scaleY(1.5);  opacity: 0; }
+  0% {
+    transform: translateY(0) scaleY(1);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-150px) scaleY(1.5);
+    opacity: 0;
+  }
 }
 
 /* --- Image principale ---
@@ -202,26 +242,57 @@ footer {
    └──────────────────────────────────────────────────────────── ┘
 */
 @keyframes p3Reveal {
-  0%   { opacity: 0;    filter: brightness(0.1) grayscale(70%) blur(3px); transform: scale(0.95); }
-  45%  { opacity: 0;    filter: brightness(0.15) grayscale(50%);          transform: scale(0.95); }
-  72%  { opacity: 0.65; filter: brightness(0.7) grayscale(10%);           transform: scale(1.0);  }
-  100% { opacity: 1;    filter: brightness(1) grayscale(0%);              transform: scale(1.02); }
+  0% {
+    opacity: 0;
+    filter: brightness(0.1) grayscale(70%) blur(3px);
+    transform: scale(0.95);
+  }
+  45% {
+    opacity: 0;
+    filter: brightness(0.15) grayscale(50%);
+    transform: scale(0.95);
+  }
+  72% {
+    opacity: 0.65;
+    filter: brightness(0.7) grayscale(10%);
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1) grayscale(0%);
+    transform: scale(1.02);
+  }
 }
 
 /* --- Responsive P3 --- */
 
 /* Tablette (<=768px) : lune légèrement réduite */
 @media (max-width: 768px) {
-  .p3-container { min-height: 70px; }
-  .p3-moon      { width: 110px; height: 110px; }
+  .p3-container {
+    min-height: 70px;
+  }
+  .p3-moon {
+    width: 110px;
+    height: 110px;
+  }
 }
 
 /* Mobile (<=480px) : lune et particules réduites */
 @media (max-width: 480px) {
-  .p3-container { min-height: 60px; border-radius: 6px; }
-  .p3-moon      { width: 80px; height: 80px; }
-  .p3-particle  { height: 18px; }
-  .p3-p3        { height: 24px; }
+  .p3-container {
+    min-height: 60px;
+    border-radius: 6px;
+  }
+  .p3-moon {
+    width: 80px;
+    height: 80px;
+  }
+  .p3-particle {
+    height: 18px;
+  }
+  .p3-p3 {
+    height: 24px;
+  }
 }
 
 /* =====================================================
@@ -239,33 +310,36 @@ footer {
 */
 .p4-container {
   position: relative;
-  background-color: #fce404;        /* Jaune emblématique Persona 4 */
+  background-color: #fce404; /* Jaune emblématique Persona 4 */
   border: none;
   cursor: pointer;
   /* Responsive : même comportement que .gamemode-button */
   width: 100%;
   max-width: 500px;
   height: auto;
-  min-height: 90px;                 /* Espace pour les décos */
+  min-height: 90px; /* Espace pour les décos */
   overflow: hidden;
-  border-radius: 15px;              /* Aligné avec les autres boutons */
+  border-radius: 15px; /* Aligné avec les autres boutons */
   display: flex;
   justify-content: center;
   align-items: center;
   /* Transition combinée : lueur + légère mise à l'échelle */
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
   padding: 6px 0;
-  margin: 20px auto;                /* Centré comme .gamemode-button */
+  margin: 20px auto; /* Centré comme .gamemode-button */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 /* Lueur jaune + léger scale au survol */
 .p4-container:hover {
   will-change: transform;
-  box-shadow: 0 8px 28px rgba(240, 198, 12, 0.9), 0 0 18px rgba(255, 220, 0, 0.5);
+  box-shadow:
+    0 8px 28px rgba(240, 198, 12, 0.9),
+    0 0 18px rgba(255, 220, 0, 0.5);
   transform: scale(1.03);
 }
-
 
 /* --- Image principale ---
    Pleine largeur du conteneur, transition douce
@@ -278,7 +352,9 @@ footer {
   height: auto;
   display: block;
   border-radius: 12px;
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease;
 }
 
 /* Révélation douce — 2s avec ease-in-out pour une montée
@@ -290,11 +366,11 @@ footer {
   animation: slowReveal 2s ease-in-out both;
 }
 
-
 /* --- Décorations (cachées par défaut) ---
    pointer-events: none pour ne pas gêner les clics.
 */
-.p4-rainbow, .p4-flower {
+.p4-rainbow,
+.p4-flower {
   position: absolute;
   opacity: 0;
   transform: scale(0);
@@ -311,11 +387,11 @@ footer {
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  border: 16px solid #ff7700;       /* Anneau orange */
+  border: 16px solid #ff7700; /* Anneau orange */
   box-shadow:
-    inset 0 0 0 16px #ffd900,       /* Anneau jaune intérieur */
-    0 0 0 16px #ff0055,             /* Anneau rose-rouge extérieur */
-    0 0 0 32px rgba(0, 170, 255, 0.55); /* Anneau bleu diffus */
+    inset 0 0 0 16px #ffd900,
+    /* Anneau jaune intérieur */ 0 0 0 16px #ff0055,
+    /* Anneau rose-rouge extérieur */ 0 0 0 32px rgba(0, 170, 255, 0.55); /* Anneau bleu diffus */
   z-index: 1;
   top: -90px;
   left: -90px;
@@ -330,10 +406,21 @@ footer {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
-.flower-1 { top: 8px;    right: 16px;  color: #ff0055; }  /* Coin haut-droit */
-.flower-2 { bottom: 8px; left: 16px;   color: #4caf50; }  /* Coin bas-gauche */
-.flower-3 { bottom: 14px; right: 44px; color: #ff7a00; }  /* Bas-droit intérieur */
-
+.flower-1 {
+  top: 8px;
+  right: 16px;
+  color: #ff0055;
+} /* Coin haut-droit */
+.flower-2 {
+  bottom: 8px;
+  left: 16px;
+  color: #4caf50;
+} /* Coin bas-gauche */
+.flower-3 {
+  bottom: 14px;
+  right: 44px;
+  color: #ff7a00;
+} /* Bas-droit intérieur */
 
 /* --- Déclenchement des animations au survol --- */
 .p4-container:hover .p4-rainbow {
@@ -341,10 +428,15 @@ footer {
 }
 
 /* Fleurs : délais décalés pour effet cascade */
-.p4-container:hover .flower-1 { animation: popFlower 0.45s ease-out 0.05s forwards; }
-.p4-container:hover .flower-2 { animation: popFlower 0.45s ease-out 0.18s forwards; }
-.p4-container:hover .flower-3 { animation: popFlower 0.45s ease-out 0.30s forwards; }
-
+.p4-container:hover .flower-1 {
+  animation: popFlower 0.45s ease-out 0.05s forwards;
+}
+.p4-container:hover .flower-2 {
+  animation: popFlower 0.45s ease-out 0.18s forwards;
+}
+.p4-container:hover .flower-3 {
+  animation: popFlower 0.45s ease-out 0.3s forwards;
+}
 
 /* =====================================================
    KEYFRAMES — Animations bouton Emoji
@@ -352,15 +444,30 @@ footer {
 
 /* Fleurs : apparition avec rebond et légère rotation */
 @keyframes popFlower {
-  0%   { opacity: 0; transform: scale(0) rotate(0deg); }
-  65%  { opacity: 1; transform: scale(1.25) rotate(40deg); }
-  100% { opacity: 1; transform: scale(1)    rotate(18deg); }
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.25) rotate(40deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(18deg);
+  }
 }
 
 /* Arc-en-ciel : expansion depuis le coin haut-gauche */
 @keyframes popRainbow {
-  0%   { opacity: 0; transform: scale(0); }
-  100% { opacity: 0.75; transform: scale(1.6); }
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 0.75;
+    transform: scale(1.6);
+  }
 }
 
 /* Révélation douce de l'image en fondu très progressif.
@@ -379,37 +486,36 @@ footer {
     filter: blur(2px);
   }
   35% {
-    opacity: 0;                               /* Décos encore en train d'apparaître */
+    opacity: 0; /* Décos encore en train d'apparaître */
     transform: scale(0.96);
     filter: blur(2px);
   }
   50% {
-    opacity: 0.12;                            /* Amorce à peine perceptible */
+    opacity: 0.12; /* Amorce à peine perceptible */
     transform: scale(0.97);
     filter: blur(1.5px);
   }
   65% {
-    opacity: 0.35;                            /* Monte doucement */
+    opacity: 0.35; /* Monte doucement */
     transform: scale(0.99);
     filter: blur(0.8px) brightness(1.08);
   }
   80% {
-    opacity: 0.65;                            /* Toujours pas fini, laisse voir les décos */
+    opacity: 0.65; /* Toujours pas fini, laisse voir les décos */
     transform: scale(1.01);
     filter: blur(0.3px) brightness(1.1);
   }
   92% {
-    opacity: 0.88;                            /* Presque là */
+    opacity: 0.88; /* Presque là */
     transform: scale(1.005);
     filter: brightness(1.05);
   }
   100% {
-    opacity: 1;                               /* Image pleinement révélée */
+    opacity: 1; /* Image pleinement révélée */
     transform: scale(1);
     filter: brightness(1);
   }
 }
-
 
 /* =====================================================
    RESPONSIVE — Bouton Emoji (p4-container)
@@ -460,9 +566,18 @@ footer {
   }
 
   /* Repositionnement des fleurs pour le format étroit */
-  .flower-1 { top: 5px;    right: 10px; }
-  .flower-2 { bottom: 5px; left: 10px; }
-  .flower-3 { bottom: 10px; right: 30px; }
+  .flower-1 {
+    top: 5px;
+    right: 10px;
+  }
+  .flower-2 {
+    bottom: 5px;
+    left: 10px;
+  }
+  .flower-3 {
+    bottom: 10px;
+    right: 30px;
+  }
 
   /* Arc-en-ciel minimal */
   .p4-rainbow {
@@ -505,7 +620,9 @@ footer {
   cursor: pointer;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
   padding: 0;
   margin: 20px auto;
   display: flex;
@@ -516,10 +633,11 @@ footer {
 /* Halo rouge vif Phantom Thieves — transition ultra-rapide */
 .p5-container:hover {
   will-change: transform;
-  box-shadow: 0 8px 40px rgba(255, 0, 0, 1), 0 0 20px rgba(255, 0, 0, 0.5);
+  box-shadow:
+    0 8px 40px rgba(255, 0, 0, 1),
+    0 0 20px rgba(255, 0, 0, 0.5);
   border-color: #ff0000;
 }
-
 
 /* =====================================================
    COUCHES D'ARRIÈRE-PLAN (z-index 1)
@@ -528,7 +646,8 @@ footer {
 /* Conteneur global des couches d'animation */
 .p5-background-layers {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   z-index: 1;
@@ -539,7 +658,8 @@ footer {
 */
 .p5-impact-flash {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   background: radial-gradient(
@@ -554,7 +674,7 @@ footer {
 }
 
 .p5-container:hover .p5-impact-flash {
-  animation: p5ImpactFlash 0.30s ease-out 0s both;
+  animation: p5ImpactFlash 0.3s ease-out 0s both;
 }
 
 /* Bandes diagonales sombres (style danger P5) + projecteur rouge central.
@@ -565,19 +685,13 @@ footer {
   height: 100%;
   background-image:
     radial-gradient(ellipse 72% 82% at 50% 50%, rgba(190, 0, 0, 0.55) 0%, transparent 65%),
-    repeating-linear-gradient(
-      -45deg,
-      #1e0000 0px,
-      #1e0000 18px,
-      #060606 18px,
-      #060606 36px
-    );
+    repeating-linear-gradient(-45deg, #1e0000 0px, #1e0000 18px, #060606 18px, #060606 36px);
   opacity: 0.12;
   transition: opacity 0.04s ease;
 }
 
 .p5-container:hover .p5-bg-jagged {
-  opacity: 1.0;
+  opacity: 1;
   transition: opacity 0.04s ease;
 }
 
@@ -586,7 +700,8 @@ footer {
 */
 .p5-speed-trails {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 }
@@ -601,25 +716,80 @@ footer {
 }
 
 /* 8 traînées — hauteurs, largeurs et couleurs variées */
-.trail-1 { top: 0%;  height: 16%; width: 75%; background: rgba(220, 0,   0,   1.00); }
-.trail-2 { top: 13%; height: 11%; width: 90%; background: rgba(255, 255, 255, 0.95); }
-.trail-3 { top: 23%; height: 17%; width: 72%; background: rgba(200, 0,   0,   0.90); }
-.trail-4 { top: 38%; height: 11%; width: 88%; background: rgba(255, 255, 255, 0.80); }
-.trail-5 { top: 48%; height: 18%; width: 70%; background: rgba(210, 0,   0,   0.92); }
-.trail-6 { top: 64%; height: 10%; width: 82%; background: rgba(255, 255, 255, 0.65); }
-.trail-7 { top: 73%; height: 16%; width: 68%; background: rgba(185, 0,   0,   0.85); }
-.trail-8 { top: 87%; height: 10%; width: 78%; background: rgba(255, 255, 255, 0.55); }
+.trail-1 {
+  top: 0%;
+  height: 16%;
+  width: 75%;
+  background: rgba(220, 0, 0, 1);
+}
+.trail-2 {
+  top: 13%;
+  height: 11%;
+  width: 90%;
+  background: rgba(255, 255, 255, 0.95);
+}
+.trail-3 {
+  top: 23%;
+  height: 17%;
+  width: 72%;
+  background: rgba(200, 0, 0, 0.9);
+}
+.trail-4 {
+  top: 38%;
+  height: 11%;
+  width: 88%;
+  background: rgba(255, 255, 255, 0.8);
+}
+.trail-5 {
+  top: 48%;
+  height: 18%;
+  width: 70%;
+  background: rgba(210, 0, 0, 0.92);
+}
+.trail-6 {
+  top: 64%;
+  height: 10%;
+  width: 82%;
+  background: rgba(255, 255, 255, 0.65);
+}
+.trail-7 {
+  top: 73%;
+  height: 16%;
+  width: 68%;
+  background: rgba(185, 0, 0, 0.85);
+}
+.trail-8 {
+  top: 87%;
+  height: 10%;
+  width: 78%;
+  background: rgba(255, 255, 255, 0.55);
+}
 
 /* Rafale ultra-serrée : toutes les traînées défilent en 0.40s */
-.p5-container:hover .trail-1 { animation: speedTrail 0.35s ease-out 0.00s both; }
-.p5-container:hover .trail-2 { animation: speedTrail 0.35s ease-out 0.03s both; }
-.p5-container:hover .trail-3 { animation: speedTrail 0.35s ease-out 0.05s both; }
-.p5-container:hover .trail-4 { animation: speedTrail 0.35s ease-out 0.08s both; }
-.p5-container:hover .trail-5 { animation: speedTrail 0.35s ease-out 0.10s both; }
-.p5-container:hover .trail-6 { animation: speedTrail 0.35s ease-out 0.13s both; }
-.p5-container:hover .trail-7 { animation: speedTrail 0.35s ease-out 0.16s both; }
-.p5-container:hover .trail-8 { animation: speedTrail 0.35s ease-out 0.19s both; }
-
+.p5-container:hover .trail-1 {
+  animation: speedTrail 0.35s ease-out 0s both;
+}
+.p5-container:hover .trail-2 {
+  animation: speedTrail 0.35s ease-out 0.03s both;
+}
+.p5-container:hover .trail-3 {
+  animation: speedTrail 0.35s ease-out 0.05s both;
+}
+.p5-container:hover .trail-4 {
+  animation: speedTrail 0.35s ease-out 0.08s both;
+}
+.p5-container:hover .trail-5 {
+  animation: speedTrail 0.35s ease-out 0.1s both;
+}
+.p5-container:hover .trail-6 {
+  animation: speedTrail 0.35s ease-out 0.13s both;
+}
+.p5-container:hover .trail-7 {
+  animation: speedTrail 0.35s ease-out 0.16s both;
+}
+.p5-container:hover .trail-8 {
+  animation: speedTrail 0.35s ease-out 0.19s both;
+}
 
 /* --- Étoiles explosives P5 ---
    Zooment depuis 0, pulsent fort, puis s'évaporent en tournant.
@@ -627,7 +797,8 @@ footer {
 */
 .p5-stars-burst-container {
   position: absolute;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
@@ -642,25 +813,104 @@ footer {
 }
 
 /* Plus grosses et plus lumineuses que l'ancienne version */
-.sburst-1 { top: 5%;     left: 5%;    font-size: 42px; color: #cc0000; text-shadow: 0 0 20px #ff4400, 0 0 40px #ff2200; }
-.sburst-2 { top: 50%;    left: 55%;   font-size: 28px; color: white;   text-shadow: 0 0 16px #ffffff, 0 0 32px #cc0000; }
-.sburst-3 { top: 3%;     right: 8%;   font-size: 50px; color: #cc0000; text-shadow: 0 0 24px #ff2200, 0 0 50px #ff0000; }
-.sburst-4 { bottom: 6%;  left: 18%;   font-size: 28px; color: white;   text-shadow: 0 0 14px #ffffff, 0 0 28px #cc0000; }
-.sburst-5 { top: 35%;    right: 4%;   font-size: 36px; color: #ff2200; text-shadow: 0 0 18px #ff4400, 0 0 36px #ff0000; }
-.sburst-6 { top: 20%;    left: 40%;   font-size: 20px; color: white;   text-shadow: 0 0 12px #ffffff, 0 0 24px #cc0000; }
-.sburst-7 { bottom: 12%; right: 12%;  font-size: 34px; color: #ff3300; text-shadow: 0 0 18px #ff5500, 0 0 36px #ff0000; }
-.sburst-8 { top: 60%;    left: 8%;    font-size: 26px; color: white;   text-shadow: 0 0 14px #ffffff, 0 0 26px #cc0000; }
+.sburst-1 {
+  top: 5%;
+  left: 5%;
+  font-size: 42px;
+  color: #cc0000;
+  text-shadow:
+    0 0 20px #ff4400,
+    0 0 40px #ff2200;
+}
+.sburst-2 {
+  top: 50%;
+  left: 55%;
+  font-size: 28px;
+  color: white;
+  text-shadow:
+    0 0 16px #ffffff,
+    0 0 32px #cc0000;
+}
+.sburst-3 {
+  top: 3%;
+  right: 8%;
+  font-size: 50px;
+  color: #cc0000;
+  text-shadow:
+    0 0 24px #ff2200,
+    0 0 50px #ff0000;
+}
+.sburst-4 {
+  bottom: 6%;
+  left: 18%;
+  font-size: 28px;
+  color: white;
+  text-shadow:
+    0 0 14px #ffffff,
+    0 0 28px #cc0000;
+}
+.sburst-5 {
+  top: 35%;
+  right: 4%;
+  font-size: 36px;
+  color: #ff2200;
+  text-shadow:
+    0 0 18px #ff4400,
+    0 0 36px #ff0000;
+}
+.sburst-6 {
+  top: 20%;
+  left: 40%;
+  font-size: 20px;
+  color: white;
+  text-shadow:
+    0 0 12px #ffffff,
+    0 0 24px #cc0000;
+}
+.sburst-7 {
+  bottom: 12%;
+  right: 12%;
+  font-size: 34px;
+  color: #ff3300;
+  text-shadow:
+    0 0 18px #ff5500,
+    0 0 36px #ff0000;
+}
+.sburst-8 {
+  top: 60%;
+  left: 8%;
+  font-size: 26px;
+  color: white;
+  text-shadow:
+    0 0 14px #ffffff,
+    0 0 26px #cc0000;
+}
 
 /* Jaillissent juste après les traînées — 3 variantes */
-.p5-container:hover .sburst-1 { animation: starBurst 0.70s ease-in-out 0.06s forwards; }
-.p5-container:hover .sburst-2 { animation: starSpin  0.75s ease-in-out 0.20s forwards; }
-.p5-container:hover .sburst-3 { animation: starFlash 0.55s ease-in-out 0.03s forwards; }
-.p5-container:hover .sburst-4 { animation: starSpin  0.68s ease-in-out 0.28s forwards; }
-.p5-container:hover .sburst-5 { animation: starBurst 0.72s ease-in-out 0.12s forwards; }
-.p5-container:hover .sburst-6 { animation: starFlash 0.50s ease-in-out 0.24s forwards; }
-.p5-container:hover .sburst-7 { animation: starBurst 0.80s ease-in-out 0.08s forwards; }
-.p5-container:hover .sburst-8 { animation: starSpin  0.65s ease-in-out 0.35s forwards; }
-
+.p5-container:hover .sburst-1 {
+  animation: starBurst 0.7s ease-in-out 0.06s forwards;
+}
+.p5-container:hover .sburst-2 {
+  animation: starSpin 0.75s ease-in-out 0.2s forwards;
+}
+.p5-container:hover .sburst-3 {
+  animation: starFlash 0.55s ease-in-out 0.03s forwards;
+}
+.p5-container:hover .sburst-4 {
+  animation: starSpin 0.68s ease-in-out 0.28s forwards;
+}
+.p5-container:hover .sburst-5 {
+  animation: starBurst 0.72s ease-in-out 0.12s forwards;
+}
+.p5-container:hover .sburst-6 {
+  animation: starFlash 0.5s ease-in-out 0.24s forwards;
+}
+.p5-container:hover .sburst-7 {
+  animation: starBurst 0.8s ease-in-out 0.08s forwards;
+}
+.p5-container:hover .sburst-8 {
+  animation: starSpin 0.65s ease-in-out 0.35s forwards;
+}
 
 /* =====================================================
    MASQUE DE JOKER — z-index 15, au-dessus de tout
@@ -691,18 +941,13 @@ footer {
   height: 160px;
   width: auto;
   display: block;
-  filter:
-    drop-shadow(0 0 10px #ff0000)
-    drop-shadow(0 0 24px #ff4400)
-    drop-shadow(0 0 5px #000)
+  filter: drop-shadow(0 0 10px #ff0000) drop-shadow(0 0 24px #ff4400) drop-shadow(0 0 5px #000)
     drop-shadow(0 3px 10px rgba(0, 0, 0, 0.9));
 }
 
 .p5-container:hover .p5-joker-mask {
-  animation: jokerReveal 2.0s ease-out 0.38s both;
+  animation: jokerReveal 2s ease-out 0.38s both;
 }
-
-
 
 /* =====================================================
    TITRE ALL-OUT / ATTACK — z-index 10
@@ -712,7 +957,10 @@ footer {
 
 .p5-main-content {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -729,9 +977,10 @@ footer {
 }
 
 /* Base commune */
-.p5-line-1, .p5-line-2 {
+.p5-line-1,
+.p5-line-2 {
   display: block;
-  font-family: 'Helvetica Neue', 'Arial Black', Arial, sans-serif;
+  font-family: "Helvetica Neue", "Arial Black", Arial, sans-serif;
   font-weight: 900;
   font-style: italic;
   text-transform: uppercase;
@@ -740,19 +989,21 @@ footer {
 
 /* "ALL-OUT" — blanc, police Persona 5, crash depuis le haut */
 .p5-line-1 {
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-family: "Persona5", "Arial Black", Arial, sans-serif;
   font-weight: normal;
   font-style: normal;
   font-size: 22px;
   color: white;
   letter-spacing: 5px;
-  text-shadow: 0 0 14px rgba(255, 0, 0, 0.95), 2px 2px 0 #000;
+  text-shadow:
+    0 0 14px rgba(255, 0, 0, 0.95),
+    2px 2px 0 #000;
   transform: translateY(-40px) scale(1.4);
 }
 
 /* "ATTACK" — rouge vif, police Persona 5, très impactant */
 .p5-line-2 {
-  font-family: 'Persona5', 'Arial Black', Arial, sans-serif;
+  font-family: "Persona5", "Arial Black", Arial, sans-serif;
   font-weight: normal;
   font-style: normal;
   font-size: 46px;
@@ -766,9 +1017,12 @@ footer {
 }
 
 /* Crash vertical avec overshoot, tient, puis disparaît */
-.p5-container:hover .p5-line-1 { animation: p5TitleCrashTop 1.4s ease-out 0.22s both; }
-.p5-container:hover .p5-line-2 { animation: p5TitleCrashBot 1.4s ease-out 0.28s both; }
-
+.p5-container:hover .p5-line-1 {
+  animation: p5TitleCrashTop 1.4s ease-out 0.22s both;
+}
+.p5-container:hover .p5-line-2 {
+  animation: p5TitleCrashBot 1.4s ease-out 0.28s both;
+}
 
 /* =====================================================
    IMAGE PRINCIPALE — z-index 2
@@ -788,74 +1042,161 @@ footer {
   animation: p5Reveal 2.5s ease-out both;
 }
 
-
 /* =====================================================
    KEYFRAMES — Bouton All-Out Attack
    ===================================================== */
 
 /* Choc visuel initial — rouge plein puis transparent */
 @keyframes p5ImpactFlash {
-  0%   { opacity: 0.9; }
-  55%  { opacity: 0.4; }
-  100% { opacity: 0;   }
+  0% {
+    opacity: 0.9;
+  }
+  55% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Traînée de vitesse : sweep gauche→droite en paralléllogramme */
 @keyframes speedTrail {
-  0%   { opacity: 0;   transform: translateX(-115%); }
-  8%   { opacity: 1;   }
-  85%  { opacity: 0.8; }
-  100% { opacity: 0;   transform: translateX(170%); }
+  0% {
+    opacity: 0;
+    transform: translateX(-115%);
+  }
+  8% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(170%);
+  }
 }
 
 /* Étoile variante 1 — zoom explosif puis expand et disparaît */
 @keyframes starBurst {
-  0%   { opacity: 0;   transform: scale(0)   rotate(0deg);   }
-  20%  { opacity: 1;   transform: scale(1.8) rotate(12deg);  }
-  55%  { opacity: 0.9; transform: scale(1.3) rotate(8deg);   }
-  100% { opacity: 0;   transform: scale(2.5) rotate(30deg);  }
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.8) rotate(12deg);
+  }
+  55% {
+    opacity: 0.9;
+    transform: scale(1.3) rotate(8deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.5) rotate(30deg);
+  }
 }
 
 /* Étoile variante 2 — apparaît en tournant puis s'évapore */
 @keyframes starSpin {
-  0%   { opacity: 0;   transform: scale(0)   rotate(-60deg); }
-  18%  { opacity: 1;   transform: scale(1.7) rotate(0deg);   }
-  60%  { opacity: 0.9; transform: scale(1.3) rotate(25deg);  }
-  100% { opacity: 0;   transform: scale(2.0) rotate(90deg);  }
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-60deg);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.7) rotate(0deg);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1.3) rotate(25deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2) rotate(90deg);
+  }
 }
 
 /* Étoile variante 3 — double flash percutant */
 @keyframes starFlash {
-  0%   { opacity: 0;   transform: scale(0);   }
-  12%  { opacity: 1;   transform: scale(2.0); }
-  28%  { opacity: 0.2; transform: scale(1.3); }
-  50%  { opacity: 1;   transform: scale(1.8); }
-  75%  { opacity: 0.4; transform: scale(1.5); }
-  100% { opacity: 0;   transform: scale(2.2); }
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(2);
+  }
+  28% {
+    opacity: 0.2;
+    transform: scale(1.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.8);
+  }
+  75% {
+    opacity: 0.4;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
 }
 
 /* Titre ligne 1 "ALL-OUT" — crash depuis le haut, rebond, tient, s'efface */
 @keyframes p5TitleCrashTop {
-  0%   { opacity: 0; transform: translateY(-40px) scale(1.4);
-         animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1); }
-  18%  { opacity: 1; transform: translateY(3px)   scale(0.95); }
-  28%  { opacity: 1; transform: translateY(0)     scale(1.0);
-         animation-timing-function: linear; }
-  62%  { opacity: 1; transform: translateY(0)     scale(1.0);
-         animation-timing-function: ease-in; }
-  100% { opacity: 0; transform: translateY(0)     scale(1.0); }
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.4);
+    animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(3px) scale(0.95);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation-timing-function: linear;
+  }
+  62% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Titre ligne 2 "ATTACK" — crash depuis le bas, rebond, tient, s'efface */
 @keyframes p5TitleCrashBot {
-  0%   { opacity: 0; transform: translateY(40px)  scale(1.4);
-         animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1); }
-  18%  { opacity: 1; transform: translateY(-3px)  scale(0.95); }
-  28%  { opacity: 1; transform: translateY(0)     scale(1.0);
-         animation-timing-function: linear; }
-  62%  { opacity: 1; transform: translateY(0)     scale(1.0);
-         animation-timing-function: ease-in; }
-  100% { opacity: 0; transform: translateY(0)     scale(1.0); }
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(1.4);
+    animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(-3px) scale(0.95);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation-timing-function: linear;
+  }
+  62% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Masque de Joker — matérialisation douce depuis le néant.
@@ -865,51 +1206,44 @@ footer {
 */
 @keyframes jokerReveal {
   /* Invisible, légèrement flou, légèrement petit */
-  0%   {
+  0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.80);
-    filter: blur(6px) brightness(2.5)
-            drop-shadow(0 0 20px #ff0000) drop-shadow(0 0 40px #ff4400);
+    transform: translate(-50%, -50%) scale(0.8);
+    filter: blur(6px) brightness(2.5) drop-shadow(0 0 20px #ff0000) drop-shadow(0 0 40px #ff4400);
   }
   /* Commence à apparaître — toujours flou, brume rouge */
-  18%  {
+  18% {
     opacity: 0.6;
     transform: translate(-50%, -50%) scale(0.93);
-    filter: blur(2.5px) brightness(1.8)
-            drop-shadow(0 0 18px #ff0000) drop-shadow(0 0 36px #ff4400);
+    filter: blur(2.5px) brightness(1.8) drop-shadow(0 0 18px #ff0000) drop-shadow(0 0 36px #ff4400);
   }
   /* Net, pleine opacité — s'installe au centre avec léger overshoot */
-  35%  {
+  35% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.04);
-    filter: blur(0) brightness(1.3)
-            drop-shadow(0 0 14px #ff0000) drop-shadow(0 0 28px #ff4400);
+    filter: blur(0) brightness(1.3) drop-shadow(0 0 14px #ff0000) drop-shadow(0 0 28px #ff4400);
   }
   /* Position stable — halo rouge qui pulse doucement */
-  50%  {
+  50% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.00);
-    filter: blur(0) brightness(1.1)
-            drop-shadow(0 0 18px #ff2200) drop-shadow(0 0 38px #ff5500);
+    transform: translate(-50%, -50%) scale(1);
+    filter: blur(0) brightness(1.1) drop-shadow(0 0 18px #ff2200) drop-shadow(0 0 38px #ff5500);
   }
-  68%  {
+  68% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.00);
-    filter: blur(0) brightness(1.0)
-            drop-shadow(0 0 12px #ff0000) drop-shadow(0 0 26px #ff3300);
+    transform: translate(-50%, -50%) scale(1);
+    filter: blur(0) brightness(1) drop-shadow(0 0 12px #ff0000) drop-shadow(0 0 26px #ff3300);
   }
   /* Disparaît dans la brume — effet symétrique à l'entrée */
-  88%  {
+  88% {
     opacity: 0.4;
     transform: translate(-50%, -50%) scale(0.94);
-    filter: blur(2px) brightness(0.8)
-            drop-shadow(0 0 8px #ff0000);
+    filter: blur(2px) brightness(0.8) drop-shadow(0 0 8px #ff0000);
   }
   100% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.82);
-    filter: blur(5px) brightness(0.3)
-            drop-shadow(0 0 4px #ff0000);
+    filter: blur(5px) brightness(0.3) drop-shadow(0 0 4px #ff0000);
   }
 }
 
@@ -919,12 +1253,23 @@ footer {
    82%–100%: image stable à pleine opacité
 */
 @keyframes p5Reveal {
-  0%   { opacity: 0;   transform: scale(0.97); }
-  60%  { opacity: 0;   transform: scale(0.97); }
-  82%  { opacity: 0.7; transform: scale(1);    }
-  100% { opacity: 1;   transform: scale(1);    }
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  60% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  82% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
-
 
 /* =====================================================
    RESPONSIVE — Bouton P5 All-Out Attack
@@ -932,24 +1277,71 @@ footer {
 
 /* Tablette (<=768px) */
 @media (max-width: 768px) {
-  .p5-container { min-height: 70px; border-width: 2px; }
-  .p5-line-1    { font-size: 16px; letter-spacing: 2px; }
-  .p5-line-2    { font-size: 28px; letter-spacing: 1px; }
-  .sburst-1, .sburst-2, .sburst-4 { font-size: 26px; }
-  .sburst-3, .sburst-5 { font-size: 22px; }
-  .p5-joker-img { height: 110px; }
+  .p5-container {
+    min-height: 70px;
+    border-width: 2px;
+  }
+  .p5-line-1 {
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+  .p5-line-2 {
+    font-size: 28px;
+    letter-spacing: 1px;
+  }
+  .sburst-1,
+  .sburst-2,
+  .sburst-4 {
+    font-size: 26px;
+  }
+  .sburst-3,
+  .sburst-5 {
+    font-size: 22px;
+  }
+  .p5-joker-img {
+    height: 110px;
+  }
 }
 
 /* Mobile (<=480px) */
 @media (max-width: 480px) {
-  .p5-container { min-height: 60px; border-width: 1px; border-radius: 4px; }
-  .p5-line-1    { font-size: 12px; letter-spacing: 1px; }
-  .p5-line-2    { font-size: 22px; letter-spacing: 0.5px; }
-  .sburst-1, .sburst-2, .sburst-4 { font-size: 20px; }
-  .sburst-3, .sburst-5 { font-size: 16px; }
-  .trail-1, .trail-3, .trail-5, .trail-7 { height: 14%; }
-  .trail-2, .trail-4, .trail-6, .trail-8 { height: 10%; }
-  .p5-joker-img { height: 76px; }
+  .p5-container {
+    min-height: 60px;
+    border-width: 1px;
+    border-radius: 4px;
+  }
+  .p5-line-1 {
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .p5-line-2 {
+    font-size: 22px;
+    letter-spacing: 0.5px;
+  }
+  .sburst-1,
+  .sburst-2,
+  .sburst-4 {
+    font-size: 20px;
+  }
+  .sburst-3,
+  .sburst-5 {
+    font-size: 16px;
+  }
+  .trail-1,
+  .trail-3,
+  .trail-5,
+  .trail-7 {
+    height: 14%;
+  }
+  .trail-2,
+  .trail-4,
+  .trail-6,
+  .trail-8 {
+    height: 10%;
+  }
+  .p5-joker-img {
+    height: 76px;
+  }
 }
 
 /* =====================================================
@@ -976,7 +1368,9 @@ footer {
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  transition:
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
   padding: 0;
 }
 
@@ -989,14 +1383,19 @@ footer {
 /* --- Fond dégradé violet Velvet Room --- */
 .shadow-bg-layers {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
 }
 
 .shadow-bg-gradient {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: radial-gradient(ellipse at 30% 50%, #1a0060 0%, #00051a 70%);
   opacity: 0;
 }
@@ -1006,9 +1405,15 @@ footer {
 }
 
 @keyframes shadowBgReveal {
-  0%   { opacity: 0; }
-  15%  { opacity: 0.9; }
-  100% { opacity: 0.75; }
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.75;
+  }
 }
 
 /* =====================================================
@@ -1020,8 +1425,10 @@ footer {
 
 .velvet-chains {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
@@ -1031,7 +1438,9 @@ footer {
   Animation : clip-path s'ouvre d'un côté → la chaîne "s'attache" d'un coin à l'autre.
   Z-index différents pour l'effet d'entrelacement.
 */
-.chain-1, .chain-2, .chain-3 {
+.chain-1,
+.chain-2,
+.chain-3 {
   position: absolute;
   left: -50%;
   top: 50%;
@@ -1048,9 +1457,7 @@ footer {
   height: 26px;
   z-index: 6;
   transform: translateY(-50%) rotate(14deg);
-  filter:
-    drop-shadow(0 0 16px rgba(60, 110, 245, 1))
-    drop-shadow(0 2px 8px rgba(10, 30, 120, 0.9));
+  filter: drop-shadow(0 0 16px rgba(60, 110, 245, 1)) drop-shadow(0 2px 8px rgba(10, 30, 120, 0.9));
 }
 
 /* Chaîne 2 — TR→BL (−14°), arrière-plan, moins épaisse */
@@ -1058,8 +1465,7 @@ footer {
   height: 20px;
   z-index: 4;
   transform: translateY(-50%) rotate(-14deg);
-  filter:
-    drop-shadow(0 0 12px rgba(50, 100, 225, 0.9))
+  filter: drop-shadow(0 0 12px rgba(50, 100, 225, 0.9))
     drop-shadow(0 2px 6px rgba(8, 25, 100, 0.85));
 }
 
@@ -1068,65 +1474,157 @@ footer {
   height: 16px;
   z-index: 5;
   transform: translateY(-50%) rotate(30deg);
-  filter:
-    drop-shadow(0 0 9px rgba(45, 90, 210, 0.82))
-    drop-shadow(0 1px 5px rgba(6, 20, 90, 0.8));
+  filter: drop-shadow(0 0 9px rgba(45, 90, 210, 0.82)) drop-shadow(0 1px 5px rgba(6, 20, 90, 0.8));
 }
 
 /* Cascade : TL→BR, puis TR→BL, puis diagonale */
-.dark-velvet-container:hover .chain-1 { animation: chainC1 2.2s ease-out 0.00s forwards; }
-.dark-velvet-container:hover .chain-2 { animation: chainC2 2.2s ease-out 0.14s forwards; }
-.dark-velvet-container:hover .chain-3 { animation: chainC3 2.2s ease-out 0.26s forwards; }
+.dark-velvet-container:hover .chain-1 {
+  animation: chainC1 2.2s ease-out 0s forwards;
+}
+.dark-velvet-container:hover .chain-2 {
+  animation: chainC2 2.2s ease-out 0.14s forwards;
+}
+.dark-velvet-container:hover .chain-3 {
+  animation: chainC3 2.2s ease-out 0.26s forwards;
+}
 
 /*
   Chaîne 1 — se déroule de TL vers BR via clip-path,
   micro-vibration verticale à l'accrochage (tension de chaîne), fondu final
 */
 @keyframes chainC1 {
-  0%   { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(-50%)   rotate(14deg); }
-  8%   { opacity: 1; clip-path: inset(0 82% 0 0);  transform: translateY(-50%)   rotate(14deg); }
-  38%  { clip-path: inset(0 0% 0 0);               transform: translateY(-50%)   rotate(14deg); }
-  46%  { clip-path: inset(0 0% 0 0);               transform: translateY(-52.5%) rotate(14deg); }
-  54%  { clip-path: inset(0 0% 0 0);               transform: translateY(-48.5%) rotate(14deg); }
-  62%  { clip-path: inset(0 0% 0 0);               transform: translateY(-50%)   rotate(14deg); opacity: 1;   }
-  82%  { clip-path: inset(0 0% 0 0);               transform: translateY(-50%)   rotate(14deg); opacity: 0.85; }
-  100% { clip-path: inset(0 0% 0 0);               transform: translateY(-50%)   rotate(14deg); opacity: 0;   }
+  0% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    transform: translateY(-50%) rotate(14deg);
+  }
+  8% {
+    opacity: 1;
+    clip-path: inset(0 82% 0 0);
+    transform: translateY(-50%) rotate(14deg);
+  }
+  38% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-50%) rotate(14deg);
+  }
+  46% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-52.5%) rotate(14deg);
+  }
+  54% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-48.5%) rotate(14deg);
+  }
+  62% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-50%) rotate(14deg);
+    opacity: 1;
+  }
+  82% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-50%) rotate(14deg);
+    opacity: 0.85;
+  }
+  100% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-50%) rotate(14deg);
+    opacity: 0;
+  }
 }
 
 /*
   Chaîne 2 — se déroule de TR vers BL (clip depuis la droite)
 */
 @keyframes chainC2 {
-  0%   { opacity: 0; clip-path: inset(0 0 0 100%); transform: translateY(-50%)   rotate(-14deg); }
-  8%   { opacity: 1; clip-path: inset(0 0 0 82%);  transform: translateY(-50%)   rotate(-14deg); }
-  38%  { clip-path: inset(0 0 0 0%);               transform: translateY(-50%)   rotate(-14deg); }
-  46%  { clip-path: inset(0 0 0 0%);               transform: translateY(-47.5%) rotate(-14deg); }
-  54%  { clip-path: inset(0 0 0 0%);               transform: translateY(-51.5%) rotate(-14deg); }
-  62%  { clip-path: inset(0 0 0 0%);               transform: translateY(-50%)   rotate(-14deg); opacity: 1;    }
-  82%  { clip-path: inset(0 0 0 0%);               transform: translateY(-50%)   rotate(-14deg); opacity: 0.72; }
-  100% { clip-path: inset(0 0 0 0%);               transform: translateY(-50%)   rotate(-14deg); opacity: 0;    }
+  0% {
+    opacity: 0;
+    clip-path: inset(0 0 0 100%);
+    transform: translateY(-50%) rotate(-14deg);
+  }
+  8% {
+    opacity: 1;
+    clip-path: inset(0 0 0 82%);
+    transform: translateY(-50%) rotate(-14deg);
+  }
+  38% {
+    clip-path: inset(0 0 0 0%);
+    transform: translateY(-50%) rotate(-14deg);
+  }
+  46% {
+    clip-path: inset(0 0 0 0%);
+    transform: translateY(-47.5%) rotate(-14deg);
+  }
+  54% {
+    clip-path: inset(0 0 0 0%);
+    transform: translateY(-51.5%) rotate(-14deg);
+  }
+  62% {
+    clip-path: inset(0 0 0 0%);
+    transform: translateY(-50%) rotate(-14deg);
+    opacity: 1;
+  }
+  82% {
+    clip-path: inset(0 0 0 0%);
+    transform: translateY(-50%) rotate(-14deg);
+    opacity: 0.72;
+  }
+  100% {
+    clip-path: inset(0 0 0 0%);
+    transform: translateY(-50%) rotate(-14deg);
+    opacity: 0;
+  }
 }
 
 /*
   Chaîne 3 — diagonale secondaire, depuis TL
 */
 @keyframes chainC3 {
-  0%   { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(-50%)   rotate(30deg); }
-  8%   { opacity: 1; clip-path: inset(0 75% 0 0);  transform: translateY(-50%)   rotate(30deg); }
-  38%  { clip-path: inset(0 0% 0 0);               transform: translateY(-50%)   rotate(30deg); }
-  46%  { clip-path: inset(0 0% 0 0);               transform: translateY(-52%)   rotate(30deg); }
-  54%  { clip-path: inset(0 0% 0 0);               transform: translateY(-49%)   rotate(30deg); }
-  62%  { clip-path: inset(0 0% 0 0);               transform: translateY(-50%)   rotate(30deg); opacity: 1;   }
-  82%  { clip-path: inset(0 0% 0 0);               transform: translateY(-50%)   rotate(30deg); opacity: 0.6; }
-  100% { clip-path: inset(0 0% 0 0);               transform: translateY(-50%)   rotate(30deg); opacity: 0;   }
+  0% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    transform: translateY(-50%) rotate(30deg);
+  }
+  8% {
+    opacity: 1;
+    clip-path: inset(0 75% 0 0);
+    transform: translateY(-50%) rotate(30deg);
+  }
+  38% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-50%) rotate(30deg);
+  }
+  46% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-52%) rotate(30deg);
+  }
+  54% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-49%) rotate(30deg);
+  }
+  62% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-50%) rotate(30deg);
+    opacity: 1;
+  }
+  82% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-50%) rotate(30deg);
+    opacity: 0.6;
+  }
+  100% {
+    clip-path: inset(0 0% 0 0);
+    transform: translateY(-50%) rotate(30deg);
+    opacity: 0;
+  }
 }
-
 
 /* --- Runes flottantes Velvet Room (z-index 2, sous les chaînes) --- */
 .shadow-runes-container {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 2;
 }
@@ -1138,47 +1636,152 @@ footer {
   line-height: 1;
 }
 
-.rune-1 { top: 7%;    left: 8%;    font-size: 34px; color: #8855ff; text-shadow: 0 0 18px #8855ff, 0 0 36px #5522cc; }
-.rune-2 { top: 50%;   left: 60%;   font-size: 22px; color: #aa77ff; text-shadow: 0 0 14px #aa77ff, 0 0 28px #6633cc; }
-.rune-3 { top: 4%;    right: 10%;  font-size: 42px; color: #6633ff; text-shadow: 0 0 22px #6633ff, 0 0 44px #4400cc; }
-.rune-4 { bottom: 8%; left: 22%;   font-size: 20px; color: #aa77ff; text-shadow: 0 0 12px #aa77ff, 0 0 24px #6633cc; }
-.rune-5 { top: 38%;   right: 5%;   font-size: 30px; color: #8855ff; text-shadow: 0 0 16px #8855ff, 0 0 32px #5522cc; }
-.rune-6 { top: 22%;   left: 40%;   font-size: 16px; color: #cc99ff; text-shadow: 0 0 10px #cc99ff, 0 0 22px #8866dd; }
+.rune-1 {
+  top: 7%;
+  left: 8%;
+  font-size: 34px;
+  color: #8855ff;
+  text-shadow:
+    0 0 18px #8855ff,
+    0 0 36px #5522cc;
+}
+.rune-2 {
+  top: 50%;
+  left: 60%;
+  font-size: 22px;
+  color: #aa77ff;
+  text-shadow:
+    0 0 14px #aa77ff,
+    0 0 28px #6633cc;
+}
+.rune-3 {
+  top: 4%;
+  right: 10%;
+  font-size: 42px;
+  color: #6633ff;
+  text-shadow:
+    0 0 22px #6633ff,
+    0 0 44px #4400cc;
+}
+.rune-4 {
+  bottom: 8%;
+  left: 22%;
+  font-size: 20px;
+  color: #aa77ff;
+  text-shadow:
+    0 0 12px #aa77ff,
+    0 0 24px #6633cc;
+}
+.rune-5 {
+  top: 38%;
+  right: 5%;
+  font-size: 30px;
+  color: #8855ff;
+  text-shadow:
+    0 0 16px #8855ff,
+    0 0 32px #5522cc;
+}
+.rune-6 {
+  top: 22%;
+  left: 40%;
+  font-size: 16px;
+  color: #cc99ff;
+  text-shadow:
+    0 0 10px #cc99ff,
+    0 0 22px #8866dd;
+}
 
-.dark-velvet-container:hover .rune-1 { animation: runeFloat 0.80s ease-in-out 0.05s forwards; }
-.dark-velvet-container:hover .rune-2 { animation: runeSpin  0.75s ease-in-out 0.22s forwards; }
-.dark-velvet-container:hover .rune-3 { animation: runeFlash 0.55s ease-in-out 0.02s forwards; }
-.dark-velvet-container:hover .rune-4 { animation: runeSpin  0.70s ease-in-out 0.32s forwards; }
-.dark-velvet-container:hover .rune-5 { animation: runeFloat 0.72s ease-in-out 0.14s forwards; }
-.dark-velvet-container:hover .rune-6 { animation: runeFlash 0.50s ease-in-out 0.28s forwards; }
+.dark-velvet-container:hover .rune-1 {
+  animation: runeFloat 0.8s ease-in-out 0.05s forwards;
+}
+.dark-velvet-container:hover .rune-2 {
+  animation: runeSpin 0.75s ease-in-out 0.22s forwards;
+}
+.dark-velvet-container:hover .rune-3 {
+  animation: runeFlash 0.55s ease-in-out 0.02s forwards;
+}
+.dark-velvet-container:hover .rune-4 {
+  animation: runeSpin 0.7s ease-in-out 0.32s forwards;
+}
+.dark-velvet-container:hover .rune-5 {
+  animation: runeFloat 0.72s ease-in-out 0.14s forwards;
+}
+.dark-velvet-container:hover .rune-6 {
+  animation: runeFlash 0.5s ease-in-out 0.28s forwards;
+}
 
 @keyframes runeFloat {
-  0%   { opacity: 0;   transform: scale(0)   translateY(8px);   }
-  25%  { opacity: 1;   transform: scale(1.5) translateY(-4px);  }
-  60%  { opacity: 0.9; transform: scale(1.2) translateY(0);     }
-  100% { opacity: 0;   transform: scale(2.0) translateY(-12px); }
+  0% {
+    opacity: 0;
+    transform: scale(0) translateY(8px);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.5) translateY(-4px);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1.2) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2) translateY(-12px);
+  }
 }
 
 @keyframes runeSpin {
-  0%   { opacity: 0;   transform: scale(0)   rotate(-60deg); }
-  18%  { opacity: 1;   transform: scale(1.4) rotate(0deg);   }
-  60%  { opacity: 0.9; transform: scale(1.2) rotate(25deg);  }
-  100% { opacity: 0;   transform: scale(1.8) rotate(90deg);  }
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-60deg);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.4) rotate(0deg);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1.2) rotate(25deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8) rotate(90deg);
+  }
 }
 
 @keyframes runeFlash {
-  0%   { opacity: 0;   transform: scale(0);   }
-  12%  { opacity: 1;   transform: scale(1.8); }
-  28%  { opacity: 0.2; transform: scale(1.2); }
-  50%  { opacity: 1;   transform: scale(1.6); }
-  75%  { opacity: 0.4; transform: scale(1.3); }
-  100% { opacity: 0;   transform: scale(2.0); }
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1.8);
+  }
+  28% {
+    opacity: 0.2;
+    transform: scale(1.2);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.6);
+  }
+  75% {
+    opacity: 0.4;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
 }
 
 /* --- Titre SHADOWS / MODE --- */
 .shadow-main-content {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -1196,7 +1799,7 @@ footer {
 
 .shadow-line-1 {
   display: block;
-  font-family: 'Times New Roman', Georgia, serif;
+  font-family: "Times New Roman", Georgia, serif;
   font-size: 48px;
   font-weight: bold;
   font-style: italic;
@@ -1218,13 +1821,34 @@ footer {
 }
 
 @keyframes shadowWord {
-  0%   { opacity: 0; transform: scale(0.88); letter-spacing: 2px;  animation-timing-function: cubic-bezier(0.25, 1.3, 0.5, 1); }
-  28%  { opacity: 1; transform: scale(1.02); letter-spacing: 10px; }
-  42%  { opacity: 1; transform: scale(1.0);  letter-spacing: 10px; }
-  65%  { opacity: 1; transform: scale(1.0);  letter-spacing: 10px; animation-timing-function: ease-in; }
-  100% { opacity: 0; transform: scale(1.0);  letter-spacing: 10px; }
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+    letter-spacing: 2px;
+    animation-timing-function: cubic-bezier(0.25, 1.3, 0.5, 1);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(1.02);
+    letter-spacing: 10px;
+  }
+  42% {
+    opacity: 1;
+    transform: scale(1);
+    letter-spacing: 10px;
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1);
+    letter-spacing: 10px;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+    letter-spacing: 10px;
+  }
 }
-
 
 /* --- Image principale --- */
 .shadow-main-img {
@@ -1240,31 +1864,73 @@ footer {
 }
 
 @keyframes shadowReveal {
-  0%   { opacity: 0;   transform: scale(0.98); }
-  50%  { opacity: 0;   transform: scale(0.98); }
-  78%  { opacity: 0.6; transform: scale(1);    }
-  100% { opacity: 1;   transform: scale(1);    }
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  78% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* --- Responsive --- */
 @media (max-width: 768px) {
-  .dark-velvet-container { min-height: 70px; border-width: 2px; }
-  .shadow-line-1 { font-size: 14px; letter-spacing: 2px; }
-  .shadow-line-2 { font-size: 28px; letter-spacing: 2px; }
-  .rune-1, .rune-2, .rune-4 { font-size: 22px; }
-  .rune-3, .rune-5 { font-size: 28px; }
-  
+  .dark-velvet-container {
+    min-height: 70px;
+    border-width: 2px;
+  }
+  .shadow-line-1 {
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+  .shadow-line-2 {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+  .rune-1,
+  .rune-2,
+  .rune-4 {
+    font-size: 22px;
+  }
+  .rune-3,
+  .rune-5 {
+    font-size: 28px;
+  }
 }
 
 @media (max-width: 480px) {
-  .dark-velvet-container { min-height: 60px; border-width: 1px; border-radius: 4px; }
-  .shadow-line-1 { font-size: 11px; letter-spacing: 1px; }
-  .shadow-line-2 { font-size: 22px; letter-spacing: 1px; }
-  .rune-1, .rune-2, .rune-4 { font-size: 16px; }
-  .rune-3, .rune-5 { font-size: 22px; }
-  
+  .dark-velvet-container {
+    min-height: 60px;
+    border-width: 1px;
+    border-radius: 4px;
+  }
+  .shadow-line-1 {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .shadow-line-2 {
+    font-size: 22px;
+    letter-spacing: 1px;
+  }
+  .rune-1,
+  .rune-2,
+  .rune-4 {
+    font-size: 16px;
+  }
+  .rune-3,
+  .rune-5 {
+    font-size: 22px;
+  }
 }
-
 
 /* =====================================================
    BOUTON PERSONAE MODE — Velvet Room / Carte de Tarot
@@ -1298,16 +1964,19 @@ footer {
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  transition:
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
   padding: 0;
 }
 
 /* Halo or/bleu au survol */
 .personae-container:hover {
   will-change: transform;
-  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.75),
-              0 0 60px rgba(80, 40, 180, 0.35);
-  border-color: rgba(212, 175, 55, 0.60);
+  box-shadow:
+    0 8px 32px rgba(212, 175, 55, 0.75),
+    0 0 60px rgba(80, 40, 180, 0.35);
+  border-color: rgba(212, 175, 55, 0.6);
 }
 
 /* --- Fond Velvet Room ─────────────────────────────
@@ -1319,13 +1988,15 @@ footer {
   inset: 0;
   z-index: 1;
   background:
-    radial-gradient(ellipse at 18% 50%, rgba(70, 10, 130, 0.60) 0%, transparent 52%),
+    radial-gradient(ellipse at 18% 50%, rgba(70, 10, 130, 0.6) 0%, transparent 52%),
     radial-gradient(ellipse at 82% 50%, rgba(10, 30, 115, 0.55) 0%, transparent 52%),
     linear-gradient(180deg, #05080f 0%, #0b0520 100%);
   opacity: 0;
   transition: opacity 0.48s ease;
 }
-.personae-container:hover .personae-bg { opacity: 1; }
+.personae-container:hover .personae-bg {
+  opacity: 1;
+}
 
 /* --- Halo doré atmosphérique ─────────────────────
    Grande orbe floue derrière la carte, pulse et s'estompe.
@@ -1333,14 +2004,17 @@ footer {
 .personae-card-halo {
   position: absolute;
   z-index: 3;
-  width: 150px; height: 150px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
-  background: radial-gradient(circle,
+  background: radial-gradient(
+    circle,
     rgba(212, 175, 55, 0.72) 0%,
     rgba(170, 118, 8, 0.32) 42%,
     transparent 70%
   );
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%) scale(0);
   opacity: 0;
   filter: blur(12px);
@@ -1357,20 +2031,21 @@ footer {
 .personae-tarot-center {
   position: absolute;
   z-index: 6;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
 
 /* Anneau lumineux doré collé sur les bords de la carte */
 .personae-tarot-center::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -5px;
   border-radius: 11px;
   opacity: 0;
   box-shadow:
-    0 0 0 2px rgba(212, 175, 55, 0.90),
+    0 0 0 2px rgba(212, 175, 55, 0.9),
     0 0 16px 5px rgba(212, 175, 55, 0.65),
     0 0 40px 8px rgba(150, 100, 0, 0.38);
   pointer-events: none;
@@ -1407,12 +2082,14 @@ footer {
 /* Shimmer : bande lumineuse qui balaye la carte une fois posée */
 .personae-tarot-shine {
   position: absolute;
-  top: 0; left: -120%;
-  width: 50%; height: 100%;
+  top: 0;
+  left: -120%;
+  width: 50%;
+  height: 100%;
   background: linear-gradient(
     to right,
     transparent 0%,
-    rgba(255, 255, 255, 0.60) 50%,
+    rgba(255, 255, 255, 0.6) 50%,
     transparent 100%
   );
   transform: skewX(-16deg);
@@ -1436,25 +2113,85 @@ footer {
 .personae-arcana {
   position: absolute;
   opacity: 0;
-  font-family: 'Times New Roman', Georgia, serif;
+  font-family: "Times New Roman", Georgia, serif;
   font-weight: bold;
   pointer-events: none;
   line-height: 1;
 }
 
-.arc-1 { top: 6%;    left: 5%;   font-size: 28px; color: #d4af37; text-shadow: 0 0 14px #d4af37, 0 0 30px #a07c10; }
-.arc-2 { top: 48%;   left: 70%;  font-size: 18px; color: #e8c96a; text-shadow: 0 0 10px #d4af37, 0 0 22px #8a6a00; }
-.arc-3 { top: 5%;    right: 5%;  font-size: 34px; color: #c9a227; text-shadow: 0 0 18px #d4af37, 0 0 38px #b08a00; }
-.arc-4 { bottom: 8%; left: 5%;   font-size: 16px; color: #f0d87a; text-shadow: 0 0 9px  #d4af37, 0 0 20px #8a6a00; }
-.arc-5 { bottom: 6%; right: 5%;  font-size: 22px; color: #d4af37; text-shadow: 0 0 12px #d4af37, 0 0 26px #a07c10; }
-.arc-6 { top: 48%;   left: 11%;  font-size: 14px; color: #f5e39a; text-shadow: 0 0 8px  #d4af37, 0 0 16px #8a6a00; }
+.arc-1 {
+  top: 6%;
+  left: 5%;
+  font-size: 28px;
+  color: #d4af37;
+  text-shadow:
+    0 0 14px #d4af37,
+    0 0 30px #a07c10;
+}
+.arc-2 {
+  top: 48%;
+  left: 70%;
+  font-size: 18px;
+  color: #e8c96a;
+  text-shadow:
+    0 0 10px #d4af37,
+    0 0 22px #8a6a00;
+}
+.arc-3 {
+  top: 5%;
+  right: 5%;
+  font-size: 34px;
+  color: #c9a227;
+  text-shadow:
+    0 0 18px #d4af37,
+    0 0 38px #b08a00;
+}
+.arc-4 {
+  bottom: 8%;
+  left: 5%;
+  font-size: 16px;
+  color: #f0d87a;
+  text-shadow:
+    0 0 9px #d4af37,
+    0 0 20px #8a6a00;
+}
+.arc-5 {
+  bottom: 6%;
+  right: 5%;
+  font-size: 22px;
+  color: #d4af37;
+  text-shadow:
+    0 0 12px #d4af37,
+    0 0 26px #a07c10;
+}
+.arc-6 {
+  top: 48%;
+  left: 11%;
+  font-size: 14px;
+  color: #f5e39a;
+  text-shadow:
+    0 0 8px #d4af37,
+    0 0 16px #8a6a00;
+}
 
-.personae-container:hover .arc-1 { animation: arcaneRise 0.85s ease-out 0.45s forwards; }
-.personae-container:hover .arc-2 { animation: arcaneSpin 0.75s ease-out 0.65s forwards; }
-.personae-container:hover .arc-3 { animation: arcaneRise 0.80s ease-out 0.38s forwards; }
-.personae-container:hover .arc-4 { animation: arcaneSpin 0.80s ease-out 0.72s forwards; }
-.personae-container:hover .arc-5 { animation: arcaneRise 0.70s ease-out 0.55s forwards; }
-.personae-container:hover .arc-6 { animation: arcaneSpin 0.65s ease-out 0.80s forwards; }
+.personae-container:hover .arc-1 {
+  animation: arcaneRise 0.85s ease-out 0.45s forwards;
+}
+.personae-container:hover .arc-2 {
+  animation: arcaneSpin 0.75s ease-out 0.65s forwards;
+}
+.personae-container:hover .arc-3 {
+  animation: arcaneRise 0.8s ease-out 0.38s forwards;
+}
+.personae-container:hover .arc-4 {
+  animation: arcaneSpin 0.8s ease-out 0.72s forwards;
+}
+.personae-container:hover .arc-5 {
+  animation: arcaneRise 0.7s ease-out 0.55s forwards;
+}
+.personae-container:hover .arc-6 {
+  animation: arcaneSpin 0.65s ease-out 0.8s forwards;
+}
 
 /* --- Titre « PERSONA » ───────────────────────────
    En bas du bouton, monte depuis le bas avec l'effet
@@ -1462,7 +2199,9 @@ footer {
 */
 .personae-title-wrap {
   position: absolute;
-  bottom: 0; left: 0; right: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
   display: flex;
   justify-content: center;
@@ -1472,7 +2211,7 @@ footer {
 }
 
 .personae-title {
-  font-family: 'Times New Roman', Georgia, serif;
+  font-family: "Times New Roman", Georgia, serif;
   font-size: 18px;
   font-weight: bold;
   font-style: italic;
@@ -1488,7 +2227,7 @@ footer {
   transform: translateY(8px);
 }
 .personae-container:hover .personae-title {
-  animation: titleRise 1.2s cubic-bezier(0.25, 1.2, 0.4, 1) 0.90s forwards;
+  animation: titleRise 1.2s cubic-bezier(0.25, 1.2, 0.4, 1) 0.9s forwards;
 }
 
 /* --- Image principale (z-index 2) ────────────────
@@ -1506,7 +2245,6 @@ footer {
   animation: arcaneReveal 2.5s ease-out both;
 }
 
-
 /* =====================================================
    KEYFRAMES — Bouton Personae
    ===================================================== */
@@ -1520,64 +2258,162 @@ footer {
   └──────────────────────────────────────────────────────
 */
 @keyframes tarotFlip {
-  0%   { opacity: 0;   transform: perspective(550px) rotateX(-88deg) scale(0.65) translateY(18px);  }
-  18%  { opacity: 1;   transform: perspective(550px) rotateX(-7deg)  scale(1.14) translateY(-6px);  }
-  28%  { opacity: 1;   transform: perspective(550px) rotateX(5deg)   scale(1.03) translateY(0px);   }
-  36%  { opacity: 1;   transform: perspective(550px) rotateX(-1deg)  scale(1.06) translateY(-2px);  }
-  46%  { opacity: 1;   transform: perspective(550px) rotateX(0deg)   scale(1.0)  translateY(0px);   }
-  56%  { opacity: 1;   transform: perspective(550px) rotateX(0deg)   scale(1.0)  translateY(-4px) rotate(-0.8deg); }
-  67%  { opacity: 1;   transform: perspective(550px) rotateX(0deg)   scale(1.0)  translateY(0px)  rotate(0.4deg);  }
-  76%  { opacity: 1;   transform: perspective(550px) rotateX(0deg)   scale(1.0)  translateY(-2px) rotate(0deg);    }
-  87%  { opacity: 0.7; transform: perspective(550px) rotateX(0deg)   scale(0.98) translateY(0px);   }
-  100% { opacity: 0;   transform: perspective(550px) rotateX(14deg)  scale(0.88) translateY(10px);  }
+  0% {
+    opacity: 0;
+    transform: perspective(550px) rotateX(-88deg) scale(0.65) translateY(18px);
+  }
+  18% {
+    opacity: 1;
+    transform: perspective(550px) rotateX(-7deg) scale(1.14) translateY(-6px);
+  }
+  28% {
+    opacity: 1;
+    transform: perspective(550px) rotateX(5deg) scale(1.03) translateY(0px);
+  }
+  36% {
+    opacity: 1;
+    transform: perspective(550px) rotateX(-1deg) scale(1.06) translateY(-2px);
+  }
+  46% {
+    opacity: 1;
+    transform: perspective(550px) rotateX(0deg) scale(1) translateY(0px);
+  }
+  56% {
+    opacity: 1;
+    transform: perspective(550px) rotateX(0deg) scale(1) translateY(-4px) rotate(-0.8deg);
+  }
+  67% {
+    opacity: 1;
+    transform: perspective(550px) rotateX(0deg) scale(1) translateY(0px) rotate(0.4deg);
+  }
+  76% {
+    opacity: 1;
+    transform: perspective(550px) rotateX(0deg) scale(1) translateY(-2px) rotate(0deg);
+  }
+  87% {
+    opacity: 0.7;
+    transform: perspective(550px) rotateX(0deg) scale(0.98) translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(550px) rotateX(14deg) scale(0.88) translateY(10px);
+  }
 }
 
 /* Bande lumineuse balayant la carte (shimmer) */
 @keyframes tarotShine {
-  0%   { left: -120%; opacity: 1;   }
-  100% { left: 165%;  opacity: 0.3; }
+  0% {
+    left: -120%;
+    opacity: 1;
+  }
+  100% {
+    left: 165%;
+    opacity: 0.3;
+  }
 }
 
 /* Anneau lumineux doré — apparaît avec la carte, s'estompe à la fin */
 @keyframes cardGlow {
-  0%   { opacity: 0;   }
-  18%  { opacity: 1;   }
-  78%  { opacity: 1;   }
-  100% { opacity: 0;   }
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Orbe atmoph. derrière la carte — pulse large et disparaît */
 @keyframes haloReveal {
-  0%   { opacity: 0;   transform: translate(-50%, -50%) scale(0.2);  }
-  22%  { opacity: 1;   transform: translate(-50%, -50%) scale(1.6);  }
-  50%  { opacity: 0.9; transform: translate(-50%, -50%) scale(1.38); }
-  72%  { opacity: 0.7; transform: translate(-50%, -50%) scale(1.20); }
-  90%  { opacity: 0.4; transform: translate(-50%, -50%) scale(1.05); }
-  100% { opacity: 0;   transform: translate(-50%, -50%) scale(0.85); }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  22% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.6);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.38);
+  }
+  72% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  90% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.85);
+  }
 }
 
 /* Arcane variante 1 : monte et s'évapore */
 @keyframes arcaneRise {
-  0%   { opacity: 0;   transform: scale(0.5) translateY(10px);  }
-  28%  { opacity: 1;   transform: scale(1.4) translateY(-4px);  }
-  60%  { opacity: 0.9; transform: scale(1.2) translateY(0);     }
-  100% { opacity: 0;   transform: scale(1.8) translateY(-10px); }
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(10px);
+  }
+  28% {
+    opacity: 1;
+    transform: scale(1.4) translateY(-4px);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1.2) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8) translateY(-10px);
+  }
 }
 
 /* Arcane variante 2 : tourne et s'évapore */
 @keyframes arcaneSpin {
-  0%   { opacity: 0;   transform: scale(0)   rotate(-45deg); }
-  20%  { opacity: 1;   transform: scale(1.4) rotate(0deg);   }
-  60%  { opacity: 0.9; transform: scale(1.2) rotate(20deg);  }
-  100% { opacity: 0;   transform: scale(1.8) rotate(80deg);  }
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-45deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.4) rotate(0deg);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1.2) rotate(20deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8) rotate(80deg);
+  }
 }
 
 /* Titre monte du bas, tient, puis s'efface */
 @keyframes titleRise {
-  0%   { opacity: 0; transform: translateY(8px);  }
-  28%  { opacity: 1; transform: translateY(0);    }
-  70%  { opacity: 1; transform: translateY(0);    }
-  100% { opacity: 0; transform: translateY(-5px); }
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
 }
 
 /*
@@ -1588,33 +2424,88 @@ footer {
   └──────────────────────────────────────────────────────── ┘
 */
 @keyframes arcaneReveal {
-  0%   { opacity: 0;   transform: scale(0.98); filter: sepia(0.55) brightness(0.5);  }
-  52%  { opacity: 0;   transform: scale(0.98); filter: sepia(0.55) brightness(0.5);  }
-  80%  { opacity: 0.7; transform: scale(1);    filter: sepia(0.10) brightness(0.95); }
-  100% { opacity: 1;   transform: scale(1);    filter: sepia(0)    brightness(1);    }
+  0% {
+    opacity: 0;
+    transform: scale(0.98);
+    filter: sepia(0.55) brightness(0.5);
+  }
+  52% {
+    opacity: 0;
+    transform: scale(0.98);
+    filter: sepia(0.55) brightness(0.5);
+  }
+  80% {
+    opacity: 0.7;
+    transform: scale(1);
+    filter: sepia(0.1) brightness(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: sepia(0) brightness(1);
+  }
 }
-
 
 /* --- Responsive Personae ─────────────────────────── */
 
 /* Tablette (≤768px) */
 @media (max-width: 768px) {
-  .personae-container      { min-height: 70px; }
-  .personae-tarot-wrap     { width: 60px; }
-  .personae-card-halo      { width: 105px; height: 105px; }
-  .personae-title          { font-size: 14px; letter-spacing: 5px; text-indent: 5px; }
-  .arc-1, .arc-2, .arc-4, .arc-6 { font-size: 16px; }
-  .arc-3, .arc-5                  { font-size: 22px; }
+  .personae-container {
+    min-height: 70px;
+  }
+  .personae-tarot-wrap {
+    width: 60px;
+  }
+  .personae-card-halo {
+    width: 105px;
+    height: 105px;
+  }
+  .personae-title {
+    font-size: 14px;
+    letter-spacing: 5px;
+    text-indent: 5px;
+  }
+  .arc-1,
+  .arc-2,
+  .arc-4,
+  .arc-6 {
+    font-size: 16px;
+  }
+  .arc-3,
+  .arc-5 {
+    font-size: 22px;
+  }
 }
 
 /* Mobile (≤480px) */
 @media (max-width: 480px) {
-  .personae-container      { min-height: 60px; border-radius: 4px; }
-  .personae-tarot-wrap     { width: 44px; }
-  .personae-card-halo      { width: 78px; height: 78px; }
-  .personae-title          { font-size: 11px; letter-spacing: 3px; text-indent: 3px; padding-bottom: 5px; }
-  .arc-1, .arc-2, .arc-4, .arc-6 { font-size: 12px; }
-  .arc-3, .arc-5                  { font-size: 18px; }
+  .personae-container {
+    min-height: 60px;
+    border-radius: 4px;
+  }
+  .personae-tarot-wrap {
+    width: 44px;
+  }
+  .personae-card-halo {
+    width: 78px;
+    height: 78px;
+  }
+  .personae-title {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-indent: 3px;
+    padding-bottom: 5px;
+  }
+  .arc-1,
+  .arc-2,
+  .arc-4,
+  .arc-6 {
+    font-size: 12px;
+  }
+  .arc-3,
+  .arc-5 {
+    font-size: 18px;
+  }
 }
 
 /* =====================================================
@@ -1649,7 +2540,10 @@ footer {
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Ombre de base identique aux autres */
-  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  transition:
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.2s ease;
 }
 
 .music-mode-btn:hover {
@@ -1676,7 +2570,10 @@ footer {
 /* --- Panneaux roses obliques --- */
 .music-bg-panels {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
   display: flex;
 }
@@ -1688,23 +2585,48 @@ footer {
   opacity: 0;
 }
 
-.m-panel-1 { background-color: #d82b68; }
-.m-panel-2 { background-color: #f7558d; }
-.m-panel-3 { background-color: #ff85af; }
-.m-panel-4 { background-color: #ffb3cd; }
-.m-panel-5 { background-color: #ffe6f0; }
+.m-panel-1 {
+  background-color: #d82b68;
+}
+.m-panel-2 {
+  background-color: #f7558d;
+}
+.m-panel-3 {
+  background-color: #ff85af;
+}
+.m-panel-4 {
+  background-color: #ffb3cd;
+}
+.m-panel-5 {
+  background-color: #ffe6f0;
+}
 
-.music-mode-btn:hover .m-panel   { animation: slidePinkPanel 0.4s ease-out forwards; }
-.music-mode-btn:hover .m-panel-1 { animation-delay: 0.0s; }
-.music-mode-btn:hover .m-panel-2 { animation-delay: 0.1s; }
-.music-mode-btn:hover .m-panel-3 { animation-delay: 0.2s; }
-.music-mode-btn:hover .m-panel-4 { animation-delay: 0.3s; }
-.music-mode-btn:hover .m-panel-5 { animation-delay: 0.4s; }
+.music-mode-btn:hover .m-panel {
+  animation: slidePinkPanel 0.4s ease-out forwards;
+}
+.music-mode-btn:hover .m-panel-1 {
+  animation-delay: 0s;
+}
+.music-mode-btn:hover .m-panel-2 {
+  animation-delay: 0.1s;
+}
+.music-mode-btn:hover .m-panel-3 {
+  animation-delay: 0.2s;
+}
+.music-mode-btn:hover .m-panel-4 {
+  animation-delay: 0.3s;
+}
+.music-mode-btn:hover .m-panel-5 {
+  animation-delay: 0.4s;
+}
 
 /* --- Étoiles & notes musicales --- */
 .music-stars-container {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 3;
   pointer-events: none;
 }
@@ -1716,44 +2638,107 @@ footer {
   line-height: 1;
 }
 
-.mstar-1 { top: 12%; left: 8%;   font-size: 26px; color: #ff6eb0; }
-.mstar-2 { top: 18%; right: 12%; font-size: 18px; color: #ffffff; text-shadow: 0 0 8px #ffb3d1; }
-.mstar-3 { top: 55%; left: 15%;  font-size: 22px; color: #ffb3d1; }
-.mstar-4 { top: 10%; left: 45%;  font-size: 20px; color: #ffffff; text-shadow: 0 0 8px #ff6eb0; }
-.mstar-5 { bottom: 12%; right: 18%; font-size: 24px; color: #ff6eb0; }
-.mstar-6 { top: 38%; right: 8%;  font-size: 16px; color: #ffffff; text-shadow: 0 0 6px #ffb3d1; }
-.mstar-7 { bottom: 18%; left: 30%; font-size: 20px; color: #ffcce0; }
-.mstar-8 { top: 30%; left: 62%;  font-size: 14px; color: #ffffff; text-shadow: 0 0 6px #ff6eb0; }
+.mstar-1 {
+  top: 12%;
+  left: 8%;
+  font-size: 26px;
+  color: #ff6eb0;
+}
+.mstar-2 {
+  top: 18%;
+  right: 12%;
+  font-size: 18px;
+  color: #ffffff;
+  text-shadow: 0 0 8px #ffb3d1;
+}
+.mstar-3 {
+  top: 55%;
+  left: 15%;
+  font-size: 22px;
+  color: #ffb3d1;
+}
+.mstar-4 {
+  top: 10%;
+  left: 45%;
+  font-size: 20px;
+  color: #ffffff;
+  text-shadow: 0 0 8px #ff6eb0;
+}
+.mstar-5 {
+  bottom: 12%;
+  right: 18%;
+  font-size: 24px;
+  color: #ff6eb0;
+}
+.mstar-6 {
+  top: 38%;
+  right: 8%;
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 0 0 6px #ffb3d1;
+}
+.mstar-7 {
+  bottom: 18%;
+  left: 30%;
+  font-size: 20px;
+  color: #ffcce0;
+}
+.mstar-8 {
+  top: 30%;
+  left: 62%;
+  font-size: 14px;
+  color: #ffffff;
+  text-shadow: 0 0 6px #ff6eb0;
+}
 
-.music-mode-btn:hover .mstar-1 { animation: musicBurst 1.0s ease-out 0.20s forwards; }
-.music-mode-btn:hover .mstar-2 { animation: musicSpin  1.0s ease-out 0.40s forwards; }
-.music-mode-btn:hover .mstar-3 { animation: musicFlash 1.0s ease-out 0.30s forwards; }
-.music-mode-btn:hover .mstar-4 { animation: musicBurst 1.0s ease-out 0.25s forwards; }
-.music-mode-btn:hover .mstar-5 { animation: musicSpin  1.0s ease-out 0.50s forwards; }
-.music-mode-btn:hover .mstar-6 { animation: musicFlash 1.0s ease-out 0.35s forwards; }
-.music-mode-btn:hover .mstar-7 { animation: musicBurst 1.0s ease-out 0.45s forwards; }
-.music-mode-btn:hover .mstar-8 { animation: musicSpin  1.0s ease-out 0.55s forwards; }
+.music-mode-btn:hover .mstar-1 {
+  animation: musicBurst 1s ease-out 0.2s forwards;
+}
+.music-mode-btn:hover .mstar-2 {
+  animation: musicSpin 1s ease-out 0.4s forwards;
+}
+.music-mode-btn:hover .mstar-3 {
+  animation: musicFlash 1s ease-out 0.3s forwards;
+}
+.music-mode-btn:hover .mstar-4 {
+  animation: musicBurst 1s ease-out 0.25s forwards;
+}
+.music-mode-btn:hover .mstar-5 {
+  animation: musicSpin 1s ease-out 0.5s forwards;
+}
+.music-mode-btn:hover .mstar-6 {
+  animation: musicFlash 1s ease-out 0.35s forwards;
+}
+.music-mode-btn:hover .mstar-7 {
+  animation: musicBurst 1s ease-out 0.45s forwards;
+}
+.music-mode-btn:hover .mstar-8 {
+  animation: musicSpin 1s ease-out 0.55s forwards;
+}
 
 /* --- Titre MUSIC --- 
    Positionné en absolute pour se centrer parfaitement SANS écraser l'image */
 .music-title {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 4px;
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
   font-size: 60px; /* Taille ajustée pour ne pas déborder */
   font-weight: bold;
   font-style: italic;
   letter-spacing: 2px;
   color: rgb(255, 255, 255);
   text-shadow:
-    0 0 18px rgba(255, 80,  150, 1),
-    0 0 40px rgba(220, 30,  100, 0.7),
-    0 0 80px rgba(180, 0,   80,  0.4),
+    0 0 18px rgba(255, 80, 150, 1),
+    0 0 40px rgba(220, 30, 100, 0.7),
+    0 0 80px rgba(180, 0, 80, 0.4),
     0 3px 8px rgba(0, 0, 0, 0.9);
   pointer-events: none;
 }
@@ -1767,65 +2752,158 @@ footer {
   animation: musicTextDrop 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.music-mode-btn:hover .music-title span:nth-child(1) { animation-delay: 0.60s; }
-.music-mode-btn:hover .music-title span:nth-child(2) { animation-delay: 0.65s; }
-.music-mode-btn:hover .music-title span:nth-child(3) { animation-delay: 0.70s; }
-.music-mode-btn:hover .music-title span:nth-child(4) { animation-delay: 0.75s; }
-.music-mode-btn:hover .music-title span:nth-child(5) { animation-delay: 0.80s; }
-
+.music-mode-btn:hover .music-title span:nth-child(1) {
+  animation-delay: 0.6s;
+}
+.music-mode-btn:hover .music-title span:nth-child(2) {
+  animation-delay: 0.65s;
+}
+.music-mode-btn:hover .music-title span:nth-child(3) {
+  animation-delay: 0.7s;
+}
+.music-mode-btn:hover .music-title span:nth-child(4) {
+  animation-delay: 0.75s;
+}
+.music-mode-btn:hover .music-title span:nth-child(5) {
+  animation-delay: 0.8s;
+}
 
 /* =====================================================
    KEYFRAMES MUSIC MODE
    ===================================================== */
 @keyframes slidePinkPanel {
-  0%   { transform: skewX(-20deg) scaleY(1.5) translateX(-200%); opacity: 0; }
-  100% { transform: skewX(-20deg) scaleY(1.5) translateX(0);     opacity: 1; }
+  0% {
+    transform: skewX(-20deg) scaleY(1.5) translateX(-200%);
+    opacity: 0;
+  }
+  100% {
+    transform: skewX(-20deg) scaleY(1.5) translateX(0);
+    opacity: 1;
+  }
 }
 @keyframes musicBurst {
-  0%   { opacity: 0;   transform: scale(0)   rotate(0deg);   }
-  20%  { opacity: 1;   transform: scale(1.6) rotate(12deg);  }
-  55%  { opacity: 0.9; transform: scale(1.2) rotate(8deg);   }
-  100% { opacity: 0;   transform: scale(2.2) rotate(30deg);  }
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.6) rotate(12deg);
+  }
+  55% {
+    opacity: 0.9;
+    transform: scale(1.2) rotate(8deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2) rotate(30deg);
+  }
 }
 @keyframes musicSpin {
-  0%   { opacity: 0;   transform: scale(0)   rotate(-60deg); }
-  18%  { opacity: 1;   transform: scale(1.5) rotate(0deg);   }
-  60%  { opacity: 0.9; transform: scale(1.2) rotate(25deg);  }
-  100% { opacity: 0;   transform: scale(1.8) rotate(90deg);  }
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-60deg);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.5) rotate(0deg);
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1.2) rotate(25deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8) rotate(90deg);
+  }
 }
 @keyframes musicFlash {
-  0%   { opacity: 0;   transform: scale(0);   }
-  12%  { opacity: 1;   transform: scale(1.8); }
-  28%  { opacity: 0.2; transform: scale(1.2); }
-  50%  { opacity: 1;   transform: scale(1.6); }
-  75%  { opacity: 0.4; transform: scale(1.3); }
-  100% { opacity: 0;   transform: scale(2.0); }
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  12% {
+    opacity: 1;
+    transform: scale(1.8);
+  }
+  28% {
+    opacity: 0.2;
+    transform: scale(1.2);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.6);
+  }
+  75% {
+    opacity: 0.4;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
 }
 @keyframes musicReveal {
-  0%   { opacity: 0;   transform: scale(0.97); }
-  60%  { opacity: 0;   transform: scale(0.97); }
-  85%  { opacity: 0.8; transform: scale(1);    }
-  100% { opacity: 1;   transform: scale(1);    }
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  60% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  85% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes musicTextDrop {
-  0%   { opacity: 0; transform: scale(1.5) translateY(-15px); animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  22%  { opacity: 1; transform: scale(1)   translateY(0);     animation-timing-function: linear; }
-  62%  { opacity: 1;                                           animation-timing-function: ease-in; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+    transform: scale(1.5) translateY(-15px);
+    animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    animation-timing-function: linear;
+  }
+  62% {
+    opacity: 1;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* =====================================================
    RESPONSIVE — Bouton Music Mode
    ===================================================== */
 @media (max-width: 768px) {
-  .music-title { font-size: 40px; }
+  .music-title {
+    font-size: 40px;
+  }
 }
 @media (max-width: 480px) {
-  .music-title { font-size: 28px; letter-spacing: 2px; }
-  .mstar-1, .mstar-5 { font-size: 18px; }
-  .mstar-3, .mstar-4, .mstar-7 { font-size: 14px; }
+  .music-title {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+  .mstar-1,
+  .mstar-5 {
+    font-size: 18px;
+  }
+  .mstar-3,
+  .mstar-4,
+  .mstar-7 {
+    font-size: 14px;
+  }
 }
-
 
 /* =====================================================
    3. BOUTON STYLE "PERSONA" (rouge Phantom Thieves)
@@ -1838,8 +2916,10 @@ footer {
   font-size: 1.2rem;
   padding: 12px 28px;
   border-radius: 12px;
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #000;
-  font-family: 'Arial Black', sans-serif;
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 6px #000;
+  font-family: "Arial Black", sans-serif;
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
@@ -1850,14 +2930,18 @@ footer {
 .persona-btn:hover {
   transform: scale(1.05) rotate(-1deg);
   background: linear-gradient(135deg, #ff0055, #d00000);
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #000, 0 0 10px #ff0000;
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 6px #000,
+    0 0 10px #ff0000;
 }
 
 .persona-btn:active {
   transform: scale(0.98) rotate(0deg);
-  box-shadow: 0 0 0 3px #fff, 0 0 0 5px #000;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px #000;
 }
-
 
 /* =====================================================
    4. LIENS SOCIAUX (GitHub, Discord, Ko-fi)
@@ -1888,7 +2972,9 @@ footer {
   width: 24px;
   height: 24px;
   filter: invert(0%) sepia(100%) saturate(0%) hue-rotate(0deg);
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
 /* Survol : légère élévation */
@@ -1920,7 +3006,6 @@ body.darkmode #socialLinks a:hover {
   background-color: #333;
   border-color: #888;
 }
-
 
 /* =====================================================
    5. SYSTÈME PROFIL (bouton, avatar, pseudo)
@@ -2103,7 +3188,6 @@ body.darkmode .border-color-label {
   color: white;
 }
 
-
 /* =====================================================
    6. CARTE DE PARTAGE DE PROFIL
    Générée dynamiquement pour partager les stats.
@@ -2191,7 +3275,6 @@ body.darkmode .border-color-label {
   color: #bbb;
 }
 
-
 /* =====================================================
    7. MODALE DAILY (compte à rebours jusqu'au prochain jour)
    ===================================================== */
@@ -2210,7 +3293,9 @@ body.darkmode .border-color-label {
   z-index: 1000;
   font-size: 15px;
   font-weight: bold;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 
 .daily-btn:hover {
@@ -2254,8 +3339,14 @@ body.darkmode .daily-btn:hover {
 }
 
 @keyframes dailyPop {
-  from { opacity: 0; transform: scale(0.88) translateY(10px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Mode sombre */
@@ -2293,7 +3384,9 @@ body:not(.darkmode) .daily-modal-content {
   color: inherit;
   opacity: 0.5;
   z-index: 20;
-  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition:
+    opacity 0.2s,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   user-select: none;
 }
 .daily-modal .close:hover {
@@ -2359,9 +3452,18 @@ body.darkmode .daily-top-bar {
 }
 
 /* z small → Z medium → Z large */
-.daily-zzzs span:nth-child(1) { font-size: 0.9em;  margin-left: 0;   }
-.daily-zzzs span:nth-child(2) { font-size: 1.2em;  margin-left: 10px; }
-.daily-zzzs span:nth-child(3) { font-size: 1.6em;  margin-left: 22px; }
+.daily-zzzs span:nth-child(1) {
+  font-size: 0.9em;
+  margin-left: 0;
+}
+.daily-zzzs span:nth-child(2) {
+  font-size: 1.2em;
+  margin-left: 10px;
+}
+.daily-zzzs span:nth-child(3) {
+  font-size: 1.6em;
+  margin-left: 22px;
+}
 
 .daily-chibi-wrap:hover .daily-zzzs span:nth-child(1) {
   animation: sleepZ 2s ease-out 0s infinite;
@@ -2376,10 +3478,22 @@ body.darkmode .daily-top-bar {
 /* Voyage de ~170px : reste visible dans le modal jusqu'aux 85 %,
    puis sort au-dessus de la bordure sur les 15 % finaux */
 @keyframes sleepZ {
-  0%   { opacity: 0;   transform: translate(0,   5px)   scale(0.5);  }
-  12%  { opacity: 1;   transform: translate(0,   0)     scale(1);    }
-  84%  { opacity: 0.8; transform: translate(12px, -120px) scale(1.15); }
-  100% { opacity: 0;   transform: translate(20px, -175px) scale(1.3); }
+  0% {
+    opacity: 0;
+    transform: translate(0, 5px) scale(0.5);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  84% {
+    opacity: 0.8;
+    transform: translate(12px, -120px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(20px, -175px) scale(1.3);
+  }
 }
 
 /* Subtitle centré sous le chibi */
@@ -2435,7 +3549,7 @@ body.darkmode .daily-top-bar {
 }
 
 .countdown-unit span {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   font-size: 2.6em;
   font-weight: 900;
   color: #00cc66;
@@ -2461,7 +3575,6 @@ body.darkmode .daily-top-bar {
   user-select: none;
 }
 
-
 /* =====================================================
    8. BOUTON / LIEN VERS LES NOTES DE MISE À JOUR (PDF)
    ===================================================== */
@@ -2481,7 +3594,9 @@ body.darkmode .daily-top-bar {
   font-weight: bold;
   font-family: sans-serif;
   border-radius: 4px;
-  transition: background 0.3s, transform 0.2s;
+  transition:
+    background 0.3s,
+    transform 0.2s;
   /* Petite ombre noire style bande dessinée */
   box-shadow: 2px 2px 0px #000;
 }
@@ -2490,7 +3605,6 @@ body.darkmode .daily-top-bar {
   background-color: #b01010;
   transform: translateY(-2px);
 }
-
 
 /* =====================================================
    9. THÈME NOUVEL AN CHINOIS (CNY)
@@ -2575,7 +3689,6 @@ body.darkmode .cny-theme .version-header:hover {
   box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.15) !important;
 }
 
-
 /* =====================================================
    10. THÈME v2.0 — Major Update (Sophia / Backend)
    ===================================================== */
@@ -2590,8 +3703,8 @@ body.darkmode .cny-theme .version-header:hover {
   border-bottom: 2px solid #ff6b35;
   position: relative;
   overflow: hidden;
-  padding: 15px;        /* même padding que les autres headers */
-  z-index: 0;           /* crée un stacking context isolé pour les enfants */
+  padding: 15px; /* même padding que les autres headers */
+  z-index: 0; /* crée un stacking context isolé pour les enfants */
 }
 
 /* Conteneur orbs — absolu, z-index 0 = derrière le texte (z-index 1+) */
@@ -2610,23 +3723,118 @@ body.darkmode .cny-theme .version-header:hover {
 }
 
 @keyframes v2OrbPop {
-  0%   { transform: scale(0);    opacity: 0;    }
-  18%  { transform: scale(1.35); opacity: 0.88; }
-  50%  { transform: scale(1);    opacity: 0.65; }
-  82%  { transform: scale(0.75); opacity: 0.28; }
-  100% { transform: scale(0);    opacity: 0;    }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  18% {
+    transform: scale(1.35);
+    opacity: 0.88;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  82% {
+    transform: scale(0.75);
+    opacity: 0.28;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
 }
 
-.v2-orb:nth-child(1)  { width:16px; height:16px; top:20%; left:5%;   background:#ff6b35; animation-delay:0s;    animation-duration:3.6s; }
-.v2-orb:nth-child(2)  { width:9px;  height:9px;  top:68%; left:14%;  background:#ffffff; animation-delay:0.8s;  animation-duration:2.9s; }
-.v2-orb:nth-child(3)  { width:20px; height:20px; top:28%; left:73%;  background:#ff8c42; animation-delay:1.4s;  animation-duration:4.1s; }
-.v2-orb:nth-child(4)  { width:7px;  height:7px;  top:12%; left:50%;  background:#ffffff; animation-delay:2.1s;  animation-duration:3.0s; }
-.v2-orb:nth-child(5)  { width:13px; height:13px; top:76%; left:83%;  background:#ff6b35; animation-delay:0.4s;  animation-duration:3.8s; }
-.v2-orb:nth-child(6)  { width:11px; height:11px; top:52%; left:38%;  background:#ffbb99; animation-delay:1.7s;  animation-duration:2.6s; }
-.v2-orb:nth-child(7)  { width:18px; height:18px; top:18%; left:88%;  background:#ff6b35; animation-delay:2.8s;  animation-duration:4.3s; }
-.v2-orb:nth-child(8)  { width:6px;  height:6px;  top:84%; left:58%;  background:#ffffff; animation-delay:1.1s;  animation-duration:3.3s; }
-.v2-orb:nth-child(9)  { width:10px; height:10px; top:60%; left:93%;  background:#ffa566; animation-delay:0.6s;  animation-duration:3.1s; }
-.v2-orb:nth-child(10) { width:8px;  height:8px;  top:40%; left:22%;  background:#ffffff; animation-delay:3.2s;  animation-duration:2.7s; }
+.v2-orb:nth-child(1) {
+  width: 16px;
+  height: 16px;
+  top: 20%;
+  left: 5%;
+  background: #ff6b35;
+  animation-delay: 0s;
+  animation-duration: 3.6s;
+}
+.v2-orb:nth-child(2) {
+  width: 9px;
+  height: 9px;
+  top: 68%;
+  left: 14%;
+  background: #ffffff;
+  animation-delay: 0.8s;
+  animation-duration: 2.9s;
+}
+.v2-orb:nth-child(3) {
+  width: 20px;
+  height: 20px;
+  top: 28%;
+  left: 73%;
+  background: #ff8c42;
+  animation-delay: 1.4s;
+  animation-duration: 4.1s;
+}
+.v2-orb:nth-child(4) {
+  width: 7px;
+  height: 7px;
+  top: 12%;
+  left: 50%;
+  background: #ffffff;
+  animation-delay: 2.1s;
+  animation-duration: 3s;
+}
+.v2-orb:nth-child(5) {
+  width: 13px;
+  height: 13px;
+  top: 76%;
+  left: 83%;
+  background: #ff6b35;
+  animation-delay: 0.4s;
+  animation-duration: 3.8s;
+}
+.v2-orb:nth-child(6) {
+  width: 11px;
+  height: 11px;
+  top: 52%;
+  left: 38%;
+  background: #ffbb99;
+  animation-delay: 1.7s;
+  animation-duration: 2.6s;
+}
+.v2-orb:nth-child(7) {
+  width: 18px;
+  height: 18px;
+  top: 18%;
+  left: 88%;
+  background: #ff6b35;
+  animation-delay: 2.8s;
+  animation-duration: 4.3s;
+}
+.v2-orb:nth-child(8) {
+  width: 6px;
+  height: 6px;
+  top: 84%;
+  left: 58%;
+  background: #ffffff;
+  animation-delay: 1.1s;
+  animation-duration: 3.3s;
+}
+.v2-orb:nth-child(9) {
+  width: 10px;
+  height: 10px;
+  top: 60%;
+  left: 93%;
+  background: #ffa566;
+  animation-delay: 0.6s;
+  animation-duration: 3.1s;
+}
+.v2-orb:nth-child(10) {
+  width: 8px;
+  height: 8px;
+  top: 40%;
+  left: 22%;
+  background: #ffffff;
+  animation-delay: 3.2s;
+  animation-duration: 2.7s;
+}
 
 /* Contenu gauche de l'en-tête : Sophia + titre */
 .v2-header-inner {
@@ -2634,11 +3842,11 @@ body.darkmode .cny-theme .version-header:hover {
   align-items: center;
   gap: 10px;
   position: relative;
-  z-index: 1;   /* au-dessus des orbs (z-index: 0) */
+  z-index: 1; /* au-dessus des orbs (z-index: 0) */
 }
 
 .v2-sophia {
-  width: 38px;          /* taille alignée sur la hauteur de texte standard */
+  width: 38px; /* taille alignée sur la hauteur de texte standard */
   height: 38px;
   border-radius: 50%;
   border: 2px solid #ff6b35;
@@ -2659,7 +3867,7 @@ body.darkmode .cny-theme .version-header:hover {
 .v2-theme .version-arrow {
   color: #ff6b35 !important;
   position: relative;
-  z-index: 1;   /* au-dessus des orbs */
+  z-index: 1; /* au-dessus des orbs */
 }
 
 /* Mots-clés en orange dans le contenu */
@@ -2672,11 +3880,15 @@ body.darkmode .cny-theme .version-header:hover {
   background: linear-gradient(135deg, #ff6b35 0%, #e84e0f 100%) !important;
   color: #fff !important;
   border: none !important;
-  box-shadow: 2px 2px 0px #7a2000, 0 4px 14px rgba(255, 107, 53, 0.35) !important;
+  box-shadow:
+    2px 2px 0px #7a2000,
+    0 4px 14px rgba(255, 107, 53, 0.35) !important;
 }
 .v2-btn:hover {
   background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%) !important;
-  box-shadow: 2px 2px 0px #7a2000, 0 6px 20px rgba(255, 107, 53, 0.55) !important;
+  box-shadow:
+    2px 2px 0px #7a2000,
+    0 6px 20px rgba(255, 107, 53, 0.55) !important;
   transform: translateY(-2px);
 }
 
@@ -2710,7 +3922,6 @@ body.darkmode .v2-theme .version-header:hover {
   background: linear-gradient(135deg, #111128 0%, #0e2540 60%, #111128 100%) !important;
   box-shadow: inset 0 0 14px rgba(255, 107, 53, 0.12) !important;
 }
-
 
 /* =====================================================
    11. RESPONSIVE — SPÉCIFIQUE INDEX
@@ -2773,7 +3984,6 @@ body.darkmode .v2-theme .version-header:hover {
     margin-top: 20px;
   }
 }
-
 
 /* -----------------------------------------------
    MOBILE (≤ 480px)

@@ -24,12 +24,12 @@
 
 Dans la saga Persona, chaque protagoniste invoque une entité spirituelle appelée **Persona** — une manifestation de sa psyché, souvent inspirée de la mythologie ou du folklore mondial.
 
-| | Personnage | Persona |
-|---|---|---|
-| **Exemple** | Ryuji Sakamoto | Captain Kidd |
-| **Ce qu'il est** | Un humain du groupe | L'esprit invoqué par Ryuji |
-| **Mode concerné** | Mode Classique, Emoji, Silhouette | **Mode Personae** |
-| **Identificateur** | Nom, arcane, rôle, âge… | Artwork officiel de l'entité |
+|                    | Personnage                        | Persona                      |
+| ------------------ | --------------------------------- | ---------------------------- |
+| **Exemple**        | Ryuji Sakamoto                    | Captain Kidd                 |
+| **Ce qu'il est**   | Un humain du groupe               | L'esprit invoqué par Ryuji   |
+| **Mode concerné**  | Mode Classique, Emoji, Silhouette | **Mode Personae**            |
+| **Identificateur** | Nom, arcane, rôle, âge…           | Artwork officiel de l'entité |
 
 > En mode Personae, on cherche **l'entité**, pas son porteur. Captain Kidd est la bonne réponse, pas Ryuji.
 
@@ -37,21 +37,21 @@ Dans la saga Persona, chaque protagoniste invoque une entité spirituelle appel�
 
 ## 🖤 Personas Picaro — les variantes corrompues
 
-Les **Personas Picaro** sont des versions sombres et altérées de Personas iconiques, apparues dans les jeux crossover (*Persona Q2*, *Persona 5 Royal*). Elles se distinguent par leur palette de couleurs inversée ou noircie.
+Les **Personas Picaro** sont des versions sombres et altérées de Personas iconiques, apparues dans les jeux crossover (_Persona Q2_, _Persona 5 Royal_). Elles se distinguent par leur palette de couleurs inversée ou noircie.
 
-| Persona Picaro | Persona d'origine | Porteur d'origine |
-|---|---|---|
-| Arsène Picaro | Arsène | Joker *(P5R)* |
-| Orpheus Picaro | Orpheus | Makoto Yuki *(P3)* |
-| Izanagi Picaro | Izanagi | Yu Narukami *(P4G)* |
-| Kaguya Picaro | Kaguya | Kasumi Yoshizawa *(P5R)* |
-| Ariadne Picaro | Ariadne | Rei *(PQ)* |
-| Asterios Picaro | Asterios | Kou *(PQ)* |
-| Athena Picaro | Athena | Aigis *(P3)* |
-| Messiah Picaro | Messiah | Makoto Yuki *(P3)* |
-| Thanatos Picaro | Thanatos | Makoto Yuki *(P3)* |
-| Magatsu-Izanagi Picaro | Magatsu-Izanagi | Adachi *(P4G)* |
-| Tsukuyomi Picaro | Tsukuyomi | Marie *(P4G)* |
+| Persona Picaro         | Persona d'origine | Porteur d'origine        |
+| ---------------------- | ----------------- | ------------------------ |
+| Arsène Picaro          | Arsène            | Joker _(P5R)_            |
+| Orpheus Picaro         | Orpheus           | Makoto Yuki _(P3)_       |
+| Izanagi Picaro         | Izanagi           | Yu Narukami _(P4G)_      |
+| Kaguya Picaro          | Kaguya            | Kasumi Yoshizawa _(P5R)_ |
+| Ariadne Picaro         | Ariadne           | Rei _(PQ)_               |
+| Asterios Picaro        | Asterios          | Kou _(PQ)_               |
+| Athena Picaro          | Athena            | Aigis _(P3)_             |
+| Messiah Picaro         | Messiah           | Makoto Yuki _(P3)_       |
+| Thanatos Picaro        | Thanatos          | Makoto Yuki _(P3)_       |
+| Magatsu-Izanagi Picaro | Magatsu-Izanagi   | Adachi _(P4G)_           |
+| Tsukuyomi Picaro       | Tsukuyomi         | Marie _(P4G)_            |
 
 > **Astuce** : Les Picaro partagent la silhouette de leur Persona d'origine mais avec des couleurs inversées. Chercher la forme, pas la couleur.
 
@@ -76,6 +76,7 @@ personaeMode/
 ## `modePersonae.js`
 
 Importe depuis `../js/gameCore.js` :
+
 - `showConfettiExplosion` — avec `{ count: 30, spreadFrom: "bottom" }` (style montée du bas)
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
 - `setupFilterButtons`
@@ -93,51 +94,51 @@ Les filtres permettent de limiter le pool de Personas par jeu d'origine. Les **P
 
 ### Badges
 
-| Badge | Condition |
-|-------|-----------|
-| Twin Blade | Deviner la Persona "Kaguya Picaro" |
+| Badge          | Condition                                     |
+| -------------- | --------------------------------------------- |
+| Twin Blade     | Deviner la Persona "Kaguya Picaro"            |
 | Crimson Legacy | Deviner une Persona liée à un opus spécifique |
 
 ### Fonctions spécifiques
 
-| Fonction | Description |
-|----------|-------------|
-| `getFilteredCharacters()` | Retourne les Personas selon les filtres actifs |
-| `pickCharacter()` | Sélectionne aléatoirement une Persona avec anti-répétition (derniers 5) |
-| `initializeAutocomplete()` | Dropdown avec flag `_guessed` pour masquer les déjà proposées |
-| `showVictory()` | Victoire avec badges, stats, confettis montants |
-| `showWrong()` | Affiche la vignette de la mauvaise Persona |
-| `handleGuess()` | Vérifie la saisie |
-| `giveUp()` | Abandonne et révèle la bonne réponse |
-| `resetGame()` | Remet à zéro et choisit une nouvelle Persona |
-| `applyDarkModeStyles()` | Ajustements dark mode |
+| Fonction                   | Description                                                             |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `getFilteredCharacters()`  | Retourne les Personas selon les filtres actifs                          |
+| `pickCharacter()`          | Sélectionne aléatoirement une Persona avec anti-répétition (derniers 5) |
+| `initializeAutocomplete()` | Dropdown avec flag `_guessed` pour masquer les déjà proposées           |
+| `showVictory()`            | Victoire avec badges, stats, confettis montants                         |
+| `showWrong()`              | Affiche la vignette de la mauvaise Persona                              |
+| `handleGuess()`            | Vérifie la saisie                                                       |
+| `giveUp()`                 | Abandonne et révèle la bonne réponse                                    |
+| `resetGame()`              | Remet à zéro et choisit une nouvelle Persona                            |
+| `applyDarkModeStyles()`    | Ajustements dark mode                                                   |
 
 ### Debug
 
 ```js
 // Dans la console du navigateur :
-debugAllPersonae()   // Vérifie que toutes les Personas ont une image valide
+debugAllPersonae(); // Vérifie que toutes les Personas ont une image valide
 ```
 
 ---
 
 ## `database/` (local)
 
-| Fichier | Contenu |
-|---------|---------|
-| `personaeCharacters.js` | Tableau des Personas jouables dans ce mode |
-| `persona.js` | Données complètes (arcane, opus, variante Picaro…) |
-| `portraitsMapPersonae.js` | Correspondance nom → chemin vers l'artwork |
-| `img/` | Artworks des Personas (WebP optimisé) |
+| Fichier                   | Contenu                                            |
+| ------------------------- | -------------------------------------------------- |
+| `personaeCharacters.js`   | Tableau des Personas jouables dans ce mode         |
+| `persona.js`              | Données complètes (arcane, opus, variante Picaro…) |
+| `portraitsMapPersonae.js` | Correspondance nom → chemin vers l'artwork         |
+| `img/`                    | Artworks des Personas (WebP optimisé)              |
 
 ---
 
 ## localStorage utilisé
 
-| Clé | Contenu |
-|-----|---------|
-| `personaeTarget` | Persona cible (JSON) |
-| `personaeAttempts` | Nombre d'essais |
-| `personaeGameOver` | `"true"` si partie terminée |
-| `personaeActiveFilters` | Filtres opus actifs |
-| `lastPlayedDate_Personae` | Date de la dernière partie |
+| Clé                       | Contenu                     |
+| ------------------------- | --------------------------- |
+| `personaeTarget`          | Persona cible (JSON)        |
+| `personaeAttempts`        | Nombre d'essais             |
+| `personaeGameOver`        | `"true"` si partie terminée |
+| `personaeActiveFilters`   | Filtres opus actifs         |
+| `lastPlayedDate_Personae` | Date de la dernière partie  |

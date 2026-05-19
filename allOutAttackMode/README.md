@@ -21,7 +21,7 @@
 
 <img src="../img/preview/preview_all_out_attack_victory.png" alt="Écran de victoire" width="600">
 
-*Écran de victoire — le personnage est révélé*
+_Écran de victoire — le personnage est révélé_
 
 </div>
 
@@ -93,6 +93,7 @@ allOutAttackMode/
 ## 🔧 `modeAllOutAttack.js`
 
 Importe depuis `../js/gameCore.js` :
+
 - `showConfettiExplosion` (style `"sides"`)
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
 - `setupFilterButtons`
@@ -103,16 +104,16 @@ Importe depuis `../js/gameCore.js` :
 Les GIFs d'All-Out Attack sont des fichiers lourds. Ce mode implémente un **cache LRU** (_Least Recently Used_) en mémoire pour éviter de recharger les GIFs déjà vus :
 
 ```js
-const IMAGE_CACHE_MAX = 20;  // max 20 GIFs en cache simultanément
+const IMAGE_CACHE_MAX = 20; // max 20 GIFs en cache simultanément
 const imageCache = new Map(); // clé = URL, valeur = Blob URL
 ```
 
-| Fonction | Description |
-|----------|-------------|
-| `addToImageCache(url, blobUrl)` | Ajoute avec éviction du plus ancien si le cache est plein |
-| `getFromCache(url)` | Retourne l'URL en cache ou `null` |
-| `smartPreload(urls)` | Pré-charge les N prochains GIFs en arrière-plan |
-| `loadImageSafely(url, imgEl, fallback)` | Charge avec gestion d'erreur |
+| Fonction                                | Description                                               |
+| --------------------------------------- | --------------------------------------------------------- |
+| `addToImageCache(url, blobUrl)`         | Ajoute avec éviction du plus ancien si le cache est plein |
+| `getFromCache(url)`                     | Retourne l'URL en cache ou `null`                         |
+| `smartPreload(urls)`                    | Pré-charge les N prochains GIFs en arrière-plan           |
+| `loadImageSafely(url, imgEl, fallback)` | Charge avec gestion d'erreur                              |
 
 ### 🔀 Sélection anti-répétition
 
@@ -124,37 +125,37 @@ const imageCache = new Map(); // clé = URL, valeur = Blob URL
 
 ### Fonctions spécifiques
 
-| Fonction | Description |
-|----------|-------------|
-| `cdn(fichier)` | Construit l'URL complète du GIF depuis la base locale |
-| `getFilteredPersonas()` | Filtre les personnages selon les opus actifs |
-| `initializeAutocomplete()` | Dropdown avec filtrage par opus actif |
-| `showVictoryBox()` | Affiche le panneau de victoire avec portrait et GIF |
-| `updateGiveUpCounter()` | Met à jour le compteur d'essais restants |
-| `disableInputs()` | Désactive les contrôles en fin de partie |
-| `applyDarkModeStyles()` | Ajustements dark mode (couleur de fond du container GIF) |
+| Fonction                   | Description                                              |
+| -------------------------- | -------------------------------------------------------- |
+| `cdn(fichier)`             | Construit l'URL complète du GIF depuis la base locale    |
+| `getFilteredPersonas()`    | Filtre les personnages selon les opus actifs             |
+| `initializeAutocomplete()` | Dropdown avec filtrage par opus actif                    |
+| `showVictoryBox()`         | Affiche le panneau de victoire avec portrait et GIF      |
+| `updateGiveUpCounter()`    | Met à jour le compteur d'essais restants                 |
+| `disableInputs()`          | Désactive les contrôles en fin de partie                 |
+| `applyDarkModeStyles()`    | Ajustements dark mode (couleur de fond du container GIF) |
 
 ---
 
 ## 🗄️ `database/` (local)
 
-| Fichier | Contenu |
-|---------|---------|
-| `aoaCharacters.js` | Tableau des personnages avec leurs fichiers GIF |
-| `personas_allOut.js` | Données complémentaires des Personas |
-| `portraitsMap.js` | Correspondance nom → portrait pour les mauvaises réponses |
+| Fichier              | Contenu                                                   |
+| -------------------- | --------------------------------------------------------- |
+| `aoaCharacters.js`   | Tableau des personnages avec leurs fichiers GIF           |
+| `personas_allOut.js` | Données complémentaires des Personas                      |
+| `portraitsMap.js`    | Correspondance nom → portrait pour les mauvaises réponses |
 
 ---
 
 ## 💾 localStorage utilisé
 
-| Clé | Contenu |
-|-----|---------|
-| `allOutTarget` | Personnage cible (JSON) |
-| `allOutAttempts` | Nombre d'essais |
-| `allOutGameOver` | `"true"` si partie terminée |
-| `filters_AllOutAttack` | Filtres opus actifs |
-| `lastPlayedDate_AllOut` | Date de la dernière partie |
+| Clé                     | Contenu                     |
+| ----------------------- | --------------------------- |
+| `allOutTarget`          | Personnage cible (JSON)     |
+| `allOutAttempts`        | Nombre d'essais             |
+| `allOutGameOver`        | `"true"` si partie terminée |
+| `filters_AllOutAttack`  | Filtres opus actifs         |
+| `lastPlayedDate_AllOut` | Date de la dernière partie  |
 
 ---
 
@@ -162,12 +163,12 @@ const imageCache = new Map(); // clé = URL, valeur = Blob URL
 
 ---
 
-### 🌫️ *Quelque chose se prépare dans le brouillard...*
+### 🌫️ _Quelque chose se prépare dans le brouillard..._
 
-> *Persona 4 Revival est en approche.*
-> *Quand il émergera de l'autre côté, leurs All-Out Attacks rejoindront l'arène.*
+> _Persona 4 Revival est en approche._
+> _Quand il émergera de l'autre côté, leurs All-Out Attacks rejoindront l'arène._
 >
-> *Patience, détective.*
+> _Patience, détective._
 
 ---
 

@@ -4,7 +4,7 @@ body {
   margin: 0;
   padding: 0;
   /* Set a background image with specific properties */
-  background-image: url('../img/personadle_wallpaper.jpg');
+  background-image: url("../img/personadle_wallpaper.jpg");
   background-size: cover; /* Make the image cover the entire background */
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* Prevent the image from repeating */
@@ -17,7 +17,7 @@ body {
   /* Style for the title element */
   display: inline-block; /* Make it inline-block for better control */
   color: #51ff00; /* Set the text color */
-  font-family: 'Times New Roman', Times, serif; /* Use a serif font */
+  font-family: "Times New Roman", Times, serif; /* Use a serif font */
   font-size: 30px; /* Set font size */
   padding: 10px 20px; /* Add padding around the title */
   border-radius: 10px; /* Round the corners */
@@ -42,7 +42,6 @@ body {
   position: relative;
 }
 
-
 /* === BOUTONS SUBMIT / REPLAY ALIGNÉS DROITE DU CHAMP === */
 #guessButton,
 #resetButton {
@@ -59,7 +58,6 @@ body {
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   z-index: 2;
 }
-
 
 /* ========== Logo Home Page ========== */
 #imgHomePage {
@@ -86,7 +84,9 @@ body {
   padding: 0; /* Remove padding */
   background: none; /* Transparent background */
   cursor: pointer; /* Pointer cursor on hover */
-  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effects */
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease; /* Smooth hover effects */
   display: block; /* Center the button */
   margin: 20px auto; /* Add margin */
 }
@@ -98,7 +98,9 @@ body {
   display: block; /* Block-level element */
   border-radius: 15px; /* Round the corners */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Add shadow */
-  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effects */
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease; /* Smooth hover effects */
 }
 
 /* Hover effects for specific gamemode buttons */
@@ -137,14 +139,16 @@ body {
   /* Style for gamemode titles */
   text-align: center; /* Center the text */
   color: white; /* Set text color */
-  font-family: 'Times New Roman', Times, serif; /* Use serif font */
+  font-family: "Times New Roman", Times, serif; /* Use serif font */
   font-size: 36px; /* Set font size */
   border: 4px solid rgb(202, 202, 202); /* Add border */
   padding: 15px 30px; /* Add padding */
   border-radius: 12px; /* Round the corners */
   background: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
   box-shadow: 0 0 15px rgba(8, 8, 8, 0.7); /* Add shadow */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease; /* Smooth hover effects */
   display: block; /* Block-level element */
   width: fit-content; /* Adjust width to content */
   margin: 30px auto; /* Center and add margin */
@@ -192,7 +196,7 @@ body {
   width: 340px; /* Set width */
   max-height: 320px; /* Limit height */
   overflow-y: auto; /* Enable vertical scrolling */
-  font-family: 'Segoe UI', sans-serif; /* Use sans-serif font */
+  font-family: "Segoe UI", sans-serif; /* Use sans-serif font */
   animation: fadeZoomIn 0.25s ease-out; /* Add fade-in animation */
 }
 
@@ -207,7 +211,7 @@ body {
   background: white;
   border: 1px solid #ccc;
   border-top: none;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
   z-index: 5;
   list-style: none;
   padding: 0;
@@ -215,7 +219,6 @@ body {
 }
 
 .list-options {
-  
   /* Style for each autocomplete option */
   display: flex; /* Use flexbox for alignment */
   align-items: center; /* Center items vertically */
@@ -247,36 +250,27 @@ body {
   margin-right: 12px;
   flex-shrink: 0;
   border: 1px solid #ccc;
-  
 }
-
 
 .list-options span {
-  white-space: normal;       /* Permet les retours à la ligne */
-  overflow: visible;         /* Ne masque pas le texte */
-  text-overflow: unset;      /* Plus d’ellipse */
-  max-width: 230px;          /* Conserve une largeur propre */
-  line-height: 1.2;          /* Un peu de respi */
+  white-space: normal; /* Permet les retours à la ligne */
+  overflow: visible; /* Ne masque pas le texte */
+  text-overflow: unset; /* Plus d’ellipse */
+  max-width: 230px; /* Conserve une largeur propre */
+  line-height: 1.2; /* Un peu de respi */
 }
-
 
 .autocomplete-active {
   background-color: #7b8383 !important;
 }
 
-
 .textbar-container {
   position: relative;
 }
 
-
 /* ========== Hint Button & Quote Text ========== */
 
-
-
-
 .link-wrapper {
-
   position: relative;
 
   display: inline-block;
@@ -286,13 +280,9 @@ body {
   width: fit-content;
 
   height: fit-content;
-
 }
 
-
-
 .link-wrapper .fallback {
-
   font-size: 2.25em;
 
   letter-spacing: 4px;
@@ -306,13 +296,9 @@ body {
   top: 15px;
 
   left: 0;
-
 }
 
-
-
 .img-wrapper {
-
   position: relative;
 
   width: 100%;
@@ -320,13 +306,9 @@ body {
   height: auto;
 
   border-radius: 10px; /* optionnel */
-
 }
 
-
-
 .img-wrapper img {
-
   width: 100%;
 
   height: auto;
@@ -340,82 +322,45 @@ body {
   transition: transform 0.15s ease;
 
   pointer-events: none;
-
 }
-
-
 
 .img-wrapper .normal {
-
   display: block;
-  
-
 }
-
-
 
 .img-wrapper .active {
-
   display: none;
-
 }
-
-
 
 .link-wrapper:hover {
-
   z-index: 9999;
-
 }
 
-
-
 .link-wrapper:hover .shape-wrapper {
-
   display: block;
 
   transform: rotate(-6deg);
-
 }
-
-
 
 .link-wrapper:nth-child(even):hover .shape-wrapper {
-
   transform: rotate(11deg);
-
 }
-
-
 
 .link-wrapper:hover .shape-wrapper .cyan-fill {
-
   transform: scale(3, 0.1);
-
 }
-
-
 
 .link-wrapper:hover .img-wrapper .normal {
-
   display: none;
-
 }
 
-
-
 .link-wrapper:hover .img-wrapper .active {
-
   display: block;
 
   animation: tiltBounce 0.15s ease forwards;
-
 }
 
-
-
 .shape-wrapper {
-
   display: none;
 
   position: absolute;
@@ -427,13 +372,9 @@ body {
   filter: sepia(50%) saturate(3);
 
   z-index: 1;
-
 }
 
-
-
 .shape {
-
   position: absolute;
 
   inset: 0;
@@ -441,13 +382,9 @@ body {
   overflow: hidden;
 
   transition: all 0.1s linear;
-
 }
 
-
-
 .shape svg {
-
   width: 100%;
 
   height: 100%;
@@ -457,13 +394,9 @@ body {
   top: 0;
 
   left: 0;
-
 }
 
-
-
 .shape.cyan-fill {
-
   mix-blend-mode: screen;
 
   animation-delay: 0.05s;
@@ -471,25 +404,17 @@ body {
   animation-duration: 0.4s;
 
   opacity: 0.6;
-
 }
 
-
-
 .shape.red-fill {
-
   animation-delay: 0.08s;
 
   animation-duration: 0.45s;
 
   opacity: 0.8;
-
 }
 
-
-
 .jelly {
-
   animation-name: jelly;
 
   animation-iteration-count: infinite;
@@ -497,64 +422,51 @@ body {
   animation-timing-function: linear;
 
   transform-origin: center;
-
 }
-
-
 
 @keyframes tiltBounce {
-
-  0% { transform: scale(1) rotate(-7deg); }
-
-  50% { transform: scale(1.5) rotate(-7deg); }
-
-  100% { transform: scale(1.15) rotate(-7deg); }
-
-}
-
-
-
-@keyframes tiltBounceAlt {
-
-  0% { transform: scale(1) rotate(7deg); }
-
-  50% { transform: scale(1.5) rotate(7deg); }
-
-  100% { transform: scale(1.15) rotate(7deg); }
-
-}
-
-
-
-@keyframes jelly {
-
   0% {
-
-    transform: scale(1.05,1) skewX(8deg) translateY(1px)
-
-               rotateX(10deg) rotateY(5deg) rotateZ(-5deg);
-
+    transform: scale(1) rotate(-7deg);
   }
 
   50% {
-
-    transform: scale(1.05,1.05) skewX(-5deg) translateY(-1px)
-
-               translateZ(-10px);
-
+    transform: scale(1.5) rotate(-7deg);
   }
 
   100% {
-
-    transform: scale(1.05,1) skewX(8deg) translateY(1px)
-
-               rotateX(-10deg) rotateY(-5deg) rotateZ(-5deg);
-
+    transform: scale(1.15) rotate(-7deg);
   }
-
 }
 
+@keyframes tiltBounceAlt {
+  0% {
+    transform: scale(1) rotate(7deg);
+  }
 
+  50% {
+    transform: scale(1.5) rotate(7deg);
+  }
+
+  100% {
+    transform: scale(1.15) rotate(7deg);
+  }
+}
+
+@keyframes jelly {
+  0% {
+    transform: scale(1.05, 1) skewX(8deg) translateY(1px) rotateX(10deg) rotateY(5deg)
+      rotateZ(-5deg);
+  }
+
+  50% {
+    transform: scale(1.05, 1.05) skewX(-5deg) translateY(-1px) translateZ(-10px);
+  }
+
+  100% {
+    transform: scale(1.05, 1) skewX(8deg) translateY(1px) rotateX(-10deg) rotateY(-5deg)
+      rotateZ(-5deg);
+  }
+}
 
 /* Style pour le texte de l'indice */
 #quoteHint {
@@ -593,8 +505,7 @@ body {
   max-width: 1300px;
 }
 
-
- .guess-image {
+.guess-image {
   width: 100px;
   height: 100px;
   object-fit: contain;
@@ -603,7 +514,6 @@ body {
   border: 2px solid #ccc;
 }
 
-
 .guess-cell {
   width: 140px;
   height: 100px;
@@ -611,7 +521,7 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   font-size: 15px;
   color: white;
   border-radius: 10px;
@@ -627,16 +537,22 @@ body {
   box-sizing: border-box;
 }
 
-
-
-
-
 /* Delay l'animation de chaque case */
-.guess-cell:nth-child(2) { animation-delay: 0.1s; }
-.guess-cell:nth-child(3) { animation-delay: 0.2s; }
-.guess-cell:nth-child(4) { animation-delay: 0.3s; }
-.guess-cell:nth-child(5) { animation-delay: 0.4s; }
-.guess-cell:nth-child(6) { animation-delay: 0.5s; }
+.guess-cell:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.guess-cell:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.guess-cell:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.guess-cell:nth-child(5) {
+  animation-delay: 0.4s;
+}
+.guess-cell:nth-child(6) {
+  animation-delay: 0.5s;
+}
 
 .category-row {
   display: grid;
@@ -653,8 +569,6 @@ body {
   border-radius: 14px;
   max-width: 1300px;
 }
-
-
 
 .correct {
   background-color: #2ecc71;
@@ -681,8 +595,14 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .confetti-emoji {
@@ -712,7 +632,7 @@ body {
   max-width: 500px;
   margin: 30px auto;
   text-align: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .emoji-hint-zone h2 {
@@ -727,8 +647,6 @@ body {
   margin-top: 10px;
 }
 
-
-
 .emoji-unit {
   font-size: 4rem;
   margin: 0 12px;
@@ -739,21 +657,14 @@ body {
   cursor: default;
 
   filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.4));
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.3s ease;
 }
 
 .emoji-unit:hover {
   transform: scale(1.35);
-  filter: drop-shadow(0 0 18px rgb(255, 234, 234))
-          drop-shadow(0 0 12px rgb(4, 255, 255));
-}
-
-
-@keyframes popEmoji {
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  filter: drop-shadow(0 0 18px rgb(255, 234, 234)) drop-shadow(0 0 12px rgb(4, 255, 255));
 }
 
 @keyframes popEmoji {
@@ -763,6 +674,12 @@ body {
   }
 }
 
+@keyframes popEmoji {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 @keyframes popEmoji {
   to {
@@ -798,8 +715,6 @@ body {
   font-weight: bold;
 }
 
-
-
 .codename {
   font-weight: 700;
   font-size: 16px;
@@ -812,7 +727,6 @@ body {
   font-style: italic;
   line-height: 1.1;
 }
-
 
 .tooltip {
   position: relative;
@@ -858,14 +772,28 @@ body {
   border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent;
 }
 
-
-.blur-level-0 { filter: blur(14px); }
-.blur-level-1 { filter: blur(12px); }
-.blur-level-2 { filter: blur(10px); }
-.blur-level-3 { filter: blur(8px); }
-.blur-level-4 { filter: blur(6px); }
-.blur-level-5 { filter: blur(3px); }
-.blur-level-6 { filter: blur(0px); transition: filter 0.4s ease; }
+.blur-level-0 {
+  filter: blur(14px);
+}
+.blur-level-1 {
+  filter: blur(12px);
+}
+.blur-level-2 {
+  filter: blur(10px);
+}
+.blur-level-3 {
+  filter: blur(8px);
+}
+.blur-level-4 {
+  filter: blur(6px);
+}
+.blur-level-5 {
+  filter: blur(3px);
+}
+.blur-level-6 {
+  filter: blur(0px);
+  transition: filter 0.4s ease;
+}
 
 .victory-box {
   display: flex;
@@ -895,10 +823,15 @@ body {
   font-weight: bold;
 }
 
-
 @keyframes fadeInVictory {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ✅ Supprime le blur quand l'image affichée est le gif de chargement */
@@ -906,8 +839,6 @@ body {
   filter: none !important;
   opacity: 1 !important;
 }
-
-
 
 .aoa-gif-zone {
   display: flex;
@@ -949,9 +880,6 @@ body {
   /* 🎯 Lueur fixe autour du GIF */
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.25);
 }
-
-
-
 
 /* ===== VICTORY BOX IMAGE PLUS GRANDE ===== */
 .victory-box img {
@@ -1004,16 +932,25 @@ body {
 
 /* Animation shake */
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 .shake {
   animation: shake 0.5s;
 }
-
 
 /* Compteur stylisé pour Give Up et Hint */
 .counter {
@@ -1028,7 +965,9 @@ body {
   font-weight: bold;
   font-family: "Segoe UI", sans-serif;
   box-shadow: 0 0 6px rgba(255, 193, 7, 0.5);
-  transition: transform 0.2s ease, background-color 0.3s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.3s ease;
 }
 
 .counter.activated {
@@ -1037,7 +976,6 @@ body {
   transform: scale(1.05);
 }
 
-
 /* ===== MODALE - Comment jouer ===== */
 .modal {
   display: none;
@@ -1045,7 +983,8 @@ body {
   z-index: 999;
   left: 0;
   top: 0;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
 }
 
@@ -1056,7 +995,7 @@ body {
   width: 90%;
   max-width: 600px;
   border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
   position: relative;
   font-family: Arial, sans-serif;
 }
@@ -1075,7 +1014,6 @@ body {
   color: #000;
 }
 
-
 .rules-button-wrapper {
   text-align: center;
   margin: 40px auto;
@@ -1088,8 +1026,10 @@ body {
   font-size: 1.2rem;
   padding: 12px 28px;
   border-radius: 12px;
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #000;
-  font-family: 'Arial Black', sans-serif;
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 6px #000;
+  font-family: "Arial Black", sans-serif;
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
@@ -1100,14 +1040,18 @@ body {
 .persona-btn:hover {
   transform: scale(1.05) rotate(-1deg);
   background: linear-gradient(135deg, #ff0055, #d00000);
-  box-shadow: 0 0 0 4px #fff, 0 0 0 6px #000, 0 0 10px #ff0000;
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 6px #000,
+    0 0 10px #ff0000;
 }
 
 .persona-btn:active {
   transform: scale(0.98) rotate(0deg);
-  box-shadow: 0 0 0 3px #fff, 0 0 0 5px #000;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px #000;
 }
-
 
 /* ========== Filtres Opus ========== */
 .filter-buttons {
@@ -1126,7 +1070,7 @@ body {
   font-weight: bold;
   color: white;
   cursor: pointer;
-  font-family: 'Arial Black', sans-serif;
+  font-family: "Arial Black", sans-serif;
   text-shadow: 1px 1px 2px black;
   transition: 0.2s;
   opacity: 0.8;
@@ -1138,16 +1082,18 @@ body {
 }
 
 .filter-btn.active {
-  box-shadow: 0 0 0 3px white, 0 0 0 5px black;
+  box-shadow:
+    0 0 0 3px white,
+    0 0 0 5px black;
   opacity: 1;
 }
 
 /* Persona 1 - Violet mystique et ésotérique */
 .filter-p1 {
-  background: linear-gradient(135deg, #4B0082 0%, #8B00FF 50%, #9370DB 100%);
-  color: #FFFFFF;
-  border: 2px solid #2E0854;
-  box-shadow: 
+  background: linear-gradient(135deg, #4b0082 0%, #8b00ff 50%, #9370db 100%);
+  color: #ffffff;
+  border: 2px solid #2e0854;
+  box-shadow:
     0 0 12px rgba(139, 0, 255, 0.5),
     inset 0 2px 4px rgba(255, 255, 255, 0.2);
   font-weight: bold;
@@ -1156,10 +1102,10 @@ body {
 
 /* Persona 2 (Innocent Sin & Eternal Punishment) - Orange feu et passion */
 .filter-p2 {
-  background: linear-gradient(135deg, #FF6B00 0%, #DF9B1E 50%, #FFA500 100%);
-  color: #2C1810;
-  border: 2px solid #8B4000;
-  box-shadow: 
+  background: linear-gradient(135deg, #ff6b00 0%, #df9b1e 50%, #ffa500 100%);
+  color: #2c1810;
+  border: 2px solid #8b4000;
+  box-shadow:
     0 0 12px rgba(255, 107, 0, 0.5),
     inset 0 2px 4px rgba(255, 255, 255, 0.3);
   font-weight: bold;
@@ -1168,10 +1114,10 @@ body {
 
 /* Persona 3 - Bleu nuit et mélancolie */
 .filter-p3 {
-  background: linear-gradient(135deg, #001F5C 0%, #0074D9 50%, #4DA6FF 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, #001f5c 0%, #0074d9 50%, #4da6ff 100%);
+  color: #ffffff;
   border: 2px solid #001233;
-  box-shadow: 
+  box-shadow:
     0 0 12px rgba(0, 116, 217, 0.6),
     inset 0 2px 4px rgba(255, 255, 255, 0.2);
   font-weight: bold;
@@ -1180,10 +1126,10 @@ body {
 
 /* Persona 4 - Jaune lumineux et optimiste */
 .filter-p4 {
-  background: linear-gradient(135deg, #FFD700 0%, #FFDC00 50%, #FFF200 100%);
-  color: #2C2C2C;
-  border: 2px solid #B8860B;
-  box-shadow: 
+  background: linear-gradient(135deg, #ffd700 0%, #ffdc00 50%, #fff200 100%);
+  color: #2c2c2c;
+  border: 2px solid #b8860b;
+  box-shadow:
     0 0 12px rgba(255, 220, 0, 0.6),
     inset 0 2px 4px rgba(255, 255, 255, 0.4);
   font-weight: bold;
@@ -1192,10 +1138,10 @@ body {
 
 /* Persona 5 - Rouge rebelle et stylé */
 .filter-p5 {
-  background: linear-gradient(135deg, #CC0000 0%, #FF4136 50%, #FF6B6B 100%);
-  color: #FFFFFF;
-  border: 2px solid #8B0000;
-  box-shadow: 
+  background: linear-gradient(135deg, #cc0000 0%, #ff4136 50%, #ff6b6b 100%);
+  color: #ffffff;
+  border: 2px solid #8b0000;
+  box-shadow:
     0 0 12px rgba(255, 65, 54, 0.6),
     inset 0 2px 4px rgba(255, 255, 255, 0.2);
   font-weight: bold;
@@ -1211,10 +1157,10 @@ body {
 
 /* Persona Q (1 & 2) - Style cartoonesque et aventure */
 .filter-pq {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
-  color: #2C1810;
-  border: 3px solid #8B4513;
-  box-shadow: 
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 50%, #ff8c00 100%);
+  color: #2c1810;
+  border: 3px solid #8b4513;
+  box-shadow:
     0 0 10px rgba(255, 215, 0, 0.5),
     inset 0 2px 4px rgba(255, 255, 255, 0.3);
   font-weight: bold;
@@ -1236,7 +1182,7 @@ body.modal-open {
   width: 100vw;
   height: 100vh;
   overflow: auto;
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 /* Contenu interne avec scroll vertical */
@@ -1248,7 +1194,7 @@ body.modal-open {
   max-width: 700px;
   max-height: 80vh;
   overflow-y: auto;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   box-shadow: 0 0 15px #000;
 }
 
@@ -1287,14 +1233,12 @@ body.modal-open {
   font-size: 1.1em;
 }
 
-
 .separator {
   border: none;
   border-top: 2px dashed #ccc;
   margin: 30px 0;
   opacity: 0.6;
 }
-
 
 .filter-switches {
   position: absolute;
@@ -1342,12 +1286,18 @@ input:checked + .slider::before {
   transform: translateX(20px);
 }
 
-input:checked + .slider.blue { background-color: #0074D9; }
-input:checked + .slider.yellow { background-color: #FFDC00; }
-input:checked + .slider.red { background-color: #FF4136; }
+input:checked + .slider.blue {
+  background-color: #0074d9;
+}
+input:checked + .slider.yellow {
+  background-color: #ffdc00;
+}
+input:checked + .slider.red {
+  background-color: #ff4136;
+}
 
 .label-text {
-  font-family: 'Arial Black', sans-serif;
+  font-family: "Arial Black", sans-serif;
   color: white;
   text-shadow: 1px 1px 2px black;
   font-size: 0.9em;
@@ -1419,7 +1369,6 @@ input:checked + .slider.red { background-color: #FF4136; }
   align-items: center;
   gap: 10px;
 }
-
 
 /* ========== Alignement Textbar avec Replay à gauche et Submit à droite ========== */
 .input-wrapper {
@@ -1548,7 +1497,7 @@ input:checked + .slider.red { background-color: #FF4136; }
 }
 
 .label-text {
-  font-family: 'Arial Black', sans-serif;
+  font-family: "Arial Black", sans-serif;
   color: white;
   font-size: 0.9rem;
 }
@@ -1557,9 +1506,11 @@ input:checked + .slider.red { background-color: #FF4136; }
 body::before {
   content: "";
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background-image: url('../img/personadle_wallpaper.jpg');
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("../img/personadle_wallpaper.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1571,7 +1522,7 @@ body::before {
 }
 
 body.darkmode::before {
-  background-image: url('../img/personadle_wallpaper_dark.jpg');
+  background-image: url("../img/personadle_wallpaper_dark.jpg");
 }
 
 /* Toggle bouton */
@@ -1627,7 +1578,7 @@ body.darkmode::before {
 }
 
 .label-text {
-  font-family: 'Arial Black', sans-serif;
+  font-family: "Arial Black", sans-serif;
   color: white;
   font-size: 0.9rem;
 }
@@ -1704,7 +1655,7 @@ body.darkmode .modal .close {
 
 body.darkmode .modal .close:hover {
   color: #fff;
-} 
+}
 
 /* Fix du texte noir dans .modal-content en dark mode */
 body.darkmode #rulesText strong {
@@ -1757,24 +1708,22 @@ body.darkmode .counter.activated {
   transform: scale(1.05);
 }
 
-
 /* Footer */
 footer {
-    background-color: #222;
-    color: #fff;
-    text-align: center;
-    padding: 15px;
-    font-size: 14px;
-    position: relative;
-    bottom: 0;
-    width: 100%;
-    font-family: Arial, sans-serif;
+  background-color: #222;
+  color: #fff;
+  text-align: center;
+  padding: 15px;
+  font-size: 14px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  font-family: Arial, sans-serif;
 }
 
 footer p {
-    margin: 5px 0;
+  margin: 5px 0;
 }
-
 
 /* ===== Silhouette Mode Zone ===== */
 /* ===== Silhouette Mode Zone ===== */
@@ -1815,10 +1764,10 @@ footer p {
   filter: brightness(0); /* silhouette noire */
   margin-bottom: 20px;
   visibility: hidden; /* cachée tant qu’elle n’est pas chargée */
-  transition: filter 0.3s ease, visibility 0s;
+  transition:
+    filter 0.3s ease,
+    visibility 0s;
 }
-
-
 
 /* Liste des mauvaises réponses */
 .wrong-guess {
@@ -1841,11 +1790,21 @@ footer p {
 }
 
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  50% { transform: translateX(4px); }
-  75% { transform: translateX(-4px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .victory-message {
@@ -1869,7 +1828,6 @@ footer p {
   align-items: center;
   padding: 20px;
 }
-
 
 /* Centrer le texte dans la victory-box */
 .silhouette-box .victory-box {
@@ -1921,8 +1879,6 @@ footer p {
   z-index: 10;
 }
 
-
-
 #daltonianToggle:hover {
   background-color: #2e2e2e;
   border-color: #81c784;
@@ -1933,7 +1889,6 @@ footer p {
   background-color: #3d3d3d;
 }
 
-
 /* Mode daltonien : les cellules n'ont pas de couleur de fond */
 body.daltonian-mode .guess-cell.correct,
 body.daltonian-mode .guess-cell.misplaced,
@@ -1941,12 +1896,11 @@ body.daltonian-mode .guess-cell.wrong {
   background-color: transparent !important;
   color: rgb(76, 67, 67) !important;
   border: 2px solid gray;
-} 
+}
 
 #silhouetteImage {
   visibility: hidden;
 }
-
 
 .persona-box {
   width: 500px;
@@ -1983,7 +1937,7 @@ body.daltonian-mode .guess-cell.wrong {
   background-color: #e7e7e7;
   border: 3px solid #000000;
   box-shadow: 0 0 18px #147501bb;
-  font-family: 'Arial Black', Impact, sans-serif;
+  font-family: "Arial Black", Impact, sans-serif;
   text-align: center;
   animation: pulseWin 0.5s ease-in-out;
 }
@@ -2007,12 +1961,16 @@ body.darkmode .victory-box {
   color: rgb(255, 255, 255);
   font-size: 1.1rem;
   line-height: 1.4;
-  text-shadow: 1px 1px 0 #000, 2px 2px 0 #857679;
+  text-shadow:
+    1px 1px 0 #000,
+    2px 2px 0 #857679;
 }
 
 body.darkmode .victory-message {
   color: #ffffff;
-  text-shadow: 1px 1px 0 #000, 2px 2px 3px #888;
+  text-shadow:
+    1px 1px 0 #000,
+    2px 2px 3px #888;
 }
 
 /* === Nom du Persona === */
@@ -2020,13 +1978,17 @@ body.darkmode .victory-message {
   color: #e53935; /* rouge profond */
   letter-spacing: 1.2px;
   font-weight: bold;
-  text-shadow: 0 0 4px #fcfcfc, 0 0 8px #b71c1c;
+  text-shadow:
+    0 0 4px #fcfcfc,
+    0 0 8px #b71c1c;
   animation: appear-glow 0.8s ease forwards;
   opacity: 0;
 }
 
 body.darkmode .persona-name {
-  text-shadow: 0 0 4px #ffffff00, 0 0 8px #630000;
+  text-shadow:
+    0 0 4px #ffffff00,
+    0 0 8px #630000;
 }
 
 /* === Apparition et effet lueur (optionnel) === */
@@ -2038,10 +2000,14 @@ body.darkmode .persona-name {
 
 @keyframes glow {
   from {
-    text-shadow: 0 0 4px #8e44ad, 0 0 10px #8e44ad;
+    text-shadow:
+      0 0 4px #8e44ad,
+      0 0 10px #8e44ad;
   }
   to {
-    text-shadow: 0 0 6px #9b59b6, 0 0 14px #9b59b6;
+    text-shadow:
+      0 0 6px #9b59b6,
+      0 0 14px #9b59b6;
   }
 }
 
@@ -2057,18 +2023,20 @@ body.darkmode .persona-name {
   }
 }
 
-
 .user-name {
   color: #3498db; /* bleu Persona */
   letter-spacing: 1px;
   font-weight: bold;
-  text-shadow: 0 0 4px #ffffff, 0 0 6px #2c3e50;
+  text-shadow:
+    0 0 4px #ffffff,
+    0 0 6px #2c3e50;
 }
 
 body.darkmode .user-name {
-  text-shadow: 0 0 4px #d0d0d000, 0 0 8px #001727;
+  text-shadow:
+    0 0 4px #d0d0d000,
+    0 0 8px #001727;
 }
-
 
 .persona-name,
 .user-name {
@@ -2079,14 +2047,15 @@ body.darkmode .user-name {
   margin: 0 4px;
 }
 
-
 audio {
   width: 300px;
   height: 40px;
   outline: none;
   border: none;
   border-radius: 12px;
-  box-shadow: 0 0 12px rgba(255, 0, 0, 0.6), 0 0 6px rgba(0, 255, 255, 0.4);
+  box-shadow:
+    0 0 12px rgba(255, 0, 0, 0.6),
+    0 0 6px rgba(0, 255, 255, 0.4);
   transition: box-shadow 0.3s ease;
   margin: 20px auto;
   display: block;
@@ -2095,14 +2064,17 @@ audio {
 /* Personnalisation quand le dark mode est actif */
 body.darkmode audio {
   background-color: #111;
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5), 0 0 6px rgba(255, 0, 0, 0.3);
+  box-shadow:
+    0 0 12px rgba(0, 255, 255, 0.5),
+    0 0 6px rgba(255, 0, 0, 0.3);
 }
 
 /* Optionnel : Hover */
 audio:hover {
-  box-shadow: 0 0 16px rgba(255, 0, 0, 0.8), 0 0 8px rgba(0, 255, 255, 0.5);
+  box-shadow:
+    0 0 16px rgba(255, 0, 0, 0.8),
+    0 0 8px rgba(0, 255, 255, 0.5);
 }
-
 
 .audio-wrapper {
   background-color: #f4f4f4;
@@ -2112,7 +2084,9 @@ audio:hover {
   width: fit-content;
   margin: 30px auto;
   border: 2px solid #d62828;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .audio-wrapper:hover {
@@ -2164,7 +2138,7 @@ body.music-mode.darkmode .victory-box {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(0, 0, 0, 0.8);
   padding-top: 60px;
 }
 
@@ -2179,7 +2153,8 @@ body.music-mode.darkmode .victory-box {
   color: #000;
 }
 
-.legal-content h2, .legal-content h3 {
+.legal-content h2,
+.legal-content h3 {
   margin-top: 20px;
 }
 
@@ -2194,7 +2169,6 @@ body.music-mode.darkmode .victory-box {
 .close:hover {
   color: #000;
 }
-
 
 .nav-button {
   background: linear-gradient(135deg, #f7f7f7, #e5e5e5);
@@ -2289,7 +2263,9 @@ body.darkmode .next-mode:hover {
   width: 24px;
   height: 24px;
   filter: invert(0%) sepia(100%) saturate(0%) hue-rotate(0deg);
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
 #socialLinks a:hover {
@@ -2330,7 +2306,9 @@ body.darkmode #socialLinks a:hover {
   font-weight: bold;
   cursor: pointer;
   z-index: 1000;
-  transition: background 0.3s, color 0.3s;
+  transition:
+    background 0.3s,
+    color 0.3s;
 }
 
 body:not(.darkmode) .daily-btn {
@@ -2342,8 +2320,10 @@ body:not(.darkmode) .daily-btn {
 .daily-modal {
   position: fixed;
   z-index: 999;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
 }
 
@@ -2398,7 +2378,9 @@ html {
 }
 
 /* Tap targets */
-button, .link-wrapper, .persona-btn {
+button,
+.link-wrapper,
+.persona-btn {
   min-height: 48px;
   padding: 12px 20px;
 }
@@ -2450,7 +2432,10 @@ button, .link-wrapper, .persona-btn {
     margin-right: 0;
   }
 
-  #guessButton, #resetButton, #hintButton, #giveUpButton {
+  #guessButton,
+  #resetButton,
+  #hintButton,
+  #giveUpButton {
     width: 80%;
     max-width: 250px;
     padding: 12px 20px;
@@ -2582,7 +2567,8 @@ button, .link-wrapper, .persona-btn {
     z-index: 1000;
   }
 
-  .filter-buttons, .filter-switches {
+  .filter-buttons,
+  .filter-switches {
     top: 110px;
     left: 10px;
     flex-direction: column;
@@ -2601,11 +2587,18 @@ button, .link-wrapper, .persona-btn {
 
 /* Écrans < 480px */
 @media (max-width: 480px) {
-  body { padding: 5px; }
+  body {
+    padding: 5px;
+  }
 
-  #title { font-size: 20px; }
+  #title {
+    font-size: 20px;
+  }
 
-  .gamemode-title { font-size: 20px; padding: 8px 15px; }
+  .gamemode-title {
+    font-size: 20px;
+    padding: 8px 15px;
+  }
 
   .guess-cell {
     height: 60px;
@@ -2885,28 +2878,29 @@ body.darkmode .border-color-label {
 
 /* Style du bouton PDF */
 .pdf-container {
-    margin-top: 15px;
-    text-align: right; /* Place le bouton à droite */
+  margin-top: 15px;
+  text-align: right; /* Place le bouton à droite */
 }
 
 .see-more-btn {
-    display: inline-block;
-    padding: 8px 16px;
-    background-color: #d92323; /* Rouge Persona */
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    font-family: sans-serif;
-    border-radius: 4px;
-    transition: background 0.3s, transform 0.2s;
-    box-shadow: 2px 2px 0px #000; /* Petite ombre noire style comics */
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #d92323; /* Rouge Persona */
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-family: sans-serif;
+  border-radius: 4px;
+  transition:
+    background 0.3s,
+    transform 0.2s;
+  box-shadow: 2px 2px 0px #000; /* Petite ombre noire style comics */
 }
 
 .see-more-btn:hover {
-    background-color: #b01010;
-    transform: translateY(-2px); /* Petit effet de saut */
+  background-color: #b01010;
+  transform: translateY(-2px); /* Petit effet de saut */
 }
-
 
 /* === PROFILE SHARE CARD === */
 .share-card {
@@ -2988,76 +2982,76 @@ body.darkmode .border-color-label {
 
 /* Bordure et fond global */
 .cny-theme {
-    border: 2px solid #c0392b !important; /* Rouge foncé */
-    background-color: #fff5f5; /* Fond très légèrement rosé */
+  border: 2px solid #c0392b !important; /* Rouge foncé */
+  background-color: #fff5f5; /* Fond très légèrement rosé */
 }
 
 /* L'en-tête (Header) */
 .cny-theme .version-header {
-    background: linear-gradient(135deg, #b71c1c 0%, #8e0000 100%); /* Dégradé rouge */
-    color: #f1c40f; /* Texte Doré */
-    border-bottom: 1px solid #d35400;
+  background: linear-gradient(135deg, #b71c1c 0%, #8e0000 100%); /* Dégradé rouge */
+  color: #f1c40f; /* Texte Doré */
+  border-bottom: 1px solid #d35400;
 }
 
 .cny-theme .version-title {
-    color: #f1c40f !important; /* Force le titre en doré */
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Ombre pour lisibilité */
+  color: #f1c40f !important; /* Force le titre en doré */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Ombre pour lisibilité */
 }
 
 .cny-theme .version-date {
-    color: #ffecb3 !important; /* Date en or pâle */
+  color: #ffecb3 !important; /* Date en or pâle */
 }
 
 .cny-theme .version-arrow {
-    color: #f1c40f !important;
+  color: #f1c40f !important;
 }
 
 /* Contenu interne */
 .cny-theme .version-content ul li strong {
-    color: #c0392b; /* Mots clés en rouge */
+  color: #c0392b; /* Mots clés en rouge */
 }
 
 /* Bouton PDF spécial */
 .cny-btn {
-    background-color: #c0392b !important;
-    color: #fff !important;
-    border: 1px solid #a93226 !important;
+  background-color: #c0392b !important;
+  color: #fff !important;
+  border: 1px solid #a93226 !important;
 }
 .cny-btn:hover {
-    background-color: #a93226 !important;
-    box-shadow: 0 0 10px rgba(192, 57, 43, 0.4);
+  background-color: #a93226 !important;
+  box-shadow: 0 0 10px rgba(192, 57, 43, 0.4);
 }
 
 /* === DARK MODE SUPPORT === */
 body.darkmode .cny-theme {
-    background-color: #2c0b0b; /* Fond rouge très sombre */
-    border-color: #e74c3c !important;
+  background-color: #2c0b0b; /* Fond rouge très sombre */
+  border-color: #e74c3c !important;
 }
 
 body.darkmode .cny-theme .version-header {
-    background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
+  background: linear-gradient(135deg, #800000 0%, #4a0000 100%);
 }
 
 body.darkmode .cny-theme .version-content ul li strong {
-    color: #ff6b6b; /* Rouge clair fluo pour le contraste */
+  color: #ff6b6b; /* Rouge clair fluo pour le contraste */
 }
 /* === 🧧 FIX HOVER NOUVEL AN CHINOIS === */
 
 /* Au survol en mode clair : Rouge plus vif + Lueur dorée */
 .cny-theme .version-header:hover {
-    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%) !important;
-    box-shadow: inset 0 0 15px rgba(241, 196, 15, 0.3) !important; /* Lueur interne dorée */
-    transform: scale(1.01); /* Léger effet de pop */
-    transition: all 0.2s ease-in-out;
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%) !important;
+  box-shadow: inset 0 0 15px rgba(241, 196, 15, 0.3) !important; /* Lueur interne dorée */
+  transform: scale(1.01); /* Léger effet de pop */
+  transition: all 0.2s ease-in-out;
 }
 
 /* Au survol en DARK MODE : On reste sombre mais on illumine un peu */
 body.darkmode .cny-theme .version-header:hover {
-    background: linear-gradient(135deg, #9e1a1a 0%, #680505 100%) !important;
-    box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.15) !important;
+  background: linear-gradient(135deg, #9e1a1a 0%, #680505 100%) !important;
+  box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.15) !important;
 }
 
 /* Ajustement de la flèche au survol pour qu'elle bouge un peu */
 .cny-theme .version-header:hover .version-arrow {
-    transform: translateX(3px); /* Petite animation sympa */
+  transform: translateX(3px); /* Petite animation sympa */
 }

@@ -31,7 +31,7 @@
  *   // Ensuite : window._currentUser est défini
  */
 
-import { api } from './api.js';
+import { api } from "./api.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ÉTAT
@@ -39,7 +39,6 @@ import { api } from './api.js';
 
 /** Utilisateur connecté, ou null si anonyme. Lecture seule depuis l'extérieur. */
 window._currentUser = null;
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS UI
@@ -49,28 +48,27 @@ window._currentUser = null;
 function showAuthError(el, msg) {
   if (!el) return;
   el.textContent = msg;
-  el.classList.remove('hidden');
+  el.classList.remove("hidden");
 }
 
 /** Cache un message d'erreur. */
 function hideAuthError(el) {
   if (!el) return;
-  el.textContent = '';
-  el.classList.add('hidden');
+  el.textContent = "";
+  el.classList.add("hidden");
 }
 
 /** Ouvre une modale (retire la classe 'hidden'). */
 function openModal(id) {
   const el = document.getElementById(id);
-  if (el) el.classList.remove('hidden');
+  if (el) el.classList.remove("hidden");
 }
 
 /** Ferme une modale. */
 function closeModal(id) {
   const el = document.getElementById(id);
-  if (el) el.classList.add('hidden');
+  if (el) el.classList.add("hidden");
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MISE À JOUR DE L'UI selon l'état de connexion
@@ -91,28 +89,27 @@ function updateAuthUI(user) {
   // Logged-in  → use numeric user_id (consistent across devices/sessions)
   // Logged-out → remove user_id; getPlayerSeedId() will fall back to anonPlayerId
   if (user) {
-    localStorage.setItem('playerUserId', String(user.id));
+    localStorage.setItem("playerUserId", String(user.id));
   } else {
-    localStorage.removeItem('playerUserId');
+    localStorage.removeItem("playerUserId");
   }
 
   // Afficher/masquer les zones selon l'état
-  document.querySelectorAll('[data-auth="connected"]').forEach(el => {
-    el.style.display = user ? '' : 'none';
+  document.querySelectorAll('[data-auth="connected"]').forEach((el) => {
+    el.style.display = user ? "" : "none";
   });
-  document.querySelectorAll('[data-auth="anonymous"]').forEach(el => {
-    el.style.display = user ? 'none' : '';
+  document.querySelectorAll('[data-auth="anonymous"]').forEach((el) => {
+    el.style.display = user ? "none" : "";
   });
 
   // Remplir les éléments portant [data-auth-field]
   if (user) {
-    document.querySelectorAll('[data-auth-field]').forEach(el => {
-      const field = el.getAttribute('data-auth-field');
+    document.querySelectorAll("[data-auth-field]").forEach((el) => {
+      const field = el.getAttribute("data-auth-field");
       if (field in user) el.textContent = user[field];
     });
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MIGRATION localStorage → cloud
@@ -132,22 +129,22 @@ function updateAuthUI(user) {
  */
 async function migrateLocalStorageToCloud() {
   // Éviter une double migration si elle a déjà eu lieu
-  if (localStorage.getItem('migratedToCloud') === 'true') return;
+  if (localStorage.getItem("migratedToCloud") === "true") return;
 
-  const profileRaw  = localStorage.getItem('personaUserProfile');
-  const sessionsRaw = localStorage.getItem('pendingSessions');
+  const profileRaw = localStorage.getItem("personaUserProfile");
+  const sessionsRaw = localStorage.getItem("pendingSessions");
 
   // Rien à migrer
   if (!profileRaw && !sessionsRaw) {
-    localStorage.setItem('migratedToCloud', 'true');
+    localStorage.setItem("migratedToCloud", "true");
     return;
   }
 
-  let profile         = null;
+  let profile = null;
   let pendingSessions = [];
 
   try {
-    if (profileRaw)  profile         = JSON.parse(profileRaw);
+    if (profileRaw) profile = JSON.parse(profileRaw);
     if (sessionsRaw) pendingSessions = JSON.parse(sessionsRaw);
   } catch {
     // JSON corrompu — on migre ce qu'on peut
@@ -157,45 +154,44 @@ async function migrateLocalStorageToCloud() {
     const result = await api.user.migrate({ profile, pendingSessions });
     console.info(
       `[Auth] Migration complete — ${result.migrated_sessions} sessions migrated,` +
-      ` ${result.skipped_sessions} skipped.`
+        ` ${result.skipped_sessions} skipped.`
     );
 
     // Migration réussie : vider la queue locale (les sessions sont en BDD)
-    localStorage.removeItem('pendingSessions');
-    localStorage.setItem('migratedToCloud', 'true');
+    localStorage.removeItem("pendingSessions");
+    localStorage.setItem("migratedToCloud", "true");
   } catch (e) {
     // 409 = déjà migré côté serveur → marquer localement pour ne plus réessayer
     if (e?.status === 409) {
-      localStorage.setItem('migratedToCloud', 'true');
+      localStorage.setItem("migratedToCloud", "true");
       return;
     }
     // 5xx = erreur serveur irrécupérable (ex: colonne manquante) → ne pas boucler
     if (e?.status >= 500) {
-      console.warn('[Auth] Migration server error — stopping retries:', e.message);
-      localStorage.setItem('migratedToCloud', 'true');
+      console.warn("[Auth] Migration server error — stopping retries:", e.message);
+      localStorage.setItem("migratedToCloud", "true");
       return;
     }
     // Erreur réseau / timeout → réessai autorisé au prochain chargement
-    console.warn('[Auth] Migration failed (will retry later):', e.message);
+    console.warn("[Auth] Migration failed (will retry later):", e.message);
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FORMULAIRE LOGIN
 // ─────────────────────────────────────────────────────────────────────────────
 
 function setupLoginForm() {
-  const form  = document.getElementById('loginForm');
-  const error = document.getElementById('loginError');
+  const form = document.getElementById("loginForm");
+  const error = document.getElementById("loginError");
   if (!form) return;
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideAuthError(error);
 
-    const identifier = document.getElementById('loginEmail')?.value.trim() ?? '';
-    const password   = document.getElementById('loginPassword')?.value ?? '';
+    const identifier = document.getElementById("loginEmail")?.value.trim() ?? "";
+    const password = document.getElementById("loginPassword")?.value ?? "";
 
     const btn = form.querySelector('button[type="submit"]');
     if (btn) btn.disabled = true;
@@ -203,46 +199,45 @@ function setupLoginForm() {
     try {
       const { user } = await api.auth.login({ identifier, password });
       updateAuthUI(user);
-      closeModal('loginModal');
-      localStorage.removeItem('_crInitDone');
-      window.dispatchEvent(new CustomEvent('personadle:auth-login', { detail: { user } }));
+      closeModal("loginModal");
+      localStorage.removeItem("_crInitDone");
+      window.dispatchEvent(new CustomEvent("personadle:auth-login", { detail: { user } }));
 
       // Synchroniser les sessions en attente accumulées en offline
       await api.stats.syncPending().catch(() => {});
     } catch (err) {
-      showAuthError(error, err.message || 'Login failed');
+      showAuthError(error, err.message || "Login failed");
     } finally {
       if (btn) btn.disabled = false;
     }
   });
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // FORMULAIRE REGISTER
 // ─────────────────────────────────────────────────────────────────────────────
 
 function setupRegisterForm() {
-  const form  = document.getElementById('registerForm');
-  const error = document.getElementById('registerError');
+  const form = document.getElementById("registerForm");
+  const error = document.getElementById("registerError");
   if (!form) return;
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideAuthError(error);
 
-    const email    = document.getElementById('registerEmail')?.value.trim()    ?? '';
-    const pseudo   = document.getElementById('registerPseudo')?.value.trim()   ?? '';
-    const password = document.getElementById('registerPassword')?.value ?? '';
-    const confirm  = document.getElementById('registerPasswordConfirm')?.value ?? '';
+    const email = document.getElementById("registerEmail")?.value.trim() ?? "";
+    const pseudo = document.getElementById("registerPseudo")?.value.trim() ?? "";
+    const password = document.getElementById("registerPassword")?.value ?? "";
+    const confirm = document.getElementById("registerPasswordConfirm")?.value ?? "";
 
     // Validation côté client (doublée côté serveur)
     if (password !== confirm) {
-      showAuthError(error, 'Passwords do not match');
+      showAuthError(error, "Passwords do not match");
       return;
     }
     if (password.length < 8) {
-      showAuthError(error, 'Password must be at least 8 characters');
+      showAuthError(error, "Password must be at least 8 characters");
       return;
     }
 
@@ -250,28 +245,30 @@ function setupRegisterForm() {
     if (btn) btn.disabled = true;
 
     // Récupérer la langue active pour la transmettre au compte
-    const lang = localStorage.getItem('lang') || 'en';
+    const lang = localStorage.getItem("lang") || "en";
 
     try {
       const { user } = await api.auth.register({ email, pseudo, password, lang });
       updateAuthUI(user);
-      closeModal('registerModal');
+      closeModal("registerModal");
 
       // Si un JSON a été sélectionné, l'injecter dans localStorage avant la migration
-      const fileInput = document.getElementById('registerImportJson');
+      const fileInput = document.getElementById("registerImportJson");
       if (fileInput?.files?.length) {
         await new Promise((resolve) => {
           const reader = new FileReader();
           reader.onload = (ev) => {
             try {
               const imported = JSON.parse(ev.target.result);
-              if (imported && typeof imported === 'object') {
+              if (imported && typeof imported === "object") {
                 // Retirer _accountId pour que la migration ne soit pas bloquée
                 delete imported._accountId;
-                localStorage.setItem('personaUserProfile', JSON.stringify(imported));
-                localStorage.removeItem('migratedToCloud');
+                localStorage.setItem("personaUserProfile", JSON.stringify(imported));
+                localStorage.removeItem("migratedToCloud");
               }
-            } catch { /* JSON invalide — on ignore */ }
+            } catch {
+              /* JSON invalide — on ignore */
+            }
             resolve();
           };
           reader.onerror = resolve;
@@ -281,16 +278,15 @@ function setupRegisterForm() {
 
       // Migration immédiate du localStorage vers le compte qui vient d'être créé
       await migrateLocalStorageToCloud();
-      localStorage.removeItem('_crInitDone');
-      window.dispatchEvent(new CustomEvent('personadle:auth-login', { detail: { user } }));
+      localStorage.removeItem("_crInitDone");
+      window.dispatchEvent(new CustomEvent("personadle:auth-login", { detail: { user } }));
     } catch (err) {
-      showAuthError(error, err.message || 'Registration failed');
+      showAuthError(error, err.message || "Registration failed");
     } finally {
       if (btn) btn.disabled = false;
     }
   });
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BOUTONS NAVIGATION ENTRE MODALES
@@ -298,40 +294,43 @@ function setupRegisterForm() {
 
 function setupModalNavigation() {
   // Fermeture
-  document.getElementById('closeLoginModal')   ?.addEventListener('click', () => closeModal('loginModal'));
-  document.getElementById('closeRegisterModal')?.addEventListener('click', () => closeModal('registerModal'));
+  document
+    .getElementById("closeLoginModal")
+    ?.addEventListener("click", () => closeModal("loginModal"));
+  document
+    .getElementById("closeRegisterModal")
+    ?.addEventListener("click", () => closeModal("registerModal"));
 
   // Basculer login ↔ register
-  document.getElementById('switchToRegister')?.addEventListener('click', () => {
-    closeModal('loginModal');
-    openModal('registerModal');
+  document.getElementById("switchToRegister")?.addEventListener("click", () => {
+    closeModal("loginModal");
+    openModal("registerModal");
   });
-  document.getElementById('switchToLogin')?.addEventListener('click', () => {
-    closeModal('registerModal');
-    openModal('loginModal');
+  document.getElementById("switchToLogin")?.addEventListener("click", () => {
+    closeModal("registerModal");
+    openModal("loginModal");
   });
 
   // Boutons d'ouverture (data-open-modal="loginModal" etc.)
-  document.querySelectorAll('[data-open-modal]').forEach(btn => {
-    btn.addEventListener('click', () => openModal(btn.getAttribute('data-open-modal')));
+  document.querySelectorAll("[data-open-modal]").forEach((btn) => {
+    btn.addEventListener("click", () => openModal(btn.getAttribute("data-open-modal")));
   });
 
   // Fermer en cliquant en dehors de la modale
-  ['loginModal', 'registerModal'].forEach(id => {
-    document.getElementById(id)?.addEventListener('click', (e) => {
+  ["loginModal", "registerModal"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", (e) => {
       if (e.target.id === id) closeModal(id);
     });
   });
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DÉCONNEXION
 // ─────────────────────────────────────────────────────────────────────────────
 
 function setupLogoutButton() {
-  document.querySelectorAll('[data-action="logout"]').forEach(btn => {
-    btn.addEventListener('click', async () => {
+  document.querySelectorAll('[data-action="logout"]').forEach((btn) => {
+    btn.addEventListener("click", async () => {
       try {
         await api.auth.logout();
       } catch {
@@ -339,14 +338,13 @@ function setupLogoutButton() {
       }
       // Vider le profil local : le prochain utilisateur qui se connecte
       // sur ce navigateur repart d'un profil vierge et récupère le sien depuis le cloud.
-      localStorage.removeItem('personaUserProfile');
-      localStorage.removeItem('personaSettings');
+      localStorage.removeItem("personaUserProfile");
+      localStorage.removeItem("personaSettings");
       updateAuthUI(null);
-      window.dispatchEvent(new CustomEvent('personadle:auth-logout'));
+      window.dispatchEvent(new CustomEvent("personadle:auth-logout"));
     });
   });
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SYNC PROFIL localStorage → cloud (toutes pages)
@@ -364,7 +362,7 @@ async function _syncLocalProfileToCloud(userId) {
 
   let profile = null;
   try {
-    const raw = localStorage.getItem('personaUserProfile');
+    const raw = localStorage.getItem("personaUserProfile");
     if (!raw) return;
     profile = JSON.parse(raw);
   } catch {
@@ -372,12 +370,13 @@ async function _syncLocalProfileToCloud(userId) {
   }
 
   const fields = {
-    avatar_border_color: profile.avatarBorderColor || '#ffffff',
-    wallpaper_id:        profile.profileTheme === 'custom'
-                           ? `custom:${profile.profileCustomColor || '#e63946'}`
-                           : (profile.profileTheme || null),
-    profile_music_id:    profile.profileSong?.fichier || profile.profileMusicId || null,
-    selected_badges:     profile.selectedBadges || [],
+    avatar_border_color: profile.avatarBorderColor || "#ffffff",
+    wallpaper_id:
+      profile.profileTheme === "custom"
+        ? `custom:${profile.profileCustomColor || "#e63946"}`
+        : profile.profileTheme || null,
+    profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
+    selected_badges: profile.selectedBadges || [],
   };
   if (profile.avatar) fields.avatar_data = profile.avatar;
   if (profile.equippedTitleId != null) fields.equipped_title_id = profile.equippedTitleId;
@@ -388,7 +387,6 @@ async function _syncLocalProfileToCloud(userId) {
     // Silencieux — le sync se retente à chaque chargement de page
   }
 }
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POINT D'ENTRÉE — initAuth()

@@ -24,7 +24,8 @@
 <div align="center">
 <img src="../img/preview/preview_classic_victory.png" alt="Écran de victoire" width="600">
 
-*Écran de victoire — le personnage est révélé avec sa citation officielle*
+_Écran de victoire — le personnage est révélé avec sa citation officielle_
+
 </div>
 
 ---
@@ -153,12 +154,12 @@ Les quotes sont stockées dans `../database/quotes.js` avec un fallback anglais 
 export const characterQuotes = {
   "Ryuji Sakamoto": {
     en: "You're a Phantom Thief now too, right?",
-    fr: null,  // fallback EN pour v2.0
+    fr: null, // fallback EN pour v2.0
   },
   "Yusuke Kitagawa": {
     en: "Art is an explosion!",
     fr: null,
-  }
+  },
   // ...
 };
 ```
@@ -181,11 +182,13 @@ classiqueMode/
 ## `classiqueMode.html`
 
 Page principale du mode. Elle charge :
+
 - `../css/global.css` — styles communs
 - `./classique.css` — styles propres au mode
 - `./modeClassique.js` via `<script type="module">`
 
 Contient les éléments HTML :
+
 - `#textbar` — champ de saisie avec autocomplete
 - `#guessButton` — bouton Valider
 - `#hintButton` — bouton Indice
@@ -201,6 +204,7 @@ Contient les éléments HTML :
 ## `modeClassique.js`
 
 Module ES6 principal du mode. Importe depuis `../js/gameCore.js` :
+
 - `showConfettiExplosion` — animation de victoire
 - `revealNextLink` — navigation vers le mode suivant
 - `setupRulesModal` — câblage du modal
@@ -211,27 +215,27 @@ Module ES6 principal du mode. Importe depuis `../js/gameCore.js` :
 
 ### Logique spécifique au mode Classique
 
-| Fonction | Description |
-|----------|-------------|
-| `checkGuess()` | Compare 7 attributs du personnage proposé au personnage cible et construit le tableau de couleurs |
-| `filterCharacterPool()` | Filtre la liste des personnages selon les opus actifs |
-| `convertAgeToValue()` | Convertit l'âge en valeur numérique pour la comparaison (flèche ↑/↓) |
-| `initializeAutocomplete()` | Dropdown de recherche avec portraits en miniature |
-| `enableHintButton()` | Active le bouton Indice après N essais |
-| `enableGiveUpButton()` | Active le bouton Abandonner après N essais |
-| `applyDarkModeStyles()` | Ajustements dark mode spécifiques à ce mode |
+| Fonction                   | Description                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------- |
+| `checkGuess()`             | Compare 7 attributs du personnage proposé au personnage cible et construit le tableau de couleurs |
+| `filterCharacterPool()`    | Filtre la liste des personnages selon les opus actifs                                             |
+| `convertAgeToValue()`      | Convertit l'âge en valeur numérique pour la comparaison (flèche ↑/↓)                              |
+| `initializeAutocomplete()` | Dropdown de recherche avec portraits en miniature                                                 |
+| `enableHintButton()`       | Active le bouton Indice après N essais                                                            |
+| `enableGiveUpButton()`     | Active le bouton Abandonner après N essais                                                        |
+| `applyDarkModeStyles()`    | Ajustements dark mode spécifiques à ce mode                                                       |
 
 ### Attributs comparés
 
-| Attribut | Type de comparaison |
-|----------|---------------------|
-| Jeu (opus) | Exact / même saga |
-| Arcane | Exact |
-| Rôle | Exact |
-| Âge | Exact / plus grand / plus petit (flèche) |
-| Genre | Exact |
-| Doublage japonais | Exact |
-| DLC | Exact |
+| Attribut          | Type de comparaison                      |
+| ----------------- | ---------------------------------------- |
+| Jeu (opus)        | Exact / même saga                        |
+| Arcane            | Exact                                    |
+| Rôle              | Exact                                    |
+| Âge               | Exact / plus grand / plus petit (flèche) |
+| Genre             | Exact                                    |
+| Doublage japonais | Exact                                    |
+| DLC               | Exact                                    |
 
 ### Mode daltonien
 
@@ -241,10 +245,10 @@ Un mode daltonien est disponible : remplace les couleurs vert/rouge par des icô
 
 ## localStorage utilisé
 
-| Clé | Contenu |
-|-----|---------|
-| `classicTarget` | Personnage cible (JSON) |
-| `classicAttempts` | Nombre d'essais |
-| `classicGameOver` | `"true"` si la partie est terminée |
-| `filters_Classic` | Filtres opus actifs (JSON array) |
-| `lastPlayedDate_Classic` | Date de la dernière partie |
+| Clé                      | Contenu                            |
+| ------------------------ | ---------------------------------- |
+| `classicTarget`          | Personnage cible (JSON)            |
+| `classicAttempts`        | Nombre d'essais                    |
+| `classicGameOver`        | `"true"` si la partie est terminée |
+| `filters_Classic`        | Filtres opus actifs (JSON array)   |
+| `lastPlayedDate_Classic` | Date de la dernière partie         |

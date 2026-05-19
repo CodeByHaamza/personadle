@@ -12,7 +12,6 @@
                     └─ .filter-sub-btn  Bouton logo d'un opus spécifique
    ============================================================= */
 
-
 /* =====================================================
    1. CONTENEUR GLOBAL
    Positionné en haut à gauche, par-dessus le contenu.
@@ -25,7 +24,6 @@
   z-index: 1000;
   user-select: none;
 }
-
 
 /* =====================================================
    2. BOUTON TOGGLE — Style Persona / Phantom Thieves
@@ -43,32 +41,35 @@
   border-radius: 6px;
   padding: 8px 16px;
   cursor: pointer;
-  font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif;
+  font-family: "Arial Black", "Arial Bold", Arial, sans-serif;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 2.5px;
   text-transform: uppercase;
   transition:
-    background   0.2s ease,
+    background 0.2s ease,
     border-color 0.2s ease,
-    box-shadow   0.2s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6),
-              inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    box-shadow 0.2s ease;
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   white-space: nowrap;
 }
 
 .filter-toggle-btn:hover {
   background: #1a0000;
   border-color: #ff0033;
-  box-shadow: 0 0 16px rgba(255, 0, 50, 0.55),
-              0 2px 10px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 0 16px rgba(255, 0, 50, 0.55),
+    0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 .filter-toggle-btn.open {
   background: #200000;
   border-color: #ff0033;
-  box-shadow: 0 0 20px rgba(255, 0, 50, 0.7),
-              inset 0 0 10px rgba(255, 0, 50, 0.08);
+  box-shadow:
+    0 0 20px rgba(255, 0, 50, 0.7),
+    inset 0 0 10px rgba(255, 0, 50, 0.08);
 }
 
 /* Icône roue dentée */
@@ -93,7 +94,6 @@
   transform: rotate(180deg);
 }
 
-
 /* =====================================================
    3. PANNEAU DÉROULANT
    Slide-down via max-height + opacity.
@@ -111,18 +111,19 @@
 
   /* Slide fermé */
   max-height: 0;
-  overflow:   hidden;
-  opacity:    0;
-  padding:    0 8px;
+  overflow: hidden;
+  opacity: 0;
+  padding: 0 8px;
   pointer-events: none;
 
   transition:
     max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity    0.25s ease,
-    padding    0.3s  ease;
+    opacity 0.25s ease,
+    padding 0.3s ease;
 
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.75),
-              inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  box-shadow:
+    0 10px 36px rgba(0, 0, 0, 0.75),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
 }
 
@@ -130,20 +131,32 @@
 .filter-dropdown.open {
   max-height: min(700px, 75vh);
   overflow-y: auto;
-  opacity:    1;
-  padding:    10px 8px;
+  opacity: 1;
+  padding: 10px 8px;
   pointer-events: auto;
 }
 
 /* ── Scrollbar Persona (webkit) ─────────────────────── */
-.filter-dropdown::-webkit-scrollbar       { width: 4px; }
-.filter-dropdown::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); border-radius: 2px; }
-.filter-dropdown::-webkit-scrollbar-thumb { background: rgba(200, 0, 40, 0.55); border-radius: 2px; }
-.filter-dropdown::-webkit-scrollbar-thumb:hover { background: rgba(220, 0, 50, 0.90); }
+.filter-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+.filter-dropdown::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 2px;
+}
+.filter-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(200, 0, 40, 0.55);
+  border-radius: 2px;
+}
+.filter-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(220, 0, 50, 0.9);
+}
 
 /* Firefox */
-.filter-dropdown { scrollbar-width: thin; scrollbar-color: rgba(200, 0, 40, 0.55) rgba(255,255,255,0.04); }
-
+.filter-dropdown {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 0, 40, 0.55) rgba(255, 255, 255, 0.04);
+}
 
 /* =====================================================
    4. GROUPES DE FILTRES
@@ -166,14 +179,13 @@
 /* Label texte pour P2 (auto-expand, pas de logo principal) */
 .filter-group-auto-label {
   font-size: 9px;
-  font-family: 'Arial Black', Arial, sans-serif;
+  font-family: "Arial Black", Arial, sans-serif;
   font-weight: 900;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.35);
   padding: 0 4px;
 }
-
 
 /* =====================================================
    5. BOUTON LOGO PRINCIPAL (par jeu)
@@ -193,10 +205,10 @@
   cursor: pointer;
   width: 100%;
   transition:
-    background    0.18s ease,
-    border-color  0.18s ease,
-    box-shadow    0.18s ease,
-    transform     0.12s ease;
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
 }
 
 .filter-main-btn:hover {
@@ -217,7 +229,9 @@
   max-width: 180px;
   object-fit: contain;
   pointer-events: none;
-  transition: opacity 0.2s ease, filter 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
   display: block;
 }
 
@@ -225,7 +239,9 @@
 .filter-expand-arrow {
   font-size: 10px;
   color: rgba(255, 255, 255, 0.4);
-  transition: transform 0.22s ease, color 0.18s ease;
+  transition:
+    transform 0.22s ease,
+    color 0.18s ease;
   flex-shrink: 0;
   line-height: 1;
 }
@@ -237,35 +253,34 @@
 
 /* ── Lueurs colorées pour chaque jeu (état active) ──── */
 
-.filter-main-btn.active.filter-color-p1  {
-  border-color: rgba(139,  0, 255, 0.55);
-  box-shadow: 0 0 9px rgba(139,  0, 255, 0.35);
+.filter-main-btn.active.filter-color-p1 {
+  border-color: rgba(139, 0, 255, 0.55);
+  box-shadow: 0 0 9px rgba(139, 0, 255, 0.35);
 }
-.filter-main-btn.active.filter-color-p2  {
-  border-color: rgba(200, 60,   0, 0.55);
-  box-shadow: 0 0 9px rgba(200, 60,   0, 0.3);
+.filter-main-btn.active.filter-color-p2 {
+  border-color: rgba(200, 60, 0, 0.55);
+  box-shadow: 0 0 9px rgba(200, 60, 0, 0.3);
 }
-.filter-main-btn.active.filter-color-p3  {
-  border-color: rgba( 32, 131, 245, 0.6);
-  box-shadow: 0 0 9px rgba( 32, 131, 245, 0.35);
+.filter-main-btn.active.filter-color-p3 {
+  border-color: rgba(32, 131, 245, 0.6);
+  box-shadow: 0 0 9px rgba(32, 131, 245, 0.35);
 }
-.filter-main-btn.active.filter-color-p4  {
-  border-color: rgba(255, 215,   0, 0.65);
-  box-shadow: 0 0 9px rgba(255, 215,   0, 0.35);
+.filter-main-btn.active.filter-color-p4 {
+  border-color: rgba(255, 215, 0, 0.65);
+  box-shadow: 0 0 9px rgba(255, 215, 0, 0.35);
 }
-.filter-main-btn.active.filter-color-p5  {
-  border-color: rgba(255,  65,  54, 0.6);
-  box-shadow: 0 0 9px rgba(255,  65,  54, 0.35);
+.filter-main-btn.active.filter-color-p5 {
+  border-color: rgba(255, 65, 54, 0.6);
+  box-shadow: 0 0 9px rgba(255, 65, 54, 0.35);
 }
 .filter-main-btn.active.filter-color-p5x {
-  border-color: rgba(255,   0,  60, 0.7);
-  box-shadow: 0 0 10px rgba(255,   0,  60, 0.4);
+  border-color: rgba(255, 0, 60, 0.7);
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.4);
 }
-.filter-main-btn.active.filter-color-pq  {
-  border-color: rgba(255, 215,   0, 0.5);
-  box-shadow: 0 0 8px rgba(255, 180,   0, 0.3);
+.filter-main-btn.active.filter-color-pq {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 8px rgba(255, 180, 0, 0.3);
 }
-
 
 /* =====================================================
    6. SOUS-PANNEAU (par sous-opus)
@@ -282,21 +297,20 @@
 
   /* Slide fermé */
   max-height: 0;
-  overflow:   hidden;
-  opacity:    0;
+  overflow: hidden;
+  opacity: 0;
   transition:
     max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity    0.2s ease,
-    padding    0.25s ease;
+    opacity 0.2s ease,
+    padding 0.25s ease;
 }
 
 /* État ouvert / auto-expand (P2) */
 .filter-sub-panel.expanded {
   max-height: 380px;
-  opacity:    1;
+  opacity: 1;
   padding: 4px 0 3px 6px;
 }
-
 
 /* =====================================================
    7. BOUTONS SOUS-FILTRES (par opus précis)
@@ -316,27 +330,27 @@
   cursor: pointer;
   transition:
     border-color 0.18s ease,
-    background   0.18s ease,
-    box-shadow   0.18s ease,
-    transform    0.12s ease,
-    opacity      0.18s ease,
-    filter       0.18s ease;
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease,
+    opacity 0.18s ease,
+    filter 0.18s ease;
 }
 
 .filter-sub-btn:hover {
-  transform: scale(1.10);
+  transform: scale(1.1);
   background: rgba(255, 255, 255, 0.09);
 }
 
 /* Inactive : grisé */
 .filter-sub-btn:not(.active) {
   opacity: 0.32;
-  filter:  grayscale(60%);
+  filter: grayscale(60%);
 }
 
 .filter-sub-btn.active {
   opacity: 1;
-  filter:  none;
+  filter: none;
 }
 
 /* Logo image */
@@ -349,46 +363,50 @@
   display: block;
 }
 
-
 /* ── Couleurs des sous-filtres actifs ─────────────────── */
 
 /* P1 — Violet mystique */
 .filter-sub-btn.filter-color-p1.active {
-  border-color: #8B00FF;
-  box-shadow: 0 0 8px rgba(139, 0, 255, 0.55),
-              inset 0 0 5px rgba(139, 0, 255, 0.12);
+  border-color: #8b00ff;
+  box-shadow:
+    0 0 8px rgba(139, 0, 255, 0.55),
+    inset 0 0 5px rgba(139, 0, 255, 0.12);
   background: rgba(139, 0, 255, 0.08);
 }
 
 /* P2 IS — Rouge Innocent Sin */
 .filter-sub-btn.filter-color-p2is.active {
-  border-color: #FF4136;
-  box-shadow: 0 0 8px rgba(255, 65, 54, 0.6),
-              inset 0 0 5px rgba(255, 65, 54, 0.1);
+  border-color: #ff4136;
+  box-shadow:
+    0 0 8px rgba(255, 65, 54, 0.6),
+    inset 0 0 5px rgba(255, 65, 54, 0.1);
   background: rgba(255, 65, 54, 0.08);
 }
 
 /* P2 EP — Violet Eternal Punishment (différent de P1) */
 .filter-sub-btn.filter-color-p2ep.active {
-  border-color: #9333EA;
-  box-shadow: 0 0 8px rgba(147, 51, 234, 0.6),
-              inset 0 0 5px rgba(147, 51, 234, 0.1);
+  border-color: #9333ea;
+  box-shadow:
+    0 0 8px rgba(147, 51, 234, 0.6),
+    inset 0 0 5px rgba(147, 51, 234, 0.1);
   background: rgba(147, 51, 234, 0.08);
 }
 
 /* P3 base / Reload — Bleu Dark Hour */
 .filter-sub-btn.filter-color-p3.active {
   border-color: #2083f5;
-  box-shadow: 0 0 8px rgba(32, 131, 245, 0.6),
-              inset 0 0 5px rgba(32, 131, 245, 0.12);
+  box-shadow:
+    0 0 8px rgba(32, 131, 245, 0.6),
+    inset 0 0 5px rgba(32, 131, 245, 0.12);
   background: rgba(32, 131, 245, 0.08);
 }
 
 /* P3 FES — Bleu légèrement plus foncé */
 .filter-sub-btn.filter-color-p3fes.active {
-  border-color: #1060C0;
-  box-shadow: 0 0 8px rgba(16, 96, 192, 0.6),
-              inset 0 0 5px rgba(16, 96, 192, 0.1);
+  border-color: #1060c0;
+  box-shadow:
+    0 0 8px rgba(16, 96, 192, 0.6),
+    inset 0 0 5px rgba(16, 96, 192, 0.1);
   background: rgba(16, 96, 192, 0.08);
 }
 
@@ -404,86 +422,96 @@
     linear-gradient(135deg, #2083f5 0%, #ff6eb0 100%) border-box;
 }
 .filter-sub-btn.filter-color-p3p.active {
-  box-shadow: 0 0 9px rgba(140, 100, 215, 0.55),
-              inset 0 0 5px rgba(100, 50, 200, 0.08);
+  box-shadow:
+    0 0 9px rgba(140, 100, 215, 0.55),
+    inset 0 0 5px rgba(100, 50, 200, 0.08);
   opacity: 1;
   filter: none;
 }
 .filter-sub-btn.filter-color-p3p:not(.active) {
   background:
     linear-gradient(rgba(10, 10, 20, 0.85), rgba(10, 10, 20, 0.85)) padding-box,
-    linear-gradient(135deg, rgba(32,131,245,0.35) 0%, rgba(255,110,176,0.35) 100%) border-box;
+    linear-gradient(135deg, rgba(32, 131, 245, 0.35) 0%, rgba(255, 110, 176, 0.35) 100%) border-box;
 }
 
 /* P3R — Persona 3 Reload : bleu électrique + cyan */
 .filter-sub-btn.filter-color-p3r.active {
-  border-color: #00BFFF;
-  box-shadow: 0 0 8px rgba(0, 191, 255, 0.65),
-              inset 0 0 5px rgba(0, 191, 255, 0.12);
+  border-color: #00bfff;
+  box-shadow:
+    0 0 8px rgba(0, 191, 255, 0.65),
+    inset 0 0 5px rgba(0, 191, 255, 0.12);
   background: rgba(0, 191, 255, 0.07);
 }
 
 /* P4 base — Jaune Junes */
 .filter-sub-btn.filter-color-p4.active {
-  border-color: #FFD700;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.65),
-              inset 0 0 5px rgba(255, 215, 0, 0.12);
+  border-color: #ffd700;
+  box-shadow:
+    0 0 8px rgba(255, 215, 0, 0.65),
+    inset 0 0 5px rgba(255, 215, 0, 0.12);
   background: rgba(255, 215, 0, 0.07);
 }
 
 /* P4 Golden — Or chaud */
 .filter-sub-btn.filter-color-p4g.active {
-  border-color: #FFB300;
-  box-shadow: 0 0 8px rgba(255, 179, 0, 0.65),
-              inset 0 0 5px rgba(255, 179, 0, 0.1);
+  border-color: #ffb300;
+  box-shadow:
+    0 0 8px rgba(255, 179, 0, 0.65),
+    inset 0 0 5px rgba(255, 179, 0, 0.1);
   background: rgba(255, 179, 0, 0.07);
 }
 
 /* P4 Arena Ultimax — Orange combat */
 .filter-sub-btn.filter-color-p4au.active {
-  border-color: #FF8C00;
-  box-shadow: 0 0 8px rgba(255, 140, 0, 0.65),
-              inset 0 0 5px rgba(255, 140, 0, 0.1);
+  border-color: #ff8c00;
+  box-shadow:
+    0 0 8px rgba(255, 140, 0, 0.65),
+    inset 0 0 5px rgba(255, 140, 0, 0.1);
   background: rgba(255, 140, 0, 0.07);
 }
 
 /* P4 Dancing All Night — Rose-jaune dancefloor */
 .filter-sub-btn.filter-color-p4d.active {
-  border-color: #FF69B4;
-  box-shadow: 0 0 8px rgba(255, 105, 180, 0.65),
-              inset 0 0 5px rgba(255, 105, 180, 0.1);
+  border-color: #ff69b4;
+  box-shadow:
+    0 0 8px rgba(255, 105, 180, 0.65),
+    inset 0 0 5px rgba(255, 105, 180, 0.1);
   background: rgba(255, 105, 180, 0.07);
 }
 
 /* P5 base — Rouge Phantom Thieves */
 .filter-sub-btn.filter-color-p5.active {
-  border-color: #FF4136;
-  box-shadow: 0 0 8px rgba(255, 65, 54, 0.65),
-              inset 0 0 5px rgba(255, 65, 54, 0.1);
+  border-color: #ff4136;
+  box-shadow:
+    0 0 8px rgba(255, 65, 54, 0.65),
+    inset 0 0 5px rgba(255, 65, 54, 0.1);
   background: rgba(255, 65, 54, 0.07);
 }
 
 /* P5 Royal — Rouge profond Kasumi */
 .filter-sub-btn.filter-color-p5r.active {
-  border-color: #CC0000;
-  box-shadow: 0 0 8px rgba(204, 0, 0, 0.65),
-              inset 0 0 5px rgba(204, 0, 0, 0.1);
+  border-color: #cc0000;
+  box-shadow:
+    0 0 8px rgba(204, 0, 0, 0.65),
+    inset 0 0 5px rgba(204, 0, 0, 0.1);
   background: rgba(204, 0, 0, 0.07);
 }
 
 /* P5 Strikers — Orange-rouge action */
 .filter-sub-btn.filter-color-p5s.active {
-  border-color: #FF6600;
-  box-shadow: 0 0 8px rgba(255, 102, 0, 0.65),
-              inset 0 0 5px rgba(255, 102, 0, 0.1);
+  border-color: #ff6600;
+  box-shadow:
+    0 0 8px rgba(255, 102, 0, 0.65),
+    inset 0 0 5px rgba(255, 102, 0, 0.1);
   background: rgba(255, 102, 0, 0.07);
 }
 
 /* P5 Tactica — Rouge tactique */
 .filter-sub-btn.filter-color-p5t.active {
-  border-color: #E82029;
-  box-shadow: 0 0 8px rgba(232, 32, 41, 0.6),
-              inset 0 0 5px rgba(0, 80, 100, 0.06);
+  border-color: #e82029;
+  box-shadow:
+    0 0 8px rgba(232, 32, 41, 0.6),
+    inset 0 0 5px rgba(0, 80, 100, 0.06);
   background: rgba(232, 32, 41, 0.07);
 }
 
@@ -491,27 +519,29 @@
 .filter-sub-btn.filter-color-p5x.active,
 .filter-main-btn.filter-color-p5x.active {
   border-color: #ff003c;
-  box-shadow: 0 0 10px rgba(255, 0, 60, 0.7),
-              inset 0 0 5px rgba(255, 0, 60, 0.1);
+  box-shadow:
+    0 0 10px rgba(255, 0, 60, 0.7),
+    inset 0 0 5px rgba(255, 0, 60, 0.1);
   background: rgba(255, 0, 60, 0.07);
 }
 
 /* PQ — Or aventure */
 .filter-sub-btn.filter-color-pq.active {
-  border-color: #FFD700;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.55),
-              inset 0 0 5px rgba(255, 179, 0, 0.08);
+  border-color: #ffd700;
+  box-shadow:
+    0 0 8px rgba(255, 215, 0, 0.55),
+    inset 0 0 5px rgba(255, 179, 0, 0.08);
   background: rgba(255, 215, 0, 0.06);
 }
 
 /* PQ2 — Or plus clair */
 .filter-sub-btn.filter-color-pq2.active {
-  border-color: #FFF44F;
-  box-shadow: 0 0 8px rgba(255, 244, 79, 0.55),
-              inset 0 0 5px rgba(255, 244, 79, 0.08);
+  border-color: #fff44f;
+  box-shadow:
+    0 0 8px rgba(255, 244, 79, 0.55),
+    inset 0 0 5px rgba(255, 244, 79, 0.08);
   background: rgba(255, 244, 79, 0.06);
 }
-
 
 /* =====================================================
    7b. TOOLTIPS — Nom du jeu au survol (couleur par opus)
@@ -530,7 +560,7 @@
   color: rgba(255, 255, 255, 0.9);
   font-size: 9px;
   font-weight: 900;
-  font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif;
+  font-family: "Arial Black", "Arial Bold", Arial, sans-serif;
   letter-spacing: 0.09em;
   text-transform: uppercase;
   padding: 4px 9px;
@@ -539,7 +569,9 @@
   border: 1.5px solid rgba(200, 0, 40, 0.45);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
   z-index: 300;
 }
 
@@ -551,37 +583,57 @@
 
 /* Couleurs tooltip par jeu */
 .filter-main-btn.filter-color-p1::after,
-.filter-sub-btn.filter-color-p1::after    { border-color: rgba(139,0,255,0.65); color: #c898ff; }
+.filter-sub-btn.filter-color-p1::after {
+  border-color: rgba(139, 0, 255, 0.65);
+  color: #c898ff;
+}
 
 .filter-main-btn.filter-color-p2::after,
 .filter-sub-btn.filter-color-p2is::after,
-.filter-sub-btn.filter-color-p2ep::after  { border-color: rgba(200,40,20,0.65); color: #ff9984; }
+.filter-sub-btn.filter-color-p2ep::after {
+  border-color: rgba(200, 40, 20, 0.65);
+  color: #ff9984;
+}
 
 .filter-main-btn.filter-color-p3::after,
 .filter-sub-btn.filter-color-p3::after,
 .filter-sub-btn.filter-color-p3fes::after,
 .filter-sub-btn.filter-color-p3p::after,
-.filter-sub-btn.filter-color-p3r::after   { border-color: rgba(32,131,245,0.65); color: #88c4ff; }
+.filter-sub-btn.filter-color-p3r::after {
+  border-color: rgba(32, 131, 245, 0.65);
+  color: #88c4ff;
+}
 
 .filter-main-btn.filter-color-p4::after,
 .filter-sub-btn.filter-color-p4::after,
 .filter-sub-btn.filter-color-p4g::after,
 .filter-sub-btn.filter-color-p4au::after,
-.filter-sub-btn.filter-color-p4d::after   { border-color: rgba(255,215,0,0.65); color: #ffe050; }
+.filter-sub-btn.filter-color-p4d::after {
+  border-color: rgba(255, 215, 0, 0.65);
+  color: #ffe050;
+}
 
 .filter-main-btn.filter-color-p5::after,
 .filter-sub-btn.filter-color-p5::after,
 .filter-sub-btn.filter-color-p5r::after,
 .filter-sub-btn.filter-color-p5s::after,
-.filter-sub-btn.filter-color-p5t::after   { border-color: rgba(255,65,54,0.65); color: #ff9088; }
+.filter-sub-btn.filter-color-p5t::after {
+  border-color: rgba(255, 65, 54, 0.65);
+  color: #ff9088;
+}
 
 .filter-main-btn.filter-color-p5x::after,
-.filter-sub-btn.filter-color-p5x::after   { border-color: rgba(255,0,60,0.70); color: #ff709a; }
+.filter-sub-btn.filter-color-p5x::after {
+  border-color: rgba(255, 0, 60, 0.7);
+  color: #ff709a;
+}
 
 .filter-main-btn.filter-color-pq::after,
 .filter-sub-btn.filter-color-pq::after,
-.filter-sub-btn.filter-color-pq2::after   { border-color: rgba(255,215,0,0.55); color: #ffe870; }
-
+.filter-sub-btn.filter-color-pq2::after {
+  border-color: rgba(255, 215, 0, 0.55);
+  color: #ffe870;
+}
 
 /* =====================================================
    8. RESPONSIVE
@@ -595,10 +647,18 @@
     letter-spacing: 1.5px;
   }
 
-  .filter-logo     { height: 52px; max-width: 130px; }
-  .filter-sub-logo { height: 40px; max-width:  80px; }
+  .filter-logo {
+    height: 52px;
+    max-width: 130px;
+  }
+  .filter-sub-logo {
+    height: 40px;
+    max-width: 80px;
+  }
 
-  .filter-dropdown { min-width: 185px; }
+  .filter-dropdown {
+    min-width: 185px;
+  }
 
   /* Bouton global tout-cocher : léger resserrement */
   .filter-select-all-btn {
@@ -627,19 +687,33 @@
   }
 
   /* Masque le texte "FILTRES", garde l'icône + flèche */
-  .filter-toggle-text { display: none; }
+  .filter-toggle-text {
+    display: none;
+  }
 
-  .filter-logo     { height: 44px; max-width: 110px; }
-  .filter-sub-logo { height: 32px; max-width:  65px; }
+  .filter-logo {
+    height: 44px;
+    max-width: 110px;
+  }
+  .filter-sub-logo {
+    height: 32px;
+    max-width: 65px;
+  }
 
   .filter-dropdown {
     min-width: 158px;
     padding: 7px 6px;
   }
 
-  .filter-sub-panel { gap: 3px; }
-  .filter-sub-btn   { padding: 2px 3px; }
-  .filter-main-btn  { padding: 4px 6px; }
+  .filter-sub-panel {
+    gap: 3px;
+  }
+  .filter-sub-btn {
+    padding: 2px 3px;
+  }
+  .filter-main-btn {
+    padding: 4px 6px;
+  }
 
   /* Bouton global tout-cocher : compact, lettre-spacing réduit */
   .filter-select-all-btn {
@@ -658,7 +732,6 @@
   }
 }
 
-
 /* =====================================================
    9. MODE CLAIR (sans classe .darkmode sur <body>)
    Fond clair, semi-transparent pour le panneau
@@ -671,8 +744,9 @@
 body:not(.darkmode) .filter-dropdown {
   background: rgba(250, 250, 255, 0.98);
   border-color: rgba(180, 0, 40, 0.25);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14),
-              inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.14),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(12px);
 }
 
@@ -730,9 +804,8 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p {
 body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
   background:
     linear-gradient(rgba(248, 248, 255, 0.96), rgba(248, 248, 255, 0.96)) padding-box,
-    linear-gradient(135deg, rgba(32,131,245,0.3) 0%, rgba(255,110,176,0.3) 100%) border-box;
+    linear-gradient(135deg, rgba(32, 131, 245, 0.3) 0%, rgba(255, 110, 176, 0.3) 100%) border-box;
 }
-
 
 /* =====================================================
    10. DARK MODE — LOGOS VISIBLES
@@ -747,18 +820,32 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
 /* Inactive dark mode : opacité relevée pour que le fond
    clair reste visible et les logos lisibles */
 .darkmode .filter-sub-btn:not(.active) {
-  opacity: 0.60;
+  opacity: 0.6;
   filter: grayscale(55%);
 }
 
 /* ── Fonds clairs teintés — boutons principaux (dark mode) ── */
-.darkmode .filter-main-btn.filter-color-p1  { background: rgba(200, 165, 255, 0.84); }
-.darkmode .filter-main-btn.filter-color-p2  { background: rgba(255, 195, 178, 0.84); }
-.darkmode .filter-main-btn.filter-color-p3  { background: rgba(168, 212, 255, 0.84); }
-.darkmode .filter-main-btn.filter-color-p4  { background: rgba(255, 246, 158, 0.84); }
-.darkmode .filter-main-btn.filter-color-p5  { background: rgba(255, 182, 178, 0.84); }
-.darkmode .filter-main-btn.filter-color-p5x { background: rgba(255, 172, 200, 0.84); }
-.darkmode .filter-main-btn.filter-color-pq  { background: rgba(255, 242, 148, 0.84); }
+.darkmode .filter-main-btn.filter-color-p1 {
+  background: rgba(200, 165, 255, 0.84);
+}
+.darkmode .filter-main-btn.filter-color-p2 {
+  background: rgba(255, 195, 178, 0.84);
+}
+.darkmode .filter-main-btn.filter-color-p3 {
+  background: rgba(168, 212, 255, 0.84);
+}
+.darkmode .filter-main-btn.filter-color-p4 {
+  background: rgba(255, 246, 158, 0.84);
+}
+.darkmode .filter-main-btn.filter-color-p5 {
+  background: rgba(255, 182, 178, 0.84);
+}
+.darkmode .filter-main-btn.filter-color-p5x {
+  background: rgba(255, 172, 200, 0.84);
+}
+.darkmode .filter-main-btn.filter-color-pq {
+  background: rgba(255, 242, 148, 0.84);
+}
 
 /* Inactive : logo légèrement atténué */
 .darkmode .filter-main-btn:not(.active) .filter-logo {
@@ -767,12 +854,24 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
 }
 
 /* ── Fonds clairs teintés — sous-boutons (dark mode) ──────── */
-.darkmode .filter-sub-btn.filter-color-p1    { background: rgba(200, 165, 255, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p2is  { background: rgba(255, 185, 172, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p2ep  { background: rgba(220, 185, 255, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p3    { background: rgba(168, 212, 255, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p3fes { background: rgba(155, 200, 255, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p3r   { background: rgba(148, 232, 255, 0.84); }
+.darkmode .filter-sub-btn.filter-color-p1 {
+  background: rgba(200, 165, 255, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p2is {
+  background: rgba(255, 185, 172, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p2ep {
+  background: rgba(220, 185, 255, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p3 {
+  background: rgba(168, 212, 255, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p3fes {
+  background: rgba(155, 200, 255, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p3r {
+  background: rgba(148, 232, 255, 0.84);
+}
 
 /* P3P : fond dégradé clair bleu→rose en dark mode */
 .darkmode .filter-sub-btn.filter-color-p3p {
@@ -783,21 +882,42 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
 .darkmode .filter-sub-btn.filter-color-p3p:not(.active) {
   background:
     linear-gradient(rgba(215, 225, 255, 0.84), rgba(248, 210, 248, 0.84)) padding-box,
-    linear-gradient(135deg, rgba(32,131,245,0.5) 0%, rgba(255,110,176,0.5) 100%) border-box;
+    linear-gradient(135deg, rgba(32, 131, 245, 0.5) 0%, rgba(255, 110, 176, 0.5) 100%) border-box;
 }
 
-.darkmode .filter-sub-btn.filter-color-p4    { background: rgba(255, 246, 158, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p4g   { background: rgba(255, 238, 138, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p4au  { background: rgba(255, 228, 168, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p4d   { background: rgba(255, 205, 235, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p5    { background: rgba(255, 182, 178, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p5r   { background: rgba(255, 168, 168, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p5s   { background: rgba(255, 210, 178, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p5t   { background: rgba(255, 182, 182, 0.84); }
-.darkmode .filter-sub-btn.filter-color-p5x   { background: rgba(255, 172, 200, 0.84); }
-.darkmode .filter-sub-btn.filter-color-pq    { background: rgba(255, 242, 148, 0.84); }
-.darkmode .filter-sub-btn.filter-color-pq2   { background: rgba(255, 248, 130, 0.84); }
-
+.darkmode .filter-sub-btn.filter-color-p4 {
+  background: rgba(255, 246, 158, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p4g {
+  background: rgba(255, 238, 138, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p4au {
+  background: rgba(255, 228, 168, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p4d {
+  background: rgba(255, 205, 235, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p5 {
+  background: rgba(255, 182, 178, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p5r {
+  background: rgba(255, 168, 168, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p5s {
+  background: rgba(255, 210, 178, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p5t {
+  background: rgba(255, 182, 182, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-p5x {
+  background: rgba(255, 172, 200, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-pq {
+  background: rgba(255, 242, 148, 0.84);
+}
+.darkmode .filter-sub-btn.filter-color-pq2 {
+  background: rgba(255, 248, 130, 0.84);
+}
 
 /* =====================================================
    11. ANIMATIONS D'ENTRÉE — DA PAR JEU
@@ -817,8 +937,10 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
     transform: scale(0.78) translateY(6px);
     filter: brightness(0.12);
   }
-  52% { filter: brightness(0.60); }
-  to  {
+  52% {
+    filter: brightness(0.6);
+  }
+  to {
     opacity: 1;
     transform: scale(1) translateY(0);
     filter: brightness(1);
@@ -828,7 +950,7 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
   animation: p2DarkEmerge 0.58s ease both;
 }
 [data-group-panel="P2"].expanded .filter-sub-btn:nth-child(2) {
-  animation-delay: 0.10s;
+  animation-delay: 0.1s;
 }
 
 /* ── P3 — Mélancolique / Tic de l'horloge (Dark Hour) ──
@@ -839,9 +961,13 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
     opacity: 0;
     transform: translateY(-14px) rotate(-7deg);
   }
-  55% { transform: translateY(4px)  rotate(1.5deg);  }
-  76% { transform: translateY(-2px) rotate(-0.5deg); }
-  to  {
+  55% {
+    transform: translateY(4px) rotate(1.5deg);
+  }
+  76% {
+    transform: translateY(-2px) rotate(-0.5deg);
+  }
+  to {
     opacity: 1;
     transform: translateY(0) rotate(0deg);
   }
@@ -849,26 +975,50 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
 [data-group-panel="P3"].expanded .filter-sub-btn {
   animation: p3ClockDrop 0.44s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
-[data-group-panel="P3"].expanded .filter-sub-btn:nth-child(2) { animation-delay: 0.07s; }
-[data-group-panel="P3"].expanded .filter-sub-btn:nth-child(3) { animation-delay: 0.14s; }
-[data-group-panel="P3"].expanded .filter-sub-btn:nth-child(4) { animation-delay: 0.21s; }
+[data-group-panel="P3"].expanded .filter-sub-btn:nth-child(2) {
+  animation-delay: 0.07s;
+}
+[data-group-panel="P3"].expanded .filter-sub-btn:nth-child(3) {
+  animation-delay: 0.14s;
+}
+[data-group-panel="P3"].expanded .filter-sub-btn:nth-child(4) {
+  animation-delay: 0.21s;
+}
 
 /* ── P4 — Solaire / Pop élastique des Junes ─────────────
    Persona 4 : soleil d'Inaba, énergie, Investigation Team.
    Chaque bouton surgit comme un rayon de soleil éclatant. */
 @keyframes p4SunBounce {
-  0%   { opacity: 0; transform: scale(0.40); }
-  55%  { opacity: 1; transform: scale(1.22); }
-  78%  { transform: scale(0.91); }
-  91%  { transform: scale(1.06); }
-  100% { transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+  78% {
+    transform: scale(0.91);
+  }
+  91% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 [data-group-panel="P4"].expanded .filter-sub-btn {
-  animation: p4SunBounce 0.50s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: p4SunBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-[data-group-panel="P4"].expanded .filter-sub-btn:nth-child(2) { animation-delay: 0.06s; }
-[data-group-panel="P4"].expanded .filter-sub-btn:nth-child(3) { animation-delay: 0.12s; }
-[data-group-panel="P4"].expanded .filter-sub-btn:nth-child(4) { animation-delay: 0.18s; }
+[data-group-panel="P4"].expanded .filter-sub-btn:nth-child(2) {
+  animation-delay: 0.06s;
+}
+[data-group-panel="P4"].expanded .filter-sub-btn:nth-child(3) {
+  animation-delay: 0.12s;
+}
+[data-group-panel="P4"].expanded .filter-sub-btn:nth-child(4) {
+  animation-delay: 0.18s;
+}
 
 /* ── P5 — Phantom Thieves / Entrée rebelle en biais ─────
    Persona 5 : style, rébellion, carte de visite phantom.
@@ -879,8 +1029,10 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
     opacity: 0;
     transform: translateX(-22px) skewX(-13deg);
   }
-  62% { transform: translateX(5px) skewX(2.5deg); }
-  to  {
+  62% {
+    transform: translateX(5px) skewX(2.5deg);
+  }
+  to {
     opacity: 1;
     transform: translateX(0) skewX(0deg);
   }
@@ -888,20 +1040,38 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
 [data-group-panel="P5"].expanded .filter-sub-btn {
   animation: p5PhantomSlide 0.36s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
-[data-group-panel="P5"].expanded .filter-sub-btn:nth-child(2) { animation-delay: 0.055s; }
-[data-group-panel="P5"].expanded .filter-sub-btn:nth-child(3) { animation-delay: 0.110s; }
-[data-group-panel="P5"].expanded .filter-sub-btn:nth-child(4) { animation-delay: 0.165s; }
+[data-group-panel="P5"].expanded .filter-sub-btn:nth-child(2) {
+  animation-delay: 0.055s;
+}
+[data-group-panel="P5"].expanded .filter-sub-btn:nth-child(3) {
+  animation-delay: 0.11s;
+}
+[data-group-panel="P5"].expanded .filter-sub-btn:nth-child(4) {
+  animation-delay: 0.165s;
+}
 
 /* ── PQ — Chibi aventure / Rebond espiègle ──────────────
    Persona Q : chibi, Yasogami + Gekkoukan, humour léger.
    Chaque bouton pirouette et rebondit comme un chibi
    surexcité partant à l'aventure dans le labyrinthe. */
 @keyframes pqChibiPop {
-  0%   { opacity: 0; transform: rotate(-15deg) scale(0.58); }
-  38%  { opacity: 1; transform: rotate(9deg)   scale(1.16); }
-  64%  { transform: rotate(-4deg) scale(0.94); }
-  82%  { transform: rotate(2.5deg) scale(1.04); }
-  100% { transform: rotate(0deg)  scale(1); }
+  0% {
+    opacity: 0;
+    transform: rotate(-15deg) scale(0.58);
+  }
+  38% {
+    opacity: 1;
+    transform: rotate(9deg) scale(1.16);
+  }
+  64% {
+    transform: rotate(-4deg) scale(0.94);
+  }
+  82% {
+    transform: rotate(2.5deg) scale(1.04);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
 }
 [data-group-panel="PQ"].expanded .filter-sub-btn {
   animation: pqChibiPop 0.54s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -909,7 +1079,6 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
 [data-group-panel="PQ"].expanded .filter-sub-btn:nth-child(2) {
   animation-delay: 0.09s;
 }
-
 
 /* =====================================================
    12. BOUTON "TOUT COCHER / DÉCOCHER"
@@ -926,15 +1095,15 @@ body:not(.darkmode) .filter-sub-btn.filter-color-p3p:not(.active) {
   color: rgba(255, 255, 255, 0.65);
   font-size: 9px;
   font-weight: 900;
-  font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif;
+  font-family: "Arial Black", "Arial Bold", Arial, sans-serif;
   letter-spacing: 1.8px;
   text-transform: uppercase;
   padding: 5px 8px;
   cursor: pointer;
   margin-bottom: 7px;
   transition:
-    background   0.15s ease,
-    color        0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease,
     border-color 0.15s ease;
 }
 
@@ -975,7 +1144,6 @@ body:not(.darkmode) .filter-select-all-btn[data-state="select"]:hover {
   color: rgba(180, 0, 20, 0.9);
 }
 
-
 /* =====================================================
    13. BOUTONS "TOUT COCHER" PAR GROUPE
    Injectés dynamiquement en tête de chaque sous-panneau
@@ -984,22 +1152,22 @@ body:not(.darkmode) .filter-select-all-btn[data-state="select"]:hover {
    ===================================================== */
 
 .filter-group-select-btn {
-  flex: 0 0 100%;       /* pleine largeur dans le flex-wrap */
+  flex: 0 0 100%; /* pleine largeur dans le flex-wrap */
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 3px;
-  color: rgba(255, 255, 255, 0.60);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 8px;
   font-weight: 900;
-  font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif;
+  font-family: "Arial Black", "Arial Bold", Arial, sans-serif;
   letter-spacing: 1.6px;
   text-transform: uppercase;
   padding: 3px 7px;
   cursor: pointer;
   margin-bottom: 5px;
   transition:
-    background   0.14s ease,
-    color        0.14s ease,
+    background 0.14s ease,
+    color 0.14s ease,
     border-color 0.14s ease;
 }
 
@@ -1027,7 +1195,7 @@ body:not(.darkmode) .filter-group-select-btn:hover {
   color: rgba(255, 120, 140, 0.75);
 }
 .filter-group-select-btn[data-state="select"]:hover {
-  border-color: rgba(255, 0, 50, 0.60);
+  border-color: rgba(255, 0, 50, 0.6);
   color: #ff6680;
 }
 
@@ -1043,7 +1211,6 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
 /* Dark mode : les styles par jeu (section 14) prennent le relais —
    aucun override générique ici pour ne pas écraser les couleurs de jeu. */
 
-
 /* =====================================================
    14. BOUTONS "TOUT COCHER" — IDENTITÉ VISUELLE PAR JEU
 
@@ -1058,26 +1225,26 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
 /* Transitions étendues communes à tous les boutons stylisés */
 [data-group-panel] .filter-group-select-btn {
   transition:
-    background   0.16s ease,
-    color        0.16s ease,
+    background 0.16s ease,
+    color 0.16s ease,
     border-color 0.16s ease,
-    box-shadow   0.20s ease,
-    transform    0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow 0.2s ease,
+    transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 
 /* ── P2 — Sang et Ombres (Innocent Sin / Eternal Punishment) ─── */
 
 [data-group-panel="P2"] .filter-group-select-btn {
-  background: linear-gradient(135deg, rgba(65,5,15,0.90) 0%, rgba(30,0,32,0.90) 100%);
+  background: linear-gradient(135deg, rgba(65, 5, 15, 0.9) 0%, rgba(30, 0, 32, 0.9) 100%);
   border: 1px solid rgba(195, 25, 50, 0.68);
   color: rgba(255, 115, 110, 0.96);
-  box-shadow: 0 0 8px rgba(155, 0, 30, 0.32),
-              inset 0 0 10px rgba(90,0,10,0.18);
+  box-shadow:
+    0 0 8px rgba(155, 0, 30, 0.32),
+    inset 0 0 10px rgba(90, 0, 10, 0.18);
   text-shadow: 0 0 9px rgba(200, 0, 40, 0.45);
 }
 [data-group-panel="P2"] .filter-group-select-btn:hover {
-  background: linear-gradient(135deg, rgba(100,5,20,0.95) 0%, rgba(50,0,52,0.95) 100%);
+  background: linear-gradient(135deg, rgba(100, 5, 20, 0.95) 0%, rgba(50, 0, 52, 0.95) 100%);
   border-color: rgba(235, 40, 70, 0.92);
   color: #ff8880;
   box-shadow: 0 0 14px rgba(200, 0, 50, 0.52);
@@ -1088,19 +1255,18 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
   color: rgba(220, 60, 60, 0.72);
 }
 
-
 /* ── P3 — Minuit et Dark Hour (Persona 3) ──────────────────────── */
 
 [data-group-panel="P3"] .filter-group-select-btn {
-  background: linear-gradient(135deg, rgba(2,10,42,0.92) 0%, rgba(5,18,58,0.92) 100%);
+  background: linear-gradient(135deg, rgba(2, 10, 42, 0.92) 0%, rgba(5, 18, 58, 0.92) 100%);
   border: 1px solid rgba(32, 131, 245, 0.58);
   color: rgba(95, 172, 255, 0.94);
   box-shadow: 0 0 8px rgba(32, 131, 245, 0.22);
   text-shadow: 0 0 9px rgba(32, 131, 245, 0.38);
 }
 [data-group-panel="P3"] .filter-group-select-btn:hover {
-  background: linear-gradient(135deg, rgba(4,16,62,0.97) 0%, rgba(7,26,85,0.97) 100%);
-  border-color: rgba(32, 131, 245, 0.90);
+  background: linear-gradient(135deg, rgba(4, 16, 62, 0.97) 0%, rgba(7, 26, 85, 0.97) 100%);
+  border-color: rgba(32, 131, 245, 0.9);
   color: #82c0ff;
   box-shadow: 0 0 14px rgba(32, 131, 245, 0.48);
   transform: scale(1.02);
@@ -1110,37 +1276,37 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
   color: rgba(60, 140, 230, 0.72);
 }
 
-
 /* ── P4 — Junes Pop / Soleil d'Inaba (Persona 4) ──────────────── */
 
 [data-group-panel="P4"] .filter-group-select-btn {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA200 100%);
-  border: 1.5px solid #FFBB00;
+  background: linear-gradient(135deg, #ffd700 0%, #ffa200 100%);
+  border: 1.5px solid #ffbb00;
   color: #5c3800;
   font-weight: 900;
-  box-shadow: 0 2px 10px rgba(255, 215, 0, 0.50),
-              inset 0 1px 0 rgba(255,255,255,0.42);
-  text-shadow: 0 1px 0 rgba(255,255,255,0.45);
+  box-shadow:
+    0 2px 10px rgba(255, 215, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 [data-group-panel="P4"] .filter-group-select-btn:hover {
-  background: linear-gradient(135deg, #FFE034 0%, #FFB800 100%);
-  border-color: #FFD000;
+  background: linear-gradient(135deg, #ffe034 0%, #ffb800 100%);
+  border-color: #ffd000;
   color: #3d2500;
-  box-shadow: 0 3px 18px rgba(255, 215, 0, 0.75),
-              inset 0 1px 0 rgba(255,255,255,0.52);
+  box-shadow:
+    0 3px 18px rgba(255, 215, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.52);
   transform: scale(1.06);
 }
 [data-group-panel="P4"] .filter-group-select-btn:active {
   transform: scale(0.95);
 }
 [data-group-panel="P4"] .filter-group-select-btn[data-state="select"] {
-  background: linear-gradient(135deg, rgba(255,200,0,0.55) 0%, rgba(255,145,0,0.55) 100%);
+  background: linear-gradient(135deg, rgba(255, 200, 0, 0.55) 0%, rgba(255, 145, 0, 0.55) 100%);
   border-color: rgba(200, 145, 0, 0.68);
   color: #7a4c00;
-  box-shadow: 0 1px 6px rgba(255,185,0,0.22);
+  box-shadow: 0 1px 6px rgba(255, 185, 0, 0.22);
   text-shadow: none;
 }
-
 
 /* ── P5 — Carte de Visite des Phantom Thieves (Persona 5) ─────── */
 
@@ -1148,8 +1314,9 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
   background: linear-gradient(135deg, #0d0d0d 0%, #1e0000 100%);
   border: 1px solid rgba(255, 65, 54, 0.72);
   color: rgba(255, 105, 95, 0.96);
-  box-shadow: 0 0 9px rgba(255, 30, 20, 0.28),
-              inset 0 0 12px rgba(255,0,0,0.06);
+  box-shadow:
+    0 0 9px rgba(255, 30, 20, 0.28),
+    inset 0 0 12px rgba(255, 0, 0, 0.06);
   text-shadow: 0 0 9px rgba(255, 60, 40, 0.42);
 }
 [data-group-panel="P5"] .filter-group-select-btn:hover {
@@ -1164,18 +1331,17 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
   color: rgba(240, 60, 50, 0.72);
 }
 
-
 /* ── PQ — Aventure Dorée des Chibi (Persona Q) ────────────────── */
 
 [data-group-panel="PQ"] .filter-group-select-btn {
-  background: linear-gradient(135deg, rgba(48,30,0,0.92) 0%, rgba(68,46,0,0.92) 100%);
+  background: linear-gradient(135deg, rgba(48, 30, 0, 0.92) 0%, rgba(68, 46, 0, 0.92) 100%);
   border: 1px solid rgba(255, 192, 0, 0.65);
   color: rgba(255, 208, 55, 0.97);
-  box-shadow: 0 0 8px rgba(255, 180, 0, 0.30);
+  box-shadow: 0 0 8px rgba(255, 180, 0, 0.3);
   text-shadow: 0 0 9px rgba(255, 200, 0, 0.38);
 }
 [data-group-panel="PQ"] .filter-group-select-btn:hover {
-  background: linear-gradient(135deg, rgba(70,48,0,0.96) 0%, rgba(94,64,0,0.96) 100%);
+  background: linear-gradient(135deg, rgba(70, 48, 0, 0.96) 0%, rgba(94, 64, 0, 0.96) 100%);
   border-color: rgba(255, 215, 0, 0.94);
   color: #ffd700;
   box-shadow: 0 0 16px rgba(255, 195, 0, 0.52);
@@ -1186,7 +1352,6 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
   color: rgba(220, 165, 0, 0.72);
 }
 
-
 /* ── Ajustements mode CLAIR — fonds colorés sur panneau blanc ─── */
 
 /* P2 et P5 : fond sombre bien visible sur panneau blanc → rien à changer.
@@ -1195,27 +1360,31 @@ body:not(.darkmode) .filter-group-select-btn[data-state="select"]:hover {
    Seul ajustement utile : ombres légèrement renforcées pour l'ancrage visuel. */
 
 body:not(.darkmode) [data-group-panel="P4"] .filter-group-select-btn {
-  box-shadow: 0 3px 12px rgba(255, 215, 0, 0.55),
-              inset 0 1px 0 rgba(255,255,255,0.48),
-              0 1px 3px rgba(0,0,0,0.10);
+  box-shadow:
+    0 3px 12px rgba(255, 215, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    0 1px 3px rgba(0, 0, 0, 0.1);
 }
 body:not(.darkmode) [data-group-panel="P2"] .filter-group-select-btn {
-  box-shadow: 0 1px 8px rgba(155, 0, 30, 0.30),
-              0 1px 3px rgba(0,0,0,0.10);
+  box-shadow:
+    0 1px 8px rgba(155, 0, 30, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.1);
 }
 body:not(.darkmode) [data-group-panel="P3"] .filter-group-select-btn {
-  box-shadow: 0 1px 8px rgba(32, 131, 245, 0.22),
-              0 1px 3px rgba(0,0,0,0.10);
+  box-shadow:
+    0 1px 8px rgba(32, 131, 245, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.1);
 }
 body:not(.darkmode) [data-group-panel="P5"] .filter-group-select-btn {
-  box-shadow: 0 1px 8px rgba(255, 50, 40, 0.22),
-              0 1px 3px rgba(0,0,0,0.10);
+  box-shadow:
+    0 1px 8px rgba(255, 50, 40, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.1);
 }
 body:not(.darkmode) [data-group-panel="PQ"] .filter-group-select-btn {
-  box-shadow: 0 1px 8px rgba(255, 180, 0, 0.28),
-              0 1px 3px rgba(0,0,0,0.10);
+  box-shadow:
+    0 1px 8px rgba(255, 180, 0, 0.28),
+    0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
 
 /* =====================================================
    15. ANIMATIONS D'ENTRÉE — BOUTONS DE GROUPE
@@ -1235,7 +1404,7 @@ body:not(.darkmode) [data-group-panel="PQ"] .filter-group-select-btn {
 
 /* P3 — chute d'horloge : tombe depuis le haut */
 [data-group-panel="P3"].expanded .filter-group-select-btn {
-  animation: p3ClockDrop 0.40s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: p3ClockDrop 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 /* P4 — pop solaire : même keyframe que les sous-boutons ! */

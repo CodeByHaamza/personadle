@@ -66,14 +66,14 @@ La même image — deux états. À gauche, ce que voit le joueur. À droite, la 
 
 Chaque mauvaise réponse dévoile davantage le portrait :
 
-| Essais | État de l'image |
-|--------|-----------------|
-| 0 | ⬛⬛⬛⬛⬛ Silhouette totale — `brightness(0)` |
-| 1 | 🟫⬛⬛⬛⬛ Légère lueur — zoom réduit |
-| 2 | 🟧⬛⬛⬛⬛ Contours visibles |
-| 3 | 🟨🟨⬛⬛⬛ Couleurs partielles |
-| 4 | 🟩🟩🟩⬛⬛ Presque révélé |
-| 5+ | 🟩🟩🟩🟩🟩 Révélation complète — `brightness(1)` |
+| Essais | État de l'image                                  |
+| ------ | ------------------------------------------------ |
+| 0      | ⬛⬛⬛⬛⬛ Silhouette totale — `brightness(0)`   |
+| 1      | 🟫⬛⬛⬛⬛ Légère lueur — zoom réduit            |
+| 2      | 🟧⬛⬛⬛⬛ Contours visibles                     |
+| 3      | 🟨🟨⬛⬛⬛ Couleurs partielles                   |
+| 4      | 🟩🟩🟩⬛⬛ Presque révélé                        |
+| 5+     | 🟩🟩🟩🟩🟩 Révélation complète — `brightness(1)` |
 
 ---
 
@@ -97,13 +97,13 @@ silhouetteMode/
 
 Éléments HTML notables :
 
-| Élément | Rôle |
-|---------|------|
-| `#silhouetteContainer` | Div contenant l'image avec `filter: brightness(0)` CSS |
-| `#textbar` | Champ de saisie avec autocomplete |
-| `#guessButton` / `#giveUpButton` | Actions principales |
-| `#wrongGuessList` | Liste des mauvaises réponses |
-| `#victoryBox` | Révélation finale avec portrait en couleur |
+| Élément                          | Rôle                                                   |
+| -------------------------------- | ------------------------------------------------------ |
+| `#silhouetteContainer`           | Div contenant l'image avec `filter: brightness(0)` CSS |
+| `#textbar`                       | Champ de saisie avec autocomplete                      |
+| `#guessButton` / `#giveUpButton` | Actions principales                                    |
+| `#wrongGuessList`                | Liste des mauvaises réponses                           |
+| `#victoryBox`                    | Révélation finale avec portrait en couleur             |
 
 ---
 
@@ -121,6 +121,7 @@ Styles spécifiques à l'effet silhouette :
 ## 🔧 `modeSilhouette.js`
 
 Importe depuis `../js/gameCore.js` :
+
 - `showConfettiExplosion` (style `"sides"`)
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
 - `showWrongMini`
@@ -129,16 +130,16 @@ Importe depuis `../js/gameCore.js` :
 
 ### Fonctions spécifiques
 
-| Fonction | Description |
-|----------|-------------|
-| `pickCharacter()` | Choisit aléatoirement un personnage avec un token anti-race (évite les changements simultanés) |
-| `applyZoom(level)` | Ajuste le niveau de zoom et de luminosité de l'image selon le nombre d'essais |
-| `showVictory()` | Révèle l'image en couleur, déclenche les confettis et vérifie le badge PQ |
-| `showWrong()` | Affiche la vignette du mauvais personnage et réduit le zoom |
-| `handleGuess()` | Vérifie la saisie et dispatche vers victoire ou mauvaise réponse |
-| `giveUp()` | Révèle le personnage sans victoire |
-| `resetGame()` | Remet à zéro l'état et choisit un nouveau personnage |
-| `initializeAutocomplete()` | Dropdown avec filtre `_guessed` (personnages déjà proposés masqués) |
+| Fonction                   | Description                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------------------- |
+| `pickCharacter()`          | Choisit aléatoirement un personnage avec un token anti-race (évite les changements simultanés) |
+| `applyZoom(level)`         | Ajuste le niveau de zoom et de luminosité de l'image selon le nombre d'essais                  |
+| `showVictory()`            | Révèle l'image en couleur, déclenche les confettis et vérifie le badge PQ                      |
+| `showWrong()`              | Affiche la vignette du mauvais personnage et réduit le zoom                                    |
+| `handleGuess()`            | Vérifie la saisie et dispatche vers victoire ou mauvaise réponse                               |
+| `giveUp()`                 | Révèle le personnage sans victoire                                                             |
+| `resetGame()`              | Remet à zéro l'état et choisit un nouveau personnage                                           |
+| `initializeAutocomplete()` | Dropdown avec filtre `_guessed` (personnages déjà proposés masqués)                            |
 
 ### 🏅 Badge PQ
 
@@ -150,21 +151,21 @@ Le mode Silhouette vérifie si le personnage deviné est lié à **Persona Q** e
 
 Ce mode possède sa propre base de données locale séparée de la base globale `database/`, car les personnages disponibles sont un sous-ensemble avec des portraits spécifiques aux silhouettes.
 
-| Fichier | Contenu |
-|---------|---------|
-| `silhouetteCharacters.js` | Tableau des personnages jouables en mode Silhouette |
-| `portraitsMapSilhouette.js` | Correspondance nom → chemin vers le portrait |
-| `persona.js` | Données des Personas (utilisées pour la vérification du badge PQ) |
-| `img/` | Portraits spécifiques au mode Silhouette (WebP, fond transparent) |
+| Fichier                     | Contenu                                                           |
+| --------------------------- | ----------------------------------------------------------------- |
+| `silhouetteCharacters.js`   | Tableau des personnages jouables en mode Silhouette               |
+| `portraitsMapSilhouette.js` | Correspondance nom → chemin vers le portrait                      |
+| `persona.js`                | Données des Personas (utilisées pour la vérification du badge PQ) |
+| `img/`                      | Portraits spécifiques au mode Silhouette (WebP, fond transparent) |
 
 ---
 
 ## 💾 localStorage utilisé
 
-| Clé | Contenu |
-|-----|---------|
-| `silhouetteTarget` | Personnage cible (JSON) |
-| `silhouetteAttempts` | Nombre d'essais |
-| `silhouetteGameOver` | `"true"` si partie terminée |
-| `silhouetteActiveFilters` | Filtres opus actifs |
-| `lastPlayedDate_Silhouette` | Date de la dernière partie |
+| Clé                         | Contenu                     |
+| --------------------------- | --------------------------- |
+| `silhouetteTarget`          | Personnage cible (JSON)     |
+| `silhouetteAttempts`        | Nombre d'essais             |
+| `silhouetteGameOver`        | `"true"` si partie terminée |
+| `silhouetteActiveFilters`   | Filtres opus actifs         |
+| `lastPlayedDate_Silhouette` | Date de la dernière partie  |

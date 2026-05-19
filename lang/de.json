@@ -455,35 +455,151 @@
       "condition": "Finde sowohl Crow als auch Black Mask im All-Out Attack-Modus",
       "description": "Zwei Seiten derselben Münze. Der freundliche Junge und die schwarze Maske... Beide Gesichter der Gerechtigkeit enthüllt."
     },
-    "one_shot": { "name": "Critical Strike", "condition": "Rate beim ersten Versuch richtig", "description": "Warum Zeit mit Strategie verschwenden, wenn man direkt zuschlagen kann?" },
-    "aoa_vision": { "name": "Piercing the Fog", "condition": "Errate den All-Out Attack beim ersten Versuch", "description": "Die Wahrheit war in dichtem Nebel verborgen, aber du hast sie auf Anhieb gesehen." },
-    "emoji_decoder": { "name": "Emoji Decoder", "condition": "10 Spiele im Emoji-Modus gewinnen", "description": "Das Metaverse spricht ohne Worte. Mit königlicher Finesse hast du den Code der digitalen Seele entschlüsselt." },
-    "navigator": { "name": "Eye of the Navigator", "condition": "Den Hinweis 50 Mal im Klassischen Modus verwenden", "description": "Fünfzig gescannte und entschlüsselte Anomalien. Keine Wahrheit kann sich vor deinem Radar verstecken." },
-    "velvet_regular": { "name": "Velvet Regular", "condition": "An 50 einzigartigen Tagen spielen", "description": "Fünfzig Tage zwischen Geist und Materie. Der Meister dieses Raumes erkennt jetzt deine Schritte." },
-    "strega": { "name": "Apostles of the Fall", "condition": "Hypnos, Moros und Medea im Personae-Modus finden", "description": "Warum gegen das Unvermeidliche kämpfen? Wir sind einfach die Regisseure deiner schönen Zerstörung." },
-    "twin_fist": { "name": "Twin Fist", "condition": "Eine Persona von Makoto Nijima und Akihiko im Personae-Modus finden", "description": "Nukleare Kraft und blitzende Energie! Du hast die zwei wildesten Kämpfer identifiziert." },
-    "twin_spear": { "name": "Twin Spear", "condition": "Eine Persona von Kotone und Ken im Personae-Modus finden", "description": "Einer sucht Rache durch Licht, der andere führt mit einer tanzenden Klinge." },
-    "tradition_modernite": { "name": "Chronological Convergence", "condition": "Naotos & Futabas Personas + ihre Musikstücke finden", "description": "Zwei Köpfe, ein Jahrhundert auseinander, nun perfekt synchronisiert. Tradition und Innovation sind eins." },
-    "shapeshifter": { "name": "The Formless Soul", "condition": "Denselben Charakter in 3 verschiedenen Modi erraten", "description": "Eine Maske kann sich ändern, die Bühne kann sich verschieben, aber das wahre Selbst bleibt konstant." },
-    "ideal_reality": { "name": "Gentle Illusion", "condition": "Aufgeben, wenn das Ziel 'Our Light' im Musik-Modus ist", "description": "Warum nach dem Licht streben, wenn Glück gegeben werden kann?" },
-    "for_real": { "name": "For Real", "condition": "Ryujis All-Out Attack und seine Persona finden", "description": "YEAH! Du hast den leidenschaftlichsten Phantom Thief gefunden!" },
-    "night_owl": { "name": "Phantom of the Night", "condition": "Zwischen Mitternacht und 5 Uhr morgens spielen (Pariser Zeit)", "description": "Echte Diebe agieren im Schutz der Dunkelheit." },
-    "nyx_hour": { "name": "Nyx Hour", "condition": "Zwischen Mitternacht und 0:30 Uhr spielen (Pariser Zeit)", "description": "Die Uhr schlägt zwölf, aber morgen kommt nie." },
-    "stylist": { "name": "Breathtaking Aesthetics", "condition": "Avatar + UI-Farbe + 1 Abzeichen + Profilmusik anpassen", "description": "Welche Leidenschaft! Du hast die Mittelmäßigkeit eines Standardprofils abgelehnt!" },
-    "pyro_spark": { "name": "The Ignition", "condition": "Eine 7-Tage-Serie erreichen", "description": "Ein kleines Flackern in der Dunkelheit. Sieben Tage lang hast du die Flamme am Leben erhalten." },
-    "raphael": { "name": "The Divine Blaze", "condition": "Eine 30-Tage-Serie erreichen", "description": "Dreißig Tage. Das Flackern hat sich zu einem tosenden Inferno entwickelt." },
-    "surt": { "name": "Ragnarök's Dawn", "condition": "Eine 90-Tage-Serie erreichen", "description": "Neunzig Tage absoluter, unerbittlicher Ausdauer." },
-    "lucifer": { "name": "Crest of the Morning Star", "condition": "Eine 120-Tage-Serie erreichen", "description": "Einhundertzwanzig Sonnenaufgänge. Jenseits der Zerstörungsfeuer liegt die blendende Klarheit." },
-    "helel": { "name": "The Eternal Zenith", "condition": "Eine 365-Tage-Serie erreichen", "description": "Jenseits der Rebellion, jenseits des Ruins, liegt die reine Gnade des ersten Sterns." },
-    "reborn_phoenix": { "name": "Phoenix Reborn", "condition": "Deine Serie nach dem Verlieren wiederherstellen", "description": "Du hast dich geweigert, die Dunkelheit dein Erbe beanspruchen zu lassen!" },
-    "best_bro": { "name": "Best Bro", "condition": "2 oder mehr Freunde haben", "description": "Die Bande der Freundschaft überschreiten Zeit und Schicksal." },
-    "data_mining": { "name": "Data Mining", "condition": "5 verschiedene Benutzerprofile besuchen", "description": "Die Konkurrenz analysieren oder neue Verbindungen suchen? Du hast die Seelen von fünf Benutzern erkundet." },
-    "leblanc_meeting": { "name": "Leblanc Meeting", "condition": "3 oder mehr Freunde am selben Tag wie du online", "description": "Synchronisierte Seelen! Selbst der beschäftigtste Phantom Thief braucht eine Kaffeepause." },
-    "golden_week": { "name": "Golden Week", "condition": "Zwischen dem 29. April und dem 5. Mai einloggen", "description": "Auch Wahrheitssuchende brauchen eine Pause." },
-    "tanabata": { "name": "Tanabata", "condition": "Am 7. Juli einloggen", "description": "Die Sterne richten sich für eine einzige Nacht aus. Dein Wunsch wurde aufgezeichnet." },
-    "promised_day": { "name": "The Promised Day", "condition": "Am 31. Dezember UND am 1. Januar spielen", "description": "Die Uhr schlägt zwölf im sterbenden Jahr. Du hast dich der Schwelle des neuen Morgenrots gestellt." },
-    "hifumi_archives": { "name": "The Grandmaster's Tome", "condition": "???", "description": "Ein echter Taktiker studiert das Spielfeld, bevor er zuschlägt." },
-    "report": { "name": "The Priestess's Audit", "condition": "???", "description": "Mit der akribischen Weisheit der Hohepriesterin hast du die Anomalien dokumentiert." }
+    "one_shot": {
+      "name": "Critical Strike",
+      "condition": "Rate beim ersten Versuch richtig",
+      "description": "Warum Zeit mit Strategie verschwenden, wenn man direkt zuschlagen kann?"
+    },
+    "aoa_vision": {
+      "name": "Piercing the Fog",
+      "condition": "Errate den All-Out Attack beim ersten Versuch",
+      "description": "Die Wahrheit war in dichtem Nebel verborgen, aber du hast sie auf Anhieb gesehen."
+    },
+    "emoji_decoder": {
+      "name": "Emoji Decoder",
+      "condition": "10 Spiele im Emoji-Modus gewinnen",
+      "description": "Das Metaverse spricht ohne Worte. Mit königlicher Finesse hast du den Code der digitalen Seele entschlüsselt."
+    },
+    "navigator": {
+      "name": "Eye of the Navigator",
+      "condition": "Den Hinweis 50 Mal im Klassischen Modus verwenden",
+      "description": "Fünfzig gescannte und entschlüsselte Anomalien. Keine Wahrheit kann sich vor deinem Radar verstecken."
+    },
+    "velvet_regular": {
+      "name": "Velvet Regular",
+      "condition": "An 50 einzigartigen Tagen spielen",
+      "description": "Fünfzig Tage zwischen Geist und Materie. Der Meister dieses Raumes erkennt jetzt deine Schritte."
+    },
+    "strega": {
+      "name": "Apostles of the Fall",
+      "condition": "Hypnos, Moros und Medea im Personae-Modus finden",
+      "description": "Warum gegen das Unvermeidliche kämpfen? Wir sind einfach die Regisseure deiner schönen Zerstörung."
+    },
+    "twin_fist": {
+      "name": "Twin Fist",
+      "condition": "Eine Persona von Makoto Nijima und Akihiko im Personae-Modus finden",
+      "description": "Nukleare Kraft und blitzende Energie! Du hast die zwei wildesten Kämpfer identifiziert."
+    },
+    "twin_spear": {
+      "name": "Twin Spear",
+      "condition": "Eine Persona von Kotone und Ken im Personae-Modus finden",
+      "description": "Einer sucht Rache durch Licht, der andere führt mit einer tanzenden Klinge."
+    },
+    "tradition_modernite": {
+      "name": "Chronological Convergence",
+      "condition": "Naotos & Futabas Personas + ihre Musikstücke finden",
+      "description": "Zwei Köpfe, ein Jahrhundert auseinander, nun perfekt synchronisiert. Tradition und Innovation sind eins."
+    },
+    "shapeshifter": {
+      "name": "The Formless Soul",
+      "condition": "Denselben Charakter in 3 verschiedenen Modi erraten",
+      "description": "Eine Maske kann sich ändern, die Bühne kann sich verschieben, aber das wahre Selbst bleibt konstant."
+    },
+    "ideal_reality": {
+      "name": "Gentle Illusion",
+      "condition": "Aufgeben, wenn das Ziel 'Our Light' im Musik-Modus ist",
+      "description": "Warum nach dem Licht streben, wenn Glück gegeben werden kann?"
+    },
+    "for_real": {
+      "name": "For Real",
+      "condition": "Ryujis All-Out Attack und seine Persona finden",
+      "description": "YEAH! Du hast den leidenschaftlichsten Phantom Thief gefunden!"
+    },
+    "night_owl": {
+      "name": "Phantom of the Night",
+      "condition": "Zwischen Mitternacht und 5 Uhr morgens spielen (Pariser Zeit)",
+      "description": "Echte Diebe agieren im Schutz der Dunkelheit."
+    },
+    "nyx_hour": {
+      "name": "Nyx Hour",
+      "condition": "Zwischen Mitternacht und 0:30 Uhr spielen (Pariser Zeit)",
+      "description": "Die Uhr schlägt zwölf, aber morgen kommt nie."
+    },
+    "stylist": {
+      "name": "Breathtaking Aesthetics",
+      "condition": "Avatar + UI-Farbe + 1 Abzeichen + Profilmusik anpassen",
+      "description": "Welche Leidenschaft! Du hast die Mittelmäßigkeit eines Standardprofils abgelehnt!"
+    },
+    "pyro_spark": {
+      "name": "The Ignition",
+      "condition": "Eine 7-Tage-Serie erreichen",
+      "description": "Ein kleines Flackern in der Dunkelheit. Sieben Tage lang hast du die Flamme am Leben erhalten."
+    },
+    "raphael": {
+      "name": "The Divine Blaze",
+      "condition": "Eine 30-Tage-Serie erreichen",
+      "description": "Dreißig Tage. Das Flackern hat sich zu einem tosenden Inferno entwickelt."
+    },
+    "surt": {
+      "name": "Ragnarök's Dawn",
+      "condition": "Eine 90-Tage-Serie erreichen",
+      "description": "Neunzig Tage absoluter, unerbittlicher Ausdauer."
+    },
+    "lucifer": {
+      "name": "Crest of the Morning Star",
+      "condition": "Eine 120-Tage-Serie erreichen",
+      "description": "Einhundertzwanzig Sonnenaufgänge. Jenseits der Zerstörungsfeuer liegt die blendende Klarheit."
+    },
+    "helel": {
+      "name": "The Eternal Zenith",
+      "condition": "Eine 365-Tage-Serie erreichen",
+      "description": "Jenseits der Rebellion, jenseits des Ruins, liegt die reine Gnade des ersten Sterns."
+    },
+    "reborn_phoenix": {
+      "name": "Phoenix Reborn",
+      "condition": "Deine Serie nach dem Verlieren wiederherstellen",
+      "description": "Du hast dich geweigert, die Dunkelheit dein Erbe beanspruchen zu lassen!"
+    },
+    "best_bro": {
+      "name": "Best Bro",
+      "condition": "2 oder mehr Freunde haben",
+      "description": "Die Bande der Freundschaft überschreiten Zeit und Schicksal."
+    },
+    "data_mining": {
+      "name": "Data Mining",
+      "condition": "5 verschiedene Benutzerprofile besuchen",
+      "description": "Die Konkurrenz analysieren oder neue Verbindungen suchen? Du hast die Seelen von fünf Benutzern erkundet."
+    },
+    "leblanc_meeting": {
+      "name": "Leblanc Meeting",
+      "condition": "3 oder mehr Freunde am selben Tag wie du online",
+      "description": "Synchronisierte Seelen! Selbst der beschäftigtste Phantom Thief braucht eine Kaffeepause."
+    },
+    "golden_week": {
+      "name": "Golden Week",
+      "condition": "Zwischen dem 29. April und dem 5. Mai einloggen",
+      "description": "Auch Wahrheitssuchende brauchen eine Pause."
+    },
+    "tanabata": {
+      "name": "Tanabata",
+      "condition": "Am 7. Juli einloggen",
+      "description": "Die Sterne richten sich für eine einzige Nacht aus. Dein Wunsch wurde aufgezeichnet."
+    },
+    "promised_day": {
+      "name": "The Promised Day",
+      "condition": "Am 31. Dezember UND am 1. Januar spielen",
+      "description": "Die Uhr schlägt zwölf im sterbenden Jahr. Du hast dich der Schwelle des neuen Morgenrots gestellt."
+    },
+    "hifumi_archives": {
+      "name": "The Grandmaster's Tome",
+      "condition": "???",
+      "description": "Ein echter Taktiker studiert das Spielfeld, bevor er zuschlägt."
+    },
+    "report": {
+      "name": "The Priestess's Audit",
+      "condition": "???",
+      "description": "Mit der akribischen Weisheit der Hohepriesterin hast du die Anomalien dokumentiert."
+    }
   },
   "social_link": {
     "rank_names": {

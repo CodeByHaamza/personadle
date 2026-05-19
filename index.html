@@ -26,136 +26,177 @@
        index.css   — styles exclusifs à cette page
        badges.css  — styles du système de badges
      ============================================================= -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle</title>
-    <meta name="description" content="Guess the Persona character of the day! Inspired by P1 to P5X.">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://www.personadle.com">
-<meta property="og:title" content="Personadle – Daily Persona Game">
-<meta property="og:image" content="https://www.personadle.com/img/Logo_PersonaDLE.png">
+    <meta
+      name="description"
+      content="Guess the Persona character of the day! Inspired by P1 to P5X."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.personadle.com" />
+    <meta property="og:title" content="Personadle – Daily Persona Game" />
+    <meta property="og:image" content="https://www.personadle.com/img/Logo_PersonaDLE.png" />
 
-    
     <!-- Google Fonts — typos du sélecteur de langue -->
     <!-- Oswald : condensé + musclé → EN (Persona 5) -->
     <!-- Playfair Display : élégant + serif italique → FR (Persona 3) -->
     <!-- Abril Fatface : rond + expressif → ES (Persona 4) -->
     <!-- Cinzel : classique gravé → DE (Persona 1) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Playfair+Display:ital,wght@1,700&family=Abril+Fatface&family=Cinzel:wght@600&family=Special+Elite&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="./css/global.css?v=9">
-    <link rel="stylesheet" href="./css/index.css?v=3">
-    <link rel="stylesheet" href="./css/langSelector.css?v=3">
-    <link rel="stylesheet" href="./css/bottomNav.css?v=1">
-    <link rel="stylesheet" href="./css/calling-card.css?v=2">
-    <link rel="stylesheet" href="./css/challenge-notif.css">
-    <link rel="stylesheet" href="./css/challenge-result.css">
-    <link rel="stylesheet" href="./css/streak-recovery.css">
-    <link rel="stylesheet" href="./css/tv-friend-anim.css">
-    <link rel="stylesheet" href="./css/p3-evoker-anim.css">
-    <link rel="stylesheet" href="./css/divine-gift.css">
-    <link rel="stylesheet" href="./css/rank10-effect.css">
-    <link rel="stylesheet" href="./profile/badges/badges.css">
-    <link rel="icon" type="image/gif" href="./img/persona_64x64.gif">
-    
-</head>
-<body>
-
-
-  
- 
-  <!-- Logo Persona -->
-  <header id="homepage">
+    <link rel="stylesheet" href="./css/global.css?v=9" />
+    <link rel="stylesheet" href="./css/index.css?v=3" />
+    <link rel="stylesheet" href="./css/langSelector.css?v=3" />
+    <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="./css/calling-card.css?v=2" />
+    <link rel="stylesheet" href="./css/challenge-notif.css" />
+    <link rel="stylesheet" href="./css/challenge-result.css" />
+    <link rel="stylesheet" href="./css/streak-recovery.css" />
+    <link rel="stylesheet" href="./css/tv-friend-anim.css" />
+    <link rel="stylesheet" href="./css/p3-evoker-anim.css" />
+    <link rel="stylesheet" href="./css/divine-gift.css" />
+    <link rel="stylesheet" href="./css/rank10-effect.css" />
+    <link rel="stylesheet" href="./profile/badges/badges.css" />
+    <link rel="icon" type="image/gif" href="./img/persona_64x64.gif" />
+  </head>
+  <body>
+    <!-- Logo Persona -->
+    <header id="homepage">
       <a href="./index.html">
-          <img src="./img/Logo_PersonaDLE.png" alt="PersonaDLE Logo" class="logo_HomePage" id="imgHomePage">
+        <img
+          src="./img/Logo_PersonaDLE.png"
+          alt="PersonaDLE Logo"
+          class="logo_HomePage"
+          id="imgHomePage"
+        />
       </a>
-  </header>
-<!-- =====================================================
+    </header>
+    <!-- =====================================================
      2. PROFIL UTILISATEUR
      Le profil est désormais sur sa propre page dédiée :
      profile/profile.html
      Navigation via la barre bottom (icône Profile).
      ===================================================== -->
 
-
-<!-- =====================================================
+    <!-- =====================================================
      3. SÉLECTEUR DE LANGUE
      Bouton fixe (top-left) qui ouvre un menu déroulant.
      Chaque option a une typo unique + personnage Persona.
      La langue choisie est sauvegardée dans localStorage.
      ===================================================== -->
-<div id="langToggle">
+    <div id="langToggle">
+      <!-- Bouton déclencheur -->
+      <button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Change language">
+        <span class="lang-btn-globe">🌐</span>
+        <span id="langBtnLabel">EN</span>
+        <span class="lang-btn-chevron">▼</span>
+      </button>
 
-  <!-- Bouton déclencheur -->
-  <button id="langBtn" aria-haspopup="listbox" aria-expanded="false" title="Change language">
-    <span class="lang-btn-globe">🌐</span>
-    <span id="langBtnLabel">EN</span>
-    <span class="lang-btn-chevron">▼</span>
-  </button>
+      <!-- Panneau déroulant -->
+      <div id="langDropdown" role="listbox" aria-label="Select language">
+        <!-- ENGLISH — Lisa Silverman -->
+        <div
+          class="lang-opt lang-opt--en"
+          data-lang="en"
+          role="option"
+          tabindex="0"
+          aria-label="English"
+        >
+          <span class="lang-opt-name">English</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Lisa_Silverman_english.webp"
+            alt="Lisa Silverman"
+            loading="lazy"
+          />
+        </div>
 
-  <!-- Panneau déroulant -->
-  <div id="langDropdown" role="listbox" aria-label="Select language">
+        <!-- FRANÇAIS — Bebe -->
+        <div
+          class="lang-opt lang-opt--fr"
+          data-lang="fr"
+          role="option"
+          tabindex="0"
+          aria-label="Français"
+        >
+          <span class="lang-opt-name">Français</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Bebe_french.webp"
+            alt="Bebe"
+            loading="lazy"
+          />
+        </div>
 
-    <!-- ENGLISH — Lisa Silverman -->
-    <div class="lang-opt lang-opt--en" data-lang="en" role="option" tabindex="0" aria-label="English">
-      <span class="lang-opt-name">English</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char"
-           src="./assets/lang/Lisa_Silverman_english.webp"
-           alt="Lisa Silverman"
-           loading="lazy">
+        <!-- ESPAÑOL — Morgana -->
+        <div
+          class="lang-opt lang-opt--es"
+          data-lang="es"
+          role="option"
+          tabindex="0"
+          aria-label="Español"
+        >
+          <span class="lang-opt-name">Español</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Morgana_Spanish.webp"
+            alt="Morgana"
+            loading="lazy"
+          />
+        </div>
+
+        <!-- DEUTSCH — Hulkenberg -->
+        <div
+          class="lang-opt lang-opt--de"
+          data-lang="de"
+          role="option"
+          tabindex="0"
+          aria-label="Deutsch"
+        >
+          <span class="lang-opt-name">Deutsch</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Hulkenberg_german.webp"
+            alt="Hulkenberg"
+            loading="lazy"
+          />
+        </div>
+
+        <!-- ITALIANO — Caesar -->
+        <div
+          class="lang-opt lang-opt--it"
+          data-lang="it"
+          role="option"
+          tabindex="0"
+          aria-label="Italiano"
+        >
+          <span class="lang-opt-name">Italiano</span>
+          <span class="lang-opt-dot" aria-hidden="true">◆</span>
+          <img
+            class="lang-opt-char"
+            src="./assets/lang/Caesar_italian.webp"
+            alt="Caesar"
+            loading="lazy"
+          />
+        </div>
+      </div>
     </div>
 
-    <!-- FRANÇAIS — Bebe -->
-    <div class="lang-opt lang-opt--fr" data-lang="fr" role="option" tabindex="0" aria-label="Français">
-      <span class="lang-opt-name">Français</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char"
-           src="./assets/lang/Bebe_french.webp"
-           alt="Bebe"
-           loading="lazy">
-    </div>
-
-    <!-- ESPAÑOL — Morgana -->
-    <div class="lang-opt lang-opt--es" data-lang="es" role="option" tabindex="0" aria-label="Español">
-      <span class="lang-opt-name">Español</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char"
-           src="./assets/lang/Morgana_Spanish.webp"
-           alt="Morgana"
-           loading="lazy">
-    </div>
-
-    <!-- DEUTSCH — Hulkenberg -->
-    <div class="lang-opt lang-opt--de" data-lang="de" role="option" tabindex="0" aria-label="Deutsch">
-      <span class="lang-opt-name">Deutsch</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char"
-           src="./assets/lang/Hulkenberg_german.webp"
-           alt="Hulkenberg"
-           loading="lazy">
-    </div>
-
-    <!-- ITALIANO — Caesar -->
-    <div class="lang-opt lang-opt--it" data-lang="it" role="option" tabindex="0" aria-label="Italiano">
-      <span class="lang-opt-name">Italiano</span>
-      <span class="lang-opt-dot" aria-hidden="true">◆</span>
-      <img class="lang-opt-char"
-           src="./assets/lang/Caesar_italian.webp"
-           alt="Caesar"
-           loading="lazy">
-    </div>
-
-  </div>
-</div>
-
-<!-- =====================================================
+    <!-- =====================================================
      SCRIPT — Sélecteur de langue
      - Au chargement : lit localStorage 'lang' (défaut EN),
        met à jour le label du bouton + marque .is-active
@@ -163,313 +204,369 @@
      - Clic option : sélectionne la langue, ferme le menu
      - Clic en dehors : ferme le dropdown
      ===================================================== -->
-<script type="module">
-import { initLang, setLang } from './js/i18n.js';
+    <script type="module">
+      import { initLang, setLang } from "./js/i18n.js";
 
-/* ── Labels du bouton ── */
-const LABELS = { en: 'EN', fr: 'FR', es: 'ES', de: 'DE', it: 'IT' };
+      /* ── Labels du bouton ── */
+      const LABELS = { en: "EN", fr: "FR", es: "ES", de: "DE", it: "IT" };
 
-function updateBtnLabel(lang) {
-  const el = document.getElementById('langBtnLabel');
-  if (el) el.textContent = LABELS[lang] || lang.toUpperCase();
-}
+      function updateBtnLabel(lang) {
+        const el = document.getElementById("langBtnLabel");
+        if (el) el.textContent = LABELS[lang] || lang.toUpperCase();
+      }
 
-function applyActive(lang) {
-  document.querySelectorAll('.lang-opt').forEach(opt => {
-    opt.classList.toggle('is-active', opt.dataset.lang === lang);
-  });
-  updateBtnLabel(lang);
-}
+      function applyActive(lang) {
+        document.querySelectorAll(".lang-opt").forEach((opt) => {
+          opt.classList.toggle("is-active", opt.dataset.lang === lang);
+        });
+        updateBtnLabel(lang);
+      }
 
-function closeDropdown() {
-  document.getElementById('langToggle').classList.remove('open');
-  document.getElementById('langBtn').setAttribute('aria-expanded', 'false');
-}
+      function closeDropdown() {
+        document.getElementById("langToggle").classList.remove("open");
+        document.getElementById("langBtn").setAttribute("aria-expanded", "false");
+      }
 
-function openDropdown() {
-  document.getElementById('langToggle').classList.add('open');
-  document.getElementById('langBtn').setAttribute('aria-expanded', 'true');
-}
+      function openDropdown() {
+        document.getElementById("langToggle").classList.add("open");
+        document.getElementById("langBtn").setAttribute("aria-expanded", "true");
+      }
 
-function toggleDropdown() {
-  document.getElementById('langToggle').classList.contains('open')
-    ? closeDropdown()
-    : openDropdown();
-}
+      function toggleDropdown() {
+        document.getElementById("langToggle").classList.contains("open")
+          ? closeDropdown()
+          : openDropdown();
+      }
 
-/* ── Sélection d'une langue ──
+      /* ── Sélection d'une langue ──
    1. setLang()   → charge le JSON + applique data-i18n sur la page
    2. applyActive → met à jour le dropdown UI
    3. closeDropdown → ferme le panneau                        */
-async function selectLang(lang) {
-  await setLang(lang);
-  applyActive(lang);
-  closeDropdown();
-}
+      async function selectLang(lang) {
+        await setLang(lang);
+        applyActive(lang);
+        closeDropdown();
+      }
 
-/* ── Init au chargement ──
+      /* ── Init au chargement ──
    Les modules sont différés par défaut (DOM prêt à l'exécution).
    On wrap dans un async IIFE pour la compatibilité navigateur. */
-(async () => {
-  const lang = await initLang();   /* charge le JSON + applique data-i18n */
-  applyActive(lang);
+      (async () => {
+        const lang = await initLang(); /* charge le JSON + applique data-i18n */
+        applyActive(lang);
 
-  document.getElementById('langBtn').addEventListener('click', e => {
-    e.stopPropagation();
-    toggleDropdown();
-  });
+        document.getElementById("langBtn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleDropdown();
+        });
 
-  document.querySelectorAll('.lang-opt').forEach(opt => {
-    opt.addEventListener('click', () => selectLang(opt.dataset.lang));
-    opt.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        selectLang(opt.dataset.lang);
-      }
-    });
-  });
+        document.querySelectorAll(".lang-opt").forEach((opt) => {
+          opt.addEventListener("click", () => selectLang(opt.dataset.lang));
+          opt.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              selectLang(opt.dataset.lang);
+            }
+          });
+        });
 
-  document.addEventListener('click', () => closeDropdown());
-  document.getElementById('langDropdown').addEventListener('click', e => e.stopPropagation());
-})();
-</script>
+        document.addEventListener("click", () => closeDropdown());
+        document
+          .getElementById("langDropdown")
+          .addEventListener("click", (e) => e.stopPropagation());
+      })();
+    </script>
 
+    <!-- Titre principal -->
+    <section class="title-wrapper">
+      <h1 class="gamemode-title" data-i18n="index.main_title">
+        Try to guess the Persona character (Persona 1 to Persona 5)
+      </h1>
+    </section>
 
-  <!-- Titre principal -->
-  <section class="title-wrapper">
-      <h1 class="gamemode-title" data-i18n="index.main_title">Try to guess the Persona character (Persona 1 to Persona 5)</h1>
-  </section>
-  
-  <!-- Buttons for game modes -->
-  <div id ="gameModeSelector">
-      <button class="p3-container" id="classicButton" onclick="location.href='./classiqueMode/classiqueMode.html'">
-  
-  <!-- La lune de l'Heure Sombre -->
-  <div class="p3-moon"></div>
-  
-  <!-- Particules bleues (Style Persona 3 Reload) -->
-  <div class="p3-particle p3-p1"></div>
-  <div class="p3-particle p3-p2"></div>
-  <div class="p3-particle p3-p3"></div>
-  <div class="p3-particle p3-p4"></div>
+    <!-- Buttons for game modes -->
+    <div id="gameModeSelector">
+      <button
+        class="p3-container"
+        id="classicButton"
+        onclick="location.href = './classiqueMode/classiqueMode.html'"
+      >
+        <!-- La lune de l'Heure Sombre -->
+        <div class="p3-moon"></div>
 
-  <!-- Image principale (Thanatos et le texte) -->
-  <img src="./img/classic_button_thanatos (1).png" alt="Classique Mode" class="p3-main-img">
+        <!-- Particules bleues (Style Persona 3 Reload) -->
+        <div class="p3-particle p3-p1"></div>
+        <div class="p3-particle p3-p2"></div>
+        <div class="p3-particle p3-p3"></div>
+        <div class="p3-particle p3-p4"></div>
 
-</button>
-      <button id="EmojiButton" class="p4-container" onclick="location.href='./emojiMode/emojiMode.html'">
-  <!-- Décorations animées au survol -->
-  <div class="p4-rainbow"></div>
-  <div class="p4-flower flower-1">✿</div>
-  <div class="p4-flower flower-2">✨</div>
-  <div class="p4-flower flower-3">✿</div>
-  <!-- Image principale du bouton -->
-  <img src="./img/Emoji_button_final.png" alt="Mode Emoji" class="p4-main-img" />
-</button>
-      <button class="p5-container" id="AllOutAttackButton" onclick="location.href='./allOutAttackMode/allOutAttack.html'">
-  <!-- Couches d'animation arrière-plan -->
-  <div class="p5-background-layers">
-    <!-- Flash rouge instantané au hover -->
-    <div class="p5-impact-flash"></div>
-    <div class="p5-bg-jagged"></div>
-    <!-- 8 traînées de vitesse (parallelogrammes rouge/blanc) -->
-    <div class="p5-speed-trails">
-      <div class="p5-trail trail-1"></div>
-      <div class="p5-trail trail-2"></div>
-      <div class="p5-trail trail-3"></div>
-      <div class="p5-trail trail-4"></div>
-      <div class="p5-trail trail-5"></div>
-      <div class="p5-trail trail-6"></div>
-      <div class="p5-trail trail-7"></div>
-      <div class="p5-trail trail-8"></div>
+        <!-- Image principale (Thanatos et le texte) -->
+        <img src="./img/classic_button_thanatos (1).png" alt="Classique Mode" class="p3-main-img" />
+      </button>
+      <button
+        id="EmojiButton"
+        class="p4-container"
+        onclick="location.href = './emojiMode/emojiMode.html'"
+      >
+        <!-- Décorations animées au survol -->
+        <div class="p4-rainbow"></div>
+        <div class="p4-flower flower-1">✿</div>
+        <div class="p4-flower flower-2">✨</div>
+        <div class="p4-flower flower-3">✿</div>
+        <!-- Image principale du bouton -->
+        <img src="./img/Emoji_button_final.png" alt="Mode Emoji" class="p4-main-img" />
+      </button>
+      <button
+        class="p5-container"
+        id="AllOutAttackButton"
+        onclick="location.href = './allOutAttackMode/allOutAttack.html'"
+      >
+        <!-- Couches d'animation arrière-plan -->
+        <div class="p5-background-layers">
+          <!-- Flash rouge instantané au hover -->
+          <div class="p5-impact-flash"></div>
+          <div class="p5-bg-jagged"></div>
+          <!-- 8 traînées de vitesse (parallelogrammes rouge/blanc) -->
+          <div class="p5-speed-trails">
+            <div class="p5-trail trail-1"></div>
+            <div class="p5-trail trail-2"></div>
+            <div class="p5-trail trail-3"></div>
+            <div class="p5-trail trail-4"></div>
+            <div class="p5-trail trail-5"></div>
+            <div class="p5-trail trail-6"></div>
+            <div class="p5-trail trail-7"></div>
+            <div class="p5-trail trail-8"></div>
+          </div>
+          <!-- 8 étoiles explosives P5 — 3 variantes d'animation -->
+          <div class="p5-stars-burst-container">
+            <div class="p5-starburst sburst-1">✦</div>
+            <div class="p5-starburst sburst-2">✦</div>
+            <div class="p5-starburst sburst-3">★</div>
+            <div class="p5-starburst sburst-4">✦</div>
+            <div class="p5-starburst sburst-5">★</div>
+            <div class="p5-starburst sburst-6">✧</div>
+            <div class="p5-starburst sburst-7">✦</div>
+            <div class="p5-starburst sburst-8">✧</div>
+          </div>
+        </div>
+        <!-- Masque de Joker — surgit au centre, domine, puis s'efface avant l'image -->
+        <div class="p5-joker-mask">
+          <img src="./img/Masque_joker.png" alt="" class="p5-joker-img" aria-hidden="true" />
+        </div>
+        <!-- Titre "ALL-OUT ATTACK" — crash vertical depuis les bords -->
+        <div class="p5-main-content">
+          <div class="p5-title">
+            <div class="p5-line-1">ALL-OUT</div>
+            <div class="p5-line-2">ATTACK</div>
+          </div>
+        </div>
+        <!-- Image principale — visible par défaut, cachée puis révélée après le masque -->
+        <img
+          src="./img/all-ou-attack_avec_masque (1).png"
+          alt="All Out Attack Mode"
+          class="p5-main-img"
+        />
+      </button>
+      <button
+        class="dark-velvet-container"
+        id="ShadowsButton"
+        onclick="location.href = './silhouetteMode/silhouette.html'"
+      >
+        <!-- Fond dégradé violet Velvet Room + runes -->
+        <div class="shadow-bg-layers">
+          <div class="shadow-bg-gradient"></div>
+          <div class="shadow-runes-container">
+            <div class="shadow-rune rune-1">◆</div>
+            <div class="shadow-rune rune-2">◆</div>
+            <div class="shadow-rune rune-3">◇</div>
+            <div class="shadow-rune rune-4">◆</div>
+            <div class="shadow-rune rune-5">◇</div>
+            <div class="shadow-rune rune-6">◆</div>
+          </div>
+        </div>
+        <!-- 3 chaînes Velvet Room : angles différents, accrochage élastique -->
+        <div class="velvet-chains">
+          <div class="chain-1"></div>
+          <div class="chain-2"></div>
+          <div class="chain-3"></div>
+        </div>
+        <!-- Titre "SHADOW" -->
+        <div class="shadow-main-content">
+          <div class="shadow-line-1">SHADOWS</div>
+        </div>
+        <!-- Image visible par défaut, cachée au hover, révélée à la fin -->
+        <img
+          src="./img/Shadows_button_Velvet_room.png"
+          alt="Shadows Mode"
+          class="shadow-main-img"
+        />
+      </button>
+      <button
+        class="personae-container"
+        id="PersonaeButton"
+        onclick="location.href = './personaeMode/personae.html'"
+      >
+        <!-- Fond Velvet Room (indigo/violet multicouche) -->
+        <div class="personae-bg"></div>
+
+        <!-- Orbe dorée atmosphérique derrière la carte -->
+        <div class="personae-card-halo"></div>
+
+        <!-- Carte de tarot — conteneur centré + wrapper animé + shimmer -->
+        <div class="personae-tarot-center">
+          <div class="personae-tarot-wrap">
+            <img src="./img/tarot.jpeg" alt="" class="personae-tarot-card" aria-hidden="true" />
+            <!-- Bande lumineuse qui balaye la carte après le flip -->
+            <div class="personae-tarot-shine"></div>
+          </div>
+        </div>
+
+        <!-- Symboles d'arcane (chiffres romains + lune) aux 4 coins -->
+        <div class="personae-arcana-container">
+          <div class="personae-arcana arc-1">I</div>
+          <div class="personae-arcana arc-2">XI</div>
+          <div class="personae-arcana arc-3">☽</div>
+          <div class="personae-arcana arc-4">✦</div>
+          <div class="personae-arcana arc-5">XVI</div>
+          <div class="personae-arcana arc-6">✦</div>
+        </div>
+
+        <!-- Titre "PERSONA" qui monte du bas -->
+        <div class="personae-title-wrap">
+          <div class="personae-title">PERSONA</div>
+        </div>
+
+        <!-- Image visible par défaut, cachée au hover, révélée avec reflet doré -->
+        <img src="./img/personae button.png" alt="Persona Mode" class="personae-main-img" />
+      </button>
+      <button
+        class="music-mode-btn"
+        id="MusicButton"
+        onclick="location.href = './musicsMode/musics.html'"
+      >
+        <!-- Panneaux roses obliques — fond en cascade -->
+        <div class="music-bg-panels">
+          <div class="m-panel m-panel-1"></div>
+          <div class="m-panel m-panel-2"></div>
+          <div class="m-panel m-panel-3"></div>
+          <div class="m-panel m-panel-4"></div>
+          <div class="m-panel m-panel-5"></div>
+        </div>
+
+        <!-- Étoiles & notes musicales — 8 éléments, 3 variantes d'animation -->
+        <div class="music-stars-container">
+          <div class="m-star mstar-1">♪</div>
+          <div class="m-star mstar-2">✦</div>
+          <div class="m-star mstar-3">♫</div>
+          <div class="m-star mstar-4">★</div>
+          <div class="m-star mstar-5">♪</div>
+          <div class="m-star mstar-6">✧</div>
+          <div class="m-star mstar-7">♩</div>
+          <div class="m-star mstar-8">✦</div>
+        </div>
+
+        <!-- Image — visible par défaut, cachée au hover, révélée à la fin -->
+        <img src="./img/musicmode.png" alt="Music Mode" class="music-main-img" />
+
+        <!-- Titre "MUSIC" — lettres animées en cascade, puis fade-out -->
+        <div class="music-title">
+          <span>M</span><span>U</span><span>S</span><span>I</span><span>C</span>
+        </div>
+      </button>
     </div>
-    <!-- 8 étoiles explosives P5 — 3 variantes d'animation -->
-    <div class="p5-stars-burst-container">
-      <div class="p5-starburst sburst-1">✦</div>
-      <div class="p5-starburst sburst-2">✦</div>
-      <div class="p5-starburst sburst-3">★</div>
-      <div class="p5-starburst sburst-4">✦</div>
-      <div class="p5-starburst sburst-5">★</div>
-      <div class="p5-starburst sburst-6">✧</div>
-      <div class="p5-starburst sburst-7">✦</div>
-      <div class="p5-starburst sburst-8">✧</div>
+
+    <!-- Bouton Mode Sombre -->
+    <div class="darkmode-toggle">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
     </div>
-  </div>
-  <!-- Masque de Joker — surgit au centre, domine, puis s'efface avant l'image -->
-  <div class="p5-joker-mask">
-    <img src="./img/Masque_joker.png" alt="" class="p5-joker-img" aria-hidden="true">
-  </div>
-  <!-- Titre "ALL-OUT ATTACK" — crash vertical depuis les bords -->
-  <div class="p5-main-content">
-    <div class="p5-title">
-      <div class="p5-line-1">ALL-OUT</div>
-      <div class="p5-line-2">ATTACK</div>
-    </div>
-  </div>
-  <!-- Image principale — visible par défaut, cachée puis révélée après le masque -->
-  <img src="./img/all-ou-attack_avec_masque (1).png" alt="All Out Attack Mode" class="p5-main-img">
-</button>
-      <button class="dark-velvet-container" id="ShadowsButton" onclick="location.href='./silhouetteMode/silhouette.html'">
-  <!-- Fond dégradé violet Velvet Room + runes -->
-  <div class="shadow-bg-layers">
-    <div class="shadow-bg-gradient"></div>
-    <div class="shadow-runes-container">
-      <div class="shadow-rune rune-1">◆</div>
-      <div class="shadow-rune rune-2">◆</div>
-      <div class="shadow-rune rune-3">◇</div>
-      <div class="shadow-rune rune-4">◆</div>
-      <div class="shadow-rune rune-5">◇</div>
-      <div class="shadow-rune rune-6">◆</div>
-    </div>
-  </div>
-  <!-- 3 chaînes Velvet Room : angles différents, accrochage élastique -->
-  <div class="velvet-chains">
-    <div class="chain-1"></div>
-    <div class="chain-2"></div>
-    <div class="chain-3"></div>
-  </div>
-  <!-- Titre "SHADOW" -->
-  <div class="shadow-main-content">
-    <div class="shadow-line-1">SHADOWS</div>
-  </div>
-  <!-- Image visible par défaut, cachée au hover, révélée à la fin -->
-  <img src="./img/Shadows_button_Velvet_room.png" alt="Shadows Mode" class="shadow-main-img">
-</button>
-      <button class="personae-container" id="PersonaeButton" onclick="location.href='./personaeMode/personae.html'">
 
-  <!-- Fond Velvet Room (indigo/violet multicouche) -->
-  <div class="personae-bg"></div>
+    <!-- Script intégré -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggle = document.getElementById("darkModeToggle");
+        const savedMode = localStorage.getItem("darkMode");
+        if (savedMode === "enabled") {
+          document.body.classList.add("darkmode");
+          toggle.checked = true;
+        }
 
-  <!-- Orbe dorée atmosphérique derrière la carte -->
-  <div class="personae-card-halo"></div>
+        toggle.addEventListener("change", () => {
+          if (toggle.checked) {
+            document.body.classList.add("darkmode");
+            localStorage.setItem("darkMode", "enabled");
+          } else {
+            document.body.classList.remove("darkmode");
+            localStorage.setItem("darkMode", "disabled");
+          }
+        });
+      });
+    </script>
 
-  <!-- Carte de tarot — conteneur centré + wrapper animé + shimmer -->
-  <div class="personae-tarot-center">
-    <div class="personae-tarot-wrap">
-      <img src="./img/tarot.jpeg" alt="" class="personae-tarot-card" aria-hidden="true">
-      <!-- Bande lumineuse qui balaye la carte après le flip -->
-      <div class="personae-tarot-shine"></div>
-    </div>
-  </div>
-
-  <!-- Symboles d'arcane (chiffres romains + lune) aux 4 coins -->
-  <div class="personae-arcana-container">
-    <div class="personae-arcana arc-1">I</div>
-    <div class="personae-arcana arc-2">XI</div>
-    <div class="personae-arcana arc-3">☽</div>
-    <div class="personae-arcana arc-4">✦</div>
-    <div class="personae-arcana arc-5">XVI</div>
-    <div class="personae-arcana arc-6">✦</div>
-  </div>
-
-  <!-- Titre "PERSONA" qui monte du bas -->
-  <div class="personae-title-wrap">
-    <div class="personae-title">PERSONA</div>
-  </div>
-
-  <!-- Image visible par défaut, cachée au hover, révélée avec reflet doré -->
-  <img src="./img/personae button.png" alt="Persona Mode" class="personae-main-img">
-
-</button>
-         <button class="music-mode-btn" id="MusicButton" onclick="location.href='./musicsMode/musics.html'">
-  
-  <!-- Panneaux roses obliques — fond en cascade -->
-  <div class="music-bg-panels">
-    <div class="m-panel m-panel-1"></div>
-    <div class="m-panel m-panel-2"></div>
-    <div class="m-panel m-panel-3"></div>
-    <div class="m-panel m-panel-4"></div>
-    <div class="m-panel m-panel-5"></div>
-  </div>
-
-  <!-- Étoiles & notes musicales — 8 éléments, 3 variantes d'animation -->
-  <div class="music-stars-container">
-    <div class="m-star mstar-1">♪</div>
-    <div class="m-star mstar-2">✦</div>
-    <div class="m-star mstar-3">♫</div>
-    <div class="m-star mstar-4">★</div>
-    <div class="m-star mstar-5">♪</div>
-    <div class="m-star mstar-6">✧</div>
-    <div class="m-star mstar-7">♩</div>
-    <div class="m-star mstar-8">✦</div>
-  </div>
-
-  <!-- Image — visible par défaut, cachée au hover, révélée à la fin -->
-  <img src="./img/musicmode.png" alt="Music Mode" class="music-main-img">
-
-  <!-- Titre "MUSIC" — lettres animées en cascade, puis fade-out -->
-  <div class="music-title">
-    <span>M</span><span>U</span><span>S</span><span>I</span><span>C</span>
-  </div>
-
-</button>
-  </div>
- 
-<!-- Bouton Mode Sombre -->
-<div class="darkmode-toggle">
-<label class="switch">
-  <input type="checkbox" id="darkModeToggle">
-  <span class="slider round"></span>
-</label>
-<span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
-</div>
-
-<!-- Script intégré -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.getElementById("darkModeToggle");
-  const savedMode = localStorage.getItem("darkMode");
-  if (savedMode === "enabled") {
-    document.body.classList.add("darkmode");
-    toggle.checked = true;
-  }
-
-  toggle.addEventListener("change", () => {
-    if (toggle.checked) {
-      document.body.classList.add("darkmode");
-      localStorage.setItem("darkMode", "enabled");
-    } else {
-      document.body.classList.remove("darkmode");
-      localStorage.setItem("darkMode", "disabled");
-    }
-  });
-});
-</script>
-
-<!-- =====================================================
+    <!-- =====================================================
      7. LIENS SOCIAUX
      GitHub (code source), Discord (communauté), Ko-fi (soutien).
      ===================================================== -->
-<div id="socialLinks" style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
-<a href="https://github.com/HamzaKarrouchi/personadle" target="_blank" title="GitHub" id="githubLink">
-  <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
-</a>
-<a href="https://discord.gg/wpMdGGDp3y" target="_blank" title="Discord">
-  <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
-</a>
-<a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
-  <img src="./assets/buttons/kofi.svg" alt="Ko-fi" width="30" height="30" />
-</a>
-</div>
+    <div
+      id="socialLinks"
+      style="display: flex; gap: 20px; justify-content: center; margin-top: 20px"
+    >
+      <a
+        href="https://github.com/HamzaKarrouchi/personadle"
+        target="_blank"
+        title="GitHub"
+        id="githubLink"
+      >
+        <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
+      </a>
+      <a href="https://discord.gg/wpMdGGDp3y" target="_blank" title="Discord">
+        <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
+      </a>
+      <a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
+        <img src="./assets/buttons/kofi.svg" alt="Ko-fi" width="30" height="30" />
+      </a>
+    </div>
 
-<!-- =====================================================
+    <!-- =====================================================
      8. FOOTER
      Copyright et liens légaux + suggestions/bug report.
      ===================================================== -->
-<footer>
-<p data-i18n="index.copyright">personadle.net — 2026</p>
-<p>
-  <span data-i18n="index.disclaimer">Personadle is a community-driven, non-commercial project. It is not affiliated with or endorsed by the rights holders.</span>
-  <a href="./privacy.html" data-i18n="index.legal_link">Privacy &amp; Legal</a> |
-  <a href="./faq.html" data-i18n="faq.footer_link">FAQ</a> |
-  <a href="https://forms.gle/SJeKi7cyUjRyp1vX8" target="_blank" data-i18n="index.feedback_link" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.reportSubmitted){p.reportSubmitted=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">📝 Suggestions & Bug Report</a>
-</p>
-</footer>
+    <footer>
+      <p data-i18n="index.copyright">personadle.net — 2026</p>
+      <p>
+        <span data-i18n="index.disclaimer"
+          >Personadle is a community-driven, non-commercial project. It is not affiliated with or
+          endorsed by the rights holders.</span
+        >
+        <a href="./privacy.html" data-i18n="index.legal_link">Privacy &amp; Legal</a> |
+        <a href="./faq.html" data-i18n="faq.footer_link">FAQ</a> |
+        <a
+          href="https://forms.gle/SJeKi7cyUjRyp1vX8"
+          target="_blank"
+          data-i18n="index.feedback_link"
+          onclick="
+            (function () {
+              try {
+                const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+                if (!p.reportSubmitted) {
+                  p.reportSubmitted = true;
+                  localStorage.setItem('personaUserProfile', JSON.stringify(p));
+                }
+              } catch (e) {}
+            })()
+          "
+          >📝 Suggestions & Bug Report</a
+        >
+      </p>
+    </footer>
 
-<!-- 🔔 News Popup -->
-<button id="newsBtn" class="news-btn" data-i18n="index.news_button">📰 News</button>
+    <!-- 🔔 News Popup -->
+    <button id="newsBtn" class="news-btn" data-i18n="index.news_button">📰 News</button>
 
-<!-- =====================================================
+    <!-- =====================================================
      10. STYLES INLINE — Chibi deco + News modal
      Scoped à index.html. Styles pour :
        .chibi-deco          Images décoratives dans la modale News
@@ -479,847 +576,1182 @@ document.addEventListener("DOMContentLoaded", () => {
      NOTE : ces styles sont inline car liés aux composants
      HTML injectés directement dans cette page.
      ===================================================== -->
-<style>
-/* === 🎨 CHIBI DECORATIONS (dans .news-modal-bar) === */
-.chibi-deco {
-  width: 130px;
-  height: auto;
-  pointer-events: none;
-  flex-shrink: 0;
-  opacity: 0;
-  animation: chibi-appear 0.5s ease-out 0.3s forwards;
-}
+    <style>
+      /* === 🎨 CHIBI DECORATIONS (dans .news-modal-bar) === */
+      .chibi-deco {
+        width: 130px;
+        height: auto;
+        pointer-events: none;
+        flex-shrink: 0;
+        opacity: 0;
+        animation: chibi-appear 0.5s ease-out 0.3s forwards;
+      }
 
-@keyframes chibi-appear {
-  from { opacity: 0; transform: scale(0.8) rotate(-10deg); }
-  to   { opacity: 1; transform: scale(1)   rotate(0deg);   }
-}
+      @keyframes chibi-appear {
+        from {
+          opacity: 0;
+          transform: scale(0.8) rotate(-10deg);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+        }
+      }
 
-body.darkmode .chibi-deco {
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.25));
-}
+      body.darkmode .chibi-deco {
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.25));
+      }
 
-@media (max-width: 480px) {
-  .chibi-deco { display: none; }
-}
-</style>
+      @media (max-width: 480px) {
+        .chibi-deco {
+          display: none;
+        }
+      }
+    </style>
 
-<!-- =====================================================
+    <!-- =====================================================
      11. MODALE NEWS — Historique des mises à jour
      Accordion : chaque .version-item se déplie au clic
      via .active qui déverrouille .version-content max-height.
      ===================================================== -->
-<div id="newsModal" class="news-modal" style="display: none;">
-  <div class="news-modal-content">
+    <div id="newsModal" class="news-modal" style="display: none">
+      <div class="news-modal-content">
+        <!-- ── Barre fixe : titre + chibis + bouton close ── -->
+        <div class="news-modal-bar">
+          <img src="img/Hamza_chibi.png" class="chibi-deco" alt="Hamza" />
+          <h2 data-i18n="index.update_history">Update History</h2>
+          <img src="img/Leo_chibi.png" class="chibi-deco" alt="Leo" />
+          <span class="news-close" id="closeNews" role="button" aria-label="Close">&times;</span>
+        </div>
 
-    <!-- ── Barre fixe : titre + chibis + bouton close ── -->
-    <div class="news-modal-bar">
-      <img src="img/Hamza_chibi.png" class="chibi-deco" alt="Hamza">
-      <h2 data-i18n="index.update_history">Update History</h2>
-      <img src="img/Leo_chibi.png" class="chibi-deco" alt="Leo">
-      <span class="news-close" id="closeNews" role="button" aria-label="Close">&times;</span>
-    </div>
+        <!-- ── Corps scrollable : accordion ── -->
+        <div class="news-modal-body">
+          <!-- ── Version 2.0 — Major Update ── -->
+          <div class="version-item v2-theme">
+            <div class="version-header">
+              <!-- Orbs animés (arrière-plan, ne bloquent pas le texte) -->
+              <div class="v2-orbs-bg" aria-hidden="true">
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+                <span class="v2-orb"></span>
+              </div>
 
-    <!-- ── Corps scrollable : accordion ── -->
-    <div class="news-modal-body">
+              <!-- Icône Sophia + titre -->
+              <div class="v2-header-inner">
+                <img src="img/Sophia_icon.webp" class="v2-sophia" alt="Sophia" />
+                <div>
+                  <div class="version-title">🚀 Version 2.0 — Major Update</div>
+                  <div class="version-date">May 2026</div>
+                </div>
+              </div>
 
-<!-- ── Version 2.0 — Major Update ── -->
-<div class="version-item v2-theme">
-  <div class="version-header">
+              <span class="version-arrow">▼</span>
+            </div>
 
-    <!-- Orbs animés (arrière-plan, ne bloquent pas le texte) -->
-    <div class="v2-orbs-bg" aria-hidden="true">
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-      <span class="v2-orb"></span>
-    </div>
+            <div class="version-content">
+              <!-- EN -->
+              <div data-i18n-block="en">
+                <ul>
+                  <li>
+                    ☁️ <strong>Full Backend:</strong> PHP 8.3 + MariaDB — 20-table schema, REST API,
+                    offline-first cloud sync with auto-retry.
+                  </li>
+                  <li>
+                    👥 <strong>Friends & Social Link:</strong> Friend system with search, requests
+                    &amp; online status. Social Link ranks 1-10 (Stranger → True Confidant) with XP,
+                    mutual bonuses, and golden halo effect at rank 10.
+                  </li>
+                  <li>
+                    ⚔️ <strong>Daily Challenges:</strong> Challenge friends to any mode — receive a
+                    banner in-game, compare results, earn Social Link XP.
+                  </li>
+                  <li>
+                    🏆 <strong>Leaderboard:</strong> Rankings by mode, period (week / month /
+                    all-time) and metric — Global or Friends scope, with your personal rank always
+                    visible.
+                  </li>
+                  <li>
+                    🎖️ <strong>60+ Badges & Titles:</strong> Server-side unlock verification, event
+                    codes, 4 rarity tiers. Equip one title under your pseudo.
+                  </li>
+                  <li>
+                    🔔 <strong>Notifications:</strong> Challenge results, rank-ups, friend requests
+                    — with 3 animation styles (Calling Card 🃏 · P4 TV 📺 · P3 Evoker 🔫).
+                  </li>
+                  <li>
+                    🖼️ <strong>Profile Card Export:</strong> Share a PNG of your profile — 8 themes,
+                    25 wallpapers, one click to X / Discord / Email.
+                  </li>
+                  <li>
+                    🌐 <strong>5 Languages:</strong> EN · FR · ES · DE · IT — 760 keys each,
+                    auto-detected from your browser.
+                  </li>
+                  <li>
+                    🛡️ <strong>Admin Panel:</strong> User moderation (ban, lock), event codes CRUD,
+                    stats dashboard.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html"
+                    target="_blank"
+                    class="see-more-btn v2-btn"
+                    onclick="
+                      (function () {
+                        try {
+                          const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+                          if (!p.hifumiArchivesRead) {
+                            p.hifumiArchivesRead = true;
+                            localStorage.setItem('personaUserProfile', JSON.stringify(p));
+                          }
+                        } catch (e) {}
+                      })()
+                    "
+                  >
+                    See full Changelog
+                  </a>
+                </div>
+              </div>
 
-    <!-- Icône Sophia + titre -->
-    <div class="v2-header-inner">
-      <img src="img/Sophia_icon.webp" class="v2-sophia" alt="Sophia">
-      <div>
-        <div class="version-title">🚀 Version 2.0 — Major Update</div>
-        <div class="version-date">May 2026</div>
-      </div>
-    </div>
+              <!-- FR -->
+              <div data-i18n-block="fr">
+                <ul>
+                  <li>
+                    ☁️ <strong>Backend complet :</strong> PHP 8.3 + MariaDB — schéma 20 tables, API
+                    REST, sync cloud offline-first avec réessai automatique.
+                  </li>
+                  <li>
+                    👥 <strong>Amis & Social Link :</strong> Système d'amis avec recherche, demandes
+                    &amp; statut en ligne. Social Link rangs 1-10 (Stranger → True Confidant) avec
+                    XP, bonus mutuels et halo doré au rang 10.
+                  </li>
+                  <li>
+                    ⚔️ <strong>Défis quotidiens :</strong> Défie tes amis dans n'importe quel mode —
+                    bandeau actif en jeu, comparaison des résultats, XP Social Link.
+                  </li>
+                  <li>
+                    🏆 <strong>Classements :</strong> Rankings par mode, période (semaine / mois /
+                    all-time) et métrique — scope Global ou Amis, avec ta position toujours
+                    affichée.
+                  </li>
+                  <li>
+                    🎖️ <strong>60+ Badges & Titres :</strong> Déblocage vérifié côté serveur, codes
+                    événement, 4 niveaux de rareté. Équipe un titre sous ton pseudo.
+                  </li>
+                  <li>
+                    🔔 <strong>Notifications :</strong> Résultats de défis, rang-ups, demandes
+                    d'amis — avec 3 styles d'animation (Calling Card 🃏 · TV P4 📺 · Evoker P3 🔫).
+                  </li>
+                  <li>
+                    🖼️ <strong>Export Carte Profil :</strong> Partage un PNG de ton profil — 8
+                    thèmes, 25 fonds d'écran, en un clic vers X / Discord / Email.
+                  </li>
+                  <li>
+                    🌐 <strong>5 Langues :</strong> EN · FR · ES · DE · IT — 760 clés chacune,
+                    détectées automatiquement depuis ton navigateur.
+                  </li>
+                  <li>
+                    🛡️ <strong>Panneau Admin :</strong> Modération utilisateurs (ban, verrou
+                    pseudo), CRUD codes événement, tableau de bord stats.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html"
+                    target="_blank"
+                    class="see-more-btn v2-btn"
+                    onclick="
+                      (function () {
+                        try {
+                          const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+                          if (!p.hifumiArchivesRead) {
+                            p.hifumiArchivesRead = true;
+                            localStorage.setItem('personaUserProfile', JSON.stringify(p));
+                          }
+                        } catch (e) {}
+                      })()
+                    "
+                  >
+                    Voir le Changelog complet
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- ── /Version 2.0 ── -->
 
-    <span class="version-arrow">▼</span>
-  </div>
-
-  <div class="version-content">
-
-    <!-- EN -->
-    <div data-i18n-block="en">
-      <ul>
-        <li>☁️ <strong>Full Backend:</strong> PHP 8.3 + MariaDB — 20-table schema, REST API, offline-first cloud sync with auto-retry.</li>
-        <li>👥 <strong>Friends & Social Link:</strong> Friend system with search, requests &amp; online status. Social Link ranks 1-10 (Stranger → True Confidant) with XP, mutual bonuses, and golden halo effect at rank 10.</li>
-        <li>⚔️ <strong>Daily Challenges:</strong> Challenge friends to any mode — receive a banner in-game, compare results, earn Social Link XP.</li>
-        <li>🏆 <strong>Leaderboard:</strong> Rankings by mode, period (week / month / all-time) and metric — Global or Friends scope, with your personal rank always visible.</li>
-        <li>🎖️ <strong>60+ Badges & Titles:</strong> Server-side unlock verification, event codes, 4 rarity tiers. Equip one title under your pseudo.</li>
-        <li>🔔 <strong>Notifications:</strong> Challenge results, rank-ups, friend requests — with 3 animation styles (Calling Card 🃏 · P4 TV 📺 · P3 Evoker 🔫).</li>
-        <li>🖼️ <strong>Profile Card Export:</strong> Share a PNG of your profile — 8 themes, 25 wallpapers, one click to X / Discord / Email.</li>
-        <li>🌐 <strong>5 Languages:</strong> EN · FR · ES · DE · IT — 760 keys each, auto-detected from your browser.</li>
-        <li>🛡️ <strong>Admin Panel:</strong> User moderation (ban, lock), event codes CRUD, stats dashboard.</li>
-      </ul>
-      <div class="pdf-container">
-        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html" target="_blank" class="see-more-btn v2-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
-          See full Changelog
-        </a>
-      </div>
-    </div>
-
-    <!-- FR -->
-    <div data-i18n-block="fr">
-      <ul>
-        <li>☁️ <strong>Backend complet :</strong> PHP 8.3 + MariaDB — schéma 20 tables, API REST, sync cloud offline-first avec réessai automatique.</li>
-        <li>👥 <strong>Amis & Social Link :</strong> Système d'amis avec recherche, demandes &amp; statut en ligne. Social Link rangs 1-10 (Stranger → True Confidant) avec XP, bonus mutuels et halo doré au rang 10.</li>
-        <li>⚔️ <strong>Défis quotidiens :</strong> Défie tes amis dans n'importe quel mode — bandeau actif en jeu, comparaison des résultats, XP Social Link.</li>
-        <li>🏆 <strong>Classements :</strong> Rankings par mode, période (semaine / mois / all-time) et métrique — scope Global ou Amis, avec ta position toujours affichée.</li>
-        <li>🎖️ <strong>60+ Badges & Titres :</strong> Déblocage vérifié côté serveur, codes événement, 4 niveaux de rareté. Équipe un titre sous ton pseudo.</li>
-        <li>🔔 <strong>Notifications :</strong> Résultats de défis, rang-ups, demandes d'amis — avec 3 styles d'animation (Calling Card 🃏 · TV P4 📺 · Evoker P3 🔫).</li>
-        <li>🖼️ <strong>Export Carte Profil :</strong> Partage un PNG de ton profil — 8 thèmes, 25 fonds d'écran, en un clic vers X / Discord / Email.</li>
-        <li>🌐 <strong>5 Langues :</strong> EN · FR · ES · DE · IT — 760 clés chacune, détectées automatiquement depuis ton navigateur.</li>
-        <li>🛡️ <strong>Panneau Admin :</strong> Modération utilisateurs (ban, verrou pseudo), CRUD codes événement, tableau de bord stats.</li>
-      </ul>
-      <div class="pdf-container">
-        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html" target="_blank" class="see-more-btn v2-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
-          Voir le Changelog complet
-        </a>
-      </div>
-    </div>
-
-  </div>
-</div>
-<!-- ── /Version 2.0 ── -->
-
-<div class="version-item cny-theme">
-        <div class="version-header">
-            <div>
+          <div class="version-item cny-theme">
+            <div class="version-header">
+              <div>
                 <div class="version-title">🧧 Version 1.1 - Chinese New Year Edition</div>
                 <div class="version-date">February 2026</div>
+              </div>
+              <span class="version-arrow">▼</span>
             </div>
-            <span class="version-arrow">▼</span>
-        </div>
-        <div class="version-content">
-    <div data-i18n-block="en">
-      <ul>
-        <li>🧧 <strong>Chinese New Year Event:</strong> Celebrate with exclusive <strong>Wonder & Rin (CNY)</strong> skins, a new wallpaper, and limited-time badges!</li>
-        <li>🌙 <strong>P3R 2nd Anniversary:</strong> Special <strong>ZUTOMAYO Collab</strong>! Added "Mass Destruction" mashup, exclusive PFP & "Hippocampus Reload" Badge.</li>
-        <li>🎥 <strong>Persona Q Expansion:</strong> The Labyrinth opens! Added <strong>4 playable characters</strong> (Rei, Zen, Hikari, Nagi) and new soundtracks.</li>
-        <li>🎭 <strong>Personae Mode Update:</strong> Massive expansion with <strong>8 New Ultimate Personas</strong> and <strong>12 Picaro Variants</strong>.</li>
-        <li>🦋 <strong>Classic Content:</strong> Added 5 characters from <strong>Persona 1 & 2</strong> to Classic Mode (Nameless, Belladonna, Katsuya, Ulala...).</li>
-        <li>🖼️ <strong>Customization Overhaul:</strong> Added <strong>40+ new wallpapers</strong> across all games and a redesigned selection interface.</li>
-        <li>🎖️ <strong>New Badges:</strong> Unlock 7 new achievements including "Twin Blade", "Velvet Master", and the mysterious "Cinema Explorer".</li>
-        <li>🛠️ <strong>QoL Improvements:</strong> Redesigned filter buttons, added "Visual History" in Emoji Mode, and added Silhouette Mode characters.</li>
-      </ul>
-      <div class="pdf-container">
-        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
-          See full Changelog (PDF)
-        </a>
-      </div>
-    </div>
-    <div data-i18n-block="fr">
-      <ul>
-        <li>🧧 <strong>Événement Nouvel An Chinois :</strong> Fêtez l'occasion avec les skins exclusifs <strong>Wonder & Rin (CNY)</strong>, un nouveau fond d'écran et des badges temporaires !</li>
-        <li>🌙 <strong>2e anniversaire de P3R :</strong> Collab spéciale <strong>ZUTOMAYO</strong> ! Ajout du mashup "Mass Destruction", PFP exclusif & badge "Hippocampus Reload".</li>
-        <li>🎥 <strong>Extension Persona Q :</strong> Le Labyrinthe ouvre ses portes ! Ajout de <strong>4 personnages jouables</strong> (Rei, Zen, Hikari, Nagi) et de nouvelles musiques.</li>
-        <li>🎭 <strong>Mise à jour du mode Personae :</strong> Expansion massive avec <strong>8 nouvelles Personas Ultimes</strong> et <strong>12 variantes Picaro</strong>.</li>
-        <li>🦋 <strong>Contenu Classique :</strong> Ajout de 5 personnages de <strong>Persona 1 & 2</strong> au mode Classique (Nameless, Belladonna, Katsuya, Ulala…).</li>
-        <li>🖼️ <strong>Personnalisation repensée :</strong> Ajout de <strong>40+ nouveaux fonds d'écran</strong> couvrant tous les jeux, et nouvelle interface de sélection.</li>
-        <li>🎖️ <strong>Nouveaux badges :</strong> Débloquez 7 nouveaux succès, dont "Twin Blade", "Velvet Master" et le mystérieux "Cinema Explorer".</li>
-        <li>🛠️ <strong>Améliorations QoL :</strong> Boutons de filtre repensés, ajout de l'"Historique visuel" en mode Emoji, et nouveaux personnages en mode Silhouette.</li>
-      </ul>
-      <div class="pdf-container">
-        <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf" target="_blank" class="see-more-btn cny-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
-          Voir le Changelog complet (PDF)
-        </a>
-      </div>
-    </div>
-</div>
-    </div>
- <!-- Version 1.02 (HOTFIX) -->
-    <div class="version-item hotfix-item">
-        <div class="version-header">
-            <div>
-                <div class="version-title">🔧 Version 1.02 <span class="hotfix-badge">HOTFIX</span></div>
+            <div class="version-content">
+              <div data-i18n-block="en">
+                <ul>
+                  <li>
+                    🧧 <strong>Chinese New Year Event:</strong> Celebrate with exclusive
+                    <strong>Wonder & Rin (CNY)</strong> skins, a new wallpaper, and limited-time
+                    badges!
+                  </li>
+                  <li>
+                    🌙 <strong>P3R 2nd Anniversary:</strong> Special
+                    <strong>ZUTOMAYO Collab</strong>! Added "Mass Destruction" mashup, exclusive PFP
+                    & "Hippocampus Reload" Badge.
+                  </li>
+                  <li>
+                    🎥 <strong>Persona Q Expansion:</strong> The Labyrinth opens! Added
+                    <strong>4 playable characters</strong> (Rei, Zen, Hikari, Nagi) and new
+                    soundtracks.
+                  </li>
+                  <li>
+                    🎭 <strong>Personae Mode Update:</strong> Massive expansion with
+                    <strong>8 New Ultimate Personas</strong> and
+                    <strong>12 Picaro Variants</strong>.
+                  </li>
+                  <li>
+                    🦋 <strong>Classic Content:</strong> Added 5 characters from
+                    <strong>Persona 1 & 2</strong> to Classic Mode (Nameless, Belladonna, Katsuya,
+                    Ulala...).
+                  </li>
+                  <li>
+                    🖼️ <strong>Customization Overhaul:</strong> Added
+                    <strong>40+ new wallpapers</strong> across all games and a redesigned selection
+                    interface.
+                  </li>
+                  <li>
+                    🎖️ <strong>New Badges:</strong> Unlock 7 new achievements including "Twin
+                    Blade", "Velvet Master", and the mysterious "Cinema Explorer".
+                  </li>
+                  <li>
+                    🛠️ <strong>QoL Improvements:</strong> Redesigned filter buttons, added "Visual
+                    History" in Emoji Mode, and added Silhouette Mode characters.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf"
+                    target="_blank"
+                    class="see-more-btn cny-btn"
+                    onclick="
+                      (function () {
+                        try {
+                          const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+                          if (!p.hifumiArchivesRead) {
+                            p.hifumiArchivesRead = true;
+                            localStorage.setItem('personaUserProfile', JSON.stringify(p));
+                          }
+                        } catch (e) {}
+                      })()
+                    "
+                  >
+                    See full Changelog (PDF)
+                  </a>
+                </div>
+              </div>
+              <div data-i18n-block="fr">
+                <ul>
+                  <li>
+                    🧧 <strong>Événement Nouvel An Chinois :</strong> Fêtez l'occasion avec les
+                    skins exclusifs <strong>Wonder & Rin (CNY)</strong>, un nouveau fond d'écran et
+                    des badges temporaires !
+                  </li>
+                  <li>
+                    🌙 <strong>2e anniversaire de P3R :</strong> Collab spéciale
+                    <strong>ZUTOMAYO</strong> ! Ajout du mashup "Mass Destruction", PFP exclusif &
+                    badge "Hippocampus Reload".
+                  </li>
+                  <li>
+                    🎥 <strong>Extension Persona Q :</strong> Le Labyrinthe ouvre ses portes ! Ajout
+                    de <strong>4 personnages jouables</strong> (Rei, Zen, Hikari, Nagi) et de
+                    nouvelles musiques.
+                  </li>
+                  <li>
+                    🎭 <strong>Mise à jour du mode Personae :</strong> Expansion massive avec
+                    <strong>8 nouvelles Personas Ultimes</strong> et
+                    <strong>12 variantes Picaro</strong>.
+                  </li>
+                  <li>
+                    🦋 <strong>Contenu Classique :</strong> Ajout de 5 personnages de
+                    <strong>Persona 1 & 2</strong> au mode Classique (Nameless, Belladonna, Katsuya,
+                    Ulala…).
+                  </li>
+                  <li>
+                    🖼️ <strong>Personnalisation repensée :</strong> Ajout de
+                    <strong>40+ nouveaux fonds d'écran</strong> couvrant tous les jeux, et nouvelle
+                    interface de sélection.
+                  </li>
+                  <li>
+                    🎖️ <strong>Nouveaux badges :</strong> Débloquez 7 nouveaux succès, dont "Twin
+                    Blade", "Velvet Master" et le mystérieux "Cinema Explorer".
+                  </li>
+                  <li>
+                    🛠️ <strong>Améliorations QoL :</strong> Boutons de filtre repensés, ajout de
+                    l'"Historique visuel" en mode Emoji, et nouveaux personnages en mode Silhouette.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf"
+                    target="_blank"
+                    class="see-more-btn cny-btn"
+                    onclick="
+                      (function () {
+                        try {
+                          const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+                          if (!p.hifumiArchivesRead) {
+                            p.hifumiArchivesRead = true;
+                            localStorage.setItem('personaUserProfile', JSON.stringify(p));
+                          }
+                        } catch (e) {}
+                      })()
+                    "
+                  >
+                    Voir le Changelog complet (PDF)
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Version 1.02 (HOTFIX) -->
+          <div class="version-item hotfix-item">
+            <div class="version-header">
+              <div>
+                <div class="version-title">
+                  🔧 Version 1.02 <span class="hotfix-badge">HOTFIX</span>
+                </div>
                 <div class="version-date">09 Dec 2025</div>
+              </div>
+              <span class="version-arrow">▼</span>
             </div>
-            <span class="version-arrow">▼</span>
-        </div>
-        <div class="version-content">
-          <div data-i18n-block="en">
-            <ul>
-              <li>🐞 Fixed <strong>Fleuret's name</strong> displaying as "Ayaka Sakai" instead of "Seiji Shiratori" in All-Out Attack mode.</li>
-              <li>🐞 Fixed <strong>sound effects</strong> not working in Music mode.</li>
-              <li>🐞 Fixed <strong>Give Up button</strong> not being disabled in Classic mode after use.</li>
-            </ul>
+            <div class="version-content">
+              <div data-i18n-block="en">
+                <ul>
+                  <li>
+                    🐞 Fixed <strong>Fleuret's name</strong> displaying as "Ayaka Sakai" instead of
+                    "Seiji Shiratori" in All-Out Attack mode.
+                  </li>
+                  <li>🐞 Fixed <strong>sound effects</strong> not working in Music mode.</li>
+                  <li>
+                    🐞 Fixed <strong>Give Up button</strong> not being disabled in Classic mode
+                    after use.
+                  </li>
+                </ul>
+              </div>
+              <div data-i18n-block="fr">
+                <ul>
+                  <li>
+                    🐞 Correction du <strong>nom de Fleuret</strong> affiché comme "Ayaka Sakai" au
+                    lieu de "Seiji Shiratori" dans le mode All-Out Attack.
+                  </li>
+                  <li>
+                    🐞 Correction des <strong>effets sonores</strong> ne fonctionnant pas dans le
+                    mode Musique.
+                  </li>
+                  <li>
+                    🐞 Correction du <strong>bouton Abandonner</strong> qui restait actif dans le
+                    mode Classique après utilisation.
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div data-i18n-block="fr">
-            <ul>
-              <li>🐞 Correction du <strong>nom de Fleuret</strong> affiché comme "Ayaka Sakai" au lieu de "Seiji Shiratori" dans le mode All-Out Attack.</li>
-              <li>🐞 Correction des <strong>effets sonores</strong> ne fonctionnant pas dans le mode Musique.</li>
-              <li>🐞 Correction du <strong>bouton Abandonner</strong> qui restait actif dans le mode Classique après utilisation.</li>
-            </ul>
-          </div>
-        </div>
-    </div>
-    <!-- Version 1.01 (HOTFIX) -->
-    <div class="version-item hotfix-item">
-        <div class="version-header">
-            <div>
-                <div class="version-title">🔧 Version 1.01 <span class="hotfix-badge">HOTFIX</span></div>
+          <!-- Version 1.01 (HOTFIX) -->
+          <div class="version-item hotfix-item">
+            <div class="version-header">
+              <div>
+                <div class="version-title">
+                  🔧 Version 1.01 <span class="hotfix-badge">HOTFIX</span>
+                </div>
                 <div class="version-date">08 Dec 2025</div>
+              </div>
+              <span class="version-arrow">▼</span>
             </div>
-            <span class="version-arrow">▼</span>
-        </div>
-        <div class="version-content">
-          <div data-i18n-block="en">
-            <ul>
-              <li>🐞 Fixed <strong>Persona 5 X characters</strong> not appearing correctly in Classic and Emoji modes.</li>
-            </ul>
+            <div class="version-content">
+              <div data-i18n-block="en">
+                <ul>
+                  <li>
+                    🐞 Fixed <strong>Persona 5 X characters</strong> not appearing correctly in
+                    Classic and Emoji modes.
+                  </li>
+                </ul>
+              </div>
+              <div data-i18n-block="fr">
+                <ul>
+                  <li>
+                    🐞 Correction des <strong>personnages de Persona 5 X</strong> qui ne
+                    s'affichaient pas correctement dans les modes Classique et Emoji.
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div data-i18n-block="fr">
-            <ul>
-              <li>🐞 Correction des <strong>personnages de Persona 5 X</strong> qui ne s'affichaient pas correctement dans les modes Classique et Emoji.</li>
-            </ul>
-          </div>
-        </div>
-    </div>
-    <!-- Version 1.0 -->
-    <div class="version-item">
-        <div class="version-header">
-            <div>
+          <!-- Version 1.0 -->
+          <div class="version-item">
+            <div class="version-header">
+              <div>
                 <div class="version-title">🎮 Version 1.0</div>
                 <div class="version-date">07 Dec 2025</div>
+              </div>
+              <span class="version-arrow">▼</span>
             </div>
-            <span class="version-arrow">▼</span>
-        </div>
-        <div class="version-content">
-          <div data-i18n-block="en">
-            <ul>
-              <li>🎖️ <strong>NEW: Badge System!</strong> Unlock 19 unique achievements, including secret badges and event codes. Select up to 4 to showcase on your profile!</li>
-              <li>🖼️ <strong>NEW: Profile Sharing!</strong> Share your stats with custom backgrounds or Persona-themed wallpapers. Click badge notifications to see details!</li>
-              <li>🔊 <strong>NEW: Sound Effects!</strong> Added victory sound when winning and hover sound effects on all interactive buttons across all game modes.</li>
-              <li>🌟 Added <strong>Fuuka Yamagishi</strong> to All-Out Attack mode.</li>
-              <li>✨ Added <strong>Persona 5 Tactica</strong> characters (<strong>Erina</strong>, <strong>Toshiro</strong>).</li>
-              <li>🎲 Improved <strong>randomization logic</strong> in All-Out Attack to reduce target repetition.</li>
-              <li>⚡ Optimized <strong>All-Out Attack performance</strong> to minimize lag and memory usage (progressive loading, CDN WebP support).</li>
-              <li>🐞 Fixed <strong>Silhouette Mode</strong> image display issues.</li>
-              <li>🐞 Fixed <strong>Classic Mode</strong> Error on Yukino Mazuki Data (the opus was P2EIS instead of P2IS).</li>
-              <li>⚙️ Fixed <strong>Emoji Mode</strong> daily reset not triggering correctly.</li>
-              <li>🎵 Fixed song title typos: "Your Are Stronger" → "You Are Stronger" and "The Days when my mother was there" → "When Mother Was There".</li>
-              <li>🖼️ Added new <strong>profile pictures</strong>: Chidori, Tae, and Maruki.</li>
-              <li>⏱️ Fixed time tracking calculation.</li>
-              <li>🎨 Minor <strong>UI and dark mode adjustments</strong> for smoother experience.</li>
-            </ul>
-            <div class="pdf-container">
-              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
-                See more (PDF)
-              </a>
+            <div class="version-content">
+              <div data-i18n-block="en">
+                <ul>
+                  <li>
+                    🎖️ <strong>NEW: Badge System!</strong> Unlock 19 unique achievements, including
+                    secret badges and event codes. Select up to 4 to showcase on your profile!
+                  </li>
+                  <li>
+                    🖼️ <strong>NEW: Profile Sharing!</strong> Share your stats with custom
+                    backgrounds or Persona-themed wallpapers. Click badge notifications to see
+                    details!
+                  </li>
+                  <li>
+                    🔊 <strong>NEW: Sound Effects!</strong> Added victory sound when winning and
+                    hover sound effects on all interactive buttons across all game modes.
+                  </li>
+                  <li>🌟 Added <strong>Fuuka Yamagishi</strong> to All-Out Attack mode.</li>
+                  <li>
+                    ✨ Added <strong>Persona 5 Tactica</strong> characters (<strong>Erina</strong>,
+                    <strong>Toshiro</strong>).
+                  </li>
+                  <li>
+                    🎲 Improved <strong>randomization logic</strong> in All-Out Attack to reduce
+                    target repetition.
+                  </li>
+                  <li>
+                    ⚡ Optimized <strong>All-Out Attack performance</strong> to minimize lag and
+                    memory usage (progressive loading, CDN WebP support).
+                  </li>
+                  <li>🐞 Fixed <strong>Silhouette Mode</strong> image display issues.</li>
+                  <li>
+                    🐞 Fixed <strong>Classic Mode</strong> Error on Yukino Mazuki Data (the opus was
+                    P2EIS instead of P2IS).
+                  </li>
+                  <li>
+                    ⚙️ Fixed <strong>Emoji Mode</strong> daily reset not triggering correctly.
+                  </li>
+                  <li>
+                    🎵 Fixed song title typos: "Your Are Stronger" → "You Are Stronger" and "The
+                    Days when my mother was there" → "When Mother Was There".
+                  </li>
+                  <li>🖼️ Added new <strong>profile pictures</strong>: Chidori, Tae, and Maruki.</li>
+                  <li>⏱️ Fixed time tracking calculation.</li>
+                  <li>
+                    🎨 Minor <strong>UI and dark mode adjustments</strong> for smoother experience.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf"
+                    target="_blank"
+                    class="see-more-btn"
+                    onclick="
+                      (function () {
+                        try {
+                          const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+                          if (!p.hifumiArchivesRead) {
+                            p.hifumiArchivesRead = true;
+                            localStorage.setItem('personaUserProfile', JSON.stringify(p));
+                          }
+                        } catch (e) {}
+                      })()
+                    "
+                  >
+                    See more (PDF)
+                  </a>
+                </div>
+              </div>
+              <div data-i18n-block="fr">
+                <ul>
+                  <li>
+                    🎖️ <strong>NOUVEAU : Système de badges !</strong> Débloquez 19 succès uniques,
+                    dont des badges secrets et des codes événement. Sélectionnez-en jusqu'à 4 pour
+                    les afficher sur votre profil !
+                  </li>
+                  <li>
+                    🖼️ <strong>NOUVEAU : Partage de profil !</strong> Partagez vos stats avec des
+                    fonds personnalisés ou des fonds Persona. Cliquez sur les notifications de
+                    badges pour voir les détails !
+                  </li>
+                  <li>
+                    🔊 <strong>NOUVEAU : Effets sonores !</strong> Ajout d'un son de victoire et
+                    d'effets sonores au survol des boutons dans tous les modes de jeu.
+                  </li>
+                  <li>🌟 Ajout de <strong>Fuuka Yamagishi</strong> dans le mode All-Out Attack.</li>
+                  <li>
+                    ✨ Ajout des personnages de
+                    <strong>Persona 5 Tactica</strong> (<strong>Erina</strong>,
+                    <strong>Toshiro</strong>).
+                  </li>
+                  <li>
+                    🎲 Amélioration de la <strong>logique de randomisation</strong> en mode All-Out
+                    Attack pour réduire la répétition des cibles.
+                  </li>
+                  <li>
+                    ⚡ Optimisation des
+                    <strong>performances du mode All-Out Attack</strong> (chargement progressif,
+                    WebP CDN).
+                  </li>
+                  <li>
+                    🐞 Correction des problèmes d'affichage en <strong>mode Silhouette</strong>.
+                  </li>
+                  <li>
+                    🐞 Correction des données de Yukino Mazuki en
+                    <strong>mode Classique</strong> (opus P2EIS au lieu de P2IS).
+                  </li>
+                  <li>
+                    ⚙️ Correction du <strong>reset quotidien du mode Emoji</strong> qui ne se
+                    déclenchait pas correctement.
+                  </li>
+                  <li>
+                    🎵 Correction de titres de chansons : "Your Are Stronger" → "You Are Stronger"
+                    et "The Days when my mother was there" → "When Mother Was There".
+                  </li>
+                  <li>
+                    🖼️ Ajout de nouvelles <strong>photos de profil</strong> : Chidori, Tae et
+                    Maruki.
+                  </li>
+                  <li>⏱️ Correction du calcul du <strong>suivi du temps de jeu</strong>.</li>
+                  <li>
+                    🎨 Ajustements mineurs de <strong>l'UI et du mode sombre</strong> pour une
+                    expérience plus fluide.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf"
+                    target="_blank"
+                    class="see-more-btn"
+                    onclick="
+                      (function () {
+                        try {
+                          const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+                          if (!p.hifumiArchivesRead) {
+                            p.hifumiArchivesRead = true;
+                            localStorage.setItem('personaUserProfile', JSON.stringify(p));
+                          }
+                        } catch (e) {}
+                      })()
+                    "
+                  >
+                    Voir plus (PDF)
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-          <div data-i18n-block="fr">
-            <ul>
-              <li>🎖️ <strong>NOUVEAU : Système de badges !</strong> Débloquez 19 succès uniques, dont des badges secrets et des codes événement. Sélectionnez-en jusqu'à 4 pour les afficher sur votre profil !</li>
-              <li>🖼️ <strong>NOUVEAU : Partage de profil !</strong> Partagez vos stats avec des fonds personnalisés ou des fonds Persona. Cliquez sur les notifications de badges pour voir les détails !</li>
-              <li>🔊 <strong>NOUVEAU : Effets sonores !</strong> Ajout d'un son de victoire et d'effets sonores au survol des boutons dans tous les modes de jeu.</li>
-              <li>🌟 Ajout de <strong>Fuuka Yamagishi</strong> dans le mode All-Out Attack.</li>
-              <li>✨ Ajout des personnages de <strong>Persona 5 Tactica</strong> (<strong>Erina</strong>, <strong>Toshiro</strong>).</li>
-              <li>🎲 Amélioration de la <strong>logique de randomisation</strong> en mode All-Out Attack pour réduire la répétition des cibles.</li>
-              <li>⚡ Optimisation des <strong>performances du mode All-Out Attack</strong> (chargement progressif, WebP CDN).</li>
-              <li>🐞 Correction des problèmes d'affichage en <strong>mode Silhouette</strong>.</li>
-              <li>🐞 Correction des données de Yukino Mazuki en <strong>mode Classique</strong> (opus P2EIS au lieu de P2IS).</li>
-              <li>⚙️ Correction du <strong>reset quotidien du mode Emoji</strong> qui ne se déclenchait pas correctement.</li>
-              <li>🎵 Correction de titres de chansons : "Your Are Stronger" → "You Are Stronger" et "The Days when my mother was there" → "When Mother Was There".</li>
-              <li>🖼️ Ajout de nouvelles <strong>photos de profil</strong> : Chidori, Tae et Maruki.</li>
-              <li>⏱️ Correction du calcul du <strong>suivi du temps de jeu</strong>.</li>
-              <li>🎨 Ajustements mineurs de <strong>l'UI et du mode sombre</strong> pour une expérience plus fluide.</li>
-            </ul>
-            <div class="pdf-container">
-              <a href="./PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf" target="_blank" class="see-more-btn" onclick="(function(){try{const p=JSON.parse(localStorage.getItem('personaUserProfile')||'{}');if(!p.hifumiArchivesRead){p.hifumiArchivesRead=true;localStorage.setItem('personaUserProfile',JSON.stringify(p));}}catch(e){}})()">
-                Voir plus (PDF)
-              </a>
-            </div>
-          </div>
         </div>
-        
+        <!-- /.news-modal-body -->
+      </div>
+      <!-- /.news-modal-content -->
     </div>
+    <!-- /#newsModal -->
 
-    </div><!-- /.news-modal-body -->
-  </div><!-- /.news-modal-content -->
-</div><!-- /#newsModal -->
-
-<!-- =====================================================
+    <!-- =====================================================
      STYLES INLINE — Bouton News + Badge IA
      Scoped à index.html. Styles pour :
        .news-btn        Bouton fixe bas-gauche "News"
        .badge-ai-info   Tooltip info sur les badges IA
      ===================================================== -->
-<style>
-/* Bouton News */
-.news-btn {
-position: fixed;
-bottom: 10px;
-left: 10px;      
-background: #eee;      /* clair par défaut */
-color: #111;           /* texte sombre */
-border: none;
-padding: 10px 18px;
-border-radius: 10px;
-cursor: pointer;
-z-index: 1000;
-font-size: 15px;
-font-weight: bold;
-transition: background 0.2s, transform 0.2s;
-}
-.news-btn:hover { 
-background: #ddd;      /* hover plus foncé */
-transform: scale(1.05);
-}
+    <style>
+      /* Bouton News */
+      .news-btn {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        background: #eee; /* clair par défaut */
+        color: #111; /* texte sombre */
+        border: none;
+        padding: 10px 18px;
+        border-radius: 10px;
+        cursor: pointer;
+        z-index: 1000;
+        font-size: 15px;
+        font-weight: bold;
+        transition:
+          background 0.2s,
+          transform 0.2s;
+      }
+      .news-btn:hover {
+        background: #ddd; /* hover plus foncé */
+        transform: scale(1.05);
+      }
 
-/* Modal News */
-.news-modal {
-display: none;
-position: fixed;
-z-index: 2000;
-left: 0;
-top: 0;
-width: 100%;
-height: 100%;
-background: rgba(0,0,0,0.7);
-}
+      /* Modal News */
+      .news-modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+      }
 
-.news-modal-content {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  margin: 5% auto;
-  padding: 0;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 700px;
-  max-height: 80vh;
-  overflow: hidden; /* le scroll est sur .news-modal-body */
-}
+      .news-modal-content {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 80vh;
+        overflow: hidden; /* le scroll est sur .news-modal-body */
+      }
 
-/* ── Barre fixe en haut de la modale ── */
-.news-modal-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 20px;
-  border-bottom: 1px solid #ddd;
-  flex-shrink: 0;
-  border-radius: 12px 12px 0 0;
-  background: #fff;
-}
+      /* ── Barre fixe en haut de la modale ── */
+      .news-modal-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 20px;
+        border-bottom: 1px solid #ddd;
+        flex-shrink: 0;
+        border-radius: 12px 12px 0 0;
+        background: #fff;
+      }
 
-.news-modal-bar h2 {
-  flex: 1;
-  text-align: center;
-  margin: 0;
-  font-size: 1.35em;
-  color: #333;
-}
+      .news-modal-bar h2 {
+        flex: 1;
+        text-align: center;
+        margin: 0;
+        font-size: 1.35em;
+        color: #333;
+      }
 
-/* Bouton close dans la barre */
-.news-close {
-  font-size: 26px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #666;
-  line-height: 1;
-  padding: 0 4px;
-  flex-shrink: 0;
-  transition: color 0.2s;
-}
-.news-close:hover { color: #333; }
+      /* Bouton close dans la barre */
+      .news-close {
+        font-size: 26px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #666;
+        line-height: 1;
+        padding: 0 4px;
+        flex-shrink: 0;
+        transition: color 0.2s;
+      }
+      .news-close:hover {
+        color: #333;
+      }
 
-/* Corps scrollable */
-.news-modal-body {
-  overflow-y: auto;
-  padding: 20px;
-  flex: 1;
-}
+      /* Corps scrollable */
+      .news-modal-body {
+        overflow-y: auto;
+        padding: 20px;
+        flex: 1;
+      }
 
-.news-modal-content h2 {
-margin-top: 0;
-color: #333;
-}
+      .news-modal-content h2 {
+        margin-top: 0;
+        color: #333;
+      }
 
-/* Version Item */
-.version-item {
-margin-bottom: 15px;
-border: 1px solid #ddd;
-border-radius: 8px;
-overflow: hidden;
-background: #fafafa;
-}
+      /* Version Item */
+      .version-item {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fafafa;
+      }
 
-/* Style spécial pour les HOTFIX (petites corrections) */
-.hotfix-item {
-border-left: 3px solid #f39c12;
-background: #fffef8;
-}
+      /* Style spécial pour les HOTFIX (petites corrections) */
+      .hotfix-item {
+        border-left: 3px solid #f39c12;
+        background: #fffef8;
+      }
 
-.hotfix-badge {
-display: inline-block;
-background: #f39c12;
-color: white;
-font-size: 0.65em;
-padding: 2px 8px;
-border-radius: 4px;
-margin-left: 8px;
-font-weight: bold;
-}
+      .hotfix-badge {
+        display: inline-block;
+        background: #f39c12;
+        color: white;
+        font-size: 0.65em;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-left: 8px;
+        font-weight: bold;
+      }
 
-.version-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 15px;
-cursor: pointer;
-background: #f0f0f0;
-transition: background 0.2s;
-}
+      .version-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        cursor: pointer;
+        background: #f0f0f0;
+        transition: background 0.2s;
+      }
 
-.version-header:hover {
-background: #e8e8e8;
-}
+      .version-header:hover {
+        background: #e8e8e8;
+      }
 
-.hotfix-item .version-header {
-background: #fff9e6;
-}
+      .hotfix-item .version-header {
+        background: #fff9e6;
+      }
 
-.hotfix-item .version-header:hover {
-background: #fff4d6;
-}
+      .hotfix-item .version-header:hover {
+        background: #fff4d6;
+      }
 
-.version-title {
-font-weight: bold;
-font-size: 1.1em;
-color: #333;
-}
+      .version-title {
+        font-weight: bold;
+        font-size: 1.1em;
+        color: #333;
+      }
 
-.version-date {
-font-size: 0.9em;
-color: #666;
-margin-top: 4px;
-}
+      .version-date {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 4px;
+      }
 
-.version-arrow {
-font-size: 1.2em;
-transition: transform 0.3s;
-color: #666;
-}
+      .version-arrow {
+        font-size: 1.2em;
+        transition: transform 0.3s;
+        color: #666;
+      }
 
-.version-item.active .version-arrow {
-transform: rotate(180deg);
-}
+      .version-item.active .version-arrow {
+        transform: rotate(180deg);
+      }
 
-.version-content {
-max-height: 0;
-overflow: hidden;
-transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-padding: 0 15px;
-}
+      .version-content {
+        max-height: 0;
+        overflow: hidden;
+        transition:
+          max-height 0.3s ease-out,
+          padding 0.3s ease-out;
+        padding: 0 15px;
+      }
 
-.version-item.active .version-content {
-max-height: 1000px;
-padding: 15px;
-}
+      .version-item.active .version-content {
+        max-height: 1000px;
+        padding: 15px;
+      }
 
-.version-content ul {
-margin: 0;
-padding-left: 20px;
-}
+      .version-content ul {
+        margin: 0;
+        padding-left: 20px;
+      }
 
-.version-content li {
-margin-bottom: 8px;
-line-height: 1.5;
-}
+      .version-content li {
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
 
-/* Dark mode — corps scrollable */
-body.darkmode .news-modal-body { color: #eee; }
+      /* Dark mode — corps scrollable */
+      body.darkmode .news-modal-body {
+        color: #eee;
+      }
 
-body.darkmode .version-item {
-background: #2a2a2a;
-border-color: #444;
-}
+      body.darkmode .version-item {
+        background: #2a2a2a;
+        border-color: #444;
+      }
 
-body.darkmode .hotfix-item {
-background: #2d2a22;
-border-left-color: #f39c12;
-}
+      body.darkmode .hotfix-item {
+        background: #2d2a22;
+        border-left-color: #f39c12;
+      }
 
-body.darkmode .hotfix-item .version-header {
-background: #332e1a;
-}
+      body.darkmode .hotfix-item .version-header {
+        background: #332e1a;
+      }
 
-body.darkmode .hotfix-item .version-header:hover {
-background: #3d3520;
-}
+      body.darkmode .hotfix-item .version-header:hover {
+        background: #3d3520;
+      }
 
-body.darkmode .version-header {
-background: #252525;
-}
+      body.darkmode .version-header {
+        background: #252525;
+      }
 
-body.darkmode .version-header:hover {
-background: #2f2f2f;
-}
+      body.darkmode .version-header:hover {
+        background: #2f2f2f;
+      }
 
-body.darkmode .version-title {
-color: #eee;
-}
+      body.darkmode .version-title {
+        color: #eee;
+      }
 
-body.darkmode .version-date {
-color: #aaa;
-}
+      body.darkmode .version-date {
+        color: #aaa;
+      }
 
-/* Dark mode — modale */
-body.darkmode .news-modal-content { background: #1e1e1e; }
-body.darkmode .news-modal-bar     { background: #1e1e1e; border-color: #333; }
-body.darkmode .news-modal-bar h2  { color: #eee; }
-body.darkmode .news-close         { color: #aaa; }
-body.darkmode .news-close:hover   { color: #fff; }
+      /* Dark mode — modale */
+      body.darkmode .news-modal-content {
+        background: #1e1e1e;
+      }
+      body.darkmode .news-modal-bar {
+        background: #1e1e1e;
+        border-color: #333;
+      }
+      body.darkmode .news-modal-bar h2 {
+        color: #eee;
+      }
+      body.darkmode .news-close {
+        color: #aaa;
+      }
+      body.darkmode .news-close:hover {
+        color: #fff;
+      }
 
-/* Dark mode pour le bouton News */
-body.darkmode .news-btn {
-background: #222;   /* sombre */
-color: #fff;        /* texte clair */
-}
-body.darkmode .news-btn:hover {
-background: #444;
-}
+      /* Dark mode pour le bouton News */
+      body.darkmode .news-btn {
+        background: #222; /* sombre */
+        color: #fff; /* texte clair */
+      }
+      body.darkmode .news-btn:hover {
+        background: #444;
+      }
 
-/* -----------------------------------------------
+      /* -----------------------------------------------
    RESPONSIVE — Bouton News
    Réduit sur tablette et mobile pour ne pas
    masquer le footer ou d'autres éléments.
    Symétrique avec .daily-btn (bas-droite).
 ----------------------------------------------- */
-@media (max-width: 768px) {
-  .news-btn {
-    bottom: 10px;
-    left: 10px;
-    font-size: 13px;
-    padding: 7px 12px;
-    border-radius: 8px;
-  }
-}
+      @media (max-width: 768px) {
+        .news-btn {
+          bottom: 10px;
+          left: 10px;
+          font-size: 13px;
+          padding: 7px 12px;
+          border-radius: 8px;
+        }
+      }
 
-@media (max-width: 480px) {
-  .news-btn {
-    bottom: 8px;
-    left: 8px;
-    font-size: 11px;
-    padding: 5px 9px;
-    border-radius: 8px;
-  }
-}
+      @media (max-width: 480px) {
+        .news-btn {
+          bottom: 8px;
+          left: 8px;
+          font-size: 11px;
+          padding: 5px 9px;
+          border-radius: 8px;
+        }
+      }
 
-/* === ℹ️ BADGE AI INFO === */
-.badge-ai-info {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  margin: 10px 0 20px 0;
-  cursor: help;
-}
+      /* === ℹ️ BADGE AI INFO === */
+      .badge-ai-info {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        margin: 10px 0 20px 0;
+        cursor: help;
+      }
 
-.info-icon {
-  font-size: 1.3em;
-  background: #3498db;
-  color: white;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  transition: all 0.2s;
-}
+      .info-icon {
+        font-size: 1.3em;
+        background: #3498db;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transition: all 0.2s;
+      }
 
-.badge-ai-info:hover .info-icon {
-  background: #2980b9;
-  transform: scale(1.1);
-}
+      .badge-ai-info:hover .info-icon {
+        background: #2980b9;
+        transform: scale(1.1);
+      }
 
-.info-tooltip {
-  position: absolute;
-  left: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.95);
-  color: white;
-  padding: 15px 20px;
-  border-radius: 12px;
-  width: 320px;
-  font-size: 0.85em;
-  line-height: 1.5;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s, transform 0.3s;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-}
+      .info-tooltip {
+        position: absolute;
+        left: 40px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.95);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 12px;
+        width: 320px;
+        font-size: 0.85em;
+        line-height: 1.5;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.3s,
+          transform 0.3s;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+      }
 
-.badge-ai-info:hover .info-tooltip {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(-50%) translateX(5px);
-}
+      .badge-ai-info:hover .info-tooltip {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(-50%) translateX(5px);
+      }
 
-.info-tooltip strong {
-  color: #3498db;
-  display: block;
-  margin-bottom: 8px;
-  font-size: 1.05em;
-}
+      .info-tooltip strong {
+        color: #3498db;
+        display: block;
+        margin-bottom: 8px;
+        font-size: 1.05em;
+      }
 
-/* Dark mode support */
-body.darkmode .info-icon {
-  background: #2980b9;
-}
+      /* Dark mode support */
+      body.darkmode .info-icon {
+        background: #2980b9;
+      }
 
-body.darkmode .badge-ai-info:hover .info-icon {
-  background: #3498db;
-}
+      body.darkmode .badge-ai-info:hover .info-icon {
+        background: #3498db;
+      }
 
-body.darkmode .info-tooltip {
-  background: rgba(30, 30, 30, 0.98);
-  border: 1px solid #444;
-}
+      body.darkmode .info-tooltip {
+        background: rgba(30, 30, 30, 0.98);
+        border: 1px solid #444;
+      }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .info-tooltip {
-    left: auto;
-    right: 0;
-    width: 280px;
-    top: 40px;
-    transform: translateY(0);
-  }
-  
-  .badge-ai-info:hover .info-tooltip {
-    transform: translateY(5px) translateX(0);
-  }
-}
+      /* Responsive */
+      @media (max-width: 768px) {
+        .info-tooltip {
+          left: auto;
+          right: 0;
+          width: 280px;
+          top: 40px;
+          transform: translateY(0);
+        }
 
-</style>
+        .badge-ai-info:hover .info-tooltip {
+          transform: translateY(5px) translateX(0);
+        }
+      }
+    </style>
 
-
-
-
-<!-- =====================================================
+    <!-- =====================================================
      12. SCRIPT — News modal + accordion
      Gère : ouverture/fermeture de la modale News,
      et le comportement accordion des .version-item.
      ===================================================== -->
-<script>
-const newsModal = document.getElementById("newsModal");
-const newsBtn = document.getElementById("newsBtn");
-const closeNews = document.getElementById("closeNews");
+    <script>
+      const newsModal = document.getElementById("newsModal");
+      const newsBtn = document.getElementById("newsBtn");
+      const closeNews = document.getElementById("closeNews");
 
-newsBtn.onclick = () => newsModal.style.display = "block";
-closeNews.onclick = () => newsModal.style.display = "none";
-window.addEventListener('click', (e) => { if (e.target === newsModal) newsModal.style.display = "none"; });
+      newsBtn.onclick = () => (newsModal.style.display = "block");
+      closeNews.onclick = () => (newsModal.style.display = "none");
+      window.addEventListener("click", (e) => {
+        if (e.target === newsModal) newsModal.style.display = "none";
+      });
 
-// Gérer l'accordion des versions
-document.querySelectorAll('.version-header').forEach(header => {
-  header.addEventListener('click', () => {
-      const versionItem = header.parentElement;
-      versionItem.classList.toggle('active');
-  });
-});
-</script>
+      // Gérer l'accordion des versions
+      document.querySelectorAll(".version-header").forEach((header) => {
+        header.addEventListener("click", () => {
+          const versionItem = header.parentElement;
+          versionItem.classList.toggle("active");
+        });
+      });
+    </script>
 
+    <!-- 🕛 Daily Reset Button + Modal -->
+    <button id="dailyInfoBtn" class="daily-btn" data-i18n="index.daily_btn">🕛 Daily Reset</button>
 
+    <div id="dailyModal" class="daily-modal" style="display: none">
+      <div class="daily-modal-content">
+        <h2 class="daily-title" data-i18n="index.daily_title">🕛 Daily Reset</h2>
+        <span id="closeDaily" class="close">&times;</span>
 
-<!-- 🕛 Daily Reset Button + Modal -->
-<button id="dailyInfoBtn" class="daily-btn" data-i18n="index.daily_btn">🕛 Daily Reset</button>
+        <div class="daily-top-bar">
+          <div class="daily-chibi-wrap">
+            <div class="daily-zzzs" aria-hidden="true">
+              <span>z</span>
+              <span>Z</span>
+              <span>Z</span>
+            </div>
+            <img src="./img/Chibi_Damien.webp" alt="Chibi Damien" class="daily-chibi" />
+          </div>
+          <p class="daily-subtitle" data-i18n="index.daily_subtitle">
+            New challenges every day at midnight (Paris time)
+          </p>
+        </div>
 
-<div id="dailyModal" class="daily-modal" style="display: none;">
-<div class="daily-modal-content">
-  <h2 class="daily-title" data-i18n="index.daily_title">🕛 Daily Reset</h2>
-  <span id="closeDaily" class="close">&times;</span>
+        <p class="daily-desc" data-i18n="index.daily_desc">
+          Each of the 6 modes resets with a brand-new target. Streaks, stats &amp; progress carry
+          over!
+        </p>
 
-  <div class="daily-top-bar">
-    <div class="daily-chibi-wrap">
-      <div class="daily-zzzs" aria-hidden="true">
-        <span>z</span>
-        <span>Z</span>
-        <span>Z</span>
+        <div class="daily-countdown-wrap">
+          <p class="countdown-label" data-i18n="index.daily_countdown_label">Next reset in</p>
+          <div class="countdown-display">
+            <div class="countdown-unit">
+              <span id="cntH">--</span>
+              <small data-i18n="index.daily_hours">hours</small>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+              <span id="cntM">--</span>
+              <small data-i18n="index.daily_min">min</small>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+              <span id="cntS">--</span>
+              <small data-i18n="index.daily_sec">sec</small>
+            </div>
+          </div>
+        </div>
       </div>
-      <img src="./img/Chibi_Damien.webp" alt="Chibi Damien" class="daily-chibi">
     </div>
-    <p class="daily-subtitle" data-i18n="index.daily_subtitle">New challenges every day at midnight (Paris time)</p>
-  </div>
 
-  <p class="daily-desc" data-i18n="index.daily_desc">Each of the 6 modes resets with a brand-new target. Streaks, stats &amp; progress carry over!</p>
-
-  <div class="daily-countdown-wrap">
-    <p class="countdown-label" data-i18n="index.daily_countdown_label">Next reset in</p>
-    <div class="countdown-display">
-      <div class="countdown-unit">
-        <span id="cntH">--</span>
-        <small data-i18n="index.daily_hours">hours</small>
-      </div>
-      <span class="countdown-sep">:</span>
-      <div class="countdown-unit">
-        <span id="cntM">--</span>
-        <small data-i18n="index.daily_min">min</small>
-      </div>
-      <span class="countdown-sep">:</span>
-      <div class="countdown-unit">
-        <span id="cntS">--</span>
-        <small data-i18n="index.daily_sec">sec</small>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- =====================================================
+    <!-- =====================================================
      16. SCRIPT — Countdown Daily Reset
      Calcule le temps restant avant minuit (Paris/Europe).
      ===================================================== -->
-<script>
-const dailyModal = document.getElementById("dailyModal");
-const dailyBtn = document.getElementById("dailyInfoBtn");
-const closeDaily = document.getElementById("closeDaily");
+    <script>
+      const dailyModal = document.getElementById("dailyModal");
+      const dailyBtn = document.getElementById("dailyInfoBtn");
+      const closeDaily = document.getElementById("closeDaily");
 
-dailyBtn.onclick = () => dailyModal.style.display = "block";
-closeDaily.onclick = () => dailyModal.style.display = "none";
-window.addEventListener('click', (e) => { if (e.target === dailyModal) dailyModal.style.display = "none"; });
+      dailyBtn.onclick = () => (dailyModal.style.display = "block");
+      closeDaily.onclick = () => (dailyModal.style.display = "none");
+      window.addEventListener("click", (e) => {
+        if (e.target === dailyModal) dailyModal.style.display = "none";
+      });
 
-function updateCountdown() {
-  const now = new Date();
-  const parisTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  const nextMidnight = new Date(parisTime);
-  nextMidnight.setHours(24, 0, 0, 0);
-  const diff = nextMidnight - parisTime;
+      function updateCountdown() {
+        const now = new Date();
+        const parisTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+        const nextMidnight = new Date(parisTime);
+        nextMidnight.setHours(24, 0, 0, 0);
+        const diff = nextMidnight - parisTime;
 
-  document.getElementById("cntH").textContent = String(Math.floor(diff / 3600000)).padStart(2, '0');
-  document.getElementById("cntM").textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-  document.getElementById("cntS").textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-  setTimeout(updateCountdown, 1000);
-}
-updateCountdown();
+        document.getElementById("cntH").textContent = String(Math.floor(diff / 3600000)).padStart(
+          2,
+          "0"
+        );
+        document.getElementById("cntM").textContent = String(
+          Math.floor((diff % 3600000) / 60000)
+        ).padStart(2, "0");
+        document.getElementById("cntS").textContent = String(
+          Math.floor((diff % 60000) / 1000)
+        ).padStart(2, "0");
+        setTimeout(updateCountdown, 1000);
+      }
+      updateCountdown();
+    </script>
 
-
-</script>
-
-
-<!-- =====================================================
+    <!-- =====================================================
      BARRE DE NAVIGATION — Bottom Nav
      Affiche Home | Ranking | Friends | Profile
      Logique dans js/bottomNav.js
      ===================================================== -->
-<!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
-<script type="module">
-import { initAuth } from './js/auth.js';
-window._authReady = initAuth();
-window._authReady.catch(() => {});
-</script>
+    <!-- Auth — restaure la session PHP, définit window._currentUser, sync les sessions offline -->
+    <script type="module">
+      import { initAuth } from "./js/auth.js";
+      window._authReady = initAuth();
+      window._authReady.catch(() => {});
+    </script>
 
-<script type="module">
-import { initBottomNav } from './js/bottomNav.js';
-initBottomNav();
-</script>
+    <script type="module">
+      import { initBottomNav } from "./js/bottomNav.js";
+      initBottomNav();
+    </script>
 
-<script type="module">
-import { initNotifications }    from './js/notifications.js';
-import { checkStreakRecovery }   from './js/streak-recovery.js';
-import { pullProfileFromCloud, pushLangToCloud } from './js/cloud-sync.js';
-import { updateNavAvatar }       from './js/bottomNav.js';
+    <script type="module">
+      import { initNotifications } from "./js/notifications.js";
+      import { checkStreakRecovery } from "./js/streak-recovery.js";
+      import { pullProfileFromCloud, pushLangToCloud } from "./js/cloud-sync.js";
+      import { updateNavAvatar } from "./js/bottomNav.js";
 
-if (window._authReady) await window._authReady;
+      if (window._authReady) await window._authReady;
 
-// Signal auth-ready pour les modules qui écoutent (ex: bottomNav admin item)
-window.dispatchEvent(new CustomEvent('personadle:auth-ready'));
+      // Signal auth-ready pour les modules qui écoutent (ex: bottomNav admin item)
+      window.dispatchEvent(new CustomEvent("personadle:auth-ready"));
 
-if (window._currentUser) {
-  // Sync complet cloud → local dès la connexion
-  await pullProfileFromCloud();
+      if (window._currentUser) {
+        // Sync complet cloud → local dès la connexion
+        await pullProfileFromCloud();
 
-  // Mettre à jour l'avatar dans la bottomNav (initBottomNav tourne avant le cloud sync)
-  updateNavAvatar();
+        // Mettre à jour l'avatar dans la bottomNav (initBottomNav tourne avant le cloud sync)
+        updateNavAvatar();
 
-  // Hook : chaque changement de langue est poussé vers le backend
-  window._onLangChange = pushLangToCloud;
+        // Hook : chaque changement de langue est poussé vers le backend
+        window._onLangChange = pushLangToCloud;
 
-  initNotifications();
-  checkStreakRecovery();
-}
-</script>
+        initNotifications();
+        checkStreakRecovery();
+      }
+    </script>
 
-<script type="module">
-import { checkBadgesAfterGame } from './profile/badges/badgesManager.js';
-// Fire badge/title checks on the home page so any unlocks gained
-// during the session are surfaced here too.
-document.addEventListener('DOMContentLoaded', () => checkBadgesAfterGame());
-</script>
+    <script type="module">
+      import { checkBadgesAfterGame } from "./profile/badges/badgesManager.js";
+      // Fire badge/title checks on the home page so any unlocks gained
+      // during the session are surfaced here too.
+      document.addEventListener("DOMContentLoaded", () => checkBadgesAfterGame());
+    </script>
 
-<!-- Cadeaux admin : affiche l'animation divine si de nouveaux items ont été débloqués -->
-<script type="module">
-import { showGiftsFromIds } from './js/divine-gift.js';
+    <!-- Cadeaux admin : affiche l'animation divine si de nouveaux items ont été débloqués -->
+    <script type="module">
+      import { showGiftsFromIds } from "./js/divine-gift.js";
 
-const _giftTitle = () => {
-  const t = k => { const v = window.i18n?.t?.(k); return (v && v !== k) ? v : null; };
-  return t('ui.admin_gift_received') || '🎁 Cadeau reçu !';
-};
+      const _giftTitle = () => {
+        const t = (k) => {
+          const v = window.i18n?.t?.(k);
+          return v && v !== k ? v : null;
+        };
+        return t("ui.admin_gift_received") || "🎁 Cadeau reçu !";
+      };
 
-// Affiche les gifts et vide la file persistante
-async function _showPendingDivineGifts(items) {
-  if (!items?.length) return;
-  localStorage.removeItem('_pendingDivineGifts');
-  await showGiftsFromIds(items, _giftTitle());
-}
+      // Affiche les gifts et vide la file persistante
+      async function _showPendingDivineGifts(items) {
+        if (!items?.length) return;
+        localStorage.removeItem("_pendingDivineGifts");
+        await showGiftsFromIds(items, _giftTitle());
+      }
 
-// Réception en temps réel (même session)
-window.addEventListener('personadle:gifts-received', (e) => {
-  _showPendingDivineGifts(e.detail?.items);
-});
+      // Réception en temps réel (même session)
+      window.addEventListener("personadle:gifts-received", (e) => {
+        _showPendingDivineGifts(e.detail?.items);
+      });
 
-// Vérification au chargement (gifts reçus pendant une autre page / session)
-const _checkOnLoad = () => {
-  try {
-    const pending = JSON.parse(localStorage.getItem('_pendingDivineGifts') || '[]');
-    if (pending.length) _showPendingDivineGifts(pending);
-  } catch {}
-};
-if (window._authResolved) {
-  _checkOnLoad();
-} else {
-  window.addEventListener('personadle:auth-ready', _checkOnLoad, { once: true });
-}
-</script>
+      // Vérification au chargement (gifts reçus pendant une autre page / session)
+      const _checkOnLoad = () => {
+        try {
+          const pending = JSON.parse(localStorage.getItem("_pendingDivineGifts") || "[]");
+          if (pending.length) _showPendingDivineGifts(pending);
+        } catch {}
+      };
+      if (window._authResolved) {
+        _checkOnLoad();
+      } else {
+        window.addEventListener("personadle:auth-ready", _checkOnLoad, { once: true });
+      }
+    </script>
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => {
-      console.warn('[SW] Registration failed:', err);
-    });
-  });
-  // Recharge automatiquement quand un nouveau Service Worker s'active
-  // → plus besoin de Ctrl+Shift+R après un déploiement.
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data?.type === 'SW_UPDATED') {
-      window.location.reload();
-    }
-  });
-}
-</script>
-
-</body>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch((err) => {
+            console.warn("[SW] Registration failed:", err);
+          });
+        });
+        // Recharge automatiquement quand un nouveau Service Worker s'active
+        // → plus besoin de Ctrl+Shift+R après un déploiement.
+        navigator.serviceWorker.addEventListener("message", (event) => {
+          if (event.data?.type === "SW_UPDATED") {
+            window.location.reload();
+          }
+        });
+      }
+    </script>
+  </body>
 </html>

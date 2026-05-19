@@ -48,15 +48,15 @@ Tableau JavaScript exporté contenant **tous les personnages** disponibles dans 
 
 ### Filtres opus disponibles
 
-| Clé filtre | Jeux couverts |
-|------------|---------------|
-| `P1` | Persona 1 |
-| `P2` | P2: Innocent Sin, P2: Eternal Punishment |
-| `P3` | P3, P3 FES, P3 Portable, P3 Reload |
-| `P4` | P4, P4 Golden, P4 Arena Ultimax, P4 Dancing |
-| `P5` | P5, P5 Royal, P5 Strikers, P5 Tactica |
-| `P5X` | Persona 5 The Phantom X |
-| `PQ` | Persona Q, Persona Q2 |
+| Clé filtre | Jeux couverts                               |
+| ---------- | ------------------------------------------- |
+| `P1`       | Persona 1                                   |
+| `P2`       | P2: Innocent Sin, P2: Eternal Punishment    |
+| `P3`       | P3, P3 FES, P3 Portable, P3 Reload          |
+| `P4`       | P4, P4 Golden, P4 Arena Ultimax, P4 Dancing |
+| `P5`       | P5, P5 Royal, P5 Strikers, P5 Tactica       |
+| `P5X`      | Persona 5 The Phantom X                     |
+| `PQ`       | Persona Q, Persona Q2                       |
 
 ---
 
@@ -73,13 +73,13 @@ Dossier contenant les portraits des personnages au format **WebP** pour un charg
 
 Quelques exemples :
 
-| Portrait | Personnage | Jeu |
-|----------|-----------|-----|
-| ![Ren](portraits/Ren.webp) | Ren Amamiya (Joker) | Persona 5 |
-| ![Yu](portraits/Yu.webp) | Yu Narukami | Persona 4 |
-| ![Aigis](portraits/Aigis.webp) | Aigis | Persona 3 |
-| ![Ann](portraits/Ann.webp) | Ann Takamaki | Persona 5 |
-| ![Mitsuru](portraits/Mitsuru.webp) | Mitsuru Kirijo | Persona 3 |
+| Portrait                           | Personnage          | Jeu       |
+| ---------------------------------- | ------------------- | --------- |
+| ![Ren](portraits/Ren.webp)         | Ren Amamiya (Joker) | Persona 5 |
+| ![Yu](portraits/Yu.webp)           | Yu Narukami         | Persona 4 |
+| ![Aigis](portraits/Aigis.webp)     | Aigis               | Persona 3 |
+| ![Ann](portraits/Ann.webp)         | Ann Takamaki        | Persona 5 |
+| ![Mitsuru](portraits/Mitsuru.webp) | Mitsuru Kirijo      | Persona 3 |
 
 > **Note** : Les portraits sont la propriété d'Atlus / SEGA. Ils sont utilisés dans un contexte fan-made non commercial.
 

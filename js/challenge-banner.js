@@ -11,17 +11,21 @@
  */
 
 export function initChallengeBanner(currentMode) {
-  const raw = localStorage.getItem('activeChallenge');
+  const raw = localStorage.getItem("activeChallenge");
   if (!raw) return;
 
   let challenge;
-  try { challenge = JSON.parse(raw); }
-  catch { localStorage.removeItem('activeChallenge'); return; }
+  try {
+    challenge = JSON.parse(raw);
+  } catch {
+    localStorage.removeItem("activeChallenge");
+    return;
+  }
 
   // Vérifier que c'est pour aujourd'hui (heure Paris, cohérent avec le reset quotidien)
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(new Date());
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
   if (challenge.date && challenge.date !== today) {
-    localStorage.removeItem('activeChallenge');
+    localStorage.removeItem("activeChallenge");
     return;
   }
 
@@ -32,23 +36,23 @@ export function initChallengeBanner(currentMode) {
 }
 
 function _injectBanner({ msgId, mode, score }) {
-  if (document.getElementById('challengeBanner')) return;
+  if (document.getElementById("challengeBanner")) return;
 
   const tf = (key, fb) => {
     if (!window.i18n?.t) return fb;
     const r = window.i18n.t(key);
-    return (r && r !== key) ? r : fb;
+    return r && r !== key ? r : fb;
   };
 
-  const banner = document.createElement('div');
-  banner.id = 'challengeBanner';
+  const banner = document.createElement("div");
+  banner.id = "challengeBanner";
   banner.innerHTML = `
     <img class="cb-avatar" src="${_defaultAvatar()}" alt="" id="cbAvatar">
     <div class="cb-text">
-      <div class="cb-pseudo" id="cbPseudo">⚔ ${tf('challenge.active_challenge', 'Challenge')}</div>
-      <div class="cb-score" id="cbScore">${tf('challenge.banner_beat', 'Beat')} <strong>${score}</strong> — ${(mode || '').toUpperCase()}</div>
+      <div class="cb-pseudo" id="cbPseudo">⚔ ${tf("challenge.active_challenge", "Challenge")}</div>
+      <div class="cb-score" id="cbScore">${tf("challenge.banner_beat", "Beat")} <strong>${score}</strong> — ${(mode || "").toUpperCase()}</div>
     </div>
-    <button class="cb-dismiss" id="cbDismiss" title="${tf('ui.dismiss', '✕')}">✕</button>
+    <button class="cb-dismiss" id="cbDismiss" title="${tf("ui.dismiss", "✕")}">✕</button>
   `;
 
   document.body.appendChild(banner);
@@ -56,7 +60,7 @@ function _injectBanner({ msgId, mode, score }) {
   // Charger les infos de l'adversaire en arrière-plan
   if (msgId) _loadChallengerInfo(msgId);
 
-  document.getElementById('cbDismiss')?.addEventListener('click', () => {
+  document.getElementById("cbDismiss")?.addEventListener("click", () => {
     banner.remove();
     // Ne pas effacer le challenge — l'utilisateur peut encore le relever
   });
@@ -66,18 +70,20 @@ async function _loadChallengerInfo(msgId) {
   if (!window._personadleApi) return;
   try {
     const data = await window._personadleApi.messages.list({ limit: 50 });
-    const msg  = (data.messages ?? []).find(m => m.id === msgId);
+    const msg = (data.messages ?? []).find((m) => m.id === msgId);
     if (!msg) return;
 
-    const pseudoEl = document.getElementById('cbPseudo');
-    const avatarEl = document.getElementById('cbAvatar');
+    const pseudoEl = document.getElementById("cbPseudo");
+    const avatarEl = document.getElementById("cbAvatar");
     if (pseudoEl) pseudoEl.textContent = `⚔ ${msg.sender.pseudo}`;
     if (avatarEl && msg.sender.avatar) avatarEl.src = msg.sender.avatar;
-  } catch { /* silencieux */ }
+  } catch {
+    /* silencieux */
+  }
 }
 
 function _defaultAvatar() {
   const p = window.location.pathname;
-  const prefix = p.startsWith('/personadle/') ? '/personadle' : '';
+  const prefix = p.startsWith("/personadle/") ? "/personadle" : "";
   return `${prefix}/img/default_avatar.png`;
 }

@@ -16,14 +16,14 @@ function makeProfile(statsOverrides = {}) {
   return {
     pseudo: "TestUser",
     stats: {
-      games:            0,
-      wins:             0,
-      giveups:          0,
-      streak:           0,
-      streakRecord:     0,
+      games: 0,
+      wins: 0,
+      giveups: 0,
+      streak: 0,
+      streakRecord: 0,
       totalTimeMinutes: 0,
-      modeCount:        {},
-      modeWins:         {},
+      modeCount: {},
+      modeWins: {},
       ...statsOverrides,
     },
   };
@@ -42,14 +42,12 @@ function daysAgoISO(n) {
   return new Date(Date.now() - n * 86_400_000).toISOString();
 }
 
-
 // ─── Suite ────────────────────────────────────────────────────────────────────
 
 describe("updateProfileStats", () => {
   beforeEach(() => {
     localStorage.clear();
   });
-
 
   // ── Guard clause ───────────────────────────────────────────────────────────
 
@@ -61,7 +59,6 @@ describe("updateProfileStats", () => {
       expect(localStorage.getItem("personaUserProfile")).toBeNull();
     });
   });
-
 
   // ── games / wins / giveups counters ───────────────────────────────────────
 
@@ -96,7 +93,6 @@ describe("updateProfileStats", () => {
       expect(loadProfile().stats.giveups).toBe(1);
     });
   });
-
 
   // ── modeCount & modeWins ──────────────────────────────────────────────────
 
@@ -151,7 +147,6 @@ describe("updateProfileStats", () => {
     });
   });
 
-
   // ── Streak logic ──────────────────────────────────────────────────────────
 
   describe("streak logic", () => {
@@ -203,7 +198,6 @@ describe("updateProfileStats", () => {
     });
   });
 
-
   // ── Time tracking ─────────────────────────────────────────────────────────
 
   describe("time tracking (timeSpent in seconds → totalTimeMinutes)", () => {
@@ -233,8 +227,8 @@ describe("updateProfileStats", () => {
 
     it("accumulates time across multiple sessions", () => {
       saveProfile(makeProfile({ totalTimeMinutes: 0 }));
-      updateProfileStats({ result: "win",    mode: "Classic", timeSpent: 60 });  // +1
-      updateProfileStats({ result: "giveup", mode: "Emoji",   timeSpent: 180 }); // +3
+      updateProfileStats({ result: "win", mode: "Classic", timeSpent: 60 }); // +1
+      updateProfileStats({ result: "giveup", mode: "Emoji", timeSpent: 180 }); // +3
       expect(loadProfile().stats.totalTimeMinutes).toBe(4);
     });
   });

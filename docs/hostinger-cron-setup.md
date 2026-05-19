@@ -9,7 +9,7 @@
 
 1. Connexion au cPanel Hostinger
 2. Menu "Cron Jobs" (section "Advanced")
-3. Fréquence : **Every Hour** (minute=0, hour=*, day=*, month=*, weekday=*)
+3. Fréquence : **Every Hour** (minute=0, hour=_, day=_, month=_, weekday=_)
 4. Commande :
 
 ```bash

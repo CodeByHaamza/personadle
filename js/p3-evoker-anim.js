@@ -9,24 +9,25 @@
  */
 
 const _queue = [];
-let   _busy  = false;
+let _busy = false;
 
 function _imgBase() {
   const p = window.location.pathname;
-  const prefix = p.startsWith('/personadle/') ? '/personadle' : '';
+  const prefix = p.startsWith("/personadle/") ? "/personadle" : "";
   return `${prefix}/img/`;
 }
 
 function _esc(str) {
-  return String(str ?? '').replace(/[&<>"']/g, c =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+  return String(str ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
   );
 }
 
 function _avatarSrc(data) {
   if (!data) return `${_imgBase()}default_avatar.png`;
-  if (data.startsWith('data:')) return data;
-  const base = _imgBase().replace(/img\/$/, '');
+  if (data.startsWith("data:")) return data;
+  const base = _imgBase().replace(/img\/$/, "");
   return data.replace(/^\.\.\//, base).replace(/^\.\//, base);
 }
 
@@ -41,21 +42,24 @@ export function queueEvokerAnimations(requests) {
 }
 
 function _showNext() {
-  if (!_queue.length) { _busy = false; return; }
+  if (!_queue.length) {
+    _busy = false;
+    return;
+  }
   _busy = true;
   _render(_queue.shift());
 }
 
 function _render({ pseudo, friendship_id, avatar_data }) {
-  document.getElementById('p3e-overlay')?.remove();
+  document.getElementById("p3e-overlay")?.remove();
 
   const t = (key, fallback) => {
     const val = window.i18n?.t?.(key);
-    return (val && val !== key) ? val : fallback;
+    return val && val !== key ? val : fallback;
   };
 
-  const overlay = document.createElement('div');
-  overlay.id = 'p3e-overlay';
+  const overlay = document.createElement("div");
+  overlay.id = "p3e-overlay";
 
   overlay.innerHTML = `
     <div class="p3e-backdrop"></div>
@@ -87,16 +91,16 @@ function _render({ pseudo, friendship_id, avatar_data }) {
       <!-- Panneau bleu foncé central — apparaît après le tir -->
       <div class="p3e-panel">
         <p class="p3e-pseudo">${_esc(pseudo)}</p>
-        <p class="p3e-msg">${t('friends.cc_wants_confidant', 'vous demande en ami.')}</p>
+        <p class="p3e-msg">${t("friends.cc_wants_confidant", "vous demande en ami.")}</p>
       </div>
 
       <!-- Boutons sous la pdp -->
       <div class="p3e-actions">
         <button class="p3e-btn p3e-btn--yes" data-fid="${friendship_id}">
-          ${t('friends.cc_yes', 'OUI')}
+          ${t("friends.cc_yes", "OUI")}
         </button>
         <button class="p3e-btn p3e-btn--no" data-fid="${friendship_id}">
-          ${t('friends.cc_no', 'NON')}
+          ${t("friends.cc_no", "NON")}
         </button>
       </div>
     </div>
@@ -105,30 +109,30 @@ function _render({ pseudo, friendship_id, avatar_data }) {
   document.body.appendChild(overlay);
 
   // Phase 1 : backdrop + avatar sombre
-  requestAnimationFrame(() => overlay.classList.add('p3e--visible'));
+  requestAnimationFrame(() => overlay.classList.add("p3e--visible"));
 
   // Phase 2 : tir (evoker a fini de viser)
-  setTimeout(() => overlay.classList.add('p3e--fired'), 1800);
+  setTimeout(() => overlay.classList.add("p3e--fired"), 1800);
 
   // Phase 3 : panneau + boutons
   setTimeout(() => {
-    overlay.querySelector('.p3e-panel').classList.add('p3e-panel--visible');
-    overlay.querySelector('.p3e-actions').classList.add('p3e-actions--visible');
+    overlay.querySelector(".p3e-panel").classList.add("p3e-panel--visible");
+    overlay.querySelector(".p3e-actions").classList.add("p3e-actions--visible");
   }, 2300);
 
-  overlay.querySelector('.p3e-btn--yes').addEventListener('click', async e => {
+  overlay.querySelector(".p3e-btn--yes").addEventListener("click", async (e) => {
     const fid = parseInt(e.currentTarget.dataset.fid, 10);
-    await window._personadleApi?.friends.respond(fid, 'accept').catch(() => {});
+    await window._personadleApi?.friends.respond(fid, "accept").catch(() => {});
     _closeOverlay(overlay);
   });
 
-  overlay.querySelector('.p3e-btn--no').addEventListener('click', async e => {
+  overlay.querySelector(".p3e-btn--no").addEventListener("click", async (e) => {
     const fid = parseInt(e.currentTarget.dataset.fid, 10);
-    await window._personadleApi?.friends.respond(fid, 'decline').catch(() => {});
+    await window._personadleApi?.friends.respond(fid, "decline").catch(() => {});
     _closeOverlay(overlay);
   });
 
-  overlay.querySelector('.p3e-close').addEventListener('click', () => {
+  overlay.querySelector(".p3e-close").addEventListener("click", () => {
     _queue.length = 0;
     _busy = false;
     window._personadleApi?.notifications.markSeen().catch(() => {});
@@ -137,8 +141,8 @@ function _render({ pseudo, friendship_id, avatar_data }) {
 }
 
 function _fadeOut(overlay, onDone) {
-  overlay.style.transition = 'opacity 0.3s ease';
-  overlay.style.opacity = '0';
+  overlay.style.transition = "opacity 0.3s ease";
+  overlay.style.opacity = "0";
   setTimeout(() => {
     overlay.remove();
     if (onDone) onDone();

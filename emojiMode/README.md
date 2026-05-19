@@ -23,13 +23,13 @@
 
 Les emojis décrivent le personnage à travers sa personnalité, son jeu d'origine, ses attributs marquants ou son histoire.
 
-| Séquence | Indices révélés | Personnage |
-|----------|----------------|------------|
-| `⚡🏃💛🐻` | Énergie, mouvement, couleur jaune, mascotte | Teddie *(P4G)* |
-| `🎸💪🏴‍☠️🟡` | Musique, force, pirate, couleur | Ryuji Sakamoto *(P5R)* |
-| `🎩🃏🔴🖤` | Chapeau haut-de-forme, joker, rouge et noir | Joker / Ren Amamiya *(P5R)* |
-| `🌙🎭🔵💙` | Nuit, masque, bleu — héros mélancolique | Makoto Yuki *(P3R)* |
-| `🐄🌾🗡️🌊` | Campagne, calme, lame, fluidité | Naoto Shirogane *(P4G)* |
+| Séquence   | Indices révélés                             | Personnage                  |
+| ---------- | ------------------------------------------- | --------------------------- |
+| `⚡🏃💛🐻` | Énergie, mouvement, couleur jaune, mascotte | Teddie _(P4G)_              |
+| `🎸💪🏴‍☠️🟡` | Musique, force, pirate, couleur             | Ryuji Sakamoto _(P5R)_      |
+| `🎩🃏🔴🖤` | Chapeau haut-de-forme, joker, rouge et noir | Joker / Ren Amamiya _(P5R)_ |
+| `🌙🎭🔵💙` | Nuit, masque, bleu — héros mélancolique     | Makoto Yuki _(P3R)_         |
+| `🐄🌾🗡️🌊` | Campagne, calme, lame, fluidité             | Naoto Shirogane _(P4G)_     |
 
 > Les séquences sont construites par l'équipe pour être ni trop faciles ni trop obscures. Un fan casual devrait pouvoir les résoudre avec 2-3 indices.
 
@@ -66,6 +66,7 @@ emojiMode/
 Charge `global.css`, `emoji.css` et `emojiMode.js` en module.
 
 Éléments HTML notables :
+
 - `#emojiDisplay` — zone d'affichage des emojis du jour
 - `#textbar` — saisie du nom du personnage
 - `#guessButton` — bouton Valider
@@ -79,6 +80,7 @@ Charge `global.css`, `emoji.css` et `emojiMode.js` en module.
 ## `emojiMode.js`
 
 Module ES6. Importe depuis `../js/gameCore.js` :
+
 - `parisDateKey` + `msUntilNextParisMidnight` — pour le timer de reset
 - `showConfettiExplosion` — confettis de victoire (style `"sides"`)
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
@@ -90,6 +92,7 @@ Module ES6. Importe depuis `../js/gameCore.js` :
 #### Reset quotidien re-planifiable
 
 Contrairement aux autres modes qui utilisent `setupDailyReset` directement, le mode Emoji gère son propre timer `window.__emojiResetTimer` pour pouvoir le ré-armer :
+
 - Écouteur `visibilitychange` : re-planifie si l'onglet revient au premier plan après minuit
 - ~~Écouteur `focus`~~ : supprimé — `visibilitychange` seul suffit, avec vérification de date
 
@@ -101,22 +104,22 @@ Le module vérifie `input.dataset.autocompleteBound` avant d'initialiser l'autoc
 
 ### Fonctions spécifiques
 
-| Fonction | Description |
-|----------|-------------|
-| `checkEmojiGuess()` | Vérifie si la saisie correspond au personnage cible |
-| `updateEmojiHint()` | Révèle le prochain indice dans la séquence |
-| `resetGame()` | Réinitialise complètement l'état et choisit un nouveau personnage |
-| `applyDarkModeStyles()` | Ajustements dark mode locaux |
+| Fonction                | Description                                                       |
+| ----------------------- | ----------------------------------------------------------------- |
+| `checkEmojiGuess()`     | Vérifie si la saisie correspond au personnage cible               |
+| `updateEmojiHint()`     | Révèle le prochain indice dans la séquence                        |
+| `resetGame()`           | Réinitialise complètement l'état et choisit un nouveau personnage |
+| `applyDarkModeStyles()` | Ajustements dark mode locaux                                      |
 
 ---
 
 ## localStorage utilisé
 
-| Clé | Contenu |
-|-----|---------|
-| `emojiTarget` | Personnage cible (JSON) |
-| `emojiAttempts` | Nombre d'essais |
-| `emojiGameOver` | `"true"` si partie terminée |
-| `emojiHintIndex` | Indice actuellement révélé |
-| `filters_Emoji` | Filtres opus actifs |
-| `lastPlayedDate_Emoji` | Date de la dernière partie |
+| Clé                    | Contenu                     |
+| ---------------------- | --------------------------- |
+| `emojiTarget`          | Personnage cible (JSON)     |
+| `emojiAttempts`        | Nombre d'essais             |
+| `emojiGameOver`        | `"true"` si partie terminée |
+| `emojiHintIndex`       | Indice actuellement révélé  |
+| `filters_Emoji`        | Filtres opus actifs         |
+| `lastPlayedDate_Emoji` | Date de la dernière partie  |

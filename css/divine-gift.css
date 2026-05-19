@@ -16,11 +16,15 @@
   cursor: pointer;
 }
 
-.divine-overlay.show { opacity: 1; }
-.divine-overlay.exit { opacity: 0; }
+.divine-overlay.show {
+  opacity: 1;
+}
+.divine-overlay.exit {
+  opacity: 0;
+}
 
 .divine-title {
-  font-family: 'Cinzel', 'Georgia', serif;
+  font-family: "Cinzel", "Georgia", serif;
   font-size: 26px;
   color: #ffd700;
   text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
@@ -84,7 +88,7 @@
   color: #ffd700;
   margin-top: 4px;
   text-transform: uppercase;
-  font-family: 'Oswald', sans-serif;
+  font-family: "Oswald", sans-serif;
   letter-spacing: 0.5px;
 }
 
@@ -92,15 +96,28 @@
   margin-top: 28px;
   font-size: 11px;
   color: rgba(255, 215, 0, 0.45);
-  font-family: 'Oswald', sans-serif;
+  font-family: "Oswald", sans-serif;
   letter-spacing: 2px;
   text-transform: uppercase;
   user-select: none;
   animation: divine-blink-hint 2s infinite;
 }
 
-@keyframes divine-blink-hint { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.9; } }
-@keyframes divine-drop        { to { opacity: 1; transform: translateY(0) rotate(0deg); } }
+@keyframes divine-blink-hint {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@keyframes divine-drop {
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
 
 .divine-particles-canvas {
   position: absolute;

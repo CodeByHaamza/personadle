@@ -28,7 +28,6 @@ import {
 
 import { t } from "../js/i18n.js";
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -43,7 +42,6 @@ function clearStorage() {
   localStorage.clear();
 }
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // parisDateKey
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,7 +55,7 @@ describe("parisDateKey", () => {
   it("accepts a specific Date object and formats it correctly", () => {
     // 2025-07-14 UTC → should still be 2025-07-14 in Paris (UTC+2 in summer)
     const date = new Date("2025-07-14T10:00:00Z");
-    const key  = parisDateKey(date);
+    const key = parisDateKey(date);
     expect(key).toBe("2025-07-14");
   });
 
@@ -80,7 +78,6 @@ describe("parisDateKey", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // msUntilNextParisMidnight
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,8 +89,8 @@ describe("msUntilNextParisMidnight", () => {
   });
 
   it("returns a value no greater than 24 hours", () => {
-    const ms           = msUntilNextParisMidnight();
-    const msIn24Hours  = 24 * 60 * 60 * 1000;
+    const ms = msUntilNextParisMidnight();
+    const msIn24Hours = 24 * 60 * 60 * 1000;
     expect(ms).toBeLessThanOrEqual(msIn24Hours);
   });
 
@@ -101,7 +98,6 @@ describe("msUntilNextParisMidnight", () => {
     expect(typeof msUntilNextParisMidnight()).toBe("number");
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // normalize
@@ -118,7 +114,7 @@ describe("normalize", () => {
 
   it("normalizes typographic apostrophes to straight apostrophe", () => {
     expect(normalize("l\u2019homme")).toBe("l'homme"); // ' → '
-    expect(normalize("l\u2018autre")).toBe("l'autre");  // ' → '
+    expect(normalize("l\u2018autre")).toBe("l'autre"); // ' → '
   });
 
   it("removes double-quote characters", () => {
@@ -139,7 +135,6 @@ describe("normalize", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // showConfettiExplosion
 // ─────────────────────────────────────────────────────────────────────────────
@@ -147,9 +142,14 @@ describe("normalize", () => {
 describe("showConfettiExplosion", () => {
   beforeEach(() => {
     // Stub Audio to avoid "not implemented" errors in jsdom
-    vi.stubGlobal("Audio", class {
-      play() { return Promise.resolve(); }
-    });
+    vi.stubGlobal(
+      "Audio",
+      class {
+        play() {
+          return Promise.resolve();
+        }
+      }
+    );
     document.body.innerHTML = "";
   });
 
@@ -190,7 +190,7 @@ describe("showConfettiExplosion", () => {
 
     showConfettiExplosion({ count: 3, spreadFrom: "bottom" });
 
-    document.querySelectorAll(".confetti-emoji").forEach(el => {
+    document.querySelectorAll(".confetti-emoji").forEach((el) => {
       expect(el.style.bottom).toBe("0vh");
     });
   });
@@ -198,13 +198,17 @@ describe("showConfettiExplosion", () => {
   it("calls Audio.play()", () => {
     vi.useFakeTimers();
     const playSpy = vi.fn(() => Promise.resolve());
-    vi.stubGlobal("Audio", class { play = playSpy; });
+    vi.stubGlobal(
+      "Audio",
+      class {
+        play = playSpy;
+      }
+    );
 
     showConfettiExplosion({ count: 1 });
     expect(playSpy).toHaveBeenCalledOnce();
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // revealNextLink
@@ -268,7 +272,6 @@ describe("revealNextLink", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // setupRulesModal
 // ─────────────────────────────────────────────────────────────────────────────
@@ -315,7 +318,6 @@ describe("setupRulesModal", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // setupDailyReset
 // ─────────────────────────────────────────────────────────────────────────────
@@ -347,7 +349,6 @@ describe("setupDailyReset", () => {
     expect(spy).toHaveBeenCalledOnce();
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // checkResetOnLoad
@@ -402,7 +403,6 @@ describe("checkResetOnLoad", () => {
     expect(localStorage.getItem("lastPlayedDate_Test")).toBe(parisDateKey());
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // setupFilterButtons
@@ -463,7 +463,6 @@ describe("setupFilterButtons", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // showWrongMini
 // ─────────────────────────────────────────────────────────────────────────────
@@ -503,7 +502,7 @@ describe("showWrongMini", () => {
 
   it("appends multiple wrong guesses without overwriting previous ones", () => {
     showWrongMini("/img/a.webp", "Alice", container);
-    showWrongMini("/img/b.webp", "Bob",   container);
+    showWrongMini("/img/b.webp", "Bob", container);
     expect(container.querySelectorAll(".wrong-mini")).toHaveLength(2);
   });
 
@@ -519,7 +518,6 @@ describe("showWrongMini", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // buildGameSession
 // ─────────────────────────────────────────────────────────────────────────────
@@ -527,34 +525,40 @@ describe("showWrongMini", () => {
 describe("buildGameSession", () => {
   it("returns an object with the expected shape", () => {
     const session = buildGameSession({
-      mode:       "Classic",
+      mode: "Classic",
       targetName: "Joker",
-      result:     "win",
-      attempts:   2,
-      timeMs:     15000,
-      filters:    ["P5"],
+      result: "win",
+      attempts: 2,
+      timeMs: 15000,
+      filters: ["P5"],
     });
 
     expect(session).toMatchObject({
-      mode:           "Classic",
-      target_name:    "Joker",
-      result:         "win",
-      attempts:       2,
-      time_ms:        15000,
+      mode: "Classic",
+      target_name: "Joker",
+      result: "win",
+      attempts: 2,
+      time_ms: 15000,
       active_filters: ["P5"],
     });
   });
 
   it("includes a played_date matching YYYY-MM-DD", () => {
     const session = buildGameSession({
-      mode: "Emoji", targetName: "Ryuji", result: "giveup", attempts: 6,
+      mode: "Emoji",
+      targetName: "Ryuji",
+      result: "giveup",
+      attempts: 6,
     });
     expect(session.played_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it("defaults timeMs to 0 and filters to [] when omitted", () => {
     const session = buildGameSession({
-      mode: "Music", targetName: "Burn My Dread", result: "win", attempts: 1,
+      mode: "Music",
+      targetName: "Burn My Dread",
+      result: "win",
+      attempts: 1,
     });
     expect(session.time_ms).toBe(0);
     expect(session.active_filters).toEqual([]);
@@ -562,19 +566,25 @@ describe("buildGameSession", () => {
 
   it("rounds timeMs to the nearest integer", () => {
     const session = buildGameSession({
-      mode: "Classic", targetName: "Joker", result: "win", attempts: 1, timeMs: 1234.7,
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+      timeMs: 1234.7,
     });
     expect(session.time_ms).toBe(1235);
   });
 
   it("preserves the exact mode string passed in", () => {
     const session = buildGameSession({
-      mode: "AllOutAttack", targetName: "Makoto", result: "win", attempts: 3,
+      mode: "AllOutAttack",
+      targetName: "Makoto",
+      result: "win",
+      attempts: 3,
     });
     expect(session.mode).toBe("AllOutAttack");
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // savePendingSession
@@ -585,7 +595,10 @@ describe("savePendingSession", () => {
 
   it("stores a session in localStorage under 'pendingSessions'", () => {
     const session = buildGameSession({
-      mode: "Classic", targetName: "Joker", result: "win", attempts: 1,
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
     });
     savePendingSession(session);
 
@@ -597,9 +610,14 @@ describe("savePendingSession", () => {
   it("creates the array from scratch when pendingSessions is not yet set", () => {
     expect(localStorage.getItem("pendingSessions")).toBeNull();
 
-    savePendingSession(buildGameSession({
-      mode: "Music", targetName: "test", result: "win", attempts: 1,
-    }));
+    savePendingSession(
+      buildGameSession({
+        mode: "Music",
+        targetName: "test",
+        result: "win",
+        attempts: 1,
+      })
+    );
 
     const stored = JSON.parse(localStorage.getItem("pendingSessions"));
     expect(Array.isArray(stored)).toBe(true);
@@ -607,9 +625,24 @@ describe("savePendingSession", () => {
   });
 
   it("appends to the existing queue on subsequent calls", () => {
-    const s1 = buildGameSession({ mode: "Classic", targetName: "Joker",  result: "win",    attempts: 1 });
-    const s2 = buildGameSession({ mode: "Emoji",   targetName: "Ryuji",  result: "giveup", attempts: 6 });
-    const s3 = buildGameSession({ mode: "Music",   targetName: "P4 OST", result: "win",    attempts: 2 });
+    const s1 = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    const s2 = buildGameSession({
+      mode: "Emoji",
+      targetName: "Ryuji",
+      result: "giveup",
+      attempts: 6,
+    });
+    const s3 = buildGameSession({
+      mode: "Music",
+      targetName: "P4 OST",
+      result: "win",
+      attempts: 2,
+    });
 
     savePendingSession(s1);
     savePendingSession(s2);
@@ -624,13 +657,21 @@ describe("savePendingSession", () => {
   it("preserves existing sessions already in localStorage", () => {
     // Pre-populate queue with one session
     const existing = buildGameSession({
-      mode: "Silhouette", targetName: "Aigis", result: "win", attempts: 4,
+      mode: "Silhouette",
+      targetName: "Aigis",
+      result: "win",
+      attempts: 4,
     });
     localStorage.setItem("pendingSessions", JSON.stringify([existing]));
 
-    savePendingSession(buildGameSession({
-      mode: "Classic", targetName: "Joker", result: "win", attempts: 1,
-    }));
+    savePendingSession(
+      buildGameSession({
+        mode: "Classic",
+        targetName: "Joker",
+        result: "win",
+        attempts: 1,
+      })
+    );
 
     const stored = JSON.parse(localStorage.getItem("pendingSessions"));
     expect(stored).toHaveLength(2);
@@ -638,7 +679,6 @@ describe("savePendingSession", () => {
     expect(stored[1].mode).toBe("Classic");
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // parisDateKey — DST transition edge cases
@@ -701,7 +741,6 @@ describe("parisDateKey — DST transition edge cases", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER_STORAGE_KEYS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -746,19 +785,18 @@ describe("FILTER_STORAGE_KEYS", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // buildGameSession — all 6 modes
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("buildGameSession — all 6 modes", () => {
   const VALID_MODES = [
-    { mode: "Classic",      targetName: "Joker" },
-    { mode: "Emoji",        targetName: "Ryuji Sakamoto" },
-    { mode: "Silhouette",   targetName: "Aigis" },
+    { mode: "Classic", targetName: "Joker" },
+    { mode: "Emoji", targetName: "Ryuji Sakamoto" },
+    { mode: "Silhouette", targetName: "Aigis" },
     { mode: "AllOutAttack", targetName: "Ann Takamaki" },
-    { mode: "Personae",     targetName: "Izanagi" },
-    { mode: "Music",        targetName: "Last Surprise" },
+    { mode: "Personae", targetName: "Izanagi" },
+    { mode: "Music", targetName: "Last Surprise" },
   ];
 
   for (const { mode, targetName } of VALID_MODES) {
@@ -789,12 +827,14 @@ describe("buildGameSession — all 6 modes", () => {
 
   it("accepts result 'giveup' as a valid result value", () => {
     const session = buildGameSession({
-      mode: "Silhouette", targetName: "Aigis", result: "giveup", attempts: 6,
+      mode: "Silhouette",
+      targetName: "Aigis",
+      result: "giveup",
+      attempts: 6,
     });
     expect(session.result).toBe("giveup");
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // normalize — additional edge cases
@@ -819,7 +859,7 @@ describe("normalize — additional edge cases", () => {
     // Note: voiced Katakana like ジ DO NFD-decompose to シ + U+3099 but that
     // combining mark is outside the strip range — so in practice normalize()
     // should not be called on Japanese text, only on romaji names.
-    const jp = normalize("アン");   // Ann — no voiced consonants, no decomposition
+    const jp = normalize("アン"); // Ann — no voiced consonants, no decomposition
     expect(jp).toBe("アン");
   });
 
@@ -834,15 +874,14 @@ describe("normalize — additional edge cases", () => {
   });
 
   it("handles strings with multiple types of curly apostrophes", () => {
-    const left  = normalize("l‘autre");  // '
-    const right = normalize("l’autre");  // '
+    const left = normalize("l‘autre"); // '
+    const right = normalize("l’autre"); // '
     expect(left).toBe("l'autre");
     expect(right).toBe("l'autre");
     // Both normalize to the same straight apostrophe
     expect(left).toBe(right);
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // getPlayerSeedId
@@ -895,7 +934,6 @@ describe("getPlayerSeedId", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // getDailyTarget
 // ─────────────────────────────────────────────────────────────────────────────
@@ -932,8 +970,8 @@ describe("getDailyTarget", () => {
 
   it("different seeds produce potentially different results for same date+mode", () => {
     const results = new Set(
-      ["seed-A", "seed-B", "seed-C", "seed-D", "seed-E", "seed-F", "seed-G", "seed-H"].map(
-        (seed) => getDailyTarget(POOL, "Classic", "2025-07-14", seed)
+      ["seed-A", "seed-B", "seed-C", "seed-D", "seed-E", "seed-F", "seed-G", "seed-H"].map((seed) =>
+        getDailyTarget(POOL, "Classic", "2025-07-14", seed)
       )
     );
     // With 8 different seeds and 8 pool items, we should get more than 1 unique result
@@ -975,7 +1013,6 @@ describe("getDailyTarget", () => {
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // PIÈGE 1 — i18n: t(key) returns the raw key (truthy) for missing keys,
 //            so `t(key) ?? fallback` never falls back.
@@ -1012,30 +1049,30 @@ describe("i18n t() — raw-key return for missing key (the ?? fallback trap)", (
 
     // WRONG pattern — ?? does not trigger because rawResult is truthy (the key string)
     const wrongFallback = rawResult ?? "my-fallback";
-    expect(wrongFallback).toBe(missingKey);           // gets the key, NOT the fallback
-    expect(wrongFallback).not.toBe("my-fallback");    // confirms the fallback was skipped
+    expect(wrongFallback).toBe(missingKey); // gets the key, NOT the fallback
+    expect(wrongFallback).not.toBe("my-fallback"); // confirms the fallback was skipped
 
     // CORRECT pattern — compare against the key itself
-    const correctFallback = (rawResult !== missingKey) ? rawResult : "my-fallback";
-    expect(correctFallback).toBe("my-fallback");      // fallback is applied correctly
+    const correctFallback = rawResult !== missingKey ? rawResult : "my-fallback";
+    expect(correctFallback).toBe("my-fallback"); // fallback is applied correctly
   });
 
   it("correct guard: (r != null && r !== key) returns false for missing keys", () => {
     const missingKey = "test.nonexistent.key.xyz";
     const r = t(missingKey);
     // The documented guard from CLAUDE.md:
-    const isFound = (r != null && r !== missingKey);
+    const isFound = r != null && r !== missingKey;
     expect(isFound).toBe(false); // key was NOT found — guard correctly returns false
   });
 
   it("correct guard: (r != null && r !== key) returns true when key IS found", () => {
     // Simulate the scenario where the key is found: the returned value differs from the key.
     // We create a small helper that mirrors the t() contract for a found value:
-    const foundValue = "Valider";  // what t() would return for 'ui.submit' in French
+    const foundValue = "Valider"; // what t() would return for 'ui.submit' in French
     const simulatedKey = "ui.submit";
     // Pretend t(simulatedKey) returned foundValue (i.e. translation was loaded)
     const r = foundValue;
-    const isFound = (r != null && r !== simulatedKey);
+    const isFound = r != null && r !== simulatedKey;
     expect(isFound).toBe(true); // key was found — guard correctly returns true
     // And the value is used, not the fallback
     const result = isFound ? r : "fallback";
@@ -1049,7 +1086,6 @@ describe("i18n t() — raw-key return for missing key (the ?? fallback trap)", (
     expect(result).toBe("ui.nonexistent.with.vars"); // key returned as-is
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PIÈGE 2 — syncPending: 409 must `continue` (skip), not `return` (abort queue)
@@ -1106,8 +1142,13 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
   }
 
   it("processes all sessions even when the first one returns 409", async () => {
-    const s1 = buildGameSession({ mode: "Classic", targetName: "Joker",  result: "win",  attempts: 1 });
-    const s2 = buildGameSession({ mode: "Emoji",   targetName: "Ryuji",  result: "win",  attempts: 2 });
+    const s1 = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    const s2 = buildGameSession({ mode: "Emoji", targetName: "Ryuji", result: "win", attempts: 2 });
 
     let callCount = 0;
     const mockPostSession = vi.fn().mockImplementation(async () => {
@@ -1127,13 +1168,18 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
     // Both sessions were attempted
     expect(mockPostSession).toHaveBeenCalledTimes(2);
     // The 409-ed session is silently dropped (not counted as processed, but also not kept)
-    expect(processed).toBe(1);           // only s2 succeeded
-    expect(remaining).toHaveLength(0);   // s1 (409) discarded, s2 (200) succeeded — nothing remaining
+    expect(processed).toBe(1); // only s2 succeeded
+    expect(remaining).toHaveLength(0); // s1 (409) discarded, s2 (200) succeeded — nothing remaining
   });
 
   it("keeps sessions in the remaining queue when a real network error occurs", async () => {
-    const s1 = buildGameSession({ mode: "Classic", targetName: "Joker", result: "win", attempts: 1 });
-    const s2 = buildGameSession({ mode: "Emoji",   targetName: "Ann",   result: "win", attempts: 2 });
+    const s1 = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    const s2 = buildGameSession({ mode: "Emoji", targetName: "Ann", result: "win", attempts: 2 });
 
     let callCount = 0;
     const mockPostSession = vi.fn().mockImplementation(async () => {
@@ -1148,8 +1194,8 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
     const { processed, remaining } = await syncPendingLoop([s1, s2], mockPostSession);
 
     expect(mockPostSession).toHaveBeenCalledTimes(2);
-    expect(processed).toBe(1);           // s2 succeeded
-    expect(remaining).toHaveLength(1);   // s1 (network error) kept for retry
+    expect(processed).toBe(1); // s2 succeeded
+    expect(remaining).toHaveLength(1); // s1 (network error) kept for retry
     expect(remaining[0].target_name).toBe("Joker");
   });
 
@@ -1170,7 +1216,10 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
     };
 
     const session = buildGameSession({
-      mode: "Classic", targetName: "Makoto", result: "win", attempts: 2,
+      mode: "Classic",
+      targetName: "Makoto",
+      result: "win",
+      attempts: 2,
     });
 
     await savePendingSession(session);
@@ -1193,7 +1242,10 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
     };
 
     const session = buildGameSession({
-      mode: "Classic", targetName: "Aigis", result: "win", attempts: 3,
+      mode: "Classic",
+      targetName: "Aigis",
+      result: "win",
+      attempts: 3,
     });
 
     await savePendingSession(session);
@@ -1204,7 +1256,6 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
     expect(pending[0].target_name).toBe("Aigis");
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PIÈGE 3 — filterMenu._migrate(): ["P5","P5R"] must NOT expand to all P5 sub-codes
@@ -1224,11 +1275,11 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
 describe("filterMenu _migrate() logic — inline reproduction (function not exported)", () => {
   // Replicate LEGACY_EXPAND and _migrate exactly as they appear in filterMenu.js
   const LEGACY_EXPAND = {
-    P2:  ["P2IS", "P2EP"],
-    P3:  ["P3",   "P3FES", "P3P"],
-    P4:  ["P4",   "P4G",   "P4AU", "P4D"],
-    P5:  ["P5",   "P5R",   "P5S",  "P5T"],
-    PQ:  ["PQ",  "PQ2"],
+    P2: ["P2IS", "P2EP"],
+    P3: ["P3", "P3FES", "P3P"],
+    P4: ["P4", "P4G", "P4AU", "P4D"],
+    P5: ["P5", "P5R", "P5S", "P5T"],
+    PQ: ["PQ", "PQ2"],
   };
 
   function _migrate(saved, allOpus) {
@@ -1238,11 +1289,11 @@ describe("filterMenu _migrate() logic — inline reproduction (function not expo
     for (const code of saved) {
       const children = LEGACY_EXPAND[code];
       if (children) {
-        const alreadyPrecise = children.some(c => c !== code && saved.includes(c));
+        const alreadyPrecise = children.some((c) => c !== code && saved.includes(c));
         if (alreadyPrecise) {
           if (allOpus.includes(code)) result.push(code);
         } else {
-          result.push(...children.filter(c => allOpus.includes(c)));
+          result.push(...children.filter((c) => allOpus.includes(c)));
         }
       } else if (allOpus.includes(code)) {
         result.push(code);
@@ -1251,8 +1302,25 @@ describe("filterMenu _migrate() logic — inline reproduction (function not expo
     return result.length > 0 ? [...new Set(result)] : null;
   }
 
-  const ALL_OPUS = ["P1", "P2IS", "P2EP", "P3", "P3FES", "P3P", "P4", "P4G", "P4AU", "P4D",
-                    "P5", "P5R", "P5S", "P5T", "P5X", "PQ", "PQ2"];
+  const ALL_OPUS = [
+    "P1",
+    "P2IS",
+    "P2EP",
+    "P3",
+    "P3FES",
+    "P3P",
+    "P4",
+    "P4G",
+    "P4AU",
+    "P4D",
+    "P5",
+    "P5R",
+    "P5S",
+    "P5T",
+    "P5X",
+    "PQ",
+    "PQ2",
+  ];
 
   it("new format: ['P5','P5R'] keeps P5 and P5R only — does NOT expand to all P5 sub-codes", () => {
     // This is the core of the piège: in the new precise-code format, saving ["P5","P5R"]
@@ -1310,7 +1378,6 @@ describe("filterMenu _migrate() logic — inline reproduction (function not expo
   });
 });
 
-
 // ─────────────────────────────────────────────────────────────────────────────
 // PIÈGE 4 — DST Paris: additional edge cases not yet covered
 //
@@ -1350,7 +1417,6 @@ describe("parisDateKey — midnight boundary with UTC+2 offset (summer)", () => 
     expect(parisDateKey(date)).toBe("2025-01-16");
   });
 });
-
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PIÈGE 5 — normalize: edge cases not covered by existing tests
