@@ -101,6 +101,9 @@ musicsMode/database/music/
 # pas nécessaires dans le dépôt public.
 # ─────────────────────────────────────────────────────────────────────────────
 PersonaDLE_Update_Documentation/
+!PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf
+!PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf
+!PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/TEST_PLAN.md
 
 # ─────────────────────────────────────────────────────────────────────────────
