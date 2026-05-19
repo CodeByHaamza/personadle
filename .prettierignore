@@ -17,3 +17,11 @@ PersonaDLE_Update_Documentation/
 
 # Generated / third-party
 assets/
+
+# Auto-generated knowledge graph
+graphify-out/
+
+# Internal dev tools (Claude Code, Superpowers)
+.claude/
+.superpowers/
+docs/superpowers/

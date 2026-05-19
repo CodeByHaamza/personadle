@@ -219,8 +219,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   setupDailyReset(() => {
-    // ← shared utility
-    console.log("🔄 Auto-reset triggered at Paris midnight (Music)");
     resetBtn ? resetBtn.click() : location.reload();
   });
 });
@@ -291,7 +289,6 @@ function showVictory(force = false) {
     if (!profile.lostToNeverMore) {
       profile.lostToNeverMore = true;
       hasChanges = true;
-      console.log("🌫️ Badge Trigger: The fog remains... (Adachi wins)");
     }
   }
 
@@ -300,7 +297,6 @@ function showVictory(force = false) {
     if (!profile.foundBurnMyDread) {
       profile.foundBurnMyDread = true;
       hasChanges = true;
-      console.log("🔥 Badge Trigger: Burn My Dread found!");
     }
   }
 
@@ -309,7 +305,6 @@ function showVictory(force = false) {
     if (!profile.foundZutomayo) {
       profile.foundZutomayo = true;
       hasChanges = true;
-      console.log("🌙 Badge Trigger: Zutomayo found!");
     }
   }
 
@@ -318,14 +313,12 @@ function showVictory(force = false) {
   if (force && titleRaw.includes("our light") && !profile.gaveUpOnOurLight) {
     profile.gaveUpOnOurLight = true;
     hasChanges = true;
-    console.log("🌊 Badge Trigger: Our Light — gave up");
   }
 
   // 🏠 SECRET BASE — Find the P4 Dojima/Nanako theme
   if (!force && titleRaw.includes("secret base") && !profile.foundSecretBase) {
     profile.foundSecretBase = true;
     hasChanges = true;
-    console.log("🏠 Badge Trigger: Secret Base found!");
   }
 
   // 🎬 WHEN MOTHER WAS THERE — Find "Kimi no Kioku" / "Memories of You"
@@ -338,7 +331,6 @@ function showVictory(force = false) {
   ) {
     profile.foundWhenMotherWasThere = true;
     hasChanges = true;
-    console.log("🎬 Badge Trigger: When Mother Was There found!");
   }
 
   // 🎯 ONE SHOT — first-try win
@@ -845,20 +837,3 @@ function applyDarkModeStyles() {
 // DEBUG
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Console utility: logs every title in musicTitles.js and flags any that
- * are missing from songs.js. Useful for catching data inconsistencies.
- *
- * Usage (browser console): import('/musicsMode/modeMusic.js').then(m => m.debugAllMusic())
- */
-export function debugAllMusic() {
-  console.log("=== DEBUG MUSIC MODE ===");
-  const errors = [];
-  for (const name of [...musicTitles].sort()) {
-    const match = originalSongs.find((s) => s.titre === name);
-    if (!match) errors.push(`❌ ${name} — missing from songs.js`);
-    else console.log(`✅ OK: ${name}`);
-  }
-  if (errors.length) console.log(errors.join("\n"));
-  else console.log("🎉 No missing titles!");
-}
