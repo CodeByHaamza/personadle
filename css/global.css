@@ -843,11 +843,18 @@ input:checked + .slider.red {
 
 /* Image du personnage révélé */
 .victory-box img {
-  width: 200px;
+  width: auto;
   height: auto;
+  display: block;
+  margin: 0;
   border-radius: 14px;
-  margin-bottom: 15px;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Portraits Summer — format paysage, taille fixe */
+.victory-box img[src*="Summer"] {
+  width: 300px;
+  height: auto;
 }
 
 /* Message vert (win-message) — emoji, silhouette, allOutAttack */
@@ -1559,6 +1566,8 @@ button,
 
   .victory-box img {
     width: 120px;
+    display: block;
+    margin: 0 auto;
   }
 
   .win-message {
@@ -1690,6 +1699,8 @@ button,
   /* ---- Victoire ---- */
   .victory-box img {
     width: 100px;
+    display: block;
+    margin: 0 auto;
   }
   .win-message {
     font-size: 1.1rem;

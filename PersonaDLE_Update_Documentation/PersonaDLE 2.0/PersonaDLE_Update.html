@@ -4,32 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PersonaDLE — Documentation Technique v2.0</title>
+    <link rel="icon" type="image/gif" href="../../img/persona_64x64.gif" />
+    <script>
+        (function () {
+            var lang = localStorage.getItem("lang") || "en";
+            document.documentElement.lang = lang;
+            if (localStorage.getItem("darkMode") === "enabled") {
+                document.documentElement.classList.add("darkmode");
+            }
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     <style>
+        /* ── Theme variables — light mode by default, .darkmode overrides ── */
         :root {
-            --primary-color: #e63946; /* Rouge Persona */
-            --text-main: #1a1a1a;
-            --text-muted: #555555;
-            --bg-body: #ffffff;
-            --bg-code: #1e1e2e;
-            --bg-quote: #fdf2f2;
-            --border-color: #e2e8f0;
+            --primary-color: #e63946;
+            /* Light mode */
+            --text-main: #1e1830;
+            --text-muted: #5a4a72;
+            --text-h3: #7040a0;
+            --bg-overlay: rgba(245, 240, 255, 0.88);
+            --bg-code: #1e1428;
+            --bg-quote: rgba(228, 210, 245, 0.6);
+            --border-color: rgba(160, 80, 100, 0.22);
+            --panel-bg: rgba(255, 252, 255, 0.88);
+            --blockquote-text: #3a2060;
+            --inline-code-bg: rgba(230, 57, 70, 0.09);
+            --inline-code-color: #b01030;
+            --table-head-bg: rgba(230, 57, 70, 0.12);
+            --table-head-color: #7a0020;
+            --table-row-alt: rgba(0, 0, 0, 0.025);
+            --details-bg: rgba(255, 250, 255, 0.9);
+            --details-color: #1e1830;
+            --new-blockquote-bg: rgba(232, 212, 240, 0.5);
+            --new-blockquote-color: #3a1040;
+            --aoa-card-bg: linear-gradient(135deg, #fdf8ff 0%, #fff4fa 35%, #f4f8ff 65%, #fdf8ff 100%);
+            --aoa-portrait-bg: rgba(240, 235, 250, 0.7);
+            --aoa-battle-bg: rgba(240, 235, 250, 0.6);
+            --aoa-col-border: rgba(230, 57, 70, 0.15);
+            --card-name-color: #1e0030;
+            --card-sub-color: #7a4060;
+            --summer-card-bg: linear-gradient(135deg, #fffbf0 0%, #fff7e0 40%, #f0feff 70%, #f4fff4 100%);
+            --summer-title-color: #9a5c00;
+            --summer-intro-bg: rgba(210, 155, 30, 0.08);
+            --summer-intro-border: #b08020;
+            --section-intro-bg: rgba(100, 60, 200, 0.055);
+            --section-intro-color: #5a4878;
+            --section-intro-border: #7c4dff;
+            --mg-bg: rgba(0, 0, 0, 0.03);
+            --mg-border: rgba(230, 57, 70, 0.18);
+            --mg-track-border: rgba(0, 0, 0, 0.07);
+            --mg-track-color: #1e1830;
+            --mg-artist-color: #666;
+            --ocg-bg: rgba(0, 0, 0, 0.03);
+            --home-btn-bg: rgba(255, 252, 255, 0.93);
+            --home-btn-color: #1e1830;
+            --home-btn-hover-bg: rgba(240, 232, 255, 0.97);
         }
 
-        * {
-            box-sizing: border-box;
+        :root.darkmode {
+            --text-main: #e8e4f0;
+            --text-muted: #a89ec0;
+            --text-h3: #c8b8e0;
+            --bg-overlay: rgba(8, 6, 14, 0.9);
+            --bg-code: #12101e;
+            --bg-quote: rgba(30, 10, 20, 0.7);
+            --border-color: rgba(160, 80, 100, 0.3);
+            --panel-bg: rgba(14, 10, 24, 0.75);
+            --blockquote-text: #d4bcd8;
+            --inline-code-bg: rgba(255, 60, 80, 0.12);
+            --inline-code-color: #ff8099;
+            --table-head-bg: rgba(230, 57, 70, 0.2);
+            --table-head-color: #f0c0c8;
+            --table-row-alt: rgba(255, 255, 255, 0.03);
+            --details-bg: rgba(14, 10, 24, 0.75);
+            --details-color: #e8e4f0;
+            --new-blockquote-bg: rgba(30, 5, 20, 0.6);
+            --new-blockquote-color: #e8c9d0;
+            --aoa-card-bg: linear-gradient(135deg, #08000e 0%, #1c0018 35%, #0e0020 65%, #180010 100%);
+            --aoa-portrait-bg: rgba(6, 0, 8, 0.7);
+            --aoa-battle-bg: rgba(6, 0, 8, 0.6);
+            --aoa-col-border: rgba(230, 57, 70, 0.22);
+            --card-name-color: #fff;
+            --card-sub-color: #cc8899;
+            --summer-card-bg: linear-gradient(135deg, #100c00 0%, #1e1600 40%, #001c20 70%, #0a1400 100%);
+            --summer-title-color: #f6ab3c;
+            --summer-intro-bg: rgba(246, 171, 60, 0.07);
+            --summer-intro-border: #d4943a;
+            --section-intro-bg: rgba(140, 100, 255, 0.07);
+            --section-intro-color: #b8c0cc;
+            --section-intro-border: #7c4dff;
+            --mg-bg: rgba(255, 255, 255, 0.04);
+            --mg-border: rgba(230, 57, 70, 0.18);
+            --mg-track-border: rgba(255, 255, 255, 0.06);
+            --mg-track-color: #e8e4f0;
+            --mg-artist-color: #888;
+            --ocg-bg: rgba(255, 255, 255, 0.04);
+            --home-btn-bg: #1a1228;
+            --home-btn-color: #e8e4f0;
+            --home-btn-hover-bg: #2d1a40;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
             color: var(--text-main);
-            background-color: var(--bg-body);
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            background:
+                linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+                url('../../img/personadle_wallpaper.jpg') center / cover fixed;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .doc-wrap {
+            max-width: 1100px;
             margin: 0 auto;
-            max-width: 1000px;
-            padding: 40px 20px;
+            padding: 40px clamp(16px, 5vw, 64px);
         }
 
         /* Typographie */
@@ -57,30 +154,27 @@
             margin-top: 2em;
         }
 
-        h3 {
-            font-size: 1.3rem;
-            color: #333;
-        }
+        h3 { font-size: 1.3rem; color: var(--text-h3); }
 
-        p {
-            margin-bottom: 1.2em;
-        }
+        p { margin-bottom: 1.2em; }
 
         /* Frontmatter & Header */
         .frontmatter {
             text-align: center;
             margin-bottom: 40px;
             padding: 40px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
+            background: var(--panel-bg);
+            border-radius: 16px;
+            border: 1px solid rgba(230, 57, 70, 0.3);
+            backdrop-filter: blur(4px);
         }
 
         .frontmatter h1 {
             border: none;
             font-size: 2.8rem;
             margin: 0 0 10px 0;
-            color: var(--text-main);
+            color: var(--primary-color);
+            text-shadow: 0 0 30px rgba(230, 57, 70, 0.35);
         }
 
         .frontmatter p {
@@ -91,24 +185,23 @@
 
         /* Blockquotes */
         blockquote {
-            border-left: 6px solid var(--primary-color);
+            border-left: 5px solid var(--primary-color);
             background-color: var(--bg-quote);
             margin: 1.5em 0;
             padding: 1.2em 1.5em;
             border-radius: 0 8px 8px 0;
             font-weight: 600;
-            color: #442222;
+            color: var(--blockquote-text);
+            backdrop-filter: blur(3px);
         }
 
-        blockquote p {
-            margin: 0;
-        }
+        blockquote p { margin: 0; }
 
         /* Code & Pre */
         code {
             font-family: 'JetBrains Mono', monospace;
-            background-color: #f1f5f9;
-            color: #d90429;
+            background-color: var(--inline-code-bg);
+            color: var(--inline-code-color);
             padding: 0.2em 0.4em;
             border-radius: 4px;
             font-size: 0.9em;
@@ -124,14 +217,10 @@
             font-size: 0.9em;
             line-height: 1.5;
             page-break-inside: avoid;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
         }
 
-        pre code {
-            background-color: transparent;
-            color: inherit;
-            padding: 0;
-        }
+        pre code { background-color: transparent; color: inherit; padding: 0; }
 
         /* Tables */
         table {
@@ -143,8 +232,8 @@
         }
 
         thead {
-            background-color: var(--text-main);
-            color: #ffffff;
+            background-color: var(--table-head-bg);
+            color: var(--table-head-color);
         }
 
         th, td {
@@ -161,9 +250,7 @@
             letter-spacing: 0.5px;
         }
 
-        tbody tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
+        tbody tr:nth-child(even) { background-color: var(--table-row-alt); }
 
         /* Images */
         img {
@@ -175,19 +262,13 @@
             page-break-inside: avoid;
         }
 
-        .center {
-            text-align: center;
-        }
+        .center { text-align: center; }
 
-        hr {
-            border: 0;
-            height: 2px;
-            background: var(--border-color);
-            margin: 3em 0;
-        }
+        hr { border: 0; height: 2px; background: var(--border-color); margin: 3em 0; }
 
         details {
-            background: #f8fafc;
+            background: var(--details-bg);
+            color: var(--details-color);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 10px 15px;
@@ -195,69 +276,595 @@
             page-break-inside: avoid;
         }
 
-        summary {
+        summary { font-weight: 600; cursor: pointer; outline: none; }
+
+        /* ── Bouton retour accueil ── */
+        .home-btn {
+            position: fixed;
+            top: 12px;
+            left: 16px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--home-btn-bg);
+            color: var(--home-btn-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px;
             font-weight: 600;
-            cursor: pointer;
-            outline: none;
+            text-decoration: none;
+            transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+        }
+        .home-btn:hover {
+            background: var(--home-btn-hover-bg);
+            box-shadow: 0 0 10px rgba(230, 57, 70, 0.35);
         }
 
         /* Configurations PDF / Impression */
         @media print {
-            body {
-                padding: 0;
-                background: white;
-            }
+            body { padding: 0; background: white; }
+            .frontmatter { border: none; background: transparent; margin-top: 30vh; page-break-after: always; }
+            h1 { page-break-before: always; }
+            h1:first-of-type { page-break-before: auto; }
+            pre, blockquote, table, img, details { page-break-inside: avoid; }
+            a { text-decoration: none; color: inherit; }
+        }
 
-            .frontmatter {
-                border: none;
-                background: transparent;
-                margin-top: 30vh;
-                page-break-after: always;
-            }
+        /* ── Nouveau contenu — grille ── */
+        .new-content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 28px;
+            margin: 28px 0;
+        }
 
-            h1 {
-                page-break-before: always;
-            }
+        .new-content-section blockquote {
+            background: var(--new-blockquote-bg);
+            border-left-color: #c0193a;
+            color: var(--new-blockquote-color);
+        }
 
-            h1:first-of-type {
-                page-break-before: auto;
+        /* ── Carte Joker Starlight — P5 Dancing in Starlight ── */
+        @keyframes aoaCardGlow {
+            0%, 100% {
+                box-shadow: 0 0 24px rgba(230, 57, 70, 0.55),
+                            0 0 60px rgba(230, 57, 70, 0.15);
             }
-
-            pre, blockquote, table, img, details {
-                page-break-inside: avoid;
-            }
-
-            a {
-                text-decoration: none;
-                color: inherit;
+            50% {
+                box-shadow: 0 0 44px rgba(230, 57, 70, 0.95),
+                            0 0 90px rgba(255, 107, 157, 0.3),
+                            0 0 140px rgba(255, 200, 50, 0.12);
             }
         }
+
+        @keyframes aoaBorderShimmer {
+            0%, 100% { border-color: rgba(230, 57, 70, 0.9); }
+            33%      { border-color: rgba(255, 107, 157, 1); }
+            66%      { border-color: rgba(255, 210, 60, 0.8); }
+        }
+
+        @keyframes aoaNameNeon {
+            0%, 100% {
+                text-shadow: 0 0 8px rgba(230, 57, 70, 0.9),
+                             0 0 20px rgba(230, 57, 70, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 14px rgba(255, 107, 157, 1),
+                             0 0 34px rgba(255, 107, 157, 0.7),
+                             0 0 60px rgba(255, 200, 100, 0.3);
+            }
+        }
+
+        @keyframes aoaStarFlicker {
+            0%, 65%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            70% { opacity: 0.25; transform: scale(0.65) rotate(20deg); }
+            78% { opacity: 1; transform: scale(1.35) rotate(-8deg); color: #fff8c0; }
+        }
+
+        @keyframes aoaPortraitPulse {
+            0%, 100% {
+                box-shadow: 0 0 14px rgba(255, 107, 157, 0.75),
+                            0 0 28px rgba(255, 107, 157, 0.25);
+            }
+            50% {
+                box-shadow: 0 0 24px rgba(255, 107, 157, 1),
+                            0 0 50px rgba(255, 210, 100, 0.35);
+            }
+        }
+
+        /* ── Carte horizontale — layout 3 colonnes ── */
+        .aoa-card {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #e63946;
+            background: var(--aoa-card-bg);
+            animation: aoaCardGlow 3s ease-in-out infinite,
+                       aoaBorderShimmer 6s ease-in-out infinite;
+            transition: transform 0.25s ease;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .aoa-card:hover { transform: translateY(-6px) scale(1.006); }
+
+        .aoa-card-inner { display: flex; align-items: stretch; }
+
+        /* Colonne gauche — portrait autocomplete */
+        .aoa-portrait-col {
+            flex: 0 0 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 12px;
+            border-right: 1px solid var(--aoa-col-border);
+        }
+
+        .aoa-portrait-img {
+            width: 250px;
+            height: auto;
+            object-fit: contain;
+            object-position: center;
+            border-radius: 10px;
+            border: 1px solid rgba(230, 57, 70, 0.5);
+            background: var(--aoa-portrait-bg);
+            display: block;
+            margin: 0;
+        }
+
+        /* Colonne centre — GIF animé en PAYSAGE */
+        .aoa-gif-col {
+            flex: 0 0 300px;
+            height: 190px;
+            overflow: hidden;
+            border-right: 1px solid var(--aoa-col-border);
+            position: relative;
+            align-self: center;
+        }
+
+        .aoa-gif-col::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px,
+                transparent 1px, transparent 3px
+            );
+            pointer-events: none;
+        }
+
+        /* On garde comme ça */ 
+        .aoa-gif-img {
+            width: auto;
+            height: auto;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            margin: 0;
+            margin-top: 1pc;
+        }
+
+        /* Colonne droite — battle portrait (grand) + infos */
+        .aoa-battle-col {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 20px;
+        }
+
+        .aoa-battle-img {
+            flex-shrink: 0;
+            width: 150px;
+            height: auto;
+            object-fit: contain;
+            object-position: top;
+            border-radius: 14px;
+            border: 2px solid #ff6b9d;
+            background: var(--aoa-battle-bg);
+            display: block;
+            margin: 0;
+            animation: aoaPortraitPulse 3s ease-in-out infinite;
+        }
+
+        .aoa-info { flex: 1; }
+
+        .aoa-card .card-stars { display: flex; gap: 6px; margin-bottom: 8px; }
+
+        .aoa-card .card-stars span {
+            font-size: 0.85rem;
+            display: inline-block;
+            animation: aoaStarFlicker 2.5s ease-in-out infinite;
+        }
+
+        .aoa-card .card-stars span:nth-child(1) { animation-delay: 0s;   color: #ffd700; }
+        .aoa-card .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #fff;    }
+        .aoa-card .card-stars span:nth-child(3) { animation-delay: 1s;   color: #ffd700; }
+        .aoa-card .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #ff9dcf; }
+        .aoa-card .card-stars span:nth-child(5) { animation-delay: 2s;   color: #ffd700; }
+
+        .aoa-card .card-badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #c0193a, #ff4d6d);
+            color: #fff;
+            padding: 3px 14px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(192, 25, 58, 0.4);
+            margin-bottom: 6px;
+        }
+
+        .aoa-card .card-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--card-name-color);
+            margin: 4px 0;
+            letter-spacing: 0.5px;
+            animation: aoaNameNeon 4s ease-in-out infinite;
+        }
+
+        .aoa-card .card-sub {
+            color: var(--card-sub-color);
+            font-size: 0.83rem;
+            margin: 0;
+            letter-spacing: 0.3px;
+        }
+
+        /* Responsive mobile — empilement vertical */
+        @media (max-width: 660px) {
+            .aoa-card-inner { flex-direction: column; }
+            .aoa-portrait-col {
+                flex: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--aoa-col-border);
+                padding: 14px;
+            }
+            .aoa-gif-col { flex: auto; height: 180px; border-right: none; width: 100%; }
+            .aoa-gif-img { width: 100%; height: 240px; margin-top: -30px; }
+            .aoa-battle-col { flex: auto; flex-direction: column; align-items: center; text-align: center; padding: 16px; }
+            .aoa-battle-img { width: 140px; height: 140px; }
+            .aoa-card-summer .aoa-battle-img { width: 80px; height: 130px; }
+        }
+
+        /* ── Cartes Summer — P5X Summer Event ── */
+        /* Pas d'effet néon : ambiance ensoleillée sobre, couleurs ambre/teal */
+        .aoa-card-summer {
+            border-color: #f6ab3c;
+            background: var(--summer-card-bg);
+            animation: none;
+            box-shadow: 0 4px 18px rgba(246, 171, 60, 0.16);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+        }
+
+        .aoa-card-summer:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 8px 30px rgba(246, 171, 60, 0.28);
+        }
+
+        .aoa-card-summer .aoa-portrait-col  { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-gif-col       { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-portrait-img  { border-color: rgba(246, 171, 60, 0.5); }
+
+        .aoa-card-summer .aoa-battle-img {
+            width: 130px;
+            height: auto;
+            max-width: none;
+            object-fit: contain;
+            object-position: top;
+            display: block;
+            margin: 0;
+            border-color: #4dd0e1;
+            animation: none;
+            box-shadow: 0 2px 10px rgba(77, 208, 225, 0.18);
+        }
+
+        .aoa-card-summer .card-badge {
+            background: linear-gradient(90deg, #c07800, #f6ab3c);
+            box-shadow: 0 2px 8px rgba(246, 171, 60, 0.3);
+        }
+
+        .aoa-card-summer .card-name {
+            color: var(--summer-title-color);
+            animation: none;
+            text-shadow: none;
+        }
+
+        .aoa-card-summer .card-sub { color: #4dd0e1; }
+
+        .aoa-card-summer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #fff;    }
+        .aoa-card-summer .card-stars span:nth-child(5) { animation-delay: 2s;   color: #f6d365; }
+
+        .summer-chars-title {
+            margin-top: 36px;
+            color: var(--summer-title-color);
+        }
+
+        /* ── Intro phrase pour les cartes de perso ── */
+        .card-intro {
+            color: var(--blockquote-text);
+            font-style: italic;
+            margin: 10px 0 20px 0;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            padding: 12px 18px;
+            background: rgba(230, 57, 70, 0.06);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── Summer intro paragraph ── */
+        .summer-intro {
+            color: var(--blockquote-text);
+            font-style: italic;
+            margin: 10px 0 24px 0;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            padding: 12px 18px;
+            background: var(--summer-intro-bg);
+            border-left: 3px solid var(--summer-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── Section intro phrases ── */
+        .section-intro {
+            color: var(--section-intro-color);
+            font-style: italic;
+            margin: 8px 0 28px 0;
+            line-height: 1.65;
+            font-size: 0.94rem;
+            padding: 11px 18px;
+            background: var(--section-intro-bg);
+            border-left: 3px solid var(--section-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── Music grouped list ── */
+        .music-group-list { display:flex; flex-direction:column; gap:8px; margin:16px 0; }
+        .music-group {
+            display:flex; align-items:center; gap:16px;
+            background: var(--mg-bg);
+            border: 1px solid var(--mg-border);
+            border-radius:10px; padding:12px 16px;
+        }
+        .mg-cover { flex:0 0 96px; text-align:center; }
+        .mg-cover img { width:96px; height:96px; object-fit:cover; border-radius:10px; display:block; }
+        .mg-cover code { font-size:0.73em; color:#e63946; margin-top:5px; display:block; }
+        .mg-tracks { flex:1; }
+        .mg-track {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:4px 0; border-bottom: 1px solid var(--mg-track-border);
+            font-size:0.88em; color: var(--mg-track-color);
+        }
+        .mg-track:last-child { border-bottom:none; }
+        .mg-artist { color: var(--mg-artist-color); font-style:italic; font-size:0.9em; margin-left:12px; flex-shrink:0; }
+
+        /* ── Opus covers grid ── */
+        .opus-covers-grid { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0; }
+        .ocg-item {
+            display:flex; flex-direction:column; align-items:center; gap:5px;
+            background: var(--ocg-bg);
+            border:1px solid rgba(230,57,70,0.12);
+            border-radius:10px; padding:10px 8px;
+            transition:border-color 0.2s, transform 0.2s;
+        }
+        .ocg-item:hover { border-color:rgba(230,57,70,0.5); transform:translateY(-2px); }
+        .ocg-item img { width:80px; height:80px; object-fit:cover; border-radius:7px; display:block; }
+        .ocg-item code { font-size:0.73em; color:#e63946; }
     </style>
 </head>
 <body>
 
+<!-- ── Bouton retour accueil ── -->
+<a href="../../index.html" class="home-btn">← PersonaDLE</a>
+
+<script type="module">
+  import { initLang } from '../../js/i18n.js';
+  document.addEventListener('DOMContentLoaded', () => initLang());
+</script>
+
+<div class="doc-wrap">
+
     <!-- FRONTMATTER -->
     <div class="frontmatter">
         <h1>PersonaDLE</h1>
-        <p><strong>Documentation Technique v2.0</strong></p>
-        <p>Architecture, Backend, i18n, Social, Admin & Qualité</p>
+        <div data-i18n-block="fr"><p><strong>Documentation Technique v2.0</strong></p>
+        <p>Architecture, Backend, i18n, Social, Admin &amp; Qualité</p>
         <br>
-        <p>Auteur : <em>PersonaDLE Team</em> | Date : <em>Mai 2026</em></p>
+        <p>Auteur : <em>PersonaDLE Team</em> | Date : <em>Mai 2026</em></p></div>
+        <div data-i18n-block="en"><p><strong>Technical Documentation v2.0</strong></p>
+        <p>Architecture, Backend, i18n, Social, Admin &amp; Quality</p>
+        <br>
+        <p>Author: <em>PersonaDLE Team</em> | Date: <em>May 2026</em></p></div>
     </div>
 
     <!-- BANNIÈRE & INTRO -->
     <div class="center">
         <img src="Illustration_banniere_2.0.png" width="700" alt="Bannière PersonaDLE v2.0">
         <h2>◆ PersonaDLE v2.0 ◆</h2>
-        <h3>Documentation technique complète</h3>
+        <div data-i18n-block="fr"><h3>Documentation technique complète</h3></div>
+        <div data-i18n-block="en"><h3>Complete technical documentation</h3></div>
     </div>
 
     <blockquote>
-        <p><strong>La v2.0 marque le passage de la phase refactoring vers la phase fonctionnalités utilisateur : backend PHP/MariaDB complet, internationalisation 5 langues, système social (amis, Social Link, défis), panneau d'administration, et infrastructure CI/CD.</strong></p>
+        <div data-i18n-block="fr"><p><strong>La v2.0 marque le passage de la phase refactoring vers la phase fonctionnalités utilisateur : backend PHP/MariaDB complet, internationalisation 5 langues, système social (amis, Social Link, défis), panneau d'administration, et infrastructure CI/CD.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>v2.0 marks the transition from the refactoring phase to the user-features phase: complete PHP/MariaDB backend, 5-language internationalization, social system (friends, Social Link, challenges), administration panel, and CI/CD infrastructure.</strong></p></div>
     </blockquote>
 
     <hr>
 
+    <!-- ✨ NOUVEAU CONTENU v2.0 — section joueurs -->
+    <div class="new-content-section">
+
+        <h1 data-i18n="updates.new_content_title">✨ New Content v2.0</h1>
+        <blockquote><p><strong data-i18n="updates.new_content_desc">New characters, new music — everything added in this update.</strong></p></blockquote>
+
+        <h2 data-i18n="updates.new_chars_title">New Characters — All-Out Attack Mode</h2>
+        <p class="card-intro" data-i18n="updates.joker_starlight_intro"></p>
+        <div class="aoa-card">
+            <div class="aoa-card-inner">
+                <!-- Portrait autocomplete (gauche) -->
+                <div class="aoa-portrait-col">
+                    <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Joker_Starlight.webp" alt="Joker Starlight portrait">
+                </div>
+                <!-- GIF animé All-Out Attack (centre) -->
+                <div class="aoa-gif-col">
+                    <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Joker_Starlight.webp" alt="Joker Starlight All-Out Attack">
+                </div>
+                <!-- Battle portrait (grand) + infos (droite) -->
+                <div class="aoa-battle-col">
+                    <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Joker_Starlight_Battle.webp" alt="Joker Starlight Battle">
+                    <div class="aoa-info">
+                        <div class="card-stars" aria-hidden="true">
+                            <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                        </div>
+                        <span class="card-badge">P5X</span>
+                        <p class="card-name">Joker Starlight</p>
+                        <p class="card-sub">Ren Amamiya — Persona 5 X</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Summer 2026 — P5X Summer Characters ── -->
+        <h3 class="summer-chars-title" data-i18n="updates.new_chars_summer">☀️ Summer 2026 — P5X Summer Event</h3>
+        <p class="summer-intro" data-i18n="updates.summer_intro"></p>
+
+        <!-- Wonder Summer -->
+        <div class="aoa-card aoa-card-summer">
+            <div class="aoa-card-inner">
+                <div class="aoa-portrait-col">
+                    <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Wonder_Summer.webp" alt="Wonder Summer portrait">
+                </div>
+                <div class="aoa-gif-col">
+                    <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Wonder_Summer.webp" alt="Wonder Summer All-Out Attack">
+                </div>
+                <div class="aoa-battle-col">
+                    <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Wonder_Summer_Battle.webp" alt="Wonder Summer Battle">
+                    <div class="aoa-info">
+                        <div class="card-stars" aria-hidden="true">
+                            <span>☀️</span><span>🌊</span><span>☀️</span><span>🌊</span><span>☀️</span>
+                        </div>
+                        <span class="card-badge">P5X</span>
+                        <p class="card-name">Wonder Summer</p>
+                        <p class="card-sub">Nagisa Kamishiro — Persona 5 X</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closer Summer -->
+        <div class="aoa-card aoa-card-summer">
+            <div class="aoa-card-inner">
+                <div class="aoa-portrait-col">
+                    <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Closer_Summer.webp" alt="Closer Summer portrait">
+                </div>
+                <div class="aoa-gif-col">
+                    <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Closer_Summer.webp" alt="Closer Summer All-Out Attack">
+                </div>
+                <div class="aoa-battle-col">
+                    <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Closer_Summer_Battle.webp" alt="Closer Summer Battle">
+                    <div class="aoa-info">
+                        <div class="card-stars" aria-hidden="true">
+                            <span>🏖️</span><span>☀️</span><span>🏖️</span><span>☀️</span><span>🏖️</span>
+                        </div>
+                        <span class="card-badge">P5X</span>
+                        <p class="card-name">Closer Summer</p>
+                        <p class="card-sub">Motoha Arai — Persona 5 X</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Moko Summer -->
+        <div class="aoa-card aoa-card-summer">
+            <div class="aoa-card-inner">
+                <div class="aoa-portrait-col">
+                    <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Moko_Summer.webp" alt="Moko Summer portrait">
+                </div>
+                <div class="aoa-gif-col">
+                    <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Moko_Summer.webp" alt="Moko Summer All-Out Attack">
+                </div>
+                <div class="aoa-battle-col">
+                    <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Moko_Summer_Battle.webp" alt="Moko Summer Battle">
+                    <div class="aoa-info">
+                        <div class="card-stars" aria-hidden="true">
+                            <span>🏐</span><span>🌊</span><span>🏐</span><span>🌊</span><span>🏐</span>
+                        </div>
+                        <span class="card-badge">P5X</span>
+                        <p class="card-name">Moko Summer</p>
+                        <p class="card-sub">Tomoko Noge — Persona 5 X</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 data-i18n="updates.new_music_title">New Tracks — Music Mode</h2>
+        <div class="music-group-list">
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P3P.webp" alt="P3P"><code>P3P</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Danger Zone</span><span class="mg-artist">(instrumental)</span></div>
+                    <div class="mg-track"><span>Time</span><span class="mg-artist">Mayumi Fujita</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P3R.webp" alt="P3R"><code>P3R</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Want to Be Close -Reload-</span><span class="mg-artist">Azumi Takahashi</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P4AU.webp" alt="P4AU"><code>P4AU</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>A Fool or Clown?</span><span class="mg-artist">(instrumental)</span></div>
+                    <div class="mg-track"><span>Best Friends</span><span class="mg-artist">Yumi Kawamura</span></div>
+                    <div class="mg-track"><span>Break Out Of</span><span class="mg-artist">Shihoko Hirata, Lotus Juice</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P4G.webp" alt="P4G"><code>P4G</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>I'll Face Myself -Battle-</span><span class="mg-artist">(instrumental)</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P5R.webp" alt="P5R"><code>P5R</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Throw Away Your Mask</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P5S.webp" alt="P5S"><code>P5S</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Axe to Grind</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                    <div class="mg-track"><span>Counter Strike</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P5T.webp" alt="P5T"><code>P5T</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Got Your Tail</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                    <div class="mg-track"><span>Revolution is a Blade</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                    <div class="mg-track"><span>Truth or Dare</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <div data-i18n-block="fr">
     <h2>Stack technique</h2>
     <table>
         <thead>
@@ -274,6 +881,25 @@
             <tr><td><strong>Tests</strong></td><td>Vitest + jsdom (<code>npm test</code>)</td></tr>
         </tbody>
     </table>
+    </div>
+    <div data-i18n-block="en">
+    <h2>Tech stack</h2>
+    <table>
+        <thead>
+            <tr><th>Layer</th><th>Technology</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Frontend</strong></td><td>HTML5 / CSS3 / JavaScript ES6+ vanilla — zero framework</td></tr>
+            <tr><td><strong>Modules</strong></td><td>ES6 <code>import</code>/<code>export</code> — each mode imports from <code>js/gameCore.js</code></td></tr>
+            <tr><td><strong>Local persistence</strong></td><td><code>localStorage</code> — profile, stats, filters, game state</td></tr>
+            <tr><td><strong>Backend</strong></td><td>PHP 8.3, PDO (Prepared Statements required)</td></tr>
+            <tr><td><strong>Database</strong></td><td>MySQL 8.0 locally · MariaDB 10.6+ on Hostinger</td></tr>
+            <tr><td><strong>Hosting</strong></td><td>Hostinger</td></tr>
+            <tr><td><strong>Authentication</strong></td><td>Email + bcrypt password, PHP httpOnly sessions</td></tr>
+            <tr><td><strong>Tests</strong></td><td>Vitest + jsdom (<code>npm test</code>)</td></tr>
+        </tbody>
+    </table>
+    </div>
 
     <hr>
 
@@ -282,16 +908,22 @@
         <img src="CSS_adaptation_style_illustration.png" width="700" alt="CSS adaptation style illustration">
     </div>
     
-    <h1>1. Design & CSS</h1>
-    
-    <blockquote>
-        <p><strong>Du monolithe 2000 lignes aux fichiers par mode — responsive, dark mode, share modal, badges UI.</strong></p>
-    </blockquote>
+    <div data-i18n-block="fr"><h1>1. Design &amp; CSS</h1></div>
+    <div data-i18n-block="en"><h1>1. Design &amp; CSS</h1></div>
 
-    <h3>1.1 Séparation CSS — du monolithe aux fichiers par mode</h3>
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Du monolithe 2000 lignes aux fichiers par mode — responsive, dark mode, share modal, badges UI.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>From the 2000-line monolith to per-mode files — responsive, dark mode, share modal, badges UI.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_css"></p>
+
+
+    <div data-i18n-block="fr"><h3>1.1 Séparation CSS — du monolithe aux fichiers par mode</h3>
     <p>Avant la v2.0, l'intégralité des styles du jeu était concentrée dans un unique fichier <code>css/style.css</code> de plus de 2 000 lignes. Ce monolithe posait des problèmes de lisibilité, de maintenabilité (modifier un mode risquait d'en casser un autre), de performance (chaque page chargeait la totalité des styles) et de collaboration (conflits de merge fréquents).</p>
-    
-    <p><strong>Solution — un fichier CSS par mode :</strong></p>
+    <p><strong>Solution — un fichier CSS par mode :</strong></p></div>
+    <div data-i18n-block="en"><h3>1.1 CSS Separation — from monolith to per-mode files</h3>
+    <p>Before v2.0, all game styles were concentrated in a single <code>css/style.css</code> file of over 2,000 lines. This monolith caused readability problems, maintainability issues (modifying one mode could break another), performance issues (each page loaded all styles), and collaboration conflicts (frequent merge conflicts).</p>
+    <p><strong>Solution — one CSS file per mode:</strong></p></div>
 <pre><code>css/
 ├── global.css          ← Reset, typo, confetti, navigation, modales, dark mode global
 ├── index.css           ← Page d'accueil uniquement
@@ -304,22 +936,30 @@ musicsMode/music.css        ← Lecteur audio custom P5, thèmes de couleur
 personaeMode/personae.css
 allOutAttackMode/allOutAttack.css</code></pre>
 
-    <p>Chaque page HTML ne charge que ce dont elle a besoin :</p>
+    <div data-i18n-block="fr"><p>Chaque page HTML ne charge que ce dont elle a besoin :</p></div>
+    <div data-i18n-block="en"><p>Each HTML page only loads what it needs:</p></div>
 <pre><code>&lt;!-- Exemple : musics.html --&gt;
 &lt;link rel="stylesheet" href="../css/global.css"&gt;
 &lt;link rel="stylesheet" href="./music.css"&gt;</code></pre>
-    <p><code>css/style.css</code> existe toujours en archive mais n'est référencé par aucun fichier HTML.</p>
+    <div data-i18n-block="fr"><p><code>css/style.css</code> existe toujours en archive mais n'est référencé par aucun fichier HTML.</p></div>
+    <div data-i18n-block="en"><p><code>css/style.css</code> still exists as an archive but is not referenced by any HTML file.</p></div>
 
-    <h3>1.2 Dark Mode</h3>
-    <p>En dark mode, les thèmes de couleur de série restent actifs. Le seul changement sur le lecteur audio est un fond légèrement plus sombre pour renforcer le contraste — les CSS custom properties de couleur ne sont pas écrasées :</p>
+    <div data-i18n-block="fr"><h3>1.2 Dark Mode</h3>
+    <p>En dark mode, les thèmes de couleur de série restent actifs. Le seul changement sur le lecteur audio est un fond légèrement plus sombre pour renforcer le contraste — les CSS custom properties de couleur ne sont pas écrasées :</p></div>
+    <div data-i18n-block="en"><h3>1.2 Dark Mode</h3>
+    <p>In dark mode, the series color themes remain active. The only change on the audio player is a slightly darker background to reinforce contrast — the CSS color custom properties are not overridden:</p></div>
 <pre><code>body.darkmode .audio-wrapper {
   background: linear-gradient(150deg, #0c0c0c 0%, #080808 60%, #0c0c0c 100%);
   /* Pas d'override de couleurs — les variables de thème restent actives */
 }</code></pre>
-    <p>Dark mode disponible via la classe <code>.darkmode</code> sur <code>&lt;body&gt;</code>, togglé par <code>js/gameCore.js</code>.</p>
+    <div data-i18n-block="fr"><p>Dark mode disponible via la classe <code>.darkmode</code> sur <code>&lt;body&gt;</code>, togglé par <code>js/gameCore.js</code>.</p></div>
+    <div data-i18n-block="en"><p>Dark mode available via the <code>.darkmode</code> class on <code>&lt;body&gt;</code>, toggled by <code>js/gameCore.js</code>.</p></div>
 
-    <h3>1.3 Responsive</h3>
-    <p>Le projet respecte les breakpoints standards sur toutes les pages :</p>
+    <div data-i18n-block="fr"><h3>1.3 Responsive</h3>
+    <p>Le projet respecte les breakpoints standards sur toutes les pages :</p></div>
+    <div data-i18n-block="en"><h3>1.3 Responsive</h3>
+    <p>The project follows standard breakpoints on all pages:</p></div>
+    <div data-i18n-block="fr">
     <table>
         <thead>
             <tr><th>Breakpoint</th><th>Cible</th></tr>
@@ -331,7 +971,6 @@ allOutAttackMode/allOutAttack.css</code></pre>
         </tbody>
     </table>
     <p>Utilisation de <code>min()</code>, <code>clamp()</code>, <code>vw</code>/<code>vh</code> pour les tailles fluides. Grille résultats Classic : <code>overflow-x: auto</code> sur mobile. Audit responsive complet effectué (360px → 1440px) :</p>
-    
     <table>
         <thead>
             <tr><th>Fichier</th><th>Problème corrigé</th></tr>
@@ -342,17 +981,53 @@ allOutAttackMode/allOutAttack.css</code></pre>
             <tr><td><code>admin/admin.css</code></td><td>Aucun breakpoint sous 768px → ajout 480px et 360px (grilles compactes, logo masqué)</td></tr>
         </tbody>
     </table>
+    </div>
+    <div data-i18n-block="en">
+    <table>
+        <thead>
+            <tr><th>Breakpoint</th><th>Target</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>@media (max-width: 480px)</code></td><td>Mobile 360px+</td></tr>
+            <tr><td><code>@media (max-width: 768px)</code></td><td>Tablet</td></tr>
+            <tr><td><code>@media (max-width: 1024px)</code></td><td>Small desktop</td></tr>
+        </tbody>
+    </table>
+    <p>Using <code>min()</code>, <code>clamp()</code>, <code>vw</code>/<code>vh</code> for fluid sizes. Classic results grid: <code>overflow-x: auto</code> on mobile. Full responsive audit completed (360px → 1440px):</p>
+    <table>
+        <thead>
+            <tr><th>File</th><th>Issue fixed</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>profile/leaderboard.css</code></td><td>Mode pills wrapped onto 2-3 lines between 480–640px → horizontal scroll</td></tr>
+            <tr><td><code>profile/friends.css</code></td><td>No tablet breakpoint (768px) → reduced padding, aligned actions</td></tr>
+            <tr><td><code>admin/admin.css</code></td><td>No breakpoint below 768px → added 480px and 360px (compact grids, hidden logo)</td></tr>
+        </tbody>
+    </table>
+    </div>
 
+    <div data-i18n-block="fr">
     <h3>1.4 Share Modal — Redesign Interface Profil</h3>
     <p><strong>Fichiers :</strong> <code>profile/profile.html</code>, <code>profile/profile-page.css</code>, <code>profile/profile-page.js</code></p>
     <p>Refonte complète de l'interface de partage de profil : style Persona 5, sélecteurs CSS classes, preview correctement scalée, et capture HTML2canvas haute qualité sur clone off-screen.</p>
-    
     <p><strong>Changements visuels :</strong></p>
     <ul>
         <li>Modale élargie <code>max-width: 600px</code>, onglets <code>Color</code> / <code>Wallpaper</code> style P5</li>
         <li>Preview area : fond <code>#0a0a0a</code>, hauteur 320px, carte 9:16 scalée à 45.5%</li>
         <li>Boutons : 💾 Download PNG (rouge), 𝕏 Share on X (noir), 💬 Discord (<code>#5865F2</code>), 📧 Email</li>
     </ul>
+    </div>
+    <div data-i18n-block="en">
+    <h3>1.4 Share Modal — Profile Interface Redesign</h3>
+    <p><strong>Files:</strong> <code>profile/profile.html</code>, <code>profile/profile-page.css</code>, <code>profile/profile-page.js</code></p>
+    <p>Complete redesign of the profile sharing interface: Persona 5 style, CSS class selectors, correctly scaled preview, and high-quality HTML2canvas capture on an off-screen clone.</p>
+    <p><strong>Visual changes:</strong></p>
+    <ul>
+        <li>Wider modal <code>max-width: 600px</code>, <code>Color</code> / <code>Wallpaper</code> tabs in P5 style</li>
+        <li>Preview area: <code>#0a0a0a</code> background, 320px height, 9:16 card scaled to 45.5%</li>
+        <li>Buttons: 💾 Download PNG (red), 𝕏 Share on X (black), 💬 Discord (<code>#5865F2</code>), 📧 Email</li>
+    </ul>
+    </div>
 
     <p><strong>Technique — off-screen clone pour la capture :</strong></p>
 <pre><code>// Clone hors-écran → qualité pleine résolution, indépendant du scale CSS
@@ -363,11 +1038,19 @@ document.body.appendChild(offscreen);
 
 const cvs = await html2canvas(offscreen, { scale: 2, useCORS: true });
 document.body.removeChild(offscreen);</code></pre>
+    <div data-i18n-block="fr">
     <p>La carte affichée dans la preview est réduite via <code>transform: scale(0.455)</code>. La carte capturée est un clone off-screen non affecté par ce scale — le PNG exporté est toujours en pleine résolution (780×1386px à scale:2).</p>
     <p>Les fonds GIF animés ont été retirés du sélecteur : les GIFs sont animés dans la preview mais le PNG ne capture qu'une frame statique, créant une confusion utilisateur.</p>
+    </div>
+    <div data-i18n-block="en">
+    <p>The card displayed in the preview is reduced via <code>transform: scale(0.455)</code>. The captured card is an off-screen clone unaffected by this scale — the exported PNG is always at full resolution (780×1386px at scale:2).</p>
+    <p>Animated GIF backgrounds were removed from the selector: GIFs are animated in the preview but the PNG only captures a static frame, causing user confusion.</p>
+    </div>
 
-    <h3>1.5 Style sélecteur de langue — Ajout de l'Italien</h3>
-    <p>Bloc CSS ajouté dans <code>css/langSelector.css</code> pour la langue italienne (manquait alors que EN, FR, ES, DE avaient chacun un bloc) :</p>
+    <div data-i18n-block="fr"><h3>1.5 Style sélecteur de langue — Ajout de l'Italien</h3>
+    <p>Bloc CSS ajouté dans <code>css/langSelector.css</code> pour la langue italienne (manquait alors que EN, FR, ES, DE avaient chacun un bloc) :</p></div>
+    <div data-i18n-block="en"><h3>1.5 Language Selector Style — Adding Italian</h3>
+    <p>CSS block added in <code>css/langSelector.css</code> for the Italian language (was missing while EN, FR, ES, DE each had a block):</p></div>
 <pre><code>/* === ITALIANO === */
 .lang-opt--it { border-left-color: #6d8b4e; }
 .lang-opt--it .lang-opt-name {
@@ -375,8 +1058,10 @@ document.body.removeChild(offscreen);</code></pre>
   font-size: 1.35rem;
 }
 .lang-opt--it.is-active .lang-opt-dot { color: #8fb96a; }</code></pre>
-    <p>Thème vert olive (#6d8b4e) inspiré de Persona 2, police Special Elite (typewriter vintage).</p>
+    <div data-i18n-block="fr"><p>Thème vert olive (#6d8b4e) inspiré de Persona 2, police Special Elite (typewriter vintage).</p></div>
+    <div data-i18n-block="en"><p>Olive green theme (#6d8b4e) inspired by Persona 2, Special Elite font (vintage typewriter).</p></div>
 
+    <div data-i18n-block="fr">
     <h3>1.6 CSS Badges — Interface catégorisée</h3>
     <p>Styles ajoutés dans <code>profile/badges/badges.css</code> pour la disposition par catégorie :</p>
     <ul>
@@ -384,6 +1069,16 @@ document.body.removeChild(offscreen);</code></pre>
         <li><code>.badges-category-title</code> — uppercase, couleur variant par catégorie (gold/orange/red/green)</li>
         <li><code>#badgesGrid</code> — <code>flex-direction: column; gap: 24px</code></li>
     </ul>
+    </div>
+    <div data-i18n-block="en">
+    <h3>1.6 CSS Badges — Categorized Interface</h3>
+    <p>Styles added in <code>profile/badges/badges.css</code> for the category layout:</p>
+    <ul>
+        <li><code>.badges-category-section</code> — visual separator between categories</li>
+        <li><code>.badges-category-title</code> — uppercase, color varying by category (gold/orange/red/green)</li>
+        <li><code>#badgesGrid</code> — <code>flex-direction: column; gap: 24px</code></li>
+    </ul>
+    </div>
 <pre><code>[ ACHIEVEMENTS (3/8) ]  [ badge ] [ badge ] [ badge ] …
 [ EVENTS (1/2) ]        [ badge ] [ badge ]
 [ SECRETS (0/5) ]       [ badge ] [ badge ] …
@@ -396,14 +1091,20 @@ document.body.removeChild(offscreen);</code></pre>
         <img src="Illustration_multilingue_personadle_v1.2.png" width="700" alt="Illustration multilingue">
     </div>
     
-    <h1>2. Système de traduction i18n</h1>
-    
-    <blockquote>
-        <p><strong>5 langues, 760 clés, détection automatique, boutons localisés par langue.</strong></p>
-    </blockquote>
+    <div data-i18n-block="fr"><h1>2. Système de traduction i18n</h1></div>
+    <div data-i18n-block="en"><h1>2. i18n Translation System</h1></div>
 
-    <h3>2.1 Architecture du système i18n</h3>
-    <p>Avant la v2.0, tous les textes du jeu étaient hardcodés en anglais dans les fichiers HTML et JS.</p>
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>5 langues, 760 clés, détection automatique, boutons localisés par langue.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>5 languages, 760 keys, automatic detection, language-localized buttons.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_i18n"></p>
+
+
+    <div data-i18n-block="fr"><h3>2.1 Architecture du système i18n</h3>
+    <p>Avant la v2.0, tous les textes du jeu étaient hardcodés en anglais dans les fichiers HTML et JS.</p></div>
+    <div data-i18n-block="en"><h3>2.1 i18n system architecture</h3>
+    <p>Before v2.0, all game texts were hardcoded in English in the HTML and JS files.</p></div>
 <pre><code>lang/
 ├── en.json     ← Source de vérité — 760 clés
 ├── fr.json     ← Traduction complète synchronisée (760 clés)
@@ -428,27 +1129,45 @@ js/
         </tbody>
     </table>
 
-    <p><strong>Attributs HTML supportés :</strong></p>
+    <div data-i18n-block="fr"><p><strong>Attributs HTML supportés :</strong></p></div>
+    <div data-i18n-block="en"><p><strong>Supported HTML attributes:</strong></p></div>
 <pre><code>&lt;span data-i18n="ui.submit"&gt;Submit&lt;/span&gt;
 &lt;input data-i18n-placeholder="ui.input_placeholder"&gt;
 &lt;div data-i18n-title="modes.classic.tooltip_name"&gt;
 &lt;div data-i18n-block="fr"&gt;Contenu français uniquement&lt;/div&gt;</code></pre>
 
-    <p><strong>Piège critique — <code>t(key) ?? fallback</code> ne fonctionne pas :</strong><br>
-    <code>window.i18n.t(key)</code> retourne la clé brute (string truthy) quand elle n'existe pas — <code>??</code> ne se déclenche jamais. Pattern correct :</p>
+    <div data-i18n-block="fr"><p><strong>Piège critique — <code>t(key) ?? fallback</code> ne fonctionne pas :</strong><br>
+    <code>window.i18n.t(key)</code> retourne la clé brute (string truthy) quand elle n'existe pas — <code>??</code> ne se déclenche jamais. Pattern correct :</p></div>
+    <div data-i18n-block="en"><p><strong>Critical pitfall — <code>t(key) ?? fallback</code> does not work:</strong><br>
+    <code>window.i18n.t(key)</code> returns the raw key (truthy string) when missing — <code>??</code> never triggers. Correct pattern:</p></div>
 <pre><code>const r = window.i18n?.t?.(key);
 return (r != null && r !== key) ? r : fallback;</code></pre>
 
+    <div data-i18n-block="fr">
     <h3>2.2 Corrections critiques i18n</h3>
     <h4>Fix 404 — résolution de chemin depuis les sous-dossiers</h4>
     <p><strong>Problème :</strong> depuis les sous-dossiers (<code>classiqueMode/</code>, <code>musicsMode/</code>…), le chargement des fichiers <code>lang/</code> produisait des erreurs HTTP 404. L'ancien code construisait le chemin à partir de <code>window.location.href</code>, donnant <code>classiqueMode/lang/fr.json</code>.</p>
     <p><strong>Solution :</strong> ancrage sur <code>import.meta.url</code> — indépendant de la page hôte :</p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>2.2 Critical i18n fixes</h3>
+    <h4>Fix 404 — path resolution from subdirectories</h4>
+    <p><strong>Problem:</strong> from subdirectories (<code>classiqueMode/</code>, <code>musicsMode/</code>…), loading <code>lang/</code> files produced HTTP 404 errors. The old code built the path from <code>window.location.href</code>, giving <code>classiqueMode/lang/fr.json</code>.</p>
+    <p><strong>Solution:</strong> anchoring on <code>import.meta.url</code> — independent of the host page:</p>
+    </div>
 <pre><code>// js/i18n.js
 var _langBase = new URL('../lang/', import.meta.url).href;</code></pre>
 
+    <div data-i18n-block="fr">
     <h4>Fix persistance de la langue</h4>
     <p><strong>Problème :</strong> le choix de langue revenait à EN à chaque rechargement. Quand le fetch échouait (fallback EN), la variable <code>lang</code> était écrasée avant le <code>localStorage.setItem</code>.</p>
     <p><strong>Solution :</strong> sauvegarder la langue demandée avant tout fallback :</p>
+    </div>
+    <div data-i18n-block="en">
+    <h4>Fix language persistence</h4>
+    <p><strong>Problem:</strong> the language choice reverted to EN on each reload. When the fetch failed (EN fallback), the <code>lang</code> variable was overwritten before the <code>localStorage.setItem</code>.</p>
+    <p><strong>Solution:</strong> save the requested language before any fallback:</p>
+    </div>
 <pre><code>var requested = lang;
 try {
   translations = await fetchLang(lang);
@@ -458,9 +1177,16 @@ try {
 }
 localStorage.setItem(STORAGE_KEY, requested);  // toujours la langue voulue</code></pre>
 
+    <div data-i18n-block="fr">
     <h4>Fix race condition au chargement</h4>
     <p><strong>Problème :</strong> certains textes dynamiques affichaient la clé brute après rechargement. Le callback <code>DOMContentLoaded</code> restaurait l'état avant que <code>initLang()</code> (asynchrone) ait terminé.</p>
     <p><strong>Solution :</strong> pattern <code>window.__i18nReady</code> :</p>
+    </div>
+    <div data-i18n-block="en">
+    <h4>Fix load race condition</h4>
+    <p><strong>Problem:</strong> some dynamic texts displayed the raw key after reload. The <code>DOMContentLoaded</code> callback restored state before <code>initLang()</code> (async) had finished.</p>
+    <p><strong>Solution:</strong> <code>window.__i18nReady</code> pattern:</p>
+    </div>
 <pre><code>&lt;script type="module"&gt;
   import { initLang } from '../js/i18n.js';
   window.__i18nReady = initLang();
@@ -472,6 +1198,7 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
   // ...
 });</code></pre>
 
+    <div data-i18n-block="fr">
     <h3>2.3 Sélecteur de langue</h3>
     <p>Bouton <code>🌐 EN ▼</code> avec dropdown animé sur toutes les pages. Détection automatique de la langue navigateur au premier chargement.</p>
     <table>
@@ -486,9 +1213,28 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
             <tr><td>Italiano</td><td>Caesar (P2)</td></tr>
         </tbody>
     </table>
+    </div>
+    <div data-i18n-block="en">
+    <h3>2.3 Language selector</h3>
+    <p><code>🌐 EN ▼</code> button with animated dropdown on all pages. Automatic browser language detection on first load.</p>
+    <table>
+        <thead>
+            <tr><th>Language</th><th>Illustrated character</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>English</td><td>Lisa Silverman (P2)</td></tr>
+            <tr><td>Français</td><td>Bébé (P3)</td></tr>
+            <tr><td>Español</td><td>Morgana (P5)</td></tr>
+            <tr><td>Deutsch</td><td>Hulkenberg (P3R)</td></tr>
+            <tr><td>Italiano</td><td>Caesar (P2)</td></tr>
+        </tbody>
+    </table>
+    </div>
 
-    <h3>2.4 Boutons localisés — Images WebP par langue</h3>
-    <p>Les boutons du jeu (Hint, Give-Up, Replay, Submit) affichent désormais leur texte dans la langue active.</p>
+    <div data-i18n-block="fr"><h3>2.4 Boutons localisés — Images WebP par langue</h3>
+    <p>Les boutons du jeu (Hint, Give-Up, Replay, Submit) affichent désormais leur texte dans la langue active.</p></div>
+    <div data-i18n-block="en"><h3>2.4 Localized buttons — WebP images per language</h3>
+    <p>Game buttons (Hint, Give-Up, Replay, Submit) now display their text in the active language.</p></div>
 <pre><code>assets/buttons/
 ├── EN/   Hint_Button(.webp | _Rouge | _Transparent)
 │         Give-up_Button(.webp | _Rouge | _Transparent)
@@ -506,10 +1252,13 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
   //   img.normal.src = _btnBase + cfg.XX.n
   //   img.active.src = _btnBase + cfg.XX.a  (variante rouge = survol)
 }</code></pre>
-    <p><code>_btnBase</code> est résolu via <code>import.meta.url</code> — indépendant de la page hôte.</p>
+    <div data-i18n-block="fr"><p><code>_btnBase</code> est résolu via <code>import.meta.url</code> — indépendant de la page hôte.</p></div>
+    <div data-i18n-block="en"><p><code>_btnBase</code> is resolved via <code>import.meta.url</code> — independent of the host page.</p></div>
 
-    <h3>2.5 Traduction des valeurs d'attributs — Mode Classique</h3>
-    <p>Les valeurs de la grille de comparaison (genre, arcane) sont traduites dynamiquement :</p>
+    <div data-i18n-block="fr"><h3>2.5 Traduction des valeurs d'attributs — Mode Classique</h3>
+    <p>Les valeurs de la grille de comparaison (genre, arcane) sont traduites dynamiquement :</p></div>
+    <div data-i18n-block="en"><h3>2.5 Attribute value translation — Classic Mode</h3>
+    <p>Comparison grid values (gender, arcana) are translated dynamically:</p></div>
 <pre><code>"data": {
   "genre": { "Male": "Masculin", "Female": "Féminin", "Human": "Humain", "Shadow": "Ombre" },
   "arcane": { "Death": "Mort", "Hermit": "Ermite", "Moon": "Lune", "Fool": "Fou" }
@@ -519,8 +1268,10 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
   return (translated === `data.${ns}.${v}`) ? v : translated;
 };</code></pre>
 
-    <h3>2.6 Badges traduits (5 langues)</h3>
-    <p>Tous les badges de <code>profile/badges/badgesData.js</code> ont été traduits dans les 5 fichiers <code>lang/</code> : <code>name</code>, <code>description</code>, <code>condition</code> (condition verrouillée → <code>"???"</code> pour les badges secrets).</p>
+    <div data-i18n-block="fr"><h3>2.6 Badges traduits (5 langues)</h3>
+    <p>Tous les badges de <code>profile/badges/badgesData.js</code> ont été traduits dans les 5 fichiers <code>lang/</code> : <code>name</code>, <code>description</code>, <code>condition</code> (condition verrouillée → <code>"???"</code> pour les badges secrets).</p></div>
+    <div data-i18n-block="en"><h3>2.6 Translated badges (5 languages)</h3>
+    <p>All badges in <code>profile/badges/badgesData.js</code> have been translated in all 5 <code>lang/</code> files: <code>name</code>, <code>description</code>, <code>condition</code> (locked condition → <code>"???"</code> for secret badges).</p></div>
     <table>
         <thead>
             <tr><th>Clé</th><th>EN</th><th>FR</th><th>ES</th><th>DE</th><th>IT</th></tr>
@@ -543,14 +1294,20 @@ function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sin
         <img src="JS_correction_illustration.png" width="700" alt="Architecture JS et corrections">
     </div>
     
-    <h1>3. Architecture JavaScript</h1>
-    
-    <blockquote>
-        <p><strong>Centralisation dans gameCore.js, client REST api.js, auth.js, offline-first, fire-and-forget.</strong></p>
-    </blockquote>
+    <div data-i18n-block="fr"><h1>3. Architecture JavaScript</h1></div>
+    <div data-i18n-block="en"><h1>3. JavaScript Architecture</h1></div>
 
-    <h3>3.1 Séparation des modules JS</h3>
-    <p>Avant la v2.0, chaque mode embarquait ses propres copies des fonctions utilitaires. Toutes les fonctions partagées ont été centralisées dans <code>js/gameCore.js</code> :</p>
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Centralisation dans gameCore.js, client REST api.js, auth.js, offline-first, fire-and-forget.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Centralization in gameCore.js, REST client api.js, auth.js, offline-first, fire-and-forget.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_js"></p>
+
+
+    <div data-i18n-block="fr"><h3>3.1 Séparation des modules JS</h3>
+    <p>Avant la v2.0, chaque mode embarquait ses propres copies des fonctions utilitaires. Toutes les fonctions partagées ont été centralisées dans <code>js/gameCore.js</code> :</p></div>
+    <div data-i18n-block="en"><h3>3.1 JS module separation</h3>
+    <p>Before v2.0, each mode contained its own copies of utility functions. All shared functions have been centralized in <code>js/gameCore.js</code>:</p></div>
     <table>
         <thead>
             <tr><th>Catégorie</th><th>Fonctions</th></tr>
@@ -614,15 +1371,20 @@ function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sin
 };
 
 window._personadleApi = api;  // bridge global</code></pre>
-    <p>Toutes les requêtes utilisent <code>credentials: 'include'</code> pour transmettre le cookie <code>PHPSESSID</code>.</p>
+    <div data-i18n-block="fr"><p>Toutes les requêtes utilisent <code>credentials: 'include'</code> pour transmettre le cookie <code>PHPSESSID</code>.</p></div>
+    <div data-i18n-block="en"><p>All requests use <code>credentials: 'include'</code> to transmit the <code>PHPSESSID</code> cookie.</p></div>
 
-    <h3>3.3 Auth Frontend — <code>js/auth.js</code></h3>
+    <div data-i18n-block="fr"><h3>3.3 Auth Frontend — <code>js/auth.js</code></h3>
     <p><strong>État global :</strong> <code>window._currentUser = null</code> (null = anonyme, objet = connecté).</p>
-    <p><strong>Convention HTML <code>data-auth</code> :</strong></p>
+    <p><strong>Convention HTML <code>data-auth</code> :</strong></p></div>
+    <div data-i18n-block="en"><h3>3.3 Auth Frontend — <code>js/auth.js</code></h3>
+    <p><strong>Global state:</strong> <code>window._currentUser = null</code> (null = anonymous, object = logged in).</p>
+    <p><strong>HTML <code>data-auth</code> convention:</strong></p></div>
 <pre><code>&lt;div data-auth="connected"&gt;Mon profil&lt;/div&gt;
 &lt;button data-auth="anonymous" data-open-modal="loginModal"&gt;Se connecter&lt;/button&gt;
 &lt;span data-auth-field="pseudo"&gt;&lt;/span&gt;</code></pre>
     
+    <div data-i18n-block="fr">
     <p><strong>Séquence <code>initAuth()</code> :</strong></p>
     <ol>
         <li><code>GET /api/auth/me</code> → restaure la session si cookie valide</li>
@@ -632,6 +1394,18 @@ window._personadleApi = api;  // bridge global</code></pre>
     </ol>
     <p><strong>Migration localStorage → cloud :</strong> <code>migrateLocalStorageToCloud()</code> appelée automatiquement après inscription.</p>
     <p><strong>Auth sans rechargement :</strong> dispatch d'événements <code>personadle:auth-login</code> et <code>personadle:auth-logout</code>.</p>
+    </div>
+    <div data-i18n-block="en">
+    <p><strong><code>initAuth()</code> sequence:</strong></p>
+    <ol>
+        <li><code>GET /api/auth/me</code> → restores session if cookie is valid</li>
+        <li><code>updateAuthUI(user)</code> → shows/hides zones</li>
+        <li>If logged in: <code>syncPending()</code> → sends accumulated offline sessions</li>
+        <li>Setup of login/register/logout forms</li>
+    </ol>
+    <p><strong>localStorage → cloud migration:</strong> <code>migrateLocalStorageToCloud()</code> called automatically after registration.</p>
+    <p><strong>Auth without reload:</strong> dispatch of <code>personadle:auth-login</code> and <code>personadle:auth-logout</code> events.</p>
+    </div>
 
     <h3>3.4 <code>buildGameSession</code> + <code>savePendingSession</code> (gameCore.js)</h3>
 <pre><code>export function buildGameSession({ mode, targetName, result, attempts, timeMs = 0, filters = [] }) {
@@ -657,10 +1431,13 @@ export async function savePendingSession(session) {
   localStorage.setItem('pendingSessions', JSON.stringify(pending));
 }</code></pre>
 
-    <h3>3.5 Cloud Sync — <code>js/cloud-sync.js</code></h3>
-    <p><code>pullProfileFromCloud()</code> fait un seul <code>GET /api/user/:id</code> et écrase tout le localStorage pour maintenir la synchro.</p>
+    <div data-i18n-block="fr"><h3>3.5 Cloud Sync — <code>js/cloud-sync.js</code></h3>
+    <p><code>pullProfileFromCloud()</code> fait un seul <code>GET /api/user/:id</code> et écrase tout le localStorage pour maintenir la synchro.</p></div>
+    <div data-i18n-block="en"><h3>3.5 Cloud Sync — <code>js/cloud-sync.js</code></h3>
+    <p><code>pullProfileFromCloud()</code> makes a single <code>GET /api/user/:id</code> and overwrites all localStorage to maintain sync.</p></div>
 
-    <h3>3.6 Fix détection IS_LOCAL et autres corrections JS</h3>
+    <div data-i18n-block="fr"><h3>3.6 Fix détection IS_LOCAL et autres corrections JS</h3></div>
+    <div data-i18n-block="en"><h3>3.6 IS_LOCAL detection fix and other JS corrections</h3></div>
 <pre><code>const IS_LOCAL = (() =&gt; {
   const h = location.hostname;
   return (h === "" || h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0"
@@ -674,13 +1451,18 @@ export async function savePendingSession(session) {
         <img src="Illustration_sous_filtres.png" width="700" alt="Sous-filtres opus par jeu">
     </div>
     
-    <h1>4. Système de filtres</h1>
-    
-    <blockquote>
-        <p><strong>Sous-filtres par opus, _migrate(), ALL_OPUS, guard pool vide — robustesse complète.</strong></p>
-    </blockquote>
+    <div data-i18n-block="fr"><h1>4. Système de filtres</h1></div>
+    <div data-i18n-block="en"><h1>4. Filter System</h1></div>
 
-    <h3>4.1 Panneau de filtres partagé — <code>js/filterMenu.js</code></h3>
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Sous-filtres par opus, _migrate(), ALL_OPUS, guard pool vide — robustesse complète.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Sub-filters by opus, _migrate(), ALL_OPUS, empty pool guard — full robustness.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_filters"></p>
+
+
+    <div data-i18n-block="fr"><h3>4.1 Panneau de filtres partagé — <code>js/filterMenu.js</code></h3></div>
+    <div data-i18n-block="en"><h3>4.1 Shared filter panel — <code>js/filterMenu.js</code></h3></div>
 <pre><code>import { initFilterMenu } from "../js/filterMenu.js";
 
 const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&gt; {
@@ -689,14 +1471,22 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
   resetGame(true);  // true = sélection aléatoire dans le pool filtré
 });</code></pre>
 
+    <div data-i18n-block="fr">
     <h3>4.2 <code>_migrate()</code> — Correction de l'expansion incorrecte</h3>
     <p>Correction pour éviter que "P5" remplace les filtres détaillés lors des défis.</p>
-
     <h3>4.3 Guard pool vide + bandeau d'avertissement</h3>
     <p>Injection dynamique d'un <code>&lt;div class="filter-empty-warning"&gt;</code> affiché dès que <code>activeOpus.length === 0</code>.</p>
-
     <h3>4.4 Préservation des filtres dans les défis</h3>
     <p>Les filtres sont passés dans les requêtes de défi (colonne <code>challenge_filters</code>) et restaurés après partie.</p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>4.2 <code>_migrate()</code> — Fix for incorrect expansion</h3>
+    <p>Fix to prevent "P5" from replacing detailed filters during challenges.</p>
+    <h3>4.3 Empty pool guard + warning banner</h3>
+    <p>Dynamic injection of a <code>&lt;div class="filter-empty-warning"&gt;</code> displayed as soon as <code>activeOpus.length === 0</code>.</p>
+    <h3>4.4 Filter preservation in challenges</h3>
+    <p>Filters are passed in challenge requests (column <code>challenge_filters</code>) and restored after the game.</p>
+    </div>
 
     <hr>
 
@@ -705,14 +1495,20 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
         <img src="Illustration_style_audio.png" width="700" alt="Lecteur audio style Persona 5">
     </div>
     
-    <h1>5. Mode Musique</h1>
-    
-    <blockquote>
-        <p><strong>130+ pistes, lecteur custom P5, thème dynamique par série, filtres P4AU et P5T.</strong></p>
-    </blockquote>
+    <div data-i18n-block="fr"><h1>5. Mode Musique</h1></div>
+    <div data-i18n-block="en"><h1>5. Music Mode</h1></div>
 
-    <h3>5.1 Lecteur Audio Custom</h3>
-    <p>L'élément <code>&lt;audio controls&gt;</code> natif a été remplacé par un composant HTML/CSS/JS custom inspiré de Persona 5 :</p>
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>130+ pistes, lecteur custom P5, thème dynamique par série, filtres P4AU et P5T.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>130+ tracks, custom P5 player, dynamic theme per series, P4AU and P5T filters.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_music"></p>
+
+
+    <div data-i18n-block="fr"><h3>5.1 Lecteur Audio Custom</h3>
+    <p>L'élément <code>&lt;audio controls&gt;</code> natif a été remplacé par un composant HTML/CSS/JS custom inspiré de Persona 5 :</p></div>
+    <div data-i18n-block="en"><h3>5.1 Custom Audio Player</h3>
+    <p>The native <code>&lt;audio controls&gt;</code> element was replaced by a custom HTML/CSS/JS component inspired by Persona 5:</p></div>
 <pre><code>&lt;div class="audio-wrapper" id="audioBox"&gt;
   &lt;audio id="audioPlayer" preload="none"&gt;&lt;source src="" type="audio/mp3"&gt;&lt;/audio&gt;
   &lt;div class="p5-player"&gt;
@@ -750,6 +1546,7 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
   50%       { height: 20px; opacity: 1;   }
 }</code></pre>
 
+    <div data-i18n-block="fr">
     <h3>5.2 Thème de couleur dynamique par série</h3>
     <p>Le lecteur adapte ses couleurs via CSS custom properties — JS les écrase via <code>setPlayerTheme()</code> :</p>
     <table>
@@ -769,6 +1566,28 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
         </tbody>
     </table>
     <p><strong>Cas P3P — dégradé bicolore :</strong></p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>5.2 Dynamic color theme per series</h3>
+    <p>The player adapts its colors via CSS custom properties — JS overrides them via <code>setPlayerTheme()</code>:</p>
+    <table>
+        <thead>
+            <tr><th>Series</th><th>Primary color</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>P1</td><td><code>#7c3aed</code> — purple</td></tr>
+            <tr><td>P2IS</td><td><code>#ea580c</code> — orange</td></tr>
+            <tr><td>P2EP</td><td><code>#8b5cf6</code> — lavender</td></tr>
+            <tr><td>P3 / P3FES / P3R</td><td><code>#3b82f6</code> — blue</td></tr>
+            <tr><td>P3P</td><td><code>#818cf8</code> — border + blue→pink gradient</td></tr>
+            <tr><td>P4 / P4G / P4D / P4AU</td><td><code>#eab308</code> — gold</td></tr>
+            <tr><td>P5 / P5R / P5S / P5T</td><td><code>#e63946</code> — red</td></tr>
+            <tr><td>P5X</td><td><code>#c0193a</code> — burgundy/crimson</td></tr>
+            <tr><td>PQ / PQ2</td><td><code>#f97316</code> — orange</td></tr>
+        </tbody>
+    </table>
+    <p><strong>P3P case — two-color gradient:</strong></p>
+    </div>
 <pre><code>P3P: {
   accent: '#818cf8',
   dark:   '#3b82f6',
@@ -777,30 +1596,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
   gradientFill: 'linear-gradient(90deg, #1d4ed8, #3b82f6 30%, #c084fc 65%, #ec4899)',
 },</code></pre>
 
-    <h3>5.3 13 Nouvelles pistes ajoutées en v2.0</h3>
-    <table>
-        <thead>
-            <tr><th>Cover</th><th>Titre</th><th>Opus</th><th>Interprète</th></tr>
-        </thead>
-        <tbody>
-            <tr><td><img src="../../musicsMode/database/img/P3P.webp" width="50" alt="P3P"></td><td>Danger Zone</td><td>P3P</td><td>(instrumental)</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P3P.webp" width="50" alt="P3P"></td><td>Time</td><td>P3P</td><td>Mayumi Fujita</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P3R.webp" width="50" alt="P3R"></td><td>Want to Be Close -Reload-</td><td>P3R</td><td>Azumi Takahashi</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P4AU.webp" width="50" alt="P4AU"></td><td>A Fool or Clown?</td><td>P4AU</td><td>(instrumental)</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P4AU.webp" width="50" alt="P4AU"></td><td>Best Friends</td><td>P4AU</td><td>Yumi Kawamura</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P4AU.webp" width="50" alt="P4AU"></td><td>Break Out Of</td><td>P4AU</td><td>Shihoko Hirata, Lotus Juice</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P4G.webp" width="50" alt="P4G"></td><td>I'll Face Myself -Battle-</td><td>P4G</td><td>(instrumental)</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P5R.webp" width="50" alt="P5R"></td><td>Throw Away Your Mask</td><td>P5R</td><td>Lyn Inaizumi</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P5S.webp" width="50" alt="P5S"></td><td>Axe to Grind</td><td>P5S</td><td>Lyn Inaizumi</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P5S.webp" width="50" alt="P5S"></td><td>Counter Strike</td><td>P5S</td><td>Lyn Inaizumi</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P5T.webp" width="50" alt="P5T"></td><td>Got Your Tail</td><td>P5T</td><td>Lyn Inaizumi</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P5T.webp" width="50" alt="P5T"></td><td>Revolution is a Blade</td><td>P5T</td><td>Lyn Inaizumi</td></tr>
-            <tr><td><img src="../../musicsMode/database/img/P5T.webp" width="50" alt="P5T"></td><td>Truth or Dare</td><td>P5T</td><td>Lyn Inaizumi</td></tr>
-        </tbody>
-    </table>
-    <p><strong>Total mode Music : ~130+ pistes</strong></p>
-
-    <h3>5.4 Nouveaux opus dans les filtres — P4AU et P5T</h3>
+    <div data-i18n-block="fr">
+    <h3>5.3 Nouveaux opus dans les filtres — P4AU et P5T</h3>
     <ul>
         <li><strong>P4AU</strong> (Persona 4 Arena Ultimax) : sous-bouton dans le groupe P4, logo <code>Persona_4_Arena_Ultimax_Logo.png</code>, thème jaune P4</li>
         <li><strong>P5T</strong> (Persona 5 Tactica) : sous-bouton dans le groupe P5, logo <code>Persona_5_Tactica_Logo.png</code>, thème rouge P5</li>
@@ -809,37 +1606,43 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     </ul>
     <p><strong>Bug corrigé :</strong> <code>ALL_OPUS</code> ne contenait pas <code>P4AU</code> ni <code>P5T</code> → <code>filterMenu.js</code> ignorait silencieusement ces boutons. Fix : ajout à <code>ALL_OPUS</code> + <code>OPUS_THEMES</code>.</p>
     <p><strong>Bug corrigé :</strong> changement de filtre ne changeait pas la chanson — <code>resetGame()</code> sans argument → <code>random = false</code>. Fix : <code>resetGame(true)</code> dans le callback.</p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>5.3 New opus in filters — P4AU and P5T</h3>
+    <ul>
+        <li><strong>P4AU</strong> (Persona 4 Arena Ultimax): sub-button in P4 group, logo <code>Persona_4_Arena_Ultimax_Logo.png</code>, P4 yellow theme</li>
+        <li><strong>P5T</strong> (Persona 5 Tactica): sub-button in P5 group, logo <code>Persona_5_Tactica_Logo.png</code>, P5 red theme</li>
+        <li><code>data-opus-codes</code> for P4 and P5 groups updated in <code>musicsMode/musics.html</code></li>
+        <li><code>ALL_OPUS</code> and <code>OPUS_THEMES</code> in <code>modeMusic.js</code> completed</li>
+    </ul>
+    <p><strong>Bug fixed:</strong> <code>ALL_OPUS</code> did not contain <code>P4AU</code> or <code>P5T</code> → <code>filterMenu.js</code> silently ignored these buttons. Fix: added to <code>ALL_OPUS</code> + <code>OPUS_THEMES</code>.</p>
+    <p><strong>Bug fixed:</strong> filter change did not change the song — <code>resetGame()</code> without argument → <code>random = false</code>. Fix: <code>resetGame(true)</code> in callback.</p>
+    </div>
 
-    <h3>5.5 Couvertures d'opus disponibles</h3>
-    <table>
-        <tr>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P1.webp" width="60" alt="P1"><br><code>P1</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P2IS.webp" width="60" alt="P2IS"><br><code>P2IS</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P2EP.webp" width="60" alt="P2EP"><br><code>P2EP</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P3.webp" width="60" alt="P3"><br><code>P3</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P3FES.webp" width="60" alt="P3FES"><br><code>P3FES</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P3P.webp" width="60" alt="P3P"><br><code>P3P</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P3R.webp" width="60" alt="P3R"><br><code>P3R</code></td>
-        </tr>
-        <tr>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P4.webp" width="60" alt="P4"><br><code>P4</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P4G.webp" width="60" alt="P4G"><br><code>P4G</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P4AU.webp" width="60" alt="P4AU"><br><code>P4AU</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P4D.webp" width="60" alt="P4D"><br><code>P4D</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P5.webp" width="60" alt="P5"><br><code>P5</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P5R.webp" width="60" alt="P5R"><br><code>P5R</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P5S.webp" width="60" alt="P5S"><br><code>P5S</code></td>
-        </tr>
-        <tr>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P5T.webp" width="60" alt="P5T"><br><code>P5T</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/P5X.webp" width="60" alt="P5X"><br><code>P5X</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/PQ.webp" width="60" alt="PQ"><br><code>PQ</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/PQ2.webp" width="60" alt="PQ2"><br><code>PQ2</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/Velvet.webp" width="60" alt="Velvet"><br><code>Velvet</code></td>
-            <td style="text-align:center;padding:8px"><img src="../../musicsMode/database/img/Zutomayo.jpg" width="60" alt="Zutomayo"><br><code>Zutomayo</code></td>
-            <td></td>
-        </tr>
-    </table>
+    <div data-i18n-block="fr"><h3>5.4 Couvertures d'opus disponibles</h3></div>
+    <div data-i18n-block="en"><h3>5.4 Available opus covers</h3></div>
+        <div class="opus-covers-grid">
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P1.webp" alt="P1"><code>P1</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P2IS.webp" alt="P2IS"><code>P2IS</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P2EP.webp" alt="P2EP"><code>P2EP</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P3.webp" alt="P3"><code>P3</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P3FES.webp" alt="P3FES"><code>P3FES</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P3P.webp" alt="P3P"><code>P3P</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P3R.webp" alt="P3R"><code>P3R</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P4.webp" alt="P4"><code>P4</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P4G.webp" alt="P4G"><code>P4G</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P4AU.webp" alt="P4AU"><code>P4AU</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P4D.webp" alt="P4D"><code>P4D</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5.webp" alt="P5"><code>P5</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5R.webp" alt="P5R"><code>P5R</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5S.webp" alt="P5S"><code>P5S</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5T.webp" alt="P5T"><code>P5T</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5X.webp" alt="P5X"><code>P5X</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/PQ.webp" alt="PQ"><code>PQ</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/PQ2.webp" alt="PQ2"><code>PQ2</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/Velvet.webp" alt="Velvet"><code>Velvet</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/Zutomayo.jpg" alt="Zutomayo"><code>Zutomayo</code></div>
+    </div>
 
     <hr>
 
@@ -848,12 +1651,17 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
         <img src="Illustration_Integration_php.png" width="700" alt="Intégration PHP backend">
     </div>
 
-    <h1>6. Backend &amp; Base de données</h1>
+    <div data-i18n-block="fr"><h1>6. Backend &amp; Base de données</h1></div>
+    <div data-i18n-block="en"><h1>6. Backend &amp; Database</h1></div>
 
     <blockquote>
-        <p><strong>MariaDB 10.6+, 20 tables, API REST complète, offline-first, RGPD.</strong></p>
+        <div data-i18n-block="fr"><p><strong>MariaDB 10.6+, 20 tables, API REST complète, offline-first, RGPD.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>MariaDB 10.6+, 20 tables, complete REST API, offline-first, GDPR.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_backend"></p>
 
+
+    <div data-i18n-block="fr">
     <h3>6.1 Choix MySQL 8.0 / MariaDB 10.6+</h3>
     <p>Le schéma BDD a été adapté pour MySQL 8.0 en développement local et MariaDB 10.6+ chez Hostinger.</p>
     <table>
@@ -870,11 +1678,32 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     </table>
     <p><strong>Piège :</strong> <code>rank</code> est un mot réservé MySQL 8.0 — toujours entourer de backticks : <code>`rank`</code> dans CREATE TABLE, INSERT, CHECK, VIEW.</p>
     <p><strong>Piège PDO :</strong> MySQL PDO ne supporte pas <code>:param</code> répété plusieurs fois dans un même <code>prepare()</code>. Utiliser des <code>?</code> positionnels et <code>execute([$val, $val, $val])</code>.</p>
-
     <h3>6.2 Schéma BDD — 20 tables</h3>
     <p><strong>Fichier :</strong> <code>sql/bdd_mysql.sql</code></p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>6.1 MySQL 8.0 / MariaDB 10.6+ choice</h3>
+    <p>The DB schema was adapted for MySQL 8.0 in local development and MariaDB 10.6+ on Hostinger.</p>
+    <table>
+        <thead>
+            <tr><th>PostgreSQL</th><th>MySQL / MariaDB equivalent</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>BIGSERIAL</code></td><td><code>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</code></td></tr>
+            <tr><td><code>BOOLEAN</code></td><td><code>TINYINT(1)</code></td></tr>
+            <tr><td><code>TEXT</code> unlimited</td><td><code>TEXT</code> / <code>MEDIUMTEXT</code> (base64 avatar &gt; 64 KB)</td></tr>
+            <tr><td><code>NOW()</code></td><td><code>CURRENT_TIMESTAMP</code></td></tr>
+            <tr><td><code>ON UPDATE NOW()</code></td><td><code>ON UPDATE CURRENT_TIMESTAMP</code></td></tr>
+        </tbody>
+    </table>
+    <p><strong>Pitfall:</strong> <code>rank</code> is a reserved word in MySQL 8.0 — always wrap in backticks: <code>`rank`</code> in CREATE TABLE, INSERT, CHECK, VIEW.</p>
+    <p><strong>PDO pitfall:</strong> MySQL PDO does not support <code>:param</code> used multiple times in the same <code>prepare()</code>. Use positional <code>?</code> and <code>execute([$val, $val, $val])</code>.</p>
+    <h3>6.2 DB Schema — 20 tables</h3>
+    <p><strong>File:</strong> <code>sql/bdd_mysql.sql</code></p>
+    </div>
     <details>
-        <summary>Voir les 20 tables</summary>
+        <div data-i18n-block="fr"><summary>Voir les 20 tables</summary></div>
+        <div data-i18n-block="en"><summary>View the 20 tables</summary></div>
         <table>
             <thead>
                 <tr><th>Table</th><th>Description</th></tr>
@@ -903,7 +1732,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
             </tbody>
         </table>
     </details>
-    <p><strong>Tables créées par migrations :</strong></p>
+    <div data-i18n-block="fr"><p><strong>Tables créées par migrations :</strong></p></div>
+    <div data-i18n-block="en"><p><strong>Tables created by migrations:</strong></p></div>
 <pre><code>001_add_challenge_filters.sql     ← colonne challenge_filters sur messages
 002_add_has_migrated.sql          ← colonne has_migrated sur users
 006_fix_title_slugs.sql           ← 11 UPDATE alignent slugs BDD sur format JS
@@ -911,11 +1741,14 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
 010_true_confidant.sql            ← social_link_rankup_notifs + is_badge_prompt
 011_event_codes_moderation.sql    ← table event_codes + seed 12 codes + is_banned/pseudo_locked
 012_remove_tcb.sql                ← suppression True Confidant Badge canvas</code></pre>
-    <p><strong>Routines stockées :</strong> <code>get_or_create_social_link</code> (garantit <code>user_a_id &lt; user_b_id</code>), <code>gain_social_link_xp</code> / <code>add_social_link_xp</code> — ajoute XP, retourne nouveau rang via params <code>OUT</code>, détecte passage de rang.</p>
+    <div data-i18n-block="fr"><p><strong>Routines stockées :</strong> <code>get_or_create_social_link</code> (garantit <code>user_a_id &lt; user_b_id</code>), <code>gain_social_link_xp</code> / <code>add_social_link_xp</code> — ajoute XP, retourne nouveau rang via params <code>OUT</code>, détecte passage de rang.</p></div>
+    <div data-i18n-block="en"><p><strong>Stored routines:</strong> <code>get_or_create_social_link</code> (ensures <code>user_a_id &lt; user_b_id</code>), <code>gain_social_link_xp</code> / <code>add_social_link_xp</code> — adds XP, returns new rank via <code>OUT</code> params, detects rank change.</p></div>
 
-    <h3>6.3 API REST PHP</h3>
+    <div data-i18n-block="fr"><h3>6.3 API REST PHP</h3></div>
+    <div data-i18n-block="en"><h3>6.3 REST PHP API</h3></div>
     <details>
-        <summary>Liste complète des endpoints</summary>
+        <div data-i18n-block="fr"><summary>Liste complète des endpoints</summary></div>
+        <div data-i18n-block="en"><summary>Full endpoint list</summary></div>
         <p><strong>Auth :</strong></p>
         <ul>
             <li><code>POST /api/auth/register</code> — crée users + profiles + user_stats × 6 modes dans une transaction</li>
@@ -1003,11 +1836,15 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
         <img src="Illustration_Ami_Social.jpeg" width="700" alt="Illustration amis et social link">
     </div>
 
-    <h1>7. Système Social</h1>
+    <div data-i18n-block="fr"><h1>7. Système Social</h1></div>
+    <div data-i18n-block="en"><h1>7. Social System</h1></div>
 
     <blockquote>
-        <p><strong>Amis, Social Link (rangs 1-10, True Confidant), défis quotidiens, notifications, animations TV P4 / Calling Card / Evoker P3.</strong></p>
+        <div data-i18n-block="fr"><p><strong>Amis, Social Link (rangs 1-10, True Confidant), défis quotidiens, notifications, animations TV P4 / Calling Card / Evoker P3.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Friends, Social Link (ranks 1-10, True Confidant), daily challenges, notifications, P4 TV / Calling Card / P3 Evoker animations.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_social"></p>
+
 
     <h3>7.1 Page Friends (<code>profile/friends/friends.html</code>)</h3>
     <ul>
@@ -1123,11 +1960,15 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
         <img src="Illustration_Ranking_Leaderboard.png" width="700" alt="Illustration Ranking Leaderboard">
     </div>
 
-    <h1>8. Leaderboard</h1>
+    <div data-i18n-block="fr"><h1>8. Leaderboard</h1></div>
+    <div data-i18n-block="en"><h1>8. Leaderboard</h1></div>
 
     <blockquote>
-        <p><strong>Filtres mode/période/métrique, scope Global/Friends, my_rank, recalcul par cron.</strong></p>
+        <div data-i18n-block="fr"><p><strong>Filtres mode/période/métrique, scope Global/Friends, my_rank, recalcul par cron.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Mode/period/metric filters, Global/Friends scope, my_rank, recalculation by cron.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_leaderboard"></p>
+
 
     <h3>8.1 Page Leaderboard (<code>profile/leaderboard/leaderboard.html</code>)</h3>
     <table>
@@ -1166,11 +2007,15 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
         <img src="Illustration_titre.png" width="700" alt="Illustration Titres et Récompenses">
     </div>
 
-    <h1>9. Titres &amp; Récompenses</h1>
+    <div data-i18n-block="fr"><h1>9. Titres &amp; Récompenses</h1></div>
+    <div data-i18n-block="en"><h1>9. Titles &amp; Rewards</h1></div>
 
     <blockquote>
-        <p><strong>60 badges, 11 titres, 7 wallpapers, codes événement admin, streak recovery.</strong></p>
+        <div data-i18n-block="fr"><p><strong>60 badges, 11 titres, 7 wallpapers, codes événement admin, streak recovery.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>60 badges, 11 titles, 7 wallpapers, admin event codes, streak recovery.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_titles"></p>
+
 
     <h3>9.1 Système de titres</h3>
     <p>Texte affiché sous le pseudo. Débloqué par conditions de stats vérifiées côté serveur.</p>
@@ -1208,11 +2053,15 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
     <hr>
 
     <!-- SECTION 10 -->
-    <h1>10. Profil Utilisateur</h1>
+    <div data-i18n-block="fr"><h1>10. Profil Utilisateur</h1></div>
+    <div data-i18n-block="en"><h1>10. User Profile</h1></div>
 
     <blockquote>
-        <p><strong>Layout split desktop, dirty-state Save, Profile Song, Profil Public read-only, Calling Card PNG.</strong></p>
+        <div data-i18n-block="fr"><p><strong>Layout split desktop, dirty-state Save, Profile Song, Profil Public read-only, Calling Card PNG.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Split desktop layout, dirty-state Save, Profile Song, read-only Public Profile, Calling Card PNG.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_profile"></p>
+
 
     <h3>10.1 Page de Profil Dédiée</h3>
     <p><strong>Fichiers :</strong> <code>profile/profile.html</code>, <code>profile/profile-page.css</code>, <code>profile/profile-page.js</code></p>
@@ -1257,11 +2106,15 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
         <img src="Illustration_droit_d'admin.png" width="700" alt="Illustration panneau admin">
     </div>
 
-    <h1>11. Panneau Admin</h1>
+    <div data-i18n-block="fr"><h1>11. Panneau Admin</h1></div>
+    <div data-i18n-block="en"><h1>11. Admin Panel</h1></div>
 
     <blockquote>
-        <p><strong>Interface deux panneaux, 7 onglets par utilisateur, codes événement, modération.</strong></p>
+        <div data-i18n-block="fr"><p><strong>Interface deux panneaux, 7 onglets par utilisateur, codes événement, modération.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Two-panel interface, 7 tabs per user, event codes, moderation.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_admin"></p>
+
 
     <h3>11.1 Layout deux panneaux</h3>
     <ul>
@@ -1313,16 +2166,20 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
     <hr>
 
     <!-- SECTION 12 -->
-    <div class="center">
-        <img src="Illustration_hooks.png" width="700" alt="CI/CD et Git Hooks">
-        <img src="Illustration_Docker.jpeg" width="700" alt="Infrastructure Docker et Hostinger" style="margin-top:16px">
+    <div style="display:flex;gap:16px;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin:20px 0">
+        <img src="Illustration_hooks.png" style="width:48%;min-width:280px;max-width:480px;border-radius:10px" alt="CI/CD et Git Hooks">
+        <img src="Illustration_Docker.jpeg" style="width:48%;min-width:280px;max-width:480px;border-radius:10px" alt="Infrastructure Docker et Hostinger">
     </div>
 
-    <h1>12. CI/CD &amp; Infrastructure</h1>
+    <div data-i18n-block="fr"><h1>12. CI/CD &amp; Infrastructure</h1></div>
+    <div data-i18n-block="en"><h1>12. CI/CD &amp; Infrastructure</h1></div>
 
     <blockquote>
-        <p><strong>GitHub Actions CI/CD, git hooks versionnés, Docker, Service Worker, déploiement Hostinger.</strong></p>
+        <div data-i18n-block="fr"><p><strong>GitHub Actions CI/CD, git hooks versionnés, Docker, Service Worker, déploiement Hostinger.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>GitHub Actions CI/CD, versioned git hooks, Docker, Service Worker, Hostinger deployment.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_cicd"></p>
+
 
     <h3>12.1 Git Hooks versionnés</h3>
     <p><strong>Fichiers :</strong> <code>.githooks/pre-commit</code>, <code>.githooks/commit-msg</code>, <code>.githooks/pre-push</code></p>
@@ -1375,11 +2232,15 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
     <hr>
 
     <!-- SECTION 13 -->
-    <h1>13. Sécurité</h1>
+    <div data-i18n-block="fr"><h1>13. Sécurité</h1></div>
+    <div data-i18n-block="en"><h1>13. Security</h1></div>
 
     <blockquote>
-        <p><strong>Headers PHP, rate limiting, 7 failles corrigées (CRITIQUE → LOW).</strong></p>
+        <div data-i18n-block="fr"><p><strong>Headers PHP, rate limiting, 7 failles corrigées (CRITIQUE → LOW).</strong></p></div>
+        <div data-i18n-block="en"><p><strong>PHP headers, rate limiting, 7 vulnerabilities fixed (CRITICAL → LOW).</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_security"></p>
+
 
     <h3>13.1 Headers de sécurité PHP</h3>
     <p>Ajoutés dans <code>api/bootstrap.php</code> après le bloc CORS :</p>
@@ -1410,11 +2271,15 @@ header('Referrer-Policy: strict-origin-when-cross-origin');</code></pre>
     <hr>
 
     <!-- SECTION 14 -->
-    <h1>14. Tests &amp; Qualité de code</h1>
+    <div data-i18n-block="fr"><h1>14. Tests &amp; Qualité de code</h1></div>
+    <div data-i18n-block="en"><h1>14. Tests &amp; Code Quality</h1></div>
 
     <blockquote>
-        <p><strong>190 tests Vitest, magic numbers → constantes, debug auto-calls supprimés, edge cases §13.</strong></p>
+        <div data-i18n-block="fr"><p><strong>190 tests Vitest, magic numbers → constantes, debug auto-calls supprimés, edge cases §13.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>190 Vitest tests, magic numbers → named constants, debug auto-calls removed, edge cases §13.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_tests"></p>
+
 
     <h3>14.1 Suite de tests — 190 tests</h3>
     <table>
@@ -1465,11 +2330,15 @@ header('Referrer-Policy: strict-origin-when-cross-origin');</code></pre>
     <hr>
 
     <!-- SECTION 15 -->
-    <h1>15. Corrections &amp; Accessibilité</h1>
+    <div data-i18n-block="fr"><h1>15. Corrections &amp; Accessibilité</h1></div>
+    <div data-i18n-block="en"><h1>15. Bug Fixes &amp; Accessibility</h1></div>
 
     <blockquote>
-        <p><strong>11 bugs corrigés, gameplay fixes, aria-labels, réorganisation profile/friends &amp; leaderboard.</strong></p>
+        <div data-i18n-block="fr"><p><strong>11 bugs corrigés, gameplay fixes, aria-labels, réorganisation profile/friends &amp; leaderboard.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>11 bugs fixed, gameplay fixes, aria-labels, profile/friends &amp; leaderboard reorganization.</strong></p></div>
     </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_bugfixes"></p>
+
 
     <h3>15.1 Corrections de bugs notables</h3>
     <table>
@@ -1534,7 +2403,24 @@ header('Referrer-Policy: strict-origin-when-cross-origin');</code></pre>
 
     <hr>
 
-    <p style="text-align:center;color:#999;font-size:0.9em;margin-top:2rem"><em>Ce document est la référence technique complète de la version 2.0. Toute décision d'architecture majeure doit être ajoutée dans <code>PersonaDLE_Update_Documentation/PersonaDLE 2.0/</code>.</em></p>
+    <p style="text-align:center;color:#999;font-size:0.9em;margin-top:2rem">
+        <em data-i18n-block="fr">Ce document est la référence technique complète de la version 2.0. Toute décision d'architecture majeure doit être ajoutée dans <code>PersonaDLE_Update_Documentation/PersonaDLE 2.0/</code>.</em>
+        <em data-i18n-block="en">This document is the complete technical reference for version 2.0. Any major architectural decision must be added to <code>PersonaDLE_Update_Documentation/PersonaDLE 2.0/</code>.</em>
+    </p>
 
+    <!-- i18n — reprend la langue choisie sur le site principal -->
+    <script type="module">
+        import { initLang } from '../../js/i18n.js';
+        window.__i18nReady = initLang();
+
+        /* Mise à jour en temps réel si la langue change sur une autre page (même origin) */
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'lang' && e.newValue && window.i18n?.setLang) {
+                window.i18n.setLang(e.newValue);
+            }
+        });
+    </script>
+
+</div><!-- /.doc-wrap -->
 </body>
 </html>

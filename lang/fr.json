@@ -827,7 +827,19 @@
     "daily_countdown_label": "Prochain reset dans",
     "daily_hours": "heures",
     "daily_min": "min",
-    "daily_sec": "sec"
+    "daily_sec": "sec",
+    "news_summer": {
+      "title": "☀️ Été 2026 — Événement P5X Été",
+      "date": "Juin 2026",
+      "b1_label": "Skins d'été :",
+      "b1_text": "3 nouvelles poses All-Out Attack pour Wonder, Closer & Moko — édition plage !",
+      "b2_label": "Nouveaux portraits :",
+      "b2_text": "Wonder Summer, Closer Summer & Moko Summer ajoutés avec leurs portraits de combat.",
+      "b3_label": "All-Out Attack :",
+      "b3_text": "Plongez dans l'ambiance estivale avec les nouvelles animations saisonnières !",
+      "b4_label": "En plein soleil :",
+      "b4_text": "Lancez le mode All-Out Attack et profitez du nouveau lot P5X d'été !"
+    }
   },
   "data": {
     "genre": {
@@ -1002,5 +1014,34 @@
     "q16": "PersonaDLE est-il affilié à Atlus ou SEGA ?",
     "a16": "Non. PersonaDLE est un projet fan indépendant et non commercial. Tous les personnages, musiques et illustrations Persona appartiennent à leurs ayants droit respectifs (Atlus, SEGA). C'est une lettre d'amour à la série — rien de plus.",
     "footer_link": "FAQ"
+  },
+  "updates": {
+    "new_content_title": "✨ Nouveau contenu v2.0",
+    "new_content_desc": "Nouveaux personnages, nouvelles musiques — tout ce qui a été ajouté dans cette mise à jour.",
+    "new_chars_title": "Nouveaux personnages — Mode All-Out Attack",
+    "new_music_title": "Nouvelles musiques — Mode Musique",
+    "music_col_cover": "Cover",
+    "music_col_title": "Titre",
+    "music_col_opus": "Opus",
+    "music_col_artist": "Interprète",
+    "page_title": "PersonaDLE — Documentation Technique v2.0",
+    "new_chars_summer": "☀️ Été 2026 — Événement estival P5X",
+    "summer_intro": "☀️ L'été 2026 est officiellement là — et la plage n'a jamais été aussi dangereuse. Wonder, Closer & Moko ont troqué leurs tenues de combat pour le maillot de bain, et franchement ? Elles font toujours autant mal. Célébrez la saison avec ces nouveaux skins All-Out Attack brûlants. Vous voilà prévenus. 🏖️🔥",
+    "intro_css": "🎨 Le CSS est passé d'un énorme fichier obèse à une architecture propre par mode. Le dark mode fonctionne vraiment maintenant. Le responsive ne pleure plus sur mobile. Une révolution discrète que personne n'avait demandée — et dont tout le monde avait besoin.",
+    "intro_i18n": "🌐 Des chaînes françaises hardcodées partout à un vrai système 5 langues avec 760+ clés, détection auto et fallbacks. Plus de texte cassé quand tu passes en allemand à minuit.",
+    "intro_js": "⚙️ Le codebase était un plat de spaghettis de logique copiée-collée. Maintenant c'est modulaire, testable et maintenable. `gameCore.js` est la source de vérité unique. Il n'a fallu que quelques centaines de commits pour en arriver là.",
+    "intro_filters": "🔍 Les filtres empilaient les listeners comme des crêpes et tout cassait en silence. Maintenant ils sont partagés, persistants et respectent vraiment la portée des défis. Plus de bugs fantômes de filtres.",
+    "intro_music": "🎵 Le mode Musique a eu droit à un lecteur audio custom style P5, des thèmes de couleur dynamiques par série, et 13 nouveaux titres. Tes oreilles te remercieront. Tes playlists, non.",
+    "intro_backend": "🗄️ 20 tables, PHP 8.3, MariaDB 10.6+, API REST, sync offline-first. L'infrastructure qui rend tout le reste possible — construite from scratch, sécurisée et déployée. Pas de raccourcis.",
+    "intro_social": "👥 Amis, Social Links, défis, notifications et animations de rang-up — l'expérience sociale Persona complète, en vanilla JS et PHP. Le rang True Confidant, ça en impose toujours autant.",
+    "intro_leaderboard": "🏆 Hebdomadaire, mensuel, all-time. Par mode, par métrique. Global ou amis uniquement. Ton rang est toujours affiché. Essaie de prétendre que ça n'a pas d'importance — on sait tous les deux que si.",
+    "intro_titles": "🎖️ 60+ badges, vérification côté serveur, codes événement, 4 niveaux de rareté. Équipe un titre sous ton pseudo. Flex avec modération. Ou pas — les titres légendaires ne sont pas là pour rester cachés.",
+    "intro_profile": "🖼️ Crop d'avatar canvas, fonds d'écran, musique de profil, carte de partage — le package complet pour se montrer. Exporte ton profil en PNG et flex sur Discord. Avec 8 thèmes et 25 fonds d'écran, plus d'excuse pour un profil ennuyeux.",
+    "intro_admin": "🛡️ Ban, verrou, gestion des codes événement, monitoring stats. Le panneau admin fait tout sauf le café. Il a aussi une piste d'audit complète, donc personne ne peut prétendre ne pas avoir fait ce qu'il a clairement fait.",
+    "intro_cicd": "🚀 GitHub Actions, git hooks, Service Worker, crons Hostinger — la machinerie invisible qui fait tourner tout ça. Ça ne te réveille à 3h du matin que quand quelque chose casse vraiment. En général.",
+    "intro_security": "🔒 CORS, PDO, bcrypt, rate limiting, 7 failles corrigées. Le genre de trucs invisible quand ça marche et catastrophique quand ça ne marche pas. Ça marche.",
+    "intro_tests": "🧪 190 tests unitaires, tous au vert. Chaque nouvel utilitaire dans `gameCore.js` vient avec ses tests. Prettier garde les diffs propres. Le hook pre-commit ne laisse pas passer un i18n cassé. Fais confiance au pipeline.",
+    "intro_bugfixes": "🐛 Listeners empilés, cas limites DST, race conditions, wildcards CORS, 409 silencieux — tout ce qui pouvait casser discrètement a été corrigé. Améliorations d'accessibilité incluses, parce que 'cassé' ne se limite pas aux bugs.",
+    "joker_starlight_intro": "Le Voleur Fantôme troque son manteau pour un costume — la variante Dancing in Starlight de Joker débarque dans P5X avec une nouvelle animation All-Out Attack et une touche d'élégance."
   }
 }

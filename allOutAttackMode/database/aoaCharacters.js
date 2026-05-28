@@ -38,12 +38,16 @@ export const aoaCharacters = [
   { nom: "Caroline & Justine", gif: "Caroline_and_Justine", opus: ["P5"] },
 
   // === Persona 5 X ===
+  { nom: "Joker Starlight ( Ren Amamiya )", gif: "Joker_Starlight", opus: ["P5X"] },
+
   { nom: "Wonder ( Nagisa Kamishiro )", gif: "Wonder", opus: ["P5X"] },
   { nom: "Wonder Chinese New Year ( Nagisa Kamishiro )", gif: "Wonder_ChineseNY", opus: ["P5X"] },
   { nom: "Wonder Velvet ( Nagisa Kamishiro )", gif: "Wonder_Velvet", opus: ["P5X"] },
+  { nom: "Wonder Summer ( Nagisa Kamishiro )", gif: "Wonder_Summer", opus: ["P5X"] },
 
   { nom: "Chord ( Ayaka Sakai )", gif: "Chord", opus: ["P5X"] },
   { nom: "Closer ( Motoha Arai )", gif: "Closer", opus: ["P5X"] },
+  { nom: "Closer Summer ( Motoha Arai )", gif: "Closer_Summer", opus: ["P5X"] },
   { nom: "Fleuret ( Seiji Shiratori )", gif: "Fleuret", opus: ["P5X"] },
   { nom: "Leon ( Leo Kamiyama )", gif: "Leon", opus: ["P5X"] },
   { nom: "Rin ( Yaoling Li )", gif: "Rin", opus: ["P5X"] },
@@ -51,6 +55,7 @@ export const aoaCharacters = [
   { nom: "Wind ( Riko Tanemura )", gif: "Wind", opus: ["P5X"] },
   { nom: "Soy ( Shun Kano )", gif: "Soy", opus: ["P5X"] },
   { nom: "Moko ( Tomoko Noge )", gif: "Moko", opus: ["P5X"] },
+  { nom: "Moko Summer ( Tomoko Noge )", gif: "Moko_Summer", opus: ["P5X"] },
   { nom: "Sepia ( Toshiya Sumi )", gif: "Sepia", opus: ["P5X"] },
   { nom: "Key ( Kiyoshi Kurotani )", gif: "Key", opus: ["P5X"] },
   { nom: "Okyann ( Kayo Tomiyama )", gif: "Okyann", opus: ["P5X"] },

@@ -98,9 +98,16 @@ function applyToDOM() {
     if (val !== undefined) el.title = val;
   });
 
-  /* Blocs HTML entiers — visibles uniquement pour la langue active */
-  document.querySelectorAll("[data-i18n-block]").forEach(function (el) {
-    el.style.display = el.getAttribute("data-i18n-block") === _current ? "" : "none";
+  /* Blocs HTML entiers — visible pour la langue active, EN comme fallback
+     si aucun bloc n'existe pour la langue courante (ex: ES, DE, IT)      */
+  var _blockEls = document.querySelectorAll("[data-i18n-block]");
+  var _hasBlockForLang = false;
+  _blockEls.forEach(function (el) {
+    if (el.getAttribute("data-i18n-block") === _current) _hasBlockForLang = true;
+  });
+  var _blockLang = _hasBlockForLang ? _current : DEFAULT_LANG;
+  _blockEls.forEach(function (el) {
+    el.style.display = el.getAttribute("data-i18n-block") === _blockLang ? "" : "none";
   });
 }
 
