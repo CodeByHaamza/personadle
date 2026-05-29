@@ -660,6 +660,204 @@
         .ocg-item:hover { border-color:rgba(230,57,70,0.5); transform:translateY(-2px); }
         .ocg-item img { width:80px; height:80px; object-fit:cover; border-radius:7px; display:block; }
         .ocg-item code { font-size:0.73em; color:#e63946; }
+
+        /* ── Title showcase — Section 9 ── */
+        .title-showcase {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 28px 0 40px;
+            justify-content: center;
+        }
+
+        .title-card {
+            flex: 1 1 220px;
+            max-width: 300px;
+            border-radius: 18px;
+            padding: 28px 20px 22px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .title-card:hover { transform: translateY(-6px); }
+
+        .tc-stars {
+            font-size: 1.05rem;
+            letter-spacing: 4px;
+            margin-bottom: 6px;
+        }
+
+        .tc-rarity-label {
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            padding: 3px 12px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+
+        .tc-divider {
+            height: 1px;
+            width: 55%;
+            margin: 0 auto 18px;
+            opacity: 0.45;
+        }
+
+        .tc-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            letter-spacing: 0.2px;
+        }
+
+        .tc-game {
+            font-size: 0.76rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 14px;
+            opacity: 0.65;
+        }
+
+        .tc-condition {
+            font-size: 0.81rem;
+            line-height: 1.45;
+            opacity: 0.72;
+            font-style: italic;
+        }
+
+        /* Rare — blue */
+        .title-card.rarity-rare {
+            background: linear-gradient(155deg, #e8f4ff 0%, #c5e3ff 60%, #dde8ff 100%);
+            border: 2px solid rgba(66,165,245,0.65);
+            box-shadow: 0 4px 20px rgba(66,165,245,0.2);
+        }
+        .title-card.rarity-rare .tc-stars,
+        .title-card.rarity-rare .tc-name { color: #1565c0; }
+        .title-card.rarity-rare .tc-rarity-label {
+            background: rgba(66,165,245,0.13); color: #1565c0;
+            border: 1px solid rgba(66,165,245,0.28);
+        }
+        .title-card.rarity-rare .tc-divider { background: #42a5f5; }
+        .title-card.rarity-rare .tc-game,
+        .title-card.rarity-rare .tc-condition { color: #1e3a5f; }
+
+        /* Epic — purple */
+        .title-card.rarity-epic {
+            background: linear-gradient(155deg, #f3e8ff 0%, #e0c4ff 60%, #eee0ff 100%);
+            border: 2px solid rgba(156,39,176,0.6);
+            box-shadow: 0 4px 24px rgba(156,39,176,0.22);
+        }
+        .title-card.rarity-epic .tc-stars,
+        .title-card.rarity-epic .tc-name { color: #6a1b9a; }
+        .title-card.rarity-epic .tc-rarity-label {
+            background: rgba(156,39,176,0.1); color: #7b1fa2;
+            border: 1px solid rgba(156,39,176,0.24);
+        }
+        .title-card.rarity-epic .tc-divider { background: #ab47bc; }
+        .title-card.rarity-epic .tc-game,
+        .title-card.rarity-epic .tc-condition { color: #3a1054; }
+
+        /* Legendary — gold */
+        @keyframes legendaryPulse {
+            0%, 100% { box-shadow: 0 4px 28px rgba(250,177,0,0.28); }
+            50%       { box-shadow: 0 6px 42px rgba(250,177,0,0.52), 0 0 22px rgba(250,177,0,0.14); }
+        }
+        @keyframes legendaryPulseDark {
+            0%, 100% { box-shadow: 0 4px 28px rgba(255,196,0,0.18); }
+            50%       { box-shadow: 0 6px 42px rgba(255,196,0,0.38), 0 0 28px rgba(255,196,0,0.12); }
+        }
+        .title-card.rarity-legendary {
+            background: linear-gradient(155deg, #fffde7 0%, #fff3b0 50%, #fffbdc 100%);
+            border: 2px solid rgba(250,177,0,0.75);
+            animation: legendaryPulse 4s ease-in-out infinite;
+        }
+        .title-card.rarity-legendary .tc-stars,
+        .title-card.rarity-legendary .tc-name { color: #7a5000; }
+        .title-card.rarity-legendary .tc-rarity-label {
+            background: rgba(250,177,0,0.14); color: #7a5000;
+            border: 1px solid rgba(250,177,0,0.32);
+        }
+        .title-card.rarity-legendary .tc-divider { background: #fbc02d; }
+        .title-card.rarity-legendary .tc-game,
+        .title-card.rarity-legendary .tc-condition { color: #4a3000; }
+
+        /* Dark mode overrides — title cards */
+        :root.darkmode .title-card.rarity-rare {
+            background: linear-gradient(155deg, #0a1a2e 0%, #0d2240 60%, #101830 100%);
+            border-color: rgba(100,180,255,0.45);
+            box-shadow: 0 4px 20px rgba(66,165,245,0.14);
+        }
+        :root.darkmode .title-card.rarity-rare .tc-stars,
+        :root.darkmode .title-card.rarity-rare .tc-name { color: #90caf9; }
+        :root.darkmode .title-card.rarity-rare .tc-rarity-label {
+            background: rgba(66,165,245,0.11); color: #90caf9; border-color: rgba(100,180,255,0.22);
+        }
+        :root.darkmode .title-card.rarity-rare .tc-game,
+        :root.darkmode .title-card.rarity-rare .tc-condition { color: #7badd0; }
+
+        :root.darkmode .title-card.rarity-epic {
+            background: linear-gradient(155deg, #1a0830 0%, #280c40 60%, #1e0a38 100%);
+            border-color: rgba(200,100,220,0.45);
+            box-shadow: 0 4px 24px rgba(156,39,176,0.18);
+        }
+        :root.darkmode .title-card.rarity-epic .tc-stars,
+        :root.darkmode .title-card.rarity-epic .tc-name { color: #ce93d8; }
+        :root.darkmode .title-card.rarity-epic .tc-rarity-label {
+            background: rgba(206,147,216,0.1); color: #ce93d8; border-color: rgba(200,100,220,0.22);
+        }
+        :root.darkmode .title-card.rarity-epic .tc-game,
+        :root.darkmode .title-card.rarity-epic .tc-condition { color: #b08ac0; }
+
+        :root.darkmode .title-card.rarity-legendary {
+            background: linear-gradient(155deg, #1e1600 0%, #2c2000 50%, #1a1400 100%);
+            border-color: rgba(255,196,0,0.55);
+            animation: legendaryPulseDark 4s ease-in-out infinite;
+        }
+        :root.darkmode .title-card.rarity-legendary .tc-stars,
+        :root.darkmode .title-card.rarity-legendary .tc-name { color: #ffe082; }
+        :root.darkmode .title-card.rarity-legendary .tc-rarity-label {
+            background: rgba(255,196,0,0.11); color: #ffe082; border-color: rgba(255,196,0,0.28);
+        }
+        :root.darkmode .title-card.rarity-legendary .tc-game,
+        :root.darkmode .title-card.rarity-legendary .tc-condition { color: #c8a860; }
+
+        /* ── Responsive général ── */
+        @media (max-width: 768px) {
+            table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .doc-wrap { padding-top: 56px; }
+            .frontmatter { padding: 28px 18px; }
+            .frontmatter h1 { font-size: 2.1rem; }
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.3rem; }
+            h3 { font-size: 1.1rem; }
+            pre { font-size: 0.82em; }
+            blockquote { padding: 1em 1.1em; }
+        }
+
+        @media (max-width: 480px) {
+            .doc-wrap { padding: 56px 12px 24px; }
+            .frontmatter { padding: 20px 14px; }
+            .frontmatter h1 { font-size: 1.7rem; }
+            h1 { font-size: 1.45rem; letter-spacing: 0.5px; }
+            h2 { font-size: 1.15rem; }
+            .home-btn { font-size: 11px; padding: 5px 10px; }
+            pre { font-size: 0.76em; padding: 11px 12px; }
+            .music-group { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .mg-cover { flex: none; }
+            .mg-cover img { width: 76px; height: 76px; }
+            blockquote { padding: 0.85em 0.9em; }
+            .title-showcase { gap: 12px; }
+            .title-card { max-width: 100%; flex-basis: 100%; padding: 20px 18px; }
+            .opus-covers-grid { gap: 7px; }
+            .ocg-item img { width: 64px; height: 64px; }
+        }
     </style>
 </head>
 <body>
@@ -2025,6 +2223,38 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
         <li>Un seul titre équipé à la fois (<code>profiles.equipped_title_id</code>)</li>
         <li><strong>Bug corrigé :</strong> slugs BDD courts (<code>thou_art_i</code>) vs slugs JS préfixés (<code>velvet_room_thou_art_i</code>) — migration 006 aligne les 11 slugs BDD sur le format JS</li>
     </ul>
+
+    <div class="title-showcase">
+        <!-- I Am Not Afraid — Rare (Persona 3) -->
+        <div class="title-card rarity-rare">
+            <div class="tc-stars">★ ★</div>
+            <div class="tc-rarity-label">Rare</div>
+            <div class="tc-divider"></div>
+            <div class="tc-name">I Am Not Afraid</div>
+            <div class="tc-game">Persona 3</div>
+            <div class="tc-condition">Win 50 games in Classic Mode</div>
+        </div>
+
+        <!-- Reach Out to the Truth — Epic (Persona 4) -->
+        <div class="title-card rarity-epic">
+            <div class="tc-stars">★ ★ ★</div>
+            <div class="tc-rarity-label">Epic</div>
+            <div class="tc-divider"></div>
+            <div class="tc-name">Reach Out to the Truth</div>
+            <div class="tc-game">Persona 4</div>
+            <div class="tc-condition">Complete 100 games across all modes</div>
+        </div>
+
+        <!-- Memento Mori — Legendary (Persona 3 Reload) -->
+        <div class="title-card rarity-legendary">
+            <div class="tc-stars">✦ ✦ ✦ ✦</div>
+            <div class="tc-rarity-label">Legendary</div>
+            <div class="tc-divider"></div>
+            <div class="tc-name">Memento Mori</div>
+            <div class="tc-game">Persona 3 Reload</div>
+            <div class="tc-condition">Achieve a 30-day streak</div>
+        </div>
+    </div>
 
     <h3>9.2 Catalogue Badges — 60 badges</h3>
     <p>Table <code>badges</code> créée (migration 007) :</p>
