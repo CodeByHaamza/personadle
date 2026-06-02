@@ -278,6 +278,34 @@
 
         summary { font-weight: 600; cursor: pointer; outline: none; }
 
+        /* ── Code accordéons ── */
+        details.code-collapse {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0.5em 0;
+        }
+        details.code-collapse > summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            color: var(--primary-color);
+            border: 1px solid rgba(230, 57, 70, 0.3);
+            border-radius: 6px;
+            padding: 3px 10px;
+            background: rgba(230, 57, 70, 0.06);
+            margin-bottom: 6px;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+        details.code-collapse > summary:hover {
+            background: rgba(230, 57, 70, 0.12);
+        }
+        details.code-collapse[open] > summary {
+            margin-bottom: 8px;
+        }
+
         /* ── Bouton retour accueil ── */
         .home-btn {
             position: fixed;
@@ -1063,6 +1091,36 @@
 
     </div>
 
+    <!-- ── Antagonistes — ajoutés en v2.0, non documentés précédemment ── -->
+    <div class="new-content-section" style="margin-top:32px">
+        <div data-i18n-block="fr">
+            <h2>👾 Nouveaux Personnages — Antagonistes v2.0</h2>
+            <blockquote><p><strong>Les boss finaux de P3, P4 et P5 sont maintenant jouables dans les modes compatibles.</strong></p></blockquote>
+            <table>
+                <thead><tr><th>Personnage</th><th>Jeu</th><th>Arcane</th><th>Modes</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Nyx</strong></td><td>P3 / P3FES / P3P / P3R</td><td>Death</td><td>Classique ✅ · Silhouette ✅</td></tr>
+                    <tr><td><strong>Ameno-sagiri</strong></td><td>P4 / P4G</td><td>—</td><td>Classique ✅</td></tr>
+                    <tr><td><strong>Yaldabaoth</strong></td><td>P5 / P5R / P5S</td><td>—</td><td>Classique ✅ · Silhouette ✅</td></tr>
+                </tbody>
+            </table>
+            <p style="color:var(--text-muted);font-size:0.9rem">Ces personnages ont <code>personaUser: false</code> et <code>persona: "NONE"</code>. Ils ont été ajoutés dans le commit v2.0 mais n'étaient pas documentés dans cette page.</p>
+        </div>
+        <div data-i18n-block="en">
+            <h2>👾 New Characters — v2.0 Antagonists</h2>
+            <blockquote><p><strong>The final bosses of P3, P4 and P5 are now playable in compatible modes.</strong></p></blockquote>
+            <table>
+                <thead><tr><th>Character</th><th>Game</th><th>Arcana</th><th>Modes</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Nyx</strong></td><td>P3 / P3FES / P3P / P3R</td><td>Death</td><td>Classic ✅ · Silhouette ✅</td></tr>
+                    <tr><td><strong>Ameno-sagiri</strong></td><td>P4 / P4G</td><td>—</td><td>Classic ✅</td></tr>
+                    <tr><td><strong>Yaldabaoth</strong></td><td>P5 / P5R / P5S</td><td>—</td><td>Classic ✅ · Silhouette ✅</td></tr>
+                </tbody>
+            </table>
+            <p style="color:var(--text-muted);font-size:0.9rem">These characters have <code>personaUser: false</code> and <code>persona: "NONE"</code>. They were added in the v2.0 commit but were not documented on this page.</p>
+        </div>
+    </div>
+
     <hr>
 
     <div data-i18n-block="fr">
@@ -1125,6 +1183,8 @@
     <div data-i18n-block="en"><h3>1.1 CSS Separation — from monolith to per-mode files</h3>
     <p>Before v2.0, all game styles were concentrated in a single <code>css/style.css</code> file of over 2,000 lines. This monolith caused readability problems, maintainability issues (modifying one mode could break another), performance issues (each page loaded all styles), and collaboration conflicts (frequent merge conflicts).</p>
     <p><strong>Solution — one CSS file per mode:</strong></p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>css/
 ├── global.css          ← Reset, typo, confetti, navigation, modales, dark mode global
 ├── index.css           ← Page d'accueil uniquement
@@ -1136,12 +1196,18 @@ silhouetteMode/silhouette.css
 musicsMode/music.css        ← Lecteur audio custom P5, thèmes de couleur
 personaeMode/personae.css
 allOutAttackMode/allOutAttack.css</code></pre>
+</details>
+
 
     <div data-i18n-block="fr"><p>Chaque page HTML ne charge que ce dont elle a besoin :</p></div>
     <div data-i18n-block="en"><p>Each HTML page only loads what it needs:</p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>&lt;!-- Exemple : musics.html --&gt;
 &lt;link rel="stylesheet" href="../css/global.css"&gt;
 &lt;link rel="stylesheet" href="./music.css"&gt;</code></pre>
+</details>
+
     <div data-i18n-block="fr"><p><code>css/style.css</code> existe toujours en archive mais n'est référencé par aucun fichier HTML.</p></div>
     <div data-i18n-block="en"><p><code>css/style.css</code> still exists as an archive but is not referenced by any HTML file.</p></div>
 
@@ -1149,10 +1215,14 @@ allOutAttackMode/allOutAttack.css</code></pre>
     <p>En dark mode, les thèmes de couleur de série restent actifs. Le seul changement sur le lecteur audio est un fond légèrement plus sombre pour renforcer le contraste — les CSS custom properties de couleur ne sont pas écrasées :</p></div>
     <div data-i18n-block="en"><h3>1.2 Dark Mode</h3>
     <p>In dark mode, the series color themes remain active. The only change on the audio player is a slightly darker background to reinforce contrast — the CSS color custom properties are not overridden:</p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>body.darkmode .audio-wrapper {
   background: linear-gradient(150deg, #0c0c0c 0%, #080808 60%, #0c0c0c 100%);
   /* Pas d'override de couleurs — les variables de thème restent actives */
 }</code></pre>
+</details>
+
     <div data-i18n-block="fr"><p>Dark mode disponible via la classe <code>.darkmode</code> sur <code>&lt;body&gt;</code>, togglé par <code>js/gameCore.js</code>.</p></div>
     <div data-i18n-block="en"><p>Dark mode available via the <code>.darkmode</code> class on <code>&lt;body&gt;</code>, toggled by <code>js/gameCore.js</code>.</p></div>
 
@@ -1231,6 +1301,8 @@ allOutAttackMode/allOutAttack.css</code></pre>
     </div>
 
     <p><strong>Technique — off-screen clone pour la capture :</strong></p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>// Clone hors-écran → qualité pleine résolution, indépendant du scale CSS
 const offscreen = buildShareCard(bg, wallpaper, activeTab);
 offscreen.style.position = 'fixed';
@@ -1239,6 +1311,8 @@ document.body.appendChild(offscreen);
 
 const cvs = await html2canvas(offscreen, { scale: 2, useCORS: true });
 document.body.removeChild(offscreen);</code></pre>
+</details>
+
     <div data-i18n-block="fr">
     <p>La carte affichée dans la preview est réduite via <code>transform: scale(0.455)</code>. La carte capturée est un clone off-screen non affecté par ce scale — le PNG exporté est toujours en pleine résolution (780×1386px à scale:2).</p>
     <p>Les fonds GIF animés ont été retirés du sélecteur : les GIFs sont animés dans la preview mais le PNG ne capture qu'une frame statique, créant une confusion utilisateur.</p>
@@ -1252,6 +1326,8 @@ document.body.removeChild(offscreen);</code></pre>
     <p>Bloc CSS ajouté dans <code>css/langSelector.css</code> pour la langue italienne (manquait alors que EN, FR, ES, DE avaient chacun un bloc) :</p></div>
     <div data-i18n-block="en"><h3>1.5 Language Selector Style — Adding Italian</h3>
     <p>CSS block added in <code>css/langSelector.css</code> for the Italian language (was missing while EN, FR, ES, DE each had a block):</p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>/* === ITALIANO === */
 .lang-opt--it { border-left-color: #6d8b4e; }
 .lang-opt--it .lang-opt-name {
@@ -1259,6 +1335,8 @@ document.body.removeChild(offscreen);</code></pre>
   font-size: 1.35rem;
 }
 .lang-opt--it.is-active .lang-opt-dot { color: #8fb96a; }</code></pre>
+</details>
+
     <div data-i18n-block="fr"><p>Thème vert olive (#6d8b4e) inspiré de Persona 2, police Special Elite (typewriter vintage).</p></div>
     <div data-i18n-block="en"><p>Olive green theme (#6d8b4e) inspired by Persona 2, Special Elite font (vintage typewriter).</p></div>
 
@@ -1280,10 +1358,14 @@ document.body.removeChild(offscreen);</code></pre>
         <li><code>#badgesGrid</code> — <code>flex-direction: column; gap: 24px</code></li>
     </ul>
     </div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>[ ACHIEVEMENTS (3/8) ]  [ badge ] [ badge ] [ badge ] …
 [ EVENTS (1/2) ]        [ badge ] [ badge ]
 [ SECRETS (0/5) ]       [ badge ] [ badge ] …
 [ SOCIAL (0/3) ]        [ badge ] [ badge ] …</code></pre>
+</details>
+
 
     <hr>
 
@@ -1306,6 +1388,8 @@ document.body.removeChild(offscreen);</code></pre>
     <p>Avant la v2.0, tous les textes du jeu étaient hardcodés en anglais dans les fichiers HTML et JS.</p></div>
     <div data-i18n-block="en"><h3>2.1 i18n system architecture</h3>
     <p>Before v2.0, all game texts were hardcoded in English in the HTML and JS files.</p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>lang/
 ├── en.json     ← Source de vérité — 760 clés
 ├── fr.json     ← Traduction complète synchronisée (760 clés)
@@ -1315,6 +1399,8 @@ document.body.removeChild(offscreen);</code></pre>
 
 js/
 └── i18n.js     ← setLang(), t(), initLang(), applyToDOM(), updateLangButtons()</code></pre>
+</details>
+
 
     <table>
         <thead>
@@ -1332,17 +1418,25 @@ js/
 
     <div data-i18n-block="fr"><p><strong>Attributs HTML supportés :</strong></p></div>
     <div data-i18n-block="en"><p><strong>Supported HTML attributes:</strong></p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>&lt;span data-i18n="ui.submit"&gt;Submit&lt;/span&gt;
 &lt;input data-i18n-placeholder="ui.input_placeholder"&gt;
 &lt;div data-i18n-title="modes.classic.tooltip_name"&gt;
 &lt;div data-i18n-block="fr"&gt;Contenu français uniquement&lt;/div&gt;</code></pre>
+</details>
+
 
     <div data-i18n-block="fr"><p><strong>Piège critique — <code>t(key) ?? fallback</code> ne fonctionne pas :</strong><br>
     <code>window.i18n.t(key)</code> retourne la clé brute (string truthy) quand elle n'existe pas — <code>??</code> ne se déclenche jamais. Pattern correct :</p></div>
     <div data-i18n-block="en"><p><strong>Critical pitfall — <code>t(key) ?? fallback</code> does not work:</strong><br>
     <code>window.i18n.t(key)</code> returns the raw key (truthy string) when missing — <code>??</code> never triggers. Correct pattern:</p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>const r = window.i18n?.t?.(key);
 return (r != null && r !== key) ? r : fallback;</code></pre>
+</details>
+
 
     <div data-i18n-block="fr">
     <h3>2.2 Corrections critiques i18n</h3>
@@ -1356,8 +1450,12 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
     <p><strong>Problem:</strong> from subdirectories (<code>classiqueMode/</code>, <code>musicsMode/</code>…), loading <code>lang/</code> files produced HTTP 404 errors. The old code built the path from <code>window.location.href</code>, giving <code>classiqueMode/lang/fr.json</code>.</p>
     <p><strong>Solution:</strong> anchoring on <code>import.meta.url</code> — independent of the host page:</p>
     </div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>// js/i18n.js
 var _langBase = new URL('../lang/', import.meta.url).href;</code></pre>
+</details>
+
 
     <div data-i18n-block="fr">
     <h4>Fix persistance de la langue</h4>
@@ -1369,6 +1467,8 @@ var _langBase = new URL('../lang/', import.meta.url).href;</code></pre>
     <p><strong>Problem:</strong> the language choice reverted to EN on each reload. When the fetch failed (EN fallback), the <code>lang</code> variable was overwritten before the <code>localStorage.setItem</code>.</p>
     <p><strong>Solution:</strong> save the requested language before any fallback:</p>
     </div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>var requested = lang;
 try {
   translations = await fetchLang(lang);
@@ -1377,6 +1477,8 @@ try {
   translations = await fetchLang('en');
 }
 localStorage.setItem(STORAGE_KEY, requested);  // toujours la langue voulue</code></pre>
+</details>
+
 
     <div data-i18n-block="fr">
     <h4>Fix race condition au chargement</h4>
@@ -1388,6 +1490,8 @@ localStorage.setItem(STORAGE_KEY, requested);  // toujours la langue voulue</cod
     <p><strong>Problem:</strong> some dynamic texts displayed the raw key after reload. The <code>DOMContentLoaded</code> callback restored state before <code>initLang()</code> (async) had finished.</p>
     <p><strong>Solution:</strong> <code>window.__i18nReady</code> pattern:</p>
     </div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>&lt;script type="module"&gt;
   import { initLang } from '../js/i18n.js';
   window.__i18nReady = initLang();
@@ -1398,6 +1502,8 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
   if (window.__i18nReady) await window.__i18nReady;  // première ligne
   // ...
 });</code></pre>
+</details>
+
 
     <div data-i18n-block="fr">
     <h3>2.3 Sélecteur de langue</h3>
@@ -1436,6 +1542,8 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
     <p>Les boutons du jeu (Hint, Give-Up, Replay, Submit) affichent désormais leur texte dans la langue active.</p></div>
     <div data-i18n-block="en"><h3>2.4 Localized buttons — WebP images per language</h3>
     <p>Game buttons (Hint, Give-Up, Replay, Submit) now display their text in the active language.</p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>assets/buttons/
 ├── EN/   Hint_Button(.webp | _Rouge | _Transparent)
 │         Give-up_Button(.webp | _Rouge | _Transparent)
@@ -1445,14 +1553,20 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
 ├── ES/   Pista, Abandonar, Volver_a_jugar, Confirmar
 ├── DE/   Tipp, Aufgeben, Erneut_spielen, Senden
 ├── IT/   Suggerimento, Abbandona, Rigioca, Conferma</code></pre>
+</details>
+
     <p>Les anciens fichiers racine ont été **supprimés** — tous les modes utilisent désormais <code>EN/Hint_Button.webp</code> ou la variante de la langue active.</p>
     <p>Fonction <code>updateLangButtons(lang)</code> ajoutée dans <code>js/i18n.js</code>, appelée à la fin de <code>setLang()</code> :</p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>function updateLangButtons(lang) {
   var cfg = _BUTTON_CFG[lang] || _BUTTON_CFG['en'];
   // Pour #hintButton, #giveUpButton, #resetButton, #guessButton :
   //   img.normal.src = _btnBase + cfg.XX.n
   //   img.active.src = _btnBase + cfg.XX.a  (variante rouge = survol)
 }</code></pre>
+</details>
+
     <div data-i18n-block="fr"><p><code>_btnBase</code> est résolu via <code>import.meta.url</code> — indépendant de la page hôte.</p></div>
     <div data-i18n-block="en"><p><code>_btnBase</code> is resolved via <code>import.meta.url</code> — independent of the host page.</p></div>
 
@@ -1460,14 +1574,22 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
     <p>Les valeurs de la grille de comparaison (genre, arcane) sont traduites dynamiquement :</p></div>
     <div data-i18n-block="en"><h3>2.5 Attribute value translation — Classic Mode</h3>
     <p>Comparison grid values (gender, arcana) are translated dynamically:</p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>"data": {
   "genre": { "Male": "Masculin", "Female": "Féminin", "Human": "Humain", "Shadow": "Ombre" },
   "arcane": { "Death": "Mort", "Hermit": "Ermite", "Moon": "Lune", "Fool": "Fou" }
 }</code></pre>
+</details>
+
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>const translateAtom = (ns, v) =&gt; {
   const translated = i18.t(`data.${ns}.${v}`);
   return (translated === `data.${ns}.${v}`) ? v : translated;
 };</code></pre>
+</details>
+
 
     <div data-i18n-block="fr"><h3>2.6 Badges traduits (5 langues)</h3>
     <p>Tous les badges de <code>profile/badges/badgesData.js</code> ont été traduits dans les 5 fichiers <code>lang/</code> : <code>name</code>, <code>description</code>, <code>condition</code> (condition verrouillée → <code>"???"</code> pour les badges secrets).</p></div>
@@ -1484,9 +1606,13 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
             <tr><td><code>badges.category_social</code></td><td>Social</td><td>Social</td><td>Social</td><td>Soziales</td><td>Sociale</td></tr>
         </tbody>
     </table>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>function getBadgeName(badge)                 // t(`badges.${badge.id}.name`) || badge.name
 function getBadgeDescription(badge)          // t(`badges.${badge.id}.description`) || badge.description
 function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sinon t() || badge.condition</code></pre>
+</details>
+
 
     <hr>
 
@@ -1522,6 +1648,8 @@ function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sin
             <tr><td>Sessions</td><td><code>buildGameSession()</code>, <code>savePendingSession()</code></td></tr>
         </tbody>
     </table>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>js/
 ├── gameCore.js      ← Fonctions communes (date, confetti, filtres, sessions…)
 ├── filterMenu.js    ← Panneau de filtres collapsible (partagé)
@@ -1535,16 +1663,24 @@ function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sin
 ├── challenge-banner.js ← Bandeau défi actif en jeu
 ├── challenge-result.js ← Animation résultat défi
 └── tv-friend-anim.js   ← Animation TV Persona 4 demandes d'amis</code></pre>
+</details>
+
 
     <h3>3.2 Client REST — <code>js/api.js</code></h3>
     <p>Module centralisant tous les appels HTTP vers le backend PHP. Exposé globalement via <code>window._personadleApi</code> pour éviter les imports circulaires avec <code>gameCore.js</code>.</p>
     
     <p><strong>URL dynamique :</strong></p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>const BASE_URL = window.location.hostname === 'personadle.net'
   ? 'https://personadle.net/api'
   : `${window.location.protocol}//${window.location.host}/personadle/api`;</code></pre>
+</details>
+
 
     <p><strong>Structure de l'objet <code>api</code> :</strong></p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>export const api = {
   auth: {
     register({ email, pseudo, password, lang }),  // POST /api/auth/register
@@ -1572,6 +1708,8 @@ function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sin
 };
 
 window._personadleApi = api;  // bridge global</code></pre>
+</details>
+
     <div data-i18n-block="fr"><p>Toutes les requêtes utilisent <code>credentials: 'include'</code> pour transmettre le cookie <code>PHPSESSID</code>.</p></div>
     <div data-i18n-block="en"><p>All requests use <code>credentials: 'include'</code> to transmit the <code>PHPSESSID</code> cookie.</p></div>
 
@@ -1581,9 +1719,13 @@ window._personadleApi = api;  // bridge global</code></pre>
     <div data-i18n-block="en"><h3>3.3 Auth Frontend — <code>js/auth.js</code></h3>
     <p><strong>Global state:</strong> <code>window._currentUser = null</code> (null = anonymous, object = logged in).</p>
     <p><strong>HTML <code>data-auth</code> convention:</strong></p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>&lt;div data-auth="connected"&gt;Mon profil&lt;/div&gt;
 &lt;button data-auth="anonymous" data-open-modal="loginModal"&gt;Se connecter&lt;/button&gt;
 &lt;span data-auth-field="pseudo"&gt;&lt;/span&gt;</code></pre>
+</details>
+
     
     <div data-i18n-block="fr">
     <p><strong>Séquence <code>initAuth()</code> :</strong></p>
@@ -1609,6 +1751,8 @@ window._personadleApi = api;  // bridge global</code></pre>
     </div>
 
     <h3>3.4 <code>buildGameSession</code> + <code>savePendingSession</code> (gameCore.js)</h3>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>export function buildGameSession({ mode, targetName, result, attempts, timeMs = 0, filters = [] }) {
   return {
     mode, target_name: targetName, result, attempts,
@@ -1631,6 +1775,8 @@ export async function savePendingSession(session) {
   pending.push(session);
   localStorage.setItem('pendingSessions', JSON.stringify(pending));
 }</code></pre>
+</details>
+
 
     <div data-i18n-block="fr"><h3>3.5 Cloud Sync — <code>js/cloud-sync.js</code></h3>
     <p><code>pullProfileFromCloud()</code> fait un seul <code>GET /api/user/:id</code> et écrase tout le localStorage pour maintenir la synchro.</p></div>
@@ -1639,11 +1785,15 @@ export async function savePendingSession(session) {
 
     <div data-i18n-block="fr"><h3>3.6 Fix détection IS_LOCAL et autres corrections JS</h3></div>
     <div data-i18n-block="en"><h3>3.6 IS_LOCAL detection fix and other JS corrections</h3></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>const IS_LOCAL = (() =&gt; {
   const h = location.hostname;
   return (h === "" || h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0"
     || /^192\.168\./.test(h) || /^10\./.test(h));
 })();</code></pre>
+</details>
+
 
     <hr>
 
@@ -1664,6 +1814,8 @@ export async function savePendingSession(session) {
 
     <div data-i18n-block="fr"><h3>4.1 Panneau de filtres partagé — <code>js/filterMenu.js</code></h3></div>
     <div data-i18n-block="en"><h3>4.1 Shared filter panel — <code>js/filterMenu.js</code></h3></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>import { initFilterMenu } from "../js/filterMenu.js";
 
 const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&gt; {
@@ -1671,6 +1823,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
   activeFilters = newActive;
   resetGame(true);  // true = sélection aléatoire dans le pool filtré
 });</code></pre>
+</details>
+
 
     <div data-i18n-block="fr">
     <h3>4.2 <code>_migrate()</code> — Correction de l'expansion incorrecte</h3>
@@ -1710,6 +1864,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     <p>L'élément <code>&lt;audio controls&gt;</code> natif a été remplacé par un composant HTML/CSS/JS custom inspiré de Persona 5 :</p></div>
     <div data-i18n-block="en"><h3>5.1 Custom Audio Player</h3>
     <p>The native <code>&lt;audio controls&gt;</code> element was replaced by a custom HTML/CSS/JS component inspired by Persona 5:</p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>&lt;div class="audio-wrapper" id="audioBox"&gt;
   &lt;audio id="audioPlayer" preload="none"&gt;&lt;source src="" type="audio/mp3"&gt;&lt;/audio&gt;
   &lt;div class="p5-player"&gt;
@@ -1735,7 +1891,11 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;</code></pre>
+</details>
+
     <p><strong>Animations CSS (barres de son) :</strong></p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>.p5-sound-bars.playing span:nth-child(1) { animation: p5bar 0.75s ease-in-out infinite; }
 .p5-sound-bars.playing span:nth-child(2) { animation: p5bar 0.55s ease-in-out 0.12s infinite; }
 .p5-sound-bars.playing span:nth-child(3) { animation: p5bar 0.90s ease-in-out 0.06s infinite; }
@@ -1746,6 +1906,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
   0%, 100% { height: 4px;  opacity: 0.6; }
   50%       { height: 20px; opacity: 1;   }
 }</code></pre>
+</details>
+
 
     <div data-i18n-block="fr">
     <h3>5.2 Thème de couleur dynamique par série</h3>
@@ -1789,6 +1951,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     </table>
     <p><strong>P3P case — two-color gradient:</strong></p>
     </div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>P3P: {
   accent: '#818cf8',
   dark:   '#3b82f6',
@@ -1796,6 +1960,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
   glow:   'rgba(129,140,248,{a})',
   gradientFill: 'linear-gradient(90deg, #1d4ed8, #3b82f6 30%, #c084fc 65%, #ec4899)',
 },</code></pre>
+</details>
+
 
     <div data-i18n-block="fr">
     <h3>5.3 Nouveaux opus dans les filtres — P4AU et P5T</h3>
@@ -1935,6 +2101,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     </details>
     <div data-i18n-block="fr"><p><strong>Tables créées par migrations :</strong></p></div>
     <div data-i18n-block="en"><p><strong>Tables created by migrations:</strong></p></div>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>001_add_challenge_filters.sql     ← colonne challenge_filters sur messages
 002_add_has_migrated.sql          ← colonne has_migrated sur users
 006_fix_title_slugs.sql           ← 11 UPDATE alignent slugs BDD sur format JS
@@ -1942,6 +2110,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
 010_true_confidant.sql            ← social_link_rankup_notifs + is_badge_prompt
 011_event_codes_moderation.sql    ← table event_codes + seed 12 codes + is_banned/pseudo_locked
 012_remove_tcb.sql                ← suppression True Confidant Badge canvas</code></pre>
+</details>
+
     <div data-i18n-block="fr"><p><strong>Routines stockées :</strong> <code>get_or_create_social_link</code> (garantit <code>user_a_id &lt; user_b_id</code>), <code>gain_social_link_xp</code> / <code>add_social_link_xp</code> — ajoute XP, retourne nouveau rang via params <code>OUT</code>, détecte passage de rang.</p></div>
     <div data-i18n-block="en"><p><strong>Stored routines:</strong> <code>get_or_create_social_link</code> (ensures <code>user_a_id &lt; user_b_id</code>), <code>gain_social_link_xp</code> / <code>add_social_link_xp</code> — adds XP, returns new rank via <code>OUT</code> params, detects rank change.</p></div>
 
@@ -1995,6 +2165,8 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     </details>
 
     <h3>6.4 Architecture Offline-First</h3>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>Partie terminée
     ↓
 savePendingSession(session)
@@ -2007,6 +2179,8 @@ savePendingSession(session)
                     Reconnexion / initAuth()
                                 ↓
                     syncPending() → dépile la queue vers l'API</code></pre>
+</details>
+
     <p>Les erreurs <strong>409</strong> (session déjà enregistrée côté serveur) sont traitées par <code>continue</code> silencieux — évite de bloquer les sessions suivantes dans la queue.</p>
 
     <h3>6.5 Décisions d'architecture backend</h3>
@@ -2018,6 +2192,8 @@ savePendingSession(session)
     </ul>
 
     <h3>6.6 Soft Delete RGPD</h3>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>-- Anonymisation immédiate (DELETE déclenché par l'utilisateur)
 UPDATE users SET
     is_deleted    = 1,
@@ -2028,6 +2204,8 @@ UPDATE users SET
 WHERE id = ?;
 
 INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
+</details>
+
     <p>Hard delete différé J+30 via cron (<code>api/cron/hard-delete.php</code>) : <code>DELETE FROM users WHERE id = ?</code> + CASCADE InnoDB sur toutes les tables liées.</p>
 
     <hr>
@@ -2105,12 +2283,18 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
             <tr><td><code>delayMs</code> + 2400ms</td><td>Label fade-out et suppression du DOM</td></tr>
         </tbody>
     </table>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>applyRank10Effect(avatarEl, pseudoEl, delayMs = 0)
 // Appelé dans profile-view.js (profil public) et friends.js (stagger 150ms/entrée)</code></pre>
+</details>
+
 
     <h3>7.4 Défis quotidiens</h3>
     <p><strong>Envoi :</strong> bouton "Défier un ami" post-victoire dans les 6 modes (<code>showChallengeButton</code>). Erreur 409 si défi déjà envoyé aujourd'hui (1 défi par paire d'amis par jour).</p>
     <p><strong>Acceptation :</strong> efface l'état de jeu du mode (via <code>MODE_STATE_KEYS</code>), applique les filtres du challenger, pose <code>activeChallenge</code> en localStorage, redirige vers le mode.</p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>const MODE_STATE_KEYS = {
   classic:      ['target', 'attempts', 'guessHistory'],
   emoji:        ['targetEmoji', 'attemptsEmoji', 'emojiGameOver', 'emojiWin'],
@@ -2119,6 +2303,8 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
   personae:     ['personaeTarget', 'personaeAttempts', 'personaeGameOver'],
   music:        ['musicTarget', 'musicAttempts', 'musicGameOver', 'musicTriedTitles'],
 };</code></pre>
+</details>
+
     <p><strong>Résolution :</strong> <code>checkChallengeCompletion()</code> hors du bloc victoire dans les 6 modes — give-up résout le défi avec <code>isWin=false</code> → statut <code>'expired'</code> → animation "dommage".</p>
 
     <h3>7.5 Bandeau de défi en jeu</h3>
@@ -2303,6 +2489,8 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
 
     <h3>10.2 Profile Song — Lecteur musical de profil</h3>
     <p>Sélecteur <code>&lt;select&gt;</code> groupé par série avec image live. La chanson se joue automatiquement à l'arrivée sur la page profil. Autoplay → fallback au premier clic si bloqué par le navigateur.</p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>{
   fichier: "Last_Surprise.mp3",
   titre:   "Last Surprise",
@@ -2310,6 +2498,8 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
   image:   "P5.webp",
   customImage: null
 }</code></pre>
+</details>
+
 
     <h3>10.3 Profil Public (read-only)</h3>
     <p><code>profile.html?view=FRIENDCODE</code> active <code>profile-view.js</code> automatiquement. Données depuis <code>GET /api/user/public?code=...</code> (pas de <code>requireAuth()</code>). Toutes les strings passées par <code>escapeHtml()</code>. Affiche : avatar, pseudo, titre équipé, stats, musique de profil (mini player), Social Link gauge.</p>
@@ -2416,8 +2606,12 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
 
     <h3>12.1 Git Hooks versionnés</h3>
     <p><strong>Fichiers :</strong> <code>.githooks/pre-commit</code>, <code>.githooks/commit-msg</code>, <code>.githooks/pre-push</code></p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>npm run setup-hooks
 # → git config core.hooksPath .githooks</code></pre>
+</details>
+
     <table>
         <thead>
             <tr><th>Hook</th><th>Vérifications</th></tr>
@@ -2477,9 +2671,13 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
 
     <h3>13.1 Headers de sécurité PHP</h3>
     <p>Ajoutés dans <code>api/bootstrap.php</code> après le bloc CORS :</p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: strict-origin-when-cross-origin');</code></pre>
+</details>
+
     <p><code>Options -Indexes</code> ajouté dans <code>api/messages/.htaccess</code> et <code>api/social-links/.htaccess</code>.</p>
 
     <h3>13.2 Rate limiting</h3>
@@ -2624,11 +2822,15 @@ header('Referrer-Policy: strict-origin-when-cross-origin');</code></pre>
 
     <h3>15.4 Architecture — Réorganisation <code>profile/friends/</code> et <code>profile/leaderboard/</code></h3>
     <p>Les fichiers de la page Amis et Leaderboard ont été déplacés dans leurs propres sous-dossiers (<code>git mv</code>) :</p>
+
+<details class="code-collapse"><summary>📋 Code</summary>
 <pre><code>profile/
 ├── friends/
 │   ├── friends.html  ├── friends.css  ├── friends.js  └── README.md
 └── leaderboard/
     ├── leaderboard.html  ├── leaderboard.css  ├── leaderboard.js  └── README.md</code></pre>
+</details>
+
     <p><strong>Impacts :</strong> <code>sw.js</code> — 6 chemins mis à jour ; <code>js/bottomNav.js</code> — logique <code>isDeepSubpath</code> pour les pages à 2 niveaux de profondeur (<code>base = '../../'</code>) ; HTML — tous les <code>../css/</code> → <code>../../css/</code>.</p>
 
     <h3>15.5 READMEs unifiés</h3>
