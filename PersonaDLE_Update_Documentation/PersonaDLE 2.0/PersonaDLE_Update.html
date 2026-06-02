@@ -862,461 +862,6 @@
             .ocg-item img { width: 64px; height: 64px; }
         }
     </style>
-
-    <!-- ═══════════════════════════════════════════════════════
-         PERSONADLE DOC — VISUAL UPGRADE
-         ═══════════════════════════════════════════════════════ -->
-    <style>
-        html { scroll-behavior: smooth; }
-
-        /* ── Scroll progress bar ── */
-        #doc-progress {
-            position: fixed; top: 0; left: 0; width: 100%; height: 3px;
-            z-index: 9999; pointer-events: none;
-            background: rgba(0,0,0,0.06);
-        }
-        #doc-progress-fill {
-            height: 100%; width: 0%;
-            background: linear-gradient(90deg, #c0193a 0%, #e63946 40%, #ff6b9d 70%, #ffd700 100%);
-            box-shadow: 0 0 10px rgba(230,57,70,0.8), 0 0 20px rgba(230,57,70,0.4);
-            transition: width 0.08s linear;
-        }
-
-        /* ── TOC sidebar ── */
-        #toc-sidebar {
-            position: fixed; right: 0; top: 50%; transform: translateY(-50%);
-            z-index: 500; display: flex; flex-direction: column;
-            gap: 9px; padding: 14px 10px;
-            background: var(--panel-bg);
-            border-radius: 12px 0 0 12px;
-            border: 1px solid var(--border-color); border-right: none;
-            backdrop-filter: blur(12px);
-            max-height: 80vh; overflow: hidden;
-        }
-        .toc-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: var(--border-color);
-            cursor: pointer; border: none; padding: 0; flex-shrink: 0;
-            position: relative;
-            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
-        }
-        .toc-dot.active, .toc-dot:hover {
-            background: var(--primary-color);
-            transform: scale(1.6);
-            box-shadow: 0 0 8px rgba(230,57,70,0.7);
-        }
-        .toc-dot::after {
-            content: attr(data-title);
-            position: absolute; right: 20px; top: 50%;
-            transform: translateY(-50%);
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 4px 12px; border-radius: 6px;
-            font-size: 0.72rem; white-space: nowrap;
-            font-family: 'Montserrat', sans-serif; font-weight: 700;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.15s;
-            backdrop-filter: blur(8px);
-        }
-        .toc-dot:hover::after { opacity: 1; }
-        @media (max-width: 1200px) { #toc-sidebar { display: none; } }
-
-        /* ── Back to top ── */
-        #back-to-top {
-            position: fixed; bottom: 24px; right: 24px; z-index: 500;
-            width: 44px; height: 44px; border-radius: 10px;
-            background: var(--panel-bg);
-            border: 1.5px solid var(--primary-color);
-            color: var(--primary-color);
-            font-size: 1.3rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px);
-            opacity: 0; pointer-events: none;
-            transform: translateY(14px);
-            transition: opacity 0.3s, transform 0.3s, box-shadow 0.2s;
-            font-family: 'Montserrat', sans-serif; font-weight: 700;
-        }
-        #back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
-        #back-to-top:hover { box-shadow: 0 0 18px rgba(230,57,70,0.5); }
-
-        /* ── Scroll reveal ── */
-        .doc-reveal {
-            opacity: 0; transform: translateY(28px);
-            transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1),
-                        transform 0.65s cubic-bezier(0.22,1,0.36,1);
-        }
-        .doc-reveal.visible { opacity: 1; transform: none; }
-
-        /* ── HR — ligne lumineuse ── */
-        hr {
-            border: none !important;
-            height: auto !important;
-            background: none !important;
-            margin: 3.5em 0 !important;
-            position: relative;
-            text-align: center;
-        }
-        hr::before {
-            content: '';
-            display: block;
-            height: 1px;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                var(--border-color) 15%,
-                rgba(230,57,70,0.8) 50%,
-                var(--border-color) 85%,
-                transparent 100%);
-            box-shadow: 0 0 8px rgba(230,57,70,0.2);
-        }
-
-        /* ── Frontmatter — pulsing border + enhanced ── */
-        .frontmatter {
-            animation: frontmatterBorderPulse 5s ease-in-out infinite;
-        }
-        @keyframes frontmatterBorderPulse {
-            0%, 100% { border-color: rgba(230,57,70,0.3); box-shadow: 0 0 0 0 transparent; }
-            50% { border-color: rgba(230,57,70,0.65); box-shadow: 0 0 40px rgba(230,57,70,0.07); }
-        }
-
-        /* ── Frontmatter stats counters ── */
-        .frontmatter-stats {
-            display: flex; justify-content: center;
-            gap: clamp(10px, 3vw, 36px);
-            margin-top: 28px; flex-wrap: wrap;
-        }
-        .fstat {
-            text-align: center;
-            padding: 14px 18px;
-            background: rgba(230,57,70,0.05);
-            border: 1px solid rgba(230,57,70,0.18);
-            border-radius: 12px; min-width: 88px;
-            transition: transform 0.25s, box-shadow 0.25s;
-            cursor: default;
-        }
-        .fstat:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(230,57,70,0.14);
-        }
-        .fstat-num {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.9rem; font-weight: 800;
-            color: var(--primary-color); line-height: 1;
-            display: block;
-            text-shadow: 0 0 20px rgba(230,57,70,0.35);
-        }
-        .fstat-label {
-            font-size: 0.68rem; text-transform: uppercase;
-            letter-spacing: 1.2px; color: var(--text-muted);
-            margin-top: 5px; display: block;
-        }
-        .frontmatter-reading-time {
-            margin-top: 14px;
-        }
-        .reading-time-badge {
-            display: inline-block;
-            background: rgba(230,57,70,0.07);
-            border: 1px solid rgba(230,57,70,0.18);
-            color: var(--text-muted);
-            border-radius: 20px; padding: 5px 16px;
-            font-size: 0.76rem;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* ── Section h1 — left accent bar ── */
-        .doc-wrap > [data-i18n-block] > h1,
-        .doc-wrap > h1[data-i18n],
-        .doc-wrap > h1:not(.frontmatter h1) {
-            border-left: 4px solid var(--primary-color);
-            padding-left: 18px;
-            border-bottom: 1px solid rgba(230,57,70,0.15) !important;
-            box-shadow: -5px 0 15px rgba(230,57,70,0.12);
-        }
-
-        /* ── Code blocks — copy button ── */
-        .code-wrap { position: relative; }
-        .code-copy-btn {
-            position: absolute; top: 8px; right: 10px;
-            background: rgba(230,57,70,0.1);
-            border: 1px solid rgba(230,57,70,0.28);
-            color: var(--inline-code-color);
-            border-radius: 5px; padding: 3px 10px;
-            font-size: 0.7rem; cursor: pointer;
-            font-family: 'JetBrains Mono', monospace;
-            opacity: 0;
-            transition: opacity 0.2s, background 0.15s, box-shadow 0.15s;
-        }
-        .code-wrap:hover .code-copy-btn { opacity: 1; }
-        .code-copy-btn:hover {
-            background: rgba(230,57,70,0.22);
-            box-shadow: 0 0 8px rgba(230,57,70,0.3);
-        }
-        .code-copy-btn.copied { color: #4caf50; border-color: #4caf50; background: rgba(76,175,80,0.1); }
-
-        /* ── Enhanced details/summary ── */
-        details { cursor: default; }
-        summary {
-            user-select: none;
-            padding: 10px 14px;
-            margin: -10px -15px;
-            border-radius: 6px;
-            transition: background 0.15s;
-            list-style: none;
-            display: flex; align-items: center; gap: 8px;
-        }
-        summary::-webkit-details-marker { display: none; }
-        summary::marker { display: none; }
-        summary::before {
-            content: '▶';
-            font-size: 0.65em; color: var(--primary-color);
-            transition: transform 0.2s ease; flex-shrink: 0;
-        }
-        details[open] summary::before { transform: rotate(90deg); }
-        summary:hover { background: rgba(230,57,70,0.06); border-radius: 4px; }
-
-        /* ── Table hover ── */
-        tbody tr { transition: background 0.15s; }
-        tbody tr:hover { background: rgba(230,57,70,0.04) !important; }
-
-        /* ── Illustration images — glow on hover ── */
-        .center > img {
-            box-shadow: 0 6px 32px rgba(0,0,0,0.18), 0 0 0 1px var(--border-color);
-            transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s;
-        }
-        .center > img:hover {
-            transform: translateY(-5px) scale(1.01);
-            box-shadow: 0 16px 50px rgba(230,57,70,0.18), 0 4px 12px rgba(0,0,0,0.25);
-        }
-
-        /* ── Section number badges (injected via JS) ── */
-        .section-num-badge {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: var(--primary-color);
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.62rem; font-weight: 800;
-            width: 22px; height: 22px; border-radius: 5px;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(230,57,70,0.4);
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-
-        /* ── blockquote — enhanced left ornament ── */
-        blockquote {
-            position: relative;
-        }
-        blockquote::before {
-            content: '"';
-            position: absolute;
-            top: -6px; left: 10px;
-            font-size: 3.5rem;
-            color: var(--primary-color);
-            opacity: 0.15;
-            font-family: 'Montserrat', sans-serif;
-            line-height: 1;
-            pointer-events: none;
-        }
-
-        /* ── prefers-reduced-motion ── */
-        @media (prefers-reduced-motion: reduce) {
-            .doc-reveal { opacity: 1; transform: none; transition: none; }
-            .frontmatter { animation: none; }
-            * { animation-duration: 0.01ms !important; }
-        }
-    </style>
-
-    <!-- ── Card-based redesign — v3 layout ── -->
-    <style>
-        /* Hero */
-        .hero {
-            text-align: center;
-            margin: 20px 0 32px;
-            padding: 40px clamp(16px, 4vw, 56px);
-            background: var(--panel-bg);
-            border-radius: 16px;
-            border: 1px solid rgba(230, 57, 70, 0.3);
-            backdrop-filter: blur(4px);
-        }
-        .hero-banner {
-            max-width: 700px;
-            width: 100%;
-            border-radius: 12px;
-            margin: 0 auto 24px;
-            display: block;
-        }
-        .hero h1 {
-            font-size: clamp(1.4rem, 4vw, 2.2rem);
-            color: var(--primary-color);
-            border: none;
-            padding: 0;
-            margin: 0 0 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .hero-subtitle {
-            color: var(--text-muted);
-            font-size: 1rem;
-            max-width: 660px;
-            margin: 0 auto 24px;
-            line-height: 1.7;
-        }
-        .hero-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-        }
-        .pill {
-            background: rgba(230, 57, 70, 0.1);
-            color: var(--primary-color);
-            border: 1px solid rgba(230, 57, 70, 0.3);
-            border-radius: 20px;
-            padding: 4px 14px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* Sticky nav */
-        .sticky-nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            gap: 4px;
-            overflow-x: auto;
-            background: var(--bg-overlay);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            margin: 0 calc(-1 * clamp(16px, 5vw, 64px));
-            padding: 10px clamp(16px, 5vw, 64px);
-            scrollbar-width: none;
-        }
-        .sticky-nav::-webkit-scrollbar { display: none; }
-        .sticky-nav a {
-            flex-shrink: 0;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.78rem;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 6px;
-            border: 1px solid transparent;
-            transition: color 0.2s, border-color 0.2s, background 0.2s;
-            white-space: nowrap;
-        }
-        .sticky-nav a:hover {
-            color: var(--primary-color);
-            border-color: rgba(230, 57, 70, 0.35);
-            background: rgba(230, 57, 70, 0.07);
-        }
-
-        /* Section grid */
-        .section-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-            margin-top: 32px;
-        }
-
-        /* Card */
-        .section-card {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-        }
-        .section-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(230, 57, 70, 0.14);
-        }
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 14px;
-        }
-        .card-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
-        .card-meta { display: flex; flex-direction: column; gap: 2px; }
-        .card-num {
-            font-size: 0.68rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            border: none;
-            padding: 0;
-        }
-        .card-summary {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.65;
-            margin: 0 0 16px;
-            flex: 1;
-        }
-        .card-details {
-            border: none;
-            background: transparent;
-            padding: 0;
-            margin: 0;
-        }
-        .card-details > summary {
-            color: var(--primary-color);
-            font-size: 0.83rem;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 10px 0 0;
-            list-style: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border-top: 1px solid var(--border-color);
-            user-select: none;
-            outline: none;
-        }
-        .card-details > summary::before {
-            content: '▶';
-            font-size: 0.6rem;
-            transition: transform 0.2s;
-            display: inline-block;
-        }
-        .card-details[open] > summary::before { transform: rotate(90deg); }
-        .card-details-body {
-            margin-top: 16px;
-            font-size: 0.87rem;
-            line-height: 1.6;
-        }
-        .card-details-body h3 {
-            font-size: 0.95rem;
-            color: var(--text-h3);
-            margin: 1.4em 0 0.4em;
-        }
-        .card-details-body table { font-size: 0.83rem; margin: 1em 0; }
-        .card-details-body pre  { font-size: 0.8em; }
-        .card-details-body p    { margin-bottom: 0.8em; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .section-grid { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 480px) {
-            .hero { padding: 24px 16px; }
-            .section-card { padding: 18px 16px; }
-        }
-    </style>
 </head>
 <body>
 
@@ -1330,698 +875,1785 @@
 
 <div class="doc-wrap">
 
-    <!-- ══ HERO ══ -->
-    <section class="hero">
-        <img src="Illustration_banniere_2.0.png" alt="PersonaDLE v2.0" class="hero-banner">
-        <h1>PersonaDLE v2.0 — Ce qui a changé</h1>
-        <p class="hero-subtitle">
-            La v2.0 marque le passage à la phase fonctionnalités : backend PHP/MariaDB complet,
-            5 langues, système social (amis, Social Link, défis), panneau d'administration,
-            190 tests automatisés, et 6 modes peaufinés avec de nouveaux personnages.
-        </p>
-        <div class="hero-pills">
-            <span class="pill">PHP 8.3</span>
-            <span class="pill">MariaDB 10.6+</span>
-            <span class="pill">5 langues</span>
-            <span class="pill">20 tables BDD</span>
-            <span class="pill">190 tests</span>
-            <span class="pill">60 badges</span>
-            <span class="pill">6 modes</span>
-            <span class="pill">API REST</span>
-            <span class="pill">Offline-first</span>
-        </div>
-    </section>
+    <!-- FRONTMATTER -->
+    <div class="frontmatter">
+        <h1>PersonaDLE</h1>
+        <div data-i18n-block="fr"><p><strong>Documentation Technique v2.0</strong></p>
+        <p>Architecture, Backend, i18n, Social, Admin &amp; Qualité</p>
+        <br>
+        <p>Auteur : <em>PersonaDLE Team</em> | Date : <em>Mai 2026</em></p></div>
+        <div data-i18n-block="en"><p><strong>Technical Documentation v2.0</strong></p>
+        <p>Architecture, Backend, i18n, Social, Admin &amp; Quality</p>
+        <br>
+        <p>Author: <em>PersonaDLE Team</em> | Date: <em>May 2026</em></p></div>
+    </div>
 
-    <!-- ══ NAV STICKY ══ -->
-    <nav class="sticky-nav" aria-label="Sections">
-        <a href="#s01">🎨 CSS</a>
-        <a href="#s02">🌐 i18n</a>
-        <a href="#s03">⚙️ JS</a>
-        <a href="#s04">🔽 Filtres</a>
-        <a href="#s05">🎵 Musique</a>
-        <a href="#s06">🗄️ Backend</a>
-        <a href="#s07">👥 Social</a>
-        <a href="#s08">🏆 Board</a>
-        <a href="#s09">🎖️ Titres</a>
-        <a href="#s10">👤 Profil</a>
-        <a href="#s11">🛡️ Admin</a>
-        <a href="#s12">🚀 CI/CD</a>
-        <a href="#s13">🔒 Sécu</a>
-        <a href="#s14">🧪 Tests</a>
-        <a href="#s15">🐛 Fixes</a>
-        <a href="#s16">👾 Persos</a>
-    </nav>
+    <!-- BANNIÈRE & INTRO -->
+    <div class="center">
+        <img src="Illustration_banniere_2.0.png" width="700" alt="Bannière PersonaDLE v2.0">
+        <h2>◆ PersonaDLE v2.0 ◆</h2>
+        <div data-i18n-block="fr"><h3>Documentation technique complète</h3></div>
+        <div data-i18n-block="en"><h3>Complete technical documentation</h3></div>
+    </div>
 
-    <!-- ══ GRID ══ -->
-    <div class="section-grid">
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>La v2.0 marque le passage de la phase refactoring vers la phase fonctionnalités utilisateur : backend PHP/MariaDB complet, internationalisation 5 langues, système social (amis, Social Link, défis), panneau d'administration, et infrastructure CI/CD.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>v2.0 marks the transition from the refactoring phase to the user-features phase: complete PHP/MariaDB backend, 5-language internationalization, social system (friends, Social Link, challenges), administration panel, and CI/CD infrastructure.</strong></p></div>
+    </blockquote>
 
-        <!-- ── 01 Design & CSS ── -->
-        <div class="section-card" id="s01">
-            <div class="card-header">
-                <span class="card-icon">🎨</span>
-                <div class="card-meta">
-                    <span class="card-num">01 / 16</span>
-                    <h2 class="card-title">Design &amp; CSS</h2>
+    <hr>
+
+    <!-- ✨ NOUVEAU CONTENU v2.0 — section joueurs -->
+    <div class="new-content-section">
+
+        <h1 data-i18n="updates.new_content_title">✨ New Content v2.0</h1>
+        <blockquote><p><strong data-i18n="updates.new_content_desc">New characters, new music — everything added in this update.</strong></p></blockquote>
+
+        <h2 data-i18n="updates.new_chars_title">New Characters — All-Out Attack Mode</h2>
+        <p class="card-intro" data-i18n="updates.joker_starlight_intro"></p>
+        <div class="aoa-card">
+            <div class="aoa-card-inner">
+                <!-- Portrait autocomplete (gauche) -->
+                <div class="aoa-portrait-col">
+                    <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Joker_Starlight.webp" alt="Joker Starlight portrait">
+                </div>
+                <!-- GIF animé All-Out Attack (centre) -->
+                <div class="aoa-gif-col">
+                    <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Joker_Starlight.webp" alt="Joker Starlight All-Out Attack">
+                </div>
+                <!-- Battle portrait (grand) + infos (droite) -->
+                <div class="aoa-battle-col">
+                    <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Joker_Starlight_Battle.webp" alt="Joker Starlight Battle">
+                    <div class="aoa-info">
+                        <div class="card-stars" aria-hidden="true">
+                            <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                        </div>
+                        <span class="card-badge">P5X</span>
+                        <p class="card-name">Joker Starlight</p>
+                        <p class="card-sub">Ren Amamiya — Persona 5 X</p>
+                    </div>
                 </div>
             </div>
-            <p class="card-summary">
-                CSS splitté en un fichier par mode — fini le monolithe 2 000 lignes. Dark mode via <code>.darkmode</code> sur <code>&lt;body&gt;</code>, responsive complet 360→1440px. Share Modal style Persona 5 avec export PNG haute résolution. Badges catégorisés visuellement (ACHIEVEMENTS / EVENTS / SECRETS / SOCIAL).
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Structure CSS par mode</h3>
-                    <pre><code>css/
-├── global.css       ← Reset, dark mode, confetti, nav, modales
-├── index.css        ← Page d'accueil uniquement
-└── filterMenu.css   ← Panneau filtres (partagé)
+        </div>
+
+        <!-- ── Summer 2026 — P5X Summer Characters ── -->
+        <h3 class="summer-chars-title" data-i18n="updates.new_chars_summer">☀️ Summer 2026 — P5X Summer Event</h3>
+        <p class="summer-intro" data-i18n="updates.summer_intro"></p>
+
+        <!-- Wonder Summer -->
+        <div class="aoa-card aoa-card-summer">
+            <div class="aoa-card-inner">
+                <div class="aoa-portrait-col">
+                    <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Wonder_Summer.webp" alt="Wonder Summer portrait">
+                </div>
+                <div class="aoa-gif-col">
+                    <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Wonder_Summer.webp" alt="Wonder Summer All-Out Attack">
+                </div>
+                <div class="aoa-battle-col">
+                    <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Wonder_Summer_Battle.webp" alt="Wonder Summer Battle">
+                    <div class="aoa-info">
+                        <div class="card-stars" aria-hidden="true">
+                            <span>☀️</span><span>🌊</span><span>☀️</span><span>🌊</span><span>☀️</span>
+                        </div>
+                        <span class="card-badge">P5X</span>
+                        <p class="card-name">Wonder Summer</p>
+                        <p class="card-sub">Nagisa Kamishiro — Persona 5 X</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Closer Summer -->
+        <div class="aoa-card aoa-card-summer">
+            <div class="aoa-card-inner">
+                <div class="aoa-portrait-col">
+                    <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Closer_Summer.webp" alt="Closer Summer portrait">
+                </div>
+                <div class="aoa-gif-col">
+                    <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Closer_Summer.webp" alt="Closer Summer All-Out Attack">
+                </div>
+                <div class="aoa-battle-col">
+                    <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Closer_Summer_Battle.webp" alt="Closer Summer Battle">
+                    <div class="aoa-info">
+                        <div class="card-stars" aria-hidden="true">
+                            <span>🏖️</span><span>☀️</span><span>🏖️</span><span>☀️</span><span>🏖️</span>
+                        </div>
+                        <span class="card-badge">P5X</span>
+                        <p class="card-name">Closer Summer</p>
+                        <p class="card-sub">Motoha Arai — Persona 5 X</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Moko Summer -->
+        <div class="aoa-card aoa-card-summer">
+            <div class="aoa-card-inner">
+                <div class="aoa-portrait-col">
+                    <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Moko_Summer.webp" alt="Moko Summer portrait">
+                </div>
+                <div class="aoa-gif-col">
+                    <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Moko_Summer.webp" alt="Moko Summer All-Out Attack">
+                </div>
+                <div class="aoa-battle-col">
+                    <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Moko_Summer_Battle.webp" alt="Moko Summer Battle">
+                    <div class="aoa-info">
+                        <div class="card-stars" aria-hidden="true">
+                            <span>🏐</span><span>🌊</span><span>🏐</span><span>🌊</span><span>🏐</span>
+                        </div>
+                        <span class="card-badge">P5X</span>
+                        <p class="card-name">Moko Summer</p>
+                        <p class="card-sub">Tomoko Noge — Persona 5 X</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 data-i18n="updates.new_music_title">New Tracks — Music Mode</h2>
+        <div class="music-group-list">
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P3P.webp" alt="P3P"><code>P3P</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Danger Zone</span><span class="mg-artist">(instrumental)</span></div>
+                    <div class="mg-track"><span>Time</span><span class="mg-artist">Mayumi Fujita</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P3R.webp" alt="P3R"><code>P3R</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Want to Be Close -Reload-</span><span class="mg-artist">Azumi Takahashi</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P4AU.webp" alt="P4AU"><code>P4AU</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>A Fool or Clown?</span><span class="mg-artist">(instrumental)</span></div>
+                    <div class="mg-track"><span>Best Friends</span><span class="mg-artist">Yumi Kawamura</span></div>
+                    <div class="mg-track"><span>Break Out Of</span><span class="mg-artist">Shihoko Hirata, Lotus Juice</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P4G.webp" alt="P4G"><code>P4G</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>I'll Face Myself -Battle-</span><span class="mg-artist">(instrumental)</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P5R.webp" alt="P5R"><code>P5R</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Throw Away Your Mask</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P5S.webp" alt="P5S"><code>P5S</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Axe to Grind</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                    <div class="mg-track"><span>Counter Strike</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                </div>
+            </div>
+            <div class="music-group">
+                <div class="mg-cover"><img src="../../musicsMode/database/img/P5T.webp" alt="P5T"><code>P5T</code></div>
+                <div class="mg-tracks">
+                    <div class="mg-track"><span>Got Your Tail</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                    <div class="mg-track"><span>Revolution is a Blade</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                    <div class="mg-track"><span>Truth or Dare</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <div data-i18n-block="fr">
+    <h2>Stack technique</h2>
+    <table>
+        <thead>
+            <tr><th>Couche</th><th>Technologie</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Frontend</strong></td><td>HTML5 / CSS3 / JavaScript ES6+ vanilla — zéro framework</td></tr>
+            <tr><td><strong>Modules</strong></td><td>ES6 <code>import</code>/<code>export</code> — chaque mode importe depuis <code>js/gameCore.js</code></td></tr>
+            <tr><td><strong>Persistance locale</strong></td><td><code>localStorage</code> — profil, stats, filtres, état de jeu</td></tr>
+            <tr><td><strong>Backend</strong></td><td>PHP 8.3, PDO (Prepared Statements obligatoires)</td></tr>
+            <tr><td><strong>Base de données</strong></td><td>MySQL 8.0 en local · MariaDB 10.6+ chez Hostinger</td></tr>
+            <tr><td><strong>Hébergement</strong></td><td>Hostinger</td></tr>
+            <tr><td><strong>Authentification</strong></td><td>Email + mot de passe bcrypt, sessions PHP httpOnly</td></tr>
+            <tr><td><strong>Tests</strong></td><td>Vitest + jsdom (<code>npm test</code>)</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div data-i18n-block="en">
+    <h2>Tech stack</h2>
+    <table>
+        <thead>
+            <tr><th>Layer</th><th>Technology</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Frontend</strong></td><td>HTML5 / CSS3 / JavaScript ES6+ vanilla — zero framework</td></tr>
+            <tr><td><strong>Modules</strong></td><td>ES6 <code>import</code>/<code>export</code> — each mode imports from <code>js/gameCore.js</code></td></tr>
+            <tr><td><strong>Local persistence</strong></td><td><code>localStorage</code> — profile, stats, filters, game state</td></tr>
+            <tr><td><strong>Backend</strong></td><td>PHP 8.3, PDO (Prepared Statements required)</td></tr>
+            <tr><td><strong>Database</strong></td><td>MySQL 8.0 locally · MariaDB 10.6+ on Hostinger</td></tr>
+            <tr><td><strong>Hosting</strong></td><td>Hostinger</td></tr>
+            <tr><td><strong>Authentication</strong></td><td>Email + bcrypt password, PHP httpOnly sessions</td></tr>
+            <tr><td><strong>Tests</strong></td><td>Vitest + jsdom (<code>npm test</code>)</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <hr>
+
+    <!-- SECTION 1 -->
+    <div class="center">
+        <img src="CSS_adaptation_style_illustration.png" width="700" alt="CSS adaptation style illustration">
+    </div>
+    
+    <div data-i18n-block="fr"><h1>1. Design &amp; CSS</h1></div>
+    <div data-i18n-block="en"><h1>1. Design &amp; CSS</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Du monolithe 2000 lignes aux fichiers par mode — responsive, dark mode, share modal, badges UI.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>From the 2000-line monolith to per-mode files — responsive, dark mode, share modal, badges UI.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_css"></p>
+
+
+    <div data-i18n-block="fr"><h3>1.1 Séparation CSS — du monolithe aux fichiers par mode</h3>
+    <p>Avant la v2.0, l'intégralité des styles du jeu était concentrée dans un unique fichier <code>css/style.css</code> de plus de 2 000 lignes. Ce monolithe posait des problèmes de lisibilité, de maintenabilité (modifier un mode risquait d'en casser un autre), de performance (chaque page chargeait la totalité des styles) et de collaboration (conflits de merge fréquents).</p>
+    <p><strong>Solution — un fichier CSS par mode :</strong></p></div>
+    <div data-i18n-block="en"><h3>1.1 CSS Separation — from monolith to per-mode files</h3>
+    <p>Before v2.0, all game styles were concentrated in a single <code>css/style.css</code> file of over 2,000 lines. This monolith caused readability problems, maintainability issues (modifying one mode could break another), performance issues (each page loaded all styles), and collaboration conflicts (frequent merge conflicts).</p>
+    <p><strong>Solution — one CSS file per mode:</strong></p></div>
+<pre><code>css/
+├── global.css          ← Reset, typo, confetti, navigation, modales, dark mode global
+├── index.css           ← Page d'accueil uniquement
+└── filterMenu.css      ← Panneau de filtres déroulant (partagé)
 
 classiqueMode/classique.css
 emojiMode/emoji.css
 silhouetteMode/silhouette.css
-musicsMode/music.css
+musicsMode/music.css        ← Lecteur audio custom P5, thèmes de couleur
 personaeMode/personae.css
 allOutAttackMode/allOutAttack.css</code></pre>
-                    <h3>Share Modal — capture off-screen</h3>
-                    <p>La preview est réduite via <code>transform: scale(0.455)</code>. La capture PNG (780×1386px) se fait sur un clone hors-écran non affecté par ce scale :</p>
-                    <pre><code>const offscreen = buildShareCard(bg, wallpaper, activeTab);
-offscreen.style.cssText = 'position:fixed;left:-9999px';
+
+    <div data-i18n-block="fr"><p>Chaque page HTML ne charge que ce dont elle a besoin :</p></div>
+    <div data-i18n-block="en"><p>Each HTML page only loads what it needs:</p></div>
+<pre><code>&lt;!-- Exemple : musics.html --&gt;
+&lt;link rel="stylesheet" href="../css/global.css"&gt;
+&lt;link rel="stylesheet" href="./music.css"&gt;</code></pre>
+    <div data-i18n-block="fr"><p><code>css/style.css</code> existe toujours en archive mais n'est référencé par aucun fichier HTML.</p></div>
+    <div data-i18n-block="en"><p><code>css/style.css</code> still exists as an archive but is not referenced by any HTML file.</p></div>
+
+    <div data-i18n-block="fr"><h3>1.2 Dark Mode</h3>
+    <p>En dark mode, les thèmes de couleur de série restent actifs. Le seul changement sur le lecteur audio est un fond légèrement plus sombre pour renforcer le contraste — les CSS custom properties de couleur ne sont pas écrasées :</p></div>
+    <div data-i18n-block="en"><h3>1.2 Dark Mode</h3>
+    <p>In dark mode, the series color themes remain active. The only change on the audio player is a slightly darker background to reinforce contrast — the CSS color custom properties are not overridden:</p></div>
+<pre><code>body.darkmode .audio-wrapper {
+  background: linear-gradient(150deg, #0c0c0c 0%, #080808 60%, #0c0c0c 100%);
+  /* Pas d'override de couleurs — les variables de thème restent actives */
+}</code></pre>
+    <div data-i18n-block="fr"><p>Dark mode disponible via la classe <code>.darkmode</code> sur <code>&lt;body&gt;</code>, togglé par <code>js/gameCore.js</code>.</p></div>
+    <div data-i18n-block="en"><p>Dark mode available via the <code>.darkmode</code> class on <code>&lt;body&gt;</code>, toggled by <code>js/gameCore.js</code>.</p></div>
+
+    <div data-i18n-block="fr"><h3>1.3 Responsive</h3>
+    <p>Le projet respecte les breakpoints standards sur toutes les pages :</p></div>
+    <div data-i18n-block="en"><h3>1.3 Responsive</h3>
+    <p>The project follows standard breakpoints on all pages:</p></div>
+    <div data-i18n-block="fr">
+    <table>
+        <thead>
+            <tr><th>Breakpoint</th><th>Cible</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>@media (max-width: 480px)</code></td><td>Mobile 360px+</td></tr>
+            <tr><td><code>@media (max-width: 768px)</code></td><td>Tablette</td></tr>
+            <tr><td><code>@media (max-width: 1024px)</code></td><td>Petit desktop</td></tr>
+        </tbody>
+    </table>
+    <p>Utilisation de <code>min()</code>, <code>clamp()</code>, <code>vw</code>/<code>vh</code> pour les tailles fluides. Grille résultats Classic : <code>overflow-x: auto</code> sur mobile. Audit responsive complet effectué (360px → 1440px) :</p>
+    <table>
+        <thead>
+            <tr><th>Fichier</th><th>Problème corrigé</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>profile/leaderboard.css</code></td><td>Pills de mode wrappaient sur 2-3 lignes entre 480–640px → scroll horizontal</td></tr>
+            <tr><td><code>profile/friends.css</code></td><td>Aucun breakpoint tablette (768px) → padding réduit, actions alignées</td></tr>
+            <tr><td><code>admin/admin.css</code></td><td>Aucun breakpoint sous 768px → ajout 480px et 360px (grilles compactes, logo masqué)</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div data-i18n-block="en">
+    <table>
+        <thead>
+            <tr><th>Breakpoint</th><th>Target</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>@media (max-width: 480px)</code></td><td>Mobile 360px+</td></tr>
+            <tr><td><code>@media (max-width: 768px)</code></td><td>Tablet</td></tr>
+            <tr><td><code>@media (max-width: 1024px)</code></td><td>Small desktop</td></tr>
+        </tbody>
+    </table>
+    <p>Using <code>min()</code>, <code>clamp()</code>, <code>vw</code>/<code>vh</code> for fluid sizes. Classic results grid: <code>overflow-x: auto</code> on mobile. Full responsive audit completed (360px → 1440px):</p>
+    <table>
+        <thead>
+            <tr><th>File</th><th>Issue fixed</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>profile/leaderboard.css</code></td><td>Mode pills wrapped onto 2-3 lines between 480–640px → horizontal scroll</td></tr>
+            <tr><td><code>profile/friends.css</code></td><td>No tablet breakpoint (768px) → reduced padding, aligned actions</td></tr>
+            <tr><td><code>admin/admin.css</code></td><td>No breakpoint below 768px → added 480px and 360px (compact grids, hidden logo)</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div data-i18n-block="fr">
+    <h3>1.4 Share Modal — Redesign Interface Profil</h3>
+    <p><strong>Fichiers :</strong> <code>profile/profile.html</code>, <code>profile/profile-page.css</code>, <code>profile/profile-page.js</code></p>
+    <p>Refonte complète de l'interface de partage de profil : style Persona 5, sélecteurs CSS classes, preview correctement scalée, et capture HTML2canvas haute qualité sur clone off-screen.</p>
+    <p><strong>Changements visuels :</strong></p>
+    <ul>
+        <li>Modale élargie <code>max-width: 600px</code>, onglets <code>Color</code> / <code>Wallpaper</code> style P5</li>
+        <li>Preview area : fond <code>#0a0a0a</code>, hauteur 320px, carte 9:16 scalée à 45.5%</li>
+        <li>Boutons : 💾 Download PNG (rouge), 𝕏 Share on X (noir), 💬 Discord (<code>#5865F2</code>), 📧 Email</li>
+    </ul>
+    </div>
+    <div data-i18n-block="en">
+    <h3>1.4 Share Modal — Profile Interface Redesign</h3>
+    <p><strong>Files:</strong> <code>profile/profile.html</code>, <code>profile/profile-page.css</code>, <code>profile/profile-page.js</code></p>
+    <p>Complete redesign of the profile sharing interface: Persona 5 style, CSS class selectors, correctly scaled preview, and high-quality HTML2canvas capture on an off-screen clone.</p>
+    <p><strong>Visual changes:</strong></p>
+    <ul>
+        <li>Wider modal <code>max-width: 600px</code>, <code>Color</code> / <code>Wallpaper</code> tabs in P5 style</li>
+        <li>Preview area: <code>#0a0a0a</code> background, 320px height, 9:16 card scaled to 45.5%</li>
+        <li>Buttons: 💾 Download PNG (red), 𝕏 Share on X (black), 💬 Discord (<code>#5865F2</code>), 📧 Email</li>
+    </ul>
+    </div>
+
+    <p><strong>Technique — off-screen clone pour la capture :</strong></p>
+<pre><code>// Clone hors-écran → qualité pleine résolution, indépendant du scale CSS
+const offscreen = buildShareCard(bg, wallpaper, activeTab);
+offscreen.style.position = 'fixed';
+offscreen.style.left = '-9999px';
 document.body.appendChild(offscreen);
+
 const cvs = await html2canvas(offscreen, { scale: 2, useCORS: true });
 document.body.removeChild(offscreen);</code></pre>
-                    <h3>Responsive — breakpoints</h3>
-                    <table>
-                        <thead><tr><th>Breakpoint</th><th>Cible</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>max-width: 480px</code></td><td>Mobile 360px+</td></tr>
-                            <tr><td><code>max-width: 768px</code></td><td>Tablette</td></tr>
-                            <tr><td><code>max-width: 1024px</code></td><td>Petit desktop</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
+    <div data-i18n-block="fr">
+    <p>La carte affichée dans la preview est réduite via <code>transform: scale(0.455)</code>. La carte capturée est un clone off-screen non affecté par ce scale — le PNG exporté est toujours en pleine résolution (780×1386px à scale:2).</p>
+    <p>Les fonds GIF animés ont été retirés du sélecteur : les GIFs sont animés dans la preview mais le PNG ne capture qu'une frame statique, créant une confusion utilisateur.</p>
+    </div>
+    <div data-i18n-block="en">
+    <p>The card displayed in the preview is reduced via <code>transform: scale(0.455)</code>. The captured card is an off-screen clone unaffected by this scale — the exported PNG is always at full resolution (780×1386px at scale:2).</p>
+    <p>Animated GIF backgrounds were removed from the selector: GIFs are animated in the preview but the PNG only captures a static frame, causing user confusion.</p>
+    </div>
 
-        <!-- ── 02 i18n ── -->
-        <div class="section-card" id="s02">
-            <div class="card-header">
-                <span class="card-icon">🌐</span>
-                <div class="card-meta">
-                    <span class="card-num">02 / 16</span>
-                    <h2 class="card-title">Traduction i18n</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                5 langues (EN · FR · ES · DE · IT), 863 clés hiérarchiques. Détection auto de la langue navigateur au premier chargement, persistée en localStorage. Boutons de jeu traduits (images WebP par langue). Badges, valeurs de grille et attributs HTML traduits dans les 5 langues.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Piège critique — <code>t(key) ?? fallback</code> ne fonctionne pas</h3>
-                    <p><code>t()</code> retourne la clé brute (string truthy) quand la clé est absente — <code>??</code> ne se déclenche jamais. Pattern correct :</p>
-                    <pre><code>const r = window.i18n?.t?.(key);
-return (r != null &amp;&amp; r !== key) ? r : fallback;</code></pre>
-                    <h3>Fix chemin depuis les sous-dossiers</h3>
-                    <p>L'ancien code construisait le chemin depuis <code>window.location.href</code> → 404 depuis les sous-dossiers. Fix : ancrage sur <code>import.meta.url</code> :</p>
-                    <pre><code>// js/i18n.js
+    <div data-i18n-block="fr"><h3>1.5 Style sélecteur de langue — Ajout de l'Italien</h3>
+    <p>Bloc CSS ajouté dans <code>css/langSelector.css</code> pour la langue italienne (manquait alors que EN, FR, ES, DE avaient chacun un bloc) :</p></div>
+    <div data-i18n-block="en"><h3>1.5 Language Selector Style — Adding Italian</h3>
+    <p>CSS block added in <code>css/langSelector.css</code> for the Italian language (was missing while EN, FR, ES, DE each had a block):</p></div>
+<pre><code>/* === ITALIANO === */
+.lang-opt--it { border-left-color: #6d8b4e; }
+.lang-opt--it .lang-opt-name {
+  font-family: 'Special Elite', 'Courier New', monospace;
+  font-size: 1.35rem;
+}
+.lang-opt--it.is-active .lang-opt-dot { color: #8fb96a; }</code></pre>
+    <div data-i18n-block="fr"><p>Thème vert olive (#6d8b4e) inspiré de Persona 2, police Special Elite (typewriter vintage).</p></div>
+    <div data-i18n-block="en"><p>Olive green theme (#6d8b4e) inspired by Persona 2, Special Elite font (vintage typewriter).</p></div>
+
+    <div data-i18n-block="fr">
+    <h3>1.6 CSS Badges — Interface catégorisée</h3>
+    <p>Styles ajoutés dans <code>profile/badges/badges.css</code> pour la disposition par catégorie :</p>
+    <ul>
+        <li><code>.badges-category-section</code> — séparateur visuel entre catégories</li>
+        <li><code>.badges-category-title</code> — uppercase, couleur variant par catégorie (gold/orange/red/green)</li>
+        <li><code>#badgesGrid</code> — <code>flex-direction: column; gap: 24px</code></li>
+    </ul>
+    </div>
+    <div data-i18n-block="en">
+    <h3>1.6 CSS Badges — Categorized Interface</h3>
+    <p>Styles added in <code>profile/badges/badges.css</code> for the category layout:</p>
+    <ul>
+        <li><code>.badges-category-section</code> — visual separator between categories</li>
+        <li><code>.badges-category-title</code> — uppercase, color varying by category (gold/orange/red/green)</li>
+        <li><code>#badgesGrid</code> — <code>flex-direction: column; gap: 24px</code></li>
+    </ul>
+    </div>
+<pre><code>[ ACHIEVEMENTS (3/8) ]  [ badge ] [ badge ] [ badge ] …
+[ EVENTS (1/2) ]        [ badge ] [ badge ]
+[ SECRETS (0/5) ]       [ badge ] [ badge ] …
+[ SOCIAL (0/3) ]        [ badge ] [ badge ] …</code></pre>
+
+    <hr>
+
+    <!-- SECTION 2 -->
+    <div class="center">
+        <img src="Illustration_multilingue_personadle_v1.2.png" width="700" alt="Illustration multilingue">
+    </div>
+    
+    <div data-i18n-block="fr"><h1>2. Système de traduction i18n</h1></div>
+    <div data-i18n-block="en"><h1>2. i18n Translation System</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>5 langues, 760 clés, détection automatique, boutons localisés par langue.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>5 languages, 760 keys, automatic detection, language-localized buttons.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_i18n"></p>
+
+
+    <div data-i18n-block="fr"><h3>2.1 Architecture du système i18n</h3>
+    <p>Avant la v2.0, tous les textes du jeu étaient hardcodés en anglais dans les fichiers HTML et JS.</p></div>
+    <div data-i18n-block="en"><h3>2.1 i18n system architecture</h3>
+    <p>Before v2.0, all game texts were hardcoded in English in the HTML and JS files.</p></div>
+<pre><code>lang/
+├── en.json     ← Source de vérité — 760 clés
+├── fr.json     ← Traduction complète synchronisée (760 clés)
+├── es.json     ← Traduction complète synchronisée (760 clés)
+├── de.json     ← Traduction complète synchronisée (760 clés)
+└── it.json     ← Traduction complète synchronisée (760 clés)
+
+js/
+└── i18n.js     ← setLang(), t(), initLang(), applyToDOM(), updateLangButtons()</code></pre>
+
+    <table>
+        <thead>
+            <tr><th>Fonction</th><th>Rôle</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>initLang()</code></td><td>Détecte la langue (localStorage → navigateur → EN), charge le JSON, applique au DOM</td></tr>
+            <tr><td><code>setLang(lang)</code></td><td>Change la langue à la volée et sauvegarde en localStorage</td></tr>
+            <tr><td><code>t(key, vars)</code></td><td>Résout une clé hiérarchique avec variables <code>{{var}}</code> — fallback clé brute</td></tr>
+            <tr><td><code>applyToDOM()</code></td><td>Applique <code>data-i18n</code>, <code>data-i18n-placeholder</code>, <code>data-i18n-title</code>, <code>data-i18n-block</code></td></tr>
+            <tr><td><code>updateLangButtons(lang)</code></td><td>Swap les images de boutons localisés selon la langue active</td></tr>
+            <tr><td><code>window.i18n</code></td><td>Objet global exposé pour les modules JS qui n'importent pas directement</td></tr>
+        </tbody>
+    </table>
+
+    <div data-i18n-block="fr"><p><strong>Attributs HTML supportés :</strong></p></div>
+    <div data-i18n-block="en"><p><strong>Supported HTML attributes:</strong></p></div>
+<pre><code>&lt;span data-i18n="ui.submit"&gt;Submit&lt;/span&gt;
+&lt;input data-i18n-placeholder="ui.input_placeholder"&gt;
+&lt;div data-i18n-title="modes.classic.tooltip_name"&gt;
+&lt;div data-i18n-block="fr"&gt;Contenu français uniquement&lt;/div&gt;</code></pre>
+
+    <div data-i18n-block="fr"><p><strong>Piège critique — <code>t(key) ?? fallback</code> ne fonctionne pas :</strong><br>
+    <code>window.i18n.t(key)</code> retourne la clé brute (string truthy) quand elle n'existe pas — <code>??</code> ne se déclenche jamais. Pattern correct :</p></div>
+    <div data-i18n-block="en"><p><strong>Critical pitfall — <code>t(key) ?? fallback</code> does not work:</strong><br>
+    <code>window.i18n.t(key)</code> returns the raw key (truthy string) when missing — <code>??</code> never triggers. Correct pattern:</p></div>
+<pre><code>const r = window.i18n?.t?.(key);
+return (r != null && r !== key) ? r : fallback;</code></pre>
+
+    <div data-i18n-block="fr">
+    <h3>2.2 Corrections critiques i18n</h3>
+    <h4>Fix 404 — résolution de chemin depuis les sous-dossiers</h4>
+    <p><strong>Problème :</strong> depuis les sous-dossiers (<code>classiqueMode/</code>, <code>musicsMode/</code>…), le chargement des fichiers <code>lang/</code> produisait des erreurs HTTP 404. L'ancien code construisait le chemin à partir de <code>window.location.href</code>, donnant <code>classiqueMode/lang/fr.json</code>.</p>
+    <p><strong>Solution :</strong> ancrage sur <code>import.meta.url</code> — indépendant de la page hôte :</p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>2.2 Critical i18n fixes</h3>
+    <h4>Fix 404 — path resolution from subdirectories</h4>
+    <p><strong>Problem:</strong> from subdirectories (<code>classiqueMode/</code>, <code>musicsMode/</code>…), loading <code>lang/</code> files produced HTTP 404 errors. The old code built the path from <code>window.location.href</code>, giving <code>classiqueMode/lang/fr.json</code>.</p>
+    <p><strong>Solution:</strong> anchoring on <code>import.meta.url</code> — independent of the host page:</p>
+    </div>
+<pre><code>// js/i18n.js
 var _langBase = new URL('../lang/', import.meta.url).href;</code></pre>
-                    <h3>Fonctions clés</h3>
-                    <table>
-                        <thead><tr><th>Fonction</th><th>Rôle</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>initLang()</code></td><td>Détecte la langue, charge le JSON, applique au DOM</td></tr>
-                            <tr><td><code>setLang(lang)</code></td><td>Change la langue et sauvegarde en localStorage</td></tr>
-                            <tr><td><code>t(key, vars)</code></td><td>Résout une clé hiérarchique avec variables <code>{{var}}</code></td></tr>
-                            <tr><td><code>updateLangButtons(lang)</code></td><td>Swap les images WebP des boutons selon la langue</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
 
-        <!-- ── 03 Architecture JS ── -->
-        <div class="section-card" id="s03">
-            <div class="card-header">
-                <span class="card-icon">⚙️</span>
-                <div class="card-meta">
-                    <span class="card-num">03 / 16</span>
-                    <h2 class="card-title">Architecture JS</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Toutes les fonctions communes centralisées dans <code>gameCore.js</code> — date DST-safe, confetti, sessions, filtres. Client REST <code>api.js</code> exposé via <code>window._personadleApi</code>. Auth sans rechargement de page via events. Mode offline-first avec queue localStorage.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Structure de <code>api.js</code></h3>
-                    <pre><code>export const api = {
-  auth: { register(), login(), logout(), me() },
-  stats: { postSession(session), syncPending() },
-  user: { get(id), patch(id, data), delete(id), stats(id), migrate() },
-  badges: { catalog(lang) },
-  wallpapers: { catalog() },
-  leaderboard: { get(params) },
+    <div data-i18n-block="fr">
+    <h4>Fix persistance de la langue</h4>
+    <p><strong>Problème :</strong> le choix de langue revenait à EN à chaque rechargement. Quand le fetch échouait (fallback EN), la variable <code>lang</code> était écrasée avant le <code>localStorage.setItem</code>.</p>
+    <p><strong>Solution :</strong> sauvegarder la langue demandée avant tout fallback :</p>
+    </div>
+    <div data-i18n-block="en">
+    <h4>Fix language persistence</h4>
+    <p><strong>Problem:</strong> the language choice reverted to EN on each reload. When the fetch failed (EN fallback), the <code>lang</code> variable was overwritten before the <code>localStorage.setItem</code>.</p>
+    <p><strong>Solution:</strong> save the requested language before any fallback:</p>
+    </div>
+<pre><code>var requested = lang;
+try {
+  translations = await fetchLang(lang);
+} catch (e) {
+  lang = 'en';
+  translations = await fetchLang('en');
+}
+localStorage.setItem(STORAGE_KEY, requested);  // toujours la langue voulue</code></pre>
+
+    <div data-i18n-block="fr">
+    <h4>Fix race condition au chargement</h4>
+    <p><strong>Problème :</strong> certains textes dynamiques affichaient la clé brute après rechargement. Le callback <code>DOMContentLoaded</code> restaurait l'état avant que <code>initLang()</code> (asynchrone) ait terminé.</p>
+    <p><strong>Solution :</strong> pattern <code>window.__i18nReady</code> :</p>
+    </div>
+    <div data-i18n-block="en">
+    <h4>Fix load race condition</h4>
+    <p><strong>Problem:</strong> some dynamic texts displayed the raw key after reload. The <code>DOMContentLoaded</code> callback restored state before <code>initLang()</code> (async) had finished.</p>
+    <p><strong>Solution:</strong> <code>window.__i18nReady</code> pattern:</p>
+    </div>
+<pre><code>&lt;script type="module"&gt;
+  import { initLang } from '../js/i18n.js';
+  window.__i18nReady = initLang();
+&lt;/script&gt;
+
+// Dans chaque modeX.js
+document.addEventListener('DOMContentLoaded', async () =&gt; {
+  if (window.__i18nReady) await window.__i18nReady;  // première ligne
+  // ...
+});</code></pre>
+
+    <div data-i18n-block="fr">
+    <h3>2.3 Sélecteur de langue</h3>
+    <p>Bouton <code>🌐 EN ▼</code> avec dropdown animé sur toutes les pages. Détection automatique de la langue navigateur au premier chargement.</p>
+    <table>
+        <thead>
+            <tr><th>Langue</th><th>Personnage illustré</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>English</td><td>Lisa Silverman (P2)</td></tr>
+            <tr><td>Français</td><td>Bébé (P3)</td></tr>
+            <tr><td>Español</td><td>Morgana (P5)</td></tr>
+            <tr><td>Deutsch</td><td>Hulkenberg (P3R)</td></tr>
+            <tr><td>Italiano</td><td>Caesar (P2)</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div data-i18n-block="en">
+    <h3>2.3 Language selector</h3>
+    <p><code>🌐 EN ▼</code> button with animated dropdown on all pages. Automatic browser language detection on first load.</p>
+    <table>
+        <thead>
+            <tr><th>Language</th><th>Illustrated character</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>English</td><td>Lisa Silverman (P2)</td></tr>
+            <tr><td>Français</td><td>Bébé (P3)</td></tr>
+            <tr><td>Español</td><td>Morgana (P5)</td></tr>
+            <tr><td>Deutsch</td><td>Hulkenberg (P3R)</td></tr>
+            <tr><td>Italiano</td><td>Caesar (P2)</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div data-i18n-block="fr"><h3>2.4 Boutons localisés — Images WebP par langue</h3>
+    <p>Les boutons du jeu (Hint, Give-Up, Replay, Submit) affichent désormais leur texte dans la langue active.</p></div>
+    <div data-i18n-block="en"><h3>2.4 Localized buttons — WebP images per language</h3>
+    <p>Game buttons (Hint, Give-Up, Replay, Submit) now display their text in the active language.</p></div>
+<pre><code>assets/buttons/
+├── EN/   Hint_Button(.webp | _Rouge | _Transparent)
+│         Give-up_Button(.webp | _Rouge | _Transparent)
+│         Replay_Button(.webp | _Rouge | _Transparent)
+│         Submit_Button(.webp | _Rouge)
+├── FR/   Indice, Abandonner, Rejouer, Valider   (+ _Rouge + _Transparent)
+├── ES/   Pista, Abandonar, Volver_a_jugar, Confirmar
+├── DE/   Tipp, Aufgeben, Erneut_spielen, Senden
+├── IT/   Suggerimento, Abbandona, Rigioca, Conferma</code></pre>
+    <p>Les anciens fichiers racine ont été **supprimés** — tous les modes utilisent désormais <code>EN/Hint_Button.webp</code> ou la variante de la langue active.</p>
+    <p>Fonction <code>updateLangButtons(lang)</code> ajoutée dans <code>js/i18n.js</code>, appelée à la fin de <code>setLang()</code> :</p>
+<pre><code>function updateLangButtons(lang) {
+  var cfg = _BUTTON_CFG[lang] || _BUTTON_CFG['en'];
+  // Pour #hintButton, #giveUpButton, #resetButton, #guessButton :
+  //   img.normal.src = _btnBase + cfg.XX.n
+  //   img.active.src = _btnBase + cfg.XX.a  (variante rouge = survol)
+}</code></pre>
+    <div data-i18n-block="fr"><p><code>_btnBase</code> est résolu via <code>import.meta.url</code> — indépendant de la page hôte.</p></div>
+    <div data-i18n-block="en"><p><code>_btnBase</code> is resolved via <code>import.meta.url</code> — independent of the host page.</p></div>
+
+    <div data-i18n-block="fr"><h3>2.5 Traduction des valeurs d'attributs — Mode Classique</h3>
+    <p>Les valeurs de la grille de comparaison (genre, arcane) sont traduites dynamiquement :</p></div>
+    <div data-i18n-block="en"><h3>2.5 Attribute value translation — Classic Mode</h3>
+    <p>Comparison grid values (gender, arcana) are translated dynamically:</p></div>
+<pre><code>"data": {
+  "genre": { "Male": "Masculin", "Female": "Féminin", "Human": "Humain", "Shadow": "Ombre" },
+  "arcane": { "Death": "Mort", "Hermit": "Ermite", "Moon": "Lune", "Fool": "Fou" }
+}</code></pre>
+<pre><code>const translateAtom = (ns, v) =&gt; {
+  const translated = i18.t(`data.${ns}.${v}`);
+  return (translated === `data.${ns}.${v}`) ? v : translated;
+};</code></pre>
+
+    <div data-i18n-block="fr"><h3>2.6 Badges traduits (5 langues)</h3>
+    <p>Tous les badges de <code>profile/badges/badgesData.js</code> ont été traduits dans les 5 fichiers <code>lang/</code> : <code>name</code>, <code>description</code>, <code>condition</code> (condition verrouillée → <code>"???"</code> pour les badges secrets).</p></div>
+    <div data-i18n-block="en"><h3>2.6 Translated badges (5 languages)</h3>
+    <p>All badges in <code>profile/badges/badgesData.js</code> have been translated in all 5 <code>lang/</code> files: <code>name</code>, <code>description</code>, <code>condition</code> (locked condition → <code>"???"</code> for secret badges).</p></div>
+    <table>
+        <thead>
+            <tr><th>Clé</th><th>EN</th><th>FR</th><th>ES</th><th>DE</th><th>IT</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>badges.category_achievement</code></td><td>Achievements</td><td>Réussites</td><td>Logros</td><td>Erfolge</td><td>Risultati</td></tr>
+            <tr><td><code>badges.category_event</code></td><td>Events</td><td>Événements</td><td>Eventos</td><td>Events</td><td>Eventi</td></tr>
+            <tr><td><code>badges.category_secret</code></td><td>Secrets</td><td>Secrets</td><td>Secretos</td><td>Geheimnisse</td><td>Segreti</td></tr>
+            <tr><td><code>badges.category_social</code></td><td>Social</td><td>Social</td><td>Social</td><td>Soziales</td><td>Sociale</td></tr>
+        </tbody>
+    </table>
+<pre><code>function getBadgeName(badge)                 // t(`badges.${badge.id}.name`) || badge.name
+function getBadgeDescription(badge)          // t(`badges.${badge.id}.description`) || badge.description
+function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sinon t() || badge.condition</code></pre>
+
+    <hr>
+
+    <!-- SECTION 3 -->
+    <div class="center">
+        <img src="JS_correction_illustration.png" width="700" alt="Architecture JS et corrections">
+    </div>
+    
+    <div data-i18n-block="fr"><h1>3. Architecture JavaScript</h1></div>
+    <div data-i18n-block="en"><h1>3. JavaScript Architecture</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Centralisation dans gameCore.js, client REST api.js, auth.js, offline-first, fire-and-forget.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Centralization in gameCore.js, REST client api.js, auth.js, offline-first, fire-and-forget.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_js"></p>
+
+
+    <div data-i18n-block="fr"><h3>3.1 Séparation des modules JS</h3>
+    <p>Avant la v2.0, chaque mode embarquait ses propres copies des fonctions utilitaires. Toutes les fonctions partagées ont été centralisées dans <code>js/gameCore.js</code> :</p></div>
+    <div data-i18n-block="en"><h3>3.1 JS module separation</h3>
+    <p>Before v2.0, each mode contained its own copies of utility functions. All shared functions have been centralized in <code>js/gameCore.js</code>:</p></div>
+    <table>
+        <thead>
+            <tr><th>Catégorie</th><th>Fonctions</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Date & reset</td><td><code>getParisDateString()</code>, <code>setupDailyReset()</code>, <code>checkResetOnLoad()</code></td></tr>
+            <tr><td>UI partagée</td><td><code>showConfettiExplosion()</code>, <code>setupRulesModal()</code>, <code>revealNextLink()</code></td></tr>
+            <tr><td>Normalisation</td><td><code>normalize()</code> (accents, casse, caractères spéciaux)</td></tr>
+            <tr><td>Dark mode</td><td><code>applyDarkMode()</code>, <code>toggleDarkMode()</code></td></tr>
+            <tr><td>Navigation</td><td><code>buildModeNavigation()</code></td></tr>
+            <tr><td>Sessions</td><td><code>buildGameSession()</code>, <code>savePendingSession()</code></td></tr>
+        </tbody>
+    </table>
+<pre><code>js/
+├── gameCore.js      ← Fonctions communes (date, confetti, filtres, sessions…)
+├── filterMenu.js    ← Panneau de filtres collapsible (partagé)
+├── i18n.js          ← Moteur de traduction
+├── api.js           ← Client REST (api.auth.*, api.stats.*, api.user.*)
+├── auth.js          ← UI connexion/inscription, initAuth(), migration
+├── cloud-sync.js    ← Source de vérité cloud : pullProfileFromCloud()
+├── streak-recovery.js ← Menu Jack Frost streak recovery
+├── social-link.js   ← XP Social Link, jauges, rangs, toast rang-up
+├── notifications.js ← Polling notifications hors-jeu
+├── challenge-banner.js ← Bandeau défi actif en jeu
+├── challenge-result.js ← Animation résultat défi
+└── tv-friend-anim.js   ← Animation TV Persona 4 demandes d'amis</code></pre>
+
+    <h3>3.2 Client REST — <code>js/api.js</code></h3>
+    <p>Module centralisant tous les appels HTTP vers le backend PHP. Exposé globalement via <code>window._personadleApi</code> pour éviter les imports circulaires avec <code>gameCore.js</code>.</p>
+    
+    <p><strong>URL dynamique :</strong></p>
+<pre><code>const BASE_URL = window.location.hostname === 'personadle.net'
+  ? 'https://personadle.net/api'
+  : `${window.location.protocol}//${window.location.host}/personadle/api`;</code></pre>
+
+    <p><strong>Structure de l'objet <code>api</code> :</strong></p>
+<pre><code>export const api = {
+  auth: {
+    register({ email, pseudo, password, lang }),  // POST /api/auth/register
+    login({ email, password }),                   // POST /api/auth/login
+    logout(),                                     // POST /api/auth/logout
+    me(),                                         // GET  /api/auth/me
+  },
+  stats: {
+    postSession(session),   // POST /api/sessions
+    syncPending(),          // Dépile pendingSessions du localStorage vers l'API
+  },
+  user: {
+    get(id),                // GET   /api/user/:id
+    patch(id, data),        // PATCH /api/user/:id
+    delete(id),             // DELETE /api/user/:id
+    stats(id),              // GET   /api/user/:id/stats
+    migrate(payload),       // POST  /api/user/migrate
+  },
+  badges: { catalog(lang) },     // GET /api/badges
+  wallpapers: { catalog() },     // GET /api/wallpapers
+  leaderboard: { get(params) },  // GET /api/leaderboard
   friends: { list(), add(), respond(), remove() },
   messages: { list(), send(), update(), remove() },
-  socialLink: { get(), interact(), getByFriend() },
+  socialLink: { get(friendId), interact(linkId, action), getByFriend(friendId) },
 };
-window._personadleApi = api; // bridge global</code></pre>
-                    <h3>Offline-first — <code>savePendingSession()</code></h3>
-                    <p>Fire-and-forget : tente l'API, sinon stocke en localStorage. Erreurs 409 → <code>continue</code> silencieux (session déjà connue).</p>
-                    <pre><code>export async function savePendingSession(session) {
+
+window._personadleApi = api;  // bridge global</code></pre>
+    <div data-i18n-block="fr"><p>Toutes les requêtes utilisent <code>credentials: 'include'</code> pour transmettre le cookie <code>PHPSESSID</code>.</p></div>
+    <div data-i18n-block="en"><p>All requests use <code>credentials: 'include'</code> to transmit the <code>PHPSESSID</code> cookie.</p></div>
+
+    <div data-i18n-block="fr"><h3>3.3 Auth Frontend — <code>js/auth.js</code></h3>
+    <p><strong>État global :</strong> <code>window._currentUser = null</code> (null = anonyme, objet = connecté).</p>
+    <p><strong>Convention HTML <code>data-auth</code> :</strong></p></div>
+    <div data-i18n-block="en"><h3>3.3 Auth Frontend — <code>js/auth.js</code></h3>
+    <p><strong>Global state:</strong> <code>window._currentUser = null</code> (null = anonymous, object = logged in).</p>
+    <p><strong>HTML <code>data-auth</code> convention:</strong></p></div>
+<pre><code>&lt;div data-auth="connected"&gt;Mon profil&lt;/div&gt;
+&lt;button data-auth="anonymous" data-open-modal="loginModal"&gt;Se connecter&lt;/button&gt;
+&lt;span data-auth-field="pseudo"&gt;&lt;/span&gt;</code></pre>
+    
+    <div data-i18n-block="fr">
+    <p><strong>Séquence <code>initAuth()</code> :</strong></p>
+    <ol>
+        <li><code>GET /api/auth/me</code> → restaure la session si cookie valide</li>
+        <li><code>updateAuthUI(user)</code> → affiche/masque les zones</li>
+        <li>Si connecté : <code>syncPending()</code> → envoie les sessions offline accumulées</li>
+        <li>Setup des formulaires login/register/logout</li>
+    </ol>
+    <p><strong>Migration localStorage → cloud :</strong> <code>migrateLocalStorageToCloud()</code> appelée automatiquement après inscription.</p>
+    <p><strong>Auth sans rechargement :</strong> dispatch d'événements <code>personadle:auth-login</code> et <code>personadle:auth-logout</code>.</p>
+    </div>
+    <div data-i18n-block="en">
+    <p><strong><code>initAuth()</code> sequence:</strong></p>
+    <ol>
+        <li><code>GET /api/auth/me</code> → restores session if cookie is valid</li>
+        <li><code>updateAuthUI(user)</code> → shows/hides zones</li>
+        <li>If logged in: <code>syncPending()</code> → sends accumulated offline sessions</li>
+        <li>Setup of login/register/logout forms</li>
+    </ol>
+    <p><strong>localStorage → cloud migration:</strong> <code>migrateLocalStorageToCloud()</code> called automatically after registration.</p>
+    <p><strong>Auth without reload:</strong> dispatch of <code>personadle:auth-login</code> and <code>personadle:auth-logout</code> events.</p>
+    </div>
+
+    <h3>3.4 <code>buildGameSession</code> + <code>savePendingSession</code> (gameCore.js)</h3>
+<pre><code>export function buildGameSession({ mode, targetName, result, attempts, timeMs = 0, filters = [] }) {
+  return {
+    mode, target_name: targetName, result, attempts,
+    time_ms: Math.round(timeMs),
+    active_filters: filters,
+    played_date: getParisDateString(),
+  };
+}
+
+export async function savePendingSession(session) {
   const api = window._personadleApi;
   if (api) {
     try {
       await api.stats.postSession(session);
       await api.stats.syncPending();
       return;
-    } catch { /* réseau → fallback */ }
+    } catch { /* réseau indisponible → fallback */ }
   }
-  const q = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
-  q.push(session);
-  localStorage.setItem('pendingSessions', JSON.stringify(q));
+  const pending = JSON.parse(localStorage.getItem('pendingSessions') || '[]');
+  pending.push(session);
+  localStorage.setItem('pendingSessions', JSON.stringify(pending));
 }</code></pre>
-                </div>
-            </details>
-        </div>
 
-        <!-- ── 04 Système de filtres ── -->
-        <div class="section-card" id="s04">
-            <div class="card-header">
-                <span class="card-icon">🔽</span>
-                <div class="card-meta">
-                    <span class="card-num">04 / 16</span>
-                    <h2 class="card-title">Système de filtres</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Panneau de filtres par opus partagé entre les 6 modes via <code>filterMenu.js</code>. Fix de l'expansion incorrecte lors de la migration (un filtre précis n'est plus écrasé). Guard contre le pool vide avec bandeau rouge. Filtres préservés et restaurés lors des défis entre amis.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Initialisation partagée</h3>
-                    <pre><code>import { initFilterMenu } from "../js/filterMenu.js";
+    <div data-i18n-block="fr"><h3>3.5 Cloud Sync — <code>js/cloud-sync.js</code></h3>
+    <p><code>pullProfileFromCloud()</code> fait un seul <code>GET /api/user/:id</code> et écrase tout le localStorage pour maintenir la synchro.</p></div>
+    <div data-i18n-block="en"><h3>3.5 Cloud Sync — <code>js/cloud-sync.js</code></h3>
+    <p><code>pullProfileFromCloud()</code> makes a single <code>GET /api/user/:id</code> and overwrites all localStorage to maintain sync.</p></div>
 
-const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) => {
+    <div data-i18n-block="fr"><h3>3.6 Fix détection IS_LOCAL et autres corrections JS</h3></div>
+    <div data-i18n-block="en"><h3>3.6 IS_LOCAL detection fix and other JS corrections</h3></div>
+<pre><code>const IS_LOCAL = (() =&gt; {
+  const h = location.hostname;
+  return (h === "" || h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0"
+    || /^192\.168\./.test(h) || /^10\./.test(h));
+})();</code></pre>
+
+    <hr>
+
+    <!-- SECTION 4 -->
+    <div class="center">
+        <img src="Illustration_sous_filtres.png" width="700" alt="Sous-filtres opus par jeu">
+    </div>
+    
+    <div data-i18n-block="fr"><h1>4. Système de filtres</h1></div>
+    <div data-i18n-block="en"><h1>4. Filter System</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Sous-filtres par opus, _migrate(), ALL_OPUS, guard pool vide — robustesse complète.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Sub-filters by opus, _migrate(), ALL_OPUS, empty pool guard — full robustness.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_filters"></p>
+
+
+    <div data-i18n-block="fr"><h3>4.1 Panneau de filtres partagé — <code>js/filterMenu.js</code></h3></div>
+    <div data-i18n-block="en"><h3>4.1 Shared filter panel — <code>js/filterMenu.js</code></h3></div>
+<pre><code>import { initFilterMenu } from "../js/filterMenu.js";
+
+const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&gt; {
   if (newActive.length === 0) return;  // guard pool vide
   activeFilters = newActive;
-  resetGame(true);
+  resetGame(true);  // true = sélection aléatoire dans le pool filtré
 });</code></pre>
-                    <h3>Fix <code>_migrate()</code> — expansion incorrecte</h3>
-                    <p>Un code n'est traité comme legacy que si <strong>aucun de ses sous-codes</strong> n'est déjà présent :</p>
-                    <pre><code>const children = LEGACY_EXPAND[code];
-if (children) {
-  const alreadyPrecise = children.some(c => saved.includes(c));
-  if (alreadyPrecise) {
-    if (allOpus.includes(code)) result.push(code);
-  } else {
-    result.push(...children.filter(c => allOpus.includes(c)));
-  }
+
+    <div data-i18n-block="fr">
+    <h3>4.2 <code>_migrate()</code> — Correction de l'expansion incorrecte</h3>
+    <p>Correction pour éviter que "P5" remplace les filtres détaillés lors des défis.</p>
+    <h3>4.3 Guard pool vide + bandeau d'avertissement</h3>
+    <p>Injection dynamique d'un <code>&lt;div class="filter-empty-warning"&gt;</code> affiché dès que <code>activeOpus.length === 0</code>.</p>
+    <h3>4.4 Préservation des filtres dans les défis</h3>
+    <p>Les filtres sont passés dans les requêtes de défi (colonne <code>challenge_filters</code>) et restaurés après partie.</p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>4.2 <code>_migrate()</code> — Fix for incorrect expansion</h3>
+    <p>Fix to prevent "P5" from replacing detailed filters during challenges.</p>
+    <h3>4.3 Empty pool guard + warning banner</h3>
+    <p>Dynamic injection of a <code>&lt;div class="filter-empty-warning"&gt;</code> displayed as soon as <code>activeOpus.length === 0</code>.</p>
+    <h3>4.4 Filter preservation in challenges</h3>
+    <p>Filters are passed in challenge requests (column <code>challenge_filters</code>) and restored after the game.</p>
+    </div>
+
+    <hr>
+
+    <!-- SECTION 5 -->
+    <div class="center">
+        <img src="Illustration_style_audio.png" width="700" alt="Lecteur audio style Persona 5">
+    </div>
+    
+    <div data-i18n-block="fr"><h1>5. Mode Musique</h1></div>
+    <div data-i18n-block="en"><h1>5. Music Mode</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>130+ pistes, lecteur custom P5, thème dynamique par série, filtres P4AU et P5T.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>130+ tracks, custom P5 player, dynamic theme per series, P4AU and P5T filters.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_music"></p>
+
+
+    <div data-i18n-block="fr"><h3>5.1 Lecteur Audio Custom</h3>
+    <p>L'élément <code>&lt;audio controls&gt;</code> natif a été remplacé par un composant HTML/CSS/JS custom inspiré de Persona 5 :</p></div>
+    <div data-i18n-block="en"><h3>5.1 Custom Audio Player</h3>
+    <p>The native <code>&lt;audio controls&gt;</code> element was replaced by a custom HTML/CSS/JS component inspired by Persona 5:</p></div>
+<pre><code>&lt;div class="audio-wrapper" id="audioBox"&gt;
+  &lt;audio id="audioPlayer" preload="none"&gt;&lt;source src="" type="audio/mp3"&gt;&lt;/audio&gt;
+  &lt;div class="p5-player"&gt;
+    &lt;div class="p5-player-header"&gt;
+      &lt;span class="p5-player-label" data-i18n="ui.now_playing"&gt;♪ NOW PLAYING&lt;/span&gt;
+      &lt;div class="p5-sound-bars" id="p5SoundBars"&gt;
+        &lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="p5-player-controls"&gt;
+      &lt;button class="p5-play-btn" id="p5PlayBtn" aria-label="Play / Pause"&gt;
+        &lt;span id="p5PlayIcon"&gt;▶&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;div class="p5-timeline"&gt;
+        &lt;div class="p5-progress" id="p5Progress"&gt;
+          &lt;div class="p5-progress-fill" id="p5ProgressFill"&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="p5-time-row"&gt;
+          &lt;span id="p5CurrentTime"&gt;0:00&lt;/span&gt;
+          &lt;span id="p5Duration"&gt;--:--&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    <p><strong>Animations CSS (barres de son) :</strong></p>
+<pre><code>.p5-sound-bars.playing span:nth-child(1) { animation: p5bar 0.75s ease-in-out infinite; }
+.p5-sound-bars.playing span:nth-child(2) { animation: p5bar 0.55s ease-in-out 0.12s infinite; }
+.p5-sound-bars.playing span:nth-child(3) { animation: p5bar 0.90s ease-in-out 0.06s infinite; }
+.p5-sound-bars.playing span:nth-child(4) { animation: p5bar 0.65s ease-in-out 0.20s infinite; }
+.p5-sound-bars.playing span:nth-child(5) { animation: p5bar 1.00s ease-in-out 0.04s infinite; }
+
+@keyframes p5bar {
+  0%, 100% { height: 4px;  opacity: 0.6; }
+  50%       { height: 20px; opacity: 1;   }
 }</code></pre>
-                </div>
-            </details>
-        </div>
 
-        <!-- ── 05 Mode Musique ── -->
-        <div class="section-card" id="s05">
-            <div class="card-header">
-                <span class="card-icon">🎵</span>
-                <div class="card-meta">
-                    <span class="card-num">05 / 16</span>
-                    <h2 class="card-title">Mode Musique</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Lecteur audio entièrement custom inspiré de Persona 5 — barres animées, progression, thème de couleur dynamique par série. 13 nouvelles pistes ajoutées (P3P, P3R, P4AU, P4G, P5R, P5S, P5T). P4AU et P5T ajoutés aux filtres. ~130+ pistes au total.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Thèmes de couleur par série</h3>
-                    <table>
-                        <thead><tr><th>Série</th><th>Couleur</th></tr></thead>
-                        <tbody>
-                            <tr><td>P1</td><td><code>#7c3aed</code> violet</td></tr>
-                            <tr><td>P2IS / P2EP</td><td><code>#ea580c</code> orange / <code>#8b5cf6</code> lavande</td></tr>
-                            <tr><td>P3 / P3FES / P3R</td><td><code>#3b82f6</code> bleu</td></tr>
-                            <tr><td>P3P</td><td>dégradé bleu→rose (cas spécial)</td></tr>
-                            <tr><td>P4 / P4G / P4AU</td><td><code>#eab308</code> or</td></tr>
-                            <tr><td>P5 / P5R / P5S / P5T</td><td><code>#e63946</code> rouge</td></tr>
-                            <tr><td>P5X</td><td><code>#c0193a</code> bordeaux</td></tr>
-                        </tbody>
-                    </table>
-                    <h3>13 nouvelles pistes (v2.0)</h3>
-                    <table>
-                        <thead><tr><th>Titre</th><th>Opus</th><th>Artiste</th></tr></thead>
-                        <tbody>
-                            <tr><td>Danger Zone</td><td>P3P</td><td>(instrumental)</td></tr>
-                            <tr><td>Time</td><td>P3P</td><td>Mayumi Fujita</td></tr>
-                            <tr><td>Want to Be Close -Reload-</td><td>P3R</td><td>Azumi Takahashi</td></tr>
-                            <tr><td>A Fool or Clown?</td><td>P4AU</td><td>(instrumental)</td></tr>
-                            <tr><td>Best Friends</td><td>P4AU</td><td>Yumi Kawamura</td></tr>
-                            <tr><td>Break Out Of</td><td>P4AU</td><td>Shihoko Hirata, Lotus Juice</td></tr>
-                            <tr><td>I'll Face Myself -Battle-</td><td>P4G</td><td>(instrumental)</td></tr>
-                            <tr><td>Throw Away Your Mask</td><td>P5R</td><td>Lyn Inaizumi</td></tr>
-                            <tr><td>Axe to Grind</td><td>P5S</td><td>Lyn Inaizumi</td></tr>
-                            <tr><td>Counter Strike</td><td>P5S</td><td>Lyn Inaizumi</td></tr>
-                            <tr><td>Got Your Tail</td><td>P5T</td><td>Lyn Inaizumi</td></tr>
-                            <tr><td>Revolution is a Blade</td><td>P5T</td><td>Lyn Inaizumi</td></tr>
-                            <tr><td>Truth or Dare</td><td>P5T</td><td>Lyn Inaizumi</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
+    <div data-i18n-block="fr">
+    <h3>5.2 Thème de couleur dynamique par série</h3>
+    <p>Le lecteur adapte ses couleurs via CSS custom properties — JS les écrase via <code>setPlayerTheme()</code> :</p>
+    <table>
+        <thead>
+            <tr><th>Série</th><th>Couleur principale</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>P1</td><td><code>#7c3aed</code> — violet</td></tr>
+            <tr><td>P2IS</td><td><code>#ea580c</code> — orange</td></tr>
+            <tr><td>P2EP</td><td><code>#8b5cf6</code> — lavande</td></tr>
+            <tr><td>P3 / P3FES / P3R</td><td><code>#3b82f6</code> — bleu</td></tr>
+            <tr><td>P3P</td><td><code>#818cf8</code> — bordure + dégradé bleu→rose</td></tr>
+            <tr><td>P4 / P4G / P4D / P4AU</td><td><code>#eab308</code> — or</td></tr>
+            <tr><td>P5 / P5R / P5S / P5T</td><td><code>#e63946</code> — rouge</td></tr>
+            <tr><td>P5X</td><td><code>#c0193a</code> — bordeaux/cramoisi</td></tr>
+            <tr><td>PQ / PQ2</td><td><code>#f97316</code> — orange</td></tr>
+        </tbody>
+    </table>
+    <p><strong>Cas P3P — dégradé bicolore :</strong></p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>5.2 Dynamic color theme per series</h3>
+    <p>The player adapts its colors via CSS custom properties — JS overrides them via <code>setPlayerTheme()</code>:</p>
+    <table>
+        <thead>
+            <tr><th>Series</th><th>Primary color</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>P1</td><td><code>#7c3aed</code> — purple</td></tr>
+            <tr><td>P2IS</td><td><code>#ea580c</code> — orange</td></tr>
+            <tr><td>P2EP</td><td><code>#8b5cf6</code> — lavender</td></tr>
+            <tr><td>P3 / P3FES / P3R</td><td><code>#3b82f6</code> — blue</td></tr>
+            <tr><td>P3P</td><td><code>#818cf8</code> — border + blue→pink gradient</td></tr>
+            <tr><td>P4 / P4G / P4D / P4AU</td><td><code>#eab308</code> — gold</td></tr>
+            <tr><td>P5 / P5R / P5S / P5T</td><td><code>#e63946</code> — red</td></tr>
+            <tr><td>P5X</td><td><code>#c0193a</code> — burgundy/crimson</td></tr>
+            <tr><td>PQ / PQ2</td><td><code>#f97316</code> — orange</td></tr>
+        </tbody>
+    </table>
+    <p><strong>P3P case — two-color gradient:</strong></p>
+    </div>
+<pre><code>P3P: {
+  accent: '#818cf8',
+  dark:   '#3b82f6',
+  light:  '#f9a8d4',
+  glow:   'rgba(129,140,248,{a})',
+  gradientFill: 'linear-gradient(90deg, #1d4ed8, #3b82f6 30%, #c084fc 65%, #ec4899)',
+},</code></pre>
 
-        <!-- ── 06 Backend & BDD ── -->
-        <div class="section-card" id="s06">
-            <div class="card-header">
-                <span class="card-icon">🗄️</span>
-                <div class="card-meta">
-                    <span class="card-num">06 / 16</span>
-                    <h2 class="card-title">Backend &amp; BDD</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                PHP 8.3 + MariaDB 10.6+, 20 tables, API REST complète (40+ endpoints). Sessions PHP httpOnly — pas JWT. Architecture offline-first avec queue localStorage. Soft delete RGPD (anonymisation immédiate, hard delete J+30 par cron).
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Architecture offline-first</h3>
-                    <pre><code>Partie terminée
+    <div data-i18n-block="fr">
+    <h3>5.3 Nouveaux opus dans les filtres — P4AU et P5T</h3>
+    <ul>
+        <li><strong>P4AU</strong> (Persona 4 Arena Ultimax) : sous-bouton dans le groupe P4, logo <code>Persona_4_Arena_Ultimax_Logo.png</code>, thème jaune P4</li>
+        <li><strong>P5T</strong> (Persona 5 Tactica) : sous-bouton dans le groupe P5, logo <code>Persona_5_Tactica_Logo.png</code>, thème rouge P5</li>
+        <li><code>data-opus-codes</code> des groupes P4 et P5 mis à jour dans <code>musicsMode/musics.html</code></li>
+        <li><code>ALL_OPUS</code> et <code>OPUS_THEMES</code> dans <code>modeMusic.js</code> complétés</li>
+    </ul>
+    <p><strong>Bug corrigé :</strong> <code>ALL_OPUS</code> ne contenait pas <code>P4AU</code> ni <code>P5T</code> → <code>filterMenu.js</code> ignorait silencieusement ces boutons. Fix : ajout à <code>ALL_OPUS</code> + <code>OPUS_THEMES</code>.</p>
+    <p><strong>Bug corrigé :</strong> changement de filtre ne changeait pas la chanson — <code>resetGame()</code> sans argument → <code>random = false</code>. Fix : <code>resetGame(true)</code> dans le callback.</p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>5.3 New opus in filters — P4AU and P5T</h3>
+    <ul>
+        <li><strong>P4AU</strong> (Persona 4 Arena Ultimax): sub-button in P4 group, logo <code>Persona_4_Arena_Ultimax_Logo.png</code>, P4 yellow theme</li>
+        <li><strong>P5T</strong> (Persona 5 Tactica): sub-button in P5 group, logo <code>Persona_5_Tactica_Logo.png</code>, P5 red theme</li>
+        <li><code>data-opus-codes</code> for P4 and P5 groups updated in <code>musicsMode/musics.html</code></li>
+        <li><code>ALL_OPUS</code> and <code>OPUS_THEMES</code> in <code>modeMusic.js</code> completed</li>
+    </ul>
+    <p><strong>Bug fixed:</strong> <code>ALL_OPUS</code> did not contain <code>P4AU</code> or <code>P5T</code> → <code>filterMenu.js</code> silently ignored these buttons. Fix: added to <code>ALL_OPUS</code> + <code>OPUS_THEMES</code>.</p>
+    <p><strong>Bug fixed:</strong> filter change did not change the song — <code>resetGame()</code> without argument → <code>random = false</code>. Fix: <code>resetGame(true)</code> in callback.</p>
+    </div>
+
+    <div data-i18n-block="fr"><h3>5.4 Couvertures d'opus disponibles</h3></div>
+    <div data-i18n-block="en"><h3>5.4 Available opus covers</h3></div>
+        <div class="opus-covers-grid">
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P1.webp" alt="P1"><code>P1</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P2IS.webp" alt="P2IS"><code>P2IS</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P2EP.webp" alt="P2EP"><code>P2EP</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P3.webp" alt="P3"><code>P3</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P3FES.webp" alt="P3FES"><code>P3FES</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P3P.webp" alt="P3P"><code>P3P</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P3R.webp" alt="P3R"><code>P3R</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P4.webp" alt="P4"><code>P4</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P4G.webp" alt="P4G"><code>P4G</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P4AU.webp" alt="P4AU"><code>P4AU</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P4D.webp" alt="P4D"><code>P4D</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5.webp" alt="P5"><code>P5</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5R.webp" alt="P5R"><code>P5R</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5S.webp" alt="P5S"><code>P5S</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5T.webp" alt="P5T"><code>P5T</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/P5X.webp" alt="P5X"><code>P5X</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/PQ.webp" alt="PQ"><code>PQ</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/PQ2.webp" alt="PQ2"><code>PQ2</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/Velvet.webp" alt="Velvet"><code>Velvet</code></div>
+        <div class="ocg-item"><img src="../../musicsMode/database/img/Zutomayo.jpg" alt="Zutomayo"><code>Zutomayo</code></div>
+    </div>
+
+    <hr>
+
+    <!-- SECTION 6 -->
+    <div class="center">
+        <img src="Illustration_Integration_php.png" width="700" alt="Intégration PHP backend">
+    </div>
+
+    <div data-i18n-block="fr"><h1>6. Backend &amp; Base de données</h1></div>
+    <div data-i18n-block="en"><h1>6. Backend &amp; Database</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>MariaDB 10.6+, 20 tables, API REST complète, offline-first, RGPD.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>MariaDB 10.6+, 20 tables, complete REST API, offline-first, GDPR.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_backend"></p>
+
+
+    <div data-i18n-block="fr">
+    <h3>6.1 Choix MySQL 8.0 / MariaDB 10.6+</h3>
+    <p>Le schéma BDD a été adapté pour MySQL 8.0 en développement local et MariaDB 10.6+ chez Hostinger.</p>
+    <table>
+        <thead>
+            <tr><th>PostgreSQL</th><th>MySQL / MariaDB équivalent</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>BIGSERIAL</code></td><td><code>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</code></td></tr>
+            <tr><td><code>BOOLEAN</code></td><td><code>TINYINT(1)</code></td></tr>
+            <tr><td><code>TEXT</code> illimité</td><td><code>TEXT</code> / <code>MEDIUMTEXT</code> (avatar base64 &gt; 64 KB)</td></tr>
+            <tr><td><code>NOW()</code></td><td><code>CURRENT_TIMESTAMP</code></td></tr>
+            <tr><td><code>ON UPDATE NOW()</code></td><td><code>ON UPDATE CURRENT_TIMESTAMP</code></td></tr>
+        </tbody>
+    </table>
+    <p><strong>Piège :</strong> <code>rank</code> est un mot réservé MySQL 8.0 — toujours entourer de backticks : <code>`rank`</code> dans CREATE TABLE, INSERT, CHECK, VIEW.</p>
+    <p><strong>Piège PDO :</strong> MySQL PDO ne supporte pas <code>:param</code> répété plusieurs fois dans un même <code>prepare()</code>. Utiliser des <code>?</code> positionnels et <code>execute([$val, $val, $val])</code>.</p>
+    <h3>6.2 Schéma BDD — 20 tables</h3>
+    <p><strong>Fichier :</strong> <code>sql/bdd_mysql.sql</code></p>
+    </div>
+    <div data-i18n-block="en">
+    <h3>6.1 MySQL 8.0 / MariaDB 10.6+ choice</h3>
+    <p>The DB schema was adapted for MySQL 8.0 in local development and MariaDB 10.6+ on Hostinger.</p>
+    <table>
+        <thead>
+            <tr><th>PostgreSQL</th><th>MySQL / MariaDB equivalent</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>BIGSERIAL</code></td><td><code>BIGINT UNSIGNED NOT NULL AUTO_INCREMENT</code></td></tr>
+            <tr><td><code>BOOLEAN</code></td><td><code>TINYINT(1)</code></td></tr>
+            <tr><td><code>TEXT</code> unlimited</td><td><code>TEXT</code> / <code>MEDIUMTEXT</code> (base64 avatar &gt; 64 KB)</td></tr>
+            <tr><td><code>NOW()</code></td><td><code>CURRENT_TIMESTAMP</code></td></tr>
+            <tr><td><code>ON UPDATE NOW()</code></td><td><code>ON UPDATE CURRENT_TIMESTAMP</code></td></tr>
+        </tbody>
+    </table>
+    <p><strong>Pitfall:</strong> <code>rank</code> is a reserved word in MySQL 8.0 — always wrap in backticks: <code>`rank`</code> in CREATE TABLE, INSERT, CHECK, VIEW.</p>
+    <p><strong>PDO pitfall:</strong> MySQL PDO does not support <code>:param</code> used multiple times in the same <code>prepare()</code>. Use positional <code>?</code> and <code>execute([$val, $val, $val])</code>.</p>
+    <h3>6.2 DB Schema — 20 tables</h3>
+    <p><strong>File:</strong> <code>sql/bdd_mysql.sql</code></p>
+    </div>
+    <details>
+        <div data-i18n-block="fr"><summary>Voir les 20 tables</summary></div>
+        <div data-i18n-block="en"><summary>View the 20 tables</summary></div>
+        <table>
+            <thead>
+                <tr><th>Table</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>users</code></td><td>Compte utilisateur (email, pseudo, hash, friend_code, is_banned, pseudo_locked)</td></tr>
+                <tr><td><code>profiles</code></td><td>Avatar, fond d'écran, badges équipés, titre équipé, musique de profil</td></tr>
+                <tr><td><code>user_stats</code></td><td>Stats par mode (wins, giveups, streak, perfect_wins, total_time_ms)</td></tr>
+                <tr><td><code>game_sessions</code></td><td>Historique de chaque partie jouée (anti-duplon par user+mode+date)</td></tr>
+                <tr><td><code>badges</code></td><td>Catalogue des 60 badges (slug, condition, rarity, image_path)</td></tr>
+                <tr><td><code>badges_unlocked</code></td><td>Badges débloqués par utilisateur</td></tr>
+                <tr><td><code>wallpapers</code></td><td>Catalogue des wallpapers (7 entrées, conditions de déblocage)</td></tr>
+                <tr><td><code>user_wallpapers</code></td><td>Wallpapers débloqués par utilisateur</td></tr>
+                <tr><td><code>event_codes</code></td><td>Codes événement (code, badge_id, dates, is_active)</td></tr>
+                <tr><td><code>event_codes_redeemed</code></td><td>Codes utilisés par utilisateur</td></tr>
+                <tr><td><code>titles</code></td><td>Catalogue des titres traduits EN/FR/ES/DE/IT (11 titres)</td></tr>
+                <tr><td><code>user_titles</code></td><td>Titres débloqués par utilisateur</td></tr>
+                <tr><td><code>friendships</code></td><td>Demandes d'amis (pending / accepted / blocked)</td></tr>
+                <tr><td><code>social_link_ranks</code></td><td>Noms des rangs traduits (Stranger → True Confidant)</td></tr>
+                <tr><td><code>social_links</code></td><td>Relation Social Link entre deux amis (rang 1-10, XP)</td></tr>
+                <tr><td><code>social_link_interactions</code></td><td>Log des actions générant de l'XP</td></tr>
+                <tr><td><code>social_link_rankup_notifs</code></td><td>Notifications de passage de rang pour les deux joueurs</td></tr>
+                <tr><td><code>messages</code></td><td>Messages et défis entre amis (avec challenge_filters)</td></tr>
+                <tr><td><code>leaderboard_cache</code></td><td>Cache des classements (recalculé par cron)</td></tr>
+                <tr><td><code>deletion_requests</code></td><td>RGPD — log des suppressions de compte (hard delete J+30)</td></tr>
+            </tbody>
+        </table>
+    </details>
+    <div data-i18n-block="fr"><p><strong>Tables créées par migrations :</strong></p></div>
+    <div data-i18n-block="en"><p><strong>Tables created by migrations:</strong></p></div>
+<pre><code>001_add_challenge_filters.sql     ← colonne challenge_filters sur messages
+002_add_has_migrated.sql          ← colonne has_migrated sur users
+006_fix_title_slugs.sql           ← 11 UPDATE alignent slugs BDD sur format JS
+007_badges_wallpapers_catalog.sql ← table badges (60 entrées) + wallpapers peuplés
+010_true_confidant.sql            ← social_link_rankup_notifs + is_badge_prompt
+011_event_codes_moderation.sql    ← table event_codes + seed 12 codes + is_banned/pseudo_locked
+012_remove_tcb.sql                ← suppression True Confidant Badge canvas</code></pre>
+    <div data-i18n-block="fr"><p><strong>Routines stockées :</strong> <code>get_or_create_social_link</code> (garantit <code>user_a_id &lt; user_b_id</code>), <code>gain_social_link_xp</code> / <code>add_social_link_xp</code> — ajoute XP, retourne nouveau rang via params <code>OUT</code>, détecte passage de rang.</p></div>
+    <div data-i18n-block="en"><p><strong>Stored routines:</strong> <code>get_or_create_social_link</code> (ensures <code>user_a_id &lt; user_b_id</code>), <code>gain_social_link_xp</code> / <code>add_social_link_xp</code> — adds XP, returns new rank via <code>OUT</code> params, detects rank change.</p></div>
+
+    <div data-i18n-block="fr"><h3>6.3 API REST PHP</h3></div>
+    <div data-i18n-block="en"><h3>6.3 REST PHP API</h3></div>
+    <details>
+        <div data-i18n-block="fr"><summary>Liste complète des endpoints</summary></div>
+        <div data-i18n-block="en"><summary>Full endpoint list</summary></div>
+        <p><strong>Auth :</strong></p>
+        <ul>
+            <li><code>POST /api/auth/register</code> — crée users + profiles + user_stats × 6 modes dans une transaction</li>
+            <li><code>POST /api/auth/login</code> — protection anti-énumération : hash dummy si email inexistant</li>
+            <li><code>GET /api/auth/me</code> — retourne <code>{user: null}</code> si pas de session (pas une erreur)</li>
+            <li><code>POST /api/auth/logout</code> — nettoie session, supprime cookie, retourne toujours 200</li>
+        </ul>
+        <p><strong>Sessions &amp; Stats :</strong></p>
+        <ul>
+            <li><code>POST /api/sessions</code> — anti-duplon (user+mode+date), calcul streak atomique</li>
+            <li><code>GET /api/user/:id/stats</code> — agrégats par mode + globaux</li>
+        </ul>
+        <p><strong>Utilisateur :</strong></p>
+        <ul>
+            <li><code>GET /api/user/:id</code> — profil public restreint pour tout utilisateur authentifié</li>
+            <li><code>PATCH /api/user/:id</code> — whitelist explicite des champs modifiables, ownership checks</li>
+            <li><code>DELETE /api/user/:id</code> — soft delete RGPD + anonymisation + log deletion_requests</li>
+            <li><code>POST /api/user/migrate</code> — migration idempotente localStorage → BDD (INSERT IGNORE)</li>
+            <li><code>POST /api/user/compare</code> — comparaison stats + XP Social Link + <code>ranked_up</code>/<code>new_rank</code></li>
+            <li><code>POST /api/user/recover-streak</code> — restaure la streak (cooldown 2 mois)</li>
+        </ul>
+        <p><strong>Social :</strong></p>
+        <ul>
+            <li><code>GET|POST|PATCH|DELETE /api/friends</code> — gestion amis</li>
+            <li><code>GET|POST /api/messages</code> — CRUD messages et défis</li>
+            <li><code>GET|POST /api/social-links/by-friend/:id</code> — crée ou récupère lien</li>
+            <li><code>POST /api/social-links/:id/interact</code> — XP avec détection mutualité (×2)</li>
+        </ul>
+        <p><strong>Contenu :</strong></p>
+        <ul>
+            <li><code>GET /api/badges</code> / <code>POST /api/badges/unlock</code> — catalogue + vérification condition côté serveur</li>
+            <li><code>GET /api/wallpapers</code> / <code>POST /api/wallpapers/unlock</code></li>
+            <li><code>GET /api/titles</code> / <code>POST /api/titles/unlock</code></li>
+            <li><code>GET /api/leaderboard</code> — classements avec filtres mode/période/métrique/scope</li>
+        </ul>
+        <p><strong>Admin :</strong></p>
+        <ul>
+            <li><code>GET|PATCH /api/admin/user/:id</code> — profil complet avec champs sensibles</li>
+            <li><code>GET|POST|PATCH|DELETE /api/admin/event_codes</code> — CRUD codes événement</li>
+            <li><code>GET /api/cron/leaderboard.php?key=SECRET</code> — recalcul cache classements</li>
+            <li><code>GET /api/cron/hard-delete.php?key=SECRET</code> — hard delete RGPD J+30</li>
+        </ul>
+    </details>
+
+    <h3>6.4 Architecture Offline-First</h3>
+<pre><code>Partie terminée
     ↓
 savePendingSession(session)
-    ├── API disponible ?
-    │   ├── OUI → POST /api/sessions → syncPending() (vide queue)
-    │   └── Erreur réseau → localStorage (fallback)
-    └── Non connecté → localStorage
-                    ↓
-         Reconnexion → syncPending() dépile vers l'API</code></pre>
-                    <h3>20 tables — aperçu</h3>
-                    <table>
-                        <thead><tr><th>Table</th><th>Rôle</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>users</code></td><td>Compte (email, pseudo, friend_code, is_banned)</td></tr>
-                            <tr><td><code>profiles</code></td><td>Avatar, wallpaper, badges équipés, musique profil</td></tr>
-                            <tr><td><code>user_stats</code></td><td>Stats par mode (wins, streak, perfect, total_time_ms)</td></tr>
-                            <tr><td><code>game_sessions</code></td><td>Historique parties (anti-duplon user+mode+date)</td></tr>
-                            <tr><td><code>badges / badges_unlocked</code></td><td>Catalogue 60 badges + déblocages</td></tr>
-                            <tr><td><code>social_links</code></td><td>Rang 1-10 et XP entre deux amis</td></tr>
-                            <tr><td><code>messages</code></td><td>Défis quotidiens (avec challenge_filters)</td></tr>
-                            <tr><td><code>leaderboard_cache</code></td><td>Cache classements (recalc par cron)</td></tr>
-                            <tr><td><code>deletion_requests</code></td><td>RGPD — log soft delete (hard delete J+30)</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
+    ├── window._personadleApi disponible ?
+    │       ├── OUI → POST /api/sessions
+    │       │           ├── Succès → syncPending() (vide queue localStorage)
+    │       │           └── Erreur réseau → localStorage (fallback)
+    └── NON (non connecté) → localStorage
+                                ↓
+                    Reconnexion / initAuth()
+                                ↓
+                    syncPending() → dépile la queue vers l'API</code></pre>
+    <p>Les erreurs <strong>409</strong> (session déjà enregistrée côté serveur) sont traitées par <code>continue</code> silencieux — évite de bloquer les sessions suivantes dans la queue.</p>
 
-        <!-- ── 07 Système Social ── -->
-        <div class="section-card" id="s07">
-            <div class="card-header">
-                <span class="card-icon">👥</span>
-                <div class="card-meta">
-                    <span class="card-num">07 / 16</span>
-                    <h2 class="card-title">Système Social</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Page amis complète (recherche, demandes, online dot 🔥). Social Link inspiré de Persona : rang 1→10 via actions mutuelles, True Confidant avec halo doré. Défis quotidiens entre amis avec partage des filtres. Notifications hors-jeu. 3 animations au choix : 🃏 Calling Card, 📺 TV P4, 🔫 Evoker P3.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>XP Social Link par action</h3>
-                    <table>
-                        <thead><tr><th>Action</th><th>XP solo</th><th>XP mutuel</th></tr></thead>
-                        <tbody>
-                            <tr><td>visit_profile</td><td>5</td><td>10</td></tr>
-                            <tr><td>share_score / compare_stats</td><td>10</td><td>20</td></tr>
-                            <tr><td>share_streak</td><td>15</td><td>30</td></tr>
-                            <tr><td>challenge</td><td>15</td><td>35</td></tr>
-                            <tr><td>play_same_day</td><td>20</td><td>20</td></tr>
-                        </tbody>
-                    </table>
-                    <p>Anti-spam : 1 action par type par jour par lien. XP ×2 si les deux joueurs ont agi le même jour.</p>
-                    <h3>Rangs Social Link (1→10)</h3>
-                    <table>
-                        <thead><tr><th>Rang</th><th>Nom</th><th>XP cumulés</th></tr></thead>
-                        <tbody>
-                            <tr><td>1</td><td>Stranger</td><td>0</td></tr>
-                            <tr><td>3</td><td>Companion</td><td>250</td></tr>
-                            <tr><td>5</td><td>Confidant</td><td>700</td></tr>
-                            <tr><td>8</td><td>Bond</td><td>1 750</td></tr>
-                            <tr><td>10</td><td>True Confidant ✦</td><td>2 700</td></tr>
-                        </tbody>
-                    </table>
-                    <h3>Défis — clés localStorage réinitialisées</h3>
-                    <pre><code>const MODE_STATE_KEYS = {
+    <h3>6.5 Décisions d'architecture backend</h3>
+    <ul>
+        <li><strong>Sessions PHP et pas JWT :</strong> révocation instantanée (logout, suppression de compte). JWT stateless ne peut pas être invalidé avant expiration.</li>
+        <li><strong><code>window._personadleApi</code> :</strong> bridge global pour casser l'import circulaire <code>gameCore.js</code> ↔ <code>api.js</code> — même pattern que <code>window.i18n</code>.</li>
+        <li><strong>CORS whitelist :</strong> <code>credentials: 'include'</code> est incompatible avec <code>Access-Control-Allow-Origin: *</code>.</li>
+        <li><strong>Deux blocs <code>&lt;Directory&gt;</code> Apache :</strong> Apache résout les symlinks → <code>AllowOverride All</code> doit être sur le chemin réel <em>et</em> le chemin symlinké.</li>
+    </ul>
+
+    <h3>6.6 Soft Delete RGPD</h3>
+<pre><code>-- Anonymisation immédiate (DELETE déclenché par l'utilisateur)
+UPDATE users SET
+    is_deleted    = 1,
+    deleted_at    = NOW(),
+    email         = CONCAT("deleted_", id, "@personadle.net"),
+    pseudo        = CONCAT("DeletedUser_", id),
+    password_hash = "deleted"
+WHERE id = ?;
+
+INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
+    <p>Hard delete différé J+30 via cron (<code>api/cron/hard-delete.php</code>) : <code>DELETE FROM users WHERE id = ?</code> + CASCADE InnoDB sur toutes les tables liées.</p>
+
+    <hr>
+
+    <!-- SECTION 7 -->
+    <div class="center">
+        <img src="Illustration_Ami_Social.jpeg" width="700" alt="Illustration amis et social link">
+    </div>
+
+    <div data-i18n-block="fr"><h1>7. Système Social</h1></div>
+    <div data-i18n-block="en"><h1>7. Social System</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Amis, Social Link (rangs 1-10, True Confidant), défis quotidiens, notifications, animations TV P4 / Calling Card / Evoker P3.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Friends, Social Link (ranks 1-10, True Confidant), daily challenges, notifications, P4 TV / Calling Card / P3 Evoker animations.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_social"></p>
+
+
+    <h3>7.1 Page Friends (<code>profile/friends/friends.html</code>)</h3>
+    <ul>
+        <li><strong>Recherche :</strong> par pseudo (LIKE, 20 résultats max) ou friend_code exact (8 chars)</li>
+        <li><strong>Demandes reçues :</strong> badge de comptage, boutons Accepter / Refuser</li>
+        <li><strong>Liste d'amis :</strong> mini-avatar, pseudo, code ami, boutons "View Profile" et "Remove"</li>
+        <li><strong>Flamme 🔥</strong> si <code>last_seen_at</code> = aujourd'hui (même jour)</li>
+        <li><strong>État invité :</strong> message d'invitation à se connecter si non authentifié</li>
+    </ul>
+
+    <h3>7.2 Social Link — XP, rangs 1-10</h3>
+    <p>Mécanisme inspiré des jeux Persona : une relation entre deux amis progresse en rang (1 → 10) via des interactions mutuelles. Le rang est symétrique et partagé. Les <strong>actions mutuelles donnent 2× l'XP</strong>. Anti-spam : une action par type par jour par lien.</p>
+    <table>
+        <thead>
+            <tr><th>Action</th><th>XP solo</th><th>XP mutuel</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>visit_profile</code></td><td>5</td><td>10</td></tr>
+            <tr><td><code>share_score</code></td><td>10</td><td>20</td></tr>
+            <tr><td><code>compare_stats</code></td><td>10</td><td>20</td></tr>
+            <tr><td><code>share_streak</code></td><td>15</td><td>30</td></tr>
+            <tr><td><code>challenge</code></td><td>15</td><td>35</td></tr>
+            <tr><td><code>play_same_day</code></td><td>20</td><td>20</td></tr>
+        </tbody>
+    </table>
+    <table>
+        <thead>
+            <tr><th>Rang</th><th>Nom</th><th>XP cumulés</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>1</td><td>Stranger</td><td>0</td></tr>
+            <tr><td>2</td><td>Acquaintance</td><td>100</td></tr>
+            <tr><td>3</td><td>Companion</td><td>250</td></tr>
+            <tr><td>4</td><td>Ally</td><td>450</td></tr>
+            <tr><td>5</td><td>Confidant</td><td>700</td></tr>
+            <tr><td>6</td><td>Trusted Ally</td><td>1 000</td></tr>
+            <tr><td>7</td><td>True Ally</td><td>1 350</td></tr>
+            <tr><td>8</td><td>Bond</td><td>1 750</td></tr>
+            <tr><td>9</td><td>Unbreakable Bond</td><td>2 200</td></tr>
+            <tr><td>10</td><td>True Confidant</td><td>2 700</td></tr>
+        </tbody>
+    </table>
+    <p><strong>Animation rang-up Persona-style</strong> (<code>showSocialLinkRankUp</code>) : overlay plein écran, slash diagonal rouge + 8 particules sparkle, numéro de rang + nom en or, auto-dismiss 3.5s. Bridge global <code>window._showSocialLinkRankUp</code>.</p>
+    <p><strong>XP déclenché comme effet de bord des vraies actions :</strong> <code>visit_profile</code> au load du profil public, <code>compare_stats</code> côté serveur dans <code>/api/user/compare</code>. <strong>Jamais sur clic d'un bouton de jauge.</strong></p>
+
+    <h3>7.3 Effet True Confidant — Rang 10</h3>
+    <p><strong>Fichiers :</strong> <code>css/rank10-effect.css</code> + <code>js/social-link.js</code> (export <code>applyRank10Effect</code>)</p>
+    <table>
+        <thead>
+            <tr><th>Timing</th><th>Effet</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Immédiat</td><td>Halo doré pulsant autour de l'avatar (<code>rank10Pulse</code> 2s infinite)</td></tr>
+            <tr><td>Immédiat</td><td>Icône ✦ dorée ajoutée à droite du pseudo (<code>.rank10-icon</code>)</td></tr>
+            <tr><td><code>delayMs</code> + 0s</td><td>8 particules burst radiales depuis l'avatar</td></tr>
+            <tr><td><code>delayMs</code> + 600ms</td><td>Label typewriter "✦ True Confidant" apparaît</td></tr>
+            <tr><td><code>delayMs</code> + 2400ms</td><td>Label fade-out et suppression du DOM</td></tr>
+        </tbody>
+    </table>
+<pre><code>applyRank10Effect(avatarEl, pseudoEl, delayMs = 0)
+// Appelé dans profile-view.js (profil public) et friends.js (stagger 150ms/entrée)</code></pre>
+
+    <h3>7.4 Défis quotidiens</h3>
+    <p><strong>Envoi :</strong> bouton "Défier un ami" post-victoire dans les 6 modes (<code>showChallengeButton</code>). Erreur 409 si défi déjà envoyé aujourd'hui (1 défi par paire d'amis par jour).</p>
+    <p><strong>Acceptation :</strong> efface l'état de jeu du mode (via <code>MODE_STATE_KEYS</code>), applique les filtres du challenger, pose <code>activeChallenge</code> en localStorage, redirige vers le mode.</p>
+<pre><code>const MODE_STATE_KEYS = {
   classic:      ['target', 'attempts', 'guessHistory'],
-  emoji:        ['targetEmoji', 'attemptsEmoji', 'emojiGameOver'],
-  silhouette:   ['silhouetteTarget', 'silhouetteAttempts'],
+  emoji:        ['targetEmoji', 'attemptsEmoji', 'emojiGameOver', 'emojiWin'],
+  silhouette:   ['silhouetteTarget', 'silhouetteAttempts', 'silhouetteGameOver'],
   alloutattack: ['aoaTarget', 'aoaAttempts', 'aoaGameOver'],
-  personae:     ['personaeTarget', 'personaeAttempts'],
-  music:        ['musicTarget', 'musicAttempts', 'musicGameOver'],
+  personae:     ['personaeTarget', 'personaeAttempts', 'personaeGameOver'],
+  music:        ['musicTarget', 'musicAttempts', 'musicGameOver', 'musicTriedTitles'],
 };</code></pre>
-                </div>
-            </details>
+    <p><strong>Résolution :</strong> <code>checkChallengeCompletion()</code> hors du bloc victoire dans les 6 modes — give-up résout le défi avec <code>isWin=false</code> → statut <code>'expired'</code> → animation "dommage".</p>
+
+    <h3>7.5 Bandeau de défi en jeu</h3>
+    <p><code>initChallengeBanner(currentMode)</code> injecte un pill flottant fixe en bas à droite (<code>position: fixed; bottom: 80px; right: 16px</code>), fond sombre semi-transparent, bordure rouge, backdrop-filter blur, animation slide-in. Affiche pseudo + avatar du challenger et score à battre.</p>
+
+    <h3>7.6 Notifications hors-jeu</h3>
+    <p><code>js/notifications.js</code> — polling toutes les <code>POLL_INTERVAL_MS = 60 000</code> ms :</p>
+    <ul>
+        <li><code>_checkChallengeResults()</code> : défis <code>beaten</code>/<code>expired</code> non vus → <code>showSenderChallengeResult(msg)</code></li>
+        <li><code>_checkRankUpNotifs()</code> : passages de rang → <code>showSocialLinkRankUp</code></li>
+        <li>Guard <code>_crInitDone_${me.id}</code> namespaced par user_id — évite le flood d'animations historiques et persiste entre changements de compte</li>
+    </ul>
+
+    <h3>7.7 Animations — Calling Card, TV P4, Evoker P3</h3>
+    <p>Sélecteur dans les réglages : <code>🃏 Calling Card</code> | <code>📺 P4 TV</code> | <code>🔫 P3 Evoker</code>. Sauvegardé dans <code>personaSettings.anim_friend_request_style</code>.</p>
+    <p><strong>Animation TV Persona 4</strong> (<code>js/tv-friend-anim.js</code> + <code>css/tv-friend-anim.css</code>) — TV entièrement en CSS pur, aucune image WebP :</p>
+    <table>
+        <thead>
+            <tr><th>Étape</th><th>Timing</th><th>Détail</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>TV pop-in</td><td>0s</td><td><code>cubic-bezier(0.34, 1.56, 0.64, 1)</code> — antennes, corps beige, bezel, pieds</td></tr>
+            <tr><td>CRT noise</td><td>0–2.5s</td><td>Canvas 64×48px, RAF, noir/blanc aléatoire</td></tr>
+            <tr><td>Avatar reveal</td><td>0.5–3s</td><td><code>grayscale → couleur</code>, fond flouté 124%</td></tr>
+            <tr><td>Flash + burst</td><td>2.5s</td><td>Écran flash blanc, burst avatar hors TV</td></tr>
+            <tr><td>Idle glow pulse</td><td>3.2s+</td><td><code>.tv--waiting</code> — infinite glow</td></tr>
+            <tr><td>28 particules</td><td>2.5s</td><td><code>--dx/--dy/--rot</code> CSS vars, 8 couleurs, 6 formes</td></tr>
+            <tr><td>Boutons</td><td>2.88s</td><td>Accept / Not now — overlay reste jusqu'au choix</td></tr>
+        </tbody>
+    </table>
+    <p><strong>Architecture clé :</strong> <code>.tv-burst-wrap</code> est enfant direct de <code>.tv-wrap</code> (NON de <code>.tv-body</code>) — évite le clipping par <code>isolation: isolate</code>.</p>
+
+    <h3>7.8 Streak Recovery — Menu Jack Frost</h3>
+    <p><code>js/streak-recovery.js</code> + <code>css/streak-recovery.css</code> + <code>api/user/recover-streak.php</code> — apparaît au login si streak cassée (cooldown 2 mois). <code>POST /api/user/recover-streak { previous_streak }</code> → <code>UPDATE user_stats SET streak=?</code> pour tous les modes.</p>
+
+    <hr>
+
+    <!-- SECTION 8 -->
+    <div class="center">
+        <img src="Illustration_Ranking_Leaderboard.png" width="700" alt="Illustration Ranking Leaderboard">
+    </div>
+
+    <div data-i18n-block="fr"><h1>8. Leaderboard</h1></div>
+    <div data-i18n-block="en"><h1>8. Leaderboard</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Filtres mode/période/métrique, scope Global/Friends, my_rank, recalcul par cron.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Mode/period/metric filters, Global/Friends scope, my_rank, recalculation by cron.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_leaderboard"></p>
+
+
+    <h3>8.1 Page Leaderboard (<code>profile/leaderboard/leaderboard.html</code>)</h3>
+    <table>
+        <thead>
+            <tr><th>Filtre</th><th>Options</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Scope</td><td>Global / Friends</td></tr>
+            <tr><td>Mode</td><td>all, classic, emoji, silhouette, alloutattack, personae, music</td></tr>
+            <tr><td>Période</td><td>ever (all time), month, week, day</td></tr>
+            <tr><td>Métrique</td><td>wins, winrate (min 5 parties), streak, perfect, games</td></tr>
+        </tbody>
+    </table>
+    <ul>
+        <li><strong>Top 3</strong> mis en avant avec couleurs or/argent/bronze, avatars plus grands</li>
+        <li><strong>Mon rang :</strong> bandeau en haut si connecté (<code>my_rank</code> retourné par l'API, calculé dans le scope actif)</li>
+        <li><strong>Scope Friends :</strong> filtre <code>friends_only</code>, <code>getFriendIds()</code>, empty state 👥 si aucun ami dans le ranking</li>
+        <li>Pagination : 50 entrées par page, boutons Prev/Next. Winrate calculé uniquement si <code>games ≥ 5</code></li>
+    </ul>
+
+    <h3>8.2 Backend Leaderboard (<code>api/leaderboard/index.php</code>)</h3>
+    <ul>
+        <li><strong>ever :</strong> lit directement <code>user_stats</code> (table agrégée, temps réel)</li>
+        <li><strong>day/week/month :</strong> agrège depuis <code>game_sessions</code> filtré par <code>played_date</code> (timezone Paris)</li>
+        <li><code>friend_code</code> masqué si <code>$myId === 0</code> (visiteur non authentifié)</li>
+    </ul>
+    <p><strong>Bug corrigé :</strong> <code>getFriendIds</code> utilisait <code>:me</code> répété × 3 dans PDO → <code>PDOException</code>. Fix : <code>?</code> positionnels + <code>execute([$myId, $myId, $myId])</code>.</p>
+
+    <h3>8.3 Cron Leaderboard Cache</h3>
+    <p><strong>Fichier :</strong> <code>api/cron/leaderboard.php</code> — 7 modes × 3 périodes × 5 métriques = 105 recalculs par exécution. Nettoyage automatique avant chaque recalcul. <code>ever</code> exclu du cron (calculé live depuis <code>user_stats</code>). Endpoint recommandé : toutes les heures.</p>
+
+    <hr>
+
+    <!-- SECTION 9 -->
+    <div class="center">
+        <img src="Illustration_titre.png" width="700" alt="Illustration Titres et Récompenses">
+    </div>
+
+    <div data-i18n-block="fr"><h1>9. Titres &amp; Récompenses</h1></div>
+    <div data-i18n-block="en"><h1>9. Titles &amp; Rewards</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>60 badges, 11 titres, 7 wallpapers, codes événement admin, streak recovery.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>60 badges, 11 titles, 7 wallpapers, admin event codes, streak recovery.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_titles"></p>
+
+
+    <h3>9.1 Système de titres</h3>
+    <p>Texte affiché sous le pseudo. Débloqué par conditions de stats vérifiées côté serveur.</p>
+    <ul>
+        <li>Catalogue BDD : 11 titres (3 common, 4 rare, 3 epic, 1 legendary) — tous avec <code>image_path</code></li>
+        <li>Traduit EN/FR/ES/DE/IT via la table <code>titles</code></li>
+        <li>Un seul titre équipé à la fois (<code>profiles.equipped_title_id</code>)</li>
+        <li><strong>Bug corrigé :</strong> slugs BDD courts (<code>thou_art_i</code>) vs slugs JS préfixés (<code>velvet_room_thou_art_i</code>) — migration 006 aligne les 11 slugs BDD sur le format JS</li>
+    </ul>
+
+    <div class="title-showcase">
+        <!-- I Am Not Afraid — Rare (Persona 3) -->
+        <div class="title-card rarity-rare">
+            <div class="tc-stars">★ ★</div>
+            <div class="tc-rarity-label">Rare</div>
+            <img class="tc-img" src="../../profile/titles/aigis_i_am_not_afraid.webp" alt="I Am Not Afraid">
+            <div class="tc-name">I Am Not Afraid</div>
+            <div class="tc-game">Persona 3</div>
+            <div class="tc-condition">Win 50 games in Classic Mode</div>
         </div>
 
-        <!-- ── 08 Leaderboard ── -->
-        <div class="section-card" id="s08">
-            <div class="card-header">
-                <span class="card-icon">🏆</span>
-                <div class="card-meta">
-                    <span class="card-num">08 / 16</span>
-                    <h2 class="card-title">Leaderboard</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Classement global et entre amis, filtrable par mode, période et métrique. Top 3 mis en avant (or/argent/bronze). Mon rang toujours affiché même hors-page. Pagination 50 entrées. Cache recalculé par cron : 105 combinaisons/heure.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Filtres disponibles</h3>
-                    <table>
-                        <thead><tr><th>Paramètre</th><th>Options</th></tr></thead>
-                        <tbody>
-                            <tr><td>scope</td><td>global / friends</td></tr>
-                            <tr><td>mode</td><td>all, classic, emoji, silhouette, alloutattack, personae, music</td></tr>
-                            <tr><td>period</td><td>ever, month, week, day</td></tr>
-                            <tr><td>metric</td><td>wins, winrate (min 5 parties), streak, perfect, games</td></tr>
-                        </tbody>
-                    </table>
-                    <h3>Cron — couverture</h3>
-                    <p>7 modes × 3 périodes (day/week/month) × 5 métriques = <strong>105 recalculs</strong> par exécution. Endpoint : <code>GET /api/cron/leaderboard.php?key=SECRET</code> — recommandé toutes les heures. <code>ever</code> exclu du cron (calculé live depuis <code>user_stats</code>).</p>
-                </div>
-            </details>
+        <!-- Reach Out to the Truth — Epic (Persona 4) -->
+        <div class="title-card rarity-epic">
+            <div class="tc-stars">★ ★ ★</div>
+            <div class="tc-rarity-label">Epic</div>
+            <img class="tc-img" src="../../profile/titles/yu_reach_out_to_the_truth.webp" alt="Reach Out to the Truth">
+            <div class="tc-name">Reach Out to the Truth</div>
+            <div class="tc-game">Persona 4</div>
+            <div class="tc-condition">Complete 100 games across all modes</div>
         </div>
 
-        <!-- ── 09 Titres & Récompenses ── -->
-        <div class="section-card" id="s09">
-            <div class="card-header">
-                <span class="card-icon">🎖️</span>
-                <div class="card-meta">
-                    <span class="card-num">09 / 16</span>
-                    <h2 class="card-title">Titres &amp; Récompenses</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                60 badges en 4 catégories, 11 titres (common/rare/epic/legendary), 7 wallpapers. 12 codes événement admin. Toutes les conditions vérifiées côté serveur — impossible de s'auto-attribuer un item sans remplir la condition.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Catégories de badges</h3>
-                    <table>
-                        <thead><tr><th>Catégorie</th><th>Exemples de conditions</th></tr></thead>
-                        <tbody>
-                            <tr><td>ACHIEVEMENTS</td><td>Wins, streaks, perfect, temps joué</td></tr>
-                            <tr><td>EVENTS</td><td>Codes événement XMAS2025, NEWYEAR2026…</td></tr>
-                            <tr><td>SECRETS</td><td>Conditions cachées — <code>???</code> avant déblocage</td></tr>
-                            <tr><td>SOCIAL</td><td>Rang Social Link 5/10, défis gagnés</td></tr>
-                        </tbody>
-                    </table>
-                    <h3>Codes événement seedés</h3>
-                    <p><code>XMAS2025</code> · <code>NEWYEAR2026</code> · <code>VALENTINE2026</code> · <code>EASTER2026</code> · <code>CHINESNY2026</code> · <code>SPORT</code> · <code>ALIBABA</code> · <code>DEATHQUEEN</code> · <code>ARATI</code> · <code>DZULIAN</code> · <code>GOURMET</code> · <code>LOBSTER</code></p>
-                    <h3>Flux de déblocage</h3>
-                    <p><code>POST /api/badges</code> → <code>verifyBadgeCondition()</code> côté serveur → <code>INSERT INTO badges_unlocked</code> ET <code>event_codes_redeemed</code> (les deux obligatoires, sinon le badge reste bloqué).</p>
-                </div>
-            </details>
+        <!-- Memento Mori — Legendary (Persona 3 Reload) -->
+        <div class="title-card rarity-legendary">
+            <div class="tc-stars">✦ ✦ ✦ ✦</div>
+            <div class="tc-rarity-label">Legendary</div>
+            <img class="tc-img" src="../../profile/titles/makoto_yuki_memento_mori.webp" alt="Memento Mori">
+            <div class="tc-name">Memento Mori</div>
+            <div class="tc-game">Persona 3 Reload</div>
+            <div class="tc-condition">Achieve a 30-day streak</div>
         </div>
+    </div>
 
-        <!-- ── 10 Profil Utilisateur ── -->
-        <div class="section-card" id="s10">
-            <div class="card-header">
-                <span class="card-icon">👤</span>
-                <div class="card-meta">
-                    <span class="card-num">10 / 16</span>
-                    <h2 class="card-title">Profil Utilisateur</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Page profil dédiée avec layout split desktop. Dirty-state save button (apparaît uniquement si modification). Musique de profil jouée à l'arrivée. Profil public read-only (<code>?view=FRIENDCODE</code>). Export Calling Card PNG 780×1386px via html2canvas clone off-screen.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Affichage intelligent du temps joué</h3>
-                    <table>
-                        <thead><tr><th>Durée</th><th>Format affiché</th></tr></thead>
-                        <tbody>
-                            <tr><td>&lt; 1 jour</td><td>X min</td></tr>
-                            <tr><td>&lt; 1 semaine</td><td>X j Y h</td></tr>
-                            <tr><td>&lt; 1 mois</td><td>X sem Y j</td></tr>
-                            <tr><td>&lt; 1 an</td><td>X mois Y sem</td></tr>
-                            <tr><td>≥ 1 an</td><td>X an(s) Y mois</td></tr>
-                        </tbody>
-                    </table>
-                    <h3>Cloud sync — pattern correct</h3>
-                    <pre><code>// Toujours syncPending AVANT pullProfileFromCloud
-// pour ne pas écraser des sessions en attente
-await api.stats.syncPending();
-await pullProfileFromCloud();</code></pre>
-                </div>
-            </details>
-        </div>
+    <h3>9.2 Catalogue Badges — 60 badges</h3>
+    <p>Table <code>badges</code> créée (migration 007) :</p>
+    <table>
+        <thead>
+            <tr><th>Colonne</th><th>Type</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>slug</code></td><td>VARCHAR(100) PK</td></tr>
+            <tr><td><code>name_en</code></td><td>VARCHAR(200)</td></tr>
+            <tr><td><code>category</code></td><td>ENUM (achievement / streak / event / secret / social)</td></tr>
+            <tr><td><code>rarity</code></td><td>ENUM (common / rare / epic / legendary)</td></tr>
+            <tr><td><code>image_path</code></td><td>VARCHAR(255)</td></tr>
+            <tr><td><code>condition_en</code></td><td>VARCHAR(500)</td></tr>
+            <tr><td><code>is_secret</code></td><td>TINYINT(1)</td></tr>
+        </tbody>
+    </table>
+    <p><strong>Fix <code>api/badges/index.php</code> redeem :</strong> validait sans déverrouiller le badge — <code>INSERT IGNORE INTO badges_unlocked</code> ajouté après validation.</p>
 
-        <!-- ── 11 Panneau Admin ── -->
-        <div class="section-card" id="s11">
-            <div class="card-header">
-                <span class="card-icon">🛡️</span>
-                <div class="card-meta">
-                    <span class="card-num">11 / 16</span>
-                    <h2 class="card-title">Panneau Admin</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Interface deux panneaux : liste utilisateurs (gauche, 290px) + 7 onglets de détail (droite). Mobile en drawer slide-in. FAB "⚡ Appliquer" pour modifications badges/wallpapers/titres en batch. Modération : ban, verrouillage pseudo.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>7 onglets par utilisateur</h3>
-                    <table>
-                        <thead><tr><th>Onglet</th><th>Contenu</th></tr></thead>
-                        <tbody>
-                            <tr><td>👤 Profil</td><td>Formulaire pseudo/email/langue, toggle admin, danger zone delete</td></tr>
-                            <tr><td>🏅 Badges</td><td>Grille visuelle par catégorie, clic → queue give/remove</td></tr>
-                            <tr><td>🖼️ Walls</td><td>Grille visuelle, clic → queue give/remove</td></tr>
-                            <tr><td>👑 Titres</td><td>Cartes avec image, indicateur ⚡ équipé</td></tr>
-                            <tr><td>📊 Stats</td><td>Tableau éditable par mode (6 modes), save par ligne</td></tr>
-                            <tr><td>👫 Amis</td><td>Liste amis + en attente, suppression relation</td></tr>
-                            <tr><td>🔗 Social</td><td>Social links éditables (rang + XP)</td></tr>
-                        </tbody>
-                    </table>
-                    <h3>Bugs admin corrigés</h3>
-                    <table>
-                        <thead><tr><th>Bug</th><th>Fix</th></tr></thead>
-                        <tbody>
-                            <tr><td>Bouton Admin invisible dans bottomNav</td><td><code>is_admin</code> absent des SELECT dans <code>me.php</code> et <code>login.php</code></td></tr>
-                            <tr><td>API 404 en local dev</td><td>Chemins absolus → constante <code>_pathPrefix</code></td></tr>
-                            <tr><td>Animation divine annulée par erreur</td><td>Filtre sur <code>results[i]?.status === 'fulfilled'</code></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
+    <h3>9.3 Catalogue Wallpapers — 7 wallpapers</h3>
+    <p>La table <code>wallpapers</code> existait mais était vide — la FK sur <code>user_wallpapers.wallpaper_id</code> rejetait silencieusement tous les déblocages. Migration 007 : 7 wallpapers seedés + colonnes <code>name</code> et <code>image_path</code> ajoutées.</p>
 
-        <!-- ── 12 CI/CD & Infrastructure ── -->
-        <div class="section-card" id="s12">
-            <div class="card-header">
-                <span class="card-icon">🚀</span>
-                <div class="card-meta">
-                    <span class="card-num">12 / 16</span>
-                    <h2 class="card-title">CI/CD &amp; Infrastructure</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Git hooks versionnés (<code>.githooks/</code>) : pre-commit bloque si i18n incohérent ou tests KO, commit-msg enforce Conventional Commits. GitHub Actions CI automatique (Vitest + PHP lint). CD manuel vers Hostinger via rsync SSH. Docker pour le dev local en une commande.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Git Hooks</h3>
-                    <table>
-                        <thead><tr><th>Hook</th><th>Vérifications</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>pre-commit</code></td><td>i18n check (bloquant) + console.log (avertissement) + Vitest (bloquant)</td></tr>
-                            <tr><td><code>commit-msg</code></td><td>Format <code>feat|fix|docs|chore|refactor|style|test|perf(scope): desc</code></td></tr>
-                            <tr><td><code>pre-push</code></td><td>Tests complets + i18n + avertissement push direct vers <code>main</code></td></tr>
-                        </tbody>
-                    </table>
-                    <h3>Crons Hostinger</h3>
-                    <table>
-                        <thead><tr><th>Endpoint</th><th>Fréquence</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>GET /api/cron/leaderboard.php?key=SECRET</code></td><td>Toutes les heures</td></tr>
-                            <tr><td><code>GET /api/cron/hard-delete.php?key=SECRET</code></td><td>1×/jour — 03h00 Paris</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
+    <h3>9.4 Codes Événement</h3>
+    <p>12 codes seedés en BDD (migration 011) : <code>XMAS2025</code>, <code>NEWYEAR2026</code>, <code>VALENTINE2026</code>, <code>EASTER2026</code>, <code>CHINESNY2026</code>, <code>SPORT</code>, <code>ALIBABA</code>, <code>DEATHQUEEN</code>, <code>ARATI</code>, <code>DZULIAN</code>, <code>GOURMET</code>, <code>LOBSTER</code>.</p>
 
-        <!-- ── 13 Sécurité ── -->
-        <div class="section-card" id="s13">
-            <div class="card-header">
-                <span class="card-icon">🔒</span>
-                <div class="card-meta">
-                    <span class="card-num">13 / 16</span>
-                    <h2 class="card-title">Sécurité</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Headers PHP (nosniff, DENY frames, Referrer-Policy). Rate limiting login/register : 5 tentatives / 15 min par IP. 7 failles corrigées : unlock inconditionnel items (CRITIQUE), IDOR défi XP (HIGH), session banni ignorée (HIGH), et 4 autres.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Headers — <code>api/bootstrap.php</code></h3>
-                    <pre><code>header('X-Content-Type-Options: nosniff');
+    <hr>
+
+    <!-- SECTION 10 -->
+    <div data-i18n-block="fr"><h1>10. Profil Utilisateur</h1></div>
+    <div data-i18n-block="en"><h1>10. User Profile</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Layout split desktop, dirty-state Save, Profile Song, Profil Public read-only, Calling Card PNG.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Split desktop layout, dirty-state Save, Profile Song, read-only Public Profile, Calling Card PNG.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_profile"></p>
+
+
+    <h3>10.1 Page de Profil Dédiée</h3>
+    <p><strong>Fichiers :</strong> <code>profile/profile.html</code>, <code>profile/profile-page.css</code>, <code>profile/profile-page.js</code></p>
+    <p>Layout split desktop (panneau gauche 1/3 + panneau droit 2/3). Animations CSS d'entrée séquentielles (<code>slideFromLeft</code>, <code>popIn</code>, <code>slideFromRight</code> avec stagger).</p>
+    <p><strong>Dirty-state Save button :</strong> invisible par défaut. Apparaît (slide-in + glow vert <code>@keyframes saveDirtyGlow</code>) uniquement quand l'utilisateur modifie son profil. Après sauvegarde : cloud sync + <code>_applyCloudToUI()</code> pour soft-refresh.</p>
+
+    <h3>10.2 Profile Song — Lecteur musical de profil</h3>
+    <p>Sélecteur <code>&lt;select&gt;</code> groupé par série avec image live. La chanson se joue automatiquement à l'arrivée sur la page profil. Autoplay → fallback au premier clic si bloqué par le navigateur.</p>
+<pre><code>{
+  fichier: "Last_Surprise.mp3",
+  titre:   "Last Surprise",
+  opus:    ["P5"],
+  image:   "P5.webp",
+  customImage: null
+}</code></pre>
+
+    <h3>10.3 Profil Public (read-only)</h3>
+    <p><code>profile.html?view=FRIENDCODE</code> active <code>profile-view.js</code> automatiquement. Données depuis <code>GET /api/user/public?code=...</code> (pas de <code>requireAuth()</code>). Toutes les strings passées par <code>escapeHtml()</code>. Affiche : avatar, pseudo, titre équipé, stats, musique de profil (mini player), Social Link gauge.</p>
+
+    <h3>10.4 Calling Card — Export image profil</h3>
+    <p><strong>Fichiers :</strong> <code>js/calling-card.js</code>, <code>html2canvas</code>, 8 thèmes + 25 wallpapers. PNG 780×1386px (scale:2) capturé sur clone off-screen. Boutons : Download / Share on X / Copy for Discord / Email.</p>
+
+    <h3>10.5 Temps joué — Affichage intelligent</h3>
+    <table>
+        <thead>
+            <tr><th>Durée</th><th>Format affiché</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>&lt; 1 jour</td><td>X min</td></tr>
+            <tr><td>&lt; 1 semaine</td><td>X j Y h</td></tr>
+            <tr><td>&lt; 1 mois</td><td>X sem Y j</td></tr>
+            <tr><td>&lt; 1 an</td><td>X mois Y sem</td></tr>
+            <tr><td>≥ 1 an</td><td>X an(s) Y mois</td></tr>
+        </tbody>
+    </table>
+    <p>Fonction <code>formatPlayTime(totalMinutes)</code> dans <code>profile/profile.js</code>. Vocabulaire défini en objet local <code>U</code> (en, fr, es, de, it) — pas de nouvelles clés i18n.</p>
+
+    <hr>
+
+    <!-- SECTION 11 -->
+    <div class="center">
+        <img src="Illustration_droit_d'admin.png" width="700" alt="Illustration panneau admin">
+    </div>
+
+    <div data-i18n-block="fr"><h1>11. Panneau Admin</h1></div>
+    <div data-i18n-block="en"><h1>11. Admin Panel</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Interface deux panneaux, 7 onglets par utilisateur, codes événement, modération.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>Two-panel interface, 7 tabs per user, event codes, moderation.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_admin"></p>
+
+
+    <h3>11.1 Layout deux panneaux</h3>
+    <ul>
+        <li><strong>Panneau gauche fixe</strong> (290px) — liste des utilisateurs avec barre de recherche, pagination intelligente, avatar miniature, dot rouge pour les admins</li>
+        <li><strong>Panneau droit scrollable</strong> — header avec avatar 68px + pseudo + badge ADMIN + quick stats</li>
+        <li><strong>Mobile (&lt; 768px) :</strong> drawer slide-in activé par hamburger <code>☰</code>, bouton <code>← Users</code> pour revenir</li>
+    </ul>
+    <table>
+        <thead>
+            <tr><th>Onglet</th><th>Contenu</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>👤 Profil</td><td>Formulaire pseudo/email/langue/couleur, toggle admin, reset avatar, danger zone delete</td></tr>
+            <tr><td>🏅 Badges</td><td>Grille visuelle par catégorie, clic pour queue give/remove</td></tr>
+            <tr><td>🖼️ Walls</td><td>Grille visuelle, clic pour queue give/remove</td></tr>
+            <tr><td>👑 Titres</td><td>Grille de cartes avec image, indicateur ⚡ équipé</td></tr>
+            <tr><td>📊 Stats</td><td>Tableau éditable par mode (6 modes), save par ligne</td></tr>
+            <tr><td>👫 Amis</td><td>Liste amis acceptés + en attente, suppression de relation</td></tr>
+            <tr><td>🔗 Social</td><td>Tableau social links éditables (rang + XP), save par ligne</td></tr>
+        </tbody>
+    </table>
+    <p><strong>FAB <code>⚡ Appliquer</code> :</strong> applique toutes les modifications badges/wallpapers/titres en attente. Déclenche l'animation divine si au moins un ajout réussit (filtre sur <code>results[i]?.status === 'fulfilled'</code>).</p>
+
+    <h3>11.2 Gestion des codes événement</h3>
+    <p>Panel <strong>🎟️ Codes</strong> dans le header admin : tableau des codes avec statut coloré (✅ Actif / 📅 Expiré / ⛔ Inactif), compteur d'utilisations, actions toggle/delete. Formulaire de création avec toggle "permanent". CRUD complet via <code>api/admin/event_codes.php</code>.</p>
+
+    <h3>11.3 Modération des comptes</h3>
+    <ul>
+        <li>Toggle <strong>🔒 Verrouiller le pseudo</strong> → <code>pseudo_locked = 1</code> → <code>PATCH</code> pseudo refusé (HTTP 403)</li>
+        <li>Toggle <strong>🚫 Bannir le compte</strong> → <code>is_banned = 1</code> → connexion refusée (HTTP 403)</li>
+        <li><code>api/auth/me.php</code> vérifie <code>is_banned</code> sur les deux chemins d'auth (session + remember_me)</li>
+    </ul>
+
+    <h3>11.4 Bugs admin corrigés</h3>
+    <table>
+        <thead>
+            <tr><th>Bug</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Bouton Admin invisible dans la bottomNav</td><td><code>is_admin</code> absent des SELECT dans <code>me.php</code> et <code>login.php</code></td></tr>
+            <tr><td>API 404 en local dev</td><td><code>admin.js</code> utilisait des chemins absolus <code>/api/...</code> → constante <code>_pathPrefix</code></td></tr>
+            <tr><td>Stats non sauvegardées</td><td><code>total_time_ms</code> manquant dans le body → rendu optionnel</td></tr>
+            <tr><td>Catalogues badges/wallpapers/titres vides</td><td>APIs retournent un array brut → parsing robuste <code>Array.isArray(data) ? data : (data.badges || [])</code></td></tr>
+            <tr><td>Animation divine annulée par erreur</td><td>Seuls les ajouts réellement réussis déclenchent l'animation</td></tr>
+            <tr><td>Avatar 404 sur <code>index.html</code></td><td>Normalisation bidirectionnelle dans <code>js/bottomNav.js</code></td></tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <!-- SECTION 12 -->
+    <div style="display:flex;gap:16px;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin:20px 0">
+        <img src="Illustration_hooks.png" style="width:48%;min-width:280px;max-width:480px;border-radius:10px" alt="CI/CD et Git Hooks">
+        <img src="Illustration_Docker.jpeg" style="width:48%;min-width:280px;max-width:480px;border-radius:10px" alt="Infrastructure Docker et Hostinger">
+    </div>
+
+    <div data-i18n-block="fr"><h1>12. CI/CD &amp; Infrastructure</h1></div>
+    <div data-i18n-block="en"><h1>12. CI/CD &amp; Infrastructure</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>GitHub Actions CI/CD, git hooks versionnés, Docker, Service Worker, déploiement Hostinger.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>GitHub Actions CI/CD, versioned git hooks, Docker, Service Worker, Hostinger deployment.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_cicd"></p>
+
+
+    <h3>12.1 Git Hooks versionnés</h3>
+    <p><strong>Fichiers :</strong> <code>.githooks/pre-commit</code>, <code>.githooks/commit-msg</code>, <code>.githooks/pre-push</code></p>
+<pre><code>npm run setup-hooks
+# → git config core.hooksPath .githooks</code></pre>
+    <table>
+        <thead>
+            <tr><th>Hook</th><th>Vérifications</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>pre-commit</code></td><td>Cohérence i18n (bloquant) + <code>console.log</code> dans fichiers stagés (avertissement) + tests Vitest (bloquant)</td></tr>
+            <tr><td><code>commit-msg</code></td><td>Format Conventional Commits — exempts : merge/revert/fixup/squash</td></tr>
+            <tr><td><code>pre-push</code></td><td>Tests complets + cohérence i18n + avertissement push direct vers <code>main</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>12.2 GitHub Actions CI/CD</h3>
+    <h4>CI (<code>/.github/workflows/ci.yml</code>)</h4>
+    <p>Déclenché sur tout push vers <code>main</code> ou <code>develop</code>, et sur toute PR vers <code>main</code>.</p>
+    <table>
+        <thead>
+            <tr><th>Job</th><th>Étapes</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>test-js</code></td><td><code>npm ci</code> → <code>npm test</code> (Vitest 190 tests) → <code>npm run i18n:check</code></td></tr>
+            <tr><td><code>lint-php</code></td><td>PHP 8.3 setup → <code>find api/ -name "*.php" -exec php -l</code> → exit 1 si Parse error</td></tr>
+        </tbody>
+    </table>
+    <h4>CD (<code>/.github/workflows/cd.yml</code>)</h4>
+    <p><strong>Manuel uniquement</strong> (<code>workflow_dispatch</code>) — jamais déclenché automatiquement. Input optionnel <code>dry_run</code>. Job <code>ci-checks</code> → job <code>deploy</code> → rsync vers Hostinger via SSH.</p>
+    <p><strong>Exclusions rsync :</strong> <code>.git</code>, <code>.github</code>, <code>node_modules</code>, <code>api/config.php</code>, <code>.env</code>, <code>*.log</code>, <code>tests/</code>, <code>scripts/</code></p>
+
+    <h3>12.3 Branche develop</h3>
+    <p>Branche <code>develop</code> créée pour le travail quotidien — <code>main</code> reste stable et déployable uniquement après merge explicite.</p>
+
+    <h3>12.4 Service Worker</h3>
+    <p><code>sw.js</code> géré avec versioning (<code>CACHE_VERSION</code>). Règle <strong>network-first</strong> pour <code>lang/*.json</code> — évite que les fichiers de traduction soient servis depuis un cache SW périmé (nouvelles clés invisibles). <code>PRECACHE_URLS</code> ne contient que les ressources qui existent réellement (<code>/img/logo.png</code> supprimée car fichier inexistant).</p>
+
+    <h3>12.5 Crons Hostinger</h3>
+    <table>
+        <thead>
+            <tr><th>Cron</th><th>Endpoint</th><th>Fréquence recommandée</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Leaderboard cache</td><td><code>GET /api/cron/leaderboard.php?key=SECRET</code></td><td>Toutes les heures</td></tr>
+            <tr><td>RGPD hard delete</td><td><code>GET /api/cron/hard-delete.php?key=SECRET</code></td><td>1×/jour (03h00 Paris)</td></tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <!-- SECTION 13 -->
+    <div data-i18n-block="fr"><h1>13. Sécurité</h1></div>
+    <div data-i18n-block="en"><h1>13. Security</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>Headers PHP, rate limiting, 7 failles corrigées (CRITIQUE → LOW).</strong></p></div>
+        <div data-i18n-block="en"><p><strong>PHP headers, rate limiting, 7 vulnerabilities fixed (CRITICAL → LOW).</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_security"></p>
+
+
+    <h3>13.1 Headers de sécurité PHP</h3>
+    <p>Ajoutés dans <code>api/bootstrap.php</code> après le bloc CORS :</p>
+<pre><code>header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: strict-origin-when-cross-origin');</code></pre>
-                    <h3>Failles corrigées</h3>
-                    <table>
-                        <thead><tr><th>Sévérité</th><th>Faille</th><th>Fix</th></tr></thead>
-                        <tbody>
-                            <tr><td><strong>CRITIQUE</strong></td><td>Unlock inconditionnel badges/titres/wallpapers</td><td><code>verifyBadgeCondition()</code> côté serveur</td></tr>
-                            <tr><td><strong>HIGH</strong></td><td>IDOR statut <code>beaten</code> — farm XP défi</td><td>PATCH restreint à <code>receiver_id = ?</code></td></tr>
-                            <tr><td><strong>HIGH</strong></td><td>Banni ignoré sur restauration session</td><td><code>is_banned</code> vérifié sur les deux chemins auth</td></tr>
-                            <tr><td><strong>MEDIUM</strong></td><td>Validation inputs manquante</td><td>Regex avatar, slugs badges, ownership checks</td></tr>
-                            <tr><td><strong>LOW</strong></td><td>Session fixation</td><td><code>session_regenerate_id(true)</code> dans login + register</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
+    <p><code>Options -Indexes</code> ajouté dans <code>api/messages/.htaccess</code> et <code>api/social-links/.htaccess</code>.</p>
 
-        <!-- ── 14 Tests & Qualité ── -->
-        <div class="section-card" id="s14">
-            <div class="card-header">
-                <span class="card-icon">🧪</span>
-                <div class="card-meta">
-                    <span class="card-num">14 / 16</span>
-                    <h2 class="card-title">Tests &amp; Qualité</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                190 tests Vitest répartis sur plusieurs fichiers. Edge cases CLAUDE.md couverts (DST Paris, t() piège, syncPending 409, _migrate()…). Magic numbers → 13 constantes nommées dans 5 fichiers. Appels debug auto-exécutés supprimés de la prod.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Suite de tests</h3>
-                    <table>
-                        <thead><tr><th>Fichier</th><th>Tests</th><th>Couverture principale</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>gameCore.test.js</code></td><td>172</td><td>Date DST, normalisation, filtres, streaks, sessions, i18n</td></tr>
-                            <tr><td><code>backend.test.js</code></td><td>18</td><td>buildGameSession, savePendingSession, migration, auth DOM</td></tr>
-                        </tbody>
-                    </table>
-                    <h3>Magic numbers → constantes</h3>
-                    <pre><code>// classiqueMode
-const HINT_THRESHOLD = 3;
-const GIVE_UP_THRESHOLD = 8;
-// allOutAttackMode
-const INITIAL_BLUR = 20;
-const BLUR_STEP = 3;
-const IMAGE_LOAD_TIMEOUT_MS = 5000;
-// js/notifications.js
-const POLL_INTERVAL_MS = 60_000;
-const CHALLENGE_RESULT_CUTOFF_MS = 48 * 60 * 60 * 1000;</code></pre>
-                </div>
-            </details>
-        </div>
+    <h3>13.2 Rate limiting</h3>
+    <p><code>api/auth/login.php</code> et <code>api/auth/register.php</code> : 5 tentatives par fenêtre de 15 minutes par IP. Stockage dans des fichiers JSON temporaires dans <code>sys_get_temp_dir()</code> — portable pour l'hébergement mutualisé Hostinger.</p>
 
-        <!-- ── 15 Corrections & Accessibilité ── -->
-        <div class="section-card" id="s15">
-            <div class="card-header">
-                <span class="card-icon">🐛</span>
-                <div class="card-meta">
-                    <span class="card-num">15 / 16</span>
-                    <h2 class="card-title">Corrections &amp; Accessibilité</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                10+ bugs critiques corrigés : DST Paris dans le bandeau défi, t() ?? pattern, syncPending 409, listeners empilés, animation rejouée après changement de compte. Corrections gameplay (Personae filtres, badge one_shot, portraitsMap 168 mappings). 5 fichiers HTML accessibilisés.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Bugs notables corrigés</h3>
-                    <table>
-                        <thead><tr><th>Bug</th><th>Fix</th></tr></thead>
-                        <tbody>
-                            <tr><td>DST Paris mal géré dans le bandeau défi</td><td><code>Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' })</code></td></tr>
-                            <tr><td><code>t(key) ?? fallback</code> retourne la clé brute</td><td>Pattern <code>(r != null &amp;&amp; r !== key) ? r : fallback</code></td></tr>
-                            <tr><td><code>syncPending</code> bloqué sur 409</td><td><code>continue</code> silencieux pour 409, <code>remaining[]</code> pour les vraies erreurs</td></tr>
-                            <tr><td>Listeners autocomplete empilés sur replay</td><td>Flag <code>_acInitDone</code> + mutation en place du tableau</td></tr>
-                            <tr><td><code>_crInitDone</code> partagé entre comptes</td><td>Clé <code>_crInitDone_${me.id}</code> namespaced par user_id</td></tr>
-                            <tr><td><code>window.onclick</code> écrasait les modales</td><td><code>window.addEventListener('click', fn)</code> partout</td></tr>
-                        </tbody>
-                    </table>
-                    <h3>Corrections gameplay</h3>
-                    <table>
-                        <thead><tr><th>Bug</th><th>Fix</th></tr></thead>
-                        <tbody>
-                            <tr><td>Badge <code>one_shot</code> absent en 4 modes</td><td>Emoji : <code>attempts === 1</code> ; Silhouette/Personae/Music : <code>attempts === 0</code></td></tr>
-                            <tr><td>Auto-replay absent sur changement de filtre</td><td>Classic : <code>resetButton.click()</code> ; Emoji : <code>resetGame()</code> dans <code>onFilterChange</code></td></tr>
-                            <tr><td><code>portraitsMap.js</code> — 72 persos sur 200+</td><td>Réécriture complète : 168 mappings</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
+    <h3>13.3 Corrections de failles critiques</h3>
+    <table>
+        <thead>
+            <tr><th>Sévérité</th><th>Faille</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong style="color:#c0392b">CRITIQUE</strong></td><td>Unlock inconditionnel badges/titres/wallpapers — tout compte authentifié pouvait s'auto-attribuer n'importe quel item</td><td><code>verifyBadgeCondition()</code>, <code>verifyTitleCondition()</code>, <code>canUnlockWallpaper()</code> — vérification conditions côté serveur</td></tr>
+            <tr><td><strong style="color:#e67e22">HIGH</strong></td><td>IDOR statut <code>beaten</code> — l'expéditeur d'un défi pouvait se marquer <code>beaten</code> et farmer 35 XP</td><td><code>PATCH messages/:id</code> pour statut <code>beaten</code> restreint à <code>receiver_id = ?</code> uniquement</td></tr>
+            <tr><td><strong style="color:#e67e22">HIGH</strong></td><td>Utilisateur banni ignoré sur restauration de session (<code>me.php</code>)</td><td><code>is_banned</code> vérifié sur les deux chemins ; si banni : session détruite, cookie révoqué</td></tr>
+            <tr><td><strong style="color:#f39c12">MEDIUM</strong></td><td>Validation inputs manquante (<code>api/user/index.php</code>)</td><td>Préfixe <code>data:image/...;base64,</code> validé pour avatar ; slugs validés regex ; ownership checks</td></tr>
+            <tr><td><strong style="color:#f39c12">MEDIUM</strong></td><td><code>challenge_mode</code> non validé</td><td>Allowlist stricte des 6 modes valides</td></tr>
+            <tr><td><strong>LOW</strong></td><td><code>friend_code</code> exposé publiquement dans le leaderboard</td><td>Masqué si <code>$myId === 0</code> (visiteur non authentifié)</td></tr>
+            <tr><td><strong>LOW</strong></td><td>Session fixation</td><td><code>session_regenerate_id(true)</code> ajouté dans <code>login.php</code> et <code>register.php</code></td></tr>
+        </tbody>
+    </table>
 
-        <!-- ── 16 Nouveaux Personnages ── -->
-        <div class="section-card" id="s16">
-            <div class="card-header">
-                <span class="card-icon">👾</span>
-                <div class="card-meta">
-                    <span class="card-num">16 / 16</span>
-                    <h2 class="card-title">Nouveaux Personnages</h2>
-                </div>
-            </div>
-            <p class="card-summary">
-                Ajout des antagonistes principaux (boss finaux non jouables) de P3, P4 et P5 dans les modes compatibles. 4 personnages P5X ajoutés au mode All-Out Attack pour la saison Été 2026.
-            </p>
-            <details class="card-details">
-                <summary>Détails techniques</summary>
-                <div class="card-details-body">
-                    <h3>Antagonistes ajoutés en v2.0</h3>
-                    <table>
-                        <thead><tr><th>Personnage</th><th>Jeu</th><th>Arcane</th><th>Modes</th></tr></thead>
-                        <tbody>
-                            <tr><td><strong>Nyx</strong></td><td>P3 / P3FES / P3P / P3R</td><td>Death</td><td>Classique ✅ · Silhouette ✅</td></tr>
-                            <tr><td><strong>Ameno-sagiri</strong></td><td>P4 / P4G</td><td>—</td><td>Classique ✅</td></tr>
-                            <tr><td><strong>Yaldabaoth</strong></td><td>P5 / P5R / P5S</td><td>—</td><td>Classique ✅ · Silhouette ✅</td></tr>
-                        </tbody>
-                    </table>
-                    <p>Ces personnages ont <code>personaUser: false</code> et <code>persona: "NONE"</code> — ils n'évoquent pas de Persona propre.</p>
+    <hr>
 
-                    <h3>Personnages P5X — Été 2026 (All-Out Attack)</h3>
-                    <table>
-                        <thead><tr><th>Personnage</th><th>Jeu</th><th>Assets</th></tr></thead>
-                        <tbody>
-                            <tr><td><strong>Wonder Summer</strong></td><td>P5X</td><td>Portrait + Battle WebP</td></tr>
-                            <tr><td><strong>Closer Summer</strong></td><td>P5X</td><td>Portrait + Battle WebP</td></tr>
-                            <tr><td><strong>Moko Summer</strong></td><td>P5X</td><td>Portrait + Battle WebP</td></tr>
-                            <tr><td><strong>Joker Starlight</strong></td><td>P5X</td><td>Portrait + Battle + Animation WebP</td></tr>
-                        </tbody>
-                    </table>
-                    <p>Thème ambré/sarcelle distinct du rouge P5 standard. <code>aoaCharacters.js</code>, <code>personas_allOut.js</code> et <code>portraitsMap.js</code> mis à jour.</p>
-                </div>
-            </details>
-        </div>
+    <!-- SECTION 14 -->
+    <div data-i18n-block="fr"><h1>14. Tests &amp; Qualité de code</h1></div>
+    <div data-i18n-block="en"><h1>14. Tests &amp; Code Quality</h1></div>
 
-    </div><!-- /.section-grid -->
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>190 tests Vitest, magic numbers → constantes, debug auto-calls supprimés, edge cases §13.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>190 Vitest tests, magic numbers → named constants, debug auto-calls removed, edge cases §13.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_tests"></p>
+
+
+    <h3>14.1 Suite de tests — 190 tests</h3>
+    <table>
+        <thead>
+            <tr><th>Fichier</th><th>Tests</th><th>Couverture</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>tests/gameCore.test.js</code></td><td><strong>172</strong></td><td>Date Paris DST-safe, normalisation, filtres, streaks, buildGameSession, i18n t() edge cases, syncPending 409, _migrate(), whitespace</td></tr>
+            <tr><td><code>tests/backend.test.js</code></td><td><strong>18</strong></td><td>buildGameSession (5), savePendingSession offline (3), savePendingSession online (2), migration payload (4), auth UI DOM (4)</td></tr>
+        </tbody>
+    </table>
+
+    <h3>14.2 Tests — suites clés (26 edge cases ajoutés)</h3>
+    <table>
+        <thead>
+            <tr><th>Suite</th><th>Comportement couvert</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>i18n t() — raw-key return for missing key</code></td><td><code>t("missing")</code> retourne la clé brute (truthy) → <code>??</code> ne se déclenche jamais ; pattern correct : <code>r !== key</code></td></tr>
+            <tr><td><code>syncPending — 409 must continue</code></td><td>409 = déjà enregistré → <code>continue</code> silencieux, toute la file traitée</td></tr>
+            <tr><td><code>filterMenu _migrate() logic</code></td><td><code>["P5","P5R"]</code> n'expand PAS ; legacy <code>["P5"]</code> seul expand</td></tr>
+            <tr><td><code>parisDateKey — midnight boundary UTC+2</code></td><td>Cas DST été/hiver, rollover à 22h30 UTC</td></tr>
+            <tr><td><code>normalize — whitespace/boundary</code></td><td>Chaîne vide, espaces seuls, tabulations, <code>é→e</code>, <code>ü→u</code>, Katakana préservé</td></tr>
+        </tbody>
+    </table>
+
+    <h3>14.3 Magic numbers → constantes nommées</h3>
+    <p>13 constantes introduites dans 5 fichiers :</p>
+    <table>
+        <thead>
+            <tr><th>Fichier</th><th>Constantes</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>classiqueMode/modeClassique.js</code></td><td><code>HINT_THRESHOLD = 3</code>, <code>GIVE_UP_THRESHOLD = 8</code></td></tr>
+            <tr><td><code>emojiMode/emojiMode.js</code></td><td><code>GIVE_UP_THRESHOLD = 8</code></td></tr>
+            <tr><td><code>allOutAttackMode/modeAllOutAttack.js</code></td><td><code>GIVE_UP_THRESHOLD = 5</code>, <code>INITIAL_BLUR = 20</code>, <code>BLUR_STEP = 3</code>, <code>IMAGE_LOAD_TIMEOUT_MS = 5000</code></td></tr>
+            <tr><td><code>js/notifications.js</code></td><td><code>CHALLENGE_RESULT_CUTOFF_MS = 48 * 60 * 60 * 1000</code>, <code>POLL_INTERVAL_MS = 60_000</code></td></tr>
+            <tr><td><code>profile/friends/friends.js</code></td><td><code>ONLINE_THRESHOLD_MS = 30 * 60 * 1000</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>14.4 Debug auto-calls supprimés</h3>
+    <ul>
+        <li><code>musicsMode/modeMusic.js</code> : appel automatique à <code>debugAllMusic()</code> supprimé (export conservé pour usage console)</li>
+        <li><code>personaeMode/modePersonae.js</code> : appel automatique à <code>debugAllPersonae()</code> supprimé (export conservé)</li>
+    </ul>
+
+    <hr>
+
+    <!-- SECTION 15 -->
+    <div data-i18n-block="fr"><h1>15. Corrections &amp; Accessibilité</h1></div>
+    <div data-i18n-block="en"><h1>15. Bug Fixes &amp; Accessibility</h1></div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p><strong>11 bugs corrigés, gameplay fixes, aria-labels, réorganisation profile/friends &amp; leaderboard.</strong></p></div>
+        <div data-i18n-block="en"><p><strong>11 bugs fixed, gameplay fixes, aria-labels, profile/friends &amp; leaderboard reorganization.</strong></p></div>
+    </blockquote>
+    <p class="section-intro" data-i18n="updates.intro_bugfixes"></p>
+
+
+    <h3>15.1 Corrections de bugs notables</h3>
+    <table>
+        <thead>
+            <tr><th>Bug</th><th>Cause</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>DST Paris mal géré dans le bandeau de défi</td><td>Date de comparaison en UTC → bandeau disparaît à la mauvaise heure</td><td><code>Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' })</code> dans <code>challenge-banner.js</code></td></tr>
+            <tr><td><code>t(key) ?? fallback</code> retourne la clé brute</td><td><code>t()</code> retourne la clé (truthy) quand manquante</td><td>Pattern <code>(r != null &amp;&amp; r !== key) ? r : fallback</code></td></tr>
+            <tr><td><code>syncPending</code> bloqué sur 409</td><td><code>return</code> à la première erreur laissait les sessions suivantes dans la queue</td><td><code>continue</code> silencieux pour 409, liste <code>remaining[]</code> pour les vraies erreurs réseau</td></tr>
+            <tr><td>Listeners autocomplete empilés sur replay</td><td><code>addEventListener</code> sans cleanup → comportement erratique</td><td>Flag <code>_acInitDone</code> dans AllOutAttack + <code>_acCurrentArray</code> module-level</td></tr>
+            <tr><td><code>_crInitDone</code> non namespaced</td><td>Persistait entre changements de compte — animations rejouées</td><td>Clé <code>_crInitDone_${me.id}</code> namespaced par user_id</td></tr>
+            <tr><td>Animation défi rejouée après changement de compte</td><td><code>_crInitDone</code> sans préfixe user_id</td><td><code>localStorage.removeItem('_crInitDone')</code> dans <code>auth.js</code> avant dispatch <code>personadle:auth-login</code></td></tr>
+            <tr><td>Challenge-result animait la défaite quand l'ami gagnait</td><td><code>success = msg.status === 'expired'</code> inversé</td><td><code>success = msg.status === 'beaten'</code></td></tr>
+            <tr><td><code>window.onclick</code> court-circuitait les modales</td><td><code>window.onclick = fn</code> écrase silencieusement le handler précédent</td><td><code>window.addEventListener('click', fn)</code> partout</td></tr>
+            <tr><td><code>profile-view.js</code> : wallpapers toujours 0</td><td><code>public.php</code> ne queryait pas <code>user_wallpapers</code></td><td>Ajouté + retourné au bon niveau (top-level, pas dans <code>profile</code>)</td></tr>
+            <tr><td><code>"Yes"</code> / <code>"No"</code> hardcodés en anglais dans la grille Classic</td><td>Valeurs booléennes en dur</td><td><code>i18.t('ui.yes')</code> / <code>i18.t('ui.no')</code></td></tr>
+            <tr><td>Listener <code>settingsBtn</code> empilé à chaque <code>initSettingsModal()</code></td><td>Absence de guard</td><td>Flag <code>_settingsListenerBound</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>15.2 Corrections gameplay</h3>
+    <table>
+        <thead>
+            <tr><th>Bug</th><th>Fix</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Twin Spear — noms de Persona Kotone incorrects dans <code>modePersonae.js</code></td><td>Remplacement par les noms réels : <code>"Orpheus ( Female )"</code>, <code>"Orpheus Picaro ( Female )"</code>, <code>"Orpheus Telos"</code>, <code>"Thanatos"</code>, <code>"Thanatos Picaro"</code></td></tr>
+            <tr><td>Mode Personae — filtre opus ignoré pour la cible quotidienne</td><td>Pick depuis le pool complet, puis repick depuis <code>filteredCharacters</code> si la cible n'y est pas</td></tr>
+            <tr><td>Badge <code>one_shot</code> absent dans 4 modes</td><td>Emoji : <code>attempts === 1</code> ; Silhouette/Personae/Music : <code>attempts === 0</code></td></tr>
+            <tr><td>Auto-replay absent sur changement de filtre (Classic, Emoji)</td><td>Classic : <code>resetButton.click()</code> ; Emoji : <code>resetGame()</code> dans <code>onFilterChange</code></td></tr>
+            <tr><td><code>showLoading</code> affiché même sur images cachées (AllOutAttack)</td><td>Déplacé à l'intérieur de <code>loadImageSafely()</code>, uniquement si pas en cache ; timeout 10s → 5s</td></tr>
+            <tr><td><code>portraitsMap.js</code> couvrait seulement ~72 personnages sur 200+</td><td>Réécriture complète : 168 mappings, tous les personnages couverts</td></tr>
+        </tbody>
+    </table>
+
+    <h3>15.3 Accessibilité — aria-label et alt manquants</h3>
+    <table>
+        <thead>
+            <tr><th>Fichier</th><th>Correction</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>index.html</code></td><td><code>alt="Ko-fi"</code> sur le logo Ko-fi (était <code>alt="Twitter"</code>)</td></tr>
+            <tr><td><code>musicsMode/musics.html</code></td><td><code>aria-label="Guess the song title"</code> sur <code>#textbar</code></td></tr>
+            <tr><td><code>admin/index.html</code></td><td><code>aria-label="Search users…"</code> sur <code>#user-search</code></td></tr>
+            <tr><td><code>profile/profile.html</code></td><td><code>aria-label</code> sur <code>#zoomOut</code>, <code>#zoomIn</code>, <code>#closeBadgesModal</code>, <code>#badgesSearch</code>, <code>#closeTitlesModal</code></td></tr>
+            <tr><td><code>profile/friends/friends.html</code></td><td><code>aria-label</code> sur <code>#browseSearchClear</code> et <code>#clearMsgsBtn</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>15.4 Architecture — Réorganisation <code>profile/friends/</code> et <code>profile/leaderboard/</code></h3>
+    <p>Les fichiers de la page Amis et Leaderboard ont été déplacés dans leurs propres sous-dossiers (<code>git mv</code>) :</p>
+<pre><code>profile/
+├── friends/
+│   ├── friends.html  ├── friends.css  ├── friends.js  └── README.md
+└── leaderboard/
+    ├── leaderboard.html  ├── leaderboard.css  ├── leaderboard.js  └── README.md</code></pre>
+    <p><strong>Impacts :</strong> <code>sw.js</code> — 6 chemins mis à jour ; <code>js/bottomNav.js</code> — logique <code>isDeepSubpath</code> pour les pages à 2 niveaux de profondeur (<code>base = '../../'</code>) ; HTML — tous les <code>../css/</code> → <code>../../css/</code>.</p>
+
+    <h3>15.5 READMEs unifiés</h3>
+    <p>11 fichiers README mis à jour vers le style <code>&lt;div align="center"&gt;</code> header. <code>classiqueMode/README.md</code> corrigé : attributs comparés = <code>nom</code>, <code>genre</code>, <code>age</code>, <code>personaUser</code>, <code>persona</code>, <code>arcane</code>, <code>opus</code> — les champs <code>role</code>, <code>japanese</code>, <code>dlc</code> ne sont <strong>pas</strong> comparés.</p>
+
+    <hr>
+
+    <p style="text-align:center;color:#999;font-size:0.9em;margin-top:2rem">
+        <em data-i18n-block="fr">Ce document est la référence technique complète de la version 2.0. Toute décision d'architecture majeure doit être ajoutée dans <code>PersonaDLE_Update_Documentation/PersonaDLE 2.0/</code>.</em>
+        <em data-i18n-block="en">This document is the complete technical reference for version 2.0. Any major architectural decision must be added to <code>PersonaDLE_Update_Documentation/PersonaDLE 2.0/</code>.</em>
+    </p>
+
+    <!-- i18n — reprend la langue choisie sur le site principal -->
+    <script type="module">
+        import { initLang } from '../../js/i18n.js';
+        window.__i18nReady = initLang();
+
+        /* Mise à jour en temps réel si la langue change sur une autre page (même origin) */
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'lang' && e.newValue && window.i18n?.setLang) {
+                window.i18n.setLang(e.newValue);
+            }
+        });
+    </script>
 
 </div><!-- /.doc-wrap -->
-
 </body>
 </html>
