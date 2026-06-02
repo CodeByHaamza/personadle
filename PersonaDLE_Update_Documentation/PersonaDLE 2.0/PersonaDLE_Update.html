@@ -293,7 +293,7 @@
             color: var(--primary-color);
             border: 1px solid rgba(230, 57, 70, 0.3);
             border-radius: 6px;
-            padding: 3px 10px;
+            padding: 3px 10px 3px 4px;
             background: rgba(230, 57, 70, 0.06);
             margin-bottom: 6px;
             font-weight: 600;
@@ -304,6 +304,22 @@
         }
         details.code-collapse[open] > summary {
             margin-bottom: 8px;
+        }
+        details.code-collapse > summary img {
+            width: 22px;
+            height: 22px;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+            flex-shrink: 0;
+        }
+        /* Antagonistes table portraits */
+        .antag-portrait {
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
         }
 
         /* ── Bouton retour accueil ── */
@@ -1094,30 +1110,66 @@
     <!-- ── Antagonistes — ajoutés en v2.0, non documentés précédemment ── -->
     <div class="new-content-section" style="margin-top:32px">
         <div data-i18n-block="fr">
-            <h2>👾 Nouveaux Personnages — Antagonistes v2.0</h2>
+            <h2>Nouveaux Personnages — Antagonistes v2.0</h2>
             <blockquote><p><strong>Les boss finaux de P3, P4 et P5 sont maintenant jouables dans les modes compatibles.</strong></p></blockquote>
             <table>
-                <thead><tr><th>Personnage</th><th>Jeu</th><th>Arcane</th><th>Modes</th></tr></thead>
+                <thead><tr><th>Portrait</th><th>Personnage</th><th>Jeu</th><th>Arcane</th><th>Modes</th></tr></thead>
                 <tbody>
-                    <tr><td><strong>Nyx</strong></td><td>P3 / P3FES / P3P / P3R</td><td>Death</td><td>Classique ✅ · Silhouette ✅</td></tr>
-                    <tr><td><strong>Ameno-sagiri</strong></td><td>P4 / P4G</td><td>—</td><td>Classique ✅</td></tr>
-                    <tr><td><strong>Yaldabaoth</strong></td><td>P5 / P5R / P5S</td><td>—</td><td>Classique ✅ · Silhouette ✅</td></tr>
+                    <tr>
+                        <td><img class="antag-portrait" src="../../database/portraits/Nyx.webp" alt="Nyx"></td>
+                        <td><strong>Nyx</strong></td>
+                        <td>P3 / P3FES / P3P / P3R</td>
+                        <td>Death</td>
+                        <td>Classique · Silhouette</td>
+                    </tr>
+                    <tr>
+                        <td><img class="antag-portrait" src="../../database/portraits/Amenosagiri.webp" alt="Ameno-sagiri"></td>
+                        <td><strong>Ameno-sagiri</strong></td>
+                        <td>P4 / P4G</td>
+                        <td>—</td>
+                        <td>Classique</td>
+                    </tr>
+                    <tr>
+                        <td><img class="antag-portrait" src="../../database/portraits/Yaldabaoth.webp" alt="Yaldabaoth"></td>
+                        <td><strong>Yaldabaoth</strong></td>
+                        <td>P5 / P5R / P5S</td>
+                        <td>—</td>
+                        <td>Classique · Silhouette</td>
+                    </tr>
                 </tbody>
             </table>
-            <p style="color:var(--text-muted);font-size:0.9rem">Ces personnages ont <code>personaUser: false</code> et <code>persona: "NONE"</code>. Ils ont été ajoutés dans le commit v2.0 mais n'étaient pas documentés dans cette page.</p>
+            <p style="color:var(--text-muted);font-size:0.9rem">Ces personnages ont <code>personaUser: false</code> et <code>persona: "NONE"</code>. Ajoutés dans le commit v2.0, non documentés jusqu'ici.</p>
         </div>
         <div data-i18n-block="en">
-            <h2>👾 New Characters — v2.0 Antagonists</h2>
+            <h2>New Characters — v2.0 Antagonists</h2>
             <blockquote><p><strong>The final bosses of P3, P4 and P5 are now playable in compatible modes.</strong></p></blockquote>
             <table>
-                <thead><tr><th>Character</th><th>Game</th><th>Arcana</th><th>Modes</th></tr></thead>
+                <thead><tr><th>Portrait</th><th>Character</th><th>Game</th><th>Arcana</th><th>Modes</th></tr></thead>
                 <tbody>
-                    <tr><td><strong>Nyx</strong></td><td>P3 / P3FES / P3P / P3R</td><td>Death</td><td>Classic ✅ · Silhouette ✅</td></tr>
-                    <tr><td><strong>Ameno-sagiri</strong></td><td>P4 / P4G</td><td>—</td><td>Classic ✅</td></tr>
-                    <tr><td><strong>Yaldabaoth</strong></td><td>P5 / P5R / P5S</td><td>—</td><td>Classic ✅ · Silhouette ✅</td></tr>
+                    <tr>
+                        <td><img class="antag-portrait" src="../../database/portraits/Nyx.webp" alt="Nyx"></td>
+                        <td><strong>Nyx</strong></td>
+                        <td>P3 / P3FES / P3P / P3R</td>
+                        <td>Death</td>
+                        <td>Classic · Silhouette</td>
+                    </tr>
+                    <tr>
+                        <td><img class="antag-portrait" src="../../database/portraits/Amenosagiri.webp" alt="Ameno-sagiri"></td>
+                        <td><strong>Ameno-sagiri</strong></td>
+                        <td>P4 / P4G</td>
+                        <td>—</td>
+                        <td>Classic</td>
+                    </tr>
+                    <tr>
+                        <td><img class="antag-portrait" src="../../database/portraits/Yaldabaoth.webp" alt="Yaldabaoth"></td>
+                        <td><strong>Yaldabaoth</strong></td>
+                        <td>P5 / P5R / P5S</td>
+                        <td>—</td>
+                        <td>Classic · Silhouette</td>
+                    </tr>
                 </tbody>
             </table>
-            <p style="color:var(--text-muted);font-size:0.9rem">These characters have <code>personaUser: false</code> and <code>persona: "NONE"</code>. They were added in the v2.0 commit but were not documented on this page.</p>
+            <p style="color:var(--text-muted);font-size:0.9rem">These characters have <code>personaUser: false</code> and <code>persona: "NONE"</code>. Added in the v2.0 commit but not documented until now.</p>
         </div>
     </div>
 
@@ -1184,7 +1236,7 @@
     <p>Before v2.0, all game styles were concentrated in a single <code>css/style.css</code> file of over 2,000 lines. This monolith caused readability problems, maintainability issues (modifying one mode could break another), performance issues (each page loaded all styles), and collaboration conflicts (frequent merge conflicts).</p>
     <p><strong>Solution — one CSS file per mode:</strong></p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>css/
 ├── global.css          ← Reset, typo, confetti, navigation, modales, dark mode global
 ├── index.css           ← Page d'accueil uniquement
@@ -1202,7 +1254,7 @@ allOutAttackMode/allOutAttack.css</code></pre>
     <div data-i18n-block="fr"><p>Chaque page HTML ne charge que ce dont elle a besoin :</p></div>
     <div data-i18n-block="en"><p>Each HTML page only loads what it needs:</p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>&lt;!-- Exemple : musics.html --&gt;
 &lt;link rel="stylesheet" href="../css/global.css"&gt;
 &lt;link rel="stylesheet" href="./music.css"&gt;</code></pre>
@@ -1216,7 +1268,7 @@ allOutAttackMode/allOutAttack.css</code></pre>
     <div data-i18n-block="en"><h3>1.2 Dark Mode</h3>
     <p>In dark mode, the series color themes remain active. The only change on the audio player is a slightly darker background to reinforce contrast — the CSS color custom properties are not overridden:</p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>body.darkmode .audio-wrapper {
   background: linear-gradient(150deg, #0c0c0c 0%, #080808 60%, #0c0c0c 100%);
   /* Pas d'override de couleurs — les variables de thème restent actives */
@@ -1302,7 +1354,7 @@ allOutAttackMode/allOutAttack.css</code></pre>
 
     <p><strong>Technique — off-screen clone pour la capture :</strong></p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>// Clone hors-écran → qualité pleine résolution, indépendant du scale CSS
 const offscreen = buildShareCard(bg, wallpaper, activeTab);
 offscreen.style.position = 'fixed';
@@ -1327,7 +1379,7 @@ document.body.removeChild(offscreen);</code></pre>
     <div data-i18n-block="en"><h3>1.5 Language Selector Style — Adding Italian</h3>
     <p>CSS block added in <code>css/langSelector.css</code> for the Italian language (was missing while EN, FR, ES, DE each had a block):</p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>/* === ITALIANO === */
 .lang-opt--it { border-left-color: #6d8b4e; }
 .lang-opt--it .lang-opt-name {
@@ -1359,7 +1411,7 @@ document.body.removeChild(offscreen);</code></pre>
     </ul>
     </div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>[ ACHIEVEMENTS (3/8) ]  [ badge ] [ badge ] [ badge ] …
 [ EVENTS (1/2) ]        [ badge ] [ badge ]
 [ SECRETS (0/5) ]       [ badge ] [ badge ] …
@@ -1389,7 +1441,7 @@ document.body.removeChild(offscreen);</code></pre>
     <div data-i18n-block="en"><h3>2.1 i18n system architecture</h3>
     <p>Before v2.0, all game texts were hardcoded in English in the HTML and JS files.</p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>lang/
 ├── en.json     ← Source de vérité — 760 clés
 ├── fr.json     ← Traduction complète synchronisée (760 clés)
@@ -1419,7 +1471,7 @@ js/
     <div data-i18n-block="fr"><p><strong>Attributs HTML supportés :</strong></p></div>
     <div data-i18n-block="en"><p><strong>Supported HTML attributes:</strong></p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>&lt;span data-i18n="ui.submit"&gt;Submit&lt;/span&gt;
 &lt;input data-i18n-placeholder="ui.input_placeholder"&gt;
 &lt;div data-i18n-title="modes.classic.tooltip_name"&gt;
@@ -1432,7 +1484,7 @@ js/
     <div data-i18n-block="en"><p><strong>Critical pitfall — <code>t(key) ?? fallback</code> does not work:</strong><br>
     <code>window.i18n.t(key)</code> returns the raw key (truthy string) when missing — <code>??</code> never triggers. Correct pattern:</p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>const r = window.i18n?.t?.(key);
 return (r != null && r !== key) ? r : fallback;</code></pre>
 </details>
@@ -1451,7 +1503,7 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
     <p><strong>Solution:</strong> anchoring on <code>import.meta.url</code> — independent of the host page:</p>
     </div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>// js/i18n.js
 var _langBase = new URL('../lang/', import.meta.url).href;</code></pre>
 </details>
@@ -1468,7 +1520,7 @@ var _langBase = new URL('../lang/', import.meta.url).href;</code></pre>
     <p><strong>Solution:</strong> save the requested language before any fallback:</p>
     </div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>var requested = lang;
 try {
   translations = await fetchLang(lang);
@@ -1491,7 +1543,7 @@ localStorage.setItem(STORAGE_KEY, requested);  // toujours la langue voulue</cod
     <p><strong>Solution:</strong> <code>window.__i18nReady</code> pattern:</p>
     </div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>&lt;script type="module"&gt;
   import { initLang } from '../js/i18n.js';
   window.__i18nReady = initLang();
@@ -1543,7 +1595,7 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
     <div data-i18n-block="en"><h3>2.4 Localized buttons — WebP images per language</h3>
     <p>Game buttons (Hint, Give-Up, Replay, Submit) now display their text in the active language.</p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>assets/buttons/
 ├── EN/   Hint_Button(.webp | _Rouge | _Transparent)
 │         Give-up_Button(.webp | _Rouge | _Transparent)
@@ -1558,7 +1610,7 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
     <p>Les anciens fichiers racine ont été **supprimés** — tous les modes utilisent désormais <code>EN/Hint_Button.webp</code> ou la variante de la langue active.</p>
     <p>Fonction <code>updateLangButtons(lang)</code> ajoutée dans <code>js/i18n.js</code>, appelée à la fin de <code>setLang()</code> :</p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>function updateLangButtons(lang) {
   var cfg = _BUTTON_CFG[lang] || _BUTTON_CFG['en'];
   // Pour #hintButton, #giveUpButton, #resetButton, #guessButton :
@@ -1575,7 +1627,7 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
     <div data-i18n-block="en"><h3>2.5 Attribute value translation — Classic Mode</h3>
     <p>Comparison grid values (gender, arcana) are translated dynamically:</p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>"data": {
   "genre": { "Male": "Masculin", "Female": "Féminin", "Human": "Humain", "Shadow": "Ombre" },
   "arcane": { "Death": "Mort", "Hermit": "Ermite", "Moon": "Lune", "Fool": "Fou" }
@@ -1583,7 +1635,7 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
 </details>
 
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>const translateAtom = (ns, v) =&gt; {
   const translated = i18.t(`data.${ns}.${v}`);
   return (translated === `data.${ns}.${v}`) ? v : translated;
@@ -1607,7 +1659,7 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
         </tbody>
     </table>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>function getBadgeName(badge)                 // t(`badges.${badge.id}.name`) || badge.name
 function getBadgeDescription(badge)          // t(`badges.${badge.id}.description`) || badge.description
 function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sinon t() || badge.condition</code></pre>
@@ -1649,7 +1701,7 @@ function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sin
         </tbody>
     </table>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>js/
 ├── gameCore.js      ← Fonctions communes (date, confetti, filtres, sessions…)
 ├── filterMenu.js    ← Panneau de filtres collapsible (partagé)
@@ -1671,7 +1723,7 @@ function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sin
     
     <p><strong>URL dynamique :</strong></p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>const BASE_URL = window.location.hostname === 'personadle.net'
   ? 'https://personadle.net/api'
   : `${window.location.protocol}//${window.location.host}/personadle/api`;</code></pre>
@@ -1680,7 +1732,7 @@ function getBadgeCondition(badge, unlocked)  // "???" si secret+verrouillé, sin
 
     <p><strong>Structure de l'objet <code>api</code> :</strong></p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>export const api = {
   auth: {
     register({ email, pseudo, password, lang }),  // POST /api/auth/register
@@ -1720,7 +1772,7 @@ window._personadleApi = api;  // bridge global</code></pre>
     <p><strong>Global state:</strong> <code>window._currentUser = null</code> (null = anonymous, object = logged in).</p>
     <p><strong>HTML <code>data-auth</code> convention:</strong></p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>&lt;div data-auth="connected"&gt;Mon profil&lt;/div&gt;
 &lt;button data-auth="anonymous" data-open-modal="loginModal"&gt;Se connecter&lt;/button&gt;
 &lt;span data-auth-field="pseudo"&gt;&lt;/span&gt;</code></pre>
@@ -1752,7 +1804,7 @@ window._personadleApi = api;  // bridge global</code></pre>
 
     <h3>3.4 <code>buildGameSession</code> + <code>savePendingSession</code> (gameCore.js)</h3>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>export function buildGameSession({ mode, targetName, result, attempts, timeMs = 0, filters = [] }) {
   return {
     mode, target_name: targetName, result, attempts,
@@ -1786,7 +1838,7 @@ export async function savePendingSession(session) {
     <div data-i18n-block="fr"><h3>3.6 Fix détection IS_LOCAL et autres corrections JS</h3></div>
     <div data-i18n-block="en"><h3>3.6 IS_LOCAL detection fix and other JS corrections</h3></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>const IS_LOCAL = (() =&gt; {
   const h = location.hostname;
   return (h === "" || h === "localhost" || h === "127.0.0.1" || h === "0.0.0.0"
@@ -1815,7 +1867,7 @@ export async function savePendingSession(session) {
     <div data-i18n-block="fr"><h3>4.1 Panneau de filtres partagé — <code>js/filterMenu.js</code></h3></div>
     <div data-i18n-block="en"><h3>4.1 Shared filter panel — <code>js/filterMenu.js</code></h3></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>import { initFilterMenu } from "../js/filterMenu.js";
 
 const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&gt; {
@@ -1865,7 +1917,7 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     <div data-i18n-block="en"><h3>5.1 Custom Audio Player</h3>
     <p>The native <code>&lt;audio controls&gt;</code> element was replaced by a custom HTML/CSS/JS component inspired by Persona 5:</p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>&lt;div class="audio-wrapper" id="audioBox"&gt;
   &lt;audio id="audioPlayer" preload="none"&gt;&lt;source src="" type="audio/mp3"&gt;&lt;/audio&gt;
   &lt;div class="p5-player"&gt;
@@ -1895,7 +1947,7 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
 
     <p><strong>Animations CSS (barres de son) :</strong></p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>.p5-sound-bars.playing span:nth-child(1) { animation: p5bar 0.75s ease-in-out infinite; }
 .p5-sound-bars.playing span:nth-child(2) { animation: p5bar 0.55s ease-in-out 0.12s infinite; }
 .p5-sound-bars.playing span:nth-child(3) { animation: p5bar 0.90s ease-in-out 0.06s infinite; }
@@ -1952,7 +2004,7 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     <p><strong>P3P case — two-color gradient:</strong></p>
     </div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>P3P: {
   accent: '#818cf8',
   dark:   '#3b82f6',
@@ -2102,7 +2154,7 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
     <div data-i18n-block="fr"><p><strong>Tables créées par migrations :</strong></p></div>
     <div data-i18n-block="en"><p><strong>Tables created by migrations:</strong></p></div>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>001_add_challenge_filters.sql     ← colonne challenge_filters sur messages
 002_add_has_migrated.sql          ← colonne has_migrated sur users
 006_fix_title_slugs.sql           ← 11 UPDATE alignent slugs BDD sur format JS
@@ -2166,7 +2218,7 @@ const _filterApi = initFilterMenu("musicActiveFilters", ALL_OPUS, (newActive) =&
 
     <h3>6.4 Architecture Offline-First</h3>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>Partie terminée
     ↓
 savePendingSession(session)
@@ -2193,7 +2245,7 @@ savePendingSession(session)
 
     <h3>6.6 Soft Delete RGPD</h3>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>-- Anonymisation immédiate (DELETE déclenché par l'utilisateur)
 UPDATE users SET
     is_deleted    = 1,
@@ -2284,7 +2336,7 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
         </tbody>
     </table>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>applyRank10Effect(avatarEl, pseudoEl, delayMs = 0)
 // Appelé dans profile-view.js (profil public) et friends.js (stagger 150ms/entrée)</code></pre>
 </details>
@@ -2294,7 +2346,7 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
     <p><strong>Envoi :</strong> bouton "Défier un ami" post-victoire dans les 6 modes (<code>showChallengeButton</code>). Erreur 409 si défi déjà envoyé aujourd'hui (1 défi par paire d'amis par jour).</p>
     <p><strong>Acceptation :</strong> efface l'état de jeu du mode (via <code>MODE_STATE_KEYS</code>), applique les filtres du challenger, pose <code>activeChallenge</code> en localStorage, redirige vers le mode.</p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>const MODE_STATE_KEYS = {
   classic:      ['target', 'attempts', 'guessHistory'],
   emoji:        ['targetEmoji', 'attemptsEmoji', 'emojiGameOver', 'emojiWin'],
@@ -2490,7 +2542,7 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
     <h3>10.2 Profile Song — Lecteur musical de profil</h3>
     <p>Sélecteur <code>&lt;select&gt;</code> groupé par série avec image live. La chanson se joue automatiquement à l'arrivée sur la page profil. Autoplay → fallback au premier clic si bloqué par le navigateur.</p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>{
   fichier: "Last_Surprise.mp3",
   titre:   "Last Surprise",
@@ -2607,7 +2659,7 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
     <h3>12.1 Git Hooks versionnés</h3>
     <p><strong>Fichiers :</strong> <code>.githooks/pre-commit</code>, <code>.githooks/commit-msg</code>, <code>.githooks/pre-push</code></p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>npm run setup-hooks
 # → git config core.hooksPath .githooks</code></pre>
 </details>
@@ -2672,7 +2724,7 @@ INSERT INTO deletion_requests (user_id) VALUES (?);</code></pre>
     <h3>13.1 Headers de sécurité PHP</h3>
     <p>Ajoutés dans <code>api/bootstrap.php</code> après le bloc CORS :</p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: strict-origin-when-cross-origin');</code></pre>
@@ -2823,7 +2875,7 @@ header('Referrer-Policy: strict-origin-when-cross-origin');</code></pre>
     <h3>15.4 Architecture — Réorganisation <code>profile/friends/</code> et <code>profile/leaderboard/</code></h3>
     <p>Les fichiers de la page Amis et Leaderboard ont été déplacés dans leurs propres sous-dossiers (<code>git mv</code>) :</p>
 
-<details class="code-collapse"><summary>📋 Code</summary>
+<details class="code-collapse"><summary><img src="../../img/persona_64x64.gif" alt="">Code</summary>
 <pre><code>profile/
 ├── friends/
 │   ├── friends.html  ├── friends.css  ├── friends.js  └── README.md
