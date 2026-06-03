@@ -8,6 +8,12 @@
 
 Ce dossier contient la configuration Docker pour lancer l'environnement de développement local complet en **une seule commande**.
 
+> **Nouveau collaborateur ?** Lire d'abord le guide complet :
+> [`PersonaDLE_Update_Documentation/PersonaDLE 2.0/DOCKER_GUIDE.md`](../PersonaDLE_Update_Documentation/PersonaDLE%202.0/DOCKER_GUIDE.md)
+> (installation Docker, Windows/Mac/Linux, dépannage, reset…)
+>
+> Ce README couvre les détails techniques pour les développeurs qui connaissent déjà Docker.
+
 ---
 
 ## Ce que Docker fournit
