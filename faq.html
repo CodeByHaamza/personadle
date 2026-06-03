@@ -16,7 +16,7 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="./css/global.css?v=9" />
+    <link rel="stylesheet" href="./css/global.css?v=10" />
     <link rel="stylesheet" href="./css/langSelector.css?v=4" />
     <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="./css/faq.css?v=1" />
@@ -28,6 +28,231 @@
         document.documentElement.classList.add("darkmode");
       }
     </script>
+    <style>
+      html { scroll-behavior: smooth; }
+
+      /* ── Progress bar ── */
+      #fq-prog{position:fixed;top:0;left:0;width:100%;height:3px;z-index:9999;pointer-events:none;}
+      #fq-fill{height:100%;width:0%;background:linear-gradient(90deg,#c0193a,#e63946,#ff6b9d,#ffd700);box-shadow:0 0 10px rgba(230,57,70,.8);transition:width .08s linear;}
+
+      /* ── Gradient title ── */
+      .faq-page-title {
+        background:linear-gradient(135deg,#e63946 0%,#ff8a80 50%,#ffd740 100%);
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        font-size: clamp(1.8rem, 5vw, 3rem) !important;
+      }
+      .darkmode .faq-page-title {
+        background:linear-gradient(135deg,#ff6b9d 0%,#e63946 50%,#ffd700 100%);
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      }
+
+      /* ── Search bar ── */
+      .fq-search-wrap {
+        max-width:500px; margin:16px auto 8px; position:relative;
+      }
+      .fq-search {
+        width:100%; padding:11px 42px 11px 16px; border:2px solid rgba(230,57,70,.22);
+        border-radius:10px; font-size:.9rem; background:rgba(255,255,255,.92);
+        color:inherit; outline:none; transition:border-color .2s, box-shadow .2s;
+        font-family:inherit; box-shadow:0 2px 10px rgba(0,0,0,.07);
+      }
+      .fq-search:focus { border-color:rgba(230,57,70,.65); box-shadow:0 0 0 3px rgba(230,57,70,.12), 0 2px 10px rgba(0,0,0,.07); }
+      .darkmode .fq-search { background:rgba(28,28,28,.95); color:#f0f0f0; border-color:rgba(230,57,70,.3); }
+      .fq-search-icon { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:.85rem; pointer-events:none; opacity:.5; }
+      .fq-shortcut { position:absolute; right:38px; top:50%; transform:translateY(-50%);
+        font-size:.65rem; color:#aaa; background:rgba(0,0,0,.08); border-radius:4px;
+        padding:1px 5px; font-family:'JetBrains Mono',monospace; pointer-events:none; }
+      .fq-no-results { text-align:center; padding:32px 0; color:#999; font-size:.9rem; display:none; }
+      .fq-no-results.show { display:block; }
+
+      /* ── Category count badge ── */
+      .fq-cat-count {
+        display:inline-flex; align-items:center; justify-content:center;
+        background:rgba(230,57,70,.14); color:#e63946;
+        border-radius:20px; min-width:22px; height:22px; padding:0 6px;
+        font-size:.72rem; font-weight:800; margin-left:auto;
+        font-family:'Montserrat','Oswald',sans-serif;
+      }
+      .faq-category { display:flex; align-items:center; gap:8px; }
+
+      /* ── Category slide-in ── */
+      @keyframes catSlide { from{opacity:0;transform:translateX(-16px);} to{opacity:1;transform:none;} }
+      .fq-cat-anim { opacity:0; animation:catSlide .5s cubic-bezier(.22,1,.36,1) forwards; animation-play-state:paused; }
+      .fq-cat-anim.in { animation-play-state:running; }
+
+      /* ── FAQ item scroll reveal ── */
+      .fq-item-reveal { opacity:0; transform:translateY(14px); transition:opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1); }
+      .fq-item-reveal.in { opacity:1; transform:none; }
+
+      /* ── FAQ item hover / open ── */
+      .faq-item { transition:box-shadow .2s, transform .15s !important; }
+      .faq-item:not(.open):hover { transform:translateY(-1px); }
+      .faq-item.open { border-left:3px solid #e63946; border-radius:10px; }
+
+      /* ── FAQ answer smoother animation ── */
+      .faq-answer { transition:max-height .45s cubic-bezier(.22,1,.36,1), padding .45s ease !important; }
+
+      /* ── Jack Frost bounce ── */
+      .faq-mascot { animation:jfBounce 2.2s ease-in-out infinite; }
+      @keyframes jfBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
+      .faq-mascot-bubble { animation:bubblePop .55s cubic-bezier(.22,1,.36,1) .4s both; }
+      @keyframes bubblePop { from{transform:scale(0) rotate(-6deg);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+      /* ── Team member hover ── */
+      .faq-team li { transition:transform .2s, box-shadow .2s !important; }
+      .faq-team li:hover { transform:translateX(5px); box-shadow:0 3px 12px rgba(230,57,70,.18) !important; }
+
+      /* ── Back button ── */
+      .faq-back .btn-p5 { transition:transform .2s, box-shadow .2s !important; }
+      .faq-back .btn-p5:hover { transform:translateY(-2px) !important; box-shadow:0 6px 20px rgba(230,57,70,.3) !important; }
+
+      /* ── Reduced motion ── */
+      @media(prefers-reduced-motion:reduce){
+        .fq-cat-anim,.fq-item-reveal{opacity:1;transform:none;animation:none;transition:none;}
+        .faq-mascot{animation:none;}
+      }
+    </style>
+
+    <!-- ══ FAQ — STYLE UPGRADE ══ -->
+    <style>
+      @keyframes fqIn { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:none;} }
+      .faq-page-header { animation:fqIn .5s ease-out both; }
+      .faq-wrap { animation:fqIn .6s ease-out .1s both; }
+
+      /* ── Home button ── */
+      .fq-home {
+        position:fixed; top:12px; left:110px; z-index:9998;
+        background:rgba(255,255,255,.92); color:#1a1a1a;
+        border:1.5px solid #e63946; border-radius:8px;
+        padding:6px 14px; font-size:13px; font-weight:700;
+        text-decoration:none; display:inline-flex; align-items:center; gap:5px;
+        transition:background .2s, box-shadow .2s, transform .2s;
+        backdrop-filter:blur(12px); box-shadow:0 2px 12px rgba(0,0,0,.12);
+      }
+      .fq-home:hover { box-shadow:0 4px 18px rgba(230,57,70,.4); transform:translateY(-1px); background:rgba(255,244,246,.97); }
+      .darkmode .fq-home { background:rgba(16,12,26,.92); color:#f0f0f0; }
+      .darkmode .fq-home:hover { background:rgba(30,18,40,.97); }
+
+      /* ── Title bigger ── */
+      .faq-page-title { font-size:clamp(2rem,5vw,3.2rem) !important; }
+      .faq-page-subtitle { font-size:1.05rem !important; letter-spacing:.5px; }
+
+      /* ── Category colors ── */
+      .fq-game     { border-left-color:#e63946 !important; color:#e63946 !important; }
+      .fq-gameplay { border-left-color:#f97316 !important; color:#f97316 !important; }
+      .fq-account  { border-left-color:#3b82f6 !important; color:#3b82f6 !important; }
+      .fq-community{ border-left-color:#8b5cf6 !important; color:#8b5cf6 !important; }
+      .fq-team-cat { border-left-color:#f59e0b !important; color:#f59e0b !important; }
+
+      /* ── FAQ item open: colored border ── */
+      .faq-item.open.fi-game     { border-left:3px solid #e63946 !important; }
+      .faq-item.open.fi-gameplay { border-left:3px solid #f97316 !important; }
+      .faq-item.open.fi-account  { border-left:3px solid #3b82f6 !important; }
+      .faq-item.open.fi-community{ border-left:3px solid #8b5cf6 !important; }
+      .faq-item.open.fi-team     { border-left:3px solid #f59e0b !important; }
+
+      /* ── Category glass ── */
+      .faq-category {
+        background:rgba(255,255,255,.96) !important;
+        backdrop-filter:blur(12px) !important; -webkit-backdrop-filter:blur(12px) !important;
+        box-shadow:0 3px 16px rgba(0,0,0,.1) !important;
+        border-radius:0 10px 10px 0 !important;
+      }
+      .darkmode .faq-category { background:rgba(12,8,22,.96) !important; }
+
+      /* ── FAQ item glass ── */
+      .faq-item {
+        background:rgba(255,255,255,.96) !important;
+        backdrop-filter:blur(12px) !important; -webkit-backdrop-filter:blur(12px) !important;
+        border-radius:12px !important;
+        transition:box-shadow .2s, transform .15s !important;
+      }
+      .faq-item:not(.open):hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.12) !important; }
+      .darkmode .faq-item { background:rgba(12,8,22,.96) !important; }
+      .darkmode .faq-question { color:#f0f0f0 !important; }
+
+      /* ── Filter tabs ── */
+      .fq-tabs {
+        display:flex; flex-wrap:wrap; gap:7px; justify-content:center;
+        padding:12px 20px 4px; max-width:780px; margin:0 auto;
+      }
+      .fq-tab {
+        padding:5px 14px; border-radius:20px;
+        font-size:.77rem; font-weight:700; cursor:pointer;
+        border:1.5px solid; background:transparent; font-family:inherit;
+        transition:background .15s, transform .15s, box-shadow .15s;
+      }
+      .fq-tab:hover { transform:translateY(-1px); }
+      .fq-tab.active { color:#fff !important; }
+      .fq-tab[data-cat="all"]      { border-color:#888; color:#888; }
+      .fq-tab[data-cat="all"].active      { background:#888; }
+      .fq-tab[data-cat="game"]     { border-color:#e63946; color:#e63946; }
+      .fq-tab[data-cat="game"].active     { background:#e63946; box-shadow:0 3px 10px rgba(230,57,70,.35); }
+      .fq-tab[data-cat="gameplay"] { border-color:#f97316; color:#f97316; }
+      .fq-tab[data-cat="gameplay"].active { background:#f97316; box-shadow:0 3px 10px rgba(249,115,22,.35); }
+      .fq-tab[data-cat="account"]  { border-color:#3b82f6; color:#3b82f6; }
+      .fq-tab[data-cat="account"].active  { background:#3b82f6; box-shadow:0 3px 10px rgba(59,130,246,.35); }
+      .fq-tab[data-cat="community"]{ border-color:#8b5cf6; color:#8b5cf6; }
+      .fq-tab[data-cat="community"].active{ background:#8b5cf6; box-shadow:0 3px 10px rgba(139,92,246,.35); }
+      .fq-tab[data-cat="team"]     { border-color:#f59e0b; color:#f59e0b; }
+      .fq-tab[data-cat="team"].active     { background:#f59e0b; box-shadow:0 3px 10px rgba(245,158,11,.35); }
+
+      /* ── Team grid ── */
+      .fq-team-grid {
+        display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+        gap:12px; margin:10px 0 4px;
+      }
+      .fq-team-card {
+        background:rgba(255,255,255,.95); border-radius:14px;
+        padding:16px; border:1.5px solid rgba(230,57,70,.18);
+        backdrop-filter:blur(10px); box-shadow:0 3px 14px rgba(0,0,0,.09);
+        transition:transform .22s, box-shadow .22s;
+      }
+      .fq-team-card:hover { transform:translateY(-4px); box-shadow:0 10px 28px rgba(0,0,0,.15); }
+      .darkmode .fq-team-card { background:rgba(16,10,28,.95); border-color:rgba(230,57,70,.22); }
+      .fq-team-emoji { font-size:1.9rem; line-height:1; display:block; margin-bottom:8px; }
+      .fq-team-name  { font-weight:800; font-size:.95rem; color:#e63946; margin-bottom:4px; }
+      .fq-team-role  { font-size:.8rem; color:#666; line-height:1.5; }
+      .darkmode .fq-team-role { color:#aaa; }
+      @media(max-width:480px){ .fq-team-grid{grid-template-columns:1fr 1fr;} }
+
+      /* ── Section pill (active category) ── */
+      .fq-pill {
+        position:fixed; bottom:88px; left:50%; transform:translateX(-50%);
+        border-radius:20px; padding:5px 18px;
+        font-size:.72rem; font-weight:700; letter-spacing:.5px;
+        backdrop-filter:blur(10px); opacity:0; pointer-events:none;
+        transition:opacity .3s, background .3s; z-index:100; white-space:nowrap;
+        color:#fff; box-shadow:0 3px 12px rgba(0,0,0,.2);
+      }
+      .fq-pill.show { opacity:1; }
+
+      /* ── Jack Frost bigger ── */
+      .faq-mascot img { width:100px !important; }
+      .faq-mascot-bubble { max-width:120px; white-space:normal !important; }
+
+      /* ── Back button ── */
+      .faq-back .btn-p5 {
+        background:linear-gradient(135deg,#c0193a,#e63946) !important;
+        color:#fff !important; border-radius:10px !important;
+        padding:11px 30px !important; border:none !important;
+        box-shadow:0 4px 18px rgba(230,57,70,.3) !important;
+        font-size:.9rem !important; font-weight:700 !important;
+        transition:transform .2s, box-shadow .2s !important;
+        display:inline-block !important;
+      }
+      .faq-back .btn-p5:hover { transform:translateY(-2px) !important; box-shadow:0 8px 26px rgba(230,57,70,.48) !important; }
+
+      /* ── Discord button upgrade ── */
+      .faq-discord-btn {
+        background:linear-gradient(135deg,#4752c4,#5865f2) !important;
+        box-shadow:0 4px 16px rgba(88,101,242,.35) !important;
+        border-radius:10px !important;
+        padding:10px 22px !important;
+        transition:transform .2s, box-shadow .2s !important;
+      }
+      .faq-discord-btn:hover { transform:translateY(-2px) !important; opacity:1 !important; box-shadow:0 8px 24px rgba(88,101,242,.5) !important; }
+    </style>
   </head>
   <body>
     <!-- Mascotte Jack Frost -->
@@ -510,6 +735,212 @@
           navigator.serviceWorker.register("./sw.js").catch(() => {});
         });
       }
+    </script>
+    <script>
+    (function(){
+      'use strict';
+
+      /* ── Progress bar ── */
+      var pb=document.createElement('div'); pb.id='fq-prog';
+      var pf=document.createElement('div'); pf.id='fq-fill';
+      pb.appendChild(pf); document.body.insertBefore(pb,document.body.firstChild);
+      window.addEventListener('scroll',function(){
+        var st=window.scrollY, dh=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+        pf.style.width=(dh>0?st/dh*100:0)+'%';
+      },{passive:true});
+
+      /* ── Search bar ── */
+      var header=document.querySelector('.faq-page-header');
+      if(header){
+        var sw=document.createElement('div'); sw.className='fq-search-wrap';
+        sw.innerHTML='<input type="search" class="fq-search" placeholder="Search FAQ…  (press / to focus)" aria-label="Search FAQ"><span class="fq-search-icon">🔍</span>';
+        header.insertAdjacentElement('afterend',sw);
+
+        var noRes=document.createElement('div'); noRes.className='fq-no-results';
+        noRes.textContent='No results — try another term. Hee-ho!';
+        var wrap=document.querySelector('.faq-wrap');
+        if(wrap) wrap.insertBefore(noRes,wrap.firstChild);
+
+        var inp=sw.querySelector('.fq-search');
+        inp.addEventListener('input',function(){
+          var q=inp.value.trim().toLowerCase();
+          var cats=document.querySelectorAll('.faq-category');
+          var anyVis=false;
+          if(!q){
+            document.querySelectorAll('.faq-item,.faq-category').forEach(function(el){el.style.display='';});
+            noRes.classList.remove('show'); return;
+          }
+          cats.forEach(function(cat){
+            var vis=false; var el=cat.nextElementSibling;
+            while(el&&!el.classList.contains('faq-category')){
+              if(el.classList.contains('faq-item')){
+                var match=el.textContent.toLowerCase().indexOf(q)>=0;
+                el.style.display=match?'':'none';
+                if(match){vis=true; anyVis=true;}
+              }
+              el=el.nextElementSibling;
+            }
+            cat.style.display=vis?'':'none';
+          });
+          noRes.classList.toggle('show',!anyVis);
+        });
+
+        /* / shortcut to focus search */
+        document.addEventListener('keydown',function(e){
+          if(e.key==='/'&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='TEXTAREA'){
+            e.preventDefault(); inp.focus(); inp.select();
+          }
+        });
+      }
+
+      /* ── Category count badges ── */
+      document.querySelectorAll('.faq-category').forEach(function(cat){
+        var n=0, el=cat.nextElementSibling;
+        while(el&&!el.classList.contains('faq-category')){
+          if(el.classList.contains('faq-item')) n++;
+          el=el.nextElementSibling;
+        }
+        if(n){
+          var b=document.createElement('span'); b.className='fq-cat-count'; b.textContent=n;
+          cat.appendChild(b);
+        }
+      });
+
+      /* ── Scroll reveal: categories ── */
+      var cats=document.querySelectorAll('.faq-category');
+      cats.forEach(function(c){ c.classList.add('fq-cat-anim'); });
+      var catObs=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('in'); });
+      },{threshold:.1});
+      cats.forEach(function(c){ catObs.observe(c); });
+
+      /* ── Scroll reveal: FAQ items (staggered per category block) ── */
+      var items=document.querySelectorAll('.faq-item');
+      items.forEach(function(item){ item.classList.add('fq-item-reveal'); });
+      var itemObs=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('in'); });
+      },{threshold:.05,rootMargin:'0px 0px -30px 0px'});
+      items.forEach(function(item){ itemObs.observe(item); });
+
+    })();
+    </script>
+    <script>
+    (function(){
+      'use strict';
+
+      /* ── Home button ── */
+      var h=document.createElement('a');
+      h.href='./index.html'; h.className='fq-home'; h.innerHTML='← PersonaDLE';
+      var pb=document.getElementById('fq-prog');
+      if(pb) pb.insertAdjacentElement('afterend',h);
+      else document.body.insertBefore(h,document.body.firstChild);
+
+      /* ── Category color mapping ── */
+      var CAT_KEYS=['game','gameplay','account','community','team'];
+      var CAT_COLORS={'game':'#e63946','gameplay':'#f97316','account':'#3b82f6','community':'#8b5cf6','team':'#f59e0b'};
+      var cats=document.querySelectorAll('.faq-category');
+      cats.forEach(function(cat,i){
+        var k=CAT_KEYS[i]||'game';
+        cat.classList.add('fq-'+k); cat.dataset.catKey=k;
+        var el=cat.nextElementSibling;
+        while(el&&!el.classList.contains('faq-category')){
+          if(el.classList.contains('faq-item')){ el.classList.add('fi-'+k); el.dataset.catKey=k; }
+          el=el.nextElementSibling;
+        }
+      });
+      /* fix last cat key */
+      var lastCat=cats[cats.length-1];
+      if(lastCat) lastCat.classList.add('fq-team-cat');
+
+      /* ── Filter tabs ── */
+      var tabData=[
+        {cat:'all',label:'All'},
+        {cat:'game',label:'🎮 Game'},
+        {cat:'gameplay',label:'🕹️ Gameplay'},
+        {cat:'account',label:'👤 Account'},
+        {cat:'community',label:'👥 Community'},
+        {cat:'team',label:'👋 Team'},
+      ];
+      var tabsWrap=document.createElement('div'); tabsWrap.className='fq-tabs';
+      tabData.forEach(function(t){
+        var btn=document.createElement('button'); btn.className='fq-tab'+(t.cat==='all'?' active':'');
+        btn.dataset.cat=t.cat; btn.textContent=t.label;
+        tabsWrap.appendChild(btn);
+      });
+      var sw=document.querySelector('.fq-search-wrap');
+      if(sw) sw.insertAdjacentElement('afterend',tabsWrap);
+      else {
+        var hdr=document.querySelector('.faq-page-header');
+        if(hdr) hdr.insertAdjacentElement('afterend',tabsWrap);
+      }
+      tabsWrap.addEventListener('click',function(e){
+        var btn=e.target.closest('.fq-tab'); if(!btn) return;
+        tabsWrap.querySelectorAll('.fq-tab').forEach(function(t){t.classList.remove('active');});
+        btn.classList.add('active');
+        var cat=btn.dataset.cat;
+        document.querySelectorAll('.faq-category').forEach(function(c){
+          c.style.display=(cat==='all'||c.dataset.catKey===cat)?'':'none';
+        });
+        document.querySelectorAll('.faq-item').forEach(function(item){
+          item.style.display=(cat==='all'||item.dataset.catKey===cat)?'':'none';
+        });
+      });
+
+      /* ── Team section: replace list with grid ── */
+      var teamList=document.querySelector('.faq-team');
+      if(teamList){
+        var teamData=[
+          {e:'⚡',name:'Hamza',role:'Founder & Lead Dev — game logic, backend, animations'},
+          {e:'🎨',name:'Léo (L2GENDAIRE)',role:'Data & Design — character database, portraits, layouts'},
+          {e:'🖥️',name:'Damien (Corbover)',role:'Front-End — CSS architecture, responsive design'},
+          {e:'📚',name:'Dzulian',role:'Creative Consultant — P1/P2 accuracy, classic trilogy'},
+        ];
+        var grid=document.createElement('div'); grid.className='fq-team-grid';
+        teamData.forEach(function(m){
+          var card=document.createElement('div'); card.className='fq-team-card';
+          card.innerHTML='<span class="fq-team-emoji">'+m.e+'</span><div class="fq-team-name">'+m.name+'</div><div class="fq-team-role">'+m.role+'</div>';
+          grid.appendChild(card);
+        });
+        teamList.replaceWith(grid);
+      }
+
+      /* ── Jack Frost reactions ── */
+      var bubble=document.querySelector('.faq-mascot-bubble');
+      var reactions=['Hee-ho! ✓','Oh nice! ♪','Got it! Ho!','Sure thing!','Hee-hee! ✨','Interesting!'];
+      var originalBubble=bubble?bubble.innerHTML:'Any questions?<br>Hee-ho!';
+      document.querySelectorAll('.faq-question').forEach(function(q){
+        q.addEventListener('click',function(){
+          if(!bubble) return;
+          var item=q.closest('.faq-item');
+          if(item&&!item.classList.contains('open')){ /* about to open */
+            bubble.textContent=reactions[Math.floor(Math.random()*reactions.length)];
+            clearTimeout(bubble._rt);
+            bubble._rt=setTimeout(function(){bubble.innerHTML=originalBubble;},2200);
+          }
+        });
+      });
+
+      /* ── Active category pill ── */
+      var pill=document.createElement('div'); pill.className='fq-pill';
+      document.body.appendChild(pill);
+      var pillTimer;
+      var pillObs=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(!e.isIntersecting) return;
+          var key=e.target.dataset.catKey||'game';
+          var color=CAT_COLORS[key]||'#e63946';
+          /* strip count badge from text */
+          var txt=e.target.textContent.replace(/\d+$/,'').trim();
+          pill.textContent=txt;
+          pill.style.background=color+'cc';
+          pill.classList.add('show');
+          clearTimeout(pillTimer);
+          pillTimer=setTimeout(function(){pill.classList.remove('show');},2200);
+        });
+      },{rootMargin:'-20% 0px -72% 0px'});
+      cats.forEach(function(c){pillObs.observe(c);});
+
+    })();
     </script>
   </body>
 </html>

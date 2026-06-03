@@ -17,7 +17,7 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="./css/global.css?v=9" />
+    <link rel="stylesheet" href="./css/global.css?v=10" />
     <link rel="stylesheet" href="./css/langSelector.css?v=4" />
     <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="./privacy.css?v=8" />
@@ -29,6 +29,163 @@
         document.documentElement.classList.add("darkmode");
       }
     </script>
+    <style>
+      html { scroll-behavior: smooth; }
+
+      /* ── Progress bar ── */
+      #px-prog { position:fixed;top:0;left:0;width:100%;height:3px;z-index:9999;pointer-events:none; }
+      #px-fill { height:100%;width:0%;background:linear-gradient(90deg,#c0193a,#e63946,#ff6b9d,#ffd700);box-shadow:0 0 10px rgba(230,57,70,.8);transition:width .08s linear; }
+
+      /* ── Gradient title ── */
+      .privacy-page-title {
+        background: linear-gradient(135deg,#e63946 0%,#ff8a80 50%,#ffd740 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
+      .darkmode .privacy-page-title {
+        background: linear-gradient(135deg,#ff6b9d 0%,#e63946 50%,#ffd700 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
+
+      /* ── Scroll reveal ── */
+      .px-reveal { opacity:0; transform:translateY(22px); transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1); }
+      .px-reveal.in { opacity:1; transform:none; }
+
+      /* ── Badge entrance ── */
+      @keyframes badgePop { 0%{transform:scale(0) rotate(-8deg);opacity:0;} 65%{transform:scale(1.08) rotate(1deg);opacity:1;} 100%{transform:scale(1);opacity:1;} }
+      .privacy-badge { opacity:0; animation:badgePop .45s cubic-bezier(.22,1,.36,1) forwards; transition:transform .2s, box-shadow .2s; }
+      .privacy-badge:nth-child(1){animation-delay:.2s;} .privacy-badge:nth-child(2){animation-delay:.35s;}
+      .privacy-badge:nth-child(3){animation-delay:.5s;}  .privacy-badge:nth-child(4){animation-delay:.65s;}
+      .privacy-badge:hover { transform:translateY(-2px) scale(1.06); box-shadow:0 4px 14px rgba(0,0,0,.14); }
+
+      /* ── Card hover lift ── */
+      .privacy-card { transition:box-shadow .2s, transform .2s !important; }
+      .privacy-card:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,.12) !important; }
+      .darkmode .privacy-card:hover { box-shadow:0 8px 28px rgba(0,0,0,.4) !important; }
+
+      /* ── "Never" list stagger ── */
+      @keyframes neverIn { from{opacity:0;transform:translateX(-12px);} to{opacity:1;transform:none;} }
+      .px-never-stagger li { opacity:0; animation:neverIn .4s cubic-bezier(.22,1,.36,1) forwards; }
+
+      /* ── Security card accent ── */
+      .privacy-card--security { background:linear-gradient(135deg,rgba(25,118,210,.05) 0%,transparent 100%) !important; }
+      .darkmode .privacy-card--security { background:linear-gradient(135deg,rgba(25,118,210,.12) 0%,transparent 100%) !important; }
+
+      /* ── Back button ── */
+      .privacy-back .btn-p5 { transition:transform .2s, box-shadow .2s !important; }
+      .privacy-back .btn-p5:hover { transform:translateY(-2px) !important; box-shadow:0 6px 20px rgba(230,57,70,.3) !important; }
+
+      /* ── Reduced motion ── */
+      @media(prefers-reduced-motion:reduce){
+        .px-reveal,.privacy-badge{opacity:1;transform:none;animation:none;transition:none;}
+      }
+    </style>
+
+    <!-- ══ PRIVACY — STYLE UPGRADE ══ -->
+    <style>
+      @keyframes pgIn { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:none;} }
+      .privacy-page-header { animation:pgIn .5s ease-out both; }
+      .privacy-main { animation:pgIn .6s ease-out .1s both; }
+
+      /* ── Home button ── */
+      .px-home {
+        position:fixed; top:12px; left:110px; z-index:9998;
+        background:rgba(255,255,255,.92); color:#1a1a1a;
+        border:1.5px solid #e63946; border-radius:8px;
+        padding:6px 14px; font-size:13px; font-weight:700;
+        text-decoration:none; display:inline-flex; align-items:center; gap:5px;
+        transition:background .2s, box-shadow .2s, transform .2s;
+        backdrop-filter:blur(12px); box-shadow:0 2px 12px rgba(0,0,0,.12);
+      }
+      .px-home:hover { box-shadow:0 4px 18px rgba(230,57,70,.4); transform:translateY(-1px); background:rgba(255,244,246,.97); }
+      .darkmode .px-home { background:rgba(16,12,26,.92); color:#f0f0f0; }
+      .darkmode .px-home:hover { background:rgba(30,18,40,.97); }
+
+      /* ── Shield hero ── */
+      .px-shield-hero { text-align:center; padding:20px 0 4px; }
+      .px-shield-icon {
+        font-size:3rem; display:inline-block;
+        animation:shieldGlow 3s ease-in-out infinite;
+        filter:drop-shadow(0 0 16px rgba(230,57,70,.4));
+      }
+      @keyframes shieldGlow {
+        0%,100%{transform:scale(1);filter:drop-shadow(0 0 14px rgba(230,57,70,.3));}
+        50%{transform:scale(1.07);filter:drop-shadow(0 0 28px rgba(230,57,70,.7));}
+      }
+
+      /* ── Cards glass upgrade ── */
+      .privacy-card {
+        background:rgba(255,255,255,.96) !important;
+        backdrop-filter:blur(14px) !important; -webkit-backdrop-filter:blur(14px) !important;
+        border-radius:14px !important;
+        transition:box-shadow .25s, transform .2s !important;
+      }
+      .privacy-card:hover { transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,0,0,.13), 0 0 0 1px rgba(230,57,70,.07) !important; }
+      .darkmode .privacy-card { background:rgba(12,8,22,.96) !important; border-color:rgba(230,57,70,.22) !important; }
+      .darkmode .privacy-card:hover { box-shadow:0 12px 36px rgba(0,0,0,.55) !important; }
+
+      .privacy-intro-wrap {
+        background:rgba(255,255,255,.97) !important;
+        backdrop-filter:blur(16px) !important; -webkit-backdrop-filter:blur(16px) !important;
+        border:1px solid rgba(230,57,70,.14) !important;
+        box-shadow:0 4px 28px rgba(0,0,0,.1) !important;
+        border-radius:16px !important;
+      }
+      .darkmode .privacy-intro-wrap { background:rgba(12,8,22,.97) !important; border-color:rgba(230,57,70,.2) !important; }
+
+      /* ── Tagline gradient ── */
+      .privacy-tagline {
+        font-size:1.45rem !important; font-weight:800 !important;
+        background:linear-gradient(135deg,#e63946,#ff8a80,#ffd740);
+        -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        letter-spacing:.04em !important;
+      }
+
+      /* ── Contact button ── */
+      .px-email-btn {
+        display:inline-flex !important; align-items:center; gap:8px;
+        margin-top:14px !important; padding:11px 24px !important;
+        background:linear-gradient(135deg,#c0193a,#e63946) !important;
+        color:#fff !important; border-radius:10px !important;
+        text-decoration:none !important; font-weight:700 !important;
+        font-size:.9rem !important; letter-spacing:.2px;
+        box-shadow:0 4px 18px rgba(230,57,70,.35) !important;
+        transition:transform .2s, box-shadow .2s !important;
+        border:none !important;
+      }
+      .px-email-btn:hover { transform:translateY(-2px) !important; box-shadow:0 8px 28px rgba(230,57,70,.5) !important; opacity:1 !important; }
+
+      /* ── Two-column accent ── */
+      .privacy-row .privacy-card:first-child { border-left-color:#2196f3 !important; }
+      .privacy-row .privacy-card:last-child  { border-left-color:#4caf50 !important; }
+      .privacy-row .privacy-card:first-child .privacy-card__title { color:#1565c0; }
+      .privacy-row .privacy-card:last-child  .privacy-card__title { color:#2e7d32; }
+      .darkmode .privacy-row .privacy-card:first-child .privacy-card__title { color:#90caf9; }
+      .darkmode .privacy-row .privacy-card:last-child  .privacy-card__title { color:#81c784; }
+
+      /* ── Legal section ── */
+      .privacy-card--legal .privacy-card__title { color:#7b1fa2; }
+      .darkmode .privacy-card--legal .privacy-card__title { color:#ce93d8; }
+
+      /* ── Back button ── */
+      .privacy-back .btn-p5 {
+        background:linear-gradient(135deg,#c0193a,#e63946) !important;
+        color:#fff !important; border-radius:10px !important;
+        padding:11px 30px !important; border:none !important;
+        box-shadow:0 4px 18px rgba(230,57,70,.3) !important;
+        font-size:.9rem !important; font-weight:700 !important;
+        transition:transform .2s, box-shadow .2s !important;
+        display:inline-block !important;
+      }
+      .privacy-back .btn-p5:hover { transform:translateY(-2px) !important; box-shadow:0 8px 26px rgba(230,57,70,.48) !important; }
+
+      /* ── Last updated chip ── */
+      .px-updated-wrap { text-align:center; margin:20px 0 14px; }
+      .privacy-last-updated {
+        display:inline-block !important;
+        background:rgba(230,57,70,.07); border:1px solid rgba(230,57,70,.18);
+        border-radius:20px; padding:5px 16px;
+      }
+    </style>
   </head>
   <body>
     <!-- Art décoratif : personnages Persona sur les bords de la page -->
@@ -457,6 +614,79 @@
           navigator.serviceWorker.register("./sw.js").catch(() => {});
         });
       }
+    </script>
+    <script>
+    (function(){
+      'use strict';
+      /* Progress bar */
+      var pb=document.createElement('div'); pb.id='px-prog';
+      var pf=document.createElement('div'); pf.id='px-fill';
+      pb.appendChild(pf); document.body.insertBefore(pb,document.body.firstChild);
+      window.addEventListener('scroll',function(){
+        var st=window.scrollY, dh=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+        pf.style.width=(dh>0?st/dh*100:0)+'%';
+      },{passive:true});
+
+      /* Scroll reveal */
+      var targets=[].slice.call(document.querySelectorAll('.privacy-card,.privacy-intro-wrap'));
+      /* privacy-row children each reveal separately */
+      document.querySelectorAll('.privacy-row').forEach(function(r){
+        [].slice.call(r.children).forEach(function(c){ targets.push(c); });
+      });
+      targets.forEach(function(el){ el.classList.add('px-reveal'); });
+      var obs=new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('in'); });
+      },{threshold:.07,rootMargin:'0px 0px -40px 0px'});
+      targets.forEach(function(el){ obs.observe(el); });
+
+      /* "Never do" list stagger — triggered on scroll */
+      var neverCard=document.querySelector('.privacy-card--safe');
+      if(neverCard){
+        var nList=neverCard.querySelector('.privacy-card__list');
+        if(nList){
+          nList.classList.add('px-never-stagger');
+          nList.querySelectorAll('li').forEach(function(li,i){ li.style.animationDelay=(.3+i*.1)+'s'; });
+          var nObs=new IntersectionObserver(function(e){
+            if(e[0].isIntersecting){ nList.querySelectorAll('li').forEach(function(li){ li.style.animationPlayState='running'; }); nObs.disconnect(); }
+          },{threshold:.2});
+          nList.querySelectorAll('li').forEach(function(li){ li.style.animationPlayState='paused'; });
+          nObs.observe(neverCard);
+        }
+      }
+    })();
+    </script>
+    <script>
+    (function(){
+      'use strict';
+
+      /* ── Home button ── */
+      var h=document.createElement('a');
+      h.href='./index.html'; h.className='px-home'; h.innerHTML='← PersonaDLE';
+      var pb=document.getElementById('px-prog');
+      if(pb) pb.insertAdjacentElement('afterend',h);
+      else document.body.insertBefore(h,document.body.firstChild);
+
+      /* ── Shield hero before intro ── */
+      var intro=document.querySelector('.privacy-intro-wrap');
+      if(intro){
+        var sh=document.createElement('div'); sh.className='px-shield-hero';
+        sh.innerHTML='<span class="px-shield-icon">🔐</span>';
+        intro.parentNode.insertBefore(sh,intro);
+      }
+
+      /* ── Style email links as buttons ── */
+      document.querySelectorAll('a.privacy-email-link').forEach(function(a){
+        a.classList.add('px-email-btn');
+        a.classList.remove('privacy-email-link');
+      });
+
+      /* ── Wrap last-updated ── */
+      var lu=document.querySelector('.privacy-last-updated');
+      if(lu){
+        var wrap=document.createElement('div'); wrap.className='px-updated-wrap';
+        lu.parentNode.insertBefore(wrap,lu); wrap.appendChild(lu);
+      }
+    })();
     </script>
   </body>
 </html>
