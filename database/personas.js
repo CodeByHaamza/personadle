@@ -175,6 +175,10 @@ export const personas = [
   "Sophia",
   "Zenkichi Hasegawa",
 
+  // ── Personnages secondaires (P5S) ─────────────────────────────
+  "Akane Hasegawa",
+  "Kuon Ichinose",
+
   // ── Antagoniste(s) ────────────────────────────────────────────
   "Yaldabaoth",
   "Suguru Kamoshida",
@@ -183,6 +187,10 @@ export const personas = [
   "Kunikazu Okumura",
   "Masayoshi Shido",
   "Takuto Maruki",
+  "Alice Hiiragi",
+  "Ango Natsume",
+  "Mariko Hyodo",
+  "Akira Konoe",
 
   // ── Velvet Room ───────────────────────────────────────────────
   "Caroline",

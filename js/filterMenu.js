@@ -181,7 +181,10 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
   });
 
   /* ── 3. Fermeture au clic en dehors du panneau ──────────────── */
+  // e.isTrusted === false → clic programmatique (ex: resetButton.click() dans onFilterChange)
+  // On ignore ces événements pour éviter que le panneau se ferme après un changement de filtre.
   document.addEventListener("click", (e) => {
+    if (!e.isTrusted) return;
     const panel = document.getElementById("filterPanel");
     if (panel && !panel.contains(e.target)) {
       _closePannel();

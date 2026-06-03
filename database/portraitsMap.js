@@ -152,6 +152,12 @@ export const portraitsMap = {
   // ── Persona 5 Strikers ────────────────────────────────────────────────────
   "Sophia":            "Sophia",
   "Zenkichi Hasegawa": "Zenkichi",
+  "Akane Hasegawa":    "Akane_Hasegawa",
+  "Kuon Ichinose":     "Kuon_Ichinose",
+  "Alice Hiiragi":     "Alice_Hiiragi",
+  "Ango Natsume":      "Ango_Natsume",
+  "Mariko Hyodo":      "Mariko_Hyodo",
+  "Akira Konoe":       "Akira_Konoe",
 
   // ── Persona 5 Tactica ────────────────────────────────────────────────────
   "Erina":             "Erina",

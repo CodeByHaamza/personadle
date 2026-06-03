@@ -1223,7 +1223,7 @@ export const characters = [
     genre: ["Human","Female"],
     age: "21-40",
     arcane: ["Judgement"],
-    opus: ["P5","P5R","P5S"],
+    opus: ["P5","P5R"],
     personaUser: true,
     persona: "Leviathan",
     emoji: ["🔎", "⚖️", "👩‍⚖️"],
@@ -1251,6 +1251,30 @@ export const characters = [
     persona: "Valjean",
     emoji: ["🕴️", "🐺", "🔫"],
     quote: "I may not be a hero, and I sure as hell don't deserve any awards... But at least I know what makes a person evil. Evil only cares about itself. It's the mark of a man who would bring another to ruin and dare not show remorse. I will never let people like that go free. And I'll give everything I have to bring them down!"
+  },
+
+  // ── Personnages secondaires (P5S) ─────────────────────────────
+  {
+    nom: "Akane Hasegawa",
+    genre: ["Human", "Female"],
+    age: "< 15",
+    arcane: ["NONE"],
+    opus: ["P5S"],
+    personaUser: true,
+    persona: "Shadow Akane",
+    emoji: ["👧", "📱", "⛩️"],
+    quote: "He doesn't care about Mom anymore. He doesn't care about me. I know he's just trying to find the next woman so he can get on with his life. I know he thinks I'm just in the way. I wish anyone but him was my father!"
+  },
+  {
+    nom: "Kuon Ichinose",
+    genre: ["Human", "Female"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P5S"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["👩‍🔬", "💻", "🍬"],
+    quote: "You guys could probably never understand. I brought Sophia to life so I could learn about the human heart. Remember what I told you? All my life, I've never felt what other people call the heart..."
   },
 
   // ── Antagoniste(s) ────────────────────────────────────────────
@@ -1330,6 +1354,50 @@ export const characters = [
     persona: "Azathoth",
     emoji: ["🧠", "💭", "🍬"],
     quote: "It's true that I turned my back on the original reality... But where's the harm in that!? When it grows to be too much, too painful... Every person deserves to escape that! In all honesty, it's best for a person's growth when they tackle their own hardships... But reality doesn't always make that so feasible! No matter how much you try, or work for so long, the smallest injustice can wipe it all out, leave you with nothing... Don't you, of all people, understand that!?"
+  },
+  {
+    nom: "Alice Hiiragi",
+    genre: ["Human", "Female"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P5S"],
+    personaUser: true,
+    persona: "Mad Rabbit Alice",
+    emoji: ["🐰", "🎀", "👗"],
+    quote: "Oh, okay... You found out... No matter how much I hide it, the past still comes back to me! How pathetic... What a mess! But that doesn't matter now. With this power, I can have everything. Everything I've always wanted... Mine!"
+  },
+  {
+    nom: "Ango Natsume",
+    genre: ["Human", "Male"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P5S"],
+    personaUser: true,
+    persona: "Nightmare Dragon Ango",
+    emoji: ["🐉", "✍️", "📖"],
+    quote: "I'm sick and tired of everyone looking down on me... Yes... The time has come for my true power. You wretches shall witness... my final form!"
+  },
+  {
+    nom: "Mariko Hyodo",
+    genre: ["Human", "Female"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P5S"],
+    personaUser: true,
+    persona: "Snow Empress Mariko",
+    emoji: ["❄️", "🍽️", "🗳️"],
+    quote: "You shut your impudent mouths! I've done nothing wrong! I will wring out every last ounce of corruption from my staff by working them into the ground! I'll silence all charlatans who betray me! And I will consume every last vote in the city, whether these people agree with me or not! Only then can I build a safe haven-a radiant snow city that sparkles like winter!"
+  },
+  {
+    nom: "Akira Konoe",
+    genre: ["Human", "Male"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P5S"],
+    personaUser: true,
+    persona: "Akira the Hero",
+    emoji: ["🦸‍♂️", "🏢", "🤖"],
+    quote: "There aren't any real heroes left. So... why not make our own? The world needs someone willing to fight for its people's justice. A hero to lead them. To unify them. A hero like me."
   },
 
   // ── Velvet Room ───────────────────────────────────────────────
