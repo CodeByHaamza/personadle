@@ -305,6 +305,7 @@ body.music-mode .victory-box {
 body.music-mode .victory-box img {
   width: 300px;
   height: auto;
+  max-height: none;
   border-radius: 16px;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
