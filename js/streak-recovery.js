@@ -39,16 +39,16 @@ export function canRecover() {
 
 /**
  * Vérifie si le menu doit s'afficher au login.
- * Affiche une seule fois par session (flag `shown`).
+ * - `shown` est écrit UNIQUEMENT quand l'utilisateur confirme (dans _recover)
+ * - `_srDismissed` en sessionStorage empêche la ré-apparition si "Not now"
  */
 export function checkStreakRecovery() {
   const r = _getRecovery();
   if (!r.previousStreak || r.previousStreak <= 1) return;
   if (r.shown) return;
   if (!canRecover()) return;
-
-  r.shown = true;
-  _saveRecovery(r);
+  // Ne pas réafficher si déjà dismissé dans cette session de navigation
+  try { if (sessionStorage.getItem("_srDismissed")) return; } catch (_) {}
 
   // Petit délai pour laisser la page se stabiliser
   setTimeout(() => showStreakRecoveryMenu(r.previousStreak), 800);
@@ -114,6 +114,11 @@ function _recover(previousStreak, overlay) {
   const menu = document.getElementById("sr-menu");
   if (menu) menu.classList.add("sr--embrase");
 
+  // Marquer `shown` maintenant que l'utilisateur a confirmé (pas avant)
+  const _rConfirm = _getRecovery();
+  _rConfirm.shown = true;
+  _saveRecovery(_rConfirm);
+
   // 1. Restaurer la streak en localStorage + marquer la recovery pour le badge reborn_phoenix
   try {
     const profile = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
@@ -151,6 +156,8 @@ function _syncRecoveryToBackend(previousStreak) {
 function _close(overlay) {
   if (!overlay) overlay = document.getElementById("streak-recovery-overlay");
   if (!overlay) return;
+  // Mémoriser le dismiss en sessionStorage pour ne pas réafficher dans la même session
+  try { sessionStorage.setItem("_srDismissed", "1"); } catch (_) {}
   overlay.classList.add("sr--exit");
   setTimeout(() => overlay.remove(), 420);
 }

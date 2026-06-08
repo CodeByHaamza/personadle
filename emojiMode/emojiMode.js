@@ -318,12 +318,15 @@ function checkEmojiGuess(name, forceReveal = false) {
     checkChallengeCompletion("emoji", attempts, !forceReveal);
     showCommunityStats(modeName, target.nom);
 
-    // 🎭 SHAPESHIFTER — track character per mode
+    // 🎭 SHAPESHIFTER — track character per mode (write into personaUserProfile.characterModeMap)
     if (!forceReveal && target.nom) {
-      const cmap = JSON.parse(localStorage.getItem("characterModeMap") || "{}");
-      if (!cmap[target.nom]) cmap[target.nom] = [];
-      if (!cmap[target.nom].includes("emoji")) cmap[target.nom].push("emoji");
-      localStorage.setItem("characterModeMap", JSON.stringify(cmap));
+      const _pShape = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+      if (!_pShape.characterModeMap) _pShape.characterModeMap = {};
+      if (!_pShape.characterModeMap[target.nom]) _pShape.characterModeMap[target.nom] = [];
+      if (!_pShape.characterModeMap[target.nom].includes("emoji")) {
+        _pShape.characterModeMap[target.nom].push("emoji");
+      }
+      localStorage.setItem("personaUserProfile", JSON.stringify(_pShape));
     }
 
     if (!forceReveal) {

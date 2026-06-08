@@ -154,7 +154,7 @@
       "giveup_reveal": "❌ Ti sei arreso! La risposta era: {{name}}",
       "no_characters": "Nessun personaggio disponibile con i filtri attuali.",
       "prev_mode": "← Modalità Emoji",
-      "next_mode": "Modalità Ombre →"
+      "next_mode": "Modalità Silhouette →"
     },
     "personae": {
       "name": "Personae",
@@ -180,7 +180,7 @@
       "closing": "🔍 Fidati del tuo intuito, affidati alla tua memoria e dimostra la tua padronanza di Persona!",
       "correct": "✅ Ottima risposta! La Persona di {{name}} era {{persona}}.",
       "giveup_reveal": "❌ Peccato! La Persona di {{name}} era {{persona}}.",
-      "prev_mode": "← Modalità Ombre",
+      "prev_mode": "← Modalità Silhouette",
       "next_mode": "Modalità Musica →"
     },
     "music": {
@@ -925,7 +925,7 @@
   "privacy": {
     "page_title": "Privacy e Note Legali",
     "tagline": "Siamo trasparenti.",
-    "last_updated": "Ultimo aggiornamento: maggio 2026",
+    "last_updated": "Ultimo aggiornamento: giugno 2026",
     "intro": "PersonaDLE è un gioco di indovinelli fan-made gratuito. Ecco tutto quello che devi sapere sui tuoi dati — senza gergo legale.",
     "collected_title": "Cosa raccogliamo",
     "collected_email": "Il tuo indirizzo email — per creare e proteggere il tuo account",
@@ -987,7 +987,7 @@
     "q5": "Quante modalità di gioco ci sono?",
     "a5": "6 modalità — Classica (griglia di attributi in stile Wordle), Emoji (decifra indizi emoji), Silhouette (rivelazione progressiva dell'immagine), All-Out Attack (GIF animata), Personae (indovina dalla Persona, non dal personaggio) e Musica (breve estratto audio).",
     "q6": "Come funziona la modalità Classica?",
-    "a6": "Digita il nome di un personaggio. Dopo ogni tentativo, una griglia mostra 7 attributi: gioco di origine, ruolo, età, Arcana, arma, affiliazione e altezza. Verde = esatto, giallo = vicino, rosso = sbagliato — stessa logica di Wordle.",
+    "a6": "Inserisci un nome di personaggio. Dopo ogni tentativo, una griglia mostra 7 attributi: gioco d'origine, genere, età, Arcana, se è un Utente di Persona o un Shadow, la loro forma Persona/Shadow e il legame con un personaggio giocabile. Verde = corrispondenza esatta, giallo = vicino, rosso = sbagliato — stessa logica di Wordle.",
     "q7": "Cos'è una streak?",
     "a7": "La tua streak conta i giorni consecutivi in cui hai vinto in una data modalità. Saltare un giorno o premere Give Up la azzera a 0. La funzione Streak Recovery (menu Jack Frost nel profilo) ti permette di ripristinarla una volta ogni 2 mesi.",
     "q8": "Come funzionano i filtri?",

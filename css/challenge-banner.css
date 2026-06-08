@@ -83,10 +83,13 @@
   border: none;
   color: #888;
   border-radius: 50%;
-  width: 18px;
-  height: 18px;
+  /* WCAG 2.5.5 : taille cible minimale 44x44px */
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   cursor: pointer;
-  font-size: 0.55rem;
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,5 +116,16 @@ body.darkmode #challengeBanner {
     bottom: 70px;
     right: 10px;
     max-width: 200px;
+  }
+}
+
+/* ── prefers-reduced-motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .challenge-banner,
+  .btn-challenge,
+  .cb-avatar {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

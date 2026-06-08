@@ -18,6 +18,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $userId = requireAuth();
+
+// ── Rate limiting : 15 requêtes / 15 min par utilisateur ─────────────────────
+// Protège contre les bots qui posteraient des sessions en boucle.
+// La contrainte UNIQUE per (user, mode, date) protège l'intégrité, mais ce
+// rate limit coupe les appels répétitifs avant même d'atteindre la BDD.
+$rlKey  = sys_get_temp_dir() . '/rl_sessions_' . md5('personadle_sessions_' . $userId) . '.json';
+$rlNow  = time();
+$rlData = file_exists($rlKey) ? json_decode(file_get_contents($rlKey), true) : null;
+$rlWindow = 15 * 60;
+$rlMax    = 15;
+
+if ($rlData && ($rlNow - $rlData['window_start']) < $rlWindow) {
+    if ($rlData['count'] >= $rlMax) {
+        jsonError('Too many session submissions. Please wait a few minutes.', 429);
+    }
+    $rlData['count']++;
+} else {
+    $rlData = ['count' => 1, 'window_start' => $rlNow];
+}
+file_put_contents($rlKey, json_encode($rlData), LOCK_EX);
 $data   = getJsonBody();
 
 // ── Validation ────────────────────────────────────────────────────────────────
@@ -37,6 +57,13 @@ if (!in_array($mode, $validModes, true)) {
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $playedDate)) {
     jsonError('Invalid played_date format. Expected YYYY-MM-DD');
 }
+// Valider que played_date est aujourd'hui ou hier en heure de Paris
+// (évite les injections de sessions sur des dates passées arbitraires)
+$parisNow       = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+$parisYesterday = (new DateTime('yesterday', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+if ($playedDate !== $parisNow && $playedDate !== $parisYesterday) {
+    jsonError('played_date must be today or yesterday (Europe/Paris timezone)', 400);
+}
 if (empty($targetName)) {
     jsonError('target_name is required');
 }
@@ -53,33 +80,27 @@ if (!is_array($filters)) {
 $pdo = pdo();
 
 // ── Anti-doublon : une seule session par (user, mode, date) ──────────────────
-$stmt = $pdo->prepare('
-    SELECT id FROM game_sessions
-    WHERE user_id = ? AND mode = ? AND played_date = ?
-    LIMIT 1
-');
-$stmt->execute([$userId, $mode, $playedDate]);
-if ($stmt->fetch()) {
-    jsonError("Session already recorded for mode '$mode' on $playedDate", 409);
-}
-
+// La contrainte UNIQUE uq_session_per_day en BDD garantit l'unicité même en
+// cas de requêtes simultanées (plus de TOCTOU). On intercepte PDOException.
 $pdo->beginTransaction();
 try {
     // 1. Insérer la session
-    $pdo->prepare('
-        INSERT INTO game_sessions
-            (user_id, mode, played_date, target_name, result, attempts, time_ms, active_filters)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ')->execute([
-        $userId,
-        $mode,
-        $playedDate,
-        $targetName,
-        $result,
-        $attempts,
-        $timeMs,
-        json_encode($filters),
-    ]);
+    try {
+        $pdo->prepare('
+            INSERT INTO game_sessions
+                (user_id, mode, played_date, target_name, result, attempts, time_ms, active_filters)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ')->execute([
+            $userId, $mode, $playedDate, $targetName, $result,
+            $attempts, $timeMs, json_encode($filters),
+        ]);
+    } catch (PDOException $dup) {
+        $pdo->rollBack();
+        if ($dup->getCode() === '23000') {
+            jsonError("Session already recorded for mode '$mode' on $playedDate", 409);
+        }
+        throw $dup;
+    }
     $sessionId = (int) $pdo->lastInsertId();
 
     // 2. Lire les stats actuelles pour calculer la streak
@@ -122,7 +143,7 @@ try {
             streak_record= ?,
             perfect_wins = perfect_wins + ?,
             total_time_ms= total_time_ms + ?,
-            last_played_at = NOW()
+            last_played_at = UTC_TIMESTAMP()
         WHERE user_id = ? AND mode = ?
     ')->execute([
         $isWin ? 1 : 0,

@@ -94,3 +94,19 @@
     opacity: 0;
   }
 }
+
+/* ── Dark Mode ─────────────────────────────────────────────── */
+body.darkmode .rank10-label {
+  color: #ffd96a;
+  text-shadow: 0 0 12px rgba(255, 200, 50, 0.6);
+}
+
+/* ── prefers-reduced-motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .rank10-avatar,
+  .rank10-label,
+  .rank10-burst {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

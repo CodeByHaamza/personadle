@@ -33,14 +33,15 @@
 .sr-menu {
   position: relative;
   background: #ffffff;
-  border-radius: 28px;
+  border-radius: 16px;
+  border-top: 4px solid var(--color-accent, #e63946);
   padding: 36px 28px 26px;
   width: min(360px, 90vw);
   text-align: center;
   overflow: hidden;
   box-shadow:
     0 24px 64px rgba(0, 0, 0, 0.35),
-    0 0 0 3px #bde3ff,
+    0 0 0 1px rgba(230, 57, 70, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transform: translateY(32px) scale(0.92);
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -107,7 +108,8 @@
   font-size: 1.35rem;
   font-weight: 900;
   margin: 0 0 6px;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
+  font-family: "Persona5", "Oswald", "Arial Black", Arial, sans-serif;
 }
 .sr-subtitle {
   position: relative;
@@ -257,4 +259,32 @@
 .sr-restore-btn:hover {
   background: #ff6b00;
   color: #fff;
+}
+
+/* ── Dark Mode ─────────────────────────────────────────────── */
+body.darkmode .sr-menu {
+  background: #1a1025;
+  border-color: rgba(160, 80, 200, 0.4);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+}
+body.darkmode .sr-title { color: #e8d8ff; }
+body.darkmode .sr-subtitle { color: #c8b0e8; }
+body.darkmode .sr-desc { color: #a090c0; }
+body.darkmode .sr-btn-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: #c0a8e0;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+body.darkmode .sr-btn-cancel:hover { background: rgba(255, 255, 255, 0.14); }
+
+/* ── prefers-reduced-motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .sr-snowflake,
+  .sr-jack-img,
+  .sr-menu,
+  .sr-backdrop {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

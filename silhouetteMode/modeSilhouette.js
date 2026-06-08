@@ -6,6 +6,7 @@ import { updateProfileStats } from "../profile/profileStats.js";
 
 // Shared game utilities
 import {
+  parisDateKey,
   showConfettiExplosion,
   revealNextLink,
   setupRulesModal,
@@ -29,7 +30,7 @@ import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesMa
 // ─────────────────────────────────────────────────────────────────────────────
 
 const modeName = "silhouette";
-const todayKey = `statsLogged_${modeName}_${new Date().toISOString().split("T")[0]}`;
+const todayKey = `statsLogged_${modeName}_${parisDateKey()}`;
 let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
 let sessionStartTime = Date.now();
 
@@ -340,12 +341,15 @@ function showVictory(force = false) {
       }
     }
 
-    // 🎭 SHAPESHIFTER — track character per mode
+    // 🎭 SHAPESHIFTER — track character per mode (write into personaUserProfile.characterModeMap)
     if (target.nom) {
-      const cmap = JSON.parse(localStorage.getItem("characterModeMap") || "{}");
-      if (!cmap[target.nom]) cmap[target.nom] = [];
-      if (!cmap[target.nom].includes("silhouette")) cmap[target.nom].push("silhouette");
-      localStorage.setItem("characterModeMap", JSON.stringify(cmap));
+      const _pShape = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+      if (!_pShape.characterModeMap) _pShape.characterModeMap = {};
+      if (!_pShape.characterModeMap[target.nom]) _pShape.characterModeMap[target.nom] = [];
+      if (!_pShape.characterModeMap[target.nom].includes("silhouette")) {
+        _pShape.characterModeMap[target.nom].push("silhouette");
+      }
+      localStorage.setItem("personaUserProfile", JSON.stringify(_pShape));
     }
 
     const _pSil = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
@@ -579,7 +583,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ── Daily reset ──
-  checkResetOnLoad("lastPlayedDate_Shadow", "Shadow", () => {
+  checkResetOnLoad("lastPlayedDate_Silhouette", "silhouette", () => {
     resetBtn.click();
   });
   setupDailyReset(() => {

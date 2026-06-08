@@ -137,3 +137,15 @@
 .darkmode .sl-bar-bg {
   background: #333;
 }
+
+/* ── prefers-reduced-motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .sl-bar-fill,
+  .sl-flame,
+  .sl-rank-badge,
+  .sl-ru-overlay {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

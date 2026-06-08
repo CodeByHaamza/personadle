@@ -154,7 +154,7 @@
       "giveup_reveal": "❌ Du hast aufgegeben! Die Antwort war: {{name}}",
       "no_characters": "Keine Charaktere mit den aktuellen Filtern verfügbar.",
       "prev_mode": "← Emoji-Modus",
-      "next_mode": "Schatten-Modus →"
+      "next_mode": "Silhouette Modus →"
     },
     "personae": {
       "name": "Personae",
@@ -180,7 +180,7 @@
       "closing": "🔍 Vertraue deiner Intuition, stütze dich auf dein Gedächtnis und beweise deine Persona-Meisterschaft!",
       "correct": "✅ Guter Versuch! Die Persona von {{name}} war {{persona}}.",
       "giveup_reveal": "❌ Schade! Die Persona von {{name}} war {{persona}}.",
-      "prev_mode": "← Schatten-Modus",
+      "prev_mode": "← Silhouette Modus",
       "next_mode": "Musik-Modus →"
     },
     "music": {
@@ -987,7 +987,7 @@
     "q5": "Wie viele Spielmodi gibt es?",
     "a5": "6 Modi — Klassisch (Wordle-ähnliches Attribut-Raster), Emoji (Emoji-Hinweise entschlüsseln), Silhouette (progressive Bildenthlüllung), All-Out Attack (animiertes GIF), Personae (vom Persona-Bild auf den Charakter schließen) und Musik (kurzer Audioausschnitt).",
     "q6": "Wie funktioniert der Klassisch-Modus?",
-    "a6": "Gib einen Charakternamen ein. Nach jedem Versuch zeigt ein Raster 7 Attribute: Herkunftsspiel, Rolle, Alter, Arkana, Waffe, Zugehörigkeit und Größe. Grün = exakt, Gelb = nah dran, Rot = falsch — identische Logik wie Wordle.",
+    "a6": "Gib einen Charakternamen ein. Nach jedem Tipp zeigt ein Raster 7 Attribute: Herkunftsspiel, Geschlecht, Alter, Arkanum, ob sie Persona-Nutzer oder Shadow sind, ihre Persona/Shadow-Form und ihre Verbindung zu einem spielbaren Charakter. Grün = genaue Übereinstimmung, gelb = nah dran, rot = falsch — identische Logik wie bei Wordle.",
     "q7": "Was ist ein Streak?",
     "a7": "Dein Streak zählt die aufeinanderfolgenden Tage, an denen du in einem Modus gewonnen hast. Einen Tag auslassen oder Give Up drücken setzt ihn auf 0 zurück. Die Streak-Recovery (Jack-Frost-Menü im Profil) lässt dich ihn einmal alle 2 Monate wiederherstellen.",
     "q8": "Wie funktionieren Filter?",

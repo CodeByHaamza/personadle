@@ -76,7 +76,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.HOSTINGER_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+          # Injecter l'empreinte connue du serveur plutôt que d'ignorer la vérification
+          echo "${{ secrets.HOSTINGER_HOST_KEY }}" >> ~/.ssh/known_hosts
 
       - name: Deploy via rsync
         run: |
@@ -89,7 +90,11 @@ jobs:
             --exclude='.env' \
             --exclude='*.log' \
             --exclude='tests/' \
-            --exclude='scripts/'"
+            --exclude='scripts/' \
+            --exclude='sql/' \
+            --exclude='docker/' \
+            --exclude='docs/' \
+            --exclude='graphify-out/'"
 
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             RSYNC_OPTS="$RSYNC_OPTS --dry-run"
@@ -97,7 +102,7 @@ jobs:
           fi
 
           rsync $RSYNC_OPTS \
-            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
             ./ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/
 
       - name: Cleanup SSH key

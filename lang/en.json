@@ -154,7 +154,7 @@
       "giveup_reveal": "❌ You gave up! The answer was: {{name}}",
       "no_characters": "No characters available with current filters.",
       "prev_mode": "← Emoji Mode",
-      "next_mode": "Shadows Mode →"
+      "next_mode": "Silhouette Mode →"
     },
     "personae": {
       "name": "Personae",
@@ -180,7 +180,7 @@
       "closing": "🔍 Trust your insight, rely on your memory, and prove your Persona mastery!",
       "correct": "✅ Good guess! {{name}}'s Persona was {{persona}}.",
       "giveup_reveal": "❌ Too bad! {{name}}'s Persona was {{persona}}.",
-      "prev_mode": "← Shadows Mode",
+      "prev_mode": "← Silhouette Mode",
       "next_mode": "Music Mode →"
     },
     "music": {
@@ -230,7 +230,7 @@
     "music_label": "Profile Music",
     "title_label": "Title",
     "stat_wins": "🏆 Wins: {{count}}",
-    "stat_giveups": "🚫 Give Ups: {{count}}",
+    "stat_giveups": "🚫 Give-ups: {{count}}",
     "stat_games": "▶️ Games Played: {{count}}",
     "stat_streak": "📆 Current Streak: {{count}} day(s)",
     "stat_best_streak": "🔥 Best Streak: {{count}}",
@@ -925,7 +925,7 @@
   "privacy": {
     "page_title": "Privacy & Legal",
     "tagline": "We keep it honest.",
-    "last_updated": "Last updated: May 2026",
+    "last_updated": "Last updated: June 2026",
     "intro": "PersonaDLE is a free fan-made guessing game. Here's everything you need to know about your data — no lawyer-speak.",
     "collected_title": "What we collect",
     "collected_email": "Your email address — to create and secure your account",
@@ -987,7 +987,7 @@
     "q5": "How many game modes are there?",
     "a5": "6 modes — Classic (Wordle-style attribute grid), Emoji (decode emoji clues), Silhouette (progressive image reveal), All-Out Attack (animated GIF), Personae (guess from the Persona, not the character), and Music (short audio excerpt).",
     "q6": "How does Classic mode work?",
-    "a6": "Type a character name. After each guess, a grid shows 7 attributes: game of origin, role, age, Arcana, weapon, affiliation, and height. Green = exact match, yellow = close, red = wrong — identical logic to Wordle.",
+    "a6": "Type a character name. After each guess, a grid shows 7 attributes: game of origin, gender, age, Arcana, whether they are a Persona user or a Shadow, their Persona/Shadow form, and their link to a playable character. Green = exact match, yellow = close, red = wrong — same logic as Wordle.",
     "q7": "What is a streak?",
     "a7": "Your streak counts consecutive days you have won in a given mode. Miss a day or tap Give Up and it resets to 0. The Streak Recovery feature (Jack Frost menu on your profile) lets you restore it once every 2 months.",
     "q8": "How do filters work?",

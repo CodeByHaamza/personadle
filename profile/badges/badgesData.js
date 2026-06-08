@@ -63,7 +63,7 @@ export const badgesList = [
     description: "You see through the darkness. Even shadows can't hide from you!",
     secret: false,
     check: (stats, profile) => {
-      const silhouetteWins = stats?.modeCount?.Shadow || 0;
+      const silhouetteWins = stats?.modeWins?.Silhouette || 0;
       return silhouetteWins >= 5;
     },
   },
@@ -78,7 +78,7 @@ export const badgesList = [
       "You'll never see it coming! A true connoisseur of Persona's legendary soundtracks.",
     secret: false,
     check: (stats, profile) => {
-      const musicWins = stats?.modeCount?.Music || 0;
+      const musicWins = stats?.modeWins?.Music || 0;
       return musicWins >= 20;
     },
   },

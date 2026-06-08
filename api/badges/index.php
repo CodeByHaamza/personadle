@@ -176,12 +176,13 @@ if ($method === 'GET') {
     $lang = $_GET['lang'] ?? 'en';
     $col  = in_array($lang, ['fr','es','de','it'], true) ? "name_{$lang}" : 'name_en';
 
+    // LEFT JOIN remplace la sous-requête corrélée N+1 (une requête au lieu de N)
     $stmt = $pdo->prepare(
         "SELECT b.slug, b.{$col} AS name, b.category, b.rarity,
                 b.image_path, b.condition_en, b.is_secret,
-                (SELECT COUNT(*) FROM badges_unlocked bu
-                 WHERE bu.user_id = ? AND bu.badge_id = b.slug) AS is_unlocked
+                (bu.badge_id IS NOT NULL) AS is_unlocked
          FROM badges b
+         LEFT JOIN badges_unlocked bu ON bu.badge_id = b.slug AND bu.user_id = ?
          ORDER BY FIELD(b.category,'achievement','streak','social','event','secret'), b.slug"
     );
     $stmt->execute([$authId]);

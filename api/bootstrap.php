@@ -15,6 +15,9 @@
 
 declare(strict_types=1);
 
+// Garantir que PHP utilise UTC pour date/time, cohérent avec UTC_TIMESTAMP() MySQL
+date_default_timezone_set('UTC');
+
 // Charge config.php si présent (dev local / prod), sinon config.docker.php
 // (variables d'environnement injectées par Docker Compose).
 if (file_exists(__DIR__ . '/config.php')) {
@@ -153,6 +156,19 @@ function requireAuth(): int
         jsonError('Unauthorized — please log in', 401);
     }
     $uid = (int) $_SESSION['user_id'];
+
+    // Vérifier is_deleted (cached 5 min dans $_SESSION pour éviter une requête par hit)
+    $now = time();
+    if (empty($_SESSION['is_deleted_checked_at']) || ($now - (int)$_SESSION['is_deleted_checked_at']) > 300) {
+        $chk = pdo()->prepare('SELECT is_deleted FROM users WHERE id = ? LIMIT 1');
+        $chk->execute([$uid]);
+        $chkRow = $chk->fetch();
+        if (!$chkRow || $chkRow['is_deleted']) {
+            session_destroy();
+            jsonError('Account not found or deleted', 401);
+        }
+        $_SESSION['is_deleted_checked_at'] = $now;
+    }
 
     // Update last_login_at at most once per 5 minutes per session (heartbeat)
     $now = time();

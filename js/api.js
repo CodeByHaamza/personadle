@@ -205,11 +205,14 @@ export const api = {
 
     /**
      * Synchronise les sessions en attente stockées dans localStorage.
-     * À appeler après une reconnexion ou au chargement si l'user est connecté.
+     * Mutex _syncLock : une seule exécution simultanée (évite la race condition
+     * entre gameCore.savePendingSession, auth.initAuth et cloud-sync.pullProfileFromCloud).
      */
     syncPending: async () => {
+      if (api.stats._syncLock) return;
+      api.stats._syncLock = true;
       const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
-      if (!pending.length) return;
+      if (!pending.length) { api.stats._syncLock = false; return; }
 
       // Normalize legacy mode names stored before the server enum was finalised
       const _modeAlias = { shadow: "silhouette", classic: "classic" };
@@ -231,7 +234,9 @@ export const api = {
         }
       }
       localStorage.setItem("pendingSessions", JSON.stringify(remaining));
+      api.stats._syncLock = false;
     },
+    _syncLock: false,
   },
 
   // ── Daily target ──────────────────────────────────────

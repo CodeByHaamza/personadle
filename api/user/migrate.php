@@ -151,7 +151,7 @@ $stmtUpdateStats = $pdo->prepare('
         streak_record = ?,
         perfect_wins  = perfect_wins + ?,
         total_time_ms = total_time_ms + ?,
-        last_played_at = NOW()
+        last_played_at = UTC_TIMESTAMP()
     WHERE user_id = ? AND mode = ?
 ');
 
@@ -191,8 +191,25 @@ foreach ($pendingSessions as $session) {
 
         $isWin     = $result === 'win';
         $isPerfect = $isWin && $attempts === 1;
-        $newStreak = $isWin ? ($stats['streak'] + 1) : 0;
-        $newRecord = max($stats['streak_record'], $newStreak);
+
+        // Vérifier la consécutivité (même logique que sessions.php)
+        $currentStreak = (int) ($stats['streak'] ?? 0);
+        $currentRecord = (int) ($stats['streak_record'] ?? 0);
+        $lastPlayedAt  = $stats['last_played_at'] ?? null;
+        if ($isWin && $lastPlayedAt) {
+            $lastDate  = (new DateTime($lastPlayedAt, new DateTimeZone('UTC')))
+                ->setTimezone(new DateTimeZone('Europe/Paris'))
+                ->format('Y-m-d');
+            $daysDiff  = (int) (new DateTime($lastDate, new DateTimeZone('Europe/Paris')))
+                ->diff(new DateTime($date, new DateTimeZone('Europe/Paris')))
+                ->format('%r%a');
+            $newStreak = $daysDiff === 1 ? $currentStreak + 1 : 1;
+        } elseif ($isWin) {
+            $newStreak = 1;
+        } else {
+            $newStreak = 0;
+        }
+        $newRecord = max($currentRecord, $newStreak);
 
         $stmtUpdateStats->execute([
             $isWin ? 1 : 0,

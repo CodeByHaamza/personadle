@@ -154,7 +154,7 @@
       "giveup_reveal": "❌ ¡Te rendiste! La respuesta era: {{name}}",
       "no_characters": "No hay personajes disponibles con los filtros actuales.",
       "prev_mode": "← Modo Emoji",
-      "next_mode": "Modo Sombras →"
+      "next_mode": "Modo Silueta →"
     },
     "personae": {
       "name": "Personae",
@@ -180,7 +180,7 @@
       "closing": "🔍 ¡Confía en tu perspicacia, apóyate en tu memoria y demuestra tu dominio de Persona!",
       "correct": "✅ ¡Buen intento! La Persona de {{name}} era {{persona}}.",
       "giveup_reveal": "❌ ¡Qué pena! La Persona de {{name}} era {{persona}}.",
-      "prev_mode": "← Modo Sombras",
+      "prev_mode": "← Modo Silueta",
       "next_mode": "Modo Música →"
     },
     "music": {
@@ -987,7 +987,7 @@
     "q5": "¿Cuántos modos de juego hay?",
     "a5": "6 modos — Clásico (cuadrícula de atributos estilo Wordle), Emoji (descifra pistas en emojis), Silueta (revelación progresiva de imagen), All-Out Attack (GIF animado), Personae (adivina por la Persona, no el personaje) y Música (fragmento de audio).",
     "q6": "¿Cómo funciona el modo Clásico?",
-    "a6": "Escribe el nombre de un personaje. Tras cada intento, una cuadrícula muestra 7 atributos: juego de origen, rol, edad, Arcana, arma, afiliación y altura. Verde = correcto, amarillo = cerca, rojo = incorrecto — igual que Wordle.",
+    "a6": "Escribe un nombre de personaje. Tras cada intento, una cuadrícula muestra 7 atributos: juego de origen, género, edad, Arcana, si son Usuario de Persona o Shadow, su forma Persona/Shadow y su vínculo con un personaje jugable. Verde = coincidencia exacta, amarillo = cercano, rojo = incorrecto — lógica idéntica a Wordle.",
     "q7": "¿Qué es una racha?",
     "a7": "Tu racha cuenta los días consecutivos que has ganado en un modo. Falla un día o pulsa Give Up y se reinicia a 0. La función Streak Recovery (menú Jack Frost en tu perfil) te permite restaurarla una vez cada 2 meses.",
     "q8": "¿Cómo funcionan los filtros?",

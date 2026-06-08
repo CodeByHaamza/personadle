@@ -294,3 +294,18 @@
     gap: 10px;
   }
 }
+
+/* ── Dark Mode ─────────────────────────────────────────────── */
+body.darkmode .sc-card {
+  background: rgba(14, 10, 24, 0.97);
+  border-color: rgba(160, 80, 200, 0.3);
+}
+body.darkmode .sc-stat-label { color: #a090c0; }
+body.darkmode .sc-radar-legend__item { color: #c8b8e0; }
+body.darkmode .sc-player-name { color: #e8d8ff; }
+body.darkmode .sc-stat-bar-bg { background: rgba(255,255,255,0.08); }
+
+/* ── prefers-reduced-motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .sc-stat-bar-fill { animation: none !important; transition: none !important; }
+}

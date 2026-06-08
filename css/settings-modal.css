@@ -275,3 +275,35 @@
     font-size: 0.83rem;
   }
 }
+
+/* ── Identité Persona 5 ─────────────────────────────────────── */
+.sm-panel {
+  border-top: 3px solid var(--color-accent, #e63946) !important;
+  overflow: hidden;
+}
+/* Diagonale décorative P5 en arrière-plan du panel */
+.sm-panel::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 100px;
+  height: 100px;
+  background: var(--color-accent, #e63946);
+  opacity: 0.06;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.sm-title {
+  font-family: "Persona5", "Oswald", "Arial Black", Arial, sans-serif !important;
+  letter-spacing: 0.04em;
+}
+/* Dark mode */
+body.darkmode .sm-panel {
+  background: #1a1025 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  border-top-color: var(--color-accent, #e63946) !important;
+}
+body.darkmode .sm-title { color: #e8d8ff !important; }
+body.darkmode .sm-section-title { color: #c8b0e8 !important; }
+body.darkmode .sm-label { color: #b0a0d0 !important; }

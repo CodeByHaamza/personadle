@@ -154,7 +154,7 @@
       "giveup_reveal": "❌ Tu as abandonné ! La réponse était : {{name}}",
       "no_characters": "Aucun personnage disponible avec les filtres actuels.",
       "prev_mode": "← Mode Emoji",
-      "next_mode": "Mode Shadows →"
+      "next_mode": "Mode Silhouette →"
     },
     "personae": {
       "name": "Personae",
@@ -180,7 +180,7 @@
       "closing": "🔍 Faites confiance à votre intuition, utilisez votre mémoire, et prouvez votre maîtrise des Persona !",
       "correct": "✅ Bonne réponse ! Le Persona de {{name}} était {{persona}}.",
       "giveup_reveal": "❌ Dommage ! Le Persona de {{name}} était {{persona}}.",
-      "prev_mode": "← Mode Shadows",
+      "prev_mode": "← Mode Silhouette",
       "next_mode": "Mode Musique →"
     },
     "music": {
@@ -383,7 +383,7 @@
     "new_years_2026": {
       "name": "Nouvel An 2026",
       "condition": "Utiliser le code événement Nouvel An 2026",
-      "description": "Célébrez la nouvelle année avec style ! A une autre année à dévoiler la vérité."
+      "description": "Célébrez la nouvelle année avec style ! À une autre année à dévoiler la vérité."
     },
     "chinese_new_year_2026": {
       "name": "Bonne Année Chinoise 2026",
@@ -598,7 +598,7 @@
     "report": {
       "name": "The Priestess's Audit",
       "condition": "???",
-      "description": "Channeling la sagesse méticuleuse de la Prêtresse, tu as documenté les anomalies."
+      "description": "Puisant dans la sagesse méticuleuse de la Prêtresse, tu as documenté les anomalies."
     }
   },
   "social_link": {
@@ -925,7 +925,7 @@
   "privacy": {
     "page_title": "Confidentialité & Mentions légales",
     "tagline": "On joue la transparence.",
-    "last_updated": "Dernière mise à jour : mai 2026",
+    "last_updated": "Dernière mise à jour : juin 2026",
     "intro": "PersonaDLE est un jeu de devinettes fan-made et gratuit. Voici tout ce que tu dois savoir sur tes données — sans jargon juridique.",
     "collected_title": "Ce que nous collectons",
     "collected_email": "Ton adresse email — pour créer et sécuriser ton compte",
@@ -987,7 +987,7 @@
     "q5": "Combien de modes de jeu y a-t-il ?",
     "a5": "6 modes — Classique (grille d'attributs à la Wordle), Emoji (décode des indices en emojis), Silhouette (révélation progressive de l'image), All-Out Attack (GIF animé), Personae (deviner depuis la Persona, pas le personnage) et Musique (extrait audio).",
     "q6": "Comment fonctionne le Mode Classique ?",
-    "a6": "Saisis un nom de personnage. Après chaque essai, une grille affiche 7 attributs : jeu d'origine, rôle, âge, Arcane, arme, affiliation et taille. Vert = exact, jaune = proche, rouge = faux — même logique que Wordle.",
+    "a6": "Saisissez un nom de personnage. Après chaque tentative, une grille affiche 7 attributs : jeu d'origine, genre, âge, Arcane, statut (Utilisateur de Persona ou Shadow), leur forme Persona/Shadow, et leur lien avec un personnage jouable. Vert = correspondance exacte, jaune = proche, rouge = incorrect — logique identique à Wordle.",
     "q7": "Qu'est-ce qu'une streak ?",
     "a7": "Ta streak compte les jours consécutifs où tu as gagné dans un mode donné. Rater un jour ou appuyer sur Give Up la remet à 0. La Streak Recovery (menu Jack Frost sur ton profil) te permet de la restaurer une fois tous les 2 mois.",
     "q8": "Comment fonctionnent les filtres ?",

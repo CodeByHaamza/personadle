@@ -6,6 +6,7 @@ import { updateProfileStats } from "../profile/profileStats.js";
 
 // Shared game utilities
 import {
+  parisDateKey,
   showConfettiExplosion,
   revealNextLink,
   setupRulesModal,
@@ -201,7 +202,7 @@ const AOA_BY_NAME = new Map(aoaCharacters.map((c) => [c.nom, c]));
 // CONSTANTS & STATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const todayKey = `statsLogged_AllOut_${new Date().toISOString().split("T")[0]}`;
+const todayKey = `statsLogged_AllOut_${parisDateKey()}`;
 let sessionStartTime = Date.now();
 
 /** Minimum attempts before the Give-Up button activates. */
