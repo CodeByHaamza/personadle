@@ -25,6 +25,20 @@
 // 1. UTILITAIRES
 // ─────────────────────────────────────────────────────────
 
+/** Chemin absolu vers img/ — fonctionne quelle que soit la profondeur de la page. */
+function _imgBase() {
+  return window.location.pathname.startsWith("/personadle/") ? "/personadle/img/" : "/img/";
+}
+
+/** Normalise un chemin avatar (relatif ou absolu) en chemin absolu. */
+function _normalizeAvatar(avatar) {
+  if (!avatar || avatar.startsWith("data:")) return avatar;
+  return avatar
+    .replace(/^(\.\.\/)+img\//, _imgBase())
+    .replace(/^\.\/img\//, _imgBase())
+    .replace(/^img\//, _imgBase());
+}
+
 /**
  * Identifie la page courante d'après l'URL.
  * @returns {'home' | 'profile' | 'other'}
@@ -65,17 +79,7 @@ function getProfileAvatar(currentPage) {
     // Les data URLs (base64) sont toujours valides
     if (p.avatar.startsWith("data:")) return p.avatar;
 
-    // Normalise le chemin selon la profondeur de la page :
-    // - sous-dossier (/profile/, /classiqueMode/, …) → préfixe = ../
-    // - racine (index.html, /)                       → préfixe = ./
-    const isSubdir = ["profile", "friends", "leaderboard", "game"].includes(currentPage);
-    if (isSubdir) {
-      // ../img/ reste ../img/ ; ./img/ → ../img/
-      return p.avatar.replace(/^\.\/img\//, "../img/");
-    } else {
-      // ./img/ reste ./img/ ; ../img/ → ./img/ (depuis la racine ../img/ est hors projet)
-      return p.avatar.replace(/^\.\.\/img\//, "./img/");
-    }
+    return _normalizeAvatar(p.avatar);
   } catch {
     return null;
   }
@@ -292,21 +296,7 @@ export function updateNavAvatar() {
     const navLink = document.querySelector('a[aria-label="My profile"]');
     if (!avatar || !navLink) return;
 
-    // Normalise les chemins relatifs selon la profondeur de la page courante
-    if (!avatar.startsWith("data:")) {
-      const path = window.location.pathname;
-      const isSubpath =
-        path.includes("/profile/") ||
-        path.includes("/classiqueMode/") ||
-        path.includes("/emojiMode/") ||
-        path.includes("/silhouetteMode/") ||
-        path.includes("/allOutAttackMode/") ||
-        path.includes("/personaeMode/") ||
-        path.includes("/musicsMode/");
-      avatar = isSubpath
-        ? avatar.replace(/^\.\/img\//, "../img/")
-        : avatar.replace(/^\.\.\/img\//, "./img/");
-    }
+    avatar = _normalizeAvatar(avatar) || avatar;
 
     let img = navLink.querySelector(".nav-avatar");
     if (!img) {

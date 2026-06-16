@@ -3019,8 +3019,9 @@ body.darkmode {
   background: none;
 }
 
-/* ── Strong inline dans les li ──────────────────────────── */
-#rulesModal ul li strong {
+/* ── Strong inline dans les li et les p ─────────────────── */
+#rulesModal ul li strong,
+#rulesModal p strong {
   display: inline;
   font-family: inherit;
   font-size: inherit;
@@ -3155,7 +3156,8 @@ body.darkmode #rulesModal strong {
   border-bottom-color: rgba(220, 50, 50, 0.2);
 }
 
-body.darkmode #rulesModal ul li strong {
+body.darkmode #rulesModal ul li strong,
+body.darkmode #rulesModal p strong {
   color: #ddd;
 }
 

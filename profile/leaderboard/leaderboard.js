@@ -131,6 +131,15 @@ function renderFilterNote() {
 // RENDU
 // ─────────────────────────────────────────────────────────
 
+/** Normalise les chemins avatar stockés en DB (relatifs à profile/) pour ce dossier (profile/leaderboard/). */
+function avatarSrc(avatarData) {
+  if (!avatarData) return "../../img/default_avatar.png";
+  if (avatarData.startsWith("data:")) return avatarData;
+  if (avatarData.startsWith("../img/")) return "../" + avatarData;  // ../../img/
+  if (avatarData.startsWith("./img/"))  return "../../img/" + avatarData.slice(6);
+  return avatarData;
+}
+
 /**
  * Rend une ligne du classement.
  * @param {{ rank, user_id, pseudo, friend_code, avatar_data, score }} entry
@@ -140,7 +149,7 @@ function renderRow(entry, myId) {
   const rank = entry.rank ?? filters.offset + 1;
   const isMe = myId && entry.user_id === myId;
   const rankEmoji = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : String(rank);
-  const href = isMe ? "profile.html" : `profile.html?view=${esc(entry.friend_code)}`;
+  const href = isMe ? "../profile.html" : `../profile.html?view=${esc(entry.friend_code)}`;
   // Couleur de bordure personnelle (sauf top 3 qui ont leurs couleurs podium en CSS)
   const borderStyle =
     rank > 3 && entry.avatar_border_color
@@ -153,11 +162,11 @@ function renderRow(entry, myId) {
        title="${t("friends.view_profile") || "View profile"}">
       <span class="lb-rank">${rankEmoji}</span>
       <img class="lb-avatar"
-           src="${esc(entry.avatar_data || "../img/default_avatar.png")}"
+           src="${esc(avatarSrc(entry.avatar_data))}"
            alt="${esc(entry.pseudo)}"
            loading="lazy"
            ${borderStyle}
-           onerror="this.src='../img/default_avatar.png'">
+           onerror="this.src='../../img/default_avatar.png'">
       <div class="lb-info">
         <div class="lb-pseudo">${esc(entry.pseudo)}</div>
         <div class="lb-sub">${entry.total_games ? `${entry.total_games} games` : metricLabel()}</div>

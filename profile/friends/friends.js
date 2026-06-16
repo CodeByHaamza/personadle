@@ -46,12 +46,15 @@ function esc(str) {
   );
 }
 
-/** URL de l'avatar — normalise les chemins relatifs, fallback si absent. */
+/** URL de l'avatar — normalise les chemins relatifs, fallback si absent.
+ *  Ce fichier est servi depuis profile/friends/ (2 niveaux) — img/ est à ../../img/. */
 function avatarSrc(avatarData) {
-  if (!avatarData) return "../img/default_avatar.png";
+  if (!avatarData) return "../../img/default_avatar.png";
   if (avatarData.startsWith("data:")) return avatarData;
-  // Normalize old "./img/..." paths from localStorage/DB → "../img/..."
-  return avatarData.replace(/^\.\//, "../");
+  // Paths stored in DB are relative to profile/ (../img/...) → adjust for friends/ depth
+  if (avatarData.startsWith("../img/")) return "../" + avatarData;  // ../../img/
+  if (avatarData.startsWith("./img/"))  return "../../img/" + avatarData.slice(6);
+  return avatarData;
 }
 
 /** Renders avatar wrapped in .fr-avatar-wrap with an online/offline/unknown dot. */
@@ -67,7 +70,7 @@ function avatarHTML(pseudo, avatarData, borderColor = "#ffffff", lastSeen = null
          alt="${esc(pseudo)}"
          loading="lazy"
          style="border-color:${esc(borderColor)}"
-         onerror="this.src='../img/default_avatar.png'">
+         onerror="this.src='../../img/default_avatar.png'">
     ${dot}
   </div>`;
 }
@@ -181,14 +184,14 @@ function renderBrowseEntry(player) {
   } else if (friendship_status === "accepted") {
     badge = `<span class="fr-tag fr-tag--friend">💙 ${t("friends.friend") || "Friend"}</span>`;
     actions = `
-      <a href="profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${t("friends.view_profile") || "View profile"}">👁</a>
+      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${t("friends.view_profile") || "View profile"}">👁</a>
       <button class="fr-btn fr-btn--danger js-remove"
               data-fid="${esc(String(friendship_id))}"
               title="${t("friends.remove_friend") || "Remove"}">✕</button>
     `;
   } else if (friendship_status === "pending" && friendship_direction === "sent") {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${t("friends.request_sent") || "Sent"}</span>`;
-    actions = `<a href="profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
+    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
   } else if (friendship_status === "pending" && friendship_direction === "received") {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${t("friends.pending") || "Pending"}</span>`;
     actions = `
@@ -201,7 +204,7 @@ function renderBrowseEntry(player) {
     `;
   } else if (state.sentCodes.has(friend_code)) {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${t("friends.request_sent") || "Sent"}</span>`;
-    actions = `<a href="profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
+    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
   } else {
     // Pas de relation — bouton Add Friend
     actions = `
@@ -209,7 +212,7 @@ function renderBrowseEntry(player) {
               data-code="${esc(friend_code)}"
               data-id="${esc(String(id))}"
               title="${t("friends.add_friend") || "Add friend"}">+ ${t("friends.add_friend") || "Add"}</button>
-      <a href="profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>
+      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>
     `;
   }
 
@@ -293,7 +296,7 @@ function renderFriendEntry(entry) {
         </div>
       </div>
       <div class="fr-entry-actions">
-        <a href="profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${t("friends.view_profile") || "View"}">👁</a>
+        <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${t("friends.view_profile") || "View"}">👁</a>
         <button class="fr-btn fr-btn--danger js-remove"
                 data-fid="${esc(String(friendship_id))}"
                 title="${t("friends.remove_friend") || "Remove"}">✕</button>
@@ -461,7 +464,7 @@ async function sendFriendRequest(friendCode, targetId) {
       const actions = entry.querySelector(".fr-entry-actions");
       const infoDiv = entry.querySelector(".fr-entry-pseudo");
       if (actions)
-        actions.innerHTML = `<a href="profile.html?view=${esc(friendCode)}" class="fr-btn fr-btn--view">👁</a>`;
+        actions.innerHTML = `<a href="../profile.html?view=${esc(friendCode)}" class="fr-btn fr-btn--view">👁</a>`;
       if (infoDiv && !infoDiv.querySelector(".fr-tag")) {
         infoDiv.insertAdjacentHTML(
           "beforeend",
@@ -738,7 +741,7 @@ function renderMessage(msg) {
       <img class="fr-msg-avatar"
            src="${esc(avatarSrc(fromAvatar))}"
            alt="${esc(fromPseudo)}"
-           onerror="this.src='../img/default_avatar.png'">
+           onerror="this.src='../../img/default_avatar.png'">
       <div class="fr-msg-body">
         <div class="fr-msg-meta">
           ${direction}

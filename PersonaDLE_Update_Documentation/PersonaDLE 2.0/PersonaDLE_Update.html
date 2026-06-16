@@ -42,6 +42,19 @@
             --home-btn-hover-bg: rgba(240, 232, 255, 0.97);
             --card-bg: rgba(255, 252, 255, 0.92);
             --mode-card-border: rgba(230, 57, 70, 0.2);
+            --aoa-card-bg: linear-gradient(135deg, #fdf8ff 0%, #fff4fa 35%, #f4f8ff 65%, #fdf8ff 100%);
+            --aoa-portrait-bg: rgba(240, 235, 250, 0.7);
+            --aoa-battle-bg: rgba(240, 235, 250, 0.6);
+            --aoa-col-border: rgba(230, 57, 70, 0.15);
+            --card-name-color: #1e0030;
+            --card-sub-color: #7a4060;
+            --summer-card-bg: linear-gradient(135deg, #fffbf0 0%, #fff7e0 40%, #f0feff 70%, #f4fff4 100%);
+            --summer-title-color: #9a5c00;
+            --summer-intro-bg: rgba(210, 155, 30, 0.08);
+            --summer-intro-border: #b08020;
+            --section-intro-bg: rgba(100, 60, 200, 0.055);
+            --section-intro-color: #5a4878;
+            --section-intro-border: #7c4dff;
         }
 
         :root.darkmode {
@@ -66,6 +79,19 @@
             --home-btn-hover-bg: #2d1a40;
             --card-bg: rgba(14, 10, 24, 0.85);
             --mode-card-border: rgba(230, 57, 70, 0.3);
+            --aoa-card-bg: linear-gradient(135deg, #08000e 0%, #1c0018 35%, #0e0020 65%, #180010 100%);
+            --aoa-portrait-bg: rgba(6, 0, 8, 0.7);
+            --aoa-battle-bg: rgba(6, 0, 8, 0.6);
+            --aoa-col-border: rgba(230, 57, 70, 0.22);
+            --card-name-color: #fff;
+            --card-sub-color: #cc8899;
+            --summer-card-bg: linear-gradient(135deg, #100c00 0%, #1e1600 40%, #001c20 70%, #0a1400 100%);
+            --summer-title-color: #f6ab3c;
+            --summer-intro-bg: rgba(246, 171, 60, 0.07);
+            --summer-intro-border: #d4943a;
+            --section-intro-bg: rgba(140, 100, 255, 0.07);
+            --section-intro-color: #b8c0cc;
+            --section-intro-border: #7c4dff;
         }
 
         * { box-sizing: border-box; }
@@ -494,6 +520,18 @@
         .vx-reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1); }
         .vx-reveal.in { opacity: 1; transform: none; }
 
+        /* Illustrations */
+        .doc-illustration {
+            display: block; width: 100%; max-width: 720px;
+            margin: 1.5rem auto 0.5rem; border-radius: 14px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.18); border: 1px solid var(--border-color);
+            object-fit: cover;
+        }
+        .doc-illustration-caption {
+            display: block; text-align: center; font-size: 0.78rem;
+            color: var(--text-muted); margin-bottom: 1.2rem; font-style: italic;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .vx-reveal { opacity: 1; transform: none; transition: none; }
             .frontmatter, .title-card.rarity-legendary { animation: none; }
@@ -526,6 +564,193 @@
         @media print {
             body { background: white; }
             .home-btn, #vx-progress, #vx-btt { display: none; }
+        }
+
+        /* ── All-Out Attack card — keyframe animations ── */
+        @keyframes aoaCardGlow {
+            0%, 100% {
+                box-shadow: 0 0 24px rgba(230, 57, 70, 0.55), 0 0 60px rgba(230, 57, 70, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 44px rgba(230, 57, 70, 0.95), 0 0 90px rgba(255, 107, 157, 0.3), 0 0 140px rgba(255, 200, 50, 0.12);
+            }
+        }
+        @keyframes aoaBorderShimmer {
+            0%, 100% { border-color: rgba(230, 57, 70, 0.9); }
+            33%      { border-color: rgba(255, 107, 157, 1); }
+            66%      { border-color: rgba(255, 210, 60, 0.8); }
+        }
+        @keyframes aoaNameNeon {
+            0%, 100% { text-shadow: 0 0 8px rgba(230, 57, 70, 0.9), 0 0 20px rgba(230, 57, 70, 0.5); }
+            50%      { text-shadow: 0 0 14px rgba(255, 107, 157, 1), 0 0 34px rgba(255, 107, 157, 0.7), 0 0 60px rgba(255, 200, 100, 0.3); }
+        }
+        @keyframes aoaStarFlicker {
+            0%, 65%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            70% { opacity: 0.25; transform: scale(0.65) rotate(20deg); }
+            78% { opacity: 1; transform: scale(1.35) rotate(-8deg); color: #fff8c0; }
+        }
+        @keyframes aoaPortraitPulse {
+            0%, 100% { box-shadow: 0 0 14px rgba(255, 107, 157, 0.75), 0 0 28px rgba(255, 107, 157, 0.25); }
+            50%      { box-shadow: 0 0 24px rgba(255, 107, 157, 1), 0 0 50px rgba(255, 210, 100, 0.35); }
+        }
+
+        /* ── AoA card — layout 3 colonnes ── */
+        .aoa-card {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #e63946;
+            background: var(--aoa-card-bg);
+            animation: aoaCardGlow 3s ease-in-out infinite, aoaBorderShimmer 6s ease-in-out infinite;
+            transition: transform 0.25s ease;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .aoa-card:hover { transform: translateY(-6px) scale(1.006); }
+        .aoa-card-inner { display: flex; align-items: stretch; }
+
+        .aoa-portrait-col {
+            flex: 0 0 160px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 18px 12px;
+            border-right: 1px solid var(--aoa-col-border);
+        }
+        .aoa-portrait-img {
+            width: 250px; height: auto;
+            object-fit: contain; object-position: center;
+            border-radius: 10px;
+            border: 1px solid rgba(230, 57, 70, 0.5);
+            background: var(--aoa-portrait-bg);
+            display: block; margin: 0;
+        }
+
+        .aoa-gif-col {
+            flex: 0 0 300px; height: 190px;
+            overflow: hidden;
+            border-right: 1px solid var(--aoa-col-border);
+            position: relative; align-self: center;
+        }
+        .aoa-gif-col::after {
+            content: ''; position: absolute; inset: 0;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 3px);
+            pointer-events: none;
+        }
+        .aoa-gif-img {
+            width: auto; height: auto;
+            object-fit: cover; object-position: center;
+            display: block; margin: 0; margin-top: 1pc;
+        }
+
+        .aoa-battle-col {
+            flex: 1; display: flex; align-items: center; gap: 16px; padding: 18px 20px;
+        }
+        .aoa-battle-img {
+            flex-shrink: 0; width: 150px; height: auto;
+            object-fit: contain; object-position: top;
+            border-radius: 14px; border: 2px solid #ff6b9d;
+            background: var(--aoa-battle-bg);
+            display: block; margin: 0;
+            animation: aoaPortraitPulse 3s ease-in-out infinite;
+        }
+        .aoa-info { flex: 1; }
+
+        .aoa-card .card-stars { display: flex; gap: 6px; margin-bottom: 8px; }
+        .aoa-card .card-stars span {
+            font-size: 0.85rem; display: inline-block;
+            animation: aoaStarFlicker 2.5s ease-in-out infinite;
+        }
+        .aoa-card .card-stars span:nth-child(1) { animation-delay: 0s;   color: #ffd700; }
+        .aoa-card .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #fff; }
+        .aoa-card .card-stars span:nth-child(3) { animation-delay: 1s;   color: #ffd700; }
+        .aoa-card .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #ff9dcf; }
+        .aoa-card .card-stars span:nth-child(5) { animation-delay: 2s;   color: #ffd700; }
+
+        .aoa-card .card-badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #c0193a, #ff4d6d);
+            color: #fff; padding: 3px 14px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(192, 25, 58, 0.4); margin-bottom: 6px;
+        }
+        .aoa-card .card-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem; font-weight: 800;
+            color: var(--card-name-color); margin: 4px 0; letter-spacing: 0.5px;
+            animation: aoaNameNeon 4s ease-in-out infinite;
+        }
+        .aoa-card .card-sub { color: var(--card-sub-color); font-size: 0.83rem; margin: 0; letter-spacing: 0.3px; }
+
+        /* ── Summer variant — ambre/teal, pas de neon ── */
+        .aoa-card-summer {
+            border: 4px solid #f6ab3c;
+            background: var(--summer-card-bg);
+            animation: none;
+            box-shadow: 0 0 0 3px rgba(77, 208, 225, 0.3), 0 6px 28px rgba(246, 171, 60, 0.22), 0 2px 8px rgba(77, 208, 225, 0.12);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+        }
+        .aoa-card-summer:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 0 0 4px rgba(77, 208, 225, 0.45), 0 12px 40px rgba(246, 171, 60, 0.35), 0 4px 14px rgba(77, 208, 225, 0.2);
+        }
+        .aoa-card-summer .aoa-portrait-col { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-gif-col       { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-portrait-img  { border-color: rgba(246, 171, 60, 0.5); }
+        .aoa-card-summer .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #4dd0e1; animation: none;
+            box-shadow: 0 2px 10px rgba(77, 208, 225, 0.18);
+        }
+        .aoa-card-summer .card-badge {
+            background: linear-gradient(90deg, #c07800, #f6ab3c);
+            box-shadow: 0 2px 8px rgba(246, 171, 60, 0.3);
+        }
+        .aoa-card-summer .card-name { color: var(--summer-title-color); animation: none; text-shadow: none; }
+        .aoa-card-summer .card-sub  { color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #fff; }
+        .aoa-card-summer .card-stars span:nth-child(5) { animation-delay: 2s;   color: #f6d365; }
+
+        .summer-chars-title { margin-top: 36px; color: var(--summer-title-color); }
+
+        /* ── Intro paragraphs ── */
+        .card-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 20px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: rgba(230, 57, 70, 0.06);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 0 8px 8px 0;
+        }
+        .summer-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 24px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: var(--summer-intro-bg);
+            border-left: 3px solid var(--summer-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+        .section-intro {
+            color: var(--section-intro-color); font-style: italic;
+            margin: 8px 0 28px 0; line-height: 1.65; font-size: 0.94rem;
+            padding: 11px 18px;
+            background: var(--section-intro-bg);
+            border-left: 3px solid var(--section-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── AoA card responsive ── */
+        @media (max-width: 660px) {
+            .aoa-card-inner { flex-direction: column; }
+            .aoa-portrait-col { flex: auto; border-right: none; border-bottom: 1px solid var(--aoa-col-border); padding: 14px; }
+            .aoa-gif-col { flex: auto; height: 180px; border-right: none; width: 100%; }
+            .aoa-gif-img { width: 100%; height: 240px; margin-top: -30px; }
+            .aoa-battle-col { flex: auto; flex-direction: column; align-items: center; text-align: center; padding: 16px; }
+            .aoa-battle-img { width: 140px; height: 140px; }
+            .aoa-card-summer .aoa-battle-img { width: 80px; height: 130px; }
         }
     </style>
 </head>
@@ -664,6 +889,10 @@
         </div>
     </div>
 
+    <img src="Illustration_banniere_2.0.png" alt="PersonaDLE v2.0 banner" class="doc-illustration">
+    <img src="Illustration_multilingue_personadle_v1.2.png" alt="5 languages support" class="doc-illustration">
+    <span class="doc-illustration-caption"><span data-i18n-block="en">EN · FR · ES · DE · IT — 760 keys</span><span data-i18n-block="fr">EN · FR · ES · DE · IT — 760 clés</span></span>
+
     <hr>
 
     <!-- ═══════════════════════════════════
@@ -734,6 +963,9 @@
             <span class="mode-badge">130+ tracks</span>
         </div>
     </div>
+
+    <img src="Illustration_sous_filtres.png" alt="Filtres opus" class="doc-illustration">
+    <span class="doc-illustration-caption"><span data-i18n-block="en">Sub-filters per game (P3, P4, P5…)</span><span data-i18n-block="fr">Sous-filtres par jeu (P3, P4, P5…)</span></span>
 
     <hr>
 
@@ -834,6 +1066,110 @@
         </table>
     </div>
 
+    <!-- ── All-Out Attack — Nouveaux personnages ── -->
+    <h2 data-i18n-block="en">New Characters — All-Out Attack Mode</h2>
+    <h2 data-i18n-block="fr">Nouveaux Personnages — Mode All-Out Attack</h2>
+
+    <p class="card-intro" data-i18n-block="en">Joker Starlight joins the All-Out Attack roster — a Dancing in Starlight variant with a unique animated finish screen.</p>
+    <p class="card-intro" data-i18n-block="fr">Joker Starlight rejoint le mode All-Out Attack — une variante Dancing in Starlight avec un écran de fin animé unique.</p>
+
+    <div class="aoa-card">
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Joker_Starlight.webp" alt="Joker Starlight portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Joker_Starlight.webp" alt="Joker Starlight All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Joker_Starlight_Battle.webp" alt="Joker Starlight Battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Joker Starlight</p>
+                    <p class="card-sub">Ren Amamiya — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Summer 2026 — P5X Summer Event ── -->
+    <h3 class="summer-chars-title" data-i18n-block="en">☀️ Summer 2026 — P5X Summer Event</h3>
+    <h3 class="summer-chars-title" data-i18n-block="fr">☀️ Été 2026 — Événement Summer P5X</h3>
+
+    <p class="summer-intro" data-i18n-block="en">Three limited Summer event characters, each with a distinct beach-themed All-Out Attack animation.</p>
+    <p class="summer-intro" data-i18n-block="fr">Trois personnages limités de l'événement Summer, chacun avec une animation All-Out Attack sur le thème de la plage.</p>
+
+    <div class="aoa-card aoa-card-summer">
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Wonder_Summer.webp" alt="Wonder Summer portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Wonder_Summer.webp" alt="Wonder Summer All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Wonder_Summer_Battle.webp" alt="Wonder Summer Battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>☀️</span><span>🌊</span><span>☀️</span><span>🌊</span><span>☀️</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Wonder Summer</p>
+                    <p class="card-sub">Nagisa Kamishiro — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="aoa-card aoa-card-summer">
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Closer_Summer.webp" alt="Closer Summer portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Closer_Summer.webp" alt="Closer Summer All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Closer_Summer_Battle.webp" alt="Closer Summer Battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>🏖️</span><span>☀️</span><span>🏖️</span><span>☀️</span><span>🏖️</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Closer Summer</p>
+                    <p class="card-sub">Motoha Arai — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="aoa-card aoa-card-summer">
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Moko_Summer.webp" alt="Moko Summer portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Moko_Summer.webp" alt="Moko Summer All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Moko_Summer_Battle.webp" alt="Moko Summer Battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>🏐</span><span>🌊</span><span>🏐</span><span>🌊</span><span>🏐</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Moko Summer</p>
+                    <p class="card-sub">Tomoko Noge — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <img src="Illustration_style_audio.png" alt="Music mode" class="doc-illustration">
+
     <h2 data-i18n-block="en">New Music Tracks</h2>
     <h2 data-i18n-block="fr">Nouvelles Pistes Musicales</h2>
 
@@ -898,6 +1234,8 @@
     ════════════════════════════════════ -->
     <div data-i18n-block="fr"><h1>Fonctionnalités Sociales</h1></div>
     <div data-i18n-block="en"><h1>Social Features</h1></div>
+
+    <img src="Illustration_Ami_Social.jpeg" alt="Social features" class="doc-illustration">
 
     <h2 data-i18n-block="en">Friends</h2>
     <h2 data-i18n-block="fr">Amis</h2>
@@ -973,6 +1311,8 @@
     </ul>
     </div>
 
+    <img src="Illustration_Ranking_Leaderboard.png" alt="Leaderboard" class="doc-illustration">
+
     <hr>
 
     <!-- ═══════════════════════════════════
@@ -1010,6 +1350,8 @@
 
     <div data-i18n-block="fr"><p>60 badges organisés en 4 catégories : <strong>Achievements</strong>, <strong>Events</strong>, <strong>Secrets</strong>, <strong>Social</strong>. Les conditions sont vérifiées côté serveur. Les badges secrets affichent <code>"???"</code> comme condition tant qu'ils ne sont pas débloqués.</p></div>
     <div data-i18n-block="en"><p>60 badges organized into 4 categories: <strong>Achievements</strong>, <strong>Events</strong>, <strong>Secrets</strong>, <strong>Social</strong>. Conditions are verified server-side. Secret badges display <code>"???"</code> as their condition until unlocked.</p></div>
+
+    <img src="Illustration_titre.png" alt="Titres" class="doc-illustration">
 
     <h2 data-i18n-block="en">Titles</h2>
     <h2 data-i18n-block="fr">Titres</h2>
@@ -1075,6 +1417,8 @@
         <div data-i18n-block="en"><p>This section is for developers. It covers the stack, API, database, security, and CI/CD.</p></div>
     </blockquote>
 
+    <img src="Illustration_Integration_php.png" alt="PHP Backend integration" class="doc-illustration">
+
     <h2 data-i18n-block="en">Stack</h2>
     <h2 data-i18n-block="fr">Stack</h2>
 
@@ -1089,6 +1433,9 @@
             <tr><td data-i18n-block="en">Hosting</td><td data-i18n-block="fr">Hébergement</td><td colspan="2">Hostinger — rsync deploy via GitHub Actions</td></tr>
         </tbody>
     </table>
+
+    <img src="JS_correction_illustration.png" alt="JavaScript corrections" class="doc-illustration">
+    <img src="CSS_adaptation_style_illustration.png" alt="CSS style adaptation" class="doc-illustration">
 
     <h2 data-i18n-block="en">JavaScript Architecture</h2>
     <h2 data-i18n-block="fr">Architecture JavaScript</h2>
@@ -1123,9 +1470,8 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
     <div data-i18n-block="fr"><p>Fichier : <code>sql/bdd_mysql.sql</code>. Schéma compatible MySQL 8.0 (local) et MariaDB 10.6+ (Hostinger).</p></div>
     <div data-i18n-block="en"><p>File: <code>sql/bdd_mysql.sql</code>. Schema compatible with MySQL 8.0 (local) and MariaDB 10.6+ (Hostinger).</p></div>
 
-    <details class="vx-reveal">
-        <summary data-i18n-block="en">View all 20 tables</summary>
-        <summary data-i18n-block="fr">Voir les 20 tables</summary>
+    <details open>
+        <summary><span data-i18n-block="en">View all 20 tables</span><span data-i18n-block="fr">Voir les 20 tables</span></summary>
         <table>
             <thead><tr><th>Table</th><th data-i18n-block="en">Description</th><th data-i18n-block="fr">Description</th></tr></thead>
             <tbody>
@@ -1150,9 +1496,8 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
     <h2 data-i18n-block="en">API Endpoints</h2>
     <h2 data-i18n-block="fr">Endpoints API</h2>
 
-    <details class="vx-reveal">
-        <summary data-i18n-block="en">Full endpoint list</summary>
-        <summary data-i18n-block="fr">Liste complète des endpoints</summary>
+    <details open>
+        <summary><span data-i18n-block="en">Full endpoint list</span><span data-i18n-block="fr">Liste complète des endpoints</span></summary>
         <table>
             <thead><tr><th>Endpoint</th><th data-i18n-block="en">Description</th><th data-i18n-block="fr">Description</th></tr></thead>
             <tbody>
@@ -1173,6 +1518,8 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
             </tbody>
         </table>
     </details>
+
+    <img src="Illustration_droit_d'admin.png" alt="Admin rights" class="doc-illustration">
 
     <h2 data-i18n-block="en">Security</h2>
     <h2 data-i18n-block="fr">Sécurité</h2>
@@ -1228,6 +1575,9 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
     <div data-i18n-block="fr"><p>Rate limiting : 5 tentatives par fenêtre de 15 min par IP sur <code>/api/auth/login</code> et <code>/api/auth/register</code>. Headers de sécurité ajoutés dans <code>api/bootstrap.php</code> : <code>X-Content-Type-Options</code>, <code>X-Frame-Options: DENY</code>, <code>Referrer-Policy</code>.</p></div>
     <div data-i18n-block="en"><p>Rate limiting: 5 attempts per 15-minute window per IP on <code>/api/auth/login</code> and <code>/api/auth/register</code>. Security headers added in <code>api/bootstrap.php</code>: <code>X-Content-Type-Options</code>, <code>X-Frame-Options: DENY</code>, <code>Referrer-Policy</code>.</p></div>
 
+    <img src="Illustration_hooks.png" alt="Git hooks" class="doc-illustration">
+    <img src="Illustration_Docker.jpeg" alt="Docker setup" class="doc-illustration">
+
     <h2>CI/CD &amp; Infrastructure</h2>
 
     <table class="vx-reveal">
@@ -1269,9 +1619,8 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
     <h2 data-i18n-block="en">Known Pitfalls</h2>
     <h2 data-i18n-block="fr">Pièges Connus</h2>
 
-    <details class="vx-reveal">
-        <summary data-i18n-block="en">Show pitfalls table</summary>
-        <summary data-i18n-block="fr">Voir le tableau des pièges</summary>
+    <details open>
+        <summary><span data-i18n-block="en">Show pitfalls table</span><span data-i18n-block="fr">Voir le tableau des pièges</span></summary>
         <table>
             <thead>
                 <tr>

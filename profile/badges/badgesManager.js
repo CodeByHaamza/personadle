@@ -217,12 +217,9 @@ export async function checkSocialBadges(profile, saveProfile) {
   const user = window._currentUser;
   if (!user) return;
 
-  const _prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
-
   try {
-    const friendsRes = await fetch(`${_prefix}/api/friends`, { credentials: "include" }).then((r) =>
-      r.json()
-    );
+    const api = window._personadleApi;
+    const friendsRes = api ? await api.friends.list() : null;
     const friends = friendsRes?.friends || [];
     const friendCount = friends.length;
 

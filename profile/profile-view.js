@@ -881,7 +881,7 @@ if (viewParam) {
         `
       <div class="viewing-error">
         <p>⚠️ ${err.status === 404 ? "Player not found." : "Could not load this profile."}</p>
-        <a href="profile.html">← Back to my profile</a>
+        <a href="profile.html">← ${t("ui.back_my_profile") || "My profile"}</a>
       </div>
     `
       );
