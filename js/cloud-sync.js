@@ -187,10 +187,28 @@ export async function pullProfileFromCloud() {
       try {
         announced = JSON.parse(localStorage.getItem(ANNOUNCED_KEY) || "[]");
       } catch {}
-      const _trulyNew = _allNew.filter((item) => !announced.includes(`${item.type}:${item.id}`));
+
+      // 1re synchro de CE compte sur CET appareil (profil pas encore lié à cet id) :
+      // on établit la "baseline" SANS animation — sinon tous les items déjà possédés
+      // seraient présentés comme des cadeaux d'un seul coup (device neuf / cache vidé).
+      const isBaseline = p._accountId !== user.id;
+
+      const _trulyNew = isBaseline
+        ? []
+        : _allNew.filter((item) => !announced.includes(`${item.type}:${item.id}`));
+
+      // Dans tous les cas, marquer les items courants comme annoncés (baseline incluse).
+      let _announcedChanged = false;
+      for (const item of _allNew) {
+        const key = `${item.type}:${item.id}`;
+        if (!announced.includes(key)) {
+          announced.push(key);
+          _announcedChanged = true;
+        }
+      }
+      if (_announcedChanged) localStorage.setItem(ANNOUNCED_KEY, JSON.stringify(announced));
+
       if (_trulyNew.length > 0) {
-        _trulyNew.forEach((item) => announced.push(`${item.type}:${item.id}`));
-        localStorage.setItem(ANNOUNCED_KEY, JSON.stringify(announced));
 
         // Persiste pour les pages qui n'ont pas encore le listener (ex: mode pages)
         // Les pages qui affichent l'animation (index, profile) vident cette clé après affichage

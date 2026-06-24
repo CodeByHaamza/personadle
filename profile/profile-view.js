@@ -23,8 +23,10 @@ import {
 
 const params = new URLSearchParams(window.location.search);
 const viewParam = params.get("view")?.trim() ?? "";
+// Lien ?uid=ID (jauge Social Link) : consultation publique par id utilisateur.
+const uidParam = params.get("uid")?.trim() ?? "";
 
-if (viewParam) {
+if (viewParam || uidParam) {
   // ─────────────────────────────────────────────────────────────────────────────
   // THÈMES — identiques à profile-page.js
   // ─────────────────────────────────────────────────────────────────────────────
@@ -868,7 +870,11 @@ if (viewParam) {
     if (window.__i18nReady) await window.__i18nReady;
 
     const isFriendCode = /^[A-Z0-9]{8}$/i.test(viewParam);
-    const fetchParams = isFriendCode ? { code: viewParam.toUpperCase() } : { pseudo: viewParam };
+    const fetchParams = uidParam
+      ? { id: uidParam }
+      : isFriendCode
+        ? { code: viewParam.toUpperCase() }
+        : { pseudo: viewParam };
 
     // Mode read-only immédiatement (avant le chargement réseau)
     activateReadOnlyMode();

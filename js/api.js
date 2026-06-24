@@ -252,11 +252,15 @@ export const api = {
   // ── Profil public ─────────────────────────────────────
   publicProfile: {
     /**
-     * Récupère le profil public d'un joueur par friend_code ou pseudo.
-     * @param {{ code?: string, pseudo?: string }} params
+     * Récupère le profil public d'un joueur par friend_code, pseudo ou id.
+     * @param {{ code?: string, pseudo?: string, id?: string|number }} params
      */
-    get: ({ code, pseudo }) => {
-      const q = code ? `code=${encodeURIComponent(code)}` : `pseudo=${encodeURIComponent(pseudo)}`;
+    get: ({ code, pseudo, id }) => {
+      const q = code
+        ? `code=${encodeURIComponent(code)}`
+        : id
+          ? `id=${encodeURIComponent(id)}`
+          : `pseudo=${encodeURIComponent(pseudo)}`;
       return get(`/user/public?${q}`);
     },
 

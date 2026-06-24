@@ -2451,8 +2451,9 @@ function setupSongPicker() {
 // ─────────────────────────────────────────────────────────
 
 document.addEventListener("DOMContentLoaded", () => {
-  // En mode "view" (?view=CODE), profile-view.js gère tout — on ne touche pas au DOM
-  if (new URLSearchParams(window.location.search).get("view")) return;
+  // En mode consultation (?view=CODE ou ?uid=ID), profile-view.js gère tout.
+  const _q = new URLSearchParams(window.location.search);
+  if (_q.get("view") || _q.get("uid")) return;
 
   // 1. Charger le profil et initialiser l'UI
   initProfile();

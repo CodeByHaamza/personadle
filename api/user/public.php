@@ -25,6 +25,7 @@ $pdo = pdo();
 // ── Résoudre l'identifiant ────────────────────────────────────────────────────
 $code   = trim($_GET['code']   ?? '');
 $pseudo = trim($_GET['pseudo'] ?? '');
+$id     = trim($_GET['id']     ?? '');
 
 if ($code !== '') {
     $stmt = $pdo->prepare(
@@ -42,8 +43,17 @@ if ($code !== '') {
          LIMIT 1'
     );
     $stmt->execute([$pseudo]);
+} elseif ($id !== '' && ctype_digit($id)) {
+    // Vue publique par id (lien ?uid= depuis la jauge Social Link)
+    $stmt = $pdo->prepare(
+        'SELECT id, pseudo, friend_code, lang, created_at
+         FROM users
+         WHERE id = ? AND is_deleted = 0
+         LIMIT 1'
+    );
+    $stmt->execute([(int) $id]);
 } else {
-    jsonError('Missing parameter: code or pseudo', 400);
+    jsonError('Missing parameter: code, pseudo or id', 400);
 }
 
 $user = $stmt->fetch();
