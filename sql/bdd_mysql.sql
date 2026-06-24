@@ -421,7 +421,7 @@ CREATE TABLE deletion_requests (
 
 -- =============================================================================
 -- 16b. SOCIAL_LINK_RANKUP_NOTIFS — Notifs de rank-up pour les 2 joueurs
--- (migration api/migrations/009 ; utilisé par api/social-links + api/admin/social_links)
+-- (migration sql/migrations/009 ; utilisé par api/social-links + api/admin/social_links)
 -- =============================================================================
 CREATE TABLE social_link_rankup_notifs (
     id           BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
