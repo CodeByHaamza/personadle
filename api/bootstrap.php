@@ -18,12 +18,14 @@ declare(strict_types=1);
 // Garantir que PHP utilise UTC pour date/time, cohérent avec UTC_TIMESTAMP() MySQL
 date_default_timezone_set('UTC');
 
-// Charge config.php si présent (dev local / prod), sinon config.docker.php
-// (variables d'environnement injectées par Docker Compose).
-if (file_exists(__DIR__ . '/config.php')) {
-    require_once __DIR__ . '/config.php';
-} elseif (getenv('DB_HOST') !== false) {
+// Priorité à l'environnement Docker (DB_HOST injecté par Docker Compose) : sinon
+// un api/config.php local (Apache, DB_HOST=127.0.0.1) masquerait config.docker.php
+// à l'intérieur du conteneur (le code est bind-mounté) → "Database unavailable".
+// Hors conteneur (pas de DB_HOST), on charge config.php (dev Apache / prod Hostinger).
+if (getenv('DB_HOST') !== false) {
     require_once __DIR__ . '/config.docker.php';
+} elseif (file_exists(__DIR__ . '/config.php')) {
+    require_once __DIR__ . '/config.php';
 } else {
     http_response_code(503);
     echo json_encode(['error' => 'No database configuration found. Copy config.example.php to config.php.']);
