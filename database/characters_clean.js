@@ -713,7 +713,7 @@ export const characters = [
     genre: ["Human", "Male"],
     age: "40+",
     arcane: ["NONE"],
-    opus: ["P3", "P3FES", "P3P","P3R"],
+    opus: ["P3", "P3FES", "P3P","P3R", "P4", "P4G"],
     personaUser: false,
     persona: "NONE",
     emoji: ["🧙‍♂️", "👨‍🏫", "💤"],
@@ -1760,7 +1760,7 @@ export const characters = [
     personaUser: true,
     persona: "Cleodora",
     emoji: ["🍤","🤳","👱‍♀️"],
-    quote: ""
+    quote: "Beauty and Sexy!"
   },
   {
     nom: "Miyu Sahara",
