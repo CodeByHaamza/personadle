@@ -72,6 +72,9 @@ export const VALID_ARCANA = new Set([
   "NONE", // sentinelle « pas d'arcane » (PNJ, antagonistes…)
 ]);
 
+// Tranches d'âge canoniques (le champ `age` doit être l'une d'elles).
+export const VALID_AGES = new Set(["< 15", "15-20", "21-40", "40+", "60+", "80+", "Unknown"]);
+
 // Champs string structurels (leur absence casse l'app) → erreur.
 const REQUIRED_STRINGS = ["nom", "age"];
 // Champs tableau requis non vides → erreur.
@@ -125,6 +128,11 @@ export function validateCharacters(chars, portraits = {}, portraitFiles = null) 
       errors.push(`[${id}] champ "personaUser" doit être un booléen`);
     } else if (c.personaUser && (typeof c.persona !== "string" || !c.persona.trim())) {
       errors.push(`[${id}] personaUser=true mais "persona" est vide`);
+    }
+
+    // ── Tranche d'âge canonique ─────────────────────────────────────────────
+    if (typeof c?.age === "string" && c.age.trim() && !VALID_AGES.has(c.age)) {
+      errors.push(`[${id}] age "${c.age}" hors des tranches autorisées (${[...VALID_AGES].join(", ")})`);
     }
 
     // ── Codes opus connus ───────────────────────────────────────────────────

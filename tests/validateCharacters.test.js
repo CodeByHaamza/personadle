@@ -6,14 +6,19 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { validateCharacters, VALID_OPUS, VALID_ARCANA } from "../scripts/validate_characters.js";
+import {
+  validateCharacters,
+  VALID_OPUS,
+  VALID_ARCANA,
+  VALID_AGES,
+} from "../scripts/validate_characters.js";
 
 /** Personnage minimal valide, surchargeable champ par champ. */
 function makeChar(overrides = {}) {
   return {
     nom: "Joker",
     genre: ["Human", "Male"],
-    age: "15-16",
+    age: "15-20",
     arcane: ["Fool"],
     opus: ["P5", "P5R"],
     personaUser: true,
@@ -96,6 +101,21 @@ describe("validateCharacters", () => {
       Yusuke: "Yusuke",
     });
     expect(errors[0]).toMatch(/Yusuke/);
+  });
+});
+
+describe("validateCharacters — age buckets", () => {
+  it("accepts every canonical age bucket", () => {
+    for (const age of VALID_AGES) {
+      const { errors } = validateCharacters([makeChar({ age })], portraits);
+      expect(errors.filter((e) => /age/i.test(e))).toEqual([]);
+    }
+  });
+
+  it("flags an off-bucket age like '15-16' as an error", () => {
+    const { errors } = validateCharacters([makeChar({ age: "15-16" })], portraits);
+    expect(errors.join()).toMatch(/age/i);
+    expect(errors.join()).toMatch(/15-16/);
   });
 });
 

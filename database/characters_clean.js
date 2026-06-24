@@ -1686,6 +1686,39 @@ export const characters = [
     quote: "Leucothea!"
   },
   {
+    nom: "Aran Hirano",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Gentileschi",
+    emoji: ["🎭","📱","🔫"],
+    quote: "Gentileschi!"
+  },
+  {
+    nom: "Narumi Nashimoto",
+    genre: ["Female", "Human"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Asterope",
+    emoji: ["🌸","🎀","🎭"],
+    quote: "Asterope!"
+  },
+  {
+    nom: "Kumi Katayama",
+    genre: ["Female", "Human"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus:["P5X"],
+    personaUser: true,
+    persona: "Kiskil-lilla",
+    emoji: ["👩‍🏫","⚡","🔫"],
+    quote: "Kiskil-lilla!"
+  },
+  {
     nom: "Kotone Montagne",
     genre: ["Female", "Human"],
     age: "15-20",

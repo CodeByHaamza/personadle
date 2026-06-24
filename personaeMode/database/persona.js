@@ -78,4 +78,7 @@ export const personas = [
   "Ulala Serizawa",
   "Joker",
   "Erina",
+  "Aran Hirano",
+  "Narumi Nashimoto",
+  "Kumi Katayama",
 ];

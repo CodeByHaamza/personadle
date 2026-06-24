@@ -785,6 +785,24 @@ export const personaeCharacters = [
     user: ["Ichigo Shikano"],
     opus: ["P5X"],
   },
+  {
+    persona: "Gentileschi",
+    image: "Gentileschi",
+    user: ["Aran Hirano"],
+    opus: ["P5X"],
+  },
+  {
+    persona: "Asterope",
+    image: "Asterope",
+    user: ["Narumi Nashimoto"],
+    opus: ["P5X"],
+  },
+  {
+    persona: "Kiskil-lilla",
+    image: "Kiskil-lilla",
+    user: ["Kumi Katayama"],
+    opus: ["P5X"],
+  },
   // Persona 2 ( P2IS, P2EP )
   {
     persona: "Vulcanus",
