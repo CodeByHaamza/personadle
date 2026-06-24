@@ -64,4 +64,11 @@ export const personas = [
   "Wonder Summer ( Nagisa Kamishiro )",
   "Yuki ( Yukimi Fujikawa )",
   "Yukari Takeba",
+  "Anri ( Aran Hirano )",
+  "Pinky ( Narumi Nashimoto )",
+  "Blitz ( Kumi Katayama )",
+  "Mona Starlight ( Morgana )",
+  "Marian Summer ( Minami Miyashita )",
+  "Puppet Summer ( Miyu Sahara )",
+  "Closer Radiance ( Motoha Arai )",
 ];

@@ -72,4 +72,12 @@ export const portraitsMap = {
   "Vino ( Chizuko Nagao )": "Vino",
   "Luce ( Shoki Ikenami )": "Luce",
   "Berry ( Ichigo Shikano )": "Berry",
+  // P5X — nouveaux Phantom Idols + skins
+  "Anri ( Aran Hirano )": "Anri",
+  "Pinky ( Narumi Nashimoto )": "Pinky",
+  "Blitz ( Kumi Katayama )": "Blitz",
+  "Mona Starlight ( Morgana )": "Mona_Starlight",
+  "Marian Summer ( Minami Miyashita )": "Marian_Summer",
+  "Puppet Summer ( Miyu Sahara )": "Puppet_Summer",
+  "Closer Radiance ( Motoha Arai )": "Closer_Radiance",
 };
