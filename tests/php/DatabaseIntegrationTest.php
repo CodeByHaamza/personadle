@@ -145,6 +145,20 @@ final class DatabaseIntegrationTest extends TestCase
             ->execute([min($u1, $u2), max($u1, $u2)]);
     }
 
+    public function testUsersTableHasColumnsUsedByCode(): void
+    {
+        // Garde-fou anti-dérive : bdd_mysql.sql (schéma Docker) doit contenir les
+        // colonnes que le code utilise — sinon login.php & co plantent en Fatal error.
+        $cols = self::$pdo->query(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'"
+        )->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach (['is_admin', 'is_banned', 'pseudo_locked', 'streak_recovered_at'] as $required) {
+            $this->assertContains($required, $cols, "Colonne users.$required manquante (schéma périmé ?)");
+        }
+    }
+
     public function testDeletingUserCascadesToStats(): void
     {
         $uid = $this->makeUser();

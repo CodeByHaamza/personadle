@@ -55,6 +55,13 @@ CREATE TABLE users (
     remember_me_expires  DATETIME         NULL,
     -- Vaut 1 après le premier import JSON (une seule migration autorisée par compte)
     has_migrated         TINYINT(1)       NOT NULL DEFAULT 0,
+    -- Droits admin (utilisé par requireAdmin / login.php / formatUser).
+    is_admin             TINYINT(1)       NOT NULL DEFAULT 0,
+    -- Modération : compte banni / pseudo verrouillé (api/admin/, login.php).
+    is_banned            TINYINT(1)       NOT NULL DEFAULT 0,
+    pseudo_locked        TINYINT(1)       NOT NULL DEFAULT 0,
+    -- Date de la dernière récupération de streak Jack Frost (cooldown 60j, migration 013).
+    streak_recovered_at  DATETIME         DEFAULT NULL,
 
     PRIMARY KEY (id),
     UNIQUE KEY uq_email           (email),
