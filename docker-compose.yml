@@ -36,8 +36,10 @@ services:
       # Scripts SQL exécutés automatiquement au premier démarrage (ordre alphabétique).
       # 01_ = schéma complet (tables, index, contraintes, seed titles + social_link_ranks)
       # 02_ = données de test optionnelles (voir docker/mysql/init/)
+      # 03_ = 19 faux joueurs thémés Persona (généré par scripts/gen_seed_dev.mjs)
       - ./sql/bdd_mysql.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
       - ./docker/mysql/init/02_seed_test.sql:/docker-entrypoint-initdb.d/02_seed_test.sql:ro
+      - ./docker/mysql/init/03_seed_dev.sql:/docker-entrypoint-initdb.d/03_seed_dev.sql:ro
     ports:
       # Exposé sur 3307 pour ne pas entrer en conflit avec un MySQL local
       - "${DB_EXPOSE_PORT:-3307}:3306"

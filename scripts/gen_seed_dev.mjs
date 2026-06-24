@@ -110,7 +110,8 @@ function statsFor(r, modeIdx) {
 w("-- ============================================================================");
 w("-- seed_dev.sql — Faux joueurs de DEV (généré par scripts/gen_seed_dev.mjs).");
 w("-- NE JAMAIS charger en production. Mot de passe commun : test1234");
-w("-- Charger :  docker compose exec -T db mariadb -u root -proot personadle_db < sql/seed_dev.sql");
+w("-- Auto-chargé par Docker au 1er démarrage (docker/mysql/init/). Rechargement manuel :");
+w("--   docker compose exec -T db mariadb -u root -prootpassword personadle_db < docker/mysql/init/03_seed_dev.sql");
 w("-- ============================================================================");
 w("SET NAMES utf8mb4;");
 w("");
@@ -198,5 +199,8 @@ w("");
 w(`-- ${ROSTER.length} joueurs · mdp commun : test1234`);
 
 const sql = out.join("\n") + "\n";
-writeFileSync(join(ROOT, "sql", "seed_dev.sql"), sql);
-console.log(`✓ sql/seed_dev.sql généré — ${ROSTER.length} joueurs, ${(sql.length / 1024).toFixed(0)} Ko`);
+// Écrit dans docker/mysql/init/ → auto-chargé par MariaDB au PREMIER démarrage
+// (docker-entrypoint-initdb.d, après 01_schema + 02_seed_test).
+const target = join(ROOT, "docker", "mysql", "init", "03_seed_dev.sql");
+writeFileSync(target, sql);
+console.log(`✓ docker/mysql/init/03_seed_dev.sql généré — ${ROSTER.length} joueurs, ${(sql.length / 1024).toFixed(0)} Ko`);
