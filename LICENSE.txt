@@ -1,9 +1,22 @@
+PersonaDLE — Licensing
+================================================================================
+
+This repository contains TWO categories of material with DIFFERENT terms.
+Read both sections carefully before using anything from this project.
+
+
+1. SOURCE CODE — MIT License
+--------------------------------------------------------------------------------
+The MIT License below applies ONLY to the original source code authored by the
+PersonaDLE contributors: the JavaScript, PHP, CSS, HTML, SQL, build scripts and
+configuration files in this repository.
+
 MIT License
 
 Copyright (c) 2026 Hamza KARROUCHI & L2GENDAIRE
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the “Software”), to deal
+of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
@@ -12,10 +25,41 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+2. GAME ASSETS — NOT covered by the MIT License
+--------------------------------------------------------------------------------
+The MIT License above DOES NOT apply to any Persona / Shin Megami Tensei /
+Atlus / SEGA intellectual property included or referenced in this repository,
+including but not limited to:
+
+  - Character names, likenesses, portraits and artwork
+  - Persona / demon designs and names
+  - Music tracks, themes and audio clips (e.g. files under musicsMode/)
+  - Logos, quotes, lore and other franchise content
+
+All such assets are the property of their respective rights holders
+(© ATLUS / © SEGA and/or their licensors). They are included here solely for
+the purposes of a non-commercial, fan-made tribute, under what we believe to be
+fair use / fan-project tolerance. They are NOT licensed to you and may NOT be
+copied, redistributed, sublicensed or sold under the MIT License or otherwise.
+
+If you reuse this project's code, you must supply your own assets or obtain the
+appropriate rights. Do not redistribute the franchise assets in this repository.
+
+
+Disclaimer
+--------------------------------------------------------------------------------
+PersonaDLE is an unofficial, non-commercial fan project. It is NOT affiliated
+with, endorsed by, or connected to Atlus, SEGA, or the Persona franchise in any
+way. Rights holders may request removal of their material at any time; such
+requests will be honored.
+
+If you enjoy PersonaDLE, please support the official games from Atlus / SEGA.

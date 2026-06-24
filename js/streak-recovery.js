@@ -110,16 +110,12 @@ function _spawnSnowflakes() {
   }
 }
 
-function _recover(previousStreak, overlay) {
-  const menu = document.getElementById("sr-menu");
-  if (menu) menu.classList.add("sr--embrase");
-
-  // Marquer `shown` maintenant que l'utilisateur a confirmé (pas avant)
-  const _rConfirm = _getRecovery();
-  _rConfirm.shown = true;
-  _saveRecovery(_rConfirm);
-
-  // 1. Restaurer la streak en localStorage + marquer la recovery pour le badge reborn_phoenix
+/**
+ * Applique la récupération localement : restaure la streak, marque le profil
+ * pour le badge reborn_phoenix, consomme le crédit et notifie l'app.
+ * N'est appelée QUE lorsque la récupération est confirmée fiable (cf. performRecovery).
+ */
+function _applyRecoveryLocally(previousStreak) {
   try {
     const profile = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
     if (profile.stats) {
@@ -128,29 +124,84 @@ function _recover(previousStreak, overlay) {
     }
     profile.streakRestorationUsed = true;
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));
-    window.dispatchEvent(new CustomEvent("personadle:streak-recovered"));
   } catch (_) {}
 
-  // 2. Sync vers le backend (fire-and-forget)
-  _syncRecoveryToBackend(previousStreak);
-
-  // 3. Enregistrer la récupération (date + consommer le crédit)
+  // Consommer le crédit (date + reset previousStreak) ET marquer comme confirmé
   const r = _getRecovery();
   r.lastUsed = new Date().toISOString().split("T")[0];
   r.previousStreak = 0;
+  r.shown = true;
   _saveRecovery(r);
 
-  setTimeout(() => _close(overlay), 1800);
+  window.dispatchEvent(new CustomEvent("personadle:streak-recovered"));
 }
 
-function _syncRecoveryToBackend(previousStreak) {
-  const prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
-  fetch(`${prefix}/api/user/recover-streak`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ previous_streak: previousStreak }),
-  }).catch(() => {}); // Silencieux si offline
+/**
+ * Effectue la récupération de streak de façon FIABLE.
+ *
+ * - Utilisateur connecté → le backend fait autorité : on n'écrit le localStorage
+ *   et on ne consomme le crédit QUE si le backend confirme (200). En cas de
+ *   refus (429 cooldown, 400 validation) ou d'erreur réseau, rien n'est consommé
+ *   et l'utilisateur peut réessayer — fini le "revert silencieux".
+ * - Joueur invité (pas de compte) → application locale directe, aucun cloud à
+ *   écraser donc aucun risque de revert.
+ *
+ * @param {number} previousStreak
+ * @returns {Promise<{ok: boolean, status?: number, error?: string, streak?: number}>}
+ */
+export async function performRecovery(previousStreak) {
+  const loggedIn = !!window._currentUser?.id;
+
+  if (loggedIn) {
+    const prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
+    let res;
+    try {
+      res = await fetch(`${prefix}/api/user/recover-streak`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ previous_streak: previousStreak }),
+      });
+    } catch (_) {
+      return { ok: false, error: "network" };
+    }
+    if (!res.ok) {
+      let error = "error";
+      try {
+        error = (await res.json())?.error || error;
+      } catch (_) {}
+      return { ok: false, status: res.status, error };
+    }
+  }
+
+  _applyRecoveryLocally(previousStreak);
+  return { ok: true, streak: previousStreak };
+}
+
+async function _recover(previousStreak, overlay) {
+  const menu = document.getElementById("sr-menu");
+  const recoverBtn = overlay?.querySelector("#sr-btn-recover");
+  if (recoverBtn) recoverBtn.disabled = true;
+
+  const result = await performRecovery(previousStreak);
+
+  if (!result.ok) {
+    // Échec confirmé : on informe l'utilisateur sans consommer le crédit.
+    const subtitle = overlay?.querySelector(".sr-subtitle");
+    const msg =
+      result.status === 429
+        ? "Recovery is on cooldown — try again later."
+        : result.error === "network"
+          ? "You appear to be offline. Please try again."
+          : "Recovery unavailable right now. Please try again.";
+    if (subtitle) subtitle.textContent = msg;
+    if (recoverBtn) recoverBtn.disabled = false;
+    return;
+  }
+
+  // Succès : feu d'artifice puis fermeture.
+  if (menu) menu.classList.add("sr--embrase");
+  setTimeout(() => _close(overlay), 1800);
 }
 
 function _close(overlay) {

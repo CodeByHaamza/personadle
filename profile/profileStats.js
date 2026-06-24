@@ -1,3 +1,5 @@
+import { parisDateKey } from "../js/gameCore.js";
+
 export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   const savedProfile = localStorage.getItem("personaUserProfile");
   if (!savedProfile) return;
@@ -35,15 +37,14 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   const mostPlayed = Object.entries(stats.modeCount).sort((a, b) => b[1] - a[1]);
   if (mostPlayed.length > 0) stats.favoriteMode = mostPlayed[0][0];
 
-  // Gestion du streak quotidien
-  const today = new Date().toISOString().split("T")[0];
-  const lastPlayed = stats.lastPlayed?.split("T")[0];
+  // Gestion du streak quotidien — frontière de journée en heure de Paris
+  // (jamais UTC : tout le jeu est calé sur Europe/Paris via parisDateKey()).
+  const today = parisDateKey();
+  const lastPlayed = stats.lastPlayed ? parisDateKey(new Date(stats.lastPlayed)) : null;
   stats.lastPlayed = new Date().toISOString();
 
   if (!lastPlayed || lastPlayed !== today) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yDate = yesterday.toISOString().split("T")[0];
+    const yDate = parisDateKey(new Date(Date.now() - 86_400_000));
 
     if (lastPlayed === yDate) {
       stats.streak = (stats.streak || 0) + 1;

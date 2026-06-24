@@ -35,14 +35,19 @@ if ($row['streak_recovered_at'] !== null) {
     }
 }
 
-// ── Validation : previous_streak ne peut pas dépasser le vrai record + 10% ───
-$stmt = $pdo->prepare('SELECT MAX(streak_record) AS max_record FROM user_stats WHERE user_id = ?');
+// ── Validation anti-triche ───────────────────────────────────────────────────
+// La streak côté client est GLOBALE (une partie dans n'importe quel mode = +1/jour),
+// elle peut donc légitimement dépasser le streak_record d'un mode pris isolément.
+// La seule borne supérieure infalsifiable et vérifiable côté serveur est le nombre
+// de jours DISTINCTS réellement joués (table game_sessions). Une streak globale ne
+// peut jamais excéder ce total.
+$stmt = $pdo->prepare('SELECT COUNT(DISTINCT played_date) FROM game_sessions WHERE user_id = ?');
 $stmt->execute([$authId]);
-$maxRecord = (int) ($stmt->fetchColumn() ?? 0);
-$maxAllowed = max(1, (int) ceil($maxRecord * 1.10));
+$daysPlayed = (int) ($stmt->fetchColumn() ?? 0);
+$maxAllowed = max(1, $daysPlayed);
 
 if ($previousStreak > $maxAllowed) {
-    jsonError('Invalid previous_streak: exceeds known streak record', 400);
+    jsonError('Invalid previous_streak: exceeds total days played', 400);
 }
 
 // ── Mise à jour streak + enregistrement cooldown ─────────────────────────────

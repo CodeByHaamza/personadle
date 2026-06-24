@@ -7,6 +7,7 @@
  * Date helpers use UTC-based ISO strings (same as profileStats.js internals).
  */
 
+import { vi } from "vitest";
 import { updateProfileStats } from "../profile/profileStats.js";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -173,6 +174,21 @@ describe("updateProfileStats", () => {
       saveProfile(makeProfile({ streak: 10, lastPlayed: daysAgoISO(2) }));
       updateProfileStats({ result: "win", mode: "Classic", timeSpent: 0 });
       expect(loadProfile().stats.streak).toBe(1);
+    });
+
+    it("uses the Europe/Paris day boundary, not UTC", () => {
+      // 2025-06-15T23:30:00Z → à Paris (CEST, UTC+2) il est déjà 2025-06-16 01:30.
+      // lastPlayed (Paris) = 2025-06-15 → c'est "hier" en heure de Paris → la streak
+      // doit s'incrémenter. Avec un calcul UTC, "aujourd'hui" serait encore le 06-15
+      // et la partie serait vue comme "déjà jouée aujourd'hui" → streak figée (bug).
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2025-06-15T23:30:00Z"));
+      saveProfile(makeProfile({ streak: 3, lastPlayed: "2025-06-15T12:00:00Z" }));
+
+      updateProfileStats({ result: "win", mode: "Classic", timeSpent: 0 });
+
+      expect(loadProfile().stats.streak).toBe(4);
+      vi.useRealTimers();
     });
 
     it("updates streakRecord when the new streak exceeds it", () => {

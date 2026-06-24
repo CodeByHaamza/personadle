@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { canRecover, checkStreakRecovery } from "../js/streak-recovery.js";
+import { canRecover, checkStreakRecovery, performRecovery } from "../js/streak-recovery.js";
 
 const RECOVERY_KEY = "streakRecovery";
 const TWO_MONTHS_MS = 60 * 24 * 60 * 60 * 1000;
@@ -16,10 +16,12 @@ beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
   vi.clearAllMocks();
+  delete globalThis.window?._currentUser;
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
+  delete globalThis.window?._currentUser;
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -123,5 +125,97 @@ describe("checkStreakRecovery", () => {
     checkStreakRecovery();
     expect(setTimeoutSpy).toHaveBeenCalledOnce();
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 800);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// performRecovery() — la récupération doit refléter la réalité backend.
+// Régression historique : la récup écrivait le localStorage de façon
+// optimiste puis appelait le backend en fire-and-forget. Si le backend
+// refusait (cooldown 429 / validation 400), le client croyait avoir
+// réussi, puis le prochain pullProfileFromCloud écrasait la streak →
+// "récupération qui disparaît".
+// ─────────────────────────────────────────────────────────────
+
+describe("performRecovery", () => {
+  function seedProfile(stats = {}) {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ stats: { streak: 0, streakRecord: 0, ...stats } })
+    );
+  }
+
+  it("restores streak locally for a guest (no account, no backend call)", async () => {
+    // Pas de window._currentUser → joueur local pur, aucun risque de revert cloud
+    seedProfile();
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ previousStreak: 7 }));
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    const res = await performRecovery(7);
+
+    expect(res.ok).toBe(true);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(profile.stats.streak).toBe(7);
+    // Crédit consommé
+    const rec = JSON.parse(localStorage.getItem(RECOVERY_KEY));
+    expect(rec.previousStreak).toBe(0);
+    expect(rec.lastUsed).toBeTruthy();
+  });
+
+  it("does NOT consume the credit when the backend rejects (cooldown 429)", async () => {
+    globalThis.window._currentUser = { id: 42 };
+    seedProfile({ streak: 0 });
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ previousStreak: 7 }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: false,
+      status: 429,
+      json: async () => ({ error: "Streak recovery on cooldown." }),
+    });
+
+    const res = await performRecovery(7);
+
+    expect(res.ok).toBe(false);
+    expect(res.status).toBe(429);
+    // La streak NE doit PAS avoir été restaurée localement
+    const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(profile.stats.streak).toBe(0);
+    // Le crédit NE doit PAS être consommé → previousStreak intact, pas de lastUsed
+    const rec = JSON.parse(localStorage.getItem(RECOVERY_KEY));
+    expect(rec.previousStreak).toBe(7);
+    expect(rec.lastUsed).toBeUndefined();
+  });
+
+  it("restores streak when the backend accepts (200)", async () => {
+    globalThis.window._currentUser = { id: 42 };
+    seedProfile({ streak: 0 });
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ previousStreak: 9 }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ recovered: true, streak: 9 }),
+    });
+
+    const res = await performRecovery(9);
+
+    expect(res.ok).toBe(true);
+    const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(profile.stats.streak).toBe(9);
+    const rec = JSON.parse(localStorage.getItem(RECOVERY_KEY));
+    expect(rec.previousStreak).toBe(0);
+  });
+
+  it("does NOT consume the credit on network failure", async () => {
+    globalThis.window._currentUser = { id: 42 };
+    seedProfile({ streak: 0 });
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ previousStreak: 4 }));
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("offline"));
+
+    const res = await performRecovery(4);
+
+    expect(res.ok).toBe(false);
+    const rec = JSON.parse(localStorage.getItem(RECOVERY_KEY));
+    expect(rec.previousStreak).toBe(4);
+    expect(rec.lastUsed).toBeUndefined();
   });
 });

@@ -502,9 +502,14 @@ Track your journey with comprehensive stats:
 
 ## ⚖️ License
 
-This project is licensed under the **MIT License** - see the [LICENSE.txt](LICENSE.txt) file for details.
+The **source code** of this project is licensed under the **MIT License**.
 
-You're free to use, modify, and share the code for **non-commercial use**—just credit the authors and keep it stylish! 😎
+The **game assets** (character names, portraits, artwork, music, logos, quotes and
+other Persona / Shin Megami Tensei / Atlus / SEGA content) are **NOT** covered by
+the MIT License — they remain the property of their respective rights holders and
+may not be redistributed. See [LICENSE.txt](LICENSE.txt) for the full terms.
+
+You're free to reuse the **code**, but bring your own assets. 😎
 
 ---
 
@@ -512,7 +517,7 @@ You're free to use, modify, and share the code for **non-commercial use**—just
 
 **PersonaDLE is a fan-made project** and is **not affiliated with, endorsed by, or connected to Atlus, SEGA, or the Persona franchise** in any way.
 
-All characters, music, and references remain the property of their respective rights holders. No copyrighted assets are used—all visuals and audio are minimal recreations for educational and entertainment purposes.
+All characters, music, artwork and references remain the property of their respective rights holders (© ATLUS / © SEGA). They are used here only for a non-commercial, fan-made tribute. Rights holders may request removal of their material at any time, and such requests will be honored.
 
 ### Regarding AI-Generated Assets
 
