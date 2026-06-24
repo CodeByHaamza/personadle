@@ -420,6 +420,25 @@ CREATE TABLE deletion_requests (
 
 
 -- =============================================================================
+-- 16b. SOCIAL_LINK_RANKUP_NOTIFS — Notifs de rank-up pour les 2 joueurs
+-- (migration api/migrations/009 ; utilisé par api/social-links + api/admin/social_links)
+-- =============================================================================
+CREATE TABLE social_link_rankup_notifs (
+    id           BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    recipient_id BIGINT UNSIGNED  NOT NULL,
+    partner_id   BIGINT UNSIGNED  NOT NULL,
+    new_rank     INT              NOT NULL,
+    created_at   TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    seen_at      TIMESTAMP        NULL DEFAULT NULL,
+
+    PRIMARY KEY (id),
+    INDEX idx_recipient_unseen (recipient_id, seen_at),
+    FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (partner_id)   REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================================================
 -- VUES
 -- =============================================================================
 
