@@ -32,6 +32,18 @@ if (getenv('DB_HOST') !== false) {
     exit;
 }
 
+// ── Affichage des erreurs ────────────────────────────────────────────────────
+// En PROD : ne JAMAIS afficher les erreurs (fuite de chemins, requêtes SQL,
+// noms de colonnes…). On les journalise à la place. En local : affichage pour
+// faciliter le debug.
+if (APP_ENV === 'production') {
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+} else {
+    ini_set('display_errors', '1');
+}
+error_reporting(E_ALL);
+
 // ── CORS ─────────────────────────────────────────────────────────────────────
 // Origines autorisées : local dev (Apache port 80, Live Server port 5500)
 // + production. On renvoie l'origine exacte si elle est whitelistée
