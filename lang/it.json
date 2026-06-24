@@ -1043,5 +1043,15 @@
     "intro_tests": "🧪 190 test unitari, tutti verdi. Ogni nuova utility in `gameCore.js` viene consegnata con test. Prettier mantiene i diff puliti. L'hook pre-commit non lascia passare i18n rotto. Fidati della pipeline.",
     "intro_bugfixes": "🐛 Accumulo di listener, casi limite DST, race condition, wildcard CORS, 409 silenziosi — se poteva rompersi silenziosamente, è stato corretto. Miglioramenti di accessibilità inclusi, perché 'rotto' non è solo per i bug.",
     "joker_starlight_intro": "Il Ladro Fantasma scambia il suo cappotto con un completo — la variante Dancing in Starlight di Joker arriva in P5X con una nuova animazione All-Out Attack e un tocco di eleganza."
+  },
+  "streak_recovery": {
+    "title": "Serie persa! 🥶",
+    "subtitle": "Avevi una serie di {{count}} giorni 🔥",
+    "description": "Jack Frost può ripristinarla — una volta ogni 2 mesi.",
+    "restore_button": "🔥 Ripristina la mia serie!",
+    "cancel_button": "Non ora",
+    "error_cooldown": "Ripristino in cooldown — riprova più tardi.",
+    "error_offline": "Sembri offline. Riprova.",
+    "error_generic": "Ripristino non disponibile al momento. Riprova."
   }
 }

@@ -42,7 +42,6 @@ export const portraitsMapSilhouette = {
   "Makoto Niijima": "Makoto",
   Margaret: "Margaret",
   Marie: "Marie",
-  "Maya Amano": "Maya",
   Metis: "Metis",
   "Yuuki Mishima": "Mishima",
   Mitsuko: "Mitsuko",

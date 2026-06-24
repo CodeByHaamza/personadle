@@ -10,14 +10,8 @@
  *   if (window._currentUser) await pullProfileFromCloud();
  */
 
-const MODE_MAP = {
-  classic: "Classic",
-  emoji: "Emoji",
-  silhouette: "Silhouette",
-  alloutattack: "AllOutAttack",
-  personae: "Personae",
-  music: "Music",
-};
+// Conversion clé backend → libellé canonique : voir modeLabel() dans gameCore.js
+import { modeLabel } from "./gameCore.js";
 
 function _prefix() {
   return window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
@@ -135,7 +129,7 @@ export async function pullProfileFromCloud() {
         timeMs += r.total_time_ms ?? 0;
         best = Math.max(best, r.streak_record ?? 0);
         perfect += r.perfect_wins ?? 0;
-        const k = MODE_MAP[r.mode];
+        const k = modeLabel(r.mode);
         if (k) {
           modeCount[k] = r.games ?? 0;
           modeWins[k] = r.wins ?? 0;
@@ -152,7 +146,7 @@ export async function pullProfileFromCloud() {
       p.stats.modeCount = modeCount;
       p.stats.modeWins = modeWins;
       const fav = d.stats.reduce((b, r) => (!b || r.games > b.games ? r : b), null);
-      if (fav) p.stats.favoriteMode = MODE_MAP[fav.mode] ?? fav.mode;
+      if (fav) p.stats.favoriteMode = modeLabel(fav.mode);
     }
 
     // ── Badges (cloud → local, jamais régressif) ───────────────────────────

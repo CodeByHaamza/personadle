@@ -26,11 +26,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Lint (ESLint)
+        run: npm run lint
+
+      - name: Validate character data
+        run: npm run data:check
+
       - name: Run unit tests (Vitest)
         run: npm test
 
       - name: Check i18n key consistency
         run: npm run i18n:check
+
+      # Non bloquant tant que le repo n'est pas entièrement formaté (cf. AMELIORATIONS.md §8).
+      - name: Check Prettier formatting (non-blocking)
+        run: npm run format:check
+        continue-on-error: true
 
   # ── Job 2 : Lint PHP syntaxique ─────────────────────────────────────────────
   lint-php:

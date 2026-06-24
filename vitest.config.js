@@ -13,7 +13,14 @@ export default defineConfig({
 
     coverage: {
       provider: "v8",
-      include: ["js/gameCore.js"],
+      include: [
+        "js/gameCore.js",
+        "js/streak-recovery.js",
+        "js/cloud-sync.js",
+        "profile/profileStats.js",
+        "profile/formatPlayTime.js",
+        "scripts/validate_characters.js",
+      ],
     },
   },
 });

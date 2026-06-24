@@ -12,6 +12,15 @@
 const RECOVERY_KEY = "streakRecovery";
 const TWO_MONTHS_MS = 60 * 24 * 60 * 60 * 1000; // 60 jours en ms
 
+/**
+ * Traduction avec fallback robuste (cf. CLAUDE.md §5) : t(key) renvoie la clé
+ * brute si absente, donc on retombe sur `fallback` dans ce cas.
+ */
+function _t(key, fallback, vars) {
+  const r = window.i18n?.t?.(key, vars);
+  return r != null && r !== key ? r : fallback;
+}
+
 function _imgBase() {
   const p = window.location.pathname;
   return p.startsWith("/personadle/") ? "/personadle/img/" : "/img/";
@@ -48,7 +57,9 @@ export function checkStreakRecovery() {
   if (r.shown) return;
   if (!canRecover()) return;
   // Ne pas réafficher si déjà dismissé dans cette session de navigation
-  try { if (sessionStorage.getItem("_srDismissed")) return; } catch (_) {}
+  try {
+    if (sessionStorage.getItem("_srDismissed")) return;
+  } catch (_) {}
 
   // Petit délai pour laisser la page se stabiliser
   setTimeout(() => showStreakRecoveryMenu(r.previousStreak), 800);
@@ -73,12 +84,12 @@ export function showStreakRecoveryMenu(previousStreak) {
       <div class="sr-jack-wrap">
         <img src="${_imgBase()}Jacck_frost_streak.png" alt="Jack Frost" class="sr-jack-img" id="sr-jack-img">
       </div>
-      <h2 class="sr-title">Streak Lost! 🥶</h2>
-      <p class="sr-subtitle">You had a <strong>${previousStreak}-day streak</strong> 🔥</p>
-      <p class="sr-desc">Jack Frost can restore it — once every 2 months.</p>
+      <h2 class="sr-title">${_t("streak_recovery.title", "Streak Lost! 🥶")}</h2>
+      <p class="sr-subtitle">${_t("streak_recovery.subtitle", `You had a ${previousStreak}-day streak 🔥`, { count: previousStreak })}</p>
+      <p class="sr-desc">${_t("streak_recovery.description", "Jack Frost can restore it — once every 2 months.")}</p>
       <div class="sr-buttons">
-        <button class="sr-btn-recover" id="sr-btn-recover">🔥 Restore my streak!</button>
-        <button class="sr-btn-cancel"  id="sr-btn-cancel">Not now</button>
+        <button class="sr-btn-recover" id="sr-btn-recover">${_t("streak_recovery.restore_button", "🔥 Restore my streak!")}</button>
+        <button class="sr-btn-cancel"  id="sr-btn-cancel">${_t("streak_recovery.cancel_button", "Not now")}</button>
       </div>
     </div>
   `;
@@ -190,10 +201,13 @@ async function _recover(previousStreak, overlay) {
     const subtitle = overlay?.querySelector(".sr-subtitle");
     const msg =
       result.status === 429
-        ? "Recovery is on cooldown — try again later."
+        ? _t("streak_recovery.error_cooldown", "Recovery is on cooldown — try again later.")
         : result.error === "network"
-          ? "You appear to be offline. Please try again."
-          : "Recovery unavailable right now. Please try again.";
+          ? _t("streak_recovery.error_offline", "You appear to be offline. Please try again.")
+          : _t(
+              "streak_recovery.error_generic",
+              "Recovery unavailable right now. Please try again."
+            );
     if (subtitle) subtitle.textContent = msg;
     if (recoverBtn) recoverBtn.disabled = false;
     return;
@@ -208,7 +222,9 @@ function _close(overlay) {
   if (!overlay) overlay = document.getElementById("streak-recovery-overlay");
   if (!overlay) return;
   // Mémoriser le dismiss en sessionStorage pour ne pas réafficher dans la même session
-  try { sessionStorage.setItem("_srDismissed", "1"); } catch (_) {}
+  try {
+    sessionStorage.setItem("_srDismissed", "1");
+  } catch (_) {}
   overlay.classList.add("sr--exit");
   setTimeout(() => overlay.remove(), 420);
 }

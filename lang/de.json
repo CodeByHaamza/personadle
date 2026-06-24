@@ -1043,5 +1043,15 @@
     "intro_tests": "🧪 190 Unit-Tests, alle grün. Jedes neue Utility in `gameCore.js` wird mit Tests geliefert. Prettier hält Diffs sauber. Der Pre-Commit-Hook lässt kein kaputtes i18n durch. Vertraue der Pipeline.",
     "intro_bugfixes": "🐛 Listener-Stacking, DST-Grenzfälle, Race Conditions, CORS-Wildcards, stille 409er — wenn es leise kaputt gehen konnte, wurde es behoben. Barrierefreiheitsverbesserungen inklusive, weil 'kaputt' nicht nur für Bugs gilt.",
     "joker_starlight_intro": "Der Phantom Thief tauscht seinen Mantel gegen einen Anzug — Jokers Dancing in Starlight-Variante kommt in P5X mit einer neuen All-Out Attack-Animation und einem Hauch Eleganz."
+  },
+  "streak_recovery": {
+    "title": "Serie verloren! 🥶",
+    "subtitle": "Du hattest eine Serie von {{count}} Tagen 🔥",
+    "description": "Jack Frost kann sie wiederherstellen — einmal alle 2 Monate.",
+    "restore_button": "🔥 Meine Serie wiederherstellen!",
+    "cancel_button": "Nicht jetzt",
+    "error_cooldown": "Wiederherstellung in Abklingzeit — versuch es später.",
+    "error_offline": "Du scheinst offline zu sein. Bitte versuch es erneut.",
+    "error_generic": "Wiederherstellung derzeit nicht verfügbar. Bitte versuch es erneut."
   }
 }

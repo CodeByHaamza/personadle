@@ -24,6 +24,9 @@ import {
   FILTER_STORAGE_KEYS,
   getPlayerSeedId,
   getDailyTarget,
+  normalizeModeKey,
+  modeLabel,
+  MODES,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -1457,5 +1460,68 @@ describe("normalize — whitespace-only and boundary edge cases", () => {
     // constraint explicitly: normalize should be safe to call on Katakana names
     // (though in practice it is only called on romaji / Latin character names).
     expect(normalize("アン")).toBe("アン");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODES — source unique de vérité pour le vocabulaire des modes de jeu.
+// Avant : chaque couche (backend, profileStats, cloud-sync, pages de mode)
+// avait sa propre table → "classic" vs "classique", "All Out Attack" non
+// normalisé, etc. Ces helpers centralisent la correspondance.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("MODES catalogue", () => {
+  it("exposes the six canonical modes with key + label", () => {
+    expect(MODES.map((m) => m.key).sort()).toEqual(
+      ["alloutattack", "classic", "emoji", "music", "personae", "silhouette"]
+    );
+    const labels = Object.fromEntries(MODES.map((m) => [m.key, m.label]));
+    expect(labels).toEqual({
+      classic: "Classic",
+      emoji: "Emoji",
+      silhouette: "Silhouette",
+      alloutattack: "AllOutAttack",
+      personae: "Personae",
+      music: "Music",
+    });
+  });
+});
+
+describe("normalizeModeKey", () => {
+  it("maps backend keys to themselves", () => {
+    expect(normalizeModeKey("classic")).toBe("classic");
+    expect(normalizeModeKey("alloutattack")).toBe("alloutattack");
+  });
+
+  it("maps the French alias 'classique' to 'classic'", () => {
+    expect(normalizeModeKey("classique")).toBe("classic");
+  });
+
+  it("maps display labels (any case/spacing) to the canonical key", () => {
+    expect(normalizeModeKey("Classic")).toBe("classic");
+    expect(normalizeModeKey("All Out Attack")).toBe("alloutattack");
+    expect(normalizeModeKey("AllOutAttack")).toBe("alloutattack");
+    expect(normalizeModeKey("AOA")).toBe("alloutattack");
+    expect(normalizeModeKey("Personae")).toBe("personae");
+    expect(normalizeModeKey("Music")).toBe("music");
+  });
+
+  it("returns null for an unknown mode", () => {
+    expect(normalizeModeKey("banana")).toBeNull();
+    expect(normalizeModeKey("")).toBeNull();
+    expect(normalizeModeKey(null)).toBeNull();
+  });
+});
+
+describe("modeLabel", () => {
+  it("returns the canonical display label for any known variant", () => {
+    expect(modeLabel("classique")).toBe("Classic");
+    expect(modeLabel("alloutattack")).toBe("AllOutAttack");
+    expect(modeLabel("All Out Attack")).toBe("AllOutAttack");
+    expect(modeLabel("music")).toBe("Music");
+  });
+
+  it("falls back to the raw input for an unknown mode (non-destructive)", () => {
+    expect(modeLabel("Mystery")).toBe("Mystery");
   });
 });

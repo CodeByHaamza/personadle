@@ -1,4 +1,4 @@
-import { parisDateKey } from "../js/gameCore.js";
+import { parisDateKey, modeLabel } from "../js/gameCore.js";
 
 export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   const savedProfile = localStorage.getItem("personaUserProfile");
@@ -14,17 +14,8 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   if (result === "win") stats.wins = (stats.wins || 0) + 1;
   if (result === "giveup") stats.giveups = (stats.giveups || 0) + 1;
 
-  // Gestion du mode favori
-  const validModes = {
-    classique: "Classic",
-    emoji: "Emoji",
-    silhouette: "Silhouette",
-    alloutattack: "AllOutAttack",
-    personae: "Personae",
-    music: "Music",
-  };
-
-  const normalizedMode = validModes[mode.toLowerCase()] || mode;
+  // Mode favori — libellé canonique via le mapping unique de gameCore.js
+  const normalizedMode = modeLabel(mode);
   stats.modeCount = stats.modeCount || {};
   stats.modeCount[normalizedMode] = (stats.modeCount[normalizedMode] || 0) + 1;
 

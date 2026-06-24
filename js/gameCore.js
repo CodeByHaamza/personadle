@@ -80,6 +80,75 @@ export function normalize(str) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// MODES — source unique de vérité pour le vocabulaire des modes de jeu
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Historiquement chaque couche avait sa propre table de modes : le backend parle
+// `classic`, le profil affiche `Classic`, certaines pages passaient `classique`
+// ou `All Out Attack` (non normalisé → entrée parasite dans modeCount). Tout doit
+// désormais transiter par ces helpers.
+//
+//   - key   : identifiant canonique = clé backend/API (game_sessions.mode)
+//   - label : libellé canonique côté profil / stats / UI
+
+export const MODES = [
+  { key: "classic", label: "Classic" },
+  { key: "emoji", label: "Emoji" },
+  { key: "silhouette", label: "Silhouette" },
+  { key: "alloutattack", label: "AllOutAttack" },
+  { key: "personae", label: "Personae" },
+  { key: "music", label: "Music" },
+];
+
+// Table interne « graphie aplatie » → clé canonique.
+// On aplatit l'entrée (minuscule, sans espace/_/-) pour absorber toutes les
+// variantes ("All Out Attack", "all_out_attack", "AllOutAttack"…).
+const _MODE_LOOKUP = (() => {
+  const flat = (s) =>
+    String(s ?? "")
+      .toLowerCase()
+      .replace(/[\s_-]+/g, "");
+  const map = new Map();
+  for (const { key, label } of MODES) {
+    map.set(flat(key), key);
+    map.set(flat(label), key);
+  }
+  // Alias historiques présents dans le code / les données.
+  const aliases = {
+    classique: "classic",
+    classiquemode: "classic",
+    allout: "alloutattack",
+    aoa: "alloutattack",
+    persona: "personae",
+    musics: "music",
+    musique: "music",
+  };
+  for (const [alias, key] of Object.entries(aliases)) map.set(flat(alias), key);
+  return { map, flat };
+})();
+
+/**
+ * Convertit n'importe quelle graphie de mode en sa clé canonique backend.
+ * @param {string} input
+ * @returns {string|null} ex. "classic", ou null si inconnu
+ */
+export function normalizeModeKey(input) {
+  return _MODE_LOOKUP.map.get(_MODE_LOOKUP.flat(input)) ?? null;
+}
+
+/**
+ * Convertit n'importe quelle graphie de mode en son libellé canonique d'affichage.
+ * Retourne l'entrée brute si le mode est inconnu (non destructif).
+ * @param {string} input
+ * @returns {string} ex. "Classic"
+ */
+export function modeLabel(input) {
+  const key = normalizeModeKey(input);
+  const found = MODES.find((m) => m.key === key);
+  return found ? found.label : input;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // CONFETTI / VICTORY CELEBRATION
 // ─────────────────────────────────────────────────────────────────────────────
 

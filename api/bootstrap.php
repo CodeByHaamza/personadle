@@ -69,6 +69,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+// Réponses API = JSON pur : aucune sous-ressource ne doit jamais être chargée.
+// `default-src 'none'` est donc sûr ici (≠ pages HTML, qui ont des scripts inline).
+// `frame-ancestors 'none'` double X-Frame-Options pour les navigateurs récents.
+header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+header('X-Permitted-Cross-Domain-Policies: none');
+// HSTS uniquement en prod (HTTPS) — force le navigateur à rester en HTTPS.
+if (APP_ENV === 'production') {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
 
 // ── Session sécurisée ────────────────────────────────────────────────────────
 // Durée de vie : 30 jours (persistent login, comme tout site moderne).
