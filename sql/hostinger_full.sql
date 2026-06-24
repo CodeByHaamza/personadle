@@ -1,3 +1,8 @@
+-- ⚠️ DÉPRÉCIÉ — NE PAS UTILISER COMME SOURCE DE SCHÉMA.
+-- La source unique du schéma est sql/bdd_mysql.sql (chargé par Docker, reflète la prod).
+-- Ce dump est conservé à titre d'archive historique uniquement et peut être périmé
+-- (ex. social_links.current_rank n'existe plus). Voir sql/migrations/README.md.
+-- =============================================================================
 -- =============================================================================
 -- PersonaDLE — Installation complète Hostinger (fresh install)
 -- =============================================================================

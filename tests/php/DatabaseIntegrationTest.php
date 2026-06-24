@@ -169,10 +169,12 @@ final class DatabaseIntegrationTest extends TestCase
         )->fetchAll(PDO::FETCH_COLUMN);
 
         $required = [
-            'users', 'profiles', 'user_stats', 'game_sessions', 'badges_unlocked',
-            'titles', 'user_titles', 'friendships', 'social_links', 'social_link_ranks',
+            'users', 'profiles', 'user_stats', 'game_sessions',
+            'badges', 'badges_unlocked', 'titles', 'user_titles',
+            'friendships', 'social_links', 'social_link_ranks',
             'social_link_interactions', 'social_link_rankup_notifs', 'leaderboard_cache',
             'messages', 'wallpapers', 'user_wallpapers', 'deletion_requests',
+            'event_codes', 'event_codes_redeemed',
         ];
         foreach ($required as $t) {
             $this->assertContains($t, $tables, "Table '$t' manquante (schéma Docker périmé ?)");
