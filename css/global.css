@@ -3181,10 +3181,17 @@ body.darkmode #rulesModal em {
    ACCESSIBILITÉ : MOUVEMENT RÉDUIT
 ----------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  /* `*` seul ne couvre PAS ::before/::after : on les ajoute pour neutraliser
+     aussi les animations décoratives portées par les pseudo-éléments
+     (flashs P5, flocons Jack Frost, halos…). Le webp animé des modes
+     (All-Out Attack, silhouette) reste, car c'est du contenu de jeu. */
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 
   #imgHomePage:hover,

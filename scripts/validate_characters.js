@@ -34,6 +34,44 @@ export const VALID_OPUS = new Set([
   "PQ2",
 ]);
 
+// Arcanes canoniques : 22 Arcanes Majeurs + variantes propres à la série Persona.
+// Toute autre graphie (ex. "Hanged" au lieu de "Hanged Man", "NONE" au lieu de
+// "None") est signalée en warning pour normalisation.
+export const VALID_ARCANA = new Set([
+  "Fool",
+  "Magician",
+  "Priestess",
+  "Empress",
+  "Emperor",
+  "Hierophant",
+  "Lovers",
+  "Chariot",
+  "Justice",
+  "Hermit",
+  "Fortune",
+  "Strength",
+  "Hanged Man",
+  "Death",
+  "Temperance",
+  "Devil",
+  "Tower",
+  "Star",
+  "Moon",
+  "Sun",
+  "Judgement",
+  "World",
+  // Spécifiques Persona
+  "Aeon",
+  "Universe",
+  "Jester",
+  "Hunger",
+  "Councillor",
+  "Faith",
+  "Hope",
+  "Apostle",
+  "NONE", // sentinelle « pas d'arcane » (PNJ, antagonistes…)
+]);
+
 // Champs string structurels (leur absence casse l'app) → erreur.
 const REQUIRED_STRINGS = ["nom", "age"];
 // Champs tableau requis non vides → erreur.
@@ -45,11 +83,15 @@ const CONTENT_STRINGS = ["quote"];
  * Valide un tableau de personnages.
  * @param {Array<object>} chars
  * @param {Record<string,string>} portraits  portraitsMap (nom → identifiant portrait)
+ * @param {Set<string>|null} portraitFiles   identifiants présents sur disque
+ *                                           (sans extension) ; null = on saute la
+ *                                           vérification disque (tests unitaires).
  * @returns {{ errors: string[], warnings: string[] }}
  *          errors   = violations de schéma (bloquantes)
- *          warnings = contenu manquant (informatif, ex. quote P5X à remplir)
+ *          warnings = contenu/cohérence (informatif : quote vide, arcane à
+ *                     normaliser, emoji en double…)
  */
-export function validateCharacters(chars, portraits = {}) {
+export function validateCharacters(chars, portraits = {}, portraitFiles = null) {
   const errors = [];
   const warnings = [];
   const seen = new Map();
@@ -92,6 +134,23 @@ export function validateCharacters(chars, portraits = {}) {
       }
     }
 
+    // ── Arcanes canoniques (warning : à normaliser) ─────────────────────────
+    if (Array.isArray(c?.arcane)) {
+      for (const a of c.arcane) {
+        if (!VALID_ARCANA.has(a)) {
+          warnings.push(`[${id}] arcane non canonique "${a}" (à normaliser)`);
+        }
+      }
+    }
+
+    // ── Emoji en double dans le même personnage (warning) ───────────────────
+    if (Array.isArray(c?.emoji)) {
+      const dup = c.emoji.filter((e, idx) => c.emoji.indexOf(e) !== idx);
+      if (dup.length) {
+        warnings.push(`[${id}] emoji en double : ${[...new Set(dup)].join(" ")}`);
+      }
+    }
+
     // ── Doublon de nom ──────────────────────────────────────────────────────
     if (typeof c?.nom === "string") {
       if (seen.has(c.nom)) {
@@ -101,9 +160,13 @@ export function validateCharacters(chars, portraits = {}) {
       }
     }
 
-    // ── Portrait référencé ──────────────────────────────────────────────────
-    if (typeof c?.nom === "string" && c.nom.trim() && !(c.nom in portraits)) {
-      errors.push(`[${id}] absent de portraitsMap (aucun portrait associé)`);
+    // ── Portrait : référencé dans la map ET présent sur disque ──────────────
+    if (typeof c?.nom === "string" && c.nom.trim()) {
+      if (!(c.nom in portraits)) {
+        errors.push(`[${id}] absent de portraitsMap (aucun portrait associé)`);
+      } else if (portraitFiles instanceof Set && !portraitFiles.has(portraits[c.nom])) {
+        errors.push(`[${id}] portrait "${portraits[c.nom]}.webp" introuvable sur disque`);
+      }
     }
   });
 
@@ -113,10 +176,22 @@ export function validateCharacters(chars, portraits = {}) {
 // ── CLI : valider la vraie base ────────────────────────────────────────────────
 // Exécuté uniquement quand le script est lancé directement (pas à l'import).
 if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  const { readdirSync } = await import("node:fs");
+  const { fileURLToPath } = await import("node:url");
+  const { dirname, join } = await import("node:path");
+
   const { characters } = await import("../database/characters_clean.js");
   const { portraitsMap } = await import("../database/portraitsMap.js");
 
-  const { errors, warnings } = validateCharacters(characters, portraitsMap);
+  // Identifiants de portraits réellement présents sur disque (sans extension).
+  const portraitsDir = join(dirname(fileURLToPath(import.meta.url)), "..", "database", "portraits");
+  const portraitFiles = new Set(
+    readdirSync(portraitsDir)
+      .filter((f) => f.endsWith(".webp"))
+      .map((f) => f.replace(/\.webp$/, ""))
+  );
+
+  const { errors, warnings } = validateCharacters(characters, portraitsMap, portraitFiles);
 
   if (warnings.length) {
     console.warn(`⚠ ${warnings.length} avertissement(s) (non bloquant) :`);

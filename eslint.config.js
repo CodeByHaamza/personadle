@@ -37,7 +37,14 @@ export default [
       },
     },
     rules: {
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "warn",
+        {
+          args: "none", // signatures de callback (handlers, thèmes, fallback i18n) : args inutilisés tolérés
+          varsIgnorePattern: "^_",
+          caughtErrors: "none", // `catch (_) {}` / `catch (e) {}` idiomatiques, non flaggés
+        },
+      ],
       "no-undef": "error",
       "no-empty": ["warn", { allowEmptyCatch: true }],
       "no-constant-condition": ["warn", { checkLoops: false }],

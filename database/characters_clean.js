@@ -730,7 +730,7 @@ export const characters = [
     nom: "Yu Narukami",
     genre: ["Human","Male"],
     age: "15-20",
-    arcane: ["Fool", "Judgment", "World"],
+    arcane: ["Fool", "Judgement", "World"],
     opus: ["P4", "P4G", "P4AU", "PQ","PQ2"],
     personaUser: true,
     persona: "Izanagi",
@@ -1473,7 +1473,7 @@ export const characters = [
     nom: "Munehisa Iwai",
     genre: ["Human","Male"],
     age: "40+",
-    arcane: ["Hanged"],
+    arcane: ["Hanged Man"],
     opus: ["P5","P5R"],
     personaUser: false,
     persona: "NONE",
@@ -1552,7 +1552,7 @@ export const characters = [
     nom: "Kasumi Yoshizawa",
     genre: ["Human","Female"],
     age: "15-20",
-    arcane: ["None"],
+    arcane: ["NONE"],
     opus: ["P5R"],
     personaUser: false,
     persona: "NONE",
@@ -1615,7 +1615,7 @@ export const characters = [
     personaUser: true,
     persona: "Jánošík",
     emoji: ["🎭","🗡","⚫"],
-    quote: ""
+    quote: "All because that power was sent into her... Now it's too..."
   },
 
   // ── Équipe proche (jouable) ───────────────────────────────────
@@ -1661,7 +1661,7 @@ export const characters = [
     personaUser: true,
     persona: "Chiyome",
     emoji: ["🌂","👘","🎐"],
-    quote: ""
+    quote: "I understand now. Ms Katayama, I won't give up anymore. I promise I will save you. And you...The monster who exploited my teacher's love...Kei Akashi! I will take back all you've stolen!"
   },
   {
     nom: "Shoki Ikenami",
@@ -1683,7 +1683,7 @@ export const characters = [
     personaUser: true,
     persona: "Leucothea",
     emoji: ["👔","⚫","🤺"],
-    quote: ""
+    quote: "Leucothea!"
   },
   {
     nom: "Kotone Montagne",
@@ -1705,7 +1705,7 @@ export const characters = [
     personaUser: true,
     persona: "Styx",
     emoji: ["👘","🟣","👩‍💼"],
-    quote: ""
+    quote: "Styx!"
   },
   {
     nom: "Tomoko Noge",
@@ -1716,7 +1716,7 @@ export const characters = [
     personaUser: true,
     persona: "Prosymna",
     emoji: ["⚾","🍳","🟣"],
-    quote: ""
+    quote: "Prosymna!"
   },
   {
     nom: "Leo Kamiyama",
@@ -1727,7 +1727,7 @@ export const characters = [
     personaUser: true,
     persona: "Erytheia",
     emoji: ["🤖","🟢","👨‍🎤"],
-    quote: ""
+    quote: "Erytheia!"
   },
   {
     nom: "Yaoling Li",
@@ -1738,7 +1738,7 @@ export const characters = [
     personaUser: true,
     persona: "Meng Po",
     emoji: ["☕","🏮","🥘"],
-    quote: ""
+    quote: "I'm still not great at Japanese...I'm always making tons of mistakes. Just be patient with me, okay? Xièxiè!"
   },
   {
     nom: "Kiyoshi Kurotani",
@@ -1749,7 +1749,7 @@ export const characters = [
     personaUser: true,
     persona: "Syke",
     emoji: ["🗡","⚪","👔"],
-    quote: ""
+    quote: "I call upon you, Syke!"
   },
   {
     nom: "Kayo Tomiyama",
@@ -1771,7 +1771,7 @@ export const characters = [
     personaUser: true,
     persona: "Nemertes",
     emoji: ["🍟","🛥","👩‍🦳"],
-    quote: ""
+    quote: "Ladies and gentlemen, let the show begin!"
   },
   {
     nom: "Toshiya Sumi",
@@ -1782,7 +1782,7 @@ export const characters = [
     personaUser: true,
     persona: "Gorgyra",
     emoji: ["🎩","🦯","⚫"],
-    quote: ""
+    quote: "Gorgyra!"
   },
   {
     nom: "Haruna Nishimori",
@@ -1793,7 +1793,7 @@ export const characters = [
     personaUser: true,
     persona: "Daeira",
     emoji: ["⚙","🟤","⛏"],
-    quote: ""
+    quote: "Bang Bang Ba~ng!"
   },
   {
     nom: "YUI",
@@ -1804,7 +1804,7 @@ export const characters = [
     personaUser: true,
     persona: "Apseudes",
     emoji: ["👗","🤖","🔵"],
-    quote: ""
+    quote: "I waited for you to log in yesterday! And you never shown up..."
   },
   {
     nom: "Minami Miyashita",
@@ -1815,7 +1815,7 @@ export const characters = [
     personaUser: true,
     persona: "Thalia",
     emoji: ["❤","🌿","👩‍⚕️"],
-    quote: ""
+    quote: "I want to help everyone. Thalia, please! Activate!"
   },
   {
     nom: "Chizuko Nagao",
@@ -1826,7 +1826,7 @@ export const characters = [
     personaUser: true,
     persona: "Ampelos",
     emoji: ["🐟","🏴‍☠️","👵"],
-    quote: ""
+    quote: "Ampelos!"
   },
   {
     nom: "Yumi Shiina",
@@ -1837,7 +1837,7 @@ export const characters = [
     personaUser: true,
     persona: "Urania",
     emoji: ["🌙","🟢","🧝‍♀️"],
-    quote: ""
+    quote: "It's showtime. Urania!"
   },
   {
     nom: "Ayaka Sakai",
@@ -1848,7 +1848,7 @@ export const characters = [
     personaUser: true,
     persona: "Calliope",
     emoji: ["🐈","🎸","👩‍🎤"],
-    quote: ""
+    quote: "This is your stage. Calliope!"
   },
   {
     nom: "Kira Kitazato",
@@ -1859,7 +1859,7 @@ export const characters = [
     personaUser: true,
     persona: "Harpyia",
     emoji: ["💉","🐦","👨‍⚕️"],
-    quote: ""
+    quote: "Now let's begin...Harpyia! The pain will only last a moment...Hahaha!"
   },
   {
     nom: "Masaki Ashiya",
@@ -1870,7 +1870,7 @@ export const characters = [
     personaUser: true,
     persona: "Amalthea",
     emoji: ["🗡","🟣","💐"],
-    quote: ""
+    quote: "Are you ready? Amalthea!"
   },
   {
     nom: "Runa Dogenzaka",
@@ -1881,7 +1881,7 @@ export const characters = [
     personaUser: true,
     persona: "Aura",
     emoji: ["🍜","⚡","🐕"],
-    quote: ""
+    quote: "Surprise!"
   },
   {
     nom: "Mio Natsukawa",
@@ -1892,7 +1892,7 @@ export const characters = [
     personaUser: true,
     persona: "Minthe",
     emoji: ["💧","🐍","👩‍🚒"],
-    quote: ""
+    quote: "Minthe!"
   },
   {
     nom: "Mayumi Hashimoto",
@@ -1903,7 +1903,7 @@ export const characters = [
     personaUser: true,
     persona: "Pitys",
     emoji: ["📹","🚗","🏁"],
-    quote: ""
+    quote: "Let's do this! Full speed ahead, everyone!"
   },
   {
     nom: "Manaka Nagao",
@@ -1914,7 +1914,7 @@ export const characters = [
     personaUser: true,
     persona: "Euterpe",
     emoji: ["👼","👩‍🎤","🦽"],
-    quote: ""
+    quote: "I'm not going to rely on grandma all the time.... can I be genuinely angry now?"
   },
   {
     nom: "Ichigo Shikano",
@@ -1925,7 +1925,7 @@ export const characters = [
     personaUser: true,
     persona: "Thelxiepeia",
     emoji: ["🖤","💀","😏"],
-    quote: ""
+    quote: "Thelxiepeia!"
   },
 
   // ── Velvet Room ───────────────────────────────────────────────
@@ -1938,7 +1938,7 @@ export const characters = [
     personaUser: true,
     persona: "NONE",
     emoji: ["✨","📖","👩‍🎤"],
-    quote: ""
+    quote: "The Velvet Room exist between dreams and reality, mind and matter. I am merely a servant of its matter."
   },
 
 

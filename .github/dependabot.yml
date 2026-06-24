@@ -1,0 +1,28 @@
+# Dependabot — maintien à jour des dépendances.
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates
+version: 2
+updates:
+  # Dépendances npm (devDependencies : vitest, prettier, eslint…)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      # Regroupe les mises à jour mineures/patch en une seule PR pour réduire le bruit
+      dev-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "chore(deps)"
+
+  # Actions GitHub utilisées par la CI/CD
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(ci)"

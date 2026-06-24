@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { validateCharacters, VALID_OPUS } from "../scripts/validate_characters.js";
+import { validateCharacters, VALID_OPUS, VALID_ARCANA } from "../scripts/validate_characters.js";
 
 /** Personnage minimal valide, surchargeable champ par champ. */
 function makeChar(overrides = {}) {
@@ -96,5 +96,55 @@ describe("validateCharacters", () => {
       Yusuke: "Yusuke",
     });
     expect(errors[0]).toMatch(/Yusuke/);
+  });
+});
+
+describe("validateCharacters — arcane", () => {
+  it("accepts every canonical arcana without warning", () => {
+    const { warnings } = validateCharacters([makeChar({ arcane: [...VALID_ARCANA] })], portraits);
+    expect(warnings.filter((w) => /arcane/i.test(w))).toEqual([]);
+  });
+
+  it("warns on a non-canonical arcana spelling", () => {
+    const { warnings } = validateCharacters([makeChar({ arcane: ["Hanged"] })], portraits);
+    expect(warnings.join()).toMatch(/arcane/i);
+    expect(warnings.join()).toMatch(/Hanged/);
+  });
+});
+
+describe("validateCharacters — emoji duplicates", () => {
+  it("warns when the same emoji appears twice for a character", () => {
+    const { warnings } = validateCharacters([makeChar({ emoji: ["🎭", "🎭"] })], portraits);
+    expect(warnings.join()).toMatch(/emoji/);
+  });
+
+  it("does not warn for distinct emojis", () => {
+    const { warnings } = validateCharacters([makeChar({ emoji: ["🎭", "🔫", "🌀"] })], portraits);
+    expect(warnings.filter((w) => /emoji/.test(w))).toEqual([]);
+  });
+});
+
+describe("validateCharacters — portrait on disk", () => {
+  it("is an error when the portrait identifier has no file on disk", () => {
+    const { errors } = validateCharacters(
+      [makeChar({ nom: "Joker" })],
+      { Joker: "Joker" },
+      new Set(["SomeoneElse"])
+    );
+    expect(errors.join()).toMatch(/disque|introuvable/i);
+  });
+
+  it("passes when the portrait file is present on disk", () => {
+    const { errors } = validateCharacters(
+      [makeChar({ nom: "Joker" })],
+      { Joker: "Joker" },
+      new Set(["Joker"])
+    );
+    expect(errors).toEqual([]);
+  });
+
+  it("skips the disk check when no file set is provided", () => {
+    const { errors } = validateCharacters([makeChar({ nom: "Joker" })], { Joker: "Joker" });
+    expect(errors).toEqual([]);
   });
 });

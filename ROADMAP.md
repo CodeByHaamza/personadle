@@ -154,14 +154,14 @@
 
 ## Qualité & DevEx
 
-| #   | Fonctionnalité                                   | Statut | Notes                                                                                                                   |
-| --- | ------------------------------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Q1  | Tests unitaires Vitest (242 tests passants)      | ✅     | `npm test`                                                                                                              |
-| Q2  | i18n EN/FR/ES/DE/IT (871 clés + phrases compare) | ✅     | `npm run i18n:check`                                                                                                    |
-| Q3  | Service Worker — network-first JS/CSS            | ✅     | SW v72, précache 40+ assets                                                                                             |
-| Q4  | Offline-first (fallback gracieux)                | ✅     | SW + `savePendingSession`                                                                                               |
-| Q5  | BASE_URL API auto-détecté (Apache local + prod)  | ✅     | `pathname.startsWith('/personadle/')`                                                                                   |
-| Q6  | Audit responsive complet (360px → 1440px)        | ✅     | Tous les modes + profil + leaderboard + friends + admin couverts (3 breakpoints chacun)                                 |
-| Q7  | Couverture de tests étendue (4 suites Vitest)    | ✅     | `gameCore.test.js` (172) + `backend.test.js` (18) + `i18n.test.js` + `profileStats.test.js` — 242 tests passants        |
-| Q8  | CI — GitHub Actions                              | ✅     | `.github/workflows/ci.yml` — `npm test` + `npm run i18n:check` + `php -l` sur push develop/main + PRs vers develop/main |
-| Q9  | CD — Deploy automatique → Hostinger              | ✅     | `.github/workflows/cd.yml` — rsync SSH manuel depuis main uniquement (workflow_dispatch + dry-run option)               |
+| #   | Fonctionnalité                                          | Statut | Notes                                                                                                                                                                                               |
+| --- | ------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q1  | Tests unitaires Vitest (242 tests passants)             | ✅     | `npm test`                                                                                                                                                                                          |
+| Q2  | i18n EN/FR/ES/DE/IT (871 clés + phrases compare)        | ✅     | `npm run i18n:check`                                                                                                                                                                                |
+| Q3  | Service Worker — network-first JS/CSS                   | ✅     | SW v72, précache 40+ assets                                                                                                                                                                         |
+| Q4  | Offline-first (fallback gracieux)                       | ✅     | SW + `savePendingSession`                                                                                                                                                                           |
+| Q5  | BASE_URL API auto-détecté (Apache local + prod)         | ✅     | `pathname.startsWith('/personadle/')`                                                                                                                                                               |
+| Q6  | Audit responsive complet (360px → 1440px)               | ✅     | Tous les modes + profil + leaderboard + friends + admin couverts (3 breakpoints chacun)                                                                                                             |
+| Q7  | Couverture de tests étendue (8 suites Vitest + PHPUnit) | ✅     | 242 tests Vitest (`gameCore`, `backend`, `i18n`, `profileStats`, `streakRecovery`, `streakFlow.integration`, `validateCharacters`, `formatPlayTime`) + 7 tests PHPUnit (`tests/php/StreakTest.php`) |
+| Q8  | CI — GitHub Actions                                     | ✅     | `.github/workflows/ci.yml` — `lint` + `data:check` + `npm test` + `i18n:check` + `php -l` + PHPUnit sur push develop/main + PRs                                                                     |
+| Q9  | CD — Deploy automatique → Hostinger                     | ✅     | `.github/workflows/cd.yml` — rsync SSH manuel depuis main uniquement (workflow_dispatch + dry-run option)                                                                                           |

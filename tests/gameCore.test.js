@@ -537,7 +537,7 @@ describe("buildGameSession", () => {
     });
 
     expect(session).toMatchObject({
-      mode: "Classic",
+      mode: "classic", // normalisé vers la clé backend canonique
       target_name: "Joker",
       result: "win",
       attempts: 2,
@@ -578,14 +578,14 @@ describe("buildGameSession", () => {
     expect(session.time_ms).toBe(1235);
   });
 
-  it("preserves the exact mode string passed in", () => {
+  it("normalizes the mode to its canonical backend key", () => {
     const session = buildGameSession({
       mode: "AllOutAttack",
       targetName: "Makoto",
       result: "win",
       attempts: 3,
     });
-    expect(session.mode).toBe("AllOutAttack");
+    expect(session.mode).toBe("alloutattack");
   });
 });
 
@@ -607,7 +607,7 @@ describe("savePendingSession", () => {
 
     const stored = JSON.parse(localStorage.getItem("pendingSessions"));
     expect(stored).toHaveLength(1);
-    expect(stored[0]).toMatchObject({ mode: "Classic", target_name: "Joker" });
+    expect(stored[0]).toMatchObject({ mode: "classic", target_name: "Joker" });
   });
 
   it("creates the array from scratch when pendingSessions is not yet set", () => {
@@ -653,8 +653,8 @@ describe("savePendingSession", () => {
 
     const stored = JSON.parse(localStorage.getItem("pendingSessions"));
     expect(stored).toHaveLength(3);
-    expect(stored[1].mode).toBe("Emoji");
-    expect(stored[2].mode).toBe("Music");
+    expect(stored[1].mode).toBe("emoji");
+    expect(stored[2].mode).toBe("music");
   });
 
   it("preserves existing sessions already in localStorage", () => {
@@ -678,8 +678,8 @@ describe("savePendingSession", () => {
 
     const stored = JSON.parse(localStorage.getItem("pendingSessions"));
     expect(stored).toHaveLength(2);
-    expect(stored[0].mode).toBe("Silhouette");
-    expect(stored[1].mode).toBe("Classic");
+    expect(stored[0].mode).toBe("silhouette");
+    expect(stored[1].mode).toBe("classic");
   });
 });
 
@@ -794,18 +794,18 @@ describe("FILTER_STORAGE_KEYS", () => {
 
 describe("buildGameSession — all 6 modes", () => {
   const VALID_MODES = [
-    { mode: "Classic", targetName: "Joker" },
-    { mode: "Emoji", targetName: "Ryuji Sakamoto" },
-    { mode: "Silhouette", targetName: "Aigis" },
-    { mode: "AllOutAttack", targetName: "Ann Takamaki" },
-    { mode: "Personae", targetName: "Izanagi" },
-    { mode: "Music", targetName: "Last Surprise" },
+    { mode: "Classic", key: "classic", targetName: "Joker" },
+    { mode: "Emoji", key: "emoji", targetName: "Ryuji Sakamoto" },
+    { mode: "Silhouette", key: "silhouette", targetName: "Aigis" },
+    { mode: "AllOutAttack", key: "alloutattack", targetName: "Ann Takamaki" },
+    { mode: "Personae", key: "personae", targetName: "Izanagi" },
+    { mode: "Music", key: "music", targetName: "Last Surprise" },
   ];
 
-  for (const { mode, targetName } of VALID_MODES) {
+  for (const { mode, key, targetName } of VALID_MODES) {
     it(`builds a valid session for mode '${mode}'`, () => {
       const session = buildGameSession({ mode, targetName, result: "win", attempts: 3 });
-      expect(session.mode).toBe(mode);
+      expect(session.mode).toBe(key);
       expect(session.target_name).toBe(targetName);
       expect(session.result).toBe("win");
       expect(session.attempts).toBe(3);

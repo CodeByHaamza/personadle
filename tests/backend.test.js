@@ -111,6 +111,14 @@ describe("buildGameSession", () => {
     });
     expect(session.time_ms).toBe(0);
   });
+
+  it("normalizes the mode to its canonical backend key", () => {
+    // Quelle que soit la graphie passée par la page de mode, le backend reçoit la clé canonique.
+    expect(buildGameSession({ mode: "AllOutAttack", targetName: "x", result: "win", attempts: 1 }).mode).toBe("alloutattack");
+    expect(buildGameSession({ mode: "All Out Attack", targetName: "x", result: "win", attempts: 1 }).mode).toBe("alloutattack");
+    expect(buildGameSession({ mode: "Classic", targetName: "x", result: "win", attempts: 1 }).mode).toBe("classic");
+    expect(buildGameSession({ mode: "Music", targetName: "x", result: "win", attempts: 1 }).mode).toBe("music");
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

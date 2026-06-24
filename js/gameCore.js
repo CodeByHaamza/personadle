@@ -429,7 +429,9 @@ export function showWrongMini(
  */
 export function buildGameSession({ mode, targetName, result, attempts, timeMs = 0, filters = [] }) {
   return {
-    mode,
+    // Clé backend canonique, quelle que soit la graphie passée par le mode
+    // ("AllOutAttack", "All Out Attack", "Classic"…). Voir normalizeModeKey().
+    mode: normalizeModeKey(mode) ?? mode,
     played_date: parisDateKey(),
     target_name: targetName,
     result,
@@ -562,7 +564,7 @@ export async function showCommunityStats(mode, targetName) {
 
   try {
     const data = await api.communityStats.get({
-      mode: mode.toLowerCase(),
+      mode: normalizeModeKey(mode) ?? mode.toLowerCase(),
       date: parisDateKey(),
       target: targetName,
     });
@@ -720,7 +722,7 @@ function _showChallengeModal(mode, score, date, activeFilters = []) {
             await api.messages.send({
               receiver_id: friendId,
               type: "challenge",
-              challenge_mode: mode,
+              challenge_mode: normalizeModeKey(mode) ?? mode,
               challenge_score: score,
               challenge_date: date,
               challenge_filters: JSON.stringify(activeFilters),
