@@ -159,6 +159,26 @@ final class DatabaseIntegrationTest extends TestCase
         }
     }
 
+    public function testCriticalTablesExist(): void
+    {
+        // Contrat de schéma : toute table utilisée par le code doit exister dans
+        // bdd_mysql.sql (chargé par Docker). Garde-fou contre la dérive Docker↔code
+        // (cf. social_link_rankup_notifs qui manquait → notif rank-up cassée).
+        $tables = self::$pdo->query(
+            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE()"
+        )->fetchAll(PDO::FETCH_COLUMN);
+
+        $required = [
+            'users', 'profiles', 'user_stats', 'game_sessions', 'badges_unlocked',
+            'titles', 'user_titles', 'friendships', 'social_links', 'social_link_ranks',
+            'social_link_interactions', 'social_link_rankup_notifs', 'leaderboard_cache',
+            'messages', 'wallpapers', 'user_wallpapers', 'deletion_requests',
+        ];
+        foreach ($required as $t) {
+            $this->assertContains($t, $tables, "Table '$t' manquante (schéma Docker périmé ?)");
+        }
+    }
+
     public function testDeletingUserCascadesToStats(): void
     {
         $uid = $this->makeUser();
