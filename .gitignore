@@ -131,3 +131,6 @@ personadle_profile.json
 # PHPUnit (phar standalone + cache)
 phpunit.phar
 .phpunit.cache/
+
+# Seed de dev généré (faux joueurs) — régénérable via scripts/gen_seed_dev.mjs
+sql/seed_dev.sql
