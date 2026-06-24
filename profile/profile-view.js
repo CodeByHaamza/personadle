@@ -340,6 +340,10 @@ if (viewParam) {
     hide(document.getElementById("editAvatarBtn"));
     hide(document.getElementById("saveAndRefreshBtn"));
     hide(document.getElementById("authSection"));
+    // En mode consultation, masquer l'UI invité « connecte-toi » qu'auth.js affiche
+    // pour un visiteur déconnecté — sinon le profil consulté ressemble à un mur de login.
+    hide(document.getElementById("authGuest"));
+    document.querySelectorAll('[data-auth="anonymous"]').forEach(hide);
     hide(document.querySelector(".pseudo-edit-row"));
     hide(document.querySelector(".perso-card"));
     hide(document.getElementById("openBadgesModal"));

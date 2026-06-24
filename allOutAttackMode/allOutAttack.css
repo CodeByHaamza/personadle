@@ -7,9 +7,21 @@
 /* ── Persona 5 Font — uniquement sur le titre flash victoire ── */
 /* La déclaration @font-face est dans global.css               */
 
+/* Victoire AOA : image révélée plus grande que le global (200px → 340px),
+   spécifique à la page All-Out Attack (n'affecte pas les autres modes). */
+.victory-box #victoryImage {
+  max-height: 340px;
+  width: auto;
+  max-width: 92%;
+}
+/* Skins Summer (paysage) : annule le width:300px fixe du global pour suivre la nouvelle taille. */
+.victory-box #victoryImage[src*="Summer"] {
+  width: auto;
+}
+
 /* Titre "ALL OUT ATTACK!" dans la victoryBox */
 .aoa-victory-banner {
-  font-family: "Persona5", "Arial Black", Arial, sans-serif;
+  font-family: "Arial Black", Impact, "Segoe UI", Arial, sans-serif;
   font-size: clamp(1.3rem, 4vw, 2rem);
   letter-spacing: 0.12em;
   text-transform: uppercase;
