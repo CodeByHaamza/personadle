@@ -204,6 +204,9 @@ CREATE TABLE game_sessions (
     created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
+    -- Anti-doublon : une seule session par (user, mode, jour Paris).
+    -- Cf. migration 014 + sessions.php (interception PDOException 23000).
+    UNIQUE KEY uq_session_per_day (user_id, mode, played_date),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

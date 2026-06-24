@@ -43,10 +43,23 @@ jobs:
         run: npm run format:check
         continue-on-error: true
 
-  # ── Job 2 : Lint PHP syntaxique ─────────────────────────────────────────────
+  # ── Job 2 : Lint PHP + tests PHPUnit (logique + intégration BDD) ─────────────
   lint-php:
-    name: PHP Lint
+    name: PHP Lint & Tests
     runs-on: ubuntu-latest
+
+    # Base MariaDB jetable pour les tests d'intégration (DatabaseIntegrationTest).
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MARIADB_ROOT_PASSWORD: rootpassword
+          MARIADB_DATABASE: personadle_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
 
     steps:
       - name: Checkout
@@ -56,6 +69,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+          extensions: pdo_mysql
 
       - name: Check PHP syntax (all .php files)
         run: |
@@ -65,6 +79,21 @@ jobs:
             exit 1
           fi
           echo "No PHP syntax errors found."
+
+      - name: Load schema into MariaDB
+        run: mysql -h 127.0.0.1 -P 3306 -u root -prootpassword personadle_db < sql/bdd_mysql.sql
+
+      - name: Download PHPUnit
+        run: wget -q -O phpunit.phar https://phar.phpunit.de/phpunit-11.phar
+
+      - name: Run PHPUnit (logic + DB integration)
+        env:
+          DB_TEST_HOST: 127.0.0.1
+          DB_TEST_PORT: '3306'
+          DB_TEST_NAME: personadle_db
+          DB_TEST_USER: root
+          DB_TEST_PASS: rootpassword
+        run: php phpunit.phar
 
       - name: Backend unit tests (PHPUnit)
         run: |
