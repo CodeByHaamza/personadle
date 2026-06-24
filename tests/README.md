@@ -2,19 +2,29 @@
 
 # 🧪 Tests
 
-> **190 tests. Tous verts. Toujours.**
+> **242 tests JS + 7 tests PHP. Tous verts. Toujours.**
 
 </div>
 
-Ce dossier contient les tests automatisés de PersonaDLE, écrits avec **[Vitest](https://vitest.dev/)**.
+Ce dossier contient les tests automatisés de PersonaDLE, écrits avec **[Vitest](https://vitest.dev/)**
+(JS) et **PHPUnit** (backend).
 
 ## Structure
 
 ```
 tests/
-├── gameCore.test.js   ← 172 tests — logique de jeu, dates, streaks, filtres, normalisation…
-└── backend.test.js    ←  18 tests — buildGameSession, savePendingSession, auth UI DOM
+├── gameCore.test.js              ← logique de jeu, dates, streaks, filtres, normalisation, modes…
+├── backend.test.js               ← buildGameSession, savePendingSession, auth UI DOM
+├── i18n.test.js                  ← résolution de clés, fallback, variables
+├── profileStats.test.js          ← stats locales, streak (frontière Paris)
+├── streakRecovery.test.js        ← menu Jack Frost, performRecovery (anti-revert)
+├── streakFlow.integration.test.js← flux complet récup + sync cloud
+├── validateCharacters.test.js    ← validateur de schéma des personnages
+├── formatPlayTime.test.js        ← formatage du temps de jeu (i18n)
+└── php/StreakTest.php            ← logique de streak serveur (PHPUnit, sans DB)
 ```
+
+> Total : **242 tests Vitest** + **7 tests PHPUnit**.
 
 ---
 
@@ -77,7 +87,11 @@ npm run test:watch
 
 ---
 
-## Grand total : 190 tests — 190 passants ✅
+## Grand total : 242 tests Vitest + 7 PHPUnit — tous passants ✅
+
+> Les sections détaillées ci-dessus couvrent les deux suites historiques ; les 6 suites
+> ajoutées depuis (i18n, profileStats, streak, validation, formatPlayTime, PHP) suivent
+> la même philosophie. Lancer `npm test` pour le compte exact à jour.
 
 ---
 

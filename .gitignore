@@ -128,3 +128,6 @@ docs/superpowers/
 # Données personnelles de test
 # ─────────────────────────────────────────────────────────────────────────────
 personadle_profile.json
+# PHPUnit (phar standalone + cache)
+phpunit.phar
+.phpunit.cache/

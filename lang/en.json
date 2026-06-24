@@ -1040,7 +1040,7 @@
     "intro_admin": "🛡️ Ban, lock, manage event codes, monitor stats. The admin panel does everything except make coffee. It also has a full audit trail, so no one can pretend they didn't do the thing they definitely did.",
     "intro_cicd": "🚀 GitHub Actions, git hooks, Service Worker, Hostinger crons — the invisible machinery that keeps everything running. It only pages you at 3am when something actually breaks. Usually.",
     "intro_security": "🔒 CORS, PDO, bcrypt, rate limiting, 7 vulnerabilities patched. The kind of stuff that's invisible when it works and catastrophic when it doesn't. It works.",
-    "intro_tests": "🧪 190 unit tests, all green. Every new utility in `gameCore.js` ships with tests. Prettier keeps diffs clean. The pre-commit hook won't let you ship broken i18n. Trust the pipeline.",
+    "intro_tests": "🧪 242 unit tests, all green. Every new utility in `gameCore.js` ships with tests. Prettier keeps diffs clean. The pre-commit hook won't let you ship broken i18n. Trust the pipeline.",
     "intro_bugfixes": "🐛 Listener stacking, DST edge cases, race conditions, CORS wildcards, silent 409s — if it could break quietly, it has been fixed. Accessibility improvements included, because 'broken' isn't just for bugs.",
     "joker_starlight_intro": "The Phantom Thief trades his signature coat for a tailored suit — Joker's Dancing in Starlight variant joins P5X with a brand new All-Out Attack animation and a touch of elegance."
   },

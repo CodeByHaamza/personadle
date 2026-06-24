@@ -38,19 +38,19 @@ npm run i18n:check
 ### Exemple de sortie
 
 ```
-✅ fr.json — 760/760 keys OK
-✅ es.json — 760/760 keys OK
+✅ fr.json — 871/871 keys OK
+✅ es.json — 871/871 keys OK
 ⚠️  de.json — 2 missing keys:
     - ui.challenge.expire_in
     - badges.helel.description
-✅ it.json — 760/760 keys OK
+✅ it.json — 871/871 keys OK
 ```
 
 ---
 
 ## Règle i18n
 
-`lang/en.json` est la **source de vérité** (760 clés).  
+`lang/en.json` est la **source de vérité** (871 clés).  
 Toujours ajouter une nouvelle clé dans `en.json` en **premier**, puis dans les 4 autres langues.  
 Lancer `npm run i18n:check` avant chaque commit pour ne pas déployer des clés manquantes.
 

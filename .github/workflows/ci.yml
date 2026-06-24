@@ -65,3 +65,8 @@ jobs:
             exit 1
           fi
           echo "No PHP syntax errors found."
+
+      - name: Backend unit tests (PHPUnit)
+        run: |
+          wget -q -O phpunit.phar https://phar.phpunit.de/phpunit-11.phar
+          php phpunit.phar

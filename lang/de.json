@@ -1040,7 +1040,7 @@
     "intro_admin": "🛡️ Ban, Lock, Event-Code-Verwaltung, Stats-Monitoring. Das Admin-Panel macht alles außer Kaffee. Es hat auch einen vollständigen Audit-Trail, damit niemand so tun kann, als hätte er die Sache nicht getan, die er definitiv getan hat.",
     "intro_cicd": "🚀 GitHub Actions, Git Hooks, Service Worker, Hostinger Crons — die unsichtbare Maschinerie, die alles am Laufen hält. Sie ruft dich nur um 3 Uhr morgens an, wenn wirklich etwas kaputt geht. Meistens.",
     "intro_security": "🔒 CORS, PDO, bcrypt, Rate Limiting, 7 Schwachstellen behoben. Die Art von Zeug, das unsichtbar ist wenn es funktioniert und katastrophal wenn nicht. Es funktioniert.",
-    "intro_tests": "🧪 190 Unit-Tests, alle grün. Jedes neue Utility in `gameCore.js` wird mit Tests geliefert. Prettier hält Diffs sauber. Der Pre-Commit-Hook lässt kein kaputtes i18n durch. Vertraue der Pipeline.",
+    "intro_tests": "🧪 242 Unit-Tests, alle grün. Jedes neue Utility in `gameCore.js` wird mit Tests geliefert. Prettier hält Diffs sauber. Der Pre-Commit-Hook lässt kein kaputtes i18n durch. Vertraue der Pipeline.",
     "intro_bugfixes": "🐛 Listener-Stacking, DST-Grenzfälle, Race Conditions, CORS-Wildcards, stille 409er — wenn es leise kaputt gehen konnte, wurde es behoben. Barrierefreiheitsverbesserungen inklusive, weil 'kaputt' nicht nur für Bugs gilt.",
     "joker_starlight_intro": "Der Phantom Thief tauscht seinen Mantel gegen einen Anzug — Jokers Dancing in Starlight-Variante kommt in P5X mit einer neuen All-Out Attack-Animation und einem Hauch Eleganz."
   },

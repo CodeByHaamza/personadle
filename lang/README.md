@@ -12,13 +12,16 @@ Contient les traductions de toute l'interface de PersonaDLE.
 
 ## Fichiers
 
-| Fichier   | Langue   | Statut                            |
-| --------- | -------- | --------------------------------- |
-| `en.json` | Anglais  | ✅ Complet — **source de vérité** |
-| `fr.json` | Français | ✅ Complet                        |
-| `es.json` | Espagnol | 🔜 À créer                        |
-| `de.json` | Allemand | 🔜 À créer                        |
-| `jp.json` | Japonais | ⏳ Post-v1.2                      |
+| Fichier   | Langue    | Statut                                |
+| --------- | --------- | ------------------------------------- |
+| `en.json` | Anglais   | ✅ Complet — **source de vérité**     |
+| `fr.json` | Français  | ✅ Complet                            |
+| `es.json` | Espagnol  | ✅ Complet                            |
+| `de.json` | Allemand  | ✅ Complet                            |
+| `it.json` | Italien   | ✅ Complet                            |
+| `jp.json` | Japonais  | ⏳ Envisagé                           |
+
+> Les 5 langues actives sont synchronisées (871 clés chacune, vérifié par `npm run i18n:check`).
 
 > `en.json` est toujours la référence. En cas de clé manquante dans une autre langue, le système affiche la version anglaise.
 

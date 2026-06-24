@@ -12,6 +12,7 @@
  */
 
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/lib/streak.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);
@@ -110,28 +111,17 @@ try {
     $stmt->execute([$userId, $mode]);
     $stats = $stmt->fetch();
 
-    // Calcul de la streak :
-    // - Victoire consécutive (hier → aujourd'hui) → streak + 1
-    // - Victoire après saut de jours → streak reset à 1
-    // - Abandon → streak reset à 0
-    // - Partie parfaite (victoire en 1 essai) → perfect_wins + 1
+    // Calcul de la streak — logique pure, testée dans tests/php/StreakTest.php.
+    // (frontière de journée en heure de Paris, partie parfaite = victoire en 1 essai)
     $isWin     = $result === 'win';
-    $isPerfect = $isWin && $attempts === 1;
+    $isPerfect = personadle_is_perfect($result, $attempts);
 
-    $lastPlayed = $stats['last_played_at'] ?? null;
-    if ($lastPlayed) {
-        $lastDate = (new DateTime($lastPlayed, new DateTimeZone('UTC')))
-            ->setTimezone(new DateTimeZone('Europe/Paris'))
-            ->format('Y-m-d');
-        $playedDt    = new DateTime($playedDate, new DateTimeZone('Europe/Paris'));
-        $lastDt      = new DateTime($lastDate,   new DateTimeZone('Europe/Paris'));
-        $daysDiff    = (int) $lastDt->diff($playedDt)->format('%r%a');
-        $consecutive = $daysDiff === 1;
-    } else {
-        $consecutive = false; // première partie jamais jouée dans ce mode
-    }
-
-    $newStreak = $isWin ? ($consecutive ? $stats['streak'] + 1 : 1) : 0;
+    $newStreak = personadle_compute_streak(
+        $stats['last_played_at'] ?? null,
+        $playedDate,
+        $result,
+        (int) $stats['streak']
+    );
     $newRecord = max($stats['streak_record'], $newStreak);
 
     $pdo->prepare('

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration PHPUnit — tests du backend PHP (logique pure, sans base de données).
+
+  PHPUnit n'est PAS installé via Composer (absent du projet). Récupérer le phar standalone :
+    wget -O phpunit.phar https://phar.phpunit.de/phpunit-11.phar
+    php phpunit.phar
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         colors="true"
+         failOnWarning="true"
+         cacheDirectory=".phpunit.cache">
+  <testsuites>
+    <testsuite name="PersonaDLE backend">
+      <directory>tests/php</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
