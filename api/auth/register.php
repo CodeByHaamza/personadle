@@ -15,21 +15,7 @@ require_once __DIR__ . '/../bootstrap.php';
 $rawForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
 $firstIp         = trim(explode(',', $rawForwardedFor)[0]);
 $rlIp            = filter_var($firstIp, FILTER_VALIDATE_IP) ? $firstIp : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
-$rlKey      = sys_get_temp_dir() . '/rl_' . md5('personadle_auth_' . $rlIp . basename(__FILE__)) . '.json';
-$rlData     = file_exists($rlKey) ? json_decode(file_get_contents($rlKey), true) : null;
-$rlNow      = time();
-$rlWindow   = 15 * 60;
-$rlMaxTries = 5;
-
-if ($rlData && ($rlNow - $rlData['window_start']) < $rlWindow) {
-    if ($rlData['attempts'] >= $rlMaxTries) {
-        jsonError('Too many attempts. Please try again later.', 429);
-    }
-    $rlData['attempts']++;
-} else {
-    $rlData = ['attempts' => 1, 'window_start' => $rlNow];
-}
-file_put_contents($rlKey, json_encode($rlData), LOCK_EX);
+rateLimit('register:' . $rlIp, 5, 15 * 60); // 5 inscriptions / 15 min
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);

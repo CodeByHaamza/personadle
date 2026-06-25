@@ -24,21 +24,7 @@ $userId = requireAuth();
 // Protège contre les bots qui posteraient des sessions en boucle.
 // La contrainte UNIQUE per (user, mode, date) protège l'intégrité, mais ce
 // rate limit coupe les appels répétitifs avant même d'atteindre la BDD.
-$rlKey  = sys_get_temp_dir() . '/rl_sessions_' . md5('personadle_sessions_' . $userId) . '.json';
-$rlNow  = time();
-$rlData = file_exists($rlKey) ? json_decode(file_get_contents($rlKey), true) : null;
-$rlWindow = 15 * 60;
-$rlMax    = 15;
-
-if ($rlData && ($rlNow - $rlData['window_start']) < $rlWindow) {
-    if ($rlData['count'] >= $rlMax) {
-        jsonError('Too many session submissions. Please wait a few minutes.', 429);
-    }
-    $rlData['count']++;
-} else {
-    $rlData = ['count' => 1, 'window_start' => $rlNow];
-}
-file_put_contents($rlKey, json_encode($rlData), LOCK_EX);
+rateLimit('sessions:' . $userId, 15, 15 * 60, 'Too many session submissions. Please wait a few minutes.');
 $data   = getJsonBody();
 
 // ── Validation ────────────────────────────────────────────────────────────────

@@ -243,6 +243,37 @@ function getJsonBody(): array
 }
 
 /**
+ * Rate-limiting persistant en BDD (table rate_limits) — partagé entre instances,
+ * contrairement à sys_get_temp_dir() qui ne l'est pas. Termine en 429 si plus de
+ * $max requêtes pour cette clé dans la fenêtre glissante de $windowSec secondes.
+ *
+ * @param string $key       Clé unique (ex: "login:1.2.3.4", "sessions:42")
+ * @param int    $max       Nombre max de requêtes dans la fenêtre
+ * @param int    $windowSec Durée de la fenêtre en secondes
+ * @param string $message   Message renvoyé en cas de dépassement
+ */
+function rateLimit(string $key, int $max, int $windowSec, string $message = 'Too many attempts. Please try again later.'): void
+{
+    $pdo    = pdo();
+    $now    = time();
+    $cutoff = $now - $windowSec;
+
+    // Upsert atomique : réinitialise la fenêtre si expirée, sinon incrémente.
+    $pdo->prepare(
+        'INSERT INTO rate_limits (rl_key, hits, window_start) VALUES (?, 1, ?)
+         ON DUPLICATE KEY UPDATE
+            hits         = IF(window_start < ?, 1, hits + 1),
+            window_start = IF(window_start < ?, ?, window_start)'
+    )->execute([$key, $now, $cutoff, $cutoff, $now]);
+
+    $stmt = $pdo->prepare('SELECT hits FROM rate_limits WHERE rl_key = ?');
+    $stmt->execute([$key]);
+    if ((int) $stmt->fetchColumn() > $max) {
+        jsonError($message, 429);
+    }
+}
+
+/**
  * Génère un friend_code unique de 8 caractères (majuscules + chiffres).
  * Exclut O, 0, I, 1 pour éviter les confusions visuelles.
  * Boucle jusqu'à trouver un code non utilisé en base.

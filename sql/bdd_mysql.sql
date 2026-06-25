@@ -14,6 +14,7 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Drop dans l'ordre inverse des dépendances
+DROP TABLE IF EXISTS rate_limits;
 DROP TABLE IF EXISTS social_link_rankup_notifs;
 DROP TABLE IF EXISTS event_codes;
 DROP TABLE IF EXISTS messages;
@@ -288,6 +289,15 @@ CREATE TABLE event_codes (
 
     PRIMARY KEY (code),
     INDEX idx_event_codes_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Rate-limiting persistant (helper rateLimit() dans bootstrap.php).
+-- Partagé entre instances, contrairement à sys_get_temp_dir().
+CREATE TABLE rate_limits (
+    rl_key       VARCHAR(191) NOT NULL,
+    hits         INT          NOT NULL DEFAULT 0,
+    window_start INT          NOT NULL,
+    PRIMARY KEY (rl_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
