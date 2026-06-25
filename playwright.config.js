@@ -1,16 +1,13 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig } from "@playwright/test";
 
 /**
  * Configuration Playwright (tests end-to-end).
  *
- * ⚠️ Scaffold optionnel — non lancé par `npm test` ni par la CI par défaut.
- * Pour l'activer :
- *   npm i -D @playwright/test
- *   npx playwright install --with-deps chromium
+ * Cible la stack Docker en cours (`make up`). Par défaut http://localhost:8090
+ * (surchargeable via PLAYWRIGHT_BASE_URL). Lance d'abord :
+ *   make up
+ *   npm i -D @playwright/test && npx playwright install chromium   # 1re fois
  *   npm run test:e2e
- *
- * Le webServer sert le site statique sur le port 8080. Les pages qui ont besoin
- * du backend PHP nécessiteront un serveur PHP en plus (php -S) — voir tests-e2e/README.md.
  */
 export default defineConfig({
   testDir: "./tests-e2e",
@@ -19,14 +16,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:8080",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8090",
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
-  webServer: {
-    command: "python3 -m http.server 8080",
-    url: "http://localhost:8080",
-    reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
-  },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [{ name: "chromium", use: { browserName: "chromium" } }],
 });

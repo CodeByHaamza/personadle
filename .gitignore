@@ -132,3 +132,7 @@ personadle_profile.json
 phpunit.phar
 .phpunit.cache/
 
+
+# Playwright E2E
+test-results/
+playwright-report/
