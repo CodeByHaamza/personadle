@@ -85,6 +85,20 @@ function showChallengeResult({
   const heart = SL_HEART[Math.min(10, Math.max(1, slRank))];
   const fail = !success;
 
+  // Wallpaper "Kanji's Dungeons" : un défi ENVOYÉ par l'utilisateur a été relevé
+  // par un ami (l'utilisateur est ici le sender → la condition est remplie).
+  if (isSender) {
+    try {
+      const _prof = JSON.parse(localStorage.getItem("personaUserProfile") || "null");
+      if (_prof && _prof.challengeAcceptedByFriend !== true) {
+        _prof.challengeAcceptedByFriend = true;
+        localStorage.setItem("personaUserProfile", JSON.stringify(_prof));
+      }
+    } catch (_) {
+      /* profil absent ou JSON invalide → ignorer */
+    }
+  }
+
   // Avatar border + shadow styles using real profile colors
   const myStyle = `border-color:${myBorderColor};box-shadow:0 0 14px ${hexToRgba(myBorderColor, 0.5)}`;
   const senderStyle = `border-color:${senderBorderColor};box-shadow:0 0 14px ${hexToRgba(senderBorderColor, 0.5)}`;

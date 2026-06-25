@@ -260,6 +260,47 @@ export function trackUniqueDay(profile, saveProfile) {
     profile.uniqueDaysPlayed = profile.uniqueDaysSet.length;
     saveProfile();
   }
+  trackP4ConsecutiveDays(profile, saveProfile, today);
+}
+
+/**
+ * Jours consécutifs joués avec un filtre Persona 4 actif (wallpaper Yukiko's Dungeons).
+ * Lit les filtres d'opus actifs dans le localStorage de chaque mode ; si au moins un
+ * filtre P4* est actif, incrémente le compteur de jours consécutifs (frontière Paris).
+ */
+function trackP4ConsecutiveDays(profile, saveProfile, today) {
+  const FILTER_KEYS = [
+    "filters_Classic",
+    "filters_Emoji",
+    "silhouetteActiveFilters",
+    "filters_AllOutAttack",
+    "personaeActiveFilters",
+    "musicActiveFilters",
+  ];
+  let p4Active = false;
+  for (const k of FILTER_KEYS) {
+    try {
+      const v = JSON.parse(localStorage.getItem(k) || "[]");
+      if (Array.isArray(v) && v.some((f) => typeof f === "string" && f.startsWith("P4"))) {
+        p4Active = true;
+        break;
+      }
+    } catch (_) {
+      /* clé absente ou JSON invalide → ignorer */
+    }
+  }
+  if (!p4Active) return;
+  if (profile.p4LastDate === today) return; // déjà compté aujourd'hui
+
+  const y = new Date(today + "T12:00:00Z");
+  y.setUTCDate(y.getUTCDate() - 1);
+  const yesterday = y.toISOString().slice(0, 10);
+
+  profile.p4ConsecutiveDays = profile.p4LastDate === yesterday
+    ? (profile.p4ConsecutiveDays || 0) + 1
+    : 1;
+  profile.p4LastDate = today;
+  saveProfile();
 }
 
 /**

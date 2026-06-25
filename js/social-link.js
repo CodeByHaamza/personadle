@@ -102,6 +102,17 @@ function _renderGauge(data, friendId, container) {
   const rank = data.rank ?? 1;
   const isMax = rank >= 10;
 
+  // Wallpaper "Dark Shopping District" : mémorise le meilleur rang Social Link atteint.
+  try {
+    const _prof = JSON.parse(localStorage.getItem("personaUserProfile") || "null");
+    if (_prof && rank > (_prof.bestSocialLinkRank || 0)) {
+      _prof.bestSocialLinkRank = rank;
+      localStorage.setItem("personaUserProfile", JSON.stringify(_prof));
+    }
+  } catch (_) {
+    /* profil absent ou JSON invalide → ignorer */
+  }
+
   const pct = isMax
     ? 100
     : xpNext
