@@ -172,7 +172,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
 
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 23-table relational schema, 252+ unit tests (Vitest + jsdom)
+- 21-table relational schema, 252+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
@@ -349,7 +349,7 @@ JavaScript  → Modular ES6+, localStorage, dynamic UI
 
 ```
 PHP 8.3       → REST API, bcrypt auth, PDO prepared statements, rate-limiting SQL
-MariaDB 10.6+ → 23-table relational schema (MySQL 8.0 compatible)
+MariaDB 10.6+ → 21-table relational schema (MySQL 8.0 compatible)
 Apache        → .htaccess routing, CORS exact-origin, HTTPS, CSP/HSTS
 Hostinger     → Production hosting
 ```

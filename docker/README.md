@@ -2,7 +2,12 @@
 
 # 🐳 Docker — Environnement de dev
 
-> **`docker compose up` — c'est tout ce qu'il faut pour démarrer.**
+<img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose">
+<img src="https://img.shields.io/badge/PHP-8.3%20%2B%20Apache-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP">
+<img src="https://img.shields.io/badge/MariaDB-10.6-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB">
+
+> **`make up` (ou `docker compose up -d`) — c'est tout ce qu'il faut pour démarrer.**
+> Schéma + seed (titres, rangs, **19 faux joueurs**) chargés automatiquement.
 
 </div>
 
@@ -77,6 +82,10 @@ Un compte développeur est créé automatiquement au premier démarrage :
 | Mot de passe | `devpassword123`       |
 | Pseudo       | `DevJoker`             |
 
+En plus, **19 faux joueurs Persona** (Yu, Ren, Akechi, Wonder…) sont créés pour peupler le
+leaderboard, les profils et le social. Mot de passe commun : **`test1234`**. Pseudos visibles
+sur [http://localhost:8080/profile/leaderboard/leaderboard.html](http://localhost:8080/profile/leaderboard/leaderboard.html).
+
 ---
 
 ## Commandes utiles
@@ -145,7 +154,8 @@ docker/
 │   └── php.ini         ← Surcharges PHP (sessions 30j, display_errors en dev)
 ├── mysql/
 │   └── init/
-│       └── 02_seed_test.sql  ← Compte de test dev@personadle.local
+│       ├── 02_seed_test.sql  ← Compte de test dev@personadle.local
+│       └── 03_seed_dev.sql   ← 19 faux joueurs Persona (mdp test1234) — leaderboard/social
 └── README.md           ← Ce fichier
 
 # À la racine du projet :
