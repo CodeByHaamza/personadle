@@ -174,7 +174,7 @@ final class DatabaseIntegrationTest extends TestCase
             'friendships', 'social_links', 'social_link_ranks',
             'social_link_interactions', 'social_link_rankup_notifs', 'leaderboard_cache',
             'messages', 'wallpapers', 'user_wallpapers', 'deletion_requests',
-            'event_codes', 'event_codes_redeemed',
+            'event_codes', 'event_codes_redeemed', 'rate_limits',
         ];
         foreach ($required as $t) {
             $this->assertContains($t, $tables, "Table '$t' manquante (schéma Docker périmé ?)");
