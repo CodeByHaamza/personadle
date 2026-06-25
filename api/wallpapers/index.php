@@ -42,10 +42,69 @@ function canUnlockWallpaper(array $wallpaper): bool
         return true;
     }
 
-    // Wallpapers non-défaut avec unlock_condition définie : bloqués via /unlock
-    // Ces wallpapers sont accordés via migration, admin, ou un endpoint spécialisé
-    // qui vérifie la condition concrète (stats, badges, événements…).
+    // Wallpapers non-défaut avec unlock_condition définie : la condition concrète
+    // est validée par verifyWallpaperCondition() (appelée par l'endpoint /unlock).
     return false;
+}
+
+/**
+ * Valide côté serveur la condition d'un wallpaper déblocable (anti-triche).
+ *
+ * Les conditions calculables depuis la BDD (stats, social links, amis) sont
+ * re-vérifiées ; celles reposant sur des flags purement client (jour P4 consécutif,
+ * défi relevé) sont acceptées sur déclaration du client — comme les badges à flags.
+ *
+ * @return bool true si la condition est remplie (unlock autorisé)
+ */
+function verifyWallpaperCondition(PDO $pdo, int $userId, string $wallpaperId): bool
+{
+    switch ($wallpaperId) {
+        case 'kamoshida_palace': {
+            // Au moins 1 victoire dans chacun des 6 modes
+            $s = $pdo->prepare(
+                'SELECT COUNT(DISTINCT LOWER(mode)) FROM user_stats WHERE user_id = ? AND wins > 0'
+            );
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn() >= 6;
+        }
+        case 'rise_dungeons': {
+            // 30 parties en mode Music
+            $s = $pdo->prepare(
+                "SELECT COALESCE(SUM(games), 0) FROM user_stats WHERE user_id = ? AND LOWER(mode) = 'music'"
+            );
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn() >= 30;
+        }
+        case 'mitsuo_dungeons': {
+            // 75 parties tous modes
+            $s = $pdo->prepare('SELECT COALESCE(SUM(games), 0) FROM user_stats WHERE user_id = ?');
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn() >= 75;
+        }
+        case 'dark_shopping_district': {
+            // Social Link rang >= 5
+            $s = $pdo->prepare(
+                'SELECT COALESCE(MAX(`rank`), 0) FROM social_links WHERE user_a_id = ? OR user_b_id = ?'
+            );
+            $s->execute([$userId, $userId]);
+            return (int) $s->fetchColumn() >= 5;
+        }
+        case 'madarame_wallpaper': {
+            // Au moins 1 ami accepté (la partie "avatar custom" reste côté client)
+            $s = $pdo->prepare(
+                "SELECT COUNT(*) FROM friendships
+                 WHERE status = 'accepted' AND (requester_id = ? OR addressee_id = ?)"
+            );
+            $s->execute([$userId, $userId]);
+            return (int) $s->fetchColumn() >= 1;
+        }
+        // Flags purement client (non re-vérifiables serveur) → confiance, comme les badges à flags
+        case 'yukiko_dungeons':
+        case 'kanji_dungeons':
+            return true;
+        default:
+            return false; // wallpaper conditionnel inconnu → refus
+    }
 }
 
 // ── GET /api/wallpapers — full catalog with per-user is_unlocked ─────────────
@@ -78,8 +137,8 @@ if ($action === 'unlock') {
     $wallpaper = $check->fetch();
     if (!$wallpaper) jsonError('Wallpaper not found in catalog', 404);
 
-    // Vérifie que l'unlock est autorisé pour cet utilisateur
-    if (!canUnlockWallpaper($wallpaper)) {
+    // Wallpaper libre (défaut / sans condition) OU condition validée côté serveur
+    if (!canUnlockWallpaper($wallpaper) && !verifyWallpaperCondition($pdo, $authId, $wallpaperId)) {
         jsonError('Condition not met', 403);
     }
 
