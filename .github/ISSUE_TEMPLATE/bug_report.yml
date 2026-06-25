@@ -1,0 +1,50 @@
+name: 🐛 Bug report
+description: Signaler un problème dans PersonaDLE
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Merci de signaler ce bug 🙏 Vérifie d'abord qu'une issue similaire n'existe pas déjà.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Que s'est-il passé ?
+      description: Décris le bug clairement.
+      placeholder: Quand je clique sur…, il se passe…
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Aller sur…
+        2. Cliquer sur…
+        3. Voir l'erreur
+    validations:
+      required: true
+  - type: input
+    id: mode
+    attributes:
+      label: Mode concerné
+      placeholder: Classique / Emoji / Silhouette / All-Out Attack / Personae / Musique / Profil…
+  - type: dropdown
+    id: device
+    attributes:
+      label: Appareil
+      options:
+        - Ordinateur (desktop)
+        - Mobile
+        - Tablette
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Navigateur + version
+      placeholder: Chrome 120, Firefox 121, Safari iOS 17…
+  - type: textarea
+    id: extra
+    attributes:
+      label: Captures d'écran / infos supplémentaires

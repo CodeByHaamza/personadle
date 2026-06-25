@@ -1,0 +1,22 @@
+name: 💡 Suggestion
+description: Proposer une idée ou une amélioration pour PersonaDLE
+title: "[Suggestion] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Ton idée
+      description: Décris la fonctionnalité ou l'amélioration souhaitée.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Pourquoi ce serait utile ?
+      placeholder: Ça permettrait de…
+  - type: input
+    id: scope
+    attributes:
+      label: Partie concernée
+      placeholder: Un mode de jeu, le profil, le social, les badges…
