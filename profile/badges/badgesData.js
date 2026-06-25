@@ -148,7 +148,8 @@ export const badgesList = [
       "You've walked the same path as Naoya, Tatsuya, and Maya. The legacy of the first awakened lives on through you.",
     secret: false,
     check: (stats, profile) => {
-      return (stats?.modeCount?.Classic || 0) >= 15;
+      // "Win 15 games" → victoires (modeWins), pas parties jouées (modeCount inclut les abandons)
+      return (stats?.modeWins?.Classic || 0) >= 15;
     },
   },
   {
@@ -160,9 +161,8 @@ export const badgesList = [
     description: "You have mastered the velvet room. Igor is pleased with your progress.",
     secret: false,
     check: (stats, profile) => {
-      // Vérifie 10 victoires spécifiquement dans le mode "Personae"
-      // Ton mapping indique: personae: "Personae"
-      return (stats?.modeCount?.Personae || 0) >= 10;
+      // "Win 10 games" → victoires (modeWins), pas parties jouées (modeCount inclut les abandons)
+      return (stats?.modeWins?.Personae || 0) >= 10;
     },
   },
   {
