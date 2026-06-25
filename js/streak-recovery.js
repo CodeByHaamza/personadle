@@ -103,6 +103,19 @@ export function showStreakRecoveryMenu(previousStreak) {
     .addEventListener("click", () => _recover(previousStreak, overlay));
   overlay.querySelector("#sr-btn-cancel").addEventListener("click", () => _close(overlay));
   overlay.querySelector("#sr-backdrop").addEventListener("click", () => _close(overlay));
+
+  // Accessibilité : role=dialog, focus sur le bouton principal, Escape pour fermer.
+  const menu = overlay.querySelector("#sr-menu");
+  menu?.setAttribute("role", "dialog");
+  menu?.setAttribute("aria-modal", "true");
+  overlay.querySelector("#sr-btn-recover")?.focus();
+  const onKey = (e) => {
+    if (e.key === "Escape") {
+      document.removeEventListener("keydown", onKey);
+      _close(overlay);
+    }
+  };
+  document.addEventListener("keydown", onKey);
 }
 
 function _spawnSnowflakes() {
