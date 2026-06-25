@@ -86,19 +86,6 @@
       .privacy-page-header { animation:pgIn .5s ease-out both; }
       .privacy-main { animation:pgIn .6s ease-out .1s both; }
 
-      /* ── Home button ── */
-      .px-home {
-        position:fixed; top:12px; left:110px; z-index:9998;
-        background:rgba(255,255,255,.92); color:#1a1a1a;
-        border:1.5px solid #e63946; border-radius:8px;
-        padding:6px 14px; font-size:13px; font-weight:700;
-        text-decoration:none; display:inline-flex; align-items:center; gap:5px;
-        transition:background .2s, box-shadow .2s, transform .2s;
-        backdrop-filter:blur(12px); box-shadow:0 2px 12px rgba(0,0,0,.12);
-      }
-      .px-home:hover { box-shadow:0 4px 18px rgba(230,57,70,.4); transform:translateY(-1px); background:rgba(255,244,246,.97); }
-      .darkmode .px-home { background:rgba(16,12,26,.92); color:#f0f0f0; }
-      .darkmode .px-home:hover { background:rgba(30,18,40,.97); }
 
       /* ── Shield hero ── */
       .px-shield-hero { text-align:center; padding:20px 0 4px; }
@@ -658,13 +645,6 @@
     <script>
     (function(){
       'use strict';
-
-      /* ── Home button ── */
-      var h=document.createElement('a');
-      h.href='./index.html'; h.className='px-home'; h.innerHTML='← PersonaDLE';
-      var pb=document.getElementById('px-prog');
-      if(pb) pb.insertAdjacentElement('afterend',h);
-      else document.body.insertBefore(h,document.body.firstChild);
 
       /* ── Shield hero before intro ── */
       var intro=document.querySelector('.privacy-intro-wrap');

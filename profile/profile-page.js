@@ -2567,7 +2567,9 @@ const UNLOCKABLE_WALLPAPERS = [
     name: "Kamoshida's Palace",
     src: "../profile/Wallpaper/unlockable/kamoshida_palace.webp",
     condition: "Play at least 1 game in each of the 6 modes",
-    check: (p, stats) => Object.keys(stats?.modeCount || {}).length >= 6,
+    // modeCount contient les 6 modes dès l'inscription (lignes user_stats à 0) :
+    // on compte donc les modes RÉELLEMENT joués (count > 0), pas la présence des clés.
+    check: (p, stats) => Object.values(stats?.modeCount || {}).filter((n) => (n || 0) > 0).length >= 6,
   },
   {
     id: "madarame_wallpaper",

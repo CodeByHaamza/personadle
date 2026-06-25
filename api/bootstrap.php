@@ -183,12 +183,18 @@ function requireAuth(): int
     // Vérifier is_deleted (cached 5 min dans $_SESSION pour éviter une requête par hit)
     $now = time();
     if (empty($_SESSION['is_deleted_checked_at']) || ($now - (int)$_SESSION['is_deleted_checked_at']) > 300) {
-        $chk = pdo()->prepare('SELECT is_deleted FROM users WHERE id = ? LIMIT 1');
+        $chk = pdo()->prepare('SELECT is_deleted, is_banned FROM users WHERE id = ? LIMIT 1');
         $chk->execute([$uid]);
         $chkRow = $chk->fetch();
         if (!$chkRow || $chkRow['is_deleted']) {
             session_destroy();
             jsonError('Account not found or deleted', 401);
+        }
+        // Ban enforcé sur TOUS les endpoints authentifiés (pas seulement me.php) :
+        // sinon un banni avec session active garderait l'accès jusqu'à expiration.
+        if (!empty($chkRow['is_banned'])) {
+            session_destroy();
+            jsonError('Account banned', 403);
         }
         $_SESSION['is_deleted_checked_at'] = $now;
     }
