@@ -1,38 +1,63 @@
-# Tests E2E (Playwright)
+<div align="center">
 
-Tests end-to-end qui pilotent un vrai navigateur. **Optionnels** : non lancés par
-`npm test` (Vitest, unitaire/intégration) ni par la CI par défaut.
+# 🎭 Tests E2E (Playwright)
 
-## Installation (une fois)
+<img src="https://img.shields.io/badge/Playwright-Chromium-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
+<img src="https://img.shields.io/badge/cible-stack%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+
+> **5 smoke tests sur un vrai navigateur, contre la stack Docker complète.**
+> Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public).
+
+</div>
+
+---
+
+## ✅ Ce qui est couvert (`smoke.spec.js`)
+
+| Parcours                       | Vérifie                                                        |
+| ------------------------------ | ------------------------------------------------------------- |
+| Accueil                        | la page charge, titre correct                                 |
+| All-Out Attack                 | le mode charge                                                 |
+| Leaderboard                    | les **19 faux joueurs** s'affichent (DB → API → front)        |
+| Profil public (`?view=`)       | consultable **sans être connecté**                            |
+| Login                          | parcours auth réel via la modale (seed `ren@personadle.seed`) |
+
+---
+
+## 🚀 Lancer
 
 ```bash
+# 1. Installer Playwright (une fois) — voir §sudo ci-dessous
 npm i -D @playwright/test
-npx playwright install --with-deps chromium
-```
+npx playwright install chromium
 
-## Lancer
+# 2. Démarrer la stack Docker (DB seedée avec les faux joueurs)
+make up
 
-```bash
+# 3. Lancer les E2E
 npm run test:e2e
 ```
 
-Le `webServer` de [playwright.config.js](../playwright.config.js) sert le site statique
-sur `http://localhost:8080` (via `python3 -m http.server`).
+> Cible par défaut : `http://localhost:8090`. Si ton site Docker tourne sur un autre port :
+> `PLAYWRIGHT_BASE_URL=http://localhost:8080 npm run test:e2e`.
+> Pas de `webServer` dans [playwright.config.js](../playwright.config.js) — c'est Docker qui sert le site.
 
-## Pages nécessitant le backend
+### 🔑 sudo
 
-Les parcours qui touchent l'API (login, sync cloud, sessions…) ont besoin du backend
-PHP. Lancer en parallèle :
+`npx playwright install --with-deps chromium` installe les **dépendances système** du navigateur
+et requiert `sudo` (apt). Si tu n'as pas les droits, lance `npx playwright install chromium` (sans
+`--with-deps`) : suffisant si les libs sont déjà présentes.
 
-```bash
-php -S localhost:8000   # depuis la racine, avec api/config.php configuré
-```
+---
 
-puis adapter `baseURL` ou les routes API dans les specs.
+## ⚙️ Statut CI
 
-## Idées de scénarios à ajouter
+**Optionnels** : non lancés par `npm test` ni par la CI par défaut (ils exigent la stack Docker).
+À lancer en local avant une release ou un gros refactor front.
 
-- Parcours de jeu complet (deviner → victoire → stats mises à jour)
-- Ouverture du menu de récupération Jack Frost + restauration
+## 💡 Scénarios à ajouter
+
+- Partie complète (deviner → victoire → stats mises à jour)
+- Menu Jack Frost + restauration de streak
 - Changement de langue (FR/EN/ES/DE/IT) et persistance
-- Responsive (mobile viewport) sur les 6 modes
+- Responsive (viewport mobile) sur les 6 modes

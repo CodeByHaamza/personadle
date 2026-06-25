@@ -2,7 +2,10 @@
 
 # 🖼️ Assets
 
-> **Sons, boutons localisés, icônes — les ressources partagées de l'interface.**
+<img src="https://img.shields.io/badge/format-WebP%20·%20SVG%20·%20MP3-orange?style=for-the-badge" alt="Formats">
+<img src="https://img.shields.io/badge/usage-partagé-blue?style=for-the-badge" alt="Partagé">
+
+> **Sons, boutons, icônes — les ressources statiques partagées de l'interface.**
 
 </div>
 

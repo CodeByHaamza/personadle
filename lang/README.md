@@ -2,6 +2,10 @@
 
 # 🌐 Traductions i18n
 
+<img src="https://img.shields.io/badge/langues-EN%20·%20FR%20·%20ES%20·%20DE%20·%20IT-blueviolet?style=for-the-badge" alt="5 langues">
+<img src="https://img.shields.io/badge/source-en.json-success?style=for-the-badge" alt="Source de vérité">
+<img src="https://img.shields.io/badge/garde--fou-i18n:check-blue?style=for-the-badge" alt="i18n:check">
+
 > **Cinq langues. Une seule source de vérité : `en.json`.**
 
 </div>

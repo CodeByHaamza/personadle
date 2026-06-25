@@ -2,7 +2,11 @@
 
 # 🛡️ Admin Panel
 
+<img src="https://img.shields.io/badge/accès-is__admin%20%3D%201-critical?style=for-the-badge" alt="is_admin">
+<img src="https://img.shields.io/badge/garde-requireAdmin()-success?style=for-the-badge" alt="requireAdmin">
+
 > **Interface de modération — utilisateurs, codes événement, statistiques, Social Links.**
+> Accès verrouillé serveur : `requireAdmin()` sur chaque endpoint `api/admin/*`.
 
 </div>
 
