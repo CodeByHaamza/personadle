@@ -35,25 +35,39 @@ Dans la saga Persona, chaque protagoniste invoque une entité spirituelle appel�
 
 ---
 
-## 🖤 Personas Picaro — les variantes corrompues
+## 🎴 Exemples — quelle Persona, quel porteur ?
 
-Les **Personas Picaro** sont des versions sombres et altérées de Personas iconiques, apparues dans les jeux crossover (_Persona Q2_, _Persona 5 Royal_). Elles se distinguent par leur palette de couleurs inversée ou noircie.
+On voit l'**artwork d'une Persona**, on devine le **personnage** qui l'invoque. Beaucoup de héros
+ont plusieurs Personas (forme initiale + forme ultime) — toutes pointent vers le même porteur.
 
-| Persona Picaro         | Persona d'origine | Porteur d'origine        |
-| ---------------------- | ----------------- | ------------------------ |
-| Arsène Picaro          | Arsène            | Joker _(P5R)_            |
-| Orpheus Picaro         | Orpheus           | Makoto Yuki _(P3)_       |
-| Izanagi Picaro         | Izanagi           | Yu Narukami _(P4G)_      |
-| Kaguya Picaro          | Kaguya            | Kasumi Yoshizawa _(P5R)_ |
-| Ariadne Picaro         | Ariadne           | Rei _(PQ)_               |
-| Asterios Picaro        | Asterios          | Kou _(PQ)_               |
-| Athena Picaro          | Athena            | Aigis _(P3)_             |
-| Messiah Picaro         | Messiah           | Makoto Yuki _(P3)_       |
-| Thanatos Picaro        | Thanatos          | Makoto Yuki _(P3)_       |
-| Magatsu-Izanagi Picaro | Magatsu-Izanagi   | Adachi _(P4G)_           |
-| Tsukuyomi Picaro       | Tsukuyomi         | Marie _(P4G)_            |
+<table>
+  <tr>
+    <td align="center">
+      <img src="database/img/Arsene.webp" height="96" alt="Arsène">
+      <img src="database/img/Raoul.webp" height="96" alt="Raoul">
+    </td>
+    <td align="center">➡️</td>
+    <td align="center"><img src="../database/portraits/Ren.webp" width="78" alt="Ren"><br><b>Ren Amamiya</b><br><sub>Arsène · Raoul</sub></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="database/img/Izanagi.webp" height="96" alt="Izanagi">
+      <img src="database/img/Izanagi-No-Okami.webp" height="96" alt="Izanagi-no-Okami">
+    </td>
+    <td align="center">➡️</td>
+    <td align="center"><img src="../database/portraits/Yu.webp" width="78" alt="Yu"><br><b>Yu Narukami</b><br><sub>Izanagi · Izanagi-no-Okami</sub></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="database/img/Orpheus_M.webp" height="96" alt="Orpheus">
+      <img src="database/img/Messiah.webp" height="96" alt="Messiah">
+    </td>
+    <td align="center">➡️</td>
+    <td align="center"><img src="../database/portraits/Yuki.webp" width="78" alt="Makoto Yuki"><br><b>Makoto Yuki</b><br><sub>Orpheus · Messiah</sub></td>
+  </tr>
+</table>
 
-> **Astuce** : Les Picaro partagent la silhouette de leur Persona d'origine mais avec des couleurs inversées. Chercher la forme, pas la couleur.
+> En mode Personae, la **bonne réponse est le personnage** (Ren), pas le nom de la Persona.
 
 ---
 
@@ -91,13 +105,6 @@ Les filtres permettent de limiter le pool de Personas par jeu d'origine. Les **P
 ### Anti-répétition avec token
 
 `pickCharacter()` utilise un **token de génération** (`_pickToken`) pour éviter les race conditions : si un nouveau personnage est sélectionné pendant le chargement d'un précédent (via filtre par exemple), le résultat obsolète est ignoré.
-
-### Badges
-
-| Badge          | Condition                                     |
-| -------------- | --------------------------------------------- |
-| Twin Blade     | Deviner la Persona "Kaguya Picaro"            |
-| Crimson Legacy | Deviner une Persona liée à un opus spécifique |
 
 ### Fonctions spécifiques
 

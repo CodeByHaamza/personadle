@@ -156,14 +156,6 @@ Importe depuis `../js/gameCore.js` :
 
 > **Note** : Ce mode utilise sa propre fonction `setupFilterButtons` (comme le mode Silhouette), car il mutate directement le tableau `activeFilters` avec `push/filter`.
 
-### Badges débloquables
-
-| Badge                                                                            | Condition                                             |
-| -------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| ![Badge Burn My Dread](../profile/badges/images/Badges_Burn_My_Dread_Silver.png) | Trouver "Burn My Dread" (thème titre de P3)           |
-| ![Badge Zutomayo](../profile/badges/images/Badges_Zotomayo.webp)                 | Trouver la chanson de la collaboration ZUTOMAYO × P3R |
-| Unsolved Case (Adachi gagne)                                                     | Abandonner sur "Never More" (thème de fin de P4)      |
-
 ### Fonctions spécifiques
 
 | Fonction                   | Description                                                             |

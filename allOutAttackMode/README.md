@@ -119,10 +119,6 @@ const imageCache = new Map(); // clé = URL, valeur = Blob URL
 
 `getBetterRandomCharacter()` évite de tomber deux fois de suite sur le même personnage en maintenant un historique des **5 derniers** ciblés.
 
-### 🏅 Badges spéciaux (`checkSpecialBadges`)
-
-6 badges peuvent être débloqués dans ce mode, basés sur des personnages ou combinaisons spécifiques devinés. Vérifiés à chaque victoire via le profil `personaUserProfile` dans le `localStorage`.
-
 ### Fonctions spécifiques
 
 | Fonction                   | Description                                              |

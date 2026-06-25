@@ -141,10 +141,6 @@ Importe depuis `../js/gameCore.js` :
 | `resetGame()`              | Remet à zéro l'état et choisit un nouveau personnage                                           |
 | `initializeAutocomplete()` | Dropdown avec filtre `_guessed` (personnages déjà proposés masqués)                            |
 
-### 🏅 Badge PQ
-
-Le mode Silhouette vérifie si le personnage deviné est lié à **Persona Q** et débloque le badge correspondant dans le profil utilisateur.
-
 ---
 
 ## 🗄️ `database/` (local)

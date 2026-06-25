@@ -112,7 +112,7 @@ Ces attributs correspondent exactement aux champs utilisés dans `modeClassique.
 ## 🧩 Exemple — une partie commentée
 
 **Cible du jour : `Ryuji Sakamoto`.** On part de loin et on resserre, essai après essai.
-_(🟩 identique · 🟨 partiel · 🟥 différent. Les portraits viennent de `../database/portraits/`.)_
+_(🟩 identique · 🟨 partiel · 🟥 différent)_
 
 <table>
   <thead>
@@ -128,7 +128,7 @@ _(🟩 identique · 🟨 partiel · 🟥 différent. Les portraits viennent de `
   </thead>
   <tbody>
     <tr>
-      <td><img src="../database/portraits/Yuki.webp" width="46" alt="Makoto Yuki"><br><sub><b>Makoto Yuki</b></sub></td>
+      <td><img src="../database/portraits/Yuki.webp" width="72" alt="Makoto Yuki"><br><sub><b>Makoto Yuki</b></sub></td>
       <td align="center">🟩<br><sub>Human, Male</sub></td>
       <td align="center">🟩<br><sub>15-20</sub></td>
       <td align="center">🟩<br><sub>Oui</sub></td>
@@ -137,7 +137,7 @@ _(🟩 identique · 🟨 partiel · 🟥 différent. Les portraits viennent de `
       <td align="center">🟨<br><sub>P3… (PQ2 ✓)</sub></td>
     </tr>
     <tr>
-      <td><img src="../database/portraits/Yusuke.webp" width="46" alt="Yusuke Kitagawa"><br><sub><b>Yusuke Kitagawa</b></sub></td>
+      <td><img src="../database/portraits/Yusuke.webp" width="72" alt="Yusuke Kitagawa"><br><sub><b>Yusuke Kitagawa</b></sub></td>
       <td align="center">🟩<br><sub>Human, Male</sub></td>
       <td align="center">🟩<br><sub>15-20</sub></td>
       <td align="center">🟩<br><sub>Oui</sub></td>
@@ -146,7 +146,7 @@ _(🟩 identique · 🟨 partiel · 🟥 différent. Les portraits viennent de `
       <td align="center">🟩<br><sub>P5/P5R/P5S/P5T/PQ2</sub></td>
     </tr>
     <tr>
-      <td><img src="../database/portraits/Ryuji.webp" width="46" alt="Ryuji Sakamoto"><br><sub><b>Ryuji Sakamoto</b> 🎉</sub></td>
+      <td><img src="../database/portraits/Ryuji.webp" width="72" alt="Ryuji Sakamoto"><br><sub><b>Ryuji Sakamoto</b> 🎉</sub></td>
       <td align="center">🟩<br><sub>Human, Male</sub></td>
       <td align="center">🟩<br><sub>15-20</sub></td>
       <td align="center">🟩<br><sub>Oui</sub></td>
