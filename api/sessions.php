@@ -90,7 +90,13 @@ try {
     }
     $sessionId = (int) $pdo->lastInsertId();
 
-    // 2. Lire les stats actuelles pour calculer la streak
+    // 2. Lire les stats actuelles pour calculer la streak.
+    //    Garde-fou : si la ligne (user, mode) n'existe pas (vieux compte, init partielle),
+    //    on la crée à zéro — sinon l'UPDATE plus bas matcherait 0 ligne et les stats du
+    //    mode seraient silencieusement perdues. mode est déjà normalisé en lowercase.
+    $pdo->prepare('INSERT IGNORE INTO user_stats (user_id, mode) VALUES (?, ?)')
+        ->execute([$userId, $mode]);
+
     $stmt = $pdo->prepare('
         SELECT * FROM user_stats WHERE user_id = ? AND mode = ? LIMIT 1
     ');

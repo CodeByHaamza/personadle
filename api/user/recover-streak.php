@@ -20,16 +20,24 @@ if ($previousStreak < 2 || $previousStreak > 9999) {
     jsonError('Invalid previous_streak', 400);
 }
 
-// ── Vérification cooldown côté serveur ───────────────────────────────────────
-$stmt = $pdo->prepare('SELECT streak_recovered_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+// ── Vérification cooldown côté serveur (verrou anti-double-récupération) ──────
+// Transaction + SELECT ... FOR UPDATE : deux requêtes concurrentes ne peuvent pas
+// passer le cooldown en même temps (la 2e attend le verrou de ligne).
+$pdo->beginTransaction();
+
+$stmt = $pdo->prepare('SELECT streak_recovered_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1 FOR UPDATE');
 $stmt->execute([$authId]);
 $row = $stmt->fetch();
 
-if (!$row) jsonError('User not found', 404);
+if (!$row) {
+    $pdo->rollBack();
+    jsonError('User not found', 404);
+}
 
 if ($row['streak_recovered_at'] !== null) {
     $daysSince = (time() - strtotime($row['streak_recovered_at'])) / 86400;
     if ($daysSince < 60) {
+        $pdo->rollBack();
         $daysLeft = (int) ceil(60 - $daysSince);
         jsonError("Streak recovery on cooldown. Try again in $daysLeft day(s).", 429);
     }
@@ -47,11 +55,11 @@ $daysPlayed = (int) ($stmt->fetchColumn() ?? 0);
 $maxAllowed = max(1, $daysPlayed);
 
 if ($previousStreak > $maxAllowed) {
+    $pdo->rollBack();
     jsonError('Invalid previous_streak: exceeds total days played', 400);
 }
 
-// ── Mise à jour streak + enregistrement cooldown ─────────────────────────────
-$pdo->beginTransaction();
+// ── Mise à jour streak + enregistrement cooldown (même transaction que le verrou) ──
 try {
     $stmt = $pdo->prepare(
         'UPDATE user_stats
