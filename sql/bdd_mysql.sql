@@ -68,6 +68,10 @@ CREATE TABLE users (
     pseudo_locked        TINYINT(1)       NOT NULL DEFAULT 0,
     -- Date de la dernière récupération de streak Jack Frost (cooldown 60j, migration 013).
     streak_recovered_at  DATETIME         DEFAULT NULL,
+    -- Streak GLOBALE (jours consécutifs joués, tous modes confondus) — autoritative.
+    global_streak        INT              NOT NULL DEFAULT 0,
+    global_streak_record INT              NOT NULL DEFAULT 0,
+    global_streak_date   DATE             DEFAULT NULL,
 
     PRIMARY KEY (id),
     UNIQUE KEY uq_email           (email),

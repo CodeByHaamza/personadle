@@ -72,7 +72,7 @@ if ($method === 'GET') {
     }
 
     // Récupérer l'utilisateur
-    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, global_streak, global_streak_record FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user) jsonError('User not found', 404);
@@ -123,6 +123,8 @@ if ($method === 'GET') {
             'settings'            => json_decode($profile['settings']  ?? 'null', true) ?? [],
         ],
         'stats'   => $stats,
+        'global_streak'        => (int) ($user['global_streak'] ?? 0),
+        'global_streak_record' => (int) ($user['global_streak_record'] ?? 0),
         'badges'  => array_map(fn($b) => [
             'badge_id'    => $b['badge_id'],
             'unlocked_at' => $b['unlocked_at'],

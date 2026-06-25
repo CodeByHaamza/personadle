@@ -139,10 +139,13 @@ export async function pullProfileFromCloud() {
       p.stats.wins = wins;
       p.stats.giveups = giveups;
       p.stats.games = games;
-      p.stats.streakRecord = best;
       p.stats.totalTimeMinutes = Math.round(timeMs / 60000);
       p.stats.perfectWins = perfect;
-      p.stats.streak = Math.max(0, ...d.stats.map((r) => r.streak ?? 0));
+      // Streak GLOBALE autoritative (backend). Fallback : max par-mode si l'API ne
+      // renvoie pas encore global_streak (compat ascendante).
+      const backendGlobal = d.global_streak ?? Math.max(0, ...d.stats.map((r) => r.streak ?? 0));
+      p.stats.streak = backendGlobal;
+      p.stats.streakRecord = Math.max(best, d.global_streak_record ?? 0, backendGlobal);
       p.stats.modeCount = modeCount;
       p.stats.modeWins = modeWins;
       const fav = d.stats.reduce((b, r) => (!b || r.games > b.games ? r : b), null);

@@ -132,6 +132,23 @@ try {
         $mode,
     ]);
 
+    // 2b. Streak GLOBALE (tous modes) — autoritative, basée sur la date Paris du jour.
+    //     Indépendante des streaks par-mode : compte les jours consécutifs joués.
+    $g = $pdo->prepare('SELECT global_streak, global_streak_date FROM users WHERE id = ? LIMIT 1');
+    $g->execute([$userId]);
+    $grow = $g->fetch();
+    $newGlobalStreak = personadle_global_streak(
+        $grow['global_streak_date'] ?? null,
+        $parisNow,
+        (int) ($grow['global_streak'] ?? 0)
+    );
+    $pdo->prepare(
+        'UPDATE users
+         SET global_streak = ?, global_streak_record = GREATEST(global_streak_record, ?),
+             global_streak_date = ?
+         WHERE id = ?'
+    )->execute([$newGlobalStreak, $newGlobalStreak, $parisNow, $userId]);
+
     // 3. Relire les stats mises à jour pour les renvoyer au client
     $stmt = $pdo->prepare('SELECT * FROM user_stats WHERE user_id = ? AND mode = ?');
     $stmt->execute([$userId, $mode]);
@@ -156,4 +173,5 @@ jsonSuccess([
         'perfect_wins'  => (int) $updatedStats['perfect_wins'],
         'total_time_ms' => (int) $updatedStats['total_time_ms'],
     ],
+    'global_streak' => $newGlobalStreak,
 ], 201);

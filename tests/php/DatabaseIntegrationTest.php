@@ -154,7 +154,10 @@ final class DatabaseIntegrationTest extends TestCase
              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users'"
         )->fetchAll(PDO::FETCH_COLUMN);
 
-        foreach (['is_admin', 'is_banned', 'pseudo_locked', 'streak_recovered_at'] as $required) {
+        foreach ([
+            'is_admin', 'is_banned', 'pseudo_locked', 'streak_recovered_at',
+            'global_streak', 'global_streak_record', 'global_streak_date',
+        ] as $required) {
             $this->assertContains($required, $cols, "Colonne users.$required manquante (schéma périmé ?)");
         }
     }

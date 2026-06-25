@@ -54,3 +54,35 @@ function personadle_is_perfect(string $result, int $attempts): bool
 {
     return $result === 'win' && $attempts === 1;
 }
+
+/**
+ * Streak GLOBALE (tous modes confondus) après une partie.
+ *
+ * Contrairement à la streak par-mode, la streak globale compte les JOURS
+ * consécutifs où le joueur a joué au moins une partie (quel que soit le mode
+ * et le résultat — c'est un streak d'assiduité, comme côté client). Toute la
+ * frontière de journée est en heure de Paris.
+ *
+ * @param string|null $lastDateParis  global_streak_date précédente ("Y-m-d") ou null.
+ * @param string      $todayParis     Date du jour "Y-m-d" en heure de Paris.
+ * @param int         $currentStreak  Streak globale actuelle.
+ * @return int Nouvelle streak globale.
+ */
+function personadle_global_streak(
+    ?string $lastDateParis,
+    string $todayParis,
+    int $currentStreak
+): int {
+    if ($lastDateParis === null || $lastDateParis === '') {
+        return 1;
+    }
+    if ($lastDateParis === $todayParis) {
+        return max(1, $currentStreak); // déjà joué aujourd'hui → inchangé
+    }
+
+    $today = new DateTime($todayParis, new DateTimeZone('Europe/Paris'));
+    $last  = new DateTime($lastDateParis, new DateTimeZone('Europe/Paris'));
+    $daysDiff = (int) $last->diff($today)->format('%r%a');
+
+    return $daysDiff === 1 ? $currentStreak + 1 : 1;
+}

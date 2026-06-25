@@ -61,7 +61,17 @@ try {
     $stmt->execute([$previousStreak, $previousStreak, $authId, $previousStreak]);
     $rowsUpdated = $stmt->rowCount();
 
-    $pdo->prepare('UPDATE users SET streak_recovered_at = UTC_TIMESTAMP() WHERE id = ?')->execute([$authId]);
+    // Restaure aussi la streak GLOBALE autoritative (datée aujourd'hui, heure de Paris)
+    // pour qu'elle reparte de previous_streak et ne soit pas écrasée à la prochaine sync.
+    $parisToday = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    $pdo->prepare(
+        'UPDATE users
+         SET streak_recovered_at  = UTC_TIMESTAMP(),
+             global_streak        = GREATEST(global_streak, ?),
+             global_streak_record = GREATEST(global_streak_record, ?),
+             global_streak_date   = ?
+         WHERE id = ?'
+    )->execute([$previousStreak, $previousStreak, $parisToday, $authId]);
     $pdo->commit();
 } catch (Throwable $e) {
     $pdo->rollBack();
