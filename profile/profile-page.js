@@ -586,7 +586,7 @@ function _applyCloudToUI() {
 
   // ── Badges ────────────────────────────────────────────────
   renderBadgesPreview(profile);
-  renderBadgesModal(profile, saveProfile);
+  renderBadgesModal(profile, saveProfileAndSyncBadges);
 
   // ── Wallpapers débloquables ───────────────────────────────
   // Re-render la galerie avec l'état cloud (unlockedWallpapers mis à jour par pullProfileFromCloud)
@@ -2497,7 +2497,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderSongCard?.();
     renderUnlockableWallpaperGallery(profile);
     renderBadgesPreview(profile);
-    renderBadgesModal(profile, saveProfile);
+    renderBadgesModal(profile, saveProfileAndSyncBadges);
     _titlesData.forEach((t) => {
       t.is_unlocked = 0;
     });
