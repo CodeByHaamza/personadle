@@ -15,7 +15,7 @@
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License"></a>
   <img src="https://img.shields.io/badge/Version-2.0-brightgreen?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
-  <img src="https://img.shields.io/badge/Tests-242%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-252%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
   <img src="https://img.shields.io/badge/Backend-PHP%208.3%20%2B%20MariaDB-8892BF?style=for-the-badge&logo=php" alt="PHP Backend">
   <img src="https://img.shields.io/badge/i18n-EN%20%7C%20FR%20%7C%20ES%20%7C%20DE%20%7C%20IT-blueviolet?style=for-the-badge" alt="Languages">
 </p>
@@ -172,7 +172,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
 
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 20-table relational schema, 242+ unit tests (Vitest + jsdom)
+- 23-table relational schema, 252+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
@@ -348,19 +348,30 @@ JavaScript  → Modular ES6+, localStorage, dynamic UI
 ### Backend (v2.0)
 
 ```
-PHP 8.3     → REST API, bcrypt auth, PDO prepared statements
-MariaDB 10.6+ → 20-table relational schema (MySQL 8.0 compatible)
-Apache      → .htaccess routing, CORS exact-origin, HTTPS
-Hostinger   → Production hosting
+PHP 8.3       → REST API, bcrypt auth, PDO prepared statements, rate-limiting SQL
+MariaDB 10.6+ → 23-table relational schema (MySQL 8.0 compatible)
+Apache        → .htaccess routing, CORS exact-origin, HTTPS, CSP/HSTS
+Hostinger     → Production hosting
 ```
 
 API structure: `GET/POST/PATCH/DELETE /api/{resource}` — JSON responses, HTTP status codes.
 
-### Tests
+### Local dev & CI
 
 ```
-Vitest + jsdom → 242 unit tests (game logic, backend, streak flow, i18n, data validation)
-npm test       → run all tests
+Docker Compose → MariaDB + PHP + phpMyAdmin, schéma + seed auto-chargés (make up)
+GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
+```
+
+### Tests & quality
+
+```
+Vitest + jsdom → 252 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
+Playwright     → 5 smoke E2E sur la stack Docker complète (login, leaderboard, profil)
+PHPStan        → analyse statique PHP niveau 5
+ESLint+Prettier→ lint + format
+npm test       → lance la suite Vitest · make check → tout (lint, data, i18n)
 ```
 
 ### Browser Compatibility
@@ -421,7 +432,7 @@ Track your journey with comprehensive stats:
 | Profile Music                   | ✅ Done      | Hamza          |
 | Profile Card Export (PNG)       | ✅ Done      | Hamza          |
 | Admin Panel                     | ✅ Done      | Hamza          |
-| 242 Unit Tests                  | ✅ Done      | Hamza          |
+| 252 Unit Tests                  | ✅ Done      | Hamza          |
 | Mobile App (PWA)                | 🔜 Planned   | -              |
 | Japanese (JP) translation       | 🔜 Post-v2.0 | -              |
 
@@ -544,7 +555,7 @@ cd personadle
 # Install test dependencies
 npm install
 
-# Run the 242 unit tests
+# Run the 252 unit tests
 npm test
 
 # Backend setup (first time only — creates DB, imports schema, configures Apache)
