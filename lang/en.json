@@ -906,7 +906,17 @@
     "action_compare": "⚖ Compare stats +10 XP",
     "done_today": "Done today",
     "rank_up": "🎉 Social Link — Rank {{rank}}: {{name}}",
-    "max_rank": "✨ MAX — True Confidant"
+    "max_rank": "✨ MAX — True Confidant",
+    "howto_aria": "How to gain Social Link XP",
+    "howto_trigger": "How to gain XP?",
+    "howto_title": "Spend time together — XP is automatic:",
+    "howto_visit": "Visit a friend's profile",
+    "howto_share": "Share your score or streak",
+    "howto_compare": "Compare your stats",
+    "howto_challenge": "Send or beat a challenge",
+    "howto_sameday": "Both play on the same day",
+    "howto_mutual": "Mutual actions the same day give double XP. One reward per action per day.",
+    "howto_done_today": "{{n}} action(s) already counted today"
   },
   "compare": {
     "title": "Stats Comparison",

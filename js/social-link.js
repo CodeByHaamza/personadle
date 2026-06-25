@@ -123,40 +123,18 @@ function _renderGauge(data, friendId, container) {
     .filter((i) => i.initiator_id === window._currentUser?.id)
     .map((i) => i.action_type);
 
-  // Buttons trigger real actions — XP is awarded as a side-effect, not on click
-  const actions = [
-    {
-      type: "visit_profile",
-      label: t("social.action_visit", "👁 Visit +5 XP"),
-      done: todayActions.includes("visit_profile"),
-      onClick: () => window.scrollTo({ top: 0, behavior: "smooth" }),
-    },
-    {
-      type: "share_score",
-      label: t("social.action_score", "📊 Share score +10 XP"),
-      done: todayActions.includes("share_score"),
-      locked: true, // awarded post-game, not triggerable from gauge
-      onClick: () => {
-        if (typeof window.showToast === "function") {
-          window.showToast(t("social.share_score_tip", "📊 Play a game and share your result!"));
-        }
-      },
-    },
-    {
-      type: "compare_stats",
-      label: t("social.action_compare", "⚖ Compare stats +10 XP"),
-      done: todayActions.includes("compare_stats"),
-      onClick: () => {
-        if (window._openCompareOverlay) {
-          window._openCompareOverlay(friendId);
-        } else {
-          window.location.href = `profile.html?uid=${friendId}`;
-        }
-      },
-    },
-  ];
+  // L'XP est gagné AUTOMATIQUEMENT en réalisant les vraies actions (visiter le
+  // profil d'un ami, comparer ses stats, lancer/relever un défi, jouer le même
+  // jour, partager). Plus de boutons : un simple tooltip explique comment monter.
+  const doneToday = todayActions.length;
 
-  const doneLabel = t("social.done_today", "Done today");
+  const howtoRows = [
+    ["👁", t("social.howto_visit", "Visit a friend's profile"), "+5"],
+    ["📊", t("social.howto_share", "Share your score or streak"), "+10"],
+    ["⚖", t("social.howto_compare", "Compare your stats"), "+10"],
+    ["⚔", t("social.howto_challenge", "Send or beat a challenge"), "+15"],
+    ["📅", t("social.howto_sameday", "Both play on the same day"), "+20"],
+  ];
 
   container.innerHTML = `
     <div class="sl-gauge-wrap${isMax ? " sl-rank-10" : ""}">
@@ -174,31 +152,28 @@ function _renderGauge(data, friendId, container) {
             : `${xp} XP / ${xpNext ?? "?"} XP (${pct}%)`
         }
       </span>
-      <div class="sl-actions">
-        ${actions
-          .map(
-            (a) => `
-          <button
-            class="sl-action-btn${a.locked && !a.done ? " sl-action-btn--locked" : ""}"
-            data-action="${a.type}"
-            data-friendid="${friendId}"
-            ${a.done ? "disabled" : ""}
-            ${a.done ? `title="${doneLabel}"` : ""}
-            ${a.locked && !a.done ? `title="${t("social.share_score_tip", "Play a game and share your result!")}"` : ""}
-          >${a.label}</button>
-        `
-          )
-          .join("")}
-      </div>
+      ${
+        isMax
+          ? ""
+          : `
+      <div class="sl-howto" tabindex="0" role="button"
+           aria-label="${t("social.howto_aria", "How to gain Social Link XP")}">
+        <span class="sl-howto-trigger">ℹ️ <span>${t("social.howto_trigger", "How to gain XP?")}</span></span>
+        <div class="sl-howto-tip" role="tooltip">
+          <div class="sl-howto-tip-title">${t("social.howto_title", "Spend time together — XP is automatic:")}</div>
+          ${howtoRows
+            .map(
+              ([ic, label, xpv]) =>
+                `<div class="sl-howto-row"><span class="sl-howto-ic">${ic}</span><span class="sl-howto-label">${label}</span><span class="sl-howto-xp">${xpv}</span></div>`
+            )
+            .join("")}
+          <div class="sl-howto-note">${t("social.howto_mutual", "Mutual actions the same day give double XP. One reward per action per day.")}</div>
+          ${doneToday ? `<div class="sl-howto-done">✅ ${t("social.howto_done_today", "{{n}} action(s) already counted today", { n: doneToday })}</div>` : ""}
+        </div>
+      </div>`
+      }
     </div>
   `;
-
-  container.querySelectorAll(".sl-action-btn").forEach((btn) => {
-    const action = actions.find((a) => a.type === btn.dataset.action);
-    if (action && !btn.disabled) {
-      btn.addEventListener("click", () => action.onClick());
-    }
-  });
 }
 
 /** Rank-up phrases per rank (1-10) × 3 options × 5 languages. */

@@ -906,7 +906,17 @@
     "action_compare": "⚖ Comparer stats +10 XP",
     "done_today": "Déjà fait aujourd'hui",
     "rank_up": "🎉 Social Link — Rang {{rank}} : {{name}}",
-    "max_rank": "✨ MAX — True Confidant"
+    "max_rank": "✨ MAX — True Confidant",
+    "howto_aria": "Comment gagner de l'XP de Lien Social",
+    "howto_trigger": "Comment gagner de l'XP ?",
+    "howto_title": "Passez du temps ensemble — l'XP est automatique :",
+    "howto_visit": "Visiter le profil d'un ami",
+    "howto_share": "Partager ton score ou ta série",
+    "howto_compare": "Comparer tes stats",
+    "howto_challenge": "Envoyer ou relever un défi",
+    "howto_sameday": "Jouer le même jour tous les deux",
+    "howto_mutual": "Les actions mutuelles le même jour donnent le double d'XP. Une récompense par action et par jour.",
+    "howto_done_today": "{{n}} action(s) déjà comptée(s) aujourd'hui"
   },
   "compare": {
     "title": "Comparaison de stats",
