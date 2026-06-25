@@ -32,8 +32,8 @@ jobs:
       - name: Validate character data
         run: npm run data:check
 
-      - name: Run unit tests (Vitest)
-        run: npm test
+      - name: Run unit tests + coverage thresholds (Vitest)
+        run: npm run test:coverage
 
       - name: Check i18n key consistency
         run: npm run i18n:check
@@ -95,7 +95,7 @@ jobs:
           DB_TEST_PASS: rootpassword
         run: php phpunit.phar
 
-      - name: Backend unit tests (PHPUnit)
+      - name: Static analysis (PHPStan)
         run: |
-          wget -q -O phpunit.phar https://phar.phpunit.de/phpunit-11.phar
-          php phpunit.phar
+          wget -q -O phpstan.phar https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar
+          php phpstan.phar analyse --no-progress
