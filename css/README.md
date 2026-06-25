@@ -1,78 +1,72 @@
 <div align="center">
 
-# 🎨 Architecture des styles
+# 🎨 CSS
 
-> **Global d'abord, local ensuite. Dark mode, responsive, animations — tout commence ici.**
+<img src="https://img.shields.io/badge/CSS3-vanilla-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">
+<img src="https://img.shields.io/badge/Dark%20mode-natif-111?style=for-the-badge" alt="Dark mode">
+<img src="https://img.shields.io/badge/Responsive-480%20·%20768%20·%201024-blueviolet?style=for-the-badge" alt="Responsive">
+
+> **Global d'abord, composant ensuite.** Une feuille commune + une feuille par composant.
+> Dark mode par cascade, responsive en `clamp()`/`min()`, animations préfixées.
 
 </div>
 
-Ce dossier contient les feuilles de style globales de Personadle.
-Chaque mode de jeu possède en plus son propre CSS local dans son dossier.
+---
 
-## Structure
+## 🗂️ Organisation
 
 ```
 css/
-├── global.css   ← styles partagés par toutes les pages
-├── index.css    ← styles spécifiques à la page d'accueil (index.html)
-└── style.css    ← legacy — ancienne feuille unique (conservée pour référence)
+├── global.css        ← styles partagés par TOUTES les pages
+├── index.css         ← page d'accueil uniquement
+└── <composant>.css   ← une feuille par composant (chargée par la page qui l'utilise)
 ```
+
+Chaque **mode de jeu** a en plus son propre CSS dans son dossier (`classiqueMode/`, `emojiMode/`…).
+
+### Feuilles par composant
+
+| Domaine        | Feuilles                                                                           |
+| -------------- | ---------------------------------------------------------------------------------- |
+| Navigation/UI  | `bottomNav.css` · `filterMenu.css` · `langSelector.css` · `settings-modal.css`     |
+| Social & défis | `social-link.css` · `rank10-effect.css` · `challenge-banner.css` · `challenge-notif.css` · `challenge-result.css` · `stats-compare.css` |
+| Animations     | `calling-card.css` · `p3-evoker-anim.css` · `tv-friend-anim.css` · `divine-gift.css` |
+| Divers         | `streak-recovery.css` · `wallpaper-notification.css` · `faq.css`                    |
 
 ---
 
-## `global.css` — Styles communs
+## ⭐ `global.css`
 
-Chargé par **toutes les pages** via :
+Chargé par **toutes les pages** (versionné pour casser le cache au déploiement) :
 
 ```html
 <link rel="stylesheet" href="../css/global.css?v=3" />
 ```
 
-Contient :
+| Section            | Contenu                                                                       |
+| ------------------ | ----------------------------------------------------------------------------- |
+| Reset & base       | `box-sizing`, marges/paddings, `font-family`                                   |
+| Header / Logo      | logo cliquable en haut de page                                                |
+| Boutons d'action   | Valider, Abandonner, Rejouer, Indice                                          |
+| Autocomplete       | dropdown de saisie avec portraits miniatures                                  |
+| Filtres opus       | `.filter-btn` (P3, P4, P5…) + état `active`                                    |
+| Mauvaises réponses | `.wrong-mini` + animation `.shake`                                            |
+| Victoire           | `#victoryBox` et ses variantes par mode                                       |
+| Modal règles       | `#rulesModal` (fond semi-transparent)                                         |
+| Confettis          | `.confetti-emoji` + `flyUp` via vars custom (`--x-move`, `--y-move`, `--rotate`)|
+| Dark mode          | classe `.darkmode` sur `<body>` — surcharge toutes les couleurs               |
+| Responsive         | media queries mobile / tablette                                               |
 
-| Section                | Description                                                                                             |
-| ---------------------- | ------------------------------------------------------------------------------------------------------- |
-| **Reset & base**       | `box-sizing`, marges/paddings globaux, `font-family`                                                    |
-| **Header / Logo**      | Positionnement du logo cliquable en haut de page                                                        |
-| **Boutons d'action**   | Styles des boutons Valider, Abandonner, Rejouer, Indice                                                 |
-| **Autocomplete**       | Dropdown de saisie (`.autocomplete-items`, `.list-options`) avec portraits en miniature                 |
-| **Filtres opus**       | Boutons `.filter-btn` (P3, P4, P5…) avec état `active`                                                  |
-| **Mauvaises réponses** | `.wrong-mini` avec animation `.shake`                                                                   |
-| **Victoire**           | `#victoryBox` et ses variantes par mode                                                                 |
-| **Navigation modes**   | `#modeNavigationContainer` (boutons Précédent / Suivant)                                                |
-| **Modal règles**       | `#rulesModal` avec fond semi-transparent                                                                |
-| **Confettis**          | `.confetti-emoji` avec animation `flyUp` via propriétés CSS custom (`--x-move`, `--y-move`, `--rotate`) |
-| **Dark mode**          | Classe `.darkmode` sur `<body>` — surcharge toutes les couleurs                                         |
-| **Toggle dark mode**   | Composant `.switch` (label + input checkbox caché + pseudo-élément slider)                              |
-| **Profil**             | Styles du menu profil, avatar, pseudo                                                                   |
-| **Responsive**         | Media queries pour mobile                                                                               |
-
-### Versionning CSS
-
-Le suffixe `?v=3` dans les balises `<link>` force le rechargement du CSS chez les visiteurs après une mise à jour. À incrémenter manuellement à chaque déploiement significatif.
+> Le suffixe `?v=N` force le rechargement du CSS après une mise à jour — à incrémenter à chaque déploiement notable.
 
 ---
 
-## `index.css` — Page d'accueil
+## 📐 Conventions
 
-Chargé uniquement par `index.html`. Contient :
-
-- La grille des boutons de sélection de mode (`.gamemode-button`)
-- Le titre principal et sous-titres
-- Les styles des liens réseaux sociaux (Discord, GitHub, Ko-fi)
-- La section classement / profil en haut
-
----
-
-## `style.css` — Legacy
-
-Ancienne feuille de style monolithique d'avant le refactoring CSS.
-Conservée pour référence historique. **Ne pas modifier ni charger directement.**
-
----
-
-## Conventions
-
-- **Variables CSS custom** : utilisées pour les animations confettis (`--x-move`, `--y-move`, `--rotate`) et quelques couleurs dark mode.
-- **Classes utilitaires** : `.shake`, `.activated`, `.autocomplete-active` sont pilotées dynamiquement par JavaScript.
-- **Dark mode** : `document.body.classList.toggle("darkmode")` — tout le dark mode est géré par la cascade CSS, pas par des styles inline.
+- **Dark mode** : classe `.darkmode` sur `<body>` (jamais `<html>`, sauf script inline anti-FOUC).
+  Tout passe par la cascade, **pas** de style inline.
+- **Responsive** : `min()`, `clamp()`, `vw`/`vh` — éviter les largeurs fixes en `px`.
+  Breakpoints : **480px** (mobile) · **768px** (tablette) · **1024px** (petit desktop).
+- **Animations** : préfixer les noms spécifiques (`p5ImpactFlash`, `tarotFlip`…) pour éviter les collisions.
+- **Variables CSS custom** : animations confettis + couleurs dark mode.
+- **Classes pilotées par JS** : `.shake`, `.activated`, `.autocomplete-active`.

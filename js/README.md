@@ -1,143 +1,107 @@
 <div align="center">
 
-# ⚙️ Utilitaires partagés
+# 🧩 JavaScript
 
-> **Le cœur logique de tous les modes — dates DST-safe, confettis, filtres, sessions cloud.**
+<img src="https://img.shields.io/badge/Vanilla%20JS-ES6%2B-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="Vanilla JS">
+<img src="https://img.shields.io/badge/0-dépendances-success?style=for-the-badge" alt="Zéro dépendance">
+<img src="https://img.shields.io/badge/modules-ES6-blue?style=for-the-badge" alt="ES6 modules">
+
+> **Le cerveau du front : logique de jeu partagée, client REST, sync cloud, social & animations.**
+> Aucun framework, aucune lib externe — juste des modules ES6.
 
 </div>
 
-Ce dossier contient le **cœur logique commun** à tous les modes de jeu de Personadle.
+---
 
-## Fichier
+## 🗺️ Carte des modules
 
-| Fichier       | Rôle                                                                  |
-| ------------- | --------------------------------------------------------------------- |
-| `gameCore.js` | Module ES6 exportant toutes les fonctions réutilisées par les 6 modes |
+### Cœur
+
+| Fichier         | Rôle                                                                       |
+| --------------- | -------------------------------------------------------------------------- |
+| `gameCore.js`   | Utilitaires partagés par les 6 modes (dates Paris, normalisation, sessions)|
+| `api.js`        | Client REST + bridge `window._personadleApi` (anti-import-circulaire)      |
+| `i18n.js`       | Chargement des langues, `t('key', { vars })`, fallback                     |
+
+### Auth & synchronisation
+
+| Fichier             | Rôle                                                                  |
+| ------------------- | --------------------------------------------------------------------- |
+| `auth.js`           | Login / register / logout, modales (focus trap + Escape), état UI     |
+| `cloud-sync.js`     | `pullProfileFromCloud()` — le **backend est la source de vérité**     |
+| `streak-recovery.js`| Menu Jack Frost, `performRecovery()` (attend le backend, anti-revert) |
+
+### Social, défis & notifications
+
+| Fichier               | Rôle                                              |
+| --------------------- | ------------------------------------------------- |
+| `social-link.js`      | Rangs 1-10 (Stranger → True Confidant), XP, halo  |
+| `challenge-banner.js` | Bannière de défi quotidien                        |
+| `challenge-notif.js`  | Réception / acceptation d'un défi                 |
+| `challenge-result.js` | Comparaison des résultats d'un défi               |
+| `notifications.js`    | Cloche de notifications (défis, amis, rank-ups)   |
+| `divine-gift.js`      | Animation de don d'objets par un admin            |
+
+### Animations d'amitié
+
+| Fichier             | Rôle                                          |
+| ------------------- | --------------------------------------------- |
+| `calling-card.js`   | Carte de visite façon Phantom Thieves         |
+| `p3-evoker-anim.js` | Demande d'ami façon Evoker (Persona 3)        |
+| `tv-friend-anim.js` | Demande d'ami façon TV (Persona 4)            |
+
+### Interface
+
+| Fichier             | Rôle                                          |
+| ------------------- | --------------------------------------------- |
+| `bottomNav.js`      | Barre de navigation inférieure                |
+| `filterMenu.js`     | Menu de filtres opus (P3, P4, P5…)            |
+| `settings-modal.js` | Modale de paramètres (langue, thème, a11y)    |
+| `stats-compare.js`  | Comparaison de stats entre amis               |
 
 ---
 
-## Architecture
+## ⭐ `gameCore.js` — l'API partagée
 
-Avant ce refactoring, chaque mode de jeu (Classique, Emoji, Silhouette…) contenait sa propre copie de fonctions identiques : confettis de victoire, reset quotidien, modal des règles, etc. `gameCore.js` centralise tout cela pour appliquer le principe **DRY** (_Don't Repeat Yourself_).
-
-```
-js/
-└── gameCore.js          ← importé par les 6 fichiers de mode
-```
-
-Chaque mode importe uniquement ce dont il a besoin :
+Centralise tout ce qui était dupliqué dans chaque mode (principe **DRY**). Chaque mode importe
+seulement ce dont il a besoin :
 
 ```js
-import { normalize, showConfettiExplosion, revealNextLink } from "../js/gameCore.js";
+import { parisDateKey, normalize, modeLabel, buildGameSession } from "../js/gameCore.js";
 ```
 
----
+| Fonction                          | Rôle                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `parisDateKey(d?)`                | Date `"YYYY-MM-DD"` en heure de Paris, **DST-safe** (`Intl.DateTimeFormat`)|
+| `msUntilNextParisMidnight()`      | ms jusqu'au prochain minuit parisien (reset quotidien)                   |
+| `normalize(str)`                  | minuscules, sans accents ni apostrophes typographiques (comparaison)     |
+| `MODES` / `normalizeModeKey()` / `modeLabel()` | Vocabulaire **canonique** des modes (clé backend ↔ libellé)  |
+| `buildGameSession(...)`           | Construit le payload d'une partie (mode normalisé, filtres, flag offline)|
+| `savePendingSession(...)`         | Envoie la session à l'API, fallback `localStorage` si offline (409 silencieux)|
+| `getDailyTarget(...)`             | Personnage cible du jour (déterministe par date Paris)                   |
+| `showConfettiExplosion(opts?)`    | Son de victoire + confettis (`spreadFrom: "sides" \| "bottom"`)          |
+| `revealNextLink(...)`             | Affiche la navigation Précédent / Suivant après une partie              |
+| `setupRulesModal()`               | Câble le bouton `?` (ouverture/fermeture de la modale de règles)        |
+| `setupDailyReset(onReset)`        | `setTimeout` jusqu'à minuit Paris → `onReset`                            |
+| `checkResetOnLoad(...)`           | Détecte un nouveau jour au chargement, nettoie les stats de la veille    |
+| `setupFilterButtons(...)`         | Boutons de filtres opus : toggle, persistance `localStorage`, callback   |
+| `showWrongMini(...)`              | Mini-vignette portrait + animation _shake_ pour une mauvaise réponse     |
 
-## API exportée
-
-### Gestion des dates (fuseau Paris, heure d'été incluse)
-
-#### `parisDateKey(d?)`
-
-Retourne la date du jour au format `"YYYY-MM-DD"` en heure de Paris.
-Résistant au passage heure d'été / heure d'hiver grâce à `Intl.DateTimeFormat`.
-
-```js
-parisDateKey(); // "2025-07-14"
-parisDateKey(new Date("2025-01-01")); // "2025-01-01"
-```
-
-#### `msUntilNextParisMidnight()`
-
-Retourne le nombre de millisecondes jusqu'au prochain minuit parisien.
-Utilisé pour programmer le reset automatique quotidien.
-
----
-
-### Normalisation de texte
-
-#### `normalize(str)`
-
-Transforme une chaîne en minuscules, sans accents ni apostrophes typographiques.
-Utilisé pour comparer la saisie du joueur au titre cible sans être sensible à la casse ou aux accents.
-
-```js
-normalize("Brûle, ma Peine !"); // "brule, ma peine !"
-normalize("Never More"); // "never more"
-```
+> ⚠️ **Toujours** passer par `normalizeModeKey()` / `modeLabel()` pour le nom d'un mode, jamais
+> de chaîne en dur. Pour la frontière de journée : `parisDateKey()`, jamais `toISOString()`.
 
 ---
 
-### Victoire & confettis
+## 🔗 Bridge anti-circulaire
 
-#### `showConfettiExplosion(opts?)`
+`gameCore.js` ↔ `api.js` se référencent mutuellement. Pour éviter l'import circulaire ES6, `api.js`
+expose `window._personadleApi` et `gameCore.js` l'utilise via ce pont plutôt qu'un `import` direct.
 
-Joue le son de victoire et lance une animation de confettis emoji.
+## 🧪 Tests
 
-| Option       | Défaut                       | Description                                              |
-| ------------ | ---------------------------- | -------------------------------------------------------- |
-| `emojiList`  | `["🎉","🎊","✨","💥","🌟"]` | Liste des emojis utilisés                                |
-| `count`      | `40`                         | Nombre de particules                                     |
-| `spreadFrom` | `"sides"`                    | `"sides"` = des bords gauche/droite, `"bottom"` = du bas |
+Les utilitaires de `gameCore.js` sont couverts dans [`tests/gameCore.test.js`](../tests/README.md)
+(133 tests). **Tout nouvel utilitaire `gameCore.js` → tests obligatoires** (CLAUDE.md §8).
 
-- **`"sides"`** : utilisé par Classique, Emoji, Silhouette, AllOutAttack
-- **`"bottom"`** : utilisé par Personae et Musique (plus de profondeur)
-
----
-
-### Navigation entre modes
-
-#### `revealNextLink({ nextHref, prevHref })`
-
-Rend visible la barre de navigation entre les modes (boutons Précédent / Suivant) après une victoire ou un abandon.
-
----
-
-### Modal des règles
-
-#### `setupRulesModal()`
-
-Câble le bouton `?` pour ouvrir / fermer la fenêtre modale d'explication des règles.
-
----
-
-### Reset quotidien
-
-#### `setupDailyReset(onReset)`
-
-Programme un `setTimeout` qui déclenche `onReset` au prochain minuit parisien + 500 ms de marge.
-
-#### `checkResetOnLoad(lastPlayedKey, statsModeKey, onReset)`
-
-Vérifie au chargement de la page si un nouveau jour a commencé depuis la dernière visite.
-Si oui : nettoie la clé de stats de la veille et appelle `onReset`.
-
----
-
-### Filtres opus
-
-#### `setupFilterButtons(storageKey, onFilterChange)`
-
-Câble les boutons `.filter-btn` (P3, P4, P5…) :
-
-- Bascule la classe `active` au clic
-- Persiste le tableau des filtres actifs dans le `localStorage`
-- Appelle `onFilterChange(nouveauxFiltres)`
-
----
-
-### Mauvaise réponse
-
-#### `showWrongMini(imageSrc, altText, wrongListEl, fallbackSrc?)`
-
-Ajoute une mini-vignette portrait dans la liste des mauvaises réponses, avec une animation de tremblement (_shake_).
-
----
-
-## Tests
-
-Toutes les fonctions exportées sont couvertes par des tests unitaires dans [`tests/gameCore.test.js`](../tests/README.md).
-
-```
+```bash
 npm test
 ```

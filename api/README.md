@@ -1,10 +1,35 @@
 <div align="center">
 
-# ⚙️ API
+# ⚙️ API REST
+
+<img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.3">
+<img src="https://img.shields.io/badge/MariaDB-10.6%2B-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB">
+<img src="https://img.shields.io/badge/Auth-bcrypt%20%2B%20sessions-success?style=for-the-badge" alt="Auth">
+<img src="https://img.shields.io/badge/PDO-prepared%20only-blue?style=for-the-badge" alt="PDO">
 
 > **Backend REST PHP 8.3 — authentification, sessions, social, classements.**
+> Pas de JWT : sessions PHP `httpOnly`. Zéro concaténation SQL : PDO partout.
 
 </div>
+
+---
+
+## 🔄 Flux d'une requête
+
+```
+  Navigateur                Apache (.htaccess)            Endpoint PHP
+  ──────────                ──────────────────            ────────────
+  fetch('/api/…',     ──▶   RewriteRule → fichier   ──▶   require bootstrap.php
+   credentials:                                              │ CORS (origines exactes)
+   'include')                                                │ PDO singleton
+                                                             │ session_start (httpOnly)
+                                                             │ requireAuth() → 401/403
+                                                             ▼
+                                                          requête PDO préparée
+                                                             │
+       JSON  ◀──────────────────────────────────────  jsonSuccess() / jsonError()
+     {data}|{error}                                       + bon code HTTP
+```
 
 ---
 
@@ -191,20 +216,23 @@ Réponse : `{ rows: [...], my_rank: { rank, score } }`
 `bootstrap.php` est inclus en tête de chaque endpoint. Il fournit :
 
 ```php
-$pdo = getPdo();          // PDO singleton — exception si connexion impossible
+$pdo = pdo();             // PDO singleton — exception si connexion impossible
 
-requireAuth();            // arrête avec HTTP 401 si pas de session valide
-$user = getCurrentUser(); // retourne l'array utilisateur depuis $_SESSION
+$uid = requireAuth();     // 401 si pas de session · 403 si compte banni · retourne l'id
+$uid = requireAdmin();    // idem + exige is_admin = 1
 
 jsonSuccess($data, 201);  // {"data": ...}  + code HTTP
 jsonError('message', 400);// {"error": "..."} + code HTTP
+
+rateLimit('login:'.$ip, 5, 900); // 429 au-delà du quota (table rate_limits)
 ```
 
 Sécurité activée automatiquement :
 
 - **CORS** : whitelist d'origines exactes (pas de wildcard quand `credentials: include`)
-- **Headers** : `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`
-- **Rate limiting** : par IP — `X-RateLimit-Remaining` + `Retry-After` sur 429
+- **Headers** : `Content-Security-Policy`, `Strict-Transport-Security` (prod), `X-Frame-Options`, `X-Content-Type-Options`
+- **Rate limiting** : table SQL `rate_limits` (helper `rateLimit()`, partagé entre instances) — login 5/15 min, register 5/15 min, sessions 15/15 min
+- **Erreurs** : `display_errors` coupé en prod (`log_errors` seul) — pas de fuite de stack trace
 
 ---
 
@@ -225,7 +253,10 @@ define('ADMIN_SECRET', 'your_cron_secret');
 
 ## Migrations
 
-Les migrations sont des fichiers SQL numérotés dans `migrations/`. Elles sont **incrémentales**.
+> 📌 **Source de vérité** : `sql/bdd_mysql.sql` (schéma complet) + `sql/migrations/` (incrémentales,
+> consolidées). L'ancien dossier `api/migrations/` est conservé pour l'historique uniquement.
+
+Les migrations sont des fichiers SQL numérotés. Elles sont **incrémentales**.
 
 > ⚠️ Pour les procédures stockées MariaDB : ne pas utiliser phpMyAdmin. Utiliser le CLI :
 >
