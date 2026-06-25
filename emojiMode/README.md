@@ -21,17 +21,43 @@
 
 ## 🎭 Exemples de séquences
 
-Les emojis décrivent le personnage à travers sa personnalité, son jeu d'origine, ses attributs marquants ou son histoire.
+Les emojis (issus de `../database/characters_clean.js`) décrivent le personnage : personnalité,
+attribut marquant ou histoire. La bonne réponse est le **personnage**.
 
-| Séquence   | Indices révélés                             | Personnage                  |
-| ---------- | ------------------------------------------- | --------------------------- |
-| `⚡🏃💛🐻` | Énergie, mouvement, couleur jaune, mascotte | Teddie _(P4G)_              |
-| `🎸💪🏴‍☠️🟡` | Musique, force, pirate, couleur             | Ryuji Sakamoto _(P5R)_      |
-| `🎩🃏🔴🖤` | Chapeau haut-de-forme, joker, rouge et noir | Joker / Ren Amamiya _(P5R)_ |
-| `🌙🎭🔵💙` | Nuit, masque, bleu — héros mélancolique     | Makoto Yuki _(P3R)_         |
-| `🐄🌾🗡️🌊` | Campagne, calme, lame, fluidité             | Naoto Shirogane _(P4G)_     |
+<table>
+  <thead>
+    <tr><th>Séquence</th><th>Lecture</th><th>Réponse</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center" width="130"><h3>🎭 🃏 💥</h3></td>
+      <td>masque · joker · All-Out Attack</td>
+      <td align="center"><img src="../database/portraits/Ren.webp" width="58" alt="Ren"><br><sub><b>Ren Amamiya</b></sub></td>
+    </tr>
+    <tr>
+      <td align="center"><h3>⚡ 🏃‍♂️ 🏴‍☠️</h3></td>
+      <td>éclair · coureur · pirate</td>
+      <td align="center"><img src="../database/portraits/Ryuji.webp" width="58" alt="Ryuji"><br><sub><b>Ryuji Sakamoto</b></sub></td>
+    </tr>
+    <tr>
+      <td align="center"><h3>🤣 ❄️ 🧸</h3></td>
+      <td>rire · glace · peluche</td>
+      <td align="center"><img src="../database/portraits/Teddie.webp" width="58" alt="Teddie"><br><sub><b>Teddie</b></sub></td>
+    </tr>
+    <tr>
+      <td align="center"><h3>🔫 🔍 🕵️‍♂️</h3></td>
+      <td>flingue · loupe · détective</td>
+      <td align="center"><img src="../database/portraits/Naoto.webp" width="58" alt="Naoto"><br><sub><b>Naoto Shirogane</b></sub></td>
+    </tr>
+    <tr>
+      <td align="center"><h3>🎧 🌙 ♂️</h3></td>
+      <td>casque · lune · héros silencieux</td>
+      <td align="center"><img src="../database/portraits/Yuki.webp" width="58" alt="Makoto Yuki"><br><sub><b>Makoto Yuki</b></sub></td>
+    </tr>
+  </tbody>
+</table>
 
-> Les séquences sont construites par l'équipe pour être ni trop faciles ni trop obscures. Un fan casual devrait pouvoir les résoudre avec 2-3 indices.
+> Les séquences sont conçues pour être ni trop faciles ni trop obscures — résolvables en 2-3 indices.
 
 ---
 
@@ -40,10 +66,9 @@ Les emojis décrivent le personnage à travers sa personnalité, son jeu d'origi
 À chaque mauvaise réponse, un **indice supplémentaire** est dévoilé dans la séquence :
 
 ```
-Tentative 0 (départ)   →   🎩 🃏 ? ? ?
-Tentative 1 (raté)     →   🎩 🃏 🔴 ? ?
-Tentative 2 (raté)     →   🎩 🃏 🔴 🖤 ?
-Tentative 3 (raté)     →   🎩 🃏 🔴 🖤 ✨
+Tentative 0 (départ)   →   🎭 ? ?
+Tentative 1 (raté)     →   🎭 🃏 ?
+Tentative 2 (raté)     →   🎭 🃏 💥     → Ren Amamiya !
 ```
 
 Chaque emoji supplémentaire affine l'identité du personnage. Le premier indice peut parfois sembler abstrait — c'est voulu.

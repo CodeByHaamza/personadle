@@ -16,7 +16,7 @@
 
 <table>
   <tr>
-    <td rowspan="2" align="center"><img src="../database/portraits/JOKER.webp" width="104" alt="avatar"></td>
+    <td rowspan="2" align="center"><img src="../img/avatar/Joker.jpg" width="104" alt="avatar"></td>
     <td><h3>🎭 Joker <sub>· ✦ True Confidant</sub></h3><sub>Titre équipé : <b>Phantom Thief</b> · couleur UI rouge · 🎵 Last Surprise</sub></td>
   </tr>
   <tr>
