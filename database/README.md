@@ -71,15 +71,24 @@ Utilisé par le mode Classique pour afficher la bonne image lors d'une révélat
 
 Dossier contenant les portraits des personnages au format **WebP** pour un chargement optimisé.
 
-Quelques exemples :
+Quelques exemples (vignettes 72 px) :
 
-| Portrait                           | Personnage          | Jeu       |
-| ---------------------------------- | ------------------- | --------- |
-| ![Ren](portraits/Ren.webp)         | Ren Amamiya (Joker) | Persona 5 |
-| ![Yu](portraits/Yu.webp)           | Yu Narukami         | Persona 4 |
-| ![Aigis](portraits/Aigis.webp)     | Aigis               | Persona 3 |
-| ![Ann](portraits/Ann.webp)         | Ann Takamaki        | Persona 5 |
-| ![Mitsuru](portraits/Mitsuru.webp) | Mitsuru Kirijo      | Persona 3 |
+<table>
+  <tr>
+    <td align="center"><img src="portraits/Ren.webp" width="72" alt="Ren"><br><sub>Ren (Joker)</sub></td>
+    <td align="center"><img src="portraits/Yu.webp" width="72" alt="Yu"><br><sub>Yu Narukami</sub></td>
+    <td align="center"><img src="portraits/Aigis.webp" width="72" alt="Aigis"><br><sub>Aigis</sub></td>
+    <td align="center"><img src="portraits/Ann.webp" width="72" alt="Ann"><br><sub>Ann Takamaki</sub></td>
+    <td align="center"><img src="portraits/Mitsuru.webp" width="72" alt="Mitsuru"><br><sub>Mitsuru Kirijo</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Persona 5</sub></td>
+    <td align="center"><sub>Persona 4</sub></td>
+    <td align="center"><sub>Persona 3</sub></td>
+    <td align="center"><sub>Persona 5</sub></td>
+    <td align="center"><sub>Persona 3</sub></td>
+  </tr>
+</table>
 
 > **Note** : Les portraits sont la propriété d'Atlus / SEGA. Ils sont utilisés dans un contexte fan-made non commercial.
 

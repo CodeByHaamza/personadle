@@ -109,15 +109,15 @@ Ces attributs correspondent exactement aux champs utilisés dans `modeClassique.
 
 ---
 
-## 🧩 Exemple de comparaison
+## 🧩 Exemple — une partie commentée
 
-Cible : **Ryuji Sakamoto** — Proposition : **Yusuke Kitagawa** (tous deux dans P5/P5R/P5S, même tranche d'âge, Human Male) :
+**Cible du jour : `Ryuji Sakamoto`.** On part de loin et on resserre, essai après essai.
+_(🟩 identique · 🟨 partiel · 🟥 différent. Les portraits viennent de `../database/portraits/`.)_
 
 <table>
   <thead>
     <tr>
-      <th>Proposition</th>
-      <th>Nom</th>
+      <th>Essai</th>
       <th>Genre</th>
       <th>Âge</th>
       <th>Pers. User</th>
@@ -128,19 +128,42 @@ Cible : **Ryuji Sakamoto** — Proposition : **Yusuke Kitagawa** (tous deux dans
   </thead>
   <tbody>
     <tr>
-      <td><strong>Yusuke Kitagawa</strong></td>
-      <td style="background:#c0392b;color:white;text-align:center">🟥 Yusuke</td>
-      <td style="background:#27ae60;color:white;text-align:center">🟩 Human, Male</td>
-      <td style="background:#27ae60;color:white;text-align:center">🟩 15-20</td>
-      <td style="background:#27ae60;color:white;text-align:center">🟩 Oui</td>
-      <td style="background:#c0392b;color:white;text-align:center">🟥 Goemon</td>
-      <td style="background:#c0392b;color:white;text-align:center">🟥 Emperor</td>
-      <td style="background:#27ae60;color:white;text-align:center">🟩 P5/P5R/P5S</td>
+      <td><img src="../database/portraits/Yuki.webp" width="46" alt="Makoto Yuki"><br><sub><b>Makoto Yuki</b></sub></td>
+      <td align="center">🟩<br><sub>Human, Male</sub></td>
+      <td align="center">🟩<br><sub>15-20</sub></td>
+      <td align="center">🟩<br><sub>Oui</sub></td>
+      <td align="center">🟥<br><sub>Orpheus</sub></td>
+      <td align="center">🟥<br><sub>Fool…</sub></td>
+      <td align="center">🟨<br><sub>P3… (PQ2 ✓)</sub></td>
+    </tr>
+    <tr>
+      <td><img src="../database/portraits/Yusuke.webp" width="46" alt="Yusuke Kitagawa"><br><sub><b>Yusuke Kitagawa</b></sub></td>
+      <td align="center">🟩<br><sub>Human, Male</sub></td>
+      <td align="center">🟩<br><sub>15-20</sub></td>
+      <td align="center">🟩<br><sub>Oui</sub></td>
+      <td align="center">🟥<br><sub>Goemon</sub></td>
+      <td align="center">🟥<br><sub>Emperor</sub></td>
+      <td align="center">🟩<br><sub>P5/P5R/P5S/P5T/PQ2</sub></td>
+    </tr>
+    <tr>
+      <td><img src="../database/portraits/Ryuji.webp" width="46" alt="Ryuji Sakamoto"><br><sub><b>Ryuji Sakamoto</b> 🎉</sub></td>
+      <td align="center">🟩<br><sub>Human, Male</sub></td>
+      <td align="center">🟩<br><sub>15-20</sub></td>
+      <td align="center">🟩<br><sub>Oui</sub></td>
+      <td align="center">🟩<br><sub>Captain Kidd</sub></td>
+      <td align="center">🟩<br><sub>Chariot</sub></td>
+      <td align="center">🟩<br><sub>P5/P5R/P5S/P5T/PQ2</sub></td>
     </tr>
   </tbody>
 </table>
 
-> 🟩 Vert sur Genre, Âge, Pers. User et Opus → cherche un **Human Male, 15-20 ans, utilisateur de Persona dans P5/P5R/P5S**. L'arcane Emperor et la Persona Goemon sont rouges → Ryuji a l'arcane **Chariot** et la Persona **Captain Kidd**.
+**Comment lire la progression :**
+
+1. **Makoto Yuki** — bonnes bases (Human Male, 15-20, utilisateur de Persona 🟩), mais l'opus est 🟨 :
+   il ne partage que **PQ2** avec la cible → on cherche donc plutôt côté **Persona 5**.
+2. **Yusuke Kitagawa** — l'opus passe 🟩 (même set `P5/P5R/P5S/P5T/PQ2`), mais Persona et Arcane
+   restent 🟥 → ce n'est pas lui, mais on est dans le bon groupe.
+3. **Ryuji Sakamoto** — tout est 🟩 : **victoire !** Arcane Chariot, Persona Captain Kidd.
 
 ---
 
