@@ -282,7 +282,9 @@
     "mode_col_games": "Partidas / Win %",
     "song_title": "Canción de perfil",
     "since": "Desde",
-    "avatar_group_special": "Especial"
+    "avatar_group_special": "Especial",
+    "badges_save": "💾 Guardar",
+    "badges_saved": "✅ ¡Insignias guardadas!"
   },
   "badges": {
     "notification_title": "🎖️ ¡Insignia desbloqueada!",

@@ -3904,3 +3904,21 @@ body.darkmode .vb-code {
     bottom: 12px;
   }
 }
+
+/* Bouton « Sauvegarder » du modal de badges */
+.badges-save-btn {
+  display: block;
+  margin: 10px auto 4px;
+  padding: 8px 22px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent, #e63946);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.15s, filter 0.15s;
+  box-shadow: 0 3px 12px rgba(230, 57, 70, 0.3);
+}
+.badges-save-btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
+.badges-save-btn:active { transform: translateY(0); }

@@ -282,7 +282,9 @@
     "mode_col_games": "Runden / Win %",
     "song_title": "Profilsong",
     "since": "Seit",
-    "avatar_group_special": "Spezial"
+    "avatar_group_special": "Spezial",
+    "badges_save": "💾 Speichern",
+    "badges_saved": "✅ Abzeichen gespeichert!"
   },
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",

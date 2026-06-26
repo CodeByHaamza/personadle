@@ -909,6 +909,32 @@ function setupModalControls(openBtn, closeBtn, modal) {
       }
     };
   }
+
+  // Bouton « Sauvegarder » explicite. La sélection s'auto-sauve déjà à chaque clic,
+  // mais ce bouton confirme visuellement (sync cloud + toast + fermeture).
+  if (modal && !document.getElementById("saveBadgesBtn")) {
+    const counter = document.getElementById("badgesCounter");
+    const _t = (k, fb) => {
+      const r = window.i18n?.t?.(k);
+      return r != null && r !== k ? r : fb;
+    };
+    const btn = document.createElement("button");
+    btn.id = "saveBadgesBtn";
+    btn.className = "badges-save-btn";
+    btn.textContent = _t("profile.badges_save", "💾 Save");
+    btn.onclick = () => {
+      try {
+        _lastSaveProfile();
+      } catch (_) {
+        /* sauvegarde best-effort */
+      }
+      if (typeof window.showToast === "function") {
+        window.showToast(_t("profile.badges_saved", "✅ Badges saved!"));
+      }
+      modal.classList.add("hidden");
+    };
+    (counter?.parentElement || modal).insertBefore(btn, counter?.nextSibling || null);
+  }
 }
 
 /**

@@ -282,7 +282,9 @@
     "mode_col_games": "Parties / Win %",
     "song_title": "Chanson de profil",
     "since": "Depuis",
-    "avatar_group_special": "Spécial"
+    "avatar_group_special": "Spécial",
+    "badges_save": "💾 Sauvegarder",
+    "badges_saved": "✅ Badges enregistrés !"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",
