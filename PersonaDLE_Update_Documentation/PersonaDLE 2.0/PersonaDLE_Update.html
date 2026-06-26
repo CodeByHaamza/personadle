@@ -376,6 +376,14 @@
             display: block;
             margin: 0;
         }
+        .char-info { flex: 1; }
+        .char-persona-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-left: auto; flex-shrink: 0; }
+        .char-persona {
+            width: 78px; height: 78px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+        }
+        .char-persona-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
         .char-info strong { display: block; font-family: 'Montserrat', sans-serif; font-size: 0.95rem; }
         .char-info span { font-size: 0.82rem; color: var(--text-muted); }
         .char-info em { font-size: 0.8rem; color: var(--primary-color); font-style: normal; }
@@ -1133,6 +1141,10 @@
                 <em data-i18n-block="en">Classic · Silhouette · Personae</em>
                 <em data-i18n-block="fr">Classique · Silhouette · Personae</em>
             </div>
+            <div class="char-persona-wrap">
+                <img class="char-persona" src="../../personaeMode/database/img/Gentileschi.webp" alt="Gentileschi">
+                <span class="char-persona-label">Gentileschi</span>
+            </div>
         </div>
         <div class="char-card vx-reveal">
             <img class="char-portrait" src="../../database/portraits/Narumi.webp" alt="Narumi Nashimoto">
@@ -1142,6 +1154,10 @@
                 <em data-i18n-block="en">Classic · Silhouette · Personae</em>
                 <em data-i18n-block="fr">Classique · Silhouette · Personae</em>
             </div>
+            <div class="char-persona-wrap">
+                <img class="char-persona" src="../../personaeMode/database/img/Asterope.webp" alt="Asterope">
+                <span class="char-persona-label">Asterope</span>
+            </div>
         </div>
         <div class="char-card vx-reveal">
             <img class="char-portrait" src="../../database/portraits/Kumi_Katayama.webp" alt="Kumi Katayama">
@@ -1150,6 +1166,10 @@
                 <span>P5X — Kiskil-lilla</span><br>
                 <em data-i18n-block="en">Classic · Silhouette · Personae</em>
                 <em data-i18n-block="fr">Classique · Silhouette · Personae</em>
+            </div>
+            <div class="char-persona-wrap">
+                <img class="char-persona" src="../../personaeMode/database/img/Kiskil-lilla.webp" alt="Kiskil-lilla">
+                <span class="char-persona-label">Kiskil-lilla</span>
             </div>
         </div>
     </div>
