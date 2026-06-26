@@ -222,6 +222,7 @@ function renderThemePicker() {
 
       saveProfile();
       renderThemePicker();
+      updateAppearancePreview();
       markDirty();
       const wid = id === "custom" ? `custom:${profile.profileCustomColor || "#e63946"}` : id;
       saveProfileToCloud({ wallpaper_id: wid });
@@ -238,6 +239,7 @@ function renderThemePicker() {
   document.getElementById("customThemeColor")?.addEventListener("input", (e) => {
     profile.profileCustomColor = e.target.value;
     applyTheme("custom", e.target.value);
+    updateAppearancePreview();
     saveProfile();
     markDirty();
     saveProfileToCloud({ wallpaper_id: `custom:${e.target.value}` });
@@ -548,6 +550,8 @@ function _applyCloudToUI() {
   const themeId = profile.profileTheme || "all_out";
   applyTheme(themeId, themeId === "custom" ? profile.profileCustomColor : undefined);
   renderThemePicker();
+  renderBorderPicker();
+  updateAppearancePreview();
 
   // ── Stats ─────────────────────────────────────────────────
   renderStats();
@@ -848,23 +852,13 @@ pseudoInput.oninput = (e) => {
   }, 500);
 };
 
-// Changement de couleur de bordure
+// Couleur custom (picker natif) — aperçu live en glissant, sauvegarde à la fin.
 borderColorPicker.oninput = (e) => {
   profile.avatarBorderColor = e.target.value;
-  pageAvatar.style.borderColor = profile.avatarBorderColor;
-  updateBorderPreview(e.target.value);
-  saveProfile();
-  markDirty();
-  // Régénère la preview de partage si la modale est ouverte
-  const shareModal = document.getElementById("sharePreviewModal");
-  if (shareModal && !shareModal.classList.contains("hidden") && _regenerateSharePreview) {
-    _regenerateSharePreview();
-  }
+  if (pageAvatar) pageAvatar.style.borderColor = e.target.value;
+  updateAppearancePreview();
 };
-// onchange = fin du glissement → envoie la couleur finale au cloud (évite spam API)
-borderColorPicker.onchange = (e) => {
-  saveProfileToCloud({ avatar_border_color: e.target.value });
-};
+borderColorPicker.onchange = (e) => setBorderColor(e.target.value);
 
 /**
  * Met à jour le dot de prévisualisation et la valeur hex
@@ -872,10 +866,76 @@ borderColorPicker.onchange = (e) => {
  * @param {string} color - Valeur hex (ex. "#1a2b3c")
  */
 function updateBorderPreview(color) {
-  const dot = document.getElementById("borderColorDot");
-  const hex = document.getElementById("borderColorHex");
-  if (dot) dot.style.background = color;
-  if (hex) hex.textContent = color.toUpperCase();
+  const ap = document.getElementById("apAvatar");
+  if (ap) ap.style.borderColor = color;
+}
+
+// Palette de bordures d'avatar (pastilles preset, même UX que le thème).
+const BORDER_PRESETS = [
+  "#ffd700", "#e63946", "#3b82f6", "#2bae66", "#8b5cf6",
+  "#ff6b9d", "#ffffff", "#111111", "#00b8d4", "#f39c12",
+];
+
+/** Couleur d'accent du thème actuellement appliqué. */
+function _currentAccent() {
+  if (profile.profileTheme === "custom") return profile.profileCustomColor || "#e63946";
+  const th = THEMES.find((t) => t.id === (profile.profileTheme || "all_out"));
+  return th?.accent || "#e63946";
+}
+
+/** Met à jour l'aperçu live (avatar bordé + barres d'accent UI). */
+function updateAppearancePreview() {
+  const border = profile.avatarBorderColor || "#000000";
+  const accent = _currentAccent();
+  const ap = document.getElementById("apAvatar");
+  if (ap) ap.style.borderColor = border;
+  ["apAccent", "apAccent2", "apAccentDot"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.style.background = accent;
+  });
+}
+
+/** Applique une couleur de bordure (clic pastille ou custom) + sauvegarde. */
+function setBorderColor(color) {
+  profile.avatarBorderColor = color;
+  if (pageAvatar) pageAvatar.style.borderColor = color;
+  updateAppearancePreview();
+  renderBorderPicker();
+  saveProfile();
+  markDirty();
+  saveProfileToCloud({ avatar_border_color: color });
+  const shareModal = document.getElementById("sharePreviewModal");
+  if (shareModal && !shareModal.classList.contains("hidden") && _regenerateSharePreview) {
+    _regenerateSharePreview();
+  }
+}
+
+/** Rend les pastilles de bordure d'avatar (presets + custom), comme le thème. */
+function renderBorderPicker() {
+  const container = document.getElementById("borderSwatches");
+  if (!container) return;
+  const current = (profile.avatarBorderColor || "#000000").toLowerCase();
+  const presets = BORDER_PRESETS.map((c) => c.toLowerCase());
+  const isPreset = presets.includes(current);
+  const customLabel = _songT("profile.theme_custom", "Custom");
+
+  container.innerHTML =
+    BORDER_PRESETS.map(
+      (c) =>
+        `<button class="swatch${c.toLowerCase() === current ? " active" : ""}" data-color="${c}" style="background:${c}" title="${c}" aria-label="${c}"></button>`
+    ).join("") +
+    `<button class="swatch swatch--rainbow${!isPreset ? " active" : ""}" id="borderCustomBtn" title="${customLabel}" aria-label="${customLabel}">🎨</button>`;
+
+  container.querySelectorAll(".swatch[data-color]").forEach((b) =>
+    b.addEventListener("click", () => setBorderColor(b.dataset.color))
+  );
+  document.getElementById("borderCustomBtn")?.addEventListener("click", () => {
+    const picker = document.getElementById("borderColorPicker");
+    if (picker) {
+      picker.value = isPreset ? "#e63946" : current;
+      picker.click();
+    }
+  });
 }
 
 /**

@@ -326,28 +326,30 @@
 
             <!-- Corps -->
             <div class="perso-body" id="persoBody">
+              <!-- Aperçu en direct (avatar bordé + accent UI) -->
+              <div class="appearance-preview">
+                <span class="ap-avatar" id="apAvatar">★</span>
+                <div class="ap-ui">
+                  <span class="ap-ui-bar" id="apAccent"></span>
+                  <span class="ap-ui-bar ap-ui-bar--sm" id="apAccent2"></span>
+                  <span class="ap-ui-dot" id="apAccentDot"></span>
+                </div>
+              </div>
+
               <!-- Section 1 : couleur du contour avatar -->
               <div class="perso-section">
-                <label class="perso-section-label" data-i18n="profile.border_color_label"
-                  >Avatar Border</label
-                >
-                <div class="perso-color-chip">
-                  <span class="perso-color-dot" id="borderColorDot"></span>
-                  <span class="perso-color-hex" id="borderColorHex">#000000</span>
-                  <input
-                    type="color"
-                    id="borderColorPicker"
-                    class="perso-color-input"
-                    value="#000000"
-                  />
-                </div>
+                <label class="perso-section-label">
+                  🖼️ <span data-i18n="profile.border_color_label">Avatar Border</span>
+                </label>
+                <div class="swatch-row" id="borderSwatches"></div>
+                <input type="color" id="borderColorPicker" class="perso-color-input" value="#000000" hidden />
               </div>
 
               <!-- Section 2 : thème de l'interface -->
               <div class="perso-section">
-                <label class="perso-section-label" data-i18n="profile.theme_label"
-                  >Interface Theme</label
-                >
+                <label class="perso-section-label">
+                  🌈 <span data-i18n="profile.theme_label">Interface Theme</span>
+                </label>
                 <div class="theme-swatches" id="themeSwatches"></div>
                 <div id="customThemeRow" class="custom-theme-row hidden">
                   <label for="customThemeColor" data-i18n="profile.theme_custom"
