@@ -93,5 +93,5 @@ export const aoaCharacters = [
   { nom: "Closer Radiance ( Motoha Arai )", gif: "Closer_Radiance", opus: ["P5X"] },
 
   // === P5X — Collaboration Hatsune Miku ===
-  { nom: "Miku ( Hatsune Miku )", gif: "Hatsune_Miku", opus: ["P5X"] },
+  { nom: "Miku ( Hatsune Miku )", gif: "Miku", opus: ["P5X"] },
 ];
