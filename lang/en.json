@@ -281,7 +281,8 @@
     "mode_col_mode": "Mode",
     "mode_col_games": "Games / Win %",
     "song_title": "Profile Song",
-    "since": "Since"
+    "since": "Since",
+    "avatar_group_special": "Special"
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",

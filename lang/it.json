@@ -281,7 +281,8 @@
     "mode_col_mode": "Modalità",
     "mode_col_games": "Partite / Win %",
     "song_title": "Canzone del profilo",
-    "since": "Da"
+    "since": "Da",
+    "avatar_group_special": "Speciale"
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",

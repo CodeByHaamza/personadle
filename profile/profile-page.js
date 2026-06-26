@@ -37,6 +37,7 @@ import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
 import { canRecover, showStreakRecoveryMenu } from "../js/streak-recovery.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
+import { AVATAR_GROUPS } from "./avatars_data.js";
 
 // Exposer les songs pour d'autres modules (notifications.js, social-link.js…)
 window._profileSongs = ALL_SONGS;
@@ -901,195 +902,56 @@ function setupPersoCard() {
   });
 }
 
-// ─────────────────────────────────────────────────────────
-// GRILLE DES AVATARS
-// ─────────────────────────────────────────────────────────
 
-/** Liste complète des avatars disponibles */
-const avatarList = [
-  "Naoya.jpg",
-  "Naoya1.jpg",
-  "Yuka.webp",
-  "Hidehiko.png",
-  "Hidehiko.webp",
-  "Inaba2.webp",
-  "Inaba.webp",
-  "Eriko.png",
-  "Tatsuya2.jpg",
-  "Tatsuya.jpg",
-  "Lisa.jpeg",
-  "Jun.jpg",
-  "Ekichi2.jpeg",
-  "Ekichi.jpeg",
-  "Maya2.jpeg",
-  "Maya.jpg",
-  "Yuki.jpeg",
-  "yuki.jpg",
-  "Yuki_Zutomayo.jpeg",
-  "Kotone2.jpeg",
-  "Kotone.jpeg",
-  "Kotone3.jpeg",
-  "kotone_pdp.jpg",
-  "Aigis2.jpg",
-  "Aigis.jpg",
-  "Akihiko.jpg",
-  "Mitsuru.jpg",
-  "Mitsuru.webp",
-  "Junpei2.jpg",
-  "Junpei.png",
-  "Fuuka2.jpeg",
-  "Fuuka.jpeg",
-  "Ken.jpeg",
-  "Koromaru2.jpg",
-  "Koromaru.jpg",
-  "Shinji.jpg",
-  "Shinji.webp",
-  "Yukari2.jpg",
-  "Yukari.jpg",
-  "Metis.jpg",
-  "Metis2.jpeg",
-  "Elisabeth.jpeg",
-  "Elisabeth2.jpeg",
-  "Chidori.jpg",
-  "Chidori2.jpg",
-  "Yu2.jpg",
-  "Yu.jpg",
-  "Yosuke2.jpg",
-  "Yosuke.jpg",
-  "Chie2.jpg",
-  "Chie.jpg",
-  "Yukiko2.jpg",
-  "Yukiko.jpg",
-  "Kanji.avif",
-  "Kanji.jpg",
-  "Rise.jpg",
-  "Rise.png",
-  "Teddie2.jpg",
-  "Teddie.jpg",
-  "Naoto2.jpg",
-  "Naoto.jpg",
-  "Marie.jpg",
-  "Marie2.webp",
-  "Nanako2.jpg",
-  "Nanako.jpg",
-  "margaret.jpg",
-  "Joker.jpg",
-  "ren_t.webp",
-  "Ann.jpg",
-  "Ann_2.jpg",
-  "Ryuji.jpg",
-  "Ryuji.png",
-  "Morgana.jpg",
-  "Morgana.png",
-  "Yusuke.jpg",
-  "Yusuke.webp",
-  "Makoto2.jpg",
-  "Makoto.jpg",
-  "Futaba.jpg",
-  "Futaba.webp",
-  "Haru.png",
-  "Har.jpg",
-  "Akechi2.jpg",
-  "Akechi.jpg",
-  "Sumire2.jpg",
-  "Sumire.jpg",
-  "Tae.jpg",
-  "Tae2.jpg",
-  "Caroline&justine.png",
-  "Lavenza.jpg",
-  "Wonder.jpg",
-  "wonder1.png",
-  "wonder2.png",
-  "Lufel2.png",
-  "Lufel.png",
-  "Arai2.png",
-  "Arai.png",
-  "Shun2.png",
-  "Shun.png",
-  "Riko2.png",
-  "Riko.png",
-  "Kayo2.png",
-  "Kayo.png",
-  "Tomoko2.png",
-  "Tomoko.png",
-  "Yaoling2.png",
-  "Yaoling.png",
-  "YUI2.png",
-  "YUI.png",
-  "Yuki.gif",
-  "Yuki2.gif",
-  "pfp_makoto.gif",
-  "Yu.gif",
-  "Yu2.gif",
-  "Ren.gif",
-  "Ren2.gif",
-  "catlisabeth.gif",
-  "luix-dextructor-aigis.gif",
-  "Anniversary.gif",
-  "aigis.gif",
-  "Lavenza7.gif",
-  "Maruki.gif",
-  // === Nouveaux avatars (P5X, jazz, revival, Jack Frost…) ===
-  "chiesatonaka_revivale.jpg",
-  "makotoniijima_jazz.jpg",
-  "mionatsukawa_persona_5_phantom_x.jpg",
-  "naotoshirogane.jpg",
-  "seijishiratori_persona_5_phantom_x.jpg",
-  "yukimifujikawa_persona_5_phantom_x.jpg",
-  "yusukekitagawa_jazz.jpg",
-  "jack_frost_icon_persona.jpg",
-  "kotone_shiomi.jpg",
-  "aigis_train.jpg",
-  "akechi_jazz.jpg",
-  "ann_jazz.jpg",
-  "chie_satonaka_icon.jpg",
-  "futaba_persona5.jpg",
-  "futaba_alt.jpg",
-  "haru_jazz.jpg",
-  "hui_marie_p4r_pfp.jpg",
-  "jack_frost_gurren_aggan.jpg",
-  "jack_frost_peace_sign.jpg",
-  "jack_frost.jpg",
-  "joker_starlight.jpg",
-  "ken_amada_p4au.jpg",
-  "luce.jpg",
-  "makoto_nijima.jpg",
-  "makoto_yuki.jpg",
-  "meme_chie_shut_teddie.jpg",
-  "morgana_starlight.jpg",
-  "naoto_shirogane_icon_revivae.jpg",
-  "ren_jazz.jpg",
-  "rise_revivale.jpg",
-  "ryuji_jazz.jpg",
-  "sumire_jazz.jpg",
-  "wonder_velvet.jpg",
-  "wonder_alt.jpg",
-  "yosuke_hanamura_icon_1.jpg",
-  "yosuke_hanamura_icon.jpg",
-  "yu_alt.jpg",
-  "yu_cursed.jpg",
-  "yu_narukami_mc_icon.jpg",
-  "futaba_headphones.jpg",
-  "akechi_alt.jpg",
-
-];
 
 /**
  * Construit la grille de sélection d'avatars dans la modale crop.
  * Les chemins sont relatifs à profile/ (../img/avatar/).
  */
 function initAvatarGrid() {
-  avatarGrid.innerHTML =
-    `<div class="avatar-none" data-src="none">NONE</div>` +
-    avatarList
-      .map(
-        (name) =>
-          `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" loading="lazy" />`
-      )
-      .join("");
+  const _t = (k, fb) => {
+    const r = window.i18n?.t?.(k);
+    return r != null && r !== k ? r : fb;
+  };
+  // Libellés des groupes (noms de jeux non traduits ; "Spécial" oui).
+  const GAME_LABEL = {
+    persona1: "Persona 1",
+    persona2: "Persona 2",
+    persona3: "Persona 3",
+    persona4: "Persona 4",
+    persona5: "Persona 5",
+    persona5x: "Persona 5X",
+    special: _t("profile.avatar_group_special", "Special"),
+  };
+  const themeBadge = (name) => {
+    const n = name.toLowerCase();
+    if (n.endsWith(".gif")) return `<span class="avatar-tag avatar-tag--gif">GIF</span>`;
+    if (n.includes("jazz")) return `<span class="avatar-tag avatar-tag--jazz">JAZZ</span>`;
+    return "";
+  };
+
+  let html = `<div class="avatar-none" data-src="none">NONE</div>`;
+  for (const grp of AVATAR_GROUPS) {
+    if (!grp.avatars.length) continue;
+    html +=
+      `<div class="avatar-group-header avatar-group--${grp.key}">` +
+      `<span>${GAME_LABEL[grp.key] ?? grp.game}</span>` +
+      `<span class="avatar-group-count">${grp.avatars.length}</span></div>`;
+    html +=
+      `<div class="avatar-group-grid">` +
+      grp.avatars
+        .map(
+          (name) =>
+            `<div class="avatar-cell">${themeBadge(name)}` +
+            `<img src="../img/avatar/${name}" data-src="../img/avatar/${name}" loading="lazy" alt="${name}" /></div>`
+        )
+        .join("") +
+      `</div>`;
+  }
+  avatarGrid.innerHTML = html;
 
   // Clic sur une image → charger dans le canvas + marquer comme sélectionnée
-  avatarGrid.querySelectorAll("img").forEach((img) => {
+  avatarGrid.querySelectorAll(".avatar-cell img").forEach((img) => {
     img.onclick = () => {
       avatarGrid.querySelectorAll("img").forEach((i) => i.classList.remove("selected"));
       img.classList.add("selected");

@@ -281,7 +281,8 @@
     "mode_col_mode": "Mode",
     "mode_col_games": "Parties / Win %",
     "song_title": "Chanson de profil",
-    "since": "Depuis"
+    "since": "Depuis",
+    "avatar_group_special": "Spécial"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",

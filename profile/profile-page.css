@@ -2682,6 +2682,75 @@ body.darkmode .share-btn--email:hover {
   color: var(--accent);
 }
 
+/* ── Avatars groupés par jeu (en-têtes stylisés + tags de thème) ──────────── */
+.crop-avatar-grid {
+  display: block; /* override la grille : on grille à l'intérieur de chaque groupe */
+}
+.crop-avatar-grid .avatar-none {
+  display: inline-flex;
+  width: 64px;
+  height: 40px;
+  margin-bottom: 8px;
+}
+.avatar-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 10px 0 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-left: 4px solid var(--g, #e63946);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--g, #e63946) 14%, var(--card-bg, #fff));
+  color: var(--g, #e63946);
+  backdrop-filter: blur(4px);
+}
+.avatar-group-count {
+  font-size: 0.66rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
+.avatar-group--persona1 { --g: #c0392b; }
+.avatar-group--persona2 { --g: #8e44ad; }
+.avatar-group--persona3 { --g: #2e86de; }
+.avatar-group--persona4 { --g: #d4a017; }
+.avatar-group--persona5 { --g: #e63946; }
+.avatar-group--persona5x { --g: #00a3b8; }
+.avatar-group--special { --g: #f39c12; }
+.avatar-group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+}
+.avatar-cell {
+  position: relative;
+}
+.avatar-tag {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  z-index: 1;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: 4px;
+  color: #fff;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.avatar-tag--gif { background: #8e44ad; }
+.avatar-tag--jazz { background: #1a6b54; }
+body.darkmode .avatar-group-header {
+  background: color-mix(in srgb, var(--g, #e63946) 22%, #14101e);
+}
+
 /* ── Canvas de recadrage ── */
 .crop-canvas-wrap {
   display: flex;
