@@ -2263,7 +2263,8 @@ function openSongModal() {
           .map(
             (s) =>
               `<button type="button" class="song-pick-card" data-fichier="${s.fichier}" data-title="${s.titre.toLowerCase()}">` +
-              `<img class="song-card-cover" src="${IMG}${s.image}" alt="${SONG_OPUS_LABELS[op] || op}" loading="lazy">` +
+              `<img class="song-card-cover" src="${IMG}${s.image}" alt="${SONG_OPUS_LABELS[op] || op}" loading="lazy"` +
+              ` onerror="this.onerror=null;this.src='${IMG}${(s.opus && s.opus[0]) || "P5"}.webp'">` +
               `<span class="song-card-title">${s.titre}</span>` +
               `<span class="song-card-opus">${SONG_OPUS_LABELS[op] || op}</span>` +
               `<span class="song-card-play">▶</span></button>`
