@@ -2202,7 +2202,7 @@ function openSongModal() {
         groups[op]
           .map(
             (s) =>
-              `<button type="button" class="song-card" data-fichier="${s.fichier}" data-title="${s.titre.toLowerCase()}">` +
+              `<button type="button" class="song-pick-card" data-fichier="${s.fichier}" data-title="${s.titre.toLowerCase()}">` +
               `<img class="song-card-cover" src="${IMG}${s.image}" alt="${SONG_OPUS_LABELS[op] || op}" loading="lazy">` +
               `<span class="song-card-title">${s.titre}</span>` +
               `<span class="song-card-opus">${SONG_OPUS_LABELS[op] || op}</span>` +
@@ -2239,7 +2239,7 @@ function openSongModal() {
   };
   document.addEventListener("keydown", onKey);
 
-  modal.querySelectorAll(".song-card").forEach((cardEl) => {
+  modal.querySelectorAll(".song-pick-card").forEach((cardEl) => {
     cardEl.onclick = () => {
       selectProfileSong(cardEl.dataset.fichier);
       close();
@@ -2252,7 +2252,7 @@ function openSongModal() {
     let anyVisible = false;
     modal.querySelectorAll(".song-modal-group").forEach((grp) => {
       let groupHas = false;
-      grp.querySelectorAll(".song-card").forEach((cardEl) => {
+      grp.querySelectorAll(".song-pick-card").forEach((cardEl) => {
         const match = !q || cardEl.dataset.title.includes(q);
         cardEl.style.display = match ? "" : "none";
         if (match) groupHas = true;

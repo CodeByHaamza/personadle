@@ -4076,7 +4076,7 @@ body.darkmode .song-row:hover { background: rgba(230, 57, 70, 0.2); }
   grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
   gap: 12px;
 }
-.song-card {
+.song-pick-card {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -4091,7 +4091,7 @@ body.darkmode .song-row:hover { background: rgba(230, 57, 70, 0.2); }
   color: inherit;
   transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s;
 }
-.song-card:hover {
+.song-pick-card:hover {
   transform: translateY(-3px);
   border-color: #e63946;
   box-shadow: 0 8px 20px rgba(230, 57, 70, 0.22);
@@ -4126,8 +4126,8 @@ body.darkmode .song-row:hover { background: rgba(230, 57, 70, 0.2); }
   opacity: 0;
   transition: opacity 0.15s;
 }
-.song-card:hover .song-card-play { opacity: 1; }
+.song-pick-card:hover .song-card-play { opacity: 1; }
 body.darkmode .song-modal-box { background: #161020; }
 body.darkmode .song-modal-head { background: color-mix(in srgb, #e63946 26%, #161020); }
-body.darkmode .song-card { background: rgba(255, 255, 255, 0.05); }
+body.darkmode .song-pick-card { background: rgba(255, 255, 255, 0.05); }
 body.darkmode .song-modal-close { background: rgba(255, 255, 255, 0.08); }
