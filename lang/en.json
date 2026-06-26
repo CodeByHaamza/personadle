@@ -284,7 +284,9 @@
     "since": "Since",
     "avatar_group_special": "Special",
     "badges_save": "💾 Save",
-    "badges_saved": "✅ Badges saved!"
+    "badges_saved": "✅ Badges saved!",
+    "song_search": "🔎 Search a track…",
+    "song_no_result": "No track found."
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",

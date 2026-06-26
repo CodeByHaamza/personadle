@@ -3922,3 +3922,75 @@ body.darkmode .vb-code {
 }
 .badges-save-btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
 .badges-save-btn:active { transform: translateY(0); }
+
+/* ── Picker de musique de profil v2 (recherchable + groupé par jeu) ────────── */
+.song-picker-v2 { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.song-search {
+  width: 100%;
+  padding: 9px 14px;
+  border: 2px solid rgba(230, 57, 70, 0.22);
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.92);
+  color: inherit;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.song-search:focus {
+  border-color: rgba(230, 57, 70, 0.6);
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.12);
+}
+.song-list {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 4px;
+}
+.song-list-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 4px 10px;
+  margin: 6px 0 2px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #e63946;
+  background: color-mix(in srgb, #e63946 12%, #fff);
+  border-radius: 5px;
+}
+.song-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.84rem;
+  color: inherit;
+  text-align: left;
+  transition: background 0.12s;
+}
+.song-row:hover { background: rgba(230, 57, 70, 0.1); }
+.song-row-play {
+  flex: 0 0 auto;
+  color: #e63946;
+  font-size: 0.72rem;
+}
+.song-row-title { flex: 1; }
+.song-row-opus {
+  flex: 0 0 auto;
+  font-size: 0.64rem;
+  font-weight: 700;
+  opacity: 0.6;
+}
+body.darkmode .song-search { background: rgba(28, 28, 28, 0.95); color: #f0f0f0; }
+body.darkmode .song-list { border-color: rgba(255, 255, 255, 0.1); }
+body.darkmode .song-list-head { background: color-mix(in srgb, #e63946 26%, #14101e); }
+body.darkmode .song-row:hover { background: rgba(230, 57, 70, 0.2); }

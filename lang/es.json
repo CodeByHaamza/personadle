@@ -284,7 +284,9 @@
     "since": "Desde",
     "avatar_group_special": "Especial",
     "badges_save": "💾 Guardar",
-    "badges_saved": "✅ ¡Insignias guardadas!"
+    "badges_saved": "✅ ¡Insignias guardadas!",
+    "song_search": "🔎 Buscar una canción…",
+    "song_no_result": "Ninguna canción encontrada."
   },
   "badges": {
     "notification_title": "🎖️ ¡Insignia desbloqueada!",

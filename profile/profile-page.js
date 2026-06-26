@@ -2101,16 +2101,11 @@ function updateSongArtwork(src) {
 }
 
 /** Met à jour l'image de preview dans le sélecteur (live au changement du select). */
-function updatePickerPreview(fichier) {
-  const song = ALL_SONGS.find((s) => s.fichier === fichier);
-  const img = document.getElementById("songPickerImg");
-  if (img && song) img.src = `../musicsMode/database/img/${song.image}`;
+function _songT(key, fallback) {
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : fallback;
 }
 
-/**
- * (Re-)génère le HTML de la song card et ré-attache les handlers.
- * Appelé au démarrage et à chaque changement de song sélectionnée.
- */
 function renderSongCard() {
   const card = document.getElementById("songCard");
   if (!card) return;
@@ -2122,19 +2117,25 @@ function renderSongCard() {
   const savedFile = profile.profileSong?.fichier || null;
 
   // Placeholder musique : note SVG sur fond sombre P5
-  const pickerImgSrc = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='12' fill='%231a1a1a'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23e63946'%3E%E2%99%AA%3C/text%3E%3C/svg%3E`;
 
   // Option neutre en tête — garantit que toute sélection déclenche un vrai `change`
-  const optionsHTML =
-    `<option value="" disabled selected>— Choose a song —</option>` +
-    SONG_OPUS_ORDER.filter((op) => groups[op]?.length > 0)
-      .map(
-        (op) =>
-          `<optgroup label="${SONG_OPUS_LABELS[op] || op}">${groups[op]
-            .map((s) => `<option value="${s.fichier}">${s.titre}</option>`)
-            .join("")}</optgroup>`
-      )
-      .join("");
+  // Liste recherchable groupée par jeu (remplace l'ancien <select> peu pratique).
+  const listHTML = SONG_OPUS_ORDER.filter((op) => groups[op]?.length > 0)
+    .map(
+      (op) =>
+        `<div class="song-list-group" data-group="${op}">` +
+        `<div class="song-list-head">${SONG_OPUS_LABELS[op] || op}</div>` +
+        groups[op]
+          .map(
+            (s) =>
+              `<button type="button" class="song-row" data-fichier="${s.fichier}" data-title="${s.titre.toLowerCase()}">` +
+              `<span class="song-row-play">▶</span><span class="song-row-title">${s.titre}</span>` +
+              `<span class="song-row-opus">${SONG_OPUS_LABELS[op] || op}</span></button>`
+          )
+          .join("") +
+        `</div>`
+    )
+    .join("");
 
   card.innerHTML = `
     <h3 class="card-title"><span class="card-accent">◆</span> Profile Song</h3>
@@ -2167,14 +2168,14 @@ function renderSongCard() {
     </div>
     `
         : `
-    <!-- Sélecteur — affiché uniquement quand aucune song n'est active -->
-    <div class="song-picker">
-      <img id="songPickerImg" class="song-picker-img"
-           src="${pickerImgSrc}" alt="Song preview">
-      <div class="song-picker-right">
-        <select id="songSelect" class="song-select">${optionsHTML}</select>
-        <p class="song-empty-hint">Select a song to set it as your profile music</p>
+    <!-- Sélecteur recherchable — affiché uniquement quand aucune song n'est active -->
+    <div class="song-picker-v2">
+      <div class="song-search-wrap">
+        <input type="text" id="songSearch" class="song-search"
+               placeholder="${_songT("profile.song_search", "🔎 Search a track…")}" autocomplete="off">
       </div>
+      <div id="songList" class="song-list">${listHTML}</div>
+      <p id="songNoResult" class="song-empty-hint" style="display:none">${_songT("profile.song_no_result", "No track found.")}</p>
     </div>
     `
     }
@@ -2185,35 +2186,52 @@ function renderSongCard() {
 }
 
 /** Attache les event handlers de la song card. */
+function selectProfileSong(fichier) {
+  const song = ALL_SONGS.find((s) => s.fichier === fichier);
+  if (!song) return;
+  if (profileSongAudio) {
+    profileSongAudio.pause();
+    profileSongAudio.currentTime = 0;
+  }
+  profile.profileSong = {
+    fichier: song.fichier,
+    titre: song.titre,
+    opus: song.opus,
+    image: song.image,
+    customImage: null,
+  };
+  saveProfile();
+  renderSongCard();
+  markDirty();
+  saveProfileToCloud({ profile_music_id: song.fichier });
+}
+
 function attachSongHandlers() {
-  // ── Sélection directe : changer le select = définir la song immédiatement ──
-  document.getElementById("songSelect")?.addEventListener("change", (e) => {
-    const fichier = e.target.value;
-    if (!fichier) return; // option neutre "— Choose a song —"
-    const song = ALL_SONGS.find((s) => s.fichier === fichier);
-    if (!song) return;
-
-    // Mettre à jour la preview image en temps réel
-    updatePickerPreview(fichier);
-
-    // Déclencher après un court délai pour laisser l'image se charger
-    if (profileSongAudio) {
-      profileSongAudio.pause();
-      profileSongAudio.currentTime = 0;
-    }
-
-    profile.profileSong = {
-      fichier: song.fichier,
-      titre: song.titre,
-      opus: song.opus,
-      image: song.image,
-      customImage: null,
-    };
-    saveProfile();
-    renderSongCard();
-    markDirty();
-    saveProfileToCloud({ profile_music_id: song.fichier });
+  // ── Picker recherchable : clic sur une ligne = sélection immédiate ──
+  document.querySelectorAll("#songList .song-row").forEach((row) => {
+    row.addEventListener("click", () => selectProfileSong(row.dataset.fichier));
   });
+
+  // ── Recherche : filtre les lignes + masque les groupes vides ──
+  const search = document.getElementById("songSearch");
+  if (search) {
+    search.addEventListener("input", () => {
+      const q = search.value.trim().toLowerCase();
+      let anyVisible = false;
+      document.querySelectorAll("#songList .song-list-group").forEach((grp) => {
+        let groupHas = false;
+        grp.querySelectorAll(".song-row").forEach((row) => {
+          const match = !q || row.dataset.title.includes(q);
+          row.style.display = match ? "" : "none";
+          if (match) groupHas = true;
+        });
+        grp.style.display = groupHas ? "" : "none";
+        if (groupHas) anyVisible = true;
+      });
+      const nr = document.getElementById("songNoResult");
+      if (nr) nr.style.display = anyVisible ? "none" : "block";
+    });
+  }
 
   // ── Play / Pause ──
   document.getElementById("songPlayBtn")?.addEventListener("click", () => {

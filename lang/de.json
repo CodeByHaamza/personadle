@@ -284,7 +284,9 @@
     "since": "Seit",
     "avatar_group_special": "Spezial",
     "badges_save": "💾 Speichern",
-    "badges_saved": "✅ Abzeichen gespeichert!"
+    "badges_saved": "✅ Abzeichen gespeichert!",
+    "song_search": "🔎 Titel suchen…",
+    "song_no_result": "Kein Titel gefunden."
   },
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",

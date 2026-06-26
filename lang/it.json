@@ -284,7 +284,9 @@
     "since": "Da",
     "avatar_group_special": "Speciale",
     "badges_save": "💾 Salva",
-    "badges_saved": "✅ Distintivi salvati!"
+    "badges_saved": "✅ Distintivi salvati!",
+    "song_search": "🔎 Cerca un brano…",
+    "song_no_result": "Nessun brano trovato."
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",
