@@ -1,191 +1,125 @@
-# PersonaDLE — Roadmap
+<div align="center">
 
-> Fonctionnalités planifiées, en cours ou terminées.  
-> Mettre à jour au fil du développement.
+# 🗺️ ROADMAP — PersonaDLE
 
----
+<img src="https://img.shields.io/badge/version-2.0-brightgreen?style=for-the-badge" alt="v2.0">
+<img src="https://img.shields.io/badge/prochaine-pré--prod-orange?style=for-the-badge" alt="next">
 
-## Légende
+> **Document vivant.** En haut : ce qui reste à faire (priorisé). En bas : l'historique de ce qui est livré.
 
-| Icône | Statut         |
-| ----- | -------------- |
-| ✅    | Terminé        |
-| 🚧    | En cours       |
-| 📋    | Planifié       |
-| 💡    | Idée à valider |
+</div>
+
+**Légende** — Priorité : 🔴 tôt · 🟠 qualité · 🟢 produit · 🔐 sécurité · ❓ décision &nbsp;|&nbsp; Statut : 📋 planifié · 💡 idée · 🚧 en cours
 
 ---
 
-## Backend & Infrastructure
+## 🎯 Prochaines étapes
 
-| #   | Fonctionnalité                                 | Statut | Notes                                                                                     |
-| --- | ---------------------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
-| B1  | Schéma BDD 20 tables (MySQL/MariaDB)           | ✅     | `sql/bdd_mysql.sql` + migrations 001→009                                                  |
-| B2  | API auth — register, login, logout, me         | ✅     | Sessions PHP httpOnly, `is_admin` dans réponse                                            |
-| B3  | API sessions — POST /api/sessions + streaks    | ✅     | Calcul streak côté serveur                                                                |
-| B4  | API user — GET/PATCH/DELETE + stats + migrate  | ✅     | Migration localStorage→BDD                                                                |
-| B5  | Sync offline-first (`savePendingSession`)      | ✅     | Fallback localStorage si offline                                                          |
-| B6  | RGPD — soft delete + anonymisation             | ✅     | `is_deleted`, `deletion_requests`                                                         |
-| B7  | API amis — GET/POST/PATCH/DELETE               | ✅     | `api/friends/index.php`                                                                   |
-| B8  | API leaderboard — par mode/période/métrique    | ✅     | `api/leaderboard/index.php`                                                               |
-| B9  | Déploiement MariaDB chez Hostinger             | ✅     | 20 tables + seeds + procédure `gain_social_link_xp` importés via SSH MariaDB CLI          |
-| B10 | Cloud sync source-of-truth (`cloud-sync.js`)   | ✅     | `pullProfileFromCloud()` — backend écrase tout le localStorage                            |
-| B11 | Cron `leaderboard_cache` — recalcul périodique | ✅     | `api/cron/leaderboard.php` — scores depuis `game_sessions` filtrés par période            |
-| B12 | RGPD — hard delete J+30 (cron côté serveur)    | ✅     | `api/cron/hard-delete.php` — DELETE CASCADE + log `processed_at`                          |
-| B13 | API streak recovery (`recover-streak.php`)     | ✅     | `POST /api/user/recover-streak`                                                           |
-| B14 | API Social Link rang-up notifs                 | ✅     | Table `social_link_rankup_notifs` (migration 009), `GET /api/social-links/rankup-notifs`  |
-| B15 | API Admin — gestion comptes, badges, stats     | ✅     | `api/admin/` — users, user_badges, user_wallpapers, user_titles, user_stats, social_links |
-| B16 | CI/CD GitHub Actions                           | ✅     | Voir Q8 + Q9 dans section Qualité & DevEx                                                 |
+### 🔴 À prévoir assez tôt
 
----
+- [ ] **Pipeline de contenu** (P4 Revival, P6, Metaphor, SMT)
+  Ajouter un perso = toucher `characters_clean.js` + `personas.js` + `quotes.js` + portraits + AOA + emojis.
+  → Formaliser un **checklist / script** d'ajout (le validateur `npm run data:check` est la base).
+- [ ] **Conditions badges/wallpapers en colonnes structurées**
+  Aujourd'hui texte libre → validation serveur par mapping slug→logique (fragile).
+  → Migration `condition_type` / `condition_value` = anti-triche **générique**.
+- [ ] **Stratégie assets AOA** (~1,8 Go dans git) — Git LFS **ou** CDN-only + fetch au 1er lancement.
+  _(Script `scripts/purge_git_history.sh` prêt pour récupérer l'historique.)_
 
-## Système d'Amis
+### 🟠 Qualité / robustesse
 
-| #   | Fonctionnalité                                    | Statut | Notes                                                                                                                                                         |
-| --- | ------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Envoi / acceptation / refus de demande d'ami      | ✅     | Via friend_code                                                                                                                                               |
-| A2  | Liste d'amis avec dots online/offline             | ✅     | `last_login_at` < 30min                                                                                                                                       |
-| A3  | Recherche de joueurs (pseudo/code)                | ✅     | Paginée                                                                                                                                                       |
-| A4  | Add by friend code (inline, sans rechargement)    | ✅     | —                                                                                                                                                             |
-| A5  | Suppression d'ami                                 | ✅     | DELETE /api/friends/:id                                                                                                                                       |
-| A6  | Social Link — XP + rangs 1-10                     | ✅     | XP, jauge, flamme, toast rang-up                                                                                                                              |
-| A7  | Interactions mutuelles (2× XP), anti-spam         | ✅     | Procédure SQL                                                                                                                                                 |
-| A8  | Effet rang 10 — True Confidant                    | ✅     | Badge canvas supprimé — remplacé par halo doré + icône ✦ + animation burst/typewriter sur profil et liste amis (`css/rank10-effect.css`, `js/social-link.js`) |
-| A9  | Comparaison stats côte à côte                     | ✅     | Overlay radar + phrases Persona i18n (`database/compare-phrases.js`)                                                                                          |
-| A10 | Défis entre amis (6 modes, filtres, anti-doublon) | ✅     | Bandeau + bouton post-victoire, give-up = défaite                                                                                                             |
-| A11 | Sélecteur style animation demandes d'amis         | ✅     | 🃏 Calling Card / 📺 P4 TV / 🔫 P3 Evoker                                                                                                                     |
-| A12 | Animation TV Persona 4 — demandes d'amis          | ✅     | CSS pur, CRT noise canvas, burst avatar, idle glow                                                                                                            |
-| A13 | Streak recovery — menu Jack Frost                 | ✅     | Cooldown 2 mois, sync BDD, badge `reborn_phoenix`                                                                                                             |
-| A14 | Animation Evoker Persona 3 — demandes d'amis      | ✅     | `js/p3-evoker-anim.js` + `css/p3-evoker-anim.css`                                                                                                             |
-| A15 | Social Link rank-up animation pour les 2 joueurs  | ✅     | Backend notifs + polling `notifications.js`, guard `seen_at`                                                                                                  |
+- [ ] **Responsive + a11y** des nouvelles modales (avatar, musique, couleurs) : focus trap + Escape + test mobile.
+- [ ] **Couverture PHP** : tests d'intégration par endpoint critique (`sessions`, `social-links/interact`, `recover-streak`).
+- [ ] **Check i18n « valeur == EN »** : repérer les clés non traduites (au-delà de la simple présence).
+- [ ] **Observabilité prod** : au-delà d'`error_log` — Sentry-like ou table `error_log` + page admin.
+
+### 🟢 Produit (idées)
+
+- [ ] **Mode Versus / défi temps réel** entre amis.
+- [ ] **Historique de profil** : graphe de streak + calendrier des jours joués (on a déjà `uniqueDaysSet`).
+- [ ] **Saison / ladder** avec reset périodique + récompenses.
+- [ ] **Notifications push (PWA)** — rappel quotidien (levier de rétention « daily »).
+
+### 🔐 Sécurité / compte
+
+- [x] **Reset de mot de passe par email** — ✅ _livré (request-reset / reset-password, token hashé 1h, page dédiée)._
+- [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète).
+
+### ❓ Décisions de design à trancher
+
+- [ ] **Abandon casse-t-il le streak ?** Aujourd'hui **non** (streak global = jours _joués_). Beaucoup de daily games cassent au give-up.
+- [ ] **Durcir l'anti-triche des badges à flags ?** Crus sur parole — OK fan-game, à durcir si leaderboard « propre » (lié aux conditions structurées).
 
 ---
 
-## Leaderboard
+<details>
+<summary><b>✅ Déjà livré — historique (v1 → v2.0) — cliquer pour déplier</b></summary>
 
-| #   | Fonctionnalité                                        | Statut | Notes                                            |
-| --- | ----------------------------------------------------- | ------ | ------------------------------------------------ |
-| L1  | Classement global + par mode (7 modes)                | ✅     | —                                                |
-| L2  | Périodes : ever / month / week / day                  | ✅     | Requêtes directes `user_stats` / `game_sessions` |
-| L3  | Métriques : wins / winrate / streak / perfect / games | ✅     | —                                                |
-| L4  | Bandeau "Mon classement"                              | ✅     | `my_rank` dans réponse API                       |
-| L5  | Chips filtres actifs                                  | ✅     | —                                                |
-| L6  | Pagination 50 par page                                | ✅     | —                                                |
-| L7  | Classement entre amis uniquement                      | ✅     | Toggle Global / Friends, filtre SQL              |
-| L8  | Cron cache (optimisation perf)                        | ✅     | `api/cron/leaderboard.php` — voir B11            |
+> Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
+> profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
+> Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
+> **260 tests JS · 20 PHPUnit · 7 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
----
+### Backend & Infrastructure
 
-## Profil & Personnalisation
+| #   | Fonctionnalité                                 | Notes                                                                            |
+| --- | ---------------------------------------------- | -------------------------------------------------------------------------------- |
+| B1  | Schéma BDD (21 tables, MySQL/MariaDB)          | `sql/bdd_mysql.sql` = source de vérité + migrations `sql/migrations/` (000→018)   |
+| B2  | API auth — register / login / logout / me      | Sessions PHP httpOnly, remember-me hashé, **reset mot de passe** (email)          |
+| B3  | API sessions + streak par-mode & **globale**   | Calcul serveur (`api/lib/streak.php`), frontière Paris, contrat de schéma testé   |
+| B4  | API user — GET/PATCH/DELETE + stats + migrate  | Migration localStorage→BDD idempotente                                            |
+| B5  | Sync offline-first (`savePendingSession`)      | Fallback localStorage si offline                                                  |
+| B6  | RGPD — soft delete + anonymisation + hard J+30 | `is_deleted`, `deletion_requests`, cron `hard-delete.php`                         |
+| B7  | API amis / leaderboard / social-links          | `api/friends`, `api/leaderboard`, `api/social-links` (XP, anti-spam, mutuel)      |
+| B8  | Cloud sync source-of-truth (`cloud-sync.js`)   | `pullProfileFromCloud()` — backend écrase le localStorage                         |
+| B9  | Rate-limiting SQL + validation serveur         | Table `rate_limits`, conditions wallpapers/badges validées (anti-triche)         |
+| B10 | API Admin (comptes, badges, codes, modération) | `api/admin/` — ban enforcé sur tous les endpoints authentifiés                   |
+| B11 | CI/CD GitHub Actions                           | CI (lint, data, i18n, coverage, PHPUnit DB, PHPStan) + **CD auto sur merge main** |
 
-| #   | Fonctionnalité                                     | Statut | Notes                                                                          |
-| --- | -------------------------------------------------- | ------ | ------------------------------------------------------------------------------ |
-| P1  | Page profil dédiée (avatar, badges, stats, thèmes) | ✅     | `profile/profile.html` + `profile-page.js`                                     |
-| P2  | Migration localStorage → cloud                     | ✅     | `migrate.php`, idempotent                                                      |
-| P3  | Stats communautaires post-partie                   | ✅     | `showCommunityStats()` dans les 6 modes, `api/community-stats.php`             |
-| P4  | Social Link rank-up animation — tiers 1→10         | ✅     | Tier1/2/3/rank10, typewriter, phrases multilingues, avatars                    |
-| P5  | Page de profil consultable (vue publique)          | ✅     | `profile-view.js` — thème, musique, Add Friend, Compare, jauge SL              |
-| P6  | Titres / rangs joueur                              | ✅     | Catalogue BDD, `GET /api/titles`, unlock + équipement frontend (migration 006) |
-| P7  | Badges → backend                                   | ✅     | 60 badges, `GET /api/badges`, unlock validé contre catalogue (migration 007)   |
-| P8  | Wallpapers → backend                               | ✅     | 7 wallpapers, `GET /api/wallpapers`, FK fonctionnelle (migration 007)          |
-| P9  | Musique de profil                                  | ✅     | Sélecteur + prévisualisation + lecture sur profil perso et public              |
-| P10 | Animation cadeaux admin (divine gift)              | ✅     | `js/divine-gift.js` + `css/divine-gift.css`, déduplication `_announcedGiftIds` |
-| P11 | Bouton Settings ⚙ intégré à la pill dark mode      | ✅     | Plus de superposition sur la page profil                                       |
-| P12 | Page de profil partageable (image exportable)      | ✅     | `html2canvas` → PNG, 8 thèmes + 25 wallpapers, Download / X / Discord / Email  |
+### Système d'Amis & Social Link
 
----
+| #   | Fonctionnalité                                        | Notes                                                                 |
+| --- | ----------------------------------------------------- | --------------------------------------------------------------------- |
+| S1  | Demandes d'ami (code/pseudo), liste, statut online    | Anti-self, anti-doublon, recherche paginée                            |
+| S2  | Social Link rangs 1-10, XP, mutuel ×2, anti-spam      | Procédure SQL, **tooltip** d'explication (ex-boutons)                  |
+| S3  | Effet rang 10 — True Confidant                        | Halo doré + burst + typewriter (`css/rank10-effect.css`)              |
+| S4  | Comparaison de stats + phrases Persona i18n           | Overlay radar (`database/compare-phrases.js`)                         |
+| S5  | Défis quotidiens entre amis (6 modes)                 | Bandeau + post-victoire, give-up = défaite                            |
+| S6  | Animations de demande (Calling Card / P4 TV / Evoker) | Choix dans les paramètres                                            |
+| S7  | Streak recovery — Jack Frost                          | Cooldown 60j **enforced serveur** (verrou FOR UPDATE), anti-revert    |
+| S8  | Rank-up notifié aux **2** joueurs                     | `social_link_rankup_notifs` + polling                                |
 
-## Administration
+### Profil & Personnalisation
 
-| #   | Fonctionnalité                                           | Statut | Notes                                                                                                                                                       |
-| --- | -------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AD1 | Dashboard admin (`/admin`)                               | ✅     | Layout 2 panneaux, accès restreint `is_admin`                                                                                                               |
-| AD2 | Statistiques globales (DAU, parties/jour, taux victoire) | ✅     | Agrégats depuis `game_sessions` + `users`                                                                                                                   |
-| AD3 | Gestion des comptes (recherche, édition, soft-delete)    | ✅     | `api/admin/users.php` + `user.php`                                                                                                                          |
-| AD4 | Attribution badges / wallpapers / titres à un user       | ✅     | Grille visuelle, clic → queue → FAB apply, toasts                                                                                                           |
-| AD5 | Édition stats manuelles (streak, wins…)                  | ✅     | `api/admin/user_stats.php`                                                                                                                                  |
-| AD6 | Gestion Social Links depuis admin                        | ✅     | `api/admin/social_links.php`                                                                                                                                |
-| AD7 | Annonce / bannière in-game                               | ✅     | Modale News dans `index.html` — bannière v2.0 (thème Sophia, orbs animés, lien changelog)                                                                   |
-| AD8 | Gestion des codes événement (CRUD + stats usage)         | ✅     | Table `event_codes` (migration 011), `api/admin/event_codes.php`, bouton 🎟️ Codes dans admin                                                                |
-| AD9 | Modération des pseudos (bannissement + verrou pseudo)    | ✅     | Colonnes `is_banned`/`pseudo_locked` (migration 011), section Modération dans tab Profil admin, login vérifie `is_banned`, API user vérifie `pseudo_locked` |
+| #   | Fonctionnalité                                | Notes                                                                       |
+| --- | --------------------------------------------- | --------------------------------------------------------------------------- |
+| P1  | Page profil + vue publique (`?view=`/`?uid=`) | Consultable sans login                                                       |
+| P2  | Avatars **groupés par jeu** + tags thème      | 168 avatars, en-têtes stylisés (`avatars_data.js`)                          |
+| P3  | Musique de profil — **modal visuel** (covers) | Recherchable, groupé par jeu, fallback cover                                |
+| P4  | Couleurs **unifiées** + aperçu live           | Bordure avatar + thème en pastilles, preview en direct                      |
+| P5  | Badges (60+), titres, wallpapers → backend    | Unlock validé serveur (stats), sélection épinglée persistée + bouton Save   |
+| P6  | Carte de profil exportable (PNG)              | `html2canvas`, 8 thèmes, partage X / Discord / Email                        |
+| P7  | Cadeaux admin (divine gift), Settings ⚙       | Déduplication des annonces                                                  |
 
----
+### Leaderboard · Admin · UX
 
-## Corrections & Qualité (session mai 2026)
+| #   | Fonctionnalité                                  | Notes                                                          |
+| --- | ----------------------------------------------- | -------------------------------------------------------------- |
+| L1  | Classement mode × période × métrique × scope    | `my_rank` inclus, cron cache, amis-only                        |
+| AD1 | Dashboard admin, modération, codes événement    | Accès `is_admin`, attribution badges/titres/wallpapers         |
+| U1  | News in-game, page Confidentialité (RGPD)       | i18n 5 langues                                                 |
+| U2  | **FAQ enrichie** (32 questions) + bouton report | Report → **GitHub issues** (templates), streak expliqué        |
 
-| #    | Fix                                                                 | Statut | Notes                                                                                             |
-| ---- | ------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
-| FQ1  | Badge Golden Week rejoué à chaque chargement                        | ✅     | `checkEventBadges` mutait localStorage mais pas le profil en mémoire → `saveProfile()` l'effaçait |
-| FQ2  | `syncBadgesWithBackend` réanimait des badges connus après logout    | ✅     | `_seenBadgeAnimIds` localStorage key (hors profil, survit aux resets)                             |
-| FQ3  | Animation cadeau admin rejouée pour des items déjà possédés         | ✅     | `_announcedGiftIds` dans `cloud-sync.js`                                                          |
-| FQ4  | Social Link rank-up visible uniquement chez le déclencheur          | ✅     | Backend `social_link_rankup_notifs` + polling bidirectionnel                                      |
-| FQ5  | Avatar ami absent dans l'animation rank-up                          | ✅     | `_normalizeSrc()` unifié + `profile.avatar_data` (pas `user.avatar_data`)                         |
-| FQ6  | Badge `one_shot` jamais déclenché (Emoji/Silhouette/Personae/Music) | ✅     | `hasWonFirstTry` ajouté dans les 4 modes manquants — Classic l'avait déjà                         |
-| FQ7  | Auto-replay absent sur changement de filtre (Classic + Emoji)       | ✅     | Classic : `resetButton.click()` ; Emoji : `resetGame()` dans `onFilterChange`                     |
-| FQ8  | Animation défi rejouée après changement de compte                   | ✅     | `localStorage.removeItem('_crInitDone')` dans `auth.js` au login et register                      |
-| FQ9  | `default_avatar.png` 404 depuis `index.html`                        | ✅     | `_imgBase()` ajouté dans `challenge-result.js` — même pattern que les autres modules              |
-| FQ10 | Streak gelée à 0 sans accès au menu Jack Frost                      | ✅     | Clic sur `.stat-streak` quand `streak===0 && canRecover()` → `showStreakRecoveryMenu()`           |
+### Qualité & DevEx
 
----
+| #   | Élément                                       | Notes                                                                         |
+| --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
+| Q1  | Tests : 260 Vitest · 20 PHPUnit · 7 E2E       | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q2  | i18n EN/FR/ES/DE/IT (~920 clés)               | `npm run i18n:check`                                                          |
+| Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
+| Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
+| Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |
+| Q6  | Service Worker offline-first, BASE_URL auto   | network-first JS/CSS                                                          |
+| Q7  | CI sur push/PR · **CD auto sur merge main**   | `.github/workflows/` (ci.yml + cd.yml)                                        |
 
-## Nouveau Contenu
-
-| #   | Fonctionnalité                                      | Statut | Notes                                                                        |
-| --- | --------------------------------------------------- | ------ | ---------------------------------------------------------------------------- |
-| C1  | Personnages P5X (nouveaux)                          | 💡     | À valider selon avancement du jeu                                            |
-| C2  | Nouveaux opus P1 / P2 EP                            | 💡     | Données manquantes                                                           |
-| C3  | Mode Quotes — deviner le perso depuis une réplique  | 💡     | `database/quotes.js` déjà structuré (EN uniquement)                          |
-| C4  | Mode Daily Challenge — limite globale de tentatives | 💡     | Classement distinct                                                          |
-| C5  | Nouvelles musiques P5X / P3R                        | 📋     | À sourcer et intégrer dans `musicsMode`                                      |
-| C6  | Portraits manquants (Amenosagiri, Nyx…)             | ✅     | 168 mappings complets dans `portraitsMap.js` — tous les personnages couverts |
-
----
-
-## UX & Pages Annexes
-
-| #   | Fonctionnalité                                | Statut | Notes                                                                                                          |
-| --- | --------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------- |
-| U1  | Section News / Patch Notes in-game            | ✅     | Bannière v2.0 dans la modale News (`index.html`) — thème Sophia, orbs animés orange/blanc, lien changelog HTML |
-| U2  | Page Confidentialité (`/privacy.html`)        | ✅     | `privacy.html` + `privacy.css` + i18n 5 langues, lien footer + formulaire inscription                          |
-| U3  | FAQ (accordion sur index ou page dédiée)      | 💡     | —                                                                                                              |
-| U4  | Partage de score / streak sur réseaux sociaux | 💡     | Image canvas générée côté client                                                                               |
-
----
-
-## Qualité & DevEx
-
-| #   | Fonctionnalité                                          | Statut | Notes                                                                                                                                                                                               |
-| --- | ------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Q1  | Tests unitaires Vitest (242 tests passants)             | ✅     | `npm test`                                                                                                                                                                                          |
-| Q2  | i18n EN/FR/ES/DE/IT (871 clés + phrases compare)        | ✅     | `npm run i18n:check`                                                                                                                                                                                |
-| Q3  | Service Worker — network-first JS/CSS                   | ✅     | SW v72, précache 40+ assets                                                                                                                                                                         |
-| Q4  | Offline-first (fallback gracieux)                       | ✅     | SW + `savePendingSession`                                                                                                                                                                           |
-| Q5  | BASE_URL API auto-détecté (Apache local + prod)         | ✅     | `pathname.startsWith('/personadle/')`                                                                                                                                                               |
-| Q6  | Audit responsive complet (360px → 1440px)               | ✅     | Tous les modes + profil + leaderboard + friends + admin couverts (3 breakpoints chacun)                                                                                                             |
-| Q7  | Couverture de tests étendue (8 suites Vitest + PHPUnit) | ✅     | 242 tests Vitest (`gameCore`, `backend`, `i18n`, `profileStats`, `streakRecovery`, `streakFlow.integration`, `validateCharacters`, `formatPlayTime`) + 7 tests PHPUnit (`tests/php/StreakTest.php`) |
-| Q8  | CI — GitHub Actions                                     | ✅     | `.github/workflows/ci.yml` — `lint` + `data:check` + `npm test` + `i18n:check` + `php -l` + PHPUnit sur push develop/main + PRs                                                                     |
-| Q9  | CD — Deploy automatique → Hostinger                     | ✅     | `.github/workflows/cd.yml` — rsync SSH manuel depuis main uniquement (workflow_dispatch + dry-run option)                                                                                           |
-
----
-
-## 🔭 À prévoir — audit (session juin 2026)
-
-> Points relevés lors de l'audit profond (streaks, badges, wallpapers, social, modales).
-> Priorité : 🔴 tôt · 🟠 qualité · 🟢 produit · 🔐 sécurité.
-
-| #   | Sujet                                            | Prio | Statut | Notes                                                                                                                                  |
-| --- | ------------------------------------------------ | :--: | ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Pipeline de contenu (P4 Revival, P6, Metaphor…)  |  🔴  | 📋     | Checklist/script d'ajout de perso (touche `characters_clean.js` + `personas.js` + `quotes.js` + portraits + AOA + emojis). `data:check` = base |
-| A2  | Conditions badges/wallpapers en colonnes         |  🔴  | 📋     | Migrer du texte libre → `condition_type`/`condition_value` → anti-triche serveur **générique** (au lieu du mapping slug→logique manuel) |
-| A3  | Stratégie assets AOA (~1,8 Go dans git)          |  🔴  | 💡     | Git LFS **ou** CDN-only + fetch au 1er lancement. Script `scripts/purge_git_history.sh` prêt pour l'historique                          |
-| A4  | Responsive + a11y des nouvelles modales          |  🟠  | 📋     | Avatar groupé, musique, couleurs : focus trap + Escape (comme login/Jack Frost) + test mobile                                          |
-| A5  | Couverture PHP étendue                           |  🟠  | 📋     | Tests d'intégration par endpoint critique : `sessions`, `social-links/interact`, `recover-streak`                                      |
-| A6  | Check i18n « valeur == EN »                      |  🟠  | 💡     | `i18n:check` vérifie la présence, pas la qualité → repérer les clés non traduites (fallback EN)                                         |
-| A7  | Observabilité prod                               |  🟠  | 💡     | Aujourd'hui `error_log` seul. Sentry-like **ou** table `error_log` + page admin                                                         |
-| A8  | Reset mot de passe + vérification email          |  🔐  | 📋     | **Absent.** Important avant communication large (token reset par email + endpoint dédié)                                                |
-| A9  | Mode Versus / défi temps réel                    |  🟢  | 💡     | Au-delà du défi quotidien asynchrone actuel                                                                                            |
-| A10 | Historique de profil (graphe streak, calendrier) |  🟢  | 💡     | On a déjà `uniqueDaysSet`                                                                                                              |
-| A11 | Saison / ladder avec reset périodique            |  🟢  | 💡     | Récompenses, relance l'engagement                                                                                                     |
-| A12 | Notifications push (PWA) — rappel quotidien      |  🟢  | 💡     | Gros levier de rétention sur un jeu « daily »                                                                                          |
-| A13 | Décision : abandon casse-t-il le streak ?        |  ❓  | 💡     | Aujourd'hui **non** (streak global = jours joués, pas gagnés). À trancher                                                              |
-| A14 | Décision : durcir l'anti-triche badges à flags ? |  ❓  | 💡     | Badges à flags client crus sur parole — OK fan-game, à durcir si leaderboard « propre » (lié à A2)                                      |
+</details>
