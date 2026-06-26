@@ -165,3 +165,27 @@
 | Q7  | Couverture de tests étendue (8 suites Vitest + PHPUnit) | ✅     | 242 tests Vitest (`gameCore`, `backend`, `i18n`, `profileStats`, `streakRecovery`, `streakFlow.integration`, `validateCharacters`, `formatPlayTime`) + 7 tests PHPUnit (`tests/php/StreakTest.php`) |
 | Q8  | CI — GitHub Actions                                     | ✅     | `.github/workflows/ci.yml` — `lint` + `data:check` + `npm test` + `i18n:check` + `php -l` + PHPUnit sur push develop/main + PRs                                                                     |
 | Q9  | CD — Deploy automatique → Hostinger                     | ✅     | `.github/workflows/cd.yml` — rsync SSH manuel depuis main uniquement (workflow_dispatch + dry-run option)                                                                                           |
+
+---
+
+## 🔭 À prévoir — audit (session juin 2026)
+
+> Points relevés lors de l'audit profond (streaks, badges, wallpapers, social, modales).
+> Priorité : 🔴 tôt · 🟠 qualité · 🟢 produit · 🔐 sécurité.
+
+| #   | Sujet                                            | Prio | Statut | Notes                                                                                                                                  |
+| --- | ------------------------------------------------ | :--: | ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Pipeline de contenu (P4 Revival, P6, Metaphor…)  |  🔴  | 📋     | Checklist/script d'ajout de perso (touche `characters_clean.js` + `personas.js` + `quotes.js` + portraits + AOA + emojis). `data:check` = base |
+| A2  | Conditions badges/wallpapers en colonnes         |  🔴  | 📋     | Migrer du texte libre → `condition_type`/`condition_value` → anti-triche serveur **générique** (au lieu du mapping slug→logique manuel) |
+| A3  | Stratégie assets AOA (~1,8 Go dans git)          |  🔴  | 💡     | Git LFS **ou** CDN-only + fetch au 1er lancement. Script `scripts/purge_git_history.sh` prêt pour l'historique                          |
+| A4  | Responsive + a11y des nouvelles modales          |  🟠  | 📋     | Avatar groupé, musique, couleurs : focus trap + Escape (comme login/Jack Frost) + test mobile                                          |
+| A5  | Couverture PHP étendue                           |  🟠  | 📋     | Tests d'intégration par endpoint critique : `sessions`, `social-links/interact`, `recover-streak`                                      |
+| A6  | Check i18n « valeur == EN »                      |  🟠  | 💡     | `i18n:check` vérifie la présence, pas la qualité → repérer les clés non traduites (fallback EN)                                         |
+| A7  | Observabilité prod                               |  🟠  | 💡     | Aujourd'hui `error_log` seul. Sentry-like **ou** table `error_log` + page admin                                                         |
+| A8  | Reset mot de passe + vérification email          |  🔐  | 📋     | **Absent.** Important avant communication large (token reset par email + endpoint dédié)                                                |
+| A9  | Mode Versus / défi temps réel                    |  🟢  | 💡     | Au-delà du défi quotidien asynchrone actuel                                                                                            |
+| A10 | Historique de profil (graphe streak, calendrier) |  🟢  | 💡     | On a déjà `uniqueDaysSet`                                                                                                              |
+| A11 | Saison / ladder avec reset périodique            |  🟢  | 💡     | Récompenses, relance l'engagement                                                                                                     |
+| A12 | Notifications push (PWA) — rappel quotidien      |  🟢  | 💡     | Gros levier de rétention sur un jeu « daily »                                                                                          |
+| A13 | Décision : abandon casse-t-il le streak ?        |  ❓  | 💡     | Aujourd'hui **non** (streak global = jours joués, pas gagnés). À trancher                                                              |
+| A14 | Décision : durcir l'anti-triche badges à flags ? |  ❓  | 💡     | Badges à flags client crus sur parole — OK fan-game, à durcir si leaderboard « propre » (lié à A2)                                      |
