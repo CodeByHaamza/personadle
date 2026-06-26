@@ -250,6 +250,44 @@ function setupLoginForm() {
       if (btn) btn.disabled = false;
     }
   });
+
+  // ── Mot de passe oublié → bascule vers la demande de réinitialisation ──
+  const resetForm = document.getElementById("resetRequestForm");
+  const resetMsg = document.getElementById("resetMsg");
+  const _t = (k, fb) => {
+    const r = window.i18n?.t?.(k);
+    return r != null && r !== k ? r : fb;
+  };
+
+  document.getElementById("forgotPasswordBtn")?.addEventListener("click", () => {
+    hideAuthError(error);
+    form.classList.add("hidden");
+    resetForm?.classList.remove("hidden");
+  });
+  document.getElementById("cancelReset")?.addEventListener("click", () => {
+    resetForm?.classList.add("hidden");
+    form.classList.remove("hidden");
+  });
+
+  resetForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("resetEmail")?.value.trim() ?? "";
+    const btn = resetForm.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    try {
+      await api.auth.requestReset({ email });
+    } catch (_) {
+      /* anti-énumération : message identique quoi qu'il arrive */
+    }
+    if (resetMsg) {
+      resetMsg.textContent = _t(
+        "auth.reset_sent",
+        "If that email exists, a reset link has been sent. Check your inbox."
+      );
+      resetMsg.classList.remove("hidden");
+    }
+    if (btn) btn.disabled = false;
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

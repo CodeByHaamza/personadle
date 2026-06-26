@@ -673,7 +673,11 @@
     "migrate_success": "✅ ¡Perfil importado correctamente!",
     "migrate_already_done": "Tu perfil ya está sincronizado.",
     "privacy_notice": "Al crear una cuenta, aceptas nuestra",
-    "privacy_link": "Política de privacidad"
+    "privacy_link": "Política de privacidad",
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "send_reset": "Enviar enlace",
+    "back": "Volver al inicio de sesión",
+    "reset_sent": "Si ese correo existe, se ha enviado un enlace de restablecimiento. Revisa tu bandeja."
   },
   "leaderboard": {
     "title": "Clasificación",

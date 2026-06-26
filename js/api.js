@@ -147,6 +147,12 @@ export const api = {
      * À appeler au chargement de page pour restaurer l'état de connexion.
      */
     me: () => get("/auth/me"),
+
+    /** Demande un lien de réinitialisation de mot de passe (envoyé par email). */
+    requestReset: (data) => post("/auth/request-reset", data),
+
+    /** Applique un nouveau mot de passe à partir du token reçu par email. */
+    resetPassword: (data) => post("/auth/reset-password", data),
   },
 
   // ── Utilisateur & profil ──────────────────────────────

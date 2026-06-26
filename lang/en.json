@@ -673,7 +673,11 @@
     "migrate_success": "✅ Profile imported successfully!",
     "migrate_already_done": "Your profile is already synced.",
     "privacy_notice": "By creating an account, you agree to our",
-    "privacy_link": "Privacy Policy"
+    "privacy_link": "Privacy Policy",
+    "forgot_password": "Forgot password?",
+    "send_reset": "Send reset link",
+    "back": "Back to login",
+    "reset_sent": "If that email exists, a reset link has been sent. Check your inbox."
   },
   "leaderboard": {
     "title": "Leaderboard",

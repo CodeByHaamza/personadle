@@ -59,6 +59,9 @@ CREATE TABLE users (
     -- PHP session files, which shared hosts may garbage-collect aggressively.
     remember_me_hash     VARCHAR(64)      NULL,
     remember_me_expires  DATETIME         NULL,
+    -- Réinitialisation de mot de passe : hash sha256 du token envoyé par email + expiration
+    reset_token_hash     VARCHAR(64)      NULL,
+    reset_token_expires  DATETIME         NULL,
     -- Vaut 1 après le premier import JSON (une seule migration autorisée par compte)
     has_migrated         TINYINT(1)       NOT NULL DEFAULT 0,
     -- Droits admin (utilisé par requireAdmin / login.php / formatUser).

@@ -673,7 +673,11 @@
     "migrate_success": "✅ Profil erfolgreich importiert!",
     "migrate_already_done": "Dein Profil ist bereits synchronisiert.",
     "privacy_notice": "Mit der Kontoerstellung stimmst du unserer",
-    "privacy_link": "Datenschutzerklärung zu"
+    "privacy_link": "Datenschutzerklärung zu",
+    "forgot_password": "Passwort vergessen?",
+    "send_reset": "Link senden",
+    "back": "Zurück zur Anmeldung",
+    "reset_sent": "Falls diese E-Mail existiert, wurde ein Link gesendet. Prüfe dein Postfach."
   },
   "leaderboard": {
     "title": "Rangliste",

@@ -814,6 +814,25 @@
           <button type="submit" class="btn-p5 btn-auth-submit">
             🔐 <span data-i18n="auth.login">Log in</span>
           </button>
+          <button type="button" id="forgotPasswordBtn" class="auth-forgot-link" data-i18n="auth.forgot_password">
+            Forgot password?
+          </button>
+        </form>
+
+        <!-- Demande de réinitialisation (masquée jusqu'au clic sur "Mot de passe oublié ?") -->
+        <form id="resetRequestForm" class="auth-form hidden" novalidate>
+          <div class="auth-field">
+            <label for="resetEmail" data-i18n="auth.email">Email</label>
+            <input type="email" id="resetEmail" autocomplete="email" required
+                   data-i18n-placeholder="auth.email" />
+          </div>
+          <p id="resetMsg" class="auth-hint hidden"></p>
+          <button type="submit" class="btn-p5 btn-auth-submit">
+            📧 <span data-i18n="auth.send_reset">Send reset link</span>
+          </button>
+          <button type="button" id="cancelReset" class="auth-switch-btn" data-i18n="auth.back">
+            Back to login
+          </button>
         </form>
 
         <p class="auth-switch">
