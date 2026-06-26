@@ -91,13 +91,6 @@ env/
 .venv/
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Musiques (fichiers audio soumis au droit d'auteur — non versionnés)
-# Les fichiers .mp3 / .ogg / .flac dans la base de données du mode Musique
-# ne doivent pas être publiés sur un dépôt public.
-# ─────────────────────────────────────────────────────────────────────────────
-musicsMode/database/music/
-
-# ─────────────────────────────────────────────────────────────────────────────
 # Documentation interne (notes de mise à jour, images de travail)
 # Ce dossier contient des exports PDF et des captures de travail qui ne sont
 # pas nécessaires dans le dépôt public.
