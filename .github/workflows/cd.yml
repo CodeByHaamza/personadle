@@ -1,16 +1,23 @@
 name: CD — Deploy to Hostinger
 
-# Déclenchement MANUEL uniquement — jamais automatique sur push.
-# À ne lancer QUE depuis la branche main (après merge de develop → main).
-# Pour activer : aller dans GitHub → Actions → "CD — Deploy to Hostinger" → Run workflow.
+# Déploiement AUTOMATIQUE à chaque push/merge sur `main` (après CI).
+# Reste lançable MANUELLEMENT (avec option dry-run) via GitHub → Actions → Run workflow.
+#
+# ⚠️ Les migrations BDD ne sont PAS jouées par ce pipeline (risque sur du non-idempotent
+#    sans tracker de migration). À appliquer manuellement en SSH quand le schéma change :
+#      ssh hostinger-personadle
+#      mysql -u <user> -p <db> < sql/migrations/0XX_xxx.sql
 #
 # Secrets requis (GitHub → Settings → Secrets → Actions) :
-#   HOSTINGER_SSH_KEY   — clé privée SSH (cat ~/.ssh/id_rsa | pbcopy)
+#   HOSTINGER_SSH_KEY   — clé privée SSH
+#   HOSTINGER_HOST_KEY  — empreinte known_hosts du serveur
 #   HOSTINGER_USER      — u870779941
 #   HOSTINGER_HOST      — fr-int-web2056 (ou IP du serveur)
 #   HOSTINGER_PATH      — ~/domains/personadle.net/public_html
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       dry_run:
