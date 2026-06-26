@@ -286,7 +286,10 @@
     "badges_save": "💾 Salva",
     "badges_saved": "✅ Distintivi salvati!",
     "song_search": "🔎 Cerca un brano…",
-    "song_no_result": "Nessun brano trovato."
+    "song_no_result": "Nessun brano trovato.",
+    "song_choose": "Scegli la mia musica",
+    "song_choose_hint": "Un brano che parte quando gli amici visitano il tuo profilo",
+    "song_modal_title": "Scegli la musica del profilo"
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",

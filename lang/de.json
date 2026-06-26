@@ -286,7 +286,10 @@
     "badges_save": "💾 Speichern",
     "badges_saved": "✅ Abzeichen gespeichert!",
     "song_search": "🔎 Titel suchen…",
-    "song_no_result": "Kein Titel gefunden."
+    "song_no_result": "Kein Titel gefunden.",
+    "song_choose": "Musik auswählen",
+    "song_choose_hint": "Ein Titel, der läuft, wenn Freunde dein Profil besuchen",
+    "song_modal_title": "Profilmusik auswählen"
   },
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",

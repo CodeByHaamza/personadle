@@ -2113,29 +2113,6 @@ function renderSongCard() {
   const hasSong = !!profile.profileSong?.fichier;
   // Sur son propre profil la card est toujours visible (le picker sert à choisir).
   card.classList.remove("hidden");
-  const groups = getSortedSongGroups();
-  const savedFile = profile.profileSong?.fichier || null;
-
-  // Placeholder musique : note SVG sur fond sombre P5
-
-  // Option neutre en tête — garantit que toute sélection déclenche un vrai `change`
-  // Liste recherchable groupée par jeu (remplace l'ancien <select> peu pratique).
-  const listHTML = SONG_OPUS_ORDER.filter((op) => groups[op]?.length > 0)
-    .map(
-      (op) =>
-        `<div class="song-list-group" data-group="${op}">` +
-        `<div class="song-list-head">${SONG_OPUS_LABELS[op] || op}</div>` +
-        groups[op]
-          .map(
-            (s) =>
-              `<button type="button" class="song-row" data-fichier="${s.fichier}" data-title="${s.titre.toLowerCase()}">` +
-              `<span class="song-row-play">▶</span><span class="song-row-title">${s.titre}</span>` +
-              `<span class="song-row-opus">${SONG_OPUS_LABELS[op] || op}</span></button>`
-          )
-          .join("") +
-        `</div>`
-    )
-    .join("");
 
   card.innerHTML = `
     <h3 class="card-title"><span class="card-accent">◆</span> Profile Song</h3>
@@ -2168,14 +2145,12 @@ function renderSongCard() {
     </div>
     `
         : `
-    <!-- Sélecteur recherchable — affiché uniquement quand aucune song n'est active -->
-    <div class="song-picker-v2">
-      <div class="song-search-wrap">
-        <input type="text" id="songSearch" class="song-search"
-               placeholder="${_songT("profile.song_search", "🔎 Search a track…")}" autocomplete="off">
-      </div>
-      <div id="songList" class="song-list">${listHTML}</div>
-      <p id="songNoResult" class="song-empty-hint" style="display:none">${_songT("profile.song_no_result", "No track found.")}</p>
+    <!-- Aucune song : bouton qui ouvre le modal visuel de sélection -->
+    <div class="song-empty">
+      <button type="button" id="openSongModal" class="song-choose-btn">
+        🎵 ${_songT("profile.song_choose", "Choose your profile music")}
+      </button>
+      <p class="song-empty-hint">${_songT("profile.song_choose_hint", "A track that plays when friends visit your profile")}</p>
     </div>
     `
     }
@@ -2206,32 +2181,94 @@ function selectProfileSong(fichier) {
   saveProfileToCloud({ profile_music_id: song.fichier });
 }
 
-function attachSongHandlers() {
-  // ── Picker recherchable : clic sur une ligne = sélection immédiate ──
-  document.querySelectorAll("#songList .song-row").forEach((row) => {
-    row.addEventListener("click", () => selectProfileSong(row.dataset.fichier));
+/** Construit (une fois) et ouvre le modal visuel de sélection de musique. */
+function openSongModal() {
+  let modal = document.getElementById("songModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "songModal";
+    modal.className = "song-modal hidden";
+    document.body.appendChild(modal);
+  }
+
+  const groups = getSortedSongGroups();
+  const IMG = "../musicsMode/database/img/";
+  const cardsHTML = SONG_OPUS_ORDER.filter((op) => groups[op]?.length > 0)
+    .map(
+      (op) =>
+        `<div class="song-modal-group" data-group="${op}">` +
+        `<div class="song-modal-head">${SONG_OPUS_LABELS[op] || op}</div>` +
+        `<div class="song-modal-grid">` +
+        groups[op]
+          .map(
+            (s) =>
+              `<button type="button" class="song-card" data-fichier="${s.fichier}" data-title="${s.titre.toLowerCase()}">` +
+              `<img class="song-card-cover" src="${IMG}${s.image}" alt="${SONG_OPUS_LABELS[op] || op}" loading="lazy">` +
+              `<span class="song-card-title">${s.titre}</span>` +
+              `<span class="song-card-opus">${SONG_OPUS_LABELS[op] || op}</span>` +
+              `<span class="song-card-play">▶</span></button>`
+          )
+          .join("") +
+        `</div></div>`
+    )
+    .join("");
+
+  modal.innerHTML = `
+    <div class="song-modal-box" role="dialog" aria-modal="true" aria-label="${_songT("profile.song_modal_title", "Choose your profile music")}">
+      <div class="song-modal-bar">
+        <input type="text" id="songSearch" class="song-search" autocomplete="off"
+               placeholder="${_songT("profile.song_search", "🔎 Search a track…")}">
+        <button type="button" id="closeSongModal" class="song-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="songModalBody" class="song-modal-body">${cardsHTML}</div>
+      <p id="songNoResult" class="song-empty-hint" style="display:none">${_songT("profile.song_no_result", "No track found.")}</p>
+    </div>`;
+
+  modal.classList.remove("hidden");
+
+  const close = () => modal.classList.add("hidden");
+  modal.querySelector("#closeSongModal").onclick = close;
+  modal.onclick = (e) => {
+    if (e.target === modal) close();
+  };
+  const onKey = (e) => {
+    if (e.key === "Escape") {
+      close();
+      document.removeEventListener("keydown", onKey);
+    }
+  };
+  document.addEventListener("keydown", onKey);
+
+  modal.querySelectorAll(".song-card").forEach((cardEl) => {
+    cardEl.onclick = () => {
+      selectProfileSong(cardEl.dataset.fichier);
+      close();
+    };
   });
 
-  // ── Recherche : filtre les lignes + masque les groupes vides ──
-  const search = document.getElementById("songSearch");
-  if (search) {
-    search.addEventListener("input", () => {
-      const q = search.value.trim().toLowerCase();
-      let anyVisible = false;
-      document.querySelectorAll("#songList .song-list-group").forEach((grp) => {
-        let groupHas = false;
-        grp.querySelectorAll(".song-row").forEach((row) => {
-          const match = !q || row.dataset.title.includes(q);
-          row.style.display = match ? "" : "none";
-          if (match) groupHas = true;
-        });
-        grp.style.display = groupHas ? "" : "none";
-        if (groupHas) anyVisible = true;
+  const search = modal.querySelector("#songSearch");
+  search?.addEventListener("input", () => {
+    const q = search.value.trim().toLowerCase();
+    let anyVisible = false;
+    modal.querySelectorAll(".song-modal-group").forEach((grp) => {
+      let groupHas = false;
+      grp.querySelectorAll(".song-card").forEach((cardEl) => {
+        const match = !q || cardEl.dataset.title.includes(q);
+        cardEl.style.display = match ? "" : "none";
+        if (match) groupHas = true;
       });
-      const nr = document.getElementById("songNoResult");
-      if (nr) nr.style.display = anyVisible ? "none" : "block";
+      grp.style.display = groupHas ? "" : "none";
+      if (groupHas) anyVisible = true;
     });
-  }
+    const nr = modal.querySelector("#songNoResult");
+    if (nr) nr.style.display = anyVisible ? "none" : "block";
+  });
+  search?.focus();
+}
+
+function attachSongHandlers() {
+  // ── Bouton « Choisir ma musique » → ouvre le modal visuel ──
+  document.getElementById("openSongModal")?.addEventListener("click", openSongModal);
 
   // ── Play / Pause ──
   document.getElementById("songPlayBtn")?.addEventListener("click", () => {

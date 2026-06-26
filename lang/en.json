@@ -286,7 +286,10 @@
     "badges_save": "💾 Save",
     "badges_saved": "✅ Badges saved!",
     "song_search": "🔎 Search a track…",
-    "song_no_result": "No track found."
+    "song_no_result": "No track found.",
+    "song_choose": "Choose your profile music",
+    "song_choose_hint": "A track that plays when friends visit your profile",
+    "song_modal_title": "Choose your profile music"
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",

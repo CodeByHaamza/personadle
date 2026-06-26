@@ -286,7 +286,10 @@
     "badges_save": "💾 Sauvegarder",
     "badges_saved": "✅ Badges enregistrés !",
     "song_search": "🔎 Rechercher une musique…",
-    "song_no_result": "Aucune musique trouvée."
+    "song_no_result": "Aucune musique trouvée.",
+    "song_choose": "Choisir ma musique",
+    "song_choose_hint": "Une musique qui se lance quand des amis visitent ton profil",
+    "song_modal_title": "Choisir ma musique de profil"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",

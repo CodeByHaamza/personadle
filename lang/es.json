@@ -286,7 +286,10 @@
     "badges_save": "💾 Guardar",
     "badges_saved": "✅ ¡Insignias guardadas!",
     "song_search": "🔎 Buscar una canción…",
-    "song_no_result": "Ninguna canción encontrada."
+    "song_no_result": "Ninguna canción encontrada.",
+    "song_choose": "Elegir mi música",
+    "song_choose_hint": "Una canción que suena cuando los amigos visitan tu perfil",
+    "song_modal_title": "Elige tu música de perfil"
   },
   "badges": {
     "notification_title": "🎖️ ¡Insignia desbloqueada!",
