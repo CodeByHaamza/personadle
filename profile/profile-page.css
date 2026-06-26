@@ -1246,7 +1246,7 @@ body.darkmode .profile-card--danger {
 .perso-body {
   padding: 0 18px 18px;
   overflow: hidden;
-  max-height: 600px;
+  max-height: 960px; /* assez pour aperçu + pastilles bordure + thème (sinon clip) */
   transition:
     max-height 0.3s ease,
     padding-bottom 0.3s ease;
@@ -4183,8 +4183,9 @@ body.darkmode .song-modal-close { background: rgba(255, 255, 255, 0.08); }
 .swatch {
   width: 28px;
   height: 28px;
+  flex: 0 0 auto; /* jamais écrasé en ovale */
   border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.12);
+  border: 2px solid rgba(0, 0, 0, 0.18);
   cursor: pointer;
   padding: 0;
   transition: transform 0.1s, box-shadow 0.15s;
@@ -4203,3 +4204,14 @@ body.darkmode .song-modal-close { background: rgba(255, 255, 255, 0.08); }
 body.darkmode .appearance-preview { background: rgba(255, 255, 255, 0.05); }
 body.darkmode .swatch { border-color: rgba(255, 255, 255, 0.2); }
 body.darkmode .swatch.active { box-shadow: 0 0 0 2px #161020, 0 0 0 4px var(--accent, #e63946); }
+
+/* Input couleur custom : invisible mais cliquable (display:none empêcherait .click()) */
+.visually-hidden-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  border: 0;
+  padding: 0;
+}
