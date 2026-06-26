@@ -71,4 +71,5 @@ export const personas = [
   "Marian Summer ( Minami Miyashita )",
   "Puppet Summer ( Miyu Sahara )",
   "Closer Radiance ( Motoha Arai )",
+  "Miku ( Hatsune Miku )",
 ];

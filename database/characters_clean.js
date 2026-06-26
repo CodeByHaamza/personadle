@@ -2052,7 +2052,7 @@ export const characters = [
     genre: ["Vocaloid", "Female"],
     age: "15-20",
     arcane: ["NONE"],
-    opus: ["P4D"],
+    opus: ["P4D", "P5X"],
     personaUser: false,
     persona: "NONE",
     emoji: ["👔", "💎", "🎤"],

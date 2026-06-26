@@ -80,4 +80,5 @@ export const portraitsMap = {
   "Marian Summer ( Minami Miyashita )": "Marian_Summer",
   "Puppet Summer ( Miyu Sahara )": "Puppet_Summer",
   "Closer Radiance ( Motoha Arai )": "Closer_Radiance",
+  "Miku ( Hatsune Miku )": "Hatsune_Miku",
 };

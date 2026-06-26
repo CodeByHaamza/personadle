@@ -680,6 +680,61 @@
         .aoa-card .card-sub { color: var(--card-sub-color); font-size: 0.83rem; margin: 0; letter-spacing: 0.3px; }
 
         /* ── Summer variant — ambre/teal, pas de neon ── */
+        /* ── Thème Hatsune Miku — cyan #39C5BB + rose + rouge ── */
+        .aoa-card-miku {
+            border: 4px solid #39c5bb;
+            background: linear-gradient(135deg, #e6fbff 0%, #fff0f7 40%, #ffe9ec 70%, #e6fbff 100%);
+            box-shadow: 0 0 0 3px rgba(57, 197, 187, 0.35), 0 6px 28px rgba(255, 77, 148, 0.25), 0 2px 10px rgba(230, 57, 70, 0.18);
+            animation: mikuCardGlow 3s ease-in-out infinite;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .dark-mode .aoa-card-miku,
+        body.darkmode .aoa-card-miku {
+            background: linear-gradient(135deg, #02161a 0%, #1a0410 40%, #1a0006 70%, #02161a 100%);
+        }
+        .aoa-card-miku:hover { transform: translateY(-6px) scale(1.006); }
+        @keyframes mikuCardGlow {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(57, 197, 187, 0.35), 0 6px 28px rgba(255, 77, 148, 0.25); }
+            50%      { box-shadow: 0 0 0 3px rgba(255, 77, 148, 0.45), 0 6px 32px rgba(57, 197, 187, 0.4); }
+        }
+        .aoa-card-miku .aoa-portrait-col,
+        .aoa-card-miku .aoa-gif-col { border-right-color: rgba(57, 197, 187, 0.3); }
+        .aoa-card-miku .aoa-portrait-img,
+        .aoa-card-miku .aoa-battle-img { border-color: #39c5bb; }
+        .aoa-card-miku .card-badge {
+            background: linear-gradient(90deg, #39c5bb, #ff4d94, #e63946);
+            color: #fff; border: none;
+        }
+        .aoa-card-miku .card-name {
+            background: linear-gradient(90deg, #39c5bb 0%, #ff6bbf 50%, #e63946 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: mikuNameShift 4s linear infinite;
+            text-shadow: none;
+        }
+        @keyframes mikuNameShift { to { background-position: 200% center; } }
+        .aoa-card-miku .card-sub { color: #39c5bb; }
+        .aoa-card-miku .card-stars span { color: #39c5bb; }
+        .aoa-card-miku .card-stars span:nth-child(2),
+        .aoa-card-miku .card-stars span:nth-child(4) { color: #ff4d94; }
+        /* Notes de musique flottantes — signature visuelle Miku */
+        .aoa-card-miku::after {
+            content: "♪ ♫ ♪";
+            position: absolute; top: 8px; right: 16px;
+            font-size: 1.1rem; letter-spacing: 6px; font-weight: 700;
+            background: linear-gradient(90deg, #39c5bb, #ff4d94);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: mikuNotes 2.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes mikuNotes {
+            0%, 100% { transform: translateY(0); opacity: 0.7; }
+            50%      { transform: translateY(-5px); opacity: 1; }
+        }
+
         .aoa-card-summer {
             border: 4px solid #f6ab3c;
             background: var(--summer-card-bg);
@@ -1358,6 +1413,38 @@
                     <span class="card-badge">P5X</span>
                     <p class="card-name">Blitz</p>
                     <p class="card-sub">Kumi Katayama — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Collaboration Hatsune Miku — P5X ── -->
+    <h3 class="summer-chars-title" data-i18n-block="en">🎤 Hatsune Miku — P5X Collaboration</h3>
+    <h3 class="summer-chars-title" data-i18n-block="fr">🎤 Hatsune Miku — Collaboration P5X</h3>
+
+    <p class="summer-intro" data-i18n-block="en">The virtual diva crosses over into Persona 5 X! Hatsune Miku joins the All-Out Attack roster with a vivid cyan-pink-red finish — her real name behind the alias "Miku", just like Joker is Ren Amamiya.</p>
+    <p class="summer-intro" data-i18n-block="fr">La diva virtuelle débarque dans Persona 5 X ! Hatsune Miku rejoint le mode All-Out Attack avec un final cyan-rose-rouge éclatant — son vrai nom derrière l'alias « Miku », comme Joker est Ren Amamiya.</p>
+
+    <div class="aoa-card aoa-card-miku">
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Hatsune_Miku.webp" alt="Hatsune Miku portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img"
+                     src="https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev/allOutAttack/Hatsune_Miku.webp"
+                     onerror="this.onerror=null;this.src='../../allOutAttackMode/database/img/Hatsune_Miku_Battle.webp';"
+                     alt="Hatsune Miku All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Hatsune_Miku_Battle.webp" alt="Hatsune Miku Battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>♪</span><span>★</span><span>♫</span><span>★</span><span>♪</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Miku</p>
+                    <p class="card-sub">Hatsune Miku — Persona 5 X</p>
                 </div>
             </div>
         </div>
