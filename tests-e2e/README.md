@@ -12,7 +12,9 @@
 
 ---
 
-## ✅ Ce qui est couvert (`smoke.spec.js`)
+## ✅ Ce qui est couvert
+
+### `smoke.spec.js` — parcours UI
 
 | Parcours                       | Vérifie                                                        |
 | ------------------------------ | ------------------------------------------------------------- |
@@ -21,6 +23,13 @@
 | Leaderboard                    | les **19 faux joueurs** s'affichent (DB → API → front)        |
 | Profil public (`?view=`)       | consultable **sans être connecté**                            |
 | Login                          | parcours auth réel via la modale (seed `ren@personadle.seed`) |
+
+### `api.spec.js` — régressions sensibles (via l'API)
+
+| Test                     | Vérifie                                                          |
+| ------------------------ | --------------------------------------------------------------- |
+| Sélection de badges      | les badges épinglés **persistent** côté serveur (PATCH → GET)   |
+| Streak global cross-mode | le streak **ne s'effondre pas** quand on change de mode le même jour |
 
 ---
 
