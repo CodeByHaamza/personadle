@@ -26,6 +26,8 @@
  *   showCommunityStats(mode, t)  → injects "X% of players found this today" in victory box
  *   FILTER_STORAGE_KEYS          → localStorage key map for per-mode opus filters
  *   showChallengeButton(mode, s) → shows the "Challenge a friend" share button
+ *   applyDarkModeOverrides(list) → applies inline style overrides when darkmode is active
+ *   enableGiveUpButton(id?)      → re-enables the #giveUpButton after the attempts threshold
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -752,4 +754,39 @@ function _showChallengeModal(mode, score, date, activeFilters = []) {
       const listEl = document.getElementById("challengeFriendList");
       if (listEl) listEl.innerHTML = `<p class="challenge-card__empty">Could not load friends.</p>`;
     });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DARK MODE / UI HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Applique une liste de surcharges de style inline quand le dark mode est actif.
+ * Chaque mode de jeu cible des éléments et couleurs différents (pas de logique
+ * commune à extraire au-delà de ce squelette guard + querySelector + null-check),
+ * donc les données d'override restent locales à chaque mode — seul ce squelette
+ * répété 6 fois est factorisé ici.
+ *
+ * @param {Array<{selector?: string, id?: string, styles: Record<string,string>}>} overrides
+ */
+export function applyDarkModeOverrides(overrides) {
+  if (!document.body.classList.contains("darkmode")) return;
+  for (const { selector, id, styles } of overrides) {
+    const el = id ? document.getElementById(id) : document.querySelector(selector);
+    if (el) Object.assign(el.style, styles);
+  }
+}
+
+/**
+ * Réactive le bouton "Give up" après le délai/seuil de tentatives requis.
+ * Identique dans tous les modes qui ont un bouton #giveUpButton.
+ *
+ * @param {string} [buttonId="giveUpButton"]
+ */
+export function enableGiveUpButton(buttonId = "giveUpButton") {
+  const btn = document.getElementById(buttonId);
+  if (btn) {
+    btn.disabled = false;
+    btn.style.cursor = "pointer";
+  }
 }

@@ -19,6 +19,8 @@ import {
   getDailyTarget,
   showChallengeButton,
   showCommunityStats,
+  applyDarkModeOverrides,
+  enableGiveUpButton,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -234,13 +236,7 @@ function updateCounters() {
   }
 }
 
-function enableGiveUpButton() {
-  const btn = document.getElementById("giveUpButton");
-  if (btn) {
-    btn.disabled = false;
-    btn.style.cursor = "pointer";
-  }
-}
+// enableGiveUpButton() est maintenant importée de gameCore.js (identique dans tous les modes).
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GAME LOGIC
@@ -419,20 +415,16 @@ function resetGame() {
  * Applies inline dark-mode styles to elements specific to Emoji mode.
  */
 function applyDarkModeStyles() {
-  if (!document.body.classList.contains("darkmode")) return;
-
-  const emojiZone = document.querySelector(".emoji-hint-zone");
-  if (emojiZone) {
-    emojiZone.style.background = "rgba(20, 20, 20, 0.7)";
-    emojiZone.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.2)";
-  }
-
-  const victoryBox = document.getElementById("victoryBox");
-  if (victoryBox) {
-    victoryBox.style.backgroundColor = "#1a1a1a";
-    victoryBox.style.color = "#90ee90";
-    victoryBox.style.border = "3px solid #4caf50";
-  }
+  applyDarkModeOverrides([
+    {
+      selector: ".emoji-hint-zone",
+      styles: { background: "rgba(20, 20, 20, 0.7)", boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)" },
+    },
+    {
+      id: "victoryBox",
+      styles: { backgroundColor: "#1a1a1a", color: "#90ee90", border: "3px solid #4caf50" },
+    },
+  ]);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -24,7 +24,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/friends.php';
 
 // Extraire l'éventuel :id depuis l'URL (/api/friends/42)
-$parts        = explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
+$parts        = requestPathSegments();
 $friendshipId = 0;
 foreach ($parts as $i => $part) {
     if ($part === 'friends' && isset($parts[$i + 1]) && ctype_digit($parts[$i + 1])) {

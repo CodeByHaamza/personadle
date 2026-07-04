@@ -9,7 +9,7 @@ require_once __DIR__ . '/../bootstrap.php';
 $authId = requireAuth();
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
-$parts  = explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
+$parts  = requestPathSegments();
 $action = end($parts);
 
 /**

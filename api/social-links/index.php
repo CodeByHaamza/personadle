@@ -31,7 +31,7 @@ $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Extraire les segments de l'URI
-$parts = explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
+$parts = requestPathSegments();
 
 // ── Cas spécial : GET /api/social-links/by-friend/:friendId ──────────────────
 $slIdx = array_search('social-links', $parts);

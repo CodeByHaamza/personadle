@@ -30,7 +30,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 
 // ── Extraire l'userId depuis l'URL (/api/user/42 ou /api/user/42/stats) ───────
-$parts  = explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
+$parts  = requestPathSegments();
 $userId = 0;
 foreach ($parts as $i => $part) {
     if ($part === 'user' && isset($parts[$i + 1]) && ctype_digit($parts[$i + 1])) {
@@ -235,13 +235,16 @@ if ($method === 'PATCH') {
         $profileParams[] = $data['profile_music_id'] ? substr($data['profile_music_id'], 0, 100) : null;
     }
 
-    // selected_badges (max 4 IDs)
+    // selected_badges (max 4 IDs, doivent être réellement débloqués)
     if (array_key_exists('selected_badges', $data)) {
         $sel = array_values(array_slice((array) $data['selected_badges'], 0, 4));
         foreach ($sel as $bid) {
             if (!is_string($bid) || !preg_match('/^[a-z0-9_\-]{1,100}$/', $bid)) {
                 jsonError('Invalid badge id in selected_badges', 400);
             }
+            $owns = $pdo->prepare('SELECT 1 FROM badges_unlocked WHERE user_id = ? AND badge_id = ? LIMIT 1');
+            $owns->execute([$userId, $bid]);
+            if (!$owns->fetch()) jsonError('Badge not unlocked', 403);
         }
         $profileFields[] = 'selected_badges = ?';
         $profileParams[] = json_encode($sel);

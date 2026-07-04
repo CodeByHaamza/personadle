@@ -11,7 +11,7 @@
  *   - Connexion PDO singleton (MySQL 8.0, utf8mb4)
  *   - Helpers : pdo(), jsonSuccess(), jsonError(), requireAuth(), requireAdmin(),
  *               requireCsrf(), requireCronSecret(), getJsonBody(), rateLimit(),
- *               generateFriendCode(), fetchProfile()
+ *               generateFriendCode(), fetchProfile(), requestPathSegments()
  *   (formatUser() vit dans api/lib/format.php, chargé via require_once par ce fichier)
  */
 
@@ -295,6 +295,18 @@ function getJsonBody(): array
         jsonError('Invalid or missing JSON body');
     }
     return $data;
+}
+
+/**
+ * Découpe le chemin de l'URL courante en segments (ex: "/api/friends/42" → ["api","friends","42"]).
+ * Chaque endpoint qui route sur ses propres sous-chemins (badges, friends, messages,
+ * social-links, titles, user, wallpapers…) part de ce même découpage.
+ *
+ * @return string[]
+ */
+function requestPathSegments(): array
+{
+    return explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
 }
 
 /**

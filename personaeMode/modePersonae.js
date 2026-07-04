@@ -34,6 +34,7 @@ import {
   getDailyTarget,
   showChallengeButton,
   showCommunityStats,
+  applyDarkModeOverrides,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -542,12 +543,9 @@ function resetGame(random = false) {
  * Called once on load; the global CSS handles the rest of dark-mode styling.
  */
 function applyDarkModeStyles() {
-  if (!document.body.classList.contains("darkmode")) return;
-  const zone = document.querySelector(".persona-box");
-  if (zone) {
-    zone.style.backgroundColor = "#222";
-    zone.style.border = "3px solid #888";
-  }
+  applyDarkModeOverrides([
+    { selector: ".persona-box", styles: { backgroundColor: "#222", border: "3px solid #888" } },
+  ]);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

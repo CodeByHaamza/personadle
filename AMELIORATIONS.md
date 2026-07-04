@@ -69,11 +69,23 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
 > `AdminValidationTest`, `FormatUserTest`, `DatabaseIntegrationTest` — cette dernière avec
 > une vraie intégration MariaDB), câblés en CI (`.github/workflows/ci.yml`).
 
+> ✅ **Résolu depuis** : seuil de couverture Vitest fixé et bloquant en CI
+> (`vitest.config.js` : `lines 70% / functions 65% / branches 65% / statements 70%`
+> sur les fichiers sensibles `gameCore.js`, `streak-recovery.js`, `cloud-sync.js`,
+> `social-link.js`, `profileStats.js`, `formatPlayTime.js`, `validate_characters.js` —
+> `npm run test:coverage` dans `.github/workflows/ci.yml`).
+
 **Actions (historiques) :**
 
 1. Ajouter **PHPUnit** + une base de test SQLite/MySQL jetable. Cibler en priorité : calcul de streak (`sessions.php`), `recover-streak.php`, rate-limiting, unicité register.
 2. Couvrir le **flux d'intégration streak complet** côté JS : jeu → `syncPending` → `pullProfileFromCloud` → rupture → `performRecovery`. Aujourd'hui chaque maillon est testé isolément, mais pas la chaîne (c'est exactement ce qui laissait passer le revert).
-3. Mesurer la couverture (`@vitest/coverage-v8` est déjà installé : `vitest run --coverage`) et fixer un seuil minimal en CI.
+3. ~~Mesurer la couverture et fixer un seuil minimal en CI~~ — fait, voir ci-dessus.
+4. **Nouveau (audit du 2026-07-04)** : la couverture au niveau des **endpoints API** reste faible
+   (~7/38 fichiers `api/*.php` exercés par un test exécuté, E2E ou unitaire — le reste ne passe
+   que par PHPStan/lint statique, jamais réellement invoqué en CI). Cibler en priorité les
+   endpoints `admin/*`, `messages/index.php`, `leaderboard/index.php`.
+5. Le job E2E (`e2e` dans `ci.yml`) reste `continue-on-error` — critère de sortie documenté
+   dans `tests-e2e/README.md` § Statut CI (10 runs consécutifs verts sur `develop`).
 
 ---
 
@@ -154,7 +166,14 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 ## 9. 🟡 i18n, accessibilité, PWA
 
 - **Strings en dur** dans `streak-recovery.js` (« Streak Lost! », messages d'erreur) non passées par i18n. Les externaliser dans `lang/en.json`.
-- **Accessibilité** : audit `aria-*`, focus management des modals (le menu Jack Frost), contrastes, `prefers-reduced-motion` (animations AOA lourdes).
+- **Accessibilité** : audit `aria-*`, contrastes, `prefers-reduced-motion` (animations AOA lourdes
+  volontairement exclues — ce sont du contenu de jeu, cf. `css/global.css`).
+  > ✅ **Résolu depuis** : focus management des modales — `js/modal.js` (trap Tab/Escape +
+  > restauration du focus) est maintenant branché sur `js/auth.js`, `profile/profile-page.js`
+  > (crop avatar), `js/settings-modal.js` **et** le menu de filtres Jack Frost
+  > (`js/filterMenu.js` — focus envoyé dans le panneau à l'ouverture, restauré sur le bouton
+  > toggle à la fermeture via Escape ; pas de piège Tab complet, ce n'est pas une modale mais
+  > un menu déroulant, cf. WAI-ARIA menu-button pattern).
 - **PWA** : `sw.js` présent — vérifier la stratégie de cache des gros assets (ne pas pré-cacher 1,7 Go !).
 
 ---

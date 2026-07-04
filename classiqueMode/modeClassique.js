@@ -18,6 +18,8 @@ import {
   getDailyTarget,
   showChallengeButton,
   showCommunityStats,
+  applyDarkModeOverrides,
+  enableGiveUpButton,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -479,27 +481,24 @@ function checkGuess(name, target, forceReveal = false) {
  * Called once at startup; CSS handles the rest via the .darkmode class.
  */
 function applyDarkModeStyles() {
-  if (!document.body.classList.contains("darkmode")) return;
-
-  const emojiZone = document.querySelector(".emoji-hint-zone");
-  if (emojiZone) {
-    emojiZone.style.background = "rgba(20, 20, 20, 0.7)";
-    emojiZone.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.2)";
-  }
-
-  const persoBox = document.querySelector(".personadle-box");
-  if (persoBox) {
-    persoBox.style.background = "rgba(10, 10, 10, 0.7)";
-    persoBox.style.color = "white";
-    persoBox.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.2)";
-  }
-
-  const victoryBox = document.getElementById("victoryBox");
-  if (victoryBox) {
-    victoryBox.style.backgroundColor = "#1a1a1a";
-    victoryBox.style.color = "#90ee90";
-    victoryBox.style.border = "3px solid #4caf50";
-  }
+  applyDarkModeOverrides([
+    {
+      selector: ".emoji-hint-zone",
+      styles: { background: "rgba(20, 20, 20, 0.7)", boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)" },
+    },
+    {
+      selector: ".personadle-box",
+      styles: {
+        background: "rgba(10, 10, 10, 0.7)",
+        color: "white",
+        boxShadow: "0 0 10px rgba(255, 255, 255, 0.2)",
+      },
+    },
+    {
+      id: "victoryBox",
+      styles: { backgroundColor: "#1a1a1a", color: "#90ee90", border: "3px solid #4caf50" },
+    },
+  ]);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -735,10 +734,4 @@ function enableHintButton() {
   }
 }
 
-function enableGiveUpButton() {
-  const giveUpButton = document.getElementById("giveUpButton");
-  if (giveUpButton) {
-    giveUpButton.disabled = false;
-    giveUpButton.style.cursor = "pointer";
-  }
-}
+// enableGiveUpButton() est maintenant importée de gameCore.js (identique dans tous les modes).
