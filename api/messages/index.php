@@ -26,7 +26,7 @@ $authId = requireAuth();
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
 
-$parts = explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
+$parts = requestPathSegments();
 $msgId = 0;
 foreach ($parts as $i => $part) {
     if ($part === 'messages' && isset($parts[$i + 1]) && ctype_digit($parts[$i + 1])) {

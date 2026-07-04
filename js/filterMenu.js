@@ -114,6 +114,11 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     toggleBtn.classList.toggle("open", isOpen);
     toggleBtn.setAttribute("aria-expanded", String(isOpen));
     dropdown.setAttribute("aria-hidden", String(!isOpen));
+    if (isOpen) {
+      // Envoie le focus dans le panneau à l'ouverture (menu déroulant, pas une
+      // modale — pas de piège Tab ici, cf. WAI-ARIA menu-button pattern).
+      dropdown.querySelector('button:not([disabled]), [tabindex]:not([tabindex="-1"])')?.focus();
+    }
   });
 
   /* ── 2b. Bouton "Tout cocher / Tout décocher" ──────────────── */
@@ -202,10 +207,15 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
   });
 
   function _closePannel() {
+    // Restaure le focus sur le bouton toggle seulement si le focus était encore
+    // dans le panneau (ex: fermeture via Escape) — pas si l'utilisateur a cliqué
+    // ailleurs, pour ne pas lui voler le focus de sa véritable cible.
+    const restoreFocus = dropdown?.classList.contains("open") && dropdown.contains(document.activeElement);
     dropdown?.classList.remove("open");
     toggleBtn?.classList.remove("open");
     toggleBtn?.setAttribute("aria-expanded", "false");
     dropdown?.setAttribute("aria-hidden", "true");
+    if (restoreFocus) toggleBtn?.focus();
   }
 
   /* ── 4. Boutons logos principaux (expand/collapse groupe) ───── */

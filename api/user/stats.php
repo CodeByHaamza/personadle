@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $authId = requireAuth();
 
 // Extraire :id depuis l'URL — /api/user/42/stats
-$parts  = explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'));
+$parts  = requestPathSegments();
 // ex: ['personadle', 'api', 'user', '42', 'stats']
 $userId = 0;
 foreach ($parts as $i => $part) {

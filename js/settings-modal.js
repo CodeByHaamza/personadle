@@ -9,6 +9,8 @@
  * Structure : { sound_enabled, sound_volume, anim_victory, anim_friend_request }
  */
 
+import { openModal, closeModal } from "./modal.js";
+
 const DEFAULTS = {
   sound_enabled: true,
   sound_volume: 1.0,
@@ -25,6 +27,9 @@ export function openSettingsModal() {
   const modal = document.getElementById("settingsModal");
   _loadIntoForm(_readSettings());
   requestAnimationFrame(() => modal.classList.add("sm--visible"));
+  // Trap clavier (Tab/Escape) + restauration du focus — la visibilité elle-même
+  // reste pilotée par la classe sm--visible (transition d'opacité existante).
+  openModal("settingsModal", { onClose: _close });
 }
 
 export function initSettingsModal(userId) {
@@ -134,8 +139,8 @@ function _ensureModal() {
   });
 
   // Fermer
-  el.querySelector("#smClose").addEventListener("click", _close);
-  el.querySelector("#smBackdrop").addEventListener("click", _close);
+  el.querySelector("#smClose").addEventListener("click", _closeSettings);
+  el.querySelector("#smBackdrop").addEventListener("click", _closeSettings);
 
   // Sauvegarder
   el.querySelector("#smSave").addEventListener("click", _save);
@@ -205,4 +210,10 @@ async function _save() {
 function _close() {
   const modal = document.getElementById("settingsModal");
   modal?.classList.remove("sm--visible");
+}
+
+/** Fermeture via le bouton ✕ ou le clic sur le fond — passe aussi par le trap de modal.js. */
+function _closeSettings() {
+  closeModal("settingsModal");
+  _close();
 }

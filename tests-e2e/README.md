@@ -77,6 +77,13 @@ Lancés dans un job dédié (`e2e`) de `.github/workflows/ci.yml` : la stack Doc
 `http://localhost:8080`. Non bloquant pour les autres jobs (JS/PHP) — ils tournent en parallèle.
 Toujours lançable en local avant une release ou un gros refactor front (voir ci-dessus).
 
+**Critère de sortie (pour passer `continue-on-error` → bloquant)** : 10 runs consécutifs
+verts sur `develop` (visible dans l'onglet **Actions** du repo, filtrer sur le job `e2e`).
+Une fois ce seuil atteint, retirer `continue-on-error: true` dans `.github/workflows/ci.yml`
+(job `e2e`) et ce paragraphe. Tant que ce n'est pas fait, un échec e2e reste informatif —
+vérifier manuellement l'onglet Actions de temps en temps plutôt que de compter uniquement
+sur le statut du job PR.
+
 ## 💡 Scénarios à ajouter
 
 - Partie complète (deviner → victoire → stats mises à jour)

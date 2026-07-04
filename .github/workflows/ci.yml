@@ -107,8 +107,10 @@ jobs:
 
   # ── Job 3 : E2E Playwright contre la stack Docker complète ──────────────────
   # Auparavant lancés uniquement en local (voir tests-e2e/README.md). Premier
-  # branchement en CI : non-bloquant (continue-on-error) tant qu'on n'a pas
-  # confirmé sa stabilité sur plusieurs runs — à retirer une fois vérifié vert.
+  # branchement en CI : non-bloquant (continue-on-error).
+  # Critère de sortie : 10 runs consécutifs verts sur develop (onglet Actions,
+  # filtrer sur ce job) → retirer continue-on-error ci-dessous (voir aussi la
+  # note correspondante dans tests-e2e/README.md § Statut CI).
   e2e:
     name: E2E Playwright (Docker stack)
     runs-on: ubuntu-latest

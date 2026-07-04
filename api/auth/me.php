@@ -104,6 +104,9 @@ try {
     }
 
     // Token valide → recréer la session PHP + rotation du token (évite la réutilisation)
+    // session_regenerate_id() évite qu'un ID de session pré-fixé par un attaquant
+    // (avant même que le cookie remember_me soit relu) devienne authentifié.
+    session_regenerate_id(true);
     $_SESSION['user_id'] = (int) $user['id'];
 
     $newRawToken    = bin2hex(random_bytes(32));

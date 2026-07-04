@@ -30,7 +30,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 
 // ── Extraire l'userId depuis l'URL (/api/user/42 ou /api/user/42/stats) ───────
-$parts  = explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
+$parts  = requestPathSegments();
 $userId = 0;
 foreach ($parts as $i => $part) {
     if ($part === 'user' && isset($parts[$i + 1]) && ctype_digit($parts[$i + 1])) {
