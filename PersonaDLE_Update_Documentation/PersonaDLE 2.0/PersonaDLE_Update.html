@@ -846,9 +846,9 @@
         </div>
         <div class="fm-meta">
             <span class="fm-tag">6 modes</span>
-            <span class="fm-tag">190 tests</span>
-            <span class="fm-tag">940+ i18n keys</span>
-            <span class="fm-tag">20 DB tables</span>
+            <span class="fm-tag">449 tests</span>
+            <span class="fm-tag">947 i18n keys</span>
+            <span class="fm-tag">23 DB tables</span>
             <span class="fm-tag">60 badges</span>
         </div>
     </div>
@@ -1648,7 +1648,7 @@
         <li><strong>Save</strong> button visible only when changes are pending</li>
         <li><strong>Public profile</strong> accessible via <code>?view=FRIENDCODE</code> (read-only)</li>
         <li><strong>Profile Song</strong>: choose a song that plays when visiting your profile</li>
-        <li><strong>Calling Card</strong>: export profile as PNG 780×1386 (8 themes, 25 wallpapers)</li>
+        <li><strong>Calling Card</strong>: export profile as PNG 780×1386 (8 themes, 37 wallpapers)</li>
         <li>Smart play time display: "X d Y h", "X mo Y wk", etc.</li>
     </ul>
     </div>
@@ -1656,8 +1656,8 @@
     <h2 data-i18n-block="en">Badges</h2>
     <h2 data-i18n-block="fr">Badges</h2>
 
-    <div data-i18n-block="fr"><p>60 badges organisés en 4 catégories : <strong>Achievements</strong>, <strong>Events</strong>, <strong>Secrets</strong>, <strong>Social</strong>. Les conditions sont vérifiées côté serveur. Les badges secrets affichent <code>"???"</code> comme condition tant qu'ils ne sont pas débloqués.</p></div>
-    <div data-i18n-block="en"><p>60 badges organized into 4 categories: <strong>Achievements</strong>, <strong>Events</strong>, <strong>Secrets</strong>, <strong>Social</strong>. Conditions are verified server-side. Secret badges display <code>"???"</code> as their condition until unlocked.</p></div>
+    <div data-i18n-block="fr"><p>60 badges organisés en 5 catégories : <strong>Achievements</strong>, <strong>Events</strong>, <strong>Secrets</strong>, <strong>Social</strong>, <strong>Streak</strong>. Les conditions sont vérifiées côté serveur. Les badges secrets affichent <code>"???"</code> comme condition tant qu'ils ne sont pas débloqués.</p></div>
+    <div data-i18n-block="en"><p>60 badges organized into 5 categories: <strong>Achievements</strong>, <strong>Events</strong>, <strong>Secrets</strong>, <strong>Social</strong>, <strong>Streak</strong>. Conditions are verified server-side. Secret badges display <code>"???"</code> as their condition until unlocked.</p></div>
 
     <img src="Illustration_titre.png" alt="Titres" class="doc-illustration">
 
@@ -1737,7 +1737,7 @@
             <tr><td data-i18n-block="en">Backend</td><td data-i18n-block="fr">Backend</td><td colspan="2">PHP 8.3 + PDO (prepared statements)</td></tr>
             <tr><td data-i18n-block="en">Database</td><td data-i18n-block="fr">Base de données</td><td colspan="2">MySQL 8.0 (local) · MariaDB 10.6+ (Hostinger)</td></tr>
             <tr><td data-i18n-block="en">Auth</td><td data-i18n-block="fr">Auth</td><td colspan="2">bcrypt + PHP httpOnly sessions (no JWT)</td></tr>
-            <tr><td data-i18n-block="en">Tests</td><td data-i18n-block="fr">Tests</td><td colspan="2">Vitest + jsdom — 190 tests (<code>npm test</code>)</td></tr>
+            <tr><td data-i18n-block="en">Tests</td><td data-i18n-block="fr">Tests</td><td colspan="2">Vitest + jsdom — 449 tests (<code>npm test</code>)</td></tr>
             <tr><td data-i18n-block="en">Hosting</td><td data-i18n-block="fr">Hébergement</td><td colspan="2">Hostinger — rsync deploy via GitHub Actions</td></tr>
         </tbody>
     </table>
@@ -1772,14 +1772,14 @@
 return (r != null && r !== key) ? r : fallback;</code></pre>
     </details>
 
-    <h2 data-i18n-block="en">Database Schema — 20 Tables</h2>
-    <h2 data-i18n-block="fr">Schéma BDD — 20 Tables</h2>
+    <h2 data-i18n-block="en">Database Schema — 23 Tables</h2>
+    <h2 data-i18n-block="fr">Schéma BDD — 23 Tables</h2>
 
     <div data-i18n-block="fr"><p>Fichier : <code>sql/bdd_mysql.sql</code>. Schéma compatible MySQL 8.0 (local) et MariaDB 10.6+ (Hostinger).</p></div>
     <div data-i18n-block="en"><p>File: <code>sql/bdd_mysql.sql</code>. Schema compatible with MySQL 8.0 (local) and MariaDB 10.6+ (Hostinger).</p></div>
 
     <details open>
-        <summary><span data-i18n-block="en">View all 20 tables</span><span data-i18n-block="fr">Voir les 20 tables</span></summary>
+        <summary><span data-i18n-block="en">View all 23 tables</span><span data-i18n-block="fr">Voir les 23 tables</span></summary>
         <table>
             <thead><tr><th>Table</th><th data-i18n-block="en">Description</th><th data-i18n-block="fr">Description</th></tr></thead>
             <tbody>
@@ -1793,9 +1793,13 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
                 <tr><td><code>event_codes</code> / <code>event_codes_redeemed</code></td><td data-i18n-block="en">Event codes (active, dates, badge reward)</td><td data-i18n-block="fr">Codes événement (actif, dates, récompense badge)</td></tr>
                 <tr><td><code>friendships</code></td><td data-i18n-block="en">Friend requests (pending / accepted / blocked)</td><td data-i18n-block="fr">Demandes d'amis (pending / accepted / blocked)</td></tr>
                 <tr><td><code>social_links</code> / <code>social_link_interactions</code></td><td data-i18n-block="en">Social Link rank + XP + interaction log</td><td data-i18n-block="fr">Rang + XP Social Link + log des interactions</td></tr>
+                <tr><td><code>social_link_ranks</code></td><td data-i18n-block="en">XP thresholds for ranks 1-10</td><td data-i18n-block="fr">Seuils XP des rangs 1-10</td></tr>
                 <tr><td><code>social_link_rankup_notifs</code></td><td data-i18n-block="en">Rank-up notifications for both players</td><td data-i18n-block="fr">Notifications de passage de rang pour les deux joueurs</td></tr>
                 <tr><td><code>messages</code></td><td data-i18n-block="en">Messages and challenges between friends</td><td data-i18n-block="fr">Messages et défis entre amis</td></tr>
                 <tr><td><code>leaderboard_cache</code></td><td data-i18n-block="en">Cached rankings (recalculated by cron)</td><td data-i18n-block="fr">Cache des classements (recalculé par cron)</td></tr>
+                <tr><td><code>rate_limits</code></td><td data-i18n-block="en">Anti-abuse counters (login, register, reset)</td><td data-i18n-block="fr">Compteurs anti-abus (login, register, reset)</td></tr>
+                <tr><td><code>error_log</code></td><td data-i18n-block="en">Application error log (admin panel)</td><td data-i18n-block="fr">Journal des erreurs applicatives (panel admin)</td></tr>
+                <tr><td><code>admin_audit_log</code></td><td data-i18n-block="en">Log of every admin action (ban, grant badge, etc.)</td><td data-i18n-block="fr">Log de chaque action admin (ban, don de badge, etc.)</td></tr>
                 <tr><td><code>deletion_requests</code></td><td data-i18n-block="en">GDPR — soft-delete log, hard delete after 30 days</td><td data-i18n-block="fr">RGPD — log soft-delete, hard delete J+30</td></tr>
             </tbody>
         </table>
@@ -1900,8 +1904,8 @@ return (r != null && r !== key) ? r : fallback;</code></pre>
             <tr>
                 <td>GitHub Actions CI</td>
                 <td>GitHub Actions CI</td>
-                <td data-i18n-block="en">On push to main/develop: <code>npm test</code> (190 tests) + <code>i18n:check</code> + PHP lint</td>
-                <td data-i18n-block="fr">Sur push main/develop : <code>npm test</code> (190 tests) + <code>i18n:check</code> + lint PHP</td>
+                <td data-i18n-block="en">On push to main/develop: <code>npm test</code> (449 tests) + <code>i18n:check</code> + PHP lint</td>
+                <td data-i18n-block="fr">Sur push main/develop : <code>npm test</code> (449 tests) + <code>i18n:check</code> + lint PHP</td>
             </tr>
             <tr>
                 <td>GitHub Actions CD</td>

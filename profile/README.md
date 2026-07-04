@@ -37,6 +37,14 @@ profile/
 ├── profile.html / profile-page.css / profile-page.js  ← page profil (affichage + éditeur)
 ├── profileStats.js      ← mise à jour des statistiques après chaque partie
 ├── profile-view.js      ← vue profil public d'un autre joueur (?view= / ?uid=)
+├── profile-format.js    ← extrait de profile-page.js — formatage des données de profil
+├── avatars_data.js      ← extrait de profile-page.js — catalogue des avatars groupés par jeu
+├── formatPlayTime.js    ← extrait de profile-page.js — formatage du temps de jeu total
+├── theme.js             ← extrait de profile-page.js — thèmes de couleur du profil
+├── share-card.js        ← extrait de profile-page.js — export PNG de la carte de profil (html2canvas)
+├── song-player.js       ← extrait de profile-page.js — lecteur de musique de profil
+├── titles-ui.js         ← extrait de profile-page.js — sélection/équipement des titres
+├── wallpapers-ui.js     ← extrait de profile-page.js — sélection des fonds d'écran
 ├── friends/             ← système d'amis
 ├── leaderboard/         ← classements
 ├── badges/              ← système de badges (→ voir badges/README.md)
@@ -160,7 +168,9 @@ Frontière de journée **toujours** en heure de Paris (`parisDateKey()`), jamais
 ## 🖼️ Export de la carte de profil
 
 Le bouton **Share Profile** génère un PNG via `html2canvas` : 8 thèmes, wallpapers Persona,
-boutons Download · X · Discord · Email. (`js/calling-card.js` + `css/calling-card.css`.)
+boutons Download · X · Discord · Email. (`profile/share-card.js` — à ne pas confondre avec
+`js/calling-card.js`, qui est l'animation de demande d'ami style Calling Card P5, une feature
+sans rapport.)
 
 ---
 

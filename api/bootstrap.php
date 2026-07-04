@@ -9,8 +9,10 @@
  *   - Headers CORS + Content-Type JSON
  *   - Session PHP sécurisée (HttpOnly, SameSite=Lax, Secure en prod)
  *   - Connexion PDO singleton (MySQL 8.0, utf8mb4)
- *   - Helpers : jsonSuccess(), jsonError(), requireAuth(), requireAdmin(),
- *               requireCsrf(), getJsonBody(), generateFriendCode(), formatUser()
+ *   - Helpers : pdo(), jsonSuccess(), jsonError(), requireAuth(), requireAdmin(),
+ *               requireCsrf(), requireCronSecret(), getJsonBody(), rateLimit(),
+ *               generateFriendCode(), fetchProfile()
+ *   (formatUser() vit dans api/lib/format.php, chargé via require_once par ce fichier)
  */
 
 declare(strict_types=1);

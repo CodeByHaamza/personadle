@@ -15,6 +15,7 @@
 
    Exporté :
      initFilterMenu(storageKey, allOpus, onFilterChange)
+     migrateLegacyOpusFilters — alias test-only de _migrate(), voir plus bas
    ============================================================= */
 
 /* ── Migration : anciens codes larges → codes précis ───────────

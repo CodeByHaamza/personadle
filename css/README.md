@@ -51,7 +51,7 @@ Chargé par **toutes les pages** (versionné pour casser le cache au déploiemen
 | Autocomplete       | dropdown de saisie avec portraits miniatures                                  |
 | Filtres opus       | `.filter-btn` (P3, P4, P5…) + état `active`                                    |
 | Mauvaises réponses | `.wrong-mini` + animation `.shake`                                            |
-| Victoire           | `#victoryBox` et ses variantes par mode                                       |
+| Victoire           | `.victory-box` (classe, pas un ID) et ses variantes par mode                  |
 | Modal règles       | `#rulesModal` (fond semi-transparent)                                         |
 | Confettis          | `.confetti-emoji` + `flyUp` via vars custom (`--x-move`, `--y-move`, `--rotate`)|
 | Dark mode          | classe `.darkmode` sur `<body>` — surcharge toutes les couleurs               |

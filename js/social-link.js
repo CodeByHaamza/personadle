@@ -2,6 +2,8 @@
  * js/social-link.js — Module Social Link côté client
  * ─────────────────────────────────────────────────────────
  * Exports :
+ *   getSocialLinkData(friendId)
+ *     → Récupère (via cache) les données du Social Link avec un ami
  *   renderSocialLinkGauge(friendId, container)
  *     → Insère la jauge XP dans un container HTML
  *   gainSocialLinkXp(friendId, actionType)

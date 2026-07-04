@@ -22,7 +22,7 @@ réel, et branchement des tests E2E en CI. Pas de nouvelle feature joueur.
   CLAUDE.md §5.1 mais jamais implémenté (SameSite=Lax seul). Ajouté :
   - `api/lib/authz.php` : `personadle_csrf_required(method)` et
     `personadle_csrf_valid(sessionToken, headerToken)` — logique pure, testée
-    (`tests/php/AuthzTest.php`, 9 nouveaux tests).
+    (`tests/php/AuthzTest.php`, 7 nouveaux tests).
   - `api/bootstrap.php` : émet un cookie `csrf_token` lisible par JS (pas
     HttpOnly — c'est le principe du double-submit) dès l'ouverture de session,
     et `requireCsrf()` (appelée depuis `requireAuth()`) vérifie le header
@@ -137,7 +137,7 @@ changer le total, 1 nouveau test ajouté sur le gap `playerUserId` découvert).
   bug latent de l'implémentation d'origine à slot global unique). Option
   `onClose` pour synchroniser un état additionnel (overlay de `titlesModal`).
   Migré : `avatarCropModal`/`sharePreviewModal`/`songModal`/`titlesModal`.
-  `tests/modal.test.js` (12 tests) : ARIA, focus initial/restauré, trap
+  `tests/modal.test.js` (13 tests) : ARIA, focus initial/restauré, trap
   Tab/Shift+Tab, indépendance entre modales.
 - **Audit trail admin** : table `admin_audit_log` (migration 020) +
   `personadle_log_admin_action()` (`api/lib/admin_audit.php`) câblé sur

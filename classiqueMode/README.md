@@ -105,7 +105,7 @@ Ces attributs correspondent exactement aux champs utilisés dans `modeClassique.
   </tbody>
 </table>
 
-> **Note** : Les champs `role`, `japanese` (VA), `dlc` existent dans `characters_clean.js` mais **ne sont pas comparés** dans ce mode. Seuls les 7 champs ci-dessus sont utilisés.
+> **Note** : `characters_clean.js` ne contient QUE les 8 champs `nom, genre, age, personaUser, persona, arcane, opus, emoji, quote` — pas de `role`, `japanese` (VA) ou `dlc`, ces champs n'existent pas dans les données. Seuls les 7 champs ci-dessus (hors `emoji`/`quote`, utilisés ailleurs dans l'UI) sont comparés dans la grille.
 
 ---
 
@@ -169,25 +169,24 @@ _(🟩 identique · 🟨 partiel · 🟥 différent)_
 
 ## 💬 Citations à la victoire
 
-Chaque personnage possède une **citation officielle** révélée au moment de la victoire.
-Les quotes sont stockées dans `../database/quotes.js` avec un fallback anglais systématique.
+Chaque personnage possède une **citation officielle** révélée au moment de la victoire — stockée
+directement dans le champ `quote` de `database/characters_clean.js` (une seule langue, l'anglais,
+pour l'instant), par ex. pour Ryuji Sakamoto :
 
 ```js
-// database/quotes.js
-export const characterQuotes = {
-  "Ryuji Sakamoto": {
-    en: "You're a Phantom Thief now too, right?",
-    fr: null, // fallback EN pour v2.0
-  },
-  "Yusuke Kitagawa": {
-    en: "Art is an explosion!",
-    fr: null,
-  },
+// database/characters_clean.js
+{
+  nom: "Ryuji Sakamoto",
   // ...
-};
+  quote: "I get it now... We're doin' this to make sure people don't gotta go through the same crap we did. ...",
+}
 ```
 
-> **Règle de traduction** : les quotes FR/ES/DE/IT utilisent exclusivement les **localisations officielles Atlus**. Aucune traduction libre n'est autorisée.
+`database/quotes.js` existe en parallèle mais son `characterQuotes` est **actuellement vide**
+(`export const characterQuotes = {}`) — c'est une surcharge prévue pour de futures traductions
+officielles Atlus par langue (voir l'en-tête du fichier), pas encore peuplée en v2.0. Tant qu'une
+entrée n'y est pas ajoutée, la citation utilisée reste celle de `characters_clean.js`, en anglais
+pour toutes les langues.
 
 ---
 
@@ -250,15 +249,10 @@ Module ES6 principal du mode. Importe depuis `../js/gameCore.js` :
 
 ### Attributs comparés
 
-| Attribut          | Type de comparaison                      |
-| ----------------- | ---------------------------------------- |
-| Jeu (opus)        | Exact / même saga                        |
-| Arcane            | Exact                                    |
-| Rôle              | Exact                                    |
-| Âge               | Exact / plus grand / plus petit (flèche) |
-| Genre             | Exact                                    |
-| Doublage japonais | Exact                                    |
-| DLC               | Exact                                    |
+Voir [« Les 7 attributs comparés »](#-les-7-attributs-comparés) en tête de fichier pour le détail
+exact (champs `nom, genre, age, personaUser, persona, arcane, opus`) — il n'existe pas de champs
+`Rôle`, `Doublage japonais` ou `DLC` dans les données, contrairement à une ancienne version de
+cette section.
 
 ### Mode daltonien
 

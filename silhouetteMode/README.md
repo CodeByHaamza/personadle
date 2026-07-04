@@ -12,10 +12,11 @@
 
 ## 🎮 Principe du jeu
 
-1. Un portrait est affiché entièrement masqué — **silhouette noire totale**.
-2. À chaque mauvaise réponse, l'image se révèle progressivement (zoom out + luminosité augmente).
-3. Le joueur peut deviner à tout moment ; plus il attend, plus la révélation est grande.
-4. Après un certain nombre d'essais, le bouton **Abandonner** se déverrouille.
+1. Un portrait est affiché entièrement masqué — **silhouette noire totale** (`brightness(0)`).
+2. À chaque mauvaise réponse, l'image **dézoome** (le zoom passe de 1.8× à 1.0× par paliers de
+   0.2) — la silhouette reste noire jusqu'à la victoire ou l'abandon, seul le cadrage change.
+3. Le joueur peut deviner à tout moment ; plus il attend, plus le cadrage se resserre.
+4. Après **5 mauvaises réponses**, le bouton **Abandonner** se déverrouille.
 
 ---
 
@@ -62,18 +63,21 @@ La même image — deux états. À gauche, ce que voit le joueur. À droite, la 
 
 ---
 
-## 📊 Progression de révélation
+## 📊 Progression du zoom
 
-Chaque mauvaise réponse dévoile davantage le portrait :
+La silhouette reste **noire** (`brightness(0)`) sur toute la partie — seul le cadrage se resserre
+à chaque mauvaise réponse (`scale()` CSS, pas de couleur/luminosité progressive) :
 
-| Essais | État de l'image                                  |
-| ------ | ------------------------------------------------ |
-| 0      | ⬛⬛⬛⬛⬛ Silhouette totale — `brightness(0)`   |
-| 1      | 🟫⬛⬛⬛⬛ Légère lueur — zoom réduit            |
-| 2      | 🟧⬛⬛⬛⬛ Contours visibles                     |
-| 3      | 🟨🟨⬛⬛⬛ Couleurs partielles                   |
-| 4      | 🟩🟩🟩⬛⬛ Presque révélé                        |
-| 5+     | 🟩🟩🟩🟩🟩 Révélation complète — `brightness(1)` |
+| Essais | Zoom (`scale`) |
+| ------ | -------------- |
+| 0      | 1.8×           |
+| 1      | 1.6×           |
+| 2      | 1.4×           |
+| 3      | 1.2×           |
+| 4+     | 1.0× (plancher)|
+
+La révélation complète (couleurs, `filter: none`) n'intervient qu'à la **victoire ou l'abandon**,
+pas progressivement pendant la partie.
 
 ---
 
@@ -111,10 +115,10 @@ silhouetteMode/
 
 Styles spécifiques à l'effet silhouette :
 
-- `filter: brightness(0)` → silhouette noire complète (état initial)
-- `filter: brightness(1)` → révélation progressive pilotée par JavaScript
-- `transform: scale()` → gestion du zoom par niveau d'essai
-- Transition CSS douce entre chaque niveau de révélation
+- `filter: brightness(0)` → silhouette noire complète, maintenue jusqu'à la victoire/l'abandon
+- `filter: none` → appliqué uniquement à la révélation finale (victoire ou abandon)
+- `transform: scale()` → seul élément qui varie progressivement, par niveau d'essai (1.8× → 1.0×)
+- Transition CSS douce entre chaque niveau de zoom
 
 ---
 
@@ -126,7 +130,8 @@ Importe depuis `../js/gameCore.js` :
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
 - `showWrongMini`
 
-> **Note** : Ce mode utilise sa propre fonction `setupFilterButtons` locale (pas la version partagée), car ses filtres mutent directement le tableau `activeFilters` avec `push/filter`, contrairement à la version partagée qui reconstruit le tableau depuis le DOM.
+Le panneau de filtres opus est géré par `initFilterMenu` (`../js/filterMenu.js`), comme dans les
+5 autres modes — il n'y a pas de réimplémentation locale.
 
 ### Fonctions spécifiques
 

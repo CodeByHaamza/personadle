@@ -2,9 +2,10 @@
 /**
  * api/lib/authz.php — Décisions d'autorisation, PURES (sans base de données).
  *
- * Extraites de api/bootstrap.php (requireAuth/requireAdmin) pour être testables
- * unitairement : ces deux fonctions décident qui a accès à quoi sur TOUS les
- * endpoints authentifiés / le panel admin — une régression ici est critique.
+ * Extraites de api/bootstrap.php (requireAuth/requireAdmin/requireCsrf) pour être
+ * testables unitairement : ces 4 fonctions (is_admin_row, session_denial_reason,
+ * csrf_required, csrf_valid) décident qui a accès à quoi sur TOUS les endpoints
+ * authentifiés / le panel admin — une régression ici est critique.
  */
 
 declare(strict_types=1);

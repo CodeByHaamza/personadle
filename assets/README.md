@@ -15,16 +15,19 @@ Ce dossier contient les **ressources statiques partagées** entre toutes les pag
 
 ```
 assets/
-├── buttons/              ← images des boutons d'action du jeu
-│   ├── Give-up_button*.webp
-│   ├── Hint_button*.webp
-│   ├── Replay_button*.webp
-│   ├── Submit_button*.webp
-│   ├── boite_de_dialogue.webp
-│   ├── point_interrogation.webp
+├── buttons/              ← boutons d'action, un sous-dossier PAR LANGUE
+│   ├── DE/ EN/ ES/ FR/ IT/    ← chacun : Give-up/Hint/Replay/Submit_Button[_Rouge|_Transparent].webp
 │   ├── discord.svg
 │   ├── github.svg
-│   └── kofi.svg
+│   ├── kofi.svg
+│   └── point_interrogation.webp
+├── lang/                 ← portraits de personnages utilisés par js/lang-selector.js
+│   ├── Ann_takamaki_english.webp
+│   ├── Bebe_french.webp
+│   ├── Caesar_italian.webp
+│   ├── Hulkenberg_german.webp
+│   ├── Lisa_Silverman_english.webp
+│   └── Morgana_Spanish.webp
 └── sound_effect/         ← effets sonores du jeu
     ├── Select_sound.mp3
     └── Victory_sound.mp3
@@ -34,17 +37,23 @@ assets/
 
 ## `buttons/`
 
-Boutons de l'interface de jeu au format **WebP** (compression sans perte apparente, support transparent).
+Boutons de l'interface de jeu au format **WebP**, dans un **sous-dossier par langue** (`DE/EN/ES/FR/IT/`)
+— chaque langue a sa propre variante graphique du texte sur le bouton. Référencés dans `faq.html`,
+les 6 pages de mode, `index.html` et `js/lang-selector.js`.
+
+| Fichier (dans chaque sous-dossier de langue) | Utilisation |
+|---------|-------------|
+| `Give-up_Button.webp` | Bouton "Abandonner" (état normal) |
+| `Give-up_Button_Rouge.webp` | Bouton "Abandonner" (état actif / déverrouillé) |
+| `Give-up_Button_Transparent.webp` | Bouton "Abandonner" (état désactivé) |
+| `Hint_Button.webp` / `_Rouge` / `_Transparent` | Bouton "Indice", 3 états |
+| `Replay_Button.webp` / `_Rouge` / `_Transparent` | Bouton "Rejouer", 3 états |
+| `Submit_Button.webp` / `_Rouge` | Bouton "Valider" la réponse |
+
+Fichiers communs (hors sous-dossiers de langue) :
 
 | Fichier | Utilisation |
 |---------|-------------|
-| `Give-up_button.webp` | Bouton "Abandonner" (état normal) |
-| `Give-up_button_rouge.webp` | Bouton "Abandonner" (état actif / déverrouillé) |
-| `Give-up_button_transparent.webp` | Bouton "Abandonner" (état désactivé) |
-| `Hint_button.webp` | Bouton "Indice" |
-| `Replay_button.webp` | Bouton "Rejouer" |
-| `Submit_button.webp` | Bouton "Valider" la réponse |
-| `boite_de_dialogue.webp` | Cadre décoratif de dialogue (style RPG) |
 | `point_interrogation.webp` | Icône "?" pour ouvrir les règles |
 | `discord.svg` | Lien vers le serveur Discord |
 | `github.svg` | Lien vers le dépôt GitHub |

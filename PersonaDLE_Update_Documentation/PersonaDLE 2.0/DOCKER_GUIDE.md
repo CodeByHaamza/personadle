@@ -207,7 +207,7 @@ Puis depuis le dossier `personadle/` :
 
 ```bash
 npm install   # une seule fois après le clone
-npm test      # 190 tests doivent passer
+npm test      # 449 tests doivent passer
 ```
 
 Pour les scénarios manuels à tester (les 6 modes, auth, badges, défis…),

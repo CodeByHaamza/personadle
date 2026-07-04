@@ -132,13 +132,13 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **260 tests JS · 20 PHPUnit · 7 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **449 tests JS · 123 PHPUnit · 13 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
 | #   | Fonctionnalité                                 | Notes                                                                            |
 | --- | ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| B1  | Schéma BDD (21 tables, MySQL/MariaDB)          | `sql/bdd_mysql.sql` = source de vérité + migrations `sql/migrations/` (000→018)   |
+| B1  | Schéma BDD (23 tables, MySQL/MariaDB)          | `sql/bdd_mysql.sql` = source de vérité + migrations `sql/migrations/` (000→020)   |
 | B2  | API auth — register / login / logout / me      | Sessions PHP httpOnly, remember-me hashé, **reset mot de passe** (email)          |
 | B3  | API sessions + streak par-mode & **globale**   | Calcul serveur (`api/lib/streak.php`), frontière Paris, contrat de schéma testé   |
 | B4  | API user — GET/PATCH/DELETE + stats + migrate  | Migration localStorage→BDD idempotente                                            |
@@ -155,7 +155,7 @@ Nouveau jeu — cas A (roster inédit)
 | #   | Fonctionnalité                                        | Notes                                                                 |
 | --- | ----------------------------------------------------- | --------------------------------------------------------------------- |
 | S1  | Demandes d'ami (code/pseudo), liste, statut online    | Anti-self, anti-doublon, recherche paginée                            |
-| S2  | Social Link rangs 1-10, XP, mutuel ×2, anti-spam      | Procédure SQL, **tooltip** d'explication (ex-boutons)                  |
+| S2  | Social Link rangs 1-10, XP, mutuel ×2, anti-spam      | Logique en PHP pur (`api/lib/social_link.php`, testable sans BDD), **tooltip** d'explication (ex-boutons) |
 | S3  | Effet rang 10 — True Confidant                        | Halo doré + burst + typewriter (`css/rank10-effect.css`)              |
 | S4  | Comparaison de stats + phrases Persona i18n           | Overlay radar (`database/compare-phrases.js`)                         |
 | S5  | Défis quotidiens entre amis (6 modes)                 | Bandeau + post-victoire, give-up = défaite                            |
@@ -188,8 +188,8 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 260 Vitest · 20 PHPUnit · 7 E2E       | `npm test` · `make test-php` · `npm run test:e2e`                             |
-| Q2  | i18n EN/FR/ES/DE/IT (~920 clés)               | `npm run i18n:check`                                                          |
+| Q1  | Tests : 449 Vitest · 123 PHPUnit · 13 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q2  | i18n EN/FR/ES/DE/IT (947 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
 | Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |

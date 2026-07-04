@@ -47,9 +47,14 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
 
 ## 3. 🟠 Tests
 
-**Constat :** 209 tests JS (bien !), mais **0 test côté PHP**. `backend.test.js` teste de la logique JS qui _mime_ le backend, pas le vrai code PHP. La logique de streak serveur ([sessions.php](api/sessions.php)), la récupération, l'auth ne sont pas couvertes.
+**Constat (au 2026-06-24) :** 209 tests JS (bien !), mais **0 test côté PHP**. `backend.test.js` teste de la logique JS qui _mime_ le backend, pas le vrai code PHP. La logique de streak serveur ([sessions.php](api/sessions.php)), la récupération, l'auth ne sont pas couvertes.
 
-**Actions :**
+> ✅ **Résolu depuis** : `tests/php/` compte aujourd'hui 8 fichiers / 123 méthodes PHPUnit
+> (`StreakTest`, `AuthzTest`, `SocialLinkTest`, `FriendsTest`, `ValidationTest`,
+> `AdminValidationTest`, `FormatUserTest`, `DatabaseIntegrationTest` — cette dernière avec
+> une vraie intégration MariaDB), câblés en CI (`.github/workflows/ci.yml`).
+
+**Actions (historiques) :**
 
 1. Ajouter **PHPUnit** + une base de test SQLite/MySQL jetable. Cibler en priorité : calcul de streak (`sessions.php`), `recover-streak.php`, rate-limiting, unicité register.
 2. Couvrir le **flux d'intégration streak complet** côté JS : jeu → `syncPending` → `pullProfileFromCloud` → rupture → `performRecovery`. Aujourd'hui chaque maillon est testé isolément, mais pas la chaîne (c'est exactement ce qui laissait passer le revert).
@@ -113,6 +118,9 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 - **Rate-limiting** basé sur `sys_get_temp_dir()` : non partagé entre instances et effaçable. Passer sur une table SQL ou Redis si tu scales.
 - Ajouter un **CSP** (`Content-Security-Policy`) en plus des headers existants.
 - **CSRF** : tu es en `SameSite=Lax` + sessions cookie ; pour les POST sensibles, un token CSRF explicite serait une ceinture+bretelles.
+  > ✅ **Résolu depuis** : token CSRF double-submit (`requireCsrf()` dans `bootstrap.php`,
+  > cookie `csrf_token` lisible par JS, header `X-CSRF-Token` envoyé par `js/api.js`) — scope
+  > : endpoints authentifiés (login/register restent SameSite-Lax-only, décision documentée).
 - Logs d'erreur PHP : vérifier qu'aucune stack trace ne fuit en prod (`display_errors=Off`).
 
 ---
@@ -120,8 +128,11 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 ## 8. 🟡 CI/CD & qualité de code
 
 - Le hook pre-commit lance i18n + tests (bien). Ajouter en CI : `format:check` (Prettier), `i18n:check`, couverture, **lint** (ESLint absent — l'ajouter), et un **PHP linter** (`php -l` sur tous les `.php`, ou PHPStan).
+  > ✅ **Résolu depuis** : `eslint.config.js` existe, `npm run lint` tourne en CI
+  > (`.github/workflows/ci.yml`), PHPStan niveau 5 câblé aussi, `php -l` en CI sur tous les `.php`.
 - **Dependabot / renovate** pour les deps npm.
-- Badge de couverture réel dans le README (le badge « 190 passing » est déjà à recaler : on est à **209**).
+- Badge de couverture réel dans le README (le badge « 190 passing » est déjà à recaler : ce
+  chiffre continue de dater vite — au 2026-07, on est à **449** tests Vitest).
 
 ---
 

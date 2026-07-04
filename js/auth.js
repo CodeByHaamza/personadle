@@ -9,6 +9,8 @@
  *      (appelée une seule fois juste après l'inscription)
  *   5. La déconnexion
  *   6. La sync des sessions en attente après connexion
+ *   7. Le push du profil local vers le cloud à chaque chargement de page
+ *      (_syncLocalProfileToCloud(), appelée depuis initAuth())
  *
  * POURQUOI UN MODULE SÉPARÉ
  * ─────────────────────────────────────────────────────────────────────────────
@@ -483,7 +485,8 @@ async function _syncLocalProfileToCloud(userId) {
  *   1. GET /api/auth/me → restaure la session si cookie valide
  *   2. Met à jour l'UI (zones connecté / anonyme)
  *   3. Si connecté, synchronise les sessions en attente
- *   4. Branche les formulaires et boutons
+ *   4. Si connecté, pousse le profil local vers le cloud (_syncLocalProfileToCloud)
+ *   5. Branche les formulaires et boutons
  */
 export async function initAuth() {
   // 1. Restaurer la session

@@ -47,19 +47,19 @@
       <td><strong>P3</strong></td>
       <td><img src="database/img/P3.webp" alt="P3" width="60"/> <img src="database/img/P3FES.webp" alt="P3FES" width="60"/> <img src="database/img/P3P.webp" alt="P3P" width="60"/> <img src="database/img/P3R.webp" alt="P3R" width="60"/></td>
       <td>P3 · P3 FES · P3P · P3 Reload</td>
-      <td>27</td>
+      <td>21</td>
     </tr>
     <tr>
       <td><strong>P4</strong></td>
       <td><img src="database/img/P4.webp" alt="P4" width="60"/> <img src="database/img/P4G.webp" alt="P4G" width="60"/> <img src="database/img/P4AU.webp" alt="P4AU" width="60"/> <img src="database/img/P4D.webp" alt="P4D" width="60"/></td>
       <td>P4 · P4 Golden · P4 Arena Ultimax · P4 Dancing</td>
-      <td>21</td>
+      <td>19</td>
     </tr>
     <tr>
       <td><strong>P5</strong></td>
       <td><img src="database/img/P5.webp" alt="P5" width="60"/> <img src="database/img/P5R.webp" alt="P5R" width="60"/> <img src="database/img/P5S.webp" alt="P5S" width="60"/> <img src="database/img/P5T.webp" alt="P5T" width="60"/></td>
       <td>P5 · P5 Royal · P5 Strikers · P5 Tactica</td>
-      <td>25</td>
+      <td>23</td>
     </tr>
     <tr>
       <td><strong>P5X</strong></td>
@@ -73,22 +73,19 @@
       <td>Persona Q · Persona Q2</td>
       <td>5</td>
     </tr>
-    <tr>
-      <td><strong>Velvet Room</strong></td>
-      <td><img src="database/img/Velvet.webp" alt="Velvet" width="60"/></td>
-      <td>Aria of the Soul (toutes versions)</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <td><strong>Collab ZUTOMAYO</strong></td>
-      <td><img src="database/img/Zutomayo.jpg" alt="Zutomayo" width="60"/></td>
-      <td>P3 Reload × ZUTOMAYO</td>
-      <td>1</td>
-    </tr>
   </tbody>
 </table>
 
-> **Note** : Certaines chansons appartiennent à plusieurs opus (ex. _Aria of the Soul_ couvre P3→P5X) ; les totaux par opus reflètent le filtre actif, pas des entrées dupliquées.
+> **Note** : Certaines chansons appartiennent à plusieurs opus (ex. _Aria of the Soul_ couvre
+> P3→P5X) — les comptages ci-dessus sont des totaux **distincts** par famille (une chanson
+> multi-opus n'est comptée qu'une fois dans chaque famille où elle apparaît), donc leur somme
+> dépasse le total réel de 85 titres.
+>
+> **Velvet Room** et **Collab ZUTOMAYO** ne sont **pas** des catégories d'opus filtrables — ce
+> sont juste des habillages visuels (`image: "Velvet.webp"` / `"Zutomayo.jpg"`) posés sur des
+> chansons par ailleurs taguées avec de vrais codes opus (`Aria of the Soul` est taguée
+> P3/P3P/P3FES/P3R/P4/P4G/P5/P5R/P5S/P5X ; le remix ZUTOMAYO est tagué `P3R`). Elles n'apparaissent
+> pas dans `ALL_OPUS` (`modeMusic.js`) et ne sont donc jamais un filtre sélectionnable.
 
 ---
 
@@ -112,10 +109,13 @@ musicsMode/
     │   ├── PQ.webp / PQ2.webp
     │   ├── Velvet.webp
     │   └── Zutomayo.jpg        ← pochette spéciale collab ZUTOMAYO
-    └── music/                  ← fichiers audio (⚠️ non versionnés, voir .gitignore)
+    └── music/
+        └── song/               ← fichiers audio (.mp3, 86 fichiers)
 ```
 
-> **Important** : Le dossier `music/` contenant les fichiers `.mp3` est exclu du dépôt Git (`.gitignore`) car les pistes audio de la saga Persona sont protégées par le droit d'auteur. Les fichiers doivent être fournis séparément.
+> **Philosophie du projet** : les fichiers `.mp3` sont **committés dans le dépôt Git** (pas
+> dans `.gitignore`), comme les GIFs All-Out Attack — l'objectif est qu'un simple `git clone`
+> suffise pour jouer à tous les modes immédiatement, sans étape de téléchargement séparée.
 
 ---
 
@@ -125,7 +125,7 @@ musicsMode/
 {
   titre:    "Rivers in the Desert",   // Titre de la chanson
   opus:     ["P5R"],                  // Jeu(x) d'origine (tableau)
-  fichier:  "rivers_in_the_desert.mp3", // Fichier dans database/music/
+  fichier:  "rivers_in_the_desert.mp3", // Fichier dans database/music/song/
   image:    "P5R.webp",               // Pochette dans database/img/
   vocalist: "Lyn Inaizumi",           // Chanteur(se) (optionnel)
   lien:     "https://..."             // Lien d'écoute externe (optionnel)
@@ -154,7 +154,8 @@ Importe depuis `../js/gameCore.js` :
 - `showConfettiExplosion` — `{ emojiList: ["🎵","🎶","🎉","✨"], count: 30, spreadFrom: "bottom" }`
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
 
-> **Note** : Ce mode utilise sa propre fonction `setupFilterButtons` (comme le mode Silhouette), car il mutate directement le tableau `activeFilters` avec `push/filter`.
+Le panneau de filtres opus est géré par `initFilterMenu` (`../js/filterMenu.js`), comme dans les
+5 autres modes — il n'y a pas de réimplémentation locale.
 
 ### Fonctions spécifiques
 
@@ -169,13 +170,6 @@ Importe depuis `../js/gameCore.js` :
 | `resetGame()`              | Remet à zéro et choisit une nouvelle chanson                            |
 | `initializeAutocomplete()` | Dropdown avec pochettes, filtré par opus + chansons déjà proposées      |
 | `applyDarkModeStyles()`    | Fond sombre et bordure sur le lecteur audio                             |
-
-### Debug
-
-```js
-// Dans la console du navigateur :
-debugAllMusic(); // Vérifie que tous les titres de musicTitles.js existent dans songs.js
-```
 
 ---
 

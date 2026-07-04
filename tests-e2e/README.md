@@ -5,8 +5,8 @@
 <img src="https://img.shields.io/badge/Playwright-Chromium-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/cible-stack%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
 
-> **5 smoke tests sur un vrai navigateur, contre la stack Docker complète.**
-> Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public).
+> **13 tests (3 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
+> Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public, Social Link).
 
 </div>
 
@@ -30,6 +30,17 @@
 | ------------------------ | --------------------------------------------------------------- |
 | Sélection de badges      | les badges épinglés **persistent** côté serveur (PATCH → GET)   |
 | Streak global cross-mode | le streak **ne s'effondre pas** quand on change de mode le même jour |
+
+### `social-link.spec.js` — parcours Social Link complet (via l'API)
+
+| Test                                  | Vérifie                                                    |
+| -------------------------------------- | ----------------------------------------------------------- |
+| Garde-fou "Not friends"                | l'action Social Link échoue tant que les 2 comptes ne sont pas amis |
+| Demande d'ami                          | A envoie une demande à B via `friend_code`                 |
+| Acceptation                            | B accepte la demande                                        |
+| XP mutuelle                            | A et B gagnent chacun de l'XP en faisant `share_streak` le même jour |
+| Montée de rang                         | une 2e action mutuelle fait franchir le seuil de rang 2 (100 XP) |
+| Anti-spam                              | l'action ne peut pas être répétée le même jour               |
 
 ---
 

@@ -16,6 +16,7 @@
 | Script                  | Lancement                | Rôle                                                         |
 | ----------------------- | ------------------------ | ------------------------------------------------------------ |
 | `check-i18n.js`         | `npm run i18n:check`     | Clés manquantes/en surplus vs `lang/en.json` (source vérité) |
+| `check-i18n-untranslated.js` | `npm run i18n:check-untranslated` | Repère les valeurs FR/ES/DE/IT identiques à l'anglais (copié-collé oublié) |
 | `validate_characters.js`| `npm run data:check`     | Valide le schéma des personnages (opus, arcane, âges, emoji) |
 | `gen_seed_dev.mjs`      | `node scripts/gen_seed_dev.mjs` | Génère `docker/mysql/init/03_seed_dev.sql` (19 faux joueurs) |
 | `migrate.sh`            | `bash scripts/migrate.sh`| Applique les migrations SQL (`sql/migrations/`)              |
@@ -25,7 +26,7 @@
 
 ## 🌐 `check-i18n.js`
 
-Compare chaque langue à `lang/en.json` (source de vérité, ~871 clés).
+Compare chaque langue à `lang/en.json` (source de vérité, 947 clés).
 
 ```bash
 npm run i18n:check

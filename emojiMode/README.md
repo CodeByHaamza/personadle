@@ -95,7 +95,6 @@ Charge `global.css`, `emoji.css` et `emojiMode.js` en module.
 - `#emojiDisplay` — zone d'affichage des emojis du jour
 - `#textbar` — saisie du nom du personnage
 - `#guessButton` — bouton Valider
-- `#hintButton` — bouton Indice (révèle un nouvel emoji ou un indice textuel)
 - `#wrongGuessList` — liste des mauvaises réponses avec portrait
 - `#victoryBox` — panneau de victoire avec portrait complet
 - `#rulesModal` — fenêtre d'explication des règles

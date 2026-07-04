@@ -4,7 +4,7 @@
  * Utilisation :
  *   import { api } from '../js/api.js';
  *   await api.auth.login({ email, password });
- *   await api.stats.sync('Classic', sessionData);
+ *   await api.stats.postSession(session);
  *
  * Architecture :
  *   - Toutes les requêtes passent par apiCall() qui gère les headers, les erreurs

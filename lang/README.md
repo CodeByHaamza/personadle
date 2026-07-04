@@ -25,7 +25,7 @@ Contient les traductions de toute l'interface de PersonaDLE.
 | `it.json` | Italien  | ✅ Complet                        |
 | `jp.json` | Japonais | ⏳ Envisagé                       |
 
-> Les 5 langues actives sont synchronisées (871 clés chacune, vérifié par `npm run i18n:check`).
+> Les 5 langues actives sont synchronisées (947 clés chacune, vérifié par `npm run i18n:check`).
 
 > `en.json` est toujours la référence. En cas de clé manquante dans une autre langue, le système affiche la version anglaise.
 

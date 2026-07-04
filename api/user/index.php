@@ -21,6 +21,7 @@
  *   profile_music_id  string slug ou null
  *   selected_badges   array (max 4 IDs)
  *   equipped_title_id int ou null
+ *   settings          object JSON (préférences diverses)
  *
  * On utilise un système de champs explicitement whitelistés pour éviter
  * toute injection de colonnes arbitraires via PATCH.
