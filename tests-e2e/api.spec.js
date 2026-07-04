@@ -41,7 +41,23 @@ test.describe.serial("API — régressions sensibles (badges, streak global)", (
   });
 
   test("la sélection de badges épinglés persiste (PATCH → GET)", async () => {
-    const pick = ["first_win", "ace_detective"];
+    // api/user/index.php vérifie désormais que chaque badge de selected_badges est
+    // réellement présent dans badges_unlocked (même garde que wallpaper_id/equipped_title_id) —
+    // il faut donc gagner puis débloquer "first_win" avant de pouvoir l'épingler.
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+    const win = await ctx.post("/api/sessions", {
+      data: { mode: "silhouette", played_date: today, target_name: "Target Badge", result: "win", attempts: 1 },
+      headers: await csrfHeader(ctx),
+    });
+    expect(win.ok(), "POST session (pour déclencher first_win) doit réussir").toBeTruthy();
+
+    const unlock = await ctx.post("/api/badges/unlock", {
+      data: { badge_id: "first_win" },
+      headers: await csrfHeader(ctx),
+    });
+    expect(unlock.ok(), "POST /api/badges/unlock(first_win) doit réussir après 1 victoire").toBeTruthy();
+
+    const pick = ["first_win"];
 
     const patch = await ctx.patch(`/api/user/${userId}`, {
       data: { selected_badges: pick },
@@ -54,6 +70,14 @@ test.describe.serial("API — régressions sensibles (badges, streak global)", (
     expect(get.ok()).toBeTruthy();
     const body = await get.json();
     expect(body.profile.selected_badges).toEqual(pick);
+  });
+
+  test("PATCH selected_badges rejette un badge non débloqué", async () => {
+    const patch = await ctx.patch(`/api/user/${userId}`, {
+      data: { selected_badges: ["ace_detective"] }, // nécessite 10 victoires, jamais atteint ici
+      headers: await csrfHeader(ctx),
+    });
+    expect(patch.status(), "PATCH doit refuser un badge jamais débloqué").toBe(403);
   });
 
   test("le streak global s'incrémente et ne s'effondre pas en changeant de mode", async () => {
