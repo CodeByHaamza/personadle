@@ -399,7 +399,7 @@
             Passwords are hashed with bcrypt — we literally cannot read them.
           </li>
           <li data-i18n="privacy.security_cookie">
-            Sessions use a single secure, httpOnly cookie — no tracking.
+            Sessions use secure, first-party cookies only — no tracking.
           </li>
           <li data-i18n="privacy.security_https">The site runs on HTTPS in production.</li>
         </ul>
@@ -443,8 +443,11 @@
           🍪 <span data-i18n="privacy.cookies_title">Cookies</span>
         </h2>
         <p data-i18n="privacy.cookies_body">
-          We use exactly one cookie: a technical session cookie (httpOnly, secure), strictly
-          necessary for authentication. No advertising cookies, no analytics, no third-party
+          We use 3 strictly necessary technical cookies, all first-party: a session cookie
+          (httpOnly, secure) to keep you logged in, an optional "remember me" cookie (httpOnly,
+          secure, 30 days) if you choose to stay logged in, and a security cookie (secure,
+          readable only by the page's own script — not httpOnly by design) that protects your
+          account actions from forgery. No advertising cookies, no analytics, no third-party
           scripts.
         </p>
       </section>
