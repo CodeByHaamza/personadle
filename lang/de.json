@@ -664,6 +664,12 @@
     "error_passwords_mismatch": "Die Passwörter stimmen nicht überein.",
     "error_generic": "Ein Fehler ist aufgetreten. Bitte versuche es erneut.",
     "error_backend_offline": "Backend noch nicht verfügbar. Kommt in v2.0!",
+    "error_missing_fields": "E-Mail (oder Benutzername) und Passwort sind erforderlich.",
+    "error_banned": "Konto gesperrt. Kontaktiere den Support, wenn du denkst, das ist ein Fehler.",
+    "error_invalid_email": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "error_pseudo_length": "Der Benutzername muss zwischen 3 und 50 Zeichen lang sein.",
+    "error_pseudo_chars": "Der Benutzername darf nur Buchstaben, Zahlen, Bindestriche, Punkte und Unterstriche enthalten.",
+    "error_password_length": "Das Passwort muss mindestens 8 Zeichen haben.",
     "success_register": "Konto erstellt! Willkommen, {{pseudo}}.",
     "success_login": "Willkommen zurück, {{pseudo}}!",
     "logout": "Abmelden",
@@ -1111,5 +1117,19 @@
     "error_cooldown": "Wiederherstellung in Abklingzeit — versuch es später.",
     "error_offline": "Du scheinst offline zu sein. Bitte versuch es erneut.",
     "error_generic": "Wiederherstellung derzeit nicht verfügbar. Bitte versuch es erneut."
+  },
+  "reset_password": {
+    "title": "🔐 Setze dein Passwort zurück",
+    "subtitle": "Wähle ein neues Passwort für dein PersonaDLE-Konto.",
+    "new_password_label": "Neues Passwort",
+    "new_password_placeholder": "Mindestens 8 Zeichen",
+    "confirm_password_label": "Passwort bestätigen",
+    "submit_btn": "Passwort aktualisieren",
+    "back_link": "← Zurück zu PersonaDLE",
+    "invalid_link": "Ungültiger oder fehlender Reset-Link.",
+    "error_too_short": "Das Passwort muss mindestens 8 Zeichen haben.",
+    "error_invalid_expired": "Der Reset-Link ist ungültig oder abgelaufen.",
+    "error_network": "Netzwerkfehler. Bitte versuch es erneut.",
+    "success": "Passwort aktualisiert! Du kannst dich jetzt anmelden."
   }
 }

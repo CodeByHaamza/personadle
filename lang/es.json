@@ -664,6 +664,12 @@
     "error_passwords_mismatch": "Las contraseñas no coinciden.",
     "error_generic": "Ocurrió un error. Por favor, inténtalo de nuevo.",
     "error_backend_offline": "Backend aún no disponible. ¡Próximamente en v2.0!",
+    "error_missing_fields": "El correo (o nombre de usuario) y la contraseña son obligatorios.",
+    "error_banned": "Cuenta suspendida. Contacta con soporte si crees que es un error.",
+    "error_invalid_email": "Introduce una dirección de correo válida.",
+    "error_pseudo_length": "El nombre de usuario debe tener entre 3 y 50 caracteres.",
+    "error_pseudo_chars": "El nombre de usuario solo puede contener letras, números, guiones, puntos y guiones bajos.",
+    "error_password_length": "La contraseña debe tener al menos 8 caracteres.",
     "success_register": "¡Cuenta creada! Bienvenido, {{pseudo}}.",
     "success_login": "¡Bienvenido de nuevo, {{pseudo}}!",
     "logout": "Cerrar sesión",
@@ -1111,5 +1117,19 @@
     "error_cooldown": "Recuperación en espera — inténtalo más tarde.",
     "error_offline": "Parece que estás sin conexión. Inténtalo de nuevo.",
     "error_generic": "Recuperación no disponible ahora mismo. Inténtalo de nuevo."
+  },
+  "reset_password": {
+    "title": "🔐 Restablece tu contraseña",
+    "subtitle": "Elige una nueva contraseña para tu cuenta de PersonaDLE.",
+    "new_password_label": "Nueva contraseña",
+    "new_password_placeholder": "Mínimo 8 caracteres",
+    "confirm_password_label": "Confirma la contraseña",
+    "submit_btn": "Actualizar contraseña",
+    "back_link": "← Volver a PersonaDLE",
+    "invalid_link": "Enlace de restablecimiento inválido o faltante.",
+    "error_too_short": "La contraseña debe tener al menos 8 caracteres.",
+    "error_invalid_expired": "El enlace de restablecimiento es inválido o ha expirado.",
+    "error_network": "Error de red. Inténtalo de nuevo.",
+    "success": "¡Contraseña actualizada! Ya puedes iniciar sesión."
   }
 }

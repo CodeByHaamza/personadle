@@ -58,6 +58,63 @@ function hideAuthError(el) {
   el.classList.add("hidden");
 }
 
+/** Traduit une clé i18n avec un vrai fallback (window.i18n.t renvoie la clé brute si absente). */
+function _t(key, fallback) {
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : fallback;
+}
+
+// Le backend (toujours en anglais) renvoie un jeu fini de messages d'erreur —
+// on les mappe vers leurs traductions plutôt que d'afficher le texte brut.
+// Voir api/auth/login.php et api/auth/register.php pour la liste exhaustive.
+const LOGIN_ERROR_MAP = {
+  "Email (or username) and password are required": () =>
+    _t("auth.error_missing_fields", "Email (or username) and password are required."),
+  "Invalid email or password": () =>
+    _t("auth.error_wrong_credentials", "Incorrect email or password."),
+  "Account banned. Contact support if you think this is an error.": () =>
+    _t("auth.error_banned", "Account banned. Contact support if you think this is an error."),
+};
+
+const REGISTER_ERROR_MAP = {
+  "Invalid email address": () => _t("auth.error_invalid_email", "Please enter a valid email address."),
+  "Username must be between 3 and 50 characters": () =>
+    _t("auth.error_pseudo_length", "Username must be between 3 and 50 characters."),
+  "Username can only contain letters, numbers, hyphens, dots and underscores": () =>
+    _t(
+      "auth.error_pseudo_chars",
+      "Username can only contain letters, numbers, hyphens, dots and underscores."
+    ),
+  "Password must be at least 8 characters": () =>
+    _t("auth.error_password_length", "Password must be at least 8 characters."),
+  "This email is already registered": () =>
+    _t("auth.error_email_taken", "This email is already in use."),
+  "This username is already taken": () =>
+    _t("auth.error_pseudo_taken", "This username is already taken."),
+  "Registration failed — please try again": () =>
+    _t("auth.error_generic", "An error occurred. Please try again."),
+};
+
+/**
+ * Résout le message d'erreur à afficher pour un échec de connexion.
+ * Mappe les messages backend connus (toujours en anglais) vers leur
+ * traduction ; retombe sur le message brut puis sur un message générique.
+ * @param {string} [message] - err.message d'une ApiError (voir js/api.js)
+ */
+export function resolveLoginError(message) {
+  return LOGIN_ERROR_MAP[message]?.() || message || _t("auth.error_generic", "Login failed");
+}
+
+/**
+ * Idem pour un échec d'inscription. Voir resolveLoginError().
+ * @param {string} [message]
+ */
+export function resolveRegisterError(message) {
+  return (
+    REGISTER_ERROR_MAP[message]?.() || message || _t("auth.error_generic", "Registration failed")
+  );
+}
+
 // Accessibilité des modales : focus trap, Escape, retour du focus.
 const _FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -245,7 +302,7 @@ function setupLoginForm() {
       // Synchroniser les sessions en attente accumulées en offline
       await api.stats.syncPending().catch(() => {});
     } catch (err) {
-      showAuthError(error, err.message || "Login failed");
+      showAuthError(error, resolveLoginError(err.message));
     } finally {
       if (btn) btn.disabled = false;
     }
@@ -254,10 +311,6 @@ function setupLoginForm() {
   // ── Mot de passe oublié → bascule vers la demande de réinitialisation ──
   const resetForm = document.getElementById("resetRequestForm");
   const resetMsg = document.getElementById("resetMsg");
-  const _t = (k, fb) => {
-    const r = window.i18n?.t?.(k);
-    return r != null && r !== k ? r : fb;
-  };
 
   document.getElementById("forgotPasswordBtn")?.addEventListener("click", () => {
     hideAuthError(error);
@@ -310,11 +363,11 @@ function setupRegisterForm() {
 
     // Validation côté client (doublée côté serveur)
     if (password !== confirm) {
-      showAuthError(error, "Passwords do not match");
+      showAuthError(error, _t("auth.error_passwords_mismatch", "Passwords do not match."));
       return;
     }
     if (password.length < 8) {
-      showAuthError(error, "Password must be at least 8 characters");
+      showAuthError(error, _t("auth.error_password_length", "Password must be at least 8 characters."));
       return;
     }
 
@@ -358,7 +411,7 @@ function setupRegisterForm() {
       localStorage.removeItem("_crInitDone");
       window.dispatchEvent(new CustomEvent("personadle:auth-login", { detail: { user } }));
     } catch (err) {
-      showAuthError(error, err.message || "Registration failed");
+      showAuthError(error, resolveRegisterError(err.message));
     } finally {
       if (btn) btn.disabled = false;
     }

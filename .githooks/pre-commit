@@ -4,8 +4,9 @@
 #
 # Checks effectués :
 #   1. Cohérence des clés i18n (scripts/check-i18n.js)
-#   2. Présence de console.log dans les fichiers JS stagés
-#   3. Tests unitaires (npm test)
+#   2. Valeurs i18n identiques à l'anglais (avertissement, scripts/check-i18n-untranslated.js)
+#   3. Présence de console.log dans les fichiers JS stagés
+#   4. Tests unitaires (npm test)
 # =============================================================
 
 set -e
@@ -31,7 +32,20 @@ if command -v node &>/dev/null && [ -f "scripts/check-i18n.js" ]; then
 fi
 
 # ─────────────────────────────────────────────────────────
-# 2. Détection de console.log oubliés dans les JS stagés
+# 2. Valeurs i18n identiques à l'anglais dans les fichiers lang/ stagés
+#    (avertissement uniquement — ne bloque pas le commit, voir
+#    scripts/check-i18n-untranslated.js pour le pourquoi)
+# ─────────────────────────────────────────────────────────
+STAGED_LANG=$(git diff --cached --name-only --diff-filter=ACM | grep '^lang/.*\.json$' || true)
+if [ -n "$STAGED_LANG" ] && [ -f "scripts/check-i18n-untranslated.js" ]; then
+  UNTRANSLATED_OUT=$(node scripts/check-i18n-untranslated.js --silent 2>/dev/null || true)
+  if echo "$UNTRANSLATED_OUT" | grep -q "⚠️"; then
+    echo -e "${YELLOW}⚠  candidats non traduits détectés — 'npm run i18n:check-untranslated' pour le détail (avertissement, commit non bloqué)${NC}"
+  fi
+fi
+
+# ─────────────────────────────────────────────────────────
+# 3. Détection de console.log oubliés dans les JS stagés
 #    (avertissement uniquement — ne bloque pas le commit)
 # ─────────────────────────────────────────────────────────
 STAGED_JS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.js$' | grep -v 'node_modules' | grep -v 'check-i18n' || true)
@@ -44,7 +58,7 @@ if [ -n "$STAGED_JS" ]; then
 fi
 
 # ─────────────────────────────────────────────────────────
-# 3. Tests unitaires (Vitest)
+# 4. Tests unitaires (Vitest)
 # ─────────────────────────────────────────────────────────
 if [ -f "package.json" ] && command -v npm &>/dev/null; then
   echo "  ▸ Running tests..."

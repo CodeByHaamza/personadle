@@ -664,6 +664,12 @@
     "error_passwords_mismatch": "Le password non corrispondono.",
     "error_generic": "Si è verificato un errore. Riprova.",
     "error_backend_offline": "Backend non ancora disponibile. In arrivo nella v2.0!",
+    "error_missing_fields": "Email (o nome utente) e password sono obbligatori.",
+    "error_banned": "Account bannato. Contatta il supporto se pensi sia un errore.",
+    "error_invalid_email": "Inserisci un indirizzo email valido.",
+    "error_pseudo_length": "Il nome utente deve contenere tra 3 e 50 caratteri.",
+    "error_pseudo_chars": "Il nome utente può contenere solo lettere, numeri, trattini, punti e underscore.",
+    "error_password_length": "La password deve contenere almeno 8 caratteri.",
     "success_register": "Account creato! Benvenuto, {{pseudo}}.",
     "success_login": "Bentornato, {{pseudo}}!",
     "logout": "Disconnetti",
@@ -1111,5 +1117,19 @@
     "error_cooldown": "Ripristino in cooldown — riprova più tardi.",
     "error_offline": "Sembri offline. Riprova.",
     "error_generic": "Ripristino non disponibile al momento. Riprova."
+  },
+  "reset_password": {
+    "title": "🔐 Reimposta la tua password",
+    "subtitle": "Scegli una nuova password per il tuo account PersonaDLE.",
+    "new_password_label": "Nuova password",
+    "new_password_placeholder": "Almeno 8 caratteri",
+    "confirm_password_label": "Conferma la password",
+    "submit_btn": "Aggiorna password",
+    "back_link": "← Torna a PersonaDLE",
+    "invalid_link": "Link di ripristino non valido o mancante.",
+    "error_too_short": "La password deve contenere almeno 8 caratteri.",
+    "error_invalid_expired": "Il link di ripristino non è valido o è scaduto.",
+    "error_network": "Errore di rete. Riprova.",
+    "success": "Password aggiornata! Ora puoi accedere."
   }
 }

@@ -664,6 +664,12 @@
     "error_passwords_mismatch": "Les mots de passe ne correspondent pas.",
     "error_generic": "Une erreur est survenue. Veuillez réessayer.",
     "error_backend_offline": "Backend pas encore disponible. Arrive en v2.0 !",
+    "error_missing_fields": "L'email (ou le pseudo) et le mot de passe sont requis.",
+    "error_banned": "Compte banni. Contacte le support si tu penses que c'est une erreur.",
+    "error_invalid_email": "Merci de saisir une adresse email valide.",
+    "error_pseudo_length": "Le pseudo doit contenir entre 3 et 50 caractères.",
+    "error_pseudo_chars": "Le pseudo ne peut contenir que des lettres, chiffres, tirets, points et underscores.",
+    "error_password_length": "Le mot de passe doit contenir au moins 8 caractères.",
     "success_register": "Compte créé ! Bienvenue, {{pseudo}}.",
     "success_login": "Bon retour, {{pseudo}} !",
     "logout": "Déconnexion",
@@ -1111,5 +1117,19 @@
     "error_cooldown": "Récupération en cooldown — réessaie plus tard.",
     "error_offline": "Tu sembles hors ligne. Réessaie.",
     "error_generic": "Récupération indisponible pour le moment. Réessaie."
+  },
+  "reset_password": {
+    "title": "🔐 Réinitialise ton mot de passe",
+    "subtitle": "Choisis un nouveau mot de passe pour ton compte PersonaDLE.",
+    "new_password_label": "Nouveau mot de passe",
+    "new_password_placeholder": "8 caractères minimum",
+    "confirm_password_label": "Confirme le mot de passe",
+    "submit_btn": "Mettre à jour le mot de passe",
+    "back_link": "← Retour à PersonaDLE",
+    "invalid_link": "Lien de réinitialisation invalide ou manquant.",
+    "error_too_short": "Le mot de passe doit contenir au moins 8 caractères.",
+    "error_invalid_expired": "Le lien de réinitialisation est invalide ou expiré.",
+    "error_network": "Erreur réseau. Merci de réessayer.",
+    "success": "Mot de passe mis à jour ! Tu peux maintenant te connecter."
   }
 }

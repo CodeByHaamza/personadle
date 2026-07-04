@@ -9,6 +9,7 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "i18n:check": "node scripts/check-i18n.js",
+    "i18n:check-untranslated": "node scripts/check-i18n-untranslated.js",
     "data:check": "node scripts/validate_characters.js",
     "lint": "eslint \"**/*.js\" --ignore-pattern node_modules",
     "setup-hooks": "git config core.hooksPath .githooks && echo 'Git hooks activated (.githooks/)'",
