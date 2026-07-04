@@ -8,7 +8,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -48,6 +48,7 @@ if ($method === 'POST') {
     if (!$alreadyHad) {
         $pdo->prepare('INSERT IGNORE INTO user_wallpapers (user_id, wallpaper_id) VALUES (?, ?)')
             ->execute([$userId, $wallpaperId]);
+        personadle_log_admin_action($pdo, $adminId, 'wallpaper.grant', 'user', (string) $userId, ['wallpaper_id' => $wallpaperId]);
     }
 
     jsonSuccess(['success' => true, 'already_had' => $alreadyHad]);
@@ -65,6 +66,8 @@ if ($method === 'DELETE') {
 
     $pdo->prepare('DELETE FROM user_wallpapers WHERE user_id = ? AND wallpaper_id = ?')
         ->execute([$userId, $wallpaperId]);
+
+    personadle_log_admin_action($pdo, $adminId, 'wallpaper.revoke', 'user', (string) $userId, ['wallpaper_id' => $wallpaperId]);
 
     jsonSuccess(['success' => true]);
 }

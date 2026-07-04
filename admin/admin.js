@@ -112,8 +112,7 @@ function setupEvents() {
 
   // Back button (mobile)
   document.getElementById("detail-back").onclick = () => {
-    document.getElementById("user-detail").classList.add("hidden");
-    document.getElementById("empty-state").classList.remove("hidden");
+    showPanel("empty-state");
     openAside();
   };
 
@@ -136,11 +135,50 @@ function setupEvents() {
 
   // Event Codes panel
   document.getElementById("btn-codes").onclick = () => {
-    document.getElementById("empty-state").classList.add("hidden");
-    document.getElementById("user-detail").classList.add("hidden");
-    document.getElementById("codes-panel").classList.remove("hidden");
+    showPanel("codes-panel");
     renderEventCodes();
   };
+
+  // Error Logs panel
+  document.getElementById("btn-error-logs").onclick = () => {
+    showPanel("error-logs-panel");
+    renderErrorLogs();
+  };
+
+  // Admin Audit Log panel
+  document.getElementById("btn-audit-log").onclick = () => {
+    showPanel("audit-log-panel");
+    renderAuditLog();
+  };
+
+  // RGPD Deletion Requests panel
+  document.getElementById("btn-deletion-requests").onclick = () => {
+    showPanel("deletion-requests-panel");
+    renderDeletionRequests();
+  };
+
+  // Rate Limits panel
+  document.getElementById("btn-rate-limits").onclick = () => {
+    showPanel("rate-limits-panel");
+    renderRateLimits();
+  };
+}
+
+// ── Panel visibility (mutually exclusive right-hand panels) ────────────────
+const ADMIN_PANEL_IDS = [
+  "empty-state",
+  "user-detail",
+  "codes-panel",
+  "error-logs-panel",
+  "audit-log-panel",
+  "deletion-requests-panel",
+  "rate-limits-panel",
+];
+
+function showPanel(panelId) {
+  ADMIN_PANEL_IDS.forEach((id) => {
+    document.getElementById(id).classList.toggle("hidden", id !== panelId);
+  });
 }
 
 // ── Users List ─────────────────────────────────────────────────────────────
@@ -238,9 +276,7 @@ async function openUserDetail(userId) {
   // On mobile, close the aside drawer and show the detail panel
   if (window.innerWidth <= 768) closeAside();
 
-  document.getElementById("empty-state").classList.add("hidden");
-  document.getElementById("codes-panel").classList.add("hidden");
-  document.getElementById("user-detail").classList.remove("hidden");
+  showPanel("user-detail");
 
   document.getElementById("user-detail-content").innerHTML =
     '<div style="padding:48px;text-align:center;color:var(--text-muted)">Chargement…</div>';
@@ -499,8 +535,7 @@ function renderTabProfile(d) {
     )
       return;
     await api.delete(`/api/admin/users/${_selectedUser}`);
-    document.getElementById("user-detail").classList.add("hidden");
-    document.getElementById("empty-state").classList.remove("hidden");
+    showPanel("empty-state");
     _selectedUser = null;
     _userDetail = null;
     pendingGifts = [];
@@ -1338,6 +1373,468 @@ async function renderEventCodes() {
       toast("✅ Code créé", "success");
       renderEventCodes();
     }
+  };
+}
+
+// ── Error Logs ─────────────────────────────────────────────────────────────
+let _errorLogsPage = 1;
+let _errorLogsLevel = "";
+let _errorLogsSearch = "";
+let _errorLogsSearchTimer;
+
+async function renderErrorLogs() {
+  const el = document.getElementById("error-logs-panel-content");
+  el.innerHTML =
+    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+
+  let res;
+  try {
+    const params = new URLSearchParams({ page: _errorLogsPage, limit: 30 });
+    if (_errorLogsLevel) params.set("level", _errorLogsLevel);
+    if (_errorLogsSearch) params.set("search", _errorLogsSearch);
+    res = await api.get(`/api/admin/error_logs?${params.toString()}`);
+  } catch (e) {
+    el.innerHTML =
+      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des logs.</div>';
+    return;
+  }
+
+  const logs = res.data ?? [];
+
+  const levelClass = (level) =>
+    level === "error"
+      ? "code-status--inactive" // rouge
+      : level === "warning"
+        ? "code-status--expired" // jaune/orange
+        : "code-status--active"; // vert
+
+  const rows = logs
+    .map((l) => {
+      const context = l.context
+        ? `<pre style="white-space:pre-wrap;font-size:.75rem;margin:4px 0 0;opacity:.75">${escHtml(
+            JSON.stringify(l.context, null, 2)
+          )}</pre>`
+        : "";
+      return `<tr>
+        <td><span class="code-status ${levelClass(l.level)}">${escHtml(l.level)}</span></td>
+        <td>
+          <div>${escHtml(l.message)}</div>
+          ${context}
+        </td>
+        <td>${l.user_pseudo ? escHtml(l.user_pseudo) : "—"}</td>
+        <td>${escHtml(l.created_at)}</td>
+      </tr>`;
+    })
+    .join("");
+
+  el.innerHTML = `
+    <div style="padding:1.5rem">
+      <h2 style="margin:0 0 1rem;color:var(--accent)">🪵 Logs d'erreurs</h2>
+
+      <div class="form-grid" style="margin-bottom:1rem">
+        <label>Recherche
+          <input id="error-logs-search" type="text" placeholder="Filtrer par message…" value="${escHtml(_errorLogsSearch)}">
+        </label>
+        <label>Niveau
+          <select id="error-logs-level">
+            <option value="">Tous</option>
+            <option value="error" ${_errorLogsLevel === "error" ? "selected" : ""}>Error</option>
+            <option value="warning" ${_errorLogsLevel === "warning" ? "selected" : ""}>Warning</option>
+            <option value="info" ${_errorLogsLevel === "info" ? "selected" : ""}>Info</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="codes-table-wrap">
+        <table class="codes-table">
+          <thead>
+            <tr><th>Niveau</th><th>Message</th><th>Utilisateur</th><th>Date</th></tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Aucune erreur 🎉</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <div id="error-logs-pagination" class="pagination"></div>
+    </div>
+  `;
+
+  document.getElementById("error-logs-search").addEventListener("input", (e) => {
+    clearTimeout(_errorLogsSearchTimer);
+    _errorLogsSearchTimer = setTimeout(() => {
+      _errorLogsSearch = e.target.value.trim();
+      _errorLogsPage = 1;
+      renderErrorLogs();
+    }, 300);
+  });
+
+  document.getElementById("error-logs-level").addEventListener("change", (e) => {
+    _errorLogsLevel = e.target.value;
+    _errorLogsPage = 1;
+    renderErrorLogs();
+  });
+
+  renderErrorLogsPagination(res.total ?? 0, _errorLogsPage, res.limit ?? 30);
+}
+
+function renderErrorLogsPagination(total, page, limit) {
+  const el = document.getElementById("error-logs-pagination");
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  if (totalPages <= 1) {
+    el.innerHTML = "";
+    return;
+  }
+
+  el.innerHTML = `
+    <button class="btn-sm" id="error-logs-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
+    <span>Page ${page} / ${totalPages}</span>
+    <button class="btn-sm" id="error-logs-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
+  `;
+  document.getElementById("error-logs-prev").onclick = () => {
+    _errorLogsPage = Math.max(1, _errorLogsPage - 1);
+    renderErrorLogs();
+  };
+  document.getElementById("error-logs-next").onclick = () => {
+    _errorLogsPage = Math.min(totalPages, _errorLogsPage + 1);
+    renderErrorLogs();
+  };
+}
+
+// ── Admin Audit Log ──────────────────────────────────────────────────────────
+let _auditLogPage = 1;
+let _auditLogAction = "";
+let _auditLogSearch = "";
+let _auditLogSearchTimer;
+
+async function renderAuditLog() {
+  const el = document.getElementById("audit-log-panel-content");
+  el.innerHTML =
+    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+
+  let res;
+  try {
+    const params = new URLSearchParams({ page: _auditLogPage, limit: 30 });
+    if (_auditLogAction) params.set("action", _auditLogAction);
+    if (_auditLogSearch) params.set("search", _auditLogSearch);
+    res = await api.get(`/api/admin/audit_log?${params.toString()}`);
+  } catch (e) {
+    el.innerHTML =
+      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement du journal d\'audit.</div>';
+    return;
+  }
+
+  const entries = res.data ?? [];
+
+  const rows = entries
+    .map((a) => {
+      const details = a.details
+        ? `<pre style="white-space:pre-wrap;font-size:.75rem;margin:4px 0 0;opacity:.75">${escHtml(
+            JSON.stringify(a.details, null, 2)
+          )}</pre>`
+        : "";
+      return `<tr>
+        <td>${a.admin_pseudo ? escHtml(a.admin_pseudo) : "—"}</td>
+        <td><span class="code-status code-status--active">${escHtml(a.action)}</span></td>
+        <td>${escHtml(a.target_type)} #${escHtml(a.target_id)}</td>
+        <td>${details || "—"}</td>
+        <td>${escHtml(a.created_at)}</td>
+      </tr>`;
+    })
+    .join("");
+
+  el.innerHTML = `
+    <div style="padding:1.5rem">
+      <h2 style="margin:0 0 1rem;color:var(--accent)">📋 Journal d'audit admin</h2>
+
+      <div class="form-grid" style="margin-bottom:1rem">
+        <label>Recherche
+          <input id="audit-log-search" type="text" placeholder="Admin, action, cible…" value="${escHtml(_auditLogSearch)}">
+        </label>
+        <label>Action
+          <input id="audit-log-action" type="text" placeholder="ex: user.ban" value="${escHtml(_auditLogAction)}">
+        </label>
+      </div>
+
+      <div class="codes-table-wrap">
+        <table class="codes-table">
+          <thead>
+            <tr><th>Admin</th><th>Action</th><th>Cible</th><th>Détails</th><th>Date</th></tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Aucune action journalisée</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <div id="audit-log-pagination" class="pagination"></div>
+    </div>
+  `;
+
+  document.getElementById("audit-log-search").addEventListener("input", (e) => {
+    clearTimeout(_auditLogSearchTimer);
+    _auditLogSearchTimer = setTimeout(() => {
+      _auditLogSearch = e.target.value.trim();
+      _auditLogPage = 1;
+      renderAuditLog();
+    }, 300);
+  });
+
+  document.getElementById("audit-log-action").addEventListener("input", (e) => {
+    clearTimeout(_auditLogSearchTimer);
+    _auditLogSearchTimer = setTimeout(() => {
+      _auditLogAction = e.target.value.trim();
+      _auditLogPage = 1;
+      renderAuditLog();
+    }, 300);
+  });
+
+  renderAuditLogPagination(res.total ?? 0, _auditLogPage, res.limit ?? 30);
+}
+
+function renderAuditLogPagination(total, page, limit) {
+  const el = document.getElementById("audit-log-pagination");
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  if (totalPages <= 1) {
+    el.innerHTML = "";
+    return;
+  }
+
+  el.innerHTML = `
+    <button class="btn-sm" id="audit-log-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
+    <span>Page ${page} / ${totalPages}</span>
+    <button class="btn-sm" id="audit-log-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
+  `;
+  document.getElementById("audit-log-prev").onclick = () => {
+    _auditLogPage = Math.max(1, _auditLogPage - 1);
+    renderAuditLog();
+  };
+  document.getElementById("audit-log-next").onclick = () => {
+    _auditLogPage = Math.min(totalPages, _auditLogPage + 1);
+    renderAuditLog();
+  };
+}
+
+// ── RGPD Deletion Requests ───────────────────────────────────────────────────
+let _deletionRequestsPage = 1;
+let _deletionRequestsStatus = "";
+
+async function renderDeletionRequests() {
+  const el = document.getElementById("deletion-requests-panel-content");
+  el.innerHTML =
+    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+
+  let res;
+  try {
+    const params = new URLSearchParams({ page: _deletionRequestsPage, limit: 30 });
+    if (_deletionRequestsStatus) params.set("status", _deletionRequestsStatus);
+    res = await api.get(`/api/admin/deletion_requests?${params.toString()}`);
+  } catch (e) {
+    el.innerHTML =
+      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des demandes RGPD.</div>';
+    return;
+  }
+
+  const requests = res.data ?? [];
+
+  const rows = requests
+    .map((r) => {
+      const pending = !r.processed_at;
+      const statusPill = pending
+        ? '<span class="code-status code-status--expired">En attente</span>'
+        : '<span class="code-status code-status--active">Traité</span>';
+      const actionBtn = pending
+        ? `<button class="btn-sm dr-process-btn" data-id="${r.id}">Supprimer maintenant</button>`
+        : "—";
+      return `<tr>
+        <td>${r.user_pseudo ? escHtml(r.user_pseudo) : "—"} (#${r.user_id})</td>
+        <td>${escHtml(r.deletion_type)}</td>
+        <td>${statusPill}</td>
+        <td>${escHtml(r.requested_at)}</td>
+        <td>${r.processed_at ? escHtml(r.processed_at) : "—"}</td>
+        <td>${actionBtn}</td>
+      </tr>`;
+    })
+    .join("");
+
+  el.innerHTML = `
+    <div style="padding:1.5rem">
+      <h2 style="margin:0 0 1rem;color:var(--accent)">🗑️ Demandes de suppression RGPD</h2>
+      <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 1rem">
+        Le compte est déjà anonymisé au moment de la demande — la suppression définitive
+        (cascade complète) intervient automatiquement à J+30, ou manuellement ci-dessous.
+      </p>
+
+      <div class="form-grid" style="margin-bottom:1rem">
+        <label>Statut
+          <select id="deletion-requests-status">
+            <option value="">Toutes</option>
+            <option value="pending" ${_deletionRequestsStatus === "pending" ? "selected" : ""}>En attente</option>
+            <option value="processed" ${_deletionRequestsStatus === "processed" ? "selected" : ""}>Traitées</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="codes-table-wrap">
+        <table class="codes-table">
+          <thead>
+            <tr><th>Utilisateur</th><th>Type</th><th>Statut</th><th>Demandée le</th><th>Traitée le</th><th></th></tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Aucune demande</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <div id="deletion-requests-pagination" class="pagination"></div>
+    </div>
+  `;
+
+  document.getElementById("deletion-requests-status").addEventListener("change", (e) => {
+    _deletionRequestsStatus = e.target.value;
+    _deletionRequestsPage = 1;
+    renderDeletionRequests();
+  });
+
+  el.querySelectorAll(".dr-process-btn").forEach((btn) => {
+    btn.onclick = async () => {
+      if (!confirm("Supprimer définitivement ce compte maintenant, avant l'échéance des 30 jours ?")) return;
+      btn.disabled = true;
+      const res = await api.post(`/api/admin/deletion_requests/${btn.dataset.id}/process`, {});
+      if (res.error) {
+        toast("❌ " + res.error, "error");
+        btn.disabled = false;
+      } else {
+        toast("✅ Compte supprimé définitivement", "success");
+        renderDeletionRequests();
+      }
+    };
+  });
+
+  renderDeletionRequestsPagination(res.total ?? 0, _deletionRequestsPage, res.limit ?? 30);
+}
+
+function renderDeletionRequestsPagination(total, page, limit) {
+  const el = document.getElementById("deletion-requests-pagination");
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  if (totalPages <= 1) {
+    el.innerHTML = "";
+    return;
+  }
+
+  el.innerHTML = `
+    <button class="btn-sm" id="deletion-requests-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
+    <span>Page ${page} / ${totalPages}</span>
+    <button class="btn-sm" id="deletion-requests-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
+  `;
+  document.getElementById("deletion-requests-prev").onclick = () => {
+    _deletionRequestsPage = Math.max(1, _deletionRequestsPage - 1);
+    renderDeletionRequests();
+  };
+  document.getElementById("deletion-requests-next").onclick = () => {
+    _deletionRequestsPage = Math.min(totalPages, _deletionRequestsPage + 1);
+    renderDeletionRequests();
+  };
+}
+
+// ── Rate Limits ───────────────────────────────────────────────────────────────
+let _rateLimitsPage = 1;
+let _rateLimitsSearch = "";
+let _rateLimitsSearchTimer;
+
+async function renderRateLimits() {
+  const el = document.getElementById("rate-limits-panel-content");
+  el.innerHTML =
+    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+
+  let res;
+  try {
+    const params = new URLSearchParams({ page: _rateLimitsPage, limit: 30 });
+    if (_rateLimitsSearch) params.set("search", _rateLimitsSearch);
+    res = await api.get(`/api/admin/rate_limits?${params.toString()}`);
+  } catch (e) {
+    el.innerHTML =
+      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des rate limits.</div>';
+    return;
+  }
+
+  const limits = res.data ?? [];
+
+  const rows = limits
+    .map((r) => {
+      const windowDate = new Date(r.window_start * 1000).toLocaleString("fr-FR");
+      return `<tr>
+        <td>${escHtml(r.rl_key)}</td>
+        <td>${r.hits}</td>
+        <td>${windowDate}</td>
+        <td><button class="btn-sm rl-clear-btn" data-key="${escHtml(r.rl_key)}">Purger</button></td>
+      </tr>`;
+    })
+    .join("");
+
+  el.innerHTML = `
+    <div style="padding:1.5rem">
+      <h2 style="margin:0 0 1rem;color:var(--accent)">⏱️ Rate Limits actifs</h2>
+
+      <div class="form-grid" style="margin-bottom:1rem">
+        <label>Recherche
+          <input id="rate-limits-search" type="text" placeholder="Filtrer par clé (ex: login:)…" value="${escHtml(_rateLimitsSearch)}">
+        </label>
+      </div>
+
+      <div class="codes-table-wrap">
+        <table class="codes-table">
+          <thead>
+            <tr><th>Clé</th><th>Hits</th><th>Fenêtre depuis</th><th></th></tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Aucun compteur actif</td></tr>'}</tbody>
+        </table>
+      </div>
+
+      <div id="rate-limits-pagination" class="pagination"></div>
+    </div>
+  `;
+
+  document.getElementById("rate-limits-search").addEventListener("input", (e) => {
+    clearTimeout(_rateLimitsSearchTimer);
+    _rateLimitsSearchTimer = setTimeout(() => {
+      _rateLimitsSearch = e.target.value.trim();
+      _rateLimitsPage = 1;
+      renderRateLimits();
+    }, 300);
+  });
+
+  el.querySelectorAll(".rl-clear-btn").forEach((btn) => {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      const res = await api.delete(`/api/admin/rate_limits?key=${encodeURIComponent(btn.dataset.key)}`);
+      if (res.error) {
+        toast("❌ " + res.error, "error");
+        btn.disabled = false;
+      } else {
+        toast("✅ Compteur purgé", "success");
+        renderRateLimits();
+      }
+    };
+  });
+
+  renderRateLimitsPagination(res.total ?? 0, _rateLimitsPage, res.limit ?? 30);
+}
+
+function renderRateLimitsPagination(total, page, limit) {
+  const el = document.getElementById("rate-limits-pagination");
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  if (totalPages <= 1) {
+    el.innerHTML = "";
+    return;
+  }
+
+  el.innerHTML = `
+    <button class="btn-sm" id="rate-limits-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
+    <span>Page ${page} / ${totalPages}</span>
+    <button class="btn-sm" id="rate-limits-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
+  `;
+  document.getElementById("rate-limits-prev").onclick = () => {
+    _rateLimitsPage = Math.max(1, _rateLimitsPage - 1);
+    renderRateLimits();
+  };
+  document.getElementById("rate-limits-next").onclick = () => {
+    _rateLimitsPage = Math.min(totalPages, _rateLimitsPage + 1);
+    renderRateLimits();
   };
 }
 

@@ -12,7 +12,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -87,6 +87,11 @@ $pdo->prepare(
     $values['streak_record'],
     $values['perfect_wins'],
     $values['total_time_ms'],
+]);
+
+personadle_log_admin_action($pdo, $adminId, 'user_stats.overwrite', 'user', (string) $userId, [
+    'mode' => $mode,
+    ...$values,
 ]);
 
 jsonSuccess(['success' => true]);

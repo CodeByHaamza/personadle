@@ -8,7 +8,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/admin_validation.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -71,6 +71,14 @@ if ($method === 'POST') {
         $description ?: null,
     ]);
 
+    personadle_log_admin_action($pdo, $adminId, 'event_code.create', 'event_code', $code, [
+        'badge_id' => $badgeId,
+        'is_permanent' => (bool) $isPermanent,
+        'is_active' => (bool) $isActive,
+        'start_date' => $startDate ?: null,
+        'end_date' => $endDate ?: null,
+    ]);
+
     jsonSuccess(['created' => true, 'code' => $code]);
 }
 
@@ -82,29 +90,35 @@ if ($method === 'PATCH') {
     $stmt->execute([$codeParam]);
     if (!$stmt->fetch()) jsonError('Code introuvable', 404);
 
-    $data   = getJsonBody();
-    $fields = [];
-    $params = [];
+    $data    = getJsonBody();
+    $fields  = [];
+    $params  = [];
+    $changed = [];
 
     if (array_key_exists('is_active', $data)) {
         $fields[] = 'is_active = ?';
         $params[] = (int) (bool) $data['is_active'];
+        $changed['is_active'] = (bool) $data['is_active'];
     }
     if (array_key_exists('description', $data)) {
         $fields[] = 'description = ?';
         $params[] = trim($data['description']) ?: null;
+        $changed['description'] = trim($data['description']) ?: null;
     }
     if (array_key_exists('start_date', $data)) {
         $fields[] = 'start_date = ?';
         $params[] = $data['start_date'] ?: null;
+        $changed['start_date'] = $data['start_date'] ?: null;
     }
     if (array_key_exists('end_date', $data)) {
         $fields[] = 'end_date = ?';
         $params[] = $data['end_date'] ?: null;
+        $changed['end_date'] = $data['end_date'] ?: null;
     }
     if (array_key_exists('is_permanent', $data)) {
         $fields[] = 'is_permanent = ?';
         $params[] = (int) (bool) $data['is_permanent'];
+        $changed['is_permanent'] = (bool) $data['is_permanent'];
     }
 
     if (empty($fields)) jsonError('Aucun champ modifiable fourni', 400);
@@ -112,6 +126,8 @@ if ($method === 'PATCH') {
     $params[] = $codeParam;
     $pdo->prepare('UPDATE event_codes SET ' . implode(', ', $fields) . ' WHERE code = ?')
         ->execute($params);
+
+    personadle_log_admin_action($pdo, $adminId, 'event_code.update', 'event_code', $codeParam, $changed);
 
     jsonSuccess(['updated' => true, 'code' => $codeParam]);
 }
@@ -125,6 +141,8 @@ if ($method === 'DELETE') {
     if (!$stmt->fetch()) jsonError('Code introuvable', 404);
 
     $pdo->prepare('DELETE FROM event_codes WHERE code = ?')->execute([$codeParam]);
+
+    personadle_log_admin_action($pdo, $adminId, 'event_code.delete', 'event_code', $codeParam);
 
     jsonSuccess(['deleted' => true, 'code' => $codeParam]);
 }

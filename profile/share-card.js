@@ -8,6 +8,7 @@ import { getBadgesForShare } from "./badges/badgesManager.js";
 import { getEquippedTitle } from "./titles-ui.js";
 import { UNLOCKABLE_WALLPAPERS } from "./wallpapers-ui.js";
 import { normalizeAvatarPath } from "./profile-format.js";
+import { openModal, closeModal } from "../js/modal.js";
 
 /** Arrière-plans disponibles pour la carte de partage */
 const shareBackgrounds = [
@@ -728,7 +729,7 @@ export function setupShareProfile(profile, saveProfile) {
   _regenerateSharePreview = generatePreview;
 
   btn.onclick = () => {
-    modal.classList.remove("hidden");
+    openModal("sharePreviewModal");
     generatePreview();
   };
 
@@ -825,7 +826,7 @@ export function setupShareProfile(profile, saveProfile) {
     }, 120);
   }
 
-  closeBtn.onclick = () => modal.classList.add("hidden");
+  closeBtn.onclick = () => closeModal("sharePreviewModal");
 }
 
 /**

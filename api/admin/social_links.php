@@ -11,7 +11,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/admin_validation.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -135,15 +135,17 @@ if ($method === 'GET') {
 // Body : { "xp": 500, "rank": 5 }
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($method === 'PATCH') {
-    $data   = getJsonBody();
-    $fields = [];
-    $params = [];
+    $data    = getJsonBody();
+    $fields  = [];
+    $params  = [];
+    $changed = [];
 
     if (array_key_exists('xp', $data)) {
         $xp = (int) $data['xp'];
         if ($xpError = personadle_validate_sl_xp($xp)) jsonError($xpError, 400);
         $fields[] = 'xp = ?';
         $params[] = $xp;
+        $changed['xp'] = $xp;
     }
 
     if (array_key_exists('rank', $data)) {
@@ -151,6 +153,7 @@ if ($method === 'PATCH') {
         if ($rankError = personadle_validate_sl_rank($rank)) jsonError($rankError, 400);
         $fields[] = '`rank` = ?';
         $params[] = $rank;
+        $changed['rank'] = $rank;
     }
 
     if (empty($fields)) jsonError('No valid fields provided (xp, rank)', 400);
@@ -168,6 +171,8 @@ if ($method === 'PATCH') {
         $notifStmt->execute([(int) $link['user_a_id'], (int) $link['user_b_id'], $rank]);
         $notifStmt->execute([(int) $link['user_b_id'], (int) $link['user_a_id'], $rank]);
     }
+
+    personadle_log_admin_action($pdo, $adminId, 'social_link.update', 'social_link', (string) $linkId, $changed);
 
     jsonSuccess(['success' => true]);
 }
@@ -189,6 +194,11 @@ if ($method === 'DELETE') {
     ]);
 
     $pdo->prepare('DELETE FROM social_links WHERE id = ?')->execute([$linkId]);
+
+    personadle_log_admin_action($pdo, $adminId, 'social_link.delete', 'social_link', (string) $linkId, [
+        'user_a_id' => (int) $link['user_a_id'],
+        'user_b_id' => (int) $link['user_b_id'],
+    ]);
 
     jsonSuccess(['success' => true]);
 }

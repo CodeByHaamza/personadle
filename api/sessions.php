@@ -13,6 +13,7 @@
 
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/lib/streak.php';
+require_once __DIR__ . '/lib/game_session.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);
@@ -68,116 +69,24 @@ $pdo = pdo();
 
 // ── Anti-doublon : une seule session par (user, mode, date) ──────────────────
 // La contrainte UNIQUE uq_session_per_day en BDD garantit l'unicité même en
-// cas de requêtes simultanées (plus de TOCTOU). On intercepte PDOException.
+// cas de requêtes simultanées (plus de TOCTOU). personadle_record_game_session()
+// intercepte la PDOException et la transforme en PersonadleDuplicateSessionException.
 $pdo->beginTransaction();
 try {
-    // 1. Insérer la session
-    try {
-        $pdo->prepare('
-            INSERT INTO game_sessions
-                (user_id, mode, played_date, target_name, result, attempts, time_ms, active_filters)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ')->execute([
-            $userId, $mode, $playedDate, $targetName, $result,
-            $attempts, $timeMs, json_encode($filters),
-        ]);
-    } catch (PDOException $dup) {
-        $pdo->rollBack();
-        if ($dup->getCode() === '23000') {
-            jsonError("Session already recorded for mode '$mode' on $playedDate", 409);
-        }
-        throw $dup;
-    }
-    $sessionId = (int) $pdo->lastInsertId();
-
-    // 2. Lire les stats actuelles pour calculer la streak.
-    //    Garde-fou : si la ligne (user, mode) n'existe pas (vieux compte, init partielle),
-    //    on la crée à zéro — sinon l'UPDATE plus bas matcherait 0 ligne et les stats du
-    //    mode seraient silencieusement perdues. mode est déjà normalisé en lowercase.
-    $pdo->prepare('INSERT IGNORE INTO user_stats (user_id, mode) VALUES (?, ?)')
-        ->execute([$userId, $mode]);
-
-    $stmt = $pdo->prepare('
-        SELECT * FROM user_stats WHERE user_id = ? AND mode = ? LIMIT 1
-    ');
-    $stmt->execute([$userId, $mode]);
-    $stats = $stmt->fetch();
-
-    // Calcul de la streak — logique pure, testée dans tests/php/StreakTest.php.
-    // (frontière de journée en heure de Paris, partie parfaite = victoire en 1 essai)
-    $isWin     = $result === 'win';
-    $isPerfect = personadle_is_perfect($result, $attempts);
-
-    $newStreak = personadle_compute_streak(
-        $stats['last_played_at'] ?? null,
-        $playedDate,
-        $result,
-        (int) $stats['streak']
+    $sessionResult = personadle_record_game_session(
+        $pdo, $userId, $mode, $playedDate, $targetName, $result, $attempts, $timeMs, $filters
     );
-    $newRecord = max($stats['streak_record'], $newStreak);
-
-    $pdo->prepare('
-        UPDATE user_stats SET
-            games        = games + 1,
-            wins         = wins + ?,
-            giveups      = giveups + ?,
-            streak       = ?,
-            streak_record= ?,
-            perfect_wins = perfect_wins + ?,
-            total_time_ms= total_time_ms + ?,
-            last_played_at = UTC_TIMESTAMP()
-        WHERE user_id = ? AND mode = ?
-    ')->execute([
-        $isWin ? 1 : 0,
-        $isWin ? 0 : 1,
-        $newStreak,
-        $newRecord,
-        $isPerfect ? 1 : 0,
-        $timeMs,
-        $userId,
-        $mode,
-    ]);
-
-    // 2b. Streak GLOBALE (tous modes) — autoritative, basée sur la date Paris du jour.
-    //     Indépendante des streaks par-mode : compte les jours consécutifs joués.
-    $g = $pdo->prepare('SELECT global_streak, global_streak_date FROM users WHERE id = ? LIMIT 1');
-    $g->execute([$userId]);
-    $grow = $g->fetch();
-    $newGlobalStreak = personadle_global_streak(
-        $grow['global_streak_date'] ?? null,
-        $parisNow,
-        (int) ($grow['global_streak'] ?? 0)
-    );
-    $pdo->prepare(
-        'UPDATE users
-         SET global_streak = ?, global_streak_record = GREATEST(global_streak_record, ?),
-             global_streak_date = ?
-         WHERE id = ?'
-    )->execute([$newGlobalStreak, $newGlobalStreak, $parisNow, $userId]);
-
-    // 3. Relire les stats mises à jour pour les renvoyer au client
-    $stmt = $pdo->prepare('SELECT * FROM user_stats WHERE user_id = ? AND mode = ?');
-    $stmt->execute([$userId, $mode]);
-    $updatedStats = $stmt->fetch();
-
     $pdo->commit();
+} catch (PersonadleDuplicateSessionException $dup) {
+    $pdo->rollBack();
+    jsonError($dup->getMessage(), 409);
 } catch (Throwable $e) {
     $pdo->rollBack();
-    error_log('[PersonaDLE sessions] ' . $e->getMessage());
+    personadle_log_error($pdo, 'error', $e->getMessage(), [
+        'source' => 'sessions',
+        'mode'   => $mode,
+    ], $userId);
     jsonError('Failed to save session', 500);
 }
 
-jsonSuccess([
-    'session_id' => $sessionId,
-    'stats'      => [
-        'mode'          => $mode,
-        'games'         => (int) $updatedStats['games'],
-        'wins'          => (int) $updatedStats['wins'],
-        'giveups'       => (int) $updatedStats['giveups'],
-        'streak'        => (int) $updatedStats['streak'],
-        'streak_record' => (int) $updatedStats['streak_record'],
-        'perfect_wins'  => (int) $updatedStats['perfect_wins'],
-        'total_time_ms' => (int) $updatedStats['total_time_ms'],
-    ],
-    'global_streak' => $newGlobalStreak,
-], 201);
+jsonSuccess($sessionResult, 201);

@@ -34,3 +34,15 @@ RewriteRule ^event_codes$               event_codes.php [L,QSA]
 
 # /api/admin/event_codes/MYCODE         → event_codes.php (patch / delete)
 RewriteRule ^event_codes/(.+)$          event_codes.php [L,QSA]
+
+# /api/admin/error_logs                 → error_logs.php (liste paginée)
+RewriteRule ^error_logs$                error_logs.php [L,QSA]
+
+# /api/admin/audit_log                  → audit_log.php (liste paginée)
+RewriteRule ^audit_log$                 audit_log.php [L,QSA]
+
+# /api/admin/deletion_requests[/id]     → deletion_requests.php (liste / hard-delete manuel)
+RewriteRule ^deletion_requests          deletion_requests.php [L,QSA]
+
+# /api/admin/rate_limits[/key]          → rate_limits.php (liste / purge manuelle)
+RewriteRule ^rate_limits                rate_limits.php [L,QSA]

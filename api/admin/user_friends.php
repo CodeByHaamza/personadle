@@ -11,7 +11,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -48,5 +48,7 @@ $pdo->prepare(
     'DELETE FROM friendships
      WHERE id = ? AND (requester_id = ? OR addressee_id = ?)'
 )->execute([$fid, $userId, $userId]);
+
+personadle_log_admin_action($pdo, $adminId, 'friendship.force_delete', 'user', (string) $userId, ['friendship_id' => $fid]);
 
 jsonSuccess(['success' => true]);

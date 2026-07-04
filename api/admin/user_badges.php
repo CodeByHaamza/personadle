@@ -8,7 +8,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -48,6 +48,7 @@ if ($method === 'POST') {
     if (!$alreadyHad) {
         $pdo->prepare('INSERT IGNORE INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)')
             ->execute([$userId, $slug]);
+        personadle_log_admin_action($pdo, $adminId, 'badge.grant', 'user', (string) $userId, ['slug' => $slug]);
     }
 
     jsonSuccess(['success' => true, 'already_had' => $alreadyHad]);
@@ -65,6 +66,8 @@ if ($method === 'DELETE') {
 
     $pdo->prepare('DELETE FROM badges_unlocked WHERE user_id = ? AND badge_id = ?')
         ->execute([$userId, $slug]);
+
+    personadle_log_admin_action($pdo, $adminId, 'badge.revoke', 'user', (string) $userId, ['slug' => $slug]);
 
     jsonSuccess(['success' => true]);
 }

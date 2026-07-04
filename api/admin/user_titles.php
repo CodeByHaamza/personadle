@@ -11,7 +11,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -50,6 +50,8 @@ if ($method === 'POST') {
     $pdo->prepare('INSERT IGNORE INTO user_titles (user_id, title_id) VALUES (?, ?)')
         ->execute([$userId, $titleId]);
 
+    personadle_log_admin_action($pdo, $adminId, 'title.grant', 'user', (string) $userId, ['title_id' => $titleId]);
+
     jsonSuccess(['success' => true]);
 }
 
@@ -80,6 +82,8 @@ if ($method === 'PATCH') {
     $pdo->prepare('UPDATE profiles SET equipped_title_id = ? WHERE user_id = ?')
         ->execute([$titleId, $userId]);
 
+    personadle_log_admin_action($pdo, $adminId, 'title.equip', 'user', (string) $userId, ['title_id' => $titleId]);
+
     jsonSuccess(['success' => true]);
 }
 
@@ -96,6 +100,8 @@ if ($method === 'DELETE') {
 
     $pdo->prepare('DELETE FROM user_titles WHERE user_id = ? AND title_id = ?')
         ->execute([$userId, $titleId]);
+
+    personadle_log_admin_action($pdo, $adminId, 'title.revoke', 'user', (string) $userId, ['title_id' => $titleId]);
 
     jsonSuccess(['success' => true]);
 }

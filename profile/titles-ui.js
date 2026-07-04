@@ -9,6 +9,8 @@
  * encapsulé ici, pas exposé brut.
  */
 
+import { openModal, closeModal } from "../js/modal.js";
+
 /** Définitions locales des titres — toujours disponibles ; l'API enrichit avec le statut par utilisateur. */
 export const TITLES_LOCAL = [
   { slug: "velvet_room_thou_art_i", name: "Thou Art I", rarity: "legendary", condition_type: "badges_count", condition_value: 20 },
@@ -346,11 +348,13 @@ export function _bindTitlesModal(profile, saveProfile, saveProfileToCloud, markD
   _renderTitlesGrid(profile, saveProfile, saveProfileToCloud, markDirty);
 
   const open = () => {
-    modal.classList.remove("hidden");
+    // Escape (géré par le trap clavier d'openModal) doit aussi refermer
+    // l'overlay séparé — d'où le onClose.
+    openModal("titlesModal", { onClose: () => overlay?.classList.add("hidden") });
     if (overlay) overlay.classList.remove("hidden");
   };
   const close = () => {
-    modal.classList.add("hidden");
+    closeModal("titlesModal");
     if (overlay) overlay.classList.add("hidden");
   };
 
@@ -358,9 +362,6 @@ export function _bindTitlesModal(profile, saveProfile, saveProfileToCloud, markD
   openBtn.addEventListener("click", open);
   closeBtn?.addEventListener("click", close);
   overlay?.addEventListener("click", close);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") close();
-  });
 }
 
 /** Retourne le titre actuellement équipé (ou null), pour un usage en lecture seule (ex: carte de partage). */

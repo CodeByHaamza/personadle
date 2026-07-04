@@ -10,7 +10,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/admin_validation.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -183,6 +183,7 @@ if ($method === 'PATCH') {
     $userParams  = [];
     $profFields  = [];
     $profParams  = [];
+    $auditEntries = [];
 
     // pseudo
     if (array_key_exists('pseudo', $data)) {
@@ -195,6 +196,7 @@ if ($method === 'PATCH') {
         if ($stmt->fetch()) jsonError('Pseudo already taken', 409);
         $userFields[] = 'pseudo = ?';
         $userParams[] = $pseudo;
+        $auditEntries[] = ['action' => 'user.update_pseudo', 'details' => ['new' => $pseudo]];
     }
 
     // email
@@ -208,6 +210,7 @@ if ($method === 'PATCH') {
         if ($stmt->fetch()) jsonError('Email already taken', 409);
         $userFields[] = 'email = ?';
         $userParams[] = $email;
+        $auditEntries[] = ['action' => 'user.update_email', 'details' => ['new' => $email]];
     }
 
     // lang
@@ -218,24 +221,31 @@ if ($method === 'PATCH') {
         }
         $userFields[] = 'lang = ?';
         $userParams[] = $lang;
+        $auditEntries[] = ['action' => 'user.update_lang', 'details' => ['new' => $lang]];
     }
 
     // is_admin
     if (array_key_exists('is_admin', $data)) {
+        $isAdmin = (bool) $data['is_admin'];
         $userFields[] = 'is_admin = ?';
-        $userParams[] = (int) (bool) $data['is_admin'];
+        $userParams[] = (int) $isAdmin;
+        $auditEntries[] = ['action' => $isAdmin ? 'user.grant_admin' : 'user.revoke_admin', 'details' => []];
     }
 
     // is_banned
     if (array_key_exists('is_banned', $data)) {
+        $isBanned = (bool) $data['is_banned'];
         $userFields[] = 'is_banned = ?';
-        $userParams[] = (int) (bool) $data['is_banned'];
+        $userParams[] = (int) $isBanned;
+        $auditEntries[] = ['action' => $isBanned ? 'user.ban' : 'user.unban', 'details' => []];
     }
 
     // pseudo_locked
     if (array_key_exists('pseudo_locked', $data)) {
+        $pseudoLocked = (bool) $data['pseudo_locked'];
         $userFields[] = 'pseudo_locked = ?';
-        $userParams[] = (int) (bool) $data['pseudo_locked'];
+        $userParams[] = (int) $pseudoLocked;
+        $auditEntries[] = ['action' => 'user.set_pseudo_locked', 'details' => ['locked' => $pseudoLocked]];
     }
 
     // avatar_border_color (dans profiles)
@@ -246,12 +256,14 @@ if ($method === 'PATCH') {
         }
         $profFields[] = 'avatar_border_color = ?';
         $profParams[] = $color;
+        $auditEntries[] = ['action' => 'user.update_avatar_border_color', 'details' => ['new' => $color]];
     }
 
     // reset_avatar — efface avatar_data (remet l'avatar par défaut)
     if (!empty($data['reset_avatar'])) {
         $profFields[] = 'avatar_data = ?';
         $profParams[] = null;
+        $auditEntries[] = ['action' => 'user.reset_avatar', 'details' => []];
     }
 
     if (empty($userFields) && empty($profFields)) {
@@ -275,6 +287,10 @@ if ($method === 'PATCH') {
         $pdo->rollBack();
         error_log('[PersonaDLE admin user PATCH] ' . $e->getMessage());
         jsonError('Update failed', 500);
+    }
+
+    foreach ($auditEntries as $entry) {
+        personadle_log_admin_action($pdo, $adminId, $entry['action'], 'user', (string) $userId, $entry['details']);
     }
 
     // Retourner l'utilisateur mis à jour
@@ -307,11 +323,16 @@ if ($method === 'PATCH') {
 // Différent du soft delete RGPD : suppression définitive en cascade
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($method === 'DELETE') {
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE id = ? LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, pseudo FROM users WHERE id = ? LIMIT 1');
     $stmt->execute([$userId]);
-    if (!$stmt->fetch()) jsonError('User not found', 404);
+    $target = $stmt->fetch();
+    if (!$target) jsonError('User not found', 404);
 
     $pdo->prepare('DELETE FROM users WHERE id = ?')->execute([$userId]);
+
+    personadle_log_admin_action($pdo, $adminId, 'user.hard_delete', 'user', (string) $userId, [
+        'pseudo' => $target['pseudo'],
+    ]);
 
     jsonSuccess(['success' => true]);
 }

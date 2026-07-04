@@ -32,6 +32,7 @@
  */
 
 import { api } from "./api.js";
+import { openModal, closeModal } from "./modal.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ÉTAT
@@ -113,57 +114,6 @@ export function resolveRegisterError(message) {
   return (
     REGISTER_ERROR_MAP[message]?.() || message || _t("auth.error_generic", "Registration failed")
   );
-}
-
-// Accessibilité des modales : focus trap, Escape, retour du focus.
-const _FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-let _modalPrevFocus = null;
-let _modalKeyHandler = null;
-
-/** Ouvre une modale (a11y : role=dialog, focus, trap clavier, Escape). */
-function openModal(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.remove("hidden");
-  el.setAttribute("role", "dialog");
-  el.setAttribute("aria-modal", "true");
-
-  _modalPrevFocus = document.activeElement;
-  const focusables = el.querySelectorAll(_FOCUSABLE);
-  (focusables[0] || el).focus?.();
-
-  _modalKeyHandler = (e) => {
-    if (e.key === "Escape") {
-      closeModal(id);
-      return;
-    }
-    if (e.key !== "Tab") return;
-    const visible = [...el.querySelectorAll(_FOCUSABLE)].filter((x) => x.offsetParent !== null);
-    if (!visible.length) return;
-    const first = visible[0];
-    const last = visible[visible.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  };
-  document.addEventListener("keydown", _modalKeyHandler);
-}
-
-/** Ferme une modale et restaure le focus précédent. */
-function closeModal(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.add("hidden");
-  if (_modalKeyHandler) {
-    document.removeEventListener("keydown", _modalKeyHandler);
-    _modalKeyHandler = null;
-  }
-  _modalPrevFocus?.focus?.();
-  _modalPrevFocus = null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

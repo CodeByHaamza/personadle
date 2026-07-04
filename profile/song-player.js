@@ -10,6 +10,7 @@
 
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
 import { formatSongTime } from "./profile-format.js";
+import { openModal, closeModal } from "../js/modal.js";
 
 /** Élément <audio> du profile song — état interne, jamais exposé directement. */
 let profileSongAudio = null;
@@ -198,7 +199,7 @@ function openSongModal(profile, saveProfile, saveProfileToCloud, markDirty) {
     .join("");
 
   modal.innerHTML = `
-    <div class="song-modal-box" role="dialog" aria-modal="true" aria-label="${songT("profile.song_modal_title", "Choose your profile music")}">
+    <div class="song-modal-box" aria-label="${songT("profile.song_modal_title", "Choose your profile music")}">
       <div class="song-modal-bar">
         <input type="text" id="songSearch" class="song-search" autocomplete="off"
                placeholder="${songT("profile.song_search", "🔎 Search a track…")}">
@@ -208,20 +209,15 @@ function openSongModal(profile, saveProfile, saveProfileToCloud, markDirty) {
       <p id="songNoResult" class="song-empty-hint" style="display:none">${songT("profile.song_no_result", "No track found.")}</p>
     </div>`;
 
-  modal.classList.remove("hidden");
+  // openModal() gère role=dialog/aria-modal, le focus initial (1er élément
+  // focusable = #songSearch), le trap clavier (Tab) et Escape.
+  openModal("songModal");
+  const close = () => closeModal("songModal");
 
-  const close = () => modal.classList.add("hidden");
   modal.querySelector("#closeSongModal").onclick = close;
   modal.onclick = (e) => {
     if (e.target === modal) close();
   };
-  const onKey = (e) => {
-    if (e.key === "Escape") {
-      close();
-      document.removeEventListener("keydown", onKey);
-    }
-  };
-  document.addEventListener("keydown", onKey);
 
   modal.querySelectorAll(".song-pick-card").forEach((cardEl) => {
     cardEl.onclick = () => {
@@ -247,7 +243,6 @@ function openSongModal(profile, saveProfile, saveProfileToCloud, markDirty) {
     const nr = modal.querySelector("#songNoResult");
     if (nr) nr.style.display = anyVisible ? "none" : "block";
   });
-  search?.focus();
 }
 
 /** Attache les event handlers de la song card. */

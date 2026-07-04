@@ -32,6 +32,7 @@ import {
 } from "./badges/badgesManager.js";
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
 import { canRecover, showStreakRecoveryMenu } from "../js/streak-recovery.js";
+import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
 import { AVATAR_GROUPS } from "./avatars_data.js";
@@ -232,7 +233,6 @@ const borderColorPicker = document.getElementById("borderColorPicker");
 const statsContainer = document.getElementById("statsContainer");
 
 // Modale crop
-const cropModal = document.getElementById("avatarCropModal");
 const closeCropper = document.getElementById("closeCropper");
 const avatarGrid = document.getElementById("avatarGrid");
 const canvas = document.getElementById("avatarCanvas");
@@ -707,7 +707,7 @@ function renderModeStats() {
 // Ouvrir la modale de crop (avatar)
 editAvatarBtn.onclick = () => {
   cropTarget = "avatar";
-  cropModal.classList.remove("hidden");
+  openModal("avatarCropModal");
 };
 
 // Sauvegarder et rafraîchir
@@ -919,7 +919,7 @@ function initAvatarGrid() {
       pageAvatar.src = "../img/default_avatar.png";
       saveProfile();
       saveProfileToCloud({ avatar_data: null });
-      cropModal.classList.add("hidden");
+      closeModal("avatarCropModal");
     };
   }
 }
@@ -955,7 +955,7 @@ function drawCanvas() {
 }
 
 // Fermer la modale crop
-closeCropper.onclick = () => cropModal.classList.add("hidden");
+closeCropper.onclick = () => closeModal("avatarCropModal");
 
 // Drag sur le canvas (souris)
 canvas.onmousedown = (e) => {
@@ -1032,7 +1032,7 @@ confirmCrop.onclick = () => {
     markDirty();
     saveProfileToCloud({ avatar_data: result });
   }
-  cropModal.classList.add("hidden");
+  closeModal("avatarCropModal");
   cropTarget = "avatar"; // reset systématique
 };
 

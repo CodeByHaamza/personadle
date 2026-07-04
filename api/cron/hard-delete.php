@@ -19,6 +19,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/deletion_requests.php';
 
 // ── Vérification clé secrète ──────────────────────────────────────────────────
 $key = $_GET['key'] ?? '';
@@ -32,48 +33,23 @@ $pdo   = pdo();
 $start = microtime(true);
 $paris = new DateTimeZone('Europe/Paris');
 
-// ── Récupérer les comptes à supprimer ─────────────────────────────────────────
-$pending = $pdo->query("
-    SELECT id AS request_id, user_id
-    FROM deletion_requests
-    WHERE processed_at IS NULL
-      AND requested_at < DATE_SUB(NOW(), INTERVAL 30 DAY)
-");
-$rows = $pending->fetchAll();
-
-$deleted = 0;
-$errors  = [];
-
-$deleteUser  = $pdo->prepare('DELETE FROM users WHERE id = ?');
-$markDone    = $pdo->prepare('UPDATE deletion_requests SET processed_at = NOW() WHERE id = ?');
-
-foreach ($rows as $row) {
-    $requestId = (int) $row['request_id'];
-    $userId    = (int) $row['user_id'];
-
-    try {
-        $pdo->beginTransaction();
-
-        // Hard delete — CASCADE supprime toutes les données liées
-        $deleteUser->execute([$userId]);
-
-        // Log RGPD : marquer comme traité (l'entrée est conservée pour audit)
-        $markDone->execute([$requestId]);
-
-        $pdo->commit();
-        $deleted++;
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        $errors[] = "user_id=$userId: " . $e->getMessage();
-        error_log("[PersonaDLE hard-delete] user_id=$userId: " . $e->getMessage());
-    }
+// Transaction unique pour tout le lot : si le process crashe avant le commit
+// final, rien n'est supprimé (pas de suppression partielle non traçée).
+$pdo->beginTransaction();
+try {
+    $result = personadle_process_due_deletion_requests($pdo, 30);
+    $pdo->commit();
+} catch (Throwable $e) {
+    $pdo->rollBack();
+    personadle_log_error($pdo, 'error', $e->getMessage(), ['source' => 'cron-hard-delete']);
+    jsonError('Hard delete batch failed', 500);
 }
-
 $elapsed = round((microtime(true) - $start) * 1000);
+
 jsonSuccess([
-    'deleted'    => $deleted,
-    'pending'    => count($rows),
-    'errors'     => $errors,
+    'deleted'    => $result['deleted'],
+    'pending'    => $result['pending'],
+    'errors'     => $result['errors'],
     'elapsed_ms' => $elapsed,
     'ran_at'     => (new DateTime('now', $paris))->format('Y-m-d H:i:s'),
 ]);
