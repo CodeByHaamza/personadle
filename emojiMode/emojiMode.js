@@ -23,6 +23,7 @@ import {
 
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
+import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplete.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
@@ -114,7 +115,7 @@ function initializeAutocomplete(element, sourceArray) {
 
   element.addEventListener("input", function () {
     const val = this.value.trim();
-    closeList(null, element);
+    closeAutocompleteList(null, element);
     if (!val) return;
 
     const list = document.createElement("DIV");
@@ -161,7 +162,7 @@ function initializeAutocomplete(element, sourceArray) {
 
       option.addEventListener("click", function () {
         element.value = this.getElementsByTagName("input")[0].value;
-        closeList(null, element);
+        closeAutocompleteList(null, element);
         document.getElementById("guessButton")?.click();
       });
 
@@ -201,25 +202,8 @@ function initializeAutocomplete(element, sourceArray) {
     for (let item of items) item.classList.remove("autocomplete-active");
   }
 
-  document.addEventListener("click", (e) => closeList(e.target, element));
+  document.addEventListener("click", (e) => closeAutocompleteList(e.target, element));
   autocompleteBound = true;
-}
-
-function closeList(e, inputElement) {
-  const items = document.getElementsByClassName("autocomplete-items");
-  for (let item of items) {
-    if (e !== item && e !== inputElement) item.remove();
-  }
-}
-
-/**
- * Removes a guessed name from the autocomplete pool (mutates in place so
- * the autocomplete source array stays in sync without a rebind).
- * @param {string} name
- */
-function removeFromAutocomplete(name) {
-  const idx = personas.findIndex((n) => n.toLowerCase() === name.toLowerCase());
-  if (idx !== -1) personas.splice(idx, 1);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -378,7 +362,7 @@ function checkEmojiGuess(name, forceReveal = false) {
     if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
   }
 
-  removeFromAutocomplete(name);
+  removeFromAutocomplete(personas, name);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

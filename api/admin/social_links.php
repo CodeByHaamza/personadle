@@ -9,6 +9,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/admin_validation.php';
 
 requireAdmin();
 
@@ -140,14 +141,14 @@ if ($method === 'PATCH') {
 
     if (array_key_exists('xp', $data)) {
         $xp = (int) $data['xp'];
-        if ($xp < 0) jsonError('xp must be >= 0', 400);
+        if ($xpError = personadle_validate_sl_xp($xp)) jsonError($xpError, 400);
         $fields[] = 'xp = ?';
         $params[] = $xp;
     }
 
     if (array_key_exists('rank', $data)) {
         $rank = (int) $data['rank'];
-        if ($rank < 1 || $rank > 10) jsonError('rank must be between 1 and 10', 400);
+        if ($rankError = personadle_validate_sl_rank($rank)) jsonError($rankError, 400);
         $fields[] = '`rank` = ?';
         $params[] = $rank;
     }

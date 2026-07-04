@@ -1,8 +1,9 @@
 <?php
 /**
- * GET  /api/social-links/:linkId          → infos du Social Link (rang, xp, interactions today)
- * GET  /api/social-links/by-friend/:id    → retourne le link_id pour l'utilisateur + un ami
- * POST /api/social-links/:linkId/interact → enregistrer une interaction + XP
+ * GET  /api/social-links/:linkId                    → infos du Social Link (rang, xp, interactions today)
+ * GET  /api/social-links/by-friend/:id              → retourne le link_id pour l'utilisateur + un ami
+ * GET  /api/social-links/rankup-notifs              → notifications de montée de rang non vues
+ * POST /api/social-links/by-friend/:id/interact     → enregistrer une interaction + XP (1 round-trip)
  *
  * Format body POST : { "action_type": "visit_profile" | "share_streak" | "share_score"
  *                                    | "play_same_day" | "compare_stats" | "challenge" }
@@ -10,10 +11,14 @@
  * Règles :
  *   - Une action est possible max 1× par jour par couple d'amis (sauf play_same_day auto)
  *   - Si l'autre ami fait la même action dans la journée → is_mutual = 1 → XP doublé
- *   - La procédure add_social_link_xp() gère la montée de rang
+ *   - addSocialLinkXp() gère la montée de rang (équivalent PHP de add_social_link_xp())
+ *
+ * Note : l'ancienne route POST /:linkId/interact (sans garde-fou d'amitié) a été retirée —
+ * plus aucun appelant côté client (js/api.js n'utilise que interactByFriend()).
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/social_link.php';
 
 /**
  * Équivalent PHP de la procédure stockée add_social_link_xp().
@@ -40,15 +45,8 @@ function addSocialLinkXp(PDO $pdo, int $linkId, int $xpAmount): array
     return ['xp' => $newXp, 'rank' => $newRank, 'ranked_up' => $rankedUp];
 }
 
-// XP par action (solo | mutuel si l'autre a fait la même action aujourd'hui)
-const XP_TABLE = [
-    'share_streak'  => ['solo' => 15, 'mutual' => 30],
-    'share_score'   => ['solo' => 10, 'mutual' => 20],
-    'visit_profile' => ['solo' =>  5, 'mutual' => 10],
-    'play_same_day' => ['solo' => 20, 'mutual' => 20], // toujours mutuel
-    'compare_stats' => ['solo' => 10, 'mutual' => 20],
-    'challenge'     => ['solo' => 15, 'mutual' => 35],
-];
+// XP par action (solo | mutuel) — table + calcul extraits dans api/lib/social_link.php
+// (testable en PHPUnit sans MySQL, cf. tests/php/SocialLinkTest.php).
 
 $authId = requireAuth();
 $pdo    = pdo();
@@ -129,13 +127,15 @@ if ($method === 'POST' && $slIdx !== false
     && isset($parts[$slIdx + 2])
     && ($parts[$slIdx + 3] ?? '') === 'interact'
 ) {
+    rateLimit('sl-interact:' . $authId, 30, 15 * 60);
+
     $friendId = (int) ($parts[$slIdx + 2] ?? 0);
     if ($friendId <= 0) jsonError('Invalid friend id', 400);
     if ($friendId === $authId) jsonError('Cannot interact with yourself', 400);
 
     $data       = getJsonBody();
     $actionType = trim($data['action_type'] ?? '');
-    if (!isset(XP_TABLE[$actionType])) jsonError('Invalid action_type', 400);
+    if (!isset(PERSONADLE_SL_XP_TABLE[$actionType])) jsonError('Invalid action_type', 400);
 
     // Friendship guard : vérifier que les deux utilisateurs sont amis
     $stmtFriend = $pdo->prepare(
@@ -189,7 +189,7 @@ if ($method === 'POST' && $slIdx !== false
         $stmtOther->execute([$linkId, $friendId, $actionType, $today]);
         $isMutual = $actionType === 'play_same_day' ? true : (bool) $stmtOther->fetch();
 
-        $xpGained = $isMutual ? XP_TABLE[$actionType]['mutual'] : XP_TABLE[$actionType]['solo'];
+        $xpGained = personadle_sl_xp_for_action($actionType, $isMutual);
 
         $pdo->prepare("
             INSERT INTO social_link_interactions (social_link_id, initiator_id, action_type, xp_gained, is_mutual)
@@ -201,8 +201,8 @@ if ($method === 'POST' && $slIdx !== false
                 UPDATE social_link_interactions SET is_mutual = 1, xp_gained = ?
                 WHERE social_link_id = ? AND initiator_id = ? AND action_type = ?
                   AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
-            ")->execute([XP_TABLE[$actionType]['mutual'], $linkId, $friendId, $actionType, $today]);
-            $bonusXp = XP_TABLE[$actionType]['mutual'] - XP_TABLE[$actionType]['solo'];
+            ")->execute([PERSONADLE_SL_XP_TABLE[$actionType]['mutual'], $linkId, $friendId, $actionType, $today]);
+            $bonusXp = PERSONADLE_SL_XP_TABLE[$actionType]['mutual'] - PERSONADLE_SL_XP_TABLE[$actionType]['solo'];
             if ($bonusXp > 0) addSocialLinkXp($pdo, $linkId, $bonusXp);
         }
 
@@ -233,12 +233,10 @@ if ($method === 'POST' && $slIdx !== false
     ]);
 }
 
-// ── Extraire linkId et éventuel sous-chemin /interact ───────────────────────
-$linkId    = 0;
-$subAction = '';
+// ── Extraire linkId (GET /:linkId — seule route restante sous cette forme) ──
+$linkId = 0;
 if ($slIdx !== false && isset($parts[$slIdx + 1]) && ctype_digit($parts[$slIdx + 1])) {
-    $linkId    = (int) $parts[$slIdx + 1];
-    $subAction = $parts[$slIdx + 2] ?? '';
+    $linkId = (int) $parts[$slIdx + 1];
 }
 if ($linkId <= 0) jsonError('Missing or invalid link id', 400);
 
@@ -294,115 +292,6 @@ if ($method === 'GET') {
             'initiator_id' => (int) $i['initiator_id'],
             'is_mutual'    => (bool) $i['is_mutual'],
         ], $todayInteractions),
-    ]);
-}
-
-
-// ═══════════════════════════════════════════════════════════════════
-// POST /api/social-links/:linkId/interact
-// ═══════════════════════════════════════════════════════════════════
-if ($method === 'POST' && $subAction === 'interact') {
-    $data       = getJsonBody();
-    $actionType = trim($data['action_type'] ?? '');
-
-    if (!isset(XP_TABLE[$actionType])) {
-        jsonError('Invalid action_type', 400);
-    }
-
-    // Vérifier que l'utilisateur fait bien partie de ce Social Link
-    $stmt = $pdo->prepare('SELECT user_a_id, user_b_id FROM social_links WHERE id = ? LIMIT 1');
-    $stmt->execute([$linkId]);
-    $link = $stmt->fetch();
-    if (!$link || ((int)$link['user_a_id'] !== $authId && (int)$link['user_b_id'] !== $authId)) {
-        jsonError('Social Link not found or access denied', 404);
-    }
-
-    $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
-
-    // Anti-spam : vérifier si déjà fait aujourd'hui (toutes actions, y compris play_same_day)
-    $stmtCheck = $pdo->prepare("
-        SELECT id FROM social_link_interactions
-        WHERE social_link_id = ?
-          AND initiator_id   = ?
-          AND action_type    = ?
-          AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
-        LIMIT 1
-    ");
-    $stmtCheck->execute([$linkId, $authId, $actionType, $today]);
-    if ($stmtCheck->fetch()) {
-        jsonError('Already performed this action today', 409);
-    }
-
-    // Vérifier si l'autre ami a fait la même action aujourd'hui → mutuel
-    $otherId = ((int)$link['user_a_id'] === $authId) ? (int)$link['user_b_id'] : (int)$link['user_a_id'];
-    $stmtOther = $pdo->prepare("
-        SELECT id FROM social_link_interactions
-        WHERE social_link_id = ?
-          AND initiator_id   = ?
-          AND action_type    = ?
-          AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
-        LIMIT 1
-    ");
-    $stmtOther->execute([$linkId, $otherId, $actionType, $today]);
-    $isMutual = (bool) $stmtOther->fetch();
-
-    // play_same_day est toujours mutuel
-    if ($actionType === 'play_same_day') $isMutual = true;
-
-    $xpGained = $isMutual ? XP_TABLE[$actionType]['mutual'] : XP_TABLE[$actionType]['solo'];
-
-    $result = [];
-    $pdo->beginTransaction();
-    try {
-        // Logger l'interaction
-        $pdo->prepare("
-            INSERT INTO social_link_interactions
-                (social_link_id, initiator_id, action_type, xp_gained, is_mutual)
-            VALUES (?, ?, ?, ?, ?)
-        ")->execute([$linkId, $authId, $actionType, $xpGained, $isMutual ? 1 : 0]);
-
-        // Si mutuel, mettre à jour l'interaction précédente de l'autre aussi
-        if ($isMutual && $actionType !== 'play_same_day') {
-            $pdo->prepare("
-                UPDATE social_link_interactions
-                SET is_mutual = 1, xp_gained = ?
-                WHERE social_link_id = ?
-                  AND initiator_id   = ?
-                  AND action_type    = ?
-                  AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
-            ")->execute([XP_TABLE[$actionType]['mutual'], $linkId, $otherId, $actionType, $today]);
-
-            // Ajouter l'XP bonus à l'autre (différence solo→mutual)
-            $bonusXp = XP_TABLE[$actionType]['mutual'] - XP_TABLE[$actionType]['solo'];
-            if ($bonusXp > 0) {
-                addSocialLinkXp($pdo, $linkId, $bonusXp);
-            }
-        }
-
-        // Ajouter l'XP du joueur courant et récupérer le résultat
-        $result = addSocialLinkXp($pdo, $linkId, $xpGained);
-
-        // Notifier l'autre joueur si le rang a monté (il verra l'animation au prochain poll)
-        if ($result['ranked_up']) {
-            $pdo->prepare("
-                INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank)
-                VALUES (?, ?, ?)
-            ")->execute([$otherId, $authId, $result['rank']]);
-        }
-
-        $pdo->commit();
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        error_log('[SL interact] ' . $e->getMessage());
-        jsonError('Interaction failed', 500);
-    }
-
-    jsonSuccess([
-        'xp_gained' => $xpGained,
-        'is_mutual' => $isMutual,
-        'new_xp'    => (int) ($result['xp']       ?? 0),
-        'new_rank'  => (int) ($result['rank']      ?? 1),
-        'ranked_up' => (bool) ($result['ranked_up'] ?? false),
     ]);
 }
 

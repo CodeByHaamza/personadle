@@ -415,17 +415,8 @@ export const api = {
     getByFriend: (friendId) => get(`/social-links/by-friend/${friendId}`),
 
     /**
-     * Enregistre une interaction (visite de profil, partage streak…).
-     * @param {number} linkId
-     * @param {string} actionType  'visit_profile'|'share_streak'|'share_score'|
-     *                              'play_same_day'|'compare_stats'|'challenge'
-     */
-    interact: (linkId, actionType) =>
-      post(`/social-links/${linkId}/interact`, { action_type: actionType }),
-
-    /**
-     * Crée/résout le Social Link avec un ami et enregistre une interaction.
-     * Remplace getByFriend() + interact() — 1 requête au lieu de 2.
+     * Crée/résout le Social Link avec un ami et enregistre une interaction en 1 requête
+     * (get_or_create + interact côté serveur, avec garde-fou d'amitié).
      * @param {number} friendId
      * @param {string} actionType
      */

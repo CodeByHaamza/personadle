@@ -82,8 +82,7 @@ CREATE TABLE users (
     UNIQUE KEY uq_friend_code     (friend_code),
     INDEX      idx_remember_me    (remember_me_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE INDEX idx_users_pseudo ON users(pseudo);
+-- Pas d'index séparé sur pseudo : uq_pseudo ci-dessus l'indexe déjà (UNIQUE KEY).
 
 
 -- =============================================================================

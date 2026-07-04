@@ -10,6 +10,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/validation.php';
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
 $rawForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
@@ -32,18 +33,13 @@ $lang     = trim($data['lang']     ?? 'en');
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     jsonError('Invalid email address');
 }
-if (strlen($pseudo) < 3 || strlen($pseudo) > 50) {
-    jsonError('Username must be between 3 and 50 characters');
+if ($pseudoError = personadle_validate_pseudo($pseudo)) {
+    jsonError($pseudoError);
 }
-if (!preg_match('/^[\w\-\.]+$/u', $pseudo)) {
-    jsonError('Username can only contain letters, numbers, hyphens, dots and underscores');
+if ($passwordError = personadle_validate_password($password)) {
+    jsonError($passwordError);
 }
-if (strlen($password) < 8) {
-    jsonError('Password must be at least 8 characters');
-}
-if (!in_array($lang, ['en', 'fr', 'es', 'de', 'it'], true)) {
-    $lang = 'en';
-}
+$lang = personadle_normalize_lang($lang);
 
 $pdo = pdo();
 

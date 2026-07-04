@@ -21,6 +21,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/friends.php';
 
 // Extraire l'éventuel :id depuis l'URL (/api/friends/42)
 $parts        = explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
@@ -158,11 +159,13 @@ if ($method === 'GET') {
 // Body: { "friend_code": "XK4R2M9P" }
 // ═══════════════════════════════════════════════════════════════════════════════
 if ($method === 'POST') {
+    rateLimit('friends-add:' . $authId, 10, 15 * 60);
+
     $data       = getJsonBody();
     $friendCode = strtoupper(trim($data['friend_code'] ?? ''));
 
-    if (!preg_match('/^[A-Z0-9]{8}$/', $friendCode)) {
-        jsonError('Invalid friend code format (expected 8 alphanumeric chars)');
+    if ($codeError = personadle_validate_friend_code($friendCode)) {
+        jsonError($codeError);
     }
 
     // Trouver l'utilisateur cible
@@ -188,11 +191,8 @@ if ($method === 'POST') {
     $stmt->execute([$authId, $addresseeId, $addresseeId, $authId]);
     $existing = $stmt->fetch();
 
-    if ($existing) {
-        $status = $existing['status'];
-        if ($status === 'accepted')  jsonError('Already friends', 409);
-        if ($status === 'pending')   jsonError('Request already sent or received', 409);
-        if ($status === 'blocked')   jsonError('Cannot send request', 403);
+    if ($denial = personadle_friend_request_denial($existing['status'] ?? null)) {
+        jsonError($denial['message'], $denial['http_status']);
     }
 
     // Créer la demande

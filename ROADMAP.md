@@ -17,14 +17,65 @@
 
 ### 🔴 À prévoir assez tôt
 
-- [ ] **Pipeline de contenu** (P4 Revival, P6, Metaphor, SMT)
-  Ajouter un perso = toucher `characters_clean.js` + `personas.js` + `quotes.js` + portraits + AOA + emojis.
-  → Formaliser un **checklist / script** d'ajout (le validateur `npm run data:check` est la base).
+- [ ] **Pipeline de contenu** (P4 Revival, P6, Metaphor, SMT) — voir détail juste en dessous.
 - [ ] **Conditions badges/wallpapers en colonnes structurées**
   Aujourd'hui texte libre → validation serveur par mapping slug→logique (fragile).
   → Migration `condition_type` / `condition_value` = anti-triche **générique**.
 - [ ] **Stratégie assets AOA** (~1,8 Go dans git) — Git LFS **ou** CDN-only + fetch au 1er lancement.
   _(Script `scripts/purge_git_history.sh` prêt pour récupérer l'historique.)_
+
+#### 🎮 Détail — Pipeline de contenu par sortie de jeu
+
+Deux cas différents, qui touchent des fichiers différents :
+
+**A. Nouveau jeu de la licence (roster inédit)** — ex. Persona 6, Metaphor: ReFantazio, SMT.
+Ajouter un personnage = toucher, dans cet ordre :
+
+- [ ] `database/characters_clean.js` — fiche perso (nom, genre, âge, persona, arcane, opus…)
+- [ ] `database/personas.js` — ajouter le nom à la liste d'autocomplétion (Classic)
+- [ ] `database/quotes.js` — citation(s) du perso
+- [ ] `database/portraits/*.webp` + `database/portraitsMap.js` — portrait + mapping nom→fichier
+- [ ] `allOutAttackMode/database/aoaCharacters.js` + `personas_allOut.js` + `portraitsMap.js` + GIFs — équivalent AOA
+- [ ] `silhouetteMode/database/`, `personaeMode/database/`, `musicsMode/database/` — mêmes ajouts côté silhouette/personae/musique si le perso a un thème musical propre
+- [ ] `emojiMode` — séquence d'emojis pour le nouveau perso
+- [ ] `profile/avatars_data.js` + `img/avatar/` — nouveaux avatars de profil (PDP) groupés par jeu
+- [ ] `musicsMode/database/songs.js` + `musicTitles.js` + fichiers audio — OST du nouveau jeu
+- [ ] **Filtres opus** — ajouter le nouveau code opus (ex. `"P6"`) au tableau `ALL_OPUS` de **chaque** mode (`classiqueMode`, `emojiMode`, `silhouetteMode`, `personaeMode`, `musicsMode`, `allOutAttackMode`) pour qu'il apparaisse dans le panneau de filtres
+- [ ] `npm run data:check` (`scripts/validate_characters.js`) — doit passer sans erreur sur le nouveau roster
+
+**B. Remaster/Revival d'un jeu déjà supporté (assets seulement)** — ex. Persona 4 Revival
+(remplace P4/P4G comme Persona 3 Reload a remplacé les artworks P3 d'origine).
+
+- [ ] Remplacer les portraits (`database/portraits/*.webp`) par le nouvel artwork officiel
+- [ ] Remplacer les GIFs AOA correspondants si Atlus republie des animations
+- [ ] Vérifier si le nouvel opus doit être **distinct** dans les filtres (`P4R` séparé de `P4`/`P4G`)
+      ou **fusionné** (même roster, juste un artwork mis à jour) — décision à prendre au cas par cas
+- [ ] Pas de changement sur `personas.js`/`quotes.js` si les personnages restent les mêmes
+
+→ Formaliser ça en **checklist réutilisable** (voire un script `scripts/add_character.js` qui
+scaffolde les entrées dans tous les fichiers concernés) plutôt que de le refaire de mémoire
+à chaque sortie.
+
+**Jeux à surveiller** (photo dès qu'une date/du contenu officiel est confirmé) :
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+<img src="docs/roadmap/persona-4-revival.jpg" width="280" alt="Persona 4 Revival"><br>
+<b>Persona 4 Revival</b><br>
+Remaster — cas B (remplacement d'assets P4/P4G)
+
+</td>
+<td width="50%" align="center">
+
+<img src="docs/roadmap/persona-6.jpg" width="280" alt="Persona 6"><br>
+<b>Persona 6</b><br>
+Nouveau jeu — cas A (roster inédit)
+
+</td>
+</tr>
+</table>
 
 ### 🟠 Qualité / robustesse
 
@@ -38,6 +89,14 @@
 - [ ] **Mode Versus / défi temps réel** entre amis.
 - [ ] **Historique de profil** : graphe de streak + calendrier des jours joués (on a déjà `uniqueDaysSet`).
 - [ ] **Saison / ladder** avec reset périodique + récompenses.
+- [ ] 💡 **Mode Expert / New Game+** — moins d'essais autorisés ou moins d'indices affichés,
+  avec un badge dédié à la clé. Rejoue de la valeur pour les joueurs qui maîtrisent déjà le jeu.
+- [ ] 💡 **Compendium des unlocks** — vue "archive" style Persona de tous les badges/titres/
+  wallpapers débloqués avec leur date. Réutilise `badges_unlocked`/`user_titles` déjà en base,
+  pas de nouvelle donnée serveur nécessaire.
+- [ ] 💡 **Groupes d'amis** (au-delà du 1-à-1) — petits groupes ("table du Velvet Room") avec
+  leaderboard privé. Étend `friendships`/`leaderboard` au-delà des paires Social Link
+  (implique une nouvelle table de groupe + permissions à définir).
 - [ ] **Notifications push (PWA)** — rappel quotidien (levier de rétention « daily »).
 
 ### 🔐 Sécurité / compte

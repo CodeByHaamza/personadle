@@ -195,4 +195,59 @@ final class DatabaseIntegrationTest extends TestCase
         self::$pdo->prepare('DELETE FROM users WHERE id = ?')->execute([$uid]);
         $this->assertSame(0, $count(), 'ON DELETE CASCADE doit purger user_stats');
     }
+
+    /**
+     * Complète testDeletingUserCascadesToStats() : le hard delete admin
+     * (DELETE /api/admin/users/:id) doit purger TOUTES les tables liées, pas
+     * seulement user_stats — sinon des lignes orphelines subsistent (badges_unlocked,
+     * profiles) après suppression "définitive" d'un compte.
+     */
+    public function testDeletingUserCascadesToProfileAndBadges(): void
+    {
+        $uid = $this->makeUser();
+        self::$pdo->prepare('INSERT INTO profiles (user_id) VALUES (?)')->execute([$uid]);
+        self::$pdo->prepare(
+            "INSERT INTO badges_unlocked (user_id, badge_id) VALUES (?, 'true_hacker')"
+        )->execute([$uid]);
+
+        $profileCount = fn() => (int) self::$pdo
+            ->query("SELECT COUNT(*) FROM profiles WHERE user_id = $uid")->fetchColumn();
+        $badgeCount = fn() => (int) self::$pdo
+            ->query("SELECT COUNT(*) FROM badges_unlocked WHERE user_id = $uid")->fetchColumn();
+
+        $this->assertSame(1, $profileCount());
+        $this->assertSame(1, $badgeCount());
+
+        self::$pdo->prepare('DELETE FROM users WHERE id = ?')->execute([$uid]);
+
+        $this->assertSame(0, $profileCount(), 'ON DELETE CASCADE doit purger profiles');
+        $this->assertSame(0, $badgeCount(), 'ON DELETE CASCADE doit purger badges_unlocked');
+    }
+
+    /**
+     * Vérifie la requête de purge de api/cron/purge-rate-limits.php : les fenêtres
+     * expirées depuis plus d'1h sont supprimées, les fenêtres récentes/actives
+     * sont conservées (sans DB, rate_limits grossirait indéfiniment).
+     */
+    public function testRateLimitsPurgeDeletesOldWindowsOnly(): void
+    {
+        $rndOld    = 'phpunit_old_' . bin2hex(random_bytes(4));
+        $rndRecent = 'phpunit_recent_' . bin2hex(random_bytes(4));
+
+        $ins = self::$pdo->prepare(
+            'INSERT INTO rate_limits (rl_key, hits, window_start) VALUES (?, 1, ?)'
+        );
+        $ins->execute([$rndOld, time() - 7200]);    // 2h — au-delà de la marge de purge
+        $ins->execute([$rndRecent, time() - 60]);   // 1 min — fenêtre encore active
+
+        $cutoff = time() - 3600; // même marge que le cron (1h)
+        self::$pdo->prepare('DELETE FROM rate_limits WHERE window_start < ?')->execute([$cutoff]);
+
+        $stmt = self::$pdo->prepare('SELECT COUNT(*) FROM rate_limits WHERE rl_key = ?');
+        $stmt->execute([$rndOld]);
+        $this->assertSame(0, (int) $stmt->fetchColumn(), 'la fenêtre expirée aurait dû être purgée');
+
+        $stmt->execute([$rndRecent]);
+        $this->assertSame(1, (int) $stmt->fetchColumn(), 'la fenêtre active ne doit pas être purgée');
+    }
 }

@@ -6,6 +6,7 @@
  * DELETE /api/admin/event_codes/:code    → supprimer un code
  */
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/admin_validation.php';
 
 requireAdmin();
 
@@ -45,8 +46,8 @@ if ($method === 'POST') {
     $startDate   = trim($data['start_date']             ?? '');
     $endDate     = trim($data['end_date']               ?? '');
 
-    if (!$code || strlen($code) > 50 || !preg_match('/^[A-Z0-9_]+$/', $code)) {
-        jsonError('Code invalide (lettres majuscules, chiffres, underscore)', 400);
+    if ($codeError = personadle_validate_event_code($code)) {
+        jsonError($codeError, 400);
     }
     if (!$badgeId || strlen($badgeId) > 100) jsonError('badge_id invalide', 400);
     if (!$isPermanent && (!$startDate || !$endDate)) {

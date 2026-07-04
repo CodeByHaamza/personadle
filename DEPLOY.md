@@ -149,6 +149,7 @@ Dans hPanel → **Avancé** → **Tâches Cron** :
 | ----------------------- | --------------------------------------------------------------------------------------------- |
 | **Toutes les heures**   | `wget -qO- "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" > /dev/null 2>&1` |
 | **1× par jour à 03:00** | `wget -qO- "https://personadle.net/api/cron/hard-delete.php?key=TON_SECRET" > /dev/null 2>&1` |
+| **1× par jour à 04:00** | `wget -qO- "https://personadle.net/api/cron/purge-rate-limits.php?key=TON_SECRET" > /dev/null 2>&1` |
 
 Remplace `TON_SECRET` par la valeur de `CRON_SECRET` de ton `config.php`.
 
@@ -203,5 +204,6 @@ curl -s "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" | pytho
 - [ ] Compte admin promu via `UPDATE users SET is_admin = 1`
 - [ ] Cron leaderboard configuré (toutes les heures)
 - [ ] Cron hard-delete configuré (03:00 quotidien)
+- [ ] Cron purge-rate-limits configuré (04:00 quotidien)
 - [ ] HTTPS testé + redirect HTTP → HTTPS OK
 - [ ] Inscription + connexion + partie fonctionnels

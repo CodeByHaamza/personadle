@@ -32,7 +32,7 @@ import { FILTER_STORAGE_KEYS } from "../../js/gameCore.js";
 // ─────────────────────────────────────────────────────────
 
 /** Échappe les caractères spéciaux HTML. */
-function esc(str) {
+export function esc(str) {
   return String(str ?? "").replace(
     /[&<>"']/g,
     (c) =>
@@ -48,7 +48,7 @@ function esc(str) {
 
 /** URL de l'avatar — normalise les chemins relatifs, fallback si absent.
  *  Ce fichier est servi depuis profile/friends/ (2 niveaux) — img/ est à ../../img/. */
-function avatarSrc(avatarData) {
+export function avatarSrc(avatarData) {
   if (!avatarData) return "../../img/default_avatar.png";
   if (avatarData.startsWith("data:")) return avatarData;
   // Paths stored in DB are relative to profile/ (../img/...) → adjust for friends/ depth
@@ -75,11 +75,6 @@ function avatarHTML(pseudo, avatarData, borderColor = "#ffffff", lastSeen = null
   </div>`;
 }
 
-/** Traduit une clé i18n ou retourne la clé brute. */
-function t(key, vars = {}) {
-  return window.i18n?.t?.(key, vars) ?? key;
-}
-
 /** Traduit une clé i18n avec un vrai fallback string (détecte quand i18n retourne la clé brute). */
 function tf(key, fallback) {
   if (!window.i18n?.t) return fallback;
@@ -88,24 +83,26 @@ function tf(key, fallback) {
 }
 
 /** Returns true if lastSeen ISO string is within the last 30 minutes. */
-function isOnline(lastSeen) {
+export function isOnline(lastSeen) {
   if (!lastSeen) return false;
   return Date.now() - new Date(lastSeen).getTime() < ONLINE_THRESHOLD_MS;
 }
 
 /** Returns a human-readable "X ago" string, or null if no date. */
-function formatLastSeen(isoDate) {
+export function formatLastSeen(isoDate) {
   if (!isoDate) return null;
   const diff = Date.now() - new Date(isoDate).getTime();
   const sec = Math.floor(diff / 1000);
-  if (sec < 60) return t("friends.last_seen_just_now") || "just now";
+  // tf() (pas t() + `||`) : t(key) renvoie la clé brute — truthy — quand i18n
+  // n'est pas encore prêt, donc `||` ne retombe jamais sur le fallback anglais.
+  if (sec < 60) return tf("friends.last_seen_just_now", "just now");
   const min = Math.floor(sec / 60);
-  if (min < 60) return (t("friends.last_seen_minutes") || "{{n}}m ago").replace("{{n}}", min);
+  if (min < 60) return tf("friends.last_seen_minutes", "{{n}}m ago").replace("{{n}}", min);
   const hr = Math.floor(min / 60);
-  if (hr < 24) return (t("friends.last_seen_hours") || "{{n}}h ago").replace("{{n}}", hr);
+  if (hr < 24) return tf("friends.last_seen_hours", "{{n}}h ago").replace("{{n}}", hr);
   const days = Math.floor(hr / 24);
-  if (days < 7) return (t("friends.last_seen_days") || "{{n}}d ago").replace("{{n}}", days);
-  return t("friends.last_seen_long_ago") || "a while ago";
+  if (days < 7) return tf("friends.last_seen_days", "{{n}}d ago").replace("{{n}}", days);
+  return tf("friends.last_seen_long_ago", "a while ago");
 }
 
 // ─────────────────────────────────────────────────────────
@@ -179,31 +176,31 @@ function renderBrowseEntry(player) {
   let actions = "";
 
   if (isSelf) {
-    badge = `<span class="fr-tag fr-tag--self">${t("friends.thats_you") || "You"}</span>`;
+    badge = `<span class="fr-tag fr-tag--self">${tf("friends.thats_you", "You")}</span>`;
     actions = "";
   } else if (friendship_status === "accepted") {
-    badge = `<span class="fr-tag fr-tag--friend">💙 ${t("friends.friend") || "Friend"}</span>`;
+    badge = `<span class="fr-tag fr-tag--friend">💙 ${tf("friends.friend", "Friend")}</span>`;
     actions = `
-      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${t("friends.view_profile") || "View profile"}">👁</a>
+      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${tf("friends.view_profile", "View profile")}">👁</a>
       <button class="fr-btn fr-btn--danger js-remove"
               data-fid="${esc(String(friendship_id))}"
-              title="${t("friends.remove_friend") || "Remove"}">✕</button>
+              title="${tf("friends.remove_friend", "Remove")}">✕</button>
     `;
   } else if (friendship_status === "pending" && friendship_direction === "sent") {
-    badge = `<span class="fr-tag fr-tag--pending">⏳ ${t("friends.request_sent") || "Sent"}</span>`;
+    badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.request_sent", "Sent")}</span>`;
     actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
   } else if (friendship_status === "pending" && friendship_direction === "received") {
-    badge = `<span class="fr-tag fr-tag--pending">⏳ ${t("friends.pending") || "Pending"}</span>`;
+    badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.pending", "Pending")}</span>`;
     actions = `
       <button class="fr-btn fr-btn--accept js-accept"
               data-fid="${esc(String(friendship_id))}"
-              title="${t("friends.accept") || "Accept"}">✓</button>
+              title="${tf("friends.accept", "Accept")}">✓</button>
       <button class="fr-btn fr-btn--danger js-decline"
               data-fid="${esc(String(friendship_id))}"
-              title="${t("friends.decline") || "Decline"}">✕</button>
+              title="${tf("friends.decline", "Decline")}">✕</button>
     `;
   } else if (state.sentCodes.has(friend_code)) {
-    badge = `<span class="fr-tag fr-tag--pending">⏳ ${t("friends.request_sent") || "Sent"}</span>`;
+    badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.request_sent", "Sent")}</span>`;
     actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
   } else {
     // Pas de relation — bouton Add Friend
@@ -211,7 +208,7 @@ function renderBrowseEntry(player) {
       <button class="fr-btn fr-btn--add js-add"
               data-code="${esc(friend_code)}"
               data-id="${esc(String(id))}"
-              title="${t("friends.add_friend") || "Add friend"}">+ ${t("friends.add_friend") || "Add"}</button>
+              title="${tf("friends.add_friend", "Add friend")}">+ ${tf("friends.add_friend", "Add")}</button>
       <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>
     `;
   }
@@ -237,8 +234,8 @@ function renderBrowse() {
   if (!state.browseUsers.length) {
     const msg =
       state.browseQuery.length >= 2
-        ? t("friends.no_results") || "No players found."
-        : t("friends.no_users") || "No players yet.";
+        ? tf("friends.no_results", "No players found.")
+        : tf("friends.no_users", "No players yet.");
     list.innerHTML = `<p class="fr-empty">${esc(msg)}</p>`;
   } else {
     list.innerHTML = state.browseUsers.map(renderBrowseEntry).join("");
@@ -296,10 +293,10 @@ function renderFriendEntry(entry) {
         </div>
       </div>
       <div class="fr-entry-actions">
-        <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${t("friends.view_profile") || "View"}">👁</a>
+        <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${tf("friends.view_profile", "View")}">👁</a>
         <button class="fr-btn fr-btn--danger js-remove"
                 data-fid="${esc(String(friendship_id))}"
-                title="${t("friends.remove_friend") || "Remove"}">✕</button>
+                title="${tf("friends.remove_friend", "Remove")}">✕</button>
       </div>
     </div>
   `;
@@ -311,7 +308,7 @@ function renderFriendsList() {
   if (!list) return;
 
   if (!state.friends.length) {
-    list.innerHTML = `<p class="fr-empty">${t("friends.no_friends") || "No friends yet."}</p>`;
+    list.innerHTML = `<p class="fr-empty">${tf("friends.no_friends", "No friends yet.")}</p>`;
   } else {
     list.innerHTML = state.friends.map(renderFriendEntry).join("");
   }
@@ -344,10 +341,10 @@ function renderPendingEntry(entry) {
       <div class="fr-entry-actions">
         <button class="fr-btn fr-btn--accept js-accept"
                 data-fid="${esc(String(friendship_id))}"
-                title="${t("friends.accept") || "Accept"}">✓ ${t("friends.accept") || "Accept"}</button>
+                title="${tf("friends.accept", "Accept")}">✓ ${tf("friends.accept", "Accept")}</button>
         <button class="fr-btn fr-btn--danger js-decline"
                 data-fid="${esc(String(friendship_id))}"
-                title="${t("friends.decline") || "Decline"}">✕</button>
+                title="${tf("friends.decline", "Decline")}">✕</button>
       </div>
     </div>
   `;
@@ -422,7 +419,7 @@ async function loadBrowse(q = "", page = 0) {
   const list = document.getElementById("browseList");
   if (!api || !list) return;
 
-  list.innerHTML = `<p class="fr-empty fr-loading">${t("ui.loading") || "Loading…"}</p>`;
+  list.innerHTML = `<p class="fr-empty fr-loading">${tf("ui.loading", "Loading…")}</p>`;
 
   try {
     const data = await api.publicProfile.list({
@@ -438,7 +435,7 @@ async function loadBrowse(q = "", page = 0) {
   } catch {
     state.browseUsers = [];
     state.browseTotal = 0;
-    list.innerHTML = `<p class="fr-empty">${t("friends.load_error") || "Could not load players."}</p>`;
+    list.innerHTML = `<p class="fr-empty">${tf("friends.load_error", "Could not load players.")}</p>`;
     return;
   }
 
@@ -468,13 +465,13 @@ async function sendFriendRequest(friendCode, targetId) {
       if (infoDiv && !infoDiv.querySelector(".fr-tag")) {
         infoDiv.insertAdjacentHTML(
           "beforeend",
-          `<span class="fr-tag fr-tag--pending">⏳ ${t("friends.request_sent") || "Sent"}</span>`
+          `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.request_sent", "Sent")}</span>`
         );
       }
     }
   } catch (err) {
     console.error("[Friends] sendFriendRequest failed:", err?.status, err?.message, err?.data);
-    alert(err.message || t("friends.error_send") || "Could not send friend request.");
+    alert(err.message || tf("friends.error_send", "Could not send friend request."));
   }
 }
 
@@ -489,7 +486,7 @@ async function respondToRequest(friendshipId, action) {
     // Rafraîchir le browse pour mettre à jour les statuts
     await loadBrowse(state.browseQuery, state.browsePage);
   } catch (err) {
-    alert(err.message || t("friends.error_respond") || "Could not process this request.");
+    alert(err.message || tf("friends.error_respond", "Could not process this request."));
   }
 }
 
@@ -498,7 +495,7 @@ async function removeFriend(friendshipId) {
   const api = window._personadleApi;
   if (!api) return;
 
-  const confirmed = confirm(t("friends.confirm_remove") || "Remove this friend?");
+  const confirmed = confirm(tf("friends.confirm_remove", "Remove this friend?"));
   if (!confirmed) return;
 
   try {
@@ -508,7 +505,7 @@ async function removeFriend(friendshipId) {
     // Rafraîchir browse pour changer le bouton
     await loadBrowse(state.browseQuery, state.browsePage);
   } catch (err) {
-    alert(err.message || t("friends.error_remove") || "Could not remove friend.");
+    alert(err.message || tf("friends.error_remove", "Could not remove friend."));
   }
 }
 
@@ -564,14 +561,14 @@ async function handleAddByCode() {
   try {
     await window._personadleApi.friends.request(code);
     state.sentCodes.add(code);
-    msg.textContent = t("friends.add_success") || "Friend request sent!";
+    msg.textContent = tf("friends.add_success", "Friend request sent!");
     msg.className = "fr-add-code-msg fr-add-code-msg--success";
     input.value = "";
     addBtn.classList.add("hidden");
     document.getElementById("browseSearchClear")?.classList.add("hidden");
     await loadBrowse(state.browseQuery, state.browsePage);
   } catch (err) {
-    msg.textContent = err.message || t("friends.error_send") || "Could not send friend request.";
+    msg.textContent = err.message || tf("friends.error_send", "Could not send friend request.");
     msg.className = "fr-add-code-msg fr-add-code-msg--error";
   } finally {
     addBtn.disabled = false;
@@ -672,15 +669,15 @@ function renderMessage(msg) {
 
   const direction = isReceived
     ? `<b>${esc(fromPseudo)}</b>`
-    : `${t("friends.sent_to", "To")} <b>${esc(msg.receiver.pseudo)}</b>`;
+    : `${tf("friends.sent_to", "To")} <b>${esc(msg.receiver.pseudo)}</b>`;
 
   let content = "";
   let actions = "";
 
   if (msg.type === "friend_declined") {
-    content = `<span class="fr-msg-declined">✗ <b>${esc(msg.sender.pseudo)}</b> ${t("friends.declined_request", "declined your friend request.")}</span>`;
+    content = `<span class="fr-msg-declined">✗ <b>${esc(msg.sender.pseudo)}</b> ${tf("friends.declined_request", "declined your friend request.")}</span>`;
     if (isUnread) {
-      actions = `<button class="fr-btn fr-btn--view js-mark-read" data-mid="${msg.id}">${t("friends.mark_read", "✓ Mark read")}</button>`;
+      actions = `<button class="fr-btn fr-btn--view js-mark-read" data-mid="${msg.id}">${tf("friends.mark_read", "✓ Mark read")}</button>`;
     }
   } else if (isChallenge) {
     const modeKey = (msg.challenge_mode ?? "").toLowerCase();
@@ -693,14 +690,14 @@ function renderMessage(msg) {
       content = `
         <div class="fr-challenge-card fr-challenge-card--won">
           <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
-          <span class="fr-challenge-outcome">🏆 ${t("friends.challenge_beaten", "Challenge beaten!")}</span>
+          <span class="fr-challenge-outcome">🏆 ${tf("friends.challenge_beaten", "Challenge beaten!")}</span>
           <span class="fr-challenge-date">${esc(dateLabel)}</span>
         </div>`;
     } else if (msg.status === "expired") {
       content = `
         <div class="fr-challenge-card fr-challenge-card--lost">
           <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
-          <span class="fr-challenge-outcome">✗ ${t("friends.challenge_failed", "Challenge failed")}</span>
+          <span class="fr-challenge-outcome">✗ ${tf("friends.challenge_failed", "Challenge failed")}</span>
           <span class="fr-challenge-date">${esc(dateLabel)}</span>
         </div>`;
     } else {
@@ -710,7 +707,7 @@ function renderMessage(msg) {
             <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
             <span class="fr-challenge-date">${esc(dateLabel)}</span>
           </div>
-          <span class="fr-challenge-score">${t("friends.challenge_beat", "Beat")} <b>${score}</b> attempts</span>
+          <span class="fr-challenge-score">${tf("friends.challenge_beat", "Beat")} <b>${score}</b> attempts</span>
         </div>`;
       if (isReceived && msg.status === "unread") {
         actions = `
@@ -721,17 +718,17 @@ function renderMessage(msg) {
                   data-score="${msg.challenge_score}"
                   data-senderid="${msg.sender_id}"
                   data-filters="${esc(msg.challenge_filters ?? "[]")}">
-            ${t("friends.challenge_accept", "⚔ Accept")}
+            ${tf("friends.challenge_accept", "⚔ Accept")}
           </button>
           <button class="fr-btn fr-btn--danger js-decline-msg" data-mid="${msg.id}">
-            ${t("friends.challenge_decline", "✕")}
+            ${tf("friends.challenge_decline", "✕")}
           </button>`;
       }
     }
   } else {
     content = `<span class="fr-msg-content">${esc(msg.content ?? "")}</span>`;
     if (isUnread) {
-      actions = `<button class="fr-btn fr-btn--view js-mark-read" data-mid="${msg.id}">${t("friends.mark_read", "✓ Mark read")}</button>`;
+      actions = `<button class="fr-btn fr-btn--view js-mark-read" data-mid="${msg.id}">${tf("friends.mark_read", "✓ Mark read")}</button>`;
     }
   }
 
@@ -749,7 +746,7 @@ function renderMessage(msg) {
           ${renderStatusBadge(msg.status)}
           <button class="fr-msg-delete js-delete-msg"
                   data-mid="${msg.id}"
-                  title="${t("friends.delete_msg", "Delete")}">🗑</button>
+                  title="${tf("friends.delete_msg", "Delete")}">🗑</button>
         </div>
         ${content}
         ${actions ? `<div class="fr-msg-actions">${actions}</div>` : ""}
@@ -776,7 +773,7 @@ async function clearReadMessages() {
 
   const list = document.getElementById("messagesList");
   if (list && !list.querySelector(".fr-msg")) {
-    list.innerHTML = `<p class="fr-empty">${t("friends.msg_empty", "No messages yet.")}</p>`;
+    list.innerHTML = `<p class="fr-empty">${tf("friends.msg_empty", "No messages yet.")}</p>`;
     document.getElementById("messagesSection")?.classList.add("hidden");
   }
 }
@@ -925,7 +922,7 @@ function attachListeners() {
       deleteBtn.closest(".fr-msg")?.remove();
       const list = document.getElementById("messagesList");
       if (list && !list.querySelector(".fr-msg")) {
-        list.innerHTML = `<p class="fr-empty">${t("friends.msg_empty", "No messages yet.")}</p>`;
+        list.innerHTML = `<p class="fr-empty">${tf("friends.msg_empty", "No messages yet.")}</p>`;
         document.getElementById("messagesSection")?.classList.add("hidden");
       }
       return;

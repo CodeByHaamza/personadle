@@ -33,9 +33,8 @@ CREATE TABLE users (
     remember_me_expires DATETIME            NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE INDEX idx_users_pseudo    ON users(pseudo);
-CREATE INDEX idx_users_email     ON users(email);
-CREATE INDEX idx_users_code      ON users(friend_code);
+-- pseudo/email/friend_code sont déjà UNIQUE ci-dessus — un index séparé sur
+-- la même colonne serait redondant (MariaDB indexe déjà les contraintes UNIQUE).
 CREATE INDEX idx_remember_me     ON users(remember_me_hash);
 
 

@@ -8,6 +8,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/admin_validation.php';
 
 requireAdmin();
 
@@ -186,8 +187,8 @@ if ($method === 'PATCH') {
     // pseudo
     if (array_key_exists('pseudo', $data)) {
         $pseudo = trim((string) $data['pseudo']);
-        if (!preg_match('/^[a-zA-Z0-9_.\-]{2,30}$/', $pseudo)) {
-            jsonError('Invalid pseudo (2–30 chars, letters/digits/_.-)', 400);
+        if ($pseudoError = personadle_validate_admin_pseudo($pseudo)) {
+            jsonError($pseudoError, 400);
         }
         $stmt = $pdo->prepare('SELECT id FROM users WHERE pseudo = ? AND id != ? LIMIT 1');
         $stmt->execute([$pseudo, $userId]);
@@ -240,8 +241,8 @@ if ($method === 'PATCH') {
     // avatar_border_color (dans profiles)
     if (array_key_exists('avatar_border_color', $data)) {
         $color = trim((string) $data['avatar_border_color']);
-        if (!preg_match('/^#[0-9A-Fa-f]{6}$/', $color)) {
-            jsonError('Invalid avatar_border_color (expected #RRGGBB)', 400);
+        if ($colorError = personadle_validate_hex_color($color)) {
+            jsonError(str_replace('color', 'avatar_border_color', $colorError), 400);
         }
         $profFields[] = 'avatar_border_color = ?';
         $profParams[] = $color;

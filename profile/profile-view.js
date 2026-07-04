@@ -4,6 +4,9 @@ import {
   getSocialLinkData,
   applyRank10Effect,
 } from "../js/social-link.js";
+import { getStreakTier, formatSongTime } from "./profile-format.js";
+import { formatPlayTime } from "./formatPlayTime.js";
+import { resolveTheme, applyThemeVars } from "./theme.js";
 
 /**
  * profile/profile-view.js — Mode consultation du profil d'un autre joueur
@@ -28,62 +31,18 @@ const uidParam = params.get("uid")?.trim() ?? "";
 
 if (viewParam || uidParam) {
   // ─────────────────────────────────────────────────────────────────────────────
-  // THÈMES — identiques à profile-page.js
+  // THÈMES — partagés avec profile-page.js via profile/theme.js
   // ─────────────────────────────────────────────────────────────────────────────
-
-  const PROFILE_THEMES = {
-    all_out: { accent: "#E63946", hover: "#C1121F", light: "#FF9999", rgb: "230, 57, 70" },
-    velvet_room: { accent: "#1B3A8A", hover: "#162E72", light: "#60A5FA", rgb: "27, 58, 138" },
-    dark_hour: { accent: "#00B4D8", hover: "#0077B6", light: "#48CAE4", rgb: "0, 180, 216" },
-    pink_ribbon: { accent: "#E8739A", hover: "#D0507A", light: "#F9A8D4", rgb: "232, 115, 154" },
-    midnight_channel: { accent: "#EAB308", hover: "#CA8A04", light: "#FEF08A", rgb: "234, 179, 8" },
-    demon_palace: { accent: "#9333EA", hover: "#7E22CE", light: "#D8B4FE", rgb: "147, 51, 234" },
-    eternal_punishment: {
-      accent: "#4F46E5",
-      hover: "#4338CA",
-      light: "#A5B4FC",
-      rgb: "79, 70, 229",
-    },
-    golden_labyrinth: {
-      accent: "#F97316",
-      hover: "#EA6C12",
-      light: "#FDBA74",
-      rgb: "249, 115, 22",
-    },
-  };
-
-  function _hexToRgb(hex) {
-    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return m ? `${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}` : "0, 0, 0";
-  }
-  function _adjustHex(hex, delta) {
-    const n = parseInt(hex.replace("#", ""), 16);
-    const r = Math.min(255, Math.max(0, (n >> 16) + delta));
-    const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + delta));
-    const b = Math.min(255, Math.max(0, (n & 0xff) + delta));
-    return "#" + ((r << 16) | (g << 8) | b).toString(16).padStart(6, "0");
-  }
 
   function applyViewTheme(wallpaperId) {
     if (!wallpaperId) return;
-    const root = document.documentElement;
-
     if (wallpaperId.startsWith("custom:")) {
       const hex = wallpaperId.slice(7);
       if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
-      root.style.setProperty("--accent", hex);
-      root.style.setProperty("--accent-hover", _adjustHex(hex, -35));
-      root.style.setProperty("--accent-light", _adjustHex(hex, 45));
-      root.style.setProperty("--accent-rgb", _hexToRgb(hex));
+      applyThemeVars(resolveTheme("custom", hex));
       return;
     }
-
-    const theme = PROFILE_THEMES[wallpaperId];
-    if (!theme) return;
-    root.style.setProperty("--accent", theme.accent);
-    root.style.setProperty("--accent-hover", theme.hover);
-    root.style.setProperty("--accent-light", theme.light);
-    root.style.setProperty("--accent-rgb", theme.rgb);
+    applyThemeVars(resolveTheme(wallpaperId));
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -119,102 +78,6 @@ if (viewParam || uidParam) {
     // window.i18n.t returns the key string when not found, so check r !== key
     const r = window.i18n?.t?.(key);
     return r != null && r !== key ? r : (fallback ?? key);
-  }
-
-  /** Formate "m:ss" depuis des secondes. */
-  function formatSongTime(s) {
-    if (!isFinite(s) || s < 0) return "0:00";
-    return `${Math.floor(s / 60)}:${Math.floor(s % 60)
-      .toString()
-      .padStart(2, "0")}`;
-  }
-
-  /**
-   * Formate des minutes en texte lisible — copié de profile-page.js.
-   */
-  function formatPlayTime(totalMinutes) {
-    const lang = localStorage.getItem("lang") || "en";
-    const U = {
-      en: {
-        min: "min",
-        h: "h",
-        day: ["day", "days"],
-        week: ["week", "weeks"],
-        month: ["month", "months"],
-        year: ["year", "years"],
-      },
-      fr: {
-        min: "min",
-        h: "h",
-        day: ["jour", "jours"],
-        week: ["semaine", "semaines"],
-        month: ["mois", "mois"],
-        year: ["an", "ans"],
-      },
-      es: {
-        min: "min",
-        h: "h",
-        day: ["día", "días"],
-        week: ["semana", "semanas"],
-        month: ["mes", "meses"],
-        year: ["año", "años"],
-      },
-      de: {
-        min: "Min.",
-        h: "Std.",
-        day: ["Tag", "Tage"],
-        week: ["Woche", "Wochen"],
-        month: ["Monat", "Monate"],
-        year: ["Jahr", "Jahre"],
-      },
-      it: {
-        min: "min",
-        h: "h",
-        day: ["giorno", "giorni"],
-        week: ["settimana", "settimane"],
-        month: ["mese", "mesi"],
-        year: ["anno", "anni"],
-      },
-    };
-    const u = U[lang] || U.en;
-    const p = (n, [s, pl]) => `${n} ${n <= 1 ? s : pl}`;
-    const m = Math.max(0, Math.round(totalMinutes));
-    const PER_DAY = 1440,
-      PER_WEEK = 10080,
-      PER_MONTH = 43200,
-      PER_YEAR = 525600;
-    if (m < PER_DAY) return `${m} ${u.min}`;
-    if (m < PER_WEEK) {
-      const d = Math.floor(m / PER_DAY),
-        h = Math.floor((m % PER_DAY) / 60);
-      return h ? `${p(d, u.day)} ${h}${u.h}` : p(d, u.day);
-    }
-    if (m < PER_MONTH) {
-      const w = Math.floor(m / PER_WEEK),
-        d = Math.floor((m % PER_WEEK) / PER_DAY);
-      return d ? `${p(w, u.week)} ${p(d, u.day)}` : p(w, u.week);
-    }
-    if (m < PER_YEAR) {
-      const mo = Math.floor(m / PER_MONTH),
-        w = Math.floor((m % PER_MONTH) / PER_WEEK);
-      return w ? `${p(mo, u.month)} ${p(w, u.week)}` : p(mo, u.month);
-    }
-    const yr = Math.floor(m / PER_YEAR),
-      mo = Math.floor((m % PER_YEAR) / PER_MONTH);
-    return mo ? `${p(yr, u.year)} ${p(mo, u.month)}` : p(yr, u.year);
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // STREAK — copié de profile-page.js
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  function getStreakTier(streak) {
-    if (streak >= 30) return 5;
-    if (streak >= 14) return 4;
-    if (streak >= 7) return 3;
-    if (streak >= 3) return 2;
-    if (streak >= 1) return 1;
-    return 0;
   }
 
   function buildStreakItem(streak, label, delay) {
@@ -396,17 +259,17 @@ if (viewParam || uidParam) {
     if (window._currentUser) {
       if (friendshipStatus === "accepted") {
         friendBtn = `
-        <span class="vb-friend-status vb-friend-status--ok">✓ ${t("friends.already_friends") || "Friends"}</span>
+        <span class="vb-friend-status vb-friend-status--ok">✓ ${t("friends.already_friends", "Friends")}</span>
         <button id="vbCompareBtn" class="vb-friend-btn vb-compare-btn" data-fid="">
           ${t("compare.btn", "⚖ Compare Stats")}
         </button>
       `;
       } else if (friendshipStatus === "pending_sent") {
-        friendBtn = `<span class="vb-friend-status vb-friend-status--pending">${t("friends.request_sent") || "Request sent"}</span>`;
+        friendBtn = `<span class="vb-friend-status vb-friend-status--pending">${t("friends.request_sent", "Request sent")}</span>`;
       } else if (friendshipStatus === "pending_received") {
-        friendBtn = `<button id="vbAcceptBtn" class="vb-friend-btn vb-friend-btn--accept" data-code="${escapeHtml(friendCode)}">${t("friends.accept") || "Accept"}</button>`;
+        friendBtn = `<button id="vbAcceptBtn" class="vb-friend-btn vb-friend-btn--accept" data-code="${escapeHtml(friendCode)}">${t("friends.accept", "Accept")}</button>`;
       } else {
-        friendBtn = `<button id="vbAddFriendBtn" class="vb-friend-btn" data-code="${escapeHtml(friendCode)}">${t("friends.add_friend") || "+ Add friend"}</button>`;
+        friendBtn = `<button id="vbAddFriendBtn" class="vb-friend-btn" data-code="${escapeHtml(friendCode)}">${t("friends.add_friend", "+ Add friend")}</button>`;
       }
     }
 
@@ -417,7 +280,7 @@ if (viewParam || uidParam) {
       <span class="vb-code">${escapeHtml(friendCode)}</span>
     </div>
     ${friendBtn}
-    <a href="profile.html" class="vb-back">← ${t("ui.back_my_profile") || t("ui.back") || "My Profile"}</a>
+    <a href="profile.html" class="vb-back">← ${t("ui.back_my_profile", t("ui.back", "My Profile"))}</a>
   `;
     return banner;
   }
@@ -432,10 +295,10 @@ if (viewParam || uidParam) {
         addBtn.textContent = "…";
         try {
           await window._personadleApi.friends.request(friendCode);
-          addBtn.outerHTML = `<span class="vb-friend-status vb-friend-status--pending">${t("friends.request_sent") || "Request sent"}</span>`;
+          addBtn.outerHTML = `<span class="vb-friend-status vb-friend-status--pending">${t("friends.request_sent", "Request sent")}</span>`;
         } catch (err) {
           addBtn.disabled = false;
-          addBtn.textContent = t("friends.add_friend") || "+ Add friend";
+          addBtn.textContent = t("friends.add_friend", "+ Add friend");
           alert(err.message || "Could not send friend request.");
         }
       });
@@ -450,11 +313,11 @@ if (viewParam || uidParam) {
           const req = pending.find((p) => p.friend_code === friendCode);
           if (req) {
             await window._personadleApi.friends.respond(req.friendship_id, "accept");
-            acceptBtn.outerHTML = `<span class="vb-friend-status vb-friend-status--ok">✓ ${t("friends.already_friends") || "Friends"}</span>`;
+            acceptBtn.outerHTML = `<span class="vb-friend-status vb-friend-status--ok">✓ ${t("friends.already_friends", "Friends")}</span>`;
           }
         } catch {
           acceptBtn.disabled = false;
-          acceptBtn.textContent = t("friends.accept") || "Accept";
+          acceptBtn.textContent = t("friends.accept", "Accept");
         }
       });
     }
@@ -625,7 +488,7 @@ if (viewParam || uidParam) {
       if (rawDate) {
         const joinEl = document.createElement("p");
         joinEl.className = "profile-join-date";
-        joinEl.textContent = `${t("profile.since") || "Since"} ${new Date(rawDate).toLocaleDateString(undefined, { year: "numeric", month: "long" })}`;
+        joinEl.textContent = `${t("profile.since", "Since")} ${new Date(rawDate).toLocaleDateString(undefined, { year: "numeric", month: "long" })}`;
         infoContainer.appendChild(joinEl);
       }
       const codeEl = document.createElement("p");
@@ -640,33 +503,33 @@ if (viewParam || uidParam) {
       const firstPlayedStr = (user.first_game_date || user.created_at || "").slice(0, 10) || "—";
 
       const items = [
-        { icon: "🏆", value: stats.total_wins ?? 0, label: t("profile.stat_wins_label") || "Wins" },
-        { icon: "🏳️", value: totalGiveups, label: t("profile.stat_giveups_label") || "Give-ups" },
+        { icon: "🏆", value: stats.total_wins ?? 0, label: t("profile.stat_wins_label", "Wins") },
+        { icon: "🏳️", value: totalGiveups, label: t("profile.stat_giveups_label", "Give-ups") },
         {
           icon: "🎮",
           value: stats.total_games ?? 0,
-          label: t("profile.stat_games_label") || "Games Played",
+          label: t("profile.stat_games_label", "Games Played"),
         },
         {
           icon: "⭐",
           value: stats.best_streak ?? 0,
-          label: t("profile.stat_best_streak_label") || "Best Streak",
+          label: t("profile.stat_best_streak_label", "Best Streak"),
         },
         {
           icon: "⏱️",
           value: formatPlayTime(totalTimeMinutes),
-          label: t("profile.stat_time_label") || "Time Played",
+          label: t("profile.stat_time_label", "Time Played"),
         },
         {
           icon: "📅",
           value: firstPlayedStr,
-          label: t("profile.stat_first_played_label") || "First Played",
+          label: t("profile.stat_first_played_label", "First Played"),
           full: true,
         },
         {
           icon: "🎯",
           value: favModeLabel,
-          label: t("profile.stat_fav_mode_label") || "Fav Mode",
+          label: t("profile.stat_fav_mode_label", "Fav Mode"),
           full: true,
         },
       ];
@@ -687,7 +550,7 @@ if (viewParam || uidParam) {
 
       const streakHTML = buildStreakItem(
         currentStreak,
-        t("profile.stat_current_streak_label") || "Current Streak",
+        t("profile.stat_current_streak_label", "Current Streak"),
         "0.5s"
       );
       statsContainer.innerHTML = regularHTML + streakHTML;
@@ -722,8 +585,8 @@ if (viewParam || uidParam) {
 
         modeContainer.innerHTML = `
         <div class="mode-stats-header">
-          <span>${t("profile.mode_col_mode") || "Mode"}</span>
-          <span>${t("profile.mode_col_games") || "Games / Win %"}</span>
+          <span>${t("profile.mode_col_mode", "Mode")}</span>
+          <span>${t("profile.mode_col_games", "Games / Win %")}</span>
         </div>
         <div class="mode-stats-list">${rows}</div>`;
       }
@@ -771,7 +634,7 @@ if (viewParam || uidParam) {
     // HTML identique à renderSongCard() dans profile-page.js (sans les boutons d'action)
     songCard.classList.remove("hidden");
     songCard.innerHTML = `
-    <h3 class="card-title"><span class="card-accent">◆</span> ${t("profile.song_title") || "Profile Song"}</h3>
+    <h3 class="card-title"><span class="card-accent">◆</span> ${t("profile.song_title", "Profile Song")}</h3>
     <div id="viewSongPlayerUI" class="song-player">
       <img id="viewSongArtwork"
            class="song-artwork"
@@ -891,7 +754,7 @@ if (viewParam || uidParam) {
         `
       <div class="viewing-error">
         <p>⚠️ ${err.status === 404 ? "Player not found." : "Could not load this profile."}</p>
-        <a href="profile.html">← ${t("ui.back_my_profile") || "My profile"}</a>
+        <a href="profile.html">← ${t("ui.back_my_profile", "My profile")}</a>
       </div>
     `
       );

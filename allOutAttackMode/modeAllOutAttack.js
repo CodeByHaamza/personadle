@@ -23,6 +23,7 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
+import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplete.js";
 import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -298,7 +299,7 @@ function initializeAutocomplete(element, array) {
 
   element.addEventListener("input", function () {
     const val = this.value.trim();
-    closeList(null, element);
+    closeAutocompleteList(null, element);
     if (!val) return;
 
     const list = document.createElement("DIV");
@@ -337,9 +338,9 @@ function initializeAutocomplete(element, array) {
 
       option.addEventListener("click", function () {
         element.value = this.getElementsByTagName("input")[0].value;
-        removeFromAutocomplete(element.value);
+        removeFromAutocomplete(personas, element.value);
         handleGuess();
-        closeList(null, element);
+        closeAutocompleteList(null, element);
       });
 
       list.appendChild(option);
@@ -373,19 +374,7 @@ function initializeAutocomplete(element, array) {
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
-  document.addEventListener("click", (e) => closeList(e.target, element));
-}
-
-function closeList(e, inputElement) {
-  const items = document.getElementsByClassName("autocomplete-items");
-  for (let item of items) {
-    if (e !== item && e !== inputElement) item.remove();
-  }
-}
-
-function removeFromAutocomplete(name) {
-  const idx = personas.findIndex((n) => n.toLowerCase() === name.toLowerCase());
-  if (idx !== -1) personas.splice(idx, 1);
+  document.addEventListener("click", (e) => closeAutocompleteList(e.target, element));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -459,7 +448,7 @@ function handleGuess() {
       guess,
       document.getElementById("wrongGuessList")
     );
-    removeFromAutocomplete(guess);
+    removeFromAutocomplete(personas, guess);
 
     const blurLevel = Math.max(INITIAL_BLUR - attempts * BLUR_STEP, 0);
     document.getElementById("aoaGif").style.filter = `blur(${blurLevel}px)`;

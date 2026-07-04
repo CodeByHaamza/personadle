@@ -15,6 +15,10 @@
 
 declare(strict_types=1);
 
+// Logique pure (sans BDD) — testable en PHPUnit indépendamment de ce bootstrap.
+require_once __DIR__ . '/lib/authz.php';
+require_once __DIR__ . '/lib/format.php';
+
 // Garantir que PHP utilise UTC pour date/time, cohérent avec UTC_TIMESTAMP() MySQL
 date_default_timezone_set('UTC');
 
@@ -185,14 +189,16 @@ function requireAuth(): int
     if (empty($_SESSION['is_deleted_checked_at']) || ($now - (int)$_SESSION['is_deleted_checked_at']) > 300) {
         $chk = pdo()->prepare('SELECT is_deleted, is_banned FROM users WHERE id = ? LIMIT 1');
         $chk->execute([$uid]);
-        $chkRow = $chk->fetch();
-        if (!$chkRow || $chkRow['is_deleted']) {
+        $chkRow = $chk->fetch() ?: null;
+
+        // Ban enforcé sur TOUS les endpoints authentifiés (pas seulement me.php) :
+        // sinon un banni avec session active garderait l'accès jusqu'à expiration.
+        $denial = personadle_session_denial_reason($chkRow);
+        if ($denial === 'deleted') {
             session_destroy();
             jsonError('Account not found or deleted', 401);
         }
-        // Ban enforcé sur TOUS les endpoints authentifiés (pas seulement me.php) :
-        // sinon un banni avec session active garderait l'accès jusqu'à expiration.
-        if (!empty($chkRow['is_banned'])) {
+        if ($denial === 'banned') {
             session_destroy();
             jsonError('Account banned', 403);
         }
@@ -224,8 +230,8 @@ function requireAdmin(): int
     $uid = requireAuth();
     $stmt = pdo()->prepare('SELECT is_admin FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([$uid]);
-    $row = $stmt->fetch();
-    if (!$row || !(bool)$row['is_admin']) {
+    $row = $stmt->fetch() ?: null;
+    if (!personadle_is_admin_row($row)) {
         jsonError('Forbidden — admin only', 403);
     }
     return $uid;
@@ -301,29 +307,6 @@ function generateFriendCode(): string
     } while ($stmt->fetch());
 
     return $code;
-}
-
-/**
- * Formate une ligne users en objet public (sans password_hash).
- *
- * @param  array<string, mixed> $row Ligne fetchée depuis la table users
- * @return array<string, mixed>
- */
-function formatUser(array $row, array $profile = []): array
-{
-    return [
-        'id'                  => (int)  $row['id'],
-        'email'               =>        $row['email'],
-        'pseudo'              =>        $row['pseudo'],
-        'lang'                =>        $row['lang'],
-        'friend_code'         =>        $row['friend_code'],
-        'created_at'          =>        $row['created_at'],
-        'last_login_at'       =>        $row['last_login_at'],
-        'avatar_data'         =>        $profile['avatar_data']         ?? null,
-        'avatar_border_color' =>        $profile['avatar_border_color'] ?? '#ffffff',
-        'has_migrated'        => (bool) ($row['has_migrated']           ?? false),
-        'is_admin'            => (bool) ($row['is_admin']               ?? false),
-    ];
 }
 
 /** Fetches the profiles row for a user and returns it (empty array if none). */

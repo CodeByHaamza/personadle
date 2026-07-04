@@ -40,6 +40,7 @@ import {
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -149,7 +150,7 @@ function initializeAutocomplete(input, personasList) {
   let currentFocus = -1;
 
   input.addEventListener("input", function () {
-    closeList();
+    closeAllAutocompleteLists();
     const val = this.value.trim();
     if (!val) return;
 
@@ -198,7 +199,7 @@ function initializeAutocomplete(input, personasList) {
       option.addEventListener("click", function () {
         input.value = this.querySelector("input").value;
         handleGuess();
-        closeList();
+        closeAllAutocompleteLists();
       });
       list.appendChild(option);
     });
@@ -224,7 +225,7 @@ function initializeAutocomplete(input, personasList) {
   });
 
   document.addEventListener("click", (e) => {
-    if (!e.target.closest("#autocomplete-list") && e.target !== input) closeList();
+    if (!e.target.closest("#autocomplete-list") && e.target !== input) closeAllAutocompleteLists();
   });
 
   function updateActive(items) {
@@ -235,10 +236,6 @@ function initializeAutocomplete(input, personasList) {
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
-  function closeList() {
-    const lists = document.getElementsByClassName("autocomplete-items");
-    for (let i = 0; i < lists.length; i++) lists[i].parentNode.removeChild(lists[i]);
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

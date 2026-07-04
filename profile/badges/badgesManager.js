@@ -987,7 +987,7 @@ function adjustTooltipPositions() {
  * @param {Function} saveProfile - Fonction de sauvegarde
  * @param {string} badgeId - L'ID du badge
  */
-function toggleBadgeSelection(profile, saveProfile, badgeId) {
+export function toggleBadgeSelection(profile, saveProfile, badgeId) {
   const selectedBadges = profile.selectedBadges || [];
   const isCurrentlySelected = selectedBadges.includes(badgeId);
 
@@ -1073,7 +1073,7 @@ function setupEventCodeRedeem(profile, saveProfile) {
  * @param {HTMLInputElement} input - Le champ de saisie
  * @param {HTMLElement} msg - L'élément de message
  */
-function handleEventCodeSubmit(profile, saveProfile, input, msg) {
+export function handleEventCodeSubmit(profile, saveProfile, input, msg) {
   const code = input.value.trim().toUpperCase();
 
   // Vérifier que le code n'est pas vide

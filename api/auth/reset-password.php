@@ -8,6 +8,7 @@
  * "remember me" existantes (sécurité).
  */
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/validation.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') jsonError('Method not allowed', 405);
 
@@ -22,7 +23,7 @@ $token    = trim($data['token'] ?? '');
 $password = (string) ($data['password'] ?? '');
 
 if (strlen($token) < 32) jsonError('Invalid or expired reset link', 400);
-if (strlen($password) < 8) jsonError('Password must be at least 8 characters', 400);
+if ($passwordError = personadle_validate_password($password)) jsonError($passwordError, 400);
 
 $pdo  = pdo();
 $hash = hash('sha256', $token);

@@ -31,6 +31,7 @@ import {
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -590,7 +591,7 @@ function initializeAutocomplete(input) {
   let currentFocus = -1;
 
   input.addEventListener("input", function () {
-    closeList();
+    closeAllAutocompleteLists();
     const val = this.value.trim();
     if (!val) return;
 
@@ -632,7 +633,7 @@ function initializeAutocomplete(input) {
       option.addEventListener("click", function () {
         input.value = this.querySelector("input").value;
         handleGuess();
-        closeList();
+        closeAllAutocompleteLists();
       });
 
       list.appendChild(option);
@@ -662,7 +663,7 @@ function initializeAutocomplete(input) {
   // Close the list when clicking outside of it
   document.addEventListener("click", function (e) {
     if (!e.target.closest("#autocomplete-list") && e.target !== input) {
-      closeList();
+      closeAllAutocompleteLists();
     }
   });
 
@@ -676,9 +677,6 @@ function initializeAutocomplete(input) {
   }
 
   /** Removes all open autocomplete dropdowns from the DOM. */
-  function closeList() {
-    document.querySelectorAll(".autocomplete-items").forEach((el) => el.remove());
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
