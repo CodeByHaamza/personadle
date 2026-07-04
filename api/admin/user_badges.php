@@ -14,8 +14,7 @@ $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
 
 // ── Extraire userId et slug depuis l'URL ──────────────────────────────────────
-$path     = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
-$parts    = explode('/', $path);
+$parts    = requestPathSegments();
 $adminIdx = array_search('admin', $parts);
 $userId   = (int) ($parts[$adminIdx + 2] ?? 0);
 if ($userId <= 0) jsonError('Invalid user id', 400);

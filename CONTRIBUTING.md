@@ -40,7 +40,7 @@ Le hook de pre-commit lance déjà i18n + tests. Détail :
 
 | Commande | Vérifie |
 |---|---|
-| `make test` / `npm test` | 455 tests JS (Vitest) |
+| `make test` / `npm test` | 465 tests JS (Vitest) |
 | `make test-php` | 123 méthodes de test PHPUnit dans 8 fichiers (logique + intégration BDD, **DB doit être up**) |
 | `npm run lint` | ESLint |
 | `npm run data:check` | schéma des données personnages |

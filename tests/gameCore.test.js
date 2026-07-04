@@ -29,6 +29,8 @@ import {
   MODES,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  showChallengeButton,
+  showCommunityStats,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -1537,5 +1539,101 @@ describe("enableGiveUpButton", () => {
   it("is a no-op when the button doesn't exist", () => {
     document.body.innerHTML = "";
     expect(() => enableGiveUpButton()).not.toThrow();
+  });
+});
+
+describe("showChallengeButton", () => {
+  beforeEach(() => {
+    setHTML(
+      '<div id="modeNavigationContainer"><button id="prevModeButton"></button><button id="nextModeButton"></button></div>'
+    );
+    delete window._currentUser;
+  });
+
+  it("is a no-op when no user is logged in", () => {
+    showChallengeButton("classic", 3);
+    expect(document.getElementById("challengeFriendBtn")).toBeNull();
+  });
+
+  it("is a no-op when #modeNavigationContainer is missing", () => {
+    document.getElementById("modeNavigationContainer").remove();
+    window._currentUser = { id: 1 };
+    showChallengeButton("classic", 3);
+    expect(document.getElementById("challengeFriendBtn")).toBeNull();
+  });
+
+  it("inserts the button before #nextModeButton when logged in", () => {
+    window._currentUser = { id: 1 };
+    showChallengeButton("classic", 3);
+    const btn = document.getElementById("challengeFriendBtn");
+    expect(btn).not.toBeNull();
+    expect(btn.nextElementSibling?.id).toBe("nextModeButton");
+  });
+
+  it("appends the button when there is no #nextModeButton", () => {
+    window._currentUser = { id: 1 };
+    document.getElementById("nextModeButton").remove();
+    showChallengeButton("classic", 3);
+    const nav = document.getElementById("modeNavigationContainer");
+    expect(nav.lastElementChild.id).toBe("challengeFriendBtn");
+  });
+
+  it("does not insert a second button if one already exists", () => {
+    window._currentUser = { id: 1 };
+    showChallengeButton("classic", 3);
+    showChallengeButton("classic", 5);
+    expect(document.querySelectorAll("#challengeFriendBtn")).toHaveLength(1);
+  });
+});
+
+describe("showCommunityStats", () => {
+  beforeEach(() => {
+    setHTML('<div id="victoryBox"></div>');
+    window.i18n = { t: (_key, vars) => `${vars.percent}% of ${vars.total} players` };
+  });
+
+  afterEach(() => {
+    delete window._personadleApi;
+    delete window.i18n;
+  });
+
+  it("is a no-op when window._personadleApi.communityStats is unavailable", async () => {
+    delete window._personadleApi;
+    await showCommunityStats("classic", "Joker");
+    expect(document.querySelector(".community-stats")).toBeNull();
+  });
+
+  it("is a no-op when there are fewer than 2 total plays", async () => {
+    window._personadleApi = {
+      communityStats: { get: vi.fn().mockResolvedValue({ total: 1, percent: 100 }) },
+    };
+    await showCommunityStats("classic", "Joker");
+    expect(document.querySelector(".community-stats")).toBeNull();
+  });
+
+  it("injects the stat text into #victoryBox when there is enough data", async () => {
+    window._personadleApi = {
+      communityStats: { get: vi.fn().mockResolvedValue({ total: 42, percent: 37 }) },
+    };
+    await showCommunityStats("classic", "Joker");
+    const el = document.querySelector("#victoryBox .community-stats");
+    expect(el?.textContent).toBe("37% of 42 players");
+  });
+
+  it("reuses the existing .community-stats element instead of duplicating it", async () => {
+    window._personadleApi = {
+      communityStats: { get: vi.fn().mockResolvedValue({ total: 10, percent: 20 }) },
+    };
+    await showCommunityStats("classic", "Joker");
+    await showCommunityStats("classic", "Joker");
+    expect(document.querySelectorAll(".community-stats")).toHaveLength(1);
+  });
+
+  it("fails silently when the API call rejects (offline)", async () => {
+    window._personadleApi = {
+      communityStats: { get: vi.fn().mockRejectedValue(new Error("offline")) },
+    };
+    await expect(showCommunityStats("classic", "Joker")).resolves.toBeUndefined();
+    expect(document.querySelector(".community-stats")).toBeNull();
   });
 });

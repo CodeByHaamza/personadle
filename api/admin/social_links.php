@@ -16,8 +16,7 @@ $adminId = requireAdmin();
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
 
-$path   = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
-$parts  = explode('/', $path);
+$parts  = requestPathSegments();
 $slIdx  = array_search('social-links', $parts);
 $linkId = ($slIdx !== false && isset($parts[$slIdx + 1]) && ctype_digit($parts[$slIdx + 1]))
     ? (int) $parts[$slIdx + 1]
