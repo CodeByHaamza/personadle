@@ -38,6 +38,11 @@ jobs:
       - name: Check i18n key consistency
         run: npm run i18n:check
 
+      # Vérifie que CLAUDE.md/README.md/ROADMAP.md/etc. citent les vrais chiffres
+      # (tests, tables SQL, clés i18n) — voir scripts/check-doc-numbers.js pour le contexte.
+      - name: Check documentation numbers are up to date
+        run: npm run docs:check
+
       # Non bloquant tant que le repo n'est pas entièrement formaté (cf. AMELIORATIONS.md §8).
       - name: Check Prettier formatting (non-blocking)
         run: npm run format:check
