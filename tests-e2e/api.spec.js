@@ -1,4 +1,5 @@
 import { test, expect, request as pwRequest } from "@playwright/test";
+import { csrfHeader } from "./helpers/csrf.js";
 
 /**
  * Tests E2E via l'API (fiables, sans DOM) sur les 2 corrections sensibles :
@@ -44,6 +45,7 @@ test.describe.serial("API — régressions sensibles (badges, streak global)", (
 
     const patch = await ctx.patch(`/api/user/${userId}`, {
       data: { selected_badges: pick },
+      headers: await csrfHeader(ctx),
     });
     expect(patch.ok(), "PATCH selected_badges doit réussir").toBeTruthy();
 
@@ -56,9 +58,10 @@ test.describe.serial("API — régressions sensibles (badges, streak global)", (
 
   test("le streak global s'incrémente et ne s'effondre pas en changeant de mode", async () => {
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
-    const playSession = (mode, name) =>
+    const playSession = async (mode, name) =>
       ctx.post("/api/sessions", {
         data: { mode, played_date: today, target_name: name, result: "win", attempts: 3 },
+        headers: await csrfHeader(ctx),
       });
 
     // 1re partie (mode classic) → streak global = 1

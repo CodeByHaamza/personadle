@@ -1,4 +1,5 @@
 import { test, expect, request as pwRequest } from "@playwright/test";
+import { csrfHeader } from "./helpers/csrf.js";
 
 /**
  * Test E2E via l'API (fiables, sans DOM) du parcours Social Link complet :
@@ -46,12 +47,16 @@ test.describe.serial("API — parcours Social Link (ami → interaction → rang
   test("l'action Social Link échoue tant que les deux comptes ne sont pas amis", async () => {
     const res = await a.ctx.post(`/api/social-links/by-friend/${b.userId}/interact`, {
       data: { action_type: "visit_profile" },
+      headers: await csrfHeader(a.ctx),
     });
     expect(res.status()).toBe(403); // "Not friends"
   });
 
   test("A envoie une demande d'ami à B via son friend_code", async () => {
-    const res = await a.ctx.post("/api/friends", { data: { friend_code: b.friendCode } });
+    const res = await a.ctx.post("/api/friends", {
+      data: { friend_code: b.friendCode },
+      headers: await csrfHeader(a.ctx),
+    });
     expect(res.ok(), "POST /api/friends doit réussir").toBeTruthy();
     const body = await res.json();
     expect(body.status).toBe("pending");
@@ -61,6 +66,7 @@ test.describe.serial("API — parcours Social Link (ami → interaction → rang
   test("B accepte la demande", async () => {
     const res = await b.ctx.patch(`/api/friends/${a.friendshipId}`, {
       data: { action: "accept" },
+      headers: await csrfHeader(b.ctx),
     });
     expect(res.ok(), "PATCH accept doit réussir").toBeTruthy();
     expect((await res.json()).status).toBe("accepted");
@@ -69,6 +75,7 @@ test.describe.serial("API — parcours Social Link (ami → interaction → rang
   test("A et B gagnent chacun de l'XP mutuelle en faisant 'share_streak' le même jour", async () => {
     const rA = await a.ctx.post(`/api/social-links/by-friend/${b.userId}/interact`, {
       data: { action_type: "share_streak" },
+      headers: await csrfHeader(a.ctx),
     });
     expect(rA.ok(), "interact(A, share_streak) doit réussir").toBeTruthy();
     const bodyA = await rA.json();
@@ -77,6 +84,7 @@ test.describe.serial("API — parcours Social Link (ami → interaction → rang
 
     const rB = await b.ctx.post(`/api/social-links/by-friend/${a.userId}/interact`, {
       data: { action_type: "share_streak" },
+      headers: await csrfHeader(b.ctx),
     });
     expect(rB.ok(), "interact(B, share_streak) doit réussir").toBeTruthy();
     const bodyB = await rB.json();
@@ -91,11 +99,13 @@ test.describe.serial("API — parcours Social Link (ami → interaction → rang
   test("une seconde action mutuelle fait franchir le seuil de rang 2 (100 XP)", async () => {
     const rA = await a.ctx.post(`/api/social-links/by-friend/${b.userId}/interact`, {
       data: { action_type: "challenge" },
+      headers: await csrfHeader(a.ctx),
     });
     expect(rA.ok()).toBeTruthy();
 
     const rB = await b.ctx.post(`/api/social-links/by-friend/${a.userId}/interact`, {
       data: { action_type: "challenge" },
+      headers: await csrfHeader(b.ctx),
     });
     expect(rB.ok()).toBeTruthy();
     const bodyB = await rB.json();
@@ -109,6 +119,7 @@ test.describe.serial("API — parcours Social Link (ami → interaction → rang
   test("l'action ne peut pas être répétée le même jour (anti-spam)", async () => {
     const res = await a.ctx.post(`/api/social-links/by-friend/${b.userId}/interact`, {
       data: { action_type: "share_streak" },
+      headers: await csrfHeader(a.ctx),
     });
     expect(res.status()).toBe(409);
   });
