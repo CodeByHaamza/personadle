@@ -35,7 +35,6 @@ exportable en **carte PNG** partageable.
 ```
 profile/
 ├── profile.html / profile-page.css / profile-page.js  ← page profil (affichage + éditeur)
-├── profile.js           ← logique avatar, export JSON, crop canvas
 ├── profileStats.js      ← mise à jour des statistiques après chaque partie
 ├── profile-view.js      ← vue profil public d'un autre joueur (?view= / ?uid=)
 ├── friends/             ← système d'amis

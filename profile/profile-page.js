@@ -1,14 +1,11 @@
 /**
  * profile-page.js — Logique de la page de profil dédiée
  * ─────────────────────────────────────────────────────────
- * Adapté depuis profile/profile.js pour fonctionner sur
- * profile/profile.html (page autonome, pas une modale).
+ * Page autonome (profile/profile.html), pas une modale.
  *
- * Différences clés vs profile.js :
- *   - Chemins images : ../img/ au lieu de ./img/
- *   - Éléments DOM : pageAvatar, pageUsername (page) au lieu de headerAvatar, headerPseudo (modale)
- *   - Pas de logique d'ouverture/fermeture de modale profil
- *   - normalizeAvatarPath() pour la compatibilité avec les profils existants (./img/...)
+ *   - Chemins images : ../img/ (depuis profile/)
+ *   - normalizeAvatarPath() pour la compatibilité avec les profils existants
+ *     dont l'avatar est stocké en ./img/... (ancien format)
  *
  * Fonctionnalités :
  *   - Chargement et sauvegarde du profil depuis localStorage

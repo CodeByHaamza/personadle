@@ -17,7 +17,7 @@
  * ────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION = "personadle-v73";
+const CACHE_VERSION = "personadle-v74";
 
 // Préfixe du sous-dossier : '/personadle' en dev local, '' en production (racine).
 // Calculé depuis l'URL du SW lui-même (ex: /personadle/sw.js → /personadle).
@@ -79,7 +79,6 @@ const PRECACHE_URLS = [
   SW_BASE + "/profile/profile.html",
   SW_BASE + "/profile/profile-page.css",
   SW_BASE + "/profile/profile-page.js",
-  SW_BASE + "/profile/profile.js",
   SW_BASE + "/profile/profileStats.js",
 
   /* Pages amis & leaderboard */

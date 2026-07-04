@@ -1,5 +1,5 @@
 /**
- * formatPlayTime.js — Utilitaire partagé entre profile.js et profile-page.js
+ * formatPlayTime.js — Utilitaire partagé entre profile-page.js et profile-view.js
  * Convertit des minutes en chaîne lisible adaptée à la langue de l'utilisateur.
  */
 

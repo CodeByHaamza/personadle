@@ -97,7 +97,7 @@ user_id │ avatar_border_color │ wallpaper_id                    │ profile_
 
 **Champs importants :**
 
-- `avatar_data` : image base64 générée par le canvas crop de `profile.js`. Même format que l'export JSON localStorage actuel — la migration est directe.
+- `avatar_data` : image base64 générée par le canvas crop de `profile-page.js`. Même format que l'export JSON localStorage actuel — la migration est directe.
 - `wallpaper_id` : slug du fichier dans `/profile/Wallpaper/`. Ex: `'P3_Tartarus_Wallpaper'` correspond à `/profile/Wallpaper/P3_Tartarus_Wallpaper.png`.
 - `profile_music_id` : identifiant d'une musique dans la BDD songs. Jouée uniquement sur la page profil (style Dokkan Battle).
 - `selected_badges` : tableau JSON de max 4 badge IDs — même format que `profile.selectedBadges` dans localStorage.
@@ -465,7 +465,7 @@ Joueur clique "Supprimer mon compte"
 
 **Pourquoi :** Les joueurs existants ont leurs données dans `localStorage`. À la création de compte, on leur propose d'importer leur fichier JSON pour ne pas perdre leur progression.
 
-**Format import (identique à l'export actuel de `profile.js`) :**
+**Format import (identique à l'export actuel de `profile-page.js`) :**
 
 ```json
 {
