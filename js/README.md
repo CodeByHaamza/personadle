@@ -55,9 +55,12 @@
 | Fichier             | Rôle                                          |
 | ------------------- | --------------------------------------------- |
 | `bottomNav.js`      | Barre de navigation inférieure                |
-| `filterMenu.js`     | Menu de filtres opus (P3, P4, P5…)            |
+| `filterMenu.js`     | Menu de filtres opus (P3, P4, P5…), utilisé par les 6 modes |
 | `settings-modal.js` | Modale de paramètres (langue, thème, a11y)    |
 | `stats-compare.js`  | Comparaison de stats entre amis               |
+| `autocomplete.js`   | Fermeture/suppression d'entrées de la liste d'autocomplétion |
+| `lang-selector.js`  | Sélecteur de langue (dropdown drapeaux)        |
+| `modal.js`          | Utilitaire générique de modale (focus trap, Escape, restauration du focus) — réutilisé par avatarCropModal/sharePreviewModal/songModal/titlesModal |
 
 ---
 
@@ -84,8 +87,12 @@ import { parisDateKey, normalize, modeLabel, buildGameSession } from "../js/game
 | `setupRulesModal()`               | Câble le bouton `?` (ouverture/fermeture de la modale de règles)        |
 | `setupDailyReset(onReset)`        | `setTimeout` jusqu'à minuit Paris → `onReset`                            |
 | `checkResetOnLoad(...)`           | Détecte un nouveau jour au chargement, nettoie les stats de la veille    |
-| `setupFilterButtons(...)`         | Boutons de filtres opus : toggle, persistance `localStorage`, callback   |
+| `setupFilterButtons(...)`         | Boutons de filtres opus : toggle, persistance `localStorage`, callback — exporté mais non utilisé aujourd'hui, les 6 modes passent par `initFilterMenu()` (`filterMenu.js`) |
 | `showWrongMini(...)`              | Mini-vignette portrait + animation _shake_ pour une mauvaise réponse     |
+| `getPlayerSeedId()`               | ID stable par joueur (user_id ou UUID anonyme) pour `getDailyTarget()`   |
+| `showCommunityStats(mode, target)`| Injecte "X% des joueurs ont trouvé ça aujourd'hui" dans l'écran de victoire |
+| `FILTER_STORAGE_KEYS`             | Table des clés `localStorage` des filtres opus, par mode                 |
+| `showChallengeButton(mode, score)`| Affiche le bouton "Défier un ami" après une partie                      |
 
 > ⚠️ **Toujours** passer par `normalizeModeKey()` / `modeLabel()` pour le nom d'un mode, jamais
 > de chaîne en dur. Pour la frontière de journée : `parisDateKey()`, jamais `toISOString()`.

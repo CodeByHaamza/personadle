@@ -7,26 +7,41 @@
 
 ## 1. 🔴 Git & poids du dépôt (le problème n°1)
 
+> ⚠️ **Décision de philosophie du projet (tranchée)** : tous les assets (musiques, GIFs/webp
+> All-Out Attack, etc.) restent **committés dans le repo Git**, jamais gitignorés et jamais
+> "CDN-only" — l'objectif est qu'un simple `git clone` suffise pour jouer à tous les modes
+> immédiatement, sans étape de téléchargement séparée (c'est pour ça que les AOA existent en
+> local **en plus de** R2 Cloudflare, pas à sa place). L'option "sortir complètement les
+> assets du repo" ci-dessous est donc **écartée** — elle casse cette philosophie. Git LFS
+> reste compatible avec elle : un `git clone` via LFS télécharge quand même les fichiers
+> réels automatiquement, seul le stockage interne change.
+
 **Constat mesuré :**
 
-- `.git` = **3,5 Go**
-- AOA webp versionnés = **1,7 Go** (192 fichiers), certains à **81 Mo l'unité** (Koromaru, Ken, Aigis_FES…)
-- 75 MP3 = 26 Mo, aussi versionnés
+- `.git` = **3,5 Go** (4,8 Go au 2026-07)
+- AOA webp versionnés = **1,7 Go** (192 fichiers, 213 au 2026-07), certains à **81 Mo l'unité** (Koromaru, Ken, Aigis_FES…)
+- 75 MP3 = 26 Mo, aussi versionnés (86 au 2026-07)
 - **Aucun Git LFS** → tout l'historique binaire est dans chaque clone, à jamais
 
 **Pourquoi c'est grave :**
 
-- Cloner le repo = télécharger 3,5 Go. CI lente, onboarding pénible.
+- Cloner le repo = télécharger plusieurs Go. CI lente, onboarding pénible.
 - GitHub bloque à 100 Mo/fichier (tu frôles la limite) et conseille LFS dès 50 Mo.
 - L'historique est **immuable** : même si tu supprimes un webp, ses 81 Mo restent dans `.git` pour toujours, sauf réécriture d'historique.
 
-**Actions :**
+**Actions (compatibles avec la philosophie "tout en local, clone = jouable") :**
 
-1. Migrer les binaires lourds vers **Git LFS** (`.webp`, `.mp3`, `.mp4`) — ou mieux, les **sortir complètement du repo** et les servir depuis un CDN / object storage (Cloudflare R2, Bunny, S3). Le repo ne garde alors que le code.
-2. Réécrire l'historique pour purger le poids déjà accumulé : `git filter-repo --strip-blobs-bigger-than 5M` (⚠️ destructif, à coordonner avec les collaborateurs — backup + force-push).
-3. Ajouter un `.gitattributes` LFS si tu gardes les assets dans Git.
+1. Migrer les binaires lourds vers **Git LFS** (`.webp`, `.mp3`, `.mp4`) — les fichiers restent
+   récupérés automatiquement à chaque `git clone`/`checkout`, seul l'historique Git brut arrête
+   de grossir indéfiniment avec chaque nouvelle version d'un asset.
+2. Réécrire l'historique pour purger le poids déjà accumulé : `scripts/purge_git_history.sh`
+   (⚠️ destructif, à coordonner avec les collaborateurs — backup + force-push) — script déjà
+   prêt, voir son en-tête.
+3. Ajouter un `.gitattributes` LFS une fois la migration faite.
 
-> 💡 Ça résout aussi en grande partie le risque légal des MP3 Atlus (cf. commit précédent) : hors du repo public, plus de redistribution.
+> 💡 Risque légal des MP3/assets Atlus (fan-made, non commercial) : accepté comme un compromis
+> délibéré de ce projet, pas résolu par la philosophie "tout en local" — à garder en tête si le
+> jeu grossit en visibilité, mais ce n'est plus traité comme une raison de sortir les assets du repo.
 
 ---
 
@@ -47,9 +62,14 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
 
 ## 3. 🟠 Tests
 
-**Constat :** 209 tests JS (bien !), mais **0 test côté PHP**. `backend.test.js` teste de la logique JS qui _mime_ le backend, pas le vrai code PHP. La logique de streak serveur ([sessions.php](api/sessions.php)), la récupération, l'auth ne sont pas couvertes.
+**Constat (au 2026-06-24) :** 209 tests JS (bien !), mais **0 test côté PHP**. `backend.test.js` teste de la logique JS qui _mime_ le backend, pas le vrai code PHP. La logique de streak serveur ([sessions.php](api/sessions.php)), la récupération, l'auth ne sont pas couvertes.
 
-**Actions :**
+> ✅ **Résolu depuis** : `tests/php/` compte aujourd'hui 8 fichiers / 123 méthodes PHPUnit
+> (`StreakTest`, `AuthzTest`, `SocialLinkTest`, `FriendsTest`, `ValidationTest`,
+> `AdminValidationTest`, `FormatUserTest`, `DatabaseIntegrationTest` — cette dernière avec
+> une vraie intégration MariaDB), câblés en CI (`.github/workflows/ci.yml`).
+
+**Actions (historiques) :**
 
 1. Ajouter **PHPUnit** + une base de test SQLite/MySQL jetable. Cibler en priorité : calcul de streak (`sessions.php`), `recover-streak.php`, rate-limiting, unicité register.
 2. Couvrir le **flux d'intégration streak complet** côté JS : jeu → `syncPending` → `pullProfileFromCloud` → rupture → `performRecovery`. Aujourd'hui chaque maillon est testé isolément, mais pas la chaîne (c'est exactement ce qui laissait passer le revert).
@@ -113,6 +133,9 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 - **Rate-limiting** basé sur `sys_get_temp_dir()` : non partagé entre instances et effaçable. Passer sur une table SQL ou Redis si tu scales.
 - Ajouter un **CSP** (`Content-Security-Policy`) en plus des headers existants.
 - **CSRF** : tu es en `SameSite=Lax` + sessions cookie ; pour les POST sensibles, un token CSRF explicite serait une ceinture+bretelles.
+  > ✅ **Résolu depuis** : token CSRF double-submit (`requireCsrf()` dans `bootstrap.php`,
+  > cookie `csrf_token` lisible par JS, header `X-CSRF-Token` envoyé par `js/api.js`) — scope
+  > : endpoints authentifiés (login/register restent SameSite-Lax-only, décision documentée).
 - Logs d'erreur PHP : vérifier qu'aucune stack trace ne fuit en prod (`display_errors=Off`).
 
 ---
@@ -120,8 +143,11 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 ## 8. 🟡 CI/CD & qualité de code
 
 - Le hook pre-commit lance i18n + tests (bien). Ajouter en CI : `format:check` (Prettier), `i18n:check`, couverture, **lint** (ESLint absent — l'ajouter), et un **PHP linter** (`php -l` sur tous les `.php`, ou PHPStan).
+  > ✅ **Résolu depuis** : `eslint.config.js` existe, `npm run lint` tourne en CI
+  > (`.github/workflows/ci.yml`), PHPStan niveau 5 câblé aussi, `php -l` en CI sur tous les `.php`.
 - **Dependabot / renovate** pour les deps npm.
-- Badge de couverture réel dans le README (le badge « 190 passing » est déjà à recaler : on est à **209**).
+- Badge de couverture réel dans le README (le badge « 190 passing » est déjà à recaler : ce
+  chiffre continue de dater vite — au 2026-07, on est à **449** tests Vitest).
 
 ---
 
@@ -135,7 +161,7 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 
 ## 10. 📌 Ordre de priorité conseillé
 
-1. 🔴 **Git LFS / sortir les assets du repo** (#1) — débloque tout le reste, réduit le risque légal.
+1. 🔴 **Git LFS + purge d'historique** (#1) — assets restent en local (philosophie du projet), débloque juste le poids du `.git`.
 2. 🔴 **Réencoder les AOA** (#2) — gros gain perf immédiat pour les joueurs.
 3. 🟠 **Tests PHP + flux streak intégré** (#3).
 4. 🟠 **Mapping de modes unifié** (#5) + **validation de données en CI** (#4.3).

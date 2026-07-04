@@ -17,6 +17,7 @@ declare(strict_types=1);
  * bootstrap.php) pour rester testable en PHPUnit — même convention que
  * error_log.php/game_session.php/streak_recovery.php.
  *
+ * @param PDO    $pdo        Connexion PDO (passée explicitement, voir note ci-dessus).
  * @param int    $adminId    Admin ayant effectué l'action (requireAdmin()).
  * @param string $action     ex: 'user.ban', 'badge.grant', 'event_code.delete'.
  * @param string $targetType ex: 'user', 'badge', 'title', 'wallpaper', 'event_code', 'social_link'.

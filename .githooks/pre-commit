@@ -7,6 +7,7 @@
 #   2. Valeurs i18n identiques à l'anglais (avertissement, scripts/check-i18n-untranslated.js)
 #   3. Présence de console.log dans les fichiers JS stagés
 #   4. Tests unitaires (npm test)
+#   5. Chiffres de doc (tests/tables/clés i18n) — auto-corrigés et re-stagés
 # =============================================================
 
 set -e
@@ -67,6 +68,23 @@ if [ -f "package.json" ] && command -v npm &>/dev/null; then
     exit 1
   fi
   echo -e "  ${GREEN}✓ Tests passed${NC}"
+fi
+
+# ─────────────────────────────────────────────────────────
+# 5. Chiffres de doc (tests Vitest/PHPUnit/E2E, tables SQL, clés i18n)
+#    Auto-corrigés dans CLAUDE.md/README.md/ROADMAP.md/etc. et re-stagés —
+#    évite la dérive silencieuse qui a nécessité un audit complet (juillet 2026).
+# ─────────────────────────────────────────────────────────
+if [ -f "scripts/check-doc-numbers.js" ]; then
+  echo "  ▸ Doc numbers check..."
+  DOC_FIX_OUT=$(node scripts/check-doc-numbers.js --fix 2>&1) || true
+  if echo "$DOC_FIX_OUT" | grep -q "corrigé"; then
+    echo -e "${YELLOW}⚠  Chiffres de doc obsolètes, corrigés automatiquement et re-stagés :${NC}"
+    echo "$DOC_FIX_OUT" | grep "^   -" | sed 's/^/    /'
+    git add CLAUDE.md README.md ROADMAP.md CONTRIBUTING.md tests/README.md 2>/dev/null || true
+  else
+    echo -e "  ${GREEN}✓ Doc numbers OK${NC}"
+  fi
 fi
 
 echo -e "${GREEN}✅  All pre-commit checks passed${NC}"

@@ -12,7 +12,8 @@ declare(strict_types=1);
 /**
  * Formate une ligne users en objet public (sans password_hash).
  *
- * @param  array<string, mixed> $row Ligne fetchée depuis la table users
+ * @param  array<string, mixed> $row     Ligne fetchée depuis la table users
+ * @param  array<string, mixed> $profile Ligne fetchée depuis la table profiles (optionnelle)
  * @return array<string, mixed>
  */
 function formatUser(array $row, array $profile = []): array

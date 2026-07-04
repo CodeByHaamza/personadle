@@ -1,7 +1,8 @@
 <?php
 /**
  * GET    /api/admin/users/:id  → profil complet d'un utilisateur
- * PATCH  /api/admin/users/:id  → modifier pseudo, email, lang, avatar_border_color, is_admin
+ * PATCH  /api/admin/users/:id  → modifier pseudo, email, lang, avatar_border_color, is_admin,
+ *                                 is_banned, pseudo_locked
  * DELETE /api/admin/users/:id  → hard delete immédiat (admin uniquement)
  *
  * Accès : admin uniquement (requireAdmin()).

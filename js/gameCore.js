@@ -4,22 +4,28 @@
  * Every game mode (Classique, Emoji, Silhouette, AllOutAttack, Personae, Music)
  * imports from this file to avoid code duplication.
  *
- * Exported API:
- *   parisDateKey(d?)            → "YYYY-MM-DD" in Europe/Paris (DST-safe)
- *   msUntilNextParisMidnight()  → ms until next Paris midnight
- *   normalize(str)              → lowercase, accent-stripped, trimmed
- *   showConfettiExplosion(opts) → victory confetti burst + victory sound
- *   revealNextLink(opts)        → shows the mode-navigation bar
- *   setupRulesModal()           → wires the "?" button and modal close
- *   setupDailyReset(onReset)    → schedules an auto-reset at Paris midnight
- *   checkResetOnLoad(...)       → resets the game if a new day has started
- *   setupFilterButtons(...)     → wires opus filter-button click events
- *   showWrongMini(...)          → appends a shaking wrong-guess portrait
- *   buildGameSession(opts)      → builds a standardised session object for the backend
- *   savePendingSession(session) → stores a session in localStorage for later sync
- *   getPlayerSeedId()           → stable per-player seed ID (user_id or anon UUID)
- *   getDailyTarget(pool, mode)  → deterministic per-player daily pick via FNV-1a seeded RNG
- *   showCommunityStats(mode, t) → injects "X% of players found this today" in victory box
+ * Exported API (kept in sync with `export` statements below — update both
+ * when adding/removing an export):
+ *   parisDateKey(d?)             → "YYYY-MM-DD" in Europe/Paris (DST-safe)
+ *   msUntilNextParisMidnight()   → ms until next Paris midnight
+ *   normalize(str)               → lowercase, accent-stripped, trimmed
+ *   MODES                        → canonical mode list (id, key, label…)
+ *   normalizeModeKey(input)      → maps any mode graphy to its canonical key
+ *   modeLabel(input)             → display label for a mode key
+ *   showConfettiExplosion(opts)  → victory confetti burst + victory sound
+ *   revealNextLink(opts)         → shows the mode-navigation bar
+ *   setupRulesModal()            → wires the "?" button and modal close
+ *   setupDailyReset(onReset)     → schedules an auto-reset at Paris midnight
+ *   checkResetOnLoad(...)        → resets the game if a new day has started
+ *   setupFilterButtons(...)      → wires opus filter-button click events
+ *   showWrongMini(...)           → appends a shaking wrong-guess portrait
+ *   buildGameSession(opts)       → builds a standardised session object for the backend
+ *   savePendingSession(session)  → stores a session in localStorage for later sync
+ *   getPlayerSeedId()            → stable per-player seed ID (user_id or anon UUID)
+ *   getDailyTarget(pool, mode)   → deterministic per-player daily pick via FNV-1a seeded RNG
+ *   showCommunityStats(mode, t)  → injects "X% of players found this today" in victory box
+ *   FILTER_STORAGE_KEYS          → localStorage key map for per-mode opus filters
+ *   showChallengeButton(mode, s) → shows the "Challenge a friend" share button
  */
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -11,6 +11,7 @@
 
 import { initAuth } from "../js/auth.js";
 import { showDivineGiftAnimation } from "../js/divine-gift.js";
+import { getCsrfToken } from "../js/api.js";
 
 // ── State ──────────────────────────────────────────────────────────────────
 let _users = [];
@@ -35,18 +36,22 @@ const api = {
     fetch(_pathPrefix + url, {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": getCsrfToken() },
       body: JSON.stringify(body),
     }).then((r) => r.json()),
   patch: (url, body) =>
     fetch(_pathPrefix + url, {
       method: "PATCH",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": getCsrfToken() },
       body: JSON.stringify(body),
     }).then((r) => r.json()),
   delete: (url) =>
-    fetch(_pathPrefix + url, { method: "DELETE", credentials: "include" }).then((r) => r.json()),
+    fetch(_pathPrefix + url, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { "X-CSRF-Token": getCsrfToken() },
+    }).then((r) => r.json()),
 };
 
 // ── Init ───────────────────────────────────────────────────────────────────

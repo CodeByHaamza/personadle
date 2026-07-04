@@ -4,9 +4,9 @@
 
 <img src="https://img.shields.io/badge/MariaDB-10.6%2B-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB">
 <img src="https://img.shields.io/badge/MySQL-8.0%20compatible-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
-<img src="https://img.shields.io/badge/21-tables-success?style=for-the-badge" alt="21 tables">
+<img src="https://img.shields.io/badge/23-tables-success?style=for-the-badge" alt="23 tables">
 
-> **Schéma relationnel 21 tables.** `bdd_mysql.sql` = **source de vérité** (chargé par Docker,
+> **Schéma relationnel 23 tables.** `bdd_mysql.sql` = **source de vérité** (chargé par Docker,
 > gardé par un test de contrat). Migrations incrémentales dans `migrations/`.
 
 </div>
@@ -21,9 +21,9 @@
 | `bdd_mariadb.sql`             | Variante MariaDB (prod Hostinger)                                      |
 | `hostinger_procedure.sql`     | Procédure stockée `gain_social_link_xp` (CLI MariaDB uniquement)       |
 | `sync_local_to_hostinger.sql` | ALTER différentiels dev → prod                                         |
-| `seed_test_data.sql`          | Données de test (users, sessions, amis, Social Links)                  |
-| `explication.md`              | Description détaillée de chaque table                                  |
-| `migrations/`                 | Migrations incrémentales numérotées (000→015) + `README.md`            |
+| `seed_test_data.sql`          | Données de test (users, profiles, sessions, amis, badges débloqués — pas de Social Links) |
+| `explication.md`              | Description détaillée de chaque table (partielle — écrit avant plusieurs tables récentes) |
+| `migrations/`                 | Migrations incrémentales numérotées (000→020) + `README.md`            |
 | ~~`hostinger_full.sql`~~      | ⚠️ **Déprécié** — ancien dump, ne plus utiliser comme référence        |
 
 > 🛡️ **Garde-fou** : `tests/php/DatabaseIntegrationTest.php` échoue si une table/colonne utilisée
@@ -31,7 +31,7 @@
 
 ---
 
-## 🧱 Les 21 tables
+## 🧱 Les 23 tables
 
 | Domaine        | Tables                                                                               |
 | -------------- | ------------------------------------------------------------------------------------ |
@@ -39,7 +39,7 @@
 | Récompenses    | `badges` · `badges_unlocked` · `titles` · `user_titles` · `wallpapers` · `user_wallpapers` |
 | Événements     | `event_codes` · `event_codes_redeemed`                                               |
 | Social         | `friendships` · `social_links` · `social_link_ranks` · `social_link_interactions` · `social_link_rankup_notifs` |
-| Système        | `leaderboard_cache` · `messages` · `deletion_requests` · `rate_limits`               |
+| Système        | `leaderboard_cache` · `messages` · `deletion_requests` · `rate_limits` · `error_log` · `admin_audit_log` |
 
 ---
 

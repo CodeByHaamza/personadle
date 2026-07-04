@@ -15,7 +15,7 @@
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License"></a>
   <img src="https://img.shields.io/badge/Version-2.0-brightgreen?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
-  <img src="https://img.shields.io/badge/Tests-363%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-449%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
   <img src="https://img.shields.io/badge/Backend-PHP%208.3%20%2B%20MariaDB-8892BF?style=for-the-badge&logo=php" alt="PHP Backend">
   <img src="https://img.shields.io/badge/i18n-EN%20%7C%20FR%20%7C%20ES%20%7C%20DE%20%7C%20IT-blueviolet?style=for-the-badge" alt="Languages">
 </p>
@@ -50,7 +50,7 @@ Perfect for both long-time fans and newcomers to the series!
   </tr>
   <tr>
     <td>🖼️ <strong>Profile Card Sharing</strong></td>
-    <td>Export your profile as a PNG — 8 themes, 25 wallpapers, share on X / Discord</td>
+    <td>Export your profile as a PNG — 8 themes, 37 wallpapers, share on X / Discord</td>
   </tr>
   <tr>
     <td>🔊 <strong>Sound Effects</strong></td>
@@ -172,7 +172,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
 
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 21-table relational schema, 252+ unit tests (Vitest + jsdom)
+- 23-table relational schema, 449+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
@@ -190,13 +190,13 @@ Listen to short music clips and identify the character or theme. True fans will 
 
 ### 🎨 Profile Overhaul
 
-- **Profile card export**: PNG image, 8 themes, 25 wallpapers, one-click share on X / Discord / Email
+- **Profile card export**: PNG image, 8 themes, 37 wallpapers, one-click share on X / Discord / Email
 - Profile music: choose a Persona track that plays when friends visit your profile
 - 60+ badges (server-side unlock verification), titles/ranks, event codes
 
 ### 🌐 Internationalisation
 
-- 5 languages: EN · FR · ES · DE · IT (871 keys each)
+- 5 languages: EN · FR · ES · DE · IT (947 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
@@ -349,7 +349,7 @@ JavaScript  → Modular ES6+, localStorage, dynamic UI
 
 ```
 PHP 8.3       → REST API, bcrypt auth, PDO prepared statements, rate-limiting SQL
-MariaDB 10.6+ → 21-table relational schema (MySQL 8.0 compatible)
+MariaDB 10.6+ → 23-table relational schema (MySQL 8.0 compatible)
 Apache        → .htaccess routing, CORS exact-origin, HTTPS, CSP/HSTS
 Hostinger     → Production hosting
 ```
@@ -366,9 +366,9 @@ GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
 ### Tests & quality
 
 ```
-Vitest + jsdom → 252 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+Vitest + jsdom → 449 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 5 smoke E2E sur la stack Docker complète (login, leaderboard, profil)
+Playwright     → 13 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5
 ESLint+Prettier→ lint + format
 npm test       → lance la suite Vitest · make check → tout (lint, data, i18n)
@@ -412,7 +412,7 @@ Track your journey with comprehensive stats:
 ## 🗺️ Roadmap
 
 Grosses briques déjà livrées — backend PHP/MariaDB, amis + Social Link, leaderboard, défis
-quotidiens, i18n 5 langues, panel admin, 363 tests automatisés (Vitest + PHPUnit + Playwright).
+quotidiens, i18n 5 langues, panel admin, 449 tests automatisés (Vitest + PHPUnit + Playwright).
 
 | Feature                            | Status       |
 | ----------------------------------- | ------------ |
@@ -576,7 +576,7 @@ cd personadle
 # Install test dependencies
 npm install
 
-# Run the 252 unit tests
+# Run the 449 unit tests
 npm test
 
 # Backend setup (first time only — creates DB, imports schema, configures Apache)
@@ -633,5 +633,5 @@ We're always looking for passionate contributors! Whether you're a developer, de
 ---
 
 <p align="center">
-  <sub>Last updated: May 2026 • Version 2.0</sub>
+  <sub>Last updated: July 2026 • Version 2.0</sub>
 </p>

@@ -84,6 +84,13 @@ Nouveau jeu — cas A (roster inédit)
 - [x] **Check i18n « valeur == EN »** — ✅ _livré (`scripts/check-i18n-untranslated.js`, `npm run i18n:check-untranslated`, avertissement pre-commit sur `lang/*.json` staged). Premier passage : 0 vraie traduction manquante, uniquement des correspondances attendues (noms, opus, lore, placeholders — voir §5 de CLAUDE.md)._
 - [x] **Observabilité prod** — ✅ _livré, option self-hosted choisie (pas de dépendance externe) : table `error_log` (migration 019) + `personadle_log_error()` (`api/lib/error_log.php`) + panel admin "🪵 Logs" (recherche, filtre par niveau, pagination). Câblé dans les 3 endpoints critiques traités ci-dessus (sessions, recover-streak, social-links interact) ; le reste des `error_log()` existants dans le codebase n'a volontairement pas été balayé (portée bien plus large, décision distincte). Pas de handler d'exception global ajouté à bootstrap.php — changerait le comportement de TOUTE l'API sans pouvoir être vérifié en sandbox, jugé trop risqué pour ce lot._
 - [ ] **Panel admin — contrôle étendu** (audit trail, RGPD, rate limits) — 🚧 _code écrit, non exécuté en sandbox (même limitation que la couverture PHP ci-dessus). Livré : table `admin_audit_log` (migration 020) + `personadle_log_admin_action()` câblé sur toutes les mutations admin (ban/unban, grant/revoke admin, badges/titres/wallpapers, event codes, social links, hard delete) + panel "📋 Audit" ; visibilité + déclenchement manuel anticipé des `deletion_requests` RGPD (logique extraite de `api/cron/hard-delete.php` vers `api/lib/deletion_requests.php`, réutilisée par le cron et l'admin) + panel "🗑️ RGPD" ; visibilité + purge manuelle des `rate_limits` + panel "⏱️ Rate Limits". Vérifié en Playwright (3 panels, exclusivité mutuelle, 0 erreur page) + `php -l` sur tous les fichiers touchés. Tests PHPUnit ajoutés (`DatabaseIntegrationTest.php`) mais non exécutés — à confirmer via `make up && make test-php`. News in-game (actuellement HTML statique sans BDD) volontairement laissée hors scope — portée trop différente pour ce lot._
+- [ ] **Dédupliquer l'autocomplete et le dark-mode inline entre les 6 modes** — `initializeAutocomplete()`
+  et `applyDarkModeStyles()` sont réimplémentés quasi à l'identique dans `classiqueMode/modeClassique.js`,
+  `emojiMode/emojiMode.js`, `allOutAttackMode/modeAllOutAttack.js`, `silhouetteMode/modeSilhouette.js`,
+  `personaeMode/modePersonae.js`, `musicsMode/modeMusic.js`, alors que `js/autocomplete.js` et
+  `js/gameCore.js` existent déjà pour ça. Le dark-mode en particulier gagnerait à devenir une classe
+  CSS `.darkmode` plutôt que du style inline dupliqué par mode. À traiter avant l'ajout d'un 7ᵉ mode,
+  sinon la duplication compose au lieu de simplement s'accumuler.
 
 ### 🟢 Produit (idées)
 
@@ -104,6 +111,13 @@ Nouveau jeu — cas A (roster inédit)
 
 - [x] **Reset de mot de passe par email** — ✅ _livré (request-reset / reset-password, token hashé 1h, page dédiée)._
 - [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète).
+- [ ] **Anti-triche sur les résultats de partie** — `api/sessions.php` accepte `target_name`/`result`/
+  `attempts` directement du client sans les valider contre `daily_targets` côté serveur (la table
+  existe en BDD mais n'est lue par aucun endpoint). Un joueur connecté peut aujourd'hui POST une
+  victoire arbitraire et gonfler streak/leaderboard/badges. À trancher : valider server-side contre
+  la cible du jour, ou assumer "best effort" pour un fan-game — aujourd'hui c'est un angle mort
+  silencieux, pas une décision prise. Distinct du point ❓ ci-dessous (badges à flags) : celui-ci
+  touche l'intégrité des sessions elles-mêmes, donc le leaderboard en entier.
 
 ### ❓ Décisions de design à trancher
 
@@ -118,13 +132,13 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **260 tests JS · 20 PHPUnit · 7 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **449 tests JS · 123 PHPUnit · 13 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
 | #   | Fonctionnalité                                 | Notes                                                                            |
 | --- | ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| B1  | Schéma BDD (21 tables, MySQL/MariaDB)          | `sql/bdd_mysql.sql` = source de vérité + migrations `sql/migrations/` (000→018)   |
+| B1  | Schéma BDD (23 tables, MySQL/MariaDB)          | `sql/bdd_mysql.sql` = source de vérité + migrations `sql/migrations/` (000→020)   |
 | B2  | API auth — register / login / logout / me      | Sessions PHP httpOnly, remember-me hashé, **reset mot de passe** (email)          |
 | B3  | API sessions + streak par-mode & **globale**   | Calcul serveur (`api/lib/streak.php`), frontière Paris, contrat de schéma testé   |
 | B4  | API user — GET/PATCH/DELETE + stats + migrate  | Migration localStorage→BDD idempotente                                            |
@@ -141,7 +155,7 @@ Nouveau jeu — cas A (roster inédit)
 | #   | Fonctionnalité                                        | Notes                                                                 |
 | --- | ----------------------------------------------------- | --------------------------------------------------------------------- |
 | S1  | Demandes d'ami (code/pseudo), liste, statut online    | Anti-self, anti-doublon, recherche paginée                            |
-| S2  | Social Link rangs 1-10, XP, mutuel ×2, anti-spam      | Procédure SQL, **tooltip** d'explication (ex-boutons)                  |
+| S2  | Social Link rangs 1-10, XP, mutuel ×2, anti-spam      | Logique en PHP pur (`api/lib/social_link.php`, testable sans BDD), **tooltip** d'explication (ex-boutons) |
 | S3  | Effet rang 10 — True Confidant                        | Halo doré + burst + typewriter (`css/rank10-effect.css`)              |
 | S4  | Comparaison de stats + phrases Persona i18n           | Overlay radar (`database/compare-phrases.js`)                         |
 | S5  | Défis quotidiens entre amis (6 modes)                 | Bandeau + post-victoire, give-up = défaite                            |
@@ -174,8 +188,8 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 260 Vitest · 20 PHPUnit · 7 E2E       | `npm test` · `make test-php` · `npm run test:e2e`                             |
-| Q2  | i18n EN/FR/ES/DE/IT (~920 clés)               | `npm run i18n:check`                                                          |
+| Q1  | Tests : 449 Vitest · 123 PHPUnit · 13 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q2  | i18n EN/FR/ES/DE/IT (947 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
 | Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |

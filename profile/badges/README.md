@@ -22,12 +22,15 @@ profile/badges/
 
 ## Catégories
 
+5 catégories réelles (`BADGE_CATEGORIES` dans `badgesData.js`) :
+
 | Catégorie          | Description                         | Exemples                                             |
 | ------------------ | ----------------------------------- | ---------------------------------------------------- |
-| 🏆 **Achievement** | Performance en jeu                  | First Win, One Shot, Night Owl, Ace Detective        |
+| 🏆 **Achievement** | Performance en jeu                  | First Win, One Shot, Night Owl, Ace Detective, Strega |
+| 🔥 **Streak**      | Paliers de série (streak globale)   | The Ignition (7j), The Divine Blaze (30j), Ragnarök's Dawn (90j), Crest of the Morning Star (120j), The Eternal Zenith (365j) |
 | 🎉 **Event**       | Badges saisonniers ou codes limités | Christmas 2025, New Year 2026, Tanabata, St-Valentin |
-| 🔒 **Secret**      | Conditions cachées non documentées  | Helel, Lucifer, Truth Duality, Strega                |
-| 👥 **Social**      | Interactions avec d'autres joueurs  | Best Bro, True Hacker, Leblanc Meeting               |
+| 🔒 **Secret**      | Conditions cachées non documentées  | True Hacker, Truth & Duality, Tae Takemi Fan, Dzulian |
+| 👥 **Social**      | Interactions avec d'autres joueurs  | Best Bro, Leblanc Meeting, Take The Pose, Data Mining |
 
 ---
 

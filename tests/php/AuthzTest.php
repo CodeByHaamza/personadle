@@ -64,4 +64,53 @@ final class AuthzTest extends TestCase
         // Un compte supprimé ET banni doit être traité comme "deleted" (message le plus définitif)
         $this->assertSame('deleted', personadle_session_denial_reason(['is_deleted' => 1, 'is_banned' => 1]));
     }
+
+    // ── personadle_csrf_required ──────────────────────────────────────────────
+
+    public function testCsrfNotRequiredForReadOnlyMethods(): void
+    {
+        $this->assertFalse(personadle_csrf_required('GET'));
+        $this->assertFalse(personadle_csrf_required('HEAD'));
+        $this->assertFalse(personadle_csrf_required('OPTIONS'));
+    }
+
+    public function testCsrfRequiredForMutatingMethods(): void
+    {
+        $this->assertTrue(personadle_csrf_required('POST'));
+        $this->assertTrue(personadle_csrf_required('PATCH'));
+        $this->assertTrue(personadle_csrf_required('DELETE'));
+        $this->assertTrue(personadle_csrf_required('PUT'));
+    }
+
+    public function testCsrfRequiredIsCaseInsensitive(): void
+    {
+        $this->assertFalse(personadle_csrf_required('get'));
+        $this->assertTrue(personadle_csrf_required('post'));
+    }
+
+    // ── personadle_csrf_valid ────────────────────────────────────────────────
+
+    public function testCsrfValidWhenTokensMatch(): void
+    {
+        $this->assertTrue(personadle_csrf_valid('abc123', 'abc123'));
+    }
+
+    public function testCsrfInvalidWhenTokensDiffer(): void
+    {
+        $this->assertFalse(personadle_csrf_valid('abc123', 'wrong'));
+    }
+
+    public function testCsrfInvalidWhenSessionTokenMissing(): void
+    {
+        // Session pas encore initialisée (ne devrait jamais arriver après bootstrap.php, mais fail-closed)
+        $this->assertFalse(personadle_csrf_valid(null, 'abc123'));
+        $this->assertFalse(personadle_csrf_valid('', 'abc123'));
+    }
+
+    public function testCsrfInvalidWhenHeaderTokenMissing(): void
+    {
+        // Client n'a pas envoyé le header X-CSRF-Token
+        $this->assertFalse(personadle_csrf_valid('abc123', null));
+        $this->assertFalse(personadle_csrf_valid('abc123', ''));
+    }
 }

@@ -12,8 +12,8 @@ import { resolveTheme, applyThemeVars } from "./theme.js";
  * profile/profile-view.js — Mode consultation du profil d'un autre joueur
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * Activé quand profile.html est chargé avec ?view=FRIENDCODE ou ?view=pseudo.
- * Dans ce cas, ce module :
+ * Activé quand profile.html est chargé avec ?view=FRIENDCODE, ?view=pseudo, ou ?uid=ID
+ * (ce dernier utilisé par la jauge Social Link publique). Dans ce cas, ce module :
  *   1. Charge le profil public via GET /api/user/public?code=...
  *   2. Applique le thème du joueur consulté (CSS vars)
  *   3. Remplit la page avec les données du joueur consulté — IDENTIQUE à son propre profil

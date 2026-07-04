@@ -2,7 +2,7 @@
 
 # 🗄️ Base de données personnages
 
-> **200+ personnages de P1 à P5X — organisés par opus, avec portraits, emojis et citations.**
+> **177 personnages de P1 à P5X — organisés par opus, avec portraits, emojis et citations.**
 
 </div>
 
@@ -13,10 +13,12 @@ Les autres modes possèdent leur propre sous-dossier `database/` dans leur répe
 
 ```
 database/
-├── characters_clean.js   ← liste complète des personnages jouables
-├── personas.js           ← données sur les Personas (mode Personae)
-├── portraitsMap.js       ← correspondance nom → chemin d'image portrait
-└── portraits/            ← images des personnages (.webp, 262+ fichiers)
+├── characters_clean.js   ← liste complète des personnages jouables (177 entrées)
+├── personas.js           ← liste de noms pour l'autocomplétion du mode Classique (pas Personae)
+├── quotes.js             ← surcouche de citations traduites (actuellement vide, prévue post-v2.0)
+├── compare-phrases.js    ← phrases Persona i18n pour l'overlay de comparaison de stats (amis)
+├── portraitsMap.js       ← correspondance nom → identifiant de fichier portrait
+└── portraits/            ← images des personnages (.webp, 189 fichiers)
     ├── Ren.webp
     ├── Yu.webp
     ├── Aigis.webp
@@ -33,18 +35,20 @@ Tableau JavaScript exporté contenant **tous les personnages** disponibles dans 
 
 ```js
 {
-  codename:  "Joker",           // Nom de code / surnom (affiché)
-  realname:  "Ren Amamiya",     // Vrai nom du personnage
-  opus:      "P5",              // Jeu d'origine (P1, P2IS, P3, P4, P5…)
-  arcana:    "The Fool",        // Arcane de la Persona / Social Link
-  role:      "Protagonist",     // Rôle dans l'histoire
-  age:       "16",              // Âge (peut être "Unknown")
-  sex:       "Male",            // Genre
-  japanese:  "Yes",             // Doublage japonais disponible ?
-  dlc:       "No",              // Personnage DLC ?
-  portrait:  "Ren.webp"         // Nom du fichier dans portraits/
+  nom:         "Ren Amamiya",              // Nom complet
+  genre:       ["Human","Male"],            // Tableau — comparé par intersection
+  age:         "15-20",                     // Tranche d'âge
+  arcane:      ["Fool","World"],            // Tableau — un perso peut avoir plusieurs arcanes
+  opus:        ["P5","P5R","P5S","P5T","PQ2"], // Tableau — tous les jeux où il apparaît
+  personaUser: true,                        // Utilisateur de Persona ou Shadow ?
+  persona:     "Arsène",                    // Nom du Persona
+  emoji:       ["🎭", "🃏", "💥"],           // Séquence emoji (mode Emoji)
+  quote:       "...You are held captive...", // Citation officielle affichée à la victoire
 }
 ```
+
+Pas de champs `codename`, `realname`, `role`, `sex`, `japanese` ou `dlc` — ces champs n'existent
+pas dans les données.
 
 ### Filtres opus disponibles
 
@@ -62,8 +66,10 @@ Tableau JavaScript exporté contenant **tous les personnages** disponibles dans 
 
 ## `portraitsMap.js`
 
-Objet de correspondance `{ nomPersonnage: "chemin/vers/portrait.webp" }`.
-Utilisé par le mode Classique pour afficher la bonne image lors d'une révélation.
+Objet de correspondance `{ nomPersonnage: "identifiant" }` — une valeur **sans** extension ni
+chemin (ex: `"Ren Amamiya": "Ren"`), pas un chemin complet. Chaque mode reconstruit lui-même le
+chemin et l'extension (`portraitsMap[name] || name.split(" ")[0]`, puis `.webp`). Utilisé par
+Classique, Emoji, Silhouette et All-Out Attack pour afficher la bonne image.
 
 ---
 

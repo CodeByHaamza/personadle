@@ -15,7 +15,7 @@
 1. Un GIF animé d'All-Out Attack emblématique de la saga Persona s'affiche.
 2. Le joueur tape le nom du personnage qui lance l'attaque.
 3. **Pas de révélation progressive** — l'image reste identique jusqu'à la fin.
-4. Après **3 mauvaises réponses**, le bouton Abandonner se déverrouille.
+4. Après **5 mauvaises réponses**, le bouton Abandonner se déverrouille.
 
 <div align="center">
 
@@ -96,15 +96,16 @@ Importe depuis `../js/gameCore.js` :
 
 - `showConfettiExplosion` (style `"sides"`)
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
-- `setupFilterButtons`
 - `showWrongMini`
+
+Le panneau de filtres opus est géré par `initFilterMenu` (`../js/filterMenu.js`), comme dans les 5 autres modes — il n'y a pas de réimplémentation locale.
 
 ### ⚡ Système de cache LRU pour les GIFs
 
 Les GIFs d'All-Out Attack sont des fichiers lourds. Ce mode implémente un **cache LRU** (_Least Recently Used_) en mémoire pour éviter de recharger les GIFs déjà vus :
 
 ```js
-const IMAGE_CACHE_MAX = 20; // max 20 GIFs en cache simultanément
+const MAX_CACHE_SIZE = 20; // max 20 GIFs en cache simultanément
 const imageCache = new Map(); // clé = URL, valeur = Blob URL
 ```
 
@@ -117,13 +118,13 @@ const imageCache = new Map(); // clé = URL, valeur = Blob URL
 
 ### 🔀 Sélection anti-répétition
 
-`getBetterRandomCharacter()` évite de tomber deux fois de suite sur le même personnage en maintenant un historique des **5 derniers** ciblés.
+`getBetterRandomCharacter()` évite uniquement de retomber sur le personnage **immédiatement précédent** (profondeur 1) lors d'un tirage aléatoire non-quotidien — la variable `lastFiveTargets` existe dans le fichier mais n'est ni lue ni alimentée ailleurs, un historique plus long n'est pas (encore) implémenté.
 
 ### Fonctions spécifiques
 
 | Fonction                   | Description                                              |
 | -------------------------- | -------------------------------------------------------- |
-| `cdn(fichier)`             | Construit l'URL complète du GIF depuis la base locale    |
+| `cdn(subfolder, filename, ext="webp")` | Construit l'URL du GIF — chemin local en dev, sinon bascule vers le CDN Cloudflare R2 (`CDN_BASE_URL`) |
 | `getFilteredPersonas()`    | Filtre les personnages selon les opus actifs             |
 | `initializeAutocomplete()` | Dropdown avec filtrage par opus actif                    |
 | `showVictoryBox()`         | Affiche le panneau de victoire avec portrait et GIF      |

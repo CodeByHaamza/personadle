@@ -13,3 +13,6 @@ chronologique `NNN_description.sql`.
 
 Ancien emplacement `api/migrations/` consolidé ici (le `001` historique de
 fondation a été renommé `000_social_foundation.sql` pour éviter la collision).
+
+> Note : la numérotation saute de `009` à `011` (pas de `010`) — écart connu de la
+> consolidation, la suite reste continue à partir de `011`.

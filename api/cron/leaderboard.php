@@ -3,10 +3,11 @@
  * api/cron/leaderboard.php — Recalcul du leaderboard_cache
  *
  * Appelé par cron Hostinger :
- *   GET https://personadle.net/api/cron/leaderboard.php?key=<CRON_SECRET>
+ *   GET https://personadle.net/api/cron/leaderboard.php
+ *   Header: X-Cron-Key: <CRON_SECRET>
  *
  * Fréquence recommandée : toutes les heures.
- * Sécurité : clé secrète (hash_equals), aucune info sensible en réponse.
+ * Sécurité : clé secrète en header (hash_equals), aucune info sensible en réponse.
  *
  * Note : 'ever' est exclu — l'API lit directement user_stats (temps réel,
  * pas de cache). Seuls day/week/month sont alimentés ici.
@@ -14,13 +15,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-// ── Vérification clé secrète ──────────────────────────────────────────────────
-$key = $_GET['key'] ?? '';
-if (!defined('CRON_SECRET') || !hash_equals(CRON_SECRET, $key)) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden']);
-    exit;
-}
+requireCronSecret();
 
 $pdo   = pdo();
 $start = microtime(true);

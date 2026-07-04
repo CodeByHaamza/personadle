@@ -1,6 +1,14 @@
 # PersonaDLE — Explication de la base de données
 
 > Pour chaque table : pourquoi elle existe, ce qu'elle contient, des exemples concrets avec de vrais personnages/joueurs du jeu, et les requêtes SQL les plus utiles.
+>
+> ⚠️ **Document conceptuel écrit avant la migration MySQL/MariaDB et avant plusieurs tables
+> ajoutées depuis** (`messages`, `badges`, `event_codes`, `wallpapers`, `rate_limits`,
+> `error_log`, `admin_audit_log`…). La syntaxe SQL ici reste souvent PostgreSQL à titre
+> pédagogique — le backend réel est MySQL/MariaDB uniquement (voir `sql/bdd_mysql.sql`,
+> seule source de vérité du schéma, et `sql/README.md` pour la liste complète des 23
+> tables). Les sections ci-dessous ont été corrigées où elles contredisaient le schéma
+> actuel, mais ce document ne couvre pas les tables ajoutées après sa rédaction initiale.
 
 ---
 
@@ -28,8 +36,8 @@
     USER_TITLES (débloqués)
 
 
-FRIENDSHIPS ◄──── SOCIAL_LINKS ──────────────────► SOCIAL_LINK_BADGES
-(demandes)        (rang + XP entre 2 amis)          (badge True Confidant)
+FRIENDSHIPS ◄──── SOCIAL_LINKS
+(demandes)        (rang + XP entre 2 amis)
                        │
                        ▼
               SOCIAL_LINK_INTERACTIONS
@@ -38,10 +46,15 @@ FRIENDSHIPS ◄──── SOCIAL_LINKS ─────────────
               (seuils des rangs 1-10)
 
 
-BADGES_UNLOCKED        EVENT_CODES_REDEEMED
-DAILY_TARGETS          LEADERBOARD_CACHE
-DELETION_REQUESTS
+BADGES_UNLOCKED        EVENT_CODES_REDEEMED       MESSAGES
+LEADERBOARD_CACHE      DELETION_REQUESTS          (messages & défis entre amis)
 ```
+
+Note : la table `social_link_badges` (badge "True Confidant" en image générée) a été
+supprimée par la migration `012_remove_tcb.sql` — cette fonctionnalité n'existe plus
+sous cette forme. `daily_targets` n'a jamais existé dans le schéma MySQL réel (c'était
+une idée de conception antérieure) — les cibles du jour sont calculées à la volée
+(RNG seedée, voir `js/gameCore.js::getDailyTarget()`), pas stockées en base.
 
 ---
 
@@ -347,9 +360,10 @@ INSERT INTO social_link_interactions
     (social_link_id, initiator_id, action_type, xp_gained, is_mutual)
 VALUES (1, 1, 'share_score', 10, FALSE);
 
--- 3. Mettre à jour l'XP et le rang (via la fonction PostgreSQL)
-SELECT * FROM add_social_link_xp(1, 10);
--- → new_xp=1430, new_rank=7, ranked_up=false
+-- 3. Mettre à jour l'XP et le rang
+-- Une procédure stockée MariaDB équivalente existe (gain_social_link_xp, voir
+-- sql/hostinger_procedure.sql) mais n'est PAS utilisée en production : la logique
+-- XP/rang a été réécrite en PHP pur, testable sans BDD (api/lib/social_link.php).
 ```
 
 **Progression vers le rang 10 :**
@@ -373,15 +387,20 @@ Si en plus ils s'envoient leurs scores (share_score mutuel = 20 XP/j):
 **Pourquoi :** Calculer `RANK() OVER (ORDER BY wins DESC)` sur des milliers de joueurs à chaque requête est coûteux. On précalcule périodiquement (toutes les heures ou à minuit) et on stocke ici.
 
 ```
-user_id │ mode      │ period   │ period_start │ score │ rank_position
-────────┼───────────┼──────────┼──────────────┼───────┼──────────────
-2       │ classic   │ all_time │ NULL         │  82   │     1
-1       │ classic   │ all_time │ NULL         │  47   │     2
-3       │ classic   │ all_time │ NULL         │  35   │     3
-1       │ global    │ weekly   │ 2026-03-23   │  12   │     1
+user_id │ mode      │ period │ period_start │ score │ rank_position
+────────┼───────────┼────────┼──────────────┼───────┼──────────────
+2       │ classic   │ day    │ 2026-03-30   │  82   │     1
+1       │ classic   │ day    │ 2026-03-30   │  47   │     2
+3       │ classic   │ day    │ 2026-03-30   │  35   │     3
+1       │ all       │ week   │ 2026-03-23   │  12   │     1
 ```
 
-**Requête — Top 10 leaderboard Classic all_time :**
+`period` ne prend que 3 valeurs réelles ici : `day`, `week`, `month` — **`ever` (all-time)
+n'est jamais mis en cache** : l'API le calcule en temps réel directement depuis
+`user_stats` à chaque requête (voir `api/leaderboard/index.php`), donc pas besoin de
+précalcul pour cette période.
+
+**Requête — Top 10 leaderboard Classic sur la journée :**
 
 ```sql
 SELECT
@@ -397,32 +416,31 @@ JOIN users u        ON u.id = lc.user_id AND u.is_deleted = FALSE
 JOIN profiles p     ON p.user_id = u.id
 LEFT JOIN titles t  ON t.id = p.equipped_title_id
 WHERE lc.mode = 'classic'
-  AND lc.period = 'all_time'
-  AND lc.period_start IS NULL
+  AND lc.period = 'day'
+  AND lc.period_start = CURRENT_DATE
 ORDER BY lc.rank_position
 LIMIT 10;
 ```
 
-**Script PHP de recalcul (cron toutes les heures) :**
+**Script PHP de recalcul (cron toutes les heures, voir `api/cron/leaderboard.php`) :**
 
 ```php
 function rebuildLeaderboard(PDO $pdo, string $mode, string $period): void {
+    $dayStart   = date('Y-m-d');
     $weekStart  = date('Y-m-d', strtotime('last monday'));
     $monthStart = date('Y-m-01');
 
     $periodStart = match($period) {
-        'weekly'  => $weekStart,
-        'monthly' => $monthStart,
-        default   => null,
+        'day'   => $dayStart,
+        'week'  => $weekStart,
+        'month' => $monthStart,
     };
 
-    // Calcul depuis game_sessions pour weekly/monthly
-    // ou depuis user_stats pour all_time
-    $sql = $period === 'all_time'
-        ? "SELECT user_id, wins AS score FROM user_stats WHERE mode = :mode ORDER BY wins DESC"
-        : "SELECT user_id, COUNT(*) AS score FROM game_sessions
-           WHERE mode = :mode AND result = 'win' AND played_date >= :start
-           GROUP BY user_id ORDER BY score DESC";
+    // Calcul depuis game_sessions pour day/week/month — 'ever' n'est jamais
+    // recalculé ici, l'API le lit en direct depuis user_stats à chaque requête.
+    $sql = "SELECT user_id, COUNT(*) AS score FROM game_sessions
+            WHERE mode = :mode AND result = 'win' AND played_date >= :start
+            GROUP BY user_id ORDER BY score DESC";
 
     // ... insérer dans leaderboard_cache avec RANK
 }
@@ -553,10 +571,17 @@ function migrateLocalProfile(PDO $pdo, int $userId, array $importData): void {
 ## Choix techniques — Pourquoi ces décisions ?
 
 **PostgreSQL vs MySQL ?**
-Les deux fonctionnent. PostgreSQL est recommandé si Hostinger propose un VPS (meilleur support JSON, fonctions PL/pgSQL, `ON CONFLICT`). Si Hostinger shared hosting → MySQL/MariaDB avec `ON DUPLICATE KEY UPDATE` à la place.
+Décision tranchée depuis : le backend de production est **MySQL/MariaDB uniquement**
+(hébergement Hostinger shared, pas de VPS). La syntaxe PostgreSQL (`ON CONFLICT`, `FILTER
+(WHERE …)`) dans les exemples ci-dessus reste à titre pédagogique mais n'est pas exécutable
+telle quelle — utiliser `ON DUPLICATE KEY UPDATE` et des `CASE WHEN` à la place, comme dans
+le vrai code (`api/lib/*.php`).
 
-**Pas de table `messages` ?**
-Délibéré — pas de messagerie directe en v1.2. Les interactions sociales passent par les actions de jeu (partage de score, défi), pas par du chat.
+**Une table `messages` ?**
+Oui, elle existe (contrairement à ce que ce document affirmait auparavant) — messagerie
+directe **et** défis quotidiens entre amis, implémentée dans `api/messages/index.php`
+(GET/POST/PATCH/DELETE). Les interactions Social Link (partage de score, etc.) restent
+séparées et continuent de passer par `social_link_interactions`, pas par les messages.
 
 **`selected_badges` en JSON plutôt qu'une table séparée ?**
 Max 4 badges, lu à chaque affichage de profil. JSON dans une colonne évite une jointure supplémentaire pour une donnée très simple. Si les besoins évoluent (badges equipables > 4, métadonnées), on migrera.

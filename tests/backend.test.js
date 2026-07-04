@@ -25,6 +25,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { buildGameSession, savePendingSession } from "../js/gameCore.js";
+import { updateAuthUI } from "../js/auth.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -384,27 +385,8 @@ describe("auth UI — data-auth attributes", () => {
   afterEach(() => {
     document.body.innerHTML = "";
     window._currentUser = null;
+    localStorage.removeItem("playerUserId");
   });
-
-  /**
-   * Reproduit la logique de updateAuthUI depuis auth.js pour les tests DOM.
-   * On ne peut pas importer auth.js directement (dépendances DOM complexes).
-   */
-  function updateAuthUI(user) {
-    window._currentUser = user;
-    document.querySelectorAll('[data-auth="connected"]').forEach((el) => {
-      el.style.display = user ? "" : "none";
-    });
-    document.querySelectorAll('[data-auth="anonymous"]').forEach((el) => {
-      el.style.display = user ? "none" : "";
-    });
-    if (user) {
-      document.querySelectorAll("[data-auth-field]").forEach((el) => {
-        const field = el.getAttribute("data-auth-field");
-        if (field in user) el.textContent = user[field];
-      });
-    }
-  }
 
   it("shows connected zones and hides anonymous zones when logged in", () => {
     document.body.innerHTML = `
@@ -454,5 +436,13 @@ describe("auth UI — data-auth attributes", () => {
     expect(() => updateAuthUI({ id: 1, pseudo: "Test" })).not.toThrow();
     // Le champ reste vide
     expect(document.querySelector('[data-auth-field="nonexistent"]').textContent).toBe("");
+  });
+
+  it("syncs playerUserId in localStorage so getDailyTarget() stays stable across devices", () => {
+    updateAuthUI({ id: 42, pseudo: "Hamza" });
+    expect(localStorage.getItem("playerUserId")).toBe("42");
+
+    updateAuthUI(null);
+    expect(localStorage.getItem("playerUserId")).toBeNull();
   });
 });

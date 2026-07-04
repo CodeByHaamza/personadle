@@ -5,6 +5,8 @@
  *   checkChallengeCompletion(mode, myAttempts, isWin)
  *     → Reads activeChallenge from localStorage; if applicable shows the
  *       animation, patches the message status, and redirects to home.
+ *   showSenderChallengeResult(msg)
+ *     → Shows the result animation to the challenge sender (used by notifications.js).
  */
 
 /** Heart emoji/size per Social Link rank (1-10). Win only. */

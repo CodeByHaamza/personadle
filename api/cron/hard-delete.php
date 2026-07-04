@@ -3,7 +3,8 @@
  * api/cron/hard-delete.php — RGPD hard delete J+30
  *
  * Appelé par cron Hostinger :
- *   GET https://personadle.net/api/cron/hard-delete.php?key=<CRON_SECRET>
+ *   GET https://personadle.net/api/cron/hard-delete.php
+ *   Header: X-Cron-Key: <CRON_SECRET>
  *
  * Fréquence recommandée : une fois par jour (ex: 03h00 heure de Paris).
  * Sécurité : même clé secrète que leaderboard.php (CRON_SECRET dans config.php).
@@ -21,13 +22,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/deletion_requests.php';
 
-// ── Vérification clé secrète ──────────────────────────────────────────────────
-$key = $_GET['key'] ?? '';
-if (!defined('CRON_SECRET') || !hash_equals(CRON_SECRET, $key)) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden']);
-    exit;
-}
+requireCronSecret();
 
 $pdo   = pdo();
 $start = microtime(true);

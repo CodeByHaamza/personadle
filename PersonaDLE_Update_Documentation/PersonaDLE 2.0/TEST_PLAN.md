@@ -170,7 +170,7 @@ UPDATE users SET is_admin = 1 WHERE pseudo = 'VOTRE_PSEUDO';
 ```bash
 make test
 ```
-- [ ] Le résultat final affiche **`Test Files  9 passed (9)`** et **`Tests  260 passed (260)`** (ou plus, si du contenu a été ajouté depuis ce document — l'important est **0 failed**)
+- [ ] Le résultat final affiche **`Test Files  24 passed (24)`** et **`Tests  449 passed (449)`** (ou plus, si du contenu a été ajouté depuis ce document — l'important est **0 failed**)
 
 ```bash
 npm run lint
@@ -204,14 +204,15 @@ make test-php
 npm i -D @playwright/test
 npx playwright install chromium
 
-# Lancer les tests — ATTENTION au port : par défaut Playwright cible le port 8090,
-# alors que votre site Docker tourne sur le port 8080 (§1.4). Sans cette variable,
-# les tests échoueront à tort en disant que le site ne répond pas.
-PLAYWRIGHT_BASE_URL=http://localhost:8080 npm run test:e2e
+# Lancer les tests — cible déjà http://localhost:8080 par défaut (le port Docker de §1.4).
+# Seulement nécessaire si ton .env change APP_PORT :
+# PLAYWRIGHT_BASE_URL=http://localhost:TON_PORT npm run test:e2e
+npm run test:e2e
 ```
 
 - [ ] Les 5 scénarios de `smoke.spec.js` passent (accueil, All-Out Attack, leaderboard avec les 19 faux joueurs, profil public sans connexion, login réel)
 - [ ] Les 2 scénarios de `api.spec.js` passent (persistance des badges épinglés, streak global qui ne s'effondre pas cross-mode)
+- [ ] Les 6 scénarios de `social-link.spec.js` passent (ajout d'ami → acceptation → interaction mutuelle → XP → montée de rang)
 
 ---
 
@@ -856,7 +857,7 @@ Pour chacune des pages suivantes, à **375px de large** :
 
 ### 18.7 Autres
 
-- [ ] `PersonaDLE_Update_Documentation/README.md`
+- [ ] `docs/roadmap/README.md`
 - [ ] `Bot_Alibaba/README.md` — si ce composant n'est pas dans le périmètre de la v2.0 testée, notez-le simplement en suggestion plutôt que de chercher à le tester fonctionnellement
 
 ---

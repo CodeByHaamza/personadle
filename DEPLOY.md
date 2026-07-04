@@ -10,7 +10,7 @@
 ```
 Local ──(git push)──► GitHub ──(SFTP/FileZilla)──► Hostinger public_html/
                                                         │
-                                                   PhpMyAdmin ◄── sql/hostinger_full.sql
+                                                   PhpMyAdmin ◄── sql/bdd_mysql.sql
 ```
 
 ---
@@ -59,7 +59,7 @@ Credentials SFTP dans hPanel → **Hébergement** → **Accès FTP**.
 
 ```
 À uploader :
-  ✅ index.html, 404.html, privacy.html, debug.html, sw.js
+  ✅ index.html, 404.html, privacy.html, faq.html, reset-password.html, sw.js
   ✅ .htaccess (racine)
   ✅ api/        (tout le dossier)
   ✅ js/         (tout le dossier)
@@ -125,10 +125,16 @@ define('CRON_SECRET', 'COLLER_LE_SECRET_GENERE_A_ETAPE_1');
 
 Dans hPanel → **PhpMyAdmin** → sélectionner ta base → onglet **Importer** :
 
-1. Sélectionner le fichier `sql/hostinger_full.sql` _(depuis ton poste local)_
+1. Sélectionner le fichier `sql/bdd_mysql.sql` _(depuis ton poste local — c'est la seule
+   source de vérité du schéma, chargée automatiquement par Docker en dev)_
 2. Format : SQL → **Exécuter**
 
-Ce fichier contient : schéma complet (20 tables) + seeds badges + seeds wallpapers + Social Link ranks + titres.
+Ce fichier contient : schéma complet (23 tables) + seeds badges (60) + seeds wallpapers (7) +
+Social Link ranks + titres.
+
+> ⚠️ Ne pas utiliser `sql/hostinger_full.sql` — c'est une archive figée au 2026-05-06,
+> explicitement dépréciée dans son propre en-tête (schéma déjà périmé de plusieurs migrations).
+> `bdd_mysql.sql` contient tout ce qu'il contenait, à jour.
 
 ### Créer le compte admin
 
@@ -145,13 +151,15 @@ UPDATE users SET is_admin = 1 WHERE pseudo = 'TonPseudo';
 
 Dans hPanel → **Avancé** → **Tâches Cron** :
 
-| Fréquence               | Commande                                                                                      |
-| ----------------------- | --------------------------------------------------------------------------------------------- |
-| **Toutes les heures**   | `wget -qO- "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" > /dev/null 2>&1` |
-| **1× par jour à 03:00** | `wget -qO- "https://personadle.net/api/cron/hard-delete.php?key=TON_SECRET" > /dev/null 2>&1` |
-| **1× par jour à 04:00** | `wget -qO- "https://personadle.net/api/cron/purge-rate-limits.php?key=TON_SECRET" > /dev/null 2>&1` |
+| Fréquence               | Commande                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Toutes les heures**   | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/leaderboard.php" > /dev/null 2>&1`   |
+| **1× par jour à 03:00** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/hard-delete.php" > /dev/null 2>&1`   |
+| **1× par jour à 04:00** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/purge-rate-limits.php" > /dev/null 2>&1` |
 
-Remplace `TON_SECRET` par la valeur de `CRON_SECRET` de ton `config.php`.
+Remplace `TON_SECRET` par la valeur de `CRON_SECRET` de ton `config.php`. Le secret passe
+désormais par un header (`X-Cron-Key`) plutôt qu'en query string `?key=` — une query string
+finit en clair dans les logs d'accès HTTP du serveur/proxy, pas un header.
 
 ---
 
@@ -177,7 +185,7 @@ Tester dans l'ordre :
 curl -s https://personadle.net/api/auth/me | python3 -m json.tool
 
 # Test cron leaderboard (remplace TON_SECRET)
-curl -s "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" | python3 -m json.tool
+curl -s -H "X-Cron-Key: TON_SECRET" "https://personadle.net/api/cron/leaderboard.php" | python3 -m json.tool
 ```
 
 ---
@@ -200,7 +208,7 @@ curl -s "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" | pytho
 
 - [ ] SSL actif sur `personadle.net` + `www.personadle.net`
 - [ ] `api/config.php` créé avec `APP_ENV = 'production'`
-- [ ] `sql/hostinger_full.sql` importé sans erreur
+- [ ] `sql/bdd_mysql.sql` importé sans erreur
 - [ ] Compte admin promu via `UPDATE users SET is_admin = 1`
 - [ ] Cron leaderboard configuré (toutes les heures)
 - [ ] Cron hard-delete configuré (03:00 quotidien)

@@ -93,10 +93,12 @@ Importe depuis `../js/gameCore.js` :
 
 - `showConfettiExplosion` — avec `{ count: 30, spreadFrom: "bottom" }` (style montée du bas)
 - `revealNextLink`, `setupRulesModal`, `setupDailyReset`, `checkResetOnLoad`
-- `setupFilterButtons`
 - `showWrongMini`
 
 > **Confettis style "bottom"** : contrairement aux autres modes, les confettis montent du bas de l'écran en positions aléatoires, évoquant une invocation de Persona.
+
+Le panneau de filtres opus est géré par `initFilterMenu` (`../js/filterMenu.js`), comme dans les
+5 autres modes.
 
 ### Filtres disponibles
 
@@ -111,7 +113,7 @@ Les filtres permettent de limiter le pool de Personas par jeu d'origine. Les **P
 | Fonction                   | Description                                                             |
 | -------------------------- | ----------------------------------------------------------------------- |
 | `getFilteredCharacters()`  | Retourne les Personas selon les filtres actifs                          |
-| `pickCharacter()`          | Sélectionne aléatoirement une Persona avec anti-répétition (derniers 5) |
+| `pickCharacter()`          | Sélectionne aléatoirement une Persona en excluant seulement la précédente |
 | `initializeAutocomplete()` | Dropdown avec flag `_guessed` pour masquer les déjà proposées           |
 | `showVictory()`            | Victoire avec badges, stats, confettis montants                         |
 | `showWrong()`              | Affiche la vignette de la mauvaise Persona                              |
@@ -119,13 +121,6 @@ Les filtres permettent de limiter le pool de Personas par jeu d'origine. Les **P
 | `giveUp()`                 | Abandonne et révèle la bonne réponse                                    |
 | `resetGame()`              | Remet à zéro et choisit une nouvelle Persona                            |
 | `applyDarkModeStyles()`    | Ajustements dark mode                                                   |
-
-### Debug
-
-```js
-// Dans la console du navigateur :
-debugAllPersonae(); // Vérifie que toutes les Personas ont une image valide
-```
 
 ---
 

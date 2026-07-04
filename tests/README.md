@@ -2,9 +2,9 @@
 
 # 🧪 Tests & Qualité
 
-<img src="https://img.shields.io/badge/Vitest-351%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
+<img src="https://img.shields.io/badge/Vitest-449%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
 <img src="https://img.shields.io/badge/PHPUnit-logic%20%2B%20DB-3776AB?style=for-the-badge&logo=php&logoColor=white" alt="PHPUnit">
-<img src="https://img.shields.io/badge/Playwright-11%20E2E-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
+<img src="https://img.shields.io/badge/Playwright-13%20E2E-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/PHPStan-niveau%205-1A1A1A?style=for-the-badge" alt="PHPStan">
 
 > **Tous verts. Toujours.** Du test unitaire pur jusqu'au smoke E2E sur la stack Docker complète.
@@ -17,16 +17,14 @@
 
 ```
                  ╱╲
-                ╱  ╲      Playwright E2E — 11 tests (stack Docker réelle)
-               ╱────╲     smoke (5) + parcours Social Link ami→XP→rang (6)
+                ╱  ╲      Playwright E2E — 13 tests (stack Docker réelle)
+               ╱────╲     smoke (5) + API badges/streak (2) + Social Link ami→XP→rang (6)
               ╱      ╲
-             ╱────────╲   PHPUnit intégration — 10 tests (vraie MariaDB)
-            ╱          ╲  contraintes SQL, FK cascade, contrat de schéma
+             ╱────────╲   PHPUnit — 123 méthodes (8 fichiers, dont intégration vraie MariaDB)
+            ╱          ╲  contraintes SQL, FK cascade, contrat de schéma, streak/social/auth
            ╱────────────╲
-          ╱              ╲ PHPUnit logique — streak pur (sans DB)
-         ╱────────────────╲
-        ╱                  ╲ Vitest — 351 tests unitaires (jsdom)
-       ╱────────────────────╲ logique de jeu, streak, i18n, validation, sync
+          ╱              ╲ Vitest — 449 tests unitaires (jsdom, 24 fichiers)
+         ╱────────────────╲ logique de jeu, streak, i18n, validation, sync
       ──────────────────────
 ```
 
@@ -41,19 +39,29 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 | -------------------------------- | :---: | -------------------------------------------------------------- |
 | `gameCore.test.js`               |  133  | dates Paris, streaks, filtres, normalisation des modes, reset  |
 | `profileStats.test.js`           |  27   | stats locales, streak globale (frontière Paris, pas UTC)       |
-| `validateCharacters.test.js`     |  22   | validateur de schéma des personnages (opus, arcane, âges)      |
 | `social-link.test.js`           |  22   | jauge/rank-up Social Link, flamme, effet True Confidant (rang 10) |
+| `validateCharacters.test.js`     |  22   | validateur de schéma des personnages (opus, arcane, âges)      |
+| `backend.test.js`                |  20   | `buildGameSession`, `savePendingSession`, auth UI DOM, `syncPending` |
 | `i18n.test.js`                   |  20   | résolution de clés, fallback, variables `{{var}}`              |
 | `badgesManager.test.js`          |  19   | unlock, sélection (limite 4), codes événement, partage        |
-| `backend.test.js`                |  19   | `buildGameSession`, `savePendingSession`, auth UI DOM          |
 | `friends.test.js`                |  18   | HTML escape, avatar path, `isOnline`/`formatLastSeen`          |
 | `streakRecovery.test.js`         |  18   | menu Jack Frost, `performRecovery` (anti-revert)               |
 | `modeComparisons.test.js`        |  17   | grille de comparaison Classic (âge, tableaux, booléens)        |
 | `profilePage.test.js`            |  15   | couleurs hex, tiers de streak, temps de lecture, avatar        |
+| `titlesUi.test.js`               |  15   | sélection/équipement des titres                                |
+| `shareCard.test.js`              |  12   | export PNG de la carte de profil (html2canvas)                 |
+| `wallpapersUi.test.js`           |  12   | sélection des fonds d'écran, sync backend                      |
+| `modal.test.js`                  |  13   | ARIA, focus initial/restauré, trap Tab/Shift+Tab                |
+| `auth.test.js`                   |  11   | `resolveLoginError`/`resolveRegisterError`                     |
 | `formatPlayTime.test.js`         |  11   | formatage du temps de jeu (i18n)                               |
+| `theme.test.js`                  |  10   | thèmes de couleur du profil                                     |
 | `badgesConditions.test.js`       |   8   | conditions de déblocage de chaque badge (`badgesData.js`)      |
+| `autocomplete.test.js`           |   8   | fermeture/suppression d'entrées d'autocomplétion                |
+| `songPlayer.test.js`             |   7   | lecteur de musique de profil                                    |
+| `langSelector.test.js`           |   5   | sélecteur de langue                                              |
+| `profileFormat.test.js`          |   4   | formatage des données de profil                                 |
 | `streakFlow.integration.test.js` |   2   | flux complet récupération + sync cloud                         |
-| **Total**                        |**351**|                                                                |
+| **Total**                        |**449**|                                                                |
 
 ## 🐘 Suites PHP (`tests/php/`)
 
@@ -66,15 +74,18 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 | `FormatUserTest.php`           | logique     | `formatUser()` — jamais de fuite de `password_hash`          |
 | `AdminValidationTest.php`      | logique     | pseudo/couleur/code événement/rang/xp du panel admin          |
 | `FriendsTest.php`              | logique     | format code ami, refus de doublon/blocage de demande          |
-| `DatabaseIntegrationTest.php`  | intégration | unicité, CHECK, FK cascade, **contrat de schéma** (10 tests)|
+| `DatabaseIntegrationTest.php`  | intégration | unicité, CHECK, FK cascade, **contrat de schéma** (35 tests)|
 
-> Les tests d'intégration tournent dans une transaction annulée (`rollBack`) → zéro pollution.
-> Si la DB n'est pas joignable, ils sont **skippés** (la suite reste verte).
+> **123 méthodes de test** au total sur ces 8 fichiers. Les tests d'intégration tournent dans
+> une transaction annulée (`rollBack`) → zéro pollution. Si la DB n'est pas joignable, ils sont
+> **skippés** (la suite reste verte).
 
 ## 🎭 E2E Playwright (`tests-e2e/`)
 
 - `smoke.spec.js` — 5 parcours sur la stack Docker (DB seedée) : accueil, All-Out Attack,
   leaderboard (faux joueurs visibles), profil public sans login, **login complet via la modale**.
+- `api.spec.js` — 2 tests via l'API : persistance des badges épinglés (PATCH → GET),
+  streak globale cross-mode qui ne s'effondre pas.
 - `social-link.spec.js` — 6 tests : parcours ami → interaction mutuelle → XP → montée de
   rang, garde-fou "Not friends", anti-spam (1 action/jour).
 
