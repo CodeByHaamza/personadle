@@ -135,6 +135,21 @@ Le vocabulaire des modes diverge selon les couches :
 - **Fichiers à la racine** : `privacy.css`, `privacy.html`, `sw.js`, `404.html`, `faq.html` cohabitent avec la config. Envisager un dossier `pages/` ou `public/`.
 - **Convention de nommage de fichiers** : CLAUDE.md impose `snake_case`, mais le repo mélange `streak-recovery.js` (kebab), `gameCore.js` (camel), `characters_clean.js` (snake). Soit aligner, soit assouplir la règle dans CLAUDE.md pour refléter la réalité.
 - **`new data/`** : dossier de travail non structuré (espaces, casse hétérogène, jpeg/webp/mp4 mêlés). Définir une convention d'ingestion : `incoming/<type>/<persona-snake_case>.<ext>` + un script qui valide/renomme/optimise avant de pousser en base.
+- **Nouveau (audit du 2026-07-04)** : deux « god files » à scinder en sous-modules ES6
+  (déjà chargés en `type="module"`, donc techniquement scindable sans casser l'ordre de
+  chargement) : `admin/admin.js` (1847 lignes, 39 fonctions) et `profile/profile-page.js`
+  (1194 lignes). ⚠️ Report volontaire : ce refactor touche des actions sensibles côté admin
+  (ban, suppression RGPD…) et n'a **pas pu être vérifié visuellement en navigateur** (pas de
+  Docker dans le sandbox où cet audit a été fait) — à faire avec un vrai test manuel en local
+  après coup, pas en aveugle.
+- **Nouveau (audit du 2026-07-04)** : `filterCharacterPool`/`updateCounters` sont dupliqués
+  entre `classiqueMode/modeClassique.js` et `emojiMode/emojiMode.js` avec de **vraies
+  différences de comportement** — `filterCharacterPool` de Classique exclut les noms déjà
+  devinés (`guessHistory`) et mute le tableau `personas` en place, celui d'Emoji ne fait
+  aucune exclusion et retourne un nouveau tableau ; `updateCounters` de Classique pilote 2
+  compteurs (`hintCounter` + `giveUpCounter`), celui d'Emoji un seul. Avant de factoriser,
+  trancher si l'absence d'exclusion en Emoji est un choix voulu ou un oubli — sinon le
+  factoring risque de figer un bug ou d'en introduire un.
 
 ---
 
