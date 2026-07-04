@@ -3,7 +3,8 @@
  * api/cron/purge-rate-limits.php — Purge des fenêtres de rate-limit expirées
  *
  * Appelé par cron Hostinger :
- *   GET https://personadle.net/api/cron/purge-rate-limits.php?key=<CRON_SECRET>
+ *   GET https://personadle.net/api/cron/purge-rate-limits.php
+ *   Header: X-Cron-Key: <CRON_SECRET>
  *
  * Fréquence recommandée : une fois par jour (ex: 04h00 heure de Paris).
  * Sécurité : même clé secrète que hard-delete.php/leaderboard.php.
@@ -17,13 +18,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-// ── Vérification clé secrète ──────────────────────────────────────────────────
-$key = $_GET['key'] ?? '';
-if (!defined('CRON_SECRET') || !hash_equals(CRON_SECRET, $key)) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden']);
-    exit;
-}
+requireCronSecret();
 
 $pdo   = pdo();
 $start = microtime(true);

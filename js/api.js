@@ -63,6 +63,17 @@ export class ApiError extends Error {
 // ─────────────────────────────────────────────────────────
 
 /**
+ * Lit le token CSRF depuis le cookie `csrf_token` (posé par api/bootstrap.php,
+ * lisible par JS — pattern double-submit). Renvoyé dans le header X-CSRF-Token
+ * sur toute requête mutante ; vérifié côté serveur par requireAuth().
+ * @returns {string}
+ */
+export function getCsrfToken() {
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+/**
  * Effectue un appel vers l'API PersonaDLE.
  * - Ajoute automatiquement les headers JSON et les credentials (cookies session).
  * - Lance une ApiError si le status HTTP >= 400.
@@ -81,6 +92,7 @@ async function apiCall(endpoint, opts = {}) {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      "X-CSRF-Token": getCsrfToken(),
       ...opts.headers,
     },
   });

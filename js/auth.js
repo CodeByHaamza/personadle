@@ -128,7 +128,7 @@ export function resolveRegisterError(message) {
  *
  * @param {object|null} user
  */
-function updateAuthUI(user) {
+export function updateAuthUI(user) {
   window._currentUser = user;
 
   // Sync the player seed ID used by getDailyTarget() in gameCore.js.

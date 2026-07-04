@@ -145,13 +145,15 @@ UPDATE users SET is_admin = 1 WHERE pseudo = 'TonPseudo';
 
 Dans hPanel → **Avancé** → **Tâches Cron** :
 
-| Fréquence               | Commande                                                                                      |
-| ----------------------- | --------------------------------------------------------------------------------------------- |
-| **Toutes les heures**   | `wget -qO- "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" > /dev/null 2>&1` |
-| **1× par jour à 03:00** | `wget -qO- "https://personadle.net/api/cron/hard-delete.php?key=TON_SECRET" > /dev/null 2>&1` |
-| **1× par jour à 04:00** | `wget -qO- "https://personadle.net/api/cron/purge-rate-limits.php?key=TON_SECRET" > /dev/null 2>&1` |
+| Fréquence               | Commande                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Toutes les heures**   | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/leaderboard.php" > /dev/null 2>&1`   |
+| **1× par jour à 03:00** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/hard-delete.php" > /dev/null 2>&1`   |
+| **1× par jour à 04:00** | `wget --header="X-Cron-Key: TON_SECRET" -qO- "https://personadle.net/api/cron/purge-rate-limits.php" > /dev/null 2>&1` |
 
-Remplace `TON_SECRET` par la valeur de `CRON_SECRET` de ton `config.php`.
+Remplace `TON_SECRET` par la valeur de `CRON_SECRET` de ton `config.php`. Le secret passe
+désormais par un header (`X-Cron-Key`) plutôt qu'en query string `?key=` — une query string
+finit en clair dans les logs d'accès HTTP du serveur/proxy, pas un header.
 
 ---
 
@@ -177,7 +179,7 @@ Tester dans l'ordre :
 curl -s https://personadle.net/api/auth/me | python3 -m json.tool
 
 # Test cron leaderboard (remplace TON_SECRET)
-curl -s "https://personadle.net/api/cron/leaderboard.php?key=TON_SECRET" | python3 -m json.tool
+curl -s -H "X-Cron-Key: TON_SECRET" "https://personadle.net/api/cron/leaderboard.php" | python3 -m json.tool
 ```
 
 ---

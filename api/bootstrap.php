@@ -9,8 +9,8 @@
  *   - Headers CORS + Content-Type JSON
  *   - Session PHP sécurisée (HttpOnly, SameSite=Lax, Secure en prod)
  *   - Connexion PDO singleton (MySQL 8.0, utf8mb4)
- *   - Helpers : jsonSuccess(), jsonError(), requireAuth(),
- *               getJsonBody(), generateFriendCode(), formatUser()
+ *   - Helpers : jsonSuccess(), jsonError(), requireAuth(), requireAdmin(),
+ *               requireCsrf(), getJsonBody(), generateFriendCode(), formatUser()
  */
 
 declare(strict_types=1);
@@ -76,7 +76,7 @@ if (in_array($origin, $allowedOrigins, true)) {
     header('Access-Control-Allow-Credentials: true');
 }
 header('Access-Control-Allow-Methods: GET, POST, PATCH, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Accept');
+header('Access-Control-Allow-Headers: Content-Type, Accept, X-CSRF-Token');
 header('Content-Type: application/json; charset=utf-8');
 
 // Preflight OPTIONS → répondre immédiatement sans logique applicative
@@ -116,6 +116,24 @@ session_set_cookie_params([
     'samesite' => 'Lax',
 ]);
 session_start();
+
+// ── Token CSRF (double-submit cookie) ────────────────────────────────────────
+// Émis dès la première requête (avant même le login) dans un cookie LISIBLE
+// par JS — le front (js/api.js) le recopie dans le header X-CSRF-Token sur
+// toute requête mutante. requireAuth() compare ce header au token de session
+// (hash_equals) : un site tiers ne peut pas lire ce cookie (Same-Origin Policy)
+// donc ne peut pas forger le header, même si SameSite=Lax était contourné.
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+setcookie('csrf_token', $_SESSION['csrf_token'], [
+    'expires'  => time() + $sessionLifetime,
+    'path'     => '/',
+    'domain'   => '',
+    'secure'   => APP_ENV === 'production',
+    'httponly' => false, // doit être lisible par JS — c'est tout l'intérêt du double-submit
+    'samesite' => 'Lax',
+]);
 
 // ── PDO singleton ────────────────────────────────────────────────────────────
 /**
@@ -185,6 +203,7 @@ function requireAuth(): int
     if (empty($_SESSION['user_id'])) {
         jsonError('Unauthorized — please log in', 401);
     }
+    requireCsrf();
     $uid = (int) $_SESSION['user_id'];
 
     // Vérifier is_deleted (cached 5 min dans $_SESSION pour éviter une requête par hit)
@@ -220,6 +239,25 @@ function requireAuth(): int
     }
 
     return $uid;
+}
+
+/**
+ * Vérifie le token CSRF (double-submit cookie) pour les méthodes mutantes.
+ * Termine avec 403 si le header X-CSRF-Token est absent ou ne correspond pas
+ * au token de session. Portée volontairement limitée aux endpoints authentifiés
+ * (appelée depuis requireAuth()) : login/register/reset-password restent
+ * protégés par SameSite=Lax uniquement, décision documentée dans
+ * PersonaDLE_Update_Documentation/PersonaDLE 2.0/DEV_CHANGELOG.md.
+ */
+function requireCsrf(): void
+{
+    if (!personadle_csrf_required($_SERVER['REQUEST_METHOD'] ?? 'GET')) {
+        return;
+    }
+    $header = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+    if (!personadle_csrf_valid($_SESSION['csrf_token'] ?? null, $header)) {
+        jsonError('Invalid or missing CSRF token', 403);
+    }
 }
 
 /**
@@ -285,6 +323,22 @@ function rateLimit(string $key, int $max, int $windowSec, string $message = 'Too
     $stmt->execute([$key]);
     if ((int) $stmt->fetchColumn() > $max) {
         jsonError($message, 429);
+    }
+}
+
+/**
+ * Vérifie le secret cron pour les endpoints api/cron/*.php, via le header
+ * X-Cron-Key plutôt qu'un paramètre ?key= en query string : une query string
+ * finit en clair dans les logs d'accès HTTP (serveur, proxy), pas un header.
+ * Termine avec 403 si absent/invalide (comparaison hash_equals, timing-safe).
+ */
+function requireCronSecret(): void
+{
+    $key = $_SERVER['HTTP_X_CRON_KEY'] ?? '';
+    if (!defined('CRON_SECRET') || !hash_equals(CRON_SECRET, $key)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Forbidden']);
+        exit;
     }
 }
 

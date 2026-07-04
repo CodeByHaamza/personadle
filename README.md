@@ -633,5 +633,5 @@ We're always looking for passionate contributors! Whether you're a developer, de
 ---
 
 <p align="center">
-  <sub>Last updated: May 2026 • Version 2.0</sub>
+  <sub>Last updated: July 2026 • Version 2.0</sub>
 </p>

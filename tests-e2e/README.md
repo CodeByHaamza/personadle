@@ -47,8 +47,8 @@ make up
 npm run test:e2e
 ```
 
-> Cible par défaut : `http://localhost:8090`. Si ton site Docker tourne sur un autre port :
-> `PLAYWRIGHT_BASE_URL=http://localhost:8080 npm run test:e2e`.
+> Cible par défaut : `http://localhost:8080` (le `APP_PORT` par défaut de `docker-compose.yml`).
+> Si ton `.env` change `APP_PORT` : `PLAYWRIGHT_BASE_URL=http://localhost:TON_PORT npm run test:e2e`.
 > Pas de `webServer` dans [playwright.config.js](../playwright.config.js) — c'est Docker qui sert le site.
 
 ### 🔑 sudo
@@ -61,8 +61,10 @@ et requiert `sudo` (apt). Si tu n'as pas les droits, lance `npx playwright insta
 
 ## ⚙️ Statut CI
 
-**Optionnels** : non lancés par `npm test` ni par la CI par défaut (ils exigent la stack Docker).
-À lancer en local avant une release ou un gros refactor front.
+Lancés dans un job dédié (`e2e`) de `.github/workflows/ci.yml` : la stack Docker complète
+(`docker compose up -d --build`) est démarrée dans le runner, puis Playwright tourne contre
+`http://localhost:8080`. Non bloquant pour les autres jobs (JS/PHP) — ils tournent en parallèle.
+Toujours lançable en local avant une release ou un gros refactor front (voir ci-dessus).
 
 ## 💡 Scénarios à ajouter
 

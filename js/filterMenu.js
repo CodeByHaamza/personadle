@@ -66,6 +66,10 @@ function _migrate(saved, allOpus) {
   return result.length > 0 ? [...new Set(result)] : null;
 }
 
+// Exporté uniquement pour les tests unitaires (tests/gameCore.test.js) — l'usage
+// interne du module passe toujours par _migrate() ci-dessus, pas par cet alias.
+export { _migrate as migrateLegacyOpusFilters };
+
 /* =============================================================
    INIT — Point d'entrée principal
    ============================================================= */

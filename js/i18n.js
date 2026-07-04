@@ -241,12 +241,6 @@ export async function setLang(lang) {
  * Initialise i18n au chargement de la page :
  * lit localStorage ou détecte la langue navigateur,
  * puis applique les traductions.
- * @returns {Promise<void>}
- */
-/**
- * Initialise i18n au chargement de la page :
- * lit localStorage ou détecte la langue navigateur,
- * puis applique les traductions.
  * @returns {Promise<string>} la langue effectivement chargée
  */
 export async function initLang() {

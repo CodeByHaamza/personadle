@@ -37,3 +37,29 @@ function personadle_session_denial_reason(?array $row): ?string
     }
     return null;
 }
+
+/**
+ * Décide si une méthode HTTP doit être protégée par le token CSRF (double-submit).
+ * Pure — ne fait aucun accès BDD. GET/HEAD/OPTIONS sont en lecture seule et jamais
+ * concernés par la falsification cross-site (aucun effet de bord côté serveur).
+ */
+function personadle_csrf_required(string $method): bool
+{
+    return !in_array(strtoupper($method), ['GET', 'HEAD', 'OPTIONS'], true);
+}
+
+/**
+ * Compare en temps constant le token CSRF de session à celui envoyé par le client
+ * (header X-CSRF-Token, copié depuis le cookie lisible `csrf_token` — pattern
+ * double-submit). Pure — ne fait aucun accès BDD.
+ *
+ * @param string|null $sessionToken Token stocké côté serveur ($_SESSION['csrf_token'])
+ * @param string|null $headerToken  Token reçu dans le header X-CSRF-Token
+ */
+function personadle_csrf_valid(?string $sessionToken, ?string $headerToken): bool
+{
+    if ($sessionToken === null || $sessionToken === '' || $headerToken === null || $headerToken === '') {
+        return false;
+    }
+    return hash_equals($sessionToken, $headerToken);
+}

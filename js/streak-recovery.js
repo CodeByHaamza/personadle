@@ -9,6 +9,8 @@
  * Déclenchement : premier chargement du jour si la streak a été brisée.
  */
 
+import { getCsrfToken } from "./api.js";
+
 const RECOVERY_KEY = "streakRecovery";
 const TWO_MONTHS_MS = 60 * 24 * 60 * 60 * 1000; // 60 jours en ms
 
@@ -183,7 +185,7 @@ export async function performRecovery(previousStreak) {
       res = await fetch(`${prefix}/api/user/recover-streak`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": getCsrfToken() },
         body: JSON.stringify({ previous_streak: previousStreak }),
       });
     } catch (_) {

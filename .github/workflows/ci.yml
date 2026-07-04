@@ -99,3 +99,56 @@ jobs:
         run: |
           wget -q -O phpstan.phar https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar
           php phpstan.phar analyse --no-progress
+
+  # ── Job 3 : E2E Playwright contre la stack Docker complète ──────────────────
+  # Auparavant lancés uniquement en local (voir tests-e2e/README.md). Premier
+  # branchement en CI : non-bloquant (continue-on-error) tant qu'on n'a pas
+  # confirmé sa stabilité sur plusieurs runs — à retirer une fois vérifié vert.
+  e2e:
+    name: E2E Playwright (Docker stack)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start Docker stack (db + php + phpMyAdmin, seed inclus)
+        run: docker compose up -d --build
+
+      - name: Wait for the site to respond on :8080
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/api/auth/me -o /dev/null; then
+              echo "Site up after ${i}0s"; exit 0
+            fi
+            sleep 10
+          done
+          echo "Site never became ready — dumping logs"
+          docker compose logs
+          exit 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright + Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npx playwright test
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:8080
+
+      - name: Dump Docker logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop Docker stack
+        if: always()
+        run: docker compose down -v

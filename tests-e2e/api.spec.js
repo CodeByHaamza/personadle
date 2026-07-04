@@ -10,7 +10,7 @@ import { test, expect, request as pwRequest } from "@playwright/test";
  * de rejouer le même (user, mode, jour) — d'où le compte neuf à chaque fois).
  */
 
-const BASE = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8090";
+const BASE = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8080";
 
 test.describe.serial("API — régressions sensibles (badges, streak global)", () => {
   let ctx;

@@ -13,7 +13,7 @@ import { test, expect, request as pwRequest } from "@playwright/test";
  * par run pour rester idempotent (1 action par jour par couple d'amis).
  */
 
-const BASE = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8090";
+const BASE = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8080";
 
 async function registerUser(rnd, suffix) {
   const ctx = await pwRequest.newContext({ baseURL: BASE });

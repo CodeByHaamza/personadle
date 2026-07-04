@@ -30,6 +30,8 @@ import {
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
+import { migrateLegacyOpusFilters } from "../js/filterMenu.js";
+import { api } from "../js/api.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -594,7 +596,13 @@ describe("buildGameSession", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("savePendingSession", () => {
-  beforeEach(clearStorage);
+  beforeEach(() => {
+    clearStorage();
+    // js/api.js sets window._personadleApi as a side effect of being imported
+    // (bridge pattern, see CLAUDE.md). These tests target the no-bridge fallback
+    // path (direct localStorage write), so reset it explicitly per test.
+    window._personadleApi = undefined;
+  });
 
   it("stores a session in localStorage under 'pendingSessions'", () => {
     const session = buildGameSession({
@@ -1097,52 +1105,26 @@ describe("i18n t() — raw-key return for missing key (the ?? fallback trap)", (
 //   "409 = session déjà enregistrée côté serveur → `continue` silencieux, pas
 //    `return` ; les autres erreurs s'accumulent dans `remaining[]`"
 //
-// `syncPending` lives in api.js (not gameCore.js) and calls an actual HTTP
-// endpoint, so it cannot be imported directly in this test suite. Instead, we:
-//   1. Verify that `savePendingSession` correctly ignores a 409 on postSession
-//      and does NOT queue the session to localStorage (silent discard).
-//   2. Test the syncPending semantics directly using a self-contained helper
-//      that mirrors the documented loop logic.
+// `syncPending` lives in api.js (not gameCore.js) but IS exported (api.stats.syncPending),
+// so instead of reimplementing its loop we drive the real function directly and
+// stub the global `fetch` it calls through — this catches a regression in the
+// actual shipped code, not just in a hand-copied reproduction of it.
+// We also verify `savePendingSession` (imported for real from gameCore.js) ignores
+// a 409 on postSession and does NOT queue the session to localStorage.
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("syncPending — 409 must continue (not abort) the queue", () => {
   beforeEach(() => {
     localStorage.clear();
     window._personadleApi = undefined;
+    api.stats._syncLock = false;
   });
   afterEach(() => {
     localStorage.clear();
     window._personadleApi = undefined;
+    api.stats._syncLock = false;
+    vi.unstubAllGlobals();
   });
-
-  /**
-   * Mirrors the documented correct syncPending loop from api.js:
-   *   for (const session of pending) {
-   *     try { await postSession(session); }
-   *     catch (e) {
-   *       if (e?.status === 409) continue;   ← skip, do NOT return
-   *       remaining.push(session);
-   *     }
-   *   }
-   * Returns { processed: number, remaining: object[] }
-   */
-  async function syncPendingLoop(sessions, postSession) {
-    const remaining = [];
-    let processed = 0;
-    for (const session of sessions) {
-      try {
-        await postSession(session);
-        processed++;
-      } catch (e) {
-        if (e?.status === 409) {
-          // Correct: silently skip the already-recorded session and CONTINUE
-          continue;
-        }
-        remaining.push(session); // network/server error — keep for retry
-      }
-    }
-    return { processed, remaining };
-  }
 
   it("processes all sessions even when the first one returns 409", async () => {
     const s1 = buildGameSession({
@@ -1152,27 +1134,28 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
       attempts: 1,
     });
     const s2 = buildGameSession({ mode: "Emoji", targetName: "Ryuji", result: "win", attempts: 2 });
+    localStorage.setItem("pendingSessions", JSON.stringify([s1, s2]));
 
     let callCount = 0;
-    const mockPostSession = vi.fn().mockImplementation(async () => {
-      callCount++;
-      if (callCount === 1) {
-        // First call: 409 (session already recorded)
-        const err = new Error("Conflict");
-        err.status = 409;
-        throw err;
-      }
-      // Second call: success
-      return { session_id: 99 };
-    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        callCount++;
+        // First call: 409 (session already recorded server-side)
+        if (callCount === 1) {
+          return { ok: false, status: 409, json: async () => ({ error: "Conflict" }) };
+        }
+        // Second call: success
+        return { ok: true, status: 200, json: async () => ({ session_id: 99 }) };
+      })
+    );
 
-    const { processed, remaining } = await syncPendingLoop([s1, s2], mockPostSession);
+    await api.stats.syncPending();
 
-    // Both sessions were attempted
-    expect(mockPostSession).toHaveBeenCalledTimes(2);
-    // The 409-ed session is silently dropped (not counted as processed, but also not kept)
-    expect(processed).toBe(1); // only s2 succeeded
-    expect(remaining).toHaveLength(0); // s1 (409) discarded, s2 (200) succeeded — nothing remaining
+    expect(fetch).toHaveBeenCalledTimes(2);
+    // s1 (409) silently discarded, s2 (200) succeeded — nothing left to retry
+    const remaining = JSON.parse(localStorage.getItem("pendingSessions"));
+    expect(remaining).toHaveLength(0);
   });
 
   it("keeps sessions in the remaining queue when a real network error occurs", async () => {
@@ -1183,21 +1166,23 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
       attempts: 1,
     });
     const s2 = buildGameSession({ mode: "Emoji", targetName: "Ann", result: "win", attempts: 2 });
+    localStorage.setItem("pendingSessions", JSON.stringify([s1, s2]));
 
     let callCount = 0;
-    const mockPostSession = vi.fn().mockImplementation(async () => {
-      callCount++;
-      if (callCount === 1) {
-        // Network error (no status property = not a 409)
-        throw new Error("Network error");
-      }
-      return { session_id: 100 };
-    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        callCount++;
+        // First call: network failure (no HTTP response at all, unlike a 409)
+        if (callCount === 1) throw new Error("Network error");
+        return { ok: true, status: 200, json: async () => ({ session_id: 100 }) };
+      })
+    );
 
-    const { processed, remaining } = await syncPendingLoop([s1, s2], mockPostSession);
+    await api.stats.syncPending();
 
-    expect(mockPostSession).toHaveBeenCalledTimes(2);
-    expect(processed).toBe(1); // s2 succeeded
+    expect(fetch).toHaveBeenCalledTimes(2);
+    const remaining = JSON.parse(localStorage.getItem("pendingSessions"));
     expect(remaining).toHaveLength(1); // s1 (network error) kept for retry
     expect(remaining[0].target_name).toBe("Joker");
   });
@@ -1269,41 +1254,14 @@ describe("syncPending — 409 must continue (not abort) the queue", () => {
 //    children.some(c => saved.includes(c)) — sans ça, ["P5","P5R"] devient
 //    tous les sous-codes P5"
 //
-// `_migrate` is NOT exported from filterMenu.js and cannot be imported directly.
-// We reproduce its pure logic here to verify the documented algorithm is correct
-// and to catch regressions if the logic is ever changed.
-// If filterMenu.js ever exports _migrate, replace these inline tests with imports.
+// `_migrate` is private to filterMenu.js — exported under the test-only alias
+// `migrateLegacyOpusFilters` (see js/filterMenu.js) so this suite exercises the
+// real implementation instead of a hand-copied reproduction that could silently
+// drift from the shipped code.
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("filterMenu _migrate() logic — inline reproduction (function not exported)", () => {
-  // Replicate LEGACY_EXPAND and _migrate exactly as they appear in filterMenu.js
-  const LEGACY_EXPAND = {
-    P2: ["P2IS", "P2EP"],
-    P3: ["P3", "P3FES", "P3P"],
-    P4: ["P4", "P4G", "P4AU", "P4D"],
-    P5: ["P5", "P5R", "P5S", "P5T"],
-    PQ: ["PQ", "PQ2"],
-  };
-
-  function _migrate(saved, allOpus) {
-    if (!Array.isArray(saved)) return null;
-    if (saved.length === 0) return [];
-    const result = [];
-    for (const code of saved) {
-      const children = LEGACY_EXPAND[code];
-      if (children) {
-        const alreadyPrecise = children.some((c) => c !== code && saved.includes(c));
-        if (alreadyPrecise) {
-          if (allOpus.includes(code)) result.push(code);
-        } else {
-          result.push(...children.filter((c) => allOpus.includes(c)));
-        }
-      } else if (allOpus.includes(code)) {
-        result.push(code);
-      }
-    }
-    return result.length > 0 ? [...new Set(result)] : null;
-  }
+describe("filterMenu migrateLegacyOpusFilters() (real _migrate() via test-only export)", () => {
+  const _migrate = migrateLegacyOpusFilters;
 
   const ALL_OPUS = [
     "P1",
