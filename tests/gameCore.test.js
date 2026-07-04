@@ -27,6 +27,8 @@ import {
   normalizeModeKey,
   modeLabel,
   MODES,
+  applyDarkModeOverrides,
+  enableGiveUpButton,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -1481,5 +1483,59 @@ describe("modeLabel", () => {
 
   it("falls back to the raw input for an unknown mode (non-destructive)", () => {
     expect(modeLabel("Mystery")).toBe("Mystery");
+  });
+});
+
+describe("applyDarkModeOverrides", () => {
+  beforeEach(() => {
+    setHTML('<div class="box"></div><div id="victoryBox"></div>');
+    document.body.classList.remove("darkmode");
+  });
+
+  it("is a no-op when the body has no .darkmode class", () => {
+    applyDarkModeOverrides([{ selector: ".box", styles: { color: "red" } }]);
+    expect(document.querySelector(".box").style.color).toBe("");
+  });
+
+  it("applies styles by CSS selector when darkmode is active", () => {
+    document.body.classList.add("darkmode");
+    applyDarkModeOverrides([{ selector: ".box", styles: { backgroundColor: "#222", color: "white" } }]);
+    const box = document.querySelector(".box");
+    expect(box.style.backgroundColor).toBe("rgb(34, 34, 34)");
+    expect(box.style.color).toBe("white");
+  });
+
+  it("applies styles by element id and ignores missing targets silently", () => {
+    document.body.classList.add("darkmode");
+    expect(() =>
+      applyDarkModeOverrides([
+        { id: "victoryBox", styles: { border: "3px solid #4caf50" } },
+        { selector: ".does-not-exist", styles: { color: "red" } },
+      ])
+    ).not.toThrow();
+    expect(document.getElementById("victoryBox").style.border).toBe("3px solid rgb(76, 175, 80)");
+  });
+});
+
+describe("enableGiveUpButton", () => {
+  beforeEach(() => {
+    setHTML('<button id="giveUpButton" disabled></button><button id="customBtn" disabled></button>');
+  });
+
+  it("re-enables the default #giveUpButton and sets a pointer cursor", () => {
+    enableGiveUpButton();
+    const btn = document.getElementById("giveUpButton");
+    expect(btn.disabled).toBe(false);
+    expect(btn.style.cursor).toBe("pointer");
+  });
+
+  it("supports a custom button id", () => {
+    enableGiveUpButton("customBtn");
+    expect(document.getElementById("customBtn").disabled).toBe(false);
+  });
+
+  it("is a no-op when the button doesn't exist", () => {
+    document.body.innerHTML = "";
+    expect(() => enableGiveUpButton()).not.toThrow();
   });
 });
