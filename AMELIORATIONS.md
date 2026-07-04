@@ -56,7 +56,9 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
 1. Réencoder **toute** la base AOA existante avec le pipeline validé :
    `ffmpeg -i in.mp4 -vf fps=30 -loop 0 -an -c:v libwebp -q:v 70 -compression_level 6 out.webp`
 2. Envisager de **conserver les MP4** comme source de vérité (plus compact que le webp animé) et générer le webp à la volée / au build.
-3. Lazy-load + `loading="lazy"` sur les animations, et ne charger l'AOA du jour que quand nécessaire.
+3. ~~Lazy-load + `loading="lazy"` sur les animations~~ — `loading="lazy"` posé sur `#aoaGif`
+   (`allOutAttackMode/allOutAttack.html`). Le chargement à la demande (une seule cible du jour,
+   pas de préchargement des autres) était déjà en place côté JS (`modeAllOutAttack.js`).
 
 ---
 

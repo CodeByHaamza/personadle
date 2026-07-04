@@ -241,7 +241,7 @@ Sécurité activée automatiquement :
 
 - **CORS** : whitelist d'origines exactes (pas de wildcard quand `credentials: include`)
 - **Headers** : `Content-Security-Policy`, `Strict-Transport-Security` (prod), `X-Frame-Options`, `X-Content-Type-Options`
-- **Rate limiting** : table SQL `rate_limits` (helper `rateLimit()`, partagé entre instances) — login 5/15 min, register 5/15 min, sessions 15/15 min
+- **Rate limiting** : table SQL `rate_limits` (helper `rateLimit()`, partagé entre instances) — login 5/15 min, register 5/15 min, sessions 15/15 min, friends-add 10/15 min, social-link-interact 30/15 min, messages-send 20/15 min
 - **Erreurs** : `display_errors` coupé en prod (`log_errors` seul) — pas de fuite de stack trace
 
 ---
