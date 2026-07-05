@@ -77,6 +77,11 @@ let lastFiveTargets = []; // Prevents the same character from appearing twice in
 
 const textbar = document.getElementById("textbar");
 const silhouetteImg = document.getElementById("silhouetteImage");
+// Anti-triche : le drag natif du navigateur ignore le filtre CSS (brightness(0))
+// et peut être déposé hors de .silhouette-box (overflow: hidden), révélant le
+// personnage à deviner. draggable="false" (HTML) + user-drag: none (CSS) suffisent
+// dans la plupart des navigateurs ; ce preventDefault() couvre les cas restants.
+silhouetteImg?.addEventListener("dragstart", (e) => e.preventDefault());
 const guessBtn = document.getElementById("guessButton");
 const resetBtn = document.getElementById("resetButton");
 const giveUpBtn = document.getElementById("giveUpButton");

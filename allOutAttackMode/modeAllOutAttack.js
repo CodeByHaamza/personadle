@@ -701,6 +701,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const gifElement = document.getElementById("aoaGif");
   const guessButton = document.getElementById("guessButton");
 
+  // Anti-triche : le drag natif du navigateur ignore le filtre CSS de flou et
+  // peut être déposé hors de la zone du GIF, révélant le personnage à deviner.
+  // draggable="false" (HTML) + user-drag: none (CSS) suffisent dans la plupart
+  // des navigateurs ; ce preventDefault() couvre les cas restants.
+  gifElement?.addEventListener("dragstart", (e) => e.preventDefault());
+
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("filters_AllOutAttack", ALL_OPUS, (newActive) => {
     activeOpusFilters = newActive;

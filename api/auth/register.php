@@ -16,7 +16,12 @@ require_once __DIR__ . '/../lib/validation.php';
 $rawForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
 $firstIp         = trim(explode(',', $rawForwardedFor)[0]);
 $rlIp            = filter_var($firstIp, FILTER_VALIDATE_IP) ? $firstIp : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
-rateLimit('register:' . $rlIp, 5, 15 * 60); // 5 inscriptions / 15 min
+// 5 inscriptions / 15 min en prod ; marge élargie hors prod — les specs E2E
+// enregistrent chacun leurs propres comptes depuis la même IP locale, et un
+// retry CI sur un test en échec dans un describe.serial ré-exécute tout le
+// bloc (donc son beforeAll), ce qui peut ré-inscrire les mêmes comptes.
+$rlMaxRegister   = APP_ENV === 'production' ? 5 : 50;
+rateLimit('register:' . $rlIp, $rlMaxRegister, 15 * 60);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);

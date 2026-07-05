@@ -57,20 +57,27 @@ error_reporting(E_ALL);
 // Origines autorisées : local dev (Apache port 80, Live Server port 5500)
 // + production. On renvoie l'origine exacte si elle est whitelistée
 // pour que credentials: 'include' fonctionne (wildcard * interdit avec cookies).
+// Les origines de dev ne sont ajoutées qu'en dehors de la prod — le même fichier
+// est déployé tel quel sur Hostinger (APP_ENV=production), inutile d'y exposer
+// localhost/127.0.0.1 en dur.
 $allowedOrigins = [
-    'http://localhost',
-    'http://127.0.0.1',
-    'http://localhost:80',
-    'http://127.0.0.1:80',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'http://localhost:5500',     // Live Server VSCode
-    'http://127.0.0.1:5500',
-    'http://localhost:5173',     // Vite dev server
-    'http://127.0.0.1:5173',
     'https://personadle.net',
     'https://www.personadle.net',
 ];
+if (APP_ENV !== 'production') {
+    $allowedOrigins = array_merge($allowedOrigins, [
+        'http://localhost',
+        'http://127.0.0.1',
+        'http://localhost:80',
+        'http://127.0.0.1:80',
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'http://localhost:5500',     // Live Server VSCode
+        'http://127.0.0.1:5500',
+        'http://localhost:5173',     // Vite dev server
+        'http://127.0.0.1:5173',
+    ]);
+}
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowedOrigins, true)) {

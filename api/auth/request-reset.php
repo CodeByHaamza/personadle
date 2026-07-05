@@ -47,7 +47,7 @@ if ($user) {
     $base = (APP_ENV === 'production')
         ? 'https://personadle.net'
         : ($_SERVER['HTTP_ORIGIN'] ?? 'http://localhost:8080');
-    $link = $base . '/reset-password.html?token=' . $token;
+    $link = $base . '/pages/reset-password.html?token=' . $token;
 
     $subject = 'PersonaDLE — Reset your password';
     $body    = "Hi " . ($user['pseudo'] ?: 'there') . ",\n\n"

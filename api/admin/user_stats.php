@@ -20,8 +20,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method !== 'PATCH') jsonError('Method Not Allowed', 405);
 
 // ── Extraire userId depuis l'URL ──────────────────────────────────────────────
-$path     = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
-$parts    = explode('/', $path);
+$parts    = requestPathSegments();
 $adminIdx = array_search('admin', $parts);
 $userId   = (int) ($parts[$adminIdx + 2] ?? 0);
 if ($userId <= 0) jsonError('Invalid user id', 400);

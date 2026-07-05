@@ -28,6 +28,8 @@
  *   showChallengeButton(mode, s) → shows the "Challenge a friend" share button
  *   applyDarkModeOverrides(list) → applies inline style overrides when darkmode is active
  *   enableGiveUpButton(id?)      → re-enables the #giveUpButton after the attempts threshold
+ *   characterMatchesActiveOpus(character, activeOpus) → opus-intersection test used by filterCharacterPool()
+ *   updateCounterElement(id, attempts, threshold) → updates a single hint/give-up counter's text + .activated class
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -789,4 +791,43 @@ export function enableGiveUpButton(buttonId = "giveUpButton") {
     btn.disabled = false;
     btn.style.cursor = "pointer";
   }
+}
+
+/**
+ * Vrai si un personnage appartient à au moins un des opus actifs.
+ *
+ * Extrait de la logique dupliquée de filterCharacterPool() (classiqueMode,
+ * emojiMode) — chaque mode garde sa propre fonction wrapper car les deux
+ * diffèrent réellement au-delà de ce test (mutation en place vs retour d'un
+ * nouveau tableau, exclusion ou non des noms déjà devinés) ; seul ce test
+ * d'intersection opus, identique partout, est factorisé ici.
+ *
+ * @param {{ opus?: string|string[] }} character
+ * @param {string[]} activeOpus
+ * @returns {boolean}
+ */
+export function characterMatchesActiveOpus(character, activeOpus) {
+  if (!character || !character.opus) return false;
+  const charOpus = Array.isArray(character.opus) ? character.opus : [character.opus];
+  return charOpus.some((op) => activeOpus.includes(op));
+}
+
+/**
+ * Met à jour le texte "(x / seuil)" et la classe .activated d'un compteur de
+ * tentatives (hint/give-up). No-op si l'élément n'existe pas.
+ *
+ * Extrait de updateCounters() (classiqueMode, emojiMode) — chaque mode garde
+ * sa propre fonction wrapper car ils n'affichent pas le même nombre de
+ * compteurs (classique en a 2, emoji 1) ; seul ce fragment de mise à jour par
+ * élément, identique partout, est factorisé ici.
+ *
+ * @param {string} elementId
+ * @param {number} attempts
+ * @param {number} threshold
+ */
+export function updateCounterElement(elementId, attempts, threshold) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.textContent = `(${attempts} / ${threshold})`;
+  el.classList.toggle("activated", attempts >= threshold);
 }

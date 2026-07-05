@@ -108,7 +108,8 @@ function buildHrefs(currentPage) {
       p.includes("/silhouetteMode/") ||
       p.includes("/allOutAttackMode/") ||
       p.includes("/personaeMode/") ||
-      p.includes("/musicsMode/"));
+      p.includes("/musicsMode/") ||
+      p.includes("/pages/"));
   const base = isDeepSubpath ? "../../" : isSubpath ? "../" : "./";
   return {
     home: `${base}index.html`,

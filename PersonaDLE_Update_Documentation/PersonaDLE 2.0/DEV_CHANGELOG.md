@@ -214,6 +214,111 @@ de `profile-page.js` (voir commit suivant) — supprimé plutôt que gardé
 
 ---
 
+## 2026-07-05 — fix(classique): Give Up n'est plus compté comme une victoire
+
+**Bug trouvé en écrivant un test E2E de partie complète** (pas un audit
+ciblé) : en mode Classique, cliquer "Give Up" appelait
+`checkGuess(target.nom, target, true)` pour révéler la réponse. Le bloc
+`if (isWin)` de `checkGuess()` traite `isWin = correspondance || forceReveal`
+comme une seule condition — sans distinguer une vraie victoire d'un
+`forceReveal` — et loggait donc systématiquement `result: "win"` +
+positionnait `statsAlreadyLogged = true` **avant** que le handler du bouton
+Give Up n'ait la main pour logger son propre `result: "giveup"` (silencieusement
+ignoré ensuite, puisque le flag était déjà à `true`). Conséquence réelle :
+stats et badges (`hasWonFirstTry` notamment) faussés pour tout abandon de
+partie en Classique.
+
+Vérifié que les 5 autres modes n'ont **pas** ce bug : Emoji fait
+`result = forceReveal ? "giveup" : "win"` directement ; Silhouette/AllOutAttack
+(et par le même schéma, Personae/Music) séparent l'affichage de révélation du
+log de session, avec le win-log explicitement gardé par `!force`.
+
+**Fix** (`classiqueMode/modeClassique.js`, `checkGuess()`) : ajout de
+`!forceReveal` à la garde du bloc qui logge la victoire + les flags de badges
+(`if (wasFresh && !statsAlreadyLogged && !forceReveal)`), et au bloc de
+confettis/`showChallengeButton`/`checkChallengeCompletion(…, true)` (qui
+s'exécutaient aussi à tort sur un Give Up, en double avec les appels
+équivalents — mais avec les bons arguments — du handler Give Up
+lui-même). Comportement du vrai chemin victoire strictement inchangé
+(`forceReveal` vaut toujours `false` sur un clic normal du bouton deviner).
+
+Non vérifié en navigateur (Docker indisponible dans le sandbox où ce fix a
+été fait) — logique relue attentivement + comparée aux 5 autres modes,
+473/473 tests Vitest inchangés, `php -l`/`node --check` propres. À confirmer
+manuellement (jouer une partie Classique, cliquer Give Up, vérifier
+`user_stats`/`game_sessions` en base) avant release si possible.
+
+---
+
+## 2026-07-05 — fix(silhouette, aoa): triche possible en glissant l'image hors de sa zone
+
+**Signalé par l'utilisateur** : en mode Silhouette, on pouvait cliquer-glisser l'image
+silhouette hors de `.silhouette-box` (qui a `overflow: hidden`) pour révéler le personnage
+à deviner. Cause : les `<img>` sont nativement `draggable` dans les navigateurs, et l'aperçu
+de drag natif (la miniature qui suit le curseur) est généré à partir des pixels réels de
+l'image — il n'applique pas le filtre CSS (`filter: brightness(0)`) qui crée l'effet
+silhouette, et flotte au-dessus de la page sans être contraint par `overflow: hidden`.
+
+Vérifié que le mode **All-Out Attack** a exactement la même vulnérabilité (`#aoaGif` utilise
+aussi un filtre de flou progressif, cf. `allOutAttackMode/allOutAttack.css`) — corrigé aux
+deux endroits. Les 4 autres modes n'affichent jamais d'image volontairement floutée/masquée
+par CSS, donc pas concernés.
+
+**Fix, 3 couches (redondantes exprès, robustesse cross-browser)** :
+1. `draggable="false"` sur `<img id="silhouetteImage">` et `<img id="aoaGif">` — désactive le
+   drag natif dans la quasi-totalité des navigateurs modernes (vérifié : `img.draggable === false`
+   côté DOM après rendu, testé via Playwright/Chromium headless).
+2. CSS `-webkit-user-drag: none; user-select: none;` sur les deux mêmes éléments.
+3. `addEventListener("dragstart", e => e.preventDefault())` en JS (`modeSilhouette.js`,
+   `modeAllOutAttack.js`) — filet de sécurité si les deux couches précédentes ne suffisent pas
+   sur un navigateur particulier.
+
+473/473 tests Vitest inchangés, `node --check`/ESLint propres. Vérifié via Playwright headless
+(sans backend, juste le rendu statique) que `draggable` vaut bien `false` au niveau DOM sur les
+deux images — pas de test E2E de bout en bout du drag lui-même (comportement natif du
+navigateur, pas simulable de façon fiable en E2E).
+
+---
+
+## 2026-07-05 — fix: retours de review PR (victoryBox Classique + rate-limit E2E)
+
+**Signalé par la review GitHub de la PR** (run E2E réel, pas une supposition) :
+
+1. **`#victoryBox` invisible en mode Classique** (`game-flow.spec.js`, test Give Up) :
+   `classiqueMode/classiqueMode.html` déclarait `<div id="victoryBox" style="display: none"></div>`
+   **sans** `class="victory-box"`, contrairement aux 5 autres modes qui ont tous
+   `class="victory-box"` (cf. `.victory-box` dans `css/global.css` : `padding: 20px 25px;
+   border: 3px solid …` — c'est cette classe qui donne au conteneur sa taille/son style, pas
+   l'id). Sans elle, la boîte est un `<div>` vide sans padding/bordure : hauteur 0, donc
+   invisible pour Playwright (`toBeVisible()` exige un bounding box non nul) **que ce soit sur
+   un vrai win ou un Give Up** — pas une régression du fix Give Up=Win de la veille, un bug
+   structurel préexistant dans le HTML de ce mode, simplement révélé par le nouveau test E2E.
+   **Fix** : ajout de `class="victory-box"` sur la div (`classiqueMode/classiqueMode.html`).
+
+2. **`social-link.spec.js` en échec par épuisement du rate-limit d'inscription** :
+   `POST /api/auth/register` est limité à 5 inscriptions / 15 min par IP
+   (`api/auth/register.php`). Avec `admin.spec.js` (1 inscription) + `api.spec.js` (2, dont le
+   nouveau bloc recover-streak) + `social-link.spec.js` (2, comptes A et B), le total tombe
+   pile sur la limite — et `retries: 2` en CI + `test.describe.serial` (qui rejoue tout le
+   bloc, donc son `beforeAll`, si un test du groupe échoue) peut ré-inscrire les mêmes comptes
+   et dépasser le quota, avec un ordre non déterministe sous `fullyParallel: true`. Confirmé
+   par la review : problème de marge de la suite de tests elle-même, pas une régression du
+   code produit. **Fix** : le plafond reste `5` en production (`APP_ENV === 'production'`,
+   sécurité inchangée) mais passe à `50` dans les autres environnements
+   (`APP_ENV=local` en Docker/E2E, cf. `api/config.docker.php`) — assez de marge pour
+   absorber des retries CI sans affaiblir la protection anti-abus en prod.
+
+Ajout en bonus (suggestion de la review, pas un correctif) : upload de `test-results/` et
+`playwright-report/` en artefact CI sur échec du job `e2e` (`.github/workflows/ci.yml`), pour
+diagnostiquer plus vite la prochaine fois sans avoir à reproduire en local.
+
+473/473 tests Vitest inchangés, `php -l` propre sur `register.php`. Non revérifié par un run
+E2E réel dans ce sandbox (Docker indisponible) — les deux causes ont été confirmées par
+lecture de code croisée avec le comportement documenté de Playwright/MariaDB plutôt que par
+observation directe.
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →

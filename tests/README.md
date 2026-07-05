@@ -2,7 +2,7 @@
 
 # 🧪 Tests & Qualité
 
-<img src="https://img.shields.io/badge/Vitest-455%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
+<img src="https://img.shields.io/badge/Vitest-473%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
 <img src="https://img.shields.io/badge/PHPUnit-logic%20%2B%20DB-3776AB?style=for-the-badge&logo=php&logoColor=white" alt="PHPUnit">
 <img src="https://img.shields.io/badge/Playwright-13%20E2E-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/PHPStan-niveau%205-1A1A1A?style=for-the-badge" alt="PHPStan">
@@ -20,10 +20,10 @@
                 ╱  ╲      Playwright E2E — 13 tests (stack Docker réelle)
                ╱────╲     smoke (5) + API badges/streak (2) + Social Link ami→XP→rang (6)
               ╱      ╲
-             ╱────────╲   PHPUnit — 123 méthodes (8 fichiers, dont intégration vraie MariaDB)
+             ╱────────╲   PHPUnit — 125 méthodes (8 fichiers, dont intégration vraie MariaDB)
             ╱          ╲  contraintes SQL, FK cascade, contrat de schéma, streak/social/auth
            ╱────────────╲
-          ╱              ╲ Vitest — 455 tests unitaires (jsdom, 24 fichiers)
+          ╱              ╲ Vitest — 473 tests unitaires (jsdom, 24 fichiers)
          ╱────────────────╲ logique de jeu, streak, i18n, validation, sync
       ──────────────────────
 ```
@@ -61,7 +61,7 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 | `langSelector.test.js`           |   5   | sélecteur de langue                                              |
 | `profileFormat.test.js`          |   4   | formatage des données de profil                                 |
 | `streakFlow.integration.test.js` |   2   | flux complet récupération + sync cloud                         |
-| **Total**                        |**455**|                                                                |
+| **Total**                        |**473**|                                                                |
 
 ## 🐘 Suites PHP (`tests/php/`)
 
@@ -76,7 +76,7 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 | `FriendsTest.php`              | logique     | format code ami, refus de doublon/blocage de demande          |
 | `DatabaseIntegrationTest.php`  | intégration | unicité, CHECK, FK cascade, **contrat de schéma** (35 tests)|
 
-> **123 méthodes de test** au total sur ces 8 fichiers. Les tests d'intégration tournent dans
+> **125 méthodes de test** au total sur ces 8 fichiers. Les tests d'intégration tournent dans
 > une transaction annulée (`rollBack`) → zéro pollution. Si la DB n'est pas joignable, ils sont
 > **skippés** (la suite reste verte).
 

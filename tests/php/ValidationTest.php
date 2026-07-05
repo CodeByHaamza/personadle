@@ -63,12 +63,23 @@ final class ValidationTest extends TestCase
 
     public function testAcceptsPasswordAtExactly8Chars(): void
     {
-        $this->assertNull(personadle_validate_password('12345678'));
+        $this->assertNull(personadle_validate_password('xj4k9wpz'));
     }
 
     public function testAcceptsLongPassword(): void
     {
         $this->assertNull(personadle_validate_password('a-very-long-passphrase-indeed'));
+    }
+
+    public function testRejectsCommonPasswordEvenIfLongEnough(): void
+    {
+        $this->assertNotNull(personadle_validate_password('12345678'));
+        $this->assertNotNull(personadle_validate_password('password123'));
+    }
+
+    public function testRejectsCommonPasswordCaseInsensitively(): void
+    {
+        $this->assertNotNull(personadle_validate_password('PASSWORD1'));
     }
 
     // ── personadle_normalize_lang ────────────────────────────────────────────

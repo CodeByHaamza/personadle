@@ -56,7 +56,9 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
 1. Réencoder **toute** la base AOA existante avec le pipeline validé :
    `ffmpeg -i in.mp4 -vf fps=30 -loop 0 -an -c:v libwebp -q:v 70 -compression_level 6 out.webp`
 2. Envisager de **conserver les MP4** comme source de vérité (plus compact que le webp animé) et générer le webp à la volée / au build.
-3. Lazy-load + `loading="lazy"` sur les animations, et ne charger l'AOA du jour que quand nécessaire.
+3. ~~Lazy-load + `loading="lazy"` sur les animations~~ — `loading="lazy"` posé sur `#aoaGif`
+   (`allOutAttackMode/allOutAttack.html`). Le chargement à la demande (une seule cible du jour,
+   pas de préchargement des autres) était déjà en place côté JS (`modeAllOutAttack.js`).
 
 ---
 
@@ -84,6 +86,13 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
    (~7/38 fichiers `api/*.php` exercés par un test exécuté, E2E ou unitaire — le reste ne passe
    que par PHPStan/lint statique, jamais réellement invoqué en CI). Cibler en priorité les
    endpoints `admin/*`, `messages/index.php`, `leaderboard/index.php`.
+   > ✅ **Partiellement résolu depuis** : `tests-e2e/admin.spec.js` (nouveau) exerce désormais
+   > `GET /api/admin/users`, `GET /api/admin/audit_log`, `GET /api/admin/rate_limits` et le
+   > garde-fou `requireAdmin()` (403 pour un non-admin) sur `PATCH /api/admin/users/:id` — via
+   > un compte admin de seed dédié (`docker/mysql/init/02_seed_test.sql`,
+   > `admin@personadle.local`). Les autres endpoints `admin/*` (event_codes, social_links,
+   > user_badges/titles/wallpapers/friends/stats, deletion_requests, error_logs) restent non
+   > couverts.
 5. Le job E2E (`e2e` dans `ci.yml`) reste `continue-on-error` — critère de sortie documenté
    dans `tests-e2e/README.md` § Statut CI (10 runs consécutifs verts sur `develop`).
 
@@ -125,16 +134,51 @@ Le vocabulaire des modes diverge selon les couches :
 - Backend : `classic` ([sessions.php](api/sessions.php))
 - Client : `classique` ([profileStats.js](profile/profileStats.js)), `Classic`, `All Out Attack`, `alloutattack`…
 
-**Action :** une **table de mapping unique** exportée depuis `gameCore.js` (canonical key ↔ label ↔ backend mode ↔ dossier), importée partout. Supprime une classe entière de bugs silencieux.
+> ✅ **Résolu depuis** : la table canonique existe (`MODES`/`normalizeModeKey()`/`modeLabel()`
+> dans `gameCore.js`) et est bien adoptée dans `profileStats.js`/`cloud-sync.js`, contrairement
+> à ce que cette section laissait penser.
+>
+> **Réaudité le 2026-07-05** — ce qui reste, plus nuancé qu'un simple "pas encore migré" :
+> - `js/stats-compare.js` et `admin/admin.js` dupliquaient la **liste des clés** de mode (risque
+>   réel de drift si un mode est ajouté/retiré) → corrigé, dérivée de `MODES.map(m => m.key)`.
+> - `profile/leaderboard/leaderboard.js` et `js/challenge-notif.js` gardent des **libellés
+>   propres à leur contexte d'affichage** ("All-Out" en radar chart compact, "💥 All-Out" en
+>   onglet admin, "ALL-OUT ATTACK" en bannière de défi) qui **ne correspondent pas** au libellé
+>   canonique `modeLabel("alloutattack")` → `"AllOutAttack"` (sans espace/tiret). Les forcer à
+>   appeler `modeLabel()` changerait visuellement l'affichage dans 4 endroits différents sans
+>   pouvoir le vérifier en navigateur ici — à traiter par un vrai choix de design (uniformiser le
+>   libellé canonique lui-même, ou documenter que chaque contexte a le droit à son propre libellé
+>   court) plutôt qu'un remplacement mécanique.
 
 ---
 
 ## 6. 🟡 Architecture & arborescence
 
 - **Modes dupliqués** : chaque mode a son `database/` local (`musicsMode/database`, `personaeMode/database`…) en plus du `database/` racine. Centraliser ou documenter clairement la frontière.
-- **Fichiers à la racine** : `privacy.css`, `privacy.html`, `sw.js`, `404.html`, `faq.html` cohabitent avec la config. Envisager un dossier `pages/` ou `public/`.
+- ~~**Fichiers à la racine** : `privacy.css`, `privacy.html`, `404.html`, `faq.html`, `reset-password.html` cohabitent avec la config~~
+  > ✅ **Résolu depuis** : déplacés dans `pages/` (voir `pages/README.md`). `sw.js` reste à la
+  > racine (portée d'un service worker limitée à son propre dossier et ses sous-dossiers —
+  > le déplacer casserait le cache offline de tout le site). Toutes les références mises à
+  > jour : `index.html`, `profile/profile.html`, `.htaccess` (`ErrorDocument 404`),
+  > `sw.js` (précache), `sitemap.xml`, `api/auth/request-reset.php` (lien email), et
+  > `js/bottomNav.js` (détection de profondeur de chemin pour la nav du bas).
 - **Convention de nommage de fichiers** : CLAUDE.md impose `snake_case`, mais le repo mélange `streak-recovery.js` (kebab), `gameCore.js` (camel), `characters_clean.js` (snake). Soit aligner, soit assouplir la règle dans CLAUDE.md pour refléter la réalité.
 - **`new data/`** : dossier de travail non structuré (espaces, casse hétérogène, jpeg/webp/mp4 mêlés). Définir une convention d'ingestion : `incoming/<type>/<persona-snake_case>.<ext>` + un script qui valide/renomme/optimise avant de pousser en base.
+- **Nouveau (audit du 2026-07-04)** : deux « god files » à scinder en sous-modules ES6
+  (déjà chargés en `type="module"`, donc techniquement scindable sans casser l'ordre de
+  chargement) : `admin/admin.js` (1847 lignes, 39 fonctions) et `profile/profile-page.js`
+  (1194 lignes). ⚠️ Report volontaire : ce refactor touche des actions sensibles côté admin
+  (ban, suppression RGPD…) et n'a **pas pu être vérifié visuellement en navigateur** (pas de
+  Docker dans le sandbox où cet audit a été fait) — à faire avec un vrai test manuel en local
+  après coup, pas en aveugle.
+- **Nouveau (audit du 2026-07-04)** : `filterCharacterPool`/`updateCounters` sont dupliqués
+  entre `classiqueMode/modeClassique.js` et `emojiMode/emojiMode.js` avec de **vraies
+  différences de comportement** — `filterCharacterPool` de Classique exclut les noms déjà
+  devinés (`guessHistory`) et mute le tableau `personas` en place, celui d'Emoji ne fait
+  aucune exclusion et retourne un nouveau tableau ; `updateCounters` de Classique pilote 2
+  compteurs (`hintCounter` + `giveUpCounter`), celui d'Emoji un seul. Avant de factoriser,
+  trancher si l'absence d'exclusion en Emoji est un choix voulu ou un oubli — sinon le
+  factoring risque de figer un bug ou d'en introduire un.
 
 ---
 
@@ -142,8 +186,17 @@ Le vocabulaire des modes diverge selon les couches :
 
 Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions sécurisées). Pistes :
 
-- **Rate-limiting** basé sur `sys_get_temp_dir()` : non partagé entre instances et effaçable. Passer sur une table SQL ou Redis si tu scales.
-- Ajouter un **CSP** (`Content-Security-Policy`) en plus des headers existants.
+- ~~**Rate-limiting** basé sur `sys_get_temp_dir()`~~
+  > ✅ **Résolu depuis** : table SQL `rate_limits` (helper `rateLimit()` dans `bootstrap.php`,
+  > upsert atomique), partagée entre instances. Voir `api/README.md`.
+- ~~Ajouter un **CSP** en plus des headers existants~~
+  > ✅ **Résolu depuis** : l'API en avait déjà une (`default-src 'none'`, `api/bootstrap.php`).
+  > Ajoutée pour les pages HTML front via `.htaccess` racine (`Header set Content-Security-Policy`,
+  > scopé aux `.html` pour ne jamais écraser la policy plus stricte de l'API), avec
+  > `mod_headers` activé dans `docker/php/Dockerfile`. `'unsafe-inline'` reste nécessaire pour
+  > script-src/style-src (vanilla JS sans build step, `<script>`/`style=""` inline sur la
+  > plupart des pages) — les retirer demanderait d'externaliser tous ces scripts, un chantier
+  > séparé et plus risqué (idem god files, pas de vérification navigateur possible ici).
 - **CSRF** : tu es en `SameSite=Lax` + sessions cookie ; pour les POST sensibles, un token CSRF explicite serait une ceinture+bretelles.
   > ✅ **Résolu depuis** : token CSRF double-submit (`requireCsrf()` dans `bootstrap.php`,
   > cookie `csrf_token` lisible par JS, header `X-CSRF-Token` envoyé par `js/api.js`) — scope

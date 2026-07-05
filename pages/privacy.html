@@ -17,12 +17,12 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="./css/global.css?v=10" />
-    <link rel="stylesheet" href="./css/langSelector.css?v=4" />
-    <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="../css/global.css?v=10" />
+    <link rel="stylesheet" href="../css/langSelector.css?v=4" />
+    <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="./privacy.css?v=8" />
 
-    <link rel="icon" type="image/gif" href="./img/persona_64x64.gif" />
+    <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 
     <script>
       if (localStorage.getItem("darkMode") === "enabled") {
@@ -177,18 +177,18 @@
   <body>
     <!-- Art décoratif : personnages Persona sur les bords de la page -->
     <div class="privacy-char-wrap privacy-char-wrap--top-right" aria-hidden="true">
-      <img src="./img/Sae_judge_teddie.webp" alt="" loading="eager" />
+      <img src="../img/Sae_judge_teddie.webp" alt="" loading="eager" />
       <div class="privacy-tarot-wrap">
-        <img class="privacy-tarot-img" src="./img/Justice.webp" alt="Justice Arcana" />
+        <img class="privacy-tarot-img" src="../img/Justice.webp" alt="Justice Arcana" />
         <div class="privacy-tarot-text" data-i18n="privacy.char_sae_tooltip">
           ⚖️ OBJECTION! No data sold. NOT. EVER. 🐻
         </div>
       </div>
     </div>
     <div class="privacy-char-wrap privacy-char-wrap--bottom-left" aria-hidden="true">
-      <img src="./img/Zenkichi_toshiro_law_balance.webp" alt="" loading="lazy" />
+      <img src="../img/Zenkichi_toshiro_law_balance.webp" alt="" loading="lazy" />
       <div class="privacy-tarot-wrap">
-        <img class="privacy-tarot-img" src="./img/Judgement.webp" alt="Judgement Arcana" />
+        <img class="privacy-tarot-img" src="../img/Judgement.webp" alt="Judgement Arcana" />
         <div class="privacy-tarot-text" data-i18n="privacy.char_zenkichi_tooltip">
           🔐 Your rights are secured, Phantom Thief.
         </div>
@@ -234,7 +234,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Lisa_Silverman_english.webp"
+            src="../assets/lang/Lisa_Silverman_english.webp"
             alt="Lisa Silverman"
             loading="lazy"
           />
@@ -250,7 +250,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Bebe_french.webp"
+            src="../assets/lang/Bebe_french.webp"
             alt="Bebe"
             loading="lazy"
           />
@@ -266,7 +266,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Morgana_Spanish.webp"
+            src="../assets/lang/Morgana_Spanish.webp"
             alt="Morgana"
             loading="lazy"
           />
@@ -282,7 +282,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Hulkenberg_german.webp"
+            src="../assets/lang/Hulkenberg_german.webp"
             alt="Hulkenberg"
             loading="lazy"
           />
@@ -298,7 +298,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Caesar_italian.webp"
+            src="../assets/lang/Caesar_italian.webp"
             alt="Caesar"
             loading="lazy"
           />
@@ -518,7 +518,7 @@
 
       <!-- Back link -->
       <div class="privacy-back">
-        <a href="./index.html" class="btn-p5" data-i18n="ui.back">← Back</a>
+        <a href="../index.html" class="btn-p5" data-i18n="ui.back">← Back</a>
       </div>
     </main>
 
@@ -527,8 +527,8 @@
 
     <!-- Scripts -->
     <script type="module">
-      import { initLang, setLang } from "./js/i18n.js";
-      import { initBottomNav } from "./js/bottomNav.js";
+      import { initLang, setLang } from "../js/i18n.js";
+      import { initBottomNav } from "../js/bottomNav.js";
 
       /* ── Dark mode toggle ── */
       const toggle = document.getElementById("darkModeToggle");
@@ -603,7 +603,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js").catch(() => {});
+          navigator.serviceWorker.register("../sw.js").catch(() => {});
         });
       }
     </script>

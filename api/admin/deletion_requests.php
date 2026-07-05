@@ -18,8 +18,7 @@ $adminId = requireAdmin();
 $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
 
-$path  = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
-$parts = explode('/', $path);
+$parts = requestPathSegments();
 $drIdx = array_search('deletion_requests', $parts);
 
 // ── POST /api/admin/deletion_requests/:id/process — hard delete anticipé ─────

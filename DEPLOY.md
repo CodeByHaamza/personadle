@@ -59,7 +59,8 @@ Credentials SFTP dans hPanel → **Hébergement** → **Accès FTP**.
 
 ```
 À uploader :
-  ✅ index.html, 404.html, privacy.html, faq.html, reset-password.html, sw.js
+  ✅ index.html, sw.js
+  ✅ pages/      (tout le dossier — 404.html, privacy.html, faq.html, reset-password.html)
   ✅ .htaccess (racine)
   ✅ api/        (tout le dossier)
   ✅ js/         (tout le dossier)
@@ -201,6 +202,7 @@ curl -s -H "X-Cron-Key: TON_SECRET" "https://personadle.net/api/cron/leaderboard
 | Avatars trop lourds refusés                      | `post_max_size` trop petit                   | hPanel → PHP → `post_max_size = 16M`, `upload_max_filesize = 16M`                  |
 | Images/assets cassés                             | Chemin relatif incorrect                     | Vérifier que le projet est à la racine de `public_html/`, pas dans un sous-dossier |
 | `mod_rewrite` non actif                          | Module Apache désactivé                      | hPanel → PHP/Apache → activer `mod_rewrite`                                        |
+| CSP absente sur les pages HTML (vérifier via les DevTools → onglet Network → headers) | `mod_headers` désactivé (le `.htaccess` racine utilise `Header set`, silencieux si le module est absent) | hPanel → PHP/Apache → activer `mod_headers` (activé par défaut sur la plupart des hébergements mutualisés) |
 
 ---
 

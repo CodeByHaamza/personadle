@@ -103,6 +103,8 @@ if ($method === 'GET') {
 // POST /api/messages
 // ═══════════════════════════════════════════════════════════════════
 if ($method === 'POST') {
+    rateLimit('messages-send:' . $authId, 20, 15 * 60);
+
     $data       = getJsonBody();
     $receiverId = (int) ($data['receiver_id'] ?? 0);
     $type       = trim($data['type'] ?? 'message');

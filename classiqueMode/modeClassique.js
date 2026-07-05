@@ -20,6 +20,8 @@ import {
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  characterMatchesActiveOpus,
+  updateCounterElement,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -205,9 +207,7 @@ function filterCharacterPool() {
   const filtered = originalPersonas.filter((name) => {
     if (guessedSet.has(name.toLowerCase())) return false;
     const character = characters.find((c) => c.nom === name);
-    if (!character || !character.opus) return false;
-    const charOpus = Array.isArray(character.opus) ? character.opus : [character.opus];
-    return charOpus.some((op) => activeOpus.includes(op));
+    return characterMatchesActiveOpus(character, activeOpus);
   });
 
   // Mutation en place — le listener autocomplete garde la même référence tableau
@@ -414,7 +414,11 @@ function checkGuess(name, target, forceReveal = false) {
     giveUpButton.style.opacity = "0.5";
     gameOver = true;
 
-    if (wasFresh && !statsAlreadyLogged) {
+    // !forceReveal : un Give Up ne doit jamais se logger comme une victoire —
+    // le handler du bouton Give Up (plus bas) logge lui-même le "giveup" une
+    // fois checkGuess() revenu ; sans cette garde, statsAlreadyLogged passait
+    // déjà à true ici et le "giveup" attendu était silencieusement ignoré.
+    if (wasFresh && !statsAlreadyLogged && !forceReveal) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(
@@ -461,7 +465,12 @@ function checkGuess(name, target, forceReveal = false) {
       checkBadgesAfterGame();
     }
 
-    if (wasFresh) {
+    // !forceReveal ici aussi : le handler Give Up gère déjà lui-même revealNextLink/
+    // showCommunityStats/checkChallengeCompletion(…, false)/victoryBox après cet appel —
+    // sans cette garde ils s'exécutaient deux fois (avec des arguments contradictoires
+    // pour checkChallengeCompletion), et confettis + bouton "Challenge a friend"
+    // apparaissaient à tort sur un Give Up (incohérent avec emojiMode, qui les gate déjà).
+    if (wasFresh && !forceReveal) {
       showConfettiExplosion();
       revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
       showChallengeButton("classic", attempts);
@@ -712,18 +721,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function updateCounters() {
-  const hintCounter = document.getElementById("hintCounter");
-  const giveUpCounter = document.getElementById("giveUpCounter");
   const attempts = parseInt(localStorage.getItem("attempts")) || 0;
-
-  if (hintCounter) {
-    hintCounter.textContent = `(${attempts} / ${HINT_THRESHOLD})`;
-    hintCounter.classList.toggle("activated", attempts >= HINT_THRESHOLD);
-  }
-  if (giveUpCounter) {
-    giveUpCounter.textContent = `(${attempts} / ${GIVE_UP_THRESHOLD})`;
-    giveUpCounter.classList.toggle("activated", attempts >= GIVE_UP_THRESHOLD);
-  }
+  updateCounterElement("hintCounter", attempts, HINT_THRESHOLD);
+  updateCounterElement("giveUpCounter", attempts, GIVE_UP_THRESHOLD);
 }
 
 function enableHintButton() {

@@ -6,7 +6,8 @@
 #   intl        → Intl.DateTimeFormat côté PHP si besoin (futureproof)
 #   opcache     → cache du bytecode PHP (performances en dev)
 #
-# Apache : mod_rewrite activé pour les URLs propres de l'API REST.
+# Apache : mod_rewrite activé pour les URLs propres de l'API REST,
+#          mod_headers activé pour le Content-Security-Policy des pages HTML (.htaccess racine).
 
 FROM php:8.3-apache
 
@@ -22,7 +23,8 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Activer mod_rewrite (nécessaire pour les endpoints /api/auth/login etc.)
-RUN a2enmod rewrite
+# et mod_headers (nécessaire pour le Header set CSP du .htaccess racine).
+RUN a2enmod rewrite headers
 
 # Copier la config Apache du vhost
 COPY docker/php/vhost.conf /etc/apache2/sites-available/000-default.conf

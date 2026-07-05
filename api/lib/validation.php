@@ -26,14 +26,34 @@ function personadle_validate_pseudo(string $pseudo): ?string
 }
 
 /**
+ * Mots de passe trop communs pour être acceptés même s'ils passent la longueur
+ * minimale — liste volontairement courte (les pires du classement des mots de
+ * passe les plus utilisés au monde), pas une liste de complexité. Suit la
+ * recommandation NIST 800-63B : privilégier la longueur + un filtre anti-mots
+ * de passe compromis/évidents, plutôt que d'imposer une composition
+ * (majuscule/chiffre/symbole obligatoires) qui pousse vers des motifs
+ * prévisibles (« Password1! ») sans gain réel de sécurité.
+ */
+const PERSONADLE_COMMON_PASSWORDS = [
+    '12345678', '123456789', '1234567890', 'password', 'password1',
+    'qwertyuiop', 'letmein123', '11111111', '00000000', 'iloveyou1',
+    'admin1234', 'welcome123', 'abc123456', 'password123', 'qwerty123',
+];
+
+/**
  * Valide un mot de passe. Retourne un message d'erreur, ou null si valide.
  *
- * Règle : au moins 8 caractères (cf. bcrypt via password_hash côté appelant).
+ * Règles : au moins 8 caractères (cf. bcrypt via password_hash côté appelant),
+ * et absent de la liste des mots de passe les plus communs (comparaison
+ * insensible à la casse).
  */
 function personadle_validate_password(string $password): ?string
 {
     if (strlen($password) < 8) {
         return 'Password must be at least 8 characters';
+    }
+    if (in_array(strtolower($password), PERSONADLE_COMMON_PASSWORDS, true)) {
+        return 'This password is too common — please choose a less predictable one';
     }
     return null;
 }

@@ -59,6 +59,12 @@
     filter 0.3s ease,
     visibility 0s;
   animation: popInSilhouette 0.4s ease;
+  /* Anti-triche : empêche de glisser l'image hors de .silhouette-box (overflow:
+     hidden) pour voir l'aperçu de drag natif du navigateur, qui n'applique pas
+     le filtre — révélerait le personnage à deviner. Doublé par draggable="false"
+     (HTML) et preventDefault(dragstart) (JS) pour une couverture cross-browser. */
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 /* =====================================================

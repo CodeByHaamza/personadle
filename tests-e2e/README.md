@@ -5,8 +5,8 @@
 <img src="https://img.shields.io/badge/Playwright-Chromium-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/cible-stack%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
 
-> **13 tests (3 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
-> Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public, Social Link).
+> **25 tests (5 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
+> Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public, Social Link, admin).
 
 </div>
 
@@ -41,6 +41,32 @@
 | XP mutuelle                            | A et B gagnent chacun de l'XP en faisant `share_streak` le même jour |
 | Montée de rang                         | une 2e action mutuelle fait franchir le seuil de rang 2 (100 XP) |
 | Anti-spam                              | l'action ne peut pas être répétée le même jour               |
+
+### `admin.spec.js` — endpoints admin (via l'API)
+
+Utilise le compte admin de seed (`admin@personadle.local`, `docker/mysql/init/02_seed_test.sql`
+— nécessite une base fraîche, le seed ne tourne qu'à la première init du volume Docker).
+
+| Test                                          | Vérifie                                                  |
+| ---------------------------------------------- | --------------------------------------------------------- |
+| `GET /api/admin/users` (admin)                | réussit, retourne une liste                                |
+| `GET /api/admin/users` (non-admin)            | 403 (`requireAdmin()`)                                     |
+| `GET /api/admin/audit_log` (admin)            | réussit, retourne une liste                                |
+| `GET /api/admin/audit_log` (non-admin)        | 403                                                         |
+| `GET /api/admin/rate_limits` (admin)          | réussit                                                     |
+| `PATCH /api/admin/users/:id` (non-admin)      | 403 avant même la logique de ban                           |
+
+`api.spec.js` couvre aussi l'anti-triche de `POST /api/user/recover-streak` : rejet d'un
+`previous_streak` supérieur au nombre de jours distincts réellement joués, et rejet d'une valeur
+hors bornes (`< 2`).
+
+### `game-flow.spec.js` — partie complète, langue, responsive (navigateur réel)
+
+| Test                                          | Vérifie                                                  |
+| ---------------------------------------------- | --------------------------------------------------------- |
+| Give Up en Classique                          | révèle la réponse, enregistre une session `result: "giveup"` (pas `"win"` — cf. le fix du 2026-07-05) |
+| Changement de langue                          | l'UI se met à jour et persiste après rechargement          |
+| Responsive (375px)                            | pas de débordement horizontal sur les 6 modes de jeu        |
 
 ---
 
@@ -86,7 +112,14 @@ sur le statut du job PR.
 
 ## 💡 Scénarios à ajouter
 
-- Partie complète (deviner → victoire → stats mises à jour)
-- Menu Jack Frost + restauration de streak
-- Changement de langue (FR/EN/ES/DE/IT) et persistance
-- Responsive (viewport mobile) sur les 6 modes
+- ~~Partie complète (deviner → victoire → stats mises à jour)~~ — fait via Give Up
+  (`game-flow.spec.js`), seul chemin déterministe sans devoir prédire la cible du jour.
+- Menu Jack Frost + restauration de streak — **partiellement fait** : l'anti-triche serveur de
+  `POST /api/user/recover-streak` est testée (`api.spec.js`), mais pas l'ouverture du menu ni le
+  clic "Restaurer" en UI — nécessiterait de simuler plusieurs jours de parties réelles
+  (`played_date` n'accepte qu'aujourd'hui/hier, cf. `api/sessions.php`) pour tester le chemin de
+  succès en conditions réalistes.
+- ~~Changement de langue (FR/EN/ES/DE/IT) et persistance~~ — fait (`game-flow.spec.js`, langue FR
+  uniquement pour l'instant — ES/DE/IT non testées individuellement).
+- ~~Responsive (viewport mobile) sur les 6 modes~~ — fait (`game-flow.spec.js`, 375px, vérifie
+  l'absence de débordement horizontal).

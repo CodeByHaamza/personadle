@@ -40,8 +40,8 @@ Le hook de pre-commit lance déjà i18n + tests. Détail :
 
 | Commande | Vérifie |
 |---|---|
-| `make test` / `npm test` | 455 tests JS (Vitest) |
-| `make test-php` | 123 méthodes de test PHPUnit dans 8 fichiers (logique + intégration BDD, **DB doit être up**) |
+| `make test` / `npm test` | 473 tests JS (Vitest) |
+| `make test-php` | 125 méthodes de test PHPUnit dans 8 fichiers (logique + intégration BDD, **DB doit être up**) |
 | `npm run lint` | ESLint |
 | `npm run data:check` | schéma des données personnages |
 | `npm run i18n:check` | cohérence des clés de traduction |
@@ -87,6 +87,18 @@ gh api -X PUT repos/HamzaKarrouchi/personadle/branches/main/protection \
 
 ### Messages de commit
 Convention : `type(scope): description` (`feat`, `fix`, `test`, `docs`, `chore`).
+
+### Séparer refactor mécanique et changement de comportement
+> Retour de review PR #9 (2026-07-05) : une PR décrite comme "factorisation, comportement
+> inchangé" contenait aussi une restriction CORS en prod et un nouveau rate-limit — deux vrais
+> changements de comportement noyés dans un résumé qui annonçait un refactor sans risque. Un
+> relecteur qui fait confiance à la description sans tout relire ligne à ligne passe à côté.
+
+**Règle** : un changement de comportement (sécurité, rate-limit, politique CORS, validation,
+etc.) — même petit, même bon — a **sa propre ligne dans le résumé de la PR**, idéalement **son
+propre commit**, séparé des refactors mécaniques "comportement strictement inchangé". Ça permet
+de relire/approuver les deux à des niveaux d'attention différents au lieu de tout mélanger sous
+une étiquette "sans risque".
 
 ---
 

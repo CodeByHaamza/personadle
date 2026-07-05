@@ -14,8 +14,7 @@ $pdo    = pdo();
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Extraire le code depuis l'URL si présent (/api/admin/event_codes/MYCODE)
-$path  = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/');
-$parts = explode('/', $path);
+$parts = requestPathSegments();
 // parts: [..., 'admin', 'event_codes', 'MYCODE?']
 $codeParam = strtoupper(trim(end($parts)));
 $isCollection = ($codeParam === 'EVENT_CODES' || $codeParam === '');

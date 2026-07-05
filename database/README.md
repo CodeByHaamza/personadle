@@ -9,6 +9,28 @@
 Ce dossier contient les données des personnages utilisés dans le **mode Classique** ainsi que les portraits associés.
 Les autres modes possèdent leur propre sous-dossier `database/` dans leur répertoire.
 
+### Pourquoi pas un seul `database/` centralisé ?
+
+Chaque mode n'utilise **pas le même sous-ensemble de personnages** ni le même schéma de données
+(Silhouette exclut certains personas sans silhouette exploitable, Personae liste des *Personas*
+et non des personnages, AllOutAttack ne couvre que les persos ayant une animation AOA, Music a un
+schéma complètement différent — titres de musiques, pas de personnages). Fusionner casserait cette
+indépendance et forcerait un schéma unique artificiel. La frontière retenue :
+
+| Dossier                                | Contenu                                                              | Utilisé par              |
+| --------------------------------------- | --------------------------------------------------------------------- | ------------------------ |
+| `database/` (racine)                    | `characters_clean.js` (177 persos), `personas.js`, `quotes.js`, `compare-phrases.js`, `portraitsMap.js`, `portraits/` | Classique (+ `portraitsMap.js`/`portraits/` réutilisés par Emoji, Silhouette, AllOutAttack) |
+| `classiqueMode/database/`, `emojiMode/database/` | *(vide — ces 2 modes réutilisent entièrement la racine)*     | —                         |
+| `silhouetteMode/database/`              | `silhouetteCharacters.js`, `persona.js`, `portraitsMapSilhouette.js`, `img/` | Silhouette uniquement     |
+| `personaeMode/database/`                | `personaeCharacters.js`, `persona.js`, `portraitsMapPersonae.js`, `img/` | Personae uniquement       |
+| `allOutAttackMode/database/`            | `aoaCharacters.js`, `personas_allOut.js`, `portraitsMap.js`, `allOutAttack/`, `img/` | AllOutAttack uniquement   |
+| `musicsMode/database/`                  | `musicTitles.js`, `songs.js`, `music/`, `img/`                        | Music uniquement (schéma différent : musiques, pas personnages) |
+
+**Règle pratique** : si une donnée est nécessaire pour Classique OU réutilisée telle quelle par
+plusieurs modes (portraits), elle vit à la racine. Si un mode a son propre sous-ensemble ou
+schéma de personnages, elle vit dans son `<mode>/database/` local — pas de duplication de la
+racine dans ce cas, juste des fichiers différents pour des besoins différents.
+
 ## Structure
 
 ```

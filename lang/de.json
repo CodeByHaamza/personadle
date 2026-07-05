@@ -670,6 +670,7 @@
     "error_pseudo_length": "Der Benutzername muss zwischen 3 und 50 Zeichen lang sein.",
     "error_pseudo_chars": "Der Benutzername darf nur Buchstaben, Zahlen, Bindestriche, Punkte und Unterstriche enthalten.",
     "error_password_length": "Das Passwort muss mindestens 8 Zeichen haben.",
+    "error_password_common": "Dieses Passwort ist zu häufig — bitte wähle ein weniger vorhersehbares.",
     "success_register": "Konto erstellt! Willkommen, {{pseudo}}.",
     "success_login": "Willkommen zurück, {{pseudo}}!",
     "logout": "Abmelden",
@@ -1128,6 +1129,7 @@
     "back_link": "← Zurück zu PersonaDLE",
     "invalid_link": "Ungültiger oder fehlender Reset-Link.",
     "error_too_short": "Das Passwort muss mindestens 8 Zeichen haben.",
+    "error_too_common": "Dieses Passwort ist zu häufig — bitte wähle ein weniger vorhersehbares.",
     "error_invalid_expired": "Der Reset-Link ist ungültig oder abgelaufen.",
     "error_network": "Netzwerkfehler. Bitte versuch es erneut.",
     "success": "Passwort aktualisiert! Du kannst dich jetzt anmelden."
