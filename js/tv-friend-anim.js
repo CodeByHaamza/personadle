@@ -179,6 +179,10 @@ function _render({ pseudo, friendship_id, avatar_data }) {
 
 function _startNoise(canvas) {
   if (!canvas) return;
+  // Bruit TV décoratif, pas du contenu de jeu — respecte prefers-reduced-motion
+  // (contrairement aux animations CSS, une boucle requestAnimationFrame n'est
+  // jamais arrêtée par la media query CSS globale — voir css/global.css).
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
   const ctx = canvas.getContext("2d");
   // Résolution basse intentionnelle (effet pixel)

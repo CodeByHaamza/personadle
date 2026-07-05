@@ -123,6 +123,11 @@ export function showDivineGiftAnimation(items, title = "✨ Gift received!") {
 
 function _startParticles(canvas) {
   if (!canvas) return;
+  // Confettis décoratifs — respecte prefers-reduced-motion (une boucle
+  // requestAnimationFrame n'est jamais arrêtée par la media query CSS globale,
+  // contrairement aux animations CSS — voir css/global.css).
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
   const ctx = canvas.getContext("2d");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
