@@ -89,6 +89,12 @@
   image-rendering: auto;
   /* Lueur rouge fixe autour du GIF */
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.25);
+  /* Anti-triche : empêche de glisser l'image hors de sa zone pour voir l'aperçu
+     de drag natif du navigateur, qui n'applique pas le filtre de flou — révélerait
+     le personnage/l'attaque à deviner. Doublé par draggable="false" (HTML) et
+     preventDefault(dragstart) (JS) pour une couverture cross-browser. */
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 /* Supprime le flou quand le GIF de chargement est affiché */

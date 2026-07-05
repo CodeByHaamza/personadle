@@ -250,6 +250,36 @@ manuellement (jouer une partie Classique, cliquer Give Up, vérifier
 
 ---
 
+## 2026-07-05 — fix(silhouette, aoa): triche possible en glissant l'image hors de sa zone
+
+**Signalé par l'utilisateur** : en mode Silhouette, on pouvait cliquer-glisser l'image
+silhouette hors de `.silhouette-box` (qui a `overflow: hidden`) pour révéler le personnage
+à deviner. Cause : les `<img>` sont nativement `draggable` dans les navigateurs, et l'aperçu
+de drag natif (la miniature qui suit le curseur) est généré à partir des pixels réels de
+l'image — il n'applique pas le filtre CSS (`filter: brightness(0)`) qui crée l'effet
+silhouette, et flotte au-dessus de la page sans être contraint par `overflow: hidden`.
+
+Vérifié que le mode **All-Out Attack** a exactement la même vulnérabilité (`#aoaGif` utilise
+aussi un filtre de flou progressif, cf. `allOutAttackMode/allOutAttack.css`) — corrigé aux
+deux endroits. Les 4 autres modes n'affichent jamais d'image volontairement floutée/masquée
+par CSS, donc pas concernés.
+
+**Fix, 3 couches (redondantes exprès, robustesse cross-browser)** :
+1. `draggable="false"` sur `<img id="silhouetteImage">` et `<img id="aoaGif">` — désactive le
+   drag natif dans la quasi-totalité des navigateurs modernes (vérifié : `img.draggable === false`
+   côté DOM après rendu, testé via Playwright/Chromium headless).
+2. CSS `-webkit-user-drag: none; user-select: none;` sur les deux mêmes éléments.
+3. `addEventListener("dragstart", e => e.preventDefault())` en JS (`modeSilhouette.js`,
+   `modeAllOutAttack.js`) — filet de sécurité si les deux couches précédentes ne suffisent pas
+   sur un navigateur particulier.
+
+473/473 tests Vitest inchangés, `node --check`/ESLint propres. Vérifié via Playwright headless
+(sans backend, juste le rendu statique) que `draggable` vaut bien `false` au niveau DOM sur les
+deux images — pas de test E2E de bout en bout du drag lui-même (comportement natif du
+navigateur, pas simulable de façon fiable en E2E).
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →
