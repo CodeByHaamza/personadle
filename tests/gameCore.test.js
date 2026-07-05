@@ -31,6 +31,8 @@ import {
   enableGiveUpButton,
   showChallengeButton,
   showCommunityStats,
+  characterMatchesActiveOpus,
+  updateCounterElement,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -1635,5 +1637,50 @@ describe("showCommunityStats", () => {
     };
     await expect(showCommunityStats("classic", "Joker")).resolves.toBeUndefined();
     expect(document.querySelector(".community-stats")).toBeNull();
+  });
+});
+
+describe("characterMatchesActiveOpus", () => {
+  it("returns true when the character has an opus in the active list", () => {
+    expect(characterMatchesActiveOpus({ opus: ["P5", "P5R"] }, ["P3", "P5"])).toBe(true);
+  });
+
+  it("returns false when none of the character's opus are active", () => {
+    expect(characterMatchesActiveOpus({ opus: ["P4"] }, ["P3", "P5"])).toBe(false);
+  });
+
+  it("accepts a single string opus (non-array)", () => {
+    expect(characterMatchesActiveOpus({ opus: "P5" }, ["P5"])).toBe(true);
+  });
+
+  it("returns false for a null/undefined character or missing opus", () => {
+    expect(characterMatchesActiveOpus(null, ["P5"])).toBe(false);
+    expect(characterMatchesActiveOpus(undefined, ["P5"])).toBe(false);
+    expect(characterMatchesActiveOpus({ nom: "Joker" }, ["P5"])).toBe(false);
+  });
+});
+
+describe("updateCounterElement", () => {
+  beforeEach(() => {
+    setHTML('<span id="hintCounter"></span>');
+  });
+
+  it("sets the '(attempts / threshold)' text", () => {
+    updateCounterElement("hintCounter", 2, 5);
+    expect(document.getElementById("hintCounter").textContent).toBe("(2 / 5)");
+  });
+
+  it("adds the 'activated' class once attempts reach the threshold", () => {
+    updateCounterElement("hintCounter", 5, 5);
+    expect(document.getElementById("hintCounter").classList.contains("activated")).toBe(true);
+  });
+
+  it("does not add 'activated' below the threshold", () => {
+    updateCounterElement("hintCounter", 4, 5);
+    expect(document.getElementById("hintCounter").classList.contains("activated")).toBe(false);
+  });
+
+  it("is a no-op when the element doesn't exist", () => {
+    expect(() => updateCounterElement("missingCounter", 1, 5)).not.toThrow();
   });
 });

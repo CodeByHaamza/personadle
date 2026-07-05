@@ -21,6 +21,8 @@ import {
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  characterMatchesActiveOpus,
+  updateCounterElement,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -87,10 +89,7 @@ function getTodayStatsKey() {
  * @returns {Object[]}
  */
 function filterCharacterPool() {
-  return characters.filter((c) => {
-    const charOpus = Array.isArray(c.opus) ? c.opus : [c.opus];
-    return charOpus.some((op) => activeOpus.includes(op));
-  });
+  return characters.filter((c) => characterMatchesActiveOpus(c, activeOpus));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -229,11 +228,7 @@ function updateEmojiHint() {
 
 /** Updates the give-up counter display and activates it at the threshold. */
 function updateCounters() {
-  const giveUpCounter = document.getElementById("giveUpCounter");
-  if (giveUpCounter) {
-    giveUpCounter.textContent = `(${attempts} / ${GIVE_UP_THRESHOLD})`;
-    giveUpCounter.classList.toggle("activated", attempts >= GIVE_UP_THRESHOLD);
-  }
+  updateCounterElement("giveUpCounter", attempts, GIVE_UP_THRESHOLD);
 }
 
 // enableGiveUpButton() est maintenant importée de gameCore.js (identique dans tous les modes).
