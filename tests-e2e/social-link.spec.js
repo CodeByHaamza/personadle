@@ -53,7 +53,14 @@ test.describe.serial("API — parcours Social Link (ami → interaction → rang
   });
 
   test("A envoie une demande d'ami à B via son friend_code", async () => {
-    const res = await a.ctx.post("/api/friends", {
+    // Slash final obligatoire : api/friends/.htaccess ne route la racine du
+    // dossier (`RewriteRule ^$ index.php`) que pour l'URL avec le "/" final.
+    // Sans lui, Apache renvoie d'abord un 301 vers "/api/friends/" (mod_dir),
+    // ce qui transforme silencieusement ce POST en GET et fait échouer la
+    // création de la demande sans que res.ok() ne le révèle (le GET répond
+    // 200 avec la liste des amis, pas l'erreur) — cf. js/api.js qui utilise
+    // déjà "/friends/" pour cette même raison.
+    const res = await a.ctx.post("/api/friends/", {
       data: { friend_code: b.friendCode },
       headers: await csrfHeader(a.ctx),
     });

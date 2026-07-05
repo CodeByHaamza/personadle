@@ -9,11 +9,16 @@ Options -Indexes
 # URL rewriting — supprimer l'extension .php
 RewriteEngine On
 
+# Si un fichier .php correspondant existe, réécrire vers lui — testé AVANT
+# le passage tel quel ci-dessous : un dossier `foo/` et un stub `foo.php`
+# peuvent coexister (ex: api/friends.php pour compat avec un ancien api.js
+# mis en cache par le service worker) ; si le test -d passait en premier, une
+# requête vers /api/foo (sans slash final) matcherait toujours le dossier et
+# ne pourrait jamais atteindre le stub .php.
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+)$ $1.php [L,QSA]
+
 # Laisser passer les fichiers et dossiers existants tels quels
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
-
-# Si un fichier .php correspondant existe, réécrire vers lui
-RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.+)$ $1.php [L,QSA]
