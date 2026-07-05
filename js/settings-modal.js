@@ -52,9 +52,13 @@ function _ensureModal() {
 
   const el = document.createElement("div");
   el.id = "settingsModal";
+  // role="dialog"/aria-modal sont posés par openModal() (js/modal.js) sur cet élément
+  // englobant — ne pas les dupliquer sur .sm-panel (dialog imbriqué, screen readers
+  // l'annoncent deux fois). aria-labelledby reste ici puisque c'est l'élément dialog réel.
+  el.setAttribute("aria-labelledby", "smTitle");
   el.innerHTML = `
     <div class="sm-backdrop" id="smBackdrop"></div>
-    <div class="sm-panel" role="dialog" aria-modal="true" aria-labelledby="smTitle">
+    <div class="sm-panel">
       <div class="sm-header">
         <h2 class="sm-title" id="smTitle">${t("settings.title", "Settings")}</h2>
         <button class="sm-close" id="smClose" aria-label="Close">✕</button>

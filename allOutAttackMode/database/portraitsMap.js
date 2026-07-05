@@ -4,18 +4,18 @@
  */
 export const portraitsMap = {
   // P3
-  Aigis: "Aigis",
+  "Aigis": "Aigis",
   "Akihiko Sanada": "Akihiko",
   "Junpei Iori": "Junpei",
   "Ken Amada": "Ken",
   "Kotone Shiomi": "Kotone",
-  Koromaru: "Koromaru",
-  Lavenza: "Lavenza",
+  "Koromaru": "Koromaru",
+  "Lavenza": "Lavenza",
   "Makoto Yuki": "Yuki",
   "Mitsuru Kirijo": "Mitsuru",
   "Shinjiro Aragaki": "Shinjiro",
   "Yukari Takeba": "Yukari",
-  Metis: "Metis",
+  "Metis": "Metis",
   "Aigis ( P3FES )": "Aigis_FES",
   "Fuuka Yamagishi": "Fuuka",
 

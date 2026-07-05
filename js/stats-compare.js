@@ -6,8 +6,13 @@
  */
 
 import { COMPARE_PHRASES } from "../database/compare-phrases.js";
+import { MODES as CANONICAL_MODES } from "./gameCore.js";
 
-const MODES = ["classic", "emoji", "silhouette", "alloutattack", "personae", "music"];
+// Liste des clés dérivée de la source canonique (gameCore.js) pour ne pas dupliquer
+// la liste des modes — seuls les libellés courts ci-dessous restent propres à cet
+// écran (contrainte d'espace dans le radar chart, ex. "All-Out" au lieu de
+// "AllOutAttack"/"All-Out Attack" utilisés ailleurs).
+const MODES = CANONICAL_MODES.map((m) => m.key);
 const MODE_LABELS = {
   classic: "Classic",
   emoji: "Emoji",

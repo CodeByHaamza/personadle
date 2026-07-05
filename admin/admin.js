@@ -12,6 +12,7 @@
 import { initAuth } from "../js/auth.js";
 import { showDivineGiftAnimation } from "../js/divine-gift.js";
 import { getCsrfToken } from "../js/api.js";
+import { MODES as CANONICAL_MODES } from "../js/gameCore.js";
 
 // ── State ──────────────────────────────────────────────────────────────────
 let _users = [];
@@ -843,7 +844,9 @@ function toggleTitlePending(tid, unlockedIds, d) {
 
 // ── Tab: Stats ─────────────────────────────────────────────────────────────
 function renderTabStats(d) {
-  const modes = ["classic", "emoji", "silhouette", "alloutattack", "personae", "music"];
+  // Liste des clés dérivée de la source canonique (gameCore.js) — seuls les libellés
+  // avec emoji ci-dessous restent propres à cet onglet admin.
+  const modes = CANONICAL_MODES.map((m) => m.key);
   const labels = {
     classic: "🃏 Classic",
     emoji: "😀 Emoji",

@@ -127,7 +127,21 @@ Le vocabulaire des modes diverge selon les couches :
 - Backend : `classic` ([sessions.php](api/sessions.php))
 - Client : `classique` ([profileStats.js](profile/profileStats.js)), `Classic`, `All Out Attack`, `alloutattack`…
 
-**Action :** une **table de mapping unique** exportée depuis `gameCore.js` (canonical key ↔ label ↔ backend mode ↔ dossier), importée partout. Supprime une classe entière de bugs silencieux.
+> ✅ **Résolu depuis** : la table canonique existe (`MODES`/`normalizeModeKey()`/`modeLabel()`
+> dans `gameCore.js`) et est bien adoptée dans `profileStats.js`/`cloud-sync.js`, contrairement
+> à ce que cette section laissait penser.
+>
+> **Réaudité le 2026-07-05** — ce qui reste, plus nuancé qu'un simple "pas encore migré" :
+> - `js/stats-compare.js` et `admin/admin.js` dupliquaient la **liste des clés** de mode (risque
+>   réel de drift si un mode est ajouté/retiré) → corrigé, dérivée de `MODES.map(m => m.key)`.
+> - `profile/leaderboard/leaderboard.js` et `js/challenge-notif.js` gardent des **libellés
+>   propres à leur contexte d'affichage** ("All-Out" en radar chart compact, "💥 All-Out" en
+>   onglet admin, "ALL-OUT ATTACK" en bannière de défi) qui **ne correspondent pas** au libellé
+>   canonique `modeLabel("alloutattack")` → `"AllOutAttack"` (sans espace/tiret). Les forcer à
+>   appeler `modeLabel()` changerait visuellement l'affichage dans 4 endroits différents sans
+>   pouvoir le vérifier en navigateur ici — à traiter par un vrai choix de design (uniformiser le
+>   libellé canonique lui-même, ou documenter que chaque contexte a le droit à son propre libellé
+>   court) plutôt qu'un remplacement mécanique.
 
 ---
 
