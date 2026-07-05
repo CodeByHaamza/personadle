@@ -214,6 +214,42 @@ de `profile-page.js` (voir commit suivant) — supprimé plutôt que gardé
 
 ---
 
+## 2026-07-05 — fix(classique): Give Up n'est plus compté comme une victoire
+
+**Bug trouvé en écrivant un test E2E de partie complète** (pas un audit
+ciblé) : en mode Classique, cliquer "Give Up" appelait
+`checkGuess(target.nom, target, true)` pour révéler la réponse. Le bloc
+`if (isWin)` de `checkGuess()` traite `isWin = correspondance || forceReveal`
+comme une seule condition — sans distinguer une vraie victoire d'un
+`forceReveal` — et loggait donc systématiquement `result: "win"` +
+positionnait `statsAlreadyLogged = true` **avant** que le handler du bouton
+Give Up n'ait la main pour logger son propre `result: "giveup"` (silencieusement
+ignoré ensuite, puisque le flag était déjà à `true`). Conséquence réelle :
+stats et badges (`hasWonFirstTry` notamment) faussés pour tout abandon de
+partie en Classique.
+
+Vérifié que les 5 autres modes n'ont **pas** ce bug : Emoji fait
+`result = forceReveal ? "giveup" : "win"` directement ; Silhouette/AllOutAttack
+(et par le même schéma, Personae/Music) séparent l'affichage de révélation du
+log de session, avec le win-log explicitement gardé par `!force`.
+
+**Fix** (`classiqueMode/modeClassique.js`, `checkGuess()`) : ajout de
+`!forceReveal` à la garde du bloc qui logge la victoire + les flags de badges
+(`if (wasFresh && !statsAlreadyLogged && !forceReveal)`), et au bloc de
+confettis/`showChallengeButton`/`checkChallengeCompletion(…, true)` (qui
+s'exécutaient aussi à tort sur un Give Up, en double avec les appels
+équivalents — mais avec les bons arguments — du handler Give Up
+lui-même). Comportement du vrai chemin victoire strictement inchangé
+(`forceReveal` vaut toujours `false` sur un clic normal du bouton deviner).
+
+Non vérifié en navigateur (Docker indisponible dans le sandbox où ce fix a
+été fait) — logique relue attentivement + comparée aux 5 autres modes,
+473/473 tests Vitest inchangés, `php -l`/`node --check` propres. À confirmer
+manuellement (jouer une partie Classique, cliquer Give Up, vérifier
+`user_stats`/`game_sessions` en base) avant release si possible.
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →

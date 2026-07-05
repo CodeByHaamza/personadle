@@ -414,7 +414,11 @@ function checkGuess(name, target, forceReveal = false) {
     giveUpButton.style.opacity = "0.5";
     gameOver = true;
 
-    if (wasFresh && !statsAlreadyLogged) {
+    // !forceReveal : un Give Up ne doit jamais se logger comme une victoire —
+    // le handler du bouton Give Up (plus bas) logge lui-même le "giveup" une
+    // fois checkGuess() revenu ; sans cette garde, statsAlreadyLogged passait
+    // déjà à true ici et le "giveup" attendu était silencieusement ignoré.
+    if (wasFresh && !statsAlreadyLogged && !forceReveal) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(
@@ -461,7 +465,12 @@ function checkGuess(name, target, forceReveal = false) {
       checkBadgesAfterGame();
     }
 
-    if (wasFresh) {
+    // !forceReveal ici aussi : le handler Give Up gère déjà lui-même revealNextLink/
+    // showCommunityStats/checkChallengeCompletion(…, false)/victoryBox après cet appel —
+    // sans cette garde ils s'exécutaient deux fois (avec des arguments contradictoires
+    // pour checkChallengeCompletion), et confettis + bouton "Challenge a friend"
+    // apparaissaient à tort sur un Give Up (incohérent avec emojiMode, qui les gate déjà).
+    if (wasFresh && !forceReveal) {
       showConfettiExplosion();
       revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
       showChallengeButton("classic", attempts);
