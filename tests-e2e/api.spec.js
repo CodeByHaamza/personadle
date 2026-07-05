@@ -102,3 +102,44 @@ test.describe.serial("API — régressions sensibles (badges, streak global)", (
     expect(g2).toBeGreaterThanOrEqual(g1);
   });
 });
+
+test.describe("API — anti-triche de la récupération de streak (recover-streak)", () => {
+  let ctx;
+
+  test.beforeAll(async () => {
+    ctx = await pwRequest.newContext({ baseURL: BASE });
+    const rnd = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const res = await ctx.post("/api/auth/register", {
+      data: {
+        email: `e2e_recovery_${rnd}@test.local`,
+        pseudo: `e2e_rec_${rnd}`.slice(0, 20),
+        password: "test1234",
+      },
+    });
+    expect(res.ok(), "register doit réussir").toBeTruthy();
+  });
+
+  test.afterAll(async () => {
+    await ctx?.dispose();
+  });
+
+  test("rejette previous_streak > nombre de jours distincts réellement joués", async () => {
+    // Utilisateur fraîchement inscrit → 0 game_sessions → max autorisé = 1
+    // (cf. api/lib/streak_recovery.php: $maxAllowed = max(1, $daysPlayed)).
+    const res = await ctx.post("/api/user/recover-streak", {
+      data: { previous_streak: 5 },
+      headers: await csrfHeader(ctx),
+    });
+    expect(res.status()).toBe(400);
+    const body = await res.json();
+    expect(body.error).toMatch(/exceeds total days played/i);
+  });
+
+  test("rejette un previous_streak hors bornes (< 2)", async () => {
+    const res = await ctx.post("/api/user/recover-streak", {
+      data: { previous_streak: 1 },
+      headers: await csrfHeader(ctx),
+    });
+    expect(res.status()).toBe(400);
+  });
+});
