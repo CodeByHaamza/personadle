@@ -201,6 +201,7 @@ curl -s -H "X-Cron-Key: TON_SECRET" "https://personadle.net/api/cron/leaderboard
 | Avatars trop lourds refusés                      | `post_max_size` trop petit                   | hPanel → PHP → `post_max_size = 16M`, `upload_max_filesize = 16M`                  |
 | Images/assets cassés                             | Chemin relatif incorrect                     | Vérifier que le projet est à la racine de `public_html/`, pas dans un sous-dossier |
 | `mod_rewrite` non actif                          | Module Apache désactivé                      | hPanel → PHP/Apache → activer `mod_rewrite`                                        |
+| CSP absente sur les pages HTML (vérifier via les DevTools → onglet Network → headers) | `mod_headers` désactivé (le `.htaccess` racine utilise `Header set`, silencieux si le module est absent) | hPanel → PHP/Apache → activer `mod_headers` (activé par défaut sur la plupart des hébergements mutualisés) |
 
 ---
 

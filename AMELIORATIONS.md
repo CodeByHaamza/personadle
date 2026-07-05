@@ -180,8 +180,17 @@ Le vocabulaire des modes diverge selon les couches :
 
 Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions sécurisées). Pistes :
 
-- **Rate-limiting** basé sur `sys_get_temp_dir()` : non partagé entre instances et effaçable. Passer sur une table SQL ou Redis si tu scales.
-- Ajouter un **CSP** (`Content-Security-Policy`) en plus des headers existants.
+- ~~**Rate-limiting** basé sur `sys_get_temp_dir()`~~
+  > ✅ **Résolu depuis** : table SQL `rate_limits` (helper `rateLimit()` dans `bootstrap.php`,
+  > upsert atomique), partagée entre instances. Voir `api/README.md`.
+- ~~Ajouter un **CSP** en plus des headers existants~~
+  > ✅ **Résolu depuis** : l'API en avait déjà une (`default-src 'none'`, `api/bootstrap.php`).
+  > Ajoutée pour les pages HTML front via `.htaccess` racine (`Header set Content-Security-Policy`,
+  > scopé aux `.html` pour ne jamais écraser la policy plus stricte de l'API), avec
+  > `mod_headers` activé dans `docker/php/Dockerfile`. `'unsafe-inline'` reste nécessaire pour
+  > script-src/style-src (vanilla JS sans build step, `<script>`/`style=""` inline sur la
+  > plupart des pages) — les retirer demanderait d'externaliser tous ces scripts, un chantier
+  > séparé et plus risqué (idem god files, pas de vérification navigateur possible ici).
 - **CSRF** : tu es en `SameSite=Lax` + sessions cookie ; pour les POST sensibles, un token CSRF explicite serait une ceinture+bretelles.
   > ✅ **Résolu depuis** : token CSRF double-submit (`requireCsrf()` dans `bootstrap.php`,
   > cookie `csrf_token` lisible par JS, header `X-CSRF-Token` envoyé par `js/api.js`) — scope

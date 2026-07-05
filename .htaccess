@@ -8,3 +8,15 @@ ErrorDocument 404 /404.html
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1(:\d+)?$
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 </IfModule>
+
+# Content-Security-Policy sur les pages HTML front (jusqu'ici seule l'API en envoyait une,
+# cf. api/bootstrap.php). Scopé aux .html uniquement pour ne jamais écraser la policy plus
+# stricte (default-src 'none') que bootstrap.php pose sur les réponses JSON de api/*.php.
+# 'unsafe-inline' reste nécessaire : le site est en vanilla JS sans build step, avec des
+# <script>/style="" inline sur la plupart des pages — les retirer demanderait d'externaliser
+# tous ces scripts, un chantier séparé (voir AMELIORATIONS.md #7).
+<IfModule mod_headers.c>
+    <FilesMatch "\.html$">
+        Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+    </FilesMatch>
+</IfModule>
