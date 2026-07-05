@@ -670,6 +670,7 @@
     "error_pseudo_length": "El nombre de usuario debe tener entre 3 y 50 caracteres.",
     "error_pseudo_chars": "El nombre de usuario solo puede contener letras, números, guiones, puntos y guiones bajos.",
     "error_password_length": "La contraseña debe tener al menos 8 caracteres.",
+    "error_password_common": "Esta contraseña es demasiado común — elige una menos predecible, por favor.",
     "success_register": "¡Cuenta creada! Bienvenido, {{pseudo}}.",
     "success_login": "¡Bienvenido de nuevo, {{pseudo}}!",
     "logout": "Cerrar sesión",
@@ -1128,6 +1129,7 @@
     "back_link": "← Volver a PersonaDLE",
     "invalid_link": "Enlace de restablecimiento inválido o faltante.",
     "error_too_short": "La contraseña debe tener al menos 8 caracteres.",
+    "error_too_common": "Esta contraseña es demasiado común — elige una menos predecible, por favor.",
     "error_invalid_expired": "El enlace de restablecimiento es inválido o ha expirado.",
     "error_network": "Error de red. Inténtalo de nuevo.",
     "success": "¡Contraseña actualizada! Ya puedes iniciar sesión."

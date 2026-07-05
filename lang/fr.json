@@ -670,6 +670,7 @@
     "error_pseudo_length": "Le pseudo doit contenir entre 3 et 50 caractères.",
     "error_pseudo_chars": "Le pseudo ne peut contenir que des lettres, chiffres, tirets, points et underscores.",
     "error_password_length": "Le mot de passe doit contenir au moins 8 caractères.",
+    "error_password_common": "Ce mot de passe est trop courant — merci d'en choisir un moins prévisible.",
     "success_register": "Compte créé ! Bienvenue, {{pseudo}}.",
     "success_login": "Bon retour, {{pseudo}} !",
     "logout": "Déconnexion",
@@ -1128,6 +1129,7 @@
     "back_link": "← Retour à PersonaDLE",
     "invalid_link": "Lien de réinitialisation invalide ou manquant.",
     "error_too_short": "Le mot de passe doit contenir au moins 8 caractères.",
+    "error_too_common": "Ce mot de passe est trop courant — merci d'en choisir un moins prévisible.",
     "error_invalid_expired": "Le lien de réinitialisation est invalide ou expiré.",
     "error_network": "Erreur réseau. Merci de réessayer.",
     "success": "Mot de passe mis à jour ! Tu peux maintenant te connecter."

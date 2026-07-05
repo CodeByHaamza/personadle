@@ -90,6 +90,8 @@ const REGISTER_ERROR_MAP = {
     ),
   "Password must be at least 8 characters": () =>
     _t("auth.error_password_length", "Password must be at least 8 characters."),
+  "This password is too common — please choose a less predictable one": () =>
+    _t("auth.error_password_common", "This password is too common — please choose a less predictable one."),
   "This email is already registered": () =>
     _t("auth.error_email_taken", "This email is already in use."),
   "This username is already taken": () =>

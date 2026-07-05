@@ -670,6 +670,7 @@
     "error_pseudo_length": "Il nome utente deve contenere tra 3 e 50 caratteri.",
     "error_pseudo_chars": "Il nome utente può contenere solo lettere, numeri, trattini, punti e underscore.",
     "error_password_length": "La password deve contenere almeno 8 caratteri.",
+    "error_password_common": "Questa password è troppo comune — scegline una meno prevedibile.",
     "success_register": "Account creato! Benvenuto, {{pseudo}}.",
     "success_login": "Bentornato, {{pseudo}}!",
     "logout": "Disconnetti",
@@ -1128,6 +1129,7 @@
     "back_link": "← Torna a PersonaDLE",
     "invalid_link": "Link di ripristino non valido o mancante.",
     "error_too_short": "La password deve contenere almeno 8 caratteri.",
+    "error_too_common": "Questa password è troppo comune — scegline una meno prevedibile.",
     "error_invalid_expired": "Il link di ripristino non è valido o è scaduto.",
     "error_network": "Errore di rete. Riprova.",
     "success": "Password aggiornata! Ora puoi accedere."
