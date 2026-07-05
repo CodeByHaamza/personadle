@@ -406,6 +406,7 @@ function showVictory(force = false, name = null) {
         result,
         attempts,
         timeMs: timeSpent * 1000,
+        filters: activeFilters,
       })
     );
     localStorage.removeItem("playerProfile");
@@ -486,6 +487,7 @@ function giveUp() {
         result: "giveup",
         attempts,
         timeMs: timeSpent * 1000,
+        filters: activeFilters,
       })
     );
     localStorage.removeItem("playerProfile");

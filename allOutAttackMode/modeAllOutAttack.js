@@ -423,6 +423,7 @@ function handleGuess() {
           result: "win",
           attempts,
           timeMs: timeSpent * 1000,
+          filters: activeOpusFilters,
         })
       );
       localStorage.setItem(todayKey, "1");
@@ -477,6 +478,7 @@ function giveUp() {
         result: "giveup",
         attempts,
         timeMs: timeSpent * 1000,
+        filters: activeOpusFilters,
       })
     );
     localStorage.setItem(todayKey, "1");
