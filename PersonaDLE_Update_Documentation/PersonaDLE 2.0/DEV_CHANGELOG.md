@@ -280,6 +280,45 @@ navigateur, pas simulable de façon fiable en E2E).
 
 ---
 
+## 2026-07-05 — fix: retours de review PR (victoryBox Classique + rate-limit E2E)
+
+**Signalé par la review GitHub de la PR** (run E2E réel, pas une supposition) :
+
+1. **`#victoryBox` invisible en mode Classique** (`game-flow.spec.js`, test Give Up) :
+   `classiqueMode/classiqueMode.html` déclarait `<div id="victoryBox" style="display: none"></div>`
+   **sans** `class="victory-box"`, contrairement aux 5 autres modes qui ont tous
+   `class="victory-box"` (cf. `.victory-box` dans `css/global.css` : `padding: 20px 25px;
+   border: 3px solid …` — c'est cette classe qui donne au conteneur sa taille/son style, pas
+   l'id). Sans elle, la boîte est un `<div>` vide sans padding/bordure : hauteur 0, donc
+   invisible pour Playwright (`toBeVisible()` exige un bounding box non nul) **que ce soit sur
+   un vrai win ou un Give Up** — pas une régression du fix Give Up=Win de la veille, un bug
+   structurel préexistant dans le HTML de ce mode, simplement révélé par le nouveau test E2E.
+   **Fix** : ajout de `class="victory-box"` sur la div (`classiqueMode/classiqueMode.html`).
+
+2. **`social-link.spec.js` en échec par épuisement du rate-limit d'inscription** :
+   `POST /api/auth/register` est limité à 5 inscriptions / 15 min par IP
+   (`api/auth/register.php`). Avec `admin.spec.js` (1 inscription) + `api.spec.js` (2, dont le
+   nouveau bloc recover-streak) + `social-link.spec.js` (2, comptes A et B), le total tombe
+   pile sur la limite — et `retries: 2` en CI + `test.describe.serial` (qui rejoue tout le
+   bloc, donc son `beforeAll`, si un test du groupe échoue) peut ré-inscrire les mêmes comptes
+   et dépasser le quota, avec un ordre non déterministe sous `fullyParallel: true`. Confirmé
+   par la review : problème de marge de la suite de tests elle-même, pas une régression du
+   code produit. **Fix** : le plafond reste `5` en production (`APP_ENV === 'production'`,
+   sécurité inchangée) mais passe à `50` dans les autres environnements
+   (`APP_ENV=local` en Docker/E2E, cf. `api/config.docker.php`) — assez de marge pour
+   absorber des retries CI sans affaiblir la protection anti-abus en prod.
+
+Ajout en bonus (suggestion de la review, pas un correctif) : upload de `test-results/` et
+`playwright-report/` en artefact CI sur échec du job `e2e` (`.github/workflows/ci.yml`), pour
+diagnostiquer plus vite la prochaine fois sans avoir à reproduire en local.
+
+473/473 tests Vitest inchangés, `php -l` propre sur `register.php`. Non revérifié par un run
+E2E réel dans ce sandbox (Docker indisponible) — les deux causes ont été confirmées par
+lecture de code croisée avec le comportement documenté de Playwright/MariaDB plutôt que par
+observation directe.
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →
