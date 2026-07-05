@@ -6,13 +6,31 @@
  *            social links management, pending gifts queue, divine gift animation.
  *
  * Access : admin only (window._currentUser.is_admin === true)
+ *
+ * Panneaux indépendants (pas de couplage avec l'état user-detail ci-dessous) extraits
+ * dans leur propre module : ./event-codes.js, ./error-logs.js, ./audit-log.js,
+ * ./deletion-requests.js, ./rate-limits.js. Catalogues (badges/wallpapers/titres)
+ * dans ./catalogs.js. Client REST + toast + utilitaires dans ./admin-api.js.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { initAuth } from "../js/auth.js";
 import { showDivineGiftAnimation } from "../js/divine-gift.js";
-import { getCsrfToken } from "../js/api.js";
 import { MODES as CANONICAL_MODES } from "../js/gameCore.js";
+import { api, toast, escHtml, pathPrefix } from "./admin-api.js";
+import {
+  badgesCatalog,
+  wallpapersCatalog,
+  titlesCatalog,
+  loadBadgesCatalog,
+  loadWallpapersCatalog,
+  loadTitlesCatalog,
+} from "./catalogs.js";
+import { renderEventCodes } from "./event-codes.js";
+import { renderErrorLogs } from "./error-logs.js";
+import { renderAuditLog } from "./audit-log.js";
+import { renderDeletionRequests } from "./deletion-requests.js";
+import { renderRateLimits } from "./rate-limits.js";
 
 // ── State ──────────────────────────────────────────────────────────────────
 let _users = [];
@@ -23,44 +41,12 @@ let _searchQuery = "";
 let _activeTab = "profile";
 let pendingGifts = [];
 
-let _badgesCatalog = [];
-let _wallpapersCatalog = [];
-let _titlesCatalog = [];
-
-// ── Path prefix (handles /personadle/ local dev vs / in prod) ─────────────
-const _pathPrefix = window.location.pathname.startsWith("/personadle") ? "/personadle" : "";
-
-// ── API Helper ─────────────────────────────────────────────────────────────
-const api = {
-  get: (url) => fetch(_pathPrefix + url, { credentials: "include" }).then((r) => r.json()),
-  post: (url, body) =>
-    fetch(_pathPrefix + url, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json", "X-CSRF-Token": getCsrfToken() },
-      body: JSON.stringify(body),
-    }).then((r) => r.json()),
-  patch: (url, body) =>
-    fetch(_pathPrefix + url, {
-      method: "PATCH",
-      credentials: "include",
-      headers: { "Content-Type": "application/json", "X-CSRF-Token": getCsrfToken() },
-      body: JSON.stringify(body),
-    }).then((r) => r.json()),
-  delete: (url) =>
-    fetch(_pathPrefix + url, {
-      method: "DELETE",
-      credentials: "include",
-      headers: { "X-CSRF-Token": getCsrfToken() },
-    }).then((r) => r.json()),
-};
-
 // ── Init ───────────────────────────────────────────────────────────────────
 async function init() {
   await initAuth();
 
   if (!window._currentUser?.is_admin) {
-    window.location.href = _pathPrefix + "/";
+    window.location.href = pathPrefix + "/";
     return;
   }
 
@@ -72,20 +58,6 @@ async function init() {
 
   setupEvents();
   await loadUsers();
-}
-
-// ── Toast ──────────────────────────────────────────────────────────────────
-function toast(msg, type = "info") {
-  const container = document.getElementById("toast-container");
-  const el = document.createElement("div");
-  el.className = `toast ${type}`;
-  el.textContent = msg;
-  container.appendChild(el);
-  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("show")));
-  setTimeout(() => {
-    el.classList.remove("show");
-    setTimeout(() => el.remove(), 250);
-  }, 3200);
 }
 
 // ── Mobile aside ───────────────────────────────────────────────────────────
@@ -103,12 +75,12 @@ function closeAside() {
 // ── Events ─────────────────────────────────────────────────────────────────
 function setupEvents() {
   // Home button
-  document.getElementById("btn-home").href = _pathPrefix + "/";
+  document.getElementById("btn-home").href = pathPrefix + "/";
 
   // Logout
   document.getElementById("admin-logout").onclick = async () => {
-    await fetch(_pathPrefix + "/api/auth/logout", { method: "POST", credentials: "include" });
-    window.location.href = _pathPrefix + "/";
+    await fetch(pathPrefix + "/api/auth/logout", { method: "POST", credentials: "include" });
+    window.location.href = pathPrefix + "/";
   };
 
   // Mobile aside toggle
@@ -556,7 +528,7 @@ function renderTabBadges(d) {
 
   // Group catalog by category
   const categories = {};
-  _badgesCatalog.forEach((badge) => {
+  badgesCatalog.forEach((badge) => {
     const cat = badge.category || "Other";
     if (!categories[cat]) categories[cat] = [];
     categories[cat].push(badge);
@@ -590,7 +562,7 @@ function renderTabBadges(d) {
             return `
             <div class="${cls}" data-slug="${escHtml(badge.slug)}"
                  title="${escHtml(badge.name_en)}\nRarity: ${badge.rarity}">
-              <img src="${_pathPrefix}/${escHtml(badge.image_path || "")}" alt="${escHtml(badge.name_en)}" loading="lazy" onerror="this.style.opacity=0.2">
+              <img src="${pathPrefix}/${escHtml(badge.image_path || "")}" alt="${escHtml(badge.name_en)}" loading="lazy" onerror="this.style.opacity=0.2">
               <span class="badge-label">${escHtml(badge.name_en)}</span>
             </div>
           `;
@@ -602,7 +574,7 @@ function renderTabBadges(d) {
 
   document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
-      <h3>Badges — ${unlockedSlugs.size} / ${_badgesCatalog.length} débloqués</h3>
+      <h3>Badges — ${unlockedSlugs.size} / ${badgesCatalog.length} débloqués</h3>
       <div class="tab-note">
         🔴 Débloqué · 🟡 En attente d'ajout · Grisé = en attente de retrait<br>
         Cliquer pour basculer l'état. Appliquer via le bouton ⚡ en bas à droite.
@@ -617,7 +589,7 @@ function renderTabBadges(d) {
 }
 
 function toggleBadgePending(slug, unlockedSlugs, d) {
-  const badge = _badgesCatalog.find((b) => b.slug === slug);
+  const badge = badgesCatalog.find((b) => b.slug === slug);
   if (!badge) return;
 
   const existingAdd = pendingGifts.findIndex(
@@ -635,7 +607,7 @@ function toggleBadgePending(slug, unlockedSlugs, d) {
           action: "add",
           id: slug,
           label: badge.name_en,
-          img: _pathPrefix + "/" + badge.image_path,
+          img: pathPrefix + "/" + badge.image_path,
         });
   } else {
     existingRem >= 0
@@ -645,7 +617,7 @@ function toggleBadgePending(slug, unlockedSlugs, d) {
           action: "remove",
           id: slug,
           label: badge.name_en,
-          img: _pathPrefix + "/" + badge.image_path,
+          img: pathPrefix + "/" + badge.image_path,
         });
   }
 
@@ -659,21 +631,21 @@ function renderTabWallpapers(d) {
 
   document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
-      <h3>Wallpapers — ${unlockedIds.size} / ${_wallpapersCatalog.length} débloqués</h3>
+      <h3>Wallpapers — ${unlockedIds.size} / ${wallpapersCatalog.length} débloqués</h3>
       <div class="tab-note">
         🔴 Débloqué · 🟡 En attente d'ajout · Grisé = en attente de retrait<br>
         Cliquer pour basculer l'état. Appliquer via le bouton ⚡ en bas à droite.
       </div>
       <div class="wallpapers-grid" id="wallpapers-grid">
-        ${!_wallpapersCatalog.length ? '<p style="color:var(--text-muted)">Catalogue vide — rechargement en cours…</p>' : ""}
+        ${!wallpapersCatalog.length ? '<p style="color:var(--text-muted)">Catalogue vide — rechargement en cours…</p>' : ""}
       </div>
     </div>
   `;
 
-  if (!_wallpapersCatalog.length) return;
+  if (!wallpapersCatalog.length) return;
 
   const grid = document.getElementById("wallpapers-grid");
-  grid.innerHTML = _wallpapersCatalog
+  grid.innerHTML = wallpapersCatalog
     .map((w) => {
       const wid = String(w.id);
       const isUnlocked = unlockedIds.has(wid);
@@ -691,7 +663,7 @@ function renderTabWallpapers(d) {
 
       return `
       <div class="${cls}" data-id="${w.id}" title="${escHtml(w.name)}">
-        <img src="${_pathPrefix}/${escHtml(w.image_path || "")}" alt="${escHtml(w.name)}" loading="lazy">
+        <img src="${pathPrefix}/${escHtml(w.image_path || "")}" alt="${escHtml(w.name)}" loading="lazy">
         <span>${escHtml(w.name)}</span>
       </div>
     `;
@@ -704,7 +676,7 @@ function renderTabWallpapers(d) {
 }
 
 function toggleWallpaperPending(wid, unlockedIds, d) {
-  const wall = _wallpapersCatalog.find((w) => String(w.id) === String(wid));
+  const wall = wallpapersCatalog.find((w) => String(w.id) === String(wid));
   if (!wall) return;
 
   const isUnlocked = unlockedIds.has(String(wid));
@@ -723,7 +695,7 @@ function toggleWallpaperPending(wid, unlockedIds, d) {
           action: "add",
           id: wid,
           label: wall.name,
-          img: _pathPrefix + "/" + wall.image_path,
+          img: pathPrefix + "/" + wall.image_path,
         });
   } else {
     existingRem >= 0
@@ -733,7 +705,7 @@ function toggleWallpaperPending(wid, unlockedIds, d) {
           action: "remove",
           id: wid,
           label: wall.name,
-          img: _pathPrefix + "/" + wall.image_path,
+          img: pathPrefix + "/" + wall.image_path,
         });
   }
 
@@ -748,13 +720,13 @@ function renderTabTitles(d) {
 
   document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
-      <h3>Titres — ${unlockedIds.size} / ${_titlesCatalog.length} débloqués</h3>
+      <h3>Titres — ${unlockedIds.size} / ${titlesCatalog.length} débloqués</h3>
       <div class="tab-note">
         🔴 Débloqué · 🟡 En attente d'ajout · Grisé = en attente de retrait<br>
         Cliquer pour basculer l'état. Appliquer via le bouton ⚡ en bas à droite.
       </div>
       <div class="titles-grid">
-        ${_titlesCatalog
+        ${titlesCatalog
           .map((t) => {
             const isUnlocked = unlockedIds.has(t.id);
             const pendingAdd = pendingGifts.some(
@@ -774,7 +746,7 @@ function renderTabTitles(d) {
             <div class="${cls}" data-id="${t.id}">
               ${
                 t.image_path
-                  ? `<img class="title-card-img" src="${_pathPrefix}/${escHtml(t.image_path)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+                  ? `<img class="title-card-img" src="${pathPrefix}/${escHtml(t.image_path)}" alt="" loading="lazy" onerror="this.style.display='none'">`
                   : `<div class="title-card-img-ph rarity-${t.rarity}">👑</div>`
               }
               <div class="title-card-rarity rarity-${t.rarity}">${t.rarity.toUpperCase()}</div>
@@ -818,7 +790,7 @@ function renderTabTitles(d) {
 }
 
 function toggleTitlePending(tid, unlockedIds, d) {
-  const title = _titlesCatalog.find((t) => t.id === tid);
+  const title = titlesCatalog.find((t) => t.id === tid);
   if (!title) return;
 
   const existingAdd = pendingGifts.findIndex(
@@ -1177,673 +1149,6 @@ async function applyPendingGifts() {
   updateFab();
 
   switchTab(_activeTab);
-}
-
-// ── Catalog Loaders ────────────────────────────────────────────────────────
-async function loadBadgesCatalog() {
-  try {
-    const data = await api.get("/api/badges");
-    // /api/badges returns a raw array (no wrapper key)
-    _badgesCatalog = Array.isArray(data) ? data : data.badges || [];
-    // Normalize field: API returns `name`, admin UI expects `name_en`
-    _badgesCatalog = _badgesCatalog.map((b) => ({ ...b, name_en: b.name_en || b.name || b.slug }));
-  } catch (e) {
-    console.error("[Admin] badges catalog failed", e);
-  }
-}
-
-async function loadWallpapersCatalog() {
-  try {
-    const data = await api.get("/api/wallpapers");
-    // /api/wallpapers returns a raw array (no wrapper key)
-    _wallpapersCatalog = Array.isArray(data) ? data : data.wallpapers || [];
-  } catch (e) {
-    console.error("[Admin] wallpapers catalog failed", e);
-  }
-}
-
-async function loadTitlesCatalog() {
-  try {
-    const data = await api.get("/api/titles");
-    // /api/titles returns a raw array (no wrapper key); field is `name` not `name_en`
-    const raw = Array.isArray(data) ? data : data.titles || [];
-    _titlesCatalog = raw.map((t) => ({ ...t, name_en: t.name_en || t.name || t.slug }));
-  } catch (e) {
-    console.error("[Admin] titles catalog failed", e);
-  }
-}
-
-// ── Utilities ──────────────────────────────────────────────────────────────
-function escHtml(str) {
-  return String(str || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function getTypeLabel(type) {
-  return { badge: "Badge", wallpaper: "Wallpaper", title: "Titre", stats: "Stats" }[type] || type;
-}
-
-// ── Event Codes ────────────────────────────────────────────────────────────
-async function renderEventCodes() {
-  const el = document.getElementById("codes-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
-
-  let codes = [];
-  try {
-    const res = await api.get("/api/admin/event_codes");
-    codes = Array.isArray(res) ? res : (res.data ?? []);
-  } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des codes.</div>';
-    return;
-  }
-
-  const now = new Date().toISOString().slice(0, 10);
-
-  const rows = codes
-    .map((c) => {
-      const active = c.is_active
-        ? c.is_permanent || (c.start_date <= now && c.end_date >= now)
-          ? '<span class="code-status code-status--active">✅ Actif</span>'
-          : '<span class="code-status code-status--expired">📅 Expiré</span>'
-        : '<span class="code-status code-status--inactive">⛔ Inactif</span>';
-
-      const dates = c.is_permanent
-        ? "<em>Permanent</em>"
-        : `${c.start_date ?? "?"} → ${c.end_date ?? "?"}`;
-
-      return `<tr class="code-row">
-      <td><code class="code-pill">${escHtml(c.code)}</code></td>
-      <td>${escHtml(c.badge_id)}</td>
-      <td>${dates}</td>
-      <td>${active}</td>
-      <td><strong>${c.redemption_count ?? 0}</strong></td>
-      <td>${escHtml(c.description || "—")}</td>
-      <td class="code-actions">
-        <button class="btn-sm btn-secondary" data-code="${escHtml(c.code)}" data-active="${c.is_active ? 1 : 0}" data-action="toggle">
-          ${c.is_active ? "Désactiver" : "Activer"}
-        </button>
-        <button class="btn-sm btn-danger" data-code="${escHtml(c.code)}" data-action="delete">🗑️</button>
-      </td>
-    </tr>`;
-    })
-    .join("");
-
-  el.innerHTML = `
-    <div style="padding:1.5rem">
-      <h2 style="margin:0 0 1rem;color:var(--accent)">🎟️ Codes événement</h2>
-
-      <div class="codes-table-wrap">
-        <table class="codes-table">
-          <thead>
-            <tr>
-              <th>Code</th><th>Badge</th><th>Dates</th><th>Statut</th><th>Utilisations</th><th>Description</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>${rows || '<tr><td colspan="7" style="text-align:center;color:var(--text-muted)">Aucun code</td></tr>'}</tbody>
-        </table>
-      </div>
-
-      <div class="code-create-form">
-        <h3>Créer un code</h3>
-        <div class="form-grid">
-          <label>Code (majuscules, chiffres, _)
-            <input id="new-code" type="text" placeholder="EX: PERSONA2027" maxlength="50">
-          </label>
-          <label>Badge ID
-            <input id="new-badge-id" type="text" placeholder="slug_du_badge" maxlength="100">
-          </label>
-          <label>Description
-            <input id="new-description" type="text" placeholder="Optionnel" maxlength="255">
-          </label>
-        </div>
-        <div class="admin-toggle-row" style="margin:8px 0">
-          <input type="checkbox" id="new-permanent">
-          <span>Code permanent (pas de dates)</span>
-        </div>
-        <div id="date-fields" class="form-grid">
-          <label>Date début
-            <input id="new-start" type="date">
-          </label>
-          <label>Date fin
-            <input id="new-end" type="date">
-          </label>
-        </div>
-        <button class="btn-primary" id="create-code-btn" style="margin-top:10px">➕ Créer le code</button>
-      </div>
-    </div>
-  `;
-
-  // Toggle date fields visibility
-  document.getElementById("new-permanent").addEventListener("change", (e) => {
-    document.getElementById("date-fields").style.display = e.target.checked ? "none" : "";
-  });
-
-  // Toggle active / inactive
-  el.querySelectorAll('[data-action="toggle"]').forEach((btn) => {
-    btn.onclick = async () => {
-      const code = btn.dataset.code;
-      const active = btn.dataset.active === "1";
-      btn.disabled = true;
-      const res = await api.patch(`/api/admin/event_codes/${encodeURIComponent(code)}`, {
-        is_active: !active,
-      });
-      if (res.error) {
-        toast("❌ " + res.error, "error");
-        btn.disabled = false;
-      } else {
-        toast(`✅ Code ${active ? "désactivé" : "activé"}`, "success");
-        renderEventCodes();
-      }
-    };
-  });
-
-  // Delete
-  el.querySelectorAll('[data-action="delete"]').forEach((btn) => {
-    btn.onclick = async () => {
-      const code = btn.dataset.code;
-      if (!confirm(`Supprimer le code "${code}" ?`)) return;
-      btn.disabled = true;
-      const res = await api.delete(`/api/admin/event_codes/${encodeURIComponent(code)}`);
-      if (res.error) {
-        toast("❌ " + res.error, "error");
-        btn.disabled = false;
-      } else {
-        toast("🗑️ Code supprimé", "success");
-        renderEventCodes();
-      }
-    };
-  });
-
-  // Create
-  document.getElementById("create-code-btn").onclick = async () => {
-    const btn = document.getElementById("create-code-btn");
-    const isPerm = document.getElementById("new-permanent").checked;
-    btn.disabled = true;
-    btn.textContent = "…";
-    const res = await api.post("/api/admin/event_codes", {
-      code: document.getElementById("new-code").value.trim(),
-      badge_id: document.getElementById("new-badge-id").value.trim(),
-      description: document.getElementById("new-description").value.trim(),
-      is_permanent: isPerm,
-      is_active: true,
-      start_date: isPerm ? null : document.getElementById("new-start").value,
-      end_date: isPerm ? null : document.getElementById("new-end").value,
-    });
-    btn.disabled = false;
-    btn.textContent = "➕ Créer le code";
-    if (res.error) toast("❌ " + res.error, "error");
-    else {
-      toast("✅ Code créé", "success");
-      renderEventCodes();
-    }
-  };
-}
-
-// ── Error Logs ─────────────────────────────────────────────────────────────
-let _errorLogsPage = 1;
-let _errorLogsLevel = "";
-let _errorLogsSearch = "";
-let _errorLogsSearchTimer;
-
-async function renderErrorLogs() {
-  const el = document.getElementById("error-logs-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
-
-  let res;
-  try {
-    const params = new URLSearchParams({ page: _errorLogsPage, limit: 30 });
-    if (_errorLogsLevel) params.set("level", _errorLogsLevel);
-    if (_errorLogsSearch) params.set("search", _errorLogsSearch);
-    res = await api.get(`/api/admin/error_logs?${params.toString()}`);
-  } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des logs.</div>';
-    return;
-  }
-
-  const logs = res.data ?? [];
-
-  const levelClass = (level) =>
-    level === "error"
-      ? "code-status--inactive" // rouge
-      : level === "warning"
-        ? "code-status--expired" // jaune/orange
-        : "code-status--active"; // vert
-
-  const rows = logs
-    .map((l) => {
-      const context = l.context
-        ? `<pre style="white-space:pre-wrap;font-size:.75rem;margin:4px 0 0;opacity:.75">${escHtml(
-            JSON.stringify(l.context, null, 2)
-          )}</pre>`
-        : "";
-      return `<tr>
-        <td><span class="code-status ${levelClass(l.level)}">${escHtml(l.level)}</span></td>
-        <td>
-          <div>${escHtml(l.message)}</div>
-          ${context}
-        </td>
-        <td>${l.user_pseudo ? escHtml(l.user_pseudo) : "—"}</td>
-        <td>${escHtml(l.created_at)}</td>
-      </tr>`;
-    })
-    .join("");
-
-  el.innerHTML = `
-    <div style="padding:1.5rem">
-      <h2 style="margin:0 0 1rem;color:var(--accent)">🪵 Logs d'erreurs</h2>
-
-      <div class="form-grid" style="margin-bottom:1rem">
-        <label>Recherche
-          <input id="error-logs-search" type="text" placeholder="Filtrer par message…" value="${escHtml(_errorLogsSearch)}">
-        </label>
-        <label>Niveau
-          <select id="error-logs-level">
-            <option value="">Tous</option>
-            <option value="error" ${_errorLogsLevel === "error" ? "selected" : ""}>Error</option>
-            <option value="warning" ${_errorLogsLevel === "warning" ? "selected" : ""}>Warning</option>
-            <option value="info" ${_errorLogsLevel === "info" ? "selected" : ""}>Info</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="codes-table-wrap">
-        <table class="codes-table">
-          <thead>
-            <tr><th>Niveau</th><th>Message</th><th>Utilisateur</th><th>Date</th></tr>
-          </thead>
-          <tbody>${rows || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Aucune erreur 🎉</td></tr>'}</tbody>
-        </table>
-      </div>
-
-      <div id="error-logs-pagination" class="pagination"></div>
-    </div>
-  `;
-
-  document.getElementById("error-logs-search").addEventListener("input", (e) => {
-    clearTimeout(_errorLogsSearchTimer);
-    _errorLogsSearchTimer = setTimeout(() => {
-      _errorLogsSearch = e.target.value.trim();
-      _errorLogsPage = 1;
-      renderErrorLogs();
-    }, 300);
-  });
-
-  document.getElementById("error-logs-level").addEventListener("change", (e) => {
-    _errorLogsLevel = e.target.value;
-    _errorLogsPage = 1;
-    renderErrorLogs();
-  });
-
-  renderErrorLogsPagination(res.total ?? 0, _errorLogsPage, res.limit ?? 30);
-}
-
-function renderErrorLogsPagination(total, page, limit) {
-  const el = document.getElementById("error-logs-pagination");
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-sm" id="error-logs-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
-    <span>Page ${page} / ${totalPages}</span>
-    <button class="btn-sm" id="error-logs-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
-  `;
-  document.getElementById("error-logs-prev").onclick = () => {
-    _errorLogsPage = Math.max(1, _errorLogsPage - 1);
-    renderErrorLogs();
-  };
-  document.getElementById("error-logs-next").onclick = () => {
-    _errorLogsPage = Math.min(totalPages, _errorLogsPage + 1);
-    renderErrorLogs();
-  };
-}
-
-// ── Admin Audit Log ──────────────────────────────────────────────────────────
-let _auditLogPage = 1;
-let _auditLogAction = "";
-let _auditLogSearch = "";
-let _auditLogSearchTimer;
-
-async function renderAuditLog() {
-  const el = document.getElementById("audit-log-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
-
-  let res;
-  try {
-    const params = new URLSearchParams({ page: _auditLogPage, limit: 30 });
-    if (_auditLogAction) params.set("action", _auditLogAction);
-    if (_auditLogSearch) params.set("search", _auditLogSearch);
-    res = await api.get(`/api/admin/audit_log?${params.toString()}`);
-  } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement du journal d\'audit.</div>';
-    return;
-  }
-
-  const entries = res.data ?? [];
-
-  const rows = entries
-    .map((a) => {
-      const details = a.details
-        ? `<pre style="white-space:pre-wrap;font-size:.75rem;margin:4px 0 0;opacity:.75">${escHtml(
-            JSON.stringify(a.details, null, 2)
-          )}</pre>`
-        : "";
-      return `<tr>
-        <td>${a.admin_pseudo ? escHtml(a.admin_pseudo) : "—"}</td>
-        <td><span class="code-status code-status--active">${escHtml(a.action)}</span></td>
-        <td>${escHtml(a.target_type)} #${escHtml(a.target_id)}</td>
-        <td>${details || "—"}</td>
-        <td>${escHtml(a.created_at)}</td>
-      </tr>`;
-    })
-    .join("");
-
-  el.innerHTML = `
-    <div style="padding:1.5rem">
-      <h2 style="margin:0 0 1rem;color:var(--accent)">📋 Journal d'audit admin</h2>
-
-      <div class="form-grid" style="margin-bottom:1rem">
-        <label>Recherche
-          <input id="audit-log-search" type="text" placeholder="Admin, action, cible…" value="${escHtml(_auditLogSearch)}">
-        </label>
-        <label>Action
-          <input id="audit-log-action" type="text" placeholder="ex: user.ban" value="${escHtml(_auditLogAction)}">
-        </label>
-      </div>
-
-      <div class="codes-table-wrap">
-        <table class="codes-table">
-          <thead>
-            <tr><th>Admin</th><th>Action</th><th>Cible</th><th>Détails</th><th>Date</th></tr>
-          </thead>
-          <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Aucune action journalisée</td></tr>'}</tbody>
-        </table>
-      </div>
-
-      <div id="audit-log-pagination" class="pagination"></div>
-    </div>
-  `;
-
-  document.getElementById("audit-log-search").addEventListener("input", (e) => {
-    clearTimeout(_auditLogSearchTimer);
-    _auditLogSearchTimer = setTimeout(() => {
-      _auditLogSearch = e.target.value.trim();
-      _auditLogPage = 1;
-      renderAuditLog();
-    }, 300);
-  });
-
-  document.getElementById("audit-log-action").addEventListener("input", (e) => {
-    clearTimeout(_auditLogSearchTimer);
-    _auditLogSearchTimer = setTimeout(() => {
-      _auditLogAction = e.target.value.trim();
-      _auditLogPage = 1;
-      renderAuditLog();
-    }, 300);
-  });
-
-  renderAuditLogPagination(res.total ?? 0, _auditLogPage, res.limit ?? 30);
-}
-
-function renderAuditLogPagination(total, page, limit) {
-  const el = document.getElementById("audit-log-pagination");
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-sm" id="audit-log-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
-    <span>Page ${page} / ${totalPages}</span>
-    <button class="btn-sm" id="audit-log-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
-  `;
-  document.getElementById("audit-log-prev").onclick = () => {
-    _auditLogPage = Math.max(1, _auditLogPage - 1);
-    renderAuditLog();
-  };
-  document.getElementById("audit-log-next").onclick = () => {
-    _auditLogPage = Math.min(totalPages, _auditLogPage + 1);
-    renderAuditLog();
-  };
-}
-
-// ── RGPD Deletion Requests ───────────────────────────────────────────────────
-let _deletionRequestsPage = 1;
-let _deletionRequestsStatus = "";
-
-async function renderDeletionRequests() {
-  const el = document.getElementById("deletion-requests-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
-
-  let res;
-  try {
-    const params = new URLSearchParams({ page: _deletionRequestsPage, limit: 30 });
-    if (_deletionRequestsStatus) params.set("status", _deletionRequestsStatus);
-    res = await api.get(`/api/admin/deletion_requests?${params.toString()}`);
-  } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des demandes RGPD.</div>';
-    return;
-  }
-
-  const requests = res.data ?? [];
-
-  const rows = requests
-    .map((r) => {
-      const pending = !r.processed_at;
-      const statusPill = pending
-        ? '<span class="code-status code-status--expired">En attente</span>'
-        : '<span class="code-status code-status--active">Traité</span>';
-      const actionBtn = pending
-        ? `<button class="btn-sm dr-process-btn" data-id="${r.id}">Supprimer maintenant</button>`
-        : "—";
-      return `<tr>
-        <td>${r.user_pseudo ? escHtml(r.user_pseudo) : "—"} (#${r.user_id})</td>
-        <td>${escHtml(r.deletion_type)}</td>
-        <td>${statusPill}</td>
-        <td>${escHtml(r.requested_at)}</td>
-        <td>${r.processed_at ? escHtml(r.processed_at) : "—"}</td>
-        <td>${actionBtn}</td>
-      </tr>`;
-    })
-    .join("");
-
-  el.innerHTML = `
-    <div style="padding:1.5rem">
-      <h2 style="margin:0 0 1rem;color:var(--accent)">🗑️ Demandes de suppression RGPD</h2>
-      <p style="color:var(--text-muted);font-size:.85rem;margin:0 0 1rem">
-        Le compte est déjà anonymisé au moment de la demande — la suppression définitive
-        (cascade complète) intervient automatiquement à J+30, ou manuellement ci-dessous.
-      </p>
-
-      <div class="form-grid" style="margin-bottom:1rem">
-        <label>Statut
-          <select id="deletion-requests-status">
-            <option value="">Toutes</option>
-            <option value="pending" ${_deletionRequestsStatus === "pending" ? "selected" : ""}>En attente</option>
-            <option value="processed" ${_deletionRequestsStatus === "processed" ? "selected" : ""}>Traitées</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="codes-table-wrap">
-        <table class="codes-table">
-          <thead>
-            <tr><th>Utilisateur</th><th>Type</th><th>Statut</th><th>Demandée le</th><th>Traitée le</th><th></th></tr>
-          </thead>
-          <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Aucune demande</td></tr>'}</tbody>
-        </table>
-      </div>
-
-      <div id="deletion-requests-pagination" class="pagination"></div>
-    </div>
-  `;
-
-  document.getElementById("deletion-requests-status").addEventListener("change", (e) => {
-    _deletionRequestsStatus = e.target.value;
-    _deletionRequestsPage = 1;
-    renderDeletionRequests();
-  });
-
-  el.querySelectorAll(".dr-process-btn").forEach((btn) => {
-    btn.onclick = async () => {
-      if (!confirm("Supprimer définitivement ce compte maintenant, avant l'échéance des 30 jours ?")) return;
-      btn.disabled = true;
-      const res = await api.post(`/api/admin/deletion_requests/${btn.dataset.id}/process`, {});
-      if (res.error) {
-        toast("❌ " + res.error, "error");
-        btn.disabled = false;
-      } else {
-        toast("✅ Compte supprimé définitivement", "success");
-        renderDeletionRequests();
-      }
-    };
-  });
-
-  renderDeletionRequestsPagination(res.total ?? 0, _deletionRequestsPage, res.limit ?? 30);
-}
-
-function renderDeletionRequestsPagination(total, page, limit) {
-  const el = document.getElementById("deletion-requests-pagination");
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-sm" id="deletion-requests-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
-    <span>Page ${page} / ${totalPages}</span>
-    <button class="btn-sm" id="deletion-requests-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
-  `;
-  document.getElementById("deletion-requests-prev").onclick = () => {
-    _deletionRequestsPage = Math.max(1, _deletionRequestsPage - 1);
-    renderDeletionRequests();
-  };
-  document.getElementById("deletion-requests-next").onclick = () => {
-    _deletionRequestsPage = Math.min(totalPages, _deletionRequestsPage + 1);
-    renderDeletionRequests();
-  };
-}
-
-// ── Rate Limits ───────────────────────────────────────────────────────────────
-let _rateLimitsPage = 1;
-let _rateLimitsSearch = "";
-let _rateLimitsSearchTimer;
-
-async function renderRateLimits() {
-  const el = document.getElementById("rate-limits-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
-
-  let res;
-  try {
-    const params = new URLSearchParams({ page: _rateLimitsPage, limit: 30 });
-    if (_rateLimitsSearch) params.set("search", _rateLimitsSearch);
-    res = await api.get(`/api/admin/rate_limits?${params.toString()}`);
-  } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des rate limits.</div>';
-    return;
-  }
-
-  const limits = res.data ?? [];
-
-  const rows = limits
-    .map((r) => {
-      const windowDate = new Date(r.window_start * 1000).toLocaleString("fr-FR");
-      return `<tr>
-        <td>${escHtml(r.rl_key)}</td>
-        <td>${r.hits}</td>
-        <td>${windowDate}</td>
-        <td><button class="btn-sm rl-clear-btn" data-key="${escHtml(r.rl_key)}">Purger</button></td>
-      </tr>`;
-    })
-    .join("");
-
-  el.innerHTML = `
-    <div style="padding:1.5rem">
-      <h2 style="margin:0 0 1rem;color:var(--accent)">⏱️ Rate Limits actifs</h2>
-
-      <div class="form-grid" style="margin-bottom:1rem">
-        <label>Recherche
-          <input id="rate-limits-search" type="text" placeholder="Filtrer par clé (ex: login:)…" value="${escHtml(_rateLimitsSearch)}">
-        </label>
-      </div>
-
-      <div class="codes-table-wrap">
-        <table class="codes-table">
-          <thead>
-            <tr><th>Clé</th><th>Hits</th><th>Fenêtre depuis</th><th></th></tr>
-          </thead>
-          <tbody>${rows || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">Aucun compteur actif</td></tr>'}</tbody>
-        </table>
-      </div>
-
-      <div id="rate-limits-pagination" class="pagination"></div>
-    </div>
-  `;
-
-  document.getElementById("rate-limits-search").addEventListener("input", (e) => {
-    clearTimeout(_rateLimitsSearchTimer);
-    _rateLimitsSearchTimer = setTimeout(() => {
-      _rateLimitsSearch = e.target.value.trim();
-      _rateLimitsPage = 1;
-      renderRateLimits();
-    }, 300);
-  });
-
-  el.querySelectorAll(".rl-clear-btn").forEach((btn) => {
-    btn.onclick = async () => {
-      btn.disabled = true;
-      const res = await api.delete(`/api/admin/rate_limits?key=${encodeURIComponent(btn.dataset.key)}`);
-      if (res.error) {
-        toast("❌ " + res.error, "error");
-        btn.disabled = false;
-      } else {
-        toast("✅ Compteur purgé", "success");
-        renderRateLimits();
-      }
-    };
-  });
-
-  renderRateLimitsPagination(res.total ?? 0, _rateLimitsPage, res.limit ?? 30);
-}
-
-function renderRateLimitsPagination(total, page, limit) {
-  const el = document.getElementById("rate-limits-pagination");
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-sm" id="rate-limits-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
-    <span>Page ${page} / ${totalPages}</span>
-    <button class="btn-sm" id="rate-limits-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
-  `;
-  document.getElementById("rate-limits-prev").onclick = () => {
-    _rateLimitsPage = Math.max(1, _rateLimitsPage - 1);
-    renderRateLimits();
-  };
-  document.getElementById("rate-limits-next").onclick = () => {
-    _rateLimitsPage = Math.min(totalPages, _rateLimitsPage + 1);
-    renderRateLimits();
-  };
 }
 
 // ── Bootstrap ──────────────────────────────────────────────────────────────
