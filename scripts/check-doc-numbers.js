@@ -73,12 +73,19 @@ function countI18nKeys() {
 function countE2E() {
   const dir = join(ROOT, "tests-e2e");
   const files = readdirSync(dir).filter((f) => f.endsWith(".spec.js"));
-  let total = 0;
-  for (const f of files) {
-    const content = readFileSync(join(dir, f), "utf8");
-    total += (content.match(/^\s*test\(/gm) || []).length;
-  }
-  return { total, files: files.length };
+  // `playwright test --list` énumère les tests réellement enregistrés au runtime (il exécute le
+  // corps des fichiers .spec.js, sans lancer de navigateur ni toucher au serveur) — contrairement
+  // à un comptage par regex sur `test(`, ça compte aussi les tests générés dynamiquement dans une
+  // boucle (ex: game-flow.spec.js § responsive, 1 seul appel `test()` dans le code mais 6 tests
+  // enregistrés au runtime, un par mode de jeu).
+  const out = execSync("npx playwright test --list", {
+    cwd: ROOT,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "ignore"],
+  });
+  const match = out.match(/Total:\s+(\d+)\s+tests?\s+in\s+\d+\s+files?/);
+  if (!match) throw new Error(`Impossible de parser la sortie de "playwright test --list" : ${out}`);
+  return { total: Number(match[1]), files: files.length };
 }
 
 const vitestTests = countVitestTests();
@@ -158,7 +165,13 @@ const dirtyFiles = new Set();
 
 for (const point of syncPoints) {
   const content = getContent(point.file);
-  const m = content.match(point.re);
+  // Flag "d" : expose la position exacte (début/fin) de chaque groupe capturé dans `content`.
+  // Indispensable pour un remplacement positionnel plutôt que par sous-chaîne — sinon un nombre
+  // dont les chiffres apparaissent comme sous-chaîne d'un autre (ex: "25" dans "125") se fait
+  // corrompre par le `.replace()` du nombre voisin (vécu : "125 PHPUnit" → "130 PHPUnit" en
+  // voulant corriger "25 E2E" → "30 E2E" juste à côté).
+  const re = new RegExp(point.re.source, point.re.flags.includes("d") ? point.re.flags : point.re.flags + "d");
+  const m = re.exec(content);
   if (!m) {
     notFound.push(point);
     continue;
@@ -168,13 +181,14 @@ for (const point of syncPoints) {
   if (isStale) {
     mismatches.push({ ...point, found });
     if (FIX) {
+      // Groupes remplacés de la fin vers le début pour que les positions déjà traitées
+      // ne soient jamais décalées par un remplacement précédent de longueur différente.
+      const groupIndices = m.indices.slice(1);
       let updated = content;
-      const matchedText = m[0];
-      let newText = matchedText;
-      found.forEach((val, i) => {
-        newText = newText.replace(String(val), String(point.expected[i]));
-      });
-      updated = updated.replace(matchedText, newText);
+      for (let i = groupIndices.length - 1; i >= 0; i--) {
+        const [start, end] = groupIndices[i];
+        updated = updated.slice(0, start) + String(point.expected[i]) + updated.slice(end);
+      }
       fileCache.set(point.file, updated);
       dirtyFiles.add(point.file);
     }
