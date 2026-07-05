@@ -319,6 +319,39 @@ observation directe.
 
 ---
 
+## 2026-07-05 — fix(e2e): POST /api/friends sans slash final perd son body (issue #10)
+
+**Cause racine trouvée** après ouverture de l'issue #10 (bug latent noté hors scope de
+la PR #9) : `tests-e2e/social-link.spec.js` appelait `a.ctx.post("/api/friends", …)`
+**sans slash final**. `api/friends/.htaccess` ne route la racine du dossier
+(`RewriteRule ^$ index.php`) que pour l'URL se terminant par `/` — sur `/api/friends`
+sans slash, Apache (mod_dir, `DirectorySlash` par défaut ON) répond d'abord par un
+`301` vers `/api/friends/` **avant** que la règle de réécriture du dossier ne s'applique.
+Un client qui suit les redirections (Playwright `APIRequestContext` comme `fetch`)
+convertit alors le `POST` en `GET` sur l'URL redirigée, perdant le body — la requête
+retombe sur le handler `GET /api/friends` qui répond `200 { friends, pending_requests }`
+au lieu de créer la demande. D'où le symptôme : `res.ok()` reste vrai (200 est un succès),
+mais `body.status` ne vaut jamais `"pending"` puisque aucune demande n'a été créée.
+
+Preuve que ce n'est pas un bug produit : `js/api.js:346` fait déjà
+`post("/friends/", …)` **avec** le slash final (de même que `/messages/` pour la même
+raison) — un choix déjà fait côté front, juste pas repris dans le test E2E qui n'avait
+jamais pu être exécuté jusqu'au bout avant le fix du rate-limit d'inscription (voir
+entrée du jour précédente).
+
+**Fix** : ajout du slash final sur l'appel du test (`tests-e2e/social-link.spec.js`),
+aligné sur la convention déjà en place dans `js/api.js`. Aucun changement côté
+`api/friends/index.php` — le code serveur était correct. Piège documenté dans
+`CLAUDE.md` § 7 pour éviter la récidive sur un futur test ou appel direct à ces routes.
+
+Issue #10 fermée par ce commit. Non revérifié par un run E2E réel (Docker indisponible
+dans ce sandbox) — cause confirmée par lecture croisée du comportement documenté
+d'Apache `mod_dir`/`DirectorySlash` et de la gestion des redirections `fetch`/Playwright
+sur les méthodes non-GET, plus la présence du même contournement déjà en place côté
+front (`js/api.js`).
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →
