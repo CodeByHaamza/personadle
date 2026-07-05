@@ -67,6 +67,20 @@ Les variables dynamiques utilisent la syntaxe `{{variable}}` :
 - Termes de la lore conservés en anglais : "All-Out Attack", "Velvet Room", "Phantom Thieves", "Arcana", "Shadow"
 - Quotes des personnages (dans `database/quotes.js`)
 
+### 🔍 À propos de `npm run i18n:check-untranslated`
+
+Ce script repère les valeurs identiques à l'anglais, mais **ne peut pas distinguer un oubli
+d'une valeur volontairement identique**. Triage effectué le 2026-07-05 sur les ~327 candidats
+remontés (fr/es/de/it) : l'écrasante majorité sont **attendus, pas des bugs** —
+- noms de badges/titres (lore, exclus par design ci-dessus)
+- noms de modes ("Emoji", "Silhouette", "Personae"), titres de jeux ("Persona 5 Royal"…)
+- vrais cognats qui s'écrivent pareil dans la langue cible ("Volume"/"Style" en français,
+  "No" en espagnol/italien, "FAQ"/"Avatar"/"Cookies" en emprunt courant)
+
+**Un seul vrai oubli trouvé et corrigé** : `updates.music_col_cover` en français
+("Cover" → "Pochette"). Avant de "corriger" une entrée de ce rapport, vérifier qu'il ne s'agit
+pas d'un des deux cas ci-dessus — la plupart ne doivent PAS être traduites.
+
 ---
 
 ## Ajouter une nouvelle string UI
