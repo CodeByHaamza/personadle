@@ -104,6 +104,7 @@ const README = join(ROOT, "README.md");
 const ROADMAP = join(ROOT, "ROADMAP.md");
 const CONTRIBUTING = join(ROOT, "CONTRIBUTING.md");
 const TESTS_README = join(ROOT, "tests/README.md");
+const TESTS_E2E_README = join(ROOT, "tests-e2e/README.md");
 
 const syncPoints = [
   // CLAUDE.md
@@ -138,6 +139,9 @@ const syncPoints = [
   { file: TESTS_README, re: /Vitest — (\d+) tests unitaires \(jsdom, (\d+) fichiers\)/, expected: [vitestTests, vitestFiles] },
   { file: TESTS_README, re: /\*\*Total\*\*\s*\|\*\*(\d+)\*\*/, expected: [vitestTests] },
   { file: TESTS_README, re: /\*\*(\d+) méthodes de test\*\* au total sur ces (\d+) fichiers/, expected: [phpunit.total, phpunit.files] },
+
+  // tests-e2e/README.md
+  { file: TESTS_E2E_README, re: /\*\*(\d+) tests \((\d+) fichiers\) sur un vrai navigateur/, expected: [e2e.total, e2e.files] },
 ];
 
 // ── Vérification / correction ────────────────────────────────────────────────

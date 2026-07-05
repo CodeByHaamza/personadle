@@ -86,6 +86,13 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
    (~7/38 fichiers `api/*.php` exercés par un test exécuté, E2E ou unitaire — le reste ne passe
    que par PHPStan/lint statique, jamais réellement invoqué en CI). Cibler en priorité les
    endpoints `admin/*`, `messages/index.php`, `leaderboard/index.php`.
+   > ✅ **Partiellement résolu depuis** : `tests-e2e/admin.spec.js` (nouveau) exerce désormais
+   > `GET /api/admin/users`, `GET /api/admin/audit_log`, `GET /api/admin/rate_limits` et le
+   > garde-fou `requireAdmin()` (403 pour un non-admin) sur `PATCH /api/admin/users/:id` — via
+   > un compte admin de seed dédié (`docker/mysql/init/02_seed_test.sql`,
+   > `admin@personadle.local`). Les autres endpoints `admin/*` (event_codes, social_links,
+   > user_badges/titles/wallpapers/friends/stats, deletion_requests, error_logs) restent non
+   > couverts.
 5. Le job E2E (`e2e` dans `ci.yml`) reste `continue-on-error` — critère de sortie documenté
    dans `tests-e2e/README.md` § Statut CI (10 runs consécutifs verts sur `develop`).
 

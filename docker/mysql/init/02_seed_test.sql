@@ -40,3 +40,22 @@ CROSS JOIN (
     SELECT 'Music'
 ) m
 WHERE u.email = 'dev@personadle.local';
+
+-- Compte admin de test (is_admin = 1) — utilisé par tests-e2e/admin.spec.js et
+-- pour tester le panel admin (admin/admin.html) en local sans promouvoir un
+-- compte manuellement en base.
+-- Email    : admin@personadle.local
+-- Password : admintest123  (bcrypt hash ci-dessous)
+-- Généré avec : password_hash('admintest123', PASSWORD_BCRYPT)
+INSERT IGNORE INTO users (email, pseudo, password_hash, friend_code, lang, is_admin)
+VALUES (
+    'admin@personadle.local',
+    'AdminTest',
+    '$2y$12$eMIbNMGzGddCesFp1J94.Oth.sSJE3fHRTUvvNGhC6J48/KpwM58W',
+    'ADMIN001',
+    'en',
+    1
+);
+
+INSERT IGNORE INTO profiles (user_id)
+SELECT id FROM users WHERE email = 'admin@personadle.local';
