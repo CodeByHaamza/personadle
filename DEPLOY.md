@@ -59,7 +59,8 @@ Credentials SFTP dans hPanel → **Hébergement** → **Accès FTP**.
 
 ```
 À uploader :
-  ✅ index.html, 404.html, privacy.html, faq.html, reset-password.html, sw.js
+  ✅ index.html, sw.js
+  ✅ pages/      (tout le dossier — 404.html, privacy.html, faq.html, reset-password.html)
   ✅ .htaccess (racine)
   ✅ api/        (tout le dossier)
   ✅ js/         (tout le dossier)

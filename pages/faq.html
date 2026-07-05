@@ -16,12 +16,12 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="./css/global.css?v=10" />
-    <link rel="stylesheet" href="./css/langSelector.css?v=4" />
-    <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
-    <link rel="stylesheet" href="./css/faq.css?v=1" />
+    <link rel="stylesheet" href="../css/global.css?v=10" />
+    <link rel="stylesheet" href="../css/langSelector.css?v=4" />
+    <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="../css/faq.css?v=1" />
 
-    <link rel="icon" type="image/gif" href="./img/persona_64x64.gif" />
+    <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
 
     <script>
       if (localStorage.getItem("darkMode") === "enabled") {
@@ -244,7 +244,7 @@
     <!-- Mascotte Jack Frost -->
     <div class="faq-mascot" aria-hidden="true">
       <div class="faq-mascot-bubble" data-i18n="faq.mascot_bubble">Any questions?<br />Hee-ho!</div>
-      <img src="./img/jack-frost-persona.gif" alt="Jack Frost" width="90" />
+      <img src="../img/jack-frost-persona.gif" alt="Jack Frost" width="90" />
     </div>
 
     <!-- Toggle Dark Mode -->
@@ -275,7 +275,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Lisa_Silverman_english.webp"
+            src="../assets/lang/Lisa_Silverman_english.webp"
             alt="Lisa Silverman"
             loading="lazy"
           />
@@ -291,7 +291,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Bebe_french.webp"
+            src="../assets/lang/Bebe_french.webp"
             alt="Bebe"
             loading="lazy"
           />
@@ -307,7 +307,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Morgana_Spanish.webp"
+            src="../assets/lang/Morgana_Spanish.webp"
             alt="Morgana"
             loading="lazy"
           />
@@ -323,7 +323,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Hulkenberg_german.webp"
+            src="../assets/lang/Hulkenberg_german.webp"
             alt="Hulkenberg"
             loading="lazy"
           />
@@ -339,7 +339,7 @@
           <span class="lang-opt-dot" aria-hidden="true">◆</span>
           <img
             class="lang-opt-char"
-            src="./assets/lang/Caesar_italian.webp"
+            src="../assets/lang/Caesar_italian.webp"
             alt="Caesar"
             loading="lazy"
           />
@@ -756,7 +756,7 @@
 
       <!-- Back -->
       <div class="faq-back">
-        <a href="./index.html" class="btn-p5" data-i18n="ui.back">← Back</a>
+        <a href="../index.html" class="btn-p5" data-i18n="ui.back">← Back</a>
       </div>
       <div class="faq-item">
         <div class="faq-question">
@@ -783,8 +783,8 @@
 
     <!-- Scripts -->
     <script type="module">
-      import { initLang, setLang } from "./js/i18n.js";
-      import { initBottomNav } from "./js/bottomNav.js";
+      import { initLang, setLang } from "../js/i18n.js";
+      import { initBottomNav } from "../js/bottomNav.js";
 
       /* ── Dark mode toggle ── */
       const toggle = document.getElementById("darkModeToggle");
@@ -866,7 +866,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js").catch(() => {});
+          navigator.serviceWorker.register("../sw.js").catch(() => {});
         });
       }
     </script>

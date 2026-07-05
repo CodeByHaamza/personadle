@@ -155,7 +155,13 @@ Le vocabulaire des modes diverge selon les couches :
 ## 6. 🟡 Architecture & arborescence
 
 - **Modes dupliqués** : chaque mode a son `database/` local (`musicsMode/database`, `personaeMode/database`…) en plus du `database/` racine. Centraliser ou documenter clairement la frontière.
-- **Fichiers à la racine** : `privacy.css`, `privacy.html`, `sw.js`, `404.html`, `faq.html` cohabitent avec la config. Envisager un dossier `pages/` ou `public/`.
+- ~~**Fichiers à la racine** : `privacy.css`, `privacy.html`, `404.html`, `faq.html`, `reset-password.html` cohabitent avec la config~~
+  > ✅ **Résolu depuis** : déplacés dans `pages/` (voir `pages/README.md`). `sw.js` reste à la
+  > racine (portée d'un service worker limitée à son propre dossier et ses sous-dossiers —
+  > le déplacer casserait le cache offline de tout le site). Toutes les références mises à
+  > jour : `index.html`, `profile/profile.html`, `.htaccess` (`ErrorDocument 404`),
+  > `sw.js` (précache), `sitemap.xml`, `api/auth/request-reset.php` (lien email), et
+  > `js/bottomNav.js` (détection de profondeur de chemin pour la nav du bas).
 - **Convention de nommage de fichiers** : CLAUDE.md impose `snake_case`, mais le repo mélange `streak-recovery.js` (kebab), `gameCore.js` (camel), `characters_clean.js` (snake). Soit aligner, soit assouplir la règle dans CLAUDE.md pour refléter la réalité.
 - **`new data/`** : dossier de travail non structuré (espaces, casse hétérogène, jpeg/webp/mp4 mêlés). Définir une convention d'ingestion : `incoming/<type>/<persona-snake_case>.<ext>` + un script qui valide/renomme/optimise avant de pousser en base.
 - **Nouveau (audit du 2026-07-04)** : deux « god files » à scinder en sous-modules ES6

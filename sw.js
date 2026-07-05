@@ -31,7 +31,7 @@ const SW_BASE = self.location.pathname.replace(/\/sw\.js$/, "");
 const PRECACHE_URLS = [
   SW_BASE + "/",
   SW_BASE + "/index.html",
-  SW_BASE + "/404.html",
+  SW_BASE + "/pages/404.html",
 
   /* Styles globaux */
   SW_BASE + "/css/global.css",

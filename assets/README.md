@@ -38,7 +38,7 @@ assets/
 ## `buttons/`
 
 Boutons de l'interface de jeu au format **WebP**, dans un **sous-dossier par langue** (`DE/EN/ES/FR/IT/`)
-— chaque langue a sa propre variante graphique du texte sur le bouton. Référencés dans `faq.html`,
+— chaque langue a sa propre variante graphique du texte sur le bouton. Référencés dans `pages/faq.html`,
 les 6 pages de mode, `index.html` et `js/lang-selector.js`.
 
 | Fichier (dans chaque sous-dossier de langue) | Utilisation |
