@@ -86,15 +86,20 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
    (~7/38 fichiers `api/*.php` exercés par un test exécuté, E2E ou unitaire — le reste ne passe
    que par PHPStan/lint statique, jamais réellement invoqué en CI). Cibler en priorité les
    endpoints `admin/*`, `messages/index.php`, `leaderboard/index.php`.
-   > ✅ **Partiellement résolu depuis** : `tests-e2e/admin.spec.js` (nouveau) exerce désormais
-   > `GET /api/admin/users`, `GET /api/admin/audit_log`, `GET /api/admin/rate_limits` et le
-   > garde-fou `requireAdmin()` (403 pour un non-admin) sur `PATCH /api/admin/users/:id` — via
-   > un compte admin de seed dédié (`docker/mysql/init/02_seed_test.sql`,
-   > `admin@personadle.local`). Les autres endpoints `admin/*` (event_codes, social_links,
-   > user_badges/titles/wallpapers/friends/stats, deletion_requests, error_logs) restent non
-   > couverts.
+   > ✅ **Résolu depuis** : `tests-e2e/admin.spec.js` exerce `GET /api/admin/users`,
+   > `GET /api/admin/audit_log`, `GET /api/admin/rate_limits` et le garde-fou `requireAdmin()`
+   > (403 pour un non-admin) sur `PATCH /api/admin/users/:id`. `tests-e2e/admin-extended.spec.js`
+   > (nouveau, 24 tests) complète avec les endpoints qui restaient non couverts : `event_codes`
+   > (cycle créer/lister/désactiver/supprimer), `error_logs`, `deletion_requests`, `social_links`
+   > (liste + 404), et les dons utilisateur `user_badges`/`user_titles`/`user_wallpapers`
+   > (accorder/retirer, catalogue lu dynamiquement via `/api/titles`/`/api/wallpapers` plutôt que
+   > des IDs figés) + `user_stats` (écrasement + validations 400) + `user_friends` (403 + 404) —
+   > via le même compte admin de seed.
 5. Le job E2E (`e2e` dans `ci.yml`) reste `continue-on-error` — critère de sortie documenté
    dans `tests-e2e/README.md` § Statut CI (10 runs consécutifs verts sur `develop`).
+   > 🔎 **Vérifié le 2026-07-05** : seulement 2/10 exécutions consécutives vertes sur `develop`
+   > à ce jour (historique des jobs `e2e` depuis son introduction). Critère non atteint — le
+   > job reste `continue-on-error`, aucune action nécessaire pour l'instant.
 
 ---
 
@@ -167,10 +172,29 @@ Le vocabulaire des modes diverge selon les couches :
 - **Nouveau (audit du 2026-07-04)** : deux « god files » à scinder en sous-modules ES6
   (déjà chargés en `type="module"`, donc techniquement scindable sans casser l'ordre de
   chargement) : `admin/admin.js` (1847 lignes, 39 fonctions) et `profile/profile-page.js`
-  (1194 lignes). ⚠️ Report volontaire : ce refactor touche des actions sensibles côté admin
-  (ban, suppression RGPD…) et n'a **pas pu être vérifié visuellement en navigateur** (pas de
-  Docker dans le sandbox où cet audit a été fait) — à faire avec un vrai test manuel en local
-  après coup, pas en aveugle.
+  (1194 lignes).
+  > ✅ **`admin/admin.js` résolu depuis** : scindé en 8 modules (`admin/admin-api.js` — client
+  > REST + toast + escHtml, `admin/catalogs.js`, et un fichier par panneau autonome :
+  > `event-codes.js`, `error-logs.js`, `audit-log.js`, `deletion-requests.js`, `rate-limits.js`),
+  > `admin.js` passant de 1850 à ~1155 lignes. Comportement strictement inchangé (déplacement
+  > mécanique). La liste utilisateurs + les 7 onglets de détail utilisateur restent dans
+  > `admin.js` : ils partagent un état fortement couplé (`_selectedUser`/`_userDetail`/pending
+  > gifts) et les séparer aurait un risque de régression plus élevé pour un gain plus faible —
+  > pas de vérification navigateur possible ici (pas de Docker), donc reporté plutôt que scindé
+  > à l'aveugle. `admin.js` n'avait **aucune** couverture Vitest jusqu'ici (seul un sous-ensemble
+  > de panneaux est couvert par l'E2E, qui a besoin de Docker) ; `tests/adminSmoke.test.js`
+  > comble ce trou (import du graphe de 8 modules, bootstrap complet, clic sur les 5 boutons de
+  > panneaux extraits) — pensé pour attraper la classe de bug la plus probable d'un découpage
+  > mécanique (export manquant, variable renommée dans un seul des fichiers).
+  >
+  > ⚠️ **`profile/profile-page.js` : pas de nouveau découpage** — en le relisant, il a déjà 9
+  > modules extraits (`profile/badges/`, `wallpapers-ui.js`, `titles-ui.js`, `song-player.js`,
+  > `share-card.js`, `theme.js`, `profile-format.js`, `formatPlayTime.js`, `avatars_data.js`).
+  > Les 1194 lignes restantes sont la logique de contrôleur de page (chargement/sauvegarde du
+  > profil, thème, stats, crop avatar, bootstrap), fortement couplée à un objet `profile`
+  > partagé et des closures (`markDirty`/`saveProfile`) — un découpage supplémentaire aurait un
+  > risque de régression réel pour un gain marginal, sans pouvoir tester dans un vrai navigateur
+  > ici. Décision de ne pas re-découper plutôt que de le faire à l'aveugle.
 - **Nouveau (audit du 2026-07-04)** : `filterCharacterPool`/`updateCounters` sont dupliqués
   entre `classiqueMode/modeClassique.js` et `emojiMode/emojiMode.js` avec de **vraies
   différences de comportement** — `filterCharacterPool` de Classique exclut les noms déjà
@@ -218,7 +242,13 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 
 ## 9. 🟡 i18n, accessibilité, PWA
 
-- **Strings en dur** dans `streak-recovery.js` (« Streak Lost! », messages d'erreur) non passées par i18n. Les externaliser dans `lang/en.json`.
+- ~~**Strings en dur** dans `streak-recovery.js` (« Streak Lost! », messages d'erreur) non passées par i18n.~~
+  > ❌ **Ce constat était faux, corrigé le 2026-07-05** : les 8 chaînes visibles de
+  > `streak-recovery.js` passent déjà toutes par `_t(key, fallback, vars)`, les 8 clés
+  > `streak_recovery.*` existent dans `lang/en.json` **et** dans les 4 autres langues avec de
+  > vraies traductions (`npm run i18n:check-untranslated` ne signale aucun doublon EN). Le seul
+  > texte non traduit est `alt="Jack Frost"` — un nom de perso, volontairement exclu de l'i18n
+  > par convention (CLAUDE.md §5). Rien à corriger.
 - **Accessibilité** : audit `aria-*`, contrastes, `prefers-reduced-motion` (animations AOA lourdes
   volontairement exclues — ce sont du contenu de jeu, cf. `css/global.css`).
   > ✅ **Résolu depuis** : focus management des modales — `js/modal.js` (trap Tab/Escape +
@@ -227,6 +257,23 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
   > (`js/filterMenu.js` — focus envoyé dans le panneau à l'ouverture, restauré sur le bouton
   > toggle à la fermeture via Escape ; pas de piège Tab complet, ce n'est pas une modale mais
   > un menu déroulant, cf. WAI-ARIA menu-button pattern).
+  >
+  > ✅ **`prefers-reduced-motion` — résolu pour les 2 boucles JS restantes (2026-07-05)** :
+  > `css/global.css` neutralise déjà toutes les animations/transitions CSS (règle globale
+  > `*, *::before, *::after`), mais deux effets tournent en JS pur via une boucle
+  > `requestAnimationFrame` qu'une media query CSS ne peut jamais arrêter : le bruit TV statique
+  > (`js/tv-friend-anim.js`) et les confettis dorés du don admin (`js/divine-gift.js`). Les deux
+  > sautent maintenant leur boucle si `matchMedia('(prefers-reduced-motion: reduce)').matches`.
+  >
+  > 🔎 **Contrastes — audité, pas corrigé (décision de design à trancher séparément)** :
+  > `--color-accent` (`#e63946`, utilisé comme couleur de texte dans 10+ fichiers CSS) a un
+  > ratio de 4.17:1 sur fond blanc — sous le seuil AA texte normal (4.5:1), au-dessus du seuil
+  > AA texte large/composant (3:1). `--color-accent-dark` (`#c62828`, déjà dans la palette) est
+  > à 5.62:1 en light mode mais seulement 3.47:1 en dark mode (fond quasi noir) — aucune valeur
+  > unique ne satisfait proprement les deux thèmes ; à trancher par un choix de palette (Léo)
+  > plutôt qu'un changement mécanique sur 10+ fichiers sans vérification visuelle possible ici.
+  > `--color-success`/`--color-warning` (`css/global.css`) sont définis mais ne sont utilisés
+  > nulle part ailleurs dans le CSS — code mort, sans impact a11y, à supprimer à l'occasion.
 - **PWA** : `sw.js` présent — vérifier la stratégie de cache des gros assets (ne pas pré-cacher 1,7 Go !).
 
 ---
