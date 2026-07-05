@@ -373,8 +373,10 @@ export const api = {
 
     /**
      * Marque toutes les demandes en attente comme vues.
+     * Slash final obligatoire : PATCH sans lui se fait dégrader en GET par la
+     * redirection 301 d'Apache sur /api/notifications (dossier) — cf. /friends/.
      */
-    markSeen: () => apiCall("/notifications", { method: "PATCH", body: "{}" }),
+    markSeen: () => apiCall("/notifications/", { method: "PATCH", body: "{}" }),
   },
 
   // ── Messages & Défis ──────────────────────────────────

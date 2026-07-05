@@ -352,6 +352,45 @@ front (`js/api.js`).
 
 ---
 
+## 2026-07-05 — ⚠️ fix(api): PATCH /notifications dégradé en GET + nettoyage stubs .php/dossier
+
+**Suite de l'investigation issue #10** : la review a précisé la cause exacte du bug
+`/api/friends` — `api/.htaccess` teste `-d` (dossier) **avant** `.php -f`, donc une
+requête sur une route-dossier sans slash final matche toujours le passe-plat "dossier
+existant" avant de pouvoir atteindre un éventuel stub `.php` du même nom. Elle a aussi
+révélé que **`api/friends.php` est un stub déjà présent dans le repo** (compat pour
+d'anciennes versions d'`api.js` mises en cache par le service worker), mais rendu
+inatteignable par cet ordre.
+
+**En vérifiant ce point, découverte d'un vrai bug produit, distinct** : `api/notifications.php`
+existe en doublon de `api/notifications/index.php`, avec une implémentation du `PATCH`
+divergente et obsolète (no-op, ne renseigne jamais `seen_at` — contrairement à la
+vraie version dans `notifications/index.php`). Or `js/api.js:377`
+(`markSeen: () => apiCall("/notifications", …)`) appelle cette route **sans slash
+final** — donc en production, ce `PATCH` subit la même dégradation silencieuse en `GET`
+que `/api/friends` : le badge rouge "demandes d'ami" de la bottom nav ne se marque
+vraisemblablement **jamais** comme vu.
+
+**Fix (3 changements, comportement produit réellement modifié — d'où le `⚠️`)** :
+1. `js/api.js` — slash final ajouté sur `markSeen()` (`/notifications/`), même
+   convention que `/friends/` et `/messages/`. C'est le fix qui règle réellement le bug
+   du badge.
+2. `api/notifications.php` **supprimé** — stub mort (de toute façon inatteignable côté
+   serveur, `-d` gagnant toujours), et surtout divergent/incorrect par rapport à
+   `notifications/index.php`, qui reste la seule implémentation.
+3. `api/.htaccess` — réordonné : test `.php -f` avant `-f OR -d`, pour que
+   `api/friends.php` (stub légitime, conservé) redevienne atteignable comme prévu par
+   son propre commentaire, sans changer le routage d'aucune autre route (vérifié :
+   seules `friends.php`/`friends/` et l'ex-`notifications.php`/`notifications/`
+   avaient une collision fichier/dossier dans `api/`).
+
+Non revérifié par un run E2E réel (Docker indisponible dans ce sandbox) — le
+raisonnement s'appuie sur une relecture attentive de `api/.htaccess` et de chaque
+route concernée, plus la confirmation apportée par la review sur le run CI réel qui a
+révélé le problème initial.
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →
