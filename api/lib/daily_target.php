@@ -42,16 +42,14 @@ function personadle_fnv1a_index(string $seedId, string $date, string $mode, int 
     return $h % $poolLen;
 }
 
-/**
- * @var array|null Mémoïsation par process PHP-FPM (pas un cache inter-requêtes :
- * chaque requête HTTP démarre avec $GLOBALS réinitialisé). Aujourd'hui
- * `personadle_compute_daily_target()` n'est appelée qu'une fois par requête
- * (api/sessions.php), donc ça ne produit aucun hit dans le call-graph actuel —
- * ça protège seulement un futur 2ᵉ call-site dans la même requête d'un 2ᵉ
- * parsing JSON. Revue PR #13 : les 6 modes sont chargés d'un coup (~40 Ko)
- * même si un seul mode est nécessaire par requête — accepté pour l'instant vu
- * la taille modeste du fichier, à revisiter si le roster grossit beaucoup.
- */
+// Mémoïsation par process PHP-FPM (pas un cache inter-requêtes : chaque requête
+// HTTP démarre avec $GLOBALS réinitialisé). Aujourd'hui
+// `personadle_compute_daily_target()` n'est appelée qu'une fois par requête
+// (api/sessions.php), donc ça ne produit aucun hit dans le call-graph actuel —
+// ça protège seulement un futur 2ᵉ call-site dans la même requête d'un 2ᵉ
+// parsing JSON. Revue PR #13 : les 6 modes sont chargés d'un coup (~40 Ko)
+// même si un seul mode est nécessaire par requête — accepté pour l'instant vu
+// la taille modeste du fichier, à revisiter si le roster grossit beaucoup.
 $GLOBALS['__personadle_daily_pools'] = null;
 
 function personadle_load_daily_pools(): array
