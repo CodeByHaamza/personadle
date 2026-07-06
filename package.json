@@ -11,6 +11,7 @@
     "i18n:check": "node scripts/check-i18n.js",
     "i18n:check-untranslated": "node scripts/check-i18n-untranslated.js",
     "data:check": "node scripts/validate_characters.js",
+    "ingest:check": "node scripts/validate_incoming.js incoming",
     "docs:check": "node scripts/check-doc-numbers.js",
     "docs:fix": "node scripts/check-doc-numbers.js --fix",
     "pools:check": "node scripts/export-daily-pools.js --check",

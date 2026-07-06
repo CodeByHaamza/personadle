@@ -32,6 +32,12 @@ jobs:
       - name: Validate character data
         run: npm run data:check
 
+      # Valide le nommage/l'extension de tout asset en attente dans incoming/<type>/ avant
+      # intégration (voir ROADMAP.md § "À venir — contenu conditionné à une sortie de jeu").
+      # No-op si le dossier n'existe pas (état normal sur une branche propre).
+      - name: Check pending asset ingestion (incoming/) convention
+        run: npm run ingest:check
+
       - name: Run unit tests + coverage thresholds (Vitest)
         run: npm run test:coverage
 

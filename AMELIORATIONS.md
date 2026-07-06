@@ -81,6 +81,11 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
 
 1. Ajouter **PHPUnit** + une base de test SQLite/MySQL jetable. Cibler en priorité : calcul de streak (`sessions.php`), `recover-streak.php`, rate-limiting, unicité register.
 2. Couvrir le **flux d'intégration streak complet** côté JS : jeu → `syncPending` → `pullProfileFromCloud` → rupture → `performRecovery`. Aujourd'hui chaque maillon est testé isolément, mais pas la chaîne (c'est exactement ce qui laissait passer le revert).
+   > ✅ **Résolu depuis** : `tests/streakFlow.integration.test.js` câble ensemble
+   > `performRecovery()` et `pullProfileFromCloud()` autour d'un faux backend en mémoire —
+   > couvre le cas "récup acceptée → pas de revert au pull suivant" et "récup refusée
+   > (cooldown) → aucune fausse restauration", exactement le scénario qui laissait passer
+   > le revert silencieux.
 3. ~~Mesurer la couverture et fixer un seuil minimal en CI~~ — fait, voir ci-dessus.
 4. **Nouveau (audit du 2026-07-04)** : la couverture au niveau des **endpoints API** reste faible
    (~7/38 fichiers `api/*.php` exercés par un test exécuté, E2E ou unitaire — le reste ne passe
@@ -110,7 +115,7 @@ Les AOA versionnés font **37 à 81 Mo pièce**. Un joueur sur mobile téléchar
 Le schéma de [characters_clean.js](database/characters_clean.js) est :
 `nom, genre[], age, arcane[], opus[], personaUser, persona, emoji[], quote`.
 
-**Ce que tu as écrit dans `new data/caractere/data.txt` (P5X) ne mappe pas encore au schéma :**
+**Ce que tu avais écrit dans `new data/caractere/data.txt` (P5X) ne mappait pas encore au schéma :**
 
 | Ton champ                        | Schéma                            | À faire                                                                             |
 | -------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
@@ -121,6 +126,14 @@ Le schéma de [characters_clean.js](database/characters_clean.js) est :
 
 **Typos relevés :** `fille humainre` → _humaine_. Format hétérogène entre les 3 fiches (l'une numérote l'âge, l'autre non).
 
+> ✅ **Résolu depuis** : les 3 fiches sont intégrées dans `characters_clean.js` avec le
+> schéma conforme — `Aran Hirano` (Anri, persona Gentileschi), `Narumi Nashimoto` (Pinky,
+> persona Asterope), `Kumi Katayama` (Blitz, persona Kiskil-lilla) — `genre[]`, `age` en
+> tranche canonique (`"15-20"`/`"21-40"`), `arcane`/`opus`/`quote` tous renseignés. Champ
+> `codeName` retiré (pas exploité par les modes) plutôt qu'ajouté au schéma — décision
+> tranchée. `npm run data:check` (`scripts/validate_characters.js`) confirme les 177
+> personnages actuels conformes, ces 3 inclus.
+
 ### 4.2 Vérification lore (à confirmer par toi / Léo / Dzulian)
 
 Les personas cités — **Gentileschi** (Aran/Anri), **Asterope** (Narumi/Pinky), **Kiskil-lilla** (Kumi/Blitz) — méritent une vérif contre une source canonique P5X avant intégration : Asterope (Pléiade grecque) et Kiskil-lilla (mythologie sumérienne/Lilith) collent à la convention de nommage ; **Gentileschi** (peintre baroque) détonne — à double-checker. Je n'ai pas pu vérifier ces faits, à valider côté data.
@@ -129,6 +142,14 @@ Les personas cités — **Gentileschi** (Aran/Anri), **Asterope** (Narumi/Pinky)
 
 - Ajouter un **script de validation des données** (`scripts/validate-characters.js`) lancé en CI : vérifie que chaque perso a tous les champs requis, que `opus` ∈ liste connue, que chaque `nom` a un portrait dans [portraitsMap.js](database/portraitsMap.js) et un fichier image existant, que les emoji sont non vides, etc.
 - Vérifier les **doublons** de `nom` et la cohérence `personaUser ⇒ persona` non vide.
+
+> ✅ **Résolu depuis** : `scripts/validate_characters.js` (`npm run data:check`, câblé dans
+> `.github/workflows/ci.yml`) couvre tout ce qui précède — champs requis (`nom`/`age`
+> string, `genre`/`arcane`/`opus`/`emoji` tableaux non vides), `age` dans les tranches
+> canoniques, `opus` ∈ `VALID_OPUS`, `arcane` ∈ `VALID_ARCANA` (warning si non canonique),
+> portrait présent dans `portraitsMap` **et** sur disque, doublons de `nom`, cohérence
+> `personaUser ⇒ persona` non vide, emoji dupliqués (warning). `npm run data:check` passe
+> aujourd'hui sans erreur sur les 177 personnages.
 
 ---
 
@@ -168,7 +189,12 @@ Le vocabulaire des modes diverge selon les couches :
   > `sw.js` (précache), `sitemap.xml`, `api/auth/request-reset.php` (lien email), et
   > `js/bottomNav.js` (détection de profondeur de chemin pour la nav du bas).
 - **Convention de nommage de fichiers** : CLAUDE.md impose `snake_case`, mais le repo mélange `streak-recovery.js` (kebab), `gameCore.js` (camel), `characters_clean.js` (snake). Soit aligner, soit assouplir la règle dans CLAUDE.md pour refléter la réalité.
-- **`new data/`** : dossier de travail non structuré (espaces, casse hétérogène, jpeg/webp/mp4 mêlés). Définir une convention d'ingestion : `incoming/<type>/<persona-snake_case>.<ext>` + un script qui valide/renomme/optimise avant de pousser en base.
+- ~~**`new data/`** : dossier de travail non structuré (espaces, casse hétérogène, jpeg/webp/mp4 mêlés). Définir une convention d'ingestion : `incoming/<type>/<persona-snake_case>.<ext>` + un script qui valide/renomme/optimise avant de pousser en base.~~
+  > ✅ **Résolu depuis** : le dossier `new data/` n'existe plus (contenu P5X intégré dans
+  > `characters_clean.js`, voir §4.1). La convention d'ingestion demandée existe désormais
+  > dans `ROADMAP.md` § "À venir — contenu conditionné à une sortie de jeu" : checklist
+  > numérotée des fichiers à toucher pour un nouveau personnage/jeu, plus `npm run
+  > data:check` (§4.3) qui valide le résultat avant de le considérer prêt.
 - **Nouveau (audit du 2026-07-04)** : deux « god files » à scinder en sous-modules ES6
   (déjà chargés en `type="module"`, donc techniquement scindable sans casser l'ordre de
   chargement) : `admin/admin.js` (1847 lignes, 39 fonctions) et `profile/profile-page.js`
@@ -282,7 +308,10 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 
 1. 🔴 **Git LFS + purge d'historique** (#1) — assets restent en local (philosophie du projet), débloque juste le poids du `.git`.
 2. 🔴 **Réencoder les AOA** (#2) — gros gain perf immédiat pour les joueurs.
-3. 🟠 **Tests PHP + flux streak intégré** (#3).
-4. 🟠 **Mapping de modes unifié** (#5) + **validation de données en CI** (#4.3).
-5. 🟠 **Nettoyer/intégrer `new data/`** proprement (#4.1, #6).
-6. 🟡 Le reste (sécu, CI, i18n, a11y) au fil de l'eau.
+3. ~~🟠 **Tests PHP + flux streak intégré** (#3).~~ ✅ _fait — voir §3._
+4. ~~🟠 **Mapping de modes unifié** (#5) + **validation de données en CI** (#4.3).~~ ✅ _fait —
+   voir §5/§4.3 (un choix de design reste ouvert sur les libellés courts, pas un bug)._
+5. ~~🟠 **Nettoyer/intégrer `new data/`** proprement (#4.1, #6).~~ ✅ _fait — voir §4.1/§6._
+6. 🟡 Le reste (sécu, CI, i18n, a11y) au fil de l'eau — seuls points encore ouverts :
+   contrastes `--color-accent` (§9, décision de design Léo), stratégie Git LFS (#1) et
+   réencodage AOA (#2), toujours en 🔴.

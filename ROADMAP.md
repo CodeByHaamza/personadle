@@ -13,11 +13,24 @@
 
 ---
 
+## 🗄️ Migrations SQL à appliquer sur Hostinger (prod)
+
+> `sql/bdd_mysql.sql` est la source de vérité pour Docker/local, mais **rien ne l'applique
+> automatiquement sur Hostinger** — chaque migration doit être poussée à la main en prod
+> (SSH + `mysql --delimiter='$$' < fichier.sql` si procédure stockée, sinon import normal,
+> voir CLAUDE.md §7/§10). Cette liste évite d'en oublier une entre deux déploiements ;
+> cocher une fois réellement appliquée en prod, pas juste mergée sur `develop`.
+
+- [ ] `sql/migrations/022_fix_aigis_title_condition.sql` — corrige le titre
+  `aigis_i_am_not_afraid`, qui ne pouvait jamais se débloquer en prod (`condition_mode`
+  jamais seedé pour aucun titre). PR #14.
+
+---
+
 ## 🎯 Prochaines étapes
 
 ### 🔴 À prévoir assez tôt
 
-- [ ] **Pipeline de contenu** (P4 Revival, P6, Metaphor, SMT) — voir détail juste en dessous.
 - [x] **Conditions badges/wallpapers en colonnes structurées** — ✅ _livré (migration
   `sql/migrations/021_structured_badge_wallpaper_conditions.sql` + `bdd_mysql.sql` mis
   à jour). `badges`/`wallpapers` ont maintenant les mêmes colonnes structurées que
@@ -41,39 +54,50 @@
 - [ ] **Stratégie assets AOA** (~1,8 Go dans git) — Git LFS **ou** CDN-only + fetch au 1er lancement.
   _(Script `scripts/purge_git_history.sh` prêt pour récupérer l'historique.)_
 
-#### 🎮 Détail — Pipeline de contenu par sortie de jeu
+## 📆 À venir — contenu conditionné à une sortie de jeu
+
+> ⚠️ **Ce n'est pas une liste de tâches à faire maintenant.** Rien à faire tant qu'aucun des
+> jeux ci-dessous n'a de date/contenu officiel confirmé — c'est la procédure de référence
+> pour **le jour où** ça arrive (nouveau perso ajouté, ou remaster d'un jeu déjà supporté),
+> pour ne pas avoir à la refaire de mémoire à ce moment-là. Aucune de ces étapes ne bloque
+> la release 2.0 actuelle.
 
 Deux cas différents, qui touchent des fichiers différents :
 
 **A. Nouveau jeu de la licence (roster inédit)** — ex. Persona 6, Metaphor: ReFantazio, SMT.
-Ajouter un personnage = toucher, dans cet ordre :
+Le jour où un personnage doit être ajouté, toucher dans cet ordre :
 
-- [ ] `database/characters_clean.js` — fiche perso (nom, genre, âge, persona, arcane, opus…)
-- [ ] `database/personas.js` — ajouter le nom à la liste d'autocomplétion (Classic)
-- [ ] `database/quotes.js` — citation(s) du perso
-- [ ] `database/portraits/*.webp` + `database/portraitsMap.js` — portrait + mapping nom→fichier
-- [ ] `allOutAttackMode/database/aoaCharacters.js` + `personas_allOut.js` + `portraitsMap.js` + GIFs — équivalent AOA
-- [ ] `silhouetteMode/database/`, `personaeMode/database/`, `musicsMode/database/` — mêmes ajouts côté silhouette/personae/musique si le perso a un thème musical propre
-- [ ] `emojiMode` — séquence d'emojis pour le nouveau perso
-- [ ] `profile/avatars_data.js` + `img/avatar/` — nouveaux avatars de profil (PDP) groupés par jeu
-- [ ] `musicsMode/database/songs.js` + `musicTitles.js` + fichiers audio — OST du nouveau jeu
-- [ ] **Filtres opus** — ajouter le nouveau code opus (ex. `"P6"`) au tableau `ALL_OPUS` de **chaque** mode (`classiqueMode`, `emojiMode`, `silhouetteMode`, `personaeMode`, `musicsMode`, `allOutAttackMode`) pour qu'il apparaisse dans le panneau de filtres
-- [ ] `npm run data:check` (`scripts/validate_characters.js`) — doit passer sans erreur sur le nouveau roster
+1. `database/characters_clean.js` — fiche perso (nom, genre, âge, persona, arcane, opus…)
+2. Déposer les assets bruts (portrait, GIFs AOA, musique) dans `incoming/<type>/<persona-snake_case>.<ext>`
+   (`type` ∈ `portrait`/`aoa`/`music`/`misc`) puis `npm run ingest:check`
+   (`scripts/validate_incoming.js`) — valide le nommage snake_case et l'extension avant
+   d'intégrer quoi que ce soit dans `database/`/`<mode>/database/`. Le script valide
+   uniquement (pas de renommage/optimisation automatique) — à faire à la main avant dépôt.
+3. `database/personas.js` — ajouter le nom à la liste d'autocomplétion (Classic)
+4. `database/quotes.js` — citation(s) du perso
+5. `database/portraits/*.webp` + `database/portraitsMap.js` — portrait + mapping nom→fichier
+6. `allOutAttackMode/database/aoaCharacters.js` + `personas_allOut.js` + `portraitsMap.js` + GIFs — équivalent AOA
+7. `silhouetteMode/database/`, `personaeMode/database/`, `musicsMode/database/` — mêmes ajouts côté silhouette/personae/musique si le perso a un thème musical propre
+8. `emojiMode` — séquence d'emojis pour le nouveau perso
+9. `profile/avatars_data.js` + `img/avatar/` — nouveaux avatars de profil (PDP) groupés par jeu
+10. `musicsMode/database/songs.js` + `musicTitles.js` + fichiers audio — OST du nouveau jeu
+11. **Filtres opus** — ajouter le nouveau code opus (ex. `"P6"`) au tableau `ALL_OPUS` de **chaque** mode (`classiqueMode`, `emojiMode`, `silhouetteMode`, `personaeMode`, `musicsMode`, `allOutAttackMode`) pour qu'il apparaisse dans le panneau de filtres
+12. `npm run data:check` (`scripts/validate_characters.js`) — doit passer sans erreur sur le nouveau roster
 
 **B. Remaster/Revival d'un jeu déjà supporté (assets seulement)** — ex. Persona 4 Revival
 (remplace P4/P4G comme Persona 3 Reload a remplacé les artworks P3 d'origine).
 
-- [ ] Remplacer les portraits (`database/portraits/*.webp`) par le nouvel artwork officiel
-- [ ] Remplacer les GIFs AOA correspondants si Atlus republie des animations
-- [ ] Vérifier si le nouvel opus doit être **distinct** dans les filtres (`P4R` séparé de `P4`/`P4G`)
-      ou **fusionné** (même roster, juste un artwork mis à jour) — décision à prendre au cas par cas
-- [ ] Pas de changement sur `personas.js`/`quotes.js` si les personnages restent les mêmes
+1. Mêmes assets bruts déposés dans `incoming/<type>/...` + `npm run ingest:check` avant remplacement (voir cas A, étape 2)
+2. Remplacer les portraits (`database/portraits/*.webp`) par le nouvel artwork officiel
+3. Remplacer les GIFs AOA correspondants si Atlus republie des animations
+4. Vérifier si le nouvel opus doit être **distinct** dans les filtres (`P4R` séparé de `P4`/`P4G`)
+   ou **fusionné** (même roster, juste un artwork mis à jour) — décision à prendre au cas par cas
+5. Pas de changement sur `personas.js`/`quotes.js` si les personnages restent les mêmes
 
-→ Formaliser ça en **checklist réutilisable** (voire un script `scripts/add_character.js` qui
-scaffolde les entrées dans tous les fichiers concernés) plutôt que de le refaire de mémoire
-à chaque sortie.
+→ Le jour où ça devient récurrent, envisager un script `scripts/add_character.js` qui
+scaffolde les entrées dans tous les fichiers concernés plutôt que de suivre cette liste à la main.
 
-**Jeux à surveiller** (photo dès qu'une date/du contenu officiel est confirmé) :
+**Jeux à surveiller** (aucune action tant que rien n'est officiellement annoncé) :
 
 <table>
 <tr>
@@ -176,7 +200,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **475 tests JS · 168 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **481 tests JS · 168 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -232,7 +256,7 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 475 Vitest · 168 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q1  | Tests : 481 Vitest · 168 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
 | Q2  | i18n EN/FR/ES/DE/IT (949 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |

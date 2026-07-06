@@ -105,6 +105,13 @@ PersonaDLE_Update_Documentation/
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/TEST_PLAN_DEV.md
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Dossier de staging local pour les assets en attente d'ingestion (voir
+# scripts/validate_incoming.js + ROADMAP.md § "À venir — contenu conditionné
+# à une sortie de jeu"). Jamais commité — vidé une fois les assets intégrés.
+# ─────────────────────────────────────────────────────────────────────────────
+incoming/
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Graphify — graphe de connaissance généré automatiquement
 # Régénéré via `graphify claude install` + `/graphify` — inutile de versionner.
 # ─────────────────────────────────────────────────────────────────────────────
