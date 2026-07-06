@@ -18,9 +18,23 @@
 ### 🔴 À prévoir assez tôt
 
 - [ ] **Pipeline de contenu** (P4 Revival, P6, Metaphor, SMT) — voir détail juste en dessous.
-- [ ] **Conditions badges/wallpapers en colonnes structurées**
-  Aujourd'hui texte libre → validation serveur par mapping slug→logique (fragile).
-  → Migration `condition_type` / `condition_value` = anti-triche **générique**.
+- [x] **Conditions badges/wallpapers en colonnes structurées** — ✅ _livré (migration
+  `sql/migrations/021_structured_badge_wallpaper_conditions.sql` + `bdd_mysql.sql` mis
+  à jour). `badges`/`wallpapers` ont maintenant les mêmes colonnes structurées que
+  `titles` (`condition_type`/`condition_mode`/`condition_value`), vérifiées par
+  `api/lib/condition_check.php` — extrait de l'ancien `verifyTitleCondition()`
+  (`api/titles/index.php`), **une seule** fonction générique désormais partagée par
+  les 3 tables au lieu de 3 mappings slug→logique divergents (`api/badges/index.php`,
+  `api/wallpapers/index.php` réécrits pour l'utiliser). 15/60 badges et 5/7 wallpapers
+  ont une condition réellement structurable (le reste : flags narratifs multi-persos,
+  redeem de code événement, ou vérifié par un autre endpoint — `condition_type='manual'`,
+  documenté explicitement plutôt que laissé `NULL` en silence). Corrige au passage 2
+  badges (`velvet_regular` 50 jours uniques, `best_bro` 2+ amis) qui étaient
+  structurellement calculables mais bypassés par erreur de mapping (toujours `true`).
+  3 nouveaux `condition_type` ajoutés au vocabulaire (`mode_games`, `games_total`,
+  `social_link_min_rank`). `tests/php/ConditionCheckTest.php` (19 tests, même pattern
+  que `DatabaseIntegrationTest.php`) — non exécuté en sandbox (pas de Docker/MariaDB),
+  à confirmer via la CI._
 - [ ] **Stratégie assets AOA** (~1,8 Go dans git) — Git LFS **ou** CDN-only + fetch au 1er lancement.
   _(Script `scripts/purge_git_history.sh` prêt pour récupérer l'historique.)_
 
@@ -80,10 +94,10 @@ Nouveau jeu — cas A (roster inédit)
 ### 🟠 Qualité / robustesse
 
 - [x] **Responsive + a11y** des nouvelles modales (avatar, musique, couleurs) — ✅ _livré (`js/modal.js`, focus trap + Escape + restauration du focus, réutilisé par avatarCropModal/sharePreviewModal/songModal/titlesModal). Vérifié en Playwright/Chromium (Tab/Shift+Tab cantonné, crop modal OK en viewport mobile 375px)._
-- [ ] **Couverture PHP** : tests d'intégration par endpoint critique (`sessions`, `social-links/interact`, `recover-streak`) — 🚧 _code écrit (logique extraite dans `api/lib/game_session.php`/`streak_recovery.php`/`social_link_interaction.php`, endpoints réduits à de fins wrappers, tests ajoutés à `tests/php/DatabaseIntegrationTest.php`), mais non exécuté en sandbox (pas de MariaDB/Docker, `phpunit.phar` bloqué par le proxy réseau). À confirmer via `make up && make test-php` ou la CI._
+- [x] **Couverture PHP** : tests d'intégration par endpoint critique (`sessions`, `social-links/interact`, `recover-streak`) — ✅ _livré (logique extraite dans `api/lib/game_session.php`/`streak_recovery.php`/`social_link_interaction.php`, endpoints réduits à de fins wrappers, tests dans `tests/php/DatabaseIntegrationTest.php`). Écrit dans un sandbox sans MariaDB/Docker, donc jamais exécuté par la session qui l'a écrit — mais **confirmé vert depuis par la vraie CI** (job "PHP Lint & Tests" → "Run PHPUnit (logic + DB integration)", run [28751031317](https://github.com/HamzaKarrouchi/personadle/actions/runs/28751031317), contre une vraie MariaDB)._
 - [x] **Check i18n « valeur == EN »** — ✅ _livré (`scripts/check-i18n-untranslated.js`, `npm run i18n:check-untranslated`, avertissement pre-commit sur `lang/*.json` staged). Premier passage : 0 vraie traduction manquante, uniquement des correspondances attendues (noms, opus, lore, placeholders — voir §5 de CLAUDE.md)._
 - [x] **Observabilité prod** — ✅ _livré, option self-hosted choisie (pas de dépendance externe) : table `error_log` (migration 019) + `personadle_log_error()` (`api/lib/error_log.php`) + panel admin "🪵 Logs" (recherche, filtre par niveau, pagination). Câblé dans les 3 endpoints critiques traités ci-dessus (sessions, recover-streak, social-links interact) ; le reste des `error_log()` existants dans le codebase n'a volontairement pas été balayé (portée bien plus large, décision distincte). Pas de handler d'exception global ajouté à bootstrap.php — changerait le comportement de TOUTE l'API sans pouvoir être vérifié en sandbox, jugé trop risqué pour ce lot._
-- [ ] **Panel admin — contrôle étendu** (audit trail, RGPD, rate limits) — 🚧 _code écrit, non exécuté en sandbox (même limitation que la couverture PHP ci-dessus). Livré : table `admin_audit_log` (migration 020) + `personadle_log_admin_action()` câblé sur toutes les mutations admin (ban/unban, grant/revoke admin, badges/titres/wallpapers, event codes, social links, hard delete) + panel "📋 Audit" ; visibilité + déclenchement manuel anticipé des `deletion_requests` RGPD (logique extraite de `api/cron/hard-delete.php` vers `api/lib/deletion_requests.php`, réutilisée par le cron et l'admin) + panel "🗑️ RGPD" ; visibilité + purge manuelle des `rate_limits` + panel "⏱️ Rate Limits". Vérifié en Playwright (3 panels, exclusivité mutuelle, 0 erreur page) + `php -l` sur tous les fichiers touchés. Tests PHPUnit ajoutés (`DatabaseIntegrationTest.php`) mais non exécutés — à confirmer via `make up && make test-php`. News in-game (actuellement HTML statique sans BDD) volontairement laissée hors scope — portée trop différente pour ce lot._
+- [x] **Panel admin — contrôle étendu** (audit trail, RGPD, rate limits) — ✅ _livré : table `admin_audit_log` (migration 020) + `personadle_log_admin_action()` câblé sur toutes les mutations admin (ban/unban, grant/revoke admin, badges/titres/wallpapers, event codes, social links, hard delete) + panel "📋 Audit" ; visibilité + déclenchement manuel anticipé des `deletion_requests` RGPD (logique extraite de `api/cron/hard-delete.php` vers `api/lib/deletion_requests.php`, réutilisée par le cron et l'admin) + panel "🗑️ RGPD" ; visibilité + purge manuelle des `rate_limits` + panel "⏱️ Rate Limits". **Confirmé vert par la vraie CI** : `tests-e2e/admin.spec.js` (users/audit_log/rate_limits) + `tests-e2e/admin-extended.spec.js` (event_codes/error_logs/deletion_requests/social_links/dons utilisateur, 24 tests, PR #13) tous exécutés avec succès contre un vrai stack Docker (job "E2E Playwright", run [28751031317](https://github.com/HamzaKarrouchi/personadle/actions/runs/28751031317)). News in-game (actuellement HTML statique sans BDD) volontairement laissée hors scope — portée trop différente pour ce lot._
 - [x] **Dédupliquer l'autocomplete et le dark-mode inline entre les 6 modes** — ✅ _déjà résolu pour
   la partie réellement dupliquée : `js/autocomplete.js` extrait `closeAutocompleteList()`,
   `closeAllAutocompleteLists()` et `removeFromAutocomplete()` (identiques à 100% dans les 6 modes),
@@ -159,7 +173,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **475 tests JS · 139 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **475 tests JS · 158 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -215,7 +229,7 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 475 Vitest · 139 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q1  | Tests : 475 Vitest · 158 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
 | Q2  | i18n EN/FR/ES/DE/IT (949 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |

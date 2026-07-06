@@ -528,6 +528,49 @@ PHPUnit) — à confirmer via la CI réelle.
 
 ---
 
+## 2026-07-06 — Conditions badges/wallpapers en colonnes structurées
+
+Suite du menu ROADMAP.md : `badges`/`wallpapers` n'avaient qu'un texte libre d'affichage
+(`condition_en`/`unlock_condition`), la vérification serveur passant par un mapping
+slug→logique en dur dans `api/badges/index.php`/`api/wallpapers/index.php` — fragile
+(un nouveau badge ajouté sans mise à jour du switch passait toujours en "safe fallback
+= true"). `titles` avait déjà résolu ce problème avec des colonnes structurées
+(`condition_type`/`condition_mode`/`condition_value`) — ce lot applique le même schéma
+aux deux autres tables.
+
+- **`api/lib/condition_check.php`** (nouveau) — `personadle_verify_condition()` extrait
+  de l'ancien `verifyTitleCondition()` (`api/titles/index.php`), généralisé et partagé
+  par les 3 tables au lieu de 3 mappings divergents. 3 nouveaux `condition_type` :
+  `mode_games` (parties jouées, pas victoires — ex. wallpaper `rise_dungeons`),
+  `games_total` (parties tous modes), `social_link_min_rank` (généralise
+  `social_link_rank_10` avec un seuil au lieu d'un rang exact).
+- **`sql/migrations/021_structured_badge_wallpaper_conditions.sql`** + `bdd_mysql.sql`
+  mis à jour directement (schéma + seed) : `ALTER TABLE` badges/wallpapers, backfill de
+  toutes les valeurs existantes. 15/60 badges et 5/7 wallpapers ont une condition
+  réellement structurable ; le reste (flags narratifs multi-persos, redeem de code
+  événement, vérifié par un autre endpoint comme social-links/streak-recovery) reçoit
+  `condition_type = 'manual'` — documente explicitement le choix au lieu de laisser
+  `NULL` en silence.
+- **Corrige au passage 2 vrais bugs de mapping**, découverts en cartographiant chaque
+  badge vers son condition_type réel : `velvet_regular` ("jouer 50 jours uniques") et
+  `best_bro` ("avoir 2+ amis") étaient dans la liste des badges "impossible à
+  structurer, toujours autorisé" alors qu'ils sont structurellement identiques à
+  `unique_days`/`friends_count`, déjà utilisés par `titles`. Ces deux badges sont
+  maintenant réellement vérifiés côté serveur.
+- `api/badges/index.php`/`api/wallpapers/index.php` réécrits pour lire les 3 colonnes
+  et appeler la fonction partagée — les anciennes fonctions `verifyBadgeCondition()`
+  (avec sa liste de bypass slug par slug) et `verifyWallpaperCondition()` supprimées.
+- `tests/php/ConditionCheckTest.php` (19 tests, même pattern `DatabaseIntegrationTest.php`
+  — vraie MariaDB, transaction annulée en tearDown) couvre chaque `condition_type`.
+
+Non exécuté en sandbox (pas de Docker/MariaDB) — vérifié par relecture attentive +
+comparaison structurelle avec `verifyTitleCondition()` (déjà tournée en CI réelle avant
+cette PR) + un script Python de validation structurelle des lignes SQL modifiées
+(nombre de champs par ligne INSERT = nombre de colonnes déclarées, sur les 60 lignes
+badges et 7 lignes wallpapers). À confirmer via la CI (`make test-php`).
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →

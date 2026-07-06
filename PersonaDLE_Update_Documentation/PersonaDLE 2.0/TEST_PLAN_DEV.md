@@ -17,9 +17,9 @@
 > aux commandes**, ni contre une vraie base MariaDB. La section 2 ci-dessous liste tout ça en
 > priorité.
 >
-> **Mis à jour le 2026-07-05 (2ᵉ passe)** pour couvrir la PR #12 (mergée) et la PR #13
-> (`claude/review-develop-pr-e6s0g9`, ouverte, pas encore mergée à l'heure où j'écris ceci) —
-> voir §0.1bis et la nouvelle §2.12-2.15.
+> **Mis à jour le 2026-07-06 (3ᵉ passe)** pour couvrir la PR #13 (mergée depuis) et le nouveau
+> lot en cours (`claude/roadmap-followups-*`, pas encore en PR à l'heure où j'écris ceci :
+> conditions badges/wallpapers structurées) — voir §0.1bis et la nouvelle §2.16.
 
 ---
 
@@ -46,9 +46,10 @@ Chiffres à l'époque (post-merge PR #11) : **473 tests Vitest** (24 suites) · 
 | Lot | Statut | Contenu |
 |---|---|---|
 | **PR #12** | ✅ Mergée | Fix du sous-comptage E2E évoqué en §0.2 ci-dessous (`countE2E()` passe de regex à `npx playwright test --list`) + fix d'un 2ᵉ bug trouvé en testant le 1ᵉʳ (corruption par sous-chaîne dans `check-doc-numbers.js --fix`, ex: "25 E2E"→"30 E2E" corrompait "125 PHPUnit"→"130 PHPUnit" ; remplacement positionnel par indices de regex maintenant). CI confirmée verte, y compris `docs:check` en environnement CI réel. |
-| **PR #13** | 🔎 Ouverte, à review | Anti-triche daily target (phase 1, détection), split de `admin/admin.js` en 8 modules, couverture E2E des 9 endpoints admin qui n'avaient aucun test, fix a11y `prefers-reduced-motion` sur 2 boucles canvas JS. Détail complet en §2.12-2.15 ci-dessous. |
+| **PR #13** | ✅ Mergée | Anti-triche daily target (phase 1, détection), split de `admin/admin.js` en 8 modules, couverture E2E des 9 endpoints admin qui n'avaient aucun test, fix a11y `prefers-reduced-motion` sur 2 boucles canvas JS. Confirmé vert par la vraie CI (PHPUnit + E2E Docker, voir §2.12-2.13 ci-dessous). Suivi de review : 6 points traités (bug `escHtml` falsy-zero, dédup pagination/loading admin, cross-check hash étendu à 6/6 modes, `prefersReducedMotion()` extrait dans `gameCore.js`, CLAUDE.md §9 corrigé, limitation anti-triche AllOutAttack/Personae documentée). |
+| **Nouveau lot** | 🔎 En cours (`claude/roadmap-followups-*`) | Conditions badges/wallpapers en colonnes structurées (`condition_type`/`condition_mode`/`condition_value`, comme `titles`) — détail en §2.16 ci-dessous. |
 
-Chiffres actuels (avec PR #13, pas encore mergée) : **475 tests Vitest** (25 suites) · **139 méthodes PHPUnit** (9 fichiers, nouveau : `DailyTargetTest.php`) · **949 clés i18n** × 5 langues · **23 tables SQL** · **54 tests E2E** (6 fichiers, nouveau : `admin-extended.spec.js`, 24 tests).
+Chiffres actuels : **475 tests Vitest** (25 suites) · **158 méthodes PHPUnit** (10 fichiers, nouveau : `DailyTargetTest.php` + `ConditionCheckTest.php`) · **949 clés i18n** × 5 langues · **23 tables SQL** · **54 tests E2E** (6 fichiers, nouveau : `admin-extended.spec.js`, 24 tests).
 
 ### 0.2 Ce qui vient d'être re-vérifié à l'instant (clone frais de `develop`, sans Docker)
 
@@ -362,6 +363,35 @@ risqués à faire sans vérification navigateur, ou hors-scope) :
 - [ ] Panel admin → accorde un badge/titre/wallpaper à un utilisateur → l'animation "The Admin has
   spoken…" s'affiche sans les confettis dorés qui tombent
 - [ ] Redésactive `prefers-reduced-motion` → les deux animations retrouvent leur effet complet
+
+### 2.16 🆕 Conditions badges/wallpapers en colonnes structurées (2026-07-06)
+
+> `badges`/`wallpapers` ont maintenant les mêmes colonnes `condition_type`/`condition_mode`/
+> `condition_value` que `titles`, vérifiées par une fonction générique unique
+> (`api/lib/condition_check.php`) au lieu de 3 mappings slug→logique divergents. Corrige au
+> passage 2 badges (`velvet_regular`, `best_bro`) qui étaient bypassés par erreur. Jamais
+> exécuté contre une vraie base ici (pas de Docker/MariaDB) — `tests/php/ConditionCheckTest.php`
+> (19 tests) doit passer via `make test-php`, mais vaut aussi le coup de re-tester en vrai :
+
+- [ ] `make test-php` → `ConditionCheckTest` (19 tests) passe, en plus des suites existantes
+- [ ] Gagner 10 parties (tous modes confondus) → le badge **Ace Detective** se débloque
+  normalement (`wins_total >= 10`) — comportement inchangé, juste revérifie que le refactor
+  n'a rien cassé sur un cas déjà fonctionnel avant
+- [ ] Jouer sur **50 jours uniques** (ou modifier directement `game_sessions` en base pour
+  simuler) → le badge **Velvet Regular** se débloque désormais réellement (avant cette
+  migration, il était toujours accordé sans vérifier la condition)
+- [ ] Avoir **2 amis acceptés** → le badge **Best Bro** se débloque désormais réellement
+  (même remarque — avant, toujours accordé sans vérifier)
+- [ ] Wallpaper **Rise's Dungeons** (30 parties en mode Music, peu importe le résultat) :
+  jouer 30 parties Music en perdant volontairement (Give Up) → le wallpaper se débloque
+  quand même (vérifie que `mode_games` compte bien les *parties*, pas les *victoires*)
+- [ ] Wallpaper **Dark Shopping District** (Social Link rang ≥ 5) : atteindre le rang 5 avec
+  un ami → le wallpaper se débloque (`social_link_min_rank`, nouveau condition_type)
+- [ ] Panel admin → onglet Badges/Wallpapers d'un utilisateur : l'affichage (nom, rareté,
+  image) fonctionne comme avant — les nouvelles colonnes ne sont pas encore exploitées côté
+  admin UI, seulement côté vérification serveur
+- [ ] `GET /api/badges` et `GET /api/wallpapers` (DevTools → Network) renvoient bien les
+  champs `condition_type`/`condition_mode`/`condition_value` en plus des champs existants
 
 ---
 
