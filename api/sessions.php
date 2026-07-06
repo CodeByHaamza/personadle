@@ -14,6 +14,7 @@
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/lib/streak.php';
 require_once __DIR__ . '/lib/game_session.php';
+require_once __DIR__ . '/lib/daily_target.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);
@@ -66,6 +67,26 @@ if (!is_array($filters)) {
 }
 
 $pdo = pdo();
+
+// ── Anti-triche (phase 1 : détection uniquement) ─────────────────────────────
+// Recalcule la cible quotidienne attendue côté serveur (même algorithme seedé
+// que js/gameCore.js::getDailyTarget(), voir api/lib/daily_target.php) et logue
+// un écart au lieu de le rejeter, le temps de vérifier en prod qu'il n'y a pas
+// de faux positifs (mêmes 10 exécutions vertes avant de bloquer que le job E2E
+// CI, cf. tests-e2e/README.md). getPlayerSeedId() (js/gameCore.js) utilise
+// String(user.id) comme seed pour un compte connecté — identique à (string) $userId.
+$expectedTarget = personadle_compute_daily_target($mode, $playedDate, (string) $userId, $filters);
+if ($expectedTarget !== null && strcasecmp($expectedTarget, $targetName) !== 0) {
+    personadle_log_error($pdo, 'warning', 'Daily target mismatch', [
+        'source'   => 'anti_cheat',
+        'mode'     => $mode,
+        'date'     => $playedDate,
+        'result'   => $result,
+        'expected' => $expectedTarget,
+        'received' => $targetName,
+        'filters'  => $filters,
+    ], $userId);
+}
 
 // ── Anti-doublon : une seule session par (user, mode, date) ──────────────────
 // La contrainte UNIQUE uq_session_per_day en BDD garantit l'unicité même en

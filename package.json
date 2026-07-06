@@ -13,6 +13,8 @@
     "data:check": "node scripts/validate_characters.js",
     "docs:check": "node scripts/check-doc-numbers.js",
     "docs:fix": "node scripts/check-doc-numbers.js --fix",
+    "pools:check": "node scripts/export-daily-pools.js --check",
+    "pools:build": "node scripts/export-daily-pools.js",
     "lint": "eslint \"**/*.js\" --ignore-pattern node_modules",
     "setup-hooks": "git config core.hooksPath .githooks && echo 'Git hooks activated (.githooks/)'",
     "format": "prettier --write \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",

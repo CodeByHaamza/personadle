@@ -391,6 +391,143 @@ révélé le problème initial.
 
 ---
 
+## 2026-07-05 — Anti-triche daily target (phase 1), god files, couverture E2E admin, a11y
+
+Suite du menu d'améliorations issu de la revue de projet du 2026-07-04/05 (`AMELIORATIONS.md`,
+`ROADMAP.md`). Un point du menu (durcissement des conditions de badges "à flags") a été
+explicitement laissé de côté à la demande du dev.
+
+### ⚠️ Anti-triche `api/sessions.php` — phase 1 (détection, pas de rejet)
+
+L'investigation a révélé que le point ROADMAP était mal cadré : **aucune table
+`daily_targets` n'existe** en BDD (ni schéma ni migrations), contrairement à ce
+qu'affirmaient ROADMAP.md et ce fichier. Chacun des 6 modes calcule sa cible via un
+algorithme seedé différent (`getDailyTarget()` dans `js/gameCore.js`, hash FNV-1a
+32 bits sur `seedId|date|mode` modulo la taille du pool), avec en plus un repli
+conditionnel sur le filtre opus actif pour AllOutAttack et Personae — donc pas une
+simple lecture de table à ajouter.
+
+- `scripts/export-daily-pools.js` — exporte les pools JS (source de vérité :
+  `characters_clean.js`, `silhouetteCharacters.js`, `songs.js`, `personas_allOut.js`
+  + `aoaCharacters.js`, `personaeCharacters.js`) vers `api/data/daily_pools.json`,
+  lisible par PHP. `npm run pools:check`/`pools:build`, câblé en CI et dans le hook
+  pre-commit (même pattern que `check-doc-numbers.js`).
+- `api/lib/daily_target.php` — porte l'algorithme FNV-1a et les deux replis
+  conditionnels (AllOutAttack, Personae) en PHP. Le hash n'opère que sur de l'ASCII
+  (seed numérique, date ISO, nom de mode ASCII), donc `ord()` par octet est
+  équivalent à `charCodeAt()` par unité UTF-16 côté JS — vérifié par comparaison
+  croisée directe des deux implémentations sous Node/PHP sur des dizaines de
+  combinaisons seed/date/mode/filtre, y compris les cas qui déclenchent réellement
+  le repli filtré.
+- `api/sessions.php` recalcule la cible attendue et logue un écart (`error_log`,
+  niveau `warning`, source `anti_cheat`) **sans rejeter la requête**. Décision
+  volontaire : impossible de garantir zéro faux positif sans testing en conditions
+  réelles de prod, et un rejet à tort bloquerait des victoires légitimes pour tous
+  les joueurs. Même logique que le critère "10 runs verts" avant de rendre le job
+  E2E bloquant (`tests-e2e/README.md`). Le rejet strict (phase 2) est documenté
+  dans ROADMAP.md comme prochaine étape, conditionnée à zéro anomalie observée.
+- **Prérequis découvert en cours de route** : `AllOutAttack`/`Personae`
+  n'envoyaient jamais leur filtre opus actif dans `active_filters` du body
+  `POST /api/sessions` (toujours `[]`, alors que Classic le faisait déjà) — rendant
+  la validation de leur repli filtré impossible côté serveur. Corrigé
+  (`allOutAttackMode/modeAllOutAttack.js`, `personaeMode/modePersonae.js`) pour
+  qu'ils envoient `activeOpusFilters`/`activeFilters` comme Classic.
+- `tests/php/DailyTargetTest.php` — couvre le hash, les 6 modes, et les deux
+  replis filtrés sur des cas dont le déclenchement réel a été vérifié manuellement.
+
+### refactor(admin): `admin/admin.js` scindé en 8 modules ES6
+
+1850 → ~1155 lignes. Comportement strictement inchangé (déplacement mécanique).
+5 panneaux totalement autonomes (état/DOM propres, zéro couplage avec l'utilisateur
+sélectionné) extraits dans leur propre fichier : `event-codes.js`, `error-logs.js`,
+`audit-log.js`, `deletion-requests.js`, `rate-limits.js`. Utilitaires partagés dans
+`admin-api.js` (client REST + toast + escHtml + getTypeLabel) et `catalogs.js`
+(chargement badges/wallpapers/titres). La liste utilisateurs + les 7 onglets de
+détail utilisateur restent dans `admin.js` : état fortement couplé
+(`_selectedUser`/`_userDetail`/pending gifts), séparer aurait un risque de
+régression plus élevé pour un gain plus faible — reporté plutôt que scindé à
+l'aveugle (pas de Docker disponible pour vérifier en navigateur).
+
+`admin.js` n'avait jusqu'ici **aucune** couverture Vitest. `tests/adminSmoke.test.js`
+comble ce trou : import du graphe de 8 modules, bootstrap complet (auth → catalogues
+→ liste utilisateurs), clic sur les 5 boutons de panneaux extraits — pensé pour
+attraper la classe de bug la plus probable d'un découpage mécanique (export
+manquant, variable renommée dans un seul des fichiers).
+
+`profile/profile-page.js` (1194 lignes) n'a **pas** été re-découpé : en le relisant,
+il a déjà 9 modules extraits d'un travail antérieur (badges/, wallpapers-ui.js,
+titles-ui.js, song-player.js, share-card.js, theme.js, profile-format.js,
+formatPlayTime.js, avatars_data.js) ; les lignes restantes sont la logique de
+contrôleur de page, fortement couplée à un objet `profile` partagé et des
+closures — un découpage supplémentaire aurait un risque réel pour un gain marginal.
+
+### test(e2e): couverture des endpoints admin restants
+
+`event_codes`, `error_logs`, `deletion_requests`, `social_links`, `user_badges`,
+`user_titles`, `user_wallpapers`, `user_stats`, `user_friends` n'avaient jusqu'ici
+aucun test (ni Vitest, ni E2E, ni PHPUnit — seuls `php -l`/PHPStan les vérifiaient).
+`tests-e2e/admin-extended.spec.js` (24 tests) complète `admin.spec.js` : 403 pour un
+non-admin sur chaque route, cycles créer/lister/modifier/supprimer pour les codes
+événement et les dons badge/titre/wallpaper (catalogue lu dynamiquement via
+`/api/titles`/`/api/wallpapers` plutôt que des IDs figés en dur), validations
+400/404.
+
+### ⚠️ fix(a11y): `prefers-reduced-motion` pour les boucles canvas JS
+
+`css/global.css` neutralise déjà toutes les animations/transitions CSS pour
+`prefers-reduced-motion: reduce`, mais deux effets tournent en JS pur via une
+boucle `requestAnimationFrame` qu'une media query CSS ne peut jamais arrêter : le
+bruit TV statique (`js/tv-friend-anim.js`) et les confettis dorés du don admin
+(`js/divine-gift.js`). Les deux sautent maintenant leur boucle si
+`matchMedia('(prefers-reduced-motion: reduce)').matches`.
+
+Audit complémentaire sans changement de code (décisions de design à trancher
+séparément, détaillées dans `AMELIORATIONS.md` §9) : `streak-recovery.js` est déjà
+entièrement i18n (le point ROADMAP/AMELIORATIONS qui affirmait le contraire était
+faux, corrigé) ; `--color-accent` (#e63946) est sous le seuil AA texte normal
+(4.17:1 sur blanc) sans qu'une seule teinte de repli satisfasse proprement les deux
+thèmes clair/sombre.
+
+### Vérifications communes à ce lot
+
+`npx vitest run` (475/475), `npm run lint` (0 erreur), `npm run pools:check`,
+`npm run docs:check`, `php -l` sur tous les fichiers PHP touchés, et pour
+`daily_target.php` une comparaison croisée directe Node/PHP (voir plus haut) —
+seule vérification possible sans Docker/MariaDB dans ce sandbox. Les nouveaux
+tests E2E (`admin-extended.spec.js`) et PHPUnit (`DailyTargetTest.php`) n'ont pas
+pu être exécutés ici (nécessitent respectivement `make up` et un environnement
+PHPUnit) — à confirmer via la CI réelle.
+
+### Suite à la review de la PR #13
+
+- `admin/admin-api.js::escHtml` corrigeait `String(str || "")` — un champ numérique valant
+  légitimement 0 s'affichait vide au lieu de "0". Corrigé en `String(str ?? "")`, propagé
+  automatiquement aux 8 modules admin qui l'importent.
+- Pagination (`renderXPagination`) et bandeaux "Chargement…"/erreur, copiés-collés à l'identique
+  dans `event-codes.js`/`error-logs.js`/`audit-log.js`/`deletion-requests.js`/`rate-limits.js`,
+  factorisés en `renderPagination()`/`renderLoading()`/`renderError()` dans `admin-api.js`.
+  Vérifié par `tests/adminSmoke.test.js` (clique déjà sur les 5 panneaux) + relecture.
+- `tests/php/DailyTargetTest.php` ne cross-vérifiait la valeur de hash que pour 3 modes sur 6
+  (Classic/Personae/Music) — Emoji/Silhouette/AllOutAttack n'avaient qu'un test de bornes.
+  Ajouté les 3 valeurs manquantes (cross-check Node/PHP, même méthode).
+- **Limitation documentée, pas corrigée** : pour AllOutAttack/Personae, `$activeFilters` est
+  accepté tel que soumis par le client sans être corrélé à un état côté serveur — un client peut
+  soumettre n'importe quel sous-ensemble de codes opus pour faire correspondre le recalcul
+  serveur au nom qu'il veut faire valider. Sans conséquence en phase 1 (détection), mais à
+  corriger (filtre stocké côté serveur) avant d'activer le rejet strict pour ces 2 modes
+  spécifiquement — documenté dans `api/lib/daily_target.php` et `ROADMAP.md`.
+- `js/tv-friend-anim.js` et `js/divine-gift.js` recopiaient le même check
+  `matchMedia("(prefers-reduced-motion: reduce)")` — extrait en `prefersReducedMotion()`
+  (`js/gameCore.js`), conforme à CLAUDE.md §8 (réutiliser gameCore.js pour ce type d'utilitaire).
+- `CLAUDE.md` §9 pointait vers un `PersonaDLE_Update.md` qui n'existe pas pour la v2.0 (seulement
+  pour l'archive v1.1) — corrigé pour refléter la pratique réelle : `DEV_CHANGELOG.md` (dev) +
+  `PersonaDLE_Update.html` (joueur, page HTML bilingue), comme documenté en tête de ce fichier.
+- Perf (`daily_pools.json` entièrement reparsé à chaque `POST /api/sessions` quel que soit le
+  mode joué) : accepté tel quel vu la taille modeste du fichier (~40 Ko), commentaire ajouté
+  plutôt qu'une restructuration en fichiers par mode — à revisiter si le roster grossit beaucoup.
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →

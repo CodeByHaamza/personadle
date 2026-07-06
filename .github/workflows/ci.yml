@@ -43,6 +43,12 @@ jobs:
       - name: Check documentation numbers are up to date
         run: npm run docs:check
 
+      # Vérifie que api/data/daily_pools.json (lu par api/lib/daily_target.php pour
+      # l'anti-triche côté serveur) reflète bien les datasets JS sources — voir
+      # scripts/export-daily-pools.js.
+      - name: Check daily target pools are up to date
+        run: npm run pools:check
+
       # Non bloquant tant que le repo n'est pas entièrement formaté (cf. AMELIORATIONS.md §8).
       - name: Check Prettier formatting (non-blocking)
         run: npm run format:check

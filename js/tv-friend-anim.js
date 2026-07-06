@@ -8,6 +8,8 @@
  * Choisir cette animation via settings.anim_friend_request_style = 'persona4_tv'.
  */
 
+import { prefersReducedMotion } from "./gameCore.js";
+
 const _queue = [];
 let _busy = false;
 let _noiseRaf = null;
@@ -179,6 +181,8 @@ function _render({ pseudo, friendship_id, avatar_data }) {
 
 function _startNoise(canvas) {
   if (!canvas) return;
+  // Bruit TV décoratif, pas du contenu de jeu — respecte prefers-reduced-motion.
+  if (prefersReducedMotion()) return;
 
   const ctx = canvas.getContext("2d");
   // Résolution basse intentionnelle (effet pixel)

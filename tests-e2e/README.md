@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/badge/Playwright-Chromium-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/cible-stack%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
 
-> **30 tests (5 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
+> **54 tests (6 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
 > Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public, Social Link, admin).
 
 </div>
@@ -59,6 +59,23 @@ Utilise le compte admin de seed (`admin@personadle.local`, `docker/mysql/init/02
 `api.spec.js` couvre aussi l'anti-triche de `POST /api/user/recover-streak` : rejet d'un
 `previous_streak` supérieur au nombre de jours distincts réellement joués, et rejet d'une valeur
 hors bornes (`< 2`).
+
+### `admin-extended.spec.js` — endpoints admin restants (via l'API)
+
+Complète `admin.spec.js`, qui ne couvrait que `users`/`audit_log`/`rate_limits`. Même compte
+admin de seed.
+
+| Endpoint                                        | Vérifie                                                                  |
+| ------------------------------------------------ | -------------------------------------------------------------------------- |
+| `event_codes` (GET/POST/PATCH/DELETE)           | 403 non-admin, cycle complet créer → lister → désactiver → supprimer      |
+| `error_logs` (GET)                              | 403 non-admin, pagination admin                                           |
+| `deletion_requests` (GET, POST .../process)     | 403 non-admin, pagination admin                                           |
+| `social-links` (GET liste, GET détail)          | 403 non-admin, liste admin, 404 sur id inexistant                         |
+| `users/:id/badges` (POST/DELETE)                | 403 non-admin, accorder/re-accorder (`already_had`)/retirer, 404 slug inconnu |
+| `users/:id/titles` (POST/PATCH equip/DELETE)    | accorder, équiper, déséquiper, retirer — catalogue lu via `/api/titles`   |
+| `users/:id/wallpapers` (POST/DELETE)            | accorder/retirer — catalogue lu via `/api/wallpapers`                     |
+| `users/:id/stats` (PATCH)                       | 403 non-admin, écrasement valide, 400 mode invalide, 400 champ manquant   |
+| `users/:id/friends/:fid` (DELETE)               | 403 non-admin, 404 amitié inexistante                                     |
 
 ### `game-flow.spec.js` — partie complète, langue, responsive (navigateur réel)
 

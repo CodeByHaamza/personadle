@@ -8,6 +8,7 @@
 #   3. Présence de console.log dans les fichiers JS stagés
 #   4. Tests unitaires (npm test)
 #   5. Chiffres de doc (tests/tables/clés i18n) — auto-corrigés et re-stagés
+#   6. Pools de tirage quotidien (api/data/daily_pools.json) — régénérés et re-stagés
 # =============================================================
 
 set -e
@@ -84,6 +85,23 @@ if [ -f "scripts/check-doc-numbers.js" ]; then
     git add CLAUDE.md README.md ROADMAP.md CONTRIBUTING.md tests/README.md 2>/dev/null || true
   else
     echo -e "  ${GREEN}✓ Doc numbers OK${NC}"
+  fi
+fi
+
+# ─────────────────────────────────────────────────────────
+# 6. Pools de tirage quotidien (api/data/daily_pools.json)
+#    Régénérés depuis les datasets JS et re-stagés si un personnage/chanson a
+#    été ajouté — sinon api/lib/daily_target.php calculerait la cible attendue
+#    à partir d'un pool obsolète (faux positifs anti-triche côté serveur).
+# ─────────────────────────────────────────────────────────
+if [ -f "scripts/export-daily-pools.js" ]; then
+  echo "  ▸ Daily pools check..."
+  if ! node scripts/export-daily-pools.js --check &>/dev/null; then
+    node scripts/export-daily-pools.js &>/dev/null || true
+    echo -e "${YELLOW}⚠  api/data/daily_pools.json était désynchronisé, régénéré et re-stagé${NC}"
+    git add api/data/daily_pools.json 2>/dev/null || true
+  else
+    echo -e "  ${GREEN}✓ Daily pools OK${NC}"
   fi
 fi
 
