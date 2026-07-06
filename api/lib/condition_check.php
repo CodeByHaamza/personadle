@@ -63,7 +63,7 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
     $valueRequiredTypes = [
         'wins_total', 'mode_wins', 'classic_p1_wins', 'emoji_p2_wins', 'mode_games',
         'games_total', 'streak_record', 'perfect_wins', 'unique_days', 'giveups_total',
-        'friends_count', 'badges_count', 'social_link_min_rank', 'weekly_clean_modes',
+        'friends_count', 'badges_count', 'weekly_clean_modes',
     ];
     if (in_array($condType, $valueRequiredTypes, true) && $condValue === null) {
         return false;
