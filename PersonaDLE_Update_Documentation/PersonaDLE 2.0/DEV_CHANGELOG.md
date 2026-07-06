@@ -605,12 +605,14 @@ badges et 7 lignes wallpapers). À confirmer via la CI (`make test-php`).
 
 ### Suivi de revue, 2ᵉ passe (PR #14)
 
-- **Vrai bug attrapé par la CI elle-même** — `ConditionCheckTest::testSocialLinkMinRankDefaultsToRank10WhenValueIsNull`
-  a échoué au premier push du suivi de revue : la nouvelle garde `$valueRequiredTypes`
-  (refus si `condition_value` NULL) incluait encore `social_link_min_rank` malgré le
-  commentaire juste au-dessus affirmant l'inverse. Ce type a son propre défaut à 10
-  documenté dans le `switch`, donc la garde générique le court-circuitait avant d'y
-  arriver. Retiré de la liste — corrigé et reconfirmé vert par la CI.
+- **Vrai bug attrapé par la CI elle-même (commit `d603516`)** — `ConditionCheckTest::testSocialLinkMinRankDefaultsToRank10WhenValueIsNull`
+  a échoué au premier push du suivi de revue (`2da76c01`) : la nouvelle garde
+  `$valueRequiredTypes` (refus si `condition_value` NULL, ajoutée par ce même commit)
+  incluait encore `social_link_min_rank` malgré le commentaire juste au-dessus affirmant
+  l'inverse. Ce type a son propre défaut à 10 documenté dans le `switch`, donc la garde
+  générique le court-circuitait avant d'y arriver — `social_link_min_rank` retournait
+  toujours `false`, même à rang 10. Retiré de la liste dans `d603516` — reconfirmé vert
+  par la CI dans la foulée.
 - **Frontière exacte value-1/value ajoutée pour les 19 badges/wallpapers à seuil simple**
   (`BadgeWallpaperCatalogTest::testStructuredConditionsRespectExactThreshold`) + un test
   dédié pour `kamoshida_palace`/`all_modes_won` (5/6 modes refusé, 6/6 accordé). Répond au

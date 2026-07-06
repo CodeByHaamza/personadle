@@ -18,7 +18,7 @@ if ($method === 'GET') {
 
     $stmt = $pdo->prepare(
         "SELECT t.id, t.slug, t.image_path, t.{$col} AS name, t.rarity,
-                t.condition_type, t.condition_value,
+                t.condition_type, t.condition_mode, t.condition_value,
                 (SELECT COUNT(*) FROM user_titles ut WHERE ut.user_id = ? AND ut.title_id = t.id) AS is_unlocked
          FROM titles t ORDER BY t.id"
     );
