@@ -68,25 +68,31 @@ Deux cas différents, qui touchent des fichiers différents :
 Le jour où un personnage doit être ajouté, toucher dans cet ordre :
 
 1. `database/characters_clean.js` — fiche perso (nom, genre, âge, persona, arcane, opus…)
-2. `database/personas.js` — ajouter le nom à la liste d'autocomplétion (Classic)
-3. `database/quotes.js` — citation(s) du perso
-4. `database/portraits/*.webp` + `database/portraitsMap.js` — portrait + mapping nom→fichier
-5. `allOutAttackMode/database/aoaCharacters.js` + `personas_allOut.js` + `portraitsMap.js` + GIFs — équivalent AOA
-6. `silhouetteMode/database/`, `personaeMode/database/`, `musicsMode/database/` — mêmes ajouts côté silhouette/personae/musique si le perso a un thème musical propre
-7. `emojiMode` — séquence d'emojis pour le nouveau perso
-8. `profile/avatars_data.js` + `img/avatar/` — nouveaux avatars de profil (PDP) groupés par jeu
-9. `musicsMode/database/songs.js` + `musicTitles.js` + fichiers audio — OST du nouveau jeu
-10. **Filtres opus** — ajouter le nouveau code opus (ex. `"P6"`) au tableau `ALL_OPUS` de **chaque** mode (`classiqueMode`, `emojiMode`, `silhouetteMode`, `personaeMode`, `musicsMode`, `allOutAttackMode`) pour qu'il apparaisse dans le panneau de filtres
-11. `npm run data:check` (`scripts/validate_characters.js`) — doit passer sans erreur sur le nouveau roster
+2. Déposer les assets bruts (portrait, GIFs AOA, musique) dans `incoming/<type>/<persona-snake_case>.<ext>`
+   (`type` ∈ `portrait`/`aoa`/`music`/`misc`) puis `npm run ingest:check`
+   (`scripts/validate_incoming.js`) — valide le nommage snake_case et l'extension avant
+   d'intégrer quoi que ce soit dans `database/`/`<mode>/database/`. Le script valide
+   uniquement (pas de renommage/optimisation automatique) — à faire à la main avant dépôt.
+3. `database/personas.js` — ajouter le nom à la liste d'autocomplétion (Classic)
+4. `database/quotes.js` — citation(s) du perso
+5. `database/portraits/*.webp` + `database/portraitsMap.js` — portrait + mapping nom→fichier
+6. `allOutAttackMode/database/aoaCharacters.js` + `personas_allOut.js` + `portraitsMap.js` + GIFs — équivalent AOA
+7. `silhouetteMode/database/`, `personaeMode/database/`, `musicsMode/database/` — mêmes ajouts côté silhouette/personae/musique si le perso a un thème musical propre
+8. `emojiMode` — séquence d'emojis pour le nouveau perso
+9. `profile/avatars_data.js` + `img/avatar/` — nouveaux avatars de profil (PDP) groupés par jeu
+10. `musicsMode/database/songs.js` + `musicTitles.js` + fichiers audio — OST du nouveau jeu
+11. **Filtres opus** — ajouter le nouveau code opus (ex. `"P6"`) au tableau `ALL_OPUS` de **chaque** mode (`classiqueMode`, `emojiMode`, `silhouetteMode`, `personaeMode`, `musicsMode`, `allOutAttackMode`) pour qu'il apparaisse dans le panneau de filtres
+12. `npm run data:check` (`scripts/validate_characters.js`) — doit passer sans erreur sur le nouveau roster
 
 **B. Remaster/Revival d'un jeu déjà supporté (assets seulement)** — ex. Persona 4 Revival
 (remplace P4/P4G comme Persona 3 Reload a remplacé les artworks P3 d'origine).
 
-1. Remplacer les portraits (`database/portraits/*.webp`) par le nouvel artwork officiel
-2. Remplacer les GIFs AOA correspondants si Atlus republie des animations
-3. Vérifier si le nouvel opus doit être **distinct** dans les filtres (`P4R` séparé de `P4`/`P4G`)
+1. Mêmes assets bruts déposés dans `incoming/<type>/...` + `npm run ingest:check` avant remplacement (voir cas A, étape 2)
+2. Remplacer les portraits (`database/portraits/*.webp`) par le nouvel artwork officiel
+3. Remplacer les GIFs AOA correspondants si Atlus republie des animations
+4. Vérifier si le nouvel opus doit être **distinct** dans les filtres (`P4R` séparé de `P4`/`P4G`)
    ou **fusionné** (même roster, juste un artwork mis à jour) — décision à prendre au cas par cas
-4. Pas de changement sur `personas.js`/`quotes.js` si les personnages restent les mêmes
+5. Pas de changement sur `personas.js`/`quotes.js` si les personnages restent les mêmes
 
 → Le jour où ça devient récurrent, envisager un script `scripts/add_character.js` qui
 scaffolde les entrées dans tous les fichiers concernés plutôt que de suivre cette liste à la main.
@@ -194,7 +200,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **475 tests JS · 168 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **481 tests JS · 168 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -250,7 +256,7 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 475 Vitest · 168 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q1  | Tests : 481 Vitest · 168 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
 | Q2  | i18n EN/FR/ES/DE/IT (949 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |

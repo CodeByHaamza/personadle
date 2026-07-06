@@ -84,6 +84,15 @@ if (isMain) {
   const target = process.argv[2] ?? "incoming";
   const { errors, warnings, fileCount } = validateIncoming(target);
 
+  // "incoming/" est un dossier de travail local, pas versionné : son absence est l'état
+  // normal (rien en attente d'ingestion), pas une erreur — sinon ce check casserait la CI
+  // en permanence puisque le dossier n'existe jamais sur une branche propre.
+  const folderMissing = errors.length === 1 && errors[0].startsWith("Dossier introuvable");
+  if (folderMissing) {
+    console.log(`ℹ️  Dossier "${target}" absent — rien à valider (aucun asset en attente d'ingestion).`);
+    process.exit(0);
+  }
+
   console.log(`📦 ${fileCount} fichier(s) analysé(s) dans "${target}"`);
   warnings.forEach((w) => console.log(`⚠️  ${w}`));
 
