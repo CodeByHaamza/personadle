@@ -32,9 +32,12 @@
   badges (`velvet_regular` 50 jours uniques, `best_bro` 2+ amis) qui étaient
   structurellement calculables mais bypassés par erreur de mapping (toujours `true`).
   3 nouveaux `condition_type` ajoutés au vocabulaire (`mode_games`, `games_total`,
-  `social_link_min_rank`). `tests/php/ConditionCheckTest.php` (19 tests, même pattern
-  que `DatabaseIntegrationTest.php`) — non exécuté en sandbox (pas de Docker/MariaDB),
-  à confirmer via la CI._
+  `social_link_min_rank`). `tests/php/ConditionCheckTest.php` (22 tests) +
+  `tests/php/BadgeWallpaperCatalogTest.php` (7 tests, dont un qui prouve que chaque
+  seuil réel du catalogue est respecté à l'exacte frontière value-1/value), même
+  pattern que `DatabaseIntegrationTest.php` — confirmé vert par la CI réelle après
+  un aller-retour (un bug de garde-fou sur `social_link_min_rank` a été attrapé et
+  corrigé grâce à elle)._
 - [ ] **Stratégie assets AOA** (~1,8 Go dans git) — Git LFS **ou** CDN-only + fetch au 1er lancement.
   _(Script `scripts/purge_git_history.sh` prêt pour récupérer l'historique.)_
 
@@ -173,7 +176,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **475 tests JS · 165 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **475 tests JS · 168 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -229,7 +232,7 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 475 Vitest · 165 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q1  | Tests : 475 Vitest · 168 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
 | Q2  | i18n EN/FR/ES/DE/IT (949 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |

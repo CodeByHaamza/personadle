@@ -16,16 +16,21 @@ $action = end($parts);
  * Vérifie si un utilisateur peut débloquer un wallpaper.
  *
  * - is_default = 1 : accessible à tous les utilisateurs authentifiés → toujours true
- * - is_default = 0 et condition_type NULL/vide : REFUS (fail-closed). Contrairement à
- *   badges/titles, où condition_type NULL est un safe-fallback "true" volontaire
- *   (`personadle_verify_condition()`), wallpapers a toujours été fail-closed par
- *   conception (l'ancien verifyWallpaperCondition() faisait `default: return false`).
+ * - is_default = 0 et condition_type NULL/vide/inconnu : REFUS (fail-closed). Contrairement
+ *   à badges/titles, où condition_type NULL ou inconnu est un safe-fallback "true"
+ *   volontaire (`personadle_verify_condition()`), wallpapers a toujours été fail-closed
+ *   par conception (l'ancien verifyWallpaperCondition() faisait `default: return false`).
  *   Revue PR #14 : déléguer directement à personadle_verify_condition() aurait
- *   silencieusement inversé ce choix pour tout futur wallpaper ajouté sans
- *   condition_type — un wallpaper non-défaut doit explicitement dire 'manual' pour
- *   être débloqué sans vérification serveur, jamais l'omettre par oubli.
- * - is_default = 0 et condition_type défini ('manual' ou un type structuré) :
- *   vérifié par personadle_verify_condition().
+ *   silencieusement inversé ce choix pour tout futur wallpaper ajouté sans condition_type
+ *   — un wallpaper non-défaut doit explicitement dire 'manual' pour être débloqué sans
+ *   vérification serveur, jamais l'omettre par oubli. Deuxième passe de revue : une
+ *   simple vérification de non-vacuité ne suffisait pas — un condition_type mal
+ *   orthographié ou retiré du vocabulaire (ex: l'ancien 'social_link_rank_10') est non
+ *   vide mais tombe quand même sur le safe-fallback "true" partagé de
+ *   personadle_verify_condition(). Comparer explicitement à la liste des types reconnus
+ *   (`personadle_known_condition_types()`) ferme ce trou.
+ * - is_default = 0 et condition_type reconnu ('manual' ou un type structuré) : vérifié
+ *   par personadle_verify_condition().
  *
  * @param array $wallpaper  Ligne issue de la table wallpapers (is_default, condition_*)
  * @return bool  true si l'unlock est autorisé, false sinon
@@ -36,8 +41,10 @@ function canUnlockWallpaper(PDO $pdo, int $userId, array $wallpaper): bool
         return true;
     }
 
-    if (empty($wallpaper['condition_type'])) {
-        return false; // fail-closed : wallpaper non-défaut sans condition déclarée
+    if (empty($wallpaper['condition_type'])
+        || !in_array($wallpaper['condition_type'], personadle_known_condition_types(), true)
+    ) {
+        return false; // fail-closed : condition_type absent, vide ou inconnu du vocabulaire
     }
 
     return personadle_verify_condition(

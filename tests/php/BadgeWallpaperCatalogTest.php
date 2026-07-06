@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../api/lib/condition_check.php';
  * Tests d'intégration pour le catalogue badges/wallpapers migré vers des colonnes
  * structurées (sql/migrations/021_structured_badge_wallpaper_conditions.sql).
  *
- * Deux angles distincts de ConditionCheckTest.php (qui teste la LOGIQUE générique
+ * Trois angles distincts de ConditionCheckTest.php (qui teste la LOGIQUE générique
  * avec des valeurs arbitraires) :
  *
  *  1. Vérifie que CHAQUE ligne réellement seedée (60 badges, 7 wallpapers) a bien
@@ -18,10 +18,16 @@ require_once __DIR__ . '/../../api/lib/condition_check.php';
  *     manuelle modifie une valeur par erreur, ce test le détecte immédiatement,
  *     badge par badge / wallpaper par wallpaper (pas juste "la fonction marche").
  *  2. Exécute le EXACT SELECT utilisé par api/badges/index.php, api/wallpapers/index.php
- *     et api/titles/index.php (copié depuis ces fichiers), pas juste condition_check.php
- *     appelé directement avec des littéraux — un décalage de nom de colonne entre le
- *     SELECT d'un endpoint et ce que personadle_verify_condition() attend serait
- *     détecté ici (revue PR #14).
+ *     et api/titles/index.php (copié depuis ces fichiers, y compris la résolution
+ *     slug→id de /api/titles/unlock), pas juste condition_check.php appelé directement
+ *     avec des littéraux — un décalage de nom/clé de colonne entre la requête réelle
+ *     d'un endpoint et ce que personadle_verify_condition() attend serait détecté ici
+ *     (revue PR #14).
+ *  3. Prouve que CHAQUE seuil réel du catalogue (pas une valeur inventée) est respecté
+ *     à l'exacte frontière : value-1 refusé, value accordé. Angle absent des deux
+ *     premiers (qui vérifient soit la donnée en base, soit la logique générique) —
+ *     ajouté après qu'une revue ultérieure de cette PR a noté qu'aucun test n'aurait
+ *     détecté une régression de comportement sur un seuil réel spécifique.
  */
 final class BadgeWallpaperCatalogTest extends TestCase
 {
@@ -257,13 +263,23 @@ final class BadgeWallpaperCatalogTest extends TestCase
             self::$pdo->prepare('INSERT INTO user_stats (user_id, mode, wins) VALUES (?, "classic", 20)')
                 ->execute([$uid]);
 
-            // Copié depuis api/titles/index.php::POST /unlock.
+            // Le vrai endpoint (api/titles/index.php::POST /unlock) résout title_slug en id
+            // via une requête séparée (WHERE slug = ?), PUIS fait le check par id (WHERE id = ?)
+            // — copier seulement la 1ère requête ici passait par coïncidence (slug et id
+            // pointent sur la même ligne) sans jamais exercer le WHERE id = ? réellement
+            // utilisé par le check de condition (revue PR #14).
+            $resolve = self::$pdo->prepare('SELECT id FROM titles WHERE slug = ? LIMIT 1');
+            $resolve->execute(['naoya_first_awakening']); // condition_type = classic_p1_wins, value 15
+            $titleId = (int) $resolve->fetchColumn();
+            $this->assertGreaterThan(0, $titleId, "Le titre 'naoya_first_awakening' doit exister dans le catalogue seedé");
+
+            // Copié depuis api/titles/index.php::POST /unlock — même requête, même colonnes.
             $check = self::$pdo->prepare(
-                'SELECT id, condition_type, condition_mode, condition_value FROM titles WHERE slug = ? LIMIT 1'
+                'SELECT id, condition_type, condition_mode, condition_value FROM titles WHERE id = ? LIMIT 1'
             );
-            $check->execute(['naoya_first_awakening']); // condition_type = classic_p1_wins, value 15
+            $check->execute([$titleId]);
             $title = $check->fetch(PDO::FETCH_ASSOC);
-            $this->assertNotFalse($title, "Le titre 'naoya_first_awakening' doit exister dans le catalogue seedé");
+            $this->assertNotFalse($title);
 
             $this->assertTrue(personadle_verify_condition(
                 self::$pdo,
@@ -275,5 +291,191 @@ final class BadgeWallpaperCatalogTest extends TestCase
         } finally {
             self::$pdo->rollBack();
         }
+    }
+
+    // ── 3. Frontière exacte : value-1 refusé, value accordé (revue PR #14) ──────
+
+    /**
+     * Les 19 badges/wallpapers structurés qui ont un seuil numérique simple (sur les 20
+     * réellement structurés — `kamoshida_palace`/`all_modes_won` est testé séparément,
+     * voir testAllModesWonWallpaperRequiresAllSixModes(), car ce n'est pas un seuil mais
+     * un ET logique sur 6 modes).
+     *
+     * Angle absent de ConditionCheckTest.php (logique générique, valeurs arbitraires —
+     * certaines coïncident par hasard avec les vraies valeurs du catalogue, ex.
+     * `ace_defective`=10, `raphael`=30, mais 10 badges sur 15 n'ont aucune coïncidence)
+     * et de testEveryBadgeHasExpectedConditionColumns() (dérive de données en base, pas
+     * comportement à l'exécution). Prouve que chaque seuil réel du catalogue est
+     * respecté à l'exacte frontière : value-1 refusé, value accordé — exactement la
+     * classe de bug qui a cassé silencieusement `social_link_min_rank` dans un commit de
+     * suivi de revue (garde-fou générique `$valueRequiredTypes` qui court-circuitait son
+     * défaut documenté), détectée uniquement parce qu'un test dédié à CE cas existait.
+     *
+     * @return array<string, array{0: string, 1: ?string, 2: int}>
+     */
+    private static function structuredThresholds(): array
+    {
+        return [
+            'first_win'              => ['wins_total', null, 1],
+            'ace_detective'          => ['wins_total', null, 10],
+            'ace_defective'          => ['giveups_total', null, 10],
+            'shadow_slayer'          => ['mode_wins', 'silhouette', 5],
+            'music_master'           => ['mode_wins', 'music', 20],
+            'p1_p2_fan'              => ['mode_wins', 'classic', 15],
+            'velvet_master'          => ['mode_wins', 'personae', 10],
+            'emoji_decoder'          => ['mode_wins', 'emoji', 10],
+            'pyro_spark'             => ['streak_record', null, 7],
+            'raphael'                => ['streak_record', null, 30],
+            'surt'                   => ['streak_record', null, 90],
+            'lucifer'                => ['streak_record', null, 120],
+            'helel'                  => ['streak_record', null, 365],
+            'velvet_regular'         => ['unique_days', null, 50],
+            'best_bro'               => ['friends_count', null, 2],
+            'madarame_wallpaper'     => ['friends_count', null, 1],
+            'rise_dungeons'          => ['mode_games', 'music', 30],
+            'mitsuo_dungeons'        => ['games_total', null, 75],
+            'dark_shopping_district' => ['social_link_min_rank', null, 5],
+        ];
+    }
+
+    public function testStructuredConditionsRespectExactThreshold(): void
+    {
+        foreach (self::structuredThresholds() as $slug => [$type, $mode, $value]) {
+            $uid = $this->makeUser();
+            self::$pdo->beginTransaction();
+            try {
+                $this->setConditionStat($uid, $type, $mode, $value - 1);
+                $this->assertFalse(
+                    personadle_verify_condition(self::$pdo, $uid, $type, $mode, $value),
+                    "$slug ($type" . ($mode ? "/$mode" : '') . '=' . ($value - 1)
+                        . ") devrait être refusé juste sous le seuil $value"
+                );
+
+                $this->setConditionStat($uid, $type, $mode, $value);
+                $this->assertTrue(
+                    personadle_verify_condition(self::$pdo, $uid, $type, $mode, $value),
+                    "$slug ($type" . ($mode ? "/$mode" : '') . "=$value) devrait être accordé exactement au seuil"
+                );
+            } finally {
+                self::$pdo->rollBack();
+            }
+        }
+    }
+
+    public function testAllModesWonWallpaperRequiresAllSixModes(): void
+    {
+        $uid = $this->makeUser();
+        self::$pdo->beginTransaction();
+        try {
+            $modes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+
+            foreach (array_slice($modes, 0, 5) as $mode) {
+                self::$pdo->prepare('INSERT INTO user_stats (user_id, mode, wins) VALUES (?, ?, 1)')
+                    ->execute([$uid, $mode]);
+            }
+            $this->assertFalse(
+                personadle_verify_condition(self::$pdo, $uid, 'all_modes_won', null, null),
+                "kamoshida_palace : 5 modes gagnés sur 6 devrait être refusé"
+            );
+
+            self::$pdo->prepare('INSERT INTO user_stats (user_id, mode, wins) VALUES (?, ?, 1)')
+                ->execute([$uid, $modes[5]]);
+            $this->assertTrue(
+                personadle_verify_condition(self::$pdo, $uid, 'all_modes_won', null, null),
+                "kamoshida_palace : 6 modes gagnés sur 6 devrait être accordé"
+            );
+        } finally {
+            self::$pdo->rollBack();
+        }
+    }
+
+    /** Pose une statistique utilisateur au niveau $value pour un condition_type/mode donné. */
+    private function setConditionStat(int $userId, string $type, ?string $mode, int $value): void
+    {
+        switch ($type) {
+            case 'wins_total':
+                $this->upsertStat($userId, 'classic', 'wins', $value);
+                break;
+            case 'giveups_total':
+                $this->upsertStat($userId, 'classic', 'giveups', $value);
+                break;
+            case 'mode_wins':
+                $this->upsertStat($userId, (string) $mode, 'wins', $value);
+                break;
+            case 'mode_games':
+                $this->upsertStat($userId, (string) $mode, 'games', $value);
+                break;
+            case 'games_total':
+                $this->upsertStat($userId, 'classic', 'games', $value);
+                break;
+            case 'streak_record':
+                $this->upsertStat($userId, 'classic', 'streak_record', $value);
+                break;
+            case 'unique_days':
+                $this->setUniqueDays($userId, $value);
+                break;
+            case 'friends_count':
+                $this->setFriendsCount($userId, $value);
+                break;
+            case 'social_link_min_rank':
+                $this->setSocialLinkRank($userId, $value);
+                break;
+            default:
+                throw new InvalidArgumentException("Type non géré par ce test: $type");
+        }
+    }
+
+    private function upsertStat(int $userId, string $mode, string $column, int $value): void
+    {
+        $allowed = ['wins', 'giveups', 'games', 'streak_record'];
+        if (!in_array($column, $allowed, true)) {
+            throw new InvalidArgumentException("Colonne non autorisée: $column");
+        }
+        self::$pdo->prepare(
+            "INSERT INTO user_stats (user_id, mode, $column) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE $column = VALUES($column)"
+        )->execute([$userId, $mode, $value]);
+    }
+
+    private function setUniqueDays(int $userId, int $days): void
+    {
+        self::$pdo->prepare('DELETE FROM game_sessions WHERE user_id = ?')->execute([$userId]);
+        if ($days <= 0) {
+            return;
+        }
+        $stmt = self::$pdo->prepare(
+            'INSERT INTO game_sessions (user_id, mode, played_date, target_name, result, attempts)
+             VALUES (?, "classic", DATE_SUB(CURDATE(), INTERVAL ? DAY), "x", "win", 1)'
+        );
+        for ($i = 0; $i < $days; $i++) {
+            $stmt->execute([$userId, $i]);
+        }
+    }
+
+    private function setFriendsCount(int $userId, int $count): void
+    {
+        self::$pdo->prepare('DELETE FROM friendships WHERE requester_id = ? OR addressee_id = ?')
+            ->execute([$userId, $userId]);
+        for ($i = 0; $i < $count; $i++) {
+            $friendId = $this->makeUser("_fr{$i}");
+            self::$pdo->prepare(
+                'INSERT INTO friendships (requester_id, addressee_id, status, accepted_at)
+                 VALUES (?, ?, "accepted", NOW())'
+            )->execute([$userId, $friendId]);
+        }
+    }
+
+    private function setSocialLinkRank(int $userId, int $rank): void
+    {
+        self::$pdo->prepare('DELETE FROM social_links WHERE user_a_id = ? OR user_b_id = ?')
+            ->execute([$userId, $userId]);
+        if ($rank <= 0) {
+            return;
+        }
+        $partnerId = $this->makeUser('_partner');
+        [$lo, $hi] = $userId < $partnerId ? [$userId, $partnerId] : [$partnerId, $userId];
+        self::$pdo->prepare(
+            'INSERT INTO social_links (user_a_id, user_b_id, `rank`, xp) VALUES (?, ?, ?, 500)'
+        )->execute([$lo, $hi, $rank]);
     }
 }

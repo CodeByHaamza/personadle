@@ -49,7 +49,7 @@ Chiffres à l'époque (post-merge PR #11) : **473 tests Vitest** (24 suites) · 
 | **PR #13** | ✅ Mergée | Anti-triche daily target (phase 1, détection), split de `admin/admin.js` en 8 modules, couverture E2E des 9 endpoints admin qui n'avaient aucun test, fix a11y `prefers-reduced-motion` sur 2 boucles canvas JS. Confirmé vert par la vraie CI (PHPUnit + E2E Docker, voir §2.12-2.13 ci-dessous). Suivi de review : 6 points traités (bug `escHtml` falsy-zero, dédup pagination/loading admin, cross-check hash étendu à 6/6 modes, `prefersReducedMotion()` extrait dans `gameCore.js`, CLAUDE.md §9 corrigé, limitation anti-triche AllOutAttack/Personae documentée). |
 | **Nouveau lot** | 🔎 En cours (`claude/roadmap-followups-*`) | Conditions badges/wallpapers en colonnes structurées (`condition_type`/`condition_mode`/`condition_value`, comme `titles`) — détail en §2.16 ci-dessous. |
 
-Chiffres actuels : **475 tests Vitest** (25 suites) · **165 méthodes PHPUnit** (11 fichiers, nouveau : `DailyTargetTest.php` + `ConditionCheckTest.php` + `BadgeWallpaperCatalogTest.php`) · **949 clés i18n** × 5 langues · **23 tables SQL** · **54 tests E2E** (6 fichiers, nouveau : `admin-extended.spec.js`, 24 tests).
+Chiffres actuels : **475 tests Vitest** (25 suites) · **168 méthodes PHPUnit** (11 fichiers, nouveau : `DailyTargetTest.php` + `ConditionCheckTest.php` + `BadgeWallpaperCatalogTest.php`) · **949 clés i18n** × 5 langues · **23 tables SQL** · **54 tests E2E** (6 fichiers, nouveau : `admin-extended.spec.js`, 24 tests).
 
 ### 0.2 Ce qui vient d'être re-vérifié à l'instant (clone frais de `develop`, sans Docker)
 
@@ -375,14 +375,19 @@ risqués à faire sans vérification navigateur, ou hors-scope) :
 > fonction partagée aurait silencieusement inversé ce choix, car `titles`/`badges` sont
 > fail-open par design) ; (2) un `condition_value` NULL par erreur de saisie sur un type qui
 > en a besoin (ex: `wins_total`) refuse désormais l'unlock au lieu de le laisser toujours
-> passer (`>= 0` était toujours vrai). Jamais exécuté contre une vraie base ici (pas de
-> Docker/MariaDB) — `tests/php/ConditionCheckTest.php` (21 tests) et le nouveau
-> `tests/php/BadgeWallpaperCatalogTest.php` (5 tests, un par endpoint réel + catalogue complet
-> des 60 badges/7 wallpapers) doivent passer via `make test-php`, mais vaut aussi le coup de
-> re-tester en vrai :
+> passer (`>= 0` était toujours vrai). Une 2ᵉ passe de revue a aussi attrapé un vrai bug
+> via la CI réelle : le garde-fou (2) incluait par erreur `social_link_min_rank`, qui a
+> son propre défaut à 10 documenté séparément — corrigé (`d603516`). Elle a aussi ajouté
+> un fail-closed strict sur les wallpapers (`personadle_known_condition_types()` : un
+> `condition_type` non-vide mais inconnu du vocabulaire est maintenant refusé, pas juste
+> un `condition_type` vide) et une couverture "frontière exacte" (value-1 refusé, value
+> accordé) sur les 19 badges/wallpapers à seuil simple + un test dédié pour
+> `all_modes_won` (5/6 modes refusé, 6/6 accordé) — `tests/php/ConditionCheckTest.php`
+> (22 tests) et `tests/php/BadgeWallpaperCatalogTest.php` (7 tests) confirmés verts par
+> la CI réelle, mais vaut aussi le coup de re-tester en vrai :
 
-- [ ] `make test-php` → `ConditionCheckTest` (21 tests) et `BadgeWallpaperCatalogTest`
-  (5 tests) passent, en plus des suites existantes
+- [ ] `make test-php` → `ConditionCheckTest` (22 tests) et `BadgeWallpaperCatalogTest`
+  (7 tests) passent, en plus des suites existantes
 - [ ] Gagner 10 parties (tous modes confondus) → le badge **Ace Detective** se débloque
   normalement (`wins_total >= 10`) — comportement inchangé, juste revérifie que le refactor
   n'a rien cassé sur un cas déjà fonctionnel avant
@@ -401,6 +406,12 @@ risqués à faire sans vérification navigateur, ou hors-scope) :
 - [ ] En base, mettre `condition_value` à NULL sur un badge de type `wins_total` (ou autre
   type numérique) → l'unlock est **refusé** même avec des stats élevées, pas accordé par
   erreur (`>= 0` ne doit plus jamais être vrai par défaut)
+- [ ] En base, mettre un wallpaper non-défaut avec `condition_type` = une valeur qui n'existe
+  pas dans le vocabulaire (ex. `'social_link_rank_10'`, retiré par cette PR, ou une faute
+  de frappe) → l'unlock est **refusé**, ne retombe plus sur le safe-fallback `true`
+- [ ] Badge à seuil (**Ace Detective**, `wins_total >= 10`) : à 9 victoires, l'unlock est
+  bien **refusé** (pas seulement accordé à 10+) — vérifie la frontière exacte, pas juste
+  le cas "largement au-dessus du seuil"
 - [ ] Panel admin → onglet Badges/Wallpapers d'un utilisateur : l'affichage (nom, rareté,
   image) fonctionne comme avant — les nouvelles colonnes ne sont pas encore exploitées côté
   admin UI, seulement côté vérification serveur

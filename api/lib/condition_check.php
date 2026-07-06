@@ -180,6 +180,28 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
 }
 
 /**
+ * Liste exhaustive des condition_type reconnus par personadle_verify_condition() (voir
+ * son docblock pour le détail de chacun) — y compris 'manual'/'joker_profile', qui sont
+ * reconnus mais toujours vrais.
+ *
+ * Sert aux appelants qui ont besoin d'un fail-closed strict sur les types (ex:
+ * wallpapers, revue PR #14) : `empty($condition_type)` seul ne distingue pas "type
+ * reconnu mais non structurable" (`manual`) d'une faute de frappe ou d'un type retiré du
+ * vocabulaire (ex: l'ancien `social_link_rank_10`) — les deux tombent silencieusement
+ * dans le safe-fallback "true" de la fonction ci-dessus si on ne vérifie que la
+ * non-vacuité. Comparer explicitement à cette liste ferme ce trou.
+ */
+function personadle_known_condition_types(): array
+{
+    return [
+        'wins_total', 'mode_wins', 'mode_games', 'games_total', 'streak_record',
+        'perfect_wins', 'unique_days', 'giveups_total', 'friends_count', 'badges_count',
+        'social_link_min_rank', 'all_modes_won', 'weekly_clean_modes',
+        'classic_p1_wins', 'emoji_p2_wins', 'joker_profile', 'manual',
+    ];
+}
+
+/**
  * SUM ou MAX d'une colonne numérique de user_stats sur tous les modes d'un joueur.
  * $column est toujours un littéral fixe passé par les appelants de ce fichier
  * (jamais une entrée utilisateur) — la whitelist ci-dessous est une protection en

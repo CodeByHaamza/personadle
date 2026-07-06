@@ -327,4 +327,17 @@ final class ConditionCheckTest extends TestCase
         $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'weekly_clean_modes', null, 2));
         $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'weekly_clean_modes', null, 3));
     }
+
+    public function testKnownConditionTypesMatchesSwitchCases(): void
+    {
+        // personadle_known_condition_types() (ajouté pour le fail-closed strict des
+        // wallpapers, revue PR #14) doit rester synchronisé avec les `case` réellement
+        // gérés ci-dessus — sinon un type retiré du switch resterait accepté par le
+        // fail-closed, ou un type ajouté au switch serait refusé à tort.
+        $known = personadle_known_condition_types();
+        $this->assertContains('manual', $known);
+        $this->assertContains('social_link_min_rank', $known);
+        $this->assertNotContains('social_link_rank_10', $known);
+        $this->assertCount(17, $known, 'Ajuste ce compte si le vocabulaire de condition_check.php change');
+    }
 }

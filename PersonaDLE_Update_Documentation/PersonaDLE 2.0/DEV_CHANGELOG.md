@@ -603,6 +603,42 @@ badges et 7 lignes wallpapers). À confirmer via la CI (`make test-php`).
   donc un décalage de nom de colonne entre le SELECT d'un endpoint et la fonction n'aurait
   pas été détecté.
 
+### Suivi de revue, 2ᵉ passe (PR #14)
+
+- **Vrai bug attrapé par la CI elle-même** — `ConditionCheckTest::testSocialLinkMinRankDefaultsToRank10WhenValueIsNull`
+  a échoué au premier push du suivi de revue : la nouvelle garde `$valueRequiredTypes`
+  (refus si `condition_value` NULL) incluait encore `social_link_min_rank` malgré le
+  commentaire juste au-dessus affirmant l'inverse. Ce type a son propre défaut à 10
+  documenté dans le `switch`, donc la garde générique le court-circuitait avant d'y
+  arriver. Retiré de la liste — corrigé et reconfirmé vert par la CI.
+- **Frontière exacte value-1/value ajoutée pour les 19 badges/wallpapers à seuil simple**
+  (`BadgeWallpaperCatalogTest::testStructuredConditionsRespectExactThreshold`) + un test
+  dédié pour `kamoshida_palace`/`all_modes_won` (5/6 modes refusé, 6/6 accordé). Répond au
+  point le plus important d'une 2ᵉ passe de revue : aucun test existant ne prouvait qu'un
+  seuil réel du catalogue (par opposition à une valeur inventée dans `ConditionCheckTest.php`,
+  ou à la donnée en base vérifiée par `testEveryBadgeHasExpectedConditionColumns()`) était
+  respecté à l'exécution — exactement la classe de bug qui vient de casser
+  `social_link_min_rank` silencieusement.
+- **`personadle_known_condition_types()`** (nouveau, `condition_check.php`) — liste
+  exhaustive des 17 `condition_type` reconnus. `canUnlockWallpaper()`
+  (`api/wallpapers/index.php`) comparait juste `!empty($condition_type)`, ce qui ne
+  distingue pas un type reconnu (`manual`) d'une faute de frappe ou d'un type retiré du
+  vocabulaire (l'ancien `social_link_rank_10`) — les deux tombaient sur le safe-fallback
+  `true` partagé avec badges/titles, débloquant un wallpaper par erreur. Comparaison
+  stricte à cette liste maintenant. `ConditionCheckTest::testKnownConditionTypesMatchesSwitchCases()`
+  garde la liste synchronisée avec les vrais `case` du switch.
+- **`tests/php/BadgeWallpaperCatalogTest.php` — test titres corrigé** : utilisait
+  `WHERE slug = ?` alors que le vrai endpoint (`api/titles/index.php::POST /unlock`) fait
+  `WHERE id = ?` après une résolution slug→id séparée. Passait par coïncidence (même
+  ligne), sans jamais exercer la requête réellement utilisée par le check de condition.
+  Résout maintenant l'id d'abord, comme le fait le vrai endpoint.
+- **`sql/bdd_mysql.sql`** : commentaire de schéma sur `condition_type` mis à jour
+  (retire `social_link_rank_10`, ajoute `mode_games`/`games_total`/`social_link_min_rank`).
+- **Hors scope, noté pour un futur ticket** : `titles.aigis_i_am_not_afraid` (`mode_wins`,
+  value=50) ne peut jamais se débloquer — `condition_mode` est NULL dans le seed et ce
+  type n'est pas aliasé comme `classic_p1_wins`/`emoji_p2_wins`. Confirmé identique sur
+  `develop` (pas introduit par cette PR), pas corrigé ici.
+
 ---
 
 ## Comment utiliser ce fichier

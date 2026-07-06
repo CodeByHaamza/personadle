@@ -111,8 +111,8 @@ CREATE TABLE titles (
     condition_type  VARCHAR(50),
     -- Colonnes identiques (et vérification partagée) pour `badges`/`wallpapers` plus
     -- bas — voir api/lib/condition_check.php pour la liste exhaustive des valeurs.
-    -- 'wins_total' | 'streak_record' | 'mode_wins' | 'perfect_wins'
-    -- 'social_link_rank_10' | 'badges_count' | 'unique_days' | 'friends_count'
+    -- 'wins_total' | 'streak_record' | 'mode_wins' | 'perfect_wins' | 'mode_games'
+    -- 'games_total' | 'social_link_min_rank' | 'badges_count' | 'unique_days' | 'friends_count'
     -- 'giveups_total' | 'all_modes_won' | 'leaderboard_top' | 'weekly_clean_modes'
     -- 'classic_p1_wins' | 'emoji_p2_wins' | 'joker_profile' | 'manual'
 
