@@ -3,7 +3,7 @@
  * ban, édition profil, suppression de compte…).
  */
 
-import { api, escHtml } from "./admin-api.js";
+import { api, escHtml, renderLoading, renderError, renderPagination } from "./admin-api.js";
 
 let _auditLogPage = 1;
 let _auditLogAction = "";
@@ -12,8 +12,7 @@ let _auditLogSearchTimer;
 
 export async function renderAuditLog() {
   const el = document.getElementById("audit-log-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+  renderLoading(el);
 
   let res;
   try {
@@ -22,8 +21,7 @@ export async function renderAuditLog() {
     if (_auditLogSearch) params.set("search", _auditLogSearch);
     res = await api.get(`/api/admin/audit_log?${params.toString()}`);
   } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement du journal d\'audit.</div>';
+    renderError(el, "Erreur lors du chargement du journal d'audit.");
     return;
   }
 
@@ -90,28 +88,13 @@ export async function renderAuditLog() {
     }, 300);
   });
 
-  renderAuditLogPagination(res.total ?? 0, _auditLogPage, res.limit ?? 30);
-}
-
-function renderAuditLogPagination(total, page, limit) {
-  const el = document.getElementById("audit-log-pagination");
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-sm" id="audit-log-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
-    <span>Page ${page} / ${totalPages}</span>
-    <button class="btn-sm" id="audit-log-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
-  `;
-  document.getElementById("audit-log-prev").onclick = () => {
-    _auditLogPage = Math.max(1, _auditLogPage - 1);
-    renderAuditLog();
-  };
-  document.getElementById("audit-log-next").onclick = () => {
-    _auditLogPage = Math.min(totalPages, _auditLogPage + 1);
-    renderAuditLog();
-  };
+  renderPagination("audit-log-pagination", {
+    total: res.total ?? 0,
+    page: _auditLogPage,
+    limit: res.limit ?? 30,
+    onChange: (page) => {
+      _auditLogPage = page;
+      renderAuditLog();
+    },
+  });
 }

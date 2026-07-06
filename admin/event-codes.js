@@ -3,20 +3,18 @@
  * de codes déblocables donnant un badge exclusif).
  */
 
-import { api, toast, escHtml } from "./admin-api.js";
+import { api, toast, escHtml, renderLoading, renderError } from "./admin-api.js";
 
 export async function renderEventCodes() {
   const el = document.getElementById("codes-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+  renderLoading(el);
 
   let codes = [];
   try {
     const res = await api.get("/api/admin/event_codes");
     codes = Array.isArray(res) ? res : (res.data ?? []);
   } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des codes.</div>';
+    renderError(el, "Erreur lors du chargement des codes.");
     return;
   }
 

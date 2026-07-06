@@ -4,15 +4,14 @@
  * suppression cascade définitive avant l'échéance automatique à J+30).
  */
 
-import { api, toast, escHtml } from "./admin-api.js";
+import { api, toast, escHtml, renderLoading, renderError, renderPagination } from "./admin-api.js";
 
 let _deletionRequestsPage = 1;
 let _deletionRequestsStatus = "";
 
 export async function renderDeletionRequests() {
   const el = document.getElementById("deletion-requests-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+  renderLoading(el);
 
   let res;
   try {
@@ -20,8 +19,7 @@ export async function renderDeletionRequests() {
     if (_deletionRequestsStatus) params.set("status", _deletionRequestsStatus);
     res = await api.get(`/api/admin/deletion_requests?${params.toString()}`);
   } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des demandes RGPD.</div>';
+    renderError(el, "Erreur lors du chargement des demandes RGPD.");
     return;
   }
 
@@ -99,28 +97,13 @@ export async function renderDeletionRequests() {
     };
   });
 
-  renderDeletionRequestsPagination(res.total ?? 0, _deletionRequestsPage, res.limit ?? 30);
-}
-
-function renderDeletionRequestsPagination(total, page, limit) {
-  const el = document.getElementById("deletion-requests-pagination");
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-sm" id="deletion-requests-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
-    <span>Page ${page} / ${totalPages}</span>
-    <button class="btn-sm" id="deletion-requests-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
-  `;
-  document.getElementById("deletion-requests-prev").onclick = () => {
-    _deletionRequestsPage = Math.max(1, _deletionRequestsPage - 1);
-    renderDeletionRequests();
-  };
-  document.getElementById("deletion-requests-next").onclick = () => {
-    _deletionRequestsPage = Math.min(totalPages, _deletionRequestsPage + 1);
-    renderDeletionRequests();
-  };
+  renderPagination("deletion-requests-pagination", {
+    total: res.total ?? 0,
+    page: _deletionRequestsPage,
+    limit: res.limit ?? 30,
+    onChange: (page) => {
+      _deletionRequestsPage = page;
+      renderDeletionRequests();
+    },
+  });
 }

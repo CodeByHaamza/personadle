@@ -56,6 +56,15 @@ final class DailyTargetTest extends TestCase
         $this->assertSame(8, personadle_fnv1a_index('1', '2026-07-05', 'Classic', 10)); // 'i'
         $this->assertSame(5, personadle_fnv1a_index('12345', '2026-01-01', 'Personae', 10)); // 'f'
         $this->assertSame(7, personadle_fnv1a_index('999999', '2026-12-31', 'Music', 10)); // 'h'
+        // Revue PR #13 : seuls Classic/Personae/Music avaient une valeur de hash cross-vérifiée
+        // ci-dessus — Emoji/Silhouette/AllOutAttack n'avaient qu'un test de bornes plus bas
+        // (testFnv1aIndexAlwaysWithinPoolBounds), qui ne peut pas détecter une dérive de
+        // l'algorithme entre js/gameCore.js et ce portage PHP. Complété ici avec les 3 modes
+        // manquants pour qu'un changement de getDailyTarget() non répercuté ici casse la CI
+        // au lieu de remplir error_log de faux positifs silencieusement.
+        $this->assertSame(2, personadle_fnv1a_index('7', '2026-03-14', 'Emoji', 10)); // 'c'
+        $this->assertSame(3, personadle_fnv1a_index('99', '2026-11-20', 'Silhouette', 10)); // 'd'
+        $this->assertSame(7, personadle_fnv1a_index('555', '2026-05-01', 'AllOutAttack', 10)); // 'h'
     }
 
     public function testFnv1aIndexAlwaysWithinPoolBounds(): void

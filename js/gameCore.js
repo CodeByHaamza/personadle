@@ -780,6 +780,17 @@ export function applyDarkModeOverrides(overrides) {
 }
 
 /**
+ * True si l'utilisateur a activé la réduction de mouvement au niveau OS/navigateur.
+ * À vérifier avant de démarrer une boucle `requestAnimationFrame` décorative
+ * (confettis, bruit TV…) : contrairement aux animations CSS, une media query
+ * `prefers-reduced-motion` (css/global.css) ne peut jamais arrêter une boucle JS.
+ * @returns {boolean}
+ */
+export function prefersReducedMotion() {
+  return !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
  * Réactive le bouton "Give up" après le délai/seuil de tentatives requis.
  * Identique dans tous les modes qui ont un bouton #giveUpButton.
  *

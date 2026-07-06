@@ -12,6 +12,18 @@
  * Les pools eux-mêmes viennent de api/data/daily_pools.json, généré par
  * scripts/export-daily-pools.js à partir des datasets JS (source de vérité).
  * `npm run pools:check` (câblé en CI) échoue si ce fichier dérive des sources.
+ *
+ * ⚠️ LIMITATION CONNUE (revue PR #13) — AllOutAttack et Personae acceptent
+ * `$activeFilters` tel que soumis par le client, sans le corréler à un état
+ * connu côté serveur (aucune session ne mémorise le filtre opus réellement
+ * actif). Un client peut donc soumettre n'importe quel sous-ensemble des
+ * codes opus pour faire correspondre le recalcul serveur au nom qu'il veut
+ * faire valider — contrairement à Classic/Emoji/Silhouette/Music, qui n'ont
+ * pas ce repli filtré et ne sont donc pas contournables de cette façon. Sans
+ * conséquence tant que la phase 1 (détection, voir api/sessions.php) reste en
+ * mode logging seul ; à résoudre (filtre stocké côté serveur plutôt que
+ * re-soumis par le client) avant d'activer un rejet strict pour ces 2 modes
+ * spécifiquement — voir ROADMAP.md § Sécurité/compte.
  */
 
 /**
@@ -30,7 +42,16 @@ function personadle_fnv1a_index(string $seedId, string $date, string $mode, int 
     return $h % $poolLen;
 }
 
-/** @var array|null Cache mémoire du contenu de daily_pools.json pour la durée de la requête. */
+/**
+ * @var array|null Mémoïsation par process PHP-FPM (pas un cache inter-requêtes :
+ * chaque requête HTTP démarre avec $GLOBALS réinitialisé). Aujourd'hui
+ * `personadle_compute_daily_target()` n'est appelée qu'une fois par requête
+ * (api/sessions.php), donc ça ne produit aucun hit dans le call-graph actuel —
+ * ça protège seulement un futur 2ᵉ call-site dans la même requête d'un 2ᵉ
+ * parsing JSON. Revue PR #13 : les 6 modes sont chargés d'un coup (~40 Ko)
+ * même si un seul mode est nécessaire par requête — accepté pour l'instant vu
+ * la taille modeste du fichier, à revisiter si le roster grossit beaucoup.
+ */
 $GLOBALS['__personadle_daily_pools'] = null;
 
 function personadle_load_daily_pools(): array

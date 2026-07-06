@@ -12,6 +12,8 @@
  * items: Array<{ type: 'badge'|'wallpaper'|'title', label: string, img?: string }>
  */
 
+import { prefersReducedMotion } from "./gameCore.js";
+
 function _esc(str) {
   return String(str || "")
     .replace(/&/g, "&amp;")
@@ -123,10 +125,8 @@ export function showDivineGiftAnimation(items, title = "✨ Gift received!") {
 
 function _startParticles(canvas) {
   if (!canvas) return;
-  // Confettis décoratifs — respecte prefers-reduced-motion (une boucle
-  // requestAnimationFrame n'est jamais arrêtée par la media query CSS globale,
-  // contrairement aux animations CSS — voir css/global.css).
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+  // Confettis décoratifs — respecte prefers-reduced-motion.
+  if (prefersReducedMotion()) return;
 
   const ctx = canvas.getContext("2d");
   canvas.width = window.innerWidth;

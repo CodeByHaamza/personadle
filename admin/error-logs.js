@@ -3,7 +3,7 @@
  * api/lib/error_log.php) : recherche, filtre par niveau, pagination.
  */
 
-import { api, escHtml } from "./admin-api.js";
+import { api, escHtml, renderLoading, renderError, renderPagination } from "./admin-api.js";
 
 let _errorLogsPage = 1;
 let _errorLogsLevel = "";
@@ -12,8 +12,7 @@ let _errorLogsSearchTimer;
 
 export async function renderErrorLogs() {
   const el = document.getElementById("error-logs-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+  renderLoading(el);
 
   let res;
   try {
@@ -22,8 +21,7 @@ export async function renderErrorLogs() {
     if (_errorLogsSearch) params.set("search", _errorLogsSearch);
     res = await api.get(`/api/admin/error_logs?${params.toString()}`);
   } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des logs.</div>';
+    renderError(el, "Erreur lors du chargement des logs.");
     return;
   }
 
@@ -101,28 +99,13 @@ export async function renderErrorLogs() {
     renderErrorLogs();
   });
 
-  renderErrorLogsPagination(res.total ?? 0, _errorLogsPage, res.limit ?? 30);
-}
-
-function renderErrorLogsPagination(total, page, limit) {
-  const el = document.getElementById("error-logs-pagination");
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-sm" id="error-logs-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
-    <span>Page ${page} / ${totalPages}</span>
-    <button class="btn-sm" id="error-logs-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
-  `;
-  document.getElementById("error-logs-prev").onclick = () => {
-    _errorLogsPage = Math.max(1, _errorLogsPage - 1);
-    renderErrorLogs();
-  };
-  document.getElementById("error-logs-next").onclick = () => {
-    _errorLogsPage = Math.min(totalPages, _errorLogsPage + 1);
-    renderErrorLogs();
-  };
+  renderPagination("error-logs-pagination", {
+    total: res.total ?? 0,
+    page: _errorLogsPage,
+    limit: res.limit ?? 30,
+    onChange: (page) => {
+      _errorLogsPage = page;
+      renderErrorLogs();
+    },
+  });
 }

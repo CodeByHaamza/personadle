@@ -3,7 +3,7 @@
  * voir api/bootstrap.php) : recherche par clé, purge manuelle.
  */
 
-import { api, toast, escHtml } from "./admin-api.js";
+import { api, toast, escHtml, renderLoading, renderError, renderPagination } from "./admin-api.js";
 
 let _rateLimitsPage = 1;
 let _rateLimitsSearch = "";
@@ -11,8 +11,7 @@ let _rateLimitsSearchTimer;
 
 export async function renderRateLimits() {
   const el = document.getElementById("rate-limits-panel-content");
-  el.innerHTML =
-    '<div style="padding:32px;text-align:center;color:var(--text-muted)">Chargement…</div>';
+  renderLoading(el);
 
   let res;
   try {
@@ -20,8 +19,7 @@ export async function renderRateLimits() {
     if (_rateLimitsSearch) params.set("search", _rateLimitsSearch);
     res = await api.get(`/api/admin/rate_limits?${params.toString()}`);
   } catch (e) {
-    el.innerHTML =
-      '<div style="padding:32px;color:var(--red)">Erreur lors du chargement des rate limits.</div>';
+    renderError(el, "Erreur lors du chargement des rate limits.");
     return;
   }
 
@@ -85,28 +83,13 @@ export async function renderRateLimits() {
     };
   });
 
-  renderRateLimitsPagination(res.total ?? 0, _rateLimitsPage, res.limit ?? 30);
-}
-
-function renderRateLimitsPagination(total, page, limit) {
-  const el = document.getElementById("rate-limits-pagination");
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  if (totalPages <= 1) {
-    el.innerHTML = "";
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-sm" id="rate-limits-prev" ${page <= 1 ? "disabled" : ""}>← Préc.</button>
-    <span>Page ${page} / ${totalPages}</span>
-    <button class="btn-sm" id="rate-limits-next" ${page >= totalPages ? "disabled" : ""}>Suiv. →</button>
-  `;
-  document.getElementById("rate-limits-prev").onclick = () => {
-    _rateLimitsPage = Math.max(1, _rateLimitsPage - 1);
-    renderRateLimits();
-  };
-  document.getElementById("rate-limits-next").onclick = () => {
-    _rateLimitsPage = Math.min(totalPages, _rateLimitsPage + 1);
-    renderRateLimits();
-  };
+  renderPagination("rate-limits-pagination", {
+    total: res.total ?? 0,
+    page: _rateLimitsPage,
+    limit: res.limit ?? 30,
+    onChange: (page) => {
+      _rateLimitsPage = page;
+      renderRateLimits();
+    },
+  });
 }
