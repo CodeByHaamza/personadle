@@ -636,10 +636,31 @@ badges et 7 lignes wallpapers). À confirmer via la CI (`make test-php`).
   Résout maintenant l'id d'abord, comme le fait le vrai endpoint.
 - **`sql/bdd_mysql.sql`** : commentaire de schéma sur `condition_type` mis à jour
   (retire `social_link_rank_10`, ajoute `mode_games`/`games_total`/`social_link_min_rank`).
-- **Hors scope, noté pour un futur ticket** : `titles.aigis_i_am_not_afraid` (`mode_wins`,
-  value=50) ne peut jamais se débloquer — `condition_mode` est NULL dans le seed et ce
-  type n'est pas aliasé comme `classic_p1_wins`/`emoji_p2_wins`. Confirmé identique sur
-  `develop` (pas introduit par cette PR), pas corrigé ici.
+### Suivi de revue, 4ᵉ passe (PR #14) — bug bloquant du titre Aigis corrigé
+
+- **`titles.aigis_i_am_not_afraid` ne pouvait jamais se débloquer** — l'`INSERT INTO
+  titles` n'incluait même pas la colonne `condition_mode` (NULL pour tous les titres,
+  sans exception). Avec `condition_type='mode_wins'` et aucun mode résolu,
+  `personadle_verify_condition()` refuse immédiatement (`return false`) sans jamais
+  consulter les stats — bug confirmé identique sur `develop`, pas introduit par cette
+  PR. Fix (confirmé par le mainteneur — la doc joueur `PersonaDLE_Update.html` annonce
+  "Win 50 games in Classic Mode") : ajoute `condition_mode` à la liste de colonnes de
+  l'`INSERT INTO titles` (`bdd_mysql.sql`), NULL pour les 10 autres titres, `'classic'`
+  pour `aigis_i_am_not_afraid`. `sql/migrations/022_fix_aigis_title_condition.sql` pour
+  propager le fix vers la prod Hostinger (déjà déployée avec le seed cassé).
+- **`GET /api/titles` expose maintenant `condition_mode`** (`api/titles/index.php`) —
+  absent du `SELECT` du `GET`, incohérent avec le `POST /unlock` du même fichier et avec
+  `GET /api/badges`/`GET /api/wallpapers` (mis à jour par cette PR pour exposer les 3
+  colonnes ensemble).
+- **`BadgeWallpaperCatalogTest::testStructuredConditionsRespectExactThreshold()` remplacé
+  par un mécanisme générique lisant le catalogue DIRECTEMENT en base** (badges +
+  wallpapers + **titles**), plutôt qu'une liste de 19 slugs codée en dur — un futur
+  badge/wallpaper/titre utilisant un `condition_type` déjà supporté est désormais couvert
+  automatiquement dès son insertion en base, sans qu'un humain doive ajouter une ligne de
+  test. Étend aussi la couverture aux types utilisés uniquement par `titles`
+  (`badges_count`, `weekly_clean_modes`, `classic_p1_wins`, `emoji_p2_wins`) et à
+  `perfect_wins` (supporté par `condition_check.php` mais non utilisé par le catalogue
+  actuel — ajouté par anticipation, coût marginal nul).
 
 ---
 

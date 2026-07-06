@@ -24,10 +24,13 @@ require_once __DIR__ . '/../../api/lib/condition_check.php';
  *     d'un endpoint et ce que personadle_verify_condition() attend serait détecté ici
  *     (revue PR #14).
  *  3. Prouve que CHAQUE seuil réel du catalogue (pas une valeur inventée) est respecté
- *     à l'exacte frontière : value-1 refusé, value accordé. Angle absent des deux
- *     premiers (qui vérifient soit la donnée en base, soit la logique générique) —
- *     ajouté après qu'une revue ultérieure de cette PR a noté qu'aucun test n'aurait
- *     détecté une régression de comportement sur un seuil réel spécifique.
+ *     à l'exacte frontière : value-1 refusé, value accordé — pour les 3 tables
+ *     (badges, wallpapers, ET titles). Angle absent des deux premiers (qui vérifient
+ *     soit la donnée en base, soit la logique générique) — ajouté après qu'une revue
+ *     ultérieure de cette PR a noté qu'aucun test n'aurait détecté une régression de
+ *     comportement sur un seuil réel spécifique. Lit le catalogue DIRECTEMENT en base
+ *     (pas une liste de slugs codée en dur) : un futur badge/wallpaper/titre utilisant
+ *     un condition_type déjà supporté est couvert automatiquement dès son insertion.
  */
 final class BadgeWallpaperCatalogTest extends TestCase
 {
@@ -296,65 +299,77 @@ final class BadgeWallpaperCatalogTest extends TestCase
     // ── 3. Frontière exacte : value-1 refusé, value accordé (revue PR #14) ──────
 
     /**
-     * Les 19 badges/wallpapers structurés qui ont un seuil numérique simple (sur les 20
-     * réellement structurés — `kamoshida_palace`/`all_modes_won` est testé séparément,
-     * voir testAllModesWonWallpaperRequiresAllSixModes(), car ce n'est pas un seuil mais
-     * un ET logique sur 6 modes).
-     *
-     * Angle absent de ConditionCheckTest.php (logique générique, valeurs arbitraires —
-     * certaines coïncident par hasard avec les vraies valeurs du catalogue, ex.
-     * `ace_defective`=10, `raphael`=30, mais 10 badges sur 15 n'ont aucune coïncidence)
-     * et de testEveryBadgeHasExpectedConditionColumns() (dérive de données en base, pas
-     * comportement à l'exécution). Prouve que chaque seuil réel du catalogue est
-     * respecté à l'exacte frontière : value-1 refusé, value accordé — exactement la
-     * classe de bug qui a cassé silencieusement `social_link_min_rank` dans un commit de
-     * suivi de revue (garde-fou générique `$valueRequiredTypes` qui court-circuitait son
-     * défaut documenté), détectée uniquement parce qu'un test dédié à CE cas existait.
-     *
-     * @return array<string, array{0: string, 1: ?string, 2: int}>
+     * Types de condition à seuil numérique simple : condition_value est directement
+     * comparé (>=) à une statistique. Exclut 'all_modes_won' (ET logique sur 6 modes,
+     * pas un seuil — voir testAllModesWonRequiresAllSixModes()) et 'manual'/'joker_profile'
+     * (aucune statistique vérifiable).
      */
-    private static function structuredThresholds(): array
+    private const NUMERIC_THRESHOLD_TYPES = [
+        'wins_total', 'mode_wins', 'mode_games', 'games_total', 'streak_record',
+        'perfect_wins', 'unique_days', 'giveups_total', 'friends_count', 'badges_count',
+        'social_link_min_rank', 'weekly_clean_modes', 'classic_p1_wins', 'emoji_p2_wins',
+    ];
+
+    /**
+     * Lit DIRECTEMENT en base (pas une liste codée en dur) chaque ligne badges/
+     * wallpapers/titles dont le condition_type est un seuil numérique simple. Suite à
+     * une revue de la revue précédente : une liste de 19 slugs en dur ne couvre pas un
+     * futur badge ajouté avec un condition_type déjà supporté — ici, tout nouveau badge/
+     * wallpaper/titre utilisant un condition_type de NUMERIC_THRESHOLD_TYPES est
+     * automatiquement couvert dès son insertion en base, sans qu'un humain doive ajouter
+     * une ligne. Seul un TOUT NOUVEAU condition_type (jamais vu) demande d'étendre
+     * setConditionStat() + NUMERIC_THRESHOLD_TYPES — pas par badge.
+     *
+     * @return array<int, array{0: string, 1: string, 2: ?string, 3: int}> [label, type, mode, value]
+     */
+    private function structuredThresholdRows(): array
     {
-        return [
-            'first_win'              => ['wins_total', null, 1],
-            'ace_detective'          => ['wins_total', null, 10],
-            'ace_defective'          => ['giveups_total', null, 10],
-            'shadow_slayer'          => ['mode_wins', 'silhouette', 5],
-            'music_master'           => ['mode_wins', 'music', 20],
-            'p1_p2_fan'              => ['mode_wins', 'classic', 15],
-            'velvet_master'          => ['mode_wins', 'personae', 10],
-            'emoji_decoder'          => ['mode_wins', 'emoji', 10],
-            'pyro_spark'             => ['streak_record', null, 7],
-            'raphael'                => ['streak_record', null, 30],
-            'surt'                   => ['streak_record', null, 90],
-            'lucifer'                => ['streak_record', null, 120],
-            'helel'                  => ['streak_record', null, 365],
-            'velvet_regular'         => ['unique_days', null, 50],
-            'best_bro'               => ['friends_count', null, 2],
-            'madarame_wallpaper'     => ['friends_count', null, 1],
-            'rise_dungeons'          => ['mode_games', 'music', 30],
-            'mitsuo_dungeons'        => ['games_total', null, 75],
-            'dark_shopping_district' => ['social_link_min_rank', null, 5],
-        ];
+        $placeholders = implode(',', array_fill(0, count(self::NUMERIC_THRESHOLD_TYPES), '?'));
+        $rows = [];
+        foreach (['badges' => 'slug', 'wallpapers' => 'id', 'titles' => 'slug'] as $table => $idCol) {
+            // $table/$idCol : littéraux fixes de la boucle ci-dessus, jamais une entrée
+            // utilisateur — même pattern que personadle_aggregate_user_stat().
+            $stmt = self::$pdo->prepare(
+                "SELECT $idCol AS identifier, condition_type, condition_mode, condition_value
+                 FROM $table WHERE condition_type IN ($placeholders) AND condition_value IS NOT NULL"
+            );
+            $stmt->execute(self::NUMERIC_THRESHOLD_TYPES);
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                $rows[] = [
+                    "$table:{$r['identifier']}",
+                    $r['condition_type'],
+                    $r['condition_mode'],
+                    (int) $r['condition_value'],
+                ];
+            }
+        }
+        return $rows;
     }
 
-    public function testStructuredConditionsRespectExactThreshold(): void
+    public function testStructuredConditionsRespectExactThresholdAcrossCatalog(): void
     {
-        foreach (self::structuredThresholds() as $slug => [$type, $mode, $value]) {
+        $rows = $this->structuredThresholdRows();
+        $this->assertGreaterThanOrEqual(
+            15,
+            count($rows),
+            'Le catalogue doit contenir au moins les seuils numériques connus (badges+wallpapers+titres)'
+        );
+
+        foreach ($rows as [$label, $type, $mode, $value]) {
             $uid = $this->makeUser();
             self::$pdo->beginTransaction();
             try {
                 $this->setConditionStat($uid, $type, $mode, $value - 1);
                 $this->assertFalse(
                     personadle_verify_condition(self::$pdo, $uid, $type, $mode, $value),
-                    "$slug ($type" . ($mode ? "/$mode" : '') . '=' . ($value - 1)
+                    "$label ($type" . ($mode ? "/$mode" : '') . '=' . ($value - 1)
                         . ") devrait être refusé juste sous le seuil $value"
                 );
 
                 $this->setConditionStat($uid, $type, $mode, $value);
                 $this->assertTrue(
                     personadle_verify_condition(self::$pdo, $uid, $type, $mode, $value),
-                    "$slug ($type" . ($mode ? "/$mode" : '') . "=$value) devrait être accordé exactement au seuil"
+                    "$label ($type" . ($mode ? "/$mode" : '') . "=$value) devrait être accordé exactement au seuil"
                 );
             } finally {
                 self::$pdo->rollBack();
@@ -362,8 +377,12 @@ final class BadgeWallpaperCatalogTest extends TestCase
         }
     }
 
-    public function testAllModesWonWallpaperRequiresAllSixModes(): void
+    public function testAllModesWonRequiresAllSixModes(): void
     {
+        // Logique générique — couvre à la fois kamoshida_palace (wallpaper) et
+        // yu_reach_out_to_the_truth (titre), les deux seuls usages de 'all_modes_won'
+        // dans le catalogue seedé ; le comportement de personadle_verify_condition() ne
+        // dépend pas de la table appelante.
         $uid = $this->makeUser();
         self::$pdo->beginTransaction();
         try {
@@ -375,14 +394,14 @@ final class BadgeWallpaperCatalogTest extends TestCase
             }
             $this->assertFalse(
                 personadle_verify_condition(self::$pdo, $uid, 'all_modes_won', null, null),
-                "kamoshida_palace : 5 modes gagnés sur 6 devrait être refusé"
+                '5 modes gagnés sur 6 devrait être refusé'
             );
 
             self::$pdo->prepare('INSERT INTO user_stats (user_id, mode, wins) VALUES (?, ?, 1)')
                 ->execute([$uid, $modes[5]]);
             $this->assertTrue(
                 personadle_verify_condition(self::$pdo, $uid, 'all_modes_won', null, null),
-                "kamoshida_palace : 6 modes gagnés sur 6 devrait être accordé"
+                '6 modes gagnés sur 6 devrait être accordé'
             );
         } finally {
             self::$pdo->rollBack();
@@ -395,6 +414,12 @@ final class BadgeWallpaperCatalogTest extends TestCase
         switch ($type) {
             case 'wins_total':
                 $this->upsertStat($userId, 'classic', 'wins', $value);
+                break;
+            case 'classic_p1_wins':
+                $this->upsertStat($userId, 'classic', 'wins', $value);
+                break;
+            case 'emoji_p2_wins':
+                $this->upsertStat($userId, 'emoji', 'wins', $value);
                 break;
             case 'giveups_total':
                 $this->upsertStat($userId, 'classic', 'giveups', $value);
@@ -411,14 +436,23 @@ final class BadgeWallpaperCatalogTest extends TestCase
             case 'streak_record':
                 $this->upsertStat($userId, 'classic', 'streak_record', $value);
                 break;
+            case 'perfect_wins':
+                $this->upsertStat($userId, 'classic', 'perfect_wins', $value);
+                break;
             case 'unique_days':
                 $this->setUniqueDays($userId, $value);
                 break;
             case 'friends_count':
                 $this->setFriendsCount($userId, $value);
                 break;
+            case 'badges_count':
+                $this->setBadgesCount($userId, $value);
+                break;
             case 'social_link_min_rank':
                 $this->setSocialLinkRank($userId, $value);
+                break;
+            case 'weekly_clean_modes':
+                $this->setWeeklyCleanModes($userId, $value);
                 break;
             default:
                 throw new InvalidArgumentException("Type non géré par ce test: $type");
@@ -427,7 +461,7 @@ final class BadgeWallpaperCatalogTest extends TestCase
 
     private function upsertStat(int $userId, string $mode, string $column, int $value): void
     {
-        $allowed = ['wins', 'giveups', 'games', 'streak_record'];
+        $allowed = ['wins', 'giveups', 'games', 'streak_record', 'perfect_wins'];
         if (!in_array($column, $allowed, true)) {
             throw new InvalidArgumentException("Colonne non autorisée: $column");
         }
@@ -477,5 +511,31 @@ final class BadgeWallpaperCatalogTest extends TestCase
         self::$pdo->prepare(
             'INSERT INTO social_links (user_a_id, user_b_id, `rank`, xp) VALUES (?, ?, ?, 500)'
         )->execute([$lo, $hi, $rank]);
+    }
+
+    /** badge_id n'a pas de FK vers badges.slug (colonne libre, cf. bdd_mysql.sql) — des slugs synthétiques suffisent. */
+    private function setBadgesCount(int $userId, int $count): void
+    {
+        self::$pdo->prepare('DELETE FROM badges_unlocked WHERE user_id = ?')->execute([$userId]);
+        $stmt = self::$pdo->prepare('INSERT INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)');
+        for ($i = 0; $i < $count; $i++) {
+            $stmt->execute([$userId, "phpunit_synthetic_badge_{$i}"]);
+        }
+    }
+
+    private function setWeeklyCleanModes(int $userId, int $count): void
+    {
+        $modes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+        if ($count > count($modes)) {
+            throw new InvalidArgumentException('weekly_clean_modes ne peut pas dépasser 6 (nb de modes réels)');
+        }
+        self::$pdo->prepare('DELETE FROM game_sessions WHERE user_id = ?')->execute([$userId]);
+        $stmt = self::$pdo->prepare(
+            'INSERT INTO game_sessions (user_id, mode, played_date, target_name, result, attempts)
+             VALUES (?, ?, CURDATE(), "x", "win", 1)'
+        );
+        foreach (array_slice($modes, 0, $count) as $mode) {
+            $stmt->execute([$userId, $mode]);
+        }
     }
 }
