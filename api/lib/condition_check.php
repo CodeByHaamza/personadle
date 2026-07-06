@@ -20,15 +20,24 @@
  *   giveups_total        → SUM(giveups) tous modes
  *   friends_count        → nb d'amis acceptés
  *   badges_count         → nb de badges débloqués
- *   social_link_rank_10  → au moins un Social Link au rang exactement 10
  *   social_link_min_rank → au moins un Social Link au rang >= condition_value
  *   all_modes_won        → au moins 1 victoire dans chacun des 6 modes
  *   weekly_clean_modes   → nb de modes où l'utilisateur a joué cette semaine (approx.)
- *   classic_p1_wins      → victoires en mode classic (alias de mode_wins classic)
- *   emoji_p2_wins        → victoires en mode emoji (alias de mode_wins emoji)
+ *   classic_p1_wins      → victoires en mode classic (alias de mode_wins classic) —
+ *                          RÉELLEMENT UTILISÉ par le titre `naoya_first_awakening`
+ *                          (bdd_mysql.sql), ne pas supprimer sans migrer cette ligne.
+ *   emoji_p2_wins        → victoires en mode emoji (alias de mode_wins emoji) —
+ *                          RÉELLEMENT UTILISÉ par le titre `maya_always_be_positive`
+ *                          (bdd_mysql.sql), ne pas supprimer sans migrer cette ligne.
  *   joker_profile        → condition manuelle — retourne true (vérifié en aval par admin)
  *   manual               → condition manuelle/flag client/redeem — retourne true
  *   NULL ou inconnu      → true (safe fallback)
+ *
+ * `social_link_rank_10` (rang exactement 10) a été retiré de ce vocabulaire — c'était
+ * un prédicat strictement identique à `social_link_min_rank` + condition_value=10, et
+ * aucune ligne de seed ne l'utilisait (contrairement à classic_p1_wins/emoji_p2_wins
+ * ci-dessus). Si besoin de le réintroduire : condition_type='social_link_min_rank',
+ * condition_value=10.
  *
  * @param PDO      $pdo      Instance PDO
  * @param int      $userId   ID de l'utilisateur authentifié
@@ -45,15 +54,26 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
         return true;
     }
 
+    // Types qui comparent condition_value à une statistique numérique : un
+    // condition_value NULL par erreur de saisie (colonne nullable, rien ne
+    // l'empêche) doit refuser l'unlock, pas être traité comme un seuil 0
+    // (= toujours vrai). Exclus volontairement : 'social_link_min_rank' a sa
+    // propre valeur par défaut documentée (voir plus bas), et
+    // all_modes_won/manual/joker_profile n'utilisent pas condition_value.
+    $valueRequiredTypes = [
+        'wins_total', 'mode_wins', 'classic_p1_wins', 'emoji_p2_wins', 'mode_games',
+        'games_total', 'streak_record', 'perfect_wins', 'unique_days', 'giveups_total',
+        'friends_count', 'badges_count', 'social_link_min_rank', 'weekly_clean_modes',
+    ];
+    if (in_array($condType, $valueRequiredTypes, true) && $condValue === null) {
+        return false;
+    }
     $val = $condValue ?? 0;
 
     switch ($condType) {
 
-        case 'wins_total': {
-            $s = $pdo->prepare('SELECT COALESCE(SUM(wins), 0) FROM user_stats WHERE user_id = ?');
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
+        case 'wins_total':
+            return personadle_aggregate_user_stat($pdo, $userId, 'wins', 'SUM') >= $val;
 
         case 'mode_wins':
         case 'classic_p1_wins':
@@ -67,49 +87,32 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
                 };
             }
             if (!$mode) return false; // mode non résolu → condition invalide
-            $s = $pdo->prepare('SELECT COALESCE(wins, 0) FROM user_stats WHERE user_id = ? AND mode = ?');
-            $s->execute([$userId, $mode]);
-            return (int) $s->fetchColumn() >= $val;
+            return personadle_user_stat_for_mode($pdo, $userId, $mode, 'wins') >= $val;
         }
 
         case 'mode_games': {
             // Nombre de PARTIES (games), pas de victoires — ex: wallpaper rise_dungeons
             // ("30 total games in Music mode", peu importe le résultat).
             if (!$condMode) return false;
-            $s = $pdo->prepare('SELECT COALESCE(games, 0) FROM user_stats WHERE user_id = ? AND mode = ?');
-            $s->execute([$userId, $condMode]);
-            return (int) $s->fetchColumn() >= $val;
+            return personadle_user_stat_for_mode($pdo, $userId, $condMode, 'games') >= $val;
         }
 
-        case 'games_total': {
-            // Nombre de parties tous modes confondus — ex: wallpaper mitsuo_dungeons.
-            $s = $pdo->prepare('SELECT COALESCE(SUM(games), 0) FROM user_stats WHERE user_id = ?');
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
+        case 'games_total':
+            return personadle_aggregate_user_stat($pdo, $userId, 'games', 'SUM') >= $val;
 
-        case 'streak_record': {
-            $s = $pdo->prepare('SELECT COALESCE(MAX(streak_record), 0) FROM user_stats WHERE user_id = ?');
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
+        case 'streak_record':
+            return personadle_aggregate_user_stat($pdo, $userId, 'streak_record', 'MAX') >= $val;
 
-        case 'perfect_wins': {
-            $s = $pdo->prepare('SELECT COALESCE(SUM(perfect_wins), 0) FROM user_stats WHERE user_id = ?');
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
+        case 'perfect_wins':
+            return personadle_aggregate_user_stat($pdo, $userId, 'perfect_wins', 'SUM') >= $val;
+
+        case 'giveups_total':
+            return personadle_aggregate_user_stat($pdo, $userId, 'giveups', 'SUM') >= $val;
 
         case 'unique_days': {
             $s = $pdo->prepare(
                 'SELECT COUNT(DISTINCT played_date) FROM game_sessions WHERE user_id = ?'
             );
-            $s->execute([$userId]);
-            return (int) $s->fetchColumn() >= $val;
-        }
-
-        case 'giveups_total': {
-            $s = $pdo->prepare('SELECT COALESCE(SUM(giveups), 0) FROM user_stats WHERE user_id = ?');
             $s->execute([$userId]);
             return (int) $s->fetchColumn() >= $val;
         }
@@ -129,25 +132,17 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             return (int) $s->fetchColumn() >= $val;
         }
 
-        case 'social_link_rank_10': {
-            // Au moins un Social Link (avec n'importe quel ami) au rang 10 pile.
-            $s = $pdo->prepare(
-                'SELECT COUNT(*) FROM social_links
-                 WHERE (user_a_id = ? OR user_b_id = ?) AND `rank` = 10'
-            );
-            $s->execute([$userId, $userId]);
-            return (int) $s->fetchColumn() >= 1;
-        }
-
         case 'social_link_min_rank': {
-            // Généralisation : au moins un Social Link au rang >= condition_value
-            // (ex: wallpaper dark_shopping_district, rang >= 5).
+            // Au moins un Social Link au rang >= condition_value (défaut 10 = rang
+            // maximum si non précisé, pour rester équivalent à l'ancien
+            // 'social_link_rank_10' sans dupliquer la requête — voir docblock).
+            $threshold = $condValue ?? 10;
             $s = $pdo->prepare(
                 'SELECT COALESCE(MAX(`rank`), 0) FROM social_links
                  WHERE user_a_id = ? OR user_b_id = ?'
             );
             $s->execute([$userId, $userId]);
-            return (int) $s->fetchColumn() >= $val;
+            return (int) $s->fetchColumn() >= $threshold;
         }
 
         case 'all_modes_won': {
@@ -182,4 +177,34 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             // Type de condition inconnu → safe fallback (ne bloque pas les futurs ajouts)
             return true;
     }
+}
+
+/**
+ * SUM ou MAX d'une colonne numérique de user_stats sur tous les modes d'un joueur.
+ * $column est toujours un littéral fixe passé par les appelants de ce fichier
+ * (jamais une entrée utilisateur) — la whitelist ci-dessous est une protection en
+ * profondeur, pas une nécessité fonctionnelle actuelle.
+ */
+function personadle_aggregate_user_stat(PDO $pdo, int $userId, string $column, string $fn): int
+{
+    $allowedColumns = ['wins', 'giveups', 'games', 'perfect_wins', 'streak_record'];
+    $allowedFns     = ['SUM', 'MAX'];
+    if (!in_array($column, $allowedColumns, true) || !in_array($fn, $allowedFns, true)) {
+        throw new InvalidArgumentException("Colonne/fonction non autorisée: $fn($column)");
+    }
+    $s = $pdo->prepare("SELECT COALESCE($fn($column), 0) FROM user_stats WHERE user_id = ?");
+    $s->execute([$userId]);
+    return (int) $s->fetchColumn();
+}
+
+/** Valeur d'une colonne numérique de user_stats pour UN mode précis (pas d'agrégation). */
+function personadle_user_stat_for_mode(PDO $pdo, int $userId, string $mode, string $column): int
+{
+    $allowedColumns = ['wins', 'games'];
+    if (!in_array($column, $allowedColumns, true)) {
+        throw new InvalidArgumentException("Colonne non autorisée: $column");
+    }
+    $s = $pdo->prepare("SELECT COALESCE($column, 0) FROM user_stats WHERE user_id = ? AND mode = ?");
+    $s->execute([$userId, $mode]);
+    return (int) $s->fetchColumn();
 }

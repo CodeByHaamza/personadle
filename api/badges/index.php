@@ -19,6 +19,13 @@ if ($method === 'GET') {
     $col  = in_array($lang, ['fr','es','de','it'], true) ? "name_{$lang}" : 'name_en';
 
     // LEFT JOIN remplace la sous-requête corrélée N+1 (une requête au lieu de N)
+    //
+    // Revue PR #14 : condition_type/mode/value exposés à tout utilisateur authentifié
+    // (décision assumée, pas un effet de bord du SELECT étendu) — même contrat que
+    // GET /api/titles, qui exposait déjà condition_type/condition_value avant cette PR.
+    // Ça révèle les seuils exacts de déblocage (ex: "50 jours uniques"), acceptable pour
+    // un fan-game sans enjeu compétitif fort ; les conditions sensibles (`manual`, badges
+    // secrets à réponse "???") ne fuient rien de plus que ce que condition_en dit déjà.
     $stmt = $pdo->prepare(
         "SELECT b.slug, b.{$col} AS name, b.category, b.rarity,
                 b.image_path, b.condition_en, b.is_secret,

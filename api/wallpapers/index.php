@@ -16,9 +16,16 @@ $action = end($parts);
  * Vérifie si un utilisateur peut débloquer un wallpaper.
  *
  * - is_default = 1 : accessible à tous les utilisateurs authentifiés → toujours true
- * - is_default = 0 : condition structurée (condition_type/mode/value, voir
- *   api/lib/condition_check.php) vérifiée par personadle_verify_condition() —
- *   condition_type NULL ou 'manual' → true (safe fallback / flag client de confiance).
+ * - is_default = 0 et condition_type NULL/vide : REFUS (fail-closed). Contrairement à
+ *   badges/titles, où condition_type NULL est un safe-fallback "true" volontaire
+ *   (`personadle_verify_condition()`), wallpapers a toujours été fail-closed par
+ *   conception (l'ancien verifyWallpaperCondition() faisait `default: return false`).
+ *   Revue PR #14 : déléguer directement à personadle_verify_condition() aurait
+ *   silencieusement inversé ce choix pour tout futur wallpaper ajouté sans
+ *   condition_type — un wallpaper non-défaut doit explicitement dire 'manual' pour
+ *   être débloqué sans vérification serveur, jamais l'omettre par oubli.
+ * - is_default = 0 et condition_type défini ('manual' ou un type structuré) :
+ *   vérifié par personadle_verify_condition().
  *
  * @param array $wallpaper  Ligne issue de la table wallpapers (is_default, condition_*)
  * @return bool  true si l'unlock est autorisé, false sinon
@@ -27,6 +34,10 @@ function canUnlockWallpaper(PDO $pdo, int $userId, array $wallpaper): bool
 {
     if ((int) $wallpaper['is_default'] === 1) {
         return true;
+    }
+
+    if (empty($wallpaper['condition_type'])) {
+        return false; // fail-closed : wallpaper non-défaut sans condition déclarée
     }
 
     return personadle_verify_condition(
@@ -39,6 +50,9 @@ function canUnlockWallpaper(PDO $pdo, int $userId, array $wallpaper): bool
 }
 
 // ── GET /api/wallpapers — full catalog with per-user is_unlocked ─────────────
+// Revue PR #14 : condition_type/mode/value exposés à tout utilisateur authentifié
+// (décision assumée — même contrat que GET /api/titles/GET /api/badges, voir leurs
+// commentaires respectifs).
 if ($method === 'GET') {
     $stmt = $pdo->prepare(
         "SELECT w.id, w.name, w.game, w.is_default, w.unlock_condition, w.image_path,

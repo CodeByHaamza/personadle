@@ -111,6 +111,24 @@ final class ConditionCheckTest extends TestCase
         $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'joker_profile', null, null));
     }
 
+    /**
+     * Revue PR #14 : condition_value NULL sur un type numérique doit refuser
+     * l'unlock (fail-closed), pas être traité comme un seuil 0 (= toujours vrai).
+     * Un joueur avec 0 victoire ne doit jamais débloquer un badge wins_total mal
+     * configuré (condition_value oublié en base).
+     */
+    public function testNullConditionValueFailsClosedForNumericTypes(): void
+    {
+        $uid = $this->makeUser();
+        foreach (['wins_total', 'mode_wins', 'mode_games', 'games_total', 'streak_record',
+                  'perfect_wins', 'unique_days', 'giveups_total', 'friends_count', 'badges_count'] as $type) {
+            $this->assertFalse(
+                personadle_verify_condition(self::$pdo, $uid, $type, 'classic', null),
+                "condition_value NULL doit refuser pour condition_type=$type"
+            );
+        }
+    }
+
     // ── wins_total / giveups_total / streak_record / perfect_wins ─────────────
 
     public function testWinsTotalSumsAcrossModes(): void
@@ -238,21 +256,33 @@ final class ConditionCheckTest extends TestCase
         $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'badges_count', null, 2));
     }
 
-    // ── social_link_rank_10 / social_link_min_rank ────────────────────────────
+    // ── social_link_min_rank (remplace l'ancien social_link_rank_10, retiré car
+    //    strictement équivalent à social_link_min_rank + condition_value=10, et
+    //    aucune donnée de seed ne l'utilisait — voir docblock de condition_check.php) ──
 
-    public function testSocialLinkRank10RequiresExactlyRank10(): void
+    public function testSocialLinkMinRankDefaultsToRank10WhenValueIsNull(): void
     {
+        // condition_value NULL sur ce type précis => seuil implicite 10 (équivalent de
+        // l'ancien social_link_rank_10), documenté explicitement dans condition_check.php.
         $u1 = $this->makeUser('a');
         $u2 = $this->makeUser('b');
         [$lo, $hi] = $u1 < $u2 ? [$u1, $u2] : [$u2, $u1];
         self::$pdo->prepare(
             'INSERT INTO social_links (user_a_id, user_b_id, `rank`, xp) VALUES (?, ?, 8, 500)'
         )->execute([$lo, $hi]);
-        $this->assertFalse(personadle_verify_condition(self::$pdo, $u1, 'social_link_rank_10', null, null));
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $u1, 'social_link_min_rank', null, null));
 
         self::$pdo->prepare('UPDATE social_links SET `rank` = 10 WHERE user_a_id = ? AND user_b_id = ?')
             ->execute([$lo, $hi]);
-        $this->assertTrue(personadle_verify_condition(self::$pdo, $u1, 'social_link_rank_10', null, null));
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $u1, 'social_link_min_rank', null, null));
+    }
+
+    public function testRemovedSocialLinkRank10TypeFallsBackToTrue(): void
+    {
+        // 'social_link_rank_10' n'est plus un condition_type reconnu (retiré, voir
+        // docblock) — doit tomber dans le safe-fallback "type inconnu", pas planter.
+        $uid = $this->makeUser();
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'social_link_rank_10', null, null));
     }
 
     public function testSocialLinkMinRankUsesThreshold(): void
