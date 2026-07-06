@@ -528,6 +528,142 @@ PHPUnit) — à confirmer via la CI réelle.
 
 ---
 
+## 2026-07-06 — Conditions badges/wallpapers en colonnes structurées
+
+Suite du menu ROADMAP.md : `badges`/`wallpapers` n'avaient qu'un texte libre d'affichage
+(`condition_en`/`unlock_condition`), la vérification serveur passant par un mapping
+slug→logique en dur dans `api/badges/index.php`/`api/wallpapers/index.php` — fragile
+(un nouveau badge ajouté sans mise à jour du switch passait toujours en "safe fallback
+= true"). `titles` avait déjà résolu ce problème avec des colonnes structurées
+(`condition_type`/`condition_mode`/`condition_value`) — ce lot applique le même schéma
+aux deux autres tables.
+
+- **`api/lib/condition_check.php`** (nouveau) — `personadle_verify_condition()` extrait
+  de l'ancien `verifyTitleCondition()` (`api/titles/index.php`), généralisé et partagé
+  par les 3 tables au lieu de 3 mappings divergents. 3 nouveaux `condition_type` :
+  `mode_games` (parties jouées, pas victoires — ex. wallpaper `rise_dungeons`),
+  `games_total` (parties tous modes), `social_link_min_rank` (généralise
+  `social_link_rank_10` avec un seuil au lieu d'un rang exact).
+- **`sql/migrations/021_structured_badge_wallpaper_conditions.sql`** + `bdd_mysql.sql`
+  mis à jour directement (schéma + seed) : `ALTER TABLE` badges/wallpapers, backfill de
+  toutes les valeurs existantes. 15/60 badges et 5/7 wallpapers ont une condition
+  réellement structurable ; le reste (flags narratifs multi-persos, redeem de code
+  événement, vérifié par un autre endpoint comme social-links/streak-recovery) reçoit
+  `condition_type = 'manual'` — documente explicitement le choix au lieu de laisser
+  `NULL` en silence.
+- **Corrige au passage 2 vrais bugs de mapping**, découverts en cartographiant chaque
+  badge vers son condition_type réel : `velvet_regular` ("jouer 50 jours uniques") et
+  `best_bro` ("avoir 2+ amis") étaient dans la liste des badges "impossible à
+  structurer, toujours autorisé" alors qu'ils sont structurellement identiques à
+  `unique_days`/`friends_count`, déjà utilisés par `titles`. Ces deux badges sont
+  maintenant réellement vérifiés côté serveur.
+- `api/badges/index.php`/`api/wallpapers/index.php` réécrits pour lire les 3 colonnes
+  et appeler la fonction partagée — les anciennes fonctions `verifyBadgeCondition()`
+  (avec sa liste de bypass slug par slug) et `verifyWallpaperCondition()` supprimées.
+- `tests/php/ConditionCheckTest.php` (21 tests, même pattern `DatabaseIntegrationTest.php`
+  — vraie MariaDB, transaction annulée en tearDown) couvre chaque `condition_type`.
+
+Non exécuté en sandbox (pas de Docker/MariaDB) — vérifié par relecture attentive +
+comparaison structurelle avec `verifyTitleCondition()` (déjà tournée en CI réelle avant
+cette PR) + un script Python de validation structurelle des lignes SQL modifiées
+(nombre de champs par ligne INSERT = nombre de colonnes déclarées, sur les 60 lignes
+badges et 7 lignes wallpapers). À confirmer via la CI (`make test-php`).
+
+### Suivi de revue (PR #14)
+
+- **Fail-closed wallpaper préservé** — `personadle_verify_condition()` est fail-open par
+  design (un `condition_type` NULL/inconnu débloque toujours, pour ne jamais bloquer un
+  futur ajout de titre/badge). L'ancien `verifyWallpaperCondition()` faisait l'inverse
+  (`default: return false`). Déléguer wallpapers directement à la fonction partagée aurait
+  silencieusement inversé ce choix pour tout wallpaper futur sans `condition_type`. Fix :
+  garde explicite `if (empty($wallpaper['condition_type'])) return false;` dans
+  `canUnlockWallpaper()` (`api/wallpapers/index.php`) **avant** la délégation.
+- **`condition_value` NULL fail-closed** — `$condValue ?? 0` combiné à des comparaisons
+  `>= $val` faisait qu'un badge/wallpaper avec `condition_type` défini mais
+  `condition_value` NULL par erreur de saisie (colonne nullable) était toujours débloqué
+  (`>= 0` toujours vrai), au lieu de refuser. Fix : liste `$valueRequiredTypes` vérifiée
+  avant le `switch`, retourne `false` si un type qui a besoin d'une valeur numérique a
+  `condition_value = NULL`. `social_link_min_rank` en est volontairement exclu (défaut à
+  10 documenté séparément).
+- **`classic_p1_wins`/`emoji_p2_wins` corrigés dans le docblock** — la revue affirmait ces
+  deux alias inutilisés par le seed. Faux : `naoya_first_awakening` et
+  `maya_always_be_positive` (`bdd_mysql.sql`) les utilisent réellement. Docblock mis à
+  jour pour le documenter explicitement au lieu de supprimer du code fonctionnel.
+- **`SUM`/`MAX` factorisés** — `personadle_aggregate_user_stat()` et
+  `personadle_user_stat_for_mode()` extraits pour éliminer la duplication SQL entre les
+  différents `condition_type` numériques (whitelist de colonnes/fonctions en défense en
+  profondeur, `$column`/`$fn` ne sont jamais une entrée utilisateur).
+- **`tests/php/BadgeWallpaperCatalogTest.php`** (nouveau, 5 tests) — répond aussi à la
+  demande de couverture par badge individuel : `testEveryBadgeHasExpectedConditionColumns()`
+  vérifie que les 60 lignes réelles de `badges` correspondent exactement au mapping attendu
+  (catalogue complet, pas un échantillon), idem pour les 7 wallpapers non-défaut. Les 3
+  tests restants copient le SELECT exact des 3 endpoints réels (`badges`/`wallpapers`/
+  `titles`) pour fermer le trou identifié en revue : les tests précédents appelaient
+  `personadle_verify_condition()` avec des littéraux, jamais via le vrai flux bout-en-bout,
+  donc un décalage de nom de colonne entre le SELECT d'un endpoint et la fonction n'aurait
+  pas été détecté.
+
+### Suivi de revue, 2ᵉ passe (PR #14)
+
+- **Vrai bug attrapé par la CI elle-même (commit `d603516`)** — `ConditionCheckTest::testSocialLinkMinRankDefaultsToRank10WhenValueIsNull`
+  a échoué au premier push du suivi de revue (`2da76c01`) : la nouvelle garde
+  `$valueRequiredTypes` (refus si `condition_value` NULL, ajoutée par ce même commit)
+  incluait encore `social_link_min_rank` malgré le commentaire juste au-dessus affirmant
+  l'inverse. Ce type a son propre défaut à 10 documenté dans le `switch`, donc la garde
+  générique le court-circuitait avant d'y arriver — `social_link_min_rank` retournait
+  toujours `false`, même à rang 10. Retiré de la liste dans `d603516` — reconfirmé vert
+  par la CI dans la foulée.
+- **Frontière exacte value-1/value ajoutée pour les 19 badges/wallpapers à seuil simple**
+  (`BadgeWallpaperCatalogTest::testStructuredConditionsRespectExactThreshold`) + un test
+  dédié pour `kamoshida_palace`/`all_modes_won` (5/6 modes refusé, 6/6 accordé). Répond au
+  point le plus important d'une 2ᵉ passe de revue : aucun test existant ne prouvait qu'un
+  seuil réel du catalogue (par opposition à une valeur inventée dans `ConditionCheckTest.php`,
+  ou à la donnée en base vérifiée par `testEveryBadgeHasExpectedConditionColumns()`) était
+  respecté à l'exécution — exactement la classe de bug qui vient de casser
+  `social_link_min_rank` silencieusement.
+- **`personadle_known_condition_types()`** (nouveau, `condition_check.php`) — liste
+  exhaustive des 17 `condition_type` reconnus. `canUnlockWallpaper()`
+  (`api/wallpapers/index.php`) comparait juste `!empty($condition_type)`, ce qui ne
+  distingue pas un type reconnu (`manual`) d'une faute de frappe ou d'un type retiré du
+  vocabulaire (l'ancien `social_link_rank_10`) — les deux tombaient sur le safe-fallback
+  `true` partagé avec badges/titles, débloquant un wallpaper par erreur. Comparaison
+  stricte à cette liste maintenant. `ConditionCheckTest::testKnownConditionTypesMatchesSwitchCases()`
+  garde la liste synchronisée avec les vrais `case` du switch.
+- **`tests/php/BadgeWallpaperCatalogTest.php` — test titres corrigé** : utilisait
+  `WHERE slug = ?` alors que le vrai endpoint (`api/titles/index.php::POST /unlock`) fait
+  `WHERE id = ?` après une résolution slug→id séparée. Passait par coïncidence (même
+  ligne), sans jamais exercer la requête réellement utilisée par le check de condition.
+  Résout maintenant l'id d'abord, comme le fait le vrai endpoint.
+- **`sql/bdd_mysql.sql`** : commentaire de schéma sur `condition_type` mis à jour
+  (retire `social_link_rank_10`, ajoute `mode_games`/`games_total`/`social_link_min_rank`).
+### Suivi de revue, 4ᵉ passe (PR #14) — bug bloquant du titre Aigis corrigé
+
+- **`titles.aigis_i_am_not_afraid` ne pouvait jamais se débloquer** — l'`INSERT INTO
+  titles` n'incluait même pas la colonne `condition_mode` (NULL pour tous les titres,
+  sans exception). Avec `condition_type='mode_wins'` et aucun mode résolu,
+  `personadle_verify_condition()` refuse immédiatement (`return false`) sans jamais
+  consulter les stats — bug confirmé identique sur `develop`, pas introduit par cette
+  PR. Fix (confirmé par le mainteneur — la doc joueur `PersonaDLE_Update.html` annonce
+  "Win 50 games in Classic Mode") : ajoute `condition_mode` à la liste de colonnes de
+  l'`INSERT INTO titles` (`bdd_mysql.sql`), NULL pour les 10 autres titres, `'classic'`
+  pour `aigis_i_am_not_afraid`. `sql/migrations/022_fix_aigis_title_condition.sql` pour
+  propager le fix vers la prod Hostinger (déjà déployée avec le seed cassé).
+- **`GET /api/titles` expose maintenant `condition_mode`** (`api/titles/index.php`) —
+  absent du `SELECT` du `GET`, incohérent avec le `POST /unlock` du même fichier et avec
+  `GET /api/badges`/`GET /api/wallpapers` (mis à jour par cette PR pour exposer les 3
+  colonnes ensemble).
+- **`BadgeWallpaperCatalogTest::testStructuredConditionsRespectExactThreshold()` remplacé
+  par un mécanisme générique lisant le catalogue DIRECTEMENT en base** (badges +
+  wallpapers + **titles**), plutôt qu'une liste de 19 slugs codée en dur — un futur
+  badge/wallpaper/titre utilisant un `condition_type` déjà supporté est désormais couvert
+  automatiquement dès son insertion en base, sans qu'un humain doive ajouter une ligne de
+  test. Étend aussi la couverture aux types utilisés uniquement par `titles`
+  (`badges_count`, `weekly_clean_modes`, `classic_p1_wins`, `emoji_p2_wins`) et à
+  `perfect_wins` (supporté par `condition_check.php` mais non utilisé par le catalogue
+  actuel — ajouté par anticipation, coût marginal nul).
+
+---
+
 ## Comment utiliser ce fichier
 
 - Un commit qui touche au code (pas juste de la doc/config triviale) →
