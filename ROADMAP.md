@@ -136,6 +136,15 @@ Nouveau jeu — cas A (roster inédit)
   > `anti_cheat`) que 0 faux positif ne s'est produit sur une période à définir. Distinct du
   > point ❓ ci-dessous (badges à flags) : celui-ci touche l'intégrité des sessions elles-mêmes,
   > donc le leaderboard en entier.
+  >
+  > ⚠️ **Limitation trouvée en review (PR #13)** : pour AllOutAttack/Personae, `$activeFilters`
+  > est accepté tel que soumis par le client sans être corrélé à un état côté serveur (aucune
+  > session ne mémorise le filtre opus réellement actif) — un client peut donc soumettre
+  > n'importe quel sous-ensemble de codes opus pour faire correspondre le recalcul serveur au
+  > nom qu'il veut faire valider, contrairement à Classic/Emoji/Silhouette/Music (pas de repli
+  > filtré, donc pas contournables ainsi). À corriger (filtre stocké côté serveur, pas re-soumis
+  > par le client) avant d'activer le rejet strict pour ces 2 modes spécifiquement — voir le
+  > commentaire en tête de `api/lib/daily_target.php`.
 
 ### ❓ Décisions de design à trancher
 

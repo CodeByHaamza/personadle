@@ -498,6 +498,34 @@ tests E2E (`admin-extended.spec.js`) et PHPUnit (`DailyTargetTest.php`) n'ont pa
 pu être exécutés ici (nécessitent respectivement `make up` et un environnement
 PHPUnit) — à confirmer via la CI réelle.
 
+### Suite à la review de la PR #13
+
+- `admin/admin-api.js::escHtml` corrigeait `String(str || "")` — un champ numérique valant
+  légitimement 0 s'affichait vide au lieu de "0". Corrigé en `String(str ?? "")`, propagé
+  automatiquement aux 8 modules admin qui l'importent.
+- Pagination (`renderXPagination`) et bandeaux "Chargement…"/erreur, copiés-collés à l'identique
+  dans `event-codes.js`/`error-logs.js`/`audit-log.js`/`deletion-requests.js`/`rate-limits.js`,
+  factorisés en `renderPagination()`/`renderLoading()`/`renderError()` dans `admin-api.js`.
+  Vérifié par `tests/adminSmoke.test.js` (clique déjà sur les 5 panneaux) + relecture.
+- `tests/php/DailyTargetTest.php` ne cross-vérifiait la valeur de hash que pour 3 modes sur 6
+  (Classic/Personae/Music) — Emoji/Silhouette/AllOutAttack n'avaient qu'un test de bornes.
+  Ajouté les 3 valeurs manquantes (cross-check Node/PHP, même méthode).
+- **Limitation documentée, pas corrigée** : pour AllOutAttack/Personae, `$activeFilters` est
+  accepté tel que soumis par le client sans être corrélé à un état côté serveur — un client peut
+  soumettre n'importe quel sous-ensemble de codes opus pour faire correspondre le recalcul
+  serveur au nom qu'il veut faire valider. Sans conséquence en phase 1 (détection), mais à
+  corriger (filtre stocké côté serveur) avant d'activer le rejet strict pour ces 2 modes
+  spécifiquement — documenté dans `api/lib/daily_target.php` et `ROADMAP.md`.
+- `js/tv-friend-anim.js` et `js/divine-gift.js` recopiaient le même check
+  `matchMedia("(prefers-reduced-motion: reduce)")` — extrait en `prefersReducedMotion()`
+  (`js/gameCore.js`), conforme à CLAUDE.md §8 (réutiliser gameCore.js pour ce type d'utilitaire).
+- `CLAUDE.md` §9 pointait vers un `PersonaDLE_Update.md` qui n'existe pas pour la v2.0 (seulement
+  pour l'archive v1.1) — corrigé pour refléter la pratique réelle : `DEV_CHANGELOG.md` (dev) +
+  `PersonaDLE_Update.html` (joueur, page HTML bilingue), comme documenté en tête de ce fichier.
+- Perf (`daily_pools.json` entièrement reparsé à chaque `POST /api/sessions` quel que soit le
+  mode joué) : accepté tel quel vu la taille modeste du fichier (~40 Ko), commentaire ajouté
+  plutôt qu'une restructuration en fichiers par mode — à revisiter si le roster grossit beaucoup.
+
 ---
 
 ## Comment utiliser ce fichier
