@@ -560,7 +560,7 @@ aux deux autres tables.
 - `api/badges/index.php`/`api/wallpapers/index.php` réécrits pour lire les 3 colonnes
   et appeler la fonction partagée — les anciennes fonctions `verifyBadgeCondition()`
   (avec sa liste de bypass slug par slug) et `verifyWallpaperCondition()` supprimées.
-- `tests/php/ConditionCheckTest.php` (19 tests, même pattern `DatabaseIntegrationTest.php`
+- `tests/php/ConditionCheckTest.php` (21 tests, même pattern `DatabaseIntegrationTest.php`
   — vraie MariaDB, transaction annulée en tearDown) couvre chaque `condition_type`.
 
 Non exécuté en sandbox (pas de Docker/MariaDB) — vérifié par relecture attentive +
@@ -568,6 +568,40 @@ comparaison structurelle avec `verifyTitleCondition()` (déjà tournée en CI r�
 cette PR) + un script Python de validation structurelle des lignes SQL modifiées
 (nombre de champs par ligne INSERT = nombre de colonnes déclarées, sur les 60 lignes
 badges et 7 lignes wallpapers). À confirmer via la CI (`make test-php`).
+
+### Suivi de revue (PR #14)
+
+- **Fail-closed wallpaper préservé** — `personadle_verify_condition()` est fail-open par
+  design (un `condition_type` NULL/inconnu débloque toujours, pour ne jamais bloquer un
+  futur ajout de titre/badge). L'ancien `verifyWallpaperCondition()` faisait l'inverse
+  (`default: return false`). Déléguer wallpapers directement à la fonction partagée aurait
+  silencieusement inversé ce choix pour tout wallpaper futur sans `condition_type`. Fix :
+  garde explicite `if (empty($wallpaper['condition_type'])) return false;` dans
+  `canUnlockWallpaper()` (`api/wallpapers/index.php`) **avant** la délégation.
+- **`condition_value` NULL fail-closed** — `$condValue ?? 0` combiné à des comparaisons
+  `>= $val` faisait qu'un badge/wallpaper avec `condition_type` défini mais
+  `condition_value` NULL par erreur de saisie (colonne nullable) était toujours débloqué
+  (`>= 0` toujours vrai), au lieu de refuser. Fix : liste `$valueRequiredTypes` vérifiée
+  avant le `switch`, retourne `false` si un type qui a besoin d'une valeur numérique a
+  `condition_value = NULL`. `social_link_min_rank` en est volontairement exclu (défaut à
+  10 documenté séparément).
+- **`classic_p1_wins`/`emoji_p2_wins` corrigés dans le docblock** — la revue affirmait ces
+  deux alias inutilisés par le seed. Faux : `naoya_first_awakening` et
+  `maya_always_be_positive` (`bdd_mysql.sql`) les utilisent réellement. Docblock mis à
+  jour pour le documenter explicitement au lieu de supprimer du code fonctionnel.
+- **`SUM`/`MAX` factorisés** — `personadle_aggregate_user_stat()` et
+  `personadle_user_stat_for_mode()` extraits pour éliminer la duplication SQL entre les
+  différents `condition_type` numériques (whitelist de colonnes/fonctions en défense en
+  profondeur, `$column`/`$fn` ne sont jamais une entrée utilisateur).
+- **`tests/php/BadgeWallpaperCatalogTest.php`** (nouveau, 5 tests) — répond aussi à la
+  demande de couverture par badge individuel : `testEveryBadgeHasExpectedConditionColumns()`
+  vérifie que les 60 lignes réelles de `badges` correspondent exactement au mapping attendu
+  (catalogue complet, pas un échantillon), idem pour les 7 wallpapers non-défaut. Les 3
+  tests restants copient le SELECT exact des 3 endpoints réels (`badges`/`wallpapers`/
+  `titles`) pour fermer le trou identifié en revue : les tests précédents appelaient
+  `personadle_verify_condition()` avec des littéraux, jamais via le vrai flux bout-en-bout,
+  donc un décalage de nom de colonne entre le SELECT d'un endpoint et la fonction n'aurait
+  pas été détecté.
 
 ---
 
