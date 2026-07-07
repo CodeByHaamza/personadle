@@ -41,7 +41,7 @@ Le hook de pre-commit lance déjà i18n + tests. Détail :
 | Commande | Vérifie |
 |---|---|
 | `make test` / `npm test` | 481 tests JS (Vitest) |
-| `make test-php` | 168 méthodes de test PHPUnit dans 11 fichiers (logique + intégration BDD, **DB doit être up**) |
+| `make test-php` | 175 méthodes de test PHPUnit dans 12 fichiers (logique + intégration BDD, **DB doit être up**) |
 | `npm run lint` | ESLint |
 | `npm run data:check` | schéma des données personnages |
 | `npm run i18n:check` | cohérence des clés de traduction |
@@ -110,7 +110,10 @@ une étiquette "sans risque".
 - **PHP** : PDO préparé **obligatoire** (jamais de concaténation SQL), bcrypt,
   codes HTTP corrects, `requireAuth()`/`requireAdmin()` sur les endpoints d'état.
 - **i18n** : ajouter la clé dans `lang/en.json` (source de vérité) en premier.
-- **Données / contenu notable** → documenter dans
-  `PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.md`.
+- **Tout ajout/correction notable** → documenter dans deux fichiers distincts (voir CLAUDE.md §9) :
+  `PersonaDLE_Update_Documentation/PersonaDLE 2.0/DEV_CHANGELOG.md` (changelog dev, détail par
+  commit) et, seulement si le changement est visible pour un joueur,
+  `PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html` (changelog joueur,
+  highlights). Il n'existe pas de `PersonaDLE_Update.md` pour la v2.0.
 
 Voir `CLAUDE.md` pour les pièges critiques détaillés.
