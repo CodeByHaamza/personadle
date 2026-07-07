@@ -102,7 +102,7 @@ portrait/silhouette/persona sont bien de l'artwork officiel (P3P), mais l'animat
 "P3 Reload FeMC"** — les jeux originaux (P3/P3P, 2009-2010) n'ont jamais eu de cinématique
 All-Out-Attack (mécanique introduite dans des jeux plus récents), donc aucune animation
 officielle n'existe pour elle à la source. **P5X va lui en donner une vraie** (même mécanisme que
-Fuuka, dont le GIF AOA de ce projet vient de P5X plutôt que de P4 d'origine) — à remplacer une
+Fuuka, dont le GIF AOA de ce projet vient de P5X plutôt que de P3 d'origine) — à remplacer une
 fois ce contenu P5X publié, pas de date connue.
 
 > ✅ **Incohérence d'opus corrigée (2026-07-06)** : confirmé qu'elle n'apparaît pas dans P3 Reload
