@@ -105,11 +105,12 @@ officielle n'existe pour elle à la source. **P5X va lui en donner une vraie** (
 Fuuka, dont le GIF AOA de ce projet vient de P5X plutôt que de P4 d'origine) — à remplacer une
 fois ce contenu P5X publié, pas de date connue.
 
-> ⚠️ **Incohérence d'opus trouvée au passage** (indépendante de ce qui précède) : son `opus`
-> diverge selon le fichier — `["P3P", "PQ2"]` dans `characters_clean.js`, `["P3", "P3P"]` dans
-> `aoaCharacters.js`, `["P3", "P3R"]` dans `silhouetteCharacters.js`. Le tag `"P3R"` semble être
-> une confusion avec le design "Reload" du fan-art ci-dessus plutôt qu'une vraie apparition dans
-> P3 Reload — à confirmer, puis uniformiser les 3 fichiers sur la même liste.
+> ✅ **Incohérence d'opus corrigée (2026-07-06)** : confirmé qu'elle n'apparaît pas dans P3 Reload
+> (uniquement P3P) — le tag `"P3R"` de `silhouetteCharacters.js` était bien une confusion avec le
+> design du fan-art AOA ci-dessus. `aoaCharacters.js` (`["P3","P3P"]` → `["P3P"]`, PQ2 non
+> applicable — absent du vocabulaire d'opus de ce mode) et `silhouetteCharacters.js`
+> (`["P3","P3R"]` → `["P3P","PQ2"]`, PQ2 supporté ici) alignés sur `characters_clean.js`.
+> `npm run data:check`/`pools:check` ✅ après régénération de `api/data/daily_pools.json`.
 
 Deux cas différents, qui touchent des fichiers différents :
 

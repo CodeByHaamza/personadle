@@ -40,7 +40,7 @@ export const silhouetteCharacters = [
   { nom: "Ken Amada", image: "Ken_silhouette", opus: ["P3", "P3R"] },
   { nom: "Kenji Tomochika", image: "Kenji_silhouette", opus: ["P3", "P3R"] },
   { nom: "Koromaru", image: "Koromaru_silhouette", opus: ["P3", "P3R"] },
-  { nom: "Kotone Shiomi", image: "Kotone_silhouette", opus: ["P3", "P3R"] },
+  { nom: "Kotone Shiomi", image: "Kotone_silhouette", opus: ["P3P", "PQ2"] },
   { nom: "Kou Ichijo", image: "Kou_silhouette", opus: ["P4"] },
   { nom: "Labrys", image: "Labrys_silhouette", opus: ["P4AU"] },
   { nom: "Lavenza", image: "Lavenza_silhouette", opus: ["P5"] },
