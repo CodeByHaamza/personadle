@@ -298,6 +298,13 @@ function initializeAutocomplete(element, array) {
 
   let currentFocus = -1;
 
+  // Pattern ARIA combobox : rend la liste de suggestions perceptible par un
+  // lecteur d'écran (elle était jusqu'ici purement visuelle/souris+clavier).
+  element.setAttribute("role", "combobox");
+  element.setAttribute("aria-autocomplete", "list");
+  element.setAttribute("aria-expanded", "false");
+  element.setAttribute("aria-controls", "autocomplete-list");
+
   element.addEventListener("input", function () {
     const val = this.value.trim();
     closeAutocompleteList(null, element);
@@ -306,7 +313,9 @@ function initializeAutocomplete(element, array) {
     const list = document.createElement("DIV");
     list.setAttribute("id", "autocomplete-list");
     list.setAttribute("class", "autocomplete-items");
+    list.setAttribute("role", "listbox");
     this.parentNode.appendChild(list);
+    element.setAttribute("aria-expanded", "true");
 
     const lowerVal = val.toLowerCase();
     const matches = [];
@@ -321,13 +330,16 @@ function initializeAutocomplete(element, array) {
 
     matches.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
 
-    matches.forEach(({ name: displayName }) => {
+    matches.forEach(({ name: displayName }, idx) => {
       const imageName = portraitsMap[displayName] || displayName.split(" ")[0];
       const portraitName = encodeURIComponent(imageName);
       const realName = displayName.includes("(") ? displayName.split("(")[1].replace(")", "") : "";
 
       const option = document.createElement("DIV");
       option.className = "list-options";
+      option.id = `autocomplete-option-${idx}`;
+      option.setAttribute("role", "option");
+      option.setAttribute("aria-selected", "false");
       option.innerHTML = `
         <img src="./database/img/${portraitName}.webp" alt="${displayName}">
         <span style="display: flex; flex-direction: column;">
@@ -368,10 +380,15 @@ function initializeAutocomplete(element, array) {
   });
 
   function updateActive(items) {
-    for (let item of items) item.classList.remove("autocomplete-active");
+    for (let item of items) {
+      item.classList.remove("autocomplete-active");
+      item.setAttribute("aria-selected", "false");
+    }
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = items.length - 1;
     items[currentFocus].classList.add("autocomplete-active");
+    items[currentFocus].setAttribute("aria-selected", "true");
+    element.setAttribute("aria-activedescendant", items[currentFocus].id);
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 

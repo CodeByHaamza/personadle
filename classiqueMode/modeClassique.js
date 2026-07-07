@@ -94,6 +94,13 @@ function initializeAutocomplete(element, array) {
   let currentFocus = -1;
   let _debounceTimer = null;
 
+  // Pattern ARIA combobox : rend la liste de suggestions perceptible par un
+  // lecteur d'écran (elle était jusqu'ici purement visuelle/souris+clavier).
+  element.setAttribute("role", "combobox");
+  element.setAttribute("aria-autocomplete", "list");
+  element.setAttribute("aria-expanded", "false");
+  element.setAttribute("aria-controls", "autocomplete-list");
+
   element.addEventListener("input", function () {
     clearTimeout(_debounceTimer);
     _debounceTimer = setTimeout(() => {
@@ -104,7 +111,9 @@ function initializeAutocomplete(element, array) {
       const list = document.createElement("DIV");
       list.setAttribute("id", "autocomplete-list");
       list.setAttribute("class", "autocomplete-items");
+      list.setAttribute("role", "listbox");
       this.parentNode.appendChild(list);
+      element.setAttribute("aria-expanded", "true");
 
       // Build sorted match list (first-name start > last-name start > contains)
       const matches = [];
@@ -125,7 +134,7 @@ function initializeAutocomplete(element, array) {
         a.priority !== b.priority ? a.priority - b.priority : a.name.localeCompare(b.name)
       );
 
-      matches.forEach(({ name: displayName }) => {
+      matches.forEach(({ name: displayName }, idx) => {
         const imageName = portraitsMap[displayName] || displayName.split(" ")[0];
         const portraitName = encodeURIComponent(imageName);
 
@@ -136,6 +145,9 @@ function initializeAutocomplete(element, array) {
 
         const option = document.createElement("DIV");
         option.className = "list-options";
+        option.id = `autocomplete-option-${idx}`;
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", "false");
         option.innerHTML = `
         <img src="../database/portraits/${portraitName}.webp" alt="${displayName} portrait"
              onerror="this.src='../database/portraits/unknown.webp'" />
@@ -181,11 +193,16 @@ function initializeAutocomplete(element, array) {
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = items.length - 1;
     items[currentFocus].classList.add("autocomplete-active");
+    items[currentFocus].setAttribute("aria-selected", "true");
+    element.setAttribute("aria-activedescendant", items[currentFocus].id);
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
   function removeActive(items) {
-    for (let item of items) item.classList.remove("autocomplete-active");
+    for (let item of items) {
+      item.classList.remove("autocomplete-active");
+      item.setAttribute("aria-selected", "false");
+    }
   }
 
   document.addEventListener("click", (e) => closeAutocompleteList(e.target, element));
