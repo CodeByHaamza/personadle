@@ -17,8 +17,8 @@
 
 | Fichier                       | Rôle                                                                   |
 | ----------------------------- | ---------------------------------------------------------------------- |
-| **`bdd_mysql.sql`**           | 🟢 **Source de vérité** — schéma complet + seeds catalogue (Docker)    |
-| `bdd_mariadb.sql`             | Variante MariaDB (prod Hostinger)                                      |
+| **`bdd_mysql.sql`**           | 🟢 **Source de vérité** — schéma complet + seeds catalogue. Chargé tel quel par Docker dans un vrai conteneur MariaDB 10.6 (`docker-compose.yml`), donc validé en continu contre MariaDB malgré son nom — **c'est aussi le fichier à importer en prod Hostinger**, voir `DEPLOY.md`. |
+| ~~`bdd_mariadb.sql`~~         | ⚠️ **Déprécié (2026-07-08)** — n'a pas suivi les migrations depuis le 2026-07-04 : il manque 6 tables entières (`badges`, `error_log`, `event_codes`, `rate_limits`, `admin_audit_log`, `social_link_rankup_notifs`) et des colonnes critiques sur `users` (`is_admin`, `is_banned`, `reset_token_hash`...). Ne plus l'utiliser — importer `bdd_mysql.sql` à la place. |
 | `hostinger_procedure.sql`     | Procédure stockée `gain_social_link_xp` (CLI MariaDB uniquement)       |
 | `sync_local_to_hostinger.sql` | ALTER différentiels dev → prod                                         |
 | `seed_test_data.sql`          | Données de test (users, profiles, sessions, amis, badges débloqués — pas de Social Links) |
@@ -71,11 +71,15 @@ mutuel + rank-up. Label `proc_body:` requis par MariaDB.
 
 ## 🚀 Import en production
 
+> Guide complet (SSL, `config.php`, crons, checklist post-déploiement) : voir
+> [`DEPLOY.md`](../DEPLOY.md) à la racine. Ci-dessous, l'équivalent en ligne de commande
+> si tu as un accès SSH plutôt que phpMyAdmin.
+
 ```bash
 ssh hostinger-personadle
 
-# Schéma
-mysql -u u870779941_Hamza -p u870779941_personadle < sql/bdd_mariadb.sql
+# Schéma — bdd_mysql.sql, PAS bdd_mariadb.sql (déprécié, voir tableau ci-dessus)
+mysql -u u870779941_Hamza -p u870779941_personadle < sql/bdd_mysql.sql
 
 # Procédure stockée (DELIMITER obligatoire — pas via phpMyAdmin)
 mysql -u u870779941_Hamza -p u870779941_personadle --delimiter='$$' < sql/hostinger_procedure.sql

@@ -1,3 +1,12 @@
+-- ⚠️ DÉPRÉCIÉ (2026-07-08) — NE PAS UTILISER COMME SOURCE DE SCHÉMA.
+-- La source unique du schéma est sql/bdd_mysql.sql (chargé par Docker dans un vrai
+-- conteneur MariaDB 10.6, gardé par tests/php/DatabaseIntegrationTest.php — c'est
+-- aussi le fichier à importer en prod, voir DEPLOY.md).
+-- Ce fichier n'a pas suivi les migrations depuis le 2026-07-04 : il lui manque 6
+-- tables entières (badges, error_log, event_codes, rate_limits, admin_audit_log,
+-- social_link_rankup_notifs) et des colonnes critiques sur users (is_admin,
+-- is_banned, reset_token_hash...). L'importer casserait l'admin, le reset de mot
+-- de passe, le rate limiting et les logs. Conservé à titre d'archive uniquement.
 -- =============================================================================
 -- PersonaDLE — Schéma de base de données v2.0
 -- Compatible MariaDB 10.6+ (InnoDB, utf8mb4, JSON natif)
