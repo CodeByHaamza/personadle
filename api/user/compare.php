@@ -12,7 +12,13 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-$authId   = requireAuth();
+$authId = requireAuth();
+
+// Le cooldown de 72h (plus bas) limite déjà les requêtes par paire d'amis, mais
+// pas les requêtes contre de nombreuses paires différentes — rate limit global
+// par utilisateur en complément (audit sécurité 2026-07-06).
+rateLimit('user-compare:' . $authId, 30, 15 * 60);
+
 $pdo      = pdo();
 $friendId = (int) ($_GET['friend_id'] ?? 0);
 

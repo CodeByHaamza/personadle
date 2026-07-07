@@ -284,6 +284,13 @@ function requireAdmin(): int
     if (!personadle_is_admin_row($row)) {
         jsonError('Forbidden — admin only', 403);
     }
+    // Rate limit partagé par TOUS les endpoints api/admin/* (chacun appelle
+    // requireAdmin() en tête) : un seul point à maintenir plutôt que de le
+    // dupliquer dans les ~12 fichiers. Volontairement généreux (usage légitime
+    // = scroll rapide dans les listes utilisateurs/logs) — sert de garde-fou
+    // contre une session admin compromise/volée qui spammerait sans limite
+    // (audit sécurité 2026-07-06), pas contre l'usage normal.
+    rateLimit('admin:' . $uid, 300, 5 * 60);
     return $uid;
 }
 
