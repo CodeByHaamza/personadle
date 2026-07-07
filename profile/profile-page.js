@@ -750,7 +750,7 @@ const closeDeleteAccountBtn = document.getElementById("closeDeleteAccount");
 if (deleteAccountBtn && deleteAccountModal) {
   deleteAccountBtn.onclick = () => {
     if (!window._currentUser?.id) {
-      alert(tf("profile.share_generate_error", "Please log in first."));
+      alert(tf("profile.delete_account_login_required", "Log in to delete your account."));
       return;
     }
     deleteAccountPseudoEl.textContent = profile.pseudo || "";

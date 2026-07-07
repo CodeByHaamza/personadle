@@ -304,7 +304,8 @@
     "delete_account_placeholder": "Dein Spitzname",
     "delete_account_confirm_btn": "Endgültig löschen",
     "delete_account_success": "Dein Konto wurde deaktiviert. Du wirst jetzt abgemeldet.",
-    "delete_account_error": "Etwas ist schiefgelaufen. Bitte versuche es erneut oder kontaktiere uns."
+    "delete_account_error": "Etwas ist schiefgelaufen. Bitte versuche es erneut oder kontaktiere uns.",
+    "delete_account_login_required": "Melde dich an, um dein Konto zu löschen."
   },
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",

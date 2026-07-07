@@ -196,7 +196,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 
 ### 🌐 Internationalisation
 
-- 5 languages: EN · FR · ES · DE · IT (964 keys each)
+- 5 languages: EN · FR · ES · DE · IT (965 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
