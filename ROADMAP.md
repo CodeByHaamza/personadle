@@ -27,6 +27,31 @@
 
 ---
 
+## 🚀 v2.1 — Prochaine version (périmètre décidé le 2026-07-06)
+
+> La 2.0 part en prod sans attendre ces points — ils avancent en parallèle une fois livrée.
+> Priorité pas encore fixée entre eux. Mis de côté pour l'instant, sans version cible :
+> Mode Versus temps réel (chantier temps réel plus lourd) et notifications push PWA — restent
+> en idée dans 🟢 Produit ci-dessous. Groupes d'amis : en réflexion, pas encore tranché.
+
+- [ ] **Mode Expert** — variante à **une seule tentative**, mécanique différente par mode de jeu :
+  - Classique : seule la citation (`quote`) est donnée, aucune autre catégorie affichée
+  - Musique : 1 seconde de clip audio au lieu de la lecture complète
+  - Personae : crop aléatoire zoomé du portrait au lieu du portrait entier
+  - Émoji / Silhouette / All-Out-Attack : équivalent à définir par analogie au moment de
+    l'implémentation (un seul indice minimal, pas de révélation progressive sur mauvaise réponse)
+  - Condition de déblocage **différente par mode** (à trancher au cas par cas, pistes retenues :
+    nombre de victoires en mode normal sur ce mode, streak minimum, ou badge dédié)
+- [ ] **Historique de profil** : graphe de streak + calendrier des jours joués (`uniqueDaysSet` déjà en base).
+- [ ] **Saison / ladder** avec reset périodique + récompenses.
+- [ ] **Compendium des unlocks** — vue "archive" style Persona de tous les badges/titres/wallpapers
+  débloqués avec leur date (réutilise `badges_unlocked`/`user_titles` déjà en base, pas de
+  nouvelle donnée serveur nécessaire).
+- [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète) — détail dans 🔐 Sécurité/compte ci-dessous.
+- [ ] **Stratégie assets AOA + Git LFS** — détail dans 🔴 À prévoir assez tôt ci-dessous.
+
+---
+
 ## 🎯 Prochaines étapes
 
 ### 🔴 À prévoir assez tôt
@@ -51,8 +76,12 @@
   pattern que `DatabaseIntegrationTest.php` — confirmé vert par la CI réelle après
   un aller-retour (un bug de garde-fou sur `social_link_min_rank` a été attrapé et
   corrigé grâce à elle)._
-- [ ] **Stratégie assets AOA** (~1,8 Go dans git) — Git LFS **ou** CDN-only + fetch au 1er lancement.
-  _(Script `scripts/purge_git_history.sh` prêt pour récupérer l'historique.)_
+- [ ] **Stratégie assets AOA** (~1,8 Go dans git) — 🎯 _cible 2.1._ Git LFS (**pas** CDN-only/sortir
+  les assets du repo — option explicitement écartée, voir AMELIORATIONS.md §1 : casse la
+  philosophie "un `git clone` suffit pour jouer", Git LFS reste compatible avec elle). Migration
+  des binaires lourds (`.webp`/`.mp3`/`.mp4`) + `scripts/purge_git_history.sh` (prêt, destructif,
+  à coordonner) pour purger le poids déjà accumulé + `.gitattributes` LFS. Réencodage AOA en
+  parallèle (webp q70 : 37-81 Mo → 9-25 Mo par fichier, voir AMELIORATIONS.md §2).
 
 ## 📆 À venir — contenu conditionné à une sortie de jeu
 
@@ -61,6 +90,27 @@
 > pour **le jour où** ça arrive (nouveau perso ajouté, ou remaster d'un jeu déjà supporté),
 > pour ne pas avoir à la refaire de mémoire à ce moment-là. Aucune de ces étapes ne bloque
 > la release 2.0 actuelle.
+
+**Kotone Montagne (P5X)** : roster de base + silhouette + persona (Terpsichore) + All-Out-Attack
+tous déjà intégrés avec de vrais assets officiels — vérifié le 2026-07-06, y compris le GIF AOA
+(`allOutAttackMode/database/allOutAttack/Mont.webp`, 177 frames, vraie animation de combat, pas
+un placeholder malgré une première frame trompeuse). **Rien en attente pour elle.**
+
+**Kotone Shiomi (P3/P3P/PQ2) — GIF AOA actuel = fan-made, à remplacer une fois sorti sur P5X** :
+portrait/silhouette/persona sont bien de l'artwork officiel (P3P), mais l'animation All-Out-Attack
+(`allOutAttackMode/database/allOutAttack/Kotone.webp`) est un **fan-made imaginant un design
+"P3 Reload FeMC"** — les jeux originaux (P3/P3P, 2009-2010) n'ont jamais eu de cinématique
+All-Out-Attack (mécanique introduite dans des jeux plus récents), donc aucune animation
+officielle n'existe pour elle à la source. **P5X va lui en donner une vraie** (même mécanisme que
+Fuuka, dont le GIF AOA de ce projet vient de P5X plutôt que de P3 d'origine) — à remplacer une
+fois ce contenu P5X publié, pas de date connue.
+
+> ✅ **Incohérence d'opus corrigée (2026-07-06)** : confirmé qu'elle n'apparaît pas dans P3 Reload
+> (uniquement P3P) — le tag `"P3R"` de `silhouetteCharacters.js` était bien une confusion avec le
+> design du fan-art AOA ci-dessus. `aoaCharacters.js` (`["P3","P3P"]` → `["P3P"]`, PQ2 non
+> applicable — absent du vocabulaire d'opus de ce mode) et `silhouetteCharacters.js`
+> (`["P3","P3R"]` → `["P3P","PQ2"]`, PQ2 supporté ici) alignés sur `characters_clean.js`.
+> `npm run data:check`/`pools:check` ✅ après régénération de `api/data/daily_pools.json`.
 
 Deux cas différents, qui touchent des fichiers différents :
 
@@ -135,25 +185,24 @@ Nouveau jeu — cas A (roster inédit)
   réunifier sans pouvoir vérifier visuellement les 6 pages serait risqué pour un gain incertain._
   _Réaudité le 2026-07-05, relecture complète des 5 implémentations, même conclusion._
 
-### 🟢 Produit (idées)
+### 🟢 Produit (idées — sans version cible pour l'instant)
 
-- [ ] **Mode Versus / défi temps réel** entre amis.
-- [ ] **Historique de profil** : graphe de streak + calendrier des jours joués (on a déjà `uniqueDaysSet`).
-- [ ] **Saison / ladder** avec reset périodique + récompenses.
-- [ ] 💡 **Mode Expert / New Game+** — moins d'essais autorisés ou moins d'indices affichés,
-  avec un badge dédié à la clé. Rejoue de la valeur pour les joueurs qui maîtrisent déjà le jeu.
-- [ ] 💡 **Compendium des unlocks** — vue "archive" style Persona de tous les badges/titres/
-  wallpapers débloqués avec leur date. Réutilise `badges_unlocked`/`user_titles` déjà en base,
-  pas de nouvelle donnée serveur nécessaire.
+> **Mode Expert, historique de profil, saison/ladder, compendium des unlocks** : passés en
+> 🚀 v2.1 ci-dessus (décision du 2026-07-06) — plus dans cette liste.
+
+- [ ] **Mode Versus / défi temps réel** entre amis — écarté pour la 2.1 (chantier temps réel
+  plus lourd que les autres points retenus), reste en idée.
 - [ ] 💡 **Groupes d'amis** (au-delà du 1-à-1) — petits groupes ("table du Velvet Room") avec
   leaderboard privé. Étend `friendships`/`leaderboard` au-delà des paires Social Link
-  (implique une nouvelle table de groupe + permissions à définir).
-- [ ] **Notifications push (PWA)** — rappel quotidien (levier de rétention « daily »).
+  (implique une nouvelle table de groupe + permissions à définir). **En réflexion**, pas
+  encore de décision de version.
+- [ ] **Notifications push (PWA)** — rappel quotidien (levier de rétention « daily ») — écarté
+  pour la 2.1, reste en idée.
 
 ### 🔐 Sécurité / compte
 
 - [x] **Reset de mot de passe par email** — ✅ _livré (request-reset / reset-password, token hashé 1h, page dédiée)._
-- [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète).
+- [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète) — 🎯 _cible 2.1._
 - [x] **Anti-triche sur les résultats de partie** — 🚧 _phase 1 livrée (détection), phase 2
   (rejet strict) délibérément différée. Correction factuelle au passage : il n'existe **aucune**
   table `daily_targets` en BDD (ni dans `sql/bdd_mysql.sql`, ni dans les migrations) — l'ancienne
@@ -200,7 +249,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **481 tests JS · 168 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **481 tests JS · 175 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -256,8 +305,8 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 481 Vitest · 168 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
-| Q2  | i18n EN/FR/ES/DE/IT (949 clés)                | `npm run i18n:check`                                                          |
+| Q1  | Tests : 481 Vitest · 175 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q2  | i18n EN/FR/ES/DE/IT (965 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
 | Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |

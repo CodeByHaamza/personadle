@@ -18,6 +18,14 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+// Endpoint public (pas de requireAuth()) — limite par IP pour empêcher
+// l'énumération de pseudos/friend_codes (audit sécurité 2026-07-06).
+$rawForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+$firstIp         = trim(explode(',', $rawForwardedFor)[0]);
+$rlIp            = filter_var($firstIp, FILTER_VALIDATE_IP) ? $firstIp : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+rateLimit('user-search:' . $rlIp, 30, 5 * 60); // 30 recherches / 5 min
+
 $q = trim($_GET['q'] ?? '');
 if (strlen($q) < 2) {
     jsonError('Query too short (min 2 characters)', 400);

@@ -460,6 +460,9 @@
             <button id="resetProfile" class="btn-danger">
               🔄 <span data-i18n="profile.reset_btn">Reset Profile</span>
             </button>
+            <button id="deleteAccountBtn" class="btn-danger">
+              🗑️ <span data-i18n="profile.delete_account_btn">Delete my account</span>
+            </button>
           </div>
         </section>
       </div>
@@ -590,6 +593,48 @@
             💬 Copy for Discord
           </button>
           <button id="shareEmailBtn" class="share-btn share-btn--email">📧 Email</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================
+     6bis. MODALE SUPPRESSION DE COMPTE (RGPD)
+     Soft-delete immédiat côté serveur (DELETE /api/user/:id), hard-delete
+     différé J+30 (api/lib/deletion_requests.php). Irréversible passé ce délai
+     — texte de confirmation volontairement explicite + saisie du pseudo pour
+     éviter un clic accidentel sur une action aussi destructive.
+     ===================================================== -->
+    <div id="deleteAccountModal" class="modal hidden">
+      <div class="modal-content delete-account-content">
+        <span id="closeDeleteAccount" class="close">&times;</span>
+        <div class="delete-account-icon" aria-hidden="true">🔮</div>
+        <h2 data-i18n="profile.delete_account_title">Sever your contract?</h2>
+        <p class="delete-account-subtext" data-i18n="profile.delete_account_warning">
+          The Velvet Room does not forget lightly. Leaving means your account, stats,
+          badges, friends and every trace of your journey fade away. The door closes
+          immediately; what remains is erased for good after 30 days in the sea of
+          souls. Past that point, there is no going back.
+        </p>
+        <p class="delete-account-type-row">
+          <span data-i18n="profile.delete_account_type_prompt"
+            >Type your pseudo to confirm:</span
+          >
+          <strong id="deleteAccountPseudo"></strong>
+        </p>
+        <input
+          type="text"
+          id="deleteAccountConfirmInput"
+          autocomplete="off"
+          data-i18n-placeholder="profile.delete_account_placeholder"
+          placeholder="Your pseudo"
+        />
+        <div class="share-actions">
+          <button id="deleteAccountCancelBtn" class="share-btn">
+            <span data-i18n="ui.cancel">Cancel</span>
+          </button>
+          <button id="deleteAccountConfirmBtn" class="btn-danger" disabled>
+            🗑️ <span data-i18n="profile.delete_account_confirm_btn">Delete permanently</span>
+          </button>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@
  * En dev (APP_ENV != production), le lien est aussi écrit dans error_log pour test.
  */
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/password_reset.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') jsonError('Method not allowed', 405);
 
@@ -35,13 +36,7 @@ $stmt->execute([$email]);
 $user = $stmt->fetch();
 
 if ($user) {
-    // Token brut (envoyé) + hash stocké + expiration 1h
-    $token   = bin2hex(random_bytes(32));
-    $hash    = hash('sha256', $token);
-    $expires = date('Y-m-d H:i:s', time() + 3600);
-
-    $pdo->prepare('UPDATE users SET reset_token_hash = ?, reset_token_expires = ? WHERE id = ?')
-        ->execute([$hash, $expires, (int) $user['id']]);
+    $token = personadle_create_password_reset_token($pdo, (int) $user['id']);
 
     // Base du lien : prod = personadle.net, sinon l'Origin courant (dev local)
     $base = (APP_ENV === 'production')

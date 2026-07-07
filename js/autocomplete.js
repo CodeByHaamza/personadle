@@ -21,8 +21,16 @@ export function closeAutocompleteList(e, inputElement) {
   // Array.from() : getElementsByClassName() is a LIVE collection — removing an
   // item while iterating it directly shrinks it mid-loop and skips the next one.
   const items = Array.from(document.getElementsByClassName("autocomplete-items"));
+  const isClosing = e !== inputElement;
   for (const item of items) {
     if (e !== item && e !== inputElement) item.remove();
+  }
+  // aria-expanded/aria-activedescendant reflètent l'état "liste ouverte" du
+  // combobox (rôle posé dans chaque modeXxx.js::initializeAutocomplete) — géré
+  // ici plutôt que dans chaque mode pour n'avoir qu'un seul endroit à maintenir.
+  if (inputElement && isClosing) {
+    inputElement.setAttribute("aria-expanded", "false");
+    inputElement.removeAttribute("aria-activedescendant");
   }
 }
 

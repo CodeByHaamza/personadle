@@ -16,7 +16,7 @@ export const aoaCharacters = [
   { nom: "Metis", gif: "Metis", opus: ["P3", "P3FES"] },
 
   // === Persona 3 Portable (P3P) ===
-  { nom: "Kotone Shiomi", gif: "Kotone", opus: ["P3", "P3P"] },
+  { nom: "Kotone Shiomi", gif: "Kotone", opus: ["P3P"] },
 
   // === Persona 5 (base / Strikers / Tactica) ===
   { nom: "Panther ( Ann Takamaki )", gif: "Panther", opus: ["P5"] },

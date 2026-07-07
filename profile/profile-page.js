@@ -732,6 +732,66 @@ resetProfileBtn.onclick = () => {
   }
 };
 
+// ─────────────────────────────────────────────────────────
+// SUPPRESSION DE COMPTE (RGPD)
+// Soft-delete immédiat côté serveur (DELETE /api/user/:id, session détruite
+// server-side) + hard-delete différé J+30 (api/lib/deletion_requests.php).
+// Modale de confirmation avec saisie du pseudo (pas un simple confirm() comme
+// pour reset — action plus destructrice, irréversible passé le délai).
+// ─────────────────────────────────────────────────────────
+const deleteAccountBtn = document.getElementById("deleteAccountBtn");
+const deleteAccountModal = document.getElementById("deleteAccountModal");
+const deleteAccountPseudoEl = document.getElementById("deleteAccountPseudo");
+const deleteAccountInput = document.getElementById("deleteAccountConfirmInput");
+const deleteAccountConfirmBtn = document.getElementById("deleteAccountConfirmBtn");
+const deleteAccountCancelBtn = document.getElementById("deleteAccountCancelBtn");
+const closeDeleteAccountBtn = document.getElementById("closeDeleteAccount");
+
+if (deleteAccountBtn && deleteAccountModal) {
+  deleteAccountBtn.onclick = () => {
+    if (!window._currentUser?.id) {
+      alert(tf("profile.delete_account_login_required", "Log in to delete your account."));
+      return;
+    }
+    deleteAccountPseudoEl.textContent = profile.pseudo || "";
+    deleteAccountInput.value = "";
+    deleteAccountConfirmBtn.disabled = true;
+    openModal("deleteAccountModal");
+    deleteAccountInput.focus();
+  };
+
+  deleteAccountInput.addEventListener("input", () => {
+    deleteAccountConfirmBtn.disabled = deleteAccountInput.value.trim() !== (profile.pseudo || "").trim();
+  });
+
+  const closeDeleteModal = () => closeModal("deleteAccountModal");
+  deleteAccountCancelBtn?.addEventListener("click", closeDeleteModal);
+  closeDeleteAccountBtn?.addEventListener("click", closeDeleteModal);
+
+  deleteAccountConfirmBtn.addEventListener("click", async () => {
+    const userId = window._currentUser?.id;
+    if (!userId || deleteAccountConfirmBtn.disabled) return;
+    deleteAccountConfirmBtn.disabled = true;
+    const originalLabel = deleteAccountConfirmBtn.innerHTML;
+    deleteAccountConfirmBtn.textContent = "…";
+    try {
+      await window._personadleApi.user.delete(userId);
+      alert(
+        tf("profile.delete_account_success", "Your account has been deactivated. You'll be logged out now.")
+      );
+      localStorage.removeItem("personaUserProfile");
+      localStorage.removeItem("personaSettings");
+      localStorage.removeItem("playerUserId");
+      window.location.href = "../index.html";
+    } catch (err) {
+      console.error("Delete account failed:", err);
+      alert(tf("profile.delete_account_error", "Something went wrong. Please try again or contact us."));
+      deleteAccountConfirmBtn.disabled = false;
+      deleteAccountConfirmBtn.innerHTML = originalLabel;
+    }
+  });
+}
+
 // Mise à jour du pseudo en temps réel + sync cloud déboncée (500ms)
 let _pseudoSyncTimer = null;
 pseudoInput.oninput = (e) => {

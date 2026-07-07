@@ -292,6 +292,22 @@
    fournissent alors le seul retour visuel de feedback.
    ===================================================== */
 
+/* Le mode Classique est le seul à empiler DEUX badges fixes en haut à
+   droite (dark mode + daltonien, cf. #daltonianToggle ci-dessous), alors
+   que #imgHomePage (logo, partagé par toutes les pages via global.css)
+   n'était dimensionné que pour laisser de la place à un seul badge.
+   Résultat mesuré : le badge daltonien (bas réel ≈108px) chevauche le
+   logo/illustration "Take Your Heart" sur toute la plage ~360px–1570px,
+   quelle que soit la largeur d'écran (vérifié par capture d'écran à 10+
+   largeurs). On réserve donc ici un padding-top de page suffisant pour
+   que le contenu démarre toujours sous les deux badges empilés, quelle
+   que soit la largeur — ne dépend que de la hauteur des badges (fixe),
+   jamais de la largeur du logo (variable). Page Classique uniquement :
+   ne touche pas global.css ni les 5 autres modes qui n'ont qu'un badge. */
+body {
+  padding-top: 120px;
+}
+
 /* Bouton de bascule daltonien (fixe, sous le dark mode toggle) */
 #daltonianToggle {
   position: fixed;

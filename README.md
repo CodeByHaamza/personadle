@@ -196,7 +196,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 
 ### 🌐 Internationalisation
 
-- 5 languages: EN · FR · ES · DE · IT (949 keys each)
+- 5 languages: EN · FR · ES · DE · IT (965 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
@@ -205,6 +205,8 @@ Listen to short music clips and identify the character or theme. True fans will 
 - User moderation (ban accounts, lock pseudos)
 - Event codes CRUD (create, distribute, expire)
 - Stats dashboard per user
+- Internal tool, French-only by design (no `data-i18n` coverage) — not part of the
+  player-facing i18n scope described above
 
 </details>
 

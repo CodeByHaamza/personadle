@@ -1,0 +1,7 @@
+# Défense en profondeur (audit sécurité 2026-07-06) : ces fichiers ne contiennent
+# que des définitions de fonctions/classes, `require`/`require_once` par les
+# vrais endpoints (api/*.php, api/*/index.php) — jamais censés être appelés
+# directement en HTTP. Actuellement inoffensif (aucun code exécutable en top
+# level), mais un futur ajout de code exécutable ici deviendrait immédiatement
+# exploitable sans cette garde indépendante de la logique applicative.
+Require all denied

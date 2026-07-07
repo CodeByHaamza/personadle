@@ -186,15 +186,28 @@ function pickCharacter(random = false) {
 function initializeAutocomplete(input, personasList) {
   let currentFocus = -1;
 
+  // Pattern ARIA combobox : rend la liste de suggestions perceptible par un
+  // lecteur d'écran (elle était jusqu'ici purement visuelle/souris+clavier).
+  input.setAttribute("role", "combobox");
+  input.setAttribute("aria-autocomplete", "list");
+  input.setAttribute("aria-expanded", "false");
+  input.setAttribute("aria-controls", "autocomplete-list");
+
   input.addEventListener("input", function () {
     closeAllAutocompleteLists();
     const val = this.value.trim();
-    if (!val) return;
+    if (!val) {
+      input.setAttribute("aria-expanded", "false");
+      input.removeAttribute("aria-activedescendant");
+      return;
+    }
 
     const list = document.createElement("DIV");
     list.setAttribute("id", "autocomplete-list");
     list.setAttribute("class", "autocomplete-items");
+    list.setAttribute("role", "listbox");
     this.parentNode.appendChild(list);
+    input.setAttribute("aria-expanded", "true");
 
     const lowerVal = val.toLowerCase();
     const matches = [];
@@ -225,7 +238,7 @@ function initializeAutocomplete(input, personasList) {
 
     matches.sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name));
 
-    matches.forEach(({ name: nom }) => {
+    matches.forEach(({ name: nom }, idx) => {
       const imageName = portraitsMap[nom] || nom.split(" ")[0];
       const portraitName = encodeURIComponent(imageName);
       // Characters like "Crow (Akechi)" show the real name in parentheses
@@ -233,6 +246,9 @@ function initializeAutocomplete(input, personasList) {
 
       const option = document.createElement("DIV");
       option.className = "list-options";
+      option.id = `autocomplete-option-${idx}`;
+      option.setAttribute("role", "option");
+      option.setAttribute("aria-selected", "false");
       option.innerHTML = `
         <img src="../database/portraits/${portraitName}.webp" alt="${nom}">
         <span style="display: flex; flex-direction: column;">
@@ -246,6 +262,8 @@ function initializeAutocomplete(input, personasList) {
         input.value = this.querySelector("input").value;
         handleGuess();
         closeAllAutocompleteLists();
+        input.setAttribute("aria-expanded", "false");
+        input.removeAttribute("aria-activedescendant");
       });
 
       list.appendChild(option);
@@ -272,14 +290,23 @@ function initializeAutocomplete(input, personasList) {
   });
 
   document.addEventListener("click", (e) => {
-    if (!e.target.closest("#autocomplete-list") && e.target !== input) closeAllAutocompleteLists();
+    if (!e.target.closest("#autocomplete-list") && e.target !== input) {
+      closeAllAutocompleteLists();
+      input.setAttribute("aria-expanded", "false");
+      input.removeAttribute("aria-activedescendant");
+    }
   });
 
   function updateActive(items) {
-    items.forEach((i) => i.classList.remove("autocomplete-active"));
+    items.forEach((i) => {
+      i.classList.remove("autocomplete-active");
+      i.setAttribute("aria-selected", "false");
+    });
     if (currentFocus >= items.length) currentFocus = 0;
     if (currentFocus < 0) currentFocus = items.length - 1;
     items[currentFocus].classList.add("autocomplete-active");
+    items[currentFocus].setAttribute("aria-selected", "true");
+    input.setAttribute("aria-activedescendant", items[currentFocus].id);
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 

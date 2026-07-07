@@ -112,6 +112,7 @@ const ROADMAP = join(ROOT, "ROADMAP.md");
 const CONTRIBUTING = join(ROOT, "CONTRIBUTING.md");
 const TESTS_README = join(ROOT, "tests/README.md");
 const TESTS_E2E_README = join(ROOT, "tests-e2e/README.md");
+const LANG_README = join(ROOT, "lang/README.md");
 
 const syncPoints = [
   // CLAUDE.md
@@ -146,9 +147,17 @@ const syncPoints = [
   { file: TESTS_README, re: /Vitest — (\d+) tests unitaires \(jsdom, (\d+) fichiers\)/, expected: [vitestTests, vitestFiles] },
   { file: TESTS_README, re: /\*\*Total\*\*\s*\|\*\*(\d+)\*\*/, expected: [vitestTests] },
   { file: TESTS_README, re: /\*\*(\d+) méthodes de test\*\* au total sur ces (\d+) fichiers/, expected: [phpunit.total, phpunit.files] },
+  // Diagramme pyramide ASCII + commentaire de commande — trouvés désynchronisés
+  // lors de l'audit du 2026-07-06 (13 vs 54 réels, 351 vs 481 réels) car du texte
+  // libre, hors des motifs structurés ci-dessus.
+  { file: TESTS_README, re: /Playwright E2E — (\d+) tests \(stack Docker/, expected: [e2e.total] },
+  { file: TESTS_README, re: /npm test\s+# Vitest \((\d+)\)/, expected: [vitestTests] },
 
   // tests-e2e/README.md
   { file: TESTS_E2E_README, re: /\*\*(\d+) tests \((\d+) fichiers\) sur un vrai navigateur/, expected: [e2e.total, e2e.files] },
+
+  // lang/README.md — trouvé désynchronisé lors de l'audit du 2026-07-06 (947 vs 949 réels).
+  { file: LANG_README, re: /synchronisées \((\d+) clés chacune/, expected: [i18nKeys] },
 ];
 
 // ── Vérification / correction ────────────────────────────────────────────────
