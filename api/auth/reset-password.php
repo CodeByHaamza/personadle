@@ -9,6 +9,7 @@
  */
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/validation.php';
+require_once __DIR__ . '/../lib/password_reset.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') jsonError('Method not allowed', 405);
 
@@ -26,26 +27,11 @@ if (strlen($token) < 32) jsonError('Invalid or expired reset link', 400);
 if ($passwordError = personadle_validate_password($password)) jsonError($passwordError, 400);
 
 $pdo  = pdo();
-$hash = hash('sha256', $token);
-
-$stmt = $pdo->prepare(
-    'SELECT id FROM users
-     WHERE reset_token_hash = ? AND reset_token_expires > UTC_TIMESTAMP() AND is_deleted = 0
-     LIMIT 1'
-);
-$stmt->execute([$hash]);
-$user = $stmt->fetch();
+$user = personadle_find_user_by_reset_token($pdo, $token);
 
 if (!$user) jsonError('Invalid or expired reset link', 400);
 
 $newHash = password_hash($password, PASSWORD_BCRYPT);
-
-// Nouveau mot de passe + invalidation du token ET du remember-me (sécurité)
-$pdo->prepare(
-    'UPDATE users
-     SET password_hash = ?, reset_token_hash = NULL, reset_token_expires = NULL,
-         remember_me_hash = NULL, remember_me_expires = NULL
-     WHERE id = ?'
-)->execute([$newHash, (int) $user['id']]);
+personadle_apply_new_password($pdo, $user['id'], $newHash);
 
 jsonSuccess(['message' => 'Password updated. You can now log in.']);
