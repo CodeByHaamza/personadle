@@ -777,12 +777,19 @@ export function setupShareProfile(profile, saveProfile) {
         });
       } catch (err) {
         console.error("Share card generation failed:", err);
-        alert("❌ Couldn't generate the share image. Please try again.");
+        const t = window.i18n?.t;
+        const msg = t?.("profile.share_generate_error");
+        alert(msg && msg !== "profile.share_generate_error" ? msg : "❌ Couldn't generate the share image. Please try again.");
         return;
       } finally {
         document.body.removeChild(offscreen);
       }
       const dataUrl = cvs.toDataURL("image/png");
+      const t = window.i18n?.t;
+      const tr = (key, vars, fallback) => {
+        const v = t?.(key, vars);
+        return v && v !== key ? v : fallback;
+      };
 
       // Bouton PNG
       downloadBtn.onclick = () => {
@@ -795,8 +802,17 @@ export function setupShareProfile(profile, saveProfile) {
 
       // Partage Twitter
       twitterBtn.onclick = () => {
+        const vars = {
+          pseudo: profile.pseudo || "Guest",
+          wins: profile.stats?.wins || 0,
+          badges: profile.badges?.length || 0,
+        };
         const text = encodeURIComponent(
-          `Check out my PersonaDLE profile! 🎭\n${profile.pseudo || "Guest"} – ${profile.stats?.wins || 0} wins & ${profile.badges?.length || 0} badges 🏅\n\n#PersonaDLE #Persona`
+          tr(
+            "profile.share_tweet_text",
+            vars,
+            `Check out my PersonaDLE profile! 🎭\n${vars.pseudo} – ${vars.wins} wins & ${vars.badges} badges 🏅\n\n#PersonaDLE #Persona`
+          )
         );
         window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
         unlockPhotographerBadge(profile, saveProfile);
@@ -807,18 +823,27 @@ export function setupShareProfile(profile, saveProfile) {
         try {
           const blob = await (await fetch(dataUrl)).blob();
           await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-          alert("📋 Profile image copied! Paste it in Discord with Ctrl+V.");
+          alert(tr("profile.share_discord_copied", null, "📋 Profile image copied! Paste it in Discord with Ctrl+V."));
           unlockPhotographerBadge(profile, saveProfile);
         } catch {
-          alert("❌ Copy failed. Please download manually.");
+          alert(tr("profile.share_copy_failed", null, "❌ Copy failed. Please download manually."));
         }
       };
 
       // Email
       emailBtn.onclick = () => {
-        const subject = encodeURIComponent("My PersonaDLE Profile");
+        const subject = encodeURIComponent(tr("profile.share_email_subject", null, "My PersonaDLE Profile"));
+        const vars = {
+          wins: profile.stats?.wins || 0,
+          streak: profile.stats?.streakRecord || 0,
+          badges: profile.badges?.length || 0,
+        };
         const body = encodeURIComponent(
-          `Check out my PersonaDLE stats!\n\nWins: ${profile.stats?.wins || 0}\nBest Streak: ${profile.stats?.streakRecord || 0}\nBadges: ${profile.badges?.length || 0}\n\nPlay at: https://personadle.net`
+          tr(
+            "profile.share_email_body",
+            vars,
+            `Check out my PersonaDLE stats!\n\nWins: ${vars.wins}\nBest Streak: ${vars.streak}\nBadges: ${vars.badges}\n\nPlay at: https://personadle.net`
+          )
         );
         window.location.href = `mailto:?subject=${subject}&body=${body}`;
         unlockPhotographerBadge(profile, saveProfile);

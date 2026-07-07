@@ -30,7 +30,8 @@
     "error": "An error occurred.",
     "admin_gift_received": "🎁 Gift received!",
     "tap_continue": "Tap to continue",
-    "close": "Close"
+    "close": "Close",
+    "cancel": "Cancel"
   },
   "modes": {
     "classic": {
@@ -289,7 +290,21 @@
     "song_no_result": "No track found.",
     "song_choose": "Choose your profile music",
     "song_choose_hint": "A track that plays when friends visit your profile",
-    "song_modal_title": "Choose your profile music"
+    "song_modal_title": "Choose your profile music",
+    "share_generate_error": "❌ Couldn't generate the share image. Please try again.",
+    "share_discord_copied": "📋 Profile image copied! Paste it in Discord with Ctrl+V.",
+    "share_copy_failed": "❌ Copy failed. Please download manually.",
+    "share_tweet_text": "Check out my PersonaDLE profile! 🎭\n{{pseudo}} – {{wins}} wins & {{badges}} badges 🏅\n\n#PersonaDLE #Persona",
+    "share_email_subject": "My PersonaDLE Profile",
+    "share_email_body": "Check out my PersonaDLE stats!\n\nWins: {{wins}}\nBest Streak: {{streak}}\nBadges: {{badges}}\n\nPlay at: https://personadle.net",
+    "delete_account_btn": "Delete my account",
+    "delete_account_title": "Sever your contract?",
+    "delete_account_warning": "The Velvet Room does not forget lightly. Leaving means your account, stats, badges, friends and every trace of your journey fade away. The door closes immediately; what remains is erased for good after 30 days in the sea of souls. Past that point, there is no going back.",
+    "delete_account_type_prompt": "Type your pseudo to confirm:",
+    "delete_account_placeholder": "Your pseudo",
+    "delete_account_confirm_btn": "Delete permanently",
+    "delete_account_success": "Your account has been deactivated. You'll be logged out now.",
+    "delete_account_error": "Something went wrong. Please try again or contact us."
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",

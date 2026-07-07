@@ -30,7 +30,8 @@
     "dismiss": "Cerrar",
     "error": "Ha ocurrido un error.",
     "admin_gift_received": "🎁 ¡Regalo recibido!",
-    "tap_continue": "Toca para continuar"
+    "tap_continue": "Toca para continuar",
+    "cancel": "Cancelar"
   },
   "modes": {
     "classic": {
@@ -289,7 +290,21 @@
     "song_no_result": "Ninguna canción encontrada.",
     "song_choose": "Elegir mi música",
     "song_choose_hint": "Una canción que suena cuando los amigos visitan tu perfil",
-    "song_modal_title": "Elige tu música de perfil"
+    "song_modal_title": "Elige tu música de perfil",
+    "share_generate_error": "❌ No se pudo generar la imagen para compartir. Inténtalo de nuevo.",
+    "share_discord_copied": "📋 ¡Imagen de perfil copiada! Pégala en Discord con Ctrl+V.",
+    "share_copy_failed": "❌ Error al copiar. Descárgala manualmente.",
+    "share_tweet_text": "¡Mira mi perfil de PersonaDLE! 🎭\n{{pseudo}} – {{wins}} victorias y {{badges}} insignias 🏅\n\n#PersonaDLE #Persona",
+    "share_email_subject": "Mi perfil de PersonaDLE",
+    "share_email_body": "¡Mira mis estadísticas de PersonaDLE!\n\nVictorias: {{wins}}\nMejor racha: {{streak}}\nInsignias: {{badges}}\n\nJuega en: https://personadle.net",
+    "delete_account_btn": "Eliminar mi cuenta",
+    "delete_account_title": "¿Romper tu contrato?",
+    "delete_account_warning": "El Velvet Room no olvida fácilmente. Marcharte significa que tu cuenta, estadísticas, insignias, amigos y cada rastro de tu viaje se desvanecen. La puerta se cierra de inmediato; lo que queda se borra para siempre tras 30 días en el mar de las almas. Pasado ese plazo, no hay vuelta atrás.",
+    "delete_account_type_prompt": "Escribe tu apodo para confirmar:",
+    "delete_account_placeholder": "Tu apodo",
+    "delete_account_confirm_btn": "Eliminar definitivamente",
+    "delete_account_success": "Tu cuenta ha sido desactivada. Se cerrará tu sesión.",
+    "delete_account_error": "Algo salió mal. Inténtalo de nuevo o contáctanos."
   },
   "badges": {
     "notification_title": "🎖️ ¡Insignia desbloqueada!",

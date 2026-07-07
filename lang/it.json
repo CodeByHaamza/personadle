@@ -30,7 +30,8 @@
     "dismiss": "Chiudi",
     "error": "Si è verificato un errore.",
     "admin_gift_received": "🎁 Regalo ricevuto!",
-    "tap_continue": "Tocca per continuare"
+    "tap_continue": "Tocca per continuare",
+    "cancel": "Annulla"
   },
   "modes": {
     "classic": {
@@ -289,7 +290,21 @@
     "song_no_result": "Nessun brano trovato.",
     "song_choose": "Scegli la mia musica",
     "song_choose_hint": "Un brano che parte quando gli amici visitano il tuo profilo",
-    "song_modal_title": "Scegli la musica del profilo"
+    "song_modal_title": "Scegli la musica del profilo",
+    "share_generate_error": "❌ Impossibile generare l'immagine da condividere. Riprova.",
+    "share_discord_copied": "📋 Immagine del profilo copiata! Incollala su Discord con Ctrl+V.",
+    "share_copy_failed": "❌ Copia non riuscita. Scaricala manualmente.",
+    "share_tweet_text": "Guarda il mio profilo PersonaDLE! 🎭\n{{pseudo}} – {{wins}} vittorie e {{badges}} badge 🏅\n\n#PersonaDLE #Persona",
+    "share_email_subject": "Il mio profilo PersonaDLE",
+    "share_email_body": "Guarda le mie statistiche PersonaDLE!\n\nVittorie: {{wins}}\nMiglior serie: {{streak}}\nBadge: {{badges}}\n\nGioca su: https://personadle.net",
+    "delete_account_btn": "Elimina il mio account",
+    "delete_account_title": "Spezzare il tuo contratto?",
+    "delete_account_warning": "Il Velvet Room non dimentica facilmente. Andarsene significa che il tuo account, statistiche, badge, amici e ogni traccia del tuo viaggio svaniscono. La porta si chiude subito; ciò che resta viene cancellato per sempre dopo 30 giorni nel mare delle anime. Passato quel termine, non si torna indietro.",
+    "delete_account_type_prompt": "Digita il tuo nome utente per confermare:",
+    "delete_account_placeholder": "Il tuo nome utente",
+    "delete_account_confirm_btn": "Elimina definitivamente",
+    "delete_account_success": "Il tuo account è stato disattivato. Verrai disconnesso ora.",
+    "delete_account_error": "Qualcosa è andato storto. Riprova o contattaci."
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",

@@ -30,7 +30,8 @@
     "dismiss": "Fermer",
     "error": "Une erreur est survenue.",
     "admin_gift_received": "🎁 Cadeau reçu !",
-    "tap_continue": "Appuyer pour continuer"
+    "tap_continue": "Appuyer pour continuer",
+    "cancel": "Annuler"
   },
   "modes": {
     "classic": {
@@ -289,7 +290,21 @@
     "song_no_result": "Aucune musique trouvée.",
     "song_choose": "Choisir ma musique",
     "song_choose_hint": "Une musique qui se lance quand des amis visitent ton profil",
-    "song_modal_title": "Choisir ma musique de profil"
+    "song_modal_title": "Choisir ma musique de profil",
+    "share_generate_error": "❌ Impossible de générer l'image à partager. Réessaie.",
+    "share_discord_copied": "📋 Image de profil copiée ! Colle-la dans Discord avec Ctrl+V.",
+    "share_copy_failed": "❌ Échec de la copie. Télécharge-la manuellement.",
+    "share_tweet_text": "Découvre mon profil PersonaDLE ! 🎭\n{{pseudo}} – {{wins}} victoires & {{badges}} badges 🏅\n\n#PersonaDLE #Persona",
+    "share_email_subject": "Mon profil PersonaDLE",
+    "share_email_body": "Découvre mes stats PersonaDLE !\n\nVictoires : {{wins}}\nMeilleure série : {{streak}}\nBadges : {{badges}}\n\nJoue sur : https://personadle.net",
+    "delete_account_btn": "Supprimer mon compte",
+    "delete_account_title": "Rompre ton contrat ?",
+    "delete_account_warning": "Le Velvet Room n'oublie pas facilement. Partir signifie que ton compte, tes stats, badges, amis et chaque trace de ton parcours s'effacent. La porte se referme immédiatement ; ce qui reste est supprimé pour de bon après 30 jours dans la mer des âmes. Passé ce délai, il n'y a plus de retour possible.",
+    "delete_account_type_prompt": "Tape ton pseudo pour confirmer :",
+    "delete_account_placeholder": "Ton pseudo",
+    "delete_account_confirm_btn": "Supprimer définitivement",
+    "delete_account_success": "Ton compte a été désactivé. Tu vas être déconnecté.",
+    "delete_account_error": "Une erreur est survenue. Réessaie ou contacte-nous."
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",
