@@ -91,12 +91,19 @@
 > pour ne pas avoir à la refaire de mémoire à ce moment-là. Aucune de ces étapes ne bloque
 > la release 2.0 actuelle.
 
-**Cas concret en attente (2026-07-06)** : **Kotone** (P5X) est déjà dans le roster de base
-(`characters_clean.js`, `personas.js`, `portraitsMap.js`) et déjà présente dans
-`allOutAttackMode/database/aoaCharacters.js`/`personas_allOut.js` — mais son contenu All-Out-Attack
-(asset/animation officiels) attend une sortie/mise à jour P5X pas encore disponible. À vérifier
-et compléter (checklist cas A ci-dessous, étapes déjà faites à confirmer plutôt qu'à refaire)
-une fois ce contenu officiellement publié — pas de date connue pour l'instant.
+**Kotone Montagne (P5X)** : roster de base + silhouette + persona (Terpsichore) + All-Out-Attack
+tous déjà intégrés avec de vrais assets officiels — vérifié le 2026-07-06, y compris le GIF AOA
+(`allOutAttackMode/database/allOutAttack/Mont.webp`, 177 frames, vraie animation de combat, pas
+un placeholder malgré une première frame trompeuse). **Rien en attente pour elle.**
+
+**⚠️ Kotone Shiomi (P3/P3P/PQ2) — incohérence de données trouvée le 2026-07-06, indépendante de
+toute sortie à venir** : son `opus` diverge selon le fichier — `["P3P", "PQ2"]` dans
+`characters_clean.js`, `["P3", "P3P"]` dans `aoaCharacters.js`, `["P3", "P3R"]` dans
+`silhouetteCharacters.js` — alors qu'un seul jeu d'assets existe pour elle (pas de variante
+"style P3 Reload" distincte). À trancher : le contenu P3R pour elle est-il déjà officiellement
+sorti (auquel cas il suffit d'uniformiser l'`opus` sur les 3 fichiers vers la liste correcte) ou
+un nouvel artwork Reload est-il encore attendu (auquel cas `P3R` doit être retiré de
+`silhouetteCharacters.js` jusque-là) ? Décision en attente.
 
 Deux cas différents, qui touchent des fichiers différents :
 
