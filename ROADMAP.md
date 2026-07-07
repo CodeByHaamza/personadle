@@ -96,14 +96,20 @@ tous déjà intégrés avec de vrais assets officiels — vérifié le 2026-07-0
 (`allOutAttackMode/database/allOutAttack/Mont.webp`, 177 frames, vraie animation de combat, pas
 un placeholder malgré une première frame trompeuse). **Rien en attente pour elle.**
 
-**⚠️ Kotone Shiomi (P3/P3P/PQ2) — incohérence de données trouvée le 2026-07-06, indépendante de
-toute sortie à venir** : son `opus` diverge selon le fichier — `["P3P", "PQ2"]` dans
-`characters_clean.js`, `["P3", "P3P"]` dans `aoaCharacters.js`, `["P3", "P3R"]` dans
-`silhouetteCharacters.js` — alors qu'un seul jeu d'assets existe pour elle (pas de variante
-"style P3 Reload" distincte). À trancher : le contenu P3R pour elle est-il déjà officiellement
-sorti (auquel cas il suffit d'uniformiser l'`opus` sur les 3 fichiers vers la liste correcte) ou
-un nouvel artwork Reload est-il encore attendu (auquel cas `P3R` doit être retiré de
-`silhouetteCharacters.js` jusque-là) ? Décision en attente.
+**Kotone Shiomi (P3/P3P/PQ2) — GIF AOA actuel = fan-made, à remplacer une fois sorti sur P5X** :
+portrait/silhouette/persona sont bien de l'artwork officiel (P3P), mais l'animation All-Out-Attack
+(`allOutAttackMode/database/allOutAttack/Kotone.webp`) est un **fan-made imaginant un design
+"P3 Reload FeMC"** — les jeux originaux (P3/P3P, 2009-2010) n'ont jamais eu de cinématique
+All-Out-Attack (mécanique introduite dans des jeux plus récents), donc aucune animation
+officielle n'existe pour elle à la source. **P5X va lui en donner une vraie** (même mécanisme que
+Fuuka, dont le GIF AOA de ce projet vient de P5X plutôt que de P4 d'origine) — à remplacer une
+fois ce contenu P5X publié, pas de date connue.
+
+> ⚠️ **Incohérence d'opus trouvée au passage** (indépendante de ce qui précède) : son `opus`
+> diverge selon le fichier — `["P3P", "PQ2"]` dans `characters_clean.js`, `["P3", "P3P"]` dans
+> `aoaCharacters.js`, `["P3", "P3R"]` dans `silhouetteCharacters.js`. Le tag `"P3R"` semble être
+> une confusion avec le design "Reload" du fan-art ci-dessus plutôt qu'une vraie apparition dans
+> P3 Reload — à confirmer, puis uniformiser les 3 fichiers sur la même liste.
 
 Deux cas différents, qui touchent des fichiers différents :
 
