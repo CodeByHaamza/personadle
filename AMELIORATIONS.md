@@ -306,6 +306,9 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
 
 ## 10. 📌 Ordre de priorité conseillé
 
+> ✅ **Ciblé pour la v2.1** (décision du 2026-07-06, voir ROADMAP.md § v2.1) : les points #1 et #2
+> ci-dessous ne sont plus "au fil de l'eau" — version cible fixée.
+
 1. 🔴 **Git LFS + purge d'historique** (#1) — assets restent en local (philosophie du projet), débloque juste le poids du `.git`.
 2. 🔴 **Réencoder les AOA** (#2) — gros gain perf immédiat pour les joueurs.
 3. ~~🟠 **Tests PHP + flux streak intégré** (#3).~~ ✅ _fait — voir §3._

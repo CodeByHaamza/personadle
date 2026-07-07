@@ -27,6 +27,31 @@
 
 ---
 
+## 🚀 v2.1 — Prochaine version (périmètre décidé le 2026-07-06)
+
+> La 2.0 part en prod sans attendre ces points — ils avancent en parallèle une fois livrée.
+> Priorité pas encore fixée entre eux. Mis de côté pour l'instant, sans version cible :
+> Mode Versus temps réel (chantier temps réel plus lourd) et notifications push PWA — restent
+> en idée dans 🟢 Produit ci-dessous. Groupes d'amis : en réflexion, pas encore tranché.
+
+- [ ] **Mode Expert** — variante à **une seule tentative**, mécanique différente par mode de jeu :
+  - Classique : seule la citation (`quote`) est donnée, aucune autre catégorie affichée
+  - Musique : 1 seconde de clip audio au lieu de la lecture complète
+  - Personae : crop aléatoire zoomé du portrait au lieu du portrait entier
+  - Émoji / Silhouette / All-Out-Attack : équivalent à définir par analogie au moment de
+    l'implémentation (un seul indice minimal, pas de révélation progressive sur mauvaise réponse)
+  - Condition de déblocage **différente par mode** (à trancher au cas par cas, pistes retenues :
+    nombre de victoires en mode normal sur ce mode, streak minimum, ou badge dédié)
+- [ ] **Historique de profil** : graphe de streak + calendrier des jours joués (`uniqueDaysSet` déjà en base).
+- [ ] **Saison / ladder** avec reset périodique + récompenses.
+- [ ] **Compendium des unlocks** — vue "archive" style Persona de tous les badges/titres/wallpapers
+  débloqués avec leur date (réutilise `badges_unlocked`/`user_titles` déjà en base, pas de
+  nouvelle donnée serveur nécessaire).
+- [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète) — détail dans 🔐 Sécurité/compte ci-dessous.
+- [ ] **Stratégie assets AOA + Git LFS** — détail dans 🔴 À prévoir assez tôt ci-dessous.
+
+---
+
 ## 🎯 Prochaines étapes
 
 ### 🔴 À prévoir assez tôt
@@ -51,8 +76,12 @@
   pattern que `DatabaseIntegrationTest.php` — confirmé vert par la CI réelle après
   un aller-retour (un bug de garde-fou sur `social_link_min_rank` a été attrapé et
   corrigé grâce à elle)._
-- [ ] **Stratégie assets AOA** (~1,8 Go dans git) — Git LFS **ou** CDN-only + fetch au 1er lancement.
-  _(Script `scripts/purge_git_history.sh` prêt pour récupérer l'historique.)_
+- [ ] **Stratégie assets AOA** (~1,8 Go dans git) — 🎯 _cible 2.1._ Git LFS (**pas** CDN-only/sortir
+  les assets du repo — option explicitement écartée, voir AMELIORATIONS.md §1 : casse la
+  philosophie "un `git clone` suffit pour jouer", Git LFS reste compatible avec elle). Migration
+  des binaires lourds (`.webp`/`.mp3`/`.mp4`) + `scripts/purge_git_history.sh` (prêt, destructif,
+  à coordonner) pour purger le poids déjà accumulé + `.gitattributes` LFS. Réencodage AOA en
+  parallèle (webp q70 : 37-81 Mo → 9-25 Mo par fichier, voir AMELIORATIONS.md §2).
 
 ## 📆 À venir — contenu conditionné à une sortie de jeu
 
@@ -61,6 +90,13 @@
 > pour **le jour où** ça arrive (nouveau perso ajouté, ou remaster d'un jeu déjà supporté),
 > pour ne pas avoir à la refaire de mémoire à ce moment-là. Aucune de ces étapes ne bloque
 > la release 2.0 actuelle.
+
+**Cas concret en attente (2026-07-06)** : **Kotone** (P5X) est déjà dans le roster de base
+(`characters_clean.js`, `personas.js`, `portraitsMap.js`) et déjà présente dans
+`allOutAttackMode/database/aoaCharacters.js`/`personas_allOut.js` — mais son contenu All-Out-Attack
+(asset/animation officiels) attend une sortie/mise à jour P5X pas encore disponible. À vérifier
+et compléter (checklist cas A ci-dessous, étapes déjà faites à confirmer plutôt qu'à refaire)
+une fois ce contenu officiellement publié — pas de date connue pour l'instant.
 
 Deux cas différents, qui touchent des fichiers différents :
 
@@ -135,25 +171,24 @@ Nouveau jeu — cas A (roster inédit)
   réunifier sans pouvoir vérifier visuellement les 6 pages serait risqué pour un gain incertain._
   _Réaudité le 2026-07-05, relecture complète des 5 implémentations, même conclusion._
 
-### 🟢 Produit (idées)
+### 🟢 Produit (idées — sans version cible pour l'instant)
 
-- [ ] **Mode Versus / défi temps réel** entre amis.
-- [ ] **Historique de profil** : graphe de streak + calendrier des jours joués (on a déjà `uniqueDaysSet`).
-- [ ] **Saison / ladder** avec reset périodique + récompenses.
-- [ ] 💡 **Mode Expert / New Game+** — moins d'essais autorisés ou moins d'indices affichés,
-  avec un badge dédié à la clé. Rejoue de la valeur pour les joueurs qui maîtrisent déjà le jeu.
-- [ ] 💡 **Compendium des unlocks** — vue "archive" style Persona de tous les badges/titres/
-  wallpapers débloqués avec leur date. Réutilise `badges_unlocked`/`user_titles` déjà en base,
-  pas de nouvelle donnée serveur nécessaire.
+> **Mode Expert, historique de profil, saison/ladder, compendium des unlocks** : passés en
+> 🚀 v2.1 ci-dessus (décision du 2026-07-06) — plus dans cette liste.
+
+- [ ] **Mode Versus / défi temps réel** entre amis — écarté pour la 2.1 (chantier temps réel
+  plus lourd que les autres points retenus), reste en idée.
 - [ ] 💡 **Groupes d'amis** (au-delà du 1-à-1) — petits groupes ("table du Velvet Room") avec
   leaderboard privé. Étend `friendships`/`leaderboard` au-delà des paires Social Link
-  (implique une nouvelle table de groupe + permissions à définir).
-- [ ] **Notifications push (PWA)** — rappel quotidien (levier de rétention « daily »).
+  (implique une nouvelle table de groupe + permissions à définir). **En réflexion**, pas
+  encore de décision de version.
+- [ ] **Notifications push (PWA)** — rappel quotidien (levier de rétention « daily ») — écarté
+  pour la 2.1, reste en idée.
 
 ### 🔐 Sécurité / compte
 
 - [x] **Reset de mot de passe par email** — ✅ _livré (request-reset / reset-password, token hashé 1h, page dédiée)._
-- [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète).
+- [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète) — 🎯 _cible 2.1._
 - [x] **Anti-triche sur les résultats de partie** — 🚧 _phase 1 livrée (détection), phase 2
   (rejet strict) délibérément différée. Correction factuelle au passage : il n'existe **aucune**
   table `daily_targets` en BDD (ni dans `sql/bdd_mysql.sql`, ni dans les migrations) — l'ancienne
