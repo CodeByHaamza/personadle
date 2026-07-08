@@ -623,10 +623,6 @@ We're always looking for passionate contributors! Whether you're a developer, de
   <img src="https://img.shields.io/github/contributors/HamzaKarrouchi/personadle?style=social" alt="Contributors">
 </p>
 
-### ⭐ Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=HamzaKarrouchi/personadle&type=Date)](https://star-history.com/#HamzaKarrouchi/personadle&Date)
-
 ---
 
 <p align="center">
