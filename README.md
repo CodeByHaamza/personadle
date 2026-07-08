@@ -13,6 +13,7 @@
 <p align="center">
   <a href="https://personadle.net"><img src="https://img.shields.io/badge/Play%20Now-personadle.net-red?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptLTIgMTVsLTUtNSAxLjQxLTEuNDFMMTAgMTQuMTdsNy41OS03LjU5TDE5IDhsLTkgOXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+"/></a>
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/HamzaKarrouchi/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HamzaKarrouchi/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
   <img src="https://img.shields.io/badge/Version-2.0-brightgreen?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
   <img src="https://img.shields.io/badge/Tests-481%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
