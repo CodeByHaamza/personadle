@@ -609,7 +609,7 @@ We're always looking for passionate contributors! Whether you're a developer, de
 
 - 🌐 **Website**: [personadle.net](https://personadle.net)
 - 🐙 **GitHub**: [HamzaKarrouchi/personadle](https://github.com/HamzaKarrouchi/personadle)
-- 💬 **Discord**: [PersonaDLE](https://discord.gg/wpMdGGDp3y)
+- 💬 **Discord**: [PersonaDLE](https://discord.gg/wpMdGGDp3y) [![Discord](https://img.shields.io/discord/1364683608886874142?style=for-the-badge&logo=discord&label=Discord&color=5865F2)](https://discord.gg/wpMdGGDp3y)
 - 📧 **Contact**: Open an issue on GitHub for support or collaboration
 
 ---
