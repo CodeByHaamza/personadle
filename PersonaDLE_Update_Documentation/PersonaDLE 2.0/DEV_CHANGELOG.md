@@ -10,6 +10,46 @@
 
 ---
 
+## 2026-07-16 — fix(api): rateLimit() fail-open + erreur JS brute côté auth
+
+Bug remonté par un testeur (compte local, schéma Docker périmé) : inscription
+impossible, message d'erreur JS interne affiché à l'utilisateur.
+
+- **`js/auth.js`** (PR #22) : `setupLoginForm()`/`setupRegisterForm()`
+  affichaient `err.message` brut pour toute erreur non reconnue par
+  `resolveLoginError`/`resolveRegisterError` — y compris une `TypeError` JS
+  interne (`const { user } = await api.auth.register(...)` avec `user` `null`
+  quand `apiCall()` reçoit un statut succès mais un corps non-JSON). Fix :
+  n'afficher le message brut que si `err instanceof ApiError`, sinon message
+  générique traduit.
+- **`api/bootstrap.php` — `rateLimit()`** : cause racine trouvée côté serveur
+  du testeur — sa table `rate_limits` n'existait pas (volume Docker créé
+  avant l'ajout de cette table à `sql/bdd_mysql.sql`, jamais recréé depuis).
+  `rateLimit()` n'avait aucune gestion d'erreur et est appelée en tout premier
+  sur chaque endpoint protégé (login, register, sessions, messages…), avant
+  tout `try/catch` de l'endpoint lui-même : une `PDOException` (table
+  manquante, coupure BDD momentanée) faisait planter tout l'endpoint avec une
+  fatal error PHP brute — renvoyée en HTTP 200 par Apache/mod_php (pas 500),
+  ce qui explique le corps non-JSON reçu côté frontend. Fix : `rateLimit()`
+  attrape désormais l'exception, journalise (`error_log`), et **fail open**
+  (laisse passer la requête plutôt que de planter l'endpoint). Compromis
+  volontaire : en cas d'indisponibilité de `rate_limits`, le throttling est
+  temporairement inactif plutôt que de bloquer toute l'API — accepté car le
+  scénario déclencheur (table manquante/BDD indisponible) est déjà couvert
+  côté disponibilité générale par `pdo()` (503 sur échec de connexion), et le
+  risque d'abus pendant cette fenêtre est jugé plus faible que le risque de
+  panne totale de l'auth pour un incident BDD ponctuel.
+
+### Angle mort documenté
+
+Aucun test unitaire dédié à `rateLimit()` (testé indirectement via
+`DatabaseIntegrationTest.php`, qui nécessite Docker/MariaDB — non exécutable
+en session sandboxée, comme les autres tests d'intégration PHP de ce projet).
+Vérifié : `php -l` sur tout `api/`, `npm test` (482/482), et
+`DatabaseIntegrationTest::testDatabaseSchema` couvre déjà la présence de
+`rate_limits` (« schéma Docker périmé ? ») — confirmera en CI que ce fix ne
+casse rien côté intégration BDD.
+
 ## 2026-07-12 — fix: régression port E2E (8090) + avatarSrc stale après cloud sync
 
 Corrections suite à une review de la PR `feat/ui-pages-joker-profile-kotone`.

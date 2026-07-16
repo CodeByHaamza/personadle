@@ -335,21 +335,33 @@ function requestPathSegments(): array
  */
 function rateLimit(string $key, int $max, int $windowSec, string $message = 'Too many attempts. Please try again later.'): void
 {
-    $pdo    = pdo();
-    $now    = time();
-    $cutoff = $now - $windowSec;
+    try {
+        $pdo    = pdo();
+        $now    = time();
+        $cutoff = $now - $windowSec;
 
-    // Upsert atomique : réinitialise la fenêtre si expirée, sinon incrémente.
-    $pdo->prepare(
-        'INSERT INTO rate_limits (rl_key, hits, window_start) VALUES (?, 1, ?)
-         ON DUPLICATE KEY UPDATE
-            hits         = IF(window_start < ?, 1, hits + 1),
-            window_start = IF(window_start < ?, ?, window_start)'
-    )->execute([$key, $now, $cutoff, $cutoff, $now]);
+        // Upsert atomique : réinitialise la fenêtre si expirée, sinon incrémente.
+        $pdo->prepare(
+            'INSERT INTO rate_limits (rl_key, hits, window_start) VALUES (?, 1, ?)
+             ON DUPLICATE KEY UPDATE
+                hits         = IF(window_start < ?, 1, hits + 1),
+                window_start = IF(window_start < ?, ?, window_start)'
+        )->execute([$key, $now, $cutoff, $cutoff, $now]);
 
-    $stmt = $pdo->prepare('SELECT hits FROM rate_limits WHERE rl_key = ?');
-    $stmt->execute([$key]);
-    if ((int) $stmt->fetchColumn() > $max) {
+        $stmt = $pdo->prepare('SELECT hits FROM rate_limits WHERE rl_key = ?');
+        $stmt->execute([$key]);
+        $hits = (int) $stmt->fetchColumn();
+    } catch (Throwable $e) {
+        // Fail open : si la table rate_limits est indisponible (schéma périmé,
+        // coupure BDD momentanée…), on ne fait pas planter tout l'endpoint avec
+        // une fatal error brute — on journalise et on laisse passer la requête.
+        // Le throttling reprend dès que la BDD répond de nouveau ; appelé en tout
+        // premier sur chaque endpoint protégé, avant tout autre try/catch.
+        error_log('[PersonaDLE rateLimit] ' . $e->getMessage());
+        return;
+    }
+
+    if ($hits > $max) {
         jsonError($message, 429);
     }
 }
