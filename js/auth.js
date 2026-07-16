@@ -33,7 +33,7 @@
  *   // Ensuite : window._currentUser est défini
  */
 
-import { api } from "./api.js";
+import { api, ApiError } from "./api.js";
 import { openModal, closeModal } from "./modal.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -256,7 +256,13 @@ function setupLoginForm() {
       // Synchroniser les sessions en attente accumulées en offline
       await api.stats.syncPending().catch(() => {});
     } catch (err) {
-      showAuthError(error, resolveLoginError(err.message));
+      // err peut ne pas être une ApiError (ex: réponse serveur vide/invalide qui fait
+      // échouer un `const { user } = ...` en amont) — ne jamais afficher un message
+      // JS brut à l'utilisateur, seulement les messages backend connus/mappés.
+      showAuthError(
+        error,
+        err instanceof ApiError ? resolveLoginError(err.message) : _t("auth.error_generic", "Login failed")
+      );
     } finally {
       if (btn) btn.disabled = false;
     }
@@ -365,7 +371,13 @@ function setupRegisterForm() {
       localStorage.removeItem("_crInitDone");
       window.dispatchEvent(new CustomEvent("personadle:auth-login", { detail: { user } }));
     } catch (err) {
-      showAuthError(error, resolveRegisterError(err.message));
+      // Voir commentaire équivalent dans setupLoginForm() plus haut.
+      showAuthError(
+        error,
+        err instanceof ApiError
+          ? resolveRegisterError(err.message)
+          : _t("auth.error_generic", "Registration failed")
+      );
     } finally {
       if (btn) btn.disabled = false;
     }
