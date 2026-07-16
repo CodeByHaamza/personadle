@@ -289,6 +289,21 @@ export function compareAttribute(key, value, targetVal) {
   return { status: isMatch ? "correct" : "wrong", arrow: null };
 }
 
+function fillVictoryBox(nom, isGiveup) {
+  const i18 = window.i18n || { t: (k, v) => v?.name ?? k };
+  const img = document.getElementById("victoryPortrait");
+  const msg = document.getElementById("winMessage");
+  if (img) {
+    const imageName = portraitsMap[nom] || nom.split(" ")[0];
+    img.src = `../database/portraits/${encodeURIComponent(imageName)}.webp`;
+    img.alt = nom;
+  }
+  if (msg) {
+    const key = isGiveup ? "modes.classic.giveup_reveal" : "modes.classic.correct";
+    msg.textContent = i18.t(key, { name: nom });
+  }
+}
+
 /**
  * Validates a single guess against the current target and renders a
  * comparison row in the output grid.
@@ -430,6 +445,8 @@ function checkGuess(name, target, forceReveal = false) {
     giveUpButton.style.pointerEvents = "none";
     giveUpButton.style.opacity = "0.5";
     gameOver = true;
+    document.querySelector(".input-row")?.classList.add("hidden");
+    document.getElementById("autocompleteList")?.classList.add("hidden");
 
     // !forceReveal : un Give Up ne doit jamais se logger comme une victoire —
     // le handler du bouton Give Up (plus bas) logge lui-même le "giveup" une
@@ -493,6 +510,7 @@ function checkGuess(name, target, forceReveal = false) {
       showChallengeButton("classic", attempts);
       checkChallengeCompletion("classic", attempts, true);
       showCommunityStats(modeName, target.nom);
+      fillVictoryBox(target.nom, false);
       document.getElementById("victoryBox").style.display = "block";
     }
   }
@@ -579,7 +597,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     textbar.disabled = true;
     guessButton.disabled = true;
     giveUpButton.disabled = true;
+    document.querySelector(".input-row")?.classList.add("hidden");
+    document.getElementById("autocompleteList")?.classList.add("hidden");
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+    fillVictoryBox(target.nom, false);
     document.getElementById("victoryBox").style.display = "block";
   }
 
@@ -623,6 +644,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     giveUpButton.style.pointerEvents = "none";
     giveUpButton.style.opacity = "0.5";
     gameOver = true;
+    document.querySelector(".input-row")?.classList.add("hidden");
+    document.getElementById("autocompleteList")?.classList.add("hidden");
 
     if (!history.includes(target.nom)) {
       history.push(target.nom);
@@ -649,6 +672,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     checkChallengeCompletion("classic", attempts, false);
     showCommunityStats(modeName, target.nom);
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+    fillVictoryBox(target.nom, true);
     document.getElementById("victoryBox").style.display = "block";
   });
 

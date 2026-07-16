@@ -72,6 +72,46 @@ describe("isTitleConditionMet", () => {
     ).toBe(true);
   });
 
+  it("joker_profile — also unlocks via Joker/Ren avatar (avatarSrc)", () => {
+    const title = find("joker_looking_cool");
+    // avatarSrc contenant un fichier Joker → true
+    expect(
+      isTitleConditionMet(title, {
+        profile: { avatarSrc: "../img/avatar/JOKER.webp" },
+      })
+    ).toBe(true);
+    // avatarSrc contenant Joker.jpg → true
+    expect(
+      isTitleConditionMet(title, {
+        profile: { avatarSrc: "../img/avatar/Joker.jpg" },
+      })
+    ).toBe(true);
+    // avatarSrc contenant Ren.webp → true
+    expect(
+      isTitleConditionMet(title, {
+        profile: { avatarSrc: "../img/avatar/Ren.webp" },
+      })
+    ).toBe(true);
+    // avatar GIF (path stocké directement dans profile.avatar) → true
+    expect(
+      isTitleConditionMet(title, {
+        profile: { avatar: "../img/avatar/Ren.gif" },
+      })
+    ).toBe(true);
+    // avatar base64 sans avatarSrc, ni song+thème → false
+    expect(
+      isTitleConditionMet(title, {
+        profile: { avatar: "data:image/png;base64,abc123" },
+      })
+    ).toBe(false);
+    // avatar non-joker → false
+    expect(
+      isTitleConditionMet(title, {
+        profile: { avatarSrc: "../img/avatar/Ryuji.jpg" },
+      })
+    ).toBe(false);
+  });
+
   it("returns false for an unrecognized condition_type (defensive)", () => {
     expect(isTitleConditionMet({ condition_type: "not_a_real_condition" }, { profile: {} })).toBe(
       false

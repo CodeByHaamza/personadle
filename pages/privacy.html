@@ -30,147 +30,341 @@
       }
     </script>
     <style>
+      /* ═══════════════════════════════════════════
+         PRIVACY — VELVET ROOM REDESIGN
+         ═══════════════════════════════════════════ */
       html { scroll-behavior: smooth; }
+      *, *::before, *::after { box-sizing: border-box; }
+
+      /* ── Force dark Velvet Room bg ── */
+      /* ── Light mode (default) ── */
+      html, body {
+        background: #f4f2ff !important;
+        color: #1a1028 !important;
+      }
+      /* anti-FOUC : l'inline script met darkmode sur <html> avant <body> */
+      html.darkmode, html.darkmode body { background: #0b0a1f !important; color: #e8e0ff !important; }
+      body::before {
+        content: "";
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background:
+          radial-gradient(ellipse 60% 50% at 75% 10%, rgba(124,58,237,.05) 0%, transparent 60%),
+          radial-gradient(ellipse 50% 45% at 15% 85%, rgba(230,57,70,.04) 0%, transparent 55%),
+          #f4f2ff;
+      }
+      body::after { display: none; }
+
+      /* ── Dark mode ── */
+      body.darkmode {
+        background: #0b0a1f !important;
+        color: #e8e0ff !important;
+      }
+      body.darkmode::before {
+        background:
+          radial-gradient(ellipse 60% 50% at 75% 10%, rgba(124,58,237,.13) 0%, transparent 60%),
+          radial-gradient(ellipse 50% 45% at 15% 85%, rgba(230,57,70,.09) 0%, transparent 55%),
+          radial-gradient(ellipse 75% 65% at 50% 45%, rgba(14,9,40,.96) 0%, transparent 80%);
+        animation: pgBgPulse 18s ease-in-out infinite alternate;
+      }
+      @keyframes pgBgPulse { 0%{opacity:.75;} 50%{opacity:1;} 100%{opacity:.82;} }
+      body.darkmode::after {
+        content: "";
+        position: fixed; inset: 0; z-index: 1; pointer-events: none;
+        background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.05) 3px, rgba(0,0,0,.05) 4px);
+        display: block;
+      }
 
       /* ── Progress bar ── */
-      #px-prog { position:fixed;top:0;left:0;width:100%;height:3px;z-index:9999;pointer-events:none; }
-      #px-fill { height:100%;width:0%;background:linear-gradient(90deg,#c0193a,#e63946,#ff6b9d,#ffd700);box-shadow:0 0 10px rgba(230,57,70,.8);transition:width .08s linear; }
+      #px-prog { position:fixed; top:0; left:0; width:100%; height:3px; z-index:9999; pointer-events:none; }
+      #px-fill { height:100%; width:0%;
+        background: linear-gradient(90deg,#7c3aed,#e63946,#ff6b9d,#ffd700);
+        box-shadow: 0 0 14px rgba(124,58,237,.8); transition:width .08s linear; }
 
-      /* ── Gradient title ── */
+      /* ── Entrance animations ── */
+      @keyframes pgIn { from{opacity:0;transform:translateY(22px);} to{opacity:1;transform:none;} }
+      .privacy-page-header { animation:pgIn .7s cubic-bezier(.22,1,.36,1) both; position:relative; z-index:10; }
+      .privacy-page-header::after { display:none !important; }
+      .privacy-main { animation:pgIn .7s cubic-bezier(.22,1,.36,1) .08s both; position:relative; z-index:10; }
+
+      /* ── Title ── */
       .privacy-page-title {
-        background: linear-gradient(135deg,#e63946 0%,#ff8a80 50%,#ffd740 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        font-family: "Cinzel", "Oswald", serif !important;
+        font-size: clamp(1.8rem, 5.5vw, 3.8rem) !important;
+        font-weight: 600 !important;
+        letter-spacing: .06em !important;
+        background: linear-gradient(135deg, #e63946 0%, #ff8a80 35%, #ffd700 65%, #e63946 100%) !important;
+        background-size: 220% auto !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        animation: titleShimmer 6s linear infinite !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 14px !important;
       }
-      .darkmode .privacy-page-title {
-        background: linear-gradient(135deg,#ff6b9d 0%,#e63946 50%,#ffd700 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      @keyframes titleShimmer { 0%{background-position:0% center;} 100%{background-position:220% center;} }
+
+      /* Diamonds */
+      .p5-diamond {
+        color: #7c3aed !important;
+        -webkit-text-fill-color: #7c3aed !important;
+        font-size: .45em !important;
+        animation: diamGlow 2.6s ease-in-out infinite !important;
+        display: inline-block !important;
+      }
+      body.darkmode .p5-diamond { color: #ffd700 !important; -webkit-text-fill-color: #ffd700 !important; }
+      @keyframes diamGlow {
+        0%,100% { opacity:1; transform:scale(1); }
+        50%      { opacity:.5; transform:scale(1.3); }
       }
 
       /* ── Scroll reveal ── */
       .px-reveal { opacity:0; transform:translateY(22px); transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1); }
       .px-reveal.in { opacity:1; transform:none; }
 
-      /* ── Badge entrance ── */
+      /* ── Shield hero ── */
+      .px-shield-hero { text-align:center; padding:20px 0 6px; position:relative; z-index:10; }
+      .px-shield-icon {
+        font-size:3.2rem; display:inline-block;
+        animation: shieldPulse 3.2s ease-in-out infinite;
+        filter: drop-shadow(0 0 20px rgba(124,58,237,.6)) drop-shadow(0 0 40px rgba(124,58,237,.3));
+      }
+      @keyframes shieldPulse {
+        0%,100%{ transform:scale(1) rotate(-2deg); filter:drop-shadow(0 0 16px rgba(124,58,237,.5)) drop-shadow(0 0 32px rgba(124,58,237,.25)); }
+        50%    { transform:scale(1.1) rotate(2deg); filter:drop-shadow(0 0 30px rgba(124,58,237,.8)) drop-shadow(0 0 60px rgba(230,57,70,.3)); }
+      }
+
+      /* ── Intro card ── */
+      .privacy-intro-wrap {
+        background: rgba(255,255,255,.96) !important;
+        border: 1px solid rgba(124,58,237,.15) !important;
+        box-shadow: 0 4px 28px rgba(100,80,160,.1) !important;
+        border-radius: 18px !important;
+        margin-bottom: 20px !important;
+        padding: 24px 28px 8px !important;
+      }
+      body.darkmode .privacy-intro-wrap {
+        background: rgba(18,12,38,.82) !important;
+        backdrop-filter: blur(18px) !important; -webkit-backdrop-filter: blur(18px) !important;
+        border-color: rgba(124,58,237,.28) !important;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.05), 0 8px 40px rgba(0,0,0,.5), 0 0 60px rgba(124,58,237,.08) !important;
+      }
+
+      .privacy-tagline {
+        font-family: "Cinzel", serif !important;
+        font-size: 1.55rem !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg,#e63946,#ff8a80,#ffd740) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        letter-spacing: .04em !important;
+        text-align: center !important;
+        margin-bottom: 10px !important;
+      }
+
+      .privacy-intro {
+        color: #4a4060 !important;
+        text-align: center !important;
+        font-size: .95rem !important;
+        line-height: 1.72 !important;
+      }
+      body.darkmode .privacy-intro { color: rgba(195,178,240,.72) !important; }
+
+      /* ── Badges ── */
       @keyframes badgePop { 0%{transform:scale(0) rotate(-8deg);opacity:0;} 65%{transform:scale(1.08) rotate(1deg);opacity:1;} 100%{transform:scale(1);opacity:1;} }
-      .privacy-badge { opacity:0; animation:badgePop .45s cubic-bezier(.22,1,.36,1) forwards; transition:transform .2s, box-shadow .2s; }
-      .privacy-badge:nth-child(1){animation-delay:.2s;} .privacy-badge:nth-child(2){animation-delay:.35s;}
-      .privacy-badge:nth-child(3){animation-delay:.5s;}  .privacy-badge:nth-child(4){animation-delay:.65s;}
-      .privacy-badge:hover { transform:translateY(-2px) scale(1.06); box-shadow:0 4px 14px rgba(0,0,0,.14); }
+      .privacy-badge {
+        opacity:0; animation:badgePop .45s cubic-bezier(.22,1,.36,1) forwards;
+        border-radius: 20px !important;
+        font-size: .78rem !important; font-weight:700 !important;
+        padding: 5px 14px !important;
+        letter-spacing: .04em !important;
+        transition: transform .2s, box-shadow .2s;
+      }
+      .privacy-badge:nth-child(1){animation-delay:.2s;}
+      .privacy-badge:nth-child(2){animation-delay:.35s;}
+      .privacy-badge:nth-child(3){animation-delay:.5s;}
+      .privacy-badge:nth-child(4){animation-delay:.65s;}
 
-      /* ── Card hover lift ── */
-      .privacy-card { transition:box-shadow .2s, transform .2s !important; }
-      .privacy-card:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,.12) !important; }
-      .darkmode .privacy-card:hover { box-shadow:0 8px 28px rgba(0,0,0,.4) !important; }
+      /* light mode badges */
+      .privacy-badge--free  { background:rgba(21,128,61,.1) !important; color:#15803d !important; border:1.5px solid rgba(21,128,61,.3) !important; }
+      .privacy-badge--gdpr  { background:rgba(29,78,216,.1) !important; color:#1d4ed8 !important; border:1.5px solid rgba(29,78,216,.3) !important; }
+      .privacy-badge--noads { background:rgba(185,28,28,.1) !important; color:#b91c1c !important; border:1.5px solid rgba(185,28,28,.3) !important; }
+      .privacy-badge--open  { background:rgba(109,40,217,.1)!important; color:#6d28d9 !important; border:1.5px solid rgba(109,40,217,.3)!important; }
+      /* dark mode badges — neon */
+      body.darkmode .privacy-badge--free  { background:rgba(74,222,128,.1) !important; color:#4ade80 !important; border-color:rgba(74,222,128,.35) !important; }
+      body.darkmode .privacy-badge--gdpr  { background:rgba(96,165,250,.1) !important; color:#60a5fa !important; border-color:rgba(96,165,250,.35) !important; }
+      body.darkmode .privacy-badge--noads { background:rgba(230,57,70,.1)  !important; color:#f87171 !important; border-color:rgba(230,57,70,.35)  !important; }
+      body.darkmode .privacy-badge--open  { background:rgba(167,139,250,.1)!important; color:#a78bfa !important; border-color:rgba(167,139,250,.35)!important; }
 
-      /* ── "Never" list stagger ── */
-      @keyframes neverIn { from{opacity:0;transform:translateX(-12px);} to{opacity:1;transform:none;} }
+      /* ── Cards — light glass (default) ── */
+      .privacy-card {
+        background: rgba(255,255,255,.97) !important;
+        border: 1px solid rgba(200,180,230,.15) !important;
+        border-left: 4px solid var(--card-accent, #e63946) !important;
+        border-radius: 14px !important;
+        margin-bottom: 16px !important;
+        padding: 20px 24px !important;
+        box-shadow: 0 4px 18px rgba(100,80,160,.09) !important;
+        transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s !important;
+      }
+      .privacy-card:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 36px rgba(100,80,160,.14) !important;
+      }
+
+      /* Section-specific colors */
+      .privacy-card { --card-accent: #e63946; }
+      .privacy-card--safe     { --card-accent: #16a34a; }
+      .privacy-card--security { --card-accent: #2563eb; }
+      .privacy-card--legal    { --card-accent: #6d28d9; }
+      .privacy-row .privacy-card:first-child { --card-accent: #2563eb; }
+      .privacy-row .privacy-card:last-child  { --card-accent: #16a34a; }
+
+      /* dark mode cards */
+      body.darkmode .privacy-card {
+        background: rgba(18,12,38,.75) !important;
+        backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
+        border-color: rgba(255,255,255,.08) !important;
+        box-shadow: 0 6px 28px rgba(0,0,0,.4) !important;
+      }
+      body.darkmode .privacy-card { --card-accent: #e63946; }
+      body.darkmode .privacy-card--safe     { --card-accent: #4ade80; }
+      body.darkmode .privacy-card--security { --card-accent: #60a5fa; background:rgba(15,12,40,.82) !important; }
+      body.darkmode .privacy-card--legal    { --card-accent: #a78bfa; background:rgba(20,12,42,.82) !important; }
+      body.darkmode .privacy-row .privacy-card:first-child { --card-accent: #60a5fa; }
+      body.darkmode .privacy-row .privacy-card:last-child  { --card-accent: #4ade80; }
+      body.darkmode .privacy-card:hover { box-shadow:0 14px 44px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.1) !important; }
+      body.darkmode .privacy-card--safe:hover     { box-shadow:0 14px 44px rgba(0,0,0,.55), 0 0 40px rgba(74,222,128,.12) !important; }
+      body.darkmode .privacy-card--security:hover { box-shadow:0 14px 44px rgba(0,0,0,.55), 0 0 40px rgba(96,165,250,.12) !important; }
+      body.darkmode .privacy-card--legal:hover    { box-shadow:0 14px 44px rgba(0,0,0,.55), 0 0 40px rgba(167,139,250,.12) !important; }
+
+      /* Card titles */
+      .privacy-card__title {
+        color: #1a1028 !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        margin: 0 0 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      .privacy-card--safe     .privacy-card__title { color:#15803d !important; }
+      .privacy-card--security .privacy-card__title { color:#1d4ed8 !important; }
+      .privacy-card--legal    .privacy-card__title { color:#6d28d9 !important; }
+      .privacy-row .privacy-card:first-child  .privacy-card__title { color:#1d4ed8 !important; }
+      .privacy-row .privacy-card:last-child   .privacy-card__title { color:#15803d !important; }
+      body.darkmode .privacy-card__title                             { color: #ddd4ff !important; }
+      body.darkmode .privacy-card--safe     .privacy-card__title    { color:#4ade80 !important; }
+      body.darkmode .privacy-card--security .privacy-card__title    { color:#60a5fa !important; }
+      body.darkmode .privacy-card--legal    .privacy-card__title    { color:#a78bfa !important; }
+      body.darkmode .privacy-row .privacy-card:first-child  .privacy-card__title { color:#60a5fa !important; }
+      body.darkmode .privacy-row .privacy-card:last-child   .privacy-card__title { color:#4ade80 !important; }
+
+      /* Card text */
+      .privacy-card p { color:#4a4060 !important; line-height:1.75 !important; font-size:.92rem !important; }
+      body.darkmode .privacy-card p { color:rgba(190,175,230,.72) !important; }
+
+      /* Lists */
+      .privacy-card__list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+      .privacy-card__list li { font-size:.91rem; color:#4a4060 !important; line-height:1.55; padding-left:4px; }
+      body.darkmode .privacy-card__list li { color:rgba(190,175,230,.72) !important; }
+
+      /* "Never do" list — red cross */
+      .privacy-card__list--check li::before { content:"✕ "; color:#b91c1c; font-weight:700; }
+      /* Security list — green check */
+      .privacy-card__list--lock  li::before { content:"✓ "; color:#15803d; font-weight:700; }
+      body.darkmode .privacy-card__list--check li::before { color:#f87171; }
+      body.darkmode .privacy-card__list--lock  li::before { color:#4ade80; text-shadow:0 0 10px rgba(74,222,128,.6); }
+
+      /* ── "Never" stagger ── */
+      @keyframes neverIn { from{opacity:0;transform:translateX(-14px);} to{opacity:1;transform:none;} }
       .px-never-stagger li { opacity:0; animation:neverIn .4s cubic-bezier(.22,1,.36,1) forwards; }
 
-      /* ── Security card accent ── */
-      .privacy-card--security { background:linear-gradient(135deg,rgba(25,118,210,.05) 0%,transparent 100%) !important; }
-      .darkmode .privacy-card--security { background:linear-gradient(135deg,rgba(25,118,210,.12) 0%,transparent 100%) !important; }
+      /* ── Legal grid ── */
+      .privacy-legal-grid {
+        background: rgba(100,70,180,.06) !important;
+        border-radius: 10px !important;
+        padding: 14px 16px !important;
+        margin-bottom: 16px !important;
+      }
+      body.darkmode .privacy-legal-grid { background: rgba(255,255,255,.04) !important; }
+      .privacy-legal-label { color:#6d28d9 !important; text-transform:uppercase; letter-spacing:.06em; font-size:.76rem; font-weight:700; min-width:80px; flex-shrink:0; }
+      body.darkmode .privacy-legal-label { color:#a78bfa !important; }
+      .privacy-legal-value { color:#4a4060 !important; font-size:.88rem; text-decoration:none; }
+      body.darkmode .privacy-legal-value { color:rgba(190,175,230,.72) !important; }
+      a.privacy-legal-value:hover { color:#c0192e !important; }
+      body.darkmode a.privacy-legal-value:hover { color:#e63946 !important; }
+      .privacy-legal-disclaimer { color:rgba(80,50,130,.5) !important; font-style:italic; font-size:.82rem; line-height:1.65; }
+      body.darkmode .privacy-legal-disclaimer { color:rgba(170,155,205,.5) !important; }
+      .privacy-legal-opensource { color:#5a4870 !important; font-size:.85rem; display:flex; align-items:center; gap:10px; }
+      body.darkmode .privacy-legal-opensource { color:rgba(190,175,230,.65) !important; }
+      .privacy-gh-link { color:#c0192e !important; font-weight:700; text-decoration:none; }
+      body.darkmode .privacy-gh-link { color:#e63946 !important; }
+      .privacy-gh-link:hover { text-decoration:underline; }
+
+      /* ── Email button ── */
+      .px-email-btn {
+        display:inline-flex !important; align-items:center !important; gap:9px !important;
+        margin-top:14px !important; padding:12px 26px !important;
+        background: linear-gradient(135deg,#c0193a,#e63946) !important;
+        color:#fff !important; border-radius:10px !important;
+        text-decoration:none !important; font-weight:700 !important;
+        font-size:.9rem !important; letter-spacing:.03em !important;
+        box-shadow: 0 4px 22px rgba(230,57,70,.45) !important;
+        transition: transform .2s, box-shadow .2s !important;
+        border:none !important; cursor:pointer !important;
+      }
+      .px-email-btn:hover { transform:translateY(-2px) !important; box-shadow:0 10px 32px rgba(230,57,70,.65) !important; }
+
+      /* ── Last updated chip ── */
+      .px-updated-wrap { text-align:center; margin:22px 0 14px; }
+      .privacy-last-updated {
+        display:inline-block !important;
+        background: rgba(124,58,237,.08) !important;
+        border: 1px solid rgba(124,58,237,.25) !important;
+        color: rgba(80,50,130,.6) !important;
+        border-radius:20px !important; padding:5px 18px !important;
+        font-size:.75rem !important;
+      }
+      body.darkmode .privacy-last-updated {
+        background: rgba(124,58,237,.1) !important;
+        border-color: rgba(124,58,237,.3) !important;
+        color: rgba(180,160,240,.6) !important;
+      }
 
       /* ── Back button ── */
-      .privacy-back .btn-p5 { transition:transform .2s, box-shadow .2s !important; }
-      .privacy-back .btn-p5:hover { transform:translateY(-2px) !important; box-shadow:0 6px 20px rgba(230,57,70,.3) !important; }
+      .privacy-back { text-align:center; padding:36px 0 16px; position:relative; z-index:10; }
+      .privacy-back .btn-p5 {
+        background: linear-gradient(135deg,#c0193a,#e63946) !important;
+        color:#fff !important; border-radius:12px !important;
+        padding:14px 40px !important; border:none !important;
+        box-shadow: 0 4px 24px rgba(230,57,70,.5) !important;
+        font-size:1rem !important; font-weight:700 !important;
+        letter-spacing:.07em !important; text-transform:uppercase !important;
+        display:inline-flex !important; align-items:center !important; gap:10px !important;
+        cursor:pointer !important; text-decoration:none !important;
+        transition: transform .2s cubic-bezier(.22,1,.36,1), box-shadow .2s !important;
+      }
+      .privacy-back .btn-p5:hover { transform:translateY(-3px) !important; box-shadow:0 12px 40px rgba(230,57,70,.7) !important; }
+      .privacy-back .btn-p5:focus-visible { outline:2px solid #ffd700 !important; outline-offset:4px !important; }
+
+      /* ── Character art — neon glow ── */
+      .privacy-char-wrap img:not(.privacy-tarot-img) {
+        filter: drop-shadow(0 8px 24px rgba(0,0,0,.6)) drop-shadow(0 0 30px rgba(124,58,237,.2)) !important;
+      }
+      .privacy-char-wrap:hover img:not(.privacy-tarot-img) {
+        filter: drop-shadow(0 10px 28px rgba(0,0,0,.7)) drop-shadow(0 0 50px rgba(230,57,70,.25)) !important;
+      }
 
       /* ── Reduced motion ── */
       @media(prefers-reduced-motion:reduce){
-        .px-reveal,.privacy-badge{opacity:1;transform:none;animation:none;transition:none;}
-      }
-    </style>
-
-    <!-- ══ PRIVACY — STYLE UPGRADE ══ -->
-    <style>
-      @keyframes pgIn { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:none;} }
-      .privacy-page-header { animation:pgIn .5s ease-out both; }
-      .privacy-main { animation:pgIn .6s ease-out .1s both; }
-
-
-      /* ── Shield hero ── */
-      .px-shield-hero { text-align:center; padding:20px 0 4px; }
-      .px-shield-icon {
-        font-size:3rem; display:inline-block;
-        animation:shieldGlow 3s ease-in-out infinite;
-        filter:drop-shadow(0 0 16px rgba(230,57,70,.4));
-      }
-      @keyframes shieldGlow {
-        0%,100%{transform:scale(1);filter:drop-shadow(0 0 14px rgba(230,57,70,.3));}
-        50%{transform:scale(1.07);filter:drop-shadow(0 0 28px rgba(230,57,70,.7));}
-      }
-
-      /* ── Cards glass upgrade ── */
-      .privacy-card {
-        background:rgba(255,255,255,.96) !important;
-        backdrop-filter:blur(14px) !important; -webkit-backdrop-filter:blur(14px) !important;
-        border-radius:14px !important;
-        transition:box-shadow .25s, transform .2s !important;
-      }
-      .privacy-card:hover { transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,0,0,.13), 0 0 0 1px rgba(230,57,70,.07) !important; }
-      .darkmode .privacy-card { background:rgba(12,8,22,.96) !important; border-color:rgba(230,57,70,.22) !important; }
-      .darkmode .privacy-card:hover { box-shadow:0 12px 36px rgba(0,0,0,.55) !important; }
-
-      .privacy-intro-wrap {
-        background:rgba(255,255,255,.97) !important;
-        backdrop-filter:blur(16px) !important; -webkit-backdrop-filter:blur(16px) !important;
-        border:1px solid rgba(230,57,70,.14) !important;
-        box-shadow:0 4px 28px rgba(0,0,0,.1) !important;
-        border-radius:16px !important;
-      }
-      .darkmode .privacy-intro-wrap { background:rgba(12,8,22,.97) !important; border-color:rgba(230,57,70,.2) !important; }
-
-      /* ── Tagline gradient ── */
-      .privacy-tagline {
-        font-size:1.45rem !important; font-weight:800 !important;
-        background:linear-gradient(135deg,#e63946,#ff8a80,#ffd740);
-        -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-        letter-spacing:.04em !important;
-      }
-
-      /* ── Contact button ── */
-      .px-email-btn {
-        display:inline-flex !important; align-items:center; gap:8px;
-        margin-top:14px !important; padding:11px 24px !important;
-        background:linear-gradient(135deg,#c0193a,#e63946) !important;
-        color:#fff !important; border-radius:10px !important;
-        text-decoration:none !important; font-weight:700 !important;
-        font-size:.9rem !important; letter-spacing:.2px;
-        box-shadow:0 4px 18px rgba(230,57,70,.35) !important;
-        transition:transform .2s, box-shadow .2s !important;
-        border:none !important;
-      }
-      .px-email-btn:hover { transform:translateY(-2px) !important; box-shadow:0 8px 28px rgba(230,57,70,.5) !important; opacity:1 !important; }
-
-      /* ── Two-column accent ── */
-      .privacy-row .privacy-card:first-child { border-left-color:#2196f3 !important; }
-      .privacy-row .privacy-card:last-child  { border-left-color:#4caf50 !important; }
-      .privacy-row .privacy-card:first-child .privacy-card__title { color:#1565c0; }
-      .privacy-row .privacy-card:last-child  .privacy-card__title { color:#2e7d32; }
-      .darkmode .privacy-row .privacy-card:first-child .privacy-card__title { color:#90caf9; }
-      .darkmode .privacy-row .privacy-card:last-child  .privacy-card__title { color:#81c784; }
-
-      /* ── Legal section ── */
-      .privacy-card--legal .privacy-card__title { color:#7b1fa2; }
-      .darkmode .privacy-card--legal .privacy-card__title { color:#ce93d8; }
-
-      /* ── Back button ── */
-      .privacy-back .btn-p5 {
-        background:linear-gradient(135deg,#c0193a,#e63946) !important;
-        color:#fff !important; border-radius:10px !important;
-        padding:11px 30px !important; border:none !important;
-        box-shadow:0 4px 18px rgba(230,57,70,.3) !important;
-        font-size:.9rem !important; font-weight:700 !important;
-        transition:transform .2s, box-shadow .2s !important;
-        display:inline-block !important;
-      }
-      .privacy-back .btn-p5:hover { transform:translateY(-2px) !important; box-shadow:0 8px 26px rgba(230,57,70,.48) !important; }
-
-      /* ── Last updated chip ── */
-      .px-updated-wrap { text-align:center; margin:20px 0 14px; }
-      .privacy-last-updated {
-        display:inline-block !important;
-        background:rgba(230,57,70,.07); border:1px solid rgba(230,57,70,.18);
-        border-radius:20px; padding:5px 16px;
+        .px-reveal,.privacy-badge,.privacy-page-header,.privacy-main { opacity:1; transform:none; animation:none; transition:none; }
+        body.darkmode::before { animation:none; }
+        .privacy-page-title { animation:none !important; background-size:100% !important; }
+        .p5-diamond { animation:none !important; filter:none !important; }
+        .px-shield-icon { animation:none !important; }
       }
     </style>
   </head>
@@ -518,7 +712,7 @@
 
       <!-- Back link -->
       <div class="privacy-back">
-        <a href="../index.html" class="btn-p5" data-i18n="ui.back">← Back</a>
+        <a href="../index.html" class="btn-p5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M12 5l-7 7 7 7"/></svg><span data-i18n="ui.back">Back</span></a>
       </div>
     </main>
 

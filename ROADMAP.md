@@ -91,10 +91,11 @@
 > pour ne pas avoir à la refaire de mémoire à ce moment-là. Aucune de ces étapes ne bloque
 > la release 2.0 actuelle.
 
-**Kotone Montagne (P5X)** : roster de base + silhouette + persona (Terpsichore) + All-Out-Attack
-tous déjà intégrés avec de vrais assets officiels — vérifié le 2026-07-06, y compris le GIF AOA
-(`allOutAttackMode/database/allOutAttack/Mont.webp`, 177 frames, vraie animation de combat, pas
-un placeholder malgré une première frame trompeuse). **Rien en attente pour elle.**
+**Kotone Shiomi (P5X)** : roster de base + silhouette + persona (Orpheus) + All-Out-Attack
+— teaser P5X confirmé. GIF AOA actuel = `allOutAttackMode/database/allOutAttack/Kotone.webp`
+(fan-made P3P, à remplacer par l'animation officielle P5X une fois publiée).
+
+![Kotone Shiomi — teaser P5X](img/kotone-p5x.webp)
 
 **Kotone Shiomi (P3/P3P/PQ2) — GIF AOA actuel = fan-made, à remplacer une fois sorti sur P5X** :
 portrait/silhouette/persona sont bien de l'artwork officiel (P3P), mais l'animation All-Out-Attack
@@ -249,7 +250,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **481 tests JS · 175 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **482 tests JS · 175 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -305,8 +306,8 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 481 Vitest · 175 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
-| Q2  | i18n EN/FR/ES/DE/IT (965 clés)                | `npm run i18n:check`                                                          |
+| Q1  | Tests : 482 Vitest · 175 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q2  | i18n EN/FR/ES/DE/IT (967 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
 | Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |

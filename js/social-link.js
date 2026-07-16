@@ -20,8 +20,8 @@
 const _linkCache = new Map();
 
 /** Traduit une clé i18n ou renvoie le fallback. */
-function t(key, fallback) {
-  const v = window.i18n?.t?.(key);
+function t(key, fallback, vars) {
+  const v = window.i18n?.t?.(key, vars);
   return v != null && v !== key ? v : fallback;
 }
 

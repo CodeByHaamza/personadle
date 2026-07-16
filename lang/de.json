@@ -81,7 +81,9 @@
       "tooltip_age": "Altersbereich von \"< 15\" bis \"40+\", einschließlich einzigartiger Entitäten wie \"80+\".",
       "tooltip_persona_user": "Gibt an, ob der Charakter eine Persona beschwören kann oder ein Schatten ist.",
       "tooltip_persona": "Die spezifische Persona, die mit dem Charakter verbunden ist — oder seine Schattenform.",
-      "tooltip_arcana": "Seine Tarot-Arcana, die seine symbolische und narrative Rolle definiert."
+      "tooltip_arcana": "Seine Tarot-Arcana, die seine symbolische und narrative Rolle definiert.",
+      "correct": "✅ Richtig! Es war {{name}}!",
+      "giveup_reveal": "❌ Die Antwort war {{name}}"
     },
     "emoji": {
       "name": "Emoji",

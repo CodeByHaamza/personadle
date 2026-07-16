@@ -29,215 +29,437 @@
       }
     </script>
     <style>
+      /* ═══════════════════════════════════════════
+         FAQ — VELVET ROOM REDESIGN
+         ═══════════════════════════════════════════ */
       html { scroll-behavior: smooth; }
+      *, *::before, *::after { box-sizing: border-box; }
+
+      /* ── Force dark Velvet Room bg (always) ── */
+      /* ── Light mode (default) ── */
+      html, body {
+        background: #f4f2ff !important;
+        color: #1a1028 !important;
+      }
+      /* anti-FOUC : l'inline script met darkmode sur <html> avant <body> */
+      html.darkmode, html.darkmode body { background: #0b0a1f !important; color: #e8e0ff !important; }
+      /* subtle lavender ambiance */
+      body::before {
+        content: "";
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background:
+          radial-gradient(ellipse 65% 50% at 20% 15%, rgba(124,58,237,.06) 0%, transparent 65%),
+          radial-gradient(ellipse 55% 45% at 80% 80%, rgba(230,57,70,.04) 0%, transparent 55%),
+          #f4f2ff;
+      }
+      body::after { display: none; }
+
+      /* ── Dark mode ── */
+      body.darkmode {
+        background: #0b0a1f !important;
+        color: #e8e0ff !important;
+      }
+      body.darkmode::before {
+        background:
+          radial-gradient(ellipse 65% 50% at 20% 15%, rgba(124,58,237,.16) 0%, transparent 65%),
+          radial-gradient(ellipse 55% 45% at 80% 80%, rgba(230,57,70,.1) 0%, transparent 55%),
+          radial-gradient(ellipse 80% 60% at 50% 40%, rgba(15,10,45,.95) 0%, transparent 80%);
+        animation: fqBgPulse 16s ease-in-out infinite alternate;
+      }
+      @keyframes fqBgPulse {
+        0%   { opacity: .8; }
+        50%  { opacity: 1; }
+        100% { opacity: .85; }
+      }
+      body.darkmode::after {
+        content: "";
+        position: fixed; inset: 0; z-index: 1; pointer-events: none;
+        background: repeating-linear-gradient(
+          0deg, transparent, transparent 3px, rgba(0,0,0,.055) 3px, rgba(0,0,0,.055) 4px
+        );
+        display: block;
+      }
 
       /* ── Progress bar ── */
-      #fq-prog{position:fixed;top:0;left:0;width:100%;height:3px;z-index:9999;pointer-events:none;}
-      #fq-fill{height:100%;width:0%;background:linear-gradient(90deg,#c0193a,#e63946,#ff6b9d,#ffd700);box-shadow:0 0 10px rgba(230,57,70,.8);transition:width .08s linear;}
+      #fq-prog { position:fixed; top:0; left:0; width:100%; height:3px; z-index:9999; pointer-events:none; }
+      #fq-fill { height:100%; width:0%;
+        background: linear-gradient(90deg, #7c3aed, #e63946, #ff6b9d, #ffd700);
+        box-shadow: 0 0 14px rgba(124,58,237,.8); transition:width .08s linear; }
 
-      /* ── Gradient title ── */
+      /* ── Entrance animations ── */
+      @keyframes fqIn { from{opacity:0;transform:translateY(22px);} to{opacity:1;transform:none;} }
+      @keyframes fqSlideLeft { from{opacity:0;transform:translateX(-18px);} to{opacity:1;transform:none;} }
+
+      .faq-page-header { animation: fqIn .7s cubic-bezier(.22,1,.36,1) both; position:relative; z-index:10; }
+      .faq-page-header::after { display:none !important; }
+      .faq-wrap { position:relative; z-index:10; animation: fqIn .7s cubic-bezier(.22,1,.36,1) .08s both; }
+
+      /* ── Title — giant shimmer ── */
       .faq-page-title {
-        background:linear-gradient(135deg,#e63946 0%,#ff8a80 50%,#ffd740 100%);
-        -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-        font-size: clamp(1.8rem, 5vw, 3rem) !important;
+        font-family: "Cinzel", "Oswald", serif !important;
+        font-size: clamp(2.6rem, 8vw, 5rem) !important;
+        font-weight: 600 !important;
+        letter-spacing: .04em !important;
+        background: linear-gradient(135deg, #e63946 0%, #ff8a80 30%, #ffd700 60%, #ff6b9d 80%, #e63946 100%) !important;
+        background-size: 220% auto !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        animation: titleShimmer 6s linear infinite !important;
+        line-height: 1.1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 16px !important;
       }
-      .darkmode .faq-page-title {
-        background:linear-gradient(135deg,#ff6b9d 0%,#e63946 50%,#ffd700 100%);
-        -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      @keyframes titleShimmer {
+        0%   { background-position: 0% center; }
+        100% { background-position: 220% center; }
+      }
+
+      .faq-page-subtitle {
+        color: rgba(80,50,130,.5) !important;
+        font-size: .9rem !important;
+        letter-spacing: .12em !important;
+        text-transform: uppercase !important;
+        font-style: normal !important;
+        margin-top: 8px !important;
+      }
+      body.darkmode .faq-page-subtitle { color: rgba(200,180,255,.5) !important; }
+
+      /* ── Diamonds in title ── */
+      .p5-diamond {
+        color: #7c3aed !important;
+        -webkit-text-fill-color: #7c3aed !important;
+        font-size: .45em !important;
+        animation: diamondGlow 2.6s ease-in-out infinite !important;
+        display: inline-block !important;
+      }
+      body.darkmode .p5-diamond { color: #ffd700 !important; -webkit-text-fill-color: #ffd700 !important; }
+      @keyframes diamondGlow {
+        0%,100% { opacity:1; transform:scale(1); }
+        50%      { opacity:.5; transform:scale(1.35); }
       }
 
       /* ── Search bar ── */
-      .fq-search-wrap {
-        max-width:500px; margin:16px auto 8px; position:relative;
-      }
+      .fq-search-wrap { max-width:540px; margin:22px auto 10px; position:relative; }
       .fq-search {
-        width:100%; padding:11px 42px 11px 16px; border:2px solid rgba(230,57,70,.22);
-        border-radius:10px; font-size:.9rem; background:rgba(255,255,255,.92);
-        color:inherit; outline:none; transition:border-color .2s, box-shadow .2s;
-        font-family:inherit; box-shadow:0 2px 10px rgba(0,0,0,.07);
+        width:100%; padding:14px 48px 14px 18px;
+        background: rgba(255,255,255,.97) !important;
+        border: 1.5px solid rgba(124,58,237,.25) !important;
+        border-radius: 14px !important;
+        color: #1a1028 !important;
+        font-size: .92rem;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+        box-shadow: 0 2px 16px rgba(100,80,160,.1) !important;
+        font-family: inherit;
       }
-      .fq-search:focus { border-color:rgba(230,57,70,.65); box-shadow:0 0 0 3px rgba(230,57,70,.12), 0 2px 10px rgba(0,0,0,.07); }
-      .darkmode .fq-search { background:rgba(28,28,28,.95); color:#f0f0f0; border-color:rgba(230,57,70,.3); }
-      .fq-search-icon { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:.85rem; pointer-events:none; opacity:.5; }
-      .fq-shortcut { position:absolute; right:38px; top:50%; transform:translateY(-50%);
-        font-size:.65rem; color:#aaa; background:rgba(0,0,0,.08); border-radius:4px;
-        padding:1px 5px; font-family:'JetBrains Mono',monospace; pointer-events:none; }
-      .fq-no-results { text-align:center; padding:32px 0; color:#999; font-size:.9rem; display:none; }
+      .fq-search::placeholder { color: rgba(80,50,130,.35); }
+      .fq-search:focus {
+        border-color: rgba(230,57,70,.6) !important;
+        box-shadow: 0 0 0 3px rgba(230,57,70,.12), 0 4px 20px rgba(100,80,160,.15) !important;
+      }
+      body.darkmode .fq-search {
+        background: rgba(20,14,45,.85) !important;
+        border-color: rgba(124,58,237,.35) !important;
+        color: #e8e0ff !important;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 4px 20px rgba(0,0,0,.45) !important;
+      }
+      body.darkmode .fq-search::placeholder { color: rgba(180,160,230,.35); }
+      body.darkmode .fq-search:focus {
+        border-color: rgba(230,57,70,.7) !important;
+        box-shadow: 0 0 0 3px rgba(230,57,70,.18), 0 4px 28px rgba(0,0,0,.5) !important;
+      }
+      .fq-search-icon { position:absolute; right:15px; top:50%; transform:translateY(-50%); pointer-events:none; opacity:.4; color:#7c3aed; }
+      body.darkmode .fq-search-icon { color:#e8e0ff; }
+      .fq-no-results { text-align:center; padding:36px 0; color:rgba(80,50,130,.45); display:none; font-size:.9rem; }
+      body.darkmode .fq-no-results { color:rgba(180,160,230,.45); }
       .fq-no-results.show { display:block; }
-
-      /* ── Category count badge ── */
-      .fq-cat-count {
-        display:inline-flex; align-items:center; justify-content:center;
-        background:rgba(230,57,70,.14); color:#e63946;
-        border-radius:20px; min-width:22px; height:22px; padding:0 6px;
-        font-size:.72rem; font-weight:800; margin-left:auto;
-        font-family:'Montserrat','Oswald',sans-serif;
-      }
-      .faq-category { display:flex; align-items:center; gap:8px; }
-
-      /* ── Category slide-in ── */
-      @keyframes catSlide { from{opacity:0;transform:translateX(-16px);} to{opacity:1;transform:none;} }
-      .fq-cat-anim { opacity:0; animation:catSlide .5s cubic-bezier(.22,1,.36,1) forwards; animation-play-state:paused; }
-      .fq-cat-anim.in { animation-play-state:running; }
-
-      /* ── FAQ item scroll reveal ── */
-      .fq-item-reveal { opacity:0; transform:translateY(14px); transition:opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1); }
-      .fq-item-reveal.in { opacity:1; transform:none; }
-
-      /* ── FAQ item hover / open ── */
-      .faq-item { transition:box-shadow .2s, transform .15s !important; }
-      .faq-item:not(.open):hover { transform:translateY(-1px); }
-      .faq-item.open { border-left:3px solid #e63946; border-radius:10px; }
-
-      /* ── FAQ answer smoother animation ── */
-      .faq-answer { transition:max-height .45s cubic-bezier(.22,1,.36,1), padding .45s ease !important; }
-
-      /* ── Jack Frost bounce ── */
-      .faq-mascot { animation:jfBounce 2.2s ease-in-out infinite; }
-      @keyframes jfBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
-      .faq-mascot-bubble { animation:bubblePop .55s cubic-bezier(.22,1,.36,1) .4s both; }
-      @keyframes bubblePop { from{transform:scale(0) rotate(-6deg);opacity:0;} to{transform:scale(1);opacity:1;} }
-
-      /* ── Team member hover ── */
-      .faq-team li { transition:transform .2s, box-shadow .2s !important; }
-      .faq-team li:hover { transform:translateX(5px); box-shadow:0 3px 12px rgba(230,57,70,.18) !important; }
-
-      /* ── Back button ── */
-      .faq-back .btn-p5 { transition:transform .2s, box-shadow .2s !important; }
-      .faq-back .btn-p5:hover { transform:translateY(-2px) !important; box-shadow:0 6px 20px rgba(230,57,70,.3) !important; }
-
-      /* ── Reduced motion ── */
-      @media(prefers-reduced-motion:reduce){
-        .fq-cat-anim,.fq-item-reveal{opacity:1;transform:none;animation:none;transition:none;}
-        .faq-mascot{animation:none;}
-      }
-    </style>
-
-    <!-- ══ FAQ — STYLE UPGRADE ══ -->
-    <style>
-      @keyframes fqIn { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:none;} }
-      .faq-page-header { animation:fqIn .5s ease-out both; }
-      .faq-wrap { animation:fqIn .6s ease-out .1s both; }
-
-      /* ── Title bigger ── */
-      .faq-page-title { font-size:clamp(2rem,5vw,3.2rem) !important; }
-      .faq-page-subtitle { font-size:1.05rem !important; letter-spacing:.5px; }
-
-      /* ── Category colors ── */
-      .fq-game     { border-left-color:#e63946 !important; color:#e63946 !important; }
-      .fq-gameplay { border-left-color:#f97316 !important; color:#f97316 !important; }
-      .fq-account  { border-left-color:#3b82f6 !important; color:#3b82f6 !important; }
-      .fq-community{ border-left-color:#8b5cf6 !important; color:#8b5cf6 !important; }
-      .fq-team-cat { border-left-color:#f59e0b !important; color:#f59e0b !important; }
-
-      /* ── FAQ item open: colored border ── */
-      .faq-item.open.fi-game     { border-left:3px solid #e63946 !important; }
-      .faq-item.open.fi-gameplay { border-left:3px solid #f97316 !important; }
-      .faq-item.open.fi-account  { border-left:3px solid #3b82f6 !important; }
-      .faq-item.open.fi-community{ border-left:3px solid #8b5cf6 !important; }
-      .faq-item.open.fi-team     { border-left:3px solid #f59e0b !important; }
-
-      /* ── Category glass ── */
-      .faq-category {
-        background:rgba(255,255,255,.96) !important;
-        backdrop-filter:blur(12px) !important; -webkit-backdrop-filter:blur(12px) !important;
-        box-shadow:0 3px 16px rgba(0,0,0,.1) !important;
-        border-radius:0 10px 10px 0 !important;
-      }
-      .darkmode .faq-category { background:rgba(12,8,22,.96) !important; }
-
-      /* ── FAQ item glass ── */
-      .faq-item {
-        background:rgba(255,255,255,.96) !important;
-        backdrop-filter:blur(12px) !important; -webkit-backdrop-filter:blur(12px) !important;
-        border-radius:12px !important;
-        transition:box-shadow .2s, transform .15s !important;
-      }
-      .faq-item:not(.open):hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.12) !important; }
-      .darkmode .faq-item { background:rgba(12,8,22,.96) !important; }
-      .darkmode .faq-question { color:#f0f0f0 !important; }
 
       /* ── Filter tabs ── */
       .fq-tabs {
-        display:flex; flex-wrap:wrap; gap:7px; justify-content:center;
-        padding:12px 20px 4px; max-width:780px; margin:0 auto;
+        display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+        padding:10px 20px 6px; max-width:780px; margin:0 auto; position:relative; z-index:10;
       }
       .fq-tab {
-        padding:5px 14px; border-radius:20px;
-        font-size:.77rem; font-weight:700; cursor:pointer;
-        border:1.5px solid; background:transparent; font-family:inherit;
-        transition:background .15s, transform .15s, box-shadow .15s;
+        padding: 6px 16px; border-radius: 20px;
+        font-size: .74rem; font-weight: 700; cursor: pointer;
+        border: 1.5px solid; background: transparent;
+        font-family: inherit; letter-spacing: .05em; text-transform:uppercase;
+        transition: all .18s cubic-bezier(.22,1,.36,1);
       }
-      .fq-tab:hover { transform:translateY(-1px); }
+      .fq-tab:hover { transform: translateY(-2px); }
       .fq-tab.active { color:#fff !important; }
-      .fq-tab[data-cat="all"]      { border-color:#888; color:#888; }
-      .fq-tab[data-cat="all"].active      { background:#888; }
-      .fq-tab[data-cat="game"]     { border-color:#e63946; color:#e63946; }
-      .fq-tab[data-cat="game"].active     { background:#e63946; box-shadow:0 3px 10px rgba(230,57,70,.35); }
-      .fq-tab[data-cat="gameplay"] { border-color:#f97316; color:#f97316; }
-      .fq-tab[data-cat="gameplay"].active { background:#f97316; box-shadow:0 3px 10px rgba(249,115,22,.35); }
-      .fq-tab[data-cat="account"]  { border-color:#3b82f6; color:#3b82f6; }
-      .fq-tab[data-cat="account"].active  { background:#3b82f6; box-shadow:0 3px 10px rgba(59,130,246,.35); }
-      .fq-tab[data-cat="community"]{ border-color:#8b5cf6; color:#8b5cf6; }
-      .fq-tab[data-cat="community"].active{ background:#8b5cf6; box-shadow:0 3px 10px rgba(139,92,246,.35); }
-      .fq-tab[data-cat="team"]     { border-color:#f59e0b; color:#f59e0b; }
-      .fq-tab[data-cat="team"].active     { background:#f59e0b; box-shadow:0 3px 10px rgba(245,158,11,.35); }
+      .fq-tab[data-cat="all"]       { border-color:rgba(80,50,130,.3); color:rgba(80,50,130,.65); }
+      .fq-tab[data-cat="all"].active { background:rgba(80,50,130,.18); color:rgba(80,50,130,.9) !important; box-shadow:0 0 16px rgba(80,50,130,.2); }
+      body.darkmode .fq-tab[data-cat="all"]       { border-color:rgba(200,180,255,.3); color:rgba(200,180,255,.6); }
+      body.darkmode .fq-tab[data-cat="all"].active { background:rgba(200,180,255,.2); color:#fff !important; box-shadow:0 0 16px rgba(200,180,255,.2); }
+      .fq-tab[data-cat="game"]      { border-color:#e63946; color:#e63946; }
+      .fq-tab[data-cat="game"].active{ background:#e63946; box-shadow:0 0 20px rgba(230,57,70,.6); }
+      .fq-tab[data-cat="gameplay"]  { border-color:#ff6b9d; color:#ff6b9d; }
+      .fq-tab[data-cat="gameplay"].active{ background:#e0527a; box-shadow:0 0 20px rgba(255,107,157,.55); }
+      .fq-tab[data-cat="account"]   { border-color:#60a5fa; color:#60a5fa; }
+      .fq-tab[data-cat="account"].active { background:#2563eb; box-shadow:0 0 20px rgba(96,165,250,.55); }
+      .fq-tab[data-cat="community"] { border-color:#a78bfa; color:#a78bfa; }
+      .fq-tab[data-cat="community"].active{ background:#7c3aed; box-shadow:0 0 20px rgba(124,58,237,.6); }
+      .fq-tab[data-cat="team"]      { border-color:#ffd700; color:#ffd700; }
+      .fq-tab[data-cat="team"].active{ background:rgba(255,215,0,.9); color:#150a00 !important; box-shadow:0 0 20px rgba(255,215,0,.55); }
 
-      /* ── Team grid ── */
-      .fq-team-grid {
-        display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-        gap:12px; margin:10px 0 4px;
+      /* ── Category headers ── */
+      .faq-category {
+        background: rgba(255,255,255,.94) !important;
+        border: 1px solid rgba(140,100,200,.12) !important;
+        border-left: none !important;
+        border-radius: 14px !important;
+        padding: 14px 20px !important;
+        margin: 42px 0 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        font-size: .95rem !important;
+        font-family: "Oswald", "Arial Black", sans-serif !important;
+        letter-spacing: .12em !important;
+        text-transform: uppercase !important;
+        position: relative; overflow: hidden;
+        box-shadow: 0 2px 16px rgba(100,80,160,.07) !important;
       }
+      body.darkmode .faq-category {
+        background: rgba(14,10,34,.82) !important;
+        border-color: rgba(255,255,255,.07) !important;
+        backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
+        box-shadow: none !important;
+      }
+      /* neon left bar via ::before */
+      .faq-category::before {
+        content: "";
+        position: absolute; left:0; top:10%; bottom:10%; width:3px;
+        border-radius: 0 3px 3px 0;
+      }
+
+      .fq-game     { color:#c0192e !important; }
+      .fq-game::before { background:#e63946; box-shadow:0 0 10px rgba(230,57,70,.5); }
+      body.darkmode .fq-game     { color:#e63946 !important; box-shadow:0 0 40px rgba(230,57,70,.1), inset 0 0 40px rgba(230,57,70,.03) !important; }
+      body.darkmode .fq-game::before { box-shadow:0 0 14px #e63946; }
+
+      .fq-gameplay { color:#9b1454 !important; }
+      .fq-gameplay::before { background:#c0196a; box-shadow:0 0 10px rgba(192,25,106,.5); }
+      body.darkmode .fq-gameplay { color:#ff6b9d !important; box-shadow:0 0 40px rgba(255,107,157,.1), inset 0 0 40px rgba(255,107,157,.03) !important; }
+      body.darkmode .fq-gameplay::before { background:#ff6b9d; box-shadow:0 0 14px #ff6b9d; }
+
+      .fq-account  { color:#1d4ed8 !important; }
+      .fq-account::before { background:#2563eb; box-shadow:0 0 10px rgba(29,78,216,.5); }
+      body.darkmode .fq-account  { color:#60a5fa !important; box-shadow:0 0 40px rgba(96,165,250,.1), inset 0 0 40px rgba(96,165,250,.03) !important; }
+      body.darkmode .fq-account::before { background:#60a5fa; box-shadow:0 0 14px #60a5fa; }
+
+      .fq-community{ color:#6d28d9 !important; }
+      .fq-community::before { background:#7c3aed; box-shadow:0 0 10px rgba(124,58,237,.5); }
+      body.darkmode .fq-community{ color:#a78bfa !important; box-shadow:0 0 40px rgba(167,139,250,.1), inset 0 0 40px rgba(167,139,250,.03) !important; }
+      body.darkmode .fq-community::before { background:#a78bfa; box-shadow:0 0 14px #a78bfa; }
+
+      .fq-team-cat, .fq-team { color:#92400e !important; }
+      .fq-team-cat::before, .fq-team::before { background:#b45309; box-shadow:0 0 10px rgba(180,83,9,.5); }
+      body.darkmode .fq-team-cat, body.darkmode .fq-team { color:#ffd700 !important; box-shadow:0 0 40px rgba(255,215,0,.1), inset 0 0 40px rgba(255,215,0,.03) !important; }
+      body.darkmode .fq-team-cat::before, body.darkmode .fq-team::before { background:#ffd700; box-shadow:0 0 14px #ffd700; }
+
+      /* Category count badge */
+      .fq-cat-count {
+        background: rgba(100,70,180,.1) !important;
+        color: rgba(80,50,130,.6) !important;
+        border-radius: 20px; min-width:22px; height:22px; padding:0 7px;
+        font-size:.68rem; font-weight:800;
+        display:inline-flex; align-items:center; justify-content:center;
+        margin-left:auto !important;
+        letter-spacing: 0;
+      }
+      body.darkmode .fq-cat-count { background: rgba(255,255,255,.07) !important; color: rgba(210,190,255,.6) !important; }
+
+      /* Category slide-in (via JS observer) */
+      @keyframes catSlide { from{opacity:0;transform:translateX(-18px);} to{opacity:1;transform:none;} }
+      .fq-cat-anim { opacity:0; animation:catSlide .5s cubic-bezier(.22,1,.36,1) forwards; animation-play-state:paused; }
+      .fq-cat-anim.in { animation-play-state:running; }
+
+      /* ── FAQ items ── */
+      .faq-item {
+        background: rgba(255,255,255,.97) !important;
+        border: 1px solid rgba(140,100,200,.1) !important;
+        border-radius: 12px !important;
+        margin-bottom: 8px !important;
+        box-shadow: 0 2px 12px rgba(100,80,160,.08) !important;
+        transition: transform .2s cubic-bezier(.22,1,.36,1), box-shadow .2s, border-color .2s !important;
+        overflow: hidden;
+      }
+      .faq-item:not(.open):hover {
+        transform: translateY(-3px) !important;
+        border-color: rgba(140,100,200,.22) !important;
+        box-shadow: 0 8px 28px rgba(100,80,160,.14) !important;
+      }
+      body.darkmode .faq-item {
+        background: rgba(18,12,38,.72) !important;
+        backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important;
+        border-color: rgba(255,255,255,.07) !important;
+        box-shadow: 0 4px 24px rgba(0,0,0,.38) !important;
+      }
+      body.darkmode .faq-item:not(.open):hover {
+        border-color: rgba(255,255,255,.15) !important;
+        box-shadow: 0 10px 36px rgba(0,0,0,.52) !important;
+      }
+
+      /* open state: neon glow by category — light */
+      .faq-item.open.fi-game     { border-left:3px solid #e63946 !important; box-shadow:0 0 20px rgba(230,57,70,.12),0 4px 14px rgba(100,80,160,.1) !important; }
+      .faq-item.open.fi-gameplay { border-left:3px solid #c0196a !important; box-shadow:0 0 20px rgba(192,25,106,.1),0 4px 14px rgba(100,80,160,.1) !important; }
+      .faq-item.open.fi-account  { border-left:3px solid #2563eb !important; box-shadow:0 0 20px rgba(29,78,216,.1),0 4px 14px rgba(100,80,160,.1) !important; }
+      .faq-item.open.fi-community{ border-left:3px solid #7c3aed !important; box-shadow:0 0 20px rgba(124,58,237,.12),0 4px 14px rgba(100,80,160,.1) !important; }
+      .faq-item.open.fi-team     { border-left:3px solid #b45309 !important; box-shadow:0 0 20px rgba(180,83,9,.1),0 4px 14px rgba(100,80,160,.1) !important; }
+      /* dark */
+      body.darkmode .faq-item.open.fi-game     { border-left:3px solid #e63946 !important; box-shadow:0 0 36px rgba(230,57,70,.2),0 4px 24px rgba(0,0,0,.45) !important; }
+      body.darkmode .faq-item.open.fi-gameplay { border-left:3px solid #ff6b9d !important; box-shadow:0 0 36px rgba(255,107,157,.2),0 4px 24px rgba(0,0,0,.45) !important; }
+      body.darkmode .faq-item.open.fi-account  { border-left:3px solid #60a5fa !important; box-shadow:0 0 36px rgba(96,165,250,.2),0 4px 24px rgba(0,0,0,.45) !important; }
+      body.darkmode .faq-item.open.fi-community{ border-left:3px solid #a78bfa !important; box-shadow:0 0 36px rgba(167,139,250,.2),0 4px 24px rgba(0,0,0,.45) !important; }
+      body.darkmode .faq-item.open.fi-team     { border-left:3px solid #ffd700 !important; box-shadow:0 0 36px rgba(255,215,0,.18),0 4px 24px rgba(0,0,0,.45) !important; }
+
+      /* Question row */
+      .faq-question {
+        color: #1a1028 !important;
+        font-size: .93rem !important;
+        padding: 16px 20px !important;
+        font-weight: 600 !important;
+        cursor: pointer;
+      }
+      .faq-question:hover { background: rgba(100,80,160,.04) !important; }
+      body.darkmode .faq-question { color: #ddd4ff !important; }
+      body.darkmode .faq-question:hover { background: rgba(255,255,255,.04) !important; }
+
+      /* Arrow */
+      .faq-arrow { color: rgba(100,70,160,.35) !important; }
+      .faq-item.open .faq-arrow { color: #e63946 !important; transform: rotate(90deg); }
+      body.darkmode .faq-arrow { color: rgba(180,160,240,.4) !important; }
+
+      /* Answer */
+      .faq-answer p { color: #4a4060 !important; line-height: 1.82 !important; font-size:.91rem !important; }
+      body.darkmode .faq-answer p { color: rgba(195,178,240,.72) !important; }
+      .faq-answer a { color: #c0192e; }
+      body.darkmode .faq-answer a { color: #e63946; }
+      .faq-answer { transition: max-height .45s cubic-bezier(.22,1,.36,1), padding .45s ease !important; }
+
+      /* Scroll reveal */
+      .fq-item-reveal { opacity:0; transform:translateY(14px); transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s; }
+      .fq-item-reveal.in { opacity:1; transform:none; }
+
+      /* ── Jack Frost ── */
+      .faq-mascot img {
+        width: 115px !important;
+        filter:
+          drop-shadow(0 0 20px rgba(100,160,255,.65))
+          drop-shadow(0 0 44px rgba(80,100,220,.35)) !important;
+      }
+      .faq-mascot-bubble {
+        background: rgba(255,255,255,.97) !important;
+        border: 2px solid rgba(74,144,210,.5) !important;
+        color: #1a3060 !important;
+        box-shadow: 2px 2px 0 rgba(74,144,210,.35), 0 4px 14px rgba(100,140,220,.15) !important;
+        max-width: 130px !important;
+        white-space: normal !important;
+      }
+      body.darkmode .faq-mascot-bubble {
+        background: rgba(12,9,32,.94) !important;
+        border-color: rgba(100,160,255,.55) !important;
+        color: #c8d8ff !important;
+        box-shadow: 2px 2px 0 rgba(100,160,255,.45), 0 0 18px rgba(100,160,255,.25) !important;
+      }
+      .faq-mascot { animation: jfBounce 2.4s ease-in-out infinite; }
+      @keyframes jfBounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-9px);} }
+      .faq-mascot-bubble { animation: bubblePop .55s cubic-bezier(.22,1,.36,1) .4s both; }
+      @keyframes bubblePop { from{transform:scale(0) rotate(-6deg);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+      /* ── Team cards ── */
+      .fq-team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin:10px 0 4px; }
       .fq-team-card {
-        background:rgba(255,255,255,.95); border-radius:14px;
-        padding:16px; border:1.5px solid rgba(230,57,70,.18);
-        backdrop-filter:blur(10px); box-shadow:0 3px 14px rgba(0,0,0,.09);
-        transition:transform .22s, box-shadow .22s;
+        background: rgba(255,255,255,.97) !important;
+        border: 1px solid rgba(180,83,9,.16) !important;
+        border-radius:14px !important;
+        padding: 18px !important;
+        box-shadow: 0 4px 18px rgba(100,80,160,.1) !important;
+        transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s, border-color .22s !important;
       }
-      .fq-team-card:hover { transform:translateY(-4px); box-shadow:0 10px 28px rgba(0,0,0,.15); }
-      .darkmode .fq-team-card { background:rgba(16,10,28,.95); border-color:rgba(230,57,70,.22); }
-      .fq-team-emoji { font-size:1.9rem; line-height:1; display:block; margin-bottom:8px; }
-      .fq-team-name  { font-weight:800; font-size:.95rem; color:#e63946; margin-bottom:4px; }
-      .fq-team-role  { font-size:.8rem; color:#666; line-height:1.5; }
-      .darkmode .fq-team-role { color:#aaa; }
+      .fq-team-card:hover {
+        transform: translateY(-5px) !important;
+        border-color: rgba(180,83,9,.32) !important;
+        box-shadow: 0 12px 32px rgba(100,80,160,.16) !important;
+      }
+      body.darkmode .fq-team-card {
+        background: rgba(18,12,42,.85) !important;
+        border-color: rgba(255,215,0,.18) !important;
+        backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 4px 24px rgba(0,0,0,.45) !important;
+      }
+      body.darkmode .fq-team-card:hover {
+        border-color: rgba(255,215,0,.42) !important;
+        box-shadow: 0 12px 40px rgba(0,0,0,.55), 0 0 28px rgba(255,215,0,.12) !important;
+      }
+      .fq-team-emoji { font-size:2rem; line-height:1; display:block; margin-bottom:10px; }
+      .fq-team-name  { font-weight:800; font-size:.95rem; color:#92400e; margin-bottom:5px; }
+      body.darkmode .fq-team-name { color:#ffd700; }
+      .fq-team-role  { font-size:.8rem; color:#5a4870; line-height:1.55; }
+      body.darkmode .fq-team-role { color:rgba(195,178,240,.6); }
       @media(max-width:480px){ .fq-team-grid{grid-template-columns:1fr 1fr;} }
 
-      /* ── Section pill (active category) ── */
+      /* ── Discord button ── */
+      .faq-discord-btn {
+        display:inline-flex !important; align-items:center !important;
+        gap:8px !important; background:linear-gradient(135deg,#4752c4,#5865f2) !important;
+        border-radius:10px !important; padding:10px 22px !important;
+        cursor:pointer !important; text-decoration:none !important; color:#fff !important;
+        font-weight:600 !important; font-size:.85rem !important;
+        box-shadow:0 4px 22px rgba(88,101,242,.45) !important;
+        transition: transform .2s, box-shadow .2s !important;
+        margin-top:10px !important;
+      }
+      .faq-discord-btn:hover { transform:translateY(-2px) !important; box-shadow:0 8px 30px rgba(88,101,242,.65) !important; opacity:1 !important; }
+
+      /* ── Active category pill ── */
       .fq-pill {
         position:fixed; bottom:88px; left:50%; transform:translateX(-50%);
-        border-radius:20px; padding:5px 18px;
-        font-size:.72rem; font-weight:700; letter-spacing:.5px;
-        backdrop-filter:blur(10px); opacity:0; pointer-events:none;
-        transition:opacity .3s, background .3s; z-index:100; white-space:nowrap;
-        color:#fff; box-shadow:0 3px 12px rgba(0,0,0,.2);
+        border-radius:20px; padding:6px 20px;
+        font-size:.72rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+        backdrop-filter:blur(14px); opacity:0; pointer-events:none;
+        transition:opacity .3s; z-index:100; white-space:nowrap; color:#fff;
+        box-shadow:0 4px 20px rgba(0,0,0,.45);
       }
       .fq-pill.show { opacity:1; }
 
-      /* ── Jack Frost bigger ── */
-      .faq-mascot img { width:100px !important; }
-      .faq-mascot-bubble { max-width:120px; white-space:normal !important; }
-
       /* ── Back button ── */
+      .faq-back { text-align:center; padding:36px 0 16px; position:relative; z-index:10; }
       .faq-back .btn-p5 {
-        background:linear-gradient(135deg,#c0193a,#e63946) !important;
-        color:#fff !important; border-radius:10px !important;
-        padding:11px 30px !important; border:none !important;
-        box-shadow:0 4px 18px rgba(230,57,70,.3) !important;
-        font-size:.9rem !important; font-weight:700 !important;
-        transition:transform .2s, box-shadow .2s !important;
-        display:inline-block !important;
+        background: linear-gradient(135deg,#c0193a,#e63946) !important;
+        color:#fff !important; border-radius:12px !important;
+        padding:14px 40px !important; border:none !important;
+        box-shadow: 0 4px 24px rgba(230,57,70,.5) !important;
+        font-size:1rem !important; font-weight:700 !important;
+        letter-spacing:.07em !important; text-transform:uppercase !important;
+        display:inline-flex !important; align-items:center !important; gap:10px !important;
+        cursor:pointer !important; text-decoration:none !important;
+        transition: transform .2s cubic-bezier(.22,1,.36,1), box-shadow .2s !important;
       }
-      .faq-back .btn-p5:hover { transform:translateY(-2px) !important; box-shadow:0 8px 26px rgba(230,57,70,.48) !important; }
+      .faq-back .btn-p5:hover { transform:translateY(-3px) !important; box-shadow:0 12px 40px rgba(230,57,70,.7) !important; }
+      .faq-back .btn-p5:focus-visible { outline:2px solid #ffd700 !important; outline-offset:4px !important; }
 
-      /* ── Discord button upgrade ── */
-      .faq-discord-btn {
-        background:linear-gradient(135deg,#4752c4,#5865f2) !important;
-        box-shadow:0 4px 16px rgba(88,101,242,.35) !important;
-        border-radius:10px !important;
-        padding:10px 22px !important;
-        transition:transform .2s, box-shadow .2s !important;
+      /* ── Reduced motion ── */
+      @media(prefers-reduced-motion:reduce){
+        .fq-cat-anim,.fq-item-reveal,.faq-page-header,.faq-wrap { opacity:1; transform:none; animation:none; transition:none; }
+        .faq-mascot,.faq-mascot-bubble { animation:none; }
+        body.darkmode::before { animation:none; }
+        .faq-page-title { animation:none !important; background-size:100% !important; }
+        .p5-diamond { animation:none !important; filter:none !important; }
       }
-      .faq-discord-btn:hover { transform:translateY(-2px) !important; opacity:1 !important; box-shadow:0 8px 24px rgba(88,101,242,.5) !important; }
+
+      /* ── Responsive ── */
+      @media(max-width:480px){
+        .faq-mascot { display:none; }
+        .faq-question { font-size:.86rem; padding:14px 16px !important; }
+        .faq-category { font-size:.86rem !important; padding:12px 14px !important; }
+      }
     </style>
   </head>
   <body>
@@ -754,10 +976,6 @@
         </div>
       </div>
 
-      <!-- Back -->
-      <div class="faq-back">
-        <a href="../index.html" class="btn-p5" data-i18n="ui.back">← Back</a>
-      </div>
       <div class="faq-item">
         <div class="faq-question">
           <span data-i18n="faq.q31">Is PersonaDLE open source?</span>
@@ -775,6 +993,14 @@
         <div class="faq-answer">
           <p data-i18n="faq.a32">Yes! Open an issue or a pull request on GitHub. See CONTRIBUTING.md to get started.</p>
         </div>
+      </div>
+
+      <!-- Back — fin de page -->
+      <div class="faq-back">
+        <a href="../index.html" class="btn-p5">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          <span data-i18n="ui.back">Back</span>
+        </a>
       </div>
     </main>
 
@@ -887,7 +1113,7 @@
       var header=document.querySelector('.faq-page-header');
       if(header){
         var sw=document.createElement('div'); sw.className='fq-search-wrap';
-        sw.innerHTML='<input type="search" class="fq-search" placeholder="Search FAQ…  (press / to focus)" aria-label="Search FAQ"><span class="fq-search-icon">🔍</span>';
+        sw.innerHTML='<input type="search" class="fq-search" placeholder="Search FAQ…  (press / to focus)" aria-label="Search FAQ"><span class="fq-search-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>';
         header.insertAdjacentElement('afterend',sw);
 
         var noRes=document.createElement('div'); noRes.className='fq-no-results';

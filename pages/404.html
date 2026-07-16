@@ -2,50 +2,416 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>404 - Not Found</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 — Velvet Room Not Found</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Cinzel:wght@600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../css/global.css?v=10" />
     <link rel="stylesheet" href="../css/langSelector.css" />
+    <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
+
+    <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
+
+    <script>
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.documentElement.classList.add("darkmode");
+      }
+    </script>
+
     <style>
+      /* ── Reset & base ─────────────────────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; }
+
       body {
-        background-color: #0d0d0d;
-        color: #ffffff;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #0c0b1a;
+        color: #e8e0ff;
+        font-family: "Oswald", "Arial Black", sans-serif;
+        padding: 80px 1rem 7rem;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* ── Velvet Room radial bg ───────────────────────────────── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(ellipse 70% 55% at 50% 35%, #1e0d4a 0%, transparent 70%),
+          radial-gradient(ellipse 40% 30% at 20% 80%, #0d0a2e 0%, transparent 60%),
+          #0c0b1a;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      /* ── Subtle scanlines ────────────────────────────────────── */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(0, 0, 0, 0.06) 3px,
+          rgba(0, 0, 0, 0.06) 4px
+        );
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* ── Corner decorations (Velvet Room aesthetic) ──────────── */
+      .e-corner {
+        position: fixed;
+        width: 64px;
+        height: 64px;
+        opacity: 0.18;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .e-corner--tl { top: 1.2rem; left: 1.2rem; border-top: 2px solid #ffd700; border-left: 2px solid #ffd700; }
+      .e-corner--tr { top: 1.2rem; right: 1.2rem; border-top: 2px solid #ffd700; border-right: 2px solid #ffd700; }
+      .e-corner--bl { bottom: 5.5rem; left: 1.2rem; border-bottom: 2px solid #ffd700; border-left: 2px solid #ffd700; }
+      .e-corner--br { bottom: 5.5rem; right: 1.2rem; border-bottom: 2px solid #ffd700; border-right: 2px solid #ffd700; }
+
+      /* ── Main container ──────────────────────────────────────── */
+      .e-wrap {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         text-align: center;
-        font-family: "Arial", sans-serif;
-        padding: 2em;
+        max-width: 520px;
+        width: 100%;
+        gap: 0;
+        animation: eWrapIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
       }
-      h1 {
-        font-size: 3em;
-        margin-bottom: 0.5em;
+
+      @keyframes eWrapIn {
+        from { opacity: 0; transform: translateY(28px); }
+        to   { opacity: 1; transform: none; }
       }
-      img {
-        max-width: 300px;
-        margin: 2em auto;
+
+      /* ── 404 glitch number ───────────────────────────────────── */
+      .e-num {
+        font-family: "Cinzel", serif;
+        font-size: clamp(6rem, 22vw, 10.5rem);
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: #fff;
+        position: relative;
+        margin-bottom: 0.05em;
+        user-select: none;
+      }
+
+      /* chromatic aberration layers */
+      .e-num::before,
+      .e-num::after {
+        content: "404";
+        position: absolute;
+        inset: 0;
+        font: inherit;
+        letter-spacing: inherit;
+      }
+      .e-num::before {
+        color: #e63946;
+        opacity: 0;
+        animation: gBefore 6s 2s infinite;
+        clip-path: polygon(0 0, 100% 0, 100% 40%, 0 40%);
+      }
+      .e-num::after {
+        color: #7070ff;
+        opacity: 0;
+        animation: gAfter 6s 2s infinite;
+        clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+      }
+
+      /* main number subtle glitch */
+      @keyframes eNumMain {
+        0%, 88%, 100% { transform: none; text-shadow: none; }
+        89% { transform: translate(-2px, 0) skewX(-3deg);
+               text-shadow: -3px 0 rgba(230,57,70,.7), 3px 0 rgba(100,100,255,.5); }
+        90% { transform: translate(2px, 0) skewX(3deg);
+               text-shadow: 3px 0 rgba(230,57,70,.7), -3px 0 rgba(100,100,255,.5); }
+        91% { transform: translate(-1px, 1px); text-shadow: none; }
+        92% { transform: none; }
+      }
+      @keyframes gBefore {
+        0%, 87%, 94%, 100% { opacity: 0; transform: none; }
+        88% { opacity: 0.75; transform: translate(-4px, 0); }
+        89% { opacity: 0.75; transform: translate(4px, 0); }
+        90% { opacity: 0.75; transform: translate(-2px, 1px); }
+        91%, 93% { opacity: 0; }
+      }
+      @keyframes gAfter {
+        0%, 87%, 94%, 100% { opacity: 0; transform: none; }
+        88% { opacity: 0.75; transform: translate(4px, 0); }
+        89% { opacity: 0.75; transform: translate(-4px, 0); }
+        90% { opacity: 0.75; transform: translate(2px, -1px); }
+        91%, 93% { opacity: 0; }
+      }
+
+      .e-num { animation: eNumMain 6s 2s infinite; }
+
+      /* ── Velvet Room card ────────────────────────────────────── */
+      .e-card {
+        background: linear-gradient(145deg, #13103d 0%, #1e1450 50%, #13103d 100%);
+        border: 1.5px solid rgba(255, 215, 0, 0.28);
+        border-radius: 20px;
+        padding: 2rem 2.4rem 2.5rem;
+        box-shadow:
+          0 0 0 1px rgba(255, 215, 0, 0.07),
+          0 8px 48px rgba(0, 0, 0, 0.7),
+          0 0 80px rgba(80, 50, 180, 0.18),
+          inset 0 1px 0 rgba(255, 215, 0, 0.1);
+        animation: eCardIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+      }
+
+      @keyframes eCardIn {
+        from { opacity: 0; transform: translateY(18px) scale(0.97); }
+        to   { opacity: 1; transform: none; }
+      }
+
+      /* ── Igor image ──────────────────────────────────────────── */
+      .e-igor {
         display: block;
+        width: clamp(130px, 32vw, 200px);
+        height: auto;
+        margin: 0 auto 1.5rem;
+        filter:
+          drop-shadow(0 0 18px rgba(180, 130, 255, 0.45))
+          drop-shadow(0 0 40px rgba(100, 60, 200, 0.25));
+        animation: eFloat 3.8s ease-in-out infinite;
       }
-      p {
-        font-size: 1.2em;
-        margin-top: 1em;
+
+      @keyframes eFloat {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-9px); }
       }
-      a {
-        color: #ff4444;
+
+      /* ── Title ───────────────────────────────────────────────── */
+      .e-title {
+        font-family: "Cinzel", serif;
+        font-size: clamp(1rem, 3.5vw, 1.35rem);
+        font-weight: 600;
+        color: #f0e8ff;
+        margin: 0 0 0.55rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .e-diamond {
+        color: #ffd700;
+        font-size: 0.65em;
+        animation: diamondPulse 2.8s ease-in-out infinite;
+        display: inline-block;
+      }
+      @keyframes diamondPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.55; transform: scale(1.25); }
+      }
+
+      /* ── Subtitle ────────────────────────────────────────────── */
+      .e-sub {
+        font-family: "Oswald", sans-serif;
+        font-weight: 300;
+        font-size: clamp(0.88rem, 2.5vw, 1rem);
+        color: rgba(190, 165, 255, 0.7);
+        margin: 0 0 1.8rem;
+        letter-spacing: 0.02em;
+      }
+
+      /* ── Back button ─────────────────────────────────────────── */
+      .e-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #c0193a 0%, #e63946 100%);
+        color: #fff;
         text-decoration: none;
+        border-radius: 10px;
+        font-family: "Oswald", sans-serif;
+        font-size: 0.97rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        box-shadow: 0 4px 22px rgba(230, 57, 70, 0.42);
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        cursor: pointer;
+        border: none;
+      }
+      .e-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(230, 57, 70, 0.65);
+        color: #fff;
+        text-decoration: none;
+      }
+      .e-btn:focus-visible {
+        outline: 2px solid #ffd700;
+        outline-offset: 3px;
+      }
+
+      /* ── Footer note ─────────────────────────────────────────── */
+      .e-footer {
+        margin-top: 2.2rem;
+        font-size: 0.7rem;
+        color: rgba(180, 155, 230, 0.3);
+        font-family: "Oswald", sans-serif;
+        font-weight: 300;
+        letter-spacing: 0.04em;
+      }
+
+      /* ── Dark mode: page is already dark, just ensure toggles match ── */
+      .darkmode-toggle {
+        z-index: 200;
+      }
+
+      /* ── prefers-reduced-motion ──────────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        .e-num,
+        .e-num::before,
+        .e-num::after { animation: none; }
+        .e-igor        { animation: none; }
+        .e-wrap,
+        .e-card        { animation: none; opacity: 1; transform: none; }
+        .e-diamond     { animation: none; }
+      }
+
+      /* ── Responsive ──────────────────────────────────────────── */
+      @media (max-width: 480px) {
+        .e-card { padding: 1.5rem 1.2rem 2rem; border-radius: 14px; }
+        body    { padding: 70px 0.75rem 7rem; }
+        .e-corner { width: 44px; height: 44px; }
       }
     </style>
   </head>
-  <body>
-    <h1 data-i18n="errors.page_not_found_title">404 - Velvet Room not found 🎭</h1>
-    <img src="../img/igorbreakdancing.gif" alt="Igor breakdancing" />
-    <p data-i18n="errors.page_not_found_message">You wandered too far from the Metaverse...</p>
-    <p><a href="../index.html" data-i18n="errors.return_home">Return to Personadle</a></p>
-    <p style="display: none">SECRET HACKER CODE : ALIBABA</p>
-    <p style="margin-top: 3em; font-size: 0.8em" data-i18n="errors.copyright_notice">
-      Persona content © ATLUS / SEGA - Fan tribute project
-    </p>
 
+  <body>
+    <!-- Corner decorations -->
+    <div class="e-corner e-corner--tl" aria-hidden="true"></div>
+    <div class="e-corner e-corner--tr" aria-hidden="true"></div>
+    <div class="e-corner e-corner--bl" aria-hidden="true"></div>
+    <div class="e-corner e-corner--br" aria-hidden="true"></div>
+
+    <!-- Dark mode toggle -->
+    <div class="darkmode-toggle">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+    </div>
+
+    <!-- Lang selector (mounted by JS) -->
     <div id="langSelectorMount"></div>
 
+    <!-- Main content -->
+    <main class="e-wrap" role="main">
+
+      <!-- Glitch 404 -->
+      <div class="e-num" aria-label="404">404</div>
+
+      <!-- Velvet Room card -->
+      <div class="e-card">
+        <img
+          class="e-igor"
+          src="../img/igorbreakdancing.gif"
+          alt="Igor breakdancing"
+          width="200"
+          height="200"
+        />
+
+        <h1 class="e-title">
+          <span class="e-diamond" aria-hidden="true">◆</span>
+          <span data-i18n="errors.page_not_found_title">Velvet Room Not Found</span>
+          <span class="e-diamond" aria-hidden="true">◆</span>
+        </h1>
+
+        <p class="e-sub" data-i18n="errors.page_not_found_message">
+          You wandered too far from the Metaverse…
+        </p>
+
+        <a href="../index.html" class="e-btn" data-i18n="errors.return_home">
+          <!-- Arrow left SVG -->
+          <svg
+            width="16" height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+          Return to PersonaDLE
+        </a>
+      </div>
+
+      <p class="e-footer" data-i18n="errors.copyright_notice">
+        Persona content © ATLUS / SEGA — Fan tribute project
+      </p>
+    </main>
+
+    <!-- Easter egg (preserved) -->
+    <p style="display:none">SECRET HACKER CODE : ALIBABA</p>
+
+    <!-- Bottom Nav -->
+    <div id="bottomNav"></div>
+
+    <!-- Scripts -->
     <script type="module">
       import { initLangSelector } from "../js/lang-selector.js";
+      import { initBottomNav }   from "../js/bottomNav.js";
+      import { initLang }        from "../js/i18n.js";
+
+      /* Dark mode toggle */
+      const toggle = document.getElementById("darkModeToggle");
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("darkmode");
+        if (toggle) toggle.checked = true;
+      }
+      if (toggle) {
+        toggle.addEventListener("change", () => {
+          const on = toggle.checked;
+          document.documentElement.classList.toggle("darkmode", on);
+          document.body.classList.toggle("darkmode", on);
+          localStorage.setItem("darkMode", on ? "enabled" : "disabled");
+        });
+      }
+
+      await initLang();
       initLangSelector();
+      initBottomNav();
+    </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("../sw.js").catch(() => {});
+        });
+      }
     </script>
   </body>
 </html>

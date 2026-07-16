@@ -1087,6 +1087,7 @@ confirmCrop.onclick = () => {
     }
   } else {
     profile.avatar = result;
+    profile.avatarSrc = selectedAvatarSrc;
     pageAvatar.src = result;
     saveProfile();
     markDirty();

@@ -10,6 +10,29 @@
 
 ---
 
+## 2026-07-12 — fix: régression port E2E (8090) + avatarSrc stale après cloud sync
+
+Corrections suite à une review de la PR `feat/ui-pages-joker-profile-kotone`.
+
+- **Port E2E** : `playwright.config.js` et les specs `admin.spec.js`,
+  `admin-extended.spec.js`, `api.spec.js`, `social-link.spec.js` avaient basculé
+  le défaut de `8080` vers `8090`, exactement l'inverse du fix déjà documenté le
+  2026-07-04 (`docker-compose.yml`/`.env.example` exposent `8080` par défaut).
+  La CI restait verte car `PLAYWRIGHT_BASE_URL` y est fixé explicitement — le
+  cassage n'était visible qu'en local (`make up` + `npm run test:e2e` sans
+  variable d'env). Remis à `8080` partout (config, 4 specs, `TEST_PLAN.md`,
+  `TEST_PLAN_DEV.md`).
+- **`profile.avatarSrc` stale après sync cloud** : `js/cloud-sync.js` écrit
+  `p.avatar` depuis `avatar_data` mais ne touchait jamais `p.avatarSrc`. Or
+  `profile/titles-ui.js` donne la priorité à `avatarSrc` sur `avatar` pour la
+  condition du titre "Looking Cool" (déblocage via avatar Joker/Ren, ajouté
+  dans cette même PR) — un changement d'avatar légitime via cloud pull sur un
+  autre appareil laissait `avatarSrc` pointer sur l'ancien avatar, gardant le
+  titre affiché comme débloqué à tort. Fix : `delete p.avatarSrc` dans
+  `pullProfileFromCloud()` dès que `avatar_data` est mis à jour.
+
+---
+
 ## 2026-07-11 — Migrations BDD Hostinger m000→m022 + audit schéma
 
 Application de toutes les migrations en attente sur la base Hostinger

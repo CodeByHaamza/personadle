@@ -81,7 +81,9 @@
       "tooltip_age": "Tranche d'âge de \"< 15\" à \"40+\", incluant des entités uniques comme \"80+\".",
       "tooltip_persona_user": "Indique si le personnage peut invoquer un Persona ou est lui-même un Shadow.",
       "tooltip_persona": "Le Persona spécifique lié au personnage — ou sa forme Shadow.",
-      "tooltip_arcana": "L'Arcane du Tarot qui définit son rôle symbolique et narratif."
+      "tooltip_arcana": "L'Arcane du Tarot qui définit son rôle symbolique et narratif.",
+      "correct": "✅ Correct ! C'était {{name}} !",
+      "giveup_reveal": "❌ La réponse était {{name}}"
     },
     "emoji": {
       "name": "Emoji",

@@ -81,7 +81,9 @@
       "tooltip_age": "Age range from \"< 15\" to \"40+\", including unique entities like \"80+\".",
       "tooltip_persona_user": "Indicates if the character can summon a Persona or is a Shadow.",
       "tooltip_persona": "The specific Persona linked to the character — or their Shadow form.",
-      "tooltip_arcana": "Their Tarot Arcana, which defines their symbolic and narrative role."
+      "tooltip_arcana": "Their Tarot Arcana, which defines their symbolic and narrative role.",
+      "correct": "✅ Correct! It was {{name}}!",
+      "giveup_reveal": "❌ The answer was {{name}}"
     },
     "emoji": {
       "name": "Emoji",

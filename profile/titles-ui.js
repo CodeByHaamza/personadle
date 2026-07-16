@@ -88,7 +88,14 @@ export function isTitleConditionMet(title, ctx) {
         "No_More_What_Ifs.mp3",
       ];
       const song = profile.profileSong?.fichier || profile.profileMusicId || "";
-      return profile.profileTheme === "all_out" && jokerSongs.includes(song);
+      if (profile.profileTheme === "all_out" && jokerSongs.includes(song)) return true;
+      const jokerAvatarFiles = [
+        "JOKER.webp", "Joker.jpg", "joker_starlight.jpg",
+        "Ren.webp", "Ren.gif", "Ren2.gif", "ren_t.webp", "ren_jazz.jpg",
+      ];
+      const avatarRef = profile.avatarSrc ||
+        (!profile.avatar?.startsWith("data:") ? profile.avatar ?? "" : "");
+      return jokerAvatarFiles.some(f => avatarRef.includes(f));
     }
     default:
       return false;

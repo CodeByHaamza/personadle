@@ -81,7 +81,13 @@ export async function pullProfileFromCloud() {
     // ── Profil visuel ──────────────────────────────────────────────────────
     const cp = d.profile ?? {};
 
-    if (cp.avatar_data !== undefined) p.avatar = cp.avatar_data;
+    if (cp.avatar_data !== undefined) {
+      p.avatar = cp.avatar_data;
+      // avatarSrc (chemin galerie choisi au crop) n'est pas synchronisé côté serveur ;
+      // sans ce delete il reste figé sur l'ancien avatar après un pull cloud (ex: le titre
+      // "Looking Cool" resterait débloqué après un changement d'avatar sur un autre appareil).
+      delete p.avatarSrc;
+    }
     if (cp.avatar_border_color) p.avatarBorderColor = cp.avatar_border_color;
     if (cp.profile_music_id !== undefined) {
       p.profileMusicId = cp.profile_music_id;

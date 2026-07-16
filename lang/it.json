@@ -81,7 +81,9 @@
       "tooltip_age": "Fascia d'età da \"< 15\" a \"40+\", incluse entità uniche come \"80+\".",
       "tooltip_persona_user": "Indica se il personaggio può evocare una Persona o se è un'Ombra.",
       "tooltip_persona": "La Persona specifica collegata al personaggio — o la sua forma Ombra.",
-      "tooltip_arcana": "La sua Arcana dei Tarocchi, che definisce il suo ruolo simbolico e narrativo."
+      "tooltip_arcana": "La sua Arcana dei Tarocchi, che definisce il suo ruolo simbolico e narrativo.",
+      "correct": "✅ Corretto! Era {{name}}!",
+      "giveup_reveal": "❌ La risposta era {{name}}"
     },
     "emoji": {
       "name": "Emoji",

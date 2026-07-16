@@ -3279,10 +3279,10 @@ body.darkmode .border-color-label {
    7. MODALE DAILY (compte à rebours jusqu'au prochain jour)
    ===================================================== */
 
-/* Bouton fixe en bas à droite — discret, symétrique avec .news-btn */
+/* Bouton fixe en bas à droite — au-dessus de la bottom nav (62px + 16px marge = 78px) */
 .daily-btn {
   position: fixed;
-  bottom: 10px;
+  bottom: 78px;
   right: 10px;
   background: #eee;
   color: #111;
@@ -3968,7 +3968,7 @@ body.darkmode .v2-theme .version-header:hover {
 
   /* Daily : compacté, aligné visuellement avec News */
   .daily-btn {
-    bottom: 8px;
+    bottom: 78px;
     right: 8px;
     font-size: 13px;
     padding: 7px 12px;
@@ -4046,7 +4046,7 @@ body.darkmode .v2-theme .version-header:hover {
 
   /* Daily : très compact sur mobile, symétrique avec News */
   .daily-btn {
-    bottom: 8px;
+    bottom: 78px;
     right: 8px;
     font-size: 11px;
     padding: 5px 9px;

@@ -218,12 +218,20 @@ if ($method === 'PATCH') {
     }
 
     // wallpaper_id
+    // Deux types de valeurs :
+    //   - Thème UI  : slug parmi UI_THEME_SLUGS ou préfixe "custom:" → pas de vérif ownership
+    //   - Wallpaper : slug de la table wallpapers → doit être débloqué dans user_wallpapers
     if (array_key_exists('wallpaper_id', $data)) {
         $wid = $data['wallpaper_id'] ? substr(trim($data['wallpaper_id']), 0, 100) : null;
         if ($wid !== null) {
-            $owns = $pdo->prepare('SELECT 1 FROM user_wallpapers WHERE user_id = ? AND wallpaper_id = ? LIMIT 1');
-            $owns->execute([$userId, $wid]);
-            if (!$owns->fetch()) jsonError('Wallpaper not unlocked', 403);
+            $uiThemeSlugs = ['all_out','velvet_room','dark_hour','pink_ribbon',
+                             'midnight_channel','demon_palace','eternal_punishment','golden_labyrinth'];
+            $isUiTheme = in_array($wid, $uiThemeSlugs, true) || str_starts_with($wid, 'custom:');
+            if (!$isUiTheme) {
+                $owns = $pdo->prepare('SELECT 1 FROM user_wallpapers WHERE user_id = ? AND wallpaper_id = ? LIMIT 1');
+                $owns->execute([$userId, $wid]);
+                if (!$owns->fetch()) jsonError('Wallpaper not unlocked', 403);
+            }
         }
         $profileFields[] = 'wallpaper_id = ?';
         $profileParams[] = $wid;

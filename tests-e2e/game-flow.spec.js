@@ -31,6 +31,14 @@ test.describe("PersonaDLE — partie complète (Give Up) et vérification de ses
     // La révélation doit apparaître (victoryBox devient visible)
     await expect(page.locator("#victoryBox")).toBeVisible({ timeout: 10000 });
 
+    // savePendingSession est fire-and-forget dans le handler Give Up : la victoryBox
+    // s'affiche de façon synchrone avant que le POST /api/sessions → 401 → write
+    // localStorage soit terminé. On attend que pendingSessions soit peuplé.
+    await page.waitForFunction(
+      () => JSON.parse(localStorage.getItem("pendingSessions") || "[]").length > 0,
+      { timeout: 5000 }
+    );
+
     // La session mise en attente localement doit porter result: "giveup" (pas "win" —
     // cf. le fix du 2026-07-05, checkGuess() loggait "win" même sur un Give Up).
     const pending = await page.evaluate(() => JSON.parse(localStorage.getItem("pendingSessions") || "[]"));
@@ -73,8 +81,7 @@ test.describe("PersonaDLE — responsive (viewport mobile)", () => {
       page,
     }) => {
       await page.setViewportSize({ width: 375, height: 812 });
-      await page.goto(mode.path);
-      await page.waitForLoadState("networkidle");
+      await page.goto(mode.path, { waitUntil: "load" });
 
       const { scrollWidth, clientWidth } = await page.evaluate(() => ({
         scrollWidth: document.documentElement.scrollWidth,
