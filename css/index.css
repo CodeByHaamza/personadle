@@ -39,9 +39,9 @@ footer {
   text-align: center;
   color: white;
   font-family: "Times New Roman", Times, serif;
-  font-size: 36px;
+  font-size: 27px;
   border: 4px solid rgb(202, 202, 202);
-  padding: 15px 30px;
+  padding: 11px 22px;
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.6);
   box-shadow: 0 0 15px rgba(8, 8, 8, 0.7);
@@ -50,7 +50,20 @@ footer {
     box-shadow 0.3s ease;
   display: block;
   width: fit-content;
-  margin: 30px auto;
+  margin: 22px auto;
+}
+
+/* Grille 2×3 — desktop (>768px)
+   Colonne gauche : Classique · Emoji · All-Out Attack
+   Colonne droite : Silhouette · Personae · Music          */
+#gameModeSelector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px 36px;
+  max-width: 1080px;
+  width: 92%;
+  margin: 0 auto;
+  padding: 0;
 }
 
 /* =====================================================
@@ -3956,9 +3969,9 @@ body.darkmode .v2-theme .version-header:hover {
   }
 
   .gamemode-title {
-    font-size: 22px;
-    padding: 10px 20px;
-    margin: 20px auto;
+    font-size: 17px;
+    padding: 8px 16px;
+    margin: 16px auto;
     max-width: 95%;
   }
 
@@ -4003,13 +4016,16 @@ body.darkmode .v2-theme .version-header:hover {
   }
 
   .gamemode-title {
-    font-size: 18px;
-    padding: 8px 14px;
-    margin: 15px auto;
+    font-size: 15px;
+    padding: 7px 12px;
+    margin: 12px auto;
   }
 
   #gameModeSelector {
+    grid-template-columns: 1fr;
+    max-width: 380px;
     padding: 0 10px;
+    gap: 12px;
   }
 
   .gamemode-button {

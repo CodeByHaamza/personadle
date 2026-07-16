@@ -4282,20 +4282,22 @@ body.darkmode .swatch.active { box-shadow: 0 0 0 2px #161020, 0 0 0 4px var(--ac
   padding: 0;
 }
 
-/* Lien « Mot de passe oublié ? » + message de la demande de reset */
+/* Bouton « Mot de passe oublié ? » — action secondaire discrète, pas un lien */
 .auth-forgot-link {
   display: block;
-  margin: 10px auto 0;
+  margin: 12px auto 0;
   background: none;
   border: none;
-  color: var(--accent, #e63946);
-  font-size: 0.82rem;
-  font-weight: 600;
+  color: rgba(160, 155, 180, 0.75);
+  font-size: 0.8rem;
+  font-weight: 400;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
   font-family: inherit;
+  letter-spacing: 0.01em;
+  transition: color 0.2s ease;
 }
-.auth-forgot-link:hover { filter: brightness(1.1); }
+.auth-forgot-link:hover { color: rgba(200, 195, 220, 0.95); }
 .auth-hint {
   font-size: 0.84rem;
   text-align: center;

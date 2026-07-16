@@ -1,7 +1,7 @@
 # 🎭 PERSONADLE
 
 <p align="center">
-  <img src="./img/Logo_PersonaDLE.png" alt="Personadle Logo" width="700">
+  <img src="./img/New_Logo_PersonaDLE.png" alt="Personadle Logo" width="700">
 </p>
 
 <p align="center">

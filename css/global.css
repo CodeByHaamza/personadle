@@ -130,8 +130,7 @@ body.modal-open {
    ===================================================== */
 
 #imgHomePage {
-  /* min() évite tout overflow quel que soit le viewport (ex. 1025-1199px) */
-  width: min(1200px, 95vw);
+  width: min(460px, 80vw);
   height: auto;
   transition: transform 0.3s ease-in-out;
   display: block;
@@ -1419,8 +1418,7 @@ button,
 @media (max-width: 1024px) {
   /* Logo légèrement réduit */
   #imgHomePage {
-    width: 80%;
-    max-width: 700px;
+    width: min(380px, 75vw);
   }
 
   /* Autocomplete légèrement plus étroit */
@@ -1457,8 +1455,7 @@ button,
 
   /* ---- Logo ---- */
   #imgHomePage {
-    width: 90%;
-    max-width: 400px;
+    width: min(300px, 70vw);
     margin: 10px auto;
     display: block;
   }

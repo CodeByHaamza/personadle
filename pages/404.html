@@ -35,7 +35,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: #0c0b1a;
+        background: #070516;
         color: #e8e0ff;
         font-family: "Oswald", "Arial Black", sans-serif;
         padding: 80px 1rem 7rem;
@@ -43,31 +43,40 @@
         position: relative;
       }
 
-      /* ── Velvet Room radial bg ───────────────────────────────── */
+      /* ── Velvet Room background — couches multiples ──────────── */
       body::before {
         content: "";
         position: fixed;
         inset: 0;
         background:
-          radial-gradient(ellipse 70% 55% at 50% 35%, #1e0d4a 0%, transparent 70%),
-          radial-gradient(ellipse 40% 30% at 20% 80%, #0d0a2e 0%, transparent 60%),
-          #0c0b1a;
+          /* Halo central fort */
+          radial-gradient(ellipse 65% 50% at 50% 30%, #2a1068 0%, transparent 60%),
+          /* Lueur basse gauche */
+          radial-gradient(ellipse 55% 40% at 5% 90%, #180848 0%, transparent 55%),
+          /* Lueur basse droite */
+          radial-gradient(ellipse 45% 35% at 95% 85%, #1a0640 0%, transparent 50%),
+          /* Bandes diagonales claires — relief velvet */
+          repeating-linear-gradient(
+            -52deg,
+            transparent 0px,
+            transparent 48px,
+            rgba(80, 40, 160, 0.07) 48px,
+            rgba(80, 40, 160, 0.07) 50px
+          ),
+          /* Fond de base */
+          linear-gradient(175deg, #0d0a22 0%, #070516 45%, #0a0320 100%);
         z-index: 0;
         pointer-events: none;
       }
 
-      /* ── Subtle scanlines ────────────────────────────────────── */
+      /* ── Grain doré Velvet Room — haut et bas ────────────────── */
       body::after {
         content: "";
         position: fixed;
         inset: 0;
-        background: repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 3px,
-          rgba(0, 0, 0, 0.06) 3px,
-          rgba(0, 0, 0, 0.06) 4px
-        );
+        background:
+          radial-gradient(ellipse 100% 18% at 50% 0%,  rgba(255, 210, 80, 0.06) 0%, transparent 100%),
+          radial-gradient(ellipse 100% 12% at 50% 100%, rgba(160, 80, 220, 0.08) 0%, transparent 100%);
         pointer-events: none;
         z-index: 1;
       }

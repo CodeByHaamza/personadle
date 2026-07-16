@@ -17,7 +17,7 @@
  * ────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION = "personadle-v74";
+const CACHE_VERSION = "personadle-v75";
 
 // Préfixe du sous-dossier : '/personadle' en dev local, '' en production (racine).
 // Calculé depuis l'URL du SW lui-même (ex: /personadle/sw.js → /personadle).
@@ -176,6 +176,16 @@ self.addEventListener("fetch", (event) => {
   /* ── 2. Google Fonts → stale-while-revalidate ── */
   if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") {
     event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  /* ── 2b. CDN Cloudflare R2 (GIFs All-Out Attack) → network-only ──
+     Le CDN gère déjà son propre cache HTTP — le double-cacher dans le SW
+     créait des réponses "opaque" stale qui causaient le lag du mode AOA
+     (Ctrl+Shift+R contournait le SW et fixait le problème). On laisse
+     CloudFlare gérer seul sa mise en cache. */
+  if (url.hostname === "pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev") {
+    event.respondWith(fetch(request).catch(() => new Response("", { status: 408 })));
     return;
   }
 

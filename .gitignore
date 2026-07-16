@@ -103,6 +103,11 @@ PersonaDLE_Update_Documentation/
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/DOCKER_GUIDE.md
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/DEV_CHANGELOG.md
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/TEST_PLAN_DEV.md
+!PersonaDLE_Update_Documentation/PersonaDLE 2.0/*.png
+!PersonaDLE_Update_Documentation/PersonaDLE 2.0/*.jpg
+!PersonaDLE_Update_Documentation/PersonaDLE 2.0/*.jpeg
+!PersonaDLE_Update_Documentation/PersonaDLE 2.0/*.gif
+!PersonaDLE_Update_Documentation/PersonaDLE 2.0/*.webp
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Dossier de staging local pour les assets en attente d'ingestion (voir

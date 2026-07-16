@@ -10,6 +10,58 @@
 
 ---
 
+## 2026-07-16 — feat: nouveau logo + avatars Theodore + correctifs UI/perf
+
+### Logo
+
+`img/New_Logo_PersonaDLE.png` remplace `img/Logo_PersonaDLE.png` dans tous les
+points d'entrée : `index.html` (src + og:image), les 6 pages mode, `README.md`.
+L'ancien fichier reste présent pour l'affichage avant/après dans `PersonaDLE_Update.html`.
+
+### Avatars Theodore (P3 Portable)
+
+`theodore.jpeg`, `theodore2-5.jpeg` ajoutés dans `profile/avatars_data.js` (groupe P3),
+juste après Elisabeth/Elisabeth2. `img/avatar/` contient déjà les fichiers — le
+user les a déposés manuellement.
+
+### Fix gitignore — illustrations docs
+
+`.gitignore` : ajout de règles `!` pour `*.png`, `*.jpg`, `*.jpeg`, `*.gif`,
+`*.webp`, `*.pdf`, `note_ajout.md`, `PersonaDLE_Update.md` dans
+`PersonaDLE_Update_Documentation/PersonaDLE 2.0/`. 13 fichiers de doc précédemment
+exclus sont maintenant versionnés.
+
+### Fix "Mot de passe oublié?" — ressemble à un lien
+
+`.auth-forgot-link` dans `profile/profile-page.css` : suppression de
+`text-decoration: underline`, couleur neutre muted au lieu de la couleur accent
+rouge. Hover subtil au lieu du `filter: brightness`. Aucun changement fonctionnel.
+
+### Fix AOA lag — CDN CloudFlare R2 exclu du SW
+
+`sw.js` : le CDN R2 (`pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev`) était capturé
+par la stratégie `cacheFirst` des images, créant des réponses opaques stale qui
+causaient le lag du mode All-Out Attack (Ctrl+Shift+R le contournait). Ajout d'un
+cas `network-only` avant `cacheFirst`. CACHE_VERSION bumped `v74 → v75`.
+
+### Grille index — 2 colonnes + tailles ajustées
+
+`css/index.css` :
+
+- `#gameModeSelector` : grille 2×3 sur desktop (>768px). Colonne gauche :
+  Classique, Emoji, All-Out Attack. Colonne droite : Silhouette, Personae, Music.
+  `grid-template-columns: repeat(2, 1fr)`, max-width 900px.
+- `.gamemode-title` : font-size 36px → 27px (proportionnel 75 %), responsive
+  adapté (22px → 16px sur tablette, 16px sur mobile).
+
+### Fix background 404
+
+`pages/404.html` : redesign du background — gradient diagonal plus marqué,
+motif de lignes en relief, suppression des scanlines plates au profit d'un
+effet velvet room plus riche visuellement.
+
+---
+
 ## 2026-07-16 — fix(build): Makefile portable Windows natif (sans Git Bash/WSL)
 
 Trouvé en aidant un testeur (Windows, PowerShell natif) : `make test-php`
