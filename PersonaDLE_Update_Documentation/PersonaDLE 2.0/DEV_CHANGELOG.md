@@ -10,6 +10,67 @@
 
 ---
 
+## 2026-07-11 — Migrations BDD Hostinger m000→m022 + audit schéma
+
+Application de toutes les migrations en attente sur la base Hostinger
+(MariaDB 11.8.8) et alignement du schéma de production.
+
+### Migrations appliquées
+
+- Script consolidé idempotent `sql/migration_hostinger_full.sql` (m000→m022) :
+  tables `badges`, `wallpapers`, `event_codes`, `rate_limits`, `error_log`,
+  `admin_audit_log`, `social_link_ranks`, `social_links`, `social_link_badge_configs`,
+  `social_link_interactions`, `social_link_rankup_notifs`, `leaderboard_cache` ;
+  colonnes ajoutées : `users.global_streak/record/date`, `users.reset_token_*`,
+  `users.streak_recovered_at`, `badges.condition_*`, `wallpapers.condition_*`,
+  `titles.condition_mode` ; slugs de titres normalisés.
+
+### Correctifs appliqués (spécifiques Hostinger)
+
+- `friendships.seen_at` : ajouté sans `AFTER accepted_at` (colonne inexistante
+  sur Hostinger — schema Hostinger n'a jamais eu `accepted_at`).
+- `titles.condition_mode/type/value` : colonnes manquantes sur Hostinger
+  (créées localement dans `bdd_mysql.sql` sans migration correspondante).
+- `social_link_rankup_notifs` FK : `recipient_id`/`partner_id` étaient `INT(11)`
+  (signé) alors que `users.id` est `BIGINT(20) UNSIGNED` → corrigé, FK ajoutées.
+- `ADD CONSTRAINT IF NOT EXISTS` : syntaxe non supportée sur MariaDB 11.8 pour
+  les FK → remplacé par pattern `PREPARE/EXECUTE` conditionnel.
+- `leaderboard_cache.uq_leaderboard` : déjà à 5 colonnes (metric inclus),
+  aucune action requise.
+
+### Audit schéma (hostinger vs local)
+
+Export `sql/hostinger_current_schema.sql` (snapshot 2026-07-11). Diffs connus
+sans impact fonctionnel :
+
+- `friendships` : `accepted_at` existe localement, pas sur Hostinger.
+- `titles`/`social_link_ranks` : colonnes `name_jp`, `description_*` localement
+  uniquement (pas de langue JP en prod).
+- `user_titles`/`user_stats`/`badges_unlocked` : PK avec `id` auto-increment
+  local, PK composite sur Hostinger.
+- `game_sessions.result` : `VARCHAR` local vs `ENUM` Hostinger.
+- Types `ENUM` vs `VARCHAR` sur `rarity` (titles/badges) — valeurs identiques.
+
+### Correction post-review (2026-07-12)
+
+Le script `migration_hostinger_full.sql` committé ne reflétait pas fidèlement les
+correctifs listés ci-dessus (probablement appliqués à la main sur Hostinger sans
+être reportés dans le fichier). Corrigé :
+
+- `friendships.seen_at` : `AFTER accepted_at` remplacé par `AFTER updated_at`
+  (le script plantait sur une base fraîche, `accepted_at` n'existant pas).
+- `social_link_rankup_notifs.recipient_id/partner_id` : `MODIFY COLUMN` vers
+  `BIGINT UNSIGNED` ajouté avant les `ADD CONSTRAINT` (m015) — la FK vers
+  `users.id` échouait sinon (type mismatch, la colonne restait `INT` depuis m009).
+- `ADD CONSTRAINT IF NOT EXISTS` (FK) réellement remplacé par le pattern
+  `PREPARE/EXECUTE` conditionnel (il était encore utilisé tel quel en m015).
+- `social_link_rankup_notifs.is_badge_prompt` : colonne présente sur Hostinger
+  mais absente du script — ajoutée (`ADD COLUMN IF NOT EXISTS`).
+- Rappel de sauvegarde ajouté avant le `DROP TABLE IF EXISTS social_link_badges`
+  (destructif, aucun backup mentionné auparavant).
+
+---
+
 ## 2026-07-04 — Sécurité, tests réels, CI E2E (revue de projet)
 
 Suite à une revue complète du projet sur `develop` : correctifs de sécurité,
@@ -636,6 +697,7 @@ badges et 7 lignes wallpapers). À confirmer via la CI (`make test-php`).
   Résout maintenant l'id d'abord, comme le fait le vrai endpoint.
 - **`sql/bdd_mysql.sql`** : commentaire de schéma sur `condition_type` mis à jour
   (retire `social_link_rank_10`, ajoute `mode_games`/`games_total`/`social_link_min_rank`).
+
 ### Suivi de revue, 4ᵉ passe (PR #14) — bug bloquant du titre Aigis corrigé
 
 - **`titles.aigis_i_am_not_afraid` ne pouvait jamais se débloquer** — l'`INSERT INTO
@@ -661,6 +723,74 @@ badges et 7 lignes wallpapers). À confirmer via la CI (`make test-php`).
   (`badges_count`, `weekly_clean_modes`, `classic_p1_wins`, `emoji_p2_wins`) et à
   `perfect_wins` (supporté par `condition_check.php` mais non utilisé par le catalogue
   actuel — ajouté par anticipation, coût marginal nul).
+
+---
+
+## 2026-07-11 — redesign(ui): FAQ et Privacy — thème Velvet Room complet
+
+Refonte visuelle complète de `pages/faq.html` et `pages/privacy.html` pour rejoindre l'esthétique Retro-Futurism du reste du jeu.
+
+### FAQ
+
+- **Fond** : `#0b0a1f` toujours sombre (Velvet Room), gradients radiaux animés (`fqBgPulse`), scanlines overlay
+- **Titre** : Cinzel, `clamp(2.6rem…5rem)`, shimmer gradient animé (`titleShimmer` 6 s)
+- **Barre de progression** : dégradé violet → rouge → or
+- **Recherche** : input dark glass avec bordure violet/rouge neon au focus
+- **Tabs de filtre** : pills neon couleur par catégorie (`game`=rouge, `gameplay`=rose, `account`=bleu, `community`=violet, `team`=or)
+- **Headers catégorie** : dark glass, barre neon colorée à gauche (`::before`), glow ambiant par catégorie
+- **Items FAQ** : dark glass, bordure neon colorée + glow quand `open`
+- **Jack Frost** : 115 px, glow bleu-violet
+- **Équipe** : cartes dark glass bordure or, hover lift + glow gold
+- **Bouton Back** : déplacé à la FIN de la page (était au milieu — bug UX signalé par l'utilisateur)
+- **`prefers-reduced-motion`** : toutes les animations désactivées
+
+### Privacy
+
+- **Fond** : même thème `#0b0a1f` avec gradients radiaux animés
+- **Titre** : Cinzel, shimmer identique au FAQ
+- **Shield hero** : emoji 🔐 avec animation `shieldPulse` violet→rouge
+- **Intro card** : dark glass, bordure violet neon
+- **Badges** : glassmorphism neon (vert/bleu/rouge/violet) en remplacement des pastilles blanches plates
+- **Cartes de section** : dark glass + bordure gauche colorée par type (`--card-accent` CSS custom property) + glow hover par type (rouge/vert/bleu/violet)
+- **Titres de section** : couleur neon par type de section
+- **Listes** : `✕` rouge-pink pour "never do", `✓` vert neon pour "security"
+- **Personnages Sae/Zenkichi** : glow violet ajouté au `filter: drop-shadow`
+- **Bouton email** : style cohérent avec le bouton Back
+- **Chip "last updated"** : fond violet subtle
+
+---
+
+## 2026-07-11 — fix(ui): victoryBox Classique vide + tooltip {{n}} non interpolé + redesign pages statiques
+
+Trois correctifs isolés regroupés dans un lot UI/fix.
+
+### victoryBox Classique (mode classique — barre blanche/verte vide à la victoire)
+
+`classiqueMode/classiqueMode.html` avait un `<div id="victoryBox">` vide, contrairement à tous les autres modes qui contiennent `<img id="victoryPortrait">` + `<p id="winMessage">`. Symptôme : boîte verte/blanche vide animée à la victoire, aucun portrait ni message.
+
+- **`classiqueMode/classiqueMode.html`** — ajout de `<img id="victoryPortrait">` + `<p id="winMessage" class="win-message">` dans `#victoryBox`
+- **`classiqueMode/modeClassique.js`** — helper `fillVictoryBox(nom, isGiveup)` appelé aux 3 points : victoire, déjà-joué (restore), abandon
+- **`lang/{en,fr,es,de,it}.json`** — ajout `modes.classic.correct` et `modes.classic.giveup_reveal` (clés de texte `{{name}}`)
+
+### Tooltip amis `{{n}}` affiché brut
+
+`js/social-link.js` : fonction `t(key, fallback)` locale ignorait silencieusement l'objet `vars` (3ème argument). Les appels `t('key', fallback, { n: X })` passaient `vars` mais la fonction interne ne le relayait pas à `window.i18n?.t?.(key, vars)`.
+
+- **`js/social-link.js`** (ligne 23) — signature `t(key, fallback, vars)` + passage de `vars` à `window.i18n?.t?.(key, vars)`
+
+### Redesign pages statiques (404, FAQ, Privacy)
+
+Mise à niveau visuelle des pages statiques pour rejoindre l'esthétique Retro-Futurism du reste du jeu.
+
+- **`pages/404.html`** — réécriture complète : thème Velvet Room (bg `#0c0b1a`, dégradé violet profond), grand "404" Cinzel avec glitch/chromatic aberration CSS (`::before` rouge / `::after` bleu), card glassmorphism gold-border, Igor GIF avec floating animation, diamonds pulsants, SVG arrow sur le bouton retour, corner brackets dorés, bottom nav, dark mode toggle, scanlines overlay, `prefers-reduced-motion`, easter egg ALIBABA préservé
+- **`pages/faq.html`** — remplacement du `🔍` emoji dans le `innerHTML` dynamique (ligne 890) par un SVG inline magnifying glass ; back button : `display:inline-flex`, `cursor:pointer`, `text-decoration:none`, `:focus-visible` gold outline ; SVG arrow à la place de `← Back`
+- **`pages/privacy.html`** — back button : `display:inline-flex`, `cursor:pointer`, `text-decoration:none`, `:focus-visible` gold outline ; SVG arrow à la place de `← Back`
+
+### Détails techniques
+
+- Le glitch 404 tourne à 6 s d'intervalle, déclenche à 88 % du cycle (glitch court, pause longue) — evite la fatigue visuelle
+- Pas de `@import` Google Fonts en CSS — balise `<link>` dans le `<head>` pour ne pas bloquer le rendu
+- `initLangSelector()` importé de `js/lang-selector.js` (pattern identique à `reset-password.html`, seul autre fichier dans `pages/` qui l'utilise)
 
 ---
 
