@@ -10,6 +10,56 @@
 
 ---
 
+## 2026-07-16 — fix(build): Makefile portable Windows natif (sans Git Bash/WSL)
+
+Trouvé en aidant un testeur (Windows, PowerShell natif) : `make test-php`
+échouait avec `'test' n'est pas reconnu` / `'wget' n'est pas reconnu`.
+
+`SHELL := /bin/bash` ne résout à rien sur Windows natif (le chemin littéral
+`/bin/bash` n'existe pas hors WSL) — Make retombe silencieusement sur
+`cmd.exe`, qui n'a ni `test`, ni `wget`, ni `grep`/`sort`/`awk`, ni `rm`.
+3 cibles en dépendaient :
+
+- `$(PHPUNIT_PHAR)` (`test -f || wget`) → `scripts/download_phpunit.js`
+  (télécharge via le module `https` de Node, suit les redirections, no-op si
+  le fichier existe déjà)
+- `help` (`grep | sort | awk`) → `scripts/make_help.js` (parse le Makefile
+  lui-même)
+- `clean` (`rm -f`/`rm -rf`) → `scripts/clean_artifacts.js`
+  (`fs.rmSync(..., { recursive: true, force: true })`)
+
+Node est déjà une dépendance obligatoire du projet (Vitest) donc ces 3
+scripts tournent identiquement sur Windows/Mac/Linux/CI, sans dépendre du
+shell que `make` choisit d'invoquer. `SHELL := /bin/bash` retiré (plus aucune
+cible n'a besoin de syntaxe bash — `&&`/`||`/sous-shells) ; toutes les autres
+cibles (`up`/`down`/`db-import`…) n'appelaient déjà que des binaires
+multiplateformes (`npm`, `php`, `docker compose`) et n'ont pas changé.
+
+### Angle mort documenté
+
+Le téléchargement réel de `phpunit.phar` n'a pas pu être testé de bout en
+bout dans cette session (proxy sandbox bloquant `phar.phpunit.de`, cf.
+`/__agentproxy/status` → `connect_rejected`) — vérifié à la place : usage
+sans argument, no-op si le fichier existe déjà, `make help`/`make clean`
+réellement exécutés via `make` (pas juste les scripts isolés), `php -l`/
+`npm run lint` propres. Le téléchargement effectif reste à confirmer par un
+contributeur (CI ou local) non bloqué par ce proxy.
+
+### `test-php` déplacé vers Docker (suite du même fil)
+
+Le même testeur n'avait pas PHP installé nativement sur Windows (seulement
+dans le conteneur `personadle_php`, monté sur `.:/var/www/html`) —
+`php phpunit.phar` échouait avec `php n'est pas reconnu`. Plutôt que
+d'exiger un PHP natif juste pour lancer les tests (jamais documenté comme
+prérequis), `test-php` tourne maintenant dans le conteneur :
+`$(DC) exec -T php php $(PHPUNIT_PHAR)` au lieu de `php $(PHPUNIT_PHAR)`.
+Nécessite `make up` (déjà un prérequis documenté dans `CONTRIBUTING.md`).
+Confirmé fonctionnel en conditions réelles côté testeur : 175 tests, 317
+assertions, 71 skipped (attendu — tests d'intégration BDD spécifiques).
+
+`CONTRIBUTING.md` mis à jour en conséquence (retire la mention implicite
+d'un PHP natif requis).
+
 ## 2026-07-16 — fix(api): rateLimit() fail-open + erreur JS brute côté auth
 
 Bug remonté par un testeur (compte local, schéma Docker périmé) : inscription

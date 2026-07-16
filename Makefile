@@ -4,8 +4,10 @@
 # Lancer `make` (ou `make help`) pour la liste des cibles.
 # =============================================================================
 
-# Utilise bash et stoppe au premier échec d'une commande chaînée.
-SHELL := /bin/bash
+# Pas de SHELL forcé (ex: /bin/bash) : toutes les cibles n'utilisent que des
+# commandes npm/php/docker/node — aucune syntaxe shell POSIX (test, wget, rm,
+# grep|sort|awk…) — donc `make` fonctionne avec le shell par défaut de chaque
+# plateforme (sh sur Linux/Mac, cmd.exe sur Windows natif sans Git Bash/WSL).
 .DEFAULT_GOAL := help
 
 PHPUNIT_PHAR := phpunit.phar
@@ -17,10 +19,7 @@ DC           := docker compose
 # ---------------------------------------------------------------------------
 .PHONY: help
 help: ## Affiche cette aide
-	@echo "PersonaDLE — cibles disponibles :"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| sort \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
+	@node scripts/make_help.js
 
 # ---------------------------------------------------------------------------
 # Installation
@@ -47,11 +46,11 @@ coverage: ## Tests JS avec rapport de couverture
 
 .PHONY: $(PHPUNIT_PHAR)
 $(PHPUNIT_PHAR): ## Télécharge phpunit.phar s'il est absent
-	@test -f $(PHPUNIT_PHAR) || (echo "↓ Téléchargement de PHPUnit…" && wget -q -O $(PHPUNIT_PHAR) $(PHPUNIT_URL))
+	@node scripts/download_phpunit.js $(PHPUNIT_PHAR) $(PHPUNIT_URL)
 
 .PHONY: test-php
-test-php: $(PHPUNIT_PHAR) ## Lance les tests backend (PHPUnit)
-	php $(PHPUNIT_PHAR)
+test-php: $(PHPUNIT_PHAR) ## Lance les tests backend (PHPUnit, via Docker — `make up` requis)
+	$(DC) exec -T php php $(PHPUNIT_PHAR)
 
 .PHONY: test-all
 test-all: test test-php ## Lance tous les tests (JS + PHP)
@@ -116,5 +115,4 @@ db-import: ## (Ré)importe le schéma SQL dans le conteneur
 # ---------------------------------------------------------------------------
 .PHONY: clean
 clean: ## Supprime les artefacts de test/CI locaux
-	rm -f $(PHPUNIT_PHAR)
-	rm -rf .phpunit.cache coverage
+	node scripts/clean_artifacts.js $(PHPUNIT_PHAR) .phpunit.cache coverage
