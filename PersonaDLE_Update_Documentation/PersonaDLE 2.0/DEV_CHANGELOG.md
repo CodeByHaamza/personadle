@@ -10,6 +10,50 @@
 
 ---
 
+## 2026-07-16 — fix: onglet Admin nav + stats profil i18n + drag-to-close modale
+
+Trois bugs isolés corrigés dans la même PR.
+
+### Onglet Admin manquant sur friends/leaderboard (`js/auth.js`, `js/bottomNav.js`)
+
+`personadle:auth-ready` n'était jamais dispatché : seul `personadle:auth-login` existait,
+déclenché uniquement lors d'une connexion manuelle. Sur les pages friends et leaderboard,
+`initBottomNav()` est appelé avant que la promesse `initAuth()` soit résolue — le check
+synchrone `window._currentUser?.is_admin` échoue, et le listener `personadle:auth-ready`
+ne se déclenchait jamais → l'onglet Admin n'apparaissait pas.
+
+Fix : dispatch `personadle:auth-ready` dans le bloc `finally` d'`initAuth()`, après
+`window._authResolved = true`.
+
+Second bug associé : le calcul du href admin dans `_addAdminNavItem()` ne distinguait
+pas les pages 2 niveaux de profondeur (`/profile/friends/`, `/profile/leaderboard/`)
+— elles recevaient `../admin/` au lieu de `../../admin/`. Corrigé en réutilisant
+le pattern `isDeepSubpath` déjà présent dans `buildHrefs()`.
+
+### Stats profil en anglais quelle que soit la langue (`profile/profile-page.js`)
+
+Les labels des stats (`renderStats`) et des en-têtes du tableau de modes
+(`renderModeStats`) étaient des chaînes hardcodées en anglais, ignorant les clés i18n
+qui existent pourtant dans `lang/*.json` :
+`profile.stat_wins_label`, `stat_giveups_label`, `stat_games_label`,
+`stat_best_streak_label`, `stat_time_label`, `stat_first_played_label`,
+`stat_fav_mode_label`, `stat_current_streak_label`, `mode_col_mode`, `mode_col_games`.
+
+Fix : remplacement par `tf()`. Ajout de `renderModeStats()` dans le listener
+`personadle:i18n-ready` (seul `renderStats()` y était, le tableau de modes restait
+donc en anglais même après changement de langue).
+
+### Drag text → fermeture modale compte (`js/auth.js`)
+
+Si l'utilisateur sélectionnait du texte dans le formulaire et relâchait la souris
+sur le backdrop, le navigateur générait un `click` sur le backdrop (cible commune
+du mousedown/mouseup) → fermeture involontaire de la modale.
+
+Fix : flag `_dragStartedInside` posé sur `mousedown`. Le handler `click` ignore la
+fermeture si le drag a commencé à l'intérieur du contenu de la modale.
+
+---
+
 ## 2026-07-16 — feat: nouveau logo + avatars Theodore + correctifs UI/perf
 
 ### Logo

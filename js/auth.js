@@ -412,10 +412,19 @@ function setupModalNavigation() {
     btn.addEventListener("click", () => openModal(btn.getAttribute("data-open-modal")));
   });
 
-  // Fermer en cliquant en dehors de la modale
+  // Fermer en cliquant en dehors de la modale.
+  // Guard mousedown : si le drag a commencé dans le contenu de la modale
+  // (sélection de texte par ex.), on n'interprète pas le mouseup sur le backdrop
+  // comme un click intentionnel de fermeture.
   ["loginModal", "registerModal"].forEach((id) => {
-    document.getElementById(id)?.addEventListener("click", (e) => {
-      if (e.target.id === id) closeModal(id);
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("mousedown", (e) => {
+      el._dragStartedInside = e.target.id !== id;
+    });
+    el.addEventListener("click", (e) => {
+      if (e.target.id === id && !el._dragStartedInside) closeModal(id);
+      el._dragStartedInside = false;
     });
   });
 }
@@ -522,6 +531,7 @@ export async function initAuth() {
     // Permet aux pages qui attendent window._authResolved de ne pas
     // bloquer 2 s inutilement quand l'utilisateur n'est pas connecté.
     window._authResolved = true;
+    window.dispatchEvent(new CustomEvent("personadle:auth-ready", { detail: { user: window._currentUser } }));
   }
 
   // 3. Brancher formulaires + navigation modales + logout

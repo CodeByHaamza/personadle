@@ -249,15 +249,18 @@ export function initBottomNav() {
     if (!window._currentUser?.is_admin) return;
     if (document.getElementById("nav-admin-item")) return;
 
+    const p = window.location.pathname;
+    const isDeepSubpath = p.includes("/profile/friends/") || p.includes("/profile/leaderboard/");
     const isSubpath =
-      window.location.pathname.includes("/profile/") ||
-      window.location.pathname.includes("/classiqueMode/") ||
-      window.location.pathname.includes("/emojiMode/") ||
-      window.location.pathname.includes("/silhouetteMode/") ||
-      window.location.pathname.includes("/allOutAttackMode/") ||
-      window.location.pathname.includes("/personaeMode/") ||
-      window.location.pathname.includes("/musicsMode/");
-    const href = isSubpath ? "../admin/" : "./admin/";
+      !isDeepSubpath &&
+      (p.includes("/profile/") ||
+        p.includes("/classiqueMode/") ||
+        p.includes("/emojiMode/") ||
+        p.includes("/silhouetteMode/") ||
+        p.includes("/allOutAttackMode/") ||
+        p.includes("/personaeMode/") ||
+        p.includes("/musicsMode/"));
+    const href = isDeepSubpath ? "../../admin/" : isSubpath ? "../admin/" : "./admin/";
 
     const item = document.createElement("a");
     item.id = "nav-admin-item";

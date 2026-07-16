@@ -592,16 +592,16 @@ function renderStats() {
 
   // Stats standard (hors streak)
   const stats = [
-    { icon: "🏆", value: s.wins || 0, label: "Wins" },
-    { icon: "🏳️", value: s.giveups || 0, label: "Give-ups" },
-    { icon: "🎮", value: s.games || 0, label: "Games Played" },
-    { icon: "⭐", value: s.streakRecord || 0, label: "Best Streak" },
-    { icon: "⏱️", value: formatPlayTime(s.totalTimeMinutes || 0), label: "Time Played" },
-    { icon: "📅", value: s.firstPlayed?.split("T")[0] || "—", label: "First Played", full: true },
-    { icon: "🎯", value: modeFav, label: "Fav Mode", full: true },
+    { icon: "🏆", value: s.wins || 0, label: tf("profile.stat_wins_label", "Wins") },
+    { icon: "🏳️", value: s.giveups || 0, label: tf("profile.stat_giveups_label", "Give-ups") },
+    { icon: "🎮", value: s.games || 0, label: tf("profile.stat_games_label", "Games Played") },
+    { icon: "⭐", value: s.streakRecord || 0, label: tf("profile.stat_best_streak_label", "Best Streak") },
+    { icon: "⏱️", value: formatPlayTime(s.totalTimeMinutes || 0), label: tf("profile.stat_time_label", "Time Played") },
+    { icon: "📅", value: s.firstPlayed?.split("T")[0] || "—", label: tf("profile.stat_first_played_label", "First Played"), full: true },
+    { icon: "🎯", value: modeFav, label: tf("profile.stat_fav_mode_label", "Fav Mode"), full: true },
   ];
 
-  const streakHTML = buildStreakItem(s.streak || 0, "Current Streak", "0.22s");
+  const streakHTML = buildStreakItem(s.streak || 0, tf("profile.stat_current_streak_label", "Current Streak"), "0.22s");
   const regularHTML = stats
     .map(
       (st, idx) => `
@@ -694,8 +694,8 @@ function renderModeStats() {
 
   container.innerHTML = `
     <div class="mode-stats-header">
-      <span>Mode</span>
-      <span>Games / Win %</span>
+      <span>${tf("profile.mode_col_mode", "Mode")}</span>
+      <span>${tf("profile.mode_col_games", "Games / Win %")}</span>
     </div>
     <div class="mode-stats-list">${rows}</div>`;
 }
@@ -1223,12 +1223,14 @@ document.addEventListener("DOMContentLoaded", () => {
   //    Listener permanent : capte init + chaque setLang() depuis le sélecteur
   window.addEventListener("personadle:i18n-ready", () => {
     renderStats();
+    renderModeStats();
     renderBadgesModal(profile, saveProfileAndSyncBadges);
   });
 
   // Race-condition : si initLang() s'est terminé avant ce listener, l'event est déjà parti
   if (window.i18nIsReady) {
     renderStats();
+    renderModeStats();
     renderBadgesModal(profile, saveProfileAndSyncBadges);
   }
 });
