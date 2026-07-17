@@ -28,7 +28,8 @@ import {
 import { initFilterMenu } from "../js/filterMenu.js";
 import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplete.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
+import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -496,7 +497,7 @@ function checkGuess(name, target, forceReveal = false) {
 
       localStorage.setItem("personaUserProfile", JSON.stringify(_pr));
       trackUniqueDay(_pr, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pr)));
-      checkBadgesAfterGame();
+      checkUnlocksAfterGame();
     }
 
     // !forceReveal ici aussi : le handler Give Up gère déjà lui-même revealNextLink/
@@ -668,6 +669,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
       localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
+      // Give Up ne passait jamais par checkBadgesAfterGame() (seul le chemin victoire l'appelait,
+      // cf. checkGuess()) — un badge comme ace_defective (10 give-ups) ne se débloquait donc
+      // jamais tant qu'on n'allait pas sur le profil, jamais "en live" après l'action elle-même.
+      checkUnlocksAfterGame();
     }
 
     checkChallengeCompletion("classic", attempts, false);
@@ -705,6 +710,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     history = [];
     updateCounters();
     output.innerHTML = "";
+    document.getElementById("victoryBox").style.display = "none";
     quoteHint.style.display = "none";
     textbar.disabled = false;
     textbar.value = "";

@@ -40,7 +40,7 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -368,7 +368,15 @@ function showVictory(force = false, name = null) {
       profile.foundNaotoPersona = true;
       profileUpdated = true;
     }
-    if (["Necronomicon", "Prometheus"].includes(target.persona) && !profile.foundFutabaPersona) {
+    // "Prometheus" existe pour 2 personnages différents (Futaba P5/P5R et Baofu
+    // P2EP, cf. personaeCharacters.js) — vérifier target.user en plus du nom de
+    // persona, sinon gagner sur Baofu débloquait ce flag par erreur.
+    const targetUsers = Array.isArray(target.user) ? target.user : [target.user];
+    if (
+      ["Necronomicon", "Prometheus"].includes(target.persona) &&
+      targetUsers.includes("Futaba Sakura") &&
+      !profile.foundFutabaPersona
+    ) {
       profile.foundFutabaPersona = true;
       profileUpdated = true;
     }
@@ -441,7 +449,7 @@ function showVictory(force = false, name = null) {
   }
 
   localStorage.setItem("personaeGameOver", "true");
-  checkBadgesAfterGame();
+  checkUnlocksAfterGame();
 }
 
 /**

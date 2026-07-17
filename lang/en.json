@@ -699,6 +699,7 @@
     "migrate_already_done": "Your profile is already synced.",
     "privacy_notice": "By creating an account, you agree to our",
     "privacy_link": "Privacy Policy",
+    "remember_me": "Remember me",
     "forgot_password": "Forgot password?",
     "send_reset": "Send reset link",
     "back": "Back to login",

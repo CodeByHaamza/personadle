@@ -117,6 +117,28 @@ export function showWallpaperNotification(wp) {
   }, 4000);
 }
 
+/**
+ * Lightweight wallpaper check for game mode pages — mirrors checkBadgesAfterGame()
+ * (badgesManager.js). Reads profile from localStorage, evaluates unlock conditions,
+ * shows notifications. Does NOT render the profile page gallery.
+ * Call this after a game session ends (win or give-up), on any page.
+ */
+export async function checkWallpapersAfterGame() {
+  const p = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+  const save = () => localStorage.setItem("personaUserProfile", JSON.stringify(p));
+  let friendCount = 0;
+  if (window._currentUser) {
+    try {
+      const _prefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
+      const res = await fetch(`${_prefix}/api/friends`, { credentials: "include" }).then((r) =>
+        r.json()
+      );
+      friendCount = (res?.friends || []).length;
+    } catch (_) {}
+  }
+  await checkAndUnlockWallpapers(p, p.stats || {}, friendCount, save);
+}
+
 /** Sync backend → local des wallpapers débloqués, vérifie les nouveaux, rend la galerie. */
 export async function initUnlockableWallpapers(profile, saveProfile) {
   const stats = profile.stats || {};

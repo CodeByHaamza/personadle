@@ -55,6 +55,7 @@
     <link rel="stylesheet" href="../css/stats-compare.css" />
     <link rel="stylesheet" href="../css/rank10-effect.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
+    <link rel="stylesheet" href="../css/title-notification.css" />
     <link rel="stylesheet" href="./profile-page.css?v=4" />
     <link rel="stylesheet" href="./badges/badges.css?v=4" />
 
@@ -857,6 +858,10 @@
               data-i18n-placeholder="auth.password"
             />
           </div>
+          <label class="auth-remember">
+            <input type="checkbox" id="loginRememberMe" checked />
+            <span data-i18n="auth.remember_me">Remember me</span>
+          </label>
           <p id="loginError" class="auth-error hidden"></p>
           <button type="submit" class="btn-p5 btn-auth-submit">
             🔐 <span data-i18n="auth.login">Log in</span>

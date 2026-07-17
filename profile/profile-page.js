@@ -24,6 +24,7 @@
 
 import {
   initBadgesSystem,
+  forceCheckBadges,
   syncBadgesWithBackend,
   renderBadgesModal,
   renderBadgesPreview,
@@ -305,6 +306,29 @@ function initProfile() {
 
   // ── Statistiques ──
   renderStats();
+}
+
+/**
+ * Affiche le code ami de l'utilisateur connecté sous le pseudo, sur sa propre page de
+ * profil — même pattern que profile-view.js pour un profil public (.profile-friend-code),
+ * jamais câblé côté propriétaire du profil. Idempotent (crée l'élément une seule fois,
+ * le réutilise sinon) car appelée à chaque _fullCloudSync. Retire l'élément si déconnecté.
+ */
+function _renderFriendCode() {
+  const code = window._currentUser?.friend_code;
+  const container = pageUsername?.closest(".avatar-card-info");
+  if (!container) return;
+  let codeEl = container.querySelector(".profile-friend-code");
+  if (!code) {
+    codeEl?.remove();
+    return;
+  }
+  if (!codeEl) {
+    codeEl = document.createElement("p");
+    codeEl.className = "profile-friend-code";
+    container.appendChild(codeEl);
+  }
+  codeEl.textContent = `🔑 ${code}`;
 }
 
 /**
@@ -1167,9 +1191,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Dual approach : immédiat si auth déjà résolue, sinon event listener.
   const _fullCloudSync = async () => {
     if (!window._currentUser?.id) return;
+    _renderFriendCode();
     try {
       await pullProfileFromCloud();
       _applyCloudToUI();
+      // Re-vérifier les badges dont la condition dépend de stats agrégées côté
+      // backend (giveups_total, wins…) : le premier appel à initBadgesSystem()
+      // plus bas tourne AVANT que ce pull résolve, donc sur un profil local
+      // potentiellement périmé (autre appareil, localStorage vidé…).
+      forceCheckBadges(profile, saveProfileAndSyncBadges);
       // Re-fetcher /api/titles avec session valide → is_unlocked correct par user
       await initTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty);
       // Pousser les badges locaux manquants vers le backend (local → cloud)
@@ -1190,6 +1220,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("personadle:auth-logout", () => {
     // Arrêter la musique si elle joue
     stopProfileSong();
+    _renderFriendCode(); // window._currentUser déjà à null → retire l'élément
     // localStorage déjà vidé par auth.js — initProfile() crée un profil vierge
     initProfile();
     renderThemePicker();
@@ -1212,6 +1243,18 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(_periodicSync, 3 * 60 * 1000);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") _periodicSync();
+  });
+
+  // Retour bfcache (bouton "précédent" du navigateur après avoir joué une partie
+  // sur une autre page) : la page est restaurée depuis le cache mémoire du
+  // navigateur SANS ré-exécuter ce script — `profile` reste l'objet périmé chargé
+  // avant la partie jouée. `_periodicSync()` ne suffit pas ici (il ne fait que
+  // pull+apply, pas de re-check badges/titres) : on relance le sync complet pour
+  // que toute condition remplie entre-temps (badge/wallpaper/titre à flags locaux
+  // type `foundXPersona`, écrits par un autre mode de jeu) soit re-testée tout de
+  // suite, sans attendre un rechargement complet fortuit de la page.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) _fullCloudSync();
   });
 
   // Callback appelé par cloud-sync.js après chaque pull périodique

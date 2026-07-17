@@ -109,7 +109,20 @@ export function showStreakRecoveryMenu(previousStreak) {
     .querySelector("#sr-btn-recover")
     .addEventListener("click", () => _recover(previousStreak, overlay));
   overlay.querySelector("#sr-btn-cancel").addEventListener("click", () => _close(overlay));
-  overlay.querySelector("#sr-backdrop").addEventListener("click", () => _close(overlay));
+
+  // Fermer en cliquant sur le fond — même garde anti-clic-accidentel que la modale
+  // login/register (js/auth.js) : si le geste (mousedown) a commencé dans le contenu
+  // du popup (ex : sélection de texte sur la description), on n'interprète pas un
+  // relâchement qui déborde sur le fond comme un clic de fermeture intentionnel.
+  const backdrop = overlay.querySelector("#sr-backdrop");
+  let _dragStartedInside = false;
+  overlay.addEventListener("mousedown", (e) => {
+    _dragStartedInside = e.target !== backdrop;
+  });
+  backdrop.addEventListener("click", () => {
+    if (!_dragStartedInside) _close(overlay);
+    _dragStartedInside = false;
+  });
 
   // Accessibilité : role=dialog, focus sur le bouton principal, Escape pour fermer.
   const menu = overlay.querySelector("#sr-menu");

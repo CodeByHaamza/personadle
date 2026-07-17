@@ -11,11 +11,14 @@ import {
   renderTitlesSection,
   getEquippedTitle,
   resetTitlesUnlockedState,
+  checkTitlesAfterGame,
   _resetTitlesData,
 } from "../profile/titles-ui.js";
 
 beforeEach(() => {
   document.body.innerHTML = "";
+  localStorage.clear();
+  delete window._currentUser;
   _resetTitlesData();
   vi.restoreAllMocks();
 });
@@ -177,5 +180,55 @@ describe("resetTitlesUnlockedState", () => {
     resetTitlesUnlockedState();
     // No public getter for is_unlocked besides going through the grid render — smoke check only.
     expect(() => resetTitlesUnlockedState()).not.toThrow();
+  });
+});
+
+describe("checkTitlesAfterGame", () => {
+  it("is a no-op when no profile exists in localStorage", () => {
+    expect(() => checkTitlesAfterGame()).not.toThrow();
+    expect(document.querySelector(".title-notification")).toBeNull();
+  });
+
+  it("unlocks a newly-qualifying title from localStorage and shows a notification", async () => {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ badges: new Array(20).fill("x") }) // velvet_room_thou_art_i: badges_count >= 20
+    );
+
+    checkTitlesAfterGame();
+    await vi.waitFor(() => {
+      expect(document.querySelector(".title-notification")).not.toBeNull();
+    });
+
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.unlockedTitles).toContain("velvet_room_thou_art_i");
+  });
+
+  it("does not re-unlock a title already present in unlockedTitles", async () => {
+    // 20 badges also satisfies marie_i_remembered (badges_count >= 15) — mark both
+    // already-unlocked so the assertion isn't confused by a genuinely different unlock.
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({
+        badges: new Array(20).fill("x"),
+        unlockedTitles: ["velvet_room_thou_art_i", "marie_i_remembered"],
+      })
+    );
+
+    checkTitlesAfterGame();
+    // Give the async condition check a tick to run — no notification should ever appear.
+    await new Promise((r) => setTimeout(r, 10));
+    expect(document.querySelector(".title-notification")).toBeNull();
+  });
+
+  it("works without window._currentUser (friendCount defaults to 0, no fetch attempted)", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    localStorage.setItem("personaUserProfile", JSON.stringify({ badges: new Array(20).fill("x") }));
+
+    checkTitlesAfterGame();
+    await vi.waitFor(() => {
+      expect(document.querySelector(".title-notification")).not.toBeNull();
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

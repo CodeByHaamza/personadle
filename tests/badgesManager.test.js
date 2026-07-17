@@ -12,6 +12,7 @@ import {
   handleEventCodeSubmit,
   getBadgesForShare,
   markProfileAsShared,
+  checkBadgesAfterGame,
 } from "../profile/badges/badgesManager.js";
 
 function baseProfile(overrides = {}) {
@@ -27,6 +28,7 @@ function baseProfile(overrides = {}) {
 
 beforeEach(() => {
   document.body.innerHTML = "";
+  localStorage.clear();
   vi.restoreAllMocks();
 });
 
@@ -255,5 +257,42 @@ describe("markProfileAsShared", () => {
     markProfileAsShared(profile, saveProfile);
 
     expect(saveProfile).not.toHaveBeenCalled();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// checkBadgesAfterGame — lightweight cross-page check called from every game
+// mode's win/give-up handler (classiqueMode, emojiMode, silhouetteMode,
+// allOutAttackMode, personaeMode, musicsMode via js/unlock-notify.js).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("checkBadgesAfterGame", () => {
+  it("is a no-op when no profile exists in localStorage", () => {
+    expect(() => checkBadgesAfterGame()).not.toThrow();
+    expect(document.querySelector(".badge-notification")).toBeNull();
+  });
+
+  it("unlocks a newly-qualifying badge read straight from localStorage", () => {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify(baseProfile({ stats: { giveups: 10 } })) // ace_defective: giveups_total >= 10
+    );
+
+    checkBadgesAfterGame();
+
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.badges).toContain("ace_defective");
+  });
+
+  it("does not re-unlock a badge already present in profile.badges", () => {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify(baseProfile({ stats: { giveups: 10 }, badges: ["ace_defective"] }))
+    );
+
+    checkBadgesAfterGame();
+
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.badges).toEqual(["ace_defective"]);
   });
 });

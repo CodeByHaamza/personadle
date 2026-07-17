@@ -1,0 +1,31 @@
+/**
+ * js/unlock-notify.js — Vérifie badges/titres/wallpapers après une partie, sur
+ * n'importe quelle page (pas seulement le profil).
+ *
+ * Chaque système (badges/titres/wallpapers) garde son propre check "léger" —
+ * checkBadgesAfterGame() (profile/badges/badgesManager.js),
+ * checkTitlesAfterGame() (profile/titles-ui.js),
+ * checkWallpapersAfterGame() (profile/wallpapers-ui.js) — ce module ne fait que
+ * les regrouper pour un point d'appel unique dans chaque mode de jeu, plutôt que
+ * de dupliquer 3 imports + 3 appels dans les 6 fichiers de mode.
+ *
+ * Volontairement PAS importé depuis gameCore.js (qui reste sans imports statiques
+ * pour éviter tout risque de cycle avec api.js, cf. CLAUDE.md § Pièges critiques) —
+ * chaque mode l'importe directement, comme il importe déjà badgesManager.js.
+ */
+
+import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { checkTitlesAfterGame } from "../profile/titles-ui.js";
+import { checkWallpapersAfterGame } from "../profile/wallpapers-ui.js";
+
+/**
+ * Appeler après un win OU un give-up, dans n'importe quel mode de jeu.
+ * Chaque check est indépendant (une erreur dans l'un n'empêche pas les autres).
+ */
+export function checkUnlocksAfterGame() {
+  try {
+    checkBadgesAfterGame();
+  } catch (_) {}
+  checkTitlesAfterGame();
+  checkWallpapersAfterGame().catch(() => {});
+}

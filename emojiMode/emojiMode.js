@@ -29,7 +29,8 @@ import {
 import { initFilterMenu } from "../js/filterMenu.js";
 import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplete.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
+import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -354,7 +355,7 @@ function checkEmojiGuess(name, forceReveal = false) {
     document.getElementById("giveUpButton").disabled = true;
     gameOver = true;
     localStorage.setItem("emojiWin", "true");
-    checkBadgesAfterGame();
+    checkUnlocksAfterGame();
   } else {
     // Wrong guess: show mini portrait + increment
     const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];

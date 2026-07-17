@@ -10,6 +10,295 @@
 
 ---
 
+## 2026-07-17 — style(auth): "mot de passe oublié" ne ressemble plus à un lien
+
+Léo : malgré le fix PR25 (soulignement retiré), le texte se lit toujours comme un
+lien classique. Carte blanche donnée par Hamza. Taille et poids augmentés
+(0.8rem/400 → 0.92rem/600), couleur rapprochée du texte normal du formulaire
+(hover → `var(--accent)`) — se lit maintenant comme un bouton texte intégré,
+pas comme du texte de bas de page. `profile/profile-page.css`, `.auth-forgot-link`.
+
+---
+
+## 2026-07-17 — fix(streak-recovery): garde anti-clic-accidentel sur le fond du popup
+
+Repéré en revue (comportement confirmé, discutable) : cliquer n'importe où sur
+`#sr-backdrop` fermait le popup Jack Frost immédiatement, contrairement à la
+modale login/register (PR26) qui a une garde anti-clic-accidentel. Carte blanche
+donnée par Hamza pour trancher — implémenté (rien n'était perdu définitivement,
+mais facile à fermer par erreur pour un truc important).
+
+Fix : même pattern exact que `js/auth.js` (`_dragStartedInside` sur mousedown,
+vérifié au click sur le fond) — adapté au fait que `#sr-backdrop` et `#sr-menu`
+sont des éléments frères (pas un wrapper autour du contenu comme la modale login),
+donc le check compare `e.target !== backdrop` au mousedown plutôt que
+`e.target.id !== id`. 3 tests ajoutés (`tests/streakRecovery.test.js`).
+
+---
+
+## 2026-07-17 — feat(badges,titres,wallpapers): notifications de déblocage sur n'importe quelle page
+
+Léo : "les notifications d'obtention doivent se faire peu importe la page, je
+viens de gagner et hop notification si j'ai rempli les conditions". Point de
+départ de l'investigation : les badges avaient déjà `checkBadgesAfterGame()`
+(`profile/badges/badgesManager.js`) câblé dans les 6 modes de jeu depuis un
+moment — mais **titres et wallpapers n'avaient strictement aucun équivalent**,
+jamais vérifiés en dehors du chargement de la page profil.
+
+En creusant pourquoi les badges eux-mêmes semblaient malgré tout capricieux
+(cf. le fix `ace_defective` de la veille, qui ne couvrait que le chemin
+serveur/cloud-sync), **deux vrais bugs distincts trouvés côté client** :
+
+1. **`classiqueMode/modeClassique.js`** : le chemin Give Up n'appelait **jamais**
+   `checkBadgesAfterGame()` — seul `checkGuess()` côté victoire l'appelait, dans
+   un bloc explicitement gardé par `!forceReveal`. Un badge comme `ace_defective`
+   (10 give-ups) ne se vérifiait donc jamais juste après l'action qui devait le
+   débloquer.
+2. **`silhouetteMode/modeSilhouette.js`** : `giveUp()` appelait `showVictory(true)`
+   — qui déclenche `checkBadgesAfterGame()` en interne, à la toute fin — **avant**
+   d'écrire `stats.giveups` pour CE give-up (le `updateProfileStats`/
+   `savePendingSession` de `giveUp()` tournait après le retour de `showVictory()`).
+   Le check tournait donc systématiquement sur le compteur d'avant, un tour de
+   retard — corrigé en réordonnant : stats loggées avant l'appel à `showVictory()`.
+
+`emojiMode`/`personaeMode`/`musicsMode`/`allOutAttackMode` (chemin give-up direct,
+pas de fonction `showVictory()` partagée avec le même piège d'ordre) étaient déjà
+corrects des deux côtés.
+
+**Code mort trouvé au passage** : `allOutAttackMode/modeAllOutAttack.js` référençait
+`window.forceCheckBadges` — jamais défini nulle part dans tout le repo (`grep`
+confirmé), le bloc ne s'exécutait donc jamais. Remplacé par un vrai appel.
+
+### Fix
+
+- `profile/titles-ui.js` : nouvelle fonction exportée `checkTitlesAfterGame()`,
+  même contrat que `checkBadgesAfterGame()` (lit `localStorage`, vérifie les
+  conditions, notifie, ne rend rien de l'UI profil).
+- `profile/wallpapers-ui.js` : idem, `checkWallpapersAfterGame()`.
+- `js/unlock-notify.js` (nouveau) : `checkUnlocksAfterGame()`, point d'appel
+  unique regroupant les 3 checks — évite de dupliquer 3 imports + 3 appels dans
+  les 6 fichiers de mode. **Volontairement pas importé par `gameCore.js`** (qui
+  reste sans imports statiques pour éviter tout risque de cycle avec `api.js`,
+  cf. CLAUDE.md § Pièges critiques) — chaque mode l'importe directement, comme
+  il importait déjà `badgesManager.js`.
+- Les 12 points d'appel (6 modes × win/give-up) basculés sur
+  `checkUnlocksAfterGame()` ; les 2 bugs ci-dessus corrigés au passage.
+- `css/title-notification.css` (nouveau, extrait de `profile-page.css`) +
+  `wallpaper-notification.css` : chargés désormais sur les 6 pages de mode en
+  plus de `profile.html` — sans ça la notif se déclenchait bien en JS mais
+  s'affichait sans style (`.title-notification`/`.wallpaper-notif` n'étaient
+  stylées que sur `profile.html`). `.badge-notification`, lui, était déjà dans
+  `global.css` — les notifs badges s'affichaient donc déjà correctement partout,
+  juste jamais déclenchées au bon moment.
+
+### Angle mort noté, pas recréé par erreur
+`.title-rarity-tag` (utilisé dans le HTML généré par `titles-ui.js`, notification
+et zoom) n'est stylé nulle part — même pas sur `profile.html` avant ce commit
+(`grep` sur tout `profile-page.css` : 0 résultat). Pré-existant, pas dans le
+périmètre de ce fix — vérifié pour ne pas l'inventer par erreur en extrayant le
+CSS vers le nouveau fichier.
+
+### Tests
+20 nouveaux : `checkTitlesAfterGame` (titlesUi.test.js), `checkWallpapersAfterGame`
+(wallpapersUi.test.js), `checkBadgesAfterGame` — jusqu'ici sans **aucune**
+couverture malgré son usage déjà répandu — (badgesManager.test.js), et
+`checkUnlocksAfterGame` bout-en-bout (nouveau `unlockNotify.test.js`).
+
+---
+
+## 2026-07-17 — docs: audit TEST_PLAN_DEV.md
+
+Même traitement que `TEST_PLAN.md` la veille — relu contre le code réel, pas
+juste contre sa propre description. Trouvé : incohérence interne (139 vs 168
+méthodes PHPUnit citées à deux endroits différents du même document, écrits à
+des moments différents de sa rédaction), "Menu de filtres (Jack Frost)" — mix-up
+avec la récupération de streak (Jack Frost n'a rien à voir avec le panneau de
+filtres opus, visiblement copié par erreur depuis la section §14 dédiée),
+"Export/Import JSON" testé comme si le bouton Import existait alors qu'aucune
+trace de ce bouton n'existe dans l'UI (`profile-page.js`, aucun HTML). "Chiffres
+actuels" relabellisé "à la date de rédaction (6 juillet)" pour ne plus laisser
+croire qu'ils sont à jour, avec pointeur vers `TEST_PLAN.md` §22-23 pour tout ce
+qui est venu après (PR #25→#30, 17 juillet).
+
+---
+
+## 2026-07-17 — fix(badges): bfcache + collision de nom de persona (Naoto/Futaba)
+
+Hamza : même famille de bug que le badge `ace_defective` de la veille (action faite,
+badge pas débloqué, refaire l'action "corrige" — alors que ce n'est pas l'action qui
+manquait). Exemple donné : badge "Chronological Convergence" (Naoto + Futaba), a dû
+regagner une partie avec la persona de Naoto pour que le badge apparaisse.
+
+Deux causes distinctes, pas une seule :
+
+1. **bfcache jamais géré sur `profile-page.js`** — aucun listener `pageshow` nulle
+   part dans le repo (`grep -rl pageshow` vide avant ce commit). Revenir sur la page
+   profil via le bouton "précédent" du navigateur après avoir joué ailleurs restaure
+   la page **depuis le cache mémoire**, sans ré-exécuter ce script : la variable
+   module-level `profile` reste l'objet chargé AVANT la partie. `initBadgesSystem()`
+   ayant déjà tourné une fois au tout premier chargement, rien ne le relance sur un
+   retour bfcache — le badge fraîchement mérité reste invisible jusqu'au prochain
+   rechargement complet **fortuit** de la page (typiquement : l'utilisateur, frustré,
+   rejoue "pour être sûr", puis retape l'URL ou fait F5 au lieu de "précédent" — d'où
+   l'illusion qu'il fallait rejouer). Fix : listener `pageshow`, si `event.persisted`
+   relance `_fullCloudSync()` (qui inclut déjà `forceCheckBadges()` depuis le fix de
+   la veille).
+2. **Vrai faux-positif de badge, trouvé en creusant celui-ci en particulier** :
+   `personaeMode/modePersonae.js` détectait la persona de Futaba via
+   `["Necronomicon", "Prometheus"].includes(target.persona)` — mais "Prometheus" est
+   le nom de la persona de **2 personnages différents** dans
+   `personaeCharacters.js` (Futaba, P5/P5R, ligne ~512 ; Baofu, P2EP, ligne ~874).
+   Gagner sur Baofu déclenchait `foundFutabaPersona = true` par erreur (unlock trop
+   permissif, pas trop strict — n'explique pas le symptôme "il a fallu rejouer", mais
+   bug réel trouvé au passage). Fix : vérifie aussi `target.user.includes("Futaba
+   Sakura")`, pas seulement le nom de la persona.
+
+### Angle mort restant
+Vérifié que "Prometheus" est la SEULE collision de nom parmi les personas utilisées
+par des conditions de badges à flags (`grep -c` sur chaque nom dans
+`personaeCharacters.js` — tous les autres n'apparaissent qu'une fois). Si un futur
+personnage réutilise un nom de persona déjà utilisé dans une condition de badge à
+flags, même angle mort à vérifier au cas par cas — pas de garde générique ajoutée
+(le système `condition_type='manual'` reste entièrement à base de flags ad hoc côté
+client, cf. TEST_PLAN_DEV.md §2.11 sur les badges "à flags" laissés tels quels).
+
+---
+
+## 2026-07-17 — feat(auth): case "Remember me" réelle — décrite dans TEST_PLAN.md mais jamais codée
+
+Hamza : "vérifie qu'on n'a pas un truc noté dans le plan de test mais pas codé".
+Trouvé : `TEST_PLAN.md` §4.4 documentait un test pour une case "Remember me" "si elle
+existe" — elle n'existait nulle part (`grep -ri remember js/auth.js` + tout le HTML :
+0 résultat). `api/auth/login.php` posait pourtant déjà le cookie `remember_me` +
+`remember_me_hash` en base à **chaque** connexion, sans condition — alors que
+`lang/*.json` (`auth.cookies_body`, texte RGPD) décrivait déjà ce cookie comme
+"optional... if you choose to stay logged in". Fonctionnalité à moitié construite :
+le texte légal promettait un choix qui n'existait pas côté UI.
+
+Fix : case à cocher réelle (`#loginRememberMe` dans `profile.html`, cochée par
+défaut — comportement historique préservé si l'utilisateur n'y touche pas), envoyée
+par `js/auth.js` en `remember_me` au login. `login.php` ne pose le cookie que si
+`remember_me` est truthy (absent → `true`, compat clients pas encore à jour).
+Décochée : révoque explicitement tout `remember_me_hash` déjà en base + expire le
+cookie côté navigateur — sinon décocher n'aurait aucun effet sur un appareil déjà
+"mémorisé" par une connexion précédente. Clé i18n `auth.remember_me` ajoutée aux
+5 langues. `TEST_PLAN.md` §4.4 mis à jour pour tester coché **et** décoché.
+
+---
+
+## 2026-07-17 — fix(classic,badges): victoryBox persiste après reset + badge giveups_total jamais re-vérifié après cloud sync
+
+Léo (test §22) : "j'ai fait reset en Classic mode mais l'image de victoire est
+restée à l'écran" + "j'ai pas réussi à débloquer ace_defective malgré 10+ give-ups".
+
+**Classic mode** : `resetButton` (classiqueMode/modeClassique.js) remettait à zéro
+`attempts`/`history`/tous les champs d'input, mais oubliait de cacher
+`#victoryBox` — contrairement aux 4 autres modes concernés (allOutAttack, personae,
+music, emoji) qui le font tous en tête de leur handler de reset, juste après
+`gameOver = false; attempts = 0;`. Vérifié via grep croisé sur les 5 fichiers de
+mode — silhouetteMode utilise un mécanisme différent (élément `.victory-box` créé/
+détruit dynamiquement, déjà correctement nettoyé dans son `resetGame()`), donc pas
+concerné. Fix : ajout de `document.getElementById("victoryBox").style.display =
+"none";` au même endroit que les autres modes.
+
+**Badge ace_defective (`giveups_total >= 10`)** : bug d'ordre d'exécution, pas de
+logique de comptage — `api/lib/game_session.php` incrémente bien `user_stats.giveups`
+à chaque give-up, et `js/profileStats.js`/`js/cloud-sync.js` répercutent
+correctement ce total dans `profile.stats.giveups` (local à chaque give-up, cloud
+au pull). Le vrai trou : `initBadgesSystem()` (donc `checkAndUnlockBadges()`) est
+appelé de façon **synchrone** au chargement de `profile-page.js`, avant que
+`pullProfileFromCloud()` (async, dans `_fullCloudSync()`) ait eu la moindre chance
+de résoudre et d'écraser `profile.stats` avec le total serveur autoritatif. Tout
+badge dont la condition dépend d'un stat agrégé multi-device/multi-session
+(`giveups_total`, mais potentiellement d'autres) n'est donc testé qu'une seule
+fois, contre un profil local possiblement périmé — et jamais re-testé une fois
+les données fraîches arrivées. Classique cas "État dérivé" (CLAUDE.md §13) :
+tracer les écritures ne suffit pas, il fallait aussi tracer *quand* la lecture
+(le check) a lieu par rapport à ces écritures.
+
+Fix : appel de `forceCheckBadges(profile, saveProfileAndSyncBadges)` dans
+`_fullCloudSync()`, juste après `pullProfileFromCloud()`/`_applyCloudToUI()` et
+avant `syncBadgesWithBackend()` (pour que tout badge fraîchement débloqué soit
+inclus dans le push local→cloud qui suit).
+
+### Angle mort restant
+`initBadgesSystem()` (1er check, synchrone) et ce nouveau `forceCheckBadges()`
+(2e check, post-sync) tournent tous les deux à chaque chargement de page profil —
+redondant mais inoffensif (`checkAndUnlockBadges` ignore déjà les badges présents
+dans `profile.badges`). Pas de fix nécessaire, juste noté pour éviter la surprise
+en lisant les logs console (`🎉 Badge unlocked` peut apparaître différé de
+quelques centaines de ms après le premier rendu de page).
+
+---
+
+## 2026-07-17 — fix(profile): code ami jamais affiché sur son propre profil
+
+Léo : "on peut toujours pas voir notre code ami" — signalé pendant le test de §9
+(système social), qui suppose que le code ami est visible sur son propre profil
+(explicitement documenté ainsi en tête de §9 dans `TEST_PLAN.md`).
+
+Confirmé un vrai trou, pas une question de config : le backend renvoie bien
+`friend_code` (`api/auth/me.php`, `api/user/index.php`), et `profile/profile-view.js`
+l'affiche déjà correctement pour un profil **public** (`.profile-friend-code`, classe
+CSS déjà stylée dans `profile-page.css`). Mais `profile/profile-page.js` (sa propre
+page de profil, connecté) ne l'a jamais câblé — fonctionnalité à moitié construite.
+
+Fix : nouvelle fonction `_renderFriendCode()` dans `profile-page.js`, même pattern que
+`profile-view.js` (élément `.profile-friend-code` sous le pseudo dans
+`.avatar-card-info`). Idempotente (créée une fois, réutilisée) et appelée dans
+`_fullCloudSync()` (login/auth-ready) + au logout (retire l'élément, `window._currentUser`
+déjà à `null` à ce moment).
+
+Non testé unitairement — même choix que pour `js/auth.js` (orchestration DOM, cf.
+convention de ce projet) ; à vérifier manuellement/E2E.
+
+---
+
+## 2026-07-17 — fix(404): chemins relatifs cassés + doc test plan codes événement
+
+Trouvé en creusant les retours de Léo sur les PR #25-28 fraîchement testées.
+
+### `pages/404.html` — chemins relatifs résolus par rapport à la mauvaise URL
+
+`.htaccess` sert cette page via `ErrorDocument 404 /pages/404.html` (chemin absolu),
+mais Apache ne change pas l'URL du navigateur pour un ErrorDocument — elle reste celle
+qui a cassé. Tous les chemins **relatifs** de la page (`../css/*.css`, `../img/*.gif`,
+imports `../js/*.js`, `../sw.js` pour l'enregistrement du Service Worker,
+`../index.html` sur le bouton retour) se résolvaient donc par rapport à l'URL cassée,
+pas par rapport à `pages/` — comportement incohérent selon la profondeur de l'URL
+d'origine (peut fonctionner par coïncidence pour une URL cassée à la racine, casser pour
+une URL cassée plus profonde). Correspond exactement au signalement de Léo : le bouton
+"Return to PersonaDLE" ne ramenait pas au bon endroit.
+
+Fix : tous les chemins passés en absolu (`/css/...`, `/img/...`, `/js/...`, `/sw.js`,
+`/index.html`). Fonctionne pour Docker local et Hostinger (tous deux servis à la racine
+du domaine) — angle mort connu et accepté : ne couvre pas un déploiement Apache local
+hors-Docker servi sous un sous-chemin `/personadle/` (cf. CLAUDE.md §3), cas de moins en
+moins pertinent vu que `make up` est le flux documenté.
+
+### `TEST_PLAN.md` §8.3 — instruction obsolète (champ "quota" inexistant)
+
+La section demandait de renseigner un "quota" à la création d'un code événement — ce
+champ n'existe ni dans `admin/event-codes.js` ni dans la table `event_codes`. Réécrite
+pour matcher le vrai formulaire (Code, Badge ID = slug exact, Description, Code
+permanent, Date début/fin). Ajout d'une note de diagnostic (onglet Network → réponse de
+`redeem`) pour la prochaine fois qu'un testeur rapporte "le code n'existe pas" sans plus
+de détail — cause exacte encore non identifiée au moment de ce commit (piste : Léo à
+recontacter avec la réponse HTTP précise).
+
+### Non résolu / à trancher
+
+- **Popup streak recovery** : `#sr-backdrop` ferme le popup au moindre clic, sans la
+  garde anti-clic-accidentel ajoutée à la modale login/register (PR #26,
+  `_dragStartedInside`). Rien n'est perdu définitivement (le bouton profil reste
+  disponible ensuite), mais correspond au "despawn" rapporté par Léo. Pas corrigé ici —
+  "cliquer dehors pour fermer" peut être un choix voulu, à confirmer avant de toucher au
+  comportement.
+- **Panel admin mobile** : code du tiroir (`admin.css`/`admin.js`) relu, structurellement
+  correct (position fixed, transform, overlay, z-index). Signalé par Léo comme "pas
+  optimisé" mais pas de bug identifié dans le code — à reconfirmer s'il a bien utilisé le
+  bouton ☰.
+
 ## 2026-07-17 — fix(css): `.badge-notification` déborde sur petits viewports
 
 `css/global.css` : `min-width: 300px; max-width: 360px;` faisait déborder la

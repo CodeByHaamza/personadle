@@ -3952,83 +3952,9 @@ body.darkmode .vb-code {
   margin: 0;
 }
 
-/* ── Title unlock notification (slides in from right) ────────────── */
-.title-notification {
-  position: fixed;
-  right: -380px;
-  bottom: 24px;
-  width: 320px;
-  background: linear-gradient(150deg, #1a1025 0%, #0d0d1e 100%);
-  border: 2px solid #ffd700;
-  border-radius: 14px;
-  overflow: hidden;
-  z-index: 99999;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.7),
-    0 0 20px rgba(255, 215, 0, 0.15);
-  cursor: pointer;
-  transition: right 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-  user-select: none;
-}
-
-.title-notification.show {
-  right: 20px;
-}
-
-.title-notif-header {
-  padding: 10px 14px 6px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #ffd700;
-}
-
-.title-notif-img {
-  width: 100%;
-  display: block;
-  aspect-ratio: 4 / 1;
-  object-fit: cover;
-}
-
-.title-notif-footer {
-  padding: 8px 14px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.title-notif-footer strong {
-  color: #fff;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-/* ── Title zoom modal (wider than badge zoom for 4:1 images) ─────── */
-.title-zoom-modal .title-zoom-content {
-  max-width: 600px;
-  width: 92%;
-  padding: 32px;
-}
-
-.title-zoom-modal .title-zoom-content img {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-}
-
-@media (max-width: 480px) {
-  .title-notification {
-    width: calc(100vw - 24px);
-    right: -110%;
-  }
-  .title-notification.show {
-    right: 12px;
-    bottom: 12px;
-  }
-}
+/* Notification/zoom de déblocage de titre : extrait dans css/title-notification.css
+   (chargé aussi sur les 6 pages de mode de jeu — checkTitlesAfterGame() peut désormais
+   déclencher une notif sur n'importe quelle page, pas seulement ici). */
 
 /* Bouton « Sauvegarder » du modal de badges */
 .badges-save-btn {
@@ -4342,21 +4268,42 @@ body.darkmode .swatch.active { box-shadow: 0 0 0 2px #161020, 0 0 0 4px var(--ac
 }
 
 /* Bouton « Mot de passe oublié ? » — action secondaire discrète, pas un lien */
+.auth-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: rgba(160, 155, 180, 0.85);
+  cursor: pointer;
+  user-select: none;
+}
+.auth-remember input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Volontairement pas un style "lien" (pas de soulignement, couleur proche du texte
+   normal, poids plus affirmé) — retour Léo (17 juillet) : même sans soulignement
+   (fix PR25), la taille fine + couleur isolée continuaient à se lire comme un lien
+   classique. Taille et poids augmentés pour que ça se lise comme un vrai bouton
+   texte intégré au formulaire, pas comme du texte de bas de page. */
 .auth-forgot-link {
   display: block;
-  margin: 12px auto 0;
+  margin: 14px auto 0;
   background: none;
   border: none;
-  color: rgba(160, 155, 180, 0.75);
-  font-size: 0.8rem;
-  font-weight: 400;
+  color: rgba(190, 185, 210, 0.9);
+  font-size: 0.92rem;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
   font-family: inherit;
-  letter-spacing: 0.01em;
+  letter-spacing: normal;
   transition: color 0.2s ease;
 }
-.auth-forgot-link:hover { color: rgba(200, 195, 220, 0.95); }
+.auth-forgot-link:hover { color: var(--accent); }
 .auth-hint {
   font-size: 0.84rem;
   text-align: center;

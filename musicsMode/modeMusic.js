@@ -30,7 +30,8 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
+import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -389,7 +390,7 @@ function showVictory(force = false) {
     localStorage.setItem(todayKey, "1");
   }
 
-  checkBadgesAfterGame();
+  checkUnlocksAfterGame();
 
   // ── UI ─────────────────────────────────────────────────────────────────────
   textbar.disabled = true;

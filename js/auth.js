@@ -242,12 +242,13 @@ function setupLoginForm() {
 
     const identifier = document.getElementById("loginEmail")?.value.trim() ?? "";
     const password = document.getElementById("loginPassword")?.value ?? "";
+    const rememberMe = document.getElementById("loginRememberMe")?.checked ?? true;
 
     const btn = form.querySelector('button[type="submit"]');
     if (btn) btn.disabled = true;
 
     try {
-      const { user } = await api.auth.login({ identifier, password });
+      const { user } = await api.auth.login({ identifier, password, remember_me: rememberMe });
       updateAuthUI(user);
       closeModal("loginModal");
       localStorage.removeItem("_crInitDone");

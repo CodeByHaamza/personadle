@@ -9,10 +9,13 @@ import {
   renderUnlockableWallpaperGallery,
   checkAndUnlockWallpapers,
   showWallpaperNotification,
+  checkWallpapersAfterGame,
 } from "../profile/wallpapers-ui.js";
 
 beforeEach(() => {
   document.body.innerHTML = "";
+  localStorage.clear();
+  delete window._currentUser;
   vi.restoreAllMocks();
 });
 
@@ -113,5 +116,46 @@ describe("showWallpaperNotification", () => {
     const notif = document.querySelector(".wallpaper-notif");
     notif.click();
     expect(document.querySelector(".wallpaper-notif")).toBeNull();
+  });
+});
+
+describe("checkWallpapersAfterGame", () => {
+  it("is a no-op when no profile exists in localStorage", async () => {
+    await expect(checkWallpapersAfterGame()).resolves.not.toThrow();
+    expect(document.querySelector(".wallpaper-notif")).toBeNull();
+  });
+
+  it("unlocks a newly-qualifying wallpaper from localStorage and shows a notification", async () => {
+    localStorage.setItem("personaUserProfile", JSON.stringify({ bestSocialLinkRank: 5 }));
+
+    await checkWallpapersAfterGame();
+
+    expect(document.querySelector(".wallpaper-notif-name").textContent).toBe("Dark Shopping District");
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.unlockedWallpapers).toContain("dark_shopping_district");
+  });
+
+  it("does not re-unlock a wallpaper already present in unlockedWallpapers", async () => {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({
+        bestSocialLinkRank: 5,
+        unlockedWallpapers: ["dark_shopping_district"],
+      })
+    );
+
+    await checkWallpapersAfterGame();
+
+    expect(document.querySelector(".wallpaper-notif")).toBeNull();
+  });
+
+  it("works without window._currentUser (friendCount defaults to 0, no fetch attempted)", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    localStorage.setItem("personaUserProfile", JSON.stringify({ bestSocialLinkRank: 5 }));
+
+    await checkWallpapersAfterGame();
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(document.querySelector(".wallpaper-notif")).not.toBeNull();
   });
 });

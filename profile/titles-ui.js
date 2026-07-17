@@ -211,6 +211,18 @@ async function checkAndUnlockTitles(profile, saveProfile) {
   }
 }
 
+/**
+ * Lightweight title check for game mode pages — mirrors checkBadgesAfterGame()
+ * (badgesManager.js). Reads profile from localStorage, evaluates title conditions,
+ * shows unlock notifications. Does NOT render the profile page UI.
+ * Call this after a game session ends (win or give-up), on any page.
+ */
+export function checkTitlesAfterGame() {
+  const p = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+  const save = () => localStorage.setItem("personaUserProfile", JSON.stringify(p));
+  checkAndUnlockTitles(p, save).catch(() => {});
+}
+
 function _showTitleNotification(title) {
   const imgSrc = title.image_path || `titles/${title.slug}.webp`;
   const cond = titleConditionText(title);

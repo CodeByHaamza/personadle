@@ -31,6 +31,8 @@ $data = getJsonBody();
 // Compatibilité : accepte "identifier" (nouveau) ou "email" (ancien)
 $identifier = trim($data['identifier'] ?? $data['email'] ?? '');
 $password   =      $data['password'] ?? '';
+// Absent (anciens clients pas encore mis à jour) → true, comportement historique inchangé.
+$rememberMe = !array_key_exists('remember_me', $data) || (bool) $data['remember_me'];
 
 if (empty($identifier) || empty($password)) {
     jsonError('Email (or username) and password are required');
@@ -76,25 +78,34 @@ $_SESSION['user_id'] = (int) $user['id'];
 // Enveloppé dans un try/catch pour qu'une colonne manquante en BDD (ex: migration
 // partielle) n'empêche pas la connexion — la session PHP reste active.
 try {
-    $rawToken    = bin2hex(random_bytes(32));          // 64 chars hex
-    $hashedToken = hash('sha256', $rawToken);
-    $expires     = date('Y-m-d H:i:s', time() + 30 * 24 * 3600);
+    if ($rememberMe) {
+        $rawToken    = bin2hex(random_bytes(32));          // 64 chars hex
+        $hashedToken = hash('sha256', $rawToken);
+        $expires     = date('Y-m-d H:i:s', time() + 30 * 24 * 3600);
 
-    $pdo->prepare('UPDATE users SET remember_me_hash = ?, remember_me_expires = ? WHERE id = ?')
-        ->execute([$hashedToken, $expires, $user['id']]);
+        $pdo->prepare('UPDATE users SET remember_me_hash = ?, remember_me_expires = ? WHERE id = ?')
+            ->execute([$hashedToken, $expires, $user['id']]);
 
-    setcookie(
-        'remember_me',
-        $rawToken,
-        [
-            'expires'  => time() + 30 * 24 * 3600,
-            'path'     => '/',
-            'domain'   => '',
-            'secure'   => APP_ENV === 'production',
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]
-    );
+        setcookie(
+            'remember_me',
+            $rawToken,
+            [
+                'expires'  => time() + 30 * 24 * 3600,
+                'path'     => '/',
+                'domain'   => '',
+                'secure'   => APP_ENV === 'production',
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]
+        );
+    } else {
+        // Décoché : révoque tout token remember-me laissé par une connexion
+        // précédente sur cette machine — sinon la case décochée ne servirait à
+        // rien si l'appareil avait déjà été "mémorisé" avant.
+        $pdo->prepare('UPDATE users SET remember_me_hash = NULL, remember_me_expires = NULL WHERE id = ?')
+            ->execute([$user['id']]);
+        setcookie('remember_me', '', ['expires' => time() - 3600, 'path' => '/']);
+    }
 } catch (PDOException $e) {
     // Remember-me non disponible (colonne manquante en BDD) — la session PHP
     // reste valide, seule la reconnexion auto entre sessions est désactivée.

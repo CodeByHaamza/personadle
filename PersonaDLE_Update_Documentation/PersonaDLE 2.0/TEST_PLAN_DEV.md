@@ -1,5 +1,8 @@
 # PersonaDLE v2.0 — Plan de Test Dev (Hamza)
 
+> ⚠️ Ce document couvre `4d6634e` → PR #13 (6 juillet) : pour tout ce qui vient après
+> (PR #25→#30, 17 juillet et suivant), voir `TEST_PLAN.md` §22-§23 — pas dupliqué ici.
+
 > **Ce document est pour toi**, contrairement à [`TEST_PLAN.md`](./TEST_PLAN.md) (même dossier)
 > qui reste tel quel pour Léo et Damien (QA, sans accès code). Ici tu as accès au terminal et au
 > code : tu peux corriger directement au lieu de juste rapporter, et lancer des commandes que
@@ -49,7 +52,13 @@ Chiffres à l'époque (post-merge PR #11) : **473 tests Vitest** (24 suites) · 
 | **PR #13** | ✅ Mergée | Anti-triche daily target (phase 1, détection), split de `admin/admin.js` en 8 modules, couverture E2E des 9 endpoints admin qui n'avaient aucun test, fix a11y `prefers-reduced-motion` sur 2 boucles canvas JS. Confirmé vert par la vraie CI (PHPUnit + E2E Docker, voir §2.12-2.13 ci-dessous). Suivi de review : 6 points traités (bug `escHtml` falsy-zero, dédup pagination/loading admin, cross-check hash étendu à 6/6 modes, `prefersReducedMotion()` extrait dans `gameCore.js`, CLAUDE.md §9 corrigé, limitation anti-triche AllOutAttack/Personae documentée). |
 | **Nouveau lot** | 🔎 En cours (`claude/roadmap-followups-*`) | Conditions badges/wallpapers en colonnes structurées (`condition_type`/`condition_mode`/`condition_value`, comme `titles`) — détail en §2.16 ci-dessous. |
 
-Chiffres actuels : **475 tests Vitest** (25 suites) · **168 méthodes PHPUnit** (11 fichiers, nouveau : `DailyTargetTest.php` + `ConditionCheckTest.php` + `BadgeWallpaperCatalogTest.php`) · **949 clés i18n** × 5 langues · **23 tables SQL** · **54 tests E2E** (6 fichiers, nouveau : `admin-extended.spec.js`, 24 tests).
+Chiffres à la date de rédaction (6 juillet 2026, post-PR #13) : **475 tests Vitest**
+(25 suites) · **168 méthodes PHPUnit** (11 fichiers, nouveau : `DailyTargetTest.php` +
+`ConditionCheckTest.php` + `BadgeWallpaperCatalogTest.php`) · **949 clés i18n** × 5 langues ·
+**23 tables SQL** · **54 tests E2E** (6 fichiers, nouveau : `admin-extended.spec.js`, 24 tests).
+⚠️ Comme partout dans ce document, **snapshot figé à cette date** — ne reflète déjà plus
+l'état réel après les PR #25→#30 (17 juillet, voir `TEST_PLAN.md` §22-§23) et les sessions
+suivantes. Pour les chiffres à jour : `npm run docs:check`.
 
 ### 0.2 Ce qui vient d'être re-vérifié à l'instant (clone frais de `develop`, sans Docker)
 
@@ -143,11 +152,12 @@ make check        # lint + data:check + i18n:check + tests JS + tests PHP, tout 
 
 - [ ] `npm run lint` — 0 erreur ESLint
 - [ ] `npm run format:check` — Prettier (non-bloquant en CI, mais regarde s'il y a beaucoup de diff)
-- [ ] `npx vitest run` — **475 passed**, 0 failed
-- [ ] `npm run i18n:check` — 949 clés cohérentes sur les 5 langues
+- [ ] `npx vitest run` — 0 failed (475 à la date de rédaction, ce nombre monte — voir §0.1bis)
+- [ ] `npm run i18n:check` — clés cohérentes sur les 5 langues (949 à la date de rédaction)
 - [ ] `npm run data:check` — schéma personnages valide
 - [ ] `npm run pools:check` — `api/data/daily_pools.json` synchronisé avec les datasets JS (nouveau, PR #13)
-- [ ] `make test-php` — **139 méthodes** PHPUnit passent (première exécution télécharge `phpunit.phar`) — nouveau fichier à surveiller : `tests/php/DailyTargetTest.php`
+- [ ] `make test-php` — 0 failed (168 méthodes à la date de rédaction) — nouveau fichier à
+  surveiller : `tests/php/DailyTargetTest.php`
 - [ ] PHPStan niveau 5 (voir `ci.yml` job `PHP Lint & Tests` pour la commande exacte si tu veux le lancer isolément)
 
 ```bash
@@ -178,9 +188,8 @@ npm run test:e2e
 > coup d'œil visuel en vrai.
 
 - [ ] Mode Classique, faire 8 mauvaises réponses, cliquer "Give Up"
-- [ ] La `victoryBox` verte (fond + bordure) s'affiche correctement — **avant le fix, elle
-  n'avait ni fond ni bordure en mode Classique** (`class="victory-box"` manquante), donc si tu
-  vois une boîte vide/invisible, le fix n'est pas passé
+- [ ] La `victoryBox` verte (fond + bordure) s'affiche correctement — si tu vois une boîte
+  vide/invisible, `class="victory-box"` manque quelque part
 - [ ] Vérifier en base (`game_sessions`, dernière ligne pour ton compte) que `result = 'giveup'`
   et pas `'win'`
 - [ ] Vérifier que le badge "victoire du premier coup" (`hasWonFirstTry`) ne se débloque **pas**
@@ -192,8 +201,7 @@ npm run test:e2e
 > `user-drag:none` + `preventDefault(dragstart)`).
 
 - [ ] Mode Silhouette, essayer de cliquer-glisser l'image floutée hors de sa zone → l'image ne
-  doit **plus** pouvoir être déplacée du tout (avant : on pouvait voir l'aperçu net du personnage
-  en dehors de la zone floutée)
+  doit **plus** pouvoir être déplacée du tout
 - [ ] Même test en mode All-Out Attack sur le GIF
 
 ### 2.5 CSP — pages HTML (PR #9)
@@ -230,8 +238,7 @@ npm run test:e2e
 - [ ] Avec 2 comptes (voir §2 de la checklist fonctionnelle plus bas pour en créer un second),
   envoyer une demande d'ami → elle apparaît bien côté destinataire (pas de body perdu)
 - [ ] Le badge rouge de demandes d'ami sur la bottom nav se marque bien comme "vu" après avoir
-  consulté la page Amis (`PATCH /api/notifications/` — avant le fix, ce badge ne se marquait
-  **jamais** comme vu en prod, silencieusement)
+  consulté la page Amis (`PATCH /api/notifications/`)
 - [ ] DevTools → Network, en envoyant la demande d'ami : la requête `POST` part directement en
   `POST` vers `/api/friends/` (avec le slash), **pas** de redirection 301 visible dans l'onglet
   Network vers une variante sans slash
@@ -263,8 +270,7 @@ npm run test:e2e
   changer de langue → texte entièrement traduit, pas de résidu anglais
 - [ ] Se tromper de mot de passe / prendre un pseudo déjà utilisé / mismatch de mot de passe à
   l'inscription, **dans une langue autre que l'anglais** (ex : allemand) → le message d'erreur
-  s'affiche bien traduit (avant ce fix, ces messages arrivaient toujours en anglais brut depuis
-  le backend, quelle que soit la langue choisie)
+  s'affiche bien traduit
 - [ ] Le sélecteur de langue (`js/lang-selector.js`) se comporte identiquement sur `pages/404.html`
   et `pages/reset-password.html` que sur les autres pages qui l'utilisaient déjà
 
@@ -475,7 +481,8 @@ Pour chaque mode : une partie jusqu'à la victoire.
 - [ ] Wallpaper / musique de profil : changement immédiat + persiste
 - [ ] Profil public (`?view=CODE_AMI`) : lecture seule, pas de bouton Save
 - [ ] Export carte PNG : téléchargement réel, correspond à l'aperçu, changement de thème visible avant download
-- [ ] Export/Import JSON : fichier lisible, import ne plante rien
+- [ ] Export JSON : fichier lisible (pas de bouton "Import" actuellement dans l'UI — le
+  cloud sync est la seule voie de restauration, ne pas chercher ce bouton)
 
 ---
 
@@ -543,8 +550,8 @@ Pour chaque mode : une partie jusqu'à la victoire.
 - [ ] Mode daltonien (si activé) : grille Classique reste distinguable
 - [ ] **Nouveau** : Tab/Shift+Tab dans une modale (crop avatar, musique, titres, paramètres)
   reste cantonné dedans, Escape ferme + restaure le focus sur l'élément d'origine
-- [ ] Menu de filtres (Jack Frost) : Tab envoie le focus dans le panneau à l'ouverture, restauré
-  sur le bouton toggle à la fermeture (pattern menu déroulant, pas un piège Tab complet)
+- [ ] Menu de filtres (`js/filterMenu.js`) : Tab envoie le focus dans le panneau à l'ouverture,
+  restauré sur le bouton toggle à la fermeture (pattern menu déroulant, pas un piège Tab complet)
 - [ ] **Nouveau (PR #6)** : `avatarCropModal`, `sharePreviewModal`, `songModal`, `titlesModal`
   ont maintenant le même focus trap que les modales login/register — Tab/Shift+Tab cantonné,
   Escape ferme + restaure le focus, pas de fuite de listener si on rouvre la même modale

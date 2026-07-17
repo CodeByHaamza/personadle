@@ -25,7 +25,7 @@ import {
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplete.js";
-import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CDN / IMAGE LOADING CONFIGURATION
@@ -457,7 +457,7 @@ function handleGuess() {
 
     localStorage.setItem("aoaTarget", target);
     localStorage.setItem("aoaAttempts", attempts);
-    checkBadgesAfterGame();
+    checkUnlocksAfterGame();
     disableInputs();
   } else {
     // ── Wrong guess ──────────────────────────────────────────────────────────
@@ -510,7 +510,7 @@ function giveUp() {
   localStorage.setItem("aoaGameOver", "true");
   localStorage.setItem("aoaTarget", target);
   localStorage.setItem("aoaAttempts", attempts);
-  checkBadgesAfterGame();
+  checkUnlocksAfterGame();
 }
 
 /**
@@ -675,13 +675,10 @@ function checkSpecialBadges(characterName) {
 
   if (shouldSave) {
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));
-    setTimeout(() => {
-      if (window.forceCheckBadges) {
-        window.forceCheckBadges(profile, (updated) => {
-          localStorage.setItem("personaUserProfile", JSON.stringify(updated));
-        });
-      }
-    }, 100);
+    // `window.forceCheckBadges` n'était jamais défini nulle part dans le repo — ce bloc
+    // ne s'exécutait jamais (code mort). checkUnlocksAfterGame() relit déjà le profil
+    // frais depuis localStorage, pas besoin du setTimeout ni de repasser `profile`.
+    checkUnlocksAfterGame();
   }
 }
 

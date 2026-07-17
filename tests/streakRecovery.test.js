@@ -7,7 +7,12 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { canRecover, checkStreakRecovery, performRecovery } from "../js/streak-recovery.js";
+import {
+  canRecover,
+  checkStreakRecovery,
+  performRecovery,
+  showStreakRecoveryMenu,
+} from "../js/streak-recovery.js";
 
 const RECOVERY_KEY = "streakRecovery";
 const TWO_MONTHS_MS = 60 * 24 * 60 * 60 * 1000;
@@ -217,5 +222,52 @@ describe("performRecovery", () => {
     const rec = JSON.parse(localStorage.getItem(RECOVERY_KEY));
     expect(rec.previousStreak).toBe(4);
     expect(rec.lastUsed).toBeUndefined();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// showStreakRecoveryMenu() — backdrop anti-accidental-close guard
+// (même garde que la modale login/register, js/auth.js)
+// ─────────────────────────────────────────────────────────────
+
+describe("showStreakRecoveryMenu — backdrop click guard", () => {
+  afterEach(() => {
+    document.getElementById("streak-recovery-overlay")?.remove();
+  });
+
+  function fireMouseSequence(startEl, endEl) {
+    startEl.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    endEl.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  }
+
+  // _close() adds .sr--exit synchronously and removes the element 420ms later
+  // (fade-out) — asserting on the class avoids coupling the test to that timer.
+
+  it("closes when the drag starts AND ends on the backdrop (plain click-outside)", () => {
+    showStreakRecoveryMenu(5);
+    const backdrop = document.getElementById("sr-backdrop");
+
+    fireMouseSequence(backdrop, backdrop);
+
+    expect(document.getElementById("streak-recovery-overlay").classList).toContain("sr--exit");
+  });
+
+  it("does NOT close when the drag started inside the popup content (text selection)", () => {
+    showStreakRecoveryMenu(5);
+    const backdrop = document.getElementById("sr-backdrop");
+    const menu = document.getElementById("sr-menu");
+
+    // Simulates selecting text inside the popup, then releasing past its edge —
+    // mousedown target is the content, but the click event still lands on the backdrop.
+    fireMouseSequence(menu, backdrop);
+
+    expect(document.getElementById("streak-recovery-overlay").classList).not.toContain("sr--exit");
+  });
+
+  it("the 'Not now' button still closes the popup regardless of the backdrop guard", () => {
+    showStreakRecoveryMenu(5);
+    document.getElementById("sr-btn-cancel").click();
+
+    expect(document.getElementById("streak-recovery-overlay").classList).toContain("sr--exit");
   });
 });

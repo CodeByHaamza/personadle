@@ -24,7 +24,8 @@ import {
 // Collapsible opus filter panel (shared across all modes)
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
-import { trackUniqueDay, checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
+import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -403,7 +404,7 @@ function showVictory(force = false) {
 
   localStorage.setItem("silhouetteGameOver", "true");
   localStorage.setItem("silhouetteForceReveal", String(force));
-  checkBadgesAfterGame();
+  checkUnlocksAfterGame();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -468,8 +469,11 @@ function handleGuess() {
  */
 function giveUp() {
   if (attempts < maxAttempts || gameOver) return;
-  showVictory(true);
 
+  // Stats logged AVANT showVictory(true) — celle-ci appelle checkBadgesAfterGame() en
+  // interne (fin de showVictory()) : si on l'appelait avant d'écrire stats.giveups ici,
+  // le check tournait toujours sur le compteur d'AVANT ce give-up (ex: ace_defective,
+  // 10 give-ups, restait bloqué à "9" tant qu'on ne revisitait pas le profil plus tard).
   if (!statsAlreadyLogged) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
@@ -485,6 +489,8 @@ function giveUp() {
     localStorage.setItem(todayKey, "true");
     statsAlreadyLogged = true;
   }
+
+  showVictory(true);
 }
 
 /**

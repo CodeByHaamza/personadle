@@ -12,11 +12,11 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="../css/global.css?v=10" />
-    <link rel="stylesheet" href="../css/langSelector.css" />
-    <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="/css/global.css?v=10" />
+    <link rel="stylesheet" href="/css/langSelector.css" />
+    <link rel="stylesheet" href="/css/bottomNav.css?v=1" />
 
-    <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
+    <link rel="icon" type="image/gif" href="/img/persona_64x64.gif" />
 
     <script>
       if (localStorage.getItem("darkMode") === "enabled") {
@@ -343,7 +343,7 @@
       <div class="e-card">
         <img
           class="e-igor"
-          src="../img/igorbreakdancing.gif"
+          src="/img/igorbreakdancing.gif"
           alt="Igor breakdancing"
           width="200"
           height="200"
@@ -359,7 +359,7 @@
           You wandered too far from the Metaverse…
         </p>
 
-        <a href="../index.html" class="e-btn" data-i18n="errors.return_home">
+        <a href="/index.html" class="e-btn" data-i18n="errors.return_home">
           <!-- Arrow left SVG -->
           <svg
             width="16" height="16"
@@ -391,9 +391,9 @@
 
     <!-- Scripts -->
     <script type="module">
-      import { initLangSelector } from "../js/lang-selector.js";
-      import { initBottomNav }   from "../js/bottomNav.js";
-      import { initLang }        from "../js/i18n.js";
+      import { initLangSelector } from "/js/lang-selector.js";
+      import { initBottomNav }   from "/js/bottomNav.js";
+      import { initLang }        from "/js/i18n.js";
 
       /* Dark mode toggle */
       const toggle = document.getElementById("darkModeToggle");
@@ -418,7 +418,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch(() => {});
+          navigator.serviceWorker.register("/sw.js").catch(() => {});
         });
       }
     </script>
