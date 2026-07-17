@@ -956,5 +956,74 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 
 ---
 
+## 22 — Correctifs PR #25→#28 (17 juillet 2026) — à tester par Léo & Damien
+
+> Ces 4 PR sont arrivées **après** la rédaction initiale de ce document (26 juin), donc pas
+> couvertes par les sections ci-dessus. Chaque sous-section correspond à une PR : mêmes
+> conventions (cases à cocher, `👉` = lien direct, `>` = note importante).
+>
+> Pré-requis commun : `git pull` sur `develop` avant de commencer, puis `make up` (ou
+> redémarrer la stack si déjà lancée, pour être sûr d'avoir la dernière version du code
+> et des assets).
+
+### 22.1 PR #25 — Nouveau logo, grille index, avatars Theodore, fixes UI/perf
+
+👉 [http://localhost:8080](http://localhost:8080)
+
+- [ ] Logo affiché correctement sur la page d'accueil **et** les 6 modes (plus petit qu'avant, pas de débordement)
+- [ ] Grille des 6 modes sur l'accueil : **2 colonnes** en desktop (fenêtre large), **1 colonne** en dessous de 480px de large (redimensionner la fenêtre ou DevTools → mode responsive)
+- [ ] Mode All-Out Attack : plus de lag/saccade sur les GIFs sans avoir besoin de `Ctrl+Shift+R` (si ça lague encore au tout premier chargement après le `git pull`, c'est normal — le Service Worker doit d'abord se mettre à jour ; rechargez une 2e fois)
+- [ ] Page profil → bouton "Mot de passe oublié ?" : plus de soulignement, couleur discrète (gris), ne ressemble plus à un lien
+- [ ] Dans la grille d'avatars, groupe P3 → **Theodore** (5 variantes) apparaît juste après Elisabeth
+- [ ] Page 404 (URL invalide, ex: `/nimportequoi`) : fond visuellement plus riche (halos + bandes diagonales + grain doré)
+- [ ] `PersonaDLE_Update.html` — les images d'illustration s'affichent (déjà validé avec Léo plus tôt, normalement réglé — revérifier vite fait)
+
+### 22.2 PR #26 — Onglet Admin sur pages profondes, stats profil traduites, modale
+
+> Nécessite un compte **admin** (voir §2.3 si pas encore fait).
+
+- [ ] Connecté en admin, aller sur `/profile/friends/friends.html` → onglet **Admin** visible dans la bottom nav, et le lien pointe bien vers `/admin/` (pas de 404)
+- [ ] Idem sur `/profile/leaderboard/leaderboard.html`
+- [ ] Page profil, passer la langue en français (ou une autre) → les libellés de stats sont traduits ("Victoires", "Parties jouées", etc. — plus de texte en anglais)
+- [ ] Changer de langue une 2e fois sur la page profil → le tableau de détail par mode (en dessous des stats) se retraduit aussi (avant ce fix, il restait en anglais après un changement de langue)
+- [ ] Dans la modale login/register, **sélectionner du texte** dans le formulaire (double-clic sur un mot) puis relâcher la souris en dehors du formulaire → la modale reste ouverte (avant : elle se fermait par erreur)
+
+### 22.3 PR #27 — Streak recovery visuel, challenges classiques, console, admin responsive
+
+**Carte streak gelée + bouton de récupération**
+
+> ⚠️ Le §14.1 de ce document (modifier `streak` dans phpMyAdmin) ne suffit **plus** à lui
+> seul pour faire apparaître le bouton depuis cette PR : la valeur `previousStreak` qui
+> déclenche le bouton vit dans le `localStorage` du navigateur (clé `streakRecovery`), pas
+> en base. Pour tester sans attendre plusieurs jours réels, ouvrez la console du navigateur
+> (F12) sur la page profil et lancez :
+> ```js
+> localStorage.setItem('streakRecovery', JSON.stringify({ previousStreak: 5, shown: false }));
+> ```
+> puis mettez `streak` à `0` dans phpMyAdmin (`user_stats`, comme en §14.1) et rechargez la page.
+
+- [ ] Streak à 0 **avec** `previousStreak > 1` en localStorage → carte de streak avec effet glace (❄️, glow bleuté) + bouton proéminent "❄️ Rallumer — 0 → N jours" en dessous des stats
+- [ ] Cliquer le bouton → le menu Jack Frost habituel s'ouvre
+- [ ] Streak > 0 → pas de bouton, pas d'effet glace
+- [ ] **Compte tout neuf / jamais joué** (streak = 0, sans `previousStreak` enregistré) → l'effet glace ❄️ sur la carte reste visible (c'est normal, il s'affiche dès que streak=0, peu importe l'historique), mais **pas de bouton** "Rallumer" (normal aussi, rien à récupérer)
+- [ ] Cooldown : après une récupération, refaire le test avec le même `localStorage.setItem` — le bouton ne doit **pas** réapparaître avant ~2 mois (mais souvenez-vous : c'est le serveur qui fait vraiment foi, pas ce flag local — voir §14.3)
+
+**Challenges classiques**
+
+- [ ] Envoyer un défi Classique à un ami qui n'a pas encore joué aujourd'hui → côté ami, accepter le défi → la cible du défi correspond bien au personnage du jour normal (pas "Igor", qui était un bug de reset aléatoire)
+- [ ] Sur `classiqueMode.html`, taper quelque chose dans la barre de recherche, revenir en arrière avec le bouton du navigateur puis y retourner (ou ouvrir depuis une notification de défi) → le champ est vide au chargement, pas de texte fantôme
+
+**Divers**
+
+- [ ] Console navigateur (F12) sur `index.html` → plus de log `🔍 Checking badges...` qui spammait à chaque chargement
+- [ ] Panneau admin sur mobile ≤480px (DevTools responsive) → la barre de boutons en haut (Codes, Logs, Audit, RGPD, Rate Limits) est scrollable horizontalement, tous les boutons restent accessibles (rien de caché/coupé)
+
+### 22.4 PR #28 — Notification de badge qui débordait sur petit écran
+
+- [ ] DevTools → mode responsive → largeur **320px** (ex: iPhone SE 1ère génération)
+- [ ] Débloquer n'importe quel badge (ou en attribuer un depuis l'admin à votre propre compte pour aller plus vite) → la notification qui apparaît en haut à droite reste **entièrement visible**, pas de bord coupé à gauche
+
+---
+
 *PersonaDLE v2.0 — Plan de test généré le 26 juin 2026.*
 *À mettre à jour si de nouvelles fonctionnalités sont ajoutées avant la fin de la phase de test.*
