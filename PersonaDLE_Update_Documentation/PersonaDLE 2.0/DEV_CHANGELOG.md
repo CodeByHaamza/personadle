@@ -10,6 +10,24 @@
 
 ---
 
+## 2026-07-17 — fix(css): `.badge-notification` déborde sur petits viewports
+
+`css/global.css` : `min-width: 300px; max-width: 360px;` faisait déborder la
+notification de déblocage de badge à gauche sur viewports très étroits
+(iPhone SE 1ère gen : 320 px — bord gauche à −60 px, hors écran).
+Remplacé par `min(300px, calc(100vw - 40px))` / `min(360px, calc(100vw - 40px))`
+pour que la notification reste toujours dans le viewport avec 20 px de marge
+de chaque côté.
+
+Note : la PR d'origine (#28) proposait aussi un fix `_addAdminNavItem`
+(profondeur `/profile/friends/`, `/profile/leaderboard/`) et une correction
+`lang/README.md` (967 → 968 clés) — les deux étaient déjà appliqués sur
+`develop` au moment du merge (PR #26 et le fix `docs:fix` de PR #27,
+respectivement) ; la branche #28 avait divergé avant ces merges. Rebasée
+sans conflit fonctionnel, seul le fix CSS restait réellement nouveau.
+
+---
+
 ## 2026-07-16 — fix: streak recovery visuel + challenges classiques + console + admin responsive
 
 ### Streak recovery (bug 14.2)

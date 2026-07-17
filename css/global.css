@@ -2756,8 +2756,8 @@ body.darkmode {
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   z-index: 99999;
-  min-width: 300px;
-  max-width: 360px;
+  min-width: min(300px, calc(100vw - 40px));
+  max-width: min(360px, calc(100vw - 40px));
   transition: top 0.5s ease;
   border: 2px solid #ffd700;
   cursor: pointer;
