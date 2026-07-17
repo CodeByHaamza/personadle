@@ -10,6 +10,31 @@
 
 ---
 
+## 2026-07-16 — fix: streak recovery visuel + challenges classiques + console + admin responsive
+
+### Streak recovery (bug 14.2)
+
+- **`profile/profile.html`** : ajout `<div id="streakRecoveryPrompt" class="srp hidden">` entre `statsContainer` et `modeStatsContainer`.
+- **`js/streak-recovery.js`** : export de `getPreviousStreak()` — retourne `previousStreak` stocké en localStorage (0 si absent).
+- **`profile/profile-page.js`** : quand `streak === 0 && canRecover() && previousStreak > 1`, injecte un bouton proéminent "❄️ Rallumer — 0 → N jours" qui déclenche `showStreakRecoveryMenu(prev)`. Animation ❄️ gelée ajoutée sur la carte streak tier-0 (`streakIceGlow`, `flakeSpin`).
+- **`profile/profile-page.css`** : `.stat-streak-t0` (fond bleu glacier, border translucide, glow cyclique), `.streak-side-flake` (rotation infinie), `.srp-btn` (gradient bleu-cyan, hover subtil).
+- **`lang/{en,fr,es,de,it}.json`** : clé `streak_recovery.profile_btn` ajoutée dans les 5 langues.
+
+### Challenges classiques (bug classique)
+
+- **`classiqueMode/modeClassique.js` l.558** : `textbar.value = ""` à l'init — empêche le bfcache de restaurer la saisie précédente de Player A quand Player B ouvre le même classiqueMode.html depuis une notification.
+- **`classiqueMode/modeClassique.js` l.753-755** : guard `if (localStorage.getItem("activeChallenge")) return;` dans le callback de `checkResetOnLoad`. Sans ce guard, un Player B n'ayant pas encore joué aujourd'hui déclenchait `resetButton.click()` (reset aléatoire via `Math.random()`) qui écrasait la cible quotidienne déterministe posée par `getDailyTarget` — entraînant Igor comme cible sur les pools filtrés minuscules.
+
+### Console (bug 6.3)
+
+- **`profile/badges/badgesManager.js` l.421** : suppression du `console.log("🔍 Checking badges...")` appelé à chaque `DOMContentLoaded` (toutes les pages chargent l'index, qui appelle `checkBadgesAfterGame` en permanence).
+
+### Admin responsive (bug 11.5)
+
+- **`admin/admin.css`** breakpoint `max-width: 480px` : `.admin-header-right` passe en `overflow-x: auto; flex-shrink: 1; min-width: 0` avec enfants `flex-shrink: 0`. Permet de scroller la barre des boutons (Codes, Logs, Audit, RGPD, Rate Limits) sans les cacher — les fonctions restent accessibles sur mobile sans régression.
+
+---
+
 ## 2026-07-16 — fix: onglet Admin nav + stats profil i18n + drag-to-close modale
 
 Trois bugs isolés corrigés dans la même PR.

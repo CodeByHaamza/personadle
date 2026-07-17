@@ -555,6 +555,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupRulesModal();
 
   const textbar = document.getElementById("textbar");
+  textbar.value = "";
   const guessButton = document.getElementById("guessButton");
   const hintButton = document.getElementById("hintButton");
   const quoteHint = document.getElementById("quoteHint");
@@ -750,6 +751,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Daily reset (auto-resets at Paris midnight) ──
   checkResetOnLoad("lastPlayedDate_Classic", "Classic", () => {
+    if (localStorage.getItem("activeChallenge")) return;
     resetButton.click();
   });
   setupDailyReset(() => {

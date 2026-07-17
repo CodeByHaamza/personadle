@@ -1133,6 +1133,7 @@
     "description": "Jack Frost can restore it — once every 2 months.",
     "restore_button": "🔥 Restore my streak!",
     "cancel_button": "Not now",
+    "profile_btn": "❄️ Reignite — 0 → {{count}} days",
     "error_cooldown": "Recovery is on cooldown — try again later.",
     "error_offline": "You appear to be offline. Please try again.",
     "error_generic": "Recovery unavailable right now. Please try again."

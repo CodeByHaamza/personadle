@@ -1133,6 +1133,7 @@
     "description": "Jack Frost peut la restaurer — une fois tous les 2 mois.",
     "restore_button": "🔥 Restaurer ma série !",
     "cancel_button": "Plus tard",
+    "profile_btn": "❄️ Rallumer — 0 → {{count}} jours",
     "error_cooldown": "Récupération en cooldown — réessaie plus tard.",
     "error_offline": "Tu sembles hors ligne. Réessaie.",
     "error_generic": "Récupération indisponible pour le moment. Réessaie."

@@ -418,8 +418,6 @@ function initializeProfileBadgesData(profile) {
  * @param {Function} saveProfile - Fonction de sauvegarde
  */
 function checkAndUnlockBadges(profile, saveProfile) {
-  console.log("🔍 Checking badges...");
-
   const stats = profile.stats || {};
   const newlyUnlocked = [];
 

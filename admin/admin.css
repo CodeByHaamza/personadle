@@ -1612,15 +1612,25 @@ body {
 /* ── Petits mobiles (≤ 480px) ─────────────────────────────────────────── */
 @media (max-width: 480px) {
   .admin-header {
-    padding: 0 12px;
+    padding: 0 8px;
   }
   .admin-logo {
     font-size: 12px;
     letter-spacing: 1px;
   }
+  .admin-header-right {
+    overflow-x: auto;
+    flex-shrink: 1;
+    min-width: 0;
+    gap: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-header-right > * {
+    flex-shrink: 0;
+  }
   .btn-codes {
-    padding: 5px 10px;
-    font-size: 0.75rem;
+    padding: 5px 8px;
+    font-size: 0.72rem;
   }
 
   .user-detail-tabs {

@@ -1133,6 +1133,7 @@
     "description": "Jack Frost puede restaurarla — una vez cada 2 meses.",
     "restore_button": "🔥 ¡Restaurar mi racha!",
     "cancel_button": "Ahora no",
+    "profile_btn": "❄️ Reavivar — 0 → {{count}} días",
     "error_cooldown": "Recuperación en espera — inténtalo más tarde.",
     "error_offline": "Parece que estás sin conexión. Inténtalo de nuevo.",
     "error_generic": "Recuperación no disponible ahora mismo. Inténtalo de nuevo."

@@ -1133,6 +1133,7 @@
     "description": "Jack Frost può ripristinarla — una volta ogni 2 mesi.",
     "restore_button": "🔥 Ripristina la mia serie!",
     "cancel_button": "Non ora",
+    "profile_btn": "❄️ Riaccendi — 0 → {{count}} giorni",
     "error_cooldown": "Ripristino in cooldown — riprova più tardi.",
     "error_offline": "Sembri offline. Riprova.",
     "error_generic": "Ripristino non disponibile al momento. Riprova."

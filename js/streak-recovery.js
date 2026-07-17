@@ -40,6 +40,11 @@ function _saveRecovery(r) {
   localStorage.setItem(RECOVERY_KEY, JSON.stringify(r));
 }
 
+/** Retourne la valeur de previousStreak stockée en localStorage (0 si absente). */
+export function getPreviousStreak() {
+  return _getRecovery().previousStreak || 0;
+}
+
 /** Retourne true si la récupération est disponible (délai de 2 mois respecté). */
 export function canRecover() {
   const r = _getRecovery();

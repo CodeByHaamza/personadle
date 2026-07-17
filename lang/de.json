@@ -1133,6 +1133,7 @@
     "description": "Jack Frost kann sie wiederherstellen — einmal alle 2 Monate.",
     "restore_button": "🔥 Meine Serie wiederherstellen!",
     "cancel_button": "Nicht jetzt",
+    "profile_btn": "❄️ Wiederbeleben — 0 → {{count}} Tage",
     "error_cooldown": "Wiederherstellung in Abklingzeit — versuch es später.",
     "error_offline": "Du scheinst offline zu sein. Bitte versuch es erneut.",
     "error_generic": "Wiederherstellung derzeit nicht verfügbar. Bitte versuch es erneut."

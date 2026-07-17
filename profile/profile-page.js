@@ -31,7 +31,7 @@ import {
   markProfileAsShared,
 } from "./badges/badgesManager.js";
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
-import { canRecover, showStreakRecoveryMenu } from "../js/streak-recovery.js";
+import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/streak-recovery.js";
 import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
@@ -526,15 +526,26 @@ function _applyCloudToUI() {
 function buildStreakItem(streak, label, delay) {
   const tier = getStreakTier(streak);
 
-  // Flammes latérales selon le tier
+  // Décorateurs selon le tier
   const flameL = (n) => `<span class="streak-side-flame" aria-hidden="true">🔥</span>`.repeat(n);
   const flameR = (n) =>
     `<span class="streak-side-flame streak-side-flame--r" aria-hidden="true">🔥</span>`.repeat(n);
+  const snowL = (n) => `<span class="streak-side-flake" aria-hidden="true">❄️</span>`.repeat(n);
+  const snowR = (n) =>
+    `<span class="streak-side-flake streak-side-flake--r" aria-hidden="true">❄️</span>`.repeat(n);
 
   let leftDeco = "";
   let rightDeco = "";
+  let icon = "🔥";
   let iconSize = "1.3em";
   let fullWidth = tier >= 5;
+
+  if (tier === 0) {
+    leftDeco = snowL(1);
+    rightDeco = snowR(1);
+    icon = "❄️";
+    iconSize = "1.3em";
+  }
 
   if (tier === 3) {
     leftDeco = flameL(1);
@@ -564,7 +575,7 @@ function buildStreakItem(streak, label, delay) {
   return `
     <div class="${classes}" style="animation-delay:${delay}">
       ${leftDeco}
-      <span class="stat-icon" style="font-size:${iconSize}">🔥</span>
+      <span class="stat-icon" style="font-size:${iconSize}">${icon}</span>
       <div class="stat-body">
         <span class="stat-value">${streak}</span>
         <span class="stat-label">${label}</span>
@@ -618,21 +629,27 @@ function renderStats() {
 
   statsContainer.innerHTML = regularHTML + streakHTML;
 
-  // Streak à 0 : rendre l'élément cliquable pour ouvrir Jack Frost si récupération disponible
-  if ((s.streak || 0) === 0 && canRecover()) {
-    const streakEl = statsContainer.querySelector(".stat-streak");
-    if (streakEl) {
-      streakEl.style.cursor = "pointer";
-      streakEl.title = "🔥 Click to restore your streak";
-      streakEl.addEventListener("click", () => showStreakRecoveryMenu());
-      const btn = document.createElement("button");
-      btn.className = "sr-restore-btn";
-      btn.textContent = "🔥 Restore";
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        showStreakRecoveryMenu();
-      });
-      streakEl.querySelector(".stat-body")?.appendChild(btn);
+  // Bouton de récupération visible sous les stats quand streak = 0 et cooldown OK
+  const recoveryPrompt = document.getElementById("streakRecoveryPrompt");
+  if (recoveryPrompt) {
+    if ((s.streak || 0) === 0 && canRecover()) {
+      const prev = getPreviousStreak();
+      if (prev > 1) {
+        const btnLabel = tf(
+          "streak_recovery.profile_btn",
+          `❄️ Reignite — 0 → ${prev} days`,
+          { count: prev }
+        );
+        recoveryPrompt.innerHTML = `<button class="srp-btn">${btnLabel}</button>`;
+        recoveryPrompt.querySelector(".srp-btn").addEventListener("click", () =>
+          showStreakRecoveryMenu(prev)
+        );
+        recoveryPrompt.classList.remove("hidden");
+      } else {
+        recoveryPrompt.classList.add("hidden");
+      }
+    } else {
+      recoveryPrompt.classList.add("hidden");
     }
   }
 }

@@ -820,6 +820,65 @@ body.darkmode .stat-streak-t5 .stat-label {
   color: #f97316;
 }
 
+/* ── Tier 0 : Streak perdue — effet glace ── */
+.stat-streak-t0 {
+  border-color: rgba(100, 180, 220, 0.4);
+  background: #f0f8ff;
+  animation: streakIceGlow 3s ease-in-out infinite, fadeSlideUp 0.35s ease both;
+}
+
+@keyframes streakIceGlow {
+  0%, 100% { box-shadow: 0 0 6px rgba(100, 180, 230, 0.2); }
+  50% { box-shadow: 0 0 14px rgba(100, 180, 230, 0.45); }
+}
+
+.streak-side-flake {
+  font-size: 1em;
+  line-height: 1;
+  flex-shrink: 0;
+  display: inline-block;
+  animation: flakeSpin 4s linear infinite;
+}
+
+.streak-side-flake--r {
+  animation-direction: reverse;
+}
+
+@keyframes flakeSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+body.darkmode .stat-streak-t0 {
+  background: #0a1a24;
+  border-color: rgba(100, 200, 240, 0.35);
+}
+
+/* ── Bouton de récupération de streak (sous les stats) ── */
+.srp {
+  margin-top: 10px;
+}
+
+.srp-btn {
+  width: 100%;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #2196a8 0%, #0ea5c9 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.srp-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
 /* =====================================================
    6c. MODE BREAKDOWN STATS
    ===================================================== */
