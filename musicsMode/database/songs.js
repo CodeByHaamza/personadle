@@ -30,6 +30,7 @@ export const songs = [
     titre: "Arial Of The Soul",
     fichier: "Aria_Of_The_Soul.mp3",
     opus: ["P3","P3P","P3FES","P3R","P4","P4G","P5","P5R","P5S","P5X"],
+    theme: "VELVET",
     image: "Velvet.webp",
     vocalist: "",
     proprietaire: "ATLUS",

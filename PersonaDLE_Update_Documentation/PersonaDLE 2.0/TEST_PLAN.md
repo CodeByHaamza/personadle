@@ -1155,5 +1155,82 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 
 ---
 
+## 24 — Retours de test manuel (Hamza, BDD vierge) — à re-tester par Léo & Damien
+
+> `git pull` sur `develop` (une fois la PR mergée) + `make up`, comme aux sections précédentes.
+
+### 24.1 Écran de victoire — plus de stat communautaire
+
+- [ ] Gagner une partie dans n'importe quel mode → l'écran de victoire ne montre plus de ligne
+  du type "X% of N players found this today!"
+
+### 24.2 All-Out Attack — nom qui casse en plein milieu
+
+👉 [http://localhost:8080/allOutAttackMode/allOutAttack.html](http://localhost:8080/allOutAttackMode/allOutAttack.html)
+
+> Surtout visible en français avec des noms longs entre parenthèses (ex : personnages liés à
+> une identité secrète).
+
+- [ ] Gagner ou abandonner sur un personnage au nom long en FR → le nom ne se coupe plus en plein
+  milieu sur l'écran de victoire (reste entier, retombe proprement à la ligne si besoin)
+
+### 24.3 Code ami — cliquable pour copier
+
+👉 [http://localhost:8080/profile/profile.html](http://localhost:8080/profile/profile.html)
+
+- [ ] Cliquer sur le code ami affiché sous le pseudo → le texte devient "Copié !" pendant ~1,5s
+  puis revient au code
+- [ ] Coller (Ctrl+V) juste après le clic dans un champ texte quelconque → le bon code apparaît
+- [ ] Le code n'a plus l'air "fantôme"/grisé — lisible normalement, avec une icône 📋
+
+### 24.4 Wallpapers — condition traduite + rappel au survol
+
+👉 Profil → section Wallpapers
+
+- [ ] Passer la langue en français (ou autre) → les conditions de déblocage sous chaque
+  wallpaper verrouillé sont traduites (plus de texte en anglais)
+- [ ] Survoler un wallpaper **déjà débloqué** → un petit rappel de la condition remplie apparaît
+  au survol (comme c'est déjà le cas pour les badges/titres)
+
+### 24.5 Badges — bouton Save en bas de la modale
+
+👉 Profil → section Badges → ouvrir "See All Badges"
+
+- [ ] Le bouton "Save" est en bas de la fenêtre (pas en haut), reste visible même en scrollant
+  la grille de badges
+- [ ] Cliquer dessus → confirmation visuelle claire (le bouton change d'apparence brièvement),
+  puis la fenêtre se ferme
+
+### 24.6 Silhouette — image de Seiji
+
+👉 [http://localhost:8080/silhouetteMode/silhouette.html](http://localhost:8080/silhouetteMode/silhouette.html)
+
+- [ ] Si Seiji sort comme personnage du jour (ou via un ami/replay) → l'image de silhouette
+  s'affiche correctement, pas cassée/manquante
+
+### 24.7 Musique — thème visuel pour les musiques transversales + bordure P3P
+
+> Nouveauté trouvée en review de code, absente de la description initiale de la PR — vérifiée
+> mais jamais testée en navigateur.
+
+👉 [http://localhost:8080/musicsMode/musics.html](http://localhost:8080/musicsMode/musics.html)
+
+- [ ] Si "Aria of the Soul" (présente dans plusieurs jeux Persona) sort comme cible → le lecteur
+  prend une teinte bleu profond dédiée, pas la couleur du premier opus de la liste
+- [ ] Filtrer sur **P3P** uniquement, jouer une piste → une fine bordure tournante mi-bleue
+  mi-rose apparaît autour du lecteur audio
+- [ ] Si vous avez un réglage "réduire les animations" activé (OS ou navigateur) → la bordure
+  P3P reste visible mais ne tourne plus
+
+### 24.8 Musique — réinitialisation quotidienne (fix technique)
+
+> Le calcul de la date de reset en mode Musique utilisait l'heure UTC au lieu de l'heure de
+> Paris (même piège que documenté dans CLAUDE.md pour les streaks) — corrigé silencieusement,
+> difficile à observer directement, mais si vous jouez entre ~1h et 3h du matin (heure de Paris,
+> selon la saison), notez si le mode Musique se comporte différemment des 5 autres modes pour
+> la réinitialisation du jour.
+
+---
+
 *PersonaDLE v2.0 — Plan de test généré le 26 juin 2026, corrigé et complété le 17 juillet 2026.*
 *À mettre à jour si de nouvelles fonctionnalités sont ajoutées avant la fin de la phase de test.*

@@ -61,6 +61,17 @@ export const UNLOCKABLE_WALLPAPERS = [
   },
 ];
 
+/**
+ * Texte localisé de la condition d'un wallpaper. Fallback = la chaîne anglaise
+ * du catalogue si la clé i18n manque (pattern CLAUDE.md §5 : t(key) renvoie la
+ * clé elle-même si absente, donc on compare explicitement).
+ */
+export function wallpaperConditionText(wp) {
+  const key = `profile.wp_cond_${wp.id}`;
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : wp.condition;
+}
+
 /** Rend la galerie de wallpapers (verrouillés/débloqués) dans #unlockableWallpaperGrid. */
 export function renderUnlockableWallpaperGallery(p) {
   const container = document.getElementById("unlockableWallpaperGrid");
@@ -68,12 +79,16 @@ export function renderUnlockableWallpaperGallery(p) {
   const unlocked = p.unlockedWallpapers || [];
   container.innerHTML = UNLOCKABLE_WALLPAPERS.map((wp) => {
     const isUnlocked = unlocked.includes(wp.id);
+    const cond = wallpaperConditionText(wp);
+    // title = tooltip natif au survol : nom + condition pour un débloqué (on peut
+    // revoir comment on l'a obtenu, comme pour badges/titres), condition seule sinon.
+    const tip = isUnlocked ? `${wp.name} — ${cond}` : cond;
     return `
       <div class="unlockable-wp-item ${isUnlocked ? "unlocked" : "locked"}"
-           data-id="${wp.id}" title="${isUnlocked ? wp.name : wp.condition}">
+           data-id="${wp.id}" title="${tip}">
         <img src="${wp.src}" alt="${wp.name}" loading="lazy">
-        ${!isUnlocked ? `<div class="wp-lock-overlay">🔒<span class="wp-lock-cond">${wp.condition}</span></div>` : ""}
-        ${isUnlocked ? `<span class="wp-unlocked-label">✓ ${wp.name}</span>` : ""}
+        ${!isUnlocked ? `<div class="wp-lock-overlay">🔒<span class="wp-lock-cond">${cond}</span></div>` : ""}
+        ${isUnlocked ? `<span class="wp-unlocked-label">✓ ${wp.name}</span><div class="wp-cond-hover"><span>${cond}</span></div>` : ""}
       </div>
     `;
   }).join("");

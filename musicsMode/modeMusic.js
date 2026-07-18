@@ -25,6 +25,7 @@ import {
   getDailyTarget,
   showChallengeButton,
   showCommunityStats,
+  parisDateKey,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -71,13 +72,16 @@ const OPUS_THEMES = {
   P2EP: { accent: "#8b5cf6", dark: "#7c3aed", light: "#c4b5fd", glow: "rgba(139,92,246,{a})" },
   P3: { accent: "#3b82f6", dark: "#1d4ed8", light: "#93c5fd", glow: "rgba(59,130,246,{a})" },
   P3FES: { accent: "#3b82f6", dark: "#1d4ed8", light: "#93c5fd", glow: "rgba(59,130,246,{a})" },
-  // P3P — Makoto (bleu) + Kotone (rose) : bordure et bouton indigo, barre dégradée bleu→rose
+  // P3P — Makoto (bleu) + Kotone (rose) : bordure et bouton indigo, barre dégradée
+  // bleu→rose. `duality` active en plus la bordure tournante mi-bleu mi-rose autour
+  // du player (voir .p3p-duality dans music.css).
   P3P: {
     accent: "#818cf8",
     dark: "#3b82f6",
     light: "#f9a8d4",
     glow: "rgba(129,140,248,{a})",
     gradientFill: "linear-gradient(90deg, #1d4ed8, #3b82f6 30%, #c084fc 65%, #ec4899)",
+    duality: true,
   },
   P3R: { accent: "#3b82f6", dark: "#1d4ed8", light: "#93c5fd", glow: "rgba(59,130,246,{a})" },
   P4: { accent: "#eab308", dark: "#a16207", light: "#fde047", glow: "rgba(234,179,8,{a})" },
@@ -92,6 +96,10 @@ const OPUS_THEMES = {
   P5X: { accent: "#c0193a", dark: "#5c0f1f", light: "#e63946", glow: "rgba(192,25,58,{a})" },
   PQ: { accent: "#f97316", dark: "#ea580c", light: "#fdba74", glow: "rgba(249,115,22,{a})" },
   PQ2: { accent: "#f97316", dark: "#ea580c", light: "#fdba74", glow: "rgba(249,115,22,{a})" },
+  // VELVET (Velvet Room) — bleu profond dédié aux morceaux transversaux à toute
+  // la série (ex: Aria of the Souls, présente dans tous les Persona majeurs) :
+  // ne pas les rattacher visuellement à un seul opus.
+  VELVET: { accent: "#151da6", dark: "#0d1370", light: "#5b63d6", glow: "rgba(21,29,166,{a})" },
 };
 
 /** Maximum number of guesses before the "Give Up" button is enabled. */
@@ -126,7 +134,7 @@ let sessionStartTime = Date.now();
  * localStorage key used to prevent double-logging stats for the same day.
  * Rebuilt each session so it always uses today's date.
  */
-let todayKey = `statsLogged_Music_${new Date().toISOString().split("T")[0]}`;
+let todayKey = `statsLogged_Music_${parisDateKey()}`;
 
 /** Rolling list of the last 5 target song titles (anti-repeat guard). */
 let lastFiveTargets = [];
@@ -178,7 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     audioPlayer.src = `./database/music/song/${target.fichier}`;
     audioPlayer.load();
 
-    setPlayerTheme(target.opus);
+    setPlayerTheme(target);
 
     giveUpCounter.textContent = `(${attempts} / ${MAX_ATTEMPTS})`;
     if (attempts >= MAX_ATTEMPTS) {
@@ -545,7 +553,7 @@ function resetGame(random = false) {
   localStorage.removeItem(todayKey);
 
   // Rebuild todayKey for the new session (in case day changed)
-  todayKey = `statsLogged_Music_${new Date().toISOString().split("T")[0]}`;
+  todayKey = `statsLogged_Music_${parisDateKey()}`;
 
   // Reset in-memory state
   gameOver = false;
@@ -571,7 +579,7 @@ function resetGame(random = false) {
 
   resetPlayerVisuals();
   pickSong(random);
-  if (target) setPlayerTheme(target.opus);
+  if (target) setPlayerTheme(target);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -717,10 +725,19 @@ function initializeAutocomplete(input) {
  *
  * @param {string|string[]} opusArray - opus code(s) from the song object
  */
-function setPlayerTheme(opusArray) {
+function setPlayerTheme(songOrOpus) {
   if (!audioBox) return;
+  // Accepte soit l'objet chanson (préféré : permet un thème explicite via .theme),
+  // soit directement un tableau/chaîne d'opus (compat ascendante).
+  const isSong = songOrOpus && typeof songOrOpus === "object" && !Array.isArray(songOrOpus);
+  const opusArray = isSong ? songOrOpus.opus : songOrOpus;
+  const explicitTheme = isSong ? songOrOpus.theme : null;
   const ops = Array.isArray(opusArray) ? opusArray : [opusArray];
-  const theme = ops.map((op) => OPUS_THEMES[op]).find(Boolean) || OPUS_THEMES.P5;
+  // Priorité : thème explicite de la chanson (ex: Aria → VELVET) > 1er opus connu > P5.
+  const theme =
+    (explicitTheme && OPUS_THEMES[explicitTheme]) ||
+    ops.map((op) => OPUS_THEMES[op]).find(Boolean) ||
+    OPUS_THEMES.P5;
   const g = (a) => theme.glow.replace("{a}", a);
 
   audioBox.style.setProperty("--player-accent", theme.accent);
@@ -738,6 +755,9 @@ function setPlayerTheme(opusArray) {
     theme.gradientFill ??
     `linear-gradient(90deg, var(--player-accent-dark), var(--player-accent) 70%, var(--player-accent-light))`;
   audioBox.style.setProperty("--player-fill-gradient", fillGradient);
+
+  // Bordure tournante mi-bleu (Makoto) / mi-rose (Kotone) réservée à P3P.
+  audioBox.classList.toggle("p3p-duality", theme.duality === true);
 }
 
 /**

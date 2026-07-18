@@ -6,9 +6,9 @@
  * import must happen dynamically, after the DOM is populated.
  */
 
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
 
-let hexToRgb, adjustHex, getStreakTier, formatSongTime, normalizeAvatarPath;
+let hexToRgb, adjustHex, getStreakTier, formatSongTime, normalizeAvatarPath, _renderFriendCode;
 
 beforeAll(async () => {
   // jsdom doesn't implement 2D canvas contexts — stub it to silence a noisy
@@ -17,7 +17,10 @@ beforeAll(async () => {
   HTMLCanvasElement.prototype.getContext = () => null;
 
   document.body.innerHTML = `
-    <img id="pageAvatar" /><span id="pageUsername"></span><input id="pseudoInput" />
+    <div class="avatar-card-info">
+      <img id="pageAvatar" /><span id="pageUsername"></span>
+    </div>
+    <input id="pseudoInput" />
     <button id="editAvatarBtn"></button><button id="saveAndRefreshBtn"></button>
     <button id="resetProfile"></button><button id="exportProfile"></button>
     <input id="borderColorPicker" /><div id="statsContainer"></div>
@@ -26,7 +29,8 @@ beforeAll(async () => {
     <button id="zoomIn"></button><button id="zoomOut"></button><button id="confirmCrop"></button>
   `;
   const mod = await import("../profile/profile-page.js");
-  ({ hexToRgb, adjustHex, getStreakTier, formatSongTime, normalizeAvatarPath } = mod);
+  ({ hexToRgb, adjustHex, getStreakTier, formatSongTime, normalizeAvatarPath, _renderFriendCode } =
+    mod);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -136,5 +140,85 @@ describe("normalizeAvatarPath", () => {
 
   it("rewrites a legacy ./img/ path for the profile/ subdirectory depth", () => {
     expect(normalizeAvatarPath("./img/avatar/joker.png")).toBe("../img/avatar/joker.png");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _renderFriendCode
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("_renderFriendCode", () => {
+  afterEach(() => {
+    document.querySelector(".profile-friend-code")?.remove();
+    delete window._currentUser;
+    delete navigator.clipboard;
+    vi.restoreAllMocks();
+  });
+
+  it("does nothing when there is no logged-in user", () => {
+    _renderFriendCode();
+    expect(document.querySelector(".profile-friend-code")).toBeNull();
+  });
+
+  it("creates a clickable button showing the friend code once logged in", () => {
+    window._currentUser = { friend_code: "ABC12345" };
+    _renderFriendCode();
+    const el = document.querySelector(".profile-friend-code");
+    expect(el.tagName).toBe("BUTTON");
+    expect(el.querySelector(".pfc-code").textContent).toBe("ABC12345");
+  });
+
+  it("is idempotent — a second call reuses the same element instead of duplicating it", () => {
+    window._currentUser = { friend_code: "ABC12345" };
+    _renderFriendCode();
+    _renderFriendCode();
+    expect(document.querySelectorAll(".profile-friend-code")).toHaveLength(1);
+  });
+
+  it("updates the displayed code if it changes between calls (e.g. after cloud sync)", () => {
+    window._currentUser = { friend_code: "ABC12345" };
+    _renderFriendCode();
+    window._currentUser = { friend_code: "ZZZ99999" };
+    _renderFriendCode();
+    expect(document.querySelector(".pfc-code").textContent).toBe("ZZZ99999");
+  });
+
+  it("removes the element on logout (no _currentUser)", () => {
+    window._currentUser = { friend_code: "ABC12345" };
+    _renderFriendCode();
+    delete window._currentUser;
+    _renderFriendCode();
+    expect(document.querySelector(".profile-friend-code")).toBeNull();
+  });
+
+  it("copies the code to the clipboard and shows temporary 'Copied!' feedback on click", async () => {
+    vi.useFakeTimers();
+    window._currentUser = { friend_code: "ABC12345" };
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    _renderFriendCode();
+
+    const btn = document.querySelector(".profile-friend-code");
+    btn.click();
+    await vi.waitFor(() => expect(writeText).toHaveBeenCalledWith("ABC12345"));
+
+    expect(btn.classList.contains("copied")).toBe(true);
+    expect(btn.querySelector(".pfc-code").textContent).toBe("Copied!");
+
+    vi.advanceTimersByTime(1400);
+    expect(btn.classList.contains("copied")).toBe(false);
+    expect(btn.querySelector(".pfc-code").textContent).toBe("ABC12345");
+    vi.useRealTimers();
+  });
+
+  it("falls back to document.execCommand when the Clipboard API is unavailable", async () => {
+    window._currentUser = { friend_code: "ABC12345" };
+    delete navigator.clipboard;
+    const execCommand = vi.fn().mockReturnValue(true);
+    document.execCommand = execCommand;
+    _renderFriendCode();
+
+    document.querySelector(".profile-friend-code").click();
+    await vi.waitFor(() => expect(execCommand).toHaveBeenCalledWith("copy"));
   });
 });

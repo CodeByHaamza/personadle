@@ -10,6 +10,157 @@
 
 ---
 
+## 2026-07-18 — chore(qa): review de cette PR — tests manquants ajoutés, doc à jour
+
+Hamza a demandé une review complète de cette PR avant merge ("vérifier qu'on a tout bien
+respecté"). Code relu diff par diff (pas juste la description) — tout ce qui était annoncé
+correspondait bien au diff réel, mais deux angles morts trouvés :
+
+1. **Zéro nouveau test** pour `wallpaperConditionText()`, le bouton copie du code ami, et le
+   footer sticky des badges — seul `tests/gameCore.test.js` avait été touché (pour le retrait de
+   `showCommunityStats`). Ajoutés : 3 tests `wallpaperConditionText` (fallback EN sans i18n,
+   fallback EN si clé manquante, traduction utilisée) + 2 tests de rendu de la galerie (overlay
+   hover uniquement sur les débloqués, tooltip nom+condition) dans `tests/wallpapersUi.test.js` ;
+   7 tests `_renderFriendCode` (création, idempotence, mise à jour du code affiché, suppression
+   au logout, copie clipboard + feedback temporisé, fallback `execCommand`) dans
+   `tests/profilePage.test.js` — fonction exportée pour l'occasion (même convention que
+   `_resetTitlesData` dans `titles-ui.js`).
+2. **Changements réels non mentionnés dans la description de la PR** : `musicsMode` a un thème
+   visuel dédié "VELVET" pour les musiques transversales à toute la série (ex: Aria of the Soul)
+   + une bordure tournante mi-bleu/mi-rose pour P3P (Makoto/Kotone), et surtout un vrai fix —
+   `todayKey` utilisait `toISOString()` (UTC) au lieu de `parisDateKey()`, exactement le piège
+   documenté au CLAUDE.md §7. Rien de tout ça n'apparaissait dans le corps de la PR. Documenté a
+   posteriori ici + ajouté au plan de test (§24.7-24.8) pour que Léo/Damien le testent aussi.
+
+Fix mineur au passage : un commentaire CSS (`.badges-modal-footer`) affirmait annuler "le
+padding-bottom (30px) du #badgesModal" — aucune règle CSS de ce nom n'existe nulle part dans le
+fichier (`grep` sur tout `profile-page.css` : 0 résultat en dehors du commentaire lui-même).
+Probablement une justification a posteriori d'une valeur calée à l'œil. Reformulé pour ne plus
+affirmer une origine non vérifiée.
+
+### Angle mort assumé, pas corrigé ici
+PR #32 (stackée sur celle-ci) affichait des ✅ CI (PHPUnit 181/181, Vitest 502/502, lint) dans sa
+description alors que GitHub Actions n'avait tourné **aucune fois** dessus — le workflow ne se
+déclenche que sur PR ciblant `main`/`develop` (`.github/workflows/ci.yml`), pas sur une PR qui en
+cible une autre. Comportement inhérent au stacking, pas un bug : vérifié à la main (checkout de
+la branche, `npm test`/`lint`/`i18n:check`/`docs:check`/`php -l` — tout correspondait aux
+chiffres annoncés), mais la CI réelle ne pourra confirmer qu'une fois cette PR mergée et la base
+de #32 rebasée sur `develop`. Ne pas merger #32 sur la seule foi de sa description tant que sa
+CI n'a pas tourné pour de vrai.
+
+---
+
+## 2026-07-17 — fix(qa): 2e lot de retours de test manuel (Hamza)
+
+Suite de la session de test manuel. Trois correctifs + deux décisions de design
+laissées ouvertes.
+
+### Détails techniques
+
+- **Personae — portrait du propriétaire absent au refresh après un abandon**
+  (`personaeMode/modePersonae.js`). À la restauration de session (bloc `if (storedGameOver)`),
+  un abandon appelait `showVictory(true, null)` : `showVictory` ne pose le portrait
+  que `if (name)`, donc zone image vide. L'abandon EN DIRECT passait pourtant bien
+  `target.user[0]`. Fix : la restauration passe toujours le propriétaire du persona,
+  quel que soit `force`.
+- **Music — clé de garde quotidienne en UTC au lieu de Paris** (`musicsMode/modeMusic.js`,
+  `personaeMode/modePersonae.js`). Music et Personae construisaient
+  `statsLogged_<mode>_<date>` avec `new Date().toISOString()` (UTC) alors que les 4
+  autres modes utilisent `parisDateKey()`. Conséquence : la garde « déjà joué »
+  basculait à minuit UTC (1-2h du matin à Paris). Corrigé — `parisDateKey()` importé
+  dans les deux fichiers (piège CLAUDE.md « toujours parisDateKey() »).
+- **Music — thème couleur** (`musicsMode/modeMusic.js`, `musicsMode/music.css`,
+  `musicsMode/database/songs.js`). (1) `setPlayerTheme` accepte désormais l'objet
+  chanson et lit un champ `theme` explicite prioritaire sur l'opus. (2) Nouveau thème
+  `VELVET` (bleu profond `#151da6`) pour les morceaux transversaux à toute la série ;
+  *Aria of the Souls* (opus P3 en tête, présente dans tous les Persona majeurs) le
+  reçoit via `theme: "VELVET"` — avant elle héritait du bleu P3. (3) P3P gagne un
+  flag `duality` qui active une **bordure conique tournante mi-bleu (Makoto) /
+  mi-rose (Kotone)** autour du player (`.p3p-duality`, `@property --p3p-angle` +
+  `@keyframes`, garde `prefers-reduced-motion`).
+
+### Décisions de design — TRANCHÉES par Hamza (implémentation dans un lot dédié)
+
+Les deux points ci-dessous ont été **décidés** ; volontairement **pas implémentés
+dans ce lot QA** car ce sont des features backend + anti-triche qui méritent leur
+propre branche/PR + tests dédiés (ne pas polluer la PR QA propre).
+
+- **✅ DÉCIDÉ — une victoire compte toujours, même après un abandon le même jour.**
+  Choix produit Hamza : les give up sont déjà visibles dans les stats (le ratio est
+  connu), donc pas de double peine ni d'attente d'un jour pour la récompense — 6
+  victoires = récompense, même avec 55 abandons. Implémentation à prévoir :
+  (1) client — la garde `statsLogged_<mode>_<date>` ne doit plus bloquer un `win`
+  (mais toujours éviter le double-comptage win→win) ; (2) backend — `game_sessions`
+  a `UNIQUE (user_id, mode, played_date)` : `personadle_record_game_session` doit
+  **upserter** (si ligne du jour = `giveup` et nouveau = `win` → passer en `win`,
+  ajuster `user_stats` : +1 win / −1 giveup, `games` inchangé) au lieu de lever un
+  409. Angle mort assumé : l'abandon révèle la réponse, donc un win post-abandon est
+  « gratuit » — accepté par Hamza.
+- **✅ DÉCIDÉ — un défi tire une cible ALÉATOIRE dédiée, pas la cible du jour.**
+  « Le défi doit défier » : nouvelle partie aléatoire dans le mode du défi, un autre
+  perso/chanson à deviner (le même pour les deux joueurs). Implémentation à prévoir :
+  (1) tirer une cible aléatoire à la création du défi et la **stocker/transmettre**
+  dans le message (`api/messages`, nouveau champ `challenge_target` + éventuel seed) ;
+  (2) état de partie de défi **séparé** du quotidien côté client ; (3) **exempter
+  l'anti-triche** `api/lib/daily_target.php` pour les sessions de défi (cible ≠ cible
+  du jour = normal) ; (4) gérer la contrainte `UNIQUE (user_id, mode, played_date)`
+  de `game_sessions` (une partie de défi ne doit pas entrer en collision avec la
+  partie quotidienne — soit table/flag distinct, soit ne pas la compter dans les
+  stats quotidiennes).
+
+## 2026-07-17 — fix(qa): lot de retours de test manuel (Hamza)
+
+Session de test manuel sur une BDD vierge. Six retours traités en un lot ; deux
+autres restent ouverts (voir « Angles morts » plus bas).
+
+### Détails techniques
+
+- **Stat communautaire retirée** — la ligne « X% of N players found this today! »
+  (`showCommunityStats`, `js/gameCore.js`) encombrait/enlaidissait l'écran de
+  victoire. Décision Hamza : suppression complète. La fonction devient un no-op
+  (export conservé : 6 modes l'importent + `savePendingSession` l'appelle) ;
+  plus d'injection DOM ni d'appel API. L'endpoint backend `community_stats` reste
+  en place mais inutilisé (à retirer plus tard si on confirme). Bloc de tests
+  `showCommunityStats` de `tests/gameCore.test.js` remplacé par 2 gardes-fous de
+  non-régression (n'injecte plus rien, ne tape plus l'API).
+- **AOA — réponse qui cassait en plein milieu** (`allOutAttackMode/modeAllOutAttack.js`).
+  `showVictoryBox` passait de `textContent` à un rendu où le nom (souvent long en
+  FR, ex : « Cherish ( Masaki Ashiya ) ») est isolé dans un `<span>` `white-space:nowrap`.
+  Le template i18n reste intact via une sentinelle U+E000 (zone privée) qui n'apparaît
+  jamais dans une traduction ; échappement HTML du `before`/`name`/`after`.
+- **Code ami cliquable + lisible** (`profile/profile-page.js`, `profile/profile-page.css`).
+  `_renderFriendCode` devient un `<button>` : clic = copie presse-papier
+  (`navigator.clipboard` + fallback `execCommand` pour contexte non sécurisé),
+  feedback inline « Copié ! ». Style passé de fantôme (opacity 0.5, 0.73rem) à un
+  badge pill accentué. Nouvelles clés i18n `profile.friend_code_copy_hint` /
+  `friend_code_copied` (×5 langues). Espacement ajouté entre le badge et le
+  bouton « Change Picture » (`#editAvatarBtn` margin-top).
+- **Wallpapers — conditions i18n + rappel au survol** (`profile/wallpapers-ui.js`,
+  `profile/profile-page.css`). Les 7 conditions d'obtention étaient hardcodées en
+  anglais : nouvelles clés `profile.wp_cond_*` (×5 langues) + helper
+  `wallpaperConditionText()` (fallback sur la chaîne EN du catalogue). Un wallpaper
+  **débloqué** affiche maintenant sa condition au survol (overlay `.wp-cond-hover`),
+  comme badges/titres — avant, seul le nom apparaissait.
+- **Bouton Save de la modale badges déplacé en bas** (`profile/badges/badgesManager.js`,
+  `profile/profile-page.css`). Le bouton existait déjà mais était inséré en haut
+  (après le compteur) — peu intuitif. Déplacé dans un footer sticky en bas de la
+  modale, feedback inline « ✅ Badges saved! » garanti (ne dépend plus de
+  `window.showToast` qui peut manquer), thèmes clair/sombre gérés.
+- **Silhouette — image de Seiji** (`silhouetteMode/database/img/Seiji_silhouette.webp`)
+  remplacée (l'ancienne ne rendait pas correctement).
+
+### Angles morts / à suivre
+
+- **Titre équipé qui ne persiste pas au Save** (`profile/titles-ui.js` +
+  `profile-page.js`) — reproduit par Hamza mais pas encore corrigé : l'équipement
+  est immédiat au clic (`saveProfileToCloud`), puis le Save global relance
+  `pullProfileFromCloud` → suspicion de revert si le back ne remappe pas bien
+  `equipped_title_id`↔slug (piège CLAUDE.md « état dérivé »). Nécessite une repro
+  live à deux pour trancher. **Non inclus dans ce lot.**
+- **AOA — 1er chargement des filtres lent (Ctrl+Shift+R)** : comportement Service
+  Worker déjà documenté (§22.1 du TEST_PLAN), attendu après un `git pull`. Pas un
+  bug — laissé tel quel.
+
 ## 2026-07-17 — style(auth): "mot de passe oublié" ne ressemble plus à un lien
 
 Léo : malgré le fix PR25 (soulignement retiré), le texte se lit toujours comme un

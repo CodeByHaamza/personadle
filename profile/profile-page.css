@@ -3455,14 +3455,53 @@ body.darkmode .vb-code {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
 
-.profile-join-date,
-.profile-friend-code {
+.profile-join-date {
   font-size: 0.73rem;
   opacity: 0.5;
   margin: 3px 0 0;
 }
+
+/* Espace le bouton « Change Picture » du code ami juste au-dessus (retour Hamza). */
+#editAvatarBtn {
+  margin-top: 14px;
+}
+
+/* Code ami : badge cliquable (copie presse-papier) — lisible, plus le 0.5 opacity fantôme */
 .profile-friend-code {
-  font-family: monospace;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 2px;
+  padding: 4px 10px;
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent, #e63946);
+  background: rgba(var(--accent-rgb, 230, 57, 70), 0.1);
+  border: 1px solid rgba(var(--accent-rgb, 230, 57, 70), 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.profile-friend-code:hover {
+  background: rgba(var(--accent-rgb, 230, 57, 70), 0.18);
+  border-color: rgba(var(--accent-rgb, 230, 57, 70), 0.6);
+}
+.profile-friend-code:active {
+  transform: scale(0.97);
+}
+.profile-friend-code .pfc-copy {
+  font-size: 0.78rem;
+  opacity: 0.7;
+}
+.profile-friend-code.copied {
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.14);
+  border-color: rgba(46, 204, 113, 0.5);
+}
+.profile-friend-code.copied .pfc-copy {
+  opacity: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -3668,6 +3707,33 @@ body.darkmode .vb-code {
   padding: 2px 8px;
   border-radius: 4px;
   white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+/* Rappel de la condition d'obtention au survol d'un wallpaper DÉBLOQUÉ
+   (comme badges/titres). Caché par défaut, révélé au hover/focus. */
+.wp-cond-hover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 10px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: 0.66rem;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.unlockable-wp-item.unlocked:hover .wp-cond-hover,
+.unlockable-wp-item.unlocked:focus-within .wp-cond-hover {
+  opacity: 1;
+}
+.unlockable-wp-item.unlocked:hover .wp-unlocked-label {
+  opacity: 0;
 }
 
 @media (max-width: 480px) {
@@ -3957,22 +4023,45 @@ body.darkmode .vb-code {
    déclencher une notif sur n'importe quelle page, pas seulement ici). */
 
 /* Bouton « Sauvegarder » du modal de badges */
+/* Footer sticky de la modale badges : le bouton Save reste visible en bas
+   pendant qu'on scrolle la grille (bien plus intuitif qu'un bouton en haut). */
+.badges-modal-footer {
+  position: sticky;
+  bottom: -30px; /* ancre le footer au bord bas du modal (valeur calée visuellement) */
+  margin: 16px -30px -30px;
+  padding: 12px 30px 14px;
+  display: flex;
+  justify-content: center;
+  z-index: 3;
+  background: linear-gradient(to top, rgba(20, 20, 20, 0.99) 68%, rgba(20, 20, 20, 0));
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+body:not(.darkmode) .badges-modal-footer {
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.99) 68%, rgba(255, 255, 255, 0));
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
 .badges-save-btn {
   display: block;
-  margin: 10px auto 4px;
-  padding: 8px 22px;
-  font-size: 0.9rem;
+  margin: 0;
+  min-width: 210px;
+  padding: 11px 26px;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #fff;
   background: var(--accent, #e63946);
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.15s, filter 0.15s;
+  transition: transform 0.1s, box-shadow 0.15s, filter 0.15s, background 0.2s;
   box-shadow: 0 3px 12px rgba(230, 57, 70, 0.3);
 }
 .badges-save-btn:hover { filter: brightness(1.07); transform: translateY(-1px); }
 .badges-save-btn:active { transform: translateY(0); }
+.badges-save-btn.saved {
+  background: #2ecc71;
+  box-shadow: 0 3px 12px rgba(46, 204, 113, 0.35);
+}
 
 /* ── Picker de musique de profil v2 (recherchable + groupé par jeu) ────────── */
 .song-picker-v2 { display: flex; flex-direction: column; gap: 8px; width: 100%; }

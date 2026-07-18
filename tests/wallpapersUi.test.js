@@ -10,12 +10,14 @@ import {
   checkAndUnlockWallpapers,
   showWallpaperNotification,
   checkWallpapersAfterGame,
+  wallpaperConditionText,
 } from "../profile/wallpapers-ui.js";
 
 beforeEach(() => {
   document.body.innerHTML = "";
   localStorage.clear();
   delete window._currentUser;
+  delete window.i18n;
   vi.restoreAllMocks();
 });
 
@@ -48,6 +50,24 @@ describe("UNLOCKABLE_WALLPAPERS conditions", () => {
   });
 });
 
+describe("wallpaperConditionText", () => {
+  const wp = () => UNLOCKABLE_WALLPAPERS.find((w) => w.id === "dark_shopping_district");
+
+  it("falls back to the English catalog string when window.i18n is absent", () => {
+    expect(wallpaperConditionText(wp())).toBe("Have a Social Link at rank 5 or higher");
+  });
+
+  it("falls back to the English string when t() returns the key itself (missing translation)", () => {
+    window.i18n = { t: (k) => k };
+    expect(wallpaperConditionText(wp())).toBe("Have a Social Link at rank 5 or higher");
+  });
+
+  it("uses the translated string when the i18n key resolves", () => {
+    window.i18n = { t: (k) => (k === "profile.wp_cond_dark_shopping_district" ? "Rang 5+" : k) };
+    expect(wallpaperConditionText(wp())).toBe("Rang 5+");
+  });
+});
+
 describe("renderUnlockableWallpaperGallery", () => {
   beforeEach(() => {
     document.body.innerHTML = `<div id="unlockableWallpaperGrid"></div>`;
@@ -71,6 +91,22 @@ describe("renderUnlockableWallpaperGallery", () => {
     renderUnlockableWallpaperGallery({});
     const grid = document.getElementById("unlockableWallpaperGrid");
     expect(grid.querySelectorAll(".unlockable-wp-item")).toHaveLength(UNLOCKABLE_WALLPAPERS.length);
+  });
+
+  it("shows the condition reminder on hover only for unlocked wallpapers", () => {
+    renderUnlockableWallpaperGallery({ unlockedWallpapers: ["kamoshida_palace"] });
+    const grid = document.getElementById("unlockableWallpaperGrid");
+    const unlockedItem = grid.querySelector('[data-id="kamoshida_palace"]');
+    const lockedItem = grid.querySelector('[data-id="madarame_wallpaper"]');
+    expect(unlockedItem.querySelector(".wp-cond-hover")).not.toBeNull();
+    expect(lockedItem.querySelector(".wp-cond-hover")).toBeNull();
+  });
+
+  it("includes the wallpaper name and condition in the title tooltip of an unlocked wallpaper", () => {
+    renderUnlockableWallpaperGallery({ unlockedWallpapers: ["kamoshida_palace"] });
+    const item = document.querySelector('[data-id="kamoshida_palace"]');
+    expect(item.title).toContain("Kamoshida's Palace");
+    expect(item.title).toContain("Play at least 1 game in each of the 6 modes");
   });
 });
 

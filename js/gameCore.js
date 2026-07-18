@@ -560,43 +560,16 @@ export function getDailyTarget(pool, mode, date = parisDateKey(), seedId = getPl
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Fetches and injects the "X% of N players found this today" stat into the
- * victory box. Called automatically by savePendingSession() after each game.
+ * No-op depuis le 2026-07-17 (retour Hamza) : la stat « X% of N players found
+ * this today! » encombrait/enlaidissait l'écran de victoire et a été retirée.
  *
- * Silent no-op if: offline, API unavailable, or fewer than 2 total plays.
- *
- * @param {string} mode       - Mode string as stored in game_sessions (e.g. 'Classic')
- * @param {string} targetName - The character/song name that was the answer
+ * L'export est conservé (les 6 modes l'importent + `savePendingSession` l'appelle)
+ * pour ne rien casser, mais la fonction n'injecte plus rien et ne tape plus l'API.
+ * L'endpoint backend `community_stats` reste inutilisé — à retirer complètement
+ * dans un second temps si on confirme qu'on n'y revient pas.
  */
-export async function showCommunityStats(mode, targetName) {
-  const api = window._personadleApi;
-  if (!api?.communityStats) return;
-
-  try {
-    const data = await api.communityStats.get({
-      mode: normalizeModeKey(mode) ?? mode.toLowerCase(),
-      date: parisDateKey(),
-      target: targetName,
-    });
-    // Skip if too few data points (e.g. first player of the day)
-    if (!data?.total || data.total < 2) return;
-
-    const victoryBox =
-      document.getElementById("victoryBox") || document.querySelector(".victory-box");
-    if (!victoryBox) return;
-
-    let el = victoryBox.querySelector(".community-stats");
-    if (!el) {
-      el = document.createElement("p");
-      el.className = "community-stats";
-      victoryBox.appendChild(el);
-    }
-
-    const i18n = window.i18n || { t: (k) => k };
-    el.textContent = i18n.t("game.community_stats", { percent: data.percent, total: data.total });
-  } catch {
-    // Offline or API not available — silent fail
-  }
+export async function showCommunityStats(_mode, _targetName) {
+  // Feature retirée — plus d'affichage communautaire dans la victoryBox.
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

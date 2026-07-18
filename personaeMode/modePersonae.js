@@ -35,6 +35,7 @@ import {
   showChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
+  parisDateKey,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -74,8 +75,9 @@ let gameOver = false;
 let lastFiveTargets = [];
 
 let sessionStartTime = Date.now();
-const todayKey = new Date().toISOString().split("T")[0];
-const statsKey = `statsLogged_Personae_${todayKey}`;
+// Frontière de journée en heure de Paris (jamais toISOString/UTC, cf. CLAUDE.md) —
+// sinon la garde "déjà joué" bascule à minuit UTC (1-2h du matin à Paris).
+const statsKey = `statsLogged_Personae_${parisDateKey()}`;
 
 // DOM elements (assigned in DOMContentLoaded)
 let victoryBox, victoryImage, victoryText;
@@ -644,10 +646,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (storedGameOver) {
         const force = localStorage.getItem("personaeForceReveal") === "true";
-        showVictory(
-          force,
-          force ? null : Array.isArray(target.user) ? target.user[0] : target.user
-        );
+        // Toujours passer le propriétaire du persona (même sur abandon) pour que
+        // son portrait s'affiche à la restauration — sinon `showVictory(true, null)`
+        // laissait la zone image vide au refresh (bug remonté par Hamza), alors que
+        // l'abandon EN DIRECT (l.534) passe bien le nom.
+        const owner = Array.isArray(target.user) ? target.user[0] : target.user;
+        showVictory(force, owner);
       }
     } catch (e) {
       resetGame();

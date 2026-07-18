@@ -52,6 +52,55 @@ audio {
     border-color 0.3s ease;
 }
 
+/* ── P3P : bordure tournante mi-bleu (Makoto) / mi-rose (Kotone) ──────────────
+   Activée via .p3p-duality (posée par setPlayerTheme quand la chanson est P3P).
+   L'angle du conic-gradient est animé via @property : la bordure arrondie reste
+   fixe, seul le dégradé tourne (contrairement à un transform:rotate qui ferait
+   tourner tout le rectangle). #audioBox a overflow:hidden → anneau interne. */
+@property --p3p-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+#audioBox.p3p-duality {
+  border-color: transparent;
+}
+#audioBox.p3p-duality::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px; /* épaisseur de l'anneau */
+  background: conic-gradient(
+    from var(--p3p-angle),
+    #3b82f6,
+    #93c5fd 20%,
+    #3b82f6 40%,
+    #ec4899 60%,
+    #f9a8d4 80%,
+    #ec4899
+  );
+  /* Ne garde que l'anneau : masque plein moins la zone de contenu */
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
+  animation: p3pSpin 4s linear infinite;
+}
+@keyframes p3pSpin {
+  to {
+    --p3p-angle: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #audioBox.p3p-duality::after {
+    animation: none;
+  }
+}
+
 /* Grille diagonale décorative P5 en fond */
 .audio-wrapper::before {
   content: "";

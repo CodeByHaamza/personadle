@@ -604,9 +604,19 @@ function showVictoryBox(name, force = false) {
 
   img.src = `./database/img/${baseName}_Battle.webp`;
   img.alt = name;
-  text.textContent = force
-    ? i18n.t("modes.alloutattack.giveup_reveal", { name })
-    : i18n.t("modes.alloutattack.correct", { name });
+  // Le nom (souvent long en FR, ex: "Cherish ( Masaki Ashiya )") ne doit pas se
+  // couper en plein milieu : on l'isole dans un span insécable qui, s'il ne tient
+  // pas, retombe proprement sur sa propre ligne au lieu de casser après "Cherish (".
+  const esc = (s) =>
+    String(s).replace(
+      /[&<>"]/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]
+    );
+  const key = force ? "giveup_reveal" : "correct";
+  const SENTINEL = ""; // zone privée Unicode, jamais dans une traduction
+  const raw = i18n.t(`modes.alloutattack.${key}`, { name: SENTINEL });
+  const [before, after = ""] = raw.split(SENTINEL);
+  text.innerHTML = `${esc(before)}<span class="aoa-answer-name" style="white-space:nowrap;">${esc(name)}</span>${esc(after)}`;
   box.style.display = "flex";
   setTimeout(() => box.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
 }

@@ -908,30 +908,43 @@ function setupModalControls(openBtn, closeBtn, modal) {
     };
   }
 
-  // Bouton « Sauvegarder » explicite. La sélection s'auto-sauve déjà à chaque clic,
-  // mais ce bouton confirme visuellement (sync cloud + toast + fermeture).
+  // Bouton « Sauvegarder » explicite, en bas de la modale (sticky). La sélection
+  // s'auto-sauve déjà à chaque clic, mais ce bouton confirme visuellement
+  // (sync cloud best-effort + feedback inline + fermeture).
   if (modal && !document.getElementById("saveBadgesBtn")) {
-    const counter = document.getElementById("badgesCounter");
     const _t = (k, fb) => {
       const r = window.i18n?.t?.(k);
       return r != null && r !== k ? r : fb;
     };
+    const footer = document.createElement("div");
+    footer.className = "badges-modal-footer";
     const btn = document.createElement("button");
     btn.id = "saveBadgesBtn";
+    btn.type = "button";
     btn.className = "badges-save-btn";
-    btn.textContent = _t("profile.badges_save", "💾 Save");
+    const label = _t("profile.badges_save", "💾 Save");
+    btn.textContent = label;
     btn.onclick = () => {
       try {
         _lastSaveProfile();
       } catch (_) {
         /* sauvegarde best-effort */
       }
+      // Feedback inline garanti (ne dépend pas de window.showToast qui peut manquer)
+      btn.classList.add("saved");
+      btn.textContent = _t("profile.badges_saved", "✅ Badges saved!");
       if (typeof window.showToast === "function") {
         window.showToast(_t("profile.badges_saved", "✅ Badges saved!"));
       }
-      modal.classList.add("hidden");
+      setTimeout(() => modal.classList.add("hidden"), 550);
+      setTimeout(() => {
+        btn.classList.remove("saved");
+        btn.textContent = label;
+      }, 900);
     };
-    (counter?.parentElement || modal).insertBefore(btn, counter?.nextSibling || null);
+    footer.appendChild(btn);
+    // En bas de la modale, après la grille des badges.
+    modal.appendChild(footer);
   }
 }
 
