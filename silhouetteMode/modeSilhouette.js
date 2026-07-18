@@ -19,6 +19,8 @@ import {
   showChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
+  getActiveChallengeTarget,
+  isChallengePlay,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -130,7 +132,16 @@ function pickCharacter(random = false) {
     return;
   }
 
-  if (random) {
+  // Défi à cible dédiée (2026-07-17) : elle prime sur le tirage du jour ET sur
+  // le random du Replay tant que le défi est actif.
+  const _challengeTargetName = getActiveChallengeTarget("silhouette");
+  const _challengeChar = _challengeTargetName
+    ? originalCharacters.find((c) => c.nom === _challengeTargetName)
+    : null;
+
+  if (_challengeChar) {
+    target = _challengeChar;
+  } else if (random) {
     const _prev = target;
     const _candidates =
       filteredCharacters.length > 1 && _prev
@@ -343,8 +354,12 @@ function showVictory(force = false) {
     : `<span class="success-text">${(window.i18n || { t: (k, v) => k }).t("modes.silhouette.correct", { name: target.nom })}</span>`;
   silhouetteBox.insertAdjacentElement("afterend", message);
 
+  // Capturé AVANT checkChallengeCompletion (qui consomme activeChallenge) :
+  // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
+  const wasChallengePlay = isChallengePlay("silhouette");
+
   if (!force) {
-    if (!statsAlreadyLogged) {
+    if (!statsAlreadyLogged && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(
@@ -390,7 +405,11 @@ function showVictory(force = false) {
     }
     trackUniqueDay(_pSil, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pSil)));
     showConfettiExplosion();
-    showChallengeButton("silhouette", attempts);
+    showChallengeButton(
+      "silhouette",
+      attempts,
+      filteredCharacters.filter((c) => c.nom !== target.nom).map((c) => c.nom)
+    );
     let winCount = parseInt(localStorage.getItem("silhouetteWins") || "0");
     localStorage.setItem("silhouetteWins", winCount + 1);
   }
@@ -474,7 +493,10 @@ function giveUp() {
   // interne (fin de showVictory()) : si on l'appelait avant d'écrire stats.giveups ici,
   // le check tournait toujours sur le compteur d'AVANT ce give-up (ex: ace_defective,
   // 10 give-ups, restait bloqué à "9" tant qu'on ne revisitait pas le profil plus tard).
-  if (!statsAlreadyLogged) {
+  // Défi à cible dédiée : le give-up compte pour le défi (perdu) mais ne se
+  // logge pas en session quotidienne (showVictory(true) transmet la défaite
+  // au défi via checkChallengeCompletion).
+  if (!statsAlreadyLogged && !isChallengePlay("silhouette")) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
     savePendingSession(

@@ -23,6 +23,8 @@ import {
   enableGiveUpButton,
   characterMatchesActiveOpus,
   updateCounterElement,
+  getActiveChallengeTarget,
+  isChallengePlay,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -307,7 +309,16 @@ function checkEmojiGuess(name, forceReveal = false) {
       prevHref: "../classiqueMode/classiqueMode.html",
       nextHref: "../allOutAttackMode/allOutAttack.html",
     });
-    if (!forceReveal) showChallengeButton("emoji", attempts);
+    // Capturé AVANT checkChallengeCompletion (qui consomme activeChallenge) :
+    // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
+    const wasChallengePlay = isChallengePlay("emoji");
+    if (!forceReveal)
+      showChallengeButton(
+        "emoji",
+        attempts,
+        // Seuls les persos AVEC données emoji sont jouables comme cible de défi.
+        characters.filter((c) => c.emoji && c.nom !== target.nom).map((c) => c.nom)
+      );
     checkChallengeCompletion("emoji", attempts, !forceReveal);
     showCommunityStats(modeName, target.nom);
 
@@ -334,7 +345,7 @@ function checkEmojiGuess(name, forceReveal = false) {
     }
 
     const todayKey = getTodayStatsKey();
-    if (!localStorage.getItem(todayKey)) {
+    if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       const result = forceReveal ? "giveup" : "win";
       updateProfileStats({ result, mode: modeName, timeSpent });
@@ -476,6 +487,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (_rawEmoji && _rawEmoji !== "undefined") _savedEmoji = JSON.parse(_rawEmoji);
   } catch {}
   target = _savedEmoji || getDailyTarget(ALL_EMOJI_CHARS, "Emoji");
+
+  // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du
+  // jour. Persistée dans targetEmoji (état wipé à l'acceptation) → un refresh
+  // mi-défi reprend la même cible. Idempotent si déjà persistée.
+  const _challengeTargetName = getActiveChallengeTarget("emoji");
+  if (_challengeTargetName) {
+    const _ct = ALL_EMOJI_CHARS.find((c) => c.nom === _challengeTargetName);
+    if (_ct) target = _ct;
+  }
+
   attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
   localStorage.setItem("targetEmoji", JSON.stringify(target));
   localStorage.setItem("attemptsEmoji", attempts);
@@ -514,6 +535,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("emojiGameOver");
     localStorage.removeItem("emojiForceReveal");
     localStorage.removeItem("emojiWin");
+    // Aligne Emoji sur les 5 autres modes : le replay efface aussi la garde
+    // stats du jour, pour qu'une victoire en replay soit envoyée au backend
+    // (qui upgrade un éventuel giveup→win — décision produit 2026-07-17).
+    localStorage.removeItem(getTodayStatsKey());
     resetGame();
   });
 

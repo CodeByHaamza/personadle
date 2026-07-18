@@ -75,17 +75,32 @@ $pdo = pdo();
 // de faux positifs (mêmes 10 exécutions vertes avant de bloquer que le job E2E
 // CI, cf. tests-e2e/README.md). getPlayerSeedId() (js/gameCore.js) utilise
 // String(user.id) comme seed pour un compte connecté — identique à (string) $userId.
-$expectedTarget = personadle_compute_daily_target($mode, $playedDate, (string) $userId, $filters);
-if ($expectedTarget !== null && strcasecmp($expectedTarget, $targetName) !== 0) {
-    personadle_log_error($pdo, 'warning', 'Daily target mismatch', [
-        'source'   => 'anti_cheat',
-        'mode'     => $mode,
-        'date'     => $playedDate,
-        'result'   => $result,
-        'expected' => $expectedTarget,
-        'received' => $targetName,
-        'filters'  => $filters,
-    ], $userId);
+// Seule la PREMIÈRE session du jour doit matcher la cible quotidienne : les
+// replays (bouton Replay après win/giveup) tirent volontairement une cible
+// aléatoire côté client (resetGame(random)), donc un écart y est NORMAL — sans
+// cette garde, chaque replay loggait un faux positif anti_cheat. Cf. décision
+// produit 2026-07-17 (victoire en replay upgradée giveup→win, game_session.php).
+$hasSessionToday = (static function (PDO $pdo, int $userId, string $mode, string $playedDate): bool {
+    $st = $pdo->prepare(
+        'SELECT 1 FROM game_sessions WHERE user_id = ? AND mode = ? AND played_date = ? LIMIT 1'
+    );
+    $st->execute([$userId, $mode, $playedDate]);
+    return (bool) $st->fetchColumn();
+})($pdo, $userId, $mode, $playedDate);
+
+if (!$hasSessionToday) {
+    $expectedTarget = personadle_compute_daily_target($mode, $playedDate, (string) $userId, $filters);
+    if ($expectedTarget !== null && strcasecmp($expectedTarget, $targetName) !== 0) {
+        personadle_log_error($pdo, 'warning', 'Daily target mismatch', [
+            'source'   => 'anti_cheat',
+            'mode'     => $mode,
+            'date'     => $playedDate,
+            'result'   => $result,
+            'expected' => $expectedTarget,
+            'received' => $targetName,
+            'filters'  => $filters,
+        ], $userId);
+    }
 }
 
 // ── Anti-doublon : une seule session par (user, mode, date) ──────────────────

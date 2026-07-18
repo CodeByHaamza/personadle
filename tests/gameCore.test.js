@@ -33,6 +33,8 @@ import {
   showCommunityStats,
   characterMatchesActiveOpus,
   updateCounterElement,
+  getActiveChallengeTarget,
+  isChallengePlay,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -1585,6 +1587,55 @@ describe("showChallengeButton", () => {
     showChallengeButton("classic", 3);
     showChallengeButton("classic", 5);
     expect(document.querySelectorAll("#challengeFriendBtn")).toHaveLength(1);
+  });
+});
+
+describe("getActiveChallengeTarget / isChallengePlay", () => {
+  afterEach(() => localStorage.removeItem("activeChallenge"));
+
+  it("retourne null sans défi actif", () => {
+    expect(getActiveChallengeTarget("classic")).toBeNull();
+    expect(isChallengePlay("classic")).toBe(false);
+  });
+
+  it("retourne la cible dédiée quand le défi correspond au mode", () => {
+    localStorage.setItem(
+      "activeChallenge",
+      JSON.stringify({ msgId: 1, mode: "classic", target: "Aigis" })
+    );
+    expect(getActiveChallengeTarget("classic")).toBe("Aigis");
+    expect(isChallengePlay("classic")).toBe(true);
+  });
+
+  it("retourne null pour un autre mode que celui du défi", () => {
+    localStorage.setItem(
+      "activeChallenge",
+      JSON.stringify({ msgId: 1, mode: "classic", target: "Aigis" })
+    );
+    expect(getActiveChallengeTarget("music")).toBeNull();
+    expect(isChallengePlay("music")).toBe(false);
+  });
+
+  it("normalise la graphie du mode (Classic / CLASSIC → classic)", () => {
+    localStorage.setItem(
+      "activeChallenge",
+      JSON.stringify({ msgId: 1, mode: "classic", target: "Aigis" })
+    );
+    expect(getActiveChallengeTarget("Classic")).toBe("Aigis");
+  });
+
+  it("défi ancien format (sans target) → null : comportement historique cible du jour", () => {
+    localStorage.setItem(
+      "activeChallenge",
+      JSON.stringify({ msgId: 1, mode: "classic", score: 3 })
+    );
+    expect(getActiveChallengeTarget("classic")).toBeNull();
+    expect(isChallengePlay("classic")).toBe(false);
+  });
+
+  it("JSON corrompu → null, sans throw", () => {
+    localStorage.setItem("activeChallenge", "{oops");
+    expect(getActiveChallengeTarget("classic")).toBeNull();
   });
 });
 

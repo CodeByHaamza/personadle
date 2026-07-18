@@ -600,13 +600,39 @@ function _getActiveFilters(mode) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Cible dédiée du défi actif pour un mode (décision produit 2026-07-17 :
+ * « le défi doit défier » — cible aléatoire, pas celle du jour).
+ * Retourne le nom de la cible, ou null si pas de défi actif pour ce mode ou
+ * défi ancien format (sans cible propre → comportement historique, cible du jour).
+ */
+export function getActiveChallengeTarget(mode) {
+  try {
+    const c = JSON.parse(localStorage.getItem("activeChallenge") || "null");
+    if (!c) return null;
+    const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
+    if ((c.mode || "").toLowerCase() !== key) return null;
+    return c.target ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** True si la partie en cours est un défi à cible dédiée (stats quotidiennes à NE PAS logger). */
+export function isChallengePlay(mode) {
+  return getActiveChallengeTarget(mode) !== null;
+}
+
+/**
  * Injecte le bouton "Challenge a Friend" dans le modeNavigationContainer
  * après une victoire. Ne fait rien si l'utilisateur n'est pas connecté.
  *
- * @param {string} mode   - Mode lowercase ('classic', 'emoji', etc.)
- * @param {number} score  - Score à battre (tentatives ou secondes selon le mode)
+ * @param {string}   mode       - Mode lowercase ('classic', 'emoji', etc.)
+ * @param {number}   score      - Score à battre (tentatives ou secondes selon le mode)
+ * @param {string[]} targetPool - Noms candidats pour la cible du défi (pool filtré,
+ *                                cible du jour exclue par l'appelant). Null/vide =
+ *                                défi ancien format (cible du jour).
  */
-export function showChallengeButton(mode, score) {
+export function showChallengeButton(mode, score, targetPool = null) {
   if (!window._currentUser) return;
 
   const nav = document.getElementById("modeNavigationContainer");
@@ -626,11 +652,11 @@ export function showChallengeButton(mode, score) {
   else nav.appendChild(btn);
 
   btn.addEventListener("click", () =>
-    _showChallengeModal(mode, score, date, _getActiveFilters(mode))
+    _showChallengeModal(mode, score, date, _getActiveFilters(mode), targetPool)
   );
 }
 
-function _showChallengeModal(mode, score, date, activeFilters = []) {
+function _showChallengeModal(mode, score, date, activeFilters = [], targetPool = null) {
   const api = window._personadleApi;
   if (!api || !window._currentUser) return;
 
@@ -702,6 +728,13 @@ function _showChallengeModal(mode, score, date, activeFilters = []) {
           sendBtn.disabled = true;
           const friendId = parseInt(sendBtn.dataset.fid);
           try {
+            // Cible aléatoire dédiée au défi (« un autre guest à deviner ») —
+            // tirée dans le pool filtré du mode, cible du jour déjà exclue par
+            // l'appelant. Null si pool indisponible → défi ancien format.
+            const challengeTarget =
+              Array.isArray(targetPool) && targetPool.length
+                ? targetPool[Math.floor(Math.random() * targetPool.length)]
+                : null;
             await api.messages.send({
               receiver_id: friendId,
               type: "challenge",
@@ -709,6 +742,7 @@ function _showChallengeModal(mode, score, date, activeFilters = []) {
               challenge_score: score,
               challenge_date: date,
               challenge_filters: JSON.stringify(activeFilters),
+              ...(challengeTarget ? { challenge_target: challengeTarget } : {}),
             });
             sendBtn.textContent = "✓ Sent!";
             sendBtn.classList.add("sent");

@@ -22,6 +22,8 @@ import {
   enableGiveUpButton,
   characterMatchesActiveOpus,
   updateCounterElement,
+  getActiveChallengeTarget,
+  isChallengePlay,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -441,6 +443,9 @@ function checkGuess(name, target, forceReveal = false) {
     const giveUpButton = document.getElementById("giveUpButton");
 
     const wasFresh = !gameOver;
+    // Capturé AVANT checkChallengeCompletion (qui consomme activeChallenge) :
+    // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
+    const wasChallengePlay = isChallengePlay("classic");
     textbar.disabled = true;
     guessButton.style.pointerEvents = "none";
     giveUpButton.style.pointerEvents = "none";
@@ -453,7 +458,7 @@ function checkGuess(name, target, forceReveal = false) {
     // le handler du bouton Give Up (plus bas) logge lui-même le "giveup" une
     // fois checkGuess() revenu ; sans cette garde, statsAlreadyLogged passait
     // déjà à true ici et le "giveup" attendu était silencieusement ignoré.
-    if (wasFresh && !statsAlreadyLogged && !forceReveal) {
+    if (wasFresh && !statsAlreadyLogged && !forceReveal && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(
@@ -508,7 +513,11 @@ function checkGuess(name, target, forceReveal = false) {
     if (wasFresh && !forceReveal) {
       showConfettiExplosion();
       revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
-      showChallengeButton("classic", attempts);
+      showChallengeButton(
+        "classic",
+        attempts,
+        characters.filter((c) => personas.includes(c.nom) && c.nom !== target.nom).map((c) => c.nom)
+      );
       checkChallengeCompletion("classic", attempts, true);
       showCommunityStats(modeName, target.nom);
       fillVictoryBox(target.nom, false);
@@ -606,6 +615,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("victoryBox").style.display = "block";
   }
 
+  // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du jour.
+  // Persistée dans "target" (état wipé à l'acceptation) → un refresh mi-défi
+  // reprend la même cible. Idempotent si déjà persistée.
+  const challengeTargetName = getActiveChallengeTarget("classic");
+  if (challengeTargetName) {
+    const ct = characters.find((c) => c.nom === challengeTargetName);
+    if (ct) {
+      target = ct;
+      localStorage.setItem("target", JSON.stringify(target));
+    }
+  }
+
   // Pick daily target if none stored (seeded RNG — same character for all players today)
   if (!target) {
     target = getDailyTarget(characters, "Classic");
@@ -654,7 +675,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem("guessHistory", JSON.stringify(history));
     }
 
-    if (!statsAlreadyLogged) {
+    // Défi à cible dédiée : le give-up compte pour le défi (perdu) mais ne se
+    // logge pas en session quotidienne. Capturé avant checkChallengeCompletion.
+    const wasChallengePlay = isChallengePlay("classic");
+    if (!statsAlreadyLogged && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
       savePendingSession(

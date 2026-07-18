@@ -1232,5 +1232,46 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 
 ---
 
+## 25 — Victoire post-abandon & défi à cible aléatoire (PR #32) — à tester AVANT prod
+
+> Ces 2 features (décisions produit du 17 juillet) ont été vérifiées par tests
+> automatisés (PHPUnit contre vraie MariaDB + Vitest) mais **jamais cliquées dans
+> un vrai navigateur**. Le flux défi touche 6 modes + l'API — c'est le test
+> manuel le plus important de ce document tant qu'il n'est pas coché.
+> Pré-requis : `git pull`, `make up`, et 2 comptes (§2).
+
+### 25.1 Une victoire compte même après un abandon (même jour)
+
+1. Sur un mode au choix (ex : Classique), jouer la partie du jour et **Give Up**
+2. Vérifier sur la page profil : le mode compte 1 partie, 0 victoire
+3. Revenir sur le mode, cliquer **Replay**, jouer jusqu'à la victoire
+
+- [ ] La victoire est bien comptée : profil → +1 victoire, le give-up du jour est annulé (0 giveup sur ce mode aujourd'hui)
+- [ ] En base (phpMyAdmin → `game_sessions`, ligne du jour pour ce mode) : `result = 'win'`
+- [ ] `user_stats` : `games` n'a PAS augmenté une 2ᵉ fois (toujours 1 partie pour ce jour)
+- [ ] Rejouer encore et re-gagner → pas de double comptage (la 2ᵉ victoire du jour est ignorée, 409 silencieux)
+- [ ] admin → 🪵 Logs, recherche `anti_cheat` : **aucune** nouvelle ligne provoquée par ces replays
+
+### 25.2 Défi à cible aléatoire (« un autre guest à deviner »)
+
+1. Compte A : jouer et gagner la partie du jour d'un mode (ex : Musique), cliquer **⚔ Challenge a Friend** → envoyer au compte B
+2. Compte B (navigation privée) : jouer d'abord **sa propre partie du jour** dans ce même mode (pour vérifier que le défi ne tombe pas dessus)
+3. Compte B : accepter le défi depuis la notification
+
+- [ ] La cible du défi est **différente** de la cible du jour (B ne retombe pas sur ce qu'il vient de jouer — c'était le bug d'origine)
+- [ ] Refresh (F5) en pleine partie de défi → même cible de défi conservée, pas de re-tirage
+- [ ] Finir le défi (victoire ou give-up) → l'écran de résultat du défi s'affiche (score, Social Link)
+- [ ] Après le défi, revenir sur le mode → la **partie du jour normale** est de retour (cible quotidienne, état propre)
+- [ ] La partie de défi n'apparaît PAS dans les stats quotidiennes (profil : pas de partie/victoire en plus pour ce mode ce jour-là)
+- [ ] Compte A : la notification de résultat du défi arrive (~1 min)
+- [ ] Refaire le test sur au moins un 2ᵉ mode (les 6 sont câblés : Classique, Emoji, Silhouette, AOA, Personae, Musique)
+- [ ] Filtres opus de B restaurés après le défi (comportement §9 inchangé)
+
+### 25.3 Déploiement (Hamza uniquement)
+
+- [ ] **Migration `sql/migrations/023_challenge_target.sql` appliquée sur Hostinger AVANT de déployer le code** (SSH + `mysql < fichier.sql`, jamais phpMyAdmin — cf. CLAUDE.md §7) ; sans elle, l'INSERT de défi retombe sur le fallback sans cible (défis ancien format, pas de casse mais feature inactive)
+
+---
+
 *PersonaDLE v2.0 — Plan de test généré le 26 juin 2026, corrigé et complété le 17 juillet 2026.*
 *À mettre à jour si de nouvelles fonctionnalités sont ajoutées avant la fin de la phase de test.*

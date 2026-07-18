@@ -563,6 +563,7 @@ CREATE TABLE messages (
     challenge_score   INT             NULL,
     challenge_date    DATE            NULL,
     challenge_filters TEXT            NULL,
+    challenge_target  VARCHAR(200)    NULL,  -- cible aléatoire dédiée au défi (migration 023) ; NULL = cible du jour (anciens défis)
     status            VARCHAR(20)     NOT NULL DEFAULT 'unread',
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_msg_sender   FOREIGN KEY (sender_id)   REFERENCES users(id) ON DELETE CASCADE,

@@ -18,6 +18,33 @@ class PersonadleDuplicateSessionException extends RuntimeException
 }
 
 /**
+ * Recalcule la streak par-mode depuis l'historique game_sessions : jours
+ * consécutifs (Paris) se terminant à $playedDate dont le résultat est 'win'.
+ * Utilisé lors d'un upgrade giveup→win : le giveup avait mis la streak à 0 et
+ * on ne peut pas retrouver sa valeur d'avant sans rejouer l'historique.
+ */
+function personadle_recompute_mode_streak(PDO $pdo, int $userId, string $mode, string $playedDate): int
+{
+    $stmt = $pdo->prepare(
+        'SELECT played_date, result FROM game_sessions
+         WHERE user_id = ? AND mode = ? AND played_date <= ?
+         ORDER BY played_date DESC LIMIT 400'
+    );
+    $stmt->execute([$userId, $mode, $playedDate]);
+
+    $streak   = 0;
+    $expected = new DateTime($playedDate, new DateTimeZone('Europe/Paris'));
+    foreach ($stmt->fetchAll() as $row) {
+        if ($row['played_date'] !== $expected->format('Y-m-d') || $row['result'] !== 'win') {
+            break;
+        }
+        $streak++;
+        $expected->modify('-1 day');
+    }
+    return $streak;
+}
+
+/**
  * Enregistre une partie terminée : insère la session, met à jour les stats du
  * mode (games/wins/giveups/streak/streak_record/perfect_wins/total_time_ms) et
  * la streak globale (tous modes confondus, frontière de journée Europe/Paris).
@@ -54,6 +81,19 @@ function personadle_record_game_session(
         ]);
     } catch (PDOException $dup) {
         if ($dup->getCode() === '23000') {
+            // Décision produit (2026-07-17, Hamza) : une victoire compte toujours,
+            // même après un abandon le même jour. Si la ligne du jour est un
+            // giveup et que le nouveau résultat est un win → upgrade au lieu de 409.
+            // Tous les autres doublons (win→win, win→giveup, giveup→giveup)
+            // restent rejetés en 409 comme avant.
+            if ($result === 'win') {
+                $upgraded = personadle_upgrade_giveup_to_win(
+                    $pdo, $userId, $mode, $playedDate, $attempts, $timeMs
+                );
+                if ($upgraded !== null) {
+                    return $upgraded;
+                }
+            }
             throw new PersonadleDuplicateSessionException(
                 "Session already recorded for mode '$mode' on $playedDate"
             );
@@ -142,5 +182,81 @@ function personadle_record_game_session(
             'total_time_ms' => (int) $updatedStats['total_time_ms'],
         ],
         'global_streak' => $newGlobalStreak,
+    ];
+}
+
+/**
+ * Upgrade la session giveup du jour en win (décision produit 2026-07-17).
+ *
+ * Retourne le même shape que personadle_record_game_session (avec 'upgraded' =>
+ * true en plus), ou null si la ligne existante n'est pas un giveup (l'appelant
+ * retombe alors sur le 409 habituel).
+ *
+ * Choix assumés (documentés aussi dans DEV_CHANGELOG.md) :
+ *   - `games` inchangé (c'est la même journée de jeu, pas une partie de plus) ;
+ *   - `wins` +1 / `giveups` −1 ;
+ *   - `total_time_ms` += le temps de la nouvelle tentative (temps réellement passé) ;
+ *   - `perfect_wins` PAS incrémenté : l'abandon a révélé la réponse, une
+ *     « victoire parfaite » après coup serait du farming gratuit — le win compte,
+ *     pas le perfect (anti-abus minimal sans pénaliser la récompense) ;
+ *   - streak recalculée depuis l'historique game_sessions (le giveup l'avait mise
+ *     à 0 et sa valeur d'avant n'est pas récupérable autrement).
+ */
+function personadle_upgrade_giveup_to_win(
+    PDO $pdo,
+    int $userId,
+    string $mode,
+    string $playedDate,
+    int $attempts,
+    int $timeMs
+): ?array {
+    $stmt = $pdo->prepare(
+        'SELECT id, result FROM game_sessions
+         WHERE user_id = ? AND mode = ? AND played_date = ? LIMIT 1'
+    );
+    $stmt->execute([$userId, $mode, $playedDate]);
+    $existing = $stmt->fetch();
+    if (!$existing || $existing['result'] !== 'giveup') {
+        return null;
+    }
+
+    $pdo->prepare(
+        'UPDATE game_sessions SET result = "win", attempts = ?, time_ms = time_ms + ? WHERE id = ?'
+    )->execute([$attempts, $timeMs, (int) $existing['id']]);
+
+    // Stats du mode : bascule giveup→win + streak recalculée depuis l'historique.
+    $newStreak = personadle_recompute_mode_streak($pdo, $userId, $mode, $playedDate);
+    $pdo->prepare('
+        UPDATE user_stats SET
+            wins          = wins + 1,
+            giveups       = GREATEST(giveups - 1, 0),
+            streak        = ?,
+            streak_record = GREATEST(streak_record, ?),
+            total_time_ms = total_time_ms + ?,
+            last_played_at = UTC_TIMESTAMP()
+        WHERE user_id = ? AND mode = ?
+    ')->execute([$newStreak, $newStreak, $timeMs, $userId, $mode]);
+
+    $stmt = $pdo->prepare('SELECT * FROM user_stats WHERE user_id = ? AND mode = ?');
+    $stmt->execute([$userId, $mode]);
+    $updatedStats = $stmt->fetch();
+
+    $g = $pdo->prepare('SELECT global_streak FROM users WHERE id = ? LIMIT 1');
+    $g->execute([$userId]);
+
+    return [
+        'session_id' => (int) $existing['id'],
+        'upgraded'   => true,
+        'stats'      => [
+            'mode'          => $mode,
+            'games'         => (int) $updatedStats['games'],
+            'wins'          => (int) $updatedStats['wins'],
+            'giveups'       => (int) $updatedStats['giveups'],
+            'streak'        => (int) $updatedStats['streak'],
+            'streak_record' => (int) $updatedStats['streak_record'],
+            'perfect_wins'  => (int) $updatedStats['perfect_wins'],
+            'total_time_ms' => (int) $updatedStats['total_time_ms'],
+        ],
+        'global_streak' => (int) ($g->fetch()['global_streak'] ?? 0),
     ];
 }

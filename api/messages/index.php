@@ -89,6 +89,7 @@ if ($method === 'GET') {
         'challenge_score'   => $m['challenge_score'] ? (int) $m['challenge_score'] : null,
         'challenge_date'    => $m['challenge_date'],
         'challenge_filters' => isset($m['challenge_filters']) ? $m['challenge_filters'] : null,
+        'challenge_target'  => isset($m['challenge_target']) ? $m['challenge_target'] : null,
         'status'            => $m['status'],
         'created_at'      => $m['created_at'],
         'sender'   => ['pseudo' => $m['sender_pseudo'],   'avatar' => $m['sender_avatar']],
@@ -161,14 +162,19 @@ if ($method === 'POST') {
         $rawFilters  = trim($data['challenge_filters'] ?? '');
         $filtersJson = $rawFilters ? $rawFilters : null;
 
+        // challenge_target (migration 023) : cible aléatoire dédiée au défi,
+        // tirée côté expéditeur. NULL = compat anciens clients → cible du jour.
+        $rawTarget = substr(trim($data['challenge_target'] ?? ''), 0, 200);
+        $target    = $rawTarget !== '' ? $rawTarget : null;
+
         try {
             $pdo->prepare("
                 INSERT INTO messages
-                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters)
-                VALUES (?, ?, 'challenge', ?, ?, ?, ?)
-            ")->execute([$authId, $receiverId, $mode, $score, $date, $filtersJson]);
+                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters, challenge_target)
+                VALUES (?, ?, 'challenge', ?, ?, ?, ?, ?)
+            ")->execute([$authId, $receiverId, $mode, $score, $date, $filtersJson, $target]);
         } catch (PDOException $e) {
-            // Fallback if challenge_filters column doesn't exist yet (migration not run)
+            // Fallback if challenge_filters/challenge_target columns don't exist yet (migrations not run)
             $pdo->prepare("
                 INSERT INTO messages
                     (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date)

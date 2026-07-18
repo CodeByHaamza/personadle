@@ -19,6 +19,8 @@ import {
   showChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
+  getActiveChallengeTarget,
+  isChallengePlay,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -416,6 +418,9 @@ function handleGuess() {
 
   if (guess.toLowerCase() === target.toLowerCase()) {
     // ── Win ──────────────────────────────────────────────────────────────────
+    // Capturé AVANT checkChallengeCompletion (qui consomme activeChallenge) :
+    // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
+    const wasChallengePlay = isChallengePlay("alloutattack");
     checkSpecialBadges(target);
     document.getElementById("aoaGif").style.filter = "none";
     showVictoryBox(target);
@@ -424,13 +429,17 @@ function handleGuess() {
       prevHref: "../emojiMode/emojiMode.html",
       nextHref: "../silhouetteMode/silhouette.html",
     });
-    showChallengeButton("alloutattack", attempts);
+    showChallengeButton(
+      "alloutattack",
+      attempts,
+      personas.filter((n) => n !== target)
+    );
     checkChallengeCompletion("alloutattack", attempts, true);
     showCommunityStats("alloutattack", target);
     gameOver = true;
     localStorage.setItem("aoaGameOver", "true");
 
-    if (!localStorage.getItem(todayKey)) {
+    if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       updateProfileStats({ result: "win", mode: "All Out Attack", timeSpent });
       savePendingSession(
@@ -485,7 +494,10 @@ function giveUp() {
   disableInputs();
   gameOver = true;
 
-  if (!localStorage.getItem(todayKey)) {
+  // Défi à cible dédiée : le give-up compte pour le défi (perdu) mais ne se
+  // logge pas en session quotidienne. Capturé avant checkChallengeCompletion.
+  const wasChallengePlay = isChallengePlay("alloutattack");
+  if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result: "giveup", mode: "All Out Attack", timeSpent });
     savePendingSession(
@@ -767,6 +779,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   personas = getFilteredPersonas();
   setTimeout(() => smartPreload(personas, "low"), 1500);
   initializeAutocomplete(textbar, personas);
+
+  // ── Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle
+  //    du jour. On la persiste dans aoaTarget (état wipé à l'acceptation) pour
+  //    que le refresh mi-défi reprenne la même cible. ──
+  const challengeTargetName = getActiveChallengeTarget("alloutattack");
+  if (challengeTargetName && originalPersonas.includes(challengeTargetName)) {
+    localStorage.setItem("aoaTarget", challengeTargetName);
+    localStorage.setItem("aoaAttempts", localStorage.getItem("aoaAttempts") || 0);
+  }
 
   // ── Restore session ──
   const savedTarget = localStorage.getItem("aoaTarget");

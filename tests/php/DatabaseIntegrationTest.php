@@ -169,6 +169,23 @@ final class DatabaseIntegrationTest extends TestCase
         }
     }
 
+    public function testMessagesTableHasChallengeColumns(): void
+    {
+        // Garde-fou anti-dérive : api/messages/index.php écrit/relit ces colonnes
+        // (challenge_target ajoutée par migration 023 — défi à cible dédiée).
+        $cols = self::$pdo->query(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'messages'"
+        )->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach ([
+            'challenge_mode', 'challenge_score', 'challenge_date',
+            'challenge_filters', 'challenge_target',
+        ] as $required) {
+            $this->assertContains($required, $cols, "Colonne messages.$required manquante (schéma périmé ?)");
+        }
+    }
+
     public function testCriticalTablesExist(): void
     {
         // Contrat de schéma : toute table utilisée par le code doit exister dans
@@ -315,6 +332,88 @@ final class DatabaseIntegrationTest extends TestCase
 
         $this->expectException(PersonadleDuplicateSessionException::class);
         personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'win', 1, 1000, []);
+    }
+
+    // ── Upgrade giveup→win (décision produit 2026-07-17) ─────────────────────
+
+    public function testWinAfterGiveupUpgradesSessionAndStats(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'giveup', 8, 5000, []);
+        $out = personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'win', 3, 2000, []);
+
+        $this->assertTrue($out['upgraded'] ?? false, 'la victoire post-abandon doit être un upgrade, pas un 409');
+        $this->assertSame(1, $out['stats']['games'], 'games inchangé — même journée de jeu');
+        $this->assertSame(1, $out['stats']['wins']);
+        $this->assertSame(0, $out['stats']['giveups'], 'le giveup du jour est annulé par la victoire');
+        $this->assertSame(1, $out['stats']['streak'], 'streak recalculée depuis l\'historique');
+        $this->assertSame(7000, $out['stats']['total_time_ms'], 'temps des deux tentatives cumulé');
+
+        // La ligne du jour est bien passée en win.
+        $stmt = self::$pdo->prepare(
+            'SELECT result, attempts FROM game_sessions WHERE user_id = ? AND mode = ? AND played_date = ?'
+        );
+        $stmt->execute([$uid, 'classic', $today]);
+        $row = $stmt->fetch();
+        $this->assertSame('win', $row['result']);
+        $this->assertSame(3, (int) $row['attempts']);
+    }
+
+    public function testWinAfterGiveupDoesNotCountAsPerfect(): void
+    {
+        // L'abandon a révélé la réponse : le win compte, pas le "perfect"
+        // (victoire en 1 essai) — sinon farming gratuit de perfect_wins.
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'giveup', 8, 5000, []);
+        $out = personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'win', 1, 1000, []);
+
+        $this->assertSame(0, $out['stats']['perfect_wins']);
+    }
+
+    public function testGiveupAfterWinStillRejected(): void
+    {
+        // L'upgrade ne marche que dans le sens giveup→win : un giveup (ou un win)
+        // après un win reste un doublon 409.
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'win', 2, 1000, []);
+
+        $this->expectException(PersonadleDuplicateSessionException::class);
+        personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'giveup', 8, 1000, []);
+    }
+
+    public function testGiveupAfterGiveupStillRejected(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'giveup', 8, 1000, []);
+
+        $this->expectException(PersonadleDuplicateSessionException::class);
+        personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'giveup', 8, 1000, []);
+    }
+
+    public function testWinAfterGiveupExtendsStreakFromHistory(): void
+    {
+        // Victoire hier + giveup aujourd'hui (streak cassée à 0), puis win
+        // aujourd'hui → la streak recalculée depuis l'historique doit être 2
+        // (hier win + aujourd'hui win), pas 1.
+        $uid = $this->makeUser();
+        $paris = new DateTimeZone('Europe/Paris');
+        $today = (new DateTime('now', $paris))->format('Y-m-d');
+        $yesterday = (new DateTime('yesterday', $paris))->format('Y-m-d');
+
+        personadle_record_game_session(self::$pdo, $uid, 'classic', $yesterday, 'Morgana', 'win', 2, 1000, []);
+        personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'giveup', 8, 1000, []);
+        $out = personadle_record_game_session(self::$pdo, $uid, 'classic', $today, 'Joker', 'win', 2, 1000, []);
+
+        $this->assertSame(2, $out['stats']['streak']);
+        $this->assertSame(2, $out['stats']['streak_record']);
     }
 
     public function testRecordGameSessionBootstrapsMissingStatsRow(): void

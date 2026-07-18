@@ -36,6 +36,8 @@ import {
   showCommunityStats,
   applyDarkModeOverrides,
   parisDateKey,
+  getActiveChallengeTarget,
+  isChallengePlay,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -112,7 +114,16 @@ function getFilteredCharacters() {
 function pickCharacter(random = false) {
   filteredCharacters = getFilteredCharacters();
 
-  if (random && filteredCharacters.length) {
+  // Défi à cible dédiée (2026-07-17) : elle prime sur le tirage du jour ET sur
+  // le random du Replay tant que le défi est actif (identifiée par le persona).
+  const _challengeTargetName = getActiveChallengeTarget("personae");
+  const _challengeChar = _challengeTargetName
+    ? originalCharacters.find((c) => c.persona === _challengeTargetName)
+    : null;
+
+  if (_challengeChar) {
+    target = _challengeChar;
+  } else if (random && filteredCharacters.length) {
     const _prev = target;
     const _candidates =
       filteredCharacters.length > 1 && _prev
@@ -427,12 +438,21 @@ function showVictory(force = false, name = null) {
     prevHref: "../silhouetteMode/silhouette.html",
     nextHref: "../musicsMode/musics.html",
   });
-  if (!force) showChallengeButton("personae", attempts);
+  // Capturé AVANT checkChallengeCompletion (qui consomme activeChallenge) :
+  // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
+  const wasChallengePlay = isChallengePlay("personae");
+  if (!force)
+    showChallengeButton(
+      "personae",
+      attempts,
+      // La cible d'un défi Personae est identifiée par le nom du persona.
+      filteredCharacters.filter((c) => c.persona !== target.persona).map((c) => c.persona)
+    );
   checkChallengeCompletion("personae", attempts, !force);
   showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
 
   // ── Stats ─────────────────────────────────────────────────────────────────
-  if (!localStorage.getItem(statsKey)) {
+  if (!wasChallengePlay && !localStorage.getItem(statsKey)) {
     const result = force ? "giveup" : "win";
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result, mode: "Personae", timeSpent });
@@ -514,7 +534,9 @@ function giveUp() {
   if (attempts < maxAttempts || gameOver) return;
   gameOver = true;
 
-  if (!localStorage.getItem(statsKey)) {
+  // Défi à cible dédiée : le give-up compte pour le défi (perdu, via
+  // showVictory → checkChallengeCompletion) mais pas en session quotidienne.
+  if (!isChallengePlay("personae") && !localStorage.getItem(statsKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result: "giveup", mode: "Personae", timeSpent });
     savePendingSession(

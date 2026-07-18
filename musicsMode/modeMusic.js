@@ -26,6 +26,8 @@ import {
   showChallengeButton,
   showCommunityStats,
   parisDateKey,
+  getActiveChallengeTarget,
+  isChallengePlay,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -257,7 +259,16 @@ function getFilteredSongs() {
 function pickSong(random = false) {
   filteredSongs = getFilteredSongs();
 
-  if (random && filteredSongs.length) {
+  // Défi à cible dédiée (2026-07-17) : elle prime sur le tirage du jour ET sur
+  // le random du Replay tant que le défi est actif.
+  const _challengeTargetName = getActiveChallengeTarget("music");
+  const _challengeSong = _challengeTargetName
+    ? originalSongs.find((s) => s.titre === _challengeTargetName)
+    : null;
+
+  if (_challengeSong) {
+    target = _challengeSong;
+  } else if (random && filteredSongs.length) {
     const _prev = target;
     const _candidates =
       filteredSongs.length > 1 && _prev
@@ -382,7 +393,8 @@ function showVictory(force = false) {
   }
 
   // ── Stats logging (once per day) ───────────────────────────────────────────
-  if (!localStorage.getItem(todayKey)) {
+  // Une partie de défi à cible dédiée ne se logge pas en session quotidienne.
+  if (!isChallengePlay("music") && !localStorage.getItem(todayKey)) {
     const result = force ? "giveup" : "win";
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result, mode: "Music", timeSpent });
@@ -433,7 +445,11 @@ function showVictory(force = false) {
       count: 30,
       spreadFrom: "bottom",
     });
-    showChallengeButton("music", attempts);
+    showChallengeButton(
+      "music",
+      attempts,
+      filteredSongs.filter((s) => s.titre !== target.titre).map((s) => s.titre)
+    );
   }
   checkChallengeCompletion("music", attempts, !force);
   showCommunityStats("music", target.titre);
@@ -520,8 +536,9 @@ function giveUp() {
   gameOver = true;
   localStorage.setItem("musicForceReveal", "true");
 
-  // Log stats if not already done
-  if (!localStorage.getItem(todayKey)) {
+  // Log stats if not already done — jamais pour une partie de défi à cible
+  // dédiée (le give-up compte pour le défi via showVictory, pas en quotidien).
+  if (!isChallengePlay("music") && !localStorage.getItem(todayKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     updateProfileStats({ result: "giveup", mode: "Music", timeSpent });
     savePendingSession(

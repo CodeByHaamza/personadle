@@ -9,6 +9,8 @@
  *     → Shows the result animation to the challenge sender (used by notifications.js).
  */
 
+import { MODE_STATE_KEYS } from "./challenge-notif.js";
+
 /** Heart emoji/size per Social Link rank (1-10). Win only. */
 const SL_HEART = {
   1: { emoji: "🤍", size: "1.5rem", glow: false },
@@ -234,6 +236,16 @@ export async function checkChallengeCompletion(mode, myAttempts, isWin) {
     challenge.originalFilters !== undefined
   ) {
     localStorage.setItem(challenge.filterKey, challenge.originalFilters);
+  }
+
+  // Défi à cible DÉDIÉE (2026-07-17) : la partie jouée n'était pas celle du
+  // jour — on efface l'état du mode pour que le prochain chargement retombe
+  // sur la cible quotidienne (seedée, donc parfaitement restaurable). L'écran
+  // de résultat affiché reste intact (pas de re-render ici).
+  if (challenge.target) {
+    (MODE_STATE_KEYS[(challenge.mode ?? "").toLowerCase()] ?? []).forEach((k) =>
+      localStorage.removeItem(k)
+    );
   }
 
   const success = isWin && myAttempts <= challenge.score;

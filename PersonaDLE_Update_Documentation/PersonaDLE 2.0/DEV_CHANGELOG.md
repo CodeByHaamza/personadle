@@ -48,6 +48,83 @@ chiffres annoncés), mais la CI réelle ne pourra confirmer qu'une fois cette PR
 de #32 rebasée sur `develop`. Ne pas merger #32 sur la seule foi de sa description tant que sa
 CI n'a pas tourné pour de vrai.
 
+> Mise à jour (post-rebase) : ce point est résolu — PR #32 a été rebasée directement sur
+> `develop` après le merge de #31, la CI a enfin pu tourner dessus pour de vrai.
+
+---
+
+## 2026-07-18 — feat: victoire post-abandon comptabilisée + défi à cible aléatoire
+
+Implémentation des 2 décisions produit actées le 17 juillet (voir l'entrée
+« Décisions de design — TRANCHÉES » plus bas). Branche/PR dédiée, séparée du
+lot QA, car ça touche backend + anti-triche + les 6 modes.
+
+### Feature 1 — une victoire compte toujours, même après un abandon le même jour
+
+Cause racine du vécu de Hamza : les 5 modes sur 6 dont le bouton Replay efface
+la garde `statsLogged_*` permettaient DÉJÀ de rejouer et poster une victoire —
+mais le serveur la rejetait en 409 (contrainte `UNIQUE (user_id, mode,
+played_date)`) et le cloud-sync suivant écrasait la victoire locale. Le fix est
+donc principalement serveur :
+
+- `api/lib/game_session.php` — sur doublon 23000 avec `result='win'` et ligne
+  du jour en `giveup`, **upgrade** au lieu de 409 :
+  `personadle_upgrade_giveup_to_win()` passe la ligne en `win`, ajuste
+  `user_stats` (+1 win / −1 giveup, `games` inchangé, `total_time_ms` cumulé),
+  et recalcule la streak depuis l'historique `game_sessions`
+  (`personadle_recompute_mode_streak()` — le giveup l'avait mise à 0 sans
+  mémoire de sa valeur d'avant). **Choix assumé : `perfect_wins` PAS incrémenté**
+  sur un win post-abandon (la réponse a été révélée — le win compte, pas le
+  perfect). win→win, win→giveup, giveup→giveup restent des 409.
+- `api/sessions.php` — l'anti-triche daily target ne vérifie plus que la
+  **première** session du jour : les replays tirent une cible aléatoire côté
+  client, chaque replay loggait donc un faux positif `anti_cheat` (défaut
+  pré-existant, aggravé par cette feature — corrigé à la racine).
+- `emojiMode/emojiMode.js` — le Replay d'Emoji n'effaçait pas sa garde stats,
+  seul mode dans ce cas ; aligné sur les 5 autres.
+- Tests : +5 méthodes `DatabaseIntegrationTest` (upgrade, frontières 409, pas
+  de perfect farmé, streak recalculée depuis l'historique), **exécutées contre
+  la vraie MariaDB Docker** (`DB_TEST_HOST=db DB_TEST_PORT=3306`), pas skippées.
+
+### Feature 2 — le défi tire une cible aléatoire dédiée (« le défi doit défier »)
+
+- **Migration `023_challenge_target.sql`** (+ `bdd_mysql.sql`) : colonne
+  `messages.challenge_target VARCHAR(200) NULL`. NULL = ancien défi → cible du
+  jour (compat ascendante). Rejouée sur base VIERGE (26 tables ✓) + garde-fou
+  `testMessagesTableHasChallengeColumns`.
+- **API** `api/messages/index.php` : accepte/stocke/renvoie `challenge_target`
+  (fallback INSERT sans la colonne si migration pas encore passée, comme
+  `challenge_filters`).
+- **Envoi** (`js/gameCore.js`) : `showChallengeButton(mode, score, targetPool)`
+  — chaque mode passe son pool filtré **moins la cible du jour** ; le tirage se
+  fait au clic d'envoi. Pools par mode : Classic/Silhouette noms filtrés, Emoji
+  restreint aux persos avec données emoji, AOA noms filtrés, Personae **noms de
+  persona** (identité de cible de ce mode), Music titres filtrés.
+- **Acceptation** (`js/notifications.js`, `js/challenge-notif.js`) :
+  `challenge_target` transporté jusqu'à `activeChallenge.target`.
+- **Modes ×6** : la cible du défi prime sur le tirage du jour (et sur le random
+  du Replay) tant que le défi est actif — `getActiveChallengeTarget(mode)` ; un
+  refresh mi-défi reprend la même cible (persistée dans l'état du mode, wipé à
+  l'acceptation). **Une partie de défi à cible dédiée n'est PAS enregistrée en
+  session quotidienne** (`isChallengePlay(mode)`, capturé AVANT
+  `checkChallengeCompletion` qui consomme `activeChallenge`) : pas de collision
+  avec `uq_session_per_day`, pas de pollution stats/anti-triche, et la partie
+  quotidienne du destinataire reste disponible.
+- **Complétion** (`js/challenge-result.js`) : si le défi avait une cible dédiée,
+  l'état du mode est effacé (`MODE_STATE_KEYS`, désormais exporté de
+  `challenge-notif.js`) → le prochain chargement retombe sur la cible du jour
+  (seedée, donc parfaitement restaurable).
+- Tests : +6 tests Vitest `getActiveChallengeTarget`/`isChallengePlay`
+  (mode-mismatch, ancien format, JSON corrompu, normalisation de graphie).
+
+### Angles morts connus (à tester en navigateur)
+
+- Le flux complet à 2 comptes (envoi → acceptation → partie → résultat) n'a pas
+  encore tourné dans un vrai navigateur — priorité au prochain passage QA.
+- Un défi Emoji dont la cible n'a pas de données emoji est impossible par
+  construction côté envoi, mais un défi forgé à la main retomberait sur la
+  cible du jour (fallback silencieux voulu).
+
 ---
 
 ## 2026-07-17 — fix(qa): 2e lot de retours de test manuel (Hamza)

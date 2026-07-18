@@ -16,7 +16,9 @@ import { gainSocialLinkXp } from "./social-link.js";
 const _queue = [];
 let _busy = false;
 
-const MODE_STATE_KEYS = {
+// Exporté : challenge-result.js efface ces clés en fin de défi à cible dédiée
+// pour restaurer la partie quotidienne (cible du jour recalculable, seedée).
+export const MODE_STATE_KEYS = {
   classic: ["target", "attempts", "guessHistory"],
   emoji: ["targetEmoji", "attemptsEmoji", "emojiGameOver", "emojiForceReveal", "emojiWin"],
   silhouette: [
@@ -103,6 +105,7 @@ function _render({
   date,
   senderId,
   challengeFilters,
+  challengeTarget = null,
 }) {
   document.getElementById("cn-overlay")?.remove();
 
@@ -174,6 +177,10 @@ function _render({
         senderId,
         filterKey,
         originalFilters,
+        // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
+        // du jour et n'enregistrera PAS la partie en session quotidienne.
+        // Null (ancien défi) = comportement historique, cible du jour.
+        target: challengeTarget ?? null,
       })
     );
 

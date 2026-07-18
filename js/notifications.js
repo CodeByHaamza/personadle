@@ -185,6 +185,8 @@ async function _checkPendingChallenges(msgs) {
         date: m.challenge_date ?? "",
         senderId: m.sender_id,
         challengeFilters: m.challenge_filters ?? "[]",
+        // Cible dédiée du défi (migration 023) — null sur les anciens défis.
+        challengeTarget: m.challenge_target ?? null,
       }))
     );
   } catch {
