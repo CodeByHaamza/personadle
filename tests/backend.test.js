@@ -35,19 +35,6 @@ function clearStorage() {
   localStorage.clear();
 }
 
-/**
- * Crée un mock fetch qui retourne une réponse JSON avec le statut indiqué.
- * @param {object} body   - Contenu JSON à retourner
- * @param {number} status - Code HTTP (défaut 200)
- */
-function mockFetch(body, status = 200) {
-  return vi.fn().mockResolvedValue({
-    ok: status >= 200 && status < 300,
-    status,
-    json: async () => body,
-  });
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. CONSTRUCTION DES SESSIONS (buildGameSession)
 // ─────────────────────────────────────────────────────────────────────────────

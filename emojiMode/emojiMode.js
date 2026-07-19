@@ -11,7 +11,6 @@ import {
   showConfettiExplosion,
   revealNextLink,
   setupRulesModal,
-  setupDailyReset,
   checkResetOnLoad,
   showWrongMini,
   buildGameSession,

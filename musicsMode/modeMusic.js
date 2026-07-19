@@ -10,7 +10,6 @@
 
 // === IMPORTS ===
 import { songs as originalSongs } from "./database/songs.js";
-import { musicTitles } from "./database/musicTitles.js";
 import { updateProfileStats } from "../profile/profileStats.js";
 
 import {
@@ -137,9 +136,6 @@ let sessionStartTime = Date.now();
  * Rebuilt each session so it always uses today's date.
  */
 let todayKey = `statsLogged_Music_${parisDateKey()}`;
-
-/** Rolling list of the last 5 target song titles (anti-repeat guard). */
-let lastFiveTargets = [];
 
 /** Titles already guessed in this session (hidden from autocomplete). */
 let triedTitles = [];

@@ -74,7 +74,6 @@ let target = null;
 let attempts = 0;
 const maxAttempts = 3; // Give Up unlocks after this many wrong guesses
 let gameOver = false;
-let lastFiveTargets = [];
 
 let sessionStartTime = Date.now();
 // Frontière de journée en heure de Paris (jamais toISOString/UTC, cf. CLAUDE.md) —

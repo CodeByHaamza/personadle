@@ -778,7 +778,7 @@ describe("FILTER_STORAGE_KEYS", () => {
   });
 
   it("maps each mode to a non-empty string storage key", () => {
-    for (const [mode, key] of Object.entries(FILTER_STORAGE_KEYS)) {
+    for (const key of Object.values(FILTER_STORAGE_KEYS)) {
       expect(typeof key).toBe("string");
       expect(key.length).toBeGreaterThan(0);
       // Each key should be distinct

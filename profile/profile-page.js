@@ -28,8 +28,6 @@ import {
   syncBadgesWithBackend,
   renderBadgesModal,
   renderBadgesPreview,
-  getBadgesForShare,
-  markProfileAsShared,
 } from "./badges/badgesManager.js";
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
 import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/streak-recovery.js";
@@ -40,7 +38,6 @@ import { AVATAR_GROUPS } from "./avatars_data.js";
 import { getStreakTier, formatSongTime, normalizeAvatarPath } from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
 import {
-  UNLOCKABLE_WALLPAPERS,
   renderUnlockableWallpaperGallery,
   initUnlockableWallpapers,
 } from "./wallpapers-ui.js";
@@ -48,7 +45,6 @@ import {
   renderTitlesSection,
   initTitlesSection,
   _bindTitlesModal,
-  getEquippedTitle,
   resetTitlesUnlockedState,
   refreshTitlesAfterCloudSync,
 } from "./titles-ui.js";
@@ -435,69 +431,6 @@ function saveProfileAndSyncBadges() {
   saveProfileToCloud({ selected_badges: profile.selectedBadges || [] });
 }
 
-// ─────────────────────────────────────────────────────────
-// SYNC STATS DEPUIS LE BACKEND
-// ─────────────────────────────────────────────────────────
-
-/**
- * Récupère les stats depuis le backend et écrase les valeurs localStorage.
- * Appelé une fois après auth-ready si l'utilisateur est connecté.
- * En cas d'erreur (offline, serveur), les stats localStorage sont conservées.
- *
- * @param {number} userId - ID de l'utilisateur connecté
- */
-async function syncStatsFromBackend(userId) {
-  const api = window._personadleApi;
-  if (!api) return;
-
-  // Mapping API (lowercase) → localStorage (PascalCase)
-  const modeKeyMap = {
-    classic: "Classic",
-    emoji: "Emoji",
-    silhouette: "Silhouette",
-    alloutattack: "AllOutAttack",
-    personae: "Personae",
-    music: "Music",
-  };
-
-  try {
-    const { stats } = await api.stats.get(userId);
-    const g = stats.global;
-
-    // Écraser les stats globales
-    profile.stats.wins = g.total_wins;
-    profile.stats.giveups = g.total_giveups;
-    profile.stats.games = g.total_games;
-    profile.stats.streakRecord = g.best_streak;
-    profile.stats.totalTimeMinutes = Math.round(g.total_time_ms / 60000);
-    profile.stats.perfectWins = g.total_perfect_wins;
-
-    // Streak courant = max des streaks actifs par mode
-    profile.stats.streak = Math.max(0, ...stats.by_mode.map((m) => m.streak ?? 0));
-
-    // Stats par mode
-    profile.stats.modeCount = {};
-    profile.stats.modeWins = {};
-    stats.by_mode.forEach((m) => {
-      const key = modeKeyMap[m.mode];
-      if (key) {
-        profile.stats.modeCount[key] = m.games;
-        profile.stats.modeWins[key] = m.wins;
-      }
-    });
-
-    // Mode favori = celui avec le plus de parties
-    const fav = stats.by_mode.reduce((best, m) => (!best || m.games > best.games ? m : best), null);
-    if (fav) profile.stats.favoriteMode = modeKeyMap[fav.mode] ?? fav.mode;
-
-    saveProfile();
-    renderStats();
-    renderModeStats();
-  } catch {
-    // Offline ou erreur serveur — conserver les stats localStorage
-  }
-}
-
 /**
  * Re-rend toute l'UI à partir du profil localStorage (après un pull cloud).
  * Appelée par window._onCloudSync et pullProfileFromCloud().then().
@@ -654,7 +587,6 @@ function buildStreakItem(streak, label, delay) {
  */
 function renderStats() {
   const s = profile.stats || {};
-  const i = window.i18n || { t: (k, v) => k };
 
   const modeNames = {
     Classique: "Classic",

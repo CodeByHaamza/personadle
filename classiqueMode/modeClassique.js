@@ -12,7 +12,6 @@ import {
   setupRulesModal,
   setupDailyReset,
   checkResetOnLoad,
-  showWrongMini,
   buildGameSession,
   savePendingSession,
   getDailyTarget,

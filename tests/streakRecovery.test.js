@@ -15,7 +15,6 @@ import {
 } from "../js/streak-recovery.js";
 
 const RECOVERY_KEY = "streakRecovery";
-const TWO_MONTHS_MS = 60 * 24 * 60 * 60 * 1000;
 
 beforeEach(() => {
   localStorage.clear();

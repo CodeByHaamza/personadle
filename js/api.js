@@ -21,15 +21,6 @@
 // CONFIGURATION
 // ─────────────────────────────────────────────────────────
 
-// Détecte tout environnement local : file://, localhost, 127.0.0.1, LAN (192.168.x, 10.x)
-const IS_DEV =
-  window.location.hostname === "" || // file://
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1" ||
-  window.location.hostname === "0.0.0.0" ||
-  /^192\.168\./.test(window.location.hostname) ||
-  /^10\./.test(window.location.hostname);
-
 // Local Apache : projet servi depuis /personadle/ (symlink via setup.sh)
 // Docker       : projet servi depuis / (DocumentRoot = /var/www/html)
 // Prod         : Hostinger, projet à la racine du domaine

@@ -71,7 +71,6 @@ let currentZoom = 1.8; // Initial zoom level (decreases on each wrong guess)
 const maxZoomOut = 1;
 let gameOver = false;
 let currentPickToken = 0; // Anti-race-condition token for image preloading
-let lastFiveTargets = []; // Prevents the same character from appearing twice in a row
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DOM ELEMENT REFERENCES (safe to resolve at module scope since module loads
@@ -645,36 +644,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     resetBtn?.click() ?? location.reload();
   });
 });
-
-// ─────────────────────────────────────────────────────────────────────────────
-// DEBUG (console only)
-// ─────────────────────────────────────────────────────────────────────────────
-
-function debugAllSilhouettes() {
-  console.log("🔍 === DEBUG SILHOUETTE MODE ===");
-  const usableNames = [...personas].sort((a, b) => a.localeCompare(b));
-  const accepted = activeFilters;
-  const foundInSilhouette = new Set(originalCharacters.map((c) => c.nom));
-  const foundInMap = new Set(Object.keys(portraitsMap));
-  const errors = [];
-
-  for (const name of usableNames) {
-    if (!foundInSilhouette.has(name)) {
-      errors.push(`❌ ${name} — Not in silhouetteCharacters.js`);
-      continue;
-    }
-    if (!foundInMap.has(name)) {
-      errors.push(`❌ ${name} — Missing portrait in portraitsMapSilhouette`);
-      continue;
-    }
-    const char = originalCharacters.find((c) => c.nom === name);
-    const passes = (Array.isArray(char.opus) ? char.opus : [char.opus]).some((o) =>
-      accepted.includes(o)
-    );
-    if (!passes) console.warn(`⚠️ ${name} — Does not match active filters`);
-    else console.log(`✅ ${name}`);
-  }
-
-  if (errors.length) errors.forEach((e) => console.error(e));
-  console.log("=== END DEBUG ===");
-}

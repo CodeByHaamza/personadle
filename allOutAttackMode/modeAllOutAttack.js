@@ -229,7 +229,6 @@ let personas = []; // mutable filtered list of character names
 let attempts = 0;
 let gameOver = false;
 let target = null;
-let lastFiveTargets = [];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER / CHARACTER POOL
