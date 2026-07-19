@@ -49,6 +49,37 @@
   nouvelle donnée serveur nécessaire).
 - [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète) — détail dans 🔐 Sécurité/compte ci-dessous.
 - [ ] **Stratégie assets AOA + Git LFS** — détail dans 🔴 À prévoir assez tôt ci-dessous.
+- [ ] **CRUD Badges (admin)** — proposé par Hamza le 2026-07-19 suite au bug event_codes/badge_id
+  (voir DEV_CHANGELOG.md même date) : formulaire admin pour créer un badge (nom, description,
+  image en drag & drop, code événement optionnel, dates optionnelles) sans passer par SQL/SSH.
+  **Piège identifié à l'analyse — pas un simple formulaire** : le rendu client actuel ne lit
+  PAS la table `badges`, il duplique chaque badge dans 2 fichiers statiques —
+  `profile/badges/badgesData.js` (`badgesList`, avec fonction `check()` de vérif client) et
+  `lang/*.json` (bloc `badges.<slug>.{name,condition,description}` par langue). Un badge créé
+  uniquement en DB via le CRUD serait débloquable côté serveur mais **invisible dans l'UI**
+  (pas dans la grille, pas compté, pas d'image) tant que ces 2 fichiers ne sont pas mis à jour
+  en code — donc la promesse "badge en ligne sans coder" ne tient que si on va jusqu'au bout :
+  - **Phase A** (petite) : CRUD "bookkeeping" honnête sur ses limites — écrit dans `badges` +
+    upload image validé (jamais SVG, `getimagesize()`, nom de fichier dérivé du slug côté
+    serveur, pas du nom client) + audit log (`badge.create`/`update`/`delete`, même convention
+    que `badge.grant`/`badge.revoke` déjà utilisés pour l'octroi par joueur). Gain réel : plus
+    la classe de bug event_codes qu'on vient de fixer, un seul endroit pour gérer un badge —
+    mais le badge reste invisible joueur tant que `badgesData.js`/`lang/en.json` n'ont pas
+    été touchés en code.
+  - **Phase B** (le vrai chantier) : faire de `badges` la source unique — `badgesManager.js`
+    consomme directement `GET /api/badges` (qui résout déjà `name_{lang}` server-side) au lieu
+    de `badgesData.js`. Là seulement le CRUD tient sa promesse. Refactor plus profond, pas
+    pour un simple ticket.
+  - **Trouvé en creusant, indépendant du CRUD mais à corriger avant d'en créer plus** :
+    `condition_type = 'manual'` retourne toujours `true` dans `personadle_verify_condition()`
+    → n'importe quel utilisateur connecté peut débloquer n'importe quel badge `manual`
+    directement via `POST /api/badges/unlock {badge_id}`, sans code ni jeu (déjà vrai
+    aujourd'hui pour `burn_my_dread`, `velvet_headache`, `twin_blade`, etc.). Si le CRUD
+    facilite la création de badges "à coder plus tard" (donc `manual` par défaut), il
+    vaudrait le coup d'ajouter un `condition_type='code_only'` qui retourne `false` dans
+    `/unlock` — le seul chemin de déblocage resterait `/api/badges/redeem`. Un `case` de
+    plus dans `condition_check.php`.
+  - **Décision (2026-07-19)** : reporté à la v2.1, pas d'implémentation pour l'instant.
 
 ---
 
@@ -250,7 +281,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 5 langues,
-> **514 tests JS · 181 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **514 tests JS · 185 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -306,7 +337,7 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 514 Vitest · 181 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q1  | Tests : 514 Vitest · 185 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
 | Q2  | i18n EN/FR/ES/DE/IT (978 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |

@@ -727,6 +727,80 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertNull($row['admin_id']);
     }
 
+    // ── Garde-fou badge_id d'event_codes (api/admin/event_codes.php POST, api/badges/index.php
+    // redeem) — event_codes.badge_id n'a pas de FK vers badges.slug (PK = code), donc un slug
+    // mal tapé à la création se serait créé sans erreur puis un redeem aurait "réussi" (200)
+    // sans jamais débloquer le badge. Rejoue ici la requête EXACTE utilisée par les 2 endpoints
+    // (même convention que BadgeWallpaperCatalogTest.php) plutôt que la logique en isolation.
+
+    private function makeEventCode(string $code, string $badgeId): void
+    {
+        self::$pdo->prepare(
+            'INSERT INTO event_codes (code, badge_id, is_permanent, is_active) VALUES (?, ?, 1, 1)'
+        )->execute([$code, $badgeId]);
+    }
+
+    public function testEventCodeCreationGuardRejectsUnknownBadgeId(): void
+    {
+        // Copié depuis api/admin/event_codes.php::POST — le SELECT qui doit maintenant
+        // bloquer la création si badge_id ne correspond à aucun slug de `badges`.
+        $check = self::$pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
+        $check->execute(['slug_qui_nexiste_pas']);
+
+        $this->assertFalse($check->fetch(), 'un badge_id inexistant doit échouer la vérification de création');
+    }
+
+    public function testEventCodeCreationGuardAcceptsRealBadgeId(): void
+    {
+        $check = self::$pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
+        $check->execute(['ace_detective']); // seedé dans bdd_mysql.sql
+
+        $this->assertNotFalse($check->fetch(), 'ace_detective est seedé, la vérification doit passer');
+    }
+
+    public function testEventCodeRedeemGuardBlocksOrphanBadgeWithoutConsumingRedemption(): void
+    {
+        $uid = $this->makeUser();
+        $this->makeEventCode('PHPUNIT_ORPHAN', 'slug_qui_nexiste_pas');
+
+        // Reproduit api/badges/index.php::redeem — le garde-fou doit s'arrêter AVANT
+        // toute écriture dans event_codes_redeemed (sinon le joueur "brûle" son unique
+        // essai sur un code cassé sans jamais recevoir le badge). Ici on n'exécute
+        // l'INSERT que si le garde-fou est franchi, exactement comme le endpoint.
+        $badgeCheck = self::$pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
+        $badgeCheck->execute(['slug_qui_nexiste_pas']);
+        $badgeExists = (bool) $badgeCheck->fetch();
+        $this->assertFalse($badgeExists);
+
+        if ($badgeExists) {
+            self::$pdo->prepare('INSERT INTO event_codes_redeemed (user_id, code) VALUES (?, ?)')
+                ->execute([$uid, 'PHPUNIT_ORPHAN']);
+        }
+
+        $stmt = self::$pdo->prepare('SELECT id FROM event_codes_redeemed WHERE user_id = ? AND code = ?');
+        $stmt->execute([$uid, 'PHPUNIT_ORPHAN']);
+        $this->assertFalse($stmt->fetch(), 'un code orphelin ne doit jamais consommer la redemption du joueur');
+    }
+
+    public function testEventCodeRedeemUnlocksBadgeForValidBadgeId(): void
+    {
+        $uid = $this->makeUser();
+        $this->makeEventCode('PHPUNIT_VALID', 'ace_detective');
+
+        $badgeCheck = self::$pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
+        $badgeCheck->execute(['ace_detective']);
+        $this->assertNotFalse($badgeCheck->fetch());
+
+        self::$pdo->prepare('INSERT INTO event_codes_redeemed (user_id, code) VALUES (?, ?)')
+            ->execute([$uid, 'PHPUNIT_VALID']);
+        self::$pdo->prepare('INSERT IGNORE INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)')
+            ->execute([$uid, 'ace_detective']);
+
+        $stmt = self::$pdo->prepare('SELECT badge_id FROM badges_unlocked WHERE user_id = ?');
+        $stmt->execute([$uid]);
+        $this->assertSame('ace_detective', $stmt->fetchColumn());
+    }
+
     // ── personadle_process_deletion_request() / personadle_process_due_deletion_requests()
     // — api/lib/deletion_requests.php (RGPD hard delete — panel admin "🗑️ RGPD")
 

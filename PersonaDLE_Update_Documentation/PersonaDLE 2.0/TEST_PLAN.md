@@ -1271,6 +1271,38 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 
 - [ ] **Migration `sql/migrations/023_challenge_target.sql` appliquée sur Hostinger AVANT de déployer le code** (SSH + `mysql < fichier.sql`, jamais phpMyAdmin — cf. CLAUDE.md §7) ; sans elle, l'INSERT de défi retombe sur le fallback sans cible (défis ancien format, pas de casse mais feature inactive)
 
+## 26 — Code événement pointant vers un badge inexistant (retour Léo, 19 juillet 2026) — à re-tester
+
+> Signalé par Léo : "même si je crée un code pr un badge ça marche tjrs pas". Confirmé : la
+> création d'un code événement en admin (§11) ne vérifiait jamais que le `badge_id` saisi
+> correspondait à un slug existant dans `badges` — un slug mal tapé se créait sans erreur, puis
+> le redeem du code renvoyait quand même succès (200) sans jamais débloquer de badge, sans aucun
+> message d'erreur pour comprendre pourquoi.
+
+### 26.1 Création d'un code avec un badge_id invalide → refusée
+
+👉 Panneau admin → onglet "🎟️ Codes événement" (§11)
+
+1. Créer un nouveau code avec un `Badge ID` qui n'existe pas dans le catalogue (ex :
+   `ce_badge_nexiste_pas`)
+
+- [ ] La création est **refusée** avec un message clair ("Badge introuvable dans le catalogue"),
+  le code n'apparaît pas dans la liste
+
+### 26.2 Création d'un code avec un badge_id valide → toujours fonctionnel
+
+1. Créer un nouveau code avec un `Badge ID` réel (ex : `first_win`)
+2. Redeem ce code depuis le profil (§9 ou la modale badges) avec un compte qui n'a pas encore
+   ce badge
+
+- [ ] Le code est créé sans erreur, le redeem réussit et le badge apparaît débloqué dans la
+  collection du compte qui a redeem
+
+> 💡 Si vous avez encore un vieux code cassé créé avant ce fix (badge_id introuvable), le
+> redeem doit maintenant échouer avec une erreur explicite au lieu de renvoyer un faux succès —
+> et ne doit pas "consommer" votre essai (vous pourrez le redeem normalement une fois le
+> badge_id corrigé côté admin).
+
 ---
 
 *PersonaDLE v2.0 — Plan de test généré le 26 juin 2026, corrigé et complété le 17 juillet 2026.*

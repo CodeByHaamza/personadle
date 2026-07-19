@@ -10,6 +10,42 @@
 
 ---
 
+## 2026-07-19 — fix(badges): valide badge_id à la création d'un code événement, plus de succès silencieux au redeem
+
+Léo : "même si je crée un code pr un badge ça marche tjrs pas". `api/admin/event_codes.php`
+créait un code événement sans jamais vérifier que `badge_id` correspond à un slug existant
+dans `badges` (`event_codes.badge_id` n'a pas de FK vers `badges.slug` — juste un champ texte
+libre dans `admin/event-codes.js`, placeholder `slug_du_badge`, zéro validation). Un slug mal
+tapé se créait sans erreur, puis `POST /api/badges/redeem` retournait quand même `200
+{"redeemed":true}` sans jamais insérer dans `badges_unlocked` — le joueur croit avoir eu le
+badge, rien ne se passe, aucun message pour comprendre pourquoi.
+
+Fix des deux côtés :
+- `api/admin/event_codes.php` : rejette la création (400) si `badge_id` n'existe pas dans
+  `badges`.
+- `api/badges/index.php` (redeem) : vérifie l'existence du badge **avant** toute écriture — si
+  absent, erreur 500 explicite et **la redemption n'est pas consommée** (sinon un code cassé
+  brûle l'unique essai du joueur, même une fois le slug corrigé côté admin ensuite).
+
+4 tests d'intégration ajoutés dans `DatabaseIntegrationTest.php` (rejeu de la requête exacte
+des 2 endpoints contre vraie MariaDB, même convention que `BadgeWallpaperCatalogTest.php`).
+TEST_PLAN.md §26.
+
+En creusant le sujet, Hamza a proposé un vrai CRUD badges en admin (formulaire création avec
+upload image, plus de SQL/SSH manuel). Analyse faite : la table `badges` a déjà toutes les
+colonnes nécessaires, mais le rendu client actuel ne lit **pas** la DB — il duplique chaque
+badge dans `profile/badges/badgesData.js` (`badgesList` + fonction `check()` client) et dans
+`lang/*.json` (bloc `badges.<slug>`). Un badge créé uniquement en DB via un futur CRUD serait
+débloquable côté serveur mais invisible dans l'UI joueur tant que ces 2 fichiers ne sont pas
+mis à jour en code. Trouvé au passage, indépendant de ce sujet : `condition_type='manual'`
+retourne toujours `true` dans `personadle_verify_condition()` → n'importe quel badge `manual`
+est auto-déblocable par n'importe quel utilisateur connecté via `POST /api/badges/unlock`,
+sans code ni jeu (déjà vrai aujourd'hui pour plusieurs badges existants). Détail complet et
+découpage proposé (Phase A "bookkeeping" / Phase B "source unique") dans ROADMAP.md — reporté
+à la v2.1, pas d'implémentation pour l'instant.
+
+---
+
 ## 2026-07-18 — chore(qa): review de cette PR — tests manquants ajoutés, doc à jour
 
 Hamza a demandé une review complète de cette PR avant merge ("vérifier qu'on a tout bien

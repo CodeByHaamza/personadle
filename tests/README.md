@@ -20,7 +20,7 @@
                 ╱  ╲      Playwright E2E — 54 tests (stack Docker réelle)
                ╱────╲     smoke (5) + API badges/streak (2) + Social Link ami→XP→rang (6)
               ╱      ╲
-             ╱────────╲   PHPUnit — 181 méthodes (12 fichiers, dont intégration vraie MariaDB)
+             ╱────────╲   PHPUnit — 185 méthodes (12 fichiers, dont intégration vraie MariaDB)
             ╱          ╲  contraintes SQL, FK cascade, contrat de schéma, streak/social/auth
            ╱────────────╲
           ╱              ╲ Vitest — 514 tests unitaires (jsdom, 27 fichiers)
@@ -76,7 +76,7 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 | `FriendsTest.php`              | logique     | format code ami, refus de doublon/blocage de demande          |
 | `DatabaseIntegrationTest.php`  | intégration | unicité, CHECK, FK cascade, **contrat de schéma** (35 tests)|
 
-> **181 méthodes de test** au total sur ces 12 fichiers. Les tests d'intégration tournent dans
+> **185 méthodes de test** au total sur ces 12 fichiers. Les tests d'intégration tournent dans
 > une transaction annulée (`rollBack`) → zéro pollution. Si la DB n'est pas joignable, ils sont
 > **skippés** (la suite reste verte).
 

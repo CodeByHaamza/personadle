@@ -49,6 +49,11 @@ if ($method === 'POST') {
         jsonError($codeError, 400);
     }
     if (!$badgeId || strlen($badgeId) > 100) jsonError('badge_id invalide', 400);
+
+    $badgeCheck = $pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
+    $badgeCheck->execute([$badgeId]);
+    if (!$badgeCheck->fetch()) jsonError('Badge introuvable dans le catalogue (vérifie le slug exact)', 400);
+
     if (!$isPermanent && (!$startDate || !$endDate)) {
         jsonError('start_date et end_date requis pour un code non permanent', 400);
     }

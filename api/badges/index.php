@@ -104,18 +104,22 @@ if ($action === 'redeem') {
 
     $badgeId = $ec['badge_id'];
 
+    // Garde-fou : un code créé avant la validation admin (ou modifié en SQL direct)
+    // peut encore pointer vers un badge_id inexistant — ne jamais consommer la
+    // redemption dans ce cas, sinon le joueur perd sa chance une fois le slug corrigé.
+    $badgeCheck = $pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
+    $badgeCheck->execute([$badgeId]);
+    if (!$badgeCheck->fetch()) {
+        error_log("[PersonaDLE badges redeem] code {$code} references unknown badge_id {$badgeId}");
+        jsonError('Code mal configuré — contacte un admin', 500);
+    }
+
     $pdo->beginTransaction();
     try {
-        // Record redemption
         $pdo->prepare('INSERT INTO event_codes_redeemed (user_id, code) VALUES (?, ?)')
             ->execute([$authId, $code]);
-        // Unlock badge (if it exists in catalog)
-        $check = $pdo->prepare('SELECT slug FROM badges WHERE slug = ? LIMIT 1');
-        $check->execute([$badgeId]);
-        if ($check->fetch()) {
-            $pdo->prepare('INSERT IGNORE INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)')
-                ->execute([$authId, $badgeId]);
-        }
+        $pdo->prepare('INSERT IGNORE INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)')
+            ->execute([$authId, $badgeId]);
         $pdo->commit();
     } catch (Throwable $e) {
         $pdo->rollBack();
