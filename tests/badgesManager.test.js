@@ -5,7 +5,7 @@
  * already covered by tests/badgesConditions.test.js.
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   unlockBadge,
   toggleBadgeSelection,
@@ -130,76 +130,88 @@ describe("toggleBadgeSelection", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("handleEventCodeSubmit", () => {
-  let input, msg;
+  let input, msg, redeemSpy;
 
   beforeEach(() => {
     document.body.innerHTML = `<input id="in" /><div id="msg"></div>`;
     input = document.getElementById("in");
     msg = document.getElementById("msg");
+    redeemSpy = vi.fn();
+    window._personadleApi = { badges: { redeem: redeemSpy } };
   });
 
-  it("unlocks the badge and records the code for a valid permanent code", () => {
+  afterEach(() => {
+    delete window._personadleApi;
+  });
+
+  // Le catalogue de codes vit côté serveur (event_codes) — un code créé en
+  // admin doit marcher immédiatement, jamais besoin de le dupliquer en JS
+  // (c'était le bug : la version précédente validait contre un objet local
+  // figé, un code admin fraîchement créé retournait toujours "Invalid code").
+
+  it("unlocks the badge and records the code for a valid permanent code", async () => {
     const profile = baseProfile();
     const saveProfile = vi.fn();
+    redeemSpy.mockResolvedValue({ redeemed: true, code: "ALIBABA", badge_id: "true_hacker" });
     input.value = "alibaba"; // lowercase input — must be uppercased internally
 
-    handleEventCodeSubmit(profile, saveProfile, input, msg);
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
 
+    expect(redeemSpy).toHaveBeenCalledWith("ALIBABA");
     expect(profile.eventCodes).toContain("ALIBABA");
     expect(profile.badges).toContain("true_hacker");
     expect(saveProfile).toHaveBeenCalledOnce();
     expect(input.value).toBe("");
   });
 
-  it("rejects an unknown code without mutating the profile", () => {
+  it("rejects an unknown/invalid code without mutating the profile", async () => {
     const profile = baseProfile();
     const saveProfile = vi.fn();
+    redeemSpy.mockRejectedValue({ status: 404, message: "Invalid or expired code" });
     input.value = "NOT_A_REAL_CODE";
 
-    handleEventCodeSubmit(profile, saveProfile, input, msg);
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
 
     expect(profile.eventCodes).toEqual([]);
     expect(profile.badges).toEqual([]);
     expect(saveProfile).not.toHaveBeenCalled();
   });
 
-  it("does not re-unlock or duplicate an already-redeemed code", () => {
+  it("does not re-unlock or duplicate an already-redeemed code (server 409)", async () => {
     const profile = baseProfile({ eventCodes: ["ALIBABA"], badges: ["true_hacker"] });
     const saveProfile = vi.fn();
+    redeemSpy.mockRejectedValue({ status: 409, message: "Code already redeemed" });
     input.value = "ALIBABA";
 
-    handleEventCodeSubmit(profile, saveProfile, input, msg);
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
 
     expect(profile.eventCodes).toEqual(["ALIBABA"]);
     expect(profile.badges).toEqual(["true_hacker"]);
     expect(saveProfile).not.toHaveBeenCalled();
   });
 
-  it("shows a warning and does not mutate the profile for an empty code", () => {
+  it("shows a warning and does not mutate the profile for an empty code", async () => {
     const profile = baseProfile();
     const saveProfile = vi.fn();
     input.value = "   ";
 
-    handleEventCodeSubmit(profile, saveProfile, input, msg);
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
 
+    expect(redeemSpy).not.toHaveBeenCalled();
     expect(profile.eventCodes).toEqual([]);
     expect(saveProfile).not.toHaveBeenCalled();
   });
 
-  it("rejects a time-limited event code outside its active window", () => {
+  it("rejects a time-limited event code outside its active window (server 410)", async () => {
     const profile = baseProfile();
     const saveProfile = vi.fn();
-    input.value = "XMAS2025"; // active 2025-12-01 → 2025-12-31 only
+    redeemSpy.mockRejectedValue({ status: 410, message: "Code not active yet or already expired" });
+    input.value = "XMAS2025";
 
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-06-01T12:00:00Z"));
-
-    handleEventCodeSubmit(profile, saveProfile, input, msg);
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
 
     expect(profile.eventCodes).toEqual([]);
     expect(saveProfile).not.toHaveBeenCalled();
-
-    vi.useRealTimers();
   });
 });
 

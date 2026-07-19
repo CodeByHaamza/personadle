@@ -1303,6 +1303,35 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 > et ne doit pas "consommer" votre essai (vous pourrez le redeem normalement une fois le
 > badge_id corrigé côté admin).
 
+## 27 — Code événement créé en admin invisible en jeu (vidéo Léo, 19 juillet 2026) — à re-tester
+
+> Signalé par Léo (vidéo à l'appui) : il crée un code en admin (`QATEST2026` → `ace_defective`,
+> actif, permanent), va dans son profil, entre le code — "❌ Invalid code. Check your spelling!"
+> alors que le code est bien actif côté admin (0 utilisation, jamais fonctionnel pour personne).
+>
+> Root cause, différente du §26 : le champ "Entrer un code" du profil ne parlait **jamais** au
+> serveur. `handleEventCodeSubmit()` (`profile/badges/badgesManager.js`) validait contre un
+> dictionnaire JS codé en dur (`eventCodes` dans `badgesData.js`) — recopié à la main depuis la
+> table `event_codes` à un moment donné, jamais synchronisé depuis. Tout code créé (ou modifié)
+> en admin après ce recopiage était invisible du dictionnaire JS → "Invalid code" pour 100% des
+> joueurs, éternellement, sans nouveau déploiement de code. Les codes plus anciens (`ALIBABA`,
+> `GOURMET`, `XMAS2025`…) fonctionnaient par coïncidence : ils étaient présents des deux côtés.
+>
+> Fix : `handleEventCodeSubmit()` appelle maintenant réellement `POST /api/badges/redeem`
+> (l'endpoint déjà fixé au §26) au lieu du dictionnaire local — un code créé en admin marche
+> immédiatement, sans déploiement.
+
+1. Panneau admin → onglet "🎟️ Codes événement" (§11) : créer un nouveau code permanent avec un
+   `Badge ID` valide que vous n'avez pas encore débloqué (ex : `first_win` si pas déjà eu)
+2. Aller sur le profil → section Badges → champ "Entrer un code événement"
+3. Entrer le code fraîchement créé, cliquer "Utiliser"
+
+- [ ] Le badge se débloque **immédiatement**, sans rien redéployer ni redémarrer le serveur
+- [ ] Réessayer le même code → message "already redeemed", pas de double déblocage
+- [ ] Un code inexistant → message d'erreur clair (pas de crash, pas de blocage de l'UI)
+- [ ] Un des anciens codes secrets encore actifs (ex : `GOURMET`, `DZULIAN`, `ARATI` — voir §11
+  pour la liste, avec un compte qui ne l'a pas encore) → fonctionne toujours normalement
+
 ---
 
 *PersonaDLE v2.0 — Plan de test généré le 26 juin 2026, corrigé et complété le 17 juillet 2026.*

@@ -10,6 +10,39 @@
 
 ---
 
+## 2026-07-19 — fix(badges): le champ "Entrer un code" du profil ne parlait jamais au serveur
+
+Léo a envoyé une vidéo : il crée `QATEST2026` → `ace_defective` en admin (actif, permanent,
+0 utilisation), va sur son profil, entre le code — "❌ Invalid code. Check your spelling!".
+Le code est pourtant réel et actif côté admin.
+
+Root cause, différente du fix du jour précédent (badge_id inexistant à la création) :
+`handleEventCodeSubmit()` (`profile/badges/badgesManager.js`) ne faisait **aucun appel réseau**.
+Il validait le code contre `eventCodes`, un dictionnaire JS codé en dur dans
+`profile/badges/badgesData.js` — recopié manuellement depuis la table `event_codes` à un moment
+donné (les codes `ALIBABA`, `GOURMET`, `XMAS2025`… y figurent tous), mais jamais resynchronisé
+depuis. `api/badges/index.php` (l'endpoint `POST /api/badges/redeem`, déjà réécrit et testé la
+veille pour le fix badge_id) n'était appelé **nulle part** dans le client — `grep` confirmé.
+Concrètement : tout code créé (ou modifié) en admin après ce recopiage initial est invisible du
+dictionnaire JS et renvoie "Invalid code" à 100% des joueurs, indéfiniment, sans nouveau
+déploiement. Le panneau admin "Codes événement" était donc silencieusement non-fonctionnel pour
+tout nouveau code depuis sa création — seuls les anciens codes déjà connus du JS marchaient,
+par coïncidence de synchronisation, pas par design.
+
+Fix : `handleEventCodeSubmit()` devient async et appelle réellement `api.badges.redeem(code)`.
+Les messages UX (déjà utilisé/expiré/invalide) sont mappés depuis les codes HTTP réels du
+backend (409/410/404) au lieu de la logique locale. `profile.eventCodes`/`profile.badges`
+restent mis à jour en local à la réception de la réponse serveur — nécessaire car 11 badges
+"secrets" legacy (`true_hacker`, `chef`, `dzulian`…) lisent encore `profile.eventCodes.includes()`
+dans leur condition `check()` côté `badgesData.js`. Import mort retiré (`eventCodes`,
+`isEventCodeValid` — plus référencés nulle part après ce fix, mais laissés en place dans
+`badgesData.js` : suppression hors scope de ce correctif, aucune fonction n'y fait plus appel
+donc aucun risque à les laisser). 5 tests de `tests/badgesManager.test.js` réécrits pour mocker
+`window._personadleApi.badges.redeem` au lieu du dictionnaire local — ils testaient jusque-là
+exactement le comportement cassé (validation locale sans aller-retour serveur). TEST_PLAN.md §27.
+
+---
+
 ## 2026-07-19 — fix(badges): valide badge_id à la création d'un code événement, plus de succès silencieux au redeem
 
 Léo : "même si je crée un code pr un badge ça marche tjrs pas". `api/admin/event_codes.php`

@@ -2,13 +2,7 @@
 // 🎖️ PERSONADLE - GESTIONNAIRE DE BADGES
 // ═══════════════════════════════════════════════════════════════════════════
 
-import {
-  badgesList,
-  BADGE_CATEGORIES,
-  eventCodes,
-  isEventCodeValid,
-  getBadgeById,
-} from "./badgesData.js";
+import { badgesList, BADGE_CATEGORIES, getBadgeById } from "./badgesData.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
 let _lastSaveProfile = () => {};
 
@@ -1084,7 +1078,7 @@ function setupEventCodeRedeem(profile, saveProfile) {
  * @param {HTMLInputElement} input - Le champ de saisie
  * @param {HTMLElement} msg - L'élément de message
  */
-export function handleEventCodeSubmit(profile, saveProfile, input, msg) {
+export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
   const code = input.value.trim().toUpperCase();
 
   // Vérifier que le code n'est pas vide
@@ -1093,47 +1087,42 @@ export function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     return;
   }
 
-  // Vérifier que le code existe
-  const codeData = eventCodes[code];
-  if (!codeData) {
+  // Le catalogue de codes (event_codes) vit côté serveur — géré par l'admin
+  // (api/admin/event_codes.php), jamais dupliqué en JS. Un code créé en admin
+  // doit fonctionner immédiatement sans nouveau déploiement.
+  const api = window._personadleApi;
+  if (!api) {
     showCodeMessage(msg, "❌ Invalid code. Check your spelling!", "error");
     input.value = "";
     return;
   }
 
-  // Vérifier si déjà utilisé
-  if (profile.eventCodes.includes(code)) {
-    showCodeMessage(msg, "✅ You already redeemed this code!", "success");
+  try {
+    const res = await api.badges.redeem(code);
     input.value = "";
-    return;
-  }
 
-  // Vérifier la validité temporelle (sauf codes permanents)
-  if (!codeData.permanent && !isEventCodeValid(code)) {
-    showCodeMessage(msg, "⏰ This event is not active yet or has expired.", "error");
-    input.value = "";
-    return;
-  }
+    if (!profile.eventCodes.includes(code)) profile.eventCodes.push(code);
 
-  // Code valide : débloquer le badge
-  profile.eventCodes.push(code);
-  console.log(`🎟️ Code redeemed: ${code}`);
-
-  const badge = getBadgeById(codeData.badgeId);
-  if (badge) {
-    if (!profile.badges.includes(badge.id)) {
+    const badge = getBadgeById(res.badge_id);
+    if (badge && !profile.badges.includes(badge.id)) {
       profile.badges.push(badge.id);
       showBadgeNotification(badge);
     }
+
+    saveProfile();
+    renderBadgesModal(profile, saveProfile);
+    renderBadgesPreview(profile);
+    showCodeMessage(msg, "🎉 Badge unlocked successfully!", "success");
+  } catch (e) {
+    input.value = "";
+    if (e?.status === 409) {
+      showCodeMessage(msg, "✅ You already redeemed this code!", "success");
+    } else if (e?.status === 410) {
+      showCodeMessage(msg, "⏰ This event is not active yet or has expired.", "error");
+    } else {
+      showCodeMessage(msg, "❌ Invalid code. Check your spelling!", "error");
+    }
   }
-
-  // Sauvegarder et rafraîchir
-  saveProfile();
-  renderBadgesModal(profile, saveProfile);
-  renderBadgesPreview(profile);
-
-  input.value = "";
-  showCodeMessage(msg, "🎉 Badge unlocked successfully!", "success");
 }
 
 /**
