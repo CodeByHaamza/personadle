@@ -43,7 +43,7 @@ function _normalizeAvatar(avatar) {
  * Identifie la page courante d'après l'URL.
  * @returns {'home' | 'profile' | 'other'}
  */
-function getCurrentPage() {
+export function getCurrentPage() {
   const path = window.location.pathname;
   if (path.includes("/profile/profile")) return "profile";
   if (path.includes("/profile/friends")) return "friends";
@@ -69,7 +69,7 @@ function getCurrentPage() {
  * @param {string} currentPage - 'home' | 'profile' | 'other'
  * @returns {string|null}
  */
-function getProfileAvatar(currentPage) {
+export function getProfileAvatar(currentPage) {
   try {
     const saved = localStorage.getItem("personaUserProfile");
     if (!saved) return null;
@@ -90,7 +90,7 @@ function getProfileAvatar(currentPage) {
  * @param {string} currentPage
  * @returns {{ home: string, profile: string, friends: string, leaderboard: string }}
  */
-function buildHrefs(currentPage) {
+export function buildHrefs(currentPage) {
   const isProfile = currentPage === "profile";
   const isFriends = currentPage === "friends";
   const isLeader = currentPage === "leaderboard";

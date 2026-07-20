@@ -4,7 +4,9 @@
  * Covers the client-side logic that is *not* pure XP/rank math (that lives
  * server-side in api/lib/social_link.php, see tests/php/SocialLinkTest.php):
  * flame indicator, rank-10 permanent effect, and the rank-up overlay's
- * tier/sparkle/phrase selection.
+ * tier/sparkle/phrase selection — plus getSocialLinkData/gainSocialLinkXp/
+ * renderSocialLinkGauge (0% coverage before this file), which round-trip to
+ * window._personadleApi and were previously entirely untested.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
@@ -12,10 +14,21 @@ import {
   addFlameIfPlayedToday,
   applyRank10Effect,
   showSocialLinkRankUp,
+  getSocialLinkData,
+  gainSocialLinkXp,
+  renderSocialLinkGauge,
 } from "../js/social-link.js";
 
 function clearStorage() {
   localStorage.clear();
+}
+
+// getLinkId() caches by friendId in a module-level Map that isn't reset
+// between tests — each test below uses its own unique friendId to avoid
+// cache bleed instead of trying to reset internal state.
+let _nextFriendId = 9000;
+function freshFriendId() {
+  return ++_nextFriendId;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -220,5 +233,203 @@ describe("showSocialLinkRankUp", () => {
     document.getElementById("sl-rankup-overlay").click();
     vi.advanceTimersByTime(500 + 10);
     expect(document.getElementById("sl-rankup-overlay")).toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// getSocialLinkData
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("getSocialLinkData", () => {
+  afterEach(() => {
+    delete window._personadleApi;
+  });
+
+  it("resolves the link id then fetches and returns the full link data", async () => {
+    const friendId = freshFriendId();
+    const getByFriend = vi.fn().mockResolvedValue({ link_id: 42 });
+    const get = vi.fn().mockResolvedValue({ rank: 3, xp: 120 });
+    window._personadleApi = { socialLink: { getByFriend, get } };
+
+    const data = await getSocialLinkData(friendId);
+
+    expect(getByFriend).toHaveBeenCalledWith(friendId);
+    expect(get).toHaveBeenCalledWith(42);
+    expect(data).toEqual({ rank: 3, xp: 120 });
+  });
+
+  it("caches the link id — a second call for the same friend does not re-resolve it", async () => {
+    const friendId = freshFriendId();
+    const getByFriend = vi.fn().mockResolvedValue({ link_id: 7 });
+    const get = vi.fn().mockResolvedValue({ rank: 1 });
+    window._personadleApi = { socialLink: { getByFriend, get } };
+
+    await getSocialLinkData(friendId);
+    await getSocialLinkData(friendId);
+
+    expect(getByFriend).toHaveBeenCalledOnce();
+    expect(get).toHaveBeenCalledTimes(2);
+  });
+
+  it("throws when the API bridge is unavailable", async () => {
+    delete window._personadleApi;
+    await expect(getSocialLinkData(freshFriendId())).rejects.toThrow("API not available");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// gainSocialLinkXp
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("gainSocialLinkXp", () => {
+  afterEach(() => {
+    delete window._personadleApi;
+  });
+
+  it("triggers the interaction and returns the server result", async () => {
+    const friendId = freshFriendId();
+    const interactByFriend = vi.fn().mockResolvedValue({
+      link_id: 55,
+      xp_gained: 10,
+      is_mutual: false,
+      new_xp: 30,
+      new_rank: 1,
+      ranked_up: false,
+    });
+    window._personadleApi = { socialLink: { interactByFriend } };
+
+    const result = await gainSocialLinkXp(friendId, "visit_profile");
+
+    expect(interactByFriend).toHaveBeenCalledWith(friendId, "visit_profile");
+    expect(result.xp_gained).toBe(10);
+  });
+
+  it("caches the link id from the result so a later getSocialLinkData reuses it", async () => {
+    const friendId = freshFriendId();
+    const interactByFriend = vi.fn().mockResolvedValue({ link_id: 99, xp_gained: 5 });
+    const getByFriend = vi.fn().mockResolvedValue({ link_id: 99 });
+    const get = vi.fn().mockResolvedValue({ rank: 2 });
+    window._personadleApi = { socialLink: { interactByFriend, getByFriend, get } };
+
+    await gainSocialLinkXp(friendId, "compare_stats");
+    await getSocialLinkData(friendId);
+
+    expect(getByFriend).not.toHaveBeenCalled();
+    expect(get).toHaveBeenCalledWith(99);
+  });
+
+  it("throws when the API bridge is unavailable", async () => {
+    delete window._personadleApi;
+    await expect(gainSocialLinkXp(freshFriendId(), "visit_profile")).rejects.toThrow(
+      "API not available"
+    );
+  });
+
+  it("propagates a server error (e.g. 409 already done today)", async () => {
+    const friendId = freshFriendId();
+    const interactByFriend = vi.fn().mockRejectedValue(new Error("Already done today"));
+    window._personadleApi = { socialLink: { interactByFriend } };
+
+    await expect(gainSocialLinkXp(friendId, "visit_profile")).rejects.toThrow(
+      "Already done today"
+    );
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// renderSocialLinkGauge
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("renderSocialLinkGauge", () => {
+  let container;
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="gauge"></div>';
+    container = document.getElementById("gauge");
+    document.documentElement.lang = "en";
+    localStorage.clear();
+    window._currentUser = { id: 1 };
+  });
+
+  afterEach(() => {
+    delete window._personadleApi;
+    delete window._currentUser;
+  });
+
+  it("shows a loading state synchronously before the data resolves", () => {
+    window._personadleApi = {
+      socialLink: {
+        getByFriend: vi.fn(() => new Promise(() => {})), // never resolves
+        get: vi.fn(),
+      },
+    };
+
+    renderSocialLinkGauge(freshFriendId(), container);
+
+    expect(container.querySelector(".sl-loading")).not.toBeNull();
+  });
+
+  it("renders the gauge with the rank and XP once the data resolves", async () => {
+    window._personadleApi = {
+      socialLink: {
+        getByFriend: vi.fn().mockResolvedValue({ link_id: 1 }),
+        get: vi.fn().mockResolvedValue({
+          rank: 3,
+          xp: 60,
+          xp_current_rank: 50,
+          xp_next_rank: 100,
+          rank_names: { en: "Companion" },
+          today_interactions: [],
+        }),
+      },
+    };
+
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    expect(container.querySelector(".sl-rank-badge").textContent).toContain("Companion");
+    expect(container.querySelector(".sl-bar-fill").style.width).toBe("20%");
+  });
+
+  it("clears the container instead of throwing when the fetch fails", async () => {
+    window._personadleApi = {
+      socialLink: {
+        getByFriend: vi.fn().mockRejectedValue(new Error("network")),
+        get: vi.fn(),
+      },
+    };
+
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    expect(container.innerHTML).toBe("");
+  });
+
+  it("raises personaUserProfile.bestSocialLinkRank when the new rank is higher", async () => {
+    localStorage.setItem("personaUserProfile", JSON.stringify({ bestSocialLinkRank: 2 }));
+    window._personadleApi = {
+      socialLink: {
+        getByFriend: vi.fn().mockResolvedValue({ link_id: 1 }),
+        get: vi.fn().mockResolvedValue({ rank: 5, xp: 0, today_interactions: [] }),
+      },
+    };
+
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(profile.bestSocialLinkRank).toBe(5);
+  });
+
+  it("does not lower bestSocialLinkRank when the current rank is below the recorded best", async () => {
+    localStorage.setItem("personaUserProfile", JSON.stringify({ bestSocialLinkRank: 7 }));
+    window._personadleApi = {
+      socialLink: {
+        getByFriend: vi.fn().mockResolvedValue({ link_id: 1 }),
+        get: vi.fn().mockResolvedValue({ rank: 3, xp: 0, today_interactions: [] }),
+      },
+    };
+
+    await renderSocialLinkGauge(freshFriendId(), container);
+
+    const profile = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(profile.bestSocialLinkRank).toBe(7);
   });
 });
