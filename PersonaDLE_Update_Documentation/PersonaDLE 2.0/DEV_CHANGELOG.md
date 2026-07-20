@@ -10,6 +10,56 @@
 
 ---
 
+## 2026-07-20 — test: couverture des périmètres à 0% (social-link, challenge-result, stats-compare, bottomNav)
+
+Suite à l'audit demandé par Hamza sur `cloud-sync.js` (couverture faible) : élargi
+le scan à tout le repo. `vitest.config.js` limite le rapport de couverture à une
+allowlist de 7 fichiers (`coverage.include`) — la plupart du code (badgesManager,
+titles-ui, tous les modes de jeu…) n'y figure jamais, donc `npm run test:coverage`
+ne le voit pas. Cherché autrement : quels fichiers source ne sont importés par
+**aucun** test (`grep` des imports de `tests/*.test.js` contre la liste réelle des
+fichiers JS). Root cause de plusieurs trous : des fonctions utilitaires restaient
+`function` (privées) au lieu d'`export function`, comme documenté par la convention
+déjà en place (`_renderFriendCode`, `_resetTitlesData`…) — exportées ici avec le
+même traitement, sans renommage.
+
+- **`js/social-link.js`** (le pire du repo : 64,7% fonctions) — `getSocialLinkData`,
+  `gainSocialLinkXp`, `renderSocialLinkGauge` avaient **0 test** : les 3 vraies
+  fonctions métier (appels backend XP/rang), seules les fonctions visuelles
+  annexes étaient couvertes. 12 tests ajoutés (cache du `link_id`, propagation
+  d'erreur serveur, effet de bord `bestSocialLinkRank` en localStorage pour le
+  wallpaper "Dark Shopping District" — jamais/pas régressif). 64,7%→100% fonctions,
+  83,4%→99,2% lignes.
+- **`js/challenge-result.js`** — `checkChallengeCompletion()`, 0% avant, jamais
+  dans aucun test. 15 tests sur la logique de décision (pas le rendu de l'overlay,
+  DOM pur) : correspondance de mode insensible à la casse, calcul beaten/expired
+  (`isWin && myAttempts <= challenge.score`), consommation de `activeChallenge`,
+  restauration des filtres opus sauvegardés, nettoyage de l'état du mode
+  spécifiquement pour un défi à cible dédiée (pas pour l'ancien format sans
+  `target`). Ajouté à `vitest.config.js` (`coverage.include`) — 76%/73%/78% lignes/
+  branches/fonctions, comparable à `streak-recovery.js` déjà dans la liste.
+- **`js/stats-compare.js`** — `_globalWr`/`_pickConclusion`/`_formatCooldown`
+  (préfixe `_` gardé, déjà la convention de tout le fichier) : calcul de winrate,
+  formatage du cooldown de comparaison, sélection de la phrase de conclusion
+  (12 tests, dont le random de `_pickConclusion` fixé via `vi.spyOn(Math,
+  "random")` pour tester le branchement gap/catégorie sans dépendre du hasard).
+  **Pas** ajouté à `coverage.include` : le reste du fichier est du rendu DOM/canvas
+  volontairement non testé (même logique que pour `badgesManager.js` ou
+  `leaderboard.js`, jamais dans cette liste) — l'inclure aurait fait chuter la
+  moyenne agrégée de ~90%→~80% sans rien dire de la vraie qualité des tests.
+- **`js/bottomNav.js`** — `getCurrentPage`/`getProfileAvatar`/`buildHrefs`, 0%
+  avant. 22 tests sur le calcul de profondeur relative des liens (`./`, `../`,
+  `../../` selon la page hôte) — exactement la classe de bug déjà vue une fois en
+  vrai sur ce projet (`pages/404.html`, chemins relatifs cassés, cf. entrée
+  2026-07-17 plus bas). Pas ajouté à `coverage.include` non plus (même raison que
+  stats-compare.js — `showToast`/`buildNavHTML`/`initBottomNav` sont du DOM).
+
+526→586 tests (+60), 28→31 suites. `coverage.include` passe de 4 à 5 fichiers —
+toujours volontairement une allowlist des fichiers majoritairement logique-métier,
+pas une couverture globale du repo (cf. commentaire dans `vitest.config.js`).
+
+---
+
 ## 2026-07-19 — fix(badges): le champ "Entrer un code" du profil ne parlait jamais au serveur
 
 Léo a envoyé une vidéo : il crée `QATEST2026` → `ace_defective` en admin (actif, permanent,

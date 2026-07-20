@@ -222,7 +222,7 @@ function _populateStats(overlay, me, friend, t) {
     .join("");
 }
 
-function _globalWr(player) {
+export function _globalWr(player) {
   return player.total_games > 0 ? Math.round((player.total_wins / player.total_games) * 100) : 0;
 }
 
@@ -330,7 +330,7 @@ function _drawRadar(canvas, meByMode, friendByMode) {
 // CONCLUSION PHRASES
 // ─────────────────────────────────────────────────────────────────────────────
 
-function _pickConclusion(me, friend) {
+export function _pickConclusion(me, friend) {
   const lang = document.documentElement.lang || "en";
   const p = COMPARE_PHRASES[lang] ?? COMPARE_PHRASES.en;
   const rand = (arr) =>
@@ -420,7 +420,7 @@ function _showError(overlay, err, t) {
   overlay.querySelector(".sc-close").classList.add("sc-close--visible");
 }
 
-function _formatCooldown(iso) {
+export function _formatCooldown(iso) {
   const remaining = new Date(iso).getTime() - Date.now();
   if (remaining <= 0) return "0h";
   const h = Math.floor(remaining / 3600000);
