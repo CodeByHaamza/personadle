@@ -3021,6 +3021,179 @@ body.darkmode #socialLinks a:hover {
 }
 
 /* =====================================================
+   4bis. MODALE DISCORD — collab PersonaDLE × Le Grimoire du Cœur
+   Palette officielle Discord (blurple #5865F2, surfaces #313338/#2b2d31).
+   ===================================================== */
+
+.discord-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  /* display togglé en flex par le script (none ↔ flex) */
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.discord-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #313338;
+  color: #dbdee1;
+  border-radius: 16px;
+  border: 1px solid #232428;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  padding: clamp(20px, 4vw, 34px);
+  font-family: "Whitney", "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  animation: discordPop 0.22s ease-out;
+}
+
+@keyframes discordPop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.discord-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #b5bac1;
+  font-size: 1.9rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s;
+}
+.discord-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.discord-modal-head {
+  text-align: center;
+  margin-bottom: 22px;
+}
+.discord-modal-logo {
+  display: block;
+  margin: 0 auto 10px;
+  /* Le SVG de base est sombre → invisible sur le fond #313338. On le force en
+     blanc (brightness(0) = tout noir, invert(1) = tout blanc). */
+  filter: brightness(0) invert(1);
+}
+.discord-modal-head h2 {
+  margin: 0 0 6px;
+  font-size: clamp(1.15rem, 3.5vw, 1.5rem);
+  font-weight: 800;
+  color: #fff;
+  font-family: inherit;
+}
+.discord-modal-sub {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #949ba4;
+}
+
+.discord-servers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.discord-server-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 22px 18px;
+  background: #2b2d31;
+  border: 1px solid #232428;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.discord-server-card:hover {
+  transform: translateY(-3px);
+  border-color: #5865f2;
+  box-shadow: 0 8px 26px rgba(88, 101, 242, 0.35);
+}
+
+.discord-server-icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #1e1f22;
+  border: 2px solid #232428;
+}
+
+.discord-server-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.discord-tag-fr {
+  background: rgba(88, 101, 242, 0.18);
+  color: #c7ccf8;
+}
+.discord-tag-intl {
+  background: rgba(59, 165, 93, 0.18);
+  color: #a8e0bd;
+}
+
+.discord-server-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+}
+.discord-server-desc {
+  font-size: 0.83rem;
+  line-height: 1.4;
+  color: #b5bac1;
+  flex: 1;
+}
+
+.discord-join-btn {
+  margin-top: 6px;
+  padding: 9px 22px;
+  background: #5865f2;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.discord-server-card:hover .discord-join-btn {
+  background: #4752c4;
+}
+
+/* Empilé en colonne sur mobile */
+@media (max-width: 600px) {
+  .discord-servers {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================
    5. SYSTÈME PROFIL (bouton, avatar, pseudo)
    ===================================================== */
 

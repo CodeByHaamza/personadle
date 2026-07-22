@@ -10,6 +10,40 @@
 
 ---
 
+## 2026-07-18 — feat: modale Discord collab (PersonaDLE × Le Grimoire du Cœur)
+
+Collaboration officialisée avec le serveur FR partenaire **Le Grimoire du Cœur**.
+Le bouton Discord de l'accueil n'ouvre plus directement le serveur PersonaDLE :
+il affiche une modale style Discord présentant les deux serveurs.
+
+### Détails techniques
+
+- **`index.html`** — nouvelle modale `#discordModal` (deux cartes serveur côte à
+  côte : Grimoire à gauche = FR/le plus actif, PersonaDLE à droite = international/
+  recrute). Le bouton `#discordBtn` reste un `<a>` vers PersonaDLE (fallback si JS
+  désactivé) ; un script inline intercepte le clic pour ouvrir la modale (même
+  pattern que la modale News : `display none↔flex`, fermeture X / clic overlay /
+  Escape).
+- **`css/index.css`** — bloc `.discord-modal*` : palette officielle Discord
+  (blurple `#5865F2`, surfaces `#313338`/`#2b2d31`), grille 2 colonnes qui passe
+  en 1 colonne sous 600px, animation d'ouverture, `backdrop-filter`.
+- **Icônes serveurs en statique** — `assets/discord/{grimoire,personadle}_server.png`
+  récupérées via l'API invite Discord puis servies en local : la CSP du site
+  (`img-src 'self' data: …r2.dev`) bloque `cdn.discordapp.com`, donc pas de fetch
+  runtime. À re-télécharger manuellement si une icône de serveur change.
+- **i18n** — 7 nouvelles clés `index.discord_*` (titre, sous-titre, tags FR/intl,
+  descriptions, bouton Join) × 5 langues. Réponse FAQ `a12` réécrite (×5) pour
+  citer les deux serveurs.
+- **Docs** — `README.md` liste désormais les deux liens Discord (international vs
+  partenaire FR).
+- Vérifié en navigateur réel (Playwright) : rendu desktop + responsive 375px, les
+  deux icônes se chargent bien (HTTP 200 `image/png`, CSP OK).
+
+### À suivre
+
+- Changelog **joueur** (`PersonaDLE_Update.html`) pas encore alimenté — feature
+  visible côté joueur, à ajouter au prochain lot de comm'.
+
 ## 2026-07-20 — test: couverture des périmètres à 0% (social-link, challenge-result, stats-compare, bottomNav)
 
 Suite à l'audit demandé par Hamza sur `cloud-sync.js` (couverture faible) : élargi

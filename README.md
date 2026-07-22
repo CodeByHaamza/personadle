@@ -197,7 +197,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 
 ### 🌐 Internationalisation
 
-- 5 languages: EN · FR · ES · DE · IT (978 keys each)
+- 5 languages: EN · FR · ES · DE · IT (985 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
@@ -518,7 +518,7 @@ quotidiens, i18n 5 langues, panel admin, 586 tests automatisés (Vitest + PHPUni
 ### Community
 
 - **Arati** ([@Arati](https://x.com/Arati)) - Community support and featuring PersonaDLE
-- **Discord Community** - Beta testing, bug reports, and endless feedback
+- **Discord Communities** - [PersonaDLE (international)](https://discord.gg/wpMdGGDp3y) & [Le Grimoire du Cœur (French partner, most active)](https://discord.gg/CfR8UHXTAE) - beta testing, bug reports, and endless feedback
 - **Reddit r/persona4golden** - Support and suggestions
 
 ### Contributors & Development
@@ -609,7 +609,8 @@ We're always looking for passionate contributors! Whether you're a developer, de
 
 - 🌐 **Website**: [personadle.net](https://personadle.net)
 - 🐙 **GitHub**: [HamzaKarrouchi/personadle](https://github.com/HamzaKarrouchi/personadle)
-- 💬 **Discord**: [PersonaDLE](https://discord.gg/wpMdGGDp3y)
+- 💬 **Discord (PersonaDLE)**: [International server](https://discord.gg/wpMdGGDp3y) — always active, English-friendly
+- 💬 **Discord (Le Grimoire du Cœur)**: [French partner server](https://discord.gg/CfR8UHXTAE) — our most active community, in collaboration with PersonaDLE
 - 📧 **Contact**: Open an issue on GitHub for support or collaboration
 
 ---
