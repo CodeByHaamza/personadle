@@ -16,9 +16,9 @@
   <a href="https://github.com/HamzaKarrouchi/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HamzaKarrouchi/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
   <img src="https://img.shields.io/badge/Version-2.0-brightgreen?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
-  <img src="https://img.shields.io/badge/Tests-586%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-601%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
   <img src="https://img.shields.io/badge/Backend-PHP%208.3%20%2B%20MariaDB-8892BF?style=for-the-badge&logo=php" alt="PHP Backend">
-  <img src="https://img.shields.io/badge/i18n-EN%20%7C%20FR%20%7C%20ES%20%7C%20DE%20%7C%20IT-blueviolet?style=for-the-badge" alt="Languages">
+  <img src="https://img.shields.io/badge/i18n-EN%20%7C%20FR%20%7C%20ES%20%7C%20DE%20%7C%20IT%20%7C%20PT-blueviolet?style=for-the-badge" alt="Languages">
 </p>
 
 <p align="center">
@@ -71,7 +71,7 @@ Perfect for both long-time fans and newcomers to the series!
   </tr>
   <tr>
     <td>🌐 <strong>Multi-language</strong></td>
-    <td>5 languages: EN, FR, ES, DE, IT — auto-detected from browser</td>
+    <td>6 languages: EN, FR, ES, DE, IT, PT — auto-detected from browser</td>
   </tr>
   <tr>
     <td>👥 <strong>Friends System</strong></td>
@@ -173,7 +173,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
 
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 23-table relational schema, 586+ unit tests (Vitest + jsdom)
+- 23-table relational schema, 601+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
@@ -197,7 +197,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 
 ### 🌐 Internationalisation
 
-- 5 languages: EN · FR · ES · DE · IT (985 keys each)
+- 6 languages: EN · FR · ES · DE · IT · PT (985 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
@@ -369,7 +369,7 @@ GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
 ### Tests & quality
 
 ```
-Vitest + jsdom → 586 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+Vitest + jsdom → 601 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
 Playwright     → 54 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5
@@ -415,13 +415,13 @@ Track your journey with comprehensive stats:
 ## 🗺️ Roadmap
 
 Grosses briques déjà livrées — backend PHP/MariaDB, amis + Social Link, leaderboard, défis
-quotidiens, i18n 5 langues, panel admin, 586 tests automatisés (Vitest + PHPUnit + Playwright).
+quotidiens, i18n 6 langues, panel admin, 601 tests automatisés (Vitest + PHPUnit + Playwright).
 
 | Feature                            | Status       |
 | ----------------------------------- | ------------ |
 | All 6 Game Modes + Full Backend     | ✅ Done      |
 | Friends, Social Link & Leaderboard  | ✅ Done      |
-| Multi-language (EN/FR/ES/DE/IT)     | ✅ Done      |
+| Multi-language (EN/FR/ES/DE/IT/PT)  | ✅ Done      |
 | Mobile App (PWA)                    | 🔜 Planned   |
 | Japanese (JP) translation           | 🔜 Post-v2.0 |
 
@@ -579,13 +579,13 @@ cd personadle
 # Install test dependencies
 npm install
 
-# Run the 586 unit tests
+# Run the 601 unit tests
 npm test
 
 # Backend setup (first time only — creates DB, imports schema, configures Apache)
 bash setup.sh
 
-# Check i18n key coverage across all 5 languages
+# Check i18n key coverage across all 6 languages
 npm run i18n:check
 
 # Open in browser — no build step required

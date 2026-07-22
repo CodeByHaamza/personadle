@@ -12,7 +12,7 @@
 
 import { initLang, setLang } from "./i18n.js";
 
-const LABELS = { en: "EN", fr: "FR", es: "ES", de: "DE", it: "IT" };
+const LABELS = { en: "EN", fr: "FR", es: "ES", de: "DE", it: "IT", pt: "PT" };
 
 const LANG_OPTIONS = [
   { code: "en", name: "English", label: "English", char: "Lisa_Silverman_english.webp", alt: "Lisa Silverman" },
@@ -20,6 +20,7 @@ const LANG_OPTIONS = [
   { code: "es", name: "Español", label: "Español", char: "Morgana_Spanish.webp", alt: "Morgana" },
   { code: "de", name: "Deutsch", label: "Deutsch", char: "Hulkenberg_german.webp", alt: "Hulkenberg" },
   { code: "it", name: "Italiano", label: "Italiano", char: "Caesar_italian.webp", alt: "Caesar" },
+  { code: "pt", name: "Português", label: "Português", char: "Matador_portugal.webp", alt: "Matador" },
 ];
 
 function buildMarkup() {

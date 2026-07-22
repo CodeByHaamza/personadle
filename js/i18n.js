@@ -23,7 +23,7 @@
 
 const STORAGE_KEY = "lang";
 const DEFAULT_LANG = "en";
-const SUPPORTED = ["en", "fr", "es", "de", "it"];
+const SUPPORTED = ["en", "fr", "es", "de", "it", "pt"];
 
 /** Traductions actives (objet aplati : "ui.submit" → "Submit") */
 let _flat = {};
@@ -149,6 +149,15 @@ var _BUTTON_CFG = {
     giveUp: { n: "IT/Abbandona_Button.webp", a: "IT/Abbandona_Button_Rouge.webp" },
     reset: { n: "IT/Rigioca_Button.webp", a: "IT/Rigioca_Button_Rouge.webp" },
     guess: { n: "IT/Conferma_Button.webp", a: "IT/Conferma_Button_Rouge.webp" },
+  },
+  pt: {
+    // PT n'a pas de variante rouge (état survol/actif) — choix produit : `a` = normal
+    // pour les 4 boutons (survol uniforme, sans bascule rouge). Le hint reste « Índice »
+    // (choix Hamza, via DeepL).
+    hint: { n: "PT/Indice_Button.webp", a: "PT/Indice_Button.webp" },
+    giveUp: { n: "PT/Desistir_Button.webp", a: "PT/Desistir_Button.webp" },
+    reset: { n: "PT/Jogar_Novamente_Button.webp", a: "PT/Jogar_Novamente_Button.webp" },
+    guess: { n: "PT/Confirmar_Button.webp", a: "PT/Confirmar_Button.webp" },
   },
 };
 

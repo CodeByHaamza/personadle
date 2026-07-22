@@ -41,7 +41,11 @@ describe("initLangSelector", () => {
 
     expect(document.getElementById("langBtn")).not.toBeNull();
     expect(document.getElementById("langDropdown")).not.toBeNull();
-    expect(document.querySelectorAll(".lang-opt")).toHaveLength(5);
+    expect(document.querySelectorAll(".lang-opt")).toHaveLength(6);
+    // Le portugais (ajouté 2026-07) doit être injecté avec sa personnage Matador.
+    const pt = document.querySelector('.lang-opt--pt[data-lang="pt"]');
+    expect(pt).not.toBeNull();
+    expect(pt.querySelector(".lang-opt-char").getAttribute("src")).toContain("Matador_portugal");
     expect(document.getElementById("langBtnLabel").textContent).toBe("EN");
   });
 

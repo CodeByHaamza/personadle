@@ -168,7 +168,7 @@ describe("i18n", () => {
     it("returns the current language code", async () => {
       const lang = await initLang();
       expect(typeof lang).toBe("string");
-      expect(["en", "fr", "es", "de"]).toContain(lang);
+      expect(["en", "fr", "es", "de", "it", "pt"]).toContain(lang);
     });
   });
 });

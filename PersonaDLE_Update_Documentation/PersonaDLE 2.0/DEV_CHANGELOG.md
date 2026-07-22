@@ -72,6 +72,61 @@ PersonaDLE, sans aucun moyen d'atteindre Le Grimoire du Cœur depuis cette page.
 - Suite complète revérifiée après ces changements : Vitest 586/586, ESLint 0
   erreur, `i18n:check` 985 clés × 5 langues, `docs:check` et `pools:check` OK.
 
+## 2026-07-18 — feat(i18n): ajout du portugais (pt) — 6ᵉ langue
+
+Portugais (pt-PT) ajouté comme 6ᵉ langue. Traduction complète des 978 clés +
+câblage dans tous les points d'énumération de langues.
+
+### Détails techniques
+
+- **`lang/pt.json`** — 978 clés traduites (pt-PT), parité exacte avec `en.json`
+  (0 clé manquante/en trop, `{{placeholders}}` cohérents). Noms propres, codes
+  opus, titres de musiques et termes de lore préservés (Velvet Room, Wild Card,
+  Phantom Thief, Social Link, True Confidant…), même politique que es/fr.
+- **Câblage** : `js/i18n.js` (`SUPPORTED` + config `_BUTTON_CFG.pt`),
+  `js/lang-selector.js` (`LABELS` + `LANG_OPTIONS`, personnage Matador),
+  `scripts/check-i18n.js` & `check-i18n-untranslated.js` (`TARGET_LANGS`),
+  `scripts/check-doc-numbers.js` (regex liste de langues), `admin/admin.js`
+  (liste des langues éditables).
+- **Sélecteur** : bloc `.lang-opt--pt` ajouté dans les 4 pages à sélecteur inline
+  (`index.html`, `pages/faq.html`, `pages/privacy.html`, `profile/profile.html`)
+  + style `.lang-opt--pt` dans `css/langSelector.css` (accent vert Portugal,
+  serif système — aucune Google Font supplémentaire à charger).
+- **Boutons illustrés in-game** : config `pt` pointant vers `assets/buttons/PT/`
+  (Dica / Desistir / Jogar_de_Novo / Confirmar). ⚠️ **Assets à fournir par le
+  design (Hamza)** — tant qu'ils n'existent pas, `updateLangButtons()` retombe
+  automatiquement sur les images EN (fallback `_BUTTON_CFG[lang] || en`).
+- **Docs** : `README.md`, `ROADMAP.md`, `lang/README.md`, `CLAUDE.md` — listes de
+  langues passées à 6 (badges shields, tableaux, texte). Nombres de clés/tests
+  auto-synchronisés par `docs:fix`.
+- **Tests** : nouveau `tests/langParity.test.js` (15 tests — parité clés +
+  `{{placeholders}}` des 5 langues cibles contre en.json, dont pt) ;
+  `tests/langSelector.test.js` mis à jour (6 options, assertion sur l'option pt) ;
+  `tests/i18n.test.js` liste des langues supportées complétée (it + pt).
+- Vérifié en navigateur réel (Playwright) : option Português (personnage Matador)
+  dans le sélecteur + bascule complète de l'UI en portugais.
+- **Boutons illustrés PT** fournis (Hamza) et câblés : `assets/buttons/PT/`
+  (Indice / Desistir / Jogar_Novamente / Confirmar). Choix produit : pas de
+  variante `_Rouge` (survol) pour PT → `a` = image normale sur les 4 (survol
+  uniforme). Le hint reste « Índice » (choix Hamza via DeepL, malgré « Dica »
+  plus courant). Renommage propre des fichiers déposés.
+- **Modale « Historique des MAJ » (index.html) enfin i18n.** Elle utilisait des
+  blocs `data-i18n-block="en|fr"` uniquement → es/de/it/pt retombaient en
+  anglais (fallback `_blockLang`). Ajout des blocs **es/de/it/pt pour les 5
+  versions** (v2.0, v1.1, v1.02, v1.01, v1.0) — 6 langues × 5 = 30 blocs.
+  Easter-egg badge `hifumi_archives` déplacé sur un listener délégué
+  (`.see-more-btn`) au lieu d'un `onclick` inline par bloc → couvre les 6 langues
+  sans duplication. Angle mort : les **titres/dates de version** (« Version 2.0
+  — Major Update », « May 2026 ») restent partagés en anglais (hors blocs) — à
+  i18n plus tard si besoin.
+- **Enrichissement de l'entrée v2.0** (retours joueurs) : ajout de highlights
+  qui manquaient — Séries & Jack Frost, Mode Musique repensé, Personnalisation
+  du profil (wallpapers + musique de profil), Accessibilité (daltonien /
+  reduced-motion / clavier). Mise à jour « 5 Langues → 6 Langues EN·FR·ES·DE·IT·PT »
+  et retrait du compte de clés figé (760).
+
+## 2026-07-20 — test: couverture des périmètres à 0% (social-link, challenge-result, stats-compare, bottomNav)
+
 Suite à l'audit demandé par Hamza sur `cloud-sync.js` (couverture faible) : élargi
 le scan à tout le repo. `vitest.config.js` limite le rapport de couverture à une
 allowlist de 7 fichiers (`coverage.include`) — la plupart du code (badgesManager,
