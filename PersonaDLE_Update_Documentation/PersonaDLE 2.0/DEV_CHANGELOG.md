@@ -44,7 +44,33 @@ il affiche une modale style Discord présentant les deux serveurs.
 - Changelog **joueur** (`PersonaDLE_Update.html`) pas encore alimenté — feature
   visible côté joueur, à ajouter au prochain lot de comm'.
 
-## 2026-07-20 — test: couverture des périmètres à 0% (social-link, challenge-result, stats-compare, bottomNav)
+## 2026-07-23 — fix: modale Discord aussi sur la FAQ + changelog joueur
+
+Revue de la PR : le bouton Discord de `pages/faq.html` (question "Is there a
+Discord server?") n'avait pas été mis à jour — la réponse (`faq.a12`) mentionne
+désormais les deux serveurs, mais le bouton restait un lien direct en dur vers
+PersonaDLE, sans aucun moyen d'atteindre Le Grimoire du Cœur depuis cette page.
+
+### Détails techniques
+
+- **CSS partagé** — bloc `.discord-modal*` déplacé de `css/index.css` vers
+  `css/global.css` (173 lignes) : composant maintenant utilisé par 2 pages,
+  n'a plus sa place dans un CSS scopé à `index.html`. Version cache-buster
+  bump `?v=10 → ?v=11` sur toutes les pages qui chargent `global.css`.
+- **`pages/faq.html`** — même modale `#discordModal` que `index.html` (chemins
+  `../assets/...` adaptés), même script de branchement (clic bouton → `display:
+  flex`, fermeture X / clic overlay / Escape). Le bouton `#discordBtn` de la FAQ
+  reste un `<a href>` réel vers PersonaDLE (fallback JS désactivé), identique au
+  pattern de l'accueil.
+- **Changelog joueur** (`PersonaDLE_Update.html`) — item "Discord Collab — Le
+  Grimoire du Cœur" ajouté à la grille de highlights v2.0 (EN/FR), ce qui
+  répond au "À suivre" laissé dans l'entrée du 2026-07-18.
+- **`sw.js`** — `CACHE_VERSION` bump `v75 → v76` : le cache-first du service
+  worker sert `css/global.css`/`css/index.css` depuis le cache, sans ce bump les
+  PWA déjà installées auraient gardé l'ancien CSS (donc pas de modale Discord)
+  jusqu'à un hasard de cycle de mise à jour.
+- Suite complète revérifiée après ces changements : Vitest 586/586, ESLint 0
+  erreur, `i18n:check` 985 clés × 5 langues, `docs:check` et `pools:check` OK.
 
 Suite à l'audit demandé par Hamza sur `cloud-sync.js` (couverture faible) : élargi
 le scan à tout le repo. `vitest.config.js` limite le rapport de couverture à une
