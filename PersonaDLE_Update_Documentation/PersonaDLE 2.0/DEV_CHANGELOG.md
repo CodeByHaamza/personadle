@@ -10,6 +10,39 @@
 
 ---
 
+## 2026-07-23 — fix(content): modale in-app "Historique des MAJ" — nouveaux persos + collab Discord manquants
+
+Revue demandée par Hamza : la modale `#newsModal` d'`index.html` (celle que la
+quasi-totalité des joueurs consultent réellement, contrairement à la page
+`PersonaDLE_Update.html` séparée) ne mentionnait ni les nouveaux personnages
+de la v2.0 ni la collab Discord — deux features pourtant déjà documentées
+ailleurs, jamais reportées ici.
+
+### Détails techniques
+
+- **Nouveaux personnages** — 1er passage de review incomplet : je m'étais
+  arrêté à "Joker Starlight" en lisant `PersonaDLE_Update.html` et j'ai raté
+  Mona Starlight, les 5 tenues Summer 2026, l'event Radiance et la collab
+  Hatsune Miku (corrigé après relecture complète demandée par Hamza). Bullet
+  condensé ajouté (`✨ New Characters`) plutôt qu'une entrée par perso (24 au
+  total, disproportionné pour une liste de highlights) : 3 antagonistes
+  jouables (Nyx, Ameno-sagiri, Yaldabaoth), 6 personnages Persona 5 Strikers,
+  nouveaux Phantom Idols P5X, + exclusivités All-Out Attack (Joker/Mona
+  Starlight, 5 tenues Summer 2026, collab Hatsune Miku).
+- **Collab Discord** — bullet `💬 Discord Collab` ajouté, alignée sur le
+  wording déjà utilisé dans `PersonaDLE_Update.html` (PR #38).
+- **`index.html`** — les deux bullets ajoutés dans les **6 blocs de langue**
+  (`data-i18n-block="en|fr|es|de|it|pt"`) de la section Version 2.0 de la
+  modale, traduits (pas de placeholder anglais qui traîne). Positionnement :
+  "New Characters" juste avant "Music Mode Revamp" (contenu de jeu groupé),
+  "Discord Collab" juste après "6 Languages" (communauté groupée).
+- Rendu vérifié en navigateur réel (Playwright) sur les 6 langues : les deux
+  bullets s'affichent au bon endroit, aucune régression sur le reste de la
+  liste.
+- Suite complète revérifiée : Vitest 601/601, ESLint 0 erreur, `i18n:check`
+  985 clés × 6 langues, `docs:check` OK (ce changement ne touche pas les
+  clés i18n — texte inline `data-i18n-block`, pas `lang/*.json`).
+
 ## 2026-07-23 — fix(perf): boutons FR/ES/DE/IT redimensionnés + recompressés (25,4 Mo → 6,2 Mo)
 
 Suite du fix du 2026-07-23 sur `assets/buttons/PT/` (PR #39) : le même défaut
