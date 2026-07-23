@@ -1395,10 +1395,11 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 
 > Pas un test à cocher — une tâche à part pour Léo (Data & Design) avant la sortie de la 2.0.
 
-Le `README.md` (captures d'écran de présentation du jeu) n'a pas été mis à jour depuis l'ajout
-de la collab Discord, du portugais, et du contenu récent (nouveaux persos, mode musique
-repensé). À refaire avant la sortie officielle de la 2.0 pour éviter que les captures ne
-montrent une version obsolète du site aux nouveaux visiteurs du repo GitHub.
+Le `README.md` (captures d'écran de présentation du jeu) montre encore l'**ancien design des
+pages** — le refonte visuelle n'y est pas reflétée, pas juste du contenu manquant (collab
+Discord, portugais). À refaire avant la sortie officielle de la 2.0 pour éviter que les
+captures ne montrent une version visuellement obsolète du site aux nouveaux visiteurs du repo
+GitHub.
 
 ---
 
