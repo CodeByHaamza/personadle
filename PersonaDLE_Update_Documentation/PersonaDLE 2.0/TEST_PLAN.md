@@ -1332,7 +1332,76 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 - [ ] Un des anciens codes secrets encore actifs (ex : `GOURMET`, `DZULIAN`, `ARATI` — voir §11
   pour la liste, avec un compte qui ne l'a pas encore) → fonctionne toujours normalement
 
+## 28 — Collab Discord, portugais (PT) & modale "Historique des MAJ" (23 juillet 2026) — à tester par Léo
+
+> Lot de 4 PR : modale Discord (accueil + FAQ), ajout du portugais comme 6ᵉ langue, boutons
+> illustrés FR/ES/DE/IT/PT redimensionnés (poids divisé par ~10-15, aucun changement visuel
+> attendu), et contenu complété de la modale "Historique des MAJ".
+
+### 28.1 Modale Discord — accueil ET FAQ
+
+👉 [http://localhost:8080/index.html](http://localhost:8080/index.html) puis
+[http://localhost:8080/pages/faq.html](http://localhost:8080/pages/faq.html)
+
+1. Sur l'accueil, cliquer l'icône Discord dans les liens sociaux (bas de page)
+2. Sur la FAQ, ouvrir la question "Is there a Discord server?" (catégorie Community) puis
+   cliquer "Join the Discord →"
+
+- [ ] Dans les deux cas, une modale s'ouvre (pas de redirection directe) présentant **deux**
+  serveurs côte à côte : Le Grimoire du Cœur (FR) et PersonaDLE (international)
+- [ ] Les deux icônes de serveur s'affichent (pas d'image cassée)
+- [ ] Fermeture au clic sur le X, au clic en dehors de la modale (overlay), et à la touche
+  Échap — testez les 3 sur au moins une des deux pages
+- [ ] Les boutons "Join" de chaque carte ouvrent bien le bon serveur Discord dans un nouvel
+  onglet
+
+### 28.2 Portugais — 6ᵉ langue
+
+👉 N'importe quelle page avec le sélecteur de langue (accueil, FAQ, confidentialité, profil)
+
+1. Ouvrir le sélecteur de langue → vérifier la présence de l'option "Português" (personnage
+   Matador)
+2. Sélectionner le portugais
+
+- [ ] Toute l'interface bascule en portugais (pas de texte resté en anglais qui traînerait)
+- [ ] Aller sur un mode de jeu (ex : Classique) → les 4 boutons illustrés (Índice, Desistir,
+  Jogar de Novo, Confirmar) s'affichent nets, texte lisible, pas flous ni pixelisés
+- [ ] Survoler les boutons → pas de crash, l'état visuel change (même sans variante rouge
+  dédiée pour le PT — comportement voulu, pas un bug)
+
+### 28.3 Boutons illustrés FR/ES/DE/IT — contrôle visuel post-recompression
+
+> Ces boutons ont été redimensionnés pour diviser leur poids par ~10-15 (ils étaient exportés
+> 2x plus grands que nécessaire). Aucun changement de contenu — juste une vérification qu'il
+> n'y a pas eu de perte de qualité au passage.
+
+👉 Basculer successivement en FR, ES, DE, IT (§28.2) et aller sur un mode de jeu
+
+- [ ] Dans chaque langue, les 4 boutons (indice/abandonner/rejouer/valider et équivalents)
+  restent nets, sans flou ni artefact de compression visible
+- [ ] Le survol (variante rouge) fonctionne toujours normalement
+
+### 28.4 Modale "Historique des MAJ" — contenu complété
+
+👉 Accueil → bouton "📰 News" en bas à droite → dérouler "Version 2.0 — Major Update"
+
+- [ ] La liste contient désormais un bullet **"New Characters"** (nouveaux personnages —
+  antagonistes, Persona 5 Strikers, Phantom Idols P5X, exclusivités All-Out Attack)
+- [ ] La liste contient désormais un bullet **"Discord Collab"**
+- [ ] Vérifier dans au moins une langue autre que l'anglais (ex : FR) que ces deux bullets
+  sont bien traduits, pas restés en anglais
+
+### 📸 TODO — Screenshots README à refaire
+
+> Pas un test à cocher — une tâche à part pour Léo (Data & Design) avant la sortie de la 2.0.
+
+Le `README.md` (captures d'écran de présentation du jeu) n'a pas été mis à jour depuis l'ajout
+de la collab Discord, du portugais, et du contenu récent (nouveaux persos, mode musique
+repensé). À refaire avant la sortie officielle de la 2.0 pour éviter que les captures ne
+montrent une version obsolète du site aux nouveaux visiteurs du repo GitHub.
+
 ---
 
-*PersonaDLE v2.0 — Plan de test généré le 26 juin 2026, corrigé et complété le 17 juillet 2026.*
+*PersonaDLE v2.0 — Plan de test généré le 26 juin 2026, corrigé et complété le 17 juillet 2026,
+complété le 23 juillet 2026 (collab Discord, portugais, modale MAJ).*
 *À mettre à jour si de nouvelles fonctionnalités sont ajoutées avant la fin de la phase de test.*
