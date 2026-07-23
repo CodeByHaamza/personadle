@@ -305,6 +305,28 @@
   color: #8fb96a;
 }
 
+/* .lang-opt--pt → serif système (aucune Google Font à charger), vert Portugal */
+.lang-opt--pt {
+  border-left-color: #0a7d3c;
+}
+
+.lang-opt--pt .lang-opt-name {
+  font-family: "Georgia", "Times New Roman", "Playfair Display", serif;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  font-size: 1.3rem;
+}
+
+.lang-opt--pt:hover,
+.lang-opt--pt.is-active {
+  background: rgba(10, 125, 60, 0.2);
+}
+
+.lang-opt--pt.is-active .lang-opt-dot {
+  color: #2ecc71;
+}
+
 /* ─── Responsive ≤480px ──────────────────────────────────── */
 
 @media (max-width: 480px) {

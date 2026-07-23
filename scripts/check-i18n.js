@@ -15,7 +15,7 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LANG_DIR = path.join(__dirname, "..", "lang");
 const BASE_LANG = "en";
-const TARGET_LANGS = ["fr", "es", "de", "it"];
+const TARGET_LANGS = ["fr", "es", "de", "it", "pt"];
 
 const isSilent = process.argv.includes("--silent");
 const log = (...args) => { if (!isSilent) console.log(...args); };

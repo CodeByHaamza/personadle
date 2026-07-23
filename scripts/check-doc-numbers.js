@@ -125,7 +125,7 @@ const syncPoints = [
   { file: README, re: /Tests-(\d+)%20passing/, expected: [vitestTests] },
   { file: README, re: /(\d+)-table relational schema, (\d+)\+ unit tests/, expected: [tables, vitestTests] },
   { file: README, re: /MariaDB 10\.6\+ → (\d+)-table relational schema/, expected: [tables] },
-  { file: README, re: /EN · FR · ES · DE · IT \((\d+) keys each\)/, expected: [i18nKeys] },
+  { file: README, re: /EN · FR · ES · DE · IT · PT \((\d+) keys each\)/, expected: [i18nKeys] },
   { file: README, re: /Vitest \+ jsdom → (\d+) tests unitaires/, expected: [vitestTests] },
   { file: README, re: /Playwright\s+→ (\d+) E2E sur la stack Docker/, expected: [e2e.total] },
   { file: README, re: /panel admin, (\d+) tests automatisés/, expected: [vitestTests] },
@@ -135,7 +135,7 @@ const syncPoints = [
   { file: ROADMAP, re: /\*\*(\d+) tests JS · (\d+) PHPUnit · (\d+) E2E · PHPStan/, expected: [vitestTests, phpunit.total, e2e.total] },
   { file: ROADMAP, re: /Schéma BDD \((\d+) tables, MySQL\/MariaDB\)/, expected: [tables] },
   { file: ROADMAP, re: /Tests : (\d+) Vitest · (\d+) PHPUnit · (\d+) E2E/, expected: [vitestTests, phpunit.total, e2e.total] },
-  { file: ROADMAP, re: /i18n EN\/FR\/ES\/DE\/IT \((\d+) clés\)/, expected: [i18nKeys] },
+  { file: ROADMAP, re: /i18n EN\/FR\/ES\/DE\/IT\/PT \((\d+) clés\)/, expected: [i18nKeys] },
 
   // CONTRIBUTING.md
   { file: CONTRIBUTING, re: /(\d+) tests JS \(Vitest\)/, expected: [vitestTests] },

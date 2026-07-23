@@ -2,11 +2,11 @@
 
 # 🌐 Traductions i18n
 
-<img src="https://img.shields.io/badge/langues-EN%20·%20FR%20·%20ES%20·%20DE%20·%20IT-blueviolet?style=for-the-badge" alt="5 langues">
+<img src="https://img.shields.io/badge/langues-EN%20·%20FR%20·%20ES%20·%20DE%20·%20IT%20·%20PT-blueviolet?style=for-the-badge" alt="6 langues">
 <img src="https://img.shields.io/badge/source-en.json-success?style=for-the-badge" alt="Source de vérité">
 <img src="https://img.shields.io/badge/garde--fou-i18n:check-blue?style=for-the-badge" alt="i18n:check">
 
-> **Cinq langues. Une seule source de vérité : `en.json`.**
+> **Six langues. Une seule source de vérité : `en.json`.**
 
 </div>
 
@@ -16,16 +16,17 @@ Contient les traductions de toute l'interface de PersonaDLE.
 
 ## Fichiers
 
-| Fichier   | Langue   | Statut                            |
-| --------- | -------- | --------------------------------- |
-| `en.json` | Anglais  | ✅ Complet — **source de vérité** |
-| `fr.json` | Français | ✅ Complet                        |
-| `es.json` | Espagnol | ✅ Complet                        |
-| `de.json` | Allemand | ✅ Complet                        |
-| `it.json` | Italien  | ✅ Complet                        |
-| `jp.json` | Japonais | ⏳ Envisagé                       |
+| Fichier   | Langue    | Statut                            |
+| --------- | --------- | ---------------------------------- |
+| `en.json` | Anglais   | ✅ Complet — **source de vérité** |
+| `fr.json` | Français  | ✅ Complet                        |
+| `es.json` | Espagnol  | ✅ Complet                        |
+| `de.json` | Allemand  | ✅ Complet                        |
+| `it.json` | Italien   | ✅ Complet                        |
+| `pt.json` | Portugais | ✅ Complet                        |
+| `jp.json` | Japonais  | ⏳ Envisagé                       |
 
-> Les 5 langues actives sont synchronisées (985 clés chacune, vérifié par `npm run i18n:check`).
+> Les 6 langues actives sont synchronisées (985 clés chacune, vérifié par `npm run i18n:check`).
 
 > `en.json` est toujours la référence. En cas de clé manquante dans une autre langue, le système affiche la version anglaise.
 

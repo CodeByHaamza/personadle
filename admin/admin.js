@@ -359,7 +359,7 @@ function renderTabProfile(d) {
         </label>
         <label>Langue
           <select id="edit-lang">
-            ${["en", "fr", "es", "de", "it"].map((l) => `<option ${u.lang === l ? "selected" : ""}>${l}</option>`).join("")}
+            ${["en", "fr", "es", "de", "it", "pt"].map((l) => `<option ${u.lang === l ? "selected" : ""}>${l}</option>`).join("")}
           </select>
         </label>
         <label>Couleur bordure avatar
