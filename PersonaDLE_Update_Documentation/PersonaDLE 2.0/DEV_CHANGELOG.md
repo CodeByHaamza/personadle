@@ -159,6 +159,35 @@ produit Hamza conservé : « Índice », pas de variante `_Rouge`).
 - Suite complète revérifiée après ces changements : Vitest 601/601, ESLint 0
   erreur, `i18n:check` 978 clés × 6 langues, `docs:check` OK.
 
+## 2026-07-23 — chore(i18n): rebase post-merge Discord (#38) — pt.json 978 → 985 clés
+
+La PR #38 (modale Discord) a mergé sur `develop` pendant que cette PR était en
+review, ajoutant 7 clés `index.discord_*` à en/fr/es/de/it (985 clés). Rebase
+de cette branche sur `develop` à jour + traduction des 7 clés manquantes en
+`pt.json` pour rétablir la parité à 6 langues (sinon `tests/langParity.test.js`
+aurait cassé au merge, faute des clés `discord_*` côté PT).
+
+### Détails techniques
+
+- **`lang/pt.json`** — `discord_modal_title`, `discord_modal_sub`,
+  `discord_grimoire_tag`, `discord_grimoire_desc`, `discord_personadle_tag`,
+  `discord_personadle_desc`, `discord_join` traduits (pt-PT, forme "tu",
+  vocabulaire aligné sur l'existant : "juntar-se" déjà utilisé pour "join
+  Discord" dans `faq.a13`/`faq.a30`). `faq.a12` (réponse FAQ Discord) était
+  déjà à jour côté PT — mentionnait déjà les deux serveurs.
+- Conflits de rebase (nombres doc figés dans le même diff que #38) résolus dans
+  `CLAUDE.md`, `README.md`, `ROADMAP.md`, `lang/README.md`,
+  `DEV_CHANGELOG.md`. Au passage, `lang/README.md` avait aussi deux oublis
+  **antérieurs à cette PR** (pas liés au rebase) : « Cinq langues » au lieu de
+  six dans le sous-titre, et pas de ligne `pt.json` dans le tableau des
+  fichiers — corrigés ici.
+- **`sw.js`** — `CACHE_VERSION` bump `v76 → v77` (v76 déjà pris par le merge de
+  #38 entre-temps).
+- Suite complète revérifiée après rebase : Vitest 601/601, ESLint 0 erreur,
+  `i18n:check` **985 clés × 6 langues**, `i18n:check-untranslated` (aucune des
+  7 nouvelles clés PT signalée comme copiée de l'anglais), `docs:check` et
+  `pools:check` OK.
+
 ## 2026-07-20 — test: couverture des périmètres à 0% (social-link, challenge-result, stats-compare, bottomNav)
 
 Suite à l'audit demandé par Hamza sur `cloud-sync.js` (couverture faible) : élargi
