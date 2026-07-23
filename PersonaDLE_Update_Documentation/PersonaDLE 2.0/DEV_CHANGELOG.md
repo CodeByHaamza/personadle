@@ -10,6 +10,34 @@
 
 ---
 
+## 2026-07-23 — fix(perf): boutons FR/ES/DE/IT redimensionnés + recompressés (25,4 Mo → 6,2 Mo)
+
+Suite du fix du 2026-07-23 sur `assets/buttons/PT/` (PR #39) : le même défaut
+d'export (3246×1312px au lieu de 1640×664, résolution EN déjà confortable pour
+le rétina vu l'affichage in-game à ~90-100px de haut) touchait en fait **les 4
+langues déjà en prod**, pas seulement PT — 48 fichiers, 0,77 à 1,8 Mo chacun.
+
+### Détails techniques
+
+- Même pipeline que PT : `dwebp` → `cwebp -resize 1640 0 -lossless -z 9 -m 6`,
+  canal alpha revérifié sur toutes les variantes `_Transparent` (`webpmux
+  -info`). Lossless conservé (cohérence avec le format existant, pas
+  d'artefact autour du texte détouré).
+- Les 3 variantes par bouton (normal / `_Rouge` hover / `_Transparent`) × 4
+  boutons × 4 langues = 48 fichiers traités.
+- Résultat par langue : DE 6,3 Mo → 1,5 Mo, ES 5,7 Mo → 1,4 Mo, FR 6,4 Mo →
+  1,6 Mo, IT 7,0 Mo → 1,7 Mo. Rendu vérifié en navigateur réel (Playwright,
+  `classiqueMode.html`) sur les 4 langues, état normal **et** hover (`_Rouge`) :
+  aucune régression visuelle, texte net.
+- Typo préexistante repérée mais **non corrigée ici** (hors périmètre) :
+  `assets/buttons/DE/Aufgeben_Buttonu_Transparent.webp` (« Buttonu » au lieu de
+  « Button ») — renommer casserait la référence dans `js/i18n.js` sans
+  bénéfice fonctionnel, à faire dans un commit dédié si on nettoie ce nom un
+  jour.
+- **`sw.js`** — `CACHE_VERSION` bump `v77 → v78`.
+- Suite complète revérifiée : Vitest 601/601, ESLint 0 erreur, `i18n:check`
+  985 clés × 6 langues, `docs:check` OK.
+
 ## 2026-07-18 — feat: modale Discord collab (PersonaDLE × Le Grimoire du Cœur)
 
 Collaboration officialisée avec le serveur FR partenaire **Le Grimoire du Cœur**.
