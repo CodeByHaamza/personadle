@@ -10,7 +10,67 @@
 
 ---
 
-## 2026-07-20 — test: couverture des périmètres à 0% (social-link, challenge-result, stats-compare, bottomNav)
+## 2026-07-18 — feat: modale Discord collab (PersonaDLE × Le Grimoire du Cœur)
+
+Collaboration officialisée avec le serveur FR partenaire **Le Grimoire du Cœur**.
+Le bouton Discord de l'accueil n'ouvre plus directement le serveur PersonaDLE :
+il affiche une modale style Discord présentant les deux serveurs.
+
+### Détails techniques
+
+- **`index.html`** — nouvelle modale `#discordModal` (deux cartes serveur côte à
+  côte : Grimoire à gauche = FR/le plus actif, PersonaDLE à droite = international/
+  recrute). Le bouton `#discordBtn` reste un `<a>` vers PersonaDLE (fallback si JS
+  désactivé) ; un script inline intercepte le clic pour ouvrir la modale (même
+  pattern que la modale News : `display none↔flex`, fermeture X / clic overlay /
+  Escape).
+- **`css/index.css`** — bloc `.discord-modal*` : palette officielle Discord
+  (blurple `#5865F2`, surfaces `#313338`/`#2b2d31`), grille 2 colonnes qui passe
+  en 1 colonne sous 600px, animation d'ouverture, `backdrop-filter`.
+- **Icônes serveurs en statique** — `assets/discord/{grimoire,personadle}_server.png`
+  récupérées via l'API invite Discord puis servies en local : la CSP du site
+  (`img-src 'self' data: …r2.dev`) bloque `cdn.discordapp.com`, donc pas de fetch
+  runtime. À re-télécharger manuellement si une icône de serveur change.
+- **i18n** — 7 nouvelles clés `index.discord_*` (titre, sous-titre, tags FR/intl,
+  descriptions, bouton Join) × 5 langues. Réponse FAQ `a12` réécrite (×5) pour
+  citer les deux serveurs.
+- **Docs** — `README.md` liste désormais les deux liens Discord (international vs
+  partenaire FR).
+- Vérifié en navigateur réel (Playwright) : rendu desktop + responsive 375px, les
+  deux icônes se chargent bien (HTTP 200 `image/png`, CSP OK).
+
+### À suivre
+
+- Changelog **joueur** (`PersonaDLE_Update.html`) pas encore alimenté — feature
+  visible côté joueur, à ajouter au prochain lot de comm'.
+
+## 2026-07-23 — fix: modale Discord aussi sur la FAQ + changelog joueur
+
+Revue de la PR : le bouton Discord de `pages/faq.html` (question "Is there a
+Discord server?") n'avait pas été mis à jour — la réponse (`faq.a12`) mentionne
+désormais les deux serveurs, mais le bouton restait un lien direct en dur vers
+PersonaDLE, sans aucun moyen d'atteindre Le Grimoire du Cœur depuis cette page.
+
+### Détails techniques
+
+- **CSS partagé** — bloc `.discord-modal*` déplacé de `css/index.css` vers
+  `css/global.css` (173 lignes) : composant maintenant utilisé par 2 pages,
+  n'a plus sa place dans un CSS scopé à `index.html`. Version cache-buster
+  bump `?v=10 → ?v=11` sur toutes les pages qui chargent `global.css`.
+- **`pages/faq.html`** — même modale `#discordModal` que `index.html` (chemins
+  `../assets/...` adaptés), même script de branchement (clic bouton → `display:
+  flex`, fermeture X / clic overlay / Escape). Le bouton `#discordBtn` de la FAQ
+  reste un `<a href>` réel vers PersonaDLE (fallback JS désactivé), identique au
+  pattern de l'accueil.
+- **Changelog joueur** (`PersonaDLE_Update.html`) — item "Discord Collab — Le
+  Grimoire du Cœur" ajouté à la grille de highlights v2.0 (EN/FR), ce qui
+  répond au "À suivre" laissé dans l'entrée du 2026-07-18.
+- **`sw.js`** — `CACHE_VERSION` bump `v75 → v76` : le cache-first du service
+  worker sert `css/global.css`/`css/index.css` depuis le cache, sans ce bump les
+  PWA déjà installées auraient gardé l'ancien CSS (donc pas de modale Discord)
+  jusqu'à un hasard de cycle de mise à jour.
+- Suite complète revérifiée après ces changements : Vitest 586/586, ESLint 0
+  erreur, `i18n:check` 985 clés × 5 langues, `docs:check` et `pools:check` OK.
 
 Suite à l'audit demandé par Hamza sur `cloud-sync.js` (couverture faible) : élargi
 le scan à tout le repo. `vitest.config.js` limite le rapport de couverture à une

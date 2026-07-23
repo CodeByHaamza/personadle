@@ -54,8 +54,8 @@
     />
 
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="./css/global.css?v=10" />
-    <link rel="stylesheet" href="./css/index.css?v=3" />
+    <link rel="stylesheet" href="./css/global.css?v=11" />
+    <link rel="stylesheet" href="./css/index.css?v=4" />
     <link rel="stylesheet" href="./css/langSelector.css?v=3" />
     <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="./css/calling-card.css?v=2" />
@@ -522,7 +522,14 @@
       >
         <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
       </a>
-      <a href="https://discord.gg/wpMdGGDp3y" target="_blank" title="Discord">
+      <a
+        href="https://discord.gg/wpMdGGDp3y"
+        target="_blank"
+        rel="noopener"
+        title="Discord"
+        id="discordBtn"
+        aria-haspopup="dialog"
+      >
         <img src="./assets/buttons/discord.svg" alt="Discord" width="30" height="30" />
       </a>
       <a href="https://ko-fi.com/hamzadev" target="_blank" title="kofi">
@@ -563,6 +570,97 @@
         >
       </p>
     </footer>
+
+    <!-- =====================================================
+     💬 Modale Discord — collab PersonaDLE × Le Grimoire du Cœur
+     Ouverte par le bouton Discord des liens sociaux (#discordBtn).
+     Deux serveurs côte à côte : Grimoire (FR, +actif) / PersonaDLE (international).
+     Icônes servies en statique depuis assets/discord/ (CSP img-src 'self').
+     ===================================================== -->
+    <div
+      id="discordModal"
+      class="discord-modal"
+      style="display: none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="discordModalTitle"
+    >
+      <div class="discord-modal-content">
+        <button class="discord-close" id="closeDiscord" aria-label="Close">&times;</button>
+
+        <div class="discord-modal-head">
+          <img
+            src="./assets/buttons/discord.svg"
+            alt=""
+            class="discord-modal-logo"
+            width="46"
+            height="46"
+          />
+          <h2 id="discordModalTitle" data-i18n="index.discord_modal_title">
+            Join our Discord communities
+          </h2>
+          <p class="discord-modal-sub" data-i18n="index.discord_modal_sub">
+            Two servers, one Persona family.
+          </p>
+        </div>
+
+        <div class="discord-servers">
+          <!-- Le Grimoire du Cœur — serveur FR partenaire, le plus actif -->
+          <a
+            class="discord-server-card"
+            href="https://discord.gg/CfR8UHXTAE"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              class="discord-server-icon"
+              src="./assets/discord/grimoire_server.png"
+              alt="Le Grimoire du Cœur"
+              width="76"
+              height="76"
+              loading="lazy"
+            />
+            <span class="discord-server-tag discord-tag-fr" data-i18n="index.discord_grimoire_tag"
+              >🇫🇷 French server</span
+            >
+            <span class="discord-server-name">Le Grimoire du Cœur</span>
+            <span class="discord-server-desc" data-i18n="index.discord_grimoire_desc">
+              Our French-speaking partner community — the most active. Events, discussions and the
+              whole Persona FR scene.
+            </span>
+            <span class="discord-join-btn" data-i18n="index.discord_join">Join</span>
+          </a>
+
+          <!-- PersonaDLE — serveur officiel, international -->
+          <a
+            class="discord-server-card"
+            href="https://discord.gg/wpMdGGDp3y"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              class="discord-server-icon"
+              src="./assets/discord/personadle_server.png"
+              alt="PersonaDLE"
+              width="76"
+              height="76"
+              loading="lazy"
+            />
+            <span
+              class="discord-server-tag discord-tag-intl"
+              data-i18n="index.discord_personadle_tag"
+              >🌍 International</span
+            >
+            <span class="discord-server-name">PersonaDLE</span>
+            <span class="discord-server-desc" data-i18n="index.discord_personadle_desc">
+              The official PersonaDLE server — always active, English-friendly. Bug reports,
+              feedback, and we're recruiting!
+            </span>
+            <span class="discord-join-btn" data-i18n="index.discord_join">Join</span>
+          </a>
+        </div>
+      </div>
+    </div>
 
     <!-- 🔔 News Popup -->
     <button id="newsBtn" class="news-btn" data-i18n="index.news_button">📰 News</button>
@@ -1554,6 +1652,28 @@
       window.addEventListener("click", (e) => {
         if (e.target === newsModal) newsModal.style.display = "none";
       });
+
+      // ── Modale Discord (collab PersonaDLE × Le Grimoire du Cœur) ──
+      const discordModal = document.getElementById("discordModal");
+      const discordBtn = document.getElementById("discordBtn");
+      const closeDiscord = document.getElementById("closeDiscord");
+      if (discordModal && discordBtn) {
+        // Le bouton reste un <a> vers PersonaDLE (fallback si JS off) — sinon on
+        // intercepte pour ouvrir la modale double-serveur.
+        discordBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          discordModal.style.display = "flex";
+        });
+        closeDiscord.onclick = () => (discordModal.style.display = "none");
+        window.addEventListener("click", (e) => {
+          if (e.target === discordModal) discordModal.style.display = "none";
+        });
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && discordModal.style.display !== "none") {
+            discordModal.style.display = "none";
+          }
+        });
+      }
 
       // Gérer l'accordion des versions
       document.querySelectorAll(".version-header").forEach((header) => {

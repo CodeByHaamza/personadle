@@ -338,7 +338,7 @@ Nouveau jeu — cas A (roster inédit)
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
 | Q1  | Tests : 586 Vitest · 185 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
-| Q2  | i18n EN/FR/ES/DE/IT (978 clés)                | `npm run i18n:check`                                                          |
+| Q2  | i18n EN/FR/ES/DE/IT (985 clés)                | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
 | Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |

@@ -47,6 +47,13 @@ describe("_globalWr", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("_formatCooldown", () => {
+  // Horloge figée : _formatCooldown relit Date.now() en interne. Sans ça, les
+  // quelques ms écoulées entre la création de la date cible et l'appel faisaient
+  // tomber Math.floor d'une unité sur les valeurs exactes (25m → 24m), rendant
+  // ces tests flaky (échec intermittent au pre-push / en CI).
+  beforeEach(() => vi.useFakeTimers({ now: new Date("2026-07-18T12:00:00Z") }));
+  afterEach(() => vi.useRealTimers());
+
   it("returns '0h' once the deadline has already passed", () => {
     expect(_formatCooldown(new Date(Date.now() - 1000).toISOString())).toBe("0h");
   });
