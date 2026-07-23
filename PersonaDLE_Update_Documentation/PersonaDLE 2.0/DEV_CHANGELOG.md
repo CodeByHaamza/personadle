@@ -125,6 +125,40 @@ câblage dans tous les points d'énumération de langues.
   reduced-motion / clavier). Mise à jour « 5 Langues → 6 Langues EN·FR·ES·DE·IT·PT »
   et retrait du compte de clés figé (760).
 
+## 2026-07-23 — fix(perf): boutons PT redimensionnés + recompressés (10 Mo → 1,1 Mo)
+
+Revue de la PR : les 8 fichiers `assets/buttons/PT/*.webp` livrés par le design
+pesaient 862 Ko à 1,7 Mo **chacun** (~10 Mo au total), contre 8-15 Ko pour
+l'équivalent EN. Cause : export à 3246×1312px alors que les boutons s'affichent
+en jeu à ~90-100px de haut (`#guessButton`/`#resetButton { height: 90px }`,
+`css/global.css`) — même en comptant large pour le rétina, 1640×664 (résolution
+EN) est déjà très confortable. Texte du bouton lui-même **non modifié** (choix
+produit Hamza conservé : « Índice », pas de variante `_Rouge`).
+
+### Détails techniques
+
+- Pipeline : `dwebp` (décodage) → `cwebp -resize 1640 0 -lossless -z 9 -m 6`
+  (réencodage lossless à la bonne échelle, canal alpha vérifié préservé sur les
+  variantes `_Transparent` via `webpmux -info`). Lossless conservé (pas de passage
+  en lossy) pour rester cohérent avec le format des autres langues et ne pas
+  introduire d'artefacts autour du texte détouré.
+- Résultat par fichier : Confirmar 1,7 Mo → 130 Ko, Desistir 1,5 Mo → 160 Ko,
+  Indice 1,3 Mo → 106 Ko, Jogar_Novamente 1,2 Mo → 217 Ko (+ variantes
+  `_Transparent`, toutes plus légères). Rendu vérifié en navigateur réel
+  (Playwright, `classiqueMode.html` en langue `pt`) : boutons nets, alpha intact,
+  aucune régression visuelle.
+- **⚠️ Angle mort découvert en creusant ce fix — pas corrigé ici (hors périmètre
+  de cette PR)** : `assets/buttons/FR/`, `ES/`, `DE/`, `IT/` ont **exactement le
+  même défaut** (3246×1312px, 1,3-1,8 Mo par fichier, déjà mergés sur `develop`
+  depuis un moment) — ce n'était donc pas une erreur spécifique au lot PT mais un
+  bug systémique déjà en prod sur 4 langues. À traiter dans une PR dédiée
+  (même pipeline resize+recompress, ~24 fichiers).
+- `assets/lang/Matador_portugal.webp` (illustration du sélecteur de langue,
+  128 Ko) vérifié à part — cohérent avec les 6 autres personnages du sélecteur
+  (74-128 Ko), aucun problème là-dessus.
+- Suite complète revérifiée après ces changements : Vitest 601/601, ESLint 0
+  erreur, `i18n:check` 978 clés × 6 langues, `docs:check` OK.
+
 ## 2026-07-20 — test: couverture des périmètres à 0% (social-link, challenge-result, stats-compare, bottomNav)
 
 Suite à l'audit demandé par Hamza sur `cloud-sync.js` (couverture faible) : élargi
