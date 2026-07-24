@@ -311,156 +311,106 @@
         <span class="close">&times;</span>
         <h2 data-i18n="modes.classic.rules_title">📋 Classic Mode Rules</h2>
 
-        <div data-i18n-block="en">
-          <div id="rulesText">
-            <strong>🎯 Goal:</strong><br />
-            Guess the Persona character of the day using deduction and clues 🧩🕵️.
+        <!-- Règles : câblées sur les clés JSON (modes.classic.*) → traduites
+             automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
+        <div id="rulesText">
+          <strong data-i18n="modes.classic.goal">🎯 Goal:</strong><br />
+          <span data-i18n="modes.classic.goal_text"
+            >Guess the Persona character of the day using deduction and clues 🧩🕵️.</span
+          >
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>🧠 How it works:</strong>
-            <ul>
-              <li>🔍 Each attempt shows how close your guess is to the correct character.</li>
-              <li>📊 A grid compares multiple attributes like name, gender, age, arcana, etc.</li>
-              <li>🟩 Green = correct, 🟨 Yellow = partial match, 🟥 Red = wrong.</li>
-            </ul>
+          <strong data-i18n="modes.classic.how_it_works">🧠 How it works:</strong>
+          <ul>
+            <li data-i18n="modes.classic.rule_1">
+              Each attempt shows how close your guess is to the correct character.
+            </li>
+            <li data-i18n="modes.classic.rule_2">
+              A grid compares multiple attributes like game, gender, age, arcana, etc.
+            </li>
+            <li data-i18n="modes.classic.rule_3">
+              🟩 Green = correct, 🟨 Yellow = partial match, 🟥 Red = wrong.
+            </li>
+          </ul>
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>📊 Criteria compared:</strong>
-            <ul>
-              <li>👤 <strong>Name</strong> – Exact match required</li>
-              <li>⚧️ <strong>Gender</strong> – Human, Shadow, Entity, etc.</li>
-              <li>🎂 <strong>Age</strong> – Range (e.g. &lt;15, 15–20, 40+)</li>
-              <li>
-                💥 <strong>Persona User / Shadow</strong> – Can they use a Persona or are they a
-                Shadow?
-              </li>
-              <li>👺 <strong>Persona</strong> – The specific Persona or Shadow form</li>
-              <li>🃏 <strong>Arcana</strong> – Their Tarot Arcana (Fool, Magician, etc.)</li>
-              <li>🎮 <strong>Opus</strong> – Which Persona games they appear in</li>
-            </ul>
+          <strong data-i18n="modes.classic.criteria">📊 Criteria compared:</strong>
+          <ul>
+            <li data-i18n="modes.classic.criteria_game">
+              🎮 Game – Which Persona game they appear in
+            </li>
+            <li data-i18n="modes.classic.criteria_gender">
+              ⚧️ Gender – Human, Shadow, Entity, etc.
+            </li>
+            <li data-i18n="modes.classic.criteria_age">🎂 Age – Range (e.g. &lt;15, 15–20, 40+)</li>
+            <li data-i18n="modes.classic.criteria_persona_user">
+              💥 Persona User / Shadow – Can they use a Persona or are they a Shadow?
+            </li>
+            <li data-i18n="modes.classic.criteria_persona">
+              👺 Persona – The specific Persona or Shadow form
+            </li>
+            <li data-i18n="modes.classic.criteria_arcana">
+              🃏 Arcana – Their Tarot Arcana (Fool, Magician, etc.)
+            </li>
+          </ul>
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>💡 Tips:</strong>
-            <ul>
-              <li>🧠 Use deduction based on color-coded clues.</li>
-              <li>📈 If the age isn’t exact, an arrow ↑ or ↓ appears.</li>
-              <li>🟨 Yellow means partial match (e.g. some Arcana or one of several Opus).</li>
-            </ul>
+          <strong data-i18n="modes.classic.tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.classic.tip_1">🧠 Use deduction based on color-coded clues.</li>
+            <li data-i18n="modes.classic.tip_2">
+              📈 If the age isn't exact, an arrow ↑ or ↓ appears.
+            </li>
+            <li data-i18n="modes.classic.tip_3">
+              🟨 Yellow means partial match (e.g. same series but different game).
+            </li>
+          </ul>
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>♿ Accessibility:</strong>
-            <ul>
-              <li>
-                🌈 <strong>Daltonian Mode</strong> – A toggleable option replaces red/green/yellow
-                with colorblind-friendly shades <em>and</em> adds symbols (✔, ▲, ✖) for better
-                clarity.
-              </li>
-            </ul>
+          <strong data-i18n="modes.classic.accessibility">♿ Accessibility:</strong>
+          <ul>
+            <li data-i18n="modes.classic.daltonian_desc">
+              🌈 Daltonian Mode – Replaces red/green/yellow with colorblind-friendly shades and adds
+              symbols (✔, ▲, ✖) for better clarity.
+            </li>
+          </ul>
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>🎮 Game flow:</strong>
-            <ul>
-              <li>⌨️ Type a name and select from suggestions.</li>
-              <li>🔁 You have <strong>8 attempts</strong> max.</li>
-              <li>💬 At 3 attempts: 🔓 Hint button unlocks (displays a quote).</li>
-              <li>❌ At 8 attempts: 🔓 Give Up button unlocks (reveals the answer).</li>
-            </ul>
+          <strong data-i18n="modes.classic.game_flow">🎮 Game flow:</strong>
+          <ul>
+            <li data-i18n="modes.classic.flow_input">
+              ⌨️ Type a name and select from suggestions.
+            </li>
+            <li data-i18n="modes.classic.flow_attempts">🔁 You have 8 attempts max.</li>
+            <li data-i18n="modes.classic.flow_hint">
+              💬 At 3 attempts: 🔓 Hint unlocks (displays a quote).
+            </li>
+            <li data-i18n="modes.classic.flow_giveup">
+              ❌ At 8 attempts: 🔓 Give Up unlocks (reveals the answer).
+            </li>
+          </ul>
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>🛡️ Spoiler protection:</strong>
-            <p>
-              🕹️ Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>,
-              <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>)
-              to limit characters by game.<br />
-              👀 This helps avoid spoilers if you haven’t played them all!
-            </p>
+          <strong data-i18n="modes.classic.spoiler_protection">🛡️ Spoiler protection:</strong>
+          <p>
+            <span data-i18n="modes.classic.spoiler_desc"
+              >🕹️ Use the filter buttons to limit characters by game.</span
+            ><br />
+            <span data-i18n="modes.classic.spoiler_help"
+              >👀 This helps avoid spoilers if you haven't played them all!</span
+            >
+          </p>
 
-            <hr class="separator" />
-            <em>🎭 Think like a Phantom Thief... and unveil the truth!</em>
-          </div>
-        </div>
-
-        <div data-i18n-block="fr">
-          <div id="rulesText">
-            <strong>🎯 Objectif :</strong><br />
-            Devinez le personnage Persona du jour grâce à la déduction et aux indices 🧩🕵️.
-
-            <hr class="separator" />
-
-            <strong>🧠 Comment ça marche :</strong>
-            <ul>
-              <li>
-                Chaque tentative montre à quel point votre réponse se rapproche du personnage
-                correct.
-              </li>
-              <li>Une grille compare plusieurs attributs : jeu, genre, âge, arcane, etc.</li>
-              <li>🟩 Vert = correct, 🟨 Jaune = correspondance partielle, 🟥 Rouge = faux.</li>
-            </ul>
-
-            <hr class="separator" />
-
-            <strong>📊 Critères comparés :</strong>
-            <ul>
-              <li>⚧️ <strong>Genre</strong> – Humain, Shadow, Entité, etc.</li>
-              <li>🎂 <strong>Âge</strong> – Tranche d’âge (ex : &lt;15, 15–20, 40+)</li>
-              <li>
-                💥 <strong>Utilisateur de Persona / Shadow</strong> – Peut-il invoquer un Persona ou
-                est-il un Shadow ?
-              </li>
-              <li>👺 <strong>Persona</strong> – Le Persona ou la forme Shadow spécifique</li>
-              <li>🃏 <strong>Arcane</strong> – L’Arcane du Tarot (Fou, Magicien, etc.)</li>
-              <li>🎮 <strong>Opus</strong> – Dans quel(s) jeu(x) Persona ce personnage apparaît</li>
-            </ul>
-
-            <hr class="separator" />
-
-            <strong>💡 Conseils :</strong>
-            <ul>
-              <li>🧠 Utilisez la déduction grâce aux indices colorés.</li>
-              <li>📈 Si l’âge n’est pas exact, une flèche ↑ ou ↓ apparaît.</li>
-              <li>
-                🟨 Le jaune signifie une correspondance partielle (ex : même série mais jeu
-                différent).
-              </li>
-            </ul>
-
-            <hr class="separator" />
-
-            <strong>♿ Accessibilité :</strong>
-            <ul>
-              <li>
-                🌈 <strong>Mode Daltonien</strong> – Remplace le rouge/vert/jaune par des teintes
-                adaptées et ajoute des symboles (✔, ▲, ✖) pour plus de clarté.
-              </li>
-            </ul>
-
-            <hr class="separator" />
-
-            <strong>🎮 Déroulement :</strong>
-            <ul>
-              <li>⌨️ Tapez un nom et sélectionnez dans les suggestions.</li>
-              <li>🔁 Vous avez <strong>8 tentatives</strong> maximum.</li>
-              <li>💬 À 3 tentatives : 🔓 L’indice se déverrouille (affiche une citation).</li>
-              <li>❌ À 8 tentatives : 🔓 Abandonner se déverrouille (révèle la réponse).</li>
-            </ul>
-
-            <hr class="separator" />
-
-            <strong>🛡️ Protection anti-spoilers :</strong>
-            <p>
-              🕹️ Utilisez les filtres pour limiter les personnages par jeu.<br />
-              👀 Cela évite les spoilers si vous n’avez pas encore joué à tous les jeux !
-            </p>
-
-            <hr class="separator" />
-            <em>🎭 Pensez comme un Phantom Thief... et dévoilez la vérité !</em>
-          </div>
+          <hr class="separator" />
+          <em data-i18n="modes.classic.closing"
+            >🎭 Think like a Phantom Thief... and unveil the truth!</em
+          >
         </div>
       </div>
     </div>

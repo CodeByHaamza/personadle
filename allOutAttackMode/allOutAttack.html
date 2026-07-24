@@ -201,69 +201,51 @@
         <span class="close">&times;</span>
         <h2 data-i18n="modes.alloutattack.rules_title">All-Out Attack Mode Rules</h2>
 
-        <div data-i18n-block="en">
-          <div id="rulesText">
-            <strong>🎯 Goal:</strong><br />
-            Guess the Persona character based on their All-Out Attack animation.
-            <hr class="separator" />
-            <strong>💥 Gameplay:</strong>
-            <ul>
-              <li>You start with a <strong>blurry All-Out Attack GIF</strong>.</li>
-              <li><strong>Each incorrect guess reduces the blur</strong>.</li>
-              <li>Try to guess with the fewest attempts possible!</li>
-            </ul>
-            <hr class="separator" />
-            <strong>🎮 Included games:</strong>
-            <ul>
-              <li>
-                Only characters from <strong>Persona 3 Reload</strong>,
-                <strong>Persona 5 / Royal</strong> and <strong>Persona 5: The Phantom X</strong> are
-                used.
-              </li>
-            </ul>
-            <hr class="separator" />
-            <strong>📉 Give Up option:</strong>
-            <ul>
-              <li>
-                After <strong>5 incorrect guesses</strong>, the <em>Give Up</em> button activates.
-              </li>
-            </ul>
-            <hr class="separator" />
-            <em>Let your eyes adjust, focus your instincts, and go for the critical hit!</em>
-          </div>
-        </div>
+        <!-- Règles : câblées sur les clés JSON (modes.alloutattack.*) → traduites
+             automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
+        <div id="rulesText">
+          <strong data-i18n="modes.alloutattack.goal">🎯 Goal:</strong><br />
+          <span data-i18n="modes.alloutattack.goal_text"
+            >Guess the Persona character based on their All-Out Attack animation.</span
+          >
 
-        <div data-i18n-block="fr">
-          <div id="rulesText">
-            <strong>🎯 Objectif :</strong><br />
-            Devinez le personnage Persona d'après son animation d'All-Out Attack.
-            <hr class="separator" />
-            <strong>💥 Gameplay :</strong>
-            <ul>
-              <li>Vous commencez avec un <strong>GIF d'All-Out Attack flou</strong>.</li>
-              <li><strong>Chaque mauvaise réponse réduit le flou</strong>.</li>
-              <li>Essayez de deviner avec le moins de tentatives possible !</li>
-            </ul>
-            <hr class="separator" />
-            <strong>🎮 Jeux inclus :</strong>
-            <ul>
-              <li>
-                Uniquement des personnages de <strong>Persona 3 Reload</strong>,
-                <strong>Persona 5 / Royal</strong> et <strong>Persona 5 : The Phantom X</strong>.
-              </li>
-            </ul>
-            <hr class="separator" />
-            <strong>📉 Option Abandonner :</strong>
-            <ul>
-              <li>
-                Après <strong>5 mauvaises réponses</strong>, le bouton <em>Abandonner</em> s'active.
-              </li>
-            </ul>
-            <hr class="separator" />
-            <em
-              >Laissez vos yeux s'adapter, concentrez vos instincts, et visez le coup critique !</em
-            >
-          </div>
+          <hr class="separator" />
+
+          <strong data-i18n="modes.alloutattack.gameplay">💥 Gameplay:</strong>
+          <ul>
+            <li data-i18n="modes.alloutattack.gameplay_1">
+              You start with a blurry All-Out Attack GIF.
+            </li>
+            <li data-i18n="modes.alloutattack.gameplay_2">
+              Each incorrect guess reduces the blur.
+            </li>
+            <li data-i18n="modes.alloutattack.gameplay_3">
+              Try to guess with the fewest attempts possible!
+            </li>
+          </ul>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.alloutattack.games_included">🎮 Included games:</strong><br />
+          <span data-i18n="modes.alloutattack.games_list"
+            >Only characters from Persona 3 Reload, Persona 5 / Royal and Persona 5: The Phantom
+            X.</span
+          >
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.alloutattack.giveup_mechanics">📉 Give Up option:</strong>
+          <ul>
+            <li data-i18n="modes.alloutattack.giveup_unlock">
+              After 5 incorrect guesses, the Give Up button activates.
+            </li>
+          </ul>
+
+          <hr class="separator" />
+
+          <em data-i18n="modes.alloutattack.closing"
+            >Let your eyes adjust, focus your instincts, and go for the critical hit!</em
+          >
         </div>
       </div>
     </div>

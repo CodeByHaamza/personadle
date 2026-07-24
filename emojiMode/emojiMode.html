@@ -491,112 +491,71 @@
         <span class="close">&times;</span>
         <h2 data-i18n="modes.emoji.rules_title">🔠 Emoji Mode Rules</h2>
 
-        <div data-i18n-block="en">
-          <div id="rulesText">
-            <strong>🎯 Goal:</strong><br />
-            Guess which Persona character is being described by a sequence of emojis 🤔📱.
+        <!-- Règles : câblées sur les clés JSON (modes.emoji.*) → traduites
+             automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
+        <div id="rulesText">
+          <strong data-i18n="modes.emoji.goal">🎯 Goal:</strong><br />
+          <span data-i18n="modes.emoji.goal_text"
+            >Guess which Persona character is being described by a sequence of emojis 🤔📱.</span
+          >
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>🧠 How it works:</strong>
-            <ul>
-              <li>💬 You start with <strong>1 emoji</strong> to describe the character.</li>
-              <li>❌ Each wrong guess unlocks <strong>1 more emoji</strong>.</li>
-              <li>✅ Once you find the right character, the full emoji chain is revealed 🎉.</li>
-            </ul>
+          <strong data-i18n="modes.emoji.how_it_works">🧠 How it works:</strong>
+          <ul>
+            <li data-i18n="modes.emoji.rule_1">
+              💬 You start with 1 emoji to describe the character.
+            </li>
+            <li data-i18n="modes.emoji.rule_2">❌ Each wrong guess unlocks 1 more emoji.</li>
+            <li data-i18n="modes.emoji.rule_3">
+              ✅ Once you find the right character, the full emoji chain is revealed 🎉.
+            </li>
+          </ul>
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>💡 Tips:</strong>
-            <ul>
-              <li>🧩 Emojis may refer to: personality, arcana, story events, role, or weapon.</li>
-              <li>
-                📘 Example: <code>🗡️⚡😐</code> might describe a serious Persona user with a sword
-                and electric powers.
-              </li>
-              <li>🔍 Try to guess based on context, not just literal emoji meanings!</li>
-            </ul>
+          <strong data-i18n="modes.emoji.tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.emoji.tip_1">
+              🧩 Emojis may refer to: personality, arcana, story events, role, or weapon.
+            </li>
+            <li data-i18n="modes.emoji.tip_2">
+              📘 Example: 🗡️⚡😐 might describe a serious character with a sword and lightning.
+            </li>
+            <li data-i18n="modes.emoji.tip_3">
+              🔍 Try to guess based on context, not just literal emoji meanings!
+            </li>
+          </ul>
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>🎮 Game flow:</strong>
-            <ul>
-              <li>⌨️ Type a character’s name and choose from the suggestions.</li>
-              <li>🔁 You have <strong>8 tries max</strong> to guess the correct answer.</li>
-              <li>
-                🆘 You can press the <strong>Give Up</strong> button to reveal the answer (unlocked
-                after 8 attempts).
-              </li>
-            </ul>
+          <strong data-i18n="modes.emoji.game_flow">🎮 Game flow:</strong>
+          <ul>
+            <li data-i18n="modes.emoji.flow_input">
+              ⌨️ Type a character's name and choose from the suggestions.
+            </li>
+            <li data-i18n="modes.emoji.flow_attempts">🔁 You have 8 tries max.</li>
+            <li data-i18n="modes.emoji.flow_giveup">🆘 Give Up button unlocks after 8 attempts.</li>
+          </ul>
 
-            <hr class="separator" />
+          <hr class="separator" />
 
-            <strong>🛡️ Spoiler protection:</strong>
-            <p>
-              🎮 Use the filter buttons (<strong>P1</strong>, <strong>P2</strong>,
-              <strong>P3</strong>, <strong>P4</strong>, <strong>P5</strong>, <strong>P5X</strong>)
-              to limit the characters drawn from specific games.<br />
-              🙈 This helps avoid spoilers if you haven’t played every game yet!
-            </p>
+          <strong data-i18n="modes.emoji.spoiler_protection">🛡️ Spoiler protection:</strong>
+          <p>
+            <span data-i18n="modes.emoji.spoiler_desc"
+              >🎮 Use the filters to limit characters by game.</span
+            >
+            <br />
+            <span data-i18n="modes.emoji.spoiler_help"
+              >🙈 This helps avoid spoilers if you haven't played every game yet!</span
+            >
+          </p>
 
-            <hr class="separator" />
-            <em>✨ Let your intuition guide you... and read between the emojis 🧠📲</em>
-          </div>
-        </div>
+          <hr class="separator" />
 
-        <div data-i18n-block="fr">
-          <div id="rulesText">
-            <strong>🎯 Objectif :</strong><br />
-            Devinez quel personnage Persona est décrit par une séquence d’emojis 🤔📱.
-
-            <hr class="separator" />
-
-            <strong>🧠 Comment ça marche :</strong>
-            <ul>
-              <li>💬 Vous démarrez avec <strong>1 emoji</strong> pour décrire le personnage.</li>
-              <li>❌ Chaque mauvaise réponse débloque <strong>1 emoji supplémentaire</strong>.</li>
-              <li>
-                ✅ Une fois le bon personnage trouvé, toute la chaîne d’emojis est révélée 🎉.
-              </li>
-            </ul>
-
-            <hr class="separator" />
-
-            <strong>💡 Conseils :</strong>
-            <ul>
-              <li>
-                🧩 Les emojis peuvent faire référence à : la personnalité, l’arcane, les événements
-                de l’histoire, le rôle ou l’arme.
-              </li>
-              <li>
-                📘 Exemple : <code>🗡️⚡😐</code> pourrait décrire un personnage sérieux avec une
-                épée et des pouvoirs électriques.
-              </li>
-              <li>
-                🔍 Essayez de deviner selon le contexte, pas seulement le sens littéral des emojis !
-              </li>
-            </ul>
-
-            <hr class="separator" />
-
-            <strong>🎮 Déroulement :</strong>
-            <ul>
-              <li>⌨️ Tapez le nom d’un personnage et choisissez dans les suggestions.</li>
-              <li>🔁 Vous avez <strong>8 essais maximum</strong>.</li>
-              <li>🆘 Le bouton Abandonner se déverrouille après 8 tentatives.</li>
-            </ul>
-
-            <hr class="separator" />
-
-            <strong>🛡️ Protection anti-spoilers :</strong>
-            <p>
-              🎮 Utilisez les filtres pour limiter les personnages par jeu.<br />
-              🙈 Cela évite les spoilers si vous n’avez pas encore joué à tous les jeux !
-            </p>
-
-            <hr class="separator" />
-            <em>✨ Laissez votre intuition vous guider... et lisez entre les emojis 🧠📲</em>
-          </div>
+          <em data-i18n="modes.emoji.closing"
+            >✨ Let your intuition guide you... and read between the emojis 🧠📲</em
+          >
         </div>
       </div>
     </div>
