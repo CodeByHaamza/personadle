@@ -151,13 +151,12 @@ var _BUTTON_CFG = {
     guess: { n: "IT/Conferma_Button.webp", a: "IT/Conferma_Button_Rouge.webp" },
   },
   pt: {
-    // PT n'a pas de variante rouge (état survol/actif) — choix produit : `a` = normal
-    // pour les 4 boutons (survol uniforme, sans bascule rouge). Le hint reste « Índice »
+    // Variantes rouges (survol) fournies par Hamza. Le hint reste « Índice »
     // (choix Hamza, via DeepL).
-    hint: { n: "PT/Indice_Button.webp", a: "PT/Indice_Button.webp" },
-    giveUp: { n: "PT/Desistir_Button.webp", a: "PT/Desistir_Button.webp" },
-    reset: { n: "PT/Jogar_Novamente_Button.webp", a: "PT/Jogar_Novamente_Button.webp" },
-    guess: { n: "PT/Confirmar_Button.webp", a: "PT/Confirmar_Button.webp" },
+    hint: { n: "PT/Indice_Button.webp", a: "PT/Indice_Button_Rouge.webp" },
+    giveUp: { n: "PT/Desistir_Button.webp", a: "PT/Desistir_Button_Rouge.webp" },
+    reset: { n: "PT/Jogar_Novamente_Button.webp", a: "PT/Jogar_Novamente_Button_Rouge.webp" },
+    guess: { n: "PT/Confirmar_Button.webp", a: "PT/Confirmar_Button_Rouge.webp" },
   },
 };
 
