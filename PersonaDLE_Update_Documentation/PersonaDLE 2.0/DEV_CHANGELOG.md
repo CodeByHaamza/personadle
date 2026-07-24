@@ -10,6 +10,27 @@
 
 ---
 
+## 2026-07-24 — fix(messages): notifs de défi jamais reçues (défaut messages.status)
+
+Symptôme prod : les demandes d'ami notifiaient bien, mais **jamais les défis**. Cause :
+`messages.status` avait en prod `DEFAULT 'pending'` (héritage de l'archive du 6 mai), alors
+que le code n'emploie que `unread/read/accepted/beaten/expired`. Les défis (INSERT sans
+statut explicite) naissaient donc `'pending'` ; le poller `js/notifications.js`
+(`_checkPendingChallenges`, filtre `status === 'unread'`) ne les voyait jamais. Les amis
+passaient par `friendships.seen_at` → non affectés. Dérive de **défaut** (pas de colonne),
+non couverte par l'audit 025.
+
+### Détails techniques
+
+- `api/messages/index.php` : les 3 INSERT (message + défi + fallback défi) forcent désormais
+  `status = 'unread'` explicitement — le code ne dépend plus du défaut BDD pour une valeur
+  métier critique (fix principal, part en prod via l'auto-déploiement).
+- `sql/migrations/027_fix_messages_status_default.sql` : aligne le défaut prod
+  (`ALTER COLUMN status SET DEFAULT 'unread'`) + corrige d'éventuelles lignes `'pending'`.
+- Angle mort mis en lumière : l'audit 025 comparait l'existence des colonnes, pas leurs
+  **défauts/types**. `scripts/check_prod_schema.php` (nouveau) pourrait être étendu aux
+  défauts dans un second temps.
+
 ## 2026-07-24 — fix(db): migration 025 — audit global schéma prod, 4 colonnes manquantes
 
 Suite de 024. Plutôt que corriger les 500 un par un (badges → codes → défis → amis…),
