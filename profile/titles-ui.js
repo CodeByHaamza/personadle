@@ -223,8 +223,23 @@ export function checkTitlesAfterGame() {
   checkAndUnlockTitles(p, save).catch(() => {});
 }
 
+/**
+ * URL absolue (depuis la racine du site) de l'image d'un titre — correcte depuis
+ * N'IMPORTE QUELLE page. Le toast d'unlock s'affiche aussi sur les pages de mode
+ * (ex: /silhouetteMode/…) où un chemin relatif casse. `image_path` vaut soit
+ * "titles/x.webp" (défaut local, relatif à profile/), soit "profile/titles/x.webp"
+ * (enrichi par l'API /api/titles) → on normalise les deux vers "/profile/titles/x.webp".
+ */
+function _titleImgSrc(title) {
+  const base = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
+  let p = String(title.image_path || `titles/${title.slug}.webp`);
+  if (p.startsWith("/")) return p; // déjà absolu
+  if (!p.startsWith("profile/")) p = `profile/${p}`;
+  return `${base}/${p}`;
+}
+
 function _showTitleNotification(title) {
-  const imgSrc = title.image_path || `titles/${title.slug}.webp`;
+  const imgSrc = _titleImgSrc(title);
   const cond = titleConditionText(title);
 
   const notif = document.createElement("div");
@@ -255,7 +270,7 @@ function _showTitleNotification(title) {
 }
 
 function _showTitleZoom(title) {
-  const imgSrc = title.image_path || `titles/${title.slug}.webp`;
+  const imgSrc = _titleImgSrc(title);
   const cond = titleConditionText(title);
 
   const modal = document.createElement("div");
