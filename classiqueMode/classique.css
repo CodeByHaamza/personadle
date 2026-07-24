@@ -303,9 +303,20 @@
    que le contenu démarre toujours sous les deux badges empilés, quelle
    que soit la largeur — ne dépend que de la hauteur des badges (fixe),
    jamais de la largeur du logo (variable). Page Classique uniquement :
-   ne touche pas global.css ni les 5 autres modes qui n'ont qu'un badge. */
+   ne touche pas global.css ni les 5 autres modes qui n'ont qu'un badge.
+
+   MàJ (retour Hamza « logo trop bas vs les autres modes ») : sur desktop le
+   logo (max 460px, centré) n'atteint jamais les badges en haut à droite → on
+   remet un padding minime, comme les 5 autres modes. Le chevauchement ne
+   survient qu'en dessous de ~900px, où le logo (80vw) rejoint les badges :
+   on ne réserve la place que là, via media query. */
 body {
-  padding-top: 120px;
+  padding-top: 8px;
+}
+@media (max-width: 900px) {
+  body {
+    padding-top: 96px;
+  }
 }
 
 /* Bouton de bascule daltonien (fixe, sous le dark mode toggle) */

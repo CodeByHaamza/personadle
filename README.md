@@ -40,6 +40,10 @@ Perfect for both long-time fans and newcomers to the series!
 
 👉 **[Play now at personadle.net](https://personadle.net)**
 
+<p align="center">
+  <img src="./img/preview/home.png" alt="PersonaDLE home — 6 game modes" width="820">
+</p>
+
 ---
 
 ## ✨ Features
@@ -158,6 +162,19 @@ Listen to short music clips and identify the character or theme. True fans will 
   <tr>
     <td><img src="./img/preview/preview_personae.png" alt="Personae Mode" width="400"/></td>
     <td><img src="./img/preview/preview_music.png" alt="Music Mode" width="400"/></td>
+  </tr>
+</table>
+
+<p><strong>Social & progression</strong></p>
+
+<table>
+  <tr>
+    <td><img src="./img/preview/profile.png" alt="Profile page" width="400"/></td>
+    <td><img src="./img/preview/leaderboard.png" alt="Leaderboard" width="400"/></td>
+  </tr>
+  <tr>
+    <td><img src="./img/preview/friends.png" alt="Friends & Social Link" width="400"/></td>
+    <td><img src="./img/preview/home.png" alt="Home — 6 game modes" width="400"/></td>
   </tr>
 </table>
 
