@@ -10,6 +10,31 @@
 
 ---
 
+## 2026-07-24 — fix(db): migration 024 — reconcilie social_links en prod (500 panel admin)
+
+Premier déploiement backend v2.0 en prod (auto-déploiement Git Hostinger activé le même
+jour). La base Hostinger avait été initialisée depuis l'ancienne archive `hostinger_full.sql`
+(2026-05-06), où `social_links` portait `current_rank`/`last_interaction`/`rank_updated_at`.
+Le code déployé + `bdd_mysql.sql` attendent `rank`/`created_at`/`last_interaction_at` :
+`GET /api/admin/users/:id` (et tout le sous-système social) plantait en 500
+(`Unknown column 'rank'`). Aucune migration n'avait capturé ce renommage.
+
+### Détails techniques
+
+- Diagnostic : rejeu des requêtes de `api/admin/user.php` en base prod → `ERROR 1054` sur
+  `social_links.rank`. `SHOW CREATE TABLE` confirme l'ancien nommage (archive du 6 mai).
+- `sql/migrations/024_reconcile_social_links_prod_schema.sql` : renomme les colonnes
+  (data-safe via `CHANGE`), ajoute `created_at`, retire `rank_updated_at`, et **recrée la
+  vue `v_social_links` + la fonction `get_or_create_social_link` + la procédure
+  `add_social_link_xp`** avec les nouveaux noms (définitions alignées sur `bdd_mysql.sql`).
+- Non idempotente, à jouer une seule fois sur une base issue de l'archive du 6 mai ; contient
+  `DELIMITER` → appliquer via le client mysql en SSH (jamais phpMyAdmin), mysqldump avant.
+- Aucun changement de code ni de `bdd_mysql.sql` : dev/CI (qui chargent `bdd_mysql.sql`)
+  étaient déjà corrects. Dérive strictement côté prod.
+- Angle mort restant : d'autres tables issues de l'archive du 6 mai pourraient avoir une
+  dérive similaire non encore rencontrée — les endpoints exercés jusqu'ici (users, profiles,
+  user_stats, badges, wallpapers, titles, friendships) passent, seul social_links divergeait.
+
 ## 2026-07-24 — chore(deploy): durcissement .htaccess en vue de l'auto-déploiement Git
 
 Préparation du passage à l'auto-déploiement Hostinger (webhook GitHub sur `main` →
