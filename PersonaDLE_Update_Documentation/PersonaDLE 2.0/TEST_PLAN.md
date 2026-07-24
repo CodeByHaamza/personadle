@@ -1365,7 +1365,7 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 
 - [ ] Toute l'interface bascule en portugais (pas de texte resté en anglais qui traînerait)
 - [ ] Aller sur un mode de jeu (ex : Classique) → les 4 boutons illustrés (Índice, Desistir,
-  Jogar de Novo, Confirmar) s'affichent nets, texte lisible, pas flous ni pixelisés
+  Jogar Novamente, Confirmar) s'affichent nets, texte lisible, pas flous ni pixelisés
 - [ ] Survoler les boutons → pas de crash, l'état visuel change (même sans variante rouge
   dédiée pour le PT — comportement voulu, pas un bug)
 
@@ -1396,7 +1396,7 @@ Dans les deux cas : **une anomalie = une entrée**, même si elle vous semble mi
 > Pas un test à cocher — une tâche à part pour Léo (Data & Design) avant la sortie de la 2.0.
 
 Le `README.md` (captures d'écran de présentation du jeu) montre encore l'**ancien design des
-pages** — le refonte visuelle n'y est pas reflétée, pas juste du contenu manquant (collab
+pages** — la refonte visuelle n'y est pas reflétée, pas juste du contenu manquant (collab
 Discord, portugais). À refaire avant la sortie officielle de la 2.0 pour éviter que les
 captures ne montrent une version visuellement obsolète du site aux nouveaux visiteurs du repo
 GitHub.
