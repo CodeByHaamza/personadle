@@ -1,0 +1,25 @@
+name: Smoke test (prod)
+
+# Après un push/merge sur main, Hostinger auto-déploie (git pull natif, ~10-30 s).
+# On attend puis on vérifie que la prod répond correctement (endpoints clés).
+#
+# ⚠️ Ce job ne DÉPLOIE rien (c'est Hostinger qui déploie) — il ne fait que VÉRIFIER
+#    l'état de la prod après coup. Il n'est pas dans les "required status checks",
+#    donc son échec n'empêche rien : c'est une alerte, pas un bloqueur.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Smoke test personadle.net
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Attendre le déploiement Hostinger (~75 s)
+        run: sleep 75
+
+      - name: Smoke test des endpoints prod
+        run: bash scripts/smoke_test.sh https://personadle.net

@@ -10,6 +10,28 @@
 
 ---
 
+## 2026-07-24 — chore(ci): outillage anti-régression post-lancement v2.0
+
+Suite au lancement prod v2.0 et à sa série de bugs de schéma/défaut, ajout de 4 outils
+pour ne plus découvrir ce genre de problème à la main :
+
+### Détails techniques
+
+- **Smoke test** (`scripts/smoke_test.sh` + `.github/workflows/smoke.yml`) : après chaque
+  push sur `main`, attend le déploiement Hostinger (~75 s) puis `curl` les endpoints clés
+  (home 200, `/api/auth/me` 200 JSON, catalogues 401=route+auth, `/sql/` 403). Non bloquant
+  (alerte). `npm run smoke [URL]` en local. Aurait attrapé les 500 du jour automatiquement.
+- **Détecteur de dérive schéma** (`scripts/check_prod_schema.php`, `npm run schema:check-prod`)
+  : diff `information_schema` vs `bdd_mysql.sql`, liste les colonnes attendues manquantes.
+  À lancer sur le serveur / en cron. (Ne couvre pas encore les défauts/types — cf. bug
+  `messages.status`.)
+- **Suivi de migrations** (`sql/migrations/026_schema_migrations_tracking.sql` +
+  `scripts/apply_migrations.sh`) : table `schema_migrations` (amorcée avec 000→026 comme
+  appliquées) + script qui n'applique que les migrations en attente (backup auto avant).
+  Fini de deviner colonne par colonne l'état de la prod.
+- **Dependabot** (`.github/dependabot.yml`) : groupes `vitest` (+`@vitest/*`) et `eslint`
+  (+`@eslint/*`) incluant les majeures → plus de PRs cassées par peer-deps splittées.
+
 ## 2026-07-24 — fix(messages): notifs de défi jamais reçues (défaut messages.status)
 
 Symptôme prod : les demandes d'ami notifiaient bien, mais **jamais les défis**. Cause :

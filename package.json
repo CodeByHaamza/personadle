@@ -16,6 +16,8 @@
     "docs:fix": "node scripts/check-doc-numbers.js --fix",
     "pools:check": "node scripts/export-daily-pools.js --check",
     "pools:build": "node scripts/export-daily-pools.js",
+    "smoke": "bash scripts/smoke_test.sh",
+    "schema:check-prod": "php scripts/check_prod_schema.php",
     "lint": "eslint \"**/*.js\" --ignore-pattern node_modules",
     "setup-hooks": "git config core.hooksPath .githooks && echo 'Git hooks activated (.githooks/)'",
     "format": "prettier --write \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",
