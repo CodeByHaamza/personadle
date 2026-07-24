@@ -10,6 +10,35 @@
 
 ---
 
+## 2026-07-23 — fix(i18n): règles de jeu enfin traduites dans les 6 langues (6 modes)
+
+Bug remonté par Hamza : en portugais (et es/de/it), le **corps des règles** de
+chaque mode restait en anglais. Cause : les modales règles utilisaient le système
+`data-i18n-block="en"/"fr"` (blocs HTML en dur) → seuls EN et FR existaient,
+es/de/it/pt retombaient sur le bloc EN via le fallback de `applyToDOM()`. Les
+traductions existaient pourtant déjà dans `lang/*.json` (`modes.<mode>.goal`,
+`rule_1`, `tip_1`…), simplement pas câblées.
+
+### Détails techniques
+
+- **Refactor des 6 modales règles** (`classiqueMode`, `emojiMode`,
+  `silhouetteMode`, `allOutAttackMode`, `personaeMode`, `musicsMode`) : suppression
+  des blocs `data-i18n-block="en"/"fr"` (duplication + couverture partielle),
+  remplacés par un **jeu unique d'éléments `data-i18n="modes.<mode>.<clé>"`** qui
+  pointent vers les clés JSON déjà traduites → **traduit dans les 6 langues** (et
+  toute langue future) depuis la source de vérité unique, sans duplication.
+- HTML généré depuis `lang/en.json` (script one-shot) pour que le texte de repli
+  corresponde exactement aux clés (zéro erreur de recopie), puis `prettier --write`.
+- `data-i18n` pose `textContent` (cf. `js/i18n.js`) : les libellés de section
+  gardent leur style (`#rulesText strong`), on perd juste le gras inline sur
+  quelques noms de critères (les valeurs JSON sont du texte plat) — compromis
+  assumé pour une i18n complète.
+- Écart mineur réconcilié : le mode Classique avait un critère « Name » en dur sans
+  clé JSON — fusionné sur les 6 clés `criteria_*` existantes.
+- Vérifié en navigateur (Playwright, lang=pt) : Classique, Emoji, Music, Personae —
+  règles intégralement en portugais.
+- `i18n:check` inchangé (985 clés × 6, aucune clé ajoutée/retirée), Vitest 601/601.
+
 ## 2026-07-23 — fix(content): modale in-app "Historique des MAJ" — nouveaux persos + collab Discord manquants
 
 Revue demandée par Hamza : la modale `#newsModal` d'`index.html` (celle que la
