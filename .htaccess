@@ -20,3 +20,24 @@ ErrorDocument 404 /pages/404.html
         Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
     </FilesMatch>
 </IfModule>
+
+# Durcissement post-déploiement Git.
+# Le déploiement Git copie TOUT le dépôt dans public_html (l'ancien upload SFTP
+# excluait ces dossiers). Ce sont des fichiers de dev/outillage, jamais chargés
+# par le front — on les rend inaccessibles depuis le web.
+# ⚠️ NE PAS ajouter ici database/, assets/, css/, js/, lang/, img/, font/, pages/,
+#    profile/, api/ ni les dossiers de modes : ils sont servis à l'exécution.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule "(^|/)\.git(/|$)"                                           - [F,L]
+    RewriteRule "^(sql|tests|tests-e2e|scripts|coverage|node_modules)(/|$)"  - [F,L]
+</IfModule>
+
+# Fichiers de config / outillage présents à la racine — jamais servis en prod.
+# Guardé par mod_authz_core (Apache 2.4, présent sur Hostinger) : si le module
+# manque, le bloc est simplement ignoré plutôt que de renvoyer une 500.
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)^(package(-lock)?\.json|composer\.(json|lock)|vitest\.config\.js|playwright\.config\.js|eslint\.config\.js|phpunit\.xml|phpstan\.neon|docker-compose\.yml|Makefile|setup\.sh|\.env.*|\.hostinger)$|\.phar$">
+        Require all denied
+    </FilesMatch>
+</IfModule>

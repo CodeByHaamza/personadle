@@ -10,6 +10,31 @@
 
 ---
 
+## 2026-07-24 — chore(deploy): durcissement .htaccess en vue de l'auto-déploiement Git
+
+Préparation du passage à l'auto-déploiement Hostinger (webhook GitHub sur `main` →
+`git pull` dans `public_html`). Contrairement à l'ancien upload SFTP manuel (qui excluait
+les dossiers de dev, cf. `DEPLOY.md` étape 3), un déploiement Git copie **tout** le dépôt
+dans `public_html`. Les dossiers/fichiers d'outillage deviendraient donc accessibles
+publiquement (`/sql/bdd_mysql.sql`, `/.git/`, `/tests/`, `/scripts/`…).
+
+### Détails techniques
+
+- `.htaccess` racine : ajout de deux blocs de blocage web.
+  - `mod_rewrite` → `[F,L]` sur `.git`, `sql/`, `tests/`, `tests-e2e/`, `scripts/`,
+    `coverage/`, `node_modules/`.
+  - `mod_authz_core` → `Require all denied` sur les fichiers de config racine
+    (`package.json`, `*.config.js`, `phpunit.xml`, `phpstan.neon`, `docker-compose.yml`,
+    `Makefile`, `setup.sh`, `*.phar`, `.env*`, `.hostinger`).
+- Bloc `mod_authz_core` guardé par `<IfModule>` : si le module manque, ignoré au lieu de
+  renvoyer une 500 (angle mort évité).
+- **Non bloqués volontairement** (servis à l'exécution) : `database/`, `assets/`, `css/`,
+  `js/`, `lang/`, `img/`, `font/`, `pages/`, `profile/`, `api/`, dossiers de modes.
+- Angle mort connu : l'auto-déploiement ne met à jour que le **code**. Les migrations SQL
+  (`sql/migrations/`) restent à appliquer manuellement (SSH `mysql`/phpMyAdmin) après un
+  merge qui en introduit une — le `git pull` ne touche jamais à la BDD ni à `api/config.php`
+  (gitignoré, préservé sur le serveur).
+
 ## 2026-07-24 — chore(ci): job E2E devient bloquant (critère de sortie atteint)
 
 Branché en CI le 8 juillet 2026 en `continue-on-error: true`, le temps de confirmer sa
