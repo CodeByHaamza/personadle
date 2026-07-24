@@ -117,15 +117,14 @@ et requiert `sudo` (apt). Si tu n'as pas les droits, lance `npx playwright insta
 
 Lancés dans un job dédié (`e2e`) de `.github/workflows/ci.yml` : la stack Docker complète
 (`docker compose up -d --build`) est démarrée dans le runner, puis Playwright tourne contre
-`http://localhost:8080`. Non bloquant pour les autres jobs (JS/PHP) — ils tournent en parallèle.
+`http://localhost:8080`. Job indépendant des autres (JS/PHP) — ils tournent en parallèle.
 Toujours lançable en local avant une release ou un gros refactor front (voir ci-dessus).
 
-**Critère de sortie (pour passer `continue-on-error` → bloquant)** : 10 runs consécutifs
-verts sur `develop` (visible dans l'onglet **Actions** du repo, filtrer sur le job `e2e`).
-Une fois ce seuil atteint, retirer `continue-on-error: true` dans `.github/workflows/ci.yml`
-(job `e2e`) et ce paragraphe. Tant que ce n'est pas fait, un échec e2e reste informatif —
-vérifier manuellement l'onglet Actions de temps en temps plutôt que de compter uniquement
-sur le statut du job PR.
+**Bloquant depuis le 24 juillet 2026.** Branché en CI le 8 juillet 2026 en `continue-on-error`
+le temps de confirmer sa stabilité ; critère de sortie (10 runs consécutifs verts sur `develop`)
+largement atteint — 28 runs vérifiés job par job entre le 8 et le 24 juillet, tous verts.
+`continue-on-error: true` retiré du job `e2e` dans `.github/workflows/ci.yml` : un échec e2e
+bloque désormais la CI comme n'importe quel autre job.
 
 ## 💡 Scénarios à ajouter
 
