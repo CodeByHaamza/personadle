@@ -10,6 +10,39 @@
 
 ---
 
+## 2026-07-24 — fix(db): migration 025 — audit global schéma prod, 4 colonnes manquantes
+
+Suite de 024. Plutôt que corriger les 500 un par un (badges → codes → défis → amis…),
+audit complet du schéma prod : diff `information_schema` (prod réelle) vs `bdd_mysql.sql`
+(source), table par table, colonne par colonne, CROISÉ avec l'usage réel dans `api/*.php`.
+
+### Résultat de l'audit
+
+- **Objets** : toutes les tables/procédures/fonctions référencées par le code existent en
+  prod (`add_social_link_xp`/`get_or_create_social_link` recréées par 024). Le code n'utilise
+  aucune vue. Aucune table manquante.
+- **Colonnes manquantes ET utilisées par le code** (→ 500), corrigées par
+  `025_reconcile_prod_missing_columns.sql` :
+  - `badges_unlocked.id` (SELECT id — api/admin/user_badges.php, "donner un badge")
+  - `event_codes_redeemed.id` (SELECT id — api/badges/index.php, "utiliser un code")
+  - `friendships.accepted_at` (UPDATE — api/friends/index.php, "accepter un ami")
+  - `messages.challenge_score` (INSERT/SELECT — api/messages/index.php, "envoyer un défi")
+- **Dérive cosmétique laissée en l'état** (colonnes présentes dans bdd_mysql.sql mais
+  **0 usage** dans le code, confirmé par grep) : `titles.description_*`/`name_jp`,
+  `social_link_ranks.name_jp`, `user_stats.id`, `user_titles.id`, `game_sessions.created_at`.
+  Les ajouter serait du zèle risqué sans gain fonctionnel.
+
+### Détails techniques
+
+- Les deux `id` sont ajoutés en `AUTO_INCREMENT` + `UNIQUE KEY` **sans** toucher la PK
+  composite existante (AUTO_INCREMENT autorisé sur la 1re colonne d'une UNIQUE KEY) → pas de
+  `DROP PRIMARY KEY` risqué sur la prod.
+- `ADD COLUMN IF NOT EXISTS` + `ADD UNIQUE KEY IF NOT EXISTS` (MariaDB) → ré-exécutable.
+- Cause racine commune à 024+025 : base prod initialisée depuis l'archive `hostinger_full.sql`
+  (2026-05-06) + migrations 001-023 ; les colonnes non couvertes par une migration numérotée
+  sont restées à l'ancien schéma. Angle non audité : les *types* des colonnes existantes
+  (ne provoquent pas de 500).
+
 ## 2026-07-24 — fix(db): migration 024 — reconcilie social_links en prod (500 panel admin)
 
 Premier déploiement backend v2.0 en prod (auto-déploiement Git Hostinger activé le même
