@@ -118,15 +118,15 @@ jobs:
           php phpstan.phar analyse --no-progress
 
   # ── Job 3 : E2E Playwright contre la stack Docker complète ──────────────────
-  # Auparavant lancés uniquement en local (voir tests-e2e/README.md). Premier
-  # branchement en CI : non-bloquant (continue-on-error).
-  # Critère de sortie : 10 runs consécutifs verts sur develop (onglet Actions,
-  # filtrer sur ce job) → retirer continue-on-error ci-dessous (voir aussi la
+  # Auparavant lancés uniquement en local (voir tests-e2e/README.md). Branché en
+  # CI le 8 juillet 2026, d'abord non-bloquant (continue-on-error) le temps de
+  # confirmer sa stabilité. Critère de sortie atteint (28 runs consécutifs verts
+  # sur develop, 8 juillet → 24 juillet 2026, vérifiés job par job — pas juste
+  # au niveau du workflow) : bloquant depuis le 24 juillet 2026 (voir aussi la
   # note correspondante dans tests-e2e/README.md § Statut CI).
   e2e:
     name: E2E Playwright (Docker stack)
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
       - name: Checkout

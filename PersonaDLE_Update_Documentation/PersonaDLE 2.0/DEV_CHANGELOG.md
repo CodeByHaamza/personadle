@@ -10,6 +10,22 @@
 
 ---
 
+## 2026-07-24 — chore(ci): job E2E devient bloquant (critère de sortie atteint)
+
+Branché en CI le 8 juillet 2026 en `continue-on-error: true`, le temps de confirmer sa
+stabilité avant de pouvoir bloquer les merges dessus. Critère de sortie documenté dans
+`ci.yml` : 10 runs consécutifs verts sur `develop`.
+
+### Détails techniques
+
+- Vérifié job par job (pas juste le statut top-level du workflow, qui peut être trompeur
+  avec `continue-on-error`) sur 28 runs consécutifs de `develop` entre le 8 et le 24 juillet
+  2026 — toutes les étapes du job `e2e` réussissent réellement à chaque fois, largement
+  au-dessus du seuil des 10.
+- `continue-on-error: true` retiré du job `e2e` dans `.github/workflows/ci.yml`.
+- `tests-e2e/README.md` § Statut CI et `CLAUDE.md` §8 mis à jour en conséquence.
+- Suite complète revérifiée : Vitest 601/601, ESLint 0 erreur, `docs:check` OK.
+
 ## 2026-07-23 — fix(i18n): règles de jeu enfin traduites dans les 6 langues (6 modes)
 
 Bug remonté par Hamza : en portugais (et es/de/it), le **corps des règles** de
