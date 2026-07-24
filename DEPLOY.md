@@ -1,17 +1,47 @@
 # Déploiement PersonaDLE sur Hostinger
 
-> Guide pas-à-pas pour mettre en production sur Hostinger (shared hosting, Apache, MariaDB, PHP 8.3).  
-> À faire ensemble, étape par étape.
+> Hébergement mutualisé Hostinger (Apache, MariaDB, PHP 8.2). Domaine principal
+> `personadle.net`, webroot **`~/domains/personadle.net/public_html`**.
 
 ---
 
-## Vue d'ensemble
+## Déploiement courant — automatique (depuis le 2026-07-24)
+
+Le déploiement est **automatique** via l'intégration Git native de Hostinger
+(hPanel → Avancé → GIT, « Connecté avec GitHub ») :
 
 ```
-Local ──(git push)──► GitHub ──(SFTP/FileZilla)──► Hostinger public_html/
-                                                        │
-                                                   PhpMyAdmin ◄── sql/bdd_mysql.sql
+Local ──(git push)──► GitHub (branche main) ──(webhook auto)──► Hostinger git pull
+                                                                       │
+                                                        ~/domains/personadle.net/public_html
 ```
+
+- **Tout push/merge sur `main` déploie le code tout seul** en ~10-30 s. Rien à faire.
+- Workflow quotidien : bosser sur `develop` → merge `main` → c'est en ligne.
+- ⚠️ **La BDD n'est JAMAIS touchée par le déploiement.** Si un commit ajoute une
+  migration SQL (`sql/migrations/0XX.sql`), l'appliquer **manuellement** en SSH
+  (mysqldump avant) — voir « Migrations » plus bas.
+- ⚠️ **Ne jamais éditer un fichier directement sur le serveur** (sauf `api/config.php`) :
+  le prochain `git pull` l'écraserait.
+
+### Appliquer une migration SQL (quand le schéma change)
+
+```bash
+ssh hostinger-personadle
+# backup d'abord :
+mysqldump -u <user> -p<pass> --routines --triggers <db> > ~/db_backup_$(date +%F_%H%M).sql
+# puis appliquer (jamais phpMyAdmin si le .sql contient DELIMITER) :
+mysql -u <user> -p<pass> <db> < ~/domains/personadle.net/public_html/sql/migrations/0XX_xxx.sql
+```
+
+---
+
+## Première installation (référence — déjà réalisée le 2026-07-24)
+
+> Les étapes ci-dessous documentent la mise en place initiale (BDD, `config.php`,
+> crons). Elles n'ont **pas** à être refaites à chaque déploiement — seule la section
+> « Déploiement courant » ci-dessus s'applique au quotidien. Historique de l'ancien
+> déploiement SFTP/FileZilla manuel : voir l'historique git de ce fichier.
 
 ---
 
@@ -49,7 +79,13 @@ Dans hPanel → **Hébergement** → **SSL** :
 
 ---
 
-## Étape 3 — Upload des fichiers
+## Étape 3 — Mise en place des fichiers
+
+> **Méthode retenue (2026-07-24)** : intégration **Git native Hostinger** (hPanel →
+> Avancé → GIT → « Déploiement depuis GitHub », dépôt `HamzaKarrouchi/personadle`,
+> branche `main`, répertoire `domains/personadle.net/public_html`). Le clone initial +
+> tous les déploiements suivants passent par là (cf. « Déploiement courant » en haut).
+> Les deux options manuelles ci-dessous sont conservées pour référence historique.
 
 ### Option A — SFTP (FileZilla)
 
