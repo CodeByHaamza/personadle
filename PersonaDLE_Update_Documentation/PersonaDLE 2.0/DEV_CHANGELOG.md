@@ -78,16 +78,45 @@ Cinq correctifs indépendants issus d'un signalement groupé du lead dev.
     `setcookie('remember_me', …)` (pose, rotation, révocation) pour que le cookie soit lisible
     (et supprimable) depuis les deux hôtes.
 
+### Backfill des `user_stats` déjà perdus (mode préféré + classement faux)
+
+Cas concret confirmé en prod le jour même : un joueur avec 100+ victoires réelles en mode
+Music (son mode le plus joué, `game_sessions` en fait foi) voyait "Emoji" comme mode préféré
+et n'apparaissait pas correctement dans le classement Music — sa ligne
+`user_stats(mode='music')` était restée à zéro/manquante, exactement le bug décrit ci-dessus
+(`api/user/migrate.php`) et/ou son équivalent historique côté `game_session.php` (le garde-fou
+`INSERT IGNORE` y existait déjà mais commentait explicitement le même risque, signe qu'il a pu
+manquer par le passé). `js/cloud-sync.js:157` (mode préféré = mode avec le plus de `games` dans
+`user_stats`) et `api/leaderboard/index.php` (classement "ever" = lecture directe de
+`user_stats`) lisent tous les deux cette même table — une ligne manquante y est invisible des
+deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessions`.
+
+- `sql/migrations/028_reconcile_user_stats_from_sessions.sql` — recalcule
+  `games/wins/giveups/perfect_wins/total_time_ms` de `user_stats` par `(user_id, mode)`
+  directement depuis `game_sessions` (`INSERT … SELECT … ON DUPLICATE KEY UPDATE`, idempotent).
+  Volontairement **pas** touché : `streak`/`streak_record`/`last_played_at`/`first_played_at`
+  — dérivés de la consécutivité jour par jour (`personadle_compute_streak()`), pas de simples
+  agrégats ; les recalculer depuis `game_sessions` écraserait des streaks en cours légitimes.
+  Ils continuent de s'incrémenter normalement à la prochaine partie réelle du joueur.
+- À rejouer sur Hostinger via SSH (`mysql -u … -p … < sql/migrations/028_….sql`) — même
+  procédure que les migrations précédentes, pas de `DELIMITER` particulier ici (pas de
+  procédure stockée).
+
 ### Definition of Done (§13 CLAUDE.md)
 
 - `npm test` (604/604), `npm run lint`, `npm run data:check`, `npm run docs:fix` — tous verts.
 - `php -l` sur les 5 fichiers PHP modifiés — aucune erreur de syntaxe. PHPUnit non exécutable
   dans cet environnement (téléchargement du phar bloqué par le proxy réseau) — à faire tourner
   en CI/local avant merge.
-- Angle mort connu : rien ne corrige rétroactivement les `user_stats` déjà perdus pour des
-  comptes migrés avant ce fix — seuls les futurs signups sont concernés. Un script de
-  ré-agrégation à partir de `game_sessions` (source de vérité brute) serait nécessaire pour
-  réparer les comptes existants, hors périmètre de ce lot.
+- Migration 028 non exécutée contre une vraie base : ni `mysql`/`mysqld` ni `docker` (daemon
+  absent) disponibles dans cet environnement pour la tester en conditions réelles — relue
+  ligne par ligne à la place (syntaxe `INSERT…SELECT…ON DUPLICATE KEY UPDATE` déjà utilisée à
+  l'identique dans `api/cron/leaderboard.php`). À valider sur un dump prod avant exécution
+  réelle sur Hostinger (§13 CLAUDE.md : jamais rejouer une migration en confiance aveugle).
+- Angle mort résiduel : la migration 028 corrige les comptes déjà affectés existants au moment
+  où elle tourne, mais si le root cause `migrate.php` n'était pas fixé (voir plus haut), de
+  nouveaux comptes referaient le même trou — les deux correctifs (code + backfill) vont
+  ensemble, ne pas déployer l'un sans l'autre.
 
 ---
 
