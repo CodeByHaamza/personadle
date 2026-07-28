@@ -10,6 +10,87 @@
 
 ---
 
+## 2026-07-28 — fix: lot de bugs remontés (musique, titres, stats, remember-me)
+
+Cinq correctifs indépendants issus d'un signalement groupé du lead dev.
+
+### Musique — typo titre, opus Eriko, tri autocomplete
+
+- `musicsMode/database/songs.js` + `musicsMode/database/musicTitles.js` — "Blood Destiny" →
+  "Bloody Destiny" (coquille dans le titre de la chanson, `api/data/daily_pools.json`
+  régénéré via `npm run pools:build`)
+- `database/characters_clean.js` — Eriko Kirishima apparaît aussi dans P2IS (Innocent Sin),
+  pas seulement P1/P2EP
+- `musicsMode/modeMusic.js` — le dropdown d'autocomplete du mode musique n'appliquait aucun
+  tri (contrairement aux 4 autres modes qui trient préfixe > alphabétique via
+  `js/autocomplete.js` et leurs propres `initializeAutocomplete()`) : les titres tapés à la
+  fin de `songs.js` sortaient dans un ordre non alphabétique. Ajout du même tri
+  préfixe-puis-`localeCompare` sur `matches` pour un comportement uniforme partout.
+
+### Titres — naoya_first_awakening/maya_always_be_positive jamais débloqués, course d'équipement
+
+- `profile/titles-ui.js::isTitleConditionMet()` lisait `profile.classicP1Wins` /
+  `profile.emojiP2Wins` pour les `condition_type` `classic_p1_wins`/`emoji_p2_wins` — ces
+  champs n'ont **jamais existé** côté client (aucune écriture nulle part dans le code), donc
+  la condition était toujours `0 >= v` → `false`, quel que soit le nombre de victoires.
+  `api/lib/condition_check.php` traite déjà ces deux `condition_type` comme des alias de
+  `mode_wins` pour classic/emoji côté serveur — le client lit maintenant
+  `stats.modeWins.Classic`/`stats.modeWins.Emoji`, comme le fait déjà le cas `mode_wins`
+  existant.
+- Cherry-pick de `fedc95e` (déjà sur `main`, jamais mergé sur `develop`) : image du toast
+  d'unlock cassée sur les pages de mode (chemin relatif au lieu d'absolu).
+- `_renderTitlesGrid()` : cliquer "équiper" dans la fenêtre entre le rendu immédiat de la
+  modale (depuis localStorage, avant auth) et la résolution des vrais IDs par
+  `initTitlesSection()` (après `/api/titles`) envoyait `equipped_title_id: null` au serveur.
+  `api/user/index.php` accepte silencieusement un ID `null` (c'est le comportement voulu pour
+  le *déséquipement*), donc ça déséquipait le titre déjà équipé sans erreur visible. Le clic
+  est maintenant ignoré tant que l'ID réel n'est pas chargé.
+- Tests de régression ajoutés (`tests/titlesUi.test.js`).
+
+### Stats de profil faussées après migration d'un compte
+
+- `api/user/migrate.php` — la migration des sessions `localStorage` (jouées en anonyme) vers
+  un compte cloud (déclenchée à l'inscription/première connexion,
+  `js/auth.js::migrateLocalStorageToCloud()`) faisait un `UPDATE user_stats SET games =
+  games + 1, ...` sans garantir d'abord que la ligne `(user_id, mode)` existe. Pour un compte
+  tout neuf (cas courant), l'`UPDATE` matchait 0 ligne — PDO ne lève rien pour un `UPDATE` à 0
+  ligne affectée, donc la transaction committait quand même et l'endpoint répondait succès
+  (`migrated_sessions: N`) alors que `user_stats` restait vide pour ce mode. `game_sessions`
+  recevait bien les lignes, mais victoires/temps de jeu/abandons/mode préféré (tous dérivés de
+  `user_stats` par `cloud-sync.js`) restaient à zéro/faux. Root cause unique pour les 4
+  symptômes signalés. Ajout du même garde-fou `INSERT IGNORE INTO user_stats (user_id, mode)`
+  que `api/lib/game_session.php::personadle_record_session()` utilise déjà, avant chaque
+  lecture/mise à jour dans la boucle de migration.
+
+### "Se souvenir de moi" ne survivait pas au changement apex/www
+
+- Le mécanisme remember-me lui-même (token 64 octets, hash SHA-256 + expiration 30j en BDD,
+  cookie httpOnly) était déjà correctement implémenté de bout en bout. Le bug : tous les
+  cookies (session, CSRF, remember_me) étaient posés avec `'domain' => ''` (host-only), alors
+  que `$allowedOrigins` (api/bootstrap.php) whiteliste `personadle.net` ET
+  `www.personadle.net` — un cookie posé sur l'un n'est jamais envoyé sur l'autre. Un
+  utilisateur connecté sur `www.` puis revenant sur l'apex (ou l'inverse) se retrouvait donc
+  déconnecté malgré "se souvenir de moi" coché.
+  - `api/bootstrap.php` — nouvelle constante `PERSONADLE_COOKIE_DOMAIN` (`.personadle.net` en
+    prod, `''` en dev — un domaine avec point de tête casserait les cookies sur `localhost`),
+    utilisée pour le cookie de session et le cookie CSRF.
+  - `api/auth/login.php`, `api/auth/me.php`, `api/auth/logout.php` — même constante sur les 5
+    `setcookie('remember_me', …)` (pose, rotation, révocation) pour que le cookie soit lisible
+    (et supprimable) depuis les deux hôtes.
+
+### Definition of Done (§13 CLAUDE.md)
+
+- `npm test` (604/604), `npm run lint`, `npm run data:check`, `npm run docs:fix` — tous verts.
+- `php -l` sur les 5 fichiers PHP modifiés — aucune erreur de syntaxe. PHPUnit non exécutable
+  dans cet environnement (téléchargement du phar bloqué par le proxy réseau) — à faire tourner
+  en CI/local avant merge.
+- Angle mort connu : rien ne corrige rétroactivement les `user_stats` déjà perdus pour des
+  comptes migrés avant ce fix — seuls les futurs signups sont concernés. Un script de
+  ré-agrégation à partir de `game_sessions` (source de vérité brute) serait nécessaire pour
+  réparer les comptes existants, hors périmètre de ce lot.
+
+---
+
 ## 2026-07-24 — chore(deploy): durcissement .htaccess en vue de l'auto-déploiement Git
 
 Préparation du passage à l'auto-déploiement Hostinger (webhook GitHub sur `main` →

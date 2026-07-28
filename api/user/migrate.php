@@ -139,6 +139,13 @@ $stmtInsertSession = $pdo->prepare('
         (user_id, mode, played_date, target_name, result, attempts, time_ms, active_filters)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ');
+// Garde-fou : si la ligne (user, mode) n'existe pas encore (premier compte, jamais
+// joué en étant connecté), le SELECT/UPDATE plus bas matcheraient 0 ligne et les
+// stats migrées seraient silencieusement perdues — même garde-fou que
+// game_session.php::personadle_record_session().
+$stmtEnsureStatsRow = $pdo->prepare('
+    INSERT IGNORE INTO user_stats (user_id, mode) VALUES (?, ?)
+');
 $stmtGetStats = $pdo->prepare('
     SELECT * FROM user_stats WHERE user_id = ? AND mode = ? LIMIT 1
 ');
@@ -186,6 +193,7 @@ foreach ($pendingSessions as $session) {
         ]);
 
         // Recalculer la streak
+        $stmtEnsureStatsRow->execute([$userId, $mode]);
         $stmtGetStats->execute([$userId, $mode]);
         $stats = $stmtGetStats->fetch();
 
