@@ -537,6 +537,17 @@
         target="_blank"
         title="GitHub"
         id="githubLink"
+        onclick="
+          (function () {
+            try {
+              const p = JSON.parse(localStorage.getItem('personaUserProfile') || '{}');
+              if (!p.visitedGithub) {
+                p.visitedGithub = true;
+                localStorage.setItem('personaUserProfile', JSON.stringify(p));
+              }
+            } catch (e) {}
+          })()
+        "
       >
         <img src="./assets/buttons/github.svg" alt="GitHub" width="30" height="30" />
       </a>

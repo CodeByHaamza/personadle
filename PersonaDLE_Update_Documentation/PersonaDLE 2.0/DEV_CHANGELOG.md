@@ -10,6 +10,31 @@
 
 ---
 
+## 2026-07-28 — fix(badges): "Phantom Coder" (github_contributor) ne se débloquait jamais
+
+Audit systématique post-mortem du bug Naoya (voir entrée du jour ci-dessous) : tous les
+champs `profile.xxx` lus par les conditions de titres/badges/wallpapers, croisés avec les
+endroits où ils sont réellement écrits dans le code. Un cas identique trouvé côté badges :
+
+- `profile/badges/badgesData.js` — le badge secret `github_contributor` ("Phantom Coder")
+  vérifie `profile?.visitedGithub === true`, mais ce flag n'était écrit **nulle part** —
+  débloquage structurellement impossible, pour n'importe quel joueur.
+- `index.html` — lien GitHub (`#githubLink`) : ajout d'un `onclick` inline qui pose
+  `profile.visitedGithub = true` en localStorage, exactement le même pattern déjà utilisé
+  par le lien "Suggestions & Bug Report" juste en dessous (`reportSubmitted`).
+
+Même audit : un autre cas trouvé côté titres (`akechi_pancakes` / `weekly_clean_modes`,
+`profile.weeklyCleanWinModes` jamais écrit non plus) mais **pas corrigé ici** — contrairement
+à `visitedGithub`, il n'existe aucun suivi local "par jour, par mode" pour reproduire
+l'approximation serveur (`api/lib/condition_check.php::weekly_clean_modes`, qui compte les
+modes distincts joués sur 7 jours peu importe le résultat, alors que le texte du titre
+annonce "gagner tous les modes sans abandonner"). Nécessite soit un vrai suivi glissant
+7 jours côté client, soit de repenser `checkAndUnlockTitles()` pour laisser le serveur
+authoritatif sur ce titre sans marquer un faux-positif local optimiste. Laissé en l'état en
+attendant une décision produit — pas pire qu'avant, toujours bloqué comme il l'était déjà.
+
+---
+
 ## 2026-07-28 — fix: lot de bugs remontés (musique, titres, stats, remember-me)
 
 Cinq correctifs indépendants issus d'un signalement groupé du lead dev.
