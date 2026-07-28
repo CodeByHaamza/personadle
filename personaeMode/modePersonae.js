@@ -44,6 +44,7 @@ import {
 import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -470,6 +471,10 @@ function showVictory(force = false, name = null) {
   }
 
   localStorage.setItem("personaeGameOver", "true");
+  const _pPersonae = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+  trackUniqueDay(_pPersonae, () =>
+    localStorage.setItem("personaUserProfile", JSON.stringify(_pPersonae))
+  );
   checkUnlocksAfterGame("Personae");
 }
 

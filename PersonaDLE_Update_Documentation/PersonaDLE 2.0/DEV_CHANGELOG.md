@@ -51,16 +51,31 @@ plus promettre autre chose (`profile/titles-ui.js::titleConditionText()`).
   comme un win, no-op sans mode), `tests/unlockNotify.test.js` (mode bien relayé,
   rétrocompatibilité sans mode), `tests/titlesUi.test.js` (régression `isTitleConditionMet`).
 
-### Angle mort trouvé en cours de route, PAS corrigé ici
+### `trackUniqueDay()` manquant dans All-Out Attack / Personae — corrigé dans la foulée
 
 `trackUniqueDay()` (le suivi équivalent pour `unique_days`/`uniqueDaysPlayed`, titre
-`makoto_yuki_memento_mori` + badge 50-jours) n'est appelé **que** depuis
+`makoto_yuki_memento_mori` + badge 50-jours) n'était appelé **que** depuis
 classiqueMode/emojiMode/silhouetteMode/musicsMode — **jamais** depuis
 `allOutAttackMode.js` ni `personaeMode.js`. Un joueur qui ne joue qu'à ces deux modes ne
-verrait jamais son `uniqueDaysPlayed` progresser ces jours-là. Repéré par comparaison avec
-les points d'appel de `checkUnlocksAfterGame()` (qui, eux, couvrent bien les 6 modes) —
-non corrigé dans ce lot pour rester scopé à la demande initiale (weekly_clean_modes), mais
-même classe de bug, même fix évident (ajouter les 2 imports + appels manquants).
+voyait jamais son `uniqueDaysPlayed` progresser ces jours-là. Repéré par comparaison avec
+les points d'appel de `checkUnlocksAfterGame()` (qui, eux, couvrent bien les 6 modes).
+
+- `allOutAttackMode.js` — import ajouté + appel dans les 2 handlers (win ET give-up séparés,
+  comme pour `checkUnlocksAfterGame()` plus haut).
+- `personaeMode.js` — import ajouté + appel dans le handler partagé win/give-up.
+- **Décision de placement** : plutôt que de reproduire le `if (!force)` (win seulement) déjà
+  présent dans classiqueMode/emojiMode/silhouetteMode, l'appel est inconditionnel (win ET
+  give-up), comme le fait déjà `musicsMode/modeMusic.js` — et comme le serveur le vérifie
+  réellement (`unique_days` = `COUNT(DISTINCT played_date) FROM game_sessions`, sans filtre
+  sur `result`). Reproduire le filtre "win only" des 3 autres modes aurait propagé un bug
+  supplémentaire au lieu de le corriger.
+- **Angle mort restant, pas corrigé ici** : classiqueMode/emojiMode/silhouetteMode ne
+  comptent donc toujours un jour unique que s'il contient au moins une victoire — un joueur
+  qui n'enchaîne que des give-up sur ces 3 modes précis ne progresse pas son
+  `uniqueDaysPlayed` ces jours-là, contrairement à musicsMode/allOutAttackMode/personaeMode
+  (désormais cohérents entre eux). Même classe de bug une 3e fois, mais qui touche cette
+  fois du code déjà "fonctionnel" dans 3 fichiers différents plutôt qu'un appel totalement
+  absent — traitement séparé si voulu.
 
 ---
 
