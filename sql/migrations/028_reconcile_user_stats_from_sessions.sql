@@ -1,8 +1,8 @@
 -- 028_reconcile_user_stats_from_sessions.sql
 --
--- Backfill ponctuel : recalcule games/wins/giveups/perfect_wins/total_time_ms de
--- user_stats à partir de game_sessions (source de vérité brute, jamais affectée
--- par le bug ci-dessous — les sessions y sont toujours insérées, seul l'agrégat
+-- Backfill ponctuel : recalcule games/wins/giveups/total_time_ms de user_stats
+-- à partir de game_sessions (source de vérité brute, jamais affectée par le
+-- bug ci-dessous — les sessions y sont toujours insérées, seul l'agrégat
 -- pouvait se perdre).
 --
 -- Root cause corrigée en code (api/user/migrate.php, cf. DEV_CHANGELOG.md
@@ -27,16 +27,28 @@
 -- écraserait des streaks en cours légitimes. Ils continuent de s'incrémenter
 -- normalement à la prochaine partie réelle de l'utilisateur.
 --
+-- perfect_wins non plus (ajouté après revue) : personadle_upgrade_giveup_to_win()
+-- (api/lib/game_session.php) écrase game_sessions.attempts avec la tentative de
+-- la nouvelle soumission quand un give-up du jour est upgradé en win, sans
+-- jamais incrémenter perfect_wins pour cet upgrade — décision produit
+-- volontaire (2026-07-17, DEV_CHANGELOG.md) : le give-up a déjà révélé la
+-- réponse, un attempts=1 ensuite est "gratuit", pas une vraie victoire
+-- parfaite. Recalculer perfect_wins depuis SUM(result='win' AND attempts=1)
+-- ne peut pas distinguer ce cas (game_sessions ne garde aucune trace de
+-- l'upgrade) et créditerait donc rétroactivement des perfect_wins que l'app
+-- refuse sciemment — avec un impact direct sur les badges/titres gatés par
+-- la condition serveur 'perfect_wins' (api/lib/condition_check.php). Même
+-- traitement que streak/streak_record ci-dessus : laissé intact.
+--
 -- Idempotent : peut être rejouée sans risque (recalcule toujours les mêmes
 -- sommes depuis game_sessions, qui n'est jamais modifiée par ce script).
-INSERT INTO user_stats (user_id, mode, games, wins, giveups, perfect_wins, total_time_ms)
+INSERT INTO user_stats (user_id, mode, games, wins, giveups, total_time_ms)
 SELECT
     gs.user_id,
     gs.mode,
     COUNT(*)                                                              AS games,
     SUM(CASE WHEN gs.result = 'win'                       THEN 1 ELSE 0 END) AS wins,
     SUM(CASE WHEN gs.result = 'giveup'                    THEN 1 ELSE 0 END) AS giveups,
-    SUM(CASE WHEN gs.result = 'win' AND gs.attempts = 1   THEN 1 ELSE 0 END) AS perfect_wins,
     COALESCE(SUM(gs.time_ms), 0)                                          AS total_time_ms
 FROM game_sessions gs
 GROUP BY gs.user_id, gs.mode
@@ -44,5 +56,4 @@ ON DUPLICATE KEY UPDATE
     games         = VALUES(games),
     wins          = VALUES(wins),
     giveups       = VALUES(giveups),
-    perfect_wins  = VALUES(perfect_wins),
     total_time_ms = VALUES(total_time_ms);
