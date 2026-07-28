@@ -115,6 +115,26 @@ describe("isTitleConditionMet", () => {
     ).toBe(false);
   });
 
+  it("classic_p1_wins — reads stats.modeWins.Classic (regression: naoya_first_awakening never unlocked because it read a nonexistent profile.classicP1Wins field)", () => {
+    const title = find("naoya_first_awakening"); // condition_value: 15
+    expect(isTitleConditionMet(title, { profile: {}, stats: { modeWins: { Classic: 14 } } })).toBe(
+      false
+    );
+    expect(isTitleConditionMet(title, { profile: {}, stats: { modeWins: { Classic: 15 } } })).toBe(
+      true
+    );
+  });
+
+  it("emoji_p2_wins — reads stats.modeWins.Emoji (regression: maya_always_be_positive never unlocked because it read a nonexistent profile.emojiP2Wins field)", () => {
+    const title = find("maya_always_be_positive"); // condition_value: 10
+    expect(isTitleConditionMet(title, { profile: {}, stats: { modeWins: { Emoji: 9 } } })).toBe(
+      false
+    );
+    expect(isTitleConditionMet(title, { profile: {}, stats: { modeWins: { Emoji: 10 } } })).toBe(
+      true
+    );
+  });
+
   it("returns false for an unrecognized condition_type (defensive)", () => {
     expect(isTitleConditionMet({ condition_type: "not_a_real_condition" }, { profile: {} })).toBe(
       false
@@ -169,6 +189,24 @@ describe("renderTitlesSection", () => {
     const img = document.getElementById("equippedTitleImg");
     expect(img.style.display).toBe("block");
     expect(img.dataset.rarity).toBe("common");
+  });
+});
+
+describe("titles modal grid — equip click handler", () => {
+  it("ignores an equip click while the title's real id hasn't loaded yet (regression: used to silently unequip by sending equipped_title_id: null)", () => {
+    document.body.innerHTML = `<div id="titlesModalGrid"></div>`;
+    const profile = { unlockedTitles: ["adachi_boring_isnt_it"] };
+    const saveProfile = vi.fn();
+    const saveProfileToCloud = vi.fn();
+    renderTitlesSection(profile, saveProfile, saveProfileToCloud, vi.fn());
+
+    // Before initTitlesSection() resolves /api/titles, every card's data-id is "" (id: null).
+    const card = document.querySelector('.tm-card[data-slug="adachi_boring_isnt_it"]');
+    expect(card.dataset.id).toBe("");
+    card.dispatchEvent(new Event("click", { bubbles: true }));
+
+    expect(saveProfileToCloud).not.toHaveBeenCalled();
+    expect(profile.equippedTitleSlug).toBeUndefined();
   });
 });
 

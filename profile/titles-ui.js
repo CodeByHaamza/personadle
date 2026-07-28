@@ -73,9 +73,11 @@ export function isTitleConditionMet(title, ctx) {
     case "all_modes_won":
       return !!allModesWon;
     case "classic_p1_wins":
-      return (profile.classicP1Wins || 0) >= v;
+      // Alias de mode_wins pour "classic" — mêmes conditions_type côté serveur
+      // (api/lib/condition_check.php), pas de champ profile.classicP1Wins distinct.
+      return (stats.modeWins?.Classic || 0) >= v;
     case "emoji_p2_wins":
-      return (profile.emojiP2Wins || 0) >= v;
+      return (stats.modeWins?.Emoji || 0) >= v;
     case "leaderboard_top":
       return (profile.bestLeaderboardRank || 9999) <= v;
     case "weekly_clean_modes":
@@ -359,6 +361,12 @@ function _renderTitlesGrid(profile, saveProfile, saveProfileToCloud, markDirty) 
     if (isUnlocked) {
       const currentEquipped = profile?.equippedTitleSlug;
       const alreadyEquipped = currentEquipped === slug;
+      // titleId vient de /api/titles (via initTitlesSection), pas encore résolu juste
+      // après l'ouverture de la modale (rendu immédiat depuis localStorage, cf.
+      // _bindTitlesModal). Équiper avec un id null enverrait equipped_title_id: null
+      // au serveur et déséquiperait silencieusement le titre actuel — on ignore le
+      // clic le temps que la grille se re-rende avec les vrais IDs.
+      if (!alreadyEquipped && titleId === null) return;
       profile.equippedTitleSlug = alreadyEquipped ? null : slug;
       profile.equippedTitleId = alreadyEquipped ? null : titleId;
       saveProfile();
