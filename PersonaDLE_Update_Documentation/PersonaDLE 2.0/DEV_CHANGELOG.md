@@ -101,22 +101,31 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
 - À rejouer sur Hostinger via SSH (`mysql -u … -p … < sql/migrations/028_….sql`) — même
   procédure que les migrations précédentes, pas de `DELIMITER` particulier ici (pas de
   procédure stockée).
+- **Testée réellement** contre une instance MariaDB 10.11 jetable (`mariadb-server-core` +
+  `mariadb-install-db`, montée localement le temps de la vérif) chargée avec `bdd_mysql.sql` :
+  reproduction du bug exact (125 sessions `game_sessions` en mode music — 120 wins/5 giveups/20
+  perfect — sans AUCUNE ligne `user_stats` correspondante, + une ligne `emoji` déjà correcte en
+  contrôle). Après migration : ligne `music` créée avec les totaux exacts
+  (games=125, wins=120, giveups=5, perfect_wins=20, total_time_ms=4525000, calculs
+  vérifiés à la main), ligne `emoji` **inchangée** (streak/streak_record=2/2 préservés). Rejouée
+  une 2e fois → résultat identique (idempotence confirmée). Requêtes leaderboard "ever" et
+  mode-préféré rejouées à la main sur ces données : music remonte bien en tête des deux
+  désormais.
 
 ### Definition of Done (§13 CLAUDE.md)
 
-- `npm test` (604/604), `npm run lint`, `npm run data:check`, `npm run docs:fix` — tous verts.
-- `php -l` sur les 5 fichiers PHP modifiés — aucune erreur de syntaxe. PHPUnit non exécutable
-  dans cet environnement (téléchargement du phar bloqué par le proxy réseau) — à faire tourner
-  en CI/local avant merge.
-- Migration 028 non exécutée contre une vraie base : ni `mysql`/`mysqld` ni `docker` (daemon
-  absent) disponibles dans cet environnement pour la tester en conditions réelles — relue
-  ligne par ligne à la place (syntaxe `INSERT…SELECT…ON DUPLICATE KEY UPDATE` déjà utilisée à
-  l'identique dans `api/cron/leaderboard.php`). À valider sur un dump prod avant exécution
-  réelle sur Hostinger (§13 CLAUDE.md : jamais rejouer une migration en confiance aveugle).
-- Angle mort résiduel : la migration 028 corrige les comptes déjà affectés existants au moment
-  où elle tourne, mais si le root cause `migrate.php` n'était pas fixé (voir plus haut), de
-  nouveaux comptes referaient le même trou — les deux correctifs (code + backfill) vont
-  ensemble, ne pas déployer l'un sans l'autre.
+- `npm test` (604/604), `npm run lint`, `npm run data:check`, `npm run docs:fix` — tous verts
+  en local. CI GitHub Actions (run 30391448157, commit 7cd503d) verte sur les 3 jobs : PHP Lint
+  & Tests (PHPUnit inclus), JS Tests & i18n check, E2E Playwright — confirme que PHPUnit, non
+  exécutable dans cet environnement (proxy réseau bloque le téléchargement du phar), passe bien
+  en CI.
+- `php -l` sur les fichiers PHP modifiés — aucune erreur de syntaxe.
+- Migration 028 validée contre une vraie instance MariaDB (voir ci-dessus) — pas seulement
+  relue, réellement exécutée avec reproduction du bug.
+- Angle mort résiduel : la migration 028 corrige les comptes déjà affectés au moment où elle
+  tourne, mais si le root cause `migrate.php` n'était pas fixé (voir plus haut), de nouveaux
+  comptes referaient le même trou — les deux correctifs (code + backfill) vont ensemble, ne pas
+  déployer l'un sans l'autre.
 
 ---
 
