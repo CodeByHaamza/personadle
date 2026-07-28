@@ -135,6 +135,12 @@ describe("isTitleConditionMet", () => {
     );
   });
 
+  it("weekly_clean_modes — reads profile.weeklyCleanWinModes (regression: akechi_pancakes never unlocked because nothing wrote this field — see trackWeeklyModePlay)", () => {
+    const title = find("akechi_pancakes"); // condition_value: 3
+    expect(isTitleConditionMet(title, { profile: { weeklyCleanWinModes: 2 } })).toBe(false);
+    expect(isTitleConditionMet(title, { profile: { weeklyCleanWinModes: 3 } })).toBe(true);
+  });
+
   it("returns false for an unrecognized condition_type (defensive)", () => {
     expect(isTitleConditionMet({ condition_type: "not_a_real_condition" }, { profile: {} })).toBe(
       false

@@ -465,7 +465,7 @@ function handleGuess() {
 
     localStorage.setItem("aoaTarget", target);
     localStorage.setItem("aoaAttempts", attempts);
-    checkUnlocksAfterGame();
+    checkUnlocksAfterGame("All Out Attack");
     disableInputs();
   } else {
     // ── Wrong guess ──────────────────────────────────────────────────────────
@@ -521,7 +521,7 @@ function giveUp() {
   localStorage.setItem("aoaGameOver", "true");
   localStorage.setItem("aoaTarget", target);
   localStorage.setItem("aoaAttempts", attempts);
-  checkUnlocksAfterGame();
+  checkUnlocksAfterGame("All Out Attack");
 }
 
 /**

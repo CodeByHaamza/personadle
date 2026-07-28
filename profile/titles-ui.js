@@ -133,7 +133,10 @@ export function titleConditionText(t) {
     case "leaderboard_top":
       return `Reach top ${v} on the leaderboard`;
     case "weekly_clean_modes":
-      return `Win all modes in one week without giving up`;
+      // Correspond à ce que vérifie réellement api/lib/condition_check.php : le
+      // nombre de modes DISTINCTS joués sur 7 jours, peu importe le résultat —
+      // pas "gagner sans abandonner" (voir trackWeeklyModePlay(), badgesManager.js).
+      return `Play ${v} different modes within 7 days`;
     case "joker_profile":
       return `Equip the All-Out Attack theme with a P5 signature track`;
     default:

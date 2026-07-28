@@ -470,7 +470,7 @@ function showVictory(force = false, name = null) {
   }
 
   localStorage.setItem("personaeGameOver", "true");
-  checkUnlocksAfterGame();
+  checkUnlocksAfterGame("Personae");
 }
 
 /**

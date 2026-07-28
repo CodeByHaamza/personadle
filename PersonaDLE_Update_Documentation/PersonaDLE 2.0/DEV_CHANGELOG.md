@@ -10,6 +10,60 @@
 
 ---
 
+## 2026-07-28 — feat(titles): suivi glissant 7 jours pour akechi_pancakes (weekly_clean_modes)
+
+Suite de l'audit post-Naoya : `akechi_pancakes` ("Pancakes?") vérifiait
+`profile.weeklyCleanWinModes`, jamais écrit nulle part — structurellement bloqué comme
+Naoya/Maya/github_contributor, mais contrairement à eux il n'existait aucune donnée locale
+pour le calculer (pas de suivi "par jour, par mode" côté client). Implémenté maintenant.
+
+### Décision : miroir de l'approximation serveur, pas du texte affiché
+
+Le texte du titre annonce *"Win all modes in one week without giving up"*, mais la vraie
+requête serveur (`api/lib/condition_check.php::weekly_clean_modes`) compte les modes
+**distincts** joués sur 7 jours, peu importe le résultat (win ou give-up) — son propre
+docblock le documente comme une approximation. Un check client plus strict que le serveur
+(exiger des victoires sans give-up) bloquerait des déblocages que le serveur accorderait
+pourtant — recréerait une version plus douce du même bug. Le client reproduit donc
+exactement ce que le serveur vérifie réellement, et le texte affiché a été corrigé pour ne
+plus promettre autre chose (`profile/titles-ui.js::titleConditionText()`).
+
+### Implémentation
+
+- `profile/badges/badgesManager.js` — nouvelle fonction `trackWeeklyModePlay(profile,
+  saveProfile, mode)` : journal `profile.weeklyModeLog` (`{ "2026-07-28": ["classic", …] }`),
+  purge des entrées de plus de 7 jours à chaque appel, recalcule
+  `profile.weeklyCleanWinModes` = nombre de modes distincts restants dans la fenêtre. Mode
+  normalisé via `normalizeModeKey()` (gameCore.js) pour absorber toutes les graphies
+  ("All Out Attack", "Music", "classic"…).
+- `js/unlock-notify.js::checkUnlocksAfterGame(mode)` — nouveau paramètre optionnel (compat
+  ascendante : omis, le suivi est simplement sauté). Centralise l'appel à
+  `trackWeeklyModePlay()` ici plutôt que de dupliquer l'import + l'appel dans les 6 fichiers
+  de mode — seul le mode joué doit leur être passé.
+- 6 fichiers de mode mis à jour pour passer leur mode à `checkUnlocksAfterGame(...)` : le
+  point d'appel étant déjà partagé entre win ET give-up dans emoji/silhouette/personae/music
+  (fonction unique avec un paramètre `force`/`result`), un seul edit par fichier suffit pour
+  ces 4-là ; `classiqueMode.js` et `allOutAttackMode.js` ont des handlers win/give-up séparés
+  → 2 points d'appel modifiés chacun (le 3e appel redondant de `allOutAttackMode.js`, déjà
+  documenté comme tel dans le code, laissé sans argument — idempotent, sans risque).
+- Tests : `tests/badgesManager.test.js` (7 cas sur `trackWeeklyModePlay` — normalisation,
+  anti-doublon même jour, agrégation sur plusieurs jours, purge après 7 jours, give-up compté
+  comme un win, no-op sans mode), `tests/unlockNotify.test.js` (mode bien relayé,
+  rétrocompatibilité sans mode), `tests/titlesUi.test.js` (régression `isTitleConditionMet`).
+
+### Angle mort trouvé en cours de route, PAS corrigé ici
+
+`trackUniqueDay()` (le suivi équivalent pour `unique_days`/`uniqueDaysPlayed`, titre
+`makoto_yuki_memento_mori` + badge 50-jours) n'est appelé **que** depuis
+classiqueMode/emojiMode/silhouetteMode/musicsMode — **jamais** depuis
+`allOutAttackMode.js` ni `personaeMode.js`. Un joueur qui ne joue qu'à ces deux modes ne
+verrait jamais son `uniqueDaysPlayed` progresser ces jours-là. Repéré par comparaison avec
+les points d'appel de `checkUnlocksAfterGame()` (qui, eux, couvrent bien les 6 modes) —
+non corrigé dans ce lot pour rester scopé à la demande initiale (weekly_clean_modes), mais
+même classe de bug, même fix évident (ajouter les 2 imports + appels manquants).
+
+---
+
 ## 2026-07-28 — fix(badges): "Phantom Coder" (github_contributor) ne se débloquait jamais
 
 Audit systématique post-mortem du bug Naoya (voir entrée du jour ci-dessous) : tous les

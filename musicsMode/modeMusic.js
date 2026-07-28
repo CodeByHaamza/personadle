@@ -406,7 +406,7 @@ function showVictory(force = false) {
     localStorage.setItem(todayKey, "1");
   }
 
-  checkUnlocksAfterGame();
+  checkUnlocksAfterGame("Music");
 
   // ── UI ─────────────────────────────────────────────────────────────────────
   textbar.disabled = true;
