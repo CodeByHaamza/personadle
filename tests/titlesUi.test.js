@@ -248,6 +248,21 @@ describe("checkTitlesAfterGame", () => {
     expect(saved.unlockedTitles).toContain("velvet_room_thou_art_i");
   });
 
+  it("unlocks adachi_boring_isnt_it from profile.stats.giveups (regression: checkAndUnlockTitles summed the nonexistent stats.modeGiveups instead, always 0)", async () => {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ badges: [], stats: { giveups: 50 } }) // giveups_total >= 50, no modeGiveups at all
+    );
+
+    checkTitlesAfterGame();
+    await vi.waitFor(() => {
+      expect(document.querySelector(".title-notification")).not.toBeNull();
+    });
+
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.unlockedTitles).toContain("adachi_boring_isnt_it");
+  });
+
   it("does not re-unlock a title already present in unlockedTitles", async () => {
     // 20 badges also satisfies marie_i_remembered (badges_count >= 15) — mark both
     // already-unlocked so the assertion isn't confused by a genuinely different unlock.

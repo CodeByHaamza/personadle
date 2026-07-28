@@ -180,7 +180,12 @@ function _resolveEquippedTitle(profile, saveProfile, saveProfileToCloud) {
 
 async function checkAndUnlockTitles(profile, saveProfile) {
   const stats = profile.stats || {};
-  const giveups = Object.values(stats.modeGiveups || {}).reduce((a, b) => a + b, 0);
+  // stats.giveups (total, tous modes) — pas stats.modeGiveups, un champ jamais
+  // peuplé nulle part (js/cloud-sync.js ne calcule que modeCount/modeWins par
+  // mode, pas modeGiveups) : giveups valait donc toujours 0, bloquant
+  // structurellement adachi_boring_isnt_it (giveups_total >= 50), quel que soit
+  // le nombre réel d'abandons. Même champ que la badge ace_defective utilise déjà.
+  const giveups = stats.giveups || 0;
   const allModesWon = ["Classic", "Emoji", "Silhouette", "AllOutAttack", "Personae", "Music"].every(
     (m) => (stats.modeWins?.[m] || 0) >= 1
   );

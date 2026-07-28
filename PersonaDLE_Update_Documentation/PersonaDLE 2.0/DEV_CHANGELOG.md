@@ -10,6 +10,44 @@
 
 ---
 
+## 2026-07-28 — fix(titles): adachi_boring_isnt_it (giveups_total) ne se débloquait jamais
+
+Audit complet demandé côté badges/wallpapers (vérifier qu'on ne garde pas d'autres bugs du
+genre Naoya) — les 60 badges et les 7 wallpapers sont tous corrects (chaque champ lu par un
+`check()` est bien écrit quelque part), mais l'audit a fait remonter un 4e cas côté titres —
+cette fois dans la glue code plutôt que dans `isTitleConditionMet()` elle-même :
+
+`profile/titles-ui.js::checkAndUnlockTitles()` calculait `giveups` via
+`Object.values(stats.modeGiveups || {}).reduce((a, b) => a + b, 0)` — mais
+`js/cloud-sync.js` ne peuple jamais `stats.modeGiveups` (seulement `modeCount`/`modeWins`
+par mode, pas de détail des abandons). `giveups` valait donc toujours 0, quel que soit le
+nombre réel d'abandons, bloquant structurellement `adachi_boring_isnt_it` ("Boring, Isn't
+It?", `giveups_total` >= 50). Le test existant sur `isTitleConditionMet()` ne pouvait pas
+l'attraper : il passe `giveups` directement dans le ctx, sans jamais exercer le calcul cassé
+en amont dans `checkAndUnlockTitles()`.
+
+- `profile/titles-ui.js` — lit maintenant `stats.giveups` (le total, déjà correctement
+  peuplé) au lieu de sommer un `modeGiveups` fantôme — même champ que la badge
+  `ace_defective` utilise déjà pour la même stat.
+- Test de régression ajouté à un niveau différent des précédents (`checkTitlesAfterGame()`,
+  pas `isTitleConditionMet()` directement) pour couvrir la glue code, pas seulement la
+  fonction pure.
+
+### Audit badges/wallpapers — résultat
+
+- **60 badges** (`badgesData.js`) : tous les champs `profile.xxx`/`stats.xxx` référencés par
+  un `check()` vérifiés écrits quelque part dans le code. Seule anomalie cosmétique (pas un
+  bug fonctionnel) : le badge `sport` vérifie `profile.eventBadges?.sport` (jamais écrit),
+  mais son vrai déblocage passe par `condition_type = 'manual'` côté serveur (redeem du code
+  événementiel "SPORT", `sql/migrations/011_event_codes_moderation.sql`) — `check()` n'est
+  jamais consulté pour ce badge, le mismatch est invisible en pratique. Fenêtre de l'event
+  (avril-mai 2025) de toute façon expirée, non traité.
+- **7 wallpapers** (`wallpapers-ui.js`) : tous les champs vérifiés écrits (`modeCount`,
+  `avatar`, `p4ConsecutiveDays`, `challengeAcceptedByFriend`, `bestSocialLinkRank`) — rien à
+  corriger.
+
+---
+
 ## 2026-07-28 — feat(titles): suivi glissant 7 jours pour akechi_pancakes (weekly_clean_modes)
 
 Suite de l'audit post-Naoya : `akechi_pancakes` ("Pancakes?") vérifiait
