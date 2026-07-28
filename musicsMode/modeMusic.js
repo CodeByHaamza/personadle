@@ -640,6 +640,8 @@ function initializeAutocomplete(input) {
     const acceptedOpus = activeFilters;
 
     // Filter songs by: partial title match, not already tried, active opus
+    // Sorted the same way as the other modes' autocomplete (title starts with the
+    // typed text ranks first, then alphabetical) so the dropdown order is uniform.
     const matches = originalSongs
       .filter((song) => {
         const songOpus = Array.isArray(song.opus) ? song.opus : [song.opus];
@@ -649,7 +651,12 @@ function initializeAutocomplete(input) {
           songOpus.some((op) => acceptedOpus.includes(op))
         );
       })
-      .map((song) => song.titre);
+      .map((song) => song.titre)
+      .sort((a, b) => {
+        const aStarts = a.toLowerCase().startsWith(lowerVal) ? 0 : 1;
+        const bStarts = b.toLowerCase().startsWith(lowerVal) ? 0 : 1;
+        return aStarts !== bStarts ? aStarts - bStarts : a.localeCompare(b);
+      });
 
     // Render one dropdown row per match (album thumbnail + title)
     matches.forEach((nom, idx) => {
