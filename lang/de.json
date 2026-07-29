@@ -811,6 +811,7 @@
     "status_beaten": "Bestanden",
     "status_expired": "Abgelaufen",
     "msg_clear": "Erledigte löschen",
+    "msg_clear_kept_active": "{{count}} laufende Herausforderung(en) wurden behalten — erst abschließen.",
     "msg_empty": "Noch keine Nachrichten.",
     "delete_msg": "Löschen"
   },

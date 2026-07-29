@@ -76,9 +76,9 @@ function avatarHTML(pseudo, avatarData, borderColor = "#ffffff", lastSeen = null
 }
 
 /** Traduit une clé i18n avec un vrai fallback string (détecte quand i18n retourne la clé brute). */
-function tf(key, fallback) {
+function tf(key, fallback, vars) {
   if (!window.i18n?.t) return fallback;
-  const r = window.i18n.t(key);
+  const r = window.i18n.t(key, vars);
   return r && r !== key ? r : fallback;
 }
 
@@ -759,23 +759,39 @@ function renderMessage(msg) {
 async function clearReadMessages() {
   const api = window._personadleApi;
   const resolved = ["read", "beaten", "expired"];
-  const els = [...document.querySelectorAll(".fr-msg[data-mid][data-status]")].filter((el) =>
-    resolved.includes(el.dataset.status)
-  );
-  if (!els.length) return;
+  const allMsgEls = [...document.querySelectorAll(".fr-msg[data-mid][data-status]")];
+  const els = allMsgEls.filter((el) => resolved.includes(el.dataset.status));
+  // Défis en cours (acceptés, pas encore joués jusqu'au bout) : jamais supprimés
+  // automatiquement — ce n'est ni "lu" ni "résolu", et supprimer le message
+  // effacerait aussi la trace du défi côté ami (DELETE partagé, pas un masquage
+  // par utilisateur, cf. api/messages/index.php). On prévient juste pourquoi
+  // la poubelle ne les a pas touchés.
+  const keptActiveCount = allMsgEls.filter((el) => el.dataset.status === "accepted").length;
 
-  // Optimistic: remove from DOM immediately, then fire API deletes in background
-  const ids = els.map((el) => +el.dataset.mid);
-  els.forEach((el) => el.remove());
+  if (els.length) {
+    // Optimistic: remove from DOM immediately, then fire API deletes in background
+    const ids = els.map((el) => +el.dataset.mid);
+    els.forEach((el) => el.remove());
 
-  if (api) {
-    await Promise.all(ids.map((id) => api.messages.delete(id).catch(() => {})));
+    if (api) {
+      await Promise.all(ids.map((id) => api.messages.delete(id).catch(() => {})));
+    }
+
+    const list = document.getElementById("messagesList");
+    if (list && !list.querySelector(".fr-msg")) {
+      list.innerHTML = `<p class="fr-empty">${tf("friends.msg_empty", "No messages yet.")}</p>`;
+      document.getElementById("messagesSection")?.classList.add("hidden");
+    }
   }
 
-  const list = document.getElementById("messagesList");
-  if (list && !list.querySelector(".fr-msg")) {
-    list.innerHTML = `<p class="fr-empty">${tf("friends.msg_empty", "No messages yet.")}</p>`;
-    document.getElementById("messagesSection")?.classList.add("hidden");
+  if (keptActiveCount > 0 && typeof window.showToast === "function") {
+    window.showToast(
+      tf(
+        "friends.msg_clear_kept_active",
+        `${keptActiveCount} challenge(s) in progress were kept — finish them first.`,
+        { count: keptActiveCount }
+      )
+    );
   }
 }
 

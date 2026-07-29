@@ -811,6 +811,7 @@
     "status_beaten": "Superato",
     "status_expired": "Scaduto",
     "msg_clear": "Svuota risolti",
+    "msg_clear_kept_active": "{{count}} sfida/e in corso conservate — finiscile prima.",
     "msg_empty": "Nessun messaggio.",
     "delete_msg": "Elimina"
   },

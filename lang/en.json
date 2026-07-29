@@ -811,6 +811,7 @@
     "status_beaten": "Beaten",
     "status_expired": "Expired",
     "msg_clear": "Clear resolved",
+    "msg_clear_kept_active": "{{count}} challenge(s) in progress were kept — finish them first.",
     "msg_empty": "No messages yet.",
     "delete_msg": "Delete"
   },

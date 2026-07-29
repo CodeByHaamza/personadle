@@ -811,6 +811,7 @@
     "status_beaten": "Superado",
     "status_expired": "Expirado",
     "msg_clear": "Limpiar resueltos",
+    "msg_clear_kept_active": "Se conservaron {{count}} desafío(s) en curso — termínalos primero.",
     "msg_empty": "Sin mensajes todavía.",
     "delete_msg": "Eliminar"
   },

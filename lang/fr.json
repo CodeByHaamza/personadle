@@ -811,6 +811,7 @@
     "status_beaten": "Réussi",
     "status_expired": "Expiré",
     "msg_clear": "Vider les résolus",
+    "msg_clear_kept_active": "{{count}} défi(s) en cours conservé(s) — termine-les d'abord.",
     "msg_empty": "Aucun message pour l'instant.",
     "delete_msg": "Supprimer"
   },
