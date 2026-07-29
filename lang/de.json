@@ -824,6 +824,7 @@
     "accept": "⚔ Annehmen",
     "decline": "✕ Ablehnen",
     "already_sent": "Heute bereits gesendet",
+    "already_active": "Schließe zuerst deine aktuelle Herausforderung ab.",
     "active_challenge": "Herausforderung",
     "notif_challenges_you": "fordert dich heraus!",
     "notif_beat": "Schlagen",

@@ -824,6 +824,7 @@
     "accept": "⚔ Accepter",
     "decline": "✕ Refuser",
     "already_sent": "Déjà envoyé aujourd'hui",
+    "already_active": "Termine ton défi en cours d'abord.",
     "active_challenge": "Défi",
     "notif_challenges_you": "vous lance un défi !",
     "notif_beat": "Battre",

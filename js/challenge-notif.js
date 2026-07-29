@@ -10,7 +10,7 @@
  * dans les notifications et est visible depuis la page Amis.
  */
 
-import { FILTER_STORAGE_KEYS } from "./gameCore.js";
+import { FILTER_STORAGE_KEYS, getPendingActiveChallenge } from "./gameCore.js";
 import { gainSocialLinkXp } from "./social-link.js";
 
 const _queue = [];
@@ -73,8 +73,10 @@ function _avatarSrc(data) {
   return data.replace(/^\.\//, base);
 }
 
+/** t(key) retourne la clé brute (truthy) si absente — ?? ne se déclenche jamais, cf. CLAUDE.md §5. */
 function _t(key, fallback) {
-  return window.i18n?.t?.(key) ?? fallback;
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : fallback;
 }
 
 /**
@@ -157,6 +159,17 @@ function _render({
 
   // ── Accepter : pose localStorage + XP + redirect ────────
   overlay.querySelector(".cn-btn--accept").addEventListener("click", async () => {
+    // activeChallenge est une case localStorage unique (pas une file) — accepter
+    // ici l'écraserait silencieusement si un autre défi est déjà en cours,
+    // laissant ce dernier bloqué en statut 'accepted' pour toujours côté serveur.
+    const pending = getPendingActiveChallenge();
+    if (pending && pending.msgId !== id) {
+      if (typeof window.showToast === "function") {
+        window.showToast(_t("challenge.already_active", "Finish your current challenge first."));
+      }
+      return;
+    }
+
     const api = window._personadleApi;
     await api?.messages.updateStatus(id, "accepted").catch(() => {});
 

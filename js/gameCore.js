@@ -30,6 +30,7 @@
  *   enableGiveUpButton(id?)      → re-enables the #giveUpButton after the attempts threshold
  *   characterMatchesActiveOpus(character, activeOpus) → opus-intersection test used by filterCharacterPool()
  *   updateCounterElement(id, attempts, threshold) → updates a single hint/give-up counter's text + .activated class
+ *   getPendingActiveChallenge()  → today's still-unfinished accepted challenge (any mode), or null
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -620,6 +621,33 @@ export function getActiveChallengeTarget(mode) {
 /** True si la partie en cours est un défi à cible dédiée (stats quotidiennes à NE PAS logger). */
 export function isChallengePlay(mode) {
   return getActiveChallengeTarget(mode) !== null;
+}
+
+/**
+ * Défi en attente (accepté mais pas encore joué jusqu'au bout), tous modes
+ * confondus, s'il est encore valide pour AUJOURD'HUI (heure Paris) — sinon
+ * null (absent, JSON invalide, ou défi d'un jour précédent qu'on considère
+ * périmé, même logique que initChallengeBanner()).
+ *
+ * localStorage 'activeChallenge' est une case UNIQUE (pas une file) : accepter
+ * un nouveau défi l'écrase silencieusement, ce qui abandonne le défi en cours
+ * sans que le message associé ne se résolve jamais (reste bloqué en statut
+ * 'accepted' côté serveur — cf. DEV_CHANGELOG.md). Les points d'acceptation
+ * (js/challenge-notif.js, profile/friends/friends.js) appellent cette fonction
+ * avant d'écraser 'activeChallenge' pour empêcher ça.
+ *
+ * Ne modifie PAS localStorage (contrairement à initChallengeBanner() qui
+ * nettoie les entrées périmées au passage) — l'appelant décide de la suite.
+ */
+export function getPendingActiveChallenge() {
+  try {
+    const c = JSON.parse(localStorage.getItem("activeChallenge") || "null");
+    if (!c) return null;
+    if (c.date && c.date !== parisDateKey()) return null;
+    return c;
+  } catch {
+    return null;
+  }
 }
 
 /**

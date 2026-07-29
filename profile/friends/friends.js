@@ -25,7 +25,7 @@ import {
   gainSocialLinkXp,
   applyRank10Effect,
 } from "../../js/social-link.js";
-import { FILTER_STORAGE_KEYS } from "../../js/gameCore.js";
+import { FILTER_STORAGE_KEYS, getPendingActiveChallenge } from "../../js/gameCore.js";
 
 // ─────────────────────────────────────────────────────────
 // 1. UTILITAIRES
@@ -878,6 +878,19 @@ function attachListeners() {
       const senderId = parseInt(acceptChallenge.dataset.senderid);
       const challengeFilters = acceptChallenge.dataset.filters ?? "[]";
       const challengeTarget = acceptChallenge.dataset.target || null;
+
+      // activeChallenge est une case localStorage unique (pas une file) —
+      // accepter ici l'écraserait silencieusement si un autre défi est déjà en
+      // cours, laissant ce dernier bloqué en statut 'accepted' pour toujours
+      // côté serveur (jamais résolu en beaten/expired, cf. DEV_CHANGELOG.md).
+      const pending = getPendingActiveChallenge();
+      if (pending && pending.msgId !== mid) {
+        if (typeof window.showToast === "function") {
+          window.showToast(tf("challenge.already_active", "Finish your current challenge first."));
+        }
+        return;
+      }
+
       acceptChallenge.disabled = true;
       await window._personadleApi?.messages.updateStatus(mid, "accepted").catch(() => {});
 

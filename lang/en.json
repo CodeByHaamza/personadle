@@ -936,6 +936,7 @@
     "accept": "⚔ Accept",
     "decline": "✕ Decline",
     "already_sent": "Already sent today",
+    "already_active": "Finish your current challenge first.",
     "notif_challenges_you": "challenges you!",
     "notif_beat": "Beat",
     "notif_attempts": "attempt(s)"
