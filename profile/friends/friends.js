@@ -717,7 +717,8 @@ function renderMessage(msg) {
                   data-date="${esc(msg.challenge_date ?? "")}"
                   data-score="${msg.challenge_score}"
                   data-senderid="${msg.sender_id}"
-                  data-filters="${esc(msg.challenge_filters ?? "[]")}">
+                  data-filters="${esc(msg.challenge_filters ?? "[]")}"
+                  data-target="${esc(msg.challenge_target ?? "")}">
             ${tf("friends.challenge_accept", "⚔ Accept")}
           </button>
           <button class="fr-btn fr-btn--danger js-decline-msg" data-mid="${msg.id}">
@@ -860,6 +861,7 @@ function attachListeners() {
       const score = parseInt(acceptChallenge.dataset.score);
       const senderId = parseInt(acceptChallenge.dataset.senderid);
       const challengeFilters = acceptChallenge.dataset.filters ?? "[]";
+      const challengeTarget = acceptChallenge.dataset.target || null;
       acceptChallenge.disabled = true;
       await window._personadleApi?.messages.updateStatus(mid, "accepted").catch(() => {});
 
@@ -883,18 +885,28 @@ function attachListeners() {
           senderId,
           filterKey,
           originalFilters,
+          // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
+          // du jour et n'enregistrera PAS la partie en session quotidienne.
+          // Null (ancien défi) = comportement historique, cible du jour.
+          // Sans ce champ, isChallengePlay()/getActiveChallengeTarget() (gameCore.js)
+          // ne reconnaissent jamais le défi accepté ici — cf. challenge-notif.js
+          // qui pose déjà ce même champ pour le chemin popup d'animation.
+          target: challengeTarget,
         })
       );
 
       // XP Social Link : challenge accepté
       if (senderId) gainSocialLinkXp(senderId, "challenge").catch(() => {});
+      // Chemins relatifs à profile/friends/ (2 niveaux sous la racine du site,
+      // cf. commentaire sur avatarSrc() plus haut) — pas 1 seul niveau, sinon
+      // 404 (ex: "../classiqueMode/..." résoudrait vers profile/classiqueMode/).
       const modePageMap = {
-        classic: "../classiqueMode/classiqueMode.html",
-        emoji: "../emojiMode/emojiMode.html",
-        silhouette: "../silhouetteMode/silhouette.html",
-        alloutattack: "../allOutAttackMode/allOutAttack.html",
-        personae: "../personaeMode/personae.html",
-        music: "../musicsMode/musics.html",
+        classic: "../../classiqueMode/classiqueMode.html",
+        emoji: "../../emojiMode/emojiMode.html",
+        silhouette: "../../silhouetteMode/silhouette.html",
+        alloutattack: "../../allOutAttackMode/allOutAttack.html",
+        personae: "../../personaeMode/personae.html",
+        music: "../../musicsMode/musics.html",
       };
       const dest = modePageMap[mode?.toLowerCase()];
       if (dest) {
