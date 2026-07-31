@@ -25,7 +25,7 @@ import {
   gainSocialLinkXp,
   applyRank10Effect,
 } from "../../js/social-link.js";
-import { FILTER_STORAGE_KEYS } from "../../js/gameCore.js";
+import { FILTER_STORAGE_KEYS, getPendingActiveChallenge } from "../../js/gameCore.js";
 
 // ─────────────────────────────────────────────────────────
 // 1. UTILITAIRES
@@ -76,9 +76,9 @@ function avatarHTML(pseudo, avatarData, borderColor = "#ffffff", lastSeen = null
 }
 
 /** Traduit une clé i18n avec un vrai fallback string (détecte quand i18n retourne la clé brute). */
-function tf(key, fallback) {
+function tf(key, fallback, vars) {
   if (!window.i18n?.t) return fallback;
-  const r = window.i18n.t(key);
+  const r = window.i18n.t(key, vars);
   return r && r !== key ? r : fallback;
 }
 
@@ -717,7 +717,8 @@ function renderMessage(msg) {
                   data-date="${esc(msg.challenge_date ?? "")}"
                   data-score="${msg.challenge_score}"
                   data-senderid="${msg.sender_id}"
-                  data-filters="${esc(msg.challenge_filters ?? "[]")}">
+                  data-filters="${esc(msg.challenge_filters ?? "[]")}"
+                  data-target="${esc(msg.challenge_target ?? "")}">
             ${tf("friends.challenge_accept", "⚔ Accept")}
           </button>
           <button class="fr-btn fr-btn--danger js-decline-msg" data-mid="${msg.id}">
@@ -758,23 +759,39 @@ function renderMessage(msg) {
 async function clearReadMessages() {
   const api = window._personadleApi;
   const resolved = ["read", "beaten", "expired"];
-  const els = [...document.querySelectorAll(".fr-msg[data-mid][data-status]")].filter((el) =>
-    resolved.includes(el.dataset.status)
-  );
-  if (!els.length) return;
+  const allMsgEls = [...document.querySelectorAll(".fr-msg[data-mid][data-status]")];
+  const els = allMsgEls.filter((el) => resolved.includes(el.dataset.status));
+  // Défis en cours (acceptés, pas encore joués jusqu'au bout) : jamais supprimés
+  // automatiquement — ce n'est ni "lu" ni "résolu", et supprimer le message
+  // effacerait aussi la trace du défi côté ami (DELETE partagé, pas un masquage
+  // par utilisateur, cf. api/messages/index.php). On prévient juste pourquoi
+  // la poubelle ne les a pas touchés.
+  const keptActiveCount = allMsgEls.filter((el) => el.dataset.status === "accepted").length;
 
-  // Optimistic: remove from DOM immediately, then fire API deletes in background
-  const ids = els.map((el) => +el.dataset.mid);
-  els.forEach((el) => el.remove());
+  if (els.length) {
+    // Optimistic: remove from DOM immediately, then fire API deletes in background
+    const ids = els.map((el) => +el.dataset.mid);
+    els.forEach((el) => el.remove());
 
-  if (api) {
-    await Promise.all(ids.map((id) => api.messages.delete(id).catch(() => {})));
+    if (api) {
+      await Promise.all(ids.map((id) => api.messages.delete(id).catch(() => {})));
+    }
+
+    const list = document.getElementById("messagesList");
+    if (list && !list.querySelector(".fr-msg")) {
+      list.innerHTML = `<p class="fr-empty">${tf("friends.msg_empty", "No messages yet.")}</p>`;
+      document.getElementById("messagesSection")?.classList.add("hidden");
+    }
   }
 
-  const list = document.getElementById("messagesList");
-  if (list && !list.querySelector(".fr-msg")) {
-    list.innerHTML = `<p class="fr-empty">${tf("friends.msg_empty", "No messages yet.")}</p>`;
-    document.getElementById("messagesSection")?.classList.add("hidden");
+  if (keptActiveCount > 0 && typeof window.showToast === "function") {
+    window.showToast(
+      tf(
+        "friends.msg_clear_kept_active",
+        `${keptActiveCount} challenge(s) in progress were kept — finish them first.`,
+        { count: keptActiveCount }
+      )
+    );
   }
 }
 
@@ -860,6 +877,20 @@ function attachListeners() {
       const score = parseInt(acceptChallenge.dataset.score);
       const senderId = parseInt(acceptChallenge.dataset.senderid);
       const challengeFilters = acceptChallenge.dataset.filters ?? "[]";
+      const challengeTarget = acceptChallenge.dataset.target || null;
+
+      // activeChallenge est une case localStorage unique (pas une file) —
+      // accepter ici l'écraserait silencieusement si un autre défi est déjà en
+      // cours, laissant ce dernier bloqué en statut 'accepted' pour toujours
+      // côté serveur (jamais résolu en beaten/expired, cf. DEV_CHANGELOG.md).
+      const pending = getPendingActiveChallenge();
+      if (pending && pending.msgId !== mid) {
+        if (typeof window.showToast === "function") {
+          window.showToast(tf("challenge.already_active", "Finish your current challenge first."));
+        }
+        return;
+      }
+
       acceptChallenge.disabled = true;
       await window._personadleApi?.messages.updateStatus(mid, "accepted").catch(() => {});
 
@@ -883,18 +914,28 @@ function attachListeners() {
           senderId,
           filterKey,
           originalFilters,
+          // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
+          // du jour et n'enregistrera PAS la partie en session quotidienne.
+          // Null (ancien défi) = comportement historique, cible du jour.
+          // Sans ce champ, isChallengePlay()/getActiveChallengeTarget() (gameCore.js)
+          // ne reconnaissent jamais le défi accepté ici — cf. challenge-notif.js
+          // qui pose déjà ce même champ pour le chemin popup d'animation.
+          target: challengeTarget,
         })
       );
 
       // XP Social Link : challenge accepté
       if (senderId) gainSocialLinkXp(senderId, "challenge").catch(() => {});
+      // Chemins relatifs à profile/friends/ (2 niveaux sous la racine du site,
+      // cf. commentaire sur avatarSrc() plus haut) — pas 1 seul niveau, sinon
+      // 404 (ex: "../classiqueMode/..." résoudrait vers profile/classiqueMode/).
       const modePageMap = {
-        classic: "../classiqueMode/classiqueMode.html",
-        emoji: "../emojiMode/emojiMode.html",
-        silhouette: "../silhouetteMode/silhouette.html",
-        alloutattack: "../allOutAttackMode/allOutAttack.html",
-        personae: "../personaeMode/personae.html",
-        music: "../musicsMode/musics.html",
+        classic: "../../classiqueMode/classiqueMode.html",
+        emoji: "../../emojiMode/emojiMode.html",
+        silhouette: "../../silhouetteMode/silhouette.html",
+        alloutattack: "../../allOutAttackMode/allOutAttack.html",
+        personae: "../../personaeMode/personae.html",
+        music: "../../musicsMode/musics.html",
       };
       const dest = modePageMap[mode?.toLowerCase()];
       if (dest) {

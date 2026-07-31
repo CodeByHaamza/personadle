@@ -10,6 +10,52 @@
 
 ---
 
+## 2026-07-29 — fix(challenge): 404 à l'acceptation depuis la page Amis + défis fantômes bloqués en "accepted"
+
+Signalement joueur : accepter un défi depuis la liste de notifications de la page Amis
+(après avoir raté/fermé l'animation popup) menait à une 404. Audit du même code path a
+remonté deux bugs supplémentaires liés, corrigés dans le même lot.
+
+### Détails techniques
+
+- **404** (`profile/friends/friends.js`, handler `js-accept-challenge`) : `modePageMap`
+  utilisait des chemins relatifs à 1 niveau (`../classiqueMode/...`) alors que
+  `friends.html` est servi depuis `profile/friends/` (2 niveaux sous la racine — tout le
+  reste du fichier utilise déjà `../../js/`, `../../css/`, `../../img/`). Résolvait vers
+  `profile/classiqueMode/...` (inexistant) au lieu de `classiqueMode/...` à la racine.
+  Corrigé en `../../`.
+- **Cible de défi perdue silencieusement** : contrairement à la popup d'animation
+  (`js/challenge-notif.js`, qui pose `activeChallenge.target`), le bouton "Accepter" de la
+  liste de messages ne lisait/posait jamais `challenge_target` — accepter un défi depuis
+  cette liste retombait donc sur la cible du jour au lieu de la cible dédiée
+  (`getActiveChallengeTarget()`/`isChallengePlay()`, décision produit 2026-07-17). Ajout de
+  `data-target` sur le bouton (déjà exposé par l'API, `api/messages/index.php`) et propagé
+  dans `activeChallenge.target`.
+- **Défis bloqués en `accepted` pour toujours** (root cause plus large) : `activeChallenge`
+  est une case localStorage **unique**, pas une file. Accepter un 2ᵉ défi (popup ou liste)
+  avant d'avoir fini le 1ᵉʳ écrasait silencieusement ce dernier — son message ne se
+  résolvait alors jamais en `beaten`/`expired` côté serveur, restant `accepted` à vie,
+  invisible pour "Vider les résolus" (`clearReadMessages()`, qui ne supprime que
+  `read`/`beaten`/`expired`, comportement voulu). Nouveau `getPendingActiveChallenge()`
+  (`js/gameCore.js`, testé dans `tests/gameCore.test.js`) : renvoie le défi en attente s'il
+  date d'aujourd'hui (heure Paris, même logique que `initChallengeBanner()`), sinon `null`
+  (périmé → pas de blocage indéfini). Câblé en garde-fou dans les deux points
+  d'acceptation (`js/challenge-notif.js`, `profile/friends/friends.js`) : si un autre défi
+  est déjà en cours, toast `challenge.already_active` au lieu d'écraser.
+- **UX poubelle** : "Vider les résolus" reste inchangé dans son périmètre (unread protégé,
+  décision produit — supprimer une invitation jamais vue l'effacerait aussi chez
+  l'expéditeur, `DELETE` partagé sender/receiver côté `api/messages/index.php`, pas un
+  masquage par utilisateur) mais affiche désormais un toast quand des défis `accepted` sont
+  gardés, pour expliquer pourquoi la liste ne se vide pas entièrement.
+- `js/challenge-notif.js` : au passage, `_t()` reproduisait le piège CLAUDE.md §5
+  (`t(key) ?? fallback` — ne se déclenche jamais, `t()` retourne la clé brute si absente).
+  Corrigé avec le pattern correct.
+- Nouvelles clés i18n `challenge.already_active` et `friends.msg_clear_kept_active` (EN
+  source de vérité, propagées fr/es/de/it/pt).
+
+Pas d'entrée dans `PersonaDLE_Update.html` — correctifs de fiabilité internes, pas de
+nouvelle feature visible par le joueur au-delà du toast explicatif.
+
 ## 2026-07-28 — fix(titles): adachi_boring_isnt_it (giveups_total) ne se débloquait jamais
 
 Audit complet demandé côté badges/wallpapers (vérifier qu'on ne garde pas d'autres bugs du

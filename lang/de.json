@@ -811,6 +811,7 @@
     "status_beaten": "Bestanden",
     "status_expired": "Abgelaufen",
     "msg_clear": "Erledigte löschen",
+    "msg_clear_kept_active": "{{count}} laufende Herausforderung(en) wurden behalten — erst abschließen.",
     "msg_empty": "Noch keine Nachrichten.",
     "delete_msg": "Löschen"
   },
@@ -823,6 +824,7 @@
     "accept": "⚔ Annehmen",
     "decline": "✕ Ablehnen",
     "already_sent": "Heute bereits gesendet",
+    "already_active": "Schließe zuerst deine aktuelle Herausforderung ab.",
     "active_challenge": "Herausforderung",
     "notif_challenges_you": "fordert dich heraus!",
     "notif_beat": "Schlagen",

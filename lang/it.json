@@ -811,6 +811,7 @@
     "status_beaten": "Superato",
     "status_expired": "Scaduto",
     "msg_clear": "Svuota risolti",
+    "msg_clear_kept_active": "{{count}} sfida/e in corso conservate — finiscile prima.",
     "msg_empty": "Nessun messaggio.",
     "delete_msg": "Elimina"
   },
@@ -823,6 +824,7 @@
     "accept": "⚔ Accetta",
     "decline": "✕ Rifiuta",
     "already_sent": "Già inviato oggi",
+    "already_active": "Finisci prima la tua sfida in corso.",
     "active_challenge": "Sfida",
     "notif_challenges_you": "ti sfida!",
     "notif_beat": "Battere",

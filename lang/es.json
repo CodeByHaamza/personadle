@@ -811,6 +811,7 @@
     "status_beaten": "Superado",
     "status_expired": "Expirado",
     "msg_clear": "Limpiar resueltos",
+    "msg_clear_kept_active": "Se conservaron {{count}} desafío(s) en curso — termínalos primero.",
     "msg_empty": "Sin mensajes todavía.",
     "delete_msg": "Eliminar"
   },
@@ -823,6 +824,7 @@
     "accept": "⚔ Aceptar",
     "decline": "✕ Rechazar",
     "already_sent": "Ya enviado hoy",
+    "already_active": "Termina tu desafío actual primero.",
     "active_challenge": "Desafío",
     "notif_challenges_you": "¡te lanza un desafío!",
     "notif_beat": "Superar",

@@ -35,6 +35,7 @@ import {
   updateCounterElement,
   getActiveChallengeTarget,
   isChallengePlay,
+  getPendingActiveChallenge,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -1636,6 +1637,57 @@ describe("getActiveChallengeTarget / isChallengePlay", () => {
   it("JSON corrompu → null, sans throw", () => {
     localStorage.setItem("activeChallenge", "{oops");
     expect(getActiveChallengeTarget("classic")).toBeNull();
+  });
+});
+
+describe("getPendingActiveChallenge", () => {
+  afterEach(() => {
+    localStorage.removeItem("activeChallenge");
+    vi.useRealTimers();
+  });
+
+  it("retourne null sans défi actif", () => {
+    expect(getPendingActiveChallenge()).toBeNull();
+  });
+
+  it("retourne le défi tel quel s'il date d'aujourd'hui (heure Paris)", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+    const challenge = { msgId: 42, mode: "classic", date: "2026-01-15", score: 3 };
+    localStorage.setItem("activeChallenge", JSON.stringify(challenge));
+    expect(getPendingActiveChallenge()).toEqual(challenge);
+  });
+
+  it("retourne null pour un défi d'un jour précédent (périmé, même logique qu'initChallengeBanner)", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+    localStorage.setItem(
+      "activeChallenge",
+      JSON.stringify({ msgId: 1, mode: "classic", date: "2026-01-14", score: 3 })
+    );
+    expect(getPendingActiveChallenge()).toBeNull();
+  });
+
+  it("ne modifie pas localStorage (contrairement à initChallengeBanner)", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+    localStorage.setItem(
+      "activeChallenge",
+      JSON.stringify({ msgId: 1, mode: "classic", date: "2026-01-14", score: 3 })
+    );
+    getPendingActiveChallenge();
+    expect(localStorage.getItem("activeChallenge")).not.toBeNull();
+  });
+
+  it("défi ancien format sans date → pas considéré périmé (comportement historique)", () => {
+    const challenge = { msgId: 7, mode: "classic", score: 3 };
+    localStorage.setItem("activeChallenge", JSON.stringify(challenge));
+    expect(getPendingActiveChallenge()).toEqual(challenge);
+  });
+
+  it("JSON corrompu → null, sans throw", () => {
+    localStorage.setItem("activeChallenge", "{oops");
+    expect(getPendingActiveChallenge()).toBeNull();
   });
 });
 

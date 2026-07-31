@@ -811,6 +811,7 @@
     "status_beaten": "Réussi",
     "status_expired": "Expiré",
     "msg_clear": "Vider les résolus",
+    "msg_clear_kept_active": "{{count}} défi(s) en cours conservé(s) — termine-les d'abord.",
     "msg_empty": "Aucun message pour l'instant.",
     "delete_msg": "Supprimer"
   },
@@ -823,6 +824,7 @@
     "accept": "⚔ Accepter",
     "decline": "✕ Refuser",
     "already_sent": "Déjà envoyé aujourd'hui",
+    "already_active": "Termine ton défi en cours d'abord.",
     "active_challenge": "Défi",
     "notif_challenges_you": "vous lance un défi !",
     "notif_beat": "Battre",
