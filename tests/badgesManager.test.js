@@ -13,6 +13,7 @@ import {
   getBadgesForShare,
   markProfileAsShared,
   checkBadgesAfterGame,
+  trackWeeklyModePlay,
 } from "../profile/badges/badgesManager.js";
 
 function baseProfile(overrides = {}) {
@@ -306,5 +307,107 @@ describe("checkBadgesAfterGame", () => {
 
     const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
     expect(saved.badges).toEqual(["ace_defective"]);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// trackWeeklyModePlay — feeds profile.weeklyCleanWinModes (title akechi_pancakes,
+// condition_type 'weekly_clean_modes'). See tests/titlesUi.test.js for the
+// isTitleConditionMet side of the regression.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("trackWeeklyModePlay", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("records the first mode played and sets weeklyCleanWinModes to 1", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+
+    const profile = {};
+    const saveProfile = vi.fn();
+    trackWeeklyModePlay(profile, saveProfile, "classic");
+
+    expect(profile.weeklyCleanWinModes).toBe(1);
+    expect(profile.weeklyModeLog["2026-01-15"]).toEqual(["classic"]);
+    expect(saveProfile).toHaveBeenCalledOnce();
+  });
+
+  it("normalizes any mode graphy to its canonical key", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+
+    const profile = {};
+    trackWeeklyModePlay(profile, vi.fn(), "All Out Attack");
+
+    expect(profile.weeklyModeLog["2026-01-15"]).toEqual(["alloutattack"]);
+  });
+
+  it("does not double-count the same mode played twice in the same day", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+
+    const profile = {};
+    trackWeeklyModePlay(profile, vi.fn(), "music");
+    trackWeeklyModePlay(profile, vi.fn(), "Music");
+
+    expect(profile.weeklyModeLog["2026-01-15"]).toEqual(["music"]);
+    expect(profile.weeklyCleanWinModes).toBe(1);
+  });
+
+  it("counts distinct modes across several days within the 7-day window", () => {
+    const profile = {};
+    vi.useFakeTimers();
+
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+    trackWeeklyModePlay(profile, vi.fn(), "classic");
+
+    vi.setSystemTime(new Date("2026-01-17T12:00:00Z"));
+    trackWeeklyModePlay(profile, vi.fn(), "emoji");
+
+    vi.setSystemTime(new Date("2026-01-19T12:00:00Z"));
+    trackWeeklyModePlay(profile, vi.fn(), "music");
+
+    expect(profile.weeklyCleanWinModes).toBe(3);
+  });
+
+  it("prunes entries older than 7 days out of the rolling window", () => {
+    const profile = {};
+    vi.useFakeTimers();
+
+    // Played classic 10 days ago — should fall out of the 7-day window.
+    vi.setSystemTime(new Date("2026-01-05T12:00:00Z"));
+    trackWeeklyModePlay(profile, vi.fn(), "classic");
+    expect(profile.weeklyCleanWinModes).toBe(1);
+
+    // Today: only emoji is within the last 7 days.
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+    trackWeeklyModePlay(profile, vi.fn(), "emoji");
+
+    expect(profile.weeklyModeLog["2026-01-05"]).toBeUndefined();
+    expect(profile.weeklyCleanWinModes).toBe(1);
+  });
+
+  it("counts a give-up the same as a win — no result filtering (mirrors the server's approximation)", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-15T12:00:00Z"));
+
+    // trackWeeklyModePlay takes no `result` argument at all — calling it for a
+    // give-up (as checkUnlocksAfterGame does on every mode's give-up path too)
+    // counts identically to a win, matching condition_check.php's real query.
+    const profile = {};
+    trackWeeklyModePlay(profile, vi.fn(), "silhouette");
+
+    expect(profile.weeklyCleanWinModes).toBe(1);
+  });
+
+  it("is a no-op when no mode is provided", () => {
+    const profile = {};
+    const saveProfile = vi.fn();
+    trackWeeklyModePlay(profile, saveProfile, undefined);
+
+    expect(profile.weeklyModeLog).toBeUndefined();
+    expect(saveProfile).not.toHaveBeenCalled();
   });
 });

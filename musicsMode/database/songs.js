@@ -46,7 +46,7 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=shSGDbQgLLc"
   },
   {
-    titre: "Blood Destiny",
+    titre: "Bloody Destiny",
     fichier: "Blood_destiny.mp3",
     opus: ["P1"],
     image: "P1.webp",

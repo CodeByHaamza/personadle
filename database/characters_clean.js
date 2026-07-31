@@ -78,7 +78,7 @@ export const characters = [
     genre: ["Human", "Female"],
     age: "15-20",
     arcane: ["Judgement"],
-    opus: ["P1", "P2EP"],
+    opus: ["P1", "P2IS", "P2EP"],
     personaUser: true,
     persona: "Nike",
     emoji: ["🎭", "🏆", "🧙‍♀️"],

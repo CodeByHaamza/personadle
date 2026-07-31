@@ -42,6 +42,7 @@ if (ini_get('session.use_cookies')) {
 setcookie('remember_me', '', [
     'expires'  => time() - 3600,
     'path'     => '/',
+    'domain'   => PERSONADLE_COOKIE_DOMAIN,
     'secure'   => APP_ENV === 'production',
     'httponly' => true,
     'samesite' => 'Lax',

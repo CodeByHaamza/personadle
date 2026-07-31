@@ -73,9 +73,11 @@ export function isTitleConditionMet(title, ctx) {
     case "all_modes_won":
       return !!allModesWon;
     case "classic_p1_wins":
-      return (profile.classicP1Wins || 0) >= v;
+      // Alias de mode_wins pour "classic" — mêmes conditions_type côté serveur
+      // (api/lib/condition_check.php), pas de champ profile.classicP1Wins distinct.
+      return (stats.modeWins?.Classic || 0) >= v;
     case "emoji_p2_wins":
-      return (profile.emojiP2Wins || 0) >= v;
+      return (stats.modeWins?.Emoji || 0) >= v;
     case "leaderboard_top":
       return (profile.bestLeaderboardRank || 9999) <= v;
     case "weekly_clean_modes":
@@ -131,7 +133,10 @@ export function titleConditionText(t) {
     case "leaderboard_top":
       return `Reach top ${v} on the leaderboard`;
     case "weekly_clean_modes":
-      return `Win all modes in one week without giving up`;
+      // Correspond à ce que vérifie réellement api/lib/condition_check.php : le
+      // nombre de modes DISTINCTS joués sur 7 jours, peu importe le résultat —
+      // pas "gagner sans abandonner" (voir trackWeeklyModePlay(), badgesManager.js).
+      return `Play ${v} different modes within 7 days`;
     case "joker_profile":
       return `Equip the All-Out Attack theme with a P5 signature track`;
     default:
@@ -175,7 +180,12 @@ function _resolveEquippedTitle(profile, saveProfile, saveProfileToCloud) {
 
 async function checkAndUnlockTitles(profile, saveProfile) {
   const stats = profile.stats || {};
-  const giveups = Object.values(stats.modeGiveups || {}).reduce((a, b) => a + b, 0);
+  // stats.giveups (total, tous modes) — pas stats.modeGiveups, un champ jamais
+  // peuplé nulle part (js/cloud-sync.js ne calcule que modeCount/modeWins par
+  // mode, pas modeGiveups) : giveups valait donc toujours 0, bloquant
+  // structurellement adachi_boring_isnt_it (giveups_total >= 50), quel que soit
+  // le nombre réel d'abandons. Même champ que la badge ace_defective utilise déjà.
+  const giveups = stats.giveups || 0;
   const allModesWon = ["Classic", "Emoji", "Silhouette", "AllOutAttack", "Personae", "Music"].every(
     (m) => (stats.modeWins?.[m] || 0) >= 1
   );
@@ -223,8 +233,23 @@ export function checkTitlesAfterGame() {
   checkAndUnlockTitles(p, save).catch(() => {});
 }
 
+/**
+ * URL absolue (depuis la racine du site) de l'image d'un titre — correcte depuis
+ * N'IMPORTE QUELLE page. Le toast d'unlock s'affiche aussi sur les pages de mode
+ * (ex: /silhouetteMode/…) où un chemin relatif casse. `image_path` vaut soit
+ * "titles/x.webp" (défaut local, relatif à profile/), soit "profile/titles/x.webp"
+ * (enrichi par l'API /api/titles) → on normalise les deux vers "/profile/titles/x.webp".
+ */
+function _titleImgSrc(title) {
+  const base = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
+  let p = String(title.image_path || `titles/${title.slug}.webp`);
+  if (p.startsWith("/")) return p; // déjà absolu
+  if (!p.startsWith("profile/")) p = `profile/${p}`;
+  return `${base}/${p}`;
+}
+
 function _showTitleNotification(title) {
-  const imgSrc = title.image_path || `titles/${title.slug}.webp`;
+  const imgSrc = _titleImgSrc(title);
   const cond = titleConditionText(title);
 
   const notif = document.createElement("div");
@@ -255,7 +280,7 @@ function _showTitleNotification(title) {
 }
 
 function _showTitleZoom(title) {
-  const imgSrc = title.image_path || `titles/${title.slug}.webp`;
+  const imgSrc = _titleImgSrc(title);
   const cond = titleConditionText(title);
 
   const modal = document.createElement("div");
@@ -344,6 +369,12 @@ function _renderTitlesGrid(profile, saveProfile, saveProfileToCloud, markDirty) 
     if (isUnlocked) {
       const currentEquipped = profile?.equippedTitleSlug;
       const alreadyEquipped = currentEquipped === slug;
+      // titleId vient de /api/titles (via initTitlesSection), pas encore résolu juste
+      // après l'ouverture de la modale (rendu immédiat depuis localStorage, cf.
+      // _bindTitlesModal). Équiper avec un id null enverrait equipped_title_id: null
+      // au serveur et déséquiperait silencieusement le titre actuel — on ignore le
+      // clic le temps que la grille se re-rende avec les vrais IDs.
+      if (!alreadyEquipped && titleId === null) return;
       profile.equippedTitleSlug = alreadyEquipped ? null : slug;
       profile.equippedTitleId = alreadyEquipped ? null : titleId;
       saveProfile();

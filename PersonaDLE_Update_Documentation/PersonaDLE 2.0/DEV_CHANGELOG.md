@@ -10,6 +10,257 @@
 
 ---
 
+## 2026-07-28 — fix(titles): adachi_boring_isnt_it (giveups_total) ne se débloquait jamais
+
+Audit complet demandé côté badges/wallpapers (vérifier qu'on ne garde pas d'autres bugs du
+genre Naoya) — les 60 badges et les 7 wallpapers sont tous corrects (chaque champ lu par un
+`check()` est bien écrit quelque part), mais l'audit a fait remonter un 4e cas côté titres —
+cette fois dans la glue code plutôt que dans `isTitleConditionMet()` elle-même :
+
+`profile/titles-ui.js::checkAndUnlockTitles()` calculait `giveups` via
+`Object.values(stats.modeGiveups || {}).reduce((a, b) => a + b, 0)` — mais
+`js/cloud-sync.js` ne peuple jamais `stats.modeGiveups` (seulement `modeCount`/`modeWins`
+par mode, pas de détail des abandons). `giveups` valait donc toujours 0, quel que soit le
+nombre réel d'abandons, bloquant structurellement `adachi_boring_isnt_it` ("Boring, Isn't
+It?", `giveups_total` >= 50). Le test existant sur `isTitleConditionMet()` ne pouvait pas
+l'attraper : il passe `giveups` directement dans le ctx, sans jamais exercer le calcul cassé
+en amont dans `checkAndUnlockTitles()`.
+
+- `profile/titles-ui.js` — lit maintenant `stats.giveups` (le total, déjà correctement
+  peuplé) au lieu de sommer un `modeGiveups` fantôme — même champ que la badge
+  `ace_defective` utilise déjà pour la même stat.
+- Test de régression ajouté à un niveau différent des précédents (`checkTitlesAfterGame()`,
+  pas `isTitleConditionMet()` directement) pour couvrir la glue code, pas seulement la
+  fonction pure.
+
+### Audit badges/wallpapers — résultat
+
+- **60 badges** (`badgesData.js`) : tous les champs `profile.xxx`/`stats.xxx` référencés par
+  un `check()` vérifiés écrits quelque part dans le code. Seule anomalie cosmétique (pas un
+  bug fonctionnel) : le badge `sport` vérifie `profile.eventBadges?.sport` (jamais écrit),
+  mais son vrai déblocage passe par `condition_type = 'manual'` côté serveur (redeem du code
+  événementiel "SPORT", `sql/migrations/011_event_codes_moderation.sql`) — `check()` n'est
+  jamais consulté pour ce badge, le mismatch est invisible en pratique. Fenêtre de l'event
+  (avril-mai 2025) de toute façon expirée, non traité.
+- **7 wallpapers** (`wallpapers-ui.js`) : tous les champs vérifiés écrits (`modeCount`,
+  `avatar`, `p4ConsecutiveDays`, `challengeAcceptedByFriend`, `bestSocialLinkRank`) — rien à
+  corriger.
+
+---
+
+## 2026-07-28 — feat(titles): suivi glissant 7 jours pour akechi_pancakes (weekly_clean_modes)
+
+Suite de l'audit post-Naoya : `akechi_pancakes` ("Pancakes?") vérifiait
+`profile.weeklyCleanWinModes`, jamais écrit nulle part — structurellement bloqué comme
+Naoya/Maya/github_contributor, mais contrairement à eux il n'existait aucune donnée locale
+pour le calculer (pas de suivi "par jour, par mode" côté client). Implémenté maintenant.
+
+### Décision : miroir de l'approximation serveur, pas du texte affiché
+
+Le texte du titre annonce *"Win all modes in one week without giving up"*, mais la vraie
+requête serveur (`api/lib/condition_check.php::weekly_clean_modes`) compte les modes
+**distincts** joués sur 7 jours, peu importe le résultat (win ou give-up) — son propre
+docblock le documente comme une approximation. Un check client plus strict que le serveur
+(exiger des victoires sans give-up) bloquerait des déblocages que le serveur accorderait
+pourtant — recréerait une version plus douce du même bug. Le client reproduit donc
+exactement ce que le serveur vérifie réellement, et le texte affiché a été corrigé pour ne
+plus promettre autre chose (`profile/titles-ui.js::titleConditionText()`).
+
+### Implémentation
+
+- `profile/badges/badgesManager.js` — nouvelle fonction `trackWeeklyModePlay(profile,
+  saveProfile, mode)` : journal `profile.weeklyModeLog` (`{ "2026-07-28": ["classic", …] }`),
+  purge des entrées de plus de 7 jours à chaque appel, recalcule
+  `profile.weeklyCleanWinModes` = nombre de modes distincts restants dans la fenêtre. Mode
+  normalisé via `normalizeModeKey()` (gameCore.js) pour absorber toutes les graphies
+  ("All Out Attack", "Music", "classic"…).
+- `js/unlock-notify.js::checkUnlocksAfterGame(mode)` — nouveau paramètre optionnel (compat
+  ascendante : omis, le suivi est simplement sauté). Centralise l'appel à
+  `trackWeeklyModePlay()` ici plutôt que de dupliquer l'import + l'appel dans les 6 fichiers
+  de mode — seul le mode joué doit leur être passé.
+- 6 fichiers de mode mis à jour pour passer leur mode à `checkUnlocksAfterGame(...)` : le
+  point d'appel étant déjà partagé entre win ET give-up dans emoji/silhouette/personae/music
+  (fonction unique avec un paramètre `force`/`result`), un seul edit par fichier suffit pour
+  ces 4-là ; `classiqueMode.js` et `allOutAttackMode.js` ont des handlers win/give-up séparés
+  → 2 points d'appel modifiés chacun (le 3e appel redondant de `allOutAttackMode.js`, déjà
+  documenté comme tel dans le code, laissé sans argument — idempotent, sans risque).
+- Tests : `tests/badgesManager.test.js` (7 cas sur `trackWeeklyModePlay` — normalisation,
+  anti-doublon même jour, agrégation sur plusieurs jours, purge après 7 jours, give-up compté
+  comme un win, no-op sans mode), `tests/unlockNotify.test.js` (mode bien relayé,
+  rétrocompatibilité sans mode), `tests/titlesUi.test.js` (régression `isTitleConditionMet`).
+
+### `trackUniqueDay()` manquant dans All-Out Attack / Personae — corrigé dans la foulée
+
+`trackUniqueDay()` (le suivi équivalent pour `unique_days`/`uniqueDaysPlayed`, titre
+`makoto_yuki_memento_mori` + badge 50-jours) n'était appelé **que** depuis
+classiqueMode/emojiMode/silhouetteMode/musicsMode — **jamais** depuis
+`allOutAttackMode.js` ni `personaeMode.js`. Un joueur qui ne joue qu'à ces deux modes ne
+voyait jamais son `uniqueDaysPlayed` progresser ces jours-là. Repéré par comparaison avec
+les points d'appel de `checkUnlocksAfterGame()` (qui, eux, couvrent bien les 6 modes).
+
+- `allOutAttackMode.js` — import ajouté + appel dans les 2 handlers (win ET give-up séparés,
+  comme pour `checkUnlocksAfterGame()` plus haut).
+- `personaeMode.js` — import ajouté + appel dans le handler partagé win/give-up.
+- **Décision de placement** : plutôt que de reproduire le `if (!force)` (win seulement) déjà
+  présent dans classiqueMode/emojiMode/silhouetteMode, l'appel est inconditionnel (win ET
+  give-up), comme le fait déjà `musicsMode/modeMusic.js` — et comme le serveur le vérifie
+  réellement (`unique_days` = `COUNT(DISTINCT played_date) FROM game_sessions`, sans filtre
+  sur `result`). Reproduire le filtre "win only" des 3 autres modes aurait propagé un bug
+  supplémentaire au lieu de le corriger.
+- **Angle mort restant, pas corrigé ici** : classiqueMode/emojiMode/silhouetteMode ne
+  comptent donc toujours un jour unique que s'il contient au moins une victoire — un joueur
+  qui n'enchaîne que des give-up sur ces 3 modes précis ne progresse pas son
+  `uniqueDaysPlayed` ces jours-là, contrairement à musicsMode/allOutAttackMode/personaeMode
+  (désormais cohérents entre eux). Même classe de bug une 3e fois, mais qui touche cette
+  fois du code déjà "fonctionnel" dans 3 fichiers différents plutôt qu'un appel totalement
+  absent — traitement séparé si voulu.
+
+---
+
+## 2026-07-28 — fix(badges): "Phantom Coder" (github_contributor) ne se débloquait jamais
+
+Audit systématique post-mortem du bug Naoya (voir entrée du jour ci-dessous) : tous les
+champs `profile.xxx` lus par les conditions de titres/badges/wallpapers, croisés avec les
+endroits où ils sont réellement écrits dans le code. Un cas identique trouvé côté badges :
+
+- `profile/badges/badgesData.js` — le badge secret `github_contributor` ("Phantom Coder")
+  vérifie `profile?.visitedGithub === true`, mais ce flag n'était écrit **nulle part** —
+  débloquage structurellement impossible, pour n'importe quel joueur.
+- `index.html` — lien GitHub (`#githubLink`) : ajout d'un `onclick` inline qui pose
+  `profile.visitedGithub = true` en localStorage, exactement le même pattern déjà utilisé
+  par le lien "Suggestions & Bug Report" juste en dessous (`reportSubmitted`).
+
+Même audit : un autre cas trouvé côté titres (`akechi_pancakes` / `weekly_clean_modes`,
+`profile.weeklyCleanWinModes` jamais écrit non plus) mais **pas corrigé ici** — contrairement
+à `visitedGithub`, il n'existe aucun suivi local "par jour, par mode" pour reproduire
+l'approximation serveur (`api/lib/condition_check.php::weekly_clean_modes`, qui compte les
+modes distincts joués sur 7 jours peu importe le résultat, alors que le texte du titre
+annonce "gagner tous les modes sans abandonner"). Nécessite soit un vrai suivi glissant
+7 jours côté client, soit de repenser `checkAndUnlockTitles()` pour laisser le serveur
+authoritatif sur ce titre sans marquer un faux-positif local optimiste. Laissé en l'état en
+attendant une décision produit — pas pire qu'avant, toujours bloqué comme il l'était déjà.
+
+---
+
+## 2026-07-28 — fix: lot de bugs remontés (musique, titres, stats, remember-me)
+
+Cinq correctifs indépendants issus d'un signalement groupé du lead dev.
+
+### Musique — typo titre, opus Eriko, tri autocomplete
+
+- `musicsMode/database/songs.js` + `musicsMode/database/musicTitles.js` — "Blood Destiny" →
+  "Bloody Destiny" (coquille dans le titre de la chanson, `api/data/daily_pools.json`
+  régénéré via `npm run pools:build`)
+- `database/characters_clean.js` — Eriko Kirishima apparaît aussi dans P2IS (Innocent Sin),
+  pas seulement P1/P2EP
+- `musicsMode/modeMusic.js` — le dropdown d'autocomplete du mode musique n'appliquait aucun
+  tri (contrairement aux 4 autres modes qui trient préfixe > alphabétique via
+  `js/autocomplete.js` et leurs propres `initializeAutocomplete()`) : les titres tapés à la
+  fin de `songs.js` sortaient dans un ordre non alphabétique. Ajout du même tri
+  préfixe-puis-`localeCompare` sur `matches` pour un comportement uniforme partout.
+
+### Titres — naoya_first_awakening/maya_always_be_positive jamais débloqués, course d'équipement
+
+- `profile/titles-ui.js::isTitleConditionMet()` lisait `profile.classicP1Wins` /
+  `profile.emojiP2Wins` pour les `condition_type` `classic_p1_wins`/`emoji_p2_wins` — ces
+  champs n'ont **jamais existé** côté client (aucune écriture nulle part dans le code), donc
+  la condition était toujours `0 >= v` → `false`, quel que soit le nombre de victoires.
+  `api/lib/condition_check.php` traite déjà ces deux `condition_type` comme des alias de
+  `mode_wins` pour classic/emoji côté serveur — le client lit maintenant
+  `stats.modeWins.Classic`/`stats.modeWins.Emoji`, comme le fait déjà le cas `mode_wins`
+  existant.
+- Cherry-pick de `fedc95e` (déjà sur `main`, jamais mergé sur `develop`) : image du toast
+  d'unlock cassée sur les pages de mode (chemin relatif au lieu d'absolu).
+- `_renderTitlesGrid()` : cliquer "équiper" dans la fenêtre entre le rendu immédiat de la
+  modale (depuis localStorage, avant auth) et la résolution des vrais IDs par
+  `initTitlesSection()` (après `/api/titles`) envoyait `equipped_title_id: null` au serveur.
+  `api/user/index.php` accepte silencieusement un ID `null` (c'est le comportement voulu pour
+  le *déséquipement*), donc ça déséquipait le titre déjà équipé sans erreur visible. Le clic
+  est maintenant ignoré tant que l'ID réel n'est pas chargé.
+- Tests de régression ajoutés (`tests/titlesUi.test.js`).
+
+### Stats de profil faussées après migration d'un compte
+
+- `api/user/migrate.php` — la migration des sessions `localStorage` (jouées en anonyme) vers
+  un compte cloud (déclenchée à l'inscription/première connexion,
+  `js/auth.js::migrateLocalStorageToCloud()`) faisait un `UPDATE user_stats SET games =
+  games + 1, ...` sans garantir d'abord que la ligne `(user_id, mode)` existe. Pour un compte
+  tout neuf (cas courant), l'`UPDATE` matchait 0 ligne — PDO ne lève rien pour un `UPDATE` à 0
+  ligne affectée, donc la transaction committait quand même et l'endpoint répondait succès
+  (`migrated_sessions: N`) alors que `user_stats` restait vide pour ce mode. `game_sessions`
+  recevait bien les lignes, mais victoires/temps de jeu/abandons/mode préféré (tous dérivés de
+  `user_stats` par `cloud-sync.js`) restaient à zéro/faux. Root cause unique pour les 4
+  symptômes signalés. Ajout du même garde-fou `INSERT IGNORE INTO user_stats (user_id, mode)`
+  que `api/lib/game_session.php::personadle_record_session()` utilise déjà, avant chaque
+  lecture/mise à jour dans la boucle de migration.
+
+### "Se souvenir de moi" ne survivait pas au changement apex/www
+
+- Le mécanisme remember-me lui-même (token 64 octets, hash SHA-256 + expiration 30j en BDD,
+  cookie httpOnly) était déjà correctement implémenté de bout en bout. Le bug : tous les
+  cookies (session, CSRF, remember_me) étaient posés avec `'domain' => ''` (host-only), alors
+  que `$allowedOrigins` (api/bootstrap.php) whiteliste `personadle.net` ET
+  `www.personadle.net` — un cookie posé sur l'un n'est jamais envoyé sur l'autre. Un
+  utilisateur connecté sur `www.` puis revenant sur l'apex (ou l'inverse) se retrouvait donc
+  déconnecté malgré "se souvenir de moi" coché.
+  - `api/bootstrap.php` — nouvelle constante `PERSONADLE_COOKIE_DOMAIN` (`.personadle.net` en
+    prod, `''` en dev — un domaine avec point de tête casserait les cookies sur `localhost`),
+    utilisée pour le cookie de session et le cookie CSRF.
+  - `api/auth/login.php`, `api/auth/me.php`, `api/auth/logout.php` — même constante sur les 5
+    `setcookie('remember_me', …)` (pose, rotation, révocation) pour que le cookie soit lisible
+    (et supprimable) depuis les deux hôtes.
+
+### Backfill des `user_stats` déjà perdus (mode préféré + classement faux)
+
+Cas concret confirmé en prod le jour même : un joueur avec 100+ victoires réelles en mode
+Music (son mode le plus joué, `game_sessions` en fait foi) voyait "Emoji" comme mode préféré
+et n'apparaissait pas correctement dans le classement Music — sa ligne
+`user_stats(mode='music')` était restée à zéro/manquante, exactement le bug décrit ci-dessus
+(`api/user/migrate.php`) et/ou son équivalent historique côté `game_session.php` (le garde-fou
+`INSERT IGNORE` y existait déjà mais commentait explicitement le même risque, signe qu'il a pu
+manquer par le passé). `js/cloud-sync.js:157` (mode préféré = mode avec le plus de `games` dans
+`user_stats`) et `api/leaderboard/index.php` (classement "ever" = lecture directe de
+`user_stats`) lisent tous les deux cette même table — une ligne manquante y est invisible des
+deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessions`.
+
+- `sql/migrations/028_reconcile_user_stats_from_sessions.sql` — recalcule
+  `games/wins/giveups/perfect_wins/total_time_ms` de `user_stats` par `(user_id, mode)`
+  directement depuis `game_sessions` (`INSERT … SELECT … ON DUPLICATE KEY UPDATE`, idempotent).
+  Volontairement **pas** touché : `streak`/`streak_record`/`last_played_at`/`first_played_at`
+  — dérivés de la consécutivité jour par jour (`personadle_compute_streak()`), pas de simples
+  agrégats ; les recalculer depuis `game_sessions` écraserait des streaks en cours légitimes.
+  Ils continuent de s'incrémenter normalement à la prochaine partie réelle du joueur.
+- À rejouer sur Hostinger via SSH (`mysql -u … -p … < sql/migrations/028_….sql`) — même
+  procédure que les migrations précédentes, pas de `DELIMITER` particulier ici (pas de
+  procédure stockée).
+- **Testée réellement** contre une instance MariaDB 10.11 jetable (`mariadb-server-core` +
+  `mariadb-install-db`, montée localement le temps de la vérif) chargée avec `bdd_mysql.sql` :
+  reproduction du bug exact (125 sessions `game_sessions` en mode music — 120 wins/5 giveups/20
+  perfect — sans AUCUNE ligne `user_stats` correspondante, + une ligne `emoji` déjà correcte en
+  contrôle). Après migration : ligne `music` créée avec les totaux exacts
+  (games=125, wins=120, giveups=5, perfect_wins=20, total_time_ms=4525000, calculs
+  vérifiés à la main), ligne `emoji` **inchangée** (streak/streak_record=2/2 préservés). Rejouée
+  une 2e fois → résultat identique (idempotence confirmée). Requêtes leaderboard "ever" et
+  mode-préféré rejouées à la main sur ces données : music remonte bien en tête des deux
+  désormais.
+
+### Definition of Done (§13 CLAUDE.md)
+
+- `npm test` (604/604), `npm run lint`, `npm run data:check`, `npm run docs:fix` — tous verts
+  en local. CI GitHub Actions (run 30391448157, commit 7cd503d) verte sur les 3 jobs : PHP Lint
+  & Tests (PHPUnit inclus), JS Tests & i18n check, E2E Playwright — confirme que PHPUnit, non
+  exécutable dans cet environnement (proxy réseau bloque le téléchargement du phar), passe bien
+  en CI.
+- `php -l` sur les fichiers PHP modifiés — aucune erreur de syntaxe.
+- Migration 028 validée contre une vraie instance MariaDB (voir ci-dessus) — pas seulement
+  relue, réellement exécutée avec reproduction du bug.
+- Angle mort résiduel : la migration 028 corrige les comptes déjà affectés au moment où elle
+  tourne, mais si le root cause `migrate.php` n'était pas fixé (voir plus haut), de nouveaux
+  comptes referaient le même trou — les deux correctifs (code + backfill) vont ensemble, ne pas
+  déployer l'un sans l'autre.
+
+---
+
 ## 2026-07-24 — chore(deploy): durcissement .htaccess en vue de l'auto-déploiement Git
 
 Préparation du passage à l'auto-déploiement Hostinger (webhook GitHub sur `main` →

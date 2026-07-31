@@ -422,7 +422,7 @@ function showVictory(force = false) {
 
   localStorage.setItem("silhouetteGameOver", "true");
   localStorage.setItem("silhouetteForceReveal", String(force));
-  checkUnlocksAfterGame();
+  checkUnlocksAfterGame(modeName);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

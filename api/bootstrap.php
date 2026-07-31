@@ -116,10 +116,20 @@ if (APP_ENV === 'production') {
 $sessionLifetime = 30 * 24 * 3600; // 30 jours en secondes
 ini_set('session.gc_maxlifetime', (string) $sessionLifetime);
 
+// Domaine des cookies (session, CSRF, remember_me) : le site est whitelisté en
+// CORS sur personadle.net ET www.personadle.net (cf. $allowedOrigins ci-dessus),
+// mais un cookie 'domain' => '' est host-only — posé sur www., il n'est jamais
+// envoyé sur l'apex (et inversement). Résultat : un utilisateur qui coche
+// "se souvenir de moi" sur un sous-domaine puis revient sur l'autre se retrouve
+// déconnecté malgré un cookie remember_me valide mais invisible sur cet hôte.
+// Domaine avec point de tête (.personadle.net) = partagé apex + www. Vide en
+// dev (localhost n'accepte pas de domaine avec point de tête).
+define('PERSONADLE_COOKIE_DOMAIN', APP_ENV === 'production' ? '.personadle.net' : '');
+
 session_set_cookie_params([
     'lifetime' => $sessionLifetime,
     'path'     => '/',
-    'domain'   => '',
+    'domain'   => PERSONADLE_COOKIE_DOMAIN,
     'secure'   => APP_ENV === 'production',     // HTTPS uniquement en prod
     'httponly' => true,                         // inaccessible au JS côté client
     'samesite' => 'Lax',
@@ -138,7 +148,7 @@ if (empty($_SESSION['csrf_token'])) {
 setcookie('csrf_token', $_SESSION['csrf_token'], [
     'expires'  => time() + $sessionLifetime,
     'path'     => '/',
-    'domain'   => '',
+    'domain'   => PERSONADLE_COOKIE_DOMAIN,
     'secure'   => APP_ENV === 'production',
     'httponly' => false, // doit être lisible par JS — c'est tout l'intérêt du double-submit
     'samesite' => 'Lax',

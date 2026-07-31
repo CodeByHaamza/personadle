@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { badgesList, BADGE_CATEGORIES, getBadgeById } from "./badgesData.js";
+import { normalizeModeKey } from "../../js/gameCore.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
 let _lastSaveProfile = () => {};
 
@@ -294,6 +295,56 @@ function trackP4ConsecutiveDays(profile, saveProfile, today) {
     ? (profile.p4ConsecutiveDays || 0) + 1
     : 1;
   profile.p4LastDate = today;
+  saveProfile();
+}
+
+/**
+ * Enregistre le mode joué aujourd'hui dans une fenêtre glissante de 7 jours et
+ * recalcule profile.weeklyCleanWinModes (titre akechi_pancakes, condition_type
+ * 'weekly_clean_modes' — auparavant ce champ n'était jamais écrit, le titre ne
+ * pouvait donc jamais se débloquer, cf. DEV_CHANGELOG.md).
+ *
+ * Miroir de la logique serveur (api/lib/condition_check.php::weekly_clean_modes) :
+ * compte les modes DISTINCTS joués sur les 7 derniers jours, peu importe le
+ * résultat (win OU give-up). Volontairement PAS restreint aux victoires seules
+ * malgré le nom du champ et le texte affiché au joueur ("Win all modes...") —
+ * le serveur ne vérifie pas non plus l'absence de give-up (son propre docblock
+ * le documente comme une approximation). Un check client plus strict que le
+ * serveur bloquerait des déblocages que le serveur accorderait pourtant.
+ */
+export function trackWeeklyModePlay(profile, saveProfile, mode) {
+  const key = normalizeModeKey(mode) ?? mode;
+  if (!key) return;
+
+  const today = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris" })
+    .format(new Date())
+    .split("/")
+    .reverse()
+    .join("-");
+
+  if (!profile.weeklyModeLog || typeof profile.weeklyModeLog !== "object") {
+    profile.weeklyModeLog = {};
+  }
+  if (!profile.weeklyModeLog[today]) profile.weeklyModeLog[today] = [];
+  if (!profile.weeklyModeLog[today].includes(key)) {
+    profile.weeklyModeLog[today].push(key);
+  }
+
+  // Fenêtre glissante de 7 jours (aujourd'hui inclus) — purge le reste pour ne
+  // pas laisser grossir le journal indéfiniment.
+  const cutoff = new Date(today + "T12:00:00Z");
+  cutoff.setUTCDate(cutoff.getUTCDate() - 6);
+  const cutoffKey = cutoff.toISOString().slice(0, 10);
+  for (const day of Object.keys(profile.weeklyModeLog)) {
+    if (day < cutoffKey) delete profile.weeklyModeLog[day];
+  }
+
+  const distinctModes = new Set();
+  for (const modes of Object.values(profile.weeklyModeLog)) {
+    modes.forEach((m) => distinctModes.add(m));
+  }
+  profile.weeklyCleanWinModes = distinctModes.size;
+
   saveProfile();
 }
 
