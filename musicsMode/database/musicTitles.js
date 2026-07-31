@@ -5,7 +5,7 @@ export const musicTitles = [
   "Arial Of The Soul",
   "Backside Of The TV",
   "Beneath the Mask",
-  "Blood Destiny",
+  "Bloody Destiny",
   "Brand New Days",
   "Burn My Dread",
   "Changing Seasons",

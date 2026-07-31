@@ -28,6 +28,7 @@ import { initFilterMenu } from "../js/filterMenu.js";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplete.js";
 import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
+import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CDN / IMAGE LOADING CONFIGURATION
@@ -465,7 +466,11 @@ function handleGuess() {
 
     localStorage.setItem("aoaTarget", target);
     localStorage.setItem("aoaAttempts", attempts);
-    checkUnlocksAfterGame();
+    const _pAoaWin = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+    trackUniqueDay(_pAoaWin, () =>
+      localStorage.setItem("personaUserProfile", JSON.stringify(_pAoaWin))
+    );
+    checkUnlocksAfterGame("All Out Attack");
     disableInputs();
   } else {
     // ── Wrong guess ──────────────────────────────────────────────────────────
@@ -521,7 +526,11 @@ function giveUp() {
   localStorage.setItem("aoaGameOver", "true");
   localStorage.setItem("aoaTarget", target);
   localStorage.setItem("aoaAttempts", attempts);
-  checkUnlocksAfterGame();
+  const _pAoaGiveUp = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+  trackUniqueDay(_pAoaGiveUp, () =>
+    localStorage.setItem("personaUserProfile", JSON.stringify(_pAoaGiveUp))
+  );
+  checkUnlocksAfterGame("All Out Attack");
 }
 
 /**

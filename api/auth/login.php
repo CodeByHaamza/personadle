@@ -92,7 +92,7 @@ try {
             [
                 'expires'  => time() + 30 * 24 * 3600,
                 'path'     => '/',
-                'domain'   => '',
+                'domain'   => PERSONADLE_COOKIE_DOMAIN,
                 'secure'   => APP_ENV === 'production',
                 'httponly' => true,
                 'samesite' => 'Lax',
@@ -104,7 +104,7 @@ try {
         // rien si l'appareil avait déjà été "mémorisé" avant.
         $pdo->prepare('UPDATE users SET remember_me_hash = NULL, remember_me_expires = NULL WHERE id = ?')
             ->execute([$user['id']]);
-        setcookie('remember_me', '', ['expires' => time() - 3600, 'path' => '/']);
+        setcookie('remember_me', '', ['expires' => time() - 3600, 'path' => '/', 'domain' => PERSONADLE_COOKIE_DOMAIN]);
     }
 } catch (PDOException $e) {
     // Remember-me non disponible (colonne manquante en BDD) — la session PHP

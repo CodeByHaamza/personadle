@@ -365,7 +365,7 @@ function checkEmojiGuess(name, forceReveal = false) {
     document.getElementById("giveUpButton").disabled = true;
     gameOver = true;
     localStorage.setItem("emojiWin", "true");
-    checkUnlocksAfterGame();
+    checkUnlocksAfterGame(modeName);
   } else {
     // Wrong guess: show mini portrait + increment
     const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];

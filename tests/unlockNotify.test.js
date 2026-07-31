@@ -65,4 +65,22 @@ describe("checkUnlocksAfterGame", () => {
       expect(document.querySelector(".wallpaper-notif")).not.toBeNull();
     });
   });
+
+  it("records the mode played into the weekly rolling window (akechi_pancakes)", () => {
+    localStorage.setItem("personaUserProfile", JSON.stringify({ badges: [] }));
+
+    checkUnlocksAfterGame("classic");
+
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.weeklyCleanWinModes).toBe(1);
+  });
+
+  it("skips the weekly-mode tracking when no mode is passed (backward compat)", () => {
+    localStorage.setItem("personaUserProfile", JSON.stringify({ badges: [] }));
+
+    expect(() => checkUnlocksAfterGame()).not.toThrow();
+
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.weeklyCleanWinModes).toBeUndefined();
+  });
 });

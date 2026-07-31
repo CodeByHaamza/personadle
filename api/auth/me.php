@@ -85,6 +85,7 @@ try {
         setcookie('remember_me', '', [
             'expires'  => time() - 3600,
             'path'     => '/',
+            'domain'   => PERSONADLE_COOKIE_DOMAIN,
             'secure'   => APP_ENV === 'production',
             'httponly' => true,
             'samesite' => 'Lax',
@@ -96,6 +97,7 @@ try {
         setcookie('remember_me', '', [
             'expires'  => time() - 3600,
             'path'     => '/',
+            'domain'   => PERSONADLE_COOKIE_DOMAIN,
             'secure'   => APP_ENV === 'production',
             'httponly' => true,
             'samesite' => 'Lax',
@@ -119,7 +121,7 @@ try {
     setcookie('remember_me', $newRawToken, [
         'expires'  => time() + 30 * 24 * 3600,
         'path'     => '/',
-        'domain'   => '',
+        'domain'   => PERSONADLE_COOKIE_DOMAIN,
         'secure'   => APP_ENV === 'production',
         'httponly' => true,
         'samesite' => 'Lax',

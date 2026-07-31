@@ -115,6 +115,32 @@ describe("isTitleConditionMet", () => {
     ).toBe(false);
   });
 
+  it("classic_p1_wins — reads stats.modeWins.Classic (regression: naoya_first_awakening never unlocked because it read a nonexistent profile.classicP1Wins field)", () => {
+    const title = find("naoya_first_awakening"); // condition_value: 15
+    expect(isTitleConditionMet(title, { profile: {}, stats: { modeWins: { Classic: 14 } } })).toBe(
+      false
+    );
+    expect(isTitleConditionMet(title, { profile: {}, stats: { modeWins: { Classic: 15 } } })).toBe(
+      true
+    );
+  });
+
+  it("emoji_p2_wins — reads stats.modeWins.Emoji (regression: maya_always_be_positive never unlocked because it read a nonexistent profile.emojiP2Wins field)", () => {
+    const title = find("maya_always_be_positive"); // condition_value: 10
+    expect(isTitleConditionMet(title, { profile: {}, stats: { modeWins: { Emoji: 9 } } })).toBe(
+      false
+    );
+    expect(isTitleConditionMet(title, { profile: {}, stats: { modeWins: { Emoji: 10 } } })).toBe(
+      true
+    );
+  });
+
+  it("weekly_clean_modes — reads profile.weeklyCleanWinModes (regression: akechi_pancakes never unlocked because nothing wrote this field — see trackWeeklyModePlay)", () => {
+    const title = find("akechi_pancakes"); // condition_value: 3
+    expect(isTitleConditionMet(title, { profile: { weeklyCleanWinModes: 2 } })).toBe(false);
+    expect(isTitleConditionMet(title, { profile: { weeklyCleanWinModes: 3 } })).toBe(true);
+  });
+
   it("returns false for an unrecognized condition_type (defensive)", () => {
     expect(isTitleConditionMet({ condition_type: "not_a_real_condition" }, { profile: {} })).toBe(
       false
@@ -172,6 +198,24 @@ describe("renderTitlesSection", () => {
   });
 });
 
+describe("titles modal grid — equip click handler", () => {
+  it("ignores an equip click while the title's real id hasn't loaded yet (regression: used to silently unequip by sending equipped_title_id: null)", () => {
+    document.body.innerHTML = `<div id="titlesModalGrid"></div>`;
+    const profile = { unlockedTitles: ["adachi_boring_isnt_it"] };
+    const saveProfile = vi.fn();
+    const saveProfileToCloud = vi.fn();
+    renderTitlesSection(profile, saveProfile, saveProfileToCloud, vi.fn());
+
+    // Before initTitlesSection() resolves /api/titles, every card's data-id is "" (id: null).
+    const card = document.querySelector('.tm-card[data-slug="adachi_boring_isnt_it"]');
+    expect(card.dataset.id).toBe("");
+    card.dispatchEvent(new Event("click", { bubbles: true }));
+
+    expect(saveProfileToCloud).not.toHaveBeenCalled();
+    expect(profile.equippedTitleSlug).toBeUndefined();
+  });
+});
+
 describe("resetTitlesUnlockedState", () => {
   it("clears is_unlocked on every title", () => {
     // Simulate an unlock via renderTitlesSection's shared _titlesData state
@@ -202,6 +246,21 @@ describe("checkTitlesAfterGame", () => {
 
     const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
     expect(saved.unlockedTitles).toContain("velvet_room_thou_art_i");
+  });
+
+  it("unlocks adachi_boring_isnt_it from profile.stats.giveups (regression: checkAndUnlockTitles summed the nonexistent stats.modeGiveups instead, always 0)", async () => {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ badges: [], stats: { giveups: 50 } }) // giveups_total >= 50, no modeGiveups at all
+    );
+
+    checkTitlesAfterGame();
+    await vi.waitFor(() => {
+      expect(document.querySelector(".title-notification")).not.toBeNull();
+    });
+
+    const saved = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(saved.unlockedTitles).toContain("adachi_boring_isnt_it");
   });
 
   it("does not re-unlock a title already present in unlockedTitles", async () => {
