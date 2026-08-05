@@ -10,7 +10,26 @@ updates:
       day: "monday"
     open-pull-requests-limit: 5
     groups:
-      # Regroupe les mises à jour mineures/patch en une seule PR pour réduire le bruit
+      # Paquets liés à grouper ensemble MAJEURES incluses — sinon Dependabot bumpe
+      # vitest (ou eslint) seul et casse la peer-dependency (@vitest/coverage-v8 /
+      # @eslint/js restés à l'ancienne majeure → npm ERESOLVE en CI).
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+      eslint:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+      # Regroupe le reste des mises à jour mineures/patch en une seule PR
       dev-minor-patch:
         update-types:
           - "minor"

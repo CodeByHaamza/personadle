@@ -306,6 +306,106 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
   déployer l'un sans l'autre.
 
 ---
+## 2026-07-24 — chore(ci): outillage anti-régression post-lancement v2.0
+
+Suite au lancement prod v2.0 et à sa série de bugs de schéma/défaut, ajout de 4 outils
+pour ne plus découvrir ce genre de problème à la main :
+
+### Détails techniques
+
+- **Smoke test** (`scripts/smoke_test.sh` + `.github/workflows/smoke.yml`) : après chaque
+  push sur `main`, attend le déploiement Hostinger (~75 s) puis `curl` les endpoints clés
+  (home 200, `/api/auth/me` 200 JSON, catalogues 401=route+auth, `/sql/` 403). Non bloquant
+  (alerte). `npm run smoke [URL]` en local. Aurait attrapé les 500 du jour automatiquement.
+- **Détecteur de dérive schéma** (`scripts/check_prod_schema.php`, `npm run schema:check-prod`)
+  : diff `information_schema` vs `bdd_mysql.sql`, liste les colonnes attendues manquantes.
+  À lancer sur le serveur / en cron. (Ne couvre pas encore les défauts/types — cf. bug
+  `messages.status`.)
+- **Suivi de migrations** (`sql/migrations/026_schema_migrations_tracking.sql` +
+  `scripts/apply_migrations.sh`) : table `schema_migrations` (amorcée avec 000→026 comme
+  appliquées) + script qui n'applique que les migrations en attente (backup auto avant).
+  Fini de deviner colonne par colonne l'état de la prod.
+- **Dependabot** (`.github/dependabot.yml`) : groupes `vitest` (+`@vitest/*`) et `eslint`
+  (+`@eslint/*`) incluant les majeures → plus de PRs cassées par peer-deps splittées.
+
+## 2026-07-24 — fix(messages): notifs de défi jamais reçues (défaut messages.status)
+
+Symptôme prod : les demandes d'ami notifiaient bien, mais **jamais les défis**. Cause :
+`messages.status` avait en prod `DEFAULT 'pending'` (héritage de l'archive du 6 mai), alors
+que le code n'emploie que `unread/read/accepted/beaten/expired`. Les défis (INSERT sans
+statut explicite) naissaient donc `'pending'` ; le poller `js/notifications.js`
+(`_checkPendingChallenges`, filtre `status === 'unread'`) ne les voyait jamais. Les amis
+passaient par `friendships.seen_at` → non affectés. Dérive de **défaut** (pas de colonne),
+non couverte par l'audit 025.
+
+### Détails techniques
+
+- `api/messages/index.php` : les 3 INSERT (message + défi + fallback défi) forcent désormais
+  `status = 'unread'` explicitement — le code ne dépend plus du défaut BDD pour une valeur
+  métier critique (fix principal, part en prod via l'auto-déploiement).
+- `sql/migrations/027_fix_messages_status_default.sql` : aligne le défaut prod
+  (`ALTER COLUMN status SET DEFAULT 'unread'`) + corrige d'éventuelles lignes `'pending'`.
+- Angle mort mis en lumière : l'audit 025 comparait l'existence des colonnes, pas leurs
+  **défauts/types**. `scripts/check_prod_schema.php` (nouveau) pourrait être étendu aux
+  défauts dans un second temps.
+
+## 2026-07-24 — fix(db): migration 025 — audit global schéma prod, 4 colonnes manquantes
+
+Suite de 024. Plutôt que corriger les 500 un par un (badges → codes → défis → amis…),
+audit complet du schéma prod : diff `information_schema` (prod réelle) vs `bdd_mysql.sql`
+(source), table par table, colonne par colonne, CROISÉ avec l'usage réel dans `api/*.php`.
+
+### Résultat de l'audit
+
+- **Objets** : toutes les tables/procédures/fonctions référencées par le code existent en
+  prod (`add_social_link_xp`/`get_or_create_social_link` recréées par 024). Le code n'utilise
+  aucune vue. Aucune table manquante.
+- **Colonnes manquantes ET utilisées par le code** (→ 500), corrigées par
+  `025_reconcile_prod_missing_columns.sql` :
+  - `badges_unlocked.id` (SELECT id — api/admin/user_badges.php, "donner un badge")
+  - `event_codes_redeemed.id` (SELECT id — api/badges/index.php, "utiliser un code")
+  - `friendships.accepted_at` (UPDATE — api/friends/index.php, "accepter un ami")
+  - `messages.challenge_score` (INSERT/SELECT — api/messages/index.php, "envoyer un défi")
+- **Dérive cosmétique laissée en l'état** (colonnes présentes dans bdd_mysql.sql mais
+  **0 usage** dans le code, confirmé par grep) : `titles.description_*`/`name_jp`,
+  `social_link_ranks.name_jp`, `user_stats.id`, `user_titles.id`, `game_sessions.created_at`.
+  Les ajouter serait du zèle risqué sans gain fonctionnel.
+
+### Détails techniques
+
+- Les deux `id` sont ajoutés en `AUTO_INCREMENT` + `UNIQUE KEY` **sans** toucher la PK
+  composite existante (AUTO_INCREMENT autorisé sur la 1re colonne d'une UNIQUE KEY) → pas de
+  `DROP PRIMARY KEY` risqué sur la prod.
+- `ADD COLUMN IF NOT EXISTS` + `ADD UNIQUE KEY IF NOT EXISTS` (MariaDB) → ré-exécutable.
+- Cause racine commune à 024+025 : base prod initialisée depuis l'archive `hostinger_full.sql`
+  (2026-05-06) + migrations 001-023 ; les colonnes non couvertes par une migration numérotée
+  sont restées à l'ancien schéma. Angle non audité : les *types* des colonnes existantes
+  (ne provoquent pas de 500).
+
+## 2026-07-24 — fix(db): migration 024 — reconcilie social_links en prod (500 panel admin)
+
+Premier déploiement backend v2.0 en prod (auto-déploiement Git Hostinger activé le même
+jour). La base Hostinger avait été initialisée depuis l'ancienne archive `hostinger_full.sql`
+(2026-05-06), où `social_links` portait `current_rank`/`last_interaction`/`rank_updated_at`.
+Le code déployé + `bdd_mysql.sql` attendent `rank`/`created_at`/`last_interaction_at` :
+`GET /api/admin/users/:id` (et tout le sous-système social) plantait en 500
+(`Unknown column 'rank'`). Aucune migration n'avait capturé ce renommage.
+
+### Détails techniques
+
+- Diagnostic : rejeu des requêtes de `api/admin/user.php` en base prod → `ERROR 1054` sur
+  `social_links.rank`. `SHOW CREATE TABLE` confirme l'ancien nommage (archive du 6 mai).
+- `sql/migrations/024_reconcile_social_links_prod_schema.sql` : renomme les colonnes
+  (data-safe via `CHANGE`), ajoute `created_at`, retire `rank_updated_at`, et **recrée la
+  vue `v_social_links` + la fonction `get_or_create_social_link` + la procédure
+  `add_social_link_xp`** avec les nouveaux noms (définitions alignées sur `bdd_mysql.sql`).
+- Non idempotente, à jouer une seule fois sur une base issue de l'archive du 6 mai ; contient
+  `DELIMITER` → appliquer via le client mysql en SSH (jamais phpMyAdmin), mysqldump avant.
+- Aucun changement de code ni de `bdd_mysql.sql` : dev/CI (qui chargent `bdd_mysql.sql`)
+  étaient déjà corrects. Dérive strictement côté prod.
+- Angle mort restant : d'autres tables issues de l'archive du 6 mai pourraient avoir une
+  dérive similaire non encore rencontrée — les endpoints exercés jusqu'ici (users, profiles,
+  user_stats, badges, wallpapers, titles, friendships) passent, seul social_links divergeait.
 
 ## 2026-07-24 — chore(deploy): durcissement .htaccess en vue de l'auto-déploiement Git
 

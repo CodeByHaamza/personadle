@@ -129,8 +129,8 @@ if ($method === 'POST') {
         if (!$content) jsonError('Message content is required');
 
         $pdo->prepare("
-            INSERT INTO messages (sender_id, receiver_id, type, content)
-            VALUES (?, ?, 'message', ?)
+            INSERT INTO messages (sender_id, receiver_id, type, content, status)
+            VALUES (?, ?, 'message', ?, 'unread')
         ")->execute([$authId, $receiverId, $content]);
     }
 
@@ -170,15 +170,15 @@ if ($method === 'POST') {
         try {
             $pdo->prepare("
                 INSERT INTO messages
-                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters, challenge_target)
-                VALUES (?, ?, 'challenge', ?, ?, ?, ?, ?)
+                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters, challenge_target, status)
+                VALUES (?, ?, 'challenge', ?, ?, ?, ?, ?, 'unread')
             ")->execute([$authId, $receiverId, $mode, $score, $date, $filtersJson, $target]);
         } catch (PDOException $e) {
             // Fallback if challenge_filters/challenge_target columns don't exist yet (migrations not run)
             $pdo->prepare("
                 INSERT INTO messages
-                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date)
-                VALUES (?, ?, 'challenge', ?, ?, ?)
+                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, status)
+                VALUES (?, ?, 'challenge', ?, ?, ?, 'unread')
             ")->execute([$authId, $receiverId, $mode, $score, $date]);
         }
 

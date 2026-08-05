@@ -16,6 +16,8 @@
     "docs:fix": "node scripts/check-doc-numbers.js --fix",
     "pools:check": "node scripts/export-daily-pools.js --check",
     "pools:build": "node scripts/export-daily-pools.js",
+    "smoke": "bash scripts/smoke_test.sh",
+    "schema:check-prod": "php scripts/check_prod_schema.php",
     "lint": "eslint \"**/*.js\" --ignore-pattern node_modules",
     "setup-hooks": "git config core.hooksPath .githooks && echo 'Git hooks activated (.githooks/)'",
     "format": "prettier --write \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",
@@ -23,12 +25,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.0",
     "@vitest/coverage-v8": "^2.0.0",
-    "eslint": "^9.39.4",
-    "globals": "^17.7.0",
-    "jsdom": "^25.0.0",
-    "prettier": "^3.8.3",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.9.6",
     "vitest": "^2.0.0"
   }
 }
