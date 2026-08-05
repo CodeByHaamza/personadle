@@ -116,15 +116,16 @@ if (APP_ENV === 'production') {
 $sessionLifetime = 30 * 24 * 3600; // 30 jours en secondes
 ini_set('session.gc_maxlifetime', (string) $sessionLifetime);
 
-// Domaine des cookies (session, CSRF, remember_me) : le site est whitelisté en
-// CORS sur personadle.net ET www.personadle.net (cf. $allowedOrigins ci-dessus),
-// mais un cookie 'domain' => '' est host-only — posé sur www., il n'est jamais
-// envoyé sur l'apex (et inversement). Résultat : un utilisateur qui coche
-// "se souvenir de moi" sur un sous-domaine puis revient sur l'autre se retrouve
-// déconnecté malgré un cookie remember_me valide mais invisible sur cet hôte.
-// Domaine avec point de tête (.personadle.net) = partagé apex + www. Vide en
-// dev (localhost n'accepte pas de domaine avec point de tête).
-define('PERSONADLE_COOKIE_DOMAIN', APP_ENV === 'production' ? '.personadle.net' : '');
+// Domaine des cookies (session, CSRF, remember_me) : host-only ('').
+// On avait tenté '.personadle.net' pour partager le cookie apex <-> www, mais
+// ça déconnectait tous les utilisateurs déjà loggés au déploiement : leur
+// ancien cookie host-only cohabitait avec le nouveau cookie de domaine (même
+// nom PHPSESSID), et PHP en lisait un au hasard. Le partage apex/www est un cas
+// rare (aucune canonicalisation www->apex n'est en place) ; le host-only, lui,
+// marche pour tout le monde sans transition. Si le partage apex/www redevient
+// nécessaire un jour, canonicaliser d'abord un seul hôte en .htaccess, PUIS
+// éventuellement rétablir un domaine partagé.
+define('PERSONADLE_COOKIE_DOMAIN', '');
 
 session_set_cookie_params([
     'lifetime' => $sessionLifetime,
