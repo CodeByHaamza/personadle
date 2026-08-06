@@ -999,6 +999,28 @@ export const characters = [
     quote: "There's a river separating us... Sis is gone, and I'm still here. Sis has crossed on over to the other bank, and I'm still on this one... No matter how much I cry or piss my pants, I know Sis isn't coming back..."
   },
   {
+    nom: "Saki Konishi",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🍶", "📺", "💀"],
+    quote: "Who cares about Junes, anyway? Because of that store, our business is ruined, my parents hate me, the neighbors talk behind my back... I wish everything would just disappear."
+  },
+  {
+    nom: "Mayumi Yamano",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🎤", "📡", "💀"],
+    quote: "Why do I have to explain myself to you...? What's wrong with you...? D-don't make me call for help! Wh-What're you going to do...!?"
+  },
+  {
     nom: "Ryotaro Dojima",
     genre:["Human","Male"],
     age: "40+",
@@ -1228,6 +1250,28 @@ export const characters = [
     persona: "Leviathan",
     emoji: ["🔎", "⚖️", "👩‍⚖️"],
     quote: "Still, I'm glad I was able to save you in court. I've never felt so happy in my entire life. I'm not quite sure how to put it, but... saving your future meant more to me than my own career. I feel like you even taught me how to live."
+  },
+  {
+    nom: "Kobayakawa",
+    genre: ["Human","Male"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P5", "P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🏫", "🚛", "💀"],
+    quote: "You might have done a variety of things in hiding in your hometown, but you will behave yourself here."
+  },
+  {
+    nom: "Wakaba Isshiki",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P5", "P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🔬", "🚗", "💀"],
+    quote: ""
   },
 
   {

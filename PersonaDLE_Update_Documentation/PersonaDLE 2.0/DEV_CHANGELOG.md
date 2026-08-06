@@ -306,6 +306,16 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
   déployer l'un sans l'autre.
 
 ---
+## 2026-08-05 — feat(2.1): personnages NPC P4/P5 (Saki, Mayumi, Kobayakawa, Wakaba)
+
+Début du contenu 2.1. 4 personnages humains sans persona (`arcane: ["NONE"]`,
+`personaUser: false`) ajoutés à `database/characters_clean.js` (donc modes Classic +
+Emoji) : Saki Konishi & Mayumi Yamano (P4/P4G), Kobayakawa & Wakaba Isshiki (P5/P5R).
+Portraits copiés dans `database/portraits/`, entrées ajoutées à `portraitsMap.js`.
+Quote de Wakaba laissée vide (aucune source fiable — décision produit). Reste à venir
+pour ces persos : silhouette (Saki/Mayumi uniquement), le reste du lot 2.1 (opus Trinity
+Souls + trio Kanzato, songs, titres, badge Gyotre, All-Out Attack Ann).
+
 ## 2026-07-24 — chore(ci): outillage anti-régression post-lancement v2.0
 
 Suite au lancement prod v2.0 et à sa série de bugs de schéma/défaut, ajout de 4 outils
