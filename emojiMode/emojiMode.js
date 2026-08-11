@@ -62,6 +62,7 @@ const ALL_OPUS = [
   "P5X",
   "PQ",
   "PQ2",
+  "PTS",
 ];
 
 let activeOpus = [...ALL_OPUS];

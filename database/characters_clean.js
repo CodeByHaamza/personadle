@@ -2103,4 +2103,39 @@ export const characters = [
     quote: "I'm the number one princess in the world."
   },
 
+  // ── Persona Trinity Souls (anime) ─────────────────────────────
+  {
+    nom: "Shin Kanzato",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["PTS"],
+    personaUser: true,
+    persona: "Abel",
+    emoji: ["🎨", "⚔️", "🐋"],
+    quote: ""
+  },
+  {
+    nom: "Jun Kanzato",
+    genre: ["Human", "Male"],
+    age: "< 15",
+    arcane: ["NONE"],
+    opus: ["PTS"],
+    personaUser: true,
+    persona: "Seth",
+    emoji: ["👥", "⏱️", "💀"],
+    quote: ""
+  },
+  {
+    nom: "Ryo Kanzato",
+    genre: ["Human", "Male"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["PTS"],
+    personaUser: true,
+    persona: "Cain",
+    emoji: ["👮‍♂️", "💊", "💀"],
+    quote: ""
+  },
+
 ];

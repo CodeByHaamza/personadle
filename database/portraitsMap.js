@@ -210,4 +210,9 @@ export const portraitsMap = {
   "Yaldabaoth":        "Yaldabaoth",
   "Demon Painter":     "DemonPainter",
   "Merope":            "Merope",
+
+  // ── Persona Trinity Souls ──────────────────────────────────────────────────
+  "Shin Kanzato":      "Shin_Kanzato",
+  "Jun Kanzato":       "Jun_Kanzato",
+  "Ryo Kanzato":       "Ryo_Kanzato",
 };

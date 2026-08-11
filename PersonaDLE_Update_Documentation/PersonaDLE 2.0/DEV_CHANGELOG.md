@@ -306,6 +306,16 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
   déployer l'un sans l'autre.
 
 ---
+## 2026-08-05 — feat(2.1): opus Persona Trinity Souls + trio Kanzato
+
+Nouvel opus `PTS` (Persona Trinity Souls, anime) ajouté à `VALID_OPUS`
+(`scripts/validate_characters.js`) et aux `ALL_OPUS` des modes Classic/Emoji/Silhouette/
+Personae. Trois personnages à persona : Shin Kanzato (Abel), Jun Kanzato (Seth),
+Ryo Kanzato (Cain) — jouables en Classic + Emoji. Portraits + portraitsMap. Quotes vides
+(anime obscur, pas de source fiable). Reste pour PTS : bouton/logo filtre dans le HTML de
+chaque mode (le logo `Trinity_soul.webp` est prêt), les personae Abel/Seth/Cain dans le
+mode Personae, et les silhouettes du trio.
+
 ## 2026-08-05 — feat(2.1): personnages NPC P4/P5 (Saki, Mayumi, Kobayakawa, Wakaba)
 
 Début du contenu 2.1. 4 personnages humains sans persona (`arcane: ["NONE"]`,
