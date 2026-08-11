@@ -465,6 +465,11 @@
       "condition": "Inserisci il codice 'SPORT' tra il 6 aprile e il 1 maggio 2025",
       "description": "Come le squadre sportive di Gekkoukan, Yasogami e Shujin, hai risposto alla chiamata nella Giornata Internazionale dello Sport!"
     },
+    "gyotre": {
+      "name": "Gyotre",
+      "condition": "???",
+      "description": "Un segreto che solo i veri conoscono."
+    },
     "arati": {
       "name": "Benedizione di Arati",
       "condition": "???",

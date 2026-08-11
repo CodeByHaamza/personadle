@@ -694,6 +694,7 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('true_hacker',         'True Hacker',                'secret',      'rare',      'profile/badges/images/Badges_True_Hacker.png',           '???', 'manual', NULL, NULL, 1),
 ('tae_takemi',          'Tae Takemi Fan',             'secret',      'rare',      'profile/badges/images/Badges_Tae_Takemi.png',            '???', 'manual', NULL, NULL, 1),
 ('arati',               'Arati''s Blessing',          'secret',      'rare',      'profile/badges/images/Badges_Arati.png',                 '???', 'manual', NULL, NULL, 1),
+('gyotre',              'Gyotre',                     'secret',      'rare',      'profile/badges/images/Badge_Gyotre.webp',                '???', 'manual', NULL, NULL, 1),
 ('dzulian',             'The First Contractor',       'secret',      'epic',      'profile/badges/images/Badge_Dzulian.png',                '???', 'manual', NULL, NULL, 1),
 ('chef',                'Master Chef',                'secret',      'rare',      'profile/badges/images/Badges_Chef.png',                  '???', 'manual', NULL, NULL, 1),
 ('github_contributor',  'Phantom Coder',              'secret',      'common',    'profile/badges/images/Badges_Github_Morgana.png',        '???', 'manual', NULL, NULL, 1),
@@ -722,7 +723,8 @@ INSERT IGNORE INTO event_codes (code, badge_id, start_date, end_date, is_permane
   ('ARATI',       'arati',                 NULL, NULL, 1, 1, 'Secret — Arati'),
   ('DZULIAN',     'dzulian',               NULL, NULL, 1, 1, 'Secret — Dzulian'),
   ('GOURMET',     'chef',                  NULL, NULL, 1, 1, 'Secret — Chef'),
-  ('LOBSTER',     'lobster',               NULL, NULL, 1, 1, 'Secret — Lobster');
+  ('LOBSTER',     'lobster',               NULL, NULL, 1, 1, 'Secret — Lobster'),
+  ('GYOTRE',      'gyotre',                NULL, NULL, 1, 1, 'Secret — Gyotre');
 
 
 -- =============================================================================

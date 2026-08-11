@@ -306,6 +306,14 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
   déployer l'un sans l'autre.
 
 ---
+## 2026-08-05 — feat(2.1): badge secret Gyotre (code GYOTRE)
+
+Badge secret easter-egg `gyotre` sur le modèle d'Arati : déblocable par le code permanent
+`GYOTRE`. Seed `bdd_mysql.sql` (badges + event_codes), entrée `badgesData.js`, i18n dans les
+6 langues (`badges.gyotre.*`), image `profile/badges/images/Badge_Gyotre.webp`. Migration
+`029_badge_gyotre.sql` pour l'insérer en prod (INSERT IGNORE). Description FR = la blague
+maison ("comment build violet") ; autres langues = générique.
+
 ## 2026-08-05 — feat(2.1): opus Persona Trinity Souls + trio Kanzato
 
 Nouvel opus `PTS` (Persona Trinity Souls, anime) ajouté à `VALID_OPUS`

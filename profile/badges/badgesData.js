@@ -400,6 +400,19 @@ export const badgesList = [
     },
   },
   {
+    id: "gyotre",
+    name: "Gyotre",
+    category: BADGE_CATEGORIES.SECRET,
+    img: BADGE_IMG_BASE + "Badge_Gyotre.webp",
+    condition: "???",
+    description: "A secret only the real ones know.",
+    secret: true,
+    permanentCode: "GYOTRE",
+    check: (stats, profile) => {
+      return profile?.eventCodes?.includes("GYOTRE") || false;
+    },
+  },
+  {
     id: "dzulian",
     name: "The First Contractor",
     category: BADGE_CATEGORIES.SECRET,

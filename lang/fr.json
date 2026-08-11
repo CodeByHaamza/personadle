@@ -465,6 +465,11 @@
       "condition": "Entrer le code 'SPORT' entre le 6 avril et le 1er mai 2025",
       "description": "À l'image des équipes de Gekkoukan, Yasogami et Shujin, tu as répondu à l'appel en cette Journée Internationale du Sport !"
     },
+    "gyotre": {
+      "name": "Gyotre",
+      "condition": "???",
+      "description": "Seuls les vrais savent comment build violet."
+    },
     "arati": {
       "name": "Bénédiction d'Arati",
       "condition": "???",
