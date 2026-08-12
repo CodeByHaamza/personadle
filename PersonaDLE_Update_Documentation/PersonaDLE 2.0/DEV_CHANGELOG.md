@@ -306,6 +306,20 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
   déployer l'un sans l'autre.
 
 ---
+## 2026-08-05 — feat(2.1): silhouettes, All-Out Attack, 7 musiques, filtre PTS
+
+Suite et fin du lot de contenu 2.1 :
+- **Silhouettes** : Saki, Mayumi (dup portrait), trio Kanzato (images dédiées) —
+  `silhouetteCharacters.js` + `portraitsMapSilhouette.js`.
+- **All-Out Attack** : Panther Starlight (Ann Takamaki, P5X) — animation `mp4→webp`
+  (640×360, 60fps), image sélection + battle still.
+- **7 musiques** : Junes Themes (P4), Mass Destruction (P3FES), P3 FES (P3FES, nouvelle
+  icône), Show Stealer (P5X, nouvelle icône), Tokyo Emergency (P5/P5R), What You Wish For
+  (P5S), Hoshi to Bokura to (P5/P5R). mp3 + icônes locales, `songs.js` + `musicTitles.js`.
+  Métadonnées (vocalistes, liens) fournies par Hamza.
+- **Filtre Persona Trinity Souls** : bouton + logo dans les 4 modes à contenu PTS
+  (classic/emoji/silhouette/personae), règle CSS `filter-color-pts`.
+
 ## 2026-08-05 — feat(2.1): personae Abel/Seth/Cain + fix collision portrait Mayumi
 
 Trois personae Trinity Souls (Abel/Shin, Seth/Jun, Cain/Ryo) ajoutées à
