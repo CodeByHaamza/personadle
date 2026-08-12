@@ -1268,8 +1268,8 @@ export const characters = [
     age: "21-40",
     arcane: ["NONE"],
     opus: ["P5", "P5R"],
-    personaUser: false,
-    persona: "NONE",
+    personaUser: true,
+    persona: "Sphinx Lady",
     emoji: ["🔬", "🚗", "💀"],
     quote: ""
   },
