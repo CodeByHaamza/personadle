@@ -92,7 +92,7 @@ export const portraitsMap = {
   "Ayane Matsunaga":   "Ayane",
   "Naoki Konishi":     "Naoki",
   "Saki Konishi":      "Saki",
-  "Mayumi Yamano":     "Mayumi",
+  "Mayumi Yamano":     "Mayumi_Yamano",
   "Hisano Kuroda":     "Hisano",
   "Shu Nakajima":      "Shu",
   "Sayako Uehara":     "Sayako",

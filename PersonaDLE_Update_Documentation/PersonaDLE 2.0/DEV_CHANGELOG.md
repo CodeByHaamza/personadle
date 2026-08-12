@@ -306,6 +306,16 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
   déployer l'un sans l'autre.
 
 ---
+## 2026-08-05 — feat(2.1): personae Abel/Seth/Cain + fix collision portrait Mayumi
+
+Trois personae Trinity Souls (Abel/Shin, Seth/Jun, Cain/Ryo) ajoutées à
+`personaeCharacters.js` (opus PTS), images dans `personaeMode/database/img/`, wielders
+mappés dans `portraitsMapPersonae.js`.
+Fix au passage : la slice NPC avait écrasé `database/portraits/Mayumi.webp` (utilisé par
+Mayumi Hashimoto, P2) car Mayumi Yamano avait été mappée sur le même id `Mayumi`. Portrait
+original restauré, Yamano remappée sur `Mayumi_Yamano`. Vérifié : plus aucun id de portrait
+en double dans `portraitsMap`.
+
 ## 2026-08-05 — feat(2.1): titres Junes & Investigation Team (P4)
 
 Deux titres P4 avec conditions proxy simplifiées (les conditions "collection" d'origine
