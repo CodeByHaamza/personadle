@@ -24,7 +24,15 @@ export const TITLES_LOCAL = [
   { slug: "naoya_first_awakening", name: "The First Awakening", rarity: "rare", condition_type: "classic_p1_wins", condition_value: 15 },
   { slug: "adachi_boring_isnt_it", name: "Boring, Isn't It?", rarity: "common", condition_type: "giveups_total", condition_value: 50 },
   { slug: "maya_always_be_positive", name: "Always Be Positive", rarity: "common", condition_type: "emoji_p2_wins", condition_value: 10 },
+  { slug: "investigation_team", name: "Investigation Team", rarity: "epic", condition_type: "mode_wins", condition_mode: "personae", condition_value: 8 },
+  { slug: "junes", name: "Junes", rarity: "rare", condition_type: "mode_wins", condition_mode: "music", condition_value: 15 },
 ];
+
+/** Mappe un condition_mode (BDD, minuscule) vers la clé de stats.modeWins (capitalisée). */
+const _MODEWINS_KEY = {
+  classic: "Classic", emoji: "Emoji", silhouette: "Silhouette",
+  alloutattack: "AllOutAttack", personae: "Personae", music: "Music",
+};
 
 // Chemin relatif à profile.html → toujours correct quelle que soit la config serveur
 let _titlesData = TITLES_LOCAL.map((t) => ({
@@ -64,8 +72,11 @@ export function isTitleConditionMet(title, ctx) {
       return (profile.badges || []).length >= v;
     case "unique_days":
       return (profile.uniqueDaysPlayed || 0) >= v;
-    case "mode_wins":
-      return (stats.modeWins?.Classic || 0) >= v;
+    case "mode_wins": {
+      // condition_mode décide du mode (défaut Classic pour compat aigis_i_am_not_afraid).
+      const key = _MODEWINS_KEY[title.condition_mode] || "Classic";
+      return (stats.modeWins?.[key] || 0) >= v;
+    }
     case "friends_count":
       return friendCount >= v;
     case "giveups_total":
@@ -113,7 +124,7 @@ export function titleConditionText(t) {
     case "wins_mode":
       return `Win ${v} games in any single mode`;
     case "mode_wins":
-      return `Win ${v} Classic games`;
+      return `Win ${v} ${_MODEWINS_KEY[t.condition_mode] || "Classic"} games`;
     case "streak_record":
       return `Reach a ${v}-day streak record`;
     case "badges_count":

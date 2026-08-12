@@ -306,6 +306,15 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
   déployer l'un sans l'autre.
 
 ---
+## 2026-08-05 — feat(2.1): titres Junes & Investigation Team (P4)
+
+Deux titres P4 avec conditions proxy simplifiées (les conditions "collection" d'origine
+n'étant pas exprimables dans le système `condition_type`) : `investigation_team` =
+`mode_wins personae 8`, `junes` = `mode_wins music 15`. Seed `bdd_mysql.sql`, migration
+`030`, images converties png→webp dans `profile/titles/`. Côté client (`titles-ui.js`),
+le cas `mode_wins` respecte désormais `condition_mode` (map `_MODEWINS_KEY`) au lieu du
+Classic codé en dur — corrige aussi un angle mort latent (aigis restait sur classic, OK).
+
 ## 2026-08-05 — feat(2.1): badge secret Gyotre (code GYOTRE)
 
 Badge secret easter-egg `gyotre` sur le modèle d'Arati : déblocable par le code permanent
