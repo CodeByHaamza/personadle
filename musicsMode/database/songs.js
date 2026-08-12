@@ -766,5 +766,68 @@ export const songs = [
     vocalist: "Lyn Inaizumi",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=AFhxdC4CVrc"
+  },
+  {
+    titre: "Junes Themes",
+    fichier: "Junes_Themes.mp3",
+    opus: ["P4", "P4G"],
+    image: "P4.webp",
+    vocalist: "Instrumental",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=MJaLQhEObXY"
+  },
+  {
+    titre: "Mass Destruction (P3FES)",
+    fichier: "Mass_Destruction_P3FES.mp3",
+    opus: ["P3FES"],
+    image: "P3FES.webp",
+    vocalist: "Yumi Kawamura, Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/lSb-DRbD2sE"
+  },
+  {
+    titre: "P3 FES",
+    fichier: "P3_FES.mp3",
+    opus: ["P3FES"],
+    image: "P3FES_song.webp",
+    vocalist: "Yumi Kawamura, Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/slJQ5VBD7iQ"
+  },
+  {
+    titre: "Show Stealer",
+    fichier: "Show_Stealer.mp3",
+    opus: ["P5X"],
+    image: "Show_Stealer.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/AvXAaRMNqww"
+  },
+  {
+    titre: "Tokyo Emergency",
+    fichier: "Tokyo_Emergency.mp3",
+    opus: ["P5", "P5R"],
+    image: "P5.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/k8OFhyalA1s"
+  },
+  {
+    titre: "What You Wish For",
+    fichier: "What_You_Wish_For.mp3",
+    opus: ["P5S"],
+    image: "P5S.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/_g7lIAnLYKI"
+  },
+  {
+    titre: "Hoshi to Bokura to",
+    fichier: "Hoshi_to_Bokura_to.mp3",
+    opus: ["P5", "P5R"],
+    image: "P5.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/ghmaEb5mThw"
   }
 ];
