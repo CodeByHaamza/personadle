@@ -137,4 +137,10 @@ export const portraitsMapSilhouette = {
 
   "Erina": "Erina",
   "Toshiro Kasukabe": "Toshiro",
+
+  "Saki Konishi": "Saki",
+  "Mayumi Yamano": "Mayumi_Yamano",
+  "Shin Kanzato": "Shin_Kanzato",
+  "Jun Kanzato": "Jun_Kanzato",
+  "Ryo Kanzato": "Ryo_Kanzato",
 };
