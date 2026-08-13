@@ -10,6 +10,36 @@
 
 ---
 
+## 2026-08-13 — fix(data): opus P4AU manquant + Elizabeth wielder de Thanatos
+
+Corrections de contenu sur le casting Persona 3, repérées en revue manuelle (pas de bug
+symptomatique signalé côté joueur, juste des tags opus incomplets).
+
+- **`database/characters_clean.js`** — ajout de l'opus `P4AU` (Persona 4 Arena Ultimax) au
+  casting complet du groupe P3 jouable dans ce jeu : Junpei Iori, Yukari Takeba,
+  Fuuka Yamagishi, Mitsuru Kirijo, Akihiko Sanada, Aigis, Ken Amada, Koromaru, ainsi qu'à
+  Elizabeth (Velvet Room) — tous apparaissent en tant que personnages jouables/cameo dans
+  P4AU, absent de leurs tableaux `opus` jusqu'ici.
+- **`personaeMode/database/personaeCharacters.js`** — Elizabeth ajoutée au tableau `user` de
+  l'entrée `Thanatos` (elle l'utilise comme Persona dans P4AU, aux côtés de Makoto
+  Yuki/Kotone Shiomi).
+- **`personaeMode/database/persona.js`** — Elizabeth ajoutée à la liste d'autocomplétion du
+  mode Personae. Sans ça, si elle est un jour tirée comme wielder cible pour Thanatos, elle
+  serait injouable (jamais proposée à la saisie) — même classe de bug que le garde-fou
+  `tests/autocompleteNames.test.js` ajouté en 2.1 (PR #66) pour Classic/Emoji/Silhouette/AOA.
+- `api/data/daily_pools.json` inchangé : `scripts/export-daily-pools.js` ne retient que
+  `user[0]` pour l'entrée personae (le champ `persona` sert de clé de filtre côté
+  `modePersonae.js`, pas `user`), et Elizabeth a été ajoutée en fin de tableau — la sortie
+  générée est donc identique, `npm run pools:check` confirme.
+
+⏳ **Pas d'entrée dans `PersonaDLE_Update.html` pour l'instant** : ce lot fait partie du
+contenu 2.1 pas encore livré (branche `feat/v2.1-content`, PR #66, elle-même pas encore
+mergée). À regrouper avec le reste du changelog joueur 2.1 (Trinity Souls, badge Gyotre,
+titres P4, etc.) au moment du lancement de la version — pas avant, pour ne pas fragmenter
+le highlight en plusieurs entrées.
+
+---
+
 ## 2026-07-31 — fix(challenge): filtres opus écrasés à "tout désélectionné" après un défi
 
 Signalement joueur : après avoir joué un défi (surtout remarqué en mode Music), plus aucun
