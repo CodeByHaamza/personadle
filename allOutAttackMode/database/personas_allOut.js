@@ -68,6 +68,7 @@ export const personas = [
   "Pinky ( Narumi Nashimoto )",
   "Blitz ( Kumi Katayama )",
   "Mona Starlight ( Morgana )",
+  "Panther Starlight ( Ann Takamaki )",
   "Marian Summer ( Minami Miyashita )",
   "Puppet Summer ( Miyu Sahara )",
   "Closer Radiance ( Motoha Arai )",

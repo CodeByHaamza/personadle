@@ -465,6 +465,11 @@
       "condition": "Redeem code 'SPORT' between April 6th and May 1st, 2025",
       "description": "Like the sports teams of Gekkoukan, Yasogami, and Shujin, you've answered the call on International Sports Day!"
     },
+    "gyotre": {
+      "name": "Gyotre",
+      "condition": "???",
+      "description": "A secret only the real ones know."
+    },
     "arati": {
       "name": "Arati's Blessing",
       "condition": "???",

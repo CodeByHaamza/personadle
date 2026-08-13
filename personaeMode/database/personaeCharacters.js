@@ -906,4 +906,24 @@ export const personaeCharacters = [
     user: ["Joker"],
     opus: ["P2IS"],
   },
+
+  // Persona Trinity Souls ( PTS )
+  {
+    persona: "Abel",
+    image: "Abel",
+    user: ["Shin Kanzato"],
+    opus: ["PTS"],
+  },
+  {
+    persona: "Seth",
+    image: "Seth",
+    user: ["Jun Kanzato"],
+    opus: ["PTS"],
+  },
+  {
+    persona: "Cain",
+    image: "Cain",
+    user: ["Ryo Kanzato"],
+    opus: ["PTS"],
+  },
 ];

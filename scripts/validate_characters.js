@@ -32,6 +32,7 @@ export const VALID_OPUS = new Set([
   "P5X",
   "PQ",
   "PQ2",
+  "PTS", // Persona Trinity Souls (anime)
 ]);
 
 // Arcanes canoniques : 22 Arcanes Majeurs + variantes propres à la série Persona.

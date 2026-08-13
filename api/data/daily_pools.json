@@ -87,6 +87,8 @@
       "Kou Ichijo",
       "Nanako Dojima",
       "Naoki Konishi",
+      "Saki Konishi",
+      "Mayumi Yamano",
       "Ryotaro Dojima",
       "Sayako Uehara",
       "Shu Nakajima",
@@ -107,6 +109,8 @@
       "Goro Akechi",
       "Sumire Yoshizawa",
       "Sae Niijima",
+      "Kobayakawa",
+      "Wakaba Isshiki",
       "Sophia",
       "Zenkichi Hasegawa",
       "Akane Hasegawa",
@@ -177,7 +181,10 @@
       "Hikari",
       "Nagi",
       "Igor",
-      "Hatsune Miku"
+      "Hatsune Miku",
+      "Shin Kanzato",
+      "Jun Kanzato",
+      "Ryo Kanzato"
     ]
   },
   "emoji": {
@@ -268,6 +275,8 @@
       "Kou Ichijo",
       "Nanako Dojima",
       "Naoki Konishi",
+      "Saki Konishi",
+      "Mayumi Yamano",
       "Ryotaro Dojima",
       "Sayako Uehara",
       "Shu Nakajima",
@@ -288,6 +297,8 @@
       "Goro Akechi",
       "Sumire Yoshizawa",
       "Sae Niijima",
+      "Kobayakawa",
+      "Wakaba Isshiki",
       "Sophia",
       "Zenkichi Hasegawa",
       "Akane Hasegawa",
@@ -358,7 +369,10 @@
       "Hikari",
       "Nagi",
       "Igor",
-      "Hatsune Miku"
+      "Hatsune Miku",
+      "Shin Kanzato",
+      "Jun Kanzato",
+      "Ryo Kanzato"
     ]
   },
   "silhouette": {
@@ -514,7 +528,12 @@
       "Rei",
       "Zen",
       "Hikari",
-      "Nagi"
+      "Nagi",
+      "Saki Konishi",
+      "Mayumi Yamano",
+      "Shin Kanzato",
+      "Jun Kanzato",
+      "Ryo Kanzato"
     ]
   },
   "music": {
@@ -603,7 +622,14 @@
       "Counter Strike",
       "Got Your Tail",
       "Revolution is a Blade",
-      "Truth or Dare"
+      "Truth or Dare",
+      "Junes Themes",
+      "Mass Destruction (P3FES)",
+      "P3 FES",
+      "Show Stealer",
+      "Tokyo Emergency",
+      "What You Wish For",
+      "Hoshi to Bokura to"
     ]
   },
   "alloutattack": {
@@ -674,6 +700,7 @@
       "Pinky ( Narumi Nashimoto )",
       "Blitz ( Kumi Katayama )",
       "Mona Starlight ( Morgana )",
+      "Panther Starlight ( Ann Takamaki )",
       "Marian Summer ( Minami Miyashita )",
       "Puppet Summer ( Miyu Sahara )",
       "Closer Radiance ( Motoha Arai )",
@@ -880,6 +907,9 @@
         "P5X"
       ],
       "Mona Starlight ( Morgana )": [
+        "P5X"
+      ],
+      "Panther Starlight ( Ann Takamaki )": [
         "P5X"
       ],
       "Marian Summer ( Minami Miyashita )": [
@@ -2095,6 +2125,27 @@
         "user": "Joker",
         "opus": [
           "P2IS"
+        ]
+      },
+      {
+        "persona": "Abel",
+        "user": "Shin Kanzato",
+        "opus": [
+          "PTS"
+        ]
+      },
+      {
+        "persona": "Seth",
+        "user": "Jun Kanzato",
+        "opus": [
+          "PTS"
+        ]
+      },
+      {
+        "persona": "Cain",
+        "user": "Ryo Kanzato",
+        "opus": [
+          "PTS"
         ]
       }
     ]

@@ -77,6 +77,7 @@ export const portraitsMap = {
   "Pinky ( Narumi Nashimoto )": "Pinky",
   "Blitz ( Kumi Katayama )": "Blitz",
   "Mona Starlight ( Morgana )": "Mona_Starlight",
+  "Panther Starlight ( Ann Takamaki )": "Panther_Starlight",
   "Marian Summer ( Minami Miyashita )": "Marian_Summer",
   "Puppet Summer ( Miyu Sahara )": "Puppet_Summer",
   "Closer Radiance ( Motoha Arai )": "Closer_Radiance",

@@ -163,4 +163,9 @@ export const silhouetteCharacters = [
   { nom: "Zen", image: "Zen_silhouette", opus: ["PQ"] },
   { nom: "Hikari", image: "Hikari_silhouette", opus: ["PQ2"] },
   { nom: "Nagi", image: "Nagi_silhouette", opus: ["PQ2"] },
+  { nom: "Saki Konishi", image: "Saki_silhouette", opus: ["P4", "P4G"] },
+  { nom: "Mayumi Yamano", image: "Mayumi_Yamano_silhouette", opus: ["P4", "P4G"] },
+  { nom: "Shin Kanzato", image: "Shin_Kanzato_silhouette", opus: ["PTS"] },
+  { nom: "Jun Kanzato", image: "Jun_Kanzato_silhouette", opus: ["PTS"] },
+  { nom: "Ryo Kanzato", image: "Ryo_Kanzato_silhouette", opus: ["PTS"] },
 ];

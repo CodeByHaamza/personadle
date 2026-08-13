@@ -84,6 +84,7 @@ export const aoaCharacters = [
 
   // === P5X — Skin Starlight ===
   { nom: "Mona Starlight ( Morgana )", gif: "Mona_Starlight", opus: ["P5X"] },
+  { nom: "Panther Starlight ( Ann Takamaki )", gif: "Panther_Starlight", opus: ["P5X"] },
 
   // === P5X — Skins Summer ===
   { nom: "Marian Summer ( Minami Miyashita )", gif: "Marian_Summer", opus: ["P5X"] },

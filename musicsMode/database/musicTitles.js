@@ -71,5 +71,12 @@ export const musicTitles = [
   "Wiping All Out",
   "Wonder Light",
   "You Are Stronger",
-  "Your Affection"
+  "Your Affection",
+  "Junes Themes",
+  "Mass Destruction (P3FES)",
+  "P3 FES",
+  "Show Stealer",
+  "Tokyo Emergency",
+  "What You Wish For",
+  "Hoshi to Bokura to"
 ];

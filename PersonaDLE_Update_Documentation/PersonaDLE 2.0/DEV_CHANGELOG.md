@@ -339,6 +339,67 @@ deux côtés à la fois, peu importe le nombre réel de parties dans `game_sessi
   déployer l'un sans l'autre.
 
 ---
+## 2026-08-05 — feat(2.1): silhouettes, All-Out Attack, 7 musiques, filtre PTS
+
+Suite et fin du lot de contenu 2.1 :
+- **Silhouettes** : Saki, Mayumi (dup portrait), trio Kanzato (images dédiées) —
+  `silhouetteCharacters.js` + `portraitsMapSilhouette.js`.
+- **All-Out Attack** : Panther Starlight (Ann Takamaki, P5X) — animation `mp4→webp`
+  (640×360, 60fps), image sélection + battle still.
+- **7 musiques** : Junes Themes (P4), Mass Destruction (P3FES), P3 FES (P3FES, nouvelle
+  icône), Show Stealer (P5X, nouvelle icône), Tokyo Emergency (P5/P5R), What You Wish For
+  (P5S), Hoshi to Bokura to (P5/P5R). mp3 + icônes locales, `songs.js` + `musicTitles.js`.
+  Métadonnées (vocalistes, liens) fournies par Hamza.
+- **Filtre Persona Trinity Souls** : bouton + logo dans les 4 modes à contenu PTS
+  (classic/emoji/silhouette/personae), règle CSS `filter-color-pts`.
+
+## 2026-08-05 — feat(2.1): personae Abel/Seth/Cain + fix collision portrait Mayumi
+
+Trois personae Trinity Souls (Abel/Shin, Seth/Jun, Cain/Ryo) ajoutées à
+`personaeCharacters.js` (opus PTS), images dans `personaeMode/database/img/`, wielders
+mappés dans `portraitsMapPersonae.js`.
+Fix au passage : la slice NPC avait écrasé `database/portraits/Mayumi.webp` (utilisé par
+Mayumi Hashimoto, P2) car Mayumi Yamano avait été mappée sur le même id `Mayumi`. Portrait
+original restauré, Yamano remappée sur `Mayumi_Yamano`. Vérifié : plus aucun id de portrait
+en double dans `portraitsMap`.
+
+## 2026-08-05 — feat(2.1): titres Junes & Investigation Team (P4)
+
+Deux titres P4 avec conditions proxy simplifiées (les conditions "collection" d'origine
+n'étant pas exprimables dans le système `condition_type`) : `investigation_team` =
+`mode_wins personae 8`, `junes` = `mode_wins music 15`. Seed `bdd_mysql.sql`, migration
+`030`, images converties png→webp dans `profile/titles/`. Côté client (`titles-ui.js`),
+le cas `mode_wins` respecte désormais `condition_mode` (map `_MODEWINS_KEY`) au lieu du
+Classic codé en dur — corrige aussi un angle mort latent (aigis restait sur classic, OK).
+
+## 2026-08-05 — feat(2.1): badge secret Gyotre (code GYOTRE)
+
+Badge secret easter-egg `gyotre` sur le modèle d'Arati : déblocable par le code permanent
+`GYOTRE`. Seed `bdd_mysql.sql` (badges + event_codes), entrée `badgesData.js`, i18n dans les
+6 langues (`badges.gyotre.*`), image `profile/badges/images/Badge_Gyotre.webp`. Migration
+`029_badge_gyotre.sql` pour l'insérer en prod (INSERT IGNORE). Description FR = la blague
+maison ("comment build violet") ; autres langues = générique.
+
+## 2026-08-05 — feat(2.1): opus Persona Trinity Souls + trio Kanzato
+
+Nouvel opus `PTS` (Persona Trinity Souls, anime) ajouté à `VALID_OPUS`
+(`scripts/validate_characters.js`) et aux `ALL_OPUS` des modes Classic/Emoji/Silhouette/
+Personae. Trois personnages à persona : Shin Kanzato (Abel), Jun Kanzato (Seth),
+Ryo Kanzato (Cain) — jouables en Classic + Emoji. Portraits + portraitsMap. Quotes vides
+(anime obscur, pas de source fiable). Reste pour PTS : bouton/logo filtre dans le HTML de
+chaque mode (le logo `Trinity_soul.webp` est prêt), les personae Abel/Seth/Cain dans le
+mode Personae, et les silhouettes du trio.
+
+## 2026-08-05 — feat(2.1): personnages NPC P4/P5 (Saki, Mayumi, Kobayakawa, Wakaba)
+
+Début du contenu 2.1. 4 personnages humains sans persona (`arcane: ["NONE"]`,
+`personaUser: false`) ajoutés à `database/characters_clean.js` (donc modes Classic +
+Emoji) : Saki Konishi & Mayumi Yamano (P4/P4G), Kobayakawa & Wakaba Isshiki (P5/P5R).
+Portraits copiés dans `database/portraits/`, entrées ajoutées à `portraitsMap.js`.
+Quote de Wakaba laissée vide (aucune source fiable — décision produit). Reste à venir
+pour ces persos : silhouette (Saki/Mayumi uniquement), le reste du lot 2.1 (opus Trinity
+Souls + trio Kanzato, songs, titres, badge Gyotre, All-Out Attack Ann).
+
 ## 2026-07-24 — chore(ci): outillage anti-régression post-lancement v2.0
 
 Suite au lancement prod v2.0 et à sa série de bugs de schéma/défaut, ajout de 4 outils

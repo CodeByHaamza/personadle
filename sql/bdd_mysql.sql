@@ -138,6 +138,8 @@ INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_i
 ('adachi_boring_isnt_it',     'profile/titles/adachi_boring_isnt_it.webp',     'Boring, Isn''t It?',     'Ennuyeux, N''est-ce Pas ?','¿Aburrido, Verdad?',   'Langweilig, Oder?',    'Noioso, Vero?',       'giveups_total',       NULL,      50,  'common'),
 ('marie_i_remembered',        'profile/titles/marie_i_remembered.webp',        'I Remembered',           'Je Me Suis Souvenu',      'Lo Recordé',            'Ich Erinnerte Mich',   'Mi Sono Ricordato',   'badges_count',        NULL,      15,  'rare'),
 ('yu_reach_out_to_the_truth', 'profile/titles/yu_reach_out_to_the_truth.webp', 'Reach Out to the Truth', 'Toucher la Vérité',       'Alcanza la Verdad',     'Greife nach der Wahrheit','Raggiungi la Verita','all_modes_won',     NULL,      1,   'epic'),
+('investigation_team',        'profile/titles/investigation_team.webp',        'Investigation Team',     'Investigation Team',      'Investigation Team',    'Investigation Team',   'Investigation Team',  'mode_wins',           'personae',8,   'epic'),
+('junes',                     'profile/titles/junes.webp',                     'Junes',                  'Junes',                   'Junes',                 'Junes',                'Junes',               'mode_wins',           'music',   15,  'rare'),
 ('naoya_first_awakening',     'profile/titles/naoya_first_awakening.webp',     'The First Awakening',    'Le Premier Éveil',        'El Primer Despertar',   'Das Erste Erwachen',   'Il Primo Risveglio',  'classic_p1_wins',     NULL,      15,  'rare'),
 ('maya_always_be_positive',   'profile/titles/maya_always_be_positive.webp',   'Always Be Positive',     'Toujours Positif',        'Siempre Positivo',      'Immer Positiv',        'Sempre Positivo',     'emoji_p2_wins',       NULL,      10,  'common');
 
@@ -694,6 +696,7 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('true_hacker',         'True Hacker',                'secret',      'rare',      'profile/badges/images/Badges_True_Hacker.png',           '???', 'manual', NULL, NULL, 1),
 ('tae_takemi',          'Tae Takemi Fan',             'secret',      'rare',      'profile/badges/images/Badges_Tae_Takemi.png',            '???', 'manual', NULL, NULL, 1),
 ('arati',               'Arati''s Blessing',          'secret',      'rare',      'profile/badges/images/Badges_Arati.png',                 '???', 'manual', NULL, NULL, 1),
+('gyotre',              'Gyotre',                     'secret',      'rare',      'profile/badges/images/Badge_Gyotre.webp',                '???', 'manual', NULL, NULL, 1),
 ('dzulian',             'The First Contractor',       'secret',      'epic',      'profile/badges/images/Badge_Dzulian.png',                '???', 'manual', NULL, NULL, 1),
 ('chef',                'Master Chef',                'secret',      'rare',      'profile/badges/images/Badges_Chef.png',                  '???', 'manual', NULL, NULL, 1),
 ('github_contributor',  'Phantom Coder',              'secret',      'common',    'profile/badges/images/Badges_Github_Morgana.png',        '???', 'manual', NULL, NULL, 1),
@@ -722,7 +725,8 @@ INSERT IGNORE INTO event_codes (code, badge_id, start_date, end_date, is_permane
   ('ARATI',       'arati',                 NULL, NULL, 1, 1, 'Secret — Arati'),
   ('DZULIAN',     'dzulian',               NULL, NULL, 1, 1, 'Secret — Dzulian'),
   ('GOURMET',     'chef',                  NULL, NULL, 1, 1, 'Secret — Chef'),
-  ('LOBSTER',     'lobster',               NULL, NULL, 1, 1, 'Secret — Lobster');
+  ('LOBSTER',     'lobster',               NULL, NULL, 1, 1, 'Secret — Lobster'),
+  ('GYOTRE',      'gyotre',                NULL, NULL, 1, 1, 'Secret — Gyotre');
 
 
 -- =============================================================================

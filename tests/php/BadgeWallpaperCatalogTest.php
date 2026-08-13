@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../api/lib/condition_check.php';
  * Trois angles distincts de ConditionCheckTest.php (qui teste la LOGIQUE générique
  * avec des valeurs arbitraires) :
  *
- *  1. Vérifie que CHAQUE ligne réellement seedée (60 badges, 7 wallpapers) a bien
+ *  1. Vérifie que CHAQUE ligne réellement seedée (61 badges, 7 wallpapers) a bien
  *     le condition_type/mode/value attendu — si un futur `npm run` ou une migration
  *     manuelle modifie une valeur par erreur, ce test le détecte immédiatement,
  *     badge par badge / wallpaper par wallpaper (pas juste "la fonction marche").
@@ -118,7 +118,7 @@ final class BadgeWallpaperCatalogTest extends TestCase
 
         // Le reste du catalogue (45 badges) est 'manual' — flags narratifs, redeem
         // de code événement, ou vérifié par un autre endpoint. Liste exhaustive des
-        // 60 slugs seedés (sql/bdd_mysql.sql) pour détecter un slug ajouté/retiré.
+        // 61 slugs seedés (sql/bdd_mysql.sql) pour détecter un slug ajouté/retiré.
         $manual = [
             'burn_my_dread', 'into_the_fog', 'velvet_headache', 'chinese_new_year', 'twin_blade',
             'persona_q_explorer', 'crimson_legacy', 'hippocampus_reload', 'truth_duality', 'one_shot',
@@ -127,7 +127,7 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'reborn_phoenix', 'take_the_pose', 'data_mining', 'leblanc_meeting',
             'rentree', 'sport', 'christmas_2025', 'new_years_2026', 'chinese_new_year_2026',
             'valentine_2026', 'easter_2026', 'golden_week', 'tanabata', 'promised_day',
-            'true_hacker', 'tae_takemi', 'arati', 'dzulian', 'chef', 'github_contributor',
+            'true_hacker', 'tae_takemi', 'arati', 'gyotre', 'dzulian', 'chef', 'github_contributor',
             'lobster', 'hifumi_archives', 'report',
         ];
 
@@ -141,12 +141,12 @@ final class BadgeWallpaperCatalogTest extends TestCase
     public function testEveryBadgeHasExpectedConditionColumns(): void
     {
         $expected = self::expectedBadgeConditions();
-        $this->assertCount(60, $expected, 'Le catalogue de référence de ce test doit lister les 60 badges');
+        $this->assertCount(61, $expected, 'Le catalogue de référence de ce test doit lister les 61 badges');
 
         $rows = self::$pdo->query(
             'SELECT slug, condition_type, condition_mode, condition_value FROM badges'
         )->fetchAll(PDO::FETCH_ASSOC);
-        $this->assertCount(60, $rows, 'La table badges doit contenir exactement 60 lignes (seed bdd_mysql.sql)');
+        $this->assertCount(61, $rows, 'La table badges doit contenir exactement 61 lignes (seed bdd_mysql.sql)');
 
         $bySlug = [];
         foreach ($rows as $r) {

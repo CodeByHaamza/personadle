@@ -59,6 +59,7 @@ const ALL_OPUS = [
   "P5X",
   "PQ",
   "PQ2",
+  "PTS",
 ];
 
 let activeFilters = [...ALL_OPUS];

@@ -29,6 +29,12 @@ const LEGACY_EXPAND = {
   PQ: ["PQ", "PQ2"],
 };
 
+/* Opus ajoutés récemment : activés par défaut même pour un joueur qui a déjà des
+   filtres sauvegardés en localStorage (sinon le nouvel opus reste invisible pour
+   tous les joueurs existants jusqu'à ce qu'ils l'activent à la main). Retirer un
+   code d'ici quand il n'est plus "nouveau". */
+const DEFAULT_ON_NEW = ["PTS"];
+
 /**
  * Migre une ancienne liste de filtres larges (["P3", "P4"…])
  * vers les codes précis acceptés par allOpus.
@@ -63,6 +69,12 @@ function _migrate(saved, allOpus) {
       result.push(code);
     }
     // Unknown codes → ignore
+  }
+  // Opus récents actifs par défaut, même si absents des filtres sauvegardés.
+  if (result.length > 0) {
+    for (const code of DEFAULT_ON_NEW) {
+      if (allOpus.includes(code) && !result.includes(code)) result.push(code);
+    }
   }
   return result.length > 0 ? [...new Set(result)] : null;
 }

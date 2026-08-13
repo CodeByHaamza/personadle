@@ -253,4 +253,11 @@ export const personas = [
   // ============================================================
 
   "Hatsune Miku",
+
+  // 2.1
+  "Saki Konishi",
+  "Mayumi Yamano",
+  "Shin Kanzato",
+  "Jun Kanzato",
+  "Ryo Kanzato",
 ];
