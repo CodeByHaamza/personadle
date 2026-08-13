@@ -27,7 +27,7 @@
 
 ---
 
-## 🚀 v2.1 — Prochaine version (périmètre décidé le 2026-07-06, étendu le 2026-07-31)
+## 🚀 v2.1 — Prochaine version (périmètre décidé le 2026-07-06, étendu le 2026-07-31, révisé le 2026-08-13)
 
 > La 2.0 part en prod sans attendre ces points — ils avancent en parallèle une fois livrée.
 > Priorité pas encore fixée entre eux. Mis de côté pour l'instant, sans version cible :
@@ -35,10 +35,20 @@
 > récap périodique — restent en idée dans 🟢 Produit ci-dessous. Groupes d'amis : en réflexion,
 > pas encore tranché.
 
-- [ ] **Mode Expert** — variante à **une seule tentative**, mécanique différente par mode de jeu :
-  - Classique : seule la citation (`quote`) est donnée, aucune autre catégorie affichée
-  - AOA : flou figé au niveau initial (le plus flou) — pas de nouveau mécanisme à construire,
-    juste ne pas faire baisser le flou puisqu'il n'y a qu'un seul essai
+- [ ] **Mode Expert** — révision 2026-08-13 : **plusieurs tentatives comme en mode normal**
+  (pas de tentative unique — trop punitif sur du contenu ambigu, ex. skins AOA recolorés
+  indiscernables en un seul coup d'œil). La difficulté vient d'un **indice de base dégradé qui
+  ne s'améliore PAS au fil des essais** (contrairement au mode normal, où l'indice se précise à
+  chaque tentative) — c'est là que se loge tout le "Expert", pas dans le nombre de coups.
+  Mécanique différente par mode de jeu :
+  - Classique : seule la citation (`quote`) est donnée, aucune autre catégorie affichée, sur
+    toute la partie (pas seulement le 1er essai)
+  - AOA : flou figé au niveau initial (le plus flou) **+ image en noir et blanc** — deux filtres
+    CSS, aucun nouveau mécanisme ni contenu à produire. À valider avant de livrer : sur les
+    familles de skins recolorés (silhouette/pose identiques, ex. lignes "Starlight"/"Summer"),
+    le N&B cumulé au flou max ne doit pas rendre deux entrées de la même famille
+    indiscernables — sinon exclure ces entrées du pool Expert ou ne garder qu'un seul des deux
+    filtres pour elles
   - Silhouette : à trancher entre crop aléatoire zoomé de l'image existante (rien à écrire, prêt
     tout de suite) et description physique en texte (contenu à rédiger par perso, × 6 langues) —
     recommandation : partir sur le crop pour limiter la dette de contenu
@@ -49,22 +59,32 @@
     (`scripts/export-daily-pools.js`, `npm run pools:build`/`pools:check`) pour que la cible du
     jour en Expert Personae ne pioche que parmi les persos déjà couverts par un paquet livré
   - Musique : paroles révélées progressivement à chaque essai raté, cumulatives (les précédentes
-    restent affichées, pas juste la dernière). Pas de i18n nécessaire (parole = parole dans sa
-    langue d'origine, même traitement que les titres de musique déjà exemptés côté §5 CLAUDE.md).
-    Paroles à sourcer par Hamza — n'existent pas encore dans `musicsMode/database/songs.js`
+    restent affichées, pas juste la dernière). ⚠️ Seul mode où l'indice s'améliore avec les
+    essais — contredit en l'état le principe "indice figé" ci-dessus. À trancher : soit on
+    l'assume comme exception (le point de départ, 0 parole au 1er essai, reste bien plus dur
+    que le mode normal), soit on la remplace par un indice dégradé mais statique (ex. paroles
+    partielles fixes, jamais complétées). Pas de i18n nécessaire dans tous les cas (parole =
+    parole dans sa langue d'origine, même traitement que les titres de musique déjà exemptés
+    côté §5 CLAUDE.md). Paroles à sourcer par Hamza — n'existent pas encore dans
+    `musicsMode/database/songs.js`
   - Émoji : encore à définir, aucune mécanique retenue pour l'instant
   - Condition de déblocage **différente par mode** (à trancher au cas par cas au moment de
     l'implémentation, pas de règle uniforme entre les 6)
+  - Récompense **supérieure au mode normal**, surtout en **défi ami** (voir item "Bonus XP
+    Social Link" juste en dessous — logique mise à jour suite à cette révision)
   - Nouveau badge/titre : débloqué une fois les 6 modes Expert battus au moins une fois chacun
     (réutilise le système de conditions structurées déjà en place, `condition_check.php`)
 - [ ] **Bonus XP Social Link selon la performance en défi** — actuellement XP mutuel fixe (35)
   sur un défi battu (`checkChallengeCompletion()`, `js/challenge-result.js`). À faire varier
   selon le nombre de tentatives utilisées — **pas le temps** : déclaratif côté client, donc plus
   facile à trafiquer qu'un nombre d'essais qui découle directement du jeu réel. Pour un défi
-  joué en **Mode Expert** (1 tentative → réussi/raté, pas de comparaison d'essais possible entre
-  les deux joueurs) : bonus significatif à part (x2/x3 sur le mutuel normal), à brancher sur
-  `GET /api/user/compare` déjà existant (comparaison de stats entre amis, +10/+20 XP, cooldown
-  72h) plutôt que d'inventer un système parallèle.
+  joué en **Mode Expert** (révision 2026-08-13 : Expert a maintenant plusieurs tentatives comme
+  le mode normal, donc la comparaison d'essais entre les deux joueurs redevient possible — le
+  bonus n'est plus justifié par "pas de comparaison possible" mais par la difficulté du mode
+  lui-même, indice dégradé qui ne s'améliore pas) : bonus significatif à part (x2/x3 sur le
+  mutuel normal) pour avoir battu le défi en Expert, à brancher sur `GET /api/user/compare`
+  déjà existant (comparaison de stats entre amis, +10/+20 XP, cooldown 72h) plutôt que
+  d'inventer un système parallèle.
 - [ ] **Connexion rapide Discord** (lier un compte existant + option à l'inscription, comme
   "Sign in with Google" sur d'autres sites) — compatible avec le modèle sessions PHP actuel
   (OAuth vérifie l'identité, puis session normale ouverte comme un login classique, pas de JWT).
