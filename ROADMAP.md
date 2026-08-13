@@ -37,37 +37,52 @@
 
 - [ ] **Mode Expert** — révision 2026-08-13 : **plusieurs tentatives comme en mode normal**
   (pas de tentative unique — trop punitif sur du contenu ambigu, ex. skins AOA recolorés
-  indiscernables en un seul coup d'œil). La difficulté vient d'un **indice de base dégradé qui
-  ne s'améliore PAS au fil des essais** (contrairement au mode normal, où l'indice se précise à
-  chaque tentative) — c'est là que se loge tout le "Expert", pas dans le nombre de coups.
-  Mécanique différente par mode de jeu :
+  indiscernables en un seul coup d'œil). Principe commun : un indice de **départ nettement plus
+  pauvre qu'en mode normal**. Certains modes le gardent figé toute la partie (Classique, AOA),
+  d'autres le font évoluer par essai raté mais avec un point de départ et/ou un rythme bien plus
+  dur que le mode normal (Musique, Silhouette, Personae — détails ci-dessous). Mécanique
+  spécifiée par mode le 2026-08-13 :
   - Classique : seule la citation (`quote`) est donnée, aucune autre catégorie affichée, sur
-    toute la partie (pas seulement le 1er essai)
+    toute la partie — indice figé
+  - Émoji : encore à définir — le mode normal est déjà considéré difficile de base, donc l'écart
+    Expert pourrait être plus faible que sur les autres modes ; aucune mécanique tranchée
   - AOA : flou figé au niveau initial (le plus flou) **+ image en noir et blanc** — deux filtres
-    CSS, aucun nouveau mécanisme ni contenu à produire. À valider avant de livrer : sur les
-    familles de skins recolorés (silhouette/pose identiques, ex. lignes "Starlight"/"Summer"),
-    le N&B cumulé au flou max ne doit pas rendre deux entrées de la même famille
-    indiscernables — sinon exclure ces entrées du pool Expert ou ne garder qu'un seul des deux
-    filtres pour elles
-  - Silhouette : à trancher entre crop aléatoire zoomé de l'image existante (rien à écrire, prêt
-    tout de suite) et description physique en texte (contenu à rédiger par perso, × 6 langues) —
-    recommandation : partir sur le crop pour limiter la dette de contenu
-  - Personae : description lore en mode "devinette" (ex. "grand voleur élégant" plutôt que
-    nommer Arsène Lupin directement), **traduite** (i18n complet, 6 langues), sourcée par Hamza
-    et livrée **par paquet** (Persona 3 d'abord, Persona 4 ensuite, etc.). Implique un flag "a du
-    contenu Expert" par persona, à intégrer au pool de tirage quotidien
-    (`scripts/export-daily-pools.js`, `npm run pools:build`/`pools:check`) pour que la cible du
-    jour en Expert Personae ne pioche que parmi les persos déjà couverts par un paquet livré
+    CSS cumulés, indice figé, aucun nouveau mécanisme ni contenu à produire. À valider avant de
+    livrer : sur les familles de skins recolorés (silhouette/pose identiques, ex. lignes
+    "Starlight"/"Summer"), le N&B cumulé au flou max ne doit pas rendre deux entrées de la même
+    famille indiscernables — sinon exclure ces entrées du pool Expert ou ne garder qu'un seul
+    des deux filtres pour elles
+  - Silhouette : zoom aléatoire sur une partie de la silhouette, **re-tiré au hasard à chaque
+    essai raté** (remplace le précédent, pas cumulatif comme Musique — à confirmer que c'est
+    bien l'intention, sinon le joueur accumule quand même l'info vue aux essais précédents même
+    sans overlay explicite). CSS/logique de crop uniquement sur les images existantes, pas de
+    nouveau contenu à produire
+  - Personae : **aucune image**. Indice par défaut = texte biographique/historique de la
+    persona (origine mythologique ou littéraire réelle), **nom et alias du personnage retirés
+    du texte** — ex. pour Arsène (Arsène Lupin) : retirer à la fois "Arsène" et son alias
+    "Raoul" du texte source. Après un certain nombre d'essais ratés, le joueur peut **demander
+    un indice supplémentaire** : un second texte, la description physique/design de la persona
+    en jeu (ex. notes de Shigenori Soejima sur le design d'Arsène), même traitement de retrait
+    de nom. Implications :
+    - **Seul mode nécessitant un vrai nouveau mécanisme** (les 5 autres ne font que dégrader un
+      indice existant) : bouton "demander un indice" gated par un nombre d'essais ratés, état à
+      tracker pendant la partie (indice demandé ou non)
+    - **Deux textes par persona** à rédiger/sourcer par Hamza (au lieu d'un) ; retrait des noms
+      fait manuellement à la rédaction, pas de traitement dynamique côté client
+    - Le texte biographique est **traduit** (i18n complet, 6 langues) ; à confirmer si le
+      second texte (description physique) l'est aussi — probablement oui, même régime
+    - Sourcé par Hamza, livré **par paquet** (Persona 3 d'abord, Persona 4 ensuite, etc.).
+      Implique un flag "a du contenu Expert" par persona, à intégrer au pool de tirage
+      quotidien (`scripts/export-daily-pools.js`, `npm run pools:build`/`pools:check`) pour que
+      la cible du jour en Expert Personae ne pioche que parmi les persos déjà couverts par un
+      paquet livré
   - Musique : paroles révélées progressivement à chaque essai raté, cumulatives (les précédentes
-    restent affichées, pas juste la dernière). ⚠️ Seul mode où l'indice s'améliore avec les
-    essais — contredit en l'état le principe "indice figé" ci-dessus. À trancher : soit on
-    l'assume comme exception (le point de départ, 0 parole au 1er essai, reste bien plus dur
-    que le mode normal), soit on la remplace par un indice dégradé mais statique (ex. paroles
-    partielles fixes, jamais complétées). Pas de i18n nécessaire dans tous les cas (parole =
-    parole dans sa langue d'origine, même traitement que les titres de musique déjà exemptés
-    côté §5 CLAUDE.md). Paroles à sourcer par Hamza — n'existent pas encore dans
-    `musicsMode/database/songs.js`
-  - Émoji : encore à définir, aucune mécanique retenue pour l'instant
+    restent affichées, pas juste la dernière) — façon lecteur de paroles synchronisées type
+    Spotify : 1 phrase pour commencer, une de plus par essai raté. Paroles à sourcer en ligne
+    par Hamza, pas besoin de la chanson complète — il s'arrête où il juge avoir assez de texte
+    pour le mode. Pas de i18n nécessaire (parole = parole dans sa langue d'origine, même
+    traitement que les titres de musique déjà exemptés côté §5 CLAUDE.md). N'existent pas
+    encore dans `musicsMode/database/songs.js`
   - Condition de déblocage **différente par mode** (à trancher au cas par cas au moment de
     l'implémentation, pas de règle uniforme entre les 6)
   - Récompense **supérieure au mode normal**, surtout en **défi ami** (voir item "Bonus XP
