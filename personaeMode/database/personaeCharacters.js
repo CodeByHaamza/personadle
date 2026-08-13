@@ -32,25 +32,22 @@ export const personaeCharacters = [
   },
 
   {
+    // Elizabeth utilise Thanatos dans P4AU (aux côtés de Makoto/Kotone en P3) —
+    // fusionné dans la même entrée plutôt que scindé par opus : même image,
+    // même persona, un joueur qui répond "Elizabeth" ne doit jamais être
+    // marqué faux juste parce que la cible tirée est l'entrée P3 (précédent
+    // déjà établi par "Orpheus Telos" ci-dessus, qui fusionne aussi des
+    // wielders de sous-continuités différentes dans une seule entrée).
     persona: "Thanatos",
     image: "Thanatos",
-    user: ["Makoto Yuki", "Kotone Shiomi"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    user: ["Makoto Yuki", "Kotone Shiomi", "Elizabeth"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Thanatos Picaro",
     image: "Thanatos_Picaro",
     user: ["Makoto Yuki", "Kotone Shiomi"],
     opus: ["P3", "P3FES", "P3P", "P3R"],
-  },
-  {
-    // P4AU : seule Elizabeth utilise Thanatos dans ce jeu (le protagoniste P3
-    // n'y est pas jouable) — entrée séparée de la Thanatos P3 ci-dessus pour
-    // ne pas accepter Makoto Yuki/Kotone Shiomi comme réponse dans ce contexte.
-    persona: "Thanatos",
-    image: "Thanatos",
-    user: ["Elizabeth"],
-    opus: ["P4AU"],
   },
   {
     persona: "Messiah",

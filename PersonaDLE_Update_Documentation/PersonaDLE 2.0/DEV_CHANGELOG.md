@@ -10,6 +10,37 @@
 
 ---
 
+## 2026-08-13 — fix(data): Thanatos re-fusionné en une seule entrée (P3 + P4AU)
+
+Retour en arrière sur le split de Thanatos fait dans le commit précédent, suite à un
+signalement produit : les deux entrées affichaient la **même image**, donc un joueur
+répondant "Elizabeth" (vrai dans l'absolu) pouvait être marqué faux si la cible tirée était
+la version P3 — ressenti comme un bug, pas comme une règle de contenu.
+
+- **`personaeMode/database/personaeCharacters.js`** — `Thanatos` redevient une seule entrée
+  `user: ["Makoto Yuki", "Kotone Shiomi", "Elizabeth"]`, `opus: ["P3", "P3FES", "P3P",
+  "P3R", "P4AU"]`. Précédent déjà établi par `Orpheus Telos` (même fichier), qui fusionne
+  déjà des wielders de sous-continuités différentes dans une seule entrée — principe du
+  dataset : une entrée par persona, tous les wielders documentés dedans, pas une entrée par
+  jeu.
+- `api/data/daily_pools.json` régénéré (`npm run pools:build`) — 150 entrées personae
+  (au lieu de 151 avec le split).
+- Le fix `challengeKey()`/`findByChallengeKey()` du commit précédent reste utile et inchangé
+  : `Thanatos` n'est simplement plus détecté comme dupliqué (fonction dynamique, pas de
+  liste en dur), `Hermes`/`Prometheus` restent correctement désambiguïsés (ce sont deux
+  personnages réellement différents, pas une question de générosité d'acceptation).
+
+⚠️ **Effet de bord sur un test PHPUnit existant** (`tests/php/DailyTargetTest.php` —
+`testComputeDailyTargetForPersonaeFallsBackToFilteredPoolWhenDailyIsExcluded`) : ce test
+utilise un couple date/seed codé en dur, choisi à l'origine pour déclencher un scénario
+précis (tirage non filtré ≠ tirage filtré P4) contre le pool personae de l'époque. Les
+opus P4AU ajoutés sur plusieurs entrées ont décalé le tirage seedé déterministe pour ce
+couple précis — recalculé un nouveau couple (`2026-08-01` / seed `1`) qui redéclenche le
+même scénario contre le pool actuel, vérifié en exécutant directement
+`personadle_compute_daily_target()` (pas de DB nécessaire pour cette classe de test, mais
+PHPUnit lui-même injoignable dans cet environnement — `phar.phpunit.de` hors de la liste
+blanche du proxy sortant — vérification faite en appelant la fonction réelle directement).
+
 ## 2026-08-13 — fix(challenge): cible de défi Personae mal résolue sur les personas dupliquées
 
 Suite immédiate du lot P4AU ci-dessous : le fait de scinder `Thanatos` en 2 entrées

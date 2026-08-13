@@ -949,7 +949,8 @@
           "P3",
           "P3FES",
           "P3P",
-          "P3R"
+          "P3R",
+          "P4AU"
         ]
       },
       {
@@ -960,13 +961,6 @@
           "P3FES",
           "P3P",
           "P3R"
-        ]
-      },
-      {
-        "persona": "Thanatos",
-        "user": "Elizabeth",
-        "opus": [
-          "P4AU"
         ]
       },
       {

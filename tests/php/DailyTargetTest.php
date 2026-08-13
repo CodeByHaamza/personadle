@@ -140,9 +140,12 @@ final class DailyTargetTest extends TestCase
     {
         // "P4" (pas "P1" — Personae n'a pas de filtre P1, cf. ALL_OPUS dans
         // modePersonae.js) : seed/date choisis pour déclencher réellement le
-        // fallback (la cible non filtrée n'est pas un persona P4).
-        $unfiltered = personadle_compute_daily_target('personae', '2026-07-05', '42', []);
-        $filtered = personadle_compute_daily_target('personae', '2026-07-05', '42', ['P4']);
+        // fallback (la cible non filtrée n'est pas un persona P4). Recalculé le
+        // 2026-08-13 (contenu 2.1 : plusieurs entrées du pool personae ont reçu
+        // l'opus P4AU, ce qui a décalé le tirage seedé — l'ancien couple
+        // date/seed ne déclenchait plus le fallback avec le nouveau contenu).
+        $unfiltered = personadle_compute_daily_target('personae', '2026-08-01', '1', []);
+        $filtered = personadle_compute_daily_target('personae', '2026-08-01', '1', ['P4']);
         $this->assertNotSame($unfiltered, $filtered, 'Ce cas de test doit déclencher le fallback filtré');
 
         // Au moins UNE entrée du pool doit partager ce `user` et appartenir à P4 —
