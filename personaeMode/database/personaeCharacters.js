@@ -1,3 +1,25 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   RÈGLE — personas partagées entre plusieurs personnages (cf. CLAUDE.md §4)
+
+   1. Un même NOM de persona utilisé par plusieurs personnages dans des opus
+      différents = UNE SEULE entrée, `user` fusionné, `opus` combiné.
+      Ex: Thanatos → user: [Makoto Yuki, Kotone Shiomi, Elizabeth] (P3 + P4AU).
+      Déjà le cas d'Orpheus Telos ci-dessous (3 wielders combinés).
+
+   2. Deux personnages DIFFÉRENTS dont les personas portent juste le même nom
+      par coïncidence = DEUX entrées séparées, chacune son user/opus.
+      Ex: Hermes (Junpei, P3) vs Hermes (Jun Kurosu, P2IS) ; Prometheus
+      (Futaba, P5R) vs Prometheus (Baofu, P2EP).
+
+   Pourquoi : fusionner à tort le cas 2 ferait accepter une mauvaise réponse.
+   Scinder à tort le cas 1 peut refuser une bonne réponse selon l'entrée
+   tirée en interne, alors que l'image affichée est identique des deux côtés
+   — vécu comme un bug par le joueur, pas comme une règle de contenu.
+
+   Les noms légitimement dupliqués (cas 2) sont désambiguïsés automatiquement
+   côté défi entre amis par challengeKey()/findByChallengeKey()
+   (personaeMode/modePersonae.js) — rien à faire de plus ici.
+   ───────────────────────────────────────────────────────────────────────── */
 export const personaeCharacters = [
   //Persona 3 ( P3, P3FES, P3P, P3R )
   {
