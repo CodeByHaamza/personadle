@@ -320,7 +320,7 @@ export const characters = [
     genre: ["Human", "Female"],
     age: "15-20",
     arcane: ["Priestess"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Lucia",
     emoji: ["💻","📚","📡"],
