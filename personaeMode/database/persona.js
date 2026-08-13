@@ -81,4 +81,9 @@ export const personas = [
   "Aran Hirano",
   "Narumi Nashimoto",
   "Kumi Katayama",
+
+  // Persona Trinity Souls — 2.1 (wielders : on devine le personnage, pas la persona)
+  "Shin Kanzato",
+  "Jun Kanzato",
+  "Ryo Kanzato",
 ];

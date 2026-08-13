@@ -283,4 +283,21 @@ export const personas = [
 
   "Hatsune Miku",
 
+  // Persona 4 — 2.1
+  "Saki Konishi",
+  "Mayumi Yamano",
+  // Persona 5 — 2.1
+  "Kobayakawa",
+  "Wakaba Isshiki",
+  // Persona Trinity Souls — 2.1
+  "Shin Kanzato",
+  "Jun Kanzato",
+  "Ryo Kanzato",
+
+  // Manques pré-existants comblés (persos présents dans characters_clean.js mais
+  // absents de l'autocomplétion → étaient injouables). Repérés par le test garde-fou.
+  "Aran Hirano",
+  "Narumi Nashimoto",
+  "Kumi Katayama",
+
 ];
