@@ -10,6 +10,37 @@
 
 ---
 
+## 2026-08-13 — fix(challenge): cible de défi Personae mal résolue sur les personas dupliquées
+
+Suite immédiate du lot P4AU ci-dessous : le fait de scinder `Thanatos` en 2 entrées
+(P3 vs P4AU) a rendu concret un angle mort déjà documenté mais laissé de côté — la
+résolution de cible de défi ami en mode Personae matchait par simple nom de persona.
+
+- **Root cause** (`personaeMode/modePersonae.js`) : le pool de défi (`showChallengeButton`)
+  envoyait `c.persona` brut comme identifiant de cible, et la résolution côté ami
+  (`originalCharacters.find(c => c.persona === name)`) retombait toujours sur la
+  **première** entrée du tableau portant ce nom. Avec des noms dupliqués entre deux
+  personnages différents (`Thanatos` : Makoto/Kotone vs Elizabeth ; `Hermes` : Junpei vs
+  Jun Kurosu/P2IS ; `Prometheus` : Futaba vs Baofu/P2EP), un défi tombant sur la 2e entrée
+  se résolvait côté ami sur la mauvaise réponse acceptée.
+- **Fix** : `challengeKey(c)` calcule un identifiant — `c.persona` seul si le nom n'est pas
+  dupliqué dans le dataset (immense majorité des cas, format inchangé, rétro-compatible
+  avec un défi déjà en vol), sinon `"{persona}::{premier opus}"`. `findByChallengeKey(key)`
+  fait l'inverse, avec repli sur le comportement historique (1er match par nom) si le
+  suffixe ne matche plus rien — robustesse si le contenu change entre-temps.
+- **Pourquoi c'est sûr de changer le format de la chaîne stockée** : vérifié tout le
+  pipeline (`js/gameCore.js` → `api/messages/index.php` → `js/notifications.js` →
+  `js/challenge-notif.js` → `profile/friends/friends.js`) — la cible n'est **jamais**
+  affichée en texte au joueur défié (elle reste un attribut `data-target`/valeur
+  programmatique, jamais interpolée dans du HTML visible), donc changer son format
+  n'impacte aucun affichage, seulement la résolution interne côté Personae.
+- Validé par un round-trip exhaustif (`challengeKey` → `findByChallengeKey`) sur les 151
+  entrées de `personaeCharacters.js` (script ponctuel, pas de DB/E2E disponible dans cet
+  environnement pour tester le flux défi à deux comptes en conditions réelles — à
+  confirmer manuellement si possible avant release). Pas de nouveau test unitaire ajouté :
+  `modePersonae.js` n'exporte pas ses handlers internes, même convention que les fixes
+  challenge précédents sur ces fichiers.
+
 ## 2026-08-13 — fix(data): opus P4AU manquant sur le casting P3 + personas jouables en P4AU
 
 Corrections de contenu sur le casting Persona 3, faites en 2 passes suite à des
@@ -37,14 +68,11 @@ bug symptomatique signalé côté joueur, juste des tags opus incomplets/impréc
 - `api/data/daily_pools.json` régénéré (`npm run pools:build`) suite au nouveau `Thanatos`
   P4AU et aux opus modifiés sur les 7 autres entrées — 151 entrées personae au lieu de 150.
 
-⚠️ **Angle mort repéré, pas corrigé ici** : la résolution de cible de défi entre amis en
-mode Personae (`modePersonae.js`, `originalCharacters.find(c => c.persona === name)`)
-matche par **nom de persona**, pas par entrée précise. Avec deux entrées `Thanatos`
-(P3 et P4AU) partageant le même nom, un défi qui tombe sur la version P4AU serait résolu
-côté ami sur la première entrée du tableau (P3, Makoto/Kotone) — mauvais `user` accepté.
-Pas un bug introduit ici : `Hermes` (Junpei vs Jun Kurosu/P2IS) et `Prometheus` (Futaba vs
-Baofu/P2EP) ont déjà ce défaut latent, jamais remarqué (cas rare). Chantier à part si on
-veut le corriger : résoudre la cible de défi par index/entrée précise plutôt que par nom.
+✅ **Angle mort corrigé** (voir entrée juste au-dessus, même jour) : la résolution de
+cible de défi entre amis en mode Personae matchait par nom de persona seul, pas par
+entrée précise — avec `Thanatos` en double (P3/P4AU) ça aurait résolu le mauvais
+personnage côté ami. `challengeKey()`/`findByChallengeKey()` désambiguïsent désormais
+les noms dupliqués par opus.
 
 ⏳ **Pas d'entrée dans `PersonaDLE_Update.html` pour l'instant** : ce lot fait partie du
 contenu 2.1 pas encore livré (branche `feat/v2.1-content`, PR #66, elle-même pas encore

@@ -106,6 +106,43 @@ function getFilteredCharacters() {
 }
 
 /**
+ * Clé d'identification utilisée pour référencer une entrée personae dans le
+ * système de défi (localStorage `activeChallenge.target`, jamais affiché en
+ * clair au joueur défié — vérifié dans tout le pipeline challenge-notif.js /
+ * friends.js / api/messages/index.php, qui ne font que transporter la chaîne).
+ *
+ * Certaines personas partagent le même nom entre deux personnages différents
+ * (ex. "Thanatos" : Makoto/Kotone en P3 vs Elizabeth en P4AU ; "Hermes" :
+ * Junpei en P3 vs Jun Kurosu en P2IS ; "Prometheus" : Futaba en P5R vs Baofu
+ * en P2EP). Résoudre un défi par simple nom (ancien comportement) retombe
+ * toujours sur la PREMIÈRE entrée du tableau portant ce nom, quelle que soit
+ * l'entrée réellement tirée — mauvaise réponse acceptée côté ami si la cible
+ * tirée était la 2e entrée. Ici, seuls les noms réellement dupliqués dans le
+ * dataset reçoivent un suffixe `::OPUS` ; le reste garde le nom simple
+ * (rétro-compatible avec un défi déjà en vol créé avant ce fix).
+ */
+function challengeKey(c) {
+  const dup = originalCharacters.filter((x) => x.persona === c.persona).length > 1;
+  if (!dup) return c.persona;
+  const opus = Array.isArray(c.opus) ? c.opus[0] : c.opus;
+  return `${c.persona}::${opus}`;
+}
+
+/** Résout une clé de défi (voir challengeKey) vers l'entrée personae exacte. */
+function findByChallengeKey(key) {
+  if (!key) return null;
+  const sepIndex = key.lastIndexOf("::");
+  if (sepIndex === -1) return originalCharacters.find((c) => c.persona === key) ?? null;
+  const personaName = key.slice(0, sepIndex);
+  const opusHint = key.slice(sepIndex + 2);
+  return (
+    originalCharacters.find(
+      (c) => c.persona === personaName && (Array.isArray(c.opus) ? c.opus[0] : c.opus) === opusHint
+    ) ?? originalCharacters.find((c) => c.persona === personaName) ?? null
+  );
+}
+
+/**
  * Picks the daily target and loads their persona image.
  * Uses seeded RNG from the full unfiltered pool by default; falls back to a
  * seeded pick from the filtered pool if the daily character isn't in the
@@ -115,11 +152,10 @@ function pickCharacter(random = false) {
   filteredCharacters = getFilteredCharacters();
 
   // Défi à cible dédiée (2026-07-17) : elle prime sur le tirage du jour ET sur
-  // le random du Replay tant que le défi est actif (identifiée par le persona).
+  // le random du Replay tant que le défi est actif (identifiée par le persona,
+  // désambiguïsé par opus pour les noms dupliqués — cf. challengeKey()).
   const _challengeTargetName = getActiveChallengeTarget("personae");
-  const _challengeChar = _challengeTargetName
-    ? originalCharacters.find((c) => c.persona === _challengeTargetName)
-    : null;
+  const _challengeChar = _challengeTargetName ? findByChallengeKey(_challengeTargetName) : null;
 
   if (_challengeChar) {
     target = _challengeChar;
@@ -445,8 +481,10 @@ function showVictory(force = false, name = null) {
     showChallengeButton(
       "personae",
       attempts,
-      // La cible d'un défi Personae est identifiée par le nom du persona.
-      filteredCharacters.filter((c) => c.persona !== target.persona).map((c) => c.persona)
+      // La cible d'un défi Personae est identifiée par challengeKey() (nom du
+      // persona, désambiguïsé par opus quand plusieurs entrées partagent le
+      // même nom — voir pickCharacter() plus haut).
+      filteredCharacters.filter((c) => c.persona !== target.persona).map((c) => challengeKey(c))
     );
   checkChallengeCompletion("personae", attempts, !force);
   showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
