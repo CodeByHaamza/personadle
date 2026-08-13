@@ -34,7 +34,7 @@ export const personaeCharacters = [
   {
     persona: "Thanatos",
     image: "Thanatos",
-    user: ["Makoto Yuki", "Kotone Shiomi"],
+    user: ["Makoto Yuki", "Kotone Shiomi", "Elizabeth"],
     opus: ["P3", "P3FES", "P3P", "P3R"],
   },
   {
