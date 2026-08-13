@@ -34,7 +34,7 @@ export const personaeCharacters = [
   {
     persona: "Thanatos",
     image: "Thanatos",
-    user: ["Makoto Yuki", "Kotone Shiomi", "Elizabeth"],
+    user: ["Makoto Yuki", "Kotone Shiomi"],
     opus: ["P3", "P3FES", "P3P", "P3R"],
   },
   {
@@ -42,6 +42,15 @@ export const personaeCharacters = [
     image: "Thanatos_Picaro",
     user: ["Makoto Yuki", "Kotone Shiomi"],
     opus: ["P3", "P3FES", "P3P", "P3R"],
+  },
+  {
+    // P4AU : seule Elizabeth utilise Thanatos dans ce jeu (le protagoniste P3
+    // n'y est pas jouable) — entrée séparée de la Thanatos P3 ci-dessus pour
+    // ne pas accepter Makoto Yuki/Kotone Shiomi comme réponse dans ce contexte.
+    persona: "Thanatos",
+    image: "Thanatos",
+    user: ["Elizabeth"],
+    opus: ["P4AU"],
   },
   {
     persona: "Messiah",
@@ -65,7 +74,7 @@ export const personaeCharacters = [
     persona: "Isis",
     image: "Isis",
     user: ["Yukari Takeba"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Hermes",
@@ -77,7 +86,7 @@ export const personaeCharacters = [
     persona: "Trismegistus",
     image: "Trismegistus",
     user: ["Junpei Iori"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Polydeuces",
@@ -89,7 +98,7 @@ export const personaeCharacters = [
     persona: "Caesar",
     image: "Caesar",
     user: ["Akihiko Sanada"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Penthesilea",
@@ -101,7 +110,7 @@ export const personaeCharacters = [
     persona: "Artemisia",
     image: "Artemisia",
     user: ["Mitsuru Kirijo"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Castor",
@@ -119,7 +128,7 @@ export const personaeCharacters = [
     persona: "Kala-Nemi",
     image: "Kala-Nemi",
     user: ["Ken Amada"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Palladion",
@@ -131,7 +140,7 @@ export const personaeCharacters = [
     persona: "Athena",
     image: "Athena",
     user: ["Aigis"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Athena Picaros",
@@ -143,7 +152,7 @@ export const personaeCharacters = [
     persona: "Cerberus",
     image: "Cerberus",
     user: ["Koromaru"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Lucia",

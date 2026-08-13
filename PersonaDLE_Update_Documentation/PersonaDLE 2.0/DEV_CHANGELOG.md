@@ -10,27 +10,41 @@
 
 ---
 
-## 2026-08-13 — fix(data): opus P4AU manquant + Elizabeth wielder de Thanatos
+## 2026-08-13 — fix(data): opus P4AU manquant sur le casting P3 + personas jouables en P4AU
 
-Corrections de contenu sur le casting Persona 3, repérées en revue manuelle (pas de bug
-symptomatique signalé côté joueur, juste des tags opus incomplets).
+Corrections de contenu sur le casting Persona 3, faites en 2 passes suite à des
+clarifications successives de Hamza sur le roster réel de Persona 4 Arena Ultimax (pas de
+bug symptomatique signalé côté joueur, juste des tags opus incomplets/imprécis).
 
-- **`database/characters_clean.js`** — ajout de l'opus `P4AU` (Persona 4 Arena Ultimax) au
-  casting complet du groupe P3 jouable dans ce jeu : Junpei Iori, Yukari Takeba,
+- **`database/characters_clean.js`** — ajout de l'opus `P4AU` au casting complet du groupe
+  P3 jouable dans ce jeu (personnage, pas persona précise) : Junpei Iori, Yukari Takeba,
   Fuuka Yamagishi, Mitsuru Kirijo, Akihiko Sanada, Aigis, Ken Amada, Koromaru, ainsi qu'à
-  Elizabeth (Velvet Room) — tous apparaissent en tant que personnages jouables/cameo dans
-  P4AU, absent de leurs tableaux `opus` jusqu'ici.
-- **`personaeMode/database/personaeCharacters.js`** — Elizabeth ajoutée au tableau `user` de
-  l'entrée `Thanatos` (elle l'utilise comme Persona dans P4AU, aux côtés de Makoto
-  Yuki/Kotone Shiomi).
+  Elizabeth (Velvet Room).
+- **`personaeMode/database/personaeCharacters.js`** — `P4AU` ajouté aux 7 personas P3
+  précisément jouables dans ce jeu (confirmées par Hamza, pas la persona de base du
+  personnage à chaque fois) : `Isis` (Yukari), `Trismegistus` (Junpei), `Caesar` (Akihiko),
+  `Artemisia` (Mitsuru), `Athena` (Aigis), `Kala-Nemi` (Ken), `Cerberus` (Koromaru — Ken et
+  Koromaru partagent un seul slot jouable mais chacun garde ses techniques/persona propres).
+  `Thanatos` scindé en 2 entrées distinctes plutôt qu'un seul `user` élargi : l'entrée P3
+  historique garde `["Makoto Yuki", "Kotone Shiomi"]` inchangée, une **nouvelle** entrée
+  `{ persona: "Thanatos", opus: ["P4AU"], user: ["Elizabeth"] }` couvre P4AU — dans ce jeu
+  seule Elizabeth l'utilise (le protagoniste P3 n'y est pas jouable), un `user` fusionné
+  aurait accepté Makoto/Kotone comme réponse même quand la cible réelle est la version P4AU.
 - **`personaeMode/database/persona.js`** — Elizabeth ajoutée à la liste d'autocomplétion du
   mode Personae. Sans ça, si elle est un jour tirée comme wielder cible pour Thanatos, elle
   serait injouable (jamais proposée à la saisie) — même classe de bug que le garde-fou
   `tests/autocompleteNames.test.js` ajouté en 2.1 (PR #66) pour Classic/Emoji/Silhouette/AOA.
-- `api/data/daily_pools.json` inchangé : `scripts/export-daily-pools.js` ne retient que
-  `user[0]` pour l'entrée personae (le champ `persona` sert de clé de filtre côté
-  `modePersonae.js`, pas `user`), et Elizabeth a été ajoutée en fin de tableau — la sortie
-  générée est donc identique, `npm run pools:check` confirme.
+- `api/data/daily_pools.json` régénéré (`npm run pools:build`) suite au nouveau `Thanatos`
+  P4AU et aux opus modifiés sur les 7 autres entrées — 151 entrées personae au lieu de 150.
+
+⚠️ **Angle mort repéré, pas corrigé ici** : la résolution de cible de défi entre amis en
+mode Personae (`modePersonae.js`, `originalCharacters.find(c => c.persona === name)`)
+matche par **nom de persona**, pas par entrée précise. Avec deux entrées `Thanatos`
+(P3 et P4AU) partageant le même nom, un défi qui tombe sur la version P4AU serait résolu
+côté ami sur la première entrée du tableau (P3, Makoto/Kotone) — mauvais `user` accepté.
+Pas un bug introduit ici : `Hermes` (Junpei vs Jun Kurosu/P2IS) et `Prometheus` (Futaba vs
+Baofu/P2EP) ont déjà ce défaut latent, jamais remarqué (cas rare). Chantier à part si on
+veut le corriger : résoudre la cible de défi par index/entrée précise plutôt que par nom.
 
 ⏳ **Pas d'entrée dans `PersonaDLE_Update.html` pour l'instant** : ce lot fait partie du
 contenu 2.1 pas encore livré (branche `feat/v2.1-content`, PR #66, elle-même pas encore
