@@ -8,8 +8,11 @@
 
    2. Deux personnages DIFFÉRENTS dont les personas portent juste le même nom
       par coïncidence = DEUX entrées séparées, chacune son user/opus.
-      Ex: Hermes (Junpei, P3) vs Hermes (Jun Kurosu, P2IS) ; Prometheus
-      (Futaba, P5R) vs Prometheus (Baofu, P2EP).
+      Critère concret : le champ `image`. Même image → cas 1. Images
+      différentes → cas 2.
+      Ex: Hermes (Junpei, P3, image: "Hermes") vs Hermes (Jun Kurosu, P2IS,
+      image: "Jun_Hermes") — deux dessins différents. Prometheus (Futaba,
+      P5R) vs Prometheus (Baofu, P2EP) — même logique.
 
    Pourquoi : fusionner à tort le cas 2 ferait accepter une mauvaise réponse.
    Scinder à tort le cas 1 peut refuser une bonne réponse selon l'entrée
