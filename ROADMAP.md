@@ -52,11 +52,15 @@
     "Starlight"/"Summer"), le N&B cumulé au flou max ne doit pas rendre deux entrées de la même
     famille indiscernables — sinon exclure ces entrées du pool Expert ou ne garder qu'un seul
     des deux filtres pour elles
-  - Silhouette : zoom aléatoire sur une partie de la silhouette, **re-tiré au hasard à chaque
-    essai raté** (remplace le précédent, pas cumulatif comme Musique — à confirmer que c'est
-    bien l'intention, sinon le joueur accumule quand même l'info vue aux essais précédents même
-    sans overlay explicite). CSS/logique de crop uniquement sur les images existantes, pas de
-    nouveau contenu à produire
+  - Silhouette : garde la logique de dézoom déjà utilisée en mode normal (`modeSilhouette.js` —
+    zoom CSS `scale()` de 1.8 à 1, -0.2 par essai raté jusqu'au plein cadre) — indice figé côté
+    mécanique, aucun nouveau système. Seul changement : le **point autour duquel on zoome est
+    tiré au hasard sur la silhouette**, au lieu du centre fixe de l'image utilisé en mode
+    normal. ⚠️ Un point purement aléatoire peut tomber en plein milieu de l'aplat noir uniforme
+    (silhouette rendue via `filter: brightness(0)`) et ne rien montrer d'exploitable au 1er
+    essai — le tirage doit être contraint à des zones qui touchent un contour de la silhouette,
+    pas un pixel random sur toute l'image (ex. quelques points d'ancrage pré-repérés par
+    personnage plutôt qu'un tirage libre)
   - Personae : **aucune image**. Indice par défaut = texte biographique/historique de la
     persona (origine mythologique ou littéraire réelle), **nom et alias du personnage retirés
     du texte** — ex. pour Arsène (Arsène Lupin) : retirer à la fois "Arsène" et son alias
