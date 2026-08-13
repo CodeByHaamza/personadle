@@ -9,6 +9,8 @@ export const personas = [
   "Shinjiro Aragaki",
   "Ken Amada",
   "Koromaru",
+  // Elizabeth : wielder additionnelle de Thanatos (P4 Arena Ultimax)
+  "Elizabeth",
   "Marie",
   "Fuuka Yamagishi",
   "Chidori Yoshino",

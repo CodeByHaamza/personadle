@@ -1,3 +1,28 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   RÈGLE — personas partagées entre plusieurs personnages (cf. CLAUDE.md §4)
+
+   1. Un même NOM de persona utilisé par plusieurs personnages dans des opus
+      différents = UNE SEULE entrée, `user` fusionné, `opus` combiné.
+      Ex: Thanatos → user: [Makoto Yuki, Kotone Shiomi, Elizabeth] (P3 + P4AU).
+      Déjà le cas d'Orpheus Telos ci-dessous (3 wielders combinés).
+
+   2. Deux personnages DIFFÉRENTS dont les personas portent juste le même nom
+      par coïncidence = DEUX entrées séparées, chacune son user/opus.
+      Critère concret : le champ `image`. Même image → cas 1. Images
+      différentes → cas 2.
+      Ex: Hermes (Junpei, P3, image: "Hermes") vs Hermes (Jun Kurosu, P2IS,
+      image: "Jun_Hermes") — deux dessins différents. Prometheus (Futaba,
+      P5R) vs Prometheus (Baofu, P2EP) — même logique.
+
+   Pourquoi : fusionner à tort le cas 2 ferait accepter une mauvaise réponse.
+   Scinder à tort le cas 1 peut refuser une bonne réponse selon l'entrée
+   tirée en interne, alors que l'image affichée est identique des deux côtés
+   — vécu comme un bug par le joueur, pas comme une règle de contenu.
+
+   Les noms légitimement dupliqués (cas 2) sont désambiguïsés automatiquement
+   côté défi entre amis par challengeKey()/findByChallengeKey()
+   (personaeMode/modePersonae.js) — rien à faire de plus ici.
+   ───────────────────────────────────────────────────────────────────────── */
 export const personaeCharacters = [
   //Persona 3 ( P3, P3FES, P3P, P3R )
   {
@@ -32,10 +57,16 @@ export const personaeCharacters = [
   },
 
   {
+    // Elizabeth utilise Thanatos dans P4AU (aux côtés de Makoto/Kotone en P3) —
+    // fusionné dans la même entrée plutôt que scindé par opus : même image,
+    // même persona, un joueur qui répond "Elizabeth" ne doit jamais être
+    // marqué faux juste parce que la cible tirée est l'entrée P3 (précédent
+    // déjà établi par "Orpheus Telos" ci-dessus, qui fusionne aussi des
+    // wielders de sous-continuités différentes dans une seule entrée).
     persona: "Thanatos",
     image: "Thanatos",
-    user: ["Makoto Yuki", "Kotone Shiomi"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    user: ["Makoto Yuki", "Kotone Shiomi", "Elizabeth"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Thanatos Picaro",
@@ -65,7 +96,7 @@ export const personaeCharacters = [
     persona: "Isis",
     image: "Isis",
     user: ["Yukari Takeba"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Hermes",
@@ -77,7 +108,7 @@ export const personaeCharacters = [
     persona: "Trismegistus",
     image: "Trismegistus",
     user: ["Junpei Iori"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Polydeuces",
@@ -89,7 +120,7 @@ export const personaeCharacters = [
     persona: "Caesar",
     image: "Caesar",
     user: ["Akihiko Sanada"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Penthesilea",
@@ -101,7 +132,7 @@ export const personaeCharacters = [
     persona: "Artemisia",
     image: "Artemisia",
     user: ["Mitsuru Kirijo"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Castor",
@@ -119,7 +150,7 @@ export const personaeCharacters = [
     persona: "Kala-Nemi",
     image: "Kala-Nemi",
     user: ["Ken Amada"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Palladion",
@@ -131,7 +162,7 @@ export const personaeCharacters = [
     persona: "Athena",
     image: "Athena",
     user: ["Aigis"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Athena Picaros",
@@ -143,7 +174,7 @@ export const personaeCharacters = [
     persona: "Cerberus",
     image: "Cerberus",
     user: ["Koromaru"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Lucia",

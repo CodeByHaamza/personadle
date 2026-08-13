@@ -10,6 +10,109 @@
 
 ---
 
+## 2026-08-13 — fix(data): Thanatos re-fusionné en une seule entrée (P3 + P4AU)
+
+Retour en arrière sur le split de Thanatos fait dans le commit précédent, suite à un
+signalement produit : les deux entrées affichaient la **même image**, donc un joueur
+répondant "Elizabeth" (vrai dans l'absolu) pouvait être marqué faux si la cible tirée était
+la version P3 — ressenti comme un bug, pas comme une règle de contenu.
+
+- **`personaeMode/database/personaeCharacters.js`** — `Thanatos` redevient une seule entrée
+  `user: ["Makoto Yuki", "Kotone Shiomi", "Elizabeth"]`, `opus: ["P3", "P3FES", "P3P",
+  "P3R", "P4AU"]`. Précédent déjà établi par `Orpheus Telos` (même fichier), qui fusionne
+  déjà des wielders de sous-continuités différentes dans une seule entrée — principe du
+  dataset : une entrée par persona, tous les wielders documentés dedans, pas une entrée par
+  jeu.
+- `api/data/daily_pools.json` régénéré (`npm run pools:build`) — 150 entrées personae
+  (au lieu de 151 avec le split).
+- Le fix `challengeKey()`/`findByChallengeKey()` du commit précédent reste utile et inchangé
+  : `Thanatos` n'est simplement plus détecté comme dupliqué (fonction dynamique, pas de
+  liste en dur), `Hermes`/`Prometheus` restent correctement désambiguïsés (ce sont deux
+  personnages réellement différents, pas une question de générosité d'acceptation).
+
+⚠️ **Effet de bord sur un test PHPUnit existant** (`tests/php/DailyTargetTest.php` —
+`testComputeDailyTargetForPersonaeFallsBackToFilteredPoolWhenDailyIsExcluded`) : ce test
+utilise un couple date/seed codé en dur, choisi à l'origine pour déclencher un scénario
+précis (tirage non filtré ≠ tirage filtré P4) contre le pool personae de l'époque. Les
+opus P4AU ajoutés sur plusieurs entrées ont décalé le tirage seedé déterministe pour ce
+couple précis — recalculé un nouveau couple (`2026-08-01` / seed `1`) qui redéclenche le
+même scénario contre le pool actuel, vérifié en exécutant directement
+`personadle_compute_daily_target()` (pas de DB nécessaire pour cette classe de test, mais
+PHPUnit lui-même injoignable dans cet environnement — `phar.phpunit.de` hors de la liste
+blanche du proxy sortant — vérification faite en appelant la fonction réelle directement).
+
+## 2026-08-13 — fix(challenge): cible de défi Personae mal résolue sur les personas dupliquées
+
+Suite immédiate du lot P4AU ci-dessous : le fait de scinder `Thanatos` en 2 entrées
+(P3 vs P4AU) a rendu concret un angle mort déjà documenté mais laissé de côté — la
+résolution de cible de défi ami en mode Personae matchait par simple nom de persona.
+
+- **Root cause** (`personaeMode/modePersonae.js`) : le pool de défi (`showChallengeButton`)
+  envoyait `c.persona` brut comme identifiant de cible, et la résolution côté ami
+  (`originalCharacters.find(c => c.persona === name)`) retombait toujours sur la
+  **première** entrée du tableau portant ce nom. Avec des noms dupliqués entre deux
+  personnages différents (`Thanatos` : Makoto/Kotone vs Elizabeth ; `Hermes` : Junpei vs
+  Jun Kurosu/P2IS ; `Prometheus` : Futaba vs Baofu/P2EP), un défi tombant sur la 2e entrée
+  se résolvait côté ami sur la mauvaise réponse acceptée.
+- **Fix** : `challengeKey(c)` calcule un identifiant — `c.persona` seul si le nom n'est pas
+  dupliqué dans le dataset (immense majorité des cas, format inchangé, rétro-compatible
+  avec un défi déjà en vol), sinon `"{persona}::{premier opus}"`. `findByChallengeKey(key)`
+  fait l'inverse, avec repli sur le comportement historique (1er match par nom) si le
+  suffixe ne matche plus rien — robustesse si le contenu change entre-temps.
+- **Pourquoi c'est sûr de changer le format de la chaîne stockée** : vérifié tout le
+  pipeline (`js/gameCore.js` → `api/messages/index.php` → `js/notifications.js` →
+  `js/challenge-notif.js` → `profile/friends/friends.js`) — la cible n'est **jamais**
+  affichée en texte au joueur défié (elle reste un attribut `data-target`/valeur
+  programmatique, jamais interpolée dans du HTML visible), donc changer son format
+  n'impacte aucun affichage, seulement la résolution interne côté Personae.
+- Validé par un round-trip exhaustif (`challengeKey` → `findByChallengeKey`) sur les 151
+  entrées de `personaeCharacters.js` (script ponctuel, pas de DB/E2E disponible dans cet
+  environnement pour tester le flux défi à deux comptes en conditions réelles — à
+  confirmer manuellement si possible avant release). Pas de nouveau test unitaire ajouté :
+  `modePersonae.js` n'exporte pas ses handlers internes, même convention que les fixes
+  challenge précédents sur ces fichiers.
+
+## 2026-08-13 — fix(data): opus P4AU manquant sur le casting P3 + personas jouables en P4AU
+
+Corrections de contenu sur le casting Persona 3, faites en 2 passes suite à des
+clarifications successives de Hamza sur le roster réel de Persona 4 Arena Ultimax (pas de
+bug symptomatique signalé côté joueur, juste des tags opus incomplets/imprécis).
+
+- **`database/characters_clean.js`** — ajout de l'opus `P4AU` au casting complet du groupe
+  P3 jouable dans ce jeu (personnage, pas persona précise) : Junpei Iori, Yukari Takeba,
+  Fuuka Yamagishi, Mitsuru Kirijo, Akihiko Sanada, Aigis, Ken Amada, Koromaru, ainsi qu'à
+  Elizabeth (Velvet Room).
+- **`personaeMode/database/personaeCharacters.js`** — `P4AU` ajouté aux 7 personas P3
+  précisément jouables dans ce jeu (confirmées par Hamza, pas la persona de base du
+  personnage à chaque fois) : `Isis` (Yukari), `Trismegistus` (Junpei), `Caesar` (Akihiko),
+  `Artemisia` (Mitsuru), `Athena` (Aigis), `Kala-Nemi` (Ken), `Cerberus` (Koromaru — Ken et
+  Koromaru partagent un seul slot jouable mais chacun garde ses techniques/persona propres).
+  `Thanatos` scindé en 2 entrées distinctes plutôt qu'un seul `user` élargi : l'entrée P3
+  historique garde `["Makoto Yuki", "Kotone Shiomi"]` inchangée, une **nouvelle** entrée
+  `{ persona: "Thanatos", opus: ["P4AU"], user: ["Elizabeth"] }` couvre P4AU — dans ce jeu
+  seule Elizabeth l'utilise (le protagoniste P3 n'y est pas jouable), un `user` fusionné
+  aurait accepté Makoto/Kotone comme réponse même quand la cible réelle est la version P4AU.
+- **`personaeMode/database/persona.js`** — Elizabeth ajoutée à la liste d'autocomplétion du
+  mode Personae. Sans ça, si elle est un jour tirée comme wielder cible pour Thanatos, elle
+  serait injouable (jamais proposée à la saisie) — même classe de bug que le garde-fou
+  `tests/autocompleteNames.test.js` ajouté en 2.1 (PR #66) pour Classic/Emoji/Silhouette/AOA.
+- `api/data/daily_pools.json` régénéré (`npm run pools:build`) suite au nouveau `Thanatos`
+  P4AU et aux opus modifiés sur les 7 autres entrées — 151 entrées personae au lieu de 150.
+
+✅ **Angle mort corrigé** (voir entrée juste au-dessus, même jour) : la résolution de
+cible de défi entre amis en mode Personae matchait par nom de persona seul, pas par
+entrée précise — avec `Thanatos` en double (P3/P4AU) ça aurait résolu le mauvais
+personnage côté ami. `challengeKey()`/`findByChallengeKey()` désambiguïsent désormais
+les noms dupliqués par opus.
+
+⏳ **Pas d'entrée dans `PersonaDLE_Update.html` pour l'instant** : ce lot fait partie du
+contenu 2.1 pas encore livré (branche `feat/v2.1-content`, PR #66, elle-même pas encore
+mergée). À regrouper avec le reste du changelog joueur 2.1 (Trinity Souls, badge Gyotre,
+titres P4, etc.) au moment du lancement de la version — pas avant, pour ne pas fragmenter
+le highlight en plusieurs entrées.
+
+---
+
 ## 2026-07-31 — fix(challenge): filtres opus écrasés à "tout désélectionné" après un défi
 
 Signalement joueur : après avoir joué un défi (surtout remarqué en mode Music), plus aucun
