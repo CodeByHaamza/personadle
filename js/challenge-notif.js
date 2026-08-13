@@ -175,8 +175,15 @@ function _render({
 
     (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
 
+    // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
+    // "tout désélectionné" (état volontaire), différent de l'absence de clé
+    // ("tout actif" par défaut, cf. initFilterMenu()). Si le joueur n'a jamais
+    // touché ses filtres pour ce mode, localStorage.getItem() renvoie null —
+    // on garde null tel quel pour que la restauration plus bas
+    // (checkChallengeCompletion(), js/challenge-result.js) le laisse absent au
+    // lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
     const filterKey = FILTER_STORAGE_KEYS[modeKey] ?? null;
-    const originalFilters = filterKey ? (localStorage.getItem(filterKey) ?? "[]") : null;
+    const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
     const filters = challengeFilters && challengeFilters !== "[]" ? challengeFilters : null;
     if (filterKey && filters) localStorage.setItem(filterKey, filters);
 

@@ -27,26 +27,75 @@
 
 ---
 
-## 🚀 v2.1 — Prochaine version (périmètre décidé le 2026-07-06)
+## 🚀 v2.1 — Prochaine version (périmètre décidé le 2026-07-06, étendu le 2026-07-31)
 
 > La 2.0 part en prod sans attendre ces points — ils avancent en parallèle une fois livrée.
 > Priorité pas encore fixée entre eux. Mis de côté pour l'instant, sans version cible :
-> Mode Versus temps réel (chantier temps réel plus lourd) et notifications push PWA — restent
-> en idée dans 🟢 Produit ci-dessous. Groupes d'amis : en réflexion, pas encore tranché.
+> Mode Versus temps réel (chantier temps réel plus lourd), notifications push PWA, et carte
+> récap périodique — restent en idée dans 🟢 Produit ci-dessous. Groupes d'amis : en réflexion,
+> pas encore tranché.
 
 - [ ] **Mode Expert** — variante à **une seule tentative**, mécanique différente par mode de jeu :
   - Classique : seule la citation (`quote`) est donnée, aucune autre catégorie affichée
-  - Musique : 1 seconde de clip audio au lieu de la lecture complète
-  - Personae : crop aléatoire zoomé du portrait au lieu du portrait entier
-  - Émoji / Silhouette / All-Out-Attack : équivalent à définir par analogie au moment de
-    l'implémentation (un seul indice minimal, pas de révélation progressive sur mauvaise réponse)
-  - Condition de déblocage **différente par mode** (à trancher au cas par cas, pistes retenues :
-    nombre de victoires en mode normal sur ce mode, streak minimum, ou badge dédié)
+  - AOA : flou figé au niveau initial (le plus flou) — pas de nouveau mécanisme à construire,
+    juste ne pas faire baisser le flou puisqu'il n'y a qu'un seul essai
+  - Silhouette : à trancher entre crop aléatoire zoomé de l'image existante (rien à écrire, prêt
+    tout de suite) et description physique en texte (contenu à rédiger par perso, × 6 langues) —
+    recommandation : partir sur le crop pour limiter la dette de contenu
+  - Personae : description lore en mode "devinette" (ex. "grand voleur élégant" plutôt que
+    nommer Arsène Lupin directement), **traduite** (i18n complet, 6 langues), sourcée par Hamza
+    et livrée **par paquet** (Persona 3 d'abord, Persona 4 ensuite, etc.). Implique un flag "a du
+    contenu Expert" par persona, à intégrer au pool de tirage quotidien
+    (`scripts/export-daily-pools.js`, `npm run pools:build`/`pools:check`) pour que la cible du
+    jour en Expert Personae ne pioche que parmi les persos déjà couverts par un paquet livré
+  - Musique : paroles révélées progressivement à chaque essai raté, cumulatives (les précédentes
+    restent affichées, pas juste la dernière). Pas de i18n nécessaire (parole = parole dans sa
+    langue d'origine, même traitement que les titres de musique déjà exemptés côté §5 CLAUDE.md).
+    Paroles à sourcer par Hamza — n'existent pas encore dans `musicsMode/database/songs.js`
+  - Émoji : encore à définir, aucune mécanique retenue pour l'instant
+  - Condition de déblocage **différente par mode** (à trancher au cas par cas au moment de
+    l'implémentation, pas de règle uniforme entre les 6)
+  - Nouveau badge/titre : débloqué une fois les 6 modes Expert battus au moins une fois chacun
+    (réutilise le système de conditions structurées déjà en place, `condition_check.php`)
+- [ ] **Bonus XP Social Link selon la performance en défi** — actuellement XP mutuel fixe (35)
+  sur un défi battu (`checkChallengeCompletion()`, `js/challenge-result.js`). À faire varier
+  selon le nombre de tentatives utilisées — **pas le temps** : déclaratif côté client, donc plus
+  facile à trafiquer qu'un nombre d'essais qui découle directement du jeu réel. Pour un défi
+  joué en **Mode Expert** (1 tentative → réussi/raté, pas de comparaison d'essais possible entre
+  les deux joueurs) : bonus significatif à part (x2/x3 sur le mutuel normal), à brancher sur
+  `GET /api/user/compare` déjà existant (comparaison de stats entre amis, +10/+20 XP, cooldown
+  72h) plutôt que d'inventer un système parallèle.
+- [ ] **Connexion rapide Discord** (lier un compte existant + option à l'inscription, comme
+  "Sign in with Google" sur d'autres sites) — compatible avec le modèle sessions PHP actuel
+  (OAuth vérifie l'identité, puis session normale ouverte comme un login classique, pas de JWT).
+  Points à trancher à l'implémentation :
+  - Discord ne garantit pas un email vérifié → touche directement l'item "vérification d'email
+    à l'inscription" ci-dessous, à voir ensemble
+  - Liaison à un compte existant **uniquement depuis le profil en étant déjà connecté** (bouton
+    "Lier Discord"), pas d'auto-merge automatique par correspondance d'email — évite la classe
+    de risque prise de compte par email
+  - Schéma minimal : colonne `discord_id` (unique) + `discord_username` sur `users`, pas de
+    table `oauth_accounts` séparée tant qu'un seul provider existe
+  - `discord_id` = donnée personnelle → à intégrer au flow RGPD existant (suppression/export)
+- [ ] **Filtre "Expert" sur le classement** — `api/leaderboard/` distingue déjà mode / période /
+  métrique ; ajouter une 4e dimension (colonne `is_expert` sur `game_sessions`) plutôt qu'un
+  classement séparé — réutilise tout le pipeline existant (endpoint, agrégation `user_stats`,
+  cache horaire) au lieu d'un système parallèle.
+- [ ] **Compendium des unlocks** — vue "archive" style Persona (icône livre, aura Velvet Room),
+  structurée en **chapitres** : Naissance (inscription), Amitié (demandes acceptées + montées de
+  rang Social Link), Badges, Titres, Wallpapers, Défis (1ère victoire, records), Mode Expert
+  (1ère complétion par mode + badge 6/6), Compte lié (Discord), Streaks (record, récupérations
+  Jack Frost). Aucune nouvelle donnée serveur nécessaire pour la quasi-totalité :
+  `badges_unlocked`/`user_titles` déjà en base avec dates, et les montées de rang Social Link
+  sont déjà loggées avec timestamp (`social_link_rankup_notifs`, jamais purgé, juste marqué vu).
+- [ ] **Petits fixes trouvés lors de l'audit PR #57, laissés de côté à l'époque** — inclus dans
+  ce lot puisque Mode Expert retouche de toute façon les 6 modes :
+  - `uniqueDaysPlayed` incohérent entre modes : un give-up compte pour Music/AllOutAttack/
+    Personae mais pas pour Classic/Emoji/Silhouette
+  - Texte des titres `naoya_first_awakening`/`maya_always_be_positive` mentionne "avec filtre
+    P1/P2" alors que la vraie condition (serveur et client) ne vérifie aucun filtre
 - [ ] **Historique de profil** : graphe de streak + calendrier des jours joués (`uniqueDaysSet` déjà en base).
 - [ ] **Saison / ladder** avec reset périodique + récompenses.
-- [ ] **Compendium des unlocks** — vue "archive" style Persona de tous les badges/titres/wallpapers
-  débloqués avec leur date (réutilise `badges_unlocked`/`user_titles` déjà en base, pas de
-  nouvelle donnée serveur nécessaire).
 - [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète) — détail dans 🔐 Sécurité/compte ci-dessous.
 - [ ] **Stratégie assets AOA + Git LFS** — détail dans 🔴 À prévoir assez tôt ci-dessous.
 - [ ] **CRUD Badges (admin)** — proposé par Hamza le 2026-07-19 suite au bug event_codes/badge_id
@@ -230,6 +279,11 @@ Nouveau jeu — cas A (roster inédit)
   encore de décision de version.
 - [ ] **Notifications push (PWA)** — rappel quotidien (levier de rétention « daily ») — écarté
   pour la 2.1, reste en idée.
+- [ ] 💡 **Carte récap périodique** (façon "wrapped") — parties jouées, victoires, mode préféré,
+  streak sur la période. Distincte de la carte de profil déjà livrée (`profile/share-card.js`,
+  instantané figé de l'état actuel) — réutiliserait la même génération d'image/mêmes thèmes avec
+  des données agrégées dans le temps à la place. Hebdo vs mensuel pas tranché. **En réflexion**,
+  pas de version cible, probablement pas 2.1.
 
 ### 🔐 Sécurité / compte
 

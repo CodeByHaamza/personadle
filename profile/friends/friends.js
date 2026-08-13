@@ -898,8 +898,15 @@ function attachListeners() {
       (MODE_STATE_KEYS[mode] ?? []).forEach((k) => localStorage.removeItem(k));
 
       // Backup current filters, then apply sender's challenge filters
+      // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
+      // "tout désélectionné" (état volontaire), différent de l'absence de clé
+      // ("tout actif" par défaut, cf. initFilterMenu()). Si le joueur n'a
+      // jamais touché ses filtres pour ce mode, localStorage.getItem() renvoie
+      // null — on garde null tel quel pour que la restauration plus bas (dans
+      // checkChallengeCompletion(), js/challenge-result.js) le laisse absent
+      // au lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
       const filterKey = MODE_FILTER_KEY[mode] ?? null;
-      const originalFilters = filterKey ? (localStorage.getItem(filterKey) ?? "[]") : null;
+      const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
       if (filterKey && challengeFilters && challengeFilters !== "[]") {
         localStorage.setItem(filterKey, challengeFilters);
       }
