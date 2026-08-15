@@ -103,6 +103,10 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
         FROM game_sessions gs
         JOIN users u ON u.id = gs.user_id AND u.is_deleted = 0
         WHERE gs.played_date >= :period_start
+          -- is_expert = 0 : le classement Expert est une dimension à part (ROADMAP
+          -- v2.1), pas encore exposée. Sans ça les parties Expert gonfleraient le
+          -- classement du mode normal.
+          AND gs.is_expert = 0
         {$modeFilter}
         GROUP BY gs.user_id
         HAVING score IS NOT NULL AND score > 0

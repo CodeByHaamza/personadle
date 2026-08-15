@@ -113,6 +113,59 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): couche serveur du Mode Expert
+
+Câblage backend de `is_expert` : tirage quotidien dédié, enregistrement de session, et
+cloisonnement de toutes les lectures qui agrègent `game_sessions`. Le front n'existe
+toujours pas — ce lot rend l'Expert *enregistrable* correctement.
+
+### Détails techniques
+
+- **`api/lib/daily_target.php`** — nouveau cas `music_expert` : pool des 73 chansons à
+  paroles et **clé de hash distincte** (`'MusicExpert'`). Sans clé distincte, les deux
+  modes tireraient la même chanson et jouer le normal (où l'audio est donné) offrirait
+  l'Expert du jour. Le client doit passer exactement la même chaîne à `getDailyTarget()`,
+  sinon chaque partie Expert est loguée en `anti_cheat`.
+- **`api/sessions.php`** — accepte `is_expert`, refusé sur un autre mode que `music`
+  (rien ne saurait relire ces lignes). Plafond d'essais porté à 40 en Expert : une
+  chanson de 30 vers autorise 30 essais, contre 20 max dans les modes normaux. Le test
+  « a-t-il déjà joué aujourd'hui ? » et la route du pool anti-triche sont scopés sur
+  `is_expert`.
+- **`api/lib/game_session.php`** :
+  - `personadle_record_game_session(..., bool $isExpert)` — INSERT avec `is_expert`.
+  - `personadle_upgrade_giveup_to_win()` scopé sur `is_expert`. **C'était le vrai piège** :
+    sans ce scope, une victoire en Expert retrouvait l'abandon du mode NORMAL du même jour
+    et l'upgradait en victoire — le joueur gagnait une partie qu'il avait abandonnée.
+  - `personadle_recompute_mode_streak()` filtre `is_expert = 0` : une victoire Expert ne
+    prolonge pas la streak du mode normal.
+  - `personadle_bump_global_streak()` extrait du bloc 2b, appelé aussi en Expert : une
+    journée où le joueur n'a fait que de l'Expert reste une journée jouée, l'exclure
+    casserait sa streak globale alors qu'il a joué.
+- **`user_stats` volontairement non touché en Expert.** Cette table d'agrégat est lue par
+  15 fichiers API (profil, cloud-sync, classement, compare, conditions de badges) ; y
+  ajouter une dimension `is_expert` demanderait de tous les auditer pour un affichage qui
+  n'existe pas encore. Les parties Expert vivent dans `game_sessions`, où le futur écran
+  Expert ira les lire — ou qui recevra sa propre migration à ce moment-là.
+  `ponytail:` agrégation différée, marqué dans le docbloc de la fonction.
+- **Lectures agrégées cloisonnées** (`AND is_expert = 0`) : `api/cron/leaderboard.php`,
+  `api/leaderboard/index.php` (requête principale + comptage de pagination) et
+  `api/community-stats.php`. Sans ça les parties Expert gonflaient le classement du mode
+  normal, et le « X % des joueurs ont trouvé la cible du jour » mélangeait deux cibles
+  différentes.
+- **`js/gameCore.js`** — `buildGameSession({ isExpert })` ajoute `is_expert` au payload.
+  Le `mode` reste `music` : un mode dédié casserait `normalizeModeKey()` et le vocabulaire
+  des 6 modes partagé par le profil, les défis et le classement. `savePendingSession()`
+  saute `showCommunityStats()` en Expert — la cible y est différente et
+  `community-stats.php` ne compte que le non-Expert, le compteur afficherait 0 % à vie.
+- Tests : 5 PHPUnit dans `DailyTargetTest` (sous-ensemble strict, ordre source préservé,
+  tirages décorrélés sur 28 jours, cible toujours dans le pool, mode inconnu → null) et
+  2 Vitest sur `buildGameSession`.
+
+### Angle mort connu
+
+Le front n'envoie encore rien : aucune partie Expert n'existe. La chaîne complète
+(client → `sessions.php` → BDD) ne sera vérifiée de bout en bout qu'avec l'UI.
+
 ## 2026-08-15 — feat(music): contrôle de volume dans le lecteur
 
 Demande de Hamza : pouvoir régler le son du lecteur, avec un habillage cohérent avec le reste

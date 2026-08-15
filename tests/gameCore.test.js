@@ -598,6 +598,31 @@ describe("buildGameSession", () => {
     });
     expect(session.mode).toBe("alloutattack");
   });
+
+  it("marque is_expert à false par défaut", () => {
+    const session = buildGameSession({
+      mode: "Music",
+      targetName: "Burn My Dread",
+      result: "win",
+      attempts: 1,
+    });
+    expect(session.is_expert).toBe(false);
+  });
+
+  it("garde le mode normal en Expert — c'est is_expert qui distingue, pas le mode", () => {
+    // Le backend range la partie dans game_sessions.mode = 'music' + is_expert = 1
+    // (migration 031). Un mode dédié casserait normalizeModeKey() et le vocabulaire
+    // des 6 modes partagé par le profil, les défis et le classement.
+    const session = buildGameSession({
+      mode: "Music",
+      targetName: "Deep Breath Deep Breath",
+      result: "win",
+      attempts: 7,
+      isExpert: true,
+    });
+    expect(session.mode).toBe("music");
+    expect(session.is_expert).toBe(true);
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

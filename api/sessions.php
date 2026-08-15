@@ -39,6 +39,8 @@ $result      = strtolower(trim($data['result']      ?? ''));
 $attempts    = (int)           ($data['attempts']   ?? 0);
 $timeMs      = (int)           ($data['time_ms']    ?? 0);
 $filters     =                  $data['active_filters'] ?? [];
+// Mode Expert (migration 031) — même `mode`, mécanique et cible différentes.
+$isExpert    = filter_var($data['is_expert'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
 if (!in_array($mode, $validModes, true)) {
     jsonError("Invalid mode. Expected one of: " . implode(', ', $validModes));
@@ -59,8 +61,16 @@ if (empty($targetName)) {
 if (!in_array($result, ['win', 'giveup'], true)) {
     jsonError("Invalid result. Expected 'win' or 'giveup'");
 }
-if ($attempts < 0 || $attempts > 20) {
+// Le Mode Expert révèle un vers par essai raté : une chanson de 30 vers autorise
+// donc jusqu'à 30 essais, bien au-delà du plafond de 20 des modes normaux.
+$maxAttempts = $isExpert ? 40 : 20;
+if ($attempts < 0 || $attempts > $maxAttempts) {
     jsonError('Invalid attempts value');
+}
+// Seul Music a du contenu Expert pour l'instant — accepter is_expert sur un autre
+// mode créerait des lignes que rien ne sait relire.
+if ($isExpert && $mode !== 'music') {
+    jsonError('Expert mode is only available for music', 400);
 }
 if (!is_array($filters)) {
     $filters = [];
@@ -80,20 +90,25 @@ $pdo = pdo();
 // aléatoire côté client (resetGame(random)), donc un écart y est NORMAL — sans
 // cette garde, chaque replay loggait un faux positif anti_cheat. Cf. décision
 // produit 2026-07-17 (victoire en replay upgradée giveup→win, game_session.php).
-$hasSessionToday = (static function (PDO $pdo, int $userId, string $mode, string $playedDate): bool {
+// Le scope is_expert compte : une partie normale déjà enregistrée ne doit pas
+// dispenser la partie Expert du jour de la vérification anti-triche (et inversement).
+$hasSessionToday = (static function (PDO $pdo, int $userId, string $mode, string $playedDate, bool $isExpert): bool {
     $st = $pdo->prepare(
-        'SELECT 1 FROM game_sessions WHERE user_id = ? AND mode = ? AND played_date = ? LIMIT 1'
+        'SELECT 1 FROM game_sessions
+         WHERE user_id = ? AND mode = ? AND played_date = ? AND is_expert = ? LIMIT 1'
     );
-    $st->execute([$userId, $mode, $playedDate]);
+    $st->execute([$userId, $mode, $playedDate, $isExpert ? 1 : 0]);
     return (bool) $st->fetchColumn();
-})($pdo, $userId, $mode, $playedDate);
+})($pdo, $userId, $mode, $playedDate, $isExpert);
 
 if (!$hasSessionToday) {
-    $expectedTarget = personadle_compute_daily_target($mode, $playedDate, (string) $userId, $filters);
+    // Clé de pool distincte en Expert : le tirage est indépendant du mode normal.
+    $targetMode = $isExpert ? $mode . '_expert' : $mode;
+    $expectedTarget = personadle_compute_daily_target($targetMode, $playedDate, (string) $userId, $filters);
     if ($expectedTarget !== null && strcasecmp($expectedTarget, $targetName) !== 0) {
         personadle_log_error($pdo, 'warning', 'Daily target mismatch', [
             'source'   => 'anti_cheat',
-            'mode'     => $mode,
+            'mode'     => $targetMode,
             'date'     => $playedDate,
             'result'   => $result,
             'expected' => $expectedTarget,

@@ -91,6 +91,17 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
         case 'music':
             return personadle_pick_from_pool($pools['music']['pool'] ?? [], 'Music', $playedDate, $seedId);
 
+        // Mode Music Expert — pool ET clé de hash distincts de 'music' (73 chansons à
+        // paroles au lieu de 92). Le tirage doit être indépendant : avec la même clé,
+        // jouer le mode normal d'abord (où l'audio est donné) révélerait la réponse de
+        // l'Expert du jour. Le client passe la même chaîne "MusicExpert" à
+        // getDailyTarget() — les deux doivent rester identiques, sinon chaque partie
+        // Expert est loguée en anti_cheat.
+        case 'music_expert':
+            return personadle_pick_from_pool(
+                $pools['music_expert']['pool'] ?? [], 'MusicExpert', $playedDate, $seedId
+            );
+
         case 'alloutattack': {
             $data = $pools['alloutattack'] ?? [];
             $pool = $data['pool'] ?? [];

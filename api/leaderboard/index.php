@@ -322,6 +322,7 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
         LEFT JOIN profiles p ON p.user_id = u.id
         WHERE gs.played_date >= ?
           AND u.is_deleted = 0
+          AND gs.is_expert = 0   -- classement Expert = dimension à part, pas encore exposée
           {$modeFilter}
           {$friendsFilter}
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
@@ -342,6 +343,7 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
             JOIN users u ON u.id = gs.user_id
             WHERE gs.played_date >= ?
               AND u.is_deleted = 0
+              AND gs.is_expert = 0
               {$modeFilter}
               {$friendsFilter}
             GROUP BY u.id

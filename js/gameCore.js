@@ -472,9 +472,20 @@ export function showWrongMini(
  * @param {number}   opts.attempts   - Number of attempts made
  * @param {number}   opts.timeMs     - Time spent in milliseconds
  * @param {string[]} [opts.filters]  - Active opus filters at the time of the game
- * @returns {{ mode, played_date, target_name, result, attempts, time_ms, active_filters }}
+ * @param {boolean}  [opts.isExpert] - Partie jouée en Mode Expert (mécanique et cible
+ *   propres). Le backend garde le même `mode` et distingue via game_sessions.is_expert
+ *   (migration 031) : les stats et le classement du mode normal l'excluent.
+ * @returns {{ mode, played_date, target_name, result, attempts, time_ms, active_filters, is_expert }}
  */
-export function buildGameSession({ mode, targetName, result, attempts, timeMs = 0, filters = [] }) {
+export function buildGameSession({
+  mode,
+  targetName,
+  result,
+  attempts,
+  timeMs = 0,
+  filters = [],
+  isExpert = false,
+}) {
   return {
     // Clé backend canonique, quelle que soit la graphie passée par le mode
     // ("AllOutAttack", "All Out Attack", "Classic"…). Voir normalizeModeKey().
@@ -485,6 +496,7 @@ export function buildGameSession({ mode, targetName, result, attempts, timeMs = 
     attempts,
     time_ms: Math.round(timeMs),
     active_filters: filters,
+    is_expert: isExpert,
   };
 }
 
@@ -523,8 +535,11 @@ export async function savePendingSession(session) {
     localStorage.setItem("pendingSessions", JSON.stringify(pending));
   }
 
-  // Always try to show community stats (silent fail if offline)
-  showCommunityStats(session.mode, session.target_name);
+  // Always try to show community stats (silent fail if offline).
+  // Pas en Expert : la cible du jour y est différente de celle du mode normal, et
+  // community-stats.php ne compte que les parties non-Expert — le « X % des joueurs
+  // ont trouvé » afficherait donc 0 % en permanence.
+  if (!session.is_expert) showCommunityStats(session.mode, session.target_name);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
