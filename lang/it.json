@@ -31,7 +31,10 @@
     "error": "Si è verificato un errore.",
     "admin_gift_received": "🎁 Regalo ricevuto!",
     "tap_continue": "Tocca per continuare",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "expert_enter": "⚡ Modalità Esperto",
+    "expert_leave": "← Modalità normale",
+    "expert_lyrics": "⚡ TESTO"
   },
   "modes": {
     "classic": {
@@ -212,7 +215,15 @@
       "giveup_reveal": "💡 Era: {{title}}",
       "vocal_label": "🧑‍🎤 Voce: {{name}}",
       "listen_link": "🔗 Ascolta qui",
-      "prev_mode": "← Modalità Personae"
+      "prev_mode": "← Modalità Personae",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_intro": "Nessun audio. Ricevi il testo della canzone, un verso alla volta.",
+      "expert_tip_1": "Parti con un solo verso. Ogni errore ne rivela un altro.",
+      "expert_tip_2": "I versi precedenti restano sullo schermo — puoi rileggerli quando vuoi.",
+      "expert_tip_3": "Il titolo è nascosto nel testo. Riappare alla fine della partita.",
+      "expert_tip_4": "I brani strumentali sono esclusi: qui ogni canzone ha un testo.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha la sua canzone del giorno e le sue statistiche. Non conta per la tua serie Music normale."
     }
   },
   "game": {

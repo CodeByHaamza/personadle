@@ -113,6 +113,61 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): Mode Music Expert jouable
+
+Le mode est enfin jouable : bouton sur la page Music, paroles révélées vers par vers,
+règles dédiées, i18n dans les 6 langues.
+
+### Détails techniques
+
+- **Un flag dans `modeMusic.js`, pas une page séparée.** Filtres opus, autocomplétion,
+  défis, reset quotidien, musique de victoire, dark mode : tout est partagé. Dupliquer
+  la page aurait signifié maintenir 1600 lignes en double, avec la garantie qu'un fix ne
+  parte un jour que d'un seul côté.
+- **L'état vit dans l'URL** (`musics.html?expert=1`), pas en localStorage : le mode reste
+  partageable et bookmarkable, un rechargement ne perd rien, et une même URL ne peut pas
+  afficher deux jeux différents selon un état caché. Le bouton est donc un `<a>`, pas un
+  `<button>` — il suit l'historique du navigateur et s'ouvre dans un onglet.
+- `KEY_PREFIX` / `STATS_KEY` séparent intégralement les clés localStorage des deux parties
+  (`musicExpertTarget`, `statsLogged_MusicExpert_<date>`…). Les filtres opus, eux, restent
+  **partagés** : ce sont les préférences du joueur, pas un état de partie.
+- **Essais = nombre de vers** (5 à 30 selon la chanson), `maxAttempts()` calculé sur la
+  cible. « Abandonner » se débloque après 5 essais, seuil fixe (décision 2026-08-15).
+- `renderLyrics()` — un vers au départ, +1 par erreur, les précédents restent affichés et
+  la liste défile sur le dernier (`scroll-behavior: smooth`, conteneur borné à 46vh pour
+  que le champ de réponse reste visible). Le titre est masqué par `maskTerms()` **à
+  l'affichage** ; en fin de partie `renderLyrics(true)` réaffiche tout en clair, les vers
+  jamais gagnés en retrait (`.unheard`).
+- **Aucune écriture dans les stats client en Expert** : `updateProfileStats()` et
+  `checkUnlocksAfterGame()` sont sautés. Ils alimentent le mode Music normal, que le
+  serveur exclut déjà (`user_stats` intouché) — les appeler ici ferait diverger le profil
+  local du backend au prochain `pullProfileFromCloud()`.
+- Règles : deux blocs distincts (`#rulesNormal` / `#rulesExpert`) plutôt que des phrases
+  conditionnelles — la mécanique n'a rien à voir d'un mode à l'autre.
+- CSS : habillage rouge constant (le mode normal garde son thème par opus), angles coupés
+  façon P5, halo de page en `background-attachment: fixed` pour que le repère visuel
+  survive au scroll. Responsive sous 480px.
+- i18n : 11 clés × 6 langues (`ui.expert_*`, `modes.music.expert_*`). Les paroles
+  elles-mêmes ne sont pas traduites (CLAUDE.md §5).
+
+### Garde-fou le plus important
+
+`tests/expertContent.test.js` compare le pool client (`songs.filter(s => expertLyrics[...])`)
+au pool serveur `daily_pools.json` — **contenu et ordre**. L'index du tirage étant
+`hash % pool.length`, la moindre divergence ferait viser deux cibles différentes au client
+et au serveur, et `api/sessions.php` loguerait alors chaque partie Expert en `anti_cheat`.
+Deux autres tests vérifient que la cible Expert a toujours des paroles et que les deux
+modes ne tirent pas la même chanson jour après jour.
+
+### Angles morts connus
+
+- Le bouton Expert n'est pas encore conditionné à un déblocage (prévu ROADMAP v2.1) : il
+  est visible et cliquable par tout le monde.
+- Aucun écran ne montre de stats Expert — les parties sont en base (`game_sessions`), rien
+  ne les lit encore.
+- Pas de test E2E sur la boucle complète : la mécanique est vérifiée unitairement (pools,
+  masquage), le parcours joueur reste à valider à la main.
+
 ## 2026-08-15 — feat(expert): couche serveur du Mode Expert
 
 Câblage backend de `is_expert` : tirage quotidien dédié, enregistrement de session, et

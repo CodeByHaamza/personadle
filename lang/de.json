@@ -31,7 +31,10 @@
     "error": "Ein Fehler ist aufgetreten.",
     "admin_gift_received": "🎁 Geschenk erhalten!",
     "tap_continue": "Tippen zum Fortfahren",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "expert_enter": "⚡ Expertenmodus",
+    "expert_leave": "← Normaler Modus",
+    "expert_lyrics": "⚡ LIEDTEXT"
   },
   "modes": {
     "classic": {
@@ -212,7 +215,15 @@
       "giveup_reveal": "💡 Es war: {{title}}",
       "vocal_label": "🧑‍🎤 Gesang: {{name}}",
       "listen_link": "🔗 Hier anhören",
-      "prev_mode": "← Personae-Modus"
+      "prev_mode": "← Personae-Modus",
+      "expert_goal": "⚡ Expertenmodus:",
+      "expert_goal_intro": "Kein Ton. Du bekommst den Liedtext, Zeile für Zeile.",
+      "expert_tip_1": "Du startest mit einer einzigen Zeile. Jeder Fehlversuch enthüllt die nächste.",
+      "expert_tip_2": "Frühere Zeilen bleiben sichtbar — du kannst jederzeit zurückscrollen.",
+      "expert_tip_3": "Der Titel ist im Text versteckt. Am Rundenende wird er sichtbar.",
+      "expert_tip_4": "Instrumentalstücke sind ausgeschlossen — hier hat jedes Lied Text.",
+      "expert_tip_5": "Du hast 5 Versuche, bevor der Aufgeben-Knopf freigeschaltet wird.",
+      "expert_tip_6": "Der Expertenmodus hat sein eigenes Tageslied und eigene Statistiken. Er zählt nicht für deine normale Music-Serie."
     }
   },
   "game": {

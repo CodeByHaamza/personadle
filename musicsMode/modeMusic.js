@@ -10,6 +10,7 @@
 
 // === IMPORTS ===
 import { songs as originalSongs } from "./database/songs.js";
+import { expertLyrics } from "./database/expert_lyrics.js";
 import { updateProfileStats } from "../profile/profileStats.js";
 
 import {
@@ -27,6 +28,7 @@ import {
   parisDateKey,
   getActiveChallengeTarget,
   isChallengePlay,
+  maskTerms,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -106,6 +108,52 @@ const OPUS_THEMES = {
 /** Maximum number of guesses before the "Give Up" button is enabled. */
 const MAX_ATTEMPTS = 3;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE EXPERT
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Même page, même logique : filtres, autocomplétion, défis, reset quotidien et
+// victoire sont identiques. Seuls changent l'indice (les paroles au lieu de
+// l'audio), le pool, le nombre d'essais et les clés localStorage.
+// Dupliquer la page aurait voulu dire maintenir 1600 lignes en double.
+//
+// L'état vit dans l'URL (`?expert=1`) et non en localStorage : le mode reste
+// partageable et bookmarkable, un rechargement ne perd rien, et il n'y a pas
+// d'état caché qui ferait qu'une même URL affiche deux jeux différents.
+
+/** Vrai si la page tourne en Mode Expert. */
+const IS_EXPERT = new URLSearchParams(window.location.search).get("expert") === "1";
+
+/** Essais ratés avant que « Abandonner » se débloque en Expert (décision 2026-08-15). */
+const EXPERT_GIVE_UP_AFTER = 5;
+
+/** Préfixe des clés localStorage — sépare intégralement les deux parties du jour. */
+const KEY_PREFIX = IS_EXPERT ? "musicExpert" : "music";
+
+/** Suffixe des clés de stats/date, aligné sur le vocabulaire des modes. */
+const STATS_KEY = IS_EXPERT ? "MusicExpert" : "Music";
+
+/** Chansons éligibles à l'Expert : celles qui ont des paroles (pas les instrumentales).
+ *  L'ordre est celui de songs.js — il DOIT rester identique au pool `music_expert`
+ *  de api/data/daily_pools.json, sinon le serveur attend une autre cible et logue
+ *  chaque partie en anti_cheat. `npm run pools:build` régénère les deux depuis ici. */
+const EXPERT_SONGS = originalSongs.filter((s) => expertLyrics[s.titre]);
+
+/** Les vers de la cible courante, ou [] hors Expert. */
+function targetLyrics() {
+  return (target && expertLyrics[target.titre]) || [];
+}
+
+/** Nombre d'essais avant révélation complète. En Expert, un vers par essai raté. */
+function maxAttempts() {
+  return IS_EXPERT ? Math.max(targetLyrics().length, 1) : MAX_ATTEMPTS;
+}
+
+/** Essais ratés nécessaires pour débloquer « Abandonner ». */
+function giveUpThreshold() {
+  return IS_EXPERT ? EXPERT_GIVE_UP_AFTER : MAX_ATTEMPTS;
+}
+
 /** Confetti emojis used in Music mode victory celebration. */
 const MUSIC_EMOJIS = ["🎵", "🎶", "🎉", "✨"];
 
@@ -135,7 +183,7 @@ let sessionStartTime = Date.now();
  * localStorage key used to prevent double-logging stats for the same day.
  * Rebuilt each session so it always uses today's date.
  */
-let todayKey = `statsLogged_Music_${parisDateKey()}`;
+let todayKey = `statsLogged_${STATS_KEY}_${parisDateKey()}`;
 
 /** Titles already guessed in this session (hidden from autocomplete). */
 let triedTitles = [];
@@ -168,11 +216,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   victoryText = document.getElementById("victoryText");
 
   // ── Restore session state ──────────────────────────────────────────────────
-  const savedTarget = localStorage.getItem("musicTarget");
-  const savedAttempts = localStorage.getItem("musicAttempts");
-  const savedGameOver = localStorage.getItem("musicGameOver");
-  const savedTried = localStorage.getItem("musicTriedTitles");
-  const savedForceReveal = localStorage.getItem("musicForceReveal");
+  const savedTarget = localStorage.getItem(`${KEY_PREFIX}Target`);
+  const savedAttempts = localStorage.getItem(`${KEY_PREFIX}Attempts`);
+  const savedGameOver = localStorage.getItem(`${KEY_PREFIX}GameOver`);
+  const savedTried = localStorage.getItem(`${KEY_PREFIX}TriedTitles`);
+  const savedForceReveal = localStorage.getItem(`${KEY_PREFIX}ForceReveal`);
 
   if (savedTarget) {
     // Resume an in-progress or finished game
@@ -186,11 +234,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     setPlayerTheme(target);
 
-    giveUpCounter.textContent = `(${attempts} / ${MAX_ATTEMPTS})`;
-    if (attempts >= MAX_ATTEMPTS) {
+    giveUpCounter.textContent = `(${attempts} / ${maxAttempts()})`;
+    if (attempts >= giveUpThreshold()) {
       giveUpBtn.disabled = false;
       giveUpCounter.classList.add("activated");
     }
+
+    renderLyrics();
 
     if (gameOver || savedForceReveal === "true") {
       showVictory(savedForceReveal === "true");
@@ -209,6 +259,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── UI wiring ──────────────────────────────────────────────────────────────
   applyDarkModeStyles();
+  applyExpertChrome();
   initCustomPlayer();
   setupRulesModal(); // ← shared utility
 
@@ -221,8 +272,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Daily reset checks ─────────────────────────────────────────────────────
   checkResetOnLoad(
     // ← shared utility
-    "lastPlayedDate_Music",
-    "Music",
+    `lastPlayedDate_${STATS_KEY}`,
+    STATS_KEY,
     () => resetBtn.click()
   );
 
@@ -241,7 +292,8 @@ document.addEventListener("DOMContentLoaded", async () => {
  * @returns {Object[]} Filtered array of song objects
  */
 function getFilteredSongs() {
-  return originalSongs.filter((song) => {
+  // En Expert, seules les chansons à paroles sont jouables.
+  return (IS_EXPERT ? EXPERT_SONGS : originalSongs).filter((song) => {
     const ops = Array.isArray(song.opus) ? song.opus : [song.opus];
     return ops.some((op) => activeFilters.includes(op));
   });
@@ -272,15 +324,97 @@ function pickSong(random = false) {
         : filteredSongs;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredSongs[0];
   } else {
-    target = getDailyTarget(originalSongs, "Music");
+    // Pool ET clé de hash distincts en Expert : le tirage doit être indépendant
+    // du mode normal, sinon jouer le normal d'abord (où l'audio est donné) offre
+    // la réponse. La chaîne "MusicExpert" doit rester identique à celle de
+    // api/lib/daily_target.php, sinon chaque partie est loguée en anti_cheat.
+    target = IS_EXPERT
+      ? getDailyTarget(EXPERT_SONGS, "MusicExpert")
+      : getDailyTarget(originalSongs, "Music");
   }
 
   audioPlayer.src = `./database/music/song/${target.fichier}`;
   audioPlayer.load();
 
-  localStorage.setItem("musicTarget", JSON.stringify(target));
-  localStorage.setItem("musicAttempts", attempts);
-  localStorage.setItem("musicGameOver", "false");
+  localStorage.setItem(`${KEY_PREFIX}Target`, JSON.stringify(target));
+  localStorage.setItem(`${KEY_PREFIX}Attempts`, attempts);
+  localStorage.setItem(`${KEY_PREFIX}GameOver`, "false");
+}
+
+
+
+/**
+ * Bascule la page entre habillage normal et habillage Expert.
+ *
+ * En Expert : le lecteur audio disparaît (il donnerait la réponse), le panneau de
+ * paroles prend sa place, et le bouton bascule vers le retour au mode normal.
+ * Tout le reste — filtres, autocomplétion, victoire, défis — est partagé.
+ */
+function applyExpertChrome() {
+  const lyricsBox = document.getElementById("expertLyricsBox");
+  const toggle = document.getElementById("expertToggle");
+
+  document.body.classList.toggle("expert-mode", IS_EXPERT);
+  if (audioBox) audioBox.style.display = IS_EXPERT ? "none" : "";
+  if (lyricsBox) lyricsBox.style.display = IS_EXPERT ? "" : "none";
+
+  if (toggle) {
+    const key = IS_EXPERT ? "ui.expert_leave" : "ui.expert_enter";
+    toggle.setAttribute("data-i18n", key);
+    const t = window.i18n?.t?.(key);
+    toggle.textContent =
+      t != null && t !== key ? t : IS_EXPERT ? "← Normal mode" : "⚡ Expert mode";
+    toggle.classList.toggle("active", IS_EXPERT);
+    // Un lien, pas un bouton JS : l'URL porte le mode, donc elle doit être
+    // copiable, ouvrable dans un onglet, et gérée par l'historique du navigateur.
+    toggle.href = IS_EXPERT ? "musics.html" : "musics.html?expert=1";
+  }
+
+  // Règles : chaque mode a les siennes, la mécanique n'a rien à voir.
+  document.getElementById("rulesNormal")?.style.setProperty("display", IS_EXPERT ? "none" : "");
+  document.getElementById("rulesExpert")?.style.setProperty("display", IS_EXPERT ? "" : "none");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAROLES (Mode Expert)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Affiche les paroles révélées jusqu'ici, façon lecteur de streaming : les vers
+ * déjà obtenus restent visibles au-dessus, le dernier est mis en avant, et la
+ * liste défile automatiquement dessus.
+ *
+ * Le titre est masqué tant que la partie court — 31 chansons sur 73 le citent
+ * dans leurs propres paroles (« Burn my dread »), ce qui donnerait la réponse.
+ * Le masquage se fait ICI, à l'affichage : les données restent brutes, donc la
+ * révélation de fin de partie n'a qu'à réafficher sans masque.
+ *
+ * @param {boolean} [reveal=false] - true en fin de partie : tout, sans censure.
+ */
+function renderLyrics(reveal = false) {
+  const list = document.getElementById("expertLyricsList");
+  if (!list || !IS_EXPERT) return;
+
+  const vers = targetLyrics();
+  // 1 vers au départ, +1 par essai raté. En révélation, tout d'un coup.
+  const shown = reveal ? vers.length : Math.min(attempts + 1, vers.length);
+
+  list.innerHTML = "";
+  for (let i = 0; i < shown; i++) {
+    const li = document.createElement("li");
+    li.className = "expert-lyric-line";
+    if (!reveal && i === shown - 1) li.classList.add("current");
+    if (reveal && i >= attempts + 1) li.classList.add("unheard");
+    li.textContent = reveal ? vers[i] : maskTerms([target.titre], vers[i], "▮▮▮▮");
+    list.appendChild(li);
+  }
+
+  const counter = document.getElementById("expertLyricsCount");
+  if (counter) counter.textContent = `${shown} / ${vers.length}`;
+
+  // Suivre le vers courant sans arracher la lecture des précédents : on scrolle
+  // le conteneur, le joueur peut remonter librement.
+  list.lastElementChild?.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -393,7 +527,11 @@ function showVictory(force = false) {
   if (!isChallengePlay("music") && !localStorage.getItem(todayKey)) {
     const result = force ? "giveup" : "win";
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-    updateProfileStats({ result, mode: "Music", timeSpent });
+    // Pas d'updateProfileStats() en Expert : ces stats client alimentent le mode
+    // Music normal (victoires, streak, temps de jeu) et le serveur les exclut
+    // déjà (user_stats intouché, cf. api/lib/game_session.php). Les compter ici
+    // ferait diverger le profil local du backend au prochain pullProfileFromCloud.
+    if (!IS_EXPERT) updateProfileStats({ result, mode: "Music", timeSpent });
     savePendingSession(
       buildGameSession({
         mode: "Music",
@@ -401,14 +539,20 @@ function showVictory(force = false) {
         result,
         attempts,
         timeMs: timeSpent * 1000,
+        isExpert: IS_EXPERT,
       })
     );
     localStorage.setItem(todayKey, "1");
   }
 
-  checkUnlocksAfterGame("Music");
+  // Les conditions de déblocage portent sur les stats du mode normal, que
+  // l'Expert ne touche pas — l'appel serait un no-op. Un badge « Expert » viendra
+  // avec sa propre condition (ROADMAP v2.1 : badge une fois les 6 modes battus).
+  if (!IS_EXPERT) checkUnlocksAfterGame("Music");
 
   // ── UI ─────────────────────────────────────────────────────────────────────
+  // Fin de partie : la censure tombe, on affiche les paroles entières en clair.
+  renderLyrics(true);
   textbar.disabled = true;
   guessBtn.disabled = true;
   giveUpBtn.disabled = true;
@@ -450,7 +594,7 @@ function showVictory(force = false) {
   checkChallengeCompletion("music", attempts, !force);
   showCommunityStats("music", target.titre);
 
-  localStorage.setItem("musicGameOver", "true");
+  localStorage.setItem(`${KEY_PREFIX}GameOver`, "true");
 
   revealNextLink({ prevHref: "../personaeMode/personae.html" }); // ← shared utility
 }
@@ -503,12 +647,12 @@ function handleGuess() {
   if (!triedTitles.includes(guess)) triedTitles.push(guess);
 
   attempts++;
-  localStorage.setItem("musicAttempts", attempts);
-  localStorage.setItem("musicTriedTitles", JSON.stringify(triedTitles));
+  localStorage.setItem(`${KEY_PREFIX}Attempts`, attempts);
+  localStorage.setItem(`${KEY_PREFIX}TriedTitles`, JSON.stringify(triedTitles));
 
-  giveUpCounter.textContent = `(${attempts} / ${MAX_ATTEMPTS})`;
+  giveUpCounter.textContent = `(${attempts} / ${maxAttempts()})`;
 
-  if (attempts >= MAX_ATTEMPTS) {
+  if (attempts >= giveUpThreshold()) {
     giveUpBtn.disabled = false;
     giveUpCounter.classList.add("activated");
   }
@@ -517,6 +661,7 @@ function handleGuess() {
     showVictory(false);
   } else {
     showWrong(guess);
+    renderLyrics(); // un vers de plus
   }
 
   textbar.value = "";
@@ -524,19 +669,19 @@ function handleGuess() {
 
 /**
  * Triggered when the player clicks "Give Up".
- * Only allowed after MAX_ATTEMPTS wrong guesses.
+ * Débloqué après giveUpThreshold() mauvaises réponses (3 en normal, 5 en Expert).
  */
 function giveUp() {
-  if (attempts < MAX_ATTEMPTS || gameOver) return;
+  if (attempts < giveUpThreshold() || gameOver) return;
 
   gameOver = true;
-  localStorage.setItem("musicForceReveal", "true");
+  localStorage.setItem(`${KEY_PREFIX}ForceReveal`, "true");
 
   // Log stats if not already done — jamais pour une partie de défi à cible
   // dédiée (le give-up compte pour le défi via showVictory, pas en quotidien).
   if (!isChallengePlay("music") && !localStorage.getItem(todayKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-    updateProfileStats({ result: "giveup", mode: "Music", timeSpent });
+    if (!IS_EXPERT) updateProfileStats({ result: "giveup", mode: "Music", timeSpent });
     savePendingSession(
       buildGameSession({
         mode: "Music",
@@ -544,6 +689,7 @@ function giveUp() {
         result: "giveup",
         attempts,
         timeMs: timeSpent * 1000,
+        isExpert: IS_EXPERT,
       })
     );
     localStorage.setItem(todayKey, "1");
@@ -558,15 +704,15 @@ function giveUp() {
  */
 function resetGame(random = false) {
   // Clear all Music-mode localStorage keys
-  localStorage.removeItem("musicTarget");
-  localStorage.removeItem("musicAttempts");
-  localStorage.removeItem("musicGameOver");
-  localStorage.removeItem("musicTriedTitles");
-  localStorage.removeItem("musicForceReveal");
+  localStorage.removeItem(`${KEY_PREFIX}Target`);
+  localStorage.removeItem(`${KEY_PREFIX}Attempts`);
+  localStorage.removeItem(`${KEY_PREFIX}GameOver`);
+  localStorage.removeItem(`${KEY_PREFIX}TriedTitles`);
+  localStorage.removeItem(`${KEY_PREFIX}ForceReveal`);
   localStorage.removeItem(todayKey);
 
   // Rebuild todayKey for the new session (in case day changed)
-  todayKey = `statsLogged_Music_${parisDateKey()}`;
+  todayKey = `statsLogged_${STATS_KEY}_${parisDateKey()}`;
 
   // Reset in-memory state
   gameOver = false;
@@ -575,7 +721,6 @@ function resetGame(random = false) {
   sessionStartTime = Date.now();
 
   // Reset UI
-  giveUpCounter.textContent = `(0 / ${MAX_ATTEMPTS})`;
   giveUpCounter.classList.remove("activated");
   giveUpBtn.disabled = true;
   textbar.disabled = false;
@@ -593,6 +738,11 @@ function resetGame(random = false) {
   resetPlayerVisuals();
   pickSong(random);
   if (target) setPlayerTheme(target);
+
+  // Après pickSong() : maxAttempts() et renderLyrics() dépendent de la NOUVELLE
+  // cible. Les appeler plus haut afficherait les paroles du tirage précédent.
+  giveUpCounter.textContent = `(0 / ${maxAttempts()})`;
+  renderLyrics();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

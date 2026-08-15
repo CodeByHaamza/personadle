@@ -300,6 +300,16 @@
       </div>
     </div>
 
+    <!-- Bascule Normal ⇄ Expert.
+         Un <a> et non un <button> : le mode vit dans l'URL (?expert=1), donc le
+         lien doit être copiable, ouvrable dans un onglet, et suivre l'historique
+         du navigateur. Le libellé et la cible sont posés par applyExpertChrome(). -->
+    <div class="expert-toggle-zone">
+      <a href="musics.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <!-- Audio + Rules Button -->
     <div class="emoji-hint-zone" style="position: relative">
       <!-- Rules Button -->
@@ -347,9 +357,56 @@
         <span class="close">&times;</span>
         <h2 data-i18n="modes.music.rules_title">🎵 Music Mode — How to Play</h2>
 
+        <!-- Règles Expert — mécanique totalement différente, donc bloc distinct
+             plutôt que des phrases conditionnelles dans le bloc normal.
+             applyExpertChrome() (modeMusic.js) montre l'un ou l'autre. -->
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.music.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.music.expert_goal_intro">
+            No audio at all. You get the song's lyrics, one line at a time.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.music.tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.music.expert_tip_1">
+              You start with a single line. Every wrong guess reveals the next one.
+            </li>
+            <li data-i18n="modes.music.expert_tip_2">
+              Previous lines stay on screen — scroll back through them anytime.
+            </li>
+            <li data-i18n="modes.music.expert_tip_3">
+              The song title is hidden inside the lyrics. It comes back when the round ends.
+            </li>
+            <li data-i18n="modes.music.expert_tip_4">
+              Instrumental tracks are excluded — every song here has words.
+            </li>
+            <li data-i18n="modes.music.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.music.expert_tip_6">
+              Expert has its own daily song, and its own stats. It will not carry your
+              normal Music streak.
+            </li>
+          </ul>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.music.disclaimer">📝 Disclaimer:</strong>
+          <ul>
+            <li data-i18n="modes.music.disclaimer_1">
+              This is a fan project. All music rights belong to ATLUS and the original creators.
+            </li>
+            <li data-i18n="modes.music.disclaimer_2">
+              No commercial use. Please support the official soundtracks.
+            </li>
+          </ul>
+        </div>
+
         <!-- Règles : câblées sur les clés JSON (modes.music.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <div id="rulesNormal">
           <strong data-i18n="modes.music.goal">🎯 Objective:</strong><br />
           <span data-i18n="modes.music.goal_intro">A music clip will play...</span> <br />
           <span data-i18n="modes.music.goal_question">Your mission? Identify the song title!</span>
@@ -455,6 +512,15 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Paroles — Mode Expert (remplace le lecteur audio) -->
+    <div class="expert-lyrics-wrapper" id="expertLyricsBox" style="display: none">
+      <div class="expert-lyrics-header">
+        <span class="expert-lyrics-label" data-i18n="ui.expert_lyrics">⚡ LYRICS</span>
+        <span class="expert-lyrics-count" id="expertLyricsCount">0 / 0</span>
+      </div>
+      <ol class="expert-lyrics-list" id="expertLyricsList" aria-live="polite"></ol>
     </div>
 
     <!-- Victory Display -->

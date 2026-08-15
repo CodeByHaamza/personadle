@@ -31,7 +31,10 @@
     "error": "Ha ocurrido un error.",
     "admin_gift_received": "🎁 ¡Regalo recibido!",
     "tap_continue": "Toca para continuar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "expert_enter": "⚡ Modo Experto",
+    "expert_leave": "← Modo normal",
+    "expert_lyrics": "⚡ LETRA"
   },
   "modes": {
     "classic": {
@@ -212,7 +215,15 @@
       "giveup_reveal": "💡 Era: {{title}}",
       "vocal_label": "🧑‍🎤 Vocal: {{name}}",
       "listen_link": "🔗 Escuchar aquí",
-      "prev_mode": "← Modo Personae"
+      "prev_mode": "← Modo Personae",
+      "expert_goal": "⚡ Modo Experto:",
+      "expert_goal_intro": "Sin audio. Recibes la letra de la canción, verso a verso.",
+      "expert_tip_1": "Empiezas con un solo verso. Cada fallo revela el siguiente.",
+      "expert_tip_2": "Los versos anteriores siguen en pantalla — puedes volver a leerlos cuando quieras.",
+      "expert_tip_3": "El título está oculto dentro de la letra. Reaparece al terminar la partida.",
+      "expert_tip_4": "Los temas instrumentales quedan excluidos: aquí todas las canciones tienen letra.",
+      "expert_tip_5": "Tienes 5 intentos antes de que se active el botón Rendirse.",
+      "expert_tip_6": "El Experto tiene su propia canción diaria y sus propias estadísticas. No cuenta para tu racha de Music normal."
     }
   },
   "game": {

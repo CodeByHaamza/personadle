@@ -31,7 +31,10 @@
     "admin_gift_received": "🎁 Gift received!",
     "tap_continue": "Tap to continue",
     "close": "Close",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "expert_enter": "⚡ Expert mode",
+    "expert_leave": "← Normal mode",
+    "expert_lyrics": "⚡ LYRICS"
   },
   "modes": {
     "classic": {
@@ -212,7 +215,15 @@
       "giveup_reveal": "💡 It was: {{title}}",
       "vocal_label": "🧑‍🎤 Vocal: {{name}}",
       "listen_link": "🔗 Listen here",
-      "prev_mode": "← Personae Mode"
+      "prev_mode": "← Personae Mode",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_intro": "No audio at all. You get the song's lyrics, one line at a time.",
+      "expert_tip_1": "You start with a single line. Every wrong guess reveals the next one.",
+      "expert_tip_2": "Previous lines stay on screen — scroll back through them anytime.",
+      "expert_tip_3": "The song title is hidden inside the lyrics. It comes back when the round ends.",
+      "expert_tip_4": "Instrumental tracks are excluded — every song here has words.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily song, and its own stats. It will not carry your normal Music streak."
     }
   },
   "game": {

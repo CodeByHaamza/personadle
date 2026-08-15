@@ -3,6 +3,8 @@ import { maskTerms } from "../js/gameCore.js";
 import { expertLyrics } from "../musicsMode/database/expert_lyrics.js";
 import { songs } from "../musicsMode/database/songs.js";
 import { personaeCharacters } from "../personaeMode/database/personaeCharacters.js";
+import dailyPools from "../api/data/daily_pools.json";
+import { getDailyTarget } from "../js/gameCore.js";
 import loreEn from "../personaeMode/database/expert_lore/en.json";
 import loreFr from "../personaeMode/database/expert_lore/fr.json";
 
@@ -101,6 +103,61 @@ describe("expert_lyrics", () => {
         expect(containsWord(maskTerms([titre, base], v), base), `${titre} — "${v}"`).toBe(false);
       }
     }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pool Expert Music — accord client ⇄ serveur
+// ─────────────────────────────────────────────────────────────────────────────
+describe("pool music_expert", () => {
+  // Reproduit EXPERT_SONGS de musicsMode/modeMusic.js. Le mode lui-même n'est pas
+  // importable en test (son DOMContentLoaded lit window.location au chargement),
+  // mais c'est bien cette expression-là qui doit rester alignée sur le serveur.
+  const clientPool = songs.filter((s) => expertLyrics[s.titre]).map((s) => s.titre);
+  const serverPool = dailyPools.music_expert.pool;
+
+  it("le pool client est identique au pool serveur, ordre compris", () => {
+    // L'index du tirage est hash % pool.length : une divergence d'ordre ou de
+    // contenu fait viser deux cibles différentes au client et au serveur, et
+    // api/sessions.php logue alors CHAQUE partie Expert en anti_cheat.
+    expect(clientPool).toEqual(serverPool);
+  });
+
+  it("ne contient que des chansons ayant des paroles", () => {
+    for (const titre of serverPool) {
+      expect(expertLyrics[titre], titre).toBeDefined();
+      expect(expertLyrics[titre].length, titre).toBeGreaterThan(1);
+    }
+  });
+
+  it("exclut bien les instrumentales du pool normal", () => {
+    const exclues = dailyPools.music.pool.filter((t) => !serverPool.includes(t));
+    expect(exclues.length).toBeGreaterThan(0);
+    for (const titre of exclues) expect(expertLyrics[titre], titre).toBeUndefined();
+  });
+
+  it("la cible quotidienne Expert a toujours des paroles à révéler", () => {
+    const pool = songs.filter((s) => expertLyrics[s.titre]);
+    for (let d = 1; d <= 28; d++) {
+      const date = `2026-09-${String(d).padStart(2, "0")}`;
+      const cible = getDailyTarget(pool, "MusicExpert", date, "42");
+      expect(expertLyrics[cible.titre], date).toBeDefined();
+    }
+  });
+
+  it("Expert et Music normal ne tirent pas la même chanson tous les jours", () => {
+    const pool = songs.filter((s) => expertLyrics[s.titre]);
+    let identiques = 0;
+    for (let d = 1; d <= 28; d++) {
+      const date = `2026-09-${String(d).padStart(2, "0")}`;
+      if (getDailyTarget(pool, "MusicExpert", date, "42").titre === getDailyTarget(songs, "Music", date, "42").titre) {
+        identiques++;
+      }
+    }
+    // Une collision occasionnelle est normale (pools qui se recouvrent) ; une
+    // égalité systématique voudrait dire que la clé de hash n'a pas été différenciée
+    // — et jouer le mode normal, où l'audio est donné, offrirait l'Expert du jour.
+    expect(identiques).toBeLessThan(5);
   });
 });
 

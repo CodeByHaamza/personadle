@@ -31,7 +31,10 @@
     "admin_gift_received": "🎁 Presente recebido!",
     "tap_continue": "Toca para continuar",
     "close": "Fechar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "expert_enter": "⚡ Modo Especialista",
+    "expert_leave": "← Modo normal",
+    "expert_lyrics": "⚡ LETRA"
   },
   "modes": {
     "classic": {
@@ -212,7 +215,15 @@
       "giveup_reveal": "💡 Era: {{title}}",
       "vocal_label": "🧑‍🎤 Voz: {{name}}",
       "listen_link": "🔗 Ouvir aqui",
-      "prev_mode": "← Modo Personae"
+      "prev_mode": "← Modo Personae",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_intro": "Sem áudio. Você recebe a letra da música, um verso de cada vez.",
+      "expert_tip_1": "Você começa com um único verso. Cada erro revela o próximo.",
+      "expert_tip_2": "Os versos anteriores continuam na tela — pode voltar a lê-los quando quiser.",
+      "expert_tip_3": "O título está escondido na letra. Ele reaparece no fim da partida.",
+      "expert_tip_4": "Faixas instrumentais ficam de fora: aqui toda música tem letra.",
+      "expert_tip_5": "Você tem 5 tentativas antes que o botão Desistir seja liberado.",
+      "expert_tip_6": "O Especialista tem a própria música do dia e as próprias estatísticas. Não conta para a sua sequência de Music normal."
     }
   },
   "game": {

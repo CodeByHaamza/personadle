@@ -31,7 +31,10 @@
     "error": "Une erreur est survenue.",
     "admin_gift_received": "🎁 Cadeau reçu !",
     "tap_continue": "Appuyer pour continuer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "expert_enter": "⚡ Mode Expert",
+    "expert_leave": "← Mode normal",
+    "expert_lyrics": "⚡ PAROLES"
   },
   "modes": {
     "classic": {
@@ -212,7 +215,15 @@
       "giveup_reveal": "💡 C'était : {{title}}",
       "vocal_label": "🧑‍🎤 Voix : {{name}}",
       "listen_link": "🔗 Écouter ici",
-      "prev_mode": "← Mode Personae"
+      "prev_mode": "← Mode Personae",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_intro": "Aucun son. Tu reçois les paroles de la chanson, un vers à la fois.",
+      "expert_tip_1": "Tu démarres avec un seul vers. Chaque mauvaise réponse en révèle un de plus.",
+      "expert_tip_2": "Les vers précédents restent à l'écran — tu peux remonter les relire quand tu veux.",
+      "expert_tip_3": "Le titre est masqué dans les paroles. Il réapparaît à la fin de la partie.",
+      "expert_tip_4": "Les instrumentaux sont exclus — toutes les chansons ici ont des paroles.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a sa propre chanson du jour et ses propres stats. Il ne compte pas dans ta série Music normale."
     }
   },
   "game": {
