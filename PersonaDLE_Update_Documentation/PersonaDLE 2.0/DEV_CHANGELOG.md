@@ -113,6 +113,69 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): stats Expert, E2E, défis cloisonnés et correctifs UI
+
+Finition du Mode Music Expert : les parties Expert sont enfin lisibles quelque part, le
+parcours joueur est couvert de bout en bout, et les défis ne peuvent plus produire d'état
+incohérent.
+
+### Correctifs signalés en test manuel
+
+- **Compteur sous « Abandonner » faux** — il affichait `(essais / nombre de vers)`, soit
+  « 2 / 18 » alors que l'abandon se débloque à 5. Le compteur mesure la progression vers
+  le **déblocage** (3/3 en mode normal), pas le stock d'indices : il affiche désormais
+  `(min(essais, seuil) / seuil)`. `maxAttempts()` n'avait plus d'appelant → supprimée.
+- **Débordement horizontal sur mobile** — `.audio-wrapper` et `.expert-lyrics-wrapper`
+  n'avaient pas `box-sizing: border-box`, donc le padding s'ajoutait à `max-width` : 380px
+  de large pour un viewport de 375. Le bug est **pré-existant** (le mode normal débordait
+  déjà), corrigé pour les deux. Reste le débordement de `.nav-item` (barre du bas), commun
+  aux 6 modes et hors périmètre.
+- **Hover du bouton Expert** aligné sur les boutons Submit / Abandonner : réutilise
+  l'animation `tiltBounce` de `css/global.css` au lieu d'une variante locale, avec
+  `:focus-visible` et une sortie propre en `prefers-reduced-motion`.
+
+### Défis — cloisonnés plutôt qu'à moitié adaptés
+
+Un défi porte un barème (nombre d'essais) et une cible. Joué en Expert, le barème n'est plus
+comparable (5–30 essais contre 3), et la cible peut être un instrumental — sans aucune parole
+à révéler, donc un panneau vide et un jeu injouable.
+
+- Ouvrir `musics.html?expert=1` avec un défi actif **redirige vers le mode normal**.
+- L'Expert **n'émet pas** de défi (bouton masqué) : le destinataire le jouerait en normal
+  avec l'audio, pour un score incomparable.
+- `showCommunityStats()` sauté en Expert, comme dans `savePendingSession()` : la cible y est
+  différente et `community-stats.php` ne compte que le non-Expert → 0 % à vie.
+- La feature complète (colonne `challenge_is_expert`, URL d'acceptation, barème dédié) est
+  spécifiée dans `ROADMAP.md`, à coder sur la branche du déblocage.
+
+### Stats Expert visibles
+
+- `personadle_expert_stats_by_mode()` (`api/lib/game_session.php`) agrège **directement
+  depuis `game_sessions`** : parties, victoires, abandons, meilleure victoire (moins
+  d'essais), temps total, dernière date, et streak recalculée depuis l'historique.
+  `user_stats` reste hors du coup, conformément à la décision du lot précédent.
+  `personadle_recompute_mode_streak()` prend un paramètre `$isExpert` pour ça.
+- `api/user/stats.php` expose `stats.expert_by_mode` (tableau vide si aucune partie Expert).
+  Aucun nouveau fichier, donc aucune `RewriteRule` à ajouter.
+- `profile/profile-page.js` — `renderExpertStats()` remplit `#expertStatsContainer` depuis
+  l'API et non depuis `profile.stats` (l'Expert n'y écrit rien). Silencieux hors ligne ou
+  déconnecté : c'est un bonus d'affichage, il ne doit jamais casser la page profil.
+- 6 tests PHPUnit : coexistence normal+Expert le même jour, `user_stats` intouché mais
+  streak globale incrémentée, **une victoire Expert n'upgrade pas l'abandon normal du jour**,
+  doublon Expert toujours rejeté, agrégation correcte, tableau vide sans partie Expert.
+
+### E2E — `tests-e2e/expert-music.spec.js`, 9 tests
+
+Le parcours complet dans un vrai navigateur : bascule normal ⇄ Expert et retour, parties
+indépendantes le même jour (clés localStorage distinctes), un vers au départ puis un de plus
+par erreur avec les précédents conservés, compteur de vers, **titre jamais visible avant la
+fin**, déblocage de l'abandon à 5 exactement, abandon et victoire révélant tout sans masque
+avec `is_expert: true` dans la session en attente, et non-débordement du panneau sur 375px.
+
+Deux assertions ont dû être dérivées du tirage plutôt qu'écrites en dur (nombre de vers) :
+la cible change chaque jour et par joueur, un total figé aurait rendu le test rouge un jour
+sur deux.
+
 ## 2026-08-15 — feat(expert): Mode Music Expert jouable
 
 Le mode est enfin jouable : bouton sur la page Music, paroles révélées vers par vers,

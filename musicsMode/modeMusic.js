@@ -144,12 +144,12 @@ function targetLyrics() {
   return (target && expertLyrics[target.titre]) || [];
 }
 
-/** Nombre d'essais avant révélation complète. En Expert, un vers par essai raté. */
-function maxAttempts() {
-  return IS_EXPERT ? Math.max(targetLyrics().length, 1) : MAX_ATTEMPTS;
-}
-
-/** Essais ratés nécessaires pour débloquer « Abandonner ». */
+/**
+ * Essais ratés nécessaires pour débloquer « Abandonner » — c'est AUSSI le
+ * dénominateur affiché sous le bouton. Le compteur mesure la progression vers le
+ * déblocage (3/3 en normal), pas le stock d'indices : en Expert il y a 5 à 30 vers
+ * à révéler, mais l'abandon se débloque toujours à 5.
+ */
 function giveUpThreshold() {
   return IS_EXPERT ? EXPERT_GIVE_UP_AFTER : MAX_ATTEMPTS;
 }
@@ -202,6 +202,17 @@ let giveUpCounter, wrongList, victoryBox, victoryImage, victoryText;
 document.addEventListener("DOMContentLoaded", async () => {
   if (window.__i18nReady) await window.__i18nReady;
 
+  // Un défi est émis depuis le mode NORMAL et se compare en nombre d'essais sur
+  // l'audio. Le rejouer en Expert n'aurait pas de sens (barème incomparable) et
+  // casserait si sa cible est un instrumental — il n'aurait aucune parole à
+  // révéler. On renvoie donc le joueur vers le mode normal pour ce défi.
+  // Les défis Expert (avec leur propre barème) sont une feature à part entière :
+  // ils demandent une colonne dédiée sur `messages`, cf. ROADMAP.md v2.1.
+  if (IS_EXPERT && isChallengePlay("music")) {
+    window.location.replace("musics.html");
+    return;
+  }
+
   // ── DOM element references ─────────────────────────────────────────────────
   textbar = document.getElementById("textbar");
   audioBox = document.getElementById("audioBox");
@@ -234,7 +245,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     setPlayerTheme(target);
 
-    giveUpCounter.textContent = `(${attempts} / ${maxAttempts()})`;
+    giveUpCounter.textContent = `(${Math.min(attempts, giveUpThreshold())} / ${giveUpThreshold()})`;
     if (attempts >= giveUpThreshold()) {
       giveUpBtn.disabled = false;
       giveUpCounter.classList.add("activated");
@@ -585,14 +596,18 @@ function showVictory(force = false) {
       count: 30,
       spreadFrom: "bottom",
     });
-    showChallengeButton(
-      "music",
-      attempts,
-      filteredSongs.filter((s) => s.titre !== target.titre).map((s) => s.titre)
-    );
+    // Pas en Expert : le défi serait joué en mode normal par le destinataire
+    // (audio donné), donc un score incomparable au sien. Cf. ROADMAP.md v2.1.
+    if (!IS_EXPERT) {
+      showChallengeButton(
+        "music",
+        attempts,
+        filteredSongs.filter((s) => s.titre !== target.titre).map((s) => s.titre)
+      );
+    }
   }
   checkChallengeCompletion("music", attempts, !force);
-  showCommunityStats("music", target.titre);
+  if (!IS_EXPERT) showCommunityStats("music", target.titre);
 
   localStorage.setItem(`${KEY_PREFIX}GameOver`, "true");
 
@@ -650,7 +665,7 @@ function handleGuess() {
   localStorage.setItem(`${KEY_PREFIX}Attempts`, attempts);
   localStorage.setItem(`${KEY_PREFIX}TriedTitles`, JSON.stringify(triedTitles));
 
-  giveUpCounter.textContent = `(${attempts} / ${maxAttempts()})`;
+  giveUpCounter.textContent = `(${Math.min(attempts, giveUpThreshold())} / ${giveUpThreshold()})`;
 
   if (attempts >= giveUpThreshold()) {
     giveUpBtn.disabled = false;
@@ -739,9 +754,9 @@ function resetGame(random = false) {
   pickSong(random);
   if (target) setPlayerTheme(target);
 
-  // Après pickSong() : maxAttempts() et renderLyrics() dépendent de la NOUVELLE
-  // cible. Les appeler plus haut afficherait les paroles du tirage précédent.
-  giveUpCounter.textContent = `(0 / ${maxAttempts()})`;
+  // Après pickSong() : renderLyrics() dépend de la NOUVELLE cible — l'appeler
+  // plus haut afficherait les paroles du tirage précédent.
+  giveUpCounter.textContent = `(0 / ${giveUpThreshold()})`;
   renderLyrics();
 }
 

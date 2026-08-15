@@ -21,6 +21,10 @@ audio {
  * Remplacées par JS via setPlayerTheme() selon le jeu d'origine de la musique.
  */
 .audio-wrapper {
+  /* Sans border-box, le padding s'ajoute à max-width et le lecteur déborde de
+     l'écran sur mobile (380px de large pour un viewport de 375px). */
+  box-sizing: border-box;
+
   --player-accent: #e63946;
   --player-accent-dark: #c1121f;
   --player-accent-light: #ff8fa3;
@@ -523,10 +527,29 @@ body.music-mode.darkmode .victory-box {
   transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
 }
 
-.expert-toggle:hover {
+/* Survol : même vocabulaire que les boutons Submit / Abandonner (.link-wrapper)
+   — grossissement puis rebond incliné, plutôt qu'un simple changement de couleur.
+   On réutilise l'animation tiltBounce déjà définie dans css/global.css au lieu
+   d'en écrire une variante. */
+.expert-toggle:hover,
+.expert-toggle:focus-visible {
   background: #e63946;
-  box-shadow: 0 0 18px rgba(230, 57, 70, 0.7);
-  transform: translateY(-2px);
+  box-shadow: 0 0 22px rgba(230, 57, 70, 0.75);
+  animation: tiltBounce 0.15s ease forwards;
+}
+
+.expert-toggle:active {
+  transform: scale(0.96) rotate(-7deg);
+}
+
+/* Les formes décoratives du survol restent un effet, pas une info : coupées si le
+   joueur a demandé moins d'animations. */
+@media (prefers-reduced-motion: reduce) {
+  .expert-toggle:hover,
+  .expert-toggle:focus-visible {
+    animation: none;
+    transform: scale(1.05);
+  }
 }
 
 /* Déjà en Expert : le bouton devient la sortie de secours, donc il se calme. */
@@ -535,7 +558,8 @@ body.music-mode.darkmode .victory-box {
   color: #cfcfcf;
 }
 
-.expert-toggle.active:hover {
+.expert-toggle.active:hover,
+.expert-toggle.active:focus-visible {
   background: #333;
   box-shadow: none;
 }
@@ -548,6 +572,7 @@ body.expert-mode {
 }
 
 .expert-lyrics-wrapper {
+  box-sizing: border-box; /* cf. .audio-wrapper : sinon le padding déborde du viewport */
   width: min(560px, 92vw);
   margin: 18px auto;
   padding: 14px 16px 10px;

@@ -327,7 +327,10 @@
     "delete_account_confirm_btn": "Elimina definitivamente",
     "delete_account_success": "Il tuo account è stato disattivato. Verrai disconnesso ora.",
     "delete_account_error": "Qualcosa è andato storto. Riprova o contattaci.",
-    "delete_account_login_required": "Accedi per eliminare il tuo account."
+    "delete_account_login_required": "Accedi per eliminare il tuo account.",
+    "expert_title": "⚡ Modalità Esperto",
+    "expert_cols": "Vinte / Giocate · Tasso · Record · Serie",
+    "expert_best_hint": "Meno tentativi in una vittoria"
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",

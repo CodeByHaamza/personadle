@@ -880,4 +880,121 @@ final class DatabaseIntegrationTest extends TestCase
         $newReqStmt->execute([$reqNew]);
         $this->assertNull($newReqStmt->fetch()['processed_at']);
     }
+
+    // ── Mode Expert ─────────────────────────────────────────────────────────
+
+    public function testExpertSessionCoexistsWithNormalSessionSameDay(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        personadle_record_game_session(self::$pdo, $uid, 'music', $today, 'Burn My Dread', 'win', 2, 5000, []);
+        $out = personadle_record_game_session(
+            self::$pdo, $uid, 'music', $today, 'Deep Breath Deep Breath', 'win', 7, 9000, [], true
+        );
+
+        $this->assertGreaterThan(0, $out['session_id']);
+        $this->assertTrue($out['is_expert']);
+
+        $st = self::$pdo->prepare('SELECT COUNT(*) FROM game_sessions WHERE user_id = ? AND mode = ?');
+        $st->execute([$uid, 'music']);
+        $this->assertSame(2, (int) $st->fetchColumn(), 'normal + Expert le même jour = 2 lignes');
+    }
+
+    public function testExpertSessionDoesNotTouchModeStats(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        $out = personadle_record_game_session(
+            self::$pdo, $uid, 'music', $today, 'Deep Breath Deep Breath', 'win', 7, 9000, [], true
+        );
+
+        // user_stats n'agrège pas l'Expert : les compteurs du mode normal restent à zéro.
+        $this->assertSame(0, $out['stats']['games']);
+        $this->assertSame(0, $out['stats']['wins']);
+        $this->assertSame(0, $out['stats']['streak']);
+
+        // ... mais la journée compte bien comme jouée pour la streak globale.
+        $this->assertSame(1, $out['global_streak']);
+    }
+
+    public function testExpertWinDoesNotUpgradeTheNormalGiveupOfTheSameDay(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        personadle_record_game_session(self::$pdo, $uid, 'music', $today, 'Burn My Dread', 'giveup', 3, 5000, []);
+        personadle_record_game_session(
+            self::$pdo, $uid, 'music', $today, 'Deep Breath Deep Breath', 'win', 7, 9000, [], true
+        );
+
+        $st = self::$pdo->prepare(
+            'SELECT result FROM game_sessions WHERE user_id = ? AND mode = ? AND played_date = ? AND is_expert = 0'
+        );
+        $st->execute([$uid, 'music', $today]);
+        $this->assertSame(
+            'giveup',
+            $st->fetchColumn(),
+            'une victoire Expert ne doit pas transformer un abandon du mode normal en victoire'
+        );
+    }
+
+    public function testDuplicateExpertSessionStillRejected(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        personadle_record_game_session(self::$pdo, $uid, 'music', $today, 'A', 'win', 2, 1000, [], true);
+        $this->expectException(PersonadleDuplicateSessionException::class);
+        personadle_record_game_session(self::$pdo, $uid, 'music', $today, 'B', 'win', 3, 1000, [], true);
+    }
+
+    public function testExpertStatsByModeReadsFromSessions(): void
+    {
+        $uid   = $this->makeUser();
+        $today = new DateTime('now', new DateTimeZone('Europe/Paris'));
+        $d0    = $today->format('Y-m-d');
+        $d1    = (clone $today)->modify('-1 day')->format('Y-m-d');
+        $d2    = (clone $today)->modify('-2 day')->format('Y-m-d');
+
+        // 2 victoires consécutives + 1 abandon plus ancien, plus une partie normale
+        // qui ne doit PAS être comptée.
+        $this->insertSession($uid, 'music', $d2, 'C', 'giveup', 9, 1000, true);
+        $this->insertSession($uid, 'music', $d1, 'B', 'win', 4, 2000, true);
+        $this->insertSession($uid, 'music', $d0, 'A', 'win', 6, 3000, true);
+        $this->insertSession($uid, 'music', $d0, 'N', 'win', 1, 9999, false);
+
+        $stats = personadle_expert_stats_by_mode(self::$pdo, $uid);
+        $this->assertCount(1, $stats);
+        $this->assertSame('music', $stats[0]['mode']);
+        $this->assertSame(3, $stats[0]['games'], 'la partie normale ne doit pas être comptée');
+        $this->assertSame(2, $stats[0]['wins']);
+        $this->assertSame(1, $stats[0]['giveups']);
+        $this->assertSame(4, $stats[0]['best_attempts'], 'meilleure victoire = le moins d\'essais');
+        $this->assertSame(6000, $stats[0]['total_time_ms']);
+        $this->assertSame(2, $stats[0]['streak'], 'deux victoires consécutives jusqu\'à aujourd\'hui');
+        $this->assertSame($d0, $stats[0]['last_played_date']);
+    }
+
+    public function testExpertStatsAreEmptyForAPlayerWhoNeverPlayedExpert(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+        personadle_record_game_session(self::$pdo, $uid, 'music', $today, 'X', 'win', 1, 1000, []);
+
+        $this->assertSame([], personadle_expert_stats_by_mode(self::$pdo, $uid));
+    }
+
+    /** Insertion directe — contourne l'agrégation pour composer un historique arbitraire. */
+    private function insertSession(
+        int $userId, string $mode, string $date, string $target,
+        string $result, int $attempts, int $timeMs, bool $isExpert
+    ): void {
+        self::$pdo->prepare(
+            'INSERT INTO game_sessions
+                (user_id, mode, is_expert, played_date, target_name, result, attempts, time_ms, active_filters)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        )->execute([$userId, $mode, $isExpert ? 1 : 0, $date, $target, $result, $attempts, $timeMs, '[]']);
+    }
 }

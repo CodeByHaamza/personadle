@@ -327,7 +327,10 @@
     "delete_account_confirm_btn": "Eliminar permanentemente",
     "delete_account_success": "A tua conta foi desativada. Vais ser desligado agora.",
     "delete_account_error": "Algo correu mal. Tenta novamente ou contacta-nos.",
-    "delete_account_login_required": "Inicia sessão para eliminares a tua conta."
+    "delete_account_login_required": "Inicia sessão para eliminares a tua conta.",
+    "expert_title": "⚡ Modo Especialista",
+    "expert_cols": "Vencidas / Jogadas · Taxa · Recorde · Sequência",
+    "expert_best_hint": "Menos tentativas numa vitória"
   },
   "badges": {
     "notification_title": "🎖️ Emblema Desbloqueado!",

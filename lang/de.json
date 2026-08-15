@@ -327,7 +327,10 @@
     "delete_account_confirm_btn": "Endgültig löschen",
     "delete_account_success": "Dein Konto wurde deaktiviert. Du wirst jetzt abgemeldet.",
     "delete_account_error": "Etwas ist schiefgelaufen. Bitte versuche es erneut oder kontaktiere uns.",
-    "delete_account_login_required": "Melde dich an, um dein Konto zu löschen."
+    "delete_account_login_required": "Melde dich an, um dein Konto zu löschen.",
+    "expert_title": "⚡ Expertenmodus",
+    "expert_cols": "Gewonnen / Gespielt · Quote · Rekord · Serie",
+    "expert_best_hint": "Wenigste Versuche bei einem Sieg"
   },
   "badges": {
     "notification_title": "🎖️ Abzeichen freigeschaltet!",

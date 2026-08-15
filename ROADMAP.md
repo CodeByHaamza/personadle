@@ -88,11 +88,37 @@
     traitement que les titres de musique déjà exemptés côté §5 CLAUDE.md). N'existent pas
     encore dans `musicsMode/database/songs.js`
   - Condition de déblocage **différente par mode** (à trancher au cas par cas au moment de
-    l'implémentation, pas de règle uniforme entre les 6)
+    l'implémentation, pas de règle uniforme entre les 6). **À coder sur une branche dédiée**
+    (décision 2026-08-15) — le mode Music Expert est livré déverrouillé, le bouton
+    « ⚡ Expert mode » (`musicsMode/musics.html`) est visible et cliquable par tout le monde.
+    Ce qu'il faudra brancher :
+    - la condition elle-même passe par `api/lib/condition_check.php`
+      (`condition_type`/`condition_mode`/`condition_value`), déjà partagé par
+      titles/badges/wallpapers — pas de système parallèle à inventer
+    - vérification **côté serveur obligatoire** (CLAUDE.md §13) : un gate purement client
+      serait contournable en tapant `?expert=1` à la main, puisque le mode vit dans l'URL
+    - piste retenue pour Music : X victoires en Music normal (valeur à fixer) ; le compte
+      est déjà lisible dans `user_stats` (mode `music`, `is_expert` exclu par construction)
+    - côté front : masquer/griser le bouton et rediriger `?expert=1` vers le mode normal
+      tant que la condition n'est pas remplie
   - Récompense **supérieure au mode normal**, surtout en **défi ami** (voir item "Bonus XP
     Social Link" juste en dessous — logique mise à jour suite à cette révision)
   - Nouveau badge/titre : débloqué une fois les 6 modes Expert battus au moins une fois chacun
     (réutilise le système de conditions structurées déjà en place, `condition_check.php`)
+  - **Défis en Mode Expert** — à coder sur la branche dédiée, avec le déblocage
+    (constaté le 2026-08-15 en livrant Music Expert). Aujourd'hui l'Expert **n'émet pas**
+    de défi et **refuse** d'en jouer un : ouvrir `musics.html?expert=1` avec un défi actif
+    redirige vers le mode normal. Raison : un défi porte un barème (nombre d'essais) et une
+    cible ; joué en Expert le barème n'est plus comparable (5 à 30 essais contre 3), et la
+    cible peut être un instrumental, qui n'a aucune parole à révéler. Ce qu'il faudra :
+    - colonne `challenge_is_expert` sur `messages` (même forme que `is_expert` sur
+      `game_sessions`, migration 031) — sans elle le destinataire ne peut pas savoir en
+      quel mode le défi a été émis
+    - tirage de la cible du défi restreint au pool `music_expert` côté émetteur
+    - les deux points d'acceptation (`js/challenge-notif.js` et `profile/friends/friends.js`,
+      cf. `MODE_PAGE`) doivent ajouter `?expert=1` à l'URL du mode
+    - barème : 1 défi Expert ne se compare qu'à un autre défi Expert. Le bonus XP prévu
+      ci-dessous (x2/x3 sur le mutuel) s'y branche naturellement.
 - [ ] **Bonus XP Social Link selon la performance en défi** — actuellement XP mutuel fixe (35)
   sur un défi battu (`checkChallengeCompletion()`, `js/challenge-result.js`). À faire varier
   selon le nombre de tentatives utilisées — **pas le temps** : déclaratif côté client, donc plus
@@ -374,7 +400,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 6 langues,
-> **670 tests JS · 190 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **670 tests JS · 196 PHPUnit · 63 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -430,8 +456,8 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 670 Vitest · 190 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
-| Q2  | i18n EN/FR/ES/DE/IT/PT (1001 clés)             | `npm run i18n:check`                                                          |
+| Q1  | Tests : 670 Vitest · 196 PHPUnit · 63 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q2  | i18n EN/FR/ES/DE/IT/PT (1004 clés)             | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
 | Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |

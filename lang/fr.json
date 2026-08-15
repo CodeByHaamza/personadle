@@ -327,7 +327,10 @@
     "delete_account_confirm_btn": "Supprimer définitivement",
     "delete_account_success": "Ton compte a été désactivé. Tu vas être déconnecté.",
     "delete_account_error": "Une erreur est survenue. Réessaie ou contacte-nous.",
-    "delete_account_login_required": "Connecte-toi pour supprimer ton compte."
+    "delete_account_login_required": "Connecte-toi pour supprimer ton compte.",
+    "expert_title": "⚡ Mode Expert",
+    "expert_cols": "Gagnées / Jouées · Taux · Record · Série",
+    "expert_best_hint": "Le moins d'essais sur une victoire"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",

@@ -327,7 +327,10 @@
     "delete_account_confirm_btn": "Delete permanently",
     "delete_account_success": "Your account has been deactivated. You'll be logged out now.",
     "delete_account_error": "Something went wrong. Please try again or contact us.",
-    "delete_account_login_required": "Log in to delete your account."
+    "delete_account_login_required": "Log in to delete your account.",
+    "expert_title": "⚡ Expert Mode",
+    "expert_cols": "Won / Played · Rate · Best · Streak",
+    "expert_best_hint": "Fewest guesses in a win"
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",

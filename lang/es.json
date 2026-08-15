@@ -327,7 +327,10 @@
     "delete_account_confirm_btn": "Eliminar definitivamente",
     "delete_account_success": "Tu cuenta ha sido desactivada. Se cerrará tu sesión.",
     "delete_account_error": "Algo salió mal. Inténtalo de nuevo o contáctanos.",
-    "delete_account_login_required": "Inicia sesión para eliminar tu cuenta."
+    "delete_account_login_required": "Inicia sesión para eliminar tu cuenta.",
+    "expert_title": "⚡ Modo Experto",
+    "expert_cols": "Ganadas / Jugadas · Tasa · Récord · Racha",
+    "expert_best_hint": "Menos intentos en una victoria"
   },
   "badges": {
     "notification_title": "🎖️ ¡Insignia desbloqueada!",

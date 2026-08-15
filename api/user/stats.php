@@ -5,10 +5,16 @@
  * Retourne les statistiques de jeu d'un utilisateur, tous modes confondus.
  *
  * Accès : connecté (ses propres stats uniquement pour l'instant)
- * Succès : 200 { stats: { by_mode: [...], global: {...} } }
+ * Succès : 200 { stats: { by_mode: [...], expert_by_mode: [...], global: {...} } }
+ *
+ * `expert_by_mode` est calculé à la volée depuis `game_sessions` : le Mode Expert
+ * n'alimente pas `user_stats` (cf. api/lib/game_session.php), donc il ne peut pas
+ * apparaître dans `by_mode`. Tableau vide tant que le joueur n'a fait aucune partie
+ * Expert — le front n'affiche alors rien.
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/game_session.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     jsonError('Method Not Allowed', 405);
@@ -76,7 +82,8 @@ foreach ($rows as $row) {
 
 jsonSuccess([
     'stats' => [
-        'by_mode' => $byMode,
-        'global'  => $global,
+        'by_mode'        => $byMode,
+        'expert_by_mode' => personadle_expert_stats_by_mode($pdo, $userId),
+        'global'         => $global,
     ],
 ]);

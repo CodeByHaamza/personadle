@@ -47,24 +47,79 @@ function personadle_bump_global_streak(PDO $pdo, int $userId): int
     return $newGlobalStreak;
 }
 
+
+/**
+ * Statistiques Mode Expert d'un joueur, calculées **directement depuis
+ * game_sessions** — `user_stats` n'agrège pas l'Expert (cf.
+ * personadle_record_game_session), et rien ne justifie encore d'y ajouter une
+ * dimension pour un affichage unique.
+ *
+ * Volume : une ligne par (mode, jour) et par joueur, donc quelques centaines au
+ * pire — un GROUP BY direct est largement suffisant.
+ * ponytail: agrégation à la volée, à matérialiser si la page profil devient lente
+ *
+ * @return list<array{mode:string, games:int, wins:int, giveups:int, streak:int, best_attempts:int|null, total_time_ms:int, last_played_date:?string}>
+ */
+function personadle_expert_stats_by_mode(PDO $pdo, int $userId): array
+{
+    $stmt = $pdo->prepare(
+        "SELECT mode,
+                COUNT(*)                                          AS games,
+                SUM(result = 'win')                               AS wins,
+                SUM(result = 'giveup')                            AS giveups,
+                MIN(CASE WHEN result = 'win' THEN attempts END)   AS best_attempts,
+                COALESCE(SUM(time_ms), 0)                         AS total_time_ms,
+                MAX(played_date)                                  AS last_played_date
+         FROM game_sessions
+         WHERE user_id = ? AND is_expert = 1
+         GROUP BY mode
+         ORDER BY mode"
+    );
+    $stmt->execute([$userId]);
+
+    $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    $out = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $out[] = [
+            'mode'             => $row['mode'],
+            'games'            => (int) $row['games'],
+            'wins'             => (int) $row['wins'],
+            'giveups'          => (int) $row['giveups'],
+            // Streak Expert du mode, recalculée depuis l'historique — il n'existe
+            // aucun compteur persisté pour l'Expert.
+            'streak'           => personadle_recompute_mode_streak($pdo, $userId, $row['mode'], $today, true),
+            'best_attempts'    => $row['best_attempts'] === null ? null : (int) $row['best_attempts'],
+            'total_time_ms'    => (int) $row['total_time_ms'],
+            'last_played_date' => $row['last_played_date'],
+        ];
+    }
+    return $out;
+}
+
 /**
  * Recalcule la streak par-mode depuis l'historique game_sessions : jours
  * consécutifs (Paris) se terminant à $playedDate dont le résultat est 'win'.
  * Utilisé lors d'un upgrade giveup→win : le giveup avait mis la streak à 0 et
  * on ne peut pas retrouver sa valeur d'avant sans rejouer l'historique.
  *
- * `is_expert = 0` : les parties Expert ne comptent pas dans la streak du mode
- * normal (décision produit 2026-08-15 — stats séparées). Sans cette clause, une
- * victoire Expert prolongerait la streak Music comme une victoire normale.
+ * Le scope `is_expert` sépare les deux : par défaut on calcule la streak du mode
+ * NORMAL (une victoire Expert ne doit pas la prolonger, décision 2026-08-15).
+ * Passer `true` donne la streak Expert du mode — c'est ainsi que api/user/stats.php
+ * la calcule, `user_stats` n'agrégeant pas l'Expert.
  */
-function personadle_recompute_mode_streak(PDO $pdo, int $userId, string $mode, string $playedDate): int
-{
+function personadle_recompute_mode_streak(
+    PDO $pdo,
+    int $userId,
+    string $mode,
+    string $playedDate,
+    bool $isExpert = false
+): int {
     $stmt = $pdo->prepare(
         'SELECT played_date, result FROM game_sessions
-         WHERE user_id = ? AND mode = ? AND played_date <= ? AND is_expert = 0
+         WHERE user_id = ? AND mode = ? AND played_date <= ? AND is_expert = ?
          ORDER BY played_date DESC LIMIT 400'
     );
-    $stmt->execute([$userId, $mode, $playedDate]);
+    $stmt->execute([$userId, $mode, $playedDate, $isExpert ? 1 : 0]);
 
     $streak   = 0;
     $expected = new DateTime($playedDate, new DateTimeZone('Europe/Paris'));

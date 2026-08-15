@@ -402,6 +402,11 @@
             <div id="streakRecoveryPrompt" class="srp hidden"></div>
             <!-- Rempli dynamiquement par profile-page.js → renderModeStats() -->
             <div id="modeStatsContainer" class="mode-stats"></div>
+
+            <!-- Mode Expert — rempli depuis l'API (game_sessions), pas depuis les
+                 stats client : l'Expert n'écrit ni dans profile.stats ni dans
+                 user_stats. Reste vide tant qu'aucune partie Expert n'a été jouée. -->
+            <div id="expertStatsContainer" class="mode-stats expert-stats"></div>
           </div>
 
           <!-- Card : Badges -->
