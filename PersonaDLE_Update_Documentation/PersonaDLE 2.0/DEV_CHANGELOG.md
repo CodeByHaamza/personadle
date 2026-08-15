@@ -113,6 +113,20 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(music): lecteur rouge pour Persona 3 FES
+
+Demande de Hamza : P3FES héritait du bleu de Persona 3, alors que sa jaquette est rouge.
+
+### Détails techniques
+
+- `OPUS_THEMES.P3FES` (`musicsMode/modeMusic.js`) passe de `#3b82f6` (bleu P3) à `#d61f26`.
+  Trois rouges cohabitent désormais dans le lecteur et doivent rester distinguables :
+  P3FES `#d61f26` (chaud, sombre), P5 `#e63946` (vif, plus rose), P5X `#c0193a` (bordeaux).
+- P3, P3P et P3R gardent leur bleu — seul FES change, c'est bien sa jaquette qui est rouge,
+  pas celle de la série.
+- Aucun autre endroit à toucher : `OPUS_THEMES` n'est défini qu'ici, le lecteur du profil
+  (`profile/song-player.js`) n'a pas de thème par opus.
+
 ## 2026-08-15 — feat(expert): stats Expert, E2E, défis cloisonnés et correctifs UI
 
 Finition du Mode Music Expert : les parties Expert sont enfin lisibles quelque part, le

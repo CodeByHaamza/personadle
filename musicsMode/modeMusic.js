@@ -74,7 +74,11 @@ const OPUS_THEMES = {
   P2IS: { accent: "#ea580c", dark: "#c2410c", light: "#fb923c", glow: "rgba(234,88,12,{a})" },
   P2EP: { accent: "#8b5cf6", dark: "#7c3aed", light: "#c4b5fd", glow: "rgba(139,92,246,{a})" },
   P3: { accent: "#3b82f6", dark: "#1d4ed8", light: "#93c5fd", glow: "rgba(59,130,246,{a})" },
-  P3FES: { accent: "#3b82f6", dark: "#1d4ed8", light: "#93c5fd", glow: "rgba(59,130,246,{a})" },
+  // P3FES — rouge, comme la jaquette de FES, et non le bleu du P3 d'origine.
+  // Volontairement plus chaud et plus sombre que le rouge P5 (#e63946) et distinct
+  // du bordeaux P5X (#c0193a) : trois rouges cohabitent, ils doivent rester
+  // reconnaissables l'un de l'autre.
+  P3FES: { accent: "#d61f26", dark: "#8f0f18", light: "#ff6b60", glow: "rgba(214,31,38,{a})" },
   // P3P — Makoto (bleu) + Kotone (rose) : bordure et bouton indigo, barre dégradée
   // bleu→rose. `duality` active en plus la bordure tournante mi-bleu mi-rose autour
   // du player (voir .p3p-duality dans music.css).
