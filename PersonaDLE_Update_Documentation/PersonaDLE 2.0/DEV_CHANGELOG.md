@@ -113,6 +113,42 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): règle des réponses acceptées en Personae Expert
+
+Décision produit de Hamza, encodée plutôt que laissée en note de roadmap — c'est le genre de
+règle qui dérive silencieusement si elle n'est écrite que en prose.
+
+### La règle
+
+En mode Personae, le joueur devine **le manieur**, pas le nom de la persona
+(`personaeMode/database/persona.js`, la liste d'autocomplétion, contient des noms de
+personnages). Or une fiche de lore décrit une figure mythologique, pas une entrée précise du
+dataset, et la même figure est portée par plusieurs entrées :
+
+- variantes cosmétiques d'un même personnage (`Orpheus Picaro`, `Thanatos Picaro`…), qui
+  n'ont volontairement pas de fiche à elles ;
+- homonymes réellement distincts — `Hermes` de Junpei Iori (P3) et celui de Jun Kurosu
+  (P2IS) sont deux entrées séparées, deux dessins, mais un seul dieu grec (CLAUDE.md §4).
+
+Une fiche accepte donc **tous les manieurs de toutes ces entrées**. Refuser l'un d'eux serait
+perçu comme un bug : rien dans le texte affiché ne permet de les départager.
+
+### Détails techniques
+
+- `personaeMode/database/expert_lore/wielders.js` — `expertWielders(loreKey, personae)` et
+  `expertLoreEntries()`. La famille est résolue par nom de base (`« Orpheus ( Male ) » →
+  « Orpheus »`) plus les variantes suffixées. Le test de préfixe **exige un espace**
+  (`base + " "`) pour ne jamais ramasser une persona simplement homographe au début.
+- Vérifié sur les 39 fiches : 6 ont plusieurs manieurs ou variantes, **aucun faux positif**
+  (`Hermes` ne ramasse pas `Trismegistus`). Résultats : Orphée → Makoto/Aigis/Kotone (5
+  entrées), Hermès → Junpei/Jun, Prométhée → Futaba/Baofu, Thanatos → Makoto/Kotone/Elizabeth,
+  Messiah → Makoto/Kotone, Athéna → Aigis.
+- 4 tests dans `tests/expertContent.test.js`, dont un garde-fou « chaque fiche a au moins un
+  manieur acceptable » : une fiche non résoluble serait injouable.
+
+Le mode Personae Expert lui-même n'est pas encore écrit — cette règle est prête et verrouillée
+pour quand il le sera.
+
 ## 2026-08-15 — feat(music): lecteur agrandi
 
 Demande de Hamza : le lecteur audio était trop petit.

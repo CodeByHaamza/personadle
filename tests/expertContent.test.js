@@ -5,6 +5,7 @@ import { songs } from "../musicsMode/database/songs.js";
 import { personaeCharacters } from "../personaeMode/database/personaeCharacters.js";
 import dailyPools from "../api/data/daily_pools.json";
 import { getDailyTarget } from "../js/gameCore.js";
+import { expertWielders, expertLoreEntries } from "../personaeMode/database/expert_lore/wielders.js";
 import loreEn from "../personaeMode/database/expert_lore/en.json";
 import loreFr from "../personaeMode/database/expert_lore/fr.json";
 
@@ -234,6 +235,45 @@ describe("expert_lore", () => {
         expect(containsWord(masque, terme), `${nom} (${lang}) — terme "${terme}"`).toBe(false);
       }
     }
+  });
+
+  it("chaque fiche a au moins un manieur acceptable", () => {
+    // Sans manieur résoluble, la fiche serait injouable : le joueur devine un
+    // personnage, pas un nom de persona.
+    for (const [nom] of entries(loadLore("en"))) {
+      expect(expertWielders(nom, personaeCharacters), nom).not.toHaveLength(0);
+    }
+  });
+
+  it("une fiche accepte les manieurs de toutes les variantes de la persona", () => {
+    // Décision produit 2026-08-15 : rien dans le texte ne distingue « Orpheus » de
+    // « Orpheus Picaro », donc refuser Kotone parce que la fiche est keyée sur
+    // l'entrée masculine serait perçu comme un bug.
+    expect(expertWielders("Orpheus ( Male )", personaeCharacters).sort()).toEqual(
+      ["Aigis", "Kotone Shiomi", "Makoto Yuki"],
+    );
+    expect(expertLoreEntries("Orpheus ( Male )", personaeCharacters)).toHaveLength(5);
+  });
+
+  it("une fiche accepte les manieurs des homonymes de jeux différents", () => {
+    // « Hermes » est porté par Junpei Iori (P3) et Jun Kurosu (P2IS) — deux entrées
+    // distinctes (dessins différents), mais une seule et même figure mythologique,
+    // donc une seule fiche et deux réponses justes.
+    expect(expertWielders("Hermes", personaeCharacters).sort()).toEqual([
+      "Jun Kurosu",
+      "Junpei Iori",
+    ]);
+    expect(expertWielders("Prometheus", personaeCharacters).sort()).toEqual([
+      "Baofu",
+      "Futaba Sakura",
+    ]);
+  });
+
+  it("ne ramasse pas une persona simplement homographe au début du nom", () => {
+    // Le préfixe exige un espace : « Hermes » ne doit pas attraper « Trismegistus »
+    // ni quoi que ce soit qui commence par les mêmes lettres.
+    const noms = expertLoreEntries("Hermes", personaeCharacters).map((p) => p.persona);
+    expect(noms.every((n) => n === "Hermes")).toBe(true);
   });
 
   it.each(LANGS)("%s : chaque fiche se nomme, pour que la révélation montre quelque chose", (lang) => {

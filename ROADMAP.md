@@ -80,6 +80,14 @@
       quotidien (`scripts/export-daily-pools.js`, `npm run pools:build`/`pools:check`) pour que
       la cible du jour en Expert Personae ne pioche que parmi les persos déjà couverts par un
       paquet livré
+    - **Réponses acceptées** (décision 2026-08-15) : une fiche décrit une figure mythologique,
+      pas une entrée précise du dataset — elle accepte donc **tous les manieurs de toutes les
+      entrées de la même figure**. La fiche d'Orphée vaut pour Makoto, Kotone et Aigis (5
+      entrées avec les variantes Picaro/Telos) ; celle d'Hermès pour Junpei Iori **et** Jun
+      Kurosu, dont les personas sont deux entrées distinctes (dessins différents) du même dieu
+      grec. Refuser l'un des deux serait perçu comme un bug : rien dans le texte ne permet de
+      les départager. Règle déjà implémentée et testée —
+      `personaeMode/database/expert_lore/wielders.js`, 4 tests dans `tests/expertContent.test.js`.
   - Musique : paroles révélées progressivement à chaque essai raté, cumulatives (les précédentes
     restent affichées, pas juste la dernière) — façon lecteur de paroles synchronisées type
     Spotify : 1 phrase pour commencer, une de plus par essai raté. Paroles à sourcer en ligne
@@ -400,7 +408,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 6 langues,
-> **670 tests JS · 196 PHPUnit · 63 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **674 tests JS · 196 PHPUnit · 63 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -456,7 +464,7 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 670 Vitest · 196 PHPUnit · 63 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q1  | Tests : 674 Vitest · 196 PHPUnit · 63 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
 | Q2  | i18n EN/FR/ES/DE/IT/PT (1004 clés)             | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
