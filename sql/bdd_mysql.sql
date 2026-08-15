@@ -218,6 +218,7 @@ CREATE TABLE game_sessions (
     id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
     user_id         BIGINT UNSIGNED  NOT NULL,
     mode            VARCHAR(30)      NOT NULL,
+    is_expert       TINYINT(1)       NOT NULL DEFAULT 0,  -- 1 = partie en Mode Expert (migration 031)
     played_date     DATE             NOT NULL,   -- date Paris (Europe/Paris)
     target_name     VARCHAR(200)     NOT NULL,
     result          VARCHAR(10)      NOT NULL,   -- 'win' | 'giveup'
@@ -227,15 +228,18 @@ CREATE TABLE game_sessions (
     created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    -- Anti-doublon : une seule session par (user, mode, jour Paris).
-    -- Cf. migration 014 + sessions.php (interception PDOException 23000).
-    UNIQUE KEY uq_session_per_day (user_id, mode, played_date),
+    -- Anti-doublon : une seule session par (user, mode, jour Paris, normal|expert).
+    -- Cf. migrations 014 et 031 + sessions.php (interception PDOException 23000).
+    -- is_expert fait partie de la clé : une partie normale et une partie Expert du
+    -- même mode le même jour sont deux parties distinctes (migration 031).
+    UNIQUE KEY uq_session_per_day (user_id, mode, played_date, is_expert),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE INDEX idx_game_sessions_user_mode ON game_sessions(user_id, mode);
 CREATE INDEX idx_game_sessions_date      ON game_sessions(played_date);
 CREATE INDEX idx_game_sessions_target    ON game_sessions(mode, played_date, target_name);
+CREATE INDEX idx_game_sessions_user_mode_expert ON game_sessions(user_id, mode, is_expert);
 
 
 -- =============================================================================

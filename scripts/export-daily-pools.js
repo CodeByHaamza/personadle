@@ -38,6 +38,9 @@ const { aoaCharacters } = await import(
 const { personaeCharacters } = await import(
   join(ROOT, "personaeMode/database/personaeCharacters.js").replace(/\\/g, "/")
 );
+const { expertLyrics } = await import(
+  join(ROOT, "musicsMode/database/expert_lyrics.js").replace(/\\/g, "/")
+);
 
 const opusByName = Object.fromEntries(aoaCharacters.map((c) => [c.nom, c.opus]));
 
@@ -46,6 +49,12 @@ const pools = {
   emoji: { pool: characters.filter((c) => c.emoji).map((c) => c.nom) },
   silhouette: { pool: silhouetteCharacters.map((c) => c.nom) },
   music: { pool: songs.map((s) => s.titre) },
+  // Mode Music Expert : sous-ensemble strict de `music` — seules les chansons ayant
+  // des paroles dans expert_lyrics.js (les instrumentales n'ont rien à révéler).
+  // Pool ET clé de hash distincts de `music` : le tirage doit être indépendant,
+  // sinon le joueur fait le mode normal (où il entend l'audio), trouve la réponse,
+  // et l'Expert du jour devient gratuit. Ordre = celui de songs.js, comme les autres.
+  music_expert: { pool: songs.filter((s) => expertLyrics[s.titre]).map((s) => s.titre) },
   alloutattack: {
     pool: aoaAutocompletePool,
     opusByName,
