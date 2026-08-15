@@ -882,6 +882,75 @@ function initCustomPlayer() {
     const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     audioPlayer.currentTime = pct * audioPlayer.duration;
   });
+
+  initVolumeControl();
+}
+
+/**
+ * Volume slider + mute toggle.
+ *
+ * Le niveau est persisté (`musicVolume`) : le joueur revient chaque jour, remettre
+ * le son à fond à chaque visite serait une petite agression quotidienne.
+ * Le mute ne remet pas le volume à 0 — il mémorise le niveau et le restaure, sinon
+ * couper puis rétablir ferait perdre le réglage.
+ *
+ * @param {HTMLAudioElement} [audio] élément audio ; par défaut celui de la page
+ */
+export function initVolumeControl(audio = audioPlayer) {
+  const track = document.getElementById("p5Volume");
+  const fill = document.getElementById("p5VolumeFill");
+  const muteBtn = document.getElementById("p5MuteBtn");
+  const muteIcon = document.getElementById("p5MuteIcon");
+
+  if (!track || !fill || !audio) return;
+
+  const saved = parseFloat(localStorage.getItem("musicVolume"));
+  let volume = isFinite(saved) && saved >= 0 && saved <= 1 ? saved : 1;
+  let lastAudible = volume > 0 ? volume : 1;
+
+  const render = () => {
+    audio.volume = volume;
+    fill.style.width = `${volume * 100}%`;
+    track.setAttribute("aria-valuenow", Math.round(volume * 100));
+    if (muteIcon) muteIcon.textContent = volume === 0 ? "🔇" : volume < 0.5 ? "🔉" : "🔊";
+  };
+
+  const setVolume = (v) => {
+    volume = Math.max(0, Math.min(1, v));
+    if (volume > 0) lastAudible = volume;
+    localStorage.setItem("musicVolume", String(volume));
+    render();
+  };
+
+  // Glisser-déposer : pointer events couvrent souris ET tactile d'un seul jeu de
+  // handlers, et setPointerCapture garde le suivi si le doigt sort de la piste.
+  const setFromEvent = (e) => {
+    const rect = track.getBoundingClientRect();
+    setVolume((e.clientX - rect.left) / rect.width);
+  };
+
+  let dragging = false;
+  track.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    track.setPointerCapture?.(e.pointerId);
+    setFromEvent(e);
+  });
+  track.addEventListener("pointermove", (e) => dragging && setFromEvent(e));
+  track.addEventListener("pointerup", (e) => {
+    dragging = false;
+    track.releasePointerCapture?.(e.pointerId);
+  });
+
+  track.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") setVolume(volume + 0.05);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown") setVolume(volume - 0.05);
+    else return;
+    e.preventDefault();
+  });
+
+  muteBtn?.addEventListener("click", () => setVolume(volume === 0 ? lastAudible : 0));
+
+  render();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

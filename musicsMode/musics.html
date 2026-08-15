@@ -434,6 +434,25 @@
               <span id="p5Duration">--:--</span>
             </div>
           </div>
+
+          <!-- Volume — mêmes classes que la timeline, donc même thème couleur -->
+          <div class="p5-volume">
+            <button class="p5-mute-btn" id="p5MuteBtn" aria-label="Mute / Unmute">
+              <span id="p5MuteIcon">🔊</span>
+            </button>
+            <div
+              class="p5-progress p5-volume-track"
+              id="p5Volume"
+              role="slider"
+              tabindex="0"
+              aria-label="Volume"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="100"
+            >
+              <div class="p5-progress-fill" id="p5VolumeFill"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

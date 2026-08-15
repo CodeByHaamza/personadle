@@ -113,6 +113,40 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(music): contrôle de volume dans le lecteur
+
+Demande de Hamza : pouvoir régler le son du lecteur, avec un habillage cohérent avec le reste
+du player (couleur par opus).
+
+### Détails techniques
+
+- `musicsMode/musics.html` — bouton mute + piste de volume ajoutés dans `.p5-player-controls`.
+  La piste réutilise **les classes existantes** `.p5-progress` / `.p5-progress-fill` : le
+  dégradé vient des mêmes variables `--player-*` que la timeline, donc `setPlayerTheme()`
+  colore le volume en même temps que le reste, sans une seule règle de thème en plus. Un
+  composant séparé aurait signifié dupliquer les 20 propriétés custom par opus.
+- `musicsMode/modeMusic.js` — `initVolumeControl(audio = audioPlayer)`, appelée par
+  `initCustomPlayer()`. Le paramètre existe pour les tests : jsdom n'exécute pas
+  `DOMContentLoaded` à l'import, donc la référence interne au `<audio>` n'est jamais assignée.
+- **Le niveau est persisté** (`musicVolume`) — le joueur revient chaque jour, remettre le son
+  à fond à chaque visite serait une agression quotidienne. Valeur relue avec garde-fou :
+  `NaN`/hors [0,1] retombe sur 1 plutôt que de couper le son sur un localStorage corrompu.
+- **Le mute mémorise le niveau au lieu de l'écraser** : couper puis rétablir rend le réglage
+  d'avant, et non 100 %. Muter alors qu'on est déjà à 0 remonte à fond (sinon le bouton
+  paraîtrait cassé).
+- Pointer events plutôt que mouse + touch : un seul jeu de handlers couvre souris et tactile,
+  et `setPointerCapture` garde le suivi quand le doigt sort de la piste. Appels optionnels
+  (`?.`) — jsdom ne les implémente pas.
+- Accessibilité : `role="slider"` + `aria-valuenow` tenu à jour, flèches clavier par pas de
+  5 %, curseur du volume visible en permanence (à 0 %, une piste sans poignée paraît morte).
+- Responsive : sous 480px le volume passe sous la timeline en pleine largeur
+  (`.p5-player-controls { flex-wrap: wrap }`) — la ligne à trois éléments devenait illisible.
+- `tests/musicVolume.test.js` — 11 tests : persistance, valeurs corrompues, bornage hors
+  piste, aller-retour du mute, icône suivant le niveau, clavier, absence du lecteur dans le DOM.
+
+Pas d'entrée joueur dans `PersonaDLE_Update.html` pour l'instant — à ajouter au prochain lot
+visible, le contrôle de volume étant typiquement le genre de détail que le joueur remarque.
+
 ## 2026-08-15 — feat(expert): contenu des modes Expert Music & Personae (données uniquement)
 
 Premier lot de contenu pour le Mode Expert (v2.1) : les paroles des 73 chansons à texte, et les
