@@ -113,6 +113,26 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(music): lecteur agrandi
+
+Demande de Hamza : le lecteur audio était trop petit.
+
+### Détails techniques
+
+- `.audio-wrapper` passe de `width: fit-content` + `max-width: 480px` à
+  `width: min(560px, 92vw)`. Largeur fixée plutôt que dépendante du contenu : le lecteur
+  ne rétrécit plus selon la longueur du titre affiché, et il utilise **la même expression
+  que le panneau de paroles Expert** — basculer d'un mode à l'autre ne fait donc plus
+  sauter la mise en page.
+- Le plafond tablette de 400px (`@media max-width: 768px`) datait du lecteur étroit et
+  laissait la moitié de la largeur inutilisée : remplacé par `min(520px, 92vw)`.
+- Éléments internes proportionnés pour que le lecteur élargi ne paraisse pas vide : bouton
+  play 48 → 56px, barre de progression 6 → 8px, barres sonores 22 → 26px. La piste de
+  volume reste volontairement plus fine (5px) — c'est un contrôle secondaire, pas la
+  timeline.
+- Mobile (< 480px) inchangé : l'override `width: 94%` s'applique toujours. Mesuré à 343px
+  de large dans une fenêtre de 375, sans débordement.
+
 ## 2026-08-15 — feat(music): lecteur rouge pour Persona 3 FES
 
 Demande de Hamza : P3FES héritait du bleu de Persona 3, alors que sa jaquette est rouge.

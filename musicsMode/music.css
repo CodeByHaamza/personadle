@@ -38,10 +38,12 @@ audio {
   background: linear-gradient(150deg, #1a0505 0%, #0d0d0d 60%, #150a0a 100%);
   border: 2px solid var(--player-accent);
   border-radius: 6px 22px 6px 22px; /* asymétrique — style P5 */
-  padding: 20px 24px 16px;
-  width: fit-content;
-  min-width: 300px;
-  max-width: 480px;
+  padding: 24px 28px 20px;
+  /* Largeur fixée plutôt que fit-content : le lecteur ne rétrécit plus selon la
+     longueur du titre affiché, et il s'aligne sur le panneau de paroles Expert
+     (même expression), pour que basculer d'un mode à l'autre ne fasse pas sauter
+     la mise en page. */
+  width: min(560px, 92vw);
   margin: 30px auto;
   position: relative;
   overflow: hidden;
@@ -173,7 +175,7 @@ audio {
   display: flex;
   align-items: flex-end;
   gap: 3px;
-  height: 22px;
+  height: 26px;
 }
 
 .p5-sound-bars span {
@@ -224,13 +226,13 @@ audio {
 /* ── Bouton Play / Pause ── */
 .p5-play-btn {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--player-accent);
   border: 2px solid rgba(255, 255, 255, 0.85);
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -285,7 +287,7 @@ audio {
 
 /* Barre de progression — piste cliquable */
 .p5-progress {
-  height: 6px;
+  height: 8px;
   background: rgba(255, 255, 255, 0.12);
   border-radius: 3px;
   cursor: pointer;
@@ -365,7 +367,7 @@ audio {
 
 .p5-volume-track {
   flex: 1;
-  height: 4px;
+  height: 5px; /* volontairement plus fine que la timeline — contrôle secondaire */
 }
 
 /* Curseur visible en permanence : sans lui, un volume à 0 n'a aucune poignée
@@ -441,9 +443,11 @@ body.music-mode.darkmode .victory-box {
 
 @media (max-width: 768px) {
   .audio-wrapper {
-    width: 90%;
-    max-width: 400px;
-    padding: 16px 18px 14px;
+    /* Le plafond à 400px datait du lecteur étroit : sur une tablette il laissait
+       la moitié de la largeur inutilisée. Le lecteur suit désormais la même
+       expression que sur desktop, borné par la fenêtre. */
+    width: min(520px, 92vw);
+    padding: 18px 20px 15px;
     margin: 20px auto;
     min-width: unset;
   }
