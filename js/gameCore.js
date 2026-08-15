@@ -90,6 +90,42 @@ export function normalize(str) {
     .toLowerCase();
 }
 
+/**
+ * Masque dans `text` toute occurrence des termes donnés — utilisé par les modes
+ * Expert, où l'indice textuel cite souvent la réponse : les paroles d'une chanson
+ * répètent son titre (« Burn my dread »), la fiche d'une persona commence par son
+ * nom (« Hades, also known as… »).
+ *
+ * Le masquage est fait à l'affichage, jamais dans les données : révéler en fin de
+ * partie (victoire ou abandon) consiste simplement à afficher le texte brut, sans
+ * seconde copie du texte à maintenir en parallèle.
+ *
+ * Tolère la casse, les espaces multiples et la ponctuation interne du terme
+ * (« Dance! » masque aussi « dance »), et ne coupe jamais au milieu d'un mot
+ * (« Mask » ne masque pas « Masked »). Seuls les termes d'une seule lettre sont
+ * ignorés : les termes sont des noms propres fournis explicitement, et la frontière
+ * de mot suffit à éviter les faux positifs — « Io » (persona de Yukari) doit pouvoir
+ * être masqué, sinon sa fiche donne la réponse dès la première ligne.
+ *
+ * @param {string[]} terms  termes à masquer (nom, alias, titre…)
+ * @param {string} text     texte brut
+ * @param {string} [token]  remplacement affiché
+ * @returns {string} texte masqué
+ */
+export function maskTerms(terms, text, token = "[?]") {
+  let out = text;
+  for (const term of terms) {
+    const t = (term ?? "").trim();
+    if (t.length < 2) continue;
+    const pattern = t
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // échappe les métacaractères regex
+      .replace(/\\?[!?.,]/g, "[!?.,]?") // ponctuation interne optionnelle
+      .replace(/\s+/g, "\\s+"); // espaces variables
+    out = out.replace(new RegExp(`(^|[^\\w'])(${pattern})(?=$|[^\\w'])`, "gi"), `$1${token}`);
+  }
+  return out;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MODES — source unique de vérité pour le vocabulaire des modes de jeu
 // ─────────────────────────────────────────────────────────────────────────────

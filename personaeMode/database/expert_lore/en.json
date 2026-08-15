@@ -1,0 +1,281 @@
+{
+  "_comment": "Expert Personae lore — EN (source of truth, cf. CLAUDE.md §5). One entry per `persona` key of personaeCharacters.js. `mask` lists the terms hidden behind [?] while the round is running: the persona's own name and its aliases, never the names of OTHER personae (those are legitimate clues). Masking happens at render time via maskTerms() (js/gameCore.js) — on win or give-up the raw text is shown as-is. A persona absent from this file is out of the Expert Personae daily pool.",
+  "Vulcanus": {
+    "text": "Vulcanus, also called Vulcan or Mulciber, is the Roman god of fire, volcanoes and the forge, patron of smiths, artists and inventors — the Latin counterpart of the Greek Hephaestus. Son of Jupiter and Juno, he is the craftsman of the gods, shaping their weapons in a workshop buried beneath a volcano. He is married to the goddess of love herself, who repeatedly betrays him with his own brother, the god of war. Lame and soot-stained among a pantheon of beautiful immortals, he is the one deity who earns his place through work rather than birth.",
+    "mask": [
+      "Vulcanus",
+      "Vulcan",
+      "Volcanus",
+      "Mulciber"
+    ]
+  },
+  "Apollo": {
+    "text": "Apollo, also known as Apollon, is one of the twelve Olympians, first the god of music and poetry, later of the sun itself, eclipsing the older Titan who drove the solar chariot. Son of Zeus and Leto, twin brother of the huntress goddess. As a newborn he already wielded a bow, killing the serpent Python sent to hunt his mother. He traded the caduceus for the first lyre and became unmatched among gods and mortals alike — those who challenged his music were punished without mercy. God of archery, prophecy and medicine, he leads the Muses.",
+    "mask": [
+      "Apollo",
+      "Apollon"
+    ]
+  },
+  "Maia": {
+    "text": "In Greek myth, Maia is the eldest, shyest and most beautiful of the Pleiades, the seven sisters set in the sky as stars. Daughter of the Titan Atlas, who carries the heavens, and the sea nymph Pleione. She lived apart from the other gods, in a cave on a mountain in Arcadia, and is honoured as the protector of nursing mothers. Her beauty drew Zeus to her in secret, and from that union she bore the messenger of the gods — a son who stole cattle and invented the lyre on the day of his birth.",
+    "mask": [
+      "Maia"
+    ]
+  },
+  "Artemis": {
+    "text": "Artemis is the virgin goddess of the hunt, of childbirth and of the moon, one of the twelve Olympians, daughter of Zeus and Leto and twin sister of the god of arts. She roams the forests and hills with her silver bow, the deer and the cypress sacred to her, followed by nymphs sworn to maidenhood. Untouched by the goddess of love's schemes, uninterested in men, she is proud and merciless toward anyone who breaks an oath or claims to hunt better than she does. In later ages she absorbed the moon itself, eclipsing its earlier personification.",
+    "mask": [
+      "Artemis"
+    ]
+  },
+  "Eros": {
+    "text": "Eros is the mischievous Greek god of love and desire, counterpart of the Roman Cupid. Sources disagree on his origin: son of the goddess of love by Zeus, Ares or Hermes in some accounts, in others a primordial deity born near the beginning of everything, the creative urge driving all new life in the cosmos. He is pictured as a winged youth or child carrying a bow, sometimes blindfolded — and, for a god, a famously poor shot. He appears in countless myths without ever being named, because wherever there is love, he is already present.",
+    "mask": [
+      "Eros"
+    ]
+  },
+  "Venus": {
+    "text": "Venus is the Roman goddess of love, beauty, desire, fertility and victory, born of sea foam after Saturn cast Caelus' severed flesh into the water. Married to the lame smith of the gods, she is flirtatious, crafty and openly unfaithful, taking gods and mortals alike as lovers — the god of war above all. She holds an absolute faith in love and a deep hatred for anyone who treats it as beneath them. As mother of Aeneas she is the ancestor of Rome itself. Her symbols: the scallop shell, doves, dolphins, pearls and mirrors.",
+    "mask": [
+      "Venus"
+    ]
+  },
+  "Hermes": {
+    "text": "Hermes is the youngest of the twelve Olympians and messenger of the gods, son of Zeus and a mountain nymph. Patron of travellers, commerce, athletics and poets — and, just as readily, of thieves and liars. As an infant he stole Apollo's immortal cattle, then invented the first lyre and offered it as compensation, receiving the winged herald's staff entwined with two serpents in return. Wearing a winged hat and winged sandals, he guides the dead down to the underworld, the one god free to enter and leave that realm as he pleases.",
+    "mask": [
+      "Hermes",
+      "Mercurius",
+      "Mercury"
+    ]
+  },
+  "Chronos": {
+    "text": "Chronos, sometimes spelled Khronos, is the primordial personification of time and eternity, born of Chaos and lord of the Zodiac — his name is simply the Greek word for time. The oldest sources give him no body at all, only a serpent with three heads: a man, a bull and a lion. Later art turned him into a bearded old man, the ancestor of Father Time. Antiquity often confused him with the Titan king who castrated his own father with a sickle and devoured his children to keep his throne — a different god, and a confusion that has never been undone.",
+    "mask": [
+      "Chronos",
+      "Khronos",
+      "Chronus",
+      "Cronus",
+      "Cronos",
+      "Kronos",
+      "Saturnus",
+      "Saturn"
+    ]
+  },
+  "Rhadamanthus": {
+    "text": "Rhadamanthus is a son of Zeus and Europa, and therefore a demigod; his name evokes stern and inflexible judgement. In life he was a wise king of Crete, famed for laws so just that they were said to have been dictated by his father. After death he was not sent to be judged but made a judge himself: with Aeacus and Minos he weighs the souls arriving in the underworld and fixes their punishment, taking those who come from the eastern lands. He rules over Elysium, the resting place granted to the righteous.",
+    "mask": [
+      "Rhadamanthus",
+      "Rhadamanthys"
+    ]
+  },
+  "Hades": {
+    "text": "Hades is king and supreme ruler of the Greek underworld, called the Unseen One, counterpart of the Roman Pluto. Born of Cronus and Rhea, he fought beside his brothers against the Titans; when the world was divided, Zeus took the sky and Poseidon the sea, and he claimed the sunless realm inside the earth. His duty keeps him from leaving it, so he is not counted among the twelve Olympians despite his rank. He is not death itself — that role belongs to another. He carried off Persephone and bound her to him with a pomegranate seed.",
+    "mask": [
+      "Hades",
+      "Haides",
+      "Pluto",
+      "Plouton"
+    ]
+  },
+  "Helios": {
+    "text": "Helios is the Greek Titan of the sun, son of Hyperion and Theia. Each dawn he rises from the eastern ocean and drives a chariot drawn by four fire-breathing horses across the whole width of the sky, sinking into the western sea at dusk before sailing back east by night in a golden cup. Seeing everything from above, he is the witness the other gods call on when something has been hidden from them. His son Phaethon begged to drive the chariot once, lost control of it, and had to be struck down by Zeus before the earth burned.",
+    "mask": [
+      "Helios"
+    ]
+  },
+  "Hyperion": {
+    "text": "Hyperion is one of the twelve original Titans, children of Uranus and Gaia, and the father of the sun, the moon and the dawn by his sister Theia. His name means 'the one who watches from above'. Greek literature keeps him carefully distinct from his own son: the son is the physical sun, the disc crossing the sky each day, while he is the older, wider principle — light itself, and the watchfulness and wisdom that come with seeing everything. He belongs to the generation that ruled before the Olympians and was cast down with them.",
+    "mask": [
+      "Hyperion"
+    ]
+  },
+  "Callisto": {
+    "text": "Callisto is a nymph, daughter of King Lycaon, who followed the virgin goddess of the hunt and swore the same vow of chastity. Zeus took the goddess' own shape to approach her, then forced himself on her; months later the pregnancy was discovered while the nymphs bathed together, and she was driven from the band in fury. She bore a son, Arcas, and was turned into a bear — by Hera's jealousy in some tellings, by her former mistress in others. Nearly killed by her own son while in that shape, she was set among the stars as the Great Bear.",
+    "mask": [
+      "Callisto",
+      "Kallisto"
+    ]
+  },
+  "Astria": {
+    "text": "Asteria is the Titan goddess of the stars and of astrology, of oracles and prophetic dreams — hence the planetarium projectors she carries. Like the nymph Callisto she drew the lust of Zeus, and like her she fled: she turned herself into a quail, he pursued her as an eagle. Cornered above the sea, she threw herself into the water and became the island of Delos — the one scrap of land that later dared shelter Leto, pregnant and hunted by Hera, so that the twin gods of sun and moon could be born there.",
+    "mask": [
+      "Astria",
+      "Asteria"
+    ]
+  },
+  "Nyarlathotep": {
+    "text": "Nyarlathotep is an Outer God of the Cthulhu Mythos created by H. P. Lovecraft, known as the Crawling Chaos, the Faceless God, the Haunter of the Dark. Sprung directly from Azathoth, he is unlike the rest of his kind: the other Outer Gods sit outside the physical universe and the Great Old Ones lie dreaming, while he walks reality itself as their heart, soul and messenger, wearing a thousand masks. He sows discord and torments mortals not as a goal but to pass the time — which is why he is called the most human of his kind.",
+    "mask": [
+      "Nyarlathotep",
+      "Crawling Chaos",
+      "God of a Thousand Forms",
+      "Dweller in Darkness",
+      "Faceless God",
+      "Floating Horror",
+      "Haunter of the Dark"
+    ]
+  },
+  "Odysseus": {
+    "text": "Odysseus, also known as Ulysses, is the legendary king of Ithaca, descended from the line of Hermes, husband of Penelope and father of Telemachus. A general in the Trojan War and the man who ended it: the wooden horse was his idea. Known by the epithet 'the Cunning', he wins by guile where others win by strength. His return home took ten more years than the war itself — cyclops, sorceress, sirens, shipwreck — while suitors ate his estate and his wife held them off by unpicking her weaving each night. He is the hero of Homer's second epic and a key figure in the first.",
+    "mask": [
+      "Odysseus",
+      "Ulysses",
+      "Odyssey"
+    ]
+  },
+  "Prometheus": {
+    "text": "Prometheus is the Titan who sided with Zeus against his own kind in the war for the world; his name means 'forethought'. When the task of populating the earth was divided, his brother Epimetheus spent every gift on the beasts and left nothing for humanity — so he stole fire from Olympus and gave it to mankind. Worse still, he taught mortals how to cheat the gods of their sacrifices. Chained to a rock for eternity, an eagle ate his liver each day and it grew back each night, until Heracles freed him during his Twelve Labours.",
+    "mask": [
+      "Prometheus"
+    ]
+  },
+  "Orpheus ( Male )": {
+    "text": "Orpheus was the son of the Thracian king Oeagrus and the muse Calliope — some versions make Apollo his father instead. Given a small golden lyre and taught to sing by his mother, he played so well that rocks and animals were compelled to dance; they called him Master of Strings and Father of Songs. When his wife Eurydice died he walked into the underworld and softened Hades himself with music, winning her back on one condition: not to look behind him until both had reached the surface. He looked. Torn apart later by Maenads, his singing head floated on and his lyre was set among the stars.",
+    "mask": [
+      "Orpheus"
+    ]
+  },
+  "Thanatos": {
+    "text": "Thanatos is the Greek personification of death itself, a son of Nyx and Erebus and the elder twin of the god of sleep. He is the harbinger of the peaceful end, the eternal sleep, while more violent gods deal out harsher deaths — which is partly why he plays so small a role in the myths: the lord of the underworld overshadowed him almost entirely. Indiscriminate and merciless, detested by all and hating them back, the poets drew him as a bearded, sword-bearing spectre whose coming was marked by pain. Later ages softened him into a winged boy. Rome called him Mors.",
+    "mask": [
+      "Thanatos",
+      "Mors"
+    ]
+  },
+  "Messiah": {
+    "text": "Messiah, in Hebrew, or Christ in Greek: the anointed one, the saviour whose coming is awaited near the end of days. The term runs through the Abrahamic religions above all, Judaism and Christianity, but who exactly it designates has never been agreed upon. Western tradition overwhelmingly answers Jesus of Nazareth. Elsewhere, and in other ages, other figures have carried the same hope of deliverance for mankind: the Buddha, Krishna, and the Maitreya still to come. The word names a function rather than a person — the one who saves, whoever he turns out to be.",
+    "mask": [
+      "Messiah",
+      "Christ"
+    ]
+  },
+  "Io": {
+    "text": "Io was a mortal priestess of Hera at Argos. Zeus desired her and, to hide the affair from his wife, buried the place in a bank of cloud — a cloud so suspicious that Hera came down to look, and found her husband standing beside a beautiful white heifer. She knew perfectly well what the heifer was, and demanded it as a gift; Zeus could hardly refuse. Set under the guard of hundred-eyed Argus, the heifer went free only when Hermes lulled the giant to sleep. She fled at last to Egypt, where she came to be worshipped as Isis.",
+    "mask": [
+      "Io"
+    ]
+  },
+  "Isis": {
+    "text": "Isis, called Aset in Egypt, was the mother goddess whose cult spread across the whole Greco-Roman world: ideal wife and mother, mistress of magic, friend of slaves and sinners as readily as of rulers. Daughter of Geb the earth and Nut the sky, she once had a serpent poison Ra and withheld the cure until the sun god surrendered his true name to her. When her brother and husband Osiris was murdered and scattered in pieces across the land, it was her magic that gathered him and gave him back his life, long enough to conceive Horus.",
+    "mask": [
+      "Isis",
+      "Aset",
+      "Eset"
+    ]
+  },
+  "Trismegistus": {
+    "text": "Trismegistus, 'thrice-greatest', is the syncretic figure born from fusing the Greek messenger god with Egyptian Thoth, the two worshipped as one in the city the Greeks renamed Hermopolis. Part god, part human magician, he is named as the founder of alchemy, astrology and magic — the three arts that earn him his epithet. Antiquity credited him with tens of thousands of writings of supposedly immense age; Clement of Alexandria counted forty-two sacred books used to train Egyptian priests. Later occultists called him the teacher of Moses and the builder of the pyramids of Giza.",
+    "mask": [
+      "Trismegistus",
+      "Trismegistos"
+    ]
+  },
+  "Polydeuces": {
+    "text": "Polydeuces, Pollux to the Romans, was the younger of the twin brothers known as the Dioscuri. He and his brother shared a mother, Leda, but not a father: his was Zeus, his twin's a mortal king named Tyndareus — so one of them was born immortal and the other was not. When the mortal twin was killed, he refused the separation and begged Zeus to let him give away half of his own immortality rather than live on alone. Zeus agreed, and set the pair in the sky as the constellation Gemini, one bright star each.",
+    "mask": [
+      "Polydeuces",
+      "Pollux"
+    ]
+  },
+  "Caesar": {
+    "text": "Caesar was not originally a title but a family name, the cognomen of Gaius Julius, the last dictator of the Roman Republic. A brilliant general and populist statesman, he made enemies of Rome's elite with authoritarian reforms and was stabbed to death by members of his own Senate. His adopted son Octavian won the civil wars that followed, founded the Empire and took the name as a title; every emperor after him carried it. Both men were declared gods by the Senate. The word outlived Rome itself, surviving as Kaiser and as Tsar.",
+    "mask": [
+      "Caesar",
+      "Kaiser",
+      "Tsar",
+      "Czar"
+    ]
+  },
+  "Penthesilea": {
+    "text": "Penthesilea was a queen of the Amazons, daughter of Ares and of Otrera who founded the tribe. She came to the Trojan War in its tenth and final year, leading her warriors, in penance for having accidentally killed her own sister Hippolyta. She fought Achilles and fell to him — and when he lifted her helmet he fell in love with the dead woman's face, and gave her body back to Troy unharmed for burial. When Thersites mocked him for that mercy, Achilles killed him too. Her name means 'mourned by the people'.",
+    "mask": [
+      "Penthesilea",
+      "Penthesileia"
+    ]
+  },
+  "Artemisia": {
+    "text": "Artemisia I of Caria ruled a Greek city under Persian overlordship, taking power after her husband's death and holding it in her own right. She became an advisor to Xerxes and fought on his side against the Greeks, most famously at Salamis, where she escaped capture by ramming and sinking one of her own allied ships to open an escape route — a manoeuvre the Persians somehow read as valour rather than treachery. She then talked Xerxes into withdrawing altogether. A later ruler of the same name built the Mausoleum at Halicarnassus.",
+    "mask": [
+      "Artemisia"
+    ]
+  },
+  "Castor": {
+    "text": "Castor was the elder of the twin brothers called the Dioscuri, and sailed with the Argonauts. He and his twin shared their mother Leda but not their father: his was the mortal king Tyndareus, his brother's was Zeus — so of the two, only he could die, and he did. His brother refused to be parted from him and asked Zeus to divide his own immortality between them rather than keep it alone. They were placed together in the sky as the constellation Gemini, one bright star each.",
+    "mask": [
+      "Castor"
+    ]
+  },
+  "Nemesis": {
+    "text": "Nemesis is the Greek personification of divine retribution: the one who punishes hubris, the mortal grown too proud or too fortunate. Daughter of Nyx and Erebus, sister of Death and of Sleep. Zeus pursued her; she fled by turning into a goose, he became a swan and took her anyway, and the egg that followed was given to Leda — Helen of Troy hatched from it. When Narcissus scorned everyone who loved him, she cursed him to love what he could never have, and he wasted away staring at his own reflection.",
+    "mask": [
+      "Nemesis"
+    ]
+  },
+  "Kala-Nemi": {
+    "text": "Kala-Nemi is the pre-Vedic spirit of the zodiac, coiled around the universe like an enormous serpent — the Rim of the Wheel of Time, since it is the turning of the zodiac overhead that fixes the seasons. The name belongs to a second figure as well: in the Ramayana, a rakshasa sorcerer and uncle of Ravana. Promised half a kingdom for stopping Hanuman from fetching the herb that would heal the wounded Lakshmana, he disguised himself as a sage to deceive him. Hanuman saw through it, warned by an apsara, and killed him.",
+    "mask": [
+      "Kala-Nemi",
+      "Kalanemi"
+    ]
+  },
+  "Palladion": {
+    "text": "A palladion, or palladium, is an image of great antiquity on which the safety of an entire city was believed to rest. The word points above all to one object: the wooden statue of Pallas Athena that Odysseus and Diomedes stole out of the citadel of Troy, and that Aeneas is said to have carried to the future site of Rome — the story Virgil tells in the Aeneid. Since about 1600 the word has meant, in English, anything that protects or safeguards, much like an aegis.",
+    "mask": [
+      "Palladion",
+      "Palladium"
+    ]
+  },
+  "Athena": {
+    "text": "Athena, Greek goddess of wisdom, strategy, crafts and just war, sprang fully armoured from Zeus' forehead after he swallowed her mother Metis. She is the disciplined side of battle, against her brother Ares who is its bloodlust, and the only god allowed to carry Zeus' thunderbolts. She helped Heracles and Perseus, and backed the Greeks at Troy. Virgin patron of the city that bears her name, she won it from Poseidon by planting the first olive tree. She wears the crested helm and the Aegis; the owl is hers.",
+    "mask": [
+      "Athena",
+      "Pallas"
+    ]
+  },
+  "Cerberus": {
+    "text": "Cerberus, Kerberos in Greek, is the beast that guards the gates of the underworld — usually drawn as a gigantic dog with three heads, though the count varies from source to source. He belongs to the lord of the dead, and his task is less to keep the living out than to keep the dead in. He was whelped by Echidna, half woman and half serpent, and by Typhon, the most terrible creature ever born; his brothers came from the same litter — the Lernaean Hydra, the Chimera, and two-headed Orthrus.",
+    "mask": [
+      "Cerberus",
+      "Kerberos"
+    ]
+  },
+  "Lucia": {
+    "text": "Lucia of Syracuse, Saint Lucy, was a Christian martyr killed during the persecutions of Diocletian, and is venerated as the patron saint of the blind. Her name comes from lux, light. Having consecrated her virginity, she refused the wealthy pagan her mother had arranged for her to marry; the rejected suitor denounced her as a Christian. Condemned, she could not be moved from the spot where she knelt — not by oxen, not by fire. Her eyes were put out and her throat cut, and she went on seeing and prophesying regardless.",
+    "mask": [
+      "Lucia",
+      "Lucy"
+    ]
+  },
+  "Juno": {
+    "text": "Juno was queen of the Roman gods, goddess of marriage and of womanhood, counterpart of the Greek Hera. Daughter of Saturn and Ops, married to her own brother Jupiter, mother of Mars and of Vulcan. With Jupiter and Minerva she formed the Capitoline Triad that presided over Rome, where she was called Regina, the Queen. One of her epithets, Moneta, means 'she who warns' — the mint stood inside her temple, which is where the word money comes from. The same term named the guardian spirit every Roman woman was born with.",
+    "mask": [
+      "Juno",
+      "Uni"
+    ]
+  },
+  "Medea": {
+    "text": "Medea of Colchis, daughter of King Aeëtes, fell in love with Jason when he came for the Golden Fleece, betrayed her father to help him take it, and fled with him, bearing him two sons. At Corinth, Jason left her to marry the king's daughter Glauce. She sent the bride a poisoned dress that burned her alive, and the king with her — then killed her own children, and escaped in a chariot sent by her ancestor Helios. A sorceress as much as a princess, she could restore youth, or convincingly pretend to.",
+    "mask": [
+      "Medea"
+    ]
+  },
+  "Hypnos": {
+    "text": "Hypnos is the Greek god of sleep, son of Nyx and younger twin of Death itself — a calm and gentle deity who helps mortals in need and, since they sleep, owns half of every human life. He is drawn as a young man wrapped in poppy stems, a horn in his hand and sometimes wings at his temples. He lives in a cave where night and day meet, its entrance choked with narcotic flowers and the river Lethe running out of it; no light and no sound ever reach inside. Rome called him Somnus.",
+    "mask": [
+      "Hypnos",
+      "Somnus"
+    ]
+  },
+  "Moros": {
+    "text": "Moros is the Greek personification of doom — of impending fate, of the end already fixed for each life. Son of Nyx, brother to Sleep, to Retribution and to Death, and elder brother and leader of the three Fates. He has no shape at all: a formless spirit whose task is to reveal to a mortal the day of their own death. Because that knowledge is unbearable, he became a spirit of despair as well, since the souls he visits are left ridden with dread. His name is the root of the word 'morose'.",
+    "mask": [
+      "Moros"
+    ]
+  },
+  "Psyche": {
+    "text": "Psyche was the youngest daughter of a Sicilian king and queen, and so beautiful that suitors came from everywhere and people began to say she surpassed Aphrodite herself. Stung, the goddess sent her son Eros to shoot her with an arrow of desire and make her fall for the nearest wretched thing at hand. He looked at her, pricked himself instead, and carried her off to a hidden place. He married her, and asked Zeus to make her a goddess. Her name is simply the Greek word for the soul.",
+    "mask": [
+      "Psyche"
+    ]
+  }
+}

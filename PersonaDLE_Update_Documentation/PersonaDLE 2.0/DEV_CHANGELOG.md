@@ -113,6 +113,78 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): contenu des modes Expert Music & Personae (données uniquement)
+
+Premier lot de contenu pour le Mode Expert (v2.1) : les paroles des 73 chansons à texte, et les
+fiches lore de 39 personae — Persona 2 (IS + EP) puis Persona 3 — en EN et FR. **Aucune UI de
+jeu dans ce lot** : uniquement les données, l'utilitaire de masquage partagé et leurs garde-fous.
+
+Source du contenu : `expert_mode_content.md` à la racine, rempli à la main par Hamza. Ce fichier
+est **curé**, pas une copie des datasets : les variantes de personae (`* Picaro`,
+`Orpheus ( Male/Female )`…) sont fusionnées en une entrée, et 17 musiques instrumentales n'y
+figurent pas puisqu'elles n'ont pas de paroles à révéler. Ne jamais le régénérer en masse.
+
+### Détails techniques
+
+- **`js/gameCore.js` — `maskTerms(terms, text, token)`** : masquage partagé par les deux modes
+  Expert. Insensible à la casse, tolère la ponctuation interne (« Dance! » masque « dance ») et
+  les espaces multiples, ne coupe jamais au milieu d'un mot (« Mask » ne touche pas « Masked »),
+  ignore les termes < 4 caractères (trop fréquents pour être masqués sans mutiler le texte).
+- **Décision d'archi — masquer à l'affichage, jamais dans les données.** Les paroles et les
+  fiches sont stockées **brutes**, avec le nom/titre en clair. La censure est appliquée au rendu.
+  Conséquence voulue : la révélation de fin de partie (victoire **ou** abandon) consiste à
+  ré-afficher le texte brut, sans seconde copie du contenu à maintenir synchronisée.
+- **`musicsMode/database/expert_lyrics.js`** (généré) : 73 chansons, 1078 vers. Clé = `titre`
+  exact de `songs.js`, valeur = les vers dans l'ordre, **un par palier de révélation** (le mode
+  Music Expert révèle ligne par ligne et cumulativement, contrairement à la règle « une seule
+  tentative » des autres modes Expert — arbitré avec Hamza le 2026-08-15). Généré par
+  `scripts/export_expert_lyrics.js` (`npm run lyrics:build`), jamais édité à la main.
+- **31 chansons sur 73 citent leur propre titre dans leurs paroles** (« Burn my dread »,
+  « Mass Destruction », « Dream of Butterfly, or is life a dream? ») — réponse offerte sans
+  masquage. Un test parcourt les 1078 vers et échoue si un titre fuite après masquage.
+- **`personaeMode/database/expert_lore/{en,fr}.json`** : 39 fiches (17 P2IS/P2EP + 22 P3/P3FES ; `Hermes` est commun aux deux lots),
+  ~90 mots chacune, réécrites depuis les textes sources (les longs taillés — Eros passait de 340
+  à 95 mots ; les trop courts complétés — Helios de 30 à 95). Un fichier par langue, chargeable à
+  la demande — délibérément **pas** dans `lang/*.json`, qui est chargé sur toutes les pages : à
+  terme 139 personae × 6 langues y pèseraient pour rien.
+- **Variantes cosmétiques hors contenu Expert** : `Orpheus Picaro`, `Thanatos Picaro`,
+  `Messiah Picaro`, `Athena Picaros`, `Orpheus Telos`, `Orpheus ( Female )` n'ont pas de fiche.
+  Même mythe, donc fiche identique à l'entrée de base : les inclure rendrait la réponse
+  ambiguë (rien dans un texte ne distingue « Orpheus » de « Orpheus Picaro »). La famille
+  Orpheus est portée par `Orpheus ( Male )` — **choix à confirmer par Hamza**, c'est la seule
+  entrée du dataset qui pouvait porter le texte, le `.md` ne connaissant qu'« Orpheus ».
+- `Hermes` et `Prometheus` existent chacun **deux fois** dans le dataset (P2IS/P3 et P2EP/P5).
+  Les fiches sont volontairement keyées par le nom nu, pas par la clé désambiguïsée
+  `Nom::OPUS` de `challengeKey()` : le mythe est le même des deux côtés et le joueur tape le
+  même nom, donc une fiche unique partagée est le comportement correct.
+- Le tableau `mask` est **propre à chaque langue**, pas dupliqué par erreur : le texte FR emploie
+  souvent une autre forme du nom (« Maïa » vs « Maia », « Astéria » vs « Asteria »), qui doit
+  être masquée elle aussi. `maskTerms()` ne normalise pas les diacritiques — les variantes
+  accentuées doivent être listées explicitement.
+- **`maskTerms()` accepte les noms de 2 caractères** (seuls les termes d'une lettre sont
+  ignorés) : `Io`, la persona initiale de Yukari, est un nom de 2 lettres — avec l'ancien seuil
+  à 4, sa fiche donnait la réponse dès la première ligne. La frontière de mot suffit à éviter
+  les faux positifs (`Io` ne touche pas « Ionian »).
+- **`tests/expertContent.test.js`** — 27 tests : cohérence des clés avec `songs.js` /
+  `personaeCharacters.js`, parité EN/FR, couverture complète du roster P2, longueur jouable
+  (50–140 mots), absence de masque pré-appliqué dans les données, et les deux garde-fous de
+  fuite (aucun titre ni nom de persona ne survit au masquage). Les garde-fous raisonnent en
+  **frontière de mot**, pas en sous-chaîne : « Christ » dans « Christianity » n'est pas une
+  fuite, et `maskTerms()` ne le masque pas non plus — une assertion `toContain()` naïve
+  échouait à tort sur la fiche Messiah.
+
+### Angles morts connus
+
+- Le tirage quotidien Expert n'existe pas encore : `scripts/export-daily-pools.js` ignore ces
+  deux fichiers. Tant qu'il n'est pas branché, rien ne garantit côté serveur que la cible du
+  jour en Expert soit bien une chanson à paroles ou une persona dotée d'une fiche.
+- Un titre de chanson coupé sur deux vers n'est pas masqué (`maskTerms()` reçoit un vers à la
+  fois). Aucun cas dans les 73 chansons actuelles, le test le vérifie vers par vers.
+- Reste 105 entrées du dataset sans fiche (P4 → P5X, plus Trinity Souls) ; les 39 fiches
+  couvrent 41 entrées, `Hermes` et `Prometheus` étant partagées par deux entrées chacune et 4 langues sans traduction
+  (ES/DE/IT/PT) : l'anglais et le français d'abord, sur deux jeux, pour valider le format et le
+  ton avant d'engager ×6 le coût de traduction.
+
 ## 2026-07-31 — fix(challenge): filtres opus écrasés à "tout désélectionné" après un défi
 
 Signalement joueur : après avoir joué un défi (surtout remarqué en mode Music), plus aucun

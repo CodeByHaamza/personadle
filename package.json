@@ -21,7 +21,8 @@
     "lint": "eslint \"**/*.js\" --ignore-pattern node_modules",
     "setup-hooks": "git config core.hooksPath .githooks && echo 'Git hooks activated (.githooks/)'",
     "format": "prettier --write \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",
-    "format:check": "prettier --check \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore"
+    "format:check": "prettier --check \"**/*.{js,css,html,json,md}\" --ignore-path .prettierignore",
+    "lyrics:build": "node scripts/export_expert_lyrics.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

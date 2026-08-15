@@ -1,0 +1,302 @@
+{
+  "_comment": "Lore Expert Personae — FR. Traduction de en.json (source de vérité). Les tableaux `mask` sont volontairement propres à chaque langue : le texte FR emploie parfois une autre forme du nom (« Vulcain » plutôt que « Vulcanus »), qui doit être masquée elle aussi.",
+  "Vulcanus": {
+    "text": "Vulcanus, aussi appelé Vulcain ou Mulciber, est le dieu romain du feu, des volcans et de la forge, patron des forgerons, des artistes et des inventeurs — l'équivalent latin d'Héphaïstos. Fils de Jupiter et de Junon, il est l'artisan des dieux et façonne leurs armes dans un atelier enfoui sous un volcan. Il a épousé la déesse de l'amour elle-même, qui le trompe sans relâche avec son propre frère, le dieu de la guerre. Boiteux et couvert de suie au milieu d'un panthéon de beautés immortelles, il est le seul dieu à devoir sa place à son travail plutôt qu'à sa naissance.",
+    "mask": [
+      "Vulcanus",
+      "Vulcain",
+      "Volcanus",
+      "Mulciber"
+    ]
+  },
+  "Apollo": {
+    "text": "Apollon est l'un des douze Olympiens, d'abord dieu de la musique et de la poésie, puis du soleil lui-même, éclipsant le vieux Titan qui conduisait le char solaire. Fils de Zeus et de Létô, frère jumeau de la déesse chasseresse. Nouveau-né, il tenait déjà un arc et tua le serpent Python envoyé contre sa mère. Il échangea le caducée contre la première lyre et devint sans rival, chez les dieux comme chez les mortels — ceux qui défièrent sa musique furent châtiés sans pitié. Dieu du tir à l'arc, de la prophétie et de la médecine, il conduit les Muses.",
+    "mask": [
+      "Apollo",
+      "Apollon"
+    ]
+  },
+  "Maia": {
+    "text": "Dans la mythologie grecque, Maïa est l'aînée, la plus timide et la plus belle des Pléiades, les sept sœurs placées au ciel parmi les étoiles. Fille du Titan Atlas, qui porte les cieux, et de la nymphe marine Pléioné. Elle vivait à l'écart des autres dieux, dans une grotte d'Arcadie, et l'on honore en elle la protectrice des mères allaitantes. Sa beauté attira Zeus en secret, et de cette union naquit le messager des dieux — un fils qui, le jour même de sa naissance, vola un troupeau et inventa la lyre.",
+    "mask": [
+      "Maia",
+      "Maïa"
+    ]
+  },
+  "Artemis": {
+    "text": "Artémis est la déesse vierge de la chasse, de l'enfantement et de la lune, l'une des douze Olympiens, fille de Zeus et de Létô, sœur jumelle du dieu des arts. Elle parcourt forêts et collines avec son arc d'argent, le cerf et le cyprès lui sont consacrés, et des nymphes vouées à la virginité l'accompagnent. Insensible aux manœuvres de la déesse de l'amour, indifférente aux hommes, elle se montre orgueilleuse et impitoyable envers quiconque rompt un serment ou se prétend meilleur chasseur qu'elle. Plus tard elle absorba la lune elle-même, éclipsant sa personnification plus ancienne.",
+    "mask": [
+      "Artemis",
+      "Artémis"
+    ]
+  },
+  "Eros": {
+    "text": "Éros est le malicieux dieu grec de l'amour et du désir, équivalent du Cupidon romain. Les sources divergent sur son origine : fils de la déesse de l'amour et de Zeus, d'Arès ou d'Hermès selon les récits, ailleurs divinité primordiale née presque au commencement de tout, l'élan créateur d'où sort toute vie nouvelle dans le cosmos. On le représente en jeune homme ailé ou en enfant portant un arc, parfois les yeux bandés — et, pour un dieu, c'est un archer notoirement mauvais. Il traverse d'innombrables mythes sans jamais y être nommé : là où il y a de l'amour, il est déjà là.",
+    "mask": [
+      "Eros",
+      "Éros"
+    ]
+  },
+  "Venus": {
+    "text": "Vénus est la déesse romaine de l'amour, de la beauté, du désir, de la fécondité et de la victoire, née de l'écume après que Saturne eut jeté à la mer les chairs tranchées de Caelus. Mariée au forgeron boiteux des dieux, elle est charmeuse, rusée et ouvertement infidèle, prenant pour amants dieux et mortels — le dieu de la guerre avant tout. Elle voue à l'amour une foi absolue et une haine profonde à qui le juge indigne de lui. Mère d'Énée, elle est l'ancêtre de Rome. Ses symboles : la coquille, les colombes, les dauphins, les perles et le miroir.",
+    "mask": [
+      "Venus",
+      "Vénus"
+    ]
+  },
+  "Hermes": {
+    "text": "Hermès est le plus jeune des douze Olympiens et le messager des dieux, fils de Zeus et d'une nymphe des montagnes. Patron des voyageurs, du commerce, des athlètes et des poètes — et tout autant des voleurs et des menteurs. Nourrisson, il déroba le troupeau immortel d'Apollon, inventa la première lyre et la lui offrit en dédommagement, recevant en échange le caducée entouré de deux serpents. Coiffé d'un chapeau ailé et chaussé de sandales ailées, il guide les morts jusqu'aux enfers, seul dieu libre d'entrer dans ce royaume et d'en ressortir à sa guise.",
+    "mask": [
+      "Hermes",
+      "Hermès",
+      "Mercure",
+      "Mercurius"
+    ]
+  },
+  "Chronos": {
+    "text": "Chronos, parfois orthographié Khronos, est la personnification primordiale du temps et de l'éternité, né du Chaos et maître du Zodiaque — son nom est simplement le mot grec pour « temps ». Les sources les plus anciennes ne lui donnent aucun corps, seulement un serpent à trois têtes : un homme, un taureau et un lion. L'art plus tardif en a fait un vieillard barbu, ancêtre du Père Temps. L'Antiquité l'a souvent confondu avec le roi des Titans qui castra son père d'une faucille et dévora ses enfants pour garder son trône — un autre dieu, et une confusion jamais dissipée depuis.",
+    "mask": [
+      "Chronos",
+      "Khronos",
+      "Cronos",
+      "Cronus",
+      "Kronos",
+      "Saturne",
+      "Saturnus"
+    ]
+  },
+  "Rhadamanthus": {
+    "text": "Rhadamanthe est un fils de Zeus et d'Europe, donc demi-dieu ; son nom évoque un jugement sévère et inflexible. De son vivant, il fut un roi sage de Crète, célèbre pour des lois si justes qu'on les disait dictées par son père. Après sa mort, il ne fut pas jugé mais fait juge à son tour : avec Éaque et Minos, il pèse les âmes qui arrivent aux enfers et fixe leur châtiment, prenant en charge celles venues des contrées d'Orient. Il règne sur l'Élysée, le repos accordé aux justes.",
+    "mask": [
+      "Rhadamanthus",
+      "Rhadamanthe",
+      "Rhadamanthys"
+    ]
+  },
+  "Hades": {
+    "text": "Hadès est le roi et maître suprême des enfers grecs, appelé l'Invisible, équivalent du Pluton romain. Né de Cronos et de Rhéa, il combattit aux côtés de ses frères contre les Titans ; au partage du monde, Zeus prit le ciel, Poséidon la mer, et lui revendiqua le royaume sans soleil enfoui dans la terre. Son office l'empêche d'en sortir, aussi ne le compte-t-on pas parmi les douze Olympiens malgré son rang. Il n'est pas la mort elle-même : ce rôle revient à un autre. Il enleva Perséphone et la lia à lui par un pépin de grenade.",
+    "mask": [
+      "Hades",
+      "Hadès",
+      "Pluton",
+      "Plouton"
+    ]
+  },
+  "Helios": {
+    "text": "Hélios est le Titan grec du soleil, fils d'Hypérion et de Théia. Chaque aube il surgit de l'océan oriental et mène à travers toute la largeur du ciel un char tiré par quatre chevaux crachant le feu, sombre dans la mer occidentale au crépuscule, puis regagne l'orient de nuit dans une coupe d'or. Voyant tout d'en haut, il est le témoin que les autres dieux appellent quand on leur a caché quelque chose. Son fils Phaéton supplia de conduire le char une fois, en perdit la maîtrise, et Zeus dut le foudroyer avant que la terre ne brûle.",
+    "mask": [
+      "Helios",
+      "Hélios"
+    ]
+  },
+  "Hyperion": {
+    "text": "Hypérion est l'un des douze Titans originels, enfants d'Ouranos et de Gaïa, père du soleil, de la lune et de l'aurore qu'il eut de sa sœur Théia. Son nom signifie « celui qui observe d'en haut ». La littérature grecque le distingue soigneusement de son propre fils : le fils est le soleil physique, le disque qui traverse le ciel chaque jour, tandis que lui est le principe plus ancien et plus vaste — la lumière elle-même, et la vigilance et la sagesse que donne le fait de tout voir. Il appartient à la génération qui régnait avant les Olympiens et fut précipité avec elle.",
+    "mask": [
+      "Hyperion",
+      "Hypérion"
+    ]
+  },
+  "Callisto": {
+    "text": "Callisto est une nymphe, fille du roi Lycaon, elle suivait la déesse vierge de la chasse et avait prononcé le même vœu de chasteté. Zeus prit l'apparence de la déesse elle-même pour l'approcher, puis la força ; des mois plus tard, la grossesse fut découverte pendant que les nymphes se baignaient ensemble, et elle fut chassée du cortège avec fureur. Elle mit au monde un fils, Arcas, et fut changée en ourse — par la jalousie d'Héra selon les uns, par son ancienne maîtresse selon les autres. Presque tuée par son propre fils sous cette forme, elle fut placée parmi les étoiles en Grande Ourse.",
+    "mask": [
+      "Callisto",
+      "Kallisto"
+    ]
+  },
+  "Astria": {
+    "text": "Astéria est la déesse titanide des étoiles et de l'astrologie, des oracles et des rêves prophétiques — d'où les projecteurs de planétarium qu'elle porte. Comme la nymphe Callisto, elle attira le désir de Zeus, et comme elle, elle fuit : elle se changea en caille, il la poursuivit en aigle. Acculée au-dessus de la mer, elle se jeta dans l'eau et devint l'île de Délos — le seul lambeau de terre qui osa plus tard abriter Létô, enceinte et traquée par Héra, afin que les dieux jumeaux du soleil et de la lune puissent y naître.",
+    "mask": [
+      "Astria",
+      "Asteria",
+      "Astéria"
+    ]
+  },
+  "Nyarlathotep": {
+    "text": "Nyarlathotep est un Dieu Extérieur du Mythe de Cthulhu créé par H. P. Lovecraft, connu comme le Chaos Rampant, le Dieu sans Visage, le Hanteur des Ténèbres. Issu directement d'Azathoth, il ne ressemble en rien aux siens : les autres Dieux Extérieurs se tiennent hors de l'univers physique et les Grands Anciens dorment en rêvant, tandis que lui arpente le réel comme leur cœur, leur âme et leur messager, portant mille masques. Il sème la discorde et tourmente les mortels non par but mais pour passer le temps — ce qui lui vaut d'être dit le plus humain des siens.",
+    "mask": [
+      "Nyarlathotep",
+      "Chaos Rampant",
+      "Dieu aux Mille Formes",
+      "Habitant des Ténèbres",
+      "Dieu sans Visage",
+      "Horreur Flottante",
+      "Hanteur des Ténèbres"
+    ]
+  },
+  "Odysseus": {
+    "text": "Ulysse, appelé Odysseus en grec, est le roi légendaire d'Ithaque, descendant de la lignée d'Hermès, époux de Pénélope et père de Télémaque. Général de la guerre de Troie et l'homme qui y mit fin : le cheval de bois était son idée. Surnommé « le Rusé », il l'emporte par la ruse là où d'autres l'emportent par la force. Son retour lui prit dix ans de plus que la guerre elle-même — cyclope, magicienne, sirènes, naufrages — pendant que les prétendants dévoraient son domaine et que sa femme les tenait à distance en défaisant chaque nuit son tissage. Il est le héros de la seconde épopée d'Homère.",
+    "mask": [
+      "Odysseus",
+      "Ulysse",
+      "Ulysses",
+      "Odyssée"
+    ]
+  },
+  "Prometheus": {
+    "text": "Prométhée est le Titan qui prit le parti de Zeus contre les siens lors de la guerre pour le monde ; son nom signifie « prévoyance ». Quand fut partagée la tâche de peupler la terre, son frère Épiméthée dépensa tous les dons pour les bêtes et ne laissa rien à l'humanité — alors il déroba le feu de l'Olympe et le donna aux hommes. Pire encore, il leur apprit à tromper les dieux sur leurs sacrifices. Enchaîné à un rocher pour l'éternité, un aigle lui dévorait le foie chaque jour et il repoussait chaque nuit, jusqu'à ce qu'Héraclès le délivre au cours de ses Douze Travaux.",
+    "mask": [
+      "Prometheus",
+      "Prométhée"
+    ]
+  },
+  "Orpheus ( Male )": {
+    "text": "Orphée était le fils du roi thrace Œagre et de la muse Calliope — certaines versions donnent Apollon pour père. Doté d'une petite lyre d'or et instruit au chant par sa mère, il jouait si bien que les pierres et les bêtes se mettaient à danser ; on l'appelait Maître des Cordes et Père des Chants. À la mort de sa femme Eurydice, il descendit aux enfers et attendrit Hadès lui-même par sa musique, obtenant qu'elle le suive à une condition : ne pas se retourner avant que tous deux aient regagné la surface. Il se retourna. Déchiré plus tard par les Ménades, sa tête continua de chanter et sa lyre fut placée parmi les étoiles.",
+    "mask": [
+      "Orphée",
+      "Orpheus"
+    ]
+  },
+  "Thanatos": {
+    "text": "Thanatos est la personnification grecque de la mort elle-même, fils de Nyx et d'Érèbe, jumeau aîné du dieu du sommeil. Il annonce la fin paisible, le sommeil éternel, tandis que des dieux plus violents se chargent des morts brutales — ce qui explique en partie son rôle si mince dans les mythes : le maître des enfers l'a presque entièrement éclipsé. Indistinct et impitoyable, détesté de tous et le leur rendant bien, les poètes le décrivent en spectre barbu, l'épée à la main, dont la venue se marque par la douleur. Les époques plus tardives en firent un enfant ailé. Rome l'appela Mors.",
+    "mask": [
+      "Thanatos",
+      "Mors"
+    ]
+  },
+  "Messiah": {
+    "text": "Messie, en hébreu, ou Christ en grec : l'oint, le sauveur dont on attend la venue à la fin des temps. Le terme traverse avant tout les religions abrahamiques, judaïsme et christianisme, mais son destinataire exact n'a jamais fait l'unanimité. La tradition occidentale répond massivement Jésus de Nazareth. Ailleurs, et à d'autres époques, d'autres figures ont porté le même espoir de délivrance pour l'humanité : le Bouddha, Krishna, ou le Maitreya encore à venir. Le mot désigne une fonction plutôt qu'une personne — celui qui sauve, quel qu'il se révèle être.",
+    "mask": [
+      "Messie",
+      "Messiah",
+      "Christ"
+    ]
+  },
+  "Io": {
+    "text": "Io était une prêtresse mortelle d'Héra à Argos. Zeus la désira et, pour dissimuler l'affaire à son épouse, noya les lieux sous un banc de nuages — un nuage si suspect qu'Héra descendit voir, et trouva son mari debout auprès d'une belle génisse blanche. Elle savait parfaitement ce qu'était cette génisse, et l'exigea en cadeau ; Zeus pouvait difficilement refuser. Confiée à la garde d'Argos aux cent yeux, la génisse ne fut libérée que lorsque Hermès endormit le géant. Elle fuit enfin vers l'Égypte, où on finit par l'adorer sous le nom d'Isis.",
+    "mask": [
+      "Io"
+    ]
+  },
+  "Isis": {
+    "text": "Isis, nommée Aset en Égypte, était la déesse mère dont le culte gagna tout le monde gréco-romain : épouse et mère idéale, maîtresse de la magie, amie des esclaves et des pécheurs autant que des puissants. Fille de Geb la terre et de Nout le ciel, elle fit un jour empoisonner Rê par un serpent et refusa le remède jusqu'à ce que le dieu solaire lui livre son nom véritable. Quand son frère et époux Osiris fut assassiné et dispersé en morceaux à travers le pays, c'est sa magie qui le rassembla et lui rendit la vie, le temps de concevoir Horus.",
+    "mask": [
+      "Isis",
+      "Aset",
+      "Eset"
+    ]
+  },
+  "Trismegistus": {
+    "text": "Trismégiste, « trois fois très grand », est la figure syncrétique née de la fusion du dieu messager grec avec le Thot égyptien, tous deux adorés comme un seul dans la cité que les Grecs rebaptisèrent Hermopolis. Mi-dieu, mi-magicien humain, on le désigne comme le fondateur de l'alchimie, de l'astrologie et de la magie — les trois arts qui lui valent son épithète. L'Antiquité lui prêtait des dizaines de milliers d'écrits d'une ancienneté supposée immense ; Clément d'Alexandrie en comptait quarante-deux livres sacrés servant à former les prêtres égyptiens. Les occultistes en firent le maître de Moïse et le bâtisseur des pyramides de Gizeh.",
+    "mask": [
+      "Trismégiste",
+      "Trismegistus",
+      "Trismegistos"
+    ]
+  },
+  "Polydeuces": {
+    "text": "Polydeucès, Pollux chez les Romains, était le cadet des frères jumeaux appelés les Dioscures. Son frère et lui partageaient une mère, Léda, mais pas un père : le sien était Zeus, celui de son jumeau un roi mortel nommé Tyndare — de sorte que l'un naquit immortel et l'autre non. Quand le jumeau mortel fut tué, il refusa la séparation et supplia Zeus de le laisser céder la moitié de sa propre immortalité plutôt que de survivre seul. Zeus consentit, et plaça les deux frères au ciel en constellation des Gémeaux, une étoile brillante chacun.",
+    "mask": [
+      "Polydeucès",
+      "Polydeuces",
+      "Pollux"
+    ]
+  },
+  "Caesar": {
+    "text": "César ne fut pas d'abord un titre mais un nom de famille, le cognomen de Caius Julius, dernier dictateur de la République romaine. Général brillant et homme d'État populiste, il se fit des ennemis de l'élite romaine par ses réformes autoritaires et mourut poignardé par les membres de son propre Sénat. Son fils adoptif Octave gagna les guerres civiles qui suivirent, fonda l'Empire et reprit le nom comme titre ; tous les empereurs après lui le portèrent. Les deux hommes furent déclarés dieux par le Sénat. Le mot survécut à Rome, devenant Kaiser et Tsar.",
+    "mask": [
+      "César",
+      "Caesar",
+      "Kaiser",
+      "Tsar"
+    ]
+  },
+  "Penthesilea": {
+    "text": "Penthésilée était une reine des Amazones, fille d'Arès et d'Otréré qui fonda la tribu. Elle rejoignit la guerre de Troie dans sa dixième et dernière année, à la tête de ses guerrières, en pénitence pour avoir tué par accident sa propre sœur Hippolyte. Elle affronta Achille et tomba sous ses coups — et lorsqu'il souleva son casque, il tomba amoureux du visage de la morte, et rendit son corps intact aux Troyens pour qu'ils l'ensevelissent. Quand Thersite se moqua de cette clémence, Achille le tua aussi. Son nom signifie « pleurée par le peuple ».",
+    "mask": [
+      "Penthésilée",
+      "Penthesilea"
+    ]
+  },
+  "Artemisia": {
+    "text": "Artémise Iʳᵉ de Carie régna sur une cité grecque sous tutelle perse, prenant le pouvoir à la mort de son mari et le gardant en son nom propre. Devenue conseillère de Xerxès, elle combattit à ses côtés contre les Grecs, surtout à Salamine, où elle échappa à la capture en éperonnant et coulant l'un de ses propres navires alliés pour s'ouvrir une issue — manœuvre que les Perses prirent on ne sait comment pour de la bravoure plutôt que pour une trahison. Elle convainquit ensuite Xerxès de battre en retraite. Une souveraine plus tardive du même nom fit bâtir le Mausolée d'Halicarnasse.",
+    "mask": [
+      "Artémise",
+      "Artemisia"
+    ]
+  },
+  "Castor": {
+    "text": "Castor était l'aîné des frères jumeaux appelés les Dioscures, et navigua avec les Argonautes. Son jumeau et lui partageaient leur mère Léda mais pas leur père : le sien était le roi mortel Tyndare, celui de son frère était Zeus — de sorte que des deux, lui seul pouvait mourir, et il mourut. Son frère refusa d'en être séparé et demanda à Zeus de partager entre eux sa propre immortalité plutôt que de la garder seul. Ils furent placés ensemble au ciel en constellation des Gémeaux, une étoile brillante chacun.",
+    "mask": [
+      "Castor"
+    ]
+  },
+  "Nemesis": {
+    "text": "Némésis est la personnification grecque de la juste rétribution : celle qui châtie l'hybris, le mortel devenu trop fier ou trop fortuné. Fille de Nyx et d'Érèbe, sœur de la Mort et du Sommeil. Zeus la poursuivit ; elle fuit changée en oie, il se fit cygne et la prit malgré tout, et l'œuf qui suivit fut confié à Léda — Hélène de Troie en sortit. Quand Narcisse méprisa tous ceux qui l'aimaient, elle le condamna à aimer ce qu'il ne pourrait jamais obtenir, et il dépérit à contempler son propre reflet.",
+    "mask": [
+      "Némésis",
+      "Nemesis"
+    ]
+  },
+  "Kala-Nemi": {
+    "text": "Kala-Nemi est l'esprit prévédique du zodiaque, enroulé autour de l'univers comme un serpent immense — la Jante de la Roue du Temps, puisque c'est la rotation du zodiaque au-dessus de nos têtes qui fixe les saisons. Le nom appartient aussi à une seconde figure : dans le Rāmāyaṇa, un sorcier rakshasa, oncle de Ravana. Promis à la moitié d'un royaume s'il empêchait Hanuman de rapporter l'herbe qui devait guérir Lakshmana blessé, il se déguisa en sage pour le tromper. Hanuman perça la ruse, averti par une apsara, et le tua.",
+    "mask": [
+      "Kala-Nemi",
+      "Kalanemi"
+    ]
+  },
+  "Palladion": {
+    "text": "Un palladion, ou palladium, est une image d'une extrême ancienneté dont dépendait, croyait-on, le salut d'une cité entière. Le mot désigne avant tout un objet précis : la statue de bois de Pallas Athéna qu'Ulysse et Diomède dérobèrent dans la citadelle de Troie, et qu'Énée aurait emportée jusqu'au futur emplacement de Rome — l'histoire que raconte Virgile dans l'Énéide. Depuis 1600 environ, le mot désigne en français comme en anglais tout ce qui protège ou garantit, à la manière d'une égide.",
+    "mask": [
+      "Palladion",
+      "Palladium"
+    ]
+  },
+  "Athena": {
+    "text": "Athéna, déesse grecque de la sagesse, de la stratégie, des métiers et de la guerre juste, jaillit tout armée du front de Zeus après qu'il eut avalé sa mère Métis. Elle est le versant discipliné du combat, face à son frère Arès qui en est la fureur sanglante, et la seule divinité autorisée à porter la foudre de Zeus. Elle aida Héraclès et Persée, et soutint les Grecs devant Troie. Patronne vierge de la cité qui porte son nom, elle l'emporta sur Poséidon en y plantant le premier olivier. Elle porte le casque à cimier et l'égide ; la chouette est à elle.",
+    "mask": [
+      "Athéna",
+      "Athena",
+      "Pallas"
+    ]
+  },
+  "Cerberus": {
+    "text": "Cerbère, Kerberos en grec, est la bête qui garde les portes des enfers — représentée le plus souvent en chien gigantesque à trois têtes, le compte variant d'une source à l'autre. Il appartient au maître des morts, et sa tâche consiste moins à empêcher les vivants d'entrer qu'à empêcher les morts de sortir. Il fut engendré par Échidna, moitié femme moitié serpent, et par Typhon, la plus terrible créature jamais née ; ses frères sortent de la même portée — l'Hydre de Lerne, la Chimère et Orthros à deux têtes.",
+    "mask": [
+      "Cerbère",
+      "Cerberus",
+      "Kerberos"
+    ]
+  },
+  "Lucia": {
+    "text": "Lucie de Syracuse, sainte Lucie, fut une martyre chrétienne tuée durant les persécutions de Dioclétien, et on la vénère comme patronne des aveugles. Son nom vient de lux, la lumière. Ayant consacré sa virginité, elle refusa le riche païen que sa mère lui destinait ; le prétendant éconduit la dénonça comme chrétienne. Condamnée, elle resta impossible à déplacer de l'endroit où elle s'était agenouillée — ni les bœufs ni le feu n'y parvinrent. On lui creva les yeux et on lui trancha la gorge, et elle continua de voir et de prophétiser malgré tout.",
+    "mask": [
+      "Lucie",
+      "Lucia"
+    ]
+  },
+  "Juno": {
+    "text": "Junon était la reine des dieux romains, déesse du mariage et de la féminité, équivalente de l'Héra grecque. Fille de Saturne et d'Ops, mariée à son propre frère Jupiter, mère de Mars et de Vulcain. Avec Jupiter et Minerve, elle formait la Triade capitoline qui présidait à Rome, où on l'appelait Regina, la Reine. L'une de ses épithètes, Moneta, signifie « celle qui avertit » — l'atelier monétaire se tenait dans son temple, d'où vient notre mot monnaie. Le même terme désignait l'esprit gardien dont chaque Romaine était dotée à la naissance.",
+    "mask": [
+      "Junon",
+      "Juno",
+      "Uni"
+    ]
+  },
+  "Medea": {
+    "text": "Médée de Colchide, fille du roi Aiétès, tomba amoureuse de Jason venu chercher la Toison d'or, trahit son père pour l'aider à s'en emparer, et s'enfuit avec lui, lui donnant deux fils. À Corinthe, Jason la quitta pour épouser Glaucé, la fille du roi. Elle envoya à la promise une robe empoisonnée qui la brûla vive, et le roi avec elle — puis tua ses propres enfants, et s'échappa sur un char envoyé par son ancêtre Hélios. Magicienne autant que princesse, elle savait rendre la jeunesse, ou faire très convaincamment semblant.",
+    "mask": [
+      "Médée",
+      "Medea"
+    ]
+  },
+  "Hypnos": {
+    "text": "Hypnos est le dieu grec du sommeil, fils de Nyx et jumeau cadet de la Mort elle-même — divinité calme et douce, qui secourt les mortels dans le besoin et possède, par leur sommeil, la moitié de chaque vie humaine. On le représente en jeune homme enveloppé de tiges de pavot, une corne à la main, parfois des ailes aux tempes. Il habite une grotte où la nuit et le jour se rejoignent, dont l'entrée est étouffée de fleurs narcotiques et d'où sort le Léthé ; ni lumière ni bruit n'y pénètrent jamais. Rome l'appela Somnus.",
+    "mask": [
+      "Hypnos",
+      "Somnus"
+    ]
+  },
+  "Moros": {
+    "text": "Moros est la personnification grecque du destin funeste — de la fatalité qui vient, de la fin déjà fixée pour chaque vie. Fils de Nyx, frère du Sommeil, de la Rétribution et de la Mort, frère aîné et guide des trois Moires. Il n'a aucune forme : un esprit informe dont la tâche est de révéler à un mortel le jour de sa propre mort. Parce que ce savoir est insoutenable, il devint aussi un esprit de désespoir, les âmes qu'il visite restant rongées d'effroi. Son nom est à la racine du mot « morose ».",
+    "mask": [
+      "Moros"
+    ]
+  },
+  "Psyche": {
+    "text": "Psyché était la plus jeune fille d'un roi et d'une reine de Sicile, et si belle que les prétendants accouraient de partout et qu'on se mit à dire qu'elle surpassait Aphrodite elle-même. Piquée, la déesse envoya son fils Éros la percer d'une flèche de désir pour la faire s'éprendre du premier miséreux venu. Il la regarda, se blessa lui-même à sa place, et l'emporta en un lieu caché. Il l'épousa, et demanda à Zeus d'en faire une déesse. Son nom est simplement le mot grec pour l'âme.",
+    "mask": [
+      "Psyché",
+      "Psyche"
+    ]
+  }
+}
