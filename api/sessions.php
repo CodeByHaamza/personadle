@@ -67,10 +67,12 @@ $maxAttempts = $isExpert ? 40 : 20;
 if ($attempts < 0 || $attempts > $maxAttempts) {
     jsonError('Invalid attempts value');
 }
-// Seul Music a du contenu Expert pour l'instant — accepter is_expert sur un autre
-// mode créerait des lignes que rien ne sait relire.
-if ($isExpert && $mode !== 'music') {
-    jsonError('Expert mode is only available for music', 400);
+// Modes disposant d'une variante Expert (pool + clé de hash dédiés dans
+// api/lib/daily_target.php). Accepter is_expert sur un autre mode créerait des
+// lignes que le recalcul anti-triche ne saurait pas rejouer.
+$expertModes = ['music', 'classic', 'silhouette', 'alloutattack'];
+if ($isExpert && !in_array($mode, $expertModes, true)) {
+    jsonError('Expert mode is not available for this mode', 400);
 }
 if (!is_array($filters)) {
     $filters = [];

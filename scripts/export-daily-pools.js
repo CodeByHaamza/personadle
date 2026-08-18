@@ -49,12 +49,22 @@ const pools = {
   emoji: { pool: characters.filter((c) => c.emoji).map((c) => c.nom) },
   silhouette: { pool: silhouetteCharacters.map((c) => c.nom) },
   music: { pool: songs.map((s) => s.titre) },
-  // Mode Music Expert : sous-ensemble strict de `music` — seules les chansons ayant
-  // des paroles dans expert_lyrics.js (les instrumentales n'ont rien à révéler).
-  // Pool ET clé de hash distincts de `music` : le tirage doit être indépendant,
-  // sinon le joueur fait le mode normal (où il entend l'audio), trouve la réponse,
-  // et l'Expert du jour devient gratuit. Ordre = celui de songs.js, comme les autres.
+  // ── Pools Mode Expert ──────────────────────────────────────────────────────
+  // Tous ont une clé de hash distincte de leur mode normal : le tirage doit être
+  // indépendant, sinon jouer le mode normal d'abord — où l'indice est bien plus
+  // généreux — donne la réponse de l'Expert du jour.
+  //
+  // Seuls les modes dont le CONTENU est restreint ont un pool propre ici :
+  //   - music_expert  : uniquement les chansons ayant des paroles
+  //   - classic_expert: uniquement les personnages ayant une citation
+  // AOA et Silhouette Expert rejouent le pool normal (l'indice change, pas le
+  // roster) — api/lib/daily_target.php réutilise directement `alloutattack` et
+  // `silhouette` avec une clé de hash suffixée, plutôt que d'en dupliquer les
+  // entrées ici et de les laisser dériver.
   music_expert: { pool: songs.filter((s) => expertLyrics[s.titre]).map((s) => s.titre) },
+  classic_expert: {
+    pool: characters.filter((c) => String(c.quote ?? "").trim()).map((c) => c.nom),
+  },
   alloutattack: {
     pool: aoaAutocompletePool,
     opusByName,

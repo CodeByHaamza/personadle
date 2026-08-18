@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { maskTerms } from "../js/gameCore.js";
+import { maskTerms, expertContext } from "../js/gameCore.js";
 import { expertLyrics } from "../musicsMode/database/expert_lyrics.js";
 import { songs } from "../musicsMode/database/songs.js";
 import { personaeCharacters } from "../personaeMode/database/personaeCharacters.js";
@@ -284,6 +284,60 @@ describe("expert_lore", () => {
       const cite = mask.some((m) => text.toLowerCase().includes(m.toLowerCase()));
       expect(cite, `${nom} (${lang}) : aucune forme du nom dans le texte`).toBe(true);
       expect(maskTerms(mask, text), `${nom} (${lang})`).not.toBe(text);
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Plomberie Expert partagée (js/gameCore.js)
+// ─────────────────────────────────────────────────────────────────────────────
+describe("expertContext", () => {
+  const stub = (search) => {
+    delete window.location;
+    window.location = { search };
+  };
+
+  it("mode normal : clés historiques intactes", () => {
+    stub("");
+    const ctx = expertContext({ prefix: "classicExpert", statsKey: "Classic", hashMode: "Classic" });
+    expect(ctx.isExpert).toBe(false);
+    // Une partie normale en cours ne doit jamais être perdue par ce câblage.
+    expect(ctx.key("target")).toBe("target");
+    expect(ctx.statsKey).toBe("Classic");
+    expect(ctx.hashMode).toBe("Classic");
+  });
+
+  it("mode Expert : clés cloisonnées et hash distinct", () => {
+    stub("?expert=1");
+    const ctx = expertContext({ prefix: "classicExpert", statsKey: "Classic", hashMode: "Classic" });
+    expect(ctx.isExpert).toBe(true);
+    expect(ctx.key("target")).toBe("classicExpert_target");
+    expect(ctx.statsKey).toBe("ClassicExpert");
+    // Le hash DOIT différer, sinon jouer le mode normal d'abord — où l'indice est
+    // bien plus généreux — donne la réponse de l'Expert du jour.
+    expect(ctx.hashMode).toBe("ClassicExpert");
+  });
+
+  it("n'active pas l'Expert sur une autre valeur du paramètre", () => {
+    for (const s of ["?expert=0", "?expert=true", "?expert", "?other=1"]) {
+      stub(s);
+      expect(expertContext({ prefix: "x", statsKey: "X", hashMode: "X" }).isExpert, s).toBe(false);
+    }
+  });
+
+  it("les clés de hash Expert correspondent à celles attendues par le serveur", () => {
+    // api/lib/daily_target.php code ces chaînes en dur. Une divergence ferait viser
+    // deux cibles différentes au client et au serveur, et chaque partie Expert
+    // partirait en anti_cheat sans que rien ne se voie côté joueur.
+    stub("?expert=1");
+    const attendu = {
+      Classic: "ClassicExpert",
+      Silhouette: "SilhouetteExpert",
+      AllOutAttack: "AllOutAttackExpert",
+      Music: "MusicExpert",
+    };
+    for (const [normal, expert] of Object.entries(attendu)) {
+      expect(expertContext({ prefix: "p", statsKey: normal, hashMode: normal }).hashMode).toBe(expert);
     }
   });
 });

@@ -90,6 +90,83 @@ export function normalize(str) {
     .toLowerCase();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE EXPERT — plomberie partagée par les modes
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Chaque mode Expert vit dans la MÊME page que son mode normal, distingué par
+// `?expert=1`. Dupliquer la page coûterait des centaines de lignes maintenues en
+// double, avec la garantie qu'un correctif ne parte un jour que d'un seul côté.
+//
+// L'état vit dans l'URL et non en localStorage : le mode reste partageable et
+// bookmarkable, un rechargement ne perd rien, et une même URL ne peut pas afficher
+// deux jeux différents selon un état caché.
+
+/** Vrai si la page courante tourne en Mode Expert. */
+export function isExpertPage() {
+  return new URLSearchParams(window.location.search).get("expert") === "1";
+}
+
+/**
+ * Contexte Expert d'un mode : clés localStorage cloisonnées, clé de stats et clé
+ * de hash du tirage quotidien.
+ *
+ * **Le tirage doit être indépendant du mode normal.** Avec la même clé de hash,
+ * jouer le mode normal d'abord — où l'indice est bien plus généreux — donnerait la
+ * réponse de l'Expert du jour. D'où `hashMode` suffixé, qui doit rester identique
+ * à la chaîne attendue par `api/lib/daily_target.php`, sinon chaque partie Expert
+ * est loguée en `anti_cheat`.
+ *
+ * @param {object} o
+ * @param {string} o.prefix   préfixe des clés Expert, ex. "classicExpert"
+ * @param {string} o.statsKey clé de stats du mode normal, ex. "Classic"
+ * @param {string} o.hashMode clé de hash du mode normal, ex. "Classic"
+ * @returns {{isExpert: boolean, statsKey: string, hashMode: string, key: (name: string) => string}}
+ */
+export function expertContext({ prefix, statsKey, hashMode }) {
+  const isExpert = isExpertPage();
+  return {
+    isExpert,
+    statsKey: isExpert ? `${statsKey}Expert` : statsKey,
+    hashMode: isExpert ? `${hashMode}Expert` : hashMode,
+    /**
+     * Traduit une clé localStorage du mode normal vers sa variante Expert.
+     * En mode normal la clé historique est rendue telle quelle — aucune partie en
+     * cours ne doit être perdue par ce câblage.
+     */
+    key: (name) => (isExpert ? `${prefix}_${name}` : name),
+  };
+}
+
+/**
+ * Câble le lien de bascule Normal ⇄ Expert (`#expertToggle`) et affiche le bon
+ * bloc de règles (`#rulesNormal` / `#rulesExpert`).
+ *
+ * C'est un `<a>` et non un `<button>` : le mode vit dans l'URL, donc le lien doit
+ * être copiable, ouvrable dans un onglet, et suivre l'historique du navigateur.
+ *
+ * @param {{isExpert: boolean}} ctx  contexte rendu par expertContext()
+ * @param {string} page             nom de fichier de la page, ex. "silhouette.html"
+ */
+export function setupExpertToggle(ctx, page) {
+  document.body.classList.toggle("expert-mode", ctx.isExpert);
+
+  const rules = (id, shown) =>
+    document.getElementById(id)?.style.setProperty("display", shown ? "" : "none");
+  rules("rulesNormal", !ctx.isExpert);
+  rules("rulesExpert", ctx.isExpert);
+
+  const toggle = document.getElementById("expertToggle");
+  if (!toggle) return;
+
+  const k = ctx.isExpert ? "ui.expert_leave" : "ui.expert_enter";
+  const t = window.i18n?.t?.(k);
+  toggle.setAttribute("data-i18n", k);
+  toggle.textContent = t != null && t !== k ? t : ctx.isExpert ? "← Normal mode" : "⚡ Expert mode";
+  toggle.classList.toggle("active", ctx.isExpert);
+  toggle.href = ctx.isExpert ? page : `${page}?expert=1`;
+}
+
 /**
  * Masque dans `text` toute occurrence des termes donnés — utilisé par les modes
  * Expert, où l'indice textuel cite souvent la réponse : les paroles d'une chanson

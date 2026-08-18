@@ -102,11 +102,32 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
                 $pools['music_expert']['pool'] ?? [], 'MusicExpert', $playedDate, $seedId
             );
 
+        // Classique Expert : seule la citation est donnée, donc seuls les personnages
+        // qui en ont une sont tirables — pool propre, plus étroit que `classic`.
+        case 'classic_expert':
+            return personadle_pick_from_pool(
+                $pools['classic_expert']['pool'] ?? [], 'ClassicExpert', $playedDate, $seedId
+            );
+
+        // Silhouette Expert : MÊME roster que le mode normal — seul l'indice change
+        // (dézoom figé au maximum). On réutilise donc le pool `silhouette` avec une
+        // clé de hash distincte, plutôt que d'en dupliquer 157 entrées dans le JSON
+        // et de les laisser dériver l'une de l'autre.
+        case 'silhouette_expert':
+            return personadle_pick_from_pool(
+                $pools['silhouette']['pool'] ?? [], 'SilhouetteExpert', $playedDate, $seedId
+            );
+
+        // AOA Expert : même roster et même logique de filtre que le mode normal
+        // (l'indice change — flou figé et noir et blanc — pas le pool). Partage donc
+        // le corps du cas ci-dessous, avec une clé de hash distincte.
+        case 'alloutattack_expert':
         case 'alloutattack': {
+            $hashKey = $mode === 'alloutattack_expert' ? 'AllOutAttackExpert' : 'AllOutAttack';
             $data = $pools['alloutattack'] ?? [];
             $pool = $data['pool'] ?? [];
             $opusByName = $data['opusByName'] ?? [];
-            $daily = personadle_pick_from_pool($pool, 'AllOutAttack', $playedDate, $seedId);
+            $daily = personadle_pick_from_pool($pool, $hashKey, $playedDate, $seedId);
             if ($daily === null) return null;
             if (empty($activeFilters)) return $daily;
             $filteredPool = array_values(array_filter($pool, function ($name) use ($opusByName, $activeFilters) {
@@ -114,7 +135,7 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
                 return count(array_intersect($opus, $activeFilters)) > 0;
             }));
             if (!empty($filteredPool) && !in_array($daily, $filteredPool, true)) {
-                return personadle_pick_from_pool($filteredPool, 'AllOutAttack', $playedDate, $seedId);
+                return personadle_pick_from_pool($filteredPool, $hashKey, $playedDate, $seedId);
             }
             return $daily;
         }

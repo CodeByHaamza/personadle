@@ -113,6 +113,54 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): plomberie partagée + pools serveur pour Classique, AOA et Silhouette
+
+Préparation des trois modes Expert restants. Aucun front dans ce lot : la couche partagée et
+la couche serveur d'abord, pour ne pas réécrire trois fois la même chose.
+
+### Plomberie partagée (`js/gameCore.js`)
+
+Music Expert avait câblé son cloisonnement à la main (préfixe localStorage, clé de stats, clé
+de hash, bouton de bascule). Recopier ça dans trois modes de plus garantissait une divergence.
+
+- `isExpertPage()` — lit `?expert=1`. L'état vit dans l'URL et non en localStorage : le mode
+  reste partageable et bookmarkable, et une même URL ne peut pas afficher deux jeux différents
+  selon un état caché.
+- `expertContext({ prefix, statsKey, hashMode })` — renvoie `isExpert`, les clés de stats et de
+  hash suffixées, et surtout `key(name)` qui traduit une clé localStorage du mode normal vers
+  sa variante Expert. **En mode normal la clé historique est rendue telle quelle** : aucune
+  partie en cours ne doit être perdue par ce câblage.
+- `setupExpertToggle(ctx, page)` — bascule `body.expert-mode`, affiche le bon bloc de règles
+  (`#rulesNormal` / `#rulesExpert`) et câble le lien `#expertToggle`.
+- Les styles du bouton et du halo de page quittent `musicsMode/music.css` pour `css/global.css`
+  — ils sont identiques pour les quatre modes. L'indice propre à chaque mode (paroles, flou,
+  dézoom) reste dans son CSS.
+
+### Couche serveur
+
+- `classic_expert` — pool propre : **180 personnages sur 184**, seuls ceux ayant une citation,
+  puisque la citation est le seul indice du mode.
+- `silhouette_expert` et `alloutattack_expert` — **pas de pool dupliqué**. Le roster est
+  identique au mode normal, seul l'indice change ; `api/lib/daily_target.php` réutilise donc
+  `silhouette` et `alloutattack` avec une clé de hash suffixée, plutôt que de recopier 157 et
+  71 entrées dans le JSON et de les laisser dériver.
+- `api/sessions.php` : `is_expert` accepté sur `music`, `classic`, `silhouette`, `alloutattack`.
+  Tout autre mode est refusé — une ligne que le recalcul anti-triche ne saurait pas rejouer ne
+  doit pas exister.
+
+### Test qui compte
+
+`expertContext` est vérifié contre **les chaînes de hash codées en dur dans
+`api/lib/daily_target.php`** (`ClassicExpert`, `SilhouetteExpert`, `AllOutAttackExpert`,
+`MusicExpert`). Une divergence ferait viser deux cibles différentes au client et au serveur, et
+chaque partie Expert partirait en `anti_cheat` sans que rien ne se voie côté joueur. Les 9
+tests E2E de Music Expert restent verts après le déplacement du CSS.
+
+### Reste à faire
+
+Le front des trois modes : indice Expert (citation seule / flou figé + noir et blanc / dézoom
+figé sur un point de contour), bouton, règles, i18n, tests. La plomberie les attend.
+
 ## 2026-08-15 — feat(expert): fiches Personae Persona 5 (EN + FR)
 
 Troisième paquet : les personas de Persona 5 / Royal / Strikers / Tactica, en anglais et en
