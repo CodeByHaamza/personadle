@@ -113,6 +113,59 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — fix(challenge): défis bloqués « en cours », 404 et bannière absente
+
+Trois symptômes signalés par des joueurs — acceptation qui ne redirige pas, redirection vers
+une 404, et redirection sans bannière de défi (gagner ou perdre ne changeait rien) — plus une
+accumulation de défis bloqués en statut « accepted » qu'on ne pouvait ni jouer ni annuler.
+
+### Root cause commune
+
+**L'état était modifié avant qu'on sache si l'action pouvait aboutir.** Dans les deux points
+d'acceptation (`js/challenge-notif.js` et `profile/friends/friends.js`), l'ordre était :
+
+1. `updateStatus(id, "accepted")` — avec `.catch(() => {})`, donc un échec serveur passait inaperçu
+2. purge de l'état du mode + application des filtres de l'expéditeur
+3. écriture de `activeChallenge` en localStorage
+4. **et seulement là** : recherche de la page cible, `MODE_PAGE[modeKey] ?? ""`
+
+Si l'étape 4 ne trouvait rien, la fonction se contentait de fermer la popup. Le défi était
+pourtant déjà « accepted » côté serveur et `activeChallenge` déjà écrit côté client : bloqué,
+injouable, non annulable. Et si l'étape 1 échouait silencieusement, client et serveur
+divergeaient dans l'autre sens — le joueur jouait un défi que le serveur croyait en attente.
+
+### Pourquoi l'étape 4 échouait
+
+`challenge-notif.js` dérivait la clé de mode avec un `.toLowerCase()` nu au lieu de
+`normalizeModeKey()` (CLAUDE.md §8 : « le vocabulaire des modes passe **toujours** par
+normalizeModeKey() »). Une graphie comme « All Out Attack » devenait « all out attack », clé
+absente de `MODE_PAGE`, `MODE_STATE_KEYS` **et** `FILTER_STORAGE_KEYS` — les trois échouaient
+en silence d'un coup, ce qui explique qu'on ait observé selon les cas une absence de
+redirection, une absence de nettoyage d'état, ou une absence de bannière.
+
+### Correctifs
+
+- `normalizeModeKey()` utilisé dans les deux chemins d'acceptation, et la clé normalisée est
+  celle stockée dans `activeChallenge.mode` — `getActiveChallengeTarget()` la compare déjà via
+  `normalizeModeKey()`, les deux côtés parlent enfin la même langue.
+- **Ordre inversé** : la page cible est résolue et validée **avant** toute écriture. Mode
+  inconnu → message au joueur, aucun état touché, le défi reste acceptable plus tard.
+- `updateStatus()` n'est plus avalé : un échec serveur interrompt l'acceptation au lieu de
+  laisser le client croire que c'est parti.
+- Absence de `window._personadleApi` traitée explicitement — sans API, le serveur ne saura
+  jamais que le défi a été accepté.
+- `friends.js` : la table des pages devient `MODE_PAGE_MAP` en constante de module, documentée
+  (2 niveaux de remontée depuis `profile/friends/`, pas 1).
+- 3 clés i18n × 6 langues (`challenge.unknown_mode`, `.offline`, `.accept_failed`).
+
+`CACHE_VERSION` → `personadle-v80`.
+
+### Angle mort connu
+
+Les défis **déjà** bloqués en base ne sont pas réparés par ce correctif : il empêche d'en
+créer de nouveaux. Un nettoyage (remise en `unread` des `accepted` sans partie associée) ou
+un bouton « abandonner le défi en cours » reste à faire.
+
 ## 2026-08-15 — fix: déconnexion en boucle sur la page Amis + chargement infini en AOA
 
 Deux bugs remontés par des joueurs, tous deux « réparés » par un Ctrl+Shift+R — signature

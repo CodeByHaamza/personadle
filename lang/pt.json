@@ -960,7 +960,10 @@
     "already_active": "Termina primeiro o teu desafio atual.",
     "notif_challenges_you": "desafia-te!",
     "notif_beat": "Bate",
-    "notif_attempts": "tentativa(s)"
+    "notif_attempts": "tentativa(s)",
+    "unknown_mode": "O modo deste desafio está indisponível.",
+    "offline": "Precisas de estar online para aceitar um desafio.",
+    "accept_failed": "Não foi possível aceitar o desafio. Tenta de novo."
   },
   "challenge_result": {
     "title_win": "MUITO BEM!",

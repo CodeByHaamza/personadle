@@ -849,7 +849,10 @@
     "active_challenge": "Défi",
     "notif_challenges_you": "vous lance un défi !",
     "notif_beat": "Battre",
-    "notif_attempts": "tentative(s)"
+    "notif_attempts": "tentative(s)",
+    "unknown_mode": "Le mode de ce défi est indisponible.",
+    "offline": "Tu dois être en ligne pour accepter un défi.",
+    "accept_failed": "Impossible d'accepter le défi. Réessaie."
   },
   "challenge_result": {
     "title_win": "BRAVO !",

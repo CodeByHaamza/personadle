@@ -960,7 +960,10 @@
     "already_active": "Finish your current challenge first.",
     "notif_challenges_you": "challenges you!",
     "notif_beat": "Beat",
-    "notif_attempts": "attempt(s)"
+    "notif_attempts": "attempt(s)",
+    "unknown_mode": "This challenge's mode is unavailable.",
+    "offline": "You need to be online to accept a challenge.",
+    "accept_failed": "Could not accept the challenge. Try again."
   },
   "challenge_result": {
     "title_win": "WELL DONE!",
