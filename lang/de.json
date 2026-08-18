@@ -86,7 +86,15 @@
       "tooltip_persona": "Die spezifische Persona, die mit dem Charakter verbunden ist — oder seine Schattenform.",
       "tooltip_arcana": "Seine Tarot-Arcana, die seine symbolische und narrative Rolle definiert.",
       "correct": "✅ Richtig! Es war {{name}}!",
-      "giveup_reveal": "❌ Die Antwort war {{name}}"
+      "giveup_reveal": "❌ Die Antwort war {{name}}",
+      "expert_goal": "⚡ Expertenmodus:",
+      "expert_goal_text": "Ein Zitat. Keine Kategorien, keine Farben, keine Hinweise — nur der Satz und der Name.",
+      "expert_tip_1": "Das Zitat steht schon beim ersten Versuch da. Es ist der einzige Hinweis.",
+      "expert_tip_2": "Eine Antwort ist richtig oder falsch. Nichts wird verglichen, nichts wird gelb.",
+      "expert_tip_3": "Nennt die Figur ihren eigenen Namen, wird er verdeckt. Am Rundenende erscheint er wieder.",
+      "expert_tip_4": "Nur Figuren, die tatsächlich ein Zitat haben, können gezogen werden.",
+      "expert_tip_5": "Du hast 5 Versuche, bevor der Aufgeben-Knopf freigeschaltet wird.",
+      "expert_tip_6": "Der Expertenmodus hat seine eigene Tagesfigur und eigene Statistiken. Er zählt nicht für deine normale Klassik-Serie."
     },
     "emoji": {
       "name": "Emoji",

@@ -86,7 +86,15 @@
       "tooltip_persona": "A Persona específica ligada à personagem — ou a sua forma de Shadow.",
       "tooltip_arcana": "O seu Arcano de Tarô, que define o seu papel simbólico e narrativo.",
       "correct": "✅ Correto! Era {{name}}!",
-      "giveup_reveal": "❌ A resposta era {{name}}"
+      "giveup_reveal": "❌ A resposta era {{name}}",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "Uma citação. Sem categorias, sem cores, sem dicas — só a frase e o nome.",
+      "expert_tip_1": "A citação aparece logo na primeira tentativa. É a única pista que terás.",
+      "expert_tip_2": "Uma resposta está certa ou errada. Nada é comparado, nada fica amarelo.",
+      "expert_tip_3": "Se a personagem disser o próprio nome, ele fica escondido. Volta no fim da partida.",
+      "expert_tip_4": "Só podem sair personagens que tenham mesmo uma citação.",
+      "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_6": "O Especialista tem a própria personagem do dia e as próprias estatísticas. Não conta para a tua sequência de Clássico normal."
     },
     "emoji": {
       "name": "Emoji",

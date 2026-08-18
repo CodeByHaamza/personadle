@@ -113,6 +113,59 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): Mode Classique Expert jouable
+
+Deuxième mode Expert livré, premier à utiliser la plomberie partagée du lot précédent.
+Une citation, et rien d'autre.
+
+### Mécanique
+
+Le mode normal compare sept attributs (nom, genre, âge, manieur, persona, arcane, opus) avec
+un code couleur. L'Expert n'en montre **aucun** : la citation du personnage est affichée dès
+le premier essai, et une réponse est juste ou fausse — rien entre les deux.
+
+### Détails techniques
+
+- `EXPERT = expertContext({ prefix: "classicExpert", statsKey: "Classic", hashMode: "Classic" })`,
+  puis `EXPERT.key("target")`, `EXPERT.key("attempts")`, `EXPERT.key("guessHistory")`. En mode
+  normal ces clés restent `target` / `attempts` / `guessHistory` — les parties en cours des
+  joueurs ne sont pas perdues par le câblage.
+- **Les colonnes de comparaison ne sont pas cachées : elles ne sont pas construites.**
+  `keysToCompare` tombe à `["nom"]` et l'en-tête n'a que deux cellules. Les masquer en CSS les
+  aurait laissées lisibles dans l'inspecteur, ce qui viderait le mode de son intérêt. Un test
+  E2E compte les `.guess-cell` pour verrouiller ça.
+- **Le pool exclut les personnages sans citation** — 180 sur 184. Tirer quelqu'un sans réplique
+  donnerait une partie sans le moindre indice. `EXPERT_CHARACTERS` doit rester aligné sur le
+  pool `classic_expert` du serveur, ordre compris.
+- Le nom de la cible est masqué **à l'affichage** dans sa propre citation (certaines se nomment
+  elles-mêmes), et réapparaît en fin de partie via l'événement `personadle:classic-reveal` —
+  `fillVictoryBox()` est déclarée hors du scope où vit la cible, un événement évite de faire
+  remonter cet état d'un cran.
+- Bouton Indice masqué en Expert : il n'aurait plus rien à révéler.
+- Seuil d'abandon à 5 (contre 8 en normal), aligné sur Music Expert. Sans indice progressif,
+  8 essais avant de pouvoir renoncer n'apportent que de la frustration.
+- Ni `updateProfileStats()`, ni `checkUnlocksAfterGame()`, ni `showCommunityStats()` en Expert
+  — même raison que pour Music : le serveur exclut déjà l'Expert de `user_stats`, les appeler
+  ferait diverger le profil local au prochain `pullProfileFromCloud()`.
+- 7 clés i18n × 6 langues. CSS Expert dans `classique.css` (grille à deux colonnes, citation
+  promue en indice principal) ; le bouton et le halo restent dans `global.css`.
+
+### Ce que l'E2E a fait remonter
+
+`#giveUpButton` est un `<div class="link-wrapper">`, pas un `<button>` : `enableGiveUpButton()`
+y pose `.disabled`, **ce qui n'a aucun effet sur un div**. Le verrou réel est dans le handler
+(`if (attempts < GIVE_UP_THRESHOLD) return`), donc le comportement est correct — mais un test
+écrit avec `toBeDisabled()` passerait à côté. Le test vérifie désormais le comportement :
+cliquer avant 5 essais ne doit rien produire.
+
+6 tests E2E, plus les 17 existants (Music Expert + game-flow) revérifiés sans régression.
+`CACHE_VERSION` → `personadle-v81`.
+
+### Reste
+
+AOA Expert (flou figé + noir et blanc) et Silhouette Expert (dézoom figé sur un point de
+contour). La plomberie et les pools serveur les attendent déjà.
+
 ## 2026-08-15 — feat(expert): plomberie partagée + pools serveur pour Classique, AOA et Silhouette
 
 Préparation des trois modes Expert restants. Aucun front dans ce lot : la couche partagée et

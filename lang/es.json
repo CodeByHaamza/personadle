@@ -86,7 +86,15 @@
       "tooltip_persona": "La Persona específica vinculada al personaje — o su forma de Sombra.",
       "tooltip_arcana": "Su Arcana del Tarot, que define su rol simbólico y narrativo.",
       "correct": "✅ ¡Correcto! ¡Era {{name}}!",
-      "giveup_reveal": "❌ La respuesta era {{name}}"
+      "giveup_reveal": "❌ La respuesta era {{name}}",
+      "expert_goal": "⚡ Modo Experto:",
+      "expert_goal_text": "Una cita. Sin categorías, sin colores, sin pistas: solo la frase y el nombre.",
+      "expert_tip_1": "La cita se muestra desde el primer intento. Es la única pista que tendrás.",
+      "expert_tip_2": "Una respuesta es correcta o incorrecta. No se compara nada, nada se pone amarillo.",
+      "expert_tip_3": "Si el personaje dice su propio nombre, queda oculto. Reaparece al terminar la partida.",
+      "expert_tip_4": "Solo pueden salir personajes que realmente tengan una cita.",
+      "expert_tip_5": "Tienes 5 intentos antes de que se active el botón Rendirse.",
+      "expert_tip_6": "El Experto tiene su propio personaje diario y sus propias estadísticas. No cuenta para tu racha de Clásico normal."
     },
     "emoji": {
       "name": "Emoji",

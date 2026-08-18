@@ -86,7 +86,15 @@
       "tooltip_persona": "The specific Persona linked to the character — or their Shadow form.",
       "tooltip_arcana": "Their Tarot Arcana, which defines their symbolic and narrative role.",
       "correct": "✅ Correct! It was {{name}}!",
-      "giveup_reveal": "❌ The answer was {{name}}"
+      "giveup_reveal": "❌ The answer was {{name}}",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "One quote. No categories, no colours, no hints — just the line and the name.",
+      "expert_tip_1": "The quote is shown from the very first guess. It is the only clue you get.",
+      "expert_tip_2": "Guesses are only right or wrong. Nothing is compared, nothing turns yellow.",
+      "expert_tip_3": "If the character says their own name, it is hidden. It comes back when the round ends.",
+      "expert_tip_4": "Only characters who actually have a quote can be drawn.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily character and its own stats. It will not carry your normal Classic streak."
     },
     "emoji": {
       "name": "Emoji",

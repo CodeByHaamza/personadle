@@ -86,7 +86,15 @@
       "tooltip_persona": "Le Persona spécifique lié au personnage — ou sa forme Shadow.",
       "tooltip_arcana": "L'Arcane du Tarot qui définit son rôle symbolique et narratif.",
       "correct": "✅ Correct ! C'était {{name}} !",
-      "giveup_reveal": "❌ La réponse était {{name}}"
+      "giveup_reveal": "❌ La réponse était {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Une citation. Aucune catégorie, aucune couleur, aucun indice — la réplique et le nom, c'est tout.",
+      "expert_tip_1": "La citation est affichée dès le premier essai. C'est le seul indice que tu auras.",
+      "expert_tip_2": "Une réponse est juste ou fausse. Rien n'est comparé, rien ne passe au jaune.",
+      "expert_tip_3": "Si le personnage se nomme lui-même, son nom est masqué. Il réapparaît à la fin de la partie.",
+      "expert_tip_4": "Seuls les personnages ayant réellement une citation peuvent être tirés.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Classique normale."
     },
     "emoji": {
       "name": "Emoji",

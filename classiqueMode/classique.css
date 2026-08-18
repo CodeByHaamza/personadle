@@ -635,3 +635,45 @@ body.darkmode .counter.activated {
     z-index: 1000;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   MODE EXPERT — citation seule
+   Le bouton de bascule et le halo de page vivent dans css/global.css (partagés
+   par les 4 modes). Ici : la grille réduite à deux colonnes et la citation
+   promue au rang d'indice principal.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* Sept colonnes de comparaison en moins : portrait + nom, rien d'autre.
+   Les cellules ne sont pas masquées mais jamais construites (modeClassique.js) —
+   les cacher en CSS les laisserait lisibles dans l'inspecteur. */
+.category-row--expert,
+.guess-row--expert {
+  grid-template-columns: 60px minmax(120px, 1fr);
+  max-width: min(420px, 92vw);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* La citation devient l'indice, pas une récompense : encadrée, centrée, lisible. */
+body.expert-mode #quoteHint {
+  display: block;
+  box-sizing: border-box;
+  width: min(560px, 92vw);
+  margin: 18px auto;
+  padding: 18px 22px;
+  background: rgba(12, 12, 14, 0.92);
+  border-left: 4px solid #e63946;
+  border-radius: 4px;
+  color: #f2f2f2;
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  body.expert-mode #quoteHint {
+    padding: 14px 16px;
+    font-size: 0.95rem;
+  }
+}

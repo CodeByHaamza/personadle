@@ -23,6 +23,9 @@ import {
   updateCounterElement,
   getActiveChallengeTarget,
   isChallengePlay,
+  expertContext,
+  setupExpertToggle,
+  maskTerms,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -38,11 +41,33 @@ import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 
 const modeName = "Classic";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE EXPERT — la citation, et rien d'autre
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Même page que le mode normal, distinguée par `?expert=1`. Le mode normal
+// compare sept attributs (genre, âge, manieur, persona, arcane, opus…) ; l'Expert
+// n'en montre aucun. Seule la citation du personnage est donnée, dès le premier
+// essai, et une réponse est juste ou fausse — rien entre les deux.
+const EXPERT = expertContext({
+  prefix: "classicExpert",
+  statsKey: modeName,
+  hashMode: modeName,
+});
+
+/** Personnages tirables en Expert : ceux qui ont une citation à donner.
+ *  Ordre = celui de characters_clean.js. Doit rester identique au pool
+ *  `classic_expert` de api/data/daily_pools.json, sinon le serveur attend une
+ *  autre cible et logue chaque partie en anti_cheat. */
+const EXPERT_CHARACTERS = characters.filter((c) => String(c.quote ?? "").trim());
+
 /** Minimum attempts before the Hint button activates. */
 const HINT_THRESHOLD = 3;
 
-/** Minimum attempts before the Give-Up button activates. */
-const GIVE_UP_THRESHOLD = 8;
+/** Minimum attempts before the Give-Up button activates.
+ *  5 en Expert (aligné sur Music Expert) : sans indice progressif, laisser 8 essais
+ *  avant de pouvoir renoncer n'apporte que de la frustration. */
+const GIVE_UP_THRESHOLD = EXPERT.isExpert ? 5 : 8;
 
 /** All specific opus codes available in Classic mode. */
 const ALL_OPUS = [
@@ -74,10 +99,10 @@ let personas = [...originalPersonas];
 
 let gameOver = false;
 let daltonianMode = localStorage.getItem("daltonianMode") === "enabled";
-let attempts = parseInt(localStorage.getItem("attempts")) || 0;
+let attempts = parseInt(localStorage.getItem(EXPERT.key("attempts"))) || 0;
 
 // Stats / session tracking
-const todayKey = `statsLogged_${modeName}_${parisDateKey()}`;
+const todayKey = `statsLogged_${EXPERT.statsKey}_${parisDateKey()}`;
 let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
 let sessionStartTime = Date.now();
 
@@ -221,7 +246,7 @@ function initializeAutocomplete(element, array) {
  */
 function filterCharacterPool() {
   // Exclure les noms déjà devinés pour que l'autocomplétion reste cohérente
-  const history = JSON.parse(localStorage.getItem("guessHistory")) || [];
+  const history = JSON.parse(localStorage.getItem(EXPERT.key("guessHistory"))) || [];
   const guessedSet = new Set(history.map((n) => n.toLowerCase()));
 
   const filtered = originalPersonas.filter((name) => {
@@ -293,6 +318,10 @@ export function compareAttribute(key, value, targetVal) {
 }
 
 function fillVictoryBox(nom, isGiveup) {
+  // Fin de partie : le mode Expert réaffiche sa citation sans masque. Un événement
+  // plutôt qu'un appel direct — fillVictoryBox() est déclarée hors du scope où vit
+  // la cible, et un événement évite de faire remonter cet état d'un cran.
+  window.dispatchEvent(new CustomEvent("personadle:classic-reveal"));
   const i18 = window.i18n || { t: (k, v) => v?.name ?? k };
   const img = document.getElementById("victoryPortrait");
   const msg = document.getElementById("winMessage");
@@ -329,7 +358,12 @@ function checkGuess(name, target, forceReveal = false) {
     const i = window.i18n || { t: (k) => k };
     const categoryRow = document.createElement("div");
     categoryRow.classList.add("category-row");
-    categoryRow.innerHTML = `
+    // En Expert, aucune colonne de comparaison : les attributs ne sont ni affichés
+    // ni même construits dans le DOM. Les masquer en CSS les laisserait lisibles
+    // dans l'inspecteur, ce qui viderait le mode de son intérêt.
+    categoryRow.innerHTML = EXPERT.isExpert
+      ? `<div></div><div class="tooltip">${i.t("modes.classic.label_name")}</div>`
+      : `
       <div></div>
       <div class="tooltip">${i.t("modes.classic.label_name")}<span class="tooltip-text">${i.t("modes.classic.tooltip_name")}</span></div>
       <div class="tooltip">${i.t("modes.classic.label_gender")}<span class="tooltip-text">${i.t("modes.classic.tooltip_gender")}</span></div>
@@ -338,11 +372,13 @@ function checkGuess(name, target, forceReveal = false) {
       <div class="tooltip">${i.t("modes.classic.label_persona")}<span class="tooltip-text">${i.t("modes.classic.tooltip_persona")}</span></div>
       <div class="tooltip">${i.t("modes.classic.label_arcana")}<span class="tooltip-text">${i.t("modes.classic.tooltip_arcana")}</span></div>
       <div class="tooltip">${i.t("modes.classic.label_game")}<span class="tooltip-text">${i.t("modes.classic.tooltip_game")}</span></div>`;
+    categoryRow.classList.toggle("category-row--expert", EXPERT.isExpert);
     output.insertBefore(categoryRow, output.firstChild);
   }
 
   const row = document.createElement("div");
   row.classList.add("guess-row");
+  if (EXPERT.isExpert) row.classList.add("guess-row--expert");
 
   // Portrait image
   const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
@@ -352,7 +388,9 @@ function checkGuess(name, target, forceReveal = false) {
   img.className = "guess-image";
   row.appendChild(img);
 
-  const keysToCompare = ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
+  const keysToCompare = EXPERT.isExpert
+    ? ["nom"]
+    : ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
   const i18 = window.i18n || { t: (k) => k };
   // Labels affichés sur mobile via CSS ::before (data-label)
   const keyLabels = {
@@ -460,11 +498,12 @@ function checkGuess(name, target, forceReveal = false) {
     // déjà à true ici et le "giveup" attendu était silencieusement ignoré.
     if (wasFresh && !statsAlreadyLogged && !forceReveal && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-      updateProfileStats({ result: "win", mode: modeName, timeSpent });
+      if (!EXPERT.isExpert) updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(
         buildGameSession({
           mode: modeName,
           targetName: target.nom,
+        isExpert: EXPERT.isExpert,
           result: "win",
           attempts,
           timeMs: timeSpent * 1000,
@@ -502,7 +541,7 @@ function checkGuess(name, target, forceReveal = false) {
 
       localStorage.setItem("personaUserProfile", JSON.stringify(_pr));
       trackUniqueDay(_pr, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pr)));
-      checkUnlocksAfterGame(modeName);
+      if (!EXPERT.isExpert) checkUnlocksAfterGame(modeName);
     }
 
     // !forceReveal ici aussi : le handler Give Up gère déjà lui-même revealNextLink/
@@ -519,7 +558,7 @@ function checkGuess(name, target, forceReveal = false) {
         characters.filter((c) => personas.includes(c.nom) && c.nom !== target.nom).map((c) => c.nom)
       );
       checkChallengeCompletion("classic", attempts, true);
-      showCommunityStats(modeName, target.nom);
+      if (!EXPERT.isExpert) showCommunityStats(modeName, target.nom);
       fillVictoryBox(target.nom, false);
       document.getElementById("victoryBox").style.display = "block";
     }
@@ -563,6 +602,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (window.__i18nReady) await window.__i18nReady;
   applyDarkModeStyles();
   setupRulesModal();
+  setupExpertToggle(EXPERT, "classiqueMode.html");
 
   const textbar = document.getElementById("textbar");
   textbar.value = "";
@@ -598,9 +638,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeAutocomplete(textbar, personas);
 
   // ── Restore session state ──
-  attempts = parseInt(localStorage.getItem("attempts")) || 0;
-  let target = JSON.parse(localStorage.getItem("target"));
-  let history = JSON.parse(localStorage.getItem("guessHistory")) || [];
+  attempts = parseInt(localStorage.getItem(EXPERT.key("attempts"))) || 0;
+  let target = JSON.parse(localStorage.getItem(EXPERT.key("target")));
+  let history = JSON.parse(localStorage.getItem(EXPERT.key("guessHistory"))) || [];
 
   // If already won today, disable inputs and show navigation
   if (history.includes(target?.nom)) {
@@ -623,14 +663,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const ct = characters.find((c) => c.nom === challengeTargetName);
     if (ct) {
       target = ct;
-      localStorage.setItem("target", JSON.stringify(target));
+      localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
     }
   }
 
   // Pick daily target if none stored (seeded RNG — same character for all players today)
   if (!target) {
-    target = getDailyTarget(characters, "Classic");
-    localStorage.setItem("target", JSON.stringify(target));
+    // Pool ET clé de hash distincts en Expert : sans ça, jouer le mode normal
+    // d'abord — où sept attributs sont comparés — donnerait la réponse du jour.
+    target = EXPERT.isExpert
+      ? getDailyTarget(EXPERT_CHARACTERS, EXPERT.hashMode)
+      : getDailyTarget(characters, EXPERT.hashMode);
+    localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
   }
 
   // Replay previous guesses to restore grid
@@ -646,9 +690,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const guessName = textbar.value.trim();
     if (!guessName) return;
     attempts++;
-    localStorage.setItem("attempts", attempts);
+    localStorage.setItem(EXPERT.key("attempts"), attempts);
     history.push(guessName);
-    localStorage.setItem("guessHistory", JSON.stringify(history));
+    localStorage.setItem(EXPERT.key("guessHistory"), JSON.stringify(history));
     updateCounters();
     if (attempts >= HINT_THRESHOLD) enableHintButton();
     if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
@@ -672,7 +716,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!history.includes(target.nom)) {
       history.push(target.nom);
-      localStorage.setItem("guessHistory", JSON.stringify(history));
+      localStorage.setItem(EXPERT.key("guessHistory"), JSON.stringify(history));
     }
 
     // Défi à cible dédiée : le give-up compte pour le défi (perdu) mais ne se
@@ -680,11 +724,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const wasChallengePlay = isChallengePlay("classic");
     if (!statsAlreadyLogged && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-      updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
+      if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
       savePendingSession(
         buildGameSession({
           mode: modeName,
           targetName: target.nom,
+        isExpert: EXPERT.isExpert,
           result: "giveup",
           attempts,
           timeMs: timeSpent * 1000,
@@ -696,15 +741,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Give Up ne passait jamais par checkBadgesAfterGame() (seul le chemin victoire l'appelait,
       // cf. checkGuess()) — un badge comme ace_defective (10 give-ups) ne se débloquait donc
       // jamais tant qu'on n'allait pas sur le profil, jamais "en live" après l'action elle-même.
-      checkUnlocksAfterGame(modeName);
+      if (!EXPERT.isExpert) checkUnlocksAfterGame(modeName);
     }
 
     checkChallengeCompletion("classic", attempts, false);
-    showCommunityStats(modeName, target.nom);
+    if (!EXPERT.isExpert) showCommunityStats(modeName, target.nom);
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
     fillVictoryBox(target.nom, true);
     document.getElementById("victoryBox").style.display = "block";
   });
+
+  // ── Indice Expert : la citation, tout de suite ──
+  // Elle remplace le bouton Indice, qui n'aurait plus rien à révéler. Le nom de la
+  // cible y est masqué à l'AFFICHAGE — certaines citations se nomment elles-mêmes.
+  // La révélation de fin de partie réaffiche simplement le texte brut.
+  if (EXPERT.isExpert) {
+    hintButton.style.display = "none";
+    const showQuote = (reveal = false) => {
+      if (!target?.quote) return;
+      quoteHint.textContent = reveal ? target.quote : maskTerms([target.nom], target.quote, "▮▮▮");
+      quoteHint.style.display = "block";
+    };
+    showQuote();
+    // Rejouée à la fin de partie par fillVictoryBox() via cet écouteur.
+    window.addEventListener("personadle:classic-reveal", () => showQuote(true));
+  }
 
   // ── Hint button (available after HINT_THRESHOLD attempts) ──
   hintButton.addEventListener("click", () => {
@@ -727,9 +788,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     statsAlreadyLogged = false;
     sessionStartTime = Date.now();
 
-    localStorage.removeItem("target");
-    localStorage.removeItem("attempts");
-    localStorage.removeItem("guessHistory");
+    localStorage.removeItem(EXPERT.key("target"));
+    localStorage.removeItem(EXPERT.key("attempts"));
+    localStorage.removeItem(EXPERT.key("guessHistory"));
     attempts = 0;
     history = [];
     updateCounters();
@@ -760,7 +821,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? _filteredPool.filter((c) => c.nom !== _prevTarget.nom)
         : _filteredPool;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
-    localStorage.setItem("target", JSON.stringify(target));
+    localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
 
     const nav = document.getElementById("modeNavigationContainer");
     if (nav) {
@@ -794,7 +855,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function updateCounters() {
-  const attempts = parseInt(localStorage.getItem("attempts")) || 0;
+  const attempts = parseInt(localStorage.getItem(EXPERT.key("attempts"))) || 0;
   updateCounterElement("hintCounter", attempts, HINT_THRESHOLD);
   updateCounterElement("giveUpCounter", attempts, GIVE_UP_THRESHOLD);
 }

@@ -86,7 +86,15 @@
       "tooltip_persona": "La Persona specifica collegata al personaggio — o la sua forma Ombra.",
       "tooltip_arcana": "La sua Arcana dei Tarocchi, che definisce il suo ruolo simbolico e narrativo.",
       "correct": "✅ Corretto! Era {{name}}!",
-      "giveup_reveal": "❌ La risposta era {{name}}"
+      "giveup_reveal": "❌ La risposta era {{name}}",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "Una citazione. Nessuna categoria, nessun colore, nessun aiuto: solo la battuta e il nome.",
+      "expert_tip_1": "La citazione appare fin dal primo tentativo. È l'unico indizio che avrai.",
+      "expert_tip_2": "Una risposta è giusta o sbagliata. Non si confronta nulla, nulla diventa giallo.",
+      "expert_tip_3": "Se il personaggio pronuncia il proprio nome, viene nascosto. Riappare a fine partita.",
+      "expert_tip_4": "Possono uscire solo personaggi che hanno davvero una citazione.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie Classica normale."
     },
     "emoji": {
       "name": "Emoji",
