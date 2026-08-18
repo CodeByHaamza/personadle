@@ -574,6 +574,12 @@ export function buildGameSession({
     time_ms: Math.round(timeMs),
     active_filters: filters,
     is_expert: isExpert,
+    // Clé d'idempotence (migration 032). savePendingSession() met les sessions en
+    // file dans localStorage quand le réseau tombe puis les rejoue : sans elle, un
+    // timeout sur une requête que le serveur avait pourtant traitée insérerait la
+    // partie deux fois — l'ancienne contrainte d'unicité par jour l'empêchait
+    // accidentellement, elle n'existe plus.
+    client_session_id: crypto.randomUUID(),
   };
 }
 

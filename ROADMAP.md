@@ -161,6 +161,19 @@
   - Schéma minimal : colonne `discord_id` (unique) + `discord_username` sur `users`, pas de
     table `oauth_accounts` séparée tant qu'un seul provider existe
   - `discord_id` = donnée personnelle → à intégrer au flow RGPD existant (suppression/export)
+- [ ] **Classements séparés plutôt qu'un score unique** (décision 2026-08-15, suite à la
+  migration 032 qui fait compter toutes les parties). Un classement au volume récompenserait
+  celui qui enchaîne 200 parties plutôt que le meilleur joueur. Trois axes distincts :
+  - **Meilleure série** — la régularité, déjà mesurée par la streak (jours distincts).
+  - **Meilleur ratio** — victoires / parties, **lissé** pour qu'un joueur à 1 partie et
+    1 victoire ne soit pas premier. Deux méthodes possibles : moyenne bayésienne
+    `(wins + C·m) / (games + C)` avec `m` le taux moyen global et `C` ≈ 20 parties
+    fictives (simple à expliquer au joueur), ou borne inférieure de Wilson à 95 %
+    (plus rigoureuse, plus dure à expliquer). Recommandation : bayésienne, parce qu'un
+    classement dont personne ne comprend le calcul est perçu comme truqué.
+  - **Meilleur score** — général et par mode, sur le volume assumé.
+  Chaque axe existe aussi en version Expert (`is_expert`), soit la 4e dimension déjà prévue
+  ci-dessous.
 - [ ] **Filtre "Expert" sur le classement** — `api/leaderboard/` distingue déjà mode / période /
   métrique ; ajouter une 4e dimension (colonne `is_expert` sur `game_sessions`) plutôt qu'un
   classement séparé — réutilise tout le pipeline existant (endpoint, agrégation `user_stats`,
@@ -419,7 +432,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 6 langues,
-> **689 tests JS · 196 PHPUnit · 76 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **689 tests JS · 193 PHPUnit · 76 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -475,7 +488,7 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 689 Vitest · 196 PHPUnit · 76 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q1  | Tests : 689 Vitest · 193 PHPUnit · 76 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
 | Q2  | i18n EN/FR/ES/DE/IT/PT (1024 clés)             | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |

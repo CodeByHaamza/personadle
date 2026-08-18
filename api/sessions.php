@@ -41,6 +41,12 @@ $timeMs      = (int)           ($data['time_ms']    ?? 0);
 $filters     =                  $data['active_filters'] ?? [];
 // Mode Expert (migration 031) — même `mode`, mécanique et cible différentes.
 $isExpert    = filter_var($data['is_expert'] ?? false, FILTER_VALIDATE_BOOLEAN);
+// Clé d'idempotence générée par le client (migration 032) : rejouer une session
+// déjà enregistrée renvoie 409 au lieu de l'insérer une seconde fois.
+$clientSessionId = trim((string) ($data['client_session_id'] ?? ''));
+if ($clientSessionId !== '' && !preg_match('/^[0-9a-fA-F-]{8,36}$/', $clientSessionId)) {
+    jsonError('Invalid client_session_id', 400);
+}
 
 if (!in_array($mode, $validModes, true)) {
     jsonError("Invalid mode. Expected one of: " . implode(', ', $validModes));

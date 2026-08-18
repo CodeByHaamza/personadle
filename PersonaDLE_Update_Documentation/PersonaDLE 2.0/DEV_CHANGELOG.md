@@ -113,6 +113,65 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(stats): toutes les parties comptent, la streak seule reste journalière
+
+Signalement joueur : « j'ai gagné 50 fois en Music dans la soirée, rien n'a été sauvegardé ».
+Ce n'était pas un bug mais le design — `uq_session_per_day` n'autorisait qu'une session par
+joueur, mode et jour. Décision de Hamza : le design change.
+
+### Migration 032
+
+- **`uq_session_per_day` supprimée.** Chaque partie terminée est désormais enregistrée et
+  comptée dans les stats.
+- **`client_session_id` CHAR(36) UNIQUE** — clé d'idempotence générée par le client. La
+  contrainte d'unicité servait aussi, accidentellement, de garde-fou anti-doublon :
+  `savePendingSession()` met les sessions en file dans localStorage quand le réseau tombe,
+  puis les rejoue. Sans elle, un timeout sur une requête que le serveur avait pourtant traitée
+  aurait inséré la partie deux fois. L'UUID rend le rejeu inoffensif **sans** plafonner le
+  nombre de parties par jour.
+- L'index `(user_id, mode, played_date, is_expert)` est conservé, simplement non unique — il
+  reste l'axe de lecture de la streak, des stats du jour et de l'anti-triche.
+- Rejouée sur base vierge pré-migration : 3 parties le même jour acceptées, rejeu du même
+  `client_session_id` rejeté en 1062.
+
+### Streak — recalculée, plus jamais incrémentale
+
+`personadle_compute_streak()` partait de `last_played_at` et supposait **une partie par jour**.
+Avec plusieurs parties quotidiennes elle repartait à 1 au deuxième replay, et tombait à 0 au
+premier abandon d'une journée pourtant gagnée.
+
+`personadle_recompute_mode_streak()` devient la seule source de vérité : `GROUP BY played_date`
+avec `MAX(result = 'win')` — **un jour compte comme gagné dès qu'une seule de ses parties
+l'est**. Recalculer depuis un historique borné (400 jours) est correct dans tous les cas et
+n'a aucun état à corrompre.
+
+### Suppression de l'upgrade giveup→win
+
+Ces 87 lignes n'existaient que pour contourner la contrainte d'unicité : une victoire après un
+abandon le même jour devait muter la ligne existante. Elle est maintenant simplement une ligne
+de plus, et la streak la voit via le `MAX` par jour. Code mort supprimé.
+
+### Tests
+
+8 tests PHPUnit affirmaient l'ancienne règle — remplacés par 5 qui affirment la nouvelle :
+plusieurs parties comptées le même jour, rejeu du même `client_session_id` rejeté, streak
+insensible au volume, un abandon qui ne casse pas une journée déjà gagnée, et une victoire
+tardive qui répare une journée entamée par un abandon.
+
+### Décidé, pas encore codé
+
+Le classement va se mettre à récompenser le volume. Décision de Hamza : trois classements
+distincts plutôt qu'un score unique — meilleure série, meilleur ratio (lissé pour qu'un joueur
+à 1 partie / 1 victoire ne soit pas premier), meilleur score général et par mode. Détail et
+méthodes de lissage notés dans `ROADMAP.md`.
+
+### Reste à câbler
+
+Le client n'envoie `client_session_id` que depuis `buildGameSession()` ; les 6 modes gardent
+encore leur garde `!localStorage.getItem(todayKey)` qui empêche de loguer plus d'une partie
+par jour. **Tant que cette garde est là, la migration ne change rien pour le joueur** — c'est
+la prochaine étape.
+
 ## 2026-08-15 — fix(a11y): bouton Abandonner verrouillé sans aucun signal
 
 Dette repérée en écrivant les tests E2E de Classique Expert, corrigée sur les 6 modes.

@@ -219,6 +219,7 @@ CREATE TABLE game_sessions (
     user_id         BIGINT UNSIGNED  NOT NULL,
     mode            VARCHAR(30)      NOT NULL,
     is_expert       TINYINT(1)       NOT NULL DEFAULT 0,  -- 1 = partie en Mode Expert (migration 031)
+    client_session_id CHAR(36)       NULL,                -- clé d'idempotence client (migration 032)
     played_date     DATE             NOT NULL,   -- date Paris (Europe/Paris)
     target_name     VARCHAR(200)     NOT NULL,
     result          VARCHAR(10)      NOT NULL,   -- 'win' | 'giveup'
@@ -228,11 +229,11 @@ CREATE TABLE game_sessions (
     created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    -- Anti-doublon : une seule session par (user, mode, jour Paris, normal|expert).
-    -- Cf. migrations 014 et 031 + sessions.php (interception PDOException 23000).
-    -- is_expert fait partie de la clé : une partie normale et une partie Expert du
-    -- même mode le même jour sont deux parties distinctes (migration 031).
-    UNIQUE KEY uq_session_per_day (user_id, mode, played_date, is_expert),
+    -- Anti-doublon : plus de plafond d'une partie par jour depuis la migration 032
+    -- (toutes les parties comptent, seule la streak reste journalière). Le garde-fou
+    -- est désormais la clé d'idempotence générée par le client : rejouer une session
+    -- déjà enregistrée est rejeté, en jouer une nouvelle ne l'est pas.
+    UNIQUE KEY uq_session_client_id (client_session_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -240,6 +241,7 @@ CREATE INDEX idx_game_sessions_user_mode ON game_sessions(user_id, mode);
 CREATE INDEX idx_game_sessions_date      ON game_sessions(played_date);
 CREATE INDEX idx_game_sessions_target    ON game_sessions(mode, played_date, target_name);
 CREATE INDEX idx_game_sessions_user_mode_expert ON game_sessions(user_id, mode, is_expert);
+CREATE INDEX idx_session_per_day ON game_sessions(user_id, mode, played_date, is_expert);
 
 
 -- =============================================================================
