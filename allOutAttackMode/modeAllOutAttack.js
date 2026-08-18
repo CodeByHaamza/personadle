@@ -21,6 +21,8 @@ import {
   applyDarkModeOverrides,
   getActiveChallengeTarget,
   isChallengePlay,
+  expertContext,
+  setupExpertToggle,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -227,7 +229,20 @@ const AOA_BY_NAME = new Map(aoaCharacters.map((c) => [c.nom, c]));
 // CONSTANTS & STATE
 // ─────────────────────────────────────────────────────────────────────────────
 
-const todayKey = `statsLogged_AllOut_${parisDateKey()}`;
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE EXPERT — flou figé au maximum, et en noir et blanc
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Le mode normal fait baisser le flou de 3px par erreur : l'image finit par se
+// lire. L'Expert le fige au maximum et retire la couleur — or la couleur porte
+// une grande part de l'identification (cheveux, tenue, palette d'opus).
+const EXPERT = expertContext({
+  prefix: "aoaExpert",
+  statsKey: "AllOut",
+  hashMode: "AllOutAttack",
+});
+
+const todayKey = `statsLogged_${EXPERT.statsKey}_${parisDateKey()}`;
 let sessionStartTime = Date.now();
 
 /** Minimum attempts before the Give-Up button activates. */
@@ -289,9 +304,9 @@ function getBetterRandomCharacter(random = false) {
   }
   // Daily target depuis le pool complet — mais si le filtre actif l'exclut,
   // utiliser un daily depuis la liste filtrée pour rester jouable.
-  const daily = getDailyTarget(originalPersonas, "AllOutAttack");
+  const daily = getDailyTarget(originalPersonas, EXPERT.hashMode);
   if (personas.length && !personas.includes(daily)) {
-    return getDailyTarget(personas, "AllOutAttack");
+    return getDailyTarget(personas, EXPERT.hashMode);
   }
   return daily;
 }
@@ -421,6 +436,27 @@ function initializeAutocomplete(element, array) {
 // GAME FLOW
 // ─────────────────────────────────────────────────────────────────────────────
 
+
+/**
+ * Filtre CSS appliqué au GIF selon le mode et l'avancement.
+ *
+ * Centralisé parce que cinq endroits le construisaient à la main — en ajouter un
+ * sixième pour l'Expert aurait garanti qu'un des cinq soit oublié.
+ *
+ * - normal  : le flou baisse de BLUR_STEP par erreur, jusqu'à 0
+ * - Expert  : flou figé au maximum **et** noir et blanc. La couleur porte une
+ *   grande part de l'identification (couleur de cheveux, palette de l'opus) ;
+ *   la retirer est ce qui rend le flou maximal réellement difficile.
+ * - révélé  : aucun filtre, quel que soit le mode
+ *
+ * @param {boolean} [revealed=false] fin de partie (victoire ou abandon)
+ */
+function gifFilter(revealed = false) {
+  if (revealed) return "none";
+  if (EXPERT.isExpert) return `blur(${INITIAL_BLUR}px) grayscale(1)`;
+  return `blur(${Math.max(INITIAL_BLUR - attempts * BLUR_STEP, 0)}px)`;
+}
+
 /**
  * Processes one guess:
  *  - Correct: removes blur, shows victory box, triggers badges/stats
@@ -433,7 +469,7 @@ function handleGuess() {
   if (!guess) return;
 
   attempts++;
-  localStorage.setItem("aoaAttempts", attempts);
+  localStorage.setItem(EXPERT.key("aoaAttempts"), attempts);
   updateGiveUpCounter();
 
   if (guess.toLowerCase() === target.toLowerCase()) {
@@ -442,30 +478,33 @@ function handleGuess() {
     // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
     const wasChallengePlay = isChallengePlay("alloutattack");
     checkSpecialBadges(target);
-    document.getElementById("aoaGif").style.filter = "none";
+    document.getElementById("aoaGif").style.filter = gifFilter(true);
     showVictoryBox(target);
     showConfettiExplosion();
     revealNextLink({
       prevHref: "../emojiMode/emojiMode.html",
       nextHref: "../silhouetteMode/silhouette.html",
     });
-    showChallengeButton(
-      "alloutattack",
-      attempts,
-      personas.filter((n) => n !== target)
-    );
+    if (!EXPERT.isExpert) {
+      showChallengeButton(
+        "alloutattack",
+        attempts,
+        personas.filter((n) => n !== target)
+      );
+    }
     checkChallengeCompletion("alloutattack", attempts, true);
-    showCommunityStats("alloutattack", target);
+    if (!EXPERT.isExpert) showCommunityStats("alloutattack", target);
     gameOver = true;
-    localStorage.setItem("aoaGameOver", "true");
+    localStorage.setItem(EXPERT.key("aoaGameOver"), "true");
 
     if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-      updateProfileStats({ result: "win", mode: "All Out Attack", timeSpent });
+      if (!EXPERT.isExpert) updateProfileStats({ result: "win", mode: "All Out Attack", timeSpent });
       savePendingSession(
         buildGameSession({
           mode: "AllOutAttack",
           targetName: target,
+          isExpert: EXPERT.isExpert,
           result: "win",
           attempts,
           timeMs: timeSpent * 1000,
@@ -484,13 +523,13 @@ function handleGuess() {
       }
     }
 
-    localStorage.setItem("aoaTarget", target);
-    localStorage.setItem("aoaAttempts", attempts);
+    localStorage.setItem(EXPERT.key("aoaTarget"), target);
+    localStorage.setItem(EXPERT.key("aoaAttempts"), attempts);
     const _pAoaWin = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
     trackUniqueDay(_pAoaWin, () =>
       localStorage.setItem("personaUserProfile", JSON.stringify(_pAoaWin))
     );
-    checkUnlocksAfterGame("All Out Attack");
+    if (!EXPERT.isExpert) checkUnlocksAfterGame("All Out Attack");
     disableInputs();
   } else {
     // ── Wrong guess ──────────────────────────────────────────────────────────
@@ -502,8 +541,7 @@ function handleGuess() {
     );
     removeFromAutocomplete(personas, guess);
 
-    const blurLevel = Math.max(INITIAL_BLUR - attempts * BLUR_STEP, 0);
-    document.getElementById("aoaGif").style.filter = `blur(${blurLevel}px)`;
+    document.getElementById("aoaGif").style.filter = gifFilter();
     input.value = "";
   }
 }
@@ -511,8 +549,8 @@ function handleGuess() {
 /** Give Up: reveals the GIF and shows the victory box as a defeat screen. */
 function giveUp() {
   if (attempts < GIVE_UP_THRESHOLD || gameOver) return;
-  document.getElementById("aoaGif").style.filter = "none";
-  localStorage.setItem("aoaForceReveal", "true");
+  document.getElementById("aoaGif").style.filter = gifFilter(true);
+  localStorage.setItem(EXPERT.key("aoaForceReveal"), "true");
   showVictoryBox(target, true);
   showConfettiExplosion();
   disableInputs();
@@ -523,11 +561,12 @@ function giveUp() {
   const wasChallengePlay = isChallengePlay("alloutattack");
   if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-    updateProfileStats({ result: "giveup", mode: "All Out Attack", timeSpent });
+    if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: "All Out Attack", timeSpent });
     savePendingSession(
       buildGameSession({
         mode: "AllOutAttack",
         targetName: target,
+        isExpert: EXPERT.isExpert,
         result: "giveup",
         attempts,
         timeMs: timeSpent * 1000,
@@ -542,15 +581,15 @@ function giveUp() {
   }
 
   checkChallengeCompletion("alloutattack", attempts, false);
-  showCommunityStats("alloutattack", target);
-  localStorage.setItem("aoaGameOver", "true");
-  localStorage.setItem("aoaTarget", target);
-  localStorage.setItem("aoaAttempts", attempts);
+  if (!EXPERT.isExpert) showCommunityStats("alloutattack", target);
+  localStorage.setItem(EXPERT.key("aoaGameOver"), "true");
+  localStorage.setItem(EXPERT.key("aoaTarget"), target);
+  localStorage.setItem(EXPERT.key("aoaAttempts"), attempts);
   const _pAoaGiveUp = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
   trackUniqueDay(_pAoaGiveUp, () =>
     localStorage.setItem("personaUserProfile", JSON.stringify(_pAoaGiveUp))
   );
-  checkUnlocksAfterGame("All Out Attack");
+  if (!EXPERT.isExpert) checkUnlocksAfterGame("All Out Attack");
 }
 
 /**
@@ -579,7 +618,7 @@ function resetGame(random = false) {
   const imageName = portraitsMap[target] || target.split(" ")[0];
   const newSrc = cdn("allOutAttack", imageName);
   loadImageSafely(gifElement, newSrc, () => {
-    gifElement.style.filter = `blur(${INITIAL_BLUR}px)`;
+    gifElement.style.filter = gifFilter();
   });
 
   // Background preload of next characters
@@ -595,9 +634,9 @@ function resetGame(random = false) {
   initializeAutocomplete(input, personas);
   updateGiveUpCounter();
 
-  localStorage.setItem("aoaTarget", target);
-  localStorage.setItem("aoaAttempts", attempts);
-  localStorage.removeItem("aoaGameOver");
+  localStorage.setItem(EXPERT.key("aoaTarget"), target);
+  localStorage.setItem(EXPERT.key("aoaAttempts"), attempts);
+  localStorage.removeItem(EXPERT.key("aoaGameOver"));
 
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) {
@@ -728,7 +767,7 @@ function checkSpecialBadges(characterName) {
     // `window.forceCheckBadges` n'était jamais défini nulle part dans le repo — ce bloc
     // ne s'exécutait jamais (code mort). checkUnlocksAfterGame() relit déjà le profil
     // frais depuis localStorage, pas besoin du setTimeout ni de repasser `profile`.
-    checkUnlocksAfterGame();
+    if (!EXPERT.isExpert) checkUnlocksAfterGame();
   }
 }
 
@@ -762,6 +801,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (window.__i18nReady) await window.__i18nReady;
   applyDarkModeStyles();
   setupRulesModal();
+  setupExpertToggle(EXPERT, "allOutAttack.html");
 
   const textbar = document.getElementById("textbar");
   const gifElement = document.getElementById("aoaGif");
@@ -785,15 +825,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const imageName = portraitsMap[target] || target.split(" ")[0];
     gifElement.style.filter = "none";
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
-      gifElement.style.filter = `blur(${INITIAL_BLUR}px)`;
+      gifElement.style.filter = gifFilter();
     });
 
     attempts = 0;
     document.getElementById("wrongGuessList").innerHTML = "";
     document.getElementById("victoryBox").style.display = "none";
-    localStorage.setItem("aoaTarget", target);
-    localStorage.setItem("aoaAttempts", 0);
-    localStorage.removeItem("aoaGameOver");
+    localStorage.setItem(EXPERT.key("aoaTarget"), target);
+    localStorage.setItem(EXPERT.key("aoaAttempts"), 0);
+    localStorage.removeItem(EXPERT.key("aoaGameOver"));
     updateGiveUpCounter();
 
     textbar.value = "";
@@ -813,14 +853,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   //    que le refresh mi-défi reprenne la même cible. ──
   const challengeTargetName = getActiveChallengeTarget("alloutattack");
   if (challengeTargetName && originalPersonas.includes(challengeTargetName)) {
-    localStorage.setItem("aoaTarget", challengeTargetName);
-    localStorage.setItem("aoaAttempts", localStorage.getItem("aoaAttempts") || 0);
+    localStorage.setItem(EXPERT.key("aoaTarget"), challengeTargetName);
+    localStorage.setItem(EXPERT.key("aoaAttempts"), localStorage.getItem(EXPERT.key("aoaAttempts")) || 0);
   }
 
   // ── Restore session ──
-  const savedTarget = localStorage.getItem("aoaTarget");
-  const savedAttempts = parseInt(localStorage.getItem("aoaAttempts")) || 0;
-  const savedGameOver = localStorage.getItem("aoaGameOver") === "true";
+  const savedTarget = localStorage.getItem(EXPERT.key("aoaTarget"));
+  const savedAttempts = parseInt(localStorage.getItem(EXPERT.key("aoaAttempts"))) || 0;
+  const savedGameOver = localStorage.getItem(EXPERT.key("aoaGameOver")) === "true";
 
   if (savedTarget) {
     target = savedTarget;
@@ -831,13 +871,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
       gifElement.style.filter = gameOver
         ? "none"
-        : `blur(${Math.max(INITIAL_BLUR - attempts * BLUR_STEP, 0)}px)`;
+        : gifFilter();
     });
 
     updateGiveUpCounter();
 
     if (gameOver) {
-      const wasGiveup = localStorage.getItem("aoaForceReveal") === "true";
+      const wasGiveup = localStorage.getItem(EXPERT.key("aoaForceReveal")) === "true";
       showVictoryBox(target, wasGiveup);
       disableInputs();
       revealNextLink({
@@ -855,28 +895,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     const imageName = portraitsMap[target] || target.split(" ")[0];
     gifElement.style.filter = "none";
     loadImageSafely(gifElement, cdn("allOutAttack", imageName), () => {
-      gifElement.style.filter = `blur(${INITIAL_BLUR}px)`;
+      gifElement.style.filter = gifFilter();
     });
-    localStorage.setItem("aoaTarget", target);
-    localStorage.setItem("aoaAttempts", 0);
+    localStorage.setItem(EXPERT.key("aoaTarget"), target);
+    localStorage.setItem(EXPERT.key("aoaAttempts"), 0);
   }
 
   // ── Buttons ──
   guessButton.addEventListener("click", handleGuess);
   document.getElementById("giveUpButton").addEventListener("click", giveUp);
   document.getElementById("resetButton").addEventListener("click", () => {
-    localStorage.removeItem("aoaTarget");
-    localStorage.removeItem("aoaAttempts");
-    localStorage.removeItem("aoaGameOver");
-    localStorage.removeItem("aoaForceReveal");
+    localStorage.removeItem(EXPERT.key("aoaTarget"));
+    localStorage.removeItem(EXPERT.key("aoaAttempts"));
+    localStorage.removeItem(EXPERT.key("aoaGameOver"));
+    localStorage.removeItem(EXPERT.key("aoaForceReveal"));
     resetGame(true); // true = random character, pas le daily
   });
 
   // ── Daily reset ──
   checkResetOnLoad("lastPlayedDate_AllOut", "AllOut", () => {
-    localStorage.removeItem("aoaTarget");
-    localStorage.removeItem("aoaAttempts");
-    localStorage.removeItem("aoaGameOver");
+    localStorage.removeItem(EXPERT.key("aoaTarget"));
+    localStorage.removeItem(EXPERT.key("aoaAttempts"));
+    localStorage.removeItem(EXPERT.key("aoaGameOver"));
     location.reload();
   });
   setupDailyReset(() => {

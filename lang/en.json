@@ -168,7 +168,14 @@
       "giveup_reveal": "❌ You gave up! The answer was: {{name}}",
       "no_characters": "No characters available with current filters.",
       "prev_mode": "← Emoji Mode",
-      "next_mode": "Silhouette Mode →"
+      "next_mode": "Silhouette Mode →",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "The blur never clears, and the colour is gone.",
+      "expert_tip_1": "The image stays at maximum blur for the whole round. Wrong guesses reveal nothing.",
+      "expert_tip_2": "It is also in black and white — hair and outfit colours will not help you.",
+      "expert_tip_3": "Silhouette, pose and composition are what is left. That is the whole game.",
+      "expert_tip_4": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_5": "Expert has its own daily character and its own stats. It will not carry your normal All-Out Attack streak."
     },
     "personae": {
       "name": "Personae",

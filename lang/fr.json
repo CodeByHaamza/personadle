@@ -168,7 +168,14 @@
       "giveup_reveal": "❌ Tu as abandonné ! La réponse était : {{name}}",
       "no_characters": "Aucun personnage disponible avec les filtres actuels.",
       "prev_mode": "← Mode Emoji",
-      "next_mode": "Mode Silhouette →"
+      "next_mode": "Mode Silhouette →",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Le flou ne se lève jamais, et la couleur a disparu.",
+      "expert_tip_1": "L'image reste au flou maximum toute la partie. Une erreur ne révèle rien.",
+      "expert_tip_2": "Elle est aussi en noir et blanc — la couleur des cheveux et des tenues ne t'aidera pas.",
+      "expert_tip_3": "Il reste la silhouette, la pose et la composition. C'est tout le jeu.",
+      "expert_tip_4": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_5": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série All-Out Attack normale."
     },
     "personae": {
       "name": "Personae",

@@ -64,6 +64,9 @@ test.describe("Classique Expert — la citation et rien d'autre", () => {
     await expect(page.locator("#quoteHint")).toBeVisible();
     expect((await page.locator("#quoteHint").textContent()).trim().length).toBeGreaterThan(0);
     await expect(page.locator("#hintButton")).toBeHidden();
+    // Artefacts du mode normal qui n'ont plus rien à afficher en Expert.
+    await expect(page.locator("#hintCounter")).toBeHidden();
+    await expect(page.locator("#autocompleteList")).toBeHidden();
   });
 
   test("aucune cellule de comparaison n'existe dans le DOM", async ({ page }) => {

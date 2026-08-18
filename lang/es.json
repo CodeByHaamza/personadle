@@ -168,7 +168,14 @@
       "giveup_reveal": "❌ ¡Te rendiste! La respuesta era: {{name}}",
       "no_characters": "No hay personajes disponibles con los filtros actuales.",
       "prev_mode": "← Modo Emoji",
-      "next_mode": "Modo Silueta →"
+      "next_mode": "Modo Silueta →",
+      "expert_goal": "⚡ Modo Experto:",
+      "expert_goal_text": "El desenfoque nunca se disipa, y el color ha desaparecido.",
+      "expert_tip_1": "La imagen permanece al desenfoque máximo toda la partida. Fallar no revela nada.",
+      "expert_tip_2": "También está en blanco y negro: el color del pelo y la ropa no te ayudará.",
+      "expert_tip_3": "Quedan la silueta, la pose y la composición. Ese es todo el juego.",
+      "expert_tip_4": "Tienes 5 intentos antes de que se active el botón Rendirse.",
+      "expert_tip_5": "El Experto tiene su propio personaje diario y sus propias estadísticas. No cuenta para tu racha de All-Out Attack normal."
     },
     "personae": {
       "name": "Personae",

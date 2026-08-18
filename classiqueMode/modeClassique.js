@@ -799,6 +799,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // La révélation de fin de partie réaffiche simplement le texte brut.
   if (EXPERT.isExpert) {
     hintButton.style.display = "none";
+    // Le compteur « (0 / 3) » compte les indices : sans bouton Indice il n'a plus
+    // rien à compter, et il restait affiché à zéro pour toujours.
+    document.getElementById("hintCounter")?.style.setProperty("display", "none");
     const showQuote = (reveal = false) => {
       if (!target?.quote) return;
       quoteHint.textContent = reveal ? target.quote : maskTerms([target.nom], target.quote, "▮▮▮");

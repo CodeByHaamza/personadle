@@ -586,6 +586,12 @@ input:checked + .slider.red {
    ===================================================== */
 
 /* Dropdown créé dynamiquement par les JS de chaque mode */
+/* Vide, la liste dessinait quand même sa boîte blanche bordée — un artefact
+   visible sur toutes les pages tant qu'on n'avait rien tapé. */
+.autocomplete-items:empty {
+  display: none;
+}
+
 .autocomplete-items {
   position: absolute;
   left: 50%;

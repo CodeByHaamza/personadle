@@ -113,6 +113,52 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): Mode All-Out Attack Expert + artefacts Classique
+
+### AOA Expert — flou figé et noir et blanc
+
+Le mode normal fait baisser le flou de 3px par erreur : l'image finit par se lire. L'Expert le
+fige au maximum (20px) **et** retire la couleur — c'est le noir et blanc qui rend le flou
+maximal réellement difficile, la couleur des cheveux, de la tenue et la palette de l'opus
+portant une grande part de l'identification.
+
+- `gifFilter(revealed)` centralise la construction du filtre CSS. **Cinq endroits** le
+  fabriquaient à la main (`handleGuess`, la victoire, l'abandon, le chargement d'image, la
+  restauration de session) ; en ajouter un sixième pour l'Expert aurait garanti qu'un des cinq
+  soit oublié et laisse passer une image nette.
+- Pas de bouton de défi en Expert, même raison que Music : le destinataire le jouerait en mode
+  normal, score incomparable.
+- **Risque assumé** : 10 familles de skins recolorés (Wonder ×4, Closer ×3, Panther/Mona/Joker
+  Starlight…) partagent silhouette et pose. En noir et blanc au flou maximal, elles seront
+  vraisemblablement indistinguables. Signalé à Hamza, qui a tranché : on garde. À revoir si les
+  joueurs le remontent.
+
+### Artefacts du mode normal en Classique Expert
+
+- **`.autocomplete-items:empty { display: none }`** (`css/global.css`) — la liste
+  d'autocomplétion a un fond blanc et une bordure noire : vide, elle dessinait quand même sa
+  boîte. Le correctif est à la racine et vaut pour **les 6 modes**, pas seulement l'Expert :
+  l'artefact était visible partout tant qu'on n'avait rien tapé.
+- `#hintCounter` masqué en Expert : il compte les indices utilisés, or le bouton Indice est
+  masqué — il restait figé sur « (0 / 3) » pour toujours.
+
+### Correction i18n
+
+Les clés Expert AOA avaient d'abord été écrites dans un namespace `modes.aoa` inexistant. Le
+namespace réel est `modes.alloutattack` ; fusionné, et le HTML réutilise `gameplay` (déjà
+traduit) au lieu d'un `tips` qui n'existe pas dans ce mode.
+
+### Tests
+
+6 tests E2E AOA. Le principal vérifie que **le flou ne baisse jamais** après quatre erreurs, et
+un test miroir confirme qu'en mode normal il tombe bien à 14px — sans ce second test, une
+régression rendant l'Expert identique au normal passerait inaperçue. 7 tests Classique mis à
+jour (artefacts masqués). `CACHE_VERSION` → `personadle-v83`.
+
+### Reste
+
+Silhouette Expert : dézoom figé, point de zoom tiré sur un contour.
+
 ## 2026-08-15 — fix(expert): refonte de l'affichage Classique Expert
 
 Retour de Hamza après essai : le mode « ne marche pas du tout ». Le diagnostic était juste,

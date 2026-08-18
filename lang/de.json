@@ -168,7 +168,14 @@
       "giveup_reveal": "❌ Du hast aufgegeben! Die Antwort war: {{name}}",
       "no_characters": "Keine Charaktere mit den aktuellen Filtern verfügbar.",
       "prev_mode": "← Emoji-Modus",
-      "next_mode": "Silhouette Modus →"
+      "next_mode": "Silhouette Modus →",
+      "expert_goal": "⚡ Expertenmodus:",
+      "expert_goal_text": "Die Unschärfe verschwindet nie, und die Farbe ist weg.",
+      "expert_tip_1": "Das Bild bleibt die ganze Runde maximal unscharf. Fehlversuche enthüllen nichts.",
+      "expert_tip_2": "Es ist außerdem schwarz-weiß — Haar- und Kleidungsfarben helfen dir nicht.",
+      "expert_tip_3": "Übrig bleiben Silhouette, Pose und Bildaufbau. Das ist das ganze Spiel.",
+      "expert_tip_4": "Du hast 5 Versuche, bevor der Aufgeben-Knopf freigeschaltet wird.",
+      "expert_tip_5": "Der Expertenmodus hat seine eigene Tagesfigur und eigene Statistiken. Er zählt nicht für deine normale All-Out-Attack-Serie."
     },
     "personae": {
       "name": "Personae",

@@ -168,7 +168,14 @@
       "giveup_reveal": "❌ Desististe! A resposta era: {{name}}",
       "no_characters": "Não há personagens disponíveis com os filtros atuais.",
       "prev_mode": "← Modo Emoji",
-      "next_mode": "Modo Silhueta →"
+      "next_mode": "Modo Silhueta →",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "A desfocagem nunca se dissipa, e a cor desapareceu.",
+      "expert_tip_1": "A imagem fica na desfocagem máxima toda a partida. Errar não revela nada.",
+      "expert_tip_2": "Está também a preto e branco — a cor do cabelo e da roupa não te vai ajudar.",
+      "expert_tip_3": "Restam a silhueta, a pose e a composição. É todo o jogo.",
+      "expert_tip_4": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_5": "O Especialista tem a própria personagem do dia e as próprias estatísticas. Não conta para a tua sequência de All-Out Attack normal."
     },
     "personae": {
       "name": "Personae",

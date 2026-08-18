@@ -168,7 +168,14 @@
       "giveup_reveal": "❌ Ti sei arreso! La risposta era: {{name}}",
       "no_characters": "Nessun personaggio disponibile con i filtri attuali.",
       "prev_mode": "← Modalità Emoji",
-      "next_mode": "Modalità Silhouette →"
+      "next_mode": "Modalità Silhouette →",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "La sfocatura non si dirada mai, e il colore è sparito.",
+      "expert_tip_1": "L'immagine resta alla sfocatura massima per tutta la partita. Sbagliare non rivela nulla.",
+      "expert_tip_2": "È anche in bianco e nero: il colore dei capelli e dei vestiti non ti aiuterà.",
+      "expert_tip_3": "Restano la silhouette, la posa e la composizione. È tutto il gioco.",
+      "expert_tip_4": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_5": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie All-Out Attack normale."
     },
     "personae": {
       "name": "Personae",
