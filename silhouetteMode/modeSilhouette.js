@@ -21,6 +21,7 @@ import {
   applyDarkModeOverrides,
   getActiveChallengeTarget,
   isChallengePlay,
+  setGiveUpEnabled,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -339,7 +340,7 @@ function showVictory(force = false) {
   gameOver = true;
   textbar.disabled = true;
   guessBtn.disabled = true;
-  giveUpBtn.disabled = true;
+  setGiveUpEnabled(false);
 
   // Reveal full image (remove brightness filter and reset zoom)
   silhouetteImg.style.transform = "scale(1)";
@@ -529,7 +530,7 @@ function resetGame(random = false) {
   attempts = 0;
   giveUpCounter.textContent = `(0 / ${maxAttempts})`;
   giveUpCounter.classList.remove("activated");
-  giveUpBtn.disabled = true;
+  setGiveUpEnabled(false);
   giveUpBtn.style.cursor = "not-allowed";
   textbar.disabled = false;
   guessBtn.disabled = false;

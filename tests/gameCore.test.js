@@ -29,6 +29,7 @@ import {
   MODES,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  setGiveUpEnabled,
   showChallengeButton,
   showCommunityStats,
   characterMatchesActiveOpus,
@@ -1551,12 +1552,32 @@ describe("applyDarkModeOverrides", () => {
 
 describe("enableGiveUpButton", () => {
   beforeEach(() => {
-    setHTML('<button id="giveUpButton" disabled></button><button id="customBtn" disabled></button>');
+    // Le vrai balisage des 6 modes est un <div class="link-wrapper">, pas un
+    // <button> : l'ancien test n'utilisait que des <button> et ne prouvait donc
+    // rien sur la production, où `.disabled` n'a aucun effet.
+    setHTML(
+      '<div class="link-wrapper" id="giveUpButton" aria-disabled="true"></div>' +
+        '<button id="customBtn" disabled></button>'
+    );
   });
 
-  it("re-enables the default #giveUpButton and sets a pointer cursor", () => {
-    enableGiveUpButton();
+  it("signale l'état verrouillé sur un div via aria-disabled", () => {
     const btn = document.getElementById("giveUpButton");
+    setGiveUpEnabled(false);
+    expect(btn.getAttribute("aria-disabled")).toBe("true");
+    expect(btn.style.cursor).toBe("not-allowed");
+  });
+
+  it("lève le verrou visuel et d'accessibilité sur un div", () => {
+    const btn = document.getElementById("giveUpButton");
+    enableGiveUpButton();
+    expect(btn.getAttribute("aria-disabled")).toBe("false");
+    expect(btn.style.cursor).toBe("pointer");
+  });
+
+  it("re-enables a real <button> too", () => {
+    enableGiveUpButton("customBtn");
+    const btn = document.getElementById("customBtn");
     expect(btn.disabled).toBe(false);
     expect(btn.style.cursor).toBe("pointer");
   });

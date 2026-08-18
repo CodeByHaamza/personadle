@@ -29,6 +29,7 @@ import {
   getActiveChallengeTarget,
   isChallengePlay,
   maskTerms,
+  setGiveUpEnabled,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -570,7 +571,7 @@ function showVictory(force = false) {
   renderLyrics(true);
   textbar.disabled = true;
   guessBtn.disabled = true;
-  giveUpBtn.disabled = true;
+  setGiveUpEnabled(false);
 
   victoryImage.src = `./database/img/${target.image}`;
   victoryImage.alt = target.titre;
@@ -741,7 +742,7 @@ function resetGame(random = false) {
 
   // Reset UI
   giveUpCounter.classList.remove("activated");
-  giveUpBtn.disabled = true;
+  setGiveUpEnabled(false);
   textbar.disabled = false;
   guessBtn.disabled = false;
   wrongList.innerHTML = "";

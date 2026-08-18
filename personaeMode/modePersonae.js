@@ -38,6 +38,7 @@ import {
   parisDateKey,
   getActiveChallengeTarget,
   isChallengePlay,
+  setGiveUpEnabled,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -332,7 +333,7 @@ function showVictory(force = false, name = null) {
   gameOver = true;
   textbar.disabled = true;
   guessBtn.disabled = true;
-  giveUpBtn.disabled = true;
+  setGiveUpEnabled(false);
 
   // Show portrait of the winning/revealed character
   if (name) {
@@ -621,7 +622,7 @@ function resetGame(random = false) {
   attempts = 0;
   giveUpCounter.textContent = `(0 / ${maxAttempts})`;
   giveUpCounter.classList.remove("activated");
-  giveUpBtn.disabled = true;
+  setGiveUpEnabled(false);
   textbar.disabled = false;
   textbar.value = "";
   guessBtn.disabled = false;

@@ -20,6 +20,7 @@ import {
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  setGiveUpEnabled,
   characterMatchesActiveOpus,
   updateCounterElement,
   getActiveChallengeTarget,
@@ -363,7 +364,7 @@ function checkEmojiGuess(name, forceReveal = false) {
 
     textbar.disabled = true;
     document.getElementById("guessButton").disabled = true;
-    document.getElementById("giveUpButton").disabled = true;
+    setGiveUpEnabled(false);
     gameOver = true;
     localStorage.setItem("emojiWin", "true");
     checkUnlocksAfterGame(modeName);
@@ -410,7 +411,7 @@ function resetGame() {
   textbar.disabled = false;
   textbar.value = "";
   document.getElementById("guessButton").disabled = false;
-  document.getElementById("giveUpButton").disabled = true;
+  setGiveUpEnabled(false);
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
 
   const pool = filterCharacterPool();

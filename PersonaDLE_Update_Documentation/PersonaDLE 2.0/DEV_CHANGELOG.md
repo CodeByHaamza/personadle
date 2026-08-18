@@ -113,6 +113,49 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — fix(a11y): bouton Abandonner verrouillé sans aucun signal
+
+Dette repérée en écrivant les tests E2E de Classique Expert, corrigée sur les 6 modes.
+
+### Le problème
+
+`#giveUpButton` est un `<div class="link-wrapper">` dans les six modes. `enableGiveUpButton()`
+y écrivait `.disabled`, **qui n'existe que sur les contrôles de formulaire** : sur un div,
+l'attribut ne bloque rien, ne se voit pas, et n'est pas exposé aux lecteurs d'écran. Le verrou
+réel a toujours été dans le handler de chaque mode (`if (attempts < GIVE_UP_THRESHOLD) return`),
+donc le comportement était correct — mais rien ne distinguait à l'écran un bouton cliquable
+d'un bouton qui ignore le clic, et le test unitaire, écrit avec un `<button>`, ne prouvait rien
+sur la production.
+
+### Correctifs
+
+- `setGiveUpEnabled(enabled, id?)` pose `aria-disabled` et le curseur, en plus de `.disabled`
+  (inoffensif, utile si le bouton devient un jour un vrai `<button>`). `enableGiveUpButton()`
+  reste, en délégant.
+- `.link-wrapper[aria-disabled="true"]` (`css/global.css`) : opacité réduite, curseur
+  `not-allowed`, et neutralisation des effets de survol — jusqu'ici le bouton verrouillé
+  s'animait exactement comme un bouton actif.
+- Les 6 pages marquent le bouton `aria-disabled="true"` au départ, et les 6 modes appellent
+  `setGiveUpEnabled()` au lieu d'écrire `.disabled` en direct (14 sites).
+- `updateGiveUpCounter()` (AOA) écrivait encore `btn.disabled = attempts < GIVE_UP_THRESHOLD`
+  — le remplacement automatique ne l'avait pas attrapé, la forme étant différente.
+- Le test unitaire utilise désormais **le vrai balisage** (`<div class="link-wrapper">`) et
+  couvre les deux sens du verrou. C'était le cœur du problème : l'ancien test passait tout en
+  ne testant rien de ce qui tourne réellement.
+
+### Fiabilisation des tests E2E AOA
+
+Deux causes d'intermittence, sans rapport avec la dette mais découvertes en la corrigeant :
+
+- `waitForLoadState("networkidle")` ne se déclenche pas de façon fiable sur AOA, qui charge
+  ses GIFs depuis un CDN externe. Remplacé par l'attente d'un signal concret de la page.
+- Les listeners AOA sont branchés **à la toute fin** du `DOMContentLoaded`, après le
+  préchargement des images — donc bien après le rendu du compteur. Un premier clic pouvait
+  partir dans le vide et était perdu en silence, faisant échouer le test plus loin sur une
+  cause sans rapport. `guessWrong()` réessaie désormais jusqu'à ce que le compteur bouge.
+
+`CACHE_VERSION` → `personadle-v84`.
+
 ## 2026-08-15 — feat(expert): fiches Personae P5X et Trinity Souls — roster complet
 
 Dernier paquet de contenu Expert Personae. **137 fiches**, EN et FR : le roster est couvert

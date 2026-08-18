@@ -959,12 +959,26 @@ export function prefersReducedMotion() {
  *
  * @param {string} [buttonId="giveUpButton"]
  */
-export function enableGiveUpButton(buttonId = "giveUpButton") {
+export function setGiveUpEnabled(enabled, buttonId = "giveUpButton") {
   const btn = document.getElementById(buttonId);
-  if (btn) {
-    btn.disabled = false;
-    btn.style.cursor = "pointer";
-  }
+  if (!btn) return;
+
+  // `disabled` n'existe que sur les contrôles de formulaire. Dans les 6 modes le
+  // bouton Abandonner est un `<div class="link-wrapper">` : y écrire `.disabled`
+  // ne bloque rien et ne se voit pas. Le verrou réel est dans le handler de chaque
+  // mode (`if (attempts < GIVE_UP_THRESHOLD) return`) ; ce qui manquait, c'est le
+  // signal — visuel et pour les lecteurs d'écran.
+  btn.disabled = !enabled; // sans effet sur un div, utile si c'en devient un vrai
+  btn.setAttribute("aria-disabled", String(!enabled));
+  btn.style.cursor = enabled ? "pointer" : "not-allowed";
+}
+
+/**
+ * Débloque le bouton Abandonner. Conservée parce qu'elle est appelée depuis
+ * plusieurs modes ; délègue à setGiveUpEnabled().
+ */
+export function enableGiveUpButton(buttonId = "giveUpButton") {
+  setGiveUpEnabled(true, buttonId);
 }
 
 /**

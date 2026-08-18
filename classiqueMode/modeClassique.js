@@ -19,6 +19,7 @@ import {
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  setGiveUpEnabled,
   characterMatchesActiveOpus,
   updateCounterElement,
   getActiveChallengeTarget,
@@ -689,7 +690,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     gameOver = true;
     textbar.disabled = true;
     guessButton.disabled = true;
-    giveUpButton.disabled = true;
+    setGiveUpEnabled(false);
     document.querySelector(".input-row")?.classList.add("hidden");
     document.getElementById("autocompleteList")?.classList.add("hidden");
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
@@ -848,7 +849,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     guessButton.style.pointerEvents = "auto";
     hintButton.disabled = true;
     hintButton.style.cursor = "not-allowed";
-    giveUpButton.disabled = true;
+    setGiveUpEnabled(false);
     giveUpButton.style.cursor = "not-allowed";
     giveUpButton.style.pointerEvents = "auto";
     giveUpButton.style.opacity = "1";

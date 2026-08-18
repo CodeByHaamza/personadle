@@ -23,6 +23,7 @@ import {
   isChallengePlay,
   expertContext,
   setupExpertToggle,
+  setGiveUpEnabled,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -627,7 +628,7 @@ function resetGame(random = false) {
   input.disabled = false;
   input.value = "";
   document.getElementById("guessButton").disabled = false;
-  document.getElementById("giveUpButton").disabled = true;
+  setGiveUpEnabled(false);
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
   if (wrongListEl) wrongListEl.innerHTML = "";
 
@@ -658,15 +659,17 @@ function updateGiveUpCounter() {
     counter.classList.toggle("activated", attempts >= GIVE_UP_THRESHOLD);
   }
   if (btn) {
-    btn.disabled = attempts < GIVE_UP_THRESHOLD;
-    btn.style.cursor = attempts >= GIVE_UP_THRESHOLD ? "pointer" : "not-allowed";
+    // setGiveUpEnabled() plutôt que `btn.disabled` en direct : le bouton est un
+    // <div class="link-wrapper">, où l'attribut n'a aucun effet. Le helper pose
+    // aussi aria-disabled, qui est ce que voient le CSS et les lecteurs d'écran.
+    setGiveUpEnabled(attempts >= GIVE_UP_THRESHOLD);
   }
 }
 
 function disableInputs() {
   document.getElementById("textbar").disabled = true;
   document.getElementById("guessButton").disabled = true;
-  document.getElementById("giveUpButton").disabled = true;
+  setGiveUpEnabled(false);
   document.getElementById("giveUpButton").style.cursor = "not-allowed";
 }
 
@@ -838,7 +841,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     textbar.value = "";
     textbar.disabled = false;
-    document.getElementById("giveUpButton").disabled = true;
+    setGiveUpEnabled(false);
     document.getElementById("giveUpButton").style.cursor = "not-allowed";
     initializeAutocomplete(textbar, personas);
   });
@@ -887,7 +890,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (attempts >= GIVE_UP_THRESHOLD) {
-      document.getElementById("giveUpButton").disabled = false;
+      setGiveUpEnabled(true);
       document.getElementById("giveUpButton").style.cursor = "pointer";
     }
   } else {

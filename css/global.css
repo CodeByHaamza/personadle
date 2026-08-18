@@ -3454,3 +3454,25 @@ body.expert-mode {
   background-image: radial-gradient(circle at 50% 0%, rgba(230, 57, 70, 0.16), transparent 60%);
   background-attachment: fixed;
 }
+
+/* Bouton Abandonner verrouillé — le marqueur est aria-disabled et non l'attribut
+   `disabled`, qui n'a aucun effet sur un <div class="link-wrapper"> (ce qu'est ce
+   bouton dans les 6 modes). Sans cette règle, rien ne distinguait visuellement un
+   bouton cliquable d'un bouton qui ignore le clic. */
+.link-wrapper[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.link-wrapper[aria-disabled="true"]:hover {
+  transform: none;
+}
+
+.link-wrapper[aria-disabled="true"]:hover .img-wrapper .normal {
+  display: block;
+}
+
+.link-wrapper[aria-disabled="true"]:hover .img-wrapper .active,
+.link-wrapper[aria-disabled="true"]:hover .shape-wrapper {
+  display: none;
+}
