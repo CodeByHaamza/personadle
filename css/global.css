@@ -3383,7 +3383,9 @@ body.darkmode #rulesModal em {
 .expert-toggle-zone {
   display: flex;
   justify-content: center;
-  margin: 10px auto 0;
+  /* Marge basse : le bouton précède directement le bandeau de consigne du mode
+     (« Devinez le personnage Persona du jour ! »), les deux se touchaient. */
+  margin: 14px auto 22px;
 }
 
 .expert-toggle {

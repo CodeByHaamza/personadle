@@ -643,15 +643,72 @@ body.darkmode .counter.activated {
    promue au rang d'indice principal.
    ═════════════════════════════════════════════════════════════════════════════ */
 
-/* Sept colonnes de comparaison en moins : portrait + nom, rien d'autre.
-   Les cellules ne sont pas masquées mais jamais construites (modeClassique.js) —
-   les cacher en CSS les laisserait lisibles dans l'inspecteur. */
-.category-row--expert,
-.guess-row--expert {
-  grid-template-columns: 60px minmax(120px, 1fr);
-  max-width: min(420px, 92vw);
-  margin-left: auto;
-  margin-right: auto;
+/* Une tentative = une fiche autonome, pas une ligne de tableau : il n'y a rien
+   à aligner en colonnes quand il n'y a rien à comparer. */
+.expert-guess {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(560px, 92vw);
+  margin: 8px auto;
+  padding: 10px 16px;
+  background: rgba(18, 18, 20, 0.9);
+  border-left: 4px solid #7a7a7a;
+  border-radius: 4px;
+  animation: expertGuessIn 0.22s ease;
+}
+
+.expert-guess--right {
+  border-left-color: #3fbf5f;
+  background: rgba(24, 48, 30, 0.9);
+}
+
+.expert-guess--wrong {
+  border-left-color: #e63946;
+}
+
+.expert-guess-portrait {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.expert-guess-name {
+  flex: 1;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #f2f2f2;
+}
+
+/* Symbole en plus de la couleur : lisible sans distinguer le vert du rouge. */
+.expert-guess-verdict {
+  font-size: 1.3rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.expert-guess--right .expert-guess-verdict {
+  color: #3fbf5f;
+}
+
+.expert-guess--wrong .expert-guess-verdict {
+  color: #e63946;
+}
+
+@keyframes expertGuessIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expert-guess {
+    animation: none;
+  }
 }
 
 /* La citation devient l'indice, pas une récompense : encadrée, centrée, lisible. */
@@ -675,5 +732,19 @@ body.expert-mode #quoteHint {
   body.expert-mode #quoteHint {
     padding: 14px 16px;
     font-size: 0.95rem;
+  }
+
+  .expert-guess {
+    gap: 10px;
+    padding: 8px 12px;
+  }
+
+  .expert-guess-portrait {
+    width: 38px;
+    height: 38px;
+  }
+
+  .expert-guess-name {
+    font-size: 0.9rem;
   }
 }

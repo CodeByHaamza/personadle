@@ -113,6 +113,47 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — fix(expert): refonte de l'affichage Classique Expert
+
+Retour de Hamza après essai : le mode « ne marche pas du tout ». Le diagnostic était juste,
+et la faute est une demi-mesure de ma part.
+
+### Ce qui n'allait pas
+
+J'avais gardé la **grille du mode normal** en la réduisant à deux colonnes : un en-tête de
+catégories au-dessus d'une unique colonne « Nom ». Un tableau sert à aligner des valeurs
+comparables ; en Expert il n'y a rien à comparer, donc rien à aligner. Le résultat gardait
+tout le squelette visuel d'un mode de déduction sans en avoir la substance.
+
+### Refonte
+
+- `renderExpertGuess()` remplace entièrement le chemin de rendu en Expert : `checkGuess()`
+  délègue et sort avant même de construire l'en-tête. Plus aucune `.category-row` ni
+  `.guess-cell` en Expert — vérifié par le test, pas seulement caché en CSS.
+- Une tentative = une **fiche autonome** : portrait rond, nom, verdict. Bordure gauche verte
+  ou rouge, plus un symbole ✔/✖ — deux états seulement, autant les rendre lisibles sans
+  distinguer les couleurs.
+- **La plus récente en haut** (`insertBefore`) : le joueur relit une liste d'essais, il n'a
+  pas à scroller pour retrouver son dernier coup.
+- La citation reste le centre de l'écran, encadrée, en italique, le nom de la cible masqué
+  jusqu'à la fin de partie.
+- Le bouton Expert avait 10px sous lui et touchait le bandeau de consigne du mode : marge
+  portée à 22px dans `css/global.css` (partagée par les 4 modes, vérifiée sur Classique et
+  Music).
+
+### Tests
+
+7 tests E2E (un de plus) : l'absence totale de grille est désormais affirmée par
+`.category-row` = 0 **et** `.guess-cell` = 0, et un nouveau test vérifie l'empilement
+antichronologique des tentatives. Les 9 tests de Music Expert restent verts.
+
+`CACHE_VERSION` → `personadle-v82`.
+
+### Point ouvert
+
+Hamza a demandé « give up au bout de N essais » sans préciser N — le message était tronqué.
+Reste à 5 en attendant, aligné sur Music Expert.
+
 ## 2026-08-15 — feat(expert): Mode Classique Expert jouable
 
 Deuxième mode Expert livré, premier à utiliser la plomberie partagée du lot précédent.

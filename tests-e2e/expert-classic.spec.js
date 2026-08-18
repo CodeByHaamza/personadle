@@ -83,10 +83,33 @@ test.describe("Classique Expert — la citation et rien d'autre", () => {
     await page.locator("#textbar").fill(cible);
     await page.locator("#guessButton").click();
 
-    // Une ligne = portrait + nom. Sept colonnes en moins, et pas seulement masquées.
-    const cellules = await page.locator(".guess-row .guess-cell").count();
-    expect(cellules, "seule la colonne nom doit exister").toBe(1);
-    await expect(page.locator(".category-row--expert")).toHaveCount(1);
+    // Aucune grille du tout : ni en-tête de catégories, ni cellule de comparaison.
+    // Une tentative est une fiche autonome (portrait, nom, verdict).
+    await expect(page.locator(".category-row")).toHaveCount(0);
+    await expect(page.locator(".guess-cell")).toHaveCount(0);
+    await expect(page.locator(".expert-guess")).toHaveCount(1);
+    await expect(page.locator(".expert-guess--right")).toHaveCount(1);
+  });
+
+  test("une mauvaise réponse s'empile au-dessus, la plus récente en premier", async ({ page }) => {
+    await page.goto(EXPERT);
+    await page.waitForLoadState("networkidle");
+
+    const noms = await page.evaluate(() => {
+      const cible = JSON.parse(localStorage.getItem("classicExpert_target")).nom;
+      return { cible };
+    });
+    // Deux vrais personnages différents de la cible, pris dans l'autocomplétion.
+    await page.locator("#textbar").fill("Yukari Takeba");
+    await page.locator("#guessButton").click();
+    await page.locator("#textbar").fill("Junpei Iori");
+    await page.locator("#guessButton").click();
+
+    const fiches = page.locator(".expert-guess");
+    await expect(fiches).toHaveCount(2);
+    // Le dernier essai est en haut : pas besoin de scroller pour le lire.
+    await expect(fiches.first().locator(".expert-guess-name")).toHaveText("Junpei Iori");
+    expect(noms.cible).toBeTruthy();
   });
 
   test("la cible du jour a toujours une citation", async ({ page }) => {

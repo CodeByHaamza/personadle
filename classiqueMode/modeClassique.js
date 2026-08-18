@@ -336,6 +336,47 @@ function fillVictoryBox(nom, isGiveup) {
   }
 }
 
+
+/**
+ * Rend une tentative en Mode Expert : portrait, nom, verdict. Rien d'autre.
+ *
+ * Le mode normal aligne sept attributs en grille ; ici il n'y a rien à comparer,
+ * donc rien à aligner. Chaque essai est une fiche autonome, la plus récente en
+ * haut — le joueur relit sa liste, il ne lit pas un tableau.
+ *
+ * @param {HTMLElement} output       conteneur #output
+ * @param {Object}      guess        personnage proposé
+ * @param {Object}      target       cible secrète
+ * @param {boolean}     forceReveal  true en abandon : la cible est montrée comme trouvée
+ */
+function renderExpertGuess(output, guess, target, forceReveal) {
+  const juste = guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal;
+
+  const fiche = document.createElement("div");
+  fiche.className = `expert-guess ${juste ? "expert-guess--right" : "expert-guess--wrong"}`;
+
+  const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
+  const img = document.createElement("img");
+  img.src = `../database/portraits/${encodeURIComponent(imageName)}.webp`;
+  img.alt = guess.nom;
+  img.className = "expert-guess-portrait";
+
+  const nom = document.createElement("span");
+  nom.className = "expert-guess-name";
+  nom.textContent = guess.nom;
+
+  const verdict = document.createElement("span");
+  verdict.className = "expert-guess-verdict";
+  // Symbole ET couleur : en daltonien la couleur seule ne suffit pas, et ici il
+  // n'y a que deux états — autant les rendre lisibles sans elle dans tous les cas.
+  verdict.textContent = juste ? "✔" : "✖";
+  verdict.setAttribute("aria-label", juste ? "correct" : "incorrect");
+
+  fiche.append(img, nom, verdict);
+  // Plus récent en haut : le joueur n'a pas à scroller pour voir son dernier essai.
+  output.insertBefore(fiche, output.firstChild);
+}
+
 /**
  * Validates a single guess against the current target and renders a
  * comparison row in the output grid.
@@ -353,17 +394,22 @@ function checkGuess(name, target, forceReveal = false) {
     return;
   }
 
+  // ── Mode Expert : liste de tentatives, pas un tableau ─────────────────────
+  // Rien à comparer, donc rien à aligner en colonnes : un en-tête de catégories
+  // au-dessus d'une seule colonne « Nom » n'a aucun sens. On rend une simple
+  // fiche par essai. Les attributs ne sont ni affichés ni construits dans le DOM —
+  // les masquer en CSS les laisserait lisibles dans l'inspecteur.
+  if (EXPERT.isExpert) {
+    renderExpertGuess(output, guess, target, forceReveal);
+    return;
+  }
+
   // Insert column headers on first guess
   if (!document.querySelector(".category-row")) {
     const i = window.i18n || { t: (k) => k };
     const categoryRow = document.createElement("div");
     categoryRow.classList.add("category-row");
-    // En Expert, aucune colonne de comparaison : les attributs ne sont ni affichés
-    // ni même construits dans le DOM. Les masquer en CSS les laisserait lisibles
-    // dans l'inspecteur, ce qui viderait le mode de son intérêt.
-    categoryRow.innerHTML = EXPERT.isExpert
-      ? `<div></div><div class="tooltip">${i.t("modes.classic.label_name")}</div>`
-      : `
+    categoryRow.innerHTML = `
       <div></div>
       <div class="tooltip">${i.t("modes.classic.label_name")}<span class="tooltip-text">${i.t("modes.classic.tooltip_name")}</span></div>
       <div class="tooltip">${i.t("modes.classic.label_gender")}<span class="tooltip-text">${i.t("modes.classic.tooltip_gender")}</span></div>
@@ -372,13 +418,11 @@ function checkGuess(name, target, forceReveal = false) {
       <div class="tooltip">${i.t("modes.classic.label_persona")}<span class="tooltip-text">${i.t("modes.classic.tooltip_persona")}</span></div>
       <div class="tooltip">${i.t("modes.classic.label_arcana")}<span class="tooltip-text">${i.t("modes.classic.tooltip_arcana")}</span></div>
       <div class="tooltip">${i.t("modes.classic.label_game")}<span class="tooltip-text">${i.t("modes.classic.tooltip_game")}</span></div>`;
-    categoryRow.classList.toggle("category-row--expert", EXPERT.isExpert);
     output.insertBefore(categoryRow, output.firstChild);
   }
 
   const row = document.createElement("div");
   row.classList.add("guess-row");
-  if (EXPERT.isExpert) row.classList.add("guess-row--expert");
 
   // Portrait image
   const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
@@ -388,9 +432,7 @@ function checkGuess(name, target, forceReveal = false) {
   img.className = "guess-image";
   row.appendChild(img);
 
-  const keysToCompare = EXPERT.isExpert
-    ? ["nom"]
-    : ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
+  const keysToCompare = ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
   const i18 = window.i18n || { t: (k) => k };
   // Labels affichés sur mobile via CSS ::before (data-label)
   const keyLabels = {
