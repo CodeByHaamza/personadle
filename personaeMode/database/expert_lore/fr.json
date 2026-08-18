@@ -298,5 +298,228 @@
       "Psyché",
       "Psyche"
     ]
+  },
+  "Izanagi": {
+    "text": "Izanagi, le mâle-qui-invite, appartient aux sept générations divines du mythe japonais. Avec son épouse Izanami il engendra les îles du Japon et la plupart de ses dieux, jusqu'à ce qu'elle meure en enfantant le dieu du feu — qu'il décapita de chagrin. Il la suivit au Yomi, le pays des morts, et rompit sa promesse de ne pas la regarder ; la voyant pourrissante, il s'enfuit, et elle jura de tuer mille personnes par jour. Il répondit qu'il en naîtrait mille cinq cents. En se lavant de la souillure du Yomi, il fit naître le soleil, la lune et la tempête.",
+    "mask": [
+      "Izanagi"
+    ]
+  },
+  "Izanagi-no-Okami": {
+    "text": "Okami signifie Grande Divinité : le titre marque le rang véritable d'Izanagi, le mâle-qui-invite, parmi les sept générations divines qui ouvrent le mythe japonais. Ce n'est pas un autre dieu mais le même vu entier — le créateur qui engendra les îles et leurs dieux avec son épouse, descendit au pays des morts pour l'en ramener, et tira de ses propres ablutions le soleil, la lune et la tempête. Le nom énonce ce qu'il a toujours été, une fois la forme d'emprunt tombée et plus rien de caché.",
+    "mask": [
+      "Izanagi-no-Okami",
+      "Izanagi",
+      "Okami"
+    ]
+  },
+  "Jiraiya": {
+    "text": "Jiraiya est un héros du folklore japonais, d'abord fils de bandit devenu hors-la-loi, puis redresseur de torts errant. Il apprend la magie du crapaud auprès d'un ermite de la montagne et peut se changer en crapaud géant, ou en chevaucher un au combat. Son épouse Tsunade commande aux limaces, son rival Orochimaru aux serpents — les trois s'enchaînent en un cycle où chacun bat l'un et perd contre l'autre. Son récit fut publié en feuilleton pendant des décennies au XIXᵉ siècle et adapté sans fin au théâtre, d'où la persistance de cette image.",
+    "mask": [
+      "Jiraiya"
+    ]
+  },
+  "Takehaya Susano-o": {
+    "text": "Takehaya-Susanoo-no-Mikoto est le nom cérémoniel long que le Kojiki donne au dieu japonais des tempêtes. Takehaya se traduit par brave et rapide, et l'épithète lui va : né du nez de son père lors des ablutions après le Yomi, il reçut la mer, se déchaîna contre sa sœur le soleil jusqu'à ce qu'elle s'enferme dans une grotte, et en fut banni du ciel. En exil il se racheta en tuant le serpent à huit têtes Yamata no Orochi, trouva l'épée Kusanagi dans sa queue et l'offrit à la sœur qu'il avait outragée.",
+    "mask": [
+      "Takehaya Susano-o",
+      "Takehaya",
+      "Susano-o",
+      "Susanoo"
+    ]
+  },
+  "Tomoe": {
+    "text": "Tomoe Gozen fut une guerrière de la guerre de Genpei, dans les années 1180. Le Dit des Heike la décrit d'une beauté frappante et de taille à valoir n'importe quel homme, à cheval comme à pied : archère de rare talent, envoyée en avant comme premier capitaine, armée d'un arc puissant et d'un grand sabre. À la bataille d'Awazu, son seigneur lui ordonna de partir pour ne pas mourir aux côtés d'une femme ; elle prit une dernière tête ennemie et s'en alla. Ce qu'elle devint ensuite, nul ne le sait, et aucune archive ne prouve son existence.",
+    "mask": [
+      "Tomoe",
+      "Tomoe Gozen"
+    ]
+  },
+  "Suzuka Gongen": {
+    "text": "Suzuka Gozen est une figure des contes de l'époque de Kamakura, décrite tour à tour en ogresse, en reine des brigands, en céleste ou en déesse — jusqu'à son apparence qui change d'une version à l'autre. Dans le Tamura no Soushi, c'est une guerrière mariée à Akuro-Ou, roi des oni, jusqu'à ce qu'elle tombe amoureuse de Sakanoue no Tamuramaro, le héros envoyé pour les exterminer. Elle trahit alors les siens : elle tue les vassaux de son époux et ouvre le château des démons à l'homme venu le détruire.",
+    "mask": [
+      "Suzuka Gongen",
+      "Suzuka Gozen",
+      "Tate Eboshi"
+    ]
+  },
+  "Konohana Sakuya": {
+    "text": "Konohana Sakuya est la princesse des fleurs du mythe japonais, fille du dieu des montagnes Ouyamatsumi et épouse de Ninigi, petit-fils céleste. Elle conçut dès leur nuit de noces, et il l'accusa d'infidélité. Pour lui répondre, elle s'enferma dans une hutte et y mit le feu, déclarant qu'aucune flamme ne la toucherait si les enfants étaient bien de lui — et en ressortit indemne avec trois fils. Son emblème est la fleur de cerisier, et son symbole dit la même chose : la beauté à son sommet, et déjà passée.",
+    "mask": [
+      "Konohana Sakuya",
+      "Konohanasakuya",
+      "Sakuya"
+    ]
+  },
+  "Amaterasu": {
+    "text": "Amaterasu est la déesse japonaise du soleil, maîtresse du Takamagahara et divinité la plus sacrée du shinto ; la lignée impériale se dit issue d'elle en droite ligne. Son nom signifie celle qui illumine les cieux. Elle naquit de l'œil gauche de son père lors des ablutions après le Yomi, sœur de la lune et de la tempête. Quand son frère saccagea ses rizières et tua l'une de ses tisserandes, elle s'enferma dans une grotte et le monde s'obscurcit. Les dieux l'attirèrent dehors avec un miroir — elle n'avait jamais vu son propre visage — et la lumière revint.",
+    "mask": [
+      "Amaterasu",
+      "Amaterasu-Omikami",
+      "Sume-Omikami"
+    ]
+  },
+  "Take-Mikazuchi": {
+    "text": "Takemikazuchi, dit aussi Kashima-no-kami, est le dieu shinto du tonnerre, né du sang resté sur le sabre avec lequel Izanagi décapita le dieu du feu nouveau-né. Envoyé du ciel pacifier les divinités d'Izumo, il obtint la reddition d'Okuninushi — mais le fils de celui-ci refusa, fit tournoyer un rocher au bout des doigts pour l'effrayer et le défia à l'épreuve de force. Ce qui suivit reste comme le premier combat de sumo : il broya les bras de son adversaire comme de jeunes roseaux et les jeta. Le vaincu s'enfuit au lac Suwa et en devint le dieu gardien.",
+    "mask": [
+      "Take-Mikazuchi",
+      "Takemikazuchi",
+      "Kashima-no-kami"
+    ]
+  },
+  "Dairoku Tenmaou": {
+    "text": "Le Roi-Démon du Sixième Ciel figure sur le Gohonzon, mandala du bouddhisme japonais, comme incarnation de la soif de puissance et du désir des biens du monde. À la tête d'innombrables serviteurs, sa tâche est de détourner les croyants de l'enseignement du Bouddha ; il descend de Mara, le tentateur des récits bouddhiques les plus anciens. Le titre s'est aussi attaché à Oda Nobunaga, seigneur de guerre du XVIᵉ siècle réputé pour sa cruauté — sur la seule parole d'un missionnaire portugais, que les historiens japonais écartent, mais que la fiction répète depuis.",
+    "mask": [
+      "Roi-Démon du Sixième Ciel",
+      "Dairoku Tenmaou",
+      "Takejizaiten",
+      "Takeji Zaiten"
+    ]
+  },
+  "Himiko": {
+    "text": "Himiko fut une reine chamane du Yamatai-koku, royaume ancien des îles devenues le Japon. Les chroniques chinoises rapportent que son peuple convint d'élever une femme au trône, et qu'elle mit fin à quatre-vingts ans de guerre en les unifiant. Elle ne se maria jamais. Elle vivait derrière des tours et des palissades, servie par mille femmes et un seul homme, et son peuple prisait par-dessus tout son art de la magie. Son règne fut strict et paisible ; sa mort fut vécue comme un désastre, et l'ordre ne revint qu'avec une fillette de treize ans de sa famille faite reine.",
+    "mask": [
+      "Himiko"
+    ]
+  },
+  "Kanzeon": {
+    "text": "Kanzeon Bosatsu — le bodhisattva qui entend les voix du monde — est le nom japonais de la déesse chinoise de la miséricorde, elle-même traduction de l'Avalokiteśvara indien. Dans l'enseignement bouddhique cette origine était masculine ; la figure devint féminine au fil du voyage vers l'est. On la représente en femme vêtue de blanc, un vase d'eau pure et un rameau de saule à la main. Méditant sur tous ceux qui l'appelaient, elle vit que deux mains n'y suffiraient pas : son maître lui en donna mille. Peu de figures d'Asie orientale portent autant de noms.",
+    "mask": [
+      "Kanzeon",
+      "Kannon",
+      "Guanyin",
+      "Guanshiyin",
+      "Avalokiteśvara"
+    ]
+  },
+  "Kintoki-Douji": {
+    "text": "Kintaro, l'enfant d'or, fut élevé sur le mont Ashigara avec les bêtes pour compagnons de jeu, et les battait toutes au sumo. Adulte, il prit le nom de Sakata no Kintoki et devint l'un des quatre fidèles de Minamoto no Yorimitsu, chassant les démons de province en province. On ne le représente presque jamais sans sa hache, qu'il prêtait aux bûcherons du coin. Les enfants japonais le rencontrent encore sous les traits du nourrisson rougeaud et joufflu luttant contre des ours.",
+    "mask": [
+      "Kintoki-Douji",
+      "Kintoki",
+      "Kintaro",
+      "Sakata no Kintoki"
+    ]
+  },
+  "Kamui": {
+    "text": "Les kamuy sont les esprits divins de la religion aïnoue, proches par l'esprit des kami du shinto : toute créature et toute force digne de respect en possède un. Celui-ci est Kim-un-kamuy, le kamuy des montagnes et des ours. Les Aïnous l'honoraient par l'iyomante — un ourson capturé, élevé un an parmi les hommes en hôte de marque, puis tué d'une flèche afin que l'esprit rentre chez les dieux en rapportant comment l'humanité l'avait traité.",
+    "mask": [
+      "Kamui",
+      "Kamuy",
+      "Kim-un-kamuy"
+    ]
+  },
+  "Sukuna-Hikona": {
+    "text": "Sukuna-Hikona est le dieu nain du mythe japonais : la guérison, le brassage du saké et les sources chaudes lui reviennent. Né parmi les dieux célestes, il gagna Izumo sur une barque d'écorce, vêtu de peaux d'oie, et fit cause commune avec le dieu terrestre Okuninushi — qu'il mordit à la joue à leur première rencontre, après quoi les deux devinrent inséparables. Ensemble ils façonnèrent le pays et inventèrent ses protections contre la maladie et les bêtes sauvages. Son sanctuaire se dresse toujours dans le quartier des pharmaciens d'Osaka.",
+    "mask": [
+      "Sukuna-Hikona",
+      "Sukunabikona"
+    ]
+  },
+  "Yamato-Takeru": {
+    "text": "Le Brave du Yamato est le titre conquis par le prince Ousu, l'un des grands guerriers de la légende japonaise — près de deux mètres, le visage dur, fier de sa force, et réputé demi-dieu. Il tua son propre frère aîné pour une broutille, et son père l'empereur, qui le craignait, le tint à la guerre : d'abord la frontière de l'ouest, puis une expédition vers l'est. Sa tante lui remit l'épée divine Ame no Murakumo ; quand des ennemis incendièrent le champ autour de lui, il faucha l'herbe et survécut, et la lame fut rebaptisée fauche-herbe. La malédiction d'un dieu de montagne l'emporta, et il s'envola en oiseau blanc.",
+    "mask": [
+      "Yamato-Takeru",
+      "Yamato Takeru",
+      "Ousu"
+    ]
+  },
+  "Magatsu-Izanagi": {
+    "text": "Izanagi du Havre de Calamité : le nom du dieu créateur tel qu'il était sur le chemin du retour du Yomotsu Hirasaka, avant les ablutions. Il était descendu arracher son épouse au pays des morts, avait échoué, avait regardé ce qu'il lui était interdit de regarder, et s'enfuyait avec sa malédiction derrière lui — et la souillure de ce lieu encore sur lui. C'est le dieu à cet instant précis : non le façonneur des îles et du soleil, mais ce qui est ressorti des enfers et ne s'est pas encore lavé.",
+    "mask": [
+      "Magatsu-Izanagi",
+      "Magatsu",
+      "Izanagi"
+    ]
+  },
+  "Susano-o": {
+    "text": "Susano-o est le dieu shinto de la mer et des tempêtes, né du nez de son père lors des ablutions après le Yomi, frère du soleil et de la lune. Lui et sa sœur se querellèrent sans fin : une épreuve censée prouver sa sincérité tourna à la brouille, et il y répondit en saccageant ses rizières, en souillant son palais et en tuant l'une de ses tisserandes — la poussant dans la grotte et le monde dans les ténèbres. Banni du ciel, il gagna Izumo, enivra le serpent à huit têtes Yamata no Orochi, le tua, et trouva dans sa queue l'épée qu'il offrit à sa sœur en réparation.",
+    "mask": [
+      "Susano-o",
+      "Susanoo"
+    ]
+  },
+  "Haraedo-no-Okami": {
+    "text": "Les Haraedo-no-Okami sont les déesses shinto de la purification, nées du rite misogi qu'Izanagi accomplit pour se laver de la souillure des enfers après avoir échoué à ramener son épouse du Yomotsu Hirasaka. Elles sont quatre — Seoritsu-Hime, Haya'akitsu-Hime, Ibukidonushi et Hayasasura-Hime — et on ne les vénère jamais séparément, car le travail forme une chaîne : l'une emporte l'impureté à la mer, la suivante l'engloutit, la suivante la disperse au vent, la dernière la fait disparaître.",
+    "mask": [
+      "Haraedo-no-Okami",
+      "Haraedo"
+    ]
+  },
+  "Sumeo-Okami": {
+    "text": "Sume-Omikami, la Grande Déesse Impériale, est une épithète de la déesse japonaise du soleil employée surtout dans le Nihon Shoki. La maison impériale faisait traditionnellement remonter sa descendance jusqu'à elle, et le titre dit exactement cela : non pas seulement une grande divinité, mais celle dont le trône lui-même prétend procéder. Il ne nomme aucun dieu nouveau — il nomme la même déesse de la grotte et du miroir à son degré le plus souverain, vue depuis la dynastie qui régnait en son nom.",
+    "mask": [
+      "Sumeo-Okami",
+      "Sume-Omikami",
+      "Sume-Okami",
+      "Amaterasu"
+    ]
+  },
+  "Takeji Zaiten": {
+    "text": "Takeji Zaiten est l'autre nom du Roi-Démon du Sixième Ciel, emprunté au séjour qu'il occupe — le plus élevé des Six Cieux du Désir de la cosmologie bouddhique. Le nom signifie prendre plaisir aux transformations opérées par autrui : il jouit de ce que les autres êtres créent, sans rien créer lui-même. Le temps y coule autrement. Un jour et une nuit de ce ciel valent seize cents ans de notre monde, et le roi-démon y vit seize mille de ses années avant de renaître.",
+    "mask": [
+      "Roi-Démon du Sixième Ciel",
+      "Takeji Zaiten",
+      "Takejizaitenjin",
+      "Takejizaiten",
+      "Dairoku Tenmaou"
+    ]
+  },
+  "Kouzeon": {
+    "text": "Kouzeon est une traduction ancienne du bodhisattva de la miséricorde, due au moine érudit Dharmarakṣa, antérieure à la version devenue standard. La différence tient à un caractère et à toute une image : le nom familier signifie celle qui observe les voix du monde, celui-ci signifie la lumière de ces voix. Même figure, même vœu d'entendre quiconque appelle — mais nommée pour ce qu'elle rend plutôt que pour ce qu'elle perçoit. C'est la traduction la plus rare, et si elle survit, c'est que la compassion décrite est identique.",
+    "mask": [
+      "Kouzeon",
+      "Kanzeon",
+      "Avalokiteśvara"
+    ]
+  },
+  "Kamui-Moshiri": {
+    "text": "Kamuy-Mosir est le pays des dieux dans la croyance aïnoue : la demeure des esprits divins, et le miroir d'Aynu-Mosir, le pays des hommes. Les deux mondes ne sont pas superposés mais appariés, et le passage se fait dans les deux sens. Un esprit visite le monde des hommes vêtu en ours ou en hibou ; quand le corps est libéré selon les rites, l'esprit rentre chez lui en rapportant le récit de son traitement. Ce qui est hôte ici est résident là-bas.",
+    "mask": [
+      "Kamui-Moshiri",
+      "Kamuy-Mosir",
+      "Kamui",
+      "Kamuy"
+    ]
+  },
+  "Yamato Sumeragi": {
+    "text": "Yamato Sumeragi, ou Yamato Sumera Mikoto, sont des titres cérémoniels des empereurs du Japon — la charge que la langue courante appelle simplement Ten'nō, souverain céleste. Yamato est le vieux nom du royaume lui-même, la plaine où la cour s'établit d'abord, et le mot en vint à désigner le pays et son peuple. Réunies, les deux moitiés énoncent une revendication plus qu'une description : le souverain du pays, descendu de la déesse du soleil, au point où la lignée impériale et la lignée divine sont censées se rejoindre.",
+    "mask": [
+      "Yamato Sumeragi",
+      "Yamato Sumera Mikoto",
+      "Sumeragi"
+    ]
+  },
+  "Kaguya": {
+    "text": "Kaguya Hime est la princesse de la lune du Conte du coupeur de bambou, le plus ancien récit en prose conservé du Japon. Un vieux coupeur la trouva dans une tige de bambou lumineuse et l'éleva comme sa fille ; sa beauté devint célèbre, et elle éconduisit tous ses prétendants, l'Empereur compris. Elle était du peuple de la lune, et quand on vint la chercher, aucune garde ne put l'empêcher. Elle laissa à l'Empereur une part d'élixir de vie, et lui — ne voulant pas vivre éternellement sans elle — le fit brûler au sommet de la plus haute montagne du pays.",
+    "mask": [
+      "Kaguya",
+      "Kaguya Hime"
+    ]
+  },
+  "Tsukuyomi": {
+    "text": "Tsukuyomi est la lune faite dieu et le maître de la nuit dans le shinto, né de l'œil droit de son père lors des ablutions après le Yomi, deuxième des trois nobles enfants et chargé de veiller sur le ciel nocturne. Dans le Nihon Shoki, il tue la déesse de la nourriture pour la manière dont elle servit un repas, et sa sœur le soleil refuse dès lors de jamais le regarder — d'où le fait que le soleil et la lune ne sont jamais ensemble au ciel. On sait si peu de chose que même son sexe reste incertain, malgré un poème qui l'appelle l'homme qui lit la lune.",
+    "mask": [
+      "Tsukuyomi",
+      "Tsukiyomi"
+    ]
+  },
+  "Ariadne": {
+    "text": "Ariane était la fille du roi Minos de Crète et détenait le secret du labyrinthe. Quand Thésée vint mettre fin au tribut des sept jeunes gens et sept jeunes filles livrés au Minotaure, elle en tomba amoureuse et lui donna une épée et une pelote de fil — le fil comptait davantage, car tuer la bête n'a jamais été le plus dur, retrouver la sortie l'était. Elle s'enfuit avec lui, et à Naxos son équipage leva l'ancre à l'aube sur une fausse alerte en l'oubliant à terre. Dionysos l'y trouva et l'épousa.",
+    "mask": [
+      "Ariadne",
+      "Ariane"
+    ]
+  },
+  "Asterios": {
+    "text": "Astérion est le nom derrière le monstre. La chose à tête de taureau au cœur du labyrinthe crétois portait un nom propre, frappé en étoile sur les monnaies de Crète : le fils de l'épouse de Minos et du taureau envoyé par Poséidon quand Minos refusa de le sacrifier. Minotaure n'est pas un nom mais une description grecque — Minos plus taureau — imposée du dehors. Un roi de Crète plus ancien portait le même nom : l'époux d'Europe, qui éleva les fils qu'elle eut de Zeus, dont Minos, et laissa le trône à son beau-fils.",
+    "mask": [
+      "Asterios",
+      "Astérios",
+      "Asterion",
+      "Astérion",
+      "Minotaure",
+      "Minotaur"
+    ]
   }
 }

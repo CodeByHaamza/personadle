@@ -113,6 +113,17 @@
     Social Link" juste en dessous — logique mise à jour suite à cette révision)
   - Nouveau badge/titre : débloqué une fois les 6 modes Expert battus au moins une fois chacun
     (réutilise le système de conditions structurées déjà en place, `condition_check.php`)
+  - **Défis déjà bloqués en base** — le correctif du 2026-08-15 empêche d'en créer de
+    nouveaux, il ne répare pas l'existant. Décision : **les deux**, dans cet ordre.
+    1. Migration de nettoyage ponctuelle : repasser en `unread` les `messages` en statut
+       `accepted` sans partie associée et vieux de plus de 7 jours. Ponctuel, à jouer une
+       fois en prod, non idempotent par nature (ne pas le rejouer sur des défis récemment
+       acceptés et légitimement en cours).
+    2. Bouton « abandonner le défi en cours » côté joueur — sans lui, le même blocage se
+       reproduira à la première panne réseau au mauvais moment, et il n'existe aujourd'hui
+       aucun moyen de sortir d'un défi accepté. `getPendingActiveChallenge()` (gameCore.js)
+       fournit déjà l'état à afficher ; il manque l'action inverse (purge de
+       `activeChallenge`, restauration des filtres, statut serveur remis à `read`).
   - **Défis en Mode Expert** — à coder sur la branche dédiée, avec le déblocage
     (constaté le 2026-08-15 en livrant Music Expert). Aujourd'hui l'Expert **n'émet pas**
     de défi et **refuse** d'en jouer un : ouvrir `musics.html?expert=1` avec un défi actif

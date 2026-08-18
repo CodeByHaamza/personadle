@@ -277,5 +277,235 @@
     "mask": [
       "Psyche"
     ]
+  },
+  "Izanagi": {
+    "text": "Izanagi, the male-who-invites, is one of the seven divine generations of Japanese myth. With his wife Izanami he fathered the islands of Japan and most of its gods, until she died giving birth to the fire god — whom he beheaded in grief. He followed her into Yomi, the land of the dead, and broke his promise not to look at her; seeing her rotting, he fled, and she swore to kill a thousand people a day. He answered that fifteen hundred would be born. Washing off the filth of Yomi, he produced the sun, the moon and the storm.",
+    "mask": [
+      "Izanagi"
+    ]
+  },
+  "Izanagi-no-Okami": {
+    "text": "Okami means Great Deity: the title marks the true rank of Izanagi, the male-who-invites, among the seven divine generations that opened Japanese myth. It is not another god but the same one seen whole — the creator who fathered the islands and their gods with his wife, walked into the land of the dead to bring her back, and from his own washing brought forth the sun, the moon and the storm. The name states what he always was, once the borrowed shape is dropped and nothing is left hidden.",
+    "mask": [
+      "Izanagi-no-Okami",
+      "Izanagi",
+      "Okami"
+    ]
+  },
+  "Jiraiya": {
+    "text": "Jiraiya is a hero of Japanese folklore, first a bandit's son turned outlaw, later a wandering champion. He learns toad magic from a mountain hermit and can shapeshift into an enormous toad, or ride one into battle. His wife Tsunade commands snails, and his rival Orochimaru commands serpents — the three lock together in a cycle where each beats one and loses to another. His tale was serialised for decades in the nineteenth century and adapted endlessly for the stage, which is why a ninja on a giant toad remains one of Japan's most recognisable images.",
+    "mask": [
+      "Jiraiya"
+    ]
+  },
+  "Takehaya Susano-o": {
+    "text": "Takehaya-Susanoo-no-Mikoto is the long ceremonial name the Kojiki gives to the Japanese god of storms. Takehaya translates as brave and swift, and the epithet fits: born from his father's nose during the cleansing after Yomi, he was given the sea, raged against his sister the sun until she shut herself in a cave, and was banished from heaven for it. In exile he redeemed himself by killing the eight-headed serpent Yamata no Orochi, finding the sword Kusanagi in its tail and offering it to the sister he had wronged.",
+    "mask": [
+      "Takehaya Susano-o",
+      "Takehaya-Susanoo-no-Mikoto",
+      "Takehaya",
+      "Susano-o",
+      "Susanoo"
+    ]
+  },
+  "Tomoe": {
+    "text": "Tomoe Gozen was a woman warrior of the Genpei War, in the 1180s. The Tale of the Heike describes her as strikingly beautiful and a match for any man on horseback or on foot: an archer of rare skill, sent ahead as first captain, armed with a heavy bow and a great sword. At the battle of Awazu her lord ordered her away so as not to die beside a woman; she took one last enemy head and rode off. What became of her afterwards nobody knows, and no record proves she existed at all.",
+    "mask": [
+      "Tomoe",
+      "Tomoe Gozen"
+    ]
+  },
+  "Suzuka Gongen": {
+    "text": "Suzuka Gozen is a figure of Kamakura-period folktale, described variously as an ogress, a bandit queen, a heavenly maiden or a goddess — even her appearance changes from telling to telling. In the Tamura no Soushi she is a warrior woman married to Akuro-Ou, king of the oni, until she falls in love with Sakanoue no Tamuramaro, the hero sent to exterminate them. She betrays her own side: she kills her husband's retainers and opens the demon castle to the man sent to destroy it.",
+    "mask": [
+      "Suzuka Gongen",
+      "Suzuka Gozen",
+      "Tate Eboshi"
+    ]
+  },
+  "Konohana Sakuya": {
+    "text": "Konohana Sakuya is the blossom princess of Japanese myth, daughter of the mountain god Ouyamatsumi and wife of the heavenly grandson Ninigi. She conceived on their wedding night, and he accused her of infidelity. To answer him she sealed herself inside a hut and set it alight, declaring that no fire would touch her if the children were truly his — and walked out unharmed with three sons. Her emblem is the cherry blossom, and her symbolism is the same: beauty at its height, and gone almost at once.",
+    "mask": [
+      "Konohana Sakuya",
+      "Konohanasakuya",
+      "Sakuya"
+    ]
+  },
+  "Amaterasu": {
+    "text": "Amaterasu is the Japanese sun goddess, ruler of Takamagahara and the most sacred deity of Shinto; the imperial line claims direct descent from her. Her name means she who illuminates the heavens. She was born from her father's left eye during the cleansing after Yomi, sister to the moon and the storm. When her brother wrecked her rice fields and killed one of her weaving maidens, she shut herself in a cave and the world went dark. The gods lured her out with a mirror — she had never seen her own face — and light returned.",
+    "mask": [
+      "Amaterasu",
+      "Amaterasu-Omikami",
+      "Tenshô Daijin",
+      "Sume-Omikami"
+    ]
+  },
+  "Take-Mikazuchi": {
+    "text": "Takemikazuchi, also called Kashima-no-kami, is the Shinto thunder god, born from the blood on the sword with which Izanagi beheaded the newborn fire god. Sent down from heaven to pacify the deities of Izumo, he obtained the surrender of Okuninushi — but the god's son refused, twirling a boulder on his fingertips to frighten him, and challenged him to a trial of strength. What followed is remembered as the first sumo bout: he crushed his opponent's arms like young reeds and cast them aside. The loser fled to Lake Suwa and became its guardian god.",
+    "mask": [
+      "Take-Mikazuchi",
+      "Takemikazuchi",
+      "Kashima-no-kami"
+    ]
+  },
+  "Dairoku Tenmaou": {
+    "text": "The Demon King of the Sixth Heaven appears on the Gohonzon mandala of Japanese Buddhism as the embodiment of the hunger for power and worldly desire. Commanding vast numbers of minions, his work is to tempt believers away from the Buddha's teaching; he descends from Mara, the tempter of the earliest Buddhist stories. The title also attached itself to Oda Nobunaga, the sixteenth-century warlord famed for cruelty and eccentricity — on the word of a single Portuguese missionary, which Japanese historians dismiss, but which fiction has repeated ever since.",
+    "mask": [
+      "Sixth Heaven Demon King",
+      "Demon King of the Sixth Heaven",
+      "Dairoku Tenmaou",
+      "Dai-roku-ten-maou",
+      "Takejizaiten",
+      "Takeji Zaiten"
+    ]
+  },
+  "Himiko": {
+    "text": "Himiko was a shaman queen of Yamatai-koku, an early realm in the islands that became Japan. Chinese chronicles say her people agreed to raise a woman to the throne, and that she ended eighty years of war by uniting them. She never married. She lived behind towers and stockades, served by a thousand women and a single man, and her people prized her skill in magic above all. Her rule was strict and peaceful; her death was taken as a disaster, and order returned only when a girl of thirteen from her family was made queen.",
+    "mask": [
+      "Himiko"
+    ]
+  },
+  "Kanzeon": {
+    "text": "Kanzeon Bosatsu — the bodhisattva who hears the voices of the world — is the Japanese name of the Chinese goddess of mercy, herself a translation of the Indian Avalokiteśvara. In Buddhist teaching that origin was male; the figure became female on the journey east. She is shown as a woman in white robes with a jar of pure water and a willow branch. Meditating on all who needed her, she found two hands could not reach them, so her teacher gave her a thousand arms. Few figures in East Asia carry more names, or more contradictory histories.",
+    "mask": [
+      "Kanzeon",
+      "Kannon",
+      "Guanyin",
+      "Guanshiyin",
+      "Avalokiteśvara",
+      "Avalokitesvara"
+    ]
+  },
+  "Kintoki-Douji": {
+    "text": "Kintaro, the golden boy, was raised on Mount Ashigara with the animals for playmates and beat them all at sumo. Grown, he took the name Sakata no Kintoki and became one of the four retainers of Minamoto no Yorimitsu, hunting demons across the provinces. He is almost never pictured without his axe, which he lent to the local woodcutters. Japanese children still meet him as the round red-skinned infant wrestling bears, and the folk tale has never really left the nursery.",
+    "mask": [
+      "Kintoki-Douji",
+      "Kintoki",
+      "Kintaro",
+      "Sakata no Kintoki"
+    ]
+  },
+  "Kamui": {
+    "text": "Kamuy are the divine spirits of the Ainu religion, close in spirit to the kami of Shinto: every creature and force worth respecting has one. This particular figure is Kim-un-kamuy, the kamuy of mountains and bears. The Ainu marked him with the iyomante — a bear cub captured, raised for a year among people as an honoured guest, then killed with an arrow so that the spirit could return home to the gods carrying word of how well humanity had treated it.",
+    "mask": [
+      "Kamui",
+      "Kamuy",
+      "Kim-un-kamuy"
+    ]
+  },
+  "Sukuna-Hikona": {
+    "text": "Sukuna-Hikona is the dwarf god of Japanese myth: healing, sake brewing and hot springs are his. Born among the heavenly gods, he crossed to Izumo in a boat of bark, dressed in goose skins, and threw in his lot with the earthly god Okuninushi — biting him on the cheek at their first meeting, after which the two became inseparable. Together they shaped the land and devised its protections against sickness and wild beasts. His shrine still stands in the pharmacists' quarter of Osaka.",
+    "mask": [
+      "Sukuna-Hikona",
+      "Sukunabikona",
+      "Sukuna-Hikona no Kami"
+    ]
+  },
+  "Yamato-Takeru": {
+    "text": "The Brave of Yamato is the title won by prince Ousu, one of the great warriors of Japanese legend — six feet tall, stern-faced, proud of his strength, and said to be half god. He killed his own elder brother over a trifle, and his father the emperor, frightened of him, kept him at war: first the western frontier, then an expedition east. His aunt gave him the divine sword Ame no Murakumo; when enemies set fire to the field around him he cut the grass and lived, and the blade was renamed grass-cutter. A mountain god's curse killed him, and he flew off as a white bird.",
+    "mask": [
+      "Yamato-Takeru",
+      "Yamato Takeru",
+      "Ousu"
+    ]
+  },
+  "Magatsu-Izanagi": {
+    "text": "Calamity Haven Izanagi: the name of the creator god as he was on the road back from Yomotsu Hirasaka, before the cleansing. He had gone down to bring his wife out of the land of the dead, failed, looked at what he had been told not to look at, and fled with her curse behind him — and the filth of that place still on him. This is the god at that exact moment: not the maker of islands and of the sun, but what came out of the underworld and had not yet washed.",
+    "mask": [
+      "Magatsu-Izanagi",
+      "Magatsu",
+      "Izanagi"
+    ]
+  },
+  "Susano-o": {
+    "text": "Susano-o is the Shinto god of the sea and of storms, born from his father's nose during the cleansing after Yomi, brother to the sun and the moon. He and his sister quarrelled without end: a contest to prove his sincerity turned into a feud, and he answered it by wrecking her rice fields, fouling her palace and killing one of her weaving maidens — driving her into the cave and the world into darkness. Banished from heaven, he came to Izumo, made the eight-headed serpent Yamata no Orochi drunk, killed it, and found in its tail the sword he gave his sister as an apology.",
+    "mask": [
+      "Susano-o",
+      "Susanoo",
+      "Susanoo-no-Mikoto"
+    ]
+  },
+  "Haraedo-no-Okami": {
+    "text": "The Haraedo-no-Okami are the Shinto goddesses of purification, born from the misogi rite Izanagi performed to wash off the filth of the underworld after failing to bring his wife back from Yomotsu Hirasaka. They are four — Seoritsu-Hime, Haya'akitsu-Hime, Ibukidonushi and Hayasasura-Hime — and they are never worshipped apart, because the work is a chain: one carries the impurity to the sea, the next swallows it, the next blows it away, the last makes it vanish.",
+    "mask": [
+      "Haraedo-no-Okami",
+      "Haraedo"
+    ]
+  },
+  "Sumeo-Okami": {
+    "text": "Sume-Omikami, the Imperial Great Goddess, is an epithet of the Japanese sun goddess used above all in the Nihon Shoki. The imperial house traditionally traced its descent from her, and the title says exactly that: not merely a great deity, but the one from whom the throne itself claims to come. It names no new god — it names the same goddess of the cave and the mirror at her most sovereign, seen from the perspective of the dynasty that ruled in her name.",
+    "mask": [
+      "Sumeo-Okami",
+      "Sume-Omikami",
+      "Sume-Okami",
+      "Amaterasu"
+    ]
+  },
+  "Takeji Zaiten": {
+    "text": "Takeji Zaiten is the other name of the Demon King of the Sixth Heaven, taken from the realm he inhabits — the highest of the Six Heavens of Desire in Buddhist cosmology. The name means taking pleasure in the transformations wrought by others: he enjoys what other beings create, without creating anything himself. Time there runs at a different rate. One day and night of that heaven is sixteen hundred years of this world, and the demon lord lives sixteen thousand of its years before being reborn.",
+    "mask": [
+      "Demon King of the Sixth Heaven",
+      "Takeji Zaiten",
+      "Takejizaitenjin",
+      "Takejizaiten",
+      "Dairoku Tenmaou"
+    ]
+  },
+  "Kouzeon": {
+    "text": "Kouzeon is an older rendering of the bodhisattva of mercy, made by the scholar-monk Dharmarakṣa before the version that became standard. The difference is one character and a whole image: the familiar name means the one who observes the voices of the world, while this one means the light of those voices. Same figure, same vow to hear everyone who calls — but named for what she gives back rather than for what she perceives. It is the rarer translation, and the reason it survives at all is that the compassion it describes is identical.",
+    "mask": [
+      "Kouzeon",
+      "Kanzeon",
+      "Avalokiteśvara",
+      "Avalokitesvara"
+    ]
+  },
+  "Kamui-Moshiri": {
+    "text": "Kamuy-Mosir is the land of the gods in Ainu belief: the dwelling of the divine spirits, and the mirror of Aynu-Mosir, the land of humans. The two worlds are not stacked but paired, and traffic between them runs both ways. A spirit visits the human world clothed as a bear or an owl; when the body is released with the proper rites, the spirit goes home carrying an account of how it was treated. What is a guest here is a resident there.",
+    "mask": [
+      "Kamui-Moshiri",
+      "Kamuy-Mosir",
+      "Kamui",
+      "Kamuy"
+    ]
+  },
+  "Yamato Sumeragi": {
+    "text": "Yamato Sumeragi, or Yamato Sumera Mikoto, are ceremonial titles for the emperors of Japan — the office called simply Ten'nō, heavenly sovereign, in ordinary speech. Yamato is the old name of the realm itself, the plain where the court first settled, and the word came to stand for the country and its people. Put together, the two halves make a claim rather than a description: the sovereign of the land, descended from the sun goddess, standing at the point where the imperial line and the divine one are said to meet.",
+    "mask": [
+      "Yamato Sumeragi",
+      "Yamato Sumera Mikoto",
+      "Sumeragi"
+    ]
+  },
+  "Kaguya": {
+    "text": "Kaguya Hime is the moon princess of the Tale of the Bamboo Cutter, Japan's oldest surviving prose story. An old cutter found her inside a glowing stalk of bamboo and raised her as his daughter; she grew famous for her beauty, and refused every suitor, the Emperor included. She was of the people of the moon, and when they came for her no guard could stop them. She left the Emperor a portion of the elixir of life, and he — not wanting to live forever without her — had it burned on the highest mountain in the land.",
+    "mask": [
+      "Kaguya",
+      "Kaguya Hime",
+      "Kaguya-hime"
+    ]
+  },
+  "Tsukuyomi": {
+    "text": "Tsukuyomi is the moon made divine and the ruler of the night in Shinto, born from his father's right eye during the cleansing after Yomi, second of the three noble children and set to watch the night sky. In the Nihon Shoki he kills the food goddess for the manner in which she served a meal, and his sister the sun refuses ever to look at him again — which is why the sun and the moon are never in the sky together. So little is recorded that even the god's sex is uncertain, though one poem calls him the moon-reading man.",
+    "mask": [
+      "Tsukuyomi",
+      "Tsukiyomi",
+      "Tsukuyomi Otoko"
+    ]
+  },
+  "Ariadne": {
+    "text": "Ariadne was the daughter of King Minos of Crete and keeper of the labyrinth's secret. When Theseus came to end the tribute of seven youths and seven maidens fed to the Minotaur, she fell in love with him and gave him a sword and a ball of thread — the thread mattered more, because killing the beast was never the hard part, finding the way out was. She fled with him, and on Naxos his crew sailed at dawn in a false alarm and left her behind. Dionysus found her there and married her.",
+    "mask": [
+      "Ariadne"
+    ]
+  },
+  "Asterios": {
+    "text": "Asterion is the name behind the monster. The bull-headed thing at the heart of the Cretan labyrinth had a name of its own, stamped as a star on Cretan coins: the son of Minos' wife by the bull Poseidon sent when Minos refused to sacrifice it. Minotaur is not a name at all but a Greek description — Minos plus bull — imposed from outside. An earlier king of Crete bore the same name: the husband of Europa, who raised her sons by Zeus, Minos among them, and left the throne to his stepson.",
+    "mask": [
+      "Asterios",
+      "Asterion",
+      "Asterius",
+      "Minotaur"
+    ]
   }
 }

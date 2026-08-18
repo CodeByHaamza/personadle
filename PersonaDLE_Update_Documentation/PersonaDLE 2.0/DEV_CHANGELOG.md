@@ -113,6 +113,34 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): fiches Personae Persona 4 (EN + FR)
+
+Deuxième paquet de contenu Expert Personae : les 28 personas de Persona 4 / Golden / Arena
+Ultimax, en anglais et en français. Total 67 fiches (P2 + P3 + P4).
+
+### Détails techniques
+
+- 28 fiches, 76 à 108 mots (moyenne 94) — même calibre que les paquets précédents.
+- Les 7 variantes cosmétiques P4 (`Izanagi Picaro`, `Magatsu-Izanagi Picaro`, `Kaguya Picaro`,
+  `Tsukuyomi Picaro`, `Ariadne Picaro`, `Asterios Picaro`, `Izanagi-no-Okami Picaro`) n'ont
+  volontairement pas de fiche : `expertWielders()` les rattache déjà à l'entrée de base.
+- Sources courtes complétées : `Izanagi-no-Okami`, `Jiraiya`, `Takehaya Susano-o`,
+  `Sumeo-Okami`, `Yamato Sumeragi`, `Kamui-Moshiri`, `Kouzeon`, `Magatsu-Izanagi` faisaient
+  1 à 3 phrases dans le `.md` source. Sources trop longues taillées : `Amaterasu` passait de
+  380 mots, `Dairoku Tenmaou` de 300.
+- **Épithètes ajoutées aux `mask`** : « Demon King of the Sixth Heaven » / « Roi-Démon du
+  Sixième Ciel » identifient la persona aussi sûrement que son nom. Sans elles, la fiche
+  `Dairoku Tenmaou` affichait l'identité en clair pendant toute la partie — le test « chaque
+  fiche se nomme » l'a attrapé, ce qui est précisément son rôle.
+- **Références croisées masquées quand le manieur est le même** : la fiche `Sumeo-Okami`
+  masque `Amaterasu`, `Kouzeon` masque `Kanzeon`, `Takeji Zaiten` masque `Dairoku Tenmaou`.
+  Ce sont des épithètes de la même persona pour le même personnage : les laisser visibles
+  donnerait la réponse. Les autres noms de personas restent en clair — ce sont des indices
+  légitimes.
+
+Prochains paquets : P5, puis P5X, puis Trinity Souls, toujours EN + FR. Les 4 langues
+restantes (ES/DE/IT/PT) seront faites en un lot une fois le contenu source validé.
+
 ## 2026-08-15 — fix(challenge): défis bloqués « en cours », 404 et bannière absente
 
 Trois symptômes signalés par des joueurs — acceptation qui ne redirige pas, redirection vers
