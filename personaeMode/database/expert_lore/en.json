@@ -507,5 +507,303 @@
       "Asterius",
       "Minotaur"
     ]
+  },
+  "Arsène": {
+    "text": "Arsène Lupin is the gentleman thief created by Maurice Leblanc in 1905, and the most famous burglar in French fiction. He robs the very rich and the outright criminal, which makes him less a villain than an anti-hero: elegant, theatrical, addicted to the disguise and the taunting letter announcing the theft in advance. Leblanc may have drawn on the anarchist burglar Marius Jacob. Behind the alias there is said to be a real given name, used across several of the novels, and it is deliberately never quite the name on the cover.",
+    "mask": [
+      "Arsène",
+      "Arsene",
+      "Lupin",
+      "Raoul"
+    ]
+  },
+  "Satanael": {
+    "text": "Satanael appears in the second Book of Enoch as the archangel who led the rebellion of the fallen: he refused to bow to the human Enoch and was imprisoned for it, which is why he is generally read as a form of Lucifer. Gnostic traditions push him further — an angel in the service of Yaldabaoth who rebelled on realising his master was not the true God, and handed humanity the knowledge to free itself. The Cathars said the -el was stripped from his name when Michael sealed him in Hell: the suffix was his angelic nature, and losing it was the sentence.",
+    "mask": [
+      "Satanael",
+      "Sataniel",
+      "Satanail",
+      "Satanel"
+    ]
+  },
+  "Raoul": {
+    "text": "Raoul is the name behind the mask. First dropped in The Queen's Necklace and slipped into the narration as the gentleman burglar's true given name, it resurfaces across the novels as his most persistent alias — Raoul d'Andrésy in The Countess of Cagliostro among others. It is a small, deliberate joke on Leblanc's part: the most famous thief in French fiction has a hundred false identities, and the one underneath them is itself only ever half-confirmed. The reader is told the real name and is never allowed to be sure of it.",
+    "mask": [
+      "Raoul",
+      "Arsène",
+      "Arsene",
+      "Lupin",
+      "d'Andrésy"
+    ]
+  },
+  "Captain Kidd": {
+    "text": "Captain Kidd, a Scottish privateer of the seventeenth century, began in the Caribbean, breaking a French siege of the English colony of Nevis, and was rewarded with a letter of marque — legal cover for as long as he stayed loyal. In the Indian Ocean his crew looted a neutral ship without his knowledge and the cover evaporated. Taken to London, tried and hanged, he became a pirate in the popular imagination far more than he ever was at sea. The buried treasure that made his name is entirely legend, and it has outlasted every fact about him.",
+    "mask": [
+      "Captain Kidd",
+      "Kidd",
+      "William Kidd",
+      "William"
+    ]
+  },
+  "Seiten Taisei": {
+    "text": "Seiten Taisei — Great Sage Equalling Heaven — is not a title anyone granted — the Monkey King awarded it to himself, by force, when heaven refused to take him seriously. Born from a stone, taught seventy-two transformations and the somersault cloud, he struck his own name out of the ledger of the dead, ate the peaches of immortality and drank the banquet he was not invited to. The furnace meant to render him down burned away the last of his mortality instead. Only the Buddha could stop him, with a wager he could not win, and five hundred years under a mountain.",
+    "mask": [
+      "Seiten Taisei",
+      "Qitian Dasheng",
+      "Sun Wukong",
+      "Son Gokuu",
+      "Wukong"
+    ]
+  },
+  "Carmen": {
+    "text": "Carmen is the Romani woman of Prosper Mérimée's 1845 novella, better known through the opera Bizet built from it. She is the archetypal femme fatale: she uses her beauty to make men fall, and leaves the moment she is bored. She rolls cigarettes, having worked in a tobacco factory. A spurned lover kills her in a jealous rage, and she goes to it knowing exactly what he will do — because the alternative is being owned. Free she was born, and free she will die, is the whole of her position.",
+    "mask": [
+      "Carmen"
+    ]
+  },
+  "Hecate": {
+    "text": "Hecate is the chthonic goddess of magic and witchcraft, possibly Anatolian in origin, with her greatest cult site at Lagina in Caria; the earliest inscription, at Miletus, makes her a guardian of entrances. Childbirth, gateways, walls, crossroads, torches, dogs and the moon are all hers. From the Hellenistic period she is shown three-faced, tied to ghosts and curses, and titled she who acts from afar. The modern triple goddess of maiden, mother and crone is largely Robert Graves' invention, misreading her three bodies at the crossroads.",
+    "mask": [
+      "Hecate",
+      "Hekate",
+      "Trimorphis"
+    ]
+  },
+  "Zorro": {
+    "text": "Zorro — Spanish for fox, and for cunning — was created in 1919 by the pulp writer Johnston McCulley. He is a Californio nobleman of Spanish and native descent, living in Los Angeles under Mexican rule, who puts on a mask to defend commoners and indigenous people against tyrannical officials, riding a black horse named Tornado. The formula is now so familiar it is invisible: the idle aristocrat by day, the outlaw by night, and a signature carved into the scene at swordpoint.",
+    "mask": [
+      "Zorro",
+      "Diego",
+      "Don Diego de la Vega",
+      "de la Vega"
+    ]
+  },
+  "Mercurius": {
+    "text": "Mercurius is the Roman god of commerce, speed and merchants, and messenger of the Dii Consentes. His portfolio is unusually wide even for a god: financial gain, eloquence, messages, alchemy, divination, travellers, boundaries, luck, trickery and thieves — and he guides souls to the underworld besides. He is shown with a cockerel heralding the day, a ram or goat for fertility, and a tortoise, from whose shell he is said to have made the first lyre. Alchemists equated him with the philosopher's stone. The Greeks knew him as Hermes; the planet carries his name.",
+    "mask": [
+      "Mercurius",
+      "Mercury"
+    ]
+  },
+  "Goemon": {
+    "text": "Goemon, a Japanese outlaw executed in 1594, is known from only two sources, both written after his death. The first records an attempt on the life of the shogun Hideyoshi Toyotomi, his capture, and his execution alongside his young son; the second, by the missionary Pedro de Morejon, describes him boiled alive. That death did the rest. Over the centuries he grew into a Japanese Robin Hood robbing the rich for the poor, then into a master ninja, then into a fixture of bunraku and kabuki — a thin historical record carrying four hundred years of theatre.",
+    "mask": [
+      "Goemon",
+      "Ishikawa Goemon",
+      "Gorokichi",
+      "Goyemon"
+    ]
+  },
+  "Kamu Susano-o": {
+    "text": "Susanoo is the Japanese god of storms, born from his father's nose during the cleansing after Yomi, brother to the sun and the moon. The Kamu form is far rarer: it appears only in the Izumo no Kuni Fudoki, and the prefix means simply god in archaic Japanese. It is the same storm god, named as the regional gazetteer of Izumo named him — the province where he was banished, killed the eight-headed serpent and found the sword in its tail. The local record calls him by the local title.",
+    "mask": [
+      "Kamu Susano-o",
+      "Kamu Susanoo",
+      "Susano-o",
+      "Susanoo"
+    ]
+  },
+  "Johanna": {
+    "text": "Johanna is the legendary woman who is said to have reigned as pope, in defiance of an unbroken male line. Most versions make her learned and gifted, disguised as a man — often at a lover's urging — rising through the church hierarchy on ability alone until she was elected. Her sex was revealed when she gave birth during a procession, and she died shortly after. Later processions were said to avoid the spot. Believed for centuries, the story has no evidence behind it, and historians read it as fiction written to embarrass Rome.",
+    "mask": [
+      "Johanna",
+      "Pope Joan",
+      "Joan",
+      "Agnes"
+    ]
+  },
+  "Anat": {
+    "text": "Anat is the west Semitic goddess of war and mistress of wild animals, also tied to love and sex, famous in the myths for a violent temper and open delight in slaughter. In the Baal Cycle she backs her brother against the sea god, strong-arms her own father into letting him build his palace, and when Baal dies she kills Mot and brings him back from the land of the dead. In the tale of Aqhat she wants the hero's bow; he tells her weapons are no business of a woman, and she has him killed for it.",
+    "mask": [
+      "Anat",
+      "Anath",
+      "Anit",
+      "Anaitis",
+      "Antit"
+    ]
+  },
+  "Necronomicon": {
+    "text": "The Necronomicon is Lovecraft's grimoire, first named in The Hound and picked up by everyone who wrote in his shadow afterwards. In the fiction it is the work of the mad Arab Abdul Alhazred, written in the eighth century, and it sets down the truth about the ancient cosmic beings that inhabited the Earth and still steer humanity for ends of their own. It is dangerous in both directions: it grants forbidden knowledge, and reading it costs the reader their mind. It has never existed, which has not stopped a steady trade in replicas.",
+    "mask": [
+      "Necronomicon",
+      "Al Azif",
+      "Alhazred"
+    ]
+  },
+  "Milady": {
+    "text": "Milady de Winter is Dumas' antagonist in The Three Musketeers, and the most dangerous person in it. She works for Cardinal Richelieu, but her real campaigns are her own: against d'Artagnan, who discovered the fleur-de-lis branded on her shoulder marking her as a convict, and against Athos, who turns out to be the husband she once married under a false name. Fiercely independent, manipulative, ruining people for personal gain, she is beheaded for her crimes — and her real identity is never established, the title itself being inherited from a husband.",
+    "mask": [
+      "Milady",
+      "Milady de Winter",
+      "de Winter"
+    ]
+  },
+  "Astarte": {
+    "text": "Astarte is the western counterpart of Ishtar: goddess of war, hunting, love, sex, horses and possibly the morning star, often called name-of-Baal and generally taken for his consort. Her symbols are the lion, the panther, and perhaps the eight-pointed star. Egypt made her a warrior on horseback with a temple at Memphis; Sidon and Tyre made her their own. The Bible renames her Ashtoreth, a deliberate misspelling built to sound like the word for abomination — one of the sharpest insults in scripture, aimed at a goddess too popular to ignore.",
+    "mask": [
+      "Astarte",
+      "Athtart",
+      "Ashtart",
+      "Ashtoreth"
+    ]
+  },
+  "Robin Hood": {
+    "text": "Robin Hood is the outlaw of English folklore, archer and swordsman, dressed in Lincoln green, robbing the rich to give to the poor at the head of his Merry Men. He fights the Sheriff of Nottingham, who serves Prince John, who has taken the throne from his absent brother Richard. Later tellings added Guy of Gisbourne, the assassin sent for his head, and a rivalry over Marian. He becomes a popular figure in the late medieval period and has not left the culture since — the outlaw who is more lawful than the law.",
+    "mask": [
+      "Robin Hood",
+      "Robin of Locksley",
+      "Locksley"
+    ]
+  },
+  "Loki": {
+    "text": "Loki is the Norse god of mischief, magic and fire, son of the giant Fárbauti and the goddess Laufey, blood-brother to Odin — and that mixed parentage is his whole problem, since giants and gods are enemies. Married to Sigyn, he fathered on the giantess Angrboda three creatures the gods could not allow: Hel who rules the dead, Fenrir who is fated to kill Odin, and the World Serpent thrown into the sea. He also bore Odin's eight-legged horse himself, as a mare. At Ragnarök he kills Heimdallr and dies doing it.",
+    "mask": [
+      "Loki"
+    ]
+  },
+  "William": {
+    "text": "William Kidd, hanged in London in 1701 — the year printed on the hood — was a Scottish privateer before he was a pirate, and arguably never much of a pirate at all. He broke the French siege of Nevis, was rewarded with a letter of marque, and lost its protection when his crew plundered a neutral ship in the Indian Ocean without his knowledge. He is one of the very few personas in the series drawn from a documented human being rather than from myth, and the buried treasure everyone remembers is the part that never happened.",
+    "mask": [
+      "William",
+      "William Kidd",
+      "Kidd",
+      "Captain Kidd"
+    ]
+  },
+  "Célestine": {
+    "text": "Célestine Galli-Marié, 1837 to 1905, was a French mezzo-soprano, and the first woman to sing the role that made her famous. She was only the third choice for it, and turned out to be essential: when the management demanded the opera be toned down, she backed the composer's refusal. Her voice was distinctive enough that her surname became a classification for light mezzo-sopranos. Her jacket carries the line she sang at the climax — free she was born, free she will die — moments before the character is killed for refusing to belong to anyone.",
+    "mask": [
+      "Célestine",
+      "Celestine",
+      "Galli-Marié",
+      "Carmen"
+    ]
+  },
+  "Diego": {
+    "text": "Don Diego de la Vega is a Californio nobleman of Spanish and native descent, living in Los Angeles under Mexican rule, and by daylight a deliberate disappointment: idle, bookish, no use to anyone. It is a costume worn the other way round — the useless aristocrat is the disguise, and the masked outlaw who defends commoners and indigenous people against tyrannical officials is the man. Created in 1919 by Johnston McCulley, he set the template that every secret identity since has borrowed.",
+    "mask": [
+      "Diego",
+      "Don Diego de la Vega",
+      "de la Vega",
+      "Zorro"
+    ]
+  },
+  "Gorokichi": {
+    "text": "Gorokichi was the birth name of the Japanese outlaw executed in 1594 — the name before the legend took over. The historical record is two documents, both posthumous: one detailing his attempt on the shogun Hideyoshi Toyotomi, his capture and his execution alongside his young son; the other, by a Portuguese missionary, describing him boiled alive. Everything else came later. The robbing of the rich, the ninja skills, the kabuki stage: four centuries of retelling built on a man about whom almost nothing is actually known.",
+    "mask": [
+      "Gorokichi",
+      "Goemon",
+      "Ishikawa Goemon",
+      "Goyemon"
+    ]
+  },
+  "Agnes": {
+    "text": "Agnes is one of the names given to the legendary woman said to have reigned as pope. The version in the thirteenth-century Chronica Universalis Mettensis has her collapse while pregnant during a procession, exposing the deception that had carried her to the throne of Peter. References to a female pope reach back to the twelfth century and were widely believed for hundreds of years. Modern historians treat the whole thing as invention — a story built to embarrass the church, which the church then had to keep denying.",
+    "mask": [
+      "Agnes",
+      "Johanna",
+      "Pope Joan",
+      "Joan"
+    ]
+  },
+  "Al Azif": {
+    "text": "Al Azif is the original Arabic title of Lovecraft's forbidden book, the name it carried before the Greek one that everybody uses. The word refers to the nocturnal sound of insects, taken for the howling of demons. Written in the eighth century by the mad Arab Abdul Alhazred, it records the truth about the ancient cosmic beings that once held the Earth and still work on humanity for their own ends. Reading it grants that knowledge and costs the reader their sanity — the two are not separable, which is the whole point.",
+    "mask": [
+      "Al Azif",
+      "Azif",
+      "Necronomicon",
+      "Alhazred"
+    ]
+  },
+  "Lucy": {
+    "text": "Lucy Hay, Countess of Carlisle, was an English courtier under Charles I who helped both sides of the Civil War and betrayed both. A key ally of the Parliamentarians before the fighting, she switched to the Royalists once it began, and was arrested and imprisoned for it. She died in 1660, just after the Restoration. Her double-dealing is generally taken as the model for Dumas' most dangerous character — which makes her one of the very few personas in the series drawn from a documented person rather than from myth.",
+    "mask": [
+      "Lucy",
+      "Lucy Hay",
+      "Countess of Carlisle",
+      "Milady"
+    ]
+  },
+  "Hereward": {
+    "text": "Hereward the Wake was an Anglo-Saxon nobleman who led armed resistance to the Norman conquest, holding out in the fens around Ely long after organised opposition had collapsed. What became of him is unknown — some accounts have him pardoned, others killed. His legend spread far enough and early enough that some of the stories told about him may have migrated into the tales of a certain green-clad outlaw, or at least shaped them: the dispossessed Englishman in the woods, fighting an occupying power that holds the law.",
+    "mask": [
+      "Hereward",
+      "Hereward the Wake"
+    ]
+  },
+  "Cendrillon": {
+    "text": "Cendrillon is the French telling of a story that began as Greek folk tale and reached its definitive form with Charles Perrault, who added the glass slippers, the pumpkin carriage and the fairy godmother. A kind girl is kept as a servant by her stepmother and two vain stepsisters; the prince holds a ball; the spell ends at midnight; a slipper is left behind and fits nobody else. The name is not a name at all. It is what her stepfamily called her, from the ash she slept in beside the fire to keep warm.",
+    "mask": [
+      "Cendrillon",
+      "Cinderella",
+      "Ella",
+      "cendre"
+    ]
+  },
+  "Vanadis": {
+    "text": "Freya is the great goddess of love, beauty and fertility in Norse myth — fairest of all the goddesses, prayed to for happiness in love, for safe childbirth and for good seasons. She is also a goddess of war, death, magic, prophecy and wealth, and she takes half of everyone who falls in battle into her hall Folkvangr; Odin gets the other half. Vanadis, one of her many bynames in the Prose Edda, means dis of the Vanir — the older tribe of gods she comes from, before the peace with the Aesir.",
+    "mask": [
+      "Vanadis",
+      "Vanadís",
+      "Freya",
+      "Freyja",
+      "Freyia"
+    ]
+  },
+  "Ella": {
+    "text": "Ella is the name underneath the nickname. In the tale as Perrault fixed it — glass slippers, pumpkin carriage, fairy godmother, a spell that ends at midnight — the girl kept as a servant by her stepmother and stepsisters is never actually called anything else in the story, and Cinderella is only what her stepfamily called her, from the cinders she slept among beside the fire. Some retellings give her back the name that was buried under the insult. It is the same person, without the mockery.",
+    "mask": [
+      "Ella",
+      "Cinderella",
+      "Cendrillon",
+      "cinders"
+    ]
+  },
+  "Adam Kadmon": {
+    "text": "Adam Kadmon, Primordial Man, is Kabbalah's original conception of the human — the perfect prototype made by Ein Sof, untouched by earthly matter, born from the contraction of the infinite light. He stands against the Adam of Eden, who was shaped from clay. The Kabbalists used him to read the divine plan in the human body itself: the ten Sefirot, the circles of creation, are his form. He exists above the four worlds of emanation, creation, formation and action, and later teaching identified him with the messiah.",
+    "mask": [
+      "Adam Kadmon",
+      "Kadmon",
+      "Primordial Man"
+    ]
+  },
+  "Azathoth": {
+    "text": "Azathoth, the blind idiot god at the centre of all infinity, is that, from which everything in the Cthulhu Mythos ultimately descends — Nyarlathotep directly, and through the Nameless Mist and the Great Darkness every other Outer God and Great Old One after them. A court of lesser gods dances around it without pause, playing music to keep it asleep. It is the most powerful thing in the mythos and knows nothing whatsoever: creation was accidental and unconscious. Later writers added that reality is its dream, and ends when it wakes.",
+    "mask": [
+      "Azathoth",
+      "Blind Idiot God",
+      "Nuclear Chaos",
+      "Daemon Sultan"
+    ]
+  },
+  "Valjean": {
+    "text": "Jean Valjean is the protagonist of Victor Hugo's Les Misérables, sentenced to the galleys for stealing bread for his sister's starving children and hardened by nineteen years of it. Released, marked, and shown one act of mercy he did not expect, he spends the rest of the novel trying to live decently under a series of assumed names — caring for the dying Fantine, then raising her daughter Cosette. Compassionate, self-sacrificing, capable of cunning and jealousy, he is set against Inspector Javert, who is the law, and who is the antagonist.",
+    "mask": [
+      "Valjean",
+      "Jean Valjean"
+    ]
+  },
+  "Pithos": {
+    "text": "A pithos is a large ceramic storage jar used around the Mediterranean from the Neolithic through the Iron Age, for wine, oil or grain — and sometimes for rituals and burials. In Hesiod's Theogony the vessel that held all the evils of mankind is one of these jars, not a box. The box is a mistake: Erasmus of Rotterdam, translating into Latin in the sixteenth century, read pithos as pyxis, a small casket, and the error stuck. What did not escape when it opened was hope, which some tellings count as the cruellest thing in it.",
+    "mask": [
+      "Pithos",
+      "pithoi",
+      "Pandora"
+    ]
+  },
+  "Pandora": {
+    "text": "Pandora is the first woman of Greek myth, made from earth by Hephaestus and Athena on Zeus' orders as a punishment for the theft of fire — every god adding a seductive gift. She was given to the titan Epimetheus, whose brother had warned him to accept nothing from Zeus, and given a sealed jar she was half-heartedly told not to open. The warning was the point: the gods wanted it opened. When curiosity won, every evil escaped into the world. Only hope stayed inside, and it is not obvious whether that is a mercy.",
+    "mask": [
+      "Pandora",
+      "Anesidora"
+    ]
+  },
+  "Ernesto": {
+    "text": "Ernesto Che Guevara, Argentine Marxist and doctor, is known worldwide for his part in the Cuban Revolution and for exporting it afterwards. He is also a genuinely divisive figure: he ordered executions without trial to defend the revolution, and acted against political dissidents and those the Castro regime deemed deviant. The face on the T-shirt and the record of the man are not the same object, and most of the argument about him consists of choosing which one to look at.",
+    "mask": [
+      "Ernesto",
+      "Che Guevara",
+      "Guevara"
+    ]
   }
 }

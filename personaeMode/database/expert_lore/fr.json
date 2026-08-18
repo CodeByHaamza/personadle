@@ -521,5 +521,310 @@
       "Minotaure",
       "Minotaur"
     ]
+  },
+  "Arsène": {
+    "text": "Arsène Lupin est le gentleman cambrioleur créé par Maurice Leblanc en 1905, et le voleur le plus célèbre de la fiction française. Il détrousse les très riches et les criminels bien pires que lui, ce qui en fait moins un méchant qu'un anti-héros : élégant, théâtral, accro au déguisement et à la lettre narquoise annonçant le vol à l'avance. Leblanc s'est peut-être inspiré du cambrioleur anarchiste Marius Jacob. Derrière l'alias se cacherait un vrai prénom, employé dans plusieurs romans, et ce n'est jamais tout à fait le nom de la couverture.",
+    "mask": [
+      "Arsène",
+      "Arsene",
+      "Lupin",
+      "Raoul"
+    ]
+  },
+  "Satanael": {
+    "text": "Satanael apparaît dans le second Livre d'Hénoch comme l'archange qui mena la révolte des déchus : il refusa de s'incliner devant l'humain Hénoch et fut emprisonné pour cela, d'où sa lecture courante comme figure de Lucifer. Les traditions gnostiques vont plus loin — un ange au service de Yaldabaoth qui se révolta en comprenant que son maître n'était pas le vrai Dieu, et donna à l'humanité de quoi s'en affranchir. Les cathares disaient que le -el lui fut retiré quand Michel le scella en Enfer : le suffixe était sa nature angélique, et la perdre était la sentence.",
+    "mask": [
+      "Satanael",
+      "Sataniel",
+      "Satanail",
+      "Satanel"
+    ]
+  },
+  "Raoul": {
+    "text": "Raoul est le nom derrière le masque. Lâché dans Le Collier de la reine et glissé par la narration comme le véritable prénom du gentleman cambrioleur, il ressurgit au fil des romans comme son alias le plus tenace — Raoul d'Andrésy dans La Comtesse de Cagliostro, entre autres. C'est une petite plaisanterie délibérée de Leblanc : le voleur le plus célèbre de la fiction française a cent fausses identités, et celle du dessous n'est elle-même jamais qu'à moitié confirmée. On donne au lecteur le vrai nom sans jamais lui permettre d'en être sûr.",
+    "mask": [
+      "Raoul",
+      "Arsène",
+      "Arsene",
+      "Lupin",
+      "d'Andrésy"
+    ]
+  },
+  "Captain Kidd": {
+    "text": "Captain Kidd, corsaire écossais du XVIIᵉ siècle, débuta aux Caraïbes en brisant le siège français de la colonie anglaise de Nevis, ce qui lui valut une lettre de marque — une couverture légale tant qu'il resterait loyal. Dans l'océan Indien, son équipage pilla un navire neutre à son insu et la couverture s'évapora. Ramené à Londres, jugé, pendu, il devint dans l'imaginaire un pirate bien plus qu'il ne le fut jamais en mer. Le trésor enfoui qui a fait son nom est entièrement légendaire, et il a survécu à tous les faits le concernant.",
+    "mask": [
+      "Captain Kidd",
+      "Kidd",
+      "William Kidd",
+      "William"
+    ]
+  },
+  "Seiten Taisei": {
+    "text": "Seiten Taisei — Grand Sage Égal du Ciel — n'est pas un titre qu'on lui accorda — le Roi des Singes se le décerna lui-même, par la force, quand le ciel refusa de le prendre au sérieux. Né d'une pierre, initié aux soixante-douze transformations et au nuage-culbute, il raya son nom du registre des morts, mangea les pêches d'immortalité et vida le banquet auquel il n'était pas invité. Le four censé le réduire brûla le dernier reste de sa mortalité. Seul le Bouddha put l'arrêter, par un pari imperdable et cinq cents ans sous une montagne.",
+    "mask": [
+      "Seiten Taisei",
+      "Qitian Dasheng",
+      "Sun Wukong",
+      "Son Gokuu",
+      "Wukong"
+    ]
+  },
+  "Carmen": {
+    "text": "Carmen est la bohémienne de la nouvelle de Prosper Mérimée, parue en 1845, mieux connue par l'opéra que Bizet en tira. C'est la femme fatale archétypale : elle use de sa beauté pour faire tomber les hommes et s'en va dès qu'elle s'ennuie. Elle roule des cigarettes, ayant travaillé dans une manufacture de tabac. Un amant éconduit la tue dans un accès de jalousie, et elle y va en sachant exactement ce qu'il fera — parce que l'alternative serait d'appartenir à quelqu'un. Libre elle est née, libre elle mourra : toute sa position tient là.",
+    "mask": [
+      "Carmen"
+    ]
+  },
+  "Hecate": {
+    "text": "Hécate est la déesse chthonienne de la magie et de la sorcellerie, d'origine peut-être anatolienne, dont le grand sanctuaire se trouvait à Lagina en Carie ; la plus ancienne inscription, à Milet, la donne gardienne des seuils. L'enfantement, les portes, les murs, les carrefours, les torches, les chiens et la lune lui appartiennent. À partir de l'époque hellénistique on la montre à trois visages, liée aux fantômes et aux malédictions, sous le titre de celle qui agit de loin. La triple déesse moderne — vierge, mère, vieille — est surtout une invention de Robert Graves.",
+    "mask": [
+      "Hecate",
+      "Hécate",
+      "Hekate"
+    ]
+  },
+  "Zorro": {
+    "text": "Zorro — renard en espagnol, et par extension rusé — fut créé en 1919 par le feuilletoniste Johnston McCulley. C'est un noble californio d'ascendance espagnole et indigène, vivant à Los Angeles sous domination mexicaine, qui met un masque pour défendre le petit peuple et les autochtones contre les fonctionnaires tyranniques, monté sur un cheval noir nommé Tornado. La formule est devenue si familière qu'on ne la voit plus : l'aristocrate oisif le jour, le hors-la-loi la nuit, et une signature tracée à la pointe de l'épée.",
+    "mask": [
+      "Zorro",
+      "Diego",
+      "Don Diego de la Vega",
+      "de la Vega"
+    ]
+  },
+  "Mercurius": {
+    "text": "Mercurius est le dieu romain du commerce, de la vitesse et des marchands, et le messager des Dii Consentes. Son domaine est large même pour un dieu : le gain financier, l'éloquence, les messages, l'alchimie, la divination, les voyageurs, les frontières, la chance, la ruse et les voleurs — et il guide en outre les âmes vers les enfers. On le représente avec un coq annonçant le jour, un bélier pour la fécondité, et une tortue, de la carapace de laquelle il aurait fait la première lyre. Les alchimistes l'assimilaient à la pierre philosophale.",
+    "mask": [
+      "Mercurius",
+      "Mercure",
+      "Mercury"
+    ]
+  },
+  "Goemon": {
+    "text": "Goemon, hors-la-loi japonais exécuté en 1594, n'est connu que par deux sources, toutes deux postérieures à sa mort. La première relate une tentative contre le shogun Hideyoshi Toyotomi, sa capture et son exécution avec son jeune fils ; la seconde, du missionnaire Pedro de Morejon, le décrit bouilli vif. Cette mort a fait le reste. Au fil des siècles il est devenu un Robin des Bois japonais volant aux riches, puis un ninja d'exception, puis une figure du bunraku et du kabuki — un dossier historique mince portant quatre siècles de théâtre.",
+    "mask": [
+      "Goemon",
+      "Ishikawa Goemon",
+      "Gorokichi",
+      "Goyemon"
+    ]
+  },
+  "Kamu Susano-o": {
+    "text": "Susanoo est le dieu japonais des tempêtes, né du nez de son père lors des ablutions après le Yomi, frère du soleil et de la lune. La forme Kamu est bien plus rare : elle n'apparaît que dans l'Izumo no Kuni Fudoki, et le préfixe signifie simplement dieu en japonais archaïque. C'est le même dieu de l'orage, nommé comme le nommait la monographie provinciale d'Izumo — la province où il fut banni, tua le serpent à huit têtes et trouva l'épée dans sa queue. Le registre local l'appelle par son titre local.",
+    "mask": [
+      "Kamu Susano-o",
+      "Kamu Susanoo",
+      "Susano-o",
+      "Susanoo"
+    ]
+  },
+  "Johanna": {
+    "text": "Johanna est la femme qui aurait régné comme pape, au mépris d'une lignée masculine ininterrompue. La plupart des versions la font savante et douée, déguisée en homme — souvent à l'instigation d'un amant — gravissant la hiérarchie de l'Église sur ses seuls mérites jusqu'à l'élection. Son sexe fut révélé lorsqu'elle accoucha au cours d'une procession, et elle mourut peu après. On disait que les processions ultérieures évitaient l'endroit. Crue pendant des siècles, l'histoire ne repose sur rien, et les historiens y voient une fiction écrite pour embarrasser Rome.",
+    "mask": [
+      "Johanna",
+      "papesse Jeanne",
+      "Jeanne",
+      "Agnes",
+      "Agnès"
+    ]
+  },
+  "Anat": {
+    "text": "Anat est la déesse ouest-sémitique de la guerre et maîtresse des bêtes sauvages, liée aussi à l'amour et au sexe, célèbre dans les mythes pour un tempérament violent et un plaisir ouvert au carnage. Dans le Cycle de Baal elle soutient son frère contre le dieu de la mer, force la main de son propre père pour qu'il le laisse bâtir son palais, et quand Baal meurt elle tue Mot et le ramène du pays des morts. Dans le récit d'Aqhat elle convoite l'arc du héros ; il lui répond que les armes ne regardent pas les femmes, et elle le fait tuer pour cela.",
+    "mask": [
+      "Anat",
+      "Anath",
+      "Anit",
+      "Anaitis",
+      "Antit"
+    ]
+  },
+  "Necronomicon": {
+    "text": "Le Necronomicon est le grimoire de Lovecraft, nommé pour la première fois dans Le Molosse puis repris par tous ceux qui écrivirent dans son sillage. Dans la fiction c'est l'œuvre de l'Arabe fou Abdul Alhazred, rédigée au VIIIᵉ siècle, et elle consigne la vérité sur les anciennes entités cosmiques qui ont habité la Terre et manœuvrent encore l'humanité à leurs propres fins. Il est dangereux dans les deux sens : il accorde le savoir interdit, et sa lecture coûte la raison. Il n'a jamais existé, ce qui n'a pas empêché un commerce régulier de répliques.",
+    "mask": [
+      "Necronomicon",
+      "Al Azif",
+      "Alhazred"
+    ]
+  },
+  "Milady": {
+    "text": "Milady de Winter est l'antagoniste des Trois Mousquetaires, et la personne la plus dangereuse du roman. Elle travaille pour le cardinal de Richelieu, mais ses vraies campagnes sont les siennes : contre d'Artagnan, qui a découvert la fleur de lys marquée sur son épaule et la désignant comme condamnée, et contre Athos, qui se révèle être l'époux qu'elle avait jadis épousé sous un faux nom. Farouchement indépendante, manipulatrice, ruinant les gens pour son profit, elle est décapitée pour ses crimes — et sa véritable identité n'est jamais établie.",
+    "mask": [
+      "Milady",
+      "Milady de Winter",
+      "de Winter"
+    ]
+  },
+  "Astarte": {
+    "text": "Astarté est la contrepartie occidentale d'Ishtar : déesse de la guerre, de la chasse, de l'amour, du sexe, des chevaux et peut-être de l'étoile du matin, souvent appelée nom-de-Baal et généralement tenue pour sa parèdre. Ses symboles sont le lion, la panthère, et peut-être l'étoile à huit branches. L'Égypte en fit une guerrière à cheval avec un temple à Memphis ; Sidon et Tyr se l'approprièrent. La Bible la rebaptise Ashtoreth, déformation volontaire construite pour évoquer le mot signifiant abomination — insulte visant une déesse trop populaire pour être ignorée.",
+    "mask": [
+      "Astarte",
+      "Astarté",
+      "Athtart",
+      "Ashtart",
+      "Ashtoreth"
+    ]
+  },
+  "Robin Hood": {
+    "text": "Robin des Bois est le hors-la-loi du folklore anglais, archer et bretteur, vêtu de vert de Lincoln, volant aux riches pour donner aux pauvres à la tête de ses Joyeux Compagnons. Il combat le shérif de Nottingham, qui sert le prince Jean, qui a pris le trône à son frère Richard, absent. Les récits tardifs ajoutèrent Guy de Gisbourne, l'assassin lancé à ses trousses, et une rivalité autour de Marianne. Devenu populaire à la fin du Moyen Âge, il n'a plus quitté la culture — le hors-la-loi plus légitime que la loi.",
+    "mask": [
+      "Robin Hood",
+      "Robin des Bois",
+      "Locksley"
+    ]
+  },
+  "Loki": {
+    "text": "Loki est le dieu nordique de la malice, de la magie et du feu, fils du géant Fárbauti et de la déesse Laufey, frère de sang d'Odin — et cette double ascendance est tout son problème, géants et dieux étant ennemis. Marié à Sigyn, il engendra de la géante Angrboda trois créatures que les dieux ne pouvaient tolérer : Hel qui règne sur les morts, Fenrir voué à tuer Odin, et le Serpent-Monde jeté à la mer. Il mit lui-même bas, en jument, le cheval à huit pattes d'Odin. Au Ragnarök il tue Heimdall et y laisse la vie.",
+    "mask": [
+      "Loki"
+    ]
+  },
+  "William": {
+    "text": "William Kidd, pendu à Londres en 1701 — l'année imprimée sur la capuche — fut corsaire avant d'être pirate, et ne fut sans doute jamais vraiment pirate. Il brisa le siège français de Nevis, en fut récompensé d'une lettre de marque, et en perdit la protection quand son équipage pilla un navire neutre dans l'océan Indien à son insu. C'est l'une des très rares personas de la série tirée d'un être humain documenté plutôt que d'un mythe, et le trésor enfoui dont tout le monde se souvient est la part qui n'a jamais eu lieu.",
+    "mask": [
+      "William",
+      "William Kidd",
+      "Kidd",
+      "Captain Kidd"
+    ]
+  },
+  "Célestine": {
+    "text": "Célestine Galli-Marié, 1837-1905, fut une mezzo-soprano française, et la première à chanter le rôle qui l'a rendue célèbre. Elle n'était que le troisième choix, et se révéla indispensable : quand la direction exigea que l'opéra soit adouci, elle soutint le refus du compositeur. Sa voix était assez singulière pour que son nom serve encore à classer les mezzos légères. Sa veste porte la phrase qu'elle chantait au dénouement — libre elle est née, libre elle mourra — quelques instants avant que le personnage soit tué pour avoir refusé d'appartenir à quiconque.",
+    "mask": [
+      "Célestine",
+      "Celestine",
+      "Galli-Marié",
+      "Carmen"
+    ]
+  },
+  "Diego": {
+    "text": "Don Diego de la Vega est un noble californio d'ascendance espagnole et indigène, vivant à Los Angeles sous domination mexicaine, et de jour une déception soigneusement entretenue : oisif, livresque, inutile à tous. C'est un costume porté à l'envers — l'aristocrate inutile est le déguisement, et le hors-la-loi masqué qui défend le petit peuple et les autochtones contre les fonctionnaires tyranniques est l'homme. Créé en 1919 par Johnston McCulley, il a fixé le modèle que toutes les identités secrètes ont emprunté depuis.",
+    "mask": [
+      "Diego",
+      "Don Diego de la Vega",
+      "de la Vega",
+      "Zorro"
+    ]
+  },
+  "Gorokichi": {
+    "text": "Gorokichi était le nom de naissance du hors-la-loi japonais exécuté en 1594 — le nom d'avant la légende. Le dossier historique tient en deux documents, tous deux posthumes : l'un détaille sa tentative contre le shogun Hideyoshi Toyotomi, sa capture et son exécution avec son jeune fils ; l'autre, d'un missionnaire portugais, le décrit bouilli vif. Tout le reste est venu après. Le vol aux riches, les talents de ninja, la scène du kabuki : quatre siècles de récits bâtis sur un homme dont on ne sait presque rien.",
+    "mask": [
+      "Gorokichi",
+      "Goemon",
+      "Ishikawa Goemon",
+      "Goyemon"
+    ]
+  },
+  "Agnes": {
+    "text": "Agnès est l'un des noms donnés à la femme qui aurait régné comme pape. La version de la Chronica Universalis Mettensis, au XIIIᵉ siècle, la fait s'effondrer enceinte au cours d'une procession, révélant la supercherie qui l'avait portée au trône de Pierre. Les mentions d'une papesse remontent au XIIᵉ siècle et furent crues des siècles durant. Les historiens modernes tiennent le tout pour une invention — une histoire fabriquée pour embarrasser l'Église, que l'Église a ensuite dû passer son temps à démentir.",
+    "mask": [
+      "Agnes",
+      "Agnès",
+      "Johanna",
+      "papesse Jeanne",
+      "Jeanne"
+    ]
+  },
+  "Al Azif": {
+    "text": "Al Azif est le titre arabe original du livre interdit de Lovecraft, le nom qu'il portait avant celui, grec, que tout le monde emploie. Le mot désigne le bruit nocturne des insectes, pris pour le hurlement des démons. Rédigé au VIIIᵉ siècle par l'Arabe fou Abdul Alhazred, il consigne la vérité sur les anciennes entités cosmiques qui tenaient jadis la Terre et travaillent encore l'humanité à leurs fins. Le lire donne ce savoir et coûte la raison — les deux sont inséparables, et c'est tout le propos.",
+    "mask": [
+      "Al Azif",
+      "Azif",
+      "Necronomicon",
+      "Alhazred"
+    ]
+  },
+  "Lucy": {
+    "text": "Lucy Hay, comtesse de Carlisle, fut une courtisane anglaise sous Charles Iᵉʳ qui aida les deux camps de la guerre civile et trahit les deux. Alliée clé des parlementaires avant les combats, elle passa aux royalistes une fois la guerre déclarée, et fut arrêtée puis emprisonnée pour cela. Elle mourut en 1660, juste après la Restauration. Son double jeu passe pour avoir inspiré le personnage le plus dangereux de Dumas — ce qui en fait l'une des très rares personas de la série tirée d'une personne documentée.",
+    "mask": [
+      "Lucy",
+      "Lucy Hay",
+      "comtesse de Carlisle",
+      "Milady"
+    ]
+  },
+  "Hereward": {
+    "text": "Hereward the Wake était un noble anglo-saxon qui mena la résistance armée à la conquête normande, tenant dans les marais autour d'Ely longtemps après l'effondrement de toute opposition organisée. Ce qu'il devint reste inconnu — certains récits le disent gracié, d'autres tué. Sa légende s'est répandue assez loin et assez tôt pour que certaines histoires qu'on lui prêtait aient pu passer dans celles d'un certain hors-la-loi vêtu de vert, ou du moins les façonner : l'Anglais dépossédé dans les bois, contre une puissance d'occupation qui détient la loi.",
+    "mask": [
+      "Hereward",
+      "Hereward the Wake",
+      "Hereward l'Exilé"
+    ]
+  },
+  "Cendrillon": {
+    "text": "Cendrillon est la version française d'un récit né conte grec et fixé par Charles Perrault, qui ajouta les pantoufles de verre, le carrosse-citrouille et la fée marraine. Une jeune fille douce est tenue en servante par sa belle-mère et deux belles-sœurs vaniteuses ; le prince donne un bal ; le sortilège cesse à minuit ; une pantoufle reste et ne va à personne d'autre. Le nom n'en est pas un. C'est ce que sa belle-famille l'appelait, à cause de la cendre où elle dormait près du foyer pour avoir chaud.",
+    "mask": [
+      "Cendrillon",
+      "Cinderella",
+      "Ella",
+      "cendre"
+    ]
+  },
+  "Vanadis": {
+    "text": "Freyja est la grande déesse de l'amour, de la beauté et de la fécondité du mythe nordique — la plus belle de toutes les déesses, qu'on priait pour le bonheur en amour, pour les accouchements et pour les bonnes saisons. Elle est aussi déesse de la guerre, de la mort, de la magie, de la prophétie et de la richesse, et elle reçoit dans sa halle Folkvangr la moitié de ceux qui tombent au combat ; Odin prend l'autre. Vanadis, l'un de ses nombreux surnoms dans l'Edda en prose, signifie dise des Vanes — la tribu de dieux dont elle vient.",
+    "mask": [
+      "Vanadis",
+      "Vanadís",
+      "Freya",
+      "Freyja",
+      "Freyia"
+    ]
+  },
+  "Ella": {
+    "text": "Ella est le nom sous le surnom. Dans le conte tel que Perrault l'a fixé — pantoufles de verre, carrosse-citrouille, fée marraine, sortilège qui cesse à minuit — la jeune fille tenue en servante par sa belle-mère et ses belles-sœurs n'est jamais appelée autrement dans le récit, et Cendrillon n'est que le sobriquet de sa belle-famille, tiré des cendres où elle dormait près du foyer. Certaines réécritures lui rendent le nom que l'insulte avait enfoui. C'est la même personne, sans la moquerie.",
+    "mask": [
+      "Ella",
+      "Cinderella",
+      "Cendrillon",
+      "cendres"
+    ]
+  },
+  "Adam Kadmon": {
+    "text": "Adam Kadmon, l'Homme primordial, est la conception originelle de l'humain dans la Kabbale — le prototype parfait fait par Ein Sof, intact de toute matière terrestre, né de la contraction de la lumière infinie. Il s'oppose à l'Adam d'Éden, façonné d'argile. Les kabbalistes s'en servirent pour lire le plan divin dans le corps humain lui-même : les dix Sefirot, cercles de la création, sont sa forme. Il se tient au-dessus des quatre mondes — émanation, création, formation, action — et l'enseignement tardif l'identifia au messie.",
+    "mask": [
+      "Adam Kadmon",
+      "Kadmon",
+      "Homme primordial"
+    ]
+  },
+  "Azathoth": {
+    "text": "Azathoth est le dieu idiot aveugle au centre de toute infinité, dont descend en dernier ressort tout le Mythe de Cthulhu — Nyarlathotep directement, puis par la Brume sans Nom et la Grande Ténèbre l'ensemble des Dieux Extérieurs et des Grands Anciens. Une cour de divinités mineures danse sans fin autour de lui en jouant pour le tenir endormi. C'est la puissance suprême du Mythe et elle ne sait absolument rien : sa création fut accidentelle et inconsciente. Les auteurs suivants ont ajouté que le réel est son rêve, et cesse à son réveil.",
+    "mask": [
+      "Azathoth",
+      "Dieu Idiot Aveugle",
+      "Chaos Nucléaire",
+      "Sultan Démon"
+    ]
+  },
+  "Valjean": {
+    "text": "Jean Valjean est le protagoniste des Misérables de Victor Hugo, envoyé au bagne pour avoir volé du pain destiné aux enfants affamés de sa sœur, et endurci par dix-neuf ans de peine. Libéré, marqué, et surpris par un acte de miséricorde qu'il n'attendait pas, il passe le reste du roman à tenter de vivre honnêtement sous une série de faux noms — veillant Fantine mourante, puis élevant sa fille Cosette. Compatissant, prêt au sacrifice, capable de ruse et de jalousie, il fait face à l'inspecteur Javert, qui est la loi, et qui est l'antagoniste.",
+    "mask": [
+      "Valjean",
+      "Jean Valjean"
+    ]
+  },
+  "Pithos": {
+    "text": "Un pithos est une grande jarre de céramique utilisée autour de la Méditerranée du Néolithique à l'âge du fer, pour le vin, l'huile ou le grain — et parfois pour les rites et les sépultures. Dans la Théogonie d'Hésiode, le récipient qui contenait tous les maux de l'humanité est l'une de ces jarres, pas une boîte. La boîte est une erreur : Érasme, traduisant en latin au XVIᵉ siècle, lut pithos comme pyxis, un petit coffret, et la faute est restée. Ce qui ne s'échappa pas fut l'espérance, que certaines versions comptent pour le pire des maux.",
+    "mask": [
+      "Pithos",
+      "pithoi",
+      "Pandora",
+      "Pandore"
+    ]
+  },
+  "Pandora": {
+    "text": "Pandore est la première femme du mythe grec, façonnée de terre par Héphaïstos et Athéna sur l'ordre de Zeus, en châtiment du vol du feu — chaque dieu y ajoutant un don séduisant. On la donna au titan Épiméthée, dont le frère l'avait pourtant averti de n'accepter aucun présent de Zeus, avec une jarre scellée qu'on lui recommanda mollement de ne pas ouvrir. L'avertissement était le piège : les dieux voulaient qu'elle l'ouvre. Quand la curiosité l'emporta, tous les maux gagnèrent le monde. Seule l'espérance resta au fond, et rien ne dit que ce soit une grâce.",
+    "mask": [
+      "Pandora",
+      "Pandore",
+      "Anesidora"
+    ]
+  },
+  "Ernesto": {
+    "text": "Ernesto Che Guevara, marxiste argentin et médecin, est connu dans le monde entier pour son rôle dans la révolution cubaine et pour avoir tenté de l'exporter ensuite. C'est aussi une figure réellement clivante : il ordonna des exécutions sans procès au nom de la défense de la révolution, et agit contre les dissidents politiques et ceux que le régime castriste jugeait déviants. Le visage sur le tee-shirt et le dossier de l'homme ne sont pas le même objet, et l'essentiel du débat consiste à choisir lequel regarder.",
+    "mask": [
+      "Ernesto",
+      "Che Guevara",
+      "Guevara"
+    ]
   }
 }

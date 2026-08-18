@@ -113,6 +113,34 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): fiches Personae Persona 5 (EN + FR)
+
+Troisième paquet : les personas de Persona 5 / Royal / Strikers / Tactica, en anglais et en
+français. Total 102 fiches (P2 + P3 + P4 + P5).
+
+### Détails techniques
+
+- 35 fiches écrites. Le roster P5 en compte 36, mais `Prometheus` était **déjà couvert** par
+  la fiche P2EP : la même figure mythologique, deux entrées du dataset (Baofu et Futaba
+  Sakura), une seule fiche qui accepte les deux manieurs — c'est exactement ce que fait
+  `expertWielders()`, et la première fois que la règle sert en production de contenu.
+- `Freya` du `.md` source correspond à l'entrée `Vanadis` du dataset (Vanadís est un surnom de
+  Freyja dans l'Edda en prose). La fiche est keyée sur le nom du dataset.
+- **Références croisées masquées systématiquement quand le manieur est le même.** En P5 chaque
+  personnage a deux ou trois personas, souvent des variantes du même récit : la fiche
+  `Célestine` parle presque entièrement de Carmen, `Diego` de Zorro, `Gorokichi` de Goemon,
+  `Agnes` de Johanna, `Al Azif` du Necronomicon, `Lucy` de Milady, `Hereward` de Robin Hood,
+  `Ella` de Cendrillon, `Raoul` d'Arsène. Sans masquage, chacune de ces fiches donnait le
+  manieur en une ligne. Les autres noms de personas restent en clair — indices légitimes.
+- Sources longues taillées : `Astarte` passait de 700 mots, `Anat` de 550, `Seiten Taisei` de
+  600. Sources d'une phrase complétées : `Hereward`, `Zorro`, `Ella`, `Arsène`.
+- Quatre fiches ne se nommaient pas et ont été reprises (`Captain Kidd`, `Seiten Taisei`,
+  `Goemon`, `Azathoth`) — le test « chaque fiche se nomme » les a toutes attrapées, l'une
+  après l'autre.
+
+Reste : P5X, puis Trinity Souls, toujours EN + FR. Les 4 langues restantes une fois le contenu
+source validé.
+
 ## 2026-08-15 — feat(expert): fiches Personae Persona 4 (EN + FR)
 
 Deuxième paquet de contenu Expert Personae : les 28 personas de Persona 4 / Golden / Arena
