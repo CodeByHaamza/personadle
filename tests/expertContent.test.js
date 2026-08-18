@@ -207,6 +207,18 @@ describe("expert_lore", () => {
     expect(p3.filter((n) => !couverts.includes(n))).toEqual([]);
   });
 
+  it("tout le roster est couvert, aux variantes cosmétiques près", () => {
+    // Garde-fou de complétude : depuis le lot P5X/Trinity Souls, les 6 jeux sont
+    // couverts. Ajouter une persona sans écrire sa fiche la rendrait injouable en
+    // Expert (aucun texte à afficher) — ce test échoue avant que ça arrive.
+    const couverts = new Set(entries(loadLore("en")).map(([k]) => k));
+    const estVariante = (n) => /Picaro|Picaros|Telos|\( Female \)/.test(n);
+    const manquants = personaeCharacters
+      .map((p) => p.persona)
+      .filter((n) => !couverts.has(n) && !estVariante(n));
+    expect(manquants).toEqual([]);
+  });
+
   it("les variantes cosmétiques n'ont volontairement pas de fiche", () => {
     const couverts = entries(loadLore("en")).map(([k]) => k);
     expect(VARIANTES_P3_EXCLUES.filter((n) => couverts.includes(n))).toEqual([]);

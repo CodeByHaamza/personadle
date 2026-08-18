@@ -113,6 +113,37 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): fiches Personae P5X et Trinity Souls — roster complet
+
+Dernier paquet de contenu Expert Personae. **137 fiches**, EN et FR : le roster est couvert
+en entier.
+
+### Détails techniques
+
+- 32 fiches Persona 5 X + 3 Trinity Souls (Abel, Seth, Cain). 76 à 108 mots, moyenne 93.
+- Les seules entrées sans fiche sont les **14 variantes cosmétiques** (`* Picaro`,
+  `Orpheus Telos`, `Athena Picaros`, `Orpheus ( Female )`) — `expertWielders()` les rattache
+  déjà à leur entrée de base, leur écrire une fiche identique rendrait la réponse ambiguë.
+- Le roster P5X est massivement composé de nymphes, muses et néréides aux sources d'une à
+  trois phrases (`Syke`, `Prosymna`, `Ampelos`, `Euterpe`, `Asterope`, `Erytheia`…). Elles ont
+  été complétées avec le contexte mythologique qui les rend devinables — une fiche de 20 mots
+  sur une nymphe mineure ne donne aucune prise au joueur.
+- Sources longues taillées : `Mandrin` passait de 400 mots, `Rob Roy` de 300, `Ghino` de 350.
+- Les hors-la-loi historiques de P5X (Jánošík, Rob Roy, Mandrin, Ghino, Awilda, Chiyome,
+  Gentileschi) sont des personnes réelles ou semi-historiques, pas des figures mythologiques —
+  le ton reste factuel, sans romancer ce que les sources ne disent pas.
+
+### Nouveau garde-fou
+
+`tests/expertContent.test.js` vérifie désormais que **tout le roster est couvert**, variantes
+cosmétiques exclues. Ajouter une persona au dataset sans écrire sa fiche la rendrait injouable
+en Expert — aucun texte à afficher — et le test échoue avant que ça arrive.
+
+### Reste sur Personae
+
+Les 4 langues manquantes (ES/DE/IT/PT) sur les 137 fiches, et le mode Personae Expert
+lui-même, qui n'est pas encore codé.
+
 ## 2026-08-15 — feat(expert): Mode All-Out Attack Expert + artefacts Classique
 
 ### AOA Expert — flou figé et noir et blanc
