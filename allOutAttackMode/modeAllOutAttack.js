@@ -74,6 +74,16 @@ function cdn(subfolder, filename, ext = "webp") {
 // IMAGE CACHE & PRELOADING
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Plafond d'attente d'une image en préchargement prioritaire.
+ * Aligné sur le timeout déjà en place dans loadGif() : au-delà, on passe à la
+ * suivante plutôt que de bloquer toute la file.
+ */
+const PRELOAD_TIMEOUT_MS = 5000;
+
+/** Promesse résolue après `ms` — utilitaire de temporisation et de garde-fou. */
+const _timeout = (ms) => new Promise((r) => setTimeout(r, ms));
+
 /** LRU-like cache to avoid re-downloading GIFs. Max 20 entries. */
 const imageCache = new Map();
 const MAX_CACHE_SIZE = 20;
@@ -110,29 +120,39 @@ async function smartPreload(namesList, priority = "low") {
   if (isPreloading) return;
   isPreloading = true;
 
-  const limited = namesList.slice(0, 15);
-  for (const name of limited) {
-    const base = portraitsMap[name] || name.split(" ")[0];
-    const src = cdn("allOutAttack", base);
-    if (getFromCache(src)) continue;
+  // try/finally : sans lui, une exception laissait isPreloading bloqué à true et
+  // TOUS les préchargements suivants sortaient immédiatement — le mode restait sur
+  // le placeholder de chargement jusqu'à un rechargement complet de la page
+  // (bug « chargement infini en AOA » signalé le 2026-08-15).
+  try {
+    const limited = namesList.slice(0, 15);
+    for (const name of limited) {
+      const base = portraitsMap[name] || name.split(" ")[0];
+      const src = cdn("allOutAttack", base);
+      if (getFromCache(src)) continue;
 
-    const img = new Image();
-    img.loading = priority === "high" ? "eager" : "lazy";
-    img.src = src;
+      const img = new Image();
+      img.loading = priority === "high" ? "eager" : "lazy";
+      img.src = src;
 
-    const p = new Promise((resolve) => {
-      img.onload = () => {
-        addToImageCache(src, img);
-        resolve();
-      };
-      img.onerror = () => resolve();
-    });
+      const p = new Promise((resolve) => {
+        img.onload = () => {
+          addToImageCache(src, img);
+          resolve();
+        };
+        img.onerror = () => resolve();
+      });
 
-    if (priority === "high") await p;
-    await new Promise((r) => setTimeout(r, priority === "high" ? 30 : 100));
+      // Un GIF dont la requête reste en suspens ne déclenche NI onload NI onerror :
+      // sans borne, `await p` bloquait la boucle indéfiniment. Même garde-fou que
+      // loadGif() plus bas, qui avait déjà son timeout de 5 s — le préchargement
+      // l'avait oublié.
+      if (priority === "high") await Promise.race([p, _timeout(PRELOAD_TIMEOUT_MS)]);
+      await _timeout(priority === "high" ? 30 : 100);
+    }
+  } finally {
+    isPreloading = false;
   }
-
-  isPreloading = false;
 }
 
 /**

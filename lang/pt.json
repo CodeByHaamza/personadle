@@ -832,7 +832,9 @@
     "msg_clear": "Limpar resolvidos",
     "msg_clear_kept_active": "{{count}} desafio(s) em andamento foram mantidos — termine-os primeiro.",
     "msg_empty": "Ainda não há mensagens.",
-    "delete_msg": "Eliminar"
+    "delete_msg": "Eliminar",
+    "server_unreachable": "Não foi possível contactar o servidor. A tua sessão provavelmente ainda é válida — tenta de novo.",
+    "retry": "Tentar de novo"
   },
   "settings": {
     "title": "Definições",

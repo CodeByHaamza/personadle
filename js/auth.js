@@ -131,8 +131,13 @@ export function resolveRegisterError(message) {
  * ceux avec [data-auth="anonymous"] sont visibles si déconnecté.
  *
  * @param {object|null} user
+ * @param {boolean} [authoritative=true] - false quand le serveur n'a PAS pu être
+ *   joint : on affiche l'UI anonyme faute de mieux, mais sans toucher au seed du
+ *   joueur. Purger `playerUserId` sur un simple blip réseau changerait sa cible
+ *   du jour (getPlayerSeedId() retomberait sur anonPlayerId) — le puzzle du jour
+ *   se mettrait à changer tout seul.
  */
-export function updateAuthUI(user) {
+export function updateAuthUI(user, authoritative = true) {
   window._currentUser = user;
 
   // Sync the player seed ID used by getDailyTarget() in gameCore.js.
@@ -140,7 +145,7 @@ export function updateAuthUI(user) {
   // Logged-out → remove user_id; getPlayerSeedId() will fall back to anonPlayerId
   if (user) {
     localStorage.setItem("playerUserId", String(user.id));
-  } else {
+  } else if (authoritative) {
     localStorage.removeItem("playerUserId");
   }
 
@@ -498,6 +503,50 @@ async function _syncLocalProfileToCloud(userId) {
 // POINT D'ENTRÉE — initAuth()
 // ─────────────────────────────────────────────────────────────────────────────
 
+
+/**
+ * Vrai si l'erreur signifie « je n'ai pas pu poser la question au serveur », par
+ * opposition à « le serveur a répondu que tu n'es pas connecté ».
+ *
+ * La distinction est le cœur du bug de déconnexion en boucle (signalé le
+ * 2026-08-15) : `apiCall()` lève sur TOUTE réponse non-ok, et le service worker
+ * transforme n'importe quelle panne réseau sur /api/* en 503 JSON synthétique.
+ * Traiter ce 503 comme un 401 revenait à afficher « Connectez-vous » à un joueur
+ * dont le cookie de session était parfaitement valide.
+ *
+ * - 401 / 403 → réponse autoritaire, l'utilisateur n'est pas (ou plus) connecté
+ * - 5xx, status absent, TypeError de fetch → transport, on ne sait rien
+ */
+export function isTransportError(err) {
+  const status = err?.status;
+  return !status || status >= 500;
+}
+
+/** Pause utilitaire pour le backoff. */
+const _wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * `GET /api/auth/me` avec réessais sur erreur de transport uniquement.
+ *
+ * Trois tentatives espacées de 300 puis 900 ms : assez pour absorber un cold start
+ * PHP ou un blip réseau, assez court pour ne pas figer le chargement de la page.
+ * Un 401 n'est jamais réessayé — c'est une réponse, pas une panne.
+ *
+ * @returns {Promise<{user: object|null, reachable: boolean}>}
+ */
+async function _fetchMeWithRetry(attempts = 3) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const { user } = await api.auth.me();
+      return { user, reachable: true };
+    } catch (err) {
+      if (!isTransportError(err)) return { user: null, reachable: true };
+      if (i < attempts - 1) await _wait(300 * 3 ** i);
+    }
+  }
+  return { user: null, reachable: false };
+}
+
 /**
  * Initialise le système d'auth pour la page courante.
  *
@@ -513,27 +562,28 @@ async function _syncLocalProfileToCloud(userId) {
  *   5. Branche les formulaires et boutons
  */
 export async function initAuth() {
-  // 1. Restaurer la session
-  try {
-    const { user } = await api.auth.me();
-    updateAuthUI(user);
+  // 1. Restaurer la session — avec réessais sur panne de transport.
+  const { user, reachable } = await _fetchMeWithRetry();
 
-    // 2. Si connecté, sync des sessions offline accumulées (fire-and-forget)
-    // On ne bloque pas initAuth() sur une opération réseau non critique.
-    if (user) {
-      api.stats.syncPending().catch(() => {});
-      _syncLocalProfileToCloud(user.id).catch(() => {});
-    }
-  } catch {
-    // Serveur inaccessible (offline, déploiement en cours) → mode anonyme
-    updateAuthUI(null);
-  } finally {
-    // Signal que la résolution d'auth est terminée (connecté ou non).
-    // Permet aux pages qui attendent window._authResolved de ne pas
-    // bloquer 2 s inutilement quand l'utilisateur n'est pas connecté.
-    window._authResolved = true;
-    window.dispatchEvent(new CustomEvent("personadle:auth-ready", { detail: { user: window._currentUser } }));
+  // `reachable: false` = serveur injoignable, PAS « déconnecté ». On affiche l'UI
+  // anonyme faute de mieux, mais sans purger le seed du joueur, et on le signale
+  // via window._authUnavailable pour que les pages qui en dépendent (Amis) disent
+  // « connexion impossible » au lieu de « connectez-vous ».
+  window._authUnavailable = !reachable;
+  updateAuthUI(user, reachable);
+
+  // 2. Si connecté, sync des sessions offline accumulées (fire-and-forget)
+  // On ne bloque pas initAuth() sur une opération réseau non critique.
+  if (user) {
+    api.stats.syncPending().catch(() => {});
+    _syncLocalProfileToCloud(user.id).catch(() => {});
   }
+
+  // Signal que la résolution d'auth est terminée (connecté, anonyme, ou serveur
+  // injoignable). Plus de try/finally : _fetchMeWithRetry() ne lève jamais, elle
+  // renvoie toujours un état — c'est tout l'intérêt de la distinction reachable.
+  window._authResolved = true;
+  window.dispatchEvent(new CustomEvent("personadle:auth-ready", { detail: { user: window._currentUser } }));
 
   // 3. Brancher formulaires + navigation modales + logout
   setupLoginForm();

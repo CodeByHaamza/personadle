@@ -113,6 +113,67 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — fix: déconnexion en boucle sur la page Amis + chargement infini en AOA
+
+Deux bugs remontés par des joueurs, tous deux « réparés » par un Ctrl+Shift+R — signature
+d'un état en mémoire ou en cache, pas d'une donnée corrompue.
+
+### Bug 1 — « Connectez-vous » en boucle alors que la session est valide
+
+**Root cause** : `apiCall()` (`js/api.js`) lève une `ApiError` sur **toute** réponse non-ok,
+et `sw.js` transforme n'importe quelle panne réseau sur `/api/*` en **503 JSON synthétique**.
+`initAuth()` attrapait les deux dans le même `catch` et concluait « anonyme ». Un simple blip
+réseau ou un cold start PHP sur `GET /api/auth/me` suffisait donc à afficher « Connectez-vous »
+à un joueur dont le cookie de session était parfaitement valide — et la course se rejouait à
+chaque visite, d'où la boucle.
+
+**Deuxième conséquence, plus sournoise** : `updateAuthUI(null)` fait
+`localStorage.removeItem("playerUserId")`. Le seed de `getDailyTarget()` était donc effacé au
+passage, et `getPlayerSeedId()` retombait sur `anonPlayerId` : **la cible du jour du joueur
+changeait toute seule** après un blip réseau. Personne ne l'avait relié à ce bug.
+
+- `isTransportError(err)` — 401/403 = réponse autoritaire ; 5xx, status absent ou `TypeError`
+  de fetch = transport, on ne sait rien.
+- `_fetchMeWithRetry()` — 3 tentatives espacées de 300 puis 900 ms, **uniquement** sur erreur
+  de transport. Un 401 n'est jamais réessayé, c'est une réponse.
+- `updateAuthUI(user, authoritative = true)` — ne purge `playerUserId` que sur une réponse
+  autoritaire. Injoignable → UI anonyme faute de mieux, mais le seed est préservé.
+- `window._authUnavailable` expose l'état ; `friends.js` bascule alors la carte « non
+  connecté » en « serveur injoignable » avec un bouton **Réessayer** (rechargement) au lieu
+  d'un lien vers la connexion — envoyer se reconnecter quelqu'un de déjà connecté ne réglait
+  rien, c'est précisément ce qui bouclait.
+- `initAuth()` n'a plus de `try/finally` : `_fetchMeWithRetry()` ne lève jamais, elle renvoie
+  toujours un état.
+
+### Bug 2 — chargement infini en All-Out Attack
+
+**Root cause** : `smartPreload()` (`allOutAttackMode/modeAllOutAttack.js`) posait
+`isPreloading = true` puis le remettait à `false` **en fin de fonction seulement**. Toute
+exception laissait le drapeau bloqué, et chaque appel suivant sortait immédiatement — le mode
+restait sur le placeholder jusqu'à un rechargement complet, qui réinitialise le module.
+
+Pire : `await p` sur une image prioritaire n'avait **aucun timeout**, alors que `loadGif()`
+juste en dessous en avait déjà un de 5 s. Une requête restée en suspens ne déclenche ni
+`onload` ni `onerror` : la boucle attendait indéfiniment.
+
+- `try/finally` autour de la boucle → le drapeau retombe quoi qu'il arrive.
+- `Promise.race([p, _timeout(PRELOAD_TIMEOUT_MS)])` — 5 s, aligné sur `loadGif()`.
+- `_timeout(ms)` remplace les `new Promise(r => setTimeout(r, ms))` dispersés.
+
+### Tests
+
+`tests/authTransport.test.js` — 8 tests : classification 401/403/500/503/TypeError, et les
+trois cas de préservation du seed (connecté / anonyme autoritaire / injoignable).
+
+`CACHE_VERSION` passé à `personadle-v79` pour que les clients récupèrent le nouveau JS sans
+Ctrl+Shift+R — ce qui est précisément le problème qu'on corrige.
+
+### Angle mort connu
+
+Le scénario réel (503 du service worker sur un vrai réseau instable) n'est pas rejoué de bout
+en bout : les tests couvrent la logique de décision, pas l'intégration SW + fetch. Reproduire
+un blip réseau déterministe en E2E demanderait d'instrumenter le service worker.
+
 ## 2026-08-15 — feat(expert): règle des réponses acceptées en Personae Expert
 
 Décision produit de Hamza, encodée plutôt que laissée en note de roadmap — c'est le genre de

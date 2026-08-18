@@ -832,7 +832,9 @@
     "msg_clear": "Erledigte löschen",
     "msg_clear_kept_active": "{{count}} laufende Herausforderung(en) wurden behalten — erst abschließen.",
     "msg_empty": "Noch keine Nachrichten.",
-    "delete_msg": "Löschen"
+    "delete_msg": "Löschen",
+    "server_unreachable": "Server nicht erreichbar. Deine Sitzung ist wahrscheinlich noch gültig — versuch es erneut.",
+    "retry": "Erneut versuchen"
   },
   "challenge": {
     "challenge_friend": "Freund herausfordern",

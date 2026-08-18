@@ -832,7 +832,9 @@
     "msg_clear": "Limpiar resueltos",
     "msg_clear_kept_active": "Se conservaron {{count}} desafío(s) en curso — termínalos primero.",
     "msg_empty": "Sin mensajes todavía.",
-    "delete_msg": "Eliminar"
+    "delete_msg": "Eliminar",
+    "server_unreachable": "No se pudo contactar con el servidor. Tu sesión probablemente siga activa: inténtalo de nuevo.",
+    "retry": "Reintentar"
   },
   "challenge": {
     "challenge_friend": "Desafiar a un Amigo",

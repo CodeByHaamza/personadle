@@ -1007,5 +1007,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     connected?.classList.add("hidden");
     guest?.classList.remove("hidden");
+
+    // Serveur injoignable ≠ pas connecté. Afficher « Connectez-vous » à quelqu'un
+    // dont la session est valide l'envoie se reconnecter en boucle sans que rien
+    // ne débloque (bug signalé le 2026-08-15). On dit ce qui s'est réellement
+    // passé, et on propose de réessayer.
+    if (window._authUnavailable) _renderUnreachableState(guest);
   }
 });
+
+/**
+ * Bascule la carte « non connecté » en carte « serveur injoignable ».
+ * Réutilise le même bloc plutôt que d'en ajouter un second au HTML : seuls le
+ * texte et l'action changent.
+ */
+function _renderUnreachableState(guest) {
+  if (!guest) return;
+
+  const t = (key, fallback) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fallback;
+  };
+
+  const icon = guest.querySelector(".fr-guest-icon");
+  const texte = guest.querySelector('[data-i18n="friends.login_required"]');
+  const lien = guest.querySelector("a.fr-btn");
+
+  if (icon) icon.textContent = "📡";
+  if (texte) {
+    texte.setAttribute("data-i18n", "friends.server_unreachable");
+    texte.textContent = t(
+      "friends.server_unreachable",
+      "Could not reach the server. Your session is probably still valid — try again."
+    );
+  }
+  if (lien) {
+    // Un bouton de rechargement, pas un lien vers la page de connexion : le joueur
+    // est déjà connecté, l'envoyer se reconnecter ne réglerait rien.
+    const bouton = document.createElement("button");
+    bouton.className = lien.className;
+    bouton.type = "button";
+    bouton.setAttribute("data-i18n", "friends.retry");
+    bouton.textContent = t("friends.retry", "Retry");
+    bouton.addEventListener("click", () => window.location.reload());
+    lien.replaceWith(bouton);
+  }
+}

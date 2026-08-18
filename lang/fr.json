@@ -832,7 +832,9 @@
     "msg_clear": "Vider les résolus",
     "msg_clear_kept_active": "{{count}} défi(s) en cours conservé(s) — termine-les d'abord.",
     "msg_empty": "Aucun message pour l'instant.",
-    "delete_msg": "Supprimer"
+    "delete_msg": "Supprimer",
+    "server_unreachable": "Impossible de joindre le serveur. Ta session est probablement toujours valide — réessaie.",
+    "retry": "Réessayer"
   },
   "challenge": {
     "challenge_friend": "Défier un Ami",

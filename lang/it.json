@@ -832,7 +832,9 @@
     "msg_clear": "Svuota risolti",
     "msg_clear_kept_active": "{{count}} sfida/e in corso conservate — finiscile prima.",
     "msg_empty": "Nessun messaggio.",
-    "delete_msg": "Elimina"
+    "delete_msg": "Elimina",
+    "server_unreachable": "Impossibile contattare il server. La tua sessione è probabilmente ancora valida: riprova.",
+    "retry": "Riprova"
   },
   "challenge": {
     "challenge_friend": "Sfida un Amico",
