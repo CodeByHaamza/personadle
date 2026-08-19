@@ -148,9 +148,15 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
             return $daily;
         }
 
+        // Personae Expert : pool restreint aux personas ayant une fiche de lore
+        // (139 entrées sur 153) et clé de hash distincte. Même corps que le cas
+        // normal ci-dessous : la logique de filtre opus est identique.
+        case 'personae_expert':
         case 'personae': {
-            $entries = $pools['personae']['pool'] ?? [];
-            $daily = personadle_pick_from_pool($entries, 'Personae', $playedDate, $seedId);
+            $estExpert = $mode === 'personae_expert';
+            $entries = $pools[$estExpert ? 'personae_expert' : 'personae']['pool'] ?? [];
+            $hashKey = $estExpert ? 'PersonaeExpert' : 'Personae';
+            $daily = personadle_pick_from_pool($entries, $hashKey, $playedDate, $seedId);
             if ($daily === null) return null;
             if (empty($activeFilters)) return $daily['user'];
             $filteredEntries = array_values(array_filter($entries, function ($entry) use ($activeFilters) {
@@ -165,7 +171,7 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
                 if ($e['persona'] === $dailyPersona) { $isDailyInFiltered = true; break; }
             }
             if (!empty($filteredEntries) && !$isDailyInFiltered) {
-                $fallback = personadle_pick_from_pool($filteredEntries, 'Personae', $playedDate, $seedId);
+                $fallback = personadle_pick_from_pool($filteredEntries, $hashKey, $playedDate, $seedId);
                 return $fallback['user'] ?? null;
             }
             return $daily['user'];

@@ -306,6 +306,13 @@
     </div>
 
     <!-- Modal règles -->
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1). -->
+    <div class="expert-toggle-zone">
+      <a href="personae.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <div id="rulesModal" class="modal" style="display: none">
       <div class="modal-content">
         <span class="close">&times;</span>
@@ -313,7 +320,40 @@
 
         <!-- Règles : câblées sur les clés JSON (modes.personae.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.personae.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.personae.expert_goal_text">
+            No picture at all. You get the myth behind the Persona, and you name its wielder.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.personae.expert_tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.personae.expert_tip_1">
+              The Persona's own name is hidden in the text. It comes back when the round ends.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_2">
+              Any wielder of that same figure is accepted — Orpheus counts for Makoto, Kotone
+              and Aigis alike.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_3">
+              Only Personas that actually have a written entry can be drawn.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_4">
+              The artwork is revealed when the round ends.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_6">
+              Expert has its own daily Persona and its own stats. It will not carry your normal
+              Personae streak.
+            </li>
+          </ul>
+        </div>
+
+        <div id="rulesNormal">
           <strong data-i18n="modes.personae.goal">🎯 Goal:</strong><br />
           <span data-i18n="modes.personae.goal_intro"
             >A mysterious Persona appears on screen...</span
@@ -384,6 +424,13 @@
     <!-- Image Persona -->
     <div class="persona-box">
       <img id="personaImage" src="" alt="Persona" />
+
+      <!-- Fiche de lore — Mode Expert. Remplace l'image, qui EST la réponse ici.
+           Le nom de la persona y est masqué jusqu'à la fin de la partie. -->
+      <div class="expert-lore-box" id="expertLoreBox" style="display: none">
+        <div class="expert-lore-header" data-i18n="ui.expert_lore">⚡ LORE</div>
+        <p class="expert-lore-text" id="expertLoreText" aria-live="polite"></p>
+      </div>
     </div>
 
     <div id="victoryBox" class="victory-box" style="display: none">

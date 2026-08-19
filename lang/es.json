@@ -211,7 +211,16 @@
       "correct": "✅ ¡Buen intento! La Persona de {{name}} era {{persona}}.",
       "giveup_reveal": "❌ ¡Qué pena! La Persona de {{name}} era {{persona}}.",
       "prev_mode": "← Modo Silueta",
-      "next_mode": "Modo Música →"
+      "next_mode": "Modo Música →",
+      "expert_goal": "⚡ Modo Experto:",
+      "expert_goal_text": "Sin imagen. Recibes el mito detrás de la Persona y nombras a quien la porta.",
+      "expert_tips": "💡 Consejos:",
+      "expert_tip_1": "El nombre de la Persona está oculto en el texto. Reaparece al terminar la partida.",
+      "expert_tip_2": "Se acepta cualquier portador de esa misma figura: Orfeo vale para Makoto, Kotone y Aigis.",
+      "expert_tip_3": "Solo pueden salir Personas que tengan realmente una ficha escrita.",
+      "expert_tip_4": "La ilustración se revela al terminar la partida.",
+      "expert_tip_5": "Tienes 5 intentos antes de que se active el botón Rendirse.",
+      "expert_tip_6": "El Experto tiene su propia Persona diaria y sus propias estadísticas. No cuenta para tu racha de Personae normal."
     },
     "music": {
       "name": "Música",

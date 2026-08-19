@@ -893,6 +893,1118 @@
       "Hatsune Miku"
     ]
   },
+  "personae_expert": {
+    "pool": [
+      {
+        "persona": "Orpheus ( Male )",
+        "user": "Makoto Yuki",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Thanatos",
+        "user": "Makoto Yuki",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Messiah",
+        "user": "Makoto Yuki",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Io",
+        "user": "Yukari Takeba",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Isis",
+        "user": "Yukari Takeba",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Hermes",
+        "user": "Junpei Iori",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Trismegistus",
+        "user": "Junpei Iori",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Polydeuces",
+        "user": "Akihiko Sanada",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Caesar",
+        "user": "Akihiko Sanada",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Penthesilea",
+        "user": "Mitsuru Kirijo",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Artemisia",
+        "user": "Mitsuru Kirijo",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Castor",
+        "user": "Shinjiro Aragaki",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Nemesis",
+        "user": "Ken Amada",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Kala-Nemi",
+        "user": "Ken Amada",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Palladion",
+        "user": "Aigis",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Athena",
+        "user": "Aigis",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Cerberus",
+        "user": "Koromaru",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Lucia",
+        "user": "Fuuka Yamagishi",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Juno",
+        "user": "Fuuka Yamagishi",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Medea",
+        "user": "Chidori Yoshino",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Hypnos",
+        "user": "Takaya Sakaki",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Moros",
+        "user": "Jin Shirato",
+        "opus": [
+          "P3",
+          "P3FES",
+          "P3P",
+          "P3R"
+        ]
+      },
+      {
+        "persona": "Psyche",
+        "user": "Metis",
+        "opus": [
+          "P3FES"
+        ]
+      },
+      {
+        "persona": "Izanagi",
+        "user": "Yu Narukami",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Izanagi-no-Okami",
+        "user": "Yu Narukami",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Jiraiya",
+        "user": "Yosuke Hanamura",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Susano-o",
+        "user": "Yosuke Hanamura",
+        "opus": [
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Takehaya Susano-o",
+        "user": "Yosuke Hanamura",
+        "opus": [
+          "P4"
+        ]
+      },
+      {
+        "persona": "Tomoe",
+        "user": "Chie Satonaka",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Suzuka Gongen",
+        "user": "Chie Satonaka",
+        "opus": [
+          "P4",
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Haraedo-no-Okami",
+        "user": "Chie Satonaka",
+        "opus": [
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Konohana Sakuya",
+        "user": "Yukiko Amagi",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Amaterasu",
+        "user": "Yukiko Amagi",
+        "opus": [
+          "P4",
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Sumeo-Okami",
+        "user": "Yukiko Amagi",
+        "opus": [
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Take-Mikazuchi",
+        "user": "Kanji Tatsumi",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Dairoku Tenmaou",
+        "user": "Kanji Tatsumi",
+        "opus": [
+          "P4",
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Takeji Zaiten",
+        "user": "Kanji Tatsumi",
+        "opus": [
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Himiko",
+        "user": "Rise Kujikawa",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Kanzeon",
+        "user": "Rise Kujikawa",
+        "opus": [
+          "P4",
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Kouzeon",
+        "user": "Rise Kujikawa",
+        "opus": [
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Kintoki-Douji",
+        "user": "Teddie",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Kamui",
+        "user": "Teddie",
+        "opus": [
+          "P4",
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Kamui-Moshiri",
+        "user": "Teddie",
+        "opus": [
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Sukuna-Hikona",
+        "user": "Naoto Shirogane",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Yamato-Takeru",
+        "user": "Naoto Shirogane",
+        "opus": [
+          "P4",
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Yamato Sumeragi",
+        "user": "Naoto Shirogane",
+        "opus": [
+          "P4G"
+        ]
+      },
+      {
+        "persona": "Magatsu-Izanagi",
+        "user": "Tohru Adachi",
+        "opus": [
+          "P4",
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Kaguya",
+        "user": "Marie",
+        "opus": [
+          "P4G",
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Tsukuyomi",
+        "user": "Sho Minazuki",
+        "opus": [
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Ariadne",
+        "user": "Labrys",
+        "opus": [
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Asterios",
+        "user": "Labrys",
+        "opus": [
+          "P4AU"
+        ]
+      },
+      {
+        "persona": "Arsène",
+        "user": "Ren Amamiya",
+        "opus": [
+          "P5",
+          "P5R",
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Satanael",
+        "user": "Ren Amamiya",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Raoul",
+        "user": "Ren Amamiya",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Captain Kidd",
+        "user": "Ryuji Sakamoto",
+        "opus": [
+          "P5",
+          "P5R",
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Seiten Taisei",
+        "user": "Ryuji Sakamoto",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "William",
+        "user": "Ryuji Sakamoto",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Carmen",
+        "user": "Ann Takamaki",
+        "opus": [
+          "P5",
+          "P5R",
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Hecate",
+        "user": "Ann Takamaki",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Célestine",
+        "user": "Ann Takamaki",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Zorro",
+        "user": "Morgana",
+        "opus": [
+          "P5",
+          "P5R",
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Mercurius",
+        "user": "Morgana",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Diego",
+        "user": "Morgana",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Goemon",
+        "user": "Yusuke Kitagawa",
+        "opus": [
+          "P5",
+          "P5R",
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Kamu Susano-o",
+        "user": "Yusuke Kitagawa",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Gorokichi",
+        "user": "Yusuke Kitagawa",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Johanna",
+        "user": "Makoto Niijima",
+        "opus": [
+          "P5",
+          "P5R",
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Anat",
+        "user": "Makoto Niijima",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Agnes",
+        "user": "Makoto Niijima",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Necronomicon",
+        "user": "Futaba Sakura",
+        "opus": [
+          "P5",
+          "P5R",
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Prometheus",
+        "user": "Futaba Sakura",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Al Azif",
+        "user": "Futaba Sakura",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Milady",
+        "user": "Haru Okumura",
+        "opus": [
+          "P5",
+          "P5R",
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Astarte",
+        "user": "Haru Okumura",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Lucy",
+        "user": "Haru Okumura",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Robin Hood",
+        "user": "Goro Akechi",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Loki",
+        "user": "Goro Akechi",
+        "opus": [
+          "P5",
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Hereward",
+        "user": "Goro Akechi",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Cendrillon",
+        "user": "Sumire Yoshizawa",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Vanadis",
+        "user": "Sumire Yoshizawa",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Ella",
+        "user": "Sumire Yoshizawa",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Adam Kadmon",
+        "user": "Takuto Maruki",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Azathoth",
+        "user": "Takuto Maruki",
+        "opus": [
+          "P5R"
+        ]
+      },
+      {
+        "persona": "Valjean",
+        "user": "Zenkichi Hasegawa",
+        "opus": [
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Pithos",
+        "user": "Sophia",
+        "opus": [
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Pandora",
+        "user": "Sophia",
+        "opus": [
+          "P5S"
+        ]
+      },
+      {
+        "persona": "Ernesto",
+        "user": "Erina",
+        "opus": [
+          "P5T"
+        ]
+      },
+      {
+        "persona": "Jánošík",
+        "user": "Nagisa Kamishiro",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Rob Roy",
+        "user": "Lufel",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Awilda",
+        "user": "Motoha Arai",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Mandrin",
+        "user": "Shun Kano",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Chiyome",
+        "user": "Riko Tanemura",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Ghino",
+        "user": "Shoki Ikenami",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Leucothea",
+        "user": "Seiji Shiratori",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Terpsichore",
+        "user": "Kotone Montagne",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Styx",
+        "user": "Yukimi Fujikawa",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Prosymna",
+        "user": "Tomoko Noge",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Erytheia",
+        "user": "Leo Kamiyama",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Meng Po",
+        "user": "Yaoling Li",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Syke",
+        "user": "Kiyoshi Kurotani",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Cleodora",
+        "user": "Kayo Tomiyama",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Nemertes",
+        "user": "Miyu Sahara",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Gorgyra",
+        "user": "Toshiya Sumi",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Daeira",
+        "user": "Haruna Nishimori",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Apseudes",
+        "user": "YUI",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Thalia",
+        "user": "Minami Miyashita",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Ampelos",
+        "user": "Chizuko Nagao",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Urania",
+        "user": "Yumi Shiina",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Calliope",
+        "user": "Ayaka Sakai",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Harpyia",
+        "user": "Kira Kitazato",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Amalthea",
+        "user": "Masaki Ashiya",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Aura",
+        "user": "Runa Dogenzaka",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Minthe",
+        "user": "Mio Natsukawa",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Pitys",
+        "user": "Mayumi Hashimoto",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Euterpe",
+        "user": "Manaka Nagao",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Thelxiepeia",
+        "user": "Ichigo Shikano",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Gentileschi",
+        "user": "Aran Hirano",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Asterope",
+        "user": "Narumi Nashimoto",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Kiskil-lilla",
+        "user": "Kumi Katayama",
+        "opus": [
+          "P5X"
+        ]
+      },
+      {
+        "persona": "Vulcanus",
+        "user": "Tatsuya Suou",
+        "opus": [
+          "P2IS",
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Apollo",
+        "user": "Tatsuya Suou",
+        "opus": [
+          "P2IS",
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Maia",
+        "user": "Maya Amano",
+        "opus": [
+          "P2IS",
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Artemis",
+        "user": "Maya Amano",
+        "opus": [
+          "P2IS",
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Eros",
+        "user": "Lisa Silverman",
+        "opus": [
+          "P2IS"
+        ]
+      },
+      {
+        "persona": "Venus",
+        "user": "Lisa Silverman",
+        "opus": [
+          "P2IS"
+        ]
+      },
+      {
+        "persona": "Hermes",
+        "user": "Jun Kurosu",
+        "opus": [
+          "P2IS"
+        ]
+      },
+      {
+        "persona": "Chronos",
+        "user": "Jun Kurosu",
+        "opus": [
+          "P2IS"
+        ]
+      },
+      {
+        "persona": "Rhadamanthus",
+        "user": "Eikichi Mishina",
+        "opus": [
+          "P2IS"
+        ]
+      },
+      {
+        "persona": "Hades",
+        "user": "Eikichi Mishina",
+        "opus": [
+          "P2IS"
+        ]
+      },
+      {
+        "persona": "Odysseus",
+        "user": "Baofu",
+        "opus": [
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Prometheus",
+        "user": "Baofu",
+        "opus": [
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Helios",
+        "user": "Katsuya Suou",
+        "opus": [
+          "P2IS",
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Hyperion",
+        "user": "Katsuya Suou",
+        "opus": [
+          "P2IS",
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Callisto",
+        "user": "Ulala Serizawa",
+        "opus": [
+          "P2IS",
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Astria",
+        "user": "Ulala Serizawa",
+        "opus": [
+          "P2IS",
+          "P2EP"
+        ]
+      },
+      {
+        "persona": "Nyarlathotep",
+        "user": "Joker",
+        "opus": [
+          "P2IS"
+        ]
+      },
+      {
+        "persona": "Abel",
+        "user": "Shin Kanzato",
+        "opus": [
+          "PTS"
+        ]
+      },
+      {
+        "persona": "Seth",
+        "user": "Jun Kanzato",
+        "opus": [
+          "PTS"
+        ]
+      },
+      {
+        "persona": "Cain",
+        "user": "Ryo Kanzato",
+        "opus": [
+          "PTS"
+        ]
+      }
+    ]
+  },
   "alloutattack": {
     "pool": [
       "Aigis",

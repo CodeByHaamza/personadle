@@ -107,3 +107,48 @@
     flex: 1 1 120px;
   }
 }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   MODE EXPERT — la fiche de lore
+   Le bouton de bascule et le halo de page vivent dans css/global.css (partagés
+   par tous les modes). Ici : le panneau de texte qui remplace l'image.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.expert-lore-box {
+  box-sizing: border-box;
+  width: min(600px, 92vw);
+  margin: 18px auto;
+  padding: 20px 24px;
+  background: rgba(12, 12, 14, 0.92);
+  border: 2px solid #e63946;
+  border-radius: 4px;
+  box-shadow: 0 0 24px rgba(230, 57, 70, 0.28);
+}
+
+.expert-lore-header {
+  margin-bottom: 12px;
+  font-family: "Courier New", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e63946;
+}
+
+.expert-lore-text {
+  margin: 0;
+  color: #f2f2f2;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+@media (max-width: 480px) {
+  .expert-lore-box {
+    padding: 16px 18px;
+  }
+
+  .expert-lore-text {
+    font-size: 0.92rem;
+    text-align: left; /* justifié sur écran étroit = rivières de blanc */
+  }
+}

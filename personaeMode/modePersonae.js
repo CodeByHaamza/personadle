@@ -18,6 +18,7 @@
 // === IMPORTS ===
 import { personaeCharacters as originalCharacters } from "./database/personaeCharacters.js";
 import { portraitsMapPersonae as portraitsMap } from "./database/portraitsMapPersonae.js";
+import { expertWielders } from "./database/expert_lore/wielders.js";
 import { personas } from "./database/persona.js";
 import { updateProfileStats } from "../profile/profileStats.js";
 
@@ -39,6 +40,9 @@ import {
   getActiveChallengeTarget,
   isChallengePlay,
   setGiveUpEnabled,
+  expertContext,
+  setupExpertToggle,
+  maskTerms,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -71,17 +75,33 @@ const ALL_OPUS = [
   "PTS",
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE EXPERT — la fiche de lore, pas l'image
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Le mode normal montre le dessin de la persona. L'Expert ne le montre jamais :
+// il donne le texte mythologique de la figure, nom masqué, et le joueur doit en
+// déduire le manieur. L'image n'apparaît qu'à la révélation finale.
+const EXPERT = expertContext({
+  prefix: "personaeExpert",
+  statsKey: "Personae",
+  hashMode: "Personae",
+});
+
+/** Fiches de lore de la langue courante, chargées à la demande. */
+let expertLore = {};
+
 let activeFilters = [...ALL_OPUS];
 let filteredCharacters = [];
 let target = null;
 let attempts = 0;
-const maxAttempts = 3; // Give Up unlocks after this many wrong guesses
+const maxAttempts = EXPERT.isExpert ? 5 : 3; // Give Up unlocks after this many wrong guesses
 let gameOver = false;
 
 let sessionStartTime = Date.now();
 // Frontière de journée en heure de Paris (jamais toISOString/UTC, cf. CLAUDE.md) —
 // sinon la garde "déjà joué" bascule à minuit UTC (1-2h du matin à Paris).
-const statsKey = `statsLogged_Personae_${parisDateKey()}`;
+const statsKey = `statsLogged_${EXPERT.statsKey}_${parisDateKey()}`;
 
 // DOM elements (assigned in DOMContentLoaded)
 let victoryBox, victoryImage, victoryText;
@@ -144,6 +164,66 @@ function findByChallengeKey(key) {
   );
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE EXPERT — chargement et rendu du lore
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Restreint un pool aux personas ayant une fiche de lore.
+ *
+ * Sans fiche il n'y a aucun indice à afficher : la partie serait injouable. Doit
+ * rester aligné sur le pool `personae_expert` de api/data/daily_pools.json, sinon
+ * le serveur attend une autre cible et logue chaque partie en anti_cheat.
+ */
+function expertPool(pool) {
+  if (!EXPERT.isExpert) return pool;
+  const filtre = pool.filter((c) => expertLore[c.persona]);
+  // Repli défensif : si les fiches ne sont pas encore chargées, mieux vaut le pool
+  // complet qu'un pool vide, qui ferait planter le tirage.
+  return filtre.length ? filtre : pool;
+}
+
+/**
+ * Charge les fiches de la langue courante, avec repli sur l'anglais.
+ *
+ * Fichier séparé et chargé à la demande, délibérément PAS dans lang/*.json : ces
+ * derniers sont chargés sur toutes les pages du site, et 137 fiches × 6 langues y
+ * pèseraient pour rien.
+ */
+async function loadExpertLore() {
+  if (!EXPERT.isExpert) return;
+  const lang = window.i18n?.getCurrentLang?.() ?? "en";
+  for (const code of [lang, "en"]) {
+    try {
+      const res = await fetch(`./database/expert_lore/${code}.json`);
+      if (!res.ok) continue;
+      expertLore = await res.json();
+      return;
+    } catch {
+      /* langue absente → on tente le repli anglais */
+    }
+  }
+}
+
+/**
+ * Affiche la fiche de la cible. Le nom de la persona et ses alias sont masqués
+ * pendant la partie ; `reveal` réaffiche le texte brut, sans seconde copie à
+ * maintenir (cf. maskTerms, js/gameCore.js).
+ */
+function renderExpertLore(reveal = false) {
+  const box = document.getElementById("expertLoreBox");
+  const texte = document.getElementById("expertLoreText");
+  if (!box || !texte) return;
+
+  const fiche = expertLore[target?.persona];
+  if (!fiche) {
+    texte.textContent = "";
+    return;
+  }
+  texte.textContent = reveal ? fiche.text : maskTerms(fiche.mask, fiche.text, "▮▮▮");
+}
+
 /**
  * Picks the daily target and loads their persona image.
  * Uses seeded RNG from the full unfiltered pool by default; falls back to a
@@ -169,20 +249,23 @@ function pickCharacter(random = false) {
         : filteredCharacters;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
   } else {
-    const daily = getDailyTarget(originalCharacters, "Personae");
+    const daily = getDailyTarget(expertPool(originalCharacters), EXPERT.hashMode);
     if (filteredCharacters.length && !filteredCharacters.some((c) => c.persona === daily.persona)) {
-      target = getDailyTarget(filteredCharacters, "Personae");
+      target = getDailyTarget(expertPool(filteredCharacters), EXPERT.hashMode);
     } else {
       target = daily;
     }
   }
 
-  personaImg.src = `./database/img/${target.image}.webp`;
+  // En Expert l'image est l'inverse d'un indice : elle EST la réponse. Elle n'est
+  // posée qu'à la révélation finale (showVictory).
+  personaImg.src = EXPERT.isExpert ? "" : `./database/img/${target.image}.webp`;
+  if (EXPERT.isExpert) renderExpertLore();
   personaImg.alt = target.persona;
 
-  localStorage.setItem("personaeTarget", JSON.stringify(target));
-  localStorage.setItem("personaeAttempts", attempts);
-  localStorage.setItem("personaeGameOver", "false");
+  localStorage.setItem(EXPERT.key("personaeTarget"), JSON.stringify(target));
+  localStorage.setItem(EXPERT.key("personaeAttempts"), attempts);
+  localStorage.setItem(EXPERT.key("personaeGameOver"), "false");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -330,6 +413,12 @@ function initializeAutocomplete(input, personasList) {
  * @param {string}  [name=null]   - The correctly guessed character name
  */
 function showVictory(force = false, name = null) {
+  // Fin de partie : la censure tombe des deux côtés — l'image apparaît, la fiche
+  // reprend son texte brut.
+  if (EXPERT.isExpert) {
+    if (personaImg && target) personaImg.src = `./database/img/${target.image}.webp`;
+    renderExpertLore(true);
+  }
   gameOver = true;
   textbar.disabled = true;
   guessBtn.disabled = true;
@@ -489,17 +578,19 @@ function showVictory(force = false, name = null) {
       filteredCharacters.filter((c) => c.persona !== target.persona).map((c) => challengeKey(c))
     );
   checkChallengeCompletion("personae", attempts, !force);
-  showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
+  if (!EXPERT.isExpert)
+    showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   if (!wasChallengePlay && !localStorage.getItem(statsKey)) {
     const result = force ? "giveup" : "win";
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-    updateProfileStats({ result, mode: "Personae", timeSpent });
+    if (!EXPERT.isExpert) updateProfileStats({ result, mode: "Personae", timeSpent });
     savePendingSession(
       buildGameSession({
         mode: "Personae",
         targetName: Array.isArray(target.user) ? target.user[0] : target.user,
+        isExpert: EXPERT.isExpert,
         result,
         attempts,
         timeMs: timeSpent * 1000,
@@ -510,12 +601,12 @@ function showVictory(force = false, name = null) {
     localStorage.setItem(statsKey, "true");
   }
 
-  localStorage.setItem("personaeGameOver", "true");
+  localStorage.setItem(EXPERT.key("personaeGameOver"), "true");
   const _pPersonae = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
   trackUniqueDay(_pPersonae, () =>
     localStorage.setItem("personaUserProfile", JSON.stringify(_pPersonae))
   );
-  checkUnlocksAfterGame("Personae");
+  if (!EXPERT.isExpert) checkUnlocksAfterGame("Personae");
 }
 
 /**
@@ -542,7 +633,7 @@ function handleGuess() {
   if (!guess) return;
 
   attempts++;
-  localStorage.setItem("personaeAttempts", attempts);
+  localStorage.setItem(EXPERT.key("personaeAttempts"), attempts);
   giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
 
   if (attempts >= maxAttempts) {
@@ -550,7 +641,15 @@ function handleGuess() {
     giveUpCounter.classList.add("activated");
   }
 
-  const users = Array.isArray(target.user) ? target.user : [target.user];
+  // En Expert la fiche décrit une FIGURE mythologique, pas une entrée précise du
+  // dataset : elle accepte donc tous les manieurs de toutes ses entrées (Orphée
+  // vaut pour Makoto, Kotone et Aigis). Rien dans le texte ne permet de les
+  // départager — refuser l'un d'eux serait perçu comme un bug.
+  const users = EXPERT.isExpert
+    ? expertWielders(target.persona, originalCharacters)
+    : Array.isArray(target.user)
+      ? target.user
+      : [target.user];
   const found = users.some((u) => u.toLowerCase() === guess.toLowerCase());
 
   if (found) {
@@ -582,11 +681,12 @@ function giveUp() {
   // showVictory → checkChallengeCompletion) mais pas en session quotidienne.
   if (!isChallengePlay("personae") && !localStorage.getItem(statsKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-    updateProfileStats({ result: "giveup", mode: "Personae", timeSpent });
+    if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: "Personae", timeSpent });
     savePendingSession(
       buildGameSession({
         mode: "Personae",
         targetName: Array.isArray(target.user) ? target.user[0] : target.user,
+        isExpert: EXPERT.isExpert,
         result: "giveup",
         attempts,
         timeMs: timeSpent * 1000,
@@ -597,8 +697,8 @@ function giveUp() {
     localStorage.setItem(statsKey, "true");
   }
 
-  localStorage.setItem("personaeGameOver", "true");
-  localStorage.setItem("personaeForceReveal", "true");
+  localStorage.setItem(EXPERT.key("personaeGameOver"), "true");
+  localStorage.setItem(EXPERT.key("personaeForceReveal"), "true");
   showVictory(true, Array.isArray(target.user) ? target.user[0] : target.user);
 }
 
@@ -609,10 +709,10 @@ function giveUp() {
 function resetGame(random = false) {
   sessionStartTime = Date.now();
 
-  localStorage.removeItem("personaeTarget");
-  localStorage.removeItem("personaeAttempts");
-  localStorage.removeItem("personaeGameOver");
-  localStorage.removeItem("personaeForceReveal");
+  localStorage.removeItem(EXPERT.key("personaeTarget"));
+  localStorage.removeItem(EXPERT.key("personaeAttempts"));
+  localStorage.removeItem(EXPERT.key("personaeGameOver"));
+  localStorage.removeItem(EXPERT.key("personaeForceReveal"));
   localStorage.removeItem(statsKey);
 
   const nav = document.getElementById("modeNavigationContainer");
@@ -672,7 +772,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   victoryText = document.getElementById("victoryText");
 
   setupRulesModal();
+  setupExpertToggle(EXPERT, "personae.html");
+  document
+    .getElementById("expertLoreBox")
+    ?.style.setProperty("display", EXPERT.isExpert ? "" : "none");
   applyDarkModeStyles();
+
+  // Les fiches doivent être là AVANT le tirage : expertPool() s'en sert pour
+  // restreindre le pool aux personas ayant un texte à afficher.
+  await loadExpertLore();
 
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("personaeActiveFilters", ALL_OPUS, (newActive) => {
@@ -692,9 +800,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   // ── Restore session ──
-  const stored = localStorage.getItem("personaeTarget");
-  const storedAttempts = parseInt(localStorage.getItem("personaeAttempts")) || 0;
-  const storedGameOver = localStorage.getItem("personaeGameOver") === "true";
+  const stored = localStorage.getItem(EXPERT.key("personaeTarget"));
+  const storedAttempts = parseInt(localStorage.getItem(EXPERT.key("personaeAttempts"))) || 0;
+  const storedGameOver = localStorage.getItem(EXPERT.key("personaeGameOver")) === "true";
 
   if (stored) {
     try {
@@ -702,7 +810,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       filteredCharacters = getFilteredCharacters();
       attempts = storedAttempts;
       giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
-      personaImg.src = `./database/img/${target.image}.webp`;
+      // En Expert l'image est l'inverse d'un indice : elle EST la réponse. Elle n'est
+  // posée qu'à la révélation finale (showVictory).
+  personaImg.src = EXPERT.isExpert ? "" : `./database/img/${target.image}.webp`;
+  if (EXPERT.isExpert) renderExpertLore();
       personaImg.alt = target.persona;
 
       if (attempts >= maxAttempts) {
@@ -711,7 +822,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       if (storedGameOver) {
-        const force = localStorage.getItem("personaeForceReveal") === "true";
+        const force = localStorage.getItem(EXPERT.key("personaeForceReveal")) === "true";
         // Toujours passer le propriétaire du persona (même sur abandon) pour que
         // son portrait s'affiche à la restauration — sinon `showVictory(true, null)`
         // laissait la zone image vide au refresh (bug remonté par Hamza), alors que

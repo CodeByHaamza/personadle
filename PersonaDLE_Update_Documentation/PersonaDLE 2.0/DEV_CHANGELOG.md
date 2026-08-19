@@ -113,6 +113,55 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): Mode Personae Expert (front + back)
+
+Cinquième mode Expert. Le contenu attendait depuis trois lots : 137 fiches EN + FR, roster
+complet, règle des manieurs déjà implémentée et testée.
+
+### Mécanique
+
+Le mode normal montre le dessin de la persona. L'Expert ne le montre **jamais** : il affiche le
+texte mythologique de la figure, nom masqué, et le joueur en déduit le manieur. L'illustration
+n'apparaît qu'à la révélation finale — ici l'image n'est pas un indice, **elle est la réponse**.
+
+### Détails techniques
+
+- Pool serveur `personae_expert` — **139 entrées sur 153**, seules celles ayant une fiche.
+  Sans texte il n'y a aucun indice : la partie serait injouable. Les 14 variantes cosmétiques
+  en sont exclues d'office puisqu'elles n'ont volontairement pas de fiche.
+- `api/lib/daily_target.php` : `personae_expert` partage le corps du cas normal (même logique
+  de filtre opus) avec un pool et une clé de hash distincts. Le repli filtré utilise désormais
+  `$hashKey` et non la chaîne codée en dur — il visait sinon la cible du mode normal.
+- **Réponses acceptées = tous les manieurs de la figure**, via `expertWielders()` :
+  Orphée vaut pour Makoto, Kotone et Aigis. Rien dans le texte ne permet de les départager,
+  refuser l'un d'eux serait perçu comme un bug. C'est la première utilisation en jeu de la
+  règle posée trois lots plus tôt.
+- Les fiches sont chargées **à la demande** depuis `expert_lore/<lang>.json`, avec repli sur
+  l'anglais. Délibérément pas dans `lang/*.json`, chargé sur toutes les pages du site : 137
+  fiches × 6 langues y pèseraient pour rien.
+- Masquage à l'affichage par `maskTerms()` ; la révélation réaffiche le texte brut, sans
+  seconde copie à maintenir.
+- Seuil d'abandon à 5, comme les autres modes Expert. 8 clés i18n × 6 langues.
+
+### Fiabilisation de toute la suite E2E
+
+`serviceWorkers: "block"` dans `playwright.config.js`. Après un bump de `CACHE_VERSION`, le
+service worker s'active et **les pages se rechargent seules** (écouteur `SW_UPDATED`), en plein
+milieu d'un test : les assertions tombaient sur une page en pleine navigation, et l'échec se
+déplaçait d'un test à l'autre à chaque exécution. Ce n'est pas le SW qu'on teste ici ; son
+comportement hors-ligne mériterait sa propre suite.
+
+Deux autres pièges corrigés dans le spec Personae, tous deux découverts en le voyant échouer :
+
+- **Les « mauvaises » réponses écrites en dur finissaient par être justes.** Une fiche accepte
+  toute la famille de manieurs ; le test calcule maintenant l'ensemble accepté depuis le
+  dataset et pioche en dehors.
+- **Le premier clic partait parfois dans le vide** (listeners branchés en fin d'init) et était
+  perdu en silence. Le clic est réessayé jusqu'à ce que le compteur bouge — même correctif que
+  pour AOA.
+
+6 tests E2E Personae.
+
 ## 2026-08-15 — feat(expert): Mode Émoji Expert + bouton Abandonner resté grisé
 
 ### Émoji Expert — un émoji ment

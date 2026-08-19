@@ -211,7 +211,16 @@
       "correct": "✅ Guter Versuch! Die Persona von {{name}} war {{persona}}.",
       "giveup_reveal": "❌ Schade! Die Persona von {{name}} war {{persona}}.",
       "prev_mode": "← Silhouette Modus",
-      "next_mode": "Musik-Modus →"
+      "next_mode": "Musik-Modus →",
+      "expert_goal": "⚡ Expertenmodus:",
+      "expert_goal_text": "Gar kein Bild. Du bekommst den Mythos hinter der Persona und nennst ihren Träger.",
+      "expert_tips": "💡 Tipps:",
+      "expert_tip_1": "Der Name der Persona ist im Text verdeckt. Am Rundenende erscheint er wieder.",
+      "expert_tip_2": "Jeder Träger derselben Figur zählt — Orpheus gilt für Makoto, Kotone und Aigis gleichermaßen.",
+      "expert_tip_3": "Nur Personas mit einem tatsächlich geschriebenen Eintrag können gezogen werden.",
+      "expert_tip_4": "Die Illustration wird am Rundenende gezeigt.",
+      "expert_tip_5": "Du hast 5 Versuche, bevor der Aufgeben-Knopf freigeschaltet wird.",
+      "expert_tip_6": "Der Expertenmodus hat seine eigene Tages-Persona und eigene Statistiken. Er zählt nicht für deine normale Personae-Serie."
     },
     "music": {
       "name": "Musik",

@@ -211,7 +211,16 @@
       "correct": "✅ Bom palpite! A Persona de {{name}} era {{persona}}.",
       "giveup_reveal": "❌ Que pena! A Persona de {{name}} era {{persona}}.",
       "prev_mode": "← Modo Silhueta",
-      "next_mode": "Modo Música →"
+      "next_mode": "Modo Música →",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "Sem imagem nenhuma. Recebes o mito por trás da Persona e nomeias quem a usa.",
+      "expert_tips": "💡 Dicas:",
+      "expert_tip_1": "O nome da Persona está escondido no texto. Volta no fim da partida.",
+      "expert_tip_2": "Serve qualquer portador da mesma figura — Orfeu vale para Makoto, Kotone e Aigis.",
+      "expert_tip_3": "Só podem sair Personas que tenham mesmo uma ficha escrita.",
+      "expert_tip_4": "A ilustração é revelada no fim da partida.",
+      "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_6": "O Especialista tem a própria Persona do dia e as próprias estatísticas. Não conta para a tua sequência de Personae normal."
     },
     "music": {
       "name": "Música",

@@ -76,7 +76,7 @@ if ($attempts < 0 || $attempts > $maxAttempts) {
 // Modes disposant d'une variante Expert (pool + clé de hash dédiés dans
 // api/lib/daily_target.php). Accepter is_expert sur un autre mode créerait des
 // lignes que le recalcul anti-triche ne saurait pas rejouer.
-$expertModes = ['music', 'classic', 'emoji', 'silhouette', 'alloutattack'];
+$expertModes = ['music', 'classic', 'emoji', 'silhouette', 'alloutattack', 'personae'];
 if ($isExpert && !in_array($mode, $expertModes, true)) {
     jsonError('Expert mode is not available for this mode', 400);
 }

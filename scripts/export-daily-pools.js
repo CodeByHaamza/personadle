@@ -41,6 +41,9 @@ const { personaeCharacters } = await import(
 const { expertLyrics } = await import(
   join(ROOT, "musicsMode/database/expert_lyrics.js").replace(/\\/g, "/")
 );
+const expertLore = JSON.parse(
+  readFileSync(join(ROOT, "personaeMode/database/expert_lore/en.json"), "utf8")
+);
 
 const opusByName = Object.fromEntries(aoaCharacters.map((c) => [c.nom, c.opus]));
 
@@ -64,6 +67,18 @@ const pools = {
   music_expert: { pool: songs.filter((s) => expertLyrics[s.titre]).map((s) => s.titre) },
   classic_expert: {
     pool: characters.filter((c) => String(c.quote ?? "").trim()).map((c) => c.nom),
+  },
+  // Personae Expert : seules les personas ayant une fiche de lore sont tirables —
+  // sans texte, la partie n'aurait aucun indice. Les variantes cosmétiques
+  // (`* Picaro`…) n'ont volontairement pas de fiche et sont donc exclues d'office.
+  personae_expert: {
+    pool: personaeCharacters
+      .filter((c) => expertLore[c.persona])
+      .map((c) => ({
+        persona: c.persona,
+        user: Array.isArray(c.user) ? c.user[0] : c.user,
+        opus: c.opus,
+      })),
   },
   alloutattack: {
     pool: aoaAutocompletePool,

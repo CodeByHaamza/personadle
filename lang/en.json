@@ -211,7 +211,16 @@
       "correct": "✅ Good guess! {{name}}'s Persona was {{persona}}.",
       "giveup_reveal": "❌ Too bad! {{name}}'s Persona was {{persona}}.",
       "prev_mode": "← Silhouette Mode",
-      "next_mode": "Music Mode →"
+      "next_mode": "Music Mode →",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "No picture at all. You get the myth behind the Persona, and you name its wielder.",
+      "expert_tips": "💡 Tips:",
+      "expert_tip_1": "The Persona's own name is hidden in the text. It comes back when the round ends.",
+      "expert_tip_2": "Any wielder of that same figure is accepted — Orpheus counts for Makoto, Kotone and Aigis alike.",
+      "expert_tip_3": "Only Personas that actually have a written entry can be drawn.",
+      "expert_tip_4": "The artwork is revealed when the round ends.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily Persona and its own stats. It will not carry your normal Personae streak."
     },
     "music": {
       "name": "Music",

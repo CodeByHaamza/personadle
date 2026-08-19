@@ -211,7 +211,16 @@
       "correct": "✅ Ottima risposta! La Persona di {{name}} era {{persona}}.",
       "giveup_reveal": "❌ Peccato! La Persona di {{name}} era {{persona}}.",
       "prev_mode": "← Modalità Silhouette",
-      "next_mode": "Modalità Musica →"
+      "next_mode": "Modalità Musica →",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "Nessuna immagine. Ricevi il mito dietro la Persona e nomini chi la usa.",
+      "expert_tips": "💡 Consigli:",
+      "expert_tip_1": "Il nome della Persona è nascosto nel testo. Riappare a fine partita.",
+      "expert_tip_2": "Va bene qualsiasi utilizzatore della stessa figura: Orfeo vale per Makoto, Kotone e Aigis.",
+      "expert_tip_3": "Possono uscire solo Persona che hanno davvero una scheda scritta.",
+      "expert_tip_4": "L'illustrazione viene rivelata a fine partita.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha la sua Persona del giorno e le sue statistiche. Non conta per la tua serie Personae normale."
     },
     "music": {
       "name": "Musica",

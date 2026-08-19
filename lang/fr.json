@@ -211,7 +211,16 @@
       "correct": "✅ Bonne réponse ! Le Persona de {{name}} était {{persona}}.",
       "giveup_reveal": "❌ Dommage ! Le Persona de {{name}} était {{persona}}.",
       "prev_mode": "← Mode Silhouette",
-      "next_mode": "Mode Musique →"
+      "next_mode": "Mode Musique →",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Aucune image. Tu reçois le mythe derrière la persona, et tu nommes son manieur.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Le nom de la persona est masqué dans le texte. Il réapparaît à la fin de la partie.",
+      "expert_tip_2": "N'importe quel manieur de cette même figure est accepté — Orphée vaut pour Makoto, Kotone comme Aigis.",
+      "expert_tip_3": "Seules les personas ayant réellement une fiche peuvent être tirées.",
+      "expert_tip_4": "L'illustration est révélée à la fin de la partie.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a sa propre persona du jour et ses propres stats. Il ne compte pas dans ta série Personae normale."
     },
     "music": {
       "name": "Musique",

@@ -214,7 +214,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 
 ### 🌐 Internationalisation
 
-- 6 languages: EN · FR · ES · DE · IT · PT (1033 keys each)
+- 6 languages: EN · FR · ES · DE · IT · PT (1042 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
@@ -388,7 +388,7 @@ GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
 ```
 Vitest + jsdom → 689 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 83 E2E sur la stack Docker complète (smoke, API, Social Link)
+Playwright     → 89 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5
 ESLint+Prettier→ lint + format
 npm test       → lance la suite Vitest · make check → tout (lint, data, i18n)
