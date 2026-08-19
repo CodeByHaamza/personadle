@@ -23,6 +23,9 @@ import {
   expertContext,
   setupExpertToggle,
   setGiveUpEnabled,
+  startGame,
+  isGameLogged,
+  markGameLogged,
   characterMatchesActiveOpus,
   updateCounterElement,
   getActiveChallengeTarget,
@@ -104,10 +107,10 @@ let target = null;
 // Guard against double-binding autocomplete listeners after filter changes
 let autocompleteBound = false;
 
-/** Returns today's stats key for this mode (recalculated fresh each time). */
-function getTodayStatsKey() {
-  return `statsLogged_${EXPERT.statsKey}_${parisDateKey()}`;
-}
+// Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
+// isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
+// seule la streak reste journalière, et elle se calcule ailleurs.
+const STATS_SCOPE = EXPERT.statsKey;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER / CHARACTER POOL
@@ -413,8 +416,7 @@ function checkEmojiGuess(name, forceReveal = false) {
       );
     }
 
-    const todayKey = getTodayStatsKey();
-    if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
+    if (!wasChallengePlay && !isGameLogged(STATS_SCOPE)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       const result = forceReveal ? "giveup" : "win";
       if (!EXPERT.isExpert) updateProfileStats({ result, mode: modeName, timeSpent });
@@ -426,9 +428,9 @@ function checkEmojiGuess(name, forceReveal = false) {
           result,
           attempts,
           timeMs: timeSpent * 1000,
+          clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
-      localStorage.setItem(todayKey, "true");
     }
 
     textbar.disabled = true;
@@ -607,7 +609,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Aligne Emoji sur les 5 autres modes : le replay efface aussi la garde
     // stats du jour, pour qu'une victoire en replay soit envoyée au backend
     // (qui upgrade un éventuel giveup→win — décision produit 2026-07-17).
-    localStorage.removeItem(getTodayStatsKey());
+    startGame(STATS_SCOPE);
     resetGame();
   });
 

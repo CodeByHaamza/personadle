@@ -6,7 +6,6 @@ import { updateProfileStats } from "../profile/profileStats.js";
 
 // Shared game utilities
 import {
-  parisDateKey,
   showConfettiExplosion,
   revealNextLink,
   setupRulesModal,
@@ -22,6 +21,9 @@ import {
   getActiveChallengeTarget,
   isChallengePlay,
   setGiveUpEnabled,
+  startGame,
+  isGameLogged,
+  markGameLogged,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -36,8 +38,11 @@ import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const modeName = "silhouette";
-const todayKey = `statsLogged_${modeName}_${parisDateKey()}`;
-let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
+// Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
+// isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
+// seule la streak reste journalière, et elle se calcule ailleurs.
+const STATS_SCOPE = modeName;
+let statsAlreadyLogged = isGameLogged(STATS_SCOPE);
 let sessionStartTime = Date.now();
 
 /** All specific opus codes available in Silhouette mode. */
@@ -370,9 +375,9 @@ function showVictory(force = false) {
           result: "win",
           attempts,
           timeMs: timeSpent * 1000,
+          clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
-      localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
     }
 
@@ -506,9 +511,9 @@ function giveUp() {
         result: "giveup",
         attempts,
         timeMs: timeSpent * 1000,
+        clientSessionId: markGameLogged(STATS_SCOPE),
       })
     );
-    localStorage.setItem(todayKey, "true");
     statsAlreadyLogged = true;
   }
 
@@ -583,7 +588,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem("silhouetteTarget");
     localStorage.removeItem("silhouetteAttempts");
     localStorage.removeItem("silhouetteGameOver");
-    localStorage.removeItem(todayKey);
+    startGame(STATS_SCOPE);
     statsAlreadyLogged = false;
     sessionStartTime = Date.now();
     resetGame(true);

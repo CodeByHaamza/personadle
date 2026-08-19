@@ -6,7 +6,6 @@ import { updateProfileStats } from "../profile/profileStats.js";
 
 // Shared game utilities (confetti, navigation, modal, daily reset, filters)
 import {
-  parisDateKey,
   showConfettiExplosion,
   revealNextLink,
   setupRulesModal,
@@ -21,6 +20,9 @@ import {
   enableGiveUpButton,
   showWrongMini,
   setGiveUpEnabled,
+  startGame,
+  isGameLogged,
+  markGameLogged,
   characterMatchesActiveOpus,
   updateCounterElement,
   getActiveChallengeTarget,
@@ -104,8 +106,11 @@ let daltonianMode = localStorage.getItem("daltonianMode") === "enabled";
 let attempts = parseInt(localStorage.getItem(EXPERT.key("attempts"))) || 0;
 
 // Stats / session tracking
-const todayKey = `statsLogged_${EXPERT.statsKey}_${parisDateKey()}`;
-let statsAlreadyLogged = localStorage.getItem(todayKey) === "true";
+// Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
+// isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
+// seule la streak reste journalière, et elle se calcule ailleurs.
+const STATS_SCOPE = EXPERT.statsKey;
+let statsAlreadyLogged = isGameLogged(STATS_SCOPE);
 let sessionStartTime = Date.now();
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -447,9 +452,9 @@ function checkGuess(name, target, forceReveal = false) {
           attempts,
           timeMs: timeSpent * 1000,
           filters: activeOpus,
+          clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
-      localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
 
       // ── Badge flags ──────────────────────────────────────────────────────
@@ -673,9 +678,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           attempts,
           timeMs: timeSpent * 1000,
           filters: activeOpus,
+          clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
-      localStorage.setItem(todayKey, "true");
       statsAlreadyLogged = true;
       // Give Up ne passait jamais par checkBadgesAfterGame() (seul le chemin victoire l'appelait,
       // cf. checkGuess()) — un badge comme ace_defective (10 give-ups) ne se débloquait donc
@@ -732,7 +737,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Reset / Replay button ──
   resetButton.addEventListener("click", () => {
-    localStorage.removeItem(todayKey);
+    startGame(STATS_SCOPE);
     statsAlreadyLogged = false;
     sessionStartTime = Date.now();
 

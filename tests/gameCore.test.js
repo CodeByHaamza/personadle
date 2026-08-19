@@ -37,6 +37,9 @@ import {
   getActiveChallengeTarget,
   isChallengePlay,
   getPendingActiveChallenge,
+  startGame,
+  isGameLogged,
+  markGameLogged,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -536,6 +539,93 @@ describe("showWrongMini", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 // buildGameSession
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IDENTITÉ DE PARTIE — « une partie = un enregistrement »
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Remplace l'ancienne garde `statsLogged_<Mode>_<date>` (une partie par jour).
+// Ce qui doit tenir : la garde survit à un rechargement (sinon la restauration
+// de session re-loggerait à chaque F5), et elle tombe au tirage suivant (sinon
+// on retombe sur l'ancien plafond).
+
+describe("startGame / isGameLogged / markGameLogged", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("une partie fraîche n'est pas encore enregistrée", () => {
+    startGame("Classic");
+    expect(isGameLogged("Classic")).toBe(false);
+  });
+
+  it("sans startGame préalable, rien n'est considéré comme enregistré", () => {
+    expect(isGameLogged("Classic")).toBe(false);
+  });
+
+  it("markGameLogged rend la partie enregistrée et son identifiant", () => {
+    startGame("Classic");
+    const id = markGameLogged("Classic");
+    expect(id).toBeTruthy();
+    expect(isGameLogged("Classic")).toBe(true);
+  });
+
+  it("l'état survit à un rechargement (il vit dans localStorage)", () => {
+    startGame("Classic");
+    markGameLogged("Classic");
+    // Un F5 ne fait que relire localStorage : aucune remise à zéro en mémoire.
+    expect(isGameLogged("Classic")).toBe(true);
+  });
+
+  it("la partie suivante réarme l'enregistrement", () => {
+    startGame("Classic");
+    markGameLogged("Classic");
+    startGame("Classic");
+    expect(isGameLogged("Classic")).toBe(false);
+  });
+
+  it("chaque partie a un identifiant distinct", () => {
+    startGame("Classic");
+    const first = markGameLogged("Classic");
+    startGame("Classic");
+    const second = markGameLogged("Classic");
+    expect(second).not.toBe(first);
+  });
+
+  it("markGameLogged sans startGame crée quand même un identifiant", () => {
+    const id = markGameLogged("Classic");
+    expect(id).toBeTruthy();
+    expect(isGameLogged("Classic")).toBe(true);
+  });
+
+  it("les portées sont indépendantes entre modes et entre normal/Expert", () => {
+    startGame("Classic");
+    startGame("ClassicExpert");
+    startGame("Music");
+    markGameLogged("Classic");
+    expect(isGameLogged("Classic")).toBe(true);
+    expect(isGameLogged("ClassicExpert")).toBe(false);
+    expect(isGameLogged("Music")).toBe(false);
+  });
+
+  it("buildGameSession réutilise l'identifiant de la partie comme clé d'idempotence", () => {
+    startGame("Classic");
+    const id = markGameLogged("Classic");
+    const session = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+      clientSessionId: id,
+    });
+    expect(session.client_session_id).toBe(id);
+  });
+
+  it("buildGameSession retombe sur un identifiant neuf si aucun n'est fourni", () => {
+    const a = buildGameSession({ mode: "Classic", targetName: "Joker", result: "win", attempts: 1 });
+    const b = buildGameSession({ mode: "Classic", targetName: "Joker", result: "win", attempts: 1 });
+    expect(a.client_session_id).toBeTruthy();
+    expect(a.client_session_id).not.toBe(b.client_session_id);
+  });
+});
 
 describe("buildGameSession", () => {
   it("returns an object with the expected shape", () => {

@@ -10,6 +10,38 @@
 
 ---
 
+## 2026-08-19 — feat(stats): toutes les parties comptent — câblage client des 6 modes
+
+Le serveur enregistrait déjà chaque partie depuis la migration 032, mais le client gardait
+la garde `statsLogged_<Mode>_<date>` : le joueur ne voyait aucun changement. Ce lot ferme
+le point 1 du TODO.
+
+### Détails techniques
+
+- **`js/gameCore.js`** — `startGame()` / `isGameLogged()` / `markGameLogged()`. La garde
+  passe de « une partie enregistrée **par jour** » à « **cette** partie a-t-elle déjà été
+  enregistrée », scopée sur un identifiant régénéré à chaque tirage. Retirer la garde sans
+  rien mettre à la place aurait rejoué l'enregistrement à chaque F5 : la restauration de
+  session appelle `showVictory()`, qui contient le bloc de log.
+- **`buildGameSession()`** accepte `clientSessionId`. Les modes y passent l'identifiant rendu
+  par `markGameLogged()` : il est donc **stable pour toute la partie**, et un doublon après
+  perte du flag local (autre onglet, nettoyage navigateur) est refusé côté base par la
+  contrainte `client_session_id` au lieu de dépendre du seul client.
+- **Les 6 modes** (`modeClassique`, `emojiMode`, `modeMusic`, `modeSilhouette`,
+  `modeAllOutAttack`, `modePersonae`) : `todayKey` supprimé, garde et log remplacés,
+  `startGame()` appelé au Replay/reset. L'exclusion des parties de défi (`isChallengePlay()`)
+  est conservée telle quelle dans chaque mode — sinon un défi compterait deux fois.
+- **`updateProfileStats()` n'avait rien à changer** : il accumule déjà (`stats.games + 1`) et
+  sa streak n'avance que quand la date Paris change. Le client et le serveur restent donc
+  d'accord au prochain `pullProfileFromCloud()`.
+- **`tests/gameCore.test.js`** — 10 tests sur la nouvelle garde : survie au rechargement,
+  réarmement au tirage suivant, identifiants distincts, portées indépendantes entre modes et
+  entre normal/Expert, et reprise de l'identifiant par `buildGameSession()`. 719 tests.
+
+Reste au point 1 : un test E2E « deux parties le même jour apparaissent toutes les deux ».
+
+---
+
 ## 2026-08-19 — fix(expert): fiche Personae isolée + circuit défi neutralisé
 
 Suite des retours de test sur Personae Expert.

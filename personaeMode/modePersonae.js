@@ -36,10 +36,12 @@ import {
   showChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
-  parisDateKey,
   getActiveChallengeTarget,
   isChallengePlay,
   setGiveUpEnabled,
+  startGame,
+  isGameLogged,
+  markGameLogged,
   expertContext,
   setupExpertToggle,
   maskTerms,
@@ -99,9 +101,10 @@ const maxAttempts = EXPERT.isExpert ? 5 : 3; // Give Up unlocks after this many 
 let gameOver = false;
 
 let sessionStartTime = Date.now();
-// Frontière de journée en heure de Paris (jamais toISOString/UTC, cf. CLAUDE.md) —
-// sinon la garde "déjà joué" bascule à minuit UTC (1-2h du matin à Paris).
-const statsKey = `statsLogged_${EXPERT.statsKey}_${parisDateKey()}`;
+// Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
+// isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
+// seule la streak reste journalière, et elle se calcule ailleurs.
+const STATS_SCOPE = EXPERT.statsKey;
 
 // DOM elements (assigned in DOMContentLoaded)
 let victoryBox, victoryImage, victoryText;
@@ -610,7 +613,7 @@ function showVictory(force = false, name = null) {
     showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
 
   // ── Stats ─────────────────────────────────────────────────────────────────
-  if (!wasChallengePlay && !localStorage.getItem(statsKey)) {
+  if (!wasChallengePlay && !isGameLogged(STATS_SCOPE)) {
     const result = force ? "giveup" : "win";
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     if (!EXPERT.isExpert) updateProfileStats({ result, mode: "Personae", timeSpent });
@@ -623,10 +626,10 @@ function showVictory(force = false, name = null) {
         attempts,
         timeMs: timeSpent * 1000,
         filters: activeFilters,
+        clientSessionId: markGameLogged(STATS_SCOPE),
       })
     );
     localStorage.removeItem("playerProfile");
-    localStorage.setItem(statsKey, "true");
   }
 
   localStorage.setItem(EXPERT.key("personaeGameOver"), "true");
@@ -707,7 +710,7 @@ function giveUp() {
 
   // Défi à cible dédiée : le give-up compte pour le défi (perdu, via
   // showVictory → checkChallengeCompletion) mais pas en session quotidienne.
-  if ((EXPERT.isExpert || !isChallengePlay("personae")) && !localStorage.getItem(statsKey)) {
+  if ((EXPERT.isExpert || !isChallengePlay("personae")) && !isGameLogged(STATS_SCOPE)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: "Personae", timeSpent });
     savePendingSession(
@@ -719,10 +722,10 @@ function giveUp() {
         attempts,
         timeMs: timeSpent * 1000,
         filters: activeFilters,
+        clientSessionId: markGameLogged(STATS_SCOPE),
       })
     );
     localStorage.removeItem("playerProfile");
-    localStorage.setItem(statsKey, "true");
   }
 
   localStorage.setItem(EXPERT.key("personaeGameOver"), "true");
@@ -741,7 +744,7 @@ function resetGame(random = false) {
   localStorage.removeItem(EXPERT.key("personaeAttempts"));
   localStorage.removeItem(EXPERT.key("personaeGameOver"));
   localStorage.removeItem(EXPERT.key("personaeForceReveal"));
-  localStorage.removeItem(statsKey);
+  startGame(STATS_SCOPE);
 
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) nav.style.display = "none";

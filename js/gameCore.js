@@ -102,6 +102,61 @@ export function normalize(str) {
 // bookmarkable, un rechargement ne perd rien, et une même URL ne peut pas afficher
 // deux jeux différents selon un état caché.
 
+// ─────────────────────────────────────────────────────────────────────────────
+// IDENTITÉ DE PARTIE — « une partie = un enregistrement »
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Remplace l'ancienne garde `statsLogged_<Mode>_<date>` (une partie enregistrée
+// par jour et par mode). Le design a changé le 2026-08-15 : 50 parties dans la
+// soirée doivent compter 50 fois, seule la *streak* reste journalière — et elle
+// est calculée ailleurs, sur les jours distincts (updateProfileStats côté client,
+// GROUP BY played_date côté serveur).
+//
+// Retirer la garde sans rien mettre à la place rejouerait l'enregistrement à
+// chaque F5 : la restauration de session appelle showVictory(), qui contient le
+// bloc de log. La garde devient donc « CETTE partie a-t-elle déjà été
+// enregistrée », scopée sur un identifiant régénéré à chaque tirage.
+//
+// Ce même identifiant part au serveur comme `client_session_id` (migration 032) :
+// si le flag local est perdu (nettoyage du navigateur, autre onglet), le doublon
+// est refusé côté base au lieu de dépendre du seul client.
+
+const _gameIdKey = (scope) => `gameId_${scope}`;
+const _gameLoggedKey = (scope) => `gameLogged_${scope}`;
+
+/**
+ * Démarre une nouvelle partie : nouvel identifiant, enregistrement réarmé.
+ * À appeler au tirage de la cible (nouveau jour, Replay, changement de filtres).
+ *
+ * @param {string} scope Clé de stats du mode, Expert compris ("Classic", "ClassicExpert"…)
+ */
+export function startGame(scope) {
+  localStorage.setItem(_gameIdKey(scope), crypto.randomUUID());
+  localStorage.removeItem(_gameLoggedKey(scope));
+}
+
+/** Vrai si la partie EN COURS a déjà été enregistrée (survit à un rechargement). */
+export function isGameLogged(scope) {
+  const id = localStorage.getItem(_gameIdKey(scope));
+  return !!id && localStorage.getItem(_gameLoggedKey(scope)) === id;
+}
+
+/**
+ * Marque la partie en cours comme enregistrée et rend son identifiant, à passer
+ * en `clientSessionId` à buildGameSession().
+ *
+ * @returns {string} l'identifiant de la partie
+ */
+export function markGameLogged(scope) {
+  let id = localStorage.getItem(_gameIdKey(scope));
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(_gameIdKey(scope), id);
+  }
+  localStorage.setItem(_gameLoggedKey(scope), id);
+  return id;
+}
+
 /** Vrai si la page courante tourne en Mode Expert. */
 export function isExpertPage() {
   return new URLSearchParams(window.location.search).get("expert") === "1";
@@ -562,6 +617,7 @@ export function buildGameSession({
   timeMs = 0,
   filters = [],
   isExpert = false,
+  clientSessionId = "",
 }) {
   return {
     // Clé backend canonique, quelle que soit la graphie passée par le mode
@@ -579,7 +635,11 @@ export function buildGameSession({
     // timeout sur une requête que le serveur avait pourtant traitée insérerait la
     // partie deux fois — l'ancienne contrainte d'unicité par jour l'empêchait
     // accidentellement, elle n'existe plus.
-    client_session_id: crypto.randomUUID(),
+    //
+    // Passer markGameLogged() ici plutôt que de laisser le défaut : l'identifiant
+    // est alors stable pour toute la partie, donc un ré-enregistrement après perte
+    // du flag local (autre onglet, nettoyage navigateur) est refusé côté base.
+    client_session_id: clientSessionId || crypto.randomUUID(),
   };
 }
 

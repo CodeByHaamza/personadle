@@ -25,11 +25,13 @@ import {
   getDailyTarget,
   showChallengeButton,
   showCommunityStats,
-  parisDateKey,
   getActiveChallengeTarget,
   isChallengePlay,
   maskTerms,
   setGiveUpEnabled,
+  startGame,
+  isGameLogged,
+  markGameLogged,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -184,11 +186,10 @@ let gameOver = false;
 /** Timestamp when the game session started (for stats). */
 let sessionStartTime = Date.now();
 
-/**
- * localStorage key used to prevent double-logging stats for the same day.
- * Rebuilt each session so it always uses today's date.
- */
-let todayKey = `statsLogged_${STATS_KEY}_${parisDateKey()}`;
+// Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
+// isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
+// seule la streak reste journalière, et elle se calcule ailleurs.
+const STATS_SCOPE = STATS_KEY;
 
 /** Titles already guessed in this session (hidden from autocomplete). */
 let triedTitles = [];
@@ -538,9 +539,9 @@ function showVictory(force = false) {
     localStorage.setItem("personaUserProfile", JSON.stringify(profile));
   }
 
-  // ── Stats logging (once per day) ───────────────────────────────────────────
+  // ── Enregistrement de la partie ────────────────────────────────────────────
   // Une partie de défi à cible dédiée ne se logge pas en session quotidienne.
-  if (!isChallengePlay("music") && !localStorage.getItem(todayKey)) {
+  if (!isChallengePlay("music") && !isGameLogged(STATS_SCOPE)) {
     const result = force ? "giveup" : "win";
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     // Pas d'updateProfileStats() en Expert : ces stats client alimentent le mode
@@ -556,9 +557,9 @@ function showVictory(force = false) {
         attempts,
         timeMs: timeSpent * 1000,
         isExpert: IS_EXPERT,
+        clientSessionId: markGameLogged(STATS_SCOPE),
       })
     );
-    localStorage.setItem(todayKey, "1");
   }
 
   // Les conditions de déblocage portent sur les stats du mode normal, que
@@ -699,7 +700,7 @@ function giveUp() {
 
   // Log stats if not already done — jamais pour une partie de défi à cible
   // dédiée (le give-up compte pour le défi via showVictory, pas en quotidien).
-  if (!isChallengePlay("music") && !localStorage.getItem(todayKey)) {
+  if (!isChallengePlay("music") && !isGameLogged(STATS_SCOPE)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     if (!IS_EXPERT) updateProfileStats({ result: "giveup", mode: "Music", timeSpent });
     savePendingSession(
@@ -710,9 +711,9 @@ function giveUp() {
         attempts,
         timeMs: timeSpent * 1000,
         isExpert: IS_EXPERT,
+        clientSessionId: markGameLogged(STATS_SCOPE),
       })
     );
-    localStorage.setItem(todayKey, "1");
   }
 
   showVictory(true);
@@ -729,10 +730,7 @@ function resetGame(random = false) {
   localStorage.removeItem(`${KEY_PREFIX}GameOver`);
   localStorage.removeItem(`${KEY_PREFIX}TriedTitles`);
   localStorage.removeItem(`${KEY_PREFIX}ForceReveal`);
-  localStorage.removeItem(todayKey);
-
-  // Rebuild todayKey for the new session (in case day changed)
-  todayKey = `statsLogged_${STATS_KEY}_${parisDateKey()}`;
+  startGame(STATS_SCOPE);
 
   // Reset in-memory state
   gameOver = false;

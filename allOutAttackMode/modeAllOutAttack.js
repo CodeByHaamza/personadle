@@ -6,7 +6,6 @@ import { updateProfileStats } from "../profile/profileStats.js";
 
 // Shared game utilities
 import {
-  parisDateKey,
   showConfettiExplosion,
   revealNextLink,
   setupRulesModal,
@@ -24,6 +23,9 @@ import {
   expertContext,
   setupExpertToggle,
   setGiveUpEnabled,
+  startGame,
+  isGameLogged,
+  markGameLogged,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -243,7 +245,10 @@ const EXPERT = expertContext({
   hashMode: "AllOutAttack",
 });
 
-const todayKey = `statsLogged_${EXPERT.statsKey}_${parisDateKey()}`;
+// Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
+// isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
+// seule la streak reste journalière, et elle se calcule ailleurs.
+const STATS_SCOPE = EXPERT.statsKey;
 let sessionStartTime = Date.now();
 
 /** Minimum attempts before the Give-Up button activates. */
@@ -498,7 +503,7 @@ function handleGuess() {
     gameOver = true;
     localStorage.setItem(EXPERT.key("aoaGameOver"), "true");
 
-    if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
+    if (!wasChallengePlay && !isGameLogged(STATS_SCOPE)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       if (!EXPERT.isExpert) updateProfileStats({ result: "win", mode: "All Out Attack", timeSpent });
       savePendingSession(
@@ -510,9 +515,9 @@ function handleGuess() {
           attempts,
           timeMs: timeSpent * 1000,
           filters: activeOpusFilters,
+          clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
-      localStorage.setItem(todayKey, "1");
 
       // aoa_vision : victoire au 1er essai
       if (attempts === 1) {
@@ -560,7 +565,7 @@ function giveUp() {
   // Défi à cible dédiée : le give-up compte pour le défi (perdu) mais ne se
   // logge pas en session quotidienne. Capturé avant checkChallengeCompletion.
   const wasChallengePlay = isChallengePlay("alloutattack");
-  if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
+  if (!wasChallengePlay && !isGameLogged(STATS_SCOPE)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: "All Out Attack", timeSpent });
     savePendingSession(
@@ -572,9 +577,9 @@ function giveUp() {
         attempts,
         timeMs: timeSpent * 1000,
         filters: activeOpusFilters,
+        clientSessionId: markGameLogged(STATS_SCOPE),
       })
     );
-    localStorage.setItem(todayKey, "1");
     revealNextLink({
       prevHref: "../emojiMode/emojiMode.html",
       nextHref: "../silhouetteMode/silhouette.html",
@@ -599,7 +604,7 @@ function giveUp() {
  */
 function resetGame(random = false) {
   sessionStartTime = Date.now();
-  localStorage.removeItem(todayKey);
+  startGame(STATS_SCOPE);
 
   const input = document.getElementById("textbar");
   const gifElement = document.getElementById("aoaGif");
