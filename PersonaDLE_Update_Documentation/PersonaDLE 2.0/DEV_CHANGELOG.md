@@ -113,6 +113,29 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): fiches Personae en allemand
+
+Deuxième des quatre langues. **137 fiches**, même calibre que les trois précédentes.
+
+### Détails techniques
+
+- `personaeMode/database/expert_lore/de.json`. Comme pour l'espagnol, **aucun code à changer** :
+  poser le fichier suffit, le mode charge déjà `expert_lore/<lang>.json`.
+- Masques propres à l'allemand, là encore jamais recopiés : le texte dit « Apollon » et non
+  « Apollo », « Kerberos »/« Zerberus », « Kallisto », « Polydeukes », « Hekate », « Kalliope »,
+  « Aschenputtel », « Urmensch », « Kain ». Une forme absente du tableau resterait lisible en
+  clair pendant toute la partie.
+- Cas notables : `Caesar` masque « Kaiser » **et** « Zar » — en allemand le mot est encore le
+  titre impérial courant, donc le laisser visible désignerait la persona immédiatement.
+  `Cendrillon` et `Ella` masquent tous deux « Aschenputtel », étant deux fiches du même
+  personnage pour la même manieuse.
+
+Les 6 garde-fous du test tournent désormais sur **quatre** langues.
+
+### Reste
+
+IT et PT.
+
 ## 2026-08-15 — feat(expert): fiches Personae en espagnol
 
 Première des quatre langues restantes. **137 fiches**, 75 à 113 mots (moyenne 94) — même
