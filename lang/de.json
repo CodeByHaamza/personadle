@@ -121,7 +121,16 @@
       "closing": "✨ Lass deine Intuition dich leiten... und lies zwischen den Emojis 🧠📲",
       "not_in_database": "\"{{name}}\" ist nicht in der Datenbank.",
       "correct": "✅ Richtig! Es war {{name}}!",
-      "giveup_reveal": "Du hast aufgegeben! Die Antwort war: {{name}}"
+      "giveup_reveal": "Du hast aufgegeben! Die Antwort war: {{name}}",
+      "expert_goal": "⚡ Expertenmodus:",
+      "expert_goal_text": "Dieselben Emojis, gleich enthüllt — nur lügt eines davon.",
+      "expert_tips": "💡 Tipps:",
+      "expert_tip_1": "Genau ein Emoji ist ein Köder, von einer anderen Figur geborgt.",
+      "expert_tip_2": "Es kann an beliebiger Stelle stehen — vorne, in der Mitte oder hinten.",
+      "expert_tip_3": "Es ändert sich während der Runde nie, und Neuladen würfelt es nicht neu.",
+      "expert_tip_4": "Die echten Emojis werden am Rundenende gezeigt.",
+      "expert_tip_5": "Du hast 5 Versuche, bevor der Aufgeben-Knopf freigeschaltet wird.",
+      "expert_tip_6": "Der Expertenmodus hat seine eigene Tagesfigur und eigene Statistiken. Er zählt nicht für deine normale Emoji-Serie."
     },
     "silhouette": {
       "name": "Silhouette",

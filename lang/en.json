@@ -121,7 +121,16 @@
       "closing": "✨ Let your intuition guide you... and read between the emojis 🧠📲",
       "not_in_database": "\"{{name}}\" is not in the database.",
       "correct": "✅ Correct! It was {{name}}!",
-      "giveup_reveal": "You gave up! The answer was: {{name}}"
+      "giveup_reveal": "You gave up! The answer was: {{name}}",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "Same emojis, revealed the same way — except one of them is lying.",
+      "expert_tips": "💡 Tips:",
+      "expert_tip_1": "Exactly one emoji is a decoy, borrowed from another character.",
+      "expert_tip_2": "It can sit anywhere in the sequence — first, middle or last.",
+      "expert_tip_3": "It never changes during the round, and reloading will not reroll it.",
+      "expert_tip_4": "The real emojis are shown when the round ends.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily character and its own stats. It will not carry your normal Emoji streak."
     },
     "silhouette": {
       "name": "Silhouette",

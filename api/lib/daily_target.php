@@ -109,6 +109,14 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
                 $pools['classic_expert']['pool'] ?? [], 'ClassicExpert', $playedDate, $seedId
             );
 
+        // Émoji Expert : même roster que le mode normal — l'indice change (un des
+        // émojis affichés est un leurre), pas le pool. Clé de hash distincte pour
+        // que le tirage soit indépendant.
+        case 'emoji_expert':
+            return personadle_pick_from_pool(
+                $pools['emoji']['pool'] ?? [], 'EmojiExpert', $playedDate, $seedId
+            );
+
         // Silhouette Expert : MÊME roster que le mode normal — seul l'indice change
         // (dézoom figé au maximum). On réutilise donc le pool `silhouette` avec une
         // clé de hash distincte, plutôt que d'en dupliquer 157 entrées dans le JSON

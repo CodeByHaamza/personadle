@@ -629,7 +629,6 @@ function resetGame(random = false) {
   input.value = "";
   document.getElementById("guessButton").disabled = false;
   setGiveUpEnabled(false);
-  document.getElementById("giveUpButton").style.cursor = "not-allowed";
   if (wrongListEl) wrongListEl.innerHTML = "";
 
   initializeAutocomplete(input, personas);
@@ -670,7 +669,6 @@ function disableInputs() {
   document.getElementById("textbar").disabled = true;
   document.getElementById("guessButton").disabled = true;
   setGiveUpEnabled(false);
-  document.getElementById("giveUpButton").style.cursor = "not-allowed";
 }
 
 /**
@@ -842,7 +840,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     textbar.value = "";
     textbar.disabled = false;
     setGiveUpEnabled(false);
-    document.getElementById("giveUpButton").style.cursor = "not-allowed";
     initializeAutocomplete(textbar, personas);
   });
   activeOpusFilters = _filterApi.getActive();
@@ -891,7 +888,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (attempts >= GIVE_UP_THRESHOLD) {
       setGiveUpEnabled(true);
-      document.getElementById("giveUpButton").style.cursor = "pointer";
     }
   } else {
     target = getBetterRandomCharacter();

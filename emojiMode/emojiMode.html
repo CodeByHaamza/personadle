@@ -500,6 +500,13 @@
     </div>
     <!-- Rules Modal -->
     <!-- Rules Modal -->
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1). -->
+    <div class="expert-toggle-zone">
+      <a href="emojiMode.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <div id="rulesModal" class="modal" style="display: none">
       <div class="modal-content">
         <span class="close">&times;</span>
@@ -507,7 +514,40 @@
 
         <!-- Règles : câblées sur les clés JSON (modes.emoji.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <!-- Règles Expert — bloc distinct, affiché par setupExpertToggle(). -->
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.emoji.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.emoji.expert_goal_text">
+            Same emojis, revealed the same way — except one of them is lying.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.emoji.expert_tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.emoji.expert_tip_1">
+              Exactly one emoji is a decoy, borrowed from another character.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_2">
+              It can sit anywhere in the sequence — first, middle or last.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_3">
+              It never changes during the round, and reloading will not reroll it.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_4">
+              The real emojis are shown when the round ends.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_6">
+              Expert has its own daily character and its own stats. It will not carry your
+              normal Emoji streak.
+            </li>
+          </ul>
+        </div>
+
+        <div id="rulesNormal">
           <strong data-i18n="modes.emoji.goal">🎯 Goal:</strong><br />
           <span data-i18n="modes.emoji.goal_text"
             >Guess which Persona character is being described by a sequence of emojis 🤔📱.</span

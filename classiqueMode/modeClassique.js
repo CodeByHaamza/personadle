@@ -756,7 +756,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     hintButton.disabled = true;
     hintButton.style.cursor = "not-allowed";
     setGiveUpEnabled(false);
-    giveUpButton.style.cursor = "not-allowed";
     giveUpButton.style.pointerEvents = "auto";
     giveUpButton.style.opacity = "1";
     giveUpCounter.textContent = `(0 / ${GIVE_UP_THRESHOLD})`;

@@ -464,8 +464,7 @@ function handleGuess() {
   giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
 
   if (attempts >= maxAttempts) {
-    giveUpBtn.disabled = false;
-    giveUpBtn.style.cursor = "pointer";
+    setGiveUpEnabled(true);
     giveUpCounter.classList.add("activated");
   }
 
@@ -531,7 +530,6 @@ function resetGame(random = false) {
   giveUpCounter.textContent = `(0 / ${maxAttempts})`;
   giveUpCounter.classList.remove("activated");
   setGiveUpEnabled(false);
-  giveUpBtn.style.cursor = "not-allowed";
   textbar.disabled = false;
   guessBtn.disabled = false;
   wrongList.innerHTML = "";
@@ -618,8 +616,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
       if (attempts >= maxAttempts) {
-        giveUpBtn.disabled = false;
-        giveUpBtn.style.cursor = "pointer";
+        setGiveUpEnabled(true);
         giveUpCounter.classList.add("activated");
       }
 

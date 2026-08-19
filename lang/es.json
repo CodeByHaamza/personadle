@@ -121,7 +121,16 @@
       "closing": "✨ Deja que tu intuición te guíe... y lee entre los emojis 🧠📲",
       "not_in_database": "\"{{name}}\" no está en la base de datos.",
       "correct": "✅ ¡Correcto! ¡Era {{name}}!",
-      "giveup_reveal": "¡Te rendiste! La respuesta era: {{name}}"
+      "giveup_reveal": "¡Te rendiste! La respuesta era: {{name}}",
+      "expert_goal": "⚡ Modo Experto:",
+      "expert_goal_text": "Los mismos emojis, revelados igual… salvo que uno de ellos miente.",
+      "expert_tips": "💡 Consejos:",
+      "expert_tip_1": "Exactamente un emoji es un señuelo, tomado de otro personaje.",
+      "expert_tip_2": "Puede estar en cualquier posición: al principio, en medio o al final.",
+      "expert_tip_3": "No cambia durante la partida, y recargar no lo vuelve a sortear.",
+      "expert_tip_4": "Los emojis reales se muestran al terminar la partida.",
+      "expert_tip_5": "Tienes 5 intentos antes de que se active el botón Rendirse.",
+      "expert_tip_6": "El Experto tiene su propio personaje diario y sus propias estadísticas. No cuenta para tu racha de Emoji normal."
     },
     "silhouette": {
       "name": "Silueta",

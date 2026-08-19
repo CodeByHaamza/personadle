@@ -20,6 +20,8 @@ import {
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  expertContext,
+  setupExpertToggle,
   setGiveUpEnabled,
   characterMatchesActiveOpus,
   updateCounterElement,
@@ -40,8 +42,31 @@ import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 
 const modeName = "Emoji";
 
-/** Minimum attempts before the Give-Up button activates. */
-const GIVE_UP_THRESHOLD = 8;
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE EXPERT — un émoji ment
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Le mode normal révèle les émojis un par un, tous authentiques. L'Expert garde
+// exactement la même révélation progressive, mais **un seul** des émojis affichés
+// est un leurre emprunté à un autre personnage, à une position quelconque.
+//
+// Le joueur ne sait pas lequel ment, ni s'il l'a déjà vu. C'est ce doute qui fait
+// la difficulté : sans lui, montrer les mêmes émojis serait simplement le mode
+// normal avec moins d'essais.
+const EXPERT = expertContext({
+  prefix: "emojiExpert",
+  statsKey: modeName,
+  hashMode: modeName,
+});
+
+/** Personnages jouables : ceux qui ont des émojis. Hissé au niveau module —
+ *  displayedEmojis() en a besoin pour puiser un leurre chez un autre personnage,
+ *  et c'est une simple dérivation de `characters`, sans état. */
+const ALL_EMOJI_CHARS = characters.filter((c) => c.emoji);
+
+/** Minimum attempts before the Give-Up button activates.
+ *  5 en Expert, aligné sur les autres modes Expert. */
+const GIVE_UP_THRESHOLD = EXPERT.isExpert ? 5 : 8;
 
 /** All specific opus codes available in Emoji mode. */
 const ALL_OPUS = [
@@ -81,7 +106,7 @@ let autocompleteBound = false;
 
 /** Returns today's stats key for this mode (recalculated fresh each time). */
 function getTodayStatsKey() {
-  return `statsLogged_${modeName}_${parisDateKey()}`;
+  return `statsLogged_${EXPERT.statsKey}_${parisDateKey()}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -232,6 +257,47 @@ function initializeAutocomplete(element, sourceArray) {
 // UI HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
+
+/**
+ * Émojis affichés pour la cible : les vrais en mode normal, un leurre glissé
+ * parmi eux en Expert.
+ *
+ * **Déterministe** : le leurre et sa position sont tirés avec le même hash seedé
+ * que la cible du jour (`getDailyTarget`), donc stables pour un joueur et une
+ * date. Un tirage aléatoire à chaque rendu se serait re-roulé à chaque
+ * rechargement, et le joueur aurait identifié l'intrus par simple élimination.
+ *
+ * Le leurre vient d'un AUTRE personnage — pas d'un émoji inventé : un intrus
+ * plausible est plus dur à repérer qu'un symbole hors sujet.
+ *
+ * @returns {string[]} liste à afficher (longueur inchangée)
+ */
+function displayedEmojis() {
+  const vrais = target?.emoji ?? [];
+  if (!EXPERT.isExpert || vrais.length === 0) return vrais;
+
+  // Émojis des autres personnages, dédoublonnés et privés de ceux de la cible :
+  // un « leurre » que la cible possède déjà ne mentirait pas.
+  const siens = new Set(vrais);
+  const candidats = [
+    ...new Set(ALL_EMOJI_CHARS.filter((c) => c.nom !== target.nom).flatMap((c) => c.emoji ?? [])),
+  ]
+    .filter((e) => !siens.has(e))
+    .sort(); // ordre stable : le hash indexe une liste, elle ne doit pas bouger
+
+  if (candidats.length === 0) return vrais;
+
+  const leurre = getDailyTarget(candidats, `${EXPERT.hashMode}Decoy`);
+  const slot = getDailyTarget(
+    vrais.map((_, i) => String(i)),
+    `${EXPERT.hashMode}Slot`
+  );
+
+  const sortie = [...vrais];
+  sortie[Number(slot)] = leurre;
+  return sortie;
+}
+
 /**
  * Reveals emoji hints one by one based on the number of attempts so far.
  * Each incorrect guess unveils the next emoji in the sequence.
@@ -239,7 +305,9 @@ function initializeAutocomplete(element, sourceArray) {
 function updateEmojiHint() {
   const displayZone = document.getElementById("emojiDisplay");
   displayZone.innerHTML = "";
-  target.emoji.slice(0, attempts).forEach((e) => {
+  displayedEmojis()
+    .slice(0, attempts)
+    .forEach((e) => {
     const span = document.createElement("span");
     span.textContent = e;
     span.classList.add("emoji-unit");
@@ -292,8 +360,8 @@ function checkEmojiGuess(name, forceReveal = false) {
       displayZone.appendChild(span);
     });
 
-    localStorage.setItem("emojiGameOver", "true");
-    localStorage.setItem("emojiForceReveal", String(forceReveal));
+    localStorage.setItem(EXPERT.key("emojiGameOver"), "true");
+    localStorage.setItem(EXPERT.key("emojiForceReveal"), String(forceReveal));
 
     // Show character portrait in victory box
     const imageName = portraitsMap[target.nom] || target.nom.split(" ")[0];
@@ -314,7 +382,7 @@ function checkEmojiGuess(name, forceReveal = false) {
     // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
     const wasChallengePlay = isChallengePlay("emoji");
     if (!forceReveal)
-      showChallengeButton(
+      if (!EXPERT.isExpert) showChallengeButton(
         "emoji",
         attempts,
         // Seuls les persos AVEC données emoji sont jouables comme cible de défi.
@@ -349,11 +417,12 @@ function checkEmojiGuess(name, forceReveal = false) {
     if (!wasChallengePlay && !localStorage.getItem(todayKey)) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       const result = forceReveal ? "giveup" : "win";
-      updateProfileStats({ result, mode: modeName, timeSpent });
+      if (!EXPERT.isExpert) updateProfileStats({ result, mode: modeName, timeSpent });
       savePendingSession(
         buildGameSession({
           mode: modeName,
           targetName: target.nom,
+        isExpert: EXPERT.isExpert,
           result,
           attempts,
           timeMs: timeSpent * 1000,
@@ -366,8 +435,8 @@ function checkEmojiGuess(name, forceReveal = false) {
     document.getElementById("guessButton").disabled = true;
     setGiveUpEnabled(false);
     gameOver = true;
-    localStorage.setItem("emojiWin", "true");
-    checkUnlocksAfterGame(modeName);
+    localStorage.setItem(EXPERT.key("emojiWin"), "true");
+    if (!EXPERT.isExpert) checkUnlocksAfterGame(modeName);
   } else {
     // Wrong guess: show mini portrait + increment
     const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
@@ -377,7 +446,7 @@ function checkEmojiGuess(name, forceReveal = false) {
       wrongList
     );
     attempts++;
-    localStorage.setItem("attemptsEmoji", attempts);
+    localStorage.setItem(EXPERT.key("attemptsEmoji"), attempts);
     updateEmojiHint();
     updateCounters();
     if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
@@ -412,7 +481,6 @@ function resetGame() {
   textbar.value = "";
   document.getElementById("guessButton").disabled = false;
   setGiveUpEnabled(false);
-  document.getElementById("giveUpButton").style.cursor = "not-allowed";
 
   const pool = filterCharacterPool();
   // Mutate the shared personas array so the autocomplete stays in sync
@@ -425,8 +493,8 @@ function resetGame() {
   const _emojiCandidates =
     pool.length > 1 && _prevEmoji ? pool.filter((c) => c.nom !== _prevEmoji.nom) : pool;
   target = _emojiCandidates[Math.floor(Math.random() * _emojiCandidates.length)] || pool[0];
-  if (target) localStorage.setItem("targetEmoji", JSON.stringify(target));
-  localStorage.setItem("attemptsEmoji", attempts);
+  if (target) localStorage.setItem(EXPERT.key("targetEmoji"), JSON.stringify(target));
+  localStorage.setItem(EXPERT.key("attemptsEmoji"), attempts);
 
   updateEmojiHint();
   updateCounters();
@@ -460,6 +528,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (window.__i18nReady) await window.__i18nReady;
   applyDarkModeStyles();
   setupRulesModal();
+  setupExpertToggle(EXPERT, "emojiMode.html");
 
   const textbar = document.getElementById("textbar");
   const guessButton = document.getElementById("guessButton");
@@ -481,13 +550,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Restore or create target / attempts ──
   // Daily target uses seeded RNG so all players get the same character today.
   // Pool is all characters with emoji data (regardless of active opus filters).
-  const ALL_EMOJI_CHARS = characters.filter((c) => c.emoji);
-  const _rawEmoji = localStorage.getItem("targetEmoji");
+  const _rawEmoji = localStorage.getItem(EXPERT.key("targetEmoji"));
   let _savedEmoji = null;
   try {
     if (_rawEmoji && _rawEmoji !== "undefined") _savedEmoji = JSON.parse(_rawEmoji);
   } catch {}
-  target = _savedEmoji || getDailyTarget(ALL_EMOJI_CHARS, "Emoji");
+  target = _savedEmoji || getDailyTarget(ALL_EMOJI_CHARS, EXPERT.hashMode);
 
   // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du
   // jour. Persistée dans targetEmoji (état wipé à l'acceptation) → un refresh
@@ -498,9 +566,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (_ct) target = _ct;
   }
 
-  attempts = parseInt(localStorage.getItem("attemptsEmoji")) || 1;
-  localStorage.setItem("targetEmoji", JSON.stringify(target));
-  localStorage.setItem("attemptsEmoji", attempts);
+  attempts = parseInt(localStorage.getItem(EXPERT.key("attemptsEmoji"))) || 1;
+  localStorage.setItem(EXPERT.key("targetEmoji"), JSON.stringify(target));
+  localStorage.setItem(EXPERT.key("attemptsEmoji"), attempts);
 
   // Bind autocomplete (single bind; personas mutated on wrong guess)
   initializeAutocomplete(textbar, personas);
@@ -510,8 +578,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
 
   // Restore finished game state
-  if (localStorage.getItem("emojiGameOver") === "true" && target?.nom) {
-    checkEmojiGuess(target.nom, localStorage.getItem("emojiForceReveal") === "true");
+  if (localStorage.getItem(EXPERT.key("emojiGameOver")) === "true" && target?.nom) {
+    checkEmojiGuess(target.nom, localStorage.getItem(EXPERT.key("emojiForceReveal")) === "true");
   }
 
   // ── Guess button ──
@@ -531,11 +599,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Replay button ──
   resetButton.addEventListener("click", () => {
-    localStorage.removeItem("targetEmoji");
-    localStorage.removeItem("attemptsEmoji");
-    localStorage.removeItem("emojiGameOver");
-    localStorage.removeItem("emojiForceReveal");
-    localStorage.removeItem("emojiWin");
+    localStorage.removeItem(EXPERT.key("targetEmoji"));
+    localStorage.removeItem(EXPERT.key("attemptsEmoji"));
+    localStorage.removeItem(EXPERT.key("emojiGameOver"));
+    localStorage.removeItem(EXPERT.key("emojiForceReveal"));
+    localStorage.removeItem(EXPERT.key("emojiWin"));
     // Aligne Emoji sur les 5 autres modes : le replay efface aussi la garde
     // stats du jour, pour qu'une victoire en replay soit envoyée au backend
     // (qui upgrade un éventuel giveup→win — décision produit 2026-07-17).
@@ -545,11 +613,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Daily reset ──
   checkResetOnLoad("lastPlayedDate_Emoji", "Emoji", () => {
-    localStorage.removeItem("targetEmoji");
-    localStorage.removeItem("attemptsEmoji");
-    localStorage.removeItem("emojiGameOver");
-    localStorage.removeItem("emojiForceReveal");
-    localStorage.removeItem("emojiWin");
+    localStorage.removeItem(EXPERT.key("targetEmoji"));
+    localStorage.removeItem(EXPERT.key("attemptsEmoji"));
+    localStorage.removeItem(EXPERT.key("emojiGameOver"));
+    localStorage.removeItem(EXPERT.key("emojiForceReveal"));
+    localStorage.removeItem(EXPERT.key("emojiWin"));
     resetGame();
   });
 

@@ -252,7 +252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     giveUpCounter.textContent = `(${Math.min(attempts, giveUpThreshold())} / ${giveUpThreshold()})`;
     if (attempts >= giveUpThreshold()) {
-      giveUpBtn.disabled = false;
+      setGiveUpEnabled(true);
       giveUpCounter.classList.add("activated");
     }
 
@@ -673,7 +673,7 @@ function handleGuess() {
   giveUpCounter.textContent = `(${Math.min(attempts, giveUpThreshold())} / ${giveUpThreshold()})`;
 
   if (attempts >= giveUpThreshold()) {
-    giveUpBtn.disabled = false;
+    setGiveUpEnabled(true);
     giveUpCounter.classList.add("activated");
   }
 

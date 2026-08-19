@@ -546,7 +546,7 @@ function handleGuess() {
   giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
 
   if (attempts >= maxAttempts) {
-    giveUpBtn.disabled = false;
+    setGiveUpEnabled(true);
     giveUpCounter.classList.add("activated");
   }
 
@@ -706,7 +706,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       personaImg.alt = target.persona;
 
       if (attempts >= maxAttempts) {
-        giveUpBtn.disabled = false;
+        setGiveUpEnabled(true);
         giveUpCounter.classList.add("activated");
       }
 

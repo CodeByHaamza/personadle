@@ -113,6 +113,57 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): Mode Émoji Expert + bouton Abandonner resté grisé
+
+### Émoji Expert — un émoji ment
+
+Le mode normal révèle les émojis un par un, tous authentiques. L'Expert garde exactement la
+même révélation progressive, mais **un seul** des émojis affichés est un leurre emprunté à un
+autre personnage, à une position quelconque. Le joueur ne sait ni lequel ment, ni s'il l'a
+déjà vu — c'est ce doute qui fait la difficulté. Montrer les mêmes émojis sans mentir aurait
+juste été le mode normal avec moins d'essais.
+
+- `displayedEmojis()` produit la liste affichée. **Le leurre et sa position sont
+  déterministes** : tirés avec le même hash seedé que la cible du jour (`getDailyTarget`),
+  donc stables pour un joueur et une date. Un tirage aléatoire à chaque rendu se serait
+  re-roulé à chaque rechargement, et le joueur aurait identifié l'intrus par simple
+  élimination — le mode aurait perdu tout son sens. Un test E2E recharge la page et compare.
+- Le leurre est puisé chez les **autres** personnages, en excluant ceux que la cible possède
+  déjà : un « leurre » qu'elle a réellement ne mentirait pas. La liste candidate est triée
+  pour que l'index du hash reste stable.
+- La longueur de la séquence ne change pas — un émoji est **remplacé**, pas ajouté.
+- Fin de partie : le chemin de révélation utilise `target.emoji`, donc les vrais émojis
+  reviennent d'eux-mêmes. Vérifié par un test.
+- `ALL_EMOJI_CHARS` hissé au niveau module (il était local à l'init) : `displayedEmojis()` en
+  a besoin pour puiser le leurre.
+- Serveur : cas `emoji_expert` réutilisant le pool `emoji` avec la clé de hash `EmojiExpert`,
+  et `emoji` ajouté à la liste des modes acceptant `is_expert`.
+- 7 clés i18n × 6 langues. Seuil d'abandon à 5, comme les autres modes Expert.
+
+### Bouton Abandonner resté grisé — régression de mon propre correctif
+
+Signalement de Hamza en Personae : passé le seuil, le bouton restait grisé avec le curseur
+« interdit », **tout en fonctionnant au clic**.
+
+Cause : le correctif d'accessibilité de la veille avait converti les endroits qui
+**verrouillent** le bouton (`setGiveUpEnabled(false)`) mais pas ceux qui le **déverrouillent**.
+Music, Personae et Silhouette faisaient encore `giveUpBtn.disabled = false` — sans effet sur un
+`<div>`, et surtout sans lever l'`aria-disabled` sur lequel le nouveau CSS s'appuie. Le verrou
+visuel restait donc en place alors que le handler, lui, acceptait le clic.
+
+Neuf sites convertis, plus cinq écritures de curseur devenues redondantes (le helper s'en
+charge). Vérifié sur **les 6 modes** en navigateur : `aria-disabled` passe bien de `true` à
+`false` au franchissement du seuil.
+
+Détail relevé au passage : en Émoji, une réponse inventée n'incrémente pas le compteur
+(`checkEmojiGuess` sort avant), contrairement aux autres modes. Ma première sonde utilisait de
+faux noms et concluait à tort que le bouton restait bloqué.
+
+### Tests
+
+6 E2E Émoji. 29 tests E2E au total revérifiés sans régression, 689 Vitest, 193 PHPUnit.
+`CACHE_VERSION` → `personadle-v87`.
+
 ## 2026-08-15 — fix(expert): bouton Rejouer inopérant en Classique Expert
 
 Trois défauts cumulés, tous sur le chemin du replay.

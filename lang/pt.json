@@ -121,7 +121,16 @@
       "closing": "✨ Deixa a tua intuição guiar-te... e lê nas entrelinhas dos emojis 🧠📲",
       "not_in_database": "\"{{name}}\" não está na base de dados.",
       "correct": "✅ Correto! Era {{name}}!",
-      "giveup_reveal": "Desististe! A resposta era: {{name}}"
+      "giveup_reveal": "Desististe! A resposta era: {{name}}",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "Os mesmos emojis, revelados da mesma forma — só que um deles mente.",
+      "expert_tips": "💡 Dicas:",
+      "expert_tip_1": "Exatamente um emoji é um engodo, emprestado de outra personagem.",
+      "expert_tip_2": "Pode estar em qualquer posição: no início, no meio ou no fim.",
+      "expert_tip_3": "Não muda durante a partida, e recarregar não o volta a sortear.",
+      "expert_tip_4": "Os emojis verdadeiros são mostrados no fim da partida.",
+      "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_6": "O Especialista tem a própria personagem do dia e as próprias estatísticas. Não conta para a tua sequência de Emoji normal."
     },
     "silhouette": {
       "name": "Silhueta",

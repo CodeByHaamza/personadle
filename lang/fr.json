@@ -121,7 +121,16 @@
       "closing": "✨ Laissez votre intuition vous guider... et lisez entre les emojis 🧠📲",
       "not_in_database": "\"{{name}}\" n'est pas dans la base de données.",
       "correct": "✅ Correct ! C'était {{name}} !",
-      "giveup_reveal": "Vous avez abandonné ! La réponse était : {{name}}"
+      "giveup_reveal": "Vous avez abandonné ! La réponse était : {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Les mêmes émojis, révélés de la même façon — sauf qu'il y en a un qui ment.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Exactement un émoji est un leurre, emprunté à un autre personnage.",
+      "expert_tip_2": "Il peut se trouver n'importe où dans la séquence — au début, au milieu ou à la fin.",
+      "expert_tip_3": "Il ne change jamais pendant la partie, et recharger ne le retire pas au sort.",
+      "expert_tip_4": "Les vrais émojis sont affichés à la fin de la partie.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Émoji normale."
     },
     "silhouette": {
       "name": "Silhouette",

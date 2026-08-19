@@ -121,7 +121,16 @@
       "closing": "✨ Lascia che la tua intuizione ti guidi... e leggi tra gli emoji 🧠📲",
       "not_in_database": "\"{{name}}\" non è nel database.",
       "correct": "✅ Corretto! Era {{name}}!",
-      "giveup_reveal": "Ti sei arreso! La risposta era: {{name}}"
+      "giveup_reveal": "Ti sei arreso! La risposta era: {{name}}",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "Gli stessi emoji, rivelati allo stesso modo — solo che uno mente.",
+      "expert_tips": "💡 Consigli:",
+      "expert_tip_1": "Esattamente un emoji è un'esca, presa in prestito da un altro personaggio.",
+      "expert_tip_2": "Può trovarsi in qualsiasi posizione: all'inizio, in mezzo o alla fine.",
+      "expert_tip_3": "Non cambia durante la partita, e ricaricare non lo riestrae.",
+      "expert_tip_4": "Gli emoji veri vengono mostrati a fine partita.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie Emoji normale."
     },
     "silhouette": {
       "name": "Silhouette",
