@@ -113,6 +113,32 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — feat(expert): fiches Personae en espagnol
+
+Première des quatre langues restantes. **137 fiches**, 75 à 113 mots (moyenne 94) — même
+calibre que l'anglais et le français.
+
+### Détails techniques
+
+- `personaeMode/database/expert_lore/es.json`. Aucun code à changer : le mode charge déjà
+  `expert_lore/<lang>.json` selon `window.i18n.getCurrentLang()`, avec repli sur l'anglais.
+  Ajouter le fichier suffit à rendre le mode jouable en espagnol.
+- **Les tableaux `mask` sont propres à l'espagnol**, pas recopiés de l'anglais. Le texte y
+  emploie très souvent une autre forme du nom — « Apolo » et non « Apollo », « Tánatos »,
+  « Radamantis », « Cerbero », « Astarté », « Cenicienta », « Ío ». `maskTerms()` ne normalise
+  pas les diacritiques : une forme accentuée absente du tableau resterait visible en clair
+  pendant toute la partie.
+- Cas particuliers de masquage traités : `Caesar` masque aussi « Káiser » et « Zar » (le texte
+  raconte la survivance du mot), `Messiah` masque « Cristo », `Cendrillon` et `Ella` se masquent
+  mutuellement puisque ce sont deux fiches du même personnage pour la même manieuse.
+- Les 6 garde-fous du test tournent désormais sur **trois** langues : couverture identique,
+  longueur jouable, aucun masque pré-appliqué, aucune fuite du nom après masquage, chaque
+  fiche se nomme, roster complet.
+
+### Reste
+
+DE, IT et PT — même volume, même méthode. L'anglais reste la source de vérité.
+
 ## 2026-08-15 — feat(expert): Mode Personae Expert (front + back)
 
 Cinquième mode Expert. Le contenu attendait depuis trois lots : 137 fiches EN + FR, roster

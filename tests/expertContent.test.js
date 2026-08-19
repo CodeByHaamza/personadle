@@ -8,11 +8,12 @@ import { getDailyTarget } from "../js/gameCore.js";
 import { expertWielders, expertLoreEntries } from "../personaeMode/database/expert_lore/wielders.js";
 import loreEn from "../personaeMode/database/expert_lore/en.json";
 import loreFr from "../personaeMode/database/expert_lore/fr.json";
+import loreEs from "../personaeMode/database/expert_lore/es.json";
 
-const LORE = { en: loreEn, fr: loreFr };
+const LORE = { en: loreEn, fr: loreFr, es: loreEs };
 const loadLore = (lang) => LORE[lang];
 
-const LANGS = ["en", "fr"];
+const LANGS = ["en", "fr", "es"];
 
 // Une fuite, c'est le terme présent en tant que MOT — pas en sous-chaîne : « Christ »
 // dans « Christianity » n'en est pas une, et maskTerms() ne le masque pas non plus.
