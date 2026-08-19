@@ -19,6 +19,7 @@ import {
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  showWrongMini,
   setGiveUpEnabled,
   characterMatchesActiveOpus,
   updateCounterElement,
@@ -339,43 +340,29 @@ function fillVictoryBox(nom, isGiveup) {
 
 
 /**
- * Rend une tentative en Mode Expert : portrait, nom, verdict. Rien d'autre.
+ * Rend une tentative ratée en Mode Expert.
  *
- * Le mode normal aligne sept attributs en grille ; ici il n'y a rien à comparer,
- * donc rien à aligner. Chaque essai est une fiche autonome, la plus récente en
- * haut — le joueur relit sa liste, il ne lit pas un tableau.
+ * Même présentation que l'historique d'erreurs du mode Émoji : une vignette du
+ * portrait qui tremble, via `showWrongMini()` (js/gameCore.js). Pas de composant
+ * propre — la grille de comparaison n'a aucun sens ici, mais réinventer une liste
+ * d'erreurs alors que le jeu en a déjà une n'en avait pas davantage.
  *
- * @param {HTMLElement} output       conteneur #output
- * @param {Object}      guess        personnage proposé
- * @param {Object}      target       cible secrète
- * @param {boolean}     forceReveal  true en abandon : la cible est montrée comme trouvée
+ * Une bonne réponse n'y figure pas : elle termine la partie et la boîte de victoire
+ * prend le relais, exactement comme en Émoji.
+ *
+ * @param {Object}  guess        personnage proposé
+ * @param {Object}  target       cible secrète
+ * @param {boolean} forceReveal  true en abandon
  */
-function renderExpertGuess(output, guess, target, forceReveal) {
-  const juste = guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal;
-
-  const fiche = document.createElement("div");
-  fiche.className = `expert-guess ${juste ? "expert-guess--right" : "expert-guess--wrong"}`;
+function renderExpertGuess(guess, target, forceReveal) {
+  if (guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal) return;
 
   const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
-  const img = document.createElement("img");
-  img.src = `../database/portraits/${encodeURIComponent(imageName)}.webp`;
-  img.alt = guess.nom;
-  img.className = "expert-guess-portrait";
-
-  const nom = document.createElement("span");
-  nom.className = "expert-guess-name";
-  nom.textContent = guess.nom;
-
-  const verdict = document.createElement("span");
-  verdict.className = "expert-guess-verdict";
-  // Symbole ET couleur : en daltonien la couleur seule ne suffit pas, et ici il
-  // n'y a que deux états — autant les rendre lisibles sans elle dans tous les cas.
-  verdict.textContent = juste ? "✔" : "✖";
-  verdict.setAttribute("aria-label", juste ? "correct" : "incorrect");
-
-  fiche.append(img, nom, verdict);
-  // Plus récent en haut : le joueur n'a pas à scroller pour voir son dernier essai.
-  output.insertBefore(fiche, output.firstChild);
+  showWrongMini(
+    `../database/portraits/${encodeURIComponent(imageName)}.webp`,
+    guess.nom,
+    document.getElementById("wrongGuessList")
+  );
 }
 
 /**
@@ -395,128 +382,37 @@ function checkGuess(name, target, forceReveal = false) {
     return;
   }
 
-  // ── Mode Expert : liste de tentatives, pas un tableau ─────────────────────
-  // Rien à comparer, donc rien à aligner en colonnes : un en-tête de catégories
-  // au-dessus d'une seule colonne « Nom » n'a aucun sens. On rend une simple
-  // fiche par essai. Les attributs ne sont ni affichés ni construits dans le DOM —
-  // les masquer en CSS les laisserait lisibles dans l'inspecteur.
-  if (EXPERT.isExpert) {
-    renderExpertGuess(output, guess, target, forceReveal);
-    return;
-  }
-
-  // Insert column headers on first guess
-  if (!document.querySelector(".category-row")) {
-    const i = window.i18n || { t: (k) => k };
-    const categoryRow = document.createElement("div");
-    categoryRow.classList.add("category-row");
-    categoryRow.innerHTML = `
-      <div></div>
-      <div class="tooltip">${i.t("modes.classic.label_name")}<span class="tooltip-text">${i.t("modes.classic.tooltip_name")}</span></div>
-      <div class="tooltip">${i.t("modes.classic.label_gender")}<span class="tooltip-text">${i.t("modes.classic.tooltip_gender")}</span></div>
-      <div class="tooltip">${i.t("modes.classic.label_age")}<span class="tooltip-text">${i.t("modes.classic.tooltip_age")}</span></div>
-      <div class="tooltip">${i.t("modes.classic.label_persona_user")}<span class="tooltip-text">${i.t("modes.classic.tooltip_persona_user")}</span></div>
-      <div class="tooltip">${i.t("modes.classic.label_persona")}<span class="tooltip-text">${i.t("modes.classic.tooltip_persona")}</span></div>
-      <div class="tooltip">${i.t("modes.classic.label_arcana")}<span class="tooltip-text">${i.t("modes.classic.tooltip_arcana")}</span></div>
-      <div class="tooltip">${i.t("modes.classic.label_game")}<span class="tooltip-text">${i.t("modes.classic.tooltip_game")}</span></div>`;
-    output.insertBefore(categoryRow, output.firstChild);
-  }
-
-  const row = document.createElement("div");
-  row.classList.add("guess-row");
-
-  // Portrait image
-  const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
-  const img = document.createElement("img");
-  img.src = `../database/portraits/${encodeURIComponent(imageName)}.webp`;
-  img.alt = guess.nom;
-  img.className = "guess-image";
-  row.appendChild(img);
-
-  const keysToCompare = ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
-  const i18 = window.i18n || { t: (k) => k };
-  // Labels affichés sur mobile via CSS ::before (data-label)
-  const keyLabels = {
-    nom: i18.t("modes.classic.label_name"),
-    genre: i18.t("modes.classic.label_gender"),
-    age: i18.t("modes.classic.label_age"),
-    personaUser: i18.t("modes.classic.label_persona_user"),
-    persona: i18.t("modes.classic.label_persona"),
-    arcane: i18.t("modes.classic.label_arcana"),
-    opus: i18.t("modes.classic.label_game"),
-  };
   const isWin = guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal;
 
-  keysToCompare.forEach((key, index) => {
-    const cell = document.createElement("div");
-    cell.classList.add("guess-cell");
-    cell.dataset.label = keyLabels[key] || key; // Pour l'affichage mobile ::before
-
-    const value = guess[key];
-    const targetVal = target[key];
-    let displayValue;
-
-    // Traduit une valeur atomique (genre ou arcane) via i18n
-    const translateAtom = (ns, v) => {
-      const translated = i18.t(`data.${ns}.${v}`);
-      // Si la clé n'existe pas, t() retourne la clé brute → garder la valeur d'origine
-      return translated === `data.${ns}.${v}` ? v : translated;
-    };
-
-    if (typeof value === "boolean") {
-      displayValue = value ? i18.t("ui.yes") : i18.t("ui.no");
-    } else if (key === "genre") {
-      const vals = Array.isArray(value) ? value : [value];
-      displayValue = vals.map((v) => translateAtom("genre", v)).join(", ");
-    } else if (key === "arcane") {
-      const vals = Array.isArray(value) ? value : [value];
-      displayValue = vals.map((v) => translateAtom("arcane", v)).join(", ");
-    } else {
-      displayValue = Array.isArray(value) ? value.join(", ") : value;
+  // ── Mode Expert : historique d'erreurs, pas de tableau ────────────────────
+  // Rien à comparer, donc rien à aligner en colonnes. Les attributs ne sont ni
+  // affichés ni construits dans le DOM — les masquer en CSS les laisserait
+  // lisibles dans l'inspecteur.
+  //
+  // ⚠️ On saute la GRILLE, pas la fin de partie : la victoire, ses confettis et
+  // l'enregistrement de session vivent dans le `if (isWin)` commun plus bas.
+  if (EXPERT.isExpert) {
+    renderExpertGuess(guess, target, forceReveal);
+    removeFromAutocomplete(personas, guess.nom);
+  } else {
+    // Insert column headers on first guess
+    if (!document.querySelector(".category-row")) {
+      const i = window.i18n || { t: (k) => k };
+      const categoryRow = document.createElement("div");
+      categoryRow.classList.add("category-row");
+      categoryRow.innerHTML = `
+        <div></div>
+        <div class="tooltip">${i.t("modes.classic.label_name")}<span class="tooltip-text">${i.t("modes.classic.tooltip_name")}</span></div>
+        <div class="tooltip">${i.t("modes.classic.label_gender")}<span class="tooltip-text">${i.t("modes.classic.tooltip_gender")}</span></div>
+        <div class="tooltip">${i.t("modes.classic.label_age")}<span class="tooltip-text">${i.t("modes.classic.tooltip_age")}</span></div>
+        <div class="tooltip">${i.t("modes.classic.label_persona_user")}<span class="tooltip-text">${i.t("modes.classic.tooltip_persona_user")}</span></div>
+        <div class="tooltip">${i.t("modes.classic.label_persona")}<span class="tooltip-text">${i.t("modes.classic.tooltip_persona")}</span></div>
+        <div class="tooltip">${i.t("modes.classic.label_arcana")}<span class="tooltip-text">${i.t("modes.classic.tooltip_arcana")}</span></div>
+        <div class="tooltip">${i.t("modes.classic.label_game")}<span class="tooltip-text">${i.t("modes.classic.tooltip_game")}</span></div>`;
+      output.insertBefore(categoryRow, output.firstChild);
     }
 
-    // Determine cell colour: correct (green), misplaced (yellow), wrong (red)
-    // — decision delegated to the pure compareAttribute() (unit-tested separately).
-    if (isWin) {
-      cell.classList.add("correct");
-    } else {
-      const { status, arrow } = compareAttribute(key, value, targetVal);
-      cell.classList.add(status);
-      if (key === "age" && arrow) {
-        displayValue += arrow === "up" ? " ↑" : " ↓";
-      } else if (typeof value === "boolean" || typeof targetVal === "boolean") {
-        displayValue = value ? i18.t("ui.yes") : i18.t("ui.no");
-      }
-    }
-
-    // Daltonian mode: replace colours with symbols + accessible palette
-    if (daltonianMode) {
-      let symbol = "";
-      let bgColor = "";
-      if (cell.classList.contains("correct")) {
-        symbol = " ✔";
-        bgColor = "#4F81BD";
-      } else if (cell.classList.contains("misplaced")) {
-        symbol = " ▲";
-        bgColor = "#F79646";
-      } else if (cell.classList.contains("wrong")) {
-        symbol = " ✖";
-        bgColor = "#A6A6A6";
-      }
-      cell.textContent = `${displayValue}${symbol}`;
-      cell.style.backgroundColor = bgColor;
-      cell.style.color = "white";
-    } else {
-      cell.textContent = displayValue;
-    }
-
-    // Flip-in animation staggered by column index
-    setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
-    row.appendChild(cell);
-  });
-
-  output.insertBefore(row, output.querySelector(".category-row")?.nextSibling);
-  removeFromAutocomplete(personas, guess.nom);
+  }
 
   if (isWin) {
     const textbar = document.getElementById("textbar");

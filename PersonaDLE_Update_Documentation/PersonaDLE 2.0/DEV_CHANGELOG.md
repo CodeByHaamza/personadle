@@ -113,6 +113,52 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — fix(expert): Classique Expert cassé + historique d'erreurs aligné sur Émoji
+
+### Le mode ne se chargeait plus du tout
+
+Un refactor laissé à moitié fait avait introduit une **double déclaration de `const isWin`**
+dans `checkGuess()`. C'est une erreur de syntaxe : le module entier échouait au parsing, donc
+ni l'Expert ni le mode normal ne fonctionnaient sur cette page. `checkGuess()` a été
+reconstruit avec une seule déclaration, la grille de comparaison remise derrière sa garde
+`if (!EXPERT.isExpert)`.
+
+### Une victoire en Expert ne terminait pas la partie
+
+Bug de fond, antérieur au précédent et attrapé par un test E2E. Le chemin Expert faisait un
+`return` **avant** le bloc `if (isWin)` : une bonne réponse n'affichait ni boîte de victoire,
+ni confettis, et **n'enregistrait aucune session**. Le mode ne sautait la grille que par
+accident de structure.
+
+L'Expert saute désormais la **grille**, pas la fin de partie : les deux chemins convergent sur
+le même `if (isWin)`.
+
+### Historique d'erreurs — composant partagé au lieu d'un composant inventé
+
+Retour de Hamza : « l'historique des erreurs de classique expert est inventé et moche ».
+Exact — j'avais créé des fiches `.expert-guess` alors que le jeu a déjà une liste d'erreurs.
+
+`renderExpertGuess()` appelle maintenant `showWrongMini()` (`js/gameCore.js`), exactement comme
+le mode Émoji : une vignette de portrait qui tremble, dans un `#wrongGuessList`. Une bonne
+réponse n'y figure pas — elle termine la partie, la boîte de victoire prend le relais. Le CSS
+`.expert-guess` (80 lignes) est supprimé.
+
+### Cache — les `?v=` n'avaient jamais été bumpés
+
+Hamza a dû faire Ctrl+Shift+R pour voir le texte corrigé. Les pages écoutent pourtant toutes
+`SW_UPDATED` et se rechargent seules ; le maillon manquant était le **cache HTTP** : les
+`?v=` de `global.css`, `classique.css`, `modeClassique.js`, `music.css` et les autres fichiers
+modifiés cette session n'avaient pas bougé. Tous incrémentés sur les 14 pages concernées.
+
+`CACHE_VERSION` → `personadle-v85`.
+
+### Tests
+
+7 E2E Classique, dont deux réécrits : l'absence de grille affirme désormais aussi que la boîte
+de victoire s'affiche (c'est ce test qui a révélé le bug de victoire), et l'historique vérifie
+les `.wrong-mini` partagées plutôt qu'un composant maison. 689 Vitest et les 8 game-flow
+revérifiés — le mode normal n'a pas bougé.
+
 ## 2026-08-15 — feat(stats): toutes les parties comptent, la streak seule reste journalière
 
 Signalement joueur : « j'ai gagné 50 fois en Music dans la soirée, rien n'a été sauvegardé ».

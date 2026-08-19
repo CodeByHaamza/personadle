@@ -6,8 +6,8 @@
     <title>Personadle - Classic</title>
 
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="../css/global.css?v=11" />
-    <link rel="stylesheet" href="./classique.css?v=3" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
+    <link rel="stylesheet" href="./classique.css?v=4" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -679,6 +679,11 @@
     </section>
 
     <!-- Zone d'affichage des résultats des tentatives -->
+    <!-- Historique des erreurs — Mode Expert uniquement. Même liste de vignettes
+         que le mode Émoji (showWrongMini), plutôt qu'un composant réinventé : la
+         grille de comparaison n'a pas de sens sans attributs à comparer. -->
+    <div id="wrongGuessList"></div>
+
     <div id="output" style="margin-top: 30px"></div>
     <div id="victoryBox" class="victory-box" style="display: none">
       <img id="victoryPortrait" src="" alt="Portrait" />
@@ -691,7 +696,7 @@
       import { initLang } from "../js/i18n.js";
       window.__i18nReady = initLang();
     </script>
-    <script type="module" src="./modeClassique.js?v=3"></script>
+    <script type="module" src="./modeClassique.js?v=4"></script>
 
     <!-- Bouton Mode Sombre -->
     <div class="darkmode-toggle">
