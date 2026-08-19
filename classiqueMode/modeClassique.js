@@ -694,19 +694,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Elle remplace le bouton Indice, qui n'aurait plus rien à révéler. Le nom de la
   // cible y est masqué à l'AFFICHAGE — certaines citations se nomment elles-mêmes.
   // La révélation de fin de partie réaffiche simplement le texte brut.
+  //
+  // Déclarée dans le scope d'init (et non dans le bloc Expert) pour que le bouton
+  // Rejouer puisse la rappeler : sans ça, un replay masquait la citation et ne la
+  // réaffichait jamais — le mode se retrouvait sans le moindre indice.
+  let showExpertQuote = () => {};
+
   if (EXPERT.isExpert) {
     hintButton.style.display = "none";
     // Le compteur « (0 / 3) » compte les indices : sans bouton Indice il n'a plus
     // rien à compter, et il restait affiché à zéro pour toujours.
     document.getElementById("hintCounter")?.style.setProperty("display", "none");
-    const showQuote = (reveal = false) => {
+    showExpertQuote = (reveal = false) => {
       if (!target?.quote) return;
       quoteHint.textContent = reveal ? target.quote : maskTerms([target.nom], target.quote, "▮▮▮");
       quoteHint.style.display = "block";
     };
-    showQuote();
+    showExpertQuote();
     // Rejouée à la fin de partie par fillVictoryBox() via cet écouteur.
-    window.addEventListener("personadle:classic-reveal", () => showQuote(true));
+    window.addEventListener("personadle:classic-reveal", () => showExpertQuote(true));
   }
 
   // ── Hint button (available after HINT_THRESHOLD attempts) ──
@@ -737,6 +743,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     history = [];
     updateCounters();
     output.innerHTML = "";
+    // L'historique d'erreurs Expert vit dans sa propre liste (showWrongMini), que
+    // vider #output ne touche pas.
+    const _wrongList = document.getElementById("wrongGuessList");
+    if (_wrongList) _wrongList.innerHTML = "";
     document.getElementById("victoryBox").style.display = "none";
     quoteHint.style.display = "none";
     textbar.disabled = false;
@@ -756,7 +766,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     filterCharacterPool();
 
     // Pick from the filtered pool, never the same character twice in a row
-    const _filteredPool = characters.filter((c) => personas.includes(c.nom));
+    // En Expert, seuls les personnages ayant une citation sont jouables : sans
+    // cette restriction, un replay pouvait tomber sur l'un des 4 sans réplique et
+    // laisser le joueur sans aucun indice.
+    const _pool = EXPERT.isExpert ? EXPERT_CHARACTERS : characters;
+    const _filteredPool = _pool.filter((c) => personas.includes(c.nom));
     const _prevTarget = target;
     const _candidates =
       _filteredPool.length > 1 && _prevTarget
@@ -764,6 +778,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         : _filteredPool;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
     localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
+
+    // Après le nouveau tirage : la citation à deviner change aussi.
+    showExpertQuote();
 
     const nav = document.getElementById("modeNavigationContainer");
     if (nav) {

@@ -163,3 +163,45 @@ test.describe("Classique Expert — abandon", () => {
     expect(last.result).toBe("giveup");
   });
 });
+
+test.describe("Classique Expert — rejouer", () => {
+  test("Rejouer redonne une citation, vide les erreurs et tire un personnage qui en a une", async ({
+    page,
+  }) => {
+    await page.goto(EXPERT);
+    await page.waitForLoadState("networkidle");
+
+    const citationAvant = (await page.locator("#quoteHint").textContent()).trim();
+    const cibleAvant = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("classicExpert_target")).nom
+    );
+
+    // De vrais personnages : un nom absent de la base sort avant le rendu
+    // (`if (!guess) return`) et ne produit donc aucune vignette.
+    for (const nom of ["Yukari Takeba", "Junpei Iori"]) {
+      await page.locator("#textbar").fill(nom);
+      await page.locator("#guessButton").click();
+    }
+    await expect(page.locator("#wrongGuessList .wrong-mini")).toHaveCount(2);
+
+    await page.locator("#resetButton").click();
+
+    // La citation est l'unique indice du mode : la masquer sans la réafficher
+    // rendait le replay injouable.
+    await expect(page.locator("#quoteHint")).toBeVisible();
+    const citationApres = (await page.locator("#quoteHint").textContent()).trim();
+    expect(citationApres.length).toBeGreaterThan(0);
+
+    // L'historique d'erreurs vit dans sa propre liste, que vider #output ne touche pas.
+    await expect(page.locator("#wrongGuessList .wrong-mini")).toHaveCount(0);
+
+    const cibleApres = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("classicExpert_target"))
+    );
+    expect(cibleApres.nom).not.toBe(cibleAvant);
+    // Le replay doit rester dans le pool Expert : 4 personnages sur 184 n'ont
+    // aucune citation, en tirer un laisserait le joueur sans indice.
+    expect(String(cibleApres.quote ?? "").trim().length).toBeGreaterThan(0);
+    expect(citationAvant.length).toBeGreaterThan(0);
+  });
+});

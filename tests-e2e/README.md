@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/badge/Playwright-Chromium-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/cible-stack%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
 
-> **76 tests (9 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
+> **77 tests (9 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
 > Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public, Social Link, admin).
 
 </div>

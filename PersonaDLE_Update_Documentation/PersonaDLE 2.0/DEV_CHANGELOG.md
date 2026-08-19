@@ -113,6 +113,34 @@ le highlight en plusieurs entrées.
 
 ---
 
+## 2026-08-15 — fix(expert): bouton Rejouer inopérant en Classique Expert
+
+Trois défauts cumulés, tous sur le chemin du replay.
+
+- **La citation disparaissait sans jamais revenir.** `resetButton` fait
+  `quoteHint.style.display = "none"`, et l'affichage de la citation n'était appelé qu'une fois
+  à l'init. Or la citation est **l'unique indice** du mode : le replay était littéralement
+  injouable. `showExpertQuote()` est hissée dans le scope d'init (au lieu du bloc
+  `if (EXPERT.isExpert)`) pour que Rejouer puisse la rappeler après le nouveau tirage.
+- **Les vignettes d'erreur restaient à l'écran.** Depuis le passage à `showWrongMini()`,
+  l'historique vit dans `#wrongGuessList` — que `output.innerHTML = ""` ne touche pas.
+- **Le nouveau tirage ignorait la restriction du mode.** Il piochait dans `characters`, pas
+  dans `EXPERT_CHARACTERS` : un replay pouvait tomber sur l'un des 4 personnages sans
+  citation, laissant le joueur sans le moindre indice. Le tirage quotidien, lui, respectait
+  déjà la restriction — seul le replay l'oubliait.
+
+### Test
+
+Un 8ᵉ test E2E couvre le replay de bout en bout : citation présente après Rejouer, historique
+vidé, cible différente, et **cible ayant bien une citation**.
+
+Détail relevé en l'écrivant : une réponse inventée (`Zzz Not A Character`) sort de
+`checkGuess()` avant tout rendu (`if (!guess) return`) et ne produit donc aucune vignette. Le
+test utilise de vrais personnages — c'est ce que fait un joueur, et c'est le seul chemin qui
+exerce réellement l'historique.
+
+`CACHE_VERSION` → `personadle-v86`.
+
 ## 2026-08-15 — fix(expert): Classique Expert cassé + historique d'erreurs aligné sur Émoji
 
 ### Le mode ne se chargeait plus du tout
