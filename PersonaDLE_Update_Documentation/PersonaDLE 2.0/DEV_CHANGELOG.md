@@ -10,6 +10,30 @@
 
 ---
 
+## 2026-08-19 — feat(expert): lore Personae en portugais + Replay sans fiche corrigé
+
+Sixième et dernière langue des fiches Personae Expert, et deux correctifs signalés en jeu.
+
+### Détails techniques
+
+- **`personaeMode/database/expert_lore/pt.json`** — 137 fiches traduites depuis `en.json`
+  (72–114 mots, moyenne 91). Tableaux `mask` écrits pour le portugais : `Apolo`, `Cérbero`,
+  `Hécate`, `Plutão`, `Cinderela`/`Gata Borralheira`/`cinza`, `Caim`, `Estige`, `Papisa
+  Joana`/`Inês`, `Minotauro`, `hortelã` (Minthe). Les 6 langues sont désormais complètes.
+- **`tests/expertContent.test.js`** — `pt` câblé dans `LANGS`/`LORE` (709 tests).
+- **`personaeMode/modePersonae.js`** — `getFilteredCharacters()` applique maintenant
+  `expertPool()`. Le tirage du jour filtrait bien sur les personas ayant une fiche, mais le
+  **Replay** tirait au hasard dans `filteredCharacters` non filtré : on pouvait tomber sur une
+  persona sans lore, donc une partie sans le moindre indice. Un seul point de filtrage couvre
+  maintenant tous les appelants (tirage, Replay, leurres de défi) — même classe de bug que le
+  Replay de Classique Expert.
+- **`personaeMode/personae.css`** — en Expert, on neutralise aussi `.persona-box` (le cadre
+  carré 500×500 « Velvet Room ») en plus de masquer `#personaImage` : le cadre n'encadrait
+  plus rien et comprimait la fiche dans un carré. Il ne reste que la zone de texte.
+  `?v=5` sur `personae.css` et `modePersonae.js`.
+
+---
+
 ## 2026-08-19 — feat(expert): fiches de lore Personae en italien + image cassée corrigée
 
 Cinquième langue des fiches Personae Expert (`it.json`, 137 fiches, 72–107 mots, moyenne 90),

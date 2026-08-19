@@ -121,10 +121,16 @@ if (!localStorage.getItem("playerProfile") && localStorage.getItem("personaUserP
  * @returns {Object[]}
  */
 function getFilteredCharacters() {
-  return originalCharacters.filter((c) => {
-    const op = Array.isArray(c.opus) ? c.opus : [c.opus];
-    return op.some((o) => activeFilters.includes(o));
-  });
+  // expertPool() en sortie et pas seulement au tirage du jour : le Replay tirait
+  // au hasard dans cette liste, donc pouvait sortir une persona sans fiche —
+  // partie sans le moindre indice. Un seul point de filtrage pour tous les
+  // appelants (tirage, Replay, leurres de défi).
+  return expertPool(
+    originalCharacters.filter((c) => {
+      const op = Array.isArray(c.opus) ? c.opus : [c.opus];
+      return op.some((o) => activeFilters.includes(o));
+    })
+  );
 }
 
 /**
