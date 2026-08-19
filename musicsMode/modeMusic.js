@@ -396,6 +396,35 @@ function applyExpertChrome() {
 // PAROLES (Mode Expert)
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Index du dernier vers déjà tapé — évite de retaper à chaque re-rendu. */
+let dernierVersTape = -1;
+/** Timer de la machine à écrire en cours, annulé si un re-rendu survient. */
+let timerFrappe = null;
+
+/**
+ * Écrit un vers caractère par caractère, façon karaoké. Le curseur est une
+ * classe CSS, pas un caractère dans le texte : sinon il resterait collé au vers
+ * si la frappe est interrompue en cours de route.
+ */
+function taperVers(li, texte, vitesse = 28) {
+  clearInterval(timerFrappe);
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    li.textContent = texte;
+    return;
+  }
+  li.textContent = "";
+  li.classList.add("typing");
+  let i = 0;
+  timerFrappe = setInterval(() => {
+    li.textContent = texte.slice(0, ++i);
+    if (i >= texte.length) {
+      clearInterval(timerFrappe);
+      timerFrappe = null;
+      li.classList.remove("typing");
+    }
+  }, vitesse);
+}
+
 /**
  * Affiche les paroles révélées jusqu'ici, façon lecteur de streaming : les vers
  * déjà obtenus restent visibles au-dessus, le dernier est mis en avant, et la
@@ -417,13 +446,25 @@ function renderLyrics(reveal = false) {
   const shown = reveal ? vers.length : Math.min(attempts + 1, vers.length);
 
   list.innerHTML = "";
+  let aTaper = null;
   for (let i = 0; i < shown; i++) {
     const li = document.createElement("li");
     li.className = "expert-lyric-line";
     if (!reveal && i === shown - 1) li.classList.add("current");
     if (reveal && i >= attempts + 1) li.classList.add("unheard");
-    li.textContent = reveal ? vers[i] : maskTerms([target.titre], vers[i], "▮▮▮▮");
+    const texte = reveal ? vers[i] : maskTerms([target.titre], vers[i], "▮▮▮▮");
+    // Machine à écrire sur le SEUL vers qui vient d'être gagné. Un re-rendu de
+    // la même partie (changement de filtre, révélation) réaffiche d'un coup :
+    // retaper un vers déjà lu donnerait l'impression d'un bug, pas d'un effet.
+    if (!reveal && i === shown - 1 && i > dernierVersTape) aTaper = { li, texte };
+    else li.textContent = texte;
     list.appendChild(li);
+  }
+  if (aTaper) {
+    dernierVersTape = shown - 1;
+    taperVers(aTaper.li, aTaper.texte);
+  } else if (shown - 1 > dernierVersTape) {
+    dernierVersTape = shown - 1;
   }
 
   const counter = document.getElementById("expertLyricsCount");
@@ -731,6 +772,7 @@ function resetGame(random = false) {
   localStorage.removeItem(`${KEY_PREFIX}TriedTitles`);
   localStorage.removeItem(`${KEY_PREFIX}ForceReveal`);
   startGame(STATS_SCOPE);
+  dernierVersTape = -1;
 
   // Reset in-memory state
   gameOver = false;

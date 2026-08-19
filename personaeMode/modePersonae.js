@@ -221,9 +221,17 @@ async function loadExpertLore() {
  * lore est une sœur dans le DOM, elle reste donc seule à l'écran entre-temps.
  */
 function setPersonaBoxVisible(visible) {
-  personaImg
-    ?.closest(".persona-box")
-    ?.style.setProperty("display", visible ? "flex" : "none");
+  const box = personaImg?.closest(".persona-box");
+  if (!box) return;
+  box.style.setProperty("display", visible ? "flex" : "none");
+  // Animation d'invocation : la classe est retirée puis reposée après un
+  // reflow, sinon deux révélations d'affilée (rejouer, puis regagner) ne
+  // rejoueraient pas l'animation — la classe étant déjà là.
+  box.classList.remove("summoning");
+  if (visible) {
+    void box.offsetWidth;
+    box.classList.add("summoning");
+  }
 }
 
 /**

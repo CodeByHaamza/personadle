@@ -565,6 +565,28 @@ body.music-mode.darkmode .victory-box {
   text-shadow: 0 0 12px rgba(230, 57, 70, 0.55);
 }
 
+/* Machine à écrire — curseur clignotant pendant la frappe du vers courant.
+   Le curseur est un ::after et non un caractère du texte : une frappe
+   interrompue laisserait sinon un « | » collé au vers. */
+.expert-lyric-line.typing::after {
+  content: "▌";
+  margin-left: 2px;
+  color: #e63946;
+  animation: lyricCaret 0.7s steps(1) infinite;
+}
+
+@keyframes lyricCaret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expert-lyric-line.typing::after {
+    animation: none;
+  }
+}
+
 /* Vers révélés seulement en fin de partie : jamais gagnés, donc en retrait. */
 .expert-lyric-line.unheard {
   color: rgba(255, 255, 255, 0.28);

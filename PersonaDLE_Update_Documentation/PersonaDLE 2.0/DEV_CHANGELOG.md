@@ -10,6 +10,37 @@
 
 ---
 
+## 2026-08-19 — feat(ui): invocation de la persona et paroles à la machine à écrire
+
+Deux animations demandées en test : la révélation manquait de moment, et les paroles
+Expert apparaissaient d'un bloc alors que le mode imite un lecteur de streaming.
+
+### Détails techniques
+
+- **`personaeMode/personae.css`** — `personaSummon` (halo + rebond du cadre) et
+  `personaSummonImg` (flou + surbrillance qui se résorbent). Portées par `.persona-box`
+  et non par l'image : le halo doit envelopper le cadre.
+- **`personaeMode/modePersonae.js`** — `setPersonaBoxVisible()` retire puis repose la classe
+  `summoning` après un reflow forcé. Sans ça, deux révélations d'affilée (rejouer, regagner)
+  ne rejoueraient pas l'animation, la classe étant déjà présente.
+- **`#victoryBox img`** rejoue `personaSummonImg` **sans JS** : la victory-box passe de
+  `display:none` à visible, ce qui redéclenche l'animation à chaque affichage. Le portrait
+  s'invoque donc aussi en mode normal, où l'image de persona est visible dès le départ et
+  n'offrait aucun moment de révélation.
+- **`musicsMode/modeMusic.js`** — `taperVers()` écrit le vers caractère par caractère
+  (28 ms). Seul le vers **qui vient d'être gagné** est tapé : `dernierVersTape` évite de
+  retaper un vers déjà lu lors d'un re-rendu de la même partie (changement de filtre,
+  révélation finale), ce qui passerait pour un bug plutôt que pour un effet. Le timer est
+  annulé si un re-rendu survient en pleine frappe.
+- **`musicsMode/music.css`** — le curseur est un `::after` clignotant, jamais un caractère
+  du texte : une frappe interrompue laisserait sinon un curseur collé au vers.
+- Les deux animations respectent `prefers-reduced-motion: reduce`.
+
+`personae.css`/`modePersonae.js` en `?v=7`, `music.css` en `?v=6`, `modeMusic.js` en `?v=5`,
+`sw.js` en `v91`.
+
+---
+
 ## 2026-08-19 — feat(stats): toutes les parties comptent — câblage client des 6 modes
 
 Le serveur enregistrait déjà chaque partie depuis la migration 032, mais le client gardait

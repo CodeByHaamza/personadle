@@ -109,6 +109,10 @@
 }
 
 /* ═════════════════════════════════════════════════════════════════════════════
+   RÉVÉLATION — animation d'invocation (les deux modes)
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ═════════════════════════════════════════════════════════════════════════════
    MODE EXPERT — la fiche de lore
    Le bouton de bascule et le halo de page vivent dans css/global.css (partagés
    par tous les modes). Ici : le panneau de texte qui remplace l'image.
@@ -119,6 +123,69 @@
    est une sœur dans le HTML, pas une enfant, donc elle reste seule à l'écran. */
 body.expert-mode .persona-box {
   display: none;
+}
+
+/* Le portrait du personnage révélé s'invoque aussi, dans les deux modes. Pas de
+   JS : la victory-box passe de display:none à visible, ce qui (re)déclenche
+   l'animation à chaque affichage. */
+#victoryBox img {
+  animation: personaSummonImg 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #victoryBox img {
+    animation: none;
+  }
+}
+
+/* Invocation de la persona à la révélation. Portée par .persona-box et pas par
+   l'image : le halo doit envelopper le cadre, et l'animation démarre seulement
+   quand la classe est posée, donc jamais au chargement d'une partie en cours. */
+.persona-box.summoning {
+  animation: personaSummon 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.persona-box.summoning img {
+  animation: personaSummonImg 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes personaSummon {
+  0% {
+    transform: scale(0.82);
+    box-shadow: 0 0 0 rgba(255, 71, 87, 0);
+  }
+  45% {
+    box-shadow: 0 0 46px rgba(255, 71, 87, 0.95);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+  }
+}
+
+@keyframes personaSummonImg {
+  0% {
+    opacity: 0;
+    filter: blur(14px) brightness(2.4);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(3px) brightness(1.5);
+  }
+  100% {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .persona-box.summoning,
+  .persona-box.summoning img {
+    animation: none;
+  }
 }
 
 .expert-lore-box {
