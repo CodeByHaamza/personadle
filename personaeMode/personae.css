@@ -114,6 +114,13 @@
    par tous les modes). Ici : le panneau de texte qui remplace l'image.
    ═════════════════════════════════════════════════════════════════════════════ */
 
+/* L'image EST la réponse en Expert : elle reste dans le DOM (src vidé) mais un
+   <img> sans src affiche l'icône « image cassée » et garde sa place, ce qui
+   décalait la fiche. On la retire de la mise en page. */
+body.expert-mode #personaImage {
+  display: none;
+}
+
 .expert-lore-box {
   box-sizing: border-box;
   width: min(600px, 92vw);

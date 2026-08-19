@@ -10,11 +10,12 @@ import loreEn from "../personaeMode/database/expert_lore/en.json";
 import loreFr from "../personaeMode/database/expert_lore/fr.json";
 import loreEs from "../personaeMode/database/expert_lore/es.json";
 import loreDe from "../personaeMode/database/expert_lore/de.json";
+import loreIt from "../personaeMode/database/expert_lore/it.json";
 
-const LORE = { en: loreEn, fr: loreFr, es: loreEs, de: loreDe };
+const LORE = { en: loreEn, fr: loreFr, es: loreEs, de: loreDe, it: loreIt };
 const loadLore = (lang) => LORE[lang];
 
-const LANGS = ["en", "fr", "es", "de"];
+const LANGS = ["en", "fr", "es", "de", "it"];
 
 // Une fuite, c'est le terme présent en tant que MOT — pas en sous-chaîne : « Christ »
 // dans « Christianity » n'en est pas une, et maskTerms() ne le masque pas non plus.

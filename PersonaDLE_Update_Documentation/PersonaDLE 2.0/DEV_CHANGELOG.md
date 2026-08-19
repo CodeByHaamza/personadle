@@ -10,6 +10,33 @@
 
 ---
 
+## 2026-08-19 — feat(expert): fiches de lore Personae en italien + image cassée corrigée
+
+Cinquième langue des fiches Personae Expert (`it.json`, 137 fiches, 72–107 mots, moyenne 90),
+et correction d'un artefact visuel signalé en jeu.
+
+### Détails techniques
+
+- **`personaeMode/database/expert_lore/it.json`** — traduction complète depuis `en.json`
+  (source de vérité). Les tableaux `mask` sont **écrits pour l'italien**, jamais recopiés de
+  l'anglais : `maskTerms()` ne normalise pas les diacritiques, donc une forme localisée
+  oubliée resterait en clair pendant toute la partie et donnerait la réponse. Cas notables :
+  `Apollo`/`Apollon`, `Cerbero`, `Ecate`, `Cenerentola`/`cenere`, `Caino`, `Ade`/`Plutone`,
+  `Ermes`/`Mercurio`, `Tersicore`, `Stige`, `Minotauro`, `Papessa Giovanna`/`Agnese`,
+  `Guglielmo` (Captain Kidd / William), `Grande Saggio Uguale al Cielo` (Seiten Taisei).
+- **`tests/expertContent.test.js`** — `it` ajouté à `LANGS` et à `LORE` : les 5 langues
+  passent désormais les mêmes invariants (même jeu de clés, texte jouable, aucun masque
+  pré-appliqué dans le texte brut, aucune fuite du nom après masquage, chaque fiche se nomme).
+- **`personaeMode/personae.css` + `personae.html`** — en Expert, `#personaImage` reste dans le
+  DOM avec `src=""` (l'image EST la réponse). Un `<img>` sans `src` affiche l'icône « image
+  cassée » **et garde sa place**, ce qui décalait la fiche de lore : règle
+  `body.expert-mode #personaImage { display: none }`, une seule règle qui couvre les trois
+  sites d'affectation de `src` (tirage, révélation, reset). `?v=4` sur la feuille de style.
+
+État des traductions Personae Expert : EN · FR · ES · DE · IT ✅ — reste PT.
+
+---
+
 ## 2026-08-13 — fix(data): Thanatos re-fusionné en une seule entrée (P3 + P4AU)
 
 Retour en arrière sur le split de Thanatos fait dans le commit précédent, suite à un
