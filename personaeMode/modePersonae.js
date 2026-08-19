@@ -213,6 +213,17 @@ async function loadExpertLore() {
 }
 
 /**
+ * Affiche ou masque le cadre image. En Expert il est masqué pendant la partie
+ * (l'image EST la réponse) et ne réapparaît qu'à la révélation — la fiche de
+ * lore est une sœur dans le DOM, elle reste donc seule à l'écran entre-temps.
+ */
+function setPersonaBoxVisible(visible) {
+  personaImg
+    ?.closest(".persona-box")
+    ?.style.setProperty("display", visible ? "flex" : "none");
+}
+
+/**
  * Affiche la fiche de la cible. Le nom de la persona et ses alias sont masqués
  * pendant la partie ; `reveal` réaffiche le texte brut, sans seconde copie à
  * maintenir (cf. maskTerms, js/gameCore.js).
@@ -242,7 +253,11 @@ function pickCharacter(random = false) {
   // Défi à cible dédiée (2026-07-17) : elle prime sur le tirage du jour ET sur
   // le random du Replay tant que le défi est actif (identifiée par le persona,
   // désambiguïsé par opus pour les noms dupliqués — cf. challengeKey()).
-  const _challengeTargetName = getActiveChallengeTarget("personae");
+  // Les défis Expert ne sont pas encore implémentés (pas de `challenge_is_expert`,
+  // cf. TODO.md) : la clé localStorage n'est pas scopée, donc un défi créé en mode
+  // normal s'imposait comme cible sur la page Expert — y compris une variante
+  // Picaro, qui n'a pas de fiche et donnait une partie sans indice.
+  const _challengeTargetName = EXPERT.isExpert ? null : getActiveChallengeTarget("personae");
   const _challengeChar = _challengeTargetName ? findByChallengeKey(_challengeTargetName) : null;
 
   if (_challengeChar) {
@@ -266,6 +281,7 @@ function pickCharacter(random = false) {
   // En Expert l'image est l'inverse d'un indice : elle EST la réponse. Elle n'est
   // posée qu'à la révélation finale (showVictory).
   personaImg.src = EXPERT.isExpert ? "" : `./database/img/${target.image}.webp`;
+  if (EXPERT.isExpert) setPersonaBoxVisible(false);
   if (EXPERT.isExpert) renderExpertLore();
   personaImg.alt = target.persona;
 
@@ -422,7 +438,10 @@ function showVictory(force = false, name = null) {
   // Fin de partie : la censure tombe des deux côtés — l'image apparaît, la fiche
   // reprend son texte brut.
   if (EXPERT.isExpert) {
-    if (personaImg && target) personaImg.src = `./database/img/${target.image}.webp`;
+    if (personaImg && target) {
+      personaImg.src = `./database/img/${target.image}.webp`;
+      setPersonaBoxVisible(true);
+    }
     renderExpertLore(true);
   }
   gameOver = true;
@@ -573,8 +592,11 @@ function showVictory(force = false, name = null) {
   });
   // Capturé AVANT checkChallengeCompletion (qui consomme activeChallenge) :
   // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
-  const wasChallengePlay = isChallengePlay("personae");
-  if (!force)
+  // Expert : tout le circuit défi est neutralisé tant que `challenge_is_expert`
+  // n'existe pas (cf. TODO.md) — sinon une victoire Expert validait le défi
+  // NORMAL en attente, et sa partie n'était pas loggée en session quotidienne.
+  const wasChallengePlay = !EXPERT.isExpert && isChallengePlay("personae");
+  if (!force && !EXPERT.isExpert)
     showChallengeButton(
       "personae",
       attempts,
@@ -583,7 +605,7 @@ function showVictory(force = false, name = null) {
       // même nom — voir pickCharacter() plus haut).
       filteredCharacters.filter((c) => c.persona !== target.persona).map((c) => challengeKey(c))
     );
-  checkChallengeCompletion("personae", attempts, !force);
+  if (!EXPERT.isExpert) checkChallengeCompletion("personae", attempts, !force);
   if (!EXPERT.isExpert)
     showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
 
@@ -685,7 +707,7 @@ function giveUp() {
 
   // Défi à cible dédiée : le give-up compte pour le défi (perdu, via
   // showVictory → checkChallengeCompletion) mais pas en session quotidienne.
-  if (!isChallengePlay("personae") && !localStorage.getItem(statsKey)) {
+  if ((EXPERT.isExpert || !isChallengePlay("personae")) && !localStorage.getItem(statsKey)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: "Personae", timeSpent });
     savePendingSession(
@@ -829,6 +851,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // En Expert l'image est l'inverse d'un indice : elle EST la réponse. Elle n'est
   // posée qu'à la révélation finale (showVictory).
   personaImg.src = EXPERT.isExpert ? "" : `./database/img/${target.image}.webp`;
+  if (EXPERT.isExpert) setPersonaBoxVisible(false);
   if (EXPERT.isExpert) renderExpertLore();
       personaImg.alt = target.persona;
 

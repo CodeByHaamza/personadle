@@ -10,6 +10,31 @@
 
 ---
 
+## 2026-08-19 — fix(expert): fiche Personae isolée + circuit défi neutralisé
+
+Suite des retours de test sur Personae Expert.
+
+### Détails techniques
+
+- **`personaeMode/personae.html`** — `#expertLoreBox` sort de `.persona-box` et devient sa
+  **sœur**. Neutraliser le cadre carré au CSS ne suffisait pas : la fiche restait un enfant
+  du conteneur image et en héritait la mise en page. En Expert `.persona-box` est masquée en
+  entier (`personae.css`), la fiche est donc seule à l'écran.
+- **`personaeMode/modePersonae.js`** — `setPersonaBoxVisible()` : le cadre image réapparaît
+  à la révélation (`showVictory`) et est remasqué au tirage suivant. Les deux seuls sites qui
+  touchaient déjà `personaImg.src` portent l'appel, pas de troisième état à maintenir.
+- **`personaeMode/modePersonae.js`** — circuit défi neutralisé sur la page Expert. La clé
+  `activeChallenge` n'est pas scopée par mode (`challenge_is_expert` reste au TODO), donc un
+  défi créé en mode **normal** s'imposait comme cible en Expert — y compris une variante
+  Picaro, sans fiche, donc une partie sans indice. Trois conséquences corrigées d'un coup :
+  la cible de défi est ignorée en Expert, `checkChallengeCompletion()` n'y valide plus le défi
+  normal sur une victoire Expert, et `isChallengePlay()` ne bloque plus l'enregistrement de la
+  session quotidienne Expert.
+
+`personae.css`/`modePersonae.js` en `?v=6`, `sw.js` en `v90`.
+
+---
+
 ## 2026-08-19 — feat(expert): lore Personae en portugais + Replay sans fiche corrigé
 
 Sixième et dernière langue des fiches Personae Expert, et deux correctifs signalés en jeu.

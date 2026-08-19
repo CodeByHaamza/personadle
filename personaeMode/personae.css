@@ -114,23 +114,11 @@
    par tous les modes). Ici : le panneau de texte qui remplace l'image.
    ═════════════════════════════════════════════════════════════════════════════ */
 
-/* L'image EST la réponse en Expert : elle reste dans le DOM (src vidé) mais un
-   <img> sans src affiche l'icône « image cassée » et garde sa place. On retire
-   l'image ET son cadre carré 500×500 « Velvet Room », qui n'encadre plus rien et
-   comprimait la fiche — il ne reste que la zone de texte. */
-body.expert-mode #personaImage {
-  display: none;
-}
-
+/* L'image EST la réponse en Expert : le cadre carré 500×500 « Velvet Room »
+   n'encadre plus rien et comprimait la fiche. On le retire en entier — la fiche
+   est une sœur dans le HTML, pas une enfant, donc elle reste seule à l'écran. */
 body.expert-mode .persona-box {
-  width: auto;
-  height: auto;
-  border: none;
-  background: none;
-  box-shadow: none;
-  border-radius: 0;
-  margin: 0 auto;
-  display: block;
+  display: none;
 }
 
 .expert-lore-box {
