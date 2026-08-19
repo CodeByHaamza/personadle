@@ -806,7 +806,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   // ── Restore session ──
-  const stored = localStorage.getItem(EXPERT.key("personaeTarget"));
+  let stored = localStorage.getItem(EXPERT.key("personaeTarget"));
+  // Cible Expert périmée : une session enregistrée avant le filtrage du Replay
+  // peut porter une persona sans fiche (variantes Picaro…). Sans ça le joueur
+  // reste bloqué sur une partie muette jusqu'au reset du lendemain.
+  if (stored && EXPERT.isExpert) {
+    try {
+      if (!expertLore[JSON.parse(stored).persona]) stored = null;
+    } catch {
+      stored = null;
+    }
+  }
   const storedAttempts = parseInt(localStorage.getItem(EXPERT.key("personaeAttempts"))) || 0;
   const storedGameOver = localStorage.getItem(EXPERT.key("personaeGameOver")) === "true";
 
