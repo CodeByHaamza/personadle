@@ -135,6 +135,23 @@ export function startGame(scope) {
   localStorage.removeItem(_gameLoggedKey(scope));
 }
 
+/**
+ * Identifiant de la partie en cours, créé à la volée s'il manque.
+ *
+ * Sert aussi de graine à ce qui doit être stable PENDANT une partie mais varier
+ * d'une partie à l'autre — le leurre d'Émoji Expert, par exemple : seedé sur la
+ * date il restait figé toute la journée, seedé sur la cible il ne bougeait plus
+ * d'un Replay à l'autre pour un même personnage.
+ */
+export function currentGameId(scope) {
+  let id = localStorage.getItem(_gameIdKey(scope));
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(_gameIdKey(scope), id);
+  }
+  return id;
+}
+
 /** Vrai si la partie EN COURS a déjà été enregistrée (survit à un rechargement). */
 export function isGameLogged(scope) {
   const id = localStorage.getItem(_gameIdKey(scope));
@@ -148,11 +165,7 @@ export function isGameLogged(scope) {
  * @returns {string} l'identifiant de la partie
  */
 export function markGameLogged(scope) {
-  let id = localStorage.getItem(_gameIdKey(scope));
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(_gameIdKey(scope), id);
-  }
+  const id = currentGameId(scope);
   localStorage.setItem(_gameLoggedKey(scope), id);
   return id;
 }

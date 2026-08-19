@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle - Personae Mode</title>
     <link rel="stylesheet" href="../css/global.css?v=12" />
-    <link rel="stylesheet" href="./personae.css?v=7" />
+    <link rel="stylesheet" href="./personae.css?v=8" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -264,6 +264,15 @@
       </div>
     </div>
 
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1).
+         Placée ici, juste sous le panneau de filtres, comme dans Classique et
+         Music — et non sous le bandeau titre, qui la reléguait en bas de page. -->
+    <div class="expert-toggle-zone">
+      <a href="personae.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <!-- Zone principale -->
     <div class="emoji-hint-zone" style="position: relative">
       <!-- Bouton Rules -->
@@ -303,14 +312,6 @@
         <h1 data-i18n="modes.personae.title">Guess the Persona User from their Personae!</h1>
         <p data-i18n="modes.personae.subtitle">Type a name to start 💥</p>
       </div>
-    </div>
-
-    <!-- Modal règles -->
-    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1). -->
-    <div class="expert-toggle-zone">
-      <a href="personae.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
-        ⚡ Expert mode
-      </a>
     </div>
 
     <div id="rulesModal" class="modal" style="display: none">

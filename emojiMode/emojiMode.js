@@ -26,6 +26,7 @@ import {
   startGame,
   isGameLogged,
   markGameLogged,
+  currentGameId,
   characterMatchesActiveOpus,
   updateCounterElement,
   getActiveChallengeTarget,
@@ -265,10 +266,12 @@ function initializeAutocomplete(element, sourceArray) {
  * Émojis affichés pour la cible : les vrais en mode normal, un leurre glissé
  * parmi eux en Expert.
  *
- * **Déterministe** : le leurre et sa position sont tirés avec le même hash seedé
- * que la cible du jour (`getDailyTarget`), donc stables pour un joueur et une
- * date. Un tirage aléatoire à chaque rendu se serait re-roulé à chaque
- * rechargement, et le joueur aurait identifié l'intrus par simple élimination.
+ * **Stable par partie, pas par jour** : le leurre et sa position sont tirés avec
+ * `getDailyTarget` seedé sur l'identifiant de la partie. Un tirage aléatoire à
+ * chaque rendu se re-roulerait à chaque rechargement et le joueur identifierait
+ * l'intrus en rafraîchissant ; à l'inverse, seedé sur la date ou sur la cible,
+ * il restait figé d'un Replay à l'autre — perçu, à raison, comme « c'est
+ * toujours le premier qui change ».
  *
  * Le leurre vient d'un AUTRE personnage — pas d'un émoji inventé : un intrus
  * plausible est plus dur à repérer qu'un symbole hors sujet.
@@ -290,10 +293,16 @@ function displayedEmojis() {
 
   if (candidats.length === 0) return vrais;
 
-  const leurre = getDailyTarget(candidats, `${EXPERT.hashMode}Decoy`);
+  // Graine = l'identifiant de la PARTIE (gameCore.js), pas la date ni la cible :
+  // stable tant que la partie dure — donc increvable au rechargement, sinon le
+  // joueur repérerait l'intrus en rafraîchissant — mais re-tiré à chaque Replay.
+  // Deux parties sur le même personnage n'ont donc ni le même leurre ni la même
+  // position.
+  const graine = currentGameId(STATS_SCOPE);
+  const leurre = getDailyTarget(candidats, `${EXPERT.hashMode}Decoy_${graine}`);
   const slot = getDailyTarget(
     vrais.map((_, i) => String(i)),
-    `${EXPERT.hashMode}Slot`
+    `${EXPERT.hashMode}Slot_${graine}`
   );
 
   const sortie = [...vrais];

@@ -10,6 +10,30 @@
 
 ---
 
+## 2026-08-19 — fix(expert): leurre Émoji re-tiré à chaque partie + bouton Personae replacé
+
+### Détails techniques
+
+- **`emojiMode/emojiMode.js`** — le leurre et sa position étaient seedés sur la **date** :
+  figés toute la journée, donc dix Replay d'affilée montraient le même émoji intrus au même
+  endroit (« c'est toujours le premier »). La graine devient l'**identifiant de la partie**
+  (`currentGameId`, gameCore.js) : stable tant que la partie dure — sinon le joueur repérerait
+  l'intrus en rafraîchissant — mais re-tiré à chaque Replay. Deux parties sur le même
+  personnage n'ont donc ni le même leurre ni la même position.
+- **`js/gameCore.js`** — `currentGameId(scope)` exporté (crée l'identifiant à la volée s'il
+  manque) ; `markGameLogged()` s'appuie dessus au lieu de dupliquer la création.
+- **`database/characters_clean.js`** — `Kei Nanjo` portait `"1"` (U+0031, un chiffre nu) au
+  lieu de `"1️⃣"` : le keycap avait perdu ses `U+FE0F U+20E3`. Le mode normal affichait donc
+  un « 1 » brut comme premier indice, et le mode Expert pouvait le tirer comme leurre.
+  Repéré en vérifiant la distribution du pool de leurres, pas signalé par `data:check`.
+- **`personaeMode/personae.html`** — le bouton Expert passe sous le panneau de filtres, comme
+  dans Classique et Music, au lieu d'être sous le bandeau titre où il se retrouvait en bas.
+- **`tests/gameCore.test.js`** — 2 tests sur `currentGameId` (721 tests).
+
+`emojiMode.js` en `?v=6`, `personae.css` en `?v=8`, `sw.js` en `v92`.
+
+---
+
 ## 2026-08-19 — feat(ui): invocation de la persona et paroles à la machine à écrire
 
 Deux animations demandées en test : la révélation manquait de moment, et les paroles

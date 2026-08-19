@@ -40,6 +40,7 @@ import {
   startGame,
   isGameLogged,
   markGameLogged,
+  currentGameId,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -604,6 +605,18 @@ describe("startGame / isGameLogged / markGameLogged", () => {
     expect(isGameLogged("Classic")).toBe(true);
     expect(isGameLogged("ClassicExpert")).toBe(false);
     expect(isGameLogged("Music")).toBe(false);
+  });
+
+  it("currentGameId est stable pendant la partie et change au tirage suivant", () => {
+    startGame("Emoji");
+    const id = currentGameId("Emoji");
+    expect(currentGameId("Emoji")).toBe(id); // un rechargement relit la même valeur
+    startGame("Emoji");
+    expect(currentGameId("Emoji")).not.toBe(id);
+  });
+
+  it("currentGameId crée un identifiant même sans startGame préalable", () => {
+    expect(currentGameId("Emoji")).toBeTruthy();
   });
 
   it("buildGameSession réutilise l'identifiant de la partie comme clé d'idempotence", () => {

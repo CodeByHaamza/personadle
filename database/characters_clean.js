@@ -48,7 +48,7 @@ export const characters = [
     opus: ["P1", "P2EP"],
     personaUser: true,
     persona: "Aizen Myouou",
-    emoji: ["1", "💵", "👓"],
+    emoji: ["1️⃣", "💵", "👓"],
     quote: "Heir to the Nanjo Group. An utter pragmatist and skeptic."
   },
   {
