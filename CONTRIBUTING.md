@@ -70,11 +70,19 @@ Le test `tests/php/DatabaseIntegrationTest.php` garde-fou cette cohérence en CI
 - **`main`** = production (le déploiement Hostinger se fait **uniquement** depuis
   `main`, via `.github/workflows/cd.yml`, manuel).
 - Flux : feature → `develop` → (PR) → `main`.
+- **Une PR de feature ne vise jamais `main` directement.** Le déploiement Hostinger est un
+  `git pull` automatique depuis `main` : court-circuiter `develop`, c'est mettre en prod du
+  code dont les migrations n'ont pas encore été jouées. La règle est appliquée par le job
+  **`PR base guard`** (`.github/workflows/pr-base-guard.yml`), qui fait échouer toute PR sur
+  `main` dont la source n'est ni `develop`, ni `hotfix/*`, ni `dependabot/*` (Dependabot
+  cible la branche par défaut et n'a pas de `target-branch`). Rebaser une PR mal ciblée :
+  `gh pr edit <numéro> --base develop`.
 
 ### Protéger `main` (à faire une fois, réglages GitHub)
 Settings → Branches → Add rule sur `main` :
 - ✅ Require a pull request before merging
-- ✅ Require status checks to pass (sélectionner les jobs CI)
+- ✅ Require status checks to pass — sélectionner les jobs CI **et `PR base guard`**, sinon
+  la règle « pas de PR directe sur main » échoue sans bloquer le merge
 - ✅ Do not allow bypassing
 
 Ou en CLI :

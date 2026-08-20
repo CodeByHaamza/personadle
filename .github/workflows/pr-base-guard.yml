@@ -1,0 +1,49 @@
+name: PR base guard
+
+# `main` = ce qui est en prod (déploiement Hostinger = git pull automatique).
+# Le flux du dépôt est : feature → develop → main. Une PR de feature ouverte
+# directement sur `main` court-circuite develop, et surtout elle met en prod du
+# code dont le schéma de base n'a pas encore été migré.
+#
+# GitHub ne sait pas restreindre nativement la branche SOURCE d'une PR : on le
+# fait donc avec un check obligatoire, à cocher dans
+# Settings → Branches → main → Require status checks (job « PR base guard »).
+#
+# Exceptions volontaires :
+#   - develop        → le seul chemin normal vers main
+#   - hotfix/*       → correctif urgent en prod, qui ne peut pas attendre develop
+#   - dependabot/*   → Dependabot cible la branche par défaut (main) et n'a pas
+#                      de `target-branch` configuré dans .github/dependabot.yml
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    name: PR base guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier la branche source
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          case "$HEAD_REF" in
+            develop|hotfix/*|dependabot/*)
+              echo "✅ Source autorisée vers main : $HEAD_REF"
+              ;;
+            *)
+              echo "::error title=PR interdite sur main::La branche '$HEAD_REF' ne peut pas viser main."
+              echo ""
+              echo "Le flux du dépôt est : feature → develop → main."
+              echo "Rebaser cette PR sur develop :"
+              echo "    gh pr edit <numéro> --base develop"
+              echo ""
+              echo "Seules exceptions : develop, hotfix/*, dependabot/*."
+              exit 1
+              ;;
+          esac
