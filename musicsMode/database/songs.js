@@ -21,7 +21,7 @@ export const songs = [
     titre: "Ambitions and Visions",
     fichier: "Ambitions_and_Visions.mp3",
     opus: ["P5X"],
-    image: "P5X.webp",
+    image: "Ambition_and_Vision.jpg",
     vocalist: "Lyn Inaizumi",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=djfP0FKXhqw"
