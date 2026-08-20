@@ -126,14 +126,18 @@ if (!$hasSessionToday) {
     }
 }
 
-// ── Anti-doublon : une seule session par (user, mode, date) ──────────────────
-// La contrainte UNIQUE uq_session_per_day en BDD garantit l'unicité même en
-// cas de requêtes simultanées (plus de TOCTOU). personadle_record_game_session()
-// intercepte la PDOException et la transforme en PersonadleDuplicateSessionException.
+// ── Anti-doublon : idempotence par client_session_id (migration 032) ─────────
+// Il n'y a plus de plafond d'une partie par jour : 50 parties dans la soirée font
+// 50 lignes. Le seul doublon refusé est le REJEU d'un client_session_id déjà
+// enregistré (file savePendingSession rejouée après un timeout). La contrainte
+// UNIQUE uq_session_client_id garantit l'unicité même en requêtes simultanées ;
+// personadle_record_game_session() la transforme en
+// PersonadleDuplicateSessionException, rendue au client en 409.
 $pdo->beginTransaction();
 try {
     $sessionResult = personadle_record_game_session(
-        $pdo, $userId, $mode, $playedDate, $targetName, $result, $attempts, $timeMs, $filters
+        $pdo, $userId, $mode, $playedDate, $targetName, $result, $attempts, $timeMs, $filters,
+        $isExpert, $clientSessionId
     );
     $pdo->commit();
 } catch (PersonadleDuplicateSessionException $dup) {
