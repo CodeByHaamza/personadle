@@ -88,4 +88,15 @@ export const personas = [
   "Shin Kanzato",
   "Jun Kanzato",
   "Ryo Kanzato",
+
+  // Persona 1 — 2.1 (Eriko Kirishima absente : dessin de persona manquant)
+  "Naoya Todou",
+  "Maki Sonomura",
+  "Masao Inaba",
+  "Kei Nanjo",
+  "Hidehiko Uesugi",
+  "Yukino Mayuzumi",
+  "Yuka Ayase",
+  "Reiji Kido",
+  "Eriko Kirishima",
 ];

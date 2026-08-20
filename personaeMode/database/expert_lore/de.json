@@ -1048,5 +1048,145 @@
       "Cain",
       "Kain"
     ]
+  },
+  "Seimen Kongou": {
+    "text": "Seimen Kongou, auch Shoumen Kongou geschrieben, ist ein Rakshasa der hinduistischen Überlieferung, der im japanischen Buddhismus zur Schutzgottheit wurde und schon in einem Text des siebten Jahrhunderts bezeugt ist. Einst verbreitete er Krankheit und Leid, dann weihte er sich dem Schutz der Lebenden vor eben den Übeln, die er selbst verursacht hatte. Man stellt ihn blauhäutig und vierarmig dar: Er trägt einen dreizackigen Vajra für die unzerstörbare Kraft der Lehre, einen Zeremonienstab, ein Rad für die Lehre selbst und einen Strick, um das Böse zu binden. Der Koushin-Kult rief ihn in der Nacht an, in der ein Leben verkürzt werden konnte.",
+    "mask": [
+      "Seimen Kongou",
+      "Shoumen Kongou",
+      "Seimen",
+      "Shoumen",
+      "Kongou"
+    ]
+  },
+  "Amon-Ra": {
+    "text": "Amon-Ra ist die Verschmelzung zweier ägyptischer Götter: Amun, der das verborgene Wesen der Dinge darstellt, und Ra, die offenbarte Gottheit der Sonne. Ohne Eltern erschuf er sich selbst und wurde König der Götter, eine der meistverehrten Gestalten des Niltals neben Osiris. Als seine Gemahlinnen werden Wosret, Amaunet und Mut genannt, und mit der letzten zeugte er den Mondgott Chons. Diese Familie wurde vor allem im alten Theben verehrt, wo die gewaltige Tempelanlage von Karnak in fast zweitausend Jahren Bauzeit um ihren Kult herum wuchs.",
+    "mask": [
+      "Amon-Ra",
+      "Amon",
+      "Amun",
+      "Ra"
+    ]
+  },
+  "Vishnu": {
+    "text": "Vishnu ist eine der wichtigsten Gottheiten des hinduistischen Pantheons, der Bewahrer genannt, von gütigem Wesen und stets um das Wohl der Menschen besorgt. Mit Brahma dem Schöpfer und Shiva dem Zerstörer bildet er die Trimurti, und seine Aufgabe ist es, das Gleichgewicht der Welt zu halten und als Avatar in sie herabzusteigen, sooft dieses Gleichgewicht bricht. Dargestellt wird er blauhäutig mit bis zu vier Armen, mit Chakra-Rad, Lotos, Keule und Muschelhorn, auf dem Vogel Garuda reitend und auf der Schlange Ananta Shesha schlafend. Sein letzter Avatar Kalki soll das gegenwärtige Zeitalter beenden.",
+    "mask": [
+      "Vishnu",
+      "Wischnu"
+    ]
+  },
+  "Maso": {
+    "text": "Maso, besser bekannt als Mazu, ist die chinesische Göttin, die Fischer und Seeleute vor den Gefahren des Meeres schützt. Als Sterbliche lernte sie mit fünfzehn schwimmen und wurde die beste Schwimmerin ihres Dorfes; in roten Gewändern stand sie am Ufer, um die Boote heimzuleiten. In der Nacht, als ein Sturm das Boot ihres Vaters zerbrach, fiel sie in Trance, um ihn und ihren Bruder zurückzuholen; die Mutter weckte sie zu früh, und nur der Vater kehrte wieder. Nach ihrem Tod beteten die Familien der Seeleute zu ihr, und ihr Kult verbreitete sich als der einer mütterlichen Beschützerin.",
+    "mask": [
+      "Maso",
+      "Mazu"
+    ]
+  },
+  "Verdandi": {
+    "text": "Verdandi, altnordisch Verðandi und bisweilen Verthandi geschrieben, ist eine der drei Nornen, die das Schicksal der Menschen bestimmen, neben Urd und Skuld. Ihr Name ist das Partizip Präsens des Verbs werden und wird gelesen als das, was ins Sein tritt, was gerade geschieht, das Gewebe des gegenwärtigen Augenblicks. Wo ihre Schwestern das Gewesene und das Kommende halten, hält sie den Moment, der sich eben entfaltet. Beschrieben wird sie als schöne Frau, und ihr Name ist mit dem deutschen werden und dem niederländischen worden verwandt.",
+    "mask": [
+      "Verdandi",
+      "Verðandi",
+      "Verthandi"
+    ]
+  },
+  "Ogun": {
+    "text": "Ogun ist der Gott des Eisens bei den Yoruba in Nigeria, der Erste, der den Menschen den Gebrauch dieses Metalls zeigte. Als die Götter an einem Spinnennetz vom Himmel herabstiegen, schufen sie die ersten Menschen in einem Wald, doch die vorhandenen Werkzeuge waren aus zu weichem Metall, um irgendein Stück Land zu roden. Nachdem er das Geheimnis des Eisens vom Sohn des höchsten Gottes Olorun erhalten hatte, schmiedete er eine Axt, fällte die Bäume, schuf Raum für die Menschen und teilte sein Wissen mit Göttern wie Sterblichen. Sein Zorn kann sich gegen jene wenden, die er schützt.",
+    "mask": [
+      "Ogun"
+    ]
+  },
+  "Aizen Myouou": {
+    "text": "Aizen Myouou ist ein Weisheitskönig des esoterischen Buddhismus, gezählt zu den großen zornvollen Wächtern neben Fudou Myouou und Gozanze, verehrt in Mandalas, in denen ihn siebenunddreißig oder siebzehn Devas umgeben. Man malt ihn rothäutig und mit finsterer Miene: Dieser Zorn ist das Bild von Begehren und Leidenschaft, gebändigt statt ausgelebt. Er erscheint mit zwei, vier oder sechs Armen, die Glocke, Stab, Donnerkeil, Lotos, Bogen und Pfeil halten, mitunter mit einem Löwenkopf im gesträubten Haar. Er verkörpert den Augenblick, in dem das Begehren selbst zur Erleuchtung wird und leidenschaftliche Liebe zum Mitgefühl für alles Lebende.",
+    "mask": [
+      "Aizen Myouou",
+      "Aizen",
+      "Myouou"
+    ]
+  },
+  "Yamaoka": {
+    "text": "Yamaoka geht auf einen Menschen zurück, nicht auf einen Mythos: den Schwertmeister, Kalligrafen und Zen-Übenden Yamaoka Tesshu, der den Sturz des Shogunats im neunzehnten Jahrhundert erlebte. Berühmt für eine Meisterschaft, in der die Klinge niemals im Zorn gehoben wurde, handelte er die friedliche Übergabe der Burg Edo aus und ersparte der Stadt damit eine Belagerung. Er gründete eine eigene Schwertschule, lehrte, dass Technik ohne innere Disziplin leer sei, und diente dem Kaiser zehn Jahre, ehe er zum Unterrichten zurückkehrte. In Erinnerung blieben unerbittliches Üben, tausendfach verschenkte Kalligrafien und ein im Sitzen meditierend empfangener Tod.",
+    "mask": [
+      "Yamaoka",
+      "Tesshu",
+      "Tesshū"
+    ]
+  },
+  "Nemhain": {
+    "text": "Nemhain, auch Neamhain oder Nemain geschrieben, bildet mit Badb Catha und Macha das Dreigespann der Kriegsgöttinnen, die in der irischen Mythologie die Gesichter der Morrigan ausmachen. Sie ist die des Wahnsinns und der Panik, des Schreckens, der über ein Heer fällt, ehe überhaupt eine Klinge gezogen ist. Man sagte, sie schreie über dem Schlachtfeld, bis die Krieger jedes Urteil verlören und Verbündete wie Feinde gleichermaßen niederschlügen, und ganze Scharen allein an diesem Schrei vor Angst stürben. Ihr Name wird als giftig oder rasend gelesen, und sie zählt zu den ältesten Kriegsgestalten Irlands.",
+    "mask": [
+      "Nemhain",
+      "Neamhain",
+      "Nemain"
+    ]
+  },
+  "Tyr": {
+    "text": "Tyr, auch Tir geschrieben, ist der nordische Gott des Krieges, des Zweikampfs, des Sieges und des Heldenruhms, dargestellt als einhändiger Mann. Die rechte Hand verlor er an den Wolf Fenrir: Als die Götter das Tier fesseln wollten, legte er allein die Hand als Pfand der Redlichkeit in seinen Rachen, und als die Fessel hielt, biss der Wolf sie ab. Diese Tat macht ihn zum Sinnbild des Mutes. Er ist zugleich der Gott des Rechts und der Thingversammlung, Bürge der Eide, mit der Zeit von Odin und Thor verdrängt.",
+    "mask": [
+      "Tyr",
+      "Tir"
+    ]
+  },
+  "Vesta": {
+    "text": "Vesta ist die römische Göttin des Herdes, des Hauses, der Familie und der Keuschheit, deren Element das Feuer ist und deren griechische Entsprechung Hestia heißt. Als Tochter des Saturn und der Ops und älteste Schwester von Jupiter, Neptun, Pluto, Juno und Ceres verweigerte sie als Einzige die Ehe und schenkte sich stattdessen den Häusern, die sie segnete. Ihre Mythen sind wenige und erzählen vor allem von wunderbaren Empfängnissen aus einem Phallus in den Flammen des Herdes. Oft wurde sie nicht als Frau dargestellt, sondern als lebendige Flamme, die ihre Priesterinnen niemals erlöschen lassen durften.",
+    "mask": [
+      "Vesta"
+    ]
+  },
+  "Durga": {
+    "text": "Durga, deren Name die bedeutet, die aus äußerster Not errettet, ist eine Erscheinungsform der strahlenden Göttin Devi im Hinduismus. Dargestellt wird sie mit zehn Armen, auf einem Löwen oder Tiger reitend, mit Waffen und einem Lotos, mit meditativem Lächeln und symbolischen Handgesten. Sie verkörpert die schöpferische weibliche Kraft und lebt in vollkommener Unabhängigkeit, ohne das Universum oder irgendjemanden darin zu brauchen. Kali gilt als einer ihrer Aspekte, und sie selbst ist die dämonenschlagende, wilde Gestalt der Parvati, Gemahlin Shivas und Mutter von Ganesha und Kartikeya.",
+    "mask": [
+      "Durga"
+    ]
+  },
+  "Houri": {
+    "text": "Die Huris sind die Gefährtinnen des Paradieses in der islamischen Lehre, sittsame und schöne Wesen, die im den Gläubigen versprochenen Garten wohnen. Beschrieben werden sie als haarlos bis auf das Haupthaar, so rein, dass sie bis ins Knochenmark durchscheinend sind, und ewig jung. Zwar sprechen die Beschreibungen meist von Frauen, doch bezeichnet der arabische Begriff eine schöne, reine Gefährtin oder einen ebensolchen Gefährten, und wer das Paradies betritt, dem wird ein solcher Gefährte des jeweils anderen Geschlechts verheißen. Der Name selbst spielt auf den starken Kontrast von Weiß und Dunkel im Auge an.",
+    "mask": [
+      "Houri",
+      "Houris",
+      "Huri",
+      "Huris"
+    ]
+  },
+  "Freyr": {
+    "text": "Freyr, bisweilen Frey geschrieben und auch als Yngvi-Freyr bekannt, ist einer der wichtigsten Götter des nordischen Heidentums, ein Wane, der unter die Asen aufgenommen wurde. Er herrscht über Ackerbau, Sonnenschein und gutes Wetter, und als Fruchtbarkeitsgott heißt es, er schenke den Sterblichen Frieden und Wohlbehagen. Verehrt wurde er vor allem in Schweden, dessen Königshaus sich von ihm herleitete; ihm gehören das Schiff Skidbladnir und der Eber Gullinbursti. Um die Riesin Gerd zu gewinnen, gab er sein Schwert fort, und ohne dieses wird er am Ende der Welt dem Feuerriesen Surtr gegenüberstehen.",
+    "mask": [
+      "Freyr",
+      "Frey",
+      "Yngvi-Freyr",
+      "Yngvi"
+    ]
+  },
+  "Bres": {
+    "text": "Bres war in der irischen Mythologie ein König der Tuatha De Danann, von fomorischem Blut und geneigt, dieses Volk in jedem Urteil zu bevorzugen. Als Nuadha seine Hand verlor und als herrschaftsunfähig galt, wurde er an dessen Stelle erhoben, und Brigid von den Tuatha De Danann wurde seine Gemahlin. Seine Herrschaft war hart: Er zwang die Tuatha De Danann zu Sklavenarbeit und legte ihnen einen Tribut an die Fomoren auf, bis man ihn stürzte und verbannte, nachdem Nuadhas Hand ersetzt worden war. Mit Balors Hilfe versuchte er den Thron zurückzugewinnen und scheiterte.",
+    "mask": [
+      "Bres"
+    ]
+  },
+  "Mot": {
+    "text": "Mot, auch Mavet genannt, ist die kanaanäische Personifikation des Todes, verbunden mit Dürre, Unfruchtbarkeit und der Unterwelt. Sein Thron ist eine Grube in einer Stadt des Unrats, und ihm werden die Zepter der Witwenschaft und der Trauer zugeschrieben. Die Texte aus Ugarit machen ihn zum Sohn des höchsten Gottes El und zum Feind des Wettergottes Baal, dessen Regen dem Land Leben bringt. Den Boten Baals antwortete er mit der Prahlerei eines Fleischhungers, den nichts stillen konnte, und der Streit endete mit Baals Tod und danach mit seiner eigenen Zerstückelung durch Anat.",
+    "mask": [
+      "Mot",
+      "Mavet"
+    ]
+  },
+  "Nike": {
+    "text": "Nike ist die griechische Göttin des Sieges, der Stärke und der Schnelligkeit, und das Vorbild, dem die geflügelten Boten der späteren abrahamitischen Kunst ihre Gestalt verdanken. Ihre größte Tat vollbrachte sie im Krieg gegen die Titanen, in dem sie den Göttern als persönliche Wagenlenkerin diente: Ohne sie, so hieß es, hätten sie diesen Krieg niemals gewinnen können. Lange galt sie eher als ein Aspekt der Athene denn als eigenständige Göttin, und in der Kunst jener Zeit erscheint sie stets ungeflügelt; erst als sie für sich stand, erhielt sie Flügel. Die Römer kannten sie unter dem Namen Victoria.",
+    "mask": [
+      "Nike"
+    ]
+  },
+  "Armaiti": {
+    "text": "Armaiti, deren Name wohltätige Hingabe bedeutet, ist eine der Amesha Spentas des Zoroastrismus, jener heiligen Unsterblichen, die den Schöpfer umgeben. Sie ist die Verkörperung der Hingabe selbst und des rechtschaffenen Gehorsams und die Tochter Ahura Mazdas. Ihr Element ist die Erde, und durch sie waltet sie über die Fruchtbarkeit wie über die Toten, die man in den Boden legt, den sie verkörpert. Der fünfte Tag jedes Monats und der zwölfte Monat des Jahres sind ihr geweiht. Ihr ewiger Gegner ist der Erzdämon der Unzufriedenheit, Nanghaithya.",
+    "mask": [
+      "Armaiti",
+      "Spenta Armaiti"
+    ]
+  },
+  "Gabriel": {
+    "text": "Gabriel, von einem hebräischen Namen, der gelesen wird als Gott ist meine Stärke, ist der hohe Botenengel der drei abrahamitischen Religionen, die linke Hand Gottes genannt, wo Michael die rechte ist. Im Christentum besteht die Aufgabe in der Ankündigung: Elisabet zu sagen, dass sie Johannes den Täufer gebären werde, und Maria, dass sie einen Sohn tragen werde, den sie Jesus nennen solle. Derselbe Engel verkündet Daniel die Prophezeiung der siebzig Wochen. Im Islam ist dies der höchste der Engel, der Muhammad den Koran offenbarte. Frühe Texte lesen die Gestalt als männlich oder geschlechtslos; das sanfte Gesicht der späteren Malerei hält die Frage offen.",
+    "mask": [
+      "Gabriel"
+    ]
   }
 }

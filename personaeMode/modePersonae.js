@@ -60,6 +60,7 @@ import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 
 /** All specific opus codes available in Personae mode. */
 const ALL_OPUS = [
+  "P1",
   "P2IS",
   "P2EP",
   "P3",
