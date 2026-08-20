@@ -27,8 +27,13 @@
 
 /* Image du Persona affichée dans la boîte */
 #personaImage {
-  max-width: 90%;
-  max-height: 90%;
+  /* width/height plutôt que max-* : avec `max-` seul, un dessin plus petit que
+     le cadre s'affichait à sa taille naturelle — Freyr, fourni en 112x98, était
+     une vignette perdue au milieu de la boîte alors que les autres la remplissent.
+     `object-fit: contain` conserve le ratio, donc les grands dessins rendent
+     exactement comme avant (ils étaient déjà contraints par le cadre). */
+  width: 90%;
+  height: 90%;
   object-fit: contain;
   border-radius: 12px;
   transition: transform 0.3s ease;
@@ -89,8 +94,8 @@
 
   /* L'image du Persona occupe mieux l'espace */
   #personaImage {
-    max-width: 92%;
-    max-height: 92%;
+    width: 92%;
+    height: 92%;
   }
 
   /* ── Correctif zone input ──────────────────────────────────────────────────
