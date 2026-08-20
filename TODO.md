@@ -38,12 +38,13 @@ migrations**. Déployer sans les jouer casse la prod.
 
 ---
 
-## 1. Refonte des stats — ce qui reste
+## 1. Refonte des stats — ✅ terminé (2026-08-20)
 
-- [ ] Test E2E : jouer **deux parties le même jour** dans un mode et vérifier que les deux
-      apparaissent côté serveur. C'est le seul contrôle qui prouve la promesse « 50 parties
-      = 50 parties comptées » de bout en bout ; les 721 tests unitaires ne couvrent que la
-      garde elle-même.
+- [x] Test E2E `tests-e2e/sessions-same-day.spec.js` : trois parties le même jour dans le
+      même mode, toutes enregistrées, streak restée journalière, rejeu d'un
+      `client_session_id` refusé en 409, et partie Expert absente des stats du mode normal.
+      C'est ce test qui a confirmé le correctif d'`api/sessions.php` (les deux derniers
+      arguments n'étaient pas transmis).
 
 ## 2. Les trois classements
 
@@ -69,16 +70,18 @@ Le correctif du 2026-08-15 empêche d'en créer de nouveaux, **il ne répare pas
       `getPendingActiveChallenge()` fournit déjà l'état ; il manque l'action inverse (purge
       d'`activeChallenge`, restauration des filtres, statut serveur remis à `read`).
 
-## 4. Mode Silhouette Expert — le dernier mode
+## 4. Mode Silhouette Expert — le dernier mode ✅ (2026-08-20)
 
-Reporté explicitement par Hamza, mais c'est ce qui bloque la fermeture de la branche.
+Livré, mais **pas avec la mécanique prévue ici** : le plan « dézoom figé + point de zoom
+tiré sur un contour » demandait des ancrages pré-repérés pour 184 personnages (un point
+aléatoire tombe en plein aplat noir et ne montre rien). Remplacé par **le flash** —
+décision Hamza du 2026-08-20 : l'image reste invisible, un bouton FLASH la montre
+120 ms + 60 ms par essai, 1 crédit au départ et +1 par erreur.
 
-- [ ] Dézoom **figé** au maximum (le mode normal dézoome de 0.2 par erreur).
-- [ ] Point de zoom tiré au hasard **sur un contour**, pas au centre fixe. ⚠️ Un point
-      purement aléatoire peut tomber en plein aplat noir uniforme et ne rien montrer
-      d'exploitable — il faut des points d'ancrage pré-repérés par personnage, ou une
-      contrainte sur les zones qui touchent un contour.
-- [ ] Bouton, règles, i18n, tests. `silhouette.html` n'a aujourd'hui **aucun** `#expertToggle`.
+- [x] Bouton, règles, i18n (6 langues), 8 tests E2E.
+- [ ] **Changelog joueur** (`PersonaDLE_Update.html`) — il ne contient **aucune** entrée
+      Expert, pour aucun des 6 modes : le lot entier est à écrire d'un bloc au moment de
+      la release, pas mode par mode.
 
 ## 5. Défis en Mode Expert
 
@@ -91,7 +94,11 @@ s'imposait comme cible en Expert et une victoire Expert validait le défi normal
 - [ ] Les deux points d'acceptation (`js/challenge-notif.js`, `profile/friends/friends.js`)
       doivent ajouter `?expert=1` à l'URL.
 - [ ] Barème : un défi Expert ne se compare qu'à un défi Expert.
-- [ ] Réactiver le circuit dans `modePersonae.js` (3 gardes `!EXPERT.isExpert`) une fois fait.
+- [ ] Réactiver le circuit dans `modePersonae.js` (3 gardes `!EXPERT.isExpert`) **et** les
+      gardes centrales posées le 2026-08-20 dans `js/gameCore.js`
+      (`getActiveChallengeTarget()`, `showChallengeButton()`) et `js/challenge-result.js`
+      (`checkChallengeCompletion()`) — c'est là que la neutralisation vit désormais pour
+      les 6 modes ; les 3 gardes Personae sont devenues redondantes.
 
 ## 6. Déblocage des modes Expert — **autre branche** (décision Hamza)
 
@@ -145,6 +152,10 @@ de `composer.json`, et `npm audit --omit=dev` sort 0 vulnérabilité. Le risque 
 ---
 
 ## Points ouverts pour Hamza
+
+- [ ] **`new data/` non suivi par git** — dossier de dépôt d'assets de Léo, encore présent
+      à la racine après intégration du lot P1. À supprimer ou à mettre dans `.gitignore`
+      avant qu'un `git add -A` ne l'embarque dans le dépôt.
 
 - [ ] **`Orpheus ( Male )` porte la fiche de la famille Orpheus** — c'était la seule entrée du
       dataset capable de la recevoir, le `.md` ne connaissant qu'« Orpheus ». À confirmer.
