@@ -40,7 +40,7 @@ Le hook de pre-commit lance déjà i18n + tests. Détail :
 
 | Commande | Vérifie |
 |---|---|
-| `make test` / `npm test` | 721 tests JS (Vitest) |
+| `make test` / `npm test` | 725 tests JS (Vitest) |
 | `make test-php` | 193 méthodes de test PHPUnit dans 12 fichiers (logique + intégration BDD). Tourne **dans le conteneur Docker** (`make up` requis) — pas besoin de PHP installé sur ta machine |
 | `npm run lint` | ESLint |
 | `npm run data:check` | schéma des données personnages |
@@ -110,10 +110,12 @@ une étiquette "sans risque".
 - **PHP** : PDO préparé **obligatoire** (jamais de concaténation SQL), bcrypt,
   codes HTTP corrects, `requireAuth()`/`requireAdmin()` sur les endpoints d'état.
 - **i18n** : ajouter la clé dans `lang/en.json` (source de vérité) en premier.
-- **Tout ajout/correction notable** → documenter dans deux fichiers distincts (voir CLAUDE.md §9) :
-  `PersonaDLE_Update_Documentation/PersonaDLE 2.0/DEV_CHANGELOG.md` (changelog dev, détail par
+- **Tout ajout/correction notable** → documenter dans deux fichiers distincts (voir CLAUDE.md §9),
+  dans le dossier de la version **en cours** (aujourd'hui la 2.1) :
+  `PersonaDLE_Update_Documentation/PersonaDLE 2.1/DEV_CHANGELOG.md` (changelog dev, détail par
   commit) et, seulement si le changement est visible pour un joueur,
-  `PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html` (changelog joueur,
-  highlights). Il n'existe pas de `PersonaDLE_Update.md` pour la v2.0.
+  `PersonaDLE_Update_Documentation/PersonaDLE 2.1/PersonaDLE_Update.html` (changelog joueur,
+  highlights). Le dossier `PersonaDLE 2.0/` ne reçoit plus que des correctifs de la 2.0 en
+  prod. Il n'existe pas de `PersonaDLE_Update.md` pour la v2.0 ni la v2.1.
 
 Voir `CLAUDE.md` pour les pièges critiques détaillés.
