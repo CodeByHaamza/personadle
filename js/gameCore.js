@@ -814,6 +814,12 @@ function _getActiveFilters(mode) {
  * défi ancien format (sans cible propre → comportement historique, cible du jour).
  */
 export function getActiveChallengeTarget(mode) {
+  // Aucun défi en Mode Expert tant que `messages.challenge_is_expert` n'existe
+  // pas : `activeChallenge` n'est pas scopé par mode Expert, donc un défi créé en
+  // normal s'imposerait comme cible en Expert (et une victoire Expert validerait
+  // le défi normal). Garde ici plutôt que dans chaque mode : les 6 modes passent
+  // par cette fonction, et isChallengePlay() en dérive.
+  if (isExpertPage()) return null;
   try {
     const c = JSON.parse(localStorage.getItem("activeChallenge") || "null");
     if (!c) return null;
@@ -869,6 +875,8 @@ export function getPendingActiveChallenge() {
  */
 export function showChallengeButton(mode, score, targetPool = null) {
   if (!window._currentUser) return;
+  // Pas d'émission de défi depuis l'Expert — cf. getActiveChallengeTarget().
+  if (isExpertPage()) return;
 
   const nav = document.getElementById("modeNavigationContainer");
   if (!nav || document.getElementById("challengeFriendBtn")) return;

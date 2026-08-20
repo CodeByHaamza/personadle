@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle - Silhouette Mode</title>
     <link rel="stylesheet" href="../css/global.css?v=12" />
-    <link rel="stylesheet" href="./silhouette.css?v=3" />
+    <link rel="stylesheet" href="./silhouette.css?v=4" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -365,7 +365,7 @@
 
         <!-- Règles : câblées sur les clés JSON (modes.silhouette.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <div id="rulesNormal">
           <strong data-i18n="modes.silhouette.goal">🎯 Goal:</strong><br />
           <span data-i18n="modes.silhouette.goal_intro">A shadowy figure stands before you...</span>
           <br />
@@ -430,12 +430,64 @@
             detective!</em
           >
         </div>
+
+        <!-- Règles Expert — bloc distinct, affiché par setupExpertToggle(). -->
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.silhouette.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.silhouette.expert_goal_text">
+            The silhouette stays hidden. You only ever see it in flashes — and you decide when.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.silhouette.expert_tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.silhouette.expert_tip_1">
+              Press FLASH to show the silhouette for a fraction of a second.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_2">
+              You start with one flash, and every wrong guess earns you another one.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_3">
+              Each wrong guess also makes every following flash last longer.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_4">
+              No zoom here: the whole silhouette is shown — for as long as it lasts.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_6">
+              Expert rounds have their own daily answer, and do not count towards your streak.
+            </li>
+          </ul>
+        </div>
       </div>
+    </div>
+
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1). -->
+    <div class="expert-toggle-zone">
+      <a
+        href="silhouette.html?expert=1"
+        id="expertToggle"
+        class="expert-toggle"
+        data-i18n="ui.expert_enter"
+      >
+        ⚡ Expert mode
+      </a>
     </div>
 
     <!-- Image silhouette -->
     <div class="silhouette-box">
       <img id="silhouetteImage" src="" alt="Silhouette" draggable="false" />
+    </div>
+
+    <!-- Bouton FLASH — Expert uniquement (affiché via body.expert-mode en CSS) -->
+    <div class="flash-block">
+      <button id="flashButton" class="flash-btn" type="button" aria-disabled="true">
+        <span data-i18n="modes.silhouette.expert_flash">⚡ FLASH</span>
+        <span id="flashCounter" class="flash-counter">(0)</span>
+      </button>
     </div>
 
     <!-- Bouton Give Up -->
@@ -584,7 +636,7 @@
       import { initLang } from "../js/i18n.js";
       window.__i18nReady = initLang();
     </script>
-    <script type="module" src="./modeSilhouette.js?v=4"></script>
+    <script type="module" src="./modeSilhouette.js?v=5"></script>
 
     <!-- Dark Mode -->
     <div class="darkmode-toggle">

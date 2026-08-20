@@ -24,6 +24,8 @@ import {
   startGame,
   isGameLogged,
   markGameLogged,
+  expertContext,
+  setupExpertToggle,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -38,10 +40,37 @@ import { closeAllAutocompleteLists } from "../js/autocomplete.js";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const modeName = "silhouette";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE EXPERT — la silhouette n'apparaît qu'en flash
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Même page que le mode normal, distinguée par `?expert=1`. L'image reste
+// invisible en permanence : le joueur déclenche lui-même un flash (bouton), ce
+// qui lui laisse le temps de se préparer à regarder — un flash automatique au
+// moment du guess se serait joué pendant qu'il tape.
+//
+// Économie des flashs : 1 crédit au départ (sinon la première tentative est à
+// l'aveugle totale), +1 par erreur. La durée grandit avec le nombre d'essais,
+// c'est elle qui rend la partie jouable au fil des erreurs.
+//
+// Le dézoom progressif du mode normal n'a aucun sens ici (l'image n'est jamais
+// affichée durablement) : le zoom est figé à 1, silhouette entière.
+const EXPERT = expertContext({
+  prefix: "silhouetteExpert",
+  statsKey: modeName,
+  hashMode: "Silhouette",
+});
+
+const FLASH_BASE_MS = 120;
+const FLASH_STEP_MS = 60;
+/** Durée d'un flash après `attempts` essais : 120, 180, 240… ms. */
+const flashDurationMs = (attempts) => FLASH_BASE_MS + FLASH_STEP_MS * attempts;
+
 // Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
 // isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
 // seule la streak reste journalière, et elle se calcule ailleurs.
-const STATS_SCOPE = modeName;
+const STATS_SCOPE = EXPERT.statsKey;
 let statsAlreadyLogged = isGameLogged(STATS_SCOPE);
 let sessionStartTime = Date.now();
 
@@ -74,7 +103,8 @@ let filteredCharacters = [];
 let target = null;
 let attempts = 0;
 const maxAttempts = 5; // Give Up unlocks after this many wrong guesses
-let currentZoom = 1.8; // Initial zoom level (decreases on each wrong guess)
+const INITIAL_ZOOM = EXPERT.isExpert ? 1 : 1.8;
+let currentZoom = INITIAL_ZOOM; // Initial zoom level (decreases on each wrong guess)
 const maxZoomOut = 1;
 let gameOver = false;
 let currentPickToken = 0; // Anti-race-condition token for image preloading
@@ -97,6 +127,8 @@ const giveUpBtn = document.getElementById("giveUpButton");
 const giveUpCounter = document.getElementById("giveUpCounter");
 const wrongList = document.getElementById("wrongGuessList");
 const silhouetteBox = document.querySelector(".silhouette-box");
+const flashBtn = document.getElementById("flashButton");
+const flashCounter = document.getElementById("flashCounter");
 
 // Initially hidden while the first image loads
 silhouetteImg.style.visibility = "hidden";
@@ -127,6 +159,47 @@ function applyZoom(zoomFactor) {
   silhouetteImg.style.transform = `scale(${zoomFactor})`;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FLASH (Mode Expert)
+// ─────────────────────────────────────────────────────────────────────────────
+
+let flashCredits = 0;
+let flashTimer = null;
+
+/**
+ * Masque ou révèle l'image en Expert. `opacity` et non `visibility` : celle-ci
+ * sert déjà au chargement (pickCharacter), les deux se marcheraient dessus.
+ */
+function setFlashVisible(visible) {
+  silhouetteImg.style.opacity = visible ? "1" : "0";
+}
+
+function saveFlashCredits() {
+  localStorage.setItem(EXPERT.key("silhouetteFlashes"), String(flashCredits));
+}
+
+function updateFlashButton() {
+  if (!flashBtn) return;
+  if (flashCounter) flashCounter.textContent = `(${flashCredits})`;
+  const usable = flashCredits > 0 && !gameOver;
+  flashBtn.setAttribute("aria-disabled", usable ? "false" : "true");
+  flashBtn.classList.toggle("disabled", !usable);
+}
+
+/** Un flash : la silhouette apparaît pendant flashDurationMs(attempts), puis disparaît. */
+function triggerFlash() {
+  if (!EXPERT.isExpert || gameOver || flashCredits <= 0) return;
+  flashCredits--;
+  saveFlashCredits();
+  updateFlashButton();
+
+  clearTimeout(flashTimer);
+  setFlashVisible(true);
+  flashTimer = setTimeout(() => {
+    if (!gameOver) setFlashVisible(false);
+  }, flashDurationMs(attempts));
+}
+
 /**
  * Picks a random character (avoiding the last 5) and loads their silhouette.
  * Uses a token to cancel in-flight loads if pickCharacter() is called again.
@@ -155,10 +228,16 @@ function pickCharacter(random = false) {
         : filteredCharacters;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
   } else {
-    target = getDailyTarget(originalCharacters, "Silhouette");
+    target = getDailyTarget(originalCharacters, EXPERT.hashMode);
   }
 
-  currentZoom = 1.8;
+  currentZoom = INITIAL_ZOOM;
+  if (EXPERT.isExpert) {
+    flashCredits = 1;
+    saveFlashCredits();
+    setFlashVisible(false);
+    updateFlashButton();
+  }
 
   // Hide image during load to prevent flash
   silhouetteImg.style.visibility = "hidden";
@@ -183,9 +262,9 @@ function pickCharacter(random = false) {
   };
   tempImage.src = `./database/img/${encodeURIComponent(target.image)}.webp`;
 
-  localStorage.setItem("silhouetteTarget", JSON.stringify(target));
-  localStorage.setItem("silhouetteAttempts", attempts);
-  localStorage.setItem("silhouetteGameOver", "false");
+  localStorage.setItem(EXPERT.key("silhouetteTarget"), JSON.stringify(target));
+  localStorage.setItem(EXPERT.key("silhouetteAttempts"), attempts);
+  localStorage.setItem(EXPERT.key("silhouetteGameOver"), "false");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -327,7 +406,6 @@ function initializeAutocomplete(input, personasList) {
     input.setAttribute("aria-activedescendant", items[currentFocus].id);
     items[currentFocus].scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
-
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -348,6 +426,9 @@ function showVictory(force = false) {
   setGiveUpEnabled(false);
 
   // Reveal full image (remove brightness filter and reset zoom)
+  clearTimeout(flashTimer);
+  setFlashVisible(true);
+  updateFlashButton();
   silhouetteImg.style.transform = "scale(1)";
   silhouetteImg.style.filter = "none";
 
@@ -367,7 +448,7 @@ function showVictory(force = false) {
   if (!force) {
     if (!statsAlreadyLogged && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-      updateProfileStats({ result: "win", mode: modeName, timeSpent });
+      if (!EXPERT.isExpert) updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(
         buildGameSession({
           mode: modeName,
@@ -375,6 +456,7 @@ function showVictory(force = false) {
           result: "win",
           attempts,
           timeMs: timeSpent * 1000,
+          isExpert: EXPERT.isExpert,
           clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
@@ -416,20 +498,22 @@ function showVictory(force = false) {
       attempts,
       filteredCharacters.filter((c) => c.nom !== target.nom).map((c) => c.nom)
     );
-    let winCount = parseInt(localStorage.getItem("silhouetteWins") || "0");
-    localStorage.setItem("silhouetteWins", winCount + 1);
+    if (!EXPERT.isExpert) {
+      let winCount = parseInt(localStorage.getItem("silhouetteWins") || "0");
+      localStorage.setItem("silhouetteWins", winCount + 1);
+    }
   }
 
   checkChallengeCompletion("silhouette", attempts, !force);
-  showCommunityStats(modeName, target.nom);
+  if (!EXPERT.isExpert) showCommunityStats(modeName, target.nom);
   revealNextLink({
     prevHref: "../allOutAttackMode/allOutAttack.html",
     nextHref: "../personaeMode/personae.html",
   });
 
-  localStorage.setItem("silhouetteGameOver", "true");
-  localStorage.setItem("silhouetteForceReveal", String(force));
-  checkUnlocksAfterGame(modeName);
+  localStorage.setItem(EXPERT.key("silhouetteGameOver"), "true");
+  localStorage.setItem(EXPERT.key("silhouetteForceReveal"), String(force));
+  if (!EXPERT.isExpert) checkUnlocksAfterGame(modeName);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -465,7 +549,7 @@ function handleGuess() {
   if (!guess) return;
 
   attempts++;
-  localStorage.setItem("silhouetteAttempts", attempts);
+  localStorage.setItem(EXPERT.key("silhouetteAttempts"), attempts);
   giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
 
   if (attempts >= maxAttempts) {
@@ -475,6 +559,13 @@ function handleGuess() {
 
   if (guess === target.nom.toLowerCase()) {
     showVictory();
+  } else if (EXPERT.isExpert) {
+    // Expert : pas de dézoom (image jamais affichée durablement) — l'erreur
+    // recharge un flash, et allonge tous les suivants via flashDurationMs().
+    showWrong(guess);
+    flashCredits++;
+    saveFlashCredits();
+    updateFlashButton();
   } else {
     showWrong(guess);
     if (currentZoom > maxZoomOut) {
@@ -503,7 +594,7 @@ function giveUp() {
   // au défi via checkChallengeCompletion).
   if (!statsAlreadyLogged && !isChallengePlay("silhouette")) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
-    updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
+    if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
     savePendingSession(
       buildGameSession({
         mode: modeName,
@@ -511,6 +602,7 @@ function giveUp() {
         result: "giveup",
         attempts,
         timeMs: timeSpent * 1000,
+        isExpert: EXPERT.isExpert,
         clientSessionId: markGameLogged(STATS_SCOPE),
       })
     );
@@ -528,7 +620,7 @@ function resetGame(random = false) {
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) nav.style.display = "none";
 
-  localStorage.removeItem("silhouetteForceReveal");
+  localStorage.removeItem(EXPERT.key("silhouetteForceReveal"));
 
   gameOver = false;
   attempts = 0;
@@ -572,6 +664,7 @@ function applyDarkModeStyles() {
 document.addEventListener("DOMContentLoaded", async () => {
   if (window.__i18nReady) await window.__i18nReady;
   setupRulesModal();
+  setupExpertToggle(EXPERT, "silhouette.html");
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("silhouetteActiveFilters", ALL_OPUS, (newActive) => {
     activeFilters = newActive;
@@ -583,11 +676,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   guessBtn.addEventListener("click", handleGuess);
   giveUpBtn.addEventListener("click", giveUp);
+  if (EXPERT.isExpert) flashBtn?.addEventListener("click", triggerFlash);
 
   resetBtn.addEventListener("click", () => {
-    localStorage.removeItem("silhouetteTarget");
-    localStorage.removeItem("silhouetteAttempts");
-    localStorage.removeItem("silhouetteGameOver");
+    localStorage.removeItem(EXPERT.key("silhouetteTarget"));
+    localStorage.removeItem(EXPERT.key("silhouetteAttempts"));
+    localStorage.removeItem(EXPERT.key("silhouetteGameOver"));
     startGame(STATS_SCOPE);
     statsAlreadyLogged = false;
     sessionStartTime = Date.now();
@@ -601,20 +695,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   // ── Restore session ──
-  const stored = localStorage.getItem("silhouetteTarget");
-  const storedAttempts = parseInt(localStorage.getItem("silhouetteAttempts")) || 0;
-  const storedGameOver = localStorage.getItem("silhouetteGameOver") === "true";
+  const stored = localStorage.getItem(EXPERT.key("silhouetteTarget"));
+  const storedAttempts = parseInt(localStorage.getItem(EXPERT.key("silhouetteAttempts"))) || 0;
+  const storedGameOver = localStorage.getItem(EXPERT.key("silhouetteGameOver")) === "true";
 
   if (stored) {
     try {
       target = JSON.parse(stored);
       filteredCharacters = getFilteredCharacters();
-      currentZoom = Math.max(maxZoomOut, 1.8 - 0.2 * storedAttempts);
+      currentZoom = EXPERT.isExpert
+        ? INITIAL_ZOOM
+        : Math.max(maxZoomOut, INITIAL_ZOOM - 0.2 * storedAttempts);
       attempts = storedAttempts;
+
+      // Expert : les crédits de flash survivent au rechargement, sinon un F5 par
+      // essai rendrait la partie gratuite. 1 par défaut (partie d'avant le mode).
+      if (EXPERT.isExpert) {
+        const savedFlashes = localStorage.getItem(EXPERT.key("silhouetteFlashes"));
+        flashCredits = savedFlashes === null ? 1 : parseInt(savedFlashes, 10) || 0;
+        setFlashVisible(storedGameOver);
+      }
 
       silhouetteImg.style.visibility = "hidden";
       silhouetteImg.style.transition = "none";
-      silhouetteImg.style.transform = `scale(1.8)`;
+      silhouetteImg.style.transform = `scale(${currentZoom})`;
       silhouetteImg.src = `./database/img/${encodeURIComponent(target.image)}.webp`;
       silhouetteImg.alt = "Silhouette";
       silhouetteImg.style.filter = storedGameOver ? "none" : "brightness(0)";
@@ -626,7 +730,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       if (storedGameOver) {
-        showVictory(localStorage.getItem("silhouetteForceReveal") === "true");
+        showVictory(localStorage.getItem(EXPERT.key("silhouetteForceReveal")) === "true");
       }
 
       silhouetteImg.onload = () => {
@@ -640,8 +744,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     resetGame();
   }
 
+  updateFlashButton();
+
   // ── Daily reset ──
-  checkResetOnLoad("lastPlayedDate_Silhouette", "silhouette", () => {
+  checkResetOnLoad(EXPERT.key("lastPlayedDate_Silhouette"), "silhouette", () => {
     resetBtn.click();
   });
   setupDailyReset(() => {

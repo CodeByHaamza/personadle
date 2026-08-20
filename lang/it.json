@@ -155,7 +155,17 @@
       "games_list": "Personaggi da Persona 1, 2 (IS & EP), 3, 4, 5 e P5: The Phantom X inclusi gli spin-off.",
       "closing": "🧠 Osserva le ombre, fidati dei tuoi istinti e diventa il detective di silhouette definitivo!",
       "correct": "🎉 Hai trovato {{name}}!",
-      "giveup_reveal": "❌ La risposta era {{name}}"
+      "giveup_reveal": "❌ La risposta era {{name}}",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "La silhouette resta nascosta. La vedi solo a lampi — e decidi tu quando.",
+      "expert_tips": "💡 Consigli:",
+      "expert_tip_1": "Premi FLASH per mostrare la silhouette per una frazione di secondo.",
+      "expert_tip_2": "Inizi con un lampo, e ogni errore te ne fa guadagnare un altro.",
+      "expert_tip_3": "Ogni errore allunga anche tutti i lampi successivi.",
+      "expert_tip_4": "Qui niente zoom: viene mostrata l'intera silhouette — finché dura il lampo.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie Silhouette normale.",
+      "expert_flash": "⚡ FLASH"
     },
     "alloutattack": {
       "name": "All-Out Attack",

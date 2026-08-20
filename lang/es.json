@@ -155,7 +155,17 @@
       "games_list": "Personajes de Persona 1, 2 (IS & EP), 3, 4, 5 y P5: The Phantom X incluyendo spin-offs.",
       "closing": "🧠 ¡Observa las sombras, confía en tus instintos y conviértete en el detective de siluetas definitivo!",
       "correct": "🎉 ¡Encontraste a {{name}}!",
-      "giveup_reveal": "❌ La respuesta era {{name}}"
+      "giveup_reveal": "❌ La respuesta era {{name}}",
+      "expert_goal": "⚡ Modo Experto:",
+      "expert_goal_text": "La silueta permanece oculta. Solo la ves en destellos — y tú decides cuándo.",
+      "expert_tips": "💡 Consejos:",
+      "expert_tip_1": "Pulsa FLASH para mostrar la silueta durante una fracción de segundo.",
+      "expert_tip_2": "Empiezas con un destello, y cada fallo te da otro.",
+      "expert_tip_3": "Cada fallo alarga además todos los destellos siguientes.",
+      "expert_tip_4": "Aquí no hay zoom: se muestra la silueta entera — mientras dure el destello.",
+      "expert_tip_5": "Tienes 5 intentos antes de que se desbloquee el botón Rendirse.",
+      "expert_tip_6": "El Experto tiene su propio personaje diario y sus propias estadísticas. No cuenta para tu racha normal de Silueta.",
+      "expert_flash": "⚡ FLASH"
     },
     "alloutattack": {
       "name": "All-Out Attack",

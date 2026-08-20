@@ -253,3 +253,80 @@
     flex: 1 1 120px; /* Peut rétrécir librement, s'étend si possible */
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODE EXPERT — bouton FLASH
+   ═══════════════════════════════════════════════════════════════════════════
+   L'image reste à opacity:0 en permanence (piloté en JS) ; le bouton la révèle
+   pour flashDurationMs(). Le bloc n'existe que sur ?expert=1 : `body.expert-mode`
+   est posé par setupExpertToggle() (js/gameCore.js).
+
+   ⚠️ Aucune transition sur #silhouetteImage[style*="opacity"] : un fondu
+   rallongerait le flash de façon invisible dans le code de jeu et rendrait la
+   durée annoncée fausse. */
+.flash-block {
+  display: none;
+}
+
+body.expert-mode .flash-block {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.flash-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 26px;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, #d40000, #ff2b2b);
+  border: 3px solid #000;
+  border-radius: 4px;
+  cursor: pointer;
+  transform: skewX(-6deg);
+  box-shadow: 0 0 14px rgba(255, 0, 0, 0.45);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+
+.flash-btn:hover:not(.disabled),
+.flash-btn:focus-visible:not(.disabled) {
+  transform: skewX(-6deg) scale(1.05);
+  box-shadow: 0 0 22px rgba(255, 0, 0, 0.7);
+}
+
+.flash-btn:active:not(.disabled) {
+  transform: skewX(-6deg) scale(0.97);
+}
+
+/* Plus de crédit (ou partie finie) : bouton visible mais inerte — le compteur
+   reste lisible, c'est lui qui explique pourquoi il ne se passe rien. */
+.flash-btn.disabled {
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.flash-counter {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.darkmode .flash-btn {
+  border-color: #fff;
+}
+
+@media (max-width: 480px) {
+  .flash-btn {
+    width: min(340px, 90vw);
+    justify-content: center;
+    font-size: 1rem;
+  }
+}

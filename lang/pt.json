@@ -155,7 +155,17 @@
       "games_list": "Personagens de Persona 1, 2 (IS & EP), 3, 4, 5 e P5: The Phantom X incluindo spin-offs.",
       "closing": "🧠 Observa as sombras, confia no teu instinto e torna-te o derradeiro detetive de silhuetas!",
       "correct": "🎉 Encontraste {{name}}!",
-      "giveup_reveal": "❌ A resposta era {{name}}"
+      "giveup_reveal": "❌ A resposta era {{name}}",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "A silhueta continua escondida. Só a vês em flashes — e és tu que decides quando.",
+      "expert_tips": "💡 Dicas:",
+      "expert_tip_1": "Carrega em FLASH para mostrar a silhueta durante uma fração de segundo.",
+      "expert_tip_2": "Começas com um flash, e cada erro dá-te outro.",
+      "expert_tip_3": "Cada erro também torna todos os flashes seguintes mais longos.",
+      "expert_tip_4": "Aqui não há zoom: a silhueta inteira é mostrada — enquanto o flash durar.",
+      "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_6": "O Especialista tem o seu próprio personagem diário e as suas próprias estatísticas. Não conta para a tua sequência normal de Silhueta.",
+      "expert_flash": "⚡ FLASH"
     },
     "alloutattack": {
       "name": "All-Out Attack",

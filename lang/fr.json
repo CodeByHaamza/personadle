@@ -155,7 +155,17 @@
       "games_list": "Personnages de Persona 1, 2 (IS & EP), 3, 4, 5 et P5 : The Phantom X, spin-offs inclus.",
       "closing": "🧠 Observez les ombres, faites confiance à vos instincts, et devenez le détective de silhouettes ultime !",
       "correct": "🎉 Vous avez trouvé {{name}} !",
-      "giveup_reveal": "❌ La réponse était {{name}}"
+      "giveup_reveal": "❌ La réponse était {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "La silhouette reste cachée. Tu ne la vois qu'en flashs — et c'est toi qui choisis quand.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Appuie sur FLASH pour afficher la silhouette une fraction de seconde.",
+      "expert_tip_2": "Tu démarres avec un flash, et chaque erreur t'en redonne un.",
+      "expert_tip_3": "Chaque erreur allonge aussi tous les flashs suivants.",
+      "expert_tip_4": "Pas de zoom ici : la silhouette entière est montrée — le temps que dure le flash.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner ne se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Silhouette normale.",
+      "expert_flash": "⚡ FLASH"
     },
     "alloutattack": {
       "name": "All-Out Attack",
