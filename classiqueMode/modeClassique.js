@@ -343,7 +343,6 @@ function fillVictoryBox(nom, isGiveup) {
   }
 }
 
-
 /**
  * Rend une tentative ratée en Mode Expert.
  *
@@ -417,6 +416,100 @@ function checkGuess(name, target, forceReveal = false) {
       output.insertBefore(categoryRow, output.firstChild);
     }
 
+    const row = document.createElement("div");
+    row.classList.add("guess-row");
+
+    // Portrait image
+    const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
+    const img = document.createElement("img");
+    img.src = `../database/portraits/${encodeURIComponent(imageName)}.webp`;
+    img.alt = guess.nom;
+    img.className = "guess-image";
+    row.appendChild(img);
+
+    const keysToCompare = ["nom", "genre", "age", "personaUser", "persona", "arcane", "opus"];
+    const i18 = window.i18n || { t: (k) => k };
+    // Labels affichés sur mobile via CSS ::before (data-label)
+    const keyLabels = {
+      nom: i18.t("modes.classic.label_name"),
+      genre: i18.t("modes.classic.label_gender"),
+      age: i18.t("modes.classic.label_age"),
+      personaUser: i18.t("modes.classic.label_persona_user"),
+      persona: i18.t("modes.classic.label_persona"),
+      arcane: i18.t("modes.classic.label_arcana"),
+      opus: i18.t("modes.classic.label_game"),
+    };
+
+    keysToCompare.forEach((key, index) => {
+      const cell = document.createElement("div");
+      cell.classList.add("guess-cell");
+      cell.dataset.label = keyLabels[key] || key; // Pour l'affichage mobile ::before
+
+      const value = guess[key];
+      const targetVal = target[key];
+      let displayValue;
+
+      // Traduit une valeur atomique (genre ou arcane) via i18n
+      const translateAtom = (ns, v) => {
+        const translated = i18.t(`data.${ns}.${v}`);
+        // Si la clé n'existe pas, t() retourne la clé brute → garder la valeur d'origine
+        return translated === `data.${ns}.${v}` ? v : translated;
+      };
+
+      if (typeof value === "boolean") {
+        displayValue = value ? i18.t("ui.yes") : i18.t("ui.no");
+      } else if (key === "genre") {
+        const vals = Array.isArray(value) ? value : [value];
+        displayValue = vals.map((v) => translateAtom("genre", v)).join(", ");
+      } else if (key === "arcane") {
+        const vals = Array.isArray(value) ? value : [value];
+        displayValue = vals.map((v) => translateAtom("arcane", v)).join(", ");
+      } else {
+        displayValue = Array.isArray(value) ? value.join(", ") : value;
+      }
+
+      // Determine cell colour: correct (green), misplaced (yellow), wrong (red)
+      // — decision delegated to the pure compareAttribute() (unit-tested separately).
+      if (isWin) {
+        cell.classList.add("correct");
+      } else {
+        const { status, arrow } = compareAttribute(key, value, targetVal);
+        cell.classList.add(status);
+        if (key === "age" && arrow) {
+          displayValue += arrow === "up" ? " ↑" : " ↓";
+        } else if (typeof value === "boolean" || typeof targetVal === "boolean") {
+          displayValue = value ? i18.t("ui.yes") : i18.t("ui.no");
+        }
+      }
+
+      // Daltonian mode: replace colours with symbols + accessible palette
+      if (daltonianMode) {
+        let symbol = "";
+        let bgColor = "";
+        if (cell.classList.contains("correct")) {
+          symbol = " ✔";
+          bgColor = "#4F81BD";
+        } else if (cell.classList.contains("misplaced")) {
+          symbol = " ▲";
+          bgColor = "#F79646";
+        } else if (cell.classList.contains("wrong")) {
+          symbol = " ✖";
+          bgColor = "#A6A6A6";
+        }
+        cell.textContent = `${displayValue}${symbol}`;
+        cell.style.backgroundColor = bgColor;
+        cell.style.color = "white";
+      } else {
+        cell.textContent = displayValue;
+      }
+
+      // Flip-in animation staggered by column index
+      setTimeout(() => cell.classList.add("flip"), 100 * (index + 1));
+      row.appendChild(cell);
+    });
+
+    output.insertBefore(row, output.querySelector(".category-row")?.nextSibling);
+    removeFromAutocomplete(personas, guess.nom);
   }
 
   if (isWin) {
@@ -447,7 +540,7 @@ function checkGuess(name, target, forceReveal = false) {
         buildGameSession({
           mode: modeName,
           targetName: target.nom,
-        isExpert: EXPERT.isExpert,
+          isExpert: EXPERT.isExpert,
           result: "win",
           attempts,
           timeMs: timeSpent * 1000,
@@ -521,7 +614,10 @@ function applyDarkModeStyles() {
   applyDarkModeOverrides([
     {
       selector: ".emoji-hint-zone",
-      styles: { background: "rgba(20, 20, 20, 0.7)", boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)" },
+      styles: {
+        background: "rgba(20, 20, 20, 0.7)",
+        boxShadow: "0 0 12px rgba(255, 255, 255, 0.2)",
+      },
     },
     {
       selector: ".personadle-box",
@@ -673,7 +769,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         buildGameSession({
           mode: modeName,
           targetName: target.nom,
-        isExpert: EXPERT.isExpert,
+          isExpert: EXPERT.isExpert,
           result: "giveup",
           attempts,
           timeMs: timeSpent * 1000,

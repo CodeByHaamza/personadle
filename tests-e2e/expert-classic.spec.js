@@ -57,6 +57,30 @@ test.describe("Classique Expert — bascule", () => {
   });
 });
 
+test.describe("Classique NORMAL — la grille de comparaison", () => {
+  // Miroir du test Expert « aucune grille du tout ». Sans lui, supprimer le
+  // rendu des cellules du mode normal ne cassait AUCUN test : c'est exactement
+  // ce qui est arrivé le 2026-08-19 (commit 77f6ded), le mode normal n'affichant
+  // plus que les en-têtes de colonnes.
+  test("une tentative affiche l'en-tête ET des cellules colorées", async ({ page }) => {
+    await page.goto(NORMAL);
+    await page.waitForLoadState("networkidle");
+
+    const cible = await page.evaluate(() => JSON.parse(localStorage.getItem("target")).nom);
+    const essai = ["Yukari Takeba", "Junpei Iori", "Chie Satonaka"].find((n) => n !== cible);
+
+    await page.locator("#textbar").fill(essai);
+    await page.locator("#guessButton").click();
+
+    await expect(page.locator(".category-row")).toHaveCount(1);
+    // 7 attributs comparés : nom, genre, âge, porteur, persona, arcane, opus.
+    await expect(page.locator(".guess-row .guess-cell")).toHaveCount(7);
+    await expect(
+      page.locator(".guess-cell.correct, .guess-cell.misplaced, .guess-cell.wrong")
+    ).not.toHaveCount(0);
+  });
+});
+
 test.describe("Classique Expert — la citation et rien d'autre", () => {
   test("la citation est visible dès le départ, sans avoir cliqué sur Indice", async ({ page }) => {
     await page.goto(EXPERT);
@@ -95,7 +119,9 @@ test.describe("Classique Expert — la citation et rien d'autre", () => {
     await expect(page.locator("#victoryBox")).toBeVisible({ timeout: 10000 });
   });
 
-  test("les erreurs s'accumulent dans la même liste de vignettes que le mode Émoji", async ({ page }) => {
+  test("les erreurs s'accumulent dans la même liste de vignettes que le mode Émoji", async ({
+    page,
+  }) => {
     await page.goto(EXPERT);
     await page.waitForLoadState("networkidle");
 
