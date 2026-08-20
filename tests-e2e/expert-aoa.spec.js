@@ -1,5 +1,13 @@
 import { test, expect } from "@playwright/test";
 
+// Budget élargi pour ce seul fichier. attendreAoa() peut attendre 15 s (CDN
+// externe) et guessWrong() jusqu'à 15 s par essai : un test qui enchaîne un
+// chargement et 4 erreurs dépasse structurellement les 30 s par défaut dès que
+// les workers se partagent la machine. Ce n'était pas un aléa de charge mais un
+// budget trop court — les deux tests concernés passaient seuls, échouaient en
+// parallèle.
+test.describe.configure({ timeout: 90_000 });
+
 /**
  * AOA charge ses GIFs depuis un CDN externe : `networkidle` ne se déclenche pas de
  * façon fiable et rend les tests intermittents. On attend un signal concret de la

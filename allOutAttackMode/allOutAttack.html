@@ -155,6 +155,16 @@
       </div>
     </div>
 
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1), le
+         lien doit rester copiable et suivre l'historique du navigateur.
+         Placée ici, juste sous le panneau de filtres, comme dans les 4 autres
+         modes Expert — et non sous le bandeau titre. -->
+    <div class="expert-toggle-zone">
+      <a href="allOutAttack.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <!-- Zone principale d'affichage des emojis et du titre -->
     <div class="emoji-hint-zone" style="position: relative">
       <!-- Bouton pour afficher les règles (en haut à droite) -->
@@ -196,14 +206,6 @@
     </div>
 
     <!-- Modal Règles -->
-    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1), le
-         lien doit rester copiable et suivre l'historique du navigateur. -->
-    <div class="expert-toggle-zone">
-      <a href="allOutAttack.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
-        ⚡ Expert mode
-      </a>
-    </div>
-
     <div id="rulesModal" class="modal" style="display: none">
       <div class="modal-content">
         <span class="close">&times;</span>

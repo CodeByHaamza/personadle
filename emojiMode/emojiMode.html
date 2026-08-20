@@ -315,6 +315,16 @@
       </div>
     </div>
 
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1).
+         Placée ici, juste sous le panneau de filtres, comme dans Classique, Music
+         et Personae — et non sous l'historique des erreurs, qui la reléguait en
+         bas de page. -->
+    <div class="expert-toggle-zone">
+      <a href="emojiMode.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <!-- Zone principale d'affichage des emojis et du titre -->
     <div class="emoji-hint-zone" style="position: relative">
       <!-- Bouton pour afficher les règles (en haut à droite) -->
@@ -499,14 +509,6 @@
       <div id="wrongGuessList"></div>
     </div>
     <!-- Rules Modal -->
-    <!-- Rules Modal -->
-    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1). -->
-    <div class="expert-toggle-zone">
-      <a href="emojiMode.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
-        ⚡ Expert mode
-      </a>
-    </div>
-
     <div id="rulesModal" class="modal" style="display: none">
       <div class="modal-content">
         <span class="close">&times;</span>

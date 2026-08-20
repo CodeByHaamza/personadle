@@ -10,6 +10,28 @@
 
 ---
 
+## 2026-08-19 — fix(ui): bouton Expert aligné dans les 5 modes + deux flakes E2E
+
+### Détails techniques
+
+- **`emojiMode/emojiMode.html`, `allOutAttackMode/allOutAttack.html`** — le bouton Expert
+  passe **sous le panneau de filtres**, comme dans Classique, Music et Personae. Il était
+  sous l'historique des erreurs (Émoji) et sous le bandeau titre (AOA), donc relégué en bas
+  de page. Les 5 modes ont désormais la même position.
+- **`tests-e2e/expert-aoa.spec.js`** — budget porté à 90 s pour ce fichier seul.
+  `attendreAoa()` peut attendre 15 s (GIF sur CDN externe) et `guessWrong()` jusqu'à 15 s par
+  essai : un test qui enchaîne un chargement et 4 erreurs dépassait **structurellement** les
+  30 s par défaut dès que les workers se partagent la machine. Ce n'était pas un aléa de
+  charge — les deux tests passaient seuls et échouaient en parallèle.
+- **`tests-e2e/expert-emoji.spec.js`** — les noms devinés sont filtrés sur la cible du jour.
+  En dur, l'un d'eux finissait par **être** la cible selon la date : la partie était gagnée
+  avant la 5e erreur, `#textbar` se retrouvait désactivé, et le test échouait pour une raison
+  sans rapport avec ce qu'il vérifie.
+
+Vérifié : 89 tests E2E verts, 721 tests Vitest verts.
+
+---
+
 ## 2026-08-19 — fix(expert): leurre Émoji re-tiré à chaque partie + bouton Personae replacé
 
 ### Détails techniques

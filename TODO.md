@@ -163,6 +163,18 @@ de `composer.json`, et `npm audit --omit=dev` sort 0 vulnérabilité. Le risque 
       `Orpheus ( Female )`) sont exclues du pool Personae Expert. Choix assumé : leur lore
       serait mot pour mot celui de la persona de base, donc deux cibles afficheraient le même
       texte. À rouvrir seulement si on leur écrit un texte propre.
+- [ ] **Tests E2E sensibles à la charge en local.** Avec 4 workers et `retries: 0`, un test
+      différent échoue par intermittence (init de page trop lente quand 4 navigateurs tapent
+      le même conteneur PHP). En CI `retries: 2` l'absorbe, ce qui explique la stabilité du
+      job depuis juillet. Deux vraies causes ont été corrigées le 2026-08-19 (budget trop
+      court dans `expert-aoa.spec.js`, nom en dur qui pouvait ÊTRE la cible dans
+      `expert-emoji.spec.js`) ; le reste est de la contention. Piste : plafonner `workers`
+      en local, ou augmenter le pool PHP-FPM du conteneur de dev.
+- [ ] **Noms de personnages en dur dans les specs E2E** — plusieurs specs devinent des noms
+      fixes en supposant qu'ils sont faux. Selon la date, l'un d'eux peut être la cible : la
+      partie se gagne, les entrées se désactivent, le test échoue pour une raison sans rapport
+      avec ce qu'il vérifie. Corrigé au cas par cas dans `expert-emoji.spec.js` ; un helper
+      partagé « devine N mauvaises réponses » réglerait la classe entière.
 - [ ] **Bug 3 non tranché** — « 50 victoires non sauvegardées » s'expliquait par le design
       d'alors (une session par jour). Le point 1 étant câblé, si des joueurs signalent encore
       des parties perdues, c'est autre chose et il faudra creuser.

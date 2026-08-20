@@ -99,7 +99,25 @@ test.describe("Émoji Expert — abandon", () => {
     await page.goto(EXPERT);
     await page.waitForLoadState("networkidle");
 
-    for (const nom of ["Yukari Takeba", "Junpei Iori", "Akihiko Sanada", "Mitsuru Kirijo", "Chie Satonaka"]) {
+    // Les noms sont filtrés sur la cible du jour : en dur, l'un d'eux finissait
+    // par ÊTRE la cible selon la date, la partie était gagnée avant la 5e erreur
+    // et #textbar se retrouvait désactivé — échec intermittent, sans rapport
+    // avec ce que le test vérifie.
+    const cible = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("emojiExpert_targetEmoji")).nom
+    );
+    const faux = [
+      "Yukari Takeba",
+      "Junpei Iori",
+      "Akihiko Sanada",
+      "Mitsuru Kirijo",
+      "Chie Satonaka",
+      "Yosuke Hanamura",
+    ]
+      .filter((n) => n !== cible)
+      .slice(0, 5);
+
+    for (const nom of faux) {
       await page.locator("#textbar").fill(nom);
       await page.locator("#guessButton").click();
     }
