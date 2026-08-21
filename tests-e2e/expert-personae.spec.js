@@ -110,9 +110,15 @@ test.describe("Personae Expert — le lore", () => {
     expect(texte.trim().length).toBeGreaterThan(50);
 
     // L'image EST la réponse : elle ne doit pas exister dans le DOM, pas seulement
-    // être masquée.
+    // être masquée. L'attribut est RETIRÉ, pas vidé — `src=""` déclenche une
+    // requête vers l'URL du document sur certains moteurs, donc `getAttribute()`
+    // rend null et non "".
     const src = await page.locator("#personaImage").getAttribute("src");
-    expect(src, "aucune illustration avant la révélation").toBe("");
+    expect(src, "aucune illustration avant la révélation").toBeNull();
+
+    // Et le nom de la persona ne doit pas non plus fuiter par l'attribut alt.
+    const alt = await page.locator("#personaImage").getAttribute("alt");
+    expect(alt ?? "", "le alt ne doit pas donner la réponse").toBe("");
   });
 
   test("le nom de la persona est masqué dans sa propre fiche", async ({ page }) => {
