@@ -104,13 +104,17 @@ $maxAttempts = $isExpert ? 200 : 20;
 if ($attempts < 0 || $attempts > $maxAttempts) {
     jsonError('Invalid attempts value');
 }
-// Modes disposant d'une variante Expert (pool + clé de hash dédiés dans
-// api/lib/daily_target.php). Accepter is_expert sur un autre mode créerait des
-// lignes que le recalcul anti-triche ne saurait pas rejouer.
-$expertModes = ['music', 'classic', 'emoji', 'silhouette', 'alloutattack', 'personae'];
-if ($isExpert && !in_array($mode, $expertModes, true)) {
-    jsonError('Expert mode is not available for this mode', 400);
-}
+// Pas de garde « ce mode a-t-il une variante Expert ? » : les 6 modes de
+// $validModes en ont un, donc la liste aurait été identique et le test toujours
+// vrai — code mort, démontré par PHPStan (function.alreadyNarrowedType +
+// booleanAnd.alwaysFalse sur la version 2.2.8).
+//
+// Si un 7e mode SANS variante Expert est ajouté un jour à $validModes, il faudra
+// la rétablir ici. Le symptôme sans elle : personadle_compute_daily_target()
+// n'aurait pas de `case '<mode>_expert'`, renverrait null, et la session serait
+// enregistrée en is_expert = 1 sans aucune vérification anti-triche.
+// tests/expertWiring.test.js verrouille la correspondance entre $validModes et
+// les `case` de api/lib/daily_target.php — c'est ce test qui préviendra.
 if (!is_array($filters)) {
     $filters = [];
 }

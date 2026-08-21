@@ -266,13 +266,19 @@ describe("modes Expert — alignement des clés de hash client ⇄ serveur", () 
     }
   });
 
-  it("sessions.php accepte exactement ces 6 modes en Expert", () => {
-    const src = source("api/sessions.php");
-    const liste = src.match(/\$expertModes\s*=\s*\[([^\]]+)\]/);
-    expect(liste).not.toBeNull();
-    const modes = [...liste[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]).sort();
-    expect(modes).toEqual(
-      ["alloutattack", "classic", "emoji", "music", "personae", "silhouette"].sort()
-    );
+  it("tout mode accepté par sessions.php a un pool Expert dans daily_target.php", () => {
+    // L'invariant réel, à la place de l'ancienne liste `$expertModes` (supprimée :
+    // identique à `$validModes`, donc garde toujours vraie — code mort démontré par
+    // PHPStan). Si un 7e mode SANS variante Expert est ajouté à $validModes, ce test
+    // tombe : il faudra alors rétablir la garde dans sessions.php, sans quoi une
+    // session Expert sur ce mode serait enregistrée sans vérification anti-triche.
+    const liste = code("api/sessions.php").match(/\$validModes\s*=\s*\[([^\]]+)\]/);
+    expect(liste, "$validModes introuvable dans api/sessions.php").not.toBeNull();
+    const modes = [...liste[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
+    expect(modes).toHaveLength(6);
+
+    const target = source("api/lib/daily_target.php");
+    const sansPool = modes.filter((m) => !target.includes(`case '${m}_expert'`));
+    expect(sansPool, `modes sans cas Expert : ${sansPool.join(", ")}`).toEqual([]);
   });
 });
