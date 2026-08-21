@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PersonaDLE — What's New in v2.1</title>
+    <link rel="icon" type="image/gif" href="../../img/persona_64x64.gif" />
+    <script>
+        (function () {
+            var lang = localStorage.getItem("lang") || "en";
+            document.documentElement.lang = lang;
+            if (localStorage.getItem("darkMode") === "enabled") {
+                document.documentElement.classList.add("darkmode");
+            }
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ── Theme variables ── */
+        :root {
+            --primary-color: #e63946;
+            --text-main: #1e1830;
+            --text-muted: #5a4a72;
+            --text-h3: #7040a0;
+            --bg-overlay: rgba(245, 240, 255, 0.88);
+            --bg-code: #1e1428;
+            --bg-quote: rgba(228, 210, 245, 0.6);
+            --border-color: rgba(160, 80, 100, 0.22);
+            --panel-bg: rgba(255, 252, 255, 0.88);
+            --blockquote-text: #3a2060;
+            --inline-code-bg: rgba(230, 57, 70, 0.09);
+            --inline-code-color: #b01030;
+            --table-head-bg: rgba(230, 57, 70, 0.12);
+            --table-head-color: #7a0020;
+            --table-row-alt: rgba(0, 0, 0, 0.025);
+            --details-bg: rgba(255, 250, 255, 0.9);
+            --details-color: #1e1830;
+            --home-btn-bg: rgba(255, 252, 255, 0.93);
+            --home-btn-color: #1e1830;
+            --home-btn-hover-bg: rgba(240, 232, 255, 0.97);
+            --card-bg: rgba(255, 252, 255, 0.92);
+            --mode-card-border: rgba(230, 57, 70, 0.2);
+            --aoa-card-bg: linear-gradient(135deg, #fdf8ff 0%, #fff4fa 35%, #f4f8ff 65%, #fdf8ff 100%);
+            --aoa-portrait-bg: rgba(240, 235, 250, 0.7);
+            --aoa-battle-bg: rgba(240, 235, 250, 0.6);
+            --aoa-col-border: rgba(230, 57, 70, 0.15);
+            --card-name-color: #1e0030;
+            --card-sub-color: #7a4060;
+            --summer-card-bg: linear-gradient(135deg, #fffbf0 0%, #fff7e0 40%, #f0feff 70%, #f4fff4 100%);
+            --summer-title-color: #9a5c00;
+            --summer-intro-bg: rgba(210, 155, 30, 0.08);
+            --summer-intro-border: #b08020;
+            --section-intro-bg: rgba(100, 60, 200, 0.055);
+            --section-intro-color: #5a4878;
+            --section-intro-border: #7c4dff;
+        }
+
+        :root.darkmode {
+            --text-main: #e8e4f0;
+            --text-muted: #a89ec0;
+            --text-h3: #c8b8e0;
+            --bg-overlay: rgba(8, 6, 14, 0.9);
+            --bg-code: #12101e;
+            --bg-quote: rgba(30, 10, 20, 0.7);
+            --border-color: rgba(160, 80, 100, 0.3);
+            --panel-bg: rgba(14, 10, 24, 0.75);
+            --blockquote-text: #d4bcd8;
+            --inline-code-bg: rgba(255, 60, 80, 0.12);
+            --inline-code-color: #ff8099;
+            --table-head-bg: rgba(230, 57, 70, 0.2);
+            --table-head-color: #f0c0c8;
+            --table-row-alt: rgba(255, 255, 255, 0.03);
+            --details-bg: rgba(14, 10, 24, 0.75);
+            --details-color: #e8e4f0;
+            --home-btn-bg: #1a1228;
+            --home-btn-color: #e8e4f0;
+            --home-btn-hover-bg: #2d1a40;
+            --card-bg: rgba(14, 10, 24, 0.85);
+            --mode-card-border: rgba(230, 57, 70, 0.3);
+            --aoa-card-bg: linear-gradient(135deg, #08000e 0%, #1c0018 35%, #0e0020 65%, #180010 100%);
+            --aoa-portrait-bg: rgba(6, 0, 8, 0.7);
+            --aoa-battle-bg: rgba(6, 0, 8, 0.6);
+            --aoa-col-border: rgba(230, 57, 70, 0.22);
+            --card-name-color: #fff;
+            --card-sub-color: #cc8899;
+            --summer-card-bg: linear-gradient(135deg, #100c00 0%, #1e1600 40%, #001c20 70%, #0a1400 100%);
+            --summer-title-color: #f6ab3c;
+            --summer-intro-bg: rgba(246, 171, 60, 0.07);
+            --summer-intro-border: #d4943a;
+            --section-intro-bg: rgba(140, 100, 255, 0.07);
+            --section-intro-color: #b8c0cc;
+            --section-intro-border: #7c4dff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background:
+                linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+                url('../../img/personadle_wallpaper.jpg') center / cover fixed;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .doc-wrap {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px clamp(16px, 5vw, 56px);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-main);
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 {
+            font-size: 1.45rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 4px;
+            margin-top: 2em;
+        }
+
+        h3 { font-size: 1.15rem; color: var(--text-h3); }
+
+        p { margin-bottom: 1em; }
+
+        ul { padding-left: 1.4em; margin-bottom: 1em; }
+        ul li { margin-bottom: 0.3em; }
+
+        /* Frontmatter */
+        .frontmatter {
+            text-align: center;
+            margin-bottom: 36px;
+            padding: 36px 28px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            border: 1px solid rgba(230, 57, 70, 0.3);
+            backdrop-filter: blur(4px);
+            animation: fmPulse 5s ease-in-out infinite;
+        }
+        @keyframes fmPulse {
+            0%, 100% { border-color: rgba(230,57,70,.3); }
+            50% { border-color: rgba(230,57,70,.65); box-shadow: 0 0 40px rgba(230,57,70,.06); }
+        }
+
+        .frontmatter h1 {
+            border: none;
+            font-size: 2.6rem;
+            margin: 0 0 8px 0;
+            color: var(--primary-color);
+            text-shadow: 0 0 30px rgba(230, 57, 70, 0.35);
+        }
+
+        .frontmatter p {
+            margin: 4px 0;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .fm-meta { margin-top: 16px; display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+        .fm-tag {
+            font-size: 0.8rem;
+            background: rgba(230, 57, 70, 0.08);
+            border: 1px solid rgba(230, 57, 70, 0.2);
+            border-radius: 20px;
+            padding: 4px 14px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Blockquotes */
+        blockquote {
+            border-left: 4px solid var(--primary-color);
+            background-color: var(--bg-quote);
+            margin: 1.2em 0;
+            padding: 1em 1.4em;
+            border-radius: 0 8px 8px 0;
+            font-weight: 600;
+            color: var(--blockquote-text);
+            backdrop-filter: blur(3px);
+        }
+        blockquote p { margin: 0; }
+
+        /* Code */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--inline-code-bg);
+            color: var(--inline-code-color);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+
+        pre {
+            background-color: var(--bg-code);
+            color: #cdd6f4;
+            padding: 14px 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88em;
+            line-height: 1.5;
+        }
+        pre code { background: transparent; color: inherit; padding: 0; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.4em 0;
+            font-size: 0.93em;
+        }
+        thead { background-color: var(--table-head-bg); color: var(--table-head-color); }
+        th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { font-family: 'Montserrat', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 0.82em; letter-spacing: 0.5px; }
+        tbody tr:nth-child(even) { background-color: var(--table-row-alt); }
+        tbody tr:hover { background: rgba(230,57,70,.04) !important; }
+
+        /* Details */
+        details {
+            background: var(--details-bg);
+            color: var(--details-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 0.8em 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            user-select: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 2px 0;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: .65em; color: var(--primary-color); transition: transform .2s; flex-shrink: 0; }
+        details[open] summary::before { transform: rotate(90deg); }
+        summary:hover { color: var(--primary-color); }
+
+        hr { border: 0; height: 1px; background: var(--border-color); margin: 2.5em 0; }
+
+        img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 1.2em auto; }
+        .center { text-align: center; }
+
+        /* Home button */
+        .home-btn {
+            position: fixed;
+            top: 12px; left: 16px;
+            z-index: 999;
+            display: flex; align-items: center; gap: 6px;
+            background: var(--home-btn-bg);
+            color: var(--home-btn-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 13px; font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s, box-shadow 0.2s;
+            backdrop-filter: blur(14px);
+        }
+        .home-btn:hover {
+            background: var(--home-btn-hover-bg);
+            box-shadow: 0 0 10px rgba(230, 57, 70, 0.35);
+            transform: translateY(-2px);
+        }
+
+        /* Section label */
+        .section-label {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 2px 10px;
+            border-radius: 4px;
+            background: rgba(230, 57, 70, 0.1);
+            border: 1px solid rgba(230, 57, 70, 0.25);
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        /* Feature list (what's new bullets) */
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+            margin: 16px 0 24px;
+        }
+        .feature-item {
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            backdrop-filter: blur(4px);
+        }
+        .feature-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+        .feature-text strong { display: block; font-size: 0.92rem; margin-bottom: 2px; }
+        .feature-text span { font-size: 0.82rem; color: var(--text-muted); }
+
+        /* Mode cards grid */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .mode-card {
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            backdrop-filter: blur(4px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .mode-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(230,57,70,.12); }
+        .mode-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .mode-icon { font-size: 1.4rem; }
+        .mode-card h3 { margin: 0; font-size: 1rem; color: var(--text-main); }
+        .mode-card p { margin: 0; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+        .mode-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(230,57,70,.08);
+            border: 1px solid rgba(230,57,70,.2);
+            color: var(--primary-color);
+            border-radius: 4px;
+            padding: 1px 7px;
+            margin-top: 8px;
+        }
+
+        /* Portrait card (character showcase) */
+        .char-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 10px 0;
+            backdrop-filter: blur(4px);
+        }
+        .char-portrait {
+            width: 100px; height: 100px;
+            object-fit: cover; object-position: top;
+            border-radius: 10px;
+            border: 2px solid var(--primary-color);
+            flex-shrink: 0;
+            display: block;
+            margin: 0;
+        }
+        .char-info { flex: 1; }
+        .char-persona-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-left: auto; flex-shrink: 0; }
+        .char-persona {
+            width: 112px; height: 112px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+        }
+        .char-persona-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+        .char-info strong { display: block; font-family: 'Montserrat', sans-serif; font-size: 0.95rem; }
+        .char-info span { font-size: 0.82rem; color: var(--text-muted); }
+        .char-info em { font-size: 0.8rem; color: var(--primary-color); font-style: normal; }
+
+        /* Music group list */
+        .music-group-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+        .music-group {
+            display: flex; align-items: center; gap: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 10px; padding: 10px 14px;
+        }
+        .mg-cover { flex: 0 0 72px; }
+        .mg-cover img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; display: block; margin: 0; }
+        .mg-cover code { font-size: 0.7em; color: var(--primary-color); margin-top: 4px; display: block; text-align: center; }
+        .mg-tracks { flex: 1; }
+        .mg-track {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 3px 0; border-bottom: 1px solid var(--border-color);
+            font-size: 0.85em;
+        }
+        .mg-track:last-child { border-bottom: none; }
+        .mg-artist { color: var(--text-muted); font-style: italic; font-size: 0.88em; margin-left: 10px; flex-shrink: 0; }
+
+        /* Opus covers */
+        .opus-covers-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+        .ocg-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            background: var(--card-bg);
+            border: 1px solid rgba(230,57,70,0.12);
+            border-radius: 8px; padding: 8px 6px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .ocg-item:hover { border-color: rgba(230,57,70,0.5); transform: translateY(-2px); }
+        .ocg-item img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; display: block; margin: 0; }
+        .ocg-item code { font-size: 0.7em; color: var(--primary-color); }
+
+        /* Title showcase */
+        .title-showcase { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0; justify-content: flex-start; }
+        .title-card {
+            flex: 1 1 200px; max-width: 260px;
+            border-radius: 14px; padding: 20px 16px; text-align: center;
+            transition: transform 0.2s;
+        }
+        .title-card:hover { transform: translateY(-4px); }
+        .tc-stars { font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 5px; }
+        .tc-rarity-label {
+            display: inline-block; font-family: 'Montserrat', sans-serif;
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; padding: 2px 10px; border-radius: 20px; margin-bottom: 12px;
+        }
+        .tc-name { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; }
+        .tc-game { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; opacity: 0.6; }
+        .tc-img { width: 100%; max-width: 180px; height: auto; margin: 8px auto 10px; border-radius: 10px; display: block; object-fit: contain; }
+        .tc-condition { font-size: 0.78rem; line-height: 1.4; opacity: 0.7; font-style: italic; }
+
+        .title-card.rarity-rare {
+            background: linear-gradient(155deg, #e8f4ff, #c5e3ff 60%, #dde8ff);
+            border: 2px solid rgba(66,165,245,0.65);
+        }
+        .title-card.rarity-rare .tc-stars, .title-card.rarity-rare .tc-name { color: #1565c0; }
+        .title-card.rarity-rare .tc-rarity-label { background: rgba(66,165,245,.13); color: #1565c0; border: 1px solid rgba(66,165,245,.28); }
+        .title-card.rarity-rare .tc-game, .title-card.rarity-rare .tc-condition { color: #1e3a5f; }
+
+        .title-card.rarity-epic {
+            background: linear-gradient(155deg, #f3e8ff, #e0c4ff 60%, #eee0ff);
+            border: 2px solid rgba(156,39,176,0.6);
+        }
+        .title-card.rarity-epic .tc-stars, .title-card.rarity-epic .tc-name { color: #6a1b9a; }
+        .title-card.rarity-epic .tc-rarity-label { background: rgba(156,39,176,.1); color: #7b1fa2; border: 1px solid rgba(156,39,176,.24); }
+        .title-card.rarity-epic .tc-game, .title-card.rarity-epic .tc-condition { color: #3a1054; }
+
+        @keyframes legendaryPulse { 0%,100%{box-shadow:0 4px 28px rgba(250,177,0,.28);} 50%{box-shadow:0 6px 42px rgba(250,177,0,.52);} }
+        @keyframes legendaryPulseDark { 0%,100%{box-shadow:0 4px 28px rgba(255,196,0,.18);} 50%{box-shadow:0 6px 42px rgba(255,196,0,.38);} }
+        .title-card.rarity-legendary {
+            background: linear-gradient(155deg, #fffde7, #fff3b0 50%, #fffbdc);
+            border: 2px solid rgba(250,177,0,0.75);
+            animation: legendaryPulse 4s ease-in-out infinite;
+        }
+        .title-card.rarity-legendary .tc-stars, .title-card.rarity-legendary .tc-name { color: #7a5000; }
+        .title-card.rarity-legendary .tc-rarity-label { background: rgba(250,177,0,.14); color: #7a5000; border: 1px solid rgba(250,177,0,.32); }
+        .title-card.rarity-legendary .tc-game, .title-card.rarity-legendary .tc-condition { color: #4a3000; }
+
+        :root.darkmode .title-card.rarity-rare {
+            background: linear-gradient(155deg, #0a1a2e, #0d2240 60%, #101830);
+            border-color: rgba(100,180,255,.45);
+        }
+        :root.darkmode .title-card.rarity-rare .tc-stars, :root.darkmode .title-card.rarity-rare .tc-name { color: #90caf9; }
+        :root.darkmode .title-card.rarity-rare .tc-rarity-label { background: rgba(66,165,245,.11); color: #90caf9; border-color: rgba(100,180,255,.22); }
+        :root.darkmode .title-card.rarity-rare .tc-game, :root.darkmode .title-card.rarity-rare .tc-condition { color: #7badd0; }
+
+        :root.darkmode .title-card.rarity-epic {
+            background: linear-gradient(155deg, #1a0830, #280c40 60%, #1e0a38);
+            border-color: rgba(200,100,220,.45);
+        }
+        :root.darkmode .title-card.rarity-epic .tc-stars, :root.darkmode .title-card.rarity-epic .tc-name { color: #ce93d8; }
+        :root.darkmode .title-card.rarity-epic .tc-rarity-label { background: rgba(206,147,216,.1); color: #ce93d8; border-color: rgba(200,100,220,.22); }
+        :root.darkmode .title-card.rarity-epic .tc-game, :root.darkmode .title-card.rarity-epic .tc-condition { color: #b08ac0; }
+
+        :root.darkmode .title-card.rarity-legendary {
+            background: linear-gradient(155deg, #1e1600, #2c2000 50%, #1a1400);
+            border-color: rgba(255,196,0,.55);
+            animation: legendaryPulseDark 4s ease-in-out infinite;
+        }
+        :root.darkmode .title-card.rarity-legendary .tc-stars, :root.darkmode .title-card.rarity-legendary .tc-name { color: #ffe082; }
+        :root.darkmode .title-card.rarity-legendary .tc-rarity-label { background: rgba(255,196,0,.11); color: #ffe082; border-color: rgba(255,196,0,.28); }
+        :root.darkmode .title-card.rarity-legendary .tc-game, :root.darkmode .title-card.rarity-legendary .tc-condition { color: #c8a860; }
+
+        /* Antag portraits */
+        .antag-portrait {
+            width: 84px; height: 84px;
+            object-fit: cover; object-position: top;
+            border-radius: 8px; display: block;
+            border: 2px solid var(--primary-color);
+            margin: 0;
+        }
+
+        /* Scroll progress */
+        #vx-progress { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 9999; pointer-events: none; }
+        #vx-progress-fill {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, #c0193a, #e63946, #ff6b9d, #ffd700);
+            box-shadow: 0 0 12px rgba(230,57,70,0.9);
+            transition: width .08s linear;
+        }
+
+        /* Back to top */
+        #vx-btt {
+            position: fixed; bottom: 24px; right: 24px; z-index: 500;
+            width: 40px; height: 40px; border-radius: 8px;
+            background: var(--panel-bg); border: 1.5px solid var(--primary-color);
+            color: var(--primary-color); font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); opacity: 0; pointer-events: none;
+            transform: translateY(14px); transition: opacity .3s, transform .3s;
+            font-family: 'Montserrat', sans-serif; font-weight: 800;
+        }
+        #vx-btt.on { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        #vx-btt:hover { box-shadow: 0 0 18px rgba(230,57,70,0.5); }
+
+        /* Scroll reveal */
+        .vx-reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1); }
+        .vx-reveal.in { opacity: 1; transform: none; }
+
+        /* Illustrations */
+        .doc-illustration {
+            display: block; width: 100%; max-width: 720px;
+            margin: 1.5rem auto 0.5rem; border-radius: 14px;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.18); border: 1px solid var(--border-color);
+            object-fit: cover;
+        }
+        .doc-illustration-caption {
+            display: block; text-align: center; font-size: 0.78rem;
+            color: var(--text-muted); margin-bottom: 1.2rem; font-style: italic;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .vx-reveal { opacity: 1; transform: none; transition: none; }
+            .frontmatter, .title-card.rarity-legendary { animation: none; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            table { display: block; overflow-x: auto; }
+            .doc-wrap { padding-top: 56px; }
+            .frontmatter h1 { font-size: 2rem; }
+            h1 { font-size: 1.65rem; }
+            h2 { font-size: 1.2rem; }
+            .mode-grid { grid-template-columns: 1fr; }
+            .feature-list { grid-template-columns: 1fr; }
+            .title-showcase { justify-content: center; }
+            .title-card { max-width: 100%; flex-basis: 100%; }
+            .music-group { flex-direction: column; align-items: flex-start; }
+            .mg-cover { flex: none; }
+        }
+
+        @media (max-width: 480px) {
+            .doc-wrap { padding: 56px 12px 24px; }
+            .frontmatter { padding: 20px 14px; }
+            .frontmatter h1 { font-size: 1.7rem; }
+            h1 { font-size: 1.4rem; }
+            .home-btn { font-size: 11px; padding: 5px 10px; }
+            .char-card { flex-direction: column; }
+        }
+
+        @media print {
+            body { background: white; }
+            .home-btn, #vx-progress, #vx-btt { display: none; }
+        }
+
+        /* ── All-Out Attack card — keyframe animations ── */
+        @keyframes aoaCardGlow {
+            0%, 100% {
+                box-shadow: 0 0 24px rgba(230, 57, 70, 0.55), 0 0 60px rgba(230, 57, 70, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 44px rgba(230, 57, 70, 0.95), 0 0 90px rgba(255, 107, 157, 0.3), 0 0 140px rgba(255, 200, 50, 0.12);
+            }
+        }
+        @keyframes aoaBorderShimmer {
+            0%, 100% { border-color: rgba(230, 57, 70, 0.9); }
+            33%      { border-color: rgba(255, 107, 157, 1); }
+            66%      { border-color: rgba(255, 210, 60, 0.8); }
+        }
+        @keyframes aoaNameNeon {
+            0%, 100% { text-shadow: 0 0 8px rgba(230, 57, 70, 0.9), 0 0 20px rgba(230, 57, 70, 0.5); }
+            50%      { text-shadow: 0 0 14px rgba(255, 107, 157, 1), 0 0 34px rgba(255, 107, 157, 0.7), 0 0 60px rgba(255, 200, 100, 0.3); }
+        }
+        @keyframes aoaStarFlicker {
+            0%, 65%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+            70% { opacity: 0.25; transform: scale(0.65) rotate(20deg); }
+            78% { opacity: 1; transform: scale(1.35) rotate(-8deg); color: #fff8c0; }
+        }
+        @keyframes aoaPortraitPulse {
+            0%, 100% { box-shadow: 0 0 14px rgba(255, 107, 157, 0.75), 0 0 28px rgba(255, 107, 157, 0.25); }
+            50%      { box-shadow: 0 0 24px rgba(255, 107, 157, 1), 0 0 50px rgba(255, 210, 100, 0.35); }
+        }
+
+        /* ── AoA card — layout 3 colonnes ── */
+        .aoa-card {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #e63946;
+            background: var(--aoa-card-bg);
+            animation: aoaCardGlow 3s ease-in-out infinite, aoaBorderShimmer 6s ease-in-out infinite;
+            transition: transform 0.25s ease;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .aoa-card:hover { transform: translateY(-6px) scale(1.006); }
+        .aoa-card-inner { display: flex; align-items: stretch; }
+
+        .aoa-portrait-col {
+            flex: 0 0 160px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 18px 12px;
+            border-right: 1px solid var(--aoa-col-border);
+        }
+        .aoa-portrait-img {
+            width: 250px; height: auto;
+            object-fit: contain; object-position: center;
+            border-radius: 10px;
+            border: 1px solid rgba(230, 57, 70, 0.5);
+            background: var(--aoa-portrait-bg);
+            display: block; margin: 0;
+        }
+
+        .aoa-gif-col {
+            flex: 0 0 300px; height: 190px;
+            overflow: hidden;
+            border-right: 1px solid var(--aoa-col-border);
+            position: relative; align-self: center;
+        }
+        .aoa-gif-col::after {
+            content: ''; position: absolute; inset: 0;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 3px);
+            pointer-events: none;
+        }
+        .aoa-gif-img {
+            width: auto; height: auto;
+            object-fit: cover; object-position: center;
+            display: block; margin: 0; margin-top: 1pc;
+        }
+
+        .aoa-battle-col {
+            flex: 1; display: flex; align-items: center; gap: 16px; padding: 18px 20px;
+        }
+        .aoa-battle-img {
+            flex-shrink: 0; width: 150px; height: auto;
+            object-fit: contain; object-position: top;
+            border-radius: 14px; border: 2px solid #ff6b9d;
+            background: var(--aoa-battle-bg);
+            display: block; margin: 0;
+            animation: aoaPortraitPulse 3s ease-in-out infinite;
+        }
+        .aoa-info { flex: 1; }
+
+        .aoa-card .card-stars { display: flex; gap: 6px; margin-bottom: 8px; }
+        .aoa-card .card-stars span {
+            font-size: 0.85rem; display: inline-block;
+            animation: aoaStarFlicker 2.5s ease-in-out infinite;
+        }
+        .aoa-card .card-stars span:nth-child(1) { animation-delay: 0s;   color: #ffd700; }
+        .aoa-card .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #fff; }
+        .aoa-card .card-stars span:nth-child(3) { animation-delay: 1s;   color: #ffd700; }
+        .aoa-card .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #ff9dcf; }
+        .aoa-card .card-stars span:nth-child(5) { animation-delay: 2s;   color: #ffd700; }
+
+        .aoa-card .card-badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #c0193a, #ff4d6d);
+            color: #fff; padding: 3px 14px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(192, 25, 58, 0.4); margin-bottom: 6px;
+        }
+        .aoa-card .card-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem; font-weight: 800;
+            color: var(--card-name-color); margin: 4px 0; letter-spacing: 0.5px;
+            animation: aoaNameNeon 4s ease-in-out infinite;
+        }
+        .aoa-card .card-sub { color: var(--card-sub-color); font-size: 0.83rem; margin: 0; letter-spacing: 0.3px; }
+
+        /* ── Summer variant — ambre/teal, pas de neon ── */
+        /* ── Thème Hatsune Miku — cyan #39C5BB + rose + rouge ── */
+        .aoa-card-miku {
+            border: 4px solid #39c5bb;
+            background: linear-gradient(135deg, #e6fbff 0%, #fff0f7 40%, #ffe9ec 70%, #e6fbff 100%);
+            box-shadow: 0 0 0 3px rgba(57, 197, 187, 0.35), 0 6px 28px rgba(255, 77, 148, 0.25), 0 2px 10px rgba(230, 57, 70, 0.18);
+            animation: mikuCardGlow 3s ease-in-out infinite;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .dark-mode .aoa-card-miku,
+        body.darkmode .aoa-card-miku {
+            background: linear-gradient(135deg, #02161a 0%, #1a0410 40%, #1a0006 70%, #02161a 100%);
+        }
+        .aoa-card-miku:hover { transform: translateY(-6px) scale(1.006); }
+        @keyframes mikuCardGlow {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(57, 197, 187, 0.35), 0 6px 28px rgba(255, 77, 148, 0.25); }
+            50%      { box-shadow: 0 0 0 3px rgba(255, 77, 148, 0.45), 0 6px 32px rgba(57, 197, 187, 0.4); }
+        }
+        .aoa-card-miku .aoa-portrait-col,
+        .aoa-card-miku .aoa-gif-col { border-right-color: rgba(57, 197, 187, 0.3); }
+        .aoa-card-miku .aoa-portrait-img,
+        .aoa-card-miku .aoa-battle-img { border-color: #39c5bb; }
+        .aoa-card-miku .card-badge {
+            background: linear-gradient(90deg, #39c5bb, #ff4d94, #e63946);
+            color: #fff; border: none;
+        }
+        .aoa-card-miku .card-name {
+            background: linear-gradient(90deg, #39c5bb 0%, #ff6bbf 50%, #e63946 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: mikuNameShift 4s linear infinite;
+            text-shadow: none;
+        }
+        @keyframes mikuNameShift { to { background-position: 200% center; } }
+        .aoa-card-miku .card-sub { color: #39c5bb; }
+        .aoa-card-miku .card-stars span { color: #39c5bb; }
+        .aoa-card-miku .card-stars span:nth-child(2),
+        .aoa-card-miku .card-stars span:nth-child(4) { color: #ff4d94; }
+        /* Notes de musique flottantes — signature visuelle Miku */
+        .aoa-card-miku::after {
+            content: "♪ ♫ ♪";
+            position: absolute; top: 8px; right: 16px;
+            font-size: 1.1rem; letter-spacing: 6px; font-weight: 700;
+            background: linear-gradient(90deg, #39c5bb, #ff4d94);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: mikuNotes 2.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes mikuNotes {
+            0%, 100% { transform: translateY(0); opacity: 0.7; }
+            50%      { transform: translateY(-5px); opacity: 1; }
+        }
+
+        .aoa-card-summer {
+            border: 4px solid #f6ab3c;
+            background: var(--summer-card-bg);
+            animation: none;
+            box-shadow: 0 0 0 3px rgba(77, 208, 225, 0.3), 0 6px 28px rgba(246, 171, 60, 0.22), 0 2px 8px rgba(77, 208, 225, 0.12);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+        }
+        .aoa-card-summer:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 0 0 4px rgba(77, 208, 225, 0.45), 0 12px 40px rgba(246, 171, 60, 0.35), 0 4px 14px rgba(77, 208, 225, 0.2);
+        }
+        .aoa-card-summer .aoa-portrait-col { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-gif-col       { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-portrait-img  { border-color: rgba(246, 171, 60, 0.5); }
+        .aoa-card-summer .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #4dd0e1; animation: none;
+            box-shadow: 0 2px 10px rgba(77, 208, 225, 0.18);
+        }
+        .aoa-card-summer .card-badge {
+            background: linear-gradient(90deg, #c07800, #f6ab3c);
+            box-shadow: 0 2px 8px rgba(246, 171, 60, 0.3);
+        }
+        .aoa-card-summer .card-name { color: var(--summer-title-color); animation: none; text-shadow: none; }
+        .aoa-card-summer .card-sub  { color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #fff; }
+        .aoa-card-summer .card-stars span:nth-child(5) { animation-delay: 2s;   color: #f6d365; }
+
+        .summer-chars-title { margin-top: 36px; color: var(--summer-title-color); }
+
+        /* ── Intro paragraphs ── */
+        .card-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 20px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: rgba(230, 57, 70, 0.06);
+            border-left: 3px solid var(--primary-color);
+            border-radius: 0 8px 8px 0;
+        }
+        .summer-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 24px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: var(--summer-intro-bg);
+            border-left: 3px solid var(--summer-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+        .section-intro {
+            color: var(--section-intro-color); font-style: italic;
+            margin: 8px 0 28px 0; line-height: 1.65; font-size: 0.94rem;
+            padding: 11px 18px;
+            background: var(--section-intro-bg);
+            border-left: 3px solid var(--section-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── AoA card responsive ── */
+        @media (max-width: 660px) {
+            .aoa-card-inner { flex-direction: column; }
+            .aoa-portrait-col { flex: auto; border-right: none; border-bottom: 1px solid var(--aoa-col-border); padding: 14px; }
+            .aoa-gif-col { flex: auto; height: 180px; border-right: none; width: 100%; }
+            .aoa-gif-img { width: 100%; height: 240px; margin-top: -30px; }
+            .aoa-battle-col { flex: auto; flex-direction: column; align-items: center; text-align: center; padding: 16px; }
+            .aoa-battle-img { width: 140px; height: 140px; }
+            .aoa-card-summer .aoa-battle-img { width: 80px; height: 130px; }
+        }
+
+        /* ── Galeries v2.1 ─────────────────────────────────────────────
+           Grille compacte pour les 20 personas de Persona 1 : une fiche
+           .char-card par persona serait illisible à ce volume. */
+        .p1-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .p1-item {
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 12px;
+            padding: 10px 8px 12px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .p1-item:hover { transform: translateY(-4px); box-shadow: 0 8px 22px rgba(230,57,70,.16); }
+        .p1-item img {
+            width: 100%; height: 96px;
+            object-fit: contain;
+            display: block; margin: 0 0 8px;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,.35));
+        }
+        .p1-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--card-name-color);
+            line-height: 1.25;
+        }
+        .p1-user { font-size: 0.68rem; color: var(--text-muted); display: block; margin-top: 2px; }
+
+        .opus-banner {
+            display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+            justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid var(--mode-card-border);
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+        .opus-banner img { max-width: 260px; width: 100%; display: block; margin: 0; }
+
+        @media (max-width: 480px) {
+            .p1-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+            .p1-item img { height: 78px; }
+        }
+    </style>
+</head>
+<body>
+
+<a href="../../index.html" class="home-btn">← PersonaDLE</a>
+
+<script type="module">
+  import { initLang } from '../../js/i18n.js';
+  window.__i18nReady = initLang();
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'lang' && e.newValue && window.i18n?.setLang) {
+      window.i18n.setLang(e.newValue);
+    }
+  });
+</script>
+
+<div class="doc-wrap">
+
+    <!-- FRONTMATTER -->
+    <div class="frontmatter">
+        <h1>PersonaDLE</h1>
+        <div data-i18n-block="fr">
+            <p><strong>Nouveautés v2.1</strong> — Août 2026</p>
+            <p>Le Mode Expert, Persona 1, Trinity Souls &amp; toutes tes parties comptées</p>
+        </div>
+        <div data-i18n-block="en">
+            <p><strong>What's New in v2.1</strong> — August 2026</p>
+            <p>Expert Mode, Persona 1, Trinity Souls &amp; every game you play now counts</p>
+        </div>
+        <div class="fm-meta">
+            <span class="fm-tag">6 Expert modes</span>
+            <span class="fm-tag">Persona 1</span>
+            <span class="fm-tag">Trinity Souls</span>
+            <span class="fm-tag">7 songs</span>
+            <span class="fm-tag">6 languages</span>
+        </div>
+    </div>
+
+    <blockquote>
+        <div data-i18n-block="fr"><p>La v2.0 a construit la plateforme : comptes, profils, amis, classement. La v2.1 s'occupe du jeu lui-même — une seconde façon de jouer les six modes, du contenu neuf, et des statistiques qui comptent enfin toutes tes parties.</p></div>
+        <div data-i18n-block="en"><p>v2.0 built the platform: accounts, profiles, friends, leaderboard. v2.1 is about the game itself — a second way to play all six modes, brand new content, and stats that finally count every single game you play.</p></div>
+    </blockquote>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         1. LE MODE EXPERT
+    ════════════════════════════════════ -->
+    <div data-i18n-block="fr"><h1>⚡ Le Mode Expert</h1></div>
+    <div data-i18n-block="en"><h1>⚡ Expert Mode</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Chaque mode a désormais sa version Expert. Le principe est simple : <strong>le même jeu, avec beaucoup moins d'indices</strong>. Le bouton <strong>⚡ Expert mode</strong> se trouve juste sous le panneau de filtres, dans les six modes. Un clic, et tu bascules ; le lien est copiable et partageable tel quel.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>Every mode now has an Expert version. The idea is simple: <strong>the same game, with far fewer clues</strong>. The <strong>⚡ Expert mode</strong> button sits right under the filter panel, in all six modes. One click and you switch over; the link is shareable as-is.</p>
+    </div>
+
+    <div class="feature-list vx-reveal">
+        <div class="feature-item">
+            <span class="feature-icon">🃏</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Classique — la citation, rien d'autre</strong>
+                <strong data-i18n-block="en">Classic — one quote, nothing else</strong>
+                <span data-i18n-block="fr">Aucune colonne de comparaison. Une réplique du personnage, et son nom à trouver.</span>
+                <span data-i18n-block="en">No comparison grid at all. One line of dialogue, and a name to find.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">😀</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Émoji — un émoji ment</strong>
+                <strong data-i18n-block="en">Emoji — one emoji is lying</strong>
+                <span data-i18n-block="fr">Les mêmes émojis, révélés de la même façon, sauf qu'un intrus s'est glissé dedans. Il ne bouge pas de la partie.</span>
+                <span data-i18n-block="en">Same emojis, revealed the same way — except one of them was borrowed from someone else. It never changes during the round.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">👤</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Silhouette — le flash</strong>
+                <strong data-i18n-block="en">Silhouette — the flash</strong>
+                <span data-i18n-block="fr">L'image reste invisible. Un bouton FLASH la montre une fraction de seconde, quand tu décides d'être prêt. Tu commences avec un flash, chaque erreur t'en redonne un — et les allonge tous.</span>
+                <span data-i18n-block="en">The picture stays hidden. A FLASH button shows it for a fraction of a second, whenever you feel ready. You start with one flash, every wrong guess earns another — and makes them all last longer.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">⚔️</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">All-Out Attack — flou figé, en noir et blanc</strong>
+                <strong data-i18n-block="en">All-Out Attack — frozen blur, in black and white</strong>
+                <span data-i18n-block="fr">Le flou ne se dissipe jamais et la couleur a disparu. Seules la pose et la silhouette restent.</span>
+                <span data-i18n-block="en">The blur never clears and the colour is gone. Pose and silhouette are all you get.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">🎵</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Music — les paroles, pas la musique</strong>
+                <strong data-i18n-block="en">Music — the lyrics, not the music</strong>
+                <span data-i18n-block="fr">Aucun son. Un vers pour commencer, un vers de plus à chaque erreur — et le titre est masqué à l'intérieur des paroles jusqu'à la fin de la partie.</span>
+                <span data-i18n-block="en">No audio at all. One line to start, one more line per wrong guess — and the title is hidden inside the lyrics until the round ends.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">🎭</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Personae — le mythe, aucune image</strong>
+                <strong data-i18n-block="en">Personae — the myth, no picture</strong>
+                <span data-i18n-block="fr">Le dessin n'est jamais montré. À la place, l'histoire réelle de la figure mythologique dont la persona tire son nom — nom masqué, évidemment. À toi de nommer son manieur.</span>
+                <span data-i18n-block="en">The artwork is never shown. Instead, the real story of the mythological figure the Persona is named after — with the name masked out, of course. Your job is to name its wielder.</span>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h3>Ce qu'il faut savoir avant de te lancer</h3>
+        <ul>
+            <li><strong>La réponse du jour n'est pas la même</strong> qu'en mode normal. Gagner en normal ne te donne pas l'Expert, et inversement.</li>
+            <li><strong>5 essais</strong> avant que le bouton Abandonner ne se débloque, dans les six modes.</li>
+            <li><strong>Tes parties Expert sont enregistrées à part</strong> : elles n'entrent pas dans ta série ni dans tes statistiques de mode normal.</li>
+            <li>Les <strong>défis entre amis</strong> ne sont pas encore disponibles en Expert — ils arriveront dans une prochaine mise à jour.</li>
+            <li>Les règles complètes de chaque mode Expert sont dans le <strong>?</strong> de la page, comme d'habitude, et traduites dans les six langues.</li>
+        </ul>
+    </div>
+    <div data-i18n-block="en">
+        <h3>What to know before you jump in</h3>
+        <ul>
+            <li><strong>The daily answer is different</strong> from the normal mode. Winning the normal round does not hand you the Expert one, and the other way round.</li>
+            <li><strong>5 tries</strong> before the Give Up button unlocks, in all six modes.</li>
+            <li><strong>Expert games are recorded separately</strong>: they do not feed your normal streak or your normal per-mode stats.</li>
+            <li><strong>Friend challenges</strong> are not available in Expert yet — they are coming in a later update.</li>
+            <li>Full rules for every Expert mode live behind the <strong>?</strong> button on the page, as usual, translated into all six languages.</li>
+        </ul>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         2. NOUVEAU CONTENU
+    ════════════════════════════════════ -->
+    <div data-i18n-block="fr"><h1>Nouveau contenu</h1></div>
+    <div data-i18n-block="en"><h1>New Content</h1></div>
+
+    <!-- ── Persona 1 dans Personae ── -->
+    <div data-i18n-block="fr">
+        <h2>🎭 Persona 1 arrive dans le mode Personae</h2>
+        <p>Le mode Personae s'arrêtait à Persona 2. Il couvre désormais <strong>l'équipe complète de Persona 1</strong> : neuf personnages et <strong>vingt personas</strong>, persona de départ et persona ultime. Chacune a sa fiche de lore dans les six langues, donc chacune est aussi jouable en Expert.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2>🎭 Persona 1 joins Personae mode</h2>
+        <p>Personae mode used to stop at Persona 2. It now covers <strong>the full Persona 1 party</strong>: nine characters and <strong>twenty Personas</strong>, starting Persona and ultimate alike. Each one has its lore entry in all six languages, so each one is playable in Expert too.</p>
+    </div>
+
+    <div class="p1-grid vx-reveal">
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Seimen_Kongou.webp" alt="Seimen Kongou">
+            <div class="p1-name">Seimen Kongou<span class="p1-user">Naoya Todou</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Amon_Ra.webp" alt="Amon-Ra">
+            <div class="p1-name">Amon-Ra<span class="p1-user">Naoya Todou</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Vishnu.webp" alt="Vishnu">
+            <div class="p1-name">Vishnu<span class="p1-user">Naoya Todou</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Maso.webp" alt="Maso">
+            <div class="p1-name">Maso<span class="p1-user">Maki Sonomura</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Verdandi.webp" alt="Verdandi">
+            <div class="p1-name">Verdandi<span class="p1-user">Maki Sonomura</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Ogun.webp" alt="Ogun">
+            <div class="p1-name">Ogun<span class="p1-user">Masao Inaba</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Inaba_Susano-o.webp" alt="Susano-o">
+            <div class="p1-name">Susano-o<span class="p1-user">Masao Inaba</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Aizen_Myouou.webp" alt="Aizen Myouou">
+            <div class="p1-name">Aizen Myouou<span class="p1-user">Kei Nanjo</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Yamaoka.webp" alt="Yamaoka">
+            <div class="p1-name">Yamaoka<span class="p1-user">Kei Nanjo</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Nemhain.webp" alt="Nemhain">
+            <div class="p1-name">Nemhain<span class="p1-user">Hidehiko Uesugi</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Tyr.webp" alt="Tyr">
+            <div class="p1-name">Tyr<span class="p1-user">Hidehiko Uesugi</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Vesta.webp" alt="Vesta">
+            <div class="p1-name">Vesta<span class="p1-user">Yukino Mayuzumi</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Durga.webp" alt="Durga">
+            <div class="p1-name">Durga<span class="p1-user">Yukino Mayuzumi</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Houri.webp" alt="Houri">
+            <div class="p1-name">Houri<span class="p1-user">Yuka Ayase</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Freyr.webp" alt="Freyr">
+            <div class="p1-name">Freyr<span class="p1-user">Yuka Ayase</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Bres.webp" alt="Bres">
+            <div class="p1-name">Bres<span class="p1-user">Reiji Kido</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Mot.webp" alt="Mot">
+            <div class="p1-name">Mot<span class="p1-user">Reiji Kido</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Nike.webp" alt="Nike">
+            <div class="p1-name">Nike<span class="p1-user">Eriko Kirishima</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Armaiti.webp" alt="Armaiti">
+            <div class="p1-name">Armaiti<span class="p1-user">Eriko Kirishima</span></div>
+        </div>
+        <div class="p1-item">
+            <img src="../../personaeMode/database/img/Gabriel.webp" alt="Gabriel">
+            <div class="p1-name">Gabriel<span class="p1-user">Eriko Kirishima</span></div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ── Trinity Souls ── -->
+    <div data-i18n-block="fr">
+        <h2>⚔️ Persona Trinity Souls</h2>
+        <p>Un nouvel opus rejoint le jeu, avec son propre bouton de filtre — et le trio Kanzato, chacun avec sa persona.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2>⚔️ Persona Trinity Souls</h2>
+        <p>A new title joins the game, with its own filter button — and the Kanzato brothers, each with their Persona.</p>
+    </div>
+
+    <div class="opus-banner vx-reveal">
+        <img src="../../img/logo_jeu/Trinity_Souls_Logo.webp" alt="Persona Trinity Souls">
+    </div>
+
+        <div class="char-card vx-reveal">
+            <img class="char-portrait" src="../../database/portraits/Shin_Kanzato.webp" alt="Shin Kanzato">
+            <div class="char-info">
+                <strong>Shin Kanzato</strong>
+                <span data-i18n-block="fr">Persona Trinity Souls — jouable en Classique, Émoji, Silhouette et Personae.</span>
+                <span data-i18n-block="en">Persona Trinity Souls — playable in Classic, Emoji, Silhouette and Personae.</span>
+                <em>Abel</em>
+            </div>
+            <div class="char-persona-wrap">
+                <img class="char-persona" src="../../personaeMode/database/img/Abel.webp" alt="Abel">
+                <span class="char-persona-label">Abel</span>
+            </div>
+        </div>
+        <div class="char-card vx-reveal">
+            <img class="char-portrait" src="../../database/portraits/Jun_Kanzato.webp" alt="Jun Kanzato">
+            <div class="char-info">
+                <strong>Jun Kanzato</strong>
+                <span data-i18n-block="fr">Persona Trinity Souls — jouable en Classique, Émoji, Silhouette et Personae.</span>
+                <span data-i18n-block="en">Persona Trinity Souls — playable in Classic, Emoji, Silhouette and Personae.</span>
+                <em>Seth</em>
+            </div>
+            <div class="char-persona-wrap">
+                <img class="char-persona" src="../../personaeMode/database/img/Seth.webp" alt="Seth">
+                <span class="char-persona-label">Seth</span>
+            </div>
+        </div>
+        <div class="char-card vx-reveal">
+            <img class="char-portrait" src="../../database/portraits/Ryo_Kanzato.webp" alt="Ryo Kanzato">
+            <div class="char-info">
+                <strong>Ryo Kanzato</strong>
+                <span data-i18n-block="fr">Persona Trinity Souls — jouable en Classique, Émoji, Silhouette et Personae.</span>
+                <span data-i18n-block="en">Persona Trinity Souls — playable in Classic, Emoji, Silhouette and Personae.</span>
+                <em>Cain</em>
+            </div>
+            <div class="char-persona-wrap">
+                <img class="char-persona" src="../../personaeMode/database/img/Cain.webp" alt="Cain">
+                <span class="char-persona-label">Cain</span>
+            </div>
+        </div>
+
+    <hr>
+
+    <!-- ── Nouveaux personnages ── -->
+    <div data-i18n-block="fr">
+        <h2>🧑‍🤝‍🧑 De nouveaux visages</h2>
+        <p>Quatre personnages secondaires rejoignent les modes Classique, Émoji et Silhouette.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2>🧑‍🤝‍🧑 New faces</h2>
+        <p>Four supporting characters join Classic, Emoji and Silhouette.</p>
+    </div>
+
+        <div class="char-card vx-reveal">
+            <img class="char-portrait" src="../../database/portraits/Saki.webp" alt="Saki Konishi">
+            <div class="char-info">
+                <strong>Saki Konishi</strong>
+                <span data-i18n-block="fr">Sa disparition ouvre l'enquête de Persona 4.</span>
+                <span data-i18n-block="en">Her death opens the Persona 4 investigation.</span>
+                <em>P4</em>
+            </div>
+        </div>
+        <div class="char-card vx-reveal">
+            <img class="char-portrait" src="../../database/portraits/Mayumi_Yamano.webp" alt="Mayumi Yamano">
+            <div class="char-info">
+                <strong>Mayumi Yamano</strong>
+                <span data-i18n-block="fr">La présentatrice par qui tout commence.</span>
+                <span data-i18n-block="en">The announcer everything starts with.</span>
+                <em>P4</em>
+            </div>
+        </div>
+        <div class="char-card vx-reveal">
+            <img class="char-portrait" src="../../database/portraits/Kobayakawa.webp" alt="Principal Kobayakawa">
+            <div class="char-info">
+                <strong>Principal Kobayakawa</strong>
+                <span data-i18n-block="fr">Le principal du lycée Yasogami.</span>
+                <span data-i18n-block="en">The principal of Yasogami High.</span>
+                <em>P4</em>
+            </div>
+        </div>
+        <div class="char-card vx-reveal">
+            <img class="char-portrait" src="../../database/portraits/Wakaba_Isshiki.webp" alt="Wakaba Isshiki">
+            <div class="char-info">
+                <strong>Wakaba Isshiki</strong>
+                <span data-i18n-block="fr">La chercheuse dont l'ombre plane sur Futaba.</span>
+                <span data-i18n-block="en">The researcher whose shadow hangs over Futaba.</span>
+                <em>P5</em>
+            </div>
+        </div>
+
+    <hr>
+
+    <!-- ── All-Out Attack ── -->
+    <div data-i18n-block="fr">
+        <h2>⚔️ All-Out Attack — Panther Starlight</h2>
+        <p>Ann Takamaki rejoint le mode All-Out Attack avec son skin Starlight de Persona 5 X, aux côtés de Joker et Mona.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2>⚔️ All-Out Attack — Panther Starlight</h2>
+        <p>Ann Takamaki joins All-Out Attack with her Starlight skin from Persona 5 X, next to Joker and Mona.</p>
+    </div>
+
+    <div class="aoa-card vx-reveal">
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Panther_Starlight.webp" alt="Panther Starlight portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Panther_Starlight.webp" alt="Panther Starlight All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Panther_Starlight_Battle.webp" alt="Panther Starlight battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Panther Starlight</p>
+                    <p class="card-sub">Ann Takamaki — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ── Musiques ── -->
+    <div data-i18n-block="fr">
+        <h2>🎵 Sept musiques de plus</h2>
+        <p>Elles rejoignent le mode Music — et son Expert, puisqu'elles ont toutes des paroles à révéler, sauf l'instrumentale.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2>🎵 Seven more songs</h2>
+        <p>They join Music mode — and its Expert version too, since they all have lyrics to reveal, except the instrumental one.</p>
+    </div>
+
+    <div class="music-group-list vx-reveal">
+        <div class="music-group">
+            <div class="mg-cover"><img src="../../musicsMode/database/img/P4.webp" alt="P4"><code>P4</code></div>
+            <div class="mg-tracks">
+                <div class="mg-track"><span>Junes Themes</span><span class="mg-artist">(instrumental)</span></div>
+            </div>
+        </div>
+        <div class="music-group">
+            <div class="mg-cover"><img src="../../musicsMode/database/img/P3FES.webp" alt="P3FES"><code>P3FES</code></div>
+            <div class="mg-tracks">
+                <div class="mg-track"><span>Mass Destruction (P3FES)</span><span class="mg-artist">Yumi Kawamura, Lotus Juice</span></div>
+                <div class="mg-track"><span>P3 FES</span><span class="mg-artist">Yumi Kawamura, Lotus Juice</span></div>
+            </div>
+        </div>
+        <div class="music-group">
+            <div class="mg-cover"><img src="../../musicsMode/database/img/Show_Stealer.webp" alt="P5X"><code>P5X</code></div>
+            <div class="mg-tracks">
+                <div class="mg-track"><span>Show Stealer</span><span class="mg-artist">Lyn Inaizumi</span></div>
+            </div>
+        </div>
+        <div class="music-group">
+            <div class="mg-cover"><img src="../../musicsMode/database/img/P5.webp" alt="P5"><code>P5</code></div>
+            <div class="mg-tracks">
+                <div class="mg-track"><span>Tokyo Emergency</span><span class="mg-artist">Lyn Inaizumi</span></div>
+                <div class="mg-track"><span>Hoshi to Bokura to</span><span class="mg-artist">Lyn Inaizumi</span></div>
+            </div>
+        </div>
+        <div class="music-group">
+            <div class="mg-cover"><img src="../../musicsMode/database/img/P5S.webp" alt="P5S"><code>P5S</code></div>
+            <div class="mg-tracks">
+                <div class="mg-track"><span>What You Wish For</span><span class="mg-artist">Lyn Inaizumi</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h2>🏆 Un badge secret et deux titres</h2>
+        <p>Un badge caché à débusquer, plus les titres <strong>Junes</strong> et <strong>Investigation Team</strong>, à débloquer sur tes parties Persona 4.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2>🏆 One secret badge and two titles</h2>
+        <p>A hidden badge to track down, plus the <strong>Junes</strong> and <strong>Investigation Team</strong> titles, unlocked through your Persona 4 games.</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         3. TOUTES TES PARTIES COMPTENT
+    ════════════════════════════════════ -->
+    <div data-i18n-block="fr"><h1>📊 Toutes tes parties comptent</h1></div>
+    <div data-i18n-block="en"><h1>📊 Every game counts</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Jusqu'ici, une seule partie par mode et par jour était enregistrée. Rejouer dix fois le mode Classique dans la soirée n'en comptait qu'une : les neuf autres disparaissaient sans rien dire.</p>
+        <p>C'est terminé. <strong>Cinquante parties comptent pour cinquante parties</strong>, dans tes statistiques comme sur ton profil.</p>
+        <p>Une seule chose reste journalière, et c'est voulu : <strong>ta série</strong>. Elle se mesure en jours joués, pas en nombre de parties — jouer trente fois dans la même soirée ne la fait pas monter de trente.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>Until now, only one game per mode per day was recorded. Replaying Classic ten times in an evening counted as one: the other nine vanished without a word.</p>
+        <p>That's over. <strong>Fifty games count as fifty games</strong>, in your stats and on your profile.</p>
+        <p>One thing stays daily, on purpose: <strong>your streak</strong>. It is measured in days played, not in games played — thirty rounds in one evening will not push it up by thirty.</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         4. CONFORT DE JEU
+    ════════════════════════════════════ -->
+    <div data-i18n-block="fr"><h1>✨ Confort de jeu</h1></div>
+    <div data-i18n-block="en"><h1>✨ Quality of life</h1></div>
+
+    <div class="feature-list vx-reveal">
+        <div class="feature-item">
+            <span class="feature-icon">🔊</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Lecteur audio revu</strong>
+                <strong data-i18n-block="en">Rebuilt audio player</strong>
+                <span data-i18n-block="fr">Plus grand, avec un vrai contrôle de volume, et un habillage rouge pour les morceaux de Persona 3 FES.</span>
+                <span data-i18n-block="en">Bigger, with a proper volume control, and a red skin for the Persona 3 FES tracks.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">🎬</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Invocation de la persona</strong>
+                <strong data-i18n-block="en">Persona summoning</strong>
+                <span data-i18n-block="fr">La persona s'invoque à la révélation, et les paroles s'écrivent à la machine à écrire en Music Expert.</span>
+                <span data-i18n-block="en">The Persona is summoned on reveal, and lyrics type themselves out one character at a time in Music Expert.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">🎯</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Filtres d'opus</strong>
+                <strong data-i18n-block="en">Game filters</strong>
+                <span data-i18n-block="fr">Les nouveaux opus s'activent tout seuls la première fois, et tes filtres ne sont plus écrasés après un défi entre amis.</span>
+                <span data-i18n-block="en">Newly added titles switch themselves on the first time, and your filters are no longer overwritten after a friend challenge.</span>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h3>Corrections notables</h3>
+        <ul>
+            <li>Un défi accepté puis interrompu pouvait rester bloqué et empêcher d'en accepter un autre.</li>
+            <li>La page Amis pouvait boucler sur une déconnexion.</li>
+            <li>Le mode All-Out Attack pouvait rester en chargement infini.</li>
+            <li>Le bouton Abandonner ne donnait aucun signal tant qu'il était verrouillé.</li>
+        </ul>
+    </div>
+    <div data-i18n-block="en">
+        <h3>Notable fixes</h3>
+        <ul>
+            <li>A challenge you accepted then left could stay stuck and block you from accepting another.</li>
+            <li>The Friends page could loop on a logout.</li>
+            <li>All-Out Attack could hang on an endless loading screen.</li>
+            <li>The Give Up button gave no signal at all while it was still locked.</li>
+        </ul>
+    </div>
+
+    <hr>
+
+    <p style="text-align:center;color:var(--text-muted);font-size:0.85em;margin-top:2rem">
+        <em data-i18n-block="fr">PersonaDLE est un projet fan-made, sans lien avec ATLUS ni SEGA. Les nouveautés de la v2.0 restent consultables dans <code>PersonaDLE_Update_Documentation/PersonaDLE 2.0/</code>.</em>
+        <em data-i18n-block="en">PersonaDLE is a fan-made project, not affiliated with ATLUS or SEGA. The v2.0 release notes are still available in <code>PersonaDLE_Update_Documentation/PersonaDLE 2.0/</code>.</em>
+    </p>
+
+</div><!-- /.doc-wrap -->
+
+<script>
+(function() {
+    'use strict';
+
+    /* Progress bar */
+    var pb = document.createElement('div'); pb.id = 'vx-progress';
+    var pf = document.createElement('div'); pf.id = 'vx-progress-fill';
+    pb.appendChild(pf); document.body.insertBefore(pb, document.body.firstChild);
+
+    /* Back to top */
+    var btt = document.createElement('button'); btt.id = 'vx-btt'; btt.innerHTML = '↑';
+    btt.setAttribute('aria-label', 'Back to top'); document.body.appendChild(btt);
+    btt.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+    /* Scroll reveal */
+    var revObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.06, rootMargin: '0px 0px -60px 0px' });
+    document.querySelectorAll('.vx-reveal').forEach(function(el) { revObs.observe(el); });
+
+    /* Scroll handler */
+    var raf = false;
+    window.addEventListener('scroll', function() {
+        if (raf) return; raf = true;
+        requestAnimationFrame(function() {
+            var st = window.scrollY || 0;
+            var dh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            pf.style.width = (dh > 0 ? st / dh * 100 : 0) + '%';
+            if (st > 400) btt.classList.add('on'); else btt.classList.remove('on');
+            raf = false;
+        });
+    }, { passive: true });
+})();
+</script>
+
+</body>
+</html>

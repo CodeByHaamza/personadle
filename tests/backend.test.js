@@ -102,10 +102,18 @@ describe("buildGameSession", () => {
 
   it("normalizes the mode to its canonical backend key", () => {
     // Quelle que soit la graphie passée par la page de mode, le backend reçoit la clé canonique.
-    expect(buildGameSession({ mode: "AllOutAttack", targetName: "x", result: "win", attempts: 1 }).mode).toBe("alloutattack");
-    expect(buildGameSession({ mode: "All Out Attack", targetName: "x", result: "win", attempts: 1 }).mode).toBe("alloutattack");
-    expect(buildGameSession({ mode: "Classic", targetName: "x", result: "win", attempts: 1 }).mode).toBe("classic");
-    expect(buildGameSession({ mode: "Music", targetName: "x", result: "win", attempts: 1 }).mode).toBe("music");
+    expect(
+      buildGameSession({ mode: "AllOutAttack", targetName: "x", result: "win", attempts: 1 }).mode
+    ).toBe("alloutattack");
+    expect(
+      buildGameSession({ mode: "All Out Attack", targetName: "x", result: "win", attempts: 1 }).mode
+    ).toBe("alloutattack");
+    expect(
+      buildGameSession({ mode: "Classic", targetName: "x", result: "win", attempts: 1 }).mode
+    ).toBe("classic");
+    expect(
+      buildGameSession({ mode: "Music", targetName: "x", result: "win", attempts: 1 }).mode
+    ).toBe("music");
   });
 });
 
@@ -431,5 +439,67 @@ describe("auth UI — data-auth attributes", () => {
 
     updateAuthUI(null);
     expect(localStorage.getItem("playerUserId")).toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SYNC DES SESSIONS EN FILE — clé d'idempotence rétro-active
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("api.stats.syncPending — idempotence de la file", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.restoreAllMocks();
+  });
+
+  it("pose ET persiste une clé sur les sessions mises en file avant la migration 032", async () => {
+    // Ces sessions n'ont pas de client_session_id. L'unique key par jour qui les
+    // protégeait accidentellement du double-insert n'existe plus : sans clé, un
+    // timeout sur une requête que le serveur avait traitée insère deux fois.
+    // Elle doit être PERSISTÉE : régénérée à chaque tentative, elle ne protège
+    // de rien entre deux passages.
+    const { api } = await import("../js/api.js");
+    localStorage.setItem(
+      "pendingSessions",
+      JSON.stringify([
+        { mode: "classic", played_date: "2026-08-20", target_name: "Joker", result: "win" },
+      ])
+    );
+
+    // Le serveur est injoignable : la session reste en file, avec sa clé.
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
+    await api.stats.syncPending();
+
+    const file = JSON.parse(localStorage.getItem("pendingSessions"));
+    expect(file).toHaveLength(1);
+    expect(file[0].client_session_id).toBeTruthy();
+    // Format accepté par api/sessions.php : groupes hexa séparés par des tirets.
+    expect(file[0].client_session_id).toMatch(/^[0-9a-f]{4,}(-[0-9a-f]{4,})*$/i);
+
+    // Deuxième passage : la MÊME clé, sinon l'idempotence ne sert à rien.
+    const premiere = file[0].client_session_id;
+    await api.stats.syncPending();
+    expect(JSON.parse(localStorage.getItem("pendingSessions"))[0].client_session_id).toBe(premiere);
+  });
+
+  it("ne touche pas aux sessions qui ont déjà leur clé", async () => {
+    const { api } = await import("../js/api.js");
+    localStorage.setItem(
+      "pendingSessions",
+      JSON.stringify([
+        {
+          mode: "classic",
+          played_date: "2026-08-20",
+          target_name: "Joker",
+          result: "win",
+          client_session_id: "deadbeef-cafe-babe",
+        },
+      ])
+    );
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("Failed to fetch"));
+    await api.stats.syncPending();
+    expect(JSON.parse(localStorage.getItem("pendingSessions"))[0].client_session_id).toBe(
+      "deadbeef-cafe-babe"
+    );
   });
 });

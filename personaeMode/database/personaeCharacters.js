@@ -957,4 +957,138 @@ export const personaeCharacters = [
     user: ["Ryo Kanzato"],
     opus: ["PTS"],
   },
+
+  // ── Persona 1 (2026-08-20) ──────────────────────────────────────────────
+  // Dernier opus manquant du mode. Chaque membre du groupe a sa persona de
+  // départ et sa persona ultime ; Naoya en a trois.
+  //
+  // ⚠️ `Susano-o` existe DÉJÀ pour Yosuke Hanamura (P4G, image "Susano-o").
+  // Deux dessins différents → deux entrées, exactement comme Hermes
+  // (Junpei/Jun) — cf. règle 2 en tête de fichier. La fiche de lore unique
+  // acceptera les deux manieurs, le texte parlant du dieu shinto lui-même.
+  //
+  // Manque au roster : Eriko Kirishima (Nike + ultime) — ni dessin ni lore
+  // fournis dans le lot de Léo, donc absente du mode tant qu'ils manquent.
+  {
+    persona: "Seimen Kongou",
+    image: "Seimen_Kongou",
+    user: ["Naoya Todou"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Amon-Ra",
+    image: "Amon_Ra",
+    user: ["Naoya Todou"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Vishnu",
+    image: "Vishnu",
+    user: ["Naoya Todou"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Maso",
+    image: "Maso",
+    user: ["Maki Sonomura"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Verdandi",
+    image: "Verdandi",
+    user: ["Maki Sonomura"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Ogun",
+    image: "Ogun",
+    user: ["Masao Inaba"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Susano-o",
+    image: "Inaba_Susano-o",
+    user: ["Masao Inaba"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Aizen Myouou",
+    image: "Aizen_Myouou",
+    user: ["Kei Nanjo"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Yamaoka",
+    image: "Yamaoka",
+    user: ["Kei Nanjo"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Nemhain",
+    image: "Nemhain",
+    user: ["Hidehiko Uesugi"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Tyr",
+    image: "Tyr",
+    user: ["Hidehiko Uesugi"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Vesta",
+    image: "Vesta",
+    user: ["Yukino Mayuzumi"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Durga",
+    image: "Durga",
+    user: ["Yukino Mayuzumi"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Houri",
+    image: "Houri",
+    user: ["Yuka Ayase"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Freyr",
+    image: "Freyr",
+    user: ["Yuka Ayase"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Bres",
+    image: "Bres",
+    user: ["Reiji Kido"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Mot",
+    image: "Mot",
+    user: ["Reiji Kido"],
+    opus: ["P1"],
+  },
+  // Eriko Kirishima — arrivée après le reste du lot P1 (dessins fournis le
+  // 2026-08-20 en second envoi). Trois personas, comme Naoya Todou.
+  {
+    persona: "Nike",
+    image: "Nike",
+    user: ["Eriko Kirishima"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Armaiti",
+    image: "Armaiti",
+    user: ["Eriko Kirishima"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Gabriel",
+    image: "Gabriel",
+    user: ["Eriko Kirishima"],
+    opus: ["P1"],
+  },
 ];

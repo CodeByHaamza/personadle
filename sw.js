@@ -17,7 +17,7 @@
  * ────────────────────────────────────────────────────────────────
  */
 
-const CACHE_VERSION = "personadle-v78";
+const CACHE_VERSION = "personadle-v94";
 
 // Préfixe du sous-dossier : '/personadle' en dev local, '' en production (racine).
 // Calculé depuis l'URL du SW lui-même (ex: /personadle/sw.js → /personadle).
@@ -153,6 +153,20 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  /* ── 0. Dev local → le SW ne répond à RIEN ──
+     En dev les fichiers changent à chaque enregistrement : un service worker qui
+     s'intercale (même en network-first) transforme le moindre doute en
+     « Ctrl+Shift+R / navigation privée ». Aucun intérêt hors ligne sur localhost,
+     donc on laisse passer la requête telle quelle et le navigateur fait son
+     travail. La prod garde ses stratégies intactes. */
+  if (
+    url.hostname === "localhost" ||
+    url.hostname === "127.0.0.1" ||
+    url.hostname.endsWith(".localhost")
+  ) {
+    return;
+  }
 
   /* ── 1. Requêtes API → network-only, fallback silencieux ──
      url.pathname.includes('/api/') gère les deux cas :

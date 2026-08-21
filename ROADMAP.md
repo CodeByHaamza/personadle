@@ -80,6 +80,14 @@
       quotidien (`scripts/export-daily-pools.js`, `npm run pools:build`/`pools:check`) pour que
       la cible du jour en Expert Personae ne pioche que parmi les persos déjà couverts par un
       paquet livré
+    - **Réponses acceptées** (décision 2026-08-15) : une fiche décrit une figure mythologique,
+      pas une entrée précise du dataset — elle accepte donc **tous les manieurs de toutes les
+      entrées de la même figure**. La fiche d'Orphée vaut pour Makoto, Kotone et Aigis (5
+      entrées avec les variantes Picaro/Telos) ; celle d'Hermès pour Junpei Iori **et** Jun
+      Kurosu, dont les personas sont deux entrées distinctes (dessins différents) du même dieu
+      grec. Refuser l'un des deux serait perçu comme un bug : rien dans le texte ne permet de
+      les départager. Règle déjà implémentée et testée —
+      `personaeMode/database/expert_lore/wielders.js`, 4 tests dans `tests/expertContent.test.js`.
   - Musique : paroles révélées progressivement à chaque essai raté, cumulatives (les précédentes
     restent affichées, pas juste la dernière) — façon lecteur de paroles synchronisées type
     Spotify : 1 phrase pour commencer, une de plus par essai raté. Paroles à sourcer en ligne
@@ -88,11 +96,48 @@
     traitement que les titres de musique déjà exemptés côté §5 CLAUDE.md). N'existent pas
     encore dans `musicsMode/database/songs.js`
   - Condition de déblocage **différente par mode** (à trancher au cas par cas au moment de
-    l'implémentation, pas de règle uniforme entre les 6)
+    l'implémentation, pas de règle uniforme entre les 6). **À coder sur une branche dédiée**
+    (décision 2026-08-15) — le mode Music Expert est livré déverrouillé, le bouton
+    « ⚡ Expert mode » (`musicsMode/musics.html`) est visible et cliquable par tout le monde.
+    Ce qu'il faudra brancher :
+    - la condition elle-même passe par `api/lib/condition_check.php`
+      (`condition_type`/`condition_mode`/`condition_value`), déjà partagé par
+      titles/badges/wallpapers — pas de système parallèle à inventer
+    - vérification **côté serveur obligatoire** (CLAUDE.md §13) : un gate purement client
+      serait contournable en tapant `?expert=1` à la main, puisque le mode vit dans l'URL
+    - piste retenue pour Music : X victoires en Music normal (valeur à fixer) ; le compte
+      est déjà lisible dans `user_stats` (mode `music`, `is_expert` exclu par construction)
+    - côté front : masquer/griser le bouton et rediriger `?expert=1` vers le mode normal
+      tant que la condition n'est pas remplie
   - Récompense **supérieure au mode normal**, surtout en **défi ami** (voir item "Bonus XP
     Social Link" juste en dessous — logique mise à jour suite à cette révision)
   - Nouveau badge/titre : débloqué une fois les 6 modes Expert battus au moins une fois chacun
     (réutilise le système de conditions structurées déjà en place, `condition_check.php`)
+  - **Défis déjà bloqués en base** — le correctif du 2026-08-15 empêche d'en créer de
+    nouveaux, il ne répare pas l'existant. Décision : **les deux**, dans cet ordre.
+    1. Migration de nettoyage ponctuelle : repasser en `unread` les `messages` en statut
+       `accepted` sans partie associée et vieux de plus de 7 jours. Ponctuel, à jouer une
+       fois en prod, non idempotent par nature (ne pas le rejouer sur des défis récemment
+       acceptés et légitimement en cours).
+    2. Bouton « abandonner le défi en cours » côté joueur — sans lui, le même blocage se
+       reproduira à la première panne réseau au mauvais moment, et il n'existe aujourd'hui
+       aucun moyen de sortir d'un défi accepté. `getPendingActiveChallenge()` (gameCore.js)
+       fournit déjà l'état à afficher ; il manque l'action inverse (purge de
+       `activeChallenge`, restauration des filtres, statut serveur remis à `read`).
+  - **Défis en Mode Expert** — à coder sur la branche dédiée, avec le déblocage
+    (constaté le 2026-08-15 en livrant Music Expert). Aujourd'hui l'Expert **n'émet pas**
+    de défi et **refuse** d'en jouer un : ouvrir `musics.html?expert=1` avec un défi actif
+    redirige vers le mode normal. Raison : un défi porte un barème (nombre d'essais) et une
+    cible ; joué en Expert le barème n'est plus comparable (5 à 30 essais contre 3), et la
+    cible peut être un instrumental, qui n'a aucune parole à révéler. Ce qu'il faudra :
+    - colonne `challenge_is_expert` sur `messages` (même forme que `is_expert` sur
+      `game_sessions`, migration 031) — sans elle le destinataire ne peut pas savoir en
+      quel mode le défi a été émis
+    - tirage de la cible du défi restreint au pool `music_expert` côté émetteur
+    - les deux points d'acceptation (`js/challenge-notif.js` et `profile/friends/friends.js`,
+      cf. `MODE_PAGE`) doivent ajouter `?expert=1` à l'URL du mode
+    - barème : 1 défi Expert ne se compare qu'à un autre défi Expert. Le bonus XP prévu
+      ci-dessous (x2/x3 sur le mutuel) s'y branche naturellement.
 - [ ] **Bonus XP Social Link selon la performance en défi** — actuellement XP mutuel fixe (35)
   sur un défi battu (`checkChallengeCompletion()`, `js/challenge-result.js`). À faire varier
   selon le nombre de tentatives utilisées — **pas le temps** : déclaratif côté client, donc plus
@@ -116,6 +161,19 @@
   - Schéma minimal : colonne `discord_id` (unique) + `discord_username` sur `users`, pas de
     table `oauth_accounts` séparée tant qu'un seul provider existe
   - `discord_id` = donnée personnelle → à intégrer au flow RGPD existant (suppression/export)
+- [ ] **Classements séparés plutôt qu'un score unique** (décision 2026-08-15, suite à la
+  migration 032 qui fait compter toutes les parties). Un classement au volume récompenserait
+  celui qui enchaîne 200 parties plutôt que le meilleur joueur. Trois axes distincts :
+  - **Meilleure série** — la régularité, déjà mesurée par la streak (jours distincts).
+  - **Meilleur ratio** — victoires / parties, **lissé** pour qu'un joueur à 1 partie et
+    1 victoire ne soit pas premier. Deux méthodes possibles : moyenne bayésienne
+    `(wins + C·m) / (games + C)` avec `m` le taux moyen global et `C` ≈ 20 parties
+    fictives (simple à expliquer au joueur), ou borne inférieure de Wilson à 95 %
+    (plus rigoureuse, plus dure à expliquer). Recommandation : bayésienne, parce qu'un
+    classement dont personne ne comprend le calcul est perçu comme truqué.
+  - **Meilleur score** — général et par mode, sur le volume assumé.
+  Chaque axe existe aussi en version Expert (`is_expert`), soit la 4e dimension déjà prévue
+  ci-dessous.
 - [ ] **Filtre "Expert" sur le classement** — `api/leaderboard/` distingue déjà mode / période /
   métrique ; ajouter une 4e dimension (colonne `is_expert` sur `game_sessions`) plutôt qu'un
   classement séparé — réutilise tout le pipeline existant (endpoint, agrégation `user_stats`,
@@ -374,7 +432,7 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 6 langues,
-> **625 tests JS · 185 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **778 tests JS · 193 PHPUnit · 102 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
@@ -430,8 +488,8 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 625 Vitest · 185 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
-| Q2  | i18n EN/FR/ES/DE/IT/PT (990 clés)             | `npm run i18n:check`                                                          |
+| Q1  | Tests : 778 Vitest · 193 PHPUnit · 102 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q2  | i18n EN/FR/ES/DE/IT/PT (1052 clés)             | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
 | Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |

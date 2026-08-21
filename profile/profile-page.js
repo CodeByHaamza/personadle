@@ -34,6 +34,7 @@ import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/str
 import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
+import { modeLabel } from "../js/gameCore.js";
 import { AVATAR_GROUPS } from "./avatars_data.js";
 import { getStreakTier, formatSongTime, normalizeAvatarPath } from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
@@ -466,6 +467,7 @@ function _applyCloudToUI() {
   // ── Stats ─────────────────────────────────────────────────
   renderStats();
   renderModeStats();
+    renderExpertStats();
 
   // ── Musique de profil ─────────────────────────────────────
   // profileMusicId = valeur cloud (undefined = pas encore sync, null = pas de song, string = fichier)
@@ -710,6 +712,78 @@ function renderModeStats() {
     <div class="mode-stats-header">
       <span>${tf("profile.mode_col_mode", "Mode")}</span>
       <span>${tf("profile.mode_col_games", "Games / Win %")}</span>
+    </div>
+    <div class="mode-stats-list">${rows}</div>`;
+}
+
+
+/**
+ * Section « Mode Expert » — rendue sous le Mode Breakdown, uniquement si le joueur
+ * a au moins une partie Expert.
+ *
+ * Les données viennent de l'API (`stats.expert_by_mode`) et non de `profile.stats`
+ * comme le reste de la page : le Mode Expert n'écrit rien dans les stats client, et
+ * n'agrège pas non plus dans `user_stats` côté serveur — ses parties ne vivent que
+ * dans `game_sessions`, d'où l'endpoint les recalcule (api/user/stats.php).
+ *
+ * Silencieux si l'appel échoue ou si le joueur est déconnecté : c'est un bonus
+ * d'affichage, il ne doit jamais casser la page profil.
+ */
+/**
+ * Réponse `/user/{id}/stats` mémoïsée le temps du chargement de page.
+ *
+ * renderExpertStats() est appelée depuis cinq endroits (montage, pull cloud,
+ * i18n prêt…) parce que les libellés dépendent d'i18n. renderModeStats(), son
+ * voisin, est local et gratuit ; celle-ci fait un aller-retour réseau et un
+ * GROUP BY + un recalcul de streak par mode. Sans cache : cinq fois.
+ */
+let _expertStatsPromise = null;
+
+async function renderExpertStats() {
+  const container = document.getElementById("expertStatsContainer");
+  if (!container) return;
+  container.innerHTML = "";
+
+  // `playerUserId` est la clé écrite par updateAuthUI() (js/auth.js) — c'est la
+  // seule source de l'id côté client. `localStorage["user"]` n'existe pas et n'a
+  // jamais existé dans ce dépôt : la section entière ne s'affichait donc jamais.
+  const userId = window._currentUser?.id ?? localStorage.getItem("playerUserId");
+  if (!userId || !window._personadleApi) return;
+
+  let modes = [];
+  try {
+    _expertStatsPromise ??= window._personadleApi.stats.get(userId);
+    const res = await _expertStatsPromise;
+    modes = res?.stats?.expert_by_mode ?? [];
+  } catch {
+    _expertStatsPromise = null; // un échec ne doit pas être mis en cache
+    return; // hors ligne / non connecté — on n'affiche simplement rien
+  }
+  if (!modes.length) return;
+
+  const rows = modes
+    .map((m) => {
+      // modeLabel() et non une capitale à la main : « alloutattack » donnait
+      // « Alloutattack ». Vocabulaire des modes = gameCore (CLAUDE.md §8).
+      const label = modeLabel(m.mode);
+      const rate = m.games > 0 ? Math.round((m.wins / m.games) * 100) : 0;
+      const best = m.best_attempts == null ? "—" : m.best_attempts;
+      return `
+      <div class="mode-stat-row expert-stat-row">
+        <span class="mode-stat-icon">⚡</span>
+        <span class="mode-stat-name">${label}</span>
+        <span class="expert-stat-cell">${m.wins}/${m.games}</span>
+        <span class="expert-stat-cell">${rate}%</span>
+        <span class="expert-stat-cell" title="${tf("profile.expert_best_hint", "Fewest guesses in a win")}">${best}</span>
+        <span class="expert-stat-cell">🔥 ${m.streak}</span>
+      </div>`;
+    })
+    .join("");
+
+  container.innerHTML = `
+    <div class="mode-stats-header expert-stats-header">
+      <span>${tf("profile.expert_title", "⚡ Expert Mode")}</span>
+      <span>${tf("profile.expert_cols", "Won / Played · Rate · Best · Streak")}</span>
     </div>
     <div class="mode-stats-list">${rows}</div>`;
 }
@@ -1158,6 +1232,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. Charger le profil et initialiser l'UI
   initProfile();
   renderModeStats();
+    renderExpertStats();
 
   // 1b. Sync complet cloud → local (le backend est la source de vérité).
   // Chaîne : pull → apply UI → re-init titres avec session valide → sync badges local→back.
@@ -1198,6 +1273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initProfile();
     renderThemePicker();
     renderModeStats();
+    renderExpertStats();
     renderSongCard(profile, saveProfile, saveProfileToCloud, markDirty);
     renderUnlockableWallpaperGallery(profile);
     renderBadgesPreview(profile);
@@ -1257,6 +1333,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("personadle:i18n-ready", () => {
     renderStats();
     renderModeStats();
+    renderExpertStats();
     renderBadgesModal(profile, saveProfileAndSyncBadges);
   });
 
@@ -1264,6 +1341,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.i18nIsReady) {
     renderStats();
     renderModeStats();
+    renderExpertStats();
     renderBadgesModal(profile, saveProfileAndSyncBadges);
   }
 });

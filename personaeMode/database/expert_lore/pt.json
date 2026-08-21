@@ -1,0 +1,1282 @@
+{
+  "_comment": "Lore Expert Personae — PT. Traduction de en.json (source de vérité). Les tableaux `mask` sont spécifiques à la langue : le texte emploie souvent une autre forme du nom (« Apolo », « Cérbero », « Hades »/« Plutão »), qu'il faut masquer aussi. maskTerms() ne normalise pas les diacritiques.",
+  "Vulcanus": {
+    "text": "Vulcano, também chamado Vulcanus ou Mulcíber, é o deus romano do fogo, dos vulcões e da forja, patrono de ferreiros, artistas e inventores — o equivalente latino do grego Hefesto. Filho de Júpiter e Juno, é o artesão dos deuses e molda as armas deles numa oficina enterrada sob um vulcão. É casado com a própria deusa do amor, que o trai repetidamente com o seu irmão, o deus da guerra. Coxo e sujo de fuligem no meio de um panteão de belezas imortais, é o único deus que conquista o seu lugar pelo trabalho e não pelo nascimento.",
+    "mask": [
+      "Vulcanus",
+      "Vulcano",
+      "Volcanus",
+      "Mulcíber",
+      "Mulciber"
+    ]
+  },
+  "Apollo": {
+    "text": "Apolo é um dos doze Olímpicos, primeiro deus da música e da poesia, depois do próprio sol, eclipsando o velho titã que conduzia o carro solar. Filho de Zeus e Leto, irmão gémeo da deusa caçadora. Recém-nascido já empunhava um arco e matou a serpente Píton enviada contra a sua mãe. Trocou o caduceu pela primeira lira e tornou-se insuperável entre deuses e mortais — quem desafiou a sua música foi punido sem piedade. Deus do arco, da profecia e da medicina, conduz as Musas.",
+    "mask": [
+      "Apollo",
+      "Apolo",
+      "Apollon"
+    ]
+  },
+  "Maia": {
+    "text": "No mito grego, Maia é a mais velha, a mais tímida e a mais bela das Plêiades, as sete irmãs postas no céu como estrelas. Filha do titã Atlas, que sustenta os céus, e da ninfa marinha Pleione. Vivia afastada dos outros deuses, numa gruta de um monte da Arcádia, e é honrada como protetora das mães que amamentam. A sua beleza atraiu Zeus em segredo, e dessa união nasceu o mensageiro dos deuses — um filho que no próprio dia do nascimento roubou um rebanho e inventou a lira.",
+    "mask": [
+      "Maia"
+    ]
+  },
+  "Artemis": {
+    "text": "Ártemis é a deusa virgem da caça, do parto e da lua, uma dos doze Olímpicos, filha de Zeus e Leto e irmã gémea do deus das artes. Percorre bosques e colinas com o seu arco de prata, o veado e o cipreste consagrados a ela, seguida por ninfas votadas à virgindade. Insensível às manobras da deusa do amor, indiferente aos homens, é orgulhosa e implacável com quem quebra um juramento ou pretende caçar melhor do que ela. Em épocas posteriores absorveu a própria lua, eclipsando a sua personificação mais antiga.",
+    "mask": [
+      "Artemis",
+      "Ártemis"
+    ]
+  },
+  "Eros": {
+    "text": "Eros é o travesso deus grego do amor e do desejo, equivalente ao Cupido romano. As fontes discordam quanto à sua origem: filho da deusa do amor com Zeus, Ares ou Hermes em alguns relatos; noutros, divindade primordial nascida quase no princípio de tudo, o impulso criador de que sai toda a vida nova no cosmos. É representado como um jovem alado ou uma criança com um arco, por vezes vendado — e, para um deus, é um arqueiro notoriamente mau. Atravessa inúmeros mitos sem nunca ser nomeado: onde há amor, ele já lá está.",
+    "mask": [
+      "Eros"
+    ]
+  },
+  "Venus": {
+    "text": "Vénus é a deusa romana do amor, da beleza, do desejo, da fertilidade e da vitória, nascida da espuma depois de Saturno lançar ao mar a carne cortada de Céu. Casada com o ferreiro coxo dos deuses, é sedutora, astuta e abertamente infiel, tomando por amantes deuses e mortais — o deus da guerra acima de todos. Guarda uma fé absoluta no amor e um ódio profundo por quem o julga indigno de si. Mãe de Eneias, é a antepassada de Roma. Os seus símbolos: a concha, as pombas, os golfinhos, as pérolas e o espelho.",
+    "mask": [
+      "Venus",
+      "Vénus",
+      "Venus"
+    ]
+  },
+  "Hermes": {
+    "text": "Hermes é o mais novo dos doze Olímpicos e o mensageiro dos deuses, filho de Zeus e de uma ninfa das montanhas. Patrono dos viajantes, do comércio, dos atletas e dos poetas — e, com igual prontidão, dos ladrões e dos mentirosos. Ainda bebé roubou o gado imortal de Apolo, inventou a primeira lira e ofereceu-a como compensação, recebendo em troca o caduceu enlaçado por duas serpentes. De chapéu e sandálias aladas, guia os mortos ao mundo subterrâneo, único deus livre de entrar e sair desse reino quando lhe apetece.",
+    "mask": [
+      "Hermes",
+      "Mercurius",
+      "Mercúrio"
+    ]
+  },
+  "Chronos": {
+    "text": "Chronos, por vezes escrito Khronos, é a personificação primordial do tempo e da eternidade, nascido do Caos e senhor do Zodíaco — o seu nome é simplesmente a palavra grega para «tempo». As fontes mais antigas não lhe dão corpo algum, apenas uma serpente de três cabeças: um homem, um touro e um leão. A arte posterior fez dele um velho barbudo, antepassado do Pai Tempo. A Antiguidade confundiu-o muitas vezes com o rei titã que castrou o próprio pai com uma foice e devorou os filhos para manter o trono — outro deus, e uma confusão nunca desfeita.",
+    "mask": [
+      "Chronos",
+      "Cronos",
+      "Khronos",
+      "Crono",
+      "Kronos",
+      "Saturno",
+      "Saturnus"
+    ]
+  },
+  "Rhadamanthus": {
+    "text": "Radamanto é filho de Zeus e Europa, e portanto semideus; o seu nome evoca um julgamento severo e inflexível. Em vida foi um rei sábio de Creta, célebre por leis tão justas que se dizia terem sido ditadas pelo pai. Depois da morte não foi julgado, mas feito juiz: com Éaco e Minos pesa as almas que chegam ao mundo dos mortos e fixa-lhes o castigo, encarregando-se das que vêm das terras do Oriente. Reina sobre o Elísio, o descanso concedido aos justos.",
+    "mask": [
+      "Rhadamanthus",
+      "Radamanto",
+      "Rhadamanthys"
+    ]
+  },
+  "Hades": {
+    "text": "Hades é rei e senhor supremo do mundo subterrâneo grego, chamado o Invisível, equivalente ao Plutão romano. Nascido de Crono e Reia, lutou ao lado dos irmãos contra os titãs; na partilha do mundo Zeus ficou com o céu, Poseidon com o mar, e ele reclamou o reino sem sol enterrado na terra. O seu ofício impede-o de sair de lá, e por isso não se conta entre os doze Olímpicos apesar do posto. Não é a morte em si: esse papel é de outro. Raptou Perséfone e prendeu-a a si com um bago de romã.",
+    "mask": [
+      "Hades",
+      "Haides",
+      "Plutão",
+      "Pluto",
+      "Plouton"
+    ]
+  },
+  "Helios": {
+    "text": "Hélio é o titã grego do sol, filho de Hipérion e Teia. A cada madrugada emerge do oceano oriental e conduz um carro puxado por quatro cavalos que cospem fogo por toda a largura do céu, afunda-se no mar ocidental ao anoitecer e regressa a oriente durante a noite dentro de uma taça de ouro. Vendo tudo do alto, é a testemunha a quem os outros deuses recorrem quando alguma coisa lhes foi escondida. O seu filho Faetonte implorou para conduzir o carro uma vez, perdeu o controlo, e Zeus teve de o fulminar antes que a terra ardesse.",
+    "mask": [
+      "Helios",
+      "Hélio"
+    ]
+  },
+  "Hyperion": {
+    "text": "Hipérion é um dos doze titãs originais, filhos de Urano e Gaia, e pai do sol, da lua e da aurora com a irmã Teia. O seu nome significa «aquele que observa do alto». A literatura grega distingue-o com cuidado do próprio filho: o filho é o sol físico, o disco que atravessa o céu todos os dias, ao passo que ele é o princípio mais antigo e mais amplo — a própria luz, e a vigilância e a sabedoria que vêm de ver tudo. Pertence à geração que reinou antes dos Olímpicos e caiu com ela.",
+    "mask": [
+      "Hyperion",
+      "Hipérion",
+      "Hiperião"
+    ]
+  },
+  "Callisto": {
+    "text": "Calisto é uma ninfa, filha do rei Licáon, que seguia a deusa virgem da caça e fizera o mesmo voto de castidade. Zeus tomou a forma da própria deusa para se aproximar dela e depois forçou-a; meses mais tarde a gravidez foi descoberta enquanto as ninfas se banhavam juntas, e ela foi expulsa do séquito com fúria. Deu à luz um filho, Arcas, e foi transformada em ursa — pelo ciúme de Hera nalgumas versões, pela sua antiga senhora noutras. Quase morta pelo próprio filho sob essa forma, foi posta entre as estrelas como a Ursa Maior.",
+    "mask": [
+      "Callisto",
+      "Calisto",
+      "Kallisto"
+    ]
+  },
+  "Astria": {
+    "text": "Astéria é a deusa titânide das estrelas e da astrologia, dos oráculos e dos sonhos proféticos — daí os projetores de planetário que carrega. Como a ninfa Calisto atraiu o desejo de Zeus, e como ela fugiu: transformou-se em codorniz, ele perseguiu-a como águia. Encurralada sobre o mar, atirou-se à água e tornou-se a ilha de Delos — o único pedaço de terra que mais tarde ousou acolher Leto, grávida e caçada por Hera, para que ali nascessem os deuses gémeos do sol e da lua.",
+    "mask": [
+      "Astria",
+      "Astéria",
+      "Asteria"
+    ]
+  },
+  "Nyarlathotep": {
+    "text": "Nyarlathotep é um Deus Exterior dos Mitos de Cthulhu criado por H. P. Lovecraft, conhecido como o Caos Rastejante, o Deus sem Rosto, o Morador nas Trevas. Brotado diretamente de Azathoth, não se parece com os da sua espécie: os outros Deuses Exteriores estão fora do universo físico e os Grandes Antigos jazem a sonhar, ao passo que ele percorre a própria realidade como coração, alma e mensageiro deles, com mil máscaras. Semeia a discórdia e atormenta os mortais não como fim, mas para passar o tempo — por isso lhe chamam o mais humano dos seus.",
+    "mask": [
+      "Nyarlathotep",
+      "Caos Rastejante",
+      "Deus sem Rosto",
+      "Morador nas Trevas"
+    ]
+  },
+  "Odysseus": {
+    "text": "Odisseu, também chamado Ulisses, é o lendário rei de Ítaca, descendente da linhagem de Hermes, marido de Penélope e pai de Telémaco. General na guerra de Troia e o homem que a terminou: o cavalo de madeira foi ideia sua. Cognominado «o Astuto», vence pela manha onde outros vencem pela força. O regresso custou-lhe mais dez anos do que a guerra — ciclope, feiticeira, sereias, naufrágios — enquanto os pretendentes devoravam os seus bens e a mulher os mantinha à distância desfazendo à noite o que tecia de dia.",
+    "mask": [
+      "Odysseus",
+      "Odisseu",
+      "Ulisses",
+      "Ulysses",
+      "Odisseia"
+    ]
+  },
+  "Prometheus": {
+    "text": "Prometeu é o titã que tomou o partido de Zeus contra os seus na guerra pelo mundo; o seu nome significa «previdência». Quando foi repartida a tarefa de povoar a terra, o irmão Epimeteu gastou todos os dons nas feras e nada deixou à humanidade — por isso roubou o fogo do Olimpo e deu-o aos homens. Pior ainda, ensinou-os a enganar os deuses nos sacrifícios. Acorrentado a um rochedo por toda a eternidade, uma águia devorava-lhe o fígado todos os dias e ele renascia todas as noites, até Héracles o libertar durante os Doze Trabalhos.",
+    "mask": [
+      "Prometheus",
+      "Prometeu"
+    ]
+  },
+  "Orpheus ( Male )": {
+    "text": "Orfeu era filho do rei trácio Éagro e da musa Calíope — algumas versões dão Apolo como pai. Munido de uma pequena lira de ouro e ensinado a cantar pela mãe, tocava tão bem que pedras e animais se punham a dançar; chamavam-lhe Mestre das Cordas e Pai dos Cantos. Quando a mulher Eurídice morreu desceu ao mundo dos mortos e comoveu o próprio Hades com a sua música, obtendo que ela o seguisse com uma condição: não olhar para trás antes de ambos chegarem à superfície. Olhou. Despedaçado depois pelas Ménades, a sua cabeça continuou a cantar e a lira foi posta entre as estrelas.",
+    "mask": [
+      "Orpheus",
+      "Orfeu"
+    ]
+  },
+  "Thanatos": {
+    "text": "Thanatos é a personificação grega da própria morte, filho de Nix e Érebo e gémeo mais velho do deus do sono. Anuncia o fim sereno, o sono eterno, enquanto deuses mais violentos distribuem as mortes brutais — o que explica em parte o seu papel tão diminuto nos mitos: o senhor do mundo subterrâneo eclipsou-o quase por completo. Indiscriminado e implacável, detestado por todos e retribuindo o ódio, os poetas pintaram-no como um espectro barbudo de espada, cuja vinda se anuncia pela dor. Épocas posteriores suavizaram-no num menino alado. Roma chamou-lhe Mors.",
+    "mask": [
+      "Thanatos",
+      "Tânato",
+      "Mors"
+    ]
+  },
+  "Messiah": {
+    "text": "Messias, em hebraico, ou Cristo em grego: o ungido, o salvador cuja vinda se espera perto do fim dos tempos. O termo atravessa sobretudo as religiões abraâmicas, judaísmo e cristianismo, mas nunca houve acordo sobre quem exatamente designa. A tradição ocidental responde em massa Jesus de Nazaré. Noutros lugares e noutras épocas, outras figuras carregaram a mesma esperança de libertação para a humanidade: o Buda, Krishna, ou o Maitreya ainda por vir. A palavra nomeia uma função mais do que uma pessoa — aquele que salva, seja ele quem for.",
+    "mask": [
+      "Messiah",
+      "Messias",
+      "Cristo",
+      "Christ"
+    ]
+  },
+  "Io": {
+    "text": "Io era uma sacerdotisa mortal de Hera em Argos. Zeus desejou-a e, para esconder o caso da mulher, sepultou o lugar sob um banco de nuvens — uma nuvem tão suspeita que Hera desceu a ver e encontrou o marido ao lado de uma bela novilha branca. Sabia perfeitamente o que era aquela novilha e exigiu-a de presente; Zeus dificilmente podia recusar. Posta sob a guarda de Argos dos cem olhos, a novilha só ficou livre quando Hermes adormeceu o gigante. Fugiu por fim para o Egito, onde acabou por ser adorada como Ísis.",
+    "mask": [
+      "Io"
+    ]
+  },
+  "Isis": {
+    "text": "Ísis, chamada Aset no Egito, era a deusa-mãe cujo culto se espalhou por todo o mundo greco-romano: esposa e mãe ideal, senhora da magia, amiga de escravos e pecadores tanto quanto de soberanos. Filha de Geb, a terra, e de Nut, o céu, mandou um dia uma serpente envenenar Rá e negou-lhe a cura até que o deus solar lhe entregasse o seu nome verdadeiro. Quando o irmão e marido Osíris foi assassinado e espalhado em pedaços pelo país, foi a magia dela que o recompôs e lhe devolveu a vida, o tempo bastante para conceber Hórus.",
+    "mask": [
+      "Isis",
+      "Ísis",
+      "Aset",
+      "Eset"
+    ]
+  },
+  "Trismegistus": {
+    "text": "Trismegisto, «três vezes grandíssimo», é a figura sincrética nascida da fusão do deus mensageiro grego com o Tot egípcio, adorados como um só na cidade que os gregos rebatizaram Hermópolis. Meio deus, meio mago humano, é apontado como fundador da alquimia, da astrologia e da magia — as três artes que lhe valem o epíteto. A Antiguidade atribuía-lhe dezenas de milhares de escritos de suposta enorme antiguidade; Clemente de Alexandria contava quarenta e dois livros sagrados usados na formação dos sacerdotes egípcios. Os ocultistas fizeram dele o mestre de Moisés e o construtor das pirâmides de Gizé.",
+    "mask": [
+      "Trismegistus",
+      "Trismegisto",
+      "Trismegistos"
+    ]
+  },
+  "Polydeuces": {
+    "text": "Polideuces, Pólux para os romanos, era o mais novo dos irmãos gémeos conhecidos como Dioscuros. Ele e o irmão tinham a mesma mãe, Leda, mas não o mesmo pai: o dele era Zeus, o do gémeo um rei mortal chamado Tíndaro — de modo que um nasceu imortal e o outro não. Quando o gémeo mortal foi morto, recusou a separação e suplicou a Zeus que o deixasse ceder metade da própria imortalidade em vez de sobreviver sozinho. Zeus consentiu, e pôs ambos no céu como a constelação de Gémeos, uma estrela brilhante para cada um.",
+    "mask": [
+      "Polydeuces",
+      "Polideuces",
+      "Pólux",
+      "Pollux"
+    ]
+  },
+  "Caesar": {
+    "text": "César não foi de início um título, mas um nome de família, o cognome de Caio Júlio, último ditador da República romana. General brilhante e político populista, indispôs-se com a elite romana por causa de reformas autoritárias e morreu apunhalado por membros do seu próprio Senado. O filho adotivo Octaviano venceu as guerras civis que se seguiram, fundou o Império e tomou o nome como título; todos os imperadores depois dele o usaram. Ambos foram declarados deuses pelo Senado. A palavra sobreviveu a Roma, tornando-se Kaiser e Czar.",
+    "mask": [
+      "Caesar",
+      "César",
+      "Kaiser",
+      "Czar",
+      "Tsar"
+    ]
+  },
+  "Penthesilea": {
+    "text": "Pentesileia era uma rainha das amazonas, filha de Ares e de Otrera, que fundou a tribo. Chegou à guerra de Troia no décimo e último ano, à frente das suas guerreiras, em penitência por ter matado sem querer a própria irmã Hipólita. Combateu Aquiles e caiu às mãos dele — e quando ele lhe ergueu o elmo apaixonou-se pelo rosto da morta, e devolveu o corpo intacto aos troianos para o sepultarem. Quando Tersites troçou dessa clemência, Aquiles matou-o também. O seu nome significa «chorada pelo povo».",
+    "mask": [
+      "Penthesilea",
+      "Pentesileia",
+      "Pentesileu"
+    ]
+  },
+  "Artemisia": {
+    "text": "Artemísia I de Cária governou uma cidade grega sob tutela persa, tomando o poder à morte do marido e conservando-o por direito próprio. Tornou-se conselheira de Xerxes e combateu ao lado dele contra os gregos, sobretudo em Salamina, onde escapou à captura esporoando e afundando um dos seus próprios navios aliados para abrir caminho de fuga — manobra que os persas leram, não se sabe como, por bravura e não por traição. Depois convenceu Xerxes a retirar-se. Uma soberana posterior do mesmo nome mandou erguer o Mausoléu de Halicarnasso.",
+    "mask": [
+      "Artemisia",
+      "Artemísia"
+    ]
+  },
+  "Castor": {
+    "text": "Cástor era o mais velho dos irmãos gémeos chamados Dioscuros, e navegou com os Argonautas. Ele e o gémeo tinham a mesma mãe, Leda, mas não o mesmo pai: o dele era o rei mortal Tíndaro, o do irmão era Zeus — dos dois, portanto, só ele podia morrer, e morreu. O irmão recusou-se a ser separado dele e pediu a Zeus que repartisse entre ambos a sua própria imortalidade em vez de a guardar sozinho. Foram postos juntos no céu como a constelação de Gémeos, uma estrela brilhante para cada um.",
+    "mask": [
+      "Castor",
+      "Cástor"
+    ]
+  },
+  "Nemesis": {
+    "text": "Némesis é a personificação grega da retribuição divina: aquela que castiga a soberba, o mortal que se tornou orgulhoso demais ou afortunado demais. Filha de Nix e Érebo, irmã da Morte e do Sono. Zeus perseguiu-a; ela fugiu transformada em gansa, ele fez-se cisne e tomou-a na mesma, e o ovo que se seguiu foi entregue a Leda — dele saiu Helena de Troia. Quando Narciso desprezou todos os que o amavam, condenou-o a amar o que nunca poderia ter, e ele definhou a contemplar o próprio reflexo.",
+    "mask": [
+      "Nemesis",
+      "Némesis",
+      "Nêmesis"
+    ]
+  },
+  "Kala-Nemi": {
+    "text": "Kala-Nemi é o espírito pré-védico do zodíaco, enrolado em torno do universo como uma serpente imensa — o Aro da Roda do Tempo, pois é o girar do zodíaco acima de nós que fixa as estações. O nome pertence também a uma segunda figura: no Ramáiana, um feiticeiro rakshasa, tio de Ravana. Prometido meio reino se impedisse Hanuman de trazer a erva que curaria Lakshmana ferido, disfarçou-se de sábio para o enganar. Hanuman percebeu o embuste, avisado por uma apsará, e matou-o.",
+    "mask": [
+      "Kala-Nemi",
+      "Kalanemi"
+    ]
+  },
+  "Palladion": {
+    "text": "Um paládio é uma imagem de enorme antiguidade da qual se acreditava depender a salvação de uma cidade inteira. A palavra aponta sobretudo para um objeto: a estátua de madeira de Palas Atena que Odisseu e Diomedes roubaram da cidadela de Troia, e que Eneias teria levado até ao futuro sítio de Roma — a história que Virgílio conta na Eneida. Desde cerca de 1600 a palavra designa qualquer coisa que proteja ou garanta, à maneira de uma égide.",
+    "mask": [
+      "Palladion",
+      "Paládio",
+      "Palladium"
+    ]
+  },
+  "Athena": {
+    "text": "Atena, deusa grega da sabedoria, da estratégia, dos ofícios e da guerra justa, saltou completamente armada da testa de Zeus depois de este ter engolido a sua mãe Métis. É o rosto disciplinado do combate, contra o irmão Ares, que é a sua sanha sanguinária, e a única divindade autorizada a empunhar o raio de Zeus. Ajudou Héracles e Perseu, e apoiou os gregos diante de Troia. Padroeira virgem da cidade que leva o seu nome, ganhou-a a Poseidon plantando ali a primeira oliveira. Usa o elmo de crista e a égide; a coruja é dela.",
+    "mask": [
+      "Athena",
+      "Atena",
+      "Palas",
+      "Pallas"
+    ]
+  },
+  "Cerberus": {
+    "text": "Cérbero, Kerberos em grego, é a fera que guarda as portas do mundo subterrâneo — quase sempre representada como um cão gigantesco de três cabeças, embora o número varie de fonte para fonte. Pertence ao senhor dos mortos, e a sua tarefa consiste menos em impedir os vivos de entrar do que em impedir os mortos de sair. Foi gerado por Equidna, meio mulher e meio serpente, e por Tifão, a criatura mais terrível alguma vez nascida; os seus irmãos vêm da mesma ninhada — a Hidra de Lerna, a Quimera e o Ortro de duas cabeças.",
+    "mask": [
+      "Cerberus",
+      "Cérbero",
+      "Kerberos"
+    ]
+  },
+  "Lucia": {
+    "text": "Lúcia de Siracusa, santa Luzia, foi uma mártir cristã morta durante as perseguições de Diocleciano, e é venerada como padroeira dos cegos. O seu nome vem de lux, a luz. Tendo consagrado a sua virgindade, recusou o rico pagão que a mãe lhe destinava; o pretendente rejeitado denunciou-a como cristã. Condenada, foi impossível movê-la do sítio onde se ajoelhara — nem os bois nem o fogo o conseguiram. Arrancaram-lhe os olhos e cortaram-lhe a garganta, e ela continuou a ver e a profetizar apesar de tudo.",
+    "mask": [
+      "Lucia",
+      "Lúcia",
+      "Santa Luzia",
+      "Luzia"
+    ]
+  },
+  "Juno": {
+    "text": "Juno era a rainha dos deuses romanos, deusa do casamento e da feminilidade, equivalente à Hera grega. Filha de Saturno e Ops, casada com o próprio irmão Júpiter, mãe de Marte e de Vulcano. Com Júpiter e Minerva formava a Tríade Capitolina que presidia a Roma, onde lhe chamavam Regina, a Rainha. Um dos seus epítetos, Moneta, significa «aquela que avisa» — a casa da moeda ficava dentro do seu templo, e é daí que vem a nossa palavra moeda. O mesmo termo designava o espírito guardião com que toda a romana nascia.",
+    "mask": [
+      "Juno",
+      "Uni"
+    ]
+  },
+  "Medea": {
+    "text": "Medeia da Cólquida, filha do rei Eetes, apaixonou-se por Jasão quando este veio buscar o velo de ouro, traiu o pai para o ajudar a tomá-lo e fugiu com ele, dando-lhe dois filhos. Em Corinto, Jasão deixou-a para casar com Glauce, filha do rei. Ela enviou à noiva um vestido envenenado que a queimou viva, e com ela o rei — depois matou os próprios filhos e escapou num carro enviado pelo seu antepassado, o deus do sol. Feiticeira tanto quanto princesa, sabia devolver a juventude, ou fingi-lo de modo convincente.",
+    "mask": [
+      "Medea",
+      "Medeia"
+    ]
+  },
+  "Hypnos": {
+    "text": "Hypnos é o deus grego do sono, filho de Nix e gémeo mais novo da própria Morte — divindade calma e gentil que socorre os mortais em apuros e que, por eles dormirem, possui metade de toda a vida humana. É desenhado como um jovem envolto em hastes de papoila, um corno na mão e por vezes asas nas têmporas. Vive numa gruta onde a noite e o dia se encontram, a entrada sufocada por flores narcóticas e o rio Lete a correr dela; ali dentro não chega luz nem som. Roma chamou-lhe Somnus.",
+    "mask": [
+      "Hypnos",
+      "Hipno",
+      "Sono",
+      "Somnus"
+    ]
+  },
+  "Moros": {
+    "text": "Moros é a personificação grega da perdição — do destino iminente, do fim já fixado para cada vida. Filho de Nix, irmão do Sono, da Vingança e da Morte, e irmão mais velho e chefe das três Moiras. Não tem forma nenhuma: um espírito informe cuja tarefa é revelar a um mortal o dia da sua própria morte. Porque esse saber é insuportável, tornou-se também espírito de desespero, já que as almas que visita ficam tomadas pelo pavor. O seu nome está na raiz da palavra «moroso» no sentido de sombrio.",
+    "mask": [
+      "Moros",
+      "Moro"
+    ]
+  },
+  "Psyche": {
+    "text": "Psique era a filha mais nova de um rei e de uma rainha da Sicília, e tão bela que os pretendentes vinham de toda a parte e começou a dizer-se que superava a própria Afrodite. Picada, a deusa mandou o filho Eros atingi-la com uma flecha de desejo para que se apaixonasse pela primeira criatura miserável à mão. Ele olhou para ela, picou-se a si mesmo e levou-a para um lugar escondido. Casou com ela, e pediu a Zeus que a tornasse deusa. O seu nome é simplesmente a palavra grega para a alma.",
+    "mask": [
+      "Psyche",
+      "Psique"
+    ]
+  },
+  "Izanagi": {
+    "text": "Izanagi, o macho-que-convida, é uma das sete gerações divinas do mito japonês. Com a mulher Izanami gerou as ilhas do Japão e a maior parte dos seus deuses, até ela morrer a dar à luz o deus do fogo — que ele decapitou de dor. Seguiu-a até Yomi, a terra dos mortos, e quebrou a promessa de não olhar para ela; ao vê-la apodrecida fugiu, e ela jurou matar mil pessoas por dia. Ele respondeu que mil e quinhentas nasceriam. Lavando a imundície de Yomi, produziu o sol, a lua e a tempestade.",
+    "mask": [
+      "Izanagi"
+    ]
+  },
+  "Izanagi-no-Okami": {
+    "text": "Okami significa Grande Divindade: o título marca a verdadeira dignidade de Izanagi, o macho-que-convida, entre as sete gerações divinas que abriram o mito japonês. Não é outro deus, mas o mesmo visto por inteiro — o criador que gerou as ilhas e os seus deuses com a mulher, desceu à terra dos mortos para a trazer de volta e da sua própria ablução fez nascer o sol, a lua e a tempestade. O nome declara o que ele sempre foi, uma vez deposta a forma emprestada e nada mais deixado oculto.",
+    "mask": [
+      "Izanagi-no-Okami",
+      "Izanagi",
+      "Okami"
+    ]
+  },
+  "Jiraiya": {
+    "text": "Jiraiya é um herói do folclore japonês, primeiro filho de um bandido tornado fora-da-lei, depois campeão errante. Aprende magia dos sapos com um eremita da montanha e sabe transformar-se num sapo enorme, ou montar um em batalha. A mulher Tsunade comanda os caracóis e o rival Orochimaru comanda as serpentes — os três encaixam num ciclo em que cada um vence um e perde para outro. A sua história foi publicada em folhetim durante décadas no século XIX e adaptada sem fim para o palco, e é por isso que um ninja sobre um sapo gigante continua uma das imagens mais reconhecíveis do Japão.",
+    "mask": [
+      "Jiraiya"
+    ]
+  },
+  "Takehaya Susano-o": {
+    "text": "Takehaya-Susanoo-no-Mikoto é o longo nome cerimonial que o Kojiki dá ao deus japonês das tempestades. Takehaya traduz-se «bravo e rápido», e o epíteto assenta: nascido do nariz do pai durante a purificação depois de Yomi, recebeu o mar, enfureceu-se contra a irmã sol até ela se fechar numa gruta, e por isso foi banido do céu. No exílio redimiu-se matando a serpente de oito cabeças Yamata no Orochi, encontrando na sua cauda a espada Kusanagi e oferecendo-a à irmã que ofendera.",
+    "mask": [
+      "Takehaya Susano-o",
+      "Takehaya-Susanoo-no-Mikoto",
+      "Takehaya",
+      "Susano-o",
+      "Susanoo"
+    ]
+  },
+  "Tomoe": {
+    "text": "Tomoe Gozen foi uma mulher guerreira da guerra Genpei, na década de 1180. O Conto dos Heike descreve-a de beleza notável e capaz de igualar qualquer homem a cavalo ou a pé: arqueira de rara perícia, enviada à frente como primeira capitã, armada de arco pesado e de uma grande espada. Na batalha de Awazu o seu senhor mandou-a embora para não morrer ao lado de uma mulher; ela tomou uma última cabeça inimiga e partiu a cavalo. O que lhe aconteceu depois ninguém sabe, e nenhum registo prova que tenha sequer existido.",
+    "mask": [
+      "Tomoe",
+      "Tomoe Gozen"
+    ]
+  },
+  "Suzuka Gongen": {
+    "text": "Suzuka Gozen é uma figura dos contos populares do período Kamakura, descrita ora como ogra, ora como rainha dos bandidos, donzela celeste ou deusa — até o seu aspeto muda de versão para versão. No Tamura no Soushi é uma mulher guerreira casada com Akuro-Ou, rei dos oni, até se apaixonar por Sakanoue no Tamuramaro, o herói mandado exterminá-los. Trai os seus: mata os vassalos do marido e abre o castelo dos demónios ao homem enviado a destruí-lo.",
+    "mask": [
+      "Suzuka Gongen",
+      "Suzuka Gozen",
+      "Tate Eboshi"
+    ]
+  },
+  "Konohana Sakuya": {
+    "text": "Konohana Sakuya é a princesa das flores do mito japonês, filha do deus da montanha Ouyamatsumi e mulher do neto celeste Ninigi. Concebeu na própria noite de núpcias, e ele acusou-a de infidelidade. Para lhe responder fechou-se numa cabana e ateou-lhe fogo, declarando que nenhuma chama a tocaria se os filhos fossem mesmo dele — e saiu ilesa com três rapazes. O seu emblema é a flor de cerejeira, e o simbolismo é o mesmo: a beleza no auge, e desaparecida quase de imediato.",
+    "mask": [
+      "Konohana Sakuya",
+      "Konohanasakuya",
+      "Sakuya"
+    ]
+  },
+  "Amaterasu": {
+    "text": "Amaterasu é a deusa japonesa do sol, soberana de Takamagahara e a divindade mais sagrada do xintoísmo; a linhagem imperial reivindica descendência direta dela. O seu nome significa «aquela que ilumina os céus». Nasceu do olho esquerdo do pai durante a purificação depois de Yomi, irmã da lua e da tempestade. Quando o irmão lhe destruiu os arrozais e matou uma das suas tecelãs, fechou-se numa gruta e o mundo mergulhou na escuridão. Os deuses atraíram-na para fora com um espelho — nunca vira o próprio rosto — e a luz voltou.",
+    "mask": [
+      "Amaterasu",
+      "Amaterasu-Omikami",
+      "Tenshô Daijin",
+      "Sume-Omikami"
+    ]
+  },
+  "Take-Mikazuchi": {
+    "text": "Takemikazuchi, também chamado Kashima-no-kami, é o deus xintoísta do trovão, nascido do sangue na espada com que Izanagi decapitou o recém-nascido deus do fogo. Enviado do céu para pacificar as divindades de Izumo, obteve a rendição de Okuninushi — mas o filho do deus recusou, rodopiando um rochedo na ponta dos dedos para o assustar, e desafiou-o para uma prova de força. O que se seguiu é lembrado como o primeiro combate de sumo: esmagou-lhe os braços como canas novas e atirou-os fora. O vencido fugiu para o lago Suwa e tornou-se o seu deus guardião.",
+    "mask": [
+      "Take-Mikazuchi",
+      "Takemikazuchi",
+      "Kashima-no-kami"
+    ]
+  },
+  "Dairoku Tenmaou": {
+    "text": "O Rei Demónio do Sexto Céu aparece na mandala Gohonzon do budismo japonês como a encarnação da fome de poder e do desejo mundano. À frente de exércitos imensos de subordinados, o seu trabalho é afastar os crentes do ensinamento do Buda; descende de Mara, o tentador das mais antigas histórias budistas. O título colou-se também a Oda Nobunaga, o senhor da guerra do século XVI famoso pela crueldade e pela excentricidade — pela palavra de um único missionário português, que os historiadores japoneses rejeitam, mas que a ficção repete desde então.",
+    "mask": [
+      "Rei Demónio do Sexto Céu",
+      "Demónio Rei do Sexto Céu",
+      "Dairoku Tenmaou",
+      "Dai-roku-ten-maou",
+      "Takejizaiten",
+      "Takeji Zaiten"
+    ]
+  },
+  "Himiko": {
+    "text": "Himiko foi uma rainha xamã de Yamatai-koku, um reino antigo nas ilhas que se tornaram o Japão. As crónicas chinesas dizem que o seu povo concordou em levar uma mulher ao trono, e que ela pôs fim a oitenta anos de guerra unindo-os. Nunca casou. Vivia por detrás de torres e paliçadas, servida por mil mulheres e um só homem, e o seu povo prezava a sua perícia na magia acima de tudo. O seu governo foi severo e pacífico; a sua morte foi tida como desastre, e a ordem só voltou quando uma rapariga de treze anos da sua família foi feita rainha.",
+    "mask": [
+      "Himiko"
+    ]
+  },
+  "Kanzeon": {
+    "text": "Kanzeon Bosatsu — o bodisatva que ouve as vozes do mundo — é o nome japonês da deusa chinesa da misericórdia, ela própria tradução do indiano Avalokiteśvara. No ensinamento budista essa origem era masculina; a figura tornou-se feminina na viagem para oriente. É representada como uma mulher de vestes brancas com um jarro de água pura e um ramo de salgueiro. Meditando sobre todos os que precisavam dela, descobriu que duas mãos não chegavam para os alcançar, e o seu mestre deu-lhe mil braços. Poucas figuras da Ásia oriental carregam mais nomes, ou histórias mais contraditórias.",
+    "mask": [
+      "Kanzeon",
+      "Kannon",
+      "Guanyin",
+      "Guanshiyin",
+      "Avalokiteśvara",
+      "Avalokitesvara"
+    ]
+  },
+  "Kintoki-Douji": {
+    "text": "Kintaro, o menino dourado, foi criado no monte Ashigara com os animais por companheiros de brincadeira e vencia-os a todos no sumo. Adulto, tomou o nome de Sakata no Kintoki e tornou-se um dos quatro vassalos de Minamoto no Yorimitsu, caçando demónios pelas províncias. Quase nunca é retratado sem o seu machado, que emprestava aos lenhadores locais. As crianças japonesas continuam a encontrá-lo como o bebé rechonchudo de pele vermelha que luta com ursos, e o conto nunca chegou realmente a sair do quarto das crianças.",
+    "mask": [
+      "Kintoki-Douji",
+      "Kintoki",
+      "Kintaro",
+      "Sakata no Kintoki"
+    ]
+  },
+  "Kamui": {
+    "text": "Os kamuy são os espíritos divinos da religião ainu, próximos em espírito dos kami do xintoísmo: toda a criatura e toda a força digna de respeito tem um. Esta figura em particular é Kim-un-kamuy, o kamuy das montanhas e dos ursos. Os ainu assinalavam-no com o iyomante — uma cria de urso capturada, criada durante um ano entre os homens como hóspede de honra, depois morta com uma flecha para que o espírito pudesse voltar a casa, aos deuses, levando notícia de como a humanidade o tratara.",
+    "mask": [
+      "Kamui",
+      "Kamuy",
+      "Kim-un-kamuy"
+    ]
+  },
+  "Sukuna-Hikona": {
+    "text": "Sukuna-Hikona é o deus anão do mito japonês: a cura, o fabrico de saqué e as termas são coisa sua. Nascido entre os deuses celestes, passou a Izumo num barco de casca, vestido de peles de ganso, e ligou a sua sorte à do deus terreno Okuninushi — mordendo-lhe a face no primeiro encontro, depois do qual os dois se tornaram inseparáveis. Juntos moldaram a terra e idearam as suas defesas contra a doença e os animais selvagens. O seu santuário continua no bairro dos boticários de Osaca.",
+    "mask": [
+      "Sukuna-Hikona",
+      "Sukunabikona",
+      "Sukuna-Hikona no Kami"
+    ]
+  },
+  "Yamato-Takeru": {
+    "text": "O Bravo de Yamato é o título conquistado pelo príncipe Ousu, um dos grandes guerreiros da lenda japonesa — quase dois metros de altura, rosto severo, orgulhoso da sua força e dito meio deus. Matou o próprio irmão mais velho por uma ninharia, e o pai, o imperador, com medo dele, manteve-o na guerra: primeiro a fronteira ocidental, depois uma expedição a oriente. A tia deu-lhe a espada divina Ame no Murakumo; quando os inimigos incendiaram o campo à sua volta, cortou a erva e sobreviveu, e a lâmina foi rebatizada «corta-erva». A maldição de um deus da montanha matou-o, e ele voou como uma ave branca.",
+    "mask": [
+      "Yamato-Takeru",
+      "Yamato Takeru",
+      "Ousu"
+    ]
+  },
+  "Magatsu-Izanagi": {
+    "text": "Izanagi do Refúgio da Calamidade: o nome do deus criador tal como estava no caminho de regresso de Yomotsu Hirasaka, antes da purificação. Descera para tirar a mulher da terra dos mortos, falhara, olhara para aquilo que lhe fora dito para não olhar, e fugira com a maldição dela atrás — e a imundície daquele lugar ainda em cima. Este é o deus nesse exato instante: não o criador das ilhas e do sol, mas aquilo que saiu do submundo e ainda não se lavara.",
+    "mask": [
+      "Magatsu-Izanagi",
+      "Magatsu",
+      "Izanagi"
+    ]
+  },
+  "Susano-o": {
+    "text": "Susano-o é o deus xintoísta do mar e das tempestades, nascido do nariz do pai durante a purificação depois de Yomi, irmão do sol e da lua. Ele e a irmã discutiram sem fim: uma disputa para provar a sua sinceridade tornou-se rixa, e ele respondeu destruindo-lhe os arrozais, sujando-lhe o palácio e matando uma das suas tecelãs — empurrando-a para a gruta e o mundo para a escuridão. Banido do céu, chegou a Izumo, embebedou a serpente de oito cabeças Yamata no Orochi, matou-a, e encontrou-lhe na cauda a espada que deu à irmã como desculpa.",
+    "mask": [
+      "Susano-o",
+      "Susanoo",
+      "Susanoo-no-Mikoto"
+    ]
+  },
+  "Haraedo-no-Okami": {
+    "text": "As Haraedo-no-Okami são as deusas xintoístas da purificação, nascidas do rito misogi que Izanagi cumpriu para lavar a imundície do submundo depois de falhar em trazer a mulher de volta de Yomotsu Hirasaka. São quatro — Seoritsu-Hime, Haya'akitsu-Hime, Ibukidonushi e Hayasasura-Hime — e nunca são veneradas em separado, porque o trabalho é uma cadeia: uma leva a impureza ao mar, a seguinte engole-a, a terceira sopra-a para longe, a última fá-la desaparecer.",
+    "mask": [
+      "Haraedo-no-Okami",
+      "Haraedo"
+    ]
+  },
+  "Sumeo-Okami": {
+    "text": "Sume-Omikami, a Grande Deusa Imperial, é um epíteto da deusa japonesa do sol usado sobretudo no Nihon Shoki. A casa imperial fazia tradicionalmente descender dela a sua linhagem, e o título diz exatamente isso: não apenas uma grande divindade, mas aquela de quem o próprio trono afirma provir. Não nomeia um deus novo — nomeia a mesma deusa da gruta e do espelho no auge da sua soberania, vista da perspetiva da dinastia que reinou em seu nome.",
+    "mask": [
+      "Sumeo-Okami",
+      "Sume-Omikami",
+      "Sume-Okami",
+      "Amaterasu"
+    ]
+  },
+  "Takeji Zaiten": {
+    "text": "Takeji Zaiten é o outro nome do Rei Demónio do Sexto Céu, tirado do reino que habita — o mais alto dos Seis Céus do Desejo na cosmologia budista. O nome significa «ter prazer nas transformações operadas por outros»: goza aquilo que os outros seres criam, sem criar nada ele próprio. Ali o tempo corre a outro ritmo. Um dia e uma noite desse céu são mil e seiscentos anos deste mundo, e o senhor dos demónios vive dezasseis mil desses anos antes de renascer.",
+    "mask": [
+      "Rei Demónio do Sexto Céu",
+      "Takeji Zaiten",
+      "Takejizaitenjin",
+      "Takejizaiten",
+      "Dairoku Tenmaou"
+    ]
+  },
+  "Kouzeon": {
+    "text": "Kouzeon é uma versão mais antiga do bodisatva da misericórdia, feita pelo monge erudito Dharmarakṣa antes da que se tornou padrão. A diferença é um carácter e uma imagem inteira: o nome familiar significa «aquela que observa as vozes do mundo», enquanto este significa «a luz dessas vozes». Mesma figura, mesmo voto de ouvir todos os que chamam — mas nomeada pelo que devolve e não pelo que percebe. É a tradução mais rara, e se sobrevive é porque a compaixão que descreve é idêntica.",
+    "mask": [
+      "Kouzeon",
+      "Kanzeon",
+      "Avalokiteśvara",
+      "Avalokitesvara"
+    ]
+  },
+  "Kamui-Moshiri": {
+    "text": "Kamuy-Mosir é a terra dos deuses na crença ainu: a morada dos espíritos divinos e o espelho de Aynu-Mosir, a terra dos humanos. Os dois mundos não estão empilhados mas emparelhados, e o trânsito entre eles corre nos dois sentidos. Um espírito visita o mundo humano vestido de urso ou de coruja; quando o corpo é libertado com os ritos devidos, o espírito vai para casa levando um relato de como foi tratado. O que aqui é hóspede, ali é residente.",
+    "mask": [
+      "Kamui-Moshiri",
+      "Kamuy-Mosir",
+      "Kamui",
+      "Kamuy"
+    ]
+  },
+  "Yamato Sumeragi": {
+    "text": "Yamato Sumeragi, ou Yamato Sumera Mikoto, são títulos cerimoniais para os imperadores do Japão — o cargo chamado simplesmente Ten'nō, soberano celeste, na fala corrente. Yamato é o nome antigo do próprio reino, a planície onde a corte primeiro se fixou, e a palavra passou a designar o país e a sua gente. Juntas, as duas metades formam uma reivindicação mais do que uma descrição: o soberano da terra, descendente da deusa do sol, no ponto onde se diz que a linha imperial e a divina se encontram.",
+    "mask": [
+      "Yamato Sumeragi",
+      "Yamato Sumera Mikoto",
+      "Sumeragi"
+    ]
+  },
+  "Kaguya": {
+    "text": "Kaguya Hime é a princesa da lua do Conto do Cortador de Bambu, a mais antiga obra em prosa sobrevivente do Japão. Um velho cortador encontrou-a dentro de um caule luminoso de bambu e criou-a como filha; ficou famosa pela beleza e recusou todos os pretendentes, incluindo o imperador. Era do povo da lua, e quando vieram buscá-la nenhuma guarda os pôde deter. Deixou ao imperador uma porção do elixir da vida, e ele — não querendo viver para sempre sem ela — mandou queimá-la na montanha mais alta do país.",
+    "mask": [
+      "Kaguya",
+      "Kaguya Hime",
+      "Kaguya-hime"
+    ]
+  },
+  "Tsukuyomi": {
+    "text": "Tsukuyomi é a lua feita divindade e o soberano da noite no xintoísmo, nascido do olho direito do pai durante a purificação depois de Yomi, segundo dos três nobres filhos e posto a velar pelo céu noturno. No Nihon Shoki mata a deusa da comida pela maneira como esta serviu uma refeição, e a irmã sol recusa-se a olhar para ele outra vez — e é por isso que o sol e a lua nunca estão juntos no céu. Regista-se tão pouco que até o sexo da divindade é incerto, embora um poema lhe chame «o homem que lê a lua».",
+    "mask": [
+      "Tsukuyomi",
+      "Tsukiyomi",
+      "Tsukuyomi Otoko"
+    ]
+  },
+  "Ariadne": {
+    "text": "Ariadne era filha do rei Minos de Creta e guardiã do segredo do labirinto. Quando Teseu veio pôr fim ao tributo de sete rapazes e sete raparigas dados ao Minotauro, apaixonou-se por ele e deu-lhe uma espada e um novelo de fio — o fio importava mais, porque matar a fera nunca foi a parte difícil: encontrar a saída, sim. Fugiu com ele, e em Naxos a tripulação zarpou de madrugada por um falso alarme e deixou-a para trás. Dioniso encontrou-a ali e casou com ela.",
+    "mask": [
+      "Ariadne",
+      "Ariadna"
+    ]
+  },
+  "Asterios": {
+    "text": "Astério é o nome por detrás do monstro. A coisa de cabeça de touro no coração do labirinto cretense tinha um nome próprio, gravado como uma estrela nas moedas de Creta: o filho da mulher de Minos com o touro que Poseidon enviou quando Minos se recusou a sacrificá-lo. Minotauro não é sequer um nome, mas uma descrição grega — Minos mais touro — imposta de fora. Um rei mais antigo de Creta teve o mesmo nome: o marido de Europa, que criou os filhos dela com Zeus, Minos entre eles, e deixou o trono ao enteado.",
+    "mask": [
+      "Asterios",
+      "Asterion",
+      "Astério",
+      "Asterius",
+      "Minotauro",
+      "Minotaur"
+    ]
+  },
+  "Arsène": {
+    "text": "Arsène Lupin é o ladrão cavalheiro criado por Maurice Leblanc em 1905, e o mais famoso assaltante da ficção francesa. Rouba os muito ricos e os criminosos declarados, o que faz dele menos um vilão do que um anti-herói: elegante, teatral, viciado no disfarce e na carta trocista que anuncia o roubo de antemão. Leblanc pode ter-se inspirado no assaltante anarquista Marius Jacob. Por detrás do pseudónimo diz-se haver um nome próprio verdadeiro, usado em vários dos romances, e que nunca é bem o nome impresso na capa.",
+    "mask": [
+      "Arsène",
+      "Arsene",
+      "Lupin",
+      "Raoul"
+    ]
+  },
+  "Satanael": {
+    "text": "Satanael aparece no segundo Livro de Enoque como o arcanjo que chefiou a rebelião dos caídos: recusou-se a inclinar-se perante o humano Enoque e foi por isso aprisionado, razão pela qual é geralmente lido como uma forma de Lúcifer. As tradições gnósticas vão mais longe — um anjo ao serviço de Yaldabaoth que se revoltou ao perceber que o seu senhor não era o Deus verdadeiro, e entregou à humanidade o conhecimento para se libertar. Os cátaros diziam que o «-el» lhe foi arrancado do nome quando Miguel o selou no Inferno: o sufixo era a sua natureza angélica, e perdê-lo foi a sentença.",
+    "mask": [
+      "Satanael",
+      "Sataniel",
+      "Satanail",
+      "Satanel"
+    ]
+  },
+  "Raoul": {
+    "text": "Raoul é o nome por detrás da máscara. Deixado cair pela primeira vez em O Colar da Rainha e insinuado na narração como o verdadeiro nome próprio do ladrão cavalheiro, ressurge ao longo dos romances como o seu pseudónimo mais persistente — Raoul d'Andrésy em A Condessa de Cagliostro, entre outros. É uma pequena piada deliberada de Leblanc: o ladrão mais famoso da ficção francesa tem cem identidades falsas, e a que está por baixo é ela própria apenas meio confirmada. Ao leitor é dito o nome verdadeiro e nunca lhe é permitido ter a certeza dele.",
+    "mask": [
+      "Raoul",
+      "Arsène",
+      "Arsene",
+      "Lupin",
+      "d'Andrésy"
+    ]
+  },
+  "Captain Kidd": {
+    "text": "Captain Kidd, corsário escocês do século XVII, começou nas Caraíbas, quebrando um cerco francês à colónia inglesa de Nevis, e foi recompensado com uma carta de corso — cobertura legal enquanto se mantivesse leal. No oceano Índico a sua tripulação saqueou um navio neutro sem que ele soubesse e a cobertura evaporou-se. Levado a Londres, julgado e enforcado, tornou-se pirata no imaginário popular muito mais do que alguma vez foi no mar. O tesouro enterrado que lhe fez o nome é pura lenda, e sobreviveu a todos os factos acerca dele.",
+    "mask": [
+      "Captain Kidd",
+      "Capitão Kidd",
+      "Kidd",
+      "William Kidd",
+      "William",
+      "Guilherme"
+    ]
+  },
+  "Seiten Taisei": {
+    "text": "Seiten Taisei — Grande Sábio Igual ao Céu — não é um título que alguém tenha concedido: o Rei Macaco atribuiu-o a si próprio, à força, quando o céu se recusou a levá-lo a sério. Nascido de uma pedra, ensinado nas setenta e duas transformações e na nuvem voadora, riscou o próprio nome do registo dos mortos, comeu os pêssegos da imortalidade e bebeu o banquete para que não fora convidado. A fornalha que devia fundi-lo queimou-lhe antes o último resto de mortalidade. Só o Buda o pôde deter, com uma aposta impossível de ganhar e quinhentos anos debaixo de uma montanha.",
+    "mask": [
+      "Seiten Taisei",
+      "Qitian Dasheng",
+      "Sun Wukong",
+      "Son Gokuu",
+      "Wukong",
+      "Grande Sábio Igual ao Céu"
+    ]
+  },
+  "Carmen": {
+    "text": "Carmen é a mulher cigana da novela de Prosper Mérimée de 1845, mais conhecida através da ópera que Bizet construiu a partir dela. É o arquétipo da femme fatale: usa a beleza para fazer cair os homens, e vai-se embora no momento em que se aborrece. Enrola cigarros, por ter trabalhado numa fábrica de tabaco. Um amante rejeitado mata-a num acesso de ciúme, e ela vai ao seu encontro sabendo exatamente o que ele fará — porque a alternativa é pertencer a alguém. Livre nasceu e livre morrerá: é toda a sua posição.",
+    "mask": [
+      "Carmen"
+    ]
+  },
+  "Hecate": {
+    "text": "Hécate é a deusa ctónica da magia e da feitiçaria, possivelmente de origem anatólia, com o maior centro de culto em Lagina, na Cária; a inscrição mais antiga, em Mileto, faz dela uma guardiã de entradas. Parto, portais, muros, encruzilhadas, tochas, cães e a lua são todos dela. A partir do período helenístico é mostrada com três rostos, ligada a fantasmas e maldições, e intitulada «aquela que age de longe». A moderna deusa tríplice donzela-mãe-anciã é em grande parte invenção de Robert Graves, que leu mal os seus três corpos na encruzilhada.",
+    "mask": [
+      "Hecate",
+      "Hécate",
+      "Hekate",
+      "Trimorphis"
+    ]
+  },
+  "Zorro": {
+    "text": "Zorro — em espanhol «raposa», e por extensão «astúcia» — foi criado em 1919 pelo escritor pulp Johnston McCulley. É um nobre californiano de ascendência espanhola e indígena, que vive em Los Angeles sob domínio mexicano e põe uma máscara para defender os plebeus e os indígenas dos funcionários tirânicos, montando um cavalo preto chamado Tornado. A fórmula é hoje tão familiar que se tornou invisível: o aristocrata ocioso de dia, o fora-da-lei de noite, e uma assinatura gravada na cena à ponta de espada.",
+    "mask": [
+      "Zorro",
+      "Diego",
+      "Don Diego de la Vega",
+      "de la Vega"
+    ]
+  },
+  "Mercurius": {
+    "text": "Mercurius é o deus romano do comércio, da velocidade e dos mercadores, e mensageiro dos Dii Consentes. As suas competências são invulgarmente amplas mesmo para um deus: ganho financeiro, eloquência, mensagens, alquimia, adivinhação, viajantes, fronteiras, sorte, embuste e ladrões — e ainda guia as almas ao mundo subterrâneo. É mostrado com um galo que anuncia o dia, um carneiro ou uma cabra pela fertilidade, e uma tartaruga, de cuja carapaça se diz ter feito a primeira lira. Os alquimistas identificaram-no com a pedra filosofal. Os gregos conheciam-no como Hermes; o planeta leva o seu nome.",
+    "mask": [
+      "Mercurius",
+      "Mercúrio",
+      "Mercury"
+    ]
+  },
+  "Goemon": {
+    "text": "Goemon, fora-da-lei japonês executado em 1594, é conhecido apenas por duas fontes, ambas escritas depois da sua morte. A primeira regista um atentado à vida do xogum Hideyoshi Toyotomi, a sua captura e a sua execução juntamente com o filho pequeno; a segunda, do missionário Pedro de Morejon, descreve-o fervido vivo. Dessa morte veio o resto. Ao longo dos séculos tornou-se um Robin dos Bosques japonês que rouba os ricos para os pobres, depois um mestre ninja, depois um pilar do bunraku e do kabuki — um registo histórico mínimo a suportar quatrocentos anos de teatro.",
+    "mask": [
+      "Goemon",
+      "Ishikawa Goemon",
+      "Gorokichi",
+      "Goyemon"
+    ]
+  },
+  "Kamu Susano-o": {
+    "text": "Susanoo é o deus japonês das tempestades, nascido do nariz do pai durante a purificação depois de Yomi, irmão do sol e da lua. A forma Kamu é bem mais rara: aparece só no Izumo no Kuni Fudoki, e o prefixo significa simplesmente «deus» em japonês arcaico. É o mesmo deus da tempestade, nomeado como o nomeava o repertório regional de Izumo — a província onde foi banido, matou a serpente de oito cabeças e encontrou a espada na sua cauda. O registo local chama-lhe pelo título local.",
+    "mask": [
+      "Kamu Susano-o",
+      "Kamu Susanoo",
+      "Susano-o",
+      "Susanoo"
+    ]
+  },
+  "Johanna": {
+    "text": "Johanna é a mulher lendária que se diz ter reinado como papa, contra uma linha masculina ininterrupta. Quase todas as versões a fazem culta e dotada, disfarçada de homem — muitas vezes por insistência de um amante — subindo na hierarquia da igreja só por mérito até ser eleita. O seu sexo foi revelado quando deu à luz durante uma procissão, e morreu pouco depois. Dizia-se que as procissões posteriores evitavam aquele sítio. Acreditada durante séculos, a história não tem prova nenhuma por trás, e os historiadores leem-na como ficção escrita para embaraçar Roma.",
+    "mask": [
+      "Johanna",
+      "Papisa Joana",
+      "Joana",
+      "Agnes",
+      "Inês"
+    ]
+  },
+  "Anat": {
+    "text": "Anat é a deusa semítica ocidental da guerra e senhora dos animais selvagens, ligada também ao amor e ao sexo, célebre nos mitos pelo temperamento violento e pelo prazer declarado na matança. No Ciclo de Baal apoia o irmão contra o deus do mar, força o próprio pai a deixá-lo construir o palácio, e quando Baal morre mata Mot e traz o irmão de volta da terra dos mortos. No conto de Aqhat quer o arco do herói; ele diz-lhe que armas não são assunto de mulher, e por isso ela manda matá-lo.",
+    "mask": [
+      "Anat",
+      "Anath",
+      "Anit",
+      "Anaitis",
+      "Antit"
+    ]
+  },
+  "Necronomicon": {
+    "text": "O Necronomicon é o grimório de Lovecraft, nomeado pela primeira vez em O Sabujo e retomado por todos os que escreveram à sua sombra. Na ficção é obra do árabe louco Abdul Alhazred, escrito no século VIII, e põe por escrito a verdade sobre os antigos seres cósmicos que habitaram a Terra e ainda guiam a humanidade para fins próprios. É perigoso nos dois sentidos: concede conhecimento proibido, e lê-lo custa ao leitor a razão. Nunca existiu, o que não travou um comércio constante de réplicas.",
+    "mask": [
+      "Necronomicon",
+      "Al Azif",
+      "Alhazred"
+    ]
+  },
+  "Milady": {
+    "text": "Milady de Winter é a antagonista de Dumas em Os Três Mosqueteiros, e a pessoa mais perigosa do livro. Trabalha para o cardeal Richelieu, mas as suas verdadeiras campanhas são próprias: contra d'Artagnan, que descobriu a flor-de-lis marcada a ferro no seu ombro assinalando-a como condenada, e contra Athos, que se revela ser o marido com quem casou outrora sob nome falso. Ferozmente independente, manipuladora, capaz de arruinar quem quer que seja por proveito, é decapitada pelos seus crimes — e a sua verdadeira identidade nunca é estabelecida, já que o próprio título o herdou de um marido.",
+    "mask": [
+      "Milady",
+      "Milady de Winter",
+      "de Winter"
+    ]
+  },
+  "Astarte": {
+    "text": "Astarte é a contraparte ocidental de Ishtar: deusa da guerra, da caça, do amor, do sexo, dos cavalos e talvez da estrela da manhã, muitas vezes chamada «nome-de-Baal» e geralmente tida por sua consorte. Os seus símbolos são o leão, a pantera e talvez a estrela de oito pontas. O Egito fez dela uma guerreira a cavalo com um templo em Mênfis; Sídon e Tiro fizeram-na sua. A Bíblia rebatiza-a Ashtoreth, deturpação deliberada construída para soar como a palavra «abominação» — um dos insultos mais afiados das Escrituras, dirigido a uma deusa popular demais para ser ignorada.",
+    "mask": [
+      "Astarte",
+      "Astarté",
+      "Athtart",
+      "Ashtart",
+      "Ashtoreth",
+      "Astorete"
+    ]
+  },
+  "Robin Hood": {
+    "text": "Robin Hood é o fora-da-lei do folclore inglês, arqueiro e espadachim, vestido de verde Lincoln, que rouba os ricos para dar aos pobres à frente dos seus alegres companheiros. Combate o xerife de Nottingham, que serve o príncipe João, que tomou o trono ao irmão Ricardo, ausente. As versões posteriores acrescentaram Guy de Gisbourne, o assassino mandado buscar-lhe a cabeça, e uma rivalidade por Marian. Torna-se figura popular no fim da Idade Média e desde então não saiu da cultura — o fora-da-lei mais legal do que a lei.",
+    "mask": [
+      "Robin Hood",
+      "Robin dos Bosques",
+      "Robin de Locksley",
+      "Locksley"
+    ]
+  },
+  "Loki": {
+    "text": "Loki é o deus nórdico da travessura, da magia e do fogo, filho do gigante Fárbauti e da deusa Laufey, irmão de sangue de Odin — e essa ascendência mista é todo o seu problema, já que gigantes e deuses são inimigos. Casado com Sigyn, gerou na giganta Angrboda três criaturas que os deuses não podiam permitir: Hel, que reina sobre os mortos, Fenrir, destinado a matar Odin, e a Serpente do Mundo, atirada ao mar. Ele próprio pariu ainda, sob forma de égua, o cavalo de oito patas de Odin. No Ragnarök mata Heimdall e morre a fazê-lo.",
+    "mask": [
+      "Loki"
+    ]
+  },
+  "William": {
+    "text": "William Kidd, enforcado em Londres em 1701 — o ano impresso no capuz — foi corsário escocês antes de ser pirata, e a rigor nunca foi grande pirata. Quebrou o cerco francês a Nevis, foi recompensado com uma carta de corso, e perdeu a sua proteção quando a tripulação saqueou um navio neutro no oceano Índico sem que ele soubesse. É uma das pouquíssimas personas da série tiradas de um ser humano documentado e não do mito, e o tesouro enterrado de que toda a gente se lembra é a parte que nunca aconteceu.",
+    "mask": [
+      "William",
+      "Guilherme",
+      "William Kidd",
+      "Kidd",
+      "Captain Kidd",
+      "Capitão Kidd"
+    ]
+  },
+  "Célestine": {
+    "text": "Célestine Galli-Marié, de 1837 a 1905, foi uma meio-soprano francesa, e a primeira mulher a cantar o papel que a tornou célebre. Era apenas a terceira escolha, e revelou-se essencial: quando a direção exigiu que a ópera fosse suavizada, apoiou a recusa do compositor. A sua voz era tão distintiva que o apelido se tornou uma classificação para meios-sopranos ligeiros. O seu casaco traz o verso que cantava no clímax — livre nasceu, livre morrerá — momentos antes de a personagem ser morta por se recusar a pertencer a alguém.",
+    "mask": [
+      "Célestine",
+      "Celestine",
+      "Galli-Marié",
+      "Carmen"
+    ]
+  },
+  "Diego": {
+    "text": "Don Diego de la Vega é um nobre californiano de ascendência espanhola e indígena, que vive em Los Angeles sob domínio mexicano e de dia é uma deceção deliberada: ocioso, metido em livros, inútil para toda a gente. É um fato vestido ao contrário — o aristocrata imprestável é o disfarce, e o fora-da-lei mascarado que defende os plebeus e os indígenas dos funcionários tirânicos é o homem. Criado em 1919 por Johnston McCulley, fixou o molde que todas as identidades secretas desde então foram buscar.",
+    "mask": [
+      "Diego",
+      "Don Diego de la Vega",
+      "de la Vega",
+      "Zorro"
+    ]
+  },
+  "Gorokichi": {
+    "text": "Gorokichi era o nome de nascimento do fora-da-lei japonês executado em 1594 — o nome antes de a lenda tomar conta. O registo histórico são dois documentos, ambos póstumos: um detalha o atentado ao xogum Hideyoshi Toyotomi, a captura e a execução com o filho pequeno; o outro, de um missionário português, descreve-o fervido vivo. Tudo o resto veio depois. O roubar aos ricos, as artes ninja, o palco kabuki: quatro séculos de reconto erguidos sobre um homem de quem quase nada se sabe de facto.",
+    "mask": [
+      "Gorokichi",
+      "Goemon",
+      "Ishikawa Goemon",
+      "Goyemon"
+    ]
+  },
+  "Agnes": {
+    "text": "Inês é um dos nomes dados à mulher lendária que se diz ter reinado como papa. A versão da Chronica Universalis Mettensis, do século XIII, fá-la desabar grávida durante uma procissão, expondo o embuste que a levara ao trono de Pedro. As referências a uma papisa remontam ao século XII e foram largamente acreditadas durante centenas de anos. Os historiadores modernos tratam tudo como invenção — uma história feita para embaraçar a igreja, que a igreja depois teve de continuar a desmentir.",
+    "mask": [
+      "Agnes",
+      "Inês",
+      "Johanna",
+      "Papisa Joana",
+      "Joana"
+    ]
+  },
+  "Al Azif": {
+    "text": "Al Azif é o título árabe original do livro proibido de Lovecraft, o nome que levava antes do grego que toda a gente usa. A palavra refere-se ao som noturno dos insetos, tomado pelo uivo dos demónios. Escrito no século VIII pelo árabe louco Abdul Alhazred, regista a verdade sobre os antigos seres cósmicos que outrora dominaram a Terra e ainda trabalham sobre a humanidade para fins próprios. Lê-lo concede esse conhecimento e custa ao leitor a sanidade — as duas coisas não se separam, e é esse todo o ponto.",
+    "mask": [
+      "Al Azif",
+      "Azif",
+      "Necronomicon",
+      "Alhazred"
+    ]
+  },
+  "Lucy": {
+    "text": "Lucy Hay, condessa de Carlisle, foi uma cortesã inglesa sob Carlos I que ajudou os dois lados da guerra civil e traiu os dois. Aliada fundamental dos parlamentares antes dos combates, passou-se para os monárquicos assim que começaram, e por isso foi presa e encarcerada. Morreu em 1660, logo depois da Restauração. O seu jogo duplo é geralmente tomado como modelo da personagem mais perigosa de Dumas — o que faz dela uma das pouquíssimas personas da série tiradas de uma pessoa documentada e não do mito.",
+    "mask": [
+      "Lucy",
+      "Lucy Hay",
+      "condessa de Carlisle",
+      "Countess of Carlisle",
+      "Milady"
+    ]
+  },
+  "Hereward": {
+    "text": "Hereward the Wake foi um nobre anglo-saxão que chefiou a resistência armada à conquista normanda, aguentando-se nos pântanos à volta de Ely muito depois de a oposição organizada ter ruído. O que lhe aconteceu não se sabe — algumas fontes dizem-no perdoado, outras morto. A sua lenda espalhou-se cedo e longe o bastante para que algumas das histórias contadas sobre ele possam ter migrado para as de certo fora-da-lei vestido de verde, ou pelo menos as tenham moldado: o inglês espoliado nos bosques, a combater uma potência ocupante que detém a lei.",
+    "mask": [
+      "Hereward",
+      "Hereward the Wake",
+      "Hereward o Vigilante"
+    ]
+  },
+  "Cendrillon": {
+    "text": "Cendrillon é a versão francesa de uma história que começou como conto popular grego e chegou à forma definitiva com Charles Perrault, que lhe acrescentou os sapatinhos de vidro, a carruagem-abóbora e a fada madrinha. Uma rapariga bondosa é mantida como criada pela madrasta e por duas meias-irmãs vaidosas; o príncipe dá um baile; o encanto acaba à meia-noite; um sapatinho fica para trás e não serve a mais ninguém. O nome não é um nome de todo: é como lhe chamava a família da madrasta, pela cinza em que dormia junto ao lume para se aquecer.",
+    "mask": [
+      "Cendrillon",
+      "Cinderela",
+      "Gata Borralheira",
+      "Cinderella",
+      "Ella",
+      "cinza",
+      "cinzas",
+      "borralho"
+    ]
+  },
+  "Vanadis": {
+    "text": "Freya é a grande deusa do amor, da beleza e da fertilidade no mito nórdico — a mais bela de todas as deusas, invocada para a felicidade no amor, para um parto seguro e para as boas estações. É também deusa da guerra, da morte, da magia, da profecia e da riqueza, e leva para o seu salão Folkvangr metade de todos os que caem em batalha; a outra metade fica para Odin. Vanadis, um dos seus muitos epítetos na Edda em prosa, significa «dis dos Vanir» — a estirpe mais antiga de deuses de que provém, antes da paz com os Æsir.",
+    "mask": [
+      "Vanadis",
+      "Vanadís",
+      "Freya",
+      "Freyja",
+      "Freyia"
+    ]
+  },
+  "Ella": {
+    "text": "Ella é o nome que está por baixo da alcunha. No conto tal como Perrault o fixou — sapatinhos de vidro, carruagem-abóbora, fada madrinha, um encanto que acaba à meia-noite — a rapariga mantida como criada pela madrasta e pelas meias-irmãs nunca é chamada por outra coisa na história, e Cinderela é apenas como lhe chamava a família da madrasta, pelas cinzas entre as quais dormia junto ao lume. Algumas reescritas devolvem-lhe o nome sepultado sob o insulto. É a mesma pessoa, sem o escárnio.",
+    "mask": [
+      "Ella",
+      "Cinderela",
+      "Gata Borralheira",
+      "Cinderella",
+      "Cendrillon",
+      "cinza",
+      "cinzas",
+      "borralho"
+    ]
+  },
+  "Adam Kadmon": {
+    "text": "Adam Kadmon, o Homem Primordial, é a conceção original do ser humano na Cabala — o protótipo perfeito feito pelo Ein Sof, intocado pela matéria terrena, nascido da contração da luz infinita. Opõe-se ao Adão do Éden, moldado do barro. Os cabalistas usaram-no para ler o plano divino no próprio corpo humano: as dez Sefirot, os círculos da criação, são a sua forma. Existe acima dos quatro mundos de emanação, criação, formação e ação, e o ensinamento posterior identificou-o com o messias.",
+    "mask": [
+      "Adam Kadmon",
+      "Kadmon",
+      "Homem Primordial"
+    ]
+  },
+  "Azathoth": {
+    "text": "Azathoth, o deus idiota cego no centro de todo o infinito, é aquilo de que em última análise descende tudo nos Mitos de Cthulhu — Nyarlathotep diretamente, e através da Névoa Sem Nome e da Grande Escuridão todos os outros Deuses Exteriores e Grandes Antigos depois deles. Uma corte de deuses menores dança à sua volta sem parar, tocando música para o manter adormecido. É a coisa mais poderosa dos mitos e não sabe absolutamente nada: a criação foi acidental e inconsciente. Autores posteriores acrescentaram que a realidade é o seu sonho, e acaba quando ele acordar.",
+    "mask": [
+      "Azathoth",
+      "Deus Idiota Cego",
+      "Caos Nuclear",
+      "Sultão Demónio"
+    ]
+  },
+  "Valjean": {
+    "text": "Jean Valjean é o protagonista de Os Miseráveis de Victor Hugo, condenado às galés por roubar pão para os filhos esfomeados da irmã e endurecido por dezanove anos disso. Libertado, marcado, e destinatário de um único ato de misericórdia que não esperava, passa o resto do romance a tentar viver com decência sob uma série de nomes falsos — cuidando de Fantine moribunda, depois criando a filha dela, Cosette. Compassivo, capaz de sacrifício, capaz também de astúcia e de ciúme, é contraposto ao inspetor Javert, que é a lei, e que é o antagonista.",
+    "mask": [
+      "Valjean",
+      "Jean Valjean"
+    ]
+  },
+  "Pithos": {
+    "text": "Um pithos é um grande vaso cerâmico de armazenamento usado por todo o Mediterrâneo do neolítico à idade do ferro, para vinho, azeite ou grão — e por vezes para rituais e sepulturas. Na Teogonia de Hesíodo o recipiente que continha todos os males da humanidade é um destes vasos, não uma caixa. A caixa é um erro: Erasmo de Roterdão, ao traduzir para latim no século XVI, leu pithos como pyxis, um cofre pequeno, e o engano ficou. O que não saiu quando se abriu foi a esperança, que algumas versões consideram a coisa mais cruel lá dentro.",
+    "mask": [
+      "Pithos",
+      "pithoi",
+      "Pandora"
+    ]
+  },
+  "Pandora": {
+    "text": "Pandora é a primeira mulher do mito grego, feita de terra por Hefesto e Atena por ordem de Zeus como castigo pelo roubo do fogo — cada deus acrescentando um dom sedutor. Foi dada ao titã Epimeteu, a quem o irmão avisara para não aceitar nada de Zeus, e recebeu um vaso selado que lhe disseram sem convicção para não abrir. O aviso era o ponto: os deuses queriam que fosse aberto. Quando a curiosidade venceu, todos os males escaparam para o mundo. Só a esperança ficou dentro, e não é nada óbvio que isso seja uma misericórdia.",
+    "mask": [
+      "Pandora",
+      "Anesidora"
+    ]
+  },
+  "Ernesto": {
+    "text": "Ernesto Che Guevara, marxista e médico argentino, é conhecido em todo o mundo pelo seu papel na revolução cubana e por a ter exportado depois. É também uma figura genuinamente divisiva: ordenou execuções sem julgamento para defender a revolução, e agiu contra dissidentes políticos e contra aqueles que o regime de Castro julgava desviantes. O rosto na T-shirt e o historial do homem não são o mesmo objeto, e quase toda a discussão sobre ele consiste em escolher qual dos dois olhar.",
+    "mask": [
+      "Ernesto",
+      "Che Guevara",
+      "Guevara"
+    ]
+  },
+  "Jánošík": {
+    "text": "Juraj Jánošík foi um salteador eslovaco, e é hoje o herói fora-da-lei nacional. Antigo soldado e guarda prisional, libertou o bandido Tomáš Uhorčík e juntou-se a ele em vez de o prender. O seu bando roubava mercadores ricos, poupava as vítimas, tratou um padre ferido por acidente e passava o produto aos pobres. Foi apanhado em março de 1713 e executado. Romances, poemas e filmes eslovacos recontaram e inflacionaram a história desde então, até as façanhas que lhe atribuem se parecerem imenso com as de outro fora-da-lei vestido de verde.",
+    "mask": [
+      "Jánošík",
+      "Janosik",
+      "Juraj Jánošík"
+    ]
+  },
+  "Rob Roy": {
+    "text": "Rob Roy MacGregor foi um fora-da-lei e herói popular escocês, romantizado até ficar irreconhecível pelo romance de Walter Scott. Juntou-se à revolta jacobita de 1689 aos dezoito anos; o pai esteve dois anos preso por traição. Criador de gado respeitado que vendia proteção contra os ladrões de rebanhos, endividou-se pesadamente para aumentar a sua manada — e o seu chefe de boiada desapareceu com o dinheiro. Arruinado, declarado fora-da-lei, a família despejada, moveu guerra privada ao duque de Montrose, que lhe tomara as terras: roubando-lhe o gado, assaltando-lhe as rendas. Perdoado em 1727, foi um incómodo para o governo até morrer em 1734.",
+    "mask": [
+      "Rob Roy",
+      "MacGregor",
+      "Robert Roy MacGregor"
+    ]
+  },
+  "Awilda": {
+    "text": "Awilda foi uma princesa escandinava do século V que se dedicou à pirataria em vez de casar como lhe mandavam — história que quase todos os estudiosos arrumam como lenda. O pai mantinha-a numa torre guardada por serpentes venenosas, prometendo-a a quem conseguisse passar por elas. O príncipe Alf da Dinamarca conseguiu. Ela fugiu em roupas de homem, apoderou-se de um navio pirata sem capitão com uma tripulação de mulheres, e assaltou os mares escandinavos até o rei lhe mandar atrás o próprio Alf. Ele venceu a tripulação, tirou-lhe o elmo e reconheceu a princesa. Impressionada com ele por fim, casou com ele ali mesmo.",
+    "mask": [
+      "Awilda",
+      "Alvilda"
+    ]
+  },
+  "Mandrin": {
+    "text": "Louis Mandrin foi um contrabandista francês, lembrado como o Robin dos Bosques de França por ter feito guerra aos rendeiros dos impostos da coroa. Começou com um contrato: atravessou os Alpes com cem mulas para o exército, dezassete sobreviveram, e os coletores retiveram-lhe o pagamento. Depois uma rixa mandou-o para as galés, e um dos irmãos foi enforcado por falsificação. Dirigiu uma rede de contrabando com precisão militar, comprando na Suíça e vendendo sem imposto nas vilas francesas — acabando por obrigar os próprios rendeiros a comprar-lhe sob a mira das armas. Morto na roda em 1755, sem um grito.",
+    "mask": [
+      "Mandrin",
+      "Louis Mandrin"
+    ]
+  },
+  "Chiyome": {
+    "text": "Mochizuki Chiyome foi uma nobre e kunoichi japonesa do século XVI, nascida numa família de destaque dos ninja de Kōga e casada com um sobrinho de Takeda Shingen. Quando o marido caiu em Kawanakajima, Shingen incumbiu-a de montar uma rede clandestina — o que ela fez reunindo duzentas ou trezentas raparigas órfãs e abandonadas e treinando-as em jujutsu, ninjutsu, música, dança, sedução e manipulação. Percorriam o país disfarçadas de sacerdotisas errantes, recolhendo informações e matando quando era preciso. Quase nada sobre ela está documentado, o que não a impediu de virar lenda.",
+    "mask": [
+      "Chiyome",
+      "Mochizuki Chiyome",
+      "Mochizuki Chiyo"
+    ]
+  },
+  "Ghino": {
+    "text": "Ghino di Tacco foi um salteador italiano do século XIII que o povo de Siena admirou o bastante para lhe chamar Cavalheiro. Impostos esmagadores arruinaram a sua família, que se voltou para o roubo; o pai e o tio foram executados, e ele só foi poupado por ser menor. Exilado, tomou uma fortaleza em Radicofani, na fronteira papal, e assaltava a estrada em baixo — sem matar, deixando sempre aos viajantes o bastante para chegarem a casa, por vezes alimentando-os, e deixando passar de graça os pobres e os estudantes. Decapitou o juiz que condenara o pai, e foi perdoado depois de curar o estômago de um abade com comida simples durante um rapto.",
+    "mask": [
+      "Ghino",
+      "Ghino di Tacco"
+    ]
+  },
+  "Leucothea": {
+    "text": "Leucoteia é uma deusa marinha grega, e todas as versões da sua origem acabam do mesmo modo: uma mulher atira-se ao mar e sai de lá divina. Numa delas é Ino, rainha de Atamante, que amamentou o pequeno Dioniso e por isso foi enlouquecida por Hera, saltando à água com o próprio filho — os Olímpicos transformaram os dois em divindades marinhas por piedade. Noutra é a ninfa Hália, mulher de Poseidon, cujos filhos foram enlouquecidos até a agredirem. O seu nome significa Deusa Branca.",
+    "mask": [
+      "Leucothea",
+      "Leucoteia",
+      "Deusa Branca",
+      "Ino",
+      "Halia",
+      "Hália"
+    ]
+  },
+  "Terpsichore": {
+    "text": "Terpsícore é a Musa da dança e do coro, uma das nove filhas de Zeus e Mnemósine. A tradição faz dela a mãe das sereias — as mulheres-ave que cantam para levar os marinheiros aos rochedos prometendo-lhes exatamente aquilo que mais desejam. O emparelhamento não é acidental: ela governa a arte que move os corpos sem palavras, e as filhas usam o canto para o mesmo fim com resultados letais. O seu nome sobrevive no adjetivo «terpsicoreano», que designa tudo o que diz respeito à dança.",
+    "mask": [
+      "Terpsichore",
+      "Terpsícore"
+    ]
+  },
+  "Styx": {
+    "text": "Estige é a deusa do rio que separa os vivos dos mortos, e o próprio rio. Tomou o partido de Zeus na guerra contra os titãs, e a sua recompensa foi esta: os deuses fazem os seus juramentos vinculativos pelo nome dela, e um juramento feito sobre ela não pode ser quebrado por razão nenhuma. Vários deuses morreram por promessas que não puderam retirar. Aquiles foi mergulhado nas suas águas em bebé para o tornar invulnerável, e é através da sua corrente que Caronte transporta os mortos.",
+    "mask": [
+      "Styx",
+      "Estige",
+      "Estige"
+    ]
+  },
+  "Prosymna": {
+    "text": "Prosymna é uma figura menor do mito grego: filha do deus fluvial Astérion, irmã de Acreia e Eubeia, e com elas ama da pequena Hera. As três criaram a futura rainha dos deuses, e um distrito perto de Argos leva o seu nome. É tudo o que dela sobrevive — ama de uma deusa, e um lugar no mapa. O mito grego está cheio de figuras assim, presentes no início da história de outra pessoa e ausentes de todo o resto.",
+    "mask": [
+      "Prosymna",
+      "Prosimna"
+    ]
+  },
+  "Erytheia": {
+    "text": "Erytheia é uma das Hespérides, as ninfas do extremo ocidente que guardam a árvore dos pomos de ouro no limite do mundo. O nome faz triplo serviço no mito grego: pertence também a uma filha do gigante de três corpos Gerião, mãe de Nórax, e à ilha onde Gerião guardava o seu gado vermelho — a manada que Héracles foi mandado roubar no décimo trabalho. Ninfa, mulher e lugar carregam a mesma palavra, e os mitos raramente se dão ao trabalho de os separar.",
+    "mask": [
+      "Erytheia",
+      "Erythea",
+      "Eriteia"
+    ]
+  },
+  "Meng Po": {
+    "text": "Meng Po é a deusa do esquecimento em Diyu, o submundo chinês. A sua tarefa é preparar as almas para o renascimento tirando-lhes toda a memória da vida vivida e dos infernos atravessados — servida como um caldo, bebido na última ponte antes do regresso ao mundo. Diz-se que a sua identidade é a da senhora Meng Jiang, que não podia renascer porque a dor pelo marido morto a prendia. Inventou a sopa para que mais ninguém levasse o seu sofrimento para a vida seguinte.",
+    "mask": [
+      "Meng Po",
+      "Meng Jiang",
+      "Senhora Meng",
+      "Lady Meng"
+    ]
+  },
+  "Syke": {
+    "text": "Syke é uma das oito Hamadríades do mito grego, as ninfas ligadas cada uma a uma só espécie de árvore — e a dela é a figueira. O laço é literal e total: a ninfa não é apenas guardiã da árvore, mas a sua vida, e quando a árvore morre ela morre com ela. Abater uma árvore é ter cometido uma morte. O nome de Syke é simplesmente a palavra grega para «figo», e nisso está toda a identificação: ela não está associada à árvore, ela é a árvore.",
+    "mask": [
+      "Syke",
+      "Sike"
+    ]
+  },
+  "Cleodora": {
+    "text": "Cleodora é uma náiade, uma ninfa das águas, e uma das três virginais Trias com as irmãs Melena e Dáfnis. Poseidon gerou nela um filho, Parnaso, que fundou a cidade que deu nome à montanha. As Trias eram as patronas das abelhas — daí ser desenhada com corpo de abelhão — e as abelhas ligam-nas ao Oráculo de Delfos, cuja sacerdotisa era chamada a Abelha Délfica. A profecia pelo zumbido dos insetos é na Grécia mais antiga do que a profecia por palavras.",
+    "mask": [
+      "Cleodora",
+      "Kleodora"
+    ]
+  },
+  "Nemertes": {
+    "text": "Nemertes é uma das cinquenta Nereidas, filhas do deus marinho Nereu, e a irmã mais próxima de Apseudes. O seu nome significa «infalível», ou «verdadeira»: tal como a irmã, herdou a qualidade que define o pai, que não pode mentir nem enganar-se. Na Ilíada emerge com as outras Nereidas para confortar Tétis quando esta grita pela dor de Aquiles com a morte de Pátroclo. Um mar cheio de filhas, e as duas com nome de verdade são as que aparecem quando alguém está de luto.",
+    "mask": [
+      "Nemertes",
+      "Nemerte"
+    ]
+  },
+  "Gorgyra": {
+    "text": "Gorgyra, também chamada Orfne, é uma ninfa do submundo grego, ligada a Hécate e tida por patrona da escuridão, da poesia e da fermentação. Do rio Aqueronte teve Ascálafo, o guardião do pomar de Hades — aquele que viu Perséfone comer o bago de romã e contou, razão pela qual ela nunca mais pôde partir de vez. Foi castigado esmagado sob uma rocha, depois transformado em coruja. O nome dela significa «a escura», e tudo o que lhe diz respeito decorre daí.",
+    "mask": [
+      "Gorgyra",
+      "Orphne",
+      "Orfne"
+    ]
+  },
+  "Daeira": {
+    "text": "Daeira é uma das três mil Oceânides, filhas do titã Oceano, e a que está ligada aos mistérios de Elêusis. O seu nome significa «aquela que sabe», de um verbo grego para «saber» — apropriado para uma figura ligada ao rito de iniciação mais zelosamente guardado do mundo antigo, cujo conteúdo nenhum iniciado alguma vez pôs por escrito. Os autores antigos identificaram-na com meia dúzia de deusas diferentes; a leitura que ficou é que era ama de Perséfone, ou a sua carcereira, conforme quem conta.",
+    "mask": [
+      "Daeira",
+      "Deira"
+    ]
+  },
+  "Apseudes": {
+    "text": "Apseudes é uma das cinquenta Nereidas, filhas de Nereu e Dóris, listada na Ilíada de Homero entre as que emergem do mar para chorar com Tétis. O seu nome significa «aquela que nunca mente». Tal como a irmã próxima Nemertes, herda-o do pai, a quem os gregos chamavam o deus verdadeiro, incapaz de engano ou de erro. Numa mitologia em que quase todo o problema divino começa com alguém a mentir, uma família inteira com nome de honestidade destaca-se — e nenhuma das irmãs faz outra coisa com isso senão consolar uma mãe em luto.",
+    "mask": [
+      "Apseudes",
+      "Apseude",
+      "Aspeudes"
+    ]
+  },
+  "Thalia": {
+    "text": "Tália é a Musa da comédia e da poesia idílica, oitava das nove filhas de Zeus e Mnemósine. O seu nome significa «florescente», e é desenhada alegre e agradável, segurando ou usando a máscara que ri, par da máscara trágica da irmã. Comédia no sentido grego não é simplesmente aquilo que faz rir: é a forma em que as coisas acabam bem, em que a cidade é restaurada e o casal se casa. É a Musa desse final, e é por isso que o florescer está no seu nome.",
+    "mask": [
+      "Thalia",
+      "Tália",
+      "Thaleia"
+    ]
+  },
+  "Ampelos": {
+    "text": "Ampelos é uma das Hamadríades, as ninfas ligadas cada uma a uma espécie de planta, e o nome significa «videira» — que é aquilo a que está ligada. No relato mais conhecido Ampelos é um jovem amado por Dioniso, morto ao cair de um touro, que o deus em luto transformou na primeira videira para que o mundo tivesse vinho. De uma maneira ou de outra a identificação é a mesma: a ninfa e a planta são uma só coisa, e o fruto dessa planta é o dom próprio do deus.",
+    "mask": [
+      "Ampelos",
+      "Âmpelo"
+    ]
+  },
+  "Urania": {
+    "text": "Urânia é a Musa da astronomia e da astrologia, nona das nove filhas de Zeus e Mnemósine. É mostrada com um globo celeste, um compasso e um bastão, e o seu nome significa «celeste». É a única Musa cuja arte é uma ciência, e os antigos não achavam isso estranho: medir o céu e cantá-lo eram a mesma empresa, já que o fim de ambas era encontrar a ordem que está por baixo. Dizia-se que previa o futuro pela disposição das estrelas.",
+    "mask": [
+      "Urania",
+      "Urânia"
+    ]
+  },
+  "Calliope": {
+    "text": "Calíope é a mais velha das nove Musas, filha de Zeus e Mnemósine, e a que preside à poesia épica e à eloquência. Traz uma tábua de cera e um estilete, e a tradição atribui-lhe a inspiração de Homero tanto na Ilíada como na Odisseia — o que faz dela, na prática, a Musa de toda a herança literária ocidental. É também mãe de Orfeu, o músico arquetípico, e de Lino. O seu nome significa «de bela voz», e era a voz, não a escrita, o que os gregos queriam dizer com isso.",
+    "mask": [
+      "Calliope",
+      "Calíope",
+      "Kalliope"
+    ]
+  },
+  "Harpyia": {
+    "text": "Harpyia é a forma latina do nome grego das hárpias, as criaturas meio mulher meio ave dos ventos. A Teogonia de Hesíodo faz delas filhas do deus marinho Taumante e da Oceânide Electra, irmãs do arco-íris. São mais conhecidas por atormentarem o vidente cego Fineu: sempre que lhe punham comida à frente arrebatavam-na ou sujavam o que deixavam, de modo que ele passava fome diante de pratos cheios — até os Argonautas as afugentarem. O nome significa «arrebatadoras», e é a única coisa que alguma vez se disse que faziam.",
+    "mask": [
+      "Harpyia",
+      "harpia",
+      "hárpias",
+      "harpias",
+      "harpy"
+    ]
+  },
+  "Amalthea": {
+    "text": "Amalteia é a ninfa que criou o pequeno Zeus em Creta, escondido de um pai que comia os filhos. Alimentou-o com o leite da sua cabra — nalgumas versões ela é a cabra. Um dos cornos partiu-se, foi cheio de fruta e coroado de flores, e tornou-se a primeira cornucópia: Zeus devolveu-a às ninfas prometendo que daria tudo o que a natureza pudesse oferecer, e desde então nunca se esvaziou. Quando ela morreu, ele tomou-lhe a pele e mandou Hefesto fazer dela a égide.",
+    "mask": [
+      "Amalthea",
+      "Amalteia"
+    ]
+  },
+  "Aura": {
+    "text": "Aura é a deusa menor grega da brisa da manhã, filha do titã Lelanto, e companheira de caça de Ártemis capaz de acompanhar os ventos das terras altas. A sua história é uma das mais cruéis das Dionisíacas: troçou de Ártemis por ter um corpo demasiado feminino para uma virgem votada, e Ártemis fez com que Némesis providenciasse para que Dioniso a violasse. Deu à luz gémeos, enlouqueceu e afogou-se no rio Sangário. Zeus, com pena dela, transformou-a numa nascente. O seu nome significa simplesmente «brisa».",
+    "mask": [
+      "Aura"
+    ]
+  },
+  "Minthe": {
+    "text": "Minthe é uma náiade do submundo grego, filha do rio infernal Cocito. Hades tomou-a por amante pela sua beleza, e Perséfone — ou Deméter, conforme a fonte — descobriu e transformou-a numa planta por ciúme. A planta é a hortelã, e a transformação não é bem um castigo: continua a crescer no jardim do deus e por todo o mundo dos mortais, e anuncia-se pelo cheiro onde quer que seja esmagada. Um nome grego dessa planta significa «de doce aroma».",
+    "mask": [
+      "Minthe",
+      "Menta",
+      "menta",
+      "hortelã",
+      "hedyosmos"
+    ]
+  },
+  "Pitys": {
+    "text": "Pitys é uma oréade, uma ninfa das montanhas, perseguida pelo deus de pernas de bode Pã. Numa versão os deuses transformaram-na num pinheiro para a deixar escapar. Noutra foi perseguida por Pã e por Bóreas, o vento norte, escolheu Pã, e foi atirada de um precipício pelo perdedor ciumento — e Pã, ou Gaia, fez depois o pinheiro do seu corpo. A árvore tornou-se a própria de Pã, e os seus ramos a sua coroa. Quando o vento norte passa e a resina se junta em gotas nas pinhas, diz-se que é o seu choro.",
+    "mask": [
+      "Pitys",
+      "Píti"
+    ]
+  },
+  "Euterpe": {
+    "text": "Euterpe é a Musa da flauta e da poesia lírica, filha de Zeus e Mnemósine, uma das nove. O seu nome significa «deleite», ou «doadora de prazer», e de todas as Musas é aquela cuja arte não pede mais nada a quem a ouve — nenhuma história a seguir, nenhum argumento a vencer, só o som. Os gregos atribuíam-lhe a invenção do aulos, a flauta de palheta dupla que acompanhava tudo, de banquetes a funerais. É habitualmente mostrada com ele nas mãos.",
+    "mask": [
+      "Euterpe"
+    ]
+  },
+  "Thelxiepeia": {
+    "text": "Thelxinoë, também chamada Thelxiepeia, é uma das sereias: meio mulher, meio ave, vivendo junto ao mar e levando os marinheiros aos rochedos com o canto. O seu nome significa «encantadora da mente», e isso é preciso e não decorativo. O canto das sereias em Homero não é apenas belo: promete conhecimento, e a cada ouvinte é oferecido exatamente aquilo que mais quer saber. Odisseu só sobreviveu por se ter mandado amarrar ao mastro, e por o ouvir mesmo assim, porque queria ser o único homem a tê-lo feito.",
+    "mask": [
+      "Thelxiepeia",
+      "Telxiepeia",
+      "Thelxinoë",
+      "Telxínoe"
+    ]
+  },
+  "Gentileschi": {
+    "text": "Artemisia Gentileschi foi uma das grandes pintoras do barroco italiano, num século que mal deixava uma mulher pegar num pincel. Aprendeu na oficina romana do pai, Orazio. Em 1611 o pintor Agostino Tassi violou-a; no julgamento ela foi torturada com aperta-polegares para pôr à prova o seu testemunho, enquanto ele quase não cumpriu pena. Judite Degolando Holofernes e Susana e os Velhos saem daí, e recusam toda a tradição de pintar mulheres para o prazer de quem olha. Foi a primeira mulher admitida na Accademia delle Arti del Disegno.",
+    "mask": [
+      "Gentileschi",
+      "Artemisia Gentileschi",
+      "Artemisia Lomi",
+      "Artemisia",
+      "Artemísia"
+    ]
+  },
+  "Asterope": {
+    "text": "Asterope é uma das Hespérides, as ninfas do extremo ocidente que cuidam do jardim dos pomos de ouro no limite do mundo. O seu nome significa «de rosto estrelado», embora a mesma palavra signifique idiomaticamente «relâmpago» — uma ninfa com o nome da coisa mais calma ou da mais violenta do céu, conforme se leia. É mais habitualmente chamada Hespéria, «a do entardecer», que é o nome que toda a irmandade toma: filhas do crepúsculo, guardando o lugar onde o sol se põe.",
+    "mask": [
+      "Asterope",
+      "Astérope",
+      "Hesperia",
+      "Hespéria",
+      "Sterope"
+    ]
+  },
+  "Kiskil-lilla": {
+    "text": "Kiskil-lilla é um demónio noturno sumério, filha de An, rei dos deuses, e de Ninhursag das montanhas. Inanna encontrou-a na estrada para o reino de Ereshkigal e tomou-a ao seu serviço, pondo-a a guardar a árvore Huluppu. Tornou-se deusa das tempestades noturnas e súcubo, retratada como uma bela mulher de pé sobre dois gatos selvagens, com dois laços nas mãos e garras de ave de rapina em vez de pés. No acrescento acádico ao Gilgameš está alojada na árvore com uma serpente e uma ave Anzu, e Gilgameš mata-a.",
+    "mask": [
+      "Kiskil-lilla",
+      "kisikillilla",
+      "Ardat-lili",
+      "Lilitu"
+    ]
+  },
+  "Abel": {
+    "text": "Abel é o segundo filho de Adão e Eva, pastor de rebanhos, e o primeiro ser humano a morrer. Levou a Deus os primogénitos do seu rebanho e foram aceites; o irmão mais velho levou frutos da terra e não foram. O texto nunca explica porquê, e é toda a dificuldade da história — a injustiça que se segue começa numa preferência inexplicada. O irmão matou-o no campo, e diz-se que o seu sangue clama desde a terra. É lembrado por ter sido assassinado, e por mais nada que tenha feito.",
+    "mask": [
+      "Abel"
+    ]
+  },
+  "Seth": {
+    "text": "Seth é o terceiro filho nomeado de Adão, nascido depois de um irmão ter assassinado o outro, e dado como substituto do morto — uma criança para remendar um pai desfeito. A Escritura diz que nasceu à semelhança de Adão, expressão usada para mais ninguém, e a linhagem humana é traçada por ele e não por qualquer um dos dois primeiros. Uma tradição diz que Eva teve gémeos de todas as vezes exceto com ele. É o filho que existe por causa de uma morte, e através de quem continua tudo o que veio depois.",
+    "mask": [
+      "Seth",
+      "Set"
+    ]
+  },
+  "Cain": {
+    "text": "Caim é o primogénito de Adão e Eva, lavrador da terra, e o primeiro assassino. A sua oferta foi recusada onde a do irmão mais novo foi aceite, e por isso matou-o no campo. Marcado por Deus para que ninguém o matasse por sua vez, foi mandado vaguear, e construiu a primeira cidade. Da sua linhagem vieram os primeiros pastores de tenda, os primeiros músicos e os primeiros ferreiros — todos os ofícios, notou a tradição com desconforto, que decorrem da primeira morte. Alguns textos fazem dele um filho do diabo.",
+    "mask": [
+      "Cain",
+      "Caim"
+    ]
+  },
+  "Seimen Kongou": {
+    "text": "Seimen Kongou, também escrito Shoumen Kongou, é um rakshasa da tradição hindu tornado divindade protetora do budismo japonês, atestado já num texto do século sétimo. Outrora espalhava doença e sofrimento, e depois consagrou-se a proteger os vivos dos males que ele próprio causara. Representam-no de pele azul e quatro braços: leva um vajra de três pontas pelo poder indestrutível do ensinamento, um bastão cerimonial, uma roda pela doutrina e uma corda para atar o mal. Absorvido pelo culto Koushin, era invocado na noite em que uma vida podia ser ceifada, diante dos três macacos que não veem, não falam nem ouvem o mal.",
+    "mask": [
+      "Seimen Kongou",
+      "Shoumen Kongou",
+      "Seimen",
+      "Shoumen",
+      "Kongou"
+    ]
+  },
+  "Amon-Ra": {
+    "text": "Amon-Ra é a fusão de dois deuses egípcios: Amon, que representa a essência oculta das coisas, e Ra, a divindade revelada do sol. Sem pais, criou-se a si mesmo e tornou-se rei dos deuses e uma das figuras mais veneradas do vale do Nilo, ao lado de Osíris. Dão-lhe como esposas Useret, Amonet e Mut, e desta última nasceu o deus lunar Khonsu. Essa família foi adorada sobretudo na antiga Tebas, onde o enorme complexo de Karnak cresceu em torno do seu culto ao longo de quase dois mil anos de obras sucessivas.",
+    "mask": [
+      "Amon-Ra",
+      "Amon",
+      "Ra"
+    ]
+  },
+  "Vishnu": {
+    "text": "Vishnu é uma das principais divindades do panteão hindu, chamada o Preservador, de índole benevolente e sempre atenta ao bem-estar dos humanos. Com Brahma o criador e Shiva o destruidor forma a Trimurti, e a sua tarefa é manter o equilíbrio do mundo, descendo a ele como avatar sempre que esse equilíbrio se quebra. É figurado de pele azul e com até quatro braços, segurando uma roda chakra, um lótus, uma maça e uma concha, montando a ave Garuda e dormindo sobre a grande serpente Ananta Shesha. O seu último avatar, Kalki, deverá pôr fim à era presente.",
+    "mask": [
+      "Vishnu",
+      "Vixnu"
+    ]
+  },
+  "Maso": {
+    "text": "Maso, mais conhecida como Mazu, é a deusa chinesa que protege pescadores e marinheiros dos perigos do mar. Enquanto mortal aprendeu a nadar aos quinze anos e tornou-se a melhor nadadora da sua aldeia, de vestes vermelhas na praia para guiar os barcos de regresso. Na noite em que uma tempestade partiu o barco do pai, entrou em transe para os trazer de volta, a ele e ao irmão; a mãe acordou-a cedo demais e só o pai regressou. Após a sua morte, as famílias dos marinheiros rezaram-lhe, e o seu culto espalhou-se como o de uma protetora maternal.",
+    "mask": [
+      "Maso",
+      "Mazu"
+    ]
+  },
+  "Verdandi": {
+    "text": "Verdandi, escrita Verðandi em nórdico antigo e por vezes Verthandi, é uma das três nornas que decidem o destino dos homens, ao lado de Urd e Skuld. O seu nome é o particípio presente do verbo tornar-se: lê-se como aquilo que vem a ser, aquilo que está a acontecer, a fábrica do instante presente. Onde as irmãs seguram o que foi e o que será, ela segura o momento que se desenrola. É descrita como uma mulher belíssima, e o seu nome é primo do alemão werden e do neerlandês worden, ambos significando tornar-se.",
+    "mask": [
+      "Verdandi",
+      "Verðandi",
+      "Verthandi"
+    ]
+  },
+  "Ogun": {
+    "text": "Ogun é o deus do ferro entre os iorubás da Nigéria, o primeiro a revelar aos homens o uso desse metal. Quando os deuses desceram do céu por uma teia de aranha, criaram os primeiros humanos numa floresta, mas as ferramentas de que dispunham eram de um metal demasiado brando para desbravar qualquer terreno. Tendo recebido o segredo do ferro do filho do deus supremo Olorun, forjou um machado, abateu as árvores, abriu espaço aos homens e partilhou o seu saber com deuses e mortais. Guerreiro de energia inesgotável, a sua fúria pode voltar-se contra aqueles que protege.",
+    "mask": [
+      "Ogun"
+    ]
+  },
+  "Aizen Myouou": {
+    "text": "Aizen Myouou é um Rei da Sabedoria do budismo esotérico, contado entre os grandes guardiões irados ao lado de Fudou Myouou e Gozanze, honrado em mandalas onde o rodeiam trinta e sete ou dezassete devas. Pintam-no de pele vermelha e rosto furioso: essa cólera é a imagem do desejo e da paixão contidos em vez de saciados. Surge com dois, quatro ou seis braços que seguram um sino, um bastão, um raio, um lótus, um arco e uma flecha, por vezes com uma cabeça de leão na cabeleira eriçada. Encarna o instante em que o desejo se torna iluminação.",
+    "mask": [
+      "Aizen Myouou",
+      "Aizen",
+      "Myouou"
+    ]
+  },
+  "Yamaoka": {
+    "text": "Yamaoka vem de um homem e não de um mito: o espadachim, calígrafo e praticante de zen Yamaoka Tesshu, que atravessou a queda do xogunato no século dezanove. Célebre por um domínio em que a lâmina nunca se erguia por cólera, negociou a rendição pacífica do castelo de Edo, poupando assim um cerco à cidade. Fundou a sua própria escola de espada, ensinou que a técnica sem disciplina interior é vazia, e serviu dez anos o imperador antes de voltar ao ensino. Dele recordam-se uma prática encarniçada, milhares de caligrafias oferecidas e uma morte recebida sentado em meditação.",
+    "mask": [
+      "Yamaoka",
+      "Tesshu",
+      "Tesshū"
+    ]
+  },
+  "Nemhain": {
+    "text": "Nemhain, também escrita Neamhain ou Nemain, forma com Badb Catha e Macha o trio de deusas guerreiras que compõem os rostos da Morrigan na mitologia irlandesa. É a do frenesim e do pânico, o terror que cai sobre um exército antes mesmo de uma lâmina ser desembainhada. Dizia-se que uivava sobre o campo de batalha até os guerreiros perderem todo o discernimento e golpearem aliados e inimigos por igual, morrendo hostes inteiras de puro pavor àquele grito. O seu nome lê-se como venenosa ou desenfreada, e é uma das mais antigas figuras guerreiras da Irlanda.",
+    "mask": [
+      "Nemhain",
+      "Neamhain",
+      "Nemain"
+    ]
+  },
+  "Tyr": {
+    "text": "Tyr, também escrito Tir, é o deus nórdico da guerra, do combate singular, da vitória e da glória heroica, representado com uma só mão. Perdeu a direita por causa do lobo Fenrir: quando os deuses o quiseram acorrentar, só ele pôs a mão nas fauces da besta como penhor de boa-fé, e quando o laço aguentou, o lobo arrancou-lha. Esse gesto faz dele a própria imagem da coragem. É também o deus da lei e da assembleia, garante dos juramentos, com o tempo suplantado por Odin e Thor no favor dos fiéis.",
+    "mask": [
+      "Tyr",
+      "Tir"
+    ]
+  },
+  "Vesta": {
+    "text": "Vesta é a deusa romana do lar, da casa, da família e da castidade, cujo elemento é o fogo e cuja equivalente grega é Héstia. Filha de Saturno e de Ops, irmã mais velha de Júpiter, Neptuno, Plutão, Juno e Ceres, foi a única a recusar o casamento e entregou-se às casas que abençoava. Os seus mitos são poucos e contam sobretudo conceções milagrosas a partir de um falo surgido nas chamas da lareira. Era muitas vezes representada não como mulher mas como chama viva, mantida no seu templo pelas suas próprias sacerdotisas e que jamais podia apagar-se.",
+    "mask": [
+      "Vesta"
+    ]
+  },
+  "Durga": {
+    "text": "Durga, cujo nome significa aquela que salva nas situações de máxima aflição, é uma forma da deusa radiante Devi no hinduísmo. É representada com dez braços, montando um leão ou um tigre, portando armas e um lótus, com um sorriso meditativo e as mãos em gestos simbólicos. Encarna a força feminina criadora e vive em completa autossuficiência, sem precisar do universo nem de ninguém nele. Kali conta-se entre os seus aspetos, e ela é a forma guerreira e matadora de demónios de Parvati, esposa de Shiva e mãe de Ganesha e de Kartikeya.",
+    "mask": [
+      "Durga"
+    ]
+  },
+  "Houri": {
+    "text": "As Húris são as companheiras do paraíso no ensinamento islâmico, seres pudicos e belos que habitam o jardim prometido aos fiéis. Descrevem-nas sem pelos exceto na cabeça, tão puras que são transparentes até à medula dos ossos, e eternamente jovens. Embora as descrições falem sobretudo de mulheres, o termo árabe original designa um companheiro belo e puro de um ou outro género, e a promessa feita a quem entra no paraíso é a de um companheiro do género oposto ao seu. O próprio nome remete para o contraste do branco e do escuro no olho.",
+    "mask": [
+      "Houri",
+      "Houris",
+      "Húri",
+      "Húris"
+    ]
+  },
+  "Freyr": {
+    "text": "Freyr, por vezes escrito Frey e conhecido também como Yngvi-Freyr, é um dos deuses mais importantes do paganismo nórdico, um Vanir acolhido entre os Aesir. Reina sobre as colheitas, o sol e o bom tempo, e como deus da fertilidade diz-se que concede aos mortais paz e prazer. Foi honrado sobretudo na Suécia, cuja casa real se dizia descendente dele, e possui o navio Skidbladnir e o javali Gullinbursti. Para obter a giganta Gerd cedeu a sua espada, e sem ela enfrentará o gigante de fogo Surtr no fim do mundo.",
+    "mask": [
+      "Freyr",
+      "Frey",
+      "Yngvi-Freyr",
+      "Yngvi"
+    ]
+  },
+  "Bres": {
+    "text": "Bres foi um rei dos Tuatha De Danann na mitologia irlandesa, nascido de sangue fomoriano e inclinado a favorecer esse povo em cada um dos seus juízos. Quando Nuadha perdeu a mão e foi julgado incapaz de reinar, elevaram-no no seu lugar, e Brigid dos Tuatha De Danann tornou-se sua esposa. O seu reinado foi duro: reduziu os Tuatha De Danann a trabalho de escravos e impôs-lhes um tributo pago aos fomorianos, até ser derrubado e exilado depois de a mão de Nuadha ter sido substituída. Tentou retomar o trono com a ajuda de Balor, e falhou.",
+    "mask": [
+      "Bres"
+    ]
+  },
+  "Mot": {
+    "text": "Mot, também chamado Mavet, é a personificação cananeia da morte, ligada à seca, à esterilidade e ao mundo subterrâneo. O seu trono é uma fossa numa cidade de imundície, e atribuem-lhe os ceptros da viuvez e do luto. Os textos de Ugarit fazem dele um filho do grande deus El e o inimigo do deus da tempestade Baal, cujas chuvas dão vida à terra. Respondendo aos mensageiros de Baal, gabou-se de um apetite de carne que nada podia saciar, e a contenda acabou com a morte de Baal e depois com o seu próprio desmembramento às mãos de Anat.",
+    "mask": [
+      "Mot",
+      "Mavet"
+    ]
+  },
+  "Nike": {
+    "text": "Nike é a deusa grega da vitória, da força e da velocidade, e o modelo de que os mensageiros alados da arte abraâmica tiram a sua figura. O seu maior feito deu-se na guerra contra os Titãs, onde serviu de auriga pessoal dos deuses: dizia-se que sem ela jamais teriam ganho essa guerra. Durante muito tempo foi entendida como um aspeto de Atena e não como deusa por direito próprio, e na arte desse período surge sempre sem asas; só ao ficar sozinha as ganhou. Os romanos conheceram-na pelo nome de Victoria.",
+    "mask": [
+      "Nike"
+    ]
+  },
+  "Armaiti": {
+    "text": "Armaiti, cujo nome significa devoção benéfica, é uma das Amesha Spentas do zoroastrismo, os imortais santos que rodeiam o criador. É a personificação da própria devoção e da obediência justa, e é filha de Ahura Mazda. O seu elemento é a terra, e através dela governa tanto a fertilidade como os mortos, deitados no solo que encarna. O quinto dia de cada mês e o décimo segundo mês do ano são-lhe consagrados. O seu adversário eterno é o arquidemónio do descontentamento, Nanghaithya.",
+    "mask": [
+      "Armaiti",
+      "Spenta Armaiti"
+    ]
+  },
+  "Gabriel": {
+    "text": "Gabriel, de um nome hebraico que se lê Deus é a minha força, é o grande anjo mensageiro das três religiões abraâmicas, chamado a mão esquerda de Deus onde Miguel é a direita. No cristianismo a sua tarefa é o anúncio: dizer a Isabel que dará à luz João Baptista, e a Maria que levará um filho a quem deverá chamar Jesus. O mesmo anjo declara a Daniel a profecia das setenta semanas. No islão é o mais alto dos anjos, aquele que revelou o Alcorão a Maomé. Os textos antigos fazem dele figura masculina ou sem género; o rosto doce da pintura tardia deixa a questão em aberto.",
+    "mask": [
+      "Gabriel"
+    ]
+  }
+}

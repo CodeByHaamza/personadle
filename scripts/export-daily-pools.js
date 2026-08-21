@@ -38,6 +38,12 @@ const { aoaCharacters } = await import(
 const { personaeCharacters } = await import(
   join(ROOT, "personaeMode/database/personaeCharacters.js").replace(/\\/g, "/")
 );
+const { expertLyrics } = await import(
+  join(ROOT, "musicsMode/database/expert_lyrics.js").replace(/\\/g, "/")
+);
+const expertLore = JSON.parse(
+  readFileSync(join(ROOT, "personaeMode/database/expert_lore/en.json"), "utf8")
+);
 
 const opusByName = Object.fromEntries(aoaCharacters.map((c) => [c.nom, c.opus]));
 
@@ -46,6 +52,34 @@ const pools = {
   emoji: { pool: characters.filter((c) => c.emoji).map((c) => c.nom) },
   silhouette: { pool: silhouetteCharacters.map((c) => c.nom) },
   music: { pool: songs.map((s) => s.titre) },
+  // ── Pools Mode Expert ──────────────────────────────────────────────────────
+  // Tous ont une clé de hash distincte de leur mode normal : le tirage doit être
+  // indépendant, sinon jouer le mode normal d'abord — où l'indice est bien plus
+  // généreux — donne la réponse de l'Expert du jour.
+  //
+  // Seuls les modes dont le CONTENU est restreint ont un pool propre ici :
+  //   - music_expert  : uniquement les chansons ayant des paroles
+  //   - classic_expert: uniquement les personnages ayant une citation
+  // AOA et Silhouette Expert rejouent le pool normal (l'indice change, pas le
+  // roster) — api/lib/daily_target.php réutilise directement `alloutattack` et
+  // `silhouette` avec une clé de hash suffixée, plutôt que d'en dupliquer les
+  // entrées ici et de les laisser dériver.
+  music_expert: { pool: songs.filter((s) => expertLyrics[s.titre]).map((s) => s.titre) },
+  classic_expert: {
+    pool: characters.filter((c) => String(c.quote ?? "").trim()).map((c) => c.nom),
+  },
+  // Personae Expert : seules les personas ayant une fiche de lore sont tirables —
+  // sans texte, la partie n'aurait aucun indice. Les variantes cosmétiques
+  // (`* Picaro`…) n'ont volontairement pas de fiche et sont donc exclues d'office.
+  personae_expert: {
+    pool: personaeCharacters
+      .filter((c) => expertLore[c.persona])
+      .map((c) => ({
+        persona: c.persona,
+        user: Array.isArray(c.user) ? c.user[0] : c.user,
+        opus: c.opus,
+      })),
+  },
   alloutattack: {
     pool: aoaAutocompletePool,
     opusByName,

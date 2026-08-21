@@ -230,6 +230,21 @@ export const api = {
         return { ...s, mode: _modeAlias[m] ?? m };
       };
 
+      // Clé d'idempotence rétro-active : les sessions mises en file AVANT la
+      // migration 032 n'en ont pas, et l'unique key par jour qui les protégeait
+      // accidentellement du double-insert n'existe plus. On en pose une, et on la
+      // PERSISTE avant d'émettre : régénérée à chaque tentative, elle ne
+      // protégerait de rien entre deux passages.
+      let seeded = false;
+      for (const raw of pending) {
+        if (!raw.client_session_id) {
+          // Hexa + tirets uniquement : le format attendu par api/sessions.php.
+          raw.client_session_id = `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}`;
+          seeded = true;
+        }
+      }
+      if (seeded) localStorage.setItem("pendingSessions", JSON.stringify(pending));
+
       const remaining = [];
       for (const raw of pending) {
         const session = normalize(raw);

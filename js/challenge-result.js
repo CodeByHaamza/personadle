@@ -10,6 +10,7 @@
  */
 
 import { MODE_STATE_KEYS } from "./challenge-notif.js";
+import { isExpertPage } from "./gameCore.js";
 
 /** Heart emoji/size per Social Link rank (1-10). Win only. */
 const SL_HEART = {
@@ -215,6 +216,11 @@ function showChallengeResult({
  * @param {boolean} isWin       - Whether the player found the answer
  */
 export async function checkChallengeCompletion(mode, myAttempts, isWin) {
+  // Une partie Expert ne résout jamais un défi : `activeChallenge` n'est pas scopé
+  // par mode Expert (cf. getActiveChallengeTarget(), js/gameCore.js), donc valider
+  // ici consommerait le défi normal avec le score d'une autre mécanique.
+  if (isExpertPage()) return;
+
   const raw = localStorage.getItem("activeChallenge");
   if (!raw) return;
 

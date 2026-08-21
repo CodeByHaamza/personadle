@@ -25,7 +25,11 @@ import {
   gainSocialLinkXp,
   applyRank10Effect,
 } from "../../js/social-link.js";
-import { FILTER_STORAGE_KEYS, getPendingActiveChallenge } from "../../js/gameCore.js";
+import {
+  FILTER_STORAGE_KEYS,
+  getPendingActiveChallenge,
+  normalizeModeKey,
+} from "../../js/gameCore.js";
 
 // ─────────────────────────────────────────────────────────
 // 1. UTILITAIRES
@@ -131,6 +135,23 @@ const MODE_STATE_KEYS = {
 
 // localStorage keys where each mode stores its active opus filters
 const MODE_FILTER_KEY = FILTER_STORAGE_KEYS;
+
+/**
+ * Page de chaque mode, en relatif depuis profile/friends/ — 2 niveaux sous la
+ * racine du site, pas 1 (« ../classiqueMode/… » résoudrait vers
+ * profile/classiqueMode/ → 404).
+ *
+ * Les clés sont celles de normalizeModeKey() : toute autre graphie doit être
+ * normalisée AVANT la recherche, sinon on retombe sur le cas « mode inconnu ».
+ */
+const MODE_PAGE_MAP = {
+  classic: "../../classiqueMode/classiqueMode.html",
+  emoji: "../../emojiMode/emojiMode.html",
+  silhouette: "../../silhouetteMode/silhouette.html",
+  alloutattack: "../../allOutAttackMode/allOutAttack.html",
+  personae: "../../personaeMode/personae.html",
+  music: "../../musicsMode/musics.html",
+};
 
 let state = {
   // Données de l'API friends.list()
@@ -892,10 +913,35 @@ function attachListeners() {
       }
 
       acceptChallenge.disabled = true;
-      await window._personadleApi?.messages.updateStatus(mid, "accepted").catch(() => {});
+      // ── Rien n'est modifié tant qu'on ne sait pas qu'on peut aboutir ────────
+      // Même correctif que js/challenge-notif.js : marquer « accepted » puis
+      // écrire activeChallenge avant de savoir s'il existe une page cible et si
+      // le serveur a bien enregistré laissait des défis bloqués « en cours »,
+      // injouables et non annulables.
+      const modeKey = normalizeModeKey(mode) ?? String(mode ?? "").toLowerCase();
+      const dest = MODE_PAGE_MAP[modeKey] ?? null;
+      if (!dest) {
+        console.error(`[challenge] mode inconnu « ${mode} » → aucune page cible`);
+        alert(tf("challenge.unknown_mode", "This challenge's mode is unavailable."));
+        return;
+      }
+
+      const api = window._personadleApi;
+      if (!api) {
+        alert(tf("challenge.offline", "You need to be online to accept a challenge."));
+        return;
+      }
+
+      try {
+        await api.messages.updateStatus(mid, "accepted");
+      } catch (err) {
+        console.error("[challenge] acceptation refusée par le serveur", err);
+        alert(tf("challenge.accept_failed", "Could not accept the challenge. Try again."));
+        return;
+      }
 
       // Clear this mode's game state so the player starts fresh
-      (MODE_STATE_KEYS[mode] ?? []).forEach((k) => localStorage.removeItem(k));
+      (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
 
       // Backup current filters, then apply sender's challenge filters
       // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
@@ -905,7 +951,7 @@ function attachListeners() {
       // null — on garde null tel quel pour que la restauration plus bas (dans
       // checkChallengeCompletion(), js/challenge-result.js) le laisse absent
       // au lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
-      const filterKey = MODE_FILTER_KEY[mode] ?? null;
+      const filterKey = MODE_FILTER_KEY[modeKey] ?? null;
       const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
       if (filterKey && challengeFilters && challengeFilters !== "[]") {
         localStorage.setItem(filterKey, challengeFilters);
@@ -915,7 +961,7 @@ function attachListeners() {
         "activeChallenge",
         JSON.stringify({
           msgId: mid,
-          mode,
+          mode: modeKey,
           date,
           score,
           senderId,
@@ -933,23 +979,8 @@ function attachListeners() {
 
       // XP Social Link : challenge accepté
       if (senderId) gainSocialLinkXp(senderId, "challenge").catch(() => {});
-      // Chemins relatifs à profile/friends/ (2 niveaux sous la racine du site,
-      // cf. commentaire sur avatarSrc() plus haut) — pas 1 seul niveau, sinon
-      // 404 (ex: "../classiqueMode/..." résoudrait vers profile/classiqueMode/).
-      const modePageMap = {
-        classic: "../../classiqueMode/classiqueMode.html",
-        emoji: "../../emojiMode/emojiMode.html",
-        silhouette: "../../silhouetteMode/silhouette.html",
-        alloutattack: "../../allOutAttackMode/allOutAttack.html",
-        personae: "../../personaeMode/personae.html",
-        music: "../../musicsMode/musics.html",
-      };
-      const dest = modePageMap[mode?.toLowerCase()];
-      if (dest) {
-        window.location.href = dest;
-        return;
-      }
-      await loadMessages();
+      // `dest` a été résolu et validé avant toute écriture.
+      window.location.href = dest;
       return;
     }
 
@@ -1007,5 +1038,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     connected?.classList.add("hidden");
     guest?.classList.remove("hidden");
+
+    // Serveur injoignable ≠ pas connecté. Afficher « Connectez-vous » à quelqu'un
+    // dont la session est valide l'envoie se reconnecter en boucle sans que rien
+    // ne débloque (bug signalé le 2026-08-15). On dit ce qui s'est réellement
+    // passé, et on propose de réessayer.
+    if (window._authUnavailable) _renderUnreachableState(guest);
   }
 });
+
+/**
+ * Bascule la carte « non connecté » en carte « serveur injoignable ».
+ * Réutilise le même bloc plutôt que d'en ajouter un second au HTML : seuls le
+ * texte et l'action changent.
+ */
+function _renderUnreachableState(guest) {
+  if (!guest) return;
+
+  const t = (key, fallback) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fallback;
+  };
+
+  const icon = guest.querySelector(".fr-guest-icon");
+  const texte = guest.querySelector('[data-i18n="friends.login_required"]');
+  const lien = guest.querySelector("a.fr-btn");
+
+  if (icon) icon.textContent = "📡";
+  if (texte) {
+    texte.setAttribute("data-i18n", "friends.server_unreachable");
+    texte.textContent = t(
+      "friends.server_unreachable",
+      "Could not reach the server. Your session is probably still valid — try again."
+    );
+  }
+  if (lien) {
+    // Un bouton de rechargement, pas un lien vers la page de connexion : le joueur
+    // est déjà connecté, l'envoyer se reconnecter ne réglerait rien.
+    const bouton = document.createElement("button");
+    bouton.className = lien.className;
+    bouton.type = "button";
+    bouton.setAttribute("data-i18n", "friends.retry");
+    bouton.textContent = t("friends.retry", "Retry");
+    bouton.addEventListener("click", () => window.location.reload());
+    lien.replaceWith(bouton);
+  }
+}

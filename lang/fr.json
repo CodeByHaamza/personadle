@@ -31,7 +31,10 @@
     "error": "Une erreur est survenue.",
     "admin_gift_received": "🎁 Cadeau reçu !",
     "tap_continue": "Appuyer pour continuer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "expert_enter": "⚡ Mode Expert",
+    "expert_leave": "← Mode normal",
+    "expert_lyrics": "⚡ PAROLES"
   },
   "modes": {
     "classic": {
@@ -83,7 +86,15 @@
       "tooltip_persona": "Le Persona spécifique lié au personnage — ou sa forme Shadow.",
       "tooltip_arcana": "L'Arcane du Tarot qui définit son rôle symbolique et narratif.",
       "correct": "✅ Correct ! C'était {{name}} !",
-      "giveup_reveal": "❌ La réponse était {{name}}"
+      "giveup_reveal": "❌ La réponse était {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Une citation. Aucune catégorie, aucune couleur, aucun indice — la réplique et le nom, c'est tout.",
+      "expert_tip_1": "La citation est affichée dès le premier essai. C'est le seul indice que tu auras.",
+      "expert_tip_2": "Une réponse est juste ou fausse. Rien n'est comparé, rien ne passe au jaune.",
+      "expert_tip_3": "Si le personnage se nomme lui-même, son nom est masqué. Il réapparaît à la fin de la partie.",
+      "expert_tip_4": "Seuls les personnages ayant réellement une citation peuvent être tirés.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Classique normale."
     },
     "emoji": {
       "name": "Emoji",
@@ -110,7 +121,16 @@
       "closing": "✨ Laissez votre intuition vous guider... et lisez entre les emojis 🧠📲",
       "not_in_database": "\"{{name}}\" n'est pas dans la base de données.",
       "correct": "✅ Correct ! C'était {{name}} !",
-      "giveup_reveal": "Vous avez abandonné ! La réponse était : {{name}}"
+      "giveup_reveal": "Vous avez abandonné ! La réponse était : {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Les mêmes émojis, révélés de la même façon — sauf qu'il y en a un qui ment.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Exactement un émoji est un leurre, emprunté à un autre personnage.",
+      "expert_tip_2": "Il peut se trouver n'importe où dans la séquence — au début, au milieu ou à la fin.",
+      "expert_tip_3": "Il ne change jamais pendant la partie, et recharger ne le retire pas au sort.",
+      "expert_tip_4": "Les vrais émojis sont affichés à la fin de la partie.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Émoji normale."
     },
     "silhouette": {
       "name": "Silhouette",
@@ -135,7 +155,17 @@
       "games_list": "Personnages de Persona 1, 2 (IS & EP), 3, 4, 5 et P5 : The Phantom X, spin-offs inclus.",
       "closing": "🧠 Observez les ombres, faites confiance à vos instincts, et devenez le détective de silhouettes ultime !",
       "correct": "🎉 Vous avez trouvé {{name}} !",
-      "giveup_reveal": "❌ La réponse était {{name}}"
+      "giveup_reveal": "❌ La réponse était {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "La silhouette reste cachée. Tu ne la vois qu'en flashs — et c'est toi qui choisis quand.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Appuie sur FLASH pour afficher la silhouette une fraction de seconde.",
+      "expert_tip_2": "Tu démarres avec un flash, et chaque erreur t'en redonne un.",
+      "expert_tip_3": "Chaque erreur allonge aussi tous les flashs suivants.",
+      "expert_tip_4": "Pas de zoom ici : la silhouette entière est montrée — le temps que dure le flash.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner ne se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Silhouette normale.",
+      "expert_flash": "⚡ FLASH"
     },
     "alloutattack": {
       "name": "All-Out Attack",
@@ -157,7 +187,14 @@
       "giveup_reveal": "❌ Tu as abandonné ! La réponse était : {{name}}",
       "no_characters": "Aucun personnage disponible avec les filtres actuels.",
       "prev_mode": "← Mode Emoji",
-      "next_mode": "Mode Silhouette →"
+      "next_mode": "Mode Silhouette →",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Le flou ne se lève jamais, et la couleur a disparu.",
+      "expert_tip_1": "L'image reste au flou maximum toute la partie. Une erreur ne révèle rien.",
+      "expert_tip_2": "Elle est aussi en noir et blanc — la couleur des cheveux et des tenues ne t'aidera pas.",
+      "expert_tip_3": "Il reste la silhouette, la pose et la composition. C'est tout le jeu.",
+      "expert_tip_4": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_5": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série All-Out Attack normale."
     },
     "personae": {
       "name": "Personae",
@@ -184,7 +221,16 @@
       "correct": "✅ Bonne réponse ! Le Persona de {{name}} était {{persona}}.",
       "giveup_reveal": "❌ Dommage ! Le Persona de {{name}} était {{persona}}.",
       "prev_mode": "← Mode Silhouette",
-      "next_mode": "Mode Musique →"
+      "next_mode": "Mode Musique →",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Aucune image. Tu reçois le mythe derrière la persona, et tu nommes son manieur.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Le nom de la persona est masqué dans le texte. Il réapparaît à la fin de la partie.",
+      "expert_tip_2": "N'importe quel manieur de cette même figure est accepté — Orphée vaut pour Makoto, Kotone comme Aigis.",
+      "expert_tip_3": "Seules les personas ayant réellement une fiche peuvent être tirées.",
+      "expert_tip_4": "L'illustration est révélée à la fin de la partie.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a sa propre persona du jour et ses propres stats. Il ne compte pas dans ta série Personae normale."
     },
     "music": {
       "name": "Musique",
@@ -212,7 +258,15 @@
       "giveup_reveal": "💡 C'était : {{title}}",
       "vocal_label": "🧑‍🎤 Voix : {{name}}",
       "listen_link": "🔗 Écouter ici",
-      "prev_mode": "← Mode Personae"
+      "prev_mode": "← Mode Personae",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_intro": "Aucun son. Tu reçois les paroles de la chanson, un vers à la fois.",
+      "expert_tip_1": "Tu démarres avec un seul vers. Chaque mauvaise réponse en révèle un de plus.",
+      "expert_tip_2": "Les vers précédents restent à l'écran — tu peux remonter les relire quand tu veux.",
+      "expert_tip_3": "Le titre est masqué dans les paroles. Il réapparaît à la fin de la partie.",
+      "expert_tip_4": "Les instrumentaux sont exclus — toutes les chansons ici ont des paroles.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a sa propre chanson du jour et ses propres stats. Il ne compte pas dans ta série Music normale."
     }
   },
   "game": {
@@ -316,7 +370,10 @@
     "delete_account_confirm_btn": "Supprimer définitivement",
     "delete_account_success": "Ton compte a été désactivé. Tu vas être déconnecté.",
     "delete_account_error": "Une erreur est survenue. Réessaie ou contacte-nous.",
-    "delete_account_login_required": "Connecte-toi pour supprimer ton compte."
+    "delete_account_login_required": "Connecte-toi pour supprimer ton compte.",
+    "expert_title": "⚡ Mode Expert",
+    "expert_cols": "Gagnées / Jouées · Taux · Record · Série",
+    "expert_best_hint": "Le moins d'essais sur une victoire"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",
@@ -818,7 +875,9 @@
     "msg_clear": "Vider les résolus",
     "msg_clear_kept_active": "{{count}} défi(s) en cours conservé(s) — termine-les d'abord.",
     "msg_empty": "Aucun message pour l'instant.",
-    "delete_msg": "Supprimer"
+    "delete_msg": "Supprimer",
+    "server_unreachable": "Impossible de joindre le serveur. Ta session est probablement toujours valide — réessaie.",
+    "retry": "Réessayer"
   },
   "challenge": {
     "challenge_friend": "Défier un Ami",
@@ -833,7 +892,10 @@
     "active_challenge": "Défi",
     "notif_challenges_you": "vous lance un défi !",
     "notif_beat": "Battre",
-    "notif_attempts": "tentative(s)"
+    "notif_attempts": "tentative(s)",
+    "unknown_mode": "Le mode de ce défi est indisponible.",
+    "offline": "Tu dois être en ligne pour accepter un défi.",
+    "accept_failed": "Impossible d'accepter le défi. Réessaie."
   },
   "challenge_result": {
     "title_win": "BRAVO !",

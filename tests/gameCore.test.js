@@ -29,6 +29,7 @@ import {
   MODES,
   applyDarkModeOverrides,
   enableGiveUpButton,
+  setGiveUpEnabled,
   showChallengeButton,
   showCommunityStats,
   characterMatchesActiveOpus,
@@ -36,6 +37,10 @@ import {
   getActiveChallengeTarget,
   isChallengePlay,
   getPendingActiveChallenge,
+  startGame,
+  isGameLogged,
+  markGameLogged,
+  currentGameId,
 } from "../js/gameCore.js";
 
 import { t } from "../js/i18n.js";
@@ -399,15 +404,20 @@ describe("checkResetOnLoad", () => {
     expect(onReset).toHaveBeenCalledOnce();
   });
 
-  it("removes the previous day's stats key when a new day is detected", () => {
+  it("réarme l'enregistrement de la partie quand un nouveau jour est détecté", () => {
+    // Remplace l'ancien « supprime la clé statsLogged_<mode>_<date> » : cette clé
+    // n'existe plus depuis que la portée d'enregistrement est la PARTIE et non la
+    // journée (startGame/isGameLogged). Le test nettoyait donc une clé que plus
+    // personne n'écrivait, pendant que le vrai drapeau restait armé — c'est
+    // exactement ce trou qui a laissé passer le bug Émoji.
     const yesterday = parisDateKey(new Date(Date.now() - 86_400_000));
-    const oldStatsKey = `statsLogged_Test_${yesterday}`;
-
     localStorage.setItem("lastPlayedDate_Test", yesterday);
-    localStorage.setItem(oldStatsKey, "1");
+    startGame("Test");
+    markGameLogged("Test");
+    expect(isGameLogged("Test")).toBe(true);
 
     checkResetOnLoad("lastPlayedDate_Test", "Test", () => {});
-    expect(localStorage.getItem(oldStatsKey)).toBeNull();
+    expect(isGameLogged("Test")).toBe(false);
   });
 
   it("updates lastPlayedDate to today after a reset", () => {
@@ -536,6 +546,154 @@ describe("showWrongMini", () => {
 // buildGameSession
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// IDENTITÉ DE PARTIE — « une partie = un enregistrement »
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Remplace l'ancienne garde `statsLogged_<Mode>_<date>` (une partie par jour).
+// Ce qui doit tenir : la garde survit à un rechargement (sinon la restauration
+// de session re-loggerait à chaque F5), et elle tombe au tirage suivant (sinon
+// on retombe sur l'ancien plafond).
+
+describe("startGame / isGameLogged / markGameLogged", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("une partie fraîche n'est pas encore enregistrée", () => {
+    startGame("Classic");
+    expect(isGameLogged("Classic")).toBe(false);
+  });
+
+  it("sans startGame préalable, rien n'est considéré comme enregistré", () => {
+    expect(isGameLogged("Classic")).toBe(false);
+  });
+
+  it("markGameLogged rend la partie enregistrée et son identifiant", () => {
+    startGame("Classic");
+    const id = markGameLogged("Classic");
+    expect(id).toBeTruthy();
+    expect(isGameLogged("Classic")).toBe(true);
+  });
+
+  it("l'état survit à un rechargement (il vit dans localStorage)", () => {
+    startGame("Classic");
+    markGameLogged("Classic");
+    // Un F5 ne fait que relire localStorage : aucune remise à zéro en mémoire.
+    expect(isGameLogged("Classic")).toBe(true);
+  });
+
+  it("la partie suivante réarme l'enregistrement", () => {
+    startGame("Classic");
+    markGameLogged("Classic");
+    startGame("Classic");
+    expect(isGameLogged("Classic")).toBe(false);
+  });
+
+  it("chaque partie a un identifiant distinct", () => {
+    startGame("Classic");
+    const first = markGameLogged("Classic");
+    startGame("Classic");
+    const second = markGameLogged("Classic");
+    expect(second).not.toBe(first);
+  });
+
+  it("markGameLogged sans startGame crée quand même un identifiant", () => {
+    const id = markGameLogged("Classic");
+    expect(id).toBeTruthy();
+    expect(isGameLogged("Classic")).toBe(true);
+  });
+
+  it("les portées sont indépendantes entre modes et entre normal/Expert", () => {
+    startGame("Classic");
+    startGame("ClassicExpert");
+    startGame("Music");
+    markGameLogged("Classic");
+    expect(isGameLogged("Classic")).toBe(true);
+    expect(isGameLogged("ClassicExpert")).toBe(false);
+    expect(isGameLogged("Music")).toBe(false);
+  });
+
+  it("currentGameId est stable pendant la partie et change au tirage suivant", () => {
+    startGame("Emoji");
+    const id = currentGameId("Emoji");
+    expect(currentGameId("Emoji")).toBe(id); // un rechargement relit la même valeur
+    startGame("Emoji");
+    expect(currentGameId("Emoji")).not.toBe(id);
+  });
+
+  it("currentGameId crée un identifiant même sans startGame préalable", () => {
+    expect(currentGameId("Emoji")).toBeTruthy();
+  });
+
+  it("survit à l'absence de crypto.randomUUID (http://ip, Safari < 15.4)", () => {
+    // randomUUID() n'existe qu'en contexte sécurisé. Sur http://<ip-du-LAN> — le
+    // test mobile le plus courant — l'appel levait et cassait startGame(), donc le
+    // chargement entier du mode. Rien ici n'exige d'unicité cryptographique.
+    const vrai = crypto.randomUUID;
+    crypto.randomUUID = () => {
+      throw new TypeError("crypto.randomUUID is not a function");
+    };
+    try {
+      expect(() => startGame("Classic")).not.toThrow();
+      const id = currentGameId("Classic");
+      expect(id).toBeTruthy();
+      expect(startGame("Classic") ?? currentGameId("Classic")).not.toBe(id);
+      // Le repli doit rester acceptable par api/sessions.php : hexa + tirets.
+      expect(currentGameId("Classic")).toMatch(/^[0-9a-f]{4,}(-[0-9a-f]{4,})*$/i);
+      expect(currentGameId("Classic").length).toBeLessThanOrEqual(36);
+    } finally {
+      crypto.randomUUID = vrai;
+    }
+  });
+
+  it("buildGameSession pose une clé d'idempotence même sans crypto.randomUUID", () => {
+    const vrai = crypto.randomUUID;
+    crypto.randomUUID = () => {
+      throw new TypeError("nope");
+    };
+    try {
+      const s = buildGameSession({
+        mode: "Classic",
+        targetName: "Joker",
+        result: "win",
+        attempts: 1,
+      });
+      expect(s.client_session_id).toMatch(/^[0-9a-f]{4,}(-[0-9a-f]{4,})*$/i);
+    } finally {
+      crypto.randomUUID = vrai;
+    }
+  });
+
+  it("buildGameSession réutilise l'identifiant de la partie comme clé d'idempotence", () => {
+    startGame("Classic");
+    const id = markGameLogged("Classic");
+    const session = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+      clientSessionId: id,
+    });
+    expect(session.client_session_id).toBe(id);
+  });
+
+  it("buildGameSession retombe sur un identifiant neuf si aucun n'est fourni", () => {
+    const a = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    const b = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    expect(a.client_session_id).toBeTruthy();
+    expect(a.client_session_id).not.toBe(b.client_session_id);
+  });
+});
+
 describe("buildGameSession", () => {
   it("returns an object with the expected shape", () => {
     const session = buildGameSession({
@@ -597,6 +755,31 @@ describe("buildGameSession", () => {
       attempts: 3,
     });
     expect(session.mode).toBe("alloutattack");
+  });
+
+  it("marque is_expert à false par défaut", () => {
+    const session = buildGameSession({
+      mode: "Music",
+      targetName: "Burn My Dread",
+      result: "win",
+      attempts: 1,
+    });
+    expect(session.is_expert).toBe(false);
+  });
+
+  it("garde le mode normal en Expert — c'est is_expert qui distingue, pas le mode", () => {
+    // Le backend range la partie dans game_sessions.mode = 'music' + is_expert = 1
+    // (migration 031). Un mode dédié casserait normalizeModeKey() et le vocabulaire
+    // des 6 modes partagé par le profil, les défis et le classement.
+    const session = buildGameSession({
+      mode: "Music",
+      targetName: "Deep Breath Deep Breath",
+      result: "win",
+      attempts: 7,
+      isExpert: true,
+    });
+    expect(session.mode).toBe("music");
+    expect(session.is_expert).toBe(true);
   });
 });
 
@@ -1439,9 +1622,14 @@ describe("normalize — whitespace-only and boundary edge cases", () => {
 
 describe("MODES catalogue", () => {
   it("exposes the six canonical modes with key + label", () => {
-    expect(MODES.map((m) => m.key).sort()).toEqual(
-      ["alloutattack", "classic", "emoji", "music", "personae", "silhouette"]
-    );
+    expect(MODES.map((m) => m.key).sort()).toEqual([
+      "alloutattack",
+      "classic",
+      "emoji",
+      "music",
+      "personae",
+      "silhouette",
+    ]);
     const labels = Object.fromEntries(MODES.map((m) => [m.key, m.label]));
     expect(labels).toEqual({
       classic: "Classic",
@@ -1506,7 +1694,9 @@ describe("applyDarkModeOverrides", () => {
 
   it("applies styles by CSS selector when darkmode is active", () => {
     document.body.classList.add("darkmode");
-    applyDarkModeOverrides([{ selector: ".box", styles: { backgroundColor: "#222", color: "white" } }]);
+    applyDarkModeOverrides([
+      { selector: ".box", styles: { backgroundColor: "#222", color: "white" } },
+    ]);
     const box = document.querySelector(".box");
     expect(box.style.backgroundColor).toBe("rgb(34, 34, 34)");
     expect(box.style.color).toBe("white");
@@ -1526,12 +1716,32 @@ describe("applyDarkModeOverrides", () => {
 
 describe("enableGiveUpButton", () => {
   beforeEach(() => {
-    setHTML('<button id="giveUpButton" disabled></button><button id="customBtn" disabled></button>');
+    // Le vrai balisage des 6 modes est un <div class="link-wrapper">, pas un
+    // <button> : l'ancien test n'utilisait que des <button> et ne prouvait donc
+    // rien sur la production, où `.disabled` n'a aucun effet.
+    setHTML(
+      '<div class="link-wrapper" id="giveUpButton" aria-disabled="true"></div>' +
+        '<button id="customBtn" disabled></button>'
+    );
   });
 
-  it("re-enables the default #giveUpButton and sets a pointer cursor", () => {
-    enableGiveUpButton();
+  it("signale l'état verrouillé sur un div via aria-disabled", () => {
     const btn = document.getElementById("giveUpButton");
+    setGiveUpEnabled(false);
+    expect(btn.getAttribute("aria-disabled")).toBe("true");
+    expect(btn.style.cursor).toBe("not-allowed");
+  });
+
+  it("lève le verrou visuel et d'accessibilité sur un div", () => {
+    const btn = document.getElementById("giveUpButton");
+    enableGiveUpButton();
+    expect(btn.getAttribute("aria-disabled")).toBe("false");
+    expect(btn.style.cursor).toBe("pointer");
+  });
+
+  it("re-enables a real <button> too", () => {
+    enableGiveUpButton("customBtn");
+    const btn = document.getElementById("customBtn");
     expect(btn.disabled).toBe(false);
     expect(btn.style.cursor).toBe("pointer");
   });

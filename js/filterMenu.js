@@ -29,11 +29,82 @@ const LEGACY_EXPAND = {
   PQ: ["PQ", "PQ2"],
 };
 
-/* Opus ajoutés récemment : activés par défaut même pour un joueur qui a déjà des
-   filtres sauvegardés en localStorage (sinon le nouvel opus reste invisible pour
-   tous les joueurs existants jusqu'à ce qu'ils l'activent à la main). Retirer un
-   code d'ici quand il n'est plus "nouveau". */
-const DEFAULT_ON_NEW = ["PTS"];
+/* Opus ajoutés récemment : activés une fois pour un joueur qui a déjà des filtres
+   sauvegardés en localStorage (sinon le nouvel opus reste invisible pour tous les
+   joueurs existants jusqu'à ce qu'ils l'activent à la main). Retirer un code d'ici
+   quand il n'est plus "nouveau".
+
+   ⚠️ UNE SEULE FOIS par mode, mémorisé dans `<storageKey>_seeded` : réinjecter à
+   chaque chargement rendait l'opus IMPOSSIBLE à décocher — il revenait au
+   rechargement suivant, y compris après un « tout décocher » suivi d'un choix. */
+const DEFAULT_ON_NEW = {
+  /* Opus commun à tous les modes qui l'affichent. */
+  _tous: ["PTS"],
+  /* P1 n'est pas un opus « nouveau » en soi — il existe depuis toujours en
+     Classique, Émoji et Silhouette, où un joueur a pu le décocher exprès. Il
+     n'est nouveau QUE dans Personae (lot du 2026-08-20). Le forcer partout
+     réactiverait un filtre volontairement désactivé ailleurs. */
+  personaeActiveFilters: ["P1"],
+};
+
+/** Opus déjà proposés à ce joueur pour ce mode. */
+function _seededOpus(storageKey) {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(`${storageKey}_seeded`) || "[]"));
+  } catch (_) {
+    return new Set();
+  }
+}
+
+/**
+ * Marque des opus comme déjà proposés, sans rien activer.
+ *
+ * Utilisé pour le joueur qui n'a AUCUN filtre enregistré : tout est actif par
+ * défaut chez lui, donc DEFAULT_ON_NEW n'a rien à lui apporter — mais s'il décoche
+ * ensuite un de ces opus, le seed suivant le lui réactiverait une fois.
+ */
+function _markOpusSeeded(allOpus, storageKey) {
+  const done = _seededOpus(storageKey);
+  const candidats = [...DEFAULT_ON_NEW._tous, ...(DEFAULT_ON_NEW[storageKey] ?? [])];
+  const nouveaux = candidats.filter((c) => allOpus.includes(c) && !done.has(c));
+  if (nouveaux.length === 0) return;
+  nouveaux.forEach((c) => done.add(c));
+  try {
+    localStorage.setItem(`${storageKey}_seeded`, JSON.stringify([...done]));
+  } catch (_) {
+    /* quota dépassé → silencieux */
+  }
+}
+
+/**
+ * Active les opus de DEFAULT_ON_NEW jamais encore proposés à ce joueur, pour ce
+ * mode. Mute `activeOpus` et le renvoie.
+ */
+function _seedNewOpus(activeOpus, allOpus, storageKey) {
+  const key = `${storageKey}_seeded`;
+  const done = _seededOpus(storageKey);
+
+  const candidats = [...DEFAULT_ON_NEW._tous, ...(DEFAULT_ON_NEW[storageKey] ?? [])];
+  const nouveaux = candidats.filter((c) => allOpus.includes(c) && !done.has(c));
+  if (nouveaux.length === 0) return activeOpus;
+
+  for (const code of nouveaux) {
+    done.add(code);
+    if (!activeOpus.includes(code)) activeOpus.push(code);
+  }
+  try {
+    localStorage.setItem(key, JSON.stringify([...done]));
+    // Persister AUSSI la liste : sans ça le seed ne tenait qu'un chargement.
+    // Le drapeau `_seeded` était écrit tout de suite, la liste non — au
+    // rechargement suivant l'opus n'était plus réinjecté (déjà « seedé ») et
+    // disparaissait définitivement pour un joueur qui n'avait touché à aucun
+    // filtre entre-temps.
+    localStorage.setItem(storageKey, JSON.stringify(activeOpus));
+  } catch (_) {
+    /* quota dépassé → silencieux */
+  }
+  return activeOpus;
+}
 
 /**
  * Migre une ancienne liste de filtres larges (["P3", "P4"…])
@@ -69,12 +140,6 @@ function _migrate(saved, allOpus) {
       result.push(code);
     }
     // Unknown codes → ignore
-  }
-  // Opus récents actifs par défaut, même si absents des filtres sauvegardés.
-  if (result.length > 0) {
-    for (const code of DEFAULT_ON_NEW) {
-      if (allOpus.includes(code) && !result.includes(code)) result.push(code);
-    }
   }
   return result.length > 0 ? [...new Set(result)] : null;
 }
@@ -113,7 +178,20 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
   }
 
   const migrated = _migrate(stored, allOpus);
-  let activeOpus = migrated ?? [...allOpus]; // défaut : tout actif
+  // Liste vide = « tout décoché » assumé par le joueur : on n'y réinjecte rien.
+  // Aucun filtre enregistré = joueur neuf, tout est déjà actif : rien à seeder non
+  // plus, mais il faut MARQUER les opus comme déjà proposés. Sans ça, un joueur qui
+  // décochait PTS (ou P1 en Personae) le voyait réapparaître au chargement suivant,
+  // son premier `_seedNewOpus` n'ayant jamais eu lieu.
+  let activeOpus;
+  if (migrated === null) {
+    activeOpus = [...allOpus];
+    _markOpusSeeded(allOpus, storageKey);
+  } else if (migrated.length === 0) {
+    activeOpus = migrated;
+  } else {
+    activeOpus = _seedNewOpus(migrated, allOpus, storageKey);
+  }
   let selectAllBtn = null;
 
   /* ── 2. Bouton toggle global ────────────────────────────────── */
@@ -222,7 +300,8 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     // Restaure le focus sur le bouton toggle seulement si le focus était encore
     // dans le panneau (ex: fermeture via Escape) — pas si l'utilisateur a cliqué
     // ailleurs, pour ne pas lui voler le focus de sa véritable cible.
-    const restoreFocus = dropdown?.classList.contains("open") && dropdown.contains(document.activeElement);
+    const restoreFocus =
+      dropdown?.classList.contains("open") && dropdown.contains(document.activeElement);
     dropdown?.classList.remove("open");
     toggleBtn?.classList.remove("open");
     toggleBtn?.setAttribute("aria-expanded", "false");

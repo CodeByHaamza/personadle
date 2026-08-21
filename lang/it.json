@@ -31,7 +31,10 @@
     "error": "Si è verificato un errore.",
     "admin_gift_received": "🎁 Regalo ricevuto!",
     "tap_continue": "Tocca per continuare",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "expert_enter": "⚡ Modalità Esperto",
+    "expert_leave": "← Modalità normale",
+    "expert_lyrics": "⚡ TESTO"
   },
   "modes": {
     "classic": {
@@ -83,7 +86,15 @@
       "tooltip_persona": "La Persona specifica collegata al personaggio — o la sua forma Ombra.",
       "tooltip_arcana": "La sua Arcana dei Tarocchi, che definisce il suo ruolo simbolico e narrativo.",
       "correct": "✅ Corretto! Era {{name}}!",
-      "giveup_reveal": "❌ La risposta era {{name}}"
+      "giveup_reveal": "❌ La risposta era {{name}}",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "Una citazione. Nessuna categoria, nessun colore, nessun aiuto: solo la battuta e il nome.",
+      "expert_tip_1": "La citazione appare fin dal primo tentativo. È l'unico indizio che avrai.",
+      "expert_tip_2": "Una risposta è giusta o sbagliata. Non si confronta nulla, nulla diventa giallo.",
+      "expert_tip_3": "Se il personaggio pronuncia il proprio nome, viene nascosto. Riappare a fine partita.",
+      "expert_tip_4": "Possono uscire solo personaggi che hanno davvero una citazione.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie Classica normale."
     },
     "emoji": {
       "name": "Emoji",
@@ -110,7 +121,16 @@
       "closing": "✨ Lascia che la tua intuizione ti guidi... e leggi tra gli emoji 🧠📲",
       "not_in_database": "\"{{name}}\" non è nel database.",
       "correct": "✅ Corretto! Era {{name}}!",
-      "giveup_reveal": "Ti sei arreso! La risposta era: {{name}}"
+      "giveup_reveal": "Ti sei arreso! La risposta era: {{name}}",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "Gli stessi emoji, rivelati allo stesso modo — solo che uno mente.",
+      "expert_tips": "💡 Consigli:",
+      "expert_tip_1": "Esattamente un emoji è un'esca, presa in prestito da un altro personaggio.",
+      "expert_tip_2": "Può trovarsi in qualsiasi posizione: all'inizio, in mezzo o alla fine.",
+      "expert_tip_3": "Non cambia durante la partita, e ricaricare non lo riestrae.",
+      "expert_tip_4": "Gli emoji veri vengono mostrati a fine partita.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie Emoji normale."
     },
     "silhouette": {
       "name": "Silhouette",
@@ -135,7 +155,17 @@
       "games_list": "Personaggi da Persona 1, 2 (IS & EP), 3, 4, 5 e P5: The Phantom X inclusi gli spin-off.",
       "closing": "🧠 Osserva le ombre, fidati dei tuoi istinti e diventa il detective di silhouette definitivo!",
       "correct": "🎉 Hai trovato {{name}}!",
-      "giveup_reveal": "❌ La risposta era {{name}}"
+      "giveup_reveal": "❌ La risposta era {{name}}",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "La silhouette resta nascosta. La vedi solo a lampi — e decidi tu quando.",
+      "expert_tips": "💡 Consigli:",
+      "expert_tip_1": "Premi FLASH per mostrare la silhouette per una frazione di secondo.",
+      "expert_tip_2": "Inizi con un lampo, e ogni errore te ne fa guadagnare un altro.",
+      "expert_tip_3": "Ogni errore allunga anche tutti i lampi successivi.",
+      "expert_tip_4": "Qui niente zoom: viene mostrata l'intera silhouette — finché dura il lampo.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie Silhouette normale.",
+      "expert_flash": "⚡ FLASH"
     },
     "alloutattack": {
       "name": "All-Out Attack",
@@ -157,7 +187,14 @@
       "giveup_reveal": "❌ Ti sei arreso! La risposta era: {{name}}",
       "no_characters": "Nessun personaggio disponibile con i filtri attuali.",
       "prev_mode": "← Modalità Emoji",
-      "next_mode": "Modalità Silhouette →"
+      "next_mode": "Modalità Silhouette →",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "La sfocatura non si dirada mai, e il colore è sparito.",
+      "expert_tip_1": "L'immagine resta alla sfocatura massima per tutta la partita. Sbagliare non rivela nulla.",
+      "expert_tip_2": "È anche in bianco e nero: il colore dei capelli e dei vestiti non ti aiuterà.",
+      "expert_tip_3": "Restano la silhouette, la posa e la composizione. È tutto il gioco.",
+      "expert_tip_4": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_5": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie All-Out Attack normale."
     },
     "personae": {
       "name": "Personae",
@@ -184,7 +221,16 @@
       "correct": "✅ Ottima risposta! La Persona di {{name}} era {{persona}}.",
       "giveup_reveal": "❌ Peccato! La Persona di {{name}} era {{persona}}.",
       "prev_mode": "← Modalità Silhouette",
-      "next_mode": "Modalità Musica →"
+      "next_mode": "Modalità Musica →",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_text": "Nessuna immagine. Ricevi il mito dietro la Persona e nomini chi la usa.",
+      "expert_tips": "💡 Consigli:",
+      "expert_tip_1": "Il nome della Persona è nascosto nel testo. Riappare a fine partita.",
+      "expert_tip_2": "Va bene qualsiasi utilizzatore della stessa figura: Orfeo vale per Makoto, Kotone e Aigis.",
+      "expert_tip_3": "Possono uscire solo Persona che hanno davvero una scheda scritta.",
+      "expert_tip_4": "L'illustrazione viene rivelata a fine partita.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha la sua Persona del giorno e le sue statistiche. Non conta per la tua serie Personae normale."
     },
     "music": {
       "name": "Musica",
@@ -212,7 +258,15 @@
       "giveup_reveal": "💡 Era: {{title}}",
       "vocal_label": "🧑‍🎤 Voce: {{name}}",
       "listen_link": "🔗 Ascolta qui",
-      "prev_mode": "← Modalità Personae"
+      "prev_mode": "← Modalità Personae",
+      "expert_goal": "⚡ Modalità Esperto:",
+      "expert_goal_intro": "Nessun audio. Ricevi il testo della canzone, un verso alla volta.",
+      "expert_tip_1": "Parti con un solo verso. Ogni errore ne rivela un altro.",
+      "expert_tip_2": "I versi precedenti restano sullo schermo — puoi rileggerli quando vuoi.",
+      "expert_tip_3": "Il titolo è nascosto nel testo. Riappare alla fine della partita.",
+      "expert_tip_4": "I brani strumentali sono esclusi: qui ogni canzone ha un testo.",
+      "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
+      "expert_tip_6": "L'Esperto ha la sua canzone del giorno e le sue statistiche. Non conta per la tua serie Music normale."
     }
   },
   "game": {
@@ -316,7 +370,10 @@
     "delete_account_confirm_btn": "Elimina definitivamente",
     "delete_account_success": "Il tuo account è stato disattivato. Verrai disconnesso ora.",
     "delete_account_error": "Qualcosa è andato storto. Riprova o contattaci.",
-    "delete_account_login_required": "Accedi per eliminare il tuo account."
+    "delete_account_login_required": "Accedi per eliminare il tuo account.",
+    "expert_title": "⚡ Modalità Esperto",
+    "expert_cols": "Vinte / Giocate · Tasso · Record · Serie",
+    "expert_best_hint": "Meno tentativi in una vittoria"
   },
   "badges": {
     "notification_title": "🎖️ Badge sbloccato!",
@@ -818,7 +875,9 @@
     "msg_clear": "Svuota risolti",
     "msg_clear_kept_active": "{{count}} sfida/e in corso conservate — finiscile prima.",
     "msg_empty": "Nessun messaggio.",
-    "delete_msg": "Elimina"
+    "delete_msg": "Elimina",
+    "server_unreachable": "Impossibile contattare il server. La tua sessione è probabilmente ancora valida: riprova.",
+    "retry": "Riprova"
   },
   "challenge": {
     "challenge_friend": "Sfida un Amico",
@@ -833,7 +892,10 @@
     "active_challenge": "Sfida",
     "notif_challenges_you": "ti sfida!",
     "notif_beat": "Battere",
-    "notif_attempts": "tentativo/i"
+    "notif_attempts": "tentativo/i",
+    "unknown_mode": "La modalità di questa sfida non è disponibile.",
+    "offline": "Devi essere online per accettare una sfida.",
+    "accept_failed": "Impossibile accettare la sfida. Riprova."
   },
   "challenge_result": {
     "title_win": "BRAVO!",

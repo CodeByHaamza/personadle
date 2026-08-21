@@ -31,7 +31,10 @@
     "admin_gift_received": "🎁 Presente recebido!",
     "tap_continue": "Toca para continuar",
     "close": "Fechar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "expert_enter": "⚡ Modo Especialista",
+    "expert_leave": "← Modo normal",
+    "expert_lyrics": "⚡ LETRA"
   },
   "modes": {
     "classic": {
@@ -83,7 +86,15 @@
       "tooltip_persona": "A Persona específica ligada à personagem — ou a sua forma de Shadow.",
       "tooltip_arcana": "O seu Arcano de Tarô, que define o seu papel simbólico e narrativo.",
       "correct": "✅ Correto! Era {{name}}!",
-      "giveup_reveal": "❌ A resposta era {{name}}"
+      "giveup_reveal": "❌ A resposta era {{name}}",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "Uma citação. Sem categorias, sem cores, sem dicas — só a frase e o nome.",
+      "expert_tip_1": "A citação aparece logo na primeira tentativa. É a única pista que terás.",
+      "expert_tip_2": "Uma resposta está certa ou errada. Nada é comparado, nada fica amarelo.",
+      "expert_tip_3": "Se a personagem disser o próprio nome, ele fica escondido. Volta no fim da partida.",
+      "expert_tip_4": "Só podem sair personagens que tenham mesmo uma citação.",
+      "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_6": "O Especialista tem a própria personagem do dia e as próprias estatísticas. Não conta para a tua sequência de Clássico normal."
     },
     "emoji": {
       "name": "Emoji",
@@ -110,7 +121,16 @@
       "closing": "✨ Deixa a tua intuição guiar-te... e lê nas entrelinhas dos emojis 🧠📲",
       "not_in_database": "\"{{name}}\" não está na base de dados.",
       "correct": "✅ Correto! Era {{name}}!",
-      "giveup_reveal": "Desististe! A resposta era: {{name}}"
+      "giveup_reveal": "Desististe! A resposta era: {{name}}",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "Os mesmos emojis, revelados da mesma forma — só que um deles mente.",
+      "expert_tips": "💡 Dicas:",
+      "expert_tip_1": "Exatamente um emoji é um engodo, emprestado de outra personagem.",
+      "expert_tip_2": "Pode estar em qualquer posição: no início, no meio ou no fim.",
+      "expert_tip_3": "Não muda durante a partida, e recarregar não o volta a sortear.",
+      "expert_tip_4": "Os emojis verdadeiros são mostrados no fim da partida.",
+      "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_6": "O Especialista tem a própria personagem do dia e as próprias estatísticas. Não conta para a tua sequência de Emoji normal."
     },
     "silhouette": {
       "name": "Silhueta",
@@ -135,7 +155,17 @@
       "games_list": "Personagens de Persona 1, 2 (IS & EP), 3, 4, 5 e P5: The Phantom X incluindo spin-offs.",
       "closing": "🧠 Observa as sombras, confia no teu instinto e torna-te o derradeiro detetive de silhuetas!",
       "correct": "🎉 Encontraste {{name}}!",
-      "giveup_reveal": "❌ A resposta era {{name}}"
+      "giveup_reveal": "❌ A resposta era {{name}}",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "A silhueta continua escondida. Só a vês em flashes — e és tu que decides quando.",
+      "expert_tips": "💡 Dicas:",
+      "expert_tip_1": "Carrega em FLASH para mostrar a silhueta durante uma fração de segundo.",
+      "expert_tip_2": "Começas com um flash, e cada erro dá-te outro.",
+      "expert_tip_3": "Cada erro também torna todos os flashes seguintes mais longos.",
+      "expert_tip_4": "Aqui não há zoom: a silhueta inteira é mostrada — enquanto o flash durar.",
+      "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_6": "O Especialista tem o seu próprio personagem diário e as suas próprias estatísticas. Não conta para a tua sequência normal de Silhueta.",
+      "expert_flash": "⚡ FLASH"
     },
     "alloutattack": {
       "name": "All-Out Attack",
@@ -157,7 +187,14 @@
       "giveup_reveal": "❌ Desististe! A resposta era: {{name}}",
       "no_characters": "Não há personagens disponíveis com os filtros atuais.",
       "prev_mode": "← Modo Emoji",
-      "next_mode": "Modo Silhueta →"
+      "next_mode": "Modo Silhueta →",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "A desfocagem nunca se dissipa, e a cor desapareceu.",
+      "expert_tip_1": "A imagem fica na desfocagem máxima toda a partida. Errar não revela nada.",
+      "expert_tip_2": "Está também a preto e branco — a cor do cabelo e da roupa não te vai ajudar.",
+      "expert_tip_3": "Restam a silhueta, a pose e a composição. É todo o jogo.",
+      "expert_tip_4": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_5": "O Especialista tem a própria personagem do dia e as próprias estatísticas. Não conta para a tua sequência de All-Out Attack normal."
     },
     "personae": {
       "name": "Personae",
@@ -184,7 +221,16 @@
       "correct": "✅ Bom palpite! A Persona de {{name}} era {{persona}}.",
       "giveup_reveal": "❌ Que pena! A Persona de {{name}} era {{persona}}.",
       "prev_mode": "← Modo Silhueta",
-      "next_mode": "Modo Música →"
+      "next_mode": "Modo Música →",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_text": "Sem imagem nenhuma. Recebes o mito por trás da Persona e nomeias quem a usa.",
+      "expert_tips": "💡 Dicas:",
+      "expert_tip_1": "O nome da Persona está escondido no texto. Volta no fim da partida.",
+      "expert_tip_2": "Serve qualquer portador da mesma figura — Orfeu vale para Makoto, Kotone e Aigis.",
+      "expert_tip_3": "Só podem sair Personas que tenham mesmo uma ficha escrita.",
+      "expert_tip_4": "A ilustração é revelada no fim da partida.",
+      "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
+      "expert_tip_6": "O Especialista tem a própria Persona do dia e as próprias estatísticas. Não conta para a tua sequência de Personae normal."
     },
     "music": {
       "name": "Música",
@@ -212,7 +258,15 @@
       "giveup_reveal": "💡 Era: {{title}}",
       "vocal_label": "🧑‍🎤 Voz: {{name}}",
       "listen_link": "🔗 Ouvir aqui",
-      "prev_mode": "← Modo Personae"
+      "prev_mode": "← Modo Personae",
+      "expert_goal": "⚡ Modo Especialista:",
+      "expert_goal_intro": "Sem áudio. Você recebe a letra da música, um verso de cada vez.",
+      "expert_tip_1": "Você começa com um único verso. Cada erro revela o próximo.",
+      "expert_tip_2": "Os versos anteriores continuam na tela — pode voltar a lê-los quando quiser.",
+      "expert_tip_3": "O título está escondido na letra. Ele reaparece no fim da partida.",
+      "expert_tip_4": "Faixas instrumentais ficam de fora: aqui toda música tem letra.",
+      "expert_tip_5": "Você tem 5 tentativas antes que o botão Desistir seja liberado.",
+      "expert_tip_6": "O Especialista tem a própria música do dia e as próprias estatísticas. Não conta para a sua sequência de Music normal."
     }
   },
   "game": {
@@ -316,7 +370,10 @@
     "delete_account_confirm_btn": "Eliminar permanentemente",
     "delete_account_success": "A tua conta foi desativada. Vais ser desligado agora.",
     "delete_account_error": "Algo correu mal. Tenta novamente ou contacta-nos.",
-    "delete_account_login_required": "Inicia sessão para eliminares a tua conta."
+    "delete_account_login_required": "Inicia sessão para eliminares a tua conta.",
+    "expert_title": "⚡ Modo Especialista",
+    "expert_cols": "Vencidas / Jogadas · Taxa · Recorde · Sequência",
+    "expert_best_hint": "Menos tentativas numa vitória"
   },
   "badges": {
     "notification_title": "🎖️ Emblema Desbloqueado!",
@@ -818,7 +875,9 @@
     "msg_clear": "Limpar resolvidos",
     "msg_clear_kept_active": "{{count}} desafio(s) em andamento foram mantidos — termine-os primeiro.",
     "msg_empty": "Ainda não há mensagens.",
-    "delete_msg": "Eliminar"
+    "delete_msg": "Eliminar",
+    "server_unreachable": "Não foi possível contactar o servidor. A tua sessão provavelmente ainda é válida — tenta de novo.",
+    "retry": "Tentar de novo"
   },
   "settings": {
     "title": "Definições",
@@ -944,7 +1003,10 @@
     "already_active": "Termina primeiro o teu desafio atual.",
     "notif_challenges_you": "desafia-te!",
     "notif_beat": "Bate",
-    "notif_attempts": "tentativa(s)"
+    "notif_attempts": "tentativa(s)",
+    "unknown_mode": "O modo deste desafio está indisponível.",
+    "offline": "Precisas de estar online para aceitar um desafio.",
+    "accept_failed": "Não foi possível aceitar o desafio. Tenta de novo."
   },
   "challenge_result": {
     "title_win": "MUITO BEM!",
