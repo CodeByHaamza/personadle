@@ -286,6 +286,8 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
         formatAndSend($pdo, [], $metric, $myId, $mode, $period, $limit, $offset, 0);
     }
 
+    // Compte des PARTIES, pas des jours — doit rester identique à
+    // api/cron/leaderboard.php, où la décision produit est écrite.
     switch ($metric) {
         case 'wins':
             $scoreExpr = "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)";

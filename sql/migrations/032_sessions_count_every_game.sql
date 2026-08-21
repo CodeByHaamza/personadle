@@ -22,6 +22,8 @@
 -- NULL autorisé : les lignes antérieures à cette migration n'en ont pas, et une
 -- colonne UNIQUE accepte plusieurs NULL en MySQL comme en MariaDB.
 --
+-- ⚠️ ORDRE OBLIGATOIRE : la 031 doit être jouée AVANT (la colonne ci-dessous est
+--    déclarée `AFTER is_expert`, que la 031 crée).
 -- ⚠️ BACKUP avant application — cette migration SUPPRIME une contrainte d'unicité.
 --    Elle n'efface aucune donnée, mais le retour arrière exigerait de dédoublonner
 --    à la main les parties enregistrées entre-temps.
@@ -33,13 +35,16 @@ ALTER TABLE game_sessions
     ADD COLUMN IF NOT EXISTS client_session_id CHAR(36) NULL AFTER is_expert;
 
 ALTER TABLE game_sessions
-    ADD UNIQUE KEY uq_session_client_id (client_session_id);
+    ADD UNIQUE KEY IF NOT EXISTS uq_session_client_id (client_session_id);
 
 -- 2. Libération du plafond d'une partie par jour.
+-- IF EXISTS : la 031 a pu ne pas être jouée (ou l'avoir déjà droppé). Sans la
+-- clause, la migration casse ici en laissant la colonne et l'unique key de
+-- l'étape 1 déjà appliquées — ALTER TABLE n'est pas transactionnel.
 ALTER TABLE game_sessions
-    DROP INDEX uq_session_per_day;
+    DROP INDEX IF EXISTS uq_session_per_day;
 
 -- 3. Le même quadruplet reste l'axe de lecture principal (streak, stats du jour,
 --    anti-triche) : on garde l'index, simplement non unique.
-CREATE INDEX idx_session_per_day
+CREATE INDEX IF NOT EXISTS idx_session_per_day
     ON game_sessions(user_id, mode, played_date, is_expert);

@@ -22,11 +22,28 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $userId = requireAuth();
 
-// ── Rate limiting : 15 requêtes / 15 min par utilisateur ─────────────────────
-// Protège contre les bots qui posteraient des sessions en boucle.
-// La contrainte UNIQUE per (user, mode, date) protège l'intégrité, mais ce
-// rate limit coupe les appels répétitifs avant même d'atteindre la BDD.
-rateLimit('sessions:' . $userId, 15, 15 * 60, 'Too many session submissions. Please wait a few minutes.');
+// ── Rate limiting : 90 requêtes / 15 min par utilisateur ─────────────────────
+// RECALIBRÉ AVEC LA MIGRATION 032 — l'ancienne valeur (15 / 15 min) datait du
+// monde où `uq_session_per_day` plafonnait le jeu à 6 sessions par jour, une par
+// mode : 15 était alors dix fois au-dessus du besoin réel.
+//
+// Depuis que « toutes les parties comptent », c'est ce rate limit qui est devenu
+// le plafond effectif, et il coupait à la 16e partie d'affilée. Les suivantes
+// partaient en file `pendingSessions` (rien n'est perdu), mais elles n'arrivaient
+// en base qu'au rechargement de page suivant, une fois la fenêtre rouverte. En
+// attendant : stats du profil non mises à jour, absence du classement, et badges
+// de volume non débloqués — alors que le joueur a bien joué ses parties. Pire,
+// `pullProfileFromCloud()` écrase le local par le backend (source de vérité) :
+// le compteur RECULAIT à l'écran.
+//
+// 90 / 15 min = 6 parties/minute soutenues. La partie la plus rapide du jeu (un
+// replay Émoji ou AOA dont on connaît déjà la réponse) prend ~10-15 s : aucun
+// joueur réel n'atteint ce plafond, y compris en enchaînant une soirée entière
+// pour chasser les badges. Il reste largement assez bas pour couper un bot.
+//
+// Doit aussi absorber un rattrapage : au retour en ligne, `syncPending()`
+// (js/api.js) rejoue toute la file d'un coup, une requête par session.
+rateLimit('sessions:' . $userId, 90, 15 * 60, 'Too many session submissions. Please wait a few minutes.');
 $data   = getJsonBody();
 
 // ── Validation ────────────────────────────────────────────────────────────────
@@ -44,7 +61,14 @@ $isExpert    = filter_var($data['is_expert'] ?? false, FILTER_VALIDATE_BOOLEAN);
 // Clé d'idempotence générée par le client (migration 032) : rejouer une session
 // déjà enregistrée renvoie 409 au lieu de l'insérer une seconde fois.
 $clientSessionId = trim((string) ($data['client_session_id'] ?? ''));
-if ($clientSessionId !== '' && !preg_match('/^[0-9a-fA-F-]{8,36}$/', $clientSessionId)) {
+// Groupes hexadécimaux d'au moins 4 caractères séparés par des tirets : couvre
+// l'UUID v4 (8-4-4-4-12) et le repli de newId() (js/gameCore.js), sans accepter
+// une chaîne dégénérée comme "--------" que `[0-9a-fA-F-]{8,36}` laissait passer.
+if ($clientSessionId !== ''
+    && !preg_match('/^[0-9a-f]{4,}(-[0-9a-f]{4,})*$/i', $clientSessionId)) {
+    jsonError('Invalid client_session_id', 400);
+}
+if (strlen($clientSessionId) > 36) {
     jsonError('Invalid client_session_id', 400);
 }
 
@@ -69,7 +93,14 @@ if (!in_array($result, ['win', 'giveup'], true)) {
 }
 // Le Mode Expert révèle un vers par essai raté : une chanson de 30 vers autorise
 // donc jusqu'à 30 essais, bien au-delà du plafond de 20 des modes normaux.
-$maxAttempts = $isExpert ? 40 : 20;
+//
+// 200 et non 40 : en Classique Expert le joueur n'a AUCUN retour (ni grille, ni
+// indice progressif) sur 180 candidats — dépasser 40 essais y est un scénario de
+// jeu normal, pas un abus. Or `syncPending()` (js/api.js) jette silencieusement
+// toute session refusée en 400 : la partie était perdue sans que rien ne le dise.
+// La borne reste utile contre une valeur absurde, elle ne doit juste pas tomber
+// sous la taille du plus grand pool (184).
+$maxAttempts = $isExpert ? 200 : 20;
 if ($attempts < 0 || $attempts > $maxAttempts) {
     jsonError('Invalid attempts value');
 }

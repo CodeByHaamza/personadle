@@ -47,18 +47,42 @@ const DEFAULT_ON_NEW = {
   personaeActiveFilters: ["P1"],
 };
 
+/** Opus déjà proposés à ce joueur pour ce mode. */
+function _seededOpus(storageKey) {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(`${storageKey}_seeded`) || "[]"));
+  } catch (_) {
+    return new Set();
+  }
+}
+
+/**
+ * Marque des opus comme déjà proposés, sans rien activer.
+ *
+ * Utilisé pour le joueur qui n'a AUCUN filtre enregistré : tout est actif par
+ * défaut chez lui, donc DEFAULT_ON_NEW n'a rien à lui apporter — mais s'il décoche
+ * ensuite un de ces opus, le seed suivant le lui réactiverait une fois.
+ */
+function _markOpusSeeded(allOpus, storageKey) {
+  const done = _seededOpus(storageKey);
+  const candidats = [...DEFAULT_ON_NEW._tous, ...(DEFAULT_ON_NEW[storageKey] ?? [])];
+  const nouveaux = candidats.filter((c) => allOpus.includes(c) && !done.has(c));
+  if (nouveaux.length === 0) return;
+  nouveaux.forEach((c) => done.add(c));
+  try {
+    localStorage.setItem(`${storageKey}_seeded`, JSON.stringify([...done]));
+  } catch (_) {
+    /* quota dépassé → silencieux */
+  }
+}
+
 /**
  * Active les opus de DEFAULT_ON_NEW jamais encore proposés à ce joueur, pour ce
  * mode. Mute `activeOpus` et le renvoie.
  */
 function _seedNewOpus(activeOpus, allOpus, storageKey) {
   const key = `${storageKey}_seeded`;
-  let done;
-  try {
-    done = new Set(JSON.parse(localStorage.getItem(key) || "[]"));
-  } catch (_) {
-    done = new Set();
-  }
+  const done = _seededOpus(storageKey);
 
   const candidats = [...DEFAULT_ON_NEW._tous, ...(DEFAULT_ON_NEW[storageKey] ?? [])];
   const nouveaux = candidats.filter((c) => allOpus.includes(c) && !done.has(c));
@@ -155,10 +179,19 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
 
   const migrated = _migrate(stored, allOpus);
   // Liste vide = « tout décoché » assumé par le joueur : on n'y réinjecte rien.
-  let activeOpus =
-    migrated === null || migrated.length === 0
-      ? (migrated ?? [...allOpus])
-      : _seedNewOpus(migrated, allOpus, storageKey);
+  // Aucun filtre enregistré = joueur neuf, tout est déjà actif : rien à seeder non
+  // plus, mais il faut MARQUER les opus comme déjà proposés. Sans ça, un joueur qui
+  // décochait PTS (ou P1 en Personae) le voyait réapparaître au chargement suivant,
+  // son premier `_seedNewOpus` n'ayant jamais eu lieu.
+  let activeOpus;
+  if (migrated === null) {
+    activeOpus = [...allOpus];
+    _markOpusSeeded(allOpus, storageKey);
+  } else if (migrated.length === 0) {
+    activeOpus = migrated;
+  } else {
+    activeOpus = _seedNewOpus(migrated, allOpus, storageKey);
+  }
   let selectAllBtn = null;
 
   /* ── 2. Bouton toggle global ────────────────────────────────── */

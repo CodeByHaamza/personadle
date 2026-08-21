@@ -917,7 +917,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // ── Daily reset ──
-  checkResetOnLoad("lastPlayedDate_AllOut", "AllOut", () => {
+  checkResetOnLoad(EXPERT.key("lastPlayedDate_AllOut"), STATS_SCOPE, () => {
     localStorage.removeItem(EXPERT.key("aoaTarget"));
     localStorage.removeItem(EXPERT.key("aoaAttempts"));
     localStorage.removeItem(EXPERT.key("aoaGameOver"));

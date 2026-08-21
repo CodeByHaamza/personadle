@@ -113,6 +113,11 @@ let autocompleteBound = false;
 // seule la streak reste journalière, et elle se calcule ailleurs.
 const STATS_SCOPE = EXPERT.statsKey;
 
+// Scopée Expert comme tout le reste de l'état : partagée, ouvrir une variante un
+// nouveau jour marquait la journée comme faite pour l'AUTRE, qui restituait alors
+// la partie terminée de la veille sans jamais tirer la cible du jour.
+const LAST_PLAYED_KEY = EXPERT.key("lastPlayedDate_Emoji");
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER / CHARACTER POOL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -479,7 +484,13 @@ function resetGame() {
   if (nav) nav.style.display = "none";
 
   sessionStartTime = Date.now();
-  localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
+  localStorage.setItem(LAST_PLAYED_KEY, parisDateKey());
+  // Nouvelle cible = nouvelle partie. Le réarmement vit ici et non dans le seul
+  // handler Replay : resetGame() est AUSSI le chemin du reset de minuit, du retour
+  // d'onglet et du changement de filtres — trois chemins où il était oublié, donc
+  // où `isGameLogged()` restait vrai avec l'identifiant de la veille et où la
+  // partie n'était plus jamais enregistrée.
+  startGame(STATS_SCOPE);
 
   document.getElementById("emojiDisplay").innerHTML = "";
   document.getElementById("winMessage").textContent = "";
@@ -615,15 +626,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(EXPERT.key("emojiGameOver"));
     localStorage.removeItem(EXPERT.key("emojiForceReveal"));
     localStorage.removeItem(EXPERT.key("emojiWin"));
-    // Aligne Emoji sur les 5 autres modes : le replay efface aussi la garde
-    // stats du jour, pour qu'une victoire en replay soit envoyée au backend
-    // (qui upgrade un éventuel giveup→win — décision produit 2026-07-17).
-    startGame(STATS_SCOPE);
+    // Le réarmement de l'enregistrement est dans resetGame() — commun aux quatre
+    // chemins de nouvelle partie (Replay, minuit, retour d'onglet, filtres).
     resetGame();
   });
 
   // ── Daily reset ──
-  checkResetOnLoad("lastPlayedDate_Emoji", "Emoji", () => {
+  checkResetOnLoad(EXPERT.key("lastPlayedDate_Emoji"), STATS_SCOPE, () => {
     localStorage.removeItem(EXPERT.key("targetEmoji"));
     localStorage.removeItem(EXPERT.key("attemptsEmoji"));
     localStorage.removeItem(EXPERT.key("emojiGameOver"));
@@ -636,7 +645,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scheduleDailyReset = () => {
     clearTimeout(window.__emojiResetTimer);
     window.__emojiResetTimer = setTimeout(() => {
-      localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
+      localStorage.setItem(LAST_PLAYED_KEY, parisDateKey());
       resetGame();
       location.reload();
     }, msUntilNextParisMidnight() + 500);
@@ -650,10 +659,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // et provoquait des rechargements intempestifs.
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) return;
-    const stored = localStorage.getItem("lastPlayedDate_Emoji");
+    const stored = localStorage.getItem(LAST_PLAYED_KEY);
     if (stored && stored !== parisDateKey()) {
       // Nouveau jour détecté pendant que l'onglet était en arrière-plan
-      localStorage.setItem("lastPlayedDate_Emoji", parisDateKey());
+      localStorage.setItem(LAST_PLAYED_KEY, parisDateKey());
       resetGame();
       location.reload();
     } else {

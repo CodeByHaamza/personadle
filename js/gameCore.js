@@ -125,13 +125,31 @@ const _gameIdKey = (scope) => `gameId_${scope}`;
 const _gameLoggedKey = (scope) => `gameLogged_${scope}`;
 
 /**
+ * Identifiant unique de partie.
+ *
+ * `crypto.randomUUID()` n'existe QUE en contexte sécurisé (https ou localhost) et
+ * seulement depuis Safari 15.4 : sur http://<ip-du-LAN> — le cas de test mobile le
+ * plus courant — ou sur un vieil iPhone, l'appel lève et `startGame()` casse au tout
+ * début du chargement du mode, donc le mode entier.
+ * Rien ici n'exige d'unicité cryptographique : la clé sert d'identité de partie et
+ * de clé d'idempotence, un repli horodaté + aléatoire suffit largement.
+ */
+function newId() {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}-${Math.random().toString(16).slice(2, 10)}`;
+  }
+}
+
+/**
  * Démarre une nouvelle partie : nouvel identifiant, enregistrement réarmé.
  * À appeler au tirage de la cible (nouveau jour, Replay, changement de filtres).
  *
  * @param {string} scope Clé de stats du mode, Expert compris ("Classic", "ClassicExpert"…)
  */
 export function startGame(scope) {
-  localStorage.setItem(_gameIdKey(scope), crypto.randomUUID());
+  localStorage.setItem(_gameIdKey(scope), newId());
   localStorage.removeItem(_gameLoggedKey(scope));
 }
 
@@ -146,7 +164,7 @@ export function startGame(scope) {
 export function currentGameId(scope) {
   let id = localStorage.getItem(_gameIdKey(scope));
   if (!id) {
-    id = crypto.randomUUID();
+    id = newId();
     localStorage.setItem(_gameIdKey(scope), id);
   }
   return id;
@@ -266,7 +284,10 @@ export function maskTerms(terms, text, token = "[?]") {
       .replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // échappe les métacaractères regex
       .replace(/\\?[!?.,]/g, "[!?.,]?") // ponctuation interne optionnelle
       .replace(/\s+/g, "\\s+"); // espaces variables
-    out = out.replace(new RegExp(`(^|[^\\w'])(${pattern})(?=$|[^\\w'])`, "gi"), `$1${token}`);
+    // Frontière = tout ce qui n'est pas une lettre/chiffre. L'apostrophe en faisait
+    // partie : « Io » n'était donc PAS masqué dans « Io's blessing », et la fiche
+    // donnait la réponse dès la première ligne — le cas exact que le masquage vise.
+    out = out.replace(new RegExp(`(^|[^\\w])(${pattern})(?=$|[^\\w])`, "gi"), `$1${token}`);
   }
   return out;
 }
@@ -497,31 +518,40 @@ export function setupDailyReset(onReset) {
 
 /**
  * Checks at page load whether a new Paris day has started since last visit.
- * If yes, cleans up yesterday's stats key, saves today's date, and triggers
- * the mode-specific reset callback.
+ * If yes, arms a fresh game, saves today's date, and triggers the mode-specific
+ * reset callback.
  *
- * @param {string}   lastPlayedKey  - localStorage key storing the last-played date
- *                                    (e.g. "lastPlayedDate_Classic")
- * @param {string}   statsModeKey   - Mode identifier used in the stats key
- *                                    (e.g. "Classic" → "statsLogged_Classic_YYYY-MM-DD")
+ * ⚠️ `lastPlayedKey` DOIT être scopé par mode Expert (`EXPERT.key(...)`) : tout le
+ * reste de l'état de partie l'est. Avec une clé partagée, ouvrir la variante Expert
+ * un nouveau jour écrit la date du jour et ne reset que SES clés — la variante
+ * normale se croit alors à jour et restitue la partie terminée de la veille, sans
+ * jamais retirer la cible du jour.
+ *
+ * Le réarmement (`startGame`) vit ICI et non dans les callbacks : c'est le seul
+ * point commun aux 6 modes. Laissé à chaque `onReset`, il avait déjà été oublié en
+ * Émoji — dont la partie quotidienne n'était donc plus jamais enregistrée à partir
+ * du 2e jour (`isGameLogged()` restait vrai avec l'identifiant de la veille).
+ *
+ * @param {string}   lastPlayedKey  - localStorage key storing the last-played date,
+ *                                    scopée Expert (e.g. "lastPlayedDate_Classic")
+ * @param {string}   statsScope     - Portée d'enregistrement du mode, Expert comprise
+ *                                    (`EXPERT.statsKey` — "Classic", "ClassicExpert"…)
  * @param {Function} onReset        - Callback to run when a new day is detected
  */
-export function checkResetOnLoad(lastPlayedKey, statsModeKey, onReset) {
+export function checkResetOnLoad(lastPlayedKey, statsScope, onReset) {
   const storedDate = localStorage.getItem(lastPlayedKey);
   const today = parisDateKey();
 
   if (storedDate !== today) {
-    console.log(`📅 New day detected → auto-reset (${statsModeKey})`);
+    console.log(`📅 New day detected → auto-reset (${statsScope})`);
 
-    // Remove yesterday's stats flag so it can be re-logged today
-    if (storedDate) {
-      localStorage.removeItem(`statsLogged_${statsModeKey}_${storedDate}`);
-    }
+    // Nouvelle journée = nouvelle partie : identifiant neuf, enregistrement réarmé.
+    startGame(statsScope);
 
     localStorage.setItem(lastPlayedKey, today);
     onReset();
   } else {
-    console.log(`📅 Same day, no reset needed (${statsModeKey})`);
+    console.log(`📅 Same day, no reset needed (${statsScope})`);
   }
 }
 
@@ -652,7 +682,7 @@ export function buildGameSession({
     // Passer markGameLogged() ici plutôt que de laisser le défaut : l'identifiant
     // est alors stable pour toute la partie, donc un ré-enregistrement après perte
     // du flag local (autre onglet, nettoyage navigateur) est refusé côté base.
-    client_session_id: clientSessionId || crypto.randomUUID(),
+    client_session_id: clientSessionId || newId(),
   };
 }
 

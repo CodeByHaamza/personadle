@@ -5,7 +5,10 @@ import { songs } from "../musicsMode/database/songs.js";
 import { personaeCharacters } from "../personaeMode/database/personaeCharacters.js";
 import dailyPools from "../api/data/daily_pools.json";
 import { getDailyTarget } from "../js/gameCore.js";
-import { expertWielders, expertLoreEntries } from "../personaeMode/database/expert_lore/wielders.js";
+import {
+  expertWielders,
+  expertLoreEntries,
+} from "../personaeMode/database/expert_lore/wielders.js";
 import loreEn from "../personaeMode/database/expert_lore/en.json";
 import loreFr from "../personaeMode/database/expert_lore/fr.json";
 import loreEs from "../personaeMode/database/expert_lore/es.json";
@@ -21,7 +24,9 @@ const LANGS = ["en", "fr", "es", "de", "it", "pt"];
 // Une fuite, c'est le terme présent en tant que MOT — pas en sous-chaîne : « Christ »
 // dans « Christianity » n'en est pas une, et maskTerms() ne le masque pas non plus.
 const containsWord = (text, term) =>
-  new RegExp(`(^|[^\\w'])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^\\w'])`, "i").test(text);
+  new RegExp(`(^|[^\\w'])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^\\w'])`, "i").test(
+    text
+  );
 const entries = (lore) => Object.entries(lore).filter(([k]) => !k.startsWith("_"));
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -43,7 +48,7 @@ describe("maskTerms", () => {
 
   it("masque plusieurs termes en une passe", () => {
     expect(maskTerms(["Hades", "Pluto"], "Hades, whom Rome called Pluto")).toBe(
-      "[?], whom Rome called [?]",
+      "[?], whom Rome called [?]"
     );
   });
 
@@ -52,13 +57,28 @@ describe("maskTerms", () => {
     expect(maskTerms(["Io"], "Ionian sea"), "pas de coupe en milieu de mot").toBe("Ionian sea");
   });
 
+  it("masque un terme suivi d'un possessif — l'apostrophe est une frontière", () => {
+    // L'apostrophe comptait comme lettre : « Io » n'était PAS masqué dans « Io's »,
+    // et la fiche donnait la réponse dès la première ligne. Les fiches de lore
+    // anglaises sont pleines de « Hades' realm » / « Io's transformation ».
+    expect(maskTerms(["Io"], "Io's transformation into a heifer")).toBe(
+      "[?]'s transformation into a heifer"
+    );
+    expect(maskTerms(["Hades"], "Hades' realm of the dead")).toBe("[?]' realm of the dead");
+  });
+
+  it("ne coupe toujours pas au milieu d'un mot après ce changement", () => {
+    expect(maskTerms(["Io"], "Ionian sea")).toBe("Ionian sea");
+    expect(maskTerms(["Mask"], "Beneath the Masked ball")).toBe("Beneath the Masked ball");
+  });
+
   it("ignore les termes d'une seule lettre", () => {
     expect(maskTerms(["a"], "a persona named a")).toBe("a persona named a");
   });
 
   it("accepte un token personnalisé", () => {
     expect(maskTerms(["Venus"], "Venus rose from the foam", "[nom]")).toBe(
-      "[nom] rose from the foam",
+      "[nom] rose from the foam"
     );
   });
 
@@ -81,7 +101,7 @@ describe("expert_lyrics", () => {
     expect(
       Object.entries(expertLyrics)
         .filter(([, v]) => v.length < 2)
-        .map(([t]) => t),
+        .map(([t]) => t)
     ).toEqual([]);
   });
 
@@ -155,7 +175,10 @@ describe("pool music_expert", () => {
     let identiques = 0;
     for (let d = 1; d <= 28; d++) {
       const date = `2026-09-${String(d).padStart(2, "0")}`;
-      if (getDailyTarget(pool, "MusicExpert", date, "42").titre === getDailyTarget(songs, "Music", date, "42").titre) {
+      if (
+        getDailyTarget(pool, "MusicExpert", date, "42").titre ===
+        getDailyTarget(songs, "Music", date, "42").titre
+      ) {
         identiques++;
       }
     }
@@ -172,11 +195,19 @@ describe("pool music_expert", () => {
 describe("expert_lore", () => {
   it.each(LANGS)("%s : chaque clé correspond à une persona existante", (lang) => {
     const noms = new Set(personaeCharacters.map((p) => p.persona));
-    expect(entries(loadLore(lang)).map(([k]) => k).filter((k) => !noms.has(k))).toEqual([]);
+    expect(
+      entries(loadLore(lang))
+        .map(([k]) => k)
+        .filter((k) => !noms.has(k))
+    ).toEqual([]);
   });
 
   it("couvre exactement les mêmes personas dans toutes les langues", () => {
-    const [ref, ...rest] = LANGS.map((l) => entries(loadLore(l)).map(([k]) => k).sort());
+    const [ref, ...rest] = LANGS.map((l) =>
+      entries(loadLore(l))
+        .map(([k]) => k)
+        .sort()
+    );
     for (const other of rest) expect(other).toEqual(ref);
   });
 
@@ -265,9 +296,11 @@ describe("expert_lore", () => {
     // Décision produit 2026-08-15 : rien dans le texte ne distingue « Orpheus » de
     // « Orpheus Picaro », donc refuser Kotone parce que la fiche est keyée sur
     // l'entrée masculine serait perçu comme un bug.
-    expect(expertWielders("Orpheus ( Male )", personaeCharacters).sort()).toEqual(
-      ["Aigis", "Kotone Shiomi", "Makoto Yuki"],
-    );
+    expect(expertWielders("Orpheus ( Male )", personaeCharacters).sort()).toEqual([
+      "Aigis",
+      "Kotone Shiomi",
+      "Makoto Yuki",
+    ]);
     expect(expertLoreEntries("Orpheus ( Male )", personaeCharacters)).toHaveLength(5);
   });
 
@@ -292,16 +325,19 @@ describe("expert_lore", () => {
     expect(noms.every((n) => n === "Hermes")).toBe(true);
   });
 
-  it.each(LANGS)("%s : chaque fiche se nomme, pour que la révélation montre quelque chose", (lang) => {
-    // Le texte doit citer la persona sous AU MOINS une de ses formes (le FR dit
-    // « Maïa », l'EN « Maia ») : sans ça, rien n'est masqué pendant la partie et la
-    // révélation de fin (victoire ou abandon) n'affiche rien de nouveau.
-    for (const [nom, { text, mask }] of entries(loadLore(lang))) {
-      const cite = mask.some((m) => text.toLowerCase().includes(m.toLowerCase()));
-      expect(cite, `${nom} (${lang}) : aucune forme du nom dans le texte`).toBe(true);
-      expect(maskTerms(mask, text), `${nom} (${lang})`).not.toBe(text);
+  it.each(LANGS)(
+    "%s : chaque fiche se nomme, pour que la révélation montre quelque chose",
+    (lang) => {
+      // Le texte doit citer la persona sous AU MOINS une de ses formes (le FR dit
+      // « Maïa », l'EN « Maia ») : sans ça, rien n'est masqué pendant la partie et la
+      // révélation de fin (victoire ou abandon) n'affiche rien de nouveau.
+      for (const [nom, { text, mask }] of entries(loadLore(lang))) {
+        const cite = mask.some((m) => text.toLowerCase().includes(m.toLowerCase()));
+        expect(cite, `${nom} (${lang}) : aucune forme du nom dans le texte`).toBe(true);
+        expect(maskTerms(mask, text), `${nom} (${lang})`).not.toBe(text);
+      }
     }
-  });
+  );
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -315,7 +351,11 @@ describe("expertContext", () => {
 
   it("mode normal : clés historiques intactes", () => {
     stub("");
-    const ctx = expertContext({ prefix: "classicExpert", statsKey: "Classic", hashMode: "Classic" });
+    const ctx = expertContext({
+      prefix: "classicExpert",
+      statsKey: "Classic",
+      hashMode: "Classic",
+    });
     expect(ctx.isExpert).toBe(false);
     // Une partie normale en cours ne doit jamais être perdue par ce câblage.
     expect(ctx.key("target")).toBe("target");
@@ -325,7 +365,11 @@ describe("expertContext", () => {
 
   it("mode Expert : clés cloisonnées et hash distinct", () => {
     stub("?expert=1");
-    const ctx = expertContext({ prefix: "classicExpert", statsKey: "Classic", hashMode: "Classic" });
+    const ctx = expertContext({
+      prefix: "classicExpert",
+      statsKey: "Classic",
+      hashMode: "Classic",
+    });
     expect(ctx.isExpert).toBe(true);
     expect(ctx.key("target")).toBe("classicExpert_target");
     expect(ctx.statsKey).toBe("ClassicExpert");
@@ -353,7 +397,9 @@ describe("expertContext", () => {
       Music: "MusicExpert",
     };
     for (const [normal, expert] of Object.entries(attendu)) {
-      expect(expertContext({ prefix: "p", statsKey: normal, hashMode: normal }).hashMode).toBe(expert);
+      expect(expertContext({ prefix: "p", statsKey: normal, hashMode: normal }).hashMode).toBe(
+        expert
+      );
     }
   });
 });

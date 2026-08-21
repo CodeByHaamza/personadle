@@ -188,10 +188,11 @@ function findByChallengeKey(key) {
  */
 function expertPool(pool) {
   if (!EXPERT.isExpert) return pool;
-  const filtre = pool.filter((c) => expertLore[c.persona]);
-  // Repli défensif : si les fiches ne sont pas encore chargées, mieux vaut le pool
-  // complet qu'un pool vide, qui ferait planter le tirage.
-  return filtre.length ? filtre : pool;
+  // Pas de repli sur le pool complet si les fiches manquent : il tirait dans 173
+  // entrées là où le serveur en attend 159, donc une cible DIFFÉRENTE de celle
+  // attendue — partie sans indice, et `anti_cheat` logué à chaque enregistrement.
+  // Le cas « fiches absentes » est traité une bonne fois à l'init (loadExpertLore).
+  return pool.filter((c) => expertLore[c.persona]);
 }
 
 /**
@@ -292,10 +293,20 @@ function pickCharacter(random = false) {
 
   // En Expert l'image est l'inverse d'un indice : elle EST la réponse. Elle n'est
   // posée qu'à la révélation finale (showVictory).
-  personaImg.src = EXPERT.isExpert ? "" : `./database/img/${target.image}.webp`;
-  if (EXPERT.isExpert) setPersonaBoxVisible(false);
-  if (EXPERT.isExpert) renderExpertLore();
-  personaImg.alt = target.persona;
+  // En Expert, ni image ni alt : `src=""` déclenche une requête vers l'URL du
+  // document sur certains moteurs, et `alt = target.persona` posait la RÉPONSE en
+  // clair dans le DOM — le mode Classique Expert refuse justement de construire
+  // les attributs pour cette raison (« les masquer en CSS les laisserait lisibles
+  // dans l'inspecteur »). Même règle ici.
+  if (EXPERT.isExpert) {
+    personaImg.removeAttribute("src");
+    personaImg.alt = "";
+    setPersonaBoxVisible(false);
+    renderExpertLore();
+  } else {
+    personaImg.src = `./database/img/${target.image}.webp`;
+    personaImg.alt = target.persona;
+  }
 
   localStorage.setItem(EXPERT.key("personaeTarget"), JSON.stringify(target));
   localStorage.setItem(EXPERT.key("personaeAttempts"), attempts);
@@ -822,6 +833,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   // restreindre le pool aux personas ayant un texte à afficher.
   await loadExpertLore();
 
+  // Aucune fiche chargée (404, réseau coupé pendant le fetch) : il n'y a pas de
+  // partie Expert possible. On retombe sur le mode normal plutôt que de jouer une
+  // partie muette dont la cible diverge de celle attendue par le serveur.
+  if (EXPERT.isExpert && Object.keys(expertLore).length === 0) {
+    console.error("[personae] fiches de lore indisponibles → repli sur le mode normal");
+    window.location.replace("personae.html");
+    return;
+  }
+
   // ── Filtre opus — panneau déroulant ──
   const _filterApi = initFilterMenu("personaeActiveFilters", ALL_OPUS, (newActive) => {
     activeFilters = newActive;
@@ -860,12 +880,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       filteredCharacters = getFilteredCharacters();
       attempts = storedAttempts;
       giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
-      // En Expert l'image est l'inverse d'un indice : elle EST la réponse. Elle n'est
-  // posée qu'à la révélation finale (showVictory).
-  personaImg.src = EXPERT.isExpert ? "" : `./database/img/${target.image}.webp`;
-  if (EXPERT.isExpert) setPersonaBoxVisible(false);
-  if (EXPERT.isExpert) renderExpertLore();
-      personaImg.alt = target.persona;
+      // En Expert l'image est l'inverse d'un indice : elle EST la réponse. Elle
+      // n'est posée qu'à la révélation finale (showVictory). Cf. pickCharacter().
+      if (EXPERT.isExpert) {
+        personaImg.removeAttribute("src");
+        personaImg.alt = "";
+        setPersonaBoxVisible(false);
+        renderExpertLore();
+      } else {
+        personaImg.src = `./database/img/${target.image}.webp`;
+        personaImg.alt = target.persona;
+      }
 
       if (attempts >= maxAttempts) {
         setGiveUpEnabled(true);
@@ -889,7 +914,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ── Daily reset ──
-  checkResetOnLoad("lastPlayedDate_Personae", "Personae", () => {
+  checkResetOnLoad(EXPERT.key("lastPlayedDate_Personae"), STATS_SCOPE, () => {
     resetBtn.click();
   });
   setupDailyReset(() => {

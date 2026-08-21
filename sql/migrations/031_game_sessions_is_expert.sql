@@ -28,12 +28,15 @@ ALTER TABLE game_sessions
 
 -- 2. Refonte de l'anti-doublon pour autoriser 1 partie normale + 1 partie Expert
 --    par mode et par jour. DROP puis ADD : MySQL n'a pas d'ALTER INDEX.
+-- IF EXISTS : la 032 droppe le même index. Sans la clause, rejouer la 031 après
+-- coup (ou sur un schéma qui a dérivé) casse à mi-parcours, hors transaction —
+-- ALTER TABLE n'est pas transactionnel en MySQL/MariaDB.
 ALTER TABLE game_sessions
-    DROP INDEX uq_session_per_day;
+    DROP INDEX IF EXISTS uq_session_per_day;
 
 ALTER TABLE game_sessions
-    ADD UNIQUE KEY uq_session_per_day (user_id, mode, played_date, is_expert);
+    ADD UNIQUE KEY IF NOT EXISTS uq_session_per_day (user_id, mode, played_date, is_expert);
 
 -- 3. Index de lecture — le classement et les stats filtrent désormais sur is_expert.
-CREATE INDEX idx_game_sessions_user_mode_expert
+CREATE INDEX IF NOT EXISTS idx_game_sessions_user_mode_expert
     ON game_sessions(user_id, mode, is_expert);

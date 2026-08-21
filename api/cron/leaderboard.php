@@ -87,6 +87,12 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
 {
     $modeFilter = ($mode === 'all') ? '' : 'AND gs.mode = :mode';
 
+    // ── Le classement compte des PARTIES, volontairement ─────────────────────
+    // Décision produit (Hamza) : « toutes les parties comptent » vaut aussi pour le
+    // classement. 100 victoires jouées dans la journée valent 100 — compter des
+    // jours distincts pénaliserait le joueur assidu, qui est précisément celui que
+    // le classement doit récompenser. Les tris par ratio et par streak (TODO.md)
+    // donneront les autres angles de lecture.
     $scoreExpr = match ($metric) {
         'wins'    => "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)",
         'winrate' => "IF(COUNT(*) >= 5, ROUND(SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END) / COUNT(*) * 100, 1), NULL)",

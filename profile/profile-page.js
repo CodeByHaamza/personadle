@@ -34,6 +34,7 @@ import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/str
 import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
+import { modeLabel } from "../js/gameCore.js";
 import { AVATAR_GROUPS } from "./avatars_data.js";
 import { getStreakTier, formatSongTime, normalizeAvatarPath } from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
@@ -466,7 +467,7 @@ function _applyCloudToUI() {
   // ── Stats ─────────────────────────────────────────────────
   renderStats();
   renderModeStats();
-  renderExpertStats();
+    renderExpertStats();
 
   // ── Musique de profil ─────────────────────────────────────
   // profileMusicId = valeur cloud (undefined = pas encore sync, null = pas de song, string = fichier)
@@ -728,28 +729,43 @@ function renderModeStats() {
  * Silencieux si l'appel échoue ou si le joueur est déconnecté : c'est un bonus
  * d'affichage, il ne doit jamais casser la page profil.
  */
+/**
+ * Réponse `/user/{id}/stats` mémoïsée le temps du chargement de page.
+ *
+ * renderExpertStats() est appelée depuis cinq endroits (montage, pull cloud,
+ * i18n prêt…) parce que les libellés dépendent d'i18n. renderModeStats(), son
+ * voisin, est local et gratuit ; celle-ci fait un aller-retour réseau et un
+ * GROUP BY + un recalcul de streak par mode. Sans cache : cinq fois.
+ */
+let _expertStatsPromise = null;
+
 async function renderExpertStats() {
   const container = document.getElementById("expertStatsContainer");
   if (!container) return;
   container.innerHTML = "";
 
-  const userId = window._personadleApi ? JSON.parse(localStorage.getItem("user") || "null")?.id : null;
-  if (!userId) return;
+  // `playerUserId` est la clé écrite par updateAuthUI() (js/auth.js) — c'est la
+  // seule source de l'id côté client. `localStorage["user"]` n'existe pas et n'a
+  // jamais existé dans ce dépôt : la section entière ne s'affichait donc jamais.
+  const userId = window._currentUser?.id ?? localStorage.getItem("playerUserId");
+  if (!userId || !window._personadleApi) return;
 
   let modes = [];
   try {
-    const res = await window._personadleApi.stats.get(userId);
+    _expertStatsPromise ??= window._personadleApi.stats.get(userId);
+    const res = await _expertStatsPromise;
     modes = res?.stats?.expert_by_mode ?? [];
   } catch {
+    _expertStatsPromise = null; // un échec ne doit pas être mis en cache
     return; // hors ligne / non connecté — on n'affiche simplement rien
   }
   if (!modes.length) return;
 
   const rows = modes
     .map((m) => {
-      // MODE_META est clé sur le libellé canonique ("Music"), l'API renvoie la
-      // clé backend ("music") — d'où la normalisation par première lettre.
-      const label = m.mode.charAt(0).toUpperCase() + m.mode.slice(1);
+      // modeLabel() et non une capitale à la main : « alloutattack » donnait
+      // « Alloutattack ». Vocabulaire des modes = gameCore (CLAUDE.md §8).
+      const label = modeLabel(m.mode);
       const rate = m.games > 0 ? Math.round((m.wins / m.games) * 100) : 0;
       const best = m.best_attempts == null ? "—" : m.best_attempts;
       return `
@@ -1216,7 +1232,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1. Charger le profil et initialiser l'UI
   initProfile();
   renderModeStats();
-  renderExpertStats();
+    renderExpertStats();
 
   // 1b. Sync complet cloud → local (le backend est la source de vérité).
   // Chaîne : pull → apply UI → re-init titres avec session valide → sync badges local→back.
@@ -1257,7 +1273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initProfile();
     renderThemePicker();
     renderModeStats();
-  renderExpertStats();
+    renderExpertStats();
     renderSongCard(profile, saveProfile, saveProfileToCloud, markDirty);
     renderUnlockableWallpaperGallery(profile);
     renderBadgesPreview(profile);
@@ -1317,7 +1333,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("personadle:i18n-ready", () => {
     renderStats();
     renderModeStats();
-  renderExpertStats();
+    renderExpertStats();
     renderBadgesModal(profile, saveProfileAndSyncBadges);
   });
 
@@ -1325,7 +1341,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.i18nIsReady) {
     renderStats();
     renderModeStats();
-  renderExpertStats();
+    renderExpertStats();
     renderBadgesModal(profile, saveProfileAndSyncBadges);
   }
 });

@@ -404,15 +404,20 @@ describe("checkResetOnLoad", () => {
     expect(onReset).toHaveBeenCalledOnce();
   });
 
-  it("removes the previous day's stats key when a new day is detected", () => {
+  it("réarme l'enregistrement de la partie quand un nouveau jour est détecté", () => {
+    // Remplace l'ancien « supprime la clé statsLogged_<mode>_<date> » : cette clé
+    // n'existe plus depuis que la portée d'enregistrement est la PARTIE et non la
+    // journée (startGame/isGameLogged). Le test nettoyait donc une clé que plus
+    // personne n'écrivait, pendant que le vrai drapeau restait armé — c'est
+    // exactement ce trou qui a laissé passer le bug Émoji.
     const yesterday = parisDateKey(new Date(Date.now() - 86_400_000));
-    const oldStatsKey = `statsLogged_Test_${yesterday}`;
-
     localStorage.setItem("lastPlayedDate_Test", yesterday);
-    localStorage.setItem(oldStatsKey, "1");
+    startGame("Test");
+    markGameLogged("Test");
+    expect(isGameLogged("Test")).toBe(true);
 
     checkResetOnLoad("lastPlayedDate_Test", "Test", () => {});
-    expect(localStorage.getItem(oldStatsKey)).toBeNull();
+    expect(isGameLogged("Test")).toBe(false);
   });
 
   it("updates lastPlayedDate to today after a reset", () => {
@@ -619,6 +624,45 @@ describe("startGame / isGameLogged / markGameLogged", () => {
     expect(currentGameId("Emoji")).toBeTruthy();
   });
 
+  it("survit à l'absence de crypto.randomUUID (http://ip, Safari < 15.4)", () => {
+    // randomUUID() n'existe qu'en contexte sécurisé. Sur http://<ip-du-LAN> — le
+    // test mobile le plus courant — l'appel levait et cassait startGame(), donc le
+    // chargement entier du mode. Rien ici n'exige d'unicité cryptographique.
+    const vrai = crypto.randomUUID;
+    crypto.randomUUID = () => {
+      throw new TypeError("crypto.randomUUID is not a function");
+    };
+    try {
+      expect(() => startGame("Classic")).not.toThrow();
+      const id = currentGameId("Classic");
+      expect(id).toBeTruthy();
+      expect(startGame("Classic") ?? currentGameId("Classic")).not.toBe(id);
+      // Le repli doit rester acceptable par api/sessions.php : hexa + tirets.
+      expect(currentGameId("Classic")).toMatch(/^[0-9a-f]{4,}(-[0-9a-f]{4,})*$/i);
+      expect(currentGameId("Classic").length).toBeLessThanOrEqual(36);
+    } finally {
+      crypto.randomUUID = vrai;
+    }
+  });
+
+  it("buildGameSession pose une clé d'idempotence même sans crypto.randomUUID", () => {
+    const vrai = crypto.randomUUID;
+    crypto.randomUUID = () => {
+      throw new TypeError("nope");
+    };
+    try {
+      const s = buildGameSession({
+        mode: "Classic",
+        targetName: "Joker",
+        result: "win",
+        attempts: 1,
+      });
+      expect(s.client_session_id).toMatch(/^[0-9a-f]{4,}(-[0-9a-f]{4,})*$/i);
+    } finally {
+      crypto.randomUUID = vrai;
+    }
+  });
+
   it("buildGameSession réutilise l'identifiant de la partie comme clé d'idempotence", () => {
     startGame("Classic");
     const id = markGameLogged("Classic");
@@ -633,8 +677,18 @@ describe("startGame / isGameLogged / markGameLogged", () => {
   });
 
   it("buildGameSession retombe sur un identifiant neuf si aucun n'est fourni", () => {
-    const a = buildGameSession({ mode: "Classic", targetName: "Joker", result: "win", attempts: 1 });
-    const b = buildGameSession({ mode: "Classic", targetName: "Joker", result: "win", attempts: 1 });
+    const a = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
+    const b = buildGameSession({
+      mode: "Classic",
+      targetName: "Joker",
+      result: "win",
+      attempts: 1,
+    });
     expect(a.client_session_id).toBeTruthy();
     expect(a.client_session_id).not.toBe(b.client_session_id);
   });
@@ -1568,9 +1622,14 @@ describe("normalize — whitespace-only and boundary edge cases", () => {
 
 describe("MODES catalogue", () => {
   it("exposes the six canonical modes with key + label", () => {
-    expect(MODES.map((m) => m.key).sort()).toEqual(
-      ["alloutattack", "classic", "emoji", "music", "personae", "silhouette"]
-    );
+    expect(MODES.map((m) => m.key).sort()).toEqual([
+      "alloutattack",
+      "classic",
+      "emoji",
+      "music",
+      "personae",
+      "silhouette",
+    ]);
     const labels = Object.fromEntries(MODES.map((m) => [m.key, m.label]));
     expect(labels).toEqual({
       classic: "Classic",
@@ -1635,7 +1694,9 @@ describe("applyDarkModeOverrides", () => {
 
   it("applies styles by CSS selector when darkmode is active", () => {
     document.body.classList.add("darkmode");
-    applyDarkModeOverrides([{ selector: ".box", styles: { backgroundColor: "#222", color: "white" } }]);
+    applyDarkModeOverrides([
+      { selector: ".box", styles: { backgroundColor: "#222", color: "white" } },
+    ]);
     const box = document.querySelector(".box");
     expect(box.style.backgroundColor).toBe("rgb(34, 34, 34)");
     expect(box.style.color).toBe("white");

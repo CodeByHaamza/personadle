@@ -110,7 +110,9 @@ let attempts = parseInt(localStorage.getItem(EXPERT.key("attempts"))) || 0;
 // isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
 // seule la streak reste journalière, et elle se calcule ailleurs.
 const STATS_SCOPE = EXPERT.statsKey;
-let statsAlreadyLogged = isGameLogged(STATS_SCOPE);
+// Pas de copie en variable : `isGameLogged()` est lu à chaque usage. Un cache
+// capturé au chargement du module ne voyait pas le réarmement fait plus tard par
+// checkResetOnLoad() (nouveau jour), et bloquait l'enregistrement de la journée.
 let sessionStartTime = Date.now();
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -531,9 +533,9 @@ function checkGuess(name, target, forceReveal = false) {
 
     // !forceReveal : un Give Up ne doit jamais se logger comme une victoire —
     // le handler du bouton Give Up (plus bas) logge lui-même le "giveup" une
-    // fois checkGuess() revenu ; sans cette garde, statsAlreadyLogged passait
-    // déjà à true ici et le "giveup" attendu était silencieusement ignoré.
-    if (wasFresh && !statsAlreadyLogged && !forceReveal && !wasChallengePlay) {
+    // fois checkGuess() revenu ; sans cette garde, la partie était déjà marquée
+    // enregistrée ici et le "giveup" attendu était silencieusement ignoré.
+    if (wasFresh && !isGameLogged(STATS_SCOPE) && !forceReveal && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       if (!EXPERT.isExpert) updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(
@@ -548,7 +550,6 @@ function checkGuess(name, target, forceReveal = false) {
           clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
-      statsAlreadyLogged = true;
 
       // ── Badge flags ──────────────────────────────────────────────────────
       const _pr = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
@@ -762,7 +763,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Défi à cible dédiée : le give-up compte pour le défi (perdu) mais ne se
     // logge pas en session quotidienne. Capturé avant checkChallengeCompletion.
     const wasChallengePlay = isChallengePlay("classic");
-    if (!statsAlreadyLogged && !wasChallengePlay) {
+    if (!isGameLogged(STATS_SCOPE) && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
       savePendingSession(
@@ -777,7 +778,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
-      statsAlreadyLogged = true;
       // Give Up ne passait jamais par checkBadgesAfterGame() (seul le chemin victoire l'appelait,
       // cf. checkGuess()) — un badge comme ace_defective (10 give-ups) ne se débloquait donc
       // jamais tant qu'on n'allait pas sur le profil, jamais "en live" après l'action elle-même.
@@ -834,7 +834,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Reset / Replay button ──
   resetButton.addEventListener("click", () => {
     startGame(STATS_SCOPE);
-    statsAlreadyLogged = false;
     sessionStartTime = Date.now();
 
     localStorage.removeItem(EXPERT.key("target"));
@@ -900,7 +899,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // ── Daily reset (auto-resets at Paris midnight) ──
-  checkResetOnLoad("lastPlayedDate_Classic", "Classic", () => {
+  checkResetOnLoad(EXPERT.key("lastPlayedDate_Classic"), STATS_SCOPE, () => {
     if (localStorage.getItem("activeChallenge")) return;
     resetButton.click();
   });

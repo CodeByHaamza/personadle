@@ -73,3 +73,23 @@ describe("filterMenu — opus récents (DEFAULT_ON_NEW)", () => {
     expect(api2.getActive(), "l'opus survit au rechargement suivant").toContain("PTS");
   });
 });
+
+describe("joueur neuf — aucun filtre enregistré", () => {
+  it("marque les opus récents comme déjà proposés, sans les réactiver plus tard", () => {
+    // Le seed n'a de sens que pour un joueur dont les filtres SAUVEGARDÉS datent
+    // d'avant l'opus. Chez un joueur neuf tout est déjà actif — mais son
+    // `_seeded` n'était jamais écrit, donc son premier décochage de PTS était
+    // annulé au chargement suivant. Le bug « impossible à décocher » subsistait,
+    // une fois au lieu de toujours.
+    mount(null); // aucun filtre en localStorage
+    expect(JSON.parse(localStorage.getItem("filters_Test_seeded") || "[]")).toContain("PTS");
+
+    // Le joueur décoche PTS…
+    btn("PTS").click();
+    expect(JSON.parse(localStorage.getItem("filters_Test"))).not.toContain("PTS");
+
+    // …et il reste décoché au rechargement.
+    const api = mount(JSON.parse(localStorage.getItem("filters_Test")), { fresh: false });
+    expect(api.getActive()).not.toContain("PTS");
+  });
+});

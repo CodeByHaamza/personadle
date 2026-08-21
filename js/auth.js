@@ -515,11 +515,15 @@ async function _syncLocalProfileToCloud(userId) {
  * dont le cookie de session était parfaitement valide.
  *
  * - 401 / 403 → réponse autoritaire, l'utilisateur n'est pas (ou plus) connecté
- * - 5xx, status absent, TypeError de fetch → transport, on ne sait rien
+ * - 429, 5xx, status absent, TypeError de fetch → transport, on ne sait rien
+ *
+ * 429 compte comme transport : c'est le rate limit maison (api/bootstrap.php), qui
+ * ne dit rien de la validité de la session. Le classer « autoritaire » déconnectait
+ * visuellement un joueur parfaitement connecté — le bug même que cette fonction vise.
  */
 export function isTransportError(err) {
   const status = err?.status;
-  return !status || status >= 500;
+  return !status || status === 429 || status >= 500;
 }
 
 /** Pause utilitaire pour le backoff. */
@@ -570,20 +574,28 @@ export async function initAuth() {
   // via window._authUnavailable pour que les pages qui en dépendent (Amis) disent
   // « connexion impossible » au lieu de « connectez-vous ».
   window._authUnavailable = !reachable;
-  updateAuthUI(user, reachable);
 
-  // 2. Si connecté, sync des sessions offline accumulées (fire-and-forget)
-  // On ne bloque pas initAuth() sur une opération réseau non critique.
-  if (user) {
-    api.stats.syncPending().catch(() => {});
-    _syncLocalProfileToCloud(user.id).catch(() => {});
+  // `_fetchMeWithRetry()` ne lève jamais, mais updateAuthUI() touche au DOM et
+  // peut lever sur une page au markup partiel. Sans finally, `_authResolved`
+  // restait false et TOUTES les pages qui l'attendent bloquaient 2 s puis
+  // dégradaient en anonyme — pour une exception d'affichage.
+  try {
+    updateAuthUI(user, reachable);
+
+    // 2. Si connecté, sync des sessions offline accumulées (fire-and-forget)
+    // On ne bloque pas initAuth() sur une opération réseau non critique.
+    if (user) {
+      api.stats.syncPending().catch(() => {});
+      _syncLocalProfileToCloud(user.id).catch(() => {});
+    }
+  } finally {
+    // Signal que la résolution d'auth est terminée (connecté, anonyme, ou
+    // serveur injoignable).
+    window._authResolved = true;
+    window.dispatchEvent(
+      new CustomEvent("personadle:auth-ready", { detail: { user: window._currentUser } })
+    );
   }
-
-  // Signal que la résolution d'auth est terminée (connecté, anonyme, ou serveur
-  // injoignable). Plus de try/finally : _fetchMeWithRetry() ne lève jamais, elle
-  // renvoie toujours un état — c'est tout l'intérêt de la distinction reachable.
-  window._authResolved = true;
-  window.dispatchEvent(new CustomEvent("personadle:auth-ready", { detail: { user: window._currentUser } }));
 
   // 3. Brancher formulaires + navigation modales + logout
   setupLoginForm();

@@ -165,7 +165,7 @@ function personadle_recompute_mode_streak(
  * @param array<string,mixed> $filters Filtres actifs, encodés en JSON pour la colonne.
  * @param bool $isExpert Partie jouée en Mode Expert (migration 031).
  * @return array{session_id:int, stats:array{mode:string, games:int, wins:int, giveups:int, streak:int, streak_record:int, perfect_wins:int, total_time_ms:int}, global_streak:int}
- * @throws PersonadleDuplicateSessionException Session déjà enregistrée pour ce (user, mode, date, is_expert).
+ * @throws PersonadleDuplicateSessionException client_session_id déjà enregistré (rejeu).
  */
 function personadle_record_game_session(
     PDO $pdo,
@@ -255,7 +255,10 @@ function personadle_record_game_session(
     // Recalcul depuis l'historique, jamais incrémental : avec plusieurs parties par
     // jour, un compteur incrémental repartirait à 1 au deuxième replay et tomberait
     // à 0 au premier abandon d'une journée pourtant gagnée.
-    $newStreak = personadle_recompute_mode_streak($pdo, $userId, $mode, $playedDate, $isExpert);
+    // `false` en dur et non `$isExpert` : on ne peut arriver ici QUE hors Expert
+    // (le cas Expert a rendu plus haut). Passer la variable laissait croire que ce
+    // chemin gère les deux.
+    $newStreak = personadle_recompute_mode_streak($pdo, $userId, $mode, $playedDate, false);
     $newRecord = max((int) $stats['streak_record'], $newStreak);
 
     $pdo->prepare('

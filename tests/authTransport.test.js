@@ -34,6 +34,13 @@ describe("isTransportError", () => {
     expect(isTransportError({ status: 500 })).toBe(true);
   });
 
+  it("un 429 est une panne, pas une déconnexion", () => {
+    // rateLimit() (api/bootstrap.php) ne dit RIEN de la validité de la session.
+    // Le classer « autoritaire » déconnectait visuellement un joueur connecté —
+    // le bug même que cette distinction vise.
+    expect(isTransportError({ status: 429 })).toBe(true);
+  });
+
   it("une erreur sans status (TypeError de fetch) est une panne", () => {
     expect(isTransportError(new TypeError("Failed to fetch"))).toBe(true);
     expect(isTransportError(undefined)).toBe(true);

@@ -28,6 +28,8 @@ import {
   getActiveChallengeTarget,
   isChallengePlay,
   maskTerms,
+  expertContext,
+  setupExpertToggle,
   setGiveUpEnabled,
   startGame,
   isGameLogged,
@@ -128,8 +130,13 @@ const MAX_ATTEMPTS = 3;
 // partageable et bookmarkable, un rechargement ne perd rien, et il n'y a pas
 // d'état caché qui ferait qu'une même URL affiche deux jeux différents.
 
+// Même plomberie partagée que les 5 autres modes. Music la réimplémentait à la
+// main (détection d'URL, clés, libellé du lien de bascule) : deux copies de la même
+// logique, dont une seule aurait reçu le prochain correctif.
+const EXPERT = expertContext({ prefix: "musicExpert", statsKey: "Music", hashMode: "Music" });
+
 /** Vrai si la page tourne en Mode Expert. */
-const IS_EXPERT = new URLSearchParams(window.location.search).get("expert") === "1";
+const IS_EXPERT = EXPERT.isExpert;
 
 /** Essais ratés avant que « Abandonner » se débloque en Expert (décision 2026-08-15). */
 const EXPERT_GIVE_UP_AFTER = 5;
@@ -138,7 +145,7 @@ const EXPERT_GIVE_UP_AFTER = 5;
 const KEY_PREFIX = IS_EXPERT ? "musicExpert" : "music";
 
 /** Suffixe des clés de stats/date, aligné sur le vocabulaire des modes. */
-const STATS_KEY = IS_EXPERT ? "MusicExpert" : "Music";
+const STATS_KEY = EXPERT.statsKey;
 
 /** Chansons éligibles à l'Expert : celles qui ont des paroles (pas les instrumentales).
  *  L'ordre est celui de songs.js — il DOIT rester identique au pool `music_expert`
@@ -345,9 +352,7 @@ function pickSong(random = false) {
     // du mode normal, sinon jouer le normal d'abord (où l'audio est donné) offre
     // la réponse. La chaîne "MusicExpert" doit rester identique à celle de
     // api/lib/daily_target.php, sinon chaque partie est loguée en anti_cheat.
-    target = IS_EXPERT
-      ? getDailyTarget(EXPERT_SONGS, "MusicExpert")
-      : getDailyTarget(originalSongs, "Music");
+    target = getDailyTarget(IS_EXPERT ? EXPERT_SONGS : originalSongs, EXPERT.hashMode);
   }
 
   audioPlayer.src = `./database/music/song/${target.fichier}`;
@@ -369,27 +374,14 @@ function pickSong(random = false) {
  */
 function applyExpertChrome() {
   const lyricsBox = document.getElementById("expertLyricsBox");
-  const toggle = document.getElementById("expertToggle");
 
-  document.body.classList.toggle("expert-mode", IS_EXPERT);
+  // body.expert-mode, libellé/href du lien de bascule et blocs de règles : c'est
+  // le patron commun aux 6 modes, il vit dans gameCore.
+  setupExpertToggle(EXPERT, "musics.html");
+
+  // Seul l'habillage propre à Music reste ici.
   if (audioBox) audioBox.style.display = IS_EXPERT ? "none" : "";
   if (lyricsBox) lyricsBox.style.display = IS_EXPERT ? "" : "none";
-
-  if (toggle) {
-    const key = IS_EXPERT ? "ui.expert_leave" : "ui.expert_enter";
-    toggle.setAttribute("data-i18n", key);
-    const t = window.i18n?.t?.(key);
-    toggle.textContent =
-      t != null && t !== key ? t : IS_EXPERT ? "← Normal mode" : "⚡ Expert mode";
-    toggle.classList.toggle("active", IS_EXPERT);
-    // Un lien, pas un bouton JS : l'URL porte le mode, donc elle doit être
-    // copiable, ouvrable dans un onglet, et gérée par l'historique du navigateur.
-    toggle.href = IS_EXPERT ? "musics.html" : "musics.html?expert=1";
-  }
-
-  // Règles : chaque mode a les siennes, la mécanique n'a rien à voir.
-  document.getElementById("rulesNormal")?.style.setProperty("display", IS_EXPERT ? "none" : "");
-  document.getElementById("rulesExpert")?.style.setProperty("display", IS_EXPERT ? "" : "none");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

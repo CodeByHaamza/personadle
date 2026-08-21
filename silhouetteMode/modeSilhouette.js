@@ -71,7 +71,9 @@ const flashDurationMs = (attempts) => FLASH_BASE_MS + FLASH_STEP_MS * attempts;
 // isGameLogged, js/gameCore.js). 50 parties dans la soirée comptent 50 fois ;
 // seule la streak reste journalière, et elle se calcule ailleurs.
 const STATS_SCOPE = EXPERT.statsKey;
-let statsAlreadyLogged = isGameLogged(STATS_SCOPE);
+// Pas de copie en variable : `isGameLogged()` est lu à chaque usage. Un cache
+// capturé au chargement du module ne voyait pas le réarmement fait plus tard par
+// checkResetOnLoad() (nouveau jour), et bloquait l'enregistrement de la journée.
 let sessionStartTime = Date.now();
 
 /** All specific opus codes available in Silhouette mode. */
@@ -446,7 +448,7 @@ function showVictory(force = false) {
   const wasChallengePlay = isChallengePlay("silhouette");
 
   if (!force) {
-    if (!statsAlreadyLogged && !wasChallengePlay) {
+    if (!isGameLogged(STATS_SCOPE) && !wasChallengePlay) {
       const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
       if (!EXPERT.isExpert) updateProfileStats({ result: "win", mode: modeName, timeSpent });
       savePendingSession(
@@ -460,7 +462,6 @@ function showVictory(force = false) {
           clientSessionId: markGameLogged(STATS_SCOPE),
         })
       );
-      statsAlreadyLogged = true;
     }
 
     // ── Badge: Persona Q Explorer ──────────────────────────────────────────
@@ -592,7 +593,7 @@ function giveUp() {
   // Défi à cible dédiée : le give-up compte pour le défi (perdu) mais ne se
   // logge pas en session quotidienne (showVictory(true) transmet la défaite
   // au défi via checkChallengeCompletion).
-  if (!statsAlreadyLogged && !isChallengePlay("silhouette")) {
+  if (!isGameLogged(STATS_SCOPE) && !isChallengePlay("silhouette")) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: modeName, timeSpent });
     savePendingSession(
@@ -606,7 +607,6 @@ function giveUp() {
         clientSessionId: markGameLogged(STATS_SCOPE),
       })
     );
-    statsAlreadyLogged = true;
   }
 
   showVictory(true);
@@ -683,7 +683,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(EXPERT.key("silhouetteAttempts"));
     localStorage.removeItem(EXPERT.key("silhouetteGameOver"));
     startGame(STATS_SCOPE);
-    statsAlreadyLogged = false;
     sessionStartTime = Date.now();
     resetGame(true);
   });
@@ -747,7 +746,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateFlashButton();
 
   // ── Daily reset ──
-  checkResetOnLoad(EXPERT.key("lastPlayedDate_Silhouette"), "silhouette", () => {
+  checkResetOnLoad(EXPERT.key("lastPlayedDate_Silhouette"), STATS_SCOPE, () => {
     resetBtn.click();
   });
   setupDailyReset(() => {

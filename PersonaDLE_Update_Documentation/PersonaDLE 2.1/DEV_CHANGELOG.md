@@ -13,6 +13,201 @@
 
 ---
 
+## 2026-08-21 — fix(review): correctifs de la revue de la PR #69
+
+Revue complète de la PR #69 (`develop...feat/v2.1-expert-modes`, 118 fichiers). Les 725
+tests, le lint, `pools:check`, `i18n:check`, `docs:check` et `data:check` étaient verts —
+et trois régressions fonctionnelles passaient quand même, toutes silencieuses.
+
+### Bloquants
+
+**Les stats Expert du profil ne s'affichaient jamais.** `renderExpertStats()`
+(`profile/profile-page.js`) lisait `localStorage["user"]`, une clé que **rien n'écrit dans
+le dépôt**. `userId` valait toujours `null`, la fonction sortait avant l'appel API. Tout
+l'aval était donc du code mort : `expert_by_mode`, `personadle_expert_stats_by_mode()`, le
+CSS `.expert-stat-row`, les trois clés i18n et le conteneur HTML. Corrigé en
+`window._currentUser?.id ?? localStorage.getItem("playerUserId")` — la clé réellement
+écrite par `updateAuthUI()`.
+
+**La partie quotidienne d'Émoji n'était plus enregistrée à partir du 2e jour.** Le garde
+`isGameLogged()` compare `gameLogged_<scope>` à `gameId_<scope>` ; seul `startGame()` les
+réarme, et Émoji ne l'appelait que depuis le bouton Rejouer. Au changement de jour, les deux
+clés valaient encore celles de la veille → `isGameLogged()` restait vrai → `savePendingSession`
+était sauté, sans erreur ni log.
+
+**Une variante Expert consommait le reset quotidien de sa variante normale.** Tout l'état de
+partie est scopé par `EXPERT.key(...)`, mais pas `lastPlayedDate_*` — sauf en Silhouette et
+Music. Ouvrir `?expert=1` un nouveau jour écrivait la date du jour et ne resettait que les
+clés Expert : la page normale se croyait à jour, restituait la partie terminée de la veille
+et ne tirait jamais la cible du jour. Idem en sens inverse.
+
+Les trois sont la même famille de bug : du **câblage**, pas de la logique. `startGame()` /
+`isGameLogged()` avaient 11 tests unitaires impeccables qui ne disaient rien de qui les
+appelle ni quand.
+
+**Correction de fond plutôt que trois rustines** : `startGame()` a été déplacé dans
+`checkResetOnLoad()` (`js/gameCore.js`), seul point commun aux 6 modes. Laissé aux callbacks,
+il devait être répété dans 2 chemins × 6 modes — 12 occasions de l'oublier, une l'avait déjà
+été. Les 6 modes passent désormais `EXPERT.key("lastPlayedDate_X")` et `STATS_SCOPE`.
+`statsAlreadyLogged` (Classique, Silhouette) a été supprimé : cette copie capturée au
+chargement du module ne voyait pas le réarmement, `isGameLogged()` est lu à chaque usage.
+
+### Classement — décision produit tranchée, calcul inchangé
+
+La revue avait signalé que la migration 032 supprime `uq_session_per_day`, seul plafond
+d'insertion de sessions, et proposé de compter des jours distincts au classement.
+
+**Écarté (Hamza, 2026-08-21) : le classement doit compter des PARTIES.** « Toutes les
+parties comptent » vaut aussi pour lui — 100 victoires réellement jouées dans la journée
+valent 100. Compter des jours distincts pénaliserait le joueur assidu, c'est-à-dire
+exactement celui que le classement récompense. Les tris par ratio et par streak (TODO.md)
+apporteront les autres angles de lecture.
+
+`SUM(win)` / `COUNT(*)` restent donc **inchangés** dans `api/cron/leaderboard.php` et
+`api/leaderboard/index.php` ; seul un commentaire y consigne la décision, pour éviter qu'une
+prochaine revue repropose la même chose.
+
+Reste **distinct et non traité** : l'anti-triche ne vérifie la cible attendue que sur la
+*première* session du jour (`$hasSessionToday`, `api/sessions.php`), parce qu'un replay tire
+une cible aléatoire côté client et qu'un écart y est donc normal. Les sessions suivantes sont
+acceptées sans contrôle de `target_name`, `attempts` ni `time_ms`. Ce n'est pas le sujet
+ci-dessus — jouer 100 parties est légitime, en injecter 100 par appel direct à l'API ne l'est
+pas — et ça reste ouvert (cf. angles morts).
+
+### Rate limit des sessions — le vrai plafond, recalibré
+
+`rateLimit('sessions:' . $userId, 15, 15 * 60)` (`api/sessions.php`) datait du monde où
+`uq_session_per_day` bornait le jeu à 6 sessions par jour, une par mode : 15 était alors dix
+fois au-dessus du besoin. La migration 032 lève cette contrainte — **ce rate limit devient
+donc le plafond effectif du jeu**, et il coupe à la 16e partie d'affilée.
+
+Rien n'est perdu (les sessions partent en file `pendingSessions`), mais elles n'arrivent en
+base qu'au rechargement de page suivant, une fois la fenêtre rouverte. Entre-temps :
+`user_stats` ne bouge pas, donc pas de mise à jour du profil, pas de présence au classement,
+pas de badge de volume — alors que le joueur a bien joué. Et comme `pullProfileFromCloud()`
+écrase le local par le backend (source de vérité), le compteur affiché **reculait**.
+
+Ça touche de plein fouet le profil de joueur réel de PersonaDLE : des sessions longues,
+beaucoup de parties dans la même soirée pour chasser badges et trophées, plutôt que de la
+régularité quotidienne. Porté à **90 / 15 min** = 6 parties/minute soutenues, là où la partie
+la plus rapide du jeu (replay Émoji ou AOA dont on connaît la réponse) prend ~10-15 s. Aucun
+joueur réel ne l'atteint ; un bot reste borné. La valeur doit aussi absorber un rattrapage :
+`syncPending()` rejoue toute la file d'un coup, une requête par session.
+
+**Vérifié de bout en bout** sur base jetable au schéma post-PR, 50 victoires classique le même
+jour passées par le vrai `personadle_record_game_session()` :
+
+| Point | Résultat |
+|---|---|
+| `user_stats` | `games=50`, `wins=50`, `streak=1`, 38 min cumulées |
+| Classement `ever` (lit `user_stats`) | score **50** |
+| Classement `day` (lit `game_sessions`) | score **50** |
+| Badges `mode_wins ≥ 50`, `mode_games ≥ 30`, `games_total ≥ 25` | débloqués |
+| Badge `unique_days ≥ 2` | non débloqué — normal, c'est une condition de régularité |
+| Lignes `game_sessions` | 50 |
+
+À savoir : les classements `day` / `week` / `month` passent par `leaderboard_cache`, alimenté
+par un cron **horaire** — jusqu'à 1 h de latence. Seul `ever` est immédiat (lecture directe de
+`user_stats`).
+
+### Robustesse
+
+- `crypto.randomUUID()` n'existe qu'en contexte sécurisé et depuis Safari 15.4 : sur
+  `http://<ip-du-LAN>` ou un vieil iPhone, `startGame()` levait et cassait le chargement du
+  mode. Repli hexa dans `newId()` — rien ici n'exige d'unicité cryptographique.
+- `syncPending()` (`js/api.js`) pose et **persiste** une clé d'idempotence sur les sessions
+  mises en file avant la 032 : sans elle, un timeout sur une requête que le serveur avait
+  traitée les insérait deux fois.
+- `initAuth()` : `window._authResolved` remis dans un `finally`. `_fetchMeWithRetry()` ne
+  lève jamais, mais `updateAuthUI()` touche au DOM ; une exception d'affichage bloquait
+  toutes les pages qui attendent le drapeau.
+- `isTransportError()` classe le **429** en transport : le rate limit ne dit rien de la
+  validité de la session, le traiter en réponse autoritaire déconnectait un joueur connecté.
+- Plafond `attempts` en Expert : 40 → 200. En Classique Expert le joueur n'a aucun retour
+  sur 180 candidats ; dépasser 40 essais y est normal, et `syncPending()` jette
+  silencieusement toute session refusée en 400 — la partie était perdue sans un mot.
+- `expertPool()` (Personae) ne retombe plus sur le pool complet quand les fiches de lore
+  manquent : il tirait dans 173 entrées là où le serveur en attend 159, donc une cible
+  différente, une partie sans indice et un `anti_cheat` à chaque enregistrement. La page
+  bascule sur le mode normal si le chargement échoue.
+- `_seedNewOpus()` (`js/filterMenu.js`) : le drapeau `<clé>_seeded` est désormais posé aussi
+  pour un joueur sans filtres enregistrés. Sans ça son premier décochage de PTS (ou de P1 en
+  Personae) était annulé au chargement suivant — le bug « impossible à décocher » subsistait,
+  une fois au lieu de toujours.
+- `maskTerms()` : l'apostrophe est une frontière de mot. « Io » n'était pas masqué dans
+  « Io's transformation », et la fiche donnait la réponse dès la première ligne.
+- Personae Expert : `personaImg.alt` ne porte plus le nom de la persona (la réponse en clair
+  dans le DOM) et `src` est retiré au lieu d'être vidé — `src=""` déclenche une requête vers
+  l'URL du document sur certains moteurs.
+- `client_session_id` : validation resserrée en groupes hexadécimaux séparés par des tirets.
+  `[0-9a-fA-F-]{8,36}` acceptait `--------`.
+
+### Dette supprimée
+
+`musicsMode/modeMusic.js` réimplémentait à la main la détection d'URL Expert, les clés et le
+lien de bascule, là où les 5 autres modes utilisent `expertContext()` / `setupExpertToggle()`.
+Deux copies de la même logique, dont une seule aurait reçu le prochain correctif. Music passe
+sur la plomberie partagée (−25 lignes).
+
+### Migrations
+
+`031` et `032` gagnent `IF EXISTS` / `IF NOT EXISTS` sur leurs `DROP INDEX` / `ADD UNIQUE KEY`
+et l'ordre obligatoire est écrit en tête de la 032 (sa colonne est déclarée `AFTER is_expert`,
+que la 031 crée). `ALTER TABLE` n'étant pas transactionnel, un échec à mi-parcours laissait
+la table à moitié migrée.
+
+**Elles ont été rejouées pour de vrai** contre une base vierge au schéma *pré-migration*
+(`git show develop:sql/bdd_mysql.sql`), puis une seconde fois pour vérifier l'idempotence :
+schéma final identique à `sql/bdd_mysql.sql`, 15 colonnes d'index, rejeu sans erreur. C'est
+la vérification qu'exige la DoD (CLAUDE.md §13) et que la CI ne peut pas faire : elle charge
+`bdd_mysql.sql`, qui contient déjà le schéma d'arrivée, donc aucun environnement ne rejoue
+jamais `sql/migrations/*`.
+
+### Tests — la vraie leçon
+
+`tests/expertWiring.test.js` (nouveau, 45 tests). Les trois bloquants ci-dessus étaient tous
+invisibles aux tests de primitives. Ce fichier teste deux choses qu'un test unitaire ne peut
+pas voir :
+
+1. **Le contrat de vie** — « nouveau jour ⇒ la partie est réarmée », sur la fonction que les
+   6 modes partagent.
+2. **Les invariants de câblage** — chaque mode appelle bien ce contrat, avec une clé scopée
+   Expert, sans copie périmée, et en passant l'identité de partie comme clé d'idempotence.
+   Vérifiés en lisant les sources (commentaires retirés, sinon l'invariant se satisfait d'une
+   mention en prose). C'est le seul moyen de couvrir six fichiers de mode sans monter six DOM
+   complets — et ça protège le 7e mode que personne n'a encore écrit.
+
+Contre-vérifié : ces invariants relèvent **12 violations** sur le code d'avant les correctifs,
+0 après. Un test qui ne peut pas échouer ne prouve rien.
+
+Régressions ciblées ajoutées par ailleurs : repli sans `crypto.randomUUID` et clé
+d'idempotence sans lui (`gameCore.test.js`), 429 en transport (`authTransport.test.js`),
+seeding d'un joueur neuf (`filterMenu.test.js`), apostrophe dans `maskTerms`
+(`expertContent.test.js`), clé d'idempotence rétro-active de la file (`backend.test.js`).
+
+Un test existant a été remplacé : « removes the previous day's stats key » nettoyait
+`statsLogged_<mode>_<date>`, une clé que plus personne n'écrit depuis que la portée
+d'enregistrement est la partie et non la journée. Il passait au vert en vérifiant un vestige
+pendant que le vrai drapeau restait armé — précisément le trou par lequel le bug Émoji est
+passé.
+
+**725 → 778 tests, 37 → 38 suites.**
+
+### Angles morts restants
+
+- L'anti-triche ne couvre que la 1re session du jour par (mode, is_expert). Un client qui
+  poste directement sur `/api/sessions` peut donc enregistrer des parties inventées
+  (`target_name`, `attempts`, `time_ms` arbitraires) jusqu'au rate limit — 15 req / 15 min,
+  soit ~1440/jour. Le classement comptant les parties par choix produit, c'est ce chemin-là
+  qu'il faudra fermer si l'abus se présente : validation de `target_name` contre le pool du
+  mode, ou vérification de la cible sur toutes les sessions non-replay.
+- Aucun test PHPUnit ne couvre le calcul du score du classement.
+- La CI ne rejoue toujours pas `sql/migrations/*` : elle charge `bdd_mysql.sql`. Un job de
+  replay demanderait de rendre les migrations compatibles MySQL 8.0 (`ADD COLUMN IF NOT
+  EXISTS` est MariaDB), donc de les réécrire en procédure stockée. Non fait.
+- Le rate limit de `sessions.php` (15 req / 15 min) reste le seul plafond d'insertion de
+  lignes `game_sessions` : la table est gonflable par script.
+
 ## 2026-08-20 — test(e2e): « 50 parties comptent pour 50 parties », prouvé de bout en bout
 
 `tests-e2e/sessions-same-day.spec.js` — dernier point ouvert de la refonte des stats. Les
