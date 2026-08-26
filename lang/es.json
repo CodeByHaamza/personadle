@@ -696,7 +696,12 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Canalizando la sabiduría meticulosa de la Sacerdotisa, has documentado las anomalías."
-    }
+    },
+    "event_code_empty": "⚠️ ¡Introduce un código primero!",
+    "event_code_signin": "🔒 Inicia sesión para canjear un código: las insignias se guardan en tu cuenta.",
+    "event_code_already": "✅ ¡Ya canjeaste este código!",
+    "event_code_expired": "⏰ Este evento aún no está activo o ya terminó.",
+    "event_code_failed": "⚠️ No se pudo contactar con el servidor. Inténtalo de nuevo en un momento."
   },
   "social_link": {
     "rank_names": {

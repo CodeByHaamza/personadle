@@ -696,7 +696,12 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Channeling the meticulous wisdom of the High Priestess, you've documented the anomalies. Awarded to those who bear the heavy burden of paperwork to keep the system's chaos in check."
-    }
+    },
+    "event_code_empty": "⚠️ Please enter a code first!",
+    "event_code_signin": "🔒 Sign in to redeem a code — badges are saved to your account.",
+    "event_code_already": "✅ You already redeemed this code!",
+    "event_code_expired": "⏰ This event is not active yet or has expired.",
+    "event_code_failed": "⚠️ Couldn't reach the server. Try again in a moment."
   },
   "social_link": {
     "rank_names": {

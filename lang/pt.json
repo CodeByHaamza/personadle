@@ -696,7 +696,12 @@
       "name": "A Auditoria da Sacerdotisa",
       "condition": "???",
       "description": "Canalizando a sabedoria meticulosa da Alta Sacerdotisa, documentaste as anomalias. Atribuído a quem carrega o pesado fardo da papelada para manter o caos do sistema sob controlo."
-    }
+    },
+    "event_code_empty": "⚠️ Introduz primeiro um código!",
+    "event_code_signin": "🔒 Inicia sessão para usar um código — os emblemas ficam ligados à tua conta.",
+    "event_code_already": "✅ Já usaste este código!",
+    "event_code_expired": "⏰ Este evento ainda não está ativo ou já terminou.",
+    "event_code_failed": "⚠️ Servidor inacessível. Tenta novamente daqui a pouco."
   },
   "social_link": {
     "rank_names": {

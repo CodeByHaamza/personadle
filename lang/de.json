@@ -696,7 +696,12 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Mit der akribischen Weisheit der Hohepriesterin hast du die Anomalien dokumentiert."
-    }
+    },
+    "event_code_empty": "⚠️ Bitte gib zuerst einen Code ein!",
+    "event_code_signin": "🔒 Melde dich an, um einen Code einzulösen — Abzeichen gehören zu deinem Konto.",
+    "event_code_already": "✅ Du hast diesen Code bereits eingelöst!",
+    "event_code_expired": "⏰ Dieses Event ist noch nicht aktiv oder bereits beendet.",
+    "event_code_failed": "⚠️ Server nicht erreichbar. Versuche es gleich noch einmal."
   },
   "social_link": {
     "rank_names": {

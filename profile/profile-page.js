@@ -252,6 +252,14 @@ function initProfile() {
 
   if (saved) {
     profile = JSON.parse(saved);
+    // Un profil enregistré avant l'ajout d'un de ces champs ne l'a pas du tout :
+    // le bloc « nouveau profil » ci-dessous ne s'exécute jamais pour lui. Sans
+    // cette normalisation, un `.includes()`/`.push()` en aval lève un TypeError
+    // (cf. le code événementiel, qui accordait le badge côté serveur puis
+    // plantait côté client en l'annonçant comme invalide).
+    if (!Array.isArray(profile.badges)) profile.badges = [];
+    if (!Array.isArray(profile.selectedBadges)) profile.selectedBadges = [];
+    if (!Array.isArray(profile.eventCodes)) profile.eventCodes = [];
   } else {
     // Nouveau profil par défaut
     profile = {

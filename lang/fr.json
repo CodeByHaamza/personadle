@@ -696,7 +696,12 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Puisant dans la sagesse méticuleuse de la Prêtresse, tu as documenté les anomalies."
-    }
+    },
+    "event_code_empty": "⚠️ Entre d'abord un code !",
+    "event_code_signin": "🔒 Connecte-toi pour utiliser un code — les badges sont liés à ton compte.",
+    "event_code_already": "✅ Tu as déjà utilisé ce code !",
+    "event_code_expired": "⏰ Cet événement n'est pas encore actif ou est terminé.",
+    "event_code_failed": "⚠️ Serveur injoignable. Réessaie dans un instant."
   },
   "social_link": {
     "rank_names": {
