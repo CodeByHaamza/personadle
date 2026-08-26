@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 
+// Compte pré-débloqué (tests-e2e/global-setup.js) : la porte d'entrée du Mode
+// Expert (js/gameCore.js::applyExpertGate) redirige `?expert=1` vers le mode
+// normal pour un visiteur non débloqué — ces tests couvrent le GAMEPLAY
+// Expert, pas cette redirection.
+test.use({ storageState: "playwright/.auth/music.json" });
+
 /**
  * Mode Music Expert — parcours joueur complet.
  *
@@ -149,6 +155,17 @@ test.describe("Mode Music Expert — abandon et révélation", () => {
   });
 
   test("abandonner révèle toutes les paroles en clair et enregistre un giveup", async ({ page }) => {
+    // Compte authentifié (storageState) : la session part directement en POST
+    // /api/sessions au lieu d'atterrir dans la file `pendingSessions` (réservée
+    // au hors-ligne/anonyme, cf. savePendingSession() dans js/gameCore.js) — on
+    // intercepte donc la requête plutôt que de lire la file locale.
+    const sessionRequests = [];
+    page.on("request", (req) => {
+      if (req.method() === "POST" && req.url().includes("/api/sessions")) {
+        sessionRequests.push(req.postDataJSON());
+      }
+    });
+
     await page.goto(EXPERT_URL);
     await page.waitForLoadState("networkidle");
 
@@ -166,16 +183,10 @@ test.describe("Mode Music Expert — abandon et révélation", () => {
     const [vus, total] = compteur.split("/").map((x) => x.trim());
     expect(vus, "toutes les paroles doivent être révélées").toBe(total);
 
-    // La session est mise en attente localement (non connecté → 401 → localStorage)
-    // et porte bien is_expert, sans quoi le serveur la compterait comme normale.
-    await page.waitForFunction(
-      () => JSON.parse(localStorage.getItem("pendingSessions") || "[]").length > 0,
-      { timeout: 5000 }
-    );
-    const pending = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("pendingSessions") || "[]")
-    );
-    const last = pending[pending.length - 1];
+    // La session est postée directement au serveur (compte débloqué) et porte
+    // bien is_expert, sans quoi le serveur la compterait comme normale.
+    await expect.poll(() => sessionRequests.length, { timeout: 5000 }).toBeGreaterThan(0);
+    const last = sessionRequests[sessionRequests.length - 1];
     expect(last.mode).toBe("music");
     expect(last.is_expert).toBe(true);
     expect(last.result).toBe("giveup");
@@ -183,6 +194,17 @@ test.describe("Mode Music Expert — abandon et révélation", () => {
   });
 
   test("gagner révèle les paroles et enregistre une victoire Expert", async ({ page }) => {
+    // Compte authentifié (storageState) : la session part directement en POST
+    // /api/sessions au lieu d'atterrir dans la file `pendingSessions` (réservée
+    // au hors-ligne/anonyme, cf. savePendingSession() dans js/gameCore.js) — on
+    // intercepte donc la requête plutôt que de lire la file locale.
+    const sessionRequests = [];
+    page.on("request", (req) => {
+      if (req.method() === "POST" && req.url().includes("/api/sessions")) {
+        sessionRequests.push(req.postDataJSON());
+      }
+    });
+
     await page.goto(EXPERT_URL);
     await page.waitForLoadState("networkidle");
 
@@ -196,14 +218,8 @@ test.describe("Mode Music Expert — abandon et révélation", () => {
     await expect(page.locator("#victoryBox")).toBeVisible({ timeout: 10000 });
     expect(await page.locator("#expertLyricsList").textContent()).not.toContain("▮");
 
-    await page.waitForFunction(
-      () => JSON.parse(localStorage.getItem("pendingSessions") || "[]").length > 0,
-      { timeout: 5000 }
-    );
-    const pending = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("pendingSessions") || "[]")
-    );
-    const last = pending[pending.length - 1];
+    await expect.poll(() => sessionRequests.length, { timeout: 5000 }).toBeGreaterThan(0);
+    const last = sessionRequests[sessionRequests.length - 1];
     expect(last.is_expert).toBe(true);
     expect(last.result).toBe("win");
     expect(last.attempts).toBe(3);

@@ -337,7 +337,9 @@ final class ConditionCheckTest extends TestCase
         $known = personadle_known_condition_types();
         $this->assertContains('manual', $known);
         $this->assertContains('social_link_min_rank', $known);
+        $this->assertContains('expert_modes_mastered', $known);
+        $this->assertContains('expert_wins_total', $known);
         $this->assertNotContains('social_link_rank_10', $known);
-        $this->assertCount(17, $known, 'Ajuste ce compte si le vocabulaire de condition_check.php change');
+        $this->assertCount(22, $known, 'Ajuste ce compte si le vocabulaire de condition_check.php change');
     }
 }

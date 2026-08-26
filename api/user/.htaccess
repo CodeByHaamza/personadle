@@ -23,5 +23,8 @@ RewriteRule ^compare$        compare.php [L,QSA]
 # /api/user/recover-streak → recover-streak.php (POST — restauration streak Jack Frost)
 RewriteRule ^recover-streak$ recover-streak.php [L,QSA]
 
+# /api/user/expert-status  → expert_status.php (GET — déblocage des 6 Modes Expert)
+RewriteRule ^expert-status$ expert_status.php [L,QSA]
+
 # /api/user/42         → index.php  (GET, PATCH, DELETE)
 RewriteRule ^[0-9]+$         index.php   [L,QSA]

@@ -13,6 +13,106 @@
 
 ---
 
+## 2026-08-25 — feat(expert): porte d'entrée des 6 Modes Expert + badge Denial of Self
+
+Les 6 Modes Expert étaient ouverts à tout le monde (bouton ⚡ visible et cliquable par
+n'importe qui). C'était le point bloquant n°1 de `TODO.md` avant la release : une fois la
+v2.1 en prod, restreindre un accès déjà donné se lit comme un retrait, pas comme une
+progression. Ce lot ferme la porte pendant que la fenêtre est encore ouverte.
+
+**Conditions retenues** (une par mode, arbitrées avec Hamza le 2026-08-25) :
+
+| Mode | Condition |
+|---|---|
+| Classique, Silhouette | 10 victoires en 4 essais ou moins chacune |
+| Émoji | 10 victoires sur une seule journée |
+| All-Out Attack, Personae, Musique | 15 victoires parfaites (1 essai) d'affilée |
+
+### Détails techniques
+
+- **`api/lib/expert_unlocks.php` (nouveau)** — source **unique** des 6 seuils, lue à la fois
+  par le gate de `api/sessions.php` et par `/api/user/expert-status`. Les deux les
+  déclaraient séparément dans un premier jet : c'est exactement la duplication qui fait
+  diverger la règle appliquée de la règle affichée.
+- **`api/lib/condition_check.php`** — 4 nouveaux `condition_type` :
+  `mode_wins_under_attempts`, `mode_wins_single_day`, `mode_consecutive_perfects`, et
+  `expert_modes_mastered` (badge). Ils lisent `game_sessions` et non `user_stats`, qui n'a
+  qu'une ligne par (user, mode) et ne connaît ni le nombre d'essais, ni la date, ni Expert
+  vs normal. La logique de comptage est sortie en fonctions réutilisables
+  (`personadle_count_*`) parce que l'infobulle affiche la **progression** (« 7 / 10 »), pas
+  seulement un booléen.
+- **`api/sessions.php`** — refuse `is_expert = 1` en 403 si le mode n'est pas débloqué. Le
+  mode vit dans l'URL : un gate purement client se contourne en tapant `?expert=1`.
+- **`api/user/expert_status.php` (nouveau)** + sa `RewriteRule` dans `api/user/.htaccess`
+  (sans elle : 404, cf. CLAUDE.md §7). Renvoie `{unlocked, condition_type, required,
+  current}` par mode — **aucun libellé** : le texte serait anglais pour les 6 langues.
+- **`js/gameCore.js`** — `expertContext()` expose désormais `modeKey`, la clé backend
+  normalisée. `statsKey`/`hashMode` valent `"Classic"`/`"ClassicExpert"` : les envoyer à
+  l'API n'aurait matché aucun mode et le bouton serait resté déverrouillé en silence.
+  `setupExpertToggle()` reste synchrone et pose le verrou après réponse du backend.
+- **Migration `033_badge_denial_of_self.sql`** + seed `bdd_mysql.sql` + `badgesData.js` +
+  i18n 6 langues. `condition_type = 'expert_modes_mastered'`, valeur 10.
+- **`tests/expertUnlock.test.js`** — 11 tests : normalisation de la clé de mode, libellé de
+  condition par type, verrouillage/déverrouillage du bouton, non-verrouillage du bouton de
+  retour depuis une page Expert, et mise en cache de la réponse.
+
+### Décisions à noter
+
+- **Les 6 conditions ne sont PAS en base.** Ce sont des conditions d'accès, pas des
+  récompenses : les mettre dans `badges` les ferait apparaître dans la collection du joueur,
+  et `category` n'accepte de toute façon que
+  `'achievement'|'streak'|'event'|'secret'|'social'`. Seul `denial_of_self`, vraie
+  récompense, est en base.
+- **`mode_wins_single_day` regarde la MEILLEURE journée**, pas la journée en cours — sinon
+  le joueur qui remplit la condition aujourd'hui la reperdrait demain à minuit.
+- **`denial_of_self` n'est pas en `condition_type = 'manual'`.** `manual` renvoie toujours
+  `true` dans `personadle_verify_condition()` : le badge aurait été décrochable par un simple
+  `POST /api/badges/unlock`.
+
+### Récompenses du lot
+
+- **Badge `denial_of_self`** (migration 033, epic) — 10 victoires Expert dans **chacun** des
+  6 modes. Récompense la polyvalence.
+- **Titre `shadows_converge`** (migration 034, legendary) — 50 victoires Expert **au total**,
+  peu importe la répartition. Récompense le volume : un joueur qui n'aime que deux modes
+  décroche le titre sans jamais obtenir le badge. `condition_type = 'expert_wins_total'`,
+  à ne pas confondre avec `wins_total` qui lit `user_stats` — table que l'Expert n'alimente
+  pas, et qui aurait donc compté les parties normales.
+- Image nommée `shadows_converge.webp` en minuscules, et non `Shadow_Converge.webp` :
+  `titles-ui.js` résout le chemin en `titles/${slug}.webp`, et Hostinger tourne sous Linux
+  (casse significative) — l'écart aurait marché en local et donné un 404 en prod.
+- Nom non traduit dans les 5 langues : c'est un titre-visuel, le texte est peint dans
+  l'image (même règle que `junes` ou `joker_looking_cool`).
+
+### Vérifications réellement exécutées (stack Docker)
+
+Le PHP de ce lot a été exercé, pas seulement relu :
+
+| Scénario | Résultat |
+|---|---|
+| `/api/user/expert-status` anonyme | 401 (route résolue, PHP parse) |
+| 9 victoires ≤4 essais + 3 victoires lentes | `current = 9` — le filtre exclut bien les lentes |
+| 10ᵉ victoire rapide | débloqué au seuil exact ; Émoji reste fermé (isolation par mode) |
+| Session Expert sur mode verrouillé | 403 |
+| Session Expert après déblocage | 201 |
+| 49 puis 50 victoires Expert | titre refusé, puis accordé au seuil exact |
+| Contrôle négatif (`memento_mori`) | 403 « Condition not met » |
+| Migrations 033 et 034 rejouées ×2 | idempotentes, une seule ligne chacune |
+
+### Angles morts connus
+
+- **Le verrou client est optimiste** : hors ligne, backend en erreur ou visiteur non
+  connecté, le bouton reste cliquable. Ce n'est pas un trou — `api/sessions.php` refuse la
+  session de toute façon — mais un visiteur **non connecté** peut donc jouer en Expert sans
+  rien débloquer (ses parties ne sont de toute façon jamais enregistrées). À trancher : faut-il
+  exiger un compte pour l'Expert ?
+- **L'infobulle ne se retraduit pas au changement de langue à chaud** : le libellé du bouton
+  suit `data-i18n`, mais le `title` (qui porte les chiffres) est posé une fois.
+- **`personadle_count_consecutive_perfects()` sature à 200 parties** — sans effet sur le
+  déblocage (le plus haut seuil est 15), seulement sur l'affichage d'une série très longue.
+- **Défis en Mode Expert** toujours neutralisés (`TODO.md` §4) : à faire après ce lot, comme
+  prévu — proposer un défi sur un mode non débloqué n'aurait pas de sens.
+
 ## 2026-08-21 — fix(review): correctifs de la revue de la PR #69
 
 Revue complète de la PR #69 (`develop...feat/v2.1-expert-modes`, 118 fichiers). Les 725

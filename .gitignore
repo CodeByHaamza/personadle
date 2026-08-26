@@ -161,4 +161,5 @@ phpunit.phar
 # Playwright E2E
 test-results/
 playwright-report/
+playwright/.auth/
 phpstan.phar

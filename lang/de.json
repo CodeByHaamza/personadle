@@ -34,7 +34,14 @@
     "cancel": "Abbrechen",
     "expert_enter": "⚡ Expertenmodus",
     "expert_leave": "← Normaler Modus",
-    "expert_lyrics": "⚡ LIEDTEXT"
+    "expert_lyrics": "⚡ LIEDTEXT",
+    "expert_locked": "🔒 Expertenmodus",
+    "expert_cond_wins_under_attempts": "Gewinne {{required}} Spiele mit 4 Versuchen oder weniger",
+    "expert_cond_wins_single_day": "Gewinne {{required}} Spiele an einem einzigen Tag",
+    "expert_cond_consecutive_perfects": "Gewinne {{required}} Spiele in Folge im ersten Versuch",
+    "expert_cond_signin": "Melde dich an, um den Expertenmodus freizuschalten — dein Fortschritt folgt deinem Konto.",
+    "expert_cond_unknown": "Verbinde dich erneut, um deinen Fortschritt zu sehen.",
+    "expert_locked_title": "Expertenmodus gesperrt"
   },
   "modes": {
     "classic": {
@@ -696,6 +703,11 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Mit der akribischen Weisheit der Hohepriesterin hast du die Anomalien dokumentiert."
+    },
+    "denial_of_self": {
+      "name": "Verleugnung des Selbst",
+      "condition": "Gewinne 10 Expertenspiele in jedem der 6 Modi",
+      "description": "Du hast jede Expertenprüfung bestanden und nichts verleugnet. Der Schatten bist du — und du hast ihn gemeistert."
     },
     "event_code_empty": "⚠️ Bitte gib zuerst einen Code ein!",
     "event_code_signin": "🔒 Melde dich an, um einen Code einzulösen — Abzeichen gehören zu deinem Konto.",

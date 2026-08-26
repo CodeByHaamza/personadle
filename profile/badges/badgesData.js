@@ -400,6 +400,23 @@ export const badgesList = [
     },
   },
   {
+    id: "denial_of_self",
+    name: "Denial of Self",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Denial_Of_Self.webp",
+    condition: "Win 10 Expert games in each of the 6 modes",
+    description:
+      "You faced every Expert trial and denied nothing. The Shadow is you — and you mastered it.",
+    secret: false,
+    // Vérifié UNIQUEMENT côté serveur (condition_type `expert_modes_mastered`,
+    // api/lib/condition_check.php) : les victoires Expert par mode ne sont pas
+    // dans `stats` — le Mode Expert n'alimente pas `user_stats`, elles se
+    // recalculent depuis `game_sessions` (cf. api/user/stats.php).
+    // badgesManager fusionne `is_unlocked` renvoyé par GET /api/badges, qui fait foi.
+    check: () => false,
+  },
+
+  {
     id: "gyotre",
     name: "Gyotre",
     category: BADGE_CATEGORIES.SECRET,

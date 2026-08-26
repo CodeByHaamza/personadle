@@ -34,7 +34,14 @@
     "cancel": "Cancelar",
     "expert_enter": "⚡ Modo Experto",
     "expert_leave": "← Modo normal",
-    "expert_lyrics": "⚡ LETRA"
+    "expert_lyrics": "⚡ LETRA",
+    "expert_locked": "🔒 Modo Experto",
+    "expert_cond_wins_under_attempts": "Gana {{required}} partidas en 4 intentos o menos",
+    "expert_cond_wins_single_day": "Gana {{required}} partidas en un solo día",
+    "expert_cond_consecutive_perfects": "Gana {{required}} partidas seguidas al primer intento",
+    "expert_cond_signin": "Inicia sesión para desbloquear el Modo Experto: tu progreso sigue a tu cuenta.",
+    "expert_cond_unknown": "Vuelve a conectarte para ver tu progreso.",
+    "expert_locked_title": "Modo Experto bloqueado"
   },
   "modes": {
     "classic": {
@@ -696,6 +703,11 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Canalizando la sabiduría meticulosa de la Sacerdotisa, has documentado las anomalías."
+    },
+    "denial_of_self": {
+      "name": "Negación de Uno Mismo",
+      "condition": "Gana 10 partidas Experto en cada uno de los 6 modos",
+      "description": "Enfrentaste cada prueba Experta sin negar nada. La Sombra eres tú — y la dominaste."
     },
     "event_code_empty": "⚠️ ¡Introduce un código primero!",
     "event_code_signin": "🔒 Inicia sesión para canjear un código: las insignias se guardan en tu cuenta.",

@@ -141,7 +141,8 @@ INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_i
 ('investigation_team',        'profile/titles/investigation_team.webp',        'Investigation Team',     'Investigation Team',      'Investigation Team',    'Investigation Team',   'Investigation Team',  'mode_wins',           'personae',8,   'epic'),
 ('junes',                     'profile/titles/junes.webp',                     'Junes',                  'Junes',                   'Junes',                 'Junes',                'Junes',               'mode_wins',           'music',   15,  'rare'),
 ('naoya_first_awakening',     'profile/titles/naoya_first_awakening.webp',     'The First Awakening',    'Le Premier Éveil',        'El Primer Despertar',   'Das Erste Erwachen',   'Il Primo Risveglio',  'classic_p1_wins',     NULL,      15,  'rare'),
-('maya_always_be_positive',   'profile/titles/maya_always_be_positive.webp',   'Always Be Positive',     'Toujours Positif',        'Siempre Positivo',      'Immer Positiv',        'Sempre Positivo',     'emoji_p2_wins',       NULL,      10,  'common');
+('maya_always_be_positive',   'profile/titles/maya_always_be_positive.webp',   'Always Be Positive',     'Toujours Positif',        'Siempre Positivo',      'Immer Positiv',        'Sempre Positivo',     'emoji_p2_wins',       NULL,      10,  'common'),
+('shadows_converge',          'profile/titles/shadows_converge.webp',          'Shadows Converge',       'Shadows Converge',        'Shadows Converge',      'Shadows Converge',     'Shadows Converge',    'expert_wins_total',   NULL,      50,  'legendary');
 
 
 -- =============================================================================
@@ -671,6 +672,7 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('night_owl',           'Phantom of the Night',       'achievement', 'common',    'profile/badges/images/Badge_Night_Owl.webp',             'Play between midnight and 5 AM (Paris time)', 'manual', NULL, NULL, 0),
 ('nyx_hour',            'Nyx Hour',                   'achievement', 'rare',      'profile/badges/images/Badge_Nyx_Hour.webp',              'Play between midnight and 12:30 AM (Paris time)', 'manual', NULL, NULL, 0),
 ('stylist',             'Breathtaking Aesthetics',    'achievement', 'epic',      'profile/badges/images/Badge_stylist.webp',               'Customize your profile: avatar + UI color + profile music + equipped title', 'manual', NULL, NULL, 0),
+('denial_of_self',      'Denial of Self',             'achievement', 'epic',      'profile/badges/images/Badge_Denial_Of_Self.webp',        'Win 10 Expert games in each of the 6 modes', 'expert_modes_mastered', NULL, 10, 0),
 
 -- ── Streak badges ────────────────────────────────────────────────────────────
 ('pyro_spark',          'The Ignition',               'streak',      'common',    'profile/badges/images/Badge_Pyro_Spark.webp',            'Reach a 7-day streak', 'streak_record', NULL, 7, 0),

@@ -34,7 +34,14 @@
     "cancel": "Annuler",
     "expert_enter": "⚡ Mode Expert",
     "expert_leave": "← Mode normal",
-    "expert_lyrics": "⚡ PAROLES"
+    "expert_lyrics": "⚡ PAROLES",
+    "expert_locked": "🔒 Mode Expert",
+    "expert_cond_wins_under_attempts": "Gagne {{required}} parties en 4 essais ou moins",
+    "expert_cond_wins_single_day": "Gagne {{required}} parties dans la même journée",
+    "expert_cond_consecutive_perfects": "Gagne {{required}} parties d'affilée du premier coup",
+    "expert_cond_signin": "Connecte-toi pour débloquer le Mode Expert — ta progression suit ton compte.",
+    "expert_cond_unknown": "Reconnecte-toi pour voir ta progression.",
+    "expert_locked_title": "Mode Expert verrouillé"
   },
   "modes": {
     "classic": {
@@ -696,6 +703,11 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Puisant dans la sagesse méticuleuse de la Prêtresse, tu as documenté les anomalies."
+    },
+    "denial_of_self": {
+      "name": "Refus de Soi",
+      "condition": "Gagner 10 parties Expert dans chacun des 6 modes",
+      "description": "Tu as affronté chaque épreuve Expert sans rien renier. L'Ombre, c'est toi — et tu l'as maîtrisée."
     },
     "event_code_empty": "⚠️ Entre d'abord un code !",
     "event_code_signin": "🔒 Connecte-toi pour utiliser un code — les badges sont liés à ton compte.",

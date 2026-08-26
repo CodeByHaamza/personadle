@@ -34,7 +34,14 @@
     "cancel": "Cancelar",
     "expert_enter": "⚡ Modo Especialista",
     "expert_leave": "← Modo normal",
-    "expert_lyrics": "⚡ LETRA"
+    "expert_lyrics": "⚡ LETRA",
+    "expert_locked": "🔒 Modo Especialista",
+    "expert_cond_wins_under_attempts": "Vence {{required}} partidas em 4 tentativas ou menos",
+    "expert_cond_wins_single_day": "Vence {{required}} partidas num único dia",
+    "expert_cond_consecutive_perfects": "Vence {{required}} partidas seguidas à primeira tentativa",
+    "expert_cond_signin": "Inicia sessão para desbloquear o Modo Especialista — o teu progresso segue a tua conta.",
+    "expert_cond_unknown": "Liga-te novamente para veres o teu progresso.",
+    "expert_locked_title": "Modo Especialista bloqueado"
   },
   "modes": {
     "classic": {
@@ -696,6 +703,11 @@
       "name": "A Auditoria da Sacerdotisa",
       "condition": "???",
       "description": "Canalizando a sabedoria meticulosa da Alta Sacerdotisa, documentaste as anomalias. Atribuído a quem carrega o pesado fardo da papelada para manter o caos do sistema sob controlo."
+    },
+    "denial_of_self": {
+      "name": "Negação de Si",
+      "condition": "Vença 10 partidas Especialista em cada um dos 6 modos",
+      "description": "Enfrentaste cada prova Especialista sem negar nada. A Sombra és tu — e dominaste-a."
     },
     "event_code_empty": "⚠️ Introduz primeiro um código!",
     "event_code_signin": "🔒 Inicia sessão para usar um código — os emblemas ficam ligados à tua conta.",

@@ -25,6 +25,10 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `Unknown column 'client_session_id'` à chaque partie.
 - [ ] Backup avant la 032 — elle supprime une contrainte d'unicité (aucune donnée effacée,
       mais le retour arrière exigerait de dédoublonner à la main).
+- [ ] Jouer `sql/migrations/033_badge_denial_of_self.sql` (badge Denial of Self) et
+      `034_title_shadows_converge.sql` (titre Shadows Converge). Les deux sont
+      `INSERT IGNORE`, sans risque et rejouables — mais sans elles le badge et le titre
+      n'existent pas en prod, et le joueur ne peut jamais les décrocher.
 - [ ] **Changelog joueur** (`PersonaDLE 2.1/PersonaDLE_Update.html`) — il ne contient **aucune**
       entrée Expert, pour aucun des 6 modes. Le lot entier est à écrire d'un bloc.
 
@@ -49,20 +53,43 @@ Bonne nouvelle sur le coût : `api/lib/condition_check.php` gère déjà `mode_w
 `condition_mode`. La règle « Classique Expert après N victoires en Classique » est donc une
 **ligne de données**, pas du nouveau code de condition.
 
-- [ ] Choisir la condition par mode (reco : `mode_wins` sur le mode normal correspondant —
-      lisible, déjà mesurée, et elle apprend le mode avant d'en durcir la règle).
-- [ ] Seed SQL des conditions + **1 badge et 1 titre** de déblocage (mêmes colonnes
-      `condition_type` / `condition_mode` / `condition_value` que `titles` et `badges`).
-- [ ] **Vérification serveur obligatoire** dans `api/sessions.php` : refuser `is_expert = 1`
-      si la condition du mode n'est pas remplie. Le mode vit dans l'URL — un gate purement
-      client se contourne en tapant `?expert=1`.
-- [ ] Endpoint (ou extension d'un existant) qui rend l'état de déblocage des 6 modes, pour
-      que le front n'ait pas à le deviner.
-- [ ] Front : griser le bouton ⚡ avec la condition en clair, et rediriger `?expert=1` vers le
-      mode normal tant qu'elle n'est pas remplie.
-- [ ] i18n 6 langues (EN d'abord) pour le libellé de condition et la notification de déblocage.
-- [ ] Tests : condition serveur refusée/acceptée (PHPUnit), redirection front (E2E), et
-      l'invariant « un mode Expert non débloqué ne peut pas enregistrer de session ».
+> ✅ **Fait le 2026-08-25**, branche `feat/expert-mode-unlock-conditions`. Conditions
+> arbitrées avec Hamza, plus exigeantes que la reco `mode_wins` initiale — elles mesurent
+> la maîtrise (vitesse, régularité), pas le volume :
+>
+> | Mode | Condition |
+> |---|---|
+> | Classique, Silhouette | 10 victoires en 4 essais ou moins chacune |
+> | Émoji | 10 victoires sur une seule journée |
+> | AOA, Personae, Musique | 15 victoires parfaites (1 essai) d'affilée |
+>
+> Décision produit : le déblocage est une propriété du **compte** — il suit le joueur sur
+> tous ses appareils, et sans compte rien n'est débloquable (défaut fail-closed).
+
+- [x] Conditions choisies par mode (voir tableau ci-dessus).
+- [x] Seed SQL + **1 badge** (`denial_of_self`, migration 033 — 10 victoires Expert dans
+      chacun des 6 modes) et **1 titre** (`shadows_converge`, migration 034 — 50 victoires
+      Expert au total, toutes réparties comme le joueur veut).
+- [x] **Vérification serveur** dans `api/sessions.php` : `is_expert = 1` refusé en 403 si le
+      mode n'est pas débloqué. Seuils lus depuis `api/lib/expert_unlocks.php`, source unique
+      partagée avec l'endpoint — l'écran ne peut pas annoncer une règle différente.
+- [x] `GET /api/user/expert-status` : état des 6 modes + progression. Ne renvoie aucun
+      libellé (sinon anglais pour les 6 langues), seulement `condition_type` et les nombres.
+- [x] Front : bouton grisé avec infobulle stylée (objectif + barre de progression), et
+      redirection `?expert=1` → mode normal quand le mode est verrouillé.
+- [x] i18n 6 langues.
+- [x] Tests Vitest (20, `tests/expertUnlock.test.js`) + validation manuelle bout en bout sur
+      la stack Docker : filtre ≤4 essais, déblocage au seuil exact, isolation par mode,
+      403 sur session Expert verrouillée, 201 une fois débloquée, migrations rejouées.
+
+**Reste à faire sur ce lot** (non bloquant, mais annoncé dans CLAUDE.md §13) :
+
+- [ ] **Tests PHPUnit** du gate serveur et des 4 nouveaux `condition_type`. Vérifiés à la
+      main via curl contre Docker, pas encore automatisés — aucun runtime PHP sur le poste
+      de dev Windows, ils devront être écrits puis lancés dans le conteneur.
+- [ ] **Test E2E** de la redirection `?expert=1` → mode normal.
+- [ ] **Changelog joueur** (`PersonaDLE 2.1/PersonaDLE_Update.html`) : le lot est très
+      visible côté joueur, il doit y figurer.
 
 ## 2. Les trois classements
 

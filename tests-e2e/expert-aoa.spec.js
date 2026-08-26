@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 
+// Compte pré-débloqué (tests-e2e/global-setup.js) : la porte d'entrée du Mode
+// Expert (js/gameCore.js::applyExpertGate) redirige `?expert=1` vers le mode
+// normal pour un visiteur non débloqué — ces tests couvrent le GAMEPLAY
+// Expert, pas cette redirection.
+test.use({ storageState: "playwright/.auth/alloutattack.json" });
+
 // Budget élargi pour ce seul fichier. attendreAoa() peut attendre 15 s (CDN
 // externe) et guessWrong() jusqu'à 15 s par essai : un test qui enchaîne un
 // chargement et 4 erreurs dépasse structurellement les 30 s par défaut dès que
@@ -131,6 +137,17 @@ test.describe("AOA Expert — l'indice ne bouge pas", () => {
 
 test.describe("AOA Expert — abandon", () => {
   test("l'abandon révèle l'image en clair et enregistre is_expert", async ({ page }) => {
+    // Compte authentifié (storageState) : la session part directement en POST
+    // /api/sessions au lieu d'atterrir dans la file `pendingSessions` (réservée
+    // au hors-ligne/anonyme, cf. savePendingSession() dans js/gameCore.js) — on
+    // intercepte donc la requête plutôt que de lire la file locale.
+    const sessionRequests = [];
+    page.on("request", (req) => {
+      if (req.method() === "POST" && req.url().includes("/api/sessions")) {
+        sessionRequests.push(req.postDataJSON());
+      }
+    });
+
     await page.goto(EXPERT);
     await attendreAoa(page);
 
@@ -142,14 +159,8 @@ test.describe("AOA Expert — abandon", () => {
       .poll(async () => await filtre(page), { timeout: 10000 })
       .toBe("none");
 
-    await page.waitForFunction(
-      () => JSON.parse(localStorage.getItem("pendingSessions") || "[]").length > 0,
-      { timeout: 5000 }
-    );
-    const pending = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("pendingSessions") || "[]")
-    );
-    const last = pending[pending.length - 1];
+    await expect.poll(() => sessionRequests.length, { timeout: 5000 }).toBeGreaterThan(0);
+    const last = sessionRequests[sessionRequests.length - 1];
     expect(last.mode).toBe("alloutattack");
     expect(last.is_expert).toBe(true);
     expect(last.result).toBe("giveup");

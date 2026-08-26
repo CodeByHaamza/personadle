@@ -216,6 +216,12 @@ export function expertContext({ prefix, statsKey, hashMode }) {
     statsKey: isExpert ? `${statsKey}Expert` : statsKey,
     hashMode: isExpert ? `${hashMode}Expert` : hashMode,
     /**
+     * Clé de mode canonique du backend ("classic", "music"…), toujours celle du mode
+     * NORMAL. `statsKey`/`hashMode` sont des libellés capitalisés et suffixés en
+     * Expert ("ClassicExpert") : les passer à l'API ne matcherait aucun mode.
+     */
+    modeKey: normalizeModeKey(hashMode),
+    /**
      * Traduit une clé localStorage du mode normal vers sa variante Expert.
      * En mode normal la clé historique est rendue telle quelle — aucune partie en
      * cours ne doit être perdue par ce câblage.
@@ -251,6 +257,240 @@ export function setupExpertToggle(ctx, page) {
   toggle.textContent = t != null && t !== k ? t : ctx.isExpert ? "← Normal mode" : "⚡ Expert mode";
   toggle.classList.toggle("active", ctx.isExpert);
   toggle.href = ctx.isExpert ? page : `${page}?expert=1`;
+
+  // Le verrou se pose ensuite, quand le backend a répondu (la fonction doit
+  // rester synchrone pour ses appelants). Le bouton est donc rendu déverrouillé
+  // puis dégradé — sur une page Expert, c'est une redirection à la place.
+  applyExpertGate(ctx, page, toggle);
+}
+
+// Le déblocage de l'Expert est une propriété du COMPTE : il se gagne en jouant
+// connecté, et suit alors le joueur sur n'importe quel appareil. Conséquence
+// directe : sans compte, il n'y a rien à débloquer — le bouton reste verrouillé.
+// Le défaut est donc fail-closed (verrouillé sauf réponse serveur contraire), et
+// non l'inverse.
+const EXPERT_STATUS_STORAGE_KEY = "expertUnlockStatus";
+
+let _expertStatus = null; // { state: "ok"|"anonymous"|"unavailable", modes?: object }
+let _expertStatusPromise = null; // dédoublonne les appels concurrents des 6 modes
+
+/**
+ * État de déblocage des 6 Modes Expert.
+ *
+ * - `ok`          → réponse du serveur, fait autorité
+ * - `anonymous`   → 401 : pas de compte, donc rien de débloquable
+ * - `unavailable` → hors ligne / erreur : on retombe sur le dernier état connu
+ *                   du joueur (localStorage), sinon rien
+ *
+ * @returns {Promise<{state: string, modes?: Record<string, object>|null}>}
+ */
+export async function fetchExpertStatus() {
+  if (_expertStatus) return _expertStatus;
+  if (_expertStatusPromise) return _expertStatusPromise;
+
+  _expertStatusPromise = (async () => {
+    const api = window._personadleApi;
+    if (!api?.user?.expertStatus) {
+      // Bridge absent : on ne peut rien affirmer → verrouillé par défaut.
+      _expertStatus = { state: "unavailable", modes: readCachedExpertStatus() };
+      return _expertStatus;
+    }
+
+    try {
+      const modes = (await api.user.expertStatus())?.expert_status ?? null;
+      if (modes) {
+        cacheExpertStatus(modes);
+        _expertStatus = { state: "ok", modes };
+      } else {
+        _expertStatus = { state: "unavailable", modes: readCachedExpertStatus() };
+      }
+    } catch (err) {
+      _expertStatus =
+        err?.status === 401
+          ? { state: "anonymous" }
+          : { state: "unavailable", modes: readCachedExpertStatus() };
+    }
+    return _expertStatus;
+  })();
+
+  return _expertStatusPromise;
+}
+
+/**
+ * Mémorise le dernier état connu, pour que le joueur déjà débloqué qui passe
+ * hors ligne ne retrouve pas ses 6 modes fermés. Rattaché à l'id du compte : sur
+ * un appareil partagé, le cache d'un joueur ne doit pas déverrouiller l'autre.
+ */
+function cacheExpertStatus(modes) {
+  const userId = window._currentUser?.id;
+  if (userId == null) return;
+  try {
+    localStorage.setItem(EXPERT_STATUS_STORAGE_KEY, JSON.stringify({ userId, modes }));
+  } catch {
+    // Quota plein ou navigation privée : le cache est un confort, pas un prérequis.
+  }
+}
+
+/** Dernier état connu pour le compte courant, ou null. */
+function readCachedExpertStatus() {
+  const userId = window._currentUser?.id;
+  if (userId == null) return null;
+  try {
+    const raw = JSON.parse(localStorage.getItem(EXPERT_STATUS_STORAGE_KEY) || "null");
+    return raw && raw.userId === userId ? raw.modes : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Réinitialise le cache mémoire — utilisé par les tests. */
+export function resetExpertStatusCache() {
+  _expertStatus = null;
+  _expertStatusPromise = null;
+}
+
+/**
+ * Redirection isolée derrière un objet : jsdom n'implémente pas la navigation,
+ * les tests remplacent `go` pour vérifier qu'elle a bien lieu.
+ */
+export const expertNavigate = {
+  go: (url) => window.location.replace(url),
+};
+
+/** Traduction avec repli, cf. CLAUDE.md §5 (t() renvoie la clé si absente). */
+function _t(key, vars, fallback) {
+  const r = window.i18n?.t?.(key, vars);
+  return r != null && r !== key ? r : fallback;
+}
+
+/**
+ * Libellé de la condition, progression comprise (« 7/10 victoires… »).
+ * Construit côté client : le serveur n'envoie que le type et les deux nombres,
+ * sinon le texte serait en anglais dans les 6 langues.
+ */
+export function expertConditionLabel(progress) {
+  const { condition_type: type, current, required } = progress;
+  const vars = { current, required };
+
+  // Phrase d'objectif seule : l'avancement chiffré est rendu à part, par la barre
+  // de progression de l'infobulle. Le répéter ici donnerait « 7/10 … 7 / 10 ».
+  const fallbacks = {
+    mode_wins_under_attempts: `Win ${required} games in 4 attempts or fewer`,
+    mode_wins_single_day: `Win ${required} games in a single day`,
+    mode_consecutive_perfects: `Win ${required} games in a row on the first try`,
+  };
+
+  const suffix = String(type).replace(/^mode_/, "");
+  return _t(`ui.expert_cond_${suffix}`, vars, fallbacks[type] ?? `${current} / ${required}`);
+}
+
+/** Identifiant unique de l'infobulle, référencé par aria-describedby. */
+const EXPERT_TOOLTIP_ID = "expertLockTooltip";
+
+/**
+ * Carte d'infobulle : titre, objectif en clair, et barre de progression.
+ * Construite en DOM plutôt qu'en innerHTML — `reason` vient de l'i18n, mais rien
+ * ne justifie d'ouvrir une porte à l'injection pour trois nœuds.
+ */
+function buildExpertTooltip(reason, progress) {
+  const tip = document.createElement("div");
+  tip.className = "expert-tooltip";
+  tip.id = EXPERT_TOOLTIP_ID;
+  tip.setAttribute("role", "tooltip");
+
+  const title = document.createElement("span");
+  title.className = "expert-tooltip-title";
+  title.textContent = _t("ui.expert_locked_title", undefined, "Expert mode locked");
+  tip.append(title);
+
+  const cond = document.createElement("span");
+  cond.className = "expert-tooltip-cond";
+  cond.textContent = reason;
+  tip.append(cond);
+
+  // Pas de barre quand il n'y a rien à mesurer (visiteur non connecté, hors ligne) :
+  // une jauge à 0 laisserait croire à une progression réelle qui n'existe pas.
+  const required = Number(progress?.required) || 0;
+  if (required > 0) {
+    const current = Math.max(0, Number(progress.current) || 0);
+    const pct = Math.min(100, Math.round((current / required) * 100));
+
+    const bar = document.createElement("span");
+    bar.className = "expert-tooltip-bar";
+    const fill = document.createElement("i");
+    fill.style.width = `${pct}%`;
+    bar.append(fill);
+
+    const count = document.createElement("span");
+    count.className = "expert-tooltip-count";
+    count.textContent = `${current} / ${required}`;
+
+    tip.append(bar, count);
+  }
+
+  return tip;
+}
+
+/** Grise le bouton et lui accroche l'infobulle expliquant le verrouillage. */
+function lockExpertToggle(toggle, reason, progress) {
+  toggle.classList.add("expert-locked");
+  toggle.setAttribute("aria-disabled", "true");
+  // Un <a> sans href n'est plus activable ni copiable ; tabindex le garde
+  // atteignable au clavier — c'est aussi ce qui permet d'ouvrir l'infobulle au
+  // doigt sur mobile, où le survol n'existe pas.
+  toggle.removeAttribute("href");
+  toggle.setAttribute("tabindex", "0");
+  // L'infobulle maison remplace le title natif : les garder tous les deux
+  // afficherait deux bulles superposées au survol.
+  toggle.removeAttribute("title");
+
+  const label = _t("ui.expert_locked", undefined, "🔒 Expert mode");
+  toggle.setAttribute("data-i18n", "ui.expert_locked");
+  toggle.textContent = label;
+  toggle.setAttribute("aria-label", `${label} — ${reason}`);
+
+  // Rejouable : un second appel ne doit pas empiler deux infobulles.
+  document.getElementById(EXPERT_TOOLTIP_ID)?.remove();
+  toggle.insertAdjacentElement("afterend", buildExpertTooltip(reason, progress));
+  toggle.setAttribute("aria-describedby", EXPERT_TOOLTIP_ID);
+}
+
+/**
+ * Applique la porte d'entrée : bouton grisé sur une page normale, redirection
+ * vers le mode normal sur une page Expert non débloquée (le mode vit dans l'URL,
+ * `?expert=1` se tape à la main).
+ */
+async function applyExpertGate(ctx, page, toggle) {
+  if (!ctx.modeKey) return;
+
+  const status = await fetchExpertStatus();
+  const progress = status.modes?.[ctx.modeKey] ?? null;
+
+  let locked, reason;
+  if (status.state === "anonymous") {
+    locked = true;
+    reason = _t("ui.expert_cond_signin", undefined, "Sign in to unlock Expert mode");
+  } else if (progress) {
+    locked = !progress.unlocked;
+    reason = expertConditionLabel(progress);
+  } else {
+    // Aucune réponse et aucun état connu : verrouillé, jamais ouvert par défaut.
+    locked = true;
+    reason = _t("ui.expert_cond_unknown", undefined, "Reconnect to check your progress");
+  }
+
+  if (!locked) return;
+
+  if (ctx.isExpert) {
+    // Ne ressortir le joueur que sur une réponse FERME (serveur ou 401). Un
+    // simple échec réseau ne doit pas éjecter de sa partie un joueur
+    // légitimement débloqué — de toute façon `api/sessions.php` refuserait
+    // d'enregistrer la session de quelqu'un qui ne l'est pas.
+    if (status.state === "ok" || status.state === "anonymous") expertNavigate.go(page);
+    return;
+  }
+
+  lockExpertToggle(toggle, reason, progress);
 }
 
 /**

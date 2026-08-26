@@ -26,6 +26,7 @@ export const TITLES_LOCAL = [
   { slug: "maya_always_be_positive", name: "Always Be Positive", rarity: "common", condition_type: "emoji_p2_wins", condition_value: 10 },
   { slug: "investigation_team", name: "Investigation Team", rarity: "epic", condition_type: "mode_wins", condition_mode: "personae", condition_value: 8 },
   { slug: "junes", name: "Junes", rarity: "rare", condition_type: "mode_wins", condition_mode: "music", condition_value: 15 },
+  { slug: "shadows_converge", name: "Shadows Converge", rarity: "legendary", condition_type: "expert_wins_total", condition_value: 50 },
 ];
 
 /** Mappe un condition_mode (BDD, minuscule) vers la clé de stats.modeWins (capitalisée). */
@@ -89,6 +90,12 @@ export function isTitleConditionMet(title, ctx) {
       return (stats.modeWins?.Classic || 0) >= v;
     case "emoji_p2_wins":
       return (stats.modeWins?.Emoji || 0) >= v;
+    case "expert_wins_total":
+      // Vérifié UNIQUEMENT côté serveur (api/lib/condition_check.php) : le Mode
+      // Expert n'alimente pas `user_stats`, ses victoires se recalculent depuis
+      // `game_sessions` et n'existent donc pas dans `stats.modeWins`. L'API
+      // /api/titles renvoie `is_unlocked`, qui fait foi à l'affichage.
+      return false;
     case "leaderboard_top":
       return (profile.bestLeaderboardRank || 9999) <= v;
     case "weekly_clean_modes":
@@ -141,6 +148,8 @@ export function titleConditionText(t) {
       return `Win ${v} Classic games with P1 filter`;
     case "emoji_p2_wins":
       return `Win ${v} Emoji games with P2 filter`;
+    case "expert_wins_total":
+      return `Win ${v} games in Expert mode`;
     case "leaderboard_top":
       return `Reach top ${v} on the leaderboard`;
     case "weekly_clean_modes":

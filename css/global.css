@@ -3448,6 +3448,128 @@ body.darkmode #rulesModal em {
   box-shadow: none;
 }
 
+/* Bouton Expert verrouillé — condition de déblocage pas encore remplie.
+   Le rouge vif du bouton actif devient un gris éteint : le cadenas dit « pas
+   encore », pas « cassé ». La condition chiffrée est dans l'infobulle (title) et
+   dans aria-label, posés par setupExpertToggle(). */
+.expert-toggle.expert-locked {
+  color: #8a8a8a;
+  background: #141414;
+  border-color: #4a4a4a;
+  cursor: not-allowed;
+}
+
+/* Neutralise le survol du bouton actif (fond rouge, halo, tiltBounce) : un
+   verrou qui réagit comme un bouton cliquable laisserait croire qu'il l'est. */
+.expert-toggle.expert-locked:hover,
+.expert-toggle.expert-locked:focus-visible {
+  background: #141414;
+  box-shadow: none;
+  animation: none;
+  transform: none;
+}
+
+/* Le focus clavier doit rester visible : le bouton est atteignable au Tab
+   (tabindex=0) pour que les lecteurs d'écran lisent la condition. */
+.expert-toggle.expert-locked:focus-visible {
+  outline: 2px solid #8a8a8a;
+  outline-offset: 2px;
+}
+
+/* ── Infobulle de déblocage ────────────────────────────────────────────────
+   Remplace le title natif (lent, illisible, non stylable). Ancrée sur la zone
+   du bouton, qui devient le référentiel de positionnement. */
+.expert-toggle-zone {
+  position: relative;
+}
+
+.expert-tooltip {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 12px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: max-content;
+  min-width: 220px;
+  /* Ne jamais déborder de l'écran sur mobile, où la zone est proche des bords. */
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 12px 14px;
+  background: #101010;
+  border: 2px solid #e63946;
+  /* Mêmes angles coupés que le bouton et les cartes Persona 5. */
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-5px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+}
+
+/* `:focus` et pas seulement `:focus-visible` : sur mobile il n'y a pas de survol,
+   c'est l'appui sur le bouton (tabindex=0) qui doit révéler la condition. */
+.expert-toggle.expert-locked:hover + .expert-tooltip,
+.expert-toggle.expert-locked:focus + .expert-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.expert-tooltip-title {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e63946;
+}
+
+.expert-tooltip-cond {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #f2f2f2;
+}
+
+.expert-tooltip-bar {
+  display: block;
+  height: 6px;
+  background: #2b2b2b;
+  overflow: hidden;
+}
+
+.expert-tooltip-bar > i {
+  display: block;
+  height: 100%;
+  background: #e63946;
+  transition: width 0.3s ease;
+}
+
+.expert-tooltip-count {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: #9a9a9a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expert-tooltip {
+    transition: opacity 0.16s ease, visibility 0.16s;
+    transform: translateX(-50%);
+  }
+  .expert-toggle.expert-locked:hover + .expert-tooltip,
+  .expert-toggle.expert-locked:focus + .expert-tooltip {
+    transform: translateX(-50%);
+  }
+  .expert-tooltip-bar > i {
+    transition: none;
+  }
+}
+
 /* Le halo rouge derrière toute la page signale qu'on n'est plus dans le mode
    normal, même après avoir scrollé loin du bouton. */
 body.expert-mode {

@@ -34,7 +34,14 @@
     "cancel": "Annulla",
     "expert_enter": "⚡ Modalità Esperto",
     "expert_leave": "← Modalità normale",
-    "expert_lyrics": "⚡ TESTO"
+    "expert_lyrics": "⚡ TESTO",
+    "expert_locked": "🔒 Modalità Esperto",
+    "expert_cond_wins_under_attempts": "Vinci {{required}} partite in 4 tentativi o meno",
+    "expert_cond_wins_single_day": "Vinci {{required}} partite in un solo giorno",
+    "expert_cond_consecutive_perfects": "Vinci {{required}} partite di fila al primo tentativo",
+    "expert_cond_signin": "Accedi per sbloccare la Modalità Esperto: i tuoi progressi seguono il tuo account.",
+    "expert_cond_unknown": "Riconnettiti per vedere i tuoi progressi.",
+    "expert_locked_title": "Modalità Esperto bloccata"
   },
   "modes": {
     "classic": {
@@ -696,6 +703,11 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Canalizzando la sapienza meticolosa della Sacerdotessa, hai documentato le anomalie."
+    },
+    "denial_of_self": {
+      "name": "Negazione del Sé",
+      "condition": "Vinci 10 partite Esperto in ciascuna delle 6 modalità",
+      "description": "Hai affrontato ogni prova Esperta senza negare nulla. L'Ombra sei tu — e l'hai dominata."
     },
     "event_code_empty": "⚠️ Inserisci prima un codice!",
     "event_code_signin": "🔒 Accedi per riscattare un codice: le medaglie sono legate al tuo account.",

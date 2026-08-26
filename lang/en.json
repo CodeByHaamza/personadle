@@ -34,7 +34,14 @@
     "cancel": "Cancel",
     "expert_enter": "⚡ Expert mode",
     "expert_leave": "← Normal mode",
-    "expert_lyrics": "⚡ LYRICS"
+    "expert_lyrics": "⚡ LYRICS",
+    "expert_locked": "🔒 Expert mode",
+    "expert_cond_wins_under_attempts": "Win {{required}} games in 4 attempts or fewer",
+    "expert_cond_wins_single_day": "Win {{required}} games in a single day",
+    "expert_cond_consecutive_perfects": "Win {{required}} games in a row on the first try",
+    "expert_cond_signin": "Sign in to unlock Expert mode — your progress follows your account.",
+    "expert_cond_unknown": "Reconnect to check your progress.",
+    "expert_locked_title": "Expert mode locked"
   },
   "modes": {
     "classic": {
@@ -696,6 +703,11 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Channeling the meticulous wisdom of the High Priestess, you've documented the anomalies. Awarded to those who bear the heavy burden of paperwork to keep the system's chaos in check."
+    },
+    "denial_of_self": {
+      "name": "Denial of Self",
+      "condition": "Win 10 Expert games in each of the 6 modes",
+      "description": "You faced every Expert trial and denied nothing. The Shadow is you — and you mastered it."
     },
     "event_code_empty": "⚠️ Please enter a code first!",
     "event_code_signin": "🔒 Sign in to redeem a code — badges are saved to your account.",

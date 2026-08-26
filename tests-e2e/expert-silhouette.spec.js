@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 
+// Compte pré-débloqué (tests-e2e/global-setup.js) : la porte d'entrée du Mode
+// Expert (js/gameCore.js::applyExpertGate) redirige `?expert=1` vers le mode
+// normal pour un visiteur non débloqué — ces tests couvrent le GAMEPLAY
+// Expert, pas cette redirection.
+test.use({ storageState: "playwright/.auth/silhouette.json" });
+
 /**
  * Silhouette Expert — la silhouette n'apparaît qu'en flash.
  *
@@ -133,6 +139,17 @@ test.describe("Silhouette Expert — le flash", () => {
 
 test.describe("Silhouette Expert — fin de partie", () => {
   test("l'abandon révèle l'image et enregistre is_expert", async ({ page }) => {
+    // Compte authentifié (storageState) : la session part directement en POST
+    // /api/sessions au lieu d'atterrir dans la file `pendingSessions` (réservée
+    // au hors-ligne/anonyme, cf. savePendingSession() dans js/gameCore.js) — on
+    // intercepte donc la requête plutôt que de lire la file locale.
+    const sessionRequests = [];
+    page.on("request", (req) => {
+      if (req.method() === "POST" && req.url().includes("/api/sessions")) {
+        sessionRequests.push(req.postDataJSON());
+      }
+    });
+
     await page.goto(EXPERT);
     await page.waitForLoadState("networkidle");
 
@@ -144,14 +161,8 @@ test.describe("Silhouette Expert — fin de partie", () => {
 
     expect(await opacite(page), "la silhouette reste affichée après l'abandon").toBe("1");
 
-    await page.waitForFunction(
-      () => JSON.parse(localStorage.getItem("pendingSessions") || "[]").length > 0,
-      { timeout: 5000 }
-    );
-    const pending = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("pendingSessions") || "[]")
-    );
-    const last = pending[pending.length - 1];
+    await expect.poll(() => sessionRequests.length, { timeout: 5000 }).toBeGreaterThan(0);
+    const last = sessionRequests[sessionRequests.length - 1];
     expect(last.mode).toBe("silhouette");
     expect(last.is_expert).toBe(true);
   });

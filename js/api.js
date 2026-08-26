@@ -167,6 +167,12 @@ export const api = {
     get: (userId) => get(`/user/${userId}`),
 
     /**
+     * État de déblocage des 6 Modes Expert pour l'utilisateur connecté.
+     * @returns {Promise<{expert_status: Record<string, {unlocked: boolean, condition_type: string, required: number, current: number}>}>}
+     */
+    expertStatus: () => get("/user/expert-status"),
+
+    /**
      * Met à jour le profil (avatar, pseudo, thème, wallpaper…).
      * @param {number} userId
      * @param {object} data

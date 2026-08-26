@@ -1,5 +1,6 @@
 import { test, expect, request as pwRequest } from "@playwright/test";
 import { csrfHeader } from "./helpers/csrf.js";
+import { registerAndUnlockExpert } from "./helpers/expert-unlock.js";
 
 /**
  * « 50 parties comptent pour 50 parties » — vérification de bout en bout.
@@ -111,16 +112,42 @@ test.describe.serial("API — plusieurs parties le même jour", () => {
   });
 
   test("une partie Expert ne compte pas dans les stats du mode normal", async () => {
-    const r = await jouer(uuid(), "win", { is_expert: true });
-    expect(r.status()).toBe(201);
+    // Compte dédié, débloqué via l'API (porte d'entrée du Mode Expert,
+    // api/lib/expert_unlocks.php) : is_expert=1 est refusé en 403 tant que la
+    // condition n'est pas remplie, et unlockExpert joue ses parties sur MODE —
+    // les mêler au compte `ctx` fausserait le compte "toujours 3 parties
+    // normales" des tests précédents.
+    const ctx2 = await pwRequest.newContext({ baseURL: BASE });
+    try {
+      const { userId: userId2 } = await registerAndUnlockExpert(ctx2, MODE);
 
-    const res = await ctx.get(`/api/user/${userId}/stats`);
-    const { by_mode, expert_by_mode } = (await res.json()).stats;
-    const normal = by_mode.find((m) => m.mode === MODE);
-    expect(Number(normal.games), "toujours 3 parties normales").toBe(3);
+      const r = await ctx2.post("/api/sessions", {
+        data: {
+          mode: MODE,
+          played_date: jour,
+          target_name: `Cible expert ${uuid()}`,
+          result: "win",
+          attempts: 3,
+          time_ms: 4000,
+          client_session_id: uuid(),
+          is_expert: true,
+        },
+        headers: await csrfHeader(ctx2),
+      });
+      expect(r.status()).toBe(201);
 
-    const expert = expert_by_mode.find((m) => m.mode === MODE);
-    expect(expert, "la partie Expert apparaît dans expert_by_mode").toBeTruthy();
-    expect(Number(expert.games)).toBe(1);
+      const res = await ctx2.get(`/api/user/${userId2}/stats`);
+      const { by_mode, expert_by_mode } = (await res.json()).stats;
+      const normal = by_mode.find((m) => m.mode === MODE);
+      expect(Number(normal.games), "seules les parties de déblocage, pas la partie Expert").toBe(
+        10
+      );
+
+      const expert = expert_by_mode.find((m) => m.mode === MODE);
+      expect(expert, "la partie Expert apparaît dans expert_by_mode").toBeTruthy();
+      expect(Number(expert.games)).toBe(1);
+    } finally {
+      await ctx2.dispose();
+    }
   });
 });
