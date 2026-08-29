@@ -90,6 +90,9 @@ if ($method === 'GET') {
         'challenge_date'    => $m['challenge_date'],
         'challenge_filters' => isset($m['challenge_filters']) ? $m['challenge_filters'] : null,
         'challenge_target'  => isset($m['challenge_target']) ? $m['challenge_target'] : null,
+        // Sans ce champ le client ne peut pas savoir vers quelle page envoyer le
+        // joueur (`?expert=1`), ni quel barème appliquer à l'arrivée.
+        'challenge_is_expert' => !empty($m['challenge_is_expert']),
         'status'            => $m['status'],
         'created_at'      => $m['created_at'],
         'sender'   => ['pseudo' => $m['sender_pseudo'],   'avatar' => $m['sender_avatar']],
@@ -153,16 +156,25 @@ if ($method === 'POST') {
             $date = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
         }
 
-        // Un seul défi actif par jour entre deux amis (peu importe le mode)
+        // Défi en Mode Expert (migration 037). L'Expert est une DIMENSION du défi :
+        // cible tirée dans le pool Expert, barème propre, et un défi Expert ne se
+        // compare qu'à un défi Expert.
+        $isExpert = !empty($data['challenge_is_expert']) ? 1 : 0;
+
+        // Un seul défi actif par jour entre deux amis, POUR UNE DIMENSION DONNÉE.
+        // `challenge_is_expert` fait partie de la clé : proposer le même jour un
+        // défi normal ET un défi Expert au même ami est légitime — deux cibles,
+        // deux barèmes, deux jeux. Les confondre interdirait le second sans raison.
         $stmtExisting = $pdo->prepare("
             SELECT id FROM messages
             WHERE ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?))
               AND type = 'challenge'
               AND challenge_date = ?
+              AND challenge_is_expert = ?
               AND status IN ('unread', 'accepted')
             LIMIT 1
         ");
-        $stmtExisting->execute([$authId, $receiverId, $receiverId, $authId, $date]);
+        $stmtExisting->execute([$authId, $receiverId, $receiverId, $authId, $date, $isExpert]);
         if ($stmtExisting->fetch()) jsonError('A challenge already exists today for this friend', 409);
 
         // challenge_filters is optional — gracefully ignored if column doesn't exist yet
@@ -177,9 +189,9 @@ if ($method === 'POST') {
         try {
             $pdo->prepare("
                 INSERT INTO messages
-                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters, challenge_target, status)
-                VALUES (?, ?, 'challenge', ?, ?, ?, ?, ?, 'unread')
-            ")->execute([$authId, $receiverId, $mode, $score, $date, $filtersJson, $target]);
+                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters, challenge_target, challenge_is_expert, status)
+                VALUES (?, ?, 'challenge', ?, ?, ?, ?, ?, ?, 'unread')
+            ")->execute([$authId, $receiverId, $mode, $score, $date, $filtersJson, $target, $isExpert]);
         } catch (PDOException $e) {
             // Fallback if challenge_filters/challenge_target columns don't exist yet (migrations not run)
             $pdo->prepare("
@@ -204,6 +216,9 @@ if ($method === 'POST') {
         //   - direction fixée (`sender_id = expéditeur`) : les défis que le
         //     destinataire a envoyés DANS L'AUTRE SENS ne sont pas concernés, pas
         //     plus que ceux d'un autre ami. Chaque ami a sa propre place.
+        //   - dimension fixée (`challenge_is_expert`) : un défi Expert ne remplace
+        //     pas un défi normal en attente, et réciproquement. Ce sont deux jeux
+        //     différents — le joueur garde une place vivante dans chacun.
         //
         // Placé APRÈS l'insertion : si celle-ci échoue, on n'aura fermé aucun
         // défi précédent pour rien. `id <> ?` exclut la ligne qu'on vient de créer.
@@ -219,8 +234,9 @@ if ($method === 'POST') {
               AND status = 'unread'
               AND sender_id = ?
               AND receiver_id = ?
+              AND challenge_is_expert = ?
               AND id <> ?
-        ")->execute([$authId, $receiverId, $newId]);
+        ")->execute([$authId, $receiverId, $isExpert, $newId]);
 
         // XP Social Link : action 'challenge' (15 XP solo)
         try {

@@ -10,7 +10,12 @@
  * dans les notifications et est visible depuis la page Amis.
  */
 
-import { FILTER_STORAGE_KEYS, getPendingActiveChallenge, normalizeModeKey } from "./gameCore.js";
+import {
+  FILTER_STORAGE_KEYS,
+  activeChallengeKey,
+  getPendingActiveChallenge,
+  normalizeModeKey,
+} from "./gameCore.js";
 import { gainSocialLinkXp } from "./social-link.js";
 
 const _queue = [];
@@ -108,6 +113,10 @@ function _render({
   senderId,
   challengeFilters,
   challengeTarget = null,
+  // Dimension du défi (migration 037). Décide de la page d'arrivée (`?expert=1`)
+  // et de la case de stockage : un défi Expert ne doit ni écraser ni être résolu
+  // par le défi normal en cours.
+  challengeIsExpert = false,
 }) {
   document.getElementById("cn-overlay")?.remove();
 
@@ -163,10 +172,12 @@ function _render({
 
   // ── Accepter : pose localStorage + XP + redirect ────────
   overlay.querySelector(".cn-btn--accept").addEventListener("click", async () => {
-    // activeChallenge est une case localStorage unique (pas une file) — accepter
-    // ici l'écraserait silencieusement si un autre défi est déjà en cours,
-    // laissant ce dernier bloqué en statut 'accepted' pour toujours côté serveur.
-    const pending = getPendingActiveChallenge();
+    // Une case par dimension, mais UNE SEULE par dimension — accepter ici
+    // l'écraserait silencieusement si un autre défi de la MÊME dimension est en
+    // cours, le laissant bloqué en 'accepted' pour toujours côté serveur.
+    // Un défi Expert et un défi normal peuvent en revanche coexister : ce sont
+    // deux jeux distincts, avec deux cibles et deux barèmes.
+    const pending = getPendingActiveChallenge(challengeIsExpert);
     if (pending && pending.msgId !== id) {
       if (typeof window.showToast === "function") {
         window.showToast(_t("challenge.already_active", "Finish your current challenge first."));
@@ -179,7 +190,12 @@ function _render({
     // mode, on écrivait activeChallenge… puis on découvrait qu'il n'y avait pas
     // de page où aller. Résultat : un défi bloqué « en cours » côté serveur, sans
     // redirection ni bannière, que le joueur ne pouvait plus ni jouer ni annuler.
-    const dest = MODE_PAGE[modeKey] ? `${_siteBase()}${MODE_PAGE[modeKey]}` : null;
+    // `?expert=1` pour un défi Expert : sans lui le joueur atterrit en mode
+    // normal, où sa partie ne résoudra jamais le défi (les deux dimensions ont
+    // désormais des cases de stockage distinctes).
+    const dest = MODE_PAGE[modeKey]
+      ? `${_siteBase()}${MODE_PAGE[modeKey]}${challengeIsExpert ? "?expert=1" : ""}`
+      : null;
     if (!dest) {
       console.error(`[challenge] mode inconnu « ${mode} » → aucune page cible`);
       if (typeof window.showToast === "function") {
@@ -226,7 +242,7 @@ function _render({
     if (filterKey && filters) localStorage.setItem(filterKey, filters);
 
     localStorage.setItem(
-      "activeChallenge",
+      activeChallengeKey(challengeIsExpert),
       JSON.stringify({
         msgId: id,
         mode: modeKey,
@@ -235,6 +251,7 @@ function _render({
         senderId,
         filterKey,
         originalFilters,
+        isExpert: challengeIsExpert,
         // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
         // du jour et n'enregistrera PAS la partie en session quotidienne.
         // Null (ancien défi) = comportement historique, cible du jour.

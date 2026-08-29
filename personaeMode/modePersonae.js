@@ -270,7 +270,7 @@ function pickCharacter(random = false) {
   // cf. TODO.md) : la clé localStorage n'est pas scopée, donc un défi créé en mode
   // normal s'imposait comme cible sur la page Expert — y compris une variante
   // Picaro, qui n'a pas de fiche et donnait une partie sans indice.
-  const _challengeTargetName = EXPERT.isExpert ? null : getActiveChallengeTarget("personae");
+  const _challengeTargetName = getActiveChallengeTarget("personae");
   const _challengeChar = _challengeTargetName ? findByChallengeKey(_challengeTargetName) : null;
 
   if (_challengeChar) {
@@ -615,11 +615,13 @@ function showVictory(force = false, name = null) {
   });
   // Capturé AVANT checkChallengeCompletion (qui consomme activeChallenge) :
   // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
-  // Expert : tout le circuit défi est neutralisé tant que `challenge_is_expert`
-  // n'existe pas (cf. TODO.md) — sinon une victoire Expert validait le défi
-  // NORMAL en attente, et sa partie n'était pas loggée en session quotidienne.
-  const wasChallengePlay = !EXPERT.isExpert && isChallengePlay("personae");
-  if (!force && !EXPERT.isExpert)
+  // Le circuit défi vaut désormais aussi en Expert (migration 037) : chaque
+  // dimension a sa propre case `activeChallenge`, donc une victoire Expert ne
+  // peut plus valider le défi normal en attente. Ces gardes n'ont plus d'objet.
+  // `updateProfileStats` reste gardé plus bas — pour une tout autre raison :
+  // l'Expert n'alimente pas les stats du mode normal.
+  const wasChallengePlay = isChallengePlay("personae");
+  if (!force)
     showChallengeButton(
       "personae",
       attempts,
@@ -628,7 +630,7 @@ function showVictory(force = false, name = null) {
       // même nom — voir pickCharacter() plus haut).
       filteredCharacters.filter((c) => c.persona !== target.persona).map((c) => challengeKey(c))
     );
-  if (!EXPERT.isExpert) checkChallengeCompletion("personae", attempts, !force);
+  checkChallengeCompletion("personae", attempts, !force);
   if (!EXPERT.isExpert)
     showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
 
@@ -730,7 +732,7 @@ function giveUp() {
 
   // Défi à cible dédiée : le give-up compte pour le défi (perdu, via
   // showVictory → checkChallengeCompletion) mais pas en session quotidienne.
-  if ((EXPERT.isExpert || !isChallengePlay("personae")) && !isGameLogged(STATS_SCOPE)) {
+  if (!isChallengePlay("personae") && !isGameLogged(STATS_SCOPE)) {
     const timeSpent = Math.floor((Date.now() - sessionStartTime) / 1000);
     if (!EXPERT.isExpert) updateProfileStats({ result: "giveup", mode: "Personae", timeSpent });
     savePendingSession(

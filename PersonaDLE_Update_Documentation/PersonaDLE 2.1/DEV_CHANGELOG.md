@@ -375,6 +375,88 @@ jsdom n'implémentant pas la navigation.
 - `make test-php` cible la base de **développement**, pas une base jetable : les tests
   s'appuient sur `ROLLBACK`, ce qui suffit tant qu'aucun test ne fait de DDL.
 
+## 2026-08-27 — feat(challenge): les défis existent aussi en Mode Expert
+
+L'Expert n'émettait aucun défi et n'en jouait aucun. Plusieurs gardes le
+neutralisaient explicitement — et pour une raison structurelle, pas par frilosité.
+
+### Ce qui bloquait vraiment
+
+`activeChallenge` était **une seule case localStorage**, partagée par les deux
+dimensions. Deux conséquences, toutes deux silencieuses :
+
+- accepter un défi Expert **écrasait** le défi normal en cours, qui restait alors
+  bloqué en `accepted` côté serveur pour toujours ;
+- une victoire en Expert **résolvait le défi normal**, avec un score issu d'une
+  autre mécanique — l'Expert ne donne qu'un indice, ses essais ne se comparent
+  pas à ceux du mode normal.
+
+Interdire les défis en Expert était donc le bon choix *tant que la case restait
+unique*. Le vrai correctif n'était pas de lever les gardes, mais de supprimer
+leur raison d'être.
+
+### Le cloisonnement
+
+`activeChallengeKey(isExpert)` — une case par dimension (`activeChallenge` /
+`activeChallengeExpert`), même convention de préfixe que `expertContext().key()`
+qui cloisonne déjà l'état de partie des 6 modes.
+
+La clé du mode normal **ne change pas** : la renommer aurait fait disparaître du
+jour au lendemain les défis déjà acceptés par les joueurs.
+
+Une fois cela posé, les gardes n'ont plus d'objet et tombent :
+`getActiveChallengeTarget()`, `showChallengeButton()` (js/gameCore.js),
+`checkChallengeCompletion()` (js/challenge-result.js) et les 4 de
+`modePersonae.js` — seul mode à en porter, vérifié sur les 6.
+
+> ⚠️ Distinction conservée : dans `modePersonae.js`, `updateProfileStats` reste
+> gardé par `!EXPERT.isExpert`. Ce n'est **pas** une garde de défi — l'Expert
+> n'alimente pas les stats du mode normal, décision inchangée. Les confondre
+> aurait fait remonter les parties Expert dans les stats normales.
+
+### Migration 037 — `messages.challenge_is_expert`
+
+Une colonne, pas un `type = 'challenge_expert'` : l'Expert est une **dimension**
+du défi (même raisonnement que `game_sessions.is_expert`), pas un mode de plus.
+Un type séparé aurait dupliqué création, acceptation, statuts et barème pour une
+seule différence de règle.
+
+Deux règles existantes sont désormais cloisonnées par cette colonne :
+
+- **l'anti-doublon du jour** — proposer le même jour un défi normal ET un défi
+  Expert au même ami est légitime : deux cibles, deux barèmes, deux jeux ;
+- **« un seul défi vivant par expéditeur »** (entrée précédente) — un défi Expert
+  ne remplace pas un défi normal en attente, et réciproquement.
+
+Un index dédié accompagne la colonne : l'anti-doublon est interrogé à chaque
+envoi, donc sur le chemin critique.
+
+### Le trajet complet
+
+`api/messages` expose `challenge_is_expert` → `js/notifications.js` le reporte →
+les **deux** points d'acceptation (`challenge-notif.js`, `friends.js`) écrivent
+dans la bonne case et redirigent vers `?expert=1`. Sans ce dernier point, le
+joueur atterrissait en mode normal, où sa partie ne résolvait jamais le défi.
+
+### Tests
+
+`tests/challengeExpertScope.test.js` — 11 tests sur le cloisonnement : un défi
+Expert invisible depuis le normal et réciproquement, les deux dimensions qui
+coexistent sans se bloquer, la case toujours unique **par** dimension (un second
+défi Expert reste refusé), la clé historique préservée, et le filtre par mode
+intact. 811 Vitest au total, lint propre.
+
+### Angles morts connus
+
+- **Aucun test E2E du parcours complet** (envoyer un défi Expert → l'accepter →
+  le résoudre). Le cloisonnement est couvert unitairement, le trajet réseau ne
+  l'est pas.
+- **Pas de vérification manuelle en jeu** : le lot est câblé et testé, mais
+  personne n'a encore joué un défi Expert de bout en bout dans le navigateur.
+- **La migration 037 doit être jouée avant le déploiement.** Sans elle, chaque
+  envoi de défi tombe dans le `catch` de compatibilité et crée un défi **normal**
+  — silencieusement, y compris depuis une page Expert.
+
 ## 2026-08-27 — feat(challenge): un seul défi vivant par expéditeur
 
 Règle proposée par Hamza. Un nouveau défi remplace ceux que le **même** expéditeur avait

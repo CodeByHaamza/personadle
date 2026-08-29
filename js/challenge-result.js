@@ -10,7 +10,7 @@
  */
 
 import { MODE_STATE_KEYS } from "./challenge-notif.js";
-import { isExpertPage } from "./gameCore.js";
+import { activeChallengeKey } from "./gameCore.js";
 
 /** Heart emoji/size per Social Link rank (1-10). Win only. */
 const SL_HEART = {
@@ -216,12 +216,15 @@ function showChallengeResult({
  * @param {boolean} isWin       - Whether the player found the answer
  */
 export async function checkChallengeCompletion(mode, myAttempts, isWin) {
-  // Une partie Expert ne résout jamais un défi : `activeChallenge` n'est pas scopé
-  // par mode Expert (cf. getActiveChallengeTarget(), js/gameCore.js), donc valider
-  // ici consommerait le défi normal avec le score d'une autre mécanique.
-  if (isExpertPage()) return;
-
-  const raw = localStorage.getItem("activeChallenge");
+  // Un défi Expert ne se résout QUE par une partie Expert, et réciproquement :
+  // chaque dimension a sa propre case de stockage (activeChallengeKey(), depuis
+  // la migration 037). Auparavant la case était unique, donc une victoire en
+  // Expert consommait le défi normal avec le score d'une autre mécanique — d'où
+  // la garde qui interdisait purement et simplement les défis en Expert.
+  //
+  // Le cloisonnement remplace la garde : il n'y a plus rien à interdire, une
+  // partie ne peut atteindre que le défi de sa propre dimension.
+  const raw = localStorage.getItem(activeChallengeKey());
   if (!raw) return;
 
   let challenge;
@@ -233,7 +236,9 @@ export async function checkChallengeCompletion(mode, myAttempts, isWin) {
 
   if ((challenge.mode ?? "").toLowerCase() !== mode.toLowerCase()) return;
 
-  localStorage.removeItem("activeChallenge");
+  // Même case que la lecture ci-dessus : libérer l'autre dimension effacerait un
+  // défi que le joueur n'a pas joué.
+  localStorage.removeItem(activeChallengeKey());
 
   // Restore original filters (backed up when B accepted the challenge)
   if (

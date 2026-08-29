@@ -27,6 +27,7 @@ import {
 } from "../../js/social-link.js";
 import {
   FILTER_STORAGE_KEYS,
+  activeChallengeKey,
   getPendingActiveChallenge,
   normalizeModeKey,
 } from "../../js/gameCore.js";
@@ -739,7 +740,8 @@ function renderMessage(msg) {
                   data-score="${msg.challenge_score}"
                   data-senderid="${msg.sender_id}"
                   data-filters="${esc(msg.challenge_filters ?? "[]")}"
-                  data-target="${esc(msg.challenge_target ?? "")}">
+                  data-target="${esc(msg.challenge_target ?? "")}"
+                  data-isexpert="${msg.challenge_is_expert ? "1" : "0"}">
             ${tf("friends.challenge_accept", "⚔ Accept")}
           </button>
           <button class="fr-btn fr-btn--danger js-decline-msg" data-mid="${msg.id}">
@@ -899,12 +901,15 @@ function attachListeners() {
       const senderId = parseInt(acceptChallenge.dataset.senderid);
       const challengeFilters = acceptChallenge.dataset.filters ?? "[]";
       const challengeTarget = acceptChallenge.dataset.target || null;
+      // Dimension du défi (migration 037) : décide de la page d'arrivée
+      // (`?expert=1`) et de la case de stockage.
+      const challengeIsExpert = acceptChallenge.dataset.isexpert === "1";
 
-      // activeChallenge est une case localStorage unique (pas une file) —
-      // accepter ici l'écraserait silencieusement si un autre défi est déjà en
-      // cours, laissant ce dernier bloqué en statut 'accepted' pour toujours
-      // côté serveur (jamais résolu en beaten/expired, cf. DEV_CHANGELOG.md).
-      const pending = getPendingActiveChallenge();
+      // Une case par dimension, mais UNE SEULE par dimension — accepter ici
+      // l'écraserait silencieusement si un autre défi de la MÊME dimension est
+      // en cours, le laissant bloqué en 'accepted' pour toujours côté serveur
+      // (jamais résolu en beaten/expired, cf. DEV_CHANGELOG.md).
+      const pending = getPendingActiveChallenge(challengeIsExpert);
       if (pending && pending.msgId !== mid) {
         if (typeof window.showToast === "function") {
           window.showToast(tf("challenge.already_active", "Finish your current challenge first."));
@@ -919,7 +924,10 @@ function attachListeners() {
       // le serveur a bien enregistré laissait des défis bloqués « en cours »,
       // injouables et non annulables.
       const modeKey = normalizeModeKey(mode) ?? String(mode ?? "").toLowerCase();
-      const dest = MODE_PAGE_MAP[modeKey] ?? null;
+      // `?expert=1` pour un défi Expert : sans lui le joueur atterrit en mode
+      // normal, où sa partie ne résoudra jamais le défi (cases distinctes).
+      const basePage = MODE_PAGE_MAP[modeKey] ?? null;
+      const dest = basePage ? `${basePage}${challengeIsExpert ? "?expert=1" : ""}` : null;
       if (!dest) {
         console.error(`[challenge] mode inconnu « ${mode} » → aucune page cible`);
         alert(tf("challenge.unknown_mode", "This challenge's mode is unavailable."));
@@ -958,7 +966,7 @@ function attachListeners() {
       }
 
       localStorage.setItem(
-        "activeChallenge",
+        activeChallengeKey(challengeIsExpert),
         JSON.stringify({
           msgId: mid,
           mode: modeKey,
@@ -967,6 +975,7 @@ function attachListeners() {
           senderId,
           filterKey,
           originalFilters,
+          isExpert: challengeIsExpert,
           // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
           // du jour et n'enregistrera PAS la partie en session quotidienne.
           // Null (ancien défi) = comportement historique, cible du jour.

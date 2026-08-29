@@ -21,23 +21,27 @@
  */
 
 import { MODE_STATE_KEYS } from "./challenge-notif.js";
+import { activeChallengeKey } from "./gameCore.js";
 
 export function initChallengeBanner(currentMode) {
-  const raw = localStorage.getItem("activeChallenge");
+  // Case cloisonnée par dimension : le bandeau d'une page Expert ne doit annoncer
+  // que le défi Expert, et inversement (cf. activeChallengeKey(), gameCore.js).
+  const storageKey = activeChallengeKey();
+  const raw = localStorage.getItem(storageKey);
   if (!raw) return;
 
   let challenge;
   try {
     challenge = JSON.parse(raw);
   } catch {
-    localStorage.removeItem("activeChallenge");
+    localStorage.removeItem(storageKey);
     return;
   }
 
   // Vérifier que c'est pour aujourd'hui (heure Paris, cohérent avec le reset quotidien)
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
   if (challenge.date && challenge.date !== today) {
-    localStorage.removeItem("activeChallenge");
+    localStorage.removeItem(storageKey);
     return;
   }
 
@@ -143,7 +147,7 @@ export async function abandonActiveChallenge(challenge, banner) {
     );
   }
 
-  localStorage.removeItem("activeChallenge");
+  localStorage.removeItem(activeChallengeKey());
   banner?.remove();
   _toast(tf("challenge.abandoned", "Challenge given up. You can accept another one."));
 

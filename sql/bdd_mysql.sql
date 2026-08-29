@@ -603,6 +603,12 @@ CREATE TABLE messages (
     challenge_date    DATE            NULL,
     challenge_filters TEXT            NULL,
     challenge_target  VARCHAR(200)    NULL,  -- cible aléatoire dédiée au défi (migration 023) ; NULL = cible du jour (anciens défis)
+    -- L'Expert est une DIMENSION du défi, pas un type de message à part (même
+    -- raisonnement que game_sessions.is_expert). Sans cette colonne, un défi créé
+    -- en normal s'imposait comme cible en Expert et une victoire Expert validait
+    -- le défi normal — d'où les gardes qui neutralisaient les défis en Expert
+    -- jusqu'à la migration 037.
+    challenge_is_expert TINYINT(1)    NOT NULL DEFAULT 0,
     status            VARCHAR(20)     NOT NULL DEFAULT 'unread',
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_msg_sender   FOREIGN KEY (sender_id)   REFERENCES users(id) ON DELETE CASCADE,
@@ -612,6 +618,9 @@ CREATE TABLE messages (
 CREATE INDEX idx_messages_receiver    ON messages(receiver_id, status, created_at DESC);
 CREATE INDEX idx_messages_sender      ON messages(sender_id);
 CREATE INDEX idx_messages_sender_type ON messages(sender_id, type, status, created_at DESC);
+-- Anti-doublon de défi : interrogé à chaque envoi, donc sur le chemin critique.
+CREATE INDEX idx_messages_challenge_dedup
+    ON messages(sender_id, receiver_id, challenge_date, challenge_is_expert, status);
 
 
 -- =============================================================================

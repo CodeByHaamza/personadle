@@ -1136,15 +1136,28 @@ function _getActiveFilters(mode) {
  * Retourne le nom de la cible, ou null si pas de défi actif pour ce mode ou
  * défi ancien format (sans cible propre → comportement historique, cible du jour).
  */
+/**
+ * Clé localStorage du défi en cours, CLOISONNÉE par dimension.
+ *
+ * Normal et Expert ont chacun leur case. C'est ce qui a rendu possible les défis
+ * en Expert (migration 037) : avec une case unique, accepter un défi Expert
+ * écrasait silencieusement le défi normal en cours — et une victoire en Expert
+ * validait le défi normal, dont le barème n'a rien à voir (l'Expert ne donne
+ * qu'un indice, ses essais ne se comparent pas). D'où les gardes qui
+ * neutralisaient purement et simplement les défis en Expert jusqu'ici.
+ *
+ * Même convention de préfixe que `expertContext().key()`, qui cloisonne déjà
+ * l'état de partie des 6 modes.
+ *
+ * @param {boolean} [isExpert] défaut : la dimension de la page courante
+ */
+export function activeChallengeKey(isExpert = isExpertPage()) {
+  return isExpert ? "activeChallengeExpert" : "activeChallenge";
+}
+
 export function getActiveChallengeTarget(mode) {
-  // Aucun défi en Mode Expert tant que `messages.challenge_is_expert` n'existe
-  // pas : `activeChallenge` n'est pas scopé par mode Expert, donc un défi créé en
-  // normal s'imposerait comme cible en Expert (et une victoire Expert validerait
-  // le défi normal). Garde ici plutôt que dans chaque mode : les 6 modes passent
-  // par cette fonction, et isChallengePlay() en dérive.
-  if (isExpertPage()) return null;
   try {
-    const c = JSON.parse(localStorage.getItem("activeChallenge") || "null");
+    const c = JSON.parse(localStorage.getItem(activeChallengeKey()) || "null");
     if (!c) return null;
     const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
     if ((c.mode || "").toLowerCase() !== key) return null;
@@ -1175,9 +1188,9 @@ export function isChallengePlay(mode) {
  * Ne modifie PAS localStorage (contrairement à initChallengeBanner() qui
  * nettoie les entrées périmées au passage) — l'appelant décide de la suite.
  */
-export function getPendingActiveChallenge() {
+export function getPendingActiveChallenge(isExpert = isExpertPage()) {
   try {
-    const c = JSON.parse(localStorage.getItem("activeChallenge") || "null");
+    const c = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
     if (!c) return null;
     if (c.date && c.date !== parisDateKey()) return null;
     return c;
@@ -1198,8 +1211,13 @@ export function getPendingActiveChallenge() {
  */
 export function showChallengeButton(mode, score, targetPool = null) {
   if (!window._currentUser) return;
-  // Pas d'émission de défi depuis l'Expert — cf. getActiveChallengeTarget().
-  if (isExpertPage()) return;
+
+  // L'Expert émet désormais ses propres défis (migration 037). La dimension est
+  // portée jusqu'au serveur : elle décide de la page d'arrivée du destinataire
+  // et du barème appliqué. `targetPool` est déjà le pool de la page courante,
+  // donc celui de l'Expert quand on y est — la cible est tirée au bon endroit
+  // sans traitement supplémentaire.
+  const isExpert = isExpertPage();
 
   const nav = document.getElementById("modeNavigationContainer");
   if (!nav || document.getElementById("challengeFriendBtn")) return;
@@ -1218,11 +1236,11 @@ export function showChallengeButton(mode, score, targetPool = null) {
   else nav.appendChild(btn);
 
   btn.addEventListener("click", () =>
-    _showChallengeModal(mode, score, date, _getActiveFilters(mode), targetPool)
+    _showChallengeModal(mode, score, date, _getActiveFilters(mode), targetPool, isExpert)
   );
 }
 
-function _showChallengeModal(mode, score, date, activeFilters = [], targetPool = null) {
+function _showChallengeModal(mode, score, date, activeFilters = [], targetPool = null, isExpert = false) {
   const api = window._personadleApi;
   if (!api || !window._currentUser) return;
 
@@ -1309,6 +1327,9 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
               challenge_date: date,
               challenge_filters: JSON.stringify(activeFilters),
               ...(challengeTarget ? { challenge_target: challengeTarget } : {}),
+              // Porté jusqu'au serveur : décide de la page d'arrivée du
+              // destinataire (`?expert=1`) et du barème à l'arrivée.
+              challenge_is_expert: isExpert,
             });
             sendBtn.textContent = "✓ Sent!";
             sendBtn.classList.add("sent");
