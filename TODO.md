@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 830 tests Vitest (41 suites), 221 méthodes PHPUnit, 113 tests E2E,
+> Vérifié le 2026-08-26 : 830 tests Vitest (41 suites), 237 méthodes PHPUnit, 113 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -113,12 +113,22 @@ Bonne nouvelle sur le coût : `api/lib/condition_check.php` gère déjà `mode_w
 Décidé le 2026-08-15, détaillé dans `ROADMAP.md`. **Le prochain gros morceau**, mais il peut
 partir après la release : ajouter des axes de tri n'enlève rien à personne.
 
-- [ ] **Meilleure série** — la streak existe déjà, il manque l'axe de tri.
-- [ ] **Meilleur ratio** — lissé. Reco : moyenne bayésienne `(wins + C·m)/(games + C)`, C ≈ 20,
-      plutôt que Wilson : un classement dont personne ne comprend le calcul passe pour truqué.
-      Le garde-fou actuel est un seuil brut (`IF(COUNT(*) >= 5, …)`) qui laisse encore 5/5 =
-      100 % devant 200/210.
-- [ ] **Meilleur score** — général et par mode.
+- [x] **Meilleure série** — l'axe existait, mais il ne mesurait pas une série. Sur une
+      période il renvoyait le **nombre de victoires** (20 parties le même jour = « série 20 »),
+      et sur `ever`+`all` il lisait `MAX(us.streak_record)`, le record d'un seul mode, alors
+      que la streak est globale. Corrigé : vrais jours consécutifs (méthode des îlots) et
+      `users.global_streak_record`.
+- [x] **Meilleur ratio** — moyenne bayésienne `(wins + C·m)/(games + C)`, C = 20, `m` calculé
+      sur les données réelles. Le cas qui motivait tout est vérifié par test : 1/1 passe de
+      100 % (1ᵉʳ) à 52,4 %, et 190/200 devient premier à 90,9 %. Un seuil de **participation**
+      (≥ 1 partie) s'ajoute au lissage : la formule attribue la moyenne du site à qui n'a rien
+      joué, un compte à 0 partie serait apparu à ~50 %.
+- [x] ~~**Meilleur score**~~ — **abandonné** (arbitrage Hamza, 2026-08-27) : « victoires » et
+      « parties » couvrent déjà cet axe, une troisième métrique aurait doublonné.
+- [x] **Formules dédupliquées** — `api/leaderboard/index.php` et `api/cron/leaderboard.php`
+      recopiaient les mêmes expressions SQL avec un commentaire « doit rester identique à »
+      pour tout garde-fou. Une divergence ne se serait vue qu'en comparant deux périodes
+      entre elles. Les deux appellent désormais `api/lib/leaderboard_metrics.php`.
 - [ ] Chaque axe décliné en version Expert (`is_expert`), soit la 4e dimension déjà prévue.
 
 > Décision produit confirmée le 2026-08-21 : le classement compte des **parties**, pas des

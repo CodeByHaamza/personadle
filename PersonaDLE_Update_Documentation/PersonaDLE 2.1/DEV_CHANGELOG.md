@@ -611,6 +611,90 @@ un puits SQL ou shell serait toujours détecté, à son propre puits.
   remontent.
 - **Aucun test E2E de l'abandon** — le parcours demande deux comptes amis et un défi en base.
   Couvert par les tests unitaires du module et une vérification manuelle.
+## 2026-08-27 — fix(leaderboard): la série et le ratio affichaient autre chose que leur nom
+
+Deux axes du classement ne mesuraient pas ce qu'ils annonçaient. Les dimensions existantes
+(global/amis × mode × période × métrique) sont inchangées — c'est le calcul qui change.
+
+> Arbitrage produit (Hamza) : **pas de nouvelle métrique « score »**. « Victoires » et
+> « parties » couvrent déjà cet axe ; en ajouter une troisième aurait doublonné.
+
+### 1. La série n'était pas une série
+
+Sur une période (jour/semaine/mois), `metric=streak` renvoyait le **nombre de victoires**.
+Le code l'assumait en commentaire — « approximation » — mais ce n'était pas une
+approximation : un joueur avec 20 parties dans la même journée affichait « série : 20 »
+alors qu'il avait joué **un seul jour**. La colonne annonçait une métrique et en montrait
+une autre. Le défaut s'est aggravé avec la migration 032, qui a rendu les parties multiples
+par jour possibles.
+
+Remplacé par un vrai calcul de **jours consécutifs** (méthode des îlots : on numérote les
+journées jouées et on soustrait le rang à la date — des jours qui se suivent donnent la même
+valeur, donc un groupe). Les journées sont dédoublonnées d'abord, sans quoi chaque partie
+compterait pour une journée.
+
+Corrigé aussi sur `ever` + mode `all` : le classement lisait `MAX(us.streak_record)`, le
+meilleur record d'**un seul mode**. Or la streak du joueur est **globale** (CLAUDE.md §7).
+La valeur affichée était donc systématiquement ≤ celle du profil — deux écrans, deux
+chiffres, pour la même chose. Lit désormais `users.global_streak_record`.
+
+### 2. Le ratio récompensait le petit échantillon
+
+Ancienne formule : `IF(games >= 5, wins/games, NULL)`. Un joueur à **5/5 = 100 %** passait
+devant un joueur à **200/210 = 95 %**. Le seuil de 5 parties ne réglait rien : il déplaçait
+le problème d'un cran.
+
+Remplacé par la **moyenne bayésienne** `(wins + C·m) / (games + C)`, recommandée dans
+ROADMAP.md — chaque joueur démarre avec 20 parties fictives jouées au taux moyen du site.
+Vérifié sur cas témoins :
+
+| Joueur | Parties | Victoires | Ancien | Nouveau |
+| --- | --- | --- | --- | --- |
+| petit échantillon | 1 | 1 | **100,0 %** (1ᵉʳ) | 52,4 % |
+| joueur régulier | 200 | 190 | 95,0 % | **90,9 %** (1ᵉʳ) |
+
+Le `m` est **calculé sur les données réelles**, pas figé : une constante deviendrait fausse
+dès que la difficulté ou le public change. Replié à 0.5 sur base vide (sinon division par
+zéro et disparition du classement), et borné à [0.01, 0.99] — un taux à 0 ou 1 rendrait le
+lissage inopérant.
+
+> Garde-fou contre le contresens : « pousser au volume » ne veut **pas** dire « récompenser
+> le volume ». Jouer 80 parties de plus en perdant fait **baisser** le ratio. Un test le
+> verrouille (`testVolumeAloneNeverRaisesTheRatio`) — sans lui, une future retouche de la
+> formule pourrait transformer le ratio en second classement d'activité.
+
+Un piège apparu avec la formule : le lissage attribue la moyenne du site à qui n'a **rien**
+joué. Un compte à 0 partie serait apparu en milieu de tableau à ~50 %. D'où un seuil de
+**participation** (≥ 1 partie), distinct du lissage : la formule classe, elle n'autorise pas
+à figurer.
+
+### 3. Le cron et l'endpoint recopiaient les mêmes formules
+
+`api/leaderboard/index.php` et `api/cron/leaderboard.php` calculaient chacun leurs
+expressions SQL, avec pour tout garde-fou un commentaire « doit rester identique à ». Une
+divergence y aurait vécu longtemps : le cron alimente le cache que l'endpoint relit, donc
+l'écart ne se voit qu'en **comparant deux périodes entre elles**, jamais sur un écran isolé.
+
+Les deux appellent désormais `api/lib/leaderboard_metrics.php`.
+
+### Vérification
+
+- **16 tests PHPUnit** dédiés (`LeaderboardMetricsTest`), dont la convergence du ratio vers
+  le taux réel à fort volume, les 20 parties d'un même jour qui ne valent qu'une journée, la
+  plus longue série gardée plutôt que la dernière, et l'exclusion des parties Expert.
+- Les 6 combinaisons métrique × période interrogées sur l'API réelle.
+- PHPUnit **209** · Vitest 801 · PHPStan propre · analyse de taint propre.
+
+### Angles morts connus
+
+- **Le cache horaire garde les anciens scores** jusqu'au prochain passage du cron. Les
+  périodes jour/semaine/mois afficheront les valeurs de l'ancienne formule pendant au plus
+  une heure après déploiement. Purger `leaderboard_cache` accélère la bascule.
+- **La requête de série est plus lourde** que l'agrégation qu'elle remplace (fonction fenêtre
+  + deux niveaux de regroupement). Sans effet à l'échelle actuelle ; à surveiller si le
+  classement ralentit.
+- **Aucun test E2E** sur l'affichage front des deux axes corrigés : les tests couvrent le
+  calcul, pas le rendu.
 
 ## 2026-08-25 — feat(expert): porte d'entrée des 6 Modes Expert + badge Denial of Self
 
