@@ -4,7 +4,14 @@ import { songs } from "../musicsMode/database/songs.js";
 const SRC = new URL("../expert_mode_content.md", import.meta.url);
 const OUT = new URL("../musicsMode/database/expert_lyrics.js", import.meta.url);
 
-const lines = readFileSync(SRC, "utf8").split("\n");
+// `split(/\r?\n/)` et non `split("\n")` : le repérage de la section Music se fait
+// par égalité STRICTE (`l === "== Music =="`), donc un simple `\r` résiduel la
+// rendait introuvable — et le script sortait alors « 0 chanson » en code 0, vidant
+// expert_lyrics.js et faisant tomber le pool music_expert à 0 SANS AUCUNE ERREUR.
+// Vécu le 2026-08-27 : une édition du .md sur un poste Windows avait converti le
+// fichier entier en CRLF. Un format de fin de ligne ne doit pas pouvoir vider un
+// pool de jeu en silence.
+const lines = readFileSync(SRC, "utf8").split(/\r?\n/);
 const isEntry = (l) => /^\S.*\[[ Xx]\]\s*$/.test(l);
 const isHeader = (l) => /^(==|--) /.test(l);
 
@@ -43,6 +50,22 @@ for (const r of rows) {
     .filter(Boolean);
   stanzaCount += stanzas.length;
   result[r.title] = stanzas;
+}
+
+// Garde-fou : ne JAMAIS écrire un fichier vide en sortant avec succès.
+// Le 2026-08-27, un simple passage du .md en CRLF a fait tomber le parsing à
+// « 0 chanson » — le script a alors écrasé expert_lyrics.js avec un objet vide,
+// vidé le pool music_expert, et rendu la main en code 0. Aucune erreur nulle
+// part : ni la CI, ni le hook pre-commit n'avaient de raison de rougir.
+// Un contenu de jeu ne doit pas pouvoir disparaître sans que rien ne le dise.
+if (Object.keys(result).length === 0) {
+  console.error(
+    "❌ Aucune chanson n'a été extraite de expert_mode_content.md.\n" +
+      "   Le fichier n'est pas écrit : l'écraser viderait le pool Music Expert.\n" +
+      "   Causes déjà vues : section « == Music == » absente ou renommée, ou fins de\n" +
+      "   ligne CRLF (le repérage de section se fait par égalité stricte)."
+  );
+  process.exit(1);
 }
 
 const body = Object.entries(result)

@@ -1033,6 +1033,19 @@ Sonna bimyouna hazama no naka de mo ikiru
 
 -- Persona 2 : Innocent Sin --
 
+
+Kimi no Tonari [X]
+Parole : 
+Imasugu ni waratte agemashou
+imasugu ni utatte agemashou
+Shoujo kara otona ni naru sono shunkan ni
+Tomoshibi tozasanu you ni
+
+Susanda kawa de yumemiru minikui AHIRU no ko
+Kitto sugao motomete kokoro no kamen hazushite
+Itsu shika shiroi tsubasa ni tsunagaru you ni
+Hikari hanachi furisosogu hoshi ni
+
 Unbreakable Tie [X]
 Parole : 
 Really gotta keep it going going
@@ -1769,6 +1782,25 @@ It's only just begun
 
 
 -- Persona Q2 --
+
+Wait and See [X]
+Parole : 
+Don't let anyone
+Mislead you like you are nobody
+'Cause you mean so much to me
+
+Let them laugh at you
+Let's see at the end of the day
+Who's gonna be smiling
+
+This ain't school days, it's real life
+Realize that there ain't no textbook to your life
+Instead, you gotta write your own manuals to your life
+
+Huh, I did it my way
+Switching four lanes on the highway
+Fast and furious, the image I displayed
+And they can't wait to obey my style
 
 colorful world [X]
 Parole : 

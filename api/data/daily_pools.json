@@ -629,7 +629,10 @@
       "Show Stealer",
       "Tokyo Emergency",
       "What You Wish For",
-      "Hoshi to Bokura to"
+      "Hoshi to Bokura to",
+      "Wait and See",
+      "Heartful Cry",
+      "Kimi no Tonari"
     ]
   },
   "music_expert": {
@@ -706,7 +709,9 @@
       "P3 FES",
       "Show Stealer",
       "What You Wish For",
-      "Hoshi to Bokura to"
+      "Hoshi to Bokura to",
+      "Wait and See",
+      "Kimi no Tonari"
     ]
   },
   "classic_expert": {
@@ -2158,6 +2163,7 @@
       "Cattle ( Lufel )",
       "Cherish ( Masaki Ashiya )",
       "Chord ( Ayaka Sakai )",
+      "Chord Summer ( Ayaka Sakai )",
       "Closer ( Motoha Arai )",
       "Closer Summer ( Motoha Arai )",
       "Crow ( Goro Akechi )",
@@ -2429,6 +2435,9 @@
         "P5X"
       ],
       "Puppet Summer ( Miyu Sahara )": [
+        "P5X"
+      ],
+      "Chord Summer ( Ayaka Sakai )": [
         "P5X"
       ],
       "Closer Radiance ( Motoha Arai )": [

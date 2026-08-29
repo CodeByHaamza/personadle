@@ -59,6 +59,7 @@ export const portraitsMap = {
   "Yuki ( Yukimi Fujikawa )": "YukiX",
   "Mont ( Kotone Montagne )": "Mont",
   "Chord ( Ayaka Sakai )": "Chord",
+  "Chord Summer ( Ayaka Sakai )": "Chord_Summer",
   "Messa ( Kira Kitazato )": "Messa",
   "Cherish ( Masaki Ashiya )": "Cherish",
   "Howler ( Runa Dogenzaka )": "Howler",

@@ -13,6 +13,7 @@ export const personas = [
   "Cattle ( Lufel )",
   "Cherish ( Masaki Ashiya )",
   "Chord ( Ayaka Sakai )",
+  "Chord Summer ( Ayaka Sakai )",
   "Closer ( Motoha Arai )",
   "Closer Summer ( Motoha Arai )",
   "Crow ( Goro Akechi )",

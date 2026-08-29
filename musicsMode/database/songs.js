@@ -829,5 +829,32 @@ export const songs = [
     vocalist: "Lyn Inaizumi",
     proprietaire: "ATLUS",
     lien: "https://youtu.be/ghmaEb5mThw"
+  },
+  {
+    titre: "Wait and See",
+    fichier: "Wait_and_See.mp3",
+    opus: ["PQ2"],
+    image: "PQ2.webp",
+    vocalist: "Yumi Kawamura , Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/YlmgojMHJ60"
+  },
+  {
+    titre: "Heartful Cry",
+    fichier: "Heartful_Cry.mp3",
+    opus: ["P3FES"],
+    image: "P3FES.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/5ANGcZj4zhM"
+  },
+  {
+    titre: "Kimi no Tonari",
+    fichier: "Kimi_no_Tonari.mp3",
+    opus: ["P2IS"],
+    image: "P2IS.webp",
+    vocalist: "hitomi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/aq_jMLavtLM"
   }
 ];
