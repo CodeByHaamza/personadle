@@ -27,6 +27,7 @@ import {
   showCommunityStats,
   getActiveChallengeTarget,
   isChallengePlay,
+  getPendingActiveChallenge,
   maskTerms,
   expertContext,
   setupExpertToggle,
@@ -221,7 +222,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   // révéler. On renvoie donc le joueur vers le mode normal pour ce défi.
   // Les défis Expert (avec leur propre barème) sont une feature à part entière :
   // ils demandent une colonne dédiée sur `messages`, cf. ROADMAP.md v2.1.
-  if (IS_EXPERT && isChallengePlay("music")) {
+  //
+  // ⚠️ isChallengePlay("music") ne convient PAS ici : getActiveChallengeTarget()
+  // renvoie null dès isExpertPage() (garde documentée dans gameCore.js, pour un
+  // tout autre besoin — empêcher un défi normal de s'imposer comme cible en
+  // Expert), donc `IS_EXPERT && isChallengePlay(...)` ne serait jamais vrai.
+  // getPendingActiveChallenge() n'a pas cette garde : c'est la bonne fonction
+  // pour détecter "il y a un défi actif" indépendamment du mode courant.
+  const _pendingMusicChallenge = getPendingActiveChallenge();
+  if (
+    IS_EXPERT &&
+    _pendingMusicChallenge &&
+    (_pendingMusicChallenge.mode || "").toLowerCase() === "music"
+  ) {
     window.location.replace("musics.html");
     return;
   }
