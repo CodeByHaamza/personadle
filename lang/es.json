@@ -41,7 +41,9 @@
     "expert_cond_consecutive_perfects": "Gana {{required}} partidas seguidas al primer intento",
     "expert_cond_signin": "Inicia sesión para desbloquear el Modo Experto: tu progreso sigue a tu cuenta.",
     "expert_cond_unknown": "Vuelve a conectarte para ver tu progreso.",
-    "expert_locked_title": "Modo Experto bloqueado"
+    "expert_locked_title": "Modo Experto bloqueado",
+    "expert_unlocked_title": "¡Modo Experto desbloqueado!",
+    "expert_unlocked_hint": "El botón ⚡ ya es tuyo."
   },
   "modes": {
     "classic": {

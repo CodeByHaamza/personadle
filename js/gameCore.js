@@ -273,6 +273,42 @@ const EXPERT_STATUS_STORAGE_KEY = "expertUnlockStatus";
 
 let _expertStatus = null; // { state: "ok"|"anonymous"|"unavailable", modes?: object }
 let _expertStatusPromise = null; // dédoublonne les appels concurrents des 6 modes
+let _newlyUnlocked = []; // modes passés de verrouillé à débloqué depuis la dernière visite
+
+/**
+ * Modes qui viennent de s'ouvrir, en comparant l'état connu au dernier reçu.
+ *
+ * Couvre les deux façons dont un mode s'ouvre — le joueur a franchi le seuil en
+ * jouant, ou un admin lui a accordé l'accès (`expert_unlocks_granted`) : dans les
+ * deux cas le serveur renvoie `unlocked: true` là où le cache disait `false`.
+ *
+ * Le garde-fou important est `prev == null` → aucune annonce. Sans compte connu
+ * précédemment (première visite, cache vidé, navigation privée), TOUS les modes
+ * débloqués paraîtraient neufs et le joueur se prendrait 6 animations d'affilée
+ * pour des accès qu'il avait depuis longtemps. Dans le doute, on n'annonce rien :
+ * rater une animation est bénin, en inventer une ne l'est pas.
+ *
+ * @param {Record<string, {unlocked: boolean}>|null} prev  dernier état connu
+ * @param {Record<string, {unlocked: boolean}>} next       état reçu du serveur
+ * @returns {string[]} clés de mode nouvellement débloquées
+ */
+export function diffNewlyUnlocked(prev, next) {
+  if (!prev || !next) return [];
+  return Object.keys(next).filter((mode) => prev[mode]?.unlocked === false && next[mode]?.unlocked === true);
+}
+
+/**
+ * Rend les modes fraîchement débloqués et vide la liste — l'animation ne doit
+ * jouer qu'une fois par chargement, même si plusieurs modes appellent
+ * `fetchExpertStatus()` (l'appel est dédoublonné, pas ses lecteurs).
+ *
+ * @returns {string[]}
+ */
+export function consumeNewlyUnlockedExpertModes() {
+  const out = _newlyUnlocked;
+  _newlyUnlocked = [];
+  return out;
+}
 
 /**
  * État de déblocage des 6 Modes Expert.
@@ -299,6 +335,9 @@ export async function fetchExpertStatus() {
     try {
       const modes = (await api.user.expertStatus())?.expert_status ?? null;
       if (modes) {
+        // Comparer AVANT d'écraser le cache : c'est la seule trace de l'état
+        // précédent, et c'est elle qui dit quels modes viennent de s'ouvrir.
+        _newlyUnlocked = diffNewlyUnlocked(readCachedExpertStatus(), modes);
         cacheExpertStatus(modes);
         _expertStatus = { state: "ok", modes };
       } else {
@@ -347,6 +386,7 @@ function readCachedExpertStatus() {
 export function resetExpertStatusCache() {
   _expertStatus = null;
   _expertStatusPromise = null;
+  _newlyUnlocked = [];
 }
 
 /**
@@ -464,6 +504,19 @@ async function applyExpertGate(ctx, page, toggle) {
   if (!ctx.modeKey) return;
 
   const status = await fetchExpertStatus();
+
+  // Un mode qui vient de s'ouvrir s'annonce, qu'il ait été gagné en jouant ou
+  // accordé par un admin. Import dynamique : expert-unlock-anim.js lit modeLabel()
+  // d'ici, un import statique fermerait le cycle (CLAUDE.md §4). Le module n'est
+  // donc même pas téléchargé tant qu'il n'y a rien à annoncer.
+  const justUnlocked = consumeNewlyUnlockedExpertModes();
+  if (justUnlocked.length) {
+    import("./expert-unlock-anim.js")
+      .then((m) => m.showExpertUnlock(justUnlocked))
+      // L'annonce est un bonus : si le module ne charge pas, la partie continue.
+      .catch(() => {});
+  }
+
   const progress = status.modes?.[ctx.modeKey] ?? null;
 
   let locked, reason;

@@ -41,7 +41,9 @@
     "expert_cond_consecutive_perfects": "Win {{required}} games in a row on the first try",
     "expert_cond_signin": "Sign in to unlock Expert mode — your progress follows your account.",
     "expert_cond_unknown": "Reconnect to check your progress.",
-    "expert_locked_title": "Expert mode locked"
+    "expert_locked_title": "Expert mode locked",
+    "expert_unlocked_title": "Expert mode unlocked!",
+    "expert_unlocked_hint": "The ⚡ button is yours now."
   },
   "modes": {
     "classic": {

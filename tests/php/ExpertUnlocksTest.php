@@ -343,11 +343,94 @@ final class ExpertUnlocksTest extends TestCase
         $uid = $this->makeUser();
         $p = personadle_expert_progress(self::$pdo, $uid, 'music');
         $this->assertSame(
-            ['unlocked', 'condition_type', 'required', 'current'],
+            ['unlocked', 'condition_type', 'required', 'current', 'granted'],
             array_keys($p)
         );
         $this->assertIsBool($p['unlocked']);
+        $this->assertIsBool($p['granted']);
         $this->assertIsInt($p['required']);
         $this->assertIsInt($p['current']);
+    }
+
+    // ── Déblocage manuel par un admin (migration 035) ─────────────────────────
+
+    private function grant(int $userId, string $mode, ?int $adminId = null): void
+    {
+        self::$pdo->prepare(
+            'INSERT INTO expert_unlocks_granted (user_id, mode, granted_by) VALUES (?, ?, ?)'
+        )->execute([$userId, $mode, $adminId]);
+    }
+
+    public function testGrantUnlocksAModeWithoutAnyGame(): void
+    {
+        $uid = $this->makeUser();
+        $this->assertFalse(personadle_is_expert_unlocked(self::$pdo, $uid, 'music'));
+
+        $this->grant($uid, 'music');
+        $this->assertTrue(personadle_is_expert_unlocked(self::$pdo, $uid, 'music'));
+    }
+
+    public function testGrantDoesNotInflateTheDisplayedProgress(): void
+    {
+        // Le joueur doit voir « 0/15 » et un accès ouvert, pas un faux « 15/15 » :
+        // la progression mesure ce qu'il a joué, le don est un autre chemin.
+        $uid = $this->makeUser();
+        $this->grant($uid, 'music');
+
+        $p = personadle_expert_progress(self::$pdo, $uid, 'music');
+        $this->assertTrue($p['unlocked']);
+        $this->assertTrue($p['granted']);
+        $this->assertSame(0, $p['current']);
+        $this->assertGreaterThan(0, $p['required']);
+    }
+
+    public function testGrantIsScopedToOneModeAndOneUser(): void
+    {
+        $u1 = $this->makeUser('a');
+        $u2 = $this->makeUser('b');
+        $this->grant($u1, 'music');
+
+        $this->assertTrue(personadle_is_expert_unlocked(self::$pdo, $u1, 'music'));
+        $this->assertFalse(personadle_is_expert_unlocked(self::$pdo, $u1, 'personae'));
+        $this->assertFalse(personadle_is_expert_unlocked(self::$pdo, $u2, 'music'));
+    }
+
+    public function testEarnedUnlockIsNotReportedAsGranted(): void
+    {
+        // `granted` sert au front à masquer la barre de progression : un joueur
+        // qui a gagné son accès ne doit pas être étiqueté « offert ».
+        $uid = $this->makeUser();
+        for ($i = 0; $i < personadle_expert_conditions()['classic']['value']; $i++) {
+            $this->session($uid, 'classic', 1);
+        }
+        $p = personadle_expert_progress(self::$pdo, $uid, 'classic');
+        $this->assertTrue($p['unlocked']);
+        $this->assertFalse($p['granted']);
+    }
+
+    public function testRevokingAGrantDoesNotRemoveAnEarnedUnlock(): void
+    {
+        // Le don est un OU, pas un remplacement : retirer la ligne ne doit pas
+        // reprendre un accès que le joueur a gagné par ailleurs.
+        $uid = $this->makeUser();
+        $this->grant($uid, 'classic');
+        for ($i = 0; $i < personadle_expert_conditions()['classic']['value']; $i++) {
+            $this->session($uid, 'classic', 1);
+        }
+        self::$pdo->prepare('DELETE FROM expert_unlocks_granted WHERE user_id = ? AND mode = ?')
+            ->execute([$uid, 'classic']);
+
+        $this->assertTrue(personadle_is_expert_unlocked(self::$pdo, $uid, 'classic'));
+    }
+
+    public function testGrantingTwiceIsRejectedByTheUniqueKey(): void
+    {
+        // C'est cette contrainte qui rend l'endpoint admin idempotent : il peut
+        // se contenter d'un INSERT IGNORE sans lire d'abord.
+        $uid = $this->makeUser();
+        $this->grant($uid, 'music');
+
+        $this->expectException(PDOException::class);
+        $this->grant($uid, 'music');
     }
 }

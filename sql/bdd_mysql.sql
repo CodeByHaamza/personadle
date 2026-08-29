@@ -286,6 +286,36 @@ CREATE INDEX idx_badges_user ON badges_unlocked(user_id);
 
 
 -- =============================================================================
+-- 8bis. EXPERT_UNLOCKS_GRANTED — déblocage manuel d'un Mode Expert par un admin
+-- =============================================================================
+-- La porte d'entrée du Mode Expert (api/lib/expert_unlocks.php) calcule le
+-- déblocage depuis `game_sessions`. Cette table est le second chemin : un admin
+-- peut accorder l'accès à un mode sans que le joueur ait rempli la condition.
+--
+-- Pourquoi une table plutôt que de fausses parties dans `game_sessions` :
+-- celles-ci compteraient dans les stats, les classements et les badges. Un geste
+-- d'admin ne doit rien fabriquer qui ressemble à du jeu réel.
+--
+-- C'est un OU avec la condition calculée, jamais un remplacement : retirer la
+-- ligne ne retire pas l'accès à un joueur qui l'a gagné par ailleurs.
+-- Voir migration 035.
+-- =============================================================================
+CREATE TABLE expert_unlocks_granted (
+    id          BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id     BIGINT UNSIGNED  NOT NULL,
+    mode        VARCHAR(30)      NOT NULL,   -- validé côté PHP contre personadle_expert_conditions()
+    granted_by  BIGINT UNSIGNED  NULL,       -- NULL si l'admin a depuis supprimé son compte
+    granted_at  TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    -- Rend l'endpoint admin naturellement idempotent : accorder deux fois est un no-op.
+    UNIQUE KEY uq_expert_grant (user_id, mode),
+    CONSTRAINT fk_expert_grant_user  FOREIGN KEY (user_id)    REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_expert_grant_admin FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =============================================================================
 -- 9. EVENT_CODES_REDEEMED
 -- =============================================================================
 CREATE TABLE event_codes_redeemed (

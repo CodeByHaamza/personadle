@@ -1,0 +1,279 @@
+/* =============================================================================
+   expert-unlock.css — Le cadenas qui explose à l'ouverture d'un Mode Expert.
+   Piloté par js/expert-unlock-anim.js.
+
+   Animations préfixées `eu*` (CLAUDE.md §4) : `shake`/`burst` sont des noms bien
+   trop communs pour vivre dans une feuille chargée à côté des 6 modes.
+   ============================================================================= */
+
+.eu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(3px);
+  cursor: pointer;
+  animation: euFadeIn 0.22s ease-out both;
+}
+
+.eu-overlay.eu-closing {
+  animation: euFadeOut 0.3s ease-in both;
+}
+
+.eu-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1rem;
+  text-align: center;
+  /* Laisse respirer sur mobile sans jamais provoquer de scroll horizontal. */
+  max-width: min(92vw, 460px);
+}
+
+/* ── Le cadenas ──────────────────────────────────────────────────────────── */
+
+.eu-lock {
+  width: min(34vw, 130px);
+  height: auto;
+  color: #ffd700;
+  filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.55));
+  /* Le corps tremble puis se fige : c'est ce qui vend la rupture qui suit. */
+  animation: euLockShake 0.5s ease-in-out both;
+}
+
+.eu-keyhole {
+  fill: rgba(0, 0, 0, 0.55);
+}
+
+/* L'anse part vers le haut et bascule — elle se détache avant le corps. */
+.eu-shackle {
+  transform-origin: 30% 50%;
+  animation: euShackleSnap 0.5s cubic-bezier(0.3, -0.6, 0.7, 1.6) 0.5s both;
+}
+
+/* Le corps encaisse le choc, gonfle une dernière fois, puis disparaît. */
+.eu-body {
+  transform-origin: 50% 65%;
+  animation: euBodyBurst 0.45s cubic-bezier(0.35, 0, 0.25, 1) 0.62s both;
+}
+
+/* ── L'onde de choc ──────────────────────────────────────────────────────── */
+
+.eu-burst {
+  position: absolute;
+  top: calc(min(34vw, 130px) / 2);
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  border: 3px solid #ffd700;
+  opacity: 0;
+  animation: euShockwave 0.75s ease-out 0.66s both;
+}
+
+/* ── Les éclats ──────────────────────────────────────────────────────────── */
+
+.eu-shards {
+  position: absolute;
+  top: calc(min(34vw, 130px) / 2);
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.eu-shard {
+  position: absolute;
+  width: var(--eu-size, 8px);
+  height: var(--eu-size, 8px);
+  margin: calc(var(--eu-size, 8px) / -2) 0 0 calc(var(--eu-size, 8px) / -2);
+  background: #ffd700;
+  border-radius: 2px;
+  opacity: 0;
+  /* L'angle est tiré en JS et posé ici : chaque éclat part dans sa direction,
+     mais la trajectoire elle-même reste décrite en CSS. */
+  transform: rotate(var(--eu-angle, 0deg)) translateY(0);
+  animation: euShardFly 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) calc(0.66s + var(--eu-delay, 0ms)) both;
+}
+
+/* ── Le texte ────────────────────────────────────────────────────────────── */
+
+.eu-title {
+  margin: 0.6rem 0 0;
+  font-size: clamp(1.25rem, 5vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffd700;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  animation: euTextRise 0.5s ease-out 0.86s both;
+}
+
+.eu-modes {
+  margin: 0;
+  font-size: clamp(0.95rem, 3.6vw, 1.15rem);
+  font-weight: 700;
+  color: #ffffff;
+  animation: euTextRise 0.5s ease-out 0.98s both;
+}
+
+.eu-hint {
+  margin: 0.15rem 0 0;
+  font-size: clamp(0.8rem, 3vw, 0.92rem);
+  color: rgba(255, 255, 255, 0.72);
+  animation: euTextRise 0.5s ease-out 1.1s both;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+
+@keyframes euFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes euFadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes euLockShake {
+  0%,
+  100% {
+    transform: translateX(0) scale(1);
+  }
+  15% {
+    transform: translateX(-6px) rotate(-4deg);
+  }
+  35% {
+    transform: translateX(6px) rotate(4deg);
+  }
+  55% {
+    transform: translateX(-5px) rotate(-3deg);
+  }
+  75% {
+    transform: translateX(4px) rotate(2deg);
+  }
+  90% {
+    transform: translateX(0) scale(1.06);
+  }
+}
+
+@keyframes euShackleSnap {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  35% {
+    transform: translateY(-16px) rotate(-16deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120px) rotate(-70deg);
+    opacity: 0;
+  }
+}
+
+@keyframes euBodyBurst {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(1.22);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.25);
+    opacity: 0;
+  }
+}
+
+@keyframes euShockwave {
+  0% {
+    opacity: 0.95;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-width: 4px;
+  }
+  100% {
+    opacity: 0;
+    width: 260px;
+    height: 260px;
+    margin: -130px 0 0 -130px;
+    border-width: 1px;
+  }
+}
+
+@keyframes euShardFly {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--eu-angle, 0deg)) translateY(0) scale(0.4);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--eu-angle, 0deg)) translateY(calc(var(--eu-dist, 120px) * -1)) scale(0.2);
+  }
+}
+
+@keyframes euTextRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Accessibilité ───────────────────────────────────────────────────────── */
+
+/* Classe posée par le JS quand le système demande moins d'animation : le
+   cadenas s'ouvre quand même (sinon l'annonce n'a plus de sujet), mais sans
+   tremblement, sans éclats et sans projection. */
+.eu-overlay.eu-reduced .eu-lock,
+.eu-overlay.eu-reduced .eu-burst {
+  animation: none;
+}
+
+.eu-overlay.eu-reduced .eu-shackle {
+  animation: euShackleSnap 0.4s ease-out 0.1s both;
+}
+
+.eu-overlay.eu-reduced .eu-body {
+  animation: none;
+  opacity: 0.35;
+}
+
+.eu-overlay.eu-reduced .eu-title,
+.eu-overlay.eu-reduced .eu-modes,
+.eu-overlay.eu-reduced .eu-hint {
+  animation: euFadeIn 0.3s ease-out both;
+}
+
+/* Garde-fou système : couvre aussi le cas où la classe n'aurait pas été posée
+   (matchMedia indisponible), pour ne jamais imposer l'animation complète. */
+@media (prefers-reduced-motion: reduce) {
+  .eu-overlay,
+  .eu-overlay * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .eu-overlay .eu-body {
+    opacity: 0.35;
+  }
+}

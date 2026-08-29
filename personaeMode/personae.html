@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../css/challenge-result.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
     <link rel="stylesheet" href="../css/title-notification.css" />
+    <link rel="stylesheet" href="../css/expert-unlock.css?v=1" />
     <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
   </head>
 
@@ -528,26 +529,32 @@
           </div>
         </div>
 
-        <!-- Input -->
-
-        <input
-          type="text"
-          id="textbar"
-          placeholder="Enter character name..."
-          data-i18n-placeholder="ui.input_placeholder"
-          aria-label="Guess character name"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          style="
-            padding: 10px;
-            border-radius: 6px;
-            border: 2px solid #aaa;
-            font-size: 16px;
-            min-width: 240px;
-          "
-        />
+        <!-- Input
+             Enveloppé dans un conteneur positionné, comme en mode Music : le JS
+             accroche la liste d'autocomplétion à `input.parentNode`, et celle-ci
+             se place en `top: 100%`. Sans ce wrapper, le parent était la rangée
+             flex entière — bouton Replay de 90 px compris — et le déroulant
+             tombait sous toute la rangée au lieu de sous le champ. -->
+        <div class="autocomplete-wrapper" style="position: relative">
+          <input
+            type="text"
+            id="textbar"
+            placeholder="Enter character name..."
+            data-i18n-placeholder="ui.input_placeholder"
+            aria-label="Guess character name"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            style="
+              padding: 10px;
+              border-radius: 6px;
+              border: 2px solid #aaa;
+              font-size: 16px;
+              min-width: 240px;
+            "
+          />
+        </div>
         <!-- Submit -->
         <div class="link-wrapper" id="guessButton">
           <div class="img-wrapper">

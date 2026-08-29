@@ -41,7 +41,9 @@
     "expert_cond_consecutive_perfects": "Gewinne {{required}} Spiele in Folge im ersten Versuch",
     "expert_cond_signin": "Melde dich an, um den Expertenmodus freizuschalten — dein Fortschritt folgt deinem Konto.",
     "expert_cond_unknown": "Verbinde dich erneut, um deinen Fortschritt zu sehen.",
-    "expert_locked_title": "Expertenmodus gesperrt"
+    "expert_locked_title": "Expertenmodus gesperrt",
+    "expert_unlocked_title": "Expertenmodus freigeschaltet!",
+    "expert_unlocked_hint": "Der ⚡-Button gehört jetzt dir."
   },
   "modes": {
     "classic": {

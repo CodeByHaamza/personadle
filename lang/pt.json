@@ -41,7 +41,9 @@
     "expert_cond_consecutive_perfects": "Vence {{required}} partidas seguidas à primeira tentativa",
     "expert_cond_signin": "Inicia sessão para desbloquear o Modo Especialista — o teu progresso segue a tua conta.",
     "expert_cond_unknown": "Liga-te novamente para veres o teu progresso.",
-    "expert_locked_title": "Modo Especialista bloqueado"
+    "expert_locked_title": "Modo Especialista bloqueado",
+    "expert_unlocked_title": "Modo Especialista desbloqueado!",
+    "expert_unlocked_hint": "O botão ⚡ agora é teu."
   },
   "modes": {
     "classic": {

@@ -13,6 +13,88 @@
 
 ---
 
+## 2026-08-26 — feat(expert): cadenas qui explose au déblocage + déblocage manuel par un admin
+
+Deux demandes, **une seule mécanique** : le front compare l'état de déblocage en cache à
+celui renvoyé par le serveur. Un mode qui passe de `false` à `true` déclenche l'animation —
+que le joueur ait franchi le seuil en jouant ou qu'un admin le lui ait accordé. Le module
+d'animation ne sait rien de la différence, et n'a pas à la connaître.
+
+### Déblocage manuel (migration 035)
+
+Nouvelle table `expert_unlocks_granted (user_id, mode, granted_by, granted_at)`.
+
+**Pourquoi une table plutôt que de fausses parties dans `game_sessions`** : celles-ci
+compteraient dans les stats, les classements et les badges `mode_wins`/`games_total`. Un geste
+d'admin ne doit rien fabriquer qui ressemble à du jeu réel. Même forme que `badges_unlocked`.
+
+Le don est un **OU** avec la condition calculée, jamais un remplacement :
+
+- `personadle_expert_progress()` renvoie désormais `granted`, et n'interroge la table que si la
+  condition n'est pas déjà remplie — inutile de payer une requête pour le cas courant.
+- La progression affichée n'est **pas** gonflée : un accès offert montre « 0/15 », pas un faux
+  « 15/15 ». La barre mesure ce que le joueur a joué.
+- Retirer le don ne reprend pas un accès gagné entre-temps. L'endpoint renvoie
+  `still_unlocked` pour que l'admin ne croie pas avoir refermé un mode qui reste ouvert.
+
+`api/admin/user_expert.php` (GET/POST/DELETE) + sa `RewriteRule` dans `api/admin/.htaccess`
+(CLAUDE.md §4). Les modes sont validés contre `personadle_expert_conditions()`, source unique —
+un 7e mode n'aura rien à changer dans l'endpoint. Actions journalisées (`expert.grant`,
+`expert.revoke`) via `personadle_log_admin_action()`.
+
+Onglet **⚡ Expert** dans le panneau admin, avec trois états distincts — *Gagné en jouant*
+(non retirable), *Accordé* (retirable), *Verrouillé*. Actions immédiates plutôt que la file
+`pendingGifts` des badges : la sémantique diffère, et une file laisserait croire qu'on peut
+refermer un mode mérité.
+
+### L'animation
+
+`js/expert-unlock-anim.js` + `css/expert-unlock.css`. Cadenas SVG **inline** — une image
+externe qui n'arrive pas laisserait un trou au milieu de l'annonce. L'anse se détache et part
+en rotation, le corps se fend, 14 éclats partent en étoile (angle et distance tirés en JS,
+trajectoire décrite en CSS), onde de choc, puis le texte monte.
+
+- **Un seul overlay quel que soit le nombre de modes** : enchaîner six animations ferait de
+  l'annonce une punition. Les noms sont listés.
+- **Import dynamique** depuis `gameCore.js` : le module lit `modeLabel()` d'ici, un import
+  statique fermerait le cycle (CLAUDE.md §4). Le module n'est donc pas même téléchargé tant
+  qu'il n'y a rien à annoncer, et un échec de chargement ne casse pas la partie.
+- `prefers-reduced-motion` : le cadenas s'ouvre quand même (sinon l'annonce n'a plus de sujet)
+  mais sans tremblement ni éclats. Doublé d'un garde-fou `@media` au cas où `matchMedia` serait
+  indisponible.
+- Animations préfixées `eu*` — `shake`/`burst` sont bien trop communs pour une feuille chargée
+  à côté des 6 modes.
+
+### Le garde-fou qui compte
+
+`diffNewlyUnlocked(prev, next)` ne renvoie **rien** quand `prev` est absent. Sans ça, une
+première visite, un cache vidé ou une navigation privée feraient paraître neufs les 6 modes, et
+le joueur se prendrait six animations pour des accès qu'il avait depuis longtemps. Rater une
+animation est bénin ; en inventer une ne l'est pas.
+
+`consumeNewlyUnlockedExpertModes()` vide la liste à la lecture : l'appel à `fetchExpertStatus()`
+est dédoublonné, mais pas ses lecteurs.
+
+### Tests
+
+- `tests/php/ExpertUnlocksTest.php` : +6 méthodes (28 au total) — le don ouvre sans partie
+  jouée, ne gonfle pas la progression, reste cloisonné par mode et par compte, un accès gagné
+  n'est pas étiqueté « offert », retirer le don ne reprend pas un accès mérité, et la contrainte
+  UNIQUE rend l'endpoint idempotent.
+- `tests/expertUnlock.test.js` : +8 (28 au total) — les deux sens du diff, l'absence d'état
+  précédent, un mode apparu entre deux visites, plusieurs modes d'un coup, et la consommation
+  unique.
+- Validé de bout en bout sur la stack Docker : les 6 modes forcés à « verrouillé » en cache,
+  seul celui réellement débloqué côté serveur est annoncé.
+
+### Angles morts connus
+
+- **Aucun test E2E de l'animation** — elle dépend d'une transition d'état entre deux
+  chargements, coûteuse à monter en Playwright. Vérifiée à la main via un script de reproduction.
+- L'annonce se déclenche au **prochain chargement d'une page de mode**, pas à l'instant où la
+  partie franchit le seuil : `fetchExpertStatus()` n'est appelé qu'au câblage du bouton. Un
+  joueur qui débloque puis quitte sans changer de page verra l'animation à sa visite suivante.
+
 ## 2026-08-26 — fix(seo): l'aperçu des liens partagés pointait vers un domaine inexistant
 
 Remonté par un joueur sur Discord, capture à l'appui : un lien `personadle.net` collé dans

@@ -40,6 +40,23 @@ function personadle_expert_conditions(): array
 }
 
 /**
+ * Le mode a-t-il été accordé manuellement à ce joueur par un admin ?
+ *
+ * Second chemin de déblocage, en OU avec la condition calculée (table
+ * `expert_unlocks_granted`, migration 035). Volontairement séparé du comptage :
+ * un déblocage offert ne doit pas gonfler la progression affichée — le joueur
+ * verrait « 10/10 » sans avoir joué ces parties.
+ */
+function personadle_expert_is_granted(PDO $pdo, int $userId, string $mode): bool
+{
+    $s = $pdo->prepare(
+        'SELECT 1 FROM expert_unlocks_granted WHERE user_id = ? AND mode = ? LIMIT 1'
+    );
+    $s->execute([$userId, $mode]);
+    return (bool) $s->fetchColumn();
+}
+
+/**
  * Progression du joueur vers la porte d'un mode.
  *
  * Renvoie `current` (avancement réel) en plus de `unlocked`, pour que le front
@@ -47,7 +64,10 @@ function personadle_expert_conditions(): array
  * lui-même est construit côté client à partir de `condition_type` — le serveur
  * ne renvoie aucun texte, sinon il serait en anglais pour les 6 langues.
  *
- * @return array{unlocked: bool, condition_type: string, required: int, current: int}
+ * `granted` distingue les deux chemins : le front peut ainsi ne pas afficher de
+ * barre de progression pour un accès offert, où elle n'aurait aucun sens.
+ *
+ * @return array{unlocked: bool, condition_type: string, required: int, current: int, granted: bool}
  */
 function personadle_expert_progress(PDO $pdo, int $userId, string $mode): array
 {
@@ -55,7 +75,13 @@ function personadle_expert_progress(PDO $pdo, int $userId, string $mode): array
 
     // Mode inconnu (7e mode ajouté sans porte) : ouvert, plutôt que bloqué pour toujours.
     if (!isset($conditions[$mode])) {
-        return ['unlocked' => true, 'condition_type' => 'none', 'required' => 0, 'current' => 0];
+        return [
+            'unlocked'       => true,
+            'condition_type' => 'none',
+            'required'       => 0,
+            'current'        => 0,
+            'granted'        => false,
+        ];
     }
 
     $cond     = $conditions[$mode];
@@ -68,11 +94,18 @@ function personadle_expert_progress(PDO $pdo, int $userId, string $mode): array
         default                     => 0,
     };
 
+    $earned  = $current >= $required;
+    // Court-circuit : on n'interroge la table de dons que si la condition n'est
+    // pas déjà remplie — inutile de payer une requête pour un joueur qui a gagné
+    // son accès, c'est-à-dire le cas courant.
+    $granted = $earned ? false : personadle_expert_is_granted($pdo, $userId, $mode);
+
     return [
-        'unlocked'       => $current >= $required,
+        'unlocked'       => $earned || $granted,
         'condition_type' => $cond['type'],
         'required'       => $required,
         'current'        => $current,
+        'granted'        => $granted,
     ];
 }
 

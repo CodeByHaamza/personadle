@@ -26,6 +26,8 @@ import {
   expertConditionLabel,
   resetExpertStatusCache,
   expertNavigate,
+  diffNewlyUnlocked,
+  consumeNewlyUnlockedExpertModes,
 } from "../js/gameCore.js";
 
 /** Pose le `<a id="expertToggle">` que les 6 pages de mode contiennent. */
@@ -365,5 +367,81 @@ describe("setupExpertToggle — verrou du bouton ⚡", () => {
     await Promise.resolve();
 
     expect(window._personadleApi.user.expertStatus).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("diffNewlyUnlocked — détection d'un mode qui vient de s'ouvrir", () => {
+  it("repère un mode passé de verrouillé à débloqué", () => {
+    const prev = { classic: { unlocked: false }, music: { unlocked: false } };
+    const next = { classic: { unlocked: true }, music: { unlocked: false } };
+    expect(diffNewlyUnlocked(prev, next)).toEqual(["classic"]);
+  });
+
+  it("n'annonce rien sans état précédent connu", () => {
+    // Première visite, cache vidé, navigation privée : sans point de
+    // comparaison, les 6 modes paraîtraient neufs et le joueur se prendrait
+    // six animations pour des accès qu'il avait déjà.
+    const next = { classic: { unlocked: true }, music: { unlocked: true } };
+    expect(diffNewlyUnlocked(null, next)).toEqual([]);
+  });
+
+  it("n'annonce pas un mode déjà débloqué à la visite précédente", () => {
+    const prev = { classic: { unlocked: true } };
+    const next = { classic: { unlocked: true } };
+    expect(diffNewlyUnlocked(prev, next)).toEqual([]);
+  });
+
+  it("n'annonce pas un mode absent de l'état précédent", () => {
+    // Un 7e mode ajouté entre deux visites n'est pas un déblocage : on ne sait
+    // simplement pas ce qu'il valait avant.
+    expect(diffNewlyUnlocked({ classic: { unlocked: true } }, { nouveau: { unlocked: true } })).toEqual([]);
+  });
+
+  it("ne se déclenche jamais dans le sens verrouillé", () => {
+    const prev = { classic: { unlocked: true } };
+    const next = { classic: { unlocked: false } };
+    expect(diffNewlyUnlocked(prev, next)).toEqual([]);
+  });
+
+  it("remonte plusieurs modes ouverts d'un coup", () => {
+    const prev = { classic: { unlocked: false }, music: { unlocked: false }, emoji: { unlocked: true } };
+    const next = { classic: { unlocked: true }, music: { unlocked: true }, emoji: { unlocked: true } };
+    expect(diffNewlyUnlocked(prev, next).sort()).toEqual(["classic", "music"]);
+  });
+
+  it("tolère un état vide des deux côtés", () => {
+    expect(diffNewlyUnlocked(null, null)).toEqual([]);
+    expect(diffNewlyUnlocked({}, {})).toEqual([]);
+  });
+});
+
+describe("consumeNewlyUnlockedExpertModes — annonce jouée une seule fois", () => {
+  beforeEach(() => {
+    resetExpertStatusCache();
+    localStorage.clear();
+  });
+
+  it("rend la liste puis se vide", async () => {
+    window._currentUser = { id: 7 };
+    // État connu : music verrouillé. C'est lui qui sert de point de comparaison.
+    localStorage.setItem(
+      "expertUnlockStatus",
+      JSON.stringify({ userId: 7, modes: { music: { unlocked: false } } })
+    );
+    window._personadleApi = {
+      user: {
+        expertStatus: vi.fn().mockResolvedValue({
+          expert_status: { music: { unlocked: true, condition_type: "mode_consecutive_perfects", required: 15, current: 15 } },
+        }),
+      },
+    };
+
+    const { fetchExpertStatus } = await import("../js/gameCore.js");
+    await fetchExpertStatus();
+
+    expect(consumeNewlyUnlockedExpertModes()).toEqual(["music"]);
+    // Deuxième lecture : plus rien, sinon l'animation rejouerait à chaque mode
+    // qui interroge le statut sur la même page.
+    expect(consumeNewlyUnlockedExpertModes()).toEqual([]);
   });
 });

@@ -41,7 +41,9 @@
     "expert_cond_consecutive_perfects": "Vinci {{required}} partite di fila al primo tentativo",
     "expert_cond_signin": "Accedi per sbloccare la Modalità Esperto: i tuoi progressi seguono il tuo account.",
     "expert_cond_unknown": "Riconnettiti per vedere i tuoi progressi.",
-    "expert_locked_title": "Modalità Esperto bloccata"
+    "expert_locked_title": "Modalità Esperto bloccata",
+    "expert_unlocked_title": "Modalità Esperto sbloccata!",
+    "expert_unlocked_hint": "Il pulsante ⚡ ora è tuo."
   },
   "modes": {
     "classic": {

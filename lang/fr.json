@@ -41,7 +41,9 @@
     "expert_cond_consecutive_perfects": "Gagne {{required}} parties d'affilée du premier coup",
     "expert_cond_signin": "Connecte-toi pour débloquer le Mode Expert — ta progression suit ton compte.",
     "expert_cond_unknown": "Reconnecte-toi pour voir ta progression.",
-    "expert_locked_title": "Mode Expert verrouillé"
+    "expert_locked_title": "Mode Expert verrouillé",
+    "expert_unlocked_title": "Mode Expert débloqué !",
+    "expert_unlocked_hint": "Le bouton ⚡ est à toi."
   },
   "modes": {
     "classic": {

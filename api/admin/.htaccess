@@ -11,6 +11,9 @@ RewriteRule ^users/[0-9]+/wallpapers    user_wallpapers.php [L,QSA]
 # /api/admin/users/42/titles[/id|/equip]→ user_titles.php
 RewriteRule ^users/[0-9]+/titles        user_titles.php [L,QSA]
 
+# /api/admin/users/42/expert[/mode]     → user_expert.php (déblocage manuel Mode Expert)
+RewriteRule ^users/[0-9]+/expert        user_expert.php [L,QSA]
+
 # /api/admin/users/42/stats             → user_stats.php
 RewriteRule ^users/[0-9]+/stats$        user_stats.php [L,QSA]
 

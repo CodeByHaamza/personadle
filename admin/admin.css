@@ -1700,3 +1700,30 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ── Onglet Expert — état des 6 Modes Expert ───────────────────────────────
+   Trois états visuellement distincts : un accès GAGNÉ ne se retire pas, un
+   accès ACCORDÉ oui. Les confondre ferait cliquer l'admin au mauvais endroit. */
+.expert-state {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.expert-earned {
+  background: rgba(77, 171, 247, 0.14);
+  color: var(--rare);
+}
+
+.expert-granted {
+  background: rgba(255, 215, 0, 0.14);
+  color: var(--gold);
+}
+
+.expert-locked-state {
+  background: var(--red-dim);
+  color: var(--red);
+}
