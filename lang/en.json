@@ -1025,7 +1025,11 @@
     "notif_attempts": "attempt(s)",
     "unknown_mode": "This challenge's mode is unavailable.",
     "offline": "You need to be online to accept a challenge.",
-    "accept_failed": "Could not accept the challenge. Try again."
+    "accept_failed": "Could not accept the challenge. Try again.",
+    "abandon": "Give up challenge",
+    "abandon_confirm": "Give up this challenge? It will not count as a loss.",
+    "abandoned": "Challenge given up. You can accept another one.",
+    "abandon_failed": "Could not give up the challenge. Try again."
   },
   "challenge_result": {
     "title_win": "WELL DONE!",

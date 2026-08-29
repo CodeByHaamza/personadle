@@ -104,6 +104,40 @@
   color: #e63946;
 }
 
+/* ── Abandonner ──────────────────────────────────────────────
+   Volontairement plus discret que le ✕ : c'est l'action qui ENGAGE
+   (elle renonce vraiment au défi), alors que le ✕ ne fait que masquer.
+   Un bouton flatteur inviterait au clic réflexe. */
+.cb-abandon {
+  background: none;
+  border: 1px solid rgba(230, 57, 70, 0.35);
+  color: #b0b0b0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  /* WCAG 2.5.5 : cible tactile d'au moins 44px de haut, comme le ✕. */
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.cb-abandon:hover:not(:disabled) {
+  background: rgba(230, 57, 70, 0.18);
+  border-color: #e63946;
+  color: #e63946;
+}
+/* Désactivé pendant l'appel serveur : l'abandon attend la confirmation, un
+   double-clic enverrait deux PATCH pour le même défi. */
+.cb-abandon:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
 /* ── Dark mode ── */
 body.darkmode #challengeBanner {
   background: rgba(8, 8, 8, 0.95);

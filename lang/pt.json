@@ -1025,7 +1025,11 @@
     "notif_attempts": "tentativa(s)",
     "unknown_mode": "O modo deste desafio está indisponível.",
     "offline": "Precisas de estar online para aceitar um desafio.",
-    "accept_failed": "Não foi possível aceitar o desafio. Tenta de novo."
+    "accept_failed": "Não foi possível aceitar o desafio. Tenta de novo.",
+    "abandon": "Desistir do desafio",
+    "abandon_confirm": "Desistir deste desafio? Não contará como derrota.",
+    "abandoned": "Desafio abandonado. Podes aceitar outro.",
+    "abandon_failed": "Não foi possível desistir do desafio. Tenta de novo."
   },
   "challenge_result": {
     "title_win": "MUITO BEM!",

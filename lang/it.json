@@ -914,7 +914,11 @@
     "notif_attempts": "tentativo/i",
     "unknown_mode": "La modalità di questa sfida non è disponibile.",
     "offline": "Devi essere online per accettare una sfida.",
-    "accept_failed": "Impossibile accettare la sfida. Riprova."
+    "accept_failed": "Impossibile accettare la sfida. Riprova.",
+    "abandon": "Abbandona la sfida",
+    "abandon_confirm": "Abbandonare questa sfida? Non conterà come una sconfitta.",
+    "abandoned": "Sfida abbandonata. Puoi accettarne un'altra.",
+    "abandon_failed": "Impossibile abbandonare la sfida. Riprova."
   },
   "challenge_result": {
     "title_win": "BRAVO!",

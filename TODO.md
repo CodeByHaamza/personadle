@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 809 tests Vitest (39 suites), 221 méthodes PHPUnit, 109 tests E2E,
+> Vérifié le 2026-08-26 : 819 tests Vitest (40 suites), 221 méthodes PHPUnit, 109 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -130,13 +130,20 @@ partir après la release : ajouter des axes de tri n'enlève rien à personne.
 Le correctif du 2026-08-15 empêche d'en créer de nouveaux, **il ne répare pas l'existant**.
 Bug qui touche des joueurs **aujourd'hui en prod** — branche courte, valeur immédiate.
 
-- [ ] Migration de nettoyage ponctuelle : repasser en `unread` les `messages` en statut
-      `accepted` sans partie associée et vieux de plus de 7 jours. Non idempotente par nature
-      — ne pas la rejouer sur des défis récents légitimement en cours.
-- [ ] Bouton « abandonner le défi en cours ». Sans lui le blocage se reproduira à la première
-      panne réseau au mauvais moment, et il n'existe aujourd'hui aucune sortie.
-      `getPendingActiveChallenge()` fournit déjà l'état ; il manque l'action inverse (purge
-      d'`activeChallenge`, restauration des filtres, statut serveur remis à `read`).
+- [x] Migration de nettoyage ponctuelle — `sql/migrations/036_cleanup_stuck_challenges.sql`.
+      **Deux écarts assumés au plan initial**, détaillés dans l'en-tête du script :
+      (1) cible `read` et non `unread` — `unread` ferait ressurgir comme neufs des défis
+      vieux de plusieurs semaines ; (2) pas de test « sans partie associée » — vérifié, il
+      n'apporte aucune sécurité et laisse au contraire bloquées les lignes dont le PATCH
+      final a échoué (`updateStatus()` est en fire-and-forget). La borne de 7 jours suffit
+      à protéger les défis en cours. Rejouée pour de vrai contre la base locale : 5 cas
+      témoins OK, second passage = 0 ligne touchée.
+- [x] Bouton « abandonner le défi en cours » — `js/challenge-banner.js`
+      (`abandonActiveChallenge()`), distinct du `✕` qui ne fait que masquer le bandeau.
+      L'appel serveur est **attendu** avant toute purge locale : c'est le piège de
+      `performRecovery()` (CLAUDE.md §7), un fire-and-forget laisserait le défi `accepted`
+      en base pendant que le client se croit libéré. Restaure les filtres et l'état du mode
+      exactement comme `checkChallengeCompletion()`. 4 clés i18n × 6 langues.
 
 ## 4. Défis en Mode Expert
 
@@ -160,8 +167,19 @@ Le volet **dépendances est déjà réglé par construction** : `package.json` n
 dépendance de production, il n'y a pas de `composer.json`, `npm audit --omit=dev` sort 0
 vulnérabilité. Le risque vit dans les 61 fichiers PHP écrits à la main.
 
-- [ ] **PHPStan en mode taint sur `api/`** — déterministe, gratuit, jouable en CI à chaque PR.
-      Meilleur rapport effort/résultat, à faire **avant** strix.
+- [x] ~~**PHPStan en mode taint sur `api/`**~~ → **fait avec Psalm**, pas PHPStan.
+      ⚠️ **La prémisse de cette ligne était fausse** : PHPStan n'a **aucune** analyse de taint
+      en open source (vérifié sur la 2.2.2 embarquée par la CI — ni option `--taint`, ni
+      commande dédiée). L'outil libre qui fait ce travail est Psalm. Configuré dans
+      `psalm.xml` en `errorLevel 8` (le plus permissif) pour n'analyser **que** le taint :
+      le typage reste le domaine de PHPStan niveau 5, et un rapport noyé sous des remarques
+      de typage ne serait jamais lu. Branché en CI, **bloquant** (déterministe, sans budget).
+      Lancer en local : `npm run security:taint` (stack Docker requise).
+      Résultat sur le code actuel : **0 alerte réelle**. Le seul flux détecté
+      (`$_GET` → `echo json_encode` dans `jsonSuccess()`) est un faux positif sûr — la
+      réponse part en `application/json` + `X-Content-Type-Options: nosniff`, elle ne peut
+      pas être interprétée comme du HTML. Exclusion réduite à ces 2 identifiants dans ce seul
+      fichier, justifiée dans `psalm.xml`.
 - [ ] **strix** (pentest autonome, Apache 2.0) — exploration ponctuelle. Jamais contre
       `personadle.net` (il attaque réellement et écrit en base), uniquement contre la stack
       locale sur base jetable ; budget LLM fixé d'avance ; sortie traitée comme des hypothèses,

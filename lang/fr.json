@@ -914,7 +914,11 @@
     "notif_attempts": "tentative(s)",
     "unknown_mode": "Le mode de ce défi est indisponible.",
     "offline": "Tu dois être en ligne pour accepter un défi.",
-    "accept_failed": "Impossible d'accepter le défi. Réessaie."
+    "accept_failed": "Impossible d'accepter le défi. Réessaie.",
+    "abandon": "Abandonner le défi",
+    "abandon_confirm": "Abandonner ce défi ? Il ne comptera pas comme une défaite.",
+    "abandoned": "Défi abandonné. Tu peux en accepter un autre.",
+    "abandon_failed": "Impossible d'abandonner le défi. Réessaie."
   },
   "challenge_result": {
     "title_win": "BRAVO !",

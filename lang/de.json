@@ -914,7 +914,11 @@
     "notif_attempts": "Versuch(e)",
     "unknown_mode": "Der Modus dieser Herausforderung ist nicht verfügbar.",
     "offline": "Du musst online sein, um eine Herausforderung anzunehmen.",
-    "accept_failed": "Herausforderung konnte nicht angenommen werden. Versuch es erneut."
+    "accept_failed": "Herausforderung konnte nicht angenommen werden. Versuch es erneut.",
+    "abandon": "Herausforderung aufgeben",
+    "abandon_confirm": "Diese Herausforderung aufgeben? Sie zählt nicht als Niederlage.",
+    "abandoned": "Herausforderung aufgegeben. Du kannst eine neue annehmen.",
+    "abandon_failed": "Herausforderung konnte nicht aufgegeben werden. Versuch es erneut."
   },
   "challenge_result": {
     "title_win": "BRAVO!",

@@ -117,6 +117,20 @@ jobs:
           wget -q -O phpstan.phar https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar
           php phpstan.phar analyse --no-progress
 
+      # Analyse de TAINT (injection SQL, XSS, traversée de chemin) sur api/.
+      # Psalm et non PHPStan : PHPStan n'a pas d'analyse de taint en open source
+      # (vérifié sur la 2.2.2 — ni option ni commande). Voir psalm.xml, qui
+      # explique aussi pourquoi il tourne en errorLevel 8 (le typage est déjà
+      # couvert par PHPStan ci-dessus ; ici on ne veut QUE la sécurité).
+      #
+      # Bloquant volontairement : c'est déterministe et sans budget, donc ça a
+      # sa place en porte de CI — contrairement à un pentest autonome type strix,
+      # non déterministe, qui ne doit jamais bloquer une PR (TODO.md §5).
+      - name: Security — taint analysis (Psalm)
+        run: |
+          wget -q -O psalm.phar https://github.com/vimeo/psalm/releases/latest/download/psalm.phar
+          php psalm.phar --taint-analysis --no-cache --no-progress
+
   # ── Job 3 : E2E Playwright contre la stack Docker complète ──────────────────
   # Auparavant lancés uniquement en local (voir tests-e2e/README.md). Branché en
   # CI le 8 juillet 2026, d'abord non-bloquant (continue-on-error) le temps de

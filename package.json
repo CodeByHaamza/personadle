@@ -15,6 +15,7 @@
     "docs:check": "node scripts/check-doc-numbers.js",
     "docs:fix": "node scripts/check-doc-numbers.js --fix",
     "pools:check": "node scripts/export-daily-pools.js --check",
+    "security:taint": "docker compose exec -T php sh -c \"cd /var/www/html && [ -f psalm.phar ] || curl -sSL -o psalm.phar https://github.com/vimeo/psalm/releases/latest/download/psalm.phar; php psalm.phar --taint-analysis --no-cache --no-progress\"",
     "pools:build": "node scripts/export-daily-pools.js",
     "smoke": "bash scripts/smoke_test.sh",
     "schema:check-prod": "php scripts/check_prod_schema.php",

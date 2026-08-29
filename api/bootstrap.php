@@ -195,6 +195,11 @@ function pdo(): PDO
 function jsonSuccess(mixed $data, int $status = 200): never
 {
     http_response_code($status);
+    // Psalm voit ici un flux de taint HTML (des paramètres de requête finissent
+    // dans ce `echo`) : faux positif neutralisé dans psalm.xml, qui explique
+    // pourquoi. En résumé : la réponse part en `application/json` + `nosniff`,
+    // aucun navigateur ne l'interprète comme du HTML.
+    // ⚠️ Si cette fonction cesse d'être servie en JSON, relire cette exclusion.
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }

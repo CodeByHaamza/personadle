@@ -914,7 +914,11 @@
     "notif_attempts": "intento(s)",
     "unknown_mode": "El modo de este desafío no está disponible.",
     "offline": "Debes estar en línea para aceptar un desafío.",
-    "accept_failed": "No se pudo aceptar el desafío. Inténtalo de nuevo."
+    "accept_failed": "No se pudo aceptar el desafío. Inténtalo de nuevo.",
+    "abandon": "Abandonar el desafío",
+    "abandon_confirm": "¿Abandonar este desafío? No contará como una derrota.",
+    "abandoned": "Desafío abandonado. Puedes aceptar otro.",
+    "abandon_failed": "No se pudo abandonar el desafío. Inténtalo de nuevo."
   },
   "challenge_result": {
     "title_win": "¡BRAVO!",

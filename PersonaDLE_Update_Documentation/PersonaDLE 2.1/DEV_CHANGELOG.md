@@ -364,6 +364,106 @@ jsdom n'implémentant pas la navigation.
 - `make test-php` cible la base de **développement**, pas une base jetable : les tests
   s'appuient sur `ROLLBACK`, ce qui suffit tant qu'aucun test ne fait de DDL.
 
+## 2026-08-26 — fix(challenge): sortie pour les défis bloqués + analyse de taint en CI
+
+Deux lots indépendants, tous deux issus de `TODO.md`, et dans les deux cas **le plan écrit
+s'est révélé partiellement faux à la vérification**. Les écarts sont documentés ici plutôt
+que faits en silence.
+
+### 1. Défis bloqués — le vrai blocage n'était pas là où le TODO le disait
+
+Le correctif du 2026-08-15 a arrêté la production de nouveaux défis coincés, sans réparer
+l'existant. En lisant le code avant d'écrire quoi que ce soit, la nature exacte du blocage
+s'est précisée :
+
+- Le garde-fou anti-doublon (`api/messages/index.php`) filtre sur `challenge_date`, donc un
+  vieux défi `accepted` **ne bloque pas** l'envoi de nouveaux défis les jours suivants.
+- `getPendingActiveChallenge()` compare la date à celle du jour : le cache client se purge
+  donc **tout seul à minuit** (heure de Paris).
+- **Le blocage réel est intra-journalier** : `challenge-notif.js` refuse d'accepter un second
+  défi tant que `activeChallenge` est occupée (« Finish your current challenge first »), et
+  **il n'existait aucune sortie**. Un joueur qui accepte un défi puis ne veut ou ne peut pas
+  le jouer est bloqué jusqu'à minuit.
+
+D'où l'ordre des correctifs : le **bouton d'abandon** répare le vécu joueur, la migration ne
+fait que nettoyer l'historique.
+
+**`abandonActiveChallenge()`** (`js/challenge-banner.js`) — bouton distinct du `✕`, qui lui
+ne fait que masquer le bandeau (comportement volontaire, conservé). Points de conception :
+
+- Le statut serveur repasse à **`read`**, pas `expired` : `expired` signifie « tenté et
+  manqué » dans ce code (`checkChallengeCompletion()`), et l'expéditeur lirait une défaite
+  qui n'a jamais eu lieu.
+- **L'appel serveur est attendu** avant toute purge locale. C'est exactement le piège de
+  `performRecovery()` (CLAUDE.md §7) : en fire-and-forget, le défi resterait `accepted` en
+  base — donc toujours bloquant — pendant que le client se croirait libéré.
+- Filtres restaurés et état du mode purgé dans le **même ordre** que
+  `checkChallengeCompletion()` : un abandon et une fin de partie laissent le mode dans un
+  état strictement identique.
+- Bouton désactivé pendant l'appel (un double-clic enverrait deux PATCH).
+
+**Migration 036** — deux écarts assumés au plan initial :
+
+| Plan TODO | Retenu | Pourquoi |
+| --- | --- | --- |
+| repasser en `unread` | **`read`** | `unread` ferait ressurgir comme *neufs* des défis vieux de plusieurs semaines, pour une date de jeu passée |
+| épargner les défis « avec partie associée » | **pas de ce test** | `updateStatus()` est en fire-and-forget : une coupure réseau laisse un défi *réellement joué* en `accepted`. Ces lignes ont une partie associée — les exclure les condamnerait à rester bloquées |
+
+La borne de 7 jours suffit à protéger les défis légitimement en cours, ce qui était le vrai
+but de la clause écartée. Rejouée pour de vrai contre la base locale (CLAUDE.md §13) : 5 cas
+témoins — vieux `accepted` → `read`, récent intact, borne à 7 jours intacte, `beaten` intact,
+`unread` intact — et un second passage ne touche **0 ligne**.
+
+### 2. Analyse de taint — l'outil demandé n'existe pas
+
+`TODO.md` demandait « PHPStan en mode taint sur `api/` ». **PHPStan n'a pas d'analyse de
+taint en open source** : vérifié sur la 2.2.2 que la CI télécharge, ni option `--taint`, ni
+commande dédiée. La ligne était irréalisable telle qu'écrite.
+
+L'outil libre qui fait ce travail est **Psalm** (`taint-analysis`, stable depuis la v4).
+Mis en place :
+
+- `psalm.xml` en **`errorLevel 8`** — le niveau le plus permissif, choisi exprès. Sans lui,
+  Psalm doublonnerait PHPStan et noierait les alertes de sécurité sous des centaines de
+  remarques de typage ; un rapport que personne ne lit ne protège de rien. L'analyse de taint
+  ne dépend pas de l'errorLevel, elle reste entière.
+- Étape CI **bloquante** dans le job `lint-php`. C'est déterministe et sans budget, donc ça a
+  sa place en porte de CI — contrairement à strix (non déterministe), qui ne devra jamais
+  bloquer une PR.
+- `npm run security:taint` pour le lancer en local contre la stack Docker.
+
+**Résultat sur le code actuel : 0 alerte réelle.** Le seul flux détecté est un faux positif
+sûr : `$_GET['period']` (api/leaderboard) atteint le `echo json_encode` de `jsonSuccess()`.
+Psalm traite tout `echo` comme un puits HTML sans regarder les en-têtes ; or la réponse part
+avec `Content-Type: application/json` **et** `X-Content-Type-Options: nosniff`, tous deux
+posés en haut de `bootstrap.php` — aucun navigateur ne l'interprétera comme du HTML.
+
+Exclusion réduite au strict minimum : ces 2 identifiants, dans ce seul fichier. Un flux vers
+un puits SQL ou shell serait toujours détecté, à son propre puits.
+
+> Note d'outillage : `@psalm-suppress` posé sur l'instruction `echo` **n'est pas pris en
+> compte** par Psalm pour les puits de taint (essayé, l'alerte persistait). D'où l'exclusion
+> déclarative dans `psalm.xml`, qui elle fonctionne. À savoir pour la prochaine fois.
+
+### Fichiers touchés
+
+- `js/challenge-banner.js` — `abandonActiveChallenge()` + bouton
+- `css/challenge-banner.css` — `.cb-abandon` (volontairement plus discret que le `✕` : c'est
+  l'action qui engage)
+- `lang/*.json` — 4 clés × 6 langues
+- `sql/migrations/036_cleanup_stuck_challenges.sql` (nouveau)
+- `psalm.xml` (nouveau), `.github/workflows/ci.yml`, `package.json`, `.gitignore`
+- `api/bootstrap.php` — commentaire pointant vers l'exclusion (aucun changement de logique)
+
+### Angles morts connus
+
+- **Le bouton d'abandon n'est visible que sur la page du mode concerné**, là où le bandeau
+  s'affiche. Un joueur bloqué qui tente d'accepter un autre défi voit le refus, mais doit
+  aller sur le mode du défi en cours pour en sortir. Acceptable, à revoir si des joueurs le
+  remontent.
+- **Aucun test E2E de l'abandon** — le parcours demande deux comptes amis et un défi en base.
+  Couvert par les tests unitaires du module et une vérification manuelle.
+
 ## 2026-08-25 — feat(expert): porte d'entrée des 6 Modes Expert + badge Denial of Self
 
 Les 6 Modes Expert étaient ouverts à tout le monde (bouton ⚡ visible et cliquable par

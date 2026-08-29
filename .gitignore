@@ -163,3 +163,6 @@ test-results/
 playwright-report/
 playwright/.auth/
 phpstan.phar
+psalm.phar
+# Cache de Psalm (analyse de taint) — regénéré à chaque lancement.
+.psalm-cache/
