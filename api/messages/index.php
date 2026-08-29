@@ -124,6 +124,12 @@ if ($method === 'POST') {
     $stmtFriend->execute([$authId, $receiverId, $receiverId, $authId]);
     if (!$stmtFriend->fetch()) jsonError('Not friends', 403);
 
+    // Id de la ligne créée, relevé JUSTE APRÈS son INSERT et pas en fin de
+    // fonction : `lastInsertId()` retombe à 0 dès qu'un UPDATE passe sur la même
+    // connexion (vérifié sur MariaDB 10.6), et le bloc « défi » ci-dessous en
+    // exécute un. Le lire trop tard renverrait `{"id": 0}` au client.
+    $newId = 0;
+
     if ($type === 'message') {
         $content = substr(trim($data['content'] ?? ''), 0, 500);
         if (!$content) jsonError('Message content is required');
@@ -132,6 +138,7 @@ if ($method === 'POST') {
             INSERT INTO messages (sender_id, receiver_id, type, content, status)
             VALUES (?, ?, 'message', ?, 'unread')
         ")->execute([$authId, $receiverId, $content]);
+        $newId = (int) $pdo->lastInsertId();
     }
 
     if ($type === 'challenge') {
@@ -182,6 +189,39 @@ if ($method === 'POST') {
             ")->execute([$authId, $receiverId, $mode, $score, $date]);
         }
 
+        // ── Un seul défi vivant par expéditeur ────────────────────────────────
+        // Le nouveau défi remplace ceux que ce MÊME expéditeur avait envoyés à ce
+        // MÊME destinataire sans qu'ils soient relevés. Sans ça, un ami qui
+        // propose un défi chaque jour accumule une pile que le destinataire ne
+        // rattrapera jamais — c'est exactement l'empilement que la migration 036
+        // a dû nettoyer à la main.
+        //
+        // Deux bornes volontaires :
+        //   - `status = 'unread'` UNIQUEMENT. Un défi déjà `accepted` est un
+        //     engagement pris : seul le joueur peut en sortir, via le bouton
+        //     « abandonner » (js/challenge-banner.js). Le lui retirer dans son
+        //     dos annulerait une partie peut-être déjà en cours.
+        //   - direction fixée (`sender_id = expéditeur`) : les défis que le
+        //     destinataire a envoyés DANS L'AUTRE SENS ne sont pas concernés, pas
+        //     plus que ceux d'un autre ami. Chaque ami a sa propre place.
+        //
+        // Placé APRÈS l'insertion : si celle-ci échoue, on n'aura fermé aucun
+        // défi précédent pour rien. `id <> ?` exclut la ligne qu'on vient de créer.
+        //
+        // `read` et non `expired` : le destinataire ne l'a pas tenté et manqué,
+        // il a simplement été devancé par un défi plus récent (même raisonnement
+        // que l'abandon et que la migration 036).
+        $newId = (int) $pdo->lastInsertId();
+        $pdo->prepare("
+            UPDATE messages
+            SET status = 'read'
+            WHERE type = 'challenge'
+              AND status = 'unread'
+              AND sender_id = ?
+              AND receiver_id = ?
+              AND id <> ?
+        ")->execute([$authId, $receiverId, $newId]);
+
         // XP Social Link : action 'challenge' (15 XP solo)
         try {
             $stmt = $pdo->prepare('SELECT get_or_create_social_link(?, ?) AS link_id');
@@ -193,7 +233,6 @@ if ($method === 'POST') {
         } catch (Throwable) { /* silencieux */ }
     }
 
-    $newId = (int) $pdo->lastInsertId();
     jsonSuccess(['id' => $newId, 'created' => true], 201);
 }
 

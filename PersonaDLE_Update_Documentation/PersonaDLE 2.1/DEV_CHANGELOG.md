@@ -364,6 +364,61 @@ jsdom n'implémentant pas la navigation.
 - `make test-php` cible la base de **développement**, pas une base jetable : les tests
   s'appuient sur `ROLLBACK`, ce qui suffit tant qu'aucun test ne fait de DDL.
 
+## 2026-08-27 — feat(challenge): un seul défi vivant par expéditeur
+
+Règle proposée par Hamza. Un nouveau défi remplace ceux que le **même** expéditeur avait
+envoyés au **même** destinataire sans qu'ils soient relevés.
+
+**Le manque qu'elle comble** : rien ne plafonnait les défis non joués. Un ami qui propose un
+défi chaque jour construisait une pile que le destinataire ne rattraperait jamais — c'est
+exactement l'empilement que la migration 036 a dû nettoyer à la main la veille. Le nettoyage
+traitait le symptôme ; cette règle traite la cause.
+
+### Les trois bornes, toutes délibérées
+
+- **`status = 'unread'` uniquement.** Un défi déjà `accepted` est un engagement pris : seul le
+  joueur en sort, via le bouton « abandonner ». Le lui retirer dans son dos annulerait une
+  partie peut-être déjà en cours et le priverait du seul chemin de sortie prévu.
+- **Cloisonné par expéditeur** (`sender_id = expéditeur`). Le défi d'un autre ami n'est jamais
+  touché, ni ceux que le destinataire a envoyés dans l'autre sens. Chaque ami a sa place.
+- **Statut `read`**, pas `expired` : le destinataire ne l'a pas tenté et manqué, il a été
+  devancé. Même raisonnement que l'abandon et que la migration 036 — les trois chemins
+  laissent la base dans la même forme.
+
+Le garde-fou anti-doublon du même jour (409) est **conservé** : il joue un autre rôle
+(anti-spam intra-journalier) et se compose proprement avec la nouvelle règle.
+
+### Le piège trouvé en écrivant le test
+
+L'`UPDATE` de remplacement est placé **après** l'`INSERT` — si l'insertion échoue, aucun défi
+précédent n'est fermé pour rien. Mais ce simple ordre a révélé un bug qui serait passé
+inaperçu :
+
+> **`lastInsertId()` retombe à 0 dès qu'un UPDATE passe sur la même connexion.**
+> Vérifié empiriquement sur MariaDB 10.6 plutôt que supposé : `INSERT` → `529`,
+> `UPDATE` → `0`.
+
+Or `POST /api/messages` lisait `lastInsertId()` **en fin de fonction**, après l'UPDATE :
+l'API aurait répondu `{"id": 0, "created": true}` pour **chaque défi créé**, sans qu'aucune
+erreur ne le signale. `$newId` est désormais relevé juste après chaque `INSERT`, et le test
+E2E le verrouille explicitement (`expect(first.id).toBeGreaterThan(0)`).
+
+### Tests
+
+`tests-e2e/challenge-supersede.spec.js` — 4 tests contre l'API réelle (3 comptes, 2 amitiés) :
+id réel non nul, remplacement du précédent non relevé, cloisonnement par expéditeur dans les
+deux sens, et survie d'un défi accepté.
+
+> Détail d'écriture qui coûte du temps quand on le rate : `pseudo` est plafonné à 20
+> caractères **et** unique. Un suffixe de compte placé en fin de chaîne se faisait tronquer,
+> et les trois comptes demandaient le même pseudo (409 à l'inscription). Il est donc en tête.
+
+### Angle mort connu
+
+**Aucune notification au destinataire** quand un défi est remplacé : il voit simplement le
+nouveau en `unread` et l'ancien passé en `read`. Suffisant tant que le remplacement vient
+d'un défi plus récent du même ami — à revoir si des joueurs s'étonnent de la disparition.
+
 ## 2026-08-26 — fix(challenge): sortie pour les défis bloqués + analyse de taint en CI
 
 Deux lots indépendants, tous deux issus de `TODO.md`, et dans les deux cas **le plan écrit
