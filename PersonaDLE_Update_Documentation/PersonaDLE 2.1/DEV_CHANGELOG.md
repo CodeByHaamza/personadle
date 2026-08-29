@@ -13,6 +13,56 @@
 
 ---
 
+## 2026-08-26 — fix(seo): l'aperçu des liens partagés pointait vers un domaine inexistant
+
+Remonté par un joueur sur Discord, capture à l'appui : un lien `personadle.net` collé dans
+Discord s'affiche en **lien bleu nu**, sans logo ni description, là où d'autres jeux du même
+genre (cémantix) rendent une carte complète.
+
+### Cause
+
+Les balises Open Graph de `index.html` pointaient vers **`personadle.com`** — un domaine qui
+**ne résout pas du tout** (vérifié : `curl` renvoie `000`, pas même une erreur HTTP). Le site
+est sur `.net` depuis toujours.
+
+| URL | Code |
+| --- | --- |
+| `https://www.personadle.com/img/New_Logo_PersonaDLE.png` | **000** (DNS mort) |
+| `https://www.personadle.net/img/New_Logo_PersonaDLE.png` | 200 |
+
+Discord récupérait donc bien le `og:title` (d'où le titre bleu visible sur la capture), mais
+échouait sur l'image et n'avait aucune description à afficher. Le `<link rel="canonical">`
+était faux de la même façon — il désignait aux moteurs de recherche une URL canonique
+inexistante, ce qui est nettement plus grave que l'aperçu Discord.
+
+**Pourquoi ça a tenu si longtemps sans être vu** : un aperçu de lien cassé est invisible
+depuis le site. Rien dans la CI, les tests ou la navigation normale ne le traverse — il ne se
+manifeste qu'au moment où quelqu'un partage l'URL ailleurs.
+
+### Correctif
+
+- Domaine corrigé sur le `canonical` et l'`og:image`.
+- Balises manquantes ajoutées : `og:type`, `og:site_name`, `og:url`, `og:description`,
+  `og:image:type`, `og:image:alt`, `og:locale`. Sans `og:description`, la carte reste vide
+  même quand l'image charge.
+- `og:image:width` / `height` renseignés aux dimensions réelles (2769×1054, relevées dans
+  l'en-tête IHDR du PNG). Sans elles, Discord doit télécharger l'image pour les déduire et
+  rend souvent une vignette au premier partage.
+- `twitter:card = summary_large_image` + les balises `twitter:*` : Discord les lit aussi, et
+  c'est ce qui donne la bannière pleine largeur au lieu d'une vignette. Le logo est en 2,6:1,
+  format fait pour ça.
+- `theme-color` = `#e63946`, la couleur de la barre latérale de l'embed. Reprise de
+  `css/global.css` (14 occurrences) plutôt que choisie au jugé.
+- Commentaire d'avertissement laissé dans le `<head>` : toute URL absolue ajoutée là doit
+  rester sur `.net`.
+
+### Angle mort connu
+
+**Seul `index.html` porte des balises OG.** Les 6 pages de mode (`classiqueMode.html`,
+`musics.html`…) n'en ont aucune : un lien partagé vers un mode précis n'aura toujours aucun
+aperçu. Non traité ici — c'est la page d'accueil qui circule, et les pages de mode
+mériteraient chacune leur propre `og:title`/`description`, pas une copie de celles-ci.
+
 ## 2026-08-26 — feat(content): 3 musiques + Chord Summer en All-Out Attack
 
 Lot de contenu fourni par Hamza : trois chansons et un skin P5X de plus.

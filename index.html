@@ -37,9 +37,46 @@
       content="Guess the Persona character of the day! Inspired by P1 to P5X."
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://www.personadle.com" />
+    <link rel="canonical" href="https://www.personadle.net/" />
+
+    <!-- Open Graph — carte d'aperçu sur Discord, Twitter/X, WhatsApp, Slack…
+         ⚠️ Le domaine est personadle.NET. Ces balises ont pointé vers
+         personadle.com pendant toute la v2.0 : ce domaine n'existe pas (DNS qui
+         ne résout pas), donc Discord échouait à charger l'image et n'affichait
+         qu'un lien bleu nu, sans logo ni description. Toute URL absolue ajoutée
+         ici doit rester sur .net — un aperçu cassé ne se voit pas depuis le site,
+         seulement une fois le lien partagé. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Personadle" />
+    <meta property="og:url" content="https://www.personadle.net/" />
     <meta property="og:title" content="Personadle – Daily Persona Game" />
-    <meta property="og:image" content="https://www.personadle.com/img/New_Logo_PersonaDLE.png" />
+    <meta
+      property="og:description"
+      content="A new Persona riddle every day. Six modes — quotes, emoji, silhouettes, All-Out Attack, Personas and music — across P1 to P5X. Free, no install."
+    />
+    <meta property="og:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta property="og:image:type" content="image/png" />
+    <!-- Dimensions réelles du fichier : sans elles, Discord doit d'abord télécharger
+         l'image pour les déduire et rend souvent une vignette au premier partage. -->
+    <meta property="og:image:width" content="2769" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:image:alt" content="Personadle" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Discord lit aussi les balises Twitter. `summary_large_image` donne la
+         bannière pleine largeur plutôt qu'une vignette — le logo est en 2769×1054,
+         format fait pour ça. -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Personadle – Daily Persona Game" />
+    <meta
+      name="twitter:description"
+      content="A new Persona riddle every day. Six modes — quotes, emoji, silhouettes, All-Out Attack, Personas and music — across P1 to P5X. Free, no install."
+    />
+    <meta name="twitter:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+
+    <!-- Couleur de la barre latérale de l'embed Discord (et de l'UI mobile).
+         Reprise de css/global.css, pas choisie au jugé. -->
+    <meta name="theme-color" content="#e63946" />
 
     <!-- Google Fonts — typos du sélecteur de langue -->
     <!-- Oswald : condensé + musclé → EN (Persona 5) -->
