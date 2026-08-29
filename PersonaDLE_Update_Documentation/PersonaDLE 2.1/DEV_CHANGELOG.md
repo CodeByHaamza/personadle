@@ -183,12 +183,23 @@ manifeste qu'au moment où quelqu'un partage l'URL ailleurs.
 - Commentaire d'avertissement laissé dans le `<head>` : toute URL absolue ajoutée là doit
   rester sur `.net`.
 
-### Angle mort connu
+### Angle mort — comblé le 2026-08-27
 
-**Seul `index.html` porte des balises OG.** Les 6 pages de mode (`classiqueMode.html`,
-`musics.html`…) n'en ont aucune : un lien partagé vers un mode précis n'aura toujours aucun
-aperçu. Non traité ici — c'est la page d'accueil qui circule, et les pages de mode
-mériteraient chacune leur propre `og:title`/`description`, pas une copie de celles-ci.
+Cette entrée notait que **seul `index.html` portait des balises OG**, laissant sans aperçu
+tout lien partagé vers un mode précis. C'est fait : les **6 pages de mode** ont désormais
+leur bloc complet, avec un `og:title` et une `og:description` **propres à chaque mode** — un
+lien vers Music doit annoncer Music, pas la page d'accueil. Chacune référence aussi sa propre
+URL en `og:url` et en `canonical` (vérifié page par page, aucune ne pointe vers une autre).
+
+Ces 6 pages n'avaient d'ailleurs **aucune `<meta name="description">` non plus** : les
+moteurs de recherche n'avaient qu'un `<title>` pour les décrire. Ajoutée au passage.
+
+L'image reste le logo commun : il n'existe pas de bannière par mode, et une image partagée
+vaut mieux que pas d'image. Un visuel par mode serait le prochain cran, pas un prérequis.
+
+> Rappel pour la suite : ces balises **doivent rester en dur dans le HTML**. Les robots
+> d'aperçu (Discord, X, Slack) n'exécutent pas le JavaScript — les injecter côté client
+> donnerait un aperçu vide tout en paraissant marcher dans le navigateur.
 
 ## 2026-08-26 — feat(content): 3 musiques + Chord Summer en All-Out Attack
 
