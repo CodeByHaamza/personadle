@@ -18,29 +18,28 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CHECK = process.argv.includes("--check");
 const OUT_FILE = join(ROOT, "api/data/daily_pools.json");
 
-const { characters } = await import(join(ROOT, "database/characters_clean.js").replace(/\\/g, "/"));
-const { silhouetteCharacters } = await import(
-  join(ROOT, "silhouetteMode/database/silhouetteCharacters.js").replace(/\\/g, "/")
+// import() dynamique : sous Windows un chemin absolu ("C:\…" ou "C:/…") est lu comme
+// une URL de protocole "c:" et rejeté (ERR_UNSUPPORTED_ESM_URL_SCHEME). pathToFileURL
+// donne le file:// attendu sur les deux OS.
+const dataset = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
+
+const { characters } = await dataset("database/characters_clean.js");
+const { silhouetteCharacters } = await dataset(
+  "silhouetteMode/database/silhouetteCharacters.js"
 );
-const { songs } = await import(join(ROOT, "musicsMode/database/songs.js").replace(/\\/g, "/"));
-const { personas: aoaAutocompletePool } = await import(
-  join(ROOT, "allOutAttackMode/database/personas_allOut.js").replace(/\\/g, "/")
+const { songs } = await dataset("musicsMode/database/songs.js");
+const { personas: aoaAutocompletePool } = await dataset(
+  "allOutAttackMode/database/personas_allOut.js"
 );
-const { aoaCharacters } = await import(
-  join(ROOT, "allOutAttackMode/database/aoaCharacters.js").replace(/\\/g, "/")
-);
-const { personaeCharacters } = await import(
-  join(ROOT, "personaeMode/database/personaeCharacters.js").replace(/\\/g, "/")
-);
-const { expertLyrics } = await import(
-  join(ROOT, "musicsMode/database/expert_lyrics.js").replace(/\\/g, "/")
-);
+const { aoaCharacters } = await dataset("allOutAttackMode/database/aoaCharacters.js");
+const { personaeCharacters } = await dataset("personaeMode/database/personaeCharacters.js");
+const { expertLyrics } = await dataset("musicsMode/database/expert_lyrics.js");
 const expertLore = JSON.parse(
   readFileSync(join(ROOT, "personaeMode/database/expert_lore/en.json"), "utf8")
 );
