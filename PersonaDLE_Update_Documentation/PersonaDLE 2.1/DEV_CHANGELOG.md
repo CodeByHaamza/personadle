@@ -13,6 +13,99 @@
 
 ---
 
+## 2026-08-26 — test(expert): couverture automatisée de la porte d'entrée + `make test-php` réparé
+
+Les deux derniers points ouverts du lot « porte d'entrée du Mode Expert » (`TODO.md` §1) :
+le gate serveur et sa redirection étaient vérifiés **à la main via curl**, pas automatisés.
+CLAUDE.md §13 l'exige pour toute condition de déblocage — un seuil qui dérive ou un
+`is_expert = 0` oublié dans une requête ouvrirait les 6 modes sans qu'aucun test ne rougisse.
+
+En les écrivant, un trou plus large est apparu : **`make test-php` n'exécutait pas les tests
+qu'il prétendait lancer**.
+
+### `make test-php` sortait vert avec la moitié des tests jamais exécutés
+
+Les tests d'intégration (`ConditionCheckTest`, `DatabaseIntegrationTest`, `StreakTest`,
+`FriendsTest`…) se connectent à `DB_TEST_HOST:DB_TEST_PORT`, avec pour défaut
+`127.0.0.1:3307` — les coordonnées **vues depuis l'hôte**. La cible `test-php` lance PHPUnit
+**dans le conteneur php**, où la base est `db:3306` et où `127.0.0.1:3307` ne répond pas.
+Chaque test se marquait alors `skipped` via son `markTestSkipped()` de garde, et la cible
+sortait `OK`.
+
+Mesure avant/après :
+
+| | Tests | Assertions | Skipped |
+| --- | --- | --- | --- |
+| Avant | 215 | 483 | **106** |
+| Après | 215 | 966 | 0 |
+
+La CI ne voyait rien : le job `lint-php` passe explicitement `DB_TEST_HOST`/`PORT`/`USER`/`PASS`
+(`.github/workflows/ci.yml`), et fait tourner PHP sur le runner, pas dans le conteneur. D'où
+une situation exactement à l'envers de ce qu'on veut — **le local plus permissif que la CI**.
+C'est la cause racine du fait que le gate Expert n'ait jamais été couvert : les tests
+d'intégration existants ne tournaient tout simplement pas sur un poste de dev.
+
+Correctif : variable `PHPUNIT_DB_ENV` dans le `Makefile`, passée en `-e` à `docker compose
+exec`. Valeurs en dur volontairement — l'en-tête du fichier interdit toute syntaxe shell
+POSIX (`$${VAR:-defaut}`) pour que `make` fonctionne aussi sous `cmd.exe`.
+
+### `tests/php/ExpertUnlocksTest.php` — 22 méthodes, 50 assertions
+
+Même pattern que `ConditionCheckTest` : vraie MariaDB, transaction annulée en `tearDown`,
+skip propre si la base est absente. `ConditionCheckTest` ne vérifiait jusqu'ici que la
+**présence** des nouveaux `condition_type` dans `personadle_known_condition_types()` — leur
+comportement n'était couvert nulle part.
+
+- `mode_wins_under_attempts` — borne à 4 essais incluse, abandons exclus, parties Expert
+  exclues, isolation par mode et par compte. Un test verrouille la constante
+  `PERSONADLE_FAST_WIN_MAX_ATTEMPTS` elle-même : le front affiche cette règle au joueur.
+- `mode_wins_single_day` — c'est la **meilleure journée de la vie du compte** qui compte, pas
+  la journée en cours (sinon le déblocage se reperdrait à minuit) ; `COALESCE(MAX(…), 0)`
+  couvert par un compte sans aucune partie.
+- `mode_consecutive_perfects` — série cassée par une victoire en 2 essais et par un abandon
+  en 1 essai, **non** cassée par des journées sautées (la série se compte en parties), et
+  départage à l'`id DESC` pour plusieurs parties le même jour.
+- `personadle_expert_progress()` — déblocage au seuil **exact**, fail-closed sur un compte
+  neuf pour les 6 modes, isolation Classique ⇏ Silhouette (même type, même seuil), mode
+  inconnu ouvert plutôt que bloqué pour toujours, et absence de tout libellé dans la réponse
+  (il serait en anglais pour les 6 langues).
+
+### `tests-e2e/expert-gate.spec.js` — 7 tests
+
+Les 6 specs `expert-*.spec.js` partent d'un compte pré-débloqué et testent le *gameplay* ;
+aucune ne couvrait ce qui arrive à quelqu'un qui n'a pas le droit d'être là. Un test jsdom ne
+peut pas le faire non plus — `tests/expertUnlock.test.js` doit remplacer `expertNavigate.go`,
+jsdom n'implémentant pas la navigation.
+
+- Visiteur anonyme : `?expert=1` tapé à la main renvoie au mode normal ; bouton `expert-locked`
+  avec `aria-disabled` et **sans `href`** (un clic droit « copier le lien » ne doit pas donner
+  une porte d'entrée) ; infobulle reliée par `aria-describedby` ; deux chargements successifs
+  n'ouvrent pas le mode (le cache `localStorage` du statut ne doit pas devenir une dérobade).
+- **Contre-preuve** : le compte débloqué en Classique reste bien sur `?expert=1`. Sans elle,
+  un gate qui redirigerait tout le monde ferait passer les tests anonymes.
+- Isolation par mode côté front : ce même compte est redirigé sur Silhouette Expert.
+
+### Fichiers touchés
+
+- `tests/php/ExpertUnlocksTest.php` (nouveau)
+- `tests-e2e/expert-gate.spec.js` (nouveau)
+- `Makefile` — `PHPUNIT_DB_ENV`, passée à la cible `test-php`
+- `scripts/check-doc-numbers.js` — point de synchronisation pour `TODO.md`, dont la ligne
+  « Vérifié le … » citait des chiffres en dur sans jamais être recalculée (elle annonçait
+  encore 778 tests / 102 E2E, réels 801 et 109)
+- `TODO.md` — §1 soldée ; retrait de l'affirmation périmée « le changelog joueur ne contient
+  aucune entrée Expert », comblée par la PR #71
+- Chiffres de doc resynchronisés par `npm run docs:fix` (193 → 215 PHPUnit, 102 → 109 E2E)
+
+### Angles morts connus
+
+- La correspondance des seuils entre `api/lib/expert_unlocks.php` et
+  `tests-e2e/helpers/expert-unlock.js` reste **recopiée à la main** des deux côtés. Aucun test
+  ne compare les deux tables : changer un seuil en PHP sans toucher le helper ferait échouer
+  les specs Expert de façon opaque (déblocage incomplet → 403), pas avec un message clair.
+- `make test-php` cible la base de **développement**, pas une base jetable : les tests
+  s'appuient sur `ROLLBACK`, ce qui suffit tant qu'aucun test ne fait de DDL.
+
 ## 2026-08-25 — feat(expert): porte d'entrée des 6 Modes Expert + badge Denial of Self
 
 Les 6 Modes Expert étaient ouverts à tout le monde (bouton ⚡ visible et cliquable par

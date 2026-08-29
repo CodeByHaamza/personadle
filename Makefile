@@ -14,6 +14,19 @@ PHPUNIT_PHAR := phpunit.phar
 PHPUNIT_URL  := https://phar.phpunit.de/phpunit-11.phar
 DC           := docker compose
 
+# Coordonnées de la base VUES DEPUIS LE CONTENEUR php. Les tests d'intégration
+# (ConditionCheckTest, DatabaseIntegrationTest, ExpertUnlocksTest, StreakTest…)
+# retombent sinon sur leur défaut host-side 127.0.0.1:3307, injoignable depuis le
+# conteneur : ils se marquaient alors « skipped » et `make test-php` sortait vert
+# avec 106 tests sur 215 jamais exécutés. La CI, elle, passe déjà ces variables
+# (job lint-php de .github/workflows/ci.yml) — d'où un local plus permissif que
+# la CI, exactement l'inverse de ce qu'on veut.
+#
+# Valeurs en dur volontairement : ce fichier ne doit contenir aucune syntaxe
+# shell POSIX (cf. en-tête), donc pas de `$${VAR:-defaut}`. Ce sont les défauts
+# de docker-compose.yml — les surcharger revient à passer les variables à la main.
+PHPUNIT_DB_ENV := -e DB_TEST_HOST=db -e DB_TEST_PORT=3306 -e DB_TEST_NAME=personadle_db -e DB_TEST_USER=root -e DB_TEST_PASS=rootpassword
+
 # ---------------------------------------------------------------------------
 # Aide (cible par défaut)
 # ---------------------------------------------------------------------------
@@ -50,7 +63,7 @@ $(PHPUNIT_PHAR): ## Télécharge phpunit.phar s'il est absent
 
 .PHONY: test-php
 test-php: $(PHPUNIT_PHAR) ## Lance les tests backend (PHPUnit, via Docker — `make up` requis)
-	$(DC) exec -T php php $(PHPUNIT_PHAR)
+	$(DC) exec -T $(PHPUNIT_DB_ENV) php php $(PHPUNIT_PHAR)
 
 .PHONY: test-all
 test-all: test test-php ## Lance tous les tests (JS + PHP)

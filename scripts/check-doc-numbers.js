@@ -112,6 +112,7 @@ const ROADMAP = join(ROOT, "ROADMAP.md");
 const CONTRIBUTING = join(ROOT, "CONTRIBUTING.md");
 const TESTS_README = join(ROOT, "tests/README.md");
 const TESTS_E2E_README = join(ROOT, "tests-e2e/README.md");
+const TODO = join(ROOT, "TODO.md");
 const LANG_README = join(ROOT, "lang/README.md");
 
 const syncPoints = [
@@ -158,6 +159,12 @@ const syncPoints = [
 
   // lang/README.md — trouvé désynchronisé lors de l'audit du 2026-07-06 (947 vs 949 réels).
   { file: LANG_README, re: /synchronisées \((\d+) clés chacune/, expected: [i18nKeys] },
+
+  // TODO.md — sa ligne « Vérifié le … » citait les mêmes chiffres en dur sans point de
+  // synchronisation : elle annonçait encore 778 tests / 102 E2E le 2026-08-26, où les
+  // valeurs réelles étaient 801 et 109. Ajouté ici plutôt que de retirer les chiffres,
+  // parce que c'est cette ligne qui dit si le backlog a été relu récemment.
+  { file: TODO, re: /Vérifié le \d{4}-\d{2}-\d{2} : (\d+) tests Vitest \((\d+) suites\), (\d+) méthodes PHPUnit, (\d+) tests E2E/, expected: [vitestTests, vitestFiles, phpunit.total, e2e.total] },
 ];
 
 // ── Vérification / correction ────────────────────────────────────────────────

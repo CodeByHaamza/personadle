@@ -1,6 +1,6 @@
 # TODO — backlog post-v2.1
 
-> État au 2026-08-21, après le merge de la PR #69 dans `develop`.
+> État au 2026-08-26, après le merge des PR #70 → #73 dans `develop`.
 >
 > Ce fichier suit **le travail restant sur la v2.1 et ce qui vient juste après**. Le périmètre
 > produit reste dans `ROADMAP.md` ; le détail commit par commit dans
@@ -8,8 +8,8 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-21 : 778 tests Vitest (38 suites), 102 tests E2E, lint et PHPStan 2.2.8
-> propres. `develop` est 80 commits devant `main`.
+> Vérifié le 2026-08-26 : 801 tests Vitest (39 suites), 215 méthodes PHPUnit, 109 tests E2E,
+> lint et data/i18n/pools propres.
 
 ---
 
@@ -29,13 +29,17 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `034_title_shadows_converge.sql` (titre Shadows Converge). Les deux sont
       `INSERT IGNORE`, sans risque et rejouables — mais sans elles le badge et le titre
       n'existent pas en prod, et le joueur ne peut jamais les décrocher.
-- [ ] **Changelog joueur** (`PersonaDLE 2.1/PersonaDLE_Update.html`) — il ne contient **aucune**
-      entrée Expert, pour aucun des 6 modes. Le lot entier est à écrire d'un bloc.
 
 > ✅ Les deux migrations ont été **rejouées pour de vrai** le 2026-08-21 contre une base vierge
 > au schéma pré-migration, puis une seconde fois pour l'idempotence : schéma final identique à
 > `sql/bdd_mysql.sql`, rejeu sans erreur. Elles portent désormais `IF EXISTS` / `IF NOT EXISTS`.
 > Chemin de prod : SSH + `mysql --delimiter='$$'`, jamais phpMyAdmin.
+>
+> ✅ **Le changelog joueur n'est plus bloquant** (2026-08-26). Cette section affirmait qu'il ne
+> contenait « aucune entrée Expert, pour aucun des 6 modes » — vrai le 2026-08-21, comblé
+> depuis par la PR #71 : `PersonaDLE_Update.html` a sa section ⚡ complète (les 6 modes +
+> « Le Mode Expert se mérite »). Reste à y ajouter le contenu livré après cette PR
+> (nouvelles musiques, nouveau personnage AOA).
 
 ---
 
@@ -82,14 +86,27 @@ Bonne nouvelle sur le coût : `api/lib/condition_check.php` gère déjà `mode_w
       la stack Docker : filtre ≤4 essais, déblocage au seuil exact, isolation par mode,
       403 sur session Expert verrouillée, 201 une fois débloquée, migrations rejouées.
 
-**Reste à faire sur ce lot** (non bloquant, mais annoncé dans CLAUDE.md §13) :
+**Reste à faire sur ce lot** — ✅ **soldé le 2026-08-26** :
 
-- [ ] **Tests PHPUnit** du gate serveur et des 4 nouveaux `condition_type`. Vérifiés à la
-      main via curl contre Docker, pas encore automatisés — aucun runtime PHP sur le poste
-      de dev Windows, ils devront être écrits puis lancés dans le conteneur.
-- [ ] **Test E2E** de la redirection `?expert=1` → mode normal.
-- [ ] **Changelog joueur** (`PersonaDLE 2.1/PersonaDLE_Update.html`) : le lot est très
-      visible côté joueur, il doit y figurer.
+- [x] **Tests PHPUnit** du gate serveur et des nouveaux `condition_type` :
+      `tests/php/ExpertUnlocksTest.php`, 22 méthodes / 50 assertions contre la vraie
+      MariaDB. Couvrent les 3 fonctions de comptage (bornes, exclusion des abandons,
+      exclusion de `is_expert = 1`, isolation par mode et par compte), le déblocage au
+      seuil exact, le fail-closed d'un compte neuf, et le fait que le serveur ne renvoie
+      aucun libellé traduisible.
+- [x] **Test E2E** de la redirection `?expert=1` → mode normal : `tests-e2e/expert-gate.spec.js`,
+      7 tests. Inclut la contre-preuve (le mode débloqué reste accessible) sans laquelle un
+      gate qui redirigerait tout le monde passerait pour correct, et l'isolation par mode
+      (un compte débloqué en Classique est toujours redirigé sur Silhouette Expert).
+- [x] **Changelog joueur** : fait par la PR #71 (voir la note du bloc bloquant ci-dessus).
+
+> ⚠️ Découvert en écrivant ces tests : `make test-php` lançait PHPUnit **sans les variables
+> `DB_TEST_*`**, donc avec le défaut host-side `127.0.0.1:3307`, injoignable depuis le
+> conteneur. Résultat : 106 tests sur 215 se marquaient « skipped » et la cible sortait
+> verte — un local plus permissif que la CI, qui elle passe bien ces variables. C'est ce
+> trou qui explique que le gate n'ait jamais été couvert : les tests d'intégration
+> existants ne tournaient tout simplement pas en local. Corrigé (`PHPUNIT_DB_ENV` dans le
+> Makefile) : `make test-php` exécute désormais les 215.
 
 ## 2. Les trois classements
 
