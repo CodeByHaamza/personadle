@@ -21,6 +21,58 @@ ErrorDocument 404 /pages/404.html
     </FilesMatch>
 </IfModule>
 
+# Politique de cache navigateur (ajoutée en 2.1).
+#
+# Il n'y en avait AUCUNE : sans `Cache-Control`, le navigateur applique son cache
+# heuristique (grossièrement 10 % du temps écoulé depuis `Last-Modified`), ce qui
+# peut atteindre plusieurs jours sur un fichier stable. Le service worker faisait
+# déjà du network-first sur HTML/JS/CSS/lang, mais il ne couvre que les visiteurs
+# qu'il contrôle DÉJÀ : première visite, navigateur sans SW, navigation privée…
+# Ceux-là pouvaient rester bloqués sur la version précédente après un déploiement.
+#
+# `no-cache` ne veut pas dire « ne pas stocker » : le fichier est gardé, mais
+# revalidé auprès du serveur à chaque usage. Avec ETag/Last-Modified, un fichier
+# inchangé coûte un 304 vide — la fraîcheur sans le re-téléchargement.
+#
+# COÛT MESURÉ (2026-09-01, pour ne pas le redécouvrir en s'inquiétant) : la suite
+# E2E locale passe de 8,5 s à 11,8 s sur 13 tests, soit ~+39 %. C'est le prix des
+# revalidations, une par asset et par chargement de page. Assumé :
+#   - en PROD, les clients contrôlés par le service worker n'en paient rien — il
+#     fait déjà `fetch(request, { cache: "reload" })` sur JS/CSS/HTML/lang, donc
+#     il court-circuite le cache HTTP de toute façon ;
+#   - un `max-age` court sur JS/CSS supprimerait ces round-trips, mais aucun nom
+#     de fichier ne porte de hash : le HTML pourrait alors être frais pendant que
+#     son JS ne l'est pas encore. Une page cassée est pire qu'une page lente.
+# Si la CI devient vraiment gênante, la bonne réponse est de hasher les noms
+# d'assets (chantier séparé), pas d'affaiblir ces en-têtes.
+<IfModule mod_headers.c>
+    # sw.js — le plus critique. Un service worker périmé impose sa propre
+    # stratégie de cache à tout le reste : s'il est lui-même bloqué en cache, il
+    # n'y a plus aucun moyen de sortir de la version précédente.
+    <FilesMatch "^sw\.js$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+
+    # Code et contenu textuel : aucun n'a de hash dans son nom, donc la seule
+    # façon de garantir la fraîcheur après un déploiement est la revalidation.
+    <FilesMatch "\.(html|js|css|json)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+
+    # Médias : nommés par leur contenu, changent rarement. 7 jours et non
+    # `immutable`/1 an — un asset REMPLACÉ au même chemin (déjà arrivé avec
+    # Memories_of_You.mp3) resterait sinon périmé un an chez les joueurs, sans
+    # aucun moyen de le corriger à distance. 7 jours borne l'erreur.
+    <FilesMatch "\.(webp|png|jpe?g|gif|svg|ico|mp3|ogg|wav|mp4|webm)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+
+    # Polices : versionnées par leur nom de fichier, jamais modifiées en place.
+    <FilesMatch "\.(woff2?|ttf|otf|eot)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
 # Durcissement post-déploiement Git.
 # Le déploiement Git copie TOUT le dépôt dans public_html (l'ancien upload SFTP
 # excluait ces dossiers). Ce sont des fichiers de dev/outillage, jamais chargés

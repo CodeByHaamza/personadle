@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 856 tests Vitest (44 suites), 237 méthodes PHPUnit, 113 tests E2E,
+> Vérifié le 2026-08-26 : 863 tests Vitest (45 suites), 237 méthodes PHPUnit, 113 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -17,6 +17,10 @@
 
 Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui déclenche le
 `git pull` Hostinger : **le code arrive avant le schéma**.
+
+> 📖 Procédure complète (ordre, sauvegarde, vérification, **retour arrière**) :
+> [`DEPLOY.md`](DEPLOY.md) § « Release majeure ». Cette liste-ci ne suit que l'état
+> d'avancement.
 
 - [ ] Jouer `sql/migrations/029_badge_gyotre.sql` et `030_titles_junes_investigation.sql`.
       **Oubliées de cette liste jusqu'au 2026-09-01** : elles datent du lot de contenu 2.1
@@ -40,6 +44,16 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 - [ ] Jouer `sql/migrations/038_badge_false_spring.sql` (badge A Gentle Reprieve). Même
       forme que la 033 : `INSERT IGNORE`, rejouable, mais sans elle le badge n'existe pas
       en base.
+- [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v94 → v95, fait le 2026-09-01). Sans bump,
+      `activate` ne purge pas l'ancien cache et les assets servis en cache-first (images,
+      sons) restent ceux de la version précédente. Invisible en test : seuls les joueurs
+      DÉJÀ venus sont concernés.
+- [ ] **Déployer hors heure de pointe.** `sw.js` envoie `SW_UPDATED` à tous les onglets via
+      `clients.claim()`, et chaque page répond par `window.location.reload()`. L'état de
+      partie survit (il vit dans `localStorage`), mais un joueur en cours de partie est
+      rechargé sans préavis — et en mode Music, sa lecture audio s'arrête. Comportement
+      volontaire (c'est lui qui garantit qu'on ne reste pas sur du code périmé), simplement
+      à ne pas déclencher en pleine affluence.
 
 > ✅ Les deux migrations ont été **rejouées pour de vrai** le 2026-08-21 contre une base vierge
 > au schéma pré-migration, puis une seconde fois pour l'idempotence : schéma final identique à

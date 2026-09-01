@@ -13,6 +13,117 @@
 
 ---
 
+## 2026-09-01 — fix(anti-triche + cache): silhouette copiable, et politique de cache absente
+
+### La silhouette se copiait en clair
+
+Signalé : « quand on copie une silhouette et qu'on la colle ailleurs, ça permet de la
+trouver ». Exact, et pour une raison structurelle : `filter: brightness(0)` est un effet
+**de peinture**. Le bitmap présent dans le DOM restait l'image d'origine ; « clic droit →
+Copier l'image » livrait donc le personnage à deviner, sans le moindre outil ni la moindre
+compétence technique.
+
+Les gardes existantes (`draggable="false"`, `user-drag: none`, `preventDefault(dragstart)`)
+ne couvraient que le glisser-déposer, jamais le menu contextuel.
+
+Correctif : `js/silhouette_mask.js` noircit l'image **dans ses pixels**, hors écran, et
+c'est ce résultat qui est donné à `<img src>`. L'originale n'entre dans le DOM qu'à la
+révélation de fin de partie (`revealSrc`).
+
+- Rendu **identique au pixel près** : un remplissage noir en `source-in` conserve le canal
+  alpha, ce qui est exactement la définition de `brightness(0)`. Aucun changement visuel,
+  seulement un changement de l'endroit où le noircissement a lieu.
+- `source-in` plutôt que `getImageData()` : aucune lecture de pixels, donc rien qui lève
+  sur un canvas teinté, et bien moins coûteux.
+- Le filtre CSS est **conservé** comme filet de sécurité : si le noircissement échoue,
+  `blackenToDataURL()` renvoie `null` et l'appelant retombe sur l'ancien comportement. Une
+  partie moins protégée vaut mieux qu'une boîte vide — c'est un confort, pas un prérequis.
+- Le chemin de **restauration de session** passe par le même flux : sans ça, un F5 en
+  pleine partie remettait l'originale dans le DOM et rouvrait le trou.
+- `revealSrc` est purgé au début de chaque tirage : un Replay dont l'image n'a pas fini de
+  charger aurait sinon révélé celle de la partie précédente en cas d'abandon.
+
+**Angles morts assumés, à ne pas croire fermés** : l'URL du fichier reste visible dans
+l'onglet Réseau, et la cible du jour reste en clair dans `localStorage` (les 6 modes sont
+concernés). Les fermer demanderait un rendu serveur de la silhouette. L'intégrité du
+**classement** est déjà défendue côté serveur (`api/lib/daily_target.php`) ; ce correctif
+protège l'expérience du joueur honnête, pas le classement.
+
+**All-Out Attack ne peut pas recevoir le même correctif** : ses GIFs viennent du CDN R2
+cross-origin, qui teinte le canvas et fait échouer `toDataURL()`. Il faudrait activer CORS
+sur le bucket — hors périmètre 2.1, signalé plutôt que contourné en silence.
+
+Tests : `tests/silhouetteMask.test.js` (7). Limite connue, documentée dans le fichier :
+jsdom n'implémente pas le rendu canvas, on vérifie donc le **contrat** et surtout les
+chemins de repli (image nulle, contexte indisponible, `toDataURL` qui lève, data URL
+dégénérée) — ce sont eux qui décident entre « partie moins protégée » et « mode cassé ».
+Le noircissement lui-même se vérifie à la main (TEST_PLAN §6.7).
+
+### Nettoyage : `.blur-level-*` était du CSS mort et mensonger
+
+7 classes dans `silhouette.css`, sous un commentaire affirmant qu'elles étaient
+« appliquées par modeSilhouette.js à chaque mauvaise réponse ». Faux : le mode dézoome, il
+n'a jamais flouté, et aucune n'était référencée nulle part. Retirées — leur `filter` serait
+de toute façon entré en conflit avec le noircissement.
+
+### Aucune politique de cache navigateur n'existait
+
+`.htaccess` n'envoyait **aucun** `Cache-Control`. Le navigateur applique alors son cache
+heuristique (~10 % du temps écoulé depuis `Last-Modified`), qui atteint plusieurs jours sur
+un fichier stable. Le service worker faisait déjà du network-first sur HTML/JS/CSS/lang,
+mais il ne couvre que les clients qu'il contrôle **déjà** : première visite, navigateur
+sans service worker, navigation privée. Ceux-là pouvaient rester bloqués sur la version
+précédente après un déploiement.
+
+Ajouté, par famille de fichiers :
+
+| Fichiers | En-tête | Pourquoi |
+|---|---|---|
+| `sw.js` | `no-cache, must-revalidate` | Le plus critique : un SW périmé impose sa stratégie à tout le reste, sans issue possible |
+| `.html` `.js` `.css` `.json` | `no-cache, must-revalidate` | Aucun hash dans les noms ⇒ la revalidation est la seule garantie de fraîcheur. Un fichier inchangé coûte un 304 vide |
+| images, sons, vidéos | `public, max-age=604800` | 7 jours et **pas** `immutable`/1 an : un asset remplacé au même chemin (déjà vécu avec `Memories_of_You.mp3`) resterait sinon périmé un an chez les joueurs, sans recours à distance |
+| polices | `public, max-age=31536000, immutable` | Versionnées par leur nom, jamais modifiées en place |
+
+`CACHE_VERSION` bumpé v94 → v95, avec un commentaire expliquant pourquoi il faut le refaire
+à chaque déploiement : sans bump, `activate` ne purge rien et les assets servis en
+cache-first restent ceux d'avant — invisible en test, puisque seuls les joueurs **déjà
+venus** sont concernés.
+
+`updateViaCache: "none"` ajouté aux 13 enregistrements du service worker : garantit
+explicitement que le script du worker n'est jamais servi depuis le cache HTTP.
+
+#### Coût mesuré de cette politique
+
+La CI est passée de 5,2 à 15,4 min sur le job E2E, ce qui a d’abord fait craindre une
+régression grave. Vérification faite en mesurant au lieu de supposer : en local, la même
+sous-suite passe de **8,5 s à 11,8 s (~+39 %)** selon que le bloc est présent ou non. Le
+coût est donc réel mais bien moindre que le ×3 observé en CI — le reste est de la variance
+de runner. À noter aussi : les deux jobs qui traversent Apache ont ralenti, celui qui ne le
+traverse pas (Vitest pur) est resté à 1,9 min, ce qui désignait bien la bonne cause.
+
+Conservé malgré ce coût :
+
+- en prod, les clients contrôlés par le service worker n’en paient **rien** — il fait déjà
+  `fetch(request, { cache: reload })` sur JS/CSS/HTML/lang, donc il court-circuite le cache
+  HTTP quoi qu’il arrive ;
+- un `max-age` court sur JS/CSS supprimerait les round-trips, mais aucun nom de fichier ne
+  porte de hash : le HTML pourrait être frais pendant que son JS ne l’est pas. Une page
+  cassée est pire qu’une page lente.
+
+Si la CI devient gênante, la bonne réponse est de **hasher les noms d’assets** (chantier
+séparé), pas d’affaiblir ces en-têtes.
+
+### Point volontairement NON modifié
+
+`sw.js` envoie `SW_UPDATED` à tous les onglets via `clients.claim()`, et chaque page répond
+par un `window.location.reload()` inconditionnel. Un déploiement recharge donc les joueurs
+en pleine partie. L'état de partie **survit** (il vit dans `localStorage`) ; le coût réel se
+limite à la saisie en cours et, en mode Music, à la lecture audio interrompue. C'est ce
+mécanisme qui garantit qu'on ne reste pas sur du code périmé : le changer à la veille d'une
+mise en ligne échangerait un défaut mineur contre un risque de régression sur la fraîcheur,
+le sujet même qu'on cherche à sécuriser. Consigné dans `TODO.md` comme « déployer hors heure
+de pointe » plutôt que corrigé.
+
 ## 2026-09-01 — db: migration du badge false_spring + plage de migrations prod corrigée
 
 Deux manques trouvés en préparant le déploiement, tous deux invisibles en local.

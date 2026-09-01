@@ -2,7 +2,7 @@
 
 # 🧪 Tests & Qualité
 
-<img src="https://img.shields.io/badge/Vitest-856%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
+<img src="https://img.shields.io/badge/Vitest-863%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
 <img src="https://img.shields.io/badge/PHPUnit-logic%20%2B%20DB-3776AB?style=for-the-badge&logo=php&logoColor=white" alt="PHPUnit">
 <img src="https://img.shields.io/badge/Playwright-13%20E2E-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/PHPStan-niveau%205-1A1A1A?style=for-the-badge" alt="PHPStan">
@@ -23,7 +23,7 @@
              ╱────────╲   PHPUnit — 237 méthodes (14 fichiers, dont intégration vraie MariaDB)
             ╱          ╲  contraintes SQL, FK cascade, contrat de schéma, streak/social/auth
            ╱────────────╲
-          ╱              ╲ Vitest — 856 tests unitaires (jsdom, 44 fichiers)
+          ╱              ╲ Vitest — 863 tests unitaires (jsdom, 45 fichiers)
          ╱────────────────╲ logique de jeu, streak, i18n, validation, sync
       ──────────────────────
 ```
@@ -35,33 +35,61 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 
 ## 📁 Suites Vitest (`tests/`)
 
-| Suite                            | Tests | Ce qu'elle couvre                                              |
-| -------------------------------- | :---: | -------------------------------------------------------------- |
-| `gameCore.test.js`               |  133  | dates Paris, streaks, filtres, normalisation des modes, reset  |
-| `profileStats.test.js`           |  27   | stats locales, streak globale (frontière Paris, pas UTC)       |
-| `social-link.test.js`           |  22   | jauge/rank-up Social Link, flamme, effet True Confidant (rang 10) |
-| `validateCharacters.test.js`     |  22   | validateur de schéma des personnages (opus, arcane, âges)      |
-| `backend.test.js`                |  20   | `buildGameSession`, `savePendingSession`, auth UI DOM, `syncPending` |
-| `i18n.test.js`                   |  20   | résolution de clés, fallback, variables `{{var}}`              |
-| `badgesManager.test.js`          |  19   | unlock, sélection (limite 4), codes événement, partage        |
-| `friends.test.js`                |  18   | HTML escape, avatar path, `isOnline`/`formatLastSeen`          |
-| `streakRecovery.test.js`         |  18   | menu Jack Frost, `performRecovery` (anti-revert)               |
-| `modeComparisons.test.js`        |  17   | grille de comparaison Classic (âge, tableaux, booléens)        |
-| `profilePage.test.js`            |  15   | couleurs hex, tiers de streak, temps de lecture, avatar        |
-| `titlesUi.test.js`               |  15   | sélection/équipement des titres                                |
-| `shareCard.test.js`              |  12   | export PNG de la carte de profil (html2canvas)                 |
-| `wallpapersUi.test.js`           |  12   | sélection des fonds d'écran, sync backend                      |
-| `modal.test.js`                  |  13   | ARIA, focus initial/restauré, trap Tab/Shift+Tab                |
-| `auth.test.js`                   |  11   | `resolveLoginError`/`resolveRegisterError`                     |
-| `formatPlayTime.test.js`         |  11   | formatage du temps de jeu (i18n)                               |
-| `theme.test.js`                  |  10   | thèmes de couleur du profil                                     |
-| `badgesConditions.test.js`       |   8   | conditions de déblocage de chaque badge (`badgesData.js`)      |
-| `autocomplete.test.js`           |   8   | fermeture/suppression d'entrées d'autocomplétion                |
-| `songPlayer.test.js`             |   7   | lecteur de musique de profil                                    |
-| `langSelector.test.js`           |   5   | sélecteur de langue                                              |
-| `profileFormat.test.js`          |   4   | formatage des données de profil                                 |
-| `streakFlow.integration.test.js` |   2   | flux complet récupération + sync cloud                         |
-| **Total**                        |**856**|                                                                |
+> Table régénérée depuis les compteurs réels du lanceur (`vitest --reporter=json`), pas
+> à la main : elle avait dérivé à 24 suites listées sur 45 réelles. Les totaux (nombre de
+> suites, nombre de tests) sont eux tenus à jour automatiquement par
+> `npm run docs:fix` — cf. CLAUDE.md §8.
+
+| Fichier                         | Tests | Ce qui est couvert |
+| -------------------------------- | ----- | ------------------ |
+| `gameCore.test.js`               |  184  | dates Paris, streaks, filtres, normalisation des modes, reset, défis |
+| `expertContent.test.js`          |   63  | contenu Mode Expert — lore Personae, paroles Music, pools de tirage |
+| `expertWiring.test.js`           |   45  | câblage Expert — `expertContext`, clés localStorage, reset quotidien par dimension |
+| `social-link.test.js`            |   34  | jauge/rank-up Social Link, flamme, effet True Confidant (rang 10) |
+| `badgesManager.test.js`          |   32  | unlock, sélection (limite 4), codes événement, partage |
+| `expertUnlock.test.js`           |   28  | porte d'entrée des 6 Modes Expert — conditions, progression, don admin |
+| `profileStats.test.js`           |   27  | stats locales, streak globale (frontière Paris, pas UTC) |
+| `titlesUi.test.js`               |   25  | sélection/équipement des titres |
+| `backend.test.js`                |   22  | `buildGameSession`, `savePendingSession`, auth UI DOM, `syncPending` |
+| `bottomNav.test.js`              |   22  | barre de navigation inférieure — état actif, liens, accessibilité |
+| `profilePage.test.js`            |   22  | couleurs hex, tiers de streak, temps de lecture, avatar |
+| `validateCharacters.test.js`     |   22  | validateur de schéma des personnages (opus, arcane, âges) |
+| `streakRecovery.test.js`         |   21  | menu Jack Frost, `performRecovery` (anti-revert) |
+| `wallpapersUi.test.js`           |   21  | sélection des fonds d'écran, sync backend |
+| `i18n.test.js`                   |   20  | résolution de clés, fallback, variables `{{var}}` |
+| `friends.test.js`                |   18  | HTML escape, avatar path, `isOnline`/`formatLastSeen` |
+| `modeComparisons.test.js`        |   17  | grille de comparaison Classic (âge, tableaux, booléens) |
+| `challengeResult.test.js`        |   15  | résolution d'un défi, restauration des filtres, cible dédiée |
+| `langParity.test.js`             |   15  | parité des clés entre `en.json` et les 5 autres langues, placeholders inclus |
+| `modal.test.js`                  |   13  | ARIA, focus initial/restauré, trap Tab/Shift+Tab |
+| `cloudSync.test.js`              |   12  | `pullProfileFromCloud` — le backend est la source de vérité |
+| `contentP4AU.test.js`            |   12  | lot de contenu 2.1 — variantes P4AU, « Memories of You », badge `false_spring` |
+| `shareCard.test.js`              |   12  | export PNG de la carte de profil (html2canvas) |
+| `auth.test.js`                   |   11  | `resolveLoginError`/`resolveRegisterError` |
+| `challengeExpertScope.test.js`   |   11  | cloisonnement des défis Normal / Expert (une case par dimension) |
+| `formatPlayTime.test.js`         |   11  | formatage du temps de jeu (i18n) |
+| `musicVolume.test.js`            |   11  | contrôle de volume du lecteur, persistance |
+| `statsCompare.test.js`           |   11  | comparaison de stats entre amis |
+| `challengeAbandon.test.js`       |   10  | bouton Abandonner — purge locale seulement si le serveur a suivi |
+| `theme.test.js`                  |   10  | thèmes de couleur du profil |
+| `authTransport.test.js`          |   9   | transport des appels authentifiés (`credentials`, en-têtes) |
+| `challengeAccept.test.js`        |   9   | clic « Accepter » d'un défi — canonisation du mode, aucune écriture sur échec |
+| `autocomplete.test.js`           |   8   | fermeture/suppression d'entrées d'autocomplétion |
+| `badgesConditions.test.js`       |   8   | conditions de déblocage de chaque badge (`badgesData.js`) |
+| `silhouetteMask.test.js`         |   7   | anti-triche Silhouette — noircissement dans les pixels et ses replis |
+| `songPlayer.test.js`             |   7   | lecteur de musique de profil |
+| `validateIncoming.test.js`       |   6   | validation des données de contenu entrantes (`scripts/validate_incoming.js`) |
+| `badgesI18n.test.js`             |   5   | traduction des badges dans les 5 langues, `???` des badges secrets |
+| `filterMenu.test.js`             |   5   | menu de filtres opus — état par défaut, persistance |
+| `langSelector.test.js`           |   5   | sélecteur de langue |
+| `unlockNotify.test.js`           |   5   | notification groupée badges + titres + fonds d'écran après une partie |
+| `autocompleteNames.test.js`      |   4   | tout personnage devinable figure dans la liste d'autocomplétion de son mode |
+| `profileFormat.test.js`          |   4   | formatage des données de profil |
+| `adminSmoke.test.js`             |   2   | bootstrap de `admin/admin.js` sans exception |
+| `streakFlow.integration.test.js` |   2   | flux complet récupération + sync cloud |
+| **Total**                        |**863**| 45 suites — chiffres tenus à jour par `npm run docs:fix` |
+
+---
 
 ## 🐘 Suites PHP (`tests/php/`)
 
@@ -96,7 +124,7 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 ```bash
 npm install              # une seule fois
 
-npm test                 # Vitest (856)
+npm test                 # Vitest (863)
 npm run test:watch       # Vitest en mode watch
 npm run test:coverage    # Vitest + seuils de couverture
 

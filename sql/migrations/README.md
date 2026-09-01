@@ -1,7 +1,24 @@
 # Migrations SQL
 
-Historique des évolutions de schéma (déjà appliquées en prod). Numérotation
-chronologique `NNN_description.sql`.
+Historique des évolutions de schéma, numérotation chronologique `NNN_description.sql`.
+
+> 🚨 **Ce dossier n'est PAS le reflet de la prod.** Cette ligne disait
+> « déjà appliquées en prod » — c'était vrai à l'époque du dépôt mono-branche, ça ne
+> l'est plus : une migration est écrite sur `develop` et n'atteint la prod qu'à la
+> release suivante. Au 2026-09-01, **029 → 038 attendent encore d'être jouées** (la
+> prod s'arrête à la 028), et cette formule a directement contribué à ce qu'elles
+> soient oubliées de la checklist de release.
+>
+> **La seule source fiable, c'est la base elle-même** — table créée par la 026 :
+>
+> ```bash
+> mysql -u <user> -p <db> -e "SELECT version FROM schema_migrations ORDER BY version;"
+> ```
+>
+> La liste de ce qui reste à jouer vit dans la section « Bloquant release » de
+> [`TODO.md`](../../TODO.md).
+
+---
 
 > ⚠️ **Source unique du schéma = [`../bdd_mysql.sql`](../bdd_mysql.sql).**
 > C'est lui que charge Docker au démarrage et qui doit refléter la prod. Ces

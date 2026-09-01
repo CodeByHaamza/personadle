@@ -320,6 +320,37 @@ documenté, pas un défaut.
   **Hippocampus Reload**, **Golden Week**, **Tanabata** — ce n'est pas un oubli
 - [ ] Un badge secret affiche toujours `???` comme condition, dans toutes les langues
 
+### 6.7 Anti-triche — copier la silhouette
+
+> Vérification **obligatoirement manuelle** : jsdom n'implémente pas le rendu canvas,
+> aucun test automatisé ne peut confirmer que les pixels sortent noirs.
+
+👉 [silhouette](http://localhost:8080/silhouetteMode/silhouette.html), partie **en cours**
+(pas terminée)
+
+- [ ] Clic droit sur la silhouette → **Copier l'image**, puis coller dans n'importe quel
+  éditeur d'image ou une conversation → on doit obtenir une **forme noire**, pas le
+  personnage. C'était le trou : le filtre CSS ne s'appliquait qu'à l'affichage
+- [ ] Clic droit → **Enregistrer l'image sous…** → même résultat, fichier noir
+- [ ] Clic droit → **Ouvrir l'image dans un nouvel onglet** → forme noire
+- [ ] Recharger la page (F5) **en pleine partie** → la silhouette reste noire, et le
+  clic droit rend toujours une forme noire (le chemin de restauration de session est
+  passé par le même noircissement)
+- [ ] **Gagner ou abandonner** → l'image d'origine s'affiche enfin en couleur, et le clic
+  droit la rend normalement. La révélation ne doit pas être cassée par la protection
+- [ ] Cliquer **Rejouer** juste après → la nouvelle silhouette est noire dès son
+  apparition (aucune fuite de l'image précédente)
+
+> ℹ️ **Ce qui reste ouvert, volontairement** : l'URL du fichier reste visible dans
+> l'onglet Réseau des DevTools, et la cible du jour reste en clair dans
+> `localStorage` (`DevTools → Application`). Impossible à fermer côté client — la
+> défense de l'intégrité du **classement** est serveur (`api/lib/daily_target.php`).
+> Ce correctif protège le joueur honnête, pas le classement. **Non signalable comme bug.**
+>
+> ℹ️ Le mode **All-Out Attack** n'a pas cette protection : ses GIFs viennent d'un CDN
+> cross-origin qui « teinte » le canvas et interdit l'export. Il faudrait configurer CORS
+> sur le bucket R2 — hors périmètre 2.1.
+
 ---
 
 ## 7 — Classement (série & ratio corrigés)
@@ -372,6 +403,35 @@ documenté, pas un défaut.
 
 ---
 
+## 8bis — Cache navigateur après déploiement
+
+> À faire **une fois en prod**, juste après le déploiement. C'est le scénario que les
+> tests ne peuvent pas couvrir : il concerne les joueurs **déjà venus**, dont le
+> navigateur détient la version précédente.
+
+1. Sur un navigateur ayant **déjà visité le site avant la mise à jour** (surtout pas une
+   fenêtre privée — c'est justement l'inverse du cas à tester), ouvrir personadle.net
+   normalement, **sans** `Ctrl+Shift+R`
+
+- [ ] La page d'accueil affiche bien la 2.1 (modal « Nouveautés » avec l'entrée 2.1)
+- [ ] Les 6 modes chargent leur nouvelle version — le bouton ⚡ Expert est présent
+- [ ] Changer de langue → les nouvelles clés (badges traduits, `Chargement de la
+  silhouette…`) s'affichent traduites, pas sous forme de clé brute
+- [ ] `DevTools → Application → Service Workers` : la version active est
+  **`personadle-v95`**, et aucun ancien cache `personadle-v94` ne subsiste dans
+  `Cache Storage`
+- [ ] `DevTools → Network`, recharger : `sw.js`, les `.js`, `.css` et `lang/*.json`
+  répondent en **200 ou 304**, jamais « (disk cache) » sans requête — c'est ce que
+  garantissent les nouveaux en-têtes `Cache-Control: no-cache` du `.htaccess`
+- [ ] Les images répondent bien en cache (`max-age=604800`) — normal et voulu, elles
+  portent des noms neufs quand elles changent
+
+> ⚠️ Si un joueur signale malgré tout une version périmée : lui faire vider le service
+> worker (`Application → Service Workers → Unregister`) plutôt qu'un simple
+> `Ctrl+Shift+R`, qui contourne le SW sans le mettre à jour.
+
+---
+
 ## 9 — Checklist finale avant `develop → main`
 
 - [ ] §1 — `make check` + E2E passent, migrations 029→038 confirmées en local
@@ -384,6 +444,11 @@ documenté, pas un défaut.
   Reprieve, le voile de chargement Silhouette et les badges traduits
 - [ ] §7 — Ratio et série corrigés, cohérents avec le profil
 - [ ] §8 — Aperçu de lien vérifié une fois en prod (post-déploiement)
+- [ ] §8bis — Cache navigateur vérifié en prod sur un navigateur déjà venu
+
+> 📖 **La procédure de déploiement elle-même** (ordre des opérations, sauvegarde, vérification
+> du schéma réel, retour arrière) vit dans [`DEPLOY.md`](../../DEPLOY.md), section
+> « Release majeure ». Ce qui suit n'est que la liste des migrations propres à la 2.1.
 
 ### Migrations à jouer en prod, dans cet ordre
 

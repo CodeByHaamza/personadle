@@ -78,35 +78,13 @@
 }
 
 /* =====================================================
-   2. NIVEAUX DE FLOU PROGRESSIF
-   Appliqués comme classe CSS sur #silhouetteImage
-   par modeSilhouette.js à chaque mauvaise réponse.
+   2. (Bloc `.blur-level-*` retiré en 2.1.)
+   Il se disait « appliqué par modeSilhouette.js à chaque mauvaise réponse » —
+   c'était faux : le mode dézoome (transform), il n'a jamais flouté. Aucune de
+   ces 7 classes n'était référencée nulle part. Laissé en place, il aurait
+   surtout fait croire à un mécanisme de flou inexistant, et son `filter` serait
+   entré en conflit avec le noircissement s'il avait un jour été branché.
    ===================================================== */
-
-/* Niveau 0 : image très floue (début de partie) */
-.blur-level-0 {
-  filter: blur(14px);
-}
-.blur-level-1 {
-  filter: blur(12px);
-}
-.blur-level-2 {
-  filter: blur(10px);
-}
-.blur-level-3 {
-  filter: blur(8px);
-}
-.blur-level-4 {
-  filter: blur(6px);
-}
-.blur-level-5 {
-  filter: blur(3px);
-}
-/* Niveau 6 : image nette (révélation finale) */
-.blur-level-6 {
-  filter: blur(0px);
-  transition: filter 0.4s ease;
-}
 
 /* =====================================================
    3. MAUVAISES RÉPONSES (style silhouette)

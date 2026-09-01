@@ -59,6 +59,7 @@
 | `settings-modal.js` | Modale de paramètres (langue, thème, a11y)    |
 | `stats-compare.js`  | Comparaison de stats entre amis               |
 | `autocomplete.js`   | Fermeture/suppression d'entrées de la liste d'autocomplétion |
+| `silhouette_mask.js` | Noircit une image **dans ses pixels** (canvas hors écran) — anti-triche du mode Silhouette : un `filter` CSS ne protège pas du « clic droit → Copier l'image » |
 | `lang-selector.js`  | Sélecteur de langue (dropdown drapeaux)        |
 | `modal.js`          | Utilitaire générique de modale (focus trap, Escape, restauration du focus) — réutilisé par avatarCropModal/sharePreviewModal/songModal/titlesModal |
 

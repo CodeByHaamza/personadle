@@ -36,6 +36,175 @@ mysql -u <user> -p<pass> <db> < ~/domains/personadle.net/public_html/sql/migrati
 
 ---
 
+## Release majeure — procédure `develop → main`
+
+> Ajoutée pour la 2.1 (2026-09-01). Le déploiement courant décrit plus haut suffit pour un
+> correctif isolé. Cette section couvre le cas d'une release qui embarque **des migrations
+> SQL** — c'est là que l'ordre compte.
+
+### Le piège central : le code arrive avant le schéma
+
+Le merge sur `main` déclenche le `git pull` Hostinger en ~10-30 s, mais **ne touche jamais la
+base**. Merger d'abord, migrer ensuite, c'est donc garantir une fenêtre pendant laquelle le
+code de la nouvelle version interroge le schéma de l'ancienne : `Unknown column 'is_expert'`
+à chaque partie Expert, badges et titres introuvables, etc.
+
+**Les migrations passent AVANT le merge.** Elles sont additives et idempotentes : la 2.0 en
+production continue de tourner sans les voir.
+
+### 1. Avant de toucher à quoi que ce soit
+
+- [ ] `develop` est vert en CI, et la branche de la dernière PR y est mergée
+- [ ] Le plan de test de la version a été déroulé — pour la 2.1,
+      [`PersonaDLE 2.1/TEST_PLAN.md`](PersonaDLE_Update_Documentation/PersonaDLE%202.1/TEST_PLAN.md)
+- [ ] Les entrées de changelog joueur et dev de la version sont écrites (CLAUDE.md §9)
+- [ ] `CACHE_VERSION` a été bumpé dans `sw.js` — sinon les assets servis en cache-first
+      restent ceux de la version précédente chez les joueurs déjà venus
+- [ ] Créneau choisi **hors heure de pointe** : `sw.js` envoie `SW_UPDATED` à tous les onglets
+      ouverts, qui se rechargent. L'état de partie survit (il vit dans `localStorage`), mais
+      une lecture audio en cours s'arrête
+
+### 2. Constater l'état réel de la base — ne pas se fier au dossier
+
+`sql/migrations/` n'est **pas** le reflet de la prod : une migration y vit dès qu'elle est
+écrite sur `develop`, et n'atteint la base qu'ici. La seule source fiable est la table de
+suivi créée par la 026 :
+
+```bash
+ssh hostinger-personadle
+mysql -u <user> -p <db> -e "SELECT version FROM schema_migrations ORDER BY version;"
+```
+
+Comparer avec `ls sql/migrations/` et ne jouer que ce qui manque.
+
+### 3. Sauvegarder
+
+```bash
+ssh hostinger-personadle   "mysqldump -u <user> -p'<pass>' --routines --triggers <db>"   > db_backup_$(date +%F_%H%M).sql
+```
+
+En rapatriant le dump **en local** plutôt qu'en le laissant sur le serveur : si le disque
+Hostinger est le problème, un backup qui n'existe que là-bas ne sert à rien.
+
+Obligatoire avant toute migration **non purement additive**. Pour la 2.1, deux le sont :
+
+| Migration | Ce qu'elle fait de non réversible |
+|---|---|
+| `032` | Supprime une contrainte d'unicité — aucune donnée effacée, mais revenir en arrière exigerait de dédoublonner à la main |
+| `036` | Modifie des lignes existantes (nettoyage des défis bloqués) |
+
+### 4. Jouer les migrations, dans l'ordre
+
+> 🚨 **Les fichiers de migration ne sont PAS sur le serveur.** Le webroot est un checkout de
+> `main` : au moment où l'on migre (donc *avant* le merge), il ne contient que les migrations
+> de la version précédente. Un `mysql < sql/migrations/0XX.sql` lancé **depuis** le serveur
+> échouerait en « fichier introuvable ». C'est précisément l'ordre correct qui crée ce piège.
+
+On les envoie donc **depuis le poste local**, par l'entrée standard de SSH — le fichier est
+lu localement et transmis à `mysql` sur le serveur :
+
+```bash
+# Depuis le dépôt local, sur la branche develop
+ssh hostinger-personadle "mysql -u <user> -p'<pass>' <db>" < sql/migrations/0XX_xxx.sql
+```
+
+⚠️ **L'ordre compte au moins une fois** : la `032` déclare sa colonne `AFTER is_expert`, que
+la `031` crée. Jouer 032 sans 031 échoue.
+
+⚠️ **`--delimiter='$$'` uniquement si le fichier contient `DELIMITER`** (procédures stockées).
+Vérifier avant : `grep -l DELIMITER sql/migrations/0XX_*.sql`. Aucune des migrations 029→038
+n'en contient — pour elles, le flag est inutile. Pour celles qui en contiennent, **jamais
+phpMyAdmin** : il ne sait pas les lire et échoue à moitié.
+
+Pour la 2.1 : `029 → 030 → 031 → 032 → 033 → 034 → 035 → 036 → 037 → 038`.
+
+### 4bis. Enregistrer les migrations dans `schema_migrations`
+
+> 🚨 **Les fichiers `.sql` ne s'enregistrent PAS eux-mêmes.** C'est
+> [`scripts/apply_migrations.sh`](scripts/apply_migrations.sh) qui fait le
+> `INSERT INTO schema_migrations` après chaque fichier appliqué. Toute méthode qui
+> contourne ce script — dont le `mysql < fichier` de l'étape 4 — laisse donc la table de
+> suivi en arrière.
+>
+> Conséquence si on l'oublie : à la release suivante, l'étape 2 annoncera comme « en
+> attente » des migrations pourtant appliquées, et le script les rejouera. Sans dégât
+> tant qu'elles sont idempotentes — mais c'est un écart silencieux qui coûte cher à
+> diagnostiquer plus tard.
+
+La version est le **nom du fichier sans `.sql`** (`ver=$(basename "$f" .sql)` dans le
+script), exactement comme les lignes déjà présentes :
+
+```bash
+mysql -u <user> -p <db> -e "INSERT IGNORE INTO schema_migrations (version) VALUES
+  ('0XX_nom_du_fichier'), ('0YY_autre_fichier');"
+```
+
+> 💡 Le mieux reste d'utiliser `scripts/apply_migrations.sh` quand c'est possible : il
+> enchaîne détection du reliquat, backup, application et enregistrement. La procédure
+> manuelle ci-dessus existe parce que le script vit dans `sql/`+`scripts/`, dossiers que
+> le `.htaccess` bloque et qui ne sont pas toujours à jour sur le serveur avant le merge.
+
+### 5. Vérifier que le schéma a bougé
+
+```bash
+mysql -u <user> -p <db> -e "
+  SELECT slug FROM badges WHERE slug IN ('gyotre','denial_of_self','false_spring');
+  SELECT slug FROM titles WHERE slug IN ('junes','investigation_team','shadows_converge');
+  SHOW COLUMNS FROM messages LIKE 'challenge_is_expert';
+  SHOW COLUMNS FROM game_sessions LIKE 'is_expert';"
+```
+
+Attendu : 3 badges, 3 titres, et les deux colonnes présentes. Vérifier aussi que
+`SELECT COUNT(*) FROM schema_migrations` correspond bien au nombre de fichiers dans
+`sql/migrations/` (hors `README.md`) — c'est le contrôle qui attrape un oubli de l'étape 4bis.
+
+### 6. Merger — c'est le déclencheur du déploiement
+
+`main` est protégée : passer par une PR. Les checks requis sont **JS Tests & i18n check**,
+**PHP Lint & Tests** et **PR base guard** (l'E2E n'est pas bloquant sur `main`, mais attendre
+son vert reste préférable).
+
+```bash
+gh pr create --base main --head develop --title "release: v2.X"
+gh pr merge --merge   # merge commit, pas squash : on garde l'historique de develop
+```
+
+> Sur `main`, on **merge** au lieu de squasher. Les PR de feature sont squashées dans
+> `develop` ; écraser ensuite 98 commits en un seul rendrait `git log main` illisible et
+> `git bisect` inutilisable sur une régression de prod.
+
+Le `git pull` Hostinger part tout seul dans les ~10-30 s.
+
+### 7. Vérifier en prod
+
+- [ ] La page d'accueil affiche la nouvelle version
+- [ ] Cache navigateur : suivre le §8bis du `TEST_PLAN.md` **sur un navigateur déjà venu**
+      (surtout pas une fenêtre privée — c'est l'inverse du cas à tester)
+- [ ] Aperçu de lien (Discord / opengraph.xyz) sur l'accueil et sur une page de mode
+- [ ] Une partie complète dans un mode, connecté : elle doit apparaître dans le profil
+- [ ] Les logs d'erreur PHP Hostinger ne se remplissent pas
+
+### 8. Si ça casse — retour arrière
+
+Le code revient en une commande ; **la base, non**.
+
+```bash
+git checkout main
+git revert -m 1 <sha_du_merge>   # -m 1 : garder la ligne de main
+git push origin main             # le pull Hostinger repart tout seul
+```
+
+Ce qu'il faut savoir avant d'y compter :
+
+- Les migrations **restent appliquées**. Ce n'est presque jamais un problème : elles sont
+  additives, et l'ancien code ignore simplement les colonnes et lignes en trop.
+- Les deux exceptions sont `032` et `036`. Si l'une d'elles est en cause, c'est le
+  `mysqldump` de l'étape 3 qu'il faut restaurer, pas un `git revert`.
+- Restaurer un dump **perd les parties jouées depuis**. À ne faire qu'en dernier recours,
+  et en connaissance de cause.
+
+---
+
 ## Première installation (référence — déjà réalisée le 2026-07-24)
 
 > Les étapes ci-dessous documentent la mise en place initiale (BDD, `config.php`,

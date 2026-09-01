@@ -34,6 +34,7 @@ import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
 import { closeAllAutocompleteLists } from "../js/autocomplete.js";
+import { blackenToDataURL } from "../js/silhouette_mask.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -110,6 +111,9 @@ let currentZoom = INITIAL_ZOOM; // Initial zoom level (decreases on each wrong g
 const maxZoomOut = 1;
 let gameOver = false;
 let currentPickToken = 0; // Anti-race-condition token for image preloading
+// URL de l'image NON noircie, révélée seulement en fin de partie. Tant qu'elle
+// n'est pas posée sur l'élément, l'originale n'existe nulle part dans le DOM.
+let revealSrc = null;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DOM ELEMENT REFERENCES (safe to resolve at module scope since module loads
@@ -245,6 +249,10 @@ function pickCharacter(random = false) {
   }
 
   currentZoom = INITIAL_ZOOM;
+  // Purge avant tout chargement : sans ça, un Replay dont l'image n'a pas encore
+  // fini de charger révélerait celle de la partie PRÉCÉDENTE si le joueur
+  // abandonne dans l'intervalle.
+  revealSrc = null;
   if (EXPERT.isExpert) {
     flashCredits = 1;
     saveFlashCredits();
@@ -265,7 +273,12 @@ function pickCharacter(random = false) {
   const tempImage = new Image();
   tempImage.onload = () => {
     if (myToken !== currentPickToken) return; // superseded by a newer pick
-    silhouetteImg.src = tempImage.src;
+    // Anti-triche : c'est la version noircie DANS SES PIXELS qui entre dans le
+    // DOM, jamais l'originale — sinon « clic droit → Copier l'image » rend le
+    // personnage à deviner (cf. js/silhouette_mask.js). L'originale est gardée
+    // de côté pour la révélation de fin de partie.
+    revealSrc = tempImage.src;
+    silhouetteImg.src = blackenToDataURL(tempImage) ?? tempImage.src;
     silhouetteImg.alt = "Silhouette";
     silhouetteImg.style.visibility = "visible";
     silhouetteImg.style.transition = "transform 0.3s ease-out";
@@ -456,6 +469,12 @@ function showVictory(force = false) {
   updateFlashButton();
   silhouetteImg.style.transform = "scale(1)";
   silhouetteImg.style.filter = "none";
+  // La partie est finie : c'est le seul moment où l'image d'origine a le droit
+  // d'entrer dans le DOM. Avant, `src` porte la version noircie (anti-triche).
+  // Fallback sur le chemin du dataset si `revealSrc` n'a pas été renseigné —
+  // partie restaurée depuis localStorage avant tout chargement d'image.
+  silhouetteImg.src =
+    revealSrc ?? `./database/img/${encodeURIComponent(target.image)}.webp`;
 
   // Build result message
   document.querySelectorAll(".victory-message").forEach((e) => e.remove());
@@ -742,9 +761,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       silhouetteImg.style.visibility = "hidden";
       silhouetteImg.style.transition = "none";
       silhouetteImg.style.transform = `scale(${currentZoom})`;
-      silhouetteImg.src = `./database/img/${encodeURIComponent(target.image)}.webp`;
       silhouetteImg.alt = "Silhouette";
       silhouetteImg.style.filter = storedGameOver ? "none" : "brightness(0)";
+
+      // Anti-triche, même règle qu'au tirage : une partie EN COURS restaurée
+      // après un F5 ne doit pas remettre l'image d'origine dans le DOM. On la
+      // précharge hors écran, on la noircit, et c'est le résultat qui est posé.
+      // Partie déjà terminée : la réponse est acquise, l'originale est légitime.
+      const _restoreSrc = `./database/img/${encodeURIComponent(target.image)}.webp`;
+      revealSrc = _restoreSrc;
+
+      const _restored = new Image();
+      _restored.onload = () => {
+        silhouetteImg.src = storedGameOver
+          ? _restoreSrc
+          : (blackenToDataURL(_restored) ?? _restoreSrc);
+        silhouetteImg.style.visibility = "visible";
+        silhouetteImg.style.transition = "transform 0.3s ease-out";
+        setLoading(false);
+      };
+      // Une cible restaurée peut pointer sur une image supprimée depuis (renommage
+      // de dataset) : sans ça, le voile tournerait pour toujours.
+      _restored.onerror = () => setLoading(false);
+      _restored.src = _restoreSrc;
 
       giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
       if (attempts >= maxAttempts) {
@@ -755,15 +794,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (storedGameOver) {
         showVictory(localStorage.getItem(EXPERT.key("silhouetteForceReveal")) === "true");
       }
-
-      silhouetteImg.onload = () => {
-        silhouetteImg.style.visibility = "visible";
-        silhouetteImg.style.transition = "transform 0.3s ease-out";
-        setLoading(false);
-      };
-      // Une cible restaurée peut pointer sur une image supprimée depuis (renommage
-      // de dataset) : sans ça, le voile tournerait pour toujours.
-      silhouetteImg.onerror = () => setLoading(false);
     } catch (e) {
       resetGame();
     }
