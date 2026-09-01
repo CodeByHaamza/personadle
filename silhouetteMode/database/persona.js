@@ -260,4 +260,20 @@ export const personas = [
   "Shin Kanzato",
   "Jun Kanzato",
   "Ryo Kanzato",
+
+  // ============================================================
+  // 🎮 PERSONA 4 ARENA ULTIMAX — P4AU (variantes de la SEES)
+  // ============================================================
+  //
+  // Homonymes volontaires des entrées P3 ci-dessus : le suffixe rend le nom
+  // unique côté dataset, l'autocomplétion l'affiche sous forme de pastille
+  // « P4AU » à côté du nom nu (cf. silhouetteCharacters.js).
+  "Aigis (P4AU)",
+  "Akihiko Sanada (P4AU)",
+  "Fuuka Yamagishi (P4AU)",
+  "Junpei Iori (P4AU)",
+  "Ken Amada (P4AU)",
+  "Koromaru (P4AU)",
+  "Mitsuru Kirijo (P4AU)",
+  "Yukari Takeba (P4AU)",
 ];

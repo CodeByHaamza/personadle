@@ -856,5 +856,14 @@ export const songs = [
     vocalist: "hitomi",
     proprietaire: "ATLUS",
     lien: "https://youtu.be/aq_jMLavtLM"
+  },
+  {
+    titre: "Memories of You",
+    fichier: "Memories_of_You.mp3",
+    opus: ["P3R"],
+    image: "P3R.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/H5Qtu8fCycE"
   }
 ];

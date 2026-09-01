@@ -535,15 +535,24 @@ function showVictory(force = false) {
     hasChanges = true;
   }
 
-  // 🎬 WHEN MOTHER WAS THERE — Find "Kimi no Kioku" / "Memories of You"
-  if (
-    !force &&
-    (titleRaw.includes("when mother was there") ||
-      titleRaw.includes("kimi no kioku") ||
-      titleRaw.includes("memories of you")) &&
-    !profile.foundWhenMotherWasThere
-  ) {
+  // 🎬 WHEN MOTHER WAS THERE — Find the P4 track
+  //
+  // Les alias "kimi no kioku" / "memories of you" ont été retirés en 2.1 : c'étaient
+  // des filets de sécurité posés quand aucune chanson de ce nom n'existait dans
+  // songs.js. « Memories of You » y est entrée depuis (thème de fin P3R), et ces
+  // alias auraient débloqué la moitié du badge Chronological Convergence sur la
+  // MAUVAISE chanson. Le flag est persisté : personne ne perd un badge déjà obtenu.
+  if (!force && titleRaw.includes("when mother was there") && !profile.foundWhenMotherWasThere) {
     profile.foundWhenMotherWasThere = true;
+    hasChanges = true;
+  }
+
+  // 🌸 FALSE SPRING — Give up on "Memories of You" (thème de fin de P3R)
+  // Pendant du badge Gentle Illusion sur « Our Light » : abandonner face au thème
+  // de la fin, c'est choisir de rester assis à côté de Ryoji plutôt que d'aller
+  // au bout.
+  if (force && titleRaw.includes("memories of you") && !profile.gaveUpOnMemoriesOfYou) {
+    profile.gaveUpOnMemoriesOfYou = true;
     hasChanges = true;
   }
 

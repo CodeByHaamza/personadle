@@ -425,6 +425,7 @@ function initializeProfileBadgesData(profile) {
 
   // Music
   if (profile.gaveUpOnOurLight === undefined) profile.gaveUpOnOurLight = false;
+  if (profile.gaveUpOnMemoriesOfYou === undefined) profile.gaveUpOnMemoriesOfYou = false;
 
   // For Real (Ryuji)
   if (profile.foundRyujiAOA === undefined) profile.foundRyujiAOA = false;

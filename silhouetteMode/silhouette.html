@@ -509,7 +509,13 @@
     </div>
 
     <!-- Image silhouette -->
-    <div class="silhouette-box">
+    <div class="silhouette-box is-loading">
+      <!-- Voile de chargement : la classe `is-loading` est posée dès le HTML pour
+           couvrir la boîte AVANT même l'exécution du module (défer), et retirée par
+           modeSilhouette.js quand la silhouette est décodée. -->
+      <div class="silhouette-loader" role="status" aria-live="polite">
+        <span data-i18n="modes.silhouette.loading">Chargement de la silhouette…</span>
+      </div>
       <img id="silhouetteImage" src="" alt="Silhouette" draggable="false" />
     </div>
 

@@ -90,7 +90,10 @@ export const silhouetteCharacters = [
   { nom: "Yusuke Kitagawa", image: "Yusuke_silhouette", opus: ["P5"] },
   { nom: "Sophia", image: "Sophia_silhouette", opus: ["P5S"] },
   { nom: "Zenkichi Hasegawa", image: "Zenkichi_silhouette", opus: ["P5S"] },
-  { nom: "Shuji Ikutsuki", image: "Ikutsuki_silhouette", opus: ["P3", "P3R"] },
+  // (Shuji Ikutsuki était dupliqué ici — doublon retiré en 2.1, l'entrée d'origine
+  //  est plus haut dans le bloc alphabétique. Le doublon doublait ses chances de
+  //  sortir au tirage du jour, et `_guessed` n'en marquait qu'une des deux : il
+  //  restait proposé dans l'autocomplétion après avoir déjà été deviné.)
   { nom: "Motoha Arai", image: "Arai_silhouette", opus: ["P5X"] },
   { nom: "Ayaka Sakai", image: "Ayaka_silhouette", opus: ["P5X"] },
   { nom: "Haruna Nishimori", image: "Haruna_silhouette", opus: ["P5X"] },
@@ -168,4 +171,26 @@ export const silhouetteCharacters = [
   { nom: "Shin Kanzato", image: "Shin_Kanzato_silhouette", opus: ["PTS"] },
   { nom: "Jun Kanzato", image: "Jun_Kanzato_silhouette", opus: ["PTS"] },
   { nom: "Ryo Kanzato", image: "Ryo_Kanzato_silhouette", opus: ["PTS"] },
+
+  // === Persona 4 Arena Ultimax — variantes P4AU de la SEES ===
+  //
+  // Ces 8 personnages ont DÉJÀ une entrée P3/P3R plus haut. Le suffixe « (P4AU) »
+  // n'est pas cosmétique : il rend le `nom` unique, ce dont dépendent la recherche
+  // de cible d'un défi, `showWrong()` (portrait de l'erreur) et le drapeau
+  // `_guessed` — deux entrées homonymes feraient toutes trois pointer sur la
+  // mauvaise ligne. Même logique que la règle « une image = une entrée » des
+  // personas multi-porteurs (CLAUDE.md §4) : dessin différent → entrée séparée.
+  //
+  // Côté joueur, le suffixe n'est jamais affiché tel quel : l'autocomplétion
+  // rend « Junpei Iori » avec une pastille P4AU (cf. `initializeAutocomplete`
+  // dans modeSilhouette.js), et il faut donc désigner explicitement la version
+  // recherchée — les deux silhouettes sont bien deux dessins distincts.
+  { nom: "Aigis (P4AU)", image: "Aigis_P4AU_silhouette", opus: ["P4AU"] },
+  { nom: "Akihiko Sanada (P4AU)", image: "Akihiko_P4AU_silhouette", opus: ["P4AU"] },
+  { nom: "Fuuka Yamagishi (P4AU)", image: "Fuuka_P4AU_silhouette", opus: ["P4AU"] },
+  { nom: "Junpei Iori (P4AU)", image: "Junpei_P4AU_silhouette", opus: ["P4AU"] },
+  { nom: "Ken Amada (P4AU)", image: "Ken_P4AU_silhouette", opus: ["P4AU"] },
+  { nom: "Koromaru (P4AU)", image: "Koromaru_P4AU_silhouette", opus: ["P4AU"] },
+  { nom: "Mitsuru Kirijo (P4AU)", image: "Mitsuru_P4AU_silhouette", opus: ["P4AU"] },
+  { nom: "Yukari Takeba (P4AU)", image: "Yukari_P4AU_silhouette", opus: ["P4AU"] },
 ];

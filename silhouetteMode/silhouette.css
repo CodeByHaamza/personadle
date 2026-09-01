@@ -12,6 +12,8 @@
    ===================================================== */
 
 .silhouette-box {
+  /* Référent de positionnement du voile de chargement (.silhouette-loader) */
+  position: relative;
   width: 100%;
   max-width: 600px;
   height: 600px;
@@ -58,7 +60,15 @@
   transition:
     filter 0.3s ease,
     visibility 0s;
-  animation: popInSilhouette 0.4s ease;
+  /* ⚠️ NE PAS remettre d'`animation` ici (retirée en 2.1).
+     `popInSilhouette` animait `transform` et `opacity` — précisément les deux
+     propriétés que modeSilhouette.js pilote en style inline. Une animation en
+     cours l'emporte sur l'inline dans la cascade : pendant ses 400 ms l'image
+     s'affichait à scale(1) au lieu de scale(1.8) (dézoom visible au premier
+     chargement, plus jamais ensuite puisque l'animation ne rejoue pas), et
+     surtout, en Mode Expert, elle forçait opacity 0 → 1 par-dessus le masquage
+     de setFlashVisible(false) : la silhouette était donnée AVANT le premier
+     flash. La transition douce est désormais gérée par .silhouette-loader. */
   /* Anti-triche : empêche de glisser l'image hors de .silhouette-box (overflow:
      hidden) pour voir l'aperçu de drag natif du navigateur, qui n'applique pas
      le filtre — révélerait le personnage à deviner. Doublé par draggable="false"
@@ -167,14 +177,52 @@
    5. ANIMATION D'APPARITION DE LA SILHOUETTE
    ===================================================== */
 
-@keyframes popInSilhouette {
-  0% {
-    transform: scale(0.92);
-    opacity: 0;
+/* Voile de chargement — occupe la boîte tant que la silhouette n'est pas décodée.
+   Remplace l'ancien pop-in : il ne touche NI transform NI opacity de l'image
+   (cf. le bloc #silhouetteImage), il vit dans son propre élément par-dessus. */
+.silhouette-loader {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: inherit;
+  border-radius: 14px;
+  z-index: 2;
+}
+
+.silhouette-box.is-loading .silhouette-loader {
+  display: flex;
+}
+
+.silhouette-loader::before {
+  content: "";
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(51, 51, 51, 0.2);
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: silhouetteLoaderSpin 0.9s linear infinite;
+}
+
+.darkmode .silhouette-loader::before {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-top-color: #eee;
+}
+
+/* Respecte le réglage système : un spinner qui tourne en boucle est exactement
+   le type de mouvement que `prefers-reduced-motion` demande de couper. */
+@media (prefers-reduced-motion: reduce) {
+  .silhouette-loader::before {
+    animation-duration: 3s;
   }
-  100% {
-    transform: scale(1);
-    opacity: 1;
+}
+
+@keyframes silhouetteLoaderSpin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

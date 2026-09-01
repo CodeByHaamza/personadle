@@ -13,6 +13,245 @@
 
 ---
 
+## 2026-09-01 — db: migration du badge false_spring + plage de migrations prod corrigée
+
+Deux manques trouvés en préparant le déploiement, tous deux invisibles en local.
+
+### Le badge `false_spring` n'avait pas de migration
+
+Les badges vivent en base (`badges`), pas seulement dans `badgesData.js` — le catalogue
+client sert l'affichage, la table sert la vérification serveur et le comptage. Ajouter le
+badge côté JS sans la ligne SQL le rendait inexistant pour la prod.
+
+`038_badge_false_spring.sql` + ligne ajoutée au seed `bdd_mysql.sql`, et
+`tests/php/BadgeWallpaperCatalogTest.php` passe de 62 à 63 badges attendus — c'est ce test
+qui aurait rougi en CI si la migration avait été oubliée, ce qui est exactement son rôle.
+
+`condition_type = 'manual'`, comme `ideal_reality` dont il est le pendant : le déclencheur
+est un flag narratif posé côté client (`profile.gaveUpOnMemoriesOfYou`), que le serveur ne
+peut pas recalculer — il ne journalise pas quelle chanson a été abandonnée. **Angle mort
+assumé et hérité** (partagé avec ~45 autres badges `manual`) : `personadle_verify_condition()`
+renvoie toujours `true` pour ce type, donc un `POST /api/badges/unlock` forgé suffit à le
+décrocher. Le durcir demanderait de journaliser la cible de chaque partie côté serveur —
+hors périmètre 2.1. Cf. l'avertissement inverse de la migration 033 : ne pas copier `manual`
+pour un badge dont la condition est réellement recalculable.
+
+### `TEST_PLAN.md` annonçait la mauvaise plage de migrations
+
+Le plan disait `031 → 037`. **029** (badge `gyotre`) et **030** (titres `junes` /
+`investigation_team`) ne sont pourtant pas non plus sur `main`. Omission vérifiée, pas choix
+délibéré — quatre points concordants :
+
+1. `main` s'arrête à la migration **028** ; 029/030 n'existent que sur `develop`, créées par
+   les commits de contenu 2.1 `6f79abb` et `cdb8941`.
+2. Le `bdd_mysql.sql` de `main` ne contient **aucune** occurrence de `gyotre`, `junes` ou
+   `investigation_team` ; celui de `develop` en contient. Or le README des migrations pose
+   que le seed doit refléter la prod, et `DatabaseIntegrationTest` le vérifie en CI.
+3. Les en-têtes des deux fichiers disent eux-mêmes « Cette migration l'insère **sur la prod
+   déjà peuplée** » : elles ont été écrites pour être jouées, et ne l'ont pas été.
+4. La liste `031 → 037` vient de la section « Bloquant release » de `TODO.md`, rédigée
+   pendant le travail Mode Expert — elle démarre donc à 031 et ne mentionne 029/030 **nulle
+   part** (0 occurrence). Le lot de contenu 2.1 les avait produites plus tôt et personne ne
+   les y a reportées.
+
+Ce qui rend la décision sûre dans tous les cas : les deux sont en `INSERT IGNORE`, donc
+strictement idempotentes. Si elles avaient malgré tout déjà été passées à la main, les
+rejouer ne fait rien. Les omettre, en revanche, laisse le code 2.1 afficher un badge et deux
+titres que personne ne peut décrocher.
+
+Plage corrigée en `029 → 038`, avec la requête `schema_migrations` (table créée par la 026)
+pour vérifier d'abord ce que la prod a réellement, et deux `SELECT` de contrôle après coup.
+
+### `TEST_PLAN.md` complété pour le lot de contenu
+
+Nouvelles sections §6.3 à §6.6 : les 8 silhouettes P4AU (dont la vérification que la pastille
+d'opus est bien distincte du sous-titre italique, et que répondre la version P3 sur une cible
+P4AU compte faux), « Memories of You » + le badge, le voile de chargement Silhouette
+(**à tester cache vidé** — c'est le seul cas où le défaut se voyait, et en Expert c'est une
+fuite de réponse), et les noms de badges traduits.
+
+## 2026-09-01 — test(challenge): couvrir le clic « Accepter », le chemin le plus signalé
+
+Aucun test ne couvrait le clic « Accepter » d'une notification de défi — précisément le
+symptôme remonté en prod (« j'accepte, j'arrive sur la page du mode, et il n'y a pas de
+défi »). Les correctifs étaient déjà sur `develop` (PR #83/#85), mais rien ne les verrouillait :
+`challengeExpertScope` et `challengeAbandon` couvrent les helpers de `gameCore`,
+`challenge-notif.js` couvre leur **orchestration**, qui ne l'était pas.
+
+`tests/challengeAccept.test.js` (9 tests). Vérification faite dans les deux sens : avec le
+`js/challenge-notif.js` de `main` (ce qui tourne en prod), **7 des 9 tests échouent** ; avec
+celui de `develop`, les 9 passent. Ils décrivent donc bien les deux bugs, pas juste le
+comportement courant.
+
+### Ce qu'ils verrouillent
+
+- `« All Out Attack »` (avec espaces) atterrit bien sur `/allOutAttackMode/` : l'ancien
+  `.toLowerCase()` nu produisait une clé absente de `MODE_PAGE`/`MODE_STATE_KEYS`/
+  `FILTER_STORAGE_KEYS` — aucune redirection, mais le message était déjà `accepted` côté
+  serveur, donc le défi devenait ni jouable ni annulable.
+- **Aucune écriture** quand le mode n'a pas de page, quand le bridge API est absent, ou quand
+  le serveur refuse : c'est le point clé, `updateStatus(...).catch(() => {})` avalait l'échec
+  et laissait local et serveur diverger (défi fantôme « en cours »).
+- Un défi Expert part sur `?expert=1` et se range dans sa propre case, sans toucher au défi
+  normal en cours — et l'inverse.
+- `originalFilters` reste `null` (et non `"[]"`) quand le joueur n'a jamais touché ses filtres :
+  restaurer `"[]"` en fin de défi rendrait le mode vide de tout opus.
+
+### Détail de mise en œuvre
+
+`challenge-notif.js` garde une file et un drapeau `_busy` au niveau du module, et une
+acceptation redirige sans jamais refermer l'overlay : `_busy` resterait vrai et les tests
+suivants n'afficheraient plus rien. D'où le `vi.resetModules()` + réimport dynamique en
+`beforeEach`. `window.location.href` est remplacé par un accesseur qui enregistre l'URL
+demandée — jsdom lève sinon « Not implemented: navigation ».
+
+## 2026-09-01 — i18n: les noms de badges étaient restés en anglais
+
+Signalé par Hamza sur trois cas (*Gentle Illusion*, *Eye of the Navigator*, *Apostles of the
+Fall*) — l'audit en a trouvé **28 à 30 par langue**.
+
+### Pourquoi rien ne l'avait signalé
+
+`scripts/check-i18n.js` vérifie que chaque clé de `en.json` **existe** dans les 5 autres
+fichiers. Une valeur anglaise recopiée telle quelle est une valeur présente : elle passe le
+contrôle sans broncher. `i18n:check-untranslated` les remontait bien, mais noyés parmi 386
+candidats dont l'écrasante majorité sont des faux positifs légitimes (noms de personnages,
+titres de musiques, codes d'opus — CLAUDE.md §5).
+
+### Périmètre réel
+
+Contrairement au premier diagnostic, **seuls les noms** manquaient. Les descriptions étaient
+déjà traduites partout ; les 16 « descriptions identiques » du comptage initial étaient des
+clés d'UI de la section `badges` (`category_achievement`, `event_code_*`…) qui n'ont pas de
+champ `description` du tout — `undefined === undefined`. De même, les 25 « conditions
+identiques » sont les `"???"` des badges secrets, qui doivent évidemment le rester.
+
+121 noms traduits au total (fr 28, es 29, de 30, it 29, pt 5). `pt.json` a servi de référence
+de style : c'est le seul fichier qui traduisait déjà l'essentiel.
+
+### Ce qui reste volontairement en VO
+
+Quatre badges gardent leur nom anglais dans les 6 langues, et c'est délibéré :
+`burn_my_dread` (« Memento Mori », locution latine), `hippocampus_reload` (« Reload » renvoie
+à *Persona 3 Reload*), `golden_week` et `tanabata` (fêtes japonaises). Ils continueront de
+remonter dans `i18n:check-untranslated` — faux positifs attendus.
+
+### Écriture défensive
+
+Le script de migration ne remplaçait un nom que s'il était encore **strictement égal** à
+l'anglais : aucune traduction déjà en place n'a pu être écrasée au passage (le cas s'est
+présenté 29 fois, toutes ignorées).
+
+### Tests
+
+`tests/badgesI18n.test.js` (5 tests) verrouille l'état obtenu : tout badge de `badgesData.js`
+a son entrée `en.json`, aucun nom n'est resté identique à l'anglais hors liste `KEEP_ORIGINAL`,
+les badges de cette liste le sont dans **toutes** les langues (pour que « VO assumée » ne
+devienne pas un fourre-tout à oublis), aucun champ vide, et une condition secrète reste `"???"`
+partout — une seule langue qui l'expliciterait ferait fuiter le secret.
+
+## 2026-09-01 — feat(contenu): variantes P4AU, « Memories of You » et badge A Gentle Reprieve
+
+Dernier lot de contenu de la 2.1. Trois ajouts + deux correctifs trouvés en chemin.
+
+### 8 variantes P4AU au mode Silhouette
+
+Aigis, Akihiko, Fuuka, Junpei, Ken, Koromaru, Mitsuru et Yukari ont désormais leur
+silhouette *Persona 4 Arena Ultimax*, en plus de leur silhouette P3/P3R existante.
+
+Décision structurante : ce sont **8 entrées distinctes**, avec un `nom` suffixé
+`« (P4AU) »`, et non un opus ajouté aux entrées P3. Le suffixe n'est pas décoratif — trois
+mécanismes indexent le dataset par `nom` et cassent sur des homonymes :
+`showWrong()` (portrait de la mauvaise réponse), le drapeau `_guessed` (retrait de
+l'autocomplétion) et `getActiveChallengeTarget()` → `originalCharacters.find()` (cible
+d'un défi). Chacun retiendrait la **première** entrée trouvée, donc parfois la mauvaise
+version. C'est la transposition au mode Silhouette de la règle « une image = une entrée »
+posée pour les personas multi-porteurs (CLAUDE.md §4) : deux dessins ≠ une entrée.
+
+Côté joueur, le suffixe n'est jamais rendu tel quel. `initializeAutocomplete()`
+(`modeSilhouette.js`) sépare désormais deux cas de parenthèses :
+- un **vrai nom** (« Crow (Akechi) ») → `.realname`, sous-titre italique, comportement inchangé ;
+- un **code d'opus** présent dans `ALL_OPUS` (« Junpei Iori (P4AU) ») → nouvelle pastille
+  `.opus-tag` (`css/global.css`), volontairement distincte du sous-titre italique : le joueur
+  choisit une *version* du personnage, pas un autre personnage.
+
+Conséquence assumée : désigner la mauvaise version coûte un essai. C'est le prix de
+l'existence de deux silhouettes réellement différentes dans le même pool.
+
+Fichiers : `silhouetteCharacters.js`, `persona.js`, `portraitsMapSilhouette.js`,
+`modeSilhouette.js`, `css/global.css`, `silhouetteMode/database/img/*_P4AU_silhouette.webp`,
+`database/portraits/*_P4AU.webp`.
+
+### Musique « Memories of You » (P3R)
+
+Thème de fin de *Persona 3 Reload* (Shoji Meguro / Shigeo Komori / Yumi Kawamura). Le titre
+figurait déjà dans `musicTitles.js` comme nom devinable sans exister dans `songs.js` : il est
+maintenant une vraie cible. Paroles ajoutées à `expert_mode_content.md` puis
+`npm run lyrics:build` (76 chansons, 1105 vers) — elle entre donc aussi dans le pool Expert.
+
+Note sur l'asset : `musicsMode/database/music/song/Memories_of_You.mp3` existait déjà dans le
+dépôt (commité en `9b5928a`) mais n'était **référencé par aucune entrée de `songs.js`** —
+un asset orphelin. Il a été remplacé par le fichier fourni pour cette entrée. Le nouveau test
+« tous les fichiers audio référencés par songs.js existent » ne détecte pas l'inverse (un
+`.mp3` présent que plus personne n'utilise) : c'est une dette assumée, pas un oubli.
+
+### Badge `false_spring` — A Gentle Reprieve / Un Doux Sursis
+
+Pendant de `ideal_reality` (« Our Light ») : s'obtient en **abandonnant** face à
+« Memories of You ». Flag `profile.gaveUpOnMemoriesOfYou`, initialisé dans `badgesManager.js`,
+posé dans `showVictory(force)` de `modeMusic.js`. Traduit dans les 6 langues. Sa `condition`
+est volontairement évocatrice (« Refuser le sacrifice et attendre la fin aux côtés de Ryoji »)
+plutôt que mécanique : l'énoncer explicitement divulguerait la scène du toit.
+
+### Correctif — l'alias « memories of you » débloquait le mauvais badge
+
+`modeMusic.js` accordait `foundWhenMotherWasThere` (moitié du badge *Chronological
+Convergence*) sur `titleRaw.includes("kimi no kioku" | "memories of you")`. Ces alias étaient
+des filets de sécurité posés quand aucune chanson de ce nom n'existait — l'ajout ci-dessus les
+transformait en bug d'attribution. Restreint à `"when mother was there"`. Le flag étant
+persisté dans le profil, personne ne perd un badge déjà obtenu.
+
+### Correctif — `Shuji Ikutsuki` était dupliqué dans le dataset silhouette
+
+Deux entrées strictement identiques (même `nom`, même `image`). Effets : probabilité doublée
+de sortir au tirage du jour, et `_guessed` ne marquait que la première — il restait proposé
+dans l'autocomplétion après avoir déjà été deviné. Trouvé par le nouveau test d'unicité des
+`nom`, pas à l'œil. Pool silhouette : 165 → 164.
+
+### Correctif — le dézoom (et la fuite Expert) au premier chargement du mode Silhouette
+
+`#silhouetteImage` portait `animation: popInSilhouette 0.4s`, dont les keyframes animent
+`transform` et `opacity` — précisément les deux propriétés que `modeSilhouette.js` pilote en
+style **inline**. Une animation en cours l'emporte sur l'inline dans la cascade, donc pendant
+400 ms :
+- en mode normal, l'image s'affichait à `scale(1)` au lieu de `scale(1.8)` — le dézoom visible
+  signalé, et seulement au premier chargement puisque l'animation ne rejoue jamais ensuite ;
+- **en Mode Expert, l'animation forçait `opacity` de 0 à 1 par-dessus le masquage de
+  `setFlashVisible(false)` : la silhouette était donnée avant même le premier flash.** C'était
+  une fuite de réponse, pas un défaut cosmétique.
+
+L'animation est retirée (avec un commentaire d'avertissement en place, pour qu'elle ne soit
+pas remise). Le temps de décodage est désormais couvert par un voile `.silhouette-loader` —
+un élément à part, qui ne touche ni `transform` ni `opacity` de l'image — posé dès le HTML
+(`is-loading`) pour couvrir aussi le délai avant l'exécution du module `defer`, et retiré sur
+`onload`/`onerror` (y compris sur le chemin de restauration de session, qui ne gérait aucun
+`onerror` : le voile y aurait tourné indéfiniment).
+
+### Tests
+
+Nouvelle suite `tests/contentP4AU.test.js` (12 tests), orientée liens qui cassent **en
+silence** — un dataset qui pointe une image absente ne lève rien au build, il rend juste une
+partie injouable : unicité des `nom`, existence sur disque de **toutes** les silhouettes et de
+**tous** les `.mp3` de `songs.js`, portrait propre à chaque variante, présence de la musique
+dans les 3 datasets (songs / musicTitles / expertLyrics), et déblocage du badge.
+
+### Angle mort connu
+
+La pastille `.opus-tag` et le voile de chargement ne sont pas couverts par un test :
+`modeSilhouette.js` n'est pas unitairement testable sans simulation DOM complète
+(`DOMContentLoaded`, `localStorage`, cycle de partie). Vérifiés visuellement — à revalider en
+§6 du `TEST_PLAN.md`.
+
 ## 2026-08-29 — fix(expert): redirection de défi morte en Music Expert
 
 Trouvé en revue de code sur les 5 PR fraîchement mergées (#74-#78) — bug déjà présent sur

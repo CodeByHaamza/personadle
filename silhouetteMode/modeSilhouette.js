@@ -161,6 +161,17 @@ function applyZoom(zoomFactor) {
   silhouetteImg.style.transform = `scale(${zoomFactor})`;
 }
 
+/**
+ * Affiche/masque le voile de chargement de la boîte silhouette.
+ *
+ * `visibility: hidden` cachait déjà l'image pendant son décodage, mais laissait
+ * une boîte vide : au premier chargement (cache froid) le joueur voyait un cadre
+ * gris, puis la silhouette apparaître d'un coup. Le voile occupe ce temps mort.
+ */
+function setLoading(loading) {
+  silhouetteBox?.classList.toggle("is-loading", loading);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FLASH (Mode Expert)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -242,6 +253,7 @@ function pickCharacter(random = false) {
   }
 
   // Hide image during load to prevent flash
+  setLoading(true);
   silhouetteImg.style.visibility = "hidden";
   silhouetteImg.style.transition = "none";
   silhouetteImg.style.transform = `scale(${currentZoom})`;
@@ -257,10 +269,14 @@ function pickCharacter(random = false) {
     silhouetteImg.alt = "Silhouette";
     silhouetteImg.style.visibility = "visible";
     silhouetteImg.style.transition = "transform 0.3s ease-out";
+    setLoading(false);
   };
   tempImage.onerror = () => {
     if (myToken !== currentPickToken) return;
     console.error(`❌ Image not found for ${target.nom}`);
+    // Le voile doit tomber même sur échec, sinon il tourne indéfiniment sur une
+    // boîte qui ne recevra jamais d'image.
+    setLoading(false);
   };
   tempImage.src = `./database/img/${encodeURIComponent(target.image)}.webp`;
 
@@ -341,7 +357,13 @@ function initializeAutocomplete(input, personasList) {
       const imageName = portraitsMap[nom] || nom.split(" ")[0];
       const portraitName = encodeURIComponent(imageName);
       // Characters like "Crow (Akechi)" show the real name in parentheses
-      const realName = nom.includes("(") ? nom.split("(")[1].replace(")", "") : "";
+      const parenthesized = nom.includes("(") ? nom.split("(")[1].replace(")", "") : "";
+      // …mais un homonyme suffixé d'un code d'opus (« Junpei Iori (P4AU) ») n'a pas
+      // de « vrai nom » à révéler : c'est la MÊME personne dans un autre jeu. On le
+      // rend en pastille d'opus plutôt qu'en sous-titre italique, pour que le joueur
+      // comprenne qu'il choisit une version, pas un autre personnage.
+      const opusTag = ALL_OPUS.includes(parenthesized) ? parenthesized : "";
+      const realName = opusTag ? "" : parenthesized;
 
       const option = document.createElement("DIV");
       option.className = "list-options";
@@ -353,6 +375,7 @@ function initializeAutocomplete(input, personasList) {
         <span style="display: flex; flex-direction: column;">
           <span class="codename">${nom.split(" (")[0]}</span>
           ${realName ? `<span class="realname">(${realName})</span>` : ""}
+          ${opusTag ? `<span class="opus-tag">${opusTag}</span>` : ""}
         </span>
         <input type='hidden' value='${nom}'>
       `;
@@ -715,6 +738,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         setFlashVisible(storedGameOver);
       }
 
+      setLoading(true);
       silhouetteImg.style.visibility = "hidden";
       silhouetteImg.style.transition = "none";
       silhouetteImg.style.transform = `scale(${currentZoom})`;
@@ -735,7 +759,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       silhouetteImg.onload = () => {
         silhouetteImg.style.visibility = "visible";
         silhouetteImg.style.transition = "transform 0.3s ease-out";
+        setLoading(false);
       };
+      // Une cible restaurée peut pointer sur une image supprimée depuis (renommage
+      // de dataset) : sans ça, le voile tournerait pour toujours.
+      silhouetteImg.onerror = () => setLoading(false);
     } catch (e) {
       resetGame();
     }

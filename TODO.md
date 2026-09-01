@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 830 tests Vitest (41 suites), 237 méthodes PHPUnit, 113 tests E2E,
+> Vérifié le 2026-08-26 : 856 tests Vitest (44 suites), 237 méthodes PHPUnit, 113 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -18,6 +18,14 @@
 Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui déclenche le
 `git pull` Hostinger : **le code arrive avant le schéma**.
 
+- [ ] Jouer `sql/migrations/029_badge_gyotre.sql` et `030_titles_junes_investigation.sql`.
+      **Oubliées de cette liste jusqu'au 2026-09-01** : elles datent du lot de contenu 2.1
+      (commits `6f79abb` / `cdb8941`), alors que cette section a été rédigée pendant le
+      travail Mode Expert et démarrait donc à 031. Leurs propres en-têtes disent « insère
+      sur la prod déjà peuplée », et ni l'une ni l'autre n'est sur `main`. Sans elles, le
+      badge secret Gyotre et les titres Junes / Investigation Team n'existent pas en base :
+      le code 2.1 les affiche mais personne ne peut les décrocher. `INSERT IGNORE`, donc
+      sans risque même si elles avaient déjà été passées à la main.
 - [ ] Jouer `sql/migrations/031_game_sessions_is_expert.sql` en prod (MariaDB, garder les
       `IF NOT EXISTS`). Sans elle : `Unknown column 'is_expert'` à chaque partie Expert.
 - [ ] Jouer `sql/migrations/032_sessions_count_every_game.sql` — **dans cet ordre** : sa
@@ -29,6 +37,9 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `034_title_shadows_converge.sql` (titre Shadows Converge). Les deux sont
       `INSERT IGNORE`, sans risque et rejouables — mais sans elles le badge et le titre
       n'existent pas en prod, et le joueur ne peut jamais les décrocher.
+- [ ] Jouer `sql/migrations/038_badge_false_spring.sql` (badge A Gentle Reprieve). Même
+      forme que la 033 : `INSERT IGNORE`, rejouable, mais sans elle le badge n'existe pas
+      en base.
 
 > ✅ Les deux migrations ont été **rejouées pour de vrai** le 2026-08-21 contre une base vierge
 > au schéma pré-migration, puis une seconde fois pour l'idempotence : schéma final identique à

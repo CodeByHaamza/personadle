@@ -174,7 +174,8 @@
       "expert_tip_4": "Aqui não há zoom: a silhueta inteira é mostrada — enquanto o flash durar.",
       "expert_tip_5": "Tens 5 tentativas antes de o botão Desistir ficar disponível.",
       "expert_tip_6": "O Especialista tem o seu próprio personagem diário e as suas próprias estatísticas. Não conta para a tua sequência normal de Silhueta.",
-      "expert_flash": "⚡ FLASH"
+      "expert_flash": "⚡ FLASH",
+      "loading": "A carregar a silhueta…"
     },
     "alloutattack": {
       "name": "All-Out Attack",
@@ -502,7 +503,7 @@
       "description": "Caça ovos da Páscoa como caças Personas! A primavera traz novos começos."
     },
     "github_contributor": {
-      "name": "Phantom Coder",
+      "name": "Programador Fantasma",
       "condition": "Clica no botão do GitHub",
       "description": "Vieste ver o código-fonte! Um verdadeiro Phantom Thief recolhe sempre informação primeiro."
     },
@@ -522,7 +523,7 @@
       "description": "Quando o código não conseguia alcançar a era da PS1, o Dzulian desceu com os textos antigos. Megami Ibunroku, IS, EP — a trindade preservada. O GOAT que ligou duas gerações de Persona."
     },
     "true_confidant": {
-      "name": "True Confidant",
+      "name": "Verdadeiro Confidente",
       "condition": "Alcança o Nível 10 de Social Link com um amigo",
       "description": "Um laço inquebrável forjado através de vitórias e derrotas partilhadas. Um emblema para dois — prova de que a vossa amizade transcende o Metaverse."
     },
@@ -532,7 +533,7 @@
       "description": "Tal como as equipas desportivas de Gekkoukan, Yasogami e Shujin, respondeste ao chamamento no Dia Internacional do Desporto!"
     },
     "gyotre": {
-      "name": "Gyotre",
+      "name": "O Amor de Gyotre",
       "condition": "???",
       "description": "Um segredo que só os verdadeiros conhecem."
     },
@@ -616,13 +617,18 @@
       "condition": "Desiste quando o alvo for 'Our Light' no modo Música",
       "description": "Porquê esforçarmo-nos para alcançar a luz quando a felicidade te pode ser oferecida? Depuseste a tua alma rebelde para abraçar um sonho perfeito e sem dor."
     },
+    "false_spring": {
+      "name": "Um Doce Adiamento",
+      "condition": "Recusar o sacrifício e esperar o fim ao lado de Ryoji",
+      "description": "Sentado ao lado dele no telhado, recusas-te a fechar os olhos. Uma paz belíssima mas cruel, à espera de um fim inevitável onde a primavera nunca chegará."
+    },
     "for_real": {
-      "name": "For Real",
+      "name": "A Sério!",
       "condition": "Encontra o All-Out Attack do Ryuji no modo AOA e a sua persona no modo Personae",
       "description": "YEAH! É disto que eu estou a falar! Encontraste o Phantom Thief mais apaixonado — tanto a sua Persona como o seu All-Out Attack característico!"
     },
     "night_owl": {
-      "name": "Phantom of the Night",
+      "name": "Fantasma da Noite",
       "condition": "Joga entre a meia-noite e as 5h (hora de Paris)",
       "description": "Os verdadeiros ladrões operam sob o manto da escuridão. O mundo cognitivo é teu."
     },
@@ -667,7 +673,7 @@
       "description": "Um lapso momentâneo no fluxo do tempo! Recusaste deixar a escuridão reclamar o teu legado. Das cinzas espalhadas de ontem, elevas-te rumo a um novo amanhecer."
     },
     "best_bro": {
-      "name": "Best Bro",
+      "name": "Melhor Parceiro",
       "condition": "Tem 2 ou mais amigos",
       "description": "Os laços da amizade transcendem o tempo e o destino. Encontraste os teus aliados na teia de veludo das ligações."
     },

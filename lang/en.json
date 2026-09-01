@@ -174,7 +174,8 @@
       "expert_tip_4": "No zoom here: the whole silhouette is shown — for as long as it lasts.",
       "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
       "expert_tip_6": "Expert has its own daily character and its own stats. It will not carry your normal Silhouette streak.",
-      "expert_flash": "⚡ FLASH"
+      "expert_flash": "⚡ FLASH",
+      "loading": "Loading the silhouette…"
     },
     "alloutattack": {
       "name": "All-Out Attack",
@@ -532,7 +533,7 @@
       "description": "Like the sports teams of Gekkoukan, Yasogami, and Shujin, you've answered the call on International Sports Day!"
     },
     "gyotre": {
-      "name": "Gyotre",
+      "name": "Gyotre's Love",
       "condition": "???",
       "description": "A secret only the real ones know."
     },
@@ -615,6 +616,11 @@
       "name": "Gentle Illusion",
       "condition": "Give up when the target is 'Our Light' in Music mode",
       "description": "Why struggle to reach the light when happiness can be given to you? You laid down your rebellious soul to embrace a painless, perfect dream."
+    },
+    "false_spring": {
+      "name": "A Gentle Reprieve",
+      "condition": "Refuse the sacrifice and await the end at Ryoji's side",
+      "description": "Sitting beside him on the rooftop, you refuse to close your eyes. A beautiful, cruel peace, waiting for an inescapable end where spring will never come."
     },
     "for_real": {
       "name": "For Real",

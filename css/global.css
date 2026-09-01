@@ -664,6 +664,24 @@ input:checked + .slider.red {
   line-height: 1.1;
 }
 
+/* Pastille d'opus sous un nom homonyme (« Junpei Iori » ⟨P4AU⟩) — distingue deux
+   versions du MÊME personnage, là où .realname révèle un autre nom. Volontairement
+   non-italique et encadrée, pour ne pas se confondre avec un sous-titre. */
+.opus-tag {
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border: 1px solid #b48ead;
+  border-radius: 999px;
+  background-color: #f3e8f1;
+  color: #6d3f66;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
 /* =====================================================
    8. COMPTEURS D'ESSAIS (Hint / Give Up)
    ===================================================== */
@@ -1290,6 +1308,14 @@ body.darkmode .list-options:hover {
 
 body.darkmode .list-options span {
   color: #ffffff !important;
+}
+
+/* La pastille d'opus garde son fond en darkmode — la règle générique ci-dessus
+   force le texte en blanc, illisible sur le rose clair d'origine. */
+body.darkmode .opus-tag {
+  border-color: #b48ead;
+  background-color: #4a2c47;
+  color: #f0d9ed !important;
 }
 
 body.darkmode .list-options img {

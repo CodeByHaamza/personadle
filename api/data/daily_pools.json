@@ -468,7 +468,6 @@
       "Yusuke Kitagawa",
       "Sophia",
       "Zenkichi Hasegawa",
-      "Shuji Ikutsuki",
       "Motoha Arai",
       "Ayaka Sakai",
       "Haruna Nishimori",
@@ -533,7 +532,15 @@
       "Mayumi Yamano",
       "Shin Kanzato",
       "Jun Kanzato",
-      "Ryo Kanzato"
+      "Ryo Kanzato",
+      "Aigis (P4AU)",
+      "Akihiko Sanada (P4AU)",
+      "Fuuka Yamagishi (P4AU)",
+      "Junpei Iori (P4AU)",
+      "Ken Amada (P4AU)",
+      "Koromaru (P4AU)",
+      "Mitsuru Kirijo (P4AU)",
+      "Yukari Takeba (P4AU)"
     ]
   },
   "music": {
@@ -632,7 +639,8 @@
       "Hoshi to Bokura to",
       "Wait and See",
       "Heartful Cry",
-      "Kimi no Tonari"
+      "Kimi no Tonari",
+      "Memories of You"
     ]
   },
   "music_expert": {
@@ -711,7 +719,8 @@
       "What You Wish For",
       "Hoshi to Bokura to",
       "Wait and See",
-      "Kimi no Tonari"
+      "Kimi no Tonari",
+      "Memories of You"
     ]
   },
   "classic_expert": {

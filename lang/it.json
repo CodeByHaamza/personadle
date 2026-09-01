@@ -174,7 +174,8 @@
       "expert_tip_4": "Qui niente zoom: viene mostrata l'intera silhouette — finché dura il lampo.",
       "expert_tip_5": "Hai 5 tentativi prima che il pulsante Arrenditi si sblocchi.",
       "expert_tip_6": "L'Esperto ha il suo personaggio del giorno e le sue statistiche. Non conta per la tua serie Silhouette normale.",
-      "expert_flash": "⚡ FLASH"
+      "expert_flash": "⚡ FLASH",
+      "loading": "Caricamento della sagoma…"
     },
     "alloutattack": {
       "name": "All-Out Attack",
@@ -502,7 +503,7 @@
       "description": "Caccia le uova di Pasqua come cacci le Personae! La primavera porta nuovi inizi."
     },
     "github_contributor": {
-      "name": "Phantom Coder",
+      "name": "Programmatore Fantasma",
       "condition": "Clicca sul pulsante GitHub",
       "description": "Hai controllato il codice sorgente! Un vero Phantom Thief raccoglie sempre informazioni prima."
     },
@@ -522,7 +523,7 @@
       "description": "Quando il codice non riusciva a raggiungere l'era PS1, Dzulian è disceso con i testi antichi. Megami Ibunroku, IS, EP — la trinità preservata. Il GOAT che ha unito due generazioni di Persona."
     },
     "true_confidant": {
-      "name": "True Confidant",
+      "name": "Vero Confidente",
       "condition": "Raggiungi il Rango 10 del Social Link con un amico",
       "description": "Un legame indistruttibile forgiato attraverso vittorie e sconfitte condivise. Un badge per due — prova che la tua amicizia trascende il Metaverso."
     },
@@ -532,7 +533,7 @@
       "description": "Come le squadre sportive di Gekkoukan, Yasogami e Shujin, hai risposto alla chiamata nella Giornata Internazionale dello Sport!"
     },
     "gyotre": {
-      "name": "Gyotre",
+      "name": "L'amore di Gyotre",
       "condition": "???",
       "description": "Un segreto che solo i veri conoscono."
     },
@@ -562,122 +563,127 @@
       "description": "Due facce della stessa medaglia. Il ragazzo piacevole e la maschera nera... Entrambi i volti della giustizia rivelati."
     },
     "one_shot": {
-      "name": "Critical Strike",
+      "name": "Colpo Critico",
       "condition": "Indovinare correttamente al primo tentativo",
       "description": "Perché perdere tempo con la strategia quando puoi colpire direttamente?"
     },
     "aoa_vision": {
-      "name": "Piercing the Fog",
+      "name": "Squarciare la Nebbia",
       "condition": "Indovinare l'All-Out Attack al primo tentativo",
       "description": "La verità era velata in una fitta nebbia, ma l'hai vista a colpo d'occhio."
     },
     "emoji_decoder": {
-      "name": "Emoji Decoder",
+      "name": "Decifratore di Emoji",
       "condition": "Vincere 10 partite in modalità Emoji",
       "description": "Il Metaverso parla senza parole. Con finezza regale, hai decifrato il codice dell'anima digitale."
     },
     "navigator": {
-      "name": "Eye of the Navigator",
+      "name": "Occhio del Navigatore",
       "condition": "Usare il suggerimento 50 volte in modalità Classica",
       "description": "Cinquanta anomalie scansionate e decifrate. Nessuna verità può nascondersi dal tuo radar."
     },
     "velvet_regular": {
-      "name": "Velvet Regular",
+      "name": "Cliente Fisso del Velvet",
       "condition": "Giocare in 50 giorni unici",
       "description": "Cinquanta giorni tra mente e materia. Il padrone di questa stanza ora riconosce i tuoi passi."
     },
     "strega": {
-      "name": "Apostles of the Fall",
+      "name": "Apostoli della Caduta",
       "condition": "Trovare Hypnos, Moros e Medea in modalità Personae",
       "description": "Perché combattere l'inevitabile? Siamo semplicemente i registi della tua bellissima distruzione."
     },
     "twin_fist": {
-      "name": "Twin Fist",
+      "name": "Pugni Gemelli",
       "condition": "Trovare una Persona di Makoto Nijima e Akihiko in modalità Personae",
       "description": "Forza nucleare e fulmine! Hai identificato i due combattenti più feroci."
     },
     "twin_spear": {
-      "name": "Twin Spear",
+      "name": "Lance Gemelle",
       "condition": "Trovare una Persona di Kotone e Ken in modalità Personae",
       "description": "Uno cerca vendetta attraverso la luce, l'altro guida con una lama danzante."
     },
     "tradition_modernite": {
-      "name": "Chronological Convergence",
+      "name": "Convergenza Cronologica",
       "condition": "Trovare le persona di Naoto e Futaba + le loro musiche",
       "description": "Due menti, distanti un secolo, ora perfettamente sincronizzate. Tradizione e innovazione sono una cosa sola."
     },
     "shapeshifter": {
-      "name": "The Formless Soul",
+      "name": "L'Anima Senza Forma",
       "condition": "Indovinare lo stesso personaggio in 3 modalità diverse",
       "description": "Una maschera può cambiare, il palcoscenico può spostarsi, ma il vero sé rimane costante."
     },
     "ideal_reality": {
-      "name": "Gentle Illusion",
+      "name": "Dolce Illusione",
       "condition": "Abbandonare quando il bersaglio è 'Our Light' in modalità Musica",
       "description": "Perché lottare per raggiungere la luce quando la felicità può essere donata?"
     },
+    "false_spring": {
+      "name": "Una Dolce Tregua",
+      "condition": "Rifiutare il sacrificio e attendere la fine accanto a Ryoji",
+      "description": "Seduto al suo fianco sul tetto, ti rifiuti di chiudere gli occhi. Una pace bellissima e crudele, in attesa di una fine inevitabile in cui la primavera non arriverà mai."
+    },
     "for_real": {
-      "name": "For Real",
+      "name": "Sul Serio!",
       "condition": "Trovare l'All-Out Attack di Ryuji e la sua persona",
       "description": "YEAH! Hai trovato il Phantom Thief più appassionato!"
     },
     "night_owl": {
-      "name": "Phantom of the Night",
+      "name": "Fantasma della Notte",
       "condition": "Giocare tra mezzanotte e le 5 del mattino (ora di Parigi)",
       "description": "I veri ladri operano sotto la copertura dell'oscurità."
     },
     "nyx_hour": {
-      "name": "Nyx Hour",
+      "name": "L'Ora di Nyx",
       "condition": "Giocare tra mezzanotte e le 0:30 (ora di Parigi)",
       "description": "L'orologio batte le dodici, ma il domani non arriva mai."
     },
     "stylist": {
-      "name": "Breathtaking Aesthetics",
+      "name": "Estetica Mozzafiato",
       "condition": "Personalizzare avatar + colore UI + 1 badge + musica profilo",
       "description": "Che passione! Hai rifiutato la mediocrità di un profilo predefinito!"
     },
     "pyro_spark": {
-      "name": "The Ignition",
+      "name": "La Scintilla",
       "condition": "Raggiungere una serie di 7 giorni",
       "description": "Un piccolo bagliore nel buio. Per sette giorni, hai mantenuto viva la fiamma."
     },
     "raphael": {
-      "name": "The Divine Blaze",
+      "name": "La Fiamma Divina",
       "condition": "Raggiungere una serie di 30 giorni",
       "description": "Trenta giorni. Il bagliore è diventato un inferno ruggente."
     },
     "surt": {
-      "name": "Ragnarök's Dawn",
+      "name": "L'Alba del Ragnarök",
       "condition": "Raggiungere una serie di 90 giorni",
       "description": "Novanta giorni di perseveranza assoluta e implacabile."
     },
     "lucifer": {
-      "name": "Crest of the Morning Star",
+      "name": "Stemma della Stella del Mattino",
       "condition": "Raggiungere una serie di 120 giorni",
       "description": "Centovent'albe. Oltre i fuochi della distruzione c'è la chiarezza accecante."
     },
     "helel": {
-      "name": "The Eternal Zenith",
+      "name": "Lo Zenit Eterno",
       "condition": "Raggiungere una serie di 365 giorni",
       "description": "Oltre la ribellione, oltre la rovina, c'è la grazia pura della prima stella."
     },
     "reborn_phoenix": {
-      "name": "Phoenix Reborn",
+      "name": "Fenice Rinata",
       "condition": "Ripristinare la tua serie dopo averla persa",
       "description": "Hai rifiutato di lasciare che l'oscurità rivendicasse il tuo lascito!"
     },
     "best_bro": {
-      "name": "Best Bro",
+      "name": "Miglior Amico",
       "condition": "Avere 2 o più amici",
       "description": "I legami dell'amicizia trascendono il tempo e il destino."
     },
     "data_mining": {
-      "name": "Data Mining",
+      "name": "Estrazione di Dati",
       "condition": "Visitare 5 profili utente diversi",
       "description": "Analizzando la concorrenza o cercando nuovi legami? Hai scrutato l'anima di cinque utenti."
     },
     "leblanc_meeting": {
-      "name": "Leblanc Meeting",
+      "name": "Riunione al Leblanc",
       "condition": "3 o più amici online lo stesso giorno",
       "description": "Anime sincronizzate! Anche il Phantom Thief più impegnato ha bisogno di un caffè."
     },
@@ -692,17 +698,17 @@
       "description": "Le stelle si allineano per una sola notte. Il tuo desiderio è stato registrato."
     },
     "promised_day": {
-      "name": "The Promised Day",
+      "name": "Il Giorno Promesso",
       "condition": "Giocare il 31 dicembre E il 1° gennaio",
       "description": "L'orologio suona le dodici dell'anno morente. Hai affrontato la soglia del nuovo alba."
     },
     "hifumi_archives": {
-      "name": "The Grandmaster's Tome",
+      "name": "Il Tomo della Gran Maestra",
       "condition": "???",
       "description": "Un vero tattico studia il campo prima di colpire."
     },
     "report": {
-      "name": "The Priestess's Audit",
+      "name": "L'Audit della Sacerdotessa",
       "condition": "???",
       "description": "Canalizzando la sapienza meticolosa della Sacerdotessa, hai documentato le anomalie."
     },

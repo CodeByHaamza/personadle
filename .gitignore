@@ -148,6 +148,7 @@ PersonaDLE_Update_Documentation/PersonaDLE 2.0/*
 PersonaDLE_Update_Documentation/PersonaDLE 2.1/*
 !PersonaDLE_Update_Documentation/PersonaDLE 2.1/PersonaDLE_Update.html
 !PersonaDLE_Update_Documentation/PersonaDLE 2.1/DEV_CHANGELOG.md
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/TEST_PLAN.md
 !PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.png
 !PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.jpg
 !PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.jpeg

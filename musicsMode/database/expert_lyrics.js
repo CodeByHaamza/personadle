@@ -405,6 +405,14 @@ export const expertLyrics = {
     "Demo imasara hikisagarenai",
     "\"Mina ga neshizumareba boku no deban kuru\"",
   ],
+  "Memories of You": [
+    "hakanaku tayutau sekai wo kimi no te de mamottakara",
+    "imawa tada tsubasa wo tatande yukkuri nemurinasai",
+    "eien no yasuragi ni tsutsumarete love through all eternity",
+    "yasashiku mimamoru watashi no kono te de nemurinasai",
+    "waratteta naiteta okotteta kimi no koto oboeteiru",
+    "wasurenai itsumademo kesshite until my life is exhausted",
+  ],
   "When the Moon Reaches for the Stars": [
     "I never felt like so miserable",
     "I never knew I'd think that this would last forever",

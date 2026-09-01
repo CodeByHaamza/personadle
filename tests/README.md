@@ -2,7 +2,7 @@
 
 # 🧪 Tests & Qualité
 
-<img src="https://img.shields.io/badge/Vitest-830%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
+<img src="https://img.shields.io/badge/Vitest-856%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
 <img src="https://img.shields.io/badge/PHPUnit-logic%20%2B%20DB-3776AB?style=for-the-badge&logo=php&logoColor=white" alt="PHPUnit">
 <img src="https://img.shields.io/badge/Playwright-13%20E2E-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/PHPStan-niveau%205-1A1A1A?style=for-the-badge" alt="PHPStan">
@@ -23,7 +23,7 @@
              ╱────────╲   PHPUnit — 237 méthodes (14 fichiers, dont intégration vraie MariaDB)
             ╱          ╲  contraintes SQL, FK cascade, contrat de schéma, streak/social/auth
            ╱────────────╲
-          ╱              ╲ Vitest — 830 tests unitaires (jsdom, 41 fichiers)
+          ╱              ╲ Vitest — 856 tests unitaires (jsdom, 44 fichiers)
          ╱────────────────╲ logique de jeu, streak, i18n, validation, sync
       ──────────────────────
 ```
@@ -61,7 +61,7 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 | `langSelector.test.js`           |   5   | sélecteur de langue                                              |
 | `profileFormat.test.js`          |   4   | formatage des données de profil                                 |
 | `streakFlow.integration.test.js` |   2   | flux complet récupération + sync cloud                         |
-| **Total**                        |**830**|                                                                |
+| **Total**                        |**856**|                                                                |
 
 ## 🐘 Suites PHP (`tests/php/`)
 
@@ -96,7 +96,7 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 ```bash
 npm install              # une seule fois
 
-npm test                 # Vitest (830)
+npm test                 # Vitest (856)
 npm run test:watch       # Vitest en mode watch
 npm run test:coverage    # Vitest + seuils de couverture
 
