@@ -4399,3 +4399,45 @@ body.darkmode .swatch.active { box-shadow: 0 0 0 2px #161020, 0 0 0 4px var(--ac
   color: #2bae66;
   margin: 4px 0 0;
 }
+
+/* ─── Stats Mode Expert ────────────────────────────────────────────────────
+   Même squelette que le Mode Breakdown (.mode-stat-row) : pas de barre de
+   progression ici, mais 4 colonnes chiffrées. Rouge Expert, cohérent avec le
+   bouton et le panneau de paroles du mode Music. */
+
+.expert-stats {
+  margin-top: 18px;
+}
+
+.expert-stats-header {
+  color: #e63946;
+  letter-spacing: 0.04em;
+}
+
+.expert-stat-row {
+  /* Remplace la grille "icône | nom | barre | droite" par 4 colonnes fixes. */
+  display: grid;
+  grid-template-columns: 24px minmax(60px, 1fr) repeat(4, minmax(42px, auto));
+  align-items: center;
+  gap: 6px;
+  border-left: 2px solid rgba(230, 57, 70, 0.55);
+  padding-left: 8px;
+}
+
+.expert-stat-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .expert-stat-row {
+    grid-template-columns: 20px minmax(48px, 1fr) repeat(4, auto);
+    gap: 4px;
+  }
+
+  .expert-stat-cell {
+    font-size: 0.75rem;
+  }
+}

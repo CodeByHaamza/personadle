@@ -187,6 +187,10 @@ async function _checkPendingChallenges(msgs) {
         challengeFilters: m.challenge_filters ?? "[]",
         // Cible dédiée du défi (migration 023) — null sur les anciens défis.
         challengeTarget: m.challenge_target ?? null,
+        // Dimension du défi (migration 037). Sans ce report, un défi Expert
+        // enverrait le joueur en mode normal, où sa partie ne le résoudrait
+        // jamais — les deux dimensions ont des cases de stockage distinctes.
+        challengeIsExpert: !!m.challenge_is_expert,
       }))
     );
   } catch {

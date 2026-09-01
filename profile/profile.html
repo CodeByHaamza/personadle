@@ -40,7 +40,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="../css/global.css?v=11" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
     <link rel="stylesheet" href="../css/langSelector.css?v=4" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -56,7 +56,7 @@
     <link rel="stylesheet" href="../css/rank10-effect.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
     <link rel="stylesheet" href="../css/title-notification.css" />
-    <link rel="stylesheet" href="./profile-page.css?v=4" />
+    <link rel="stylesheet" href="./profile-page.css?v=5" />
     <link rel="stylesheet" href="./badges/badges.css?v=4" />
 
     <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
@@ -402,6 +402,11 @@
             <div id="streakRecoveryPrompt" class="srp hidden"></div>
             <!-- Rempli dynamiquement par profile-page.js → renderModeStats() -->
             <div id="modeStatsContainer" class="mode-stats"></div>
+
+            <!-- Mode Expert — rempli depuis l'API (game_sessions), pas depuis les
+                 stats client : l'Expert n'écrit ni dans profile.stats ni dans
+                 user_stats. Reste vide tant qu'aucune partie Expert n'a été jouée. -->
+            <div id="expertStatsContainer" class="mode-stats expert-stats"></div>
           </div>
 
           <!-- Card : Badges -->
@@ -756,7 +761,7 @@
     </script>
 
     <!-- Logique du profil (module ES6) — chargé APRÈS initAuth() -->
-    <script type="module" src="./profile-page.js?v=20"></script>
+    <script type="module" src="./profile-page.js?v=21"></script>
 
     <!-- Notifications + Settings (appeler après auth) -->
     <script type="module">
@@ -1011,7 +1016,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch((err) => {
+          navigator.serviceWorker.register("../sw.js", { updateViaCache: "none" }).catch((err) => {
             console.warn("[SW] Registration failed:", err);
           });
 

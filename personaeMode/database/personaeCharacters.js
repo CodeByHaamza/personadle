@@ -1,3 +1,28 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   RÈGLE — personas partagées entre plusieurs personnages (cf. CLAUDE.md §4)
+
+   1. Un même NOM de persona utilisé par plusieurs personnages dans des opus
+      différents = UNE SEULE entrée, `user` fusionné, `opus` combiné.
+      Ex: Thanatos → user: [Makoto Yuki, Kotone Shiomi, Elizabeth] (P3 + P4AU).
+      Déjà le cas d'Orpheus Telos ci-dessous (3 wielders combinés).
+
+   2. Deux personnages DIFFÉRENTS dont les personas portent juste le même nom
+      par coïncidence = DEUX entrées séparées, chacune son user/opus.
+      Critère concret : le champ `image`. Même image → cas 1. Images
+      différentes → cas 2.
+      Ex: Hermes (Junpei, P3, image: "Hermes") vs Hermes (Jun Kurosu, P2IS,
+      image: "Jun_Hermes") — deux dessins différents. Prometheus (Futaba,
+      P5R) vs Prometheus (Baofu, P2EP) — même logique.
+
+   Pourquoi : fusionner à tort le cas 2 ferait accepter une mauvaise réponse.
+   Scinder à tort le cas 1 peut refuser une bonne réponse selon l'entrée
+   tirée en interne, alors que l'image affichée est identique des deux côtés
+   — vécu comme un bug par le joueur, pas comme une règle de contenu.
+
+   Les noms légitimement dupliqués (cas 2) sont désambiguïsés automatiquement
+   côté défi entre amis par challengeKey()/findByChallengeKey()
+   (personaeMode/modePersonae.js) — rien à faire de plus ici.
+   ───────────────────────────────────────────────────────────────────────── */
 export const personaeCharacters = [
   //Persona 3 ( P3, P3FES, P3P, P3R )
   {
@@ -32,10 +57,16 @@ export const personaeCharacters = [
   },
 
   {
+    // Elizabeth utilise Thanatos dans P4AU (aux côtés de Makoto/Kotone en P3) —
+    // fusionné dans la même entrée plutôt que scindé par opus : même image,
+    // même persona, un joueur qui répond "Elizabeth" ne doit jamais être
+    // marqué faux juste parce que la cible tirée est l'entrée P3 (précédent
+    // déjà établi par "Orpheus Telos" ci-dessus, qui fusionne aussi des
+    // wielders de sous-continuités différentes dans une seule entrée).
     persona: "Thanatos",
     image: "Thanatos",
-    user: ["Makoto Yuki", "Kotone Shiomi"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    user: ["Makoto Yuki", "Kotone Shiomi", "Elizabeth"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Thanatos Picaro",
@@ -65,7 +96,7 @@ export const personaeCharacters = [
     persona: "Isis",
     image: "Isis",
     user: ["Yukari Takeba"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Hermes",
@@ -77,7 +108,7 @@ export const personaeCharacters = [
     persona: "Trismegistus",
     image: "Trismegistus",
     user: ["Junpei Iori"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Polydeuces",
@@ -89,7 +120,7 @@ export const personaeCharacters = [
     persona: "Caesar",
     image: "Caesar",
     user: ["Akihiko Sanada"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Penthesilea",
@@ -101,7 +132,7 @@ export const personaeCharacters = [
     persona: "Artemisia",
     image: "Artemisia",
     user: ["Mitsuru Kirijo"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Castor",
@@ -119,7 +150,7 @@ export const personaeCharacters = [
     persona: "Kala-Nemi",
     image: "Kala-Nemi",
     user: ["Ken Amada"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Palladion",
@@ -131,7 +162,7 @@ export const personaeCharacters = [
     persona: "Athena",
     image: "Athena",
     user: ["Aigis"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Athena Picaros",
@@ -143,7 +174,7 @@ export const personaeCharacters = [
     persona: "Cerberus",
     image: "Cerberus",
     user: ["Koromaru"],
-    opus: ["P3", "P3FES", "P3P", "P3R"],
+    opus: ["P3", "P3FES", "P3P", "P3R", "P4AU"],
   },
   {
     persona: "Lucia",
@@ -905,5 +936,159 @@ export const personaeCharacters = [
     image: "Joker_Nyarlathotep",
     user: ["Joker"],
     opus: ["P2IS"],
+  },
+
+  // Persona Trinity Souls ( PTS )
+  {
+    persona: "Abel",
+    image: "Abel",
+    user: ["Shin Kanzato"],
+    opus: ["PTS"],
+  },
+  {
+    persona: "Seth",
+    image: "Seth",
+    user: ["Jun Kanzato"],
+    opus: ["PTS"],
+  },
+  {
+    persona: "Cain",
+    image: "Cain",
+    user: ["Ryo Kanzato"],
+    opus: ["PTS"],
+  },
+
+  // ── Persona 1 (2026-08-20) ──────────────────────────────────────────────
+  // Dernier opus manquant du mode. Chaque membre du groupe a sa persona de
+  // départ et sa persona ultime ; Naoya en a trois.
+  //
+  // ⚠️ `Susano-o` existe DÉJÀ pour Yosuke Hanamura (P4G, image "Susano-o").
+  // Deux dessins différents → deux entrées, exactement comme Hermes
+  // (Junpei/Jun) — cf. règle 2 en tête de fichier. La fiche de lore unique
+  // acceptera les deux manieurs, le texte parlant du dieu shinto lui-même.
+  //
+  // Manque au roster : Eriko Kirishima (Nike + ultime) — ni dessin ni lore
+  // fournis dans le lot de Léo, donc absente du mode tant qu'ils manquent.
+  {
+    persona: "Seimen Kongou",
+    image: "Seimen_Kongou",
+    user: ["Naoya Todou"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Amon-Ra",
+    image: "Amon_Ra",
+    user: ["Naoya Todou"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Vishnu",
+    image: "Vishnu",
+    user: ["Naoya Todou"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Maso",
+    image: "Maso",
+    user: ["Maki Sonomura"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Verdandi",
+    image: "Verdandi",
+    user: ["Maki Sonomura"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Ogun",
+    image: "Ogun",
+    user: ["Masao Inaba"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Susano-o",
+    image: "Inaba_Susano-o",
+    user: ["Masao Inaba"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Aizen Myouou",
+    image: "Aizen_Myouou",
+    user: ["Kei Nanjo"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Yamaoka",
+    image: "Yamaoka",
+    user: ["Kei Nanjo"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Nemhain",
+    image: "Nemhain",
+    user: ["Hidehiko Uesugi"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Tyr",
+    image: "Tyr",
+    user: ["Hidehiko Uesugi"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Vesta",
+    image: "Vesta",
+    user: ["Yukino Mayuzumi"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Durga",
+    image: "Durga",
+    user: ["Yukino Mayuzumi"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Houri",
+    image: "Houri",
+    user: ["Yuka Ayase"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Freyr",
+    image: "Freyr",
+    user: ["Yuka Ayase"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Bres",
+    image: "Bres",
+    user: ["Reiji Kido"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Mot",
+    image: "Mot",
+    user: ["Reiji Kido"],
+    opus: ["P1"],
+  },
+  // Eriko Kirishima — arrivée après le reste du lot P1 (dessins fournis le
+  // 2026-08-20 en second envoi). Trois personas, comme Naoya Todou.
+  {
+    persona: "Nike",
+    image: "Nike",
+    user: ["Eriko Kirishima"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Armaiti",
+    image: "Armaiti",
+    user: ["Eriko Kirishima"],
+    opus: ["P1"],
+  },
+  {
+    persona: "Gabriel",
+    image: "Gabriel",
+    user: ["Eriko Kirishima"],
+    opus: ["P1"],
   },
 ];

@@ -18,25 +18,30 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CHECK = process.argv.includes("--check");
 const OUT_FILE = join(ROOT, "api/data/daily_pools.json");
 
-const { characters } = await import(join(ROOT, "database/characters_clean.js").replace(/\\/g, "/"));
-const { silhouetteCharacters } = await import(
-  join(ROOT, "silhouetteMode/database/silhouetteCharacters.js").replace(/\\/g, "/")
+// import() dynamique : sous Windows un chemin absolu ("C:\…" ou "C:/…") est lu comme
+// une URL de protocole "c:" et rejeté (ERR_UNSUPPORTED_ESM_URL_SCHEME). pathToFileURL
+// donne le file:// attendu sur les deux OS.
+const dataset = (rel) => import(pathToFileURL(join(ROOT, rel)).href);
+
+const { characters } = await dataset("database/characters_clean.js");
+const { silhouetteCharacters } = await dataset(
+  "silhouetteMode/database/silhouetteCharacters.js"
 );
-const { songs } = await import(join(ROOT, "musicsMode/database/songs.js").replace(/\\/g, "/"));
-const { personas: aoaAutocompletePool } = await import(
-  join(ROOT, "allOutAttackMode/database/personas_allOut.js").replace(/\\/g, "/")
+const { songs } = await dataset("musicsMode/database/songs.js");
+const { personas: aoaAutocompletePool } = await dataset(
+  "allOutAttackMode/database/personas_allOut.js"
 );
-const { aoaCharacters } = await import(
-  join(ROOT, "allOutAttackMode/database/aoaCharacters.js").replace(/\\/g, "/")
-);
-const { personaeCharacters } = await import(
-  join(ROOT, "personaeMode/database/personaeCharacters.js").replace(/\\/g, "/")
+const { aoaCharacters } = await dataset("allOutAttackMode/database/aoaCharacters.js");
+const { personaeCharacters } = await dataset("personaeMode/database/personaeCharacters.js");
+const { expertLyrics } = await dataset("musicsMode/database/expert_lyrics.js");
+const expertLore = JSON.parse(
+  readFileSync(join(ROOT, "personaeMode/database/expert_lore/en.json"), "utf8")
 );
 
 const opusByName = Object.fromEntries(aoaCharacters.map((c) => [c.nom, c.opus]));
@@ -46,6 +51,34 @@ const pools = {
   emoji: { pool: characters.filter((c) => c.emoji).map((c) => c.nom) },
   silhouette: { pool: silhouetteCharacters.map((c) => c.nom) },
   music: { pool: songs.map((s) => s.titre) },
+  // ── Pools Mode Expert ──────────────────────────────────────────────────────
+  // Tous ont une clé de hash distincte de leur mode normal : le tirage doit être
+  // indépendant, sinon jouer le mode normal d'abord — où l'indice est bien plus
+  // généreux — donne la réponse de l'Expert du jour.
+  //
+  // Seuls les modes dont le CONTENU est restreint ont un pool propre ici :
+  //   - music_expert  : uniquement les chansons ayant des paroles
+  //   - classic_expert: uniquement les personnages ayant une citation
+  // AOA et Silhouette Expert rejouent le pool normal (l'indice change, pas le
+  // roster) — api/lib/daily_target.php réutilise directement `alloutattack` et
+  // `silhouette` avec une clé de hash suffixée, plutôt que d'en dupliquer les
+  // entrées ici et de les laisser dériver.
+  music_expert: { pool: songs.filter((s) => expertLyrics[s.titre]).map((s) => s.titre) },
+  classic_expert: {
+    pool: characters.filter((c) => String(c.quote ?? "").trim()).map((c) => c.nom),
+  },
+  // Personae Expert : seules les personas ayant une fiche de lore sont tirables —
+  // sans texte, la partie n'aurait aucun indice. Les variantes cosmétiques
+  // (`* Picaro`…) n'ont volontairement pas de fiche et sont donc exclues d'office.
+  personae_expert: {
+    pool: personaeCharacters
+      .filter((c) => expertLore[c.persona])
+      .map((c) => ({
+        persona: c.persona,
+        user: Array.isArray(c.user) ? c.user[0] : c.user,
+        opus: c.opus,
+      })),
+  },
   alloutattack: {
     pool: aoaAutocompletePool,
     opusByName,

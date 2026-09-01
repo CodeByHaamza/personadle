@@ -21,7 +21,7 @@ export const songs = [
     titre: "Ambitions and Visions",
     fichier: "Ambitions_and_Visions.mp3",
     opus: ["P5X"],
-    image: "P5X.webp",
+    image: "Ambition_and_Vision.jpg",
     vocalist: "Lyn Inaizumi",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=djfP0FKXhqw"
@@ -766,5 +766,104 @@ export const songs = [
     vocalist: "Lyn Inaizumi",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=AFhxdC4CVrc"
+  },
+  {
+    titre: "Junes Themes",
+    fichier: "Junes_Themes.mp3",
+    opus: ["P4", "P4G"],
+    image: "P4.webp",
+    vocalist: "Instrumental",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=MJaLQhEObXY"
+  },
+  {
+    titre: "Mass Destruction (P3FES)",
+    fichier: "Mass_Destruction_P3FES.mp3",
+    opus: ["P3FES"],
+    image: "P3FES.webp",
+    vocalist: "Yumi Kawamura, Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/lSb-DRbD2sE"
+  },
+  {
+    titre: "P3 FES",
+    fichier: "P3_FES.mp3",
+    opus: ["P3FES"],
+    image: "P3FES_song.webp",
+    vocalist: "Yumi Kawamura, Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/slJQ5VBD7iQ"
+  },
+  {
+    titre: "Show Stealer",
+    fichier: "Show_Stealer.mp3",
+    opus: ["P5X"],
+    image: "Show_Stealer.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/AvXAaRMNqww"
+  },
+  {
+    titre: "Tokyo Emergency",
+    fichier: "Tokyo_Emergency.mp3",
+    opus: ["P5", "P5R"],
+    image: "P5.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/k8OFhyalA1s"
+  },
+  {
+    titre: "What You Wish For",
+    fichier: "What_You_Wish_For.mp3",
+    opus: ["P5S"],
+    image: "P5S.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/_g7lIAnLYKI"
+  },
+  {
+    titre: "Hoshi to Bokura to",
+    fichier: "Hoshi_to_Bokura_to.mp3",
+    opus: ["P5", "P5R"],
+    image: "P5.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/ghmaEb5mThw"
+  },
+  {
+    titre: "Wait and See",
+    fichier: "Wait_and_See.mp3",
+    opus: ["PQ2"],
+    image: "PQ2.webp",
+    vocalist: "Yumi Kawamura , Lotus Juice",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/YlmgojMHJ60"
+  },
+  {
+    titre: "Heartful Cry",
+    fichier: "Heartful_Cry.mp3",
+    opus: ["P3FES"],
+    image: "P3FES.webp",
+    vocalist: "",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/5ANGcZj4zhM"
+  },
+  {
+    titre: "Kimi no Tonari",
+    fichier: "Kimi_no_Tonari.mp3",
+    opus: ["P2IS"],
+    image: "P2IS.webp",
+    vocalist: "hitomi",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/aq_jMLavtLM"
+  },
+  {
+    titre: "Memories of You",
+    fichier: "Memories_of_You.mp3",
+    opus: ["P3R"],
+    image: "P3R.webp",
+    vocalist: "Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://youtu.be/H5Qtu8fCycE"
   }
 ];

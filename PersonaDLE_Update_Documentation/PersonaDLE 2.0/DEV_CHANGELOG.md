@@ -10,6 +10,46 @@
 
 ---
 
+> ℹ️ **Les entrées v2.1 ont déménagé** (2026-08-20) vers
+> `PersonaDLE 2.1/DEV_CHANGELOG.md` : Mode Expert des 6 modes, contenu 2.1 (Trinity Souls,
+> Persona 1, NPC, musiques), refonte des stats. Ce fichier ne garde que la v2.0 et ses
+> correctifs post-lancement.
+
+---
+
+## 2026-07-31 — fix(challenge): filtres opus écrasés à "tout désélectionné" après un défi
+
+Signalement joueur : après avoir joué un défi (surtout remarqué en mode Music), plus aucun
+filtre opus n'était actif — obligé de tout recocher à la main à chaque fois.
+
+### Détails techniques
+
+- **Root cause** (`profile/friends/friends.js` et `js/challenge-notif.js`, les deux points
+  d'acceptation d'un défi) : la sauvegarde des filtres avant d'appliquer ceux de l'expéditeur
+  utilisait `localStorage.getItem(filterKey) ?? "[]"`. Si le joueur n'avait **jamais** touché
+  le menu de filtres pour ce mode, la clé localStorage n'existe pas encore (son état réel est
+  "tout actif", le défaut calculé par `initFilterMenu()` — `js/filterMenu.js` — mais jamais
+  écrit tant qu'on n'interagit pas avec le menu). `localStorage.getItem()` renvoie alors `null`,
+  et le `?? "[]"` le remplaçait par la chaîne `"[]"` — qui n'est **pas** "pas de sauvegarde",
+  c'est un état volontaire "tout désélectionné" (`filterMenu.js` : `if (saved.length === 0)
+  return []; // preserve "all deselected" state`). À la fin du défi,
+  `checkChallengeCompletion()` (`js/challenge-result.js`) restaure fidèlement ce `"[]"` bidon
+  dans le localStorage réel du joueur — écrasant son "tout actif" implicite par un "tout
+  désélectionné" explicite qui n'a jamais existé.
+- **Fix** : suppression du fallback `?? "[]"` dans les deux points d'acceptation — `null` reste
+  `null` si la clé n'existe pas. La restauration dans `checkChallengeCompletion()` skip déjà
+  ce cas (`challenge.originalFilters !== null`), donc l'absence de clé reste absente après le
+  défi, et `initFilterMenu()` retombe naturellement sur "tout actif" au prochain chargement —
+  exactement le comportement attendu pour un joueur qui n'a jamais personnalisé ses filtres.
+  Aucune régression sur le cas où le joueur avait explicitement tout décoché avant le défi
+  (`localStorage.getItem()` renvoie alors la vraie chaîne `"[]"`, comportement inchangé).
+- Pas de nouveau test unitaire ajouté — même convention que le fix 404/cible de défi du
+  2026-07-29 sur ces mêmes fichiers (handlers DOM non exportés, gros fichiers non testés
+  unitairement dans ce projet).
+
+Pas d'entrée dans `PersonaDLE_Update.html` — correctif de fiabilité interne, pas de nouvelle
+feature visible par le joueur.
+
 ## 2026-07-29 — fix(challenge): 404 à l'acceptation depuis la page Amis + défis fantômes bloqués en "accepted"
 
 Signalement joueur : accepter un défi depuis la liste de notifications de la page Amis

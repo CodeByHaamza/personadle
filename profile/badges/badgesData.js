@@ -400,6 +400,36 @@ export const badgesList = [
     },
   },
   {
+    id: "denial_of_self",
+    name: "Denial of Self",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Denial_Of_Self.webp",
+    condition: "Win 10 Expert games in each of the 6 modes",
+    description:
+      "You faced every Expert trial and denied nothing. The Shadow is you — and you mastered it.",
+    secret: false,
+    // Vérifié UNIQUEMENT côté serveur (condition_type `expert_modes_mastered`,
+    // api/lib/condition_check.php) : les victoires Expert par mode ne sont pas
+    // dans `stats` — le Mode Expert n'alimente pas `user_stats`, elles se
+    // recalculent depuis `game_sessions` (cf. api/user/stats.php).
+    // badgesManager fusionne `is_unlocked` renvoyé par GET /api/badges, qui fait foi.
+    check: () => false,
+  },
+
+  {
+    id: "gyotre",
+    name: "Gyotre's Love",
+    category: BADGE_CATEGORIES.SECRET,
+    img: BADGE_IMG_BASE + "Badge_Gyotre.webp",
+    condition: "???",
+    description: "A secret only the real ones know.",
+    secret: true,
+    permanentCode: "GYOTRE",
+    check: (stats, profile) => {
+      return profile?.eventCodes?.includes("GYOTRE") || false;
+    },
+  },
+  {
     id: "dzulian",
     name: "The First Contractor",
     category: BADGE_CATEGORIES.SECRET,
@@ -614,6 +644,19 @@ export const badgesList = [
       "Why struggle to reach the light when happiness can be given to you? You laid down your rebellious soul to embrace a painless, perfect dream.",
     secret: false,
     check: (stats, profile) => profile?.gaveUpOnOurLight === true,
+  },
+  {
+    id: "false_spring",
+    name: "A Gentle Reprieve",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_False_Spring.webp",
+    // Condition volontairement évocatrice et non mécanique (texte d'Hamza) : dire
+    // « abandonne sur Memories of You » divulguerait la scène du toit de P3.
+    condition: "Refuse the sacrifice and await the end at Ryoji's side",
+    description:
+      "Sitting beside him on the rooftop, you refuse to close your eyes. A beautiful, cruel peace, waiting for an inescapable end where spring will never come.",
+    secret: false,
+    check: (stats, profile) => profile?.gaveUpOnMemoriesOfYou === true,
   },
   {
     id: "for_real",

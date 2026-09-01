@@ -40,8 +40,8 @@ Le hook de pre-commit lance déjà i18n + tests. Détail :
 
 | Commande | Vérifie |
 |---|---|
-| `make test` / `npm test` | 621 tests JS (Vitest) |
-| `make test-php` | 185 méthodes de test PHPUnit dans 12 fichiers (logique + intégration BDD). Tourne **dans le conteneur Docker** (`make up` requis) — pas besoin de PHP installé sur ta machine |
+| `make test` / `npm test` | 863 tests JS (Vitest) |
+| `make test-php` | 237 méthodes de test PHPUnit dans 14 fichiers (logique + intégration BDD). Tourne **dans le conteneur Docker** (`make up` requis) — pas besoin de PHP installé sur ta machine |
 | `npm run lint` | ESLint |
 | `npm run data:check` | schéma des données personnages |
 | `npm run i18n:check` | cohérence des clés de traduction |
@@ -70,11 +70,19 @@ Le test `tests/php/DatabaseIntegrationTest.php` garde-fou cette cohérence en CI
 - **`main`** = production (le déploiement Hostinger se fait **uniquement** depuis
   `main`, via `.github/workflows/cd.yml`, manuel).
 - Flux : feature → `develop` → (PR) → `main`.
+- **Une PR de feature ne vise jamais `main` directement.** Le déploiement Hostinger est un
+  `git pull` automatique depuis `main` : court-circuiter `develop`, c'est mettre en prod du
+  code dont les migrations n'ont pas encore été jouées. La règle est appliquée par le job
+  **`PR base guard`** (`.github/workflows/pr-base-guard.yml`), qui fait échouer toute PR sur
+  `main` dont la source n'est ni `develop`, ni `hotfix/*`, ni `dependabot/*` (Dependabot
+  cible la branche par défaut et n'a pas de `target-branch`). Rebaser une PR mal ciblée :
+  `gh pr edit <numéro> --base develop`.
 
 ### Protéger `main` (à faire une fois, réglages GitHub)
 Settings → Branches → Add rule sur `main` :
 - ✅ Require a pull request before merging
-- ✅ Require status checks to pass (sélectionner les jobs CI)
+- ✅ Require status checks to pass — sélectionner les jobs CI **et `PR base guard`**, sinon
+  la règle « pas de PR directe sur main » échoue sans bloquer le merge
 - ✅ Do not allow bypassing
 
 Ou en CLI :
@@ -110,10 +118,12 @@ une étiquette "sans risque".
 - **PHP** : PDO préparé **obligatoire** (jamais de concaténation SQL), bcrypt,
   codes HTTP corrects, `requireAuth()`/`requireAdmin()` sur les endpoints d'état.
 - **i18n** : ajouter la clé dans `lang/en.json` (source de vérité) en premier.
-- **Tout ajout/correction notable** → documenter dans deux fichiers distincts (voir CLAUDE.md §9) :
-  `PersonaDLE_Update_Documentation/PersonaDLE 2.0/DEV_CHANGELOG.md` (changelog dev, détail par
+- **Tout ajout/correction notable** → documenter dans deux fichiers distincts (voir CLAUDE.md §9),
+  dans le dossier de la version **en cours** (aujourd'hui la 2.1) :
+  `PersonaDLE_Update_Documentation/PersonaDLE 2.1/DEV_CHANGELOG.md` (changelog dev, détail par
   commit) et, seulement si le changement est visible pour un joueur,
-  `PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html` (changelog joueur,
-  highlights). Il n'existe pas de `PersonaDLE_Update.md` pour la v2.0.
+  `PersonaDLE_Update_Documentation/PersonaDLE 2.1/PersonaDLE_Update.html` (changelog joueur,
+  highlights). Le dossier `PersonaDLE 2.0/` ne reçoit plus que des correctifs de la 2.0 en
+  prod. Il n'existe pas de `PersonaDLE_Update.md` pour la v2.0 ni la v2.1.
 
 Voir `CLAUDE.md` pour les pièges critiques détaillés.

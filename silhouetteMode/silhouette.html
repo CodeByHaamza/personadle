@@ -4,8 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle - Silhouette Mode</title>
-    <link rel="stylesheet" href="../css/global.css?v=11" />
-    <link rel="stylesheet" href="./silhouette.css?v=3" />
+    <meta
+      name="description"
+      content="Guess the Persona character of the day from their silhouette alone. A new puzzle every day, from P1 to P5X."
+    />
+    <link rel="canonical" href="https://www.personadle.net/silhouetteMode/silhouette.html" />
+
+    <!-- Open Graph — cf. classiqueMode.html pour le raisonnement (domaine .NET,
+         un titre par mode, balises en dur car les robots n'exécutent pas le JS). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Personadle" />
+    <meta property="og:url" content="https://www.personadle.net/silhouetteMode/silhouette.html" />
+    <meta property="og:title" content="Personadle — Silhouette Mode" />
+    <meta
+      property="og:description"
+      content="Guess the Persona character of the day from their silhouette alone. A new puzzle every day, from P1 to P5X."
+    />
+    <meta property="og:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2769" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:image:alt" content="Personadle" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Personadle — Silhouette Mode" />
+    <meta
+      name="twitter:description"
+      content="Guess the Persona character of the day from their silhouette alone. A new puzzle every day, from P1 to P5X."
+    />
+    <meta name="twitter:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta name="theme-color" content="#e63946" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
+    <link rel="stylesheet" href="./silhouette.css?v=4" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -13,6 +43,7 @@
     <link rel="stylesheet" href="../css/challenge-result.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
     <link rel="stylesheet" href="../css/title-notification.css" />
+    <link rel="stylesheet" href="../css/expert-unlock.css?v=1" />
     <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
   </head>
 
@@ -268,6 +299,20 @@
             />
           </button>
         </div>
+        <!-- Persona Trinity Souls — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-pts active"
+            data-opus="PTS"
+            aria-label="Persona Trinity Souls"
+          >
+            <img
+              src="../img/logo_jeu/Trinity_Souls_Logo.webp"
+              alt="Persona Trinity Souls"
+              class="filter-logo"
+            />
+          </button>
+        </div>
         <!-- Persona Q — clic logo → sous-opus déroulants -->
         <div class="filter-group">
           <button
@@ -351,7 +396,7 @@
 
         <!-- Règles : câblées sur les clés JSON (modes.silhouette.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <div id="rulesNormal">
           <strong data-i18n="modes.silhouette.goal">🎯 Goal:</strong><br />
           <span data-i18n="modes.silhouette.goal_intro">A shadowy figure stands before you...</span>
           <br />
@@ -416,12 +461,70 @@
             detective!</em
           >
         </div>
+
+        <!-- Règles Expert — bloc distinct, affiché par setupExpertToggle(). -->
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.silhouette.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.silhouette.expert_goal_text">
+            The silhouette stays hidden. You only ever see it in flashes — and you decide when.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.silhouette.expert_tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.silhouette.expert_tip_1">
+              Press FLASH to show the silhouette for a fraction of a second.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_2">
+              You start with one flash, and every wrong guess earns you another one.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_3">
+              Each wrong guess also makes every following flash last longer.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_4">
+              No zoom here: the whole silhouette is shown — for as long as it lasts.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.silhouette.expert_tip_6">
+              Expert rounds have their own daily answer, and do not count towards your streak.
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1). -->
+    <div class="expert-toggle-zone">
+      <a
+        href="silhouette.html?expert=1"
+        id="expertToggle"
+        class="expert-toggle"
+        data-i18n="ui.expert_enter"
+      >
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <!-- Image silhouette -->
-    <div class="silhouette-box">
+    <div class="silhouette-box is-loading">
+      <!-- Voile de chargement : la classe `is-loading` est posée dès le HTML pour
+           couvrir la boîte AVANT même l'exécution du module (défer), et retirée par
+           modeSilhouette.js quand la silhouette est décodée. -->
+      <div class="silhouette-loader" role="status" aria-live="polite">
+        <span data-i18n="modes.silhouette.loading">Chargement de la silhouette…</span>
+      </div>
       <img id="silhouetteImage" src="" alt="Silhouette" draggable="false" />
+    </div>
+
+    <!-- Bouton FLASH — Expert uniquement (affiché via body.expert-mode en CSS) -->
+    <div class="flash-block">
+      <button id="flashButton" class="flash-btn" type="button" aria-disabled="true">
+        <span data-i18n="modes.silhouette.expert_flash">⚡ FLASH</span>
+        <span id="flashCounter" class="flash-counter">(0)</span>
+      </button>
     </div>
 
     <!-- Bouton Give Up -->
@@ -429,7 +532,7 @@
       class="giveup-block"
       style="display: flex; justify-content: center; margin-top: 20px; gap: 12px"
     >
-      <div class="link-wrapper" id="giveUpButton">
+      <div class="link-wrapper" id="giveUpButton" aria-disabled="true">
         <div class="img-wrapper">
           <img
             class="normal"
@@ -570,7 +673,7 @@
       import { initLang } from "../js/i18n.js";
       window.__i18nReady = initLang();
     </script>
-    <script type="module" src="./modeSilhouette.js?v=3"></script>
+    <script type="module" src="./modeSilhouette.js?v=5"></script>
 
     <!-- Dark Mode -->
     <div class="darkmode-toggle">
@@ -667,7 +770,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch((err) => {
+          navigator.serviceWorker.register("../sw.js", { updateViaCache: "none" }).catch((err) => {
             console.warn("[SW] Registration failed:", err);
           });
         });

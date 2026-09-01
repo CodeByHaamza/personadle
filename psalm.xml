@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+  psalm.xml — Analyse de TAINT sur api/ (injection SQL, XSS, traversée de chemin…)
+
+  Pourquoi Psalm alors que le projet utilise PHPStan : PHPStan n'a PAS d'analyse
+  de taint en open source. Vérifié sur la 2.2.2 embarquée par la CI : ni option
+  ni commande dédiée. TODO.md annonçait « PHPStan en mode taint » ; la prémisse
+  était fausse. Psalm est l'outil libre qui fait ce travail (drapeau
+  `taint-analysis`, stable depuis la v4).
+
+  Les deux cohabitent sans se marcher dessus, et c'est voulu :
+    phpstan.neon (niveau 5) → erreurs de TYPE
+    ce fichier   (errorLevel 8) → uniquement le TAINT
+
+  `errorLevel="8"` est le niveau le PLUS PERMISSIF de Psalm : on éteint
+  volontairement sa vérification de types. Sans ça, Psalm doublonnerait PHPStan
+  et noierait les vraies alertes de sécurité sous des centaines de remarques de
+  typage. Un rapport que personne ne lit ne protège de rien. L'analyse de taint
+  reste pleinement active : elle dépend du drapeau, pas de l'errorLevel.
+
+  Lancer : voir `npm run security:taint` (package.json).
+
+  Le projet n'a pas de composer.json (aucune dépendance PHP de production) :
+  Psalm tourne donc sans autoloader, d'où `findUnusedCode` désactivé — sans
+  autoloader il ne peut pas savoir ce qui est réellement appelé.
+-->
+<psalm
+    errorLevel="8"
+    resolveFromConfigFile="true"
+    findUnusedBaselineEntry="false"
+    findUnusedCode="false"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+>
+    <projectFiles>
+        <directory name="api" />
+        <ignoreFiles>
+            <!-- Exemple de config : ne contient que des constantes de démo. -->
+            <file name="api/config.example.php" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <issueHandlers>
+        <!--
+          Le seul faux positif de l'analyse, et il est sûr pour une raison
+          précise. Psalm traite tout `echo` comme un puits HTML, sans regarder
+          les en-têtes. Or `jsonSuccess()` répond avec
+          `Content-Type: application/json; charset=utf-8` ET
+          `X-Content-Type-Options: nosniff`, tous deux posés en haut de
+          bootstrap.php : aucun navigateur n'interprétera cette sortie comme du
+          HTML, donc aucun XSS n'est possible par ce chemin.
+
+          Exclusion volontairement réduite au strict minimum : ces deux
+          identifiants, dans ce seul fichier. L'analyse reste entière partout
+          ailleurs, et un flux vers un puits SQL ou shell serait de toute façon
+          détecté à SON puits, pas ici.
+
+          (Une annotation `@psalm-suppress` posée sur l'instruction `echo` a été
+          essayée d'abord : Psalm ne la prend pas en compte pour les puits de
+          taint. D'où cette exclusion déclarative, qui elle fonctionne.)
+
+          ⚠️ Si jsonSuccess() cesse un jour de répondre en JSON, retirer ces
+          deux entrées AVANT de changer le type de contenu.
+        -->
+        <TaintedHtml>
+            <errorLevel type="suppress">
+                <file name="api/bootstrap.php" />
+            </errorLevel>
+        </TaintedHtml>
+        <TaintedTextWithQuotes>
+            <errorLevel type="suppress">
+                <file name="api/bootstrap.php" />
+            </errorLevel>
+        </TaintedTextWithQuotes>
+    </issueHandlers>
+</psalm>

@@ -138,8 +138,11 @@ INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_i
 ('adachi_boring_isnt_it',     'profile/titles/adachi_boring_isnt_it.webp',     'Boring, Isn''t It?',     'Ennuyeux, N''est-ce Pas ?','¿Aburrido, Verdad?',   'Langweilig, Oder?',    'Noioso, Vero?',       'giveups_total',       NULL,      50,  'common'),
 ('marie_i_remembered',        'profile/titles/marie_i_remembered.webp',        'I Remembered',           'Je Me Suis Souvenu',      'Lo Recordé',            'Ich Erinnerte Mich',   'Mi Sono Ricordato',   'badges_count',        NULL,      15,  'rare'),
 ('yu_reach_out_to_the_truth', 'profile/titles/yu_reach_out_to_the_truth.webp', 'Reach Out to the Truth', 'Toucher la Vérité',       'Alcanza la Verdad',     'Greife nach der Wahrheit','Raggiungi la Verita','all_modes_won',     NULL,      1,   'epic'),
+('investigation_team',        'profile/titles/investigation_team.webp',        'Investigation Team',     'Investigation Team',      'Investigation Team',    'Investigation Team',   'Investigation Team',  'mode_wins',           'personae',8,   'epic'),
+('junes',                     'profile/titles/junes.webp',                     'Junes',                  'Junes',                   'Junes',                 'Junes',                'Junes',               'mode_wins',           'music',   15,  'rare'),
 ('naoya_first_awakening',     'profile/titles/naoya_first_awakening.webp',     'The First Awakening',    'Le Premier Éveil',        'El Primer Despertar',   'Das Erste Erwachen',   'Il Primo Risveglio',  'classic_p1_wins',     NULL,      15,  'rare'),
-('maya_always_be_positive',   'profile/titles/maya_always_be_positive.webp',   'Always Be Positive',     'Toujours Positif',        'Siempre Positivo',      'Immer Positiv',        'Sempre Positivo',     'emoji_p2_wins',       NULL,      10,  'common');
+('maya_always_be_positive',   'profile/titles/maya_always_be_positive.webp',   'Always Be Positive',     'Toujours Positif',        'Siempre Positivo',      'Immer Positiv',        'Sempre Positivo',     'emoji_p2_wins',       NULL,      10,  'common'),
+('shadows_converge',          'profile/titles/shadows_converge.webp',          'Shadows Converge',       'Shadows Converge',        'Shadows Converge',      'Shadows Converge',     'Shadows Converge',    'expert_wins_total',   NULL,      50,  'legendary');
 
 
 -- =============================================================================
@@ -216,6 +219,8 @@ CREATE TABLE game_sessions (
     id              BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
     user_id         BIGINT UNSIGNED  NOT NULL,
     mode            VARCHAR(30)      NOT NULL,
+    is_expert       TINYINT(1)       NOT NULL DEFAULT 0,  -- 1 = partie en Mode Expert (migration 031)
+    client_session_id CHAR(36)       NULL,                -- clé d'idempotence client (migration 032)
     played_date     DATE             NOT NULL,   -- date Paris (Europe/Paris)
     target_name     VARCHAR(200)     NOT NULL,
     result          VARCHAR(10)      NOT NULL,   -- 'win' | 'giveup'
@@ -225,15 +230,19 @@ CREATE TABLE game_sessions (
     created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    -- Anti-doublon : une seule session par (user, mode, jour Paris).
-    -- Cf. migration 014 + sessions.php (interception PDOException 23000).
-    UNIQUE KEY uq_session_per_day (user_id, mode, played_date),
+    -- Anti-doublon : plus de plafond d'une partie par jour depuis la migration 032
+    -- (toutes les parties comptent, seule la streak reste journalière). Le garde-fou
+    -- est désormais la clé d'idempotence générée par le client : rejouer une session
+    -- déjà enregistrée est rejeté, en jouer une nouvelle ne l'est pas.
+    UNIQUE KEY uq_session_client_id (client_session_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE INDEX idx_game_sessions_user_mode ON game_sessions(user_id, mode);
 CREATE INDEX idx_game_sessions_date      ON game_sessions(played_date);
 CREATE INDEX idx_game_sessions_target    ON game_sessions(mode, played_date, target_name);
+CREATE INDEX idx_game_sessions_user_mode_expert ON game_sessions(user_id, mode, is_expert);
+CREATE INDEX idx_session_per_day ON game_sessions(user_id, mode, played_date, is_expert);
 
 
 -- =============================================================================
@@ -274,6 +283,36 @@ CREATE TABLE badges_unlocked (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE INDEX idx_badges_user ON badges_unlocked(user_id);
+
+
+-- =============================================================================
+-- 8bis. EXPERT_UNLOCKS_GRANTED — déblocage manuel d'un Mode Expert par un admin
+-- =============================================================================
+-- La porte d'entrée du Mode Expert (api/lib/expert_unlocks.php) calcule le
+-- déblocage depuis `game_sessions`. Cette table est le second chemin : un admin
+-- peut accorder l'accès à un mode sans que le joueur ait rempli la condition.
+--
+-- Pourquoi une table plutôt que de fausses parties dans `game_sessions` :
+-- celles-ci compteraient dans les stats, les classements et les badges. Un geste
+-- d'admin ne doit rien fabriquer qui ressemble à du jeu réel.
+--
+-- C'est un OU avec la condition calculée, jamais un remplacement : retirer la
+-- ligne ne retire pas l'accès à un joueur qui l'a gagné par ailleurs.
+-- Voir migration 035.
+-- =============================================================================
+CREATE TABLE expert_unlocks_granted (
+    id          BIGINT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    user_id     BIGINT UNSIGNED  NOT NULL,
+    mode        VARCHAR(30)      NOT NULL,   -- validé côté PHP contre personadle_expert_conditions()
+    granted_by  BIGINT UNSIGNED  NULL,       -- NULL si l'admin a depuis supprimé son compte
+    granted_at  TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    -- Rend l'endpoint admin naturellement idempotent : accorder deux fois est un no-op.
+    UNIQUE KEY uq_expert_grant (user_id, mode),
+    CONSTRAINT fk_expert_grant_user  FOREIGN KEY (user_id)    REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_expert_grant_admin FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- =============================================================================
@@ -564,6 +603,12 @@ CREATE TABLE messages (
     challenge_date    DATE            NULL,
     challenge_filters TEXT            NULL,
     challenge_target  VARCHAR(200)    NULL,  -- cible aléatoire dédiée au défi (migration 023) ; NULL = cible du jour (anciens défis)
+    -- L'Expert est une DIMENSION du défi, pas un type de message à part (même
+    -- raisonnement que game_sessions.is_expert). Sans cette colonne, un défi créé
+    -- en normal s'imposait comme cible en Expert et une victoire Expert validait
+    -- le défi normal — d'où les gardes qui neutralisaient les défis en Expert
+    -- jusqu'à la migration 037.
+    challenge_is_expert TINYINT(1)    NOT NULL DEFAULT 0,
     status            VARCHAR(20)     NOT NULL DEFAULT 'unread',
     created_at      TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_msg_sender   FOREIGN KEY (sender_id)   REFERENCES users(id) ON DELETE CASCADE,
@@ -573,6 +618,9 @@ CREATE TABLE messages (
 CREATE INDEX idx_messages_receiver    ON messages(receiver_id, status, created_at DESC);
 CREATE INDEX idx_messages_sender      ON messages(sender_id);
 CREATE INDEX idx_messages_sender_type ON messages(sender_id, type, status, created_at DESC);
+-- Anti-doublon de défi : interrogé à chaque envoi, donc sur le chemin critique.
+CREATE INDEX idx_messages_challenge_dedup
+    ON messages(sender_id, receiver_id, challenge_date, challenge_is_expert, status);
 
 
 -- =============================================================================
@@ -659,10 +707,12 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('tradition_modernite', 'Chronological Convergence',  'achievement', 'epic',      'profile/badges/images/Badge_Tradition_Modernite.webp',   'Find Naoto''s & Futaba''s personas + Secret Base & When Mother Was There', 'manual', NULL, NULL, 0),
 ('shapeshifter',        'The Formless Soul',          'achievement', 'epic',      'profile/badges/images/Badge_Shapshifter.webp',           'Guess the same character in 3 different modes (cumulative)', 'manual', NULL, NULL, 0),
 ('ideal_reality',       'Gentle Illusion',            'achievement', 'common',    'profile/badges/images/Badge_Ideal_Reality.webp',         'Give up when the target is ''Our Light'' in Music mode', 'manual', NULL, NULL, 0),
+('false_spring',        'A Gentle Reprieve',          'achievement', 'common',    'profile/badges/images/Badge_False_Spring.webp',          'Refuse the sacrifice and await the end at Ryoji''s side', 'manual', NULL, NULL, 0),
 ('for_real',            'For Real',                   'achievement', 'rare',      'profile/badges/images/Badges_for_real.png',              'Find Ryuji''s All-Out Attack in AOA mode and his persona in Personae mode', 'manual', NULL, NULL, 0),
 ('night_owl',           'Phantom of the Night',       'achievement', 'common',    'profile/badges/images/Badge_Night_Owl.webp',             'Play between midnight and 5 AM (Paris time)', 'manual', NULL, NULL, 0),
 ('nyx_hour',            'Nyx Hour',                   'achievement', 'rare',      'profile/badges/images/Badge_Nyx_Hour.webp',              'Play between midnight and 12:30 AM (Paris time)', 'manual', NULL, NULL, 0),
 ('stylist',             'Breathtaking Aesthetics',    'achievement', 'epic',      'profile/badges/images/Badge_stylist.webp',               'Customize your profile: avatar + UI color + profile music + equipped title', 'manual', NULL, NULL, 0),
+('denial_of_self',      'Denial of Self',             'achievement', 'epic',      'profile/badges/images/Badge_Denial_Of_Self.webp',        'Win 10 Expert games in each of the 6 modes', 'expert_modes_mastered', NULL, 10, 0),
 
 -- ── Streak badges ────────────────────────────────────────────────────────────
 ('pyro_spark',          'The Ignition',               'streak',      'common',    'profile/badges/images/Badge_Pyro_Spark.webp',            'Reach a 7-day streak', 'streak_record', NULL, 7, 0),
@@ -694,6 +744,7 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('true_hacker',         'True Hacker',                'secret',      'rare',      'profile/badges/images/Badges_True_Hacker.png',           '???', 'manual', NULL, NULL, 1),
 ('tae_takemi',          'Tae Takemi Fan',             'secret',      'rare',      'profile/badges/images/Badges_Tae_Takemi.png',            '???', 'manual', NULL, NULL, 1),
 ('arati',               'Arati''s Blessing',          'secret',      'rare',      'profile/badges/images/Badges_Arati.png',                 '???', 'manual', NULL, NULL, 1),
+('gyotre',              'Gyotre',                     'secret',      'rare',      'profile/badges/images/Badge_Gyotre.webp',                '???', 'manual', NULL, NULL, 1),
 ('dzulian',             'The First Contractor',       'secret',      'epic',      'profile/badges/images/Badge_Dzulian.png',                '???', 'manual', NULL, NULL, 1),
 ('chef',                'Master Chef',                'secret',      'rare',      'profile/badges/images/Badges_Chef.png',                  '???', 'manual', NULL, NULL, 1),
 ('github_contributor',  'Phantom Coder',              'secret',      'common',    'profile/badges/images/Badges_Github_Morgana.png',        '???', 'manual', NULL, NULL, 1),
@@ -722,7 +773,8 @@ INSERT IGNORE INTO event_codes (code, badge_id, start_date, end_date, is_permane
   ('ARATI',       'arati',                 NULL, NULL, 1, 1, 'Secret — Arati'),
   ('DZULIAN',     'dzulian',               NULL, NULL, 1, 1, 'Secret — Dzulian'),
   ('GOURMET',     'chef',                  NULL, NULL, 1, 1, 'Secret — Chef'),
-  ('LOBSTER',     'lobster',               NULL, NULL, 1, 1, 'Secret — Lobster');
+  ('LOBSTER',     'lobster',               NULL, NULL, 1, 1, 'Secret — Lobster'),
+  ('GYOTRE',      'gyotre',                NULL, NULL, 1, 1, 'Secret — Gyotre');
 
 
 -- =============================================================================

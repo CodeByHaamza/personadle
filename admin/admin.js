@@ -17,7 +17,7 @@
 import { initAuth } from "../js/auth.js";
 import { showDivineGiftAnimation } from "../js/divine-gift.js";
 import { MODES as CANONICAL_MODES } from "../js/gameCore.js";
-import { api, toast, escHtml, pathPrefix } from "./admin-api.js";
+import { api, toast, escHtml, pathPrefix, renderLoading, renderError } from "./admin-api.js";
 import {
   badgesCatalog,
   wallpapersCatalog,
@@ -329,6 +329,9 @@ function switchTab(tab) {
       break;
     case "titles":
       renderTabTitles(d);
+      break;
+    case "expert":
+      renderTabExpert(d);
       break;
     case "stats":
       renderTabStats(d);
@@ -812,6 +815,126 @@ function toggleTitlePending(tid, unlockedIds, d) {
 
   updateFab();
   renderTabTitles(d);
+}
+
+// ── Tab: Expert ────────────────────────────────────────────────────────────
+//
+// Déblocage manuel des 6 Modes Expert (api/admin/user_expert.php, migration 035).
+//
+// Actions immédiates plutôt que la file `pendingGifts` des badges/walls/titres :
+// il n'y a que 6 lignes, et surtout la sémantique diffère — « retirer » ne retire
+// QUE le don, jamais un accès que le joueur a gagné en jouant. Mettre ça dans une
+// file de cadeaux laisserait croire qu'on peut refermer un mode mérité.
+
+/** Libellés FR des conditions — l'admin est mono-langue par choix (CLAUDE.md §5). */
+const EXPERT_COND_LABELS = {
+  mode_wins_under_attempts: "victoires en 4 essais ou moins",
+  mode_wins_single_day: "victoires sur une seule journée",
+  mode_consecutive_perfects: "victoires parfaites d'affilée",
+};
+
+const EXPERT_MODE_LABELS = {
+  classic: "Classique",
+  emoji: "Émoji",
+  silhouette: "Silhouette",
+  alloutattack: "All-Out Attack",
+  personae: "Personae",
+  music: "Musique",
+};
+
+async function renderTabExpert(d) {
+  const box = document.getElementById("user-detail-content");
+  renderLoading(box);
+
+  const res = await api.get(`/api/admin/users/${d.user.id}/expert`);
+  const status = res?.expert_status;
+  if (!status) {
+    renderError(box, res?.error || "Impossible de lire l'état des Modes Expert.");
+    return;
+  }
+
+  const rows = Object.entries(status)
+    .map(([mode, s]) => {
+      const label = EXPERT_MODE_LABELS[mode] || mode;
+      const cond = EXPERT_COND_LABELS[s.condition_type] || s.condition_type;
+
+      // Trois états bien distincts — un admin doit voir d'un coup d'œil ce qu'un
+      // clic va réellement faire, et « accordé » n'est pas « gagné ».
+      let badge, action;
+      if (s.earned) {
+        badge = '<span class="expert-state expert-earned">✅ Gagné en jouant</span>';
+        // Rien à retirer : l'accès ne vient pas d'un don.
+        action = '<span class="tab-note" style="margin:0">—</span>';
+      } else if (s.granted) {
+        badge = '<span class="expert-state expert-granted">🎁 Accordé</span>';
+        action = `<button class="btn-small btn-danger" data-expert-revoke="${mode}">Retirer le don</button>`;
+      } else {
+        badge = '<span class="expert-state expert-locked-state">🔒 Verrouillé</span>';
+        action = `<button class="btn-small" data-expert-grant="${mode}">Débloquer</button>`;
+      }
+
+      return `
+        <tr>
+          <td><strong>${escHtml(label)}</strong></td>
+          <td>${badge}</td>
+          <td>${s.current} / ${s.required} <span class="tab-note" style="margin:0">${escHtml(cond)}</span></td>
+          <td style="text-align:right">${action}</td>
+        </tr>`;
+    })
+    .join("");
+
+  box.innerHTML = `
+    <div class="tab-section">
+      <h3>Modes Expert</h3>
+      <div class="tab-note">
+        « Gagné en jouant » ne peut pas être retiré — l'accès a été mérité.<br>
+        Retirer un don ne referme le mode que si le joueur ne remplit pas la condition par ailleurs.
+      </div>
+      <table class="stats-table">
+        <thead>
+          <tr><th>Mode</th><th>État</th><th>Progression</th><th style="text-align:right">Action</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  box.querySelectorAll("[data-expert-grant]").forEach((btn) => {
+    btn.onclick = () => grantExpertMode(d, btn.dataset.expertGrant);
+  });
+  box.querySelectorAll("[data-expert-revoke]").forEach((btn) => {
+    btn.onclick = () => revokeExpertMode(d, btn.dataset.expertRevoke);
+  });
+}
+
+async function grantExpertMode(d, mode) {
+  const label = EXPERT_MODE_LABELS[mode] || mode;
+  const res = await api.post(`/api/admin/users/${d.user.id}/expert`, { mode });
+  if (res?.success) {
+    toast(res.already_had ? `${label} était déjà accordé.` : `${label} Expert débloqué.`, "success");
+    renderTabExpert(d);
+  } else {
+    toast(res?.error || "Échec du déblocage.", "error");
+  }
+}
+
+async function revokeExpertMode(d, mode) {
+  const label = EXPERT_MODE_LABELS[mode] || mode;
+  if (!confirm(`Retirer le déblocage offert de ${label} Expert ?`)) return;
+
+  const res = await api.delete(`/api/admin/users/${d.user.id}/expert/${mode}`);
+  if (res?.success) {
+    // Le joueur a pu remplir la condition entre-temps : le dire, sinon l'admin
+    // croit avoir refermé un mode qui reste ouvert.
+    toast(
+      res.still_unlocked
+        ? `Don retiré, mais ${label} reste débloqué : le joueur remplit la condition.`
+        : `Don retiré — ${label} Expert est de nouveau verrouillé.`,
+      res.still_unlocked ? "info" : "success"
+    );
+    renderTabExpert(d);
+  } else {
+    toast(res?.error || "Échec du retrait.", "error");
+  }
 }
 
 // ── Tab: Stats ─────────────────────────────────────────────────────────────

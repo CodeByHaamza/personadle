@@ -71,4 +71,18 @@ export const portraitsMapPersonae = {
   "Manaka Nagao": "Manaka",
   "Maya Amano": "Maya_A",
   "Joker": "JOKER",
+
+  "Shin Kanzato": "Shin_Kanzato",
+  "Jun Kanzato": "Jun_Kanzato",
+  "Ryo Kanzato": "Ryo_Kanzato",
+
+  "Naoya Todou": "Naoya",
+  "Maki Sonomura": "Maki",
+  "Masao Inaba": "Masao",
+  "Kei Nanjo": "Kei",
+  "Hidehiko Uesugi": "Hidehiko",
+  "Yukino Mayuzumi": "Yukino",
+  "Yuka Ayase": "Yuka",
+  "Reiji Kido": "Reiji",
+  "Eriko Kirishima": "Eriko",
 };

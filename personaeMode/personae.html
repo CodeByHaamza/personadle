@@ -4,8 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle - Personae Mode</title>
-    <link rel="stylesheet" href="../css/global.css?v=11" />
-    <link rel="stylesheet" href="./personae.css?v=3" />
+    <meta
+      name="description"
+      content="Guess the Persona user of the day from the Personas they wield. A new puzzle every day, from P1 to P5X."
+    />
+    <link rel="canonical" href="https://www.personadle.net/personaeMode/personae.html" />
+
+    <!-- Open Graph — cf. classiqueMode.html pour le raisonnement (domaine .NET,
+         un titre par mode, balises en dur car les robots n'exécutent pas le JS). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Personadle" />
+    <meta property="og:url" content="https://www.personadle.net/personaeMode/personae.html" />
+    <meta property="og:title" content="Personadle — Personae Mode" />
+    <meta
+      property="og:description"
+      content="Guess the Persona user of the day from the Personas they wield. A new puzzle every day, from P1 to P5X."
+    />
+    <meta property="og:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2769" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:image:alt" content="Personadle" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Personadle — Personae Mode" />
+    <meta
+      name="twitter:description"
+      content="Guess the Persona user of the day from the Personas they wield. A new puzzle every day, from P1 to P5X."
+    />
+    <meta name="twitter:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta name="theme-color" content="#e63946" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
+    <link rel="stylesheet" href="./personae.css?v=9" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -13,6 +43,7 @@
     <link rel="stylesheet" href="../css/challenge-result.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
     <link rel="stylesheet" href="../css/title-notification.css" />
+    <link rel="stylesheet" href="../css/expert-unlock.css?v=1" />
     <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
   </head>
 
@@ -51,6 +82,16 @@
         <span class="filter-toggle-arrow">▼</span>
       </button>
       <div class="filter-dropdown" id="filterDropdown" aria-hidden="true">
+        <!-- Persona 1 — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-p1 active"
+            data-opus="P1"
+            aria-label="Persona 1"
+          >
+            <img src="../img/logo_jeu/Persona_PSP_logo.png" alt="Persona 1" class="filter-logo" />
+          </button>
+        </div>
         <!-- Persona 2 — IS et EP toujours visibles (auto-expand) -->
         <div class="filter-group">
           <span class="filter-group-auto-label">Persona 2</span>
@@ -247,7 +288,30 @@
             />
           </button>
         </div>
+        <!-- Persona Trinity Souls — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-pts active"
+            data-opus="PTS"
+            aria-label="Persona Trinity Souls"
+          >
+            <img
+              src="../img/logo_jeu/Trinity_Souls_Logo.webp"
+              alt="Persona Trinity Souls"
+              class="filter-logo"
+            />
+          </button>
+        </div>
       </div>
+    </div>
+
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1).
+         Placée ici, juste sous le panneau de filtres, comme dans Classique et
+         Music — et non sous le bandeau titre, qui la reléguait en bas de page. -->
+    <div class="expert-toggle-zone">
+      <a href="personae.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
     </div>
 
     <!-- Zone principale -->
@@ -291,7 +355,6 @@
       </div>
     </div>
 
-    <!-- Modal règles -->
     <div id="rulesModal" class="modal" style="display: none">
       <div class="modal-content">
         <span class="close">&times;</span>
@@ -299,7 +362,40 @@
 
         <!-- Règles : câblées sur les clés JSON (modes.personae.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.personae.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.personae.expert_goal_text">
+            No picture at all. You get the myth behind the Persona, and you name its wielder.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.personae.expert_tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.personae.expert_tip_1">
+              The Persona's own name is hidden in the text. It comes back when the round ends.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_2">
+              Any wielder of that same figure is accepted — Orpheus counts for Makoto, Kotone
+              and Aigis alike.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_3">
+              Only Personas that actually have a written entry can be drawn.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_4">
+              The artwork is revealed when the round ends.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.personae.expert_tip_6">
+              Expert has its own daily Persona and its own stats. It will not carry your normal
+              Personae streak.
+            </li>
+          </ul>
+        </div>
+
+        <div id="rulesNormal">
           <strong data-i18n="modes.personae.goal">🎯 Goal:</strong><br />
           <span data-i18n="modes.personae.goal_intro"
             >A mysterious Persona appears on screen...</span
@@ -372,6 +468,15 @@
       <img id="personaImage" src="" alt="Persona" />
     </div>
 
+    <!-- Fiche de lore — Mode Expert. Remplace l'image, qui EST la réponse ici.
+         Le nom de la persona y est masqué jusqu'à la fin de la partie.
+         Volontairement SŒUR de .persona-box et non enfant : le cadre carré
+         « Velvet Room » n'encadre plus rien en Expert et est masqué en entier. -->
+    <div class="expert-lore-box" id="expertLoreBox" style="display: none">
+      <div class="expert-lore-header" data-i18n="ui.expert_lore">⚡ LORE</div>
+      <p class="expert-lore-text" id="expertLoreText" aria-live="polite"></p>
+    </div>
+
     <div id="victoryBox" class="victory-box" style="display: none">
       <img id="victoryImage" src="" alt="Persona image" />
       <div id="victoryText" class="victory-message"></div>
@@ -382,7 +487,7 @@
       class="giveup-block"
       style="display: flex; justify-content: center; margin-top: 20px; gap: 12px"
     >
-      <div class="link-wrapper" id="giveUpButton">
+      <div class="link-wrapper" id="giveUpButton" aria-disabled="true">
         <div class="img-wrapper">
           <img
             class="normal"
@@ -454,26 +559,32 @@
           </div>
         </div>
 
-        <!-- Input -->
-
-        <input
-          type="text"
-          id="textbar"
-          placeholder="Enter character name..."
-          data-i18n-placeholder="ui.input_placeholder"
-          aria-label="Guess character name"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          style="
-            padding: 10px;
-            border-radius: 6px;
-            border: 2px solid #aaa;
-            font-size: 16px;
-            min-width: 240px;
-          "
-        />
+        <!-- Input
+             Enveloppé dans un conteneur positionné, comme en mode Music : le JS
+             accroche la liste d'autocomplétion à `input.parentNode`, et celle-ci
+             se place en `top: 100%`. Sans ce wrapper, le parent était la rangée
+             flex entière — bouton Replay de 90 px compris — et le déroulant
+             tombait sous toute la rangée au lieu de sous le champ. -->
+        <div class="autocomplete-wrapper" style="position: relative">
+          <input
+            type="text"
+            id="textbar"
+            placeholder="Enter character name..."
+            data-i18n-placeholder="ui.input_placeholder"
+            aria-label="Guess character name"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            style="
+              padding: 10px;
+              border-radius: 6px;
+              border: 2px solid #aaa;
+              font-size: 16px;
+              min-width: 240px;
+            "
+          />
+        </div>
         <!-- Submit -->
         <div class="link-wrapper" id="guessButton">
           <div class="img-wrapper">
@@ -515,7 +626,7 @@
       import { initLang } from "../js/i18n.js";
       window.__i18nReady = initLang();
     </script>
-    <script type="module" src="./modePersonae.js?v=3"></script>
+    <script type="module" src="./modePersonae.js?v=7"></script>
 
     <!-- Dark Mode -->
     <div class="darkmode-toggle">
@@ -612,7 +723,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch((err) => {
+          navigator.serviceWorker.register("../sw.js", { updateViaCache: "none" }).catch((err) => {
             console.warn("[SW] Registration failed:", err);
           });
         });

@@ -4,8 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle - Music Mode</title>
-    <link rel="stylesheet" href="../css/global.css?v=11" />
-    <link rel="stylesheet" href="./music.css?v=4" />
+    <meta
+      name="description"
+      content="Guess the Persona track of the day by ear. A new song every day, from P1 to P5X."
+    />
+    <link rel="canonical" href="https://www.personadle.net/musicsMode/musics.html" />
+
+    <!-- Open Graph — cf. classiqueMode.html pour le raisonnement (domaine .NET,
+         un titre par mode, balises en dur car les robots n'exécutent pas le JS). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Personadle" />
+    <meta property="og:url" content="https://www.personadle.net/musicsMode/musics.html" />
+    <meta property="og:title" content="Personadle — Music Mode" />
+    <meta
+      property="og:description"
+      content="Guess the Persona track of the day by ear. A new song every day, from P1 to P5X."
+    />
+    <meta property="og:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2769" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:image:alt" content="Personadle" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Personadle — Music Mode" />
+    <meta
+      name="twitter:description"
+      content="Guess the Persona track of the day by ear. A new song every day, from P1 to P5X."
+    />
+    <meta name="twitter:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta name="theme-color" content="#e63946" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
+    <link rel="stylesheet" href="./music.css?v=6" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -13,6 +43,7 @@
     <link rel="stylesheet" href="../css/challenge-result.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
     <link rel="stylesheet" href="../css/title-notification.css" />
+    <link rel="stylesheet" href="../css/expert-unlock.css?v=1" />
     <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
   </head>
 
@@ -300,6 +331,16 @@
       </div>
     </div>
 
+    <!-- Bascule Normal ⇄ Expert.
+         Un <a> et non un <button> : le mode vit dans l'URL (?expert=1), donc le
+         lien doit être copiable, ouvrable dans un onglet, et suivre l'historique
+         du navigateur. Le libellé et la cible sont posés par applyExpertChrome(). -->
+    <div class="expert-toggle-zone">
+      <a href="musics.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <!-- Audio + Rules Button -->
     <div class="emoji-hint-zone" style="position: relative">
       <!-- Rules Button -->
@@ -347,9 +388,56 @@
         <span class="close">&times;</span>
         <h2 data-i18n="modes.music.rules_title">🎵 Music Mode — How to Play</h2>
 
+        <!-- Règles Expert — mécanique totalement différente, donc bloc distinct
+             plutôt que des phrases conditionnelles dans le bloc normal.
+             applyExpertChrome() (modeMusic.js) montre l'un ou l'autre. -->
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.music.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.music.expert_goal_intro">
+            No audio at all. You get the song's lyrics, one line at a time.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.music.tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.music.expert_tip_1">
+              You start with a single line. Every wrong guess reveals the next one.
+            </li>
+            <li data-i18n="modes.music.expert_tip_2">
+              Previous lines stay on screen — scroll back through them anytime.
+            </li>
+            <li data-i18n="modes.music.expert_tip_3">
+              The song title is hidden inside the lyrics. It comes back when the round ends.
+            </li>
+            <li data-i18n="modes.music.expert_tip_4">
+              Instrumental tracks are excluded — every song here has words.
+            </li>
+            <li data-i18n="modes.music.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.music.expert_tip_6">
+              Expert has its own daily song, and its own stats. It will not carry your
+              normal Music streak.
+            </li>
+          </ul>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.music.disclaimer">📝 Disclaimer:</strong>
+          <ul>
+            <li data-i18n="modes.music.disclaimer_1">
+              This is a fan project. All music rights belong to ATLUS and the original creators.
+            </li>
+            <li data-i18n="modes.music.disclaimer_2">
+              No commercial use. Please support the official soundtracks.
+            </li>
+          </ul>
+        </div>
+
         <!-- Règles : câblées sur les clés JSON (modes.music.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <div id="rulesNormal">
           <strong data-i18n="modes.music.goal">🎯 Objective:</strong><br />
           <span data-i18n="modes.music.goal_intro">A music clip will play...</span> <br />
           <span data-i18n="modes.music.goal_question">Your mission? Identify the song title!</span>
@@ -434,8 +522,36 @@
               <span id="p5Duration">--:--</span>
             </div>
           </div>
+
+          <!-- Volume — mêmes classes que la timeline, donc même thème couleur -->
+          <div class="p5-volume">
+            <button class="p5-mute-btn" id="p5MuteBtn" aria-label="Mute / Unmute">
+              <span id="p5MuteIcon">🔊</span>
+            </button>
+            <div
+              class="p5-progress p5-volume-track"
+              id="p5Volume"
+              role="slider"
+              tabindex="0"
+              aria-label="Volume"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="100"
+            >
+              <div class="p5-progress-fill" id="p5VolumeFill"></div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- Paroles — Mode Expert (remplace le lecteur audio) -->
+    <div class="expert-lyrics-wrapper" id="expertLyricsBox" style="display: none">
+      <div class="expert-lyrics-header">
+        <span class="expert-lyrics-label" data-i18n="ui.expert_lyrics">⚡ LYRICS</span>
+        <span class="expert-lyrics-count" id="expertLyricsCount">0 / 0</span>
+      </div>
+      <ol class="expert-lyrics-list" id="expertLyricsList" aria-live="polite"></ol>
     </div>
 
     <!-- Victory Display -->
@@ -449,7 +565,7 @@
       class="giveup-block"
       style="display: flex; justify-content: center; margin-top: 20px; gap: 12px"
     >
-      <div class="link-wrapper" id="giveUpButton">
+      <div class="link-wrapper" id="giveUpButton" aria-disabled="true">
         <div class="img-wrapper">
           <img
             class="normal"
@@ -573,7 +689,7 @@
       import { initLang } from "../js/i18n.js";
       window.__i18nReady = initLang();
     </script>
-    <script type="module" src="./modeMusic.js?v=3"></script>
+    <script type="module" src="./modeMusic.js?v=5"></script>
 
     <!-- Dark Mode -->
     <div class="darkmode-toggle">
@@ -675,7 +791,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch((err) => {
+          navigator.serviceWorker.register("../sw.js", { updateViaCache: "none" }).catch((err) => {
             console.warn("[SW] Registration failed:", err);
           });
         });

@@ -4,10 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle - All Out Attack</title>
+    <meta
+      name="description"
+      content="Guess the Persona character of the day from their All-Out Attack finisher. A new puzzle every day, from P1 to P5X."
+    />
+    <link rel="canonical" href="https://www.personadle.net/allOutAttackMode/allOutAttack.html" />
+
+    <!-- Open Graph — cf. classiqueMode.html pour le raisonnement (domaine .NET,
+         un titre par mode, balises en dur car les robots n'exécutent pas le JS). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Personadle" />
+    <meta property="og:url" content="https://www.personadle.net/allOutAttackMode/allOutAttack.html" />
+    <meta property="og:title" content="Personadle — All-Out Attack Mode" />
+    <meta
+      property="og:description"
+      content="Guess the Persona character of the day from their All-Out Attack finisher. A new puzzle every day, from P1 to P5X."
+    />
+    <meta property="og:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2769" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:image:alt" content="Personadle" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Personadle — All-Out Attack Mode" />
+    <meta
+      name="twitter:description"
+      content="Guess the Persona character of the day from their All-Out Attack finisher. A new puzzle every day, from P1 to P5X."
+    />
+    <meta name="twitter:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta name="theme-color" content="#e63946" />
 
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="../css/global.css?v=11" />
-    <link rel="stylesheet" href="./allOutAttack.css?v=3" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
+    <link rel="stylesheet" href="./allOutAttack.css?v=4" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -15,6 +45,7 @@
     <link rel="stylesheet" href="../css/challenge-result.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
     <link rel="stylesheet" href="../css/title-notification.css" />
+    <link rel="stylesheet" href="../css/expert-unlock.css?v=1" />
     <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
   </head>
 
@@ -155,6 +186,16 @@
       </div>
     </div>
 
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1), le
+         lien doit rester copiable et suivre l'historique du navigateur.
+         Placée ici, juste sous le panneau de filtres, comme dans les 4 autres
+         modes Expert — et non sous le bandeau titre. -->
+    <div class="expert-toggle-zone">
+      <a href="allOutAttack.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <!-- Zone principale d'affichage des emojis et du titre -->
     <div class="emoji-hint-zone" style="position: relative">
       <!-- Bouton pour afficher les règles (en haut à droite) -->
@@ -203,7 +244,38 @@
 
         <!-- Règles : câblées sur les clés JSON (modes.alloutattack.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <!-- Règles Expert — mécanique sans rapport avec le mode normal, donc bloc
+             distinct. setupExpertToggle() (js/gameCore.js) montre l'un ou l'autre. -->
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.alloutattack.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.alloutattack.expert_goal_text">
+            The blur never clears, and the colour is gone.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.alloutattack.gameplay">💡 Gameplay:</strong>
+          <ul>
+            <li data-i18n="modes.alloutattack.expert_tip_1">
+              The image stays at maximum blur for the whole round. Wrong guesses reveal nothing.
+            </li>
+            <li data-i18n="modes.alloutattack.expert_tip_2">
+              It is also in black and white — hair and outfit colours will not help you.
+            </li>
+            <li data-i18n="modes.alloutattack.expert_tip_3">
+              Silhouette, pose and composition are what is left. That is the whole game.
+            </li>
+            <li data-i18n="modes.alloutattack.expert_tip_4">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.alloutattack.expert_tip_5">
+              Expert has its own daily character and its own stats. It will not carry your normal
+              All-Out Attack streak.
+            </li>
+          </ul>
+        </div>
+
+        <div id="rulesNormal">
           <strong data-i18n="modes.alloutattack.goal">🎯 Goal:</strong><br />
           <span data-i18n="modes.alloutattack.goal_text"
             >Guess the Persona character based on their All-Out Attack animation.</span
@@ -260,7 +332,7 @@
       class="giveup-block"
       style="display: flex; justify-content: center; margin-top: 20px; gap: 12px"
     >
-      <div class="link-wrapper" id="giveUpButton">
+      <div class="link-wrapper" id="giveUpButton" aria-disabled="true">
         <div class="img-wrapper">
           <img
             class="normal"
@@ -393,7 +465,7 @@
       import { initLang } from "../js/i18n.js";
       window.__i18nReady = initLang();
     </script>
-    <script type="module" src="./modeAllOutAttack.js?v=4"></script>
+    <script type="module" src="./modeAllOutAttack.js?v=5"></script>
 
     <!-- Bouton Mode Sombre -->
     <div class="darkmode-toggle">
@@ -493,7 +565,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch((err) => {
+          navigator.serviceWorker.register("../sw.js", { updateViaCache: "none" }).catch((err) => {
             console.warn("[SW] Registration failed:", err);
           });
         });

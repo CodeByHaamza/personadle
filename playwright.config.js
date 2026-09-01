@@ -12,12 +12,19 @@ import { defineConfig } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests-e2e",
+  globalSetup: "./tests-e2e/global-setup.js",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8080",
+    // Service worker bloqué : après un bump de CACHE_VERSION il s'active et les
+    // pages se rechargent seules (écouteur SW_UPDATED), en plein milieu d'un test.
+    // Les assertions tombaient alors sur une page en pleine navigation, et l'échec
+    // se déplaçait d'un test à l'autre à chaque exécution. Ce n'est pas le SW qu'on
+    // teste ici — le comportement hors-ligne mériterait sa propre suite dédiée.
+    serviceWorkers: "block",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },

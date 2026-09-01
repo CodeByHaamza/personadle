@@ -4,10 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle - Classic</title>
+    <meta
+      name="description"
+      content="Guess the Persona character of the day from clues: game, arcana, gender, weapon and more. A new character every day, from P1 to P5X."
+    />
+    <link rel="canonical" href="https://www.personadle.net/classiqueMode/classiqueMode.html" />
+
+    <!-- Open Graph — aperçu du lien partagé (Discord, X, WhatsApp, Slack…).
+         ⚠️ Le domaine est personadle.NET : le .com ne résout pas. Voir index.html
+         pour le détail de ce piège.
+         Chaque mode porte son PROPRE titre et sa propre description : un lien vers
+         un mode précis doit annoncer ce mode, pas la page d'accueil. L'image reste
+         le logo commun, faute de bannière par mode. Ces balises doivent rester en
+         dur dans le HTML — les robots d'aperçu n'exécutent pas le JS. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Personadle" />
+    <meta property="og:url" content="https://www.personadle.net/classiqueMode/classiqueMode.html" />
+    <meta property="og:title" content="Personadle — Classic Mode" />
+    <meta
+      property="og:description"
+      content="Guess the Persona character of the day from clues: game, arcana, gender, weapon and more. A new character every day, from P1 to P5X."
+    />
+    <meta property="og:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2769" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:image:alt" content="Personadle" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Personadle — Classic Mode" />
+    <meta
+      name="twitter:description"
+      content="Guess the Persona character of the day from clues: game, arcana, gender, weapon and more. A new character every day, from P1 to P5X."
+    />
+    <meta name="twitter:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta name="theme-color" content="#e63946" />
 
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="../css/global.css?v=11" />
-    <link rel="stylesheet" href="./classique.css?v=3" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
+    <link rel="stylesheet" href="./classique.css?v=4" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/calling-card.css?v=2" />
@@ -15,6 +50,7 @@
     <link rel="stylesheet" href="../css/challenge-result.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
     <link rel="stylesheet" href="../css/title-notification.css" />
+    <link rel="stylesheet" href="../css/expert-unlock.css?v=1" />
     <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
   </head>
 
@@ -270,6 +306,20 @@
             />
           </button>
         </div>
+        <!-- Persona Trinity Souls — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-pts active"
+            data-opus="PTS"
+            aria-label="Persona Trinity Souls"
+          >
+            <img
+              src="../img/logo_jeu/Trinity_Souls_Logo.webp"
+              alt="Persona Trinity Souls"
+              class="filter-logo"
+            />
+          </button>
+        </div>
         <!-- Persona Q — clic logo → sous-opus déroulants -->
         <div class="filter-group">
           <button
@@ -306,14 +356,58 @@
 
     <!-- Fenêtre modale affichant les règles du mode classique -->
     <!-- Fenêtre modale affichant les règles du mode classique -->
+    <!-- Bascule Normal ⇄ Expert. Un <a> et non un <button> : le mode vit dans
+         l'URL (?expert=1), donc le lien doit être copiable, ouvrable dans un onglet
+         et suivre l'historique. Libellé et cible posés par setupExpertToggle(). -->
+    <div class="expert-toggle-zone">
+      <a href="classiqueMode.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
+    </div>
+
     <div id="rulesModal" class="modal" style="display: none">
       <div class="modal-content">
         <span class="close">&times;</span>
         <h2 data-i18n="modes.classic.rules_title">📋 Classic Mode Rules</h2>
 
+        <!-- Règles Expert — mécanique sans rapport avec le mode normal, donc bloc
+             distinct plutôt que des phrases conditionnelles. setupExpertToggle()
+             (js/gameCore.js) montre l'un ou l'autre. -->
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.classic.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.classic.expert_goal_text">
+            One quote. No categories, no colours, no hints — just the line and the name.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.classic.tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.classic.expert_tip_1">
+              The quote is shown from the very first guess. It is the only clue you get.
+            </li>
+            <li data-i18n="modes.classic.expert_tip_2">
+              Guesses are only right or wrong. Nothing is compared, nothing turns yellow.
+            </li>
+            <li data-i18n="modes.classic.expert_tip_3">
+              If the character says their own name, it is hidden. It comes back when the round ends.
+            </li>
+            <li data-i18n="modes.classic.expert_tip_4">
+              Only characters who actually have a quote can be drawn.
+            </li>
+            <li data-i18n="modes.classic.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.classic.expert_tip_6">
+              Expert has its own daily character and its own stats. It will not carry your normal
+              Classic streak.
+            </li>
+          </ul>
+        </div>
+
         <!-- Règles : câblées sur les clés JSON (modes.classic.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <div id="rulesNormal">
           <strong data-i18n="modes.classic.goal">🎯 Goal:</strong><br />
           <span data-i18n="modes.classic.goal_text"
             >Guess the Persona character of the day using deduction and clues 🧩🕵️.</span
@@ -497,7 +591,7 @@
 
       <!-- Bloc pour abandonner et révéler la réponse -->
       <div class="giveup-block">
-        <div class="link-wrapper" id="giveUpButton">
+        <div class="link-wrapper" id="giveUpButton" aria-disabled="true">
           <div class="img-wrapper">
             <img
               class="normal"
@@ -621,6 +715,11 @@
     </section>
 
     <!-- Zone d'affichage des résultats des tentatives -->
+    <!-- Historique des erreurs — Mode Expert uniquement. Même liste de vignettes
+         que le mode Émoji (showWrongMini), plutôt qu'un composant réinventé : la
+         grille de comparaison n'a pas de sens sans attributs à comparer. -->
+    <div id="wrongGuessList"></div>
+
     <div id="output" style="margin-top: 30px"></div>
     <div id="victoryBox" class="victory-box" style="display: none">
       <img id="victoryPortrait" src="" alt="Portrait" />
@@ -633,7 +732,7 @@
       import { initLang } from "../js/i18n.js";
       window.__i18nReady = initLang();
     </script>
-    <script type="module" src="./modeClassique.js?v=3"></script>
+    <script type="module" src="./modeClassique.js?v=5"></script>
 
     <!-- Bouton Mode Sombre -->
     <div class="darkmode-toggle">
@@ -732,7 +831,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch((err) => {
+          navigator.serviceWorker.register("../sw.js", { updateViaCache: "none" }).catch((err) => {
             console.warn("[SW] Registration failed:", err);
           });
         });

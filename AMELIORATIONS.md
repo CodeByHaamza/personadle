@@ -253,6 +253,38 @@ Le backend est déjà bien fait (PDO préparé, bcrypt, CORS whitelist, sessions
   > : endpoints authentifiés (login/register restent SameSite-Lax-only, décision documentée).
 - Logs d'erreur PHP : vérifier qu'aucune stack trace ne fuit en prod (`display_errors=Off`).
 
+### Audit de pré-release 2.1 (2026-09-01)
+
+Passé sur la surface ajoutée par la 2.1 (4 nouveaux endpoints PHP, 7 modifiés, le diff front).
+Psalm `--taint-analysis` : **aucune erreur**. Rien de bloquant trouvé. Vérifié un par un :
+
+- Gardes d'auth et `RewriteRule` présentes sur les 2 nouveaux endpoints (`api/user/expert_status.php`,
+  `api/admin/user_expert.php`) — le piège documenté en CLAUDE.md §7 n'a pas été rejoué.
+- `api/admin/user_expert.php` : `requireAdmin()` en tête (auth → vérification `is_admin` en base →
+  403 → rate limit partagé), `userId` casté et son existence vérifiée, mode validé contre la source
+  unique plutôt qu'une liste recopiée, actions journalisées, et un retrait ne peut pas fermer un
+  accès **mérité**.
+- Classement : `$mode`/`$period`/`$metric` en liste blanche `in_array(..., true)` ; `$limit`/`$offset`
+  castés `int` et bornés **avant** leur interpolation dans `LIMIT`/`OFFSET` ; `getFriendIds()` fait
+  `array_map('intval')` avant l'`IN (...)`. Interpolations sûres.
+- Sessions Expert : `403` si le mode n'est pas débloqué (`api/sessions.php`).
+- Rate limits en place : messages 20/15 min, sessions 90/15 min, admin 300/5 min.
+- Front : aucun XSS dans le diff 2.1 — le pseudo passe par `textContent`, et les `innerHTML`
+  n'interpolent que des nombres et des chaînes i18n internes.
+
+**Deux points ouverts, hérités et assumés — pas des régressions 2.1 :**
+
+- 🟠 **L'anti-triche serveur est en phase 1 : détection seulement.** `api/sessions.php` recalcule la
+  cible attendue et **logue** l'écart au lieu de rejeter la session, le temps de confirmer l'absence
+  de faux positifs en prod. Conséquence : le classement n'est pas encore *protégé*, seulement
+  *observable*. **Action après le déploiement 2.1** : surveiller les logs `anti_cheat` quelques
+  jours, puis basculer en rejet.
+- 🟠 **`condition_type = 'manual'` renvoie toujours `true`** dans `personadle_verify_condition()`.
+  Un `POST /api/badges/unlock` forgé suffit donc à décrocher n'importe lequel des ~46 badges à flag
+  narratif. Fermer ce trou demanderait de journaliser la cible de chaque partie côté serveur. Le
+  choix est documenté dans les migrations 033 et 038 — et surtout : ne **pas** utiliser `'manual'`
+  pour un badge dont la condition est réellement recalculable.
+
 ---
 
 ## 8. 🟡 CI/CD & qualité de code

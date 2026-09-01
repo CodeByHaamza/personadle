@@ -16,7 +16,7 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="../css/global.css?v=11" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
     <link rel="stylesheet" href="../css/langSelector.css?v=4" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
     <link rel="stylesheet" href="../css/faq.css?v=1" />
@@ -666,15 +666,12 @@
           <p data-i18n="faq.a17">We don&#x27;t have high-quality Golden-style All-Out Attack artwork for Persona 4 yet. They&#x27;ll be added when Persona 4 Revival arrives.</p>
         </div>
       </div>
-      <div class="faq-item">
-        <div class="faq-question">
-          <span data-i18n="faq.q18">Why can&#x27;t I find Persona 1 Personas in Personae mode?</span>
-          <span class="faq-arrow" aria-hidden="true">▶</span>
-        </div>
-        <div class="faq-answer">
-          <p data-i18n="faq.a18">We don&#x27;t have enough good-quality artwork for Persona 1&#x27;s Personas yet to include them fairly.</p>
-        </div>
-      </div>
+      <!-- q18/a18 (« pourquoi pas de personas de Persona 1 en mode Personae ? ») retirée
+           le 2026-08-25 : les 20 personas P1 ont été ajoutées au dataset (normal + Expert).
+           La question n'a plus d'objet, et la réponse était devenue fausse.
+           Les questions suivantes gardent leur numéro : chaque bloc référence sa propre
+           clé i18n, un trou dans la numérotation n'a aucun effet — renuméroter aurait
+           touché 16 blocs dans 6 langues pour rien. -->
       <div class="faq-item">
         <div class="faq-question">
           <span data-i18n="faq.q19">Will you add other Atlus games like Metaphor or Shin Megami Tensei?</span>
@@ -1224,7 +1221,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch(() => {});
+          navigator.serviceWorker.register("../sw.js", { updateViaCache: "none" }).catch(() => {});
         });
       }
     </script>

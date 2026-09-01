@@ -29,6 +29,19 @@
  *   emoji_p2_wins        → victoires en mode emoji (alias de mode_wins emoji) —
  *                          RÉELLEMENT UTILISÉ par le titre `maya_always_be_positive`
  *                          (bdd_mysql.sql), ne pas supprimer sans migrer cette ligne.
+ *   mode_wins_under_attempts → condition_value victoires dans condition_mode en ≤4 essais chacune
+ *                          (porte du Mode Expert Classique/Silhouette)
+ *   mode_wins_single_day → condition_value victoires dans condition_mode sur UNE journée — la
+ *                          meilleure journée du joueur, pas la journée en cours (porte Expert Émoji)
+ *   mode_consecutive_perfects → série EN COURS de condition_value victoires parfaites (1 essai)
+ *                          dans condition_mode, comptée en parties et non en jours
+ *                          (porte Expert AOA/Personae/Music)
+ *   expert_wins_total    → condition_value victoires EN EXPERT, tous modes confondus
+ *                          (titre `shadows_converge`). À ne pas confondre avec
+ *                          `wins_total`, qui lit user_stats — table que l'Expert
+ *                          n'alimente pas.
+ *   expert_modes_mastered → condition_value victoires EN EXPERT dans chacun des 6 modes
+ *                          (badge `denial_of_self`)
  *   joker_profile        → condition manuelle — retourne true (vérifié en aval par admin)
  *   manual               → condition manuelle/flag client/redeem — retourne true
  *   NULL ou inconnu      → true (safe fallback)
@@ -64,6 +77,8 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
         'wins_total', 'mode_wins', 'classic_p1_wins', 'emoji_p2_wins', 'mode_games',
         'games_total', 'streak_record', 'perfect_wins', 'unique_days', 'giveups_total',
         'friends_count', 'badges_count', 'weekly_clean_modes',
+        'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
+        'expert_modes_mastered', 'expert_wins_total',
     ];
     if (in_array($condType, $valueRequiredTypes, true) && $condValue === null) {
         return false;
@@ -165,6 +180,35 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             return (int) $s->fetchColumn() >= $val;
         }
 
+        // Les 3 types ci-dessous délèguent à des fonctions de comptage réutilisables :
+        // l'écran de déblocage du Mode Expert affiche la PROGRESSION (« 7 / 10 »), pas
+        // seulement un booléen — cf. api/lib/expert_unlocks.php.
+        case 'mode_wins_under_attempts':
+            if (!$condMode) return false;
+            return personadle_count_wins_under_attempts($pdo, $userId, $condMode) >= $val;
+
+        case 'mode_wins_single_day':
+            if (!$condMode) return false;
+            return personadle_count_best_single_day_wins($pdo, $userId, $condMode) >= $val;
+
+        case 'mode_consecutive_perfects':
+            if (!$condMode) return false;
+            return personadle_count_consecutive_perfects($pdo, $userId, $condMode) >= $val;
+
+        case 'expert_wins_total':
+            // Victoires EN EXPERT, tous modes confondus (titre `shadows_converge`).
+            // Surtout pas `wins_total` : celui-ci lit `user_stats`, que le Mode
+            // Expert n'alimente pas (cf. api/lib/game_session.php) — il compterait
+            // donc uniquement les parties normales.
+            return personadle_count_expert_wins($pdo, $userId) >= $val;
+
+        case 'expert_modes_mastered':
+            // condition_value victoires EN EXPERT dans chacun des 6 modes (badge Denial of Self).
+            // Pas besoin de vérifier en plus que les 6 gates sont franchis : le serveur
+            // (api/sessions.php) refuse d'enregistrer une session Expert tant que le mode
+            // n'est pas débloqué, donc une victoire Expert prouve le déblocage.
+            return personadle_count_mastered_expert_modes($pdo, $userId, $val) >= 6;
+
         // Conditions manuelles — flags/narratif client, redeem via code événement,
         // ou vérifiées par un autre endpoint (ex: social-links pour true_confidant,
         // streak-recovery pour reborn_phoenix). Accordées sur déclaration/ailleurs,
@@ -198,6 +242,8 @@ function personadle_known_condition_types(): array
         'perfect_wins', 'unique_days', 'giveups_total', 'friends_count', 'badges_count',
         'social_link_min_rank', 'all_modes_won', 'weekly_clean_modes',
         'classic_p1_wins', 'emoji_p2_wins', 'joker_profile', 'manual',
+        'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
+        'expert_modes_mastered', 'expert_wins_total',
     ];
 }
 
@@ -228,5 +274,121 @@ function personadle_user_stat_for_mode(PDO $pdo, int $userId, string $mode, stri
     }
     $s = $pdo->prepare("SELECT COALESCE($column, 0) FROM user_stats WHERE user_id = ? AND mode = ?");
     $s->execute([$userId, $mode]);
+    return (int) $s->fetchColumn();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Compteurs du déblocage du Mode Expert
+//
+// Ils lisent `game_sessions` et non `user_stats` : cette dernière n'a qu'une ligne
+// par (user_id, mode) et ne distingue ni le nombre d'essais, ni la date, ni Expert
+// vs normal — les trois dimensions dont ces conditions ont besoin.
+//
+// Toutes excluent `is_expert = 1` : la condition mesure la maîtrise du mode NORMAL,
+// c'est ce qui ouvre la porte de l'Expert.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Seuil « victoire rapide » : gagner en 4 essais ou moins (= en moins de 5). */
+const PERSONADLE_FAST_WIN_MAX_ATTEMPTS = 4;
+
+/**
+ * Nombre de victoires obtenues en <= PERSONADLE_FAST_WIN_MAX_ATTEMPTS essais.
+ * Cumulatif sur toute la vie du compte (un déblocage ne se reperd jamais).
+ */
+function personadle_count_wins_under_attempts(PDO $pdo, int $userId, string $mode): int
+{
+    $s = $pdo->prepare(
+        'SELECT COUNT(*) FROM game_sessions
+         WHERE user_id = ? AND mode = ? AND result = ? AND is_expert = 0 AND attempts <= ?'
+    );
+    $s->execute([$userId, $mode, 'win', PERSONADLE_FAST_WIN_MAX_ATTEMPTS]);
+    return (int) $s->fetchColumn();
+}
+
+/**
+ * MEILLEURE journée du joueur : nombre de victoires du jour le plus prolifique.
+ *
+ * On regarde le maximum sur TOUTES les journées, pas la journée en cours — sinon
+ * le joueur qui remplit la condition aujourd'hui la reperdrait demain à minuit,
+ * alors qu'un déblocage doit être définitif.
+ */
+function personadle_count_best_single_day_wins(PDO $pdo, int $userId, string $mode): int
+{
+    $s = $pdo->prepare(
+        'SELECT COALESCE(MAX(wins_that_day), 0) FROM (
+             SELECT COUNT(*) AS wins_that_day
+             FROM game_sessions
+             WHERE user_id = ? AND mode = ? AND result = ? AND is_expert = 0
+             GROUP BY played_date
+         ) AS per_day'
+    );
+    $s->execute([$userId, $mode, 'win']);
+    return (int) $s->fetchColumn();
+}
+
+/**
+ * Longueur de la série EN COURS de victoires parfaites (1 seul essai).
+ *
+ * « Consécutif » se compte en parties, pas en jours : les journées sautées ne
+ * cassent rien, seule une partie non parfaite (giveup, ou victoire en 2+ essais)
+ * remet le compteur à zéro.
+ *
+ * Le LIMIT borne le coût de la requête : la plus haute exigence est de 15, donc
+ * 200 lignes couvrent très largement le besoin. Une série plus longue est
+ * simplement affichée saturée à 200 dans la progression — sans effet sur le
+ * déblocage lui-même.
+ */
+function personadle_count_consecutive_perfects(PDO $pdo, int $userId, string $mode): int
+{
+    $s = $pdo->prepare(
+        'SELECT attempts, result FROM game_sessions
+         WHERE user_id = ? AND mode = ? AND is_expert = 0
+         ORDER BY played_date DESC, id DESC
+         LIMIT 200'
+    );
+    $s->execute([$userId, $mode]);
+
+    $streak = 0;
+    foreach ($s->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        if ((int) $row['attempts'] === 1 && $row['result'] === 'win') {
+            $streak++;
+        } else {
+            break; // série cassée
+        }
+    }
+    return $streak;
+}
+
+/**
+ * Total de victoires EN EXPERT, tous modes confondus. Sert au titre
+ * `shadows_converge`. Lu depuis `game_sessions` et non `user_stats`, que le Mode
+ * Expert n'alimente pas.
+ */
+function personadle_count_expert_wins(PDO $pdo, int $userId): int
+{
+    $s = $pdo->prepare(
+        'SELECT COUNT(*) FROM game_sessions
+         WHERE user_id = ? AND is_expert = 1 AND result = ?'
+    );
+    $s->execute([$userId, 'win']);
+    return (int) $s->fetchColumn();
+}
+
+/**
+ * Nombre de modes (sur 6) où le joueur a au moins $winsPerMode victoires EN EXPERT.
+ * Sert au badge `denial_of_self`.
+ */
+function personadle_count_mastered_expert_modes(PDO $pdo, int $userId, int $winsPerMode): int
+{
+    if ($winsPerMode < 1) return 0;
+    $s = $pdo->prepare(
+        'SELECT COUNT(*) FROM (
+             SELECT mode FROM game_sessions
+             WHERE user_id = ? AND is_expert = 1 AND result = ?
+             GROUP BY mode
+             HAVING COUNT(*) >= ?
+         ) AS mastered'
+    );
+    $s->execute([$userId, 'win', $winsPerMode]);
     return (int) $s->fetchColumn();
 }

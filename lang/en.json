@@ -31,7 +31,19 @@
     "admin_gift_received": "🎁 Gift received!",
     "tap_continue": "Tap to continue",
     "close": "Close",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "expert_enter": "⚡ Expert mode",
+    "expert_leave": "← Normal mode",
+    "expert_lyrics": "⚡ LYRICS",
+    "expert_locked": "🔒 Expert mode",
+    "expert_cond_wins_under_attempts": "Win {{required}} games in 4 attempts or fewer",
+    "expert_cond_wins_single_day": "Win {{required}} games in a single day",
+    "expert_cond_consecutive_perfects": "Win {{required}} games in a row on the first try",
+    "expert_cond_signin": "Sign in to unlock Expert mode — your progress follows your account.",
+    "expert_cond_unknown": "Reconnect to check your progress.",
+    "expert_locked_title": "Expert mode locked",
+    "expert_unlocked_title": "Expert mode unlocked!",
+    "expert_unlocked_hint": "The ⚡ button is yours now."
   },
   "modes": {
     "classic": {
@@ -83,7 +95,15 @@
       "tooltip_persona": "The specific Persona linked to the character — or their Shadow form.",
       "tooltip_arcana": "Their Tarot Arcana, which defines their symbolic and narrative role.",
       "correct": "✅ Correct! It was {{name}}!",
-      "giveup_reveal": "❌ The answer was {{name}}"
+      "giveup_reveal": "❌ The answer was {{name}}",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "One quote. No categories, no colours, no hints — just the line and the name.",
+      "expert_tip_1": "The quote is shown from the very first guess. It is the only clue you get.",
+      "expert_tip_2": "Guesses are only right or wrong. Nothing is compared, nothing turns yellow.",
+      "expert_tip_3": "If the character says their own name, it is hidden. It comes back when the round ends.",
+      "expert_tip_4": "Only characters who actually have a quote can be drawn.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily character and its own stats. It will not carry your normal Classic streak."
     },
     "emoji": {
       "name": "Emoji",
@@ -110,7 +130,16 @@
       "closing": "✨ Let your intuition guide you... and read between the emojis 🧠📲",
       "not_in_database": "\"{{name}}\" is not in the database.",
       "correct": "✅ Correct! It was {{name}}!",
-      "giveup_reveal": "You gave up! The answer was: {{name}}"
+      "giveup_reveal": "You gave up! The answer was: {{name}}",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "Same emojis, revealed the same way — except one of them is lying.",
+      "expert_tips": "💡 Tips:",
+      "expert_tip_1": "Exactly one emoji is a decoy, borrowed from another character.",
+      "expert_tip_2": "It can sit anywhere in the sequence — first, middle or last.",
+      "expert_tip_3": "It never changes during the round, and reloading will not reroll it.",
+      "expert_tip_4": "The real emojis are shown when the round ends.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily character and its own stats. It will not carry your normal Emoji streak."
     },
     "silhouette": {
       "name": "Silhouette",
@@ -135,7 +164,18 @@
       "games_list": "Characters from Persona 1, 2 (IS & EP), 3, 4, 5 and P5: The Phantom X including spin-offs.",
       "closing": "🧠 Observe the shadows, trust your instincts, and become the ultimate silhouette detective!",
       "correct": "🎉 You found {{name}}!",
-      "giveup_reveal": "❌ The answer was {{name}}"
+      "giveup_reveal": "❌ The answer was {{name}}",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "The silhouette stays hidden. You only ever see it in flashes — and you decide when.",
+      "expert_tips": "💡 Tips:",
+      "expert_tip_1": "Press FLASH to show the silhouette for a fraction of a second.",
+      "expert_tip_2": "You start with one flash, and every wrong guess earns you another one.",
+      "expert_tip_3": "Each wrong guess also makes every following flash last longer.",
+      "expert_tip_4": "No zoom here: the whole silhouette is shown — for as long as it lasts.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily character and its own stats. It will not carry your normal Silhouette streak.",
+      "expert_flash": "⚡ FLASH",
+      "loading": "Loading the silhouette…"
     },
     "alloutattack": {
       "name": "All-Out Attack",
@@ -157,7 +197,14 @@
       "giveup_reveal": "❌ You gave up! The answer was: {{name}}",
       "no_characters": "No characters available with current filters.",
       "prev_mode": "← Emoji Mode",
-      "next_mode": "Silhouette Mode →"
+      "next_mode": "Silhouette Mode →",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "The blur never clears, and the colour is gone.",
+      "expert_tip_1": "The image stays at maximum blur for the whole round. Wrong guesses reveal nothing.",
+      "expert_tip_2": "It is also in black and white — hair and outfit colours will not help you.",
+      "expert_tip_3": "Silhouette, pose and composition are what is left. That is the whole game.",
+      "expert_tip_4": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_5": "Expert has its own daily character and its own stats. It will not carry your normal All-Out Attack streak."
     },
     "personae": {
       "name": "Personae",
@@ -184,7 +231,16 @@
       "correct": "✅ Good guess! {{name}}'s Persona was {{persona}}.",
       "giveup_reveal": "❌ Too bad! {{name}}'s Persona was {{persona}}.",
       "prev_mode": "← Silhouette Mode",
-      "next_mode": "Music Mode →"
+      "next_mode": "Music Mode →",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_text": "No picture at all. You get the myth behind the Persona, and you name its wielder.",
+      "expert_tips": "💡 Tips:",
+      "expert_tip_1": "The Persona's own name is hidden in the text. It comes back when the round ends.",
+      "expert_tip_2": "Any wielder of that same figure is accepted — Orpheus counts for Makoto, Kotone and Aigis alike.",
+      "expert_tip_3": "Only Personas that actually have a written entry can be drawn.",
+      "expert_tip_4": "The artwork is revealed when the round ends.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily Persona and its own stats. It will not carry your normal Personae streak."
     },
     "music": {
       "name": "Music",
@@ -212,7 +268,15 @@
       "giveup_reveal": "💡 It was: {{title}}",
       "vocal_label": "🧑‍🎤 Vocal: {{name}}",
       "listen_link": "🔗 Listen here",
-      "prev_mode": "← Personae Mode"
+      "prev_mode": "← Personae Mode",
+      "expert_goal": "⚡ Expert Mode:",
+      "expert_goal_intro": "No audio at all. You get the song's lyrics, one line at a time.",
+      "expert_tip_1": "You start with a single line. Every wrong guess reveals the next one.",
+      "expert_tip_2": "Previous lines stay on screen — scroll back through them anytime.",
+      "expert_tip_3": "The song title is hidden inside the lyrics. It comes back when the round ends.",
+      "expert_tip_4": "Instrumental tracks are excluded — every song here has words.",
+      "expert_tip_5": "You get 5 tries before the Give Up button becomes available.",
+      "expert_tip_6": "Expert has its own daily song, and its own stats. It will not carry your normal Music streak."
     }
   },
   "game": {
@@ -316,7 +380,10 @@
     "delete_account_confirm_btn": "Delete permanently",
     "delete_account_success": "Your account has been deactivated. You'll be logged out now.",
     "delete_account_error": "Something went wrong. Please try again or contact us.",
-    "delete_account_login_required": "Log in to delete your account."
+    "delete_account_login_required": "Log in to delete your account.",
+    "expert_title": "⚡ Expert Mode",
+    "expert_cols": "Won / Played · Rate · Best · Streak",
+    "expert_best_hint": "Fewest guesses in a win"
   },
   "badges": {
     "notification_title": "🎖️ Badge Unlocked!",
@@ -465,6 +532,11 @@
       "condition": "Redeem code 'SPORT' between April 6th and May 1st, 2025",
       "description": "Like the sports teams of Gekkoukan, Yasogami, and Shujin, you've answered the call on International Sports Day!"
     },
+    "gyotre": {
+      "name": "Gyotre's Love",
+      "condition": "???",
+      "description": "A secret only the real ones know."
+    },
     "arati": {
       "name": "Arati's Blessing",
       "condition": "???",
@@ -544,6 +616,11 @@
       "name": "Gentle Illusion",
       "condition": "Give up when the target is 'Our Light' in Music mode",
       "description": "Why struggle to reach the light when happiness can be given to you? You laid down your rebellious soul to embrace a painless, perfect dream."
+    },
+    "false_spring": {
+      "name": "A Gentle Reprieve",
+      "condition": "Refuse the sacrifice and await the end at Ryoji's side",
+      "description": "Sitting beside him on the rooftop, you refuse to close your eyes. A beautiful, cruel peace, waiting for an inescapable end where spring will never come."
     },
     "for_real": {
       "name": "For Real",
@@ -634,7 +711,17 @@
       "name": "The Priestess's Audit",
       "condition": "???",
       "description": "Channeling the meticulous wisdom of the High Priestess, you've documented the anomalies. Awarded to those who bear the heavy burden of paperwork to keep the system's chaos in check."
-    }
+    },
+    "denial_of_self": {
+      "name": "Denial of Self",
+      "condition": "Win 10 Expert games in each of the 6 modes",
+      "description": "You faced every Expert trial and denied nothing. The Shadow is you — and you mastered it."
+    },
+    "event_code_empty": "⚠️ Please enter a code first!",
+    "event_code_signin": "🔒 Sign in to redeem a code — badges are saved to your account.",
+    "event_code_already": "✅ You already redeemed this code!",
+    "event_code_expired": "⏰ This event is not active yet or has expired.",
+    "event_code_failed": "⚠️ Couldn't reach the server. Try again in a moment."
   },
   "social_link": {
     "rank_names": {
@@ -813,7 +900,9 @@
     "msg_clear": "Clear resolved",
     "msg_clear_kept_active": "{{count}} challenge(s) in progress were kept — finish them first.",
     "msg_empty": "No messages yet.",
-    "delete_msg": "Delete"
+    "delete_msg": "Delete",
+    "server_unreachable": "Could not reach the server. Your session is probably still valid — try again.",
+    "retry": "Retry"
   },
   "settings": {
     "title": "Settings",
@@ -939,7 +1028,14 @@
     "already_active": "Finish your current challenge first.",
     "notif_challenges_you": "challenges you!",
     "notif_beat": "Beat",
-    "notif_attempts": "attempt(s)"
+    "notif_attempts": "attempt(s)",
+    "unknown_mode": "This challenge's mode is unavailable.",
+    "offline": "You need to be online to accept a challenge.",
+    "accept_failed": "Could not accept the challenge. Try again.",
+    "abandon": "Give up challenge",
+    "abandon_confirm": "Give up this challenge? It will not count as a loss.",
+    "abandoned": "Challenge given up. You can accept another one.",
+    "abandon_failed": "Could not give up the challenge. Try again."
   },
   "challenge_result": {
     "title_win": "WELL DONE!",
@@ -1082,8 +1178,6 @@
     "footer_link": "FAQ",
     "q17": "Why aren't there Persona 4 characters in All-Out Attack mode?",
     "a17": "We don't have high-quality Golden-style All-Out Attack artwork for Persona 4 yet. They'll be added when Persona 4 Revival arrives.",
-    "q18": "Why can't I find Persona 1 Personas in Personae mode?",
-    "a18": "We don't have enough good-quality artwork for Persona 1's Personas yet to include them fairly.",
     "q19": "Will you add other Atlus games like Metaphor or Shin Megami Tensei?",
     "a19": "We're still thinking about it! For now PersonaDLE focuses on the Persona series.",
     "q20": "Will the game be updated for Persona 4 Revival and Persona 6?",

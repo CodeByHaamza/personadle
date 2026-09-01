@@ -586,6 +586,12 @@ input:checked + .slider.red {
    ===================================================== */
 
 /* Dropdown créé dynamiquement par les JS de chaque mode */
+/* Vide, la liste dessinait quand même sa boîte blanche bordée — un artefact
+   visible sur toutes les pages tant qu'on n'avait rien tapé. */
+.autocomplete-items:empty {
+  display: none;
+}
+
 .autocomplete-items {
   position: absolute;
   left: 50%;
@@ -656,6 +662,24 @@ input:checked + .slider.red {
   color: #555;
   font-style: italic;
   line-height: 1.1;
+}
+
+/* Pastille d'opus sous un nom homonyme (« Junpei Iori » ⟨P4AU⟩) — distingue deux
+   versions du MÊME personnage, là où .realname révèle un autre nom. Volontairement
+   non-italique et encadrée, pour ne pas se confondre avec un sous-titre. */
+.opus-tag {
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border: 1px solid #b48ead;
+  border-radius: 999px;
+  background-color: #f3e8f1;
+  color: #6d3f66;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  white-space: nowrap;
 }
 
 /* =====================================================
@@ -1284,6 +1308,14 @@ body.darkmode .list-options:hover {
 
 body.darkmode .list-options span {
   color: #ffffff !important;
+}
+
+/* La pastille d'opus garde son fond en darkmode — la règle générique ci-dessus
+   force le texte en blanc, illisible sur le rose clair d'origine. */
+body.darkmode .opus-tag {
+  border-color: #b48ead;
+  background-color: #4a2c47;
+  color: #f0d9ed !important;
 }
 
 body.darkmode .list-options img {
@@ -3372,3 +3404,223 @@ body.darkmode #rulesModal em {
   }
 }
 
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   MODE EXPERT — bascule partagée par les modes
+   Le bouton et le halo de page sont identiques pour Classique, AOA, Silhouette et
+   Music : ils vivent ici plutôt que dupliqués dans les quatre feuilles de mode.
+   L'indice propre à chaque mode (paroles, flou, dézoom) reste dans son CSS.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+.expert-toggle-zone {
+  display: flex;
+  justify-content: center;
+  /* Marge basse : le bouton précède directement le bandeau de consigne du mode
+     (« Devinez le personnage Persona du jour ! »), les deux se touchaient. */
+  margin: 14px auto 22px;
+}
+
+.expert-toggle {
+  display: inline-block;
+  padding: 8px 22px;
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #fff;
+  background: #1a1a1a;
+  border: 2px solid #e63946;
+  /* Angles coupés — même vocabulaire graphique que les cartes Persona 5 */
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
+}
+
+/* Survol : même vocabulaire que les boutons Submit / Abandonner (.link-wrapper)
+   — grossissement puis rebond incliné, plutôt qu'un simple changement de couleur.
+   On réutilise l'animation tiltBounce déjà définie dans css/global.css au lieu
+   d'en écrire une variante. */
+.expert-toggle:hover,
+.expert-toggle:focus-visible {
+  background: #e63946;
+  box-shadow: 0 0 22px rgba(230, 57, 70, 0.75);
+  animation: tiltBounce 0.15s ease forwards;
+}
+
+.expert-toggle:active {
+  transform: scale(0.96) rotate(-7deg);
+}
+
+/* Les formes décoratives du survol restent un effet, pas une info : coupées si le
+   joueur a demandé moins d'animations. */
+@media (prefers-reduced-motion: reduce) {
+  .expert-toggle:hover,
+  .expert-toggle:focus-visible {
+    animation: none;
+    transform: scale(1.05);
+  }
+}
+
+/* Déjà en Expert : le bouton devient la sortie de secours, donc il se calme. */
+.expert-toggle.active {
+  border-color: #7a7a7a;
+  color: #cfcfcf;
+}
+
+.expert-toggle.active:hover,
+.expert-toggle.active:focus-visible {
+  background: #333;
+  box-shadow: none;
+}
+
+/* Bouton Expert verrouillé — condition de déblocage pas encore remplie.
+   Le rouge vif du bouton actif devient un gris éteint : le cadenas dit « pas
+   encore », pas « cassé ». La condition chiffrée est dans l'infobulle (title) et
+   dans aria-label, posés par setupExpertToggle(). */
+.expert-toggle.expert-locked {
+  color: #8a8a8a;
+  background: #141414;
+  border-color: #4a4a4a;
+  cursor: not-allowed;
+}
+
+/* Neutralise le survol du bouton actif (fond rouge, halo, tiltBounce) : un
+   verrou qui réagit comme un bouton cliquable laisserait croire qu'il l'est. */
+.expert-toggle.expert-locked:hover,
+.expert-toggle.expert-locked:focus-visible {
+  background: #141414;
+  box-shadow: none;
+  animation: none;
+  transform: none;
+}
+
+/* Le focus clavier doit rester visible : le bouton est atteignable au Tab
+   (tabindex=0) pour que les lecteurs d'écran lisent la condition. */
+.expert-toggle.expert-locked:focus-visible {
+  outline: 2px solid #8a8a8a;
+  outline-offset: 2px;
+}
+
+/* ── Infobulle de déblocage ────────────────────────────────────────────────
+   Remplace le title natif (lent, illisible, non stylable). Ancrée sur la zone
+   du bouton, qui devient le référentiel de positionnement. */
+.expert-toggle-zone {
+  position: relative;
+}
+
+.expert-tooltip {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 12px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: max-content;
+  min-width: 220px;
+  /* Ne jamais déborder de l'écran sur mobile, où la zone est proche des bords. */
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 12px 14px;
+  background: #101010;
+  border: 2px solid #e63946;
+  /* Mêmes angles coupés que le bouton et les cartes Persona 5. */
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-5px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s;
+}
+
+/* `:focus` et pas seulement `:focus-visible` : sur mobile il n'y a pas de survol,
+   c'est l'appui sur le bouton (tabindex=0) qui doit révéler la condition. */
+.expert-toggle.expert-locked:hover + .expert-tooltip,
+.expert-toggle.expert-locked:focus + .expert-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.expert-tooltip-title {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e63946;
+}
+
+.expert-tooltip-cond {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #f2f2f2;
+}
+
+.expert-tooltip-bar {
+  display: block;
+  height: 6px;
+  background: #2b2b2b;
+  overflow: hidden;
+}
+
+.expert-tooltip-bar > i {
+  display: block;
+  height: 100%;
+  background: #e63946;
+  transition: width 0.3s ease;
+}
+
+.expert-tooltip-count {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: #9a9a9a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expert-tooltip {
+    transition: opacity 0.16s ease, visibility 0.16s;
+    transform: translateX(-50%);
+  }
+  .expert-toggle.expert-locked:hover + .expert-tooltip,
+  .expert-toggle.expert-locked:focus + .expert-tooltip {
+    transform: translateX(-50%);
+  }
+  .expert-tooltip-bar > i {
+    transition: none;
+  }
+}
+
+/* Le halo rouge derrière toute la page signale qu'on n'est plus dans le mode
+   normal, même après avoir scrollé loin du bouton. */
+body.expert-mode {
+  background-image: radial-gradient(circle at 50% 0%, rgba(230, 57, 70, 0.16), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Bouton Abandonner verrouillé — le marqueur est aria-disabled et non l'attribut
+   `disabled`, qui n'a aucun effet sur un <div class="link-wrapper"> (ce qu'est ce
+   bouton dans les 6 modes). Sans cette règle, rien ne distinguait visuellement un
+   bouton cliquable d'un bouton qui ignore le clic. */
+.link-wrapper[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.link-wrapper[aria-disabled="true"]:hover {
+  transform: none;
+}
+
+.link-wrapper[aria-disabled="true"]:hover .img-wrapper .normal {
+  display: block;
+}
+
+.link-wrapper[aria-disabled="true"]:hover .img-wrapper .active,
+.link-wrapper[aria-disabled="true"]:hover .shape-wrapper {
+  display: none;
+}

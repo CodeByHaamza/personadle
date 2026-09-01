@@ -21,6 +21,10 @@ audio {
  * Remplacées par JS via setPlayerTheme() selon le jeu d'origine de la musique.
  */
 .audio-wrapper {
+  /* Sans border-box, le padding s'ajoute à max-width et le lecteur déborde de
+     l'écran sur mobile (380px de large pour un viewport de 375px). */
+  box-sizing: border-box;
+
   --player-accent: #e63946;
   --player-accent-dark: #c1121f;
   --player-accent-light: #ff8fa3;
@@ -34,10 +38,12 @@ audio {
   background: linear-gradient(150deg, #1a0505 0%, #0d0d0d 60%, #150a0a 100%);
   border: 2px solid var(--player-accent);
   border-radius: 6px 22px 6px 22px; /* asymétrique — style P5 */
-  padding: 20px 24px 16px;
-  width: fit-content;
-  min-width: 300px;
-  max-width: 480px;
+  padding: 24px 28px 20px;
+  /* Largeur fixée plutôt que fit-content : le lecteur ne rétrécit plus selon la
+     longueur du titre affiché, et il s'aligne sur le panneau de paroles Expert
+     (même expression), pour que basculer d'un mode à l'autre ne fasse pas sauter
+     la mise en page. */
+  width: min(560px, 92vw);
   margin: 30px auto;
   position: relative;
   overflow: hidden;
@@ -169,7 +175,7 @@ audio {
   display: flex;
   align-items: flex-end;
   gap: 3px;
-  height: 22px;
+  height: 26px;
 }
 
 .p5-sound-bars span {
@@ -220,13 +226,13 @@ audio {
 /* ── Bouton Play / Pause ── */
 .p5-play-btn {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--player-accent);
   border: 2px solid rgba(255, 255, 255, 0.85);
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -281,7 +287,7 @@ audio {
 
 /* Barre de progression — piste cliquable */
 .p5-progress {
-  height: 6px;
+  height: 8px;
   background: rgba(255, 255, 255, 0.12);
   border-radius: 3px;
   cursor: pointer;
@@ -329,6 +335,64 @@ audio {
 
 .p5-progress:hover .p5-progress-fill::after {
   opacity: 1;
+}
+
+/* ── Volume ───────────────────────────────────────────────────────────────────
+   Réutilise .p5-progress / .p5-progress-fill : le dégradé vient des mêmes
+   variables --player-* que la timeline, donc setPlayerTheme() colore le volume
+   en même temps que le reste, sans une seule règle de thème supplémentaire. */
+.p5-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  width: clamp(70px, 18%, 120px);
+}
+
+.p5-mute-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.p5-mute-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.p5-volume-track {
+  flex: 1;
+  height: 5px; /* volontairement plus fine que la timeline — contrôle secondaire */
+}
+
+/* Curseur visible en permanence : sans lui, un volume à 0 n'a aucune poignée
+   à attraper — la piste paraîtrait morte plutôt que réglable. */
+.p5-volume-track .p5-progress-fill::after {
+  opacity: 0.6;
+  width: 10px;
+  height: 10px;
+}
+
+.p5-volume-track:hover .p5-progress-fill::after {
+  opacity: 1;
+}
+
+/* Sous 480px la ligne play + timeline + volume devient trop serrée : le volume
+   passe sous la timeline, pleine largeur. */
+@media (max-width: 480px) {
+  .p5-player-controls {
+    flex-wrap: wrap;
+  }
+
+  .p5-volume {
+    width: 100%;
+    margin-top: 8px;
+  }
 }
 
 /* Temps courant / durée */
@@ -379,9 +443,11 @@ body.music-mode.darkmode .victory-box {
 
 @media (max-width: 768px) {
   .audio-wrapper {
-    width: 90%;
-    max-width: 400px;
-    padding: 16px 18px 14px;
+    /* Le plafond à 400px datait du lecteur étroit : sur une tablette il laissait
+       la moitié de la largeur inutilisée. Le lecteur suit désormais la même
+       expression que sur desktop, borné par la fenêtre. */
+    width: min(520px, 92vw);
+    padding: 18px 20px 15px;
     margin: 20px auto;
     min-width: unset;
   }
@@ -432,5 +498,120 @@ body.music-mode.darkmode .victory-box {
     gap: 8px;
     width: min(340px, 95vw);
     box-sizing: border-box;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   MODE EXPERT
+   Habillage plus dur que le mode normal : rouge sang, angles cassés, gros
+   contraste. Le mode normal garde son thème par opus — ici la couleur est
+   volontairement constante, c'est la signature du mode.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+
+.expert-lyrics-wrapper {
+  box-sizing: border-box; /* cf. .audio-wrapper : sinon le padding déborde du viewport */
+  width: min(560px, 92vw);
+  margin: 18px auto;
+  padding: 14px 16px 10px;
+  background: rgba(12, 12, 14, 0.92);
+  border: 2px solid #e63946;
+  border-radius: 4px;
+  box-shadow: 0 0 24px rgba(230, 57, 70, 0.28);
+}
+
+.expert-lyrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+  font-family: "Courier New", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e63946;
+}
+
+.expert-lyrics-count {
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.08em;
+}
+
+/* Liste défilante : les vers précédents restent lisibles au-dessus, comme sur un
+   lecteur de streaming. Hauteur bornée pour que le champ de réponse reste visible
+   sans scroller la page entière. */
+.expert-lyrics-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: min(46vh, 320px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.expert-lyric-line {
+  padding: 7px 4px;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.42);
+  transition: color 0.25s;
+}
+
+/* Le vers qui vient d'apparaître — c'est lui qu'on lit, les autres sont du contexte. */
+.expert-lyric-line.current {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-shadow: 0 0 12px rgba(230, 57, 70, 0.55);
+}
+
+/* Machine à écrire — curseur clignotant pendant la frappe du vers courant.
+   Le curseur est un ::after et non un caractère du texte : une frappe
+   interrompue laisserait sinon un « | » collé au vers. */
+.expert-lyric-line.typing::after {
+  content: "▌";
+  margin-left: 2px;
+  color: #e63946;
+  animation: lyricCaret 0.7s steps(1) infinite;
+}
+
+@keyframes lyricCaret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expert-lyric-line.typing::after {
+    animation: none;
+  }
+}
+
+/* Vers révélés seulement en fin de partie : jamais gagnés, donc en retrait. */
+.expert-lyric-line.unheard {
+  color: rgba(255, 255, 255, 0.28);
+  font-style: italic;
+}
+
+.expert-lyrics-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.expert-lyrics-list::-webkit-scrollbar-thumb {
+  background: rgba(230, 57, 70, 0.55);
+  border-radius: 3px;
+}
+
+@media (max-width: 480px) {
+  .expert-lyrics-wrapper {
+    padding: 12px 12px 8px;
+  }
+
+  .expert-lyric-line {
+    font-size: 0.92rem;
+  }
+
+  .expert-lyric-line.current {
+    font-size: 1rem;
   }
 }

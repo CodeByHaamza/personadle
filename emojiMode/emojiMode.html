@@ -4,9 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Personadle - Emoji Mode</title>
+    <meta
+      name="description"
+      content="Guess the Persona character of the day from a handful of emoji. A new puzzle every day, from P1 to P5X."
+    />
+    <link rel="canonical" href="https://www.personadle.net/emojiMode/emojiMode.html" />
+
+    <!-- Open Graph — cf. classiqueMode.html pour le raisonnement (domaine .NET,
+         un titre par mode, balises en dur car les robots n'exécutent pas le JS). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Personadle" />
+    <meta property="og:url" content="https://www.personadle.net/emojiMode/emojiMode.html" />
+    <meta property="og:title" content="Personadle — Emoji Mode" />
+    <meta
+      property="og:description"
+      content="Guess the Persona character of the day from a handful of emoji. A new puzzle every day, from P1 to P5X."
+    />
+    <meta property="og:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="2769" />
+    <meta property="og:image:height" content="1054" />
+    <meta property="og:image:alt" content="Personadle" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Personadle — Emoji Mode" />
+    <meta
+      name="twitter:description"
+      content="Guess the Persona character of the day from a handful of emoji. A new puzzle every day, from P1 to P5X."
+    />
+    <meta name="twitter:image" content="https://www.personadle.net/img/New_Logo_PersonaDLE.png" />
+    <meta name="theme-color" content="#e63946" />
 
     <!-- Styles & Icon -->
-    <link rel="stylesheet" href="../css/global.css?v=11" />
+    <link rel="stylesheet" href="../css/global.css?v=12" />
     <link rel="stylesheet" href="./emoji.css?v=3" />
     <link rel="stylesheet" href="../css/filterMenu.css?v=2" />
     <link rel="stylesheet" href="../css/bottomNav.css?v=1" />
@@ -15,6 +45,7 @@
     <link rel="stylesheet" href="../css/challenge-result.css" />
     <link rel="stylesheet" href="../css/wallpaper-notification.css" />
     <link rel="stylesheet" href="../css/title-notification.css" />
+    <link rel="stylesheet" href="../css/expert-unlock.css?v=1" />
     <link rel="icon" type="image/gif" href="../img/persona_64x64.gif" />
   </head>
 
@@ -269,6 +300,20 @@
             />
           </button>
         </div>
+        <!-- Persona Trinity Souls — filtre direct -->
+        <div class="filter-group">
+          <button
+            class="filter-main-btn filter-color-pts active"
+            data-opus="PTS"
+            aria-label="Persona Trinity Souls"
+          >
+            <img
+              src="../img/logo_jeu/Trinity_Souls_Logo.webp"
+              alt="Persona Trinity Souls"
+              class="filter-logo"
+            />
+          </button>
+        </div>
         <!-- Persona Q — clic logo → sous-opus déroulants -->
         <div class="filter-group">
           <button
@@ -299,6 +344,16 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Bascule Normal ⇄ Expert. Un <a> : le mode vit dans l'URL (?expert=1).
+         Placée ici, juste sous le panneau de filtres, comme dans Classique, Music
+         et Personae — et non sous l'historique des erreurs, qui la reléguait en
+         bas de page. -->
+    <div class="expert-toggle-zone">
+      <a href="emojiMode.html?expert=1" id="expertToggle" class="expert-toggle" data-i18n="ui.expert_enter">
+        ⚡ Expert mode
+      </a>
     </div>
 
     <!-- Zone principale d'affichage des emojis et du titre -->
@@ -353,7 +408,7 @@
       class="giveup-block"
       style="display: flex; justify-content: center; margin-top: 40px; gap: 12px"
     >
-      <div class="link-wrapper" id="giveUpButton">
+      <div class="link-wrapper" id="giveUpButton" aria-disabled="true">
         <div class="img-wrapper">
           <img
             class="normal"
@@ -485,7 +540,6 @@
       <div id="wrongGuessList"></div>
     </div>
     <!-- Rules Modal -->
-    <!-- Rules Modal -->
     <div id="rulesModal" class="modal" style="display: none">
       <div class="modal-content">
         <span class="close">&times;</span>
@@ -493,7 +547,40 @@
 
         <!-- Règles : câblées sur les clés JSON (modes.emoji.*) → traduites
              automatiquement dans les 6 langues, plus de blocs en/fr en dur. -->
-        <div id="rulesText">
+        <!-- Règles Expert — bloc distinct, affiché par setupExpertToggle(). -->
+        <div id="rulesExpert" style="display: none">
+          <strong data-i18n="modes.emoji.expert_goal">⚡ Expert Mode:</strong><br />
+          <span data-i18n="modes.emoji.expert_goal_text">
+            Same emojis, revealed the same way — except one of them is lying.
+          </span>
+
+          <hr class="separator" />
+
+          <strong data-i18n="modes.emoji.expert_tips">💡 Tips:</strong>
+          <ul>
+            <li data-i18n="modes.emoji.expert_tip_1">
+              Exactly one emoji is a decoy, borrowed from another character.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_2">
+              It can sit anywhere in the sequence — first, middle or last.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_3">
+              It never changes during the round, and reloading will not reroll it.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_4">
+              The real emojis are shown when the round ends.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_5">
+              You get 5 tries before the Give Up button becomes available.
+            </li>
+            <li data-i18n="modes.emoji.expert_tip_6">
+              Expert has its own daily character and its own stats. It will not carry your
+              normal Emoji streak.
+            </li>
+          </ul>
+        </div>
+
+        <div id="rulesNormal">
           <strong data-i18n="modes.emoji.goal">🎯 Goal:</strong><br />
           <span data-i18n="modes.emoji.goal_text"
             >Guess which Persona character is being described by a sequence of emojis 🤔📱.</span
@@ -597,7 +684,7 @@
       import { initLang } from "../js/i18n.js";
       window.__i18nReady = initLang();
     </script>
-    <script type="module" src="./emojiMode.js?v=4"></script>
+    <script type="module" src="./emojiMode.js?v=6"></script>
 
     <div
       id="modeNavigationContainer"
@@ -660,7 +747,7 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("../sw.js").catch((err) => {
+          navigator.serviceWorker.register("../sw.js", { updateViaCache: "none" }).catch((err) => {
             console.warn("[SW] Registration failed:", err);
           });
         });

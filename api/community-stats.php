@@ -50,6 +50,9 @@ $stmt = $pdo->prepare("
     WHERE LOWER(mode) = LOWER(?)
       AND played_date = ?
       AND target_name = ?
+      -- Le % de joueurs ayant trouvé la cible du jour porte sur le mode normal :
+      -- l'Expert a sa propre cible, mélanger les deux rendrait le chiffre faux.
+      AND is_expert = 0
 ");
 $stmt->execute([$mode, $date, $target]);
 $row = $stmt->fetch();

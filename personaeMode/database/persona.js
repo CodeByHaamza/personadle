@@ -9,6 +9,8 @@ export const personas = [
   "Shinjiro Aragaki",
   "Ken Amada",
   "Koromaru",
+  // Elizabeth : wielder additionnelle de Thanatos (P4 Arena Ultimax)
+  "Elizabeth",
   "Marie",
   "Fuuka Yamagishi",
   "Chidori Yoshino",
@@ -81,4 +83,20 @@ export const personas = [
   "Aran Hirano",
   "Narumi Nashimoto",
   "Kumi Katayama",
+
+  // Persona Trinity Souls — 2.1 (wielders : on devine le personnage, pas la persona)
+  "Shin Kanzato",
+  "Jun Kanzato",
+  "Ryo Kanzato",
+
+  // Persona 1 — 2.1 (Eriko Kirishima absente : dessin de persona manquant)
+  "Naoya Todou",
+  "Maki Sonomura",
+  "Masao Inaba",
+  "Kei Nanjo",
+  "Hidehiko Uesugi",
+  "Yukino Mayuzumi",
+  "Yuka Ayase",
+  "Reiji Kido",
+  "Eriko Kirishima",
 ];

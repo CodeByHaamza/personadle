@@ -90,6 +90,9 @@ if ($method === 'GET') {
         'challenge_date'    => $m['challenge_date'],
         'challenge_filters' => isset($m['challenge_filters']) ? $m['challenge_filters'] : null,
         'challenge_target'  => isset($m['challenge_target']) ? $m['challenge_target'] : null,
+        // Sans ce champ le client ne peut pas savoir vers quelle page envoyer le
+        // joueur (`?expert=1`), ni quel barème appliquer à l'arrivée.
+        'challenge_is_expert' => !empty($m['challenge_is_expert']),
         'status'            => $m['status'],
         'created_at'      => $m['created_at'],
         'sender'   => ['pseudo' => $m['sender_pseudo'],   'avatar' => $m['sender_avatar']],
@@ -124,6 +127,12 @@ if ($method === 'POST') {
     $stmtFriend->execute([$authId, $receiverId, $receiverId, $authId]);
     if (!$stmtFriend->fetch()) jsonError('Not friends', 403);
 
+    // Id de la ligne créée, relevé JUSTE APRÈS son INSERT et pas en fin de
+    // fonction : `lastInsertId()` retombe à 0 dès qu'un UPDATE passe sur la même
+    // connexion (vérifié sur MariaDB 10.6), et le bloc « défi » ci-dessous en
+    // exécute un. Le lire trop tard renverrait `{"id": 0}` au client.
+    $newId = 0;
+
     if ($type === 'message') {
         $content = substr(trim($data['content'] ?? ''), 0, 500);
         if (!$content) jsonError('Message content is required');
@@ -132,6 +141,7 @@ if ($method === 'POST') {
             INSERT INTO messages (sender_id, receiver_id, type, content, status)
             VALUES (?, ?, 'message', ?, 'unread')
         ")->execute([$authId, $receiverId, $content]);
+        $newId = (int) $pdo->lastInsertId();
     }
 
     if ($type === 'challenge') {
@@ -146,16 +156,25 @@ if ($method === 'POST') {
             $date = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
         }
 
-        // Un seul défi actif par jour entre deux amis (peu importe le mode)
+        // Défi en Mode Expert (migration 037). L'Expert est une DIMENSION du défi :
+        // cible tirée dans le pool Expert, barème propre, et un défi Expert ne se
+        // compare qu'à un défi Expert.
+        $isExpert = !empty($data['challenge_is_expert']) ? 1 : 0;
+
+        // Un seul défi actif par jour entre deux amis, POUR UNE DIMENSION DONNÉE.
+        // `challenge_is_expert` fait partie de la clé : proposer le même jour un
+        // défi normal ET un défi Expert au même ami est légitime — deux cibles,
+        // deux barèmes, deux jeux. Les confondre interdirait le second sans raison.
         $stmtExisting = $pdo->prepare("
             SELECT id FROM messages
             WHERE ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?))
               AND type = 'challenge'
               AND challenge_date = ?
+              AND challenge_is_expert = ?
               AND status IN ('unread', 'accepted')
             LIMIT 1
         ");
-        $stmtExisting->execute([$authId, $receiverId, $receiverId, $authId, $date]);
+        $stmtExisting->execute([$authId, $receiverId, $receiverId, $authId, $date, $isExpert]);
         if ($stmtExisting->fetch()) jsonError('A challenge already exists today for this friend', 409);
 
         // challenge_filters is optional — gracefully ignored if column doesn't exist yet
@@ -170,9 +189,9 @@ if ($method === 'POST') {
         try {
             $pdo->prepare("
                 INSERT INTO messages
-                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters, challenge_target, status)
-                VALUES (?, ?, 'challenge', ?, ?, ?, ?, ?, 'unread')
-            ")->execute([$authId, $receiverId, $mode, $score, $date, $filtersJson, $target]);
+                    (sender_id, receiver_id, type, challenge_mode, challenge_score, challenge_date, challenge_filters, challenge_target, challenge_is_expert, status)
+                VALUES (?, ?, 'challenge', ?, ?, ?, ?, ?, ?, 'unread')
+            ")->execute([$authId, $receiverId, $mode, $score, $date, $filtersJson, $target, $isExpert]);
         } catch (PDOException $e) {
             // Fallback if challenge_filters/challenge_target columns don't exist yet (migrations not run)
             $pdo->prepare("
@@ -181,6 +200,43 @@ if ($method === 'POST') {
                 VALUES (?, ?, 'challenge', ?, ?, ?, 'unread')
             ")->execute([$authId, $receiverId, $mode, $score, $date]);
         }
+
+        // ── Un seul défi vivant par expéditeur ────────────────────────────────
+        // Le nouveau défi remplace ceux que ce MÊME expéditeur avait envoyés à ce
+        // MÊME destinataire sans qu'ils soient relevés. Sans ça, un ami qui
+        // propose un défi chaque jour accumule une pile que le destinataire ne
+        // rattrapera jamais — c'est exactement l'empilement que la migration 036
+        // a dû nettoyer à la main.
+        //
+        // Deux bornes volontaires :
+        //   - `status = 'unread'` UNIQUEMENT. Un défi déjà `accepted` est un
+        //     engagement pris : seul le joueur peut en sortir, via le bouton
+        //     « abandonner » (js/challenge-banner.js). Le lui retirer dans son
+        //     dos annulerait une partie peut-être déjà en cours.
+        //   - direction fixée (`sender_id = expéditeur`) : les défis que le
+        //     destinataire a envoyés DANS L'AUTRE SENS ne sont pas concernés, pas
+        //     plus que ceux d'un autre ami. Chaque ami a sa propre place.
+        //   - dimension fixée (`challenge_is_expert`) : un défi Expert ne remplace
+        //     pas un défi normal en attente, et réciproquement. Ce sont deux jeux
+        //     différents — le joueur garde une place vivante dans chacun.
+        //
+        // Placé APRÈS l'insertion : si celle-ci échoue, on n'aura fermé aucun
+        // défi précédent pour rien. `id <> ?` exclut la ligne qu'on vient de créer.
+        //
+        // `read` et non `expired` : le destinataire ne l'a pas tenté et manqué,
+        // il a simplement été devancé par un défi plus récent (même raisonnement
+        // que l'abandon et que la migration 036).
+        $newId = (int) $pdo->lastInsertId();
+        $pdo->prepare("
+            UPDATE messages
+            SET status = 'read'
+            WHERE type = 'challenge'
+              AND status = 'unread'
+              AND sender_id = ?
+              AND receiver_id = ?
+              AND challenge_is_expert = ?
+              AND id <> ?
+        ")->execute([$authId, $receiverId, $isExpert, $newId]);
 
         // XP Social Link : action 'challenge' (15 XP solo)
         try {
@@ -193,7 +249,6 @@ if ($method === 'POST') {
         } catch (Throwable) { /* silencieux */ }
     }
 
-    $newId = (int) $pdo->lastInsertId();
     jsonSuccess(['id' => $newId, 'created' => true], 201);
 }
 

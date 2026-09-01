@@ -140,9 +140,12 @@ final class DailyTargetTest extends TestCase
     {
         // "P4" (pas "P1" — Personae n'a pas de filtre P1, cf. ALL_OPUS dans
         // modePersonae.js) : seed/date choisis pour déclencher réellement le
-        // fallback (la cible non filtrée n'est pas un persona P4).
-        $unfiltered = personadle_compute_daily_target('personae', '2026-07-05', '42', []);
-        $filtered = personadle_compute_daily_target('personae', '2026-07-05', '42', ['P4']);
+        // fallback (la cible non filtrée n'est pas un persona P4). Recalculé le
+        // 2026-08-13 (contenu 2.1 : plusieurs entrées du pool personae ont reçu
+        // l'opus P4AU, ce qui a décalé le tirage seedé — l'ancien couple
+        // date/seed ne déclenchait plus le fallback avec le nouveau contenu).
+        $unfiltered = personadle_compute_daily_target('personae', '2026-08-01', '1', []);
+        $filtered = personadle_compute_daily_target('personae', '2026-08-01', '1', ['P4']);
         $this->assertNotSame($unfiltered, $filtered, 'Ce cas de test doit déclencher le fallback filtré');
 
         // Au moins UNE entrée du pool doit partager ce `user` et appartenir à P4 —
@@ -160,5 +163,70 @@ final class DailyTargetTest extends TestCase
             }
         }
         $this->assertTrue($hasMatchingP4Entry, "Aucune entrée P4 du pool Personae ne correspond à \"$filtered\"");
+    }
+
+    // ── Mode Expert ─────────────────────────────────────────────────────────
+
+    public function testMusicExpertPoolIsAStrictSubsetOfMusic(): void
+    {
+        $pools = personadle_load_daily_pools();
+        $this->assertArrayHasKey('music_expert', $pools, 'pool music_expert absent — lancer npm run pools:build');
+
+        $music  = $pools['music']['pool'];
+        $expert = $pools['music_expert']['pool'];
+
+        $this->assertNotEmpty($expert);
+        $this->assertLessThan(count($music), count($expert), 'les instrumentales doivent être exclues');
+        foreach ($expert as $titre) {
+            $this->assertContains($titre, $music, "« $titre » n'existe pas dans le pool music");
+        }
+    }
+
+    public function testMusicExpertPoolKeepsSourceOrder(): void
+    {
+        $pools = personadle_load_daily_pools();
+        // L'ordre pilote l'index du tirage (hash % len) : un pool réordonné change
+        // la cible de tout le monde. Il doit rester celui de songs.js.
+        $filtered = array_values(array_filter(
+            $pools['music']['pool'],
+            static fn ($t) => in_array($t, $pools['music_expert']['pool'], true)
+        ));
+        $this->assertSame($filtered, $pools['music_expert']['pool']);
+    }
+
+    public function testMusicExpertDrawsADifferentTargetThanMusic(): void
+    {
+        // Le cœur de la décision produit : si les deux modes tiraient la même
+        // chanson, jouer le normal (où l'audio est donné) offrirait l'Expert.
+        $identiques = 0;
+        for ($d = 1; $d <= 28; $d++) {
+            $date = sprintf('2026-09-%02d', $d);
+            $normal = personadle_compute_daily_target('music', $date, '42', []);
+            $expert = personadle_compute_daily_target('music_expert', $date, '42', []);
+            $this->assertNotNull($normal);
+            $this->assertNotNull($expert);
+            if ($normal === $expert) {
+                $identiques++;
+            }
+        }
+        // Une collision occasionnelle est normale (deux tirages indépendants sur des
+        // pools qui se recouvrent) ; une égalité systématique voudrait dire que la
+        // clé de hash n'a pas été différenciée.
+        $this->assertLessThan(5, $identiques, 'les deux tirages semblent corrélés');
+    }
+
+    public function testMusicExpertTargetAlwaysHasLyrics(): void
+    {
+        $pools = personadle_load_daily_pools();
+        for ($d = 1; $d <= 31; $d++) {
+            $date = sprintf('2026-10-%02d', $d);
+            $cible = personadle_compute_daily_target('music_expert', $date, '7', []);
+            $this->assertContains($cible, $pools['music_expert']['pool'], "cible hors pool le $date");
+        }
+    }
+
+    public function testUnknownModeStillReturnsNull(): void
+    {
+        $this->assertNull(personadle_compute_daily_target('music_expert_typo', '2026-09-01', '42', []));
     }
 }

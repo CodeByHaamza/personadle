@@ -94,10 +94,44 @@ env/
 # Documentation interne (notes de mise à jour, images de travail)
 # Ce dossier contient des exports PDF et des captures de travail qui ne sont
 # pas nécessaires dans le dépôt public.
+#
+# ⚠️ PIÈGE CORRIGÉ le 2026-08-29 (vérifié empiriquement : `git check-ignore -v`
+# désignait TOUJOURS la règle du dossier racine, même avec `!dossier/` posé
+# juste après, et `git add -A`/`git add <fichier>` restaient silencieux).
+#
+# Cause exacte (doc git elle-même) : « It is not possible to re-include a file
+# if a parent directory of that file is excluded. Git doesn't list excluded
+# directories for performance reasons, so any patterns on contained files have
+# no effect. » — une exclusion en `dossier/` (slash final = pattern de
+# RÉPERTOIRE) fait que git ne descend JAMAIS dedans, quoi qu'on écrive après,
+# `!dossier/sous-dossier/` compris. Ce n'est donc pas un problème d'ordre des
+# règles : aucun ordre ne peut réparer ça avec un pattern `dossier/`.
+#
+# Fix qui marche réellement (vérifié) : exclure avec `dossier/*` (glob, PAS un
+# pattern de répertoire) plutôt que `dossier/` — git traite alors chaque entrée
+# individuellement et les ré-inclusions plus bas redeviennent effectives. Motif
+# à 2 niveaux, dossier par dossier : `!.../X.Y` (ré-inclut le DOSSIER) PUIS
+# `.../X.Y/*` (ré-exclut son CONTENU par défaut) PUIS `!.../X.Y/fichier.ext`
+# (ré-inclut chaque fichier voulu).
+#
+# Sans ce fix : un nouveau fichier ajouté par un `git add` normal (pas `-f`)
+# disparaissait sans le moindre avertissement — exactement ce qui aurait pu
+# arriver à une image ajoutée après coup au changelog joueur, avec en bout de
+# chaîne un lien cassé en prod.
+#
+# Pour une NOUVELLE version (ex. 2.2) : copier le bloc à 3 lignes par dossier
+# ci-dessous (`!dossier`, `dossier/*`, `!dossier/fichier`) — sauter l'une des
+# trois reproduit ce piège en silence.
 # ─────────────────────────────────────────────────────────────────────────────
-PersonaDLE_Update_Documentation/
+PersonaDLE_Update_Documentation/*
+!PersonaDLE_Update_Documentation/PersonaDLE 1.0
+PersonaDLE_Update_Documentation/PersonaDLE 1.0/*
 !PersonaDLE_Update_Documentation/PersonaDLE 1.0/PersonaDLE_Update.pdf
+!PersonaDLE_Update_Documentation/PersonaDLE 1.1
+PersonaDLE_Update_Documentation/PersonaDLE 1.1/*
 !PersonaDLE_Update_Documentation/PersonaDLE 1.1/PersonaDLE_Update_V2.pdf
+!PersonaDLE_Update_Documentation/PersonaDLE 2.0
+PersonaDLE_Update_Documentation/PersonaDLE 2.0/*
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/PersonaDLE_Update.html
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/TEST_PLAN.md
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/DOCKER_GUIDE.md
@@ -108,6 +142,18 @@ PersonaDLE_Update_Documentation/
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/*.jpeg
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/*.gif
 !PersonaDLE_Update_Documentation/PersonaDLE 2.0/*.webp
+
+# v2.1 — même liste blanche, même motif à 3 lignes (cf. piège ci-dessus).
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1
+PersonaDLE_Update_Documentation/PersonaDLE 2.1/*
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/PersonaDLE_Update.html
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/DEV_CHANGELOG.md
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/TEST_PLAN.md
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.png
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.jpg
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.jpeg
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.gif
+!PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.webp
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Dossier de staging local pour les assets en attente d'ingestion (voir
@@ -143,4 +189,8 @@ phpunit.phar
 # Playwright E2E
 test-results/
 playwright-report/
+playwright/.auth/
 phpstan.phar
+psalm.phar
+# Cache de Psalm (analyse de taint) — regénéré à chaque lancement.
+.psalm-cache/

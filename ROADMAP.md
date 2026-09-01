@@ -27,26 +27,187 @@
 
 ---
 
-## 🚀 v2.1 — Prochaine version (périmètre décidé le 2026-07-06)
+## 🚀 v2.1 — Prochaine version (périmètre décidé le 2026-07-06, étendu le 2026-07-31, révisé le 2026-08-13)
 
 > La 2.0 part en prod sans attendre ces points — ils avancent en parallèle une fois livrée.
 > Priorité pas encore fixée entre eux. Mis de côté pour l'instant, sans version cible :
-> Mode Versus temps réel (chantier temps réel plus lourd) et notifications push PWA — restent
-> en idée dans 🟢 Produit ci-dessous. Groupes d'amis : en réflexion, pas encore tranché.
+> Mode Versus temps réel (chantier temps réel plus lourd), notifications push PWA, et carte
+> récap périodique — restent en idée dans 🟢 Produit ci-dessous. Groupes d'amis : en réflexion,
+> pas encore tranché.
 
-- [ ] **Mode Expert** — variante à **une seule tentative**, mécanique différente par mode de jeu :
-  - Classique : seule la citation (`quote`) est donnée, aucune autre catégorie affichée
-  - Musique : 1 seconde de clip audio au lieu de la lecture complète
-  - Personae : crop aléatoire zoomé du portrait au lieu du portrait entier
-  - Émoji / Silhouette / All-Out-Attack : équivalent à définir par analogie au moment de
-    l'implémentation (un seul indice minimal, pas de révélation progressive sur mauvaise réponse)
-  - Condition de déblocage **différente par mode** (à trancher au cas par cas, pistes retenues :
-    nombre de victoires en mode normal sur ce mode, streak minimum, ou badge dédié)
+- [ ] **Mode Expert** — révision 2026-08-13 : **plusieurs tentatives comme en mode normal**
+  (pas de tentative unique — trop punitif sur du contenu ambigu, ex. skins AOA recolorés
+  indiscernables en un seul coup d'œil). Principe commun : un indice de **départ nettement plus
+  pauvre qu'en mode normal**. Certains modes le gardent figé toute la partie (Classique, AOA),
+  d'autres le font évoluer par essai raté mais avec un point de départ et/ou un rythme bien plus
+  dur que le mode normal (Musique, Silhouette, Personae — détails ci-dessous). Mécanique
+  spécifiée par mode le 2026-08-13 :
+  - Classique : seule la citation (`quote`) est donnée, aucune autre catégorie affichée, sur
+    toute la partie — indice figé
+  - Émoji : encore à définir — le mode normal est déjà considéré difficile de base, donc l'écart
+    Expert pourrait être plus faible que sur les autres modes ; aucune mécanique tranchée
+  - AOA : flou figé au niveau initial (le plus flou) **+ image en noir et blanc** — deux filtres
+    CSS cumulés, indice figé, aucun nouveau mécanisme ni contenu à produire. À valider avant de
+    livrer : sur les familles de skins recolorés (silhouette/pose identiques, ex. lignes
+    "Starlight"/"Summer"), le N&B cumulé au flou max ne doit pas rendre deux entrées de la même
+    famille indiscernables — sinon exclure ces entrées du pool Expert ou ne garder qu'un seul
+    des deux filtres pour elles
+  - Silhouette : garde la logique de dézoom déjà utilisée en mode normal (`modeSilhouette.js` —
+    zoom CSS `scale()` de 1.8 à 1, -0.2 par essai raté jusqu'au plein cadre) — indice figé côté
+    mécanique, aucun nouveau système. Seul changement : le **point autour duquel on zoome est
+    tiré au hasard sur la silhouette**, au lieu du centre fixe de l'image utilisé en mode
+    normal. ⚠️ Un point purement aléatoire peut tomber en plein milieu de l'aplat noir uniforme
+    (silhouette rendue via `filter: brightness(0)`) et ne rien montrer d'exploitable au 1er
+    essai — le tirage doit être contraint à des zones qui touchent un contour de la silhouette,
+    pas un pixel random sur toute l'image (ex. quelques points d'ancrage pré-repérés par
+    personnage plutôt qu'un tirage libre)
+  - Personae : **aucune image**. Indice par défaut = texte biographique/historique de la
+    persona (origine mythologique ou littéraire réelle), **nom et alias du personnage retirés
+    du texte** — ex. pour Arsène (Arsène Lupin) : retirer à la fois "Arsène" et son alias
+    "Raoul" du texte source. Après un certain nombre d'essais ratés, le joueur peut **demander
+    un indice supplémentaire** : un second texte, la description physique/design de la persona
+    en jeu (ex. notes de Shigenori Soejima sur le design d'Arsène), même traitement de retrait
+    de nom. Implications :
+    - **Seul mode nécessitant un vrai nouveau mécanisme** (les 5 autres ne font que dégrader un
+      indice existant) : bouton "demander un indice" gated par un nombre d'essais ratés, état à
+      tracker pendant la partie (indice demandé ou non)
+    - **Deux textes par persona** à rédiger/sourcer par Hamza (au lieu d'un) ; retrait des noms
+      fait manuellement à la rédaction, pas de traitement dynamique côté client
+    - Le texte biographique est **traduit** (i18n complet, 6 langues) ; à confirmer si le
+      second texte (description physique) l'est aussi — probablement oui, même régime
+    - Sourcé par Hamza, livré **par paquet** (Persona 3 d'abord, Persona 4 ensuite, etc.).
+      Implique un flag "a du contenu Expert" par persona, à intégrer au pool de tirage
+      quotidien (`scripts/export-daily-pools.js`, `npm run pools:build`/`pools:check`) pour que
+      la cible du jour en Expert Personae ne pioche que parmi les persos déjà couverts par un
+      paquet livré
+    - **Réponses acceptées** (décision 2026-08-15) : une fiche décrit une figure mythologique,
+      pas une entrée précise du dataset — elle accepte donc **tous les manieurs de toutes les
+      entrées de la même figure**. La fiche d'Orphée vaut pour Makoto, Kotone et Aigis (5
+      entrées avec les variantes Picaro/Telos) ; celle d'Hermès pour Junpei Iori **et** Jun
+      Kurosu, dont les personas sont deux entrées distinctes (dessins différents) du même dieu
+      grec. Refuser l'un des deux serait perçu comme un bug : rien dans le texte ne permet de
+      les départager. Règle déjà implémentée et testée —
+      `personaeMode/database/expert_lore/wielders.js`, 4 tests dans `tests/expertContent.test.js`.
+  - Musique : paroles révélées progressivement à chaque essai raté, cumulatives (les précédentes
+    restent affichées, pas juste la dernière) — façon lecteur de paroles synchronisées type
+    Spotify : 1 phrase pour commencer, une de plus par essai raté. Paroles à sourcer en ligne
+    par Hamza, pas besoin de la chanson complète — il s'arrête où il juge avoir assez de texte
+    pour le mode. Pas de i18n nécessaire (parole = parole dans sa langue d'origine, même
+    traitement que les titres de musique déjà exemptés côté §5 CLAUDE.md). N'existent pas
+    encore dans `musicsMode/database/songs.js`
+  - Condition de déblocage **différente par mode** (à trancher au cas par cas au moment de
+    l'implémentation, pas de règle uniforme entre les 6). **À coder sur une branche dédiée**
+    (décision 2026-08-15) — le mode Music Expert est livré déverrouillé, le bouton
+    « ⚡ Expert mode » (`musicsMode/musics.html`) est visible et cliquable par tout le monde.
+    Ce qu'il faudra brancher :
+    - la condition elle-même passe par `api/lib/condition_check.php`
+      (`condition_type`/`condition_mode`/`condition_value`), déjà partagé par
+      titles/badges/wallpapers — pas de système parallèle à inventer
+    - vérification **côté serveur obligatoire** (CLAUDE.md §13) : un gate purement client
+      serait contournable en tapant `?expert=1` à la main, puisque le mode vit dans l'URL
+    - piste retenue pour Music : X victoires en Music normal (valeur à fixer) ; le compte
+      est déjà lisible dans `user_stats` (mode `music`, `is_expert` exclu par construction)
+    - côté front : masquer/griser le bouton et rediriger `?expert=1` vers le mode normal
+      tant que la condition n'est pas remplie
+  - Récompense **supérieure au mode normal**, surtout en **défi ami** (voir item "Bonus XP
+    Social Link" juste en dessous — logique mise à jour suite à cette révision)
+  - Nouveau badge/titre : débloqué une fois les 6 modes Expert battus au moins une fois chacun
+    (réutilise le système de conditions structurées déjà en place, `condition_check.php`)
+  - **Défis déjà bloqués en base** — le correctif du 2026-08-15 empêche d'en créer de
+    nouveaux, il ne répare pas l'existant. Décision : **les deux**, dans cet ordre.
+    1. Migration de nettoyage ponctuelle : repasser en `unread` les `messages` en statut
+       `accepted` sans partie associée et vieux de plus de 7 jours. Ponctuel, à jouer une
+       fois en prod, non idempotent par nature (ne pas le rejouer sur des défis récemment
+       acceptés et légitimement en cours).
+    2. Bouton « abandonner le défi en cours » côté joueur — sans lui, le même blocage se
+       reproduira à la première panne réseau au mauvais moment, et il n'existe aujourd'hui
+       aucun moyen de sortir d'un défi accepté. `getPendingActiveChallenge()` (gameCore.js)
+       fournit déjà l'état à afficher ; il manque l'action inverse (purge de
+       `activeChallenge`, restauration des filtres, statut serveur remis à `read`).
+  - **Défis en Mode Expert** — à coder sur la branche dédiée, avec le déblocage
+    (constaté le 2026-08-15 en livrant Music Expert). Aujourd'hui l'Expert **n'émet pas**
+    de défi et **refuse** d'en jouer un : ouvrir `musics.html?expert=1` avec un défi actif
+    redirige vers le mode normal. Raison : un défi porte un barème (nombre d'essais) et une
+    cible ; joué en Expert le barème n'est plus comparable (5 à 30 essais contre 3), et la
+    cible peut être un instrumental, qui n'a aucune parole à révéler. Ce qu'il faudra :
+    - colonne `challenge_is_expert` sur `messages` (même forme que `is_expert` sur
+      `game_sessions`, migration 031) — sans elle le destinataire ne peut pas savoir en
+      quel mode le défi a été émis
+    - tirage de la cible du défi restreint au pool `music_expert` côté émetteur
+    - les deux points d'acceptation (`js/challenge-notif.js` et `profile/friends/friends.js`,
+      cf. `MODE_PAGE`) doivent ajouter `?expert=1` à l'URL du mode
+    - barème : 1 défi Expert ne se compare qu'à un autre défi Expert. Le bonus XP prévu
+      ci-dessous (x2/x3 sur le mutuel) s'y branche naturellement.
+- [ ] **Bonus XP Social Link selon la performance en défi** — actuellement XP mutuel fixe (35)
+  sur un défi battu (`checkChallengeCompletion()`, `js/challenge-result.js`). À faire varier
+  selon le nombre de tentatives utilisées — **pas le temps** : déclaratif côté client, donc plus
+  facile à trafiquer qu'un nombre d'essais qui découle directement du jeu réel. Pour un défi
+  joué en **Mode Expert** (révision 2026-08-13 : Expert a maintenant plusieurs tentatives comme
+  le mode normal, donc la comparaison d'essais entre les deux joueurs redevient possible — le
+  bonus n'est plus justifié par "pas de comparaison possible" mais par la difficulté du mode
+  lui-même, indice dégradé qui ne s'améliore pas) : bonus significatif à part (x2/x3 sur le
+  mutuel normal) pour avoir battu le défi en Expert, à brancher sur `GET /api/user/compare`
+  déjà existant (comparaison de stats entre amis, +10/+20 XP, cooldown 72h) plutôt que
+  d'inventer un système parallèle.
+- [ ] **Connexion rapide Discord** — 📅 **reporté en 2.2** (arbitrage Hamza, 2026-08-27).
+  Un temps envisagé dans la 2.1 avec les classements et les défis Expert, puis sorti du lot :
+  c'est le seul des cinq qui touche à l'**authentification**, le plus risqué (flow OAuth,
+  migration, liaison de comptes), et le seul dont la valeur ne dépend pas d'être livré
+  maintenant. Le décaler ne retire rien aux joueurs — les quatre autres lots, eux, sont faits.
+  À grouper avec la **vérification d'e-mail** ci-dessus : les deux touchent le même code
+  d'inscription, les faire ensemble coûte bien moins cher que séparément.
+
+  **Ordre retenu : lier d'abord, inscrire ensuite.** Lier est strictement additif (le compte
+  reste e-mail + mot de passe, Discord devient une identité en plus). L'inscription via
+  Discord, elle, change le modèle de compte — des comptes sans mot de passe, ce qui ruisselle
+  sur la réinitialisation, la suppression RGPD, et laisse le joueur sans accès si Discord
+  tombe ou s'il quitte la plateforme. Faire la liaison d'abord signifie que l'inscription
+  réutilisera ensuite une machinerie déjà éprouvée.
+
+  (lier un compte existant + option à l'inscription, comme "Sign in with Google" sur d'autres
+  sites) — compatible avec le modèle sessions PHP actuel (OAuth vérifie l'identité, puis
+  session normale ouverte comme un login classique, pas de JWT).
+  Points à trancher à l'implémentation :
+  - Discord ne garantit pas un email vérifié → touche directement l'item "vérification d'email
+    à l'inscription" ci-dessous, à voir ensemble
+  - Liaison à un compte existant **uniquement depuis le profil en étant déjà connecté** (bouton
+    "Lier Discord"), pas d'auto-merge automatique par correspondance d'email — évite la classe
+    de risque prise de compte par email
+  - Schéma minimal : colonne `discord_id` (unique) + `discord_username` sur `users`, pas de
+    table `oauth_accounts` séparée tant qu'un seul provider existe
+  - `discord_id` = donnée personnelle → à intégrer au flow RGPD existant (suppression/export)
+- [ ] **Classements séparés plutôt qu'un score unique** (décision 2026-08-15, suite à la
+  migration 032 qui fait compter toutes les parties). Un classement au volume récompenserait
+  celui qui enchaîne 200 parties plutôt que le meilleur joueur. Trois axes distincts :
+  - **Meilleure série** — la régularité, déjà mesurée par la streak (jours distincts).
+  - **Meilleur ratio** — victoires / parties, **lissé** pour qu'un joueur à 1 partie et
+    1 victoire ne soit pas premier. Deux méthodes possibles : moyenne bayésienne
+    `(wins + C·m) / (games + C)` avec `m` le taux moyen global et `C` ≈ 20 parties
+    fictives (simple à expliquer au joueur), ou borne inférieure de Wilson à 95 %
+    (plus rigoureuse, plus dure à expliquer). Recommandation : bayésienne, parce qu'un
+    classement dont personne ne comprend le calcul est perçu comme truqué.
+  - **Meilleur score** — général et par mode, sur le volume assumé.
+  Chaque axe existe aussi en version Expert (`is_expert`), soit la 4e dimension déjà prévue
+  ci-dessous.
+- [ ] **Filtre "Expert" sur le classement** — `api/leaderboard/` distingue déjà mode / période /
+  métrique ; ajouter une 4e dimension (colonne `is_expert` sur `game_sessions`) plutôt qu'un
+  classement séparé — réutilise tout le pipeline existant (endpoint, agrégation `user_stats`,
+  cache horaire) au lieu d'un système parallèle.
+- [ ] **Compendium des unlocks** — vue "archive" style Persona (icône livre, aura Velvet Room),
+  structurée en **chapitres** : Naissance (inscription), Amitié (demandes acceptées + montées de
+  rang Social Link), Badges, Titres, Wallpapers, Défis (1ère victoire, records), Mode Expert
+  (1ère complétion par mode + badge 6/6), Compte lié (Discord), Streaks (record, récupérations
+  Jack Frost). Aucune nouvelle donnée serveur nécessaire pour la quasi-totalité :
+  `badges_unlocked`/`user_titles` déjà en base avec dates, et les montées de rang Social Link
+  sont déjà loggées avec timestamp (`social_link_rankup_notifs`, jamais purgé, juste marqué vu).
+- [ ] **Petits fixes trouvés lors de l'audit PR #57, laissés de côté à l'époque** — inclus dans
+  ce lot puisque Mode Expert retouche de toute façon les 6 modes :
+  - `uniqueDaysPlayed` incohérent entre modes : un give-up compte pour Music/AllOutAttack/
+    Personae mais pas pour Classic/Emoji/Silhouette
+  - Texte des titres `naoya_first_awakening`/`maya_always_be_positive` mentionne "avec filtre
+    P1/P2" alors que la vraie condition (serveur et client) ne vérifie aucun filtre
 - [ ] **Historique de profil** : graphe de streak + calendrier des jours joués (`uniqueDaysSet` déjà en base).
 - [ ] **Saison / ladder** avec reset périodique + récompenses.
-- [ ] **Compendium des unlocks** — vue "archive" style Persona de tous les badges/titres/wallpapers
-  débloqués avec leur date (réutilise `badges_unlocked`/`user_titles` déjà en base, pas de
-  nouvelle donnée serveur nécessaire).
 - [ ] **Vérification d'email à l'inscription** (confirmer l'adresse avant activation complète) — détail dans 🔐 Sécurité/compte ci-dessous.
 - [ ] **Stratégie assets AOA + Git LFS** — détail dans 🔴 À prévoir assez tôt ci-dessous.
 - [ ] **CRUD Badges (admin)** — proposé par Hamza le 2026-07-19 suite au bug event_codes/badge_id
@@ -230,6 +391,11 @@ Nouveau jeu — cas A (roster inédit)
   encore de décision de version.
 - [ ] **Notifications push (PWA)** — rappel quotidien (levier de rétention « daily ») — écarté
   pour la 2.1, reste en idée.
+- [ ] 💡 **Carte récap périodique** (façon "wrapped") — parties jouées, victoires, mode préféré,
+  streak sur la période. Distincte de la carte de profil déjà livrée (`profile/share-card.js`,
+  instantané figé de l'état actuel) — réutiliserait la même génération d'image/mêmes thèmes avec
+  des données agrégées dans le temps à la place. Hebdo vs mensuel pas tranché. **En réflexion**,
+  pas de version cible, probablement pas 2.1.
 
 ### 🔐 Sécurité / compte
 
@@ -281,13 +447,13 @@ Nouveau jeu — cas A (roster inédit)
 > Synthèse : backend PHP/MariaDB complet (auth, sessions, social, leaderboard, admin, RGPD),
 > profil personnalisable (avatars groupés, musique, couleurs, badges, titres, wallpapers),
 > Social Link rangs 1-10, défis, streak globale + Jack Frost, FAQ, i18n 6 langues,
-> **621 tests JS · 185 PHPUnit · 54 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
+> **863 tests JS · 237 PHPUnit · 113 E2E · PHPStan niveau 5 · CI/CD GitHub Actions**.
 
 ### Backend & Infrastructure
 
 | #   | Fonctionnalité                                 | Notes                                                                            |
 | --- | ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| B1  | Schéma BDD (23 tables, MySQL/MariaDB)          | `sql/bdd_mysql.sql` = source de vérité + migrations `sql/migrations/` (000→020)   |
+| B1  | Schéma BDD (24 tables, MySQL/MariaDB)          | `sql/bdd_mysql.sql` = source de vérité + migrations `sql/migrations/` (000→020)   |
 | B2  | API auth — register / login / logout / me      | Sessions PHP httpOnly, remember-me hashé, **reset mot de passe** (email)          |
 | B3  | API sessions + streak par-mode & **globale**   | Calcul serveur (`api/lib/streak.php`), frontière Paris, contrat de schéma testé   |
 | B4  | API user — GET/PATCH/DELETE + stats + migrate  | Migration localStorage→BDD idempotente                                            |
@@ -337,8 +503,8 @@ Nouveau jeu — cas A (roster inédit)
 
 | #   | Élément                                       | Notes                                                                         |
 | --- | --------------------------------------------- | ----------------------------------------------------------------------------- |
-| Q1  | Tests : 621 Vitest · 185 PHPUnit · 54 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
-| Q2  | i18n EN/FR/ES/DE/IT/PT (987 clés)             | `npm run i18n:check`                                                          |
+| Q1  | Tests : 863 Vitest · 237 PHPUnit · 113 E2E     | `npm test` · `make test-php` · `npm run test:e2e`                             |
+| Q2  | i18n EN/FR/ES/DE/IT/PT (1075 clés)             | `npm run i18n:check`                                                          |
 | Q3  | PHPStan niveau 5 + ESLint + Prettier          | Dans la CI                                                                     |
 | Q4  | Seuils de couverture en CI                    | `npm run test:coverage` (~77 %)                                              |
 | Q5  | Docker Compose (DB + PHP + phpMyAdmin + seed) | `make up` — 19 faux joueurs                                                   |

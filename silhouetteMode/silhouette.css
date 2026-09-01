@@ -12,6 +12,8 @@
    ===================================================== */
 
 .silhouette-box {
+  /* Référent de positionnement du voile de chargement (.silhouette-loader) */
+  position: relative;
   width: 100%;
   max-width: 600px;
   height: 600px;
@@ -58,7 +60,15 @@
   transition:
     filter 0.3s ease,
     visibility 0s;
-  animation: popInSilhouette 0.4s ease;
+  /* ⚠️ NE PAS remettre d'`animation` ici (retirée en 2.1).
+     `popInSilhouette` animait `transform` et `opacity` — précisément les deux
+     propriétés que modeSilhouette.js pilote en style inline. Une animation en
+     cours l'emporte sur l'inline dans la cascade : pendant ses 400 ms l'image
+     s'affichait à scale(1) au lieu de scale(1.8) (dézoom visible au premier
+     chargement, plus jamais ensuite puisque l'animation ne rejoue pas), et
+     surtout, en Mode Expert, elle forçait opacity 0 → 1 par-dessus le masquage
+     de setFlashVisible(false) : la silhouette était donnée AVANT le premier
+     flash. La transition douce est désormais gérée par .silhouette-loader. */
   /* Anti-triche : empêche de glisser l'image hors de .silhouette-box (overflow:
      hidden) pour voir l'aperçu de drag natif du navigateur, qui n'applique pas
      le filtre — révélerait le personnage à deviner. Doublé par draggable="false"
@@ -68,35 +78,13 @@
 }
 
 /* =====================================================
-   2. NIVEAUX DE FLOU PROGRESSIF
-   Appliqués comme classe CSS sur #silhouetteImage
-   par modeSilhouette.js à chaque mauvaise réponse.
+   2. (Bloc `.blur-level-*` retiré en 2.1.)
+   Il se disait « appliqué par modeSilhouette.js à chaque mauvaise réponse » —
+   c'était faux : le mode dézoome (transform), il n'a jamais flouté. Aucune de
+   ces 7 classes n'était référencée nulle part. Laissé en place, il aurait
+   surtout fait croire à un mécanisme de flou inexistant, et son `filter` serait
+   entré en conflit avec le noircissement s'il avait un jour été branché.
    ===================================================== */
-
-/* Niveau 0 : image très floue (début de partie) */
-.blur-level-0 {
-  filter: blur(14px);
-}
-.blur-level-1 {
-  filter: blur(12px);
-}
-.blur-level-2 {
-  filter: blur(10px);
-}
-.blur-level-3 {
-  filter: blur(8px);
-}
-.blur-level-4 {
-  filter: blur(6px);
-}
-.blur-level-5 {
-  filter: blur(3px);
-}
-/* Niveau 6 : image nette (révélation finale) */
-.blur-level-6 {
-  filter: blur(0px);
-  transition: filter 0.4s ease;
-}
 
 /* =====================================================
    3. MAUVAISES RÉPONSES (style silhouette)
@@ -167,14 +155,52 @@
    5. ANIMATION D'APPARITION DE LA SILHOUETTE
    ===================================================== */
 
-@keyframes popInSilhouette {
-  0% {
-    transform: scale(0.92);
-    opacity: 0;
+/* Voile de chargement — occupe la boîte tant que la silhouette n'est pas décodée.
+   Remplace l'ancien pop-in : il ne touche NI transform NI opacity de l'image
+   (cf. le bloc #silhouetteImage), il vit dans son propre élément par-dessus. */
+.silhouette-loader {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: inherit;
+  border-radius: 14px;
+  z-index: 2;
+}
+
+.silhouette-box.is-loading .silhouette-loader {
+  display: flex;
+}
+
+.silhouette-loader::before {
+  content: "";
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(51, 51, 51, 0.2);
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: silhouetteLoaderSpin 0.9s linear infinite;
+}
+
+.darkmode .silhouette-loader::before {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-top-color: #eee;
+}
+
+/* Respecte le réglage système : un spinner qui tourne en boucle est exactement
+   le type de mouvement que `prefers-reduced-motion` demande de couper. */
+@media (prefers-reduced-motion: reduce) {
+  .silhouette-loader::before {
+    animation-duration: 3s;
   }
-  100% {
-    transform: scale(1);
-    opacity: 1;
+}
+
+@keyframes silhouetteLoaderSpin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -251,5 +277,82 @@
   #textbar {
     min-width: 0 !important; /* Annule le min-width:240px inline */
     flex: 1 1 120px; /* Peut rétrécir librement, s'étend si possible */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MODE EXPERT — bouton FLASH
+   ═══════════════════════════════════════════════════════════════════════════
+   L'image reste à opacity:0 en permanence (piloté en JS) ; le bouton la révèle
+   pour flashDurationMs(). Le bloc n'existe que sur ?expert=1 : `body.expert-mode`
+   est posé par setupExpertToggle() (js/gameCore.js).
+
+   ⚠️ Aucune transition sur #silhouetteImage[style*="opacity"] : un fondu
+   rallongerait le flash de façon invisible dans le code de jeu et rendrait la
+   durée annoncée fausse. */
+.flash-block {
+  display: none;
+}
+
+body.expert-mode .flash-block {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.flash-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 26px;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, #d40000, #ff2b2b);
+  border: 3px solid #000;
+  border-radius: 4px;
+  cursor: pointer;
+  transform: skewX(-6deg);
+  box-shadow: 0 0 14px rgba(255, 0, 0, 0.45);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+
+.flash-btn:hover:not(.disabled),
+.flash-btn:focus-visible:not(.disabled) {
+  transform: skewX(-6deg) scale(1.05);
+  box-shadow: 0 0 22px rgba(255, 0, 0, 0.7);
+}
+
+.flash-btn:active:not(.disabled) {
+  transform: skewX(-6deg) scale(0.97);
+}
+
+/* Plus de crédit (ou partie finie) : bouton visible mais inerte — le compteur
+   reste lisible, c'est lui qui explique pourquoi il ne se passe rien. */
+.flash-btn.disabled {
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.flash-counter {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.darkmode .flash-btn {
+  border-color: #fff;
+}
+
+@media (max-width: 480px) {
+  .flash-btn {
+    width: min(340px, 90vw);
+    justify-content: center;
+    font-size: 1rem;
   }
 }

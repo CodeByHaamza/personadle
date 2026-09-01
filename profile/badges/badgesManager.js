@@ -425,6 +425,7 @@ function initializeProfileBadgesData(profile) {
 
   // Music
   if (profile.gaveUpOnOurLight === undefined) profile.gaveUpOnOurLight = false;
+  if (profile.gaveUpOnMemoriesOfYou === undefined) profile.gaveUpOnMemoriesOfYou = false;
 
   // For Real (Ryuji)
   if (profile.foundRyujiAOA === undefined) profile.foundRyujiAOA = false;
@@ -1129,12 +1130,18 @@ function setupEventCodeRedeem(profile, saveProfile) {
  * @param {HTMLInputElement} input - Le champ de saisie
  * @param {HTMLElement} msg - L'élément de message
  */
+/** Traduction avec repli — t() renvoie la clé si absente (CLAUDE.md §5). */
+function tCode(key, fallback) {
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : fallback;
+}
+
 export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
   const code = input.value.trim().toUpperCase();
 
   // Vérifier que le code n'est pas vide
   if (!code) {
-    showCodeMessage(msg, "⚠️ Please enter a code first!", "warning");
+    showCodeMessage(msg, tCode("badges.event_code_empty", "⚠️ Please enter a code first!"), "warning");
     return;
   }
 
@@ -1143,7 +1150,11 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
   // doit fonctionner immédiatement sans nouveau déploiement.
   const api = window._personadleApi;
   if (!api) {
-    showCodeMessage(msg, "❌ Invalid code. Check your spelling!", "error");
+    showCodeMessage(
+      msg,
+      tCode("badges.event_code_failed", "⚠️ Couldn't reach the server. Try again in a moment."),
+      "error",
+    );
     input.value = "";
     return;
   }
@@ -1151,6 +1162,13 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
   try {
     const res = await api.badges.redeem(code);
     input.value = "";
+
+    // Un profil enregistré avant l'ajout du champ n'a pas la clé : `initProfile()`
+    // ne pose `eventCodes: []` que sur un profil NEUF. Sans ce garde-fou,
+    // `.includes()` lève un TypeError APRÈS que le serveur a accordé le badge —
+    // et le catch l'annonçait au joueur comme un code invalide.
+    if (!Array.isArray(profile.eventCodes)) profile.eventCodes = [];
+    if (!Array.isArray(profile.badges)) profile.badges = [];
 
     if (!profile.eventCodes.includes(code)) profile.eventCodes.push(code);
 
@@ -1163,15 +1181,43 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     saveProfile();
     renderBadgesModal(profile, saveProfile);
     renderBadgesPreview(profile);
-    showCodeMessage(msg, "🎉 Badge unlocked successfully!", "success");
+    showCodeMessage(msg, tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"), "success");
   } catch (e) {
     input.value = "";
-    if (e?.status === 409) {
-      showCodeMessage(msg, "✅ You already redeemed this code!", "success");
-    } else if (e?.status === 410) {
-      showCodeMessage(msg, "⏰ This event is not active yet or has expired.", "error");
-    } else {
-      showCodeMessage(msg, "❌ Invalid code. Check your spelling!", "error");
+
+    // Chaque cause a son message. Auparavant tout ce qui n'était ni 409 ni 410
+    // devenait « code invalide » : un joueur déconnecté (401) ou victime d'une
+    // coupure réseau croyait s'être trompé et réessayait un code pourtant bon.
+    switch (e?.status) {
+      case 401:
+        showCodeMessage(
+          msg,
+          tCode("badges.event_code_signin", "🔒 Sign in to redeem a code — badges are saved to your account."),
+          "warning",
+        );
+        break;
+      case 409:
+        showCodeMessage(msg, tCode("badges.event_code_already", "✅ You already redeemed this code!"), "success");
+        break;
+      case 410:
+        showCodeMessage(
+          msg,
+          tCode("badges.event_code_expired", "⏰ This event is not active yet or has expired."),
+          "error",
+        );
+        break;
+      case 400:
+      case 404:
+        // Les deux seuls cas où le code est réellement en cause.
+        showCodeMessage(msg, tCode("badges.event_code_error", "❌ Invalid code. Check your spelling!"), "error");
+        break;
+      default:
+        // 500, panne réseau, ou bug client : ne jamais accuser le code.
+        showCodeMessage(
+          msg,
+          tCode("badges.event_code_failed", "⚠️ Couldn't reach the server. Try again in a moment."),
+          "error",
+        );
     }
   }
 }

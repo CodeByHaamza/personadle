@@ -31,7 +31,19 @@
     "error": "Une erreur est survenue.",
     "admin_gift_received": "🎁 Cadeau reçu !",
     "tap_continue": "Appuyer pour continuer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "expert_enter": "⚡ Mode Expert",
+    "expert_leave": "← Mode normal",
+    "expert_lyrics": "⚡ PAROLES",
+    "expert_locked": "🔒 Mode Expert",
+    "expert_cond_wins_under_attempts": "Gagne {{required}} parties en 4 essais ou moins",
+    "expert_cond_wins_single_day": "Gagne {{required}} parties dans la même journée",
+    "expert_cond_consecutive_perfects": "Gagne {{required}} parties d'affilée du premier coup",
+    "expert_cond_signin": "Connecte-toi pour débloquer le Mode Expert — ta progression suit ton compte.",
+    "expert_cond_unknown": "Reconnecte-toi pour voir ta progression.",
+    "expert_locked_title": "Mode Expert verrouillé",
+    "expert_unlocked_title": "Mode Expert débloqué !",
+    "expert_unlocked_hint": "Le bouton ⚡ est à toi."
   },
   "modes": {
     "classic": {
@@ -83,7 +95,15 @@
       "tooltip_persona": "Le Persona spécifique lié au personnage — ou sa forme Shadow.",
       "tooltip_arcana": "L'Arcane du Tarot qui définit son rôle symbolique et narratif.",
       "correct": "✅ Correct ! C'était {{name}} !",
-      "giveup_reveal": "❌ La réponse était {{name}}"
+      "giveup_reveal": "❌ La réponse était {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Une citation. Aucune catégorie, aucune couleur, aucun indice — la réplique et le nom, c'est tout.",
+      "expert_tip_1": "La citation est affichée dès le premier essai. C'est le seul indice que tu auras.",
+      "expert_tip_2": "Une réponse est juste ou fausse. Rien n'est comparé, rien ne passe au jaune.",
+      "expert_tip_3": "Si le personnage se nomme lui-même, son nom est masqué. Il réapparaît à la fin de la partie.",
+      "expert_tip_4": "Seuls les personnages ayant réellement une citation peuvent être tirés.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Classique normale."
     },
     "emoji": {
       "name": "Emoji",
@@ -110,7 +130,16 @@
       "closing": "✨ Laissez votre intuition vous guider... et lisez entre les emojis 🧠📲",
       "not_in_database": "\"{{name}}\" n'est pas dans la base de données.",
       "correct": "✅ Correct ! C'était {{name}} !",
-      "giveup_reveal": "Vous avez abandonné ! La réponse était : {{name}}"
+      "giveup_reveal": "Vous avez abandonné ! La réponse était : {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Les mêmes émojis, révélés de la même façon — sauf qu'il y en a un qui ment.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Exactement un émoji est un leurre, emprunté à un autre personnage.",
+      "expert_tip_2": "Il peut se trouver n'importe où dans la séquence — au début, au milieu ou à la fin.",
+      "expert_tip_3": "Il ne change jamais pendant la partie, et recharger ne le retire pas au sort.",
+      "expert_tip_4": "Les vrais émojis sont affichés à la fin de la partie.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Émoji normale."
     },
     "silhouette": {
       "name": "Silhouette",
@@ -135,7 +164,18 @@
       "games_list": "Personnages de Persona 1, 2 (IS & EP), 3, 4, 5 et P5 : The Phantom X, spin-offs inclus.",
       "closing": "🧠 Observez les ombres, faites confiance à vos instincts, et devenez le détective de silhouettes ultime !",
       "correct": "🎉 Vous avez trouvé {{name}} !",
-      "giveup_reveal": "❌ La réponse était {{name}}"
+      "giveup_reveal": "❌ La réponse était {{name}}",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "La silhouette reste cachée. Tu ne la vois qu'en flashs — et c'est toi qui choisis quand.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Appuie sur FLASH pour afficher la silhouette une fraction de seconde.",
+      "expert_tip_2": "Tu démarres avec un flash, et chaque erreur t'en redonne un.",
+      "expert_tip_3": "Chaque erreur allonge aussi tous les flashs suivants.",
+      "expert_tip_4": "Pas de zoom ici : la silhouette entière est montrée — le temps que dure le flash.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner ne se débloque.",
+      "expert_tip_6": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série Silhouette normale.",
+      "expert_flash": "⚡ FLASH",
+      "loading": "Chargement de la silhouette…"
     },
     "alloutattack": {
       "name": "All-Out Attack",
@@ -157,7 +197,14 @@
       "giveup_reveal": "❌ Tu as abandonné ! La réponse était : {{name}}",
       "no_characters": "Aucun personnage disponible avec les filtres actuels.",
       "prev_mode": "← Mode Emoji",
-      "next_mode": "Mode Silhouette →"
+      "next_mode": "Mode Silhouette →",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Le flou ne se lève jamais, et la couleur a disparu.",
+      "expert_tip_1": "L'image reste au flou maximum toute la partie. Une erreur ne révèle rien.",
+      "expert_tip_2": "Elle est aussi en noir et blanc — la couleur des cheveux et des tenues ne t'aidera pas.",
+      "expert_tip_3": "Il reste la silhouette, la pose et la composition. C'est tout le jeu.",
+      "expert_tip_4": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_5": "L'Expert a son propre personnage du jour et ses propres stats. Il ne compte pas dans ta série All-Out Attack normale."
     },
     "personae": {
       "name": "Personae",
@@ -184,7 +231,16 @@
       "correct": "✅ Bonne réponse ! Le Persona de {{name}} était {{persona}}.",
       "giveup_reveal": "❌ Dommage ! Le Persona de {{name}} était {{persona}}.",
       "prev_mode": "← Mode Silhouette",
-      "next_mode": "Mode Musique →"
+      "next_mode": "Mode Musique →",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_text": "Aucune image. Tu reçois le mythe derrière la persona, et tu nommes son manieur.",
+      "expert_tips": "💡 Conseils :",
+      "expert_tip_1": "Le nom de la persona est masqué dans le texte. Il réapparaît à la fin de la partie.",
+      "expert_tip_2": "N'importe quel manieur de cette même figure est accepté — Orphée vaut pour Makoto, Kotone comme Aigis.",
+      "expert_tip_3": "Seules les personas ayant réellement une fiche peuvent être tirées.",
+      "expert_tip_4": "L'illustration est révélée à la fin de la partie.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a sa propre persona du jour et ses propres stats. Il ne compte pas dans ta série Personae normale."
     },
     "music": {
       "name": "Musique",
@@ -212,7 +268,15 @@
       "giveup_reveal": "💡 C'était : {{title}}",
       "vocal_label": "🧑‍🎤 Voix : {{name}}",
       "listen_link": "🔗 Écouter ici",
-      "prev_mode": "← Mode Personae"
+      "prev_mode": "← Mode Personae",
+      "expert_goal": "⚡ Mode Expert :",
+      "expert_goal_intro": "Aucun son. Tu reçois les paroles de la chanson, un vers à la fois.",
+      "expert_tip_1": "Tu démarres avec un seul vers. Chaque mauvaise réponse en révèle un de plus.",
+      "expert_tip_2": "Les vers précédents restent à l'écran — tu peux remonter les relire quand tu veux.",
+      "expert_tip_3": "Le titre est masqué dans les paroles. Il réapparaît à la fin de la partie.",
+      "expert_tip_4": "Les instrumentaux sont exclus — toutes les chansons ici ont des paroles.",
+      "expert_tip_5": "Tu as 5 essais avant que le bouton Abandonner se débloque.",
+      "expert_tip_6": "L'Expert a sa propre chanson du jour et ses propres stats. Il ne compte pas dans ta série Music normale."
     }
   },
   "game": {
@@ -316,7 +380,10 @@
     "delete_account_confirm_btn": "Supprimer définitivement",
     "delete_account_success": "Ton compte a été désactivé. Tu vas être déconnecté.",
     "delete_account_error": "Une erreur est survenue. Réessaie ou contacte-nous.",
-    "delete_account_login_required": "Connecte-toi pour supprimer ton compte."
+    "delete_account_login_required": "Connecte-toi pour supprimer ton compte.",
+    "expert_title": "⚡ Mode Expert",
+    "expert_cols": "Gagnées / Jouées · Taux · Record · Série",
+    "expert_best_hint": "Le moins d'essais sur une victoire"
   },
   "badges": {
     "notification_title": "🎖️ Badge débloqué !",
@@ -456,7 +523,7 @@
       "description": "Quand le code ne pouvait pas atteindre l'ère PS1, Dzulian est descendu avec les textes anciens. Megami Ibunroku, IS, EP — la trinité préservée. Le GOAT qui a fait le pont entre deux générations de Persona."
     },
     "true_confidant": {
-      "name": "True Confidant",
+      "name": "Véritable Confident",
       "condition": "Atteindre le rang 10 du Social Link avec un ami",
       "description": "Un lien indéfectible forgé à travers victoires et défaites partagées. Un badge pour deux — la preuve que votre amitié transcende le Metaverse."
     },
@@ -464,6 +531,11 @@
       "name": "Esprit Sportif",
       "condition": "Entrer le code 'SPORT' entre le 6 avril et le 1er mai 2025",
       "description": "À l'image des équipes de Gekkoukan, Yasogami et Shujin, tu as répondu à l'appel en cette Journée Internationale du Sport !"
+    },
+    "gyotre": {
+      "name": "L'amour de Gyotre",
+      "condition": "???",
+      "description": "Seuls les vrais savent comment build violet."
     },
     "arati": {
       "name": "Bénédiction d'Arati",
@@ -491,122 +563,127 @@
       "description": "Les deux faces d'une même pièce. Le garçon souriant et le masque noir... Les deux visages de la justice révélés."
     },
     "one_shot": {
-      "name": "Critical Strike",
+      "name": "Coup Critique",
       "condition": "Deviner au premier essai",
       "description": "Pourquoi perdre du temps avec la stratégie quand on peut frapper directement ? Décerné pour une première tentative parfaite."
     },
     "aoa_vision": {
-      "name": "Piercing the Fog",
+      "name": "Percer le Brouillard",
       "condition": "Deviner l'All-Out Attack au premier essai",
       "description": "La vérité était voilée dans un lourd brouillard, mais tu l'as percé du premier regard."
     },
     "emoji_decoder": {
-      "name": "Emoji Decoder",
+      "name": "Décodeur d'Émojis",
       "condition": "Gagner 10 parties en mode Emoji",
       "description": "Le Metaverse parle sans mots. Avec une finesse royale, tu as percé le code de l'âme numérique."
     },
     "navigator": {
-      "name": "Eye of the Navigator",
+      "name": "Œil du Navigateur",
       "condition": "Utiliser l'indice 50 fois en mode Classique",
       "description": "Cinquante anomalies scannées et déchiffrées. Aucune vérité ne peut se cacher de ton radar."
     },
     "velvet_regular": {
-      "name": "Velvet Regular",
+      "name": "Habitué du Velvet",
       "condition": "Jouer 50 jours uniques",
       "description": "Cinquante jours entre l'esprit et la matière. Le maître de ces lieux reconnaît désormais tes pas."
     },
     "strega": {
-      "name": "Apostles of the Fall",
+      "name": "Apôtres de la Chute",
       "condition": "Trouver Hypnos, Moros et Médée en mode Personae",
       "description": "Pourquoi combattre l'inévitable ? Nous sommes les metteurs en scène de ta magnifique destruction."
     },
     "twin_fist": {
-      "name": "Twin Fist",
+      "name": "Poings Jumeaux",
       "condition": "Trouver une Persona de Makoto Nijima et Akihiko en mode Personae",
       "description": "Force nucléaire et éclair crépitant ! Tu as identifié le duo de bagarreurs qui dirigent avec leurs poings."
     },
     "twin_spear": {
-      "name": "Twin Spear",
+      "name": "Lances Jumelles",
       "condition": "Trouver une Persona de Kotone et Ken en mode Personae",
       "description": "L'un cherche la vengeance par la lumière, l'autre dirige avec une lame dansante."
     },
     "tradition_modernite": {
-      "name": "Chronological Convergence",
+      "name": "Convergence Chronologique",
       "condition": "Trouver les personas de Naoto et Futaba + leurs musiques",
       "description": "Deux esprits, séparés d'un siècle, désormais synchronisés. La tradition et l'innovation ne font qu'un."
     },
     "shapeshifter": {
-      "name": "The Formless Soul",
+      "name": "L'Âme Sans Forme",
       "condition": "Deviner le même personnage dans 3 modes différents",
       "description": "Un masque peut changer, la scène peut basculer, mais le vrai soi reste constant."
     },
     "ideal_reality": {
-      "name": "Gentle Illusion",
+      "name": "Douce Illusion",
       "condition": "Abandonner quand la cible est 'Our Light' en mode Musique",
       "description": "Pourquoi lutter pour atteindre la lumière quand le bonheur peut t'être offert ?"
     },
+    "false_spring": {
+      "name": "Un Doux Sursis",
+      "condition": "Refuser le sacrifice et attendre la fin aux côtés de Ryoji",
+      "description": "Assis à ses côtés sur le toit, vous refusez de fermer les yeux. Une paix magnifique mais cruelle, en attendant une fin inéluctable où le printemps n'arrivera jamais."
+    },
     "for_real": {
-      "name": "For Real",
+      "name": "Carrément !",
       "condition": "Trouver l'All-Out Attack de Ryuji et sa persona",
       "description": "YEAH ! Tu as trouvé le Phantom Thief le plus passionné !"
     },
     "night_owl": {
-      "name": "Phantom of the Night",
+      "name": "Fantôme de la Nuit",
       "condition": "Jouer entre minuit et 5h (heure de Paris)",
       "description": "Les vrais voleurs opèrent sous le couvert de l'obscurité. Le monde cognitif est à toi."
     },
     "nyx_hour": {
-      "name": "Nyx Hour",
+      "name": "L'Heure de Nyx",
       "condition": "Jouer entre minuit et 0h30 (heure de Paris)",
       "description": "L'horloge sonne minuit, mais demain n'arrive jamais. Tu as été témoin de l'arrivée de la fin."
     },
     "stylist": {
-      "name": "Breathtaking Aesthetics",
+      "name": "Esthétique à Couper le Souffle",
       "condition": "Personnaliser avatar + couleur UI + 1 badge + musique de profil",
       "description": "Quelle passion ! Tu as refusé la médiocrité d'un profil par défaut pour forger un chef-d'œuvre visuel."
     },
     "pyro_spark": {
-      "name": "The Ignition",
+      "name": "L'Étincelle",
       "condition": "Atteindre une série de 7 jours",
       "description": "Un petit scintillement dans le noir. Pendant sept jours, tu as gardé la flamme en vie."
     },
     "raphael": {
-      "name": "The Divine Blaze",
+      "name": "Le Brasier Divin",
       "condition": "Atteindre une série de 30 jours",
       "description": "Trente jours. Le scintillement est devenu un enfer rugissant."
     },
     "surt": {
-      "name": "Ragnarök's Dawn",
+      "name": "L'Aube du Ragnarök",
       "condition": "Atteindre une série de 90 jours",
       "description": "Quatre-vingt-dix jours d'une persistance absolue et implacable."
     },
     "lucifer": {
-      "name": "Crest of the Morning Star",
+      "name": "Blason de l'Étoile du Matin",
       "condition": "Atteindre une série de 120 jours",
       "description": "Cent vingt levers de soleil. Au-delà des feux de la destruction se trouve la clarté aveuglante."
     },
     "helel": {
-      "name": "The Eternal Zenith",
+      "name": "Le Zénith Éternel",
       "condition": "Atteindre une série de 365 jours",
       "description": "Au-delà de la rébellion, au-delà de la ruine, se trouve la grâce pure de la première étoile."
     },
     "reborn_phoenix": {
-      "name": "Phoenix Reborn",
+      "name": "Phénix Renaissant",
       "condition": "Restaurer ta série après l'avoir perdue",
       "description": "Tu as refusé de laisser les ténèbres réclamer ton héritage. Des cendres, tu t'élances vers une nouvelle aube."
     },
     "best_bro": {
-      "name": "Best Bro",
+      "name": "Meilleur Pote",
       "condition": "Avoir 2 amis ou plus",
       "description": "Les liens d'amitié transcendent le temps et le destin. Tu as trouvé tes alliés."
     },
     "data_mining": {
-      "name": "Data Mining",
+      "name": "Exploration de Données",
       "condition": "Visiter 5 profils d'utilisateurs différents",
       "description": "Analyse de la compétition ou recherche de nouveaux liens ? Tu as scruté l'âme de cinq utilisateurs."
     },
     "leblanc_meeting": {
-      "name": "Leblanc Meeting",
+      "name": "Réunion au Leblanc",
       "condition": "3 amis ou plus connectés le même jour que toi",
       "description": "Âmes synchronisées ! Même le plus occupé des Phantom Thieves a besoin d'une pause café."
     },
@@ -621,20 +698,30 @@
       "description": "Les étoiles s'alignent pour une seule nuit. Ton vœu a été consigné dans les archives célestes."
     },
     "promised_day": {
-      "name": "The Promised Day",
+      "name": "Le Jour Promis",
       "condition": "Jouer le 31 décembre ET le 1er janvier",
       "description": "L'horloge sonne les douze coups de l'année mourante. Tu as fait face au seuil de la nouvelle aube."
     },
     "hifumi_archives": {
-      "name": "The Grandmaster's Tome",
+      "name": "Le Traité de la Grande Maîtresse",
       "condition": "???",
       "description": "Un vrai tacticien étudie le plateau avant de frapper. Tu as découvert les rapports cachés."
     },
     "report": {
-      "name": "The Priestess's Audit",
+      "name": "L'Audit de la Prêtresse",
       "condition": "???",
       "description": "Puisant dans la sagesse méticuleuse de la Prêtresse, tu as documenté les anomalies."
-    }
+    },
+    "denial_of_self": {
+      "name": "Refus de Soi",
+      "condition": "Gagner 10 parties Expert dans chacun des 6 modes",
+      "description": "Tu as affronté chaque épreuve Expert sans rien renier. L'Ombre, c'est toi — et tu l'as maîtrisée."
+    },
+    "event_code_empty": "⚠️ Entre d'abord un code !",
+    "event_code_signin": "🔒 Connecte-toi pour utiliser un code — les badges sont liés à ton compte.",
+    "event_code_already": "✅ Tu as déjà utilisé ce code !",
+    "event_code_expired": "⏰ Cet événement n'est pas encore actif ou est terminé.",
+    "event_code_failed": "⚠️ Serveur injoignable. Réessaie dans un instant."
   },
   "social_link": {
     "rank_names": {
@@ -813,7 +900,9 @@
     "msg_clear": "Vider les résolus",
     "msg_clear_kept_active": "{{count}} défi(s) en cours conservé(s) — termine-les d'abord.",
     "msg_empty": "Aucun message pour l'instant.",
-    "delete_msg": "Supprimer"
+    "delete_msg": "Supprimer",
+    "server_unreachable": "Impossible de joindre le serveur. Ta session est probablement toujours valide — réessaie.",
+    "retry": "Réessayer"
   },
   "challenge": {
     "challenge_friend": "Défier un Ami",
@@ -828,7 +917,14 @@
     "active_challenge": "Défi",
     "notif_challenges_you": "vous lance un défi !",
     "notif_beat": "Battre",
-    "notif_attempts": "tentative(s)"
+    "notif_attempts": "tentative(s)",
+    "unknown_mode": "Le mode de ce défi est indisponible.",
+    "offline": "Tu dois être en ligne pour accepter un défi.",
+    "accept_failed": "Impossible d'accepter le défi. Réessaie.",
+    "abandon": "Abandonner le défi",
+    "abandon_confirm": "Abandonner ce défi ? Il ne comptera pas comme une défaite.",
+    "abandoned": "Défi abandonné. Tu peux en accepter un autre.",
+    "abandon_failed": "Impossible d'abandonner le défi. Réessaie."
   },
   "challenge_result": {
     "title_win": "BRAVO !",
@@ -1082,8 +1178,6 @@
     "footer_link": "FAQ",
     "q17": "Pourquoi n'y a-t-il pas de personnages Persona 4 dans le mode All-Out Attack ?",
     "a17": "Nous n'avons pas encore d'illustrations All-Out Attack de qualité (style Golden) pour Persona 4. Elles arriveront avec Persona 4 Revival.",
-    "q18": "Pourquoi je ne trouve pas de Personas de Persona 1 dans le mode Personae ?",
-    "a18": "Nous n'avons pas encore assez d'illustrations de qualité pour les Personas de Persona 1.",
     "q19": "Allez-vous ajouter d'autres jeux Atlus comme Metaphor ou Shin Megami Tensei ?",
     "a19": "On y réfléchit encore ! Pour l'instant PersonaDLE se concentre sur la série Persona.",
     "q20": "Le jeu sera-t-il mis à jour pour Persona 4 Revival et Persona 6 ?",

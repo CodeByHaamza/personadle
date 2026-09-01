@@ -12,7 +12,9 @@
 
 ## 🎮 Principe du jeu
 
-1. Un portrait est affiché entièrement masqué — **silhouette noire totale** (`brightness(0)`).
+1. Un portrait est affiché entièrement masqué — **silhouette noire totale**. Depuis la 2.1 le
+   noircissement est **cuit dans les pixels** (`js/silhouette_mask.js`), plus seulement appliqué
+   en CSS : voir « Anti-triche » plus bas.
 2. À chaque mauvaise réponse, l'image **dézoome** (le zoom passe de 1.8× à 1.0× par paliers de
    0.2) — la silhouette reste noire jusqu'à la victoire ou l'abandon, seul le cadrage change.
 3. Le joueur peut deviner à tout moment ; plus il attend, plus le cadrage se resserre.
@@ -65,8 +67,8 @@ La même image — deux états. À gauche, ce que voit le joueur. À droite, la 
 
 ## 📊 Progression du zoom
 
-La silhouette reste **noire** (`brightness(0)`) sur toute la partie — seul le cadrage se resserre
-à chaque mauvaise réponse (`scale()` CSS, pas de couleur/luminosité progressive) :
+La silhouette reste **noire** sur toute la partie — seul le cadrage se resserre à chaque
+mauvaise réponse (`scale()` CSS, pas de couleur/luminosité progressive) :
 
 | Essais | Zoom (`scale`) |
 | ------ | -------------- |
@@ -103,7 +105,9 @@ silhouetteMode/
 
 | Élément                          | Rôle                                                   |
 | -------------------------------- | ------------------------------------------------------ |
-| `#silhouetteContainer`           | Div contenant l'image avec `filter: brightness(0)` CSS |
+| `.silhouette-box`                | Div contenant l'image, le voile de chargement et le message de fin |
+| `#silhouetteImage`               | L'image elle-même — son `src` porte la version **déjà noircie** |
+| `.silhouette-loader`             | Voile de chargement, couvre le décodage de la première image |
 | `#textbar`                       | Champ de saisie avec autocomplete                      |
 | `#guessButton` / `#giveUpButton` | Actions principales                                    |
 | `#wrongGuessList`                | Liste des mauvaises réponses                           |
@@ -115,10 +119,48 @@ silhouetteMode/
 
 Styles spécifiques à l'effet silhouette :
 
-- `filter: brightness(0)` → silhouette noire complète, maintenue jusqu'à la victoire/l'abandon
+- `filter: brightness(0)` → **filet de sécurité uniquement** depuis la 2.1. Les pixels arrivent
+  déjà noirs ; ce filtre ne sert plus que si le noircissement par canvas a échoué
+  (`blackenToDataURL()` renvoie `null`), auquel cas on retombe sur l'ancien comportement
 - `filter: none` → appliqué uniquement à la révélation finale (victoire ou abandon)
 - `transform: scale()` → seul élément qui varie progressivement, par niveau d'essai (1.8× → 1.0×)
 - Transition CSS douce entre chaque niveau de zoom
+- ⚠️ **Ne jamais remettre d'`animation` sur `#silhouetteImage`** : une animation en cours bat le
+  style inline dans la cascade. L'ancienne `popInSilhouette` animait `transform` et `opacity`,
+  les deux propriétés pilotées par le JS — elle dézoomait l'image au premier chargement et,
+  en Mode Expert, la révélait avant le premier flash
+
+---
+
+## 🛡️ Anti-triche
+
+`filter: brightness(0)` est un effet **de peinture** : il n'existe qu'au moment d'afficher. Le
+bitmap présent dans le DOM restait donc l'image d'origine, et « clic droit → Copier l'image »
+livrait le personnage à deviner — sans outil ni compétence technique.
+
+Depuis la 2.1, `js/silhouette_mask.js` noircit l'image **dans ses pixels** via un canvas hors
+écran (remplissage noir en `source-in`, qui conserve le canal alpha — rendu identique au pixel
+près à `brightness(0)`). C'est ce résultat qui est donné à `<img src>` ; l'originale n'entre
+dans le DOM qu'à la révélation de fin de partie.
+
+Le chemin de **restauration de session** passe par le même flux : sans ça, un F5 en pleine
+partie rouvrirait le trou.
+
+Autres gardes, plus anciennes, contre le glisser-déposer (qui ignore lui aussi le filtre CSS) :
+`draggable="false"` (HTML), `-webkit-user-drag: none` (CSS) et `preventDefault('dragstart')` (JS).
+
+### Ce que ça ne protège pas — à ne pas croire fermé
+
+- L'**URL du fichier** reste visible dans l'onglet Réseau des DevTools.
+- La **cible du jour** reste en clair dans `localStorage` (les 6 modes sont concernés).
+
+Fermer ces deux-là demanderait de rendre la silhouette côté serveur. Ce n'est pas le sujet :
+l'intégrité du **classement** est défendue côté serveur (`api/lib/daily_target.php`), et ce
+module protège l'expérience du joueur honnête, pas le classement.
+
+Le mode **All-Out Attack** ne peut pas recevoir le même correctif : ses GIFs viennent d'un CDN
+cross-origin, qui « teinte » le canvas et fait échouer `toDataURL()`. Il faudrait activer CORS
+sur le bucket R2.
 
 ---
 

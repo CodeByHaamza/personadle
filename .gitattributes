@@ -1,0 +1,5 @@
+# Force des fins de ligne LF pour tous les fichiers texte, quel que soit l'OS
+# du contributeur — évite qu'un checkout Windows (core.autocrlf=true) convertisse
+# les fichiers en CRLF, ce qui fait planter l'ancien esbuild de vitest (0.21.5)
+# sur les fichiers combinant shebang + commentaire accentué (ex: scripts/validate_incoming.js).
+* text=auto eol=lf

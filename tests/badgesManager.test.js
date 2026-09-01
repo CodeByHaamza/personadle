@@ -165,6 +165,57 @@ describe("handleEventCodeSubmit", () => {
     expect(input.value).toBe("");
   });
 
+  // ── Messages d'erreur : chaque cause doit être distinguable ────────────────
+  // Auparavant tout ce qui n'était ni 409 ni 410 devenait « Invalid code. Check
+  // your spelling! ». Un joueur déconnecté (401) ou hors ligne croyait s'être
+  // trompé et réessayait indéfiniment un code pourtant valide.
+
+  it("tells a signed-out player to sign in instead of blaming the code (401)", async () => {
+    const profile = baseProfile();
+    const saveProfile = vi.fn();
+    redeemSpy.mockRejectedValue({ status: 401, message: "Unauthorized — please log in" });
+    input.value = "GYOTRE";
+
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
+
+    expect(msg.textContent).not.toMatch(/spelling/i);
+    expect(msg.textContent.toLowerCase()).toMatch(/sign in|connecte/);
+    expect(profile.eventCodes).toEqual([]);
+  });
+
+  it("does not blame the code on a network failure or server error", async () => {
+    const profile = baseProfile();
+    const saveProfile = vi.fn();
+    redeemSpy.mockRejectedValue(new Error("Failed to fetch")); // pas de .status
+    input.value = "GYOTRE";
+
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
+
+    expect(msg.textContent).not.toMatch(/spelling/i);
+    expect(saveProfile).not.toHaveBeenCalled();
+  });
+
+  // ── Régression : le badge était accordé côté serveur, puis le client plantait ──
+  // `initProfile()` ne pose `eventCodes: []` que sur un profil NEUF. Un profil
+  // enregistré avant l'ajout du champ n'a pas la clé : `.includes()` levait un
+  // TypeError APRÈS le 200 du serveur, et le catch l'affichait comme un code
+  // invalide. Le joueur avait donc le badge en base, mais lisait « code faux ».
+  it("succeeds on a legacy profile that has no eventCodes/badges arrays", async () => {
+    const profile = baseProfile();
+    delete profile.eventCodes;
+    delete profile.badges;
+    const saveProfile = vi.fn();
+    redeemSpy.mockResolvedValue({ redeemed: true, code: "GYOTRE", badge_id: "gyotre" });
+    input.value = "GYOTRE";
+
+    await handleEventCodeSubmit(profile, saveProfile, input, msg);
+
+    expect(profile.eventCodes).toContain("GYOTRE");
+    expect(profile.badges).toContain("gyotre");
+    expect(saveProfile).toHaveBeenCalledOnce();
+    expect(msg.textContent).not.toMatch(/spelling/i);
+  });
+
   it("rejects an unknown/invalid code without mutating the profile", async () => {
     const profile = baseProfile();
     const saveProfile = vi.fn();

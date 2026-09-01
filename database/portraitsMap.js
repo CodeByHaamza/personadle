@@ -91,6 +91,8 @@ export const portraitsMap = {
   "Yumi Ozawa":        "Yumi",
   "Ayane Matsunaga":   "Ayane",
   "Naoki Konishi":     "Naoki",
+  "Saki Konishi":      "Saki",
+  "Mayumi Yamano":     "Mayumi_Yamano",
   "Hisano Kuroda":     "Hisano",
   "Shu Nakajima":      "Shu",
   "Sayako Uehara":     "Sayako",
@@ -123,6 +125,8 @@ export const portraitsMap = {
   "Sumire Yoshizawa":  "Sumire",
   "Kasumi Yoshizawa":  "Kasumi",
   "Sae Niijima":       "Sae",
+  "Kobayakawa":        "Kobayakawa",
+  "Wakaba Isshiki":    "Wakaba_Isshiki",
   "Sojiro Sakura":     "Sojiro",
   "Chihaya Mifune":    "Chihaya",
   "Hifumi Togo":       "Hifumi",
@@ -206,4 +210,9 @@ export const portraitsMap = {
   "Yaldabaoth":        "Yaldabaoth",
   "Demon Painter":     "DemonPainter",
   "Merope":            "Merope",
+
+  // ── Persona Trinity Souls ──────────────────────────────────────────────────
+  "Shin Kanzato":      "Shin_Kanzato",
+  "Jun Kanzato":       "Jun_Kanzato",
+  "Ryo Kanzato":       "Ryo_Kanzato",
 };

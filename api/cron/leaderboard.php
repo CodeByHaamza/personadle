@@ -14,6 +14,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/leaderboard_metrics.php';
 
 requireCronSecret();
 
@@ -80,38 +81,60 @@ jsonSuccess([
  * l'activité réelle de la période (jour/semaine/mois en cours), pas les
  * totaux cumulatifs de user_stats.
  *
- * 'streak' sur une période courte = nb de victoires (approximation identique
- * au fallback live dans buildPeriodLeaderboardLive).
+ * 'streak' calcule la vraie série de jours consécutifs (méthode des îlots,
+ * api/lib/leaderboard_metrics.php) — identique au fallback live de
+ * buildPeriodLeaderboardLive, puisque les deux appellent la même fonction.
  */
 function _recalculate(PDO $pdo, string $mode, string $period, string $periodStart, string $metric): void
 {
     $modeFilter = ($mode === 'all') ? '' : 'AND gs.mode = :mode';
 
-    $scoreExpr = match ($metric) {
-        'wins'    => "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)",
-        'winrate' => "IF(COUNT(*) >= 5, ROUND(SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END) / COUNT(*) * 100, 1), NULL)",
-        'streak'  => "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)",
-        'perfect' => "SUM(CASE WHEN gs.result = 'win' AND gs.attempts = 1 THEN 1 ELSE 0 END)",
-        'games'   => 'COUNT(*)',
-        default   => "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)",
-    };
-
-    $sql = "
-        SELECT
-            gs.user_id,
-            ({$scoreExpr}) AS score
-        FROM game_sessions gs
-        JOIN users u ON u.id = gs.user_id AND u.is_deleted = 0
-        WHERE gs.played_date >= :period_start
-        {$modeFilter}
-        GROUP BY gs.user_id
-        HAVING score IS NOT NULL AND score > 0
-        ORDER BY score DESC
-        LIMIT 500
-    ";
-
+    // ── Le classement compte des PARTIES, volontairement ─────────────────────
+    // Décision produit (Hamza) : « toutes les parties comptent » vaut aussi pour le
+    // classement. 100 victoires jouées dans la journée valent 100 — compter des
+    // jours distincts pénaliserait le joueur assidu, qui est précisément celui que
+    // le classement doit récompenser. Les axes ratio et série donnent les autres
+    // angles de lecture, chacun avec sa propre règle.
+    //
+    // Les formules vivent dans api/lib/leaderboard_metrics.php, partagées avec
+    // api/leaderboard/index.php. Elles étaient auparavant recopiées ici, avec pour
+    // seul garde-fou un commentaire « doit rester identique à ». Une divergence
+    // ne se serait vue qu'en comparant deux périodes entre elles — jamais sur un
+    // écran isolé, puisque ce cron alimente le cache que l'endpoint relit.
     $params = [':period_start' => $periodStart];
     if ($mode !== 'all') $params[':mode'] = $mode;
+
+    if ($metric === 'streak') {
+        // La série n'est pas une agrégation : elle a sa propre requête.
+        $sql = personadle_period_streak_scores_sql($modeFilter, '', ':period_start')
+            . ' ORDER BY score DESC LIMIT 500';
+    } else {
+        $prior     = personadle_leaderboard_prior($pdo, $mode);
+        $scoreExpr = personadle_period_score_expr($metric, $prior);
+        if ($scoreExpr === null) return; // métrique inconnue : rien à recalculer
+
+        // Seuil de participation : le lissage bayésien donnerait la moyenne du
+        // site à un joueur sans partie. Cf. api/leaderboard/index.php.
+        $participation = $metric === 'winrate' ? 'AND COUNT(*) >= 1' : '';
+
+        $sql = "
+            SELECT
+                gs.user_id,
+                ({$scoreExpr}) AS score
+            FROM game_sessions gs
+            JOIN users u ON u.id = gs.user_id AND u.is_deleted = 0
+            WHERE gs.played_date >= :period_start
+              -- is_expert = 0 : le classement Expert est une dimension à part (ROADMAP
+              -- v2.1), pas encore exposée. Sans ça les parties Expert gonfleraient le
+              -- classement du mode normal.
+              AND gs.is_expert = 0
+            {$modeFilter}
+            GROUP BY gs.user_id
+            HAVING score IS NOT NULL AND score > 0 {$participation}
+            ORDER BY score DESC
+            LIMIT 500
+        ";
+    }
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);

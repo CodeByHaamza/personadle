@@ -137,4 +137,22 @@ export const portraitsMapSilhouette = {
 
   "Erina": "Erina",
   "Toshiro Kasukabe": "Toshiro",
+
+  "Saki Konishi": "Saki",
+  "Mayumi Yamano": "Mayumi_Yamano",
+  "Shin Kanzato": "Shin_Kanzato",
+  "Jun Kanzato": "Jun_Kanzato",
+  "Ryo Kanzato": "Ryo_Kanzato",
+
+  // Variantes P4AU — portrait propre à Arena Ultimax, distinct du portrait P3.
+  // Sans ces entrées le fallback `nom.split(" ")[0]` renverrait le portrait P3
+  // (« Aigis »), rendant les deux versions indiscernables dans la liste.
+  "Aigis (P4AU)": "Aigis_P4AU",
+  "Akihiko Sanada (P4AU)": "Akihiko_P4AU",
+  "Fuuka Yamagishi (P4AU)": "Fuuka_P4AU",
+  "Junpei Iori (P4AU)": "Junpei_P4AU",
+  "Ken Amada (P4AU)": "Ken_P4AU",
+  "Koromaru (P4AU)": "Koromaru_P4AU",
+  "Mitsuru Kirijo (P4AU)": "Mitsuru_P4AU",
+  "Yukari Takeba (P4AU)": "Yukari_P4AU",
 };

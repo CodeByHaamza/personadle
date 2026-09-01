@@ -48,7 +48,7 @@ export const characters = [
     opus: ["P1", "P2EP"],
     personaUser: true,
     persona: "Aizen Myouou",
-    emoji: ["1", "💵", "👓"],
+    emoji: ["1️⃣", "💵", "👓"],
     quote: "Heir to the Nanjo Group. An utter pragmatist and skeptic."
   },
   {
@@ -298,7 +298,7 @@ export const characters = [
     genre: ["Male", "Human"],
     age: "15-20",
     arcane: ["Magician"],
-    opus:["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus:["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Hermes",
     emoji: ["⚾","🎮","🪽"],
@@ -309,7 +309,7 @@ export const characters = [
     genre: ["Human", "Female"],
     age: "15-20",
     arcane: ["Lovers"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Io",
     emoji: ["🏹","👩‍🎤","❤️"],
@@ -320,7 +320,7 @@ export const characters = [
     genre: ["Human", "Female"],
     age: "15-20",
     arcane: ["Priestess"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Lucia",
     emoji: ["💻","📚","📡"],
@@ -331,7 +331,7 @@ export const characters = [
     genre: ["Human", "Female"],
     age: "15-20",
     arcane: ["Empress"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Penthesilea",
     emoji: ["🏍️","🤺","❄️"],
@@ -342,7 +342,7 @@ export const characters = [
     genre: ["Human", "Male"],
     age: "15-20",
     arcane: ["Star"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Polydeuces",
     emoji: ["🥊", "💪", "🏅"],
@@ -353,7 +353,7 @@ export const characters = [
     genre: ["Artificial", "Female"],
     age: "< 15",
     arcane: ["Aeon"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Palladion",
     emoji: ["🤖", "💔", "💡"],
@@ -364,7 +364,7 @@ export const characters = [
     genre: ["Human", "Male"],
     age: "< 15",
     arcane: ["Justice"],
-    opus:["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus:["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Nemesis",
     emoji: ["🧒","🐶","💔"],
@@ -375,7 +375,7 @@ export const characters = [
     genre: ["Animal", "Male"],
     age: "Unknown",
     arcane: ["Strength"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: true,
     persona: "Cerberus",
     emoji: ["⛩️", "🐾", "🐕"],
@@ -478,7 +478,7 @@ export const characters = [
     genre: ["Velvet", "Female"],
     age: "Unknown",
     arcane: ["NONE"],
-    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R"],
+    opus: ["P3", "P3FES", "P3P","PQ","PQ2","P3R","P4AU"],
     personaUser: false,
     persona: "NONE",
     emoji: ["🧢", "🛝", "📖"],
@@ -999,6 +999,28 @@ export const characters = [
     quote: "There's a river separating us... Sis is gone, and I'm still here. Sis has crossed on over to the other bank, and I'm still on this one... No matter how much I cry or piss my pants, I know Sis isn't coming back..."
   },
   {
+    nom: "Saki Konishi",
+    genre: ["Human","Female"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🍶", "📺", "💀"],
+    quote: "Who cares about Junes, anyway? Because of that store, our business is ruined, my parents hate me, the neighbors talk behind my back... I wish everything would just disappear."
+  },
+  {
+    nom: "Mayumi Yamano",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P4", "P4G"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🎤", "📡", "💀"],
+    quote: "Why do I have to explain myself to you...? What's wrong with you...? D-don't make me call for help! Wh-What're you going to do...!?"
+  },
+  {
     nom: "Ryotaro Dojima",
     genre:["Human","Male"],
     age: "40+",
@@ -1228,6 +1250,28 @@ export const characters = [
     persona: "Leviathan",
     emoji: ["🔎", "⚖️", "👩‍⚖️"],
     quote: "Still, I'm glad I was able to save you in court. I've never felt so happy in my entire life. I'm not quite sure how to put it, but... saving your future meant more to me than my own career. I feel like you even taught me how to live."
+  },
+  {
+    nom: "Kobayakawa",
+    genre: ["Human","Male"],
+    age: "40+",
+    arcane: ["NONE"],
+    opus: ["P5", "P5R"],
+    personaUser: false,
+    persona: "NONE",
+    emoji: ["🏫", "🚛", "💀"],
+    quote: "You might have done a variety of things in hiding in your hometown, but you will behave yourself here."
+  },
+  {
+    nom: "Wakaba Isshiki",
+    genre: ["Human","Female"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["P5", "P5R"],
+    personaUser: true,
+    persona: "Sphinx Lady",
+    emoji: ["🔬", "🚗", "💀"],
+    quote: ""
   },
 
   {
@@ -2057,6 +2101,41 @@ export const characters = [
     persona: "NONE",
     emoji: ["👔", "💎", "🎤"],
     quote: "I'm the number one princess in the world."
+  },
+
+  // ── Persona Trinity Souls (anime) ─────────────────────────────
+  {
+    nom: "Shin Kanzato",
+    genre: ["Human", "Male"],
+    age: "15-20",
+    arcane: ["NONE"],
+    opus: ["PTS"],
+    personaUser: true,
+    persona: "Abel",
+    emoji: ["🎨", "⚔️", "🐋"],
+    quote: ""
+  },
+  {
+    nom: "Jun Kanzato",
+    genre: ["Human", "Male"],
+    age: "< 15",
+    arcane: ["NONE"],
+    opus: ["PTS"],
+    personaUser: true,
+    persona: "Seth",
+    emoji: ["👥", "⏱️", "💀"],
+    quote: ""
+  },
+  {
+    nom: "Ryo Kanzato",
+    genre: ["Human", "Male"],
+    age: "21-40",
+    arcane: ["NONE"],
+    opus: ["PTS"],
+    personaUser: true,
+    persona: "Cain",
+    emoji: ["👮‍♂️", "💊", "💀"],
+    quote: ""
   },
 
 ];

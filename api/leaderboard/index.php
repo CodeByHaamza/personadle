@@ -32,6 +32,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/leaderboard_metrics.php';
 
 $pdo = pdo();
 
@@ -108,39 +109,21 @@ function buildFriendsClause(PDO $pdo, bool $friendsOnly, int $myId): string
  */
 function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false): never
 {
-    // Construction du SELECT selon la métrique
-    switch ($metric) {
-        case 'wins':
-            $scoreExpr  = $mode === 'all' ? 'SUM(us.wins)'         : 'us.wins';
-            $orderDir   = 'DESC';
-            $minGames   = 0;
-            break;
-        case 'winrate':
-            // ratio victoires / parties (on exclut les joueurs < 5 parties pour éviter 100% avec 1 partie)
-            $scoreExpr  = $mode === 'all'
-                ? 'IF(SUM(us.games) >= 5, ROUND(SUM(us.wins) / SUM(us.games) * 100, 1), NULL)'
-                : 'IF(us.games >= 5, ROUND(us.wins / us.games * 100, 1), NULL)';
-            $orderDir   = 'DESC';
-            $minGames   = 5;
-            break;
-        case 'streak':
-            $scoreExpr  = $mode === 'all' ? 'MAX(us.streak_record)' : 'us.streak_record';
-            $orderDir   = 'DESC';
-            $minGames   = 0;
-            break;
-        case 'perfect':
-            $scoreExpr  = $mode === 'all' ? 'SUM(us.perfect_wins)'  : 'us.perfect_wins';
-            $orderDir   = 'DESC';
-            $minGames   = 0;
-            break;
-        case 'games':
-            $scoreExpr  = $mode === 'all' ? 'SUM(us.games)'         : 'us.games';
-            $orderDir   = 'DESC';
-            $minGames   = 0;
-            break;
-        default:
-            jsonError('Unknown metric', 400);
-    }
+    // Formules centralisées dans api/lib/leaderboard_metrics.php — partagées avec
+    // le cron, qui alimente le cache lu pour les autres périodes.
+    $prior     = personadle_leaderboard_prior($pdo, $mode);
+    $scoreExpr = personadle_ever_score_expr($metric, $mode, $prior);
+    if ($scoreExpr === null) jsonError('Unknown metric', 400);
+    $orderDir = 'DESC';
+
+    // Seuil de PARTICIPATION, à ne pas confondre avec le lissage.
+    // Le ratio bayésien attribue la moyenne du site à qui n'a rien joué : sans ce
+    // garde-fou, un compte à 0 partie apparaîtrait en milieu de classement avec
+    // ~50 %. Le lissage règle l'ordre entre joueurs, pas le droit d'y figurer.
+    // Une seule partie suffit : c'est la formule, pas un seuil arbitraire, qui
+    // empêche désormais un 1/1 de finir premier (cf. leaderboard_metrics.php).
+    $gamesExpr    = $mode === 'all' ? 'SUM(us.games)' : 'us.games';
+    $participation = $metric === 'winrate' ? "AND ({$gamesExpr}) >= 1" : '';
 
     // Filtre mode
     $modeFilter = $mode === 'all' ? '' : 'AND us.mode = ' . $pdo->quote($mode);
@@ -168,7 +151,7 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
         {$modeFilter}
         {$friendsFilter}
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
-        HAVING score IS NOT NULL AND score > 0
+        HAVING score IS NOT NULL AND score > 0 {$participation}
         ORDER BY score {$orderDir}, u.pseudo ASC
         LIMIT {$limit} OFFSET {$offset}
     ";
@@ -186,7 +169,7 @@ function buildEverLeaderboard(PDO $pdo, string $mode, string $metric, int $limit
             {$modeFilter}
             {$friendsFilter}
             GROUP BY u.id
-            HAVING score IS NOT NULL AND score > 0
+            HAVING score IS NOT NULL AND score > 0 {$participation}
         ) cnt
     ";
     $total = (int) $pdo->query($countSql)->fetchColumn();
@@ -286,26 +269,35 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
         formatAndSend($pdo, [], $metric, $myId, $mode, $period, $limit, $offset, 0);
     }
 
-    switch ($metric) {
-        case 'wins':
-            $scoreExpr = "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)";
-            break;
-        case 'winrate':
-            $scoreExpr = "IF(COUNT(*) >= 5, ROUND(SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END) / COUNT(*) * 100, 1), NULL)";
-            break;
-        case 'streak':
-            // Sur une période courte : nombre de victoires (approximation)
-            $scoreExpr = "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)";
-            break;
-        case 'perfect':
-            $scoreExpr = "SUM(CASE WHEN gs.result = 'win' AND gs.attempts = 1 THEN 1 ELSE 0 END)";
-            break;
-        case 'games':
-            $scoreExpr = 'COUNT(*)';
-            break;
-        default:
-            jsonError('Unknown metric', 400);
+    // ── Série : requête à part, pas une simple agrégation ─────────────────────
+    // Une série se mesure en JOURS CONSÉCUTIFS, ce qu'aucun SUM() ne sait faire.
+    // L'ancien code renvoyait ici le nombre de victoires, assumé « approximation »
+    // en commentaire : un joueur avec 20 victoires dans la même journée affichait
+    // « série : 20 » alors qu'il avait joué un seul jour. C'était faux, pas
+    // approximatif — la colonne annonçait une métrique et en montrait une autre.
+    if ($metric === 'streak') {
+        $sql       = personadle_period_streak_sql($modeFilter, $friendsFilter);
+        $pagedStmt = $pdo->prepare($sql . " LIMIT {$limit} OFFSET {$offset}");
+        $pagedStmt->execute([$startDate]);
+        $rows = $pagedStmt->fetchAll();
+
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM ({$sql}) AS s");
+        $countStmt->execute([$startDate]);
+        $total = (int) $countStmt->fetchColumn();
+
+        formatAndSend($pdo, $rows, $metric, $myId, $mode, $period, $limit, $offset, $total);
     }
+
+    // Compte des PARTIES, pas des jours — décision produit écrite dans
+    // api/cron/leaderboard.php. Les formules elles-mêmes vivent désormais dans
+    // api/lib/leaderboard_metrics.php, partagées avec le cron : elles devaient
+    // « rester identiques » des deux côtés, elles sont maintenant les mêmes.
+    $prior     = personadle_leaderboard_prior($pdo, $mode);
+    $scoreExpr = personadle_period_score_expr($metric, $prior);
+    if ($scoreExpr === null) jsonError('Unknown metric', 400);
+
+    // Cf. buildEverLeaderboard : le lissage classe, il n'autorise pas à figurer.
+    $participation = $metric === 'winrate' ? 'AND COUNT(*) >= 1' : '';
 
     $sql = "
         SELECT
@@ -322,10 +314,11 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
         LEFT JOIN profiles p ON p.user_id = u.id
         WHERE gs.played_date >= ?
           AND u.is_deleted = 0
+          AND gs.is_expert = 0   -- classement Expert = dimension à part, pas encore exposée
           {$modeFilter}
           {$friendsFilter}
         GROUP BY u.id, u.pseudo, u.friend_code, p.avatar_data, p.avatar_border_color, p.selected_badges
-        HAVING score IS NOT NULL AND score > 0
+        HAVING score IS NOT NULL AND score > 0 {$participation}
         ORDER BY score DESC, u.pseudo ASC
         LIMIT {$limit} OFFSET {$offset}
     ";
@@ -342,10 +335,11 @@ function buildPeriodLeaderboardLive(PDO $pdo, string $mode, string $period, stri
             JOIN users u ON u.id = gs.user_id
             WHERE gs.played_date >= ?
               AND u.is_deleted = 0
+              AND gs.is_expert = 0
               {$modeFilter}
               {$friendsFilter}
             GROUP BY u.id
-            HAVING score IS NOT NULL AND score > 0
+            HAVING score IS NOT NULL AND score > 0 {$participation}
         ) cnt
     ";
     $countStmt = $pdo->prepare($countSql);
