@@ -1,10 +1,24 @@
 # Dependabot — maintien à jour des dépendances.
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates
+# ⚠️ `target-branch: develop` sur les deux écosystèmes.
+#
+# Sans lui, Dependabot cible la branche par défaut du dépôt — `main`, c'est-à-dire
+# la PRODUCTION. Deux conséquences vécues lors de la release 2.1 (2026-09-01) :
+#   - `develop` se retrouvait EN RETARD sur `main`, et GitHub refusait la PR de
+#     release (« head branch is not up to date »), au milieu d'un déploiement ;
+#   - vitest est passé de la v2 à la v4 directement sur `main`, sans avoir jamais
+#     tourné contre le code de `develop`. Un bump de framework de test de deux
+#     majeures ne doit pas arriver dans une release par surprise.
+#
+# Les mises à jour transitent désormais par `develop` comme n'importe quel
+# changement, et atteignent la prod par la PR de release.
+
 version: 2
 updates:
   # Dépendances npm (devDependencies : vitest, prettier, eslint…)
   - package-ecosystem: "npm"
     directory: "/"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -40,6 +54,7 @@ updates:
   # Actions GitHub utilisées par la CI/CD
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
       day: "monday"
