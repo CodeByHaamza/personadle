@@ -45,12 +45,49 @@ export function getPreviousStreak() {
   return _getRecovery().previousStreak || 0;
 }
 
-/** Retourne true si la récupération est disponible (délai de 2 mois respecté). */
+/**
+ * Aligne le cooldown local sur la date du serveur (`users.streak_recovered_at`).
+ *
+ * Appelé par `pullProfileFromCloud()`. Le backend est la source de vérité — y
+ * compris pour effacer : `null` signifie « jamais récupéré », et doit donc
+ * remettre `lastUsed` à zéro plutôt que d'être ignoré.
+ *
+ * @param {string|null|undefined} serverDate  `streak_recovered_at` (SQL/ISO) ou null
+ */
+export function syncRecoveryCooldown(serverDate) {
+  if (serverDate === undefined) return; // champ absent (backend antérieur) → on ne touche à rien
+  const r = _getRecovery();
+  // MySQL renvoie "YYYY-MM-DD HH:MM:SS" en UTC : sans le "T" ni le "Z", Safari
+  // refuse de le parser et les autres navigateurs l'interprètent en heure locale.
+  const normalized =
+    typeof serverDate === "string" && !serverDate.includes("T")
+      ? serverDate.replace(" ", "T") + "Z"
+      : serverDate;
+  r.lastUsed = normalized || null;
+  _saveRecovery(r);
+}
+
+/**
+ * Retourne true si la récupération est disponible (cooldown de 60 jours respecté).
+ *
+ * ⚠️ `lastUsed` doit venir du SERVEUR (`syncRecoveryCooldown`), pas d'une trace
+ * purement locale. Le cooldown est appliqué par le backend
+ * (`api/lib/streak_recovery.php`) ; tant que le client ne connaissait que son
+ * propre localStorage, l'absence de trace passait pour « disponible » — d'où un
+ * Jack Frost proposé sur un autre appareil, après un cache vidé ou en navigation
+ * privée, puis refusé par le serveur au clic.
+ *
+ * Le repli reste volontaire : hors ligne, ou avant la première synchronisation,
+ * mieux vaut proposer une récupération que le serveur pourra refuser que la
+ * cacher à quelqu'un qui y a droit.
+ */
 export function canRecover() {
   const r = _getRecovery();
   if (!r.previousStreak || r.previousStreak <= 1) return false;
   if (!r.lastUsed) return true;
-  return Date.now() - new Date(r.lastUsed).getTime() >= TWO_MONTHS_MS;
+  const used = new Date(r.lastUsed).getTime();
+  if (Number.isNaN(used)) return true; // date illisible : ne pas bloquer sur une donnée corrompue
+  return Date.now() - used >= TWO_MONTHS_MS;
 }
 
 /**
