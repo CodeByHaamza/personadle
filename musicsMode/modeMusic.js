@@ -27,7 +27,6 @@ import {
   showCommunityStats,
   getActiveChallengeTarget,
   isChallengePlay,
-  getPendingActiveChallenge,
   maskTerms,
   expertContext,
   setupExpertToggle,
@@ -216,28 +215,26 @@ let giveUpCounter, wrongList, victoryBox, victoryImage, victoryText;
 document.addEventListener("DOMContentLoaded", async () => {
   if (window.__i18nReady) await window.__i18nReady;
 
-  // Un défi est émis depuis le mode NORMAL et se compare en nombre d'essais sur
-  // l'audio. Le rejouer en Expert n'aurait pas de sens (barème incomparable) et
-  // casserait si sa cible est un instrumental — il n'aurait aucune parole à
-  // révéler. On renvoie donc le joueur vers le mode normal pour ce défi.
-  // Les défis Expert (avec leur propre barème) sont une feature à part entière :
-  // ils demandent une colonne dédiée sur `messages`, cf. ROADMAP.md v2.1.
+  // ⚠️ NE PAS réintroduire de renvoi vers le mode normal depuis Music Expert.
   //
-  // ⚠️ isChallengePlay("music") ne convient PAS ici : getActiveChallengeTarget()
-  // renvoie null dès isExpertPage() (garde documentée dans gameCore.js, pour un
-  // tout autre besoin — empêcher un défi normal de s'imposer comme cible en
-  // Expert), donc `IS_EXPERT && isChallengePlay(...)` ne serait jamais vrai.
-  // getPendingActiveChallenge() n'a pas cette garde : c'est la bonne fonction
-  // pour détecter "il y a un défi actif" indépendamment du mode courant.
-  const _pendingMusicChallenge = getPendingActiveChallenge();
-  if (
-    IS_EXPERT &&
-    _pendingMusicChallenge &&
-    (_pendingMusicChallenge.mode || "").toLowerCase() === "music"
-  ) {
-    window.location.replace("musics.html");
-    return;
-  }
+  // Un bloc le faisait ici jusqu'au 2026-09-02, écrit avant que les défis Expert
+  // n'existent : un défi étant alors forcément « normal », le rejouer en Expert
+  // n'avait pas de sens (barème incomparable) et cassait sur un instrumental,
+  // sans parole à révéler. Son propre commentaire annonçait la suite — « les défis
+  // Expert demandent une colonne dédiée sur `messages` » — livrée depuis par la
+  // migration 037. Sa raison d'être avait donc disparu.
+  //
+  // Il éjectait alors les joueurs : `getPendingActiveChallenge()` sans argument
+  // lit la dimension de la PAGE, donc `activeChallengeExpert` sur `?expert=1`. Il
+  // détectait un défi Expert… et renvoyait vers le mode normal — l'inverse de ce
+  // qu'il fallait. Le joueur était piégé : le défi vivant en localStorage, ni un
+  // rechargement forcé ni un déblocage admin n'y changeaient rien, et la bannière
+  // du mode normal ne lit pas la case Expert, donc pas de bouton Abandonner non plus.
+  //
+  // Plus rien à garder ici : les deux dimensions sont cloisonnées. Un défi NORMAL
+  // vit dans `activeChallenge` et `getActiveChallengeTarget()` ne le voit pas en
+  // Expert — il ne peut donc pas y imposer sa cible. Un défi EXPERT tire la sienne
+  // dans le pool Expert, d'où les instrumentaux sont déjà exclus (faute de paroles).
 
   // ── DOM element references ─────────────────────────────────────────────────
   textbar = document.getElementById("textbar");
