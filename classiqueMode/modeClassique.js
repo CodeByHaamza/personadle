@@ -900,7 +900,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Daily reset (auto-resets at Paris midnight) ──
   checkResetOnLoad(EXPERT.key("lastPlayedDate_Classic"), STATS_SCOPE, () => {
-    if (localStorage.getItem("activeChallenge")) return;
+    // Ne pas écraser une partie de défi EN COURS — mais un défi périmé, si.
+    // Cette garde lisait `localStorage.activeChallenge` brut : présence seule,
+    // sans date ni dimension. Un défi de la veille empêchait donc la remise à
+    // zéro indéfiniment, et le joueur restait sur le plateau d'hier.
+    //
+    // Depuis que `getActiveChallengeTarget()` expire (même règle que partout
+    // ailleurs), la lecture brute est devenue franchement dangereuse : la partie
+    // n'est plus considérée comme un défi, donc elle EST enregistrée — mais avec
+    // la cible du défi d'hier au lieu de celle du jour. Une session au mauvais
+    // nom, que l'anti-triche serveur signalerait à raison.
+    //
+    // Même helper que les 5 autres modes : expiration + mode + dimension.
+    if (getActiveChallengeTarget("classic")) return;
     resetButton.click();
   });
   setupDailyReset(() => {

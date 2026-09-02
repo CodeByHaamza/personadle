@@ -13,6 +13,80 @@
 
 ---
 
+## 2026-09-02 — fix(défi): un défi périmé gelait l'enregistrement des parties
+
+Deux fonctions lisaient la **même** case `localStorage`, avec **deux règles différentes** :
+
+| Lecteur | Expiration |
+|---|---|
+| `getPendingActiveChallenge()` | `if (c.date !== parisDateKey()) return null;` |
+| `getActiveChallengeTarget()` | *aucune* |
+
+C'est la seconde qui alimente `isChallengePlay()`, dont les 6 modes se servent pour décider
+s'ils enregistrent la partie :
+
+```js
+if (!isChallengePlay("music") && !isGameLogged(STATS_SCOPE)) { savePendingSession(...) }
+```
+
+Un défi accepté et laissé en plan imposait donc sa cible au-delà de sa journée, et la partie
+suivante n'était pas enregistrée — sans le moindre signal, puisque rien n'était même envoyé
+au serveur.
+
+### Ampleur réelle — correction d'une affirmation trop forte
+
+La première rédaction de ce correctif (et le corps de la PR #102) annonçait un gel
+**définitif**. C'est faux dans le cas général, et il vaut mieux l'écrire ici que de laisser
+traîner une analyse fausse : `checkChallengeCompletion()` **consomme** la case en fin de
+partie (`challenge-result.js`), sur les deux chemins de sortie — victoire *et* abandon, ce
+dernier repassant par `showVictory(true)`. Une partie terminée suffit donc à débloquer.
+
+Le coût normal est d'**une partie perdue** par défi périmé. Il ne devient permanent que si le
+joueur ne peut pas terminer de partie dans cette dimension — précisément ce que produisait
+l'éjection de Music Expert corrigée le même jour : renvoyé vers le mode normal à chaque
+ouverture, il ne pouvait plus atteindre la page où le défi Expert se serait résolu. Les deux
+bugs se refermaient l'un sur l'autre.
+
+**Ce que je n'affirme pas** : que ceci explique à lui seul les compteurs figés constatés sur
+le compte témoin (47 sessions, 1 dans la journée). La divergence est réelle et vérifiée, son
+lien avec ce symptôme précis ne l'est pas.
+
+### Effet de bord découvert en vérifiant les autres lecteurs
+
+En cherchant s'il existait un **troisième** lecteur divergent — c'est la divergence qui fait
+le bug, pas la fonction — j'en ai trouvé un dans Classic, seul des 6 modes à conditionner sa
+remise à zéro quotidienne :
+
+```js
+if (localStorage.getItem("activeChallenge")) return;   // présence brute
+```
+
+Ni date, ni dimension. Un défi de la veille empêchait le plateau de se réinitialiser. Et
+l'expiration ajoutée juste au-dessus rendait ce reste **dangereux** au lieu d'inoffensif : la
+partie n'étant plus tenue pour un défi, elle *était* désormais enregistrée — avec la cible
+d'hier au lieu de celle du jour, une session au mauvais nom que l'anti-triche serveur
+signalerait à raison. Corrigé en passant par `getActiveChallengeTarget("classic")`, qui
+vérifie les trois choses.
+
+### Tests
+
+- 4 cas sur l'expiration, dont un qui vérifie que **les deux lecteurs s'accordent** — leur
+  divergence *est* le bug.
+- 6 cas structurels : aucun mode ne lit la case en direct. Le risque n'est pas qu'un helper
+  se casse, c'est qu'on le court-circuite ailleurs, comme Classic le faisait.
+- Vérifié dans les deux sens (`git stash`) : ils échouent contre le code non corrigé.
+
+### Angle mort assumé
+
+Un défi accepté **aujourd'hui** et jamais terminé gèle toujours le mode jusqu'à minuit
+(heure de Paris). C'est voulu : une partie de défi joue une autre cible, la compter en
+quotidien fausserait les statistiques. Le bouton **Abandonner** reste la sortie immédiate.
+
+**Fichiers** : `js/gameCore.js`, `classiqueMode/modeClassique.js`,
+`tests/challengeExpertScope.test.js`. Aucune migration.
+
+---
+
 ## 2026-09-02 — feat(social): un défi Expert rapporte plus d'XP Social Link
 
 Question d'Hamza : « gagner un défi en Expert donne beaucoup plus d'XP, c'est ça ? » Non —
