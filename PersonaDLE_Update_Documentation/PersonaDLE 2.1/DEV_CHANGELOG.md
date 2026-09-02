@@ -13,6 +13,184 @@
 
 ---
 
+## 2026-09-02 — feat(défi): impasse Expert fermée, modale dédiée, 2 onglets FAQ
+
+### L'impasse
+
+Un défi Expert pouvait être envoyé à quelqu'un n'ayant pas débloqué le mode. Rien ne
+l'empêchait — ni le client, ni le serveur (`$isExpert = !empty($data['challenge_is_expert'])`,
+sans contrôle). Le destinataire acceptait, la porte Expert le renvoyait en mode normal
+(`gameCore.js`), et le défi restait `accepted` côté serveur.
+
+Il ne pouvait alors **ni le jouer ni l'abandonner** : `challenge-banner.js` lit
+`activeChallengeKey()`, donc la case de la dimension **courante** — en normal, la bannière ne
+voit jamais un défi Expert, donc aucun bouton Abandonner. Et comme un défi accepté n'est
+jamais remplacé (règle « un seul défi vivant »), l'expéditeur ne pouvait plus lui en envoyer
+d'autre de la journée. **Les deux étaient bloqués.**
+
+### Trois gardes, à trois niveaux
+
+- **Serveur, à l'envoi** — `api/messages/index.php` refuse en 409 si le destinataire n'a pas
+  débloqué le mode. C'est la seule qui compte vraiment : le reste est de l'ergonomie, et rien
+  n'empêche d'envoyer la requête à la main.
+- **Client, à l'acceptation** — refus avant toute écriture, dans la lignée du « on ne touche à
+  rien tant qu'on ne peut pas aboutir » déjà en place. Couvre les défis créés *avant* ce
+  correctif et déjà en base. Seul un refus **ferme** bloque : sur `unavailable` (réseau), on
+  laisse passer plutôt que d'empêcher un joueur légitime.
+- **Client, au choix de l'ami** — la liste ne propose que les éligibles.
+
+### Le filtre d'amis
+
+`GET /api/friends` gagne un paramètre **optionnel** `?expert_mode=<mode>` qui ajoute
+`expert_unlocked` à chaque ami. Sur la route existante plutôt qu'un nouveau `.php` : tout
+fichier ajouté dans `api/friends/` exigerait sa propre `RewriteRule` (CLAUDE.md §7), pour un
+besoin qui tient en un champ.
+
+Coût assumé : ~2 requêtes par ami, **uniquement quand le paramètre est présent** — donc à
+l'ouverture d'une modale de défi Expert, pas à chaque affichage de la page Amis.
+
+`expert_unlocked` absent (backend antérieur) ⇒ **on ne filtre pas**. Vider la liste sur un
+champ manquant serait pire que laisser le serveur refuser avec un message clair.
+
+### La modale
+
+Variante `--expert` sombre : fond `#14101c`, liseré violet/rose, halo. Construite en
+**surcharges de variables CSS** (`--challenge-bg`, `--challenge-border`…) plutôt qu'en second
+composant — tout ce qui les lit bascule d'un coup, et la carte Expert suivra les évolutions de
+la normale. Pas d'animation permanente : la carte reste ouverte le temps de choisir.
+
+Un texte explicatif (`challenge.expert_note`) dit **pourquoi** la liste est plus courte. Sans
+lui, on croirait avoir perdu des amis.
+
+### FAQ : deux catégories
+
+**⚡ Mode Expert** (5 questions) et **📊 Scores & séries** (3), traduites dans les 6 langues.
+Elles répondent aux questions réellement posées ce cycle : comment débloquer, peut-on perdre
+l'accès (non — cf. le correctif de la veille), pourquoi le taux de victoire du classement
+n'est pas `victoires ÷ parties`, et pourquoi les compteurs semblaient figés avant la 2.1.
+
+⚠️ Piège trouvé au passage : `pages/faq.html` affecte les catégories **par index**
+(`CAT_KEYS[i]`, position dans le DOM). Insérer une catégorie au milieu sans l'ajouter au
+tableau décale toutes les suivantes — les onglets filtrent alors les mauvaises questions,
+**sans lever la moindre erreur**.
+
+### Tests
+
+- `challengeModalExpert.test.js` (6) — le paramètre n'est demandé qu'en Expert, seuls les
+  éligibles sont proposés, message dédié si aucun, et absence de filtrage en compat ascendante
+- `faqCategories.test.js` (5) — aligne les trois listes qui doivent le rester (titres du DOM,
+  `CAT_KEYS`, onglets). C'est la seule façon de voir un décalage qui, fichier par fichier,
+  paraît cohérent
+
+**879 tests JS / 49 suites** · **239 PHPUnit / 1016 assertions** · lint et i18n propres.
+
+## 2026-09-01 — fix(expert): trois Modes Expert se re-verrouillaient tout seuls
+
+Trouvé en vérifiant, à la demande d'Hamza, si les conditions de déblocage pouvaient « buguer
+en pleine partie » — surtout celle « d'affilée ». Elle le pouvait.
+
+### Le bug
+
+Les trois types de condition ne se comportaient pas pareil :
+
+| Condition | Modes | Se reperdait ? |
+|---|---|---|
+| `mode_wins_under_attempts` | Classique, Silhouette | Non — cumulatif à vie |
+| `mode_wins_single_day` | Émoji | Non — `MAX()` sur toutes les journées |
+| `mode_consecutive_perfects` | **AOA, Personae, Musique** | **Oui — série EN COURS** |
+
+Rien n'est persisté : `personadle_expert_progress()` recalcule la condition à chaque appel.
+Pour les trois modes en `consecutive_perfects`, l'accès disparaissait donc dès la première
+partie normale non parfaite jouée **après** le déblocage — c'est-à-dire presque tout de
+suite, puisqu'on débloque l'Expert précisément pour continuer à jouer.
+
+Et le pire n'est pas le bouton regrisé : le gate de `api/sessions.php` refuse une session
+Expert en **403** si le mode n'est pas débloqué. Un joueur dont la série cassait pendant
+qu'il jouait en Expert **perdait sa partie** à l'enregistrement.
+
+### Ce qui rend le diagnostic net
+
+L'auteur avait explicitement protégé les deux autres conditions, et l'a écrit :
+
+> « On regarde le maximum sur TOUTES les journées, pas la journée en cours — sinon le joueur
+> qui remplit la condition aujourd'hui la reperdrait demain à minuit, **alors qu'un déblocage
+> doit être définitif**. »
+
+Le principe existait donc bien ; c'est son application à `mode_consecutive_perfects` qui
+manquait. Aucun test ne vérifiait la permanence d'un accès — l'angle mort exact.
+
+### Le correctif
+
+`personadle_count_consecutive_perfects()` renvoie désormais la **meilleure série jamais
+atteinte** au lieu de la série en cours. C'est le pattern déjà appliqué à
+`personadle_count_best_single_day_wins()`, donc aucune nouvelle table et aucune migration :
+un correctif purement serveur.
+
+Le `LIMIT 200` est retiré : borner le balayage suffisait pour une série en cours, mais
+tronquerait un maximum historique plus ancien. La requête reste étroite (deux colonnes,
+filtrée sur `user_id` + `mode`).
+
+Vérifié qu'aucun badge ni titre n'utilise `mode_consecutive_perfects` — seul le gate Expert
+en dépend, le changement de sémantique est donc contenu.
+
+### Le symptôme rapporté par un joueur : « bloqué à 9, peu importe les victoires d'affilée »
+
+Cause **différente**, et déjà corrigée par le déploiement de la 2.1 quelques heures plus tôt.
+En 2.0, la contrainte `uq_session_per_day` faisait rejeter en **409** toute seconde partie du
+même mode dans la journée (`win→win`, cf. `game_session.php`). Les rejouages n'étaient donc
+**pas enregistrés du tout** : construire 15 parfaites d'affilée aurait exigé 15 *journées*
+différentes sans aucune partie ratée entre-temps. La migration 032 (`sessions_count_every_game`)
+et `client_session_id` ont levé cette limite.
+
+Les deux problèmes se cumulaient : impossible d'avancer en 2.0, et impossible de conserver
+l'acquis une fois avancé.
+
+### Second bug, signalé dans la foulée : pas de « Défier un ami » en Music Expert
+
+Vérifié : la PR #85 a rendu les défis compatibles avec le Mode Expert (colonne
+`challenge_is_expert`, redirection vers `?expert=1`), mais n'a retiré la garde
+`if (!isExpert)` que dans **3 modes sur 6**.
+
+| Mode | Bouton en Expert |
+|---|---|
+| Classique, Silhouette, Personae | affiché |
+| **Émoji, All-Out Attack, Musique** | **caché — garde oubliée** |
+
+Seule la garde de Musique portait un commentaire, devenu faux : « le défi serait joué en mode
+normal par le destinataire (audio donné), donc un score incomparable ». C'était juste **avant**
+la #85 ; depuis, `showChallengeButton()` transmet `challenge_is_expert` (gameCore.js) et
+l'acceptation redirige bien vers la page Expert. Les deux autres gardes n'avaient aucun
+commentaire.
+
+Vérifié avant de les retirer que la plomberie est complète de bout en bout : envoi
+(`gameCore.js`), stockage (migration 037), relecture (`notifications.js`), redirection
+(`challenge-notif.js`). Le `!EXPERT.isExpert` de `showCommunityStats()` en All-Out Attack est
+conservé — celui-là est légitime, ces statistiques portent sur la cible quotidienne du mode
+normal.
+
+`tests/challengeButtonExpert.test.js` (3 tests) verrouille la **cohérence entre les 6 modes**
+plutôt que chaque mode isolément : une garde oubliée ne casse aucun test et ne lève aucune
+erreur, elle fait juste disparaître un bouton. La vérification est structurelle (lecture du
+source, commentaires retirés). Contrôlée dans les deux sens : contre le code d'avant, elle
+désigne précisément `emoji`, `alloutattack` et `music`.
+
+### Tests
+
+`tests/php/ExpertUnlocksTest.php` : les cas existants encodaient l'ancienne sémantique
+(« la série retombe à 0 »), ils décrivent maintenant le maximum conservé. Deux tests ajoutés
+sur ce qui n'était pas couvert :
+
+- `testAnUnlockedExpertModeIsNeverLostAgain` — 15 parfaites, puis une victoire en 4 essais et
+  un abandon : le mode doit rester débloqué ;
+- `testProgressNeverGoesBackwards` — corollaire visible du joueur, l'infobulle « 9 / 15 » ne
+  doit pas redescendre.
+
+`testConsecutivePerfectsOrdersWithinTheSameDay` change aussi de valeur attendue : plusieurs
+parties le même jour sont devenues courantes depuis la 032, et une ratée jouée en dernier
+n'annule plus la série qui la précède.
+
+**239 tests PHPUnit, 1016 assertions** — verts.
+
 ## 2026-09-01 — fix(anti-triche + cache): silhouette copiable, et politique de cache absente
 
 ### La silhouette se copiait en clair

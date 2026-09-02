@@ -1255,14 +1255,28 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
 
   const modal = document.createElement("div");
   modal.id = "challengeModal";
-  modal.className = "challenge-overlay";
+  modal.className = `challenge-overlay${isExpert ? " challenge-overlay--expert" : ""}`;
+  // En Expert, la carte prend un habillage sombre (css/global.css) : le défi n'y
+  // est pas le même jeu, et l'écart visuel évite de croire qu'on lance un défi
+  // ordinaire depuis une page qui, elle, ne l'est pas.
   modal.innerHTML = `
-    <div class="challenge-card">
+    <div class="challenge-card${isExpert ? " challenge-card--expert" : ""}">
+      ${
+        isExpert
+          ? `<p class="challenge-card__note">${t(
+              "challenge.expert_note",
+              "Expert challenge — only friends who have unlocked this mode's Expert can receive it."
+            )}</p>`
+          : ""
+      }
       <div id="challengeFriendList" class="challenge-card__list">
         <p class="challenge-card__empty">${t("ui.loading", "Loading…")}</p>
       </div>
       <div class="challenge-card__footer">
-        <span class="challenge-card__footer-label">⚔ ${t("challenge.select_friend", "Challenge a friend")}</span>
+        <span class="challenge-card__footer-label">${isExpert ? "⚡" : "⚔"} ${t(
+          isExpert ? "challenge.select_friend_expert" : "challenge.select_friend",
+          isExpert ? "Challenge a friend — Expert" : "Challenge a friend"
+        )}</span>
         <button id="challengeModalClose" class="challenge-card__footer-close" aria-label="Close">✕</button>
       </div>
     </div>
@@ -1275,15 +1289,37 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
   modal.querySelector("#challengeModalClose").addEventListener("click", () => modal.remove());
 
   // Charger la liste d'amis
-  api.friends
-    .list()
+  // En Expert, on demande au serveur l'état de déblocage de chaque ami pour ce
+  // mode (`?expert_mode=`), et on ne propose que les éligibles. Défier quelqu'un
+  // qui n'a pas le mode l'enverrait dans une impasse : il accepterait, la porte
+  // Expert le renverrait en normal, et le défi resterait bloqué des deux côtés.
+  const modeKeyForApi = normalizeModeKey(mode) ?? mode;
+  const friendsPromise = isExpert
+    ? api.friends.list({ expert_mode: modeKeyForApi })
+    : api.friends.list();
+
+  friendsPromise
     .then((data) => {
-      const friends = data.friends ?? [];
+      const all = data.friends ?? [];
       const listEl = document.getElementById("challengeFriendList");
       if (!listEl) return;
 
-      if (!friends.length) {
+      if (!all.length) {
         listEl.innerHTML = `<p class="challenge-card__empty">${t("friends.no_friends", "No friends yet.")}</p>`;
+        return;
+      }
+
+      // `expert_unlocked` absent = backend antérieur : on ne filtre pas plutôt
+      // que de vider la liste. Le serveur refusera l'envoi de toute façon.
+      const friends = isExpert
+        ? all.filter((f) => f.expert_unlocked !== false)
+        : all;
+
+      if (!friends.length) {
+        listEl.innerHTML = `<p class="challenge-card__empty">${t(
+          "challenge.no_expert_friend",
+          "None of your friends has unlocked this mode's Expert yet."
+        )}</p>`;
         return;
       }
 

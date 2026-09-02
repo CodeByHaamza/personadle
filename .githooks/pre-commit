@@ -82,7 +82,15 @@ if [ -f "scripts/check-doc-numbers.js" ]; then
   if echo "$DOC_FIX_OUT" | grep -q "corrigé"; then
     echo -e "${YELLOW}⚠  Chiffres de doc obsolètes, corrigés automatiquement et re-stagés :${NC}"
     echo "$DOC_FIX_OUT" | grep "^   -" | sed 's/^/    /'
-    git add CLAUDE.md README.md ROADMAP.md CONTRIBUTING.md tests/README.md 2>/dev/null || true
+    # Re-stager EXACTEMENT ce que --fix peut réécrire, en demandant la liste au
+    # script plutôt qu'en la recopiant ici. La recopie précédente avait dérivé :
+    # elle citait 5 fichiers sur 8 et oubliait TODO.md, tests-e2e/README.md et
+    # lang/README.md. Ceux-là restaient donc modifiés APRÈS le commit, et la CI
+    # échouait ensuite sur `docs:check` pour un simple compteur — alors que ce
+    # hook venait d'afficher « corrigés automatiquement et re-stagés ».
+    node scripts/check-doc-numbers.js --list-files 2>/dev/null | while IFS= read -r f; do
+      [ -n "$f" ] && git add "$f" 2>/dev/null || true
+    done
   else
     echo -e "  ${GREEN}✓ Doc numbers OK${NC}"
   fi

@@ -73,7 +73,7 @@ if ($method === 'GET') {
     }
 
     // Récupérer l'utilisateur
-    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, global_streak, global_streak_record FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, global_streak, global_streak_record, streak_recovered_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user) jsonError('User not found', 404);
@@ -126,6 +126,15 @@ if ($method === 'GET') {
         'stats'   => $stats,
         'global_streak'        => (int) ($user['global_streak'] ?? 0),
         'global_streak_record' => (int) ($user['global_streak_record'] ?? 0),
+        // Dernière récupération de streak (Jack Frost), ou null si jamais utilisée.
+        //
+        // Exposé pour que le client cesse de deviner. Le cooldown de 60 jours est
+        // appliqué ICI (api/lib/streak_recovery.php), mais cette date n'était jamais
+        // envoyée : `canRecover()` ne pouvait s'appuyer que sur le localStorage, et
+        // renvoyait donc « disponible » sur un autre appareil, après un cache vidé
+        // ou en navigation privée. Le joueur voyait Jack Frost, cliquait, et se
+        // faisait refuser par le serveur.
+        'streak_recovered_at'  => $user['streak_recovered_at'] ?? null,
         'badges'  => array_map(fn($b) => [
             'badge_id'    => $b['badge_id'],
             'unlocked_at' => $b['unlocked_at'],

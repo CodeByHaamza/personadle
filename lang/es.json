@@ -924,7 +924,11 @@
     "abandon": "Abandonar el desafío",
     "abandon_confirm": "¿Abandonar este desafío? No contará como una derrota.",
     "abandoned": "Desafío abandonado. Puedes aceptar otro.",
-    "abandon_failed": "No se pudo abandonar el desafío. Inténtalo de nuevo."
+    "abandon_failed": "No se pudo abandonar el desafío. Inténtalo de nuevo.",
+    "select_friend_expert": "Desafiar a un amigo — Experto",
+    "expert_note": "Desafío Experto: solo los amigos que hayan desbloqueado el Experto de este modo pueden aceptarlo.",
+    "no_expert_friend": "Ninguno de tus amigos ha desbloqueado aún el Experto de este modo.",
+    "expert_locked": "Desbloquea el Experto de este modo antes de aceptar este desafío."
   },
   "challenge_result": {
     "title_win": "¡BRAVO!",
@@ -1209,7 +1213,25 @@
     "q33": "¿Cómo cambio el idioma o activo el modo daltónico?",
     "a33": "En Ajustes (icono de engranaje): elige entre 5 idiomas y activa el modo oscuro o los colores para daltónicos.",
     "q34": "¿Mis datos se sincronizan entre dispositivos?",
-    "a34": "Sí — con una cuenta, tu progreso, estadísticas y perfil se sincronizan automáticamente. Sin ella, el progreso se guarda solo en ese dispositivo."
+    "a34": "Sí — con una cuenta, tu progreso, estadísticas y perfil se sincronizan automáticamente. Sin ella, el progreso se guarda solo en ese dispositivo.",
+    "cat_expert": "⚡ Modo Experto",
+    "cat_scoring": "📊 Puntuaciones y rachas",
+    "q35": "¿Qué es el Modo Experto?",
+    "a35": "Una segunda forma, más difícil, de jugar cada uno de los 6 modos, con muchas menos pistas: una sola frase en Clásico, un emoji mentiroso en Emoji, un destello de una fracción de segundo en Silueta, un desenfoque congelado en blanco y negro en All-Out Attack, la letra sin audio en Música, y el mito real detrás de la Persona en Personae.",
+    "q36": "¿Cómo se desbloquea el Modo Experto?",
+    "a36": "Cada modo tiene su propia condición, verificada en el servidor. Clásico y Silueta: 10 victorias en 4 intentos o menos. Emoji: 10 victorias en un mismo día. All-Out Attack, Personae y Música: 15 victorias al primer intento seguidas. Una animación de candado que estalla aparece al cargar la siguiente página.",
+    "q37": "¿Puedo perder un modo que ya desbloqueé?",
+    "a37": "No. Un desbloqueo es definitivo. Para los tres modos basados en una racha de victorias perfectas, cuenta tu mejor racha histórica: una partida imperfecta posterior interrumpe la racha actual, pero nunca te quita el acceso conseguido.",
+    "q38": "¿El Modo Experto afecta a mi partida normal?",
+    "a38": "No. Cada modo Experto tiene su propio objetivo, sus propios intentos y sus propias estadísticas. Jugar en Experto nunca toca tu partida normal del día, y tus resultados Experto se cuentan aparte.",
+    "q39": "¿Se puede desafiar a un amigo en Modo Experto?",
+    "a39": "Sí, pero solo los amigos que hayan desbloqueado el Experto de ese modo pueden recibirlo — el selector los filtra por ti. Un desafío Experto y uno normal pueden coexistir el mismo día con el mismo amigo: son dos juegos distintos, con dos puntuaciones distintas.",
+    "q40": "¿Cómo se calcula mi racha?",
+    "a40": "Cuenta los días consecutivos en los que has jugado, con el cambio de día en hora de París — no tu medianoche local. Varias partidas el mismo día cuentan como un solo día. Por modo, un día cuenta como ganado si al menos una de tus partidas de ese día es una victoria.",
+    "q41": "¿Por qué el porcentaje de victorias del ranking no es simplemente victorias ÷ partidas?",
+    "a41": "Porque un jugador con 1 victoria de 1 partida encabezaría la tabla para siempre. El ranking usa una media suavizada: todos empiezan con 20 partidas imaginarias jugadas al ritmo medio del sitio. Con pocas partidas te quedas cerca de esa media; cuanto más juegas, más se refleja tu ritmo real. Jugar más solo sube tu porcentaje si además ganas.",
+    "q42": "¿Cuentan las partidas repetidas?",
+    "a42": "Sí, desde la v2.1 se registra cada partida terminada, incluidas las repetidas el mismo día. Antes solo se guardaba la primera partida de cada día y de cada modo — por eso algunos contadores de desbloqueo parecían congelados."
   },
   "updates": {
     "new_content_title": "✨ Nuevo contenido v2.0",

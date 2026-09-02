@@ -13,6 +13,7 @@
 import {
   FILTER_STORAGE_KEYS,
   activeChallengeKey,
+  fetchExpertStatus,
   getPendingActiveChallenge,
   normalizeModeKey,
 } from "./gameCore.js";
@@ -212,6 +213,26 @@ function _render({
         window.showToast(_t("challenge.offline", "You need to be online to accept a challenge."));
       }
       return;
+    }
+
+    // Défi Expert sur un mode que CE joueur n'a pas débloqué : refuser avant
+    // d'écrire quoi que ce soit. Accepter le mènerait dans une impasse — la porte
+    // Expert le renverrait en mode normal, où sa bannière (qui ne lit que la
+    // dimension courante) ne verrait pas le défi : ni jouable, ni abandonnable.
+    // Le serveur refuse déjà d'en CRÉER un (api/messages/index.php) ; cette garde
+    // couvre ceux créés avant le correctif et déjà en base.
+    // Seul un refus FERME bloque : sur `unavailable` (réseau), on laisse passer
+    // plutôt que d'empêcher un joueur légitime d'accepter.
+    if (challengeIsExpert) {
+      const status = await fetchExpertStatus();
+      if (status.state === "ok" && status.modes?.[modeKey]?.unlocked === false) {
+        if (typeof window.showToast === "function") {
+          window.showToast(
+            _t("challenge.expert_locked", "Unlock this mode's Expert first to accept this challenge.")
+          );
+        }
+        return;
+      }
     }
 
     try {

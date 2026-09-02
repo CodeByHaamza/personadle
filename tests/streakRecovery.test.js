@@ -12,6 +12,7 @@ import {
   checkStreakRecovery,
   performRecovery,
   showStreakRecoveryMenu,
+  syncRecoveryCooldown,
 } from "../js/streak-recovery.js";
 
 const RECOVERY_KEY = "streakRecovery";
@@ -67,6 +68,82 @@ describe("canRecover", () => {
   it("returns true when lastUsed is more than 60 days ago", () => {
     const oldDate = new Date(Date.now() - 65 * 24 * 60 * 60 * 1000).toISOString();
     localStorage.setItem(RECOVERY_KEY, JSON.stringify({ previousStreak: 5, lastUsed: oldDate }));
+    expect(canRecover()).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// syncRecoveryCooldown() — le serveur est la source de vérité
+// ─────────────────────────────────────────────────────────────
+
+describe("syncRecoveryCooldown", () => {
+  /** Place une série cassée récupérable, sans aucune trace de cooldown local. */
+  const brokenStreakNoLocalTrace = () =>
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify({ previousStreak: 12 }));
+
+  it("bloque la récupération quand le SERVEUR dit qu'elle est récente", () => {
+    // Le bug d'origine : sur un appareil neuf, un cache vidé ou en navigation
+    // privée, le localStorage ne portait aucune trace — `canRecover()` répondait
+    // donc « disponible », Jack Frost s'affichait, et le serveur refusait au clic.
+    brokenStreakNoLocalTrace();
+    expect(canRecover()).toBe(true); // état avant synchronisation
+
+    const tenDaysAgo = new Date(Date.now() - 10 * 86400e3).toISOString();
+    syncRecoveryCooldown(tenDaysAgo);
+
+    expect(canRecover()).toBe(false);
+  });
+
+  it("rouvre la récupération passé les 60 jours", () => {
+    brokenStreakNoLocalTrace();
+    syncRecoveryCooldown(new Date(Date.now() - 61 * 86400e3).toISOString());
+    expect(canRecover()).toBe(true);
+  });
+
+  it("efface un cooldown local quand le serveur répond null", () => {
+    // Le backend fait autorité dans les DEUX sens : `null` veut dire « jamais
+    // récupéré ». L'ignorer laisserait un joueur bloqué par une trace locale
+    // périmée — l'exact symétrique du bug corrigé.
+    localStorage.setItem(
+      RECOVERY_KEY,
+      JSON.stringify({ previousStreak: 12, lastUsed: new Date().toISOString() })
+    );
+    expect(canRecover()).toBe(false);
+
+    syncRecoveryCooldown(null);
+
+    expect(canRecover()).toBe(true);
+  });
+
+  it("accepte le format DATETIME de MySQL, lu comme de l'UTC", () => {
+    // MySQL renvoie "YYYY-MM-DD HH:MM:SS" : sans le "T" ni le "Z", Safari refuse
+    // de parser et les autres l'interprètent en heure locale — jusqu'à 14 h
+    // d'écart, assez pour se tromper de côté du seuil.
+    brokenStreakNoLocalTrace();
+    const d = new Date(Date.now() - 10 * 86400e3);
+    syncRecoveryCooldown(d.toISOString().slice(0, 19).replace("T", " "));
+
+    const stored = JSON.parse(localStorage.getItem(RECOVERY_KEY));
+    expect(Number.isNaN(new Date(stored.lastUsed).getTime())).toBe(false);
+    expect(canRecover()).toBe(false);
+  });
+
+  it("ne touche à rien si le champ est absent de la réponse", () => {
+    // Compat ascendante : un backend antérieur ne renvoie pas le champ. On ne
+    // doit pas confondre « absent » et « null ».
+    localStorage.setItem(
+      RECOVERY_KEY,
+      JSON.stringify({ previousStreak: 12, lastUsed: new Date().toISOString() })
+    );
+    syncRecoveryCooldown(undefined);
+    expect(canRecover()).toBe(false);
+  });
+
+  it("ne bloque pas sur une date illisible", () => {
+    localStorage.setItem(
+      RECOVERY_KEY,
+      JSON.stringify({ previousStreak: 12, lastUsed: "pas-une-date" })
+    );
     expect(canRecover()).toBe(true);
   });
 });

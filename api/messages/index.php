@@ -21,6 +21,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/expert_unlocks.php';
 
 $authId = requireAuth();
 $pdo    = pdo();
@@ -160,6 +161,20 @@ if ($method === 'POST') {
         // cible tirée dans le pool Expert, barème propre, et un défi Expert ne se
         // compare qu'à un défi Expert.
         $isExpert = !empty($data['challenge_is_expert']) ? 1 : 0;
+
+        // Le DESTINATAIRE doit avoir débloqué ce Mode Expert. Sans cette garde, le
+        // défi menait à une impasse dont il ne pouvait pas sortir : il acceptait,
+        // la porte Expert (js/gameCore.js) le renvoyait en mode normal, et le défi
+        // restait « accepted » côté serveur — invisible pour sa bannière, qui ne lit
+        // que la dimension de la page courante, donc sans bouton Abandonner. Et
+        // comme un défi accepté n'est jamais remplacé, l'expéditeur ne pouvait plus
+        // lui en envoyer d'autre de la journée. Les deux étaient bloqués.
+        //
+        // Vérifié ICI et pas seulement dans l'interface : le client filtre déjà la
+        // liste d'amis, mais rien n'empêche d'envoyer la requête à la main.
+        if ($isExpert && !personadle_is_expert_unlocked($pdo, $receiverId, $mode)) {
+            jsonError('This friend has not unlocked Expert mode for this game mode yet.', 409);
+        }
 
         // Un seul défi actif par jour entre deux amis, POUR UNE DIMENSION DONNÉE.
         // `challenge_is_expert` fait partie de la clé : proposer le même jour un

@@ -200,6 +200,10 @@
       .fq-tab[data-cat="game"].active{ background:#e63946; box-shadow:0 0 20px rgba(230,57,70,.6); }
       .fq-tab[data-cat="gameplay"]  { border-color:#ff6b9d; color:#ff6b9d; }
       .fq-tab[data-cat="gameplay"].active{ background:#e0527a; box-shadow:0 0 20px rgba(255,107,157,.55); }
+      .fq-tab[data-cat="expert"]    { border-color:#b26aff; color:#b26aff; }
+      .fq-tab[data-cat="expert"].active{ background:#7b3fd4; box-shadow:0 0 20px rgba(178,106,255,.6); }
+      .fq-tab[data-cat="scoring"]   { border-color:#14b8a6; color:#14b8a6; }
+      .fq-tab[data-cat="scoring"].active{ background:#0d9488; box-shadow:0 0 20px rgba(20,184,166,.55); }
       .fq-tab[data-cat="account"]   { border-color:#60a5fa; color:#60a5fa; }
       .fq-tab[data-cat="account"].active { background:#2563eb; box-shadow:0 0 20px rgba(96,165,250,.55); }
       .fq-tab[data-cat="community"] { border-color:#a78bfa; color:#a78bfa; }
@@ -771,6 +775,90 @@
           <p data-i18n="faq.a22">No — each player gets their own daily character, so you can&#x27;t simply copy a friend&#x27;s answer.</p>
         </div>
       </div>
+      <h2 class="faq-category" data-i18n="faq.cat_expert">⚡ Expert Mode</h2>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span data-i18n="faq.q35">What is Expert Mode?</span>
+          <span class="faq-arrow" aria-hidden="true">▶</span>
+        </div>
+        <div class="faq-answer">
+          <p data-i18n="faq.a35">A second, harder way to play each of the 6 modes, with far fewer clues.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span data-i18n="faq.q36">How do I unlock Expert Mode?</span>
+          <span class="faq-arrow" aria-hidden="true">▶</span>
+        </div>
+        <div class="faq-answer">
+          <p data-i18n="faq.a36">Each mode has its own condition, checked on the server.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span data-i18n="faq.q37">Can I lose access to a mode I unlocked?</span>
+          <span class="faq-arrow" aria-hidden="true">▶</span>
+        </div>
+        <div class="faq-answer">
+          <p data-i18n="faq.a37">No. An unlock is permanent.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span data-i18n="faq.q38">Does Expert Mode affect my normal game?</span>
+          <span class="faq-arrow" aria-hidden="true">▶</span>
+        </div>
+        <div class="faq-answer">
+          <p data-i18n="faq.a38">No. Each Expert mode has its own target, attempts and stats.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span data-i18n="faq.q39">Can I challenge a friend in Expert Mode?</span>
+          <span class="faq-arrow" aria-hidden="true">▶</span>
+        </div>
+        <div class="faq-answer">
+          <p data-i18n="faq.a39">Yes, but only friends who have unlocked that mode&#x27;s Expert can receive it.</p>
+        </div>
+      </div>
+
+      <h2 class="faq-category" data-i18n="faq.cat_scoring">📊 Scores &amp; Streaks</h2>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span data-i18n="faq.q40">How is my streak calculated?</span>
+          <span class="faq-arrow" aria-hidden="true">▶</span>
+        </div>
+        <div class="faq-answer">
+          <p data-i18n="faq.a40">It counts consecutive days on which you played, using the Paris day boundary.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span data-i18n="faq.q41">Why isn&#x27;t the leaderboard win rate just wins divided by games?</span>
+          <span class="faq-arrow" aria-hidden="true">▶</span>
+        </div>
+        <div class="faq-answer">
+          <p data-i18n="faq.a41">Because a player with 1 win out of 1 game would top the board forever.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          <span data-i18n="faq.q42">Do replays count?</span>
+          <span class="faq-arrow" aria-hidden="true">▶</span>
+        </div>
+        <div class="faq-answer">
+          <p data-i18n="faq.a42">Yes, since v2.1 every game you finish is recorded.</p>
+        </div>
+      </div>
+
       <h2 class="faq-category" data-i18n="faq.cat_account">👤 Account &amp; Profile</h2>
 
       <div class="faq-item">
@@ -1318,8 +1406,11 @@
       'use strict';
 
       /* ── Category color mapping ── */
-      var CAT_KEYS=['game','gameplay','account','community','team'];
-      var CAT_COLORS={'game':'#e63946','gameplay':'#f97316','account':'#3b82f6','community':'#8b5cf6','team':'#f59e0b'};
+      // ⚠️ Affectation PAR INDEX : l'ordre doit suivre exactement celui des
+      // <h2 class="faq-category"> dans le HTML. Insérer une catégorie au milieu
+      // sans l'ajouter ici décalerait toutes les suivantes.
+      var CAT_KEYS=['game','gameplay','expert','scoring','account','community','team'];
+      var CAT_COLORS={'game':'#e63946','gameplay':'#f97316','expert':'#b26aff','scoring':'#14b8a6','account':'#3b82f6','community':'#8b5cf6','team':'#f59e0b'};
       var cats=document.querySelectorAll('.faq-category');
       cats.forEach(function(cat,i){
         var k=CAT_KEYS[i]||'game';
@@ -1339,6 +1430,8 @@
         {cat:'all',label:'All'},
         {cat:'game',label:'🎮 Game'},
         {cat:'gameplay',label:'🕹️ Gameplay'},
+        {cat:'expert',label:'⚡ Expert'},
+        {cat:'scoring',label:'📊 Scores'},
         {cat:'account',label:'👤 Account'},
         {cat:'community',label:'👥 Community'},
         {cat:'team',label:'👋 Team'},

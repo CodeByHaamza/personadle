@@ -127,15 +127,20 @@ Comme pour la 2.0 (§2.2 de son plan) : ouvrez une fenêtre de navigation privé
 ### 2.4 Débloquer un mode « régularité » (AOA, Personae ou Musique)
 
 > Condition : 15 victoires **parfaites** (1er essai) **d'affilée**. Une seule partie non
-> parfaite (2+ essais, ou abandon) remet le compteur à zéro.
+> parfaite (2+ essais, ou abandon) interrompt la série en cours — mais la
+> **meilleure série jamais atteinte** reste acquise (corrigé le 2026-09-01).
 
 1. Choisir un des 3 modes, enchaîner 15 victoires en 1 seul essai chacune, sans en rater
    aucune entre-temps
 
 - [ ] Le compteur de progression dans l'infobulle avance bien à chaque victoire parfaite
 - [ ] Si vous ratez volontairement une partie avant d'arriver à 15 (2 essais ou give-up)
-  → la progression retombe à 0 (revérifier l'infobulle)
+  → la progression **ne recule pas** : elle garde le meilleur score atteint. Il faut
+  simplement repartir d'une nouvelle série pour le dépasser
 - [ ] Une fois les 15 d'affilée obtenues → animation de déblocage
+- [ ] **Rejouer ensuite une partie normale et la rater** (2+ essais ou abandon) → le
+  Mode Expert reste **débloqué**. C'était le bug du 2026-09-01 : il se re-verrouillait,
+  et une partie Expert en cours au même moment était refusée par le serveur
 
 ### 2.5 Un mode débloqué n'en débloque pas un autre
 

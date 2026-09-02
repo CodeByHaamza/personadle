@@ -924,7 +924,11 @@
     "abandon": "Abandonner le défi",
     "abandon_confirm": "Abandonner ce défi ? Il ne comptera pas comme une défaite.",
     "abandoned": "Défi abandonné. Tu peux en accepter un autre.",
-    "abandon_failed": "Impossible d'abandonner le défi. Réessaie."
+    "abandon_failed": "Impossible d'abandonner le défi. Réessaie.",
+    "select_friend_expert": "Défier un ami — Expert",
+    "expert_note": "Défi Expert : seuls les amis ayant débloqué l'Expert de ce mode peuvent le relever.",
+    "no_expert_friend": "Aucun de tes amis n'a encore débloqué l'Expert de ce mode.",
+    "expert_locked": "Débloque l'Expert de ce mode avant d'accepter ce défi."
   },
   "challenge_result": {
     "title_win": "BRAVO !",
@@ -1209,7 +1213,25 @@
     "q33": "Comment changer la langue ou activer le mode daltonien ?",
     "a33": "Dans les Paramètres (icône engrenage) : choisis parmi 5 langues et active le mode sombre ou les couleurs adaptées aux daltoniens.",
     "q34": "Mes données sont-elles synchronisées entre appareils ?",
-    "a34": "Oui — avec un compte, ta progression, tes stats et ton profil se synchronisent automatiquement. Sans compte, la progression n'est sauvée que sur cet appareil."
+    "a34": "Oui — avec un compte, ta progression, tes stats et ton profil se synchronisent automatiquement. Sans compte, la progression n'est sauvée que sur cet appareil.",
+    "cat_expert": "⚡ Mode Expert",
+    "cat_scoring": "📊 Scores & séries",
+    "q35": "C'est quoi le Mode Expert ?",
+    "a35": "Une seconde façon, plus dure, de jouer chacun des 6 modes, avec bien moins d'indices : une seule réplique en Classique, un émoji menteur en Émoji, un flash d'une fraction de seconde en Silhouette, un flou figé en noir et blanc en All-Out Attack, les paroles sans le son en Music, et le vrai mythe derrière la persona en Personae.",
+    "q36": "Comment débloquer le Mode Expert ?",
+    "a36": "Chaque mode a sa propre condition, vérifiée côté serveur. Classique et Silhouette : 10 victoires en 4 essais ou moins. Émoji : 10 victoires dans la même journée. All-Out Attack, Personae et Music : 15 victoires au premier essai d'affilée. Une animation de cadenas qui explose se déclenche au chargement de page suivant.",
+    "q37": "Puis-je perdre un mode que j'ai débloqué ?",
+    "a37": "Non. Un déblocage est définitif. Pour les trois modes basés sur une série de victoires parfaites, c'est la meilleure série jamais atteinte qui compte : une partie ratée plus tard interrompt la série en cours, mais ne reprend jamais l'accès acquis.",
+    "q38": "Le Mode Expert affecte-t-il ma partie normale ?",
+    "a38": "Non. Chaque mode Expert a sa propre cible, ses propres essais et ses propres statistiques. Jouer en Expert ne touche jamais à ta partie normale du jour, et tes résultats Expert sont comptés à part.",
+    "q39": "Peut-on défier un ami en Mode Expert ?",
+    "a39": "Oui, mais seuls les amis ayant débloqué l'Expert de ce mode peuvent le recevoir — le sélecteur les filtre pour toi. Un défi Expert et un défi normal peuvent coexister le même jour avec le même ami : ce sont deux jeux différents, avec deux scores différents.",
+    "q40": "Comment est calculée ma série ?",
+    "a40": "Elle compte les jours consécutifs où tu as joué, avec la frontière de journée en heure de Paris — pas ton minuit local. Plusieurs parties le même jour comptent pour un seul jour. Par mode, une journée compte comme gagnée si au moins une de tes parties du jour est une victoire.",
+    "q41": "Pourquoi le taux de victoire du classement n'est pas simplement victoires ÷ parties ?",
+    "a41": "Parce qu'un joueur avec 1 victoire sur 1 partie resterait premier indéfiniment. Le classement utilise une moyenne lissée : chacun démarre avec 20 parties imaginaires jouées au taux moyen du site. Avec peu de parties tu restes proche de cette moyenne ; plus tu joues, plus ton vrai taux ressort. Jouer plus ne monte ton taux que si tu gagnes aussi.",
+    "q42": "Est-ce que les parties rejouées comptent ?",
+    "a42": "Oui, depuis la v2.1 chaque partie terminée est enregistrée, y compris celles rejouées dans la même journée. Avant, seule la première partie de chaque jour et de chaque mode était sauvegardée — c'est pourquoi certains compteurs de déblocage paraissaient figés."
   },
   "updates": {
     "new_content_title": "✨ Nouveau contenu v2.0",

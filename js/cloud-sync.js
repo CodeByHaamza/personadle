@@ -12,6 +12,7 @@
 
 // Conversion clé backend → libellé canonique : voir modeLabel() dans gameCore.js
 import { modeLabel } from "./gameCore.js";
+import { syncRecoveryCooldown } from "./streak-recovery.js";
 
 function _prefix() {
   return window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
@@ -157,6 +158,13 @@ export async function pullProfileFromCloud() {
       const fav = d.stats.reduce((b, r) => (!b || r.games > b.games ? r : b), null);
       if (fav) p.stats.favoriteMode = modeLabel(fav.mode);
     }
+
+    // Cooldown Jack Frost : le backend est la source de vérité, ici comme ailleurs.
+    // Sans cette ligne, `canRecover()` ne connaissait que la trace locale et
+    // proposait la récupération sur un appareil neuf, un cache vidé ou une
+    // navigation privée — le serveur la refusait ensuite au clic.
+    // Hors du `if (d.stats)` : la date ne dépend pas des statistiques de modes.
+    syncRecoveryCooldown(d.streak_recovered_at);
 
     // ── Badges (cloud → local, jamais régressif) ───────────────────────────
     let newB = [];

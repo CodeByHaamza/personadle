@@ -20,7 +20,7 @@
 
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -88,6 +88,37 @@ function countE2E() {
   return { total: Number(match[1]), files: files.length };
 }
 
+const CLAUDE_MD = join(ROOT, "CLAUDE.md");
+const README = join(ROOT, "README.md");
+const ROADMAP = join(ROOT, "ROADMAP.md");
+const CONTRIBUTING = join(ROOT, "CONTRIBUTING.md");
+const TESTS_README = join(ROOT, "tests/README.md");
+const TESTS_E2E_README = join(ROOT, "tests-e2e/README.md");
+const TODO = join(ROOT, "TODO.md");
+const LANG_README = join(ROOT, "lang/README.md");
+
+/**
+ * Tous les fichiers que ce script est susceptible de réécrire.
+ *
+ * Exposé via `--list-files` pour que le hook pre-commit re-stage EXACTEMENT ce
+ * que `--fix` a pu modifier, au lieu d'une liste recopiée à la main. Cette
+ * recopie avait dérivé : le hook oubliait TODO.md, tests-e2e/README.md et
+ * lang/README.md, qui restaient donc modifiés APRÈS le commit — la CI rougissait
+ * ensuite sur `docs:check` pour un simple compteur, alors que le hook affichait
+ * « corrigés automatiquement et re-stagés ».
+ */
+const MANAGED_FILES = [
+  CLAUDE_MD, README, ROADMAP, CONTRIBUTING,
+  TESTS_README, TESTS_E2E_README, TODO, LANG_README,
+];
+
+// Sortie machine, une entrée par ligne, chemins relatifs à la racine du dépôt.
+// Placé AVANT tout calcul : lister les fichiers ne doit pas coûter un `vitest run`.
+if (process.argv.includes("--list-files")) {
+  for (const f of MANAGED_FILES) console.log(relative(ROOT, f).split(sep).join("/"));
+  process.exit(0);
+}
+
 const vitestTests = countVitestTests();
 const vitestFiles = countVitestFiles();
 const phpunit = countPhpUnit();
@@ -105,15 +136,6 @@ console.log(
 // Chaque regex doit capturer UNIQUEMENT les nombres à vérifier/remplacer, dans
 // l'ordre. Le remplacement se fait par substitution ciblée du nombre trouvé
 // (pas de reconstruction de template) pour rester sûr même si le texte autour change.
-
-const CLAUDE_MD = join(ROOT, "CLAUDE.md");
-const README = join(ROOT, "README.md");
-const ROADMAP = join(ROOT, "ROADMAP.md");
-const CONTRIBUTING = join(ROOT, "CONTRIBUTING.md");
-const TESTS_README = join(ROOT, "tests/README.md");
-const TESTS_E2E_README = join(ROOT, "tests-e2e/README.md");
-const TODO = join(ROOT, "TODO.md");
-const LANG_README = join(ROOT, "lang/README.md");
 
 const syncPoints = [
   // CLAUDE.md
