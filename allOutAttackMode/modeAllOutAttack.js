@@ -491,13 +491,16 @@ function handleGuess() {
       prevHref: "../emojiMode/emojiMode.html",
       nextHref: "../silhouetteMode/silhouette.html",
     });
-    if (!EXPERT.isExpert) {
-      showChallengeButton(
-        "alloutattack",
-        attempts,
-        personas.filter((n) => n !== target)
-      );
-    }
+    // Visible AUSSI en Expert : la garde `!EXPERT.isExpert` qui était ici est un
+    // reste d'avant les défis Expert (PR #85), retiré en 2.1 — cf. modeMusic.js.
+    // À NE PAS confondre avec le `!EXPERT.isExpert` de showCommunityStats() juste
+    // en dessous, qui lui est légitime : ces statistiques portent sur la cible
+    // quotidienne du mode normal.
+    showChallengeButton(
+      "alloutattack",
+      attempts,
+      personas.filter((n) => n !== target)
+    );
     checkChallengeCompletion("alloutattack", attempts, true);
     if (!EXPERT.isExpert) showCommunityStats("alloutattack", target);
     gameOver = true;

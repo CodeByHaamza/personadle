@@ -327,36 +327,51 @@ function personadle_count_best_single_day_wins(PDO $pdo, int $userId, string $mo
 }
 
 /**
- * Longueur de la série EN COURS de victoires parfaites (1 seul essai).
+ * MEILLEURE série de victoires parfaites (1 seul essai) jamais atteinte.
  *
  * « Consécutif » se compte en parties, pas en jours : les journées sautées ne
  * cassent rien, seule une partie non parfaite (giveup, ou victoire en 2+ essais)
- * remet le compteur à zéro.
+ * interrompt une série.
  *
- * Le LIMIT borne le coût de la requête : la plus haute exigence est de 15, donc
- * 200 lignes couvrent très largement le besoin. Une série plus longue est
- * simplement affichée saturée à 200 dans la progression — sans effet sur le
- * déblocage lui-même.
+ * ⚠️ On renvoie le MAXIMUM historique, pas la série en cours — corrigé le
+ * 2026-09-01. Cette fonction ne sert qu'aux portes du Mode Expert (AOA, Personae,
+ * Musique), et un déblocage doit être **définitif** : c'est le principe déjà
+ * appliqué à `personadle_count_best_single_day_wins()` (MAX sur toutes les
+ * journées, justement pour qu'on ne reperde pas l'accès à minuit) et à
+ * `personadle_count_wins_under_attempts()` (cumulatif à vie).
+ *
+ * Avec l'ancienne version, qui renvoyait la série EN COURS, un joueur perdait son
+ * Mode Expert dès la première partie normale non parfaite jouée après l'avoir
+ * débloqué — quasi certain, puisqu'on débloque l'Expert pour continuer à jouer.
+ * Pire : s'il était en pleine partie Expert au moment où sa série cassait,
+ * `api/sessions.php` refusait sa session en 403 et la partie était perdue.
+ *
+ * Plus de `LIMIT` : borner le balayage à 200 lignes suffisait pour une série en
+ * cours, mais tronquerait un maximum historique situé plus loin dans le passé.
+ * La requête reste étroite (deux colonnes, filtrée sur user_id + mode).
  */
 function personadle_count_consecutive_perfects(PDO $pdo, int $userId, string $mode): int
 {
     $s = $pdo->prepare(
         'SELECT attempts, result FROM game_sessions
          WHERE user_id = ? AND mode = ? AND is_expert = 0
-         ORDER BY played_date DESC, id DESC
-         LIMIT 200'
+         ORDER BY played_date ASC, id ASC'
     );
     $s->execute([$userId, $mode]);
 
-    $streak = 0;
+    $best = 0;
+    $run  = 0;
     foreach ($s->fetchAll(PDO::FETCH_ASSOC) as $row) {
         if ((int) $row['attempts'] === 1 && $row['result'] === 'win') {
-            $streak++;
+            $run++;
+            if ($run > $best) {
+                $best = $run;
+            }
         } else {
-            break; // série cassée
+            $run = 0; // série interrompue — mais le maximum déjà atteint reste acquis
         }
     }
-    return $streak;
+    return $best;
 }
 
 /**

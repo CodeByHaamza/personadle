@@ -557,7 +557,10 @@ function showVictory(force = false) {
   }
 
   // 🎯 ONE SHOT — first-try win
-  if (!force && attempts === 0 && !profile.hasWonFirstTry) {
+  // `attempts` vaut 1 sur une victoire au premier essai : les modes incrementent
+  // AVANT de tester la victoire. Le test portait sur 0, donc ce badge n'etait
+  // jamais decerne (corrige en 2.1).
+  if (!force && attempts === 1 && !profile.hasWonFirstTry) {
     profile.hasWonFirstTry = true;
     hasChanges = true;
   }
@@ -657,15 +660,17 @@ function showVictory(force = false) {
       count: 30,
       spreadFrom: "bottom",
     });
-    // Pas en Expert : le défi serait joué en mode normal par le destinataire
-    // (audio donné), donc un score incomparable au sien. Cf. ROADMAP.md v2.1.
-    if (!IS_EXPERT) {
-      showChallengeButton(
-        "music",
-        attempts,
-        filteredSongs.filter((s) => s.titre !== target.titre).map((s) => s.titre)
-      );
-    }
+    // Le bouton s'affiche AUSSI en Expert depuis la 2.1. La garde `!IS_EXPERT`
+    // qui était ici datait d'avant les défis Expert : à l'époque le destinataire
+    // aurait joué en mode normal (audio donné), donc avec un score incomparable.
+    // La PR #85 a réglé ça — `showChallengeButton()` transmet désormais
+    // `challenge_is_expert` (gameCore.js), et l'acceptation redirige vers
+    // `?expert=1` (challenge-notif.js). La garde est restée par oubli.
+    showChallengeButton(
+      "music",
+      attempts,
+      filteredSongs.filter((s) => s.titre !== target.titre).map((s) => s.titre)
+    );
   }
   checkChallengeCompletion("music", attempts, !force);
   if (!IS_EXPERT) showCommunityStats("music", target.titre);

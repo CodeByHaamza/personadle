@@ -367,6 +367,19 @@ function checkEmojiGuess(name, forceReveal = false) {
     return;
   }
 
+  // `attempts` compte les RÉPONSES DONNÉES, la bonne comprise — c'est ce que font
+  // les 5 autres modes, et c'est ce que le serveur attend : une partie « parfaite »
+  // s'y définit par `attempts === 1` (api/lib/condition_check.php).
+  // L'incrément ne vivait ici que dans la branche « mauvaise réponse » : une
+  // victoire au premier essai envoyait donc `attempts = 0`, faussant le badge
+  // Critical Strike, la métrique « victoires parfaites » du classement, et le
+  // score transmis avec un défi lancé depuis l'Émoji.
+  // Exclu sur `forceReveal` (abandon) : aucune réponse n'a été donnée.
+  if (!forceReveal) {
+    attempts++;
+    localStorage.setItem(EXPERT.key("attemptsEmoji"), attempts);
+  }
+
   if (guess.nom.toLowerCase() === target.nom.toLowerCase() || forceReveal) {
     // Reveal all emojis
     displayZone.innerHTML = "";
@@ -398,8 +411,10 @@ function checkEmojiGuess(name, forceReveal = false) {
     // Capturé AVANT checkChallengeCompletion (qui consomme activeChallenge) :
     // une partie de défi à cible dédiée ne se logge pas en session quotidienne.
     const wasChallengePlay = isChallengePlay("emoji");
+    // Visible AUSSI en Expert : la garde `!EXPERT.isExpert` qui était ici est un
+    // reste d'avant les défis Expert (PR #85), retiré en 2.1 — cf. modeMusic.js.
     if (!forceReveal)
-      if (!EXPERT.isExpert) showChallengeButton(
+      showChallengeButton(
         "emoji",
         attempts,
         // Seuls les persos AVEC données emoji sont jouables comme cible de défi.
@@ -454,15 +469,14 @@ function checkEmojiGuess(name, forceReveal = false) {
     localStorage.setItem(EXPERT.key("emojiWin"), "true");
     if (!EXPERT.isExpert) checkUnlocksAfterGame(modeName);
   } else {
-    // Wrong guess: show mini portrait + increment
+    // Wrong guess: show mini portrait (l'incrément a lieu plus haut, avant le
+    // branchement, pour que la victoire au premier essai compte bien 1 et non 0)
     const imageName = portraitsMap[guess.nom] || guess.nom.split(" ")[0];
     showWrongMini(
       `../database/portraits/${encodeURIComponent(imageName)}.webp`,
       guess.nom,
       wrongList
     );
-    attempts++;
-    localStorage.setItem(EXPERT.key("attemptsEmoji"), attempts);
     updateEmojiHint();
     updateCounters();
     if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();

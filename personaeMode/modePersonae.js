@@ -584,7 +584,10 @@ function showVictory(force = false, name = null) {
       profileUpdated = true;
     }
 
-    if (attempts === 0 && !profile.hasWonFirstTry) {
+    // `attempts` vaut 1 sur une victoire au premier essai : les modes incrementent
+    // AVANT de tester la victoire. Le test portait sur 0, donc ce badge n'etait
+    // jamais decerne (corrige en 2.1).
+    if (attempts === 1 && !profile.hasWonFirstTry) {
       profile.hasWonFirstTry = true;
       profileUpdated = true;
     }

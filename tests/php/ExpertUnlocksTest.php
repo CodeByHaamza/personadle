@@ -202,7 +202,7 @@ final class ExpertUnlocksTest extends TestCase
 
     // ── mode_consecutive_perfects (AOA, Personae, Musique — 15 parfaites d'affilée) ─
 
-    public function testConsecutivePerfectsCountsCurrentStreak(): void
+    public function testConsecutivePerfectsCountsARun(): void
     {
         $uid = $this->makeUser();
         $this->session($uid, 'music', 1, 'win', 3);
@@ -211,24 +211,28 @@ final class ExpertUnlocksTest extends TestCase
         $this->assertSame(3, personadle_count_consecutive_perfects(self::$pdo, $uid, 'music'));
     }
 
-    public function testConsecutivePerfectsBreaksOnImperfectWin(): void
+    public function testConsecutivePerfectsKeepsTheBestRunAfterAnImperfectWin(): void
     {
-        // Une victoire en 2 essais casse la série : « parfaite » = 1 seul essai.
+        // Le cœur du correctif du 2026-09-01. L'ancienne version renvoyait la série
+        // EN COURS : ici elle aurait répondu 2, et un joueur à 15 aurait perdu son
+        // Mode Expert dès sa première victoire en 2 essais. On garde le maximum.
         $uid = $this->makeUser();
+        $this->session($uid, 'music', 1, 'win', 5);
         $this->session($uid, 'music', 1, 'win', 4);
-        $this->session($uid, 'music', 2, 'win', 3); // casse ici
-        $this->session($uid, 'music', 1, 'win', 2);
-        $this->session($uid, 'music', 1, 'win', 1);
-        $this->assertSame(2, personadle_count_consecutive_perfects(self::$pdo, $uid, 'music'));
+        $this->session($uid, 'music', 1, 'win', 3); // meilleure série : 3
+        $this->session($uid, 'music', 2, 'win', 2); // casse
+        $this->session($uid, 'music', 1, 'win', 1); // série en cours : 1
+        $this->assertSame(3, personadle_count_consecutive_perfects(self::$pdo, $uid, 'music'));
     }
 
-    public function testConsecutivePerfectsBreaksOnGiveup(): void
+    public function testConsecutivePerfectsKeepsTheBestRunAfterAGiveup(): void
     {
         $uid = $this->makeUser();
-        $this->session($uid, 'music', 1, 'win', 3);
-        $this->session($uid, 'music', 1, 'giveup', 2); // 1 essai mais abandon
+        $this->session($uid, 'music', 1, 'win', 4);
+        $this->session($uid, 'music', 1, 'win', 3); // meilleure série : 2
+        $this->session($uid, 'music', 1, 'giveup', 2);
         $this->session($uid, 'music', 1, 'win', 1);
-        $this->assertSame(1, personadle_count_consecutive_perfects(self::$pdo, $uid, 'music'));
+        $this->assertSame(2, personadle_count_consecutive_perfects(self::$pdo, $uid, 'music'));
     }
 
     public function testConsecutivePerfectsSurvivesSkippedDays(): void
@@ -254,14 +258,58 @@ final class ExpertUnlocksTest extends TestCase
 
     public function testConsecutivePerfectsOrdersWithinTheSameDay(): void
     {
-        // Plusieurs parties le même jour : le départage se fait sur `id DESC`, donc
-        // sur l'ordre d'insertion. Une partie ratée jouée en DERNIER doit remettre
-        // le compteur à zéro, même si des parfaites la précèdent le même jour.
+        // Plusieurs parties le même jour — cas devenu courant depuis la migration
+        // 032, qui a retiré la contrainte « une session par jour ». Le départage se
+        // fait sur `id`, donc sur l'ordre d'insertion : la ratée jouée en DERNIER
+        // n'annule pas la série de 2 qui la précède.
         $uid = $this->makeUser();
         $this->session($uid, 'alloutattack', 1, 'win', 0);
         $this->session($uid, 'alloutattack', 1, 'win', 0);
         $this->session($uid, 'alloutattack', 3, 'win', 0); // la plus récente
-        $this->assertSame(0, personadle_count_consecutive_perfects(self::$pdo, $uid, 'alloutattack'));
+        $this->assertSame(2, personadle_count_consecutive_perfects(self::$pdo, $uid, 'alloutattack'));
+    }
+
+    // ── Permanence du déblocage — l'angle mort qui a laissé passer le bug ─────────
+
+    public function testAnUnlockedExpertModeIsNeverLostAgain(): void
+    {
+        // Aucun test ne vérifiait qu'un accès RESTE acquis. Les trois types de
+        // condition doivent être monotones : `mode_wins_under_attempts` est
+        // cumulatif à vie, `mode_wins_single_day` prend le MAX des journées, et
+        // `mode_consecutive_perfects` prend désormais le MAX des séries.
+        $uid = $this->makeUser();
+        for ($i = 15; $i >= 1; $i--) {
+            $this->session($uid, 'music', 1, 'win', $i);
+        }
+        $this->assertTrue(
+            personadle_is_expert_unlocked(self::$pdo, $uid, 'music'),
+            '15 parfaites de suite doivent débloquer le Mode Expert'
+        );
+
+        // Le joueur continue de jouer en normal, et rate. C'est le scénario le plus
+        // banal qui soit : on débloque l'Expert précisément pour continuer à jouer.
+        $this->session($uid, 'music', 4, 'win', 0);
+        $this->session($uid, 'music', 2, 'giveup', 0);
+
+        $this->assertTrue(
+            personadle_is_expert_unlocked(self::$pdo, $uid, 'music'),
+            'un Mode Expert débloqué ne doit JAMAIS se re-verrouiller'
+        );
+    }
+
+    public function testProgressNeverGoesBackwards(): void
+    {
+        // Corollaire visible par le joueur : l'infobulle « 9 / 15 » ne doit pas
+        // redescendre après une partie ratée, sinon la progression paraît aléatoire.
+        $uid = $this->makeUser();
+        $this->session($uid, 'personae', 1, 'win', 3);
+        $this->session($uid, 'personae', 1, 'win', 2);
+        $before = personadle_expert_progress(self::$pdo, $uid, 'personae')['current'];
+
+        $this->session($uid, 'personae', 3, 'giveup', 1);
+        $after = personadle_expert_progress(self::$pdo, $uid, 'personae')['current'];
+
+        $this->assertSame($before, $after, 'la progression affichée ne doit jamais reculer');
     }
 
     // ── personadle_expert_conditions / progress / is_unlocked ─────────────────────

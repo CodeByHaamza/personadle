@@ -530,7 +530,10 @@ function showVictory(force = false) {
     }
 
     const _pSil = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
-    if (attempts === 0 && !_pSil.hasWonFirstTry) {
+    // `attempts` vaut 1 sur une victoire au premier essai : les modes incrementent
+    // AVANT de tester la victoire. Le test portait sur 0, donc ce badge n'etait
+    // jamais decerne (corrige en 2.1).
+    if (attempts === 1 && !_pSil.hasWonFirstTry) {
       _pSil.hasWonFirstTry = true;
       localStorage.setItem("personaUserProfile", JSON.stringify(_pSil));
     }
