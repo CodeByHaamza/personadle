@@ -251,9 +251,23 @@ export const api = {
       }
       if (seeded) localStorage.setItem("pendingSessions", JSON.stringify(pending));
 
+      // Plafond par passage. Le rate limit de POST /api/sessions est de 90 requêtes
+      // par 15 min (api/sessions.php), PARTAGÉ avec les parties en cours. Vider une
+      // file de 60 d'un coup consommait donc presque tout le quota, et les parties
+      // suivantes du joueur se faisaient refuser en 429 — puis remettre en file, ce
+      // qui grossissait le retard. Un joueur avec du retard n'enregistrait plus
+      // qu'UNE partie par fenêtre de 15 min : celle envoyée avant le rattrapage.
+      // Vécu en prod le 2026-09-02.
+      //
+      // 20 laisse largement de quoi jouer (une partie manuelle prend au mieux ~30 s,
+      // soit ~30 par fenêtre) tout en résorbant le retard à chaque partie terminée.
+      const BATCH = 20;
+      const batch = pending.slice(0, BATCH);
+      const deferred = pending.slice(BATCH);
+
       const remaining = [];
-      for (let i = 0; i < pending.length; i++) {
-        const raw = pending[i];
+      for (let i = 0; i < batch.length; i++) {
+        const raw = batch[i];
         const session = normalize(raw);
         try {
           await api.stats.postSession(session);
@@ -274,7 +288,7 @@ export const api = {
           // On garde donc le reste SANS l'essayer : la file est conservée intacte
           // pour le prochain passage, quand la fenêtre de limitation sera écoulée.
           if (e?.status === 429 || e?.status >= 500) {
-            remaining.push(...pending.slice(i + 1));
+            remaining.push(...batch.slice(i + 1));
             console.warn(
               `⚠️ Sync interrompue (${e.status}) — ${remaining.length} session(s) gardées pour plus tard`
             );
@@ -284,7 +298,7 @@ export const api = {
           console.warn("⚠️ Session sync failed:", e.message);
         }
       }
-      localStorage.setItem("pendingSessions", JSON.stringify(remaining));
+      localStorage.setItem("pendingSessions", JSON.stringify([...remaining, ...deferred]));
       api.stats._syncLock = false;
     },
     _syncLock: false,

@@ -50,6 +50,53 @@ afterEach(() => {
   api.stats._syncLock = false;
 });
 
+describe("syncPending — plafond par passage", () => {
+  it("n'envoie pas plus de 20 sessions d'un coup", async () => {
+    // Le rate limit de POST /api/sessions (90 / 15 min) est PARTAGÉ avec les
+    // parties en cours. Vider une grosse file d'un seul élan consommait presque
+    // tout le quota : les parties suivantes du joueur partaient en 429, étaient
+    // remises en file, et le retard grossissait. En pratique il n'enregistrait
+    // plus qu'UNE partie par fenêtre de 15 min.
+    queue(60);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(reply(201)));
+
+    await api.stats.syncPending();
+
+    expect(fetch).toHaveBeenCalledTimes(20);
+    expect(readQueue()).toHaveLength(40);
+  });
+
+  it("conserve l'ordre : le lot suivant reprend là où on s'est arrêté", async () => {
+    queue(30);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(reply(201)));
+
+    await api.stats.syncPending();
+
+    expect(readQueue().map((s) => s.client_session_id)).toEqual(
+      Array.from({ length: 10 }, (_, i) => `cid-${20 + i}`)
+    );
+  });
+
+  it("garde le reliquat non tenté quand le lot est interrompu par un 429", async () => {
+    // Interruption au 3ᵉ du lot : les 17 restants du lot ET les 40 différés
+    // doivent tous survivre, aucun ne doit être perdu.
+    queue(60);
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(reply(201))
+        .mockResolvedValueOnce(reply(201))
+        .mockResolvedValue(reply(429, { message: "Too many session submissions." }))
+    );
+
+    await api.stats.syncPending();
+
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(readQueue()).toHaveLength(58); // 60 - 2 envoyées avec succès
+  });
+});
+
 describe("syncPending — arrêt sur 429 / 5xx", () => {
   it("s'arrête au premier 429 au lieu de vider la file en la rejouant", async () => {
     queue(5);
