@@ -50,6 +50,54 @@ afterEach(() => {
   api.stats._syncLock = false;
 });
 
+describe("syncPending — plafond par passage", () => {
+  it("n'envoie pas plus de 5 sessions d'un coup", async () => {
+    // Le rate limit de POST /api/sessions (90 / 15 min) est PARTAGÉ avec les
+    // parties en cours. Vider une grosse file d'un seul élan consommait presque
+    // tout le quota : les parties suivantes du joueur partaient en 429, étaient
+    // remises en file, et le retard grossissait. En pratique il n'enregistrait
+    // plus qu'UNE partie par fenêtre de 15 min.
+    // Coût par partie terminée = 1 + BATCH. Avec 90 requêtes / 15 min, BATCH = 5
+    // laisse 15 parties par fenêtre — le rythme d'un joueur qui enchaîne. Un
+    // plafond de 20 n'en laissait que 4 et le renvoyait dans le mur des 429.
+    queue(60);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(reply(201)));
+
+    await api.stats.syncPending();
+
+    expect(fetch).toHaveBeenCalledTimes(5);
+    expect(readQueue()).toHaveLength(55);
+  });
+
+  it("conserve l'ordre : le lot suivant reprend là où on s'est arrêté", async () => {
+    queue(8);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(reply(201)));
+
+    await api.stats.syncPending();
+
+    expect(readQueue().map((s) => s.client_session_id)).toEqual(["cid-5", "cid-6", "cid-7"]);
+  });
+
+  it("garde le reliquat non tenté quand le lot est interrompu par un 429", async () => {
+    // Interruption au 3ᵉ du lot : le reste du lot ET tous les différés doivent
+    // survivre, aucun ne doit être perdu.
+    queue(60);
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(reply(201))
+        .mockResolvedValueOnce(reply(201))
+        .mockResolvedValue(reply(429, { message: "Too many session submissions." }))
+    );
+
+    await api.stats.syncPending();
+
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(readQueue()).toHaveLength(58); // 60 - 2 envoyées avec succès
+  });
+});
+
 describe("syncPending — arrêt sur 429 / 5xx", () => {
   it("s'arrête au premier 429 au lieu de vider la file en la rejouant", async () => {
     queue(5);
