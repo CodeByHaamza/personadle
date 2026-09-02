@@ -1035,7 +1035,11 @@
     "abandon": "Desistir do desafio",
     "abandon_confirm": "Desistir deste desafio? Não contará como derrota.",
     "abandoned": "Desafio abandonado. Podes aceitar outro.",
-    "abandon_failed": "Não foi possível desistir do desafio. Tenta de novo."
+    "abandon_failed": "Não foi possível desistir do desafio. Tenta de novo.",
+    "select_friend_expert": "Desafiar um amigo — Especialista",
+    "expert_note": "Desafio Especialista: só os amigos que desbloquearam o Especialista deste modo o podem aceitar.",
+    "no_expert_friend": "Nenhum dos teus amigos desbloqueou ainda o Especialista deste modo.",
+    "expert_locked": "Desbloqueia o Especialista deste modo antes de aceitares este desafio."
   },
   "challenge_result": {
     "title_win": "MUITO BEM!",
@@ -1209,7 +1213,25 @@
     "q33": "Como mudo o idioma ou ativo o modo para daltónicos?",
     "a33": "Nas Definições (ícone de engrenagem): escolhe entre 5 idiomas e alterna o modo escuro ou as cores para daltónicos.",
     "q34": "Os meus dados são sincronizados entre dispositivos?",
-    "a34": "Sim — com uma conta, o teu progresso, estatísticas e perfil sincronizam automaticamente. Sem ela, o progresso é guardado apenas nesse dispositivo."
+    "a34": "Sim — com uma conta, o teu progresso, estatísticas e perfil sincronizam automaticamente. Sem ela, o progresso é guardado apenas nesse dispositivo.",
+    "cat_expert": "⚡ Modo Especialista",
+    "cat_scoring": "📊 Pontuações e sequências",
+    "q35": "O que é o Modo Especialista?",
+    "a35": "Uma segunda forma, mais difícil, de jogar cada um dos 6 modos, com muito menos pistas: uma única fala no Clássico, um emoji mentiroso no Emoji, um clarão de uma fração de segundo na Silhueta, um desfoque congelado a preto e branco no All-Out Attack, a letra sem áudio na Música, e o verdadeiro mito por trás da Persona no Personae.",
+    "q36": "Como se desbloqueia o Modo Especialista?",
+    "a36": "Cada modo tem a sua própria condição, verificada no servidor. Clássico e Silhueta: 10 vitórias em 4 tentativas ou menos. Emoji: 10 vitórias num só dia. All-Out Attack, Personae e Música: 15 vitórias à primeira tentativa seguidas. Ao carregar a página seguinte surge uma animação de cadeado a estilhaçar.",
+    "q37": "Posso perder um modo que desbloqueei?",
+    "a37": "Não. Um desbloqueio é definitivo. Nos três modos baseados numa sequência de vitórias perfeitas conta a melhor sequência alguma vez alcançada: uma partida imperfeita mais tarde interrompe a sequência atual, mas nunca retira o acesso conquistado.",
+    "q38": "O Modo Especialista afeta a minha partida normal?",
+    "a38": "Não. Cada modo Especialista tem o seu próprio alvo, as suas próprias tentativas e as suas próprias estatísticas. Jogar em Especialista nunca toca na tua partida normal do dia, e os teus resultados Especialista são contados à parte.",
+    "q39": "Pode desafiar-se um amigo no Modo Especialista?",
+    "a39": "Sim, mas só os amigos que desbloquearam o Especialista desse modo o podem receber — o seletor filtra-os por ti. Um desafio Especialista e um normal podem coexistir no mesmo dia com o mesmo amigo: são dois jogos diferentes, com duas pontuações diferentes.",
+    "q40": "Como é calculada a minha sequência?",
+    "a40": "Conta os dias consecutivos em que jogaste, com a fronteira do dia na hora de Paris — não a tua meia-noite local. Várias partidas no mesmo dia contam como um só dia. Por modo, um dia conta como ganho se pelo menos uma das tuas partidas desse dia for uma vitória.",
+    "q41": "Porque é que a taxa de vitórias da classificação não é simplesmente vitórias ÷ partidas?",
+    "a41": "Porque um jogador com 1 vitória em 1 partida ficaria em primeiro para sempre. A classificação usa uma média suavizada: todos começam com 20 partidas imaginárias jogadas ao ritmo médio do site. Com poucas partidas ficas perto dessa média; quanto mais jogas, mais a tua taxa real se destaca. Jogar mais só sobe a tua taxa se também venceres.",
+    "q42": "As partidas repetidas contam?",
+    "a42": "Sim, desde a v2.1 cada partida terminada é registada, incluindo as repetidas no mesmo dia. Antes só era guardada a primeira partida de cada dia e de cada modo — por isso alguns contadores de desbloqueio pareciam parados."
   },
   "updates": {
     "new_content_title": "✨ Novo Conteúdo v2.0",

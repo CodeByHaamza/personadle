@@ -16,7 +16,7 @@
   <a href="https://github.com/HamzaKarrouchi/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HamzaKarrouchi/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
   <img src="https://img.shields.io/badge/Version-2.1-brightgreen?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
-  <img src="https://img.shields.io/badge/Tests-874%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-885%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
   <img src="https://img.shields.io/badge/Backend-PHP%208.3%20%2B%20MariaDB-8892BF?style=for-the-badge&logo=php" alt="PHP Backend">
   <img src="https://img.shields.io/badge/i18n-EN%20%7C%20FR%20%7C%20ES%20%7C%20DE%20%7C%20IT%20%7C%20PT-blueviolet?style=for-the-badge" alt="Languages">
 </p>
@@ -241,7 +241,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
 
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 24-table relational schema, 874+ unit tests (Vitest + jsdom)
+- 24-table relational schema, 885+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
@@ -265,7 +265,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 
 ### 🌐 Internationalisation
 
-- 6 languages: EN · FR · ES · DE · IT · PT (1075 keys each)
+- 6 languages: EN · FR · ES · DE · IT · PT (1097 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
@@ -437,7 +437,7 @@ GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
 ### Tests & quality
 
 ```
-Vitest + jsdom → 874 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+Vitest + jsdom → 885 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
 Playwright     → 113 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5
@@ -483,7 +483,7 @@ Track your journey with comprehensive stats:
 ## 🗺️ Roadmap
 
 Grosses briques déjà livrées — backend PHP/MariaDB, amis + Social Link, leaderboard, défis
-quotidiens, i18n 6 langues, panel admin, 874 tests automatisés (Vitest + PHPUnit + Playwright).
+quotidiens, i18n 6 langues, panel admin, 885 tests automatisés (Vitest + PHPUnit + Playwright).
 
 | Feature                            | Status       |
 | ----------------------------------- | ------------ |
@@ -647,7 +647,7 @@ cd personadle
 # Install test dependencies
 npm install
 
-# Run the 874 unit tests
+# Run the 885 unit tests
 npm test
 
 # Backend setup (first time only — creates DB, imports schema, configures Apache)

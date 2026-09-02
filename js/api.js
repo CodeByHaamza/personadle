@@ -348,8 +348,20 @@ export const api = {
 
   // ── Amis ──────────────────────────────────────────────
   friends: {
-    /** Récupère la liste d'amis + demandes en attente de l'utilisateur connecté. */
-    list: () => get("/friends"),
+    /**
+     * Récupère la liste d'amis + demandes en attente de l'utilisateur connecté.
+     *
+     * @param {{expert_mode?: string}} [opts] `expert_mode` ajoute `expert_unlocked`
+     *   à chaque ami — utilisé par le sélecteur d'un défi Expert, qui ne doit
+     *   proposer que des amis capables de le recevoir. Coûteux côté serveur
+     *   (~2 requêtes par ami) : à ne demander que lorsque c'est nécessaire.
+     */
+    list: (opts = {}) => {
+      const qs = opts.expert_mode
+        ? `?expert_mode=${encodeURIComponent(opts.expert_mode)}`
+        : "";
+      return get(`/friends${qs}`);
+    },
 
     /**
      * Envoie une demande d'ami par friend_code.

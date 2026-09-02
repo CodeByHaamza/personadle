@@ -13,6 +13,77 @@
 
 ---
 
+## 2026-09-02 — feat(défi): impasse Expert fermée, modale dédiée, 2 onglets FAQ
+
+### L'impasse
+
+Un défi Expert pouvait être envoyé à quelqu'un n'ayant pas débloqué le mode. Rien ne
+l'empêchait — ni le client, ni le serveur (`$isExpert = !empty($data['challenge_is_expert'])`,
+sans contrôle). Le destinataire acceptait, la porte Expert le renvoyait en mode normal
+(`gameCore.js`), et le défi restait `accepted` côté serveur.
+
+Il ne pouvait alors **ni le jouer ni l'abandonner** : `challenge-banner.js` lit
+`activeChallengeKey()`, donc la case de la dimension **courante** — en normal, la bannière ne
+voit jamais un défi Expert, donc aucun bouton Abandonner. Et comme un défi accepté n'est
+jamais remplacé (règle « un seul défi vivant »), l'expéditeur ne pouvait plus lui en envoyer
+d'autre de la journée. **Les deux étaient bloqués.**
+
+### Trois gardes, à trois niveaux
+
+- **Serveur, à l'envoi** — `api/messages/index.php` refuse en 409 si le destinataire n'a pas
+  débloqué le mode. C'est la seule qui compte vraiment : le reste est de l'ergonomie, et rien
+  n'empêche d'envoyer la requête à la main.
+- **Client, à l'acceptation** — refus avant toute écriture, dans la lignée du « on ne touche à
+  rien tant qu'on ne peut pas aboutir » déjà en place. Couvre les défis créés *avant* ce
+  correctif et déjà en base. Seul un refus **ferme** bloque : sur `unavailable` (réseau), on
+  laisse passer plutôt que d'empêcher un joueur légitime.
+- **Client, au choix de l'ami** — la liste ne propose que les éligibles.
+
+### Le filtre d'amis
+
+`GET /api/friends` gagne un paramètre **optionnel** `?expert_mode=<mode>` qui ajoute
+`expert_unlocked` à chaque ami. Sur la route existante plutôt qu'un nouveau `.php` : tout
+fichier ajouté dans `api/friends/` exigerait sa propre `RewriteRule` (CLAUDE.md §7), pour un
+besoin qui tient en un champ.
+
+Coût assumé : ~2 requêtes par ami, **uniquement quand le paramètre est présent** — donc à
+l'ouverture d'une modale de défi Expert, pas à chaque affichage de la page Amis.
+
+`expert_unlocked` absent (backend antérieur) ⇒ **on ne filtre pas**. Vider la liste sur un
+champ manquant serait pire que laisser le serveur refuser avec un message clair.
+
+### La modale
+
+Variante `--expert` sombre : fond `#14101c`, liseré violet/rose, halo. Construite en
+**surcharges de variables CSS** (`--challenge-bg`, `--challenge-border`…) plutôt qu'en second
+composant — tout ce qui les lit bascule d'un coup, et la carte Expert suivra les évolutions de
+la normale. Pas d'animation permanente : la carte reste ouverte le temps de choisir.
+
+Un texte explicatif (`challenge.expert_note`) dit **pourquoi** la liste est plus courte. Sans
+lui, on croirait avoir perdu des amis.
+
+### FAQ : deux catégories
+
+**⚡ Mode Expert** (5 questions) et **📊 Scores & séries** (3), traduites dans les 6 langues.
+Elles répondent aux questions réellement posées ce cycle : comment débloquer, peut-on perdre
+l'accès (non — cf. le correctif de la veille), pourquoi le taux de victoire du classement
+n'est pas `victoires ÷ parties`, et pourquoi les compteurs semblaient figés avant la 2.1.
+
+⚠️ Piège trouvé au passage : `pages/faq.html` affecte les catégories **par index**
+(`CAT_KEYS[i]`, position dans le DOM). Insérer une catégorie au milieu sans l'ajouter au
+tableau décale toutes les suivantes — les onglets filtrent alors les mauvaises questions,
+**sans lever la moindre erreur**.
+
+### Tests
+
+- `challengeModalExpert.test.js` (6) — le paramètre n'est demandé qu'en Expert, seuls les
+  éligibles sont proposés, message dédié si aucun, et absence de filtrage en compat ascendante
+- `faqCategories.test.js` (5) — aligne les trois listes qui doivent le rester (titres du DOM,
+  `CAT_KEYS`, onglets). C'est la seule façon de voir un décalage qui, fichier par fichier,
+  paraît cohérent
+
+**879 tests JS / 49 suites** · **239 PHPUnit / 1016 assertions** · lint et i18n propres.
+
 ## 2026-09-01 — fix(expert): trois Modes Expert se re-verrouillaient tout seuls
 
 Trouvé en vérifiant, à la demande d'Hamza, si les conditions de déblocage pouvaient « buguer

@@ -924,7 +924,11 @@
     "abandon": "Abbandona la sfida",
     "abandon_confirm": "Abbandonare questa sfida? Non conterà come una sconfitta.",
     "abandoned": "Sfida abbandonata. Puoi accettarne un'altra.",
-    "abandon_failed": "Impossibile abbandonare la sfida. Riprova."
+    "abandon_failed": "Impossibile abbandonare la sfida. Riprova.",
+    "select_friend_expert": "Sfida un amico — Esperto",
+    "expert_note": "Sfida Esperto: solo gli amici che hanno sbloccato l'Esperto di questa modalità possono raccoglierla.",
+    "no_expert_friend": "Nessuno dei tuoi amici ha ancora sbloccato l'Esperto di questa modalità.",
+    "expert_locked": "Sblocca l'Esperto di questa modalità prima di accettare questa sfida."
   },
   "challenge_result": {
     "title_win": "BRAVO!",
@@ -1209,7 +1213,25 @@
     "q33": "Come cambio lingua o attivo la modalità daltonica?",
     "a33": "Nelle Impostazioni (icona ingranaggio): scegli tra 5 lingue e attiva la modalità scura o i colori per daltonici.",
     "q34": "I miei dati sono sincronizzati tra dispositivi?",
-    "a34": "Sì — con un account, progressi, statistiche e profilo si sincronizzano automaticamente. Senza, i progressi restano solo su quel dispositivo."
+    "a34": "Sì — con un account, progressi, statistiche e profilo si sincronizzano automaticamente. Senza, i progressi restano solo su quel dispositivo.",
+    "cat_expert": "⚡ Modalità Esperto",
+    "cat_scoring": "📊 Punteggi e serie",
+    "q35": "Cos'è la Modalità Esperto?",
+    "a35": "Un secondo modo, più difficile, di giocare ciascuna delle 6 modalità, con molti meno indizi: una sola battuta in Classica, un emoji bugiardo in Emoji, un lampo di una frazione di secondo in Silhouette, una sfocatura congelata in bianco e nero in All-Out Attack, il testo senza audio in Musica, e il vero mito dietro la Persona in Personae.",
+    "q36": "Come si sblocca la Modalità Esperto?",
+    "a36": "Ogni modalità ha la sua condizione, verificata dal server. Classica e Silhouette: 10 vittorie in 4 tentativi o meno. Emoji: 10 vittorie in una sola giornata. All-Out Attack, Personae e Musica: 15 vittorie al primo tentativo di fila. Al caricamento successivo parte un'animazione di lucchetto che esplode.",
+    "q37": "Posso perdere una modalità che ho sbloccato?",
+    "a37": "No. Uno sblocco è definitivo. Per le tre modalità basate su una serie di vittorie perfette conta la miglior serie mai raggiunta: una partita imperfetta successiva interrompe la serie in corso, ma non ti toglie mai l'accesso ottenuto.",
+    "q38": "La Modalità Esperto influisce sulla mia partita normale?",
+    "a38": "No. Ogni modalità Esperto ha il proprio bersaglio, i propri tentativi e le proprie statistiche. Giocare in Esperto non tocca mai la tua partita normale del giorno, e i risultati Esperto sono contati a parte.",
+    "q39": "Si può sfidare un amico in Modalità Esperto?",
+    "a39": "Sì, ma solo gli amici che hanno sbloccato l'Esperto di quella modalità possono riceverla — il selettore li filtra per te. Una sfida Esperto e una normale possono coesistere lo stesso giorno con lo stesso amico: sono due giochi diversi, con due punteggi diversi.",
+    "q40": "Come viene calcolata la mia serie?",
+    "a40": "Conta i giorni consecutivi in cui hai giocato, con il confine di giornata sull'ora di Parigi — non la tua mezzanotte locale. Più partite nello stesso giorno contano come un solo giorno. Per modalità, un giorno conta come vinto se almeno una delle tue partite di quel giorno è una vittoria.",
+    "q41": "Perché la percentuale di vittorie in classifica non è semplicemente vittorie ÷ partite?",
+    "a41": "Perché un giocatore con 1 vittoria su 1 partita resterebbe primo per sempre. La classifica usa una media smorzata: tutti partono con 20 partite immaginarie giocate al tasso medio del sito. Con poche partite resti vicino a quella media; più giochi, più emerge il tuo tasso reale. Giocare di più alza la percentuale solo se vinci anche.",
+    "q42": "Le partite rigiocate contano?",
+    "a42": "Sì, dalla v2.1 ogni partita conclusa viene registrata, comprese quelle rigiocate nello stesso giorno. Prima veniva salvata solo la prima partita di ogni giorno e di ogni modalità — ecco perché alcuni contatori di sblocco sembravano fermi."
   },
   "updates": {
     "new_content_title": "✨ Nuovi contenuti v2.0",

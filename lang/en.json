@@ -1035,7 +1035,11 @@
     "abandon": "Give up challenge",
     "abandon_confirm": "Give up this challenge? It will not count as a loss.",
     "abandoned": "Challenge given up. You can accept another one.",
-    "abandon_failed": "Could not give up the challenge. Try again."
+    "abandon_failed": "Could not give up the challenge. Try again.",
+    "select_friend_expert": "Challenge a friend — Expert",
+    "expert_note": "Expert challenge: only friends who have unlocked this mode's Expert can take it on.",
+    "no_expert_friend": "None of your friends has unlocked this mode's Expert yet.",
+    "expert_locked": "Unlock this mode's Expert before accepting this challenge."
   },
   "challenge_result": {
     "title_win": "WELL DONE!",
@@ -1209,7 +1213,25 @@
     "q33": "How do I change the language or enable colorblind mode?",
     "a33": "In Settings (gear icon): pick from 5 languages and toggle dark mode or colorblind-friendly colors.",
     "q34": "Are my data synced across devices?",
-    "a34": "Yes — with an account, your progress, stats and profile sync automatically. Without one, progress is saved only on that device."
+    "a34": "Yes — with an account, your progress, stats and profile sync automatically. Without one, progress is saved only on that device.",
+    "cat_expert": "⚡ Expert Mode",
+    "cat_scoring": "📊 Scores & Streaks",
+    "q35": "What is Expert Mode?",
+    "a35": "A second, harder way to play each of the 6 modes, with far fewer clues: a single quote in Classic, one lying emoji in Emoji, a split-second flash in Silhouette, a frozen black-and-white blur in All-Out Attack, lyrics with no audio in Music, and the real myth behind the Persona in Personae.",
+    "q36": "How do I unlock Expert Mode?",
+    "a36": "Each mode has its own condition, checked on the server. Classic and Silhouette: 10 wins in 4 attempts or fewer. Emoji: 10 wins in a single day. All-Out Attack, Personae and Music: 15 first-try wins in a row. A lock-shattering animation plays on your next page load once you get there.",
+    "q37": "Can I lose access to a mode I unlocked?",
+    "a37": "No. An unlock is permanent. For the three modes based on a run of perfect wins, what counts is your best run ever — a later imperfect game interrupts the current run but never takes back the access you earned.",
+    "q38": "Does Expert Mode affect my normal game?",
+    "a38": "No. Each Expert mode has its own target, its own attempts and its own stats. Playing Expert never touches your daily normal game, and your Expert results are counted separately.",
+    "q39": "Can I challenge a friend in Expert Mode?",
+    "a39": "Yes, but only friends who have unlocked that mode's Expert can receive it — the challenge picker filters them for you. An Expert challenge and a normal one can coexist the same day with the same friend: they are two different games with two different scores.",
+    "q40": "How is my streak calculated?",
+    "a40": "It counts consecutive days on which you played, using the Paris day boundary — not your local midnight. Playing several games on the same day counts as one day. Per mode, a day counts as won if at least one of your games that day was a win.",
+    "q41": "Why isn't the leaderboard win rate just wins divided by games?",
+    "a41": "Because a player with 1 win out of 1 game would top the board forever. The ranking uses a smoothed average: everyone starts with 20 imaginary games played at the site's average rate. With few games you sit near that average; the more you play, the more your real rate shows through. Playing more only raises your rate if you also win.",
+    "q42": "Do replays count?",
+    "a42": "Yes, since v2.1 every game you finish is recorded — including the ones you replay the same day. Before that, only the first game of each day and each mode was ever saved, which is why some unlock counters seemed frozen."
   },
   "updates": {
     "new_content_title": "✨ New Content v2.0",

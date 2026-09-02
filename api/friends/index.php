@@ -22,6 +22,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/friends.php';
+require_once __DIR__ . '/../lib/expert_unlocks.php';
 
 // Extraire l'éventuel :id depuis l'URL (/api/friends/42)
 $parts        = requestPathSegments();
@@ -145,6 +146,29 @@ if ($method === 'GET') {
             // social_links table indisponible — on retourne quand même la liste sans XP
             error_log('[Friends GET] social_links enrichment failed: ' . $e->getMessage());
         }
+    }
+
+    // ── Étape 3 : `expert_unlocked` par ami, si `?expert_mode=` est fourni ──────
+    //
+    // Sert au sélecteur d'amis d'un défi Expert : proposer quelqu'un qui n'a pas
+    // débloqué le mode l'enverrait dans une impasse — il accepterait, la porte le
+    // renverrait en mode normal, et le défi resterait « accepté » sans qu'il
+    // puisse ni le jouer ni l'abandonner (sa bannière ne lit que la dimension
+    // courante). Mieux vaut ne pas le proposer du tout.
+    //
+    // Paramètre OPTIONNEL, et sur la route existante plutôt qu'une nouvelle :
+    // tout `.php` ajouté dans api/friends/ exigerait sa propre RewriteRule
+    // (CLAUDE.md §7), pour un besoin qui tient en un champ.
+    //
+    // Coût : ~2 requêtes par ami, uniquement quand le paramètre est présent —
+    // c'est-à-dire à l'ouverture d'une modale de défi Expert, pas à chaque
+    // affichage de la page Amis.
+    $expertMode = $_GET['expert_mode'] ?? null;
+    if ($expertMode !== null && isset(personadle_expert_conditions()[$expertMode]) && !empty($friends)) {
+        foreach ($friends as &$f) {
+            $f['expert_unlocked'] = personadle_is_expert_unlocked($pdo, $f['friend_id'], $expertMode);
+        }
+        unset($f);
     }
 
     jsonSuccess([

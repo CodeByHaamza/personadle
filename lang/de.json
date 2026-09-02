@@ -924,7 +924,11 @@
     "abandon": "Herausforderung aufgeben",
     "abandon_confirm": "Diese Herausforderung aufgeben? Sie zählt nicht als Niederlage.",
     "abandoned": "Herausforderung aufgegeben. Du kannst eine neue annehmen.",
-    "abandon_failed": "Herausforderung konnte nicht aufgegeben werden. Versuch es erneut."
+    "abandon_failed": "Herausforderung konnte nicht aufgegeben werden. Versuch es erneut.",
+    "select_friend_expert": "Freund herausfordern — Experte",
+    "expert_note": "Experten-Duell: nur Freunde, die den Experten dieses Modus freigeschaltet haben, können es annehmen.",
+    "no_expert_friend": "Keiner deiner Freunde hat den Experten dieses Modus bisher freigeschaltet.",
+    "expert_locked": "Schalte zuerst den Experten dieses Modus frei, um dieses Duell anzunehmen."
   },
   "challenge_result": {
     "title_win": "BRAVO!",
@@ -1209,7 +1213,25 @@
     "q33": "Wie ändere ich die Sprache oder aktiviere den Farbenblind-Modus?",
     "a33": "In den Einstellungen (Zahnrad): aus 5 Sprachen wählen und Dunkelmodus oder farbenblindfreundliche Farben aktivieren.",
     "q34": "Werden meine Daten geräteübergreifend synchronisiert?",
-    "a34": "Ja — mit Konto werden Fortschritt, Statistiken und Profil automatisch synchronisiert. Ohne Konto wird der Fortschritt nur auf diesem Gerät gespeichert."
+    "a34": "Ja — mit Konto werden Fortschritt, Statistiken und Profil automatisch synchronisiert. Ohne Konto wird der Fortschritt nur auf diesem Gerät gespeichert.",
+    "cat_expert": "⚡ Experten-Modus",
+    "cat_scoring": "📊 Punkte & Serien",
+    "q35": "Was ist der Experten-Modus?",
+    "a35": "Eine zweite, schwerere Art, jeden der 6 Modi zu spielen — mit weit weniger Hinweisen: ein einziges Zitat in Klassisch, ein lügender Emoji in Emoji, ein Sekundenbruchteil-Blitz in Silhouette, ein eingefrorenes Schwarz-Weiß-Unschärfebild in All-Out Attack, Songtext ohne Ton in Musik, und der echte Mythos hinter der Persona in Personae.",
+    "q36": "Wie schalte ich den Experten-Modus frei?",
+    "a36": "Jeder Modus hat seine eigene Bedingung, serverseitig geprüft. Klassisch und Silhouette: 10 Siege in höchstens 4 Versuchen. Emoji: 10 Siege an einem einzigen Tag. All-Out Attack, Personae und Musik: 15 Siege im ersten Versuch in Folge. Beim nächsten Seitenaufruf zerspringt dann ein Schloss.",
+    "q37": "Kann ich einen freigeschalteten Modus wieder verlieren?",
+    "a37": "Nein. Eine Freischaltung ist dauerhaft. Bei den drei Modi mit Serie perfekter Siege zählt die beste jemals erreichte Serie: eine spätere unperfekte Partie unterbricht zwar die laufende Serie, nimmt dir den Zugang aber nie wieder weg.",
+    "q38": "Beeinflusst der Experten-Modus meine normale Partie?",
+    "a38": "Nein. Jeder Experten-Modus hat sein eigenes Ziel, seine eigenen Versuche und seine eigene Statistik. Experte zu spielen berührt deine normale Tagespartie nie, und deine Experten-Ergebnisse werden getrennt gezählt.",
+    "q39": "Kann ich Freunde im Experten-Modus herausfordern?",
+    "a39": "Ja, aber nur Freunde, die den Experten dieses Modus freigeschaltet haben, können es annehmen — die Auswahl filtert sie für dich. Ein Experten-Duell und ein normales können am selben Tag mit derselben Person nebeneinander bestehen: zwei verschiedene Spiele mit zwei verschiedenen Wertungen.",
+    "q40": "Wie wird meine Serie berechnet?",
+    "a40": "Sie zählt aufeinanderfolgende Tage, an denen du gespielt hast, mit der Tagesgrenze in Pariser Zeit — nicht deiner lokalen Mitternacht. Mehrere Partien am selben Tag zählen als ein Tag. Pro Modus gilt ein Tag als gewonnen, wenn mindestens eine deiner Partien an diesem Tag ein Sieg war.",
+    "q41": "Warum ist die Siegquote der Bestenliste nicht einfach Siege ÷ Partien?",
+    "a41": "Weil ein Spieler mit 1 Sieg aus 1 Partie sonst für immer oben stünde. Die Bestenliste nutzt einen geglätteten Durchschnitt: jeder startet mit 20 gedachten Partien zum Durchschnittswert der Seite. Mit wenigen Partien bleibst du nahe an diesem Durchschnitt; je mehr du spielst, desto stärker zeigt sich deine echte Quote. Mehr spielen hebt sie nur, wenn du auch gewinnst.",
+    "q42": "Zählen Wiederholungen?",
+    "a42": "Ja, seit v2.1 wird jede beendete Partie erfasst, auch die am selben Tag wiederholten. Vorher wurde nur die erste Partie pro Tag und Modus gespeichert — deshalb wirkten manche Freischaltzähler eingefroren."
   },
   "updates": {
     "new_content_title": "✨ Neue Inhalte v2.0",

@@ -3624,3 +3624,99 @@ body.expert-mode {
 .link-wrapper[aria-disabled="true"]:hover .shape-wrapper {
   display: none;
 }
+
+/* =====================================================
+   MODALE DE DÉFI — VARIANTE MODE EXPERT
+   =====================================================
+   Un défi Expert n'est pas le même jeu qu'un défi normal : cible tirée dans un
+   autre pool, barème propre, et destinataire restreint. L'écart visuel évite
+   qu'on croie lancer un défi ordinaire depuis une page qui, elle, ne l'est pas.
+
+   Volontairement construit en surcharges de la carte de base plutôt qu'en
+   second composant : une seule structure à maintenir, et le jour où la carte
+   normale évolue, l'Expert suit. */
+
+.challenge-overlay--expert {
+  background: rgba(6, 2, 10, 0.88);
+  backdrop-filter: blur(4px);
+}
+
+.challenge-card--expert {
+  /* Les variables sont redéfinies ICI plutôt que les règles filles réécrites :
+     tout ce qui lit --challenge-* (lignes d'amis, pied, bouton de fermeture)
+     bascule d'un coup, sans duplication. */
+  --challenge-bg: #14101c;
+  --challenge-border: rgba(178, 106, 255, 0.28);
+  --challenge-text: #ede8f7;
+  --challenge-text-muted: #a99cc4;
+
+  background: linear-gradient(165deg, #191325 0%, #100b18 55%, #0b0710 100%);
+  border-color: rgba(178, 106, 255, 0.45);
+  color: var(--challenge-text);
+  box-shadow:
+    0 0 0 1px rgba(178, 106, 255, 0.12),
+    0 10px 48px rgba(0, 0, 0, 0.6),
+    0 0 60px -18px rgba(150, 70, 255, 0.55);
+}
+
+/* Liseré supérieur : la seule touche « énergie » de la carte, assez discrète
+   pour ne pas concurrencer les avatars des amis juste en dessous. */
+.challenge-card--expert::before {
+  content: "";
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #b26aff 35%, #ff4d8d 65%, transparent);
+  opacity: 0.9;
+}
+
+.challenge-card--expert .challenge-friend-row {
+  border-bottom-color: rgba(178, 106, 255, 0.14);
+}
+.challenge-card--expert .challenge-friend-row:hover {
+  background: rgba(178, 106, 255, 0.09);
+}
+.challenge-card--expert .challenge-friend-row__pseudo {
+  color: var(--challenge-text);
+}
+.challenge-card--expert .challenge-friend-row__code {
+  color: var(--challenge-text-muted);
+}
+.challenge-card--expert .challenge-friend-row__avatar {
+  background: #0d0914;
+  border-color: rgba(178, 106, 255, 0.35);
+}
+.challenge-card--expert .challenge-friend-row__send {
+  background: linear-gradient(135deg, #7b3fd4, #b26aff);
+  border-color: rgba(178, 106, 255, 0.6);
+  color: #fff;
+}
+.challenge-card--expert .challenge-friend-row__send:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8f4ae8, #c98cff);
+}
+
+/* Texte explicatif : pourquoi la liste est plus courte qu'à l'ordinaire.
+   Sans lui, un joueur croirait avoir perdu des amis. */
+.challenge-card__note {
+  margin: 0;
+  padding: 12px 16px 10px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--challenge-text-muted);
+  border-bottom: 1px solid var(--challenge-border);
+}
+.challenge-card--expert .challenge-card__note {
+  color: #c3b4e0;
+  background: rgba(178, 106, 255, 0.06);
+}
+
+.challenge-card--expert .challenge-card__empty {
+  color: var(--challenge-text-muted);
+}
+
+/* Le mouvement d'entrée est le seul effet animé : pas de pulsation permanente,
+   qui fatiguerait sur une carte qu'on garde ouverte le temps de choisir. */
+@media (prefers-reduced-motion: reduce) {
+  .challenge-card--expert {
+    animation: none;
+  }
+}
