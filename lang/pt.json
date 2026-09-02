@@ -1231,7 +1231,9 @@
     "q41": "Porque é que a taxa de vitórias da classificação não é simplesmente vitórias ÷ partidas?",
     "a41": "Porque um jogador com 1 vitória em 1 partida ficaria em primeiro para sempre. A classificação usa uma média suavizada: todos começam com 20 partidas imaginárias jogadas ao ritmo médio do site. Com poucas partidas ficas perto dessa média; quanto mais jogas, mais a tua taxa real se destaca. Jogar mais só sobe a tua taxa se também venceres.",
     "q42": "As partidas repetidas contam?",
-    "a42": "Sim, desde a v2.1 cada partida terminada é registada, incluindo as repetidas no mesmo dia. Antes só era guardada a primeira partida de cada dia e de cada modo — por isso alguns contadores de desbloqueio pareciam parados."
+    "a42": "Sim, desde a v2.1 cada partida terminada é registada, incluindo as repetidas no mesmo dia. Antes só era guardada a primeira partida de cada dia e de cada modo — por isso alguns contadores de desbloqueio pareciam parados.",
+    "q43": "Como se ganha XP de Social Link com um amigo?",
+    "a43": "Seis ações dão XP: enviar um desafio (15), jogar no mesmo dia (20), partilhar a tua sequência (15), comparar estatísticas (10), partilhar uma pontuação (10) e visitar o perfil dele (5). Cada uma rende cerca do dobro se o teu amigo fizer o mesmo nesse dia. Um desafio Especialista vale mais — 25, ou 50 mútuo — porque ambos tiveram de desbloquear esse modo para que ele possa existir."
   },
   "updates": {
     "new_content_title": "✨ Novo Conteúdo v2.0",

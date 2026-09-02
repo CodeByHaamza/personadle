@@ -1231,7 +1231,9 @@
     "q41": "Perché la percentuale di vittorie in classifica non è semplicemente vittorie ÷ partite?",
     "a41": "Perché un giocatore con 1 vittoria su 1 partita resterebbe primo per sempre. La classifica usa una media smorzata: tutti partono con 20 partite immaginarie giocate al tasso medio del sito. Con poche partite resti vicino a quella media; più giochi, più emerge il tuo tasso reale. Giocare di più alza la percentuale solo se vinci anche.",
     "q42": "Le partite rigiocate contano?",
-    "a42": "Sì, dalla v2.1 ogni partita conclusa viene registrata, comprese quelle rigiocate nello stesso giorno. Prima veniva salvata solo la prima partita di ogni giorno e di ogni modalità — ecco perché alcuni contatori di sblocco sembravano fermi."
+    "a42": "Sì, dalla v2.1 ogni partita conclusa viene registrata, comprese quelle rigiocate nello stesso giorno. Prima veniva salvata solo la prima partita di ogni giorno e di ogni modalità — ecco perché alcuni contatori di sblocco sembravano fermi.",
+    "q43": "Come si guadagna XP Social Link con un amico?",
+    "a43": "Sei azioni danno XP: inviare una sfida (15), giocare lo stesso giorno (20), condividere la propria serie (15), confrontare le statistiche (10), condividere un punteggio (10) e visitare il suo profilo (5). Ognuna rende circa il doppio se il tuo amico fa la stessa cosa lo stesso giorno. Una sfida Esperto vale di più — 25, o 50 reciproca — perché entrambi avete dovuto sbloccare quella modalità perché potesse esistere."
   },
   "updates": {
     "new_content_title": "✨ Nuovi contenuti v2.0",

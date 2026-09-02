@@ -58,6 +58,18 @@ describe("modale de défi — mode normal", () => {
       expect(document.querySelector(".challenge-card--expert")).toBeNull();
     });
   });
+
+  it("émet l'action XP `challenge` (barème normal)", async () => {
+    const interact = vi.fn().mockResolvedValue({});
+    window._personadleApi.socialLink = { interactByFriend: interact };
+
+    showChallengeButton("music", 3, ["A", "B"]);
+    await openModal();
+    document.querySelector(".js-send-challenge").click();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(interact).toHaveBeenCalledWith(2, "challenge");
+  });
 });
 
 describe("modale de défi — Mode Expert", () => {
@@ -91,6 +103,22 @@ describe("modale de défi — Mode Expert", () => {
       expect(document.querySelector(".challenge-overlay--expert")).not.toBeNull();
       expect(document.querySelector(".challenge-card__note")?.textContent?.trim()).toBeTruthy();
     });
+  });
+
+  it("émet l'action XP `challenge_expert`, mieux payée qu'un défi normal", async () => {
+    // Le barème vit côté serveur (api/lib/social_link.php) : ce qui se vérifie
+    // ici, c'est que le client demande bien le BON type d'action. Se tromper de
+    // chaîne ne lève rien — le serveur refuserait en 400, silencieusement, et le
+    // joueur perdrait simplement son XP.
+    const interact = vi.fn().mockResolvedValue({});
+    window._personadleApi.socialLink = { interactByFriend: interact };
+
+    showChallengeButton("music", 3, ["A", "B"]);
+    await openModal();
+    document.querySelector(".js-send-challenge").click();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(interact).toHaveBeenCalledWith(2, "challenge_expert");
   });
 
   it("affiche un message dédié quand aucun ami n'est éligible", () => {

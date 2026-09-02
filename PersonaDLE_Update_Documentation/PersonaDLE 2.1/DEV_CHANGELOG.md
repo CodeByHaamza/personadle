@@ -13,6 +13,51 @@
 
 ---
 
+## 2026-09-02 — feat(social): un défi Expert rapporte plus d'XP Social Link
+
+Question d'Hamza : « gagner un défi en Expert donne beaucoup plus d'XP, c'est ça ? » Non —
+vérification faite, `api/lib/social_link.php` ne contenait qu'une seule entrée `challenge`
+(15 solo / 35 mutuel) et le mot « expert » n'apparaissait nulle part dans la chaîne XP.
+
+Nouveau palier `challenge_expert` : **25 solo / 50 mutuel**.
+
+### Pourquoi cet écart-là, et pas plus
+
+L'XP Social Link mesure le **lien entre deux joueurs**, pas la difficulté d'une partie. Un
+gros bonus pousserait à ne plus jouer que l'Expert et déformerait ce que la jauge raconte.
+25/50 récompense l'engagement réel — il faut que **les deux** joueurs aient débloqué le mode
+pour que le défi puisse seulement exister (le serveur refuse l'envoi sinon, cf. le correctif
+de l'impasse Expert) — sans transformer le reste en second choix.
+
+### Portée du changement
+
+- `PERSONADLE_SL_XP_TABLE` gagne une entrée. La validation serveur se fait déjà contre cette
+  table (`isset(PERSONADLE_SL_XP_TABLE[$actionType])`), donc rien d'autre à ouvrir.
+- Les **deux** émetteurs passent le bon type : `challenge-notif.js` à l'acceptation et le
+  sélecteur d'amis de `gameCore.js` à l'envoi. En oublier un aurait donné un barème
+  asymétrique selon le bout de la chaîne — invisible, puisque le serveur répondrait 400 en
+  silence et que l'appel est en `.catch(() => {})`.
+- Aucun libellé i18n à ajouter : les types d'action ne sont jamais affichés tels quels.
+
+### Tests
+
+Côté PHP, deux ajouts qui vérifient une **relation** plutôt que des constantes — un futur
+réglage du barème ne doit pas pouvoir inverser l'intention sans faire rougir un test :
+`testExpertChallengeIsWorthMoreThanANormalOne`, et `testEveryActionGivesMoreWhenMutual` qui
+balaie toute la table (`play_same_day` excepté, toujours mutuel par nature).
+
+Côté JS, deux tests vérifient que le client demande la bonne chaîne selon la dimension. Se
+tromper de type ne lève rien : le serveur refuserait en 400, silencieusement, et le joueur
+perdrait simplement son XP.
+
+### FAQ
+
+Question ajoutée à « 📊 Scores & séries » (6 langues) listant les six actions et leurs
+valeurs, dont le palier Expert. Elle vient directement de la question posée — si elle s'est
+posée une fois, elle se posera encore.
+
+**887 tests JS / 49 suites** · **241 PHPUnit / 1028 assertions**.
+
 ## 2026-09-02 — feat(défi): impasse Expert fermée, modale dédiée, 2 onglets FAQ
 
 ### L'impasse

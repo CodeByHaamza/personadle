@@ -1231,7 +1231,9 @@
     "q41": "¿Por qué el porcentaje de victorias del ranking no es simplemente victorias ÷ partidas?",
     "a41": "Porque un jugador con 1 victoria de 1 partida encabezaría la tabla para siempre. El ranking usa una media suavizada: todos empiezan con 20 partidas imaginarias jugadas al ritmo medio del sitio. Con pocas partidas te quedas cerca de esa media; cuanto más juegas, más se refleja tu ritmo real. Jugar más solo sube tu porcentaje si además ganas.",
     "q42": "¿Cuentan las partidas repetidas?",
-    "a42": "Sí, desde la v2.1 se registra cada partida terminada, incluidas las repetidas el mismo día. Antes solo se guardaba la primera partida de cada día y de cada modo — por eso algunos contadores de desbloqueo parecían congelados."
+    "a42": "Sí, desde la v2.1 se registra cada partida terminada, incluidas las repetidas el mismo día. Antes solo se guardaba la primera partida de cada día y de cada modo — por eso algunos contadores de desbloqueo parecían congelados.",
+    "q43": "¿Cómo se gana XP de Social Link con un amigo?",
+    "a43": "Seis acciones dan XP: enviar un desafío (15), jugar el mismo día (20), compartir tu racha (15), comparar estadísticas (10), compartir una puntuación (10) y visitar su perfil (5). Cada una da aproximadamente el doble si tu amigo hace lo mismo ese día. Un desafío Experto vale más — 25, o 50 mutuo — porque ambos habéis tenido que desbloquear ese modo para que exista."
   },
   "updates": {
     "new_content_title": "✨ Nuevo contenido v2.0",
