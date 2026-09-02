@@ -252,14 +252,35 @@ export const api = {
       if (seeded) localStorage.setItem("pendingSessions", JSON.stringify(pending));
 
       const remaining = [];
-      for (const raw of pending) {
+      for (let i = 0; i < pending.length; i++) {
+        const raw = pending[i];
         const session = normalize(raw);
         try {
           await api.stats.postSession(session);
         } catch (e) {
           if (e?.status === 409) continue; // already recorded server-side, discard
           if (e?.status === 400) continue; // permanently invalid data — discard silently
+
           remaining.push(raw); // network/server error — keep for later
+
+          // 429 (rate limit) ou 5xx : le serveur demande d'ARRÊTER, pas de
+          // réessayer avec l'élément suivant. Poursuivre la boucle relançait une
+          // requête immédiatement, qui re-déclenchait un 429, et ainsi de suite
+          // jusqu'au bout de la file — puis tout était remis en file et rejoué au
+          // chargement suivant. Une file un peu grosse suffisait à s'y enfermer
+          // définitivement, en noyant la console et sans qu'aucune session ne
+          // passe. Vécu en prod le 2026-09-02.
+          //
+          // On garde donc le reste SANS l'essayer : la file est conservée intacte
+          // pour le prochain passage, quand la fenêtre de limitation sera écoulée.
+          if (e?.status === 429 || e?.status >= 500) {
+            remaining.push(...pending.slice(i + 1));
+            console.warn(
+              `⚠️ Sync interrompue (${e.status}) — ${remaining.length} session(s) gardées pour plus tard`
+            );
+            break;
+          }
+
           console.warn("⚠️ Session sync failed:", e.message);
         }
       }
