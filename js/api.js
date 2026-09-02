@@ -259,9 +259,22 @@ export const api = {
       // qu'UNE partie par fenêtre de 15 min : celle envoyée avant le rattrapage.
       // Vécu en prod le 2026-09-02.
       //
-      // 20 laisse largement de quoi jouer (une partie manuelle prend au mieux ~30 s,
-      // soit ~30 par fenêtre) tout en résorbant le retard à chaque partie terminée.
-      const BATCH = 20;
+      // DIMENSIONNEMENT — l'arithmétique compte ici, une valeur « qui semble
+      // raisonnable » ne suffit pas :
+      //
+      //   coût d'une partie terminée = 1 (la partie elle-même) + BATCH (le rattrapage)
+      //   parties possibles par fenêtre = 90 / (1 + BATCH)
+      //
+      //     BATCH = 20 →  4 parties / 15 min   ← starve un joueur normal
+      //     BATCH = 5  → 15 parties / 15 min
+      //     BATCH = 3  → 22 parties / 15 min
+      //
+      // Un joueur qui enchaîne (une partie par minute) en fait ~15 par fenêtre.
+      // BATCH = 5 le couvre exactement ; on s'y tient plutôt que de descendre à 3,
+      // qui résorberait le retard presque deux fois plus lentement pour une marge
+      // dont on n'a pas besoin. Le rattrapage doit rester DERRIÈRE le jeu en
+      // priorité : mieux vaut résorber lentement que réintroduire des 429.
+      const BATCH = 5;
       const batch = pending.slice(0, BATCH);
       const deferred = pending.slice(BATCH);
 
