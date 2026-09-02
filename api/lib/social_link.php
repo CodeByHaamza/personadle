@@ -19,6 +19,12 @@ const PERSONADLE_SL_XP_TABLE = [
     'play_same_day' => ['solo' => 20, 'mutual' => 20], // toujours mutuel
     'compare_stats' => ['solo' => 10, 'mutual' => 20],
     'challenge'     => ['solo' => 15, 'mutual' => 35],
+    // Défi en Mode Expert : les DEUX joueurs ont dû débloquer le mode (le serveur
+    // refuse l'envoi sinon, cf. api/messages/index.php), et la partie y est plus
+    // exigeante. L'écart reste volontairement modeste — l'XP Social Link mesure le
+    // lien entre deux joueurs, pas la difficulté ; un gros bonus pousserait à ne
+    // plus jouer que ça et déformerait ce que la jauge raconte.
+    'challenge_expert' => ['solo' => 25, 'mutual' => 50],
 ];
 
 /**

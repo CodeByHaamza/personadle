@@ -1231,7 +1231,9 @@
     "q41": "Pourquoi le taux de victoire du classement n'est pas simplement victoires ÷ parties ?",
     "a41": "Parce qu'un joueur avec 1 victoire sur 1 partie resterait premier indéfiniment. Le classement utilise une moyenne lissée : chacun démarre avec 20 parties imaginaires jouées au taux moyen du site. Avec peu de parties tu restes proche de cette moyenne ; plus tu joues, plus ton vrai taux ressort. Jouer plus ne monte ton taux que si tu gagnes aussi.",
     "q42": "Est-ce que les parties rejouées comptent ?",
-    "a42": "Oui, depuis la v2.1 chaque partie terminée est enregistrée, y compris celles rejouées dans la même journée. Avant, seule la première partie de chaque jour et de chaque mode était sauvegardée — c'est pourquoi certains compteurs de déblocage paraissaient figés."
+    "a42": "Oui, depuis la v2.1 chaque partie terminée est enregistrée, y compris celles rejouées dans la même journée. Avant, seule la première partie de chaque jour et de chaque mode était sauvegardée — c'est pourquoi certains compteurs de déblocage paraissaient figés.",
+    "q43": "Comment gagner de l'XP Social Link avec un ami ?",
+    "a43": "Six actions donnent de l'XP : envoyer un défi (15), jouer le même jour (20), partager sa série (15), comparer ses stats (10), partager un score (10) et visiter son profil (5). Chacune rapporte environ le double si ton ami fait la même chose le même jour. Un défi Expert vaut plus — 25, ou 50 en mutuel — parce qu'il faut que vous ayez tous les deux débloqué ce mode pour qu'il puisse exister."
   },
   "updates": {
     "new_content_title": "✨ Nouveau contenu v2.0",

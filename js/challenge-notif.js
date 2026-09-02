@@ -280,7 +280,13 @@ function _render({
       })
     );
 
-    if (senderId) gainSocialLinkXp(senderId, "challenge").catch(() => {});
+    // Un défi Expert rapporte davantage (25/50 au lieu de 15/35) : les deux
+    // joueurs ont dû débloquer le mode pour qu'il existe.
+    if (senderId) {
+      gainSocialLinkXp(senderId, challengeIsExpert ? "challenge_expert" : "challenge").catch(
+        () => {}
+      );
+    }
 
     // `dest` a été résolu et validé plus haut, avant toute écriture.
     window.location.href = dest;

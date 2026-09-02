@@ -1231,7 +1231,9 @@
     "q41": "Warum ist die Siegquote der Bestenliste nicht einfach Siege ÷ Partien?",
     "a41": "Weil ein Spieler mit 1 Sieg aus 1 Partie sonst für immer oben stünde. Die Bestenliste nutzt einen geglätteten Durchschnitt: jeder startet mit 20 gedachten Partien zum Durchschnittswert der Seite. Mit wenigen Partien bleibst du nahe an diesem Durchschnitt; je mehr du spielst, desto stärker zeigt sich deine echte Quote. Mehr spielen hebt sie nur, wenn du auch gewinnst.",
     "q42": "Zählen Wiederholungen?",
-    "a42": "Ja, seit v2.1 wird jede beendete Partie erfasst, auch die am selben Tag wiederholten. Vorher wurde nur die erste Partie pro Tag und Modus gespeichert — deshalb wirkten manche Freischaltzähler eingefroren."
+    "a42": "Ja, seit v2.1 wird jede beendete Partie erfasst, auch die am selben Tag wiederholten. Vorher wurde nur die erste Partie pro Tag und Modus gespeichert — deshalb wirkten manche Freischaltzähler eingefroren.",
+    "q43": "Wie verdiene ich Social-Link-XP mit einem Freund?",
+    "a43": "Sechs Aktionen geben XP: ein Duell senden (15), am selben Tag spielen (20), deine Serie teilen (15), Statistiken vergleichen (10), eine Wertung teilen (10) und sein Profil besuchen (5). Jede gibt ungefähr das Doppelte, wenn dein Freund am selben Tag dasselbe tut. Ein Experten-Duell ist mehr wert — 25, oder 50 beidseitig — weil ihr beide diesen Modus freigeschaltet haben musstet, damit es überhaupt existiert."
   },
   "updates": {
     "new_content_title": "✨ Neue Inhalte v2.0",

@@ -14,6 +14,36 @@ final class SocialLinkTest extends TestCase
 {
     // ── personadle_sl_xp_for_action ─────────────────────────────────────────
 
+    public function testExpertChallengeIsWorthMoreThanANormalOne(): void
+    {
+        // Le barème est la source de vérité unique du calcul (CLAUDE.md §5.9) :
+        // on vérifie la RELATION, pas seulement les valeurs, pour qu'un futur
+        // réglage ne puisse pas inverser l'intention sans faire rougir un test.
+        $this->assertGreaterThan(
+            personadle_sl_xp_for_action('challenge', false),
+            personadle_sl_xp_for_action('challenge_expert', false)
+        );
+        $this->assertGreaterThan(
+            personadle_sl_xp_for_action('challenge', true),
+            personadle_sl_xp_for_action('challenge_expert', true)
+        );
+    }
+
+    public function testEveryActionGivesMoreWhenMutual(): void
+    {
+        // Invariant de la table, `play_same_day` excepté : il est toujours mutuel
+        // par nature, donc ses deux valeurs sont volontairement égales.
+        foreach (array_keys(PERSONADLE_SL_XP_TABLE) as $action) {
+            if ($action === 'play_same_day') continue;
+            $this->assertGreaterThan(
+                personadle_sl_xp_for_action($action, false),
+                personadle_sl_xp_for_action($action, true),
+                "$action devrait rapporter davantage en mutuel"
+            );
+        }
+    }
+
+
     public function testSoloXpMatchesSpecForEveryAction(): void
     {
         $this->assertSame(15, personadle_sl_xp_for_action('share_streak', false));
@@ -22,6 +52,7 @@ final class SocialLinkTest extends TestCase
         $this->assertSame(20, personadle_sl_xp_for_action('play_same_day', false));
         $this->assertSame(10, personadle_sl_xp_for_action('compare_stats', false));
         $this->assertSame(15, personadle_sl_xp_for_action('challenge', false));
+        $this->assertSame(25, personadle_sl_xp_for_action('challenge_expert', false));
     }
 
     public function testMutualXpMatchesSpecForEveryAction(): void
@@ -32,6 +63,7 @@ final class SocialLinkTest extends TestCase
         $this->assertSame(20, personadle_sl_xp_for_action('play_same_day', true));
         $this->assertSame(20, personadle_sl_xp_for_action('compare_stats', true));
         $this->assertSame(35, personadle_sl_xp_for_action('challenge', true));
+        $this->assertSame(50, personadle_sl_xp_for_action('challenge_expert', true));
     }
 
     public function testMutualXpIsAlwaysGreaterOrEqualToSolo(): void

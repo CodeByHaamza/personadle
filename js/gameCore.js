@@ -1370,9 +1370,12 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
             sendBtn.textContent = "✓ Sent!";
             sendBtn.classList.add("sent");
 
-            // XP Social Link : action 'challenge'
+            // XP Social Link. Un défi Expert vaut plus (25/50 au lieu de 15/35) :
+            // les deux joueurs ont dû débloquer le mode pour qu'il puisse exister.
             if (api.socialLink) {
-              api.socialLink.interactByFriend(friendId, "challenge").catch(() => {});
+              api.socialLink
+                .interactByFriend(friendId, isExpert ? "challenge_expert" : "challenge")
+                .catch(() => {});
             }
           } catch (err) {
             sendBtn.disabled = false;
