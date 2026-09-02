@@ -21,12 +21,18 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import {
   activeChallengeKey,
   getActiveChallengeTarget,
   getPendingActiveChallenge,
+  isChallengePlay,
   parisDateKey,
 } from "../js/gameCore.js";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 /** Place la page en Normal ou en Expert (le mode vit dans l'URL). */
 function goTo({ expert }) {
@@ -103,6 +109,43 @@ describe("getActiveChallengeTarget — une partie ne voit que son propre défi",
   });
 });
 
+describe("getActiveChallengeTarget — un défi périmé ne gèle plus la progression", () => {
+  // LE bug de production du 2026-09-02. `isChallengePlay()` dérive de cette
+  // fonction, et les 6 modes s'en servent pour décider s'ils enregistrent la
+  // partie : tant qu'elle renvoyait la cible d'un défi jamais terminé, plus
+  // aucune partie de ce mode n'était enregistrée. Sans le moindre signal — ni
+  // message, ni erreur en console, puisque rien n'était même envoyé au serveur.
+  //
+  // Le joueur voyait ses compteurs figés et ne pouvait rien y faire.
+
+  it("ignore un défi d'un jour précédent", () => {
+    storeChallenge(activeChallengeKey(false), { date: "2020-01-01", target: "Orpheus" });
+    expect(getActiveChallengeTarget("personae")).toBeNull();
+    expect(isChallengePlay("personae")).toBe(false);
+  });
+
+  it("rend toujours la cible d'un défi du jour", () => {
+    storeChallenge(activeChallengeKey(false), { target: "Orpheus" });
+    expect(getActiveChallengeTarget("personae")).toBe("Orpheus");
+    expect(isChallengePlay("personae")).toBe(true);
+  });
+
+  it("applique la même règle d'expiration que getPendingActiveChallenge", () => {
+    // Les deux fonctions lisent la même case : elles doivent s'accorder sur ce
+    // qui est encore valide. C'est leur divergence qui a créé le bug — l'une
+    // considérait le défi périmé, l'autre non.
+    storeChallenge(activeChallengeKey(false), { date: "2020-01-01", target: "Orpheus" });
+    expect(getPendingActiveChallenge(false)).toBeNull();
+    expect(getActiveChallengeTarget("personae")).toBeNull();
+  });
+
+  it("un défi périmé en Expert ne gèle pas non plus", () => {
+    goTo({ expert: true });
+    storeChallenge(activeChallengeKey(true), { date: "2020-01-01", target: "Orpheus" });
+    expect(isChallengePlay("personae")).toBe(false);
+  });
+});
+
 describe("getPendingActiveChallenge — les deux dimensions coexistent", () => {
   it("un défi Expert en cours ne bloque pas l'acceptation d'un défi normal", () => {
     // C'est ce qui rend les deux jeux réellement indépendants : sinon accepter
@@ -129,5 +172,42 @@ describe("getPendingActiveChallenge — les deux dimensions coexistent", () => {
   it("considère toujours périmé un défi d'un jour précédent", () => {
     storeChallenge(activeChallengeKey(true), { date: "2020-01-01" });
     expect(getPendingActiveChallenge(true)).toBeNull();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUCUNE LECTURE BRUTE DE LA CASE DÉFI
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Le bug du 2026-09-02 vient d'une DIVERGENCE : deux lecteurs de la même case,
+ * avec deux règles. Les tests ci-dessus verrouillent le comportement des helpers,
+ * mais rien n'empêchait un mode de relire `localStorage.activeChallenge` à la
+ * main — donc de recréer la divergence ailleurs.
+ *
+ * C'était exactement le cas de Classic : sa remise à zéro quotidienne testait la
+ * PRÉSENCE brute de la case, sans date ni dimension. Un défi de la veille
+ * empêchait le plateau de se réinitialiser, et depuis que l'expiration existe,
+ * la partie d'hier partait au serveur avec la mauvaise cible.
+ *
+ * Vérification STRUCTURELLE assumée : le risque n'est pas qu'un helper se casse,
+ * c'est qu'on court-circuite les helpers.
+ */
+describe("Les modes ne lisent jamais la case défi en direct", () => {
+  const MODES = [
+    "classiqueMode/modeClassique.js",
+    "emojiMode/emojiMode.js",
+    "silhouetteMode/modeSilhouette.js",
+    "allOutAttackMode/modeAllOutAttack.js",
+    "personaeMode/modePersonae.js",
+    "musicsMode/modeMusic.js",
+  ];
+
+  it.each(MODES)("%s passe par les helpers, pas par localStorage", (relative) => {
+    const src = readFileSync(join(ROOT, relative), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^[ \t]*\/\/.*$/gm, "");
+
+    expect(src).not.toMatch(/localStorage\.(getItem\(\s*["']activeChallenge|activeChallenge)/);
   });
 });

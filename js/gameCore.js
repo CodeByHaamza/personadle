@@ -1159,6 +1159,15 @@ export function getActiveChallengeTarget(mode) {
   try {
     const c = JSON.parse(localStorage.getItem(activeChallengeKey()) || "null");
     if (!c) return null;
+    // Périmé après sa journée — même règle que getPendingActiveChallenge() et
+    // initChallengeBanner(), qui l'appliquaient déjà. Son absence ICI gelait la
+    // progression des joueurs : `isChallengePlay()` en dérive, et les 6 modes
+    // s'en servent pour décider s'ils enregistrent la partie. Un défi accepté et
+    // jamais terminé rendait donc `isChallengePlay()` vrai indéfiniment, et plus
+    // AUCUNE partie de ce mode n'était enregistrée — sans le moindre signal, ni
+    // message ni erreur en console, puisque rien n'était même envoyé.
+    // Constaté en prod le 2026-09-02 sur un joueur bloqué depuis des jours.
+    if (c.date && c.date !== parisDateKey()) return null;
     const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
     if ((c.mode || "").toLowerCase() !== key) return null;
     return c.target ?? null;
