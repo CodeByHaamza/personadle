@@ -339,6 +339,11 @@ function requestPathSegments(): array
     return explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
 }
 
+function getClientIp(): string
+{
+    return $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+}
+
 /**
  * Rate-limiting persistant en BDD (table rate_limits) — partagé entre instances,
  * contrairement à sys_get_temp_dir() qui ne l'est pas. Termine en 429 si plus de
