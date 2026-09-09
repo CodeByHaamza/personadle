@@ -13,6 +13,81 @@
 
 ---
 
+## 2026-09-09 — feat(cron): annonce quotidienne du PersonaDLE sur Discord
+
+Le Discord venait d'être refondu, mais rien n'annonçait le PersonaDLE du jour : le salon
+`#🎲┃daily-personadle` restait vide tant qu'un joueur n'y postait pas de lui-même. Ce cron
+poste l'annonce à 00:05 heure de Paris, juste après le reset quotidien.
+
+Huit voix tournent (Morgana, Teddie, Elizabeth, Margaret, Theodore, Lavenza, Merope,
+Philemon), six phrases chacune, soit 48 messages distincts. Le casting n'est pas arbitraire :
+ce sont les personnages qui brisent le quatrième mur dans les jeux — Velvet Room et
+mascottes. Les autres sonneraient faux à s'adresser directement au joueur.
+
+Choix d'un **webhook** plutôt que d'un bot : c'est une simple URL POST, donc aucun process à
+héberger, aucun token de bot à faire tourner. Et il accepte `username` et `avatar_url` à
+chaque message, ce qui suffit à faire parler huit personnages depuis un seul webhook. La
+contrepartie est que cette URL est un secret porteur — quiconque l'a peut poster sous ce
+nom — d'où les garde-fous ci-dessous.
+
+### Détails techniques
+
+- `api/cron/discord-daily.php` (nouveau) — même moule que les 3 crons existants :
+  `require_once bootstrap.php`, `requireCronSecret()`, `jsonSuccess()` / `jsonError()`,
+  timezone `Europe/Paris`, plus les champs `elapsed_ms` / `ran_at`.
+- **Rotation** : `jour_de_l_année % 8` choisit la voix, `intdiv(jour, 8) % 6` choisit sa
+  phrase. La voix revient tous les 8 jours en disant la suivante ; cycle complet 48 jours.
+- ⚠️ **Le nombre de voix ne doit jamais être un multiple de 7.** Avec 7 pile, la formule fige
+  une voix par jour de la semaine : mercredi serait Elizabeth à vie, et le joueur qui ne
+  passe que le lundi n'en verrait jamais qu'une seule. Vérifié par simulation avant/après :
+  à 7 voix, 8 mercredis consécutifs donnaient 8 fois le même personnage ; à 8 voix, ils en
+  donnent 8 différents. L'avertissement est porté en commentaire dans le fichier.
+- **Avatars** : Discord télécharge l'image lui-même, elle doit donc être publiquement servie
+  — un chemin local ne lui sert à rien. Les 8 URL ont été vérifiées en 200 avant déploiement.
+  Merope et Philemon n'ayant pas d'avatar dans `img/avatar/`, on prend leur portrait de jeu
+  dans `database/portraits/`.
+- Morgana pointe sur `Morgana.jpg` et non `Morgana.png` : c'est le fichier retenu dans
+  `personadle-discord/avatars/` (md5 identique), et il pèse 93 Ko contre 886 Ko.
+- **Le secret ne peut pas fuiter, par trois chemins distincts :**
+  1. l'URL vit dans `api/config.php` (gitignoré) ; `api/config.example.php` ne porte que la
+     clé vide et l'explication ;
+  2. sa forme est validée par regex *avant* l'appel curl — une config erronée ne peut pas
+     faire poster le contenu ailleurs que chez Discord, et l'absence garantie de query
+     string rend sûr l'ajout de `?wait=true` ;
+  3. `_discordRedact()` caviarde l'URL complète *et* le token seul dans tout ce qui part en
+     log. Sans ce filet, un simple incident réseau écrirait le secret dans `error_log()`
+     **et** dans la table `error_log`, relue par `api/admin/error_logs.php` — donc lisible
+     depuis l'admin.
+- La réponse HTTP d'erreur ne contient que le code Discord, jamais le message curl ni le
+  corps de réponse : le diagnostic va en log, caviardé.
+- `?wait=true` fait répondre Discord avec le message créé (200) au lieu d'un 204 muet. Sans
+  ça, un webhook révoqué serait indiscernable d'un envoi réussi — le salon resterait vide
+  sans que le cron ne signale quoi que ce soit.
+- `curl_init()` sans argument puis `CURLOPT_URL` : avec l'URL en paramètre, `curl_init()`
+  peut renvoyer `false`, et `curl_setopt_array(false, …)` est une `TypeError` fatale en PHP 8.
+- `CURLOPT_CONNECTTIMEOUT` à 5 s en plus du `CURLOPT_TIMEOUT` à 15 s : un cron qui pend sur
+  un TCP mort n'a aucun intérêt.
+- `docs/hostinger-cron-setup.md` — entrée 4, fréquence et prérequis `DISCORD_DAILY_WEBHOOK`.
+
+### Angles morts connus
+
+- **Le serveur est en UTC, pas en heure de Paris**, et `crontab` est absent de l'hébergement :
+  la tâche se crée dans hPanel, dont le fuseau n'est pas vérifiable en SSH. `5 0 * * *` est
+  juste dans les deux cas — 00:05 si hPanel raisonne en heure de Paris, 01:05 l'hiver /
+  02:05 l'été s'il raisonne en UTC — donc toujours *après* le reset, jamais avant. La
+  conversion « maligne » en `5 22 * * *` donnerait 00:05 l'été mais 23:05 l'hiver, soit
+  avant le reset : à ne pas faire. Le script forçant `Europe/Paris` en interne, la date
+  annoncée et la voix choisie restent justes quoi qu'il arrive ; seul l'horaire de
+  publication glisse.
+- L'annonce est postée sans vérifier que la cible du jour a bien tourné côté jeu : le cron ne
+  lit ni `daily_pools.json` ni la base. C'est volontaire — le message ne divulgue aucune
+  cible, il annonce seulement que la journée est ouverte — mais s'il devait un jour citer le
+  mode ou un indice, il faudrait le brancher sur `api/lib/daily_target.php`.
+- Le fichier déployé à la main sur le serveur est **non suivi par git** dans le webroot, qui
+  est un checkout. À la release qui portera cette branche jusqu'à `main`, il faudra supprimer
+  la copie manuelle avant le `git pull`, sous peine de le voir échouer sur un fichier non
+  suivi à écraser.
+
 ## 2026-09-09 — Règle : aucune signature d'outil dans l'historique
 
 Les trois commits du lot précédent portaient des *trailers* de signature d'outil
