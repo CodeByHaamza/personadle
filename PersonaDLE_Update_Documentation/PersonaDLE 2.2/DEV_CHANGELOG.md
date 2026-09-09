@@ -13,6 +13,27 @@
 
 ---
 
+## 2026-09-09 — Règle : aucune signature d'outil dans l'historique
+
+Les trois commits du lot précédent portaient des *trailers* de signature d'outil
+(`Co-Authored-By`, lien de session) et le corps de la PR #108 finissait par une mention
+« generated with ». Ajoutés automatiquement par l'outillage, jamais décidés. L'historique
+du dépôt est celui de l'équipe : le crédit va aux humains qui décident.
+
+### Détails techniques
+
+- `CLAUDE.md` §4 : nouvelle sous-section « Messages de commit et corps de PR — RÈGLE
+  ABSOLUE : aucune signature d'outil ». Couvre messages de commit, titres et corps de PR,
+  commentaires de code et entrées de changelog. Seule exception : une demande explicite,
+  formulée pour le lot en cours.
+- Le point important est que ces signatures sont ajoutées **par défaut** par l'outillage :
+  la consigne est de les **retirer activement** avant de pousser (`git log -1 --format=%B`),
+  pas seulement de « ne pas les écrire ».
+- Les commits déjà mergés dans `develop` les gardent : réécrire un historique partagé
+  coûterait plus cher que le bénéfice cosmétique. La règle vaut pour la suite.
+
+---
+
 ## 2026-09-09 — CLAUDE.md : règle de branches explicitée
 
 `main` = prod (pull automatique Hostinger à chaque push). Le flux `feature/*` → `develop`
