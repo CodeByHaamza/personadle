@@ -13,6 +13,23 @@
 
 ---
 
+## 2026-09-09 — CLAUDE.md : règle de branches explicitée
+
+`main` = prod (pull automatique Hostinger à chaque push). Le flux `feature/*` → `develop`
+→ `main` n'était écrit nulle part dans `CLAUDE.md` : il n'existait que dans les commentaires
+de `.github/workflows/pr-base-guard.yml`, donc invisible pour qui lit la doc avant de coder.
+
+### Détails techniques
+
+- `CLAUDE.md` §4 : nouvelle sous-section « Branches — RÈGLE ABSOLUE ». Toute PR de travail
+  vise `develop` ; le **seul** merge légitime sur `main` est `develop` → `main` au moment
+  de sortir une version, et c'est un acte de release décidé explicitement.
+- Le garde-fou CI (« PR base guard », exceptions `develop`/`hotfix/*`/`dependabot/*`) y est
+  décrit comme un **filet**, pas comme la règle : il ne voit que les PR déjà ouvertes sur
+  `main` et ne dit rien du reste.
+
+---
+
 ## 2026-09-09 — ouverture du dossier v2.2
 
 La v2.1 est livrée : son dossier ne reçoit plus que d'éventuels correctifs de la 2.1
