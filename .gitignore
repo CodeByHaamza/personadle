@@ -155,6 +155,18 @@ PersonaDLE_Update_Documentation/PersonaDLE 2.1/*
 !PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.gif
 !PersonaDLE_Update_Documentation/PersonaDLE 2.1/*.webp
 
+# v2.2 — même liste blanche, même motif à 3 lignes (cf. piège ci-dessus).
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2
+PersonaDLE_Update_Documentation/PersonaDLE 2.2/*
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2/PersonaDLE_Update.html
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2/DEV_CHANGELOG.md
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2/TEST_PLAN.md
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2/*.png
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2/*.jpg
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2/*.jpeg
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2/*.gif
+!PersonaDLE_Update_Documentation/PersonaDLE 2.2/*.webp
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Dossier de staging local pour les assets en attente d'ingestion (voir
 # scripts/validate_incoming.js + ROADMAP.md § "À venir — contenu conditionné
