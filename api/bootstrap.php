@@ -11,7 +11,7 @@
  *   - Connexion PDO singleton (MySQL 8.0, utf8mb4)
  *   - Helpers : pdo(), jsonSuccess(), jsonError(), requireAuth(), requireAdmin(),
  *               requireCsrf(), requireCronSecret(), getJsonBody(), rateLimit(),
- *               generateFriendCode(), fetchProfile(), requestPathSegments()
+ *               getClientIp(), generateFriendCode(), fetchProfile(), requestPathSegments()
  *   (formatUser() vit dans api/lib/format.php, chargé via require_once par ce fichier)
  */
 
@@ -19,6 +19,7 @@ declare(strict_types=1);
 
 // Logique pure (sans BDD) — testable en PHPUnit indépendamment de ce bootstrap.
 require_once __DIR__ . '/lib/authz.php';
+require_once __DIR__ . '/lib/client_ip.php';
 require_once __DIR__ . '/lib/format.php';
 require_once __DIR__ . '/lib/error_log.php';
 require_once __DIR__ . '/lib/admin_audit.php';
@@ -339,9 +340,25 @@ function requestPathSegments(): array
     return explode('/', trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/'));
 }
 
+/**
+ * IP client servant de clé de rate limiting (login, register, reset, search).
+ *
+ * Ne lit JAMAIS X-Forwarded-For tant que REMOTE_ADDR n'est pas un proxy déclaré
+ * dans TRUSTED_PROXIES (api/config.php, vide par défaut) : ce header est fourni
+ * par le client, et en valider le format ne prouve rien sur sa provenance —
+ * le faire varier suffisait à repartir d'un compteur neuf à chaque requête.
+ * Toute la logique (et le pourquoi) vit dans api/lib/client_ip.php, testée.
+ *
+ * ⚠️ Si un CDN/reverse-proxy est activé un jour devant le site, REMOTE_ADDR
+ * devient l'IP de ce proxy et TOUS les joueurs partagent alors le même seau
+ * (5 connexions / 15 min pour le site entier). C'est le moment de renseigner
+ * TRUSTED_PROXIES — voir DEPLOY.md § Dépannage.
+ */
 function getClientIp(): string
 {
-    return $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    $trusted = defined('TRUSTED_PROXIES') ? constant('TRUSTED_PROXIES') : [];
+
+    return personadle_client_ip($_SERVER, personadle_normalize_trusted_proxies($trusted));
 }
 
 /**

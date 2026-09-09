@@ -234,7 +234,8 @@ $uid = requireAdmin();    // idem + exige is_admin = 1
 jsonSuccess($data, 201);  // {"data": ...}  + code HTTP
 jsonError('message', 400);// {"error": "..."} + code HTTP
 
-rateLimit('login:'.$ip, 5, 900); // 429 au-delà du quota (table rate_limits)
+getClientIp();                            // IP client (REMOTE_ADDR ; X-Forwarded-For ignoré, cf. lib/client_ip.php)
+rateLimit('login:'.getClientIp(), 5, 900); // 429 au-delà du quota (table rate_limits)
 ```
 
 Sécurité activée automatiquement :
@@ -242,6 +243,7 @@ Sécurité activée automatiquement :
 - **CORS** : whitelist d'origines exactes (pas de wildcard quand `credentials: include`)
 - **Headers** : `Content-Security-Policy`, `Strict-Transport-Security` (prod), `X-Frame-Options`, `X-Content-Type-Options`
 - **Rate limiting** : table SQL `rate_limits` (helper `rateLimit()`, partagé entre instances) — login 5/15 min, register 5/15 min, sessions 15/15 min, friends-add 10/15 min, social-link-interact 30/15 min, messages-send 20/15 min
+  - La clé par IP vient de `getClientIp()` → `REMOTE_ADDR`. **`X-Forwarded-For` n'est jamais lu** tant que `REMOTE_ADDR` n'est pas listé dans `TRUSTED_PROXIES` (`api/config.php`, vide par défaut) : un header client validé sur sa forme ne prouve rien sur sa provenance, et le faire varier suffisait à repartir d'un compteur neuf (corrigé le 2026-09-09, cf. `api/lib/client_ip.php`)
 - **Erreurs** : `display_errors` coupé en prod (`log_errors` seul) — pas de fuite de stack trace
 
 ---
