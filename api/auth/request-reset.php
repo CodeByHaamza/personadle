@@ -15,10 +15,7 @@ require_once __DIR__ . '/../lib/password_reset.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') jsonError('Method not allowed', 405);
 
 // Rate limiting par IP (anti-spam d'emails)
-$rawForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-$firstIp         = trim(explode(',', $rawForwardedFor)[0]);
-$rlIp            = filter_var($firstIp, FILTER_VALIDATE_IP) ? $firstIp : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
-rateLimit('reset-request:' . $rlIp, 3, 15 * 60); // 3 demandes / 15 min
+rateLimit('reset-request:' . getClientIp(), 3, 15 * 60); // 3 demandes / 15 min
 
 $data  = getJsonBody();
 $email = strtolower(trim($data['email'] ?? ''));

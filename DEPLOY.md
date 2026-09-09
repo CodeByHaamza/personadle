@@ -408,6 +408,7 @@ curl -s -H "X-Cron-Key: TON_SECRET" "https://personadle.net/api/cron/leaderboard
 | Images/assets cassés                             | Chemin relatif incorrect                     | Vérifier que le projet est à la racine de `public_html/`, pas dans un sous-dossier |
 | `mod_rewrite` non actif                          | Module Apache désactivé                      | hPanel → PHP/Apache → activer `mod_rewrite`                                        |
 | CSP absente sur les pages HTML (vérifier via les DevTools → onglet Network → headers) | `mod_headers` désactivé (le `.htaccess` racine utilise `Header set`, silencieux si le module est absent) | hPanel → PHP/Apache → activer `mod_headers` (activé par défaut sur la plupart des hébergements mutualisés) |
+| `429 Too many attempts` sur `/api/auth/login` alors que le joueur n'a fait **qu'un seul** essai (ou 429 en rafale sur `register`/`request-reset`/`user/search`) | Un CDN/reverse-proxy est actif devant le site : `REMOTE_ADDR` vaut l'IP du proxy pour **tout le monde**, donc un seul seau de rate limiting partagé par tous les joueurs | Renseigner `TRUSTED_PROXIES` (IPs/CIDR du proxy) dans `api/config.php` — cf. `api/config.example.php` et `api/lib/client_ip.php`. Vérification préalable : `tail -50 ~/logs/*access*` côté SSH, la 1ʳᵉ colonne est `REMOTE_ADDR` — si elle est identique pour tous les visiteurs, c'est le cas |
 
 ---
 

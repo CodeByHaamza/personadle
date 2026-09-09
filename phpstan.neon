@@ -9,6 +9,9 @@ parameters:
         - api/config.example.php
     dynamicConstantNames:
         - APP_ENV
+        # Renseignée seulement si un CDN/reverse-proxy est placé devant le site
+        # (vide dans config.example.php) — cf. api/lib/client_ip.php.
+        - TRUSTED_PROXIES
         - DB_HOST
         - DB_PORT
         - DB_NAME

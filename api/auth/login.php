@@ -15,12 +15,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
-// Prend uniquement la première IP de X-Forwarded-For et valide le format
-// pour empêcher le spoofing du rate limiting via un header arbitraire.
-$rawForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-$firstIp         = trim(explode(',', $rawForwardedFor)[0]);
-$rlIp            = filter_var($firstIp, FILTER_VALIDATE_IP) ? $firstIp : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
-rateLimit('login:' . $rlIp, 5, 15 * 60); // 5 tentatives / 15 min
+rateLimit('login:' . getClientIp(), 5, 15 * 60); // 5 tentatives / 15 min
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);
