@@ -12,6 +12,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/social_link.php';
+require_once __DIR__ . '/pusher_trigger.php';
 
 /** Levée quand l'action a déjà été effectuée aujourd'hui pour ce couple d'amis — mappée vers un 409. */
 class PersonadleAlreadyInteractedException extends RuntimeException
@@ -131,12 +132,13 @@ function personadle_perform_social_link_interaction(
 
     $result = personadle_sl_add_xp($pdo, $linkId, $xpGained);
 
-    // Notifier l'autre joueur si le rang a monté (il verra l'animation au prochain poll)
+    // Notifier l'autre joueur si le rang a monté (push temps réel + fallback poll)
     if ($result['ranked_up']) {
         $pdo->prepare("
             INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank)
             VALUES (?, ?, ?)
         ")->execute([$friendId, $authId, $result['rank']]);
+        personadle_pusher_trigger("private-user-{$friendId}", 'rankup', []);
     }
 
     return [
