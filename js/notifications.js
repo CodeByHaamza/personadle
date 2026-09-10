@@ -1,8 +1,14 @@
 /**
- * js/notifications.js — Polling notifications + badge nav + calling card
- * ─────────────────────────────────────────────────────────────────────
+ * js/notifications.js — Push temps réel (Pusher) + fallback polling + badge nav
+ * ────────────────────────────────────────────────────────────────────────────
  * Importer et appeler initNotifications() sur toutes les pages après auth.
  * Ne montre PAS la calling card sur la page friends (l'UI est déjà visible).
+ *
+ * _check() reste l'unique source de vérité (dédup localStorage, animations,
+ * affichage) : un event Pusher ne porte aucune donnée, il ne fait que rappeler
+ * _check() immédiatement au lieu d'attendre le prochain tick. Si Pusher est
+ * indisponible, un fallback polling (5 min, contre 60s avant ce chantier)
+ * prend le relais — dégradé de latence, jamais de perte de notification.
  */
 
 import { queueCallingCards } from "./calling-card.js";
@@ -11,6 +17,7 @@ import { queueEvokerAnimations } from "./p3-evoker-anim.js";
 import { showSenderChallengeResult } from "./challenge-result.js";
 import { queueChallengeNotifs } from "./challenge-notif.js";
 import { showSocialLinkRankUp } from "./social-link.js";
+import { getCsrfToken, BASE_URL } from "./api.js";
 
 const SEEN_KEY = "ccShownFriendshipIds";
 const SEEN_CHALLENGE_KEY = "seenChallengeResults";
@@ -19,10 +26,17 @@ const SEEN_CHALLENGE_NOTIF = "seenChallengeNotifIds";
 /** How far back (ms) to look for challenge results to notify about (48 hours). */
 const CHALLENGE_RESULT_CUTOFF_MS = 48 * 60 * 60 * 1000;
 
-/** Notification polling interval (ms). */
-const POLL_INTERVAL_MS = 60_000;
+/** Fallback polling interval (ms) — seulement si la connexion Pusher est indisponible. */
+const FALLBACK_POLL_INTERVAL_MS = 5 * 60_000;
 
-let _pollTimer = null;
+/** Délai de grâce avant de considérer une déconnexion Pusher comme "prolongée". */
+const RECONNECT_GRACE_MS = 10_000;
+
+const PUSHER_JS_URL = "https://cdn.jsdelivr.net/npm/pusher-js@8.4.0/dist/web/pusher.min.js";
+
+let _fallbackPollTimer = null;
+let _pusher = null;
+let _disconnectGraceTimer = null;
 
 /**
  * Lance le polling des notifications.
@@ -33,11 +47,10 @@ export async function initNotifications() {
 
   _syncSettingsToLocal();
 
-  // Premier check immédiat
+  // Premier check immédiat (état de départ — Pusher ne rejoue pas le passé)
   await _check();
 
-  // Poll toutes les 60 secondes
-  _pollTimer = setInterval(_check, POLL_INTERVAL_MS);
+  await _initPusher();
 
   // Sur la page friends : marquer comme vus (localStorage) pour ne pas re-déclencher
   if (_isOnFriendsPage()) {
@@ -45,10 +58,83 @@ export async function initNotifications() {
   }
 }
 
-/** Arrête le polling (ex: logout). */
+/** Arrête le push et le fallback polling (ex: logout). */
 export function stopNotifications() {
-  clearInterval(_pollTimer);
-  _pollTimer = null;
+  if (_pusher) {
+    _pusher.disconnect();
+    _pusher = null;
+  }
+  _stopFallbackPolling();
+  if (_disconnectGraceTimer) {
+    clearTimeout(_disconnectGraceTimer);
+    _disconnectGraceTimer = null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// Pusher — push temps réel + fallback polling
+// ─────────────────────────────────────────────────────────
+
+async function _loadPusherScript() {
+  if (window.Pusher) return;
+  await new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = PUSHER_JS_URL;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function _initPusher() {
+  try {
+    await _loadPusherScript();
+  } catch {
+    // CDN injoignable — le fallback polling prend le relais
+    _startFallbackPolling();
+    return;
+  }
+
+  const me = window._currentUser;
+  _pusher = new window.Pusher(window._pusherKey, {
+    cluster: window._pusherCluster,
+    authEndpoint: `${BASE_URL}/pusher/auth`,
+    auth: { headers: { "X-CSRF-Token": getCsrfToken() } },
+  });
+
+  const channel = _pusher.subscribe(`private-user-${me.id}`);
+  ["friend_request", "friend_declined", "challenge", "challenge_beaten", "rankup"].forEach((evt) => {
+    channel.bind(evt, () => _check());
+  });
+
+  _pusher.connection.bind("state_change", (states) => {
+    if (states.current === "connected") {
+      if (_disconnectGraceTimer) {
+        clearTimeout(_disconnectGraceTimer);
+        _disconnectGraceTimer = null;
+      }
+      _stopFallbackPolling();
+      return;
+    }
+
+    if (_disconnectGraceTimer) return;
+    _disconnectGraceTimer = setTimeout(() => {
+      _disconnectGraceTimer = null;
+      if (_pusher?.connection.state !== "connected") _startFallbackPolling();
+    }, RECONNECT_GRACE_MS);
+  });
+}
+
+function _startFallbackPolling() {
+  if (_fallbackPollTimer) return;
+  _fallbackPollTimer = setInterval(_check, FALLBACK_POLL_INTERVAL_MS);
+}
+
+function _stopFallbackPolling() {
+  if (_fallbackPollTimer) {
+    clearInterval(_fallbackPollTimer);
+    _fallbackPollTimer = null;
+  }
 }
 
 // ─────────────────────────────────────────────────────────

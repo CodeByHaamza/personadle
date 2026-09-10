@@ -136,9 +136,16 @@ export function resolveRegisterError(message) {
  *   joueur. Purger `playerUserId` sur un simple blip réseau changerait sa cible
  *   du jour (getPlayerSeedId() retomberait sur anonPlayerId) — le puzzle du jour
  *   se mettrait à changer tout seul.
+ * @param {{key: string, cluster: string}|null} [pusherConfig=null] - Identifiants
+ *   publics Pusher renvoyés par GET /api/auth/me, consommés par
+ *   js/notifications.js pour s'abonner au canal temps réel de l'utilisateur.
  */
-export function updateAuthUI(user, authoritative = true) {
+export function updateAuthUI(user, authoritative = true, pusherConfig = null) {
   window._currentUser = user;
+  if (pusherConfig) {
+    window._pusherKey = pusherConfig.key;
+    window._pusherCluster = pusherConfig.cluster;
+  }
 
   // Sync the player seed ID used by getDailyTarget() in gameCore.js.
   // Logged-in  → use numeric user_id (consistent across devices/sessions)
@@ -541,14 +548,14 @@ const _wait = (ms) => new Promise((r) => setTimeout(r, ms));
 async function _fetchMeWithRetry(attempts = 3) {
   for (let i = 0; i < attempts; i++) {
     try {
-      const { user } = await api.auth.me();
-      return { user, reachable: true };
+      const { user, pusher } = await api.auth.me();
+      return { user, pusher, reachable: true };
     } catch (err) {
-      if (!isTransportError(err)) return { user: null, reachable: true };
+      if (!isTransportError(err)) return { user: null, pusher: null, reachable: true };
       if (i < attempts - 1) await _wait(300 * 3 ** i);
     }
   }
-  return { user: null, reachable: false };
+  return { user: null, pusher: null, reachable: false };
 }
 
 /**
@@ -567,7 +574,7 @@ async function _fetchMeWithRetry(attempts = 3) {
  */
 export async function initAuth() {
   // 1. Restaurer la session — avec réessais sur panne de transport.
-  const { user, reachable } = await _fetchMeWithRetry();
+  const { user, pusher, reachable } = await _fetchMeWithRetry();
 
   // `reachable: false` = serveur injoignable, PAS « déconnecté ». On affiche l'UI
   // anonyme faute de mieux, mais sans purger le seed du joueur, et on le signale
@@ -580,7 +587,7 @@ export async function initAuth() {
   // restait false et TOUTES les pages qui l'attendent bloquaient 2 s puis
   // dégradaient en anonyme — pour une exception d'affichage.
   try {
-    updateAuthUI(user, reachable);
+    updateAuthUI(user, reachable, pusher);
 
     // 2. Si connecté, sync des sessions offline accumulées (fire-and-forget)
     // On ne bloque pas initAuth() sur une opération réseau non critique.

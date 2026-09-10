@@ -31,6 +31,10 @@ function meResponse(PDO $pdo, array $user): never
     jsonSuccess([
         'user'     => formatUser($user, $profileRow),
         'settings' => $settings,
+        'pusher'   => [
+            'key'     => defined('PUSHER_KEY') ? PUSHER_KEY : null,
+            'cluster' => defined('PUSHER_CLUSTER') ? PUSHER_CLUSTER : null,
+        ],
     ]);
 }
 
