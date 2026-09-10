@@ -902,7 +902,9 @@
     "msg_empty": "Sin mensajes todavía.",
     "delete_msg": "Eliminar",
     "server_unreachable": "No se pudo contactar con el servidor. Tu sesión probablemente siga activa: inténtalo de nuevo.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "challenge_resume": "▶ Reanudar",
+    "challenge_give_up": "Rendirse"
   },
   "challenge": {
     "challenge_friend": "Desafiar a un Amigo",
@@ -928,7 +930,8 @@
     "select_friend_expert": "Desafiar a un amigo — Experto",
     "expert_note": "Desafío Experto: solo los amigos que hayan desbloqueado el Experto de este modo pueden aceptarlo.",
     "no_expert_friend": "Ninguno de tus amigos ha desbloqueado aún el Experto de este modo.",
-    "expert_locked": "Desbloquea el Experto de este modo antes de aceptar este desafío."
+    "expert_locked": "Desbloquea el Experto de este modo antes de aceptar este desafío.",
+    "target_unavailable": "Este desafío ya no se puede jugar en este modo: ha sido cancelado."
   },
   "challenge_result": {
     "title_win": "¡BRAVO!",
@@ -943,7 +946,8 @@
     "to_beat": "Puntuación a superar",
     "social_link": "Social Link",
     "xp_gained": "+{{xp}} XP Social Link",
-    "close": "Volver al inicio"
+    "close": "Volver al inicio",
+    "close_notif": "Cerrar"
   },
   "settings": {
     "title": "Ajustes",

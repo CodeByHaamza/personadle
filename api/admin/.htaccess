@@ -14,6 +14,12 @@ RewriteRule ^users/[0-9]+/titles        user_titles.php [L,QSA]
 # /api/admin/users/42/expert[/mode]     → user_expert.php (déblocage manuel Mode Expert)
 RewriteRule ^users/[0-9]+/expert        user_expert.php [L,QSA]
 
+# /api/admin/users/42/challenges[/17]   → user_challenges.php (défis : relance, annulation, suppression)
+RewriteRule ^users/[0-9]+/challenges    user_challenges.php [L,QSA]
+
+# /api/admin/users/42/streak            → user_streak.php (streak globale + cooldown Jack Frost)
+RewriteRule ^users/[0-9]+/streak$       user_streak.php [L,QSA]
+
 # /api/admin/users/42/stats             → user_stats.php
 RewriteRule ^users/[0-9]+/stats$        user_stats.php [L,QSA]
 

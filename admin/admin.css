@@ -884,7 +884,10 @@ body {
   background: rgba(255, 255, 255, 0.015);
 }
 
-.stats-table input[type="number"] {
+/* `date` inclus depuis l'onglet Streak : sans lui le champ tombait sur le style
+   natif du navigateur, blanc sur blanc dans ce panneau sombre. */
+.stats-table input[type="number"],
+.stats-table input[type="date"] {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
@@ -896,7 +899,13 @@ body {
   transition: border-color 0.15s;
 }
 
-.stats-table input[type="number"]:focus {
+.stats-table input[type="date"] {
+  width: auto;
+  color-scheme: dark;
+}
+
+.stats-table input[type="number"]:focus,
+.stats-table input[type="date"]:focus {
   border-color: var(--red);
 }
 
@@ -1726,4 +1735,38 @@ body {
 .expert-locked-state {
   background: var(--red-dim);
   color: var(--red);
+}
+
+/* ── Onglet Défis — pastille d'état ────────────────────────────────────────
+   Cinq états, dont un seul est un problème : « En cours » (accepted) sur un défi
+   qui ne bouge plus veut dire que le joueur est bloqué dessus. Il est donc le
+   seul en rouge — les autres ne demandent aucune action. */
+.challenge-status {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.challenge-status--pending {
+  background: rgba(245, 200, 66, 0.14);
+  color: #f5c842;
+}
+.challenge-status--active {
+  background: var(--red-dim);
+  color: var(--red);
+}
+.challenge-status--ok {
+  background: rgba(74, 222, 128, 0.14);
+  color: #4ade80;
+}
+.challenge-status--fail {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+.challenge-status--muted {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
 }

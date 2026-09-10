@@ -902,7 +902,9 @@
     "msg_empty": "Ainda não há mensagens.",
     "delete_msg": "Eliminar",
     "server_unreachable": "Não foi possível contactar o servidor. A tua sessão provavelmente ainda é válida — tenta de novo.",
-    "retry": "Tentar de novo"
+    "retry": "Tentar de novo",
+    "challenge_resume": "▶ Retomar",
+    "challenge_give_up": "Desistir"
   },
   "settings": {
     "title": "Definições",
@@ -1039,7 +1041,8 @@
     "select_friend_expert": "Desafiar um amigo — Especialista",
     "expert_note": "Desafio Especialista: só os amigos que desbloquearam o Especialista deste modo o podem aceitar.",
     "no_expert_friend": "Nenhum dos teus amigos desbloqueou ainda o Especialista deste modo.",
-    "expert_locked": "Desbloqueia o Especialista deste modo antes de aceitares este desafio."
+    "expert_locked": "Desbloqueia o Especialista deste modo antes de aceitares este desafio.",
+    "target_unavailable": "Este desafio já não pode ser jogado neste modo — foi cancelado."
   },
   "challenge_result": {
     "title_win": "MUITO BEM!",
@@ -1054,7 +1057,8 @@
     "to_beat": "Pontuação a bater",
     "social_link": "Social Link",
     "xp_gained": "+{{xp}} XP Social Link",
-    "close": "Voltar ao Início"
+    "close": "Voltar ao Início",
+    "close_notif": "Fechar"
   },
   "social": {
     "action_visit": "👁 Visitar +5 XP",

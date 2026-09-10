@@ -27,9 +27,16 @@ import {
 } from "../../js/social-link.js";
 import {
   FILTER_STORAGE_KEYS,
+  MODE_STATE_KEYS,
   activeChallengeKey,
+  fetchExpertStatus,
   getPendingActiveChallenge,
+  modeLabel,
+  modePageHref,
   normalizeModeKey,
+  parisDateKey,
+  readActiveChallenge,
+  releaseActiveChallenge,
 } from "../../js/gameCore.js";
 
 // ─────────────────────────────────────────────────────────
@@ -119,40 +126,17 @@ const PAGE_SIZE = 20;
 /** Time window (ms) within which a user is considered "online". */
 const ONLINE_THRESHOLD_MS = 30 * 60 * 1000;
 
-// localStorage keys to clear when accepting a challenge (forces fresh game)
-const MODE_STATE_KEYS = {
-  classic: ["target", "attempts", "guessHistory"],
-  emoji: ["targetEmoji", "attemptsEmoji", "emojiGameOver", "emojiForceReveal", "emojiWin"],
-  silhouette: [
-    "silhouetteTarget",
-    "silhouetteAttempts",
-    "silhouetteGameOver",
-    "silhouetteForceReveal",
-  ],
-  alloutattack: ["aoaTarget", "aoaAttempts", "aoaGameOver", "aoaForceReveal"],
-  personae: ["personaeTarget", "personaeAttempts", "personaeGameOver", "personaeForceReveal"],
-  music: ["musicTarget", "musicAttempts", "musicGameOver", "musicTriedTitles", "musicForceReveal"],
-};
+// Les clés d'état de mode à purger à l'acceptation viennent de gameCore.js
+// (MODE_STATE_KEYS). Ce fichier en gardait une copie manuscrite, que
+// js/challenge-notif.js dupliquait de son côté : deux tables à tenir alignées
+// pour un même geste, sur les deux seuls chemins d'acceptation du produit.
 
 // localStorage keys where each mode stores its active opus filters
 const MODE_FILTER_KEY = FILTER_STORAGE_KEYS;
 
-/**
- * Page de chaque mode, en relatif depuis profile/friends/ — 2 niveaux sous la
- * racine du site, pas 1 (« ../classiqueMode/… » résoudrait vers
- * profile/classiqueMode/ → 404).
- *
- * Les clés sont celles de normalizeModeKey() : toute autre graphie doit être
- * normalisée AVANT la recherche, sinon on retombe sur le cas « mode inconnu ».
- */
-const MODE_PAGE_MAP = {
-  classic: "../../classiqueMode/classiqueMode.html",
-  emoji: "../../emojiMode/emojiMode.html",
-  silhouette: "../../silhouetteMode/silhouette.html",
-  alloutattack: "../../allOutAttackMode/allOutAttack.html",
-  personae: "../../personaeMode/personae.html",
-  music: "../../musicsMode/musics.html",
-};
+// Les pages de mode viennent de gameCore.js (modePageHref), qui les résout en
+// relatif depuis la page courante — ce fichier en gardait sa propre table, en
+// « ../../ » codé en dur, et js/challenge-notif.js une troisième, en absolu.
 
 let state = {
   // Données de l'API friends.list()
@@ -747,6 +731,31 @@ function renderMessage(msg) {
           <button class="fr-btn fr-btn--danger js-decline-msg" data-mid="${msg.id}">
             ${tf("friends.challenge_decline", "✕")}
           </button>`;
+      } else if (isReceived && msg.status === "accepted") {
+        // ── LA porte de sortie d'un défi bloqué ────────────────────────────
+        // Un défi `accepted` n'affichait AUCUN bouton ici : le seul moyen d'en
+        // sortir était le bandeau « Abandonner », qui ne s'affiche que sur la
+        // bonne page ET la bonne dimension ET si la case locale est encore
+        // valable. Dès que cette case disparaissait (autre appareil, cache vidé,
+        // acceptation d'un jour précédent, cible devenue injouable), le joueur
+        // restait « en défi en cours » sans plus rien pour y toucher — et son
+        // ami ne recevait jamais de résultat. C'est le blocage signalé en prod.
+        //
+        // Deux issues explicites, adossées au message lui-même (donc disponibles
+        // même sans état local) : y retourner, ou renoncer.
+        actions = `
+          <button class="fr-btn fr-btn--accept js-resume-challenge"
+                  data-mid="${msg.id}"
+                  data-mode="${esc(msg.challenge_mode ?? "")}"
+                  data-isexpert="${msg.challenge_is_expert ? "1" : "0"}">
+            ${tf("friends.challenge_resume", "▶ Resume")}
+          </button>
+          <button class="fr-btn fr-btn--danger js-abandon-challenge"
+                  data-mid="${msg.id}"
+                  data-mode="${esc(msg.challenge_mode ?? "")}"
+                  data-isexpert="${msg.challenge_is_expert ? "1" : "0"}">
+            ${tf("friends.challenge_give_up", "Give up")}
+          </button>`;
       }
     }
   } else {
@@ -912,7 +921,9 @@ function attachListeners() {
       const pending = getPendingActiveChallenge(challengeIsExpert);
       if (pending && pending.msgId !== mid) {
         if (typeof window.showToast === "function") {
-          window.showToast(tf("challenge.already_active", "Finish your current challenge first."));
+          window.showToast(
+            `${tf("challenge.already_active", "Finish your current challenge first.")} (${modeLabel(pending.mode) ?? pending.mode})`
+          );
         }
         return;
       }
@@ -926,24 +937,49 @@ function attachListeners() {
       const modeKey = normalizeModeKey(mode) ?? String(mode ?? "").toLowerCase();
       // `?expert=1` pour un défi Expert : sans lui le joueur atterrit en mode
       // normal, où sa partie ne résoudra jamais le défi (cases distinctes).
-      const basePage = MODE_PAGE_MAP[modeKey] ?? null;
-      const dest = basePage ? `${basePage}${challengeIsExpert ? "?expert=1" : ""}` : null;
+      const dest = modePageHref(modeKey, challengeIsExpert);
       if (!dest) {
         console.error(`[challenge] mode inconnu « ${mode} » → aucune page cible`);
+        acceptChallenge.disabled = false;
         alert(tf("challenge.unknown_mode", "This challenge's mode is unavailable."));
         return;
       }
 
       const api = window._personadleApi;
       if (!api) {
+        acceptChallenge.disabled = false;
         alert(tf("challenge.offline", "You need to be online to accept a challenge."));
         return;
+      }
+
+      // Défi Expert sur un mode que CE joueur n'a pas débloqué : refuser avant
+      // d'écrire quoi que ce soit. Accepter le mènerait dans une impasse — la
+      // porte Expert le renverrait en mode normal, où sa bannière (qui ne lit
+      // que la dimension courante) ne verrait pas le défi : ni jouable, ni
+      // abandonnable. La notification (js/challenge-notif.js) tenait déjà cette
+      // garde ; ce chemin-ci, non — le même défi était donc acceptable ou pas
+      // selon l'endroit d'où on cliquait.
+      // Seul un refus FERME bloque : sur `unavailable` (réseau), on laisse
+      // passer plutôt que d'empêcher un joueur légitime d'accepter.
+      if (challengeIsExpert) {
+        const status = await fetchExpertStatus();
+        if (status.state === "ok" && status.modes?.[modeKey]?.unlocked === false) {
+          acceptChallenge.disabled = false;
+          alert(
+            tf(
+              "challenge.expert_locked",
+              "Unlock this mode's Expert first to accept this challenge."
+            )
+          );
+          return;
+        }
       }
 
       try {
         await api.messages.updateStatus(mid, "accepted");
       } catch (err) {
         console.error("[challenge] acceptation refusée par le serveur", err);
+        acceptChallenge.disabled = false;
         alert(tf("challenge.accept_failed", "Could not accept the challenge. Try again."));
         return;
       }
@@ -970,7 +1006,14 @@ function attachListeners() {
         JSON.stringify({
           msgId: mid,
           mode: modeKey,
-          date,
+          // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
+          // (`date`, conservé ci-dessous). Toutes les lectures de la case le
+          // comparent à parisDateKey() d'aujourd'hui : un défi envoyé la veille
+          // au soir et accepté le lendemain naissait périmé — pas de bannière,
+          // pas de cible dédiée, et un `accepted` que plus rien ne résolvait.
+          // Cf. le même correctif dans js/challenge-notif.js.
+          date: parisDateKey(),
+          challengeDate: date ?? null,
           score,
           senderId,
           filterKey,
@@ -986,10 +1029,78 @@ function attachListeners() {
         })
       );
 
-      // XP Social Link : challenge accepté
-      if (senderId) gainSocialLinkXp(senderId, "challenge").catch(() => {});
+      // XP Social Link : challenge accepté. Un défi Expert rapporte davantage
+      // (les deux joueurs ont dû débloquer le mode pour qu'il existe) — la
+      // notification appliquait déjà ce barème, pas ce chemin-ci.
+      if (senderId) {
+        gainSocialLinkXp(senderId, challengeIsExpert ? "challenge_expert" : "challenge").catch(
+          () => {}
+        );
+      }
       // `dest` a été résolu et validé avant toute écriture.
       window.location.href = dest;
+      return;
+    }
+
+    // ── Messages : Reprendre un défi en cours ─────────────
+    const resumeChallenge = e.target.closest(".js-resume-challenge");
+    if (resumeChallenge) {
+      const modeKey =
+        normalizeModeKey(resumeChallenge.dataset.mode) ??
+        String(resumeChallenge.dataset.mode ?? "").toLowerCase();
+      const isExpert = resumeChallenge.dataset.isexpert === "1";
+      const dest = modePageHref(modeKey, isExpert);
+      if (!dest) {
+        alert(tf("challenge.unknown_mode", "This challenge's mode is unavailable."));
+        return;
+      }
+      window.location.href = dest;
+      return;
+    }
+
+    // ── Messages : Abandonner un défi en cours ────────────
+    const abandonChallenge = e.target.closest(".js-abandon-challenge");
+    if (abandonChallenge) {
+      const mid = parseInt(abandonChallenge.dataset.mid, 10);
+      const isExpert = abandonChallenge.dataset.isexpert === "1";
+      if (
+        !window.confirm(
+          tf("challenge.abandon_confirm", "Give up this challenge? It will not count as a loss.")
+        )
+      ) {
+        return;
+      }
+
+      abandonChallenge.disabled = true;
+      const api = window._personadleApi;
+      try {
+        // `read` et non `expired` : le joueur n'a pas tenté et manqué le défi,
+        // il y renonce. Même distinction que le bandeau (js/challenge-banner.js)
+        // — les confondre ferait croire à l'expéditeur qu'une partie a eu lieu.
+        //
+        // ATTENDU, jamais en fire-and-forget : purger le local avant la réponse
+        // laisserait le défi `accepted` en base — donc toujours bloquant — avec
+        // un client qui se croit libéré (même piège que performRecovery(),
+        // CLAUDE.md §7).
+        await api.messages.updateStatus(mid, "read");
+      } catch {
+        abandonChallenge.disabled = false;
+        alert(tf("challenge.abandon_failed", "Could not give up the challenge. Try again."));
+        return;
+      }
+
+      // L'état local n'existe peut-être pas (abandon depuis un autre appareil,
+      // cache vidé) : on ne le défait que s'il correspond bien à CE défi, sinon
+      // on effacerait un autre défi en cours de la même dimension.
+      const local = readActiveChallenge(isExpert);
+      if (local?.msgId === mid) releaseActiveChallenge(local);
+
+      await loadMessages();
+      if (typeof window.showToast === "function") {
+        window.showToast(
+          tf("challenge.abandoned", "Challenge given up. You can accept another one.")
+        );
+      }
       return;
     }
 

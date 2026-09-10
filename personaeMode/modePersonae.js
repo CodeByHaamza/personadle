@@ -37,6 +37,7 @@ import {
   showCommunityStats,
   applyDarkModeOverrides,
   getActiveChallengeTarget,
+  dropUnplayableChallenge,
   isChallengePlay,
   setGiveUpEnabled,
   startGame,
@@ -270,8 +271,19 @@ function pickCharacter(random = false) {
   // cf. TODO.md) : la clé localStorage n'est pas scopée, donc un défi créé en mode
   // normal s'imposait comme cible sur la page Expert — y compris une variante
   // Picaro, qui n'a pas de fiche et donnait une partie sans indice.
+  // Résolution maison (challengeKey() désambiguïse les personas homonymes), donc
+  // pas resolveChallengeTarget() comme les 5 autres modes — mais MÊME règle de
+  // sortie : une cible introuvable, ou sans fiche de lore en Expert, purge le
+  // défi au lieu de laisser le joueur enchaîner sur la cible du jour en croyant
+  // relever un défi (partie ni comptée en défi, ni enregistrée en quotidien).
   const _challengeTargetName = getActiveChallengeTarget("personae");
-  const _challengeChar = _challengeTargetName ? findByChallengeKey(_challengeTargetName) : null;
+  let _challengeChar = _challengeTargetName ? findByChallengeKey(_challengeTargetName) : null;
+  // expertPool() et non originalCharacters : en Expert, une persona sans fiche
+  // ne donne AUCUN indice — la partie serait injouable.
+  if (_challengeChar && !expertPool([_challengeChar]).length) _challengeChar = null;
+  if (_challengeTargetName && !_challengeChar) {
+    dropUnplayableChallenge("personae", _challengeTargetName);
+  }
 
   if (_challengeChar) {
     target = _challengeChar;

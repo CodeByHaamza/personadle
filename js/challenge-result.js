@@ -9,8 +9,7 @@
  *     → Shows the result animation to the challenge sender (used by notifications.js).
  */
 
-import { MODE_STATE_KEYS } from "./challenge-notif.js";
-import { activeChallengeKey } from "./gameCore.js";
+import { activeChallengeKey, readActiveChallenge, releaseActiveChallenge } from "./gameCore.js";
 
 /** Heart emoji/size per Social Link rank (1-10). Win only. */
 const SL_HEART = {
@@ -86,6 +85,12 @@ function showChallengeResult({
   slRank = 1,
   xpGained = 0,
   isSender = false,
+  // Fin de partie : on ramène le joueur à l'accueil, la page de jeu n'a plus
+  // rien à montrer. Notification reçue en naviguant (variante `isSender`) : NON.
+  // Le `setTimeout(goHome, 11 s)` s'appliquait aussi à elle et éjectait le joueur
+  // de la page qu'il consultait — en détruisant au passage toute notification de
+  // défi affichée en même temps, définitivement perdue (elle était déjà « vue »).
+  goHomeOnClose = true,
 }) {
   const heart = SL_HEART[Math.min(10, Math.max(1, slRank))];
   const fail = !success;
@@ -122,7 +127,9 @@ function showChallengeResult({
   const labelMy = t("challenge_result.my_score", "Your attempts");
   const labelBeat = t("challenge_result.to_beat", "Score to beat");
   const labelSL = t("challenge_result.social_link", "Social Link");
-  const labelClose = t("challenge_result.close", "Back to Home");
+  const labelClose = goHomeOnClose
+    ? t("challenge_result.close", "Back to Home")
+    : t("challenge_result.close_notif", "Close");
   const labelXp = t("challenge_result.xp_gained", "+{{xp}} XP Social Link").replace(
     "{{xp}}",
     xpGained
@@ -196,14 +203,19 @@ function showChallengeResult({
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.classList.add("cr--visible"));
 
-  const goHome = () => {
+  const close = () => {
     overlay.remove();
+    if (!goHomeOnClose) return;
     const depth = window.location.pathname.split("/").filter(Boolean).length;
     window.location.href = depth <= 1 ? "index.html" : "../index.html";
   };
 
-  document.getElementById("crCloseBtn")?.addEventListener("click", goHome);
-  setTimeout(goHome, 11_000);
+  document.getElementById("crCloseBtn")?.addEventListener("click", close);
+  const _autoClose = setTimeout(close, 11_000);
+  // Une fermeture manuelle ne doit pas laisser un timer armé : sur la variante
+  // « notification » il ne redirige plus, mais il rappelait `overlay.remove()`
+  // sur un nœud détaché — inoffensif, sauf qu'il masquait la vraie règle.
+  document.getElementById("crCloseBtn")?.addEventListener("click", () => clearTimeout(_autoClose));
 }
 
 /**
@@ -224,40 +236,26 @@ export async function checkChallengeCompletion(mode, myAttempts, isWin) {
   //
   // Le cloisonnement remplace la garde : il n'y a plus rien à interdire, une
   // partie ne peut atteindre que le défi de sa propre dimension.
-  const raw = localStorage.getItem(activeChallengeKey());
-  if (!raw) return;
-
-  let challenge;
-  try {
-    challenge = JSON.parse(raw);
-  } catch {
+  // readActiveChallenge() et non une lecture brute : il applique la garde de
+  // date (jour de jeu, heure Paris) que ce chemin était le seul à ne pas avoir.
+  // Sans elle, un défi resté en localStorage depuis la veille — parce que le
+  // joueur n'est jamais revenu sur la page du mode, seul endroit qui le nettoyait
+  // — était consommé par la partie du jour : l'expéditeur recevait un résultat
+  // pour une partie qui n'avait rien à voir avec son défi.
+  const challenge = readActiveChallenge();
+  if (!challenge) {
+    // Case périmée : la purger ici évite qu'elle continue de faire passer chaque
+    // partie du mode pour un défi (isChallengePlay()) sans jamais se résoudre.
+    localStorage.removeItem(activeChallengeKey());
     return;
   }
 
   if ((challenge.mode ?? "").toLowerCase() !== mode.toLowerCase()) return;
 
   // Même case que la lecture ci-dessus : libérer l'autre dimension effacerait un
-  // défi que le joueur n'a pas joué.
-  localStorage.removeItem(activeChallengeKey());
-
-  // Restore original filters (backed up when B accepted the challenge)
-  if (
-    challenge.filterKey &&
-    challenge.originalFilters !== null &&
-    challenge.originalFilters !== undefined
-  ) {
-    localStorage.setItem(challenge.filterKey, challenge.originalFilters);
-  }
-
-  // Défi à cible DÉDIÉE (2026-07-17) : la partie jouée n'était pas celle du
-  // jour — on efface l'état du mode pour que le prochain chargement retombe
-  // sur la cible quotidienne (seedée, donc parfaitement restaurable). L'écran
-  // de résultat affiché reste intact (pas de re-render ici).
-  if (challenge.target) {
-    (MODE_STATE_KEYS[(challenge.mode ?? "").toLowerCase()] ?? []).forEach((k) =>
-      localStorage.removeItem(k)
-    );
-  }
+  // défi que le joueur n'a pas joué. Geste partagé avec l'abandon et la purge
+  // d'un défi injouable — les trois sorties laissent le mode dans le même état.
+  releaseActiveChallenge(challenge);
 
   const success = isWin && myAttempts <= challenge.score;
   const api = window._personadleApi;
@@ -386,5 +384,6 @@ export async function showSenderChallengeResult(msg) {
     slRank,
     xpGained: 0,
     isSender: true,
+    goHomeOnClose: false,
   });
 }

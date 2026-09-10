@@ -18,7 +18,7 @@ import {
   showChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
-  getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
   setGiveUpEnabled,
   startGame,
@@ -230,10 +230,13 @@ function pickCharacter(random = false) {
 
   // Défi à cible dédiée (2026-07-17) : elle prime sur le tirage du jour ET sur
   // le random du Replay tant que le défi est actif.
-  const _challengeTargetName = getActiveChallengeTarget("silhouette");
-  const _challengeChar = _challengeTargetName
-    ? originalCharacters.find((c) => c.nom === _challengeTargetName)
-    : null;
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  const _challengeChar = resolveChallengeTarget("silhouette", originalCharacters);
 
   if (_challengeChar) {
     target = _challengeChar;
