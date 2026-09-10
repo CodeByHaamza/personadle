@@ -68,6 +68,10 @@ services:
       DB_USER:     ${MYSQL_USER:-personadle_usr}
       DB_PASSWORD: ${MYSQL_PASSWORD:-devpassword}
       APP_ENV:     local
+      PUSHER_APP_ID:  ${PUSHER_APP_ID:-}
+      PUSHER_KEY:     ${PUSHER_KEY:-}
+      PUSHER_SECRET:  ${PUSHER_SECRET:-}
+      PUSHER_CLUSTER: ${PUSHER_CLUSTER:-}
     volumes:
       # Code source monté en lecture-écriture (hot-reload sans rebuild)
       - .:/var/www/html
