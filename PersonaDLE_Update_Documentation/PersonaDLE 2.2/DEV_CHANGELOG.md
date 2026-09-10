@@ -68,6 +68,10 @@ nom — d'où les garde-fous ci-dessous.
 - `CURLOPT_CONNECTTIMEOUT` à 5 s en plus du `CURLOPT_TIMEOUT` à 15 s : un cron qui pend sur
   un TCP mort n'a aucun intérêt.
 - `docs/hostinger-cron-setup.md` — entrée 4, fréquence et prérequis `DISCORD_DAILY_WEBHOOK`.
+- `phpstan.neon` — `DISCORD_DAILY_WEBHOOK` ajoutée à `dynamicConstantNames`, comme
+  `TRUSTED_PROXIES` avant elle. `config.example.php` sert de `bootstrapFiles` : sans cette
+  ligne, PHPStan replie la constante sur `''`, juge la garde toujours vraie et déclare mort
+  tout le code qui suit — la CI échouait sur ce seul motif.
 
 ### Angles morts connus
 
