@@ -13,12 +13,16 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { checkChallengeCompletion } from "../js/challenge-result.js";
+import { parisDateKey } from "../js/gameCore.js";
 
 function activeChallenge(overrides = {}) {
   return {
     msgId: 1,
     mode: "classic",
-    date: "2026-07-20",
+    // Jour de JEU du défi (posé à l'acceptation). Une date figée dans le passé
+    // décrivait un défi périmé — que checkChallengeCompletion() consommait quand
+    // même, faute de garde de date sur ce seul chemin.
+    date: parisDateKey(),
     score: 3,
     senderId: 7,
     filterKey: null,
@@ -59,6 +63,27 @@ afterEach(() => {
 });
 
 describe("checkChallengeCompletion — early returns", () => {
+  it("ne consomme pas un défi périmé, et purge sa case", async () => {
+    // Le joueur a accepté un défi hier et n'est jamais revenu sur la page du
+    // mode (seul endroit qui nettoyait la case). Sans garde de date ici, sa
+    // partie du lendemain résolvait le défi de la veille : l'expéditeur recevait
+    // « relevé/manqué » pour une partie jouée sur une TOUTE AUTRE cible.
+    localStorage.setItem(
+      "activeChallenge",
+      JSON.stringify(activeChallenge({ date: "2026-07-20" }))
+    );
+    const api = mockApi();
+    window._personadleApi = api;
+
+    await checkChallengeCompletion("classic", 2, true);
+
+    expect(api.messages.updateStatus).not.toHaveBeenCalled();
+    expect(document.getElementById("cr-overlay")).toBeNull();
+    // Purgée : la laisser ferait passer chaque partie du mode pour un défi
+    // (isChallengePlay()), donc plus aucune session enregistrée.
+    expect(localStorage.getItem("activeChallenge")).toBeNull();
+  });
+
   it("is a no-op when there is no active challenge", async () => {
     const api = mockApi();
     window._personadleApi = api;

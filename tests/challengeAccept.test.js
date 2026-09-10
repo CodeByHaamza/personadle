@@ -22,13 +22,18 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { activeChallengeKey, parisDateKey } from "../js/gameCore.js";
+import {
+  activeChallengeKey,
+  getPendingActiveChallenge,
+  parisDateKey,
+} from "../js/gameCore.js";
 
 // challenge-notif.js garde une file et un drapeau `_busy` au niveau du module :
 // une notification acceptée redirige sans jamais refermer l'overlay, donc `_busy`
 // resterait vrai et les tests suivants n'afficheraient plus rien. On réimporte le
 // module à neuf avant chaque test.
 let queueChallengeNotifs;
+let setChallengeNotifDismissHandler;
 
 /** Dernière URL demandée via `window.location.href = …` (jsdom ne navigue pas). */
 let navigatedTo = null;
@@ -68,7 +73,9 @@ function stored(isExpert = false) {
 
 beforeEach(async () => {
   vi.resetModules();
-  ({ queueChallengeNotifs } = await import("../js/challenge-notif.js"));
+  ({ queueChallengeNotifs, setChallengeNotifDismissHandler } = await import(
+    "../js/challenge-notif.js"
+  ));
 
   localStorage.clear();
   document.body.innerHTML = "";
@@ -101,11 +108,36 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe("accepter un défi — jour de jeu", () => {
+  it("date la case au jour d'ACCEPTATION, pas au jour de création du défi", async () => {
+    // LE bug « redirigé mais pas de défi, et bloqué en défi en cours » : un ami
+    // envoie son défi à 23 h 55, on l'accepte le lendemain matin. La case portait
+    // alors `challenge_date` (hier), et toutes ses lectures la comparent au jour
+    // courant — donc bannière supprimée au chargement, cible dédiée ignorée (on
+    // rejoue celle du jour), et statut `accepted` que plus rien ne résout.
+    // Rien ne s'y oppose : la cible et le score voyagent dans le message, ils ne
+    // dépendent d'aucune date.
+    await accept({ date: "2020-01-01" });
+
+    expect(stored()?.date).toBe(parisDateKey());
+    // Le jour d'origine reste consultable, pour l'affichage et le débogage.
+    expect(stored()?.challengeDate).toBe("2020-01-01");
+  });
+
+  it("le défi accepté est immédiatement reconnu comme actif pour aujourd'hui", async () => {
+    await accept({ date: "2020-01-01", mode: "classic" });
+
+    // getPendingActiveChallenge() applique la même frontière de journée que la
+    // bannière et que les 6 modes : s'il ne le voit pas, personne ne le verra.
+    expect(getPendingActiveChallenge(false)?.msgId).toBe(42);
+  });
+});
+
 describe("accepter un défi — chemin nominal", () => {
   it("redirige vers la page du mode et pose la case activeChallenge", async () => {
     await accept({ mode: "classic" });
 
-    expect(navigatedTo).toBe("/classiqueMode/classiqueMode.html");
+    expect(navigatedTo).toBe("../../classiqueMode/classiqueMode.html");
     expect(updateStatus).toHaveBeenCalledWith(42, "accepted");
     expect(stored()).toMatchObject({ msgId: 42, mode: "classic", target: "Yu Narukami" });
   });
@@ -116,14 +148,14 @@ describe("accepter un défi — chemin nominal", () => {
     // était undefined → aucune redirection, mais le défi était déjà accepté.
     await accept({ mode: "All Out Attack" });
 
-    expect(navigatedTo).toBe("/allOutAttackMode/allOutAttack.html");
+    expect(navigatedTo).toBe("../../allOutAttackMode/allOutAttack.html");
     expect(stored()?.mode).toBe("alloutattack");
   });
 
   it("envoie sur la page Expert quand le défi est Expert", async () => {
     await accept({ mode: "silhouette", challengeIsExpert: true });
 
-    expect(navigatedTo).toBe("/silhouetteMode/silhouette.html?expert=1");
+    expect(navigatedTo).toBe("../../silhouetteMode/silhouette.html?expert=1");
     // Rangé dans la case Expert, et SEULEMENT là : un défi normal en cours ne
     // doit être ni écrasé ni résolu par cette partie.
     expect(stored(true)).toMatchObject({ mode: "silhouette", isExpert: true });
@@ -195,8 +227,129 @@ describe("accepter un défi — échecs, qui doivent tous être fermés", () => 
     await accept({ mode: "emoji", challengeIsExpert: true });
 
     // Deux dimensions = deux jeux : elles coexistent.
-    expect(navigatedTo).toBe("/emojiMode/emojiMode.html?expert=1");
+    expect(navigatedTo).toBe("../../emojiMode/emojiMode.html?expert=1");
     expect(stored(false)?.msgId).toBe(1);
     expect(stored(true)?.msgId).toBe(42);
+  });
+});
+
+describe("notification — fermeture explicite vs manquée", () => {
+  /**
+   * notifications.js ne persiste plus « déjà vu » avant l'affichage : une
+   * notification que le joueur n'a jamais vue (navigation dans la seconde,
+   * plein écran par-dessus) était perdue POUR TOUJOURS alors que le message
+   * restait `unread` côté serveur — la cause n°1 des « parfois pas d'animation ».
+   * Le « vu » persistant est désormais posé par ce module, et seulement quand le
+   * joueur ferme réellement la notification.
+   */
+  it("accepter n'a pas besoin du drapeau « vu » : le statut serveur suffit", async () => {
+    const dismissed = vi.fn();
+    setChallengeNotifDismissHandler(dismissed);
+
+    await accept({ mode: "classic" });
+
+    // Le message passe `accepted` côté serveur, et le sondage ne remonte que les
+    // `unread` : il ne peut plus revenir. Marquer « vu » en plus n'apporterait
+    // rien et masquerait un éventuel échec d'acceptation.
+    expect(updateStatus).toHaveBeenCalledWith(42, "accepted");
+    expect(navigatedTo).toBe("../../classiqueMode/classiqueMode.html");
+    expect(dismissed).not.toHaveBeenCalled();
+  });
+
+  it("signale la fermeture quand le joueur refuse", async () => {
+    const dismissed = vi.fn();
+    setChallengeNotifDismissHandler(dismissed);
+
+    queueChallengeNotifs([challenge()]);
+    document.querySelector(".cn-btn--refuse").click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(dismissed).toHaveBeenCalledWith(42);
+    expect(updateStatus).toHaveBeenCalledWith(42, "read");
+  });
+
+  it("signale la fermeture quand le joueur ferme par la croix", async () => {
+    const dismissed = vi.fn();
+    setChallengeNotifDismissHandler(dismissed);
+
+    queueChallengeNotifs([challenge()]);
+    document.querySelector(".cn-close").click();
+
+    // « Plus tard » explicite : le message reste `unread` (donc visible sur la
+    // page Amis) mais on ne le relance pas au prochain sondage.
+    expect(dismissed).toHaveBeenCalledWith(42);
+    expect(updateStatus).not.toHaveBeenCalled();
+  });
+
+  it("ne signale rien tant que le joueur n'a pas répondu", async () => {
+    const dismissed = vi.fn();
+    setChallengeNotifDismissHandler(dismissed);
+
+    queueChallengeNotifs([challenge()]);
+
+    expect(document.querySelector(".cn-btn--accept")).toBeTruthy();
+    expect(dismissed).not.toHaveBeenCalled();
+  });
+});
+
+describe("notification — double clic sur Accepter", () => {
+  it("n'accepte le défi qu'une seule fois", async () => {
+    // Deux allers-retours réseau séparent le clic de la redirection : un joueur
+    // qui reclique parce que « rien ne se passe » lançait deux acceptations —
+    // et deux gains d'XP Social Link.
+    queueChallengeNotifs([challenge()]);
+    const btn = document.querySelector(".cn-btn--accept");
+    btn.click();
+    btn.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(updateStatus).toHaveBeenCalledTimes(1);
+  });
+
+  it("rouvre les boutons quand l'acceptation échoue, pour laisser refuser", async () => {
+    updateStatus.mockRejectedValue(new Error("500"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await accept({ mode: "classic" });
+
+    expect(navigatedTo).toBeNull();
+    expect(document.querySelector(".cn-btn--accept").disabled).toBe(false);
+    expect(document.querySelector(".cn-btn--refuse").disabled).toBe(false);
+  });
+});
+
+describe("notification — la destination doit exister", () => {
+  /**
+   * La destination était ABSOLUE, avec un seul cas particulier codé en dur
+   * (`pathname.startsWith("/personadle/")` → "/personadle", sinon ""). Le site
+   * n'est à la racine du domaine qu'en prod : partout ailleurs — sous-dossier,
+   * préproduction, ou « …/personadle » SANS slash final, qui ne déclenche même
+   * pas le test — accepter menait sur une 404, avec un défi déjà `accepted`
+   * côté serveur. Bloqué, et sans page où aller.
+   */
+  it("résout la page du mode relativement, depuis un sous-dossier profond", async () => {
+    window.location.pathname = "/profile/friends/friends.html";
+
+    await accept({ mode: "classic" });
+
+    expect(navigatedTo).toBe("../../classiqueMode/classiqueMode.html");
+  });
+
+  it("résout la page du mode relativement, depuis la racine", async () => {
+    window.location.pathname = "/index.html";
+
+    await accept({ mode: "classic" });
+
+    expect(navigatedTo).toBe("./classiqueMode/classiqueMode.html");
+  });
+
+  it("reste correct sous une racine de site arbitraire (ex. /jeux/personadle)", async () => {
+    // Le cas qui produisait la 404 : la racine n'est ni « / » ni « /personadle/ ».
+    // Un lien relatif n'a pas à la connaître.
+    window.location.pathname = "/jeux/personadle/profile/profile.html";
+
+    await accept({ mode: "music" });
+
+    expect(navigatedTo).toBe("../musicsMode/musics.html");
   });
 });

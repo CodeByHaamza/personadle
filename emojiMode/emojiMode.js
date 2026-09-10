@@ -29,7 +29,7 @@ import {
   currentGameId,
   characterMatchesActiveOpus,
   updateCounterElement,
-  getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
 } from "../js/gameCore.js";
 
@@ -596,11 +596,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du
   // jour. Persistée dans targetEmoji (état wipé à l'acceptation) → un refresh
   // mi-défi reprend la même cible. Idempotent si déjà persistée.
-  const _challengeTargetName = getActiveChallengeTarget("emoji");
-  if (_challengeTargetName) {
-    const _ct = ALL_EMOJI_CHARS.find((c) => c.nom === _challengeTargetName);
-    if (_ct) target = _ct;
-  }
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  const _challengeChar = resolveChallengeTarget("emoji", ALL_EMOJI_CHARS);
+  if (_challengeChar) target = _challengeChar;
 
   attempts = parseInt(localStorage.getItem(EXPERT.key("attemptsEmoji"))) || 1;
   localStorage.setItem(EXPERT.key("targetEmoji"), JSON.stringify(target));

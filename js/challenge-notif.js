@@ -12,40 +12,53 @@
 
 import {
   FILTER_STORAGE_KEYS,
+  MODE_STATE_KEYS,
   activeChallengeKey,
   fetchExpertStatus,
   getPendingActiveChallenge,
+  modeLabel,
+  modePageHref,
   normalizeModeKey,
+  parisDateKey,
+  siteRootPrefix,
 } from "./gameCore.js";
 import { gainSocialLinkXp } from "./social-link.js";
 
 const _queue = [];
 let _busy = false;
 
-// Exporté : challenge-result.js efface ces clés en fin de défi à cible dédiée
-// pour restaurer la partie quotidienne (cible du jour recalculable, seedée).
-export const MODE_STATE_KEYS = {
-  classic: ["target", "attempts", "guessHistory"],
-  emoji: ["targetEmoji", "attemptsEmoji", "emojiGameOver", "emojiForceReveal", "emojiWin"],
-  silhouette: [
-    "silhouetteTarget",
-    "silhouetteAttempts",
-    "silhouetteGameOver",
-    "silhouetteForceReveal",
-  ],
-  alloutattack: ["aoaTarget", "aoaAttempts", "aoaGameOver", "aoaForceReveal"],
-  personae: ["personaeTarget", "personaeAttempts", "personaeGameOver", "personaeForceReveal"],
-  music: ["musicTarget", "musicAttempts", "musicGameOver", "musicTriedTitles", "musicForceReveal"],
-};
+// Ré-export historique : challenge-banner.js et challenge-result.js l'importent
+// d'ici. La table elle-même vit dans gameCore.js (source unique — friends.js en
+// gardait une copie manuscrite qui avait divergé).
+export { MODE_STATE_KEYS };
 
-const MODE_PAGE = {
-  classic: "/classiqueMode/classiqueMode.html",
-  emoji: "/emojiMode/emojiMode.html",
-  silhouette: "/silhouetteMode/silhouette.html",
-  alloutattack: "/allOutAttackMode/allOutAttack.html",
-  personae: "/personaeMode/personae.html",
-  music: "/musicsMode/musics.html",
-};
+/**
+ * Appelé quand le joueur a explicitement CLOS une notification (accepté, refusé
+ * ou fermé par la croix). Posé par notifications.js, qui s'en sert pour ne plus
+ * la reproposer. Sans ce rappel, la seule alternative était de marquer « vu »
+ * AVANT l'affichage : une notification manquée (navigation, overlay recouvert)
+ * était alors perdue pour toujours alors que le message restait `unread`.
+ */
+let _onDismissed = null;
+
+/** @param {(id:number)=>void} fn */
+export function setChallengeNotifDismissHandler(fn) {
+  _onDismissed = fn;
+}
+
+function _dismissed(id) {
+  try {
+    _onDismissed?.(id);
+  } catch {
+    /* le suivi « déjà vu » ne doit jamais casser la fermeture */
+  }
+}
+
+// La table des pages de mode vit dans gameCore.js (MODE_PAGE_PATH), et la
+// destination se construit avec modePageHref() — en RELATIF. Elle était ici, en
+// absolu, avec un `/personadle` codé en dur comme seule alternative à la racine
+// du domaine : partout ailleurs, accepter un défi menait sur une 404 alors que
+// le message était déjà passé `accepted`. Défi bloqué, sans page où aller.
 
 const MODE_ICONS = {
   classic: "🃏",
@@ -56,13 +69,8 @@ const MODE_ICONS = {
   music: "🎵",
 };
 
-/** Racine du site (vide en prod, '/personadle' en dev sous-dossier). */
-function _siteBase() {
-  return window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
-}
-
 function _imgBase() {
-  return `${_siteBase()}/img/`;
+  return `${siteRootPrefix()}img/`;
 }
 
 function _esc(str) {
@@ -75,8 +83,11 @@ function _esc(str) {
 function _avatarSrc(data) {
   if (!data) return `${_imgBase()}default_avatar.png`;
   if (data.startsWith("data:")) return data;
-  const base = _imgBase().replace(/img\/$/, "");
-  return data.replace(/^\.\//, base);
+  // Ne réécrit QUE les chemins relatifs vers `img/` — la forme sous laquelle les
+  // avatars sont stockés. Une URL absolue (http…) doit passer telle quelle : lui
+  // coller un préfixe relatif produirait « ./https://… ». Même règle que
+  // avatarSrc() dans js/challenge-result.js.
+  return data.replace(/^(\.\.?\/)*img\//, _imgBase());
 }
 
 /** t(key) retourne la clé brute (truthy) si absente — ?? ne se déclenche jamais, cf. CLAUDE.md §5. */
@@ -172,7 +183,23 @@ function _render({
   requestAnimationFrame(() => overlay.classList.add("cn--visible"));
 
   // ── Accepter : pose localStorage + XP + redirect ────────
-  overlay.querySelector(".cn-btn--accept").addEventListener("click", async () => {
+  const acceptBtn = overlay.querySelector(".cn-btn--accept");
+  const refuseBtn = overlay.querySelector(".cn-btn--refuse");
+
+  /** Rouvre les boutons après un refus d'accepter (le joueur doit pouvoir refuser). */
+  const _unlock = () => {
+    acceptBtn.disabled = false;
+    refuseBtn.disabled = false;
+  };
+
+  acceptBtn.addEventListener("click", async () => {
+    // Deux appels réseau (statut Expert, acceptation) séparent le clic de la
+    // redirection : sans verrou, un joueur qui reclique parce que « rien ne se
+    // passe » lançait deux acceptations et deux gains d'XP.
+    if (acceptBtn.disabled) return;
+    acceptBtn.disabled = true;
+    refuseBtn.disabled = true;
+
     // Une case par dimension, mais UNE SEULE par dimension — accepter ici
     // l'écraserait silencieusement si un autre défi de la MÊME dimension est en
     // cours, le laissant bloqué en 'accepted' pour toujours côté serveur.
@@ -180,9 +207,16 @@ function _render({
     // deux jeux distincts, avec deux cibles et deux barèmes.
     const pending = getPendingActiveChallenge(challengeIsExpert);
     if (pending && pending.msgId !== id) {
-      if (typeof window.showToast === "function") {
-        window.showToast(_t("challenge.already_active", "Finish your current challenge first."));
-      }
+      // Nommer le mode bloquant : « Finish your current challenge first » sans
+      // dire LEQUEL laissait le joueur chercher, alors que le défi en cours peut
+      // vivre sur n'importe laquelle des 6 pages (et sa bannière ne s'affiche que
+      // sur la bonne). La page Amis liste désormais les défis en cours avec un
+      // bouton « Reprendre » / « Abandonner » — c'est la sortie à indiquer.
+      _toast(
+        _t("challenge.already_active", "Finish your current challenge first.") +
+          ` (${modeLabel(pending.mode) ?? pending.mode})`
+      );
+      _unlock();
       return;
     }
 
@@ -194,14 +228,11 @@ function _render({
     // `?expert=1` pour un défi Expert : sans lui le joueur atterrit en mode
     // normal, où sa partie ne résoudra jamais le défi (les deux dimensions ont
     // désormais des cases de stockage distinctes).
-    const dest = MODE_PAGE[modeKey]
-      ? `${_siteBase()}${MODE_PAGE[modeKey]}${challengeIsExpert ? "?expert=1" : ""}`
-      : null;
+    const dest = modePageHref(modeKey, challengeIsExpert);
     if (!dest) {
       console.error(`[challenge] mode inconnu « ${mode} » → aucune page cible`);
-      if (typeof window.showToast === "function") {
-        window.showToast(_t("challenge.unknown_mode", "This challenge's mode is unavailable."));
-      }
+      _toast(_t("challenge.unknown_mode", "This challenge's mode is unavailable."));
+      _unlock();
       return;
     }
 
@@ -209,9 +240,8 @@ function _render({
     if (!api) {
       // Sans API, le serveur ne saura jamais que le défi a été accepté : le
       // joueur jouerait pour rien et le défi resterait « en attente » chez lui.
-      if (typeof window.showToast === "function") {
-        window.showToast(_t("challenge.offline", "You need to be online to accept a challenge."));
-      }
+      _toast(_t("challenge.offline", "You need to be online to accept a challenge."));
+      _unlock();
       return;
     }
 
@@ -226,11 +256,10 @@ function _render({
     if (challengeIsExpert) {
       const status = await fetchExpertStatus();
       if (status.state === "ok" && status.modes?.[modeKey]?.unlocked === false) {
-        if (typeof window.showToast === "function") {
-          window.showToast(
-            _t("challenge.expert_locked", "Unlock this mode's Expert first to accept this challenge.")
-          );
-        }
+        _toast(
+          _t("challenge.expert_locked", "Unlock this mode's Expert first to accept this challenge.")
+        );
+        _unlock();
         return;
       }
     }
@@ -242,9 +271,8 @@ function _render({
       // activeChallenge en local ferait diverger les deux états — c'est ce qui
       // produisait les défis fantômes « en cours ».
       console.error("[challenge] acceptation refusée par le serveur", err);
-      if (typeof window.showToast === "function") {
-        window.showToast(_t("challenge.accept_failed", "Could not accept the challenge. Try again."));
-      }
+      _toast(_t("challenge.accept_failed", "Could not accept the challenge. Try again."));
+      _unlock();
       return;
     }
 
@@ -267,7 +295,19 @@ function _render({
       JSON.stringify({
         msgId: id,
         mode: modeKey,
-        date,
+        // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé.
+        // C'était `date` (= `challenge_date`), et TOUTES les lectures de la case
+        // le comparent à `parisDateKey()` d'aujourd'hui : un défi envoyé la veille
+        // au soir puis accepté le lendemain matin naissait donc déjà périmé — pas
+        // de bannière (supprimée au chargement), pas de cible dédiée (le mode
+        // rejouait celle du jour), et un statut `accepted` que plus rien ne
+        // pouvait résoudre. C'est le « je suis redirigé mais il n'y a pas de
+        // défi, et je reste bloqué en défi en cours » signalé en prod.
+        // Rien ne s'y oppose côté règles : la cible et le score voyagent en clair
+        // dans le message, ils ne dépendent d'aucune date.
+        date: parisDateKey(),
+        // Jour d'origine, conservé pour l'affichage et le débogage uniquement.
+        challengeDate: date ?? null,
         score,
         senderId,
         filterKey,
@@ -293,18 +333,33 @@ function _render({
   });
 
   // ── Refuser : marque comme lu côté API + ferme ───────────
-  overlay.querySelector(".cn-btn--refuse").addEventListener("click", async () => {
+  refuseBtn.addEventListener("click", async () => {
+    if (refuseBtn.disabled) return;
+    refuseBtn.disabled = true;
+    acceptBtn.disabled = true;
     await window._personadleApi?.messages.updateStatus(id, "read").catch(() => {});
+    _dismissed(id);
     _closeOverlay(overlay);
   });
 
   // ── Croix : ferme seulement l'animation ─────────────────
-  // Le message reste "unread" dans l'API → visible depuis la page Amis.
+  // Le message reste "unread" dans l'API → visible depuis la page Amis. Mais
+  // c'est un « plus tard » EXPLICITE : on le note pour ne pas le relancer au
+  // prochain sondage, contrairement à une notification simplement manquée.
   overlay.querySelector(".cn-close").addEventListener("click", () => {
+    _dismissed(id);
+    // Les défis encore en file n'ont, EUX, jamais été montrés : les jeter
+    // silencieusement était la deuxième cause de « parfois pas d'animation ».
+    // Ils repartiront au prochain sondage puisqu'ils restent `unread` et non vus.
     _queue.length = 0;
     _busy = false;
     _fadeOut(overlay, null);
   });
+}
+
+/** Toast si la page en fournit un — l'acceptation ne doit pas dépendre de l'UI. */
+function _toast(msg) {
+  if (typeof window.showToast === "function") window.showToast(msg);
 }
 
 function _fadeOut(overlay, onDone) {

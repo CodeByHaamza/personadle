@@ -658,9 +658,12 @@ CREATE TABLE admin_audit_log (
     --     'badge.grant', 'badge.revoke', 'title.grant', 'title.revoke',
     --     'wallpaper.grant', 'wallpaper.revoke', 'event_code.create',
     --     'event_code.update', 'event_code.delete', 'social_link.update',
-    --     'social_link.delete'
+    --     'social_link.delete', 'user_stats.overwrite',
+    --     'challenge.set_status', 'challenge.delete',
+    --     'streak.set', 'streak.recover', 'streak.reset_cooldown'
     target_type VARCHAR(40)     NOT NULL,
-    -- ex: 'user', 'badge', 'title', 'wallpaper', 'event_code', 'social_link'
+    -- ex: 'user', 'badge', 'title', 'wallpaper', 'event_code', 'social_link',
+    --     'message' (défi piloté depuis l'onglet Défis du panel admin)
     target_id   VARCHAR(100)    NOT NULL,
     -- id numérique ou code/slug selon la cible, toujours stocké en texte
     details     JSON            NULL,

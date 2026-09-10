@@ -902,7 +902,9 @@
     "msg_empty": "Noch keine Nachrichten.",
     "delete_msg": "Löschen",
     "server_unreachable": "Server nicht erreichbar. Deine Sitzung ist wahrscheinlich noch gültig — versuch es erneut.",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "challenge_resume": "▶ Fortsetzen",
+    "challenge_give_up": "Aufgeben"
   },
   "challenge": {
     "challenge_friend": "Freund herausfordern",
@@ -928,7 +930,8 @@
     "select_friend_expert": "Freund herausfordern — Experte",
     "expert_note": "Experten-Duell: nur Freunde, die den Experten dieses Modus freigeschaltet haben, können es annehmen.",
     "no_expert_friend": "Keiner deiner Freunde hat den Experten dieses Modus bisher freigeschaltet.",
-    "expert_locked": "Schalte zuerst den Experten dieses Modus frei, um dieses Duell anzunehmen."
+    "expert_locked": "Schalte zuerst den Experten dieses Modus frei, um dieses Duell anzunehmen.",
+    "target_unavailable": "Diese Herausforderung ist in diesem Modus nicht mehr spielbar – sie wurde abgebrochen."
   },
   "challenge_result": {
     "title_win": "BRAVO!",
@@ -943,7 +946,8 @@
     "to_beat": "Zu schlagender Wert",
     "social_link": "Social Link",
     "xp_gained": "+{{xp}} XP Social Link",
-    "close": "Zurück zur Startseite"
+    "close": "Zurück zur Startseite",
+    "close_notif": "Schließen"
   },
   "settings": {
     "title": "Einstellungen",

@@ -26,6 +26,7 @@ import {
   characterMatchesActiveOpus,
   updateCounterElement,
   getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
   expertContext,
   setupExpertToggle,
@@ -699,13 +700,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du jour.
   // Persistée dans "target" (état wipé à l'acceptation) → un refresh mi-défi
   // reprend la même cible. Idempotent si déjà persistée.
-  const challengeTargetName = getActiveChallengeTarget("classic");
-  if (challengeTargetName) {
-    const ct = characters.find((c) => c.nom === challengeTargetName);
-    if (ct) {
-      target = ct;
-      localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
-    }
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  const _challengeChar = resolveChallengeTarget(
+    "classic",
+    EXPERT.isExpert ? EXPERT_CHARACTERS : characters
+  );
+  if (_challengeChar) {
+    target = _challengeChar;
+    localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
   }
 
   // Pick daily target if none stored (seeded RNG — same character for all players today)

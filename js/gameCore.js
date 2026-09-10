@@ -31,6 +31,10 @@
  *   characterMatchesActiveOpus(character, activeOpus) → opus-intersection test used by filterCharacterPool()
  *   updateCounterElement(id, attempts, threshold) → updates a single hint/give-up counter's text + .activated class
  *   getPendingActiveChallenge()  → today's still-unfinished accepted challenge (any mode), or null
+ *   readActiveChallenge(isExpert)→ raw active-challenge box for a dimension, or null if stale
+ *   resolveChallengeTarget(m,p)  → challenge target resolved against the page's playable pool
+ *   releaseActiveChallenge(c)    → undoes a challenge's local state (filters, mode state, box)
+ *   MODE_STATE_KEYS              → per-mode localStorage keys wiped when a challenge starts/ends
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1131,11 +1135,66 @@ function _getActiveFilters(mode) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Cible dédiée du défi actif pour un mode (décision produit 2026-07-17 :
- * « le défi doit défier » — cible aléatoire, pas celle du jour).
- * Retourne le nom de la cible, ou null si pas de défi actif pour ce mode ou
- * défi ancien format (sans cible propre → comportement historique, cible du jour).
+ * Page de chaque mode, RELATIVE à la racine du site (pas de « / » initial).
+ * Clés de normalizeModeKey() : toute autre graphie doit être normalisée avant.
  */
+export const MODE_PAGE_PATH = {
+  classic: "classiqueMode/classiqueMode.html",
+  emoji: "emojiMode/emojiMode.html",
+  silhouette: "silhouetteMode/silhouette.html",
+  alloutattack: "allOutAttackMode/allOutAttack.html",
+  personae: "personaeMode/personae.html",
+  music: "musicsMode/musics.html",
+};
+
+/** Dossiers à deux niveaux sous la racine du site. */
+const _DEEP_SUBPATHS = ["/profile/friends/", "/profile/leaderboard/"];
+
+/** Dossiers à un niveau sous la racine du site. */
+const _SUBPATHS = [
+  "/profile/",
+  "/pages/",
+  "/admin/",
+  ...Object.values(MODE_PAGE_PATH).map((page) => `/${page.split("/")[0]}/`),
+];
+
+/**
+ * Préfixe relatif menant à la racine du site depuis la page courante ("./",
+ * "../" ou "../../").
+ *
+ * Pourquoi relatif : les liens de défi étaient construits en ABSOLU, avec un cas
+ * particulier codé en dur (`pathname.startsWith("/personadle/")` → "/personadle",
+ * sinon ""). Le site n'est à la racine du domaine qu'en prod : partout ailleurs —
+ * installation en sous-dossier, préproduction, `…/personadle` SANS slash final,
+ * qui ne déclenche pas le test — accepter un défi menait droit sur une 404, avec
+ * un défi déjà passé `accepted` côté serveur. Donc bloqué, et sans page où aller.
+ *
+ * La bottomNav (js/bottomNav.js) calculait déjà ses liens exactement ainsi, et
+ * ne rencontrait pas le problème ; elle consomme désormais ce helper, pour que
+ * les deux ne puissent plus diverger.
+ */
+export function siteRootPrefix(pathname = window.location.pathname) {
+  if (_DEEP_SUBPATHS.some((dir) => pathname.includes(dir))) return "../../";
+  if (_SUBPATHS.some((dir) => pathname.includes(dir))) return "../";
+  return "./";
+}
+
+/**
+ * URL de la page d'un mode depuis la page courante, ou null si le mode est
+ * inconnu (l'appelant doit alors refuser AVANT toute écriture — un défi accepté
+ * sans destination est un défi bloqué).
+ *
+ * @param {string} mode  n'importe quelle graphie acceptée par normalizeModeKey()
+ * @param {boolean} [isExpert] ajoute `?expert=1` — sans lui, un défi Expert fait
+ *   atterrir le joueur en mode normal, où sa partie ne le résoudra jamais.
+ */
+export function modePageHref(mode, isExpert = false) {
+  const key = normalizeModeKey(mode) ?? String(mode ?? "").toLowerCase();
+  const page = MODE_PAGE_PATH[key];
+  if (!page) return null;
+  return `${siteRootPrefix()}${page}${isExpert ? "?expert=1" : ""}`;
+}
+
 /**
  * Clé localStorage du défi en cours, CLOISONNÉE par dimension.
  *
@@ -1155,24 +1214,181 @@ export function activeChallengeKey(isExpert = isExpertPage()) {
   return isExpert ? "activeChallengeExpert" : "activeChallenge";
 }
 
-export function getActiveChallengeTarget(mode) {
+/**
+ * État de partie à purger quand un défi commence ou se termine — une entrée par
+ * mode, préfixée par `expertContext().key()` à l'usage.
+ *
+ * Source unique : `js/challenge-notif.js` la ré-exporte et `profile/friends/friends.js`
+ * l'importe d'ici. Les deux en gardaient une copie manuscrite ; elles ont divergé
+ * (le point d'entrée « page Amis » ne purgeait pas les mêmes clés que le point
+ * d'entrée « notification »), ce qui laissait selon le chemin d'acceptation une
+ * partie à moitié restaurée par-dessus le défi.
+ */
+export const MODE_STATE_KEYS = {
+  classic: ["target", "attempts", "guessHistory"],
+  emoji: ["targetEmoji", "attemptsEmoji", "emojiGameOver", "emojiForceReveal", "emojiWin"],
+  silhouette: [
+    "silhouetteTarget",
+    "silhouetteAttempts",
+    "silhouetteGameOver",
+    "silhouetteForceReveal",
+  ],
+  alloutattack: ["aoaTarget", "aoaAttempts", "aoaGameOver", "aoaForceReveal"],
+  personae: ["personaeTarget", "personaeAttempts", "personaeGameOver", "personaeForceReveal"],
+  music: ["musicTarget", "musicAttempts", "musicGameOver", "musicTriedTitles", "musicForceReveal"],
+};
+
+/**
+ * Lit la case de défi d'une dimension et renvoie son contenu s'il est encore
+ * valable AUJOURD'HUI (heure Paris), sinon null.
+ *
+ * ⚠️ `date` est le jour où le défi doit se JOUER (posé à l'acceptation), pas le
+ * jour où l'expéditeur l'a créé (`challengeDate`, purement informatif). Les deux
+ * ont longtemps été confondus : un défi envoyé la veille au soir et accepté le
+ * lendemain matin naissait donc périmé — ni bannière, ni cible dédiée, et un
+ * statut `accepted` que plus rien ne pouvait résoudre côté serveur.
+ *
+ * @param {boolean} [isExpert] défaut : la dimension de la page courante
+ */
+export function readActiveChallenge(isExpert = isExpertPage()) {
   try {
-    const c = JSON.parse(localStorage.getItem(activeChallengeKey()) || "null");
+    const c = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
     if (!c) return null;
-    // Périmé après sa journée — même règle que getPendingActiveChallenge() et
-    // initChallengeBanner(), qui l'appliquaient déjà. Son absence ICI gelait la
-    // progression des joueurs : `isChallengePlay()` en dérive, et les 6 modes
-    // s'en servent pour décider s'ils enregistrent la partie. Un défi accepté et
-    // jamais terminé rendait donc `isChallengePlay()` vrai indéfiniment, et plus
-    // AUCUNE partie de ce mode n'était enregistrée — sans le moindre signal, ni
-    // message ni erreur en console, puisque rien n'était même envoyé.
-    // Constaté en prod le 2026-09-02 sur un joueur bloqué depuis des jours.
     if (c.date && c.date !== parisDateKey()) return null;
-    const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
-    if ((c.mode || "").toLowerCase() !== key) return null;
-    return c.target ?? null;
+    return c;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Cible dédiée du défi actif pour un mode (décision produit 2026-07-17 :
+ * « le défi doit défier » — cible aléatoire, pas celle du jour).
+ * Retourne le nom de la cible, ou null si pas de défi actif pour ce mode ou
+ * défi ancien format (sans cible propre → comportement historique, cible du jour).
+ */
+export function getActiveChallengeTarget(mode) {
+  // Périmé après sa journée — même règle que getPendingActiveChallenge() et
+  // initChallengeBanner(), qui l'appliquaient déjà. Son absence ICI gelait la
+  // progression des joueurs : `isChallengePlay()` en dérive, et les 6 modes
+  // s'en servent pour décider s'ils enregistrent la partie. Un défi accepté et
+  // jamais terminé rendait donc `isChallengePlay()` vrai indéfiniment, et plus
+  // AUCUNE partie de ce mode n'était enregistrée — sans le moindre signal, ni
+  // message ni erreur en console, puisque rien n'était même envoyé.
+  // Constaté en prod le 2026-09-02 sur un joueur bloqué depuis des jours.
+  const c = readActiveChallenge();
+  if (!c) return null;
+  const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
+  if ((c.mode || "").toLowerCase() !== key) return null;
+  return c.target ?? null;
+}
+
+/**
+ * Défait l'état local d'un défi : filtres rendus au joueur, état de mode purgé
+ * si la partie tournait sur une cible dédiée, case libérée.
+ *
+ * Geste unique partagé par la fin de partie (`checkChallengeCompletion`),
+ * l'abandon (`abandonActiveChallenge`) et la purge d'un défi injouable
+ * (`dropUnplayableChallenge`) : les trois laissaient le mode dans des états
+ * légèrement différents selon la porte de sortie empruntée.
+ *
+ * @param {object} challenge contenu de la case de défi
+ * @returns {boolean} true si l'état du mode a été purgé (donc rechargement utile)
+ */
+export function releaseActiveChallenge(challenge) {
+  if (!challenge) return false;
+
+  // `!= null` volontaire : `originalFilters === null` veut dire « la clé était
+  // ABSENTE à l'acceptation ». Ne rien écrire alors, surtout pas "[]", que
+  // filterMenu.js lit comme « tout désélectionné » — un état que le joueur n'a
+  // jamais choisi, et qui vide son pool.
+  if (challenge.filterKey && challenge.originalFilters != null) {
+    localStorage.setItem(challenge.filterKey, challenge.originalFilters);
+  }
+
+  // Défi à cible dédiée : la partie chargée n'est pas celle du jour. On efface
+  // l'état du mode pour que le prochain chargement retombe sur la cible
+  // quotidienne (seedée, donc parfaitement restaurable).
+  const wiped = Boolean(challenge.target);
+  if (wiped) {
+    const modeKey = normalizeModeKey(challenge.mode) ?? String(challenge.mode ?? "").toLowerCase();
+    (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+  }
+
+  localStorage.removeItem(activeChallengeKey(Boolean(challenge.isExpert)));
+  return wiped;
+}
+
+/**
+ * Résout la cible d'un défi actif contre le pool RÉELLEMENT jouable de la page.
+ *
+ * Les 6 modes faisaient `pool.find(...)` et, quand la cible restait introuvable,
+ * retombaient en SILENCE sur la cible du jour — alors que `isChallengePlay()`
+ * restait vrai. Le joueur jouait donc une partie qui ne comptait ni comme défi
+ * (mauvaise cible) ni comme partie quotidienne (jamais enregistrée), et le défi
+ * restait `accepted` côté serveur : « on joue sans rien », et bloqué ensuite.
+ *
+ * Cas réels d'échec : dimension Expert dont le pool est plus étroit (fiches de
+ * lore, paroles), dataset amputé depuis l'envoi, défi d'un ancien format, ou
+ * clé de désambiguïsation inconnue du client. Aucun n'est rattrapable — mieux
+ * vaut rendre sa liberté au joueur que le laisser jouer pour rien.
+ *
+ * @param {string}   mode  clé de mode ('classic', 'music'…)
+ * @param {Array}    pool  entrées jouables SUR CETTE PAGE (pool Expert inclus)
+ * @param {Function} [keyOf] extrait d'une entrée la clé comparée à la cible
+ * @returns {*} l'entrée du pool, ou null (pas de défi, ou défi purgé)
+ */
+export function resolveChallengeTarget(mode, pool, keyOf = (entry) => entry?.nom) {
+  const wanted = getActiveChallengeTarget(mode);
+  if (!wanted) return null;
+
+  const found = (pool ?? []).find((entry) => keyOf(entry) === wanted);
+  if (found) return found;
+
+  dropUnplayableChallenge(mode, wanted);
+  return null;
+}
+
+/**
+ * Rend sa liberté au joueur quand la cible d'un défi accepté est introuvable.
+ *
+ * L'état local part TOUT DE SUITE : le garder ne rendrait pas le défi jouable,
+ * mais continuerait d'occuper la case (« Finish your current challenge first »)
+ * et de faire passer chaque partie du mode pour un défi, donc non enregistrée.
+ * Le statut serveur repasse à `read` au mieux — `read` et non `expired` : le
+ * joueur n'a pas tenté et manqué, il n'a jamais pu jouer. Si l'appel échoue
+ * (hors ligne), le défi reste `accepted` côté base ; la page Amis expose depuis
+ * ce lot un bouton « Abandonner » sur les défis en cours, qui est la reprise
+ * manuelle de ce même geste.
+ */
+export function dropUnplayableChallenge(mode, wanted) {
+  const isExpert = isExpertPage();
+  let challenge = null;
+  try {
+    challenge = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
+  } catch {
+    /* case illisible : la suppression ci-dessous suffit */
+  }
+
+  console.error(
+    `[challenge] cible « ${wanted} » introuvable dans le pool ${mode}${isExpert ? " (Expert)" : ""} → défi abandonné`
+  );
+
+  releaseActiveChallenge(challenge ?? { mode, isExpert });
+
+  const msgId = challenge?.msgId;
+  if (msgId) {
+    window._personadleApi?.messages?.updateStatus?.(msgId, "read")?.catch?.(() => {});
+  }
+
+  if (typeof window.showToast === "function") {
+    window.showToast(
+      _t(
+        "challenge.target_unavailable",
+        undefined,
+        "This challenge can't be played on this mode anymore — it has been cancelled."
+      )
+    );
   }
 }
 
@@ -1198,14 +1414,7 @@ export function isChallengePlay(mode) {
  * nettoie les entrées périmées au passage) — l'appelant décide de la suite.
  */
 export function getPendingActiveChallenge(isExpert = isExpertPage()) {
-  try {
-    const c = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
-    if (!c) return null;
-    if (c.date && c.date !== parisDateKey()) return null;
-    return c;
-  } catch {
-    return null;
-  }
+  return readActiveChallenge(isExpert);
 }
 
 /**

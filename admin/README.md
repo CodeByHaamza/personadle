@@ -16,9 +16,11 @@
 
 ```
 admin/
-├── index.html   ← Interface HTML (single-page, liste + détail 7 sous-onglets + 5 panneaux globaux)
-├── admin.css    ← Styles du panneau (tableaux, pills, actions)
-└── admin.js     ← Logique (fetch API admin, rendu dynamique, formulaires)
+├── index.html      ← Interface HTML (single-page, liste + détail 9 sous-onglets + 5 panneaux globaux)
+├── admin.css       ← Styles du panneau (tableaux, pills, actions)
+├── admin.js        ← Logique (fetch API admin, rendu dynamique, formulaires)
+├── challenges.js   ← Sous-onglet ⚔ Défis (relance / annulation / suppression)
+└── streak.js       ← Sous-onglet 🔥 Streak (streak globale + cooldown Jack Frost)
 ```
 
 ---
@@ -35,7 +37,7 @@ Route : `/admin/` (protégé côté serveur, redirection si non-admin)
 ## Onglets
 
 Panneau gauche = liste des utilisateurs (toujours visible, recherche + pagination). Panneau
-droit = détail d'un utilisateur sélectionné, avec 7 sous-onglets. 5 panneaux globaux sont
+droit = détail d'un utilisateur sélectionné, avec 9 sous-onglets. 5 panneaux globaux sont
 accessibles depuis le header, indépendamment de l'utilisateur sélectionné.
 
 **Sous-onglets "User Detail" :**
@@ -47,6 +49,8 @@ accessibles depuis le header, indépendamment de l'utilisateur sélectionné.
 | 🖼️ **Walls**    | Attribution ou révocation manuelle de fonds d'écran                   |
 | 👑 **Titres**   | Attribution, équipement ou révocation manuelle de titres               |
 | 📊 **Stats**    | Écrasement manuel des statistiques par mode                            |
+| 🔥 **Streak**   | Streak globale (correction à la hausse **comme à la baisse**), restauration Jack Frost illimitée, effacement du cooldown 60 j |
+| ⚔ **Défis**    | 100 derniers défis d'un joueur : relancer, annuler, supprimer — la sortie de secours d'un défi bloqué `accepted` |
 | 👫 **Amis**     | Suppression forcée d'une amitié                                        |
 | 🔗 **Social**   | Inspection des relations et rangs Social Link                          |
 
@@ -73,6 +77,11 @@ accessibles depuis le header, indépendamment de l'utilisateur sélectionné.
 | Give/revoke wallpaper    | `INSERT IGNORE` / `DELETE` sur `user_wallpapers`                       |
 | Give/equip/revoke title  | `INSERT` / `PATCH` / `DELETE` sur `user_titles`                        |
 | Overwrite stats          | `PATCH` sur `user_stats` (par mode)                                    |
+| Relancer / annuler un défi | `PATCH messages.status` → `unread` (reproposé) ou `read` (clos sans le compter comme manqué) |
+| Supprimer un défi        | `DELETE FROM messages` — ⚠️ la ligne est **partagée**, elle disparaît aussi chez l'autre joueur |
+| Corriger la streak       | `PATCH users.global_streak / global_streak_record / global_streak_date` — seul chemin qui autorise une **baisse** |
+| Restaurer la streak      | `UPDATE user_stats` + `users` sans cooldown ni plafond « jours joués » ; ne consomme pas le Jack Frost du joueur |
+| Effacer le cooldown      | `users.streak_recovered_at = NULL` — le joueur peut réutiliser Jack Frost immédiatement |
 | Remove friendship        | `DELETE` sur `friendships`                                              |
 | Create event code        | `INSERT INTO event_codes` (code, badge_id, start_date, end_date, is_permanent, is_active, description) |
 | Edit/deactivate event code | `PATCH event_codes` (is_active, dates, description — pas de `quota` ni `expires_at`, ces colonnes n'existent pas) |
@@ -90,6 +99,9 @@ Tous dans `api/admin/`. Chaque fichier PHP nécessite sa propre `RewriteRule` da
 GET                      /api/admin/users                     ← liste paginée
 GET  PATCH  DELETE       /api/admin/users/:id                 ← détail, édition, suppression
 PATCH                    /api/admin/users/:id/stats           ← écrasement stats par mode
+GET  PATCH               /api/admin/users/:id/streak          ← PATCH { action: set | recover | reset_cooldown }
+GET                      /api/admin/users/:id/challenges      ← 100 derniers défis (les deux sens)
+     PATCH  DELETE       /api/admin/users/:id/challenges/:msgId ← PATCH { status } — forcer l'état d'un défi
 POST        DELETE       /api/admin/users/:id/badges          ← pas de GET (inclus dans le détail user)
 POST PATCH  DELETE       /api/admin/users/:id/titles          ← PATCH = équiper un titre
 POST        DELETE       /api/admin/users/:id/wallpapers      ← pas de GET (inclus dans le détail user)

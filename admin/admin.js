@@ -31,6 +31,8 @@ import { renderErrorLogs } from "./error-logs.js";
 import { renderAuditLog } from "./audit-log.js";
 import { renderDeletionRequests } from "./deletion-requests.js";
 import { renderRateLimits } from "./rate-limits.js";
+import { renderTabChallenges } from "./challenges.js";
+import { renderTabStreak } from "./streak.js";
 
 // ── State ──────────────────────────────────────────────────────────────────
 let _users = [];
@@ -335,6 +337,12 @@ function switchTab(tab) {
       break;
     case "stats":
       renderTabStats(d);
+      break;
+    case "streak":
+      renderTabStreak(d);
+      break;
+    case "challenges":
+      renderTabChallenges(d);
       break;
     case "friends":
       renderTabFriends(d);

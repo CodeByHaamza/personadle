@@ -18,7 +18,7 @@ import {
   showChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
-  getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
   expertContext,
   setupExpertToggle,
@@ -859,8 +859,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle
   //    du jour. On la persiste dans aoaTarget (état wipé à l'acceptation) pour
   //    que le refresh mi-défi reprenne la même cible. ──
-  const challengeTargetName = getActiveChallengeTarget("alloutattack");
-  if (challengeTargetName && originalPersonas.includes(challengeTargetName)) {
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  // Pool de chaînes : la cible EST la clé.
+  const challengeTargetName = resolveChallengeTarget(
+    "alloutattack",
+    originalPersonas,
+    (name) => name
+  );
+  if (challengeTargetName) {
     localStorage.setItem(EXPERT.key("aoaTarget"), challengeTargetName);
     localStorage.setItem(EXPERT.key("aoaAttempts"), localStorage.getItem(EXPERT.key("aoaAttempts")) || 0);
   }
