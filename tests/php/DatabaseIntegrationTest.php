@@ -966,4 +966,54 @@ final class DatabaseIntegrationTest extends TestCase
 
         $this->assertSame(1, $out['stats']['streak'], 'la journée est gagnée, donc la streak repart');
     }
+
+    public function testGrantSocialLinkXpViaProcedureInsertsRankupNotifOnRankUp(): void
+    {
+        require_once __DIR__ . '/../../api/lib/social_link_xp_grant.php';
+
+        $userA = $this->makeUser('a');
+        $userB = $this->makeUser('b');
+
+        $stmt = self::$pdo->prepare('SELECT get_or_create_social_link(?, ?) AS link_id');
+        $stmt->execute([min($userA, $userB), max($userA, $userB)]);
+        $linkId = (int) $stmt->fetchColumn();
+
+        // XP requis pour le rang 2 (cf. social_link_ranks) : on force un gros
+        // apport pour être certain de franchir un palier quel que soit le seuil.
+        $result = personadle_grant_social_link_xp_via_procedure(self::$pdo, $linkId, 10000, $userB, $userA);
+
+        $this->assertTrue($result['ranked_up']);
+        $this->assertGreaterThan(1, $result['new_rank']);
+
+        $notif = self::$pdo->prepare(
+            'SELECT recipient_id, partner_id, new_rank FROM social_link_rankup_notifs WHERE recipient_id = ? ORDER BY id DESC LIMIT 1'
+        );
+        $notif->execute([$userB]);
+        $row = $notif->fetch();
+
+        $this->assertNotFalse($row);
+        $this->assertSame($userA, (int) $row['partner_id']);
+        $this->assertSame($result['new_rank'], (int) $row['new_rank']);
+    }
+
+    public function testGrantSocialLinkXpViaProcedureNoNotifWithoutRankUp(): void
+    {
+        require_once __DIR__ . '/../../api/lib/social_link_xp_grant.php';
+
+        $userA = $this->makeUser('c');
+        $userB = $this->makeUser('d');
+
+        $stmt = self::$pdo->prepare('SELECT get_or_create_social_link(?, ?) AS link_id');
+        $stmt->execute([min($userA, $userB), max($userA, $userB)]);
+        $linkId = (int) $stmt->fetchColumn();
+
+        // 1 XP ne franchit aucun palier depuis un lien tout neuf (rang 1, xp 0).
+        $result = personadle_grant_social_link_xp_via_procedure(self::$pdo, $linkId, 1, $userB, $userA);
+
+        $this->assertFalse($result['ranked_up']);
+
+        $notif = self::$pdo->prepare('SELECT id FROM social_link_rankup_notifs WHERE recipient_id = ?');
+        $notif->execute([$userB]);
+        $this->assertFalse($notif->fetch());
+    }
 }
