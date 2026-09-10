@@ -12,6 +12,11 @@ parameters:
         # Renseignée seulement si un CDN/reverse-proxy est placé devant le site
         # (vide dans config.example.php) — cf. api/lib/client_ip.php.
         - TRUSTED_PROXIES
+        # Secret du webhook Discord : vide dans config.example.php, renseignée
+        # uniquement dans api/config.php (gitignoré). Sans cette ligne, PHPStan
+        # replie la constante sur '' et déclare mort tout le code qui suit la
+        # garde — cf. api/cron/discord-daily.php.
+        - DISCORD_DAILY_WEBHOOK
         - DB_HOST
         - DB_PORT
         - DB_NAME

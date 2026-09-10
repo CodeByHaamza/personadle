@@ -39,6 +39,17 @@ Fréquence : **Daily at 04:00** (heure de Paris)
 curl -s -H "X-Cron-Key: VOTRE_CRON_SECRET" "https://personadle.net/api/cron/purge-rate-limits.php" > /dev/null 2>&1
 ```
 
+### 4. Annonce Discord du daily — une fois par jour
+
+Fréquence : **Daily at 00:05** (heure de Paris) — juste après le reset du jeu.
+
+```bash
+curl -s -H "X-Cron-Key: VOTRE_CRON_SECRET" "https://personadle.net/api/cron/discord-daily.php" > /dev/null 2>&1
+```
+
+Prérequis : `DISCORD_DAILY_WEBHOOK` défini dans `api/config.php` (webhook
+Morgana du salon `#🎲┃daily-personadle`).
+
 Remplacer `VOTRE_CRON_SECRET` par la valeur de `CRON_SECRET` dans `api/config.php`.
 
 ## Test après déploiement

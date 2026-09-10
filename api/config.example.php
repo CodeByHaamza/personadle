@@ -42,3 +42,9 @@ define('CRON_SECRET', 'CHANGE_ME_generate_with_php_random_bytes');
 // Format : IPs exactes et/ou CIDR, IPv4 et IPv6.
 //   define('TRUSTED_PROXIES', ['203.0.113.7', '198.51.100.0/24', '2001:db8::/32']);
 define('TRUSTED_PROXIES', []);
+
+// ── Discord ──────────────────────────────────────────────────────────────────
+// Webhook Discord "Morgana" du salon #🎲┃daily-personadle.
+// Récupérable dans Discord : Modifier le salon → Intégrations → Webhooks.
+// SECRET : quiconque possède cette URL peut poster sous ce nom.
+define('DISCORD_DAILY_WEBHOOK', '');
