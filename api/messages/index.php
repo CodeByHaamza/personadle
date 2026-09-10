@@ -22,6 +22,8 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/expert_unlocks.php';
+require_once __DIR__ . '/../lib/pusher_trigger.php';
+require_once __DIR__ . '/../lib/social_link_xp_grant.php';
 
 $authId = requireAuth();
 $pdo    = pdo();
@@ -253,13 +255,19 @@ if ($method === 'POST') {
               AND id <> ?
         ")->execute([$authId, $receiverId, $isExpert, $newId]);
 
-        // XP Social Link : action 'challenge' (15 XP solo)
+        personadle_pusher_trigger("private-user-{$receiverId}", 'challenge', []);
+
+        // XP Social Link : action 'challenge' (15 XP solo). Rank-up notifié au
+        // destinataire (bénéficiaire passif du lien, cf. api/lib/social_link_xp_grant.php).
         try {
             $stmt = $pdo->prepare('SELECT get_or_create_social_link(?, ?) AS link_id');
             $stmt->execute([min($authId, $receiverId), max($authId, $receiverId)]);
             $linkId = (int) $stmt->fetchColumn();
             if ($linkId) {
-                $pdo->prepare('CALL add_social_link_xp(?, 15, @x, @r, @u)')->execute([$linkId]);
+                $xpResult = personadle_grant_social_link_xp_via_procedure($pdo, $linkId, 15, $receiverId, $authId);
+                if ($xpResult['ranked_up']) {
+                    personadle_pusher_trigger("private-user-{$receiverId}", 'rankup', []);
+                }
             }
         } catch (Throwable) { /* silencieux */ }
     }
@@ -302,17 +310,24 @@ if ($method === 'PATCH') {
 
     $pdo->prepare('UPDATE messages SET status = ? WHERE id = ?')->execute([$status, $msgId]);
 
-    // Si 'beaten' → XP Social Link mutuel (35 XP)
+    // Si 'beaten' → notifier l'expéditeur du défi + XP Social Link mutuel (35 XP)
     if ($status === 'beaten') {
+        $senderId   = (int) $msg['sender_id'];
+        $receiverId = (int) $msg['receiver_id'];
+
+        personadle_pusher_trigger("private-user-{$senderId}", 'challenge_beaten', []);
+
         try {
             $stmt = $pdo->prepare('SELECT get_or_create_social_link(?, ?) AS link_id');
-            $stmt->execute([
-                min((int)$msg['sender_id'], (int)$msg['receiver_id']),
-                max((int)$msg['sender_id'], (int)$msg['receiver_id'])
-            ]);
+            $stmt->execute([min($senderId, $receiverId), max($senderId, $receiverId)]);
             $linkId = (int) $stmt->fetchColumn();
             if ($linkId) {
-                $pdo->prepare('CALL add_social_link_xp(?, 35, @x, @r, @u)')->execute([$linkId]);
+                // Rank-up notifié à l'expéditeur (bénéficiaire passif — le receveur
+                // vient d'agir en relevant le défi, cf. api/lib/social_link_xp_grant.php).
+                $xpResult = personadle_grant_social_link_xp_via_procedure($pdo, $linkId, 35, $senderId, $receiverId);
+                if ($xpResult['ranked_up']) {
+                    personadle_pusher_trigger("private-user-{$senderId}", 'rankup', []);
+                }
             }
         } catch (Throwable) { /* silencieux */ }
     }
