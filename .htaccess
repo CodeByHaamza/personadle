@@ -17,7 +17,7 @@ ErrorDocument 404 /pages/404.html
 # tous ces scripts, un chantier séparé (voir AMELIORATIONS.md #7).
 <IfModule mod_headers.c>
     <FilesMatch "\.html$">
-        Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+        Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://pub-39a737fc7a9c44c08b7701bdd4b2de4a.r2.dev; connect-src 'self' https://*.pusher.com wss://*.pusher.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
     </FilesMatch>
 </IfModule>
 
