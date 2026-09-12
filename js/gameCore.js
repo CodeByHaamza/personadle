@@ -1453,44 +1453,138 @@ export function getPendingActiveChallenge(isExpert = isExpertPage()) {
 }
 
 /**
- * Injecte le bouton "Challenge a Friend" dans le modeNavigationContainer
- * après une victoire. Ne fait rien si l'utilisateur n'est pas connecté.
+ * Score « par » par mode : le score à battre envoyé avec un défi lancé AVANT
+ * d'avoir terminé sa partie du jour (décision produit 2026-09-12, retour joueur :
+ * « le bouton Défier devrait toujours être disponible »). Le serveur exige un
+ * score > 0 (api/messages/index.php) et la cible du défi est tirée au hasard
+ * (pas celle du jour), donc rien n'oblige à avoir joué — il faut juste un seuil.
+ * Un défi est réussi si le destinataire gagne en `attempts <= score`
+ * (js/challenge-result.js) ; ces valeurs sont donc « gagner en N essais ou
+ * moins », calées sous le seuil d'abandon de chaque mode. Dès que la partie du
+ * jour est finie, le vrai score du joueur remplace le par.
+ */
+export const CHALLENGE_PAR = {
+  classic: 5,
+  emoji: 5,
+  silhouette: 4,
+  alloutattack: 4,
+  personae: 3,
+  music: 3,
+};
+
+/** Score effectif d'un défi : celui du joueur s'il a fini, sinon le par du mode. */
+export function challengeScoreFor(mode, score) {
+  if (Number.isFinite(score) && score > 0) return score;
+  const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
+  return CHALLENGE_PAR[key] ?? 5;
+}
+
+/**
+ * Affiche (ou met à jour) le bouton "Challenge a Friend". Ne fait rien si
+ * l'utilisateur n'est pas connecté.
+ *
+ * Historique : le bouton n'était injecté qu'à la victoire, dans le
+ * modeNavigationContainer, et `return` si déjà présent — donc absent avant la
+ * fin de partie, absent après un Give Up, absent après un rechargement (la
+ * victoire n'est pas « fraîche »). Retour joueur 2.2 : « toujours disponible »
+ * et « disparaît parfois ». Désormais :
+ *   - tant que la navigation de fin de partie est cachée, le bouton vit dans
+ *     .expert-toggle-zone (sous le logo, toujours visible) ;
+ *   - une fois la navigation révélée (revealNextLink), il y est déplacé, entre
+ *     « mode précédent » et « mode suivant », là où le joueur regarde ;
+ *   - rappeler la fonction MET À JOUR score et pool au lieu de ne rien faire —
+ *     c'est ce qui permet le montage précoce avec un score « par » puis le
+ *     remplacement par le vrai score à la fin (initChallengeButton ci-dessous).
  *
  * @param {string}   mode       - Mode lowercase ('classic', 'emoji', etc.)
- * @param {number}   score      - Score à battre (tentatives ou secondes selon le mode)
- * @param {string[]} targetPool - Noms candidats pour la cible du défi (pool filtré,
- *                                cible du jour exclue par l'appelant). Null/vide =
- *                                défi ancien format (cible du jour).
+ * @param {number|null} score   - Score à battre (tentatives). null = par du mode.
+ * @param {string[]|(() => string[])} targetPool - Noms candidats pour la cible du
+ *                                défi (pool filtré, cible du jour exclue par
+ *                                l'appelant), ou une fonction qui le calcule au
+ *                                clic — les filtres peuvent changer entre-temps.
+ *                                Null/vide = défi ancien format (cible du jour).
  */
 export function showChallengeButton(mode, score, targetPool = null) {
   if (!window._currentUser) return;
 
-  // L'Expert émet désormais ses propres défis (migration 037). La dimension est
-  // portée jusqu'au serveur : elle décide de la page d'arrivée du destinataire
-  // et du barème appliqué. `targetPool` est déjà le pool de la page courante,
-  // donc celui de l'Expert quand on y est — la cible est tirée au bon endroit
-  // sans traitement supplémentaire.
-  const isExpert = isExpertPage();
-
   const nav = document.getElementById("modeNavigationContainer");
-  if (!nav || document.getElementById("challengeFriendBtn")) return;
+  const zone = document.querySelector(".expert-toggle-zone");
+  // Le conteneur de navigation naît en `display: none` inline et passe en flex
+  // dans revealNextLink() : c'est ce style inline qui dit si la partie est finie.
+  const navVisible = !!nav && nav.style.display !== "none";
 
-  const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
-  const date = parisDateKey();
+  let btn = document.getElementById("challengeFriendBtn");
+  if (!btn) {
+    const host = navVisible ? nav : (zone ?? nav);
+    if (!host) return;
 
-  const btn = document.createElement("button");
-  btn.id = "challengeFriendBtn";
-  btn.className = "btn-challenge";
-  btn.innerHTML = `<span>⚔</span><span>${t("challenge.challenge_friend", "Challenge a Friend")}</span>`;
+    // L'Expert émet ses propres défis (migration 037). La dimension est portée
+    // jusqu'au serveur : elle décide de la page d'arrivée du destinataire et
+    // du barème appliqué. `targetPool` est déjà le pool de la page courante,
+    // donc celui de l'Expert quand on y est.
+    const isExpert = isExpertPage();
+    const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
 
-  // Insérer entre prevMode et nextMode
-  const nextBtn = document.getElementById("nextModeButton");
-  if (nextBtn) nav.insertBefore(btn, nextBtn);
-  else nav.appendChild(btn);
+    btn = document.createElement("button");
+    btn.id = "challengeFriendBtn";
+    btn.className = "btn-challenge";
+    btn.innerHTML = `<span>⚔</span><span>${t("challenge.challenge_friend", "Challenge a Friend")}</span>`;
+    btn.addEventListener("click", () => {
+      // Tout est lu au clic, pas au montage : score et pool changent en fin de
+      // partie, les filtres à tout moment, et la date à minuit.
+      const st = btn._challenge ?? {};
+      const pool = typeof st.targetPool === "function" ? st.targetPool() : st.targetPool;
+      _showChallengeModal(
+        st.mode ?? mode,
+        challengeScoreFor(st.mode ?? mode, st.score),
+        parisDateKey(),
+        _getActiveFilters(st.mode ?? mode),
+        pool ?? null,
+        isExpert
+      );
+    });
+    _placeChallengeButton(btn, host, nav);
+  } else if (navVisible && btn.parentElement !== nav) {
+    _placeChallengeButton(btn, nav, nav);
+  }
 
-  btn.addEventListener("click", () =>
-    _showChallengeModal(mode, score, date, _getActiveFilters(mode), targetPool, isExpert)
-  );
+  btn._challenge = {
+    mode,
+    score: Number.isFinite(score) && score > 0 ? score : null,
+    targetPool,
+  };
+}
+
+/** Insère le bouton dans son hôte — entre prev/next quand l'hôte est la navigation. */
+function _placeChallengeButton(btn, host, nav) {
+  if (host === nav) {
+    const nextBtn = document.getElementById("nextModeButton");
+    if (nextBtn && nextBtn.parentElement === nav) nav.insertBefore(btn, nextBtn);
+    else nav.appendChild(btn);
+  } else {
+    host.appendChild(btn);
+  }
+}
+
+/**
+ * Montage précoce du bouton, à l'arrivée sur la page de mode : attend la
+ * résolution de l'auth (window._authReady, posé par initAuth) puisque sans
+ * compte il n'y a pas de bouton, puis délègue à showChallengeButton().
+ *
+ * @param {string} mode
+ * @param {string[]|(() => string[])} targetPool  voir showChallengeButton()
+ * @param {number|null} [score]  score déjà acquis si la partie du jour est
+ *                               finie (état restauré), sinon null = par
+ */
+export async function initChallengeButton(mode, targetPool, score = null) {
+  if (window._authReady) {
+    try {
+      await window._authReady;
+    } catch {
+      /* le mode fonctionne sans backend — pas de bouton, simplement */
+    }
+  }
+  showChallengeButton(mode, score, targetPool);
 }
 
 function _showChallengeModal(mode, score, date, activeFilters = [], targetPool = null, isExpert = false) {
@@ -1522,6 +1616,7 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
             )}</p>`
           : ""
       }
+      <p class="challenge-card__score">🎯 ${t("challenge.score_to_beat", "Score to beat: {{score}} attempt(s)").replace("{{score}}", String(score))}</p>
       <div id="challengeFriendList" class="challenge-card__list">
         <p class="challenge-card__empty">${t("ui.loading", "Loading…")}</p>
       </div>

@@ -912,6 +912,7 @@
   "challenge": {
     "challenge_friend": "Défier un Ami",
     "select_friend": "Choisir un ami à défier",
+    "score_to_beat": "Score à battre : {{score}} essai(s)",
     "send": "Envoyer",
     "banner_title": "⚔ Défi en cours",
     "banner_beat": "Battre",

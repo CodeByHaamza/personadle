@@ -912,6 +912,7 @@
   "challenge": {
     "challenge_friend": "Freund herausfordern",
     "select_friend": "Freund zum Herausfordern wählen",
+    "score_to_beat": "Zu schlagen: {{score}} Versuch(e)",
     "send": "Senden",
     "banner_title": "⚔ Aktive Herausforderung",
     "banner_beat": "Schlagen",

@@ -1026,6 +1026,7 @@
   "challenge": {
     "challenge_friend": "Challenge a Friend",
     "select_friend": "Select a friend to challenge",
+    "score_to_beat": "Score to beat: {{score}} attempt(s)",
     "send": "Send",
     "active_challenge": "Challenge",
     "banner_title": "⚔ Active Challenge",

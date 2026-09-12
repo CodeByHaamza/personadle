@@ -1946,6 +1946,21 @@ body.darkmode {
 }
 
 /* ── Pied de la modale ── */
+/* Score à battre, rappelé au-dessus de la liste d'amis : avec le montage précoce
+   du bouton (score « par » avant la fin de partie), le joueur doit voir ce qu'il
+   s'apprête à envoyer. */
+.challenge-card__score {
+  margin: 0;
+  padding: 10px 16px 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e63946;
+  text-align: center;
+}
+.challenge-card--expert .challenge-card__score {
+  color: #ffd166;
+}
+
 .challenge-card__footer {
   display: flex;
   align-items: center;
@@ -3416,9 +3431,23 @@ body.darkmode #rulesModal em {
 .expert-toggle-zone {
   display: flex;
   justify-content: center;
+  align-items: center;
+  /* « Défier un ami » vit ici aussi tant que la partie n'est pas finie (2.2) :
+     les deux pilules sur une ligne, passage à la ligne sur mobile étroit. */
+  flex-wrap: wrap;
+  gap: 10px;
   /* Marge basse : le bouton précède directement le bandeau de consigne du mode
      (« Devinez le personnage Persona du jour ! »), les deux se touchaient. */
   margin: 14px auto 22px;
+}
+
+/* Même gabarit que la pilule Expert quand le bouton est dans la zone ; il
+   retrouve sa taille normale une fois déplacé dans la navigation. */
+.expert-toggle-zone .btn-challenge {
+  margin-top: 0;
+  min-height: 0;
+  padding: 8px 18px;
+  font-size: 0.78rem;
 }
 
 .expert-toggle {

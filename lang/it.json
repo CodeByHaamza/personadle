@@ -912,6 +912,7 @@
   "challenge": {
     "challenge_friend": "Sfida un Amico",
     "select_friend": "Seleziona un amico da sfidare",
+    "score_to_beat": "Punteggio da battere: {{score}} tentativo/i",
     "send": "Invia",
     "banner_title": "⚔ Sfida attiva",
     "banner_beat": "Battere",

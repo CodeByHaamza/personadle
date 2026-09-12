@@ -1026,6 +1026,7 @@
   "challenge": {
     "challenge_friend": "Desafiar um Amigo",
     "select_friend": "Seleciona um amigo para desafiar",
+    "score_to_beat": "Pontuação a bater: {{score}} tentativa(s)",
     "send": "Enviar",
     "active_challenge": "Desafio",
     "banner_title": "⚔ Desafio Ativo",
