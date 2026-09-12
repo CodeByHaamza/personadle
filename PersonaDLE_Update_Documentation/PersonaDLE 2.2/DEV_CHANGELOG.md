@@ -155,6 +155,37 @@ la même longueur. Effet voulu : une lettre accentuée est une lettre, plus une 
 mot. Le test de non-fuite (`tests/expertContent.test.js`) compare lui aussi sans
 diacritiques — il échouait sur Minthe/fr et Moros/de avec l'ancien code.
 
+### Second passage (même jour) — bug `{{count}}`, E2E des défis, six améliorations
+
+- **« ❄️ Rallumer — 0 → {{count}} jours »** : le `tf()` de `profile-page.js` ne transmettait pas
+  son 3ᵉ argument à `i18n.t()`, les placeholders restaient bruts. Seul appelant touché : le
+  bouton Jack Frost sous les stats. Test de régression sur `tf()` (exporté `_tf`).
+- **Profil visité ≠ profil propre pour la streak** : `public.php` n'exposait pas
+  `global_streak` ; `profile-view.js` prenait le max des streaks par mode (un joueur voyait
+  30 chez lui, ses amis 37 — et une correction admin de la globale restait invisible chez
+  eux). Exposée, avec repli sur l'ancien calcul si le champ manque.
+- **E2E `tests-e2e/challenge_flow.spec.js`** (8 étapes, navigateur réel) : bouton avant toute
+  partie, score par, envoi, ⚔ depuis Amis avec présélection, acceptation depuis la Boîte et
+  victoire (`beaten`), *calling card*, abandon depuis le bandeau (`read`), Give Up en défi
+  (`expired`). Un seul contexte navigateur par joueur sur les étapes chaînées : le défi accepté
+  vit dans `localStorage`. C'est la réponse à « comment tester les défis ».
+- **Filtres d'un défi** : un joueur qui n'a jamais touché ses filtres n'a rien en localStorage
+  (voulu : « absent = tout actif »), donc `_getActiveFilters()` envoyait `[]` et le
+  destinataire gardait SES filtres — cible hors de son autocomplétion s'ils étaient
+  restrictifs. `initFilterMenu()` enregistre la liste effective auprès de `gameCore`
+  (`registerActiveFilters`), rien n'est persisté, le seeding des futurs opus est intact.
+- **Défis Expert depuis l'onglet Amis** : ligne ⚡ remplie en asynchrone, limitée aux modes
+  débloqués des deux côtés (`fetchExpertStatus()` + `friends.list({ expert_mode })` par mode
+  débloqué chez soi, en parallèle, six au maximum, à l'ouverture du sélecteur).
+- **Onglet 📊 Stats admin** : note — les streaks y sont *par mode*, la « Série actuelle » du
+  joueur est `users.global_streak` (onglet 🔥). Le « ça ne change rien » était attendu.
+- **`stats.favoriteMode` retiré** de `profileStats.js` / `cloud-sync.js` (plus lu depuis le
+  mode favori choisi) ; le pull efface la clé d'un profil 2.1.
+- **`tests-e2e/visual_layout.spec.js`** (opt-in `E2E_VISUAL=1`, hors CI) : 6 modes × 2
+  viewports, cible du jour masquée (elle dépend de `anonPlayerId` et du jour). Références
+  locales hors dépôt (`tests-e2e/__screenshots__/`, gitignoré) — le rendu des polices n'est
+  pas portable Windows → Linux. À figer AVANT la PR layout, pour relire chaque diff pendant.
+
 ### Divers
 
 - Liens GitHub `HamzaKarrouchi` → `CodeByHaamza` (12 fichiers ; l'ancien compte renvoie
