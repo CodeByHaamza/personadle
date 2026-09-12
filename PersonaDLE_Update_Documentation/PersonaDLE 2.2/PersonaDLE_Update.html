@@ -738,6 +738,174 @@
             animation: mikuNotes 2.5s ease-in-out infinite;
             pointer-events: none;
         }
+        /* ── Summer variant — ambre/teal, pas de neon (même style que les Summer de la 2.1) ── */
+        .aoa-card-summer {
+            border: 4px solid #f6ab3c;
+            background: var(--summer-card-bg);
+            animation: none;
+            box-shadow: 0 0 0 3px rgba(77, 208, 225, 0.3), 0 6px 28px rgba(246, 171, 60, 0.22), 0 2px 8px rgba(77, 208, 225, 0.12);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+        }
+        .aoa-card-summer:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 0 0 4px rgba(77, 208, 225, 0.45), 0 12px 40px rgba(246, 171, 60, 0.35), 0 4px 14px rgba(77, 208, 225, 0.2);
+        }
+        .aoa-card-summer .aoa-portrait-col { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-gif-col       { border-right-color: rgba(246, 171, 60, 0.22); }
+        .aoa-card-summer .aoa-portrait-img  { border-color: rgba(246, 171, 60, 0.5); }
+        .aoa-card-summer .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #4dd0e1; animation: none;
+            box-shadow: 0 2px 10px rgba(77, 208, 225, 0.18);
+        }
+        .aoa-card-summer .card-badge {
+            background: linear-gradient(90deg, #c07800, #f6ab3c);
+            box-shadow: 0 2px 8px rgba(246, 171, 60, 0.3);
+        }
+        .aoa-card-summer .card-name { color: var(--summer-title-color); animation: none; text-shadow: none; }
+        .aoa-card-summer .card-sub  { color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(1) { animation-delay: 0s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #4dd0e1; }
+        .aoa-card-summer .card-stars span:nth-child(3) { animation-delay: 1s;   color: #f6d365; }
+        .aoa-card-summer .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #fff; }
+        .aoa-card-summer .card-stars span:nth-child(5) { animation-delay: 2s;   color: #f6d365; }
+
+        .summer-chars-title { margin-top: 36px; color: var(--summer-title-color); }
+        .summer-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 24px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: var(--summer-intro-bg);
+            border-left: 3px solid var(--summer-intro-border);
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* ── Cosmic variant — galaxie animée (Bui Cosmic, P5X) ─────────────────
+           Fond d'espace profond dans les deux thèmes (c'est le sujet), nébuleuse
+           qui dérive lentement, deux couches d'étoiles qui scintillent à des
+           rythmes différents (parallaxe), nom en dégradé aurore. Tout en CSS. */
+        .aoa-card-cosmic {
+            position: relative;
+            border: 4px solid #7c4dff;
+            background:
+                radial-gradient(ellipse 60% 50% at 18% 30%, rgba(124, 77, 255, 0.55), transparent 70%),
+                radial-gradient(ellipse 50% 60% at 82% 70%, rgba(0, 200, 255, 0.35), transparent 70%),
+                radial-gradient(ellipse 40% 40% at 60% 20%, rgba(255, 64, 160, 0.28), transparent 70%),
+                linear-gradient(135deg, #05030f 0%, #0b0722 45%, #04101f 100%);
+            background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+            animation: cosmicDrift 22s ease-in-out infinite alternate;
+            box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.25), 0 8px 34px rgba(124, 77, 255, 0.35), 0 2px 10px rgba(0, 200, 255, 0.18);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            margin-top: 20px;
+            overflow: hidden;
+            color: #e9e6ff;
+        }
+        .aoa-card-cosmic:hover {
+            transform: translateY(-6px) scale(1.006);
+            box-shadow: 0 0 0 4px rgba(0, 200, 255, 0.45), 0 14px 46px rgba(124, 77, 255, 0.5), 0 4px 16px rgba(0, 200, 255, 0.28);
+        }
+        @keyframes cosmicDrift {
+            0%   { background-position: 0% 0%, 100% 100%, 50% 0%, 0 0; }
+            100% { background-position: 100% 60%, 0% 20%, 20% 100%, 0 0; }
+        }
+        /* Deux champs d'étoiles : des points blancs en radial-gradient répétés,
+           tailles et périodes différentes pour donner de la profondeur. */
+        .aoa-card-cosmic::before,
+        .aoa-card-cosmic::after {
+            content: "";
+            position: absolute; inset: -20%;
+            pointer-events: none; z-index: 0;
+            background-repeat: repeat;
+        }
+        .aoa-card-cosmic::before {
+            background-image:
+                radial-gradient(1.5px 1.5px at 20px 30px, #fff 60%, transparent 100%),
+                radial-gradient(1px 1px at 90px 80px, rgba(255,255,255,0.8) 60%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 160px 20px, #cfe8ff 60%, transparent 100%),
+                radial-gradient(1px 1px at 210px 120px, rgba(255,255,255,0.7) 60%, transparent 100%),
+                radial-gradient(2px 2px at 60px 150px, #ffe9c9 60%, transparent 100%);
+            background-size: 240px 180px;
+            animation: cosmicTwinkle 4s ease-in-out infinite, cosmicPan 60s linear infinite;
+            opacity: 0.9;
+        }
+        .aoa-card-cosmic::after {
+            background-image:
+                radial-gradient(1px 1px at 40px 60px, rgba(255,255,255,0.6) 60%, transparent 100%),
+                radial-gradient(1px 1px at 130px 20px, rgba(200,230,255,0.7) 60%, transparent 100%),
+                radial-gradient(1.5px 1.5px at 190px 140px, rgba(255,255,255,0.9) 60%, transparent 100%),
+                radial-gradient(1px 1px at 250px 90px, rgba(255,200,240,0.7) 60%, transparent 100%);
+            background-size: 300px 220px;
+            animation: cosmicTwinkle 6s ease-in-out infinite reverse, cosmicPan 95s linear infinite reverse;
+            opacity: 0.7;
+        }
+        @keyframes cosmicTwinkle { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+        @keyframes cosmicPan { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-240px, -180px, 0); } }
+        .aoa-card-cosmic .aoa-card-inner { position: relative; z-index: 1; }
+        .aoa-card-cosmic .aoa-portrait-col { border-right-color: rgba(124, 77, 255, 0.35); }
+        .aoa-card-cosmic .aoa-gif-col       { border-right-color: rgba(124, 77, 255, 0.35); }
+        .aoa-card-cosmic .aoa-portrait-img  { border-color: rgba(0, 200, 255, 0.7); box-shadow: 0 0 18px rgba(0, 200, 255, 0.35); }
+        .aoa-card-cosmic .aoa-battle-img {
+            width: 130px; height: auto; max-width: none;
+            object-fit: contain; object-position: top;
+            display: block; margin: 0;
+            border-color: #7c4dff; animation: none;
+            box-shadow: 0 0 22px rgba(124, 77, 255, 0.45);
+        }
+        .aoa-card-cosmic .card-badge {
+            background: linear-gradient(90deg, #7c4dff, #00c8ff);
+            box-shadow: 0 2px 10px rgba(0, 200, 255, 0.35);
+        }
+        .aoa-card-cosmic .card-name {
+            background: linear-gradient(90deg, #b39dff 0%, #6ee7ff 40%, #ff8ad4 70%, #b39dff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: cosmicNameShift 6s linear infinite;
+            text-shadow: none;
+        }
+        @keyframes cosmicNameShift { to { background-position: 200% center; } }
+        .aoa-card-cosmic .card-sub  { color: #9fdcff; }
+        .aoa-card-cosmic .card-stars span:nth-child(1) { animation-delay: 0s;   color: #cbb8ff; }
+        .aoa-card-cosmic .card-stars span:nth-child(2) { animation-delay: 0.5s; color: #6ee7ff; }
+        .aoa-card-cosmic .card-stars span:nth-child(3) { animation-delay: 1s;   color: #fff; }
+        .aoa-card-cosmic .card-stars span:nth-child(4) { animation-delay: 1.5s; color: #ff8ad4; }
+        .aoa-card-cosmic .card-stars span:nth-child(5) { animation-delay: 2s;   color: #cbb8ff; }
+        /* Filante — un trait qui traverse la carte de temps en temps */
+        .aoa-card-cosmic .cosmic-shooting {
+            position: absolute; top: 12%; left: -20%;
+            width: 140px; height: 2px; z-index: 1; pointer-events: none;
+            background: linear-gradient(90deg, transparent, #fff 60%, transparent);
+            transform: rotate(-18deg);
+            opacity: 0;
+            animation: cosmicShoot 9s ease-in infinite 3s;
+        }
+        @keyframes cosmicShoot {
+            0%   { opacity: 0; transform: rotate(-18deg) translateX(0); }
+            4%   { opacity: 1; }
+            12%  { opacity: 0; transform: rotate(-18deg) translateX(900px); }
+            100% { opacity: 0; transform: rotate(-18deg) translateX(900px); }
+        }
+        .cosmic-chars-title {
+            margin-top: 36px;
+            background: linear-gradient(90deg, #7c4dff, #00a8ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .cosmic-intro {
+            color: var(--blockquote-text); font-style: italic;
+            margin: 10px 0 24px 0; line-height: 1.6; font-size: 0.95rem;
+            padding: 12px 18px;
+            background: rgba(124, 77, 255, 0.08);
+            border-left: 3px solid #7c4dff;
+            border-radius: 0 8px 8px 0;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .aoa-card-cosmic, .aoa-card-cosmic::before, .aoa-card-cosmic::after,
+            .aoa-card-cosmic .card-name, .aoa-card-cosmic .cosmic-shooting { animation: none; }
+            .aoa-card-cosmic .cosmic-shooting { display: none; }
+        }
+
         @keyframes mikuNotes {
             0%, 100% { transform: translateY(0); opacity: 0.7; }
             50%      { transform: translateY(-5px); opacity: 1; }
@@ -914,9 +1082,80 @@
     </div>
 
     <blockquote>
-        <div data-i18n-block="fr"><p>Cette page se remplit au fil de la v2.2. Le durcissement des limites anti-bruteforce et l'annonce quotidienne sur Discord ne changent rien de visible en jeu ; les défis et vos retours de septembre, si.</p></div>
-        <div data-i18n-block="en"><p>This page fills up as v2.2 goes on. Hardening the anti-bruteforce limits and the daily Discord announcement change nothing visible in game; challenges and your September feedback do.</p></div>
+        <div data-i18n-block="fr"><p>Cette page se remplit au fil de la v2.2. Le durcissement des limites anti-bruteforce et l'annonce quotidienne sur Discord ne changent rien de visible en jeu ; les défis, vos retours de septembre et deux nouveaux All-Out Attack, si.</p></div>
+        <div data-i18n-block="en"><p>This page fills up as v2.2 goes on. Hardening the anti-bruteforce limits and the daily Discord announcement change nothing visible in game; challenges, your September feedback and two new All-Out Attacks do.</p></div>
     </blockquote>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         ALL-OUT ATTACK — NOUVEAUX SKINS P5X
+    ════════════════════════════════════ -->
+    <div data-i18n-block="fr"><h1>⚔️ Deux nouveaux All-Out Attack</h1></div>
+    <div data-i18n-block="en"><h1>⚔️ Two new All-Out Attacks</h1></div>
+
+    <div data-i18n-block="fr">
+        <h2 class="cosmic-chars-title">🌌 All-Out Attack — Bui Cosmic</h2>
+        <p class="cosmic-intro">Yui traverse la galaxie avec son skin Cosmic de Persona 5 X. Une seule silhouette, un ciel entier à deviner.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2 class="cosmic-chars-title">🌌 All-Out Attack — Bui Cosmic</h2>
+        <p class="cosmic-intro">Yui crosses the galaxy with her Cosmic skin from Persona 5 X. One silhouette, a whole sky to guess.</p>
+    </div>
+
+    <div class="aoa-card aoa-card-cosmic vx-reveal">
+        <span class="cosmic-shooting" aria-hidden="true"></span>
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Bui_Cosmic.webp" alt="Bui Cosmic portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Bui_Cosmic.webp" alt="Bui Cosmic All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Bui_Cosmic_Battle.webp" alt="Bui Cosmic battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Bui Cosmic</p>
+                    <p class="card-sub">YUI — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div data-i18n-block="fr">
+        <h2 class="summer-chars-title">☀️ All-Out Attack — Berry Summer</h2>
+        <p class="summer-intro">Ichigo Shikano rejoint la plage avec son skin Summer, aux côtés de Wonder, Closer, Moko, Marian, Puppet et Chord.</p>
+    </div>
+    <div data-i18n-block="en">
+        <h2 class="summer-chars-title">☀️ All-Out Attack — Berry Summer</h2>
+        <p class="summer-intro">Ichigo Shikano hits the beach with her Summer skin, joining Wonder, Closer, Moko, Marian, Puppet and Chord.</p>
+    </div>
+
+    <div class="aoa-card aoa-card-summer vx-reveal">
+        <div class="aoa-card-inner">
+            <div class="aoa-portrait-col">
+                <img class="aoa-portrait-img" src="../../allOutAttackMode/database/img/Berry_Summer.webp" alt="Berry Summer portrait">
+            </div>
+            <div class="aoa-gif-col">
+                <img class="aoa-gif-img" src="../../allOutAttackMode/database/allOutAttack/Berry_Summer.webp" alt="Berry Summer All-Out Attack">
+            </div>
+            <div class="aoa-battle-col">
+                <img class="aoa-battle-img" src="../../allOutAttackMode/database/img/Berry_Summer_Battle.webp" alt="Berry Summer battle">
+                <div class="aoa-info">
+                    <div class="card-stars" aria-hidden="true">
+                        <span>✦</span><span>★</span><span>✦</span><span>★</span><span>✦</span>
+                    </div>
+                    <span class="card-badge">P5X</span>
+                    <p class="card-name">Berry Summer</p>
+                    <p class="card-sub">Ichigo Shikano — Persona 5 X</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <hr>
 

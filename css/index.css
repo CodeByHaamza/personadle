@@ -4160,6 +4160,269 @@ body.darkmode .expert-theme .version-content ul li strong {
 }
 
 /* =====================================================
+   10c. THÈME v2.2 — Mise à jour communautaire (techno)
+   -----------------------------------------------------
+   Blanc et bleu, « informatique » : grille de circuit
+   imprimé en fond, faisceau de scan qui balaie le bandeau,
+   coins de HUD, curseur de terminal qui clignote après le
+   titre. Aucun asset : le composant (puce) est un SVG
+   inline dans index.html, le reste est en CSS.
+   ===================================================== */
+
+.tech-theme {
+  border: 2px solid #1e6fff !important;
+  background-color: #f7fbff;
+}
+
+.tech-theme .version-header {
+  background: linear-gradient(135deg, #ffffff 0%, #eef5ff 55%, #e3efff 100%);
+  border-bottom: 2px solid #1e6fff;
+  position: relative;
+  overflow: hidden;
+  padding: 15px;
+  z-index: 0;
+}
+
+/* Grille de circuit : deux quadrillages bleus superposés, le fin et le gros,
+   avec un fondu vers la droite pour ne pas concurrencer le texte. */
+.tech-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(30, 111, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 111, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(30, 111, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 111, 255, 0.18) 1px, transparent 1px);
+  background-size:
+    12px 12px,
+    12px 12px,
+    60px 60px,
+    60px 60px;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.35) 60%, transparent);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.35) 60%, transparent);
+}
+
+/* Faisceau de scan : une barre bleue translucide qui descend en boucle. */
+.tech-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -30%;
+  height: 26%;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 168, 255, 0.18) 45%,
+    rgba(0, 168, 255, 0.55) 50%,
+    rgba(0, 168, 255, 0.18) 55%,
+    transparent
+  );
+  animation: techScan 4.6s linear infinite;
+}
+
+@keyframes techScan {
+  0% {
+    top: -30%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 110%;
+    opacity: 0;
+  }
+}
+
+/* Coins de HUD — deux équerres bleues, en haut à gauche et en bas à droite. */
+.tech-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  z-index: 1;
+  border: 2px solid #1e6fff;
+}
+.tech-corner--tl {
+  top: 8px;
+  left: 8px;
+  border-right: none;
+  border-bottom: none;
+}
+.tech-corner--br {
+  bottom: 8px;
+  right: 46px; /* laisse la flèche du déroulant respirer */
+  border-left: none;
+  border-top: none;
+}
+
+.tech-theme .v2-header-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* La puce — même gabarit que le masque de Joker (2.1) et l'avatar Sophia (2.0). */
+.tech-chip {
+  flex-shrink: 0;
+  color: #1e6fff;
+  filter: drop-shadow(0 0 6px rgba(0, 168, 255, 0.7));
+  animation: techChipPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes techChipPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(0, 168, 255, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(0, 168, 255, 0.95));
+  }
+}
+
+.tech-theme .version-title {
+  color: #0b2a4a !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(0, 168, 255, 0.35);
+}
+
+/* Curseur de terminal après le titre. */
+.tech-cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  margin-left: 4px;
+  vertical-align: -0.15em;
+  background: #1e6fff;
+  animation: techCursor 1.1s steps(2, start) infinite;
+}
+
+@keyframes techCursor {
+  to {
+    visibility: hidden;
+  }
+}
+
+.tech-theme .version-date {
+  color: #1e6fff !important;
+  letter-spacing: 0.12em;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.tech-theme .version-arrow {
+  color: #1e6fff !important;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 8px rgba(0, 168, 255, 0.6);
+}
+
+.tech-theme .version-content ul li strong {
+  color: #1e6fff;
+}
+
+/* Bouton « Voir le Changelog complet » — blanc, liseré bleu, se remplit au survol. */
+.tech-btn {
+  background: #ffffff !important;
+  color: #1e6fff !important;
+  border: 2px solid #1e6fff !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: 700;
+  box-shadow:
+    0 0 0 3px rgba(30, 111, 255, 0.12),
+    0 4px 16px rgba(30, 111, 255, 0.25) !important;
+}
+.tech-btn:hover {
+  background: linear-gradient(135deg, #1e6fff 0%, #00a8ff 100%) !important;
+  color: #fff !important;
+  box-shadow:
+    0 0 0 3px rgba(30, 111, 255, 0.2),
+    0 6px 24px rgba(0, 168, 255, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+.tech-theme .version-header:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #e6f1ff 55%, #d6e8ff 100%) !important;
+  box-shadow: inset 0 0 26px rgba(0, 168, 255, 0.18) !important;
+  transition: all 0.22s ease-in-out;
+}
+.tech-theme .version-header:hover .version-arrow {
+  transform: translateX(3px);
+}
+
+.tech-theme.active .version-content {
+  max-height: 2200px;
+}
+
+/* Dark mode — le bandeau reste « écran allumé » : bleu nuit, grille cyan. */
+body.darkmode .tech-theme {
+  background-color: #071426;
+  border-color: #3b8bff !important;
+}
+body.darkmode .tech-theme .version-header {
+  background: linear-gradient(135deg, #0a1a33 0%, #0b2246 55%, #0a1c3d 100%);
+  border-bottom-color: #3b8bff;
+}
+body.darkmode .tech-theme .version-header:hover {
+  background: linear-gradient(135deg, #0d2140 0%, #0f2c58 55%, #0d244c 100%) !important;
+}
+body.darkmode .tech-grid {
+  background-image:
+    linear-gradient(rgba(0, 200, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 200, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(0, 200, 255, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 200, 255, 0.22) 1px, transparent 1px);
+}
+body.darkmode .tech-theme .version-title {
+  color: #ffffff !important;
+  text-shadow: 0 0 10px rgba(0, 200, 255, 0.6);
+}
+body.darkmode .tech-theme .version-date,
+body.darkmode .tech-theme .version-arrow,
+body.darkmode .tech-chip,
+body.darkmode .tech-corner {
+  color: #5fc3ff !important;
+  border-color: #5fc3ff;
+}
+body.darkmode .tech-cursor {
+  background: #5fc3ff;
+}
+body.darkmode .tech-theme .version-content ul li strong {
+  color: #5fc3ff;
+}
+body.darkmode .tech-btn {
+  background: #0a1a33 !important;
+  color: #5fc3ff !important;
+  border-color: #5fc3ff !important;
+}
+body.darkmode .tech-btn:hover {
+  background: linear-gradient(135deg, #1e6fff 0%, #00a8ff 100%) !important;
+  color: #fff !important;
+}
+
+/* prefers-reduced-motion : scan, curseur et pulsation sont de l'ornement. */
+@media (prefers-reduced-motion: reduce) {
+  .tech-scan,
+  .tech-cursor,
+  .tech-chip {
+    animation: none;
+  }
+  .tech-scan {
+    display: none;
+  }
+}
+
+/* =====================================================
    11. RESPONSIVE — SPÉCIFIQUE INDEX
    ===================================================== */
 
