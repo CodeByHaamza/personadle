@@ -4291,6 +4291,41 @@ body.darkmode .song-modal-close { background: rgba(255, 255, 255, 0.08); }
 }
 
 .swatch-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ── Sélecteur de mode favori (puces) — retour joueur 2.2 ─────────────────── */
+.mode-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mode-chip {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) */
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 100px;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.04);
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+}
+.mode-chip:hover { transform: translateY(-1px); border-color: var(--accent, #e63946); }
+.mode-chip.active {
+  background: var(--accent, #e63946);
+  border-color: var(--accent, #e63946);
+  color: #fff;
+}
+.mode-chip--none { opacity: 0.75; }
+.mode-chip--none.active { background: #555; border-color: #555; opacity: 1; }
+body.darkmode .mode-chip { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06); }
+body.darkmode .mode-chip.active { background: var(--accent, #e63946); border-color: var(--accent, #e63946); }
 .swatch {
   min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   width: 28px;

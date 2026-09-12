@@ -34,9 +34,14 @@ import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/str
 import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
-import { modeLabel } from "../js/gameCore.js";
+import { MODES, modeLabel, normalizeModeKey } from "../js/gameCore.js";
 import { AVATAR_GROUPS } from "./avatars_data.js";
-import { getStreakTier, formatSongTime, normalizeAvatarPath } from "./profile-format.js";
+import {
+  getStreakTier,
+  formatSongTime,
+  normalizeAvatarPath,
+  bestModeOverall,
+} from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
 import {
   renderUnlockableWallpaperGallery,
@@ -419,6 +424,7 @@ async function syncProfileToCloud() {
     profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
     selected_badges: profile.selectedBadges || [],
     equipped_title_id: profile.equippedTitleId || null,
+    favorite_mode: normalizeModeKey(profile.favoriteMode) ?? null,
   };
   if (profile.avatar) fields.avatar_data = profile.avatar;
   // Sync des settings (son, animations…) — stockés dans personaSettings
@@ -470,6 +476,7 @@ function _applyCloudToUI() {
   applyTheme(themeId, themeId === "custom" ? profile.profileCustomColor : undefined);
   renderThemePicker();
   renderBorderPicker();
+  renderFavoriteModePicker();
   updateAppearancePreview();
 
   // ── Stats ─────────────────────────────────────────────────
@@ -606,7 +613,22 @@ function renderStats() {
     Personae: "Personae",
     Music: "Music",
   };
-  const modeFav = s.favoriteMode ? modeNames[s.favoriteMode] || s.favoriteMode : "—";
+  // Mode favori = le CHOIX du joueur (profile.favoriteMode, migration 040), plus le
+  // mode le plus joué (stats.favoriteMode, toujours calculé mais plus affiché).
+  // Retour joueur 2.2 : « je veux le choisir, et mettre le mode où je performe le
+  // mieux à côté, sous "Best Mode Overall" ».
+  const favKey = normalizeModeKey(profile.favoriteMode);
+  const modeFav = favKey ? modeNames[modeLabel(favKey)] || modeLabel(favKey) : "—";
+  const best = bestModeOverall(
+    Object.keys(s.modeCount || {}).map((m) => ({
+      mode: m,
+      games: s.modeCount?.[m] || 0,
+      wins: s.modeWins?.[m] || 0,
+    }))
+  );
+  const modeBest = best
+    ? `${modeNames[modeLabel(best.mode)] || modeLabel(best.mode)} · ${Math.round(best.rate * 100)}%`
+    : "—";
 
   // Stats standard (hors streak)
   const stats = [
@@ -616,7 +638,8 @@ function renderStats() {
     { icon: "⭐", value: s.streakRecord || 0, label: tf("profile.stat_best_streak_label", "Best Streak") },
     { icon: "⏱️", value: formatPlayTime(s.totalTimeMinutes || 0), label: tf("profile.stat_time_label", "Time Played") },
     { icon: "📅", value: s.firstPlayed?.split("T")[0] || "—", label: tf("profile.stat_first_played_label", "First Played"), full: true },
-    { icon: "🎯", value: modeFav, label: tf("profile.stat_fav_mode_label", "Fav Mode"), full: true },
+    { icon: "🎯", value: modeFav, label: tf("profile.stat_fav_mode_label", "Fav Mode") },
+    { icon: "🏅", value: modeBest, label: tf("profile.stat_best_mode_label", "Best Mode Overall") },
   ];
 
   const streakHTML = buildStreakItem(s.streak || 0, tf("profile.stat_current_streak_label", "Current Streak"), "0.22s");
@@ -993,6 +1016,45 @@ function renderBorderPicker() {
   });
 }
 
+/** Icône par clé de mode pour le sélecteur de mode favori (même table que MODE_META). */
+const MODE_ICON_BY_KEY = Object.fromEntries(
+  Object.entries(MODE_META).map(([label, meta]) => [normalizeModeKey(label), meta.icon])
+);
+
+/**
+ * Rend le sélecteur de mode favori (carte Customization) : une puce par mode,
+ * plus « Aucun ». Le choix est sauvegardé localement et poussé en cloud tout de
+ * suite, comme la couleur de bordure — le bouton Save global le renvoie aussi.
+ */
+function renderFavoriteModePicker() {
+  const container = document.getElementById("favModeChips");
+  if (!container) return;
+  const current = normalizeModeKey(profile.favoriteMode);
+  const noneLabel = tf("profile.fav_mode_none", "None");
+
+  container.innerHTML =
+    MODES.map(
+      ({ key, label }) =>
+        `<button type="button" class="mode-chip${key === current ? " active" : ""}" data-mode="${key}" aria-pressed="${key === current}">${MODE_ICON_BY_KEY[key] ?? ""} ${label === "AllOutAttack" ? "All-Out" : label}</button>`
+    ).join("") +
+    `<button type="button" class="mode-chip mode-chip--none${current ? "" : " active"}" data-mode="" aria-pressed="${!current}">${noneLabel}</button>`;
+
+  container.querySelectorAll(".mode-chip").forEach((b) =>
+    b.addEventListener("click", () => setFavoriteMode(b.dataset.mode || null))
+  );
+}
+
+function setFavoriteMode(key) {
+  const next = normalizeModeKey(key) ?? null;
+  if (next === (normalizeModeKey(profile.favoriteMode) ?? null)) return;
+  profile.favoriteMode = next;
+  saveProfile();
+  markDirty();
+  saveProfileToCloud({ favorite_mode: next });
+  renderFavoriteModePicker();
+  renderStats();
+}
+
 /**
  * Gère le toggle collapse/expand de la perso-card.
  * L'état est persisté dans localStorage.
@@ -1289,6 +1351,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // localStorage déjà vidé par auth.js — initProfile() crée un profil vierge
     initProfile();
     renderThemePicker();
+    renderBorderPicker();
+    renderFavoriteModePicker();
     renderModeStats();
     renderExpertStats();
     renderSongCard(profile, saveProfile, saveProfileToCloud, markDirty);
@@ -1327,6 +1391,11 @@ document.addEventListener("DOMContentLoaded", () => {
   window._onCloudSync = () => _applyCloudToUI();
 
   renderThemePicker();
+  // Bordure et mode favori : rendus ici aussi, pas seulement après le pull cloud
+  // (_applyCloudToUI) — sinon un invité, ou un joueur hors ligne, voit les deux
+  // sections vides sous leur intitulé.
+  renderBorderPicker();
+  renderFavoriteModePicker();
   setupPersoCard();
   initAvatarGrid();
   setupShareProfile(profile, saveProfile);

@@ -4,7 +4,7 @@ import {
   getSocialLinkData,
   applyRank10Effect,
 } from "../js/social-link.js";
-import { getStreakTier, formatSongTime } from "./profile-format.js";
+import { getStreakTier, formatSongTime, bestModeOverall } from "./profile-format.js";
 import { formatPlayTime } from "./formatPlayTime.js";
 import { resolveTheme, applyThemeVars } from "./theme.js";
 import { profileAutoplayAllowed } from "../js/settings-modal.js";
@@ -422,8 +422,15 @@ if (viewParam || uidParam) {
     const totalGiveups = byMode.reduce((acc, m) => acc + (m.giveups ?? 0), 0);
     const totalTimeMinutes = (stats.total_time_ms ?? 0) / 60000;
     const currentStreak = byMode.reduce((acc, m) => Math.max(acc, m.streak ?? 0), 0);
-    const favMode = byMode.reduce((acc, m) => (!acc || m.games > acc.games ? m : acc), null);
-    const favModeLabel = favMode ? (VIEW_MODE_META[favMode.mode]?.label ?? favMode.mode) : "—";
+    // Mode favori = le CHOIX du joueur (profiles.favorite_mode, migration 040) ;
+    // « Best Mode Overall » = meilleur taux de victoire, 3 parties minimum —
+    // même calcul que renderStats() dans profile-page.js.
+    const favKey = profile.favorite_mode ?? null;
+    const favModeLabel = favKey ? (VIEW_MODE_META[favKey]?.label ?? favKey) : "—";
+    const best = bestModeOverall(byMode);
+    const bestModeLabel = best
+      ? `${VIEW_MODE_META[best.mode]?.label ?? best.mode} · ${Math.round(best.rate * 100)}%`
+      : "—";
 
     // ── Avatar — supporte les GIFs animés ──
     const avatarEl = document.getElementById("pageAvatar");
@@ -531,7 +538,11 @@ if (viewParam || uidParam) {
           icon: "🎯",
           value: favModeLabel,
           label: t("profile.stat_fav_mode_label", "Fav Mode"),
-          full: true,
+        },
+        {
+          icon: "🏅",
+          value: bestModeLabel,
+          label: t("profile.stat_best_mode_label", "Best Mode Overall"),
         },
       ];
 

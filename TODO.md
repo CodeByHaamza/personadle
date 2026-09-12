@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 943 tests Vitest (53 suites), 267 méthodes PHPUnit, 113 tests E2E,
+> Vérifié le 2026-08-26 : 951 tests Vitest (53 suites), 267 méthodes PHPUnit, 113 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -44,6 +44,10 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 - [ ] Jouer `sql/migrations/038_badge_false_spring.sql` (badge A Gentle Reprieve). Même
       forme que la 033 : `INSERT IGNORE`, rejouable, mais sans elle le badge n'existe pas
       en base.
+- [ ] Jouer `sql/migrations/040_profiles_favorite_mode.sql` (colonne
+      `profiles.favorite_mode`, MariaDB `IF NOT EXISTS`, rejouable). Sans elle :
+      `Unknown column 'favorite_mode'` sur **tout** GET /api/user/:id et GET
+      /api/user/public — le profil ne charge plus, pas seulement le mode favori.
 - [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v94 → v95, fait le 2026-09-01). Sans bump,
       `activate` ne purge pas l'ancien cache et les assets servis en cache-first (images,
       sons) restent ceux de la version précédente. Invisible en test : seuls les joueurs

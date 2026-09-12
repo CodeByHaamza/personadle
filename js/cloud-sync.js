@@ -99,6 +99,9 @@ export async function pullProfileFromCloud() {
       p.selectedBadges = Array.isArray(cp.selected_badges) ? cp.selected_badges : [];
     if (cp.equipped_title_id !== undefined) p.equippedTitleId = cp.equipped_title_id ?? null;
     if (cp.equipped_title_slug !== undefined) p.equippedTitleSlug = cp.equipped_title_slug ?? null;
+    // Mode favori CHOISI (migration 040) — distinct de stats.favoriteMode, qui reste
+    // le mode le plus joué calculé, et du « Best Mode Overall » calculé à l'affichage.
+    if (cp.favorite_mode !== undefined) p.favoriteMode = cp.favorite_mode ?? null;
 
     // Wallpaper / thème  (wallpaper_id stocke aussi 'custom:#rrggbb' ou l'id de thème)
     if (cp.wallpaper_id) {

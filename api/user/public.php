@@ -147,6 +147,7 @@ jsonSuccess([
         'profile_music_id'    => $profile['profile_music_id']     ?? null,
         'selected_badges'     => json_decode($profile['selected_badges'] ?? 'null') ?? [],
         'equipped_title_id'   => $profile['equipped_title_id']    ?? null,
+        'favorite_mode'       => $profile['favorite_mode']        ?? null,
     ],
     'stats' => [
         'by_mode'        => $byMode,

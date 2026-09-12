@@ -364,7 +364,16 @@
                 <input type="color" id="borderColorPicker" class="visually-hidden-input" value="#000000" />
               </div>
 
-              <!-- Section 2 : thème de l'interface -->
+              <!-- Section 2 : mode favori — choix du joueur (migration 040). Le mode
+                   où il performe le mieux est calculé et affiché dans les stats
+                   sous « Best Mode Overall ». -->
+              <div class="perso-section">
+                <label class="perso-section-label">
+                  🎯 <span data-i18n="profile.fav_mode_pick_label">Favorite mode</span>
+                </label>
+                <div class="mode-chips" id="favModeChips"></div>
+              </div>
+              <!-- Section 3 : thème de l'interface -->
               <div class="perso-section">
                 <label class="perso-section-label">
                   🌈 <span data-i18n="profile.theme_label">Interface Theme</span>
