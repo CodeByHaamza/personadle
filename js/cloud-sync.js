@@ -99,8 +99,8 @@ export async function pullProfileFromCloud() {
       p.selectedBadges = Array.isArray(cp.selected_badges) ? cp.selected_badges : [];
     if (cp.equipped_title_id !== undefined) p.equippedTitleId = cp.equipped_title_id ?? null;
     if (cp.equipped_title_slug !== undefined) p.equippedTitleSlug = cp.equipped_title_slug ?? null;
-    // Mode favori CHOISI (migration 040) — distinct de stats.favoriteMode, qui reste
-    // le mode le plus joué calculé, et du « Best Mode Overall » calculé à l'affichage.
+    // Mode favori CHOISI (migration 040). Le « Best Mode Overall » est calculé à
+    // l'affichage depuis modeCount / modeWins ; rien d'autre n'est dérivé ici.
     if (cp.favorite_mode !== undefined) p.favoriteMode = cp.favorite_mode ?? null;
 
     // Wallpaper / thème  (wallpaper_id stocke aussi 'custom:#rrggbb' ou l'id de thème)
@@ -158,8 +158,9 @@ export async function pullProfileFromCloud() {
       p.stats.streakRecord = Math.max(best, d.global_streak_record ?? 0, backendGlobal);
       p.stats.modeCount = modeCount;
       p.stats.modeWins = modeWins;
-      const fav = d.stats.reduce((b, r) => (!b || r.games > b.games ? r : b), null);
-      if (fav) p.stats.favoriteMode = modeLabel(fav.mode);
+      // stats.favoriteMode (le plus joué) n'est plus écrit : un profil local qui
+      // en garde un de la 2.1 n'est pas lu, il est simplement inerte.
+      delete p.stats.favoriteMode;
     }
 
     // Cooldown Jack Frost : le backend est la source de vérité, ici comme ailleurs.

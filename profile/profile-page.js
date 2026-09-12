@@ -620,7 +620,7 @@ function renderStats() {
     Music: "Music",
   };
   // Mode favori = le CHOIX du joueur (profile.favoriteMode, migration 040), plus le
-  // mode le plus joué (stats.favoriteMode, toujours calculé mais plus affiché).
+  // mode le plus joué (l'ancien stats.favoriteMode, retiré en 2.2).
   // Retour joueur 2.2 : « je veux le choisir, et mettre le mode où je performe le
   // mieux à côté, sous "Best Mode Overall" ».
   const favKey = normalizeModeKey(profile.favoriteMode);
