@@ -4421,29 +4421,68 @@ body.darkmode .swatch.active { box-shadow: 0 0 0 2px #161020, 0 0 0 4px var(--ac
 }
 
 .expert-stat-row {
-  /* Remplace la grille "icône | nom | barre | droite" par 4 colonnes fixes. */
+  /* Remplace la grille "icône | nom | barre | droite" par 4 colonnes de stats.
+     Chaque ligne est SA PROPRE grille : des colonnes `auto` se dimensionnent
+     ligne par ligne et l'en-tête ne tombait jamais au-dessus des chiffres.
+     En fractions, toutes les lignes partagent les mêmes proportions. */
   display: grid;
-  grid-template-columns: 24px minmax(60px, 1fr) repeat(4, minmax(42px, auto));
+  grid-template-columns: 24px minmax(0, 1.3fr) repeat(4, minmax(0, 1fr));
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   border-left: 2px solid rgba(230, 57, 70, 0.55);
   padding-left: 8px;
 }
 
 .expert-stat-cell {
-  text-align: right;
+  text-align: center;
   font-variant-numeric: tabular-nums;
   font-size: 0.85rem;
+  font-weight: 700;
+  /* Couleur posée explicitement : les cellules héritaient du corps de page et
+     se fondaient dans la carte en mode sombre (retour joueur 2.2). */
+  color: #333;
   white-space: nowrap;
+}
+
+/* Ligne d'en-tête : mêmes colonnes que les lignes de données, un libellé par
+   colonne — c'est ce qui garantit l'alignement chiffres ↔ texte. */
+.expert-stat-cols {
+  border-bottom: 1px solid rgba(230, 57, 70, 0.18);
+  padding-top: 0;
+}
+.expert-stat-cols .expert-stat-cell {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  white-space: normal;
+  line-height: 1.15;
+}
+
+body.darkmode .expert-stats-header {
+  /* body.darkmode .mode-stats-header (gris) est plus spécifique que
+     .expert-stats-header : sans cette règle, le titre perdait son rouge. */
+  color: #ff6b76;
+}
+body.darkmode .expert-stat-cell {
+  color: #ececec;
+}
+body.darkmode .expert-stat-cols .expert-stat-cell {
+  color: #8a8a8a;
 }
 
 @media (max-width: 480px) {
   .expert-stat-row {
-    grid-template-columns: 20px minmax(48px, 1fr) repeat(4, auto);
-    gap: 4px;
+    grid-template-columns: 20px minmax(0, 1.1fr) repeat(4, minmax(0, 1fr));
+    gap: 5px;
   }
 
   .expert-stat-cell {
     font-size: 0.75rem;
+  }
+
+  .expert-stat-cols .expert-stat-cell {
+    font-size: 0.56rem;
   }
 }

@@ -788,10 +788,19 @@ async function renderExpertStats() {
     })
     .join("");
 
+  // Les 4 libellés de colonnes vivent dans une seule clé (« Won / Played · Rate ·
+  // Best · Streak », même forme dans les 6 langues) : on la découpe sur « · »
+  // pour poser chaque libellé au-dessus de SA colonne, dans la même grille que
+  // les lignes. En un seul <span> calé à droite, l'en-tête n'était aligné sur
+  // rien — retour joueur 2.2 : « les chiffres sont décalés du texte ».
+  const cols = tf("profile.expert_cols", "Won / Played · Rate · Best · Streak").split(/\s*·\s*/);
   container.innerHTML = `
     <div class="mode-stats-header expert-stats-header">
       <span>${tf("profile.expert_title", "⚡ Expert Mode")}</span>
-      <span>${tf("profile.expert_cols", "Won / Played · Rate · Best · Streak")}</span>
+    </div>
+    <div class="mode-stat-row expert-stat-row expert-stat-cols" aria-hidden="true">
+      <span></span><span></span>
+      ${cols.map((c) => `<span class="expert-stat-cell">${c}</span>`).join("")}
     </div>
     <div class="mode-stats-list">${rows}</div>`;
 }
