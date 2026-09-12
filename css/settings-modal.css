@@ -56,6 +56,7 @@
 }
 
 .sm-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   background: none;
   border: none;
   font-size: 1.1rem;

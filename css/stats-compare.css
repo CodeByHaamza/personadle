@@ -254,6 +254,7 @@
 
 /* ── Bouton fermer ───────────────────────────────────────────────────── */
 .sc-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   position: fixed;
   top: 16px;
   right: 16px;

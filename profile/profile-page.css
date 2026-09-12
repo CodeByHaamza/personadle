@@ -100,6 +100,7 @@
 
 /* ── Bouton Settings ⚙ dans .darkmode-toggle ── */
 .profile-settings-btn {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   background: none;
   border: none;
   border-radius: 50%;
@@ -1470,6 +1471,7 @@ body.darkmode .profile-card--danger {
 
 /* Chip de thème : fond coloré + nom en texte blanc */
 .theme-swatch {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   height: 46px;
   border-radius: 8px;
   border: 2px solid transparent;
@@ -2027,6 +2029,7 @@ body.darkmode .custom-theme-row input[type="color"] {
 }
 
 .song-play-btn {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -2359,6 +2362,7 @@ body.darkmode .song-empty-hint {
 }
 
 .share-color-swatch {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -4185,6 +4189,7 @@ body.darkmode .song-row:hover { background: rgba(230, 57, 70, 0.2); }
 }
 .song-modal-bar .song-search { flex: 1; }
 .song-modal-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   flex: 0 0 auto;
   width: 34px;
   height: 34px;
@@ -4321,6 +4326,7 @@ body.darkmode .song-modal-close { background: rgba(255, 255, 255, 0.08); }
 
 .swatch-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .swatch {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   width: 28px;
   height: 28px;
   flex: 0 0 auto; /* jamais écrasé en ovale */

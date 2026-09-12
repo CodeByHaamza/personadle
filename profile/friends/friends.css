@@ -107,6 +107,7 @@
 }
 
 .fr-search-clear {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   background: none;
   border: none;
   cursor: pointer;
@@ -674,6 +675,7 @@
 
 /* ── Messages & Défis ──────────────────────────────── */
 .fr-msg-clear-btn {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   margin-left: auto;
   background: none;
   border: 1px solid var(--fr-border);

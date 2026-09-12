@@ -2895,6 +2895,7 @@ body.darkmode {
   max-width: 450px;
 }
 .badge-zoom-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   position: absolute;
   top: 15px;
   right: 20px;
