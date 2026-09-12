@@ -18,6 +18,12 @@ import { csrfHeader } from "./helpers/csrf.js";
  *   5. Bob accepte le défi depuis la Boîte, atterrit sur Classique avec la cible
  *      du défi, la devine : le défi passe en `beaten`.
  *
+ * Puis les autres portes, avec un second jeu de comptes :
+ *   6. la calling card (js/challenge-notif.js) sur une page quelconque, accepter
+ *      emmène sur le mode — le chemin des six pannes silencieuses de la PR #111 ;
+ *   7. « Abandonner » depuis le bandeau : case locale libérée, statut `read` ;
+ *   8. Give Up en plein défi : statut `expired`, case libérée.
+ *
  * Pré-requis : stack Docker démarrée (make up). Comptes frais à chaque run.
  */
 
@@ -178,5 +184,130 @@ test.describe.serial("UI — un défi de bout en bout", () => {
       timeout: 15_000,
     }).toBe("beaten");
     await page.context().close();
+  });
+});
+
+/** Date du jour en heure de Paris, "YYYY-MM-DD" — même frontière que le jeu. */
+function parisToday() {
+  const parts = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (t) => parts.find((p) => p.type === t).value;
+  return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+/** Envoi d'un défi par l'API (cible du jour, ancien format — suffit pour ces parcours). */
+async function sendChallengeApi(from, to, mode) {
+  const res = await from.ctx.post("/api/messages/", {
+    data: {
+      receiver_id: to.userId,
+      type: "challenge",
+      challenge_mode: mode,
+      challenge_score: 3,
+      challenge_date: parisToday(),
+    },
+    headers: await csrfHeader(from.ctx),
+  });
+  expect(res.ok(), `l'envoi du défi ${mode} doit réussir`).toBeTruthy();
+  return (await res.json()).id;
+}
+
+test.describe.serial("UI — les autres portes du défi : calling card, abandon, Give Up", () => {
+  let bob, carol, dave;
+  let carolChallenge, daveChallenge;
+  // UN SEUL navigateur pour Bob sur les trois tests : le défi accepté vit dans
+  // localStorage (`activeChallenge`), un contexte neuf par test l'oublierait.
+  let bobBrowser;
+
+  test.beforeAll(async ({ browser }) => {
+    const rnd = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    bob = await registerUser(rnd, "b2");
+    carol = await registerUser(rnd, "c2");
+    dave = await registerUser(rnd, "d2");
+    await befriend(carol, bob);
+    await befriend(dave, bob);
+    carolChallenge = await sendChallengeApi(carol, bob, "emoji");
+    bobBrowser = await browser.newContext({ storageState: await bob.ctx.storageState() });
+  });
+
+  test.afterAll(async () => {
+    await bobBrowser?.close();
+    for (const u of [bob, carol, dave]) await u?.ctx?.dispose();
+  });
+
+  test("6. la calling card apparaît sur n'importe quelle page, accepter emmène sur le mode", async () => {
+    // Deuxième porte d'acceptation (js/challenge-notif.js), celle des six pannes
+    // silencieuses corrigées par la PR #111 — jamais couverte jusqu'ici.
+    const page = await bobBrowser.newPage();
+    await page.goto("/index.html");
+
+    const card = page.locator(".cn-card");
+    await expect(card, "notification plein écran d'un défi non lu").toBeVisible({ timeout: 15_000 });
+    await expect(card.locator(".cn-pseudo")).toContainText(carol.pseudo);
+    await card.locator(".cn-btn--accept").click();
+
+    await page.waitForURL(/emojiMode\/emojiMode\.html/, { timeout: 15_000 });
+    await expect(page.locator("#cbScore")).toContainText("3");
+    await expect
+      .poll(async () => (await challengesOf(bob)).find((m) => m.id === carolChallenge)?.status)
+      .toBe("accepted");
+    await page.close();
+  });
+
+  test("7. « Abandonner » depuis le bandeau libère le défi sans le compter comme perdu", async () => {
+    const page = await bobBrowser.newPage();
+    await page.goto("/emojiMode/emojiMode.html");
+    await expect(page.locator("#cbAbandon")).toBeVisible({ timeout: 10_000 });
+
+    page.once("dialog", (d) => d.accept());
+    await page.locator("#cbAbandon").click();
+
+    await expect(page.locator("#cbAbandon")).toBeHidden({ timeout: 10_000 });
+    // La case locale est libérée (une seule case par dimension — sans ça, plus
+    // aucun autre défi ne pouvait être accepté de la journée).
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem("activeChallenge")))
+      .toBeNull();
+    // Côté serveur : retour à `read`, pas `expired` — l'abandon n'est pas une défaite.
+    await expect
+      .poll(async () => (await challengesOf(bob)).find((m) => m.id === carolChallenge)?.status)
+      .toBe("read");
+    await page.close();
+  });
+
+  test("8. Give Up en plein défi → le défi expire, côté client comme côté serveur", async () => {
+    daveChallenge = await sendChallengeApi(dave, bob, "classic");
+
+    const page = await bobBrowser.newPage();
+    await page.goto("/profile/friends/friends.html");
+    await page.locator('.fr-tab[data-tab="inbox"]').click();
+    const accept = page.locator(`.js-accept-challenge[data-mid="${daveChallenge}"]`);
+    await expect(accept).toBeVisible({ timeout: 10_000 });
+    await accept.click();
+    await page.waitForURL(/classiqueMode\/classiqueMode\.html/, { timeout: 15_000 });
+    await expect(page.locator("#cbScore")).toContainText("3");
+
+    // Huit essais (GIVE_UP_THRESHOLD du Classique) puis Give Up. Un nom inconnu
+    // compte comme un essai, comme dans expert-classic.spec.js.
+    for (let i = 0; i < 8; i++) {
+      await page.locator("#textbar").fill(`Zzz Not A Character ${i}`);
+      await page.locator("#guessButton").click();
+    }
+    const giveUp = page.locator("#giveUpButton");
+    await expect(giveUp).toHaveAttribute("aria-disabled", "false");
+    await giveUp.click();
+
+    await expect
+      .poll(async () => (await challengesOf(bob)).find((m) => m.id === daveChallenge)?.status, {
+        timeout: 15_000,
+      })
+      .toBe("expired");
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem("activeChallenge")))
+      .toBeNull();
+    await page.close();
   });
 });
