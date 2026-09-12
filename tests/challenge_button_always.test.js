@@ -186,3 +186,43 @@ describe("les 6 modes montent le bouton dès l'arrivée", () => {
     expect(missing).toEqual([]);
   });
 });
+
+describe("filtres transmis avec le défi", () => {
+  it("prend la liste EFFECTIVE de filterMenu quand elle est enregistrée, même sans localStorage", async () => {
+    // Joueur qui n'a jamais touché ses filtres : localStorage vide (= tout actif),
+    // filterMenu tient la vraie liste en mémoire. Avant : `[]` partait au
+    // destinataire, qui gardait ses propres filtres.
+    const { registerActiveFilters } = await import("../js/gameCore.js");
+    localStorage.removeItem("filters_Classic");
+    registerActiveFilters("filters_Classic", () => ["P3", "P4", "P5"]);
+    window._personadleApi.friends.list.mockResolvedValue({
+      friends: [{ friend_id: 2, pseudo: "Ann", friend_code: "AAA", avatar_data: null }],
+    });
+
+    mountPage();
+    showChallengeButton("classic", null, ["A", "B"]);
+    await openModal();
+    document.querySelector('.js-send-challenge[data-fid="2"]').click();
+    await vi.waitFor(() => expect(window._personadleApi.messages.send).toHaveBeenCalledTimes(1));
+
+    const payload = window._personadleApi.messages.send.mock.calls[0][0];
+    expect(JSON.parse(payload.challenge_filters)).toEqual(["P3", "P4", "P5"]);
+    expect(payload.challenge_score).toBe(CHALLENGE_PAR.classic);
+    expect(["A", "B"]).toContain(payload.challenge_target);
+    registerActiveFilters("filters_Classic", null);
+  });
+
+  it("sans fournisseur, lit localStorage comme avant", async () => {
+    localStorage.setItem("filters_Classic", JSON.stringify(["P5"]));
+    window._personadleApi.friends.list.mockResolvedValue({
+      friends: [{ friend_id: 2, pseudo: "Ann", friend_code: "AAA", avatar_data: null }],
+    });
+    mountPage();
+    showChallengeButton("classic", 3, ["A"]);
+    await openModal();
+    document.querySelector('.js-send-challenge[data-fid="2"]').click();
+    await vi.waitFor(() => expect(window._personadleApi.messages.send).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(window._personadleApi.messages.send.mock.calls[0][0].challenge_filters)).toEqual(["P5"]);
+    localStorage.removeItem("filters_Classic");
+  });
+});

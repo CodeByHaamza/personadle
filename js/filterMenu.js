@@ -21,6 +21,8 @@
 /* ── Migration : anciens codes larges → codes précis ───────────
    Quand l'utilisateur a sauvegardé "P3" dans l'ancien format,
    on l'étend automatiquement en ["P3", "P3FES", "P3P"]. */
+import { registerActiveFilters } from "./gameCore.js";
+
 const LEGACY_EXPAND = {
   P2: ["P2IS", "P2EP"],
   P3: ["P3", "P3FES", "P3P"],
@@ -193,6 +195,10 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     activeOpus = _seedNewOpus(migrated, allOpus, storageKey);
   }
   let selectAllBtn = null;
+
+  // La liste effective est ce que les défis doivent transmettre (js/gameCore.js,
+  // _getActiveFilters) — localStorage reste vide tant que le joueur n'a rien touché.
+  registerActiveFilters(storageKey, () => [...activeOpus]);
 
   /* ── 2. Bouton toggle global ────────────────────────────────── */
   const toggleBtn = document.getElementById("filterToggleBtn");

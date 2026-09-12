@@ -1155,10 +1155,38 @@ export const FILTER_STORAGE_KEYS = {
 };
 const _FILTER_STORAGE_KEY = FILTER_STORAGE_KEYS;
 
+/**
+ * Fournisseurs de la liste d'opus EFFECTIVEMENT active, par clé de stockage —
+ * enregistrés par initFilterMenu() (js/filterMenu.js).
+ *
+ * Pourquoi : un joueur qui n'a jamais touché ses filtres n'a rien en localStorage
+ * (« absent = tout actif », et c'est voulu : un opus ajouté plus tard doit lui
+ * arriver actif). Lire localStorage donnait donc `[]` pour son défi, et le
+ * destinataire gardait SES filtres — s'ils étaient restrictifs, la cible du défi
+ * n'apparaissait pas dans son autocomplétion. La liste effective vit dans
+ * filterMenu ; on la lui demande au lieu de la deviner.
+ */
+const _activeFilterProviders = new Map();
+
+/** @param {string} storageKey clé localStorage du mode · @param {() => string[]} getter */
+export function registerActiveFilters(storageKey, getter) {
+  if (typeof getter === "function") _activeFilterProviders.set(storageKey, getter);
+  else _activeFilterProviders.delete(storageKey);
+}
+
 /** Returns the currently active opus filters for a given mode (array of strings). */
 function _getActiveFilters(mode) {
   const key = _FILTER_STORAGE_KEY[mode?.toLowerCase()];
   if (!key) return [];
+  const provider = _activeFilterProviders.get(key);
+  if (provider) {
+    try {
+      const list = provider();
+      if (Array.isArray(list)) return [...list];
+    } catch {
+      /* on retombe sur localStorage */
+    }
+  }
   try {
     return JSON.parse(localStorage.getItem(key) || "[]");
   } catch {
