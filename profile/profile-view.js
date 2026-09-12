@@ -269,7 +269,7 @@ if (viewParam || uidParam) {
       } else if (friendshipStatus === "pending_received") {
         friendBtn = `<button id="vbAcceptBtn" class="vb-friend-btn vb-friend-btn--accept" data-code="${escapeHtml(friendCode)}">${t("friends.accept", "Accept")}</button>`;
       } else {
-        friendBtn = `<button id="vbAddFriendBtn" class="vb-friend-btn" data-code="${escapeHtml(friendCode)}">${t("friends.add_friend", "+ Add friend")}</button>`;
+        friendBtn = `<button id="vbAddFriendBtn" class="vb-friend-btn" data-code="${escapeHtml(friendCode)}">+ ${t("friends.add_friend", "Add friend")}</button>`;
       }
     }
 
@@ -298,7 +298,7 @@ if (viewParam || uidParam) {
           addBtn.outerHTML = `<span class="vb-friend-status vb-friend-status--pending">${t("friends.request_sent", "Request sent")}</span>`;
         } catch (err) {
           addBtn.disabled = false;
-          addBtn.textContent = t("friends.add_friend", "+ Add friend");
+          addBtn.textContent = `+ ${t("friends.add_friend", "Add friend")}`;
           alert(err.message || "Could not send friend request.");
         }
       });

@@ -187,27 +187,27 @@ function renderBrowseEntry(player) {
   } else if (friendship_status === "accepted") {
     badge = `<span class="fr-tag fr-tag--friend">💙 ${tf("friends.friend", "Friend")}</span>`;
     actions = `
-      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${tf("friends.view_profile", "View profile")}">👁</a>
-      <button class="fr-btn fr-btn--danger js-remove"
+      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon" title="${tf("friends.view_profile", "View profile")}">👁</a>
+      <button class="fr-btn fr-btn--danger fr-btn--icon js-remove"
               data-fid="${esc(String(friendship_id))}"
               title="${tf("friends.remove_friend", "Remove")}">✕</button>
     `;
   } else if (friendship_status === "pending" && friendship_direction === "sent") {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.request_sent", "Sent")}</span>`;
-    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
+    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon">👁</a>`;
   } else if (friendship_status === "pending" && friendship_direction === "received") {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.pending", "Pending")}</span>`;
     actions = `
-      <button class="fr-btn fr-btn--accept js-accept"
+      <button class="fr-btn fr-btn--accept fr-btn--icon js-accept"
               data-fid="${esc(String(friendship_id))}"
               title="${tf("friends.accept", "Accept")}">✓</button>
-      <button class="fr-btn fr-btn--danger js-decline"
+      <button class="fr-btn fr-btn--danger fr-btn--icon js-decline"
               data-fid="${esc(String(friendship_id))}"
               title="${tf("friends.decline", "Decline")}">✕</button>
     `;
   } else if (state.sentCodes.has(friend_code)) {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.request_sent", "Sent")}</span>`;
-    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
+    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon">👁</a>`;
   } else {
     // Pas de relation — bouton Add Friend
     actions = `
@@ -215,7 +215,7 @@ function renderBrowseEntry(player) {
               data-code="${esc(friend_code)}"
               data-id="${esc(String(id))}"
               title="${tf("friends.add_friend", "Add friend")}">+ ${tf("friends.add_friend", "Add")}</button>
-      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>
+      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon">👁</a>
     `;
   }
 
@@ -299,8 +299,8 @@ function renderFriendEntry(entry) {
         </div>
       </div>
       <div class="fr-entry-actions">
-        <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${tf("friends.view_profile", "View")}">👁</a>
-        <button class="fr-btn fr-btn--danger js-remove"
+        <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon" title="${tf("friends.view_profile", "View")}">👁</a>
+        <button class="fr-btn fr-btn--danger fr-btn--icon js-remove"
                 data-fid="${esc(String(friendship_id))}"
                 title="${tf("friends.remove_friend", "Remove")}">✕</button>
       </div>
@@ -348,7 +348,7 @@ function renderPendingEntry(entry) {
         <button class="fr-btn fr-btn--accept js-accept"
                 data-fid="${esc(String(friendship_id))}"
                 title="${tf("friends.accept", "Accept")}">✓ ${tf("friends.accept", "Accept")}</button>
-        <button class="fr-btn fr-btn--danger js-decline"
+        <button class="fr-btn fr-btn--danger fr-btn--icon js-decline"
                 data-fid="${esc(String(friendship_id))}"
                 title="${tf("friends.decline", "Decline")}">✕</button>
       </div>
@@ -467,7 +467,7 @@ async function sendFriendRequest(friendCode, targetId) {
       const actions = entry.querySelector(".fr-entry-actions");
       const infoDiv = entry.querySelector(".fr-entry-pseudo");
       if (actions)
-        actions.innerHTML = `<a href="../profile.html?view=${esc(friendCode)}" class="fr-btn fr-btn--view">👁</a>`;
+        actions.innerHTML = `<a href="../profile.html?view=${esc(friendCode)}" class="fr-btn fr-btn--view fr-btn--icon">👁</a>`;
       if (infoDiv && !infoDiv.querySelector(".fr-tag")) {
         infoDiv.insertAdjacentHTML(
           "beforeend",
@@ -779,7 +779,8 @@ function renderMessage(msg) {
           ${renderStatusBadge(msg.status)}
           <button class="fr-msg-delete js-delete-msg"
                   data-mid="${msg.id}"
-                  title="${tf("friends.delete_msg", "Delete")}">🗑</button>
+                  title="${tf("friends.delete_msg", "Delete")}"
+                  aria-label="${tf("friends.delete_msg", "Delete")}"><svg class="fr-trash-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 1.5h4l.6 1.5H14v1.5H2V3h3.4L6 1.5zM3 5.5h10l-.8 8.6A1.5 1.5 0 0 1 10.7 15.5H5.3a1.5 1.5 0 0 1-1.5-1.4L3 5.5zm3 2v6h1.3v-6H6zm2.7 0v6H10v-6H8.7z"/></svg></button>
         </div>
         ${content}
         ${actions ? `<div class="fr-msg-actions">${actions}</div>` : ""}

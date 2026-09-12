@@ -309,7 +309,13 @@
 .fr-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
+  box-sizing: border-box;
+  /* Hauteur unique pour <a> et <button> : global.css §18 n'impose ses 48 px
+     qu'aux <button>, donc 👁 (un lien) sortait à 30 px et ✕ (un bouton) à 48
+     sur la même ligne. Posée ici, la hauteur vaut pour les deux éléments. */
+  min-height: 36px;
   padding: 6px 13px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -325,6 +331,16 @@
     opacity 0.15s;
   font-family: inherit;
   line-height: 1.3;
+}
+
+/* Icône seule (👁 ✕ ✓) : carré parfait, même côté que la hauteur des boutons texte. */
+.fr-btn--icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .fr-btn:active {
@@ -682,7 +698,12 @@
   border-radius: 8px;
   color: var(--fr-text-muted);
   font-size: 0.85rem;
-  padding: 3px 8px;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition:
     background 0.12s,
@@ -757,17 +778,39 @@
   background: none;
   border: none;
   color: var(--fr-text-muted);
-  font-size: 0.78rem;
+  /* Retour joueur 2.2 : la poubelle était « à peine visible » — 0.78rem à 50 %
+     d'opacité, pleine seulement au survol, donc jamais sur mobile. Zone tactile
+     32 px et opacité de repos lisible ; le survol ne fait plus que renforcer. */
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) */
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
   cursor: pointer;
-  padding: 1px 4px;
-  border-radius: 4px;
-  opacity: 0.5;
+  padding: 0;
+  border-radius: 6px;
+  opacity: 0.85;
   transition:
     opacity 0.12s,
     background 0.12s;
 }
 .fr-msg:hover .fr-msg-delete {
   opacity: 1;
+}
+/* Icône SVG plutôt que l'emoji 🗑 : celui-ci se rend en trait fin monochrome
+   sur Windows et en pictogramme couleur ailleurs — impossible d'en garantir
+   le contraste. Le SVG suit currentColor, donc la couleur de survol. */
+.fr-trash-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.fr-msg-clear-btn .fr-trash-icon {
+  width: 15px;
+  height: 15px;
 }
 .fr-msg-delete:hover {
   background: var(--fr-accent-light);
