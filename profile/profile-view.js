@@ -421,7 +421,11 @@ if (viewParam || uidParam) {
     // ── Agrégats calculés côté client (manquants dans l'API) ──
     const totalGiveups = byMode.reduce((acc, m) => acc + (m.giveups ?? 0), 0);
     const totalTimeMinutes = (stats.total_time_ms ?? 0) / 60000;
-    const currentStreak = byMode.reduce((acc, m) => Math.max(acc, m.streak ?? 0), 0);
+    // Streak globale = users.global_streak, comme sur son propre profil (cloud-sync.js).
+    // Repli sur le max par mode si l'API ne l'expose pas encore (backend antérieur).
+    const currentStreak =
+      stats.global_streak ?? byMode.reduce((acc, m) => Math.max(acc, m.streak ?? 0), 0);
+    const bestStreak = Math.max(stats.global_streak_record ?? 0, stats.best_streak ?? 0);
     // Mode favori = le CHOIX du joueur (profiles.favorite_mode, migration 040) ;
     // « Best Mode Overall » = meilleur taux de victoire, 3 parties minimum —
     // même calcul que renderStats() dans profile-page.js.
@@ -520,7 +524,7 @@ if (viewParam || uidParam) {
         },
         {
           icon: "⭐",
-          value: stats.best_streak ?? 0,
+          value: bestStreak,
           label: t("profile.stat_best_streak_label", "Best Streak"),
         },
         {
