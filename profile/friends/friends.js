@@ -771,6 +771,66 @@ async function handleAddByCode() {
 }
 
 // ─────────────────────────────────────────────────────────
+// 8a. ÉTAT LOCAL D'UN DÉFI
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Installe un défi comme « en cours » sur CET appareil : état du mode purgé,
+ * filtres de l'expéditeur appliqués (les tiens sauvegardés), case
+ * `activeChallenge` écrite. Partagée par Accepter (après le PATCH serveur) et
+ * Reprendre (le serveur est déjà à `accepted`). Exportée pour les tests.
+ *
+ * @param {{ mid:number, modeKey:string, date?:string, score:number, senderId:number,
+ *           challengeFilters?:string, challengeTarget?:string|null, isExpert:boolean }} c
+ */
+export function installActiveChallenge(c) {
+  // Clear this mode's game state so the player starts fresh
+  (MODE_STATE_KEYS[c.modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+
+  // Backup current filters, then apply sender's challenge filters
+  // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
+  // "tout désélectionné" (état volontaire), différent de l'absence de clé
+  // ("tout actif" par défaut, cf. initFilterMenu()). Si le joueur n'a
+  // jamais touché ses filtres pour ce mode, localStorage.getItem() renvoie
+  // null — on garde null tel quel pour que la restauration plus bas (dans
+  // checkChallengeCompletion(), js/challenge-result.js) le laisse absent
+  // au lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
+  const filterKey = MODE_FILTER_KEY[c.modeKey] ?? null;
+  const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
+  if (filterKey && c.challengeFilters && c.challengeFilters !== "[]") {
+    localStorage.setItem(filterKey, c.challengeFilters);
+  }
+
+  localStorage.setItem(
+    activeChallengeKey(c.isExpert),
+    JSON.stringify({
+      msgId: c.mid,
+      mode: c.modeKey,
+      // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
+      // (`challengeDate`, conservé). Toutes les lectures de la case le
+      // comparent à parisDateKey() d'aujourd'hui : un défi envoyé la veille
+      // au soir et accepté le lendemain naissait périmé — pas de bannière,
+      // pas de cible dédiée, et un `accepted` que plus rien ne résolvait.
+      // Cf. le même correctif dans js/challenge-notif.js.
+      date: parisDateKey(),
+      challengeDate: c.date || null,
+      score: c.score,
+      senderId: c.senderId,
+      filterKey,
+      originalFilters,
+      isExpert: c.isExpert,
+      // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
+      // du jour et n'enregistrera PAS la partie en session quotidienne.
+      // Null (ancien défi) = comportement historique, cible du jour.
+      // Sans ce champ, isChallengePlay()/getActiveChallengeTarget() (gameCore.js)
+      // ne reconnaissent jamais le défi accepté ici — cf. challenge-notif.js
+      // qui pose déjà ce même champ pour le chemin popup d'animation.
+      target: c.challengeTarget ?? null,
+    })
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // 8b. MESSAGERIE
 // ─────────────────────────────────────────────────────────
 
@@ -939,6 +999,11 @@ function renderMessage(msg) {
           <button class="fr-btn fr-btn--accept js-resume-challenge"
                   data-mid="${msg.id}"
                   data-mode="${esc(msg.challenge_mode ?? "")}"
+                  data-date="${esc(msg.challenge_date ?? "")}"
+                  data-score="${msg.challenge_score}"
+                  data-senderid="${msg.sender_id}"
+                  data-filters="${esc(msg.challenge_filters ?? "[]")}"
+                  data-target="${esc(msg.challenge_target ?? "")}"
                   data-isexpert="${msg.challenge_is_expert ? "1" : "0"}">
             ${tf("friends.challenge_resume", "▶ Resume")}
           </button>
@@ -1185,50 +1250,16 @@ function attachListeners() {
         return;
       }
 
-      // Clear this mode's game state so the player starts fresh
-      (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
-
-      // Backup current filters, then apply sender's challenge filters
-      // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
-      // "tout désélectionné" (état volontaire), différent de l'absence de clé
-      // ("tout actif" par défaut, cf. initFilterMenu()). Si le joueur n'a
-      // jamais touché ses filtres pour ce mode, localStorage.getItem() renvoie
-      // null — on garde null tel quel pour que la restauration plus bas (dans
-      // checkChallengeCompletion(), js/challenge-result.js) le laisse absent
-      // au lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
-      const filterKey = MODE_FILTER_KEY[modeKey] ?? null;
-      const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
-      if (filterKey && challengeFilters && challengeFilters !== "[]") {
-        localStorage.setItem(filterKey, challengeFilters);
-      }
-
-      localStorage.setItem(
-        activeChallengeKey(challengeIsExpert),
-        JSON.stringify({
-          msgId: mid,
-          mode: modeKey,
-          // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
-          // (`date`, conservé ci-dessous). Toutes les lectures de la case le
-          // comparent à parisDateKey() d'aujourd'hui : un défi envoyé la veille
-          // au soir et accepté le lendemain naissait périmé — pas de bannière,
-          // pas de cible dédiée, et un `accepted` que plus rien ne résolvait.
-          // Cf. le même correctif dans js/challenge-notif.js.
-          date: parisDateKey(),
-          challengeDate: date ?? null,
-          score,
-          senderId,
-          filterKey,
-          originalFilters,
-          isExpert: challengeIsExpert,
-          // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
-          // du jour et n'enregistrera PAS la partie en session quotidienne.
-          // Null (ancien défi) = comportement historique, cible du jour.
-          // Sans ce champ, isChallengePlay()/getActiveChallengeTarget() (gameCore.js)
-          // ne reconnaissent jamais le défi accepté ici — cf. challenge-notif.js
-          // qui pose déjà ce même champ pour le chemin popup d'animation.
-          target: challengeTarget,
-        })
-      );
+      installActiveChallenge({
+        mid,
+        modeKey,
+        date,
+        score,
+        senderId,
+        challengeFilters,
+        challengeTarget,
+        isExpert: challengeIsExpert,
+      });
 
       // XP Social Link : challenge accepté. Un défi Expert rapporte davantage
       // (les deux joueurs ont dû débloquer le mode pour qu'il existe) — la
@@ -1246,14 +1277,45 @@ function attachListeners() {
     // ── Messages : Reprendre un défi en cours ─────────────
     const resumeChallenge = e.target.closest(".js-resume-challenge");
     if (resumeChallenge) {
-      const modeKey =
-        normalizeModeKey(resumeChallenge.dataset.mode) ??
-        String(resumeChallenge.dataset.mode ?? "").toLowerCase();
-      const isExpert = resumeChallenge.dataset.isexpert === "1";
+      const ds = resumeChallenge.dataset;
+      const mid = parseInt(ds.mid, 10);
+      const modeKey = normalizeModeKey(ds.mode) ?? String(ds.mode ?? "").toLowerCase();
+      const isExpert = ds.isexpert === "1";
       const dest = modePageHref(modeKey, isExpert);
       if (!dest) {
         alert(tf("challenge.unknown_mode", "This challenge's mode is unavailable."));
         return;
+      }
+
+      // « Reprendre » ne faisait QUE rediriger : la page du mode ne joue le défi
+      // que si la case locale `activeChallenge` existe, et elle n'existe que sur
+      // l'appareil où le défi a été accepté. Depuis un autre appareil ou après
+      // un cache vidé — précisément les cas que ce bouton devait couvrir — le
+      // joueur retombait sur la partie du jour, sans un mot (signalé par Hamza
+      // sur un défi « accepté » côté serveur seulement). Le message porte tout
+      // ce qu'il faut : on reconstruit l'état local comme à l'acceptation, sans
+      // repasser par le serveur (le statut y est déjà `accepted`).
+      const local = readActiveChallenge(isExpert);
+      if (local?.msgId !== mid) {
+        const pending = getPendingActiveChallenge(isExpert);
+        if (pending && pending.msgId !== mid) {
+          if (typeof window.showToast === "function") {
+            window.showToast(
+              `${tf("challenge.already_active", "Finish your current challenge first.")} (${modeLabel(pending.mode) ?? pending.mode})`
+            );
+          }
+          return;
+        }
+        installActiveChallenge({
+          mid,
+          modeKey,
+          date: ds.date,
+          score: parseInt(ds.score, 10),
+          senderId: parseInt(ds.senderid, 10),
+          challengeFilters: ds.filters ?? "[]",
+          challengeTarget: ds.target || null,
+          isExpert,
+        });
       }
       window.location.href = dest;
       return;

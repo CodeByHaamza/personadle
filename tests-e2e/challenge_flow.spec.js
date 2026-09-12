@@ -22,7 +22,9 @@ import { csrfHeader } from "./helpers/csrf.js";
  *   6. la calling card (js/challenge-notif.js) sur une page quelconque, accepter
  *      emmène sur le mode — le chemin des six pannes silencieuses de la PR #111 ;
  *   7. « Abandonner » depuis le bandeau : case locale libérée, statut `read` ;
- *   8. Give Up en plein défi : statut `expired`, case libérée.
+ *   8. Give Up en plein défi : statut `expired`, case libérée ;
+ *   9. « Reprendre » depuis un autre appareil (défi `accepted` côté serveur
+ *      seulement) reconstruit l'état local et joue bien le défi.
  *
  * Pré-requis : stack Docker démarrée (make up). Comptes frais à chaque run.
  */
@@ -199,8 +201,8 @@ function parisToday() {
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
-/** Envoi d'un défi par l'API (cible du jour, ancien format — suffit pour ces parcours). */
-async function sendChallengeApi(from, to, mode) {
+/** Envoi d'un défi par l'API. Sans `target` : ancien format, cible du jour. */
+async function sendChallengeApi(from, to, mode, target = null) {
   const res = await from.ctx.post("/api/messages/", {
     data: {
       receiver_id: to.userId,
@@ -208,6 +210,7 @@ async function sendChallengeApi(from, to, mode) {
       challenge_mode: mode,
       challenge_score: 3,
       challenge_date: parisToday(),
+      ...(target ? { challenge_target: target } : {}),
     },
     headers: await csrfHeader(from.ctx),
   });
@@ -309,5 +312,37 @@ test.describe.serial("UI — les autres portes du défi : calling card, abandon,
       .poll(() => page.evaluate(() => localStorage.getItem("activeChallenge")))
       .toBeNull();
     await page.close();
+  });
+
+  test("9. « Reprendre » depuis un autre appareil reconstruit le défi, il ne redirige pas à vide", async ({ browser }) => {
+    // Signalé par Hamza : un défi `accepted` côté serveur (accepté sur un autre
+    // appareil, ou mock) → « Reprendre » envoyait sur le mode… en partie du jour.
+    // Cible dédiée explicite : c'est elle qui prouve que le défi est bien joué
+    // (sans cible, le mode jouerait légitimement celle du jour).
+    const eveChallenge = await sendChallengeApi(dave, bob, "silhouette", "Tohru Adachi");
+    // Acceptation par l'API = « sur un autre appareil » : rien en localStorage ici.
+    const acc = await bob.ctx.patch(`/api/messages/${eveChallenge}`, {
+      data: { status: "accepted" },
+      headers: await csrfHeader(bob.ctx),
+    });
+    expect(acc.ok()).toBeTruthy();
+
+    const fresh = await browser.newContext({ storageState: await bob.ctx.storageState() });
+    const page = await fresh.newPage();
+    await page.goto("/profile/friends/friends.html");
+    await page.locator('.fr-tab[data-tab="inbox"]').click();
+    const resume = page.locator(`.js-resume-challenge[data-mid="${eveChallenge}"]`);
+    await expect(resume).toBeVisible({ timeout: 10_000 });
+    await resume.click();
+
+    await page.waitForURL(/silhouetteMode\/silhouette\.html/, { timeout: 15_000 });
+    await expect(page.locator("#cbScore"), "le bandeau du défi est là").toContainText("3");
+    const { challenge_target: cible } = (await challengesOf(bob)).find((m) => m.id === eveChallenge);
+    await expect
+      .poll(() =>
+        page.evaluate(() => JSON.parse(localStorage.getItem("silhouetteTarget") || "null")?.nom)
+      )
+      .toBe(cible);
+    await fresh.close();
   });
 });
