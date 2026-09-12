@@ -442,15 +442,25 @@ function renderFriendsList() {
   }
   if (countEl) countEl.textContent = state.friends.length;
 
-  // Effet True Confidant pour les amis rang 10
+  // Effet True Confidant pour les amis rang 10. La liste se re-rend à chaque
+  // poll (30 s) : la célébration (burst + label) ne joue qu'à la première
+  // apparition de chaque ami dans cette session, le marqueur permanent (anneau
+  // + pastille) est reposé à chaque rendu.
   list.querySelectorAll('.fr-entry[data-rank="10"]').forEach((entry, idx) => {
+    const fid = entry.dataset.fid;
+    const first = !_rank10Celebrated.has(fid);
+    _rank10Celebrated.add(fid);
     applyRank10Effect(
       entry.querySelector(".fr-avatar"),
       entry.querySelector(".fr-entry-pseudo"),
-      idx * 150
+      idx * 150,
+      { celebrate: first }
     );
   });
 }
+
+/** Amis (friendship_id) dont la célébration rang 10 a déjà joué dans cette session. */
+const _rank10Celebrated = new Set();
 
 // ─────────────────────────────────────────────────────────
 // 5. RENDU — PENDING REQUESTS
