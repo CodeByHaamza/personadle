@@ -281,6 +281,24 @@ describe("notification — fermeture explicite vs manquée", () => {
     expect(updateStatus).not.toHaveBeenCalled();
   });
 
+  it("« Plus tard » ferme sans décider : même contrat que la croix, mais visible", async () => {
+    // Signalé par Hamza (2.2) : la pop-up ne proposait qu'Accepter et « ✕ » —
+    // ce « ✕ » REFUSAIT (statut read) alors qu'il ressemblait à une fermeture,
+    // et la vraie croix, discrète en haut à gauche, passait inaperçue.
+    const dismissed = vi.fn();
+    setChallengeNotifDismissHandler(dismissed);
+
+    queueChallengeNotifs([challenge()]);
+    const later = document.querySelector(".cn-btn--later");
+    expect(later, "un bouton Plus tard dans la rangée des choix").toBeTruthy();
+    expect(document.querySelector(".cn-btn--refuse").textContent).toContain("✕");
+    later.click();
+
+    expect(dismissed).toHaveBeenCalledWith(42);
+    expect(updateStatus).not.toHaveBeenCalled();
+    expect(navigatedTo).toBeNull();
+  });
+
   it("ne signale rien tant que le joueur n'a pas répondu", async () => {
     const dismissed = vi.fn();
     setChallengeNotifDismissHandler(dismissed);

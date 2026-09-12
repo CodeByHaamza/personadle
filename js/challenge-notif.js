@@ -171,8 +171,16 @@ function _render({
           <button class="cn-btn cn-btn--accept">
             ⚔ ${_t("friends.challenge_accept", "Accepter")}
           </button>
+          <!-- « Plus tard » : ferme seulement l'animation, le défi reste à
+               accepter ou refuser depuis la page Amis. La croix en haut à
+               gauche fait pareil mais personne ne la voit ; et « Refuser »
+               était libellé « ✕ » seul (clé de l'icône de la page Amis), donc
+               pris pour une fermeture alors qu'il refuse pour de bon. -->
+          <button class="cn-btn cn-btn--later">
+            ${_t("challenge.later", "Plus tard")}
+          </button>
           <button class="cn-btn cn-btn--refuse">
-            ${_t("friends.challenge_decline", "Refuser")}
+            ✕ ${_t("challenge.refuse", "Refuser")}
           </button>
         </div>
       </div>
@@ -185,6 +193,7 @@ function _render({
   // ── Accepter : pose localStorage + XP + redirect ────────
   const acceptBtn = overlay.querySelector(".cn-btn--accept");
   const refuseBtn = overlay.querySelector(".cn-btn--refuse");
+  const laterBtn = overlay.querySelector(".cn-btn--later");
 
   /** Rouvre les boutons après un refus d'accepter (le joueur doit pouvoir refuser). */
   const _unlock = () => {
@@ -342,11 +351,11 @@ function _render({
     _closeOverlay(overlay);
   });
 
-  // ── Croix : ferme seulement l'animation ─────────────────
+  // ── Croix et « Plus tard » : ferment seulement l'animation ──────────────
   // Le message reste "unread" dans l'API → visible depuis la page Amis. Mais
   // c'est un « plus tard » EXPLICITE : on le note pour ne pas le relancer au
   // prochain sondage, contrairement à une notification simplement manquée.
-  overlay.querySelector(".cn-close").addEventListener("click", () => {
+  const closeOnly = () => {
     _dismissed(id);
     // Les défis encore en file n'ont, EUX, jamais été montrés : les jeter
     // silencieusement était la deuxième cause de « parfois pas d'animation ».
@@ -354,7 +363,9 @@ function _render({
     _queue.length = 0;
     _busy = false;
     _fadeOut(overlay, null);
-  });
+  };
+  overlay.querySelector(".cn-close").addEventListener("click", closeOnly);
+  laterBtn?.addEventListener("click", closeOnly);
 }
 
 /** Toast si la page en fournit un — l'acceptation ne doit pas dépendre de l'UI. */
