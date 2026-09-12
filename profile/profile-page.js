@@ -70,6 +70,8 @@ import {
 // Ré-exportées pour compatibilité avec le code existant qui importe ces
 // fonctions depuis profile-page.js plutôt que depuis profile-format.js/theme.js.
 export { getStreakTier, formatSongTime, hexToRgb, adjustHex, normalizeAvatarPath };
+// Exporté pour les tests (tests/profilePage.test.js) — voir le bug {{count}} sur tf().
+export { tf as _tf };
 
 // Exposer les songs pour d'autres modules (notifications.js, social-link.js…)
 window._profileSongs = ALL_SONGS;
@@ -100,9 +102,13 @@ const THEMES = THEME_LABELS.map(({ id, label }) => ({
   ...(THEME_COLORS[id] || { accent: null, hover: null, light: null, rgb: null }),
 }));
 
-/** Traduit une clé i18n avec un vrai fallback string (window.i18n.t renvoie la clé brute si absente). */
-function tf(key, fallback) {
-  const v = window.i18n?.t?.(key);
+/**
+ * Traduit une clé i18n avec un vrai fallback string (window.i18n.t renvoie la clé
+ * brute si absente). `vars` est transmis à t() pour les {{placeholders}} — il était
+ * ignoré, et le bouton Jack Frost affichait « 0 → {{count}} jours » (retour 2.2).
+ */
+function tf(key, fallback, vars) {
+  const v = window.i18n?.t?.(key, vars);
   return v != null && v !== key ? v : fallback;
 }
 
