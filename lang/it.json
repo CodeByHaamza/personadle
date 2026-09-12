@@ -961,6 +961,9 @@
     "anim_style_cc": "Calling Card",
     "anim_style_tv": "TV P4",
     "anim_style_p3": "P3 Evoker",
+    "profile_music": "Musica del profilo",
+    "profile_autoplay_own": "Riproduzione automatica sul mio profilo",
+    "profile_autoplay_others": "Riproduzione automatica sui profili degli altri giocatori",
     "save": "Salva",
     "saved": "✓ Salvato!"
   },

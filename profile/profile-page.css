@@ -89,40 +89,6 @@
   }
 }
 
-/* ── Séparateur vertical dans .darkmode-toggle ── */
-.dm-sep {
-  display: inline-block;
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.25);
-  flex-shrink: 0;
-}
-
-/* ── Bouton Settings ⚙ dans .darkmode-toggle ── */
-.profile-settings-btn {
-  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
-  background: none;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 1rem;
-  cursor: pointer;
-  color: rgba(255, 255, 255, 0.8);
-  transition:
-    color 0.15s,
-    transform 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  flex-shrink: 0;
-}
-.profile-settings-btn:hover {
-  color: #fff;
-  transform: rotate(30deg);
-}
-
 /* Ligne décorative rouge sous le titre */
 .profile-page-header::after {
   content: "";

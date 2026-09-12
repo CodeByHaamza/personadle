@@ -7,6 +7,7 @@ import {
 import { getStreakTier, formatSongTime } from "./profile-format.js";
 import { formatPlayTime } from "./formatPlayTime.js";
 import { resolveTheme, applyThemeVars } from "./theme.js";
+import { profileAutoplayAllowed } from "../js/settings-modal.js";
 
 /**
  * profile/profile-view.js — Mode consultation du profil d'un autre joueur
@@ -718,6 +719,8 @@ if (viewParam || uidParam) {
     });
 
     // ── Autoplay avec fallback au premier geste utilisateur ──
+    // Réglage « Autoplay sur les profils des autres » (settings-modal.js).
+    if (!profileAutoplayAllowed("others")) return;
     _viewSongAudio.play().catch(() => {
       const unlock = () => _viewSongAudio.play().catch(() => {});
       document.addEventListener("click", unlock, { once: true });

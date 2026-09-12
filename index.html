@@ -92,6 +92,7 @@
 
     <!-- Styles & Icon -->
     <link rel="stylesheet" href="./css/global.css?v=12" />
+    <link rel="stylesheet" href="./css/settings-modal.css" />
     <link rel="stylesheet" href="./css/index.css?v=5" />
     <link rel="stylesheet" href="./css/langSelector.css?v=3" />
     <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
@@ -537,6 +538,16 @@
         <span class="slider round"></span>
       </label>
       <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+      <span class="dm-sep"></span>
+      <button
+        id="settingsBtn"
+        class="settings-btn"
+        title="Settings"
+        aria-label="Settings"
+        data-i18n-title="settings.title"
+      >
+        ⚙
+      </button>
     </div>
 
     <!-- Script intégré -->
@@ -3144,6 +3155,11 @@
       import { initAuth } from "./js/auth.js";
       window._authReady = initAuth();
       window._authReady.catch(() => {});
+    </script>
+    <!-- Paramètres joueur (son, animations, musique de profil) — même modale que le profil -->
+    <script type="module">
+      import { initSettingsModal } from "./js/settings-modal.js";
+      initSettingsModal();
     </script>
 
     <script type="module">
