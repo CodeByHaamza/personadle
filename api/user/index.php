@@ -29,6 +29,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/validation.php';
 
 // ── Extraire l'userId depuis l'URL (/api/user/42 ou /api/user/42/stats) ───────
 $parts  = requestPathSegments();
@@ -198,7 +199,7 @@ if ($method === 'PATCH') {
     // lang
     if (array_key_exists('lang', $data)) {
         $lang = trim($data['lang']);
-        if (!in_array($lang, ['en', 'fr', 'es', 'de', 'it'], true)) {
+        if (!in_array($lang, PERSONADLE_SUPPORTED_LANGS, true)) {
             jsonError('Invalid lang');
         }
         $userFields[] = 'lang = ?';
