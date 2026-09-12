@@ -207,6 +207,133 @@
 }
 
 /* ──────────────────────────────────────────────────────────
+   4b. ONGLETS (2.2) — Amis / Boîte / Trouver
+   ────────────────────────────────────────────────────────── */
+.fr-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: var(--fr-surface);
+  border: 1.5px solid var(--fr-border);
+  border-radius: 100px;
+  box-shadow: var(--fr-shadow);
+}
+.fr-tab {
+  min-height: 40px; /* remplace la taille tactile globale (global.css §18), 48 px trop haut ici */
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 100px;
+  background: transparent;
+  color: var(--fr-text-muted);
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.fr-tab:hover {
+  color: var(--fr-text);
+}
+.fr-tab.active {
+  background: var(--fr-accent);
+  color: #fff;
+}
+.fr-tab-icon {
+  font-size: 1rem;
+}
+.fr-tab-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100px;
+  background: var(--fr-accent);
+  color: #fff;
+  font-family: monospace;
+  font-size: 0.68rem;
+}
+.fr-tab.active .fr-tab-badge {
+  background: #fff;
+  color: var(--fr-accent);
+}
+.fr-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ⚔ Défier — même carré que 👁 / ✕, en rouge plein pour le distinguer. */
+.fr-btn--challenge {
+  background: var(--fr-accent);
+  color: #fff;
+  border-color: var(--fr-accent);
+}
+.fr-btn--challenge:hover {
+  background: var(--fr-accent-hover);
+  border-color: var(--fr-accent-hover);
+}
+
+/* Sélecteur de mode ouvert sous la ligne de l'ami par ⚔ */
+.fr-entry {
+  flex-wrap: wrap;
+}
+.fr-mode-picker {
+  flex-basis: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--fr-radius-sm);
+  background: var(--fr-surface);
+  border: 1.5px solid var(--fr-border);
+}
+.fr-mode-picker__title {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  color: var(--fr-text-muted);
+}
+.fr-mode-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.fr-mode-picker__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1.5px solid var(--fr-border);
+  background: var(--fr-surface-alt);
+  color: var(--fr-text);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+.fr-mode-picker__btn:hover {
+  border-color: var(--fr-accent);
+  background: var(--fr-accent-light);
+}
+
+/* ──────────────────────────────────────────────────────────
    5. PLAYER ENTRY
    ────────────────────────────────────────────────────────── */
 .fr-entry {
@@ -978,4 +1105,19 @@
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
   border-color: rgba(74, 222, 128, 0.25);
+}
+
+/* ── Dark mode — onglets & sélecteur de mode (2.2) ────────── */
+.darkmode .fr-tabs,
+.darkmode .fr-mode-picker {
+  background: #1a1a1a;
+  border-color: #333;
+}
+.darkmode .fr-tab:hover {
+  color: #eee;
+}
+.darkmode .fr-mode-picker__btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #333;
+  color: #eee;
 }

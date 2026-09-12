@@ -2009,6 +2009,12 @@ body.darkmode {
 }
 
 /* ── Ligne ami ── */
+/* Ami présélectionné (arrivée depuis l'onglet Amis avec ?challenge=<id>). */
+.challenge-friend-row--preselected {
+  border-left-color: #e63946 !important;
+  background: rgba(230, 57, 70, 0.1);
+}
+
 .challenge-friend-row {
   display: flex;
   align-items: center;

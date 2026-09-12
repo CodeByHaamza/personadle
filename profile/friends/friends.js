@@ -27,6 +27,7 @@ import {
 } from "../../js/social-link.js";
 import {
   FILTER_STORAGE_KEYS,
+  MODES,
   MODE_STATE_KEYS,
   activeChallengeKey,
   fetchExpertStatus,
@@ -299,6 +300,11 @@ function renderFriendEntry(entry) {
         </div>
       </div>
       <div class="fr-entry-actions">
+        <button class="fr-btn fr-btn--challenge fr-btn--icon js-challenge"
+                data-friend-id="${esc(String(entry.friend_id))}"
+                data-pseudo="${esc(pseudo)}"
+                title="${tf("friends.challenge_btn", "Challenge")}"
+                aria-label="${tf("friends.challenge_btn", "Challenge")} ${esc(pseudo)}">⚔</button>
         <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon" title="${tf("friends.view_profile", "View")}">👁</a>
         <button class="fr-btn fr-btn--danger fr-btn--icon js-remove"
                 data-fid="${esc(String(friendship_id))}"
@@ -306,6 +312,122 @@ function renderFriendEntry(entry) {
       </div>
     </div>
   `;
+}
+
+// ─────────────────────────────────────────────────────────
+// 5b. DÉFIER DEPUIS L'ONGLET AMIS (2.2)
+// ─────────────────────────────────────────────────────────
+// Retour joueur : « il devrait y avoir un bouton pour défier un ami depuis
+// l'onglet Amis ». Un défi se joue dans un mode, avec le pool, les filtres et
+// la dimension Expert de la page de ce mode — tout ça vit dans les pages de
+// mode, pas ici. Plutôt que de recharger les six datasets sur cette page, on
+// demande le mode, puis on emmène le joueur sur la page du mode avec l'ami
+// présélectionné (`?challenge=<friend_id>`) : initChallengeButton() y ouvre la
+// modale de défi sur cet ami (js/gameCore.js).
+
+const MODE_ICONS = {
+  classic: "🔤",
+  emoji: "😄",
+  silhouette: "👤",
+  alloutattack: "⚔️",
+  personae: "✨",
+  music: "🎵",
+};
+
+/** Ouvre le choix du mode sous le bouton ⚔ de l'ami. Exportée pour les tests. */
+export function openChallengeModePicker(anchorBtn, friendId, pseudo) {
+  closeChallengeModePicker();
+  const picker = document.createElement("div");
+  picker.id = "frModePicker";
+  picker.className = "fr-mode-picker";
+  picker.setAttribute("role", "dialog");
+  picker.setAttribute("aria-label", tf("friends.challenge_pick_mode", "Which mode?"));
+  picker.innerHTML = `
+    <p class="fr-mode-picker__title">⚔ ${tf("friends.challenge_pick_mode", "Which mode?")} <strong>${esc(pseudo)}</strong></p>
+    <div class="fr-mode-picker__grid">
+      ${MODES.map(
+        ({ key, label }) =>
+          `<a class="fr-mode-picker__btn" href="${modePageHref(key)}?challenge=${encodeURIComponent(friendId)}">${MODE_ICONS[key] ?? "🎮"} ${label === "AllOutAttack" ? "All-Out" : label}</a>`
+      ).join("")}
+    </div>`;
+  anchorBtn.closest(".fr-entry")?.appendChild(picker);
+  // Fermeture au clic ailleurs / Échap — après le tick courant, sinon le clic
+  // qui vient d'ouvrir le sélecteur le referme aussitôt.
+  setTimeout(() => {
+    document.addEventListener("click", _onDocClickClosePicker);
+    document.addEventListener("keydown", _onEscClosePicker);
+  }, 0);
+}
+
+function closeChallengeModePicker() {
+  document.getElementById("frModePicker")?.remove();
+  document.removeEventListener("click", _onDocClickClosePicker);
+  document.removeEventListener("keydown", _onEscClosePicker);
+}
+function _onDocClickClosePicker(e) {
+  if (!e.target.closest("#frModePicker")) closeChallengeModePicker();
+}
+function _onEscClosePicker(e) {
+  if (e.key === "Escape") closeChallengeModePicker();
+}
+
+// ─────────────────────────────────────────────────────────
+// 5c. ONGLETS (2.2)
+// ─────────────────────────────────────────────────────────
+const TABS = ["friends", "inbox", "find"];
+const TAB_STORAGE_KEY = "friendsTab";
+let _browseLoaded = false;
+
+/** Onglet initial : ?tab= dans l'URL, sinon le dernier ouvert, sinon Amis. Exportée pour les tests. */
+export function initialTab() {
+  const fromUrl = new URLSearchParams(window.location.search).get("tab");
+  if (TABS.includes(fromUrl)) return fromUrl;
+  try {
+    const saved = localStorage.getItem(TAB_STORAGE_KEY);
+    if (TABS.includes(saved)) return saved;
+  } catch {
+    /* localStorage indisponible : Amis par défaut */
+  }
+  return "friends";
+}
+
+export function activateTab(tab) {
+  if (!TABS.includes(tab)) tab = "friends";
+  document.querySelectorAll(".fr-tab").forEach((b) => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", String(on));
+  });
+  document.querySelectorAll(".fr-tab-panel").forEach((p) => {
+    p.classList.toggle("hidden", p.dataset.tabPanel !== tab);
+  });
+  try {
+    localStorage.setItem(TAB_STORAGE_KEY, tab);
+  } catch {
+    /* ignore */
+  }
+  // « Trouver » charge la liste des joueurs à sa première ouverture seulement :
+  // c'était l'un des cinq blocs affichés d'office, pour rien la plupart du temps.
+  if (tab === "find" && !_browseLoaded) {
+    _browseLoaded = true;
+    loadBrowse("", 0);
+  }
+  if (tab === "find") document.getElementById("browseSearch")?.focus({ preventScroll: true });
+}
+
+function setupTabs() {
+  document.querySelectorAll(".fr-tab").forEach((b) => {
+    b.addEventListener("click", () => activateTab(b.dataset.tab));
+  });
+  activateTab(initialTab());
+}
+
+/** Pastille d'un onglet : cachée à 0. Exportée pour les tests. */
+export function setTabBadge(id, count) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = String(count);
+  el.classList.toggle("hidden", !(count > 0));
 }
 
 function renderFriendsList() {
@@ -364,6 +486,8 @@ function renderPendingSection() {
 
   // Filtrer seulement les reçues (direction === 'received')
   const received = state.pending.filter((p) => p.direction === "received");
+
+  setTabBadge("tabFriendsBadge", received.length);
 
   if (!received.length) {
     section.classList.add("hidden");
@@ -603,15 +727,18 @@ async function loadMessages() {
       unreadEl.textContent = unreadCnt;
       unreadEl.classList.toggle("hidden", unreadCnt === 0);
     }
+    setTabBadge("tabInboxBadge", unreadCnt);
 
+    // La section vit dans son onglet : vide, elle le dit, elle ne disparaît plus.
+    section.classList.remove("hidden");
     if (!msgs.length) {
-      section.classList.add("hidden");
+      list.innerHTML = `<p class="fr-empty">${tf("friends.msg_empty", "No messages yet.")}</p>`;
       return;
     }
-    section.classList.remove("hidden");
     list.innerHTML = msgs.map(renderMessage).join("");
   } catch {
-    section.classList.add("hidden");
+    section.classList.remove("hidden");
+    list.innerHTML = `<p class="fr-empty">${tf("friends.load_error", "Could not load messages.")}</p>`;
   }
 }
 
@@ -901,6 +1028,14 @@ function attachListeners() {
       return;
     }
 
+    // ⚔ Défier cet ami — choix du mode, puis départ vers la page du mode
+    const challengeBtn = e.target.closest(".js-challenge");
+    if (challengeBtn) {
+      e.stopPropagation();
+      openChallengeModePicker(challengeBtn, challengeBtn.dataset.friendId, challengeBtn.dataset.pseudo);
+      return;
+    }
+
     // ── Messages : Accept challenge ───────────────────────
     const acceptChallenge = e.target.closest(".js-accept-challenge");
     if (acceptChallenge) {
@@ -1151,9 +1286,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     guest?.classList.add("hidden");
 
     attachListeners();
+    setupTabs();
 
-    // Charger les trois sections en parallèle
-    await Promise.all([loadFriends(), loadBrowse("", 0), loadMessages()]);
+    // Amis et boîte en parallèle ; « Trouver » se charge à l'ouverture de son onglet.
+    await Promise.all([loadFriends(), loadMessages()]);
 
     startPolling();
   } else {

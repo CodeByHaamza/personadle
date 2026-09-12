@@ -63,6 +63,89 @@
 
     <!-- ── Connecté ── -->
     <main id="friendsConnected" class="fr-page hidden">
+      <!-- ── Onglets (2.2) ──────────────────────────────────────────────
+           Avant : cinq blocs empilés (recherche, demandes, amis, messages & défis,
+           tous les joueurs paginés) sur une seule page — « pas intuitif, trop de
+           choses affichées ». Trois onglets : Amis (demandes + liste), Boîte
+           (messages & défis), Trouver (recherche + joueurs). Les ids des sections
+           sont inchangés : friends.js les remplit comme avant. -->
+      <nav class="fr-tabs" role="tablist" aria-label="Friends sections">
+        <button class="fr-tab active" role="tab" data-tab="friends" aria-selected="true" id="tabFriends">
+          <span class="fr-tab-icon" aria-hidden="true">👥</span>
+          <span data-i18n="friends.tab_friends">Friends</span>
+          <span class="fr-tab-badge hidden" id="tabFriendsBadge">0</span>
+        </button>
+        <button class="fr-tab" role="tab" data-tab="inbox" aria-selected="false" id="tabInbox">
+          <span class="fr-tab-icon" aria-hidden="true">💬</span>
+          <span data-i18n="friends.tab_inbox">Inbox</span>
+          <span class="fr-tab-badge hidden" id="tabInboxBadge">0</span>
+        </button>
+        <button class="fr-tab" role="tab" data-tab="find" aria-selected="false" id="tabFind">
+          <span class="fr-tab-icon" aria-hidden="true">🔍</span>
+          <span data-i18n="friends.tab_find">Find players</span>
+        </button>
+      </nav>
+
+      <!-- ── Onglet Amis ── -->
+      <div class="fr-tab-panel" data-tab-panel="friends" role="tabpanel" aria-labelledby="tabFriends">
+
+      <!-- Demandes reçues -->
+      <section id="pendingSection" class="fr-card hidden">
+        <div class="fr-card-header">
+          <h2 class="fr-card-title">
+            <span class="fr-card-icon">⏳</span>
+            <span data-i18n="friends.pending_title">Pending Requests</span>
+          </h2>
+          <span id="pendingCount" class="fr-badge">0</span>
+        </div>
+        <div id="pendingList" class="fr-list"></div>
+      </section>
+
+      <!-- Mes amis -->
+      <section id="friendsSection" class="fr-card">
+        <div class="fr-card-header">
+          <h2 class="fr-card-title">
+            <span class="fr-card-icon">💙</span>
+            <span data-i18n="friends.list_title">My Friends</span>
+          </h2>
+          <span id="friendsCount" class="fr-count">0</span>
+        </div>
+        <div id="friendsList" class="fr-list">
+          <p class="fr-empty" data-i18n="friends.no_friends">No friends yet.</p>
+        </div>
+      </section>
+
+      </div>
+
+      <!-- ── Onglet Boîte de réception ── -->
+      <div class="fr-tab-panel hidden" data-tab-panel="inbox" role="tabpanel" aria-labelledby="tabInbox">
+      <!-- Messagerie & Défis — toujours affichée dans son onglet (état vide inclus) -->
+      <section id="messagesSection" class="fr-card">
+        <div class="fr-card-header">
+          <h2 class="fr-card-title">
+            <span class="fr-card-icon">💬</span>
+            <span data-i18n="friends.messages_title">Messages &amp; Challenges</span>
+          </h2>
+          <span id="unreadCount" class="fr-badge hidden">0</span>
+          <button
+            id="clearMsgsBtn"
+            class="fr-msg-clear-btn"
+            title="Clear resolved"
+            data-i18n-title="friends.msg_clear"
+            aria-label="Clear resolved messages"
+          >
+            <svg class="fr-trash-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 1.5h4l.6 1.5H14v1.5H2V3h3.4L6 1.5zM3 5.5h10l-.8 8.6A1.5 1.5 0 0 1 10.7 15.5H5.3a1.5 1.5 0 0 1-1.5-1.4L3 5.5zm3 2v6h1.3v-6H6zm2.7 0v6H10v-6H8.7z"/></svg>
+          </button>
+        </div>
+        <div id="messagesList" class="fr-list fr-messages-list">
+          <p class="fr-empty" data-i18n="ui.loading">Loading…</p>
+        </div>
+      </section>
+
+      </div>
+
+      <!-- ── Onglet Trouver ── -->
+      <div class="fr-tab-panel hidden" data-tab-panel="find" role="tabpanel" aria-labelledby="tabFind">
       <!-- Barre de recherche — search players OR add by friend code (8-char alphanumeric) -->
       <div class="fr-search-wrap">
         <div class="fr-search-box">
@@ -95,56 +178,6 @@
         </div>
         <p id="addByCodeMsg" class="fr-add-code-msg hidden"></p>
       </div>
-
-      <!-- Demandes reçues -->
-      <section id="pendingSection" class="fr-card hidden">
-        <div class="fr-card-header">
-          <h2 class="fr-card-title">
-            <span class="fr-card-icon">⏳</span>
-            <span data-i18n="friends.pending_title">Pending Requests</span>
-          </h2>
-          <span id="pendingCount" class="fr-badge">0</span>
-        </div>
-        <div id="pendingList" class="fr-list"></div>
-      </section>
-
-      <!-- Mes amis -->
-      <section id="friendsSection" class="fr-card">
-        <div class="fr-card-header">
-          <h2 class="fr-card-title">
-            <span class="fr-card-icon">💙</span>
-            <span data-i18n="friends.list_title">My Friends</span>
-          </h2>
-          <span id="friendsCount" class="fr-count">0</span>
-        </div>
-        <div id="friendsList" class="fr-list">
-          <p class="fr-empty" data-i18n="friends.no_friends">No friends yet.</p>
-        </div>
-      </section>
-
-      <!-- Messagerie & Défis -->
-      <section id="messagesSection" class="fr-card hidden">
-        <div class="fr-card-header">
-          <h2 class="fr-card-title">
-            <span class="fr-card-icon">💬</span>
-            <span data-i18n="friends.messages_title">Messages &amp; Challenges</span>
-          </h2>
-          <span id="unreadCount" class="fr-badge hidden">0</span>
-          <button
-            id="clearMsgsBtn"
-            class="fr-msg-clear-btn"
-            title="Clear resolved"
-            data-i18n-title="friends.msg_clear"
-            aria-label="Clear resolved messages"
-          >
-            <svg class="fr-trash-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 1.5h4l.6 1.5H14v1.5H2V3h3.4L6 1.5zM3 5.5h10l-.8 8.6A1.5 1.5 0 0 1 10.7 15.5H5.3a1.5 1.5 0 0 1-1.5-1.4L3 5.5zm3 2v6h1.3v-6H6zm2.7 0v6H10v-6H8.7z"/></svg>
-          </button>
-        </div>
-        <div id="messagesList" class="fr-list fr-messages-list">
-          <p class="fr-empty" data-i18n="ui.loading">Loading…</p>
-        </div>
-      </section>
-
       <!-- Tous les joueurs -->
       <section id="browseSection" class="fr-card">
         <div class="fr-card-header">
@@ -164,6 +197,7 @@
           <button id="browseNextBtn" class="fr-page-btn">Next →</button>
         </div>
       </section>
+      </div>
     </main>
 
     <!-- i18n -->

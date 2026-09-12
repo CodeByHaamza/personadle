@@ -1585,7 +1585,27 @@ export async function initChallengeButton(mode, targetPool, score = null) {
     }
   }
   showChallengeButton(mode, score, targetPool);
+
+  // Arrivée depuis l'onglet Amis (profile/friends/friends.js) : `?challenge=<id>`
+  // ouvre la modale directement, sur cet ami. Le paramètre est retiré de l'URL
+  // aussitôt, sinon un F5 rouvrirait la modale à chaque fois.
+  const params = new URLSearchParams(window.location.search);
+  const preselect = params.get("challenge");
+  if (preselect && document.getElementById("challengeFriendBtn")) {
+    params.delete("challenge");
+    const qs = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`
+    );
+    _challengePreselectId = String(preselect);
+    document.getElementById("challengeFriendBtn").click();
+  }
 }
+
+/** Ami à mettre en avant à la prochaine ouverture de la modale (une seule fois). */
+let _challengePreselectId = null;
 
 function _showChallengeModal(mode, score, date, activeFilters = [], targetPool = null, isExpert = false) {
   const api = window._personadleApi;
@@ -1690,6 +1710,20 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
     `
         )
         .join("");
+
+      // Ami présélectionné (arrivée depuis l'onglet Amis) : sa ligne est mise
+      // en avant et amenée à l'écran ; le clic « Envoyer » reste au joueur.
+      if (_challengePreselectId) {
+        const row = listEl
+          .querySelector(`.js-send-challenge[data-fid="${CSS.escape(_challengePreselectId)}"]`)
+          ?.closest(".challenge-friend-row");
+        _challengePreselectId = null;
+        if (row) {
+          row.classList.add("challenge-friend-row--preselected");
+          row.scrollIntoView({ block: "nearest" });
+          row.querySelector(".js-send-challenge")?.focus({ preventScroll: true });
+        }
+      }
 
       listEl.querySelectorAll(".js-send-challenge").forEach((sendBtn) => {
         sendBtn.addEventListener("click", async () => {
