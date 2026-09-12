@@ -185,3 +185,49 @@ describe("expertModesSharedWith — ligne ⚡ du sélecteur", () => {
     expect(await expertModesSharedWith(42)).toEqual([]);
   });
 });
+
+describe("installActiveChallenge — Reprendre depuis un autre appareil", () => {
+  let installActiveChallenge, readActiveChallenge;
+
+  beforeEach(async () => {
+    ({ installActiveChallenge } = await import("../profile/friends/friends.js"));
+    ({ readActiveChallenge } = await import("../js/gameCore.js"));
+    localStorage.clear();
+  });
+
+  it("écrit la case locale du défi, datée du jour de JEU, avec la cible dédiée", () => {
+    // Signalé par Hamza : « Reprendre » ne faisait que rediriger ; sans case
+    // locale (défi accepté ailleurs), le mode jouait la partie du jour.
+    installActiveChallenge({
+      mid: 77,
+      modeKey: "classic",
+      date: "2026-09-10",
+      score: 5,
+      senderId: 8,
+      challengeFilters: "[]",
+      challengeTarget: "Zenkichi Hasegawa",
+      isExpert: false,
+    });
+    const c = readActiveChallenge(false);
+    expect(c).toMatchObject({ msgId: 77, mode: "classic", score: 5, senderId: 8, target: "Zenkichi Hasegawa" });
+    expect(c.challengeDate).toBe("2026-09-10");
+    expect(c.date).not.toBe("2026-09-10"); // jour de jeu = aujourd'hui, pas le jour d'envoi
+  });
+
+  it("applique les filtres de l'expéditeur en sauvegardant les tiens, sauf « [] »", () => {
+    localStorage.setItem("filters_Classic", JSON.stringify(["P5"]));
+    installActiveChallenge({ mid: 1, modeKey: "classic", score: 3, senderId: 2, challengeFilters: '["P3","P4"]', isExpert: false });
+    expect(JSON.parse(localStorage.getItem("filters_Classic"))).toEqual(["P3", "P4"]);
+    expect(readActiveChallenge(false).originalFilters).toBe(JSON.stringify(["P5"]));
+
+    localStorage.setItem("filters_Classic", JSON.stringify(["P5"]));
+    installActiveChallenge({ mid: 2, modeKey: "classic", score: 3, senderId: 2, challengeFilters: "[]", isExpert: false });
+    expect(JSON.parse(localStorage.getItem("filters_Classic"))).toEqual(["P5"]);
+  });
+
+  it("un défi Expert va dans SA case, sans toucher à la case normale", () => {
+    installActiveChallenge({ mid: 3, modeKey: "music", score: 3, senderId: 2, isExpert: true });
+    expect(readActiveChallenge(true)?.msgId).toBe(3);
+    expect(readActiveChallenge(false)).toBeNull();
+  });
+});
