@@ -908,6 +908,7 @@
     "tab_find": "Trouver",
     "challenge_btn": "Défier",
     "challenge_pick_mode": "Quel mode ?",
+    "challenge_expert_row": "⚡ Expert — débloqué de votre côté à tous les deux",
     "delete_msg": "Supprimer",
     "server_unreachable": "Impossible de joindre le serveur. Ta session est probablement toujours valide — réessaie.",
     "retry": "Réessayer",

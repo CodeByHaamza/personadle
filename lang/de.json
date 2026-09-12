@@ -908,6 +908,7 @@
     "tab_find": "Suchen",
     "challenge_btn": "Herausfordern",
     "challenge_pick_mode": "Welcher Modus?",
+    "challenge_expert_row": "⚡ Experte — von euch beiden freigeschaltet",
     "delete_msg": "Löschen",
     "server_unreachable": "Server nicht erreichbar. Deine Sitzung ist wahrscheinlich noch gültig — versuch es erneut.",
     "retry": "Erneut versuchen",

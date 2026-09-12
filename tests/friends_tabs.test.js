@@ -133,3 +133,55 @@ describe("openChallengeModePicker — ⚔ depuis l'onglet Amis", () => {
     expect(document.querySelector("#frModePicker img")).toBeNull();
   });
 });
+
+describe("expertModesSharedWith — ligne ⚡ du sélecteur", () => {
+  let expertModesSharedWith, resetExpertStatusCache;
+
+  beforeEach(async () => {
+    ({ expertModesSharedWith } = await import("../profile/friends/friends.js"));
+    ({ resetExpertStatusCache } = await import("../js/gameCore.js"));
+    resetExpertStatusCache();
+  });
+
+  const status = (unlocked) =>
+    Object.fromEntries(
+      ["classic", "emoji", "silhouette", "alloutattack", "personae", "music"].map((m) => [
+        m,
+        { unlocked: unlocked.includes(m) },
+      ])
+    );
+
+  it("ne propose que les modes débloqués des DEUX côtés, dans l'ordre des modes", async () => {
+    const list = vi.fn(async ({ expert_mode }) => ({
+      friends: [
+        { friend_id: 42, expert_unlocked: expert_mode !== "music" }, // Bob : tout sauf Music
+        { friend_id: 7, expert_unlocked: true },
+      ],
+    }));
+    window._personadleApi = {
+      user: { expertStatus: async () => ({ expert_status: status(["music", "classic", "personae"]) }) },
+      friends: { list },
+    };
+    expect(await expertModesSharedWith(42)).toEqual(["classic", "personae"]);
+    // Une requête par mode débloqué chez soi, pas six.
+    expect(list).toHaveBeenCalledTimes(3);
+  });
+
+  it("rien si le joueur n'a aucun Expert, sans appeler l'API amis", async () => {
+    const list = vi.fn();
+    window._personadleApi = {
+      user: { expertStatus: async () => ({ expert_status: status([]) }) },
+      friends: { list },
+    };
+    expect(await expertModesSharedWith(42)).toEqual([]);
+    expect(list).not.toHaveBeenCalled();
+  });
+
+  it("rien si le statut Expert est indisponible (hors ligne) — on ne devine pas", async () => {
+    window._personadleApi = {
+      user: { expertStatus: async () => { throw new Error("offline"); } },
+      friends: { list: vi.fn() },
+    };
+    expect(await expertModesSharedWith(42)).toEqual([]);
+  });
+});

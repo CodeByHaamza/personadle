@@ -349,14 +349,69 @@ export function openChallengeModePicker(anchorBtn, friendId, pseudo) {
         ({ key, label }) =>
           `<a class="fr-mode-picker__btn" href="${modePageHref(key)}?challenge=${encodeURIComponent(friendId)}">${MODE_ICONS[key] ?? "🎮"} ${label === "AllOutAttack" ? "All-Out" : label}</a>`
       ).join("")}
-    </div>`;
+    </div>
+    <div class="fr-mode-picker__expert" id="frModePickerExpert" hidden></div>`;
   anchorBtn.closest(".fr-entry")?.appendChild(picker);
+  // Ligne ⚡ Expert, remplie en asynchrone : elle ne propose que les modes que
+  // LES DEUX joueurs ont débloqués — le serveur refuse un défi Expert vers un
+  // ami non débloqué, et la modale du mode ne le listerait pas (impasse).
+  fillExpertChallengeRow(picker, friendId).catch(() => {});
   // Fermeture au clic ailleurs / Échap — après le tick courant, sinon le clic
   // qui vient d'ouvrir le sélecteur le referme aussitôt.
   setTimeout(() => {
     document.addEventListener("click", _onDocClickClosePicker);
     document.addEventListener("keydown", _onEscClosePicker);
   }, 0);
+}
+
+
+/**
+ * Modes Expert débloqués par le joueur ET par l'ami, pour la ligne ⚡ du
+ * sélecteur. Côté ami, l'API ne répond que mode par mode (`?expert_mode=`) :
+ * une requête par mode débloqué chez soi, en parallèle, six au maximum.
+ * Exportée pour les tests.
+ *
+ * @returns {Promise<string[]>} clés de mode, dans l'ordre de MODES
+ */
+export async function expertModesSharedWith(friendId) {
+  const status = await fetchExpertStatus();
+  if (status.state !== "ok") return [];
+  const mine = MODES.map((m) => m.key).filter((key) => status.modes?.[key]?.unlocked === true);
+  if (!mine.length) return [];
+
+  const api = window._personadleApi;
+  if (!api?.friends?.list) return [];
+  const checks = await Promise.all(
+    mine.map(async (mode) => {
+      try {
+        const data = await api.friends.list({ expert_mode: mode });
+        const friend = (data.friends ?? []).find((f) => String(f.friend_id) === String(friendId));
+        return friend?.expert_unlocked === true ? mode : null;
+      } catch {
+        return null;
+      }
+    })
+  );
+  return checks.filter(Boolean);
+}
+
+async function fillExpertChallengeRow(picker, friendId) {
+  const row = picker.querySelector("#frModePickerExpert");
+  if (!row) return;
+  const shared = await expertModesSharedWith(friendId);
+  // Le sélecteur a pu être fermé entre-temps.
+  if (!shared.length || !row.isConnected) return;
+  row.innerHTML = `
+    <p class="fr-mode-picker__title">${tf("friends.challenge_expert_row", "⚡ Expert — unlocked by you both")}</p>
+    <div class="fr-mode-picker__grid">
+      ${shared
+        .map((key) => {
+          const label = MODES.find((m) => m.key === key)?.label ?? key;
+          return `<a class="fr-mode-picker__btn fr-mode-picker__btn--expert" href="${modePageHref(key, true)}&challenge=${encodeURIComponent(friendId)}">⚡ ${label === "AllOutAttack" ? "All-Out" : label}</a>`;
+        })
+        .join("")}
+    </div>`;
+  row.hidden = false;
 }
 
 function closeChallengeModePicker() {

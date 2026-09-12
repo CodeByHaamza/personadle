@@ -908,6 +908,7 @@
     "tab_find": "Find players",
     "challenge_btn": "Challenge",
     "challenge_pick_mode": "Which mode?",
+    "challenge_expert_row": "⚡ Expert — unlocked by you both",
     "delete_msg": "Delete",
     "server_unreachable": "Could not reach the server. Your session is probably still valid — try again.",
     "retry": "Retry",

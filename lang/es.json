@@ -908,6 +908,7 @@
     "tab_find": "Buscar",
     "challenge_btn": "Desafiar",
     "challenge_pick_mode": "¿Qué modo?",
+    "challenge_expert_row": "⚡ Experto — desbloqueado por los dos",
     "delete_msg": "Eliminar",
     "server_unreachable": "No se pudo contactar con el servidor. Tu sesión probablemente siga activa: inténtalo de nuevo.",
     "retry": "Reintentar",
