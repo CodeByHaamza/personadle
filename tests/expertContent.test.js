@@ -23,10 +23,14 @@ const LANGS = ["en", "fr", "es", "de", "it", "pt"];
 
 // Une fuite, c'est le terme présent en tant que MOT — pas en sous-chaîne : « Christ »
 // dans « Christianity » n'en est pas une, et maskTerms() ne le masque pas non plus.
+// Comparaison sans diacritiques : « Minthé » EST une fuite de « Minthe » (le joueur
+// lit la réponse), et ce test la laissait passer tant qu'il comparait à l'accent près.
+const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
 const containsWord = (text, term) =>
-  new RegExp(`(^|[^\\w'])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^\\w'])`, "i").test(
-    text
-  );
+  new RegExp(
+    `(^|[^\\w'])${fold(term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^\\w'])`,
+    "i"
+  ).test(fold(text));
 const entries = (lore) => Object.entries(lore).filter(([k]) => !k.startsWith("_"));
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -85,6 +89,38 @@ describe("maskTerms", () => {
   it("laisse le texte intact quand aucun terme ne matche", () => {
     const t = "You'll never see it coming";
     expect(maskTerms(["Last Surprise"], t)).toBe(t);
+  });
+
+  it("masque une forme accentuée du terme — « Minthé » par « Minthe »", () => {
+    // Signalé en 2.2 : la fiche FR de Minthe (Mio Natsukawa) s'ouvrait sur
+    // « Minthé est une naïade… », et l'accent suffisait à faire rater le masque.
+    expect(maskTerms(["Minthe"], "Minthé est une naïade des enfers")).toBe(
+      "[?] est une naïade des enfers"
+    );
+    expect(maskTerms(["Moros"], "in der Wurzel des Wortes «morös».")).toBe(
+      "in der Wurzel des Wortes «[?]»."
+    );
+  });
+
+  it("masque aussi dans l'autre sens — terme accentué, texte sans accent", () => {
+    expect(maskTerms(["Minthé"], "Minthe is a naiad")).toBe("[?] is a naiad");
+  });
+
+  it("garde le reste du texte accentué intact autour du masque", () => {
+    expect(maskTerms(["Hades"], "Hadès prit Minthé — Perséphone l'apprit")).toBe(
+      "[?] prit Minthé — Perséphone l'apprit"
+    );
+  });
+
+  it("accepte un accent saisi en deux points de code (forme décomposée)", () => {
+    const decomposed = "Minthé est une naïade"; // e + accent aigu combinant
+    expect(maskTerms(["Minthe"], decomposed)).toBe("[?] est une naïade");
+  });
+
+  it("une lettre accentuée est une lettre, pas une frontière de mot", () => {
+    // « Io » ne doit pas être masqué dans « Ioé… » : avant le repli, « é » n'était
+    // pas dans \w et comptait donc comme une frontière.
+    expect(maskTerms(["Io"], "Ioé ne veut rien dire")).toBe("Ioé ne veut rien dire");
   });
 });
 

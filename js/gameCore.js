@@ -567,26 +567,61 @@ async function applyExpertGate(ctx, page, toggle) {
  * de mot suffit à éviter les faux positifs — « Io » (persona de Yukari) doit pouvoir
  * être masqué, sinon sa fiche donne la réponse dès la première ligne.
  *
+ * Insensible aux diacritiques : la comparaison se fait sur une copie « repliée »
+ * du texte (é → e, ö → o…), mais le remplacement s'applique au texte d'origine.
+ * Sans ça, la traduction d'une fiche laissait passer la réponse dès qu'elle
+ * accentuait le nom : « Minthé » (FR) n'était pas masqué par « Minthe », « morös »
+ * (DE) pas par « Moros » — signalé par un joueur en 2.2 sur Mio Natsukawa.
+ *
  * @param {string[]} terms  termes à masquer (nom, alias, titre…)
  * @param {string} text     texte brut
  * @param {string} [token]  remplacement affiché
  * @returns {string} texte masqué
  */
 export function maskTerms(terms, text, token = "[?]") {
-  let out = text;
+  // NFC d'abord : un « é » saisi en deux points de code (e + accent combinant)
+  // devient un seul caractère, et foldText garde alors une longueur identique
+  // au texte — condition pour reporter les positions trouvées sur l'original.
+  let out = text.normalize("NFC");
   for (const term of terms) {
     const t = (term ?? "").trim();
     if (t.length < 2) continue;
-    const pattern = t
+    const pattern = foldText(t.normalize("NFC"))
       .replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // échappe les métacaractères regex
       .replace(/\\?[!?.,]/g, "[!?.,]?") // ponctuation interne optionnelle
       .replace(/\s+/g, "\\s+"); // espaces variables
     // Frontière = tout ce qui n'est pas une lettre/chiffre. L'apostrophe en faisait
     // partie : « Io » n'était donc PAS masqué dans « Io's blessing », et la fiche
     // donnait la réponse dès la première ligne — le cas exact que le masquage vise.
-    out = out.replace(new RegExp(`(^|[^\\w])(${pattern})(?=$|[^\\w])`, "gi"), `$1${token}`);
+    const re = new RegExp(`(^|[^\\w])(${pattern})(?=$|[^\\w])`, "gi");
+    const folded = foldText(out);
+    let result = "";
+    let last = 0;
+    let m;
+    while ((m = re.exec(folded)) !== null) {
+      const start = m.index + m[1].length; // début du terme, frontière conservée
+      result += out.slice(last, start) + token;
+      last = m.index + m[0].length;
+    }
+    out = result + out.slice(last);
   }
   return out;
+}
+
+/**
+ * Replie un caractère NFC sur sa base sans diacritique (é → e, ö → o). Seul un
+ * repli à longueur égale est appliqué : ce qui ne se décompose pas (ß, œ, emoji)
+ * reste tel quel, pour que le texte replié garde exactement la longueur de
+ * l'original — c'est ce qui permet à maskTerms() de reporter les positions.
+ */
+function foldChar(c) {
+  const f = c.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return f.length === c.length ? f : c;
+}
+
+/** Replie un texte NFC caractère par caractère — même longueur en sortie. */
+function foldText(s) {
+  return Array.from(s, foldChar).join("");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
