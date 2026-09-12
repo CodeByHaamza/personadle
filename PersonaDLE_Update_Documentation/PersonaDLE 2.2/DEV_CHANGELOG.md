@@ -13,6 +13,156 @@
 
 ---
 
+## 2026-09-12 — Lot « retours communauté » : 8 corrections + 2 refontes (branche `fix/community-feedback-batch`)
+
+Huit remontées joueurs (Discord) plus deux demandes de Hamza, traitées en un commit par
+point. Au passage, trois bugs découverts en creusant les remontées (dont deux qui
+n'avaient rien à voir avec la plainte initiale). Le layout des pages de mode (barre de
+saisie collante, compactage du haut de page) est **volontairement hors de ce lot** : PR
+séparée à venir, pour être validé visuellement à part.
+
+### Boutons ronds rendus ovales (retour n° 2, n° 5) — `css/global.css` §18
+
+La règle tactile `button { min-height: 48px; padding: 12px 20px }` s'applique à **tout**
+`<button>`, y compris ceux qui déclarent leur propre `width`/`height`. Mesuré au pixel :
+pastilles de bordure 28×48, lecteur de musique de profil 34×48, ⚙ Settings 28×48. Sur la
+page Amis, 👁 est un `<a>` (30 px) et ✕ un `<button>` (48 px) sur la même ligne — d'où
+« pas la même taille ». Chaque bouton-icône pose `min-height: 0` dans sa propre règle
+(14 règles, 8 fichiers), `.fr-btn` fixe 36 px pour `<a>` et `<button>`, `.fr-btn--icon`
+fait un carré 36×36. **Piège documenté dans CLAUDE.md §7** — c'est un pattern, pas un cas.
+
+Angle mort : tout nouveau bouton-icône retombe dedans s'il ne pose pas `min-height: 0`.
+
+### Double « + » sur Ajouter (n° 5) — `lang/*.json` + `friends.js` + `profile-view.js`
+
+`friends.js` préfixait `+ ` à une clé i18n qui contenait déjà `+ Add`. La clé
+`friends.add_friend` redevient un libellé nu (c'est aussi le `title`), les deux appelants
+ajoutent le signe.
+
+### Poubelle invisible (n° 6) — `friends.css` + SVG inline
+
+`opacity: 0.5`, 0.78 rem, pleine au survol seulement — donc jamais sur mobile. Zone
+tactile 32 px, opacité de repos 0.85, et un SVG inline en `currentColor` à la place de
+l'emoji 🗑 (trait fin monochrome sur Windows, pictogramme couleur ailleurs — aucun
+contraste garanti).
+
+### Stats Expert : chiffres décalés et fondus (n° 8) — `profile-page.js` / `.css`
+
+Deux causes. L'en-tête « Won / Played · Rate · Best · Streak » était un seul `<span>` calé à
+droite ; la clé i18n (même forme `a · b · c · d` dans les 6 langues) est découpée pour poser
+un libellé par colonne. **Et chaque ligne est sa propre grille** (`display: grid` par
+`.expert-stat-row`) : avec des colonnes `auto`, chaque ligne dimensionne les siennes selon
+son contenu, l'en-tête ne pouvait pas tomber au-dessus des chiffres → colonnes en `fr`.
+Couleur explicite sur les cellules (elles héritaient du corps de page → gris sur gris en
+sombre), et `body.darkmode .mode-stats-header` écrasait le rouge du titre par spécificité.
+
+### Iwatodai Dorm (n° 4) — `musicsMode/database/songs.js`
+
+`opus: ["P3R"]` → `["P3"]`, image `P3.webp`. Convention du dataset = jeu d'origine (Burn My
+Dread, Mass Destruction sont en P3 alors qu'ils sont aussi dans Reload), même si la piste
+jouée est l'arrangement chanté de Reload. Pools quotidiens indexés par titre → inchangés.
+
+### Bouton ⚙ sur les pages de mode + autoplay de profil réglable (n° 3)
+
+`settings-modal.js` crée sa modale à la demande : le bouton ⚙ rejoint le bloc « Mode Sombre »
+sur `index.html` et les 6 modes (style déplacé de `profile-page.css` vers
+`settings-modal.css`, classe générique `.settings-btn`). **L'id utilisateur est résolu au
+clic « Sauvegarder », pas à l'init** : sur ces pages le bouton est monté avant que
+`initAuth()` ait posé `_currentUser`, le réglage ne serait jamais parti en cloud. Deux
+réglages `profile_autoplay_own` / `profile_autoplay_others` (vrais par défaut) dans
+`profiles.settings` (JSON libre, pas de migration), lus par `song-player.js` et
+`profile-view.js` via `profileAutoplayAllowed()`. Tests : `tests/settings_modal.test.js`.
+
+### Mode favori choisi + « Best Mode Overall » (n° 1) — migration **040**
+
+Décision produit : mode favori = choix du joueur ; « Best Mode Overall » = **meilleur taux
+de victoire, 3 parties minimum** (un 1/1 ne fait pas 100 %), égalité → le plus joué.
+Colonne `profiles.favorite_mode` (**et non** une clé de `settings` : le mode favori se voit
+sur le profil visité, `settings` est privé et jamais renvoyé par `public.php`). Validée
+serveur (PATCH) contre la liste de `MODES`. Puces dans la carte Customization, sauvegarde
+locale + cloud au clic ; `cloud-sync.js` redescend le choix, un `null` cloud efface, un
+payload sans le champ (backend pas migré) laisse intact. Helper pur `bestModeOverall()`
+(`profile-format.js`), partagé par la page et le profil visité. `stats.favoriteMode` (le
+plus joué) reste calculé, plus affiché.
+
+Au passage : les pastilles de bordure n'étaient rendues qu'après un pull cloud — un invité
+voyait une rangée vide sous « Avatar Border ». Rendues au chargement et après déconnexion.
+
+⚠️ **Release** : `040` ajoutée à la checklist `TODO.md`. Sans elle, `Unknown column
+'favorite_mode'` sur **tout** GET `/api/user/:id` et `/api/user/public` — le profil ne
+charge plus, pas seulement le mode favori. PHPUnit n'a pas tourné localement (pas de PHP
+hors Docker) : à confirmer en CI.
+
+### Portugais refusé par l'API (bug trouvé en chemin) — `api/lib/validation.php`
+
+Trois listes locales de langues s'arrêtaient à `it` : un joueur en `pt` voyait **tout** son
+PATCH profil refusé en 400 « Invalid lang » (avatar, bordure, badges compris — le client
+envoie toujours la langue avec le reste), était inscrit en `en`, et l'admin ne pouvait pas
+lui poser `pt`. Constante unique `PERSONADLE_SUPPORTED_LANGS`, test PHPUnit de parité avec
+`lang/*.json`.
+
+### « Défier un ami » toujours disponible (n° 7) — `js/gameCore.js` + 6 modes
+
+Ce qui se passait : injecté uniquement à la **victoire fraîche**, dans la navigation de fin
+de partie (cachée avant), et `return` si déjà présent. Absent avant la fin, après un Give
+Up, et au rechargement — pour ce dernier, deux raisons : la victoire restaurée n'est plus
+« fraîche », et quand le mode rejoue sa fin de partie au chargement, `initAuth()` n'a pas
+encore posé `_currentUser`.
+
+- `initChallengeButton(mode, pool, score)` monte le bouton à l'arrivée, après
+  `window._authReady`, dans `.expert-toggle-zone` ; une fois la navigation révélée par
+  `revealNextLink`, il y est **déplacé** entre précédent/suivant. Rappeler
+  `showChallengeButton()` **met à jour** score et pool.
+- Score « par » par mode tant que la partie n'est pas finie (`CHALLENGE_PAR` : classic 5,
+  emoji 5, silhouette 4, alloutattack 4, personae 3, music 3) — le serveur exige un score
+  > 0, la cible est tirée au hasard, rien n'oblige à avoir joué. Vrai score à la fin,
+  victoire **ou abandon**. La modale affiche le score à battre.
+- Le pool de cibles peut être une **fonction**, évaluée au clic (les filtres changent).
+
+Tests : `tests/challenge_button_always.test.js` (placement, par, mise à jour, auth).
+
+### Page Amis en 3 onglets + ⚔ Défier par ami (demande Hamza + n° 7)
+
+Cinq blocs empilés → Amis (demandes + liste) / Boîte (messages & défis, état vide au lieu de
+disparaître) / Trouver (recherche + joueurs, chargés à la **première ouverture** seulement).
+Pastilles (demandes reçues, non-lus), dernier onglet mémorisé, `?tab=`. Ids de sections
+inchangés.
+
+⚔ par ami : un défi se joue dans un mode, avec le pool/filtres/dimension Expert **de la page
+de ce mode**. Plutôt que recharger six datasets sur la page Amis, le bouton demande le mode
+puis navigue vers la page du mode avec `?challenge=<friend_id>` ; `initChallengeButton()`
+ouvre la modale sur cet ami (mis en avant, `scrollIntoView`), retire le paramètre de l'URL
+(sinon un F5 rouvre). Le clic « Envoyer » reste au joueur. Tests : `tests/friends_tabs.test.js`.
+
+### Marqueur True Confidant (demande Hamza) — deux bugs + un restyle
+
+- `friends.html` ne chargeait **pas** `css/rank10-effect.css` : particules et label
+  arrivaient sans style — un bloc de texte brut « ✦ True Confidant » sous l'avatar.
+- La liste se re-rend à chaque poll (30 s) et **rejouait** burst + label à chaque fois.
+  `applyRank10Effect(…, { celebrate })` : la liste ne célèbre qu'à la première apparition
+  de chaque ami dans la session (`Set` par `friendship_id`).
+- Restyle : anneau doré fixe (plus de halo pulsant), pastille « ✦ MAX » plate, label
+  d'entrée en bulle qui s'efface (plus de machine à écrire).
+
+### Masque Personae Expert insensible aux accents (remontée Minthe / Mio Natsukawa)
+
+La fiche FR de Minthe s'ouvre sur « Minthé est une naïade… » : l'accent faisait rater le
+masque « Minthe », la réponse se lisait dès la première ligne. Même fuite en allemand sur
+Moros (« morös »). Un balayage des 6 langues n'en trouve pas d'autre — mais rien n'empêchait
+la prochaine traduction d'en créer une. `maskTerms()` (`gameCore.js`) compare sur une copie
+repliée (é → e) et remplace dans l'original ; NFC en amont pour qu'un accent décomposé garde
+la même longueur. Effet voulu : une lettre accentuée est une lettre, plus une frontière de
+mot. Le test de non-fuite (`tests/expertContent.test.js`) compare lui aussi sans
+diacritiques — il échouait sur Minthe/fr et Moros/de avec l'ancien code.
+
+### Divers
+
+- Liens GitHub `HamzaKarrouchi` → `CodeByHaamza` (12 fichiers ; l'ancien compte renvoie
+  404, l'avatar du README était cassé).
+- Doc cron Discord : horaire hPanel `5 0 * * *` (jamais une heure « convertie »).
+
+---
+
 ## 2026-09-10 — fix(défi): les six façons dont un défi mourait en silence
 
 Signalé en prod : « parfois pas d'animation, parfois pas de redirection donc on joue sans
