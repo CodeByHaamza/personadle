@@ -86,6 +86,24 @@ En plus, **19 faux joueurs Persona** (Yu, Ren, Akechi, Wonder…) sont créés p
 leaderboard, les profils et le social. Mot de passe commun : **`test1234`**. Pseudos visibles
 sur [http://localhost:8080/profile/leaderboard/leaderboard.html](http://localhost:8080/profile/leaderboard/leaderboard.html).
 
+### Mocks « page Amis & défis » pour ton propre compte
+
+`docker/mysql/dev/seed_challenge_mocks.sql` remplit **un compte existant** (le tien) avec
+tout ce qu'il faut pour tester la page Amis sans jouer pendant des jours : 9 amis, 2 demandes
+reçues et 1 envoyée, **7 Social Links au rang 10** (Kotone, Futaba, Naoto, Ren, Aigis, Yosuke,
+Makoto Yuki), et des défis dans **tous les états**, dans les deux sens — à accepter (un par
+mode, dont un Expert), en cours, abandonné, battu, expiré ; envoyés en attente, accepté par
+l'ami, battu par lui, expiré — plus deux messages.
+
+```bash
+# Le code ami par défaut est celui de Hamza ; pour un autre compte, éditer @code en tête du fichier
+docker compose exec -T db mariadb -u root -prootpassword personadle_db < docker/mysql/dev/seed_challenge_mocks.sql
+```
+
+Rejouable (les défis mock portent `content = '[mock]'` et sont recréés). Les amis sont les
+faux joueurs ci-dessus : se connecter avec l'un d'eux (`test1234`) montre le miroir des mêmes
+défis. **Jamais en prod** — le script ne vérifie rien d'autre que l'existence du code.
+
 ---
 
 ## Commandes utiles
