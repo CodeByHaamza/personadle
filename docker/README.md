@@ -51,7 +51,7 @@ docker compose version  # Docker Compose version 2+
 
 ```bash
 # 1. Cloner le repo
-git clone https://github.com/HamzaKarrouchi/personadle.git
+git clone https://github.com/CodeByHaamza/personadle.git
 cd personadle
 
 # 2. Copier le fichier d'environnement

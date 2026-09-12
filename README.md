@@ -13,7 +13,7 @@
 <p align="center">
   <a href="https://personadle.net"><img src="https://img.shields.io/badge/Play%20Now-personadle.net-red?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptLTIgMTVsLTUtNSAxLjQxLTEuNDFMMTAgMTQuMTdsNy41OS03LjU5TDE5IDhsLTkgOXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+"/></a>
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License"></a>
-  <a href="https://github.com/HamzaKarrouchi/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HamzaKarrouchi/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
+  <a href="https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
   <img src="https://img.shields.io/badge/Version-2.1-brightgreen?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
   <img src="https://img.shields.io/badge/Tests-930%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
@@ -537,7 +537,7 @@ quotidiens, i18n 6 langues, panel admin, 930 tests automatisés (Vitest + PHPUni
 <table>
   <tr>
     <td align="center" width="25%">
-      <img src="https://github.com/HamzaKarrouchi.png" width="100px;" alt="Hamza"/><br>
+      <img src="https://github.com/CodeByHaamza.png" width="100px;" alt="Hamza"/><br>
       <sub><b>Hamza Karrouchi</b></sub><br>
       <em>Founder & Lead Developer</em><br>
       <sub>Game logic, backend, animations, UI, profile system</sub><br>
@@ -632,7 +632,7 @@ Some badges and wallpapers were created with AI assistance. As students working 
 
 We welcome contributions! Here's how you can help:
 
-1. **Report Bugs** - Found an issue? [Open an issue](https://github.com/HamzaKarrouchi/personadle/issues)
+1. **Report Bugs** - Found an issue? [Open an issue](https://github.com/CodeByHaamza/personadle/issues)
 2. **Suggest Features** - Have an idea? We'd love to hear it!
 3. **Join the Community** - Share your achievements and help others
 4. **Spread the Word** - Share PersonaDLE with fellow Persona fans!
@@ -641,7 +641,7 @@ We welcome contributions! Here's how you can help:
 
 ```bash
 # Clone the repository
-git clone https://github.com/HamzaKarrouchi/personadle.git
+git clone https://github.com/CodeByHaamza/personadle.git
 cd personadle
 
 # Install test dependencies
@@ -676,7 +676,7 @@ We're always looking for passionate contributors! Whether you're a developer, de
 ## 📞 Contact & Community
 
 - 🌐 **Website**: [personadle.net](https://personadle.net)
-- 🐙 **GitHub**: [HamzaKarrouchi/personadle](https://github.com/HamzaKarrouchi/personadle)
+- 🐙 **GitHub**: [CodeByHaamza/personadle](https://github.com/CodeByHaamza/personadle)
 - 💬 **Discord (PersonaDLE)**: [International server](https://discord.gg/wpMdGGDp3y) — always active, English-friendly
 - 💬 **Discord (Le Grimoire du Cœur)**: [French partner server](https://discord.gg/CfR8UHXTAE) — our most active community, in collaboration with PersonaDLE
 - 📧 **Contact**: Open an issue on GitHub for support or collaboration
@@ -686,10 +686,10 @@ We're always looking for passionate contributors! Whether you're a developer, de
 ## 📈 Stats
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/HamzaKarrouchi/personadle?style=social" alt="GitHub Stars">
-  <img src="https://img.shields.io/github/forks/HamzaKarrouchi/personadle?style=social" alt="GitHub Forks">
-  <img src="https://img.shields.io/github/watchers/HamzaKarrouchi/personadle?style=social" alt="GitHub Watchers">
-  <img src="https://img.shields.io/github/contributors/HamzaKarrouchi/personadle?style=social" alt="Contributors">
+  <img src="https://img.shields.io/github/stars/CodeByHaamza/personadle?style=social" alt="GitHub Stars">
+  <img src="https://img.shields.io/github/forks/CodeByHaamza/personadle?style=social" alt="GitHub Forks">
+  <img src="https://img.shields.io/github/watchers/CodeByHaamza/personadle?style=social" alt="GitHub Watchers">
+  <img src="https://img.shields.io/github/contributors/CodeByHaamza/personadle?style=social" alt="Contributors">
 </p>
 
 ---

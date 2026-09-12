@@ -87,7 +87,7 @@ Settings → Branches → Add rule sur `main` :
 
 Ou en CLI :
 ```bash
-gh api -X PUT repos/HamzaKarrouchi/personadle/branches/main/protection \
+gh api -X PUT repos/CodeByHaamza/personadle/branches/main/protection \
   -F required_pull_request_reviews.required_approving_review_count=0 \
   -F required_status_checks.strict=true \
   -F enforce_admins=true -F restrictions=
