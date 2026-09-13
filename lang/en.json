@@ -1159,6 +1159,19 @@
     "close": "Back to Home",
     "close_notif": "Close"
   },
+  "friends_today": {
+    "title": "Your friends today",
+    "not_played": "hasn't played yet",
+    "gave_up": "gave up",
+    "first_game_note": "First game of the day only — everyone gets their own daily character.",
+    "empty": "Add friends to compare your games."
+  },
+  "guest_nudge": {
+    "title": "🔥 {{n}}-day streak!",
+    "text": "Create a free account to save it — and find it on any device.",
+    "cta": "Create an account",
+    "later": "Later"
+  },
   "social": {
     "action_visit": "👁 Visit +5 XP",
     "action_score": "📊 Share score +10 XP",

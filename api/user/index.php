@@ -290,7 +290,7 @@ if ($method === 'PATCH') {
         if ($fav !== null) {
             if (!is_string($fav)) jsonError('Invalid favorite_mode');
             $fav = strtolower(trim($fav));
-            if (!in_array($fav, ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'], true)) {
+            if (!in_array($fav, PERSONADLE_MODES, true)) {
                 jsonError('Invalid favorite_mode');
             }
         }

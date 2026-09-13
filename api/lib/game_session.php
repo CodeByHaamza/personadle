@@ -164,6 +164,8 @@ function personadle_recompute_mode_streak(
  *
  * @param array<string,mixed> $filters Filtres actifs, encodés en JSON pour la colonne.
  * @param bool $isExpert Partie jouée en Mode Expert (migration 031).
+ * @param ?list<string> $guesses Suite ordonnée des essais, le bon en dernier si gagné
+ *                               (migration 041) ; null = client qui ne l'envoie pas.
  * @return array{session_id:int, stats:array{mode:string, games:int, wins:int, giveups:int, streak:int, streak_record:int, perfect_wins:int, total_time_ms:int}, global_streak:int}
  * @throws PersonadleDuplicateSessionException client_session_id déjà enregistré (rejeu).
  */
@@ -178,19 +180,21 @@ function personadle_record_game_session(
     int $timeMs,
     array $filters,
     bool $isExpert = false,
-    string $clientSessionId = ''
+    string $clientSessionId = '',
+    ?array $guesses = null
 ): array {
     // 1. Insérer la session — la contrainte UNIQUE (user, mode, date, is_expert)
     //    protège même en cas de requêtes concurrentes (pas de TOCTOU).
     try {
         $pdo->prepare('
             INSERT INTO game_sessions
-                (user_id, mode, is_expert, client_session_id, played_date, target_name, result, attempts, time_ms, active_filters)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (user_id, mode, is_expert, client_session_id, played_date, target_name, result, attempts, time_ms, active_filters, guesses)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ')->execute([
             $userId, $mode, $isExpert ? 1 : 0, $clientSessionId !== '' ? $clientSessionId : null,
             $playedDate, $targetName, $result,
             $attempts, $timeMs, json_encode($filters),
+            $guesses === null ? null : json_encode(array_values($guesses), JSON_UNESCAPED_UNICODE),
         ]);
     } catch (PDOException $dup) {
         if ($dup->getCode() === '23000') {

@@ -1159,6 +1159,19 @@
     "close": "Voltar ao Início",
     "close_notif": "Fechar"
   },
+  "friends_today": {
+    "title": "Os teus amigos hoje",
+    "not_played": "ainda não jogou",
+    "gave_up": "desistiu",
+    "first_game_note": "Só a primeira partida do dia — cada um tem a sua própria personagem do dia.",
+    "empty": "Adiciona amigos para comparar as vossas partidas."
+  },
+  "guest_nudge": {
+    "title": "🔥 {{n}} dias seguidos!",
+    "text": "Cria uma conta gratuita para a guardar — e recuperá-la em qualquer dispositivo.",
+    "cta": "Criar uma conta",
+    "later": "Mais tarde"
+  },
   "social": {
     "action_visit": "👁 Visitar +5 XP",
     "action_score": "📊 Partilhar pontuação +10 XP",

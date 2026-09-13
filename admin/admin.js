@@ -31,6 +31,7 @@ import { renderErrorLogs } from "./error-logs.js";
 import { renderAuditLog } from "./audit-log.js";
 import { renderDeletionRequests } from "./deletion-requests.js";
 import { renderRateLimits } from "./rate-limits.js";
+import { renderActivity } from "./activity.js";
 import { renderTabChallenges } from "./challenges.js";
 import { renderTabStreak } from "./streak.js";
 
@@ -142,6 +143,12 @@ function setupEvents() {
     showPanel("rate-limits-panel");
     renderRateLimits();
   };
+
+  // Activité (joueurs actifs, parties par jour et par mode)
+  document.getElementById("btn-activity").onclick = () => {
+    showPanel("activity-panel");
+    renderActivity();
+  };
 }
 
 // ── Panel visibility (mutually exclusive right-hand panels) ────────────────
@@ -153,6 +160,7 @@ const ADMIN_PANEL_IDS = [
   "audit-log-panel",
   "deletion-requests-panel",
   "rate-limits-panel",
+  "activity-panel",
 ];
 
 function showPanel(panelId) {

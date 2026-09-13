@@ -33,6 +33,7 @@
           <button id="btn-audit-log" class="btn-codes">📋 Audit</button>
           <button id="btn-deletion-requests" class="btn-codes">🗑️ RGPD</button>
           <button id="btn-rate-limits" class="btn-codes">⏱️ Rate Limits</button>
+          <button id="btn-activity" class="btn-codes">📈 Activité</button>
           <span id="admin-username" class="admin-username-pill"></span>
           <button id="admin-logout" class="btn-logout">Logout</button>
         </div>
@@ -96,6 +97,11 @@
           <!-- ── Rate Limits panel (global, not per-user) ────── -->
           <section id="rate-limits-panel" class="user-detail hidden">
             <div id="rate-limits-panel-content"></div>
+          </section>
+
+          <!-- ── Activité panel (global, not per-user) ────────── -->
+          <section id="activity-panel" class="user-detail hidden">
+            <div id="activity-panel-content"></div>
           </section>
 
           <section id="user-detail" class="user-detail hidden">

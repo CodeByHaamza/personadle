@@ -272,8 +272,11 @@ describe("modes Expert — alignement des clés de hash client ⇄ serveur", () 
     // PHPStan). Si un 7e mode SANS variante Expert est ajouté à $validModes, ce test
     // tombe : il faudra alors rétablir la garde dans sessions.php, sans quoi une
     // session Expert sur ce mode serait enregistrée sans vérification anti-triche.
-    const liste = code("api/sessions.php").match(/\$validModes\s*=\s*\[([^\]]+)\]/);
-    expect(liste, "$validModes introuvable dans api/sessions.php").not.toBeNull();
+    // Depuis le 2026-09-13 la liste vit dans api/lib/validation.php (PERSONADLE_MODES,
+    // source unique côté PHP) et sessions.php s'y réfère.
+    expect(code("api/sessions.php")).toMatch(/\$validModes\s*=\s*PERSONADLE_MODES/);
+    const liste = code("api/lib/validation.php").match(/const PERSONADLE_MODES\s*=\s*\[([^\]]+)\]/);
+    expect(liste, "PERSONADLE_MODES introuvable dans api/lib/validation.php").not.toBeNull();
     const modes = [...liste[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]);
     expect(modes).toHaveLength(6);
 

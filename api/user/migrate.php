@@ -121,7 +121,7 @@ $skippedSessions  = 0;
 // de streak soit cohérent.
 // ═════════════════════════════════════════════════════════════════════════════
 
-$validModes    = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+$validModes    = PERSONADLE_MODES;
 $validResults  = ['win', 'giveup'];
 
 // Trier par date croissante (ordre chronologique)
