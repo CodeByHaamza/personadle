@@ -92,11 +92,11 @@ est conduite, comme un joueur. Deux jeux de comptes frais à chaque run.
 
 | Étape | Vérifie                                                                                   |
 | ----- | ------------------------------------------------------------------------------------------ |
-| 1     | « Défier un ami » est présent **avant** toute partie, dans la zone Expert (lot 2.2)         |
-| 2     | la modale annonce le score « par » du mode ; l'envoi crée un message avec ce score et une cible |
-| 3     | le bouton survit à un rechargement                                                          |
-| 4     | ⚔ depuis l'onglet Amis → choix du mode → modale ouverte sur cet ami (`?challenge=` consommé) |
-| 5     | acceptation depuis la Boîte → cible du défi jouée → statut serveur `beaten`                  |
+| 1     | « Défier un ami » est présent **avant** toute partie, dans la zone Expert — mais **verrouillé** : bulle « finis ta partie du jour », pas de modale |
+| 2     | Alice gagne → déverrouillé ; la modale porte son **vrai score** (1) ; l'envoi crée un message avec ce score et une cible |
+| 3     | le bouton survit à un rechargement, toujours déverrouillé (même appareil)                    |
+| 4     | ⚔ depuis l'onglet Amis → choix du mode → page verrouillée (« joue d'abord ») → Bob gagne → modale ouverte sur cet ami (`?challenge=` consommé) |
+| 5     | acceptation depuis la Boîte → bandeau au score d'Alice → cible du défi jouée → statut serveur `beaten` |
 | 6     | la *calling card* (`js/challenge-notif.js`) sur une page quelconque ; accepter emmène sur le mode |
 | 7     | « Abandonner » depuis le bandeau → case locale libérée, statut `read` (pas une défaite)      |
 | 8     | Give Up en plein défi → statut `expired`, case libérée                                      |

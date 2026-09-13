@@ -913,7 +913,8 @@
     "server_unreachable": "Impossible de joindre le serveur. Ta session est probablement toujours valide — réessaie.",
     "retry": "Réessayer",
     "challenge_resume": "▶ Reprendre",
-    "challenge_give_up": "Abandonner"
+    "challenge_give_up": "Abandonner",
+    "challenge_pick_note": "Ton score du jour est utilisé — si tu n'as pas encore joué ce mode, tu le joueras d'abord."
   },
   "challenge": {
     "challenge_friend": "Défier un Ami",
@@ -943,7 +944,8 @@
     "expert_note": "Défi Expert : seuls les amis ayant débloqué l'Expert de ce mode peuvent le relever.",
     "no_expert_friend": "Aucun de tes amis n'a encore débloqué l'Expert de ce mode.",
     "expert_locked": "Débloque l'Expert de ce mode avant d'accepter ce défi.",
-    "target_unavailable": "Ce défi n'est plus jouable sur ce mode — il a été annulé."
+    "target_unavailable": "Ce défi n'est plus jouable sur ce mode — il a été annulé.",
+    "locked_hint": "Finis ta partie du jour pour défier un ami"
   },
   "compendium": {
     "title": "Compendium",

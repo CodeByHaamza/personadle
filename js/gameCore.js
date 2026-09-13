@@ -1491,20 +1491,19 @@ export function getPendingActiveChallenge(isExpert = isExpertPage()) {
  * moins », calées sous le seuil d'abandon de chaque mode. Dès que la partie du
  * jour est finie, le vrai score du joueur remplace le par.
  */
-export const CHALLENGE_PAR = {
-  classic: 5,
-  emoji: 5,
-  silhouette: 4,
-  alloutattack: 4,
-  personae: 3,
-  music: 3,
-};
+/**
+ * Un défi porte TOUJOURS le vrai score du jour de l'expéditeur : le bouton est
+ * verrouillé tant que la partie n'est pas finie (décision Hamza, 2026-09-13 —
+ * « bats mon score » n'a pas de sens sans score). Le « par » par mode qui
+ * servait de score de référence avant la fin de partie a été retiré.
+ */
+export function challengeScoreFor(score) {
+  return Number.isFinite(score) && score > 0 ? score : null;
+}
 
-/** Score effectif d'un défi : celui du joueur s'il a fini, sinon le par du mode. */
-export function challengeScoreFor(mode, score) {
-  if (Number.isFinite(score) && score > 0) return score;
-  const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
-  return CHALLENGE_PAR[key] ?? 5;
+/** Le bouton est verrouillé tant qu'il n'a pas de score (partie du jour non finie). */
+export function isChallengeLocked(score) {
+  return challengeScoreFor(score) === null;
 }
 
 /**
@@ -1521,11 +1520,15 @@ export function challengeScoreFor(mode, score) {
  *   - une fois la navigation révélée (revealNextLink), il y est déplacé, entre
  *     « mode précédent » et « mode suivant », là où le joueur regarde ;
  *   - rappeler la fonction MET À JOUR score et pool au lieu de ne rien faire —
- *     c'est ce qui permet le montage précoce avec un score « par » puis le
- *     remplacement par le vrai score à la fin (initChallengeButton ci-dessous).
+ *     c'est ce qui permet le montage précoce, verrouillé, puis le déverrouillage
+ *     avec le vrai score à la fin (initChallengeButton ci-dessous).
+ *   - **verrouillé tant que la partie du jour n'est pas finie** (score null) :
+ *     visible, grisé, un message au survol / au tap explique quoi faire. Un
+ *     défi se lance sur un score réel, jamais sur un score de référence.
  *
  * @param {string}   mode       - Mode lowercase ('classic', 'emoji', etc.)
- * @param {number|null} score   - Score à battre (tentatives). null = par du mode.
+ * @param {number|null} score   - Score à battre (tentatives). null = partie non
+ *                                finie → bouton verrouillé.
  * @param {string[]|(() => string[])} targetPool - Noms candidats pour la cible du
  *                                défi (pool filtré, cible du jour exclue par
  *                                l'appelant), ou une fonction qui le calcule au
@@ -1561,10 +1564,14 @@ export function showChallengeButton(mode, score, targetPool = null) {
       // Tout est lu au clic, pas au montage : score et pool changent en fin de
       // partie, les filtres à tout moment, et la date à minuit.
       const st = btn._challenge ?? {};
+      if (isChallengeLocked(st.score)) {
+        _showChallengeLockHint(btn);
+        return;
+      }
       const pool = typeof st.targetPool === "function" ? st.targetPool() : st.targetPool;
       _showChallengeModal(
         st.mode ?? mode,
-        challengeScoreFor(st.mode ?? mode, st.score),
+        challengeScoreFor(st.score),
         parisDateKey(),
         _getActiveFilters(st.mode ?? mode),
         pool ?? null,
@@ -1578,10 +1585,56 @@ export function showChallengeButton(mode, score, targetPool = null) {
 
   btn._challenge = {
     mode,
-    score: Number.isFinite(score) && score > 0 ? score : null,
+    score: challengeScoreFor(score),
     targetPool,
   };
+  _applyChallengeLock(btn);
+
+  // Arrivé depuis la page Amis avec un ami présélectionné alors que la partie
+  // n'était pas finie : la modale s'ouvre d'elle-même au déverrouillage.
+  if (_challengePreselectId && !isChallengeLocked(btn._challenge.score) && !_preselectConsumed) {
+    _preselectConsumed = true;
+    btn.click();
+  }
 }
+
+/** Grise le bouton et pose le message d'explication tant qu'il n'y a pas de score. */
+function _applyChallengeLock(btn) {
+  const locked = isChallengeLocked(btn._challenge?.score);
+  const t = (key, fb) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fb;
+  };
+  btn.classList.toggle("btn-challenge--locked", locked);
+  btn.setAttribute("aria-disabled", locked ? "true" : "false");
+  if (locked) {
+    btn.title = t("challenge.locked_hint", "Finish today's game to challenge a friend");
+  } else {
+    btn.removeAttribute("title");
+  }
+}
+
+/** Bulle « finis ta partie » sous le bouton, au clic ou au tap (le survol a le title). */
+function _showChallengeLockHint(btn) {
+  const t = (key, fb) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fb;
+  };
+  let hint = btn.querySelector(".btn-challenge__hint");
+  if (!hint) {
+    hint = document.createElement("span");
+    hint.className = "btn-challenge__hint";
+    hint.setAttribute("role", "status");
+    btn.appendChild(hint);
+  }
+  hint.textContent = t("challenge.locked_hint", "Finish today's game to challenge a friend");
+  hint.classList.add("btn-challenge__hint--show");
+  clearTimeout(btn._hintTimer);
+  btn._hintTimer = setTimeout(() => hint.classList.remove("btn-challenge__hint--show"), 2600);
+}
+
+/** La présélection d'ami (?challenge=) ne doit ouvrir la modale qu'une fois. */
+let _preselectConsumed = false;
 
 /** Insère le bouton dans son hôte — entre prev/next quand l'hôte est la navigation. */
 function _placeChallengeButton(btn, host, nav) {
@@ -1619,7 +1672,8 @@ export async function initChallengeButton(mode, targetPool, score = null) {
   // aussitôt, sinon un F5 rouvrirait la modale à chaque fois.
   const params = new URLSearchParams(window.location.search);
   const preselect = params.get("challenge");
-  if (preselect && document.getElementById("challengeFriendBtn")) {
+  const btn = document.getElementById("challengeFriendBtn");
+  if (preselect && btn) {
     params.delete("challenge");
     const qs = params.toString();
     window.history.replaceState(
@@ -1628,7 +1682,14 @@ export async function initChallengeButton(mode, targetPool, score = null) {
       `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`
     );
     _challengePreselectId = String(preselect);
-    document.getElementById("challengeFriendBtn").click();
+    if (isChallengeLocked(btn._challenge?.score)) {
+      // Partie du jour pas encore jouée : on le dit, et la modale s'ouvrira
+      // toute seule sur cet ami à la fin (showChallengeButton).
+      _showChallengeLockHint(btn);
+    } else {
+      _preselectConsumed = true;
+      btn.click();
+    }
   }
 }
 
@@ -1742,13 +1803,15 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
       // Ami présélectionné (arrivée depuis l'onglet Amis) : sa ligne est mise
       // en avant et amenée à l'écran ; le clic « Envoyer » reste au joueur.
       if (_challengePreselectId) {
-        const row = listEl
-          .querySelector(`.js-send-challenge[data-fid="${CSS.escape(_challengePreselectId)}"]`)
-          ?.closest(".challenge-friend-row");
+        // L'id est numérique ; on ne dépend pas de CSS.escape (absent de jsdom).
+        const wanted = String(_challengePreselectId);
         _challengePreselectId = null;
+        const row = [...listEl.querySelectorAll(".js-send-challenge")]
+          .find((b) => b.dataset.fid === wanted)
+          ?.closest(".challenge-friend-row");
         if (row) {
           row.classList.add("challenge-friend-row--preselected");
-          row.scrollIntoView({ block: "nearest" });
+          row.scrollIntoView?.({ block: "nearest" });
           row.querySelector(".js-send-challenge")?.focus({ preventScroll: true });
         }
       }

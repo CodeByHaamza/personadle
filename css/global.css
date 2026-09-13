@@ -1879,6 +1879,76 @@ body.darkmode .btn-challenge:hover {
     0 6px 22px rgba(0, 0, 0, 0.5);
 }
 
+/* ── Verrouillé tant que la partie du jour n'est pas finie (2.2) ──
+   Visible mais grisé, sans pulsation ; le `title` explique au survol, et un
+   clic / tap fait sortir la même phrase en bulle sous le bouton (mobile n'a
+   pas de survol). Pas d'attribut disabled : il faut que le clic arrive. */
+.btn-challenge--locked,
+body.darkmode .btn-challenge--locked {
+  background: linear-gradient(135deg, #5a5a5a 0%, #7a7a7a 100%);
+  color: rgba(255, 255, 255, 0.75);
+  cursor: not-allowed;
+  animation: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+.btn-challenge--locked:hover,
+body.darkmode .btn-challenge--locked:hover {
+  background: linear-gradient(135deg, #5a5a5a 0%, #7a7a7a 100%);
+  transform: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+.btn-challenge--locked:hover > span:first-child {
+  transform: none;
+}
+.btn-challenge--locked > span:first-child::before {
+  content: "🔒";
+  font-size: 0.8em;
+  margin-right: 4px;
+}
+.btn-challenge__hint {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translate(-50%, -4px);
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.btn-challenge__hint::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  background: #1a1a1a;
+  transform: translateX(-50%) rotate(45deg);
+}
+.btn-challenge__hint--show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+@media (max-width: 480px) {
+  .btn-challenge__hint {
+    white-space: normal;
+    width: max-content;
+    max-width: 78vw;
+    text-align: center;
+  }
+}
+
 /* ── Overlay de la modale ── */
 .challenge-overlay {
   position: fixed;

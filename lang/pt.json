@@ -913,7 +913,8 @@
     "server_unreachable": "Não foi possível contactar o servidor. A tua sessão provavelmente ainda é válida — tenta de novo.",
     "retry": "Tentar de novo",
     "challenge_resume": "▶ Retomar",
-    "challenge_give_up": "Desistir"
+    "challenge_give_up": "Desistir",
+    "challenge_pick_note": "Usa-se a tua marca do dia — se ainda não jogaste esse modo, jogá-lo-ás primeiro."
   },
   "settings": {
     "title": "Definições",
@@ -1057,7 +1058,8 @@
     "expert_note": "Desafio Especialista: só os amigos que desbloquearam o Especialista deste modo o podem aceitar.",
     "no_expert_friend": "Nenhum dos teus amigos desbloqueou ainda o Especialista deste modo.",
     "expert_locked": "Desbloqueia o Especialista deste modo antes de aceitares este desafio.",
-    "target_unavailable": "Este desafio já não pode ser jogado neste modo — foi cancelado."
+    "target_unavailable": "Este desafio já não pode ser jogado neste modo — foi cancelado.",
+    "locked_hint": "Termina a tua partida de hoje para desafiar um amigo"
   },
   "compendium": {
     "title": "Compêndio",
