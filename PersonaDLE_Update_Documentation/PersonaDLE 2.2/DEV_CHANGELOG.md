@@ -13,6 +13,63 @@
 
 ---
 
+## 2026-09-13 — Défi verrouillé avant la partie, entrée 2.2 Velvet Room, pile haut-droite du profil
+
+Trois décisions de Hamza, plus la CI de #112 (rouge depuis l'ajout de `challenge_flow.spec.js`).
+
+### « Défier un ami » : verrouillé tant que la partie du jour n'est pas finie
+
+Le lot du 12 laissait le bouton cliquable dès l'arrivée, avec un score de référence (« par »
+par mode). Décision : un défi porte **toujours un vrai score** — « bats mon score » n'a pas
+de sens sans score. `js/gameCore.js` :
+
+- `CHALLENGE_PAR` et le par sont **retirés** ; `challengeScoreFor(score)` renvoie le score ou
+  `null`, `isChallengeLocked(score)` en découle. Les 6 modes n'ont rien à changer : ils
+  passaient déjà `null` avant la fin et `attempts` après.
+- `showChallengeButton()` pose `.btn-challenge--locked` + `aria-disabled` + `title` (i18n
+  `challenge.locked_hint`) ; le clic verrouillé n'ouvre rien et fait sortir une bulle
+  `.btn-challenge__hint` 2,6 s (le mobile n'a pas de survol). Pas d'attribut `disabled` : le
+  clic doit arriver pour montrer le message. CSS dans `global.css` (gris, 🔒 devant l'épée,
+  bulle avec flèche, retour à la ligne ≤ 480 px).
+- **Depuis la page Amis** (`?challenge=<id>`) sur un mode pas encore joué : la bulle s'affiche
+  au lieu de la modale, la présélection est gardée, et `showChallengeButton()` ouvre la modale
+  **tout seul** sur cet ami au déverrouillage (`_preselectConsumed` garantit une seule fois).
+  Le sélecteur de mode de `friends.js` annonce la règle (`friends.challenge_pick_note`).
+- Deux fragilités trouvées en écrivant les tests, corrigées : la ligne présélectionnée
+  dépendait de `CSS.escape` et de `scrollIntoView`, absents de jsdom — l'exception faisait
+  retomber la liste d'amis sur son état d'erreur. Recherche par `dataset.fid`, appel optionnel.
+- Tests : `tests/challenge_button_always.test.js` → **`challenge_button_lock.test.js`** (15,
+  dont la présélection différée) ; `tests-e2e/challenge_flow.spec.js` étapes 1–5 réécrites
+  (Alice joue pour déverrouiller, Bob joue l'Emoji avant que la modale s'ouvre sur Alice) avec
+  **un seul contexte navigateur pour Alice** — « partie finie » est un état local, un contexte
+  neuf par étape était un autre appareil. Changelogs joueur (index + page 2.2) reformulés.
+
+### CI #112 — pourquoi le E2E était rouge
+
+`challenge_flow` étape 2 cliquait le bouton avant toute partie ; en CI (1280×720) Playwright
+loggait 55× « `.personadle-box` subtree intercepts pointer events » — la boîte de consigne
+chevauche le bouton pendant le défilement d'actionnabilité, jamais en local. Le clic sur ce
+bouton passe en `{ force: true }` (la visibilité est vérifiée à part) ; le scénario a de toute
+façon changé avec le verrou.
+
+### Entrée 2.2 du déroulant « Nouveautés » — Velvet Room, pas techno
+
+« Mise à jour communautaire » était faux (les retours joueurs n'en sont pas le cœur) et le
+thème techno ne parlait de rien. L'entrée s'appelle **« Version 2.2 — Le Compendium »** (6
+langues), reprend le langage du carnet (`css/index.css` §10c réécrite : `.velvet-theme`,
+damier de losanges qui dérive, pentacle qui respire, ornements ❦, or, papier crème en clair /
+velours en sombre, `.velvet-btn`) et ouvre sur une puce 📖 Compendium. Plus aucune trace
+`tech-*`.
+
+### Profil — pile haut-droite
+
+`profile.html` : le toggle dark mode/⚙ et le bouton Compendium sont dans `.top-right-stack`
+(fixe, colonne, `align-items: stretch`) ; le toggle redevient statique dedans, le bouton prend
+**exactement sa largeur** (224 px desktop, 93 px mobile où le libellé disparaît), avec 12 px
+d'écart. `profile-page.css` §16 réécrite. Mesuré des deux côtés.
+
+---
+
 ## 2026-09-13 — Le Compendium : carnet de collection (branche `fix/community-feedback-batch`)
 
 Nouvelle page `profile/compendium/` — un livre qui raconte ce que le joueur a accompli :

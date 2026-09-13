@@ -304,6 +304,15 @@
   font-size: 0.78rem;
   color: var(--fr-text-muted);
 }
+/* Le défi porte le score du jour : on le dit avant de choisir le mode */
+.fr-mode-picker__note {
+  margin: -2px 0 8px;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--fr-text-muted);
+  opacity: 0.85;
+}
+
 .fr-mode-picker__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

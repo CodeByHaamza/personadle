@@ -1,14 +1,19 @@
 /**
- * challenge_button_always.test.js — « Défier un ami » toujours disponible (2.2)
+ * challenge_button_lock.test.js — « Défier un ami » : visible dès l'arrivée,
+ * verrouillé tant que la partie du jour n'est pas finie (2.2)
  *
  * Retour joueur : le bouton n'apparaissait qu'après une victoire, et
  * « disparaissait parfois » (rechargement : la victoire n'est plus fraîche, et
  * l'auth n'a pas encore posé _currentUser quand le mode restaure sa partie).
- * Couvre le nouveau contrat de showChallengeButton() / initChallengeButton() :
+ * Décision Hamza (2026-09-13) : il est là tout de suite, mais **verrouillé**
+ * jusqu'à la fin de la partie — un défi porte toujours un vrai score, jamais un
+ * score de référence. Contrat de showChallengeButton() / initChallengeButton() :
  *   - montage précoce dans .expert-toggle-zone tant que la navigation de fin de
  *     partie est cachée, déplacement dans la navigation une fois révélée ;
- *   - score « par » du mode tant que la partie n'est pas finie, vrai score après ;
- *   - rappeler la fonction met à jour, ne fait plus rien d'autre.
+ *   - verrouillé (grisé, message au clic) sans score, déverrouillé avec ;
+ *   - rappeler la fonction met à jour, ne fait plus rien d'autre ;
+ *   - ?challenge=<ami> sur une partie non finie attend la fin, puis ouvre la
+ *     modale sur cet ami.
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -18,7 +23,7 @@ import {
   showChallengeButton,
   initChallengeButton,
   challengeScoreFor,
-  CHALLENGE_PAR,
+  isChallengeLocked,
 } from "../js/gameCore.js";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -51,19 +56,15 @@ beforeEach(() => {
   delete window._authReady;
 });
 
-describe("challengeScoreFor / CHALLENGE_PAR", () => {
-  it("chaque mode a un par, sous le seuil d'abandon", () => {
-    for (const mode of ["classic", "emoji", "silhouette", "alloutattack", "personae", "music"]) {
-      expect(CHALLENGE_PAR[mode], mode).toBeGreaterThan(0);
-    }
-  });
-
-  it("le vrai score l'emporte sur le par ; sinon le par du mode ; sinon 5", () => {
-    expect(challengeScoreFor("classic", 3)).toBe(3);
-    expect(challengeScoreFor("classic", null)).toBe(CHALLENGE_PAR.classic);
-    expect(challengeScoreFor("music", 0)).toBe(CHALLENGE_PAR.music);
-    expect(challengeScoreFor("Classique", undefined)).toBe(CHALLENGE_PAR.classic);
-    expect(challengeScoreFor("inconnu", NaN)).toBe(5);
+describe("challengeScoreFor / isChallengeLocked", () => {
+  it("un vrai score passe tel quel ; sans score, pas de par : null et verrouillé", () => {
+    expect(challengeScoreFor(3)).toBe(3);
+    expect(challengeScoreFor(null)).toBeNull();
+    expect(challengeScoreFor(0)).toBeNull();
+    expect(challengeScoreFor(undefined)).toBeNull();
+    expect(challengeScoreFor(NaN)).toBeNull();
+    expect(isChallengeLocked(null)).toBe(true);
+    expect(isChallengeLocked(4)).toBe(false);
   });
 });
 
@@ -106,20 +107,30 @@ describe("showChallengeButton — placement", () => {
   });
 });
 
-describe("showChallengeButton — score et pool lus au clic", () => {
-  it("envoie le par tant qu'aucun score n'est connu, puis le vrai score", async () => {
+describe("showChallengeButton — verrou, score et pool lus au clic", () => {
+  it("sans score : verrouillé, le clic montre le message et n'ouvre rien", async () => {
     mountPage();
     showChallengeButton("classic", null, ["A"]);
+    expect(btn().classList.contains("btn-challenge--locked")).toBe(true);
+    expect(btn().getAttribute("aria-disabled")).toBe("true");
+    expect(btn().title).toContain("Finish today's game");
     await openModal();
-    expect(document.querySelector(".challenge-card__score").textContent).toContain(
-      String(CHALLENGE_PAR.classic)
-    );
-    document.getElementById("challengeModal").remove();
+    expect(document.getElementById("challengeModal")).toBeNull();
+    const hint = btn().querySelector(".btn-challenge__hint");
+    expect(hint?.classList.contains("btn-challenge__hint--show")).toBe(true);
+    expect(hint.textContent).toContain("Finish today's game");
+  });
 
-    // Fin de partie : rappel avec le vrai score — même bouton, score mis à jour.
+  it("fin de partie : rappel avec le vrai score — même bouton, déverrouillé, score dans la modale", async () => {
+    mountPage();
+    showChallengeButton("classic", null, ["A"]);
     showChallengeButton("classic", 2, ["A"]);
+    expect(btn().classList.contains("btn-challenge--locked")).toBe(false);
+    expect(btn().getAttribute("aria-disabled")).toBe("false");
+    expect(btn().hasAttribute("title")).toBe(false);
     await openModal();
     expect(document.querySelector(".challenge-card__score").textContent).toContain("2");
+    expect(document.querySelectorAll("#challengeFriendBtn")).toHaveLength(1);
   });
 
   it("le pool peut être une fonction, évaluée au clic (les filtres bougent)", async () => {
@@ -159,6 +170,27 @@ describe("initChallengeButton", () => {
     expect(btn()._challenge.score).toBe(6);
   });
 
+  it("?challenge=<ami> sur une partie non finie : message, puis la modale s'ouvre seule à la fin", async () => {
+    mountPage();
+    window.history.replaceState({}, "", "/classiqueMode/classiqueMode.html?challenge=2");
+    window._authReady = Promise.resolve();
+    window._personadleApi.friends.list.mockResolvedValue({
+      friends: [{ friend_id: 2, pseudo: "Ann", friend_code: "AAA", avatar_data: null }],
+    });
+    await initChallengeButton("classic", ["A"], null);
+    expect(window.location.search, "le paramètre est consommé").toBe("");
+    expect(document.getElementById("challengeModal"), "pas de modale sans score").toBeNull();
+    expect(btn().querySelector(".btn-challenge__hint--show")).not.toBeNull();
+
+    showChallengeButton("classic", 3, ["A"]);
+    await new Promise((r) => setTimeout(r, 0));
+    const modal = document.getElementById("challengeModal");
+    expect(modal, "la fin de partie ouvre la modale sur l'ami présélectionné").not.toBeNull();
+    await vi.waitFor(() =>
+      expect(modal.querySelector(".challenge-friend-row--preselected")).not.toBeNull()
+    );
+  });
+
   it("une auth qui échoue (pas de backend) ne casse pas le mode", async () => {
     mountPage();
     delete window._currentUser;
@@ -169,7 +201,7 @@ describe("initChallengeButton", () => {
   });
 });
 
-describe("les 6 modes montent le bouton dès l'arrivée", () => {
+describe("les 6 modes montent le bouton dès l'arrivée (verrouillé)", () => {
   const MODE_FILES = {
     classic: "classiqueMode/modeClassique.js",
     emoji: "emojiMode/emojiMode.js",
@@ -200,14 +232,14 @@ describe("filtres transmis avec le défi", () => {
     });
 
     mountPage();
-    showChallengeButton("classic", null, ["A", "B"]);
+    showChallengeButton("classic", 4, ["A", "B"]);
     await openModal();
     document.querySelector('.js-send-challenge[data-fid="2"]').click();
     await vi.waitFor(() => expect(window._personadleApi.messages.send).toHaveBeenCalledTimes(1));
 
     const payload = window._personadleApi.messages.send.mock.calls[0][0];
     expect(JSON.parse(payload.challenge_filters)).toEqual(["P3", "P4", "P5"]);
-    expect(payload.challenge_score).toBe(CHALLENGE_PAR.classic);
+    expect(payload.challenge_score).toBe(4);
     expect(["A", "B"]).toContain(payload.challenge_target);
     registerActiveFilters("filters_Classic", null);
   });

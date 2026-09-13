@@ -913,7 +913,8 @@
     "server_unreachable": "Server nicht erreichbar. Deine Sitzung ist wahrscheinlich noch gültig — versuch es erneut.",
     "retry": "Erneut versuchen",
     "challenge_resume": "▶ Fortsetzen",
-    "challenge_give_up": "Aufgeben"
+    "challenge_give_up": "Aufgeben",
+    "challenge_pick_note": "Deine Tagesmarke zählt — hast du den Modus heute noch nicht gespielt, spielst du ihn zuerst."
   },
   "challenge": {
     "challenge_friend": "Freund herausfordern",
@@ -943,7 +944,8 @@
     "expert_note": "Experten-Duell: nur Freunde, die den Experten dieses Modus freigeschaltet haben, können es annehmen.",
     "no_expert_friend": "Keiner deiner Freunde hat den Experten dieses Modus bisher freigeschaltet.",
     "expert_locked": "Schalte zuerst den Experten dieses Modus frei, um dieses Duell anzunehmen.",
-    "target_unavailable": "Diese Herausforderung ist in diesem Modus nicht mehr spielbar – sie wurde abgebrochen."
+    "target_unavailable": "Diese Herausforderung ist in diesem Modus nicht mehr spielbar – sie wurde abgebrochen.",
+    "locked_hint": "Beende dein heutiges Spiel, um einen Freund herauszufordern"
   },
   "compendium": {
     "title": "Kompendium",

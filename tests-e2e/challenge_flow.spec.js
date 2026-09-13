@@ -9,12 +9,16 @@ import { csrfHeader } from "./helpers/csrf.js";
  *
  *   1. Alice arrive sur le mode Classique : « Défier un ami » est là AVANT toute
  *      partie (lot 2.2 — il n'apparaissait qu'après une victoire, et disparaissait
- *      au rechargement).
- *   2. La modale annonce le score « par » du mode, Alice envoie le défi à Bob :
- *      le message existe côté serveur avec ce score et une cible dédiée.
- *   3. Le bouton survit à un rechargement.
- *   4. Bob, depuis l'onglet Amis, clique ⚔ sur Alice → choisit un mode → arrive
- *      sur la page du mode avec la modale ouverte sur Alice.
+ *      au rechargement), mais VERROUILLÉ : un clic explique qu'il faut finir sa
+ *      partie du jour, aucune modale (décision Hamza, 2026-09-13 — un défi porte
+ *      toujours un vrai score, jamais un score de référence).
+ *   2. Alice gagne sa partie : le bouton se déverrouille, la modale annonce son
+ *      score, Alice envoie le défi à Bob : le message existe côté serveur avec ce
+ *      score et une cible dédiée.
+ *   3. Le bouton survit à un rechargement — et reste déverrouillé.
+ *   4. Bob, depuis l'onglet Amis, clique ⚔ sur Alice → choisit un mode qu'il n'a
+ *      pas joué → arrive sur la page verrouillée, avec le message ; il joue, et
+ *      la modale s'ouvre d'elle-même sur Alice.
  *   5. Bob accepte le défi depuis la Boîte, atterrit sur Classique avec la cible
  *      du défi, la devine : le défi passe en `beaten`.
  *
@@ -73,41 +77,66 @@ async function pageAs(browser, user) {
 test.describe.serial("UI — un défi de bout en bout", () => {
   let alice, bob;
   let challengeId;
+  // UN SEUL navigateur pour Alice sur les étapes 1 à 3 : « partie finie » est un
+  // état local (localStorage) ; un contexte neuf par étape serait un autre appareil.
+  let aliceBrowser;
 
-  test.beforeAll(async () => {
+  test.beforeAll(async ({ browser }) => {
     const rnd = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     alice = await registerUser(rnd, "a");
     bob = await registerUser(rnd, "b");
     await befriend(alice, bob);
+    aliceBrowser = await browser.newContext({ storageState: await alice.ctx.storageState() });
   });
 
   test.afterAll(async () => {
+    await aliceBrowser?.close();
     await alice?.ctx?.dispose();
     await bob?.ctx?.dispose();
   });
 
-  test("1. « Défier un ami » est présent dès l'arrivée, avant toute partie", async ({ browser }) => {
-    const page = await pageAs(browser, alice);
+  test("1. « Défier un ami » est présent dès l'arrivée, mais verrouillé avant la partie", async () => {
+    const page = await aliceBrowser.newPage();
     await page.goto("/classiqueMode/classiqueMode.html");
 
     const btn = page.locator("#challengeFriendBtn");
     await expect(btn, "le bouton attend la résolution de l'auth, puis apparaît").toBeVisible({
       timeout: 10_000,
     });
-    // Tant que la partie n'est pas finie, il vit sous le logo, avec la pilule Expert.
+    // Tant que la partie n'est pas finie, il vit sous le logo, avec la pilule Expert…
     await expect(page.locator(".expert-toggle-zone #challengeFriendBtn")).toHaveCount(1);
-    await page.context().close();
+    // …et il est verrouillé : grisé, message au survol, bulle au clic, pas de modale.
+    await expect(btn).toHaveClass(/btn-challenge--locked/);
+    await expect(btn).toHaveAttribute("aria-disabled", "true");
+    await expect(btn).toHaveAttribute("title", /finish today's game/i);
+    // force : en CI (1280×720) la boîte de consigne chevauche le bouton pendant
+    // le défilement d'actionnabilité de Playwright ; ce n'est pas ce qu'on teste.
+    await btn.click({ force: true });
+    await expect(btn.locator(".btn-challenge__hint--show")).toBeVisible();
+    await expect(page.locator("#challengeModal")).toHaveCount(0);
+    await page.close();
   });
 
-  test("2. la modale annonce le score par et envoie le défi à Bob", async ({ browser }) => {
-    const page = await pageAs(browser, alice);
+  test("2. Alice gagne : le bouton se déverrouille, la modale porte son score, le défi part à Bob", async () => {
+    const page = await aliceBrowser.newPage();
     await page.goto("/classiqueMode/classiqueMode.html");
-    await page.locator("#challengeFriendBtn").click();
+    const btn = page.locator("#challengeFriendBtn");
+    await expect(btn).toBeVisible({ timeout: 10_000 });
+
+    // La cible du jour est dans localStorage : Alice la devine du premier coup.
+    const target = await page.evaluate(() => JSON.parse(localStorage.getItem("target") || "null")?.nom);
+    expect(target, "la cible du jour doit être posée").toBeTruthy();
+    await page.locator("#textbar").fill(target);
+    await page.locator("#guessButton").click();
+
+    await expect(btn, "victoire → déverrouillé").not.toHaveClass(/btn-challenge--locked/, {
+      timeout: 10_000,
+    });
+    await btn.click({ force: true });
 
     const modal = page.locator("#challengeModal");
     await expect(modal).toBeVisible();
-    // Score « par » du Classique = 5 (CHALLENGE_PAR, js/gameCore.js).
-    await expect(modal.locator(".challenge-card__score")).toContainText("5");
+    await expect(modal.locator(".challenge-card__score"), "score réel : 1 essai").toContainText("1");
 
     const send = modal.locator(`.js-send-challenge[data-fid="${bob.userId}"]`);
     await expect(send, "Bob doit être dans la liste d'amis de la modale").toBeVisible();
@@ -118,22 +147,27 @@ test.describe.serial("UI — un défi de bout en bout", () => {
     const mine = msgs.find((m) => m.sender_id === alice.userId && m.status === "unread");
     expect(mine, "Bob doit avoir reçu un défi non lu d'Alice").toBeTruthy();
     expect(mine.challenge_mode).toBe("classic");
-    expect(mine.challenge_score, "score par du Classique").toBe(5);
+    expect(mine.challenge_score, "le vrai score d'Alice, pas un par").toBe(1);
     expect(mine.challenge_target, "cible dédiée tirée dans le pool").toBeTruthy();
     challengeId = mine.id;
-    await page.context().close();
+    await page.close();
   });
 
-  test("3. le bouton survit à un rechargement de la page", async ({ browser }) => {
-    const page = await pageAs(browser, alice);
+  test("3. le bouton survit à un rechargement, déverrouillé puisque la partie est finie", async () => {
+    const page = await aliceBrowser.newPage();
     await page.goto("/classiqueMode/classiqueMode.html");
-    await expect(page.locator("#challengeFriendBtn")).toBeVisible({ timeout: 10_000 });
+    const btn = page.locator("#challengeFriendBtn");
+    await expect(btn).toBeVisible({ timeout: 10_000 });
+    await expect(btn).not.toHaveClass(/btn-challenge--locked/);
     await page.reload();
-    await expect(page.locator("#challengeFriendBtn")).toBeVisible({ timeout: 10_000 });
-    await page.context().close();
+    await expect(btn).toBeVisible({ timeout: 10_000 });
+    await expect(btn).not.toHaveClass(/btn-challenge--locked/);
+    await page.close();
   });
 
-  test("4. ⚔ depuis l'onglet Amis ouvre la modale du mode choisi sur cet ami", async ({ browser }) => {
+  test("4. ⚔ depuis l'onglet Amis : mode pas encore joué → on joue d'abord, puis la modale s'ouvre sur cet ami", async ({
+    browser,
+  }) => {
     const page = await pageAs(browser, bob);
     await page.goto("/profile/friends/friends.html");
 
@@ -147,11 +181,26 @@ test.describe.serial("UI — un défi de bout en bout", () => {
     const picker = page.locator("#frModePicker");
     await expect(picker).toBeVisible();
     await expect(picker.locator(".fr-mode-picker__btn")).toHaveCount(6);
+    await expect(picker.locator(".fr-mode-picker__note"), "la règle est annoncée").toBeVisible();
     await picker.locator(".fr-mode-picker__btn", { hasText: "Emoji" }).click();
 
     await page.waitForURL(/emojiMode\/emojiMode\.html/);
     // Le paramètre est consommé : un F5 ne rouvrirait pas la modale.
     await expect.poll(() => page.url()).not.toContain("challenge=");
+    const btn = page.locator("#challengeFriendBtn");
+    await expect(btn).toBeVisible({ timeout: 10_000 });
+    await expect(btn, "Bob n'a pas joué l'Emoji aujourd'hui").toHaveClass(/btn-challenge--locked/);
+    await expect(btn.locator(".btn-challenge__hint--show"), "le message dit de jouer d'abord").toBeVisible();
+    await expect(page.locator("#challengeModal")).toHaveCount(0);
+
+    // Bob joue (et gagne) : la modale s'ouvre toute seule, sur Alice.
+    const target = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("targetEmoji") || "null")?.nom
+    );
+    expect(target, "la cible Emoji du jour doit être posée").toBeTruthy();
+    await page.locator("#textbar").fill(target);
+    await page.locator("#guessButton").click();
+
     const row = page.locator(".challenge-friend-row--preselected");
     await expect(row, "la ligne d'Alice est mise en avant").toBeVisible({ timeout: 10_000 });
     await expect(row).toContainText(alice.pseudo);
@@ -170,7 +219,7 @@ test.describe.serial("UI — un défi de bout en bout", () => {
     await accept.click();
 
     await page.waitForURL(/classiqueMode\/classiqueMode\.html/, { timeout: 15_000 });
-    await expect(page.locator("#cbScore"), "le bandeau annonce le score à battre").toContainText("5");
+    await expect(page.locator("#cbScore"), "le bandeau annonce le score d'Alice").toContainText("1");
 
     // La cible du défi a remplacé celle du jour (resolveChallengeTarget).
     const { challenge_target: cible } = (await challengesOf(bob)).find((m) => m.id === challengeId);
@@ -181,7 +230,7 @@ test.describe.serial("UI — un défi de bout en bout", () => {
     await page.locator("#textbar").fill(cible);
     await page.locator("#guessButton").click();
 
-    // Un seul essai ≤ 5 : défi battu, statut serveur `beaten`.
+    // Un seul essai ≤ 1 : défi battu, statut serveur `beaten`.
     await expect.poll(async () => (await challengesOf(bob)).find((m) => m.id === challengeId)?.status, {
       timeout: 15_000,
     }).toBe("beaten");

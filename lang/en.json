@@ -913,7 +913,8 @@
     "server_unreachable": "Could not reach the server. Your session is probably still valid — try again.",
     "retry": "Retry",
     "challenge_resume": "▶ Resume",
-    "challenge_give_up": "Give up"
+    "challenge_give_up": "Give up",
+    "challenge_pick_note": "Your score of the day is used — if you haven't played that mode yet, you'll play it first."
   },
   "settings": {
     "title": "Settings",
@@ -1057,7 +1058,8 @@
     "expert_note": "Expert challenge: only friends who have unlocked this mode's Expert can take it on.",
     "no_expert_friend": "None of your friends has unlocked this mode's Expert yet.",
     "expert_locked": "Unlock this mode's Expert before accepting this challenge.",
-    "target_unavailable": "This challenge can't be played on this mode anymore — it has been cancelled."
+    "target_unavailable": "This challenge can't be played on this mode anymore — it has been cancelled.",
+    "locked_hint": "Finish today's game to challenge a friend"
   },
   "compendium": {
     "title": "Compendium",

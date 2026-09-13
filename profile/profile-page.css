@@ -4489,23 +4489,42 @@ body.darkmode .expert-stat-cols .expert-stat-cell {
 }
 
 /* =====================================================
-   16. BOUTON COMPENDIUM — sous le toggle dark mode
-   Hommage au « Grimoire du Cœur » : losanges bleus,
-   pentacle doré. Fixe, sous .darkmode-toggle (top 12px,
-   ~44px de haut). Icône seule sur mobile.
+   16. PILE HAUT-DROITE — toggle dark mode + ⚙, puis le
+   bouton Compendium à la même largeur
+   -----------------------------------------------------
+   La pile prend le `position: fixed` du toggle (global.css
+   §1) ; le toggle redevient statique dedans, et
+   `align-items: stretch` donne au bouton exactement la
+   largeur du bloc du dessus — desktop comme mobile, où
+   le libellé « Dark Mode » disparaît (global.css ≤ 768).
+   Le bouton : hommage au « Grimoire du Cœur » — losanges
+   bleus, pentacle doré.
    ===================================================== */
 
-.grimoire-btn {
+.top-right-stack {
   position: fixed;
-  top: 62px;
+  top: 12px;
   right: 14px;
-  z-index: 9998;
-  display: inline-flex;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.top-right-stack .darkmode-toggle {
+  position: static;
+  z-index: auto;
+}
+
+.grimoire-btn {
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   min-height: 0;
-  padding: 6px 12px 6px 8px;
-  border-radius: 12px;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: 14px;
   overflow: hidden;
   isolation: isolate;
   background: linear-gradient(135deg, #0a1733 0%, #143a7a 55%, #0a1733 100%);
@@ -4521,10 +4540,10 @@ body.darkmode .expert-stat-cols .expert-stat-cell {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-decoration: none;
+  position: relative;
   transition:
     transform 0.2s ease,
-    box-shadow 0.2s ease,
-    filter 0.2s ease;
+    box-shadow 0.2s ease;
 }
 
 /* Losanges bleus (motif du grimoire) : damier tourné à 45°, qui dérive lentement */
@@ -4539,14 +4558,18 @@ body.darkmode .expert-stat-cols .expert-stat-cell {
       transparent 0% 50%
     )
     0 0 / 14px 14px;
-  -webkit-mask: linear-gradient(90deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
-  mask: linear-gradient(90deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
+  -webkit-mask: linear-gradient(90deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  mask: linear-gradient(90deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
   animation: grimoireDiamondsDrift 8s linear infinite;
 }
 
 @keyframes grimoireDiamondsDrift {
-  from { transform: translateX(0); }
-  to   { transform: translateX(14px); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(14px);
+  }
 }
 
 .grimoire-btn__icon {
@@ -4583,12 +4606,16 @@ body.darkmode .expert-stat-cols .expert-stat-cell {
   transform: translateY(0) scale(0.98);
 }
 
+/* Mobile : le toggle perd son libellé (global.css) et se resserre — le bouton
+   suit sa largeur (≈ 90 px) : icône seule, motif visible en entier. */
 @media (max-width: 768px) {
-  .grimoire-btn {
-    top: 58px;
+  .top-right-stack {
+    top: 10px;
     right: 10px;
-    padding: 6px;
-    border-radius: 50%;
+    gap: 8px;
+  }
+  .grimoire-btn {
+    padding: 6px 8px;
   }
   .grimoire-btn__label {
     display: none;

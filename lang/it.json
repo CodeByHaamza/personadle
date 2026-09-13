@@ -913,7 +913,8 @@
     "server_unreachable": "Impossibile contattare il server. La tua sessione è probabilmente ancora valida: riprova.",
     "retry": "Riprova",
     "challenge_resume": "▶ Riprendi",
-    "challenge_give_up": "Rinuncia"
+    "challenge_give_up": "Rinuncia",
+    "challenge_pick_note": "Vale il tuo punteggio del giorno — se non hai ancora giocato quella modalità, la giocherai prima."
   },
   "challenge": {
     "challenge_friend": "Sfida un Amico",
@@ -943,7 +944,8 @@
     "expert_note": "Sfida Esperto: solo gli amici che hanno sbloccato l'Esperto di questa modalità possono raccoglierla.",
     "no_expert_friend": "Nessuno dei tuoi amici ha ancora sbloccato l'Esperto di questa modalità.",
     "expert_locked": "Sblocca l'Esperto di questa modalità prima di accettare questa sfida.",
-    "target_unavailable": "Questa sfida non è più giocabile in questa modalità: è stata annullata."
+    "target_unavailable": "Questa sfida non è più giocabile in questa modalità: è stata annullata.",
+    "locked_hint": "Finisci la partita di oggi per sfidare un amico"
   },
   "compendium": {
     "title": "Compendio",

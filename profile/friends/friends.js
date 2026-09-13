@@ -344,6 +344,10 @@ export function openChallengeModePicker(anchorBtn, friendId, pseudo) {
   picker.setAttribute("aria-label", tf("friends.challenge_pick_mode", "Which mode?"));
   picker.innerHTML = `
     <p class="fr-mode-picker__title">⚔ ${tf("friends.challenge_pick_mode", "Which mode?")} <strong>${esc(pseudo)}</strong></p>
+    <p class="fr-mode-picker__note">${tf(
+      "friends.challenge_pick_note",
+      "Your score of the day is used — if you haven't played that mode yet, you'll play it first."
+    )}</p>
     <div class="fr-mode-picker__grid">
       ${MODES.map(
         ({ key, label }) =>

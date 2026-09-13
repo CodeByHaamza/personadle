@@ -913,7 +913,8 @@
     "server_unreachable": "No se pudo contactar con el servidor. Tu sesión probablemente siga activa: inténtalo de nuevo.",
     "retry": "Reintentar",
     "challenge_resume": "▶ Reanudar",
-    "challenge_give_up": "Rendirse"
+    "challenge_give_up": "Rendirse",
+    "challenge_pick_note": "Se usa tu marca del día — si aún no has jugado ese modo, lo jugarás primero."
   },
   "challenge": {
     "challenge_friend": "Desafiar a un Amigo",
@@ -943,7 +944,8 @@
     "expert_note": "Desafío Experto: solo los amigos que hayan desbloqueado el Experto de este modo pueden aceptarlo.",
     "no_expert_friend": "Ninguno de tus amigos ha desbloqueado aún el Experto de este modo.",
     "expert_locked": "Desbloquea el Experto de este modo antes de aceptar este desafío.",
-    "target_unavailable": "Este desafío ya no se puede jugar en este modo: ha sido cancelado."
+    "target_unavailable": "Este desafío ya no se puede jugar en este modo: ha sido cancelado.",
+    "locked_hint": "Termina tu partida de hoy para desafiar a un amigo"
   },
   "compendium": {
     "title": "Compendio",
