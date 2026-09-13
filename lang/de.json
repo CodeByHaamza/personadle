@@ -1050,7 +1050,11 @@
     "not_played": "hat noch nicht gespielt",
     "gave_up": "hat aufgegeben",
     "first_game_note": "Nur das erste Spiel des Tages — jeder hat seinen eigenen Tagescharakter.",
-    "empty": "Füge Freunde hinzu, um eure Spiele zu vergleichen."
+    "empty": "Füge Freunde hinzu, um eure Spiele zu vergleichen.",
+    "button": "Spiele der Freunde",
+    "locked_hint": "Beende dein heutiges Spiel, um die deiner Freunde zu sehen",
+    "first_game_short": "Erstes Spiel des Tages",
+    "unavailable": "Gerade nicht verfügbar."
   },
   "guest_nudge": {
     "title": "🔥 {{n}} Tage in Folge!",

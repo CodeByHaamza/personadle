@@ -3,9 +3,10 @@
  *
  * Deux moitiés : côté envoi, la session porte la suite ordonnée des essais
  * (journal rattaché à l'identifiant de partie, donc vidé par un Replay et
- * retrouvé après un rechargement) ; côté affichage, showCommunityStats() rend
- * dans la boîte de victoire la première partie du jour de chaque ami, avec le
- * bon essai en vert, et se tait tant que le serveur répond « play_first ».
+ * retrouvé après un rechargement) ; côté affichage, un bouton 👥 jumeau de
+ * ⚔ Défier (même hôte, même verrou) ouvre une fenêtre qui rend la première
+ * partie du jour de chaque ami, avec le bon essai en vert, et qui explique
+ * « finis ta partie » tant que le serveur répond « play_first ».
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -17,6 +18,9 @@ import {
   buildGameSession,
   showWrongMini,
   showCommunityStats,
+  renderFriendsToday,
+  openFriendsGamesModal,
+  showChallengeButton,
   parisDateKey,
 } from "../js/gameCore.js";
 
@@ -81,10 +85,67 @@ describe("journal des essais", () => {
   });
 });
 
-describe("showCommunityStats — « tes amis aujourd'hui »", () => {
-  const friendsToday = vi.fn();
+describe("bouton 👥 Parties des amis — jumeau de ⚔ Défier", () => {
   beforeEach(() => {
+    document.body.innerHTML = `
+      <div class="expert-toggle-zone"></div>
+      <div id="modeNavigationContainer" style="display:none"><div id="nextModeButton"></div></div>`;
+    window._personadleApi = {
+      friends: { list: vi.fn().mockResolvedValue({ friends: [] }) },
+      stats: { friendsToday: vi.fn().mockResolvedValue({ friends: [] }) },
+    };
+  });
+
+  it("se monte juste après ⚔, verrouillé avec lui, et le suit dans la navigation", () => {
+    showChallengeButton("classic", null, ["A"]);
+    const fb = document.getElementById("friendsGamesBtn");
+    expect(fb).not.toBeNull();
+    expect(fb.previousElementSibling.id).toBe("challengeFriendBtn");
+    expect(fb.classList.contains("btn-challenge--locked")).toBe(true);
+    expect(fb.title).toContain("Finish today's game");
+
+    fb.click();
+    expect(document.getElementById("friendsGamesModal"), "verrouillé : pas de fenêtre").toBeNull();
+    expect(fb.querySelector(".btn-challenge__hint--show").textContent).toContain("friends' games");
+
+    document.getElementById("modeNavigationContainer").style.display = "flex";
+    showChallengeButton("classic", 3, ["A"]);
+    expect(fb.classList.contains("btn-challenge--locked")).toBe(false);
+    expect(fb.parentElement.id).toBe("modeNavigationContainer");
+    expect(fb.previousElementSibling.id).toBe("challengeFriendBtn");
+    expect(document.querySelectorAll("#friendsGamesBtn")).toHaveLength(1);
+  });
+
+  it("déverrouillé : le clic ouvre la fenêtre, ✕ et Échap la ferment", async () => {
+    showChallengeButton("classic", 2, ["A"]);
+    document.getElementById("friendsGamesBtn").click();
+    const modal = document.getElementById("friendsGamesModal");
+    expect(modal).not.toBeNull();
+    expect(window._personadleApi.stats.friendsToday).toHaveBeenCalledWith({
+      mode: "classic",
+      expert: false,
+    });
+    modal.querySelector("#friendsGamesClose").click();
+    expect(document.getElementById("friendsGamesModal")).toBeNull();
+
+    openFriendsGamesModal("classic");
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(document.getElementById("friendsGamesModal")).toBeNull();
+  });
+
+  it("showCommunityStats() reste une no-op (les 6 modes l'appellent encore)", async () => {
     document.body.innerHTML = `<div id="victoryBox"></div>`;
+    await showCommunityStats("classic", "X");
+    expect(document.getElementById("victoryBox").innerHTML).toBe("");
+  });
+});
+
+describe("renderFriendsToday — la liste", () => {
+  const friendsToday = vi.fn();
+  let box;
+  beforeEach(() => {
+    document.body.innerHTML = `<div id="list"></div>`;
+    box = document.getElementById("list");
     friendsToday.mockReset();
     window._personadleApi = { stats: { friendsToday } };
   });
@@ -110,33 +171,21 @@ describe("showCommunityStats — « tes amis aujourd'hui »", () => {
           avatar_data: "../img/avatar/naoto.webp",
           session: { result: "giveup", attempts: 8, guesses: null },
         },
-        {
-          id: 5,
-          pseudo: "Rise",
-          avatar_data: null,
-          session: { result: "win", attempts: 1, guesses: ["Ann Takamaki"] },
-        },
         { id: 4, pseudo: "Kanji", avatar_data: null, session: null },
       ],
     });
-    await showCommunityStats("Classic", "Yu Narukami");
+    await renderFriendsToday(box, "Classic");
     expect(friendsToday).toHaveBeenCalledWith({ mode: "classic", expert: false });
 
-    const rows = [...document.querySelectorAll(".friends-today__row")];
-    expect(rows).toHaveLength(4);
-    // Rise a gagné sur un autre personnage que le mien : son dernier essai est vert quand même
-    const rise = rows[2].querySelector(".friends-today__chip");
-    expect(rise.textContent).toBe("Ann Takamaki");
-    expect(rise.classList.contains("friends-today__chip--ok")).toBe(true);
+    const rows = [...box.querySelectorAll(".friends-today__row")];
+    expect(rows).toHaveLength(3);
     expect(rows[0].className).toContain("friends-today__row--win");
     expect(rows[0].querySelector(".friends-today__status").textContent).toContain("2");
     const chips = [...rows[0].querySelectorAll(".friends-today__chip")];
     expect(chips.map((c) => c.textContent)).toEqual(["Yosuke Hanamura", "Yu Narukami"]);
+    // Chaque joueur a SON personnage du jour : le bon essai d'un ami est le dernier de sa partie gagnée.
     expect(chips[1].classList.contains("friends-today__chip--ok")).toBe(true);
     expect(chips[0].classList.contains("friends-today__chip--ok")).toBe(false);
-    // Chaque joueur a SON personnage du jour : le bon essai d'un ami est le
-    // dernier de sa partie gagnée, même s'il diffère de ma cible.
-    expect(chips[1].textContent).toBe("Yu Narukami");
 
     expect(rows[1].className).toContain("friends-today__row--giveup");
     expect(rows[1].querySelector(".friends-today__avatar").getAttribute("src")).toBe(
@@ -144,43 +193,35 @@ describe("showCommunityStats — « tes amis aujourd'hui »", () => {
     );
     expect(rows[1].querySelector(".friends-today__chips")).toBeNull();
 
-    expect(rows[3].className).toContain("friends-today__row--pending");
-    expect(rows[3].querySelector(".friends-today__status").textContent).toContain(
+    expect(rows[2].className).toContain("friends-today__row--pending");
+    expect(rows[2].querySelector(".friends-today__status").textContent).toContain(
       "hasn't played yet"
     );
   });
 
-  it("rappelée (mode + savePendingSession) : un seul bloc, rafraîchi", async () => {
-    friendsToday.mockResolvedValue({ friends: [{ id: 2, pseudo: "A", session: null }] });
-    await showCommunityStats("classic", "X");
-    friendsToday.mockResolvedValue({
-      friends: [{ id: 2, pseudo: "A", session: { result: "win", attempts: 1, guesses: ["X"] } }],
-    });
-    await showCommunityStats("classic", "X");
-    expect(document.querySelectorAll("#friendsToday")).toHaveLength(1);
-    expect(document.querySelector(".friends-today__row--win")).not.toBeNull();
-  });
-
-  it("sans ami : message d'invitation ; erreur serveur (play_first, hors ligne) : rien", async () => {
+  it("sans ami : invitation ; play_first (403) : « finis ta partie » ; autre erreur : indisponible", async () => {
     friendsToday.mockResolvedValue({ friends: [] });
-    await showCommunityStats("classic", "X");
-    expect(document.querySelector(".friends-today__empty")).not.toBeNull();
+    await renderFriendsToday(box, "classic");
+    expect(box.querySelector(".friends-today__empty").textContent).toContain("Add friends");
 
-    document.body.innerHTML = `<div id="victoryBox"></div>`;
     friendsToday.mockRejectedValue(Object.assign(new Error("play_first"), { status: 403 }));
-    await showCommunityStats("classic", "X");
-    expect(document.getElementById("friendsToday")).toBeNull();
+    await renderFriendsToday(box, "classic");
+    expect(box.textContent).toContain("Finish today's game");
+
+    friendsToday.mockRejectedValue(new Error("offline"));
+    await renderFriendsToday(box, "classic");
+    expect(box.textContent).toContain("Unavailable");
   });
 
   it("Expert : demande la dimension Expert ; invité : ne fait rien", async () => {
     window.history.replaceState({}, "", "/classiqueMode/classiqueMode.html?expert=1");
     friendsToday.mockResolvedValue({ friends: [] });
-    await showCommunityStats("classic", "X");
+    await renderFriendsToday(box, "classic");
     expect(friendsToday).toHaveBeenCalledWith({ mode: "classic", expert: true });
 
     delete window._currentUser;
     friendsToday.mockClear();
-    await showCommunityStats("classic", "X");
+    await renderFriendsToday(box, "classic");
     expect(friendsToday).not.toHaveBeenCalled();
   });
 });

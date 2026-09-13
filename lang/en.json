@@ -1164,7 +1164,11 @@
     "not_played": "hasn't played yet",
     "gave_up": "gave up",
     "first_game_note": "First game of the day only — everyone gets their own daily character.",
-    "empty": "Add friends to compare your games."
+    "empty": "Add friends to compare your games.",
+    "button": "Friends' games",
+    "locked_hint": "Finish today's game to see your friends' games",
+    "first_game_short": "First game of the day",
+    "unavailable": "Unavailable right now."
   },
   "guest_nudge": {
     "title": "🔥 {{n}}-day streak!",

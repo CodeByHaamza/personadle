@@ -1782,7 +1782,9 @@ describe("showChallengeButton", () => {
     showChallengeButton("classic", 3);
     const btn = document.getElementById("challengeFriendBtn");
     expect(btn).not.toBeNull();
-    expect(btn.nextElementSibling?.id).toBe("nextModeButton");
+    // 👥 Parties des amis suit ⚔ partout (2.2) ; « suivant » vient après les deux
+    expect(btn.nextElementSibling?.id).toBe("friendsGamesBtn");
+    expect(btn.nextElementSibling?.nextElementSibling?.id).toBe("nextModeButton");
   });
 
   it("appends the button when there is no #nextModeButton", () => {
@@ -1790,7 +1792,8 @@ describe("showChallengeButton", () => {
     document.getElementById("nextModeButton").remove();
     showChallengeButton("classic", 3);
     const nav = document.getElementById("modeNavigationContainer");
-    expect(nav.lastElementChild.id).toBe("challengeFriendBtn");
+    expect(nav.lastElementChild.id).toBe("friendsGamesBtn");
+    expect(nav.lastElementChild.previousElementSibling.id).toBe("challengeFriendBtn");
   });
 
   it("does not insert a second button if one already exists", () => {

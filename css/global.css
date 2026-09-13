@@ -2113,6 +2113,51 @@ body.darkmode .btn-challenge:hover {
     0 6px 22px rgba(0, 0, 0, 0.5);
 }
 
+/* ── 👥 Parties des amis — jumeau bleu de ⚔ Défier (2.2) ── */
+.btn-friends,
+body.darkmode .btn-friends {
+  background: linear-gradient(135deg, #1e4fbf 0%, #3b7dff 100%);
+  box-shadow:
+    0 0 0 0 rgba(59, 125, 255, 0.55),
+    0 3px 12px rgba(0, 0, 0, 0.25);
+  animation: none;
+}
+.btn-friends:hover,
+body.darkmode .btn-friends:hover {
+  background: linear-gradient(135deg, #173f9c 0%, #2b6be6 100%);
+  box-shadow:
+    0 0 18px rgba(59, 125, 255, 0.55),
+    0 6px 20px rgba(0, 0, 0, 0.35);
+}
+.challenge-card.friends-games-card {
+  width: min(440px, 94vw);
+  max-height: 85vh;
+}
+.friends-games-card__title {
+  margin: 0;
+  padding: 14px 18px 10px;
+  font-family: Arial, sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--challenge-header-text);
+  background: var(--challenge-header-bg);
+  border-bottom: 1px solid var(--challenge-border);
+}
+.friends-games-card__body {
+  overflow-y: auto;
+  padding: 12px 14px;
+}
+.friends-games-card .friends-today {
+  box-sizing: border-box; /* width: 100% + le padding du corps, sinon ça déborde */
+  max-width: none;
+  margin: 0;
+  background: none;
+  border: none;
+  animation: none;
+}
+
 /* ── Verrouillé tant que la partie du jour n'est pas finie (2.2) ──
    Visible mais grisé, sans pulsation ; le `title` explique au survol, et un
    clic / tap fait sortir la même phrase en bulle sous le bouton (mobile n'a
