@@ -235,6 +235,47 @@ vulnérabilité. Le risque vit dans les 61 fichiers PHP écrits à la main.
 
 ---
 
+## Dépôt git — purge des anciens `.gif` All-Out Attack de l'historique (décision Hamza)
+
+Mesuré le 2026-09-13 (`git rev-list --objects --all | git cat-file --batch-check`) : `.git`
+pèse **3,8 Go**. Dans `allOutAttackMode/database/allOutAttack/` : **79 blobs `.webp` = 1,82 Go**
+(les animations actuelles et leurs versions — **on les garde**, le dépôt doit permettre de
+jouer 100 % en local) et **62 blobs `.gif` = 1,28 Go** : les anciens GIF remplacés par les
+`.webp`, **plus aucun n'est suivi**, ils ne servent qu'à gonfler chaque clone. Le reste
+(0,22 Go de docs d'anciennes versions, quelques wallpapers) est négligeable.
+
+Seule une réécriture de l'historique enlève ces 1,28 Go — donc **force-push, re-clone pour
+Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne faire que :
+
+- [ ] **au bon créneau** : juste après une release, **aucune PR ouverte** (chaque PR ouverte
+      devrait être recréée — tous les SHA changent) ;
+- [ ] **Léo et Damien prévenus** : leurs clones deviennent incompatibles → `git clone` à
+      neuf (rien de local à garder chez eux avant) ;
+- [ ] **sauvegarde** : `git clone --mirror https://github.com/CodeByHaamza/personadle.git
+      personadle-backup.git`, gardée hors ligne un mois ;
+- [ ] **réécriture** (`git filter-repo`, jamais `filter-branch`) sur un second miroir :
+      ```bash
+      pip install git-filter-repo
+      git clone --mirror https://github.com/CodeByHaamza/personadle.git personadle-purge.git
+      cd personadle-purge.git
+      git filter-repo --invert-paths --path-glob 'allOutAttackMode/database/allOutAttack/*.gif'
+      git count-objects -vH          # attendu : size-pack ≈ 2,5 Go (3,76 − 1,28)
+      ```
+      Ne toucher ni aux `.webp` (jouer local), ni aux `.gif` d'`img/` (avatars, loading —
+      petits et encore servis) ;
+- [ ] **vérifier** sur le miroir réécrit, cloné à part : `npm test`, `make up` +
+      `npm run test:e2e`, `git log --oneline | wc -l` identique, `git diff <ancien main>
+      <nouveau main>` vide hors `.gif` purgés ;
+- [ ] **pousser** : `git push --force --mirror` (toutes branches et tags) ;
+- [ ] **Hostinger** (le `git pull` auto refusera l'historique divergent) : SSH,
+      `cd domains/personadle.net/public_html && git fetch origin && git reset --hard
+      origin/main`, puis vérifier `api/config.php` et les fichiers non suivis toujours en
+      place. Hors heure de pointe, prévoir quelques minutes ;
+- [ ] **après coup** : `git gc --prune=now --aggressive` sur chaque clone survivant ;
+      supprimer le miroir de sauvegarde après un mois sans problème.
+
+---
+
 ## Outillage
 
 - [ ] **CI : rejeu de migration sur base vierge.** CLAUDE.md §13 l'exige, rien ne le vérifie —
