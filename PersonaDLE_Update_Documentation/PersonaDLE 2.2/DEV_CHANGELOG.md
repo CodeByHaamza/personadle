@@ -19,9 +19,13 @@ Trois idées validées par Hamza (« 8, 10, 16 » de la liste du soir), une PR e
 
 ### « Tes amis aujourd'hui » — comparer nos parties (migration 041)
 
-Après sa partie du jour, le joueur voit dans la boîte de victoire la **première partie du
-jour** de chaque ami sur ce mode : résultat, nombre d'essais, et la **suite des noms
-proposés** (le bon en vert) ; les amis qui n'ont pas encore joué sont listés aussi.
+Un bouton **👥 Parties des amis**, jumeau de ⚔ Défier (même hôte — zone Expert puis
+navigation —, même verrou « partie du jour finie », monté par `showChallengeButton()` via
+`_ensureFriendsGamesButton()`), ouvre une fenêtre (`openFriendsGamesModal()`, habillage de la
+modale de défi) avec la **première partie du jour** de chaque ami sur ce mode : résultat,
+nombre d'essais, et la **suite des noms proposés** (le bon en vert) ; les amis qui n'ont pas
+encore joué sont listés aussi. Première version dans la boîte de victoire, déplacée en bouton
+à la demande de Hamza (« à côté des défis ») — la boîte reste propre.
 
 - **Serveur** : `game_sessions.guesses` (JSON, migration 041 — MariaDB `IF NOT EXISTS`,
   rejouable, **à jouer avant le merge dans main** : sans elle plus aucune partie ne
@@ -41,17 +45,18 @@ proposés** (le bon en vert) ; les amis qui n'ont pas encore joué sont listés 
   `logGuess()` dans le handler de Classique (sa grille ne passe pas par showWrongMini) et
   dans Music (liste maison) ; doublons consécutifs ignorés (Classique Expert journalise
   par les deux chemins). `buildGameSession()` ajoute `guesses`, le bon nom en dernier si
-  gagné. `showCommunityStats()` — vidée depuis le retrait du « X % des joueurs » mais
-  toujours appelée par les 6 modes ET `savePendingSession()` — rend le bloc
-  `#friendsToday` (idempotent, rafraîchi au second appel) ; `api.stats.friendsToday()`.
+  gagné. `renderFriendsToday(container, mode)` rend la liste (réutilisable) ;
+  `showCommunityStats()` reste une no-op exportée (les 6 modes l'appellent encore) ;
+  `api.stats.friendsToday()`.
 - ⚠️ **La cible du jour est tirée PAR JOUEUR** (`getDailyTarget` seedé sur l'id) : deux
   amis n'ont pas le même personnage. Découvert en testant en navigateur — on compare des
   *parcours*, pas des réponses : le bon essai d'un ami est le dernier de sa partie gagnée,
   et la note le dit (« chacun a son propre personnage du jour »).
 - Avatars : chemins `../img/…` relatifs à `profile/` — les pages de mode sont à la même
   profondeur, ils marchent tels quels.
-- Tests : `tests/friends_today.test.js` (9 : journal, Replay, showWrongMini, buildGameSession,
-  bornes, rendu des trois états, idempotence, play_first, Expert/invité) ;
+- Tests : `tests/friends_today.test.js` (11 : journal, Replay, showWrongMini, buildGameSession,
+  bornes, bouton jumeau et son verrou, fenêtre ✕/Échap, rendu des trois états, play_first,
+  Expert/invité) ;
   `DatabaseIntegrationTest::testRecordGameSessionStoresGuesses` (PHPUnit 270 vert) ;
   scénario navigateur Alice/Bob/Carol vérifié (capture).
 

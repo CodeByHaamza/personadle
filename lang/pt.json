@@ -1164,7 +1164,11 @@
     "not_played": "ainda não jogou",
     "gave_up": "desistiu",
     "first_game_note": "Só a primeira partida do dia — cada um tem a sua própria personagem do dia.",
-    "empty": "Adiciona amigos para comparar as vossas partidas."
+    "empty": "Adiciona amigos para comparar as vossas partidas.",
+    "button": "Partidas dos amigos",
+    "locked_hint": "Termina a tua partida de hoje para ver as dos teus amigos",
+    "first_game_short": "Primeira partida do dia",
+    "unavailable": "Indisponível de momento."
   },
   "guest_nudge": {
     "title": "🔥 {{n}} dias seguidos!",

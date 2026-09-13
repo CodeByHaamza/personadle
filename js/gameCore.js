@@ -1239,84 +1239,88 @@ export function getDailyTarget(pool, mode, date = parisDateKey(), seedId = getPl
  * dans un second temps si on confirme qu'on n'y revient pas.
  */
 /**
- * « Tes amis aujourd'hui » dans la boîte de victoire (2.2) — remplace l'ancien
- * « X % des joueurs ont trouvé », retiré. Après sa partie, le joueur voit la
- * PREMIÈRE partie du jour de chaque ami sur ce mode : résultat, essais, et la
- * suite des noms proposés (le bon en vert). Les amis qui n'ont pas encore joué
- * sont listés aussi — c'est le moment de les défier.
+ * Appelée par les 6 modes et savePendingSession() à la fin d'une partie. Vide
+ * depuis le retrait du « X % des joueurs ont trouvé » ; « Tes amis aujourd'hui »
+ * a d'abord vécu ici (dans la boîte de victoire), puis Hamza l'a voulu comme un
+ * bouton à côté de ⚔ Défier — voir showChallengeButton() / openFriendsGamesModal().
+ * Gardée exportée pour ne pas toucher aux six modes.
+ */
+export async function showCommunityStats(_mode, _targetName) {}
+
+/**
+ * « Tes amis aujourd'hui » (2.2) — la PREMIÈRE partie du jour de chaque ami sur
+ * ce mode : résultat, essais, et la suite des noms proposés (le bon en vert).
+ * Les amis qui n'ont pas encore joué sont listés aussi — c'est le moment de
+ * les défier.
  *
  * ⚠️ La cible du jour est tirée PAR JOUEUR (getDailyTarget est seedé sur
  * l'identifiant) : deux amis n'ont pas le même personnage. On compare donc des
  * parcours, pas des réponses — le bon essai d'un ami est le dernier de sa
- * partie gagnée, quel que soit mon propre personnage.
+ * partie gagnée.
  *
  * Le serveur (api/sessions_today.php) ne répond qu'à qui a fini sa propre
- * partie ; appelée avant, la fonction ne montre rien. Appelée deux fois (le
- * mode ET savePendingSession), elle se contente de rafraîchir le bloc.
+ * partie ; avant, il dit `play_first` et le conteneur l'explique.
  *
- * @param {string} mode       n'importe quelle graphie (normalizeModeKey)
- * @param {string} targetName cible du jour — pour marquer le bon essai
+ * @param {HTMLElement} container où rendre (la modale, ou n'importe quel bloc)
+ * @param {string} mode           n'importe quelle graphie (normalizeModeKey)
  */
-export async function showCommunityStats(mode, targetName) {
+export async function renderFriendsToday(container, mode) {
   const api = window._personadleApi;
-  const box = document.getElementById("victoryBox");
-  if (!api?.stats?.friendsToday || !window._currentUser || !box) return;
+  if (!container || !api?.stats?.friendsToday || !window._currentUser) return;
+  const t = (k, fb, vars) => {
+    const r = window.i18n?.t?.(k, vars);
+    return r != null && r !== k ? r : fb;
+  };
+  const esc = (v) =>
+    String(v ?? "").replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+    );
+
+  container.classList.add("friends-today");
+  container.innerHTML = `<p class="friends-today__empty">${esc(t("ui.loading", "Loading…"))}</p>`;
 
   const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
   let data;
   try {
     data = await api.stats.friendsToday({ mode: key, expert: isExpertPage() });
-  } catch {
-    return; // pas encore joué (403), hors ligne… : rien à montrer, rien à casser
+  } catch (err) {
+    container.innerHTML = `<p class="friends-today__empty">${esc(
+      err?.status === 403
+        ? t("friends_today.locked_hint", "Finish today's game to see your friends' games")
+        : t("friends_today.unavailable", "Unavailable right now.")
+    )}</p>`;
+    return;
   }
-  const t = (k, fb, vars) => {
-    const r = window.i18n?.t?.(k, vars);
-    return r != null && r !== k ? r : fb;
-  };
-  const esc = (s) =>
-    String(s ?? "").replace(
-      /[&<>"']/g,
-      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
-    );
+
   const avatar = (f) => {
     const a = f.avatar_data;
     if (!a) return "../img/default_avatar.png";
     if (a.startsWith("data:") || a.startsWith("http")) return a;
     return a.replace(/^(\.\.\/|\.\/)+/, "../");
   };
-
   const friends = data?.friends ?? [];
-  let block = document.getElementById("friendsToday");
-  if (!block) {
-    block = document.createElement("div");
-    block.id = "friendsToday";
-    block.className = "friends-today";
-    box.appendChild(block);
-  }
-
   const rows = friends.map((f) => {
-    const s = f.session;
+    const sess = f.session;
     let status;
     let cls = "friends-today__row--pending";
-    if (!s) {
+    if (!sess) {
       status = `<span class="friends-today__status">${esc(t("friends_today.not_played", "hasn't played yet"))}</span>`;
-    } else if (s.result === "win") {
+    } else if (sess.result === "win") {
       cls = "friends-today__row--win";
       status = `<span class="friends-today__status">✓ ${esc(
-        s.attempts === 1
+        sess.attempts === 1
           ? t("compendium.tries_one", "1 try")
-          : t("compendium.tries", `${s.attempts} tries`, { n: s.attempts })
+          : t("compendium.tries", `${sess.attempts} tries`, { n: sess.attempts })
       )}</span>`;
     } else {
       cls = "friends-today__row--giveup";
       status = `<span class="friends-today__status">✗ ${esc(t("friends_today.gave_up", "gave up"))}</span>`;
     }
-    const guesses = s?.guesses ?? [];
+    const guesses = sess?.guesses ?? [];
     const chips = guesses
       .map((g, i) => {
-        const ok =
-          (s?.result === "win" && i === guesses.length - 1) ||
-          (targetName && g.toLowerCase() === String(targetName).toLowerCase());
+        const ok = sess?.result === "win" && i === guesses.length - 1;
         return `<span class="friends-today__chip${ok ? " friends-today__chip--ok" : ""}">${esc(g)}</span>`;
       })
       .join("");
@@ -1329,14 +1333,50 @@ export async function showCommunityStats(mode, targetName) {
     </li>`;
   });
 
-  block.innerHTML = `
-    <p class="friends-today__title">👥 ${esc(t("friends_today.title", "Your friends today"))}</p>
-    ${
-      rows.length
-        ? `<ul class="friends-today__list">${rows.join("")}</ul>
-           <p class="friends-today__note">${esc(t("friends_today.first_game_note", "First game of the day only."))}</p>`
-        : `<p class="friends-today__empty">${esc(t("friends_today.empty", "Add friends to compare your games."))}</p>`
-    }`;
+  container.innerHTML = rows.length
+    ? `<ul class="friends-today__list">${rows.join("")}</ul>
+       <p class="friends-today__note">${esc(t("friends_today.first_game_note", "First game of the day only — everyone gets their own daily character."))}</p>`
+    : `<p class="friends-today__empty">${esc(t("friends_today.empty", "Add friends to compare your games."))}</p>`;
+}
+
+/**
+ * Fenêtre « Tes amis aujourd'hui », ouverte par le bouton 👥 à côté de ⚔ Défier.
+ * Même habillage que la modale de défi (challenge-overlay / challenge-card).
+ */
+export function openFriendsGamesModal(mode) {
+  if (!window._currentUser) return null;
+  const t = (k, fb) => {
+    const r = window.i18n?.t?.(k);
+    return r != null && r !== k ? r : fb;
+  };
+  document.getElementById("friendsGamesModal")?.remove();
+  const modal = document.createElement("div");
+  modal.id = "friendsGamesModal";
+  modal.className = "challenge-overlay";
+  modal.innerHTML = `
+    <div class="challenge-card friends-games-card" role="dialog" aria-modal="true" aria-labelledby="friendsGamesTitle">
+      <p id="friendsGamesTitle" class="friends-games-card__title">👥 ${t("friends_today.title", "Your friends today")}</p>
+      <div id="friendsGamesList" class="friends-games-card__body"></div>
+      <div class="challenge-card__footer">
+        <span class="challenge-card__footer-label">${t("friends_today.first_game_short", "First game of the day")}</span>
+        <button id="friendsGamesClose" class="challenge-card__footer-close" aria-label="${t("ui.close", "Close")}">✕</button>
+      </div>
+    </div>`;
+  const close = () => {
+    modal.remove();
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => {
+    if (e.key === "Escape") close();
+  };
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) close();
+  });
+  modal.querySelector("#friendsGamesClose").addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(modal);
+  renderFriendsToday(modal.querySelector("#friendsGamesList"), mode);
+  return modal;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1786,6 +1826,7 @@ export function showChallengeButton(mode, score, targetPool = null) {
     targetPool,
   };
   _applyChallengeLock(btn);
+  _ensureFriendsGamesButton(btn);
 
   // Arrivé depuis la page Amis avec un ami présélectionné alors que la partie
   // n'était pas finie : la modale s'ouvre d'elle-même au déverrouillage.
@@ -1793,6 +1834,39 @@ export function showChallengeButton(mode, score, targetPool = null) {
     _preselectConsumed = true;
     btn.click();
   }
+}
+
+/**
+ * Bouton 👥 « Parties des amis », jumeau de ⚔ Défier : toujours juste après lui
+ * (il suit ses déplacements zone → navigation), même verrou (partie du jour
+ * finie — le serveur refuse de toute façon avant), ouvre openFriendsGamesModal().
+ */
+function _ensureFriendsGamesButton(challengeBtn) {
+  const t = (key, fb) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fb;
+  };
+  let fb = document.getElementById("friendsGamesBtn");
+  if (!fb) {
+    fb = document.createElement("button");
+    fb.id = "friendsGamesBtn";
+    fb.className = "btn-challenge btn-friends";
+    fb.innerHTML = `<span>👥</span><span>${t("friends_today.button", "Friends' games")}</span>`;
+    fb.addEventListener("click", () => {
+      const st = challengeBtn._challenge ?? {};
+      if (isChallengeLocked(st.score)) {
+        _showChallengeLockHint(fb, t("friends_today.locked_hint", "Finish today's game to see your friends' games"));
+        return;
+      }
+      openFriendsGamesModal(st.mode);
+    });
+  }
+  if (fb.previousElementSibling !== challengeBtn) challengeBtn.insertAdjacentElement("afterend", fb);
+  const locked = isChallengeLocked(challengeBtn._challenge?.score);
+  fb.classList.toggle("btn-challenge--locked", locked);
+  fb.setAttribute("aria-disabled", locked ? "true" : "false");
+  if (locked) fb.title = t("friends_today.locked_hint", "Finish today's game to see your friends' games");
+  else fb.removeAttribute("title");
 }
 
 /** Grise le bouton et pose le message d'explication tant qu'il n'y a pas de score. */
@@ -1812,7 +1886,7 @@ function _applyChallengeLock(btn) {
 }
 
 /** Bulle « finis ta partie » sous le bouton, au clic ou au tap (le survol a le title). */
-function _showChallengeLockHint(btn) {
+function _showChallengeLockHint(btn, text = null) {
   const t = (key, fb) => {
     const r = window.i18n?.t?.(key);
     return r != null && r !== key ? r : fb;
@@ -1824,7 +1898,7 @@ function _showChallengeLockHint(btn) {
     hint.setAttribute("role", "status");
     btn.appendChild(hint);
   }
-  hint.textContent = t("challenge.locked_hint", "Finish today's game to challenge a friend");
+  hint.textContent = text ?? t("challenge.locked_hint", "Finish today's game to challenge a friend");
   hint.classList.add("btn-challenge__hint--show");
   clearTimeout(btn._hintTimer);
   btn._hintTimer = setTimeout(() => hint.classList.remove("btn-challenge__hint--show"), 2600);
