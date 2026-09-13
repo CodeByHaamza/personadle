@@ -35,6 +35,7 @@ import {
   startGame,
   isGameLogged,
   markGameLogged,
+  logGuess,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -737,6 +738,7 @@ function handleGuess() {
   if (!guess) return;
 
   if (!triedTitles.includes(guess)) triedTitles.push(guess);
+  logGuess(guess); // « comparer nos parties » — Music n'utilise pas showWrongMini()
 
   attempts++;
   localStorage.setItem(`${KEY_PREFIX}Attempts`, attempts);

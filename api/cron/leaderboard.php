@@ -23,7 +23,7 @@ $start = microtime(true);
 $paris = new DateTimeZone('Europe/Paris');
 $now   = new DateTime('now', $paris);
 
-$modes = ['all', 'classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+$modes = ['all', ...PERSONADLE_MODES];
 
 // 'ever' exclu : l'API le calcule live depuis user_stats, jamais depuis le cache.
 $periods = [

@@ -162,7 +162,7 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
 
         case 'all_modes_won': {
             // Au moins 1 victoire dans chacun des 6 modes reconnus
-            $modes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+            $modes = PERSONADLE_MODES;
             $s = $pdo->prepare(
                 'SELECT COUNT(DISTINCT mode) FROM user_stats
                  WHERE user_id = ? AND wins >= 1 AND mode IN (?,?,?,?,?,?)'

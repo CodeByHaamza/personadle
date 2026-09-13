@@ -174,6 +174,44 @@ export function currentGameId(scope) {
   return id;
 }
 
+// ── Journal des essais de la partie en cours ────────────────────────────────
+// « Comparer nos parties » (2.2) : la session envoyée au serveur porte la suite
+// ordonnée des noms proposés (migration 041). Le journal est rattaché à
+// l'identifiant de partie : un Replay (startGame) ou un nouveau jour le vide
+// d'eux-mêmes, un rechargement le retrouve.
+
+/** Portée (scope de stats) de la page courante, posée par checkResetOnLoad(). */
+let _currentScope = null;
+const _guessLogKey = (scope) => `guessLog_${scope}`;
+
+/** Suite des essais de la partie en cours, ou [] si le journal date d'une autre partie. */
+export function readGuessLog(scope = _currentScope) {
+  if (!scope) return [];
+  try {
+    const raw = JSON.parse(localStorage.getItem(_guessLogKey(scope)) || "null");
+    if (!raw || raw.id !== localStorage.getItem(_gameIdKey(scope))) return [];
+    return Array.isArray(raw.guesses) ? raw.guesses : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Ajoute un essai au journal de la partie en cours. Appelé par showWrongMini()
+ * pour les mauvaises réponses de 5 modes ; le mode Music, qui a sa propre liste,
+ * l'appelle directement. Le bon nom est ajouté par buildGameSession() à la victoire.
+ */
+export function logGuess(name, scope = _currentScope) {
+  if (!scope || !name) return;
+  const id = currentGameId(scope);
+  const guesses = readGuessLog(scope);
+  // Classique Expert journalise depuis son handler ET via showWrongMini() : un
+  // même nom deux fois d'affilée est un doublon, pas un second essai.
+  if (guesses.at(-1) === String(name)) return;
+  guesses.push(String(name));
+  localStorage.setItem(_guessLogKey(scope), JSON.stringify({ id, guesses: guesses.slice(0, 40) }));
+}
+
 /** Vrai si la partie EN COURS a déjà été enregistrée (survit à un rechargement). */
 export function isGameLogged(scope) {
   const id = localStorage.getItem(_gameIdKey(scope));
@@ -873,6 +911,9 @@ export function setupDailyReset(onReset) {
 export function checkResetOnLoad(lastPlayedKey, statsScope, onReset) {
   const storedDate = localStorage.getItem(lastPlayedKey);
   const today = parisDateKey();
+  // La page a désormais une portée courante : le journal des essais (logGuess)
+  // et la session enregistrée s'y rattachent sans que chaque mode le répète.
+  _currentScope = statsScope;
 
   if (storedDate !== today) {
     console.log(`📅 New day detected → auto-reset (${statsScope})`);
@@ -946,6 +987,7 @@ export function showWrongMini(
   fallbackSrc = "../database/portraits/unknown.webp"
 ) {
   if (!wrongListEl) return;
+  logGuess(altText);
 
   const div = document.createElement("div");
   div.className = "wrong-mini";
@@ -1015,7 +1057,17 @@ export function buildGameSession({
     // est alors stable pour toute la partie, donc un ré-enregistrement après perte
     // du flag local (autre onglet, nettoyage navigateur) est refusé côté base.
     client_session_id: clientSessionId || newId(),
+    // Suite ordonnée des essais, le bon en dernier si gagné (migration 041) —
+    // c'est ce que « comparer nos parties » montre aux amis.
+    guesses: _guessesForSession(result, targetName),
   };
+}
+
+function _guessesForSession(result, targetName) {
+  const log = readGuessLog();
+  const guesses = log.filter((g) => g !== targetName);
+  if (result === "win" && targetName) guesses.push(String(targetName));
+  return guesses.slice(0, 40);
 }
 
 /**
@@ -1058,6 +1110,54 @@ export async function savePendingSession(session) {
   // community-stats.php ne compte que les parties non-Expert — le « X % des joueurs
   // ont trouvé » afficherait donc 0 % en permanence.
   if (!session.is_expert) showCommunityStats(session.mode, session.target_name);
+
+  // Invité avec une série qui compte : lui proposer de la sauvegarder.
+  maybeNudgeGuest();
+}
+
+/**
+ * Relance des invités (2.2, décision Hamza) : un joueur SANS compte qui a
+ * 3 jours de série ou plus voit, dans sa boîte de victoire, une carte
+ * « sauvegarde ta série » avec un lien vers l'inscription — une fois par
+ * semaine au plus (`guestNudgeShownAt`), jamais pour un joueur connecté.
+ * La série lue est celle du profil local (profile/profileStats.js).
+ *
+ * @returns {boolean} true si la carte est affichée
+ */
+export function maybeNudgeGuest() {
+  if (window._currentUser) return false;
+  const box = document.getElementById("victoryBox");
+  if (!box) return false;
+  let streak = 0;
+  try {
+    streak = Number(JSON.parse(localStorage.getItem("personaUserProfile") || "{}")?.stats?.streak || 0);
+  } catch {
+    return false;
+  }
+  if (streak < 3) return false;
+  if (document.getElementById("guestNudge")) return true;
+  const shownAt = Number(localStorage.getItem("guestNudgeShownAt") || 0);
+  if (Date.now() - shownAt < 7 * 86_400_000) return false;
+
+  const t = (key, fb, vars) => {
+    const r = window.i18n?.t?.(key, vars);
+    return r != null && r !== key ? r : fb;
+  };
+  const card = document.createElement("div");
+  card.id = "guestNudge";
+  card.className = "guest-nudge";
+  card.setAttribute("role", "status");
+  card.innerHTML = `
+    <p class="guest-nudge__title">${t("guest_nudge.title", "🔥 {{n}}-day streak!", { n: streak }).replace("{{n}}", String(streak))}</p>
+    <p class="guest-nudge__text">${t("guest_nudge.text", "Create a free account to save it — and find it on any device.")}</p>
+    <div class="guest-nudge__actions">
+      <a class="guest-nudge__cta" href="${siteRootPrefix()}profile/profile.html#register">${t("guest_nudge.cta", "Create an account")}</a>
+      <button type="button" class="guest-nudge__later">${t("guest_nudge.later", "Later")}</button>
+    </div>`;
+  card.querySelector(".guest-nudge__later").addEventListener("click", () => card.remove());
+  box.appendChild(card);
+  localStorage.setItem("guestNudgeShownAt", String(Date.now()));
+  return true;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1138,8 +1238,105 @@ export function getDailyTarget(pool, mode, date = parisDateKey(), seedId = getPl
  * L'endpoint backend `community_stats` reste inutilisé — à retirer complètement
  * dans un second temps si on confirme qu'on n'y revient pas.
  */
-export async function showCommunityStats(_mode, _targetName) {
-  // Feature retirée — plus d'affichage communautaire dans la victoryBox.
+/**
+ * « Tes amis aujourd'hui » dans la boîte de victoire (2.2) — remplace l'ancien
+ * « X % des joueurs ont trouvé », retiré. Après sa partie, le joueur voit la
+ * PREMIÈRE partie du jour de chaque ami sur ce mode : résultat, essais, et la
+ * suite des noms proposés (le bon en vert). Les amis qui n'ont pas encore joué
+ * sont listés aussi — c'est le moment de les défier.
+ *
+ * ⚠️ La cible du jour est tirée PAR JOUEUR (getDailyTarget est seedé sur
+ * l'identifiant) : deux amis n'ont pas le même personnage. On compare donc des
+ * parcours, pas des réponses — le bon essai d'un ami est le dernier de sa
+ * partie gagnée, quel que soit mon propre personnage.
+ *
+ * Le serveur (api/sessions_today.php) ne répond qu'à qui a fini sa propre
+ * partie ; appelée avant, la fonction ne montre rien. Appelée deux fois (le
+ * mode ET savePendingSession), elle se contente de rafraîchir le bloc.
+ *
+ * @param {string} mode       n'importe quelle graphie (normalizeModeKey)
+ * @param {string} targetName cible du jour — pour marquer le bon essai
+ */
+export async function showCommunityStats(mode, targetName) {
+  const api = window._personadleApi;
+  const box = document.getElementById("victoryBox");
+  if (!api?.stats?.friendsToday || !window._currentUser || !box) return;
+
+  const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
+  let data;
+  try {
+    data = await api.stats.friendsToday({ mode: key, expert: isExpertPage() });
+  } catch {
+    return; // pas encore joué (403), hors ligne… : rien à montrer, rien à casser
+  }
+  const t = (k, fb, vars) => {
+    const r = window.i18n?.t?.(k, vars);
+    return r != null && r !== k ? r : fb;
+  };
+  const esc = (s) =>
+    String(s ?? "").replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+    );
+  const avatar = (f) => {
+    const a = f.avatar_data;
+    if (!a) return "../img/default_avatar.png";
+    if (a.startsWith("data:") || a.startsWith("http")) return a;
+    return a.replace(/^(\.\.\/|\.\/)+/, "../");
+  };
+
+  const friends = data?.friends ?? [];
+  let block = document.getElementById("friendsToday");
+  if (!block) {
+    block = document.createElement("div");
+    block.id = "friendsToday";
+    block.className = "friends-today";
+    box.appendChild(block);
+  }
+
+  const rows = friends.map((f) => {
+    const s = f.session;
+    let status;
+    let cls = "friends-today__row--pending";
+    if (!s) {
+      status = `<span class="friends-today__status">${esc(t("friends_today.not_played", "hasn't played yet"))}</span>`;
+    } else if (s.result === "win") {
+      cls = "friends-today__row--win";
+      status = `<span class="friends-today__status">✓ ${esc(
+        s.attempts === 1
+          ? t("compendium.tries_one", "1 try")
+          : t("compendium.tries", `${s.attempts} tries`, { n: s.attempts })
+      )}</span>`;
+    } else {
+      cls = "friends-today__row--giveup";
+      status = `<span class="friends-today__status">✗ ${esc(t("friends_today.gave_up", "gave up"))}</span>`;
+    }
+    const guesses = s?.guesses ?? [];
+    const chips = guesses
+      .map((g, i) => {
+        const ok =
+          (s?.result === "win" && i === guesses.length - 1) ||
+          (targetName && g.toLowerCase() === String(targetName).toLowerCase());
+        return `<span class="friends-today__chip${ok ? " friends-today__chip--ok" : ""}">${esc(g)}</span>`;
+      })
+      .join("");
+    return `<li class="friends-today__row ${cls}">
+      <img class="friends-today__avatar" src="${esc(avatar(f))}" alt="" loading="lazy" onerror="this.src='../img/default_avatar.png'" style="border-color:${esc(f.avatar_border_color || "#fff")}">
+      <div class="friends-today__body">
+        <div class="friends-today__head"><span class="friends-today__pseudo">${esc(f.pseudo)}</span>${status}</div>
+        ${chips ? `<div class="friends-today__chips">${chips}</div>` : ""}
+      </div>
+    </li>`;
+  });
+
+  block.innerHTML = `
+    <p class="friends-today__title">👥 ${esc(t("friends_today.title", "Your friends today"))}</p>
+    ${
+      rows.length
+        ? `<ul class="friends-today__list">${rows.join("")}</ul>
+           <p class="friends-today__note">${esc(t("friends_today.first_game_note", "First game of the day only."))}</p>`
+        : `<p class="friends-today__empty">${esc(t("friends_today.empty", "Add friends to compare your games."))}</p>`
+    }`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

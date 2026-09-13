@@ -13,6 +13,88 @@
 
 ---
 
+## 2026-09-13 — Comparer nos parties, relance des invités, tableau de bord Activité (branche `feat/guest-nudge-compare-admin`)
+
+Trois idées validées par Hamza (« 8, 10, 16 » de la liste du soir), une PR empilée sur #112.
+
+### « Tes amis aujourd'hui » — comparer nos parties (migration 041)
+
+Après sa partie du jour, le joueur voit dans la boîte de victoire la **première partie du
+jour** de chaque ami sur ce mode : résultat, nombre d'essais, et la **suite des noms
+proposés** (le bon en vert) ; les amis qui n'ont pas encore joué sont listés aussi.
+
+- **Serveur** : `game_sessions.guesses` (JSON, migration 041 — MariaDB `IF NOT EXISTS`,
+  rejouable, **à jouer avant le merge dans main** : sans elle plus aucune partie ne
+  s'enregistre). `api/sessions.php` accepte `guesses[]` (≤ 40 chaînes ≤ 200 car., sinon
+  ignoré, jamais rejeté) ; `personadle_record_game_session()` prend un 12ᵉ paramètre
+  optionnel — les appels existants (tests PHPUnit compris) ne changent pas.
+  **`api/sessions_today.php`** (`GET ?mode=&expert=`) : amis acceptés, `MIN(id)` par ami
+  sur la journée Paris (les replays ne comptent pas — « on garde que la première partie »,
+  décision Hamza), **403 `play_first`** tant que le demandeur n'a pas fini la sienne (la
+  liste des essais révélerait la cible). Fichier **plat**, pas `api/sessions/today.php` :
+  un dossier `sessions/` à côté de `sessions.php` déclenche le 301 de mod_dir sur
+  `POST /api/sessions` (méthode dégradée en GET, 403 sur le listing) — vécu en le
+  développant, c'est le piège CLAUDE.md §7.
+- **Client** (`js/gameCore.js`) : journal des essais `guessLog_<scope>` rattaché à
+  l'identifiant de partie (`currentGameId`) — vidé d'office par un Replay ou un nouveau
+  jour, retrouvé après un rechargement. Alimenté par `showWrongMini()` (5 modes), par
+  `logGuess()` dans le handler de Classique (sa grille ne passe pas par showWrongMini) et
+  dans Music (liste maison) ; doublons consécutifs ignorés (Classique Expert journalise
+  par les deux chemins). `buildGameSession()` ajoute `guesses`, le bon nom en dernier si
+  gagné. `showCommunityStats()` — vidée depuis le retrait du « X % des joueurs » mais
+  toujours appelée par les 6 modes ET `savePendingSession()` — rend le bloc
+  `#friendsToday` (idempotent, rafraîchi au second appel) ; `api.stats.friendsToday()`.
+- ⚠️ **La cible du jour est tirée PAR JOUEUR** (`getDailyTarget` seedé sur l'id) : deux
+  amis n'ont pas le même personnage. Découvert en testant en navigateur — on compare des
+  *parcours*, pas des réponses : le bon essai d'un ami est le dernier de sa partie gagnée,
+  et la note le dit (« chacun a son propre personnage du jour »).
+- Avatars : chemins `../img/…` relatifs à `profile/` — les pages de mode sont à la même
+  profondeur, ils marchent tels quels.
+- Tests : `tests/friends_today.test.js` (9 : journal, Replay, showWrongMini, buildGameSession,
+  bornes, rendu des trois états, idempotence, play_first, Expert/invité) ;
+  `DatabaseIntegrationTest::testRecordGameSessionStoresGuesses` (PHPUnit 270 vert) ;
+  scénario navigateur Alice/Bob/Carol vérifié (capture).
+
+### Relance des invités
+
+Un joueur **sans compte** avec **3 jours de série ou plus** voit, à la fin de sa partie, une
+carte « 🔥 N jours de série ! Crée un compte gratuit pour la sauvegarder » — CTA vers
+`profile.html#register`, « Plus tard », au plus une fois par semaine (`guestNudgeShownAt`),
+jamais pour un connecté. `maybeNudgeGuest()` appelée par `savePendingSession()` (les 6 modes y
+passent, invités compris). `js/auth.js` ouvre la modale d'inscription sur `#register` et
+retire l'ancre. La série lue est celle du profil local (`profile/profileStats.js`).
+`tests/guest_nudge.test.js` (5) ; parcours carte → modale vérifié en navigateur.
+
+### Admin — 📈 Activité
+
+`api/admin/activity.php` (`?days=7..180`, `requireAdmin()`) : totaux (inscrits, actifs 7 j /
+N j, parties, nouveaux comptes, écarts anti-triche loggés), par jour (jours vides inclus), par
+mode (parties, taux de victoire, essais moyens sur victoires, part Expert), par heure Paris.
+Les TIMESTAMP sont regroupés **en PHP** (`DateTime` + `Europe/Paris`) : `CONVERT_TZ` dépend
+des tables de fuseaux du serveur SQL, absentes en mutualisé. `admin/activity.js` : KPI, barres
+CSS pures (aucune librairie), sélecteur 7/30/90 j. Route dans `api/admin/.htaccess`, panneau
+dans `admin/index.html`, `ADMIN_PANEL_IDS`. Comptes seulement : les invités ne postent pas de
+session. Vérifié en navigateur avec le compte admin de seed.
+
+### En passant
+
+- `PERSONADLE_MODES` (`api/lib/validation.php`, chargé par `bootstrap.php`) remplace les
+  **neuf** copies de la liste des modes côté PHP ; `tests/expertWiring.test.js` lit désormais
+  cette source unique.
+- Docs : `api/README.md`, `admin/README.md`, `TODO.md` (migration 041 dans la checklist
+  release), FAQ inchangée (rien de nouveau à expliquer au joueur au-delà du bloc lui-même).
+
+### Angles morts
+
+- `guesses` NULL pour toutes les parties enregistrées avant la 2.2 : la comparaison montre
+  alors le nombre d'essais seul — c'est voulu, on n'invente rien.
+- Un ami qui joue en Expert a une autre cible et une autre dimension : le bloc Expert ne
+  liste que les parties Expert (`expert=1`), jamais les normales.
+- La relance des invités lit `stats.streak` : un invité qui n'a jamais eu de profil local
+  (première visite) n'en a pas — normal, il n'a pas 3 jours.
+
+---
+
 ## 2026-09-13 — Défi verrouillé avant la partie, entrée 2.2 Velvet Room, pile haut-droite du profil
 
 Trois décisions de Hamza, plus la CI de #112 (rouge depuis l'ajout de `challenge_flow.spec.js`).

@@ -233,6 +233,15 @@ export const api = {
     postSession: (session) => post("/sessions", session),
 
     /**
+     * « Tes amis aujourd'hui » : première partie du jour de chaque ami sur un
+     * mode (résultat, essais, suite des essais). 403 `play_first` tant que le
+     * joueur n'a pas fini la sienne — le client l'attrape et n'affiche rien.
+     * @param {{ mode: string, expert?: boolean }} p
+     */
+    friendsToday: ({ mode, expert = false }) =>
+      get(`/sessions_today?mode=${encodeURIComponent(mode)}&expert=${expert ? 1 : 0}`),
+
+    /**
      * Synchronise les sessions en attente stockées dans localStorage.
      * Mutex _syncLock : une seule exécution simultanée (évite la race condition
      * entre gameCore.savePendingSession, auth.initAuth et cloud-sync.pullProfileFromCloud).

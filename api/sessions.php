@@ -48,7 +48,7 @@ rateLimit('sessions:' . $userId, 90, 15 * 60, 'Too many session submissions. Ple
 $data   = getJsonBody();
 
 // ── Validation ────────────────────────────────────────────────────────────────
-$validModes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+$validModes = PERSONADLE_MODES;
 
 $mode        = strtolower(trim($data['mode']        ?? ''));
 $playedDate  =            trim($data['played_date'] ?? '');
@@ -57,6 +57,7 @@ $result      = strtolower(trim($data['result']      ?? ''));
 $attempts    = (int)           ($data['attempts']   ?? 0);
 $timeMs      = (int)           ($data['time_ms']    ?? 0);
 $filters     =                  $data['active_filters'] ?? [];
+$guessesIn   =                  $data['guesses'] ?? null;
 // Mode Expert (migration 031) — même `mode`, mécanique et cible différentes.
 $isExpert    = filter_var($data['is_expert'] ?? false, FILTER_VALIDATE_BOOLEAN);
 // Clé d'idempotence générée par le client (migration 032) : rejouer une session
@@ -133,6 +134,21 @@ if (!is_array($filters)) {
     $filters = [];
 }
 
+// Suite des essais (migration 041) — optionnelle. Liste de chaînes, bornée : au
+// plus 40 entrées de 200 caractères, pour que « comparer nos parties » ne puisse
+// pas servir à stocker n'importe quoi. Tout ce qui ne colle pas est ignoré (null),
+// jamais rejeté : la partie compte, la comparaison sera juste moins bavarde.
+$guesses = null;
+if (is_array($guessesIn) && count($guessesIn) <= 40) {
+    $guesses = [];
+    foreach ($guessesIn as $g) {
+        if (!is_string($g)) { $guesses = null; break; }
+        $g = trim($g);
+        if ($g === '' || mb_strlen($g) > 200) { $guesses = null; break; }
+        $guesses[] = $g;
+    }
+}
+
 $pdo = pdo();
 
 // ── Anti-triche (phase 1 : détection uniquement) ─────────────────────────────
@@ -186,7 +202,7 @@ $pdo->beginTransaction();
 try {
     $sessionResult = personadle_record_game_session(
         $pdo, $userId, $mode, $playedDate, $targetName, $result, $attempts, $timeMs, $filters,
-        $isExpert, $clientSessionId
+        $isExpert, $clientSessionId, $guesses
     );
     $pdo->commit();
 } catch (PersonadleDuplicateSessionException $dup) {

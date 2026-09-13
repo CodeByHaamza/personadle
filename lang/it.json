@@ -1045,6 +1045,19 @@
     "close": "Torna alla Home",
     "close_notif": "Chiudi"
   },
+  "friends_today": {
+    "title": "I tuoi amici oggi",
+    "not_played": "non ha ancora giocato",
+    "gave_up": "si è arreso",
+    "first_game_note": "Solo la prima partita del giorno — ognuno ha il proprio personaggio del giorno.",
+    "empty": "Aggiungi amici per confrontare le vostre partite."
+  },
+  "guest_nudge": {
+    "title": "🔥 Serie di {{n}} giorni!",
+    "text": "Crea un account gratuito per salvarla — e ritrovarla su qualsiasi dispositivo.",
+    "cta": "Crea un account",
+    "later": "Più tardi"
+  },
   "settings": {
     "title": "Impostazioni",
     "sound": "Suono",

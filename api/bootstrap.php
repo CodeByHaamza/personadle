@@ -22,6 +22,7 @@ require_once __DIR__ . '/lib/authz.php';
 require_once __DIR__ . '/lib/client_ip.php';
 require_once __DIR__ . '/lib/format.php';
 require_once __DIR__ . '/lib/error_log.php';
+require_once __DIR__ . '/lib/validation.php';
 require_once __DIR__ . '/lib/admin_audit.php';
 require_once __DIR__ . '/lib/deletion_requests.php';
 

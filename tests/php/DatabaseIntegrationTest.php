@@ -311,6 +311,27 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertSame(['opus' => ['P5']], json_decode($stmt->fetchColumn(), true));
     }
 
+    /** Migration 041 : la suite des essais est persistée telle quelle, NULL si absente. */
+    public function testRecordGameSessionStoresGuesses(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        $with = personadle_record_game_session(
+            self::$pdo, $uid, 'classic', $today, 'Yu Narukami', 'win', 2, 900, [],
+            false, '', ['Yosuke Hanamura', 'Yu Narukami']
+        );
+        $without = personadle_record_game_session(
+            self::$pdo, $uid, 'emoji', $today, 'Teddie', 'giveup', 8, 0, []
+        );
+
+        $stmt = self::$pdo->prepare('SELECT guesses FROM game_sessions WHERE id = ?');
+        $stmt->execute([$with['session_id']]);
+        $this->assertSame(['Yosuke Hanamura', 'Yu Narukami'], json_decode($stmt->fetchColumn(), true));
+        $stmt->execute([$without['session_id']]);
+        $this->assertNull($stmt->fetchColumn(), 'sans liste envoyée, la colonne reste NULL');
+    }
+
 
     // ── Upgrade giveup→win (décision produit 2026-07-17) ─────────────────────
 
