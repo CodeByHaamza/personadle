@@ -85,8 +85,25 @@ allOutAttackMode/
     ├── aoaCharacters.js         ← liste des personnages avec GIF
     ├── personas_allOut.js       ← données des personas associées
     ├── portraitsMap.js          ← correspondance nom → portrait
-    └── [images GIF/WebP]        ← les GIFs d'All-Out Attack
+    ├── img/                     ← portraits (suivis par git, 23 Mo)
+    └── allOutAttack/            ← animations .webp — HORS GIT, sur Cloudflare R2
+                                    (README du dossier ; `npm run aoa:fetch` pour jouer hors ligne)
 ```
+
+### ☁️ Les animations vivent sur R2, pas dans le dépôt
+
+Depuis la 2.2, les 74 `.webp` animés (≈ 1,8 Go) ne sont plus suivis par git — ils faisaient
+3,8 Go de `.git`. La prod les sert depuis Cloudflare R2 (`CDN_BASE_URL`) ; en local, `cdn()`
+tente `./database/allOutAttack/<nom>.webp` et **se replie sur R2 à la première 404**
+(`cdnFallbackFor()`), donc un clone frais joue sans rien télécharger.
+
+| Commande            | Rôle                                                                         |
+| ------------------- | ---------------------------------------------------------------------------- |
+| `npm run aoa:fetch` | télécharge dans `database/allOutAttack/` ce qui manque (jouer hors ligne)    |
+| `npm run aoa:check` | vérifie que chaque animation demandée par le jeu est sur R2 — **avant release** |
+
+Ajouter un All-Out Attack : voir `database/allOutAttack/README.md` (conversion ffmpeg, upload
+R2, portraits, datasets).
 
 ---
 
@@ -124,7 +141,7 @@ const imageCache = new Map(); // clé = URL, valeur = Blob URL
 
 | Fonction                   | Description                                              |
 | -------------------------- | -------------------------------------------------------- |
-| `cdn(subfolder, filename, ext="webp")` | Construit l'URL du GIF — chemin local en dev, sinon bascule vers le CDN Cloudflare R2 (`CDN_BASE_URL`) |
+| `cdn(subfolder, filename, ext="webp")` | Construit l'URL du GIF — chemin local en dev tant que les fichiers y sont, sinon CDN Cloudflare R2 (`CDN_BASE_URL`) ; `cdnFallbackFor(src)` rejoue une 404 locale sur le CDN |
 | `getFilteredPersonas()`    | Filtre les personnages selon les opus actifs             |
 | `initializeAutocomplete()` | Dropdown avec filtrage par opus actif                    |
 | `showVictoryBox()`         | Affiche le panneau de victoire avec portrait et GIF      |

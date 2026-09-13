@@ -208,3 +208,17 @@ phpstan.phar
 psalm.phar
 # Cache de Psalm (analyse de taint) — regénéré à chaque lancement.
 .psalm-cache/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Animations d'All-Out Attack — HORS GIT depuis la 2.2 (2026-09-13).
+# 74 .webp ≈ 1,8 Go : c'est ce qui faisait 3,8 Go de .git. Elles vivent sur
+# Cloudflare R2 (CDN_BASE_URL dans modeAllOutAttack.js) ; la prod les sert de là,
+# et le mode se replie sur le CDN en local quand le fichier manque.
+#   npm run aoa:fetch  → remplit le dossier pour jouer hors ligne
+#   npm run aoa:check  → vérifie que tout ce que le jeu demande est sur R2
+# Le README du dossier reste suivi ; les portraits (database/img/) aussi (23 Mo).
+# ─────────────────────────────────────────────────────────────────────────────
+allOutAttackMode/database/allOutAttack/*.webp
+allOutAttackMode/database/allOutAttack/*.gif
+allOutAttackMode/database/allOutAttack/*.mp4
+allOutAttackMode/database/allOutAttack/*.mov

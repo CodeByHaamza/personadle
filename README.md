@@ -656,6 +656,10 @@ bash setup.sh
 # Check i18n key coverage across all 6 languages
 npm run i18n:check
 
+# Optional — All-Out Attack animations live on Cloudflare R2 (not in git, ~1.8 GB);
+# the mode falls back to the CDN locally. Download them only to play offline:
+npm run aoa:fetch
+
 # Open in browser — no build step required
 # With backend: http://localhost/personadle/
 ```

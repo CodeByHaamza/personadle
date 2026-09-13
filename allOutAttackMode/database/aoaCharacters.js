@@ -61,7 +61,7 @@ export const aoaCharacters = [
   { nom: "Okyann ( Kayo Tomiyama )", gif: "Okyann", opus: ["P5X"] },
   { nom: "Puppet ( Miyu Sahara )", gif: "Puppet", opus: ["P5X"] },
   { nom: "Riddle ( Haruna Nishimori )", gif: "Riddle", opus: ["P5X"] },
-  { nom: "Yuki ( Yukimi Fujikawa )", gif: "Yuki_X", opus: ["P5X"] },
+  { nom: "Yuki ( Yukimi Fujikawa )", gif: "YukiX", opus: ["P5X"] },
   { nom: "Mont ( Kotone Montagne )", gif: "Mont", opus: ["P5X"] },
   { nom: "Messa ( Kira Kitazato )", gif: "Messa", opus: ["P5X"] },
   { nom: "Cherish ( Masaki Ashiya )", gif: "Cherish", opus: ["P5X"] },

@@ -61,9 +61,26 @@ const IS_LOCAL = (() => {
   );
 })();
 
+/** Dossier local des animations — hors git depuis la 2.2 (`npm run aoa:fetch` pour le remplir). */
+const LOCAL_ASSET_DIR = "./database/allOutAttack/";
+
+/**
+ * Bascule à true dès qu'une animation locale manque : le dépôt ne contient plus
+ * les .webp d'All-Out Attack (1,8 Go — ils vivent sur R2). Un clone frais joue
+ * donc depuis le CDN sans rien télécharger ; un dev qui a lancé `aoa:fetch`
+ * reste en local. Une seule 404 suffit à basculer, pour ne pas en payer une
+ * par image.
+ */
+let localAssetsMissing = false;
+
+/** URL CDN d'un asset — valable partout, c'est le repli du mode local. */
+function cdnUrl(subfolder, filename, ext = "webp") {
+  return `${CDN_BASE_URL}${subfolder}/${encodeURIComponent(filename)}.${ext}?cache=${CACHE_CONTROL}`;
+}
+
 /**
  * Builds the URL for an All-Out Attack asset.
- * Local: `./database/allOutAttack/<filename>.<ext>`
+ * Local: `./database/allOutAttack/<filename>.<ext>` (tant que les fichiers y sont)
  * Production: CDN Cloudflare R2
  *
  * @param {string} subfolder - CDN subfolder (e.g. "allOutAttack")
@@ -72,8 +89,26 @@ const IS_LOCAL = (() => {
  * @returns {string}
  */
 function cdn(subfolder, filename, ext = "webp") {
-  if (IS_LOCAL) return `./database/allOutAttack/${encodeURIComponent(filename)}.${ext}`;
-  return `${CDN_BASE_URL}${subfolder}/${encodeURIComponent(filename)}.${ext}?cache=${CACHE_CONTROL}`;
+  if (IS_LOCAL && !localAssetsMissing) {
+    return `${LOCAL_ASSET_DIR}${encodeURIComponent(filename)}.${ext}`;
+  }
+  return cdnUrl(subfolder, filename, ext);
+}
+
+/**
+ * Équivalent CDN d'une URL locale qui vient d'échouer — null si l'URL n'était
+ * pas locale (une 404 CDN n'a pas de repli). Effet de bord voulu : marque les
+ * assets locaux comme absents, donc `cdn()` répond CDN pour la suite.
+ * @param {string} src
+ * @returns {string|null}
+ */
+function cdnFallbackFor(src) {
+  if (!src.startsWith(LOCAL_ASSET_DIR)) return null;
+  const file = src.slice(LOCAL_ASSET_DIR.length);
+  const dot = file.lastIndexOf(".");
+  if (dot < 1) return null;
+  localAssetsMissing = true;
+  return cdnUrl("allOutAttack", decodeURIComponent(file.slice(0, dot)), file.slice(dot + 1));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -146,7 +181,12 @@ async function smartPreload(namesList, priority = "low") {
           addToImageCache(src, img);
           resolve();
         };
-        img.onerror = () => resolve();
+        img.onerror = () => {
+          // Fichier absent en local : bascule le mode sur le CDN — les tours
+          // suivants de cette boucle et loadImageSafely() n'y repasseront plus.
+          cdnFallbackFor(src);
+          resolve();
+        };
       });
 
       // Un GIF dont la requête reste en suspens ne déclenche NI onload NI onerror :
@@ -200,6 +240,13 @@ function loadImageSafely(gifElement, src, onLoadCallback) {
 
   tempImg.onerror = () => {
     cleanup();
+    // Le dépôt ne contient plus les animations : en local, une 404 sur le
+    // disque se rejoue sur le CDN avant de renoncer.
+    const fallback = cdnFallbackFor(src);
+    if (fallback) {
+      loadImageSafely(gifElement, fallback, onLoadCallback);
+      return;
+    }
     console.error(`Failed to load: ${src}`);
     gifElement.src = "../img/loading.gif";
   };

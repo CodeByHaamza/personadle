@@ -52,6 +52,9 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `activate` ne purge pas l'ancien cache et les assets servis en cache-first (images,
       sons) restent ceux de la version précédente. Invisible en test : seuls les joueurs
       DÉJÀ venus sont concernés.
+- [ ] **`npm run aoa:check` vert** — chaque animation d'All-Out Attack demandée par le jeu
+      est sur R2 (les `.webp` ne sont plus dans git depuis la 2.2 ; la prod n'a QUE le CDN).
+      Fait le 2026-09-13 : 74/74, Bui Cosmic et Berry Summer compris.
 - [ ] **Déployer hors heure de pointe.** `sw.js` envoie `SW_UPDATED` à tous les onglets via
       `clients.claim()`, et chaque page répond par `window.location.reload()`. L'état de
       partie survit (il vit dans `localStorage`), mais un joueur en cours de partie est
@@ -232,6 +235,53 @@ vulnérabilité. Le risque vit dans les 61 fichiers PHP écrits à la main.
       (`api/data/daily_pools.json` est déjà chargé par `daily_target.php`).
 - [ ] Cibles prioritaires : IDOR sur `api/user/*`, contournement de `requireAdmin()`, absence
       de jeton anti-CSRF (sessions en cookie httpOnly), abus de la logique de défis.
+
+---
+
+## Dépôt git — purge de l'historique des médias (phase B, décision Hamza)
+
+Phase A livrée le 2026-09-13 (PR `chore/aoa-assets-off-git`) : les 74 `.webp` d'All-Out
+Attack (1,8 Go) ne sont plus **suivis** — R2 en prod, repli CDN en local, `npm run aoa:fetch`
+pour jouer hors ligne. Effet : plus aucun média lourd n'entre dans l'historique. Mais tout ce
+qui y est déjà y reste : `.git` pèse **3,8 Go** (3,76 Go de packs). Mesuré le 2026-09-13
+(`git rev-list --objects --all | git cat-file --batch-check`) : **3,06 Go pour
+`allOutAttackMode/database/allOutAttack/` seul** — 131 blobs : les 74 `.webp` actuels, les
+**50 `.gif` d'anciens All-Out Attack supprimés** au fil des versions (aucun `.mp4`/`.mov` n'a
+jamais été commité), et les versions successives de chaque fichier. Le reste (0,22 Go) est de
+la documentation d'anciennes versions (un PDF de 83 Mo de la doc technique 2.0, déjà retiré
+de l'arbre ; bannières 1.1) — négligeable, on ne le purge pas. Seule une réécriture de
+l'historique enlève les 3 Go.
+
+- [ ] **Décider le créneau** : juste après une release, quand **aucune PR n'est ouverte**
+      (chaque PR ouverte devrait être recréée — les SHA changent tous).
+- [ ] **Prévenir Léo et Damien** : leurs clones deviennent incompatibles → `git clone` à neuf
+      (ou `git fetch && git reset --hard origin/<branche>` sur chaque branche, rien de local
+      à garder).
+- [ ] **Sauvegarde** : `git clone --mirror` du dépôt avant toute chose, gardée hors ligne.
+- [ ] **Réécriture** (`git filter-repo`, pas `filter-branch`) sur un clone frais :
+      ```bash
+      pip install git-filter-repo
+      git clone --mirror https://github.com/CodeByHaamza/personadle.git personadle-purge
+      cd personadle-purge
+      git filter-repo --invert-paths --path allOutAttackMode/database/allOutAttack
+      # puis : git count-objects -vH → attendu ≈ 0,7 Go (3,8 − 3,06)
+      ```
+      Ne pas toucher aux `.gif` d'`img/` (avatars, loading — petits et encore servis).
+- [ ] **Vérifier** sur le clone réécrit : `npm test`, `make up` + `npm run test:e2e`,
+      `git log --oneline | wc -l` identique, `git diff <ancien HEAD> <nouveau HEAD>` vide
+      hors chemins purgés.
+- [ ] **Pousser** : `git push --force --mirror` (toutes branches et tags), puis dans
+      GitHub → Settings → « Danger zone », rien à faire ; les PR fermées gardent leurs
+      anciens SHA (liens morts, acceptable).
+- [ ] **Hostinger** (le `git pull` auto refusera l'historique divergent) : SSH,
+      `cd domains/personadle.net/public_html && git fetch origin && git reset --hard
+      origin/main` — vérifier ensuite `api/config.php` et les fichiers non suivis (uploads)
+      toujours en place. Prévoir 5 min d'indisponibilité, hors heure de pointe.
+- [ ] **Après coup** : `git gc --prune=now --aggressive` sur chaque clone survivant,
+      supprimer le miroir de sauvegarde après un mois sans problème.
+
+Pourquoi maintenant et pas avant : tant que les `.webp` étaient suivis, purger l'historique
+n'aurait rien réglé — le prochain commit les réintroduisait.
 
 ---
 

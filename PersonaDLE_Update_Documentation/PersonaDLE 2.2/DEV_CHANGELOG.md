@@ -13,6 +13,65 @@
 
 ---
 
+## 2026-09-13 — Les animations d'All-Out Attack sortent de git (branche `chore/aoa-assets-off-git`)
+
+`.git` pesait **3,8 Go**, dont 3,06 Go pour `allOutAttackMode/database/allOutAttack/` seul :
+les 74 `.webp` animés suivis (1,8 Go dans l'arbre), les 50 `.gif` d'anciens All-Out Attack
+supprimés au fil des versions, et chaque version de chaque fichier. Or la prod ne lit **jamais**
+ce dossier — `modeAllOutAttack.js` sert les animations depuis Cloudflare R2 dès que
+`location.hostname` n'est pas local. Ces fichiers ne servaient qu'au dev, et coûtaient un clone
+de 4 Go à chaque contributeur et à chaque job CI.
+
+### Ce qui change
+
+- **Plus aucun `.webp` d'animation suivi** (`git rm --cached`, `.gitignore` sur
+  `allOutAttackMode/database/allOutAttack/*.{webp,gif,mp4,mov}`). Les portraits (`database/img/`,
+  23 Mo) restent dans git. Trois fichiers **orphelins** (hors dataset, jamais référencés :
+  `Mount_Ice`, `Mount_Wind`, `Wind_V`, 20 Mo) supprimés au passage.
+- **Repli CDN en local** — `cdn()` garde le chemin local tant que les fichiers y sont ; à la
+  première 404, `cdnFallbackFor(src)` rejoue la même image sur R2 et bascule
+  `localAssetsMissing`, donc les appels suivants partent directement sur le CDN (une seule 404,
+  pas une par image). `loadImageSafely()` et `smartPreload()` l'utilisent. Vérifié en
+  navigateur avec le dossier vidé : 404 locale → 200 R2, image affichée, aucune erreur.
+  **Un clone frais joue donc sans rien télécharger.**
+- **`scripts/fetch_aoa_assets.js`** — `npm run aoa:fetch` télécharge dans le dossier ce qui
+  manque (jouer hors ligne / sans CDN en dev) ; `npm run aoa:check` vérifie que chaque
+  animation attendue par le jeu (`portraitsMap[nom] || premier mot`, dérivé des datasets) est
+  sur R2 et liste les orphelins locaux — **ajouté à la checklist « Bloquant release »** de
+  `TODO.md`. Résultat du jour : 74/74 sur R2 (Bui Cosmic et Berry Summer compris). Le
+  téléchargement a été comparé octet à octet au fichier précédemment suivi : identique.
+- **Pages joueur 2.0 / 2.1 / 2.2** : les 16 `<img>` d'animation pointaient sur
+  `../../allOutAttackMode/database/allOutAttack/…` — elles pointent sur R2 (les 14 URLs
+  distinctes répondent 200). Sans ça, ces pages auraient perdu leurs animations en prod au
+  prochain `git pull`, qui va supprimer le dossier sur Hostinger.
+- `aoaCharacters.js` : `gif: "Yuki_X"` → `"YukiX"` (le fichier et R2 s'appellent `YukiX` ;
+  le champ `gif` n'est lu nulle part, c'est `portraitsMap` qui donne le nom — corrigé pour
+  que `aoa:check` et un lecteur humain ne cherchent pas un fichier qui n'existe pas).
+- Docs : `allOutAttackMode/README.md` (section « Les animations vivent sur R2 »),
+  `database/allOutAttack/README.md` (procédure d'ajout : ffmpeg, upload R2, portraits,
+  datasets), `README.md` (quick start), `.gitignore` commenté.
+
+### Ce qui ne change pas — et la phase B
+
+L'historique garde ses 3 Go : seule une réécriture (`git filter-repo --invert-paths --path
+allOutAttackMode/database/allOutAttack`) les enlève, avec force-push de toutes les branches,
+re-clone pour Léo et Damien et `git reset --hard` sur Hostinger. C'est une décision de Hamza,
+à prendre juste après une release quand aucune PR n'est ouverte — plan détaillé, mesuré et
+ordonné dans `TODO.md` § « Dépôt git — purge de l'historique des médias ». Sans la phase A
+d'aujourd'hui, la purge n'aurait servi à rien : le commit suivant réintroduisait les `.webp`.
+
+### Angles morts
+
+- Un dev **sans réseau** et sans `aoa:fetch` verra le placeholder de chargement en AOA — le
+  repli CDN a besoin d'internet. C'est le seul cas où l'ancien comportement était meilleur.
+- Le job E2E de la CI joue désormais AOA depuis R2 (le checkout n'a plus les fichiers) — les
+  specs n'attendent pas le chargement de l'image, donc pas d'impact mesuré, mais une panne R2
+  se verrait en CI avant de se voir en prod (ce qui n'est pas un mal).
+- Le premier `git pull` Hostinger après merge dans `main` supprimera 1,8 Go du serveur — rien à
+  faire, la prod ne les servait pas.
+
+---
+
 ## 2026-09-13 — Le Compendium : carnet de collection (branche `fix/community-feedback-batch`)
 
 Nouvelle page `profile/compendium/` — un livre qui raconte ce que le joueur a accompli :

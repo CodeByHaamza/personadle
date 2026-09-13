@@ -17,6 +17,8 @@
     "pools:check": "node scripts/export-daily-pools.js --check",
     "security:taint": "docker compose exec -T php sh -c \"cd /var/www/html && [ -f psalm.phar ] || curl -sSL -o psalm.phar https://github.com/vimeo/psalm/releases/latest/download/psalm.phar; php psalm.phar --taint-analysis --no-cache --no-progress\"",
     "pools:build": "node scripts/export-daily-pools.js",
+    "aoa:fetch": "node scripts/fetch_aoa_assets.js",
+    "aoa:check": "node scripts/fetch_aoa_assets.js --check",
     "smoke": "bash scripts/smoke_test.sh",
     "schema:check-prod": "php scripts/check_prod_schema.php",
     "lint": "eslint \"**/*.js\" --ignore-pattern node_modules",
