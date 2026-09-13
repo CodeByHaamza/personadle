@@ -1211,7 +1211,7 @@ export const MODE_PAGE_PATH = {
 };
 
 /** Dossiers à deux niveaux sous la racine du site. */
-const _DEEP_SUBPATHS = ["/profile/friends/", "/profile/leaderboard/"];
+const _DEEP_SUBPATHS = ["/profile/friends/", "/profile/leaderboard/", "/profile/compendium/"];
 
 /** Dossiers à un niveau sous la racine du site. */
 const _SUBPATHS = [

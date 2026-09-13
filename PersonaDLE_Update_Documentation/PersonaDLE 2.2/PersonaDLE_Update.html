@@ -1032,6 +1032,68 @@
             .p1-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
             .p1-item img { height: 78px; }
         }
+        /* ── Le Compendium : carte « Grimoire » — losanges bleus, or, pentacle ── */
+        .grimoire-card {
+            --gr-blue: #0f1f5c; --gr-blue-light: #2b46b3; --gr-gold: #d4af37; --gr-gold-light: #f1d27a;
+            position: relative;
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 22px;
+            align-items: center;
+            margin: 18px 0 22px;
+            padding: 22px 24px;
+            border-radius: 16px;
+            border: 3px solid var(--gr-gold);
+            color: #eef2ff;
+            background-color: var(--gr-blue);
+            background-image:
+                linear-gradient(45deg, var(--gr-blue-light) 25%, transparent 25%, transparent 75%, var(--gr-blue-light) 75%),
+                linear-gradient(-45deg, var(--gr-blue-light) 25%, transparent 25%, transparent 75%, var(--gr-blue-light) 75%);
+            background-size: 44px 44px;
+            background-position: 0 0, 22px 22px;
+            box-shadow: inset 0 0 0 5px #070f33, inset 0 0 0 7px rgba(212, 175, 55, 0.45), 0 12px 36px rgba(3, 6, 30, 0.45);
+            overflow: hidden;
+            animation: grimoireDrift 14s linear infinite;
+        }
+        @keyframes grimoireDrift { from { background-position: 0 0, 22px 22px; } to { background-position: 44px 44px, 66px 66px; } }
+        .grimoire-card::after {
+            content: "";
+            position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.10), transparent 60%);
+        }
+        .grimoire-pentacle {
+            width: 150px; height: 150px; color: var(--gr-gold-light);
+            filter: drop-shadow(0 0 10px rgba(241, 210, 122, 0.55));
+            animation: grimoireGlow 4s ease-in-out infinite;
+        }
+        @keyframes grimoireGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(241, 210, 122, 0.35)); }
+            50%      { filter: drop-shadow(0 0 18px rgba(241, 210, 122, 0.8)); }
+        }
+        .grimoire-body h3 {
+            margin: 0 0 6px;
+            font-family: 'Cinzel', Georgia, serif;
+            font-size: 1.35rem; letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--gr-gold-light);
+            text-shadow: 0 2px 0 #7a5f14, 0 0 14px rgba(241, 210, 122, 0.35);
+        }
+        .grimoire-body p { margin: 0 0 12px; color: #dfe6ff; font-size: 0.92rem; line-height: 1.55; }
+        .grimoire-chapters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+        .grimoire-chapters li {
+            padding: 4px 10px; border-radius: 100px;
+            border: 1px solid rgba(241, 210, 122, 0.55);
+            background: rgba(7, 15, 51, 0.65);
+            color: var(--gr-gold-light);
+            font-family: 'Cinzel', Georgia, serif; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        @media (max-width: 600px) {
+            .grimoire-card { grid-template-columns: 1fr; text-align: center; padding: 18px 16px; }
+            .grimoire-pentacle { width: 110px; height: 110px; margin: 0 auto; }
+            .grimoire-chapters { justify-content: center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .grimoire-card, .grimoire-pentacle { animation: none; }
+        }
     </style>
 </head>
 <body>
@@ -1082,9 +1144,84 @@
     </div>
 
     <blockquote>
-        <div data-i18n-block="fr"><p>Cette page se remplit au fil de la v2.2. Le durcissement des limites anti-bruteforce et l'annonce quotidienne sur Discord ne changent rien de visible en jeu ; les défis, vos retours de septembre et deux nouveaux All-Out Attack, si.</p></div>
-        <div data-i18n-block="en"><p>This page fills up as v2.2 goes on. Hardening the anti-bruteforce limits and the daily Discord announcement change nothing visible in game; challenges, your September feedback and two new All-Out Attacks do.</p></div>
+        <div data-i18n-block="fr"><p>Cette page se remplit au fil de la v2.2. Le durcissement des limites anti-bruteforce et l'annonce quotidienne sur Discord ne changent rien de visible en jeu ; les défis, vos retours de septembre, deux nouveaux All-Out Attack et le Compendium, si.</p></div>
+        <div data-i18n-block="en"><p>This page fills up as v2.2 goes on. Hardening the anti-bruteforce limits and the daily Discord announcement change nothing visible in game; challenges, your September feedback, two new All-Out Attacks and the Compendium do.</p></div>
     </blockquote>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════
+         LE COMPENDIUM — CARNET DE COLLECTION
+    ════════════════════════════════════ -->
+    <div data-i18n-block="fr"><h1>📖 Le Compendium</h1></div>
+    <div data-i18n-block="en"><h1>📖 The Compendium</h1></div>
+
+    <div data-i18n-block="fr">
+        <p>Un livre, sur ta page profil, qui raconte ce que tu as accompli. Le bouton au pentacle, juste sous le mode sombre, l'ouvre.</p>
+    </div>
+    <div data-i18n-block="en">
+        <p>A book, on your profile page, that tells what you've accomplished. The pentacle button, right under Dark Mode, opens it.</p>
+    </div>
+
+    <div class="grimoire-card vx-reveal">
+        <div class="grimoire-pentacle-col">
+            <svg class="grimoire-pentacle" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+                <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" stroke-width="2.2" />
+                <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5" />
+                <polygon points="100,18 122,76 184,76 134,112 152,172 100,136 48,172 66,112 16,76 78,76" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" />
+                <circle cx="100" cy="100" r="14" fill="none" stroke="currentColor" stroke-width="2" />
+                <circle cx="94" cy="97" r="1.8" fill="currentColor" /><circle cx="106" cy="97" r="1.8" fill="currentColor" />
+                <path d="M94 105 q6 5 12 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+            </svg>
+        </div>
+        <div class="grimoire-body">
+            <div data-i18n-block="fr">
+                <h3>Compendium</h3>
+                <p>Six chapitres, chaque entrée datée, avec qui, et un petit mot. Les badges épinglés, les titres gagnés, les fonds débloqués, chaque rang de Social Link franchi, chaque défi relevé, tes premières fois et tes records. Il s'écrit tout seul à partir de ce que tu as déjà fait — rien à remplir.</p>
+            </div>
+            <div data-i18n-block="en">
+                <h3>Compendium</h3>
+                <p>Six chapters, every entry dated, with who, and a short note. Badges pinned, titles earned, wallpapers unlocked, every Social Link rank crossed, every challenge taken up, your firsts and your records. It writes itself from what you've already done — nothing to fill in.</p>
+            </div>
+            <ul class="grimoire-chapters" aria-label="Chapitres">
+                <li>🎖️ Badges</li><li>🏅 <span data-i18n-block="fr">Titres</span><span data-i18n-block="en">Titles</span></li>
+                <li>🖼️ <span data-i18n-block="fr">Fonds d'écran</span><span data-i18n-block="en">Wallpapers</span></li>
+                <li>💙 <span data-i18n-block="fr">Liens</span><span data-i18n-block="en">Bonds</span></li>
+                <li>⚔ <span data-i18n-block="fr">Défis</span><span data-i18n-block="en">Challenges</span></li>
+                <li>🌟 <span data-i18n-block="fr">Exploits</span><span data-i18n-block="en">Feats</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="feature-list vx-reveal">
+        <div class="feature-item">
+            <span class="feature-icon">👁</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Public, comme ton profil</strong>
+                <strong data-i18n-block="en">Public, like your profile</strong>
+                <span data-i18n-block="fr">Depuis le profil d'un ami, le même bouton ouvre son carnet à lui. Compare vos collections, jalouse ses True Confidants.</span>
+                <span data-i18n-block="en">From a friend's profile, the same button opens their book. Compare collections, envy their True Confidants.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">🕯️</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">« Avant le Compendium »</strong>
+                <strong data-i18n-block="en">"Before the Compendium"</strong>
+                <span data-i18n-block="fr">Ce qui s'est passé avant qu'on note les dates (vieux rangs de Social Link, ton record de série) est marqué ainsi — plutôt que d'inventer une date.</span>
+                <span data-i18n-block="en">Whatever happened before dates were recorded (old Social Link ranks, your streak record) is marked this way — rather than making a date up.</span>
+            </div>
+        </div>
+        <div class="feature-item">
+            <span class="feature-icon">📱</span>
+            <div class="feature-text">
+                <strong data-i18n-block="fr">Un vrai livre, même sur mobile</strong>
+                <strong data-i18n-block="en">A real book, on mobile too</strong>
+                <span data-i18n-block="fr">Couverture qui s'ouvre, onglets de chapitres, pages qui se tournent — au clic, au clavier, ou d'un balayage du pouce.</span>
+                <span data-i18n-block="en">A cover that opens, chapter tabs, pages that turn — by click, keyboard, or a swipe of the thumb.</span>
+            </div>
+        </div>
+    </div>
 
     <hr>
 

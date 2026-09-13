@@ -77,6 +77,15 @@ INSERT INTO social_links (user_a_id, user_b_id, `rank`, xp, created_at, last_int
   (LEAST(@me, @wonder), GREATEST(@me, @wonder), 2, 130, NOW() - INTERVAL 3 DAY,  NOW())
 ON DUPLICATE KEY UPDATE `rank` = VALUES(`rank`), xp = VALUES(xp);
 
+-- Rang-ups datés (compendium, chapitre Liens) : quelques passages de rang avec
+-- Futaba et Ren ; les autres True Confidants n'en ont pas → « avant le compendium ».
+DELETE FROM social_link_rankup_notifs WHERE recipient_id = @me AND partner_id IN (@futaba, @ren);
+INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank, created_at, seen_at) VALUES
+  (@me, @futaba, 2,  NOW() - INTERVAL 28 DAY, NOW() - INTERVAL 28 DAY),
+  (@me, @futaba, 5,  NOW() - INTERVAL 14 DAY, NOW() - INTERVAL 14 DAY),
+  (@me, @futaba, 10, NOW() - INTERVAL 1 DAY,  NOW() - INTERVAL 1 DAY),
+  (@me, @ren,    10, NOW() - INTERVAL 9 DAY,  NOW() - INTERVAL 9 DAY);
+
 -- ── 3. Défis — tous les états, dans les deux sens ────────────────────────────
 DELETE FROM messages WHERE content = '[mock]' AND (sender_id = @me OR receiver_id = @me);
 
