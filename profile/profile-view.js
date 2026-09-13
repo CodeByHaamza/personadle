@@ -792,6 +792,15 @@ if (viewParam || uidParam) {
     header?.insertAdjacentElement("afterend", banner);
     attachBannerActions(user.friend_code);
 
+    // Le Compendium est public : le bouton pointe vers le carnet du joueur
+    // visité, et reste visible même pour un visiteur non connecté.
+    const compendiumBtn = document.getElementById("compendiumBtn");
+    if (compendiumBtn) {
+      compendiumBtn.href = `./compendium/compendium.html?view=${encodeURIComponent(user.friend_code)}`;
+      compendiumBtn.removeAttribute("data-auth");
+      compendiumBtn.style.display = "";
+    }
+
     // Remplir le profil + appliquer le thème
     populatePublicProfile(profileData);
 

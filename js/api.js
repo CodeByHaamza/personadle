@@ -202,6 +202,20 @@ export const api = {
      * @returns {Promise<{ me, friend, on_cooldown, cooldown_until, xp_gained }>}
      */
     compare: (friendId) => get(`/user/compare?friend_id=${friendId}`),
+
+    /**
+     * Le Compendium (carnet de collection) — public, comme le profil.
+     * Sans paramètre : celui de l'utilisateur connecté. `{ code }` (friend_code)
+     * ou `{ id }` : celui d'un autre joueur.
+     * @param {{ code?: string, id?: number }} [target]
+     */
+    compendium: (target = {}) => {
+      const q = new URLSearchParams();
+      if (target.code) q.set("code", target.code);
+      else if (target.id) q.set("id", String(target.id));
+      const qs = q.toString();
+      return get(`/user/compendium${qs ? `?${qs}` : ""}`);
+    },
   },
 
   // ── Statistiques & sessions de jeu ───────────────────

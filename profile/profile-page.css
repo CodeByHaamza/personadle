@@ -4487,3 +4487,123 @@ body.darkmode .expert-stat-cols .expert-stat-cell {
     font-size: 0.56rem;
   }
 }
+
+/* =====================================================
+   16. BOUTON COMPENDIUM — sous le toggle dark mode
+   Hommage au « Grimoire du Cœur » : losanges bleus,
+   pentacle doré. Fixe, sous .darkmode-toggle (top 12px,
+   ~44px de haut). Icône seule sur mobile.
+   ===================================================== */
+
+.grimoire-btn {
+  position: fixed;
+  top: 62px;
+  right: 14px;
+  z-index: 9998;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+  padding: 6px 12px 6px 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, #0a1733 0%, #143a7a 55%, #0a1733 100%);
+  color: #f3d78a;
+  border: 1px solid rgba(130, 185, 255, 0.55);
+  box-shadow:
+    0 0 0 2px rgba(6, 14, 38, 0.65),
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    inset 0 0 14px rgba(90, 150, 255, 0.28);
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* Losanges bleus (motif du grimoire) : damier tourné à 45°, qui dérive lentement */
+.grimoire-btn__diamonds {
+  position: absolute;
+  inset: -20px;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-conic-gradient(
+      from 45deg,
+      rgba(110, 170, 255, 0.28) 0% 25%,
+      transparent 0% 50%
+    )
+    0 0 / 14px 14px;
+  -webkit-mask: linear-gradient(90deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
+  mask: linear-gradient(90deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
+  animation: grimoireDiamondsDrift 8s linear infinite;
+}
+
+@keyframes grimoireDiamondsDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(14px); }
+}
+
+.grimoire-btn__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 3px rgba(243, 215, 138, 0.55));
+  transition: transform 0.6s ease;
+}
+
+.grimoire-btn__label {
+  white-space: nowrap;
+  color: #e9f1ff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.grimoire-btn:hover,
+.grimoire-btn:focus-visible {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 2px rgba(6, 14, 38, 0.65),
+    0 6px 18px rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(110, 170, 255, 0.45),
+    inset 0 0 18px rgba(110, 170, 255, 0.35);
+  outline: none;
+}
+
+.grimoire-btn:hover .grimoire-btn__icon,
+.grimoire-btn:focus-visible .grimoire-btn__icon {
+  transform: rotate(72deg);
+}
+
+.grimoire-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .grimoire-btn {
+    top: 58px;
+    right: 10px;
+    padding: 6px;
+    border-radius: 50%;
+  }
+  .grimoire-btn__label {
+    display: none;
+  }
+  .grimoire-btn__diamonds {
+    -webkit-mask: none;
+    mask: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grimoire-btn__diamonds {
+    animation: none;
+  }
+  .grimoire-btn__icon {
+    transition: none;
+  }
+}

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compendium — PersonaDLE</title>
+    <meta name="robots" content="noindex" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="../../css/global.css?v=12" />
+    <link rel="stylesheet" href="../../css/langSelector.css?v=4" />
+    <link rel="stylesheet" href="../../css/bottomNav.css?v=1" />
+    <link rel="stylesheet" href="../../css/calling-card.css?v=2" />
+    <link rel="stylesheet" href="../../css/challenge-notif.css" />
+    <link rel="stylesheet" href="../../css/challenge-result.css" />
+    <link rel="stylesheet" href="../../css/p3-evoker-anim.css" />
+    <link rel="stylesheet" href="../../css/social-link.css" />
+    <link rel="stylesheet" href="./compendium.css?v=1" />
+
+    <link rel="icon" type="image/gif" href="../../img/persona_64x64.gif" />
+
+    <script>
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.documentElement.classList.add("darkmode");
+      }
+    </script>
+  </head>
+  <body class="cp-body">
+    <div class="darkmode-toggle">
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider round"></span>
+      </label>
+      <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+    </div>
+
+    <!-- ── Le Compendium ─────────────────────────────────────────────────────
+         Un livre : couverture fermée à l'arrivée (losanges bleus, pentacle —
+         hommage au Grimoire du Cœur), puis double page. Chapitres = onglets
+         dorés sur la tranche ; entrées = « tampons » datés. Sur mobile, une
+         page à la fois, chapitres en onglets, balayage pour tourner.
+         Tout le contenu est rendu par compendium.js depuis
+         GET /api/user/compendium (le sien, ou ?view=CODE pour un ami). -->
+    <main class="cp-stage" id="cpStage">
+      <p class="cp-back-row">
+        <a href="../profile.html" id="cpBackLink" class="cp-back"
+          >← <span data-i18n="ui.back_my_profile">My Profile</span></a
+        >
+      </p>
+
+      <!-- Couverture -->
+      <section class="cp-cover" id="cpCover" aria-labelledby="cpCoverTitle">
+        <div class="cp-cover__ornament cp-cover__ornament--tl" aria-hidden="true">❦</div>
+        <div class="cp-cover__ornament cp-cover__ornament--tr" aria-hidden="true">❦</div>
+        <div class="cp-cover__ornament cp-cover__ornament--bl" aria-hidden="true">❦</div>
+        <div class="cp-cover__ornament cp-cover__ornament--br" aria-hidden="true">❦</div>
+
+        <svg class="cp-pentacle" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+          <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" stroke-width="2.2" />
+          <circle
+            cx="100"
+            cy="100"
+            r="80"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-dasharray="3 5"
+          />
+          <polygon
+            points="100,18 122,76 184,76 134,112 152,172 100,136 48,172 66,112 16,76 78,76"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.6"
+            stroke-linejoin="round"
+          />
+          <circle cx="100" cy="100" r="14" fill="none" stroke="currentColor" stroke-width="2" />
+          <circle cx="94" cy="97" r="1.8" fill="currentColor" />
+          <circle cx="106" cy="97" r="1.8" fill="currentColor" />
+          <path
+            d="M94 105 q6 5 12 0"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+          <g
+            class="cp-pentacle__glyphs"
+            fill="currentColor"
+            font-family="Cinzel, serif"
+            font-size="9"
+            text-anchor="middle"
+          >
+            <text x="100" y="50">☉</text>
+            <text x="146" y="90">☿</text>
+            <text x="128" y="150">♀</text>
+            <text x="72" y="150">♂</text>
+            <text x="54" y="90">☽</text>
+          </g>
+        </svg>
+
+        <h1 class="cp-cover__title" id="cpCoverTitle" data-i18n="compendium.title">Compendium</h1>
+        <p class="cp-cover__owner" id="cpOwner">…</p>
+        <p class="cp-cover__tagline" data-i18n="compendium.tagline">
+          Personality changes the world.
+        </p>
+
+        <button type="button" class="cp-open-btn" id="cpOpenBtn" data-i18n="compendium.open">
+          Open
+        </button>
+        <p class="cp-cover__state hidden" id="cpCoverState"></p>
+      </section>
+
+      <!-- Livre ouvert -->
+      <section class="cp-book hidden" id="cpBook" aria-live="polite">
+        <nav class="cp-tabs" id="cpTabs" role="tablist" aria-label="Chapters"></nav>
+
+        <div class="cp-spread">
+          <!-- Page de gauche : le chapitre (titre, résumé, illustration) -->
+          <article class="cp-page cp-page--left" id="cpPageLeft"></article>
+          <!-- Page de droite : les entrées, paginées -->
+          <article class="cp-page cp-page--right" id="cpPageRight"></article>
+        </div>
+
+        <div class="cp-pager">
+          <button type="button" class="cp-pager__btn" id="cpPrev" aria-label="Previous page">
+            ‹
+          </button>
+          <span class="cp-pager__info" id="cpPagerInfo">1 / 1</span>
+          <button type="button" class="cp-pager__btn" id="cpNext" aria-label="Next page">›</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- i18n -->
+    <script type="module">
+      import { initLang } from "../../js/i18n.js";
+      window.__i18nReady = initLang();
+    </script>
+
+    <!-- API -->
+    <script type="module" src="../../js/api.js"></script>
+
+    <!-- Auth -->
+    <script type="module">
+      import { initAuth } from "../../js/auth.js";
+      window._authReady = initAuth();
+      window._authReady.catch(() => {});
+    </script>
+
+    <!-- Logique Compendium -->
+    <script type="module" src="./compendium.js?v=1"></script>
+
+    <!-- Notifications -->
+    <script type="module">
+      import { initNotifications } from "../../js/notifications.js";
+
+      if (window._authReady) await window._authReady;
+      if (window._currentUser) initNotifications();
+    </script>
+
+    <!-- Dark mode + bottom nav -->
+    <script type="module">
+      import { initBottomNav } from "../../js/bottomNav.js";
+
+      const toggle = document.getElementById("darkModeToggle");
+      if (localStorage.getItem("darkMode") === "enabled") {
+        document.body.classList.add("darkmode");
+        toggle.checked = true;
+      }
+      toggle.addEventListener("change", () => {
+        document.body.classList.toggle("darkmode", toggle.checked);
+        localStorage.setItem("darkMode", toggle.checked ? "enabled" : "disabled");
+      });
+
+      initBottomNav();
+    </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("../../sw.js", { updateViaCache: "none" }).catch(() => {});
+        navigator.serviceWorker.addEventListener("message", (e) => {
+          if (e.data?.type === "SW_UPDATED") window.location.reload();
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -945,6 +945,88 @@
     "expert_locked": "Débloque l'Expert de ce mode avant d'accepter ce défi.",
     "target_unavailable": "Ce défi n'est plus jouable sur ce mode — il a été annulé."
   },
+  "compendium": {
+    "title": "Compendium",
+    "tagline": "La personnalité change le monde.",
+    "open": "Ouvrir le Compendium",
+    "button": "Compendium",
+    "button_hint": "Ton carnet de collection",
+    "chapter_kicker": "Chapitre",
+    "undated": "Avant le Compendium",
+    "tries": "{{n}} essais",
+    "tries_one": "1 essai",
+    "rank": "Rang {{n}}",
+    "page_prev": "Page précédente",
+    "page_next": "Page suivante",
+    "chapters_label": "Chapitres",
+    "login_required": "Connecte-toi pour ouvrir ton Compendium.",
+    "unavailable": "Le Compendium est indisponible pour le moment.",
+    "not_found": "Aucun Compendium pour ce joueur.",
+    "back_to_profile": "Retour au profil",
+    "chapter": {
+      "badges": "Badges",
+      "titles": "Titres",
+      "wallpapers": "Fonds d'écran",
+      "bonds": "Liens",
+      "challenges": "Défis",
+      "feats": "Exploits"
+    },
+    "chapter_desc": {
+      "badges": "Chaque badge obtenu, avec le jour où il a été épinglé à ta veste.",
+      "titles": "Les titres que tu peux porter, du commun au légendaire.",
+      "wallpapers": "Les lieux débloqués pour décorer ta chambre.",
+      "bonds": "Amitiés nouées et Social Links montés — les gens de ton histoire.",
+      "challenges": "Gants jetés et relevés : ton historique de défis entre amis.",
+      "feats": "Premières fois, sans-faute, records — les jalons de ton parcours."
+    },
+    "empty": {
+      "default": "Rien ici pour l'instant. Les pages attendent.",
+      "badges": "Aucun badge pour l'instant. Joue, et le premier viendra.",
+      "titles": "Aucun titre pour l'instant. Continue de jouer pour gagner le premier.",
+      "wallpapers": "Aucun fond d'écran pour l'instant. Certains se méritent, d'autres se trouvent.",
+      "bonds": "Aucun lien pour l'instant. Ajoute un ami pour écrire la première ligne.",
+      "challenges": "Aucun défi pour l'instant. Défie un ami depuis son profil.",
+      "feats": "Aucun exploit pour l'instant. Ta première partie sera la première entrée."
+    },
+    "stat": {
+      "games": "Parties",
+      "wins": "Victoires",
+      "days": "Jours joués",
+      "streak": "Meilleure série",
+      "friends": "Amis",
+      "confidants": "True Confidants",
+      "challenges": "Défis",
+      "won": "Gagnés"
+    },
+    "feat": {
+      "first_game": "Première partie",
+      "first_win": "Première victoire",
+      "first_perfect": "Premier sans-faute",
+      "expert_unlocked": "Mode Expert",
+      "streak_record": "Record de série"
+    },
+    "flavor": {
+      "badge": "Gagné à la force du poignet, gardé pour de bon. Le Compendium s'en souvient.",
+      "title_common": "Un titre à porter avec fierté : {{name}}.",
+      "title_rare": "Peu l'ont obtenu. Il est désormais à toi : {{name}}.",
+      "title_epic": "La Velvet Room prend note. {{name}} rejoint ta légende.",
+      "title_legendary": "Écrit en lettres d'or dans le grand livre : {{name}}.",
+      "wallpaper": "{{name}} décore désormais ta chambre — un morceau de {{game}} rien qu'à toi.",
+      "bond_created": "Un nouveau lien se noue avec {{name}}. Toute histoire commence par un bonjour.",
+      "bond_rank": "Ton lien avec {{name}} se renforce — Rang {{rank}}.",
+      "bond_max": "True Confidants. Ton lien avec {{name}} a atteint son apogée.",
+      "challenge_won": "{{name}} a jeté le gant en {{mode}} — et tu l'as relevé. Battu en {{score}}.",
+      "challenge_lost": "Le défi {{mode}} de {{name}} a tenu bon cette fois. Ce sera pour la prochaine.",
+      "challenge_sent_beaten": "Tu as défié {{name}} en {{mode}}… et ton score de {{score}} a été battu. Bien joué à l'adversaire.",
+      "challenge_sent_held": "Ton défi {{mode}} lancé à {{name}} tient toujours — {{score}}, c'était trop fort.",
+      "first_game": "Là où tout a commencé. La première porte de la Velvet Room s'est ouverte.",
+      "first_win": "Première victoire en {{mode}} : {{target}}, trouvé en {{n}}.",
+      "first_perfect": "Un sans-faute en {{mode}} — {{target}} du premier coup.",
+      "expert_unlocked": "{{mode}} Expert débloqué. La vraie épreuve commence.",
+      "expert_granted": "{{mode}} Expert accordé. À toi de leur donner raison.",
+      "streak_record": "{{n}} jours d'affilée. L'habitude devient légende."
+    }
+  },
   "challenge_result": {
     "title_win": "BRAVO !",
     "title_fail": "DOMMAGE...",
@@ -1252,7 +1334,11 @@
     "q42": "Est-ce que les parties rejouées comptent ?",
     "a42": "Oui, depuis la v2.1 chaque partie terminée est enregistrée, y compris celles rejouées dans la même journée. Avant, seule la première partie de chaque jour et de chaque mode était sauvegardée — c'est pourquoi certains compteurs de déblocage paraissaient figés.",
     "q43": "Comment gagner de l'XP Social Link avec un ami ?",
-    "a43": "Six actions donnent de l'XP : envoyer un défi (15), jouer le même jour (20), partager sa série (15), comparer ses stats (10), partager un score (10) et visiter son profil (5). Chacune rapporte environ le double si ton ami fait la même chose le même jour. Un défi Expert vaut plus — 25, ou 50 en mutuel — parce qu'il faut que vous ayez tous les deux débloqué ce mode pour qu'il puisse exister."
+    "a43": "Six actions donnent de l'XP : envoyer un défi (15), jouer le même jour (20), partager sa série (15), comparer ses stats (10), partager un score (10) et visiter son profil (5). Chacune rapporte environ le double si ton ami fait la même chose le même jour. Un défi Expert vaut plus — 25, ou 50 en mutuel — parce qu'il faut que vous ayez tous les deux débloqué ce mode pour qu'il puisse exister.",
+    "q44": "C'est quoi le Compendium ?",
+    "a44": "Ton carnet de collection. Sur ton profil, le bouton au pentacle sous le mode sombre l'ouvre : six chapitres — badges, titres, fonds d'écran, liens, défis et exploits — chaque entrée datée, avec qui, et un petit mot. Il s'écrit tout seul à partir de ce que tu as déjà fait : rien à remplir.",
+    "q45": "Les autres peuvent-ils lire mon Compendium, et pourquoi certaines entrées disent « Avant le Compendium » ?",
+    "a45": "Il est public, comme ton profil — depuis le profil d'un ami, le même bouton ouvre le sien. Les entrées dont la date exacte n'était pas enregistrée avant l'arrivée de la fonctionnalité (anciens rangs de Social Link, record de série) sont marquées « Avant le Compendium » plutôt que d'inventer une date."
   },
   "updates": {
     "new_content_title": "✨ Nouveau contenu v2.0",

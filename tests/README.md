@@ -2,7 +2,7 @@
 
 # 🧪 Tests & Qualité
 
-<img src="https://img.shields.io/badge/Vitest-987%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
+<img src="https://img.shields.io/badge/Vitest-1014%20passing-6E9F18?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest">
 <img src="https://img.shields.io/badge/PHPUnit-logic%20%2B%20DB-3776AB?style=for-the-badge&logo=php&logoColor=white" alt="PHPUnit">
 <img src="https://img.shields.io/badge/Playwright-13%20E2E-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/PHPStan-niveau%205-1A1A1A?style=for-the-badge" alt="PHPStan">
@@ -17,13 +17,13 @@
 
 ```
                  ╱╲
-                ╱  ╲      Playwright E2E — 134 tests (stack Docker réelle)
+                ╱  ╲      Playwright E2E — 138 tests (stack Docker réelle)
                ╱────╲     smoke (5) + API badges/streak (2) + Social Link ami→XP→rang (6)
               ╱      ╲
              ╱────────╲   PHPUnit — 269 méthodes (15 fichiers, dont intégration vraie MariaDB)
             ╱          ╲  contraintes SQL, FK cascade, contrat de schéma, streak/social/auth
            ╱────────────╲
-          ╱              ╲ Vitest — 987 tests unitaires (jsdom, 55 fichiers)
+          ╱              ╲ Vitest — 1014 tests unitaires (jsdom, 57 fichiers)
          ╱────────────────╲ logique de jeu, streak, i18n, validation, sync
       ──────────────────────
 ```
@@ -87,7 +87,7 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 | `profileFormat.test.js`          |   4   | formatage des données de profil |
 | `adminSmoke.test.js`             |   2   | bootstrap de `admin/admin.js` sans exception |
 | `streakFlow.integration.test.js` |   2   | flux complet récupération + sync cloud |
-| **Total**                        |**987**| 45 suites — chiffres tenus à jour par `npm run docs:fix` |
+| **Total**                        |**1014**| 45 suites — chiffres tenus à jour par `npm run docs:fix` |
 
 ---
 
@@ -125,7 +125,7 @@ Plus, en garde-fou statique : **PHPStan niveau 5** (analyse PHP) · **ESLint + P
 ```bash
 npm install              # une seule fois
 
-npm test                 # Vitest (987)
+npm test                 # Vitest (1014)
 npm run test:watch       # Vitest en mode watch
 npm run test:coverage    # Vitest + seuils de couverture
 

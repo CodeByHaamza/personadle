@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/badge/Playwright-Chromium-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/cible-stack%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
 
-> **134 tests (17 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
+> **138 tests (18 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
 > Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public, Social Link, admin).
 
 </div>
@@ -119,6 +119,13 @@ npx playwright show-report                                          # diffs côt
 ```
 
 Usage prévu : figer l'état **avant** une refonte de layout, relire chaque diff pendant.
+
+### `compendium.spec.js` — le carnet de collection (2.2)
+
+Ce que l'unitaire ne voit pas : la route `.htaccess` `GET /api/user/compendium` (publique par
+`?code=`, 404 sur un code inconnu, 401 sans cible ni session), le bouton `#compendiumBtn` d'un
+profil visité qui pointe vers `compendium.html?view=<code>`, et l'ouverture du livre sans
+session (couverture → 6 onglets → page de gauche du chapitre). Joueur seed : Yu (`SEED2226`).
 
 ---
 

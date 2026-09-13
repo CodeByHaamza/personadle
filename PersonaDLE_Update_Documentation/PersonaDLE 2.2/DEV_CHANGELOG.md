@@ -13,6 +13,97 @@
 
 ---
 
+## 2026-09-13 — Le Compendium : carnet de collection (branche `fix/community-feedback-batch`)
+
+Nouvelle page `profile/compendium/` — un livre qui raconte ce que le joueur a accompli :
+badges, titres, fonds d'écran, liens (amitiés + rangs de Social Link), défis et exploits,
+chaque entrée datée, avec qui, et un texte d'ambiance. Demande de Hamza (« comme un carnet
+de collection », dans le style du *Grimoire du Cœur* de Persona Q), décisions prises le
+2026-09-12 : texte **généré** (pas de note personnelle), **uniquement des données
+existantes** (aucune table, aucune migration), **public** comme le profil, pas de 3D
+lourde, et « Avant le Compendium » pour ce qui n'a pas de date plutôt qu'une date
+inventée.
+
+### Backend — `api/user/compendium.php` (+ `RewriteRule ^compendium$` dans `api/user/.htaccess`)
+
+`GET /api/user/compendium` : `?code=` ou `?id=` → public (même exposition que
+`user/public.php` : pseudo, code ami, avatar) ; sans cible → `requireAuth()` et le sien.
+Lecture seule, 100 % PDO préparé, `is_deleted = 0` partout, défis plafonnés à 300.
+
+- **Badges** : `badges_unlocked` (`unlocked_at`).
+- **Titres** : `user_titles × titles` — nom en 5 langues, `rarity`, `image_path`.
+- **Fonds** : `user_wallpapers × wallpapers`.
+- **Liens** : `friendships` (`accepted_at`) + `social_links` (rang, xp) +
+  `social_link_rankup_notifs` (chaque passage de rang daté). Un rang atteint **avant**
+  l'existence de cette table n'a pas de date → le client le marque « avant le compendium ».
+- **Défis** : `messages` type `challenge`, statuts `beaten`/`expired`, dans les deux sens.
+  Le partenaire n'expose que `{id, pseudo}` — l'avatar est résolu côté client depuis la
+  liste d'amis, pour ne pas renvoyer un base64 par défi.
+- **Exploits** : `game_sessions` (première partie, première victoire et premier
+  sans-faute par mode — sous-requêtes `MIN(played_date)` groupées par `mode, is_expert`),
+  `expert_unlocks_granted` (accordé par l'admin) vs première session Expert jouée
+  (débloqué), `users.global_streak_record`.
+
+### Front — `profile/compendium/`
+
+- `compendium_entries.js` — module **pur** (aucun DOM, aucun i18n) : réponse API →
+  `{ badges[], titles[], wallpapers[], bonds[], challenges[], feats[] }` d'entrées
+  `{ chapter, kind, title, flavor, vars, date, img|icon|avatar, rank?, expert?, won? }`.
+  Tri décroissant par date, non datées à la fin, record de série épinglé en tête
+  (`pin`). Doublons de notifs de rang fusionnés (`Set` par rang). `titleName(title,
+  lang)` avec repli EN puis slug. `chapterSummary()` pour la page de gauche,
+  `paginate()` (jamais zéro page).
+- `compendium.js` — la page : `initCompendium()` (exporté pour les tests) attend
+  `__i18nReady` + `_authReady`, lit `?view=`, appelle `api.user.compendium()`. Couverture
+  (pseudo, *Ouvrir*) → `.cp-cover--opening` → livre : onglets (rôle `tab`, compteur),
+  page de gauche (chapitre, résumé chiffré, filigrane, folio romain), page de droite
+  (5 entrées/page, folio numérique), tourne-page 3D avec filet `setTimeout` si
+  `animationend` ne vient pas (onglet en arrière-plan), ‹ › + flèches clavier, balayage
+  tactile. Dates via `Intl.DateTimeFormat(lang, { dateStyle: "long" })`. Scores et
+  tentatives en « N essais » (`compendium.tries` / `tries_one`), jamais un nombre nu.
+  Libellés d'accessibilité (pager, onglets) posés en JS — `data-i18n` ne couvre pas
+  `aria-label`.
+- `compendium.css` — préfixe `cp-*`, palette Velvet Room en variables (`--cp-blue`,
+  `--cp-gold`, `--cp-paper`…), mode sombre en surcharge de variables seulement. Onglets
+  en **index sur le bord supérieur** du livre (première version : signets sur la tranche
+  droite — débordaient du viewport à 1280 px et recouvraient le texte en actif).
+  `.cp-cover` en `box-sizing: border-box` (sinon 360 + padding + bordure = 410 px sur un
+  mobile de 390). Bannières de titre (≈ 4:1) en bandeau au-dessus du texte
+  (`.cp-entry--banner`), pas dans un carré de 52 px. `prefers-reduced-motion` coupe tout.
+- `js/api.js` — `user.compendium({ code } | { id } | {})`. `js/gameCore.js` —
+  `/profile/compendium/` ajouté à `_DEEP_SUBPATHS` (`siteRootPrefix()` → `../../`).
+- **Bouton sur le profil** — `profile/profile.html` `#compendiumBtn.grimoire-btn`, fixe
+  sous `.darkmode-toggle` (losanges bleus animés + pentacle doré, `profile-page.css`
+  §16 ; icône seule ≤ 768 px). `data-auth="connected"` ; en mode `?view=`,
+  `profile-view.js` le pointe vers le carnet du joueur visité et le rend visible même
+  déconnecté (le carnet est public).
+- `sw.js` — les 4 fichiers de la page ajoutés au pré-cache.
+
+### i18n, FAQ, docs, tests
+
+- `lang/*.json` (6 langues) : namespace `compendium.*` — titre, tagline, chapitres et
+  descriptions, états vides, stats, exploits, 19 textes d'ambiance `flavor.*`, libellés
+  d'accessibilité. FAQ : `faq.q44/a44` (c'est quoi) et `faq.q45/a45` (public, « avant le
+  compendium ») dans `pages/faq.html`, section Compte & Profil.
+- `profile/compendium/README.md` — chapitres → tables, contrat API, flux, conventions,
+  procédure pour ajouter une source d'entrées.
+- `tests/compendium_entries.test.js` (18) — chapitres, tri, dates absentes, fusion des
+  rang-ups, genres de défi, avatar de partenaire, exploits, résumé, pagination.
+  `tests/compendium_page.test.js` (9) — couverture, `?view=`, déconnecté, 404, onglets,
+  pagination clavier, rendu d'une entrée (nom i18n, date locale, pastilles, essais).
+  `tests-e2e/compendium.spec.js` (4) — route `.htaccess` publique, 404/401, bouton du
+  profil visité, ouverture du livre sans session.
+
+### Angles morts
+
+- Les rangs de Social Link antérieurs à `social_link_rankup_notifs` resteront sans date
+  pour toujours (pas de reconstruction possible) — c'est assumé, et dit au joueur.
+- Un joueur qui a plus de 300 défis terminés verra les 300 plus récents.
+- `expert_modes` : « débloqué » est daté de la **première session Expert jouée**, pas du
+  jour où la condition a été remplie (non historisé).
+
+---
+
 ## 2026-09-12 — Lot « retours communauté » : 8 corrections + 2 refontes (branche `fix/community-feedback-batch`)
 
 Huit remontées joueurs (Discord) plus deux demandes de Hamza, traitées en un commit par
