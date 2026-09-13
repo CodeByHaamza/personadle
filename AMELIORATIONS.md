@@ -1,7 +1,249 @@
 # 🔧 PersonaDLE — Propositions d'amélioration
 
-> Audit du 2026-06-24. Priorités : 🔴 critique · 🟠 important · 🟡 confort.
-> Ce document est une feuille de route, pas une obligation. À piocher selon ton temps.
+> Audit du 2026-06-24, réaudité le 2026-07-05, **relu et complété le 2026-09-13** (section en tête).
+> Priorités : 🔴 critique · 🟠 important · 🟡 confort. Ce document est une feuille de route, pas
+> une obligation. À piocher selon ton temps.
+
+---
+
+# 🔍 Audit du 2026-09-13 — perf, dépôt, sécurité, docs, idées par mode
+
+> Demande de Hamza : « optimiser le site, rendre le repo plus propre, une template de PR,
+> corriger nos docs, checker l'état des PR, proposer des automatisations, et sur chaque page
+> et chaque mode proposer des améliorations — anticheat, sécurité, cache, data ». Tout est
+> **mesuré** sur le dépôt du jour (branche `fix/community-feedback-batch`, PR #112). Les
+> sections historiques (juin–septembre) restent plus bas, elles gardent leurs ✅.
+>
+> Priorités : 🔴 à faire avant/avec la 2.2 · 🟠 prochaine PR dédiée · 🟡 quand on a le temps ·
+> 💡 idée produit à trancher par Hamza/Léo.
+
+## 0. Fait aujourd'hui, dans #112
+
+- ✅ **Template de PR** `.github/PULL_REQUEST_TEMPLATE.md` — la Definition of Done de
+  CLAUDE.md §13 en cases à cocher (item « Outillage » de TODO.md).
+- ✅ **`new data/` retiré** (corbeille Windows, pas effacé : il contenait les deux `.mov`
+  sources de Bui Cosmic et Berry Summer, déjà convertis et intégrés).
+- ✅ **CI de #112 verte** : le E2E échouait depuis le 12 (clic intercepté par la boîte de
+  consigne en 1280×720) — réécrit avec le verrou du bouton Défier.
+- ✅ **`scripts/purge_git_history.sh` corrigé** : il purgeait « tout blob > 5 Mo » et aurait
+  effacé badges et wallpapers de l'arbre ; il ne cible plus que les anciens `.gif` AOA.
+- ✅ **PR ouvertes** : #112 (ce lot) ; #104/#106 dependabot `vitest`/`coverage-v8` 4 → 5
+  (majeure, à traiter à part — lot d'outillage) ; **#62 dependabot `jsdom` vise `main`**
+  (antérieur à `target-branch: develop`) → à fermer, une PR équivalente vers `develop`
+  reviendra toute seule au prochain cycle hebdo.
+
+## 1. 🔴 Performance — les images du profil (le vrai problème n° 1 aujourd'hui)
+
+| Dossier                  | Fichiers | Poids  | Format actuel            | Affiché à            |
+| ------------------------ | -------- | ------ | ------------------------ | -------------------- |
+| `profile/badges/images/` | 63       | 109 Mo | PNG 2048×2048, 6–8 Mo/u  | 80 px (200 px zoomé) |
+| `profile/Wallpaper/`     | 38       | 115 Mo | PNG 1696×2528, 6–7 Mo/u  | fond de page         |
+| `img/avatar/`            | 175      | 27 Mo  | mixte                    | 60–120 px            |
+| `database/portraits/`    | 204      | 14 Mo  | webp                     | ok                   |
+
+**Ouvrir la grille des badges = jusqu'à 109 Mo de PNG** pour un joueur ; un wallpaper = 6 Mo
+pour un fond. Sur mobile c'est le premier goulot, avant les AOA. Le média est en cache 7 jours
+(`.htaccess`), donc un joueur régulier ne le paie qu'une fois par semaine — mais chaque
+nouveau joueur, chaque navigation privée, chaque « vider le cache » le repaie.
+
+**Action (mécanique, sans changer l'art — Léo valide le rendu)** : convertir en WebP
+`badges` à 512×512 q85 (≈ 40–60 Ko/u → ~3 Mo total, ×35) et `Wallpaper` à 1696 de large
+q80 (≈ 250–400 Ko/u → ~12 Mo, ×9), remplacer les 63 `.png` dans `badgesData.js` et les
+chemins wallpaper (DB `wallpapers.image_path` + `profile/theme.js`), garder les PNG sources
+hors dépôt (dossier partagé Léo) ou dans `assets/sources/` si on veut les versionner. Un
+script `scripts/optimize_images.js` (sharp) avec `--check` en CI empêcherait le retour d'un
+PNG de 7 Mo. **Gain : −210 Mo dans l'arbre, page profil 20× plus légère.**
+
+## 2. 🔴 Performance — les animations AOA les plus lourdes
+
+77 `.webp` (74 + 3 orphelins `Mount_Ice`, `Mount_Wind`, `Wind_V`, jamais référencés, 20 Mo à
+supprimer) : médiane 7 Mo, mais **25 fichiers > 30 Mo, max 80 Mo (Akihiko)**. Le pipeline
+validé en 2.2 (`scale=1280:-2, fps=24, libwebp_anim q80`) donne 8 Mo pour Bui Cosmic. La
+section §2 historique (juin) le demandait déjà, ce n'est pas fait.
+
+**Action** : réencoder les 25 fichiers > 30 Mo avec le pipeline 2.2, comparer visuellement 3
+d'entre eux (Léo), remplacer dans le dépôt **et sur R2** (`npm run aoa:check`… voir §6 —
+script à récupérer de la PR #113 fermée, il est indépendant de la décision « hors git »).
+Gain joueur : −60 % sur le mode le plus lourd. Gain dépôt : −700 Mo dans l'arbre (l'historique
+grossira du poids des nouveaux fichiers, ~200 Mo, puis la purge §3 s'applique).
+
+## 3. 🟠 Dépôt git — 3,8 Go, et quoi faire
+
+Mesuré (`git rev-list --objects --all | git cat-file --batch-check`) : **1,82 Go de `.webp`
+AOA (gardés — philosophie « clone = jouable »)**, **1,28 Go d'anciens `.gif` AOA** (62 blobs,
+plus aucun suivi), 0,22 Go de docs d'anciennes versions, le reste = code. Deux options,
+compatibles entre elles :
+
+1. **Purger les anciens `.gif`** — `scripts/purge_git_history.sh` (corrigé aujourd'hui) :
+   3,8 → ≈ 2,5 Go. Réécriture d'historique → force-push, re-clone Léo/Damien, `reset --hard`
+   Hostinger, aucune PR ouverte. Procédure pas à pas : TODO.md § « Dépôt git ». **Décision
+   Hamza, créneau après release.**
+2. **Git LFS pour `allOutAttackMode/database/allOutAttack/*.webp`** (section §1 historique) :
+   un `git clone` continue de télécharger les animations (jouable en local, philosophie
+   respectée), mais chaque *nouvelle version* d'une animation ne s'empile plus dans les packs.
+   Coût : quota LFS GitHub (1 Go stockage / 1 Go bande passante gratuits, puis 5 $/50 Go) —
+   avec 1,8 Go d'animations et chaque clone qui les tire, **le quota gratuit ne tient pas** :
+   à chiffrer avant (≈ 5–10 $/mois), sinon rester sans LFS et ne purger que l'historique.
+
+## 4. 🟠 Sécurité & anti-triche — état réel, et la marche suivante
+
+**Solide** (vérifié) : PDO préparé partout, bcrypt, sessions httpOnly, CSRF double-submit,
+CORS liste blanche, CSP sur l'API (`default-src 'none'`) et sur les pages (`'unsafe-inline'`
+assumé, vanilla sans build), HSTS, `X-Frame-Options`, rate limits (login 5/15 min, register,
+reset 3/15 min, friends 10, messages 20, sessions 90, admin 300/5 min), `.htaccess` qui
+interdit `.git`, `sql/`, `tests/`, `scripts/`, configs. Psalm taint + PHPStan en CI.
+
+**Le trou de fond — l'anti-triche est en phase 1 (détection)** : `api/sessions.php` recalcule
+la cible attendue et **logue** l'écart (`error_logs`, source `anti_cheat`) sans rejeter. Et
+plus profond : la partie se joue **entièrement côté client** — cible, essais, résultat et
+`time_ms` sont déclarés par le navigateur. Un `POST /api/sessions` forgé `{result:'win',
+attempts:1, time_ms:800}` monte au classement. Les « manual » badges (~46) s'obtiennent par un
+`POST /api/badges/unlock` forgé (section §7 historique).
+
+**Marche 1 (2.2 ou 2.3, une journée)** : `SELECT COUNT(*), user_id FROM error_logs WHERE
+context->'$.source'='anti_cheat' GROUP BY user_id` en prod — si zéro faux positif depuis la
+2.1, **passer en rejet** (`jsonError('Target mismatch', 422)` à la place du log) sur la
+première session du jour. Ajouter un flag `users.suspicious_count` incrémenté à chaque
+rejet, visible dans l'admin.
+
+**Marche 2 (2.3, le vrai anti-triche, ~1 semaine)** : *le serveur tient la partie*.
+`POST /api/game/start` → le serveur tire la cible (même algo), crée une ligne
+`game_rounds (id, user_id, mode, date, target, started_at, attempts, status)` et renvoie un
+`round_id` **sans la cible** ; `POST /api/game/guess {round_id, name}` → le serveur compare
+et renvoie le feedback (les colonnes 🟩🟨🟥 sont calculées côté serveur) ; la session finale
+est déduite de `game_rounds`, plus déclarée. Conséquences : `attempts`, `time_ms`, `result`
+deviennent incontestables ; le classement et les badges « manual » liés à une partie
+deviennent vérifiables ; le mode anonyme garde l'algo client (rien à protéger). C'est le
+seul moyen de rendre le classement *protégé* et pas seulement *observable*. Les 6 modes
+partagent déjà `gameCore` → un seul client à écrire.
+
+**Vérifié en passant, rien à faire** : `display_errors` forcé à `0` hors dev
+(`api/bootstrap.php`) ; la prod sert déjà **brotli** (`curl -I https://personadle.net/js/gameCore.js`
+→ `Content-Encoding: br`, Hostinger compresse au niveau serveur, inutile de l'ajouter au
+`.htaccess`). **Un seul durcissement court** : `Permissions-Policy: camera=(), microphone=(),
+geolocation=()` manque dans `.htaccess` (une ligne, aucune fonctionnalité ne les utilise).
+
+## 5. 🟠 Cache & chargement
+
+- `Cache-Control` : `no-cache` sur HTML/JS/CSS/JSON (revalidation, 304), 7 j sur les médias,
+  1 an sur les polices — cohérent, documenté dans `.htaccess`. Le service worker fait du
+  network-first sur le code. **Rien à changer**, sauf le point suivant.
+- **Aucun nom de fichier n'est haché** → impossible de mettre `max-age` long sur JS/CSS.
+  Un `?v=` manuel traîne sur certains liens (`global.css?v=12`, `profile-page.css?v=7`) et
+  pas d'autres : incohérent, et chaque bump touche 20 fichiers. **Action 🟡** : un script
+  `scripts/stamp_assets.js` qui réécrit `?v=<hash court du contenu>` dans les HTML au
+  pre-commit — même sans build step, ça rend le cache long possible (1 an, `immutable`).
+- **Polices** : `font/` n'héberge que `Persona5Font.ttf` ; Oswald, Playfair, Cinzel, Abril
+  viennent de Google Fonts sur chaque page (2 connexions tierces, FOUT au chargement) →
+  auto-héberger les 4 en `.woff2` dans `font/` (cache 1 an `immutable` déjà prévu par le
+  `.htaccess`), et retirer `fonts.googleapis.com` de la CSP.
+- `index.html` fait **153 Ko** (le modal « Nouveautés » embarque 5 versions × 6 langues) :
+  charger le contenu des versions passées à l'ouverture du modal (fetch d'un fragment) ou
+  ne garder inline que la version courante — −100 Ko sur la page d'accueil.
+- `sw.js` : `CACHE_VERSION` à bumper à la release (checklist), OK.
+
+## 6. 🟠 Automatisations à ajouter
+
+| Quoi                                          | Comment                                                                                  | Bloque ? |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------- | -------- |
+| Images trop lourdes / mauvais format          | `scripts/check_assets.js` : refuse un PNG > 500 Ko ou une image > 2048 px hors AOA        | CI       |
+| Animations AOA ↔ R2                           | `npm run aoa:check` (script de la PR #113, à reprendre tel quel : HEAD sur chaque nom)   | release  |
+| Migration jouée en prod avant merge main      | `scripts/check_prod_schema.php` existe — l'appeler dans le job « PR base guard » vers `main` | CI       |
+| Chiffres de doc                               | déjà `docs:fix` au pre-commit ✅                                                          | —        |
+| Pools quotidiens                              | déjà `pools:check` ✅                                                                     | —        |
+| Rappel de bump `CACHE_VERSION`                | test unitaire : si `git diff develop..HEAD` touche `css/` ou `js/` et pas `sw.js` → warning en CI (non bloquant) | CI |
+| Purge des `rate_limits`, `error_logs`         | cron `purge-rate-limits.php` existe ; ajouter une rétention 90 j sur `error_logs`        | cron     |
+| Dependabot                                    | grouper `vitest`+`@vitest/*` (déjà) ; ajouter `ignore: major` sur `jsdom`/`vitest` pour ne recevoir que les mineures, et traiter les majeures en lot trimestriel | —   |
+| Captures de référence des 6 modes             | `E2E_VISUAL=1` existe (hors CI) ; les figer **avant** la PR layout                       | manuel   |
+
+## 7. 🟡 Documentation — 48 fichiers `.md`, quoi garder
+
+Ce qui est vivant et sain : `README.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `DEPLOY.md`,
+`TODO.md`, `ROADMAP.md`, ce fichier, un README par dossier (23), `tests*/README.md`, les
+`DEV_CHANGELOG.md` par version.
+
+À nettoyer (une PR `docs/`, sans risque) :
+
+- `docs/superpowers/specs/*.md` (2 specs d'avril, nom de dossier hérité d'un outil) →
+  `docs/specs/` ou les sections « Décisions » de `api/README.md` ; supprimer `superpowers/`.
+- `PersonaDLE 2.0/TEST_PLAN.md` (1408 lignes) + `TEST_PLAN_DEV.md` (635) + `2.1/TEST_PLAN.md`
+  (505) : plans de test manuels d'une version livrée — soit archivés dans un
+  `PersonaDLE_Update_Documentation/archive/`, soit résumés en 30 lignes « ce que couvre
+  l'E2E aujourd'hui » dans `tests-e2e/README.md` (qui existe déjà).
+- `PersonaDLE 2.0/DOCKER_GUIDE.md` (335) vs `docker/README.md` (221) : deux guides Docker.
+  Fusionner dans `docker/README.md`, garder un lien.
+- `sql/explication.md` (590) vs `sql/README.md` (88) : même sujet ; fusionner.
+- `PersonaDLE 1.1/PersonaDLE_Update.md` + `note_ajout.md` : archive 1.1, ok mais à déplacer
+  dans `archive/` pour que le dossier ne montre que le vivant.
+- `README.md` (709 lignes) : la section « Development Setup » dit « 1014 unit tests » (auto),
+  mais le badge « tests passing » et le tableau des modes datent — 3 chiffres à raccrocher à
+  `check-doc-numbers.js` (`syncPoints`) plutôt qu'à corriger à la main.
+- Une seule occurrence restante de `HamzaKarrouchi` (DEV_CHANGELOG 2.2, historique — normal).
+
+## 8. 💡 Idées par page et par mode (à trancher — rien n'est fait)
+
+**Transversal (tous les modes)**
+- **Partage du résultat du jour** façon Wordle (`🟩🟨🟥` × essais + lien) — copie presse-papiers
+  + `navigator.share` sur mobile. Il n'existe que la carte de profil. C'est le premier levier
+  de croissance d'un daily game, et c'est 60 lignes dans `gameCore` (les 6 modes ont déjà
+  l'historique des essais).
+- **Résumé du jour sur l'accueil** : 6 pastilles ✓/✗/– (joué, gagné, pas encore) et le
+  streak, à la place des 6 boutons muets — le joueur voit ce qui lui reste.
+- **Barre de saisie sticky + compactage** (PR layout déjà décidée).
+- **Notification quotidienne** (PWA `Notification` + `sw.js` `push`, opt-in) à l'heure du
+  reset — retient les joueurs à streak. Demande un backend VAPID (petit) ou, plus simple,
+  une notification locale planifiée quand l'app est ouverte.
+- **Calendrier de streak** sur le profil (grille 30 jours par mode, façon GitHub).
+- **Onboarding 20 s** : au premier lancement, une bulle par mode (« Classique = devine avec
+  des indices colorés ») — beaucoup de joueurs ne comprennent le code couleur qu'après 3 jours.
+
+**Classique** — 🟩🟨🟥 déjà là. Idées : indice « arcane » payant (coûte 1 essai) ; un mode
+« sans indice » chronométré pour le classement Expert ; l'historique des essais rejouable
+après victoire (« comment j'ai deviné »).
+
+**Emoji** — révélation progressive (un emoji de plus par erreur) ; « thème du jour » (les
+3 emojis ont un fil rouge) ; permettre la lecture à voix haute des emojis (a11y).
+
+**Silhouette** — flou dégressif OK ; idée : **silhouette animée** (pose d'attaque, 2 frames) en
+Expert ; indice « opus » à 3 erreurs ; la révélation finale avec le portrait couleur qui
+« s'allume » (déjà ? à vérifier).
+
+**All-Out Attack** — poids (§2) avant tout. Idées : « image fixe » à 2 erreurs (une frame de
+l'animation), ; défi « 5 AOA d'affilée » le week-end ; badge par opus complété.
+
+**Personae** — masque d'accents corrigé en 2.2. Idées : afficher **l'arcane** comme premier
+indice, **l'élément** comme second ; un mini « Compendium des personas devinées » (le
+Compendium sait déjà lister les premières victoires).
+
+**Music** — Heardle-like : extrait qui **s'allonge** à chaque erreur (2 s → 4 → 8 → 15) au lieu
+d'un extrait fixe ; « chanté / instrumental » comme filtre ; paroles Expert existantes.
+
+**Profil / Compendium** — badges en WebP (§1) ; **page « Statistiques »** séparée (distribution
+des essais par mode, comme Wordle) ; le Compendium déjà public → bouton « partager mon
+Compendium » (lien) ; export JSON du profil déjà là.
+
+**Amis** — 3 onglets OK ; idées : **fil d'activité** (« Yu a battu ton défi Emoji », « Naoto
+a atteint rang 5 avec toi ») alimenté par `messages` + `social_link_rankup_notifs` déjà en
+base ; défi **hebdomadaire** automatique entre amis (7 jours, cumul des essais).
+
+**Classement** — `day`/`week`/`month` lisent un cache horaire (TODO) ; `friends_only`
+existe déjà côté API — le mettre en avant (onglet « Mes amis » par défaut quand on en a) ;
+anti-triche §4 d'abord, sinon le classement ne vaut rien.
+
+**Admin** — mono-langue FR (choix) ; ajouter un onglet **« Anti-triche »** : les `error_logs`
+source `anti_cheat` groupés par joueur, avec bouton « invalider la session » — préalable à
+la marche 1 du §4.
+
+## 9. 📌 Ordre conseillé
+
+1. 🔴 **Merge #112** (CI verte), release 2.2 avec migration 040 + bump `CACHE_VERSION`.
+2. 🔴 **Images du profil en WebP** (§1) — PR mécanique, 1 journée, gain immédiat pour tous.
+3. 🔴 **Réencodage des 25 AOA lourds** (§2) + upload R2 + `aoa:check` en checklist release.
+4. 🟠 **PR layout** (sticky input) — déjà décidée.
+5. 🟠 **Anti-triche marche 1** (rejet) après lecture des logs prod ; **marche 2** planifiée 2.3.
+6. 🟠 **Partage du résultat du jour** (§8) — le plus gros levier produit pour le moins d'effort.
+7. 🟡 Purge des `.gif` (§3) au premier créneau calme ; docs (§7) ; compression/`Permissions-Policy`
+   (§4) après un `curl -I` sur la prod.
 
 ---
 

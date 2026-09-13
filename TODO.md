@@ -253,16 +253,12 @@ Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne f
       neuf (rien de local à garder chez eux avant) ;
 - [ ] **sauvegarde** : `git clone --mirror https://github.com/CodeByHaamza/personadle.git
       personadle-backup.git`, gardée hors ligne un mois ;
-- [ ] **réécriture** (`git filter-repo`, jamais `filter-branch`) sur un second miroir :
-      ```bash
-      pip install git-filter-repo
-      git clone --mirror https://github.com/CodeByHaamza/personadle.git personadle-purge.git
-      cd personadle-purge.git
-      git filter-repo --invert-paths --path-glob 'allOutAttackMode/database/allOutAttack/*.gif'
-      git count-objects -vH          # attendu : size-pack ≈ 2,5 Go (3,76 − 1,28)
-      ```
-      Ne toucher ni aux `.webp` (jouer local), ni aux `.gif` d'`img/` (avatars, loading —
-      petits et encore servis) ;
+- [ ] **réécriture** : `bash scripts/purge_git_history.sh` (réécrit le 2026-09-13 — il cible
+      **uniquement** `allOutAttackMode/database/allOutAttack/*.gif` ; l'ancienne version purgeait
+      « tout blob > 5 Mo » et aurait emporté les badges et wallpapers PNG). Il fait lui-même le
+      miroir de sauvegarde, refuse un arbre sale, demande `PURGE`, puis `gc`. Attendu :
+      `.git` ≈ 3,8 → ≈ 2,5 Go. Ne toucher ni aux `.webp` (jouer local), ni aux `.gif` d'`img/`
+      (avatars, loading — petits et encore servis) ;
 - [ ] **vérifier** sur le miroir réécrit, cloné à part : `npm test`, `make up` +
       `npm run test:e2e`, `git log --oneline | wc -l` identique, `git diff <ancien main>
       <nouveau main>` vide hors `.gif` purgés ;
