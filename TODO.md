@@ -317,6 +317,12 @@ Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne f
 
 ## Dette repérée en passant
 
+- [ ] **Page Classique défilée de ~215 px au chargement en CI (1280×720)** — la boîte de
+      consigne `.personadle-box` intercepte alors le clic sur ⚔ Défier (55 retries Playwright,
+      trace du run 34777768286 ; capture : bouton collé au bord haut, logo hors écran). Non
+      reproduit en local (bouton à y=214, boîte à y=273, `scrollY=0`). Contourné dans
+      `challenge_flow.spec.js` par `dispatchEvent("click")`. À comprendre avec la PR layout
+      (sticky input) : si un joueur en 720 px de haut arrive défilé, c'est un vrai défaut.
 - [ ] **Débordement horizontal de `.nav-item`** (barre du bas) sur mobile, commun aux 6 modes.
       `.audio-wrapper` et `.expert-lyrics-wrapper` ont été corrigés ; la barre non.
 - [ ] **`personadle_expert_stats_by_mode()` fait du N+1** — un recalcul de streak par mode.

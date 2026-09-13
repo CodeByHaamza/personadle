@@ -109,9 +109,11 @@ test.describe.serial("UI — un défi de bout en bout", () => {
     await expect(btn).toHaveClass(/btn-challenge--locked/);
     await expect(btn).toHaveAttribute("aria-disabled", "true");
     await expect(btn).toHaveAttribute("title", /finish today's game/i);
-    // force : en CI (1280×720) la boîte de consigne chevauche le bouton pendant
-    // le défilement d'actionnabilité de Playwright ; ce n'est pas ce qu'on teste.
-    await btn.click({ force: true });
+    // dispatchEvent, pas click() : en CI (1280×720) la page Classique arrive
+    // défilée de ~215 px et la boîte de consigne intercepte le point de clic
+    // (trace du run 34777768286, non reproduit en local — TODO.md « Dette »).
+    // Ce qu'on teste ici est la réaction du bouton, pas le hit-testing.
+    await btn.dispatchEvent("click");
     await expect(btn.locator(".btn-challenge__hint--show")).toBeVisible();
     await expect(page.locator("#challengeModal")).toHaveCount(0);
     await page.close();
@@ -132,7 +134,7 @@ test.describe.serial("UI — un défi de bout en bout", () => {
     await expect(btn, "victoire → déverrouillé").not.toHaveClass(/btn-challenge--locked/, {
       timeout: 10_000,
     });
-    await btn.click({ force: true });
+    await btn.dispatchEvent("click"); // même raison qu'à l'étape 1
 
     const modal = page.locator("#challengeModal");
     await expect(modal).toBeVisible();
