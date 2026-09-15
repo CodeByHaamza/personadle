@@ -312,6 +312,45 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertSame(['opus' => ['P5']], json_decode($stmt->fetchColumn(), true));
     }
 
+    /**
+     * La streak GLOBALE suit le jour de JEU (played_date), pas le jour de
+     * réception. Partie d'hier synchronisée aujourd'hui (file hors ligne vidée
+     * après minuit) puis partie du jour : 2 — et non 1 comme avant, où la partie
+     * d'hier était datée d'aujourd'hui et la journée d'hier n'existait pas.
+     */
+    public function testGlobalStreakFollowsPlayedDateNotReceiptDate(): void
+    {
+        $uid       = $this->makeUser();
+        $paris     = new DateTimeZone('Europe/Paris');
+        $today     = (new DateTime('now', $paris))->format('Y-m-d');
+        $yesterday = (new DateTime('yesterday', $paris))->format('Y-m-d');
+
+        $late = personadle_record_game_session(
+            self::$pdo, $uid, 'classic', $yesterday, 'Joker', 'win', 2, 1000, []
+        );
+        $this->assertSame(1, $late['global_streak']);
+
+        $now = personadle_record_game_session(
+            self::$pdo, $uid, 'emoji', $today, 'Teddie', 'win', 3, 1000, []
+        );
+        $this->assertSame(2, $now['global_streak'], 'hier (en retard) + aujourd\'hui = 2 jours consécutifs');
+
+        $stmt = self::$pdo->prepare('SELECT global_streak, global_streak_date FROM users WHERE id = ?');
+        $stmt->execute([$uid]);
+        $row = $stmt->fetch();
+        $this->assertSame(2, (int) $row['global_streak']);
+        $this->assertSame($today, $row['global_streak_date']);
+
+        // Une session d'hier qui arrive APRÈS celle du jour ne recule pas la date
+        // et ne touche pas à la streak.
+        $again = personadle_record_game_session(
+            self::$pdo, $uid, 'music', $yesterday, 'Mass Destruction', 'win', 1, 1000, []
+        );
+        $this->assertSame(2, $again['global_streak']);
+        $stmt->execute([$uid]);
+        $this->assertSame($today, $stmt->fetch()['global_streak_date']);
+    }
+
     /** Migration 041 : la suite des essais est persistée telle quelle, NULL si absente. */
     public function testRecordGameSessionStoresGuesses(): void
     {

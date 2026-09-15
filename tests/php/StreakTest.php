@@ -91,4 +91,26 @@ final class StreakTest extends TestCase
         $s = personadle_global_streak('2025-06-16', '2025-06-17', $s); // J3 Music   → 3
         $this->assertSame(3, $s);
     }
+
+    // ── Jour de JEU vs jour de réception (2.2) ───────────────────────────────
+
+    public function testGlobalLateSyncOfYesterdayKeepsTheChain(): void
+    {
+        // Dernière journée comptée : le 13. Partie jouée le 14 à 23 h 50, hors
+        // ligne, synchronisée le 15 à 0 h 10 avec played_date = 14. Avant : datée
+        // du 15 → écart de 2 jours → streak remise à 1. Maintenant : le 14 suit
+        // le 13, +1.
+        $this->assertSame(6, personadle_global_streak('2025-06-13', '2025-06-14', 5));
+        // Puis la partie du 15 : +1 encore.
+        $this->assertSame(7, personadle_global_streak('2025-06-14', '2025-06-15', 6));
+    }
+
+    public function testGlobalYesterdaySessionArrivingAfterTodayIsInert(): void
+    {
+        // La journée du 15 est déjà comptée ; une session du 14 qui arrive ensuite
+        // (file hors ligne vidée en retard) ne doit ni avancer ni remettre à 1.
+        $this->assertSame(5, personadle_global_streak('2025-06-15', '2025-06-14', 5));
+        // Et jamais 0, même si la valeur courante était incohérente.
+        $this->assertSame(1, personadle_global_streak('2025-06-15', '2025-06-14', 0));
+    }
 }
