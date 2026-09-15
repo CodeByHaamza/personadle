@@ -13,6 +13,100 @@
 
 ---
 
+## 2026-09-15 — test(défis, stats) : tous les cas d'usage, et les cinq bugs qu'ils ont sortis (branche `test/defis-stats-usecases`)
+
+Demande Hamza : « tester TOUS les cas de défi possibles » (pop-up index / profil,
+Boîte de la page Amis, plusieurs défis en même temps, Plus tard…) et « plein de cas
+d'usage sur l'enregistrement des stats », après les bugs de défis qui les ont abîmées.
+Chaque test a été écrit contre le comportement RÉEL ; cinq ont trouvé un bug, corrigé
+dans le même lot.
+
+### Les bugs trouvés
+
+1. **Titres jamais réclamés au serveur (point 2 de Hamza — « badge Velvet Regular oui,
+   titre I Am Not Afraid non »).** En fin de partie, `checkUnlocksAfterGame()` tourne
+   juste après `savePendingSession()` SANS l'attendre : le client compte la 50ᵉ
+   victoire, POST `/titles/unlock`, le serveur (qui lit `user_stats`) n'a pas encore la
+   session → 403 avalé. Le titre entre dans `profile.unlockedTitles` (donc plus jamais
+   renvoyé par `checkAndUnlockTitles`) et n'atteint jamais `user_titles`. Les badges
+   ont `syncBadgesWithBackend()` depuis toujours ; les titres n'avaient rien.
+   → `profile/titles-ui.js` : `syncTitlesWithBackend()` appelé par `initTitlesSection`
+   (local absent du serveur → repoussé ; 403 définitif → titre fantôme retiré, le
+   backend est la source de vérité ; réseau/404 → gardé pour la prochaine fois).
+   Reproduit contre le vrai serveur dans `tests-e2e/stats_usecases.spec.js` (49
+   victoires → 403, 50 → 200, et `velvet_regular` reste 403 avec 1 jour distinct).
+   **Vérifié sur `develop` avant correctif : le bug y était** (aucun code de titres
+   n'a changé entre `main` et `develop`).
+2. **Streak globale datée du jour de réception, pas du jour de jeu.**
+   `personadle_bump_global_streak()` utilisait `now` : une partie de 23 h 50
+   synchronisée à 0 h 10 (file hors ligne) comptait pour le lendemain ; si la
+   précédente datait de l'avant-veille, la streak repartait à 1 alors que le joueur
+   avait joué chaque jour. La streak par mode lisait déjà `played_date`.
+   → `api/lib/streak.php` + `api/lib/game_session.php` : jour de JEU, la date
+   mémorisée ne recule jamais (une session de la veille arrivée après celle du jour
+   est inerte). PHPUnit `StreakTest` + `DatabaseIntegrationTest`.
+3. **Résultat de défi perdu si l'appel échoue.** `checkChallengeCompletion()` envoyait
+   `beaten`/`expired` en fire-and-forget : réseau coupé = défi `accepted` en base pour
+   toujours (expéditeur jamais prévenu, « en cours » sur la page Amis, 409 pour un
+   nouveau défi le même jour). → file `pendingChallengeStatus` (gameCore.js), rejouée
+   au début de chaque sondage (`notifications.js`) ; 4xx = définitif, jeté.
+4. **Case de défi périmée jamais libérée hors de la page du mode.** Défi accepté lundi,
+   jamais joué, nouveau défi accepté mardi depuis l'accueil : les filtres du défi de
+   lundi étaient encore posés et devenaient les « filtres d'origine » du défi de mardi.
+   → `installActiveChallenge()` partagé dans gameCore.js (les deux chemins
+   d'acceptation dupliquaient le même bloc), qui appelle `releaseStaleChallenge()`
+   d'abord.
+5. **Machine à états des défis sans garde côté serveur.** Un expéditeur pouvait passer
+   son propre défi en `expired`/`accepted` ; un `beaten` pouvait revenir `accepted`
+   (donc re-bloquer un nouveau défi le même jour). → `api/messages/index.php` :
+   destinataire seul, `unread → accepted|read`, `accepted → beaten|expired|read`,
+   finaux immuables, `accepted → accepted` idempotent (double clic / second appareil).
+
+### Point 4 de Hamza — bulle d'info des badges (signalement joueur)
+
+Mesuré avec Playwright à 390 px : `#badgesModal` en `content-box` faisait 415 px
+(90 % + 60 px de padding + bordure) → débordait des deux côtés, première colonne
+coupée (2ᵉ capture du joueur). La bulle d'un badge de première rangée partait à
+`top: -75 px`, au-dessus du conteneur de défilement (1ʳᵉ capture).
+→ `profile/badges/badges.css` : `box-sizing: border-box`, padding réduit ≤ 480 px,
+variante `.badge-tooltip--below` (flèche en haut, couleur via `--badge-arrow`) ;
+`badgesManager.js::adjustTooltipPositions()` calcule depuis la géométrie du badge
+(plus depuis la position courante de la bulle, faussée par les `nth-child` écrits
+pour 4 colonnes) et bascule sous le badge quand le haut serait coupé. Au passage :
+`opacity: 0.5` sur `.badge-item.locked` rendait la bulle semi-transparente — déplacé
+sur l'image et le nom.
+
+### Tests ajoutés
+
+- `tests/notifications_challenges.test.js` (25) — le sondage n'avait AUCUN test :
+  accueil / profil / pages de jeu / page Amis, deux défis, `_queuedThisPage` vs « vu »
+  persistant, plein écran `cr-overlay`, résultats pour l'expéditeur, file de relance.
+- `tests/friends_challenge_actions.test.js` (20) — Accepter / Refuser / Reprendre /
+  Abandonner par les vrais boutons de la Boîte, serveur d'abord, autre appareil, garde
+  d'exclusivité, Expert verrouillé/débloqué (statut mis en cache par module : un seul
+  jeu de réponses par fichier).
+- `tests/challenge_install.test.js` (15) — l'installateur partagé et la libération
+  d'une case périmée ; les deux chemins produisent une case identique.
+- `tests/titles_reconcile.test.js` (10) — le scénario « badge oui, titre non » de bout
+  en bout côté client.
+- `tests/challengeResult.test.js` (+3) — la file de relance.
+- `tests-e2e/challenge_usecases.spec.js` (13) — API : toute la machine à états ; UI :
+  deux défis à l'accueil, Plus tard / Refuser, mémoire au rechargement et sur le
+  profil, accepter depuis la pop-up du profil, exclusivité depuis la pop-up ET la Boîte,
+  abandon, **et une partie de défi n'entre pas dans les stats, la partie du jour qui
+  suit, si** (vérifié en base).
+- `tests-e2e/stats_usecases.spec.js` (16) — `user_stats` ↔ réponse de POST, le cas
+  titre/badge, streak hier+aujourd'hui / par mode / globale, ce que le serveur refuse.
+- PHPUnit `StreakTest` (+2), `DatabaseIntegrationTest` (+1).
+
+Angle mort assumé : les deux nouveaux specs E2E tolèrent le 503 « maintenance » que
+`moderation.spec.js` déclenche en parallèle (toute requête passe par un `call()` qui
+rejoue sur 503). Les autres specs n'ont pas cette tolérance et peuvent échouer
+localement sans `retries` (la CI en a 2) ; `expert-personae` « nom masqué » échoue
+aussi les jours où la fiche de la cible contient un dérivé de son nom
+(« terpsichorean ») — c'est la règle de frontière de mot de `maskTerms`, pas un
+bug de masquage.
+
 ## 2026-09-15 — fix(défi): « Plus tard » ne cachait plus les autres défis en file (relecture PR #112)
 
 Relecture avant merge des PRs empilées #112 → #114 → #117. Un seul vrai bug, dans le
