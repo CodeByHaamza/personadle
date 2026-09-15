@@ -13,6 +13,376 @@
 
 ---
 
+## 2026-09-15 — fix(défi): « Plus tard » ne cachait plus les autres défis en file (relecture PR #112)
+
+Relecture avant merge des PRs empilées #112 → #114 → #117. Un seul vrai bug, dans le
+chemin que « Plus tard » venait de rendre visible : deux défis reçus en même temps (deux
+amis), « Plus tard » ou la croix sur le premier → le second **n'apparaissait jamais sur
+cette page**.
+
+- `js/challenge-notif.js` — `closeOnly` vidait la file (`_queue.length = 0`) en comptant
+  sur le sondage suivant (60 s) pour représenter les défis jamais montrés. Or
+  `js/notifications.js` les avait déjà notés dans `_queuedThisPage` **avant** de les
+  pousser, donc le sondage les filtrait : ils ne revenaient qu'après un changement de
+  page. Le commentaire promettait l'inverse. Désormais « Plus tard » et la croix ne
+  valent que pour le défi fermé et **enchaînent sur le suivant**, comme « Refuser »
+  (`_closeOverlay` → `_showNext`) : le joueur ne l'a pas vu, il n'a rien décidé à son
+  sujet.
+- `tests/challengeAccept.test.js` — cas « deux défis, Plus tard sur le premier » : le
+  second s'affiche, `dismissed` n'est appelé que pour le premier, rien n'est envoyé au
+  serveur. Vérifié rouge sans le correctif.
+- `js/gameCore.js` — docblock mort au-dessus de `challengeScoreFor()` : le bloc décrivait
+  le « par » par mode du 2026-09-12, retiré le 13. Fusionné avec le bloc qui suivait.
+
+Le reste de la relecture (aucun changement de code) :
+
+- migrations 040/041/042 rejouées sur une base **vierge** au schéma de `develop`, puis
+  rejouées une seconde fois (idempotence) ; colonnes **et** index du schéma migré
+  identiques à `sql/bdd_mysql.sql` de la branche (`information_schema` diffé) ;
+- PDO/requêtes préparées ligne à ligne sur `api/admin/{user,announcements,settings,
+  anticheat,user_notes,user_notices}.php`, `api/notices/index.php`,
+  `api/sessions_today.php`, `api/lib/moderation.php` ; `escHtml` partout dans
+  `admin/moderation.js` et `admin/site_panels.js` ;
+- garde de maintenance : `me/login/logout`, `admin/`, `cron/` exemptés, admin connecté
+  passe, 503 + `Retry-After` sinon — couvert par `tests-e2e/moderation.spec.js` ;
+- #114 et #117 n'avaient **jamais tourné en CI** (le workflow ne se déclenche que sur
+  les PR vers `develop`/`main`) : Vitest 1043/1043, PHPUnit 275/275, E2E 133/133, lint,
+  i18n, pools, docs et data verts en local sur la tête de #117.
+
+Angle mort assumé, inchangé : sans les migrations 040→042 jouées **avant** le pull
+Hostinger, `requireAuth()` (colonnes `ban_reason`/`banned_until`), `login.php`, `me.php`
+et l'INSERT de `game_sessions` (`guesses`) tombent en 500 — c'est le contrat de la
+checklist de release (`DEPLOY.md`, `npm run schema:check-prod`), pas un fallback à coder.
+
+## 2026-09-13 — Défi verrouillé avant la partie, entrée 2.2 Velvet Room, pile haut-droite du profil
+
+Trois décisions de Hamza, plus la CI de #112 (rouge depuis l'ajout de `challenge_flow.spec.js`).
+
+### « Défier un ami » : verrouillé tant que la partie du jour n'est pas finie
+
+Le lot du 12 laissait le bouton cliquable dès l'arrivée, avec un score de référence (« par »
+par mode). Décision : un défi porte **toujours un vrai score** — « bats mon score » n'a pas
+de sens sans score. `js/gameCore.js` :
+
+- `CHALLENGE_PAR` et le par sont **retirés** ; `challengeScoreFor(score)` renvoie le score ou
+  `null`, `isChallengeLocked(score)` en découle. Les 6 modes n'ont rien à changer : ils
+  passaient déjà `null` avant la fin et `attempts` après.
+- `showChallengeButton()` pose `.btn-challenge--locked` + `aria-disabled` + `title` (i18n
+  `challenge.locked_hint`) ; le clic verrouillé n'ouvre rien et fait sortir une bulle
+  `.btn-challenge__hint` 2,6 s (le mobile n'a pas de survol). Pas d'attribut `disabled` : le
+  clic doit arriver pour montrer le message. CSS dans `global.css` (gris, 🔒 devant l'épée,
+  bulle avec flèche, retour à la ligne ≤ 480 px).
+- **Depuis la page Amis** (`?challenge=<id>`) sur un mode pas encore joué : la bulle s'affiche
+  au lieu de la modale, la présélection est gardée, et `showChallengeButton()` ouvre la modale
+  **tout seul** sur cet ami au déverrouillage (`_preselectConsumed` garantit une seule fois).
+  Le sélecteur de mode de `friends.js` annonce la règle (`friends.challenge_pick_note`).
+- Deux fragilités trouvées en écrivant les tests, corrigées : la ligne présélectionnée
+  dépendait de `CSS.escape` et de `scrollIntoView`, absents de jsdom — l'exception faisait
+  retomber la liste d'amis sur son état d'erreur. Recherche par `dataset.fid`, appel optionnel.
+- Tests : `tests/challenge_button_always.test.js` → **`challenge_button_lock.test.js`** (15,
+  dont la présélection différée) ; `tests-e2e/challenge_flow.spec.js` étapes 1–5 réécrites
+  (Alice joue pour déverrouiller, Bob joue l'Emoji avant que la modale s'ouvre sur Alice) avec
+  **un seul contexte navigateur pour Alice** — « partie finie » est un état local, un contexte
+  neuf par étape était un autre appareil. Changelogs joueur (index + page 2.2) reformulés.
+
+### CI #112 — pourquoi le E2E était rouge
+
+`challenge_flow` étape 2 cliquait le bouton avant toute partie ; en CI (1280×720) Playwright
+loggait 55× « `.personadle-box` subtree intercepts pointer events » — la boîte de consigne
+chevauche le bouton pendant le défilement d'actionnabilité, jamais en local. Le clic sur ce
+bouton passe en `{ force: true }` (la visibilité est vérifiée à part) ; le scénario a de toute
+façon changé avec le verrou.
+
+### Entrée 2.2 du déroulant « Nouveautés » — Velvet Room, pas techno
+
+« Mise à jour communautaire » était faux (les retours joueurs n'en sont pas le cœur) et le
+thème techno ne parlait de rien. L'entrée s'appelle **« Version 2.2 — Le Compendium »** (6
+langues), reprend le langage du carnet (`css/index.css` §10c réécrite : `.velvet-theme`,
+damier de losanges qui dérive, pentacle qui respire, ornements ❦, or, papier crème en clair /
+velours en sombre, `.velvet-btn`) et ouvre sur une puce 📖 Compendium. Plus aucune trace
+`tech-*`.
+
+### Profil — pile haut-droite
+
+`profile.html` : le toggle dark mode/⚙ et le bouton Compendium sont dans `.top-right-stack`
+(fixe, colonne, `align-items: stretch`) ; le toggle redevient statique dedans, le bouton prend
+**exactement sa largeur** (224 px desktop, 93 px mobile où le libellé disparaît), avec 12 px
+d'écart. `profile-page.css` §16 réécrite. Mesuré des deux côtés.
+
+---
+
+## 2026-09-13 — Le Compendium : carnet de collection (branche `fix/community-feedback-batch`)
+
+Nouvelle page `profile/compendium/` — un livre qui raconte ce que le joueur a accompli :
+badges, titres, fonds d'écran, liens (amitiés + rangs de Social Link), défis et exploits,
+chaque entrée datée, avec qui, et un texte d'ambiance. Demande de Hamza (« comme un carnet
+de collection », dans le style du *Grimoire du Cœur* de Persona Q), décisions prises le
+2026-09-12 : texte **généré** (pas de note personnelle), **uniquement des données
+existantes** (aucune table, aucune migration), **public** comme le profil, pas de 3D
+lourde, et « Avant le Compendium » pour ce qui n'a pas de date plutôt qu'une date
+inventée.
+
+### Backend — `api/user/compendium.php` (+ `RewriteRule ^compendium$` dans `api/user/.htaccess`)
+
+`GET /api/user/compendium` : `?code=` ou `?id=` → public (même exposition que
+`user/public.php` : pseudo, code ami, avatar) ; sans cible → `requireAuth()` et le sien.
+Lecture seule, 100 % PDO préparé, `is_deleted = 0` partout, défis plafonnés à 300.
+
+- **Badges** : `badges_unlocked` (`unlocked_at`).
+- **Titres** : `user_titles × titles` — nom en 5 langues, `rarity`, `image_path`.
+- **Fonds** : `user_wallpapers × wallpapers`.
+- **Liens** : `friendships` (`accepted_at`) + `social_links` (rang, xp) +
+  `social_link_rankup_notifs` (chaque passage de rang daté). Un rang atteint **avant**
+  l'existence de cette table n'a pas de date → le client le marque « avant le compendium ».
+- **Défis** : `messages` type `challenge`, statuts `beaten`/`expired`, dans les deux sens.
+  Le partenaire n'expose que `{id, pseudo}` — l'avatar est résolu côté client depuis la
+  liste d'amis, pour ne pas renvoyer un base64 par défi.
+- **Exploits** : `game_sessions` (première partie, première victoire et premier
+  sans-faute par mode — sous-requêtes `MIN(played_date)` groupées par `mode, is_expert`),
+  `expert_unlocks_granted` (accordé par l'admin) vs première session Expert jouée
+  (débloqué), `users.global_streak_record`.
+
+### Front — `profile/compendium/`
+
+- `compendium_entries.js` — module **pur** (aucun DOM, aucun i18n) : réponse API →
+  `{ badges[], titles[], wallpapers[], bonds[], challenges[], feats[] }` d'entrées
+  `{ chapter, kind, title, flavor, vars, date, img|icon|avatar, rank?, expert?, won? }`.
+  Tri décroissant par date, non datées à la fin, record de série épinglé en tête
+  (`pin`). Doublons de notifs de rang fusionnés (`Set` par rang). `titleName(title,
+  lang)` avec repli EN puis slug. `chapterSummary()` pour la page de gauche,
+  `paginate()` (jamais zéro page).
+- `compendium.js` — la page : `initCompendium()` (exporté pour les tests) attend
+  `__i18nReady` + `_authReady`, lit `?view=`, appelle `api.user.compendium()`. Couverture
+  (pseudo, *Ouvrir*) → `.cp-cover--opening` → livre : onglets (rôle `tab`, compteur),
+  page de gauche (chapitre, résumé chiffré, filigrane, folio romain), page de droite
+  (5 entrées/page, folio numérique), tourne-page 3D avec filet `setTimeout` si
+  `animationend` ne vient pas (onglet en arrière-plan), ‹ › + flèches clavier, balayage
+  tactile. Dates via `Intl.DateTimeFormat(lang, { dateStyle: "long" })`. Scores et
+  tentatives en « N essais » (`compendium.tries` / `tries_one`), jamais un nombre nu.
+  Libellés d'accessibilité (pager, onglets) posés en JS — `data-i18n` ne couvre pas
+  `aria-label`.
+- `compendium.css` — préfixe `cp-*`, palette Velvet Room en variables (`--cp-blue`,
+  `--cp-gold`, `--cp-paper`…), mode sombre en surcharge de variables seulement. Onglets
+  en **index sur le bord supérieur** du livre (première version : signets sur la tranche
+  droite — débordaient du viewport à 1280 px et recouvraient le texte en actif).
+  `.cp-cover` en `box-sizing: border-box` (sinon 360 + padding + bordure = 410 px sur un
+  mobile de 390). Bannières de titre (≈ 4:1) en bandeau au-dessus du texte
+  (`.cp-entry--banner`), pas dans un carré de 52 px. `prefers-reduced-motion` coupe tout.
+- `js/api.js` — `user.compendium({ code } | { id } | {})`. `js/gameCore.js` —
+  `/profile/compendium/` ajouté à `_DEEP_SUBPATHS` (`siteRootPrefix()` → `../../`).
+- **Bouton sur le profil** — `profile/profile.html` `#compendiumBtn.grimoire-btn`, fixe
+  sous `.darkmode-toggle` (losanges bleus animés + pentacle doré, `profile-page.css`
+  §16 ; icône seule ≤ 768 px). `data-auth="connected"` ; en mode `?view=`,
+  `profile-view.js` le pointe vers le carnet du joueur visité et le rend visible même
+  déconnecté (le carnet est public).
+- `sw.js` — les 4 fichiers de la page ajoutés au pré-cache.
+
+### i18n, FAQ, docs, tests
+
+- `lang/*.json` (6 langues) : namespace `compendium.*` — titre, tagline, chapitres et
+  descriptions, états vides, stats, exploits, 19 textes d'ambiance `flavor.*`, libellés
+  d'accessibilité. FAQ : `faq.q44/a44` (c'est quoi) et `faq.q45/a45` (public, « avant le
+  compendium ») dans `pages/faq.html`, section Compte & Profil.
+- `profile/compendium/README.md` — chapitres → tables, contrat API, flux, conventions,
+  procédure pour ajouter une source d'entrées.
+- `tests/compendium_entries.test.js` (18) — chapitres, tri, dates absentes, fusion des
+  rang-ups, genres de défi, avatar de partenaire, exploits, résumé, pagination.
+  `tests/compendium_page.test.js` (9) — couverture, `?view=`, déconnecté, 404, onglets,
+  pagination clavier, rendu d'une entrée (nom i18n, date locale, pastilles, essais).
+  `tests-e2e/compendium.spec.js` (4) — route `.htaccess` publique, 404/401, bouton du
+  profil visité, ouverture du livre sans session.
+
+### Angles morts
+
+- Les rangs de Social Link antérieurs à `social_link_rankup_notifs` resteront sans date
+  pour toujours (pas de reconstruction possible) — c'est assumé, et dit au joueur.
+- Un joueur qui a plus de 300 défis terminés verra les 300 plus récents.
+- `expert_modes` : « débloqué » est daté de la **première session Expert jouée**, pas du
+  jour où la condition a été remplie (non historisé).
+
+---
+
+## 2026-09-12 — Lot « retours communauté » : 8 corrections + 2 refontes (branche `fix/community-feedback-batch`)
+
+Huit remontées joueurs (Discord) plus deux demandes de Hamza, traitées en un commit par
+point. Au passage, trois bugs découverts en creusant les remontées (dont deux qui
+n'avaient rien à voir avec la plainte initiale). Le layout des pages de mode (barre de
+saisie collante, compactage du haut de page) est **volontairement hors de ce lot** : PR
+séparée à venir, pour être validé visuellement à part.
+
+### Boutons ronds rendus ovales (retour n° 2, n° 5) — `css/global.css` §18
+
+La règle tactile `button { min-height: 48px; padding: 12px 20px }` s'applique à **tout**
+`<button>`, y compris ceux qui déclarent leur propre `width`/`height`. Mesuré au pixel :
+pastilles de bordure 28×48, lecteur de musique de profil 34×48, ⚙ Settings 28×48. Sur la
+page Amis, 👁 est un `<a>` (30 px) et ✕ un `<button>` (48 px) sur la même ligne — d'où
+« pas la même taille ». Chaque bouton-icône pose `min-height: 0` dans sa propre règle
+(14 règles, 8 fichiers), `.fr-btn` fixe 36 px pour `<a>` et `<button>`, `.fr-btn--icon`
+fait un carré 36×36. **Piège documenté dans CLAUDE.md §7** — c'est un pattern, pas un cas.
+
+Angle mort : tout nouveau bouton-icône retombe dedans s'il ne pose pas `min-height: 0`.
+
+### Double « + » sur Ajouter (n° 5) — `lang/*.json` + `friends.js` + `profile-view.js`
+
+`friends.js` préfixait `+ ` à une clé i18n qui contenait déjà `+ Add`. La clé
+`friends.add_friend` redevient un libellé nu (c'est aussi le `title`), les deux appelants
+ajoutent le signe.
+
+### Poubelle invisible (n° 6) — `friends.css` + SVG inline
+
+`opacity: 0.5`, 0.78 rem, pleine au survol seulement — donc jamais sur mobile. Zone
+tactile 32 px, opacité de repos 0.85, et un SVG inline en `currentColor` à la place de
+l'emoji 🗑 (trait fin monochrome sur Windows, pictogramme couleur ailleurs — aucun
+contraste garanti).
+
+### Stats Expert : chiffres décalés et fondus (n° 8) — `profile-page.js` / `.css`
+
+Deux causes. L'en-tête « Won / Played · Rate · Best · Streak » était un seul `<span>` calé à
+droite ; la clé i18n (même forme `a · b · c · d` dans les 6 langues) est découpée pour poser
+un libellé par colonne. **Et chaque ligne est sa propre grille** (`display: grid` par
+`.expert-stat-row`) : avec des colonnes `auto`, chaque ligne dimensionne les siennes selon
+son contenu, l'en-tête ne pouvait pas tomber au-dessus des chiffres → colonnes en `fr`.
+Couleur explicite sur les cellules (elles héritaient du corps de page → gris sur gris en
+sombre), et `body.darkmode .mode-stats-header` écrasait le rouge du titre par spécificité.
+
+### Iwatodai Dorm (n° 4) — `musicsMode/database/songs.js`
+
+`opus: ["P3R"]` → `["P3"]`, image `P3.webp`. Convention du dataset = jeu d'origine (Burn My
+Dread, Mass Destruction sont en P3 alors qu'ils sont aussi dans Reload), même si la piste
+jouée est l'arrangement chanté de Reload. Pools quotidiens indexés par titre → inchangés.
+
+### Bouton ⚙ sur les pages de mode + autoplay de profil réglable (n° 3)
+
+`settings-modal.js` crée sa modale à la demande : le bouton ⚙ rejoint le bloc « Mode Sombre »
+sur `index.html` et les 6 modes (style déplacé de `profile-page.css` vers
+`settings-modal.css`, classe générique `.settings-btn`). **L'id utilisateur est résolu au
+clic « Sauvegarder », pas à l'init** : sur ces pages le bouton est monté avant que
+`initAuth()` ait posé `_currentUser`, le réglage ne serait jamais parti en cloud. Deux
+réglages `profile_autoplay_own` / `profile_autoplay_others` (vrais par défaut) dans
+`profiles.settings` (JSON libre, pas de migration), lus par `song-player.js` et
+`profile-view.js` via `profileAutoplayAllowed()`. Tests : `tests/settings_modal.test.js`.
+
+### Mode favori choisi + « Best Mode Overall » (n° 1) — migration **040**
+
+Décision produit : mode favori = choix du joueur ; « Best Mode Overall » = **meilleur taux
+de victoire, 3 parties minimum** (un 1/1 ne fait pas 100 %), égalité → le plus joué.
+Colonne `profiles.favorite_mode` (**et non** une clé de `settings` : le mode favori se voit
+sur le profil visité, `settings` est privé et jamais renvoyé par `public.php`). Validée
+serveur (PATCH) contre la liste de `MODES`. Puces dans la carte Customization, sauvegarde
+locale + cloud au clic ; `cloud-sync.js` redescend le choix, un `null` cloud efface, un
+payload sans le champ (backend pas migré) laisse intact. Helper pur `bestModeOverall()`
+(`profile-format.js`), partagé par la page et le profil visité. `stats.favoriteMode` (le
+plus joué) reste calculé, plus affiché.
+
+Au passage : les pastilles de bordure n'étaient rendues qu'après un pull cloud — un invité
+voyait une rangée vide sous « Avatar Border ». Rendues au chargement et après déconnexion.
+
+⚠️ **Release** : `040` ajoutée à la checklist `TODO.md`. Sans elle, `Unknown column
+'favorite_mode'` sur **tout** GET `/api/user/:id` et `/api/user/public` — le profil ne
+charge plus, pas seulement le mode favori. PHPUnit n'a pas tourné localement (pas de PHP
+hors Docker) : à confirmer en CI.
+
+### Portugais refusé par l'API (bug trouvé en chemin) — `api/lib/validation.php`
+
+Trois listes locales de langues s'arrêtaient à `it` : un joueur en `pt` voyait **tout** son
+PATCH profil refusé en 400 « Invalid lang » (avatar, bordure, badges compris — le client
+envoie toujours la langue avec le reste), était inscrit en `en`, et l'admin ne pouvait pas
+lui poser `pt`. Constante unique `PERSONADLE_SUPPORTED_LANGS`, test PHPUnit de parité avec
+`lang/*.json`.
+
+### « Défier un ami » toujours disponible (n° 7) — `js/gameCore.js` + 6 modes
+
+Ce qui se passait : injecté uniquement à la **victoire fraîche**, dans la navigation de fin
+de partie (cachée avant), et `return` si déjà présent. Absent avant la fin, après un Give
+Up, et au rechargement — pour ce dernier, deux raisons : la victoire restaurée n'est plus
+« fraîche », et quand le mode rejoue sa fin de partie au chargement, `initAuth()` n'a pas
+encore posé `_currentUser`.
+
+- `initChallengeButton(mode, pool, score)` monte le bouton à l'arrivée, après
+  `window._authReady`, dans `.expert-toggle-zone` ; une fois la navigation révélée par
+  `revealNextLink`, il y est **déplacé** entre précédent/suivant. Rappeler
+  `showChallengeButton()` **met à jour** score et pool.
+- Score « par » par mode tant que la partie n'est pas finie (`CHALLENGE_PAR` : classic 5,
+  emoji 5, silhouette 4, alloutattack 4, personae 3, music 3) — le serveur exige un score
+  > 0, la cible est tirée au hasard, rien n'oblige à avoir joué. Vrai score à la fin,
+  victoire **ou abandon**. La modale affiche le score à battre.
+- Le pool de cibles peut être une **fonction**, évaluée au clic (les filtres changent).
+
+Tests : `tests/challenge_button_always.test.js` (placement, par, mise à jour, auth).
+
+### Page Amis en 3 onglets + ⚔ Défier par ami (demande Hamza + n° 7)
+
+Cinq blocs empilés → Amis (demandes + liste) / Boîte (messages & défis, état vide au lieu de
+disparaître) / Trouver (recherche + joueurs, chargés à la **première ouverture** seulement).
+Pastilles (demandes reçues, non-lus), dernier onglet mémorisé, `?tab=`. Ids de sections
+inchangés.
+
+⚔ par ami : un défi se joue dans un mode, avec le pool/filtres/dimension Expert **de la page
+de ce mode**. Plutôt que recharger six datasets sur la page Amis, le bouton demande le mode
+puis navigue vers la page du mode avec `?challenge=<friend_id>` ; `initChallengeButton()`
+ouvre la modale sur cet ami (mis en avant, `scrollIntoView`), retire le paramètre de l'URL
+(sinon un F5 rouvre). Le clic « Envoyer » reste au joueur. Tests : `tests/friends_tabs.test.js`.
+
+### Marqueur True Confidant (demande Hamza) — deux bugs + un restyle
+
+- `friends.html` ne chargeait **pas** `css/rank10-effect.css` : particules et label
+  arrivaient sans style — un bloc de texte brut « ✦ True Confidant » sous l'avatar.
+- La liste se re-rend à chaque poll (30 s) et **rejouait** burst + label à chaque fois.
+  `applyRank10Effect(…, { celebrate })` : la liste ne célèbre qu'à la première apparition
+  de chaque ami dans la session (`Set` par `friendship_id`).
+- Restyle : anneau doré fixe (plus de halo pulsant), pastille « ✦ MAX » plate, label
+  d'entrée en bulle qui s'efface (plus de machine à écrire).
+
+### Masque Personae Expert insensible aux accents (remontée Minthe / Mio Natsukawa)
+
+La fiche FR de Minthe s'ouvre sur « Minthé est une naïade… » : l'accent faisait rater le
+masque « Minthe », la réponse se lisait dès la première ligne. Même fuite en allemand sur
+Moros (« morös »). Un balayage des 6 langues n'en trouve pas d'autre — mais rien n'empêchait
+la prochaine traduction d'en créer une. `maskTerms()` (`gameCore.js`) compare sur une copie
+repliée (é → e) et remplace dans l'original ; NFC en amont pour qu'un accent décomposé garde
+la même longueur. Effet voulu : une lettre accentuée est une lettre, plus une frontière de
+mot. Le test de non-fuite (`tests/expertContent.test.js`) compare lui aussi sans
+diacritiques — il échouait sur Minthe/fr et Moros/de avec l'ancien code.
+
+### Second passage (même jour) — bug `{{count}}`, E2E des défis, six améliorations
+
+- **« ❄️ Rallumer — 0 → {{count}} jours »** : le `tf()` de `profile-page.js` ne transmettait pas
+  son 3ᵉ argument à `i18n.t()`, les placeholders restaient bruts. Seul appelant touché : le
+  bouton Jack Frost sous les stats. Test de régression sur `tf()` (exporté `_tf`).
+- **Profil visité ≠ profil propre pour la streak** : `public.php` n'exposait pas
+  `global_streak` ; `profile-view.js` prenait le max des streaks par mode (un joueur voyait
+  30 chez lui, ses amis 37 — et une correction admin de la globale restait invisible chez
+  eux). Exposée, avec repli sur l'ancien calcul si le champ manque.
+- **E2E `tests-e2e/challenge_flow.spec.js`** (8 étapes, navigateur réel) : bouton avant toute
+  partie, score par, envoi, ⚔ depuis Amis avec présélection, acceptation depuis la Boîte et
+  victoire (`beaten`), *calling card*, abandon depuis le bandeau (`read`), Give Up en défi
+  (`expired`). Un seul contexte navigateur par joueur sur les étapes chaînées : le défi accepté
+  vit dans `localStorage`. C'est la réponse à « comment tester les défis ».
+- **Filtres d'un défi** : un joueur qui n'a jamais touché ses filtres n'a rien en localStorage
+  (voulu : « absent = tout actif »), donc `_getActiveFilters()` envoyait `[]` et le
+  destinataire gardait SES filtres — cible hors de son autocomplétion s'ils étaient
+  restrictifs. `initFilterMenu()` enregistre la liste effective auprès de `gameCore`
+  (`registerActiveFilters`), rien n'est persisté, le seeding des futurs opus est intact.
+- **Défis Expert depuis l'onglet Amis** : ligne ⚡ remplie en asynchrone, limitée aux modes
+  débloqués des deux côtés (`fetchExpertStatus()` + `friends.list({ expert_mode })` par mode
+  débloqué chez soi, en parallèle, six au maximum, à l'ouverture du sélecteur).
+- **Onglet 📊 Stats admin** : note — les streaks y sont *par mode*, la « Série actuelle » du
+  joueur est `users.global_streak` (onglet 🔥). Le « ça ne change rien » était attendu.
+- **`stats.favoriteMode` retiré** de `profileStats.js` / `cloud-sync.js` (plus lu depuis le
+  mode favori choisi) ; le pull efface la clé d'un profil 2.1.
+- **`tests-e2e/visual_layout.spec.js`** (opt-in `E2E_VISUAL=1`, hors CI) : 6 modes × 2
+  viewports, cible du jour masquée (elle dépend de `anonPlayerId` et du jour). Références
+  locales hors dépôt (`tests-e2e/__screenshots__/`, gitignoré) — le rendu des polices n'est
+  pas portable Windows → Linux. À figer AVANT la PR layout, pour relire chaque diff pendant.
+
+### Divers
+
+- Liens GitHub `HamzaKarrouchi` → `CodeByHaamza` (12 fichiers ; l'ancien compte renvoie
+  404, l'avatar du README était cassé).
+- Doc cron Discord : horaire hPanel `5 0 * * *` (jamais une heure « convertie »).
+
+---
+
 ## 2026-09-10 — fix(défi): les six façons dont un défi mourait en silence
 
 Signalé en prod : « parfois pas d'animation, parfois pas de redirection donc on joue sans

@@ -27,6 +27,7 @@ import {
 } from "../../js/social-link.js";
 import {
   FILTER_STORAGE_KEYS,
+  MODES,
   MODE_STATE_KEYS,
   activeChallengeKey,
   fetchExpertStatus,
@@ -187,27 +188,27 @@ function renderBrowseEntry(player) {
   } else if (friendship_status === "accepted") {
     badge = `<span class="fr-tag fr-tag--friend">💙 ${tf("friends.friend", "Friend")}</span>`;
     actions = `
-      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${tf("friends.view_profile", "View profile")}">👁</a>
-      <button class="fr-btn fr-btn--danger js-remove"
+      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon" title="${tf("friends.view_profile", "View profile")}">👁</a>
+      <button class="fr-btn fr-btn--danger fr-btn--icon js-remove"
               data-fid="${esc(String(friendship_id))}"
               title="${tf("friends.remove_friend", "Remove")}">✕</button>
     `;
   } else if (friendship_status === "pending" && friendship_direction === "sent") {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.request_sent", "Sent")}</span>`;
-    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
+    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon">👁</a>`;
   } else if (friendship_status === "pending" && friendship_direction === "received") {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.pending", "Pending")}</span>`;
     actions = `
-      <button class="fr-btn fr-btn--accept js-accept"
+      <button class="fr-btn fr-btn--accept fr-btn--icon js-accept"
               data-fid="${esc(String(friendship_id))}"
               title="${tf("friends.accept", "Accept")}">✓</button>
-      <button class="fr-btn fr-btn--danger js-decline"
+      <button class="fr-btn fr-btn--danger fr-btn--icon js-decline"
               data-fid="${esc(String(friendship_id))}"
               title="${tf("friends.decline", "Decline")}">✕</button>
     `;
   } else if (state.sentCodes.has(friend_code)) {
     badge = `<span class="fr-tag fr-tag--pending">⏳ ${tf("friends.request_sent", "Sent")}</span>`;
-    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>`;
+    actions = `<a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon">👁</a>`;
   } else {
     // Pas de relation — bouton Add Friend
     actions = `
@@ -215,7 +216,7 @@ function renderBrowseEntry(player) {
               data-code="${esc(friend_code)}"
               data-id="${esc(String(id))}"
               title="${tf("friends.add_friend", "Add friend")}">+ ${tf("friends.add_friend", "Add")}</button>
-      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view">👁</a>
+      <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon">👁</a>
     `;
   }
 
@@ -299,13 +300,193 @@ function renderFriendEntry(entry) {
         </div>
       </div>
       <div class="fr-entry-actions">
-        <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view" title="${tf("friends.view_profile", "View")}">👁</a>
-        <button class="fr-btn fr-btn--danger js-remove"
+        <button class="fr-btn fr-btn--challenge fr-btn--icon js-challenge"
+                data-friend-id="${esc(String(entry.friend_id))}"
+                data-pseudo="${esc(pseudo)}"
+                title="${tf("friends.challenge_btn", "Challenge")}"
+                aria-label="${tf("friends.challenge_btn", "Challenge")} ${esc(pseudo)}">⚔</button>
+        <a href="../profile.html?view=${esc(friend_code)}" class="fr-btn fr-btn--view fr-btn--icon" title="${tf("friends.view_profile", "View")}">👁</a>
+        <button class="fr-btn fr-btn--danger fr-btn--icon js-remove"
                 data-fid="${esc(String(friendship_id))}"
                 title="${tf("friends.remove_friend", "Remove")}">✕</button>
       </div>
     </div>
   `;
+}
+
+// ─────────────────────────────────────────────────────────
+// 5b. DÉFIER DEPUIS L'ONGLET AMIS (2.2)
+// ─────────────────────────────────────────────────────────
+// Retour joueur : « il devrait y avoir un bouton pour défier un ami depuis
+// l'onglet Amis ». Un défi se joue dans un mode, avec le pool, les filtres et
+// la dimension Expert de la page de ce mode — tout ça vit dans les pages de
+// mode, pas ici. Plutôt que de recharger les six datasets sur cette page, on
+// demande le mode, puis on emmène le joueur sur la page du mode avec l'ami
+// présélectionné (`?challenge=<friend_id>`) : initChallengeButton() y ouvre la
+// modale de défi sur cet ami (js/gameCore.js).
+
+const MODE_ICONS = {
+  classic: "🔤",
+  emoji: "😄",
+  silhouette: "👤",
+  alloutattack: "⚔️",
+  personae: "✨",
+  music: "🎵",
+};
+
+/** Ouvre le choix du mode sous le bouton ⚔ de l'ami. Exportée pour les tests. */
+export function openChallengeModePicker(anchorBtn, friendId, pseudo) {
+  closeChallengeModePicker();
+  const picker = document.createElement("div");
+  picker.id = "frModePicker";
+  picker.className = "fr-mode-picker";
+  picker.setAttribute("role", "dialog");
+  picker.setAttribute("aria-label", tf("friends.challenge_pick_mode", "Which mode?"));
+  picker.innerHTML = `
+    <p class="fr-mode-picker__title">⚔ ${tf("friends.challenge_pick_mode", "Which mode?")} <strong>${esc(pseudo)}</strong></p>
+    <p class="fr-mode-picker__note">${tf(
+      "friends.challenge_pick_note",
+      "Your score of the day is used — if you haven't played that mode yet, you'll play it first."
+    )}</p>
+    <div class="fr-mode-picker__grid">
+      ${MODES.map(
+        ({ key, label }) =>
+          `<a class="fr-mode-picker__btn" href="${modePageHref(key)}?challenge=${encodeURIComponent(friendId)}">${MODE_ICONS[key] ?? "🎮"} ${label === "AllOutAttack" ? "All-Out" : label}</a>`
+      ).join("")}
+    </div>
+    <div class="fr-mode-picker__expert" id="frModePickerExpert" hidden></div>`;
+  anchorBtn.closest(".fr-entry")?.appendChild(picker);
+  // Ligne ⚡ Expert, remplie en asynchrone : elle ne propose que les modes que
+  // LES DEUX joueurs ont débloqués — le serveur refuse un défi Expert vers un
+  // ami non débloqué, et la modale du mode ne le listerait pas (impasse).
+  fillExpertChallengeRow(picker, friendId).catch(() => {});
+  // Fermeture au clic ailleurs / Échap — après le tick courant, sinon le clic
+  // qui vient d'ouvrir le sélecteur le referme aussitôt.
+  setTimeout(() => {
+    document.addEventListener("click", _onDocClickClosePicker);
+    document.addEventListener("keydown", _onEscClosePicker);
+  }, 0);
+}
+
+
+/**
+ * Modes Expert débloqués par le joueur ET par l'ami, pour la ligne ⚡ du
+ * sélecteur. Côté ami, l'API ne répond que mode par mode (`?expert_mode=`) :
+ * une requête par mode débloqué chez soi, en parallèle, six au maximum.
+ * Exportée pour les tests.
+ *
+ * @returns {Promise<string[]>} clés de mode, dans l'ordre de MODES
+ */
+export async function expertModesSharedWith(friendId) {
+  const status = await fetchExpertStatus();
+  if (status.state !== "ok") return [];
+  const mine = MODES.map((m) => m.key).filter((key) => status.modes?.[key]?.unlocked === true);
+  if (!mine.length) return [];
+
+  const api = window._personadleApi;
+  if (!api?.friends?.list) return [];
+  const checks = await Promise.all(
+    mine.map(async (mode) => {
+      try {
+        const data = await api.friends.list({ expert_mode: mode });
+        const friend = (data.friends ?? []).find((f) => String(f.friend_id) === String(friendId));
+        return friend?.expert_unlocked === true ? mode : null;
+      } catch {
+        return null;
+      }
+    })
+  );
+  return checks.filter(Boolean);
+}
+
+async function fillExpertChallengeRow(picker, friendId) {
+  const row = picker.querySelector("#frModePickerExpert");
+  if (!row) return;
+  const shared = await expertModesSharedWith(friendId);
+  // Le sélecteur a pu être fermé entre-temps.
+  if (!shared.length || !row.isConnected) return;
+  row.innerHTML = `
+    <p class="fr-mode-picker__title">${tf("friends.challenge_expert_row", "⚡ Expert — unlocked by you both")}</p>
+    <div class="fr-mode-picker__grid">
+      ${shared
+        .map((key) => {
+          const label = MODES.find((m) => m.key === key)?.label ?? key;
+          return `<a class="fr-mode-picker__btn fr-mode-picker__btn--expert" href="${modePageHref(key, true)}&challenge=${encodeURIComponent(friendId)}">⚡ ${label === "AllOutAttack" ? "All-Out" : label}</a>`;
+        })
+        .join("")}
+    </div>`;
+  row.hidden = false;
+}
+
+function closeChallengeModePicker() {
+  document.getElementById("frModePicker")?.remove();
+  document.removeEventListener("click", _onDocClickClosePicker);
+  document.removeEventListener("keydown", _onEscClosePicker);
+}
+function _onDocClickClosePicker(e) {
+  if (!e.target.closest("#frModePicker")) closeChallengeModePicker();
+}
+function _onEscClosePicker(e) {
+  if (e.key === "Escape") closeChallengeModePicker();
+}
+
+// ─────────────────────────────────────────────────────────
+// 5c. ONGLETS (2.2)
+// ─────────────────────────────────────────────────────────
+const TABS = ["friends", "inbox", "find"];
+const TAB_STORAGE_KEY = "friendsTab";
+let _browseLoaded = false;
+
+/** Onglet initial : ?tab= dans l'URL, sinon le dernier ouvert, sinon Amis. Exportée pour les tests. */
+export function initialTab() {
+  const fromUrl = new URLSearchParams(window.location.search).get("tab");
+  if (TABS.includes(fromUrl)) return fromUrl;
+  try {
+    const saved = localStorage.getItem(TAB_STORAGE_KEY);
+    if (TABS.includes(saved)) return saved;
+  } catch {
+    /* localStorage indisponible : Amis par défaut */
+  }
+  return "friends";
+}
+
+export function activateTab(tab) {
+  if (!TABS.includes(tab)) tab = "friends";
+  document.querySelectorAll(".fr-tab").forEach((b) => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", String(on));
+  });
+  document.querySelectorAll(".fr-tab-panel").forEach((p) => {
+    p.classList.toggle("hidden", p.dataset.tabPanel !== tab);
+  });
+  try {
+    localStorage.setItem(TAB_STORAGE_KEY, tab);
+  } catch {
+    /* ignore */
+  }
+  // « Trouver » charge la liste des joueurs à sa première ouverture seulement :
+  // c'était l'un des cinq blocs affichés d'office, pour rien la plupart du temps.
+  if (tab === "find" && !_browseLoaded) {
+    _browseLoaded = true;
+    loadBrowse("", 0);
+  }
+  if (tab === "find") document.getElementById("browseSearch")?.focus({ preventScroll: true });
+}
+
+function setupTabs() {
+  document.querySelectorAll(".fr-tab").forEach((b) => {
+    b.addEventListener("click", () => activateTab(b.dataset.tab));
+  });
+  activateTab(initialTab());
+}
+
+/** Pastille d'un onglet : cachée à 0. Exportée pour les tests. */
+export function setTabBadge(id, count) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = String(count);
+  el.classList.toggle("hidden", !(count > 0));
 }
 
 function renderFriendsList() {
@@ -320,15 +501,25 @@ function renderFriendsList() {
   }
   if (countEl) countEl.textContent = state.friends.length;
 
-  // Effet True Confidant pour les amis rang 10
+  // Effet True Confidant pour les amis rang 10. La liste se re-rend à chaque
+  // poll (30 s) : la célébration (burst + label) ne joue qu'à la première
+  // apparition de chaque ami dans cette session, le marqueur permanent (anneau
+  // + pastille) est reposé à chaque rendu.
   list.querySelectorAll('.fr-entry[data-rank="10"]').forEach((entry, idx) => {
+    const fid = entry.dataset.fid;
+    const first = !_rank10Celebrated.has(fid);
+    _rank10Celebrated.add(fid);
     applyRank10Effect(
       entry.querySelector(".fr-avatar"),
       entry.querySelector(".fr-entry-pseudo"),
-      idx * 150
+      idx * 150,
+      { celebrate: first }
     );
   });
 }
+
+/** Amis (friendship_id) dont la célébration rang 10 a déjà joué dans cette session. */
+const _rank10Celebrated = new Set();
 
 // ─────────────────────────────────────────────────────────
 // 5. RENDU — PENDING REQUESTS
@@ -348,7 +539,7 @@ function renderPendingEntry(entry) {
         <button class="fr-btn fr-btn--accept js-accept"
                 data-fid="${esc(String(friendship_id))}"
                 title="${tf("friends.accept", "Accept")}">✓ ${tf("friends.accept", "Accept")}</button>
-        <button class="fr-btn fr-btn--danger js-decline"
+        <button class="fr-btn fr-btn--danger fr-btn--icon js-decline"
                 data-fid="${esc(String(friendship_id))}"
                 title="${tf("friends.decline", "Decline")}">✕</button>
       </div>
@@ -364,6 +555,8 @@ function renderPendingSection() {
 
   // Filtrer seulement les reçues (direction === 'received')
   const received = state.pending.filter((p) => p.direction === "received");
+
+  setTabBadge("tabFriendsBadge", received.length);
 
   if (!received.length) {
     section.classList.add("hidden");
@@ -467,7 +660,7 @@ async function sendFriendRequest(friendCode, targetId) {
       const actions = entry.querySelector(".fr-entry-actions");
       const infoDiv = entry.querySelector(".fr-entry-pseudo");
       if (actions)
-        actions.innerHTML = `<a href="../profile.html?view=${esc(friendCode)}" class="fr-btn fr-btn--view">👁</a>`;
+        actions.innerHTML = `<a href="../profile.html?view=${esc(friendCode)}" class="fr-btn fr-btn--view fr-btn--icon">👁</a>`;
       if (infoDiv && !infoDiv.querySelector(".fr-tag")) {
         infoDiv.insertAdjacentHTML(
           "beforeend",
@@ -582,6 +775,66 @@ async function handleAddByCode() {
 }
 
 // ─────────────────────────────────────────────────────────
+// 8a. ÉTAT LOCAL D'UN DÉFI
+// ─────────────────────────────────────────────────────────
+
+/**
+ * Installe un défi comme « en cours » sur CET appareil : état du mode purgé,
+ * filtres de l'expéditeur appliqués (les tiens sauvegardés), case
+ * `activeChallenge` écrite. Partagée par Accepter (après le PATCH serveur) et
+ * Reprendre (le serveur est déjà à `accepted`). Exportée pour les tests.
+ *
+ * @param {{ mid:number, modeKey:string, date?:string, score:number, senderId:number,
+ *           challengeFilters?:string, challengeTarget?:string|null, isExpert:boolean }} c
+ */
+export function installActiveChallenge(c) {
+  // Clear this mode's game state so the player starts fresh
+  (MODE_STATE_KEYS[c.modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+
+  // Backup current filters, then apply sender's challenge filters
+  // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
+  // "tout désélectionné" (état volontaire), différent de l'absence de clé
+  // ("tout actif" par défaut, cf. initFilterMenu()). Si le joueur n'a
+  // jamais touché ses filtres pour ce mode, localStorage.getItem() renvoie
+  // null — on garde null tel quel pour que la restauration plus bas (dans
+  // checkChallengeCompletion(), js/challenge-result.js) le laisse absent
+  // au lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
+  const filterKey = MODE_FILTER_KEY[c.modeKey] ?? null;
+  const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
+  if (filterKey && c.challengeFilters && c.challengeFilters !== "[]") {
+    localStorage.setItem(filterKey, c.challengeFilters);
+  }
+
+  localStorage.setItem(
+    activeChallengeKey(c.isExpert),
+    JSON.stringify({
+      msgId: c.mid,
+      mode: c.modeKey,
+      // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
+      // (`challengeDate`, conservé). Toutes les lectures de la case le
+      // comparent à parisDateKey() d'aujourd'hui : un défi envoyé la veille
+      // au soir et accepté le lendemain naissait périmé — pas de bannière,
+      // pas de cible dédiée, et un `accepted` que plus rien ne résolvait.
+      // Cf. le même correctif dans js/challenge-notif.js.
+      date: parisDateKey(),
+      challengeDate: c.date || null,
+      score: c.score,
+      senderId: c.senderId,
+      filterKey,
+      originalFilters,
+      isExpert: c.isExpert,
+      // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
+      // du jour et n'enregistrera PAS la partie en session quotidienne.
+      // Null (ancien défi) = comportement historique, cible du jour.
+      // Sans ce champ, isChallengePlay()/getActiveChallengeTarget() (gameCore.js)
+      // ne reconnaissent jamais le défi accepté ici — cf. challenge-notif.js
+      // qui pose déjà ce même champ pour le chemin popup d'animation.
+      target: c.challengeTarget ?? null,
+    })
+  );
+}
+
+// ─────────────────────────────────────────────────────────
 // 8b. MESSAGERIE
 // ─────────────────────────────────────────────────────────
 
@@ -603,15 +856,18 @@ async function loadMessages() {
       unreadEl.textContent = unreadCnt;
       unreadEl.classList.toggle("hidden", unreadCnt === 0);
     }
+    setTabBadge("tabInboxBadge", unreadCnt);
 
+    // La section vit dans son onglet : vide, elle le dit, elle ne disparaît plus.
+    section.classList.remove("hidden");
     if (!msgs.length) {
-      section.classList.add("hidden");
+      list.innerHTML = `<p class="fr-empty">${tf("friends.msg_empty", "No messages yet.")}</p>`;
       return;
     }
-    section.classList.remove("hidden");
     list.innerHTML = msgs.map(renderMessage).join("");
   } catch {
-    section.classList.add("hidden");
+    section.classList.remove("hidden");
+    list.innerHTML = `<p class="fr-empty">${tf("friends.load_error", "Could not load messages.")}</p>`;
   }
 }
 
@@ -747,6 +1003,11 @@ function renderMessage(msg) {
           <button class="fr-btn fr-btn--accept js-resume-challenge"
                   data-mid="${msg.id}"
                   data-mode="${esc(msg.challenge_mode ?? "")}"
+                  data-date="${esc(msg.challenge_date ?? "")}"
+                  data-score="${msg.challenge_score}"
+                  data-senderid="${msg.sender_id}"
+                  data-filters="${esc(msg.challenge_filters ?? "[]")}"
+                  data-target="${esc(msg.challenge_target ?? "")}"
                   data-isexpert="${msg.challenge_is_expert ? "1" : "0"}">
             ${tf("friends.challenge_resume", "▶ Resume")}
           </button>
@@ -779,7 +1040,8 @@ function renderMessage(msg) {
           ${renderStatusBadge(msg.status)}
           <button class="fr-msg-delete js-delete-msg"
                   data-mid="${msg.id}"
-                  title="${tf("friends.delete_msg", "Delete")}">🗑</button>
+                  title="${tf("friends.delete_msg", "Delete")}"
+                  aria-label="${tf("friends.delete_msg", "Delete")}"><svg class="fr-trash-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 1.5h4l.6 1.5H14v1.5H2V3h3.4L6 1.5zM3 5.5h10l-.8 8.6A1.5 1.5 0 0 1 10.7 15.5H5.3a1.5 1.5 0 0 1-1.5-1.4L3 5.5zm3 2v6h1.3v-6H6zm2.7 0v6H10v-6H8.7z"/></svg></button>
         </div>
         ${content}
         ${actions ? `<div class="fr-msg-actions">${actions}</div>` : ""}
@@ -900,6 +1162,14 @@ function attachListeners() {
       return;
     }
 
+    // ⚔ Défier cet ami — choix du mode, puis départ vers la page du mode
+    const challengeBtn = e.target.closest(".js-challenge");
+    if (challengeBtn) {
+      e.stopPropagation();
+      openChallengeModePicker(challengeBtn, challengeBtn.dataset.friendId, challengeBtn.dataset.pseudo);
+      return;
+    }
+
     // ── Messages : Accept challenge ───────────────────────
     const acceptChallenge = e.target.closest(".js-accept-challenge");
     if (acceptChallenge) {
@@ -984,50 +1254,16 @@ function attachListeners() {
         return;
       }
 
-      // Clear this mode's game state so the player starts fresh
-      (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
-
-      // Backup current filters, then apply sender's challenge filters
-      // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
-      // "tout désélectionné" (état volontaire), différent de l'absence de clé
-      // ("tout actif" par défaut, cf. initFilterMenu()). Si le joueur n'a
-      // jamais touché ses filtres pour ce mode, localStorage.getItem() renvoie
-      // null — on garde null tel quel pour que la restauration plus bas (dans
-      // checkChallengeCompletion(), js/challenge-result.js) le laisse absent
-      // au lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
-      const filterKey = MODE_FILTER_KEY[modeKey] ?? null;
-      const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
-      if (filterKey && challengeFilters && challengeFilters !== "[]") {
-        localStorage.setItem(filterKey, challengeFilters);
-      }
-
-      localStorage.setItem(
-        activeChallengeKey(challengeIsExpert),
-        JSON.stringify({
-          msgId: mid,
-          mode: modeKey,
-          // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
-          // (`date`, conservé ci-dessous). Toutes les lectures de la case le
-          // comparent à parisDateKey() d'aujourd'hui : un défi envoyé la veille
-          // au soir et accepté le lendemain naissait périmé — pas de bannière,
-          // pas de cible dédiée, et un `accepted` que plus rien ne résolvait.
-          // Cf. le même correctif dans js/challenge-notif.js.
-          date: parisDateKey(),
-          challengeDate: date ?? null,
-          score,
-          senderId,
-          filterKey,
-          originalFilters,
-          isExpert: challengeIsExpert,
-          // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
-          // du jour et n'enregistrera PAS la partie en session quotidienne.
-          // Null (ancien défi) = comportement historique, cible du jour.
-          // Sans ce champ, isChallengePlay()/getActiveChallengeTarget() (gameCore.js)
-          // ne reconnaissent jamais le défi accepté ici — cf. challenge-notif.js
-          // qui pose déjà ce même champ pour le chemin popup d'animation.
-          target: challengeTarget,
-        })
-      );
+      installActiveChallenge({
+        mid,
+        modeKey,
+        date,
+        score,
+        senderId,
+        challengeFilters,
+        challengeTarget,
+        isExpert: challengeIsExpert,
+      });
 
       // XP Social Link : challenge accepté. Un défi Expert rapporte davantage
       // (les deux joueurs ont dû débloquer le mode pour qu'il existe) — la
@@ -1045,14 +1281,45 @@ function attachListeners() {
     // ── Messages : Reprendre un défi en cours ─────────────
     const resumeChallenge = e.target.closest(".js-resume-challenge");
     if (resumeChallenge) {
-      const modeKey =
-        normalizeModeKey(resumeChallenge.dataset.mode) ??
-        String(resumeChallenge.dataset.mode ?? "").toLowerCase();
-      const isExpert = resumeChallenge.dataset.isexpert === "1";
+      const ds = resumeChallenge.dataset;
+      const mid = parseInt(ds.mid, 10);
+      const modeKey = normalizeModeKey(ds.mode) ?? String(ds.mode ?? "").toLowerCase();
+      const isExpert = ds.isexpert === "1";
       const dest = modePageHref(modeKey, isExpert);
       if (!dest) {
         alert(tf("challenge.unknown_mode", "This challenge's mode is unavailable."));
         return;
+      }
+
+      // « Reprendre » ne faisait QUE rediriger : la page du mode ne joue le défi
+      // que si la case locale `activeChallenge` existe, et elle n'existe que sur
+      // l'appareil où le défi a été accepté. Depuis un autre appareil ou après
+      // un cache vidé — précisément les cas que ce bouton devait couvrir — le
+      // joueur retombait sur la partie du jour, sans un mot (signalé par Hamza
+      // sur un défi « accepté » côté serveur seulement). Le message porte tout
+      // ce qu'il faut : on reconstruit l'état local comme à l'acceptation, sans
+      // repasser par le serveur (le statut y est déjà `accepted`).
+      const local = readActiveChallenge(isExpert);
+      if (local?.msgId !== mid) {
+        const pending = getPendingActiveChallenge(isExpert);
+        if (pending && pending.msgId !== mid) {
+          if (typeof window.showToast === "function") {
+            window.showToast(
+              `${tf("challenge.already_active", "Finish your current challenge first.")} (${modeLabel(pending.mode) ?? pending.mode})`
+            );
+          }
+          return;
+        }
+        installActiveChallenge({
+          mid,
+          modeKey,
+          date: ds.date,
+          score: parseInt(ds.score, 10),
+          senderId: parseInt(ds.senderid, 10),
+          challengeFilters: ds.filters ?? "[]",
+          challengeTarget: ds.target || null,
+          isExpert,
+        });
       }
       window.location.href = dest;
       return;
@@ -1150,9 +1417,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     guest?.classList.add("hidden");
 
     attachListeners();
+    setupTabs();
 
-    // Charger les trois sections en parallèle
-    await Promise.all([loadFriends(), loadBrowse("", 0), loadMessages()]);
+    // Amis et boîte en parallèle ; « Trouver » se charge à l'ouverture de son onglet.
+    await Promise.all([loadFriends(), loadMessages()]);
 
     startPolling();
   } else {

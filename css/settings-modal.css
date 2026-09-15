@@ -1,4 +1,40 @@
-/* settings-modal.css — Modal paramètres joueur */
+/* settings-modal.css — Modal paramètres joueur + bouton ⚙ qui l'ouvre */
+
+/* ── Bouton ⚙ dans .darkmode-toggle (profil, accueil, 6 modes) ──────────────
+   Déplacé ici depuis profile-page.css quand le bouton est arrivé sur les pages
+   de jeu (retour joueur 2.2 : « pas de bouton Settings sur la page de mode »),
+   pour que les 7 pages partagent une seule règle. */
+.dm-sep {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.settings-btn {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
+  background: none;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  transition:
+    color 0.15s,
+    transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+.settings-btn:hover {
+  color: #fff;
+  transform: rotate(30deg);
+}
 
 #settingsModal {
   position: fixed;
@@ -56,6 +92,7 @@
 }
 
 .sm-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   background: none;
   border: none;
   font-size: 1.1rem;

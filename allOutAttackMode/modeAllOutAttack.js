@@ -16,6 +16,7 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   resolveChallengeTarget,
@@ -272,6 +273,9 @@ let attempts = 0;
 let gameOver = false;
 let target = null;
 
+/** Cibles possibles d'un défi : pool filtré de la page, cible du jour exclue. Calculé au clic. */
+const challengePool = () => personas.filter((n) => n !== target);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER / CHARACTER POOL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -496,11 +500,7 @@ function handleGuess() {
     // À NE PAS confondre avec le `!EXPERT.isExpert` de showCommunityStats() juste
     // en dessous, qui lui est légitime : ces statistiques portent sur la cible
     // quotidienne du mode normal.
-    showChallengeButton(
-      "alloutattack",
-      attempts,
-      personas.filter((n) => n !== target)
-    );
+    showChallengeButton("alloutattack", attempts, challengePool);
     checkChallengeCompletion("alloutattack", attempts, true);
     if (!EXPERT.isExpert) showCommunityStats("alloutattack", target);
     gameOver = true;
@@ -591,6 +591,8 @@ function giveUp() {
 
   checkChallengeCompletion("alloutattack", attempts, false);
   if (!EXPERT.isExpert) showCommunityStats("alloutattack", target);
+  // Abandon (2.2) : le nombre d'essais consommés devient le score à battre.
+  showChallengeButton("alloutattack", attempts, challengePool);
   localStorage.setItem(EXPERT.key("aoaGameOver"), "true");
   localStorage.setItem(EXPERT.key("aoaTarget"), target);
   localStorage.setItem(EXPERT.key("aoaAttempts"), attempts);
@@ -918,6 +920,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem(EXPERT.key("aoaTarget"), target);
     localStorage.setItem(EXPERT.key("aoaAttempts"), 0);
   }
+
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que
+  // la partie n'est pas finie, vrai score si elle l'est (F5 après victoire ou
+  // abandon — le bouton « disparaissait » dans ce cas). Attend l'auth.
+  initChallengeButton("alloutattack", challengePool, gameOver ? attempts : null);
 
   // ── Buttons ──
   guessButton.addEventListener("click", handleGuess);

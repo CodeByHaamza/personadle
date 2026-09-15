@@ -34,6 +34,7 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   getActiveChallengeTarget,
@@ -101,6 +102,14 @@ let target = null;
 let attempts = 0;
 const maxAttempts = EXPERT.isExpert ? 5 : 3; // Give Up unlocks after this many wrong guesses
 let gameOver = false;
+
+/**
+ * Cibles possibles d'un défi, calculées au clic : pool filtré de la page, cible
+ * du jour exclue, identifiées par challengeKey() (nom du persona désambiguïsé
+ * par opus quand plusieurs entrées partagent le même nom — voir pickCharacter()).
+ */
+const challengePool = () =>
+  filteredCharacters.filter((c) => c.persona !== target?.persona).map((c) => challengeKey(c));
 
 let sessionStartTime = Date.now();
 // Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
@@ -636,15 +645,10 @@ function showVictory(force = false, name = null) {
   // `updateProfileStats` reste gardé plus bas — pour une tout autre raison :
   // l'Expert n'alimente pas les stats du mode normal.
   const wasChallengePlay = isChallengePlay("personae");
-  if (!force)
-    showChallengeButton(
-      "personae",
-      attempts,
-      // La cible d'un défi Personae est identifiée par challengeKey() (nom du
-      // persona, désambiguïsé par opus quand plusieurs entrées partagent le
-      // même nom — voir pickCharacter() plus haut).
-      filteredCharacters.filter((c) => c.persona !== target.persona).map((c) => challengeKey(c))
-    );
+  // Victoire OU abandon (2.2) : le nombre d'essais devient le score à battre.
+  // Le bouton est monté depuis l'arrivée (initChallengeButton) ; ici on fixe le
+  // score réel et il rejoint la navigation révélée juste au-dessus.
+  showChallengeButton("personae", attempts, challengePool);
   checkChallengeCompletion("personae", attempts, !force);
   if (!EXPERT.isExpert)
     showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
@@ -929,6 +933,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     resetGame();
   }
+
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que
+  // la partie n'est pas finie. Au rechargement, showVictory() ci-dessus tourne
+  // AVANT que l'auth ait posé _currentUser (no-op) : c'est cet appel, qui
+  // attend l'auth, qui remonte le bouton — le « bouton qui disparaît ».
+  initChallengeButton("personae", challengePool, storedGameOver ? attempts : null);
 
   // ── Daily reset ──
   checkResetOnLoad(EXPERT.key("lastPlayedDate_Personae"), STATS_SCOPE, () => {

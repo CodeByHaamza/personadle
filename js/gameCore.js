@@ -567,26 +567,61 @@ async function applyExpertGate(ctx, page, toggle) {
  * de mot suffit à éviter les faux positifs — « Io » (persona de Yukari) doit pouvoir
  * être masqué, sinon sa fiche donne la réponse dès la première ligne.
  *
+ * Insensible aux diacritiques : la comparaison se fait sur une copie « repliée »
+ * du texte (é → e, ö → o…), mais le remplacement s'applique au texte d'origine.
+ * Sans ça, la traduction d'une fiche laissait passer la réponse dès qu'elle
+ * accentuait le nom : « Minthé » (FR) n'était pas masqué par « Minthe », « morös »
+ * (DE) pas par « Moros » — signalé par un joueur en 2.2 sur Mio Natsukawa.
+ *
  * @param {string[]} terms  termes à masquer (nom, alias, titre…)
  * @param {string} text     texte brut
  * @param {string} [token]  remplacement affiché
  * @returns {string} texte masqué
  */
 export function maskTerms(terms, text, token = "[?]") {
-  let out = text;
+  // NFC d'abord : un « é » saisi en deux points de code (e + accent combinant)
+  // devient un seul caractère, et foldText garde alors une longueur identique
+  // au texte — condition pour reporter les positions trouvées sur l'original.
+  let out = text.normalize("NFC");
   for (const term of terms) {
     const t = (term ?? "").trim();
     if (t.length < 2) continue;
-    const pattern = t
+    const pattern = foldText(t.normalize("NFC"))
       .replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // échappe les métacaractères regex
       .replace(/\\?[!?.,]/g, "[!?.,]?") // ponctuation interne optionnelle
       .replace(/\s+/g, "\\s+"); // espaces variables
     // Frontière = tout ce qui n'est pas une lettre/chiffre. L'apostrophe en faisait
     // partie : « Io » n'était donc PAS masqué dans « Io's blessing », et la fiche
     // donnait la réponse dès la première ligne — le cas exact que le masquage vise.
-    out = out.replace(new RegExp(`(^|[^\\w])(${pattern})(?=$|[^\\w])`, "gi"), `$1${token}`);
+    const re = new RegExp(`(^|[^\\w])(${pattern})(?=$|[^\\w])`, "gi");
+    const folded = foldText(out);
+    let result = "";
+    let last = 0;
+    let m;
+    while ((m = re.exec(folded)) !== null) {
+      const start = m.index + m[1].length; // début du terme, frontière conservée
+      result += out.slice(last, start) + token;
+      last = m.index + m[0].length;
+    }
+    out = result + out.slice(last);
   }
   return out;
+}
+
+/**
+ * Replie un caractère NFC sur sa base sans diacritique (é → e, ö → o). Seul un
+ * repli à longueur égale est appliqué : ce qui ne se décompose pas (ß, œ, emoji)
+ * reste tel quel, pour que le texte replié garde exactement la longueur de
+ * l'original — c'est ce qui permet à maskTerms() de reporter les positions.
+ */
+function foldChar(c) {
+  const f = c.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return f.length === c.length ? f : c;
+}
+
+/** Replie un texte NFC caractère par caractère — même longueur en sortie. */
+function foldText(s) {
+  return Array.from(s, foldChar).join("");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1120,10 +1155,38 @@ export const FILTER_STORAGE_KEYS = {
 };
 const _FILTER_STORAGE_KEY = FILTER_STORAGE_KEYS;
 
+/**
+ * Fournisseurs de la liste d'opus EFFECTIVEMENT active, par clé de stockage —
+ * enregistrés par initFilterMenu() (js/filterMenu.js).
+ *
+ * Pourquoi : un joueur qui n'a jamais touché ses filtres n'a rien en localStorage
+ * (« absent = tout actif », et c'est voulu : un opus ajouté plus tard doit lui
+ * arriver actif). Lire localStorage donnait donc `[]` pour son défi, et le
+ * destinataire gardait SES filtres — s'ils étaient restrictifs, la cible du défi
+ * n'apparaissait pas dans son autocomplétion. La liste effective vit dans
+ * filterMenu ; on la lui demande au lieu de la deviner.
+ */
+const _activeFilterProviders = new Map();
+
+/** @param {string} storageKey clé localStorage du mode · @param {() => string[]} getter */
+export function registerActiveFilters(storageKey, getter) {
+  if (typeof getter === "function") _activeFilterProviders.set(storageKey, getter);
+  else _activeFilterProviders.delete(storageKey);
+}
+
 /** Returns the currently active opus filters for a given mode (array of strings). */
 function _getActiveFilters(mode) {
   const key = _FILTER_STORAGE_KEY[mode?.toLowerCase()];
   if (!key) return [];
+  const provider = _activeFilterProviders.get(key);
+  if (provider) {
+    try {
+      const list = provider();
+      if (Array.isArray(list)) return [...list];
+    } catch {
+      /* on retombe sur localStorage */
+    }
+  }
   try {
     return JSON.parse(localStorage.getItem(key) || "[]");
   } catch {
@@ -1148,7 +1211,7 @@ export const MODE_PAGE_PATH = {
 };
 
 /** Dossiers à deux niveaux sous la racine du site. */
-const _DEEP_SUBPATHS = ["/profile/friends/", "/profile/leaderboard/"];
+const _DEEP_SUBPATHS = ["/profile/friends/", "/profile/leaderboard/", "/profile/compendium/"];
 
 /** Dossiers à un niveau sous la racine du site. */
 const _SUBPATHS = [
@@ -1418,45 +1481,212 @@ export function getPendingActiveChallenge(isExpert = isExpertPage()) {
 }
 
 /**
- * Injecte le bouton "Challenge a Friend" dans le modeNavigationContainer
- * après une victoire. Ne fait rien si l'utilisateur n'est pas connecté.
+ * Un défi porte TOUJOURS le vrai score du jour de l'expéditeur : le bouton est
+ * verrouillé tant que la partie n'est pas finie (décision Hamza, 2026-09-13 —
+ * « bats mon score » n'a pas de sens sans score). Le « par » par mode qui a
+ * servi de score de référence avant la fin de partie (2026-09-12) a été retiré
+ * le lendemain : un défi est réussi si le destinataire gagne en
+ * `attempts <= score` (js/challenge-result.js), un seuil n'a donc de sens que
+ * s'il est le score réel de quelqu'un.
+ */
+export function challengeScoreFor(score) {
+  return Number.isFinite(score) && score > 0 ? score : null;
+}
+
+/** Le bouton est verrouillé tant qu'il n'a pas de score (partie du jour non finie). */
+export function isChallengeLocked(score) {
+  return challengeScoreFor(score) === null;
+}
+
+/**
+ * Affiche (ou met à jour) le bouton "Challenge a Friend". Ne fait rien si
+ * l'utilisateur n'est pas connecté.
+ *
+ * Historique : le bouton n'était injecté qu'à la victoire, dans le
+ * modeNavigationContainer, et `return` si déjà présent — donc absent avant la
+ * fin de partie, absent après un Give Up, absent après un rechargement (la
+ * victoire n'est pas « fraîche »). Retour joueur 2.2 : « toujours disponible »
+ * et « disparaît parfois ». Désormais :
+ *   - tant que la navigation de fin de partie est cachée, le bouton vit dans
+ *     .expert-toggle-zone (sous le logo, toujours visible) ;
+ *   - une fois la navigation révélée (revealNextLink), il y est déplacé, entre
+ *     « mode précédent » et « mode suivant », là où le joueur regarde ;
+ *   - rappeler la fonction MET À JOUR score et pool au lieu de ne rien faire —
+ *     c'est ce qui permet le montage précoce, verrouillé, puis le déverrouillage
+ *     avec le vrai score à la fin (initChallengeButton ci-dessous).
+ *   - **verrouillé tant que la partie du jour n'est pas finie** (score null) :
+ *     visible, grisé, un message au survol / au tap explique quoi faire. Un
+ *     défi se lance sur un score réel, jamais sur un score de référence.
  *
  * @param {string}   mode       - Mode lowercase ('classic', 'emoji', etc.)
- * @param {number}   score      - Score à battre (tentatives ou secondes selon le mode)
- * @param {string[]} targetPool - Noms candidats pour la cible du défi (pool filtré,
- *                                cible du jour exclue par l'appelant). Null/vide =
- *                                défi ancien format (cible du jour).
+ * @param {number|null} score   - Score à battre (tentatives). null = partie non
+ *                                finie → bouton verrouillé.
+ * @param {string[]|(() => string[])} targetPool - Noms candidats pour la cible du
+ *                                défi (pool filtré, cible du jour exclue par
+ *                                l'appelant), ou une fonction qui le calcule au
+ *                                clic — les filtres peuvent changer entre-temps.
+ *                                Null/vide = défi ancien format (cible du jour).
  */
 export function showChallengeButton(mode, score, targetPool = null) {
   if (!window._currentUser) return;
 
-  // L'Expert émet désormais ses propres défis (migration 037). La dimension est
-  // portée jusqu'au serveur : elle décide de la page d'arrivée du destinataire
-  // et du barème appliqué. `targetPool` est déjà le pool de la page courante,
-  // donc celui de l'Expert quand on y est — la cible est tirée au bon endroit
-  // sans traitement supplémentaire.
-  const isExpert = isExpertPage();
-
   const nav = document.getElementById("modeNavigationContainer");
-  if (!nav || document.getElementById("challengeFriendBtn")) return;
+  const zone = document.querySelector(".expert-toggle-zone");
+  // Le conteneur de navigation naît en `display: none` inline et passe en flex
+  // dans revealNextLink() : c'est ce style inline qui dit si la partie est finie.
+  const navVisible = !!nav && nav.style.display !== "none";
 
-  const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
-  const date = parisDateKey();
+  let btn = document.getElementById("challengeFriendBtn");
+  if (!btn) {
+    const host = navVisible ? nav : (zone ?? nav);
+    if (!host) return;
 
-  const btn = document.createElement("button");
-  btn.id = "challengeFriendBtn";
-  btn.className = "btn-challenge";
-  btn.innerHTML = `<span>⚔</span><span>${t("challenge.challenge_friend", "Challenge a Friend")}</span>`;
+    // L'Expert émet ses propres défis (migration 037). La dimension est portée
+    // jusqu'au serveur : elle décide de la page d'arrivée du destinataire et
+    // du barème appliqué. `targetPool` est déjà le pool de la page courante,
+    // donc celui de l'Expert quand on y est.
+    const isExpert = isExpertPage();
+    const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
 
-  // Insérer entre prevMode et nextMode
-  const nextBtn = document.getElementById("nextModeButton");
-  if (nextBtn) nav.insertBefore(btn, nextBtn);
-  else nav.appendChild(btn);
+    btn = document.createElement("button");
+    btn.id = "challengeFriendBtn";
+    btn.className = "btn-challenge";
+    btn.innerHTML = `<span>⚔</span><span>${t("challenge.challenge_friend", "Challenge a Friend")}</span>`;
+    btn.addEventListener("click", () => {
+      // Tout est lu au clic, pas au montage : score et pool changent en fin de
+      // partie, les filtres à tout moment, et la date à minuit.
+      const st = btn._challenge ?? {};
+      if (isChallengeLocked(st.score)) {
+        _showChallengeLockHint(btn);
+        return;
+      }
+      const pool = typeof st.targetPool === "function" ? st.targetPool() : st.targetPool;
+      _showChallengeModal(
+        st.mode ?? mode,
+        challengeScoreFor(st.score),
+        parisDateKey(),
+        _getActiveFilters(st.mode ?? mode),
+        pool ?? null,
+        isExpert
+      );
+    });
+    _placeChallengeButton(btn, host, nav);
+  } else if (navVisible && btn.parentElement !== nav) {
+    _placeChallengeButton(btn, nav, nav);
+  }
 
-  btn.addEventListener("click", () =>
-    _showChallengeModal(mode, score, date, _getActiveFilters(mode), targetPool, isExpert)
-  );
+  btn._challenge = {
+    mode,
+    score: challengeScoreFor(score),
+    targetPool,
+  };
+  _applyChallengeLock(btn);
+
+  // Arrivé depuis la page Amis avec un ami présélectionné alors que la partie
+  // n'était pas finie : la modale s'ouvre d'elle-même au déverrouillage.
+  if (_challengePreselectId && !isChallengeLocked(btn._challenge.score) && !_preselectConsumed) {
+    _preselectConsumed = true;
+    btn.click();
+  }
 }
+
+/** Grise le bouton et pose le message d'explication tant qu'il n'y a pas de score. */
+function _applyChallengeLock(btn) {
+  const locked = isChallengeLocked(btn._challenge?.score);
+  const t = (key, fb) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fb;
+  };
+  btn.classList.toggle("btn-challenge--locked", locked);
+  btn.setAttribute("aria-disabled", locked ? "true" : "false");
+  if (locked) {
+    btn.title = t("challenge.locked_hint", "Finish today's game to challenge a friend");
+  } else {
+    btn.removeAttribute("title");
+  }
+}
+
+/** Bulle « finis ta partie » sous le bouton, au clic ou au tap (le survol a le title). */
+function _showChallengeLockHint(btn) {
+  const t = (key, fb) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fb;
+  };
+  let hint = btn.querySelector(".btn-challenge__hint");
+  if (!hint) {
+    hint = document.createElement("span");
+    hint.className = "btn-challenge__hint";
+    hint.setAttribute("role", "status");
+    btn.appendChild(hint);
+  }
+  hint.textContent = t("challenge.locked_hint", "Finish today's game to challenge a friend");
+  hint.classList.add("btn-challenge__hint--show");
+  clearTimeout(btn._hintTimer);
+  btn._hintTimer = setTimeout(() => hint.classList.remove("btn-challenge__hint--show"), 2600);
+}
+
+/** La présélection d'ami (?challenge=) ne doit ouvrir la modale qu'une fois. */
+let _preselectConsumed = false;
+
+/** Insère le bouton dans son hôte — entre prev/next quand l'hôte est la navigation. */
+function _placeChallengeButton(btn, host, nav) {
+  if (host === nav) {
+    const nextBtn = document.getElementById("nextModeButton");
+    if (nextBtn && nextBtn.parentElement === nav) nav.insertBefore(btn, nextBtn);
+    else nav.appendChild(btn);
+  } else {
+    host.appendChild(btn);
+  }
+}
+
+/**
+ * Montage précoce du bouton, à l'arrivée sur la page de mode : attend la
+ * résolution de l'auth (window._authReady, posé par initAuth) puisque sans
+ * compte il n'y a pas de bouton, puis délègue à showChallengeButton().
+ *
+ * @param {string} mode
+ * @param {string[]|(() => string[])} targetPool  voir showChallengeButton()
+ * @param {number|null} [score]  score déjà acquis si la partie du jour est
+ *                               finie (état restauré), sinon null = par
+ */
+export async function initChallengeButton(mode, targetPool, score = null) {
+  if (window._authReady) {
+    try {
+      await window._authReady;
+    } catch {
+      /* le mode fonctionne sans backend — pas de bouton, simplement */
+    }
+  }
+  showChallengeButton(mode, score, targetPool);
+
+  // Arrivée depuis l'onglet Amis (profile/friends/friends.js) : `?challenge=<id>`
+  // ouvre la modale directement, sur cet ami. Le paramètre est retiré de l'URL
+  // aussitôt, sinon un F5 rouvrirait la modale à chaque fois.
+  const params = new URLSearchParams(window.location.search);
+  const preselect = params.get("challenge");
+  const btn = document.getElementById("challengeFriendBtn");
+  if (preselect && btn) {
+    params.delete("challenge");
+    const qs = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`
+    );
+    _challengePreselectId = String(preselect);
+    if (isChallengeLocked(btn._challenge?.score)) {
+      // Partie du jour pas encore jouée : on le dit, et la modale s'ouvrira
+      // toute seule sur cet ami à la fin (showChallengeButton).
+      _showChallengeLockHint(btn);
+    } else {
+      _preselectConsumed = true;
+      btn.click();
+    }
+  }
+}
+
+/** Ami à mettre en avant à la prochaine ouverture de la modale (une seule fois). */
+let _challengePreselectId = null;
 
 function _showChallengeModal(mode, score, date, activeFilters = [], targetPool = null, isExpert = false) {
   const api = window._personadleApi;
@@ -1487,6 +1717,7 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
             )}</p>`
           : ""
       }
+      <p class="challenge-card__score">🎯 ${t("challenge.score_to_beat", "Score to beat: {{score}} attempt(s)").replace("{{score}}", String(score))}</p>
       <div id="challengeFriendList" class="challenge-card__list">
         <p class="challenge-card__empty">${t("ui.loading", "Loading…")}</p>
       </div>
@@ -1560,6 +1791,22 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
     `
         )
         .join("");
+
+      // Ami présélectionné (arrivée depuis l'onglet Amis) : sa ligne est mise
+      // en avant et amenée à l'écran ; le clic « Envoyer » reste au joueur.
+      if (_challengePreselectId) {
+        // L'id est numérique ; on ne dépend pas de CSS.escape (absent de jsdom).
+        const wanted = String(_challengePreselectId);
+        _challengePreselectId = null;
+        const row = [...listEl.querySelectorAll(".js-send-challenge")]
+          .find((b) => b.dataset.fid === wanted)
+          ?.closest(".challenge-friend-row");
+        if (row) {
+          row.classList.add("challenge-friend-row--preselected");
+          row.scrollIntoView?.({ block: "nearest" });
+          row.querySelector(".js-send-challenge")?.focus({ preventScroll: true });
+        }
+      }
 
       listEl.querySelectorAll(".js-send-challenge").forEach((sendBtn) => {
         sendBtn.addEventListener("click", async () => {

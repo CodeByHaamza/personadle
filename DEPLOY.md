@@ -251,7 +251,7 @@ Dans hPanel → **Hébergement** → **SSL** :
 ## Étape 3 — Mise en place des fichiers
 
 > **Méthode retenue (2026-07-24)** : intégration **Git native Hostinger** (hPanel →
-> Avancé → GIT → « Déploiement depuis GitHub », dépôt `HamzaKarrouchi/personadle`,
+> Avancé → GIT → « Déploiement depuis GitHub », dépôt `CodeByHaamza/personadle`,
 > branche `main`, répertoire `domains/personadle.net/public_html`). Le clone initial +
 > tous les déploiements suivants passent par là (cf. « Déploiement courant » en haut).
 > Les deux options manuelles ci-dessous sont conservées pour référence historique.
@@ -298,7 +298,7 @@ Credentials SFTP dans hPanel → **Hébergement** → **Accès FTP**.
 ```bash
 # Dans le terminal SSH Hostinger
 cd ~/public_html
-git clone https://github.com/HamzaKarrouchi/personadle.git .
+git clone https://github.com/CodeByHaamza/personadle.git .
 ```
 
 ---

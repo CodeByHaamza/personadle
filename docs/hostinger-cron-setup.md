@@ -50,6 +50,25 @@ curl -s -H "X-Cron-Key: VOTRE_CRON_SECRET" "https://personadle.net/api/cron/disc
 Prérequis : `DISCORD_DAILY_WEBHOOK` défini dans `api/config.php` (webhook
 Morgana du salon `#🎲┃daily-personadle`).
 
+**À créer à la main dans hPanel → Avancé → Tâches Cron.** `crontab` n'existe
+pas sur cet hébergement, la tâche ne peut pas être posée en SSH.
+
+⚠️ **Planifier `5 0 * * *`, surtout pas `5 22 * * *`.** Le serveur tourne en
+UTC. Une heure « convertie » pour tomber à 00:05 Paris en été publierait
+l'annonce à 23:05 Paris en hiver — donc **avant** le reset de minuit, avec le
+puzzle de la veille.
+
+`5 0 * * *` fait tomber l'annonce entre 01:05 et 02:05 heure de Paris selon la
+saison. C'est plus tard qu'idéal, mais toujours **après** le reset, ce qui est
+la seule contrainte qui compte. Le script calcule sa date en `Europe/Paris`,
+donc le contenu reste correct quelle que soit l'heure de déclenchement.
+
+Tant que cette tâche n'existe pas, rien ne se poste automatiquement.
+
+**Pour affiner ensuite :** l'horodatage du premier message automatique sur
+Discord révèle si hPanel raisonne en UTC ou en heure de Paris. Avec cette
+information, on peut resserrer à 00:05 pile.
+
 Remplacer `VOTRE_CRON_SECRET` par la valeur de `CRON_SECRET` dans `api/config.php`.
 
 ## Test après déploiement

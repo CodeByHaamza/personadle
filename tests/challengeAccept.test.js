@@ -281,6 +281,24 @@ describe("notification — fermeture explicite vs manquée", () => {
     expect(updateStatus).not.toHaveBeenCalled();
   });
 
+  it("« Plus tard » ferme sans décider : même contrat que la croix, mais visible", async () => {
+    // Signalé par Hamza (2.2) : la pop-up ne proposait qu'Accepter et « ✕ » —
+    // ce « ✕ » REFUSAIT (statut read) alors qu'il ressemblait à une fermeture,
+    // et la vraie croix, discrète en haut à gauche, passait inaperçue.
+    const dismissed = vi.fn();
+    setChallengeNotifDismissHandler(dismissed);
+
+    queueChallengeNotifs([challenge()]);
+    const later = document.querySelector(".cn-btn--later");
+    expect(later, "un bouton Plus tard dans la rangée des choix").toBeTruthy();
+    expect(document.querySelector(".cn-btn--refuse").textContent).toContain("✕");
+    later.click();
+
+    expect(dismissed).toHaveBeenCalledWith(42);
+    expect(updateStatus).not.toHaveBeenCalled();
+    expect(navigatedTo).toBeNull();
+  });
+
   it("ne signale rien tant que le joueur n'a pas répondu", async () => {
     const dismissed = vi.fn();
     setChallengeNotifDismissHandler(dismissed);
@@ -289,6 +307,49 @@ describe("notification — fermeture explicite vs manquée", () => {
 
     expect(document.querySelector(".cn-btn--accept")).toBeTruthy();
     expect(dismissed).not.toHaveBeenCalled();
+  });
+
+  /**
+   * Deux défis reçus en même temps (deux amis). « Plus tard » sur le premier ne
+   * décide rien pour le second, que le joueur n'a même pas encore vu : il doit
+   * s'afficher à son tour. L'ancienne fermeture vidait la file en comptant sur le
+   * sondage suivant pour le représenter — mais notifications.js l'avait déjà noté
+   * « poussé sur cette page », donc il ne revenait qu'après un changement de page.
+   */
+  it("« Plus tard » avec plusieurs défis en file : le suivant s'affiche à son tour", async () => {
+    vi.useFakeTimers();
+    try {
+      const dismissed = vi.fn();
+      setChallengeNotifDismissHandler(dismissed);
+
+      queueChallengeNotifs([
+        challenge({ id: 42, senderPseudo: "Yosuke" }),
+        challenge({ id: 43, senderPseudo: "Chie", mode: "emoji" }),
+      ]);
+      expect(document.querySelector(".cn-pseudo").textContent).toBe("Yosuke");
+
+      document.querySelector(".cn-btn--later").click();
+      // « Plus tard » ne vaut que pour le défi fermé.
+      expect(dismissed).toHaveBeenCalledTimes(1);
+      expect(dismissed).toHaveBeenCalledWith(42);
+
+      // Fondu de sortie (240 ms) puis le second prend la place.
+      vi.advanceTimersByTime(300);
+      const pseudo = document.querySelector(".cn-pseudo");
+      expect(pseudo, "le second défi doit s'afficher après « Plus tard »").toBeTruthy();
+      expect(pseudo.textContent).toBe("Chie");
+      expect(dismissed).toHaveBeenCalledTimes(1);
+
+      // Même contrat pour la croix.
+      document.querySelector(".cn-close").click();
+      vi.advanceTimersByTime(300);
+      expect(dismissed).toHaveBeenCalledWith(43);
+      expect(document.getElementById("cn-overlay")).toBeNull();
+      expect(updateStatus).not.toHaveBeenCalled();
+      expect(navigatedTo).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

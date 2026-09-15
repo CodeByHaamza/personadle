@@ -34,9 +34,14 @@ import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/str
 import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
-import { modeLabel } from "../js/gameCore.js";
+import { MODES, modeLabel, normalizeModeKey } from "../js/gameCore.js";
 import { AVATAR_GROUPS } from "./avatars_data.js";
-import { getStreakTier, formatSongTime, normalizeAvatarPath } from "./profile-format.js";
+import {
+  getStreakTier,
+  formatSongTime,
+  normalizeAvatarPath,
+  bestModeOverall,
+} from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
 import {
   renderUnlockableWallpaperGallery,
@@ -65,6 +70,8 @@ import {
 // Ré-exportées pour compatibilité avec le code existant qui importe ces
 // fonctions depuis profile-page.js plutôt que depuis profile-format.js/theme.js.
 export { getStreakTier, formatSongTime, hexToRgb, adjustHex, normalizeAvatarPath };
+// Exporté pour les tests (tests/profilePage.test.js) — voir le bug {{count}} sur tf().
+export { tf as _tf };
 
 // Exposer les songs pour d'autres modules (notifications.js, social-link.js…)
 window._profileSongs = ALL_SONGS;
@@ -95,9 +102,13 @@ const THEMES = THEME_LABELS.map(({ id, label }) => ({
   ...(THEME_COLORS[id] || { accent: null, hover: null, light: null, rgb: null }),
 }));
 
-/** Traduit une clé i18n avec un vrai fallback string (window.i18n.t renvoie la clé brute si absente). */
-function tf(key, fallback) {
-  const v = window.i18n?.t?.(key);
+/**
+ * Traduit une clé i18n avec un vrai fallback string (window.i18n.t renvoie la clé
+ * brute si absente). `vars` est transmis à t() pour les {{placeholders}} — il était
+ * ignoré, et le bouton Jack Frost affichait « 0 → {{count}} jours » (retour 2.2).
+ */
+function tf(key, fallback, vars) {
+  const v = window.i18n?.t?.(key, vars);
   return v != null && v !== key ? v : fallback;
 }
 
@@ -419,6 +430,7 @@ async function syncProfileToCloud() {
     profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
     selected_badges: profile.selectedBadges || [],
     equipped_title_id: profile.equippedTitleId || null,
+    favorite_mode: normalizeModeKey(profile.favoriteMode) ?? null,
   };
   if (profile.avatar) fields.avatar_data = profile.avatar;
   // Sync des settings (son, animations…) — stockés dans personaSettings
@@ -470,6 +482,7 @@ function _applyCloudToUI() {
   applyTheme(themeId, themeId === "custom" ? profile.profileCustomColor : undefined);
   renderThemePicker();
   renderBorderPicker();
+  renderFavoriteModePicker();
   updateAppearancePreview();
 
   // ── Stats ─────────────────────────────────────────────────
@@ -606,7 +619,22 @@ function renderStats() {
     Personae: "Personae",
     Music: "Music",
   };
-  const modeFav = s.favoriteMode ? modeNames[s.favoriteMode] || s.favoriteMode : "—";
+  // Mode favori = le CHOIX du joueur (profile.favoriteMode, migration 040), plus le
+  // mode le plus joué (l'ancien stats.favoriteMode, retiré en 2.2).
+  // Retour joueur 2.2 : « je veux le choisir, et mettre le mode où je performe le
+  // mieux à côté, sous "Best Mode Overall" ».
+  const favKey = normalizeModeKey(profile.favoriteMode);
+  const modeFav = favKey ? modeNames[modeLabel(favKey)] || modeLabel(favKey) : "—";
+  const best = bestModeOverall(
+    Object.keys(s.modeCount || {}).map((m) => ({
+      mode: m,
+      games: s.modeCount?.[m] || 0,
+      wins: s.modeWins?.[m] || 0,
+    }))
+  );
+  const modeBest = best
+    ? `${modeNames[modeLabel(best.mode)] || modeLabel(best.mode)} · ${Math.round(best.rate * 100)}%`
+    : "—";
 
   // Stats standard (hors streak)
   const stats = [
@@ -616,7 +644,8 @@ function renderStats() {
     { icon: "⭐", value: s.streakRecord || 0, label: tf("profile.stat_best_streak_label", "Best Streak") },
     { icon: "⏱️", value: formatPlayTime(s.totalTimeMinutes || 0), label: tf("profile.stat_time_label", "Time Played") },
     { icon: "📅", value: s.firstPlayed?.split("T")[0] || "—", label: tf("profile.stat_first_played_label", "First Played"), full: true },
-    { icon: "🎯", value: modeFav, label: tf("profile.stat_fav_mode_label", "Fav Mode"), full: true },
+    { icon: "🎯", value: modeFav, label: tf("profile.stat_fav_mode_label", "Fav Mode") },
+    { icon: "🏅", value: modeBest, label: tf("profile.stat_best_mode_label", "Best Mode Overall") },
   ];
 
   const streakHTML = buildStreakItem(s.streak || 0, tf("profile.stat_current_streak_label", "Current Streak"), "0.22s");
@@ -788,10 +817,19 @@ async function renderExpertStats() {
     })
     .join("");
 
+  // Les 4 libellés de colonnes vivent dans une seule clé (« Won / Played · Rate ·
+  // Best · Streak », même forme dans les 6 langues) : on la découpe sur « · »
+  // pour poser chaque libellé au-dessus de SA colonne, dans la même grille que
+  // les lignes. En un seul <span> calé à droite, l'en-tête n'était aligné sur
+  // rien — retour joueur 2.2 : « les chiffres sont décalés du texte ».
+  const cols = tf("profile.expert_cols", "Won / Played · Rate · Best · Streak").split(/\s*·\s*/);
   container.innerHTML = `
     <div class="mode-stats-header expert-stats-header">
       <span>${tf("profile.expert_title", "⚡ Expert Mode")}</span>
-      <span>${tf("profile.expert_cols", "Won / Played · Rate · Best · Streak")}</span>
+    </div>
+    <div class="mode-stat-row expert-stat-row expert-stat-cols" aria-hidden="true">
+      <span></span><span></span>
+      ${cols.map((c) => `<span class="expert-stat-cell">${c}</span>`).join("")}
     </div>
     <div class="mode-stats-list">${rows}</div>`;
 }
@@ -982,6 +1020,45 @@ function renderBorderPicker() {
       picker.click();
     }
   });
+}
+
+/** Icône par clé de mode pour le sélecteur de mode favori (même table que MODE_META). */
+const MODE_ICON_BY_KEY = Object.fromEntries(
+  Object.entries(MODE_META).map(([label, meta]) => [normalizeModeKey(label), meta.icon])
+);
+
+/**
+ * Rend le sélecteur de mode favori (carte Customization) : une puce par mode,
+ * plus « Aucun ». Le choix est sauvegardé localement et poussé en cloud tout de
+ * suite, comme la couleur de bordure — le bouton Save global le renvoie aussi.
+ */
+function renderFavoriteModePicker() {
+  const container = document.getElementById("favModeChips");
+  if (!container) return;
+  const current = normalizeModeKey(profile.favoriteMode);
+  const noneLabel = tf("profile.fav_mode_none", "None");
+
+  container.innerHTML =
+    MODES.map(
+      ({ key, label }) =>
+        `<button type="button" class="mode-chip${key === current ? " active" : ""}" data-mode="${key}" aria-pressed="${key === current}">${MODE_ICON_BY_KEY[key] ?? ""} ${label === "AllOutAttack" ? "All-Out" : label}</button>`
+    ).join("") +
+    `<button type="button" class="mode-chip mode-chip--none${current ? "" : " active"}" data-mode="" aria-pressed="${!current}">${noneLabel}</button>`;
+
+  container.querySelectorAll(".mode-chip").forEach((b) =>
+    b.addEventListener("click", () => setFavoriteMode(b.dataset.mode || null))
+  );
+}
+
+function setFavoriteMode(key) {
+  const next = normalizeModeKey(key) ?? null;
+  if (next === (normalizeModeKey(profile.favoriteMode) ?? null)) return;
+  profile.favoriteMode = next;
+  saveProfile();
+  markDirty();
+  saveProfileToCloud({ favorite_mode: next });
+  renderFavoriteModePicker();
+  renderStats();
 }
 
 /**
@@ -1280,6 +1357,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // localStorage déjà vidé par auth.js — initProfile() crée un profil vierge
     initProfile();
     renderThemePicker();
+    renderBorderPicker();
+    renderFavoriteModePicker();
     renderModeStats();
     renderExpertStats();
     renderSongCard(profile, saveProfile, saveProfileToCloud, markDirty);
@@ -1318,6 +1397,11 @@ document.addEventListener("DOMContentLoaded", () => {
   window._onCloudSync = () => _applyCloudToUI();
 
   renderThemePicker();
+  // Bordure et mode favori : rendus ici aussi, pas seulement après le pull cloud
+  // (_applyCloudToUI) — sinon un invité, ou un joueur hors ligne, voit les deux
+  // sections vides sous leur intitulé.
+  renderBorderPicker();
+  renderFavoriteModePicker();
   setupPersoCard();
   initAvatarGrid();
   setupShareProfile(profile, saveProfile);

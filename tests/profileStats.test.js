@@ -134,17 +134,13 @@ describe("updateProfileStats", () => {
       expect(loadProfile().stats.modeWins.Classic).toBe(5);
     });
 
-    it("sets favoriteMode to the most-played mode", () => {
+    it("ne dérive plus de favoriteMode — c'est un choix du joueur depuis la 2.2", () => {
+      // Le « Best Mode Overall » se calcule à l'affichage depuis modeCount/modeWins
+      // (profile-format.js). Écrire un favori ici écraserait le choix du joueur.
       saveProfile(makeProfile({ modeCount: { Classic: 5, Emoji: 3 } }));
-      updateProfileStats({ result: "win", mode: "Emoji", timeSpent: 0 }); // Emoji → 4
-      // Classic (5) is still ahead
-      expect(loadProfile().stats.favoriteMode).toBe("Classic");
-    });
-
-    it("updates favoriteMode when a mode overtakes the current leader", () => {
-      saveProfile(makeProfile({ modeCount: { Classic: 2, Emoji: 2 } }));
-      updateProfileStats({ result: "win", mode: "Emoji", timeSpent: 0 }); // Emoji → 3
-      expect(loadProfile().stats.favoriteMode).toBe("Emoji");
+      updateProfileStats({ result: "win", mode: "Emoji", timeSpent: 0 });
+      expect(loadProfile().stats.favoriteMode).toBeUndefined();
+      expect(loadProfile().stats.modeCount.Emoji).toBe(4);
     });
   });
 

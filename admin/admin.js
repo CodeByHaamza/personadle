@@ -966,7 +966,13 @@ function renderTabStats(d) {
   document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
       <h3>Statistiques par mode</h3>
-      <div class="tab-note">Modifier les valeurs puis cliquer Save sur chaque ligne.</div>
+      <div class="tab-note">
+        Modifier les valeurs puis cliquer Save sur chaque ligne.<br>
+        ⚠️ Les colonnes <strong>streak</strong> / <strong>streak_record</strong> ci-dessous sont
+        <em>par mode</em>. La « Série actuelle » que le joueur voit sur son profil est la streak
+        <strong>globale</strong> (<code>users.global_streak</code>) : elle se corrige dans l'onglet
+        🔥 Streak, pas ici.
+      </div>
       <div style="overflow-x:auto">
         <table class="stats-table">
           <thead>
