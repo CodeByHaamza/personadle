@@ -55,7 +55,7 @@ $newAccounts30 = (int) $st->fetchColumn();
 // Écarts anti-triche loggés sur la période (api/sessions.php, phase 1 = détection)
 $antiCheat30 = 0;
 try {
-    $st = $pdo->prepare("SELECT COUNT(*) FROM error_logs WHERE created_at >= ? AND message = 'Daily target mismatch'");
+    $st = $pdo->prepare("SELECT COUNT(*) FROM error_log WHERE created_at >= ? AND message = 'Daily target mismatch'");
     $st->execute([$fromTs]);
     $antiCheat30 = (int) $st->fetchColumn();
 } catch (Throwable) {

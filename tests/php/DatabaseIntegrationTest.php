@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../api/lib/social_link_interaction.php';
 require_once __DIR__ . '/../../api/lib/error_log.php';
 require_once __DIR__ . '/../../api/lib/admin_audit.php';
 require_once __DIR__ . '/../../api/lib/deletion_requests.php';
+require_once __DIR__ . '/../../api/lib/moderation.php';
 
 /**
  * Tests d'INTÉGRATION sur la vraie base MariaDB (Docker).
@@ -986,5 +987,83 @@ final class DatabaseIntegrationTest extends TestCase
         $out = personadle_record_game_session(self::$pdo, $uid, 'music', $today, 'B', 'win', 2, 1000, [], false, 'r2');
 
         $this->assertSame(1, $out['stats']['streak'], 'la journée est gagnée, donc la streak repart');
+    }
+
+    // ── Modération avec messages (migration 042) — api/lib/moderation.php ────
+
+    public function testBanStateCarriesReasonAndUntil(): void
+    {
+        $uid = $this->makeUser();
+        self::$pdo->prepare("UPDATE users SET is_banned = 1, ban_reason = 'Triche', banned_at = NOW(),
+                             banned_until = DATE_ADD(NOW(), INTERVAL 1 DAY) WHERE id = ?")->execute([$uid]);
+        $row = self::$pdo->query("SELECT id, is_banned, ban_reason, banned_until FROM users WHERE id = $uid")->fetch();
+
+        $state = personadle_ban_state(self::$pdo, $row);
+        $this->assertNotNull($state);
+        $this->assertSame('Triche', $state['reason']);
+        $this->assertNotNull($state['until']);
+    }
+
+    public function testExpiredBanIsLiftedOnCheck(): void
+    {
+        $uid = $this->makeUser();
+        self::$pdo->prepare("UPDATE users SET is_banned = 1, ban_reason = 'Échu', banned_at = NOW(),
+                             banned_until = DATE_SUB(NOW(), INTERVAL 1 MINUTE) WHERE id = ?")->execute([$uid]);
+        $row = self::$pdo->query("SELECT id, is_banned, ban_reason, banned_until FROM users WHERE id = $uid")->fetch();
+
+        $this->assertNull(personadle_ban_state(self::$pdo, $row), 'un ban échu ne bloque plus');
+        $after = self::$pdo->query("SELECT is_banned, ban_reason, banned_until FROM users WHERE id = $uid")->fetch();
+        $this->assertSame(0, (int) $after['is_banned'], 'et il est levé en base');
+        $this->assertNull($after['ban_reason']);
+        $this->assertNull($after['banned_until']);
+    }
+
+    public function testPermanentBanNeverExpires(): void
+    {
+        $uid = $this->makeUser();
+        self::$pdo->prepare("UPDATE users SET is_banned = 1, banned_until = NULL WHERE id = ?")->execute([$uid]);
+        $row = self::$pdo->query("SELECT id, is_banned, ban_reason, banned_until FROM users WHERE id = $uid")->fetch();
+        $state = personadle_ban_state(self::$pdo, $row);
+        $this->assertNotNull($state);
+        $this->assertNull($state['until']);
+        $this->assertNull($state['reason']);
+    }
+
+    public function testMaintenanceStateFollowsSiteSettings(): void
+    {
+        personadle_set_site_setting(self::$pdo, 'maintenance_enabled', '0', null);
+        // Le cache statique de personadle_site_setting() est par processus : on lit
+        // via un état qui n'a pas encore été mis en cache dans ce test.
+        $direct = self::$pdo->query("SELECT setting_value FROM site_settings WHERE setting_key = 'maintenance_enabled'")->fetchColumn();
+        $this->assertSame('0', $direct);
+
+        personadle_set_site_setting(self::$pdo, 'maintenance_enabled', '1', null);
+        personadle_set_site_setting(self::$pdo, 'maintenance_message_fr', 'Migration', null);
+        $direct = self::$pdo->query("SELECT setting_value FROM site_settings WHERE setting_key = 'maintenance_message_fr'")->fetchColumn();
+        $this->assertSame('Migration', $direct, 'upsert : la valeur est remplacée, pas dupliquée');
+        $count = (int) self::$pdo->query("SELECT COUNT(*) FROM site_settings WHERE setting_key = 'maintenance_enabled'")->fetchColumn();
+        $this->assertSame(1, $count);
+
+        personadle_set_site_setting(self::$pdo, 'maintenance_enabled', '0', null);
+    }
+
+    public function testActiveAnnouncementsRespectWindowAndFlag(): void
+    {
+        self::$pdo->exec("DELETE FROM announcements");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, is_active) VALUES ('info', 'Toujours', 1)");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, is_active) VALUES ('info', 'Inactive', 0)");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, is_active, starts_at) VALUES ('warning', 'Future', 1, DATE_ADD(NOW(), INTERVAL 1 DAY))");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, is_active, ends_at) VALUES ('warning', 'Passée', 1, DATE_SUB(NOW(), INTERVAL 1 DAY))");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, message_en, is_active) VALUES ('maintenance', 'Bientôt', 'Soon', 1)");
+
+        $list = personadle_active_announcements(self::$pdo);
+        $msgs = array_column($list, 'message_fr');
+        $this->assertContains('Toujours', $msgs);
+        $this->assertContains('Bientôt', $msgs);
+        $this->assertNotContains('Inactive', $msgs);
+        $this->assertNotContains('Future', $msgs);
+        $this->assertNotContains('Passée', $msgs);
+        $this->assertSame('maintenance', $list[0]['level'], 'la maintenance passe devant');
+        self::$pdo->exec("DELETE FROM announcements");
     }
 }

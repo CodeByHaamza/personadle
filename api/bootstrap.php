@@ -23,6 +23,7 @@ require_once __DIR__ . '/lib/client_ip.php';
 require_once __DIR__ . '/lib/format.php';
 require_once __DIR__ . '/lib/error_log.php';
 require_once __DIR__ . '/lib/validation.php';
+require_once __DIR__ . '/lib/moderation.php';
 require_once __DIR__ . '/lib/admin_audit.php';
 require_once __DIR__ . '/lib/deletion_requests.php';
 
@@ -220,6 +221,19 @@ function jsonError(string $message, int $status = 400): never
 }
 
 /**
+ * Comme jsonError(), avec des champs supplémentaires (ex: raison et échéance
+ * d'un ban) — `error` reste le message lisible, jamais écrasé.
+ *
+ * @param array<string,mixed> $extra
+ */
+function jsonErrorWith(string $message, int $status, array $extra): never
+{
+    http_response_code($status);
+    echo json_encode(['error' => $message] + $extra, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+/**
  * Vérifie qu'une session utilisateur est active.
  * Termine avec 401 si non connecté.
  *
@@ -236,18 +250,19 @@ function requireAuth(): int
     // Vérifier is_deleted (cached 5 min dans $_SESSION pour éviter une requête par hit)
     $now = time();
     if (empty($_SESSION['is_deleted_checked_at']) || ($now - (int)$_SESSION['is_deleted_checked_at']) > 300) {
-        $chk = pdo()->prepare('SELECT is_deleted, is_banned FROM users WHERE id = ? LIMIT 1');
+        $chk = pdo()->prepare('SELECT id, is_deleted, is_banned, ban_reason, banned_until FROM users WHERE id = ? LIMIT 1');
         $chk->execute([$uid]);
         $chkRow = $chk->fetch() ?: null;
 
         // Ban enforcé sur TOUS les endpoints authentifiés (pas seulement me.php) :
         // sinon un banni avec session active garderait l'accès jusqu'à expiration.
+        // Un ban à échéance dépassée est levé au passage (personadle_ban_state).
         $denial = personadle_session_denial_reason($chkRow);
         if ($denial === 'deleted') {
             session_destroy();
             jsonError('Account not found or deleted', 401);
         }
-        if ($denial === 'banned') {
+        if ($denial === 'banned' && personadle_ban_state(pdo(), $chkRow) !== null) {
             session_destroy();
             jsonError('Account banned', 403);
         }
@@ -452,3 +467,8 @@ function fetchProfile(PDO $pdo, int $userId): array
     $s->execute([$userId]);
     return $s->fetch(PDO::FETCH_ASSOC) ?: [];
 }
+
+// ── Maintenance (migration 042) ──────────────────────────────────────────────
+// Placée en dernier : tout est défini (session, pdo, helpers). Répond 503 à tout
+// sauf me/login/logout, admin/ et cron/ — et laisse passer un admin connecté.
+personadle_maintenance_gate(pdo());

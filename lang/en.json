@@ -802,7 +802,10 @@
     "forgot_password": "Forgot password?",
     "send_reset": "Send reset link",
     "back": "Back to login",
-    "reset_sent": "If that email exists, a reset link has been sent. Check your inbox."
+    "reset_sent": "If that email exists, a reset link has been sent. Check your inbox.",
+    "banned_until": "Account suspended until {{date}}.",
+    "banned_permanent": "Account banned.",
+    "banned_reason": "Reason: {{reason}}"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -1413,5 +1416,20 @@
     "error_invalid_expired": "Reset link is invalid or expired.",
     "error_network": "Network error. Please try again.",
     "success": "Password updated! You can now log in."
+  },
+  "maintenance": {
+    "title": "Maintenance in progress",
+    "default": "The Velvet Room is closed for a moment. We'll be back shortly.",
+    "until": "Expected return: {{time}}",
+    "hint": "Your progress is safe — come back a little later.",
+    "admin_banner": "Maintenance mode is ON — players see the maintenance screen.",
+    "admin_link": "Open admin"
+  },
+  "announce": {
+    "until": "until {{time}}"
+  },
+  "notice": {
+    "from_team": "Message from the team",
+    "ack": "Understood"
   }
 }

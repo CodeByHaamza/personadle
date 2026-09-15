@@ -802,7 +802,10 @@
     "forgot_password": "Passwort vergessen?",
     "send_reset": "Link senden",
     "back": "Zurück zur Anmeldung",
-    "reset_sent": "Falls diese E-Mail existiert, wurde ein Link gesendet. Prüfe dein Postfach."
+    "reset_sent": "Falls diese E-Mail existiert, wurde ein Link gesendet. Prüfe dein Postfach.",
+    "banned_until": "Konto gesperrt bis {{date}}.",
+    "banned_permanent": "Konto gesperrt.",
+    "banned_reason": "Grund: {{reason}}"
   },
   "leaderboard": {
     "title": "Rangliste",
@@ -1413,5 +1416,20 @@
     "error_invalid_expired": "Der Reset-Link ist ungültig oder abgelaufen.",
     "error_network": "Netzwerkfehler. Bitte versuch es erneut.",
     "success": "Passwort aktualisiert! Du kannst dich jetzt anmelden."
+  },
+  "maintenance": {
+    "title": "Wartung läuft",
+    "default": "Der Velvet Room ist kurz geschlossen. Wir sind gleich zurück.",
+    "until": "Voraussichtlich zurück: {{time}}",
+    "hint": "Dein Fortschritt ist sicher — schau etwas später wieder vorbei.",
+    "admin_banner": "Wartungsmodus AKTIV — Spieler sehen den Wartungsbildschirm.",
+    "admin_link": "Admin öffnen"
+  },
+  "announce": {
+    "until": "bis {{time}}"
+  },
+  "notice": {
+    "from_team": "Nachricht vom Team",
+    "ack": "Verstanden"
   }
 }

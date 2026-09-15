@@ -34,6 +34,9 @@
           <button id="btn-deletion-requests" class="btn-codes">🗑️ RGPD</button>
           <button id="btn-rate-limits" class="btn-codes">⏱️ Rate Limits</button>
           <button id="btn-activity" class="btn-codes">📈 Activité</button>
+          <button id="btn-announcements" class="btn-codes">📣 Annonces</button>
+          <button id="btn-maintenance" class="btn-codes">🔧 Maintenance</button>
+          <button id="btn-anticheat" class="btn-codes">🛡️ Anti-triche</button>
           <span id="admin-username" class="admin-username-pill"></span>
           <button id="admin-logout" class="btn-logout">Logout</button>
         </div>
@@ -61,6 +64,14 @@
               autocomplete="off"
               aria-label="Search users by pseudo, email, or friend code"
             />
+          </div>
+          <div class="aside-tools">
+            <select id="user-sort" aria-label="Trier les joueurs">
+              <option value="created">Inscription (récent)</option>
+              <option value="last_login">Dernière connexion</option>
+              <option value="pseudo">Pseudo (A→Z)</option>
+            </select>
+            <a id="users-export" class="btn-sm" href="../api/admin/users?export=csv" title="Exporter tous les joueurs en CSV">⬇ CSV</a>
           </div>
           <div id="users-list" class="users-list"></div>
           <div id="users-pagination" class="pagination"></div>
@@ -104,6 +115,17 @@
             <div id="activity-panel-content"></div>
           </section>
 
+          <!-- ── Annonces / Maintenance / Anti-triche (migration 042) ── -->
+          <section id="announcements-panel" class="user-detail hidden">
+            <div id="announcements-panel-content"></div>
+          </section>
+          <section id="maintenance-panel" class="user-detail hidden">
+            <div id="maintenance-panel-content"></div>
+          </section>
+          <section id="anticheat-panel" class="user-detail hidden">
+            <div id="anticheat-panel-content"></div>
+          </section>
+
           <section id="user-detail" class="user-detail hidden">
             <button id="detail-back" class="btn-detail-back">← Users</button>
 
@@ -131,6 +153,7 @@
               <button class="detail-tab" data-tab="challenges">⚔ Défis</button>
               <button class="detail-tab" data-tab="friends">👫 Amis</button>
               <button class="detail-tab" data-tab="social">🔗 Social</button>
+              <button class="detail-tab" data-tab="moderation">🛡️ Modération</button>
             </div>
 
             <div id="user-detail-content" class="user-detail-content"></div>

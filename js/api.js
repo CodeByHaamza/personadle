@@ -250,7 +250,10 @@ export const api = {
       if (api.stats._syncLock) return;
       api.stats._syncLock = true;
       const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
-      if (!pending.length) { api.stats._syncLock = false; return; }
+      if (!pending.length) {
+        api.stats._syncLock = false;
+        return;
+      }
 
       // Normalize legacy mode names stored before the server enum was finalised
       const _modeAlias = { shadow: "silhouette", classic: "classic" };
@@ -428,9 +431,7 @@ export const api = {
      *   (~2 requêtes par ami) : à ne demander que lorsque c'est nécessaire.
      */
     list: (opts = {}) => {
-      const qs = opts.expert_mode
-        ? `?expert_mode=${encodeURIComponent(opts.expert_mode)}`
-        : "";
+      const qs = opts.expert_mode ? `?expert_mode=${encodeURIComponent(opts.expert_mode)}` : "";
       return get(`/friends${qs}`);
     },
 
@@ -459,6 +460,14 @@ export const api = {
   },
 
   // ── Notifications ─────────────────────────────────────
+  // ── Messages de l'équipe (migration 042) ─────────────────
+  notices: {
+    /** Mes messages de l'équipe non lus (avertissement / info). */
+    pending: () => get("/notices/"),
+    /** Accusé de lecture — le message ne reviendra plus. */
+    markRead: (id) => apiCall(`/notices/${id}`, { method: "PATCH" }),
+  },
+
   notifications: {
     /**
      * Retourne le nombre de demandes d'ami non vues.
