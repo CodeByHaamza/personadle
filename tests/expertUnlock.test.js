@@ -444,4 +444,51 @@ describe("consumeNewlyUnlockedExpertModes — annonce jouée une seule fois", ()
     // qui interroge le statut sur la même page.
     expect(consumeNewlyUnlockedExpertModes()).toEqual([]);
   });
+
+  it("attend l'auth : /expert-status qui répond avant /me ne fait plus manquer l'annonce ni le cache", async () => {
+    // Le cache est rattaché au compte : au moment où la porte interroge le
+    // statut, initAuth() n'a pas encore posé window._currentUser. Sans attente,
+    // le diff se faisait contre « rien » (pas d'annonce) et rien n'était mis en
+    // cache (l'annonce était perdue pour la fois suivante aussi).
+    localStorage.setItem(
+      "expertUnlockStatus",
+      JSON.stringify({ userId: 7, modes: { music: { unlocked: false } } })
+    );
+    window._personadleApi = {
+      user: {
+        expertStatus: vi.fn().mockResolvedValue({
+          expert_status: { music: { unlocked: true, condition_type: "mode_consecutive_perfects", required: 15, current: 15 } },
+        }),
+      },
+    };
+    let resolveAuth;
+    window._authReady = new Promise((r) => {
+      resolveAuth = r;
+    });
+
+    const { fetchExpertStatus } = await import("../js/gameCore.js");
+    const pending = fetchExpertStatus();
+    // /expert-status a déjà répondu (mock résolu au tour suivant) quand /me
+    // aboutit enfin et pose l'identifiant du compte.
+    await new Promise((r) => setTimeout(r, 0));
+    window._currentUser = { id: 7 };
+    resolveAuth();
+    await pending;
+
+    expect(consumeNewlyUnlockedExpertModes()).toEqual(["music"]);
+    expect(JSON.parse(localStorage.getItem("expertUnlockStatus")).modes.music.unlocked).toBe(true);
+    delete window._authReady;
+  });
+
+  it("une auth qui échoue (pas de backend) ne bloque pas la porte", async () => {
+    window._authReady = Promise.reject(new Error("offline"));
+    window._authReady.catch(() => {});
+    window._personadleApi = undefined;
+
+    const { fetchExpertStatus } = await import("../js/gameCore.js");
+    const status = await fetchExpertStatus();
+
+    expect(status.state).toBe("unavailable");
+    delete window._authReady;
+  });
 });
