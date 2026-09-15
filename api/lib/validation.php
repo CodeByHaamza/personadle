@@ -59,11 +59,21 @@ function personadle_validate_password(string $password): ?string
 }
 
 /**
+ * Langues servies par le site — une par fichier lang/*.json. Source unique côté
+ * PHP : register (normalisation), PATCH /api/user/:id et le panel admin la
+ * partagent. Le portugais manquait aux trois listes locales qu'ils gardaient
+ * chacun : un joueur en `pt` voyait son PATCH profil entier refusé en 400
+ * (« Invalid lang »), avatar et bordure compris, puisque le client envoie
+ * toujours la langue avec le reste.
+ */
+const PERSONADLE_SUPPORTED_LANGS = ['en', 'fr', 'es', 'de', 'it', 'pt'];
+
+/**
  * Normalise une langue vers une valeur supportée, sinon 'en' par défaut.
  *
  * @param array<int,string> $supported
  */
-function personadle_normalize_lang(string $lang, array $supported = ['en', 'fr', 'es', 'de', 'it']): string
+function personadle_normalize_lang(string $lang, array $supported = PERSONADLE_SUPPORTED_LANGS): string
 {
     return in_array($lang, $supported, true) ? $lang : 'en';
 }

@@ -94,6 +94,10 @@ export const aoaCharacters = [
   // === P5X — Skin Radiance ===
   { nom: "Closer Radiance ( Motoha Arai )", gif: "Closer_Radiance", opus: ["P5X"] },
 
+  // === P5X — Skins 2.2 (lot du 2026-09-12) ===
+  { nom: "Bui Cosmic ( YUI )", gif: "Bui_Cosmic", opus: ["P5X"] },
+  { nom: "Berry Summer ( Ichigo Shikano )", gif: "Berry_Summer", opus: ["P5X"] },
+
   // === P5X — Collaboration Hatsune Miku ===
   { nom: "Miku ( Hatsune Miku )", gif: "Miku", opus: ["P5X"] },
 ];

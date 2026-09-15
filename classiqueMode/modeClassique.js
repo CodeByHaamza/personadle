@@ -15,6 +15,7 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
@@ -728,6 +729,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Replay previous guesses to restore grid
   history.forEach((name) => checkGuess(name, target));
 
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2) : score « par » tant que
+  // la partie du jour n'est pas finie, vrai score si elle l'est déjà (F5 après
+  // une victoire ou un abandon — le bouton « disparaissait » dans ce cas). Le
+  // pool est calculé au clic pour suivre les filtres.
+  const challengePool = () =>
+    characters.filter((c) => personas.includes(c.nom) && c.nom !== target.nom).map((c) => c.nom);
+  initChallengeButton("classic", challengePool, gameOver ? attempts : null);
+
   updateCounters();
   if (attempts >= HINT_THRESHOLD) enableHintButton();
   if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
@@ -794,6 +803,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     checkChallengeCompletion("classic", attempts, false);
     if (!EXPERT.isExpert) showCommunityStats(modeName, target.nom);
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+    // Abandon : le défi reste possible, avec le nombre d'essais consommés comme
+    // score à battre — « je n'ai pas trouvé en N, fais mieux ».
+    showChallengeButton("classic", attempts, challengePool);
     fillVictoryBox(target.nom, true);
     document.getElementById("victoryBox").style.display = "block";
   });

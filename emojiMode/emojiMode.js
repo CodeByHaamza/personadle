@@ -17,6 +17,7 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
@@ -101,6 +102,10 @@ let activeOpus = [...ALL_OPUS];
 let personas = [...originalPersonas];
 
 let gameOver = false;
+
+/** Cibles possibles d'un défi : persos AVEC données emoji, cible du jour exclue. Calculé au clic. */
+const challengePool = () =>
+  characters.filter((c) => c.emoji && c.nom !== target?.nom).map((c) => c.nom);
 let sessionStartTime = Date.now();
 let attempts = 0;
 let target = null;
@@ -413,13 +418,10 @@ function checkEmojiGuess(name, forceReveal = false) {
     const wasChallengePlay = isChallengePlay("emoji");
     // Visible AUSSI en Expert : la garde `!EXPERT.isExpert` qui était ici est un
     // reste d'avant les défis Expert (PR #85), retiré en 2.1 — cf. modeMusic.js.
-    if (!forceReveal)
-      showChallengeButton(
-        "emoji",
-        attempts,
-        // Seuls les persos AVEC données emoji sont jouables comme cible de défi.
-        characters.filter((c) => c.emoji && c.nom !== target.nom).map((c) => c.nom)
-      );
+    // Et AUSSI après un abandon (2.2) : le nombre d'essais consommés devient le
+    // score à battre. Le bouton est déjà monté depuis l'arrivée sur la page
+    // (initChallengeButton) ; cet appel ne fait que fixer le score réel.
+    showChallengeButton("emoji", attempts, challengePool);
     checkChallengeCompletion("emoji", attempts, !forceReveal);
     showCommunityStats(modeName, target.nom);
 
@@ -617,9 +619,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
 
   // Restore finished game state
-  if (localStorage.getItem(EXPERT.key("emojiGameOver")) === "true" && target?.nom) {
+  const restoredGameOver = localStorage.getItem(EXPERT.key("emojiGameOver")) === "true";
+  if (restoredGameOver && target?.nom) {
     checkEmojiGuess(target.nom, localStorage.getItem(EXPERT.key("emojiForceReveal")) === "true");
   }
+
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que
+  // la partie n'est pas finie. Au rechargement, checkEmojiGuess() ci-dessus
+  // tourne AVANT que l'auth ait posé _currentUser, donc son showChallengeButton
+  // est un no-op : c'est cet appel, qui attend l'auth, qui remonte le bouton —
+  // c'était le « bouton qui disparaît » signalé.
+  initChallengeButton("emoji", challengePool, restoredGameOver ? attempts : null);
 
   // ── Guess button ──
   guessButton.addEventListener("click", () => {

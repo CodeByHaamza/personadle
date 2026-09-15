@@ -122,7 +122,7 @@ Tu dois voir `Hello from Docker!`. Si oui, Docker est opérationnel.
 ## 4 — Cloner le projet
 
 ```bash
-git clone https://github.com/HamzaKarrouchi/personadle.git
+git clone https://github.com/CodeByHaamza/personadle.git
 cd personadle
 ```
 

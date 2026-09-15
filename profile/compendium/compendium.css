@@ -1,0 +1,817 @@
+/* =============================================================
+   compendium.css — Le Compendium (carnet de collection)
+   ─────────────────────────────────────────────────────────────
+   Préfixe CSS : cp-*
+   Palette Velvet Room : bleu profond, or, papier crème. Le mode
+   sombre garde le velours (il l'est déjà) et assombrit le papier.
+   Sections :
+     1. VARIABLES
+     2. SCÈNE
+     3. COUVERTURE (losanges + pentacle, hommage au Grimoire du Cœur)
+     4. LIVRE OUVERT — onglets, double page, tampons
+     5. ANIMATIONS — ouverture, tourne-page
+     6. RESPONSIVE — une page, onglets horizontaux, balayage
+   ============================================================= */
+
+/* ──────────────────────────────────────────────────────────
+   1. VARIABLES
+   ────────────────────────────────────────────────────────── */
+:root {
+  --cp-blue: #0f1f5c;
+  --cp-blue-deep: #070f33;
+  --cp-blue-light: #2b46b3;
+  --cp-gold: #d4af37;
+  --cp-gold-light: #f1d27a;
+  --cp-gold-dark: #9a7a1c;
+  --cp-paper: #f4ead3;
+  --cp-paper-dark: #e8dbbd;
+  --cp-ink: #2a2118;
+  --cp-ink-muted: #6b5a3e;
+  --cp-line: rgba(154, 122, 28, 0.35);
+  --cp-shadow: 0 18px 50px rgba(3, 6, 30, 0.55);
+}
+body.darkmode {
+  --cp-paper: #1b1a2b;
+  --cp-paper-dark: #14131f;
+  --cp-ink: #efe6d2;
+  --cp-ink-muted: #b7a98a;
+  --cp-line: rgba(241, 210, 122, 0.25);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   2. SCÈNE
+   ────────────────────────────────────────────────────────── */
+.cp-body {
+  /* Velours bleu nuit derrière le livre, quel que soit le thème */
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(43, 70, 179, 0.35), transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(212, 175, 55, 0.12), transparent 55%),
+    var(--cp-blue-deep) !important;
+  min-height: 100vh;
+}
+.cp-body::before {
+  display: none !important; /* pas le fond urbain des autres pages */
+}
+
+.cp-stage {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 64px 16px 110px;
+}
+
+.cp-back-row {
+  margin: 0 0 14px;
+}
+.cp-back {
+  color: var(--cp-gold-light);
+  text-decoration: none;
+  font-family: "Cinzel", "Playfair Display", serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+.cp-back:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ──────────────────────────────────────────────────────────
+   3. COUVERTURE
+   ────────────────────────────────────────────────────────── */
+.cp-cover {
+  position: relative;
+  margin: 0 auto;
+  box-sizing: border-box;
+  width: min(420px, 100%);
+  aspect-ratio: 3 / 4;
+  border-radius: 14px 22px 22px 14px;
+  border: 3px solid var(--cp-gold);
+  box-shadow:
+    inset 0 0 0 6px var(--cp-blue-deep),
+    inset 0 0 0 8px rgba(212, 175, 55, 0.5),
+    var(--cp-shadow);
+  /* Losanges bleus, deux tons — le damier en diagonale du Grimoire */
+  background-color: var(--cp-blue);
+  background-image:
+    linear-gradient(
+      45deg,
+      var(--cp-blue-light) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--cp-blue-light) 75%
+    ),
+    linear-gradient(
+      -45deg,
+      var(--cp-blue-light) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--cp-blue-light) 75%
+    );
+  background-size: 56px 56px;
+  background-position:
+    0 0,
+    28px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 34px 22px;
+  color: var(--cp-gold-light);
+  text-align: center;
+  transform-style: preserve-3d;
+  animation: cpCoverIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  overflow: hidden;
+}
+/* Tranche du livre : quelques feuillets crème qui dépassent à droite */
+.cp-cover::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  top: 10px;
+  bottom: 10px;
+  width: 9px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--cp-paper) 0 2px,
+    var(--cp-paper-dark) 2px 3px
+  );
+  border-radius: 0 4px 4px 0;
+  opacity: 0.9;
+}
+
+.cp-cover__ornament {
+  position: absolute;
+  font-size: 2rem;
+  color: var(--cp-gold-light);
+  opacity: 0.85;
+  text-shadow: 0 0 8px rgba(241, 210, 122, 0.5);
+}
+.cp-cover__ornament--tl {
+  top: 12px;
+  left: 14px;
+}
+.cp-cover__ornament--tr {
+  top: 12px;
+  right: 14px;
+  transform: scaleX(-1);
+}
+.cp-cover__ornament--bl {
+  bottom: 12px;
+  left: 14px;
+  transform: scaleY(-1);
+}
+.cp-cover__ornament--br {
+  bottom: 12px;
+  right: 14px;
+  transform: scale(-1);
+}
+
+.cp-pentacle {
+  width: min(200px, 48%);
+  height: auto;
+  color: var(--cp-gold-light);
+  filter: drop-shadow(0 0 10px rgba(241, 210, 122, 0.45));
+  animation: cpPentacleGlow 4s ease-in-out infinite;
+}
+
+.cp-cover__title {
+  margin: 6px 0 0;
+  font-family: "Cinzel", "Playfair Display", serif;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 6vw, 2.3rem);
+  letter-spacing: 0.08em;
+  color: var(--cp-gold-light);
+  text-shadow:
+    0 2px 0 var(--cp-gold-dark),
+    0 0 18px rgba(241, 210, 122, 0.35);
+}
+.cp-cover__owner {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #fff;
+  opacity: 0.9;
+}
+.cp-cover__tagline {
+  margin: 4px 0 10px;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 0.86rem;
+  color: var(--cp-gold-light);
+  opacity: 0.8;
+}
+.cp-cover__state {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #ffb3b3;
+}
+
+.cp-open-btn {
+  min-height: 0;
+  padding: 10px 26px;
+  border-radius: 100px;
+  border: 2px solid var(--cp-gold);
+  background: linear-gradient(135deg, var(--cp-gold-dark), var(--cp-gold));
+  color: #1a1305;
+  font-family: "Cinzel", serif;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.cp-open-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(241, 210, 122, 0.5);
+}
+
+/* ──────────────────────────────────────────────────────────
+   4. LIVRE OUVERT
+   ────────────────────────────────────────────────────────── */
+.cp-book {
+  animation: cpBookIn 0.6s ease both;
+}
+
+/* Onglets — index dorés sur le bord supérieur du livre (comme les onglets
+   d'un classeur). En haut plutôt que sur la tranche : visibles en entier à
+   toute largeur, et jamais par-dessus le texte de la page. */
+.cp-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0 18px;
+  position: relative;
+  z-index: 3;
+  margin-bottom: -3px; /* l'onglet actif se soude à la bordure du livre */
+}
+.cp-tab {
+  min-height: 0;
+  padding: 8px 12px 10px;
+  border: 1.5px solid var(--cp-gold-dark);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, #4a3608, #2a1f05);
+  color: var(--cp-gold-light);
+  font-family: "Cinzel", serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transform: translateY(4px);
+  transition:
+    transform 0.2s,
+    background 0.2s,
+    color 0.2s;
+  white-space: nowrap;
+}
+.cp-tab:hover {
+  transform: translateY(1px);
+  background: linear-gradient(180deg, #5c440c, #35280a);
+}
+.cp-tab.active {
+  transform: translateY(0);
+  padding-bottom: 13px;
+  background: linear-gradient(180deg, var(--cp-gold-light), var(--cp-gold));
+  color: #1a1305;
+  box-shadow: 0 -4px 12px rgba(212, 175, 55, 0.25);
+}
+.cp-tab__icon {
+  font-size: 1rem;
+}
+.cp-tab__count {
+  font-family: monospace;
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+/* Double page */
+.cp-spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 560px;
+  border-radius: 16px;
+  box-shadow: var(--cp-shadow);
+  perspective: 1600px;
+  background: var(--cp-paper-dark);
+  border: 3px solid var(--cp-gold);
+  overflow: hidden;
+}
+.cp-page {
+  position: relative;
+  padding: 30px 32px 44px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.35), transparent 60%), var(--cp-paper);
+  color: var(--cp-ink);
+  min-width: 0;
+  transform-origin: left center;
+}
+body.darkmode .cp-page {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%), var(--cp-paper);
+}
+/* Reliure : ombre au centre */
+.cp-page--left {
+  box-shadow: inset -28px 0 32px -22px rgba(0, 0, 0, 0.35);
+}
+.cp-page--right {
+  box-shadow: inset 28px 0 32px -22px rgba(0, 0, 0, 0.35);
+  border-left: 1px solid var(--cp-line);
+}
+
+/* Page de gauche */
+.cp-chapter__kicker {
+  margin: 0;
+  font-family: "Cinzel", serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cp-gold-dark);
+}
+body.darkmode .cp-chapter__kicker {
+  color: var(--cp-gold-light);
+}
+.cp-chapter__title {
+  margin: 6px 0 10px;
+  font-family: "Cinzel", serif;
+  font-weight: 800;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  color: var(--cp-ink);
+}
+.cp-chapter__icon {
+  font-size: 3.2rem;
+  line-height: 1;
+  margin: 8px 0 14px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+.cp-chapter__desc {
+  margin: 0 0 18px;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--cp-ink-muted);
+}
+.cp-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.cp-stat {
+  border: 1px solid var(--cp-line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(212, 175, 55, 0.06);
+}
+.cp-stat__value {
+  display: block;
+  font-family: "Cinzel", serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--cp-ink);
+}
+.cp-stat__label {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cp-ink-muted);
+}
+.cp-chapter__rule {
+  margin: 22px auto 0;
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cp-gold), transparent);
+}
+
+/* Filigrane du chapitre (bas de la page de gauche) et folios de bas de page */
+.cp-chapter__watermark {
+  position: absolute;
+  right: 26px;
+  bottom: 30px;
+  font-size: 7rem;
+  line-height: 1;
+  opacity: 0.07;
+  filter: grayscale(1);
+  pointer-events: none;
+  user-select: none;
+}
+.cp-folio {
+  position: absolute;
+  bottom: 12px;
+  margin: 0;
+  font-family: "Cinzel", serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--cp-gold-dark);
+  opacity: 0.85;
+}
+.cp-folio::before,
+.cp-folio::after {
+  content: "—";
+  margin: 0 6px;
+  opacity: 0.5;
+}
+.cp-folio--left {
+  left: 32px;
+}
+.cp-folio--right {
+  right: 32px;
+}
+
+/* Page de droite : les tampons */
+.cp-entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cp-entry {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--cp-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.35);
+  animation: cpStampIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+body.darkmode .cp-entry {
+  background: rgba(255, 255, 255, 0.04);
+}
+.cp-entry--won {
+  border-color: rgba(34, 160, 94, 0.45);
+}
+.cp-entry--lost {
+  border-color: rgba(200, 60, 60, 0.35);
+  opacity: 0.85;
+}
+.cp-entry__visual {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgba(15, 31, 92, 0.08);
+  border: 1px solid var(--cp-line);
+  font-size: 1.6rem;
+}
+.cp-entry__visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cp-entry__visual--wide img {
+  object-fit: contain;
+}
+/* Titres : la bannière (≈ 4:1) en bandeau au-dessus du texte, pas dans un carré */
+.cp-entry--banner {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+.cp-entry--banner .cp-entry__visual--wide {
+  width: min(260px, 100%);
+  height: auto;
+  aspect-ratio: 4 / 1;
+  border-radius: 8px;
+  background: none;
+}
+.cp-entry__visual--avatar {
+  border-radius: 50%;
+}
+.cp-entry__body {
+  min-width: 0;
+}
+.cp-entry__title {
+  margin: 0;
+  font-family: "Cinzel", serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--cp-ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cp-entry__flavor {
+  margin: 2px 0 0;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--cp-ink-muted);
+}
+.cp-entry__date {
+  margin: 4px 0 0;
+  font-family: "Cinzel", serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cp-gold-dark);
+}
+body.darkmode .cp-entry__date {
+  color: var(--cp-gold-light);
+}
+.cp-entry__date--undated {
+  opacity: 0.7;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+.cp-pill {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 100px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--cp-gold);
+  color: #1a1305;
+}
+.cp-pill--expert {
+  background: #141414;
+  color: #ffd166;
+}
+.cp-pill--rank {
+  background: var(--cp-blue);
+  color: #fff;
+}
+.cp-empty {
+  margin: 40px 10px;
+  text-align: center;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  color: var(--cp-ink-muted);
+}
+
+/* Pagination */
+.cp-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+.cp-pager__btn {
+  min-height: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--cp-gold);
+  background: var(--cp-blue-deep);
+  color: var(--cp-gold-light);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+.cp-pager__btn:hover {
+  background: var(--cp-blue);
+}
+.cp-pager__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.cp-pager__info {
+  font-family: "Cinzel", serif;
+  color: var(--cp-gold-light);
+  letter-spacing: 0.1em;
+  font-size: 0.85rem;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* ──────────────────────────────────────────────────────────
+   5. ANIMATIONS
+   ────────────────────────────────────────────────────────── */
+@keyframes cpCoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) rotateX(8deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cpPentacleGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(241, 210, 122, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(241, 210, 122, 0.7));
+  }
+}
+/* Ouverture : la couverture pivote comme une vraie couverture (charnière à gauche) */
+.cp-cover--opening {
+  transform-origin: left center;
+  animation: cpCoverOpen 0.75s cubic-bezier(0.6, 0, 0.3, 1) forwards;
+  pointer-events: none;
+}
+@keyframes cpCoverOpen {
+  to {
+    transform: perspective(1400px) rotateY(-100deg);
+    opacity: 0;
+  }
+}
+@keyframes cpBookIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Tourne-page : la page de droite se rabat vers la gauche, puis la suivante se pose */
+.cp-page--flip-out {
+  animation: cpFlipOut 0.32s ease-in forwards;
+}
+.cp-page--flip-in {
+  animation: cpFlipIn 0.34s ease-out both;
+}
+@keyframes cpFlipOut {
+  to {
+    transform: rotateY(-70deg);
+    opacity: 0.2;
+  }
+}
+@keyframes cpFlipIn {
+  from {
+    transform: rotateY(60deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.cp-page--flip-back-out {
+  animation: cpFlipBackOut 0.32s ease-in forwards;
+}
+.cp-page--flip-back-in {
+  animation: cpFlipBackIn 0.34s ease-out both;
+}
+@keyframes cpFlipBackOut {
+  to {
+    transform: rotateY(60deg);
+    opacity: 0.2;
+  }
+}
+@keyframes cpFlipBackIn {
+  from {
+    transform: rotateY(-70deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes cpStampIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) rotate(-1.5deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-cover,
+  .cp-book,
+  .cp-entry,
+  .cp-pentacle,
+  .cp-cover--opening,
+  .cp-page--flip-out,
+  .cp-page--flip-in,
+  .cp-page--flip-back-out,
+  .cp-page--flip-back-in {
+    animation: none !important;
+  }
+  .cp-cover--opening {
+    opacity: 0;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   6. RESPONSIVE — une page, onglets en haut, balayage
+   ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .cp-stage {
+    padding: 58px 10px 110px;
+  }
+  .cp-tabs {
+    flex-wrap: nowrap;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 0 2px 8px;
+    margin-bottom: 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .cp-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .cp-tab {
+    transform: none;
+    border-bottom: 1.5px solid var(--cp-gold-dark);
+    border-radius: 100px;
+    padding: 7px 12px;
+    flex: 0 0 auto;
+  }
+  .cp-tab:hover,
+  .cp-tab.active {
+    transform: none;
+    padding-bottom: 7px;
+    box-shadow: none;
+  }
+  .cp-spread {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    perspective: none;
+  }
+  .cp-page {
+    padding: 20px 16px 24px;
+  }
+  .cp-page--left {
+    box-shadow: none;
+    border-bottom: 1px solid var(--cp-line);
+    padding-bottom: 16px;
+  }
+  .cp-page--right {
+    box-shadow: none;
+    border-left: none;
+  }
+  .cp-chapter__icon {
+    font-size: 2.2rem;
+    margin: 4px 0 8px;
+  }
+  .cp-chapter__title {
+    font-size: 1.35rem;
+  }
+  .cp-chapter__desc {
+    margin-bottom: 12px;
+  }
+  .cp-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .cp-chapter__rule {
+    display: none;
+  }
+  .cp-chapter__watermark,
+  .cp-folio {
+    display: none;
+  }
+  /* Pas d'effet 3D sur mobile : un simple glissement */
+  .cp-page--flip-out,
+  .cp-page--flip-back-out {
+    animation: cpSlideOut 0.2s ease-in forwards;
+  }
+  .cp-page--flip-in,
+  .cp-page--flip-back-in {
+    animation: cpSlideIn 0.22s ease-out both;
+  }
+}
+@keyframes cpSlideOut {
+  to {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+}
+@keyframes cpSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

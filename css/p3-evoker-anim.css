@@ -419,6 +419,7 @@
 /* ── Bouton fermer ───────────────────────────────────── */
 
 .p3e-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   position: fixed;
   top: 18px;
   right: 18px;

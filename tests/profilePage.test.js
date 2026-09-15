@@ -8,7 +8,7 @@
 
 import { describe, it, expect, beforeAll, afterEach, vi } from "vitest";
 
-let hexToRgb, adjustHex, getStreakTier, formatSongTime, normalizeAvatarPath, _renderFriendCode;
+let hexToRgb, adjustHex, getStreakTier, formatSongTime, normalizeAvatarPath, _renderFriendCode, _tf;
 
 beforeAll(async () => {
   // jsdom doesn't implement 2D canvas contexts — stub it to silence a noisy
@@ -29,8 +29,47 @@ beforeAll(async () => {
     <button id="zoomIn"></button><button id="zoomOut"></button><button id="confirmCrop"></button>
   `;
   const mod = await import("../profile/profile-page.js");
-  ({ hexToRgb, adjustHex, getStreakTier, formatSongTime, normalizeAvatarPath, _renderFriendCode } =
-    mod);
+  ({
+    hexToRgb,
+    adjustHex,
+    getStreakTier,
+    formatSongTime,
+    normalizeAvatarPath,
+    _renderFriendCode,
+    _tf,
+  } = mod);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// tf — traduction avec repli ET variables
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("tf", () => {
+  afterEach(() => {
+    delete window.i18n;
+  });
+
+  it("transmet les variables à i18n.t — le bouton Jack Frost affichait « 0 → {{count}} jours »", () => {
+    // Même contrat que js/i18n.js : t(key, vars) remplace les {{placeholders}}.
+    window.i18n = {
+      t: (key, vars = {}) =>
+        key === "streak_recovery.profile_btn"
+          ? "❄️ Rallumer — 0 → {{count}} jours".replace("{{count}}", vars.count ?? "{{count}}")
+          : key,
+    };
+    expect(_tf("streak_recovery.profile_btn", "fallback", { count: 12 })).toBe(
+      "❄️ Rallumer — 0 → 12 jours"
+    );
+  });
+
+  it("retombe sur le fallback quand la clé est absente (t renvoie la clé brute)", () => {
+    window.i18n = { t: (key) => key };
+    expect(_tf("nope.key", "Fallback", { count: 1 })).toBe("Fallback");
+  });
+
+  it("retombe sur le fallback sans i18n chargé", () => {
+    expect(_tf("nope.key", "Fallback")).toBe("Fallback");
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

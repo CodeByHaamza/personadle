@@ -92,6 +92,7 @@
 
     <!-- Styles & Icon -->
     <link rel="stylesheet" href="./css/global.css?v=12" />
+    <link rel="stylesheet" href="./css/settings-modal.css" />
     <link rel="stylesheet" href="./css/index.css?v=5" />
     <link rel="stylesheet" href="./css/langSelector.css?v=3" />
     <link rel="stylesheet" href="./css/bottomNav.css?v=1" />
@@ -537,6 +538,16 @@
         <span class="slider round"></span>
       </label>
       <span class="label-text" data-i18n="ui.dark_mode">Dark Mode</span>
+      <span class="dm-sep"></span>
+      <button
+        id="settingsBtn"
+        class="settings-btn"
+        title="Settings"
+        aria-label="Settings"
+        data-i18n-title="settings.title"
+      >
+        ⚙
+      </button>
     </div>
 
     <!-- Script intégré -->
@@ -570,7 +581,7 @@
       style="display: flex; gap: 20px; justify-content: center; margin-top: 20px"
     >
       <a
-        href="https://github.com/HamzaKarrouchi/personadle"
+        href="https://github.com/CodeByHaamza/personadle"
         target="_blank"
         title="GitHub"
         id="githubLink"
@@ -617,7 +628,7 @@
         <a href="./pages/privacy.html" data-i18n="index.legal_link">Privacy &amp; Legal</a> |
         <a href="./pages/faq.html" data-i18n="faq.footer_link">FAQ</a> |
         <a
-          href="https://github.com/HamzaKarrouchi/personadle/issues/new/choose"
+          href="https://github.com/CodeByHaamza/personadle/issues/new/choose"
           target="_blank"
           rel="noopener"
           data-i18n="index.feedback_link"
@@ -791,6 +802,247 @@
 
         <!-- ── Corps scrollable : accordion ── -->
         <div class="news-modal-body">
+          <!-- ── Version 2.2 — Le Compendium (thème Velvet Room, même langage que profile/compendium/) ── -->
+          <div class="version-item velvet-theme">
+            <div class="version-header">
+              <!-- Décor : losanges bleus + ornements ❦, même langage que le Compendium (CSS pur) -->
+              <span class="velvet-ornament velvet-ornament--tl" aria-hidden="true">❦</span>
+              <span class="velvet-ornament velvet-ornament--br" aria-hidden="true">❦</span>
+
+              <div class="v2-header-inner">
+                <svg class="velvet-pentacle" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+                  <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" stroke-width="5" />
+                  <circle cx="100" cy="100" r="78" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 7" />
+                  <polygon points="100,18 122,76 184,76 134,112 152,172 100,136 48,172 66,112 16,76 78,76" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round" />
+                  <circle cx="100" cy="100" r="14" fill="none" stroke="currentColor" stroke-width="4" />
+                </svg>
+                <div>
+                  <div class="version-title" data-i18n-block="en">📖 Version 2.2 — The Compendium</div>
+                  <div class="version-date" data-i18n-block="en">September 2026</div>
+                  <div class="version-title" data-i18n-block="fr">📖 Version 2.2 — Le Compendium</div>
+                  <div class="version-date" data-i18n-block="fr">Septembre 2026</div>
+                  <div class="version-title" data-i18n-block="es">📖 Versión 2.2 — El Compendio</div>
+                  <div class="version-date" data-i18n-block="es">Septiembre de 2026</div>
+                  <div class="version-title" data-i18n-block="de">📖 Version 2.2 — Das Kompendium</div>
+                  <div class="version-date" data-i18n-block="de">September 2026</div>
+                  <div class="version-title" data-i18n-block="it">📖 Versione 2.2 — Il Compendio</div>
+                  <div class="version-date" data-i18n-block="it">Settembre 2026</div>
+                  <div class="version-title" data-i18n-block="pt">📖 Versão 2.2 — O Compêndio</div>
+                  <div class="version-date" data-i18n-block="pt">Setembro de 2026</div>
+                </div>
+              </div>
+
+              <span class="version-arrow">▼</span>
+            </div>
+
+            <div class="version-content">
+              <div data-i18n-block="en">
+                <ul>
+                  <li>
+                    📖 <strong>The Compendium:</strong> a collection book on your profile — badges, titles, wallpapers, bonds, challenges and feats, every entry dated, with who, and a short note. Public, like your profile.
+                  </li>
+                  <li>
+                    ⚔ <strong>Challenge a friend, on your real score:</strong> the button is there as soon as you land on a mode, but locked until you finish your daily game — a challenge always carries the score you actually made. It stays after a give-up, survives a reload, and works from your friends list too, Expert included.
+                  </li>
+                  <li>
+                    👥 <strong>Friends page in three tabs:</strong> Friends, Inbox (messages & challenges, unread count) and Find. Buttons the same size at last, a visible trash icon, one single « + ».
+                  </li>
+                  <li>
+                    🎯 <strong>Pick your favorite mode:</strong> you choose it now; the mode you do best in gets its own « Best Mode Overall » line, based on your win rate.
+                  </li>
+                  <li>
+                    ⚙ <strong>Settings everywhere:</strong> the ⚙ button sits next to dark mode on every page, with two new switches to stop profile music autoplay — on your profile, on other players' profiles.
+                  </li>
+                  <li>
+                    ⚔️ <strong>Two new All-Out Attacks:</strong> Bui Cosmic and Berry Summer, from Persona 5 X.
+                  </li>
+                  <li>
+                    🛠 <strong>And the fixes you asked for:</strong> round buttons that were stretched, Expert stats lined up and readable, a True Confidant that looks the part, Minthe's card no longer giving away her name in French, streaks identical on your profile and your friends'.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 2.2/PersonaDLE_Update.html"
+                    target="_blank"
+                    class="see-more-btn velvet-btn"
+                  >
+                    See full Changelog
+                  </a>
+                </div>
+              </div>
+              <div data-i18n-block="fr">
+                <ul>
+                  <li>
+                    📖 <strong>Le Compendium :</strong> un carnet de collection sur ton profil — badges, titres, fonds d'écran, liens, défis et exploits, chaque entrée datée, avec qui, et un petit mot. Public, comme ton profil.
+                  </li>
+                  <li>
+                    ⚔ <strong>Défier un ami, sur ton vrai score :</strong> le bouton est là dès que tu arrives sur un mode, mais verrouillé tant que ta partie du jour n'est pas finie — un défi porte toujours le score que tu as vraiment fait. Il reste après un abandon, survit au rechargement, et marche aussi depuis ta liste d'amis, Expert compris.
+                  </li>
+                  <li>
+                    👥 <strong>Page Amis en trois onglets :</strong> Amis, Boîte (messages & défis, non-lus comptés) et Trouver. Des boutons enfin de la même taille, une poubelle visible, un seul « + ».
+                  </li>
+                  <li>
+                    🎯 <strong>Choisis ton mode favori :</strong> c'est toi qui le choisis ; le mode où tu réussis le mieux a sa propre ligne « Meilleur mode », calculée sur ton taux de victoire.
+                  </li>
+                  <li>
+                    ⚙ <strong>Les paramètres partout :</strong> le bouton ⚙ est à côté du mode sombre sur chaque page, avec deux nouveaux interrupteurs pour couper l'autoplay de la musique — sur ton profil, sur celui des autres.
+                  </li>
+                  <li>
+                    ⚔️ <strong>Deux nouveaux All-Out Attack :</strong> Bui Cosmic et Berry Summer, de Persona 5 X.
+                  </li>
+                  <li>
+                    🛠 <strong>Et les corrections demandées :</strong> boutons ronds qui étaient étirés, stats Expert alignées et lisibles, un True Confidant qui a de l'allure, la fiche de Minthe qui ne trahit plus son nom en français, une série identique sur ton profil et chez tes amis.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 2.2/PersonaDLE_Update.html"
+                    target="_blank"
+                    class="see-more-btn velvet-btn"
+                  >
+                    Voir le Changelog complet
+                  </a>
+                </div>
+              </div>
+              <div data-i18n-block="es">
+                <ul>
+                  <li>
+                    📖 <strong>El Compendio:</strong> un libro de colección en tu perfil — insignias, títulos, fondos, vínculos, desafíos y hazañas, cada entrada con fecha, con quién y una breve nota. Público, como tu perfil.
+                  </li>
+                  <li>
+                    ⚔ <strong>Desafía a un amigo con tu marca real:</strong> el botón está ahí en cuanto entras en un modo, pero bloqueado hasta que termines tu partida del día — un desafío siempre lleva la marca que hiciste de verdad. Sigue tras rendirte, sobrevive a una recarga y funciona desde tu lista de amigos, Experto incluido.
+                  </li>
+                  <li>
+                    👥 <strong>Página de amigos en tres pestañas:</strong> Amigos, Bandeja (mensajes y desafíos, no leídos contados) y Buscar. Botones por fin del mismo tamaño, papelera visible, un solo « + ».
+                  </li>
+                  <li>
+                    🎯 <strong>Elige tu modo favorito:</strong> ahora lo eliges tú; el modo en el que mejor rindes tiene su propia línea « Mejor modo », según tu tasa de victoria.
+                  </li>
+                  <li>
+                    ⚙ <strong>Ajustes en todas partes:</strong> el botón ⚙ está junto al modo oscuro en cada página, con dos nuevos interruptores para cortar la reproducción automática de la música — en tu perfil, en el de los demás.
+                  </li>
+                  <li>
+                    ⚔️ <strong>Dos nuevos All-Out Attack:</strong> Bui Cosmic y Berry Summer, de Persona 5 X.
+                  </li>
+                  <li>
+                    🛠 <strong>Y las correcciones pedidas:</strong> botones redondos que salían estirados, estadísticas Experto alineadas y legibles, un True Confidant con más clase, la ficha de Minthe que ya no revela su nombre en francés, una racha idéntica en tu perfil y en el de tus amigos.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 2.2/PersonaDLE_Update.html"
+                    target="_blank"
+                    class="see-more-btn velvet-btn"
+                  >
+                    Ver el Changelog completo
+                  </a>
+                </div>
+              </div>
+              <div data-i18n-block="de">
+                <ul>
+                  <li>
+                    📖 <strong>Das Kompendium:</strong> ein Sammelbuch auf deinem Profil — Abzeichen, Titel, Hintergründe, Bande, Herausforderungen und Taten, jeder Eintrag datiert, mit wem, und einer kurzen Notiz. Öffentlich, wie dein Profil.
+                  </li>
+                  <li>
+                    ⚔ <strong>Freunde mit deiner echten Marke herausfordern:</strong> der Button ist da, sobald du einen Modus öffnest, aber gesperrt, bis dein Tagesspiel beendet ist — eine Herausforderung trägt immer die Marke, die du wirklich erreicht hast. Er bleibt nach dem Aufgeben, überlebt ein Neuladen und funktioniert auch aus deiner Freundesliste, Experte inklusive.
+                  </li>
+                  <li>
+                    👥 <strong>Freundeseite in drei Tabs:</strong> Freunde, Posteingang (Nachrichten & Herausforderungen, Ungelesene gezählt) und Suchen. Endlich gleich große Buttons, ein sichtbarer Papierkorb, ein einziges « + ».
+                  </li>
+                  <li>
+                    🎯 <strong>Wähl deinen Lieblingsmodus:</strong> du bestimmst ihn jetzt selbst; der Modus, in dem du am besten bist, bekommt seine eigene Zeile « Bester Modus », nach deiner Siegquote.
+                  </li>
+                  <li>
+                    ⚙ <strong>Einstellungen überall:</strong> der ⚙-Button sitzt auf jeder Seite neben dem Dunkelmodus, mit zwei neuen Schaltern gegen das automatische Abspielen der Profilmusik — auf deinem Profil, auf dem der anderen.
+                  </li>
+                  <li>
+                    ⚔️ <strong>Zwei neue All-Out Attacks:</strong> Bui Cosmic und Berry Summer, aus Persona 5 X.
+                  </li>
+                  <li>
+                    🛠 <strong>Und die gewünschten Korrekturen:</strong> verzerrte runde Buttons, ausgerichtete und lesbare Experten-Statistiken, ein True Confidant mit Stil, Minthes Karte, die ihren Namen auf Französisch nicht mehr verrät, eine Serie, die auf deinem Profil und bei deinen Freunden gleich ist.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 2.2/PersonaDLE_Update.html"
+                    target="_blank"
+                    class="see-more-btn velvet-btn"
+                  >
+                    Vollständiges Changelog ansehen
+                  </a>
+                </div>
+              </div>
+              <div data-i18n-block="it">
+                <ul>
+                  <li>
+                    📖 <strong>Il Compendio:</strong> un libro della collezione sul tuo profilo — distintivi, titoli, sfondi, legami, sfide e imprese, ogni voce datata, con chi, e una breve nota. Pubblico, come il tuo profilo.
+                  </li>
+                  <li>
+                    ⚔ <strong>Sfida un amico con il tuo vero punteggio:</strong> il pulsante c'è appena entri in una modalità, ma resta bloccato finché non finisci la partita del giorno — una sfida porta sempre il punteggio che hai davvero fatto. Sopravvive all'abbandono e al ricaricamento, e funziona anche dalla lista amici, Esperto compreso.
+                  </li>
+                  <li>
+                    👥 <strong>Pagina amici in tre schede:</strong> Amici, Posta (messaggi e sfide, non letti contati) e Cerca. Pulsanti finalmente della stessa dimensione, un cestino visibile, un solo « + ».
+                  </li>
+                  <li>
+                    🎯 <strong>Scegli la tua modalità preferita:</strong> ora la scegli tu; la modalità in cui rendi meglio ha la sua riga « Modalità migliore », in base al tuo tasso di vittoria.
+                  </li>
+                  <li>
+                    ⚙ <strong>Impostazioni ovunque:</strong> il pulsante ⚙ è accanto alla modalità scura su ogni pagina, con due nuovi interruttori per fermare la riproduzione automatica della musica — sul tuo profilo, su quello degli altri.
+                  </li>
+                  <li>
+                    ⚔️ <strong>Due nuovi All-Out Attack:</strong> Bui Cosmic e Berry Summer, da Persona 5 X.
+                  </li>
+                  <li>
+                    🛠 <strong>E le correzioni richieste:</strong> pulsanti rotondi che risultavano schiacciati, statistiche Esperto allineate e leggibili, un True Confidant con più stile, la scheda di Minthe che non rivela più il suo nome in francese, una serie identica sul tuo profilo e su quello dei tuoi amici.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 2.2/PersonaDLE_Update.html"
+                    target="_blank"
+                    class="see-more-btn velvet-btn"
+                  >
+                    Vedi il Changelog completo
+                  </a>
+                </div>
+              </div>
+              <div data-i18n-block="pt">
+                <ul>
+                  <li>
+                    📖 <strong>O Compêndio:</strong> um livro de coleção no teu perfil — emblemas, títulos, fundos, laços, desafios e feitos, cada entrada com data, com quem, e uma pequena nota. Público, como o teu perfil.
+                  </li>
+                  <li>
+                    ⚔ <strong>Desafia um amigo com a tua marca real:</strong> o botão está lá assim que entras num modo, mas bloqueado até terminares a tua partida do dia — um desafio leva sempre a marca que fizeste de verdade. Fica depois de desistires, sobrevive a um recarregamento e funciona a partir da lista de amigos, Expert incluído.
+                  </li>
+                  <li>
+                    👥 <strong>Página de amigos em três separadores:</strong> Amigos, Caixa (mensagens e desafios, não lidos contados) e Procurar. Botões finalmente do mesmo tamanho, um caixote visível, um único « + ».
+                  </li>
+                  <li>
+                    🎯 <strong>Escolhe o teu modo favorito:</strong> agora és tu que o escolhes; o modo em que és melhor tem a sua própria linha « Melhor modo », segundo a tua taxa de vitória.
+                  </li>
+                  <li>
+                    ⚙ <strong>Definições em todo o lado:</strong> o botão ⚙ está ao lado do modo escuro em todas as páginas, com dois novos interruptores para parar a reprodução automática da música — no teu perfil, no dos outros.
+                  </li>
+                  <li>
+                    ⚔️ <strong>Dois novos All-Out Attack:</strong> Bui Cosmic e Berry Summer, de Persona 5 X.
+                  </li>
+                  <li>
+                    🛠 <strong>E as correções pedidas:</strong> botões redondos que saíam esticados, estatísticas Expert alinhadas e legíveis, um True Confidant com mais classe, a ficha da Minthe que já não revela o nome em francês, uma sequência igual no teu perfil e no dos teus amigos.
+                  </li>
+                </ul>
+                <div class="pdf-container">
+                  <a
+                    href="./PersonaDLE_Update_Documentation/PersonaDLE 2.2/PersonaDLE_Update.html"
+                    target="_blank"
+                    class="see-more-btn velvet-btn"
+                  >
+                    Ver o Changelog completo
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- ── Version 2.1 — Mode Expert ── -->
           <div class="version-item expert-theme">
             <div class="version-header">
@@ -3144,6 +3396,11 @@
       import { initAuth } from "./js/auth.js";
       window._authReady = initAuth();
       window._authReady.catch(() => {});
+    </script>
+    <!-- Paramètres joueur (son, animations, musique de profil) — même modale que le profil -->
+    <script type="module">
+      import { initSettingsModal } from "./js/settings-modal.js";
+      initSettingsModal();
     </script>
 
     <script type="module">

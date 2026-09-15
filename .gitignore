@@ -202,6 +202,8 @@ phpunit.phar
 test-results/
 playwright-report/
 playwright/.auth/
+# Captures de référence visuelles (tests-e2e/visual_layout.spec.js) : propres à l'OS, jamais commitées
+tests-e2e/__screenshots__/
 phpstan.phar
 psalm.phar
 # Cache de Psalm (analyse de taint) — regénéré à chaque lancement.

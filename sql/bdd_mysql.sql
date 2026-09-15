@@ -156,6 +156,10 @@ CREATE TABLE profiles (
     profile_music_id    VARCHAR(100),
     selected_badges     JSON,                             -- max 4 badge IDs
     equipped_title_id   BIGINT UNSIGNED  NULL,
+    -- Mode favori CHOISI par le joueur (clé canonique de mode ou NULL) — visible
+    -- sur le profil public, d'où une colonne et non une clé de `settings`
+    -- (migration 040). Le « Best Mode Overall » est calculé à l'affichage.
+    favorite_mode       VARCHAR(20)      NULL,
     settings            JSON             NULL,
     updated_at          TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
                                                   ON UPDATE CURRENT_TIMESTAMP,

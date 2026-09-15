@@ -10,6 +10,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/admin_validation.php';
+require_once __DIR__ . '/../lib/validation.php';
 
 $adminId = requireAdmin();
 
@@ -216,8 +217,8 @@ if ($method === 'PATCH') {
     // lang
     if (array_key_exists('lang', $data)) {
         $lang = trim((string) $data['lang']);
-        if (!in_array($lang, ['en', 'fr', 'es', 'de', 'it'], true)) {
-            jsonError('Invalid lang (en|fr|es|de|it)', 400);
+        if (!in_array($lang, PERSONADLE_SUPPORTED_LANGS, true)) {
+            jsonError('Invalid lang (' . implode('|', PERSONADLE_SUPPORTED_LANGS) . ')', 400);
         }
         $userFields[] = 'lang = ?';
         $userParams[] = $lang;

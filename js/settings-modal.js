@@ -6,7 +6,13 @@
  *   initSettingsModal(userId);  // appeler après auth
  *
  * Settings sauvegardés : cloud (profiles.settings) + cache localStorage.
- * Structure : { sound_enabled, sound_volume, anim_victory, anim_friend_request }
+ * Structure : { sound_enabled, sound_volume, anim_victory, anim_friend_request,
+ *               anim_friend_request_style, profile_autoplay_own, profile_autoplay_others }
+ *
+ * Monté sur profile.html, index.html et les 6 pages de mode (retour joueur 2.2 :
+ * « pas de bouton Settings sur la page de mode »). Le bouton ⚙ vit dans
+ * .darkmode-toggle et la modale est créée à la demande, donc aucune page n'a de
+ * markup à porter au-delà du bouton.
  */
 
 import { openModal, closeModal } from "./modal.js";
@@ -17,6 +23,10 @@ const DEFAULTS = {
   anim_victory: true,
   anim_friend_request: true,
   anim_friend_request_style: "calling_card",
+  // Deux réglages distincts, demandés tels quels : couper l'autoplay de SA
+  // musique de profil n'a rien à voir avec couper celle des autres joueurs.
+  profile_autoplay_own: true,
+  profile_autoplay_others: true,
 };
 
 let _userId = null;
@@ -32,7 +42,24 @@ export function openSettingsModal() {
   openModal("settingsModal", { onClose: _close });
 }
 
-export function initSettingsModal(userId) {
+/**
+ * Lecture des réglages effectifs (défauts + cache local), pour les modules qui
+ * n'ouvrent pas la modale — le lecteur de musique de profil, notamment.
+ */
+export function readPlayerSettings() {
+  return _readSettings();
+}
+
+/**
+ * L'autoplay de la musique de profil est-il autorisé ?
+ * @param {"own"|"others"} whose  "own" = mon profil, "others" = profil visité
+ */
+export function profileAutoplayAllowed(whose) {
+  const s = _readSettings();
+  return whose === "own" ? s.profile_autoplay_own !== false : s.profile_autoplay_others !== false;
+}
+
+export function initSettingsModal(userId = null) {
   _userId = userId;
   const btn = document.getElementById("settingsBtn");
   if (btn && !btn._settingsListenerBound) {
@@ -116,6 +143,25 @@ function _ensureModal() {
         </div>
       </div>
 
+      <!-- MUSIQUE DE PROFIL -->
+      <div>
+        <p class="sm-section-title">${t("settings.profile_music", "Profile music")}</p>
+        <div class="sm-row">
+          <span class="sm-label">${t("settings.profile_autoplay_own", "Autoplay on my profile")}</span>
+          <label class="switch sm-toggle">
+            <input type="checkbox" id="smProfileAutoplayOwn">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="sm-row">
+          <span class="sm-label">${t("settings.profile_autoplay_others", "Autoplay on other players' profiles")}</span>
+          <label class="switch sm-toggle">
+            <input type="checkbox" id="smProfileAutoplayOthers">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+
       <button class="sm-save" id="smSave">${t("settings.save", "Save")}</button>
       <p class="sm-save-status hidden" id="smStatus"></p>
     </div>
@@ -154,6 +200,8 @@ function _loadIntoForm(s) {
   document.getElementById("smSoundEnabled").checked = s.sound_enabled ?? true;
   document.getElementById("smSoundVolume").value = s.sound_volume ?? 1.0;
   document.getElementById("smAnimVictory").checked = s.anim_victory ?? true;
+  document.getElementById("smProfileAutoplayOwn").checked = s.profile_autoplay_own ?? true;
+  document.getElementById("smProfileAutoplayOthers").checked = s.profile_autoplay_others ?? true;
   document.getElementById("smVolumeVal").textContent =
     `${Math.round((s.sound_volume ?? 1.0) * 100)}%`;
 
@@ -186,15 +234,19 @@ async function _save() {
     anim_victory: document.getElementById("smAnimVictory").checked,
     anim_friend_request: document.getElementById("smAnimFriendRequest").checked,
     anim_friend_request_style: activeStyleBtn?.dataset.style ?? "calling_card",
+    profile_autoplay_own: document.getElementById("smProfileAutoplayOwn").checked,
+    profile_autoplay_others: document.getElementById("smProfileAutoplayOthers").checked,
   };
 
   btn.disabled = true;
   status.classList.add("hidden");
 
   try {
-    // Sauvegarder en cloud
-    if (_userId && window._personadleApi) {
-      await window._personadleApi.user.update(_userId, { settings: newSettings });
+    // Sauvegarder en cloud. L'id est résolu ICI et non à l'init : sur les pages
+    // de mode, le bouton est monté avant que initAuth() ait posé _currentUser.
+    const userId = _userId ?? window._currentUser?.id ?? null;
+    if (userId && window._personadleApi) {
+      await window._personadleApi.user.update(userId, { settings: newSettings });
     }
     // Cache local
     localStorage.setItem("personaSettings", JSON.stringify(newSettings));

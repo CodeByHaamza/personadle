@@ -16,6 +16,7 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   resolveChallengeTarget,
@@ -110,6 +111,9 @@ const INITIAL_ZOOM = EXPERT.isExpert ? 1 : 1.8;
 let currentZoom = INITIAL_ZOOM; // Initial zoom level (decreases on each wrong guess)
 const maxZoomOut = 1;
 let gameOver = false;
+
+/** Cibles possibles d'un défi : pool filtré de la page, cible du jour exclue. Calculé au clic. */
+const challengePool = () => filteredCharacters.filter((c) => c.nom !== target?.nom).map((c) => c.nom);
 let currentPickToken = 0; // Anti-race-condition token for image preloading
 // URL de l'image NON noircie, révélée seulement en fin de partie. Tant qu'elle
 // n'est pas posée sur l'élément, l'originale n'existe nulle part dans le DOM.
@@ -542,11 +546,6 @@ function showVictory(force = false) {
     }
     trackUniqueDay(_pSil, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pSil)));
     showConfettiExplosion();
-    showChallengeButton(
-      "silhouette",
-      attempts,
-      filteredCharacters.filter((c) => c.nom !== target.nom).map((c) => c.nom)
-    );
     if (!EXPERT.isExpert) {
       let winCount = parseInt(localStorage.getItem("silhouetteWins") || "0");
       localStorage.setItem("silhouetteWins", winCount + 1);
@@ -559,6 +558,10 @@ function showVictory(force = false) {
     prevHref: "../allOutAttackMode/allOutAttack.html",
     nextHref: "../personaeMode/personae.html",
   });
+  // Victoire OU abandon (2.2) : le nombre d'essais devient le score à battre.
+  // Le bouton est monté depuis l'arrivée (initChallengeButton) ; ici on fixe le
+  // score réel et il rejoint la navigation révélée juste au-dessus.
+  showChallengeButton("silhouette", attempts, challengePool);
 
   localStorage.setItem(EXPERT.key("silhouetteGameOver"), "true");
   localStorage.setItem(EXPERT.key("silhouetteForceReveal"), String(force));
@@ -808,6 +811,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   updateFlashButton();
+
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que
+  // la partie n'est pas finie. Au rechargement, showVictory() ci-dessus tourne
+  // AVANT que l'auth ait posé _currentUser (no-op) : c'est cet appel, qui
+  // attend l'auth, qui remonte le bouton — le « bouton qui disparaît ».
+  initChallengeButton("silhouette", challengePool, storedGameOver ? attempts : null);
 
   // ── Daily reset ──
   checkResetOnLoad(EXPERT.key("lastPlayedDate_Silhouette"), STATS_SCOPE, () => {

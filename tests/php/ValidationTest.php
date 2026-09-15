@@ -98,4 +98,26 @@ final class ValidationTest extends TestCase
     {
         $this->assertSame('en', personadle_normalize_lang(''));
     }
+
+    public function testKeepsPortuguese(): void
+    {
+        // `pt` manquait aux trois listes locales (register, PATCH profil, admin) :
+        // un joueur en portugais était inscrit en `en` et voyait son PATCH profil
+        // entier refusé en 400.
+        $this->assertSame('pt', personadle_normalize_lang('pt'));
+    }
+
+    public function testSupportedLangsMatchTheLangFiles(): void
+    {
+        // Une langue = un fichier lang/*.json. La liste PHP ne doit ni en oublier
+        // (le cas `pt`) ni en inventer.
+        $files = array_map(
+            static fn (string $f): string => basename($f, '.json'),
+            glob(__DIR__ . '/../../lang/*.json') ?: []
+        );
+        sort($files);
+        $langs = PERSONADLE_SUPPORTED_LANGS;
+        sort($langs);
+        $this->assertSame($files, $langs);
+    }
 }

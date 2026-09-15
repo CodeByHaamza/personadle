@@ -4,9 +4,10 @@ import {
   getSocialLinkData,
   applyRank10Effect,
 } from "../js/social-link.js";
-import { getStreakTier, formatSongTime } from "./profile-format.js";
+import { getStreakTier, formatSongTime, bestModeOverall } from "./profile-format.js";
 import { formatPlayTime } from "./formatPlayTime.js";
 import { resolveTheme, applyThemeVars } from "./theme.js";
+import { profileAutoplayAllowed } from "../js/settings-modal.js";
 
 /**
  * profile/profile-view.js — Mode consultation du profil d'un autre joueur
@@ -269,7 +270,7 @@ if (viewParam || uidParam) {
       } else if (friendshipStatus === "pending_received") {
         friendBtn = `<button id="vbAcceptBtn" class="vb-friend-btn vb-friend-btn--accept" data-code="${escapeHtml(friendCode)}">${t("friends.accept", "Accept")}</button>`;
       } else {
-        friendBtn = `<button id="vbAddFriendBtn" class="vb-friend-btn" data-code="${escapeHtml(friendCode)}">${t("friends.add_friend", "+ Add friend")}</button>`;
+        friendBtn = `<button id="vbAddFriendBtn" class="vb-friend-btn" data-code="${escapeHtml(friendCode)}">+ ${t("friends.add_friend", "Add friend")}</button>`;
       }
     }
 
@@ -298,7 +299,7 @@ if (viewParam || uidParam) {
           addBtn.outerHTML = `<span class="vb-friend-status vb-friend-status--pending">${t("friends.request_sent", "Request sent")}</span>`;
         } catch (err) {
           addBtn.disabled = false;
-          addBtn.textContent = t("friends.add_friend", "+ Add friend");
+          addBtn.textContent = `+ ${t("friends.add_friend", "Add friend")}`;
           alert(err.message || "Could not send friend request.");
         }
       });
@@ -420,9 +421,20 @@ if (viewParam || uidParam) {
     // ── Agrégats calculés côté client (manquants dans l'API) ──
     const totalGiveups = byMode.reduce((acc, m) => acc + (m.giveups ?? 0), 0);
     const totalTimeMinutes = (stats.total_time_ms ?? 0) / 60000;
-    const currentStreak = byMode.reduce((acc, m) => Math.max(acc, m.streak ?? 0), 0);
-    const favMode = byMode.reduce((acc, m) => (!acc || m.games > acc.games ? m : acc), null);
-    const favModeLabel = favMode ? (VIEW_MODE_META[favMode.mode]?.label ?? favMode.mode) : "—";
+    // Streak globale = users.global_streak, comme sur son propre profil (cloud-sync.js).
+    // Repli sur le max par mode si l'API ne l'expose pas encore (backend antérieur).
+    const currentStreak =
+      stats.global_streak ?? byMode.reduce((acc, m) => Math.max(acc, m.streak ?? 0), 0);
+    const bestStreak = Math.max(stats.global_streak_record ?? 0, stats.best_streak ?? 0);
+    // Mode favori = le CHOIX du joueur (profiles.favorite_mode, migration 040) ;
+    // « Best Mode Overall » = meilleur taux de victoire, 3 parties minimum —
+    // même calcul que renderStats() dans profile-page.js.
+    const favKey = profile.favorite_mode ?? null;
+    const favModeLabel = favKey ? (VIEW_MODE_META[favKey]?.label ?? favKey) : "—";
+    const best = bestModeOverall(byMode);
+    const bestModeLabel = best
+      ? `${VIEW_MODE_META[best.mode]?.label ?? best.mode} · ${Math.round(best.rate * 100)}%`
+      : "—";
 
     // ── Avatar — supporte les GIFs animés ──
     const avatarEl = document.getElementById("pageAvatar");
@@ -512,7 +524,7 @@ if (viewParam || uidParam) {
         },
         {
           icon: "⭐",
-          value: stats.best_streak ?? 0,
+          value: bestStreak,
           label: t("profile.stat_best_streak_label", "Best Streak"),
         },
         {
@@ -530,7 +542,11 @@ if (viewParam || uidParam) {
           icon: "🎯",
           value: favModeLabel,
           label: t("profile.stat_fav_mode_label", "Fav Mode"),
-          full: true,
+        },
+        {
+          icon: "🏅",
+          value: bestModeLabel,
+          label: t("profile.stat_best_mode_label", "Best Mode Overall"),
         },
       ];
 
@@ -718,6 +734,8 @@ if (viewParam || uidParam) {
     });
 
     // ── Autoplay avec fallback au premier geste utilisateur ──
+    // Réglage « Autoplay sur les profils des autres » (settings-modal.js).
+    if (!profileAutoplayAllowed("others")) return;
     _viewSongAudio.play().catch(() => {
       const unlock = () => _viewSongAudio.play().catch(() => {});
       document.addEventListener("click", unlock, { once: true });
@@ -773,6 +791,15 @@ if (viewParam || uidParam) {
     if (compareBtn) compareBtn.dataset.fid = user.id;
     header?.insertAdjacentElement("afterend", banner);
     attachBannerActions(user.friend_code);
+
+    // Le Compendium est public : le bouton pointe vers le carnet du joueur
+    // visité, et reste visible même pour un visiteur non connecté.
+    const compendiumBtn = document.getElementById("compendiumBtn");
+    if (compendiumBtn) {
+      compendiumBtn.href = `./compendium/compendium.html?view=${encodeURIComponent(user.friend_code)}`;
+      compendiumBtn.removeAttribute("data-auth");
+      compendiumBtn.style.display = "";
+    }
 
     // Remplir le profil + appliquer le thème
     populatePublicProfile(profileData);

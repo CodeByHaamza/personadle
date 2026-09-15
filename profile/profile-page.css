@@ -89,39 +89,6 @@
   }
 }
 
-/* ── Séparateur vertical dans .darkmode-toggle ── */
-.dm-sep {
-  display: inline-block;
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.25);
-  flex-shrink: 0;
-}
-
-/* ── Bouton Settings ⚙ dans .darkmode-toggle ── */
-.profile-settings-btn {
-  background: none;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 1rem;
-  cursor: pointer;
-  color: rgba(255, 255, 255, 0.8);
-  transition:
-    color 0.15s,
-    transform 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  flex-shrink: 0;
-}
-.profile-settings-btn:hover {
-  color: #fff;
-  transform: rotate(30deg);
-}
-
 /* Ligne décorative rouge sous le titre */
 .profile-page-header::after {
   content: "";
@@ -1470,6 +1437,7 @@ body.darkmode .profile-card--danger {
 
 /* Chip de thème : fond coloré + nom en texte blanc */
 .theme-swatch {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   height: 46px;
   border-radius: 8px;
   border: 2px solid transparent;
@@ -2027,6 +1995,7 @@ body.darkmode .custom-theme-row input[type="color"] {
 }
 
 .song-play-btn {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -2359,6 +2328,7 @@ body.darkmode .song-empty-hint {
 }
 
 .share-color-swatch {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -4185,6 +4155,7 @@ body.darkmode .song-row:hover { background: rgba(230, 57, 70, 0.2); }
 }
 .song-modal-bar .song-search { flex: 1; }
 .song-modal-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   flex: 0 0 auto;
   width: 34px;
   height: 34px;
@@ -4320,7 +4291,43 @@ body.darkmode .song-modal-close { background: rgba(255, 255, 255, 0.08); }
 }
 
 .swatch-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ── Sélecteur de mode favori (puces) — retour joueur 2.2 ─────────────────── */
+.mode-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mode-chip {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) */
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 100px;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.04);
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+}
+.mode-chip:hover { transform: translateY(-1px); border-color: var(--accent, #e63946); }
+.mode-chip.active {
+  background: var(--accent, #e63946);
+  border-color: var(--accent, #e63946);
+  color: #fff;
+}
+.mode-chip--none { opacity: 0.75; }
+.mode-chip--none.active { background: #555; border-color: #555; opacity: 1; }
+body.darkmode .mode-chip { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06); }
+body.darkmode .mode-chip.active { background: var(--accent, #e63946); border-color: var(--accent, #e63946); }
 .swatch {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   width: 28px;
   height: 28px;
   flex: 0 0 auto; /* jamais écrasé en ovale */
@@ -4415,29 +4422,215 @@ body.darkmode .swatch.active { box-shadow: 0 0 0 2px #161020, 0 0 0 4px var(--ac
 }
 
 .expert-stat-row {
-  /* Remplace la grille "icône | nom | barre | droite" par 4 colonnes fixes. */
+  /* Remplace la grille "icône | nom | barre | droite" par 4 colonnes de stats.
+     Chaque ligne est SA PROPRE grille : des colonnes `auto` se dimensionnent
+     ligne par ligne et l'en-tête ne tombait jamais au-dessus des chiffres.
+     En fractions, toutes les lignes partagent les mêmes proportions. */
   display: grid;
-  grid-template-columns: 24px minmax(60px, 1fr) repeat(4, minmax(42px, auto));
+  grid-template-columns: 24px minmax(0, 1.3fr) repeat(4, minmax(0, 1fr));
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   border-left: 2px solid rgba(230, 57, 70, 0.55);
   padding-left: 8px;
 }
 
 .expert-stat-cell {
-  text-align: right;
+  text-align: center;
   font-variant-numeric: tabular-nums;
   font-size: 0.85rem;
+  font-weight: 700;
+  /* Couleur posée explicitement : les cellules héritaient du corps de page et
+     se fondaient dans la carte en mode sombre (retour joueur 2.2). */
+  color: #333;
   white-space: nowrap;
+}
+
+/* Ligne d'en-tête : mêmes colonnes que les lignes de données, un libellé par
+   colonne — c'est ce qui garantit l'alignement chiffres ↔ texte. */
+.expert-stat-cols {
+  border-bottom: 1px solid rgba(230, 57, 70, 0.18);
+  padding-top: 0;
+}
+.expert-stat-cols .expert-stat-cell {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  white-space: normal;
+  line-height: 1.15;
+}
+
+body.darkmode .expert-stats-header {
+  /* body.darkmode .mode-stats-header (gris) est plus spécifique que
+     .expert-stats-header : sans cette règle, le titre perdait son rouge. */
+  color: #ff6b76;
+}
+body.darkmode .expert-stat-cell {
+  color: #ececec;
+}
+body.darkmode .expert-stat-cols .expert-stat-cell {
+  color: #8a8a8a;
 }
 
 @media (max-width: 480px) {
   .expert-stat-row {
-    grid-template-columns: 20px minmax(48px, 1fr) repeat(4, auto);
-    gap: 4px;
+    grid-template-columns: 20px minmax(0, 1.1fr) repeat(4, minmax(0, 1fr));
+    gap: 5px;
   }
 
   .expert-stat-cell {
     font-size: 0.75rem;
+  }
+
+  .expert-stat-cols .expert-stat-cell {
+    font-size: 0.56rem;
+  }
+}
+
+/* =====================================================
+   16. PILE HAUT-DROITE — toggle dark mode + ⚙, puis le
+   bouton Compendium à la même largeur
+   -----------------------------------------------------
+   La pile prend le `position: fixed` du toggle (global.css
+   §1) ; le toggle redevient statique dedans, et
+   `align-items: stretch` donne au bouton exactement la
+   largeur du bloc du dessus — desktop comme mobile, où
+   le libellé « Dark Mode » disparaît (global.css ≤ 768).
+   Le bouton : hommage au « Grimoire du Cœur » — losanges
+   bleus, pentacle doré.
+   ===================================================== */
+
+.top-right-stack {
+  position: fixed;
+  top: 12px;
+  right: 14px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.top-right-stack .darkmode-toggle {
+  position: static;
+  z-index: auto;
+}
+
+.grimoire-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, #0a1733 0%, #143a7a 55%, #0a1733 100%);
+  color: #f3d78a;
+  border: 1px solid rgba(130, 185, 255, 0.55);
+  box-shadow:
+    0 0 0 2px rgba(6, 14, 38, 0.65),
+    0 4px 14px rgba(0, 0, 0, 0.45),
+    inset 0 0 14px rgba(90, 150, 255, 0.28);
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  position: relative;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Losanges bleus (motif du grimoire) : damier tourné à 45°, qui dérive lentement */
+.grimoire-btn__diamonds {
+  position: absolute;
+  inset: -20px;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-conic-gradient(
+      from 45deg,
+      rgba(110, 170, 255, 0.28) 0% 25%,
+      transparent 0% 50%
+    )
+    0 0 / 14px 14px;
+  -webkit-mask: linear-gradient(90deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  mask: linear-gradient(90deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  animation: grimoireDiamondsDrift 8s linear infinite;
+}
+
+@keyframes grimoireDiamondsDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(14px);
+  }
+}
+
+.grimoire-btn__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 3px rgba(243, 215, 138, 0.55));
+  transition: transform 0.6s ease;
+}
+
+.grimoire-btn__label {
+  white-space: nowrap;
+  color: #e9f1ff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.grimoire-btn:hover,
+.grimoire-btn:focus-visible {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 2px rgba(6, 14, 38, 0.65),
+    0 6px 18px rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(110, 170, 255, 0.45),
+    inset 0 0 18px rgba(110, 170, 255, 0.35);
+  outline: none;
+}
+
+.grimoire-btn:hover .grimoire-btn__icon,
+.grimoire-btn:focus-visible .grimoire-btn__icon {
+  transform: rotate(72deg);
+}
+
+.grimoire-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Mobile : le toggle perd son libellé (global.css) et se resserre — le bouton
+   suit sa largeur (≈ 90 px) : icône seule, motif visible en entier. */
+@media (max-width: 768px) {
+  .top-right-stack {
+    top: 10px;
+    right: 10px;
+    gap: 8px;
+  }
+  .grimoire-btn {
+    padding: 6px 8px;
+  }
+  .grimoire-btn__label {
+    display: none;
+  }
+  .grimoire-btn__diamonds {
+    -webkit-mask: none;
+    mask: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grimoire-btn__diamonds {
+    animation: none;
+  }
+  .grimoire-btn__icon {
+    transition: none;
   }
 }
