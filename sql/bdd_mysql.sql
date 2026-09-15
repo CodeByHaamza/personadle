@@ -231,6 +231,7 @@ CREATE TABLE game_sessions (
     attempts        INT              NOT NULL,
     time_ms         INT,
     active_filters  JSON,                        -- ["P3","P5","P5R"]
+    guesses         JSON,                        -- suite des essais, le bon en dernier si gagné (migration 041)
     created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),

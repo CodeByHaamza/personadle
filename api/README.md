@@ -42,6 +42,7 @@ api/
 ├── config.example.php      ← Template à copier (local + Hostinger)
 ├── config.docker.php       ← Config pour Docker
 ├── sessions.php            ← POST /api/sessions
+├── sessions_today.php      ← GET /api/sessions_today (première partie du jour de mes amis)
 ├── community-stats.php     ← GET /api/community-stats
 ├── .htaccess               ← Routing Apache
 │
@@ -106,7 +107,8 @@ api/
 │   ├── error_logs.php      ← GET /api/admin/error_logs
 │   ├── audit_log.php       ← GET /api/admin/audit_log
 │   ├── deletion_requests.php ← GET / POST /api/admin/deletion_requests (POST = déclenchement manuel du hard delete)
-│   └── rate_limits.php     ← GET / DELETE /api/admin/rate_limits
+│   ├── rate_limits.php     ← GET / DELETE /api/admin/rate_limits
+│   └── activity.php        ← GET /api/admin/activity (tableau de bord)
 │
 └── cron/                   ← Tâches planifiées (auth par header X-Cron-Key, pas en query string)
     ├── leaderboard.php     ← Recalcul périodique du leaderboard_cache
@@ -135,7 +137,8 @@ api/
 
 | Méthode | Endpoint               | Description                                                     |
 | ------- | ---------------------- | --------------------------------------------------------------- |
-| `POST`  | `/api/sessions`        | Enregistrer une partie — calcule streaks, incrémente user_stats |
+| `POST`  | `/api/sessions`        | Enregistrer une partie — calcule streaks, incrémente user_stats ; `guesses[]` optionnel (migration 041) |
+| `GET`   | `/api/sessions_today`  | `?mode=&expert=` — première partie du jour de chaque ami (résultat, essais, suite des essais) ; 403 `play_first` tant que la sienne n'est pas finie |
 | `GET`   | `/api/community-stats` | % joueurs ayant trouvé le personnage du jour                    |
 
 ### Utilisateur
@@ -218,6 +221,7 @@ Réponse : `{ mode, period, metric, entries: [...], my_rank, count, offset, limi
 | `GET`                 | `/api/admin/audit_log`               | Journal des actions admin (paginé)                       |
 | `GET / POST`          | `/api/admin/deletion_requests`       | Suivi RGPD + déclenchement manuel du hard delete (POST)  |
 | `GET / DELETE`        | `/api/admin/rate_limits`             | Consultation + purge manuelle des compteurs              |
+| `GET`                 | `/api/admin/activity`                | `?days=7..180` — joueurs actifs, parties et comptes par jour, par mode, par heure |
 
 ---
 

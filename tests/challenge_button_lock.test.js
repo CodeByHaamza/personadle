@@ -81,7 +81,9 @@ describe("showChallengeButton — placement", () => {
     showChallengeButton("classic", 4, ["A"]);
     const nav = document.getElementById("modeNavigationContainer");
     expect(btn().parentElement).toBe(nav);
-    expect(btn().nextElementSibling.id).toBe("nextModeButton");
+    // 👥 Parties des amis suit ⚔ partout ; « suivant » vient après les deux
+    expect(btn().nextElementSibling.id).toBe("friendsGamesBtn");
+    expect(btn().nextElementSibling.nextElementSibling.id).toBe("nextModeButton");
   });
 
   it("rejoint la navigation entre prev et next quand elle est révélée en fin de partie", () => {
@@ -91,7 +93,8 @@ describe("showChallengeButton — placement", () => {
     showChallengeButton("classic", 3, ["A"]);
     expect(btn().parentElement.id).toBe("modeNavigationContainer");
     expect(btn().previousElementSibling.id).toBe("prevModeButton");
-    expect(btn().nextElementSibling.id).toBe("nextModeButton");
+    expect(btn().nextElementSibling.id).toBe("friendsGamesBtn");
+    expect(btn().nextElementSibling.nextElementSibling.id).toBe("nextModeButton");
     expect(document.querySelectorAll("#challengeFriendBtn")).toHaveLength(1);
   });
 

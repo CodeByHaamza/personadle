@@ -69,6 +69,13 @@ function personadle_validate_password(string $password): ?string
 const PERSONADLE_SUPPORTED_LANGS = ['en', 'fr', 'es', 'de', 'it', 'pt'];
 
 /**
+ * Les six modes de jeu, clés canoniques (même vocabulaire que MODES dans
+ * js/gameCore.js). Source unique côté PHP depuis le 2026-09-13 : neuf fichiers
+ * recopiaient la liste — un 7ᵉ mode aurait dû être ajouté neuf fois.
+ */
+const PERSONADLE_MODES = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+
+/**
  * Normalise une langue vers une valeur supportée, sinon 'en' par défaut.
  *
  * @param array<int,string> $supported

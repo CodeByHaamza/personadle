@@ -63,6 +63,7 @@ accessibles depuis le header, indépendamment de l'utilisateur sélectionné.
 | 📋 **Audit**           | Journal des actions admin (ban, attribution badge/titre, etc.)        |
 | 🗑️ **RGPD**            | Suivi des demandes de suppression + déclenchement manuel du hard delete |
 | ⏱️ **Rate Limits**     | Consultation + purge manuelle des compteurs de rate-limiting          |
+| 📈 **Activité**        | Joueurs actifs, parties et comptes par jour, ventilation par mode, heures de jeu (7/30/90 j) |
 
 ---
 
@@ -113,6 +114,7 @@ GET                      /api/admin/error_logs
 GET                      /api/admin/audit_log
 GET  POST                /api/admin/deletion_requests          ← POST = déclenchement manuel du hard delete
 GET          DELETE      /api/admin/rate_limits
+GET                      /api/admin/activity                   ← ?days=7..180
 ```
 
 > ⚠️ Tout nouveau fichier PHP dans `api/admin/` doit avoir sa propre ligne dans `api/admin/.htaccess` — sinon 404 garanti.

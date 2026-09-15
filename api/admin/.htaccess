@@ -55,3 +55,4 @@ RewriteRule ^deletion_requests          deletion_requests.php [L,QSA]
 
 # /api/admin/rate_limits[/key]          → rate_limits.php (liste / purge manuelle)
 RewriteRule ^rate_limits                rate_limits.php [L,QSA]
+RewriteRule ^activity$                  activity.php    [L,QSA]

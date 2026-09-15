@@ -146,7 +146,7 @@ if ($method === 'POST') {
     }
 
     if ($type === 'challenge') {
-        $validModes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+        $validModes = PERSONADLE_MODES;
         $mode = trim($data['challenge_mode'] ?? '');
         if (!in_array($mode, $validModes, true)) jsonError('Invalid challenge_mode', 400);
         $score = (int) ($data['challenge_score'] ?? 0);

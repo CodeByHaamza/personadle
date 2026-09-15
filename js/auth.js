@@ -413,6 +413,13 @@ function setupModalNavigation() {
     openModal("loginModal");
   });
 
+  // Arrivée avec #register (relance des invités, js/gameCore.js maybeNudgeGuest) :
+  // ouvrir l'inscription directement, et retirer l'ancre pour qu'un F5 ne la rouvre pas.
+  if (window.location.hash === "#register" && document.getElementById("registerModal")) {
+    openModal("registerModal");
+    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+  }
+
   // Boutons d'ouverture (data-open-modal="loginModal" etc.)
   document.querySelectorAll("[data-open-modal]").forEach((btn) => {
     btn.addEventListener("click", () => openModal(btn.getAttribute("data-open-modal")));
