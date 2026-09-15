@@ -1718,21 +1718,13 @@ export function getPendingActiveChallenge(isExpert = isExpertPage()) {
 }
 
 /**
- * Score « par » par mode : le score à battre envoyé avec un défi lancé AVANT
- * d'avoir terminé sa partie du jour (décision produit 2026-09-12, retour joueur :
- * « le bouton Défier devrait toujours être disponible »). Le serveur exige un
- * score > 0 (api/messages/index.php) et la cible du défi est tirée au hasard
- * (pas celle du jour), donc rien n'oblige à avoir joué — il faut juste un seuil.
- * Un défi est réussi si le destinataire gagne en `attempts <= score`
- * (js/challenge-result.js) ; ces valeurs sont donc « gagner en N essais ou
- * moins », calées sous le seuil d'abandon de chaque mode. Dès que la partie du
- * jour est finie, le vrai score du joueur remplace le par.
- */
-/**
  * Un défi porte TOUJOURS le vrai score du jour de l'expéditeur : le bouton est
  * verrouillé tant que la partie n'est pas finie (décision Hamza, 2026-09-13 —
- * « bats mon score » n'a pas de sens sans score). Le « par » par mode qui
- * servait de score de référence avant la fin de partie a été retiré.
+ * « bats mon score » n'a pas de sens sans score). Le « par » par mode qui a
+ * servi de score de référence avant la fin de partie (2026-09-12) a été retiré
+ * le lendemain : un défi est réussi si le destinataire gagne en
+ * `attempts <= score` (js/challenge-result.js), un seuil n'a donc de sens que
+ * s'il est le score réel de quelqu'un.
  */
 export function challengeScoreFor(score) {
   return Number.isFinite(score) && score > 0 ? score : null;

@@ -13,6 +13,49 @@
 
 ---
 
+## 2026-09-15 — fix(défi): « Plus tard » ne cachait plus les autres défis en file (relecture PR #112)
+
+Relecture avant merge des PRs empilées #112 → #114 → #117. Un seul vrai bug, dans le
+chemin que « Plus tard » venait de rendre visible : deux défis reçus en même temps (deux
+amis), « Plus tard » ou la croix sur le premier → le second **n'apparaissait jamais sur
+cette page**.
+
+- `js/challenge-notif.js` — `closeOnly` vidait la file (`_queue.length = 0`) en comptant
+  sur le sondage suivant (60 s) pour représenter les défis jamais montrés. Or
+  `js/notifications.js` les avait déjà notés dans `_queuedThisPage` **avant** de les
+  pousser, donc le sondage les filtrait : ils ne revenaient qu'après un changement de
+  page. Le commentaire promettait l'inverse. Désormais « Plus tard » et la croix ne
+  valent que pour le défi fermé et **enchaînent sur le suivant**, comme « Refuser »
+  (`_closeOverlay` → `_showNext`) : le joueur ne l'a pas vu, il n'a rien décidé à son
+  sujet.
+- `tests/challengeAccept.test.js` — cas « deux défis, Plus tard sur le premier » : le
+  second s'affiche, `dismissed` n'est appelé que pour le premier, rien n'est envoyé au
+  serveur. Vérifié rouge sans le correctif.
+- `js/gameCore.js` — docblock mort au-dessus de `challengeScoreFor()` : le bloc décrivait
+  le « par » par mode du 2026-09-12, retiré le 13. Fusionné avec le bloc qui suivait.
+
+Le reste de la relecture (aucun changement de code) :
+
+- migrations 040/041/042 rejouées sur une base **vierge** au schéma de `develop`, puis
+  rejouées une seconde fois (idempotence) ; colonnes **et** index du schéma migré
+  identiques à `sql/bdd_mysql.sql` de la branche (`information_schema` diffé) ;
+- PDO/requêtes préparées ligne à ligne sur `api/admin/{user,announcements,settings,
+  anticheat,user_notes,user_notices}.php`, `api/notices/index.php`,
+  `api/sessions_today.php`, `api/lib/moderation.php` ; `escHtml` partout dans
+  `admin/moderation.js` et `admin/site_panels.js` ;
+- garde de maintenance : `me/login/logout`, `admin/`, `cron/` exemptés, admin connecté
+  passe, 503 + `Retry-After` sinon — couvert par `tests-e2e/moderation.spec.js` ;
+- #114 et #117 n'avaient **jamais tourné en CI** (le workflow ne se déclenche que sur
+  les PR vers `develop`/`main`) : Vitest 1043/1043, PHPUnit 275/275, E2E 133/133, lint,
+  i18n, pools, docs et data verts en local sur la tête de #117.
+
+Angle mort assumé, inchangé : sans les migrations 040→042 jouées **avant** le pull
+Hostinger, `requireAuth()` (colonnes `ban_reason`/`banned_until`), `login.php`, `me.php`
+et l'INSERT de `game_sessions` (`guesses`) tombent en 500 — c'est le contrat de la
+checklist de release (`DEPLOY.md`, `npm run schema:check-prod`), pas un fallback à coder.
+
+---
+
 ## 2026-09-13 — Comparer nos parties, relance des invités, tableau de bord Activité (branche `feat/guest-nudge-compare-admin`)
 
 Trois idées validées par Hamza (« 8, 10, 16 » de la liste du soir), une PR empilée sur #112.
