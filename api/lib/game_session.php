@@ -18,31 +18,40 @@ class PersonadleDuplicateSessionException extends RuntimeException
 }
 
 /**
- * Avance la streak GLOBALE (tous modes confondus) d'un cran si le joueur n'a pas
- * déjà joué aujourd'hui, frontière de journée Europe/Paris. Extrait de
- * personadle_record_game_session() parce que le Mode Expert en a besoin sans
- * passer par l'agrégation user_stats : une journée où le joueur n'a fait que de
- * l'Expert reste une journée jouée.
+ * Avance la streak GLOBALE (tous modes confondus) d'un cran si la journée de JEU
+ * de la partie n'est pas encore comptée, frontière de journée Europe/Paris.
+ * Extrait de personadle_record_game_session() parce que le Mode Expert en a
+ * besoin sans passer par l'agrégation user_stats : une journée où le joueur n'a
+ * fait que de l'Expert reste une journée jouée.
+ *
+ * `$playedDate` est le jour de jeu validé par api/sessions.php (aujourd'hui ou
+ * hier). La version précédente datait la streak du jour de RÉCEPTION : une partie
+ * de 23 h 50 synchronisée après minuit (file hors ligne) comptait pour le
+ * lendemain, et la journée réellement jouée manquait — voir
+ * personadle_global_streak(). La date mémorisée ne recule jamais : une session
+ * de la veille arrivée après celle du jour laisse `global_streak_date` au jour.
  *
  * @return int La nouvelle valeur de global_streak.
  */
-function personadle_bump_global_streak(PDO $pdo, int $userId): int
+function personadle_bump_global_streak(PDO $pdo, int $userId, ?string $playedDate = null): int
 {
     $g = $pdo->prepare('SELECT global_streak, global_streak_date FROM users WHERE id = ? LIMIT 1');
     $g->execute([$userId]);
     $grow = $g->fetch();
-    $parisNow = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    $played   = $playedDate ?? (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    $lastDate = $grow['global_streak_date'] ?? null;
     $newGlobalStreak = personadle_global_streak(
-        $grow['global_streak_date'] ?? null,
-        $parisNow,
+        $lastDate,
+        $played,
         (int) ($grow['global_streak'] ?? 0)
     );
+    $newDate = ($lastDate !== null && $lastDate !== '' && $lastDate > $played) ? $lastDate : $played;
     $pdo->prepare(
         'UPDATE users
          SET global_streak = ?, global_streak_record = GREATEST(global_streak_record, ?),
              global_streak_date = ?
          WHERE id = ?'
-    )->execute([$newGlobalStreak, $newGlobalStreak, $parisNow, $userId]);
+    )->execute([$newGlobalStreak, $newGlobalStreak, $newDate, $userId]);
 
     return $newGlobalStreak;
 }
@@ -194,7 +203,7 @@ function personadle_record_game_session(
             $userId, $mode, $isExpert ? 1 : 0, $clientSessionId !== '' ? $clientSessionId : null,
             $playedDate, $targetName, $result,
             $attempts, $timeMs, json_encode($filters),
-            $guesses === null ? null : json_encode(array_values($guesses), JSON_UNESCAPED_UNICODE),
+            $guesses === null ? null : json_encode($guesses, JSON_UNESCAPED_UNICODE),
         ]);
     } catch (PDOException $dup) {
         if ($dup->getCode() === '23000') {
@@ -221,7 +230,7 @@ function personadle_record_game_session(
     //    directement à la streak globale, puis on renvoie les stats du mode
     //    INCHANGÉES — le client doit voir que sa streak Music n'a pas bougé.
     if ($isExpert) {
-        $globalStreak = personadle_bump_global_streak($pdo, $userId);
+        $globalStreak = personadle_bump_global_streak($pdo, $userId, $playedDate);
         $stmt = $pdo->prepare('SELECT * FROM user_stats WHERE user_id = ? AND mode = ? LIMIT 1');
         $stmt->execute([$userId, $mode]);
         $unchanged = $stmt->fetch() ?: [];
@@ -289,7 +298,7 @@ function personadle_record_game_session(
 
     // 2b. Streak GLOBALE (tous modes) — autoritative, basée sur la date Paris du jour.
     //     Indépendante des streaks par-mode : compte les jours consécutifs joués.
-    $newGlobalStreak = personadle_bump_global_streak($pdo, $userId);
+    $newGlobalStreak = personadle_bump_global_streak($pdo, $userId, $playedDate);
 
     // 3. Relire les stats mises à jour pour les renvoyer au client
     $stmt = $pdo->prepare('SELECT * FROM user_stats WHERE user_id = ? AND mode = ?');

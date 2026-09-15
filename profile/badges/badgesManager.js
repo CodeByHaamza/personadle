@@ -291,9 +291,8 @@ function trackP4ConsecutiveDays(profile, saveProfile, today) {
   y.setUTCDate(y.getUTCDate() - 1);
   const yesterday = y.toISOString().slice(0, 10);
 
-  profile.p4ConsecutiveDays = profile.p4LastDate === yesterday
-    ? (profile.p4ConsecutiveDays || 0) + 1
-    : 1;
+  profile.p4ConsecutiveDays =
+    profile.p4LastDate === yesterday ? (profile.p4ConsecutiveDays || 0) + 1 : 1;
   profile.p4LastDate = today;
   saveProfile();
 }
@@ -890,12 +889,35 @@ function attachBadgeClickEvents(profile, saveProfile, grid) {
   });
 }
 
+/**
+ * Replie / déplie une catégorie. `overflow: hidden` n'est posé sur le bloc que
+ * pendant l'animation (classe is-animating) et à l'état replié : à l'état ouvert
+ * il coupait la bulle d'info de la première rangée (badges.css).
+ */
+function setCategoryCollapsed(section, collapsed) {
+  const wrap = section.querySelector(".badges-grid-wrap");
+  if (wrap && !collapsed && section.classList.contains("collapsed")) {
+    wrap.classList.add("is-animating");
+    const done = (e) => {
+      if (e && e.target !== wrap) return;
+      wrap.classList.remove("is-animating");
+      wrap.removeEventListener("transitionend", done);
+    };
+    wrap.addEventListener("transitionend", done);
+    // Filet si transitionend ne vient pas (onglet en arrière-plan, reduced motion).
+    setTimeout(done, 600);
+  }
+  section.classList.toggle("collapsed", collapsed);
+  section
+    .querySelector(".badges-category-header")
+    ?.setAttribute("aria-expanded", String(!collapsed));
+}
+
 function setupCategoryCollapse(grid) {
   grid.querySelectorAll(".badges-category-header").forEach((header) => {
     header.addEventListener("click", () => {
       const section = header.closest(".badges-category-section");
-      const isCollapsed = section.classList.toggle("collapsed");
-      header.setAttribute("aria-expanded", String(!isCollapsed));
+      setCategoryCollapsed(section, !section.classList.contains("collapsed"));
     });
   });
 }
@@ -916,10 +938,7 @@ function setupBadgesSearch(grid) {
       });
       section.style.display = anyVisible ? "" : "none";
       // Auto-expand sections that have matching results
-      if (q && anyVisible) {
-        section.classList.remove("collapsed");
-        section.querySelector(".badges-category-header")?.setAttribute("aria-expanded", "true");
-      }
+      if (q && anyVisible) setCategoryCollapsed(section, false);
     });
   };
 }
@@ -1009,25 +1028,45 @@ function adjustTooltipPositions() {
       const modalRect = modal.getBoundingClientRect();
 
       setTimeout(() => {
-        const tooltipRect = tooltip.getBoundingClientRect();
+        // Tout se calcule depuis la géométrie du BADGE et la taille de la bulle,
+        // jamais depuis la position courante de la bulle : celle-ci dépend des
+        // styles inline du survol précédent et des règles nth-child de badges.css
+        // (écrites pour 4 colonnes, fausses dès que la grille auto-fill en a 2
+        // ou 3) — mesurer la bulle, c'était mesurer le résultat d'un calcul faux.
+        const itemRect = item.getBoundingClientRect();
+        const w = tooltip.offsetWidth;
+        const h = tooltip.offsetHeight;
+        const margin = 10;
+
+        // Verticalement d'abord : la modale est le conteneur de défilement, tout
+        // ce qui passe au-dessus de son bord haut est coupé. Première rangée d'une
+        // catégorie collée en haut → la bulle bascule SOUS le badge (signalé par
+        // un joueur, 2.2). `bottom: 110%` place la bulle à 10 % de la hauteur du
+        // badge au-dessus de lui, plus les 10 px du survol.
+        const topIfAbove = itemRect.top - itemRect.height * 0.1 - h - margin;
+        const below = topIfAbove < modalRect.top + margin;
+        tooltip.classList.toggle("badge-tooltip--below", below);
+        const dy = below ? "10px" : "-10px";
+
+        const centerX = itemRect.left + itemRect.width / 2;
 
         // Déborde à gauche
-        if (tooltipRect.left < modalRect.left + 10) {
+        if (centerX - w / 2 < modalRect.left + margin) {
           tooltip.style.left = "0";
           tooltip.style.right = "auto";
-          tooltip.style.transform = "translateX(0) translateY(-10px)";
+          tooltip.style.transform = `translateX(0) translateY(${dy})`;
         }
         // Déborde à droite
-        else if (tooltipRect.right > modalRect.right - 10) {
+        else if (centerX + w / 2 > modalRect.right - margin) {
           tooltip.style.left = "auto";
           tooltip.style.right = "0";
-          tooltip.style.transform = "translateX(0) translateY(-10px)";
+          tooltip.style.transform = `translateX(0) translateY(${dy})`;
         }
         // Centré (position normale)
         else {
           tooltip.style.left = "50%";
           tooltip.style.right = "auto";
-          tooltip.style.transform = "translate(-50%, -10px)";
+          tooltip.style.transform = `translate(-50%, ${dy})`;
         }
       }, 10);
     });
@@ -1141,7 +1180,11 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
 
   // Vérifier que le code n'est pas vide
   if (!code) {
-    showCodeMessage(msg, tCode("badges.event_code_empty", "⚠️ Please enter a code first!"), "warning");
+    showCodeMessage(
+      msg,
+      tCode("badges.event_code_empty", "⚠️ Please enter a code first!"),
+      "warning"
+    );
     return;
   }
 
@@ -1153,7 +1196,7 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     showCodeMessage(
       msg,
       tCode("badges.event_code_failed", "⚠️ Couldn't reach the server. Try again in a moment."),
-      "error",
+      "error"
     );
     input.value = "";
     return;
@@ -1181,7 +1224,11 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     saveProfile();
     renderBadgesModal(profile, saveProfile);
     renderBadgesPreview(profile);
-    showCodeMessage(msg, tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"), "success");
+    showCodeMessage(
+      msg,
+      tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
+      "success"
+    );
   } catch (e) {
     input.value = "";
 
@@ -1192,31 +1239,42 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
       case 401:
         showCodeMessage(
           msg,
-          tCode("badges.event_code_signin", "🔒 Sign in to redeem a code — badges are saved to your account."),
-          "warning",
+          tCode(
+            "badges.event_code_signin",
+            "🔒 Sign in to redeem a code — badges are saved to your account."
+          ),
+          "warning"
         );
         break;
       case 409:
-        showCodeMessage(msg, tCode("badges.event_code_already", "✅ You already redeemed this code!"), "success");
+        showCodeMessage(
+          msg,
+          tCode("badges.event_code_already", "✅ You already redeemed this code!"),
+          "success"
+        );
         break;
       case 410:
         showCodeMessage(
           msg,
           tCode("badges.event_code_expired", "⏰ This event is not active yet or has expired."),
-          "error",
+          "error"
         );
         break;
       case 400:
       case 404:
         // Les deux seuls cas où le code est réellement en cause.
-        showCodeMessage(msg, tCode("badges.event_code_error", "❌ Invalid code. Check your spelling!"), "error");
+        showCodeMessage(
+          msg,
+          tCode("badges.event_code_error", "❌ Invalid code. Check your spelling!"),
+          "error"
+        );
         break;
       default:
         // 500, panne réseau, ou bug client : ne jamais accuser le code.
         showCodeMessage(
           msg,
           tCode("badges.event_code_failed", "⚠️ Couldn't reach the server. Try again in a moment."),
-          "error",
+          "error"
         );
     }
   }

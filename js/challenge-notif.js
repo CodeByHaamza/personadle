@@ -11,15 +11,13 @@
  */
 
 import {
-  FILTER_STORAGE_KEYS,
   MODE_STATE_KEYS,
-  activeChallengeKey,
   fetchExpertStatus,
   getPendingActiveChallenge,
+  installActiveChallenge,
   modeLabel,
   modePageHref,
   normalizeModeKey,
-  parisDateKey,
   siteRootPrefix,
 } from "./gameCore.js";
 import { gainSocialLinkXp } from "./social-link.js";
@@ -285,49 +283,19 @@ function _render({
       return;
     }
 
-    (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
-
-    // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
-    // "tout désélectionné" (état volontaire), différent de l'absence de clé
-    // ("tout actif" par défaut, cf. initFilterMenu()). Si le joueur n'a jamais
-    // touché ses filtres pour ce mode, localStorage.getItem() renvoie null —
-    // on garde null tel quel pour que la restauration plus bas
-    // (checkChallengeCompletion(), js/challenge-result.js) le laisse absent au
-    // lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
-    const filterKey = FILTER_STORAGE_KEYS[modeKey] ?? null;
-    const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
-    const filters = challengeFilters && challengeFilters !== "[]" ? challengeFilters : null;
-    if (filterKey && filters) localStorage.setItem(filterKey, filters);
-
-    localStorage.setItem(
-      activeChallengeKey(challengeIsExpert),
-      JSON.stringify({
-        msgId: id,
-        mode: modeKey,
-        // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé.
-        // C'était `date` (= `challenge_date`), et TOUTES les lectures de la case
-        // le comparent à `parisDateKey()` d'aujourd'hui : un défi envoyé la veille
-        // au soir puis accepté le lendemain matin naissait donc déjà périmé — pas
-        // de bannière (supprimée au chargement), pas de cible dédiée (le mode
-        // rejouait celle du jour), et un statut `accepted` que plus rien ne
-        // pouvait résoudre. C'est le « je suis redirigé mais il n'y a pas de
-        // défi, et je reste bloqué en défi en cours » signalé en prod.
-        // Rien ne s'y oppose côté règles : la cible et le score voyagent en clair
-        // dans le message, ils ne dépendent d'aucune date.
-        date: parisDateKey(),
-        // Jour d'origine, conservé pour l'affichage et le débogage uniquement.
-        challengeDate: date ?? null,
-        score,
-        senderId,
-        filterKey,
-        originalFilters,
-        isExpert: challengeIsExpert,
-        // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
-        // du jour et n'enregistrera PAS la partie en session quotidienne.
-        // Null (ancien défi) = comportement historique, cible du jour.
-        target: challengeTarget ?? null,
-      })
-    );
+    // Même geste que la page Amis (Accepter et Reprendre) : case périmée libérée,
+    // état du mode purgé, filtres de l'expéditeur posés, case datée du jour de
+    // JEU — tout vit dans gameCore.js, plus de copie à tenir alignée ici.
+    installActiveChallenge({
+      msgId: id,
+      mode: modeKey,
+      score,
+      senderId,
+      challengeDate: date ?? null,
+      challengeFilters,
+      challengeTarget,
+      isExpert: challengeIsExpert,
+    });
 
     // Un défi Expert rapporte davantage (25/50 au lieu de 15/35) : les deux
     // joueurs ont dû débloquer le mode pour qu'il existe.

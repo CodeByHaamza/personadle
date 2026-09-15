@@ -63,26 +63,37 @@ function personadle_is_perfect(string $result, int $attempts): bool
  * et le résultat — c'est un streak d'assiduité, comme côté client). Toute la
  * frontière de journée est en heure de Paris.
  *
+ * Le jour comptabilisé est le jour de JEU de la partie (`played_date`, validé par
+ * api/sessions.php à aujourd'hui ou hier), pas le jour où elle arrive au serveur.
+ * Une partie jouée à 23 h 50 et synchronisée à 0 h 10 (file hors ligne) était
+ * datée du lendemain : la journée de la veille manquait, et si la précédente
+ * était l'avant-veille, la streak repartait à 1 alors que le joueur avait joué
+ * tous les jours — la streak par mode, elle, lisait déjà `played_date`.
+ *
+ * Une partie datée d'AVANT la dernière journée comptée (la session de la veille
+ * qui arrive après celle du jour) ne change rien : sa journée est déjà comptée
+ * ou déjà passée, on ne recule jamais.
+ *
  * @param string|null $lastDateParis  global_streak_date précédente ("Y-m-d") ou null.
- * @param string      $todayParis     Date du jour "Y-m-d" en heure de Paris.
+ * @param string      $playedDateParis Jour de jeu "Y-m-d" en heure de Paris.
  * @param int         $currentStreak  Streak globale actuelle.
  * @return int Nouvelle streak globale.
  */
 function personadle_global_streak(
     ?string $lastDateParis,
-    string $todayParis,
+    string $playedDateParis,
     int $currentStreak
 ): int {
     if ($lastDateParis === null || $lastDateParis === '') {
         return 1;
     }
-    if ($lastDateParis === $todayParis) {
-        return max(1, $currentStreak); // déjà joué aujourd'hui → inchangé
+    if ($playedDateParis <= $lastDateParis) {
+        return max(1, $currentStreak); // journée déjà comptée (ou antérieure) → inchangé
     }
 
-    $today = new DateTime($todayParis, new DateTimeZone('Europe/Paris'));
-    $last  = new DateTime($lastDateParis, new DateTimeZone('Europe/Paris'));
-    $daysDiff = (int) $last->diff($today)->format('%r%a');
+    $played = new DateTime($playedDateParis, new DateTimeZone('Europe/Paris'));
+    $last   = new DateTime($lastDateParis, new DateTimeZone('Europe/Paris'));
+    $daysDiff = (int) $last->diff($played)->format('%r%a');
 
     return $daysDiff === 1 ? $currentStreak + 1 : 1;
 }
