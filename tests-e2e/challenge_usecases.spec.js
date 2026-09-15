@@ -1,5 +1,6 @@
 import { test, expect, request as pwRequest } from "@playwright/test";
 import { csrfHeader } from "./helpers/csrf.js";
+import { gotoSettled } from "./helpers/page.js";
 
 /**
  * tests-e2e/challenge_usecases.spec.js — TOUS les cas d'usage d'un défi, contre
@@ -119,7 +120,7 @@ async function classicStats(user) {
 /** Page de navigateur connectée avec les cookies d'un contexte API. */
 async function pageIn(context, path) {
   const page = await context.newPage();
-  await page.goto(path);
+  await gotoSettled(page, path);
   return page;
 }
 
@@ -312,13 +313,13 @@ test.describe.serial("UI — deux défis en même temps, Plus tard, Refuser, mé
     await page.waitForTimeout(2500);
     await expect(page.locator("#cn-overlay"), "pas de nouvelle pop-up à l'accueil").toHaveCount(0);
 
-    await page.goto("/profile/profile.html");
+    await gotoSettled(page, "/profile/profile.html");
     await page.waitForTimeout(2500);
     await expect(page.locator("#cn-overlay"), "pas de pop-up sur le profil non plus").toHaveCount(
       0
     );
 
-    await page.goto("/profile/friends/friends.html");
+    await gotoSettled(page, "/profile/friends/friends.html");
     await page.locator('.fr-tab[data-tab="inbox"]').click();
     const pendingId = (await statusOf(bob, carolId)) === "unread" ? carolId : daveId;
     await expect(
@@ -384,7 +385,7 @@ test.describe.serial("UI — accepter depuis le profil, exclusivité, abandon, e
     await page.locator("#cn-overlay .cn-btn--later").click();
 
     // Boîte : même refus.
-    await page.goto("/profile/friends/friends.html");
+    await gotoSettled(page, "/profile/friends/friends.html");
     await page.locator('.fr-tab[data-tab="inbox"]').click();
     await page.locator(`.js-accept-challenge[data-mid="${daveId}"]`).click();
     await page.waitForTimeout(1000);
@@ -421,10 +422,20 @@ test.describe.serial("UI — accepter depuis le profil, exclusivité, abandon, e
     await expect.poll(() => statusOf(bob, daveId)).toBe("read");
 
     const id = await sendChallengeOk(carol, bob, "classic", { target: "Yu Narukami" });
-    await page.reload();
-    await page.locator('.fr-tab[data-tab="inbox"]').click();
-    await page.locator(`.js-accept-challenge[data-mid="${id}"]`).click();
-    await page.waitForURL(/classiqueMode\/classiqueMode\.html/, { timeout: 15_000 });
+    // Accepter appelle le serveur avant de rediriger : si l'appel tombe dans la
+    // fenêtre de maintenance (503), le client le dit et reste sur la Boîte — on
+    // recommence, comme le joueur.
+    for (let attempt = 0; attempt < 4; attempt++) {
+      await gotoSettled(page, "/profile/friends/friends.html");
+      await page.locator('.fr-tab[data-tab="inbox"]').click();
+      await page.locator(`.js-accept-challenge[data-mid="${id}"]`).click();
+      const navigated = await page
+        .waitForURL(/classiqueMode\/classiqueMode\.html/, { timeout: 6_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (navigated) break;
+    }
+    expect(page.url()).toMatch(/classiqueMode\/classiqueMode\.html/);
     await expect
       .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("target") || "null")?.nom))
       .toBe("Yu Narukami");
@@ -445,7 +456,7 @@ test.describe.serial("UI — accepter depuis le profil, exclusivité, abandon, e
     expect(localAfterChallenge, "les stats locales non plus").toBe(0);
 
     // La partie du jour : la cible du défi a été retirée, celle du jour revient.
-    await page.goto("/classiqueMode/classiqueMode.html");
+    await gotoSettled(page, "/classiqueMode/classiqueMode.html");
     await expect(page.locator("#challengeBanner")).toHaveCount(0);
     const daily = await page.evaluate(
       () => JSON.parse(localStorage.getItem("target") || "null")?.nom
@@ -454,9 +465,21 @@ test.describe.serial("UI — accepter depuis le profil, exclusivité, abandon, e
     expect(daily).not.toBe("Yu Narukami");
     await page.locator("#textbar").fill(daily);
     await page.locator("#guessButton").click();
+    await expect(page.locator("#victoryBox")).toBeVisible({ timeout: 10_000 });
 
+    // Si le POST /api/sessions est tombé dans la fenêtre de maintenance de
+    // moderation.spec.js (503), le client l'a mis en file (pendingSessions) et
+    // ne le rejouera qu'au prochain chargement : on recharge, comme le joueur
+    // en revenant sur le site — c'est le comportement réel du client.
     await expect
-      .poll(async () => (await classicStats(bob)).games, { timeout: 15_000 })
+      .poll(
+        async () => {
+          const games = (await classicStats(bob)).games;
+          if (games === before.games) await page.reload();
+          return games;
+        },
+        { timeout: 20_000, intervals: [1000, 2000, 3000] }
+      )
       .toBe(before.games + 1);
     expect((await classicStats(bob)).wins).toBe(before.wins + 1);
     await page.close();

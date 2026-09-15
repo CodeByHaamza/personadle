@@ -13,6 +13,72 @@
 
 ---
 
+## 2026-09-15 — test(E2E) : Expert ↔ défis, déblocages, streak vue du profil, mobile — et deux bugs de plus (même branche)
+
+Deuxième vague demandée par Hamza (« streak, stats, mobile, débloquer les modes Expert
+couplé aux défis ça bug beaucoup, badges, titres, wallpapers… ») : 22 tests E2E de
+plus, tous contre la vraie pile, et deux bugs sortis en les écrivant.
+
+### Les bugs
+
+6. **L'annonce « Mode Expert débloqué » jouait une fois sur deux.** Le cache de l'état
+   Expert est rattaché au compte (`window._currentUser.id`, posé par `initAuth()`) et
+   la porte Expert n'attendait pas l'auth : quand `/expert-status` répondait avant
+   `/me`, le cache n'était ni lu (pas de diff → pas de cadenas qui explose) ni écrit
+   (l'annonce était perdue pour la fois suivante aussi). → `fetchExpertStatus()`
+   attend `window._authReady` avant de toucher au cache. Test unitaire rouge sans le
+   correctif (auth résolue un tour après la réponse).
+7. **4 titres fantômes de plus en prod** (`looking_cool`, `pancakes`, `first_awakening`,
+   `always_be_positive`), vus dans `user_titles` du compte de Hamza — la 039 n'en
+   listait que 7. → migration **043**, même méthode par slug, rejouée sur base vierge
+   avec les trois cas seedés (fantôme seul → transféré ; les deux → le canonique
+   reste ; fantôme équipé → repointé), 0 orphelin, idempotente.
+
+### Le diagnostic du titre I Am Not Afraid (compte de Hamza)
+
+Les SELECT prod : `user_stats.classic` = 74 parties / 71 victoires, et
+`user_titles` contient bien `aigis_i_am_not_afraid` depuis le 2026-07-24 (import v1).
+Le compte de Hamza est sain côté serveur ; le cas « badge oui, titre non » rapporté
+est celui d'un ami — même requête à lancer avec son pseudo pour trancher entre
+« < 50 victoires Classique enregistrées » et la course corrigée par
+`syncTitlesWithBackend()`. Au passage : `user_stats` (71) ≫ `game_sessions` (3
+victoires depuis le 24/07) est NORMAL — `user_stats` porte l'historique v1 importé,
+`game_sessions` ne commence qu'à la 2.0. Le badge `velvet_regular` (50 jours) a été
+accordé à l'import, alors que `game_sessions` n'a que 35 jours distincts : deux
+sources, deux histoires.
+
+### Tests ajoutés
+
+- `tests-e2e/unlocks_usecases.spec.js` (15) — **Expert ↔ défis** : porte à 9/10
+  victoires rapides, session Expert 403 avant, `?expert=1` renvoyé, défi Expert vers un
+  ami non débloqué refusé (409), normal + Expert coexistent le même jour, un défi Expert
+  en cours ne bloque pas un défi normal (deux cases), accepter un Expert mène sur
+  `?expert=1` avec le bandeau, le jouer n'écrit ni session normale ni Expert, le cadenas
+  s'anime une fois. **Déblocages** : badge `first_win` / `ace_defective` (403 → 200,
+  idempotent, catalogue), inconnu 404, manuel accordé, fond d'écran `rise_dungeons`
+  (29 → 403, 30 → 200), titre `marie_i_remembered` après 12 badges accordés par l'admin,
+  code événement (201 / 409 / désactivé 404 / inconnu 404 / vide 400). **Autre
+  appareil** : badges et titre accordés en base affichés sur un navigateur neuf, titre
+  équipé → persiste côté serveur et sur un troisième navigateur.
+- `tests-e2e/mobile_streak_usecases.spec.js` (7) — **streak et stats vues du profil**
+  après de vraies parties (0 → hier par API + victoire du jour au navigateur → Parties 2
+  / Victoires 2 / Série 2 / Record 2 ; abandon Émoji → Abandons 1, Parties 3, série
+  toujours 2 ; navigateur neuf → mêmes chiffres). **Mobile 390 × 844 tactile** : pop-up
+  de défi dans l'écran, Accepter au doigt → mode + bandeau, aucun débordement horizontal
+  (accueil, mode, Amis, profil), Boîte au doigt, modale des badges dans l'écran, bulle
+  d'info entière.
+- `tests-e2e/helpers/page.js` — `gotoSettled()` : recharge tant que l'écran de
+  maintenance (déclenché en parallèle par `moderation.spec.js`) est là. Les trois
+  nouveaux specs passent par lui et par `call()` (503 rejoué) : 6 passages complets
+  consécutifs sans échec (184/184).
+- `api/auth/register.php` : limite hors prod 50 → 200 inscriptions / 15 min — la suite
+  complète en fait 51, la 51e tombait en 429. Prod inchangée (5).
+- `tests/expertUnlock.test.js` (+2).
+
+Angle mort : la limite admin (300 requêtes / 5 min, `requireAdmin`) est atteinte si on
+enchaîne deux suites complètes en moins de 5 min en local — pas en CI (un passage par
+job). `DELETE FROM rate_limits` dans le conteneur pour relancer.
+
 ## 2026-09-15 — test(défis, stats) : tous les cas d'usage, et les cinq bugs qu'ils ont sortis (branche `test/defis-stats-usecases`)
 
 Demande Hamza : « tester TOUS les cas de défi possibles » (pop-up index / profil,
