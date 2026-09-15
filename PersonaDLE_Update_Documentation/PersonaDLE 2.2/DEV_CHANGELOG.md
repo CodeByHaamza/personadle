@@ -56,6 +56,96 @@ checklist de release (`DEPLOY.md`, `npm run schema:check-prod`), pas un fallback
 
 ---
 
+## 2026-09-15 — Modération avec messages, annonces, maintenance (branche `feat/admin-moderation-maintenance`)
+
+Réponse à « on peut rendre le menu admin plus booster encore ? genre laisser un message pour
+quand je bannis une personne » → « FAIT TOUT et la possibilité de mettre le site en
+maintenance ». Un ban sans explication était un mur pour le joueur et une amnésie pour
+l'admin ; il n'existait aucun canal admin → joueur, et fermer le site voulait dire « couper
+Apache ». Tout passe par la **migration 042** (`042_moderation_maintenance.sql`, MariaDB
+`IF NOT EXISTS`, rejouable — reflétée dans `sql/bdd_mysql.sql`).
+
+### Base (migration 042)
+
+- `users` : `ban_reason` (300, vu par le joueur), `ban_note` (interne), `banned_at`,
+  `banned_until` (NULL = définitif), `reset_local_state_at`.
+- `user_notices` : messages de l'équipe (type `warning`/`info`, `read_at`).
+- `admin_notes` : carnet interne par joueur, jamais exposé.
+- `announcements` : bandeau global (`level` info/warning/maintenance, FR + EN optionnel,
+  fenêtre `starts_at`/`ends_at`, `is_active`).
+- `site_settings` : clé/valeur (`maintenance_enabled`, `maintenance_message_fr/en`,
+  `maintenance_until`) — extensible à d'autres réglages sans nouvelle migration.
+
+### Serveur
+
+- **`api/lib/moderation.php`** : `personadle_ban_state($pdo, $row)` — `null` si pas banni,
+  sinon `{reason, until}` ; **un ban à durée échu est levé en base au passage** (colonnes
+  remises à NULL), pas de cron. `personadle_site_setting()` / `personadle_set_site_setting()`
+  (upsert, cache statique par requête), `personadle_maintenance_state()`,
+  `personadle_active_announcements()` (fenêtre + flag, maintenance devant),
+  **`personadle_maintenance_gate($pdo)`** : appelé en fin de `bootstrap.php`, renvoie **503
+  `{"error":"maintenance", …}`** à tout le monde sauf `auth/(me|login|logout)`, `admin/`,
+  `cron/`, CLI et les admins connectés (`is_admin` mis en cache 60 s en session pour ne pas
+  requêter `users` à chaque appel).
+- `bootstrap.php` : `requireAuth()` lit les colonnes de ban et passe par `personadle_ban_state`
+  (un ban échu ne bloque donc plus) ; **`jsonErrorWith($message, $status, $extra)`** pour les
+  erreurs avec champs.
+- `auth/login.php` : compte banni → 403 `{"error", "code":"banned", "reason", "until"}`.
+  Rate limit login **50/15 min hors prod** (5 en prod), même logique que `register.php` : les
+  specs E2E se connectent toutes depuis la même IP et un retry CI rejoue le `beforeAll`.
+- `auth/me.php` : toute réponse porte désormais `maintenance`, `announcements`,
+  `reset_local_state_at` (et `banned` quand la session vient d'être détruite pour ban) —
+  **un seul appel** au chargement, pas de nouvel aller-retour par page.
+- `api/notices/index.php` (+ `.htaccess`) : `GET /api/notices/` (mes messages non lus),
+  `PATCH /api/notices/:id` (accusé). Dossier avec slash final, comme `friends/` et
+  `messages/` (piège mod_dir).
+- `api/admin/` : `user.php` (GET expose ban, `notes`, `notices` ; PATCH `is_banned` avec
+  `ban_reason`/`ban_note`/`ban_hours` (0 = définitif), `reset_local_state`),
+  `user_notes.php`, `user_notices.php`, `announcements.php` (CRUD), `settings.php`
+  (GET/PATCH maintenance), `anticheat.php` (écarts « Daily target mismatch » de `error_log`
+  groupés par joueur, `?days=`), `users.php` (`?sort=created|last_login|games|pseudo`,
+  `?export=csv` — `;` comme séparateur, Excel FR). Chaque fichier a sa `RewriteRule`.
+  Au passage : `activity.php` lisait `error_logs` (la table est `error_log`, singulier) —
+  corrigé ici, la #114 seule a le bug.
+
+### Client
+
+- **`js/site_notices.js`** (+ `css/site_notices.css`, injecté à la demande) :
+  `showMaintenance()` (écran plein Velvet pour le joueur, `body.maintenance-active` ; simple
+  bandeau avec lien vers l'admin pour un admin connecté), `showAnnouncements()` (un bandeau
+  par annonce, fermeture mémorisée par id dans `dismissedAnnouncements`),
+  `showTeamNotices()` (messages de l'équipe, accusés via `api.notices.markRead`),
+  `applyRemoteLocalReset(at)` (vide `MODE_STATE_KEYS` normal + Expert, `gameId_*`,
+  `guessLog_*`, `activeChallenge`, `lastPlayedDate_*` — **pas** le profil ni la langue ;
+  accusé dans `localResetAckAt`, jamais deux fois). `applySiteNotices(me)` orchestre le tout
+  depuis `initAuth()` et **ne fait rien sur `/admin/`** (un bandeau y interceptait le clic
+  de navigation en test).
+- `js/auth.js` : `resolveBanMessage(err)` → « Compte suspendu jusqu'au … Raison : … » au
+  login (i18n `auth.banned_until` / `banned_permanent` / `banned_reason`, 6 langues).
+- `js/api.js` : `api.notices.pending()` / `markRead(id)`.
+- Admin : onglet **🛡️ Modération** (`admin/moderation.js` — ban avec raison/durée/note,
+  levée, messages + historique lu/pas lu, notes, profil public, reset ciblé), panneaux
+  **📣 Annonces**, **🔧 Maintenance**, **🛡️ Anti-triche** (`admin/site_panels.js`), tri et
+  export CSV de la liste. Le bouton ban de l'onglet Profil renvoie vers Modération.
+
+### Tests
+
+- `tests/site_notices.test.js` (12) ; PHPUnit +5 (état de ban, levée à l'échéance,
+  définitif, upsert `site_settings`, fenêtre des annonces) ;
+  `tests-e2e/moderation.spec.js` (7, stack complète : 403 `banned` au login, accusé de
+  message, 403 admin-only, annonce via `/me`, **503 joueur / admin qui passe**, CSV).
+
+### Angles morts
+
+- La maintenance ne se lève **pas** toute seule à `maintenance_until` (informatif) — choix :
+  c'est l'admin qui rouvre, après avoir vérifié.
+- Le cache `is_admin` de 60 s en session : un admin rétrogradé garde l'accès pendant la
+  maintenance jusqu'à une minute.
+- Les annonces sont livrées par `/me` : un joueur qui reste sur une page sans recharger ne
+  les voit pas avant sa prochaine navigation.
+
+---
+
 ## 2026-09-13 — Comparer nos parties, relance des invités, tableau de bord Activité (branche `feat/guest-nudge-compare-admin`)
 
 Trois idées validées par Hamza (« 8, 10, 16 » de la liste du soir), une PR empilée sur #112.

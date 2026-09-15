@@ -802,7 +802,10 @@
     "forgot_password": "Password dimenticata?",
     "send_reset": "Invia il link",
     "back": "Torna al login",
-    "reset_sent": "Se l'email esiste, è stato inviato un link di reset. Controlla la posta."
+    "reset_sent": "Se l'email esiste, è stato inviato un link di reset. Controlla la posta.",
+    "banned_until": "Account sospeso fino al {{date}}.",
+    "banned_permanent": "Account bannato.",
+    "banned_reason": "Motivo: {{reason}}"
   },
   "leaderboard": {
     "title": "Classifica",
@@ -1413,5 +1416,20 @@
     "error_invalid_expired": "Il link di ripristino non è valido o è scaduto.",
     "error_network": "Errore di rete. Riprova.",
     "success": "Password aggiornata! Ora puoi accedere."
+  },
+  "maintenance": {
+    "title": "Manutenzione in corso",
+    "default": "La Velvet Room è chiusa per un momento. Torniamo subito.",
+    "until": "Ritorno previsto: {{time}}",
+    "hint": "I tuoi progressi sono al sicuro — torna un po' più tardi.",
+    "admin_banner": "Modalità manutenzione ATTIVA — i giocatori vedono la schermata di manutenzione.",
+    "admin_link": "Apri l'admin"
+  },
+  "announce": {
+    "until": "fino al {{time}}"
+  },
+  "notice": {
+    "from_team": "Messaggio del team",
+    "ack": "Capito"
   }
 }

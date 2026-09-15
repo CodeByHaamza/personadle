@@ -68,6 +68,14 @@ CREATE TABLE users (
     is_admin             TINYINT(1)       NOT NULL DEFAULT 0,
     -- Modération : compte banni / pseudo verrouillé (api/admin/, login.php).
     is_banned            TINYINT(1)       NOT NULL DEFAULT 0,
+    -- Ban avec message (migration 042) : raison VISIBLE par le joueur, note interne,
+    -- date, échéance (NULL = définitif — un ban échu est levé au prochain login).
+    ban_reason           VARCHAR(300)     NULL,
+    ban_note             TEXT             NULL,
+    banned_at            DATETIME         NULL,
+    banned_until         DATETIME         NULL,
+    -- Reset ciblé (migration 042) : le client vide son état local des modes si plus récent que son accusé.
+    reset_local_state_at DATETIME         NULL,
     pseudo_locked        TINYINT(1)       NOT NULL DEFAULT 0,
     -- Date de la dernière récupération de streak Jack Frost (cooldown 60j, migration 013).
     streak_recovered_at  DATETIME         DEFAULT NULL,
@@ -631,6 +639,60 @@ CREATE INDEX idx_messages_challenge_dedup
 -- =============================================================================
 -- 20. ERROR_LOG — Observabilité applicative (erreurs backend capturées)
 -- =============================================================================
+-- =============================================================================
+-- MODÉRATION AVEC MESSAGES, ANNONCES, MAINTENANCE (migration 042)
+-- =============================================================================
+
+-- Avertissement / message de l'équipe à un joueur, vu une fois (read_at).
+CREATE TABLE user_notices (
+    id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT UNSIGNED NOT NULL,
+    admin_id   BIGINT UNSIGNED NULL,
+    type       VARCHAR(20)     NOT NULL DEFAULT 'warning',   -- 'warning' | 'info'
+    message    TEXT            NOT NULL,
+    created_at TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    read_at    DATETIME        NULL,
+    INDEX idx_user_notices_pending (user_id, read_at),
+    CONSTRAINT fk_user_notices_user  FOREIGN KEY (user_id)  REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_notices_admin FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Carnet interne de l'admin sur un joueur — jamais exposé au joueur.
+CREATE TABLE admin_notes (
+    id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT UNSIGNED NOT NULL,
+    admin_id   BIGINT UNSIGNED NULL,
+    note       TEXT            NOT NULL,
+    created_at TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_admin_notes_user (user_id, created_at),
+    CONSTRAINT fk_admin_notes_user  FOREIGN KEY (user_id)  REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_admin_notes_admin FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Annonce globale (bandeau sur toutes les pages), FR + EN, fenêtre optionnelle.
+CREATE TABLE announcements (
+    id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    level      VARCHAR(20)     NOT NULL DEFAULT 'info',      -- 'info' | 'warning' | 'maintenance'
+    message_fr TEXT            NOT NULL,
+    message_en TEXT            NULL,                          -- NULL = message_fr partout
+    starts_at  DATETIME        NULL,                          -- NULL = tout de suite
+    ends_at    DATETIME        NULL,                          -- NULL = jusqu'à désactivation
+    is_active  TINYINT(1)      NOT NULL DEFAULT 1,
+    created_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_announcements_active (is_active, starts_at, ends_at),
+    CONSTRAINT fk_announcements_admin FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Réglages du site (maintenance_enabled, maintenance_message_fr/en, maintenance_until).
+CREATE TABLE site_settings (
+    setting_key   VARCHAR(60)     NOT NULL PRIMARY KEY,
+    setting_value TEXT            NULL,
+    updated_by    BIGINT UNSIGNED NULL,
+    updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_site_settings_admin FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE error_log (
     id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     level      VARCHAR(20)     NOT NULL DEFAULT 'error',

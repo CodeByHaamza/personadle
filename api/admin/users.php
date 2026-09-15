@@ -10,13 +10,45 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-requireAdmin();
+$adminId = requireAdmin();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     jsonError('Method Not Allowed', 405);
 }
 
 $pdo = pdo();
+
+// ── Tri (2.2) : created (défaut), last_login, pseudo ─────────────────────────
+$SORTS = [
+    'created'    => 'u.created_at DESC',
+    'last_login' => 'u.last_login_at DESC',
+    'pseudo'     => 'u.pseudo ASC',
+];
+$sortKey = (string) ($_GET['sort'] ?? 'created');
+$orderBy = $SORTS[$sortKey] ?? $SORTS['created'];
+
+// ── Export CSV (2.2) : ?export=csv — tous les comptes non supprimés ──────────
+if (($_GET['export'] ?? '') === 'csv') {
+    personadle_log_admin_action($pdo, $adminId, 'users.export_csv', 'user', '*', []);
+    $rows = $pdo->query(
+        'SELECT u.id, u.pseudo, u.email, u.lang, u.friend_code, u.is_admin, u.is_banned, u.created_at, u.last_login_at,
+                (SELECT COUNT(*) FROM game_sessions s WHERE s.user_id = u.id) AS games
+         FROM users u WHERE u.is_deleted = 0 ORDER BY u.created_at DESC'
+    )->fetchAll();
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="personadle_users_' . date('Y-m-d') . '.csv"');
+    $out = fopen('php://output', 'wb');
+    fwrite($out, "\xEF\xBB\xBF"); // BOM : Excel lit l'UTF-8
+    fputcsv($out, ['id', 'pseudo', 'email', 'lang', 'friend_code', 'is_admin', 'is_banned', 'created_at', 'last_login_at', 'games'], ';');
+    foreach ($rows as $r) {
+        fputcsv($out, [
+            $r['id'], $r['pseudo'], $r['email'], $r['lang'], $r['friend_code'],
+            (int) $r['is_admin'], (int) $r['is_banned'], $r['created_at'], $r['last_login_at'], (int) $r['games'],
+        ], ';');
+    }
+    fclose($out);
+    exit;
+}
 
 // ── Pagination ────────────────────────────────────────────────────────────────
 $page  = max(1, (int) ($_GET['page']  ?? 1));
@@ -45,7 +77,7 @@ if ($q !== '') {
          LEFT JOIN profiles p ON p.user_id = u.id
          WHERE u.is_deleted = 0
            AND (u.pseudo LIKE ? OR u.email LIKE ? OR u.friend_code LIKE ?)
-         ORDER BY u.created_at DESC
+         ORDER BY ' . $orderBy . '
          LIMIT ? OFFSET ?'
     );
     $stmt->execute([$like, $like, $like, $limit, $offset]);
@@ -61,7 +93,7 @@ if ($q !== '') {
          FROM users u
          LEFT JOIN profiles p ON p.user_id = u.id
          WHERE u.is_deleted = 0
-         ORDER BY u.created_at DESC
+         ORDER BY ' . $orderBy . '
          LIMIT ? OFFSET ?'
     );
     $stmt->execute([$limit, $offset]);
