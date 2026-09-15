@@ -453,6 +453,68 @@ export function resetTitlesUnlockedState() {
 }
 
 /**
+ * Réconcilie les titres local → backend, comme syncBadgesWithBackend() le fait
+ * pour les badges depuis toujours. Les titres n'avaient PAS ce rattrapage, et
+ * c'est ce qui produisait « j'ai le badge des 50 jours mais pas le titre des
+ * 50 victoires » :
+ *
+ * En fin de partie, checkUnlocksAfterGame() tourne juste après
+ * savePendingSession() — SANS l'attendre. Le client compte déjà la 50ᵉ victoire
+ * (updateProfileStats), donc il pose le titre en local et POST /titles/unlock ;
+ * mais le serveur, qui revérifie sur `user_stats`, n'a pas encore reçu la
+ * session : 403 « Condition not met », avalé. Le titre est alors dans
+ * `profile.unlockedTitles` (donc plus jamais renvoyé par checkAndUnlockTitles,
+ * qui saute ce qui est déjà local) mais absent de `user_titles` — invisible sur
+ * tout autre appareil, et impossible à équiper. Les badges, eux, sont repoussés
+ * à chaque visite du profil.
+ *
+ * Règle : le backend est la source de vérité (js/cloud-sync.js). Une entrée
+ * locale qu'il refuse pour de bon (403 : condition réellement non remplie, par
+ * exemple une victoire comptée en local mais jamais enregistrée) est un titre
+ * fantôme — on la retire, le joueur ne doit pas voir un titre qu'il ne peut ni
+ * équiper ni afficher aux autres. Un échec réseau, lui, garde l'entrée : on
+ * réessaiera à la prochaine visite.
+ *
+ * @param {object} profile  profil local (personaUserProfile)
+ * @param {string[]} serverSlugs  slugs que /api/titles donne comme débloqués
+ * @param {() => void} saveProfile
+ * @returns {Promise<{pushed:string[], dropped:string[]}>}
+ */
+export async function syncTitlesWithBackend(profile, serverSlugs, saveProfile) {
+  const api = window._personadleApi;
+  const user = window._currentUser;
+  const result = { pushed: [], dropped: [] };
+  if (!api?.titles?.unlock || !user) return result;
+
+  // Même garde anti-import que les badges : un profil local venu d'un autre
+  // compte ne pousse rien vers le backend.
+  if (profile._accountId && String(profile._accountId) !== String(user.id)) return result;
+
+  const server = new Set(serverSlugs);
+  const local = Array.isArray(profile.unlockedTitles) ? profile.unlockedTitles : [];
+  const toPush = local.filter((slug) => !server.has(slug));
+
+  for (const slug of toPush) {
+    try {
+      await api.titles.unlock(slug);
+      result.pushed.push(slug);
+      const t = _titlesData.find((x) => x.slug === slug);
+      if (t) t.is_unlocked = 1;
+    } catch (err) {
+      if (Number(err?.status) === 403) {
+        result.dropped.push(slug);
+        profile.unlockedTitles = profile.unlockedTitles.filter((s) => s !== slug);
+        const t = _titlesData.find((x) => x.slug === slug);
+        if (t) t.is_unlocked = 0;
+      }
+      // 404 (titre inconnu côté serveur) ou réseau : on laisse tel quel.
+    }
+  }
+  if (result.dropped.length) saveProfile();
+  return result;
+}
+
+/**
  * Rafraîchissement léger après un pull cloud (sans re-fetch de /api/titles) :
  * resync l'état débloqué depuis profile.unlockedTitles, résout l'équipé,
  * revérifie les conditions, re-rend.
@@ -473,6 +535,9 @@ export async function initTitlesSection(profile, saveProfile, saveProfileToCloud
   //    - vrais IDs (pour les appels unlock)
   //    - noms localisés (depuis la BDD)
   //    - is_unlocked PER-USER (la source de vérité la plus fiable)
+  // `serverSlugs` reste null si l'API n'a pas répondu : sans vérité serveur, on
+  // ne réconcilie rien (ni push, ni retrait) — on repart du local comme avant.
+  let serverSlugs = null;
   try {
     const res = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: "include" });
     const json = await res.json();
@@ -480,6 +545,7 @@ export async function initTitlesSection(profile, saveProfile, saveProfileToCloud
     if (apiTitles.length > 0) {
       const bySlug = {};
       for (const t of apiTitles) bySlug[t.slug] = t;
+      serverSlugs = apiTitles.filter((t) => Number(t.is_unlocked) === 1).map((t) => t.slug);
 
       _titlesData = _titlesData.map((t) => {
         const api = bySlug[t.slug];
@@ -495,6 +561,11 @@ export async function initTitlesSection(profile, saveProfile, saveProfileToCloud
       });
     }
   } catch (_) {}
+
+  // 1bis. Local → backend : ce que cet appareil croit débloqué et que le serveur
+  //       n'a pas (déblocage refusé dans la course de fin de partie, ou fait hors
+  //       ligne) est repoussé ; ce qu'il refuse pour de bon est retiré du local.
+  if (serverSlugs) await syncTitlesWithBackend(profile, serverSlugs, saveProfile);
 
   // 2. Fusionner avec localStorage (titres débloqués offline ou sur un autre appareil)
   _refreshTitlesUnlockState(profile);

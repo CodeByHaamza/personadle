@@ -26,16 +26,13 @@ import {
   applyRank10Effect,
 } from "../../js/social-link.js";
 import {
-  FILTER_STORAGE_KEYS,
   MODES,
-  MODE_STATE_KEYS,
-  activeChallengeKey,
   fetchExpertStatus,
   getPendingActiveChallenge,
+  installActiveChallenge as installChallenge,
   modeLabel,
   modePageHref,
   normalizeModeKey,
-  parisDateKey,
   readActiveChallenge,
   releaseActiveChallenge,
 } from "../../js/gameCore.js";
@@ -131,9 +128,6 @@ const ONLINE_THRESHOLD_MS = 30 * 60 * 1000;
 // (MODE_STATE_KEYS). Ce fichier en gardait une copie manuscrite, que
 // js/challenge-notif.js dupliquait de son côté : deux tables à tenir alignées
 // pour un même geste, sur les deux seuls chemins d'acceptation du produit.
-
-// localStorage keys where each mode stores its active opus filters
-const MODE_FILTER_KEY = FILTER_STORAGE_KEYS;
 
 // Les pages de mode viennent de gameCore.js (modePageHref), qui les résout en
 // relatif depuis la page courante — ce fichier en gardait sa propre table, en
@@ -779,59 +773,26 @@ async function handleAddByCode() {
 // ─────────────────────────────────────────────────────────
 
 /**
- * Installe un défi comme « en cours » sur CET appareil : état du mode purgé,
- * filtres de l'expéditeur appliqués (les tiens sauvegardés), case
- * `activeChallenge` écrite. Partagée par Accepter (après le PATCH serveur) et
- * Reprendre (le serveur est déjà à `accepted`). Exportée pour les tests.
+ * Installe un défi comme « en cours » sur CET appareil. Le geste vit dans
+ * gameCore.js (installActiveChallenge) — partagé avec la notification
+ * (js/challenge-notif.js). Ré-exporté ici pour Accepter, Reprendre, et les
+ * tests qui l'importent depuis cette page. Prend le vocabulaire historique de
+ * ce fichier ({ mid, modeKey, date, … }).
  *
  * @param {{ mid:number, modeKey:string, date?:string, score:number, senderId:number,
  *           challengeFilters?:string, challengeTarget?:string|null, isExpert:boolean }} c
  */
 export function installActiveChallenge(c) {
-  // Clear this mode's game state so the player starts fresh
-  (MODE_STATE_KEYS[c.modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
-
-  // Backup current filters, then apply sender's challenge filters
-  // Pas de fallback "[]" ici : filterMenu.js traite un tableau vide comme
-  // "tout désélectionné" (état volontaire), différent de l'absence de clé
-  // ("tout actif" par défaut, cf. initFilterMenu()). Si le joueur n'a
-  // jamais touché ses filtres pour ce mode, localStorage.getItem() renvoie
-  // null — on garde null tel quel pour que la restauration plus bas (dans
-  // checkChallengeCompletion(), js/challenge-result.js) le laisse absent
-  // au lieu d'écraser avec un "tout désélectionné" qui n'a jamais existé.
-  const filterKey = MODE_FILTER_KEY[c.modeKey] ?? null;
-  const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
-  if (filterKey && c.challengeFilters && c.challengeFilters !== "[]") {
-    localStorage.setItem(filterKey, c.challengeFilters);
-  }
-
-  localStorage.setItem(
-    activeChallengeKey(c.isExpert),
-    JSON.stringify({
-      msgId: c.mid,
-      mode: c.modeKey,
-      // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
-      // (`challengeDate`, conservé). Toutes les lectures de la case le
-      // comparent à parisDateKey() d'aujourd'hui : un défi envoyé la veille
-      // au soir et accepté le lendemain naissait périmé — pas de bannière,
-      // pas de cible dédiée, et un `accepted` que plus rien ne résolvait.
-      // Cf. le même correctif dans js/challenge-notif.js.
-      date: parisDateKey(),
-      challengeDate: c.date || null,
-      score: c.score,
-      senderId: c.senderId,
-      filterKey,
-      originalFilters,
-      isExpert: c.isExpert,
-      // Cible dédiée (2026-07-17) : le mode la jouera à la place de la cible
-      // du jour et n'enregistrera PAS la partie en session quotidienne.
-      // Null (ancien défi) = comportement historique, cible du jour.
-      // Sans ce champ, isChallengePlay()/getActiveChallengeTarget() (gameCore.js)
-      // ne reconnaissent jamais le défi accepté ici — cf. challenge-notif.js
-      // qui pose déjà ce même champ pour le chemin popup d'animation.
-      target: c.challengeTarget ?? null,
-    })
-  );
+  return installChallenge({
+    msgId: c.mid,
+    mode: c.modeKey,
+    score: c.score,
+    senderId: c.senderId,
+    challengeDate: c.date || null,
+    challengeFilters: c.challengeFilters ?? null,
+    challengeTarget: c.challengeTarget ?? null,
+    isExpert: c.isExpert,
+  });
 }
 
 // ─────────────────────────────────────────────────────────
