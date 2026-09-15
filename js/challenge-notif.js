@@ -355,14 +355,17 @@ function _render({
   // Le message reste "unread" dans l'API → visible depuis la page Amis. Mais
   // c'est un « plus tard » EXPLICITE : on le note pour ne pas le relancer au
   // prochain sondage, contrairement à une notification simplement manquée.
+  //
+  // Ce « plus tard » ne vaut que pour CE défi : ceux encore en file viennent
+  // d'autres amis, le joueur ne les a pas vus, il n'a rien décidé à leur sujet —
+  // on enchaîne donc sur le suivant, exactement comme après un refus. On vidait
+  // la file ici en comptant sur le sondage suivant pour les représenter, mais
+  // notifications.js les avait déjà notés « poussés sur cette page »
+  // (_queuedThisPage) : ils ne revenaient qu'après un changement de page, et
+  // « j'ai deux défis, je n'en ai vu qu'un » était injouable à reproduire.
   const closeOnly = () => {
     _dismissed(id);
-    // Les défis encore en file n'ont, EUX, jamais été montrés : les jeter
-    // silencieusement était la deuxième cause de « parfois pas d'animation ».
-    // Ils repartiront au prochain sondage puisqu'ils restent `unread` et non vus.
-    _queue.length = 0;
-    _busy = false;
-    _fadeOut(overlay, null);
+    _closeOverlay(overlay);
   };
   overlay.querySelector(".cn-close").addEventListener("click", closeOnly);
   laterBtn?.addEventListener("click", closeOnly);
