@@ -19,7 +19,8 @@
  */
 
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, dirname, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -29,12 +30,20 @@ const FIX = process.argv.includes("--fix");
 // ── Calcul des chiffres réels ────────────────────────────────────────────────
 
 function countVitestTests() {
-  const json = execSync("npx vitest run --reporter=json", {
+  // Rapport écrit dans un fichier, pas lu sur stdout : depuis vitest 5 le
+  // reporter JSON y ajoute une ligne « JSON report written to … » qui n'est
+  // pas du JSON — JSON.parse(stdout) cassait la CI au premier bump.
+  const out = join(tmpdir(), `personadle-vitest-${process.pid}.json`);
+  execSync(`npx vitest run --reporter=json --outputFile="${out}"`, {
     cwd: ROOT,
     encoding: "utf8",
-    stdio: ["ignore", "pipe", "ignore"],
+    stdio: ["ignore", "ignore", "ignore"],
   });
-  return JSON.parse(json).numTotalTests;
+  try {
+    return JSON.parse(readFileSync(out, "utf8")).numTotalTests;
+  } finally {
+    rmSync(out, { force: true });
+  }
 }
 
 function countVitestFiles() {
