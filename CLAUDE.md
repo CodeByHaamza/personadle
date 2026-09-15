@@ -34,12 +34,12 @@ personadle/
 ├── js/                  ← gameCore.js, api.js, auth.js, i18n.js, cloud-sync.js…
 ├── css/                 ← global.css + un CSS par composant
 ├── database/            ← characters_clean.js, personas.js, quotes.js, portraits/
-├── lang/                ← en.json (source de vérité, 1205 clés), fr/es/de/it/pt.json
+├── lang/                ← en.json (source de vérité, 1217 clés), fr/es/de/it/pt.json
 ├── classiqueMode/  emojiMode/  allOutAttackMode/  silhouetteMode/  personaeMode/  musicsMode/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
-├── tests/               ← 59 suites Vitest (1031 tests) + tests/php/ (PHPUnit)
-└── sql/                 ← bdd_mysql.sql (24 tables)
+├── tests/               ← 60 suites Vitest (1043 tests) + tests/php/ (PHPUnit)
+└── sql/                 ← bdd_mysql.sql (28 tables)
 ```
 
 **Fichiers clés :**
@@ -216,7 +216,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 ## 8. Tests & qualité
 
 - `npm test` · `npm run test:watch` · `npm run test:coverage`
-- **1031 tests** (Vitest + jsdom), 59 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
+- **1043 tests** (Vitest + jsdom), 60 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
   `social-link`, `profilePage`, `badgesManager`, `badgesConditions`, `streakFlow.integration`,
   `streakRecovery`, `validateCharacters`, `formatPlayTime`… — cf. `tests/` pour la liste à jour)
 - `npm run lint` (ESLint flat config) · `npm run data:check` (schéma personnages) · `npm run i18n:check`

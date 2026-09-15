@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1031 tests Vitest (59 suites), 270 méthodes PHPUnit, 138 tests E2E,
+> Vérifié le 2026-08-26 : 1043 tests Vitest (60 suites), 275 méthodes PHPUnit, 145 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -51,6 +51,11 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 - [ ] Jouer `sql/migrations/041_game_sessions_guesses.sql` (colonne `game_sessions.guesses`,
       MariaDB `IF NOT EXISTS`, rejouable). Sans elle : **tout** `POST /api/sessions` échoue
       (`Unknown column 'guesses'`) — plus aucune partie n'est enregistrée.
+- [ ] Jouer `sql/migrations/042_moderation_maintenance.sql` (colonnes de ban motivé sur `users`,
+      tables `user_notices`, `admin_notes`, `announcements`, `site_settings` ; MariaDB
+      `IF NOT EXISTS`, rejouable). Sans elle : **`requireAuth()` plante** (`Unknown column
+      'ban_reason'`) — plus aucun appel authentifié ne passe, et `GET /api/auth/me` tombe
+      en 500 sur toutes les pages. À jouer **avant** le `git pull` de Hostinger, pas après.
 - [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v94 → v95, fait le 2026-09-01). Sans bump,
       `activate` ne purge pas l'ancien cache et les assets servis en cache-first (images,
       sons) restent ceux de la version précédente. Invisible en test : seuls les joueurs
