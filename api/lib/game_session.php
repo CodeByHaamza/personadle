@@ -203,7 +203,7 @@ function personadle_record_game_session(
             $userId, $mode, $isExpert ? 1 : 0, $clientSessionId !== '' ? $clientSessionId : null,
             $playedDate, $targetName, $result,
             $attempts, $timeMs, json_encode($filters),
-            $guesses === null ? null : json_encode(array_values($guesses), JSON_UNESCAPED_UNICODE),
+            $guesses === null ? null : json_encode($guesses, JSON_UNESCAPED_UNICODE),
         ]);
     } catch (PDOException $dup) {
         if ($dup->getCode() === '23000') {
