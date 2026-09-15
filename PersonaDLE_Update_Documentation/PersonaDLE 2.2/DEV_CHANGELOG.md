@@ -64,17 +64,30 @@ dans le même lot.
 
 ### Point 4 de Hamza — bulle d'info des badges (signalement joueur)
 
-Mesuré avec Playwright à 390 px : `#badgesModal` en `content-box` faisait 415 px
-(90 % + 60 px de padding + bordure) → débordait des deux côtés, première colonne
-coupée (2ᵉ capture du joueur). La bulle d'un badge de première rangée partait à
-`top: -75 px`, au-dessus du conteneur de défilement (1ʳᵉ capture).
-→ `profile/badges/badges.css` : `box-sizing: border-box`, padding réduit ≤ 480 px,
-variante `.badge-tooltip--below` (flèche en haut, couleur via `--badge-arrow`) ;
-`badgesManager.js::adjustTooltipPositions()` calcule depuis la géométrie du badge
-(plus depuis la position courante de la bulle, faussée par les `nth-child` écrits
-pour 4 colonnes) et bascule sous le badge quand le haut serait coupé. Au passage :
-`opacity: 0.5` sur `.badge-item.locked` rendait la bulle semi-transparente — déplacé
-sur l'image et le nom.
+Mesuré avec Playwright (sonde `getBoundingClientRect` + captures), trois causes :
+
+1. **LA cause** (retour de Hamza : « la bulle passe dessous, genre Série ») :
+   `.badges-grid-wrap { overflow: hidden }`, posé pour l'animation de repli des
+   catégories, coupait toute bulle qui MONTE au-dessus du bloc — c'est-à-dire celle
+   de chaque badge de première rangée, quelle que soit la position dans la modale
+   (bulle à `top: 190`, bloc à `top: 367` : invisible). → `overflow: hidden` seulement
+   `.collapsed` ou `.is-animating` (classe posée par `setCategoryCollapsed()` le
+   temps de la transition `grid-template-rows`, filet `setTimeout` 600 ms). Vérifié :
+   replié → hidden, dépliage → hidden, ouvert → visible, hauteurs identiques à avant.
+   `.badge-item:hover { z-index: 5 }` pour que la bulle passe aussi devant la
+   catégorie suivante (le `transform` du survol crée un contexte d'empilement).
+2. Bord haut de la modale (conteneur de défilement) : variante `.badge-tooltip--below`
+   (flèche en haut, couleur via `--badge-arrow`), décidée par
+   `adjustTooltipPositions()` depuis la géométrie du badge — plus depuis la position
+   courante de la bulle, faussée par les `nth-child` écrits pour 4 colonnes.
+3. Mobile : `#badgesModal` en `content-box` faisait 415 px sur 390 (2ᵉ capture du
+   joueur, première colonne coupée). → `border-box` avec `max-width: 764px` (= les
+   700 px de contenu d'avant + padding + bordure : rendu desktop strictement
+   identique, Hamza avait vu la modale rétrécie avec un 700 border-box), padding
+   réduit ≤ 480 px.
+
+Au passage : `opacity: 0.5` sur `.badge-item.locked` rendait la bulle
+semi-transparente — déplacé sur l'image et le nom.
 
 ### Tests ajoutés
 

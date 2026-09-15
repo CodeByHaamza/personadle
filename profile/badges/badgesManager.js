@@ -889,12 +889,35 @@ function attachBadgeClickEvents(profile, saveProfile, grid) {
   });
 }
 
+/**
+ * Replie / déplie une catégorie. `overflow: hidden` n'est posé sur le bloc que
+ * pendant l'animation (classe is-animating) et à l'état replié : à l'état ouvert
+ * il coupait la bulle d'info de la première rangée (badges.css).
+ */
+function setCategoryCollapsed(section, collapsed) {
+  const wrap = section.querySelector(".badges-grid-wrap");
+  if (wrap && !collapsed && section.classList.contains("collapsed")) {
+    wrap.classList.add("is-animating");
+    const done = (e) => {
+      if (e && e.target !== wrap) return;
+      wrap.classList.remove("is-animating");
+      wrap.removeEventListener("transitionend", done);
+    };
+    wrap.addEventListener("transitionend", done);
+    // Filet si transitionend ne vient pas (onglet en arrière-plan, reduced motion).
+    setTimeout(done, 600);
+  }
+  section.classList.toggle("collapsed", collapsed);
+  section
+    .querySelector(".badges-category-header")
+    ?.setAttribute("aria-expanded", String(!collapsed));
+}
+
 function setupCategoryCollapse(grid) {
   grid.querySelectorAll(".badges-category-header").forEach((header) => {
     header.addEventListener("click", () => {
       const section = header.closest(".badges-category-section");
-      const isCollapsed = section.classList.toggle("collapsed");
-      header.setAttribute("aria-expanded", String(!isCollapsed));
+      setCategoryCollapsed(section, !section.classList.contains("collapsed"));
     });
   });
 }
@@ -915,10 +938,7 @@ function setupBadgesSearch(grid) {
       });
       section.style.display = anyVisible ? "" : "none";
       // Auto-expand sections that have matching results
-      if (q && anyVisible) {
-        section.classList.remove("collapsed");
-        section.querySelector(".badges-category-header")?.setAttribute("aria-expanded", "true");
-      }
+      if (q && anyVisible) setCategoryCollapsed(section, false);
     });
   };
 }

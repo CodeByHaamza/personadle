@@ -33,11 +33,13 @@
   padding: 30px;
   border-radius: 20px;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-  max-width: 700px;
+  /* 764 = les 700 px de contenu d'avant + 2 × 30 px de padding + 2 × 2 px de
+     bordure : même rendu qu'avant sur desktop, mais en border-box. En content-box,
+     90 % + padding + bordure donnaient 415 px sur un écran de 390 px — la modale
+     débordait des deux côtés et la première colonne de badges était coupée
+     (signalé par un joueur, 2.2). */
+  max-width: 764px;
   width: 90%;
-  /* border-box : en content-box, 90 % + 2 × 30 px de padding + bordure donnaient
-     415 px sur un écran de 390 px — la modale débordait des deux côtés et la
-     première colonne de badges était coupée (signalé par un joueur, 2.2). */
   box-sizing: border-box;
   max-height: 80vh;
   overflow-y: auto;
@@ -200,11 +202,20 @@
 .badges-grid-wrap {
   display: grid;
   grid-template-rows: 1fr;
-  overflow: hidden;
   transition:
     grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.3s ease;
   opacity: 1;
+}
+
+/* `overflow: hidden` SEULEMENT replié ou pendant l'animation (classe posée par
+   setupCategoryCollapse, badgesManager.js). À l'état ouvert il coupait la bulle
+   d'info de toute la première rangée d'une catégorie : la bulle monte au-dessus
+   du bloc, donc hors de lui, et disparaissait sous le titre « Série » —
+   c'était LE bug signalé, pas seulement le bord de la modale. */
+.badges-category-section.collapsed .badges-grid-wrap,
+.badges-grid-wrap.is-animating {
+  overflow: hidden;
 }
 
 .badges-category-section.collapsed .badges-grid-wrap {
@@ -318,6 +329,9 @@ body:not(.darkmode) .badges-category-section[data-category="streak"] .badges-cat
 .badge-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+  /* Le transform crée un contexte d'empilement : sans z-index, la bulle qui
+     chevauche la catégorie SUIVANTE (plus loin dans le DOM) passerait dessous. */
+  z-index: 5;
 }
 
 .badge-item img {
