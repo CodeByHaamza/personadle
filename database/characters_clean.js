@@ -892,8 +892,8 @@ export const characters = [
     age: "15-20",
     arcane: ["Aeon"],
     opus: ["P4G", "P4AU","PQ","PQ2"],
-    personaUser: false,
-    persona: "NONE",
+    personaUser: true,
+    persona: "Kaguya",
     emoji: ["🧢", "📝", "🌧️"],
     quote: "There are things that you can't do by yourself, but can do with others... That's true. You gave me a new memory. You taught me that I don't need to be worried. ...I wouldn't have been able to do that on my own. I only realized that because of you."
   },
