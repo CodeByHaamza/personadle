@@ -175,6 +175,60 @@ describe("checkChallengeCompletion — success/fail computation", () => {
     await expect(checkChallengeCompletion("classic", 2, true)).resolves.toBeUndefined();
     expect(document.getElementById("cr-overlay")).not.toBeNull();
   });
+
+  /**
+   * Le résultat ne doit JAMAIS se perdre : la partie ne peut pas être rejouée, et
+   * un défi resté `accepted` en base bloque un nouveau défi le même jour (409),
+   * reste « en cours » sur la page Amis, et l'expéditeur n'apprend rien.
+   */
+  it("keeps the result in a retry queue when the server is unreachable (network / 5xx)", async () => {
+    localStorage.setItem("activeChallenge", JSON.stringify(activeChallenge()));
+    window._personadleApi = mockApi({
+      updateStatus: vi.fn().mockRejectedValue(Object.assign(new Error("boom"), { status: 503 })),
+    });
+
+    await checkChallengeCompletion("classic", 2, true);
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(JSON.parse(localStorage.getItem("pendingChallengeStatus"))).toEqual([
+      expect.objectContaining({ msgId: 1, status: "beaten" }),
+    ]);
+  });
+
+  it("queues 'expired' too, and does not queue a definitive 4xx refusal", async () => {
+    localStorage.setItem("activeChallenge", JSON.stringify(activeChallenge()));
+    window._personadleApi = mockApi({
+      updateStatus: vi.fn().mockRejectedValue(new Error("Failed to fetch")),
+    });
+    await checkChallengeCompletion("classic", 9, false);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(JSON.parse(localStorage.getItem("pendingChallengeStatus"))[0]).toMatchObject({
+      msgId: 1,
+      status: "expired",
+    });
+
+    localStorage.removeItem("pendingChallengeStatus");
+    document.body.innerHTML = "";
+    localStorage.setItem("activeChallenge", JSON.stringify(activeChallenge()));
+    window._personadleApi = mockApi({
+      updateStatus: vi.fn().mockRejectedValue(Object.assign(new Error("gone"), { status: 404 })),
+    });
+    await checkChallengeCompletion("classic", 2, true);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(localStorage.getItem("pendingChallengeStatus")).toBeNull();
+  });
+
+  it("queues the result when the API bridge is absent (page without backend)", async () => {
+    localStorage.setItem("activeChallenge", JSON.stringify(activeChallenge()));
+    delete window._personadleApi;
+
+    await checkChallengeCompletion("classic", 2, true);
+
+    expect(JSON.parse(localStorage.getItem("pendingChallengeStatus"))[0]).toMatchObject({
+      msgId: 1,
+      status: "beaten",
+    });
+  });
 });
 
 describe("checkChallengeCompletion — localStorage cleanup", () => {
@@ -205,10 +259,7 @@ describe("checkChallengeCompletion — localStorage cleanup", () => {
   it("clears the mode's game-state keys when the challenge had a dedicated target", async () => {
     localStorage.setItem("target", JSON.stringify({ nom: "Joker" }));
     localStorage.setItem("attempts", "2");
-    localStorage.setItem(
-      "activeChallenge",
-      JSON.stringify(activeChallenge({ target: "Joker" }))
-    );
+    localStorage.setItem("activeChallenge", JSON.stringify(activeChallenge({ target: "Joker" })));
     window._personadleApi = mockApi();
 
     await checkChallengeCompletion("classic", 2, true);
@@ -219,10 +270,7 @@ describe("checkChallengeCompletion — localStorage cleanup", () => {
 
   it("leaves the mode's game-state keys untouched for an old-format challenge without a target", async () => {
     localStorage.setItem("target", JSON.stringify({ nom: "Joker" }));
-    localStorage.setItem(
-      "activeChallenge",
-      JSON.stringify(activeChallenge({ target: null }))
-    );
+    localStorage.setItem("activeChallenge", JSON.stringify(activeChallenge({ target: null })));
     window._personadleApi = mockApi();
 
     await checkChallengeCompletion("classic", 2, true);

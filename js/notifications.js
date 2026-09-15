@@ -11,6 +11,7 @@ import { queueEvokerAnimations } from "./p3-evoker-anim.js";
 import { showSenderChallengeResult } from "./challenge-result.js";
 import { queueChallengeNotifs, setChallengeNotifDismissHandler } from "./challenge-notif.js";
 import { showSocialLinkRankUp } from "./social-link.js";
+import { flushPendingChallengeStatus } from "./gameCore.js";
 
 const SEEN_KEY = "ccShownFriendshipIds";
 const SEEN_CHALLENGE_KEY = "seenChallengeResults";
@@ -83,6 +84,15 @@ export function stopNotifications() {
 async function _check() {
   const api = window._personadleApi;
   if (!api) return;
+
+  // Résultats de défi que la fin de partie n'a pas pu transmettre (réseau, 5xx) :
+  // rejoués ici avant de lire quoi que ce soit, pour que la liste des messages
+  // ci-dessous reflète déjà le vrai statut. Cf. gameCore.js, file de relance.
+  try {
+    await flushPendingChallengeStatus(api);
+  } catch {
+    /* jamais bloquant */
+  }
 
   try {
     const data = await api.notifications.get();
