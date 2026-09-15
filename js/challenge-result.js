@@ -9,7 +9,12 @@
  *     → Shows the result animation to the challenge sender (used by notifications.js).
  */
 
-import { activeChallengeKey, readActiveChallenge, releaseActiveChallenge } from "./gameCore.js";
+import {
+  activeChallengeKey,
+  queueChallengeStatusUpdate,
+  readActiveChallenge,
+  releaseActiveChallenge,
+} from "./gameCore.js";
 
 /** Heart emoji/size per Social Link rank (1-10). Win only. */
 const SL_HEART = {
@@ -260,8 +265,24 @@ export async function checkChallengeCompletion(mode, myAttempts, isWin) {
   const success = isWin && myAttempts <= challenge.score;
   const api = window._personadleApi;
 
+  // Le résultat part au serveur sans bloquer l'animation — mais s'il n'arrive
+  // pas (réseau, 5xx, onglet fermé), il est gardé en file et relancé au prochain
+  // sondage (js/notifications.js). Sinon le défi restait `accepted` en base pour
+  // toujours : l'expéditeur n'apprenait jamais le résultat, la page Amis le
+  // montrait « en cours », et la partie ne peut pas être rejouée.
   const newStatus = success ? "beaten" : "expired";
-  api?.messages.updateStatus(challenge.msgId, newStatus).catch(() => {});
+  const msgId = challenge.msgId;
+  if (api?.messages?.updateStatus) {
+    api.messages
+      .updateStatus(msgId, newStatus)
+      .catch((err) => {
+        const status = Number(err?.status ?? 0);
+        // 4xx = le serveur a tranché (message supprimé, déjà résolu) : inutile d'insister.
+        if (!(status >= 400 && status < 500)) queueChallengeStatusUpdate(msgId, newStatus);
+      });
+  } else {
+    queueChallengeStatusUpdate(msgId, newStatus);
+  }
 
   let senderPseudo = "???";
   let senderAvatar = null;

@@ -1406,6 +1406,12 @@
             <li>Le bouton de récupération de série affichait « 0 → {{count}} jours » au lieu du vrai nombre.</li>
             <li>Sur le profil d'un ami, la série affichée n'était pas la même que sur son propre profil.</li>
             <li>Un défi envoyé sans avoir jamais touché ses filtres pouvait proposer un personnage absent de l'autocomplétion de l'ami.</li>
+            <li>Un titre mérité pouvait rester fermé pour toujours (« j'ai le badge des 50 jours mais pas le titre des 50 victoires ») : le serveur le refusait une fraction de seconde avant d'avoir enregistré la partie décisive, et on ne lui redemandait jamais. Le profil réclame désormais ce qui lui manque à chaque visite, comme pour les badges.</li>
+            <li>La bulle d'info d'un badge de première ligne se faisait couper par le titre de sa catégorie (« Série », « Événements »…). Elle s'affiche maintenant par-dessus, passe sous le badge quand elle toucherait le haut de la fenêtre, et n'est plus à moitié transparente sur les badges verrouillés. Sur mobile, la fenêtre des badges débordait de l'écran et coupait la première colonne : corrigé aussi.</li>
+            <li>Une partie jouée juste avant minuit et synchronisée juste après (connexion coupée) comptait pour le lendemain : la journée jouée manquait et la série pouvait repartir de 1. Elle compte maintenant pour le jour où elle a été jouée.</li>
+            <li>Deux défis reçus en même temps : « Plus tard » sur le premier cachait le second jusqu'au prochain changement de page. Il s'affiche maintenant à son tour.</li>
+            <li>Le cadenas qui explose quand un Mode Expert s'ouvre ne jouait qu'une fois sur deux. Il joue à chaque déblocage, une seule fois.</li>
+            <li>Marie (Persona 4 Golden) a maintenant sa Persona, Kaguya, dans la grille Classique.</li>
         </ul>
     </div>
     <div data-i18n-block="en">
@@ -1419,6 +1425,12 @@
             <li>The streak recovery button read "0 → {{count}} days" instead of the actual number.</li>
             <li>On a friend's profile, the streak shown wasn't the same as on their own profile.</li>
             <li>A challenge sent without ever touching your filters could pick a character missing from your friend's autocomplete.</li>
+            <li>A title you had earned could stay locked forever ("I have the 50-days badge but not the 50-wins title"): the server refused it a split second before the decisive game was saved, and we never asked again. Your profile now claims whatever it's missing on every visit, as badges already did.</li>
+            <li>The info bubble of a first-row badge got clipped by its category title ("Streaks", "Events"…). It now shows on top, flips below the badge when it would touch the top of the window, and is no longer half-transparent on locked badges. On mobile, the badges window overflowed the screen and cut off the first column: fixed as well.</li>
+            <li>A game played just before midnight and synced just after (connection dropped) counted for the next day: the day you played was missing and your streak could reset to 1. It now counts for the day it was played.</li>
+            <li>Two challenges received at once: "Later" on the first hid the second until the next page change. It now shows up in turn.</li>
+            <li>The padlock burst when an Expert Mode unlocks only played half the time. It now plays on every unlock, once.</li>
+            <li>Marie (Persona 4 Golden) now has her Persona, Kaguya, in the Classic grid.</li>
         </ul>
     </div>
 

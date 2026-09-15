@@ -367,6 +367,20 @@ export async function fetchExpertStatus() {
   if (_expertStatusPromise) return _expertStatusPromise;
 
   _expertStatusPromise = (async () => {
+    // Le cache (readCachedExpertStatus / cacheExpertStatus) est rattaché au
+    // compte : il lit window._currentUser.id, que pose initAuth(). La porte
+    // Expert n'attendait pas l'auth — quand /expert-status répondait avant /me,
+    // le cache n'était ni lu ni écrit sur cette page : l'animation « Mode Expert
+    // débloqué » (diff ancien état → nouveau) était manquée, et le cache restait
+    // périmé pour la fois suivante. Une course, donc « ça marche parfois ».
+    if (window._authReady) {
+      try {
+        await window._authReady;
+      } catch {
+        /* sans backend, la porte reste fail-closed plus bas */
+      }
+    }
+
     const api = window._personadleApi;
     if (!api?.user?.expertStatus) {
       // Bridge absent : on ne peut rien affirmer → verrouillé par défaut.
@@ -1695,6 +1709,163 @@ export function dropUnplayableChallenge(mode, wanted) {
 /** True si la partie en cours est un défi à cible dédiée (stats quotidiennes à NE PAS logger). */
 export function isChallengePlay(mode) {
   return getActiveChallengeTarget(mode) !== null;
+}
+
+/**
+ * Libère une case de défi PÉRIMÉE (jour de jeu ≠ aujourd'hui) qui traînerait
+ * encore dans la dimension demandée, et rend ses filtres au joueur.
+ *
+ * Seule la page du mode nettoyait les cases périmées (initChallengeBanner) : un
+ * joueur qui acceptait un défi la veille, ne retournait jamais sur le mode, puis
+ * en acceptait un autre depuis l'accueil ou la page Amis, gardait les filtres du
+ * défi de la veille installés — et le nouveau défi les sauvegardait comme
+ * « filtres d'origine ». À sa fin, on lui rendait les filtres du défi périmé,
+ * pas les siens. Appelée avant toute installation (installActiveChallenge).
+ *
+ * @param {boolean} isExpert dimension de la case
+ * @returns {boolean} true si une case périmée a été libérée
+ */
+export function releaseStaleChallenge(isExpert) {
+  let raw = null;
+  try {
+    raw = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
+  } catch {
+    localStorage.removeItem(activeChallengeKey(isExpert));
+    return false;
+  }
+  if (!raw) return false;
+  if (raw.date && raw.date === parisDateKey()) return false;
+  releaseActiveChallenge({ ...raw, isExpert: Boolean(isExpert) });
+  return true;
+}
+
+/**
+ * Installe un défi comme « en cours » sur CET appareil : case périmée libérée,
+ * état du mode purgé, filtres de l'expéditeur appliqués (les tiens sauvegardés),
+ * case `activeChallenge` écrite pour AUJOURD'HUI.
+ *
+ * Geste unique des trois entrées d'un défi — Accepter depuis la notification
+ * (js/challenge-notif.js), Accepter et Reprendre depuis la page Amis
+ * (profile/friends/friends.js). Les deux premiers dupliquaient ce bloc à
+ * l'identique ; chaque correctif (le jour de JEU plutôt que le jour d'envoi,
+ * `originalFilters` à null quand la clé est absente…) a dû être porté deux fois.
+ *
+ * N'appelle PAS le serveur : l'appelant a déjà fait passer le message en
+ * `accepted` (Accepter) ou sait qu'il l'est déjà (Reprendre).
+ *
+ * @param {{ msgId:number, mode:string, score:number, senderId:number|null,
+ *           challengeDate?:string|null, challengeFilters?:string|null,
+ *           challengeTarget?:string|null, isExpert?:boolean }} c
+ * @returns {object} le contenu écrit dans la case
+ */
+export function installActiveChallenge(c) {
+  const isExpert = Boolean(c.isExpert);
+  const modeKey = normalizeModeKey(c.mode) ?? String(c.mode ?? "").toLowerCase();
+
+  releaseStaleChallenge(isExpert);
+
+  // Le joueur repart de zéro sur ce mode : la cible dédiée remplace celle du jour.
+  (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+
+  // Pas de repli "[]" : filterMenu.js lit un tableau vide comme « tout
+  // désélectionné » (état volontaire), différent de l'absence de clé (« tout
+  // actif » par défaut). Si le joueur n'a jamais touché ses filtres, la clé est
+  // absente — on garde null pour que releaseActiveChallenge() la laisse absente
+  // au lieu d'écrire un "[]" qu'il n'a jamais choisi.
+  const filterKey = FILTER_STORAGE_KEYS[modeKey] ?? null;
+  const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
+  const filters =
+    c.challengeFilters && c.challengeFilters !== "[]" ? String(c.challengeFilters) : null;
+  if (filterKey && filters) localStorage.setItem(filterKey, filters);
+
+  const entry = {
+    msgId: c.msgId,
+    mode: modeKey,
+    // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
+    // (`challengeDate`, informatif). Toutes les lectures de la case comparent
+    // `date` à parisDateKey() : un défi envoyé la veille au soir et accepté le
+    // lendemain naissait périmé — ni bannière, ni cible dédiée, et un `accepted`
+    // que plus rien ne résolvait côté serveur.
+    date: parisDateKey(),
+    challengeDate: c.challengeDate ?? null,
+    score: c.score,
+    senderId: c.senderId ?? null,
+    filterKey,
+    originalFilters,
+    isExpert,
+    // Cible dédiée (2026-07-17) : le mode la joue à la place de la cible du jour
+    // et n'enregistre PAS la partie en session quotidienne. Null (ancien défi) =
+    // comportement historique, cible du jour.
+    target: c.challengeTarget ?? null,
+  };
+  localStorage.setItem(activeChallengeKey(isExpert), JSON.stringify(entry));
+  return entry;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE DE RELANCE DES STATUTS DE DÉFI
+//
+// La fin de partie (js/challenge-result.js) prévient le serveur que le défi est
+// `beaten` ou `expired`. Si cet appel échoue (réseau coupé, 500, onglet fermé
+// pendant la requête), le défi reste `accepted` en base pour toujours : le joueur
+// a joué, sa case locale est libérée, mais l'expéditeur ne verra jamais le
+// résultat et le défi apparaît « en cours » sur la page Amis. Rejouer la partie
+// n'est pas possible — on garde l'intention et on la relance au prochain
+// sondage (js/notifications.js), comme les sessions avec `pendingSessions`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PENDING_CHALLENGE_STATUS_KEY = "pendingChallengeStatus";
+
+/** Relances en attente : [{ msgId, status, at }]. */
+export function readPendingChallengeStatus() {
+  try {
+    const list = JSON.parse(localStorage.getItem(PENDING_CHALLENGE_STATUS_KEY) || "[]");
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Note qu'un changement de statut n'a pas pu être transmis. Un même message ne
+ * garde qu'une entrée : la dernière intention l'emporte.
+ */
+export function queueChallengeStatusUpdate(msgId, status) {
+  if (!msgId || !status) return;
+  const list = readPendingChallengeStatus().filter((e) => e.msgId !== msgId);
+  list.push({ msgId, status, at: Date.now() });
+  localStorage.setItem(PENDING_CHALLENGE_STATUS_KEY, JSON.stringify(list.slice(-20)));
+}
+
+/**
+ * Rejoue les relances en attente. Une réponse 4xx est DÉFINITIVE (message
+ * supprimé, transition refusée parce que l'admin ou le joueur a déjà tranché
+ * autrement) : l'entrée est jetée. Tout le reste (réseau, 5xx) est retenté au
+ * prochain passage.
+ *
+ * @param {{ messages: { updateStatus: (id:number, status:string) => Promise<*> } }} api
+ * @returns {Promise<number>} nombre de relances abouties
+ */
+export async function flushPendingChallengeStatus(api) {
+  const list = readPendingChallengeStatus();
+  if (!list.length || !api?.messages?.updateStatus) return 0;
+  const remaining = [];
+  let done = 0;
+  for (const entry of list) {
+    try {
+      await api.messages.updateStatus(entry.msgId, entry.status);
+      done++;
+    } catch (err) {
+      const status = Number(err?.status ?? 0);
+      if (!(status >= 400 && status < 500)) remaining.push(entry);
+    }
+  }
+  if (remaining.length) {
+    localStorage.setItem(PENDING_CHALLENGE_STATUS_KEY, JSON.stringify(remaining));
+  } else {
+    localStorage.removeItem(PENDING_CHALLENGE_STATUS_KEY);
+  }
+  return done;
 }
 
 /**
