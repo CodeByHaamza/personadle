@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/badge/Playwright-Chromium-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/cible-stack%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
 
-> **138 tests (18 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
+> **145 tests (19 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
 > Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public, Social Link, admin).
 
 </div>
@@ -126,6 +126,17 @@ Ce que l'unitaire ne voit pas : la route `.htaccess` `GET /api/user/compendium` 
 `?code=`, 404 sur un code inconnu, 401 sans cible ni session), le bouton `#compendiumBtn` d'un
 profil visité qui pointe vers `compendium.html?view=<code>`, et l'ouverture du livre sans
 session (couverture → 6 onglets → page de gauche du chapitre). Joueur seed : Yu (`SEED2226`).
+
+### `moderation.spec.js` — modération, annonces, maintenance (2.2, migration 042)
+
+Via l'API, `describe.serial`, compte admin de seed + un joueur inscrit pour l'occasion. Ce que
+PHPUnit et Vitest ne voient pas : les routes `.htaccess` (`users/:id/notes`, `/notices`,
+`announcements`, `settings`, `anticheat`, `/api/notices/`), le **403 `code: banned`** avec
+raison et échéance au login, la session détruite par `/me` d'un joueur banni, l'accusé d'un
+message de l'équipe visible dans l'historique admin, une annonce livrée par `/me` puis retirée,
+et la garde de maintenance de `bootstrap.php` — **503 pour le joueur, l'admin passe**, puis
+rouverture (`afterAll` rouvre le site quoi qu'il arrive). Le login est rate-limité 5/15 min en
+prod, 50 hors prod : c'est ce qui permet à cette spec de se connecter trois fois.
 
 ---
 
