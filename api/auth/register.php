@@ -76,7 +76,7 @@ try {
 
     // 3. Stats initialisées à zéro pour chaque mode
     $stmtStats = $pdo->prepare('INSERT INTO user_stats (user_id, mode) VALUES (?, ?)');
-    foreach (['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'] as $mode) {
+    foreach (PERSONADLE_MODES as $mode) {
         $stmtStats->execute([$userId, $mode]);
     }
 

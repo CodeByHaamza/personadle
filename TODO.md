@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1016 tests Vitest (57 suites), 269 méthodes PHPUnit, 138 tests E2E,
+> Vérifié le 2026-08-26 : 1032 tests Vitest (59 suites), 270 méthodes PHPUnit, 138 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -48,6 +48,9 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `profiles.favorite_mode`, MariaDB `IF NOT EXISTS`, rejouable). Sans elle :
       `Unknown column 'favorite_mode'` sur **tout** GET /api/user/:id et GET
       /api/user/public — le profil ne charge plus, pas seulement le mode favori.
+- [ ] Jouer `sql/migrations/041_game_sessions_guesses.sql` (colonne `game_sessions.guesses`,
+      MariaDB `IF NOT EXISTS`, rejouable). Sans elle : **tout** `POST /api/sessions` échoue
+      (`Unknown column 'guesses'`) — plus aucune partie n'est enregistrée.
 - [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v94 → v95, fait le 2026-09-01). Sans bump,
       `activate` ne purge pas l'ancien cache et les assets servis en cache-first (images,
       sons) restent ceux de la version précédente. Invisible en test : seuls les joueurs

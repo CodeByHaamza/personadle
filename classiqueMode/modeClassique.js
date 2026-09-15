@@ -20,6 +20,7 @@ import {
   applyDarkModeOverrides,
   enableGiveUpButton,
   showWrongMini,
+  logGuess,
   setGiveUpEnabled,
   startGame,
   isGameLogged,
@@ -750,6 +751,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem(EXPERT.key("attempts"), attempts);
     history.push(guessName);
     localStorage.setItem(EXPERT.key("guessHistory"), JSON.stringify(history));
+    logGuess(guessName); // « comparer nos parties » — la grille classique ne passe pas par showWrongMini()
     updateCounters();
     if (attempts >= HINT_THRESHOLD) enableHintButton();
     if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();

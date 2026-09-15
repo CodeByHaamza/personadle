@@ -1770,3 +1770,171 @@ body {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-muted);
 }
+
+/* ── Panneau 📈 Activité (admin/activity.js) — barres en CSS pur ─────────── */
+.act-panel {
+  padding: 1.5rem;
+}
+.act-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+.act-range {
+  display: flex;
+  gap: 6px;
+}
+.act-range-btn.active {
+  background: var(--red);
+  color: #fff;
+}
+.act-muted {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+.act-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 1rem 0 1.5rem;
+}
+.act-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+}
+.act-kpi__value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+}
+.act-kpi__label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.act-kpi__hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+.act-h3 {
+  margin: 1.4rem 0 0.6rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.act-legend {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+}
+.act-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+}
+.act-days,
+.act-hours {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 140px;
+  padding: 8px 6px 22px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+.act-day,
+.act-hour {
+  position: relative;
+  flex: 1 0 14px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+.act-day__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+}
+.act-bar {
+  display: block;
+  flex: 1;
+  min-height: 2px;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.3s ease;
+}
+.act-bar--games,
+i.act-bar--games {
+  background: var(--red);
+}
+.act-bar--players,
+i.act-bar--players {
+  background: #4fa3ff;
+}
+.act-hour .act-bar {
+  width: 100%;
+  flex: 0 0 auto; /* sinon flex: 1 (colonne) remplit toute la hauteur, la height inline est ignorée */
+}
+.act-day__label,
+.act-hour__label {
+  position: absolute;
+  bottom: -18px;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.act-day:nth-child(odd) .act-day__label {
+  display: none;
+}
+.act-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.act-table th,
+.act-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.act-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+.act-hbar {
+  display: inline-block;
+  vertical-align: middle;
+  width: 120px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.act-hbar span {
+  display: block;
+  height: 100%;
+  background: var(--red);
+}

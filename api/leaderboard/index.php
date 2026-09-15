@@ -37,7 +37,7 @@ require_once __DIR__ . '/../lib/leaderboard_metrics.php';
 $pdo = pdo();
 
 // ── Paramètres ────────────────────────────────────────────────────────────────
-$validModes   = ['all', 'classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+$validModes   = ['all', ...PERSONADLE_MODES];
 $validPeriods = ['day', 'week', 'month', 'ever'];
 $validMetrics = ['wins', 'winrate', 'streak', 'perfect', 'games'];
 

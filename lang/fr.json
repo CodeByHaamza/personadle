@@ -1045,6 +1045,23 @@
     "close": "Retour à l'accueil",
     "close_notif": "Fermer"
   },
+  "friends_today": {
+    "title": "Tes amis aujourd'hui",
+    "not_played": "n'a pas encore joué",
+    "gave_up": "a abandonné",
+    "first_game_note": "Première partie du jour seulement — chacun a son propre personnage du jour.",
+    "empty": "Ajoute des amis pour comparer vos parties.",
+    "button": "Parties des amis",
+    "locked_hint": "Finis ta partie du jour pour voir celles de tes amis",
+    "first_game_short": "Première partie du jour",
+    "unavailable": "Indisponible pour le moment."
+  },
+  "guest_nudge": {
+    "title": "🔥 {{n}} jours de série !",
+    "text": "Crée un compte gratuit pour la sauvegarder — et la retrouver sur n'importe quel appareil.",
+    "cta": "Créer un compte",
+    "later": "Plus tard"
+  },
   "settings": {
     "title": "Paramètres",
     "sound": "Son",

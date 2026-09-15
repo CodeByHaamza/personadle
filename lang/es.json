@@ -1045,6 +1045,23 @@
     "close": "Volver al inicio",
     "close_notif": "Cerrar"
   },
+  "friends_today": {
+    "title": "Tus amigos hoy",
+    "not_played": "aún no ha jugado",
+    "gave_up": "se rindió",
+    "first_game_note": "Solo la primera partida del día — cada uno tiene su propio personaje del día.",
+    "empty": "Añade amigos para comparar vuestras partidas.",
+    "button": "Partidas de amigos",
+    "locked_hint": "Termina tu partida de hoy para ver las de tus amigos",
+    "first_game_short": "Primera partida del día",
+    "unavailable": "No disponible ahora mismo."
+  },
+  "guest_nudge": {
+    "title": "🔥 ¡Racha de {{n}} días!",
+    "text": "Crea una cuenta gratis para guardarla — y recuperarla en cualquier dispositivo.",
+    "cta": "Crear una cuenta",
+    "later": "Más tarde"
+  },
   "settings": {
     "title": "Ajustes",
     "sound": "Sonido",

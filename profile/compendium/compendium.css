@@ -57,14 +57,30 @@ body.darkmode {
   display: none !important; /* pas le fond urbain des autres pages */
 }
 
+/* Le livre est centré dans la fenêtre, horizontalement ET verticalement (retour
+   Hamza : « il n'est pas au centre de la page ») — hauteur = écran moins la barre
+   du bas ; le lien retour flotte en haut à gauche pour ne pas peser dans le calcul. */
 .cp-stage {
+  position: relative;
+  box-sizing: border-box;
   max-width: 1080px;
+  min-height: calc(100vh - 80px);
   margin: 0 auto;
-  padding: 64px 16px 110px;
+  padding: 64px 16px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.cp-stage > .cp-book {
+  width: 100%; /* la couverture garde sa largeur propre (min(420px, 100%)) */
 }
 
 .cp-back-row {
-  margin: 0 0 14px;
+  position: absolute;
+  top: 18px;
+  left: 16px;
+  margin: 0;
 }
 .cp-back {
   color: var(--cp-gold-light);
@@ -724,6 +740,8 @@ body.darkmode .cp-entry__date {
    ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .cp-stage {
+    min-height: 0;
+    justify-content: flex-start;
     padding: 58px 10px 110px;
   }
   .cp-tabs {
