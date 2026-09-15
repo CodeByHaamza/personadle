@@ -367,6 +367,20 @@ export async function fetchExpertStatus() {
   if (_expertStatusPromise) return _expertStatusPromise;
 
   _expertStatusPromise = (async () => {
+    // Le cache (readCachedExpertStatus / cacheExpertStatus) est rattaché au
+    // compte : il lit window._currentUser.id, que pose initAuth(). La porte
+    // Expert n'attendait pas l'auth — quand /expert-status répondait avant /me,
+    // le cache n'était ni lu ni écrit sur cette page : l'animation « Mode Expert
+    // débloqué » (diff ancien état → nouveau) était manquée, et le cache restait
+    // périmé pour la fois suivante. Une course, donc « ça marche parfois ».
+    if (window._authReady) {
+      try {
+        await window._authReady;
+      } catch {
+        /* sans backend, la porte reste fail-closed plus bas */
+      }
+    }
+
     const api = window._personadleApi;
     if (!api?.user?.expertStatus) {
       // Bridge absent : on ne peut rien affirmer → verrouillé par défaut.
