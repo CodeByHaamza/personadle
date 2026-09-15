@@ -35,11 +35,22 @@
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
   max-width: 700px;
   width: 90%;
+  /* border-box : en content-box, 90 % + 2 × 30 px de padding + bordure donnaient
+     415 px sur un écran de 390 px — la modale débordait des deux côtés et la
+     première colonne de badges était coupée (signalé par un joueur, 2.2). */
+  box-sizing: border-box;
   max-height: 80vh;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 10000;
   border: 2px solid #444;
+}
+
+@media (max-width: 480px) {
+  #badgesModal {
+    width: 96%;
+    padding: 18px 12px;
+  }
 }
 
 #badgesModal.hidden {
@@ -383,7 +394,28 @@ body:not(.darkmode) .badges-category-section[data-category="streak"] .badges-cat
   left: 50%;
   transform: translateX(-50%);
   border: 10px solid transparent;
-  border-top-color: #34495e;
+  border-top-color: var(--badge-arrow, #34495e);
+}
+
+/* ✅ BASCULE SOUS LE BADGE quand il n'y a pas la place au-dessus (première rangée
+   d'une catégorie collée au haut de la modale, qui est le conteneur de défilement :
+   la bulle partait au-dessus de son bord et se faisait couper — signalé par un
+   joueur en 2.2). Décidé au survol par adjustTooltipPositions() (badgesManager.js),
+   après mesure — un nth-child ne sait pas combien de colonnes la grille a. */
+.badge-tooltip.badge-tooltip--below {
+  bottom: auto;
+  top: 110%;
+}
+
+.badge-item:hover .badge-tooltip.badge-tooltip--below {
+  transform: translate(-50%, 10px);
+}
+
+.badge-tooltip.badge-tooltip--below::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--badge-arrow, #34495e);
 }
 
 /* ✅ AJUSTER LA FLÈCHE POUR LES BADGES À GAUCHE */
@@ -421,8 +453,16 @@ body:not(.darkmode) .badges-category-section[data-category="streak"] .badges-cat
 
 /* === 🔒 LOCKED STATE === */
 .badge-item.locked {
-  opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* L'estompage d'un badge verrouillé se pose sur SON image et SON nom, pas sur
+   la carte entière : `opacity: 0.5` sur .badge-item s'appliquait aussi à la
+   bulle d'info (enfant), rendue à moitié transparente sur les badges qu'on
+   survole précisément pour lire comment les débloquer. */
+.badge-item.locked > img,
+.badge-item.locked > p {
+  opacity: 0.5;
 }
 
 .badge-item.locked img {
@@ -447,8 +487,8 @@ body:not(.darkmode) .badges-category-section[data-category="streak"] .badges-cat
   visibility: visible;
 }
 
-.badge-item.locked .badge-tooltip::after {
-  border-top-color: #16213e;
+.badge-item.locked .badge-tooltip {
+  --badge-arrow: #16213e;
 }
 
 .badge-item.locked .badge-tooltip strong {
@@ -724,8 +764,8 @@ body.darkmode .badge-tooltip {
   border-color: #ffd700;
 }
 
-body.darkmode .badge-tooltip::after {
-  border-top-color: #2d2d2d;
+body.darkmode .badge-tooltip {
+  --badge-arrow: #2d2d2d;
 }
 
 body.darkmode .badge-item.locked .badge-tooltip {
@@ -734,8 +774,8 @@ body.darkmode .badge-item.locked .badge-tooltip {
   box-shadow: 0 6px 25px rgba(255, 71, 87, 0.6);
 }
 
-body.darkmode .badge-item.locked .badge-tooltip::after {
-  border-top-color: #1a1a2e;
+body.darkmode .badge-item.locked .badge-tooltip {
+  --badge-arrow: #1a1a2e;
 }
 
 body.darkmode .badge-item.locked .badge-tooltip strong {
@@ -778,8 +818,8 @@ body:not(.darkmode) .badge-tooltip {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-body:not(.darkmode) .badge-tooltip::after {
-  border-top-color: #f0f0f0;
+body:not(.darkmode) .badge-tooltip {
+  --badge-arrow: #f0f0f0;
 }
 
 body:not(.darkmode) .badge-tooltip strong {
@@ -797,8 +837,8 @@ body:not(.darkmode) .badge-item.locked .badge-tooltip {
   box-shadow: 0 6px 25px rgba(231, 76, 60, 0.4);
 }
 
-body:not(.darkmode) .badge-item.locked .badge-tooltip::after {
-  border-top-color: #34495e;
+body:not(.darkmode) .badge-item.locked .badge-tooltip {
+  --badge-arrow: #34495e;
 }
 
 body:not(.darkmode) .badge-item.locked .badge-tooltip strong {
