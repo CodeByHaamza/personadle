@@ -21,7 +21,7 @@ beforeAll(async () => {
       <img id="pageAvatar" /><span id="pageUsername"></span>
     </div>
     <input id="pseudoInput" />
-    <button id="editAvatarBtn"></button><button id="saveAndRefreshBtn"></button>
+    <button id="editAvatarBtn"></button><div id="saveStatus"><span id="saveStatusText"></span></div>
     <button id="resetProfile"></button><button id="exportProfile"></button>
     <input id="borderColorPicker" /><div id="statsContainer"></div>
     <div id="avatarCropModal"></div><button id="closeCropper"></button>

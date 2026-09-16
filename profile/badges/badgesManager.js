@@ -4,6 +4,7 @@
 
 import { badgesList, BADGE_CATEGORIES, getBadgeById } from "./badgesData.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
+import { openAtelierTab } from "../atelier.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
 let _lastSaveProfile = () => {};
 
@@ -132,6 +133,7 @@ export function initBadgesSystem(profile, saveProfile) {
 
   // Rendre l'interface
   renderBadgesPreview(profile);
+  renderBadgePicker(profile, saveProfile);
   renderBadgesModal(profile, saveProfile);
 
   // Configurer le système de codes
@@ -187,6 +189,7 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
 
       // Re-render : renderBadgesModal était déjà appelé avant la fin de ce fetch async
       renderBadgesPreview(profile);
+      renderBadgePicker(profile, saveProfile);
       renderBadgesModal(profile, saveProfile);
     }
 
@@ -678,43 +681,128 @@ function showBadgeZoom(badge) {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// 🏅 PRÉVISUALISATION DES BADGES (4 badges max)
+// 🏅 BADGES ÉPINGLÉS (4 emplacements sur la carte d'identité)
 // ───────────────────────────────────────────────────────────────────────────
 
+/** t(key) renvoie la clé si absente — cf. CLAUDE.md §5. */
+function _tr(key, fallback) {
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : fallback;
+}
+
 /**
- * Affiche la prévisualisation des badges sélectionnés
+ * Rend les 4 emplacements de badges épinglés sur la carte d'identité (2.2).
+ * Un emplacement rempli montre le badge (clic = zoom, cf. share-card.js) avec
+ * une croix pour le désépingler ; un emplacement vide est un « + » qui ouvre
+ * l'onglet Badges de l'atelier. Toujours 4 cases : le joueur voit d'un coup
+ * d'œil ce qu'il lui reste à remplir, sans texte à lire.
  * @param {Object} profile - Le profil utilisateur
  */
 export function renderBadgesPreview(profile) {
   const preview = document.getElementById("previewBadges");
   if (!preview) return;
 
-  const ids = profile.selectedBadges || [];
+  const ids = (profile.selectedBadges || []).slice(0, MAX_SELECTED_BADGES);
   preview.innerHTML = "";
-
-  if (ids.length === 0) {
-    preview.innerHTML = `<p style="opacity:0.6; text-align:center;">No badges selected yet.</p>`;
-    window.dispatchEvent(new CustomEvent("badgesRendered"));
-    return;
-  }
 
   ids.forEach((id) => {
     const strId = String(id);
     const badge = badgesList.find((b) => b.id === id);
     if (!badge) return;
+    const name = getBadgeName(badge);
+    const slot = document.createElement("div");
+    slot.className = "pin-slot pin-slot--filled";
+    slot.dataset.badgeId = strId;
+
     const img = document.createElement("img");
     img.src = badge.img;
-    img.alt = badge.name;
-    img.title = badge.name;
+    img.alt = name;
+    img.title = name;
     img.className = "badge-preview-img";
     img.dataset.badgeId = strId;
     img.onerror = () => {
       img.src = new URL("./images/default.png", import.meta.url).href;
     };
-    preview.appendChild(img);
+    slot.appendChild(img);
+
+    const unpin = document.createElement("button");
+    unpin.type = "button";
+    unpin.className = "pin-unpin";
+    unpin.dataset.unpin = strId;
+    unpin.setAttribute("aria-label", `${_tr("profile.unpin_badge", "Unpin")} — ${name}`);
+    unpin.title = _tr("profile.unpin_badge", "Unpin");
+    unpin.textContent = "✕";
+    unpin.onclick = (e) => {
+      e.stopPropagation();
+      toggleBadgeSelection(profile, _lastSaveProfile, strId);
+    };
+    slot.appendChild(unpin);
+    preview.appendChild(slot);
   });
 
+  for (let i = ids.length; i < MAX_SELECTED_BADGES; i++) {
+    const empty = document.createElement("button");
+    empty.type = "button";
+    empty.className = "pin-slot pin-slot--empty";
+    empty.setAttribute("aria-label", _tr("profile.pin_badge", "Pin a badge"));
+    empty.title = _tr("profile.pin_badge", "Pin a badge");
+    empty.textContent = "+";
+    empty.onclick = () => openAtelierTab("badges", { scroll: true });
+    preview.appendChild(empty);
+  }
+
   window.dispatchEvent(new CustomEvent("badgesRendered"));
+}
+
+/**
+ * Rend l'onglet Badges de l'atelier : uniquement les badges débloqués, en
+ * vignettes cliquables — épinglé = bordure accent + ✓. Le catalogue complet
+ * (verrouillés, conditions) reste dans la modale « See All Badges ».
+ * @param {Object} profile - Le profil utilisateur
+ * @param {Function} saveProfile - Fonction de sauvegarde
+ */
+export function renderBadgePicker(profile, saveProfile) {
+  const grid = document.getElementById("badgePickGrid");
+  if (!grid) return;
+  if (saveProfile) _lastSaveProfile = saveProfile;
+
+  const unlocked = badgesList.filter((b) => (profile.badges || []).includes(b.id));
+  const selected = profile.selectedBadges || [];
+  const hint = document.getElementById("badgePickHint");
+  if (hint) {
+    hint.dataset.count = `${selected.length}/${MAX_SELECTED_BADGES}`;
+  }
+
+  if (!unlocked.length) {
+    grid.innerHTML = `<p class="badge-pick-empty">${_tr(
+      "profile.pick_empty",
+      "No badge unlocked yet — play a few games, they will show up here."
+    )}</p>`;
+    return;
+  }
+
+  grid.innerHTML = unlocked
+    .map((badge) => {
+      const pinned = selected.includes(badge.id);
+      const name = getBadgeName(badge);
+      return `
+        <button type="button" class="badge-pick${pinned ? " badge-pick--pinned" : ""}"
+                data-id="${badge.id}" aria-pressed="${pinned}" title="${name}">
+          <span class="badge-pick-thumb">
+            <img src="${badge.img}" alt="" loading="lazy"
+                 onerror="this.src=new URL('./images/default.png',import.meta.url).href">
+            ${pinned ? '<span class="badge-pick-check" aria-hidden="true">✓</span>' : ""}
+          </span>
+          <span class="badge-pick-name">${name}</span>
+        </button>`;
+    })
+    .join("");
+
+  grid.onclick = (e) => {
+    const btn = e.target.closest(".badge-pick");
+    if (!btn) return;
+    toggleBadgeSelection(profile, _lastSaveProfile, btn.dataset.id);
+  };
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -1106,6 +1194,7 @@ export function toggleBadgeSelection(profile, saveProfile, badgeId) {
   // Sauvegarder et rafraîchir
   saveProfile();
   renderBadgesPreview(profile);
+  renderBadgePicker(profile, saveProfile);
   renderBadgesModal(profile, saveProfile);
 }
 
@@ -1117,8 +1206,8 @@ function showSelectionLimitAlert() {
   alertDiv.className = "badge-limit-alert";
   alertDiv.innerHTML = `
     <div class="alert-content">
-      ⚠️ You can only select <strong>${MAX_SELECTED_BADGES} badges</strong>!<br>
-      <small>Deselect one first.</small>
+      ⚠️ ${_tr("profile.pin_limit", `You can only pin <strong>${MAX_SELECTED_BADGES} badges</strong>!`)}<br>
+      <small>${_tr("profile.pin_limit_hint", "Unpin one first.")}</small>
     </div>
   `;
 
@@ -1224,6 +1313,7 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     saveProfile();
     renderBadgesModal(profile, saveProfile);
     renderBadgesPreview(profile);
+    renderBadgePicker(profile, saveProfile);
     showCodeMessage(
       msg,
       tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
@@ -1352,6 +1442,7 @@ export function forceCheckBadges(profile, saveProfile) {
   checkAndUnlockBadges(profile, saveProfile);
   renderBadgesModal(profile, saveProfile);
   renderBadgesPreview(profile);
+  renderBadgePicker(profile, saveProfile);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

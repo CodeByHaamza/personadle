@@ -378,6 +378,9 @@ export function renderTitlesSection(profile, saveProfile, saveProfileToCloud, ma
     (t) => (equippedId && t.id && t.id === equippedId) || (equippedSlug && t.slug === equippedSlug)
   );
   const titleImg = document.getElementById("equippedTitleImg");
+  // Sans titre, la puce affiche « ＋ Choisir un titre » (2.2, atelier) — même
+  // bouton, il ouvre l'onglet Titre dans les deux cas.
+  const titleEmpty = document.getElementById("equippedTitleEmpty");
   if (titleImg) {
     if (eq) {
       titleImg.src = eq.image_path || `titles/${eq.slug}.webp`;
@@ -387,6 +390,8 @@ export function renderTitlesSection(profile, saveProfile, saveProfileToCloud, ma
       titleImg.style.display = "none";
     }
   }
+  if (titleEmpty) titleEmpty.hidden = !!eq;
+  document.getElementById("equippedTitleBtn")?.classList.toggle("title-chip--empty", !eq);
   // ── Grille modale ─────────────────────────────────────────────────────────
   _renderTitlesGrid(profile, saveProfile, saveProfileToCloud, markDirty);
 }
@@ -459,9 +464,12 @@ export function _bindTitlesModal(profile, saveProfile, saveProfileToCloud, markD
   const overlay = document.getElementById("titlesModalOverlay");
   const openBtn = document.getElementById("openTitlesModal");
   const closeBtn = document.getElementById("closeTitlesModal");
-  if (!modal || !openBtn) return;
 
+  // Rendu immédiat depuis localStorage, avant auth/cloud. Depuis la 2.2 la
+  // grille vit dans l'atelier (onglet Titre, #titlesModalGrid) et il n'y a plus
+  // de modale : on rend et on s'arrête là.
   _renderTitlesGrid(profile, saveProfile, saveProfileToCloud, markDirty);
+  if (!modal || !openBtn) return;
 
   const open = () => {
     // Escape (géré par le trap clavier d'openModal) doit aussi refermer

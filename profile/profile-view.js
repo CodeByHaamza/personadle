@@ -204,16 +204,26 @@ if (viewParam || uidParam) {
     };
 
     hide(document.getElementById("editAvatarBtn"));
-    hide(document.getElementById("saveAndRefreshBtn"));
     hide(document.getElementById("authSection"));
+    // 2.2 : l atelier, l indicateur d enregistrement et la puce « Choisir un titre »
+    // sont des commandes du propriétaire — sur un profil consulté on ne montre que
+    // le résultat (avatar, titre équipé, badges épinglés).
+    hide(document.getElementById("atelier"));
+    hide(document.getElementById("saveStatus"));
+    hide(document.getElementById("equippedTitleEmpty"));
+    const titleBtn = document.getElementById("equippedTitleBtn");
+    if (titleBtn) {
+      titleBtn.disabled = true;
+      titleBtn.classList.add("title-chip--static");
+    }
     // En mode consultation, masquer l'UI invité « connecte-toi » qu'auth.js affiche
     // pour un visiteur déconnecté — sinon le profil consulté ressemble à un mur de login.
     hide(document.getElementById("authGuest"));
     document.querySelectorAll('[data-auth="anonymous"]').forEach(hide);
     hide(document.querySelector(".pseudo-edit-row"));
-    hide(document.querySelector(".perso-card"));
-    hide(document.getElementById("openBadgesModal"));
-    hide(document.getElementById("openTitlesModal"));
+    // La carte « Badges » ne contient plus que l accès à la collection du propriétaire
+    // (les épinglés sont sur la carte d identité) : on la retire entière.
+    hide(document.getElementById("openBadgesModal")?.closest(".profile-card"));
 
     // Masquer les cartes d'action (export, import, share, reset, event code)
     document.querySelectorAll(".profile-card").forEach((card) => {
@@ -367,6 +377,9 @@ if (viewParam || uidParam) {
 
     if (!selectedIds.length) {
       previewEl.innerHTML = "";
+      // Pas de « + » à proposer à un visiteur : le bloc entier disparaît.
+      const block = previewEl.closest(".pinned-block");
+      if (block) block.style.display = "none";
       return;
     }
 
@@ -379,7 +392,8 @@ if (viewParam || uidParam) {
         const badge = _badgesList.find((b) => b.id === id);
         if (!badge) continue;
         const wrapper = document.createElement("div");
-        wrapper.className = "badge-preview-item";
+        // Même emplacement que sur le profil du propriétaire (2.2), sans la croix.
+        wrapper.className = "pin-slot pin-slot--filled badge-preview-item";
         wrapper.title = escapeHtml(badge.name);
         const img = document.createElement("img");
         img.className = "badge-preview-img";
