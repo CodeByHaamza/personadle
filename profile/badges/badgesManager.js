@@ -4,7 +4,7 @@
 
 import { badgesList, BADGE_CATEGORIES, getBadgeById } from "./badgesData.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
-import { openAtelierTab } from "../atelier.js";
+import { openAtelier } from "../atelier.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
 let _lastSaveProfile = () => {};
 
@@ -134,6 +134,7 @@ export function initBadgesSystem(profile, saveProfile) {
   // Rendre l'interface
   renderBadgesPreview(profile);
   renderBadgePicker(profile, saveProfile);
+  renderBadgesShowcase(profile);
   renderBadgesModal(profile, saveProfile);
 
   // Configurer le système de codes
@@ -190,6 +191,7 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
       // Re-render : renderBadgesModal était déjà appelé avant la fin de ce fetch async
       renderBadgesPreview(profile);
       renderBadgePicker(profile, saveProfile);
+      renderBadgesShowcase(profile);
       renderBadgesModal(profile, saveProfile);
     }
 
@@ -747,11 +749,61 @@ export function renderBadgesPreview(profile) {
     empty.setAttribute("aria-label", _tr("profile.pin_badge", "Pin a badge"));
     empty.title = _tr("profile.pin_badge", "Pin a badge");
     empty.textContent = "+";
-    empty.onclick = () => openAtelierTab("badges", { scroll: true });
+    empty.onclick = () => openAtelier("badges");
     preview.appendChild(empty);
   }
 
   window.dispatchEvent(new CustomEvent("badgesRendered"));
+}
+
+/**
+ * Rend la vitrine de la page profil : les badges DÉBLOQUÉS, en grand.
+ *
+ * Retour Hamza (2026-09-16) : « les badges encore plus visibles (petits et
+ * cachés, on les voit mal) — et la carte Badges dit "toute ta collection" mais
+ * on ne les voit pas dedans ». La carte ne contenait qu'un bouton : elle montre
+ * maintenant ce que le joueur a gagné (les verrouillés et leurs conditions
+ * restent dans la collection complète, #badgesModal). Un clic zoome le badge.
+ *
+ * @param {Object} profile - Le profil utilisateur
+ */
+export function renderBadgesShowcase(profile) {
+  const grid = document.getElementById("badgesShowcase");
+  const count = document.getElementById("badgesCount");
+  if (count) count.textContent = `${(profile.badges || []).length} / ${badgesList.length}`;
+  if (!grid) return;
+
+  const unlocked = badgesList.filter((b) => (profile.badges || []).includes(b.id));
+  if (!unlocked.length) {
+    grid.innerHTML = `<p class="badges-showcase-empty">${_tr(
+      "profile.showcase_empty",
+      "No badge yet — play a game, they start dropping fast."
+    )}</p>`;
+    return;
+  }
+
+  const pinned = profile.selectedBadges || [];
+  grid.innerHTML = unlocked
+    .map((badge) => {
+      const name = getBadgeName(badge);
+      const isPinned = pinned.includes(badge.id);
+      return `
+        <button type="button" class="showcase-badge${isPinned ? " showcase-badge--pinned" : ""}"
+                data-id="${badge.id}" title="${name}">
+          <img src="${badge.img}" alt="${name}" loading="lazy"
+               onerror="this.src=new URL('./images/default.png',import.meta.url).href">
+          ${isPinned ? '<span class="showcase-pin" aria-hidden="true">📌</span>' : ""}
+          <span class="showcase-badge-name">${name}</span>
+        </button>`;
+    })
+    .join("");
+
+  grid.onclick = (e) => {
+    const btn = e.target.closest(".showcase-badge");
+    if (!btn) return;
+    const badge = badgesList.find((b) => b.id === btn.dataset.id);
+    if (badge) showBadgeZoom(badge);
+  };
 }
 
 /**
@@ -1061,44 +1113,9 @@ function setupModalControls(openBtn, closeBtn, modal) {
     };
   }
 
-  // Bouton « Sauvegarder » explicite, en bas de la modale (sticky). La sélection
-  // s'auto-sauve déjà à chaque clic, mais ce bouton confirme visuellement
-  // (sync cloud best-effort + feedback inline + fermeture).
-  if (modal && !document.getElementById("saveBadgesBtn")) {
-    const _t = (k, fb) => {
-      const r = window.i18n?.t?.(k);
-      return r != null && r !== k ? r : fb;
-    };
-    const footer = document.createElement("div");
-    footer.className = "badges-modal-footer";
-    const btn = document.createElement("button");
-    btn.id = "saveBadgesBtn";
-    btn.type = "button";
-    btn.className = "badges-save-btn";
-    const label = _t("profile.badges_save", "💾 Save");
-    btn.textContent = label;
-    btn.onclick = () => {
-      try {
-        _lastSaveProfile();
-      } catch (_) {
-        /* sauvegarde best-effort */
-      }
-      // Feedback inline garanti (ne dépend pas de window.showToast qui peut manquer)
-      btn.classList.add("saved");
-      btn.textContent = _t("profile.badges_saved", "✅ Badges saved!");
-      if (typeof window.showToast === "function") {
-        window.showToast(_t("profile.badges_saved", "✅ Badges saved!"));
-      }
-      setTimeout(() => modal.classList.add("hidden"), 550);
-      setTimeout(() => {
-        btn.classList.remove("saved");
-        btn.textContent = label;
-      }, 900);
-    };
-    footer.appendChild(btn);
-    // En bas de la modale, après la grille des badges.
-    modal.appendChild(footer);
-  }
+  // Plus de bouton « Sauvegarder » ici : depuis la 2.2 chaque clic épingle et
+  // envoie tout de suite (voir profile/atelier.js), un bouton Save ne ferait que
+  // laisser croire qu'il faut penser à l'utiliser.
 }
 
 /**
@@ -1195,6 +1212,7 @@ export function toggleBadgeSelection(profile, saveProfile, badgeId) {
   saveProfile();
   renderBadgesPreview(profile);
   renderBadgePicker(profile, saveProfile);
+  renderBadgesShowcase(profile);
   renderBadgesModal(profile, saveProfile);
 }
 
@@ -1314,6 +1332,7 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     renderBadgesModal(profile, saveProfile);
     renderBadgesPreview(profile);
     renderBadgePicker(profile, saveProfile);
+    renderBadgesShowcase(profile);
     showCodeMessage(
       msg,
       tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
@@ -1443,6 +1462,7 @@ export function forceCheckBadges(profile, saveProfile) {
   renderBadgesModal(profile, saveProfile);
   renderBadgesPreview(profile);
   renderBadgePicker(profile, saveProfile);
+  renderBadgesShowcase(profile);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

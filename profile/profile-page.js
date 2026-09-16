@@ -9,7 +9,7 @@
  *
  * Fonctionnalités :
  *   - Chargement et sauvegarde du profil depuis localStorage
- *   - Sélection et recadrage d'avatar (canvas crop)
+ *   - Choix de l'avatar parmi les portraits du jeu (pas d'import : 2026-09-16)
  *   - Affichage des statistiques avec animation stagger
  *   - Système de badges (délégué à badgesManager.js)
  *   - Code événement (badge exclusif)
@@ -29,6 +29,7 @@ import {
   renderBadgesModal,
   renderBadgesPreview,
   renderBadgePicker,
+  renderBadgesShowcase,
 } from "./badges/badgesManager.js";
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
 import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/streak-recovery.js";
@@ -44,7 +45,7 @@ import {
   bestModeOverall,
 } from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
-import { initAtelier, openAtelierTab, initSaveStatus, scheduleAutosave } from "./atelier.js";
+import { initAtelier, openAtelier, initSaveStatus, scheduleAutosave } from "./atelier.js";
 import {
   renderUnlockableWallpaperGallery,
   initUnlockableWallpapers,
@@ -56,12 +57,7 @@ import {
   resetTitlesUnlockedState,
   refreshTitlesAfterCloudSync,
 } from "./titles-ui.js";
-import {
-  renderSongCard,
-  setupSongPicker,
-  stopProfileSong,
-  updateSongArtwork,
-} from "./song-player.js";
+import { renderSongCard, setupSongPicker, stopProfileSong } from "./song-player.js";
 import {
   setupShareProfile,
   setupCopyProfileLink,
@@ -197,15 +193,14 @@ function renderThemePicker() {
 // ─────────────────────────────────────────────────────────
 
 let profile = null; // Objet profil utilisateur (localStorage)
-let zoom = 1; // Niveau de zoom du canvas crop
+let zoom = 1; // Niveau de zoom du canvas de recadrage
 let offsetX = 0; // Décalage horizontal du canvas
 let offsetY = 0; // Décalage vertical du canvas
 let dragging = false; // État du drag
 let startX = 0; // Position X initiale du drag
 let startY = 0; // Position Y initiale du drag
-let selectedAvatarSrc = ""; // Source de l'avatar sélectionné dans la grille
+let selectedAvatarSrc = ""; // Portrait sélectionné dans la grille (chemin ../img/avatar/…)
 
-let cropTarget = "avatar"; // 'avatar' | 'song' — détermine où le crop est sauvegardé
 
 // ─────────────────────────────────────────────────────────
 // ÉLÉMENTS DOM
@@ -231,13 +226,13 @@ function markDirty() {
   scheduleAutosave();
 }
 const resetProfileBtn = document.getElementById("resetProfile");
-const exportBtn = document.getElementById("exportProfile");
 const borderColorPicker = document.getElementById("borderColorPicker");
 const statsContainer = document.getElementById("statsContainer");
 
-// Modale crop
-const closeCropper = document.getElementById("closeCropper");
 const avatarGrid = document.getElementById("avatarGrid");
+
+// Modale de recadrage (sur un portrait du jeu — aucun import)
+const closeCropper = document.getElementById("closeCropper");
 const canvas = document.getElementById("avatarCanvas");
 const ctx = canvas.getContext("2d");
 const zoomInBtn = document.getElementById("zoomIn");
@@ -389,6 +384,20 @@ function saveProfile() {
 }
 
 /**
+ * Chemin de galerie d'un avatar, ou null si ce n'en est pas un (image encodée
+ * d'avant 2026-09-16, valeur vide…). Les anciens chemins « ./img/… » (stockés
+ * depuis la racine du site en v1) sont ramenés à la forme « ../img/… » attendue
+ * depuis profile/.
+ * @param {string|undefined} avatar
+ * @returns {string|null}
+ */
+function galleryAvatarPath(avatar) {
+  if (typeof avatar !== "string" || !avatar) return null;
+  const path = avatar.replace(/^\.\/img\//, "../img/");
+  return /^\.\.\/img\/avatar\/[A-Za-z0-9_-]+\.(?:gif|png|jpe?g|webp)$/i.test(path) ? path : null;
+}
+
+/**
  * Envoie les champs de profil modifiés vers le backend (PATCH /api/user/:id).
  * Fire-and-forget — une erreur réseau ne bloque pas l'UI locale.
  * @param {object} fields - Champs à synchroniser (avatar_data, avatar_border_color, selected_badges…)
@@ -427,9 +436,12 @@ async function syncProfileToCloud({ strict = false } = {}) {
     equipped_title_id: profile.equippedTitleId || null,
     favorite_mode: normalizeModeKey(profile.favoriteMode) ?? null,
   };
-  // Un ancien chemin v1 (./img/…, stocké depuis la racine) est renvoyé sous la
-  // forme que le serveur accepte (../img/avatar/…, cf. personadle_validate_avatar).
-  if (profile.avatar) fields.avatar_data = profile.avatar.replace(/^\.\/img\//, "../img/");
+  // Portrait de la galerie, ou son recadrage encodé — les deux formes que le
+  // serveur accepte (personadle_validate_avatar). Un ancien chemin v1 « ./img/… »
+  // est ramené à la forme attendue depuis profile/.
+  if (profile.avatar) {
+    fields.avatar_data = galleryAvatarPath(profile.avatar) ?? profile.avatar;
+  }
   // Sync des settings (son, animations…) — stockés dans personaSettings
   const settings = JSON.parse(localStorage.getItem("personaSettings") || "{}");
   if (Object.keys(settings).length) fields.settings = settings;
@@ -522,6 +534,7 @@ function _applyCloudToUI() {
   // ── Badges ────────────────────────────────────────────────
   renderBadgesPreview(profile);
   renderBadgePicker(profile, saveProfileAndSyncBadges);
+  renderBadgesShowcase(profile);
   renderBadgesModal(profile, saveProfileAndSyncBadges);
 
   // ── Wallpapers débloquables ───────────────────────────────
@@ -838,44 +851,26 @@ async function renderExpertStats() {
 
 // ✎ sur l'avatar → onglet Avatar de l'atelier (les portraits s'appliquent au
 // clic ; le recadrage n'est proposé que pour une image importée ou « Ajuster »).
-if (editAvatarBtn) editAvatarBtn.onclick = () => openAtelierTab("avatar", { scroll: true });
+if (editAvatarBtn) editAvatarBtn.onclick = () => openAtelier("avatar");
 
 // Le titre sous le pseudo → onglet Titre.
 document.getElementById("equippedTitleBtn")?.addEventListener("click", () => {
-  openAtelierTab("title", { scroll: true });
+  openAtelier("title");
 });
 
 /**
- * Applique un portrait du jeu tout de suite (sans passer par la modale de
- * recadrage) : un GIF garde son chemin, une image fixe est rendue en 300 × 300
- * comme le ferait « Appliquer » avec le cadrage par défaut — même format que
- * tout ce qui lit profile.avatar (amis, défis, carte de partage).
+ * Applique un portrait du jeu. On enregistre le CHEMIN du portrait, jamais une
+ * image encodée : c'est ce qui garantit qu'un avatar est toujours un portrait
+ * du jeu (décision Hamza du 2026-09-16), et ça évite au passage de trimballer
+ * ~100 Ko de base64 dans chaque liste d'amis et chaque défi.
  * @param {string} src  chemin relatif à profile/ (../img/avatar/…)
  */
 function applyAvatarPreset(src) {
   selectedAvatarSrc = src;
-  cropTarget = "avatar";
-  if (src.toLowerCase().endsWith(".gif")) {
-    commitAvatar(src);
-    return;
-  }
-  const img = new Image();
-  img.onload = () => {
-    image = img;
-    zoom = 1;
-    offsetX = 0;
-    offsetY = 0;
-    drawCanvas();
-    commitAvatar(canvas.toDataURL("image/png"));
-  };
-  img.onerror = () => {
-    // Image absente : on garde le chemin, comme un GIF — mieux qu'un avatar vide.
-    commitAvatar(src);
-  };
-  img.src = src;
+  commitAvatar(src);
 }
 
-/** Pose l'avatar (données ou chemin), sauvegarde, envoie. */
+/** Pose l'avatar, sauvegarde, envoie. */
 function commitAvatar(result) {
   profile.avatar = result;
   profile.avatarSrc = selectedAvatarSrc;
@@ -886,6 +881,19 @@ function commitAvatar(result) {
   refreshShareCardPreview();
   _markSelectedAvatarCell();
 }
+
+// « Ajuster le cadrage » : recadre le portrait porté (certains sont mal cadrés
+// par défaut — retour Hamza du 2026-09-16). Sans portrait choisi, rien à recadrer.
+document.getElementById("avatarAdjustBtn")?.addEventListener("click", () => {
+  const src = selectedAvatarSrc || galleryAvatarPath(profile.avatarSrc || profile.avatar);
+  if (!src || src === "none") {
+    openAtelier("avatar");
+    return;
+  }
+  selectedAvatarSrc = src;
+  loadImageToCanvas(src);
+  openModal("avatarCropModal");
+});
 
 /**
  * Surligne dans la grille le portrait actuellement porté. Un portrait recadré
@@ -899,34 +907,6 @@ function _markSelectedAvatarCell() {
     img.classList.toggle("selected", !!current && img.dataset.src === current);
   });
 }
-
-// Importer sa propre image → recadrage.
-document.getElementById("avatarUploadInput")?.addEventListener("change", (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    selectedAvatarSrc = String(reader.result);
-    cropTarget = "avatar";
-    loadImageToCanvas(selectedAvatarSrc);
-    openModal("avatarCropModal");
-  };
-  reader.readAsDataURL(file);
-  e.target.value = "";
-});
-
-// « Ajuster le cadrage » : la modale de recadrage sur l'image en cours.
-document.getElementById("avatarAdjustBtn")?.addEventListener("click", () => {
-  const src = selectedAvatarSrc || profile.avatarSrc || profile.avatar;
-  if (!src || src === "none") {
-    openAtelierTab("avatar");
-    return;
-  }
-  selectedAvatarSrc = src;
-  cropTarget = "avatar";
-  loadImageToCanvas(src);
-  openModal("avatarCropModal");
-});
 
 // Réinitialiser le profil
 resetProfileBtn.onclick = () => {
@@ -1260,44 +1240,24 @@ zoomOutBtn.onclick = () => {
   drawCanvas();
 };
 
-// Confirmer le crop → route vers avatar ou song selon cropTarget
+// Appliquer le recadrage. Un GIF garde son chemin (le canvas perdrait
+// l'animation) ; sinon on enregistre l'image recadrée. La SOURCE reste toujours
+// un portrait du jeu : la modale ne s'ouvre que sur celui qui est porté.
 confirmCrop.onclick = () => {
-  const result = selectedAvatarSrc.endsWith(".gif")
-    ? selectedAvatarSrc
-    : canvas.toDataURL("image/png");
-
-  if (cropTarget === "song") {
-    if (profile.profileSong) {
-      profile.profileSong.customImage = result;
-      updateSongArtwork(result);
-      saveProfile();
-    }
-  } else {
-    commitAvatar(result);
-  }
+  commitAvatar(
+    selectedAvatarSrc.toLowerCase().endsWith(".gif")
+      ? selectedAvatarSrc
+      : canvas.toDataURL("image/png")
+  );
   closeModal("avatarCropModal");
-  cropTarget = "avatar"; // reset systématique
 };
 
 // ─────────────────────────────────────────────────────────
-// EXPORT / IMPORT JSON
+// EXPORT JSON
 // ─────────────────────────────────────────────────────────
 
-/** Exporte le profil complet en fichier JSON téléchargeable. */
-exportBtn.onclick = () => {
-  const exportData = {
-    ...profile,
-    // Jeton de liaison au compte — empêche l'import du JSON sur un autre compte
-    _accountId: window._currentUser?.id ?? profile._accountId ?? null,
-    _exportedAt: new Date().toISOString(),
-  };
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "personadle_profile.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
-};
+// L'export du profil vit désormais dans la modale ⚙ Paramètres
+// (js/settings-modal.js → exportProfileFile), retour Hamza du 2026-09-16.
 
 
 // ─────────────────────────────────────────────────────────
@@ -1374,6 +1334,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderUnlockableWallpaperGallery(profile);
     renderBadgesPreview(profile);
     renderBadgePicker(profile, saveProfileAndSyncBadges);
+    renderBadgesShowcase(profile);
     renderBadgesModal(profile, saveProfileAndSyncBadges);
     resetTitlesUnlockedState();
     renderTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty);

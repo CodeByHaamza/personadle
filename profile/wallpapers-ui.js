@@ -72,26 +72,87 @@ export function wallpaperConditionText(wp) {
   return r != null && r !== key ? r : wp.condition;
 }
 
-/** Rend la galerie de wallpapers (verrouillés/débloqués) dans #unlockableWallpaperGrid. */
+/**
+ * Rend la bande de wallpapers dans #unlockableWallpaperGrid + le compteur.
+ *
+ * Retour Hamza (2026-09-16) : « les wallpapers débloqués, trouve un autre moyen,
+ * ils sont supra grands » — sept vignettes en grille mangeaient ~500 px de haut
+ * en bas de profil. C'est maintenant UNE ligne qui défile horizontalement, et
+ * le clic ouvre l'aperçu en grand (la condition d'obtention y est lisible, au
+ * lieu d'être écrasée sur une vignette).
+ *
+ * @param {Object} p - Le profil utilisateur
+ */
 export function renderUnlockableWallpaperGallery(p) {
   const container = document.getElementById("unlockableWallpaperGrid");
+  const unlocked = p?.unlockedWallpapers || [];
+  const counter = document.getElementById("wallpapersCount");
+  if (counter) counter.textContent = `${unlocked.length} / ${UNLOCKABLE_WALLPAPERS.length}`;
   if (!container) return;
-  const unlocked = p.unlockedWallpapers || [];
+
   container.innerHTML = UNLOCKABLE_WALLPAPERS.map((wp) => {
     const isUnlocked = unlocked.includes(wp.id);
     const cond = wallpaperConditionText(wp);
-    // title = tooltip natif au survol : nom + condition pour un débloqué (on peut
-    // revoir comment on l'a obtenu, comme pour badges/titres), condition seule sinon.
     const tip = isUnlocked ? `${wp.name} — ${cond}` : cond;
     return `
-      <div class="unlockable-wp-item ${isUnlocked ? "unlocked" : "locked"}"
-           data-id="${wp.id}" title="${tip}">
-        <img src="${wp.src}" alt="${wp.name}" loading="lazy">
-        ${!isUnlocked ? `<div class="wp-lock-overlay">🔒<span class="wp-lock-cond">${cond}</span></div>` : ""}
-        ${isUnlocked ? `<span class="wp-unlocked-label">✓ ${wp.name}</span><div class="wp-cond-hover"><span>${cond}</span></div>` : ""}
-      </div>
-    `;
+      <button type="button" class="wp-chip ${isUnlocked ? "unlocked" : "locked"}"
+              data-id="${wp.id}" title="${tip}" aria-label="${tip}">
+        <img src="${wp.src}" alt="" loading="lazy">
+        ${isUnlocked ? '<span class="wp-chip-check" aria-hidden="true">✓</span>' : '<span class="wp-chip-lock" aria-hidden="true">🔒</span>'}
+      </button>`;
   }).join("");
+
+  container.onclick = (e) => {
+    const chip = e.target.closest(".wp-chip");
+    if (!chip) return;
+    const wp = UNLOCKABLE_WALLPAPERS.find((w) => w.id === chip.dataset.id);
+    if (wp) showWallpaperPreview(wp, unlocked.includes(wp.id));
+  };
+}
+
+/**
+ * Aperçu plein écran d'un wallpaper : l'image en grand, son nom, et comment on
+ * l'obtient (ou qu'on l'a déjà). Verrouillé, l'image reste assombrie — la
+ * découvrir fait partie de la récompense.
+ *
+ * @param {{id: string, name: string, src: string}} wp
+ * @param {boolean} isUnlocked
+ */
+export function showWallpaperPreview(wp, isUnlocked) {
+  document.querySelector(".wp-preview")?.remove();
+  const cond = wallpaperConditionText(wp);
+  const t = (key, fallback) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fallback;
+  };
+
+  const el = document.createElement("div");
+  el.className = `wp-preview ${isUnlocked ? "unlocked" : "locked"}`;
+  el.innerHTML = `
+    <div class="wp-preview-box" role="dialog" aria-label="${wp.name}">
+      <button class="wp-preview-close" type="button" aria-label="Close">✕</button>
+      <img class="wp-preview-img" src="${wp.src}" alt="${wp.name}">
+      <div class="wp-preview-info">
+        <strong class="wp-preview-name">${isUnlocked ? "" : "🔒 "}${wp.name}</strong>
+        <span class="wp-preview-cond">${isUnlocked ? `✓ ${t("profile.wp_owned", "Unlocked")} — ${cond}` : cond}</span>
+      </div>
+    </div>`;
+
+  const close = () => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 200);
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => {
+    if (e.key === "Escape") close();
+  };
+  el.addEventListener("click", (e) => {
+    if (e.target === el || e.target.closest(".wp-preview-close")) close();
+  });
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  el.querySelector(".wp-preview-close").focus();
 }
 
 /** Vérifie et débloque les nouveaux wallpapers, affiche une notif pour chacun. */

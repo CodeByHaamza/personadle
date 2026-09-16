@@ -326,16 +326,23 @@
               </div>
             </div>
 
-            <!-- Badges épinglés : 4 emplacements, remplis depuis l'onglet Badges -->
-            <div class="pinned-block">
-              <span class="pinned-label" data-i18n="profile.pinned_badges">Pinned badges</span>
-              <div id="previewBadges" class="badge-preview pinned-slots" aria-label="Pinned badges"></div>
-            </div>
+            <!-- Tout ce qui se personnalise est dans une seule modale (atelier) -->
+            <button id="openAtelierBtn" class="btn-p5 btn-customize" type="button">
+              🎨 <span data-i18n="profile.customize_btn">Customize</span>
+            </button>
 
             <!-- Enregistrement automatique : plus de bouton Save, l'état se lit ici -->
-            <div id="saveStatus" class="save-status" role="status" aria-live="polite">
+            <div
+              id="saveStatus"
+              class="save-status"
+              data-save-status
+              role="status"
+              aria-live="polite"
+            >
               <span class="save-status-dot" aria-hidden="true"></span>
-              <span id="saveStatusText" data-i18n="profile.all_saved">Everything is saved</span>
+              <span id="saveStatusText" data-save-status-text data-i18n="profile.all_saved"
+                >Everything is saved</span
+              >
             </div>
 
             <!-- ── Section Auth ── -->
@@ -383,84 +390,6 @@
 
         <!-- ───────── PANNEAU DROIT ───────── -->
         <section class="profile-right">
-          <!-- ── Atelier : tout ce qui se personnalise, en cinq onglets ──
-               Remplace « Change Picture », « Titles », « Save » et la carte
-               « Customization » dépliable. Chaque choix est enregistré tout de
-               suite (voir #saveStatus). Les conteneurs gardent leurs ids
-               historiques : profile-page.js, titles-ui.js et badgesManager.js
-               rendent dedans. -->
-          <section class="atelier animate-right" id="atelier" aria-labelledby="atelierTitle">
-            <h3 class="card-title atelier-title" id="atelierTitle">
-              <span class="card-accent">◆</span>
-              <span data-i18n="profile.atelier_title">Customize</span>
-            </h3>
-            <div class="atelier-body">
-            <div class="atelier-tabs" role="tablist" aria-label="Customize" id="atelierTabs">
-              <button class="atelier-tab" role="tab" type="button" data-pane="avatar" aria-selected="true" aria-controls="pane-avatar" id="tab-avatar">
-                <span class="atelier-tab-ic" aria-hidden="true">🖼</span><span data-i18n="profile.tab_avatar">Avatar</span>
-              </button>
-              <button class="atelier-tab" role="tab" type="button" data-pane="border" aria-selected="false" aria-controls="pane-border" id="tab-border">
-                <span class="atelier-tab-ic" aria-hidden="true">◯</span><span data-i18n="profile.tab_border">Border</span>
-              </button>
-              <button class="atelier-tab" role="tab" type="button" data-pane="theme" aria-selected="false" aria-controls="pane-theme" id="tab-theme">
-                <span class="atelier-tab-ic" aria-hidden="true">🎨</span><span data-i18n="profile.tab_theme">Theme</span>
-              </button>
-              <button class="atelier-tab" role="tab" type="button" data-pane="title" aria-selected="false" aria-controls="pane-title" id="tab-title">
-                <span class="atelier-tab-ic" aria-hidden="true">🏅</span><span data-i18n="profile.tab_title">Title</span>
-              </button>
-              <button class="atelier-tab" role="tab" type="button" data-pane="badges" aria-selected="false" aria-controls="pane-badges" id="tab-badges">
-                <span class="atelier-tab-ic" aria-hidden="true">🎖</span><span data-i18n="profile.tab_badges">Badges</span>
-              </button>
-            </div>
-
-            <div class="atelier-panes">
-            <!-- Avatar : portraits du jeu (clic = appliqué), ou import + recadrage -->
-            <div class="atelier-pane" id="pane-avatar" role="tabpanel" data-pane="avatar" aria-labelledby="tab-avatar">
-              <p class="atelier-hint" data-i18n="profile.avatar_hint">Pick a portrait, it is applied right away. Or import your own image.</p>
-              <div class="atelier-avatar-actions">
-                <label class="btn-secondary atelier-import" for="avatarUploadInput">
-                  ⬆ <span data-i18n="profile.avatar_import">Import an image</span>
-                  <input type="file" id="avatarUploadInput" accept="image/*" class="visually-hidden-input" />
-                </label>
-                <button id="avatarAdjustBtn" class="btn-secondary" type="button">
-                  ✂ <span data-i18n="profile.avatar_adjust">Adjust crop</span>
-                </button>
-              </div>
-              <div id="avatarGrid" class="crop-avatar-grid atelier-avatar-grid"></div>
-            </div>
-
-            <!-- Bordure : la couleur autour de l'avatar, partout -->
-            <div class="atelier-pane hidden" id="pane-border" role="tabpanel" data-pane="border" aria-labelledby="tab-border">
-              <p class="atelier-hint" data-i18n="profile.border_hint">The ring around your avatar: on your profile, in your friends' lists and in challenges.</p>
-              <div class="swatch-row" id="borderSwatches"></div>
-              <input type="color" id="borderColorPicker" class="visually-hidden-input" value="#000000" />
-            </div>
-
-            <!-- Thème : ambiance du profil -->
-            <div class="atelier-pane hidden" id="pane-theme" role="tabpanel" data-pane="theme" aria-labelledby="tab-theme">
-              <p class="atelier-hint" data-i18n="profile.theme_hint">The look of your profile page: background and accent color.</p>
-              <div class="theme-swatches" id="themeSwatches"></div>
-              <div id="customThemeRow" class="custom-theme-row hidden">
-                <label for="customThemeColor" data-i18n="profile.theme_custom">Custom color</label>
-                <input type="color" id="customThemeColor" value="#e63946" />
-              </div>
-            </div>
-
-            <!-- Titre : un seul équipé, les verrouillés disent comment les obtenir -->
-            <div class="atelier-pane hidden" id="pane-title" role="tabpanel" data-pane="title" aria-labelledby="tab-title">
-              <p class="atelier-hint" data-i18n="profile.title_pick_hint">One title shows under your name. Click to equip, click again to remove.</p>
-              <div id="titlesModalGrid" class="titles-grid-modal atelier-titles-grid"></div>
-            </div>
-
-            <!-- Badges : choisir les 4 épinglés parmi ceux débloqués -->
-            <div class="atelier-pane hidden" id="pane-badges" role="tabpanel" data-pane="badges" aria-labelledby="tab-badges">
-              <p class="atelier-hint" id="badgePickHint" data-i18n="profile.pinned_hint">Pick up to 4 badges to pin on your card. Click a pinned one to unpin it.</p>
-              <div id="badgePickGrid" class="badge-pick-grid"></div>
-            </div>
-            </div><!-- /.atelier-panes -->
-            </div><!-- /.atelier-body -->
-          </section>
-
           <!-- Card : Statistiques -->
           <div class="profile-card animate-right" style="animation-delay: 0.08s">
             <h3 class="card-title">
@@ -485,15 +414,26 @@
             <div id="expertStatsContainer" class="mode-stats expert-stats"></div>
           </div>
 
-          <!-- Card : Badges -->
+          <!-- Card : Badges — vitrine des badges DÉBLOQUÉS (retour Hamza : on les
+               voyait mal). Les verrouillés et leurs conditions restent dans la
+               collection complète (#badgesModal). -->
           <div class="profile-card animate-right" style="animation-delay: 0.16s">
             <h3 class="card-title">
               <span class="card-accent">◆</span>
               <span data-i18n="profile.badges_title">Badges</span>
+              <span class="card-count" id="badgesCount"></span>
             </h3>
-            <p class="card-desc" data-i18n="profile.collection_desc">
-              Your whole collection, locked badges included, with how to earn them.
-            </p>
+            <!-- Les 4 badges mis en avant — ils vivent ici, dans la carte Badges,
+                 et pas sous la photo de profil (retour Hamza du 2026-09-16 :
+                 « je veux l'ancien fonctionnement, les 4 affichés dans l'onglet
+                 badge »). Remplis depuis l'onglet Badges de l'atelier. -->
+            <div class="pinned-block">
+              <span class="pinned-label" data-i18n="profile.pinned_badges">Pinned badges</span>
+              <div id="previewBadges" class="badge-preview pinned-slots" aria-label="Pinned badges"></div>
+            </div>
+
+            <p class="badges-showcase-label" data-i18n="profile.unlocked_label">Unlocked</p>
+            <div id="badgesShowcase" class="badges-showcase"></div>
             <button id="openBadgesModal" class="btn-secondary" data-i18n="profile.see_all_badges">
               See All Badges
             </button>
@@ -522,24 +462,26 @@
             <p id="eventCodeMessage" class="event-code-msg"></p>
           </div>
 
-          <!-- Card : Export / Import / Share -->
+          <!-- Card : Partage — l'export/import du profil a rejoint les ⚙ Paramètres
+               (retour Hamza) : c'est de la maintenance de données, pas du partage. -->
           <div class="profile-card animate-right" style="animation-delay: 0.32s">
             <h3 class="card-title">
               <span class="card-accent">◆</span>
-              <span data-i18n="profile.export_import_title">Data</span>
+              <span data-i18n="profile.share_title">Share</span>
             </h3>
+            <p class="card-desc" data-i18n="profile.share_desc">
+              Turn your profile into a card to post anywhere — or copy its link so a
+              friend can come and look around.
+            </p>
             <div class="io-buttons">
-              <button id="exportProfile" class="btn-p5">
-                📤 <span data-i18n="profile.export">Export</span>
-              </button>
               <button id="shareProfileBtn" class="btn-p5">
-                🔗 <span data-i18n="profile.share_btn">Share</span>
+                🔗 <span data-i18n="profile.share_btn">Share My Profile</span>
               </button>
-              <button id="copyProfileLinkBtn" class="btn-p5" style="display: none">
+              <button id="copyProfileLinkBtn" class="btn-secondary" style="display: none">
                 📎 <span data-i18n="profile.copy_link">Copy link</span>
               </button>
             </div>
-            <p id="shareStatus" style="margin-top: 8px; font-size: 0.82em; opacity: 0.7"></p>
+            <p id="shareStatus" class="share-status-line"></p>
           </div>
 
           <!-- Card : Wallpapers débloquables -->
@@ -550,9 +492,13 @@
           >
             <h3 class="card-title">
               <span class="card-accent">◆</span>
-              <span>🖼️ Unlockable Wallpapers</span>
+              <span data-i18n="profile.wallpapers_title">🖼️ Unlockable Wallpapers</span>
+              <span class="card-count" id="wallpapersCount"></span>
             </h3>
-            <div id="unlockableWallpaperGrid"></div>
+            <!-- Bande horizontale : 7 wallpapers tenaient sur ~500 px de haut
+                 (retour Hamza « ils sont supra grands ») → une ligne qui défile,
+                 le clic ouvre l'aperçu en grand (wallpapers-ui.js). -->
+            <div id="unlockableWallpaperGrid" class="wp-strip"></div>
           </div>
 
           <!-- Card : Zone dangereuse -->
@@ -570,39 +516,6 @@
         </section>
       </div>
     </main>
-
-    <!-- =====================================================
-     4. MODALE CROP D'AVATAR
-     IDs identiques → profile-page.js peut cibler les mêmes.
-     ===================================================== -->
-    <div id="avatarCropModal" class="modal hidden">
-      <div class="modal-content crop-modal-content">
-        <!-- En-tête P5 -->
-        <div class="crop-modal-header">
-          <h3 class="crop-modal-title"><span class="card-accent">◆</span> <span data-i18n="profile.crop_title">Adjust your avatar</span></h3>
-          <span class="close" id="closeCropper">&times;</span>
-        </div>
-
-        <!-- Recadrage (la grille de portraits vit dans l'atelier, onglet Avatar) -->
-        <div class="crop-section">
-          <p class="crop-section-label" data-i18n="profile.crop_label">Adjust &amp; confirm</p>
-          <div class="crop-canvas-wrap">
-            <canvas id="avatarCanvas" width="300" height="300"></canvas>
-            <p class="crop-canvas-hint">Drag to reposition · Scroll to zoom</p>
-          </div>
-          <div class="crop-controls">
-            <button id="zoomOut" class="crop-zoom-btn" title="Zoom out" aria-label="Zoom out">
-              −
-            </button>
-            <span class="crop-zoom-label">Zoom</span>
-            <button id="zoomIn" class="crop-zoom-btn" title="Zoom in" aria-label="Zoom in">
-              +
-            </button>
-            <button id="confirmCrop" class="btn-p5 crop-confirm-btn">✓ Apply</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- =====================================================
      5. MODALE COMPLÈTE DES BADGES
@@ -651,30 +564,267 @@
     </div>
 
     <!-- =====================================================
-     7. MODALE PARTAGE DE PROFIL
-     Génère un aperçu canvas → téléchargement / partage.
+     4. MODALE DE RECADRAGE
+     Elle ne travaille que sur un PORTRAIT DU JEU déjà choisi : on ne
+     téléverse plus d'image (décision Hamza du 2026-09-16), mais certains
+     portraits sont mal cadrés par défaut — on peut donc les recadrer.
      ===================================================== -->
+    <div id="avatarCropModal" class="modal hidden">
+      <div class="modal-content crop-modal-content">
+        <!-- En-tête P5 -->
+        <div class="crop-modal-header">
+          <h3 class="crop-modal-title"><span class="card-accent">◆</span> <span data-i18n="profile.crop_title">Adjust your avatar</span></h3>
+          <span class="close" id="closeCropper">&times;</span>
+        </div>
+
+        <!-- Recadrage (la grille de portraits vit dans l'atelier, onglet Avatar) -->
+        <div class="crop-section">
+          <p class="crop-section-label" data-i18n="profile.crop_label">Adjust &amp; confirm</p>
+          <div class="crop-canvas-wrap">
+            <canvas id="avatarCanvas" width="300" height="300"></canvas>
+            <p class="crop-canvas-hint">Drag to reposition · Scroll to zoom</p>
+          </div>
+          <div class="crop-controls">
+            <button id="zoomOut" class="crop-zoom-btn" title="Zoom out" aria-label="Zoom out">
+              −
+            </button>
+            <span class="crop-zoom-label">Zoom</span>
+            <button id="zoomIn" class="crop-zoom-btn" title="Zoom in" aria-label="Zoom in">
+              +
+            </button>
+            <button id="confirmCrop" class="btn-p5 crop-confirm-btn">✓ Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================
+     4bis. MODALE ATELIER — toute la personnalisation du profil
+     Décision Hamza (2026-09-16, second retour) : la page profil est une
+     VITRINE ; tout ce qui s'édite (avatar, bordure, thème, titre, badges
+     épinglés) vit dans cette seule modale, ouverte par « Personnaliser »,
+     par le ✎ de l'avatar, par la puce de titre ou par un emplacement vide.
+     Les conteneurs gardent leurs ids historiques : profile-page.js,
+     titles-ui.js et badgesManager.js rendent dedans.
+     ===================================================== -->
+    <div id="atelierModal" class="modal hidden">
+      <div class="modal-content atelier-modal" id="atelier">
+        <div class="atelier-modal-head">
+          <h2 class="atelier-modal-title" id="atelierTitle">
+            <span class="card-accent">◆</span>
+            <span data-i18n="profile.atelier_title">Customize</span>
+          </h2>
+          <div
+            id="atelierSaveStatus"
+            class="save-status save-status--modal"
+            data-save-status
+            role="status"
+            aria-live="polite"
+          >
+            <span class="save-status-dot" aria-hidden="true"></span>
+            <span data-save-status-text data-i18n="profile.all_saved">Everything is saved</span>
+          </div>
+          <button id="closeAtelierModal" class="atelier-modal-close" type="button" aria-label="Close">
+            ✕
+          </button>
+        </div>
+        <div class="atelier-body">
+          <div class="atelier-tabs" role="tablist" aria-label="Customize" id="atelierTabs">
+            <button
+              class="atelier-tab"
+              role="tab"
+              type="button"
+              data-pane="avatar"
+              aria-selected="true"
+              aria-controls="pane-avatar"
+              id="tab-avatar"
+            >
+              <span class="atelier-tab-ic" aria-hidden="true">🖼</span>
+              <span data-i18n="profile.tab_avatar">Avatar</span>
+            </button>
+            <button
+              class="atelier-tab"
+              role="tab"
+              type="button"
+              data-pane="border"
+              aria-selected="false"
+              aria-controls="pane-border"
+              id="tab-border"
+            >
+              <span class="atelier-tab-ic" aria-hidden="true">◯</span>
+              <span data-i18n="profile.tab_border">Border</span>
+            </button>
+            <button
+              class="atelier-tab"
+              role="tab"
+              type="button"
+              data-pane="theme"
+              aria-selected="false"
+              aria-controls="pane-theme"
+              id="tab-theme"
+            >
+              <span class="atelier-tab-ic" aria-hidden="true">🎨</span>
+              <span data-i18n="profile.tab_theme">Theme</span>
+            </button>
+            <button
+              class="atelier-tab"
+              role="tab"
+              type="button"
+              data-pane="title"
+              aria-selected="false"
+              aria-controls="pane-title"
+              id="tab-title"
+            >
+              <span class="atelier-tab-ic" aria-hidden="true">🏅</span>
+              <span data-i18n="profile.tab_title">Title</span>
+            </button>
+            <button
+              class="atelier-tab"
+              role="tab"
+              type="button"
+              data-pane="badges"
+              aria-selected="false"
+              aria-controls="pane-badges"
+              id="tab-badges"
+            >
+              <span class="atelier-tab-ic" aria-hidden="true">🎖</span>
+              <span data-i18n="profile.tab_badges">Badges</span>
+            </button>
+          </div>
+
+          <div class="atelier-panes">
+            <!-- Avatar : portraits du jeu (clic = appliqué), ou import + recadrage -->
+            <div
+              class="atelier-pane"
+              id="pane-avatar"
+              role="tabpanel"
+              data-pane="avatar"
+              aria-labelledby="tab-avatar"
+            >
+              <!-- Portraits du jeu UNIQUEMENT : décision Hamza du 2026-09-16, on
+                   n'importe plus sa propre image (dérives sur un avatar que voient
+                   les amis et le classement). Le serveur applique la même règle
+                   (api/lib/validation.php → personadle_validate_avatar). -->
+              <p class="atelier-hint" data-i18n="profile.avatar_hint">
+                Pick a portrait — it is applied right away. Badly framed? Adjust it.
+              </p>
+              <div class="atelier-avatar-actions">
+                <button id="avatarAdjustBtn" class="btn-secondary" type="button">
+                  ✂ <span data-i18n="profile.avatar_adjust">Adjust framing</span>
+                </button>
+              </div>
+              <div id="avatarGrid" class="crop-avatar-grid atelier-avatar-grid"></div>
+            </div>
+
+            <!-- Bordure : la couleur autour de l'avatar, partout -->
+            <div
+              class="atelier-pane hidden"
+              id="pane-border"
+              role="tabpanel"
+              data-pane="border"
+              aria-labelledby="tab-border"
+            >
+              <p class="atelier-hint" data-i18n="profile.border_hint">
+                The ring around your avatar: on your profile, in your friends' lists and in
+                challenges.
+              </p>
+              <div class="swatch-row" id="borderSwatches"></div>
+              <input type="color" id="borderColorPicker" class="visually-hidden-input" value="#000000" />
+            </div>
+
+            <!-- Thème : ambiance du profil -->
+            <div
+              class="atelier-pane hidden"
+              id="pane-theme"
+              role="tabpanel"
+              data-pane="theme"
+              aria-labelledby="tab-theme"
+            >
+              <p class="atelier-hint" data-i18n="profile.theme_hint">
+                The look of your profile page: background and accent color.
+              </p>
+              <div class="theme-swatches" id="themeSwatches"></div>
+              <div id="customThemeRow" class="custom-theme-row hidden">
+                <label for="customThemeColor" data-i18n="profile.theme_custom">Custom color</label>
+                <input type="color" id="customThemeColor" value="#e63946" />
+              </div>
+            </div>
+
+            <!-- Titre : un seul équipé, les verrouillés disent comment les obtenir -->
+            <div
+              class="atelier-pane hidden"
+              id="pane-title"
+              role="tabpanel"
+              data-pane="title"
+              aria-labelledby="tab-title"
+            >
+              <p class="atelier-hint" data-i18n="profile.title_pick_hint">
+                One title shows under your name. Click to equip, click again to remove.
+              </p>
+              <div id="titlesModalGrid" class="titles-grid-modal atelier-titles-grid"></div>
+            </div>
+
+            <!-- Badges : choisir les 4 épinglés parmi ceux débloqués -->
+            <div
+              class="atelier-pane hidden"
+              id="pane-badges"
+              role="tabpanel"
+              data-pane="badges"
+              aria-labelledby="tab-badges"
+            >
+              <p class="atelier-hint" id="badgePickHint" data-i18n="profile.pinned_hint">
+                Pick up to 4 badges to pin on your card. Click a pinned one to unpin it.
+              </p>
+              <div id="badgePickGrid" class="badge-pick-grid"></div>
+            </div>
+          </div>
+        </div><!-- /.atelier-body -->
+      </div>
+    </div>
+
+    <!-- Modale de partage — refonte 2026-09-16 (retour Hamza : « rendre
+         l'interface de partage plus belle et intuitive »). L'aperçu passe en
+         premier et reste visible (colonne de gauche sur desktop, en haut sur
+         mobile) ; les réglages sont à côté, les actions dans une barre qui ne
+         bouge pas. Avant : un mur de réglages, la carte hors écran. -->
     <div id="sharePreviewModal" class="modal hidden">
-      <div class="modal-content share-preview">
-        <span id="closeSharePreview" class="close">&times;</span>
-        <h2>📸 Share Profile</h2>
+      <div class="modal-content share-modal">
+        <div class="share-head">
+          <h2 class="share-modal-title">
+            <span class="card-accent">◆</span>
+            <span data-i18n="profile.share_modal_title">Share my profile</span>
+          </h2>
+          <button id="closeSharePreview" class="share-modal-close" type="button" aria-label="Close">
+            ✕
+          </button>
+        </div>
 
-        <!-- Sélecteur de fond (onglets couleur / wallpaper) -->
-        <div id="backgroundSelector"></div>
+        <div class="share-body">
+          <!-- Aperçu : ce qu'on va réellement poster -->
+          <div class="share-stage">
+            <div id="sharePreviewArea" class="share-preview-area"></div>
+          </div>
 
-        <!-- Zone de prévisualisation -->
-        <div id="sharePreviewArea" class="share-preview-area"></div>
+          <!-- Réglages : fond (couleur / wallpaper) + style du texte -->
+          <div class="share-controls">
+            <div id="backgroundSelector"></div>
+          </div>
+        </div>
 
         <!-- Boutons de partage -->
         <div class="share-actions">
           <button id="downloadProfileBtn" class="share-btn share-btn--download">
-            💾 Download PNG
+            💾 <span data-i18n="profile.share_download">Download PNG</span>
           </button>
-          <button id="shareTwitterBtn" class="share-btn share-btn--twitter">𝕏 Share on X</button>
+          <button id="shareTwitterBtn" class="share-btn share-btn--twitter">
+            𝕏 <span data-i18n="profile.share_on_x">Share on X</span>
+          </button>
           <button id="shareDiscordBtn" class="share-btn share-btn--discord">
-            💬 Copy for Discord
+            💬 <span data-i18n="profile.share_discord">Copy for Discord</span>
           </button>
-          <button id="shareEmailBtn" class="share-btn share-btn--email">📧 Email</button>
+          <button id="shareEmailBtn" class="share-btn share-btn--email">
+            📧 <span data-i18n="profile.share_email">Email</span>
+          </button>
         </div>
       </div>
     </div>
@@ -825,9 +975,12 @@
       import { initSettingsModal } from "../js/settings-modal.js";
 
       if (window._authReady) await window._authReady;
+      // Les paramètres se montent même déconnecté : l'export du profil y vit
+      // désormais, et un joueur sans compte est justement celui qui en a besoin
+      // (_save() ignore le cloud sans utilisateur et n'écrit que localStorage).
+      initSettingsModal(window._currentUser?.id ?? null);
       if (window._currentUser) {
         initNotifications();
-        initSettingsModal(window._currentUser.id);
       }
     </script>
 

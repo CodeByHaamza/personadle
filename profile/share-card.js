@@ -451,6 +451,21 @@ function unlockPhotographerBadge(profile, saveProfile) {
 let _regenerateSharePreview = null;
 
 /**
+ * Relit le profil dans localStorage (source de vérité locale, réécrite par le
+ * pull cloud) et le fusionne sur la référence connue. Retourne la référence
+ * d'origine si le stockage est illisible.
+ * @param {Object} fallback
+ */
+function _liveProfile(fallback) {
+  try {
+    const raw = JSON.parse(localStorage.getItem("personaUserProfile") || "null");
+    return raw && typeof raw === "object" ? { ...fallback, ...raw } : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
  * Régénère la prévisualisation de la carte de partage si sa modale est
  * actuellement ouverte — no-op sinon. À appeler après tout changement visuel
  * du profil (thème, couleur de bordure d'avatar…) susceptible d'apparaître
@@ -735,6 +750,13 @@ export function setupShareProfile(profile, saveProfile) {
 
   // ── Génération de la prévisualisation ──
   function generatePreview() {
+    // Le profil courant, relu à chaque génération : profile-page.js REMPLACE son
+    // objet profil après un pull cloud (initProfile réassigne), et la référence
+    // capturée à l'init restait sur l'ancien — la carte partait avec « Guest
+    // Player » et l'ancien avatar pour un joueur connecté dont le pseudo n'arrive
+    // du serveur qu'après le premier rendu.
+    profile = _liveProfile(profile);
+
     const bg = shareBackgrounds.find((b) => b.id === selectedBg) || shareBackgrounds[0];
 
     let wallpaper = null;

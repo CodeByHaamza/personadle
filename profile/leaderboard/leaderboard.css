@@ -1,32 +1,56 @@
 /* =============================================================
-   leaderboard.css — Page de classement PersonaDLE v2
+   leaderboard.css — Page de classement PersonaDLE
    ─────────────────────────────────────────────────────────────
-   Design inspiré de l'interface Persona 5 :
-   - Filtres sombres, dramatiques, avec icônes par mode
-   - Top 3 avec effet podium coloré et brillance
-   - Lignes épurées avec hover fluide
-   - Scores grands et lisibles (Oswald)
+   Refonte 2026-09-16 (demande Hamza : « refais le style de la page
+   ranking, vu que Amis a bien été refait »). Ce qui change :
+
+   - La page suivait son propre thème sombre en permanence : en mode
+     clair, c'était le seul écran noir du site. Elle reprend le système
+     de friends.css — des jetons --lb-* redéfinis par .darkmode, donc
+     une page claire en clair et sombre en sombre.
+   - Le top 3 était trois lignes identiques aux autres avec une médaille
+     en emoji : il a maintenant une vraie estrade (1ᵉʳ au centre, plus
+     grand), et les autres suivent en liste aérée.
+   - Sa propre position est épinglée en haut de la carte (elle défilait
+     avec le reste et se perdait à la 40ᵉ place).
+
+   Préfixe CSS : lb-*
+   Sections :
+     1. VARIABLES
+     2. LAYOUT
+     3. CARTE DE FILTRES + PASTILLES
+     4. RÉSUMÉ DES FILTRES
+     5. CARTE DU CLASSEMENT + « MON RANG »
+     6. PODIUM (top 3)
+     7. LIGNES
+     8. VIDE / CHARGEMENT
+     9. PAGINATION
+    10. DARK MODE
+    11. RESPONSIVE
    ============================================================= */
 
+/* ──────────────────────────────────────────────────────────
+   1. VARIABLES
+   ────────────────────────────────────────────────────────── */
 :root {
-  --lb-gold: #f0b429;
-  --lb-gold-bg: rgba(240, 180, 41, 0.12);
-  --lb-silver: #b0c4d4;
-  --lb-silver-bg: rgba(176, 196, 212, 0.1);
-  --lb-bronze: #cd7f32;
-  --lb-bronze-bg: rgba(205, 127, 50, 0.1);
-  --lb-border: #ebebeb;
-  --lb-radius: 16px;
-  --lb-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   --lb-accent: var(--accent, #e63946);
-  --lb-accent-light: var(--accent-light, #ff9999);
   --lb-accent-rgb: var(--accent-rgb, 230, 57, 70);
+  --lb-gold: #d99a00;
+  --lb-silver: #8a99a8;
+  --lb-bronze: #b46b28;
+  --lb-surface: #ffffff;
+  --lb-surface-alt: #f8f8f8;
+  --lb-border: #ececec;
+  --lb-text: #1a1a1a;
+  --lb-text-muted: #888;
+  --lb-radius: 16px;
+  --lb-radius-sm: 10px;
+  --lb-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
 }
 
-/* =====================================================
-   1. LAYOUT
-   ===================================================== */
-
+/* ──────────────────────────────────────────────────────────
+   2. LAYOUT
+   ────────────────────────────────────────────────────────── */
 .leaderboard-page {
   max-width: 740px;
   margin: 0 auto;
@@ -36,64 +60,44 @@
   gap: 18px;
 }
 
-/* =====================================================
-   2. FILTER CARD — Sombre, style Persona
-   ===================================================== */
-
+/* ──────────────────────────────────────────────────────────
+   3. CARTE DE FILTRES + PASTILLES
+   ────────────────────────────────────────────────────────── */
 .lb-filters-card {
-  background: linear-gradient(160deg, #111118 0%, #1a1a28 100%);
+  background: var(--lb-surface);
+  border: 1.5px solid var(--lb-border);
   border-radius: var(--lb-radius);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  padding: 20px 20px 18px;
+  box-shadow: var(--lb-shadow);
+  padding: 16px 18px 18px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  position: relative;
-  overflow: hidden;
+  gap: 14px;
 }
 
-/* Barre d'accent en haut */
-.lb-filters-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--lb-accent) 30%,
-    var(--lb-accent-light) 60%,
-    transparent 100%
-  );
-}
-
-/* En-tête des filtres "◆ Rankings ◆" */
 .lb-filters-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--lb-border);
 }
 
 .lb-filters-title {
   font-family: "Oswald", "Arial Black", Arial, sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--lb-text);
 }
 
 .lb-filters-diamond {
   color: var(--lb-accent);
-  font-size: 0.65rem;
-  opacity: 0.7;
+  font-size: 0.7rem;
+}
+/* Le second losange de l'en-tête n'apporte rien une fois le titre aligné à gauche */
+.lb-filters-diamond:last-of-type {
+  display: none;
 }
 
 .lb-filter-group {
@@ -104,65 +108,62 @@
 }
 
 .lb-filter-label {
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
-  padding-top: 7px;
-  min-width: 44px;
+  color: var(--lb-text-muted);
+  padding-top: 8px;
+  min-width: 52px;
   flex-shrink: 0;
 }
-
-/* =====================================================
-   3. PILLS — style P5 sur fond sombre
-   ===================================================== */
 
 .lb-filter-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .lb-pill {
+  min-height: 0; /* cible tactile globale (global.css §18) : ce sont des jetons, pas des boutons pleins */
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  padding: 7px 13px;
   border-radius: 100px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 0.74rem;
-  font-weight: 600;
+  border: 1.5px solid var(--lb-border);
+  background: var(--lb-surface-alt);
+  color: var(--lb-text-muted);
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
   transition:
     background 0.15s,
     border-color 0.15s,
     color 0.15s,
-    box-shadow 0.15s,
     transform 0.1s;
-  font-family: inherit;
-  white-space: nowrap;
 }
 
 .lb-pill:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--lb-text);
+  border-color: rgba(var(--lb-accent-rgb), 0.45);
   transform: translateY(-1px);
+}
+
+.lb-pill:focus-visible {
+  outline: 2px solid var(--lb-accent);
+  outline-offset: 2px;
 }
 
 .lb-pill.active {
   background: var(--lb-accent);
   border-color: var(--lb-accent);
   color: #fff;
-  box-shadow: 0 2px 14px rgba(var(--lb-accent-rgb), 0.45);
-}
-
-/* Pills mode : icône un peu plus grande */
-.lb-filter-pills--modes .lb-pill {
-  padding: 7px 13px;
+  box-shadow: 0 2px 10px rgba(var(--lb-accent-rgb), 0.3);
 }
 
 .lb-pill-icon {
@@ -170,576 +171,441 @@
   line-height: 1;
 }
 
-.lb-pill-text {
-  font-size: 0.74rem;
-}
-
-/* =====================================================
-   4. TABLE CARD
-   ===================================================== */
-
-.lb-table-card {
-  background: linear-gradient(180deg, #13131f 0%, #1a1a2e 100%);
-  border-radius: var(--lb-radius);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  overflow: hidden;
-  position: relative;
-}
-
-.lb-table-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--lb-accent) 30%,
-    var(--lb-accent-light) 60%,
-    transparent 100%
-  );
-  z-index: 1;
-}
-
-.lb-body {
-  padding: 10px 16px 16px;
-}
-
-.lb-loading {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 0.85rem;
-  padding: 48px 0;
-  margin: 0;
-}
-
-/* =====================================================
-   5. MY RANK BANNER
-   ===================================================== */
-
-.lb-my-rank {
-  padding: 12px 20px;
-  background: linear-gradient(90deg, rgba(var(--lb-accent-rgb), 0.12) 0%, transparent 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.lb-my-rank__rank {
-  font-family: "Oswald", "Arial Black", sans-serif;
-  font-weight: 700;
-  color: var(--lb-accent);
-  font-size: 1.1rem;
-  min-width: 36px;
-  text-align: center;
-}
-
-.lb-my-rank.hidden {
-  display: none;
-}
-
-/* =====================================================
-   6. TOP 3 PODIUM — cartes brillantes
-   ===================================================== */
-
-/* Rang 1 — Or : carte pleine avec glow */
-.lb-row--1 {
-  background: linear-gradient(135deg, rgba(240, 180, 41, 0.13) 0%, rgba(240, 180, 41, 0.04) 100%);
-  border: 1.5px solid rgba(240, 180, 41, 0.45);
-  border-radius: 12px;
-  box-shadow:
-    0 4px 20px rgba(240, 180, 41, 0.15),
-    inset 0 1px 0 rgba(240, 180, 41, 0.2);
-  margin: 10px 0 6px;
-  padding: 14px 10px;
-  position: relative;
-}
-
-/* Étincelle subtile sur le rang 1 */
-.lb-row--1::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
-  border-radius: 10px;
-  pointer-events: none;
-}
-
-/* Rang 2 — Argent */
-.lb-row--2 {
-  background: linear-gradient(135deg, rgba(176, 196, 212, 0.12) 0%, rgba(176, 196, 212, 0.03) 100%);
-  border: 1.5px solid rgba(176, 196, 212, 0.4);
-  border-radius: 10px;
-  box-shadow: 0 3px 14px rgba(176, 196, 212, 0.12);
-  margin: 4px 0;
-  padding: 12px 10px;
-}
-
-/* Rang 3 — Bronze */
-.lb-row--3 {
-  background: linear-gradient(135deg, rgba(205, 127, 50, 0.1) 0%, rgba(205, 127, 50, 0.03) 100%);
-  border: 1.5px solid rgba(205, 127, 50, 0.35);
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(205, 127, 50, 0.1);
-  margin: 4px 0 10px;
-  padding: 11px 10px;
-}
-
-/* Rangs top 3 — rank emoji plus grands */
-.lb-row--1 .lb-rank {
-  color: var(--lb-gold);
-  font-size: 1.5rem;
-  text-shadow: 0 0 12px rgba(240, 180, 41, 0.5);
-}
-.lb-row--2 .lb-rank {
-  color: var(--lb-silver);
-  font-size: 1.25rem;
-}
-.lb-row--3 .lb-rank {
-  color: var(--lb-bronze);
-  font-size: 1.1rem;
-}
-
-/* Avatars top 3 — plus grands */
-.lb-row--1 .lb-avatar {
-  width: 52px;
-  height: 52px;
-  border-color: var(--lb-gold);
-  border-width: 2.5px;
-  box-shadow: 0 0 0 3px rgba(240, 180, 41, 0.2);
-}
-.lb-row--2 .lb-avatar {
-  width: 46px;
-  height: 46px;
-  border-color: var(--lb-silver);
-  border-width: 2px;
-}
-.lb-row--3 .lb-avatar {
-  width: 42px;
-  height: 42px;
-  border-color: var(--lb-bronze);
-  border-width: 2px;
-}
-
-/* Scores top 3 */
-.lb-row--1 .lb-score {
-  color: var(--lb-gold);
-  font-size: 1.3rem;
-  text-shadow: 0 0 8px rgba(240, 180, 41, 0.3);
-}
-.lb-row--2 .lb-score {
-  color: var(--lb-silver);
-  font-size: 1.1rem;
-}
-.lb-row--3 .lb-score {
-  color: var(--lb-bronze);
-  font-size: 1rem;
-}
-
-/* Pseudo rang 1 légèrement plus grand */
-.lb-row--1 .lb-pseudo {
-  font-size: 0.96rem;
-  font-weight: 800;
-}
-
-/* Hover top 3 */
-.lb-row--1:hover,
-.lb-row--2:hover,
-.lb-row--3:hover {
-  filter: brightness(0.95);
-  transform: translateX(2px);
-}
-
-/* =====================================================
-   7. LEADERBOARD ROWS — lignes régulières
-   ===================================================== */
-
-.lb-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  border-left: 3px solid transparent;
-  border-radius: 4px;
-  transition:
-    background 0.12s,
-    transform 0.1s,
-    border-left-color 0.15s;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-}
-
-.lb-row:last-child {
-  border-bottom: none;
-}
-
-.lb-row--n:hover {
-  background: rgba(var(--lb-accent-rgb), 0.07);
-  border-left-color: var(--lb-accent);
-  transform: translateX(3px);
-}
-
-/* Rang */
-.lb-rank {
-  font-family: "Oswald", "Arial Black", Arial, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  min-width: 36px;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.25);
-  flex-shrink: 0;
-}
-
-/* Mise en avant du joueur connecté */
-.lb-row--me {
-  background: rgba(var(--lb-accent-rgb), 0.08) !important;
-  border-left-color: var(--lb-accent) !important;
-}
-
-.lb-row--me .lb-pseudo::after {
-  content: " ◀";
-  font-size: 0.62em;
-  color: var(--lb-accent);
-  font-weight: 800;
-  margin-left: 2px;
-}
-
-/* Avatar */
-.lb-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.06);
-  transition: transform 0.15s;
-}
-
-.lb-row:hover .lb-avatar {
-  transform: scale(1.06);
-}
-
-/* Info */
-.lb-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.lb-pseudo {
-  font-weight: 700;
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.9);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.lb-sub {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.3);
-  margin-top: 1px;
-  letter-spacing: 0.02em;
-}
-
-/* Score */
-.lb-score {
-  font-family: "Oswald", "Arial Black", Arial, monospace;
-  font-size: 1rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  white-space: nowrap;
-  flex-shrink: 0;
-  min-width: 50px;
-  text-align: right;
-}
-
-/* Lien profil */
-.lb-profile-link {
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-family: inherit;
-  color: rgba(255, 255, 255, 0.3);
-  text-decoration: none;
-  flex-shrink: 0;
-  padding: 4px 9px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  transition:
-    color 0.15s,
-    background 0.15s,
-    border-color 0.15s;
-  white-space: nowrap;
-}
-
-.lb-profile-link:hover {
-  color: #fff;
-  background: var(--lb-accent);
-  border-color: var(--lb-accent);
-}
-
-/* =====================================================
-   8. SÉPARATEUR PODIUM
-   ===================================================== */
-
-.lb-podium-divider {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 0.65rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 8px 0 6px;
-  user-select: none;
-  font-weight: 600;
-}
-
-.lb-podium-divider::before,
-.lb-podium-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-}
-
-/* =====================================================
-   9. PAGINATION
-   ===================================================== */
-
-.lb-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 14px 16px;
-  border-top: 1px solid var(--lb-border);
-}
-
-.lb-pagination.hidden {
-  display: none;
-}
-
-.lb-page-info {
-  font-size: 0.8rem;
-  color: #aaa;
-  font-weight: 600;
-}
-
-.btn-action {
-  padding: 7px 16px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  font-family: inherit;
-  background: #f4f4f4;
-  color: #444;
-  border: 1.5px solid #e0e0e0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-}
-
-.btn-action:hover {
-  background: #eaeaea;
-  border-color: #ccc;
-}
-.btn-action:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-/* =====================================================
-   10. DARK MODE
-   ===================================================== */
-
-/* Table card et rows : déjà sombres en light mode — dark mode les assombrit encore un peu */
-.darkmode .lb-table-card {
-  background: linear-gradient(180deg, #0d0d18 0%, #111122 100%);
-  border-color: rgba(255, 255, 255, 0.04);
-}
-
-/* Filter card : reste sombre en dark mode (déjà sombre en light mode) */
-.darkmode .lb-filters-card {
-  background: linear-gradient(160deg, #0d0d12 0%, #131320 100%);
-  border-color: rgba(255, 255, 255, 0.04);
-}
-
-.darkmode .lb-row {
-  border-color: rgba(255, 255, 255, 0.04);
-}
-
-/* Top 3 dark mode */
-.darkmode .lb-row--1 {
-  background: linear-gradient(135deg, rgba(240, 180, 41, 0.16) 0%, rgba(240, 180, 41, 0.05) 100%);
-  border-color: rgba(240, 180, 41, 0.5);
-  box-shadow:
-    0 4px 20px rgba(240, 180, 41, 0.2),
-    inset 0 1px 0 rgba(240, 180, 41, 0.15);
-}
-
-.darkmode .lb-row--2 {
-  background: linear-gradient(135deg, rgba(176, 196, 212, 0.14) 0%, rgba(176, 196, 212, 0.04) 100%);
-  border-color: rgba(176, 196, 212, 0.4);
-}
-
-.darkmode .lb-row--3 {
-  background: linear-gradient(135deg, rgba(205, 127, 50, 0.12) 0%, rgba(205, 127, 50, 0.04) 100%);
-  border-color: rgba(205, 127, 50, 0.38);
-}
-
-.darkmode .lb-my-rank {
-  background: linear-gradient(90deg, rgba(var(--lb-accent-rgb), 0.1) 0%, transparent 100%);
-  border-color: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.darkmode .lb-pagination {
-  border-color: rgba(255, 255, 255, 0.05);
-}
-.darkmode .lb-page-info {
-  color: rgba(255, 255, 255, 0.3);
-}
-.darkmode .btn-action {
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-.darkmode .btn-action:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.darkmode .lb-podium-divider {
-  color: rgba(255, 255, 255, 0.1);
-}
-.darkmode .lb-podium-divider::before,
-.darkmode .lb-podium-divider::after {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-}
-
-/* =====================================================
-   11. ÉTAT VIDE / ERREUR
-   ===================================================== */
-
-/* Utilisé quand le classement ne contient aucune entrée
-   ou en cas d'erreur réseau — distinct du spinner de chargement. */
-.lb-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 52px 24px;
-  text-align: center;
-}
-
-.lb-empty__icon {
-  font-size: 2.4rem;
-  opacity: 0.35;
-}
-
-.lb-empty__text {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.4);
-  font-weight: 600;
-  margin: 0;
-}
-
-.lb-empty__sub {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.25);
-  margin: 0;
-}
-
-.darkmode .lb-empty__text {
-  color: rgba(255, 255, 255, 0.25);
-}
-.darkmode .lb-empty__sub {
-  color: rgba(255, 255, 255, 0.15);
-}
-
-/* =====================================================
-   12. FILTER NOTE
-   ===================================================== */
-
+/* ──────────────────────────────────────────────────────────
+   4. RÉSUMÉ DES FILTRES
+   ────────────────────────────────────────────────────────── */
 .lb-filter-note {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
   padding: 10px 16px;
-  background: linear-gradient(135deg, #111118 0%, #1a1a28 100%);
-  border: 1px solid rgba(230, 57, 70, 0.3);
-  border-radius: 10px;
+  background: var(--lb-surface);
+  border: 1.5px solid var(--lb-border);
+  border-left: 4px solid var(--lb-accent);
+  border-radius: var(--lb-radius-sm);
   font-size: 0.76rem;
   min-height: 38px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--lb-shadow);
 }
 
 .lb-fn-chips {
   display: flex;
   align-items: center;
   gap: 5px;
+  flex-wrap: wrap;
 }
 
 .lb-fn-chip {
-  background: rgba(230, 57, 70, 0.18);
+  background: rgba(var(--lb-accent-rgb), 0.12);
   color: var(--lb-accent);
   padding: 2px 9px;
   border-radius: 100px;
+  font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
   font-weight: 700;
-  font-family: "Oswald", sans-serif;
   letter-spacing: 0.05em;
   font-size: 0.73rem;
   text-transform: uppercase;
-  border: 1px solid rgba(230, 57, 70, 0.25);
+  border: 1px solid rgba(var(--lb-accent-rgb), 0.25);
 }
 
 .lb-fn-sep {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--lb-text-muted);
   font-size: 0.7rem;
 }
 
 .lb-fn-note {
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--lb-text-muted);
   font-size: 0.72rem;
   font-style: italic;
   flex: 1;
+  min-width: 160px;
 }
 
-/* Filter note reste sombre en dark mode (déjà sombre en light mode) */
-.darkmode .lb-filter-note {
-  background: linear-gradient(135deg, #0d0d12 0%, #131320 100%);
-  border-color: rgba(230, 57, 70, 0.25);
+/* ──────────────────────────────────────────────────────────
+   5. CARTE DU CLASSEMENT + « MON RANG »
+   ────────────────────────────────────────────────────────── */
+.lb-table-card {
+  background: var(--lb-surface);
+  border: 1.5px solid var(--lb-border);
+  border-radius: var(--lb-radius);
+  box-shadow: var(--lb-shadow);
+  overflow: hidden;
 }
 
-.darkmode .lb-fn-note {
-  color: rgba(255, 255, 255, 0.3);
-}
-.darkmode .lb-fn-sep {
-  color: rgba(255, 255, 255, 0.2);
+/* Sa propre position, épinglée en haut de la carte */
+.lb-my-rank {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: rgba(var(--lb-accent-rgb), 0.08);
+  border-bottom: 1.5px solid rgba(var(--lb-accent-rgb), 0.2);
+  font-size: 0.82rem;
+  color: var(--lb-text);
+  backdrop-filter: blur(6px);
 }
 
-/* =====================================================
-   13. RESPONSIVE
-   ===================================================== */
+.lb-my-rank__rank {
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--lb-accent);
+  font-variant-numeric: tabular-nums;
+}
 
-/* Tablette (≤ 640px) : mode pills → scroll horizontal pour éviter le wrap sur 2-3 lignes */
+.lb-my-rank.hidden,
+.lb-pagination.hidden {
+  display: none;
+}
+
+.lb-body {
+  padding: 10px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ──────────────────────────────────────────────────────────
+   6. PODIUM (top 3)
+   ────────────────────────────────────────────────────────── */
+.lb-podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 10px;
+  padding: 14px 4px 10px;
+}
+
+.lb-podium-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px 12px;
+  border-radius: var(--lb-radius-sm);
+  border: 1.5px solid var(--lb-border);
+  background: var(--lb-surface-alt);
+  text-decoration: none;
+  color: var(--lb-text);
+  position: relative;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    border-color 0.15s;
+}
+
+.lb-podium-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Le premier : plus haut, plus grand, couronné d'or */
+.lb-podium-card--1 {
+  padding-top: 20px;
+  border-color: var(--lb-gold);
+  background: linear-gradient(180deg, rgba(217, 154, 0, 0.16), var(--lb-surface-alt) 70%);
+}
+.lb-podium-card--2 {
+  border-color: var(--lb-silver);
+  background: linear-gradient(180deg, rgba(138, 153, 168, 0.16), var(--lb-surface-alt) 70%);
+}
+.lb-podium-card--3 {
+  border-color: var(--lb-bronze);
+  background: linear-gradient(180deg, rgba(180, 107, 40, 0.16), var(--lb-surface-alt) 70%);
+}
+.lb-podium-card--me {
+  box-shadow: 0 0 0 2px rgba(var(--lb-accent-rgb), 0.5);
+}
+
+.lb-podium-medal {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+.lb-podium-card--1 .lb-podium-medal {
+  font-size: 1.7rem;
+}
+
+.lb-podium-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--lb-surface);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+.lb-podium-card--1 .lb-podium-avatar {
+  width: 80px;
+  height: 80px;
+}
+
+.lb-podium-name {
+  font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-podium-score {
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--lb-accent);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.lb-podium-card--1 .lb-podium-score {
+  font-size: 1.5rem;
+}
+
+.lb-podium-sub {
+  font-size: 0.68rem;
+  color: var(--lb-text-muted);
+  text-align: center;
+}
+
+/* Séparateur « Others » entre le podium et la liste */
+.lb-podium-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 4px 8px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lb-text-muted);
+}
+.lb-podium-divider::before,
+.lb-podium-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--lb-border);
+}
+
+/* ──────────────────────────────────────────────────────────
+   7. LIGNES
+   ────────────────────────────────────────────────────────── */
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: var(--lb-radius-sm);
+  border: 1.5px solid transparent;
+  text-decoration: none;
+  color: var(--lb-text);
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+}
+
+.lb-row:hover {
+  background: var(--lb-surface-alt);
+  border-color: var(--lb-border);
+  transform: translateX(2px);
+}
+
+.lb-row--me {
+  background: rgba(var(--lb-accent-rgb), 0.07);
+  border-color: rgba(var(--lb-accent-rgb), 0.3);
+}
+
+.lb-rank {
+  min-width: 34px;
+  text-align: center;
+  font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--lb-text-muted);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.lb-row--me .lb-rank {
+  color: var(--lb-accent);
+}
+
+.lb-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--lb-border);
+  flex-shrink: 0;
+}
+
+.lb-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.lb-pseudo {
+  font-size: 0.88rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-sub {
+  font-size: 0.7rem;
+  color: var(--lb-text-muted);
+}
+
+.lb-score {
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--lb-text);
+  font-variant-numeric: tabular-nums;
+  min-width: 46px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.lb-row--me .lb-score {
+  color: var(--lb-accent);
+}
+
+.lb-profile-link {
+  color: var(--lb-text-muted);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.lb-row:hover .lb-profile-link {
+  opacity: 1;
+}
+
+/* ──────────────────────────────────────────────────────────
+   8. VIDE / CHARGEMENT
+   ────────────────────────────────────────────────────────── */
+.lb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 44px 20px;
+  text-align: center;
+}
+
+.lb-empty__icon {
+  font-size: 2.2rem;
+  opacity: 0.6;
+}
+
+.lb-empty__text {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--lb-text);
+}
+
+.lb-empty__sub {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--lb-text-muted);
+}
+
+.lb-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--lb-text-muted);
+  font-size: 0.88rem;
+}
+
+/* ──────────────────────────────────────────────────────────
+   9. PAGINATION
+   ────────────────────────────────────────────────────────── */
+.lb-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px 18px 16px;
+  border-top: 1.5px solid var(--lb-border);
+}
+
+.lb-page-info {
+  font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
+  font-size: 0.82rem;
+  color: var(--lb-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-action {
+  min-height: 0;
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1.5px solid var(--lb-border);
+  background: var(--lb-surface-alt);
+  color: var(--lb-text);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.btn-action:hover:not(:disabled) {
+  border-color: var(--lb-accent);
+  color: var(--lb-accent);
+}
+
+.btn-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ──────────────────────────────────────────────────────────
+   10. DARK MODE — mêmes jetons, valeurs sombres (cf. friends.css)
+   ────────────────────────────────────────────────────────── */
+.darkmode {
+  --lb-surface: #1a1a1a;
+  --lb-surface-alt: #242424;
+  --lb-border: #333;
+  --lb-text: #f0f0f0;
+  --lb-text-muted: #888;
+  --lb-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+  --lb-gold: #f0b429;
+  --lb-silver: #b0c4d4;
+  --lb-bronze: #cd7f32;
+}
+
+.darkmode .lb-podium-card--1 {
+  background: linear-gradient(180deg, rgba(240, 180, 41, 0.18), var(--lb-surface-alt) 70%);
+}
+.darkmode .lb-podium-card--2 {
+  background: linear-gradient(180deg, rgba(176, 196, 212, 0.16), var(--lb-surface-alt) 70%);
+}
+.darkmode .lb-podium-card--3 {
+  background: linear-gradient(180deg, rgba(205, 127, 50, 0.16), var(--lb-surface-alt) 70%);
+}
+.darkmode .lb-podium-avatar {
+  border-color: #111;
+}
+.darkmode .lb-row:hover {
+  background: #2c2c2c;
+  border-color: #444;
+}
+
+/* ──────────────────────────────────────────────────────────
+   11. RESPONSIVE
+   ────────────────────────────────────────────────────────── */
+
+/* Les pastilles de mode défilent plutôt que de passer sur trois lignes */
 @media (max-width: 640px) {
   .lb-filter-pills--modes {
     flex-wrap: nowrap;
@@ -765,95 +631,84 @@
   }
 
   .lb-filters-card {
-    padding: 16px 14px 14px;
+    padding: 14px 14px 16px;
     gap: 12px;
   }
   .lb-filter-group {
     gap: 8px;
   }
   .lb-filter-label {
-    min-width: 38px;
+    min-width: 100%;
+    padding-top: 0;
     font-size: 0.6rem;
   }
 
   .lb-pill {
-    padding: 5px 9px;
-    font-size: 0.7rem;
-  }
-  .lb-filter-pills--modes .lb-pill {
     padding: 6px 10px;
+    font-size: 0.72rem;
   }
-  .lb-pill-text {
+  /* Modes : icône seule, sauf celui qui est actif (on doit savoir où on est) */
+  .lb-filter-pills--modes .lb-pill .lb-pill-text {
     display: none;
   }
-  .lb-pill-icon {
-    font-size: 1.1em;
-  }
-  /* Sur mobile : mode pills = icônes seules */
   .lb-filter-pills--modes .lb-pill.active .lb-pill-text {
     display: inline;
   }
-  /* Mode pills: horizontal scroll instead of wrap */
-  .lb-filter-pills--modes {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 3px;
+  .lb-pill-icon {
+    font-size: 1.05em;
   }
-  .lb-filter-pills--modes::-webkit-scrollbar {
+
+  .lb-podium {
+    gap: 6px;
+    padding: 10px 0 6px;
+  }
+  .lb-podium-card {
+    padding: 10px 4px 9px;
+  }
+  .lb-podium-card--1 {
+    padding-top: 14px;
+  }
+  .lb-podium-avatar {
+    width: 48px;
+    height: 48px;
+  }
+  .lb-podium-card--1 .lb-podium-avatar {
+    width: 62px;
+    height: 62px;
+  }
+  .lb-podium-name {
+    font-size: 0.74rem;
+  }
+  .lb-podium-score {
+    font-size: 1.05rem;
+  }
+  .lb-podium-card--1 .lb-podium-score {
+    font-size: 1.25rem;
+  }
+  .lb-podium-sub {
     display: none;
-  }
-  .lb-filter-pills--modes .lb-pill {
-    scroll-snap-align: start;
-    flex-shrink: 0;
   }
 
   .lb-body {
-    padding: 6px 10px 12px;
+    padding: 6px 8px 12px;
   }
-
   .lb-rank {
-    min-width: 30px;
-    font-size: 0.85rem;
-  }
-
-  .lb-row--1 .lb-avatar {
-    width: 44px;
-    height: 44px;
-  }
-  .lb-row--2 .lb-avatar {
-    width: 40px;
-    height: 40px;
-  }
-  .lb-row--3 .lb-avatar {
-    width: 38px;
-    height: 38px;
+    min-width: 26px;
+    font-size: 0.82rem;
   }
   .lb-avatar {
     width: 34px;
     height: 34px;
   }
-
   .lb-pseudo {
     font-size: 0.83rem;
   }
   .lb-score {
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     min-width: 40px;
   }
-
+  /* Pas de survol au doigt : la flèche reste visible */
   .lb-profile-link {
-    padding: 3px 8px;
-    font-size: 0.72rem;
-  }
-
-  .lb-row--1 {
-    padding: 12px 8px;
-  }
-  .lb-row--2,
-  .lb-row--3 {
-    padding: 10px 8px;
+    opacity: 0.5;
   }
 }

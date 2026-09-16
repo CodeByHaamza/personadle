@@ -13,6 +13,8 @@
  *   user:    id, pseudo, friend_code, lang, created_at
  *   profile: avatar_data, avatar_border_color, wallpaper_id,
  *            profile_music_id, selected_badges, equipped_title_id
+ *   badges, unlocked_wallpapers : ce que le joueur a débloqué (sa collection
+ *   est publique, comme son profil)
  *   stats:   tableau by_mode[] + agrégats globaux
  *   badges:  liste des badge_id débloqués
  *   title:   titre équipé (slug + nom traduit) ou null

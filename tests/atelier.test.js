@@ -11,7 +11,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   initAtelier,
+  openAtelier,
   openAtelierTab,
+  closeAtelier,
   savedAtelierTab,
   initSaveStatus,
   scheduleAutosave,
@@ -21,6 +23,7 @@ import {
 import {
   renderBadgesPreview,
   renderBadgePicker,
+  renderBadgesShowcase,
   toggleBadgeSelection,
 } from "../profile/badges/badgesManager.js";
 import { badgesList } from "../profile/badges/badgesData.js";
@@ -29,28 +32,46 @@ const TABS = ["avatar", "border", "theme", "title", "badges"];
 
 function atelierDom() {
   document.body.innerHTML = `
-    <section id="atelier">
-      <div id="atelierTabs" role="tablist">
-        ${TABS.map(
-          (p, i) =>
-            `<button class="atelier-tab" role="tab" data-pane="${p}" aria-selected="${i === 0}"></button>`
-        ).join("")}
+    <button id="openAtelierBtn"></button>
+    <div id="saveStatus" data-save-status>
+      <span class="save-status-dot"></span><span id="saveStatusText" data-save-status-text></span>
+    </div>
+    <div id="atelierModal" class="modal hidden">
+      <div class="modal-content" id="atelier">
+        <div class="atelier-modal-head">
+          <div id="atelierSaveStatus" data-save-status>
+            <span data-save-status-text></span>
+          </div>
+          <button id="closeAtelierModal"></button>
+        </div>
+        <div id="atelierTabs" role="tablist">
+          ${TABS.map(
+            (p, i) =>
+              `<button class="atelier-tab" role="tab" data-pane="${p}" aria-selected="${i === 0}"></button>`
+          ).join("")}
+        </div>
+        <div class="atelier-panes">
+          ${TABS.map(
+            (p, i) => `<div class="atelier-pane${i === 0 ? "" : " hidden"}" data-pane="${p}"></div>`
+          ).join("")}
+        </div>
       </div>
-      ${TABS.map(
-        (p, i) => `<div class="atelier-pane${i === 0 ? "" : " hidden"}" data-pane="${p}"></div>`
-      ).join("")}
-    </section>
-    <div id="saveStatus"><span class="save-status-dot"></span><span id="saveStatusText"></span></div>
+    </div>
     <div id="previewBadges"></div>
     <p id="badgePickHint"></p>
     <div id="badgePickGrid"></div>
+    <span id="badgesCount"></span>
+    <div id="badgesShowcase"></div>
   `;
 }
+
+const modalOpen = () => !document.getElementById("atelierModal").classList.contains("hidden");
 
 const selectedTab = () =>
   document.querySelector('.atelier-tab[aria-selected="true"]')?.dataset.pane;
 const visiblePane = () => document.querySelector(".atelier-pane:not(.hidden)")?.dataset.pane;
 const status = () => document.getElementById("saveStatus").dataset.state;
+const modalStatus = () => document.getElementById("atelierSaveStatus").dataset.state;
 
 beforeEach(() => {
   atelierDom();
@@ -107,17 +128,82 @@ describe("onglets de l'atelier", () => {
     expect(document.querySelector('.atelier-tab[data-pane="avatar"]').tabIndex).toBe(-1);
   });
 
-  it("scroll:true amène l'atelier à l'écran (clic depuis la carte d'identité)", () => {
-    const spy = vi.fn();
-    document.getElementById("atelier").scrollIntoView = spy;
-    openAtelierTab("avatar", { scroll: true });
-    expect(spy).toHaveBeenCalledOnce();
-  });
-
   it("ne plante pas sur une page sans atelier (profil public, tests d'autres modules)", () => {
     document.body.innerHTML = "";
     expect(() => openAtelierTab("title")).not.toThrow();
+    expect(() => openAtelier("title")).not.toThrow();
+    expect(() => closeAtelier()).not.toThrow();
     expect(() => initAtelier()).not.toThrow();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La modale (2.2, second retour Hamza : la page profil est une vitrine)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("la modale de personnalisation", () => {
+  it("openAtelierTab seul ne l'ouvre PAS — c'est openAtelier qui ouvre", () => {
+    openAtelierTab("theme");
+    expect(modalOpen()).toBe(false);
+    openAtelier("theme");
+    expect(modalOpen()).toBe(true);
+    expect(visiblePane()).toBe("theme");
+  });
+
+  it("openAtelier sans argument rouvre le dernier onglet utilisé", () => {
+    localStorage.setItem("atelierTab", "badges");
+    openAtelier();
+    expect(modalOpen()).toBe(true);
+    expect(visiblePane()).toBe("badges");
+  });
+
+  it("« Personnaliser », la croix et le clic sur le fond ouvrent/ferment", () => {
+    initAtelier();
+    document.getElementById("openAtelierBtn").click();
+    expect(modalOpen()).toBe(true);
+
+    document.getElementById("closeAtelierModal").click();
+    expect(modalOpen()).toBe(false);
+
+    document.getElementById("openAtelierBtn").click();
+    document.getElementById("atelierModal").click(); // le fond, pas le contenu
+    expect(modalOpen()).toBe(false);
+  });
+
+  it("un clic DANS la modale ne la ferme pas", () => {
+    initAtelier();
+    openAtelier();
+    document.getElementById("atelier").click();
+    expect(modalOpen()).toBe(true);
+  });
+
+  it("fermer envoie tout de suite ce qui était en attente (et rien sinon)", async () => {
+    const sync = vi.fn().mockResolvedValue();
+    initSaveStatus(sync);
+    initAtelier();
+    openAtelier();
+
+    closeAtelier();
+    expect(sync, "rien en attente : pas d'envoi pour une simple fermeture").not.toHaveBeenCalled();
+
+    openAtelier();
+    scheduleAutosave();
+    closeAtelier();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(sync, "un choix en attente part sans attendre le regroupement").toHaveBeenCalledOnce();
+  });
+
+  it("l'indicateur de l'en-tête de la modale suit celui de la carte", async () => {
+    const sync = vi.fn().mockResolvedValue();
+    initSaveStatus(sync);
+    scheduleAutosave();
+    expect(status()).toBe("saving");
+    expect(modalStatus()).toBe("saving");
+    await vi.advanceTimersByTimeAsync(700);
+    expect(modalStatus()).toBe("saved");
+    expect(document.querySelector("#atelierSaveStatus [data-save-status-text]").textContent).toBe(
+      "Saved"
+    );
   });
 });
 
@@ -153,8 +239,9 @@ describe("enregistrement automatique", () => {
     await vi.advanceTimersByTimeAsync(700);
     expect(status()).toBe("error");
     expect(document.getElementById("saveStatus").classList.contains("save-status--error")).toBe(true);
+    expect(modalStatus()).toBe("error");
 
-    document.getElementById("saveStatus").click();
+    document.getElementById("atelierSaveStatus").click(); // relance depuis la modale aussi
     await vi.advanceTimersByTimeAsync(0);
     expect(sync).toHaveBeenCalledTimes(2);
     expect(status()).toBe("saved");
@@ -251,6 +338,39 @@ describe("renderBadgesPreview — 4 emplacements", () => {
   });
 });
 
+describe("renderBadgesShowcase — la vitrine de la page", () => {
+    it("montre les badges DÉBLOQUÉS en grand et compte la collection", () => {
+      renderBadgesShowcase(profileWith(ids.slice(0, 3), [ids[1]]));
+      const cards = document.querySelectorAll("#badgesShowcase .showcase-badge");
+      expect(cards).toHaveLength(3);
+      expect(cards[0].querySelector("img")).not.toBeNull();
+      expect(document.getElementById("badgesCount").textContent).toMatch(/^3 \/ \d+$/);
+    });
+
+    it("marque d'une épingle ceux qui sont sur la carte", () => {
+      renderBadgesShowcase(profileWith(ids.slice(0, 3), [ids[1]]));
+      const pinned = document.querySelector(`.showcase-badge[data-id="${ids[1]}"]`);
+      expect(pinned.classList.contains("showcase-badge--pinned")).toBe(true);
+      expect(pinned.querySelector(".showcase-pin")).not.toBeNull();
+      expect(
+        document.querySelector(`.showcase-badge[data-id="${ids[0]}"]`).querySelector(".showcase-pin")
+      ).toBeNull();
+    });
+
+    it("état vide quand rien n'est débloqué (le compteur reste juste)", () => {
+      renderBadgesShowcase(profileWith([], []));
+      expect(document.querySelector(".badges-showcase-empty")).not.toBeNull();
+      expect(document.querySelectorAll(".showcase-badge")).toHaveLength(0);
+      expect(document.getElementById("badgesCount").textContent).toMatch(/^0 \/ \d+$/);
+    });
+
+    it("un clic ouvre le zoom du badge", () => {
+      renderBadgesShowcase(profileWith(ids.slice(0, 2), []));
+      document.querySelector(".showcase-badge").click();
+      expect(document.querySelector(".badge-zoom-modal")).not.toBeNull();
+    });
+  });
+
 describe("renderBadgePicker — onglet Badges", () => {
   it("ne montre que les badges débloqués, épinglés marqués aria-pressed + ✓, compteur dans l'indication", () => {
     renderBadgePicker(profileWith(ids.slice(0, 3), [ids[1]]), vi.fn());
@@ -296,6 +416,13 @@ describe("renderBadgePicker — onglet Badges", () => {
     renderBadgePicker(profileWith([], []), vi.fn());
     expect(document.querySelector("#badgePickGrid .badge-pick-empty")).not.toBeNull();
     expect(document.querySelectorAll(".badge-pick")).toHaveLength(0);
+  });
+
+  it("un emplacement vide ouvre la MODALE sur l'onglet Badges", () => {
+    renderBadgesPreview(profileWith(ids, []));
+    document.querySelector(".pin-slot--empty").click();
+    expect(modalOpen()).toBe(true);
+    expect(visiblePane()).toBe("badges");
   });
 
   it("toggleBadgeSelection re-rend aussi le sélecteur (une seule source d'état)", () => {
