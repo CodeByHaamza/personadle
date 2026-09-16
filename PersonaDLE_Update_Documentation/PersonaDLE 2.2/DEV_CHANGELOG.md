@@ -13,6 +13,80 @@
 
 ---
 
+## 2026-09-16 — fix(modes) : la cible du jour était aléatoire dès le lendemain, dans les six modes (branche `fix/silhouette-daily-target-notifs`)
+
+Point de départ : un joueur sur Discord — « en mode Shadows, ça affiche parfois Akechi,
+taper Akechi ne marche pas, et l'abandon révèle un autre Shadow ». Deux bugs derrière,
+dont un gros.
+
+### 1. Le reset quotidien tirait au hasard (six modes)
+
+`checkResetOnLoad()` (nouveau jour au chargement) et `setupDailyReset()` (minuit page
+ouverte) faisaient `resetBtn.click()` — le bouton **Rejouer**, qui tire au hasard dans
+le pool. La cible seedée joueur + jour + mode (`getDailyTarget`) ne servait donc qu'à
+la toute première partie d'un appareil ; dès le lendemain, chaque joueur jouait un
+personnage aléatoire : différent sur deux appareils, et signalé par l'anti-triche
+serveur (`api/lib/daily_target.php` recalcule la cible seedée) à **chaque** partie.
+Mesuré avec une sonde Playwright (joueur qui revient, identifiant connu, état d'hier
+en place) : Classique, Émoji, Silhouette, Personae, Musique en écart ; AOA correct au
+chargement (il recharge la page) mais pas à minuit. Émoji : `resetGame()` tirait au
+hasard sur TOUS ses chemins, sans aucun `getDailyTarget` hors première visite.
+
+Conséquence directe : le journal anti-triche (phase 1, et le panneau admin 🛡 de la
+2.2) est du bruit — tout le monde y est. La phase 2 (rejet) prévue par l'audit aurait
+bloqué tout le monde. **À vérifier en prod après déploiement** :
+`SELECT JSON_UNQUOTE(JSON_EXTRACT(context,'$.mode')) m, COUNT(*) FROM error_log
+WHERE message='Daily target mismatch' GROUP BY m` — le compteur doit cesser de
+grimper le lendemain de la release.
+
+→ Un tirage explicite par mode : Classique `newRound(random)` (corps de Rejouer),
+Émoji `resetGame(random)`, Silhouette `newRound(random)`, Personae / Musique
+`resetGame()` sans random, AOA même chemin que le chargement. Rejouer et changement
+de filtres restent aléatoires.
+
+### 2. Silhouette : l'image d'hier recouvrait celle du jour (le cas « Akechi »)
+
+Le chargement de l'image **restaurée** depuis localStorage n'avait pas le jeton
+`currentPickToken` de `pickCharacter()` : quand le tirage du jour partait pendant que
+l'image d'hier chargeait encore (réseau lent, cache froid), l'image d'hier finissait
+par se poser dans le DOM — cible d'aujourd'hui, silhouette d'hier. Taper le nom
+d'hier : refusé ; abandonner : `revealSrc` (correct) révélait la vraie cible. → même
+jeton sur la restauration ; `data-target` sur l'image pour les tests.
+
+### 3. `getPlayerSeedId()` : le compte d'abord
+
+Au premier chargement d'un appareil, `localStorage.playerUserId` n'existe pas encore
+quand le mode tire sa cible (posé par auth.js après `/me`) : tirage sur un
+identifiant anonyme, différent de celui du serveur. `window._currentUser.id` est
+préféré quand la page le connaît déjà (re-tirages, retour d'onglet).
+
+### 4. Toast « Title Unlocked! » à chaque visite du profil
+
+« À chaque fois que je vais sur mon profil j'ai la notif de I Remembered » (Hamza).
+`checkAndUnlockTitles()` posait le titre en local et jouait la toast AVANT la réponse
+du serveur, 403 avalé. Sur un navigateur qui perd son localStorage entre deux visites,
+rebelote à chaque fois. → le serveur confirme d'abord ; 4xx = rien n'est posé ni
+annoncé ; l'annonce est mémorisée hors du profil (`_seenTitleAnimIds`, comme
+`_seenBadgeAnimIds`). Invité : le local fait foi. Cette règle rend aussi caduc le
+« titre fantôme » que `syncTitlesWithBackend()` retire : il ne peut plus naître.
+
+### Divers
+
+- Ren Amamiya : citation « Checkmate! » (décision Hamza).
+- README : « Core Team » (Hamza) + « Contributors & Credits » (Léo, Damien, Dzulian,
+  rôles datés) ; tableau de CLAUDE.md aligné.
+
+### Tests
+
+- `tests-e2e/daily_target.spec.js` (8) — six modes : deux navigateurs « joueur qui
+  revient » tirent la même cible, égale à celle que le serveur attend (même helper,
+  pool de `api/data/daily_pools.json`), date du jour posée ; Classique : la partie
+  jouée n'apparaît pas dans `/api/admin/anticheat` ; Silhouette : image d'hier
+  retardée de 1,5 s → la silhouette affichée est celle du jour. 7/8 rouges sans le
+  correctif.
+- `tests/titles_reconcile.test.js` (+2) — 403 → rien en local, rien annoncé ;
+  accepté → annoncé une fois, plus jamais même profil reconstruit ; invité → local.
+
 ## 2026-09-15 — test(E2E) : Expert ↔ défis, déblocages, streak vue du profil, mobile — et deux bugs de plus (même branche)
 
 Deuxième vague demandée par Hamza (« streak, stats, mobile, débloquer les modes Expert

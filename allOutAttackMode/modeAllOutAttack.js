@@ -944,7 +944,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(EXPERT.key("aoaGameOver"));
     location.reload();
   });
+  // Minuit page ouverte : même chemin que le nouveau jour au chargement (le
+  // tirage du jour), pas un clic sur « Rejouer » qui tirait au hasard.
   setupDailyReset(() => {
-    document.getElementById("resetButton")?.click() ?? location.reload();
+    localStorage.removeItem(EXPERT.key("aoaTarget"));
+    localStorage.removeItem(EXPERT.key("aoaAttempts"));
+    localStorage.removeItem(EXPERT.key("aoaGameOver"));
+    location.reload();
   });
 });

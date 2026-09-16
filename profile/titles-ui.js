@@ -228,17 +228,63 @@ async function checkAndUnlockTitles(profile, saveProfile) {
   for (const title of _titlesData) {
     if (title.is_unlocked) continue;
     if (!isTitleConditionMet(title, ctx)) continue;
+    if (!profile.unlockedTitles) profile.unlockedTitles = [];
+    if (profile.unlockedTitles.includes(title.slug)) {
+      // Déjà acquis en local (hors ligne, ou avant le serveur) : rien à annoncer.
+      title.is_unlocked = 1;
+      continue;
+    }
+
+    // Le SERVEUR tranche avant qu'on annonce quoi que ce soit. Avant : le titre
+    // était posé en local et la toast « Title Unlocked! » jouait AVANT la
+    // réponse, et un 403 (condition non remplie côté serveur — un badge compté
+    // en local mais absent de badges_unlocked, une session pas encore
+    // enregistrée) était avalé. Sur un navigateur qui perd son localStorage
+    // entre deux visites (navigation privée, nettoyage, second appareil), le
+    // titre revenait donc en « nouveau » à CHAQUE visite du profil — « la notif
+    // de I Remembered à chaque fois que je vais sur mon profil » (Hamza).
+    const api = window._personadleApi;
+    let confirmed = !api?.titles?.unlock || !window._currentUser; // invité / hors bridge : local fait foi
+    if (!confirmed) {
+      try {
+        await api.titles.unlock(title.slug);
+        confirmed = true;
+      } catch (err) {
+        // 4xx = le serveur dit non (ou ne connaît pas le titre) : on n'insiste
+        // pas et on n'annonce rien. Réseau/5xx : on garde l'acquis local, la
+        // réconciliation (syncTitlesWithBackend) le repoussera.
+        confirmed = !(Number(err?.status) >= 400 && Number(err?.status) < 500);
+      }
+    }
+    if (!confirmed) continue;
 
     title.is_unlocked = 1;
-    if (!profile.unlockedTitles) profile.unlockedTitles = [];
-    if (!profile.unlockedTitles.includes(title.slug)) {
-      profile.unlockedTitles.push(title.slug);
-      saveProfile();
-      _showTitleNotification(title);
-      // Persister en BDD — on envoie le slug (l'id peut être null si l'API n'a pas répondu)
-      window._personadleApi?.titles?.unlock(title.slug).catch(() => {});
-    }
+    profile.unlockedTitles.push(title.slug);
+    saveProfile();
+    // Annonce une seule fois par titre sur cet appareil, même si le profil local
+    // est reconstruit entre-temps — même mécanisme que _seenBadgeAnimIds.
+    if (_markTitleAnnounced(title.slug)) _showTitleNotification(title);
   }
+}
+
+const SEEN_TITLE_ANIM_KEY = "_seenTitleAnimIds";
+
+/** true la PREMIÈRE fois qu'on note ce titre comme annoncé sur cet appareil. */
+function _markTitleAnnounced(slug) {
+  let seen = [];
+  try {
+    seen = JSON.parse(localStorage.getItem(SEEN_TITLE_ANIM_KEY) || "[]");
+  } catch {
+    seen = [];
+  }
+  if (seen.includes(slug)) return false;
+  seen.push(slug);
+  try {
+    localStorage.setItem(SEEN_TITLE_ANIM_KEY, JSON.stringify(seen.slice(-100)));
+  } catch {
+    /* stockage indisponible : on annonce quand même */
+  }
+  return true;
 }
 
 /**
