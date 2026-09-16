@@ -586,7 +586,7 @@ days and are credited for it — the project is maintained by Hamza alone since 
 
 ### Community
 
-- **Arati** ([@Arati](https://x.com/Arati)) - Community support and featuring PersonaDLE
+- <img src="img/credits/arati_youtube.jpg" width="28" height="28" alt="" align="absmiddle"/> **Arati** ([YouTube](https://www.youtube.com/@Arati_Persona) · [@Arati](https://x.com/Arati)) - Community support and featuring PersonaDLE
 - **Discord Communities** - [PersonaDLE (international)](https://discord.gg/wpMdGGDp3y) & [Le Grimoire du Cœur (French partner, most active)](https://discord.gg/CfR8UHXTAE) - beta testing, bug reports, and endless feedback
 - **Reddit r/persona4golden** - Support and suggestions
 
@@ -599,6 +599,7 @@ days and are credited for it — the project is maintained by Hamza alone since 
 ### Resources
 
 - **[Megami Tensei Wiki](https://megamitensei.fandom.com/)** - Character data and lore
+- <img src="img/credits/faz_youtube.jpg" width="28" height="28" alt="" align="absmiddle"/> **[Faz](https://www.youtube.com/@FazPersona)** (YouTube) - Persona footage, notably the All-Out Attack references
 - **Atlus/SEGA** - For creating the incredible Persona universe
 - **Shoji Meguro** - For the unforgettable music
 
