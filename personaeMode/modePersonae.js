@@ -941,12 +941,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   initChallengeButton("personae", challengePool, storedGameOver ? attempts : null);
 
   // ── Daily reset ──
+  // Reset quotidien : la cible DU JOUR (resetGame() sans random), pas un clic sur
+  // « Rejouer » qui tirait au hasard — cf. la même correction dans les cinq
+  // autres modes (anti-triche « Daily target mismatch » sur chaque partie).
   checkResetOnLoad(EXPERT.key("lastPlayedDate_Personae"), STATS_SCOPE, () => {
-    resetBtn.click();
+    resetGame();
   });
-  setupDailyReset(() => {
-    resetBtn?.click() ?? location.reload();
-  });
+  setupDailyReset(() => resetGame());
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

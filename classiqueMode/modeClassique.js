@@ -852,8 +852,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ── Reset / Replay button ──
-  resetButton.addEventListener("click", () => {
+  // ── Nouvelle partie : Rejouer (cible aléatoire) ou nouveau jour (cible du jour) ──
+  // Le reset quotidien cliquait sur « Rejouer », donc tirait une cible AU HASARD :
+  // la cible du jour seedée (getDailyTarget) ne servait qu'à la toute première
+  // partie d'un appareil, et l'anti-triche serveur, qui recalcule cette cible,
+  // signalait chaque partie suivante en « Daily target mismatch ». Même chose sur
+  // deux appareils : deux personnages différents le même jour. Les six modes
+  // avaient le raccourci ; ils passent tous par un tirage explicite.
+  const newRound = (random) => {
     startGame(STATS_SCOPE);
     sessionStartTime = Date.now();
 
@@ -890,13 +896,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     // cette restriction, un replay pouvait tomber sur l'un des 4 sans réplique et
     // laisser le joueur sans aucun indice.
     const _pool = EXPERT.isExpert ? EXPERT_CHARACTERS : characters;
-    const _filteredPool = _pool.filter((c) => personas.includes(c.nom));
-    const _prevTarget = target;
-    const _candidates =
-      _filteredPool.length > 1 && _prevTarget
-        ? _filteredPool.filter((c) => c.nom !== _prevTarget.nom)
-        : _filteredPool;
-    target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
+    if (random) {
+      const _filteredPool = _pool.filter((c) => personas.includes(c.nom));
+      const _prevTarget = target;
+      const _candidates =
+        _filteredPool.length > 1 && _prevTarget
+          ? _filteredPool.filter((c) => c.nom !== _prevTarget.nom)
+          : _filteredPool;
+      target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
+    } else {
+      // Même tirage qu'à la première visite : seedé joueur + jour + mode.
+      target = getDailyTarget(_pool, EXPERT.hashMode);
+    }
     localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
 
     // Après le nouveau tirage : la citation à deviner change aussi.
@@ -907,7 +918,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       nav.style.display = "none";
       nav.classList.remove("reveal-style");
     }
-  });
+  };
+  resetButton.addEventListener("click", () => newRound(true));
 
   // ── Daltonian mode toggle ──
   daltonianToggle?.addEventListener("click", () => {
@@ -934,11 +946,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     //
     // Même helper que les 5 autres modes : expiration + mode + dimension.
     if (getActiveChallengeTarget("classic")) return;
-    resetButton.click();
+    newRound(false);
   });
-  setupDailyReset(() => {
-    resetButton?.click() ?? location.reload();
-  });
+  setupDailyReset(() => newRound(false));
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

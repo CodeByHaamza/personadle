@@ -11,10 +11,14 @@
 
 | Pseudo | Rôle |
 |---|---|
-| Hamza Karrouchi | Lead Dev |
-| Léo (L2GENDAIRE) | Data & Design |
-| Damien (Corbover) | Front-End / CSS |
-| Dzulian | Consultant P1/P2 |
+| Hamza Karrouchi | Founder & Lead Dev — **seul mainteneur actif** depuis mi-2025 |
+| Léo (L2GENDAIRE) | Data & Design (2025) — base de personnages d'origine, inactif depuis |
+| Damien (Corbover) | Front-End / CSS (2026) — modularisation CSS, ponctuel |
+| Dzulian | Consultant P1/P2 — ponctuel |
+
+Le README distingue désormais « Core Team » (Hamza) et « Contributors & Credits »
+(les trois autres, rôles datés) — décision Hamza du 2026-09-15 : le crédit reste, le
+niveau d'implication est dit honnêtement.
 
 ---
 
@@ -38,7 +42,7 @@ personadle/
 ├── classiqueMode/  emojiMode/  allOutAttackMode/  silhouetteMode/  personaeMode/  musicsMode/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
-├── tests/               ← 64 suites Vitest (1119 tests) + tests/php/ (PHPUnit)
+├── tests/               ← 64 suites Vitest (1121 tests) + tests/php/ (PHPUnit)
 └── sql/                 ← bdd_mysql.sql (28 tables)
 ```
 
@@ -216,7 +220,7 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 ## 8. Tests & qualité
 
 - `npm test` · `npm run test:watch` · `npm run test:coverage`
-- **1119 tests** (Vitest + jsdom), 64 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
+- **1121 tests** (Vitest + jsdom), 64 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
   `social-link`, `profilePage`, `badgesManager`, `badgesConditions`, `streakFlow.integration`,
   `streakRecovery`, `validateCharacters`, `formatPlayTime`… — cf. `tests/` pour la liste à jour)
 - `npm run lint` (ESLint flat config) · `npm run data:check` (schéma personnages) · `npm run i18n:check`

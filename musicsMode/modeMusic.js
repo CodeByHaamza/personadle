@@ -315,16 +315,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeAutocomplete(textbar);
 
   // ── Daily reset checks ─────────────────────────────────────────────────────
+  // Reset quotidien : la chanson DU JOUR (resetGame() sans random), pas un clic
+  // sur « Rejouer » qui tirait au hasard — cf. la même correction dans les cinq
+  // autres modes (anti-triche « Daily target mismatch » sur chaque partie).
   checkResetOnLoad(
     // ← shared utility
     `lastPlayedDate_${STATS_KEY}`,
     STATS_KEY,
-    () => resetBtn.click()
+    () => resetGame()
   );
 
-  setupDailyReset(() => {
-    resetBtn ? resetBtn.click() : location.reload();
-  });
+  setupDailyReset(() => resetGame());
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
