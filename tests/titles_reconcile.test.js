@@ -129,22 +129,73 @@ describe("syncTitlesWithBackend", () => {
 });
 
 describe("le scénario complet « badge oui, titre non »", () => {
-  it("fin de partie : la 50e victoire pose le titre en local mais le serveur dit 403 (session pas encore là)", async () => {
+  it("fin de partie : le serveur dit 403 (session pas encore là) → rien en local, rien annoncé", async () => {
     // Sur la page du mode, juste après la victoire : le client compte 50, le
-    // serveur 49. Le POST part, échoue, l'erreur est avalée.
+    // serveur 49. Le POST part et échoue. Avant : le titre était posé en local
+    // et la toast jouait quand même — et sur un navigateur qui perd son
+    // localStorage entre deux visites, elle rejouait à CHAQUE visite du profil.
     localStorage.setItem(
       "personaUserProfile",
       JSON.stringify({ stats: { modeWins: { Classic: 50 } }, badges: [], unlockedTitles: [] })
     );
     unlock.mockRejectedValue(Object.assign(new Error("Condition not met"), { status: 403 }));
-    delete window._currentUser; // pas de fetch /api/friends sur les pages de mode
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({ json: async () => ({ friends: [] }) });
 
     checkTitlesAfterGame();
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 10));
 
-    const local = JSON.parse(localStorage.getItem("personaUserProfile"));
-    expect(local.unlockedTitles).toContain("aigis_i_am_not_afraid");
     expect(unlock).toHaveBeenCalledWith("aigis_i_am_not_afraid");
+    const local = JSON.parse(localStorage.getItem("personaUserProfile"));
+    expect(local.unlockedTitles).not.toContain("aigis_i_am_not_afraid");
+    expect(document.querySelector(".title-notification")).toBeNull();
+  });
+
+  it("quand le serveur accepte : posé en local, annoncé UNE fois — plus jamais, même profil reconstruit", async () => {
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ stats: { modeWins: { Classic: 50 } }, badges: [], unlockedTitles: [] })
+    );
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({ json: async () => ({ friends: [] }) });
+
+    checkTitlesAfterGame();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).unlockedTitles).toContain(
+      "aigis_i_am_not_afraid"
+    );
+    // (naoya_first_awakening — 15 victoires Classique — s'annonce aussi, légitimement)
+    expect(document.querySelectorAll(".title-notification").length).toBeGreaterThanOrEqual(1);
+
+    // Profil local perdu (navigation privée, second appareil), serveur pas encore
+    // interrogé : la condition est de nouveau « remplie » — mais l'annonce ne
+    // rejoue pas, le titre a déjà été fêté sur cet appareil.
+    document.body.innerHTML = "";
+    _resetTitlesData();
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ stats: { modeWins: { Classic: 50 } }, badges: [], unlockedTitles: [] })
+    );
+    checkTitlesAfterGame();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(document.querySelector(".title-notification")).toBeNull();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).unlockedTitles).toContain(
+      "aigis_i_am_not_afraid"
+    );
+  });
+
+  it("invité (pas de compte) : le titre se pose en local et s'annonce, sans serveur", async () => {
+    delete window._currentUser;
+    localStorage.setItem(
+      "personaUserProfile",
+      JSON.stringify({ stats: { modeWins: { Classic: 50 } }, badges: [], unlockedTitles: [] })
+    );
+    checkTitlesAfterGame();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(unlock).not.toHaveBeenCalled();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).unlockedTitles).toContain(
+      "aigis_i_am_not_afraid"
+    );
+    // (naoya_first_awakening — 15 victoires Classique — s'annonce aussi, légitimement)
+    expect(document.querySelectorAll(".title-notification").length).toBeGreaterThanOrEqual(1);
   });
 
   it("visite suivante du profil : le titre local absent du serveur est repoussé — et accepté cette fois", async () => {
