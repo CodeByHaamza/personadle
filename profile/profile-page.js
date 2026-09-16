@@ -29,7 +29,6 @@ import {
   renderBadgesModal,
   renderBadgesPreview,
   renderBadgePicker,
-  renderBadgesShowcase,
 } from "./badges/badgesManager.js";
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
 import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/streak-recovery.js";
@@ -111,6 +110,19 @@ function tf(key, fallback, vars) {
 }
 
 /**
+ * Pose la couleur d'un thème personnalisé : aperçu immédiat, sauvegarde locale
+ * et envoi. Partagé par le nuancier natif et la saisie hexadécimale.
+ * @param {string} color  #RRGGBB
+ */
+function _applyCustomThemeColor(color) {
+  profile.profileCustomColor = color;
+  applyTheme("custom", color);
+  saveProfile();
+  markDirty();
+  saveProfileToCloud({ wallpaper_id: `custom:${color}` });
+}
+
+/**
  * Applique un thème en injectant les variables CSS sur <html>.
  * @param {string} themeId  - ID du thème (voir THEMES)
  * @param {string} [customColor] - Couleur hex si themeId === 'custom'
@@ -144,14 +156,16 @@ function renderThemePicker() {
       </button>`;
   }).join("");
 
-  // Afficher/masquer la rangée de couleur custom
+  // Afficher/masquer la rangée de couleur custom (le nuancier natif + le code
+  // hexadécimal, pour ceux qui ont une couleur précise en tête).
   const customRow = document.getElementById("customThemeRow");
   if (customRow) {
     customRow.classList.toggle("hidden", currentId !== "custom");
     const picker = document.getElementById("customThemeColor");
-    if (picker && profile.profileCustomColor) {
-      picker.value = profile.profileCustomColor;
-    }
+    const hex = document.getElementById("customThemeHex");
+    const current = profile.profileCustomColor || "#e63946";
+    if (picker) picker.value = current;
+    if (hex) hex.value = current.toUpperCase();
   }
 
   // Handlers swatches
@@ -173,18 +187,35 @@ function renderThemePicker() {
       const wid = id === "custom" ? `custom:${profile.profileCustomColor || "#e63946"}` : id;
       saveProfileToCloud({ wallpaper_id: wid });
 
+      // « Couleur perso » : ouvrir le nuancier tout de suite. Il fallait cliquer
+      // deux fois — la pastille, puis le carré de couleur qui apparaissait
+      // dessous (retour Hamza du 2026-09-16).
+      if (id === "custom") {
+        const picker = document.getElementById("customThemeColor");
+        picker?.focus?.();
+        picker?.click?.();
+      }
+
       // Régénère la preview de partage si la modale est ouverte
       refreshShareCardPreview();
     });
   });
 
-  // Handler couleur custom
+  // Handler couleur custom (nuancier natif)
   document.getElementById("customThemeColor")?.addEventListener("input", (e) => {
-    profile.profileCustomColor = e.target.value;
-    applyTheme("custom", e.target.value);
-    saveProfile();
-    markDirty();
-    saveProfileToCloud({ wallpaper_id: `custom:${e.target.value}` });
+    _applyCustomThemeColor(e.target.value);
+    const hex = document.getElementById("customThemeHex");
+    if (hex) hex.value = e.target.value.toUpperCase();
+  });
+
+  // …et saisie directe du code hexadécimal (#RRGGBB), pour une couleur précise
+  document.getElementById("customThemeHex")?.addEventListener("input", (e) => {
+    const value = e.target.value.trim();
+    if (!/^#?[0-9a-f]{6}$/i.test(value)) return;
+    const color = value.startsWith("#") ? value : `#${value}`;
+    const picker = document.getElementById("customThemeColor");
+    if (picker) picker.value = color;
+    _applyCustomThemeColor(color);
   });
 }
 
@@ -225,7 +256,6 @@ const editAvatarBtn = document.getElementById("editAvatarBtn");
 function markDirty() {
   scheduleAutosave();
 }
-const resetProfileBtn = document.getElementById("resetProfile");
 const borderColorPicker = document.getElementById("borderColorPicker");
 const statsContainer = document.getElementById("statsContainer");
 
@@ -534,7 +564,6 @@ function _applyCloudToUI() {
   // ── Badges ────────────────────────────────────────────────
   renderBadgesPreview(profile);
   renderBadgePicker(profile, saveProfileAndSyncBadges);
-  renderBadgesShowcase(profile);
   renderBadgesModal(profile, saveProfileAndSyncBadges);
 
   // ── Wallpapers débloquables ───────────────────────────────
@@ -859,15 +888,24 @@ document.getElementById("equippedTitleBtn")?.addEventListener("click", () => {
 });
 
 /**
- * Applique un portrait du jeu. On enregistre le CHEMIN du portrait, jamais une
- * image encodée : c'est ce qui garantit qu'un avatar est toujours un portrait
- * du jeu (décision Hamza du 2026-09-16), et ça évite au passage de trimballer
- * ~100 Ko de base64 dans chaque liste d'amis et chaque défi.
+ * Choisir un portrait du jeu : il est appliqué tout de suite (par son CHEMIN —
+ * jamais une image encodée, c'est ce qui garantit qu'un avatar est toujours un
+ * portrait du jeu, et ça évite ~100 Ko de base64 dans chaque liste d'amis), et
+ * la fenêtre de recadrage s'ouvre dans la foulée : beaucoup de portraits sont
+ * mal cadrés d'origine et le joueur veut régler ça tout de suite (retour Hamza
+ * du 2026-09-16). La fermer sans rien toucher garde le portrait tel quel.
+ *
+ * Un GIF ne passe pas par le canvas (il y perdrait son animation) : pas de
+ * recadrage possible, on s'arrête à l'application.
+ *
  * @param {string} src  chemin relatif à profile/ (../img/avatar/…)
  */
 function applyAvatarPreset(src) {
   selectedAvatarSrc = src;
   commitAvatar(src);
+  if (src.toLowerCase().endsWith(".gif")) return;
+  loadImageToCanvas(src);
+  openModal("avatarCropModal");
 }
 
 /** Pose l'avatar, sauvegarde, envoie. */
@@ -908,13 +946,27 @@ function _markSelectedAvatarCell() {
   });
 }
 
-// Réinitialiser le profil
-resetProfileBtn.onclick = () => {
-  if (confirm(tf("profile.reset_confirm", "Reset your profile? This cannot be undone."))) {
-    localStorage.removeItem("personaUserProfile");
-    location.reload();
-  }
-};
+// ── Réinitialiser le profil ──────────────────────────────────────────────────
+// Déclenché depuis ⚙ Paramètres (window._personadleDanger.reset), plus depuis un
+// bouton posé au bas de la page : un confirm() natif suffisait à tout effacer.
+function openResetProfileModal() {
+  if (!document.getElementById("resetProfileModal")) return;
+  openModal("resetProfileModal");
+}
+
+document.getElementById("closeResetProfile")?.addEventListener("click", () => {
+  closeModal("resetProfileModal");
+});
+document.getElementById("resetProfileCancelBtn")?.addEventListener("click", () => {
+  closeModal("resetProfileModal");
+});
+document.getElementById("resetProfileModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "resetProfileModal") closeModal("resetProfileModal");
+});
+document.getElementById("resetProfileConfirmBtn")?.addEventListener("click", () => {
+  localStorage.removeItem("personaUserProfile");
+  location.reload();
+});
 
 // ─────────────────────────────────────────────────────────
 // SUPPRESSION DE COMPTE (RGPD)
@@ -923,6 +975,13 @@ resetProfileBtn.onclick = () => {
 // Modale de confirmation avec saisie du pseudo (pas un simple confirm() comme
 // pour reset — action plus destructrice, irréversible passé le délai).
 // ─────────────────────────────────────────────────────────
+// Les deux actions destructrices, exposées à la modale ⚙ Paramètres : c'est
+// elle qui porte les boutons désormais, cette page garde les confirmations.
+window._personadleDanger = {
+  reset: openResetProfileModal,
+  deleteAccount: () => document.getElementById("deleteAccountBtn")?.click(),
+};
+
 const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 const deleteAccountModal = document.getElementById("deleteAccountModal");
 const deleteAccountPseudoEl = document.getElementById("deleteAccountPseudo");
@@ -1334,8 +1393,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderUnlockableWallpaperGallery(profile);
     renderBadgesPreview(profile);
     renderBadgePicker(profile, saveProfileAndSyncBadges);
-    renderBadgesShowcase(profile);
-    renderBadgesModal(profile, saveProfileAndSyncBadges);
+      renderBadgesModal(profile, saveProfileAndSyncBadges);
     resetTitlesUnlockedState();
     renderTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty);
   });

@@ -748,6 +748,14 @@ export function setupShareProfile(profile, saveProfile) {
     generatePreview();
   };
 
+  // Cliquer à côté de la carte referme, comme partout ailleurs (retour Hamza).
+  if (!modal._backdropBound) {
+    modal._backdropBound = true;
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal("sharePreviewModal");
+    });
+  }
+
   // ── Génération de la prévisualisation ──
   function generatePreview() {
     // Le profil courant, relu à chaque génération : profile-page.js REMPLACE son

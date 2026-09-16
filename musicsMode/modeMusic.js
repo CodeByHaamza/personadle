@@ -1044,6 +1044,7 @@ function resetPlayerVisuals() {
   if (durEl) durEl.textContent = "--:--";
   if (soundBars) soundBars.classList.remove("playing");
   if (playIcon) playIcon.textContent = "▶";
+  playIcon.classList.remove("is-pause");
   if (playBtn) {
     playBtn.classList.remove("playing");
     playBtn.classList.add("idle");
@@ -1087,18 +1088,21 @@ function initCustomPlayer() {
 
   audioPlayer.addEventListener("play", () => {
     playIcon.textContent = "⏸";
+  playIcon.classList.add("is-pause");
     playBtn.classList.remove("idle");
     soundBars?.classList.add("playing");
   });
 
   audioPlayer.addEventListener("pause", () => {
     playIcon.textContent = "▶";
+  playIcon.classList.remove("is-pause");
     playBtn.classList.add("idle");
     soundBars?.classList.remove("playing");
   });
 
   audioPlayer.addEventListener("ended", () => {
     playIcon.textContent = "▶";
+  playIcon.classList.remove("is-pause");
     playBtn.classList.add("idle");
     soundBars?.classList.remove("playing");
     if (progressFill) progressFill.style.width = "0%";

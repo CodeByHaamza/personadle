@@ -59,6 +59,11 @@ export function openModal(id, opts = {}) {
 
   const keyHandler = (e) => {
     if (e.key === "Escape") {
+      // Une modale peut en ouvrir une autre (l atelier → le recadrage) : chacune
+      // pose son propre écouteur, et Escape les fermait TOUTES. Seule celle du
+      // dessus réagit — _trapState garde l ordre d ouverture.
+      const open = [..._trapState.keys()];
+      if (open.length && open[open.length - 1] !== id) return;
       closeModal(id);
       opts.onClose?.();
       return;

@@ -84,10 +84,12 @@
 
 /* Flèche — tourne 180° quand ouvert */
 .filter-toggle-arrow {
-  font-size: 9px;
+  /* 9 px à 60 % d'opacité : on ne la voyait pas (retour Hamza du 2026-09-16). */
+  font-size: 12px;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-block;
-  color: rgba(255, 255, 255, 0.6);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .filter-toggle-btn.open .filter-toggle-arrow {
@@ -237,8 +239,8 @@
 
 /* Flèche expand — ▸ tourne 90° quand ouvert */
 .filter-expand-arrow {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
   transition:
     transform 0.22s ease,
     color 0.18s ease;
@@ -248,7 +250,7 @@
 
 .filter-main-btn.expanded .filter-expand-arrow {
   transform: rotate(90deg);
-  color: rgba(255, 255, 255, 0.75);
+  color: #fff;
 }
 
 /* ── Lueurs colorées pour chaque jeu (état active) ──── */
@@ -1448,4 +1450,68 @@ body:not(.darkmode) [data-group-panel="PQ"] .filter-group-select-btn {
   box-shadow:
     0 0 10px rgba(0, 190, 200, 0.7),
     inset 0 0 5px rgba(0, 190, 200, 0.1);
+}
+
+/* ── Ce que fait un clic, dit une fois en haut du panneau (2.2) ─────────────
+   Le panneau ne montrait que des logos : impossible de deviner qu'un clic
+   inclut/exclut un jeu et que la flèche ouvre ses opus. */
+.filter-hint {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  line-height: 1.45;
+}
+body:not(.darkmode) .filter-hint {
+  background: rgba(0, 0, 0, 0.05);
+  color: #555;
+}
+
+/* État lisible d'un coup d'œil : un jeu retenu porte une pastille ✓ */
+.filter-main-btn,
+.filter-sub-btn {
+  position: relative;
+}
+.filter-main-btn.active::after,
+.filter-sub-btn.active::after {
+  content: "✓";
+  position: absolute;
+  /* À l intérieur du bouton : le panneau défile (overflow) et une pastille
+     débordante était rognée. */
+  top: 4px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2bae66;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+/* …et un jeu écarté se voit aussi : contour en pointillés, pas juste un logo pâle */
+.filter-main-btn:not(.active),
+.filter-sub-btn:not(.active) {
+  border-style: dashed;
+}
+
+/* Boutons « tout / aucun » de groupe : plus discrets que le bouton global */
+.filter-group-select-btn {
+  font-size: 10px;
+  padding: 3px 8px;
+  opacity: 0.85;
+}
+
+/* Le panneau ne dépasse plus de l'écran (P5X était coupé en bas) */
+.filter-dropdown.open {
+  max-height: min(72vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }

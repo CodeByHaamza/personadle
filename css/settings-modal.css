@@ -373,3 +373,62 @@ body.darkmode .sm-label { color: #b0a0d0 !important; }
   background: var(--accent, #e63946);
   color: #fff;
 }
+
+/* ── Zone de danger (réinitialisation / suppression de compte, 2.2) ──────────
+   Déplacée depuis le bas de la page profil : deux boutons rouges y étaient
+   atteignables en un clic, dont un derrière un simple confirm() natif. */
+.sm-danger {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 14px;
+}
+
+.sm-danger.hidden {
+  display: none;
+}
+
+.sm-section-title--danger {
+  color: #dc3545;
+}
+
+.sm-danger-intro {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #888;
+}
+
+.sm-danger-btn {
+  min-height: 0;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(220, 53, 69, 0.4);
+  background: transparent;
+  color: #dc3545;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.sm-danger-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: #dc3545;
+}
+
+.sm-danger-btn--hard:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+.darkmode .sm-danger {
+  border-top-color: #2e2e2e;
+}
+
+.darkmode .sm-danger-intro {
+  color: #999;
+}
