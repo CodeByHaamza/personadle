@@ -208,3 +208,6 @@ phpstan.phar
 psalm.phar
 # Cache de Psalm (analyse de taint) — regénéré à chaque lancement.
 .psalm-cache/
+
+# Cache de vitest 5 (résultats de la dernière exécution)
+.vitest/
