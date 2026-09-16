@@ -344,3 +344,32 @@ body.darkmode .sm-panel {
 body.darkmode .sm-title { color: #e8d8ff !important; }
 body.darkmode .sm-section-title { color: #c8b0e8 !important; }
 body.darkmode .sm-label { color: #b0a0d0 !important; }
+
+/* ── Section « Données » : export du profil (déplacé de la page profil, 2.2) ── */
+.sm-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.sm-data-btn {
+  min-height: 0;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--accent, #e63946);
+  background: transparent;
+  color: var(--accent, #e63946);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.sm-data-btn:hover {
+  background: var(--accent, #e63946);
+  color: #fff;
+}

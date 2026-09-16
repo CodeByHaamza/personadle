@@ -65,6 +65,14 @@ function formatScore(entry) {
   }
 }
 
+/** « 674 parties » — sous-titre d'une ligne, localisé (c'était "games" en dur). */
+function gamesLabel(n) {
+  const raw = t("leaderboard.games_count");
+  return raw && raw !== "leaderboard.games_count"
+    ? raw.replace("{{count}}", n)
+    : `${n} game${n > 1 ? "s" : ""}`;
+}
+
 /** Label de la métrique courante (pour la sous-info). */
 function metricLabel() {
   const labels = {
@@ -141,6 +149,52 @@ function avatarSrc(avatarData) {
 }
 
 /**
+ * Rend le podium (3 premiers), affiché seulement sur la première page.
+ *
+ * Refonte 2026-09-16 (demande Hamza : « refais le style de la page ranking »,
+ * la page Amis servant de référence) : les trois premiers étaient trois lignes
+ * identiques aux autres, avec juste une médaille en emoji. Ils ont maintenant
+ * leur estrade — 1ᵉʳ au centre et plus haut, comme sur un vrai podium.
+ *
+ * @param {Array<Object>} top  1 à 3 entrées, déjà triées
+ * @param {number|null} myId
+ */
+function renderPodium(top, myId) {
+  // Ordre visuel : 2 — 1 — 3 (le CSS remet 1,2,3 en colonne sur mobile)
+  const order = [top[1], top[0], top[2]].filter(Boolean);
+  const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+  return `
+    <div class="lb-podium">
+      ${order
+        .map((entry) => {
+          const rank = entry.rank ?? top.indexOf(entry) + 1;
+          const isMe = myId && entry.user_id === myId;
+          const href = isMe ? "../profile.html" : `../profile.html?view=${esc(entry.friend_code)}`;
+          const border = entry.avatar_border_color
+            ? `style="border-color:${esc(entry.avatar_border_color)}"`
+            : "";
+          return `
+            <a class="lb-podium-card lb-podium-card--${rank}${isMe ? " lb-podium-card--me" : ""}"
+               href="${href}" title="${esc(t("friends.view_profile") || "View profile")}">
+              <span class="lb-podium-medal" aria-hidden="true">${medals[rank] ?? rank}</span>
+              <img class="lb-podium-avatar"
+                   src="${esc(avatarSrc(entry.avatar_data))}"
+                   alt="${esc(entry.pseudo)}"
+                   loading="lazy" ${border}
+                   onerror="this.src='../../img/default_avatar.png'">
+              <span class="lb-podium-name">${esc(entry.pseudo)}</span>
+              <span class="lb-podium-score">${esc(formatScore(entry))}</span>
+              <span class="lb-podium-sub">${
+                entry.total_games ? esc(gamesLabel(entry.total_games)) : esc(metricLabel())
+              }</span>
+            </a>`;
+        })
+        .join("")}
+    </div>`;
+}
+
+/**
  * Rend une ligne du classement.
  * @param {{ rank, user_id, pseudo, friend_code, avatar_data, score }} entry
  * @param {number|null} myId - ID de l'utilisateur connecté (pour mise en avant)
@@ -148,13 +202,13 @@ function avatarSrc(avatarData) {
 function renderRow(entry, myId) {
   const rank = entry.rank ?? filters.offset + 1;
   const isMe = myId && entry.user_id === myId;
+  // Le podium prend les médailles quand il est affiché ; une ligne de top 3 en
+  // garde une (classement amis à deux joueurs, page 2 d'une recherche…).
   const rankEmoji = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : String(rank);
   const href = isMe ? "../profile.html" : `../profile.html?view=${esc(entry.friend_code)}`;
-  // Couleur de bordure personnelle (sauf top 3 qui ont leurs couleurs podium en CSS)
-  const borderStyle =
-    rank > 3 && entry.avatar_border_color
-      ? `style="border-color:${esc(entry.avatar_border_color)}"`
-      : "";
+  const borderStyle = entry.avatar_border_color
+    ? `style="border-color:${esc(entry.avatar_border_color)}"`
+    : "";
 
   return `
     <a class="lb-row lb-row--${rank <= 3 ? rank : "n"} ${isMe ? "lb-row--me" : ""}"
@@ -169,7 +223,9 @@ function renderRow(entry, myId) {
            onerror="this.src='../../img/default_avatar.png'">
       <div class="lb-info">
         <div class="lb-pseudo">${esc(entry.pseudo)}</div>
-        <div class="lb-sub">${entry.total_games ? `${entry.total_games} games` : metricLabel()}</div>
+        <div class="lb-sub">${
+          entry.total_games ? esc(gamesLabel(entry.total_games)) : esc(metricLabel())
+        }</div>
       </div>
       <span class="lb-score">${esc(formatScore(entry))}</span>
       <span class="lb-profile-link">→</span>
@@ -216,12 +272,15 @@ function renderLeaderboard(data) {
     return;
   }
 
-  let html = "";
-  entries.forEach((entry, i) => {
-    // Séparateur après le podium
-    if (i === 3 && filters.offset === 0) {
-      html += `<div class="lb-podium-divider">── ${t("leaderboard.others") || "Others"} ──</div>`;
-    }
+  // Podium sur la première page seulement, et seulement s'il y a un vrai top 3.
+  const podium = filters.offset === 0 && entries.length >= 3;
+  let html = podium ? renderPodium(entries.slice(0, 3), myId) : "";
+  if (podium) {
+    html += `<div class="lb-podium-divider"><span>${esc(
+      t("leaderboard.others") || "Others"
+    )}</span></div>`;
+  }
+  (podium ? entries.slice(3) : entries).forEach((entry) => {
     html += renderRow(entry, myId);
   });
 

@@ -13,6 +13,140 @@
 
 ---
 
+## 2026-09-16 — feat(profil, classement) : la page profil devient une vitrine, l'atelier passe en modale, le classement repasse au thème du site (branche `feat/profil-vitrine`)
+
+Second retour de Hamza dans la journée, après avoir essayé l'atelier de la PR #121 :
+« les badges encore plus visibles (petits et cachés, on les voit mal — et la carte
+Badges dit "toute ta collection" mais on ne les voit pas dedans) ; l'avatar dans une
+modale, pas dans la fenêtre par défaut ; p't'être une modale globale pour la
+personnalisation ; le bouton exporter on l'enlève et on le met dans les paramètres,
+et on rend le partage plus beau et intuitif ; les wallpapers débloqués, trouve un
+autre moyen, ils sont supra grands. En bref presque tout à changer. Et refais le
+style de la page ranking, vu que Amis a bien été refait. »
+
+Puis, en cours de route : pas d'import d'image en photo de profil (dérives), mais on
+doit pouvoir recadrer un portrait mal cadré ; les badges de la page « comme avant »
+(gros médaillons) ; et de quoi consulter tous les badges et titres d'un ami.
+
+### La page profil est une vitrine, l'édition vit dans une modale
+
+- Bouton **« Personnaliser »** sur la carte d'identité → `#atelierModal`, la modale qui
+  contient les cinq onglets (Avatar, Bordure, Thème, Titre, Badges épinglés). Le ✎ de
+  l'avatar, la puce de titre et un emplacement de badge vide y mènent aussi, sur le bon
+  onglet. Le dernier onglet ouvert est mémorisé, la croix / Escape / le fond ferment, et
+  fermer envoie tout de suite ce qui restait en attente (`closeAtelier`).
+- `#atelierModal` et `#sharePreviewModal` sont à **z-index 10000** : `.modal` vit à 1000
+  et `.top-right-stack` (Mode sombre, ⚙, Compendium) à 9999 — la croix de fermeture se
+  retrouvait sous le bouton Compendium. Même convention que la modale des badges. Le
+  recadrage, ouvert DEPUIS l'atelier, passe à 10002.
+- L'indicateur d'enregistrement est dupliqué dans l'en-tête de la modale : il est écrit
+  sur tous les `[data-save-status]`, la carte étant derrière le fond assombri.
+- **Blowout de grille corrigé** : `grid-template-columns: 300px 1fr` → `minmax(0, 1fr)`.
+  Une bande à défilement horizontal (les wallpapers) élargissait la colonne de droite à
+  1008 px et toute la page défilait de côté.
+
+### Badges : une vraie vitrine, en grand
+
+`renderBadgesShowcase()` (badgesManager.js) rend les badges **débloqués** dans la carte
+Badges — gros médaillons cerclés d'or, comme avant la 2.2, épingle sur ceux qui sont sur
+la carte d'identité, compteur `n / 63` dans le titre, clic = zoom. La carte ne contenait
+qu'un bouton « See All Badges ». La collection complète (verrouillés + conditions) reste
+dans `#badgesModal`, qui perd son bouton « Sauvegarder » (chaque clic enregistre déjà).
+
+### Wallpapers : une bande, plus une galerie
+
+Sept vignettes de 180 px mangeaient ~500 px de haut. `renderUnlockableWallpaperGallery()`
+rend maintenant une **bande horizontale** de jetons 128 × 72 (~84 px de haut au total) +
+compteur ; le clic ouvre `showWallpaperPreview()` — l'image en grand, son nom, sa
+condition (lisible, au lieu d'être écrasée sur la vignette). Verrouillé = assombri.
+
+### Partage : l'aperçu d'abord
+
+La modale empilait tous les réglages en haut, l'aperçu tombait sous la ligne de
+flottaison et les boutons encore plus bas. Elle passe en deux colonnes (aperçu collant à
+gauche, réglages à droite, actions dans une barre fixe), une seule colonne sous 860 px.
+**Bug corrigé au passage** : la carte partait avec « Guest Player » et l'ancien avatar —
+`setupShareProfile` capturait la référence du profil à l'init, or `initProfile()`
+RÉASSIGNE `profile` après le pull cloud. `generatePreview()` relit désormais
+localStorage (`_liveProfile`).
+
+### Export → ⚙ Paramètres
+
+`exportProfileFile()` vit dans `js/settings-modal.js` (section « Données »), lu depuis
+localStorage donc utilisable partout. La modale des paramètres est montée sur la page
+profil **même déconnecté** (`_save()` gère déjà `userId === null`) : un joueur sans
+compte est justement celui qui a besoin d'exporter. La carte « Data » du profil devient
+la carte « Partage ».
+
+### Avatar : portraits du jeu uniquement, mais recadrables
+
+- **Plus d'import d'image** (`#avatarUploadInput` retiré) : un avatar est vu par les
+  amis, le classement et les défis, et rien ne modère une image libre.
+- Le **recadrage reste** (`#avatarCropModal`), mais il ne s'ouvre que sur le portrait
+  porté — certains portraits sont mal cadrés par défaut. Sa branche morte `cropTarget
+  === "song"` disparaît avec `cropTarget`.
+- `api/user/migrate.php` écrivait `avatar_data` **sans aucune validation** (JSON fourni
+  par l'utilisateur au moment de l'inscription) : il passe maintenant par
+  `personadle_validate_avatar()`, comme `PATCH /api/user/:id`.
+- Angle mort assumé et documenté dans la fonction : un appel d'API fabriqué à la main
+  peut encore poster une image encodée arbitraire — le serveur ne peut pas distinguer le
+  recadrage d'un portrait d'une autre image. Fermer ça demanderait de stocker le cadrage
+  (zoom/offsets) au lieu des pixels et de refaire le rendu partout où un avatar
+  s'affiche (amis, classement, calling cards, carte de partage, compendium).
+
+### Profil consulté : sa collection de badges
+
+`profile-view.js` rend la vitrine de badges du joueur visité (compteur compris) : la
+carte Badges n'est plus masquée en entier, seul le bouton vers SA propre collection
+l'est. Une carte listant ses **titres** a été essayée puis retirée le même jour
+(« ça rend mal » — des calling cards 16:9 empilées) ; l'ajout correspondant à
+`GET /api/user/public` a été annulé avec elle. Deux rectangles vides corrigés au
+passage : `.song-card.hidden` et `.profile-card.hidden` gardaient leur hauteur (la page
+n'a pas de règle `.hidden` globale), et le sélecteur de mode favori s'affichait vide sur
+un profil consulté.
+
+### Où vivent les 4 badges mis en avant
+
+Ils étaient passés sous la photo de profil avec la PR #121 ; ils retournent **dans la
+carte Badges** (« je veux l'ancien fonctionnement, les 4 affichés dans l'onglet badge et
+pas sous la pdp »), au-dessus de la vitrine des débloqués, en emplacements de 76 px. La
+carte d'identité ne garde que l'identité : avatar, titre, pseudo, code ami, le bouton
+« Personnaliser » et l'état d'enregistrement.
+
+### Classement : le style de la page Amis
+
+`leaderboard.css` réécrit sur le système de `friends.css` (jetons `--lb-*` redéfinis par
+`.darkmode`) : la page était sombre en permanence, seul écran noir du site en mode clair.
+Le top 3 devient un **podium** (`renderPodium()`, ordre visuel 2–1–3, 1ᵉʳ plus grand et
+doré ; une colonne sur mobile), les lignes s'aèrent, sa propre position est épinglée en
+haut de la carte (`position: sticky`), et « 674 games » en dur devient
+`leaderboard.games_count` traduit.
+
+### Fichiers
+
+`profile/profile.html` (modale atelier, vitrine, carte Titres, modale de partage),
+`profile/atelier.js` (ouverture/fermeture de modale, statut multi-cible),
+`profile/profile-page.js`, `profile/badges/badgesManager.js` (+ `renderBadgesShowcase`),
+`profile/wallpapers-ui.js` (bande + aperçu), `profile/share-card.js` (`_liveProfile`),
+`profile/profile-view.js`, `js/settings-modal.js` (+ `exportProfileFile`), `js/auth.js`,
+`api/user/public.php` (+ `titles`), `api/user/migrate.php`, `api/lib/validation.php`,
+`profile/profile-page.css` (§10c–10f), `profile/leaderboard/leaderboard.{css,js}`,
+`css/settings-modal.css`, `lang/*.json` (+18 clés, 3 retirées).
+
+Tests : `tests/atelier.test.js` (+11 : modale, statut de la modale, vitrine),
+`tests/wallpapersUi.test.js` (bande + aperçu), `tests/php/ValidationTest.php`,
+`tests-e2e/profile_atelier.spec.js` (14 scénarios : vitrine, modale, recadrage, pas
+d'import, export dans les paramètres, collection d'un ami…).
+
+### Angles morts connus
+
+- Le podium n'apparaît qu'à la première page et à partir de 3 entrées ; en dessous, les
+  lignes gardent leur médaille en emoji.
+- La modale de partage garde ses `<select>` natifs : la refonte porte sur la mise en
+  page, pas sur les contrôles eux-mêmes.
+
+---
+
 ## 2026-09-16 — feat(profile) : l'atelier — personnalisation du profil sans bouton Save (branche `feat/profile-atelier`)
 
 Demande Hamza (2026-09-15) : « rendre la personnalisation du profil plus intuitive —

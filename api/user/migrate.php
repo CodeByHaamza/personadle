@@ -272,6 +272,14 @@ if (is_array($profileData)) {
         $avatar = '../' . substr($avatar, 2);
     }
 
+    // Un profil importé est un JSON fourni par l'utilisateur : il passe par la
+    // même règle que PATCH /api/user/:id (portraits du jeu uniquement, cf.
+    // personadle_validate_avatar). Sans ça, cette route restait une porte
+    // d'entrée pour un avatar arbitraire. Non conforme → pas d'avatar.
+    if ($avatar !== null && personadle_validate_avatar((string) $avatar) !== null) {
+        $avatar = null;
+    }
+
     // Valider la couleur (hex #RRGGBB)
     if (!preg_match('/^#[0-9A-Fa-f]{6}$/', $borderColor)) {
         $borderColor = '#ffffff';
