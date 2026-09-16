@@ -16,7 +16,7 @@
   <a href="https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
   <img src="https://img.shields.io/badge/Version-2.1-brightgreen?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
-  <img src="https://img.shields.io/badge/Tests-1119%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-1121%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
   <img src="https://img.shields.io/badge/Backend-PHP%208.3%20%2B%20MariaDB-8892BF?style=for-the-badge&logo=php" alt="PHP Backend">
   <img src="https://img.shields.io/badge/i18n-EN%20%7C%20FR%20%7C%20ES%20%7C%20DE%20%7C%20IT%20%7C%20PT-blueviolet?style=for-the-badge" alt="Languages">
 </p>
@@ -241,7 +241,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
 
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 28-table relational schema, 1119+ unit tests (Vitest + jsdom)
+- 28-table relational schema, 1121+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
@@ -437,9 +437,9 @@ GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
 ### Tests & quality
 
 ```
-Vitest + jsdom → 1119 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+Vitest + jsdom → 1121 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 196 E2E sur la stack Docker complète (smoke, API, Social Link)
+Playwright     → 204 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5
 ESLint+Prettier→ lint + format
 npm test       → lance la suite Vitest · make check → tout (lint, data, i18n)
@@ -483,7 +483,7 @@ Track your journey with comprehensive stats:
 ## 🗺️ Roadmap
 
 Grosses briques déjà livrées — backend PHP/MariaDB, amis + Social Link, leaderboard, défis
-quotidiens, i18n 6 langues, panel admin, 1119 tests automatisés (Vitest + PHPUnit + Playwright).
+quotidiens, i18n 6 langues, panel admin, 1121 tests automatisés (Vitest + PHPUnit + Playwright).
 
 | Feature                            | Status       |
 | ----------------------------------- | ------------ |
@@ -536,43 +536,44 @@ quotidiens, i18n 6 langues, panel admin, 1119 tests automatisés (Vitest + PHPUn
 
 <table>
   <tr>
-    <td align="center" width="25%">
+    <td align="center" width="100%">
       <img src="https://github.com/CodeByHaamza.png" width="100px;" alt="Hamza"/><br>
       <sub><b>Hamza Karrouchi</b></sub><br>
       <em>Founder & Lead Developer</em><br>
-      <sub>Game logic, backend, animations, UI, profile system</sub><br>
+      <sub>Game design, game logic, backend, animations, UI, profile system, content, ops</sub><br>
       <sub>CS student & Persona/JoJo enjoyer</sub>
-    </td>
-    <td align="center" width="25%">
-      <img src="https://github.com/L2GENDAIRE.png" width="100px;" alt="Léo" /><br>
-      <sub><b>Léo (L2GENDAIRE)</b></sub><br>
-      <em>Data & Design Lead</em><br>
-      <sub>Character database, layout, portraits</sub><br>
-      <sub>Spreadsheet wizard & UI enthusiast</sub>
-    </td>
-    <td align="center" width="25%">
-      <img src="https://github.com/Corbover.png" width="100px;" alt="Damien"/><br>
-      <sub><b>Damien (Corbover)</b></sub><br>
-      <em>Front-End Developer</em><br>
-      <sub>CSS Architecture & Responsive Design</sub><br>
-      <sub>Modularization specialist</sub>
-    </td>
-    <td align="center" width="25%">
-      <img src="https://i.pinimg.com/736x/db/c8/93/dbc8933b2e2b02ae9aca23fc78ea9107.jpg" width="100px;" alt="Dzulian"/><br>
-      <sub><b>Dzulian</b></sub><br>
-      <em>Creative Consultant & Data Specialist</em><br>
-      <sub>Ideas development & P1/P2 accuracy</sub><br>
-      <sub>Classic trilogy preservation expert</sub>
     </td>
   </tr>
 </table>
 
-### 🌟 Special Thanks
+### Contributors & Credits
 
-**Active Contributors:**
+PersonaDLE started as a small team in spring 2025. The people below shaped its early
+days and are credited for it — the project is maintained by Hamza alone since mid-2025.
 
-- **Damien Nouvellon** - CSS restructuring and modularization for improved maintainability and responsive design preparation
-- **Dzulian** - Creative ideas and data accuracy for Persona 1 & 2 (Megami Ibunroku, IS, EP)
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="https://github.com/L2GENDAIRE.png" width="100px;" alt="Léo" /><br>
+      <sub><b>Léo (L2GENDAIRE)</b></sub><br>
+      <em>Data & Design — 2025</em><br>
+      <sub>Original character database, layout, portraits</sub><br>
+      <sub>Spreadsheet wizard & UI enthusiast</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="https://github.com/Corbover.png" width="100px;" alt="Damien"/><br>
+      <sub><b>Damien (Corbover)</b></sub><br>
+      <em>Front-End — 2026</em><br>
+      <sub>CSS modularization, responsive groundwork</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="https://i.pinimg.com/736x/db/c8/93/dbc8933b2e2b02ae9aca23fc78ea9107.jpg" width="100px;" alt="Dzulian"/><br>
+      <sub><b>Dzulian</b></sub><br>
+      <em>Consultant — P1 / P2</em><br>
+      <sub>Ideas & data accuracy for Persona 1 & 2 (Megami Ibunroku, IS, EP)</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -647,7 +648,7 @@ cd personadle
 # Install test dependencies
 npm install
 
-# Run the 1119 unit tests
+# Run the 1121 unit tests
 npm test
 
 # Backend setup (first time only — creates DB, imports schema, configures Apache)

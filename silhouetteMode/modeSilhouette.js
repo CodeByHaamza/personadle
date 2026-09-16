@@ -286,6 +286,9 @@ function pickCharacter(random = false) {
     // de côté pour la révélation de fin de partie.
     revealSrc = tempImage.src;
     silhouetteImg.src = blackenToDataURL(tempImage) ?? tempImage.src;
+    // Trace de la cible réellement affichée (tests E2E, débogage) : la source est
+    // une data-URL noircie, impossible à relire.
+    silhouetteImg.dataset.target = target.image;
     silhouetteImg.alt = "Silhouette";
     silhouetteImg.style.visibility = "visible";
     silhouetteImg.style.transition = "transform 0.3s ease-out";
@@ -729,14 +732,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   giveUpBtn.addEventListener("click", giveUp);
   if (EXPERT.isExpert) flashBtn?.addEventListener("click", triggerFlash);
 
-  resetBtn.addEventListener("click", () => {
+  // Nouvelle partie : Rejouer tire au hasard, le reset quotidien tire la cible
+  // DU JOUR (seedée joueur + jour + mode, celle que l'anti-triche serveur
+  // recalcule). Le reset quotidien cliquait sur « Rejouer » et tirait donc au
+  // hasard : deux appareils, deux personnages, et chaque partie signalée
+  // « Daily target mismatch ».
+  const newRound = (random) => {
     localStorage.removeItem(EXPERT.key("silhouetteTarget"));
     localStorage.removeItem(EXPERT.key("silhouetteAttempts"));
     localStorage.removeItem(EXPERT.key("silhouetteGameOver"));
     startGame(STATS_SCOPE);
     sessionStartTime = Date.now();
-    resetGame(true);
-  });
+    resetGame(random);
+  };
+  resetBtn.addEventListener("click", () => newRound(true));
 
   // Bind autocomplete to the sorted persona name list
   initializeAutocomplete(
@@ -780,18 +789,29 @@ document.addEventListener("DOMContentLoaded", async () => {
       const _restoreSrc = `./database/img/${encodeURIComponent(target.image)}.webp`;
       revealSrc = _restoreSrc;
 
+      // Même jeton que pickCharacter() : quand le reset quotidien (ci-dessous)
+      // tire la cible du jour pendant que l'image d'HIER charge encore, c'est
+      // l'image d'hier qui finissait par s'afficher — « je vois Akechi, taper
+      // Akechi ne marche pas, et l'abandon révèle quelqu'un d'autre » (retour
+      // joueur, 2.2). Une image dépassée par un nouveau tirage n'est plus posée.
+      const _restoreToken = ++currentPickToken;
       const _restored = new Image();
       _restored.onload = () => {
+        if (_restoreToken !== currentPickToken) return; // supplanté par un nouveau tirage
         silhouetteImg.src = storedGameOver
           ? _restoreSrc
           : (blackenToDataURL(_restored) ?? _restoreSrc);
+        silhouetteImg.dataset.target = target.image;
         silhouetteImg.style.visibility = "visible";
         silhouetteImg.style.transition = "transform 0.3s ease-out";
         setLoading(false);
       };
       // Une cible restaurée peut pointer sur une image supprimée depuis (renommage
       // de dataset) : sans ça, le voile tournerait pour toujours.
-      _restored.onerror = () => setLoading(false);
+      _restored.onerror = () => {
+        if (_restoreToken !== currentPickToken) return;
+        setLoading(false);
+      };
       _restored.src = _restoreSrc;
 
       giveUpCounter.textContent = `(${attempts} / ${maxAttempts})`;
@@ -820,9 +840,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ── Daily reset ──
   checkResetOnLoad(EXPERT.key("lastPlayedDate_Silhouette"), STATS_SCOPE, () => {
-    resetBtn.click();
+    newRound(false);
   });
-  setupDailyReset(() => {
-    resetBtn?.click() ?? location.reload();
-  });
+  setupDailyReset(() => newRound(false));
 });
