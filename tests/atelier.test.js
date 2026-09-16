@@ -23,7 +23,6 @@ import {
 import {
   renderBadgesPreview,
   renderBadgePicker,
-  renderBadgesShowcase,
   toggleBadgeSelection,
 } from "../profile/badges/badgesManager.js";
 import { badgesList } from "../profile/badges/badgesData.js";
@@ -60,8 +59,6 @@ function atelierDom() {
     <div id="previewBadges"></div>
     <p id="badgePickHint"></p>
     <div id="badgePickGrid"></div>
-    <span id="badgesCount"></span>
-    <div id="badgesShowcase"></div>
   `;
 }
 
@@ -337,39 +334,6 @@ describe("renderBadgesPreview — 4 emplacements", () => {
     expect(document.querySelectorAll(".pin-slot--filled")).toHaveLength(1);
   });
 });
-
-describe("renderBadgesShowcase — la vitrine de la page", () => {
-    it("montre les badges DÉBLOQUÉS en grand et compte la collection", () => {
-      renderBadgesShowcase(profileWith(ids.slice(0, 3), [ids[1]]));
-      const cards = document.querySelectorAll("#badgesShowcase .showcase-badge");
-      expect(cards).toHaveLength(3);
-      expect(cards[0].querySelector("img")).not.toBeNull();
-      expect(document.getElementById("badgesCount").textContent).toMatch(/^3 \/ \d+$/);
-    });
-
-    it("marque d'une épingle ceux qui sont sur la carte", () => {
-      renderBadgesShowcase(profileWith(ids.slice(0, 3), [ids[1]]));
-      const pinned = document.querySelector(`.showcase-badge[data-id="${ids[1]}"]`);
-      expect(pinned.classList.contains("showcase-badge--pinned")).toBe(true);
-      expect(pinned.querySelector(".showcase-pin")).not.toBeNull();
-      expect(
-        document.querySelector(`.showcase-badge[data-id="${ids[0]}"]`).querySelector(".showcase-pin")
-      ).toBeNull();
-    });
-
-    it("état vide quand rien n'est débloqué (le compteur reste juste)", () => {
-      renderBadgesShowcase(profileWith([], []));
-      expect(document.querySelector(".badges-showcase-empty")).not.toBeNull();
-      expect(document.querySelectorAll(".showcase-badge")).toHaveLength(0);
-      expect(document.getElementById("badgesCount").textContent).toMatch(/^0 \/ \d+$/);
-    });
-
-    it("un clic ouvre le zoom du badge", () => {
-      renderBadgesShowcase(profileWith(ids.slice(0, 2), []));
-      document.querySelector(".showcase-badge").click();
-      expect(document.querySelector(".badge-zoom-modal")).not.toBeNull();
-    });
-  });
 
 describe("renderBadgePicker — onglet Badges", () => {
   it("ne montre que les badges débloqués, épinglés marqués aria-pressed + ✓, compteur dans l'indication", () => {

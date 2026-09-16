@@ -91,8 +91,7 @@ test.describe("Atelier — enregistrement automatique, avatar, bordure", () => {
     await expect(page.locator("#atelierModal .atelier-tab")).toHaveCount(5);
     await expect(page.locator("#openAtelierBtn")).toBeVisible();
     await expect(page.locator("#previewBadges .pin-slot")).toHaveCount(4);
-    // La vitrine des badges et la bande de wallpapers sont sur la page
-    await expect(page.locator("#badgesShowcase")).toBeVisible();
+    // La bande de wallpapers est sur la page
     await expect(page.locator(".wp-chip")).toHaveCount(7);
     await expect(page.locator("#wallpapersCount")).toHaveText(/\d+ \/ 7/);
     await ctx.close();
@@ -116,7 +115,7 @@ test.describe("Atelier — enregistrement automatique, avatar, bordure", () => {
     await ctx.close();
   });
 
-  test("un clic sur un badge de la vitrine l'ouvre en grand ; un wallpaper montre sa condition", async ({
+  test("un wallpaper montre sa condition dans un aperçu", async ({
     browser,
   }) => {
     const ctx = await browser.newContext({ storageState: await u.ctx.storageState() });
@@ -201,6 +200,8 @@ test.describe("Atelier — enregistrement automatique, avatar, bordure", () => {
     );
     await gif.click();
     expect((await patch).status(), "le serveur accepte un portrait de la galerie").toBe(200);
+    // Un GIF ne passe pas par le canvas (il y perdrait son animation) : pas de recadrage
+    await expect(page.locator("#avatarCropModal")).toBeHidden();
     await expect(page.locator("#pageAvatar")).toHaveAttribute("src", src);
     await expect(gif).toHaveClass(/selected/);
     await expect.poll(async () => (await serverProfile(u)).avatar_data).toBe(src);
@@ -235,14 +236,16 @@ test.describe("Atelier — enregistrement automatique, avatar, bordure", () => {
     }
   });
 
-  test("recadrer le portrait porté : l'image recadrée remplace le chemin", async ({ browser }) => {
+  test("choisir un portrait ouvre le recadrage, et l'image recadrée remplace le chemin", async ({
+    browser,
+  }) => {
     const ctx = await browser.newContext({ storageState: await u.ctx.storageState() });
     const page = await ctx.newPage();
     await gotoSettled(page, "/profile/profile.html");
     await page.click("#openAtelierBtn");
-    // Un portrait fixe (un GIF garderait son chemin pour ne pas perdre l'animation)
+    // Un portrait fixe : le recadrage s'ouvre tout de suite (beaucoup de portraits
+    // sont mal cadrés d'origine — retour Hamza du 2026-09-16).
     await page.locator('#avatarGrid .avatar-cell img:not([data-src$=".gif"])').first().click();
-    await page.click("#avatarAdjustBtn");
     await expect(page.locator("#avatarCropModal")).toBeVisible();
     await page.click("#zoomIn");
     await page.click("#confirmCrop");
@@ -264,6 +267,10 @@ test.describe("Atelier — enregistrement automatique, avatar, bordure", () => {
     const png = page.locator('#avatarGrid .avatar-cell img:not([data-src$=".gif"])').first();
     const src = await png.getAttribute("data-src");
     await png.click();
+    // Le recadrage s'ouvre par-dessus ; fermé sans rien toucher, le portrait
+    // reste appliqué tel quel.
+    await expect(page.locator("#avatarCropModal")).toBeVisible();
+    await page.click("#closeCropper");
     await expect(page.locator("#pageAvatar")).toHaveAttribute("src", src);
     await expect.poll(async () => (await serverProfile(u)).avatar_data).toBe(src);
     await ctx.close();
@@ -382,13 +389,6 @@ test.describe("Atelier — badges épinglés et profil consulté", () => {
       "ace_defective",
     ]);
 
-    // Et la vitrine de la page montre bien les deux badges gagnés, dont l'épinglé
-    await page.click("#closeAtelierModal");
-    await expect(page.locator("#badgesShowcase .showcase-badge")).toHaveCount(2);
-    await expect(
-      page.locator('#badgesShowcase .showcase-badge[data-id="ace_defective"]')
-    ).toHaveClass(/showcase-badge--pinned/);
-    await expect(page.locator("#badgesCount")).toHaveText(/^2 \/ \d+$/);
     await ctx.close();
   });
 
@@ -411,22 +411,17 @@ test.describe("Atelier — badges épinglés et profil consulté", () => {
     await ctx.close();
   });
 
-  test("profil consulté : on voit TOUS ses badges, en lecture seule", async ({
+  test("profil consulté : ses badges mis en avant et son titre, sans rien à éditer", async ({
     browser,
   }) => {
-    // Retour Hamza (2026-09-16) : « il faudrait un truc pour consulter tous les
-    // badges d'un ami quand on visite son profil ». (La liste de ses titres a été
-    // essayée puis retirée le même jour : « ça rend mal ».)
     const ctx = await browser.newContext({ storageState: await viewer.ctx.storageState() });
     const page = await ctx.newPage();
     await gotoSettled(page, `/profile/profile.html?view=${u.friendCode}`);
 
-    // Ses badges : les deux accordés, avec le compteur de sa collection
-    await expect(page.locator("#badgesShowcase .showcase-badge")).toHaveCount(2, {
+    // Ses badges mis en avant (et pas le bouton vers SA propre collection à soi)
+    await expect(page.locator("#previewBadges .badge-preview-img").first()).toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.locator("#badgesCount")).toHaveText(/^2 \/ \d+$/);
-    // …et pas le bouton vers SA propre collection à soi
     await expect(page.locator("#openBadgesModal")).toBeHidden();
 
     // Son titre équipé reste visible sous son pseudo

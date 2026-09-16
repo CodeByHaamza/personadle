@@ -370,49 +370,6 @@ if (viewParam || uidParam) {
   // BADGES — avec click-to-zoom identique à profile-page.js
   // ─────────────────────────────────────────────────────────────────────────────
 
-  /**
-   * Vitrine des badges du joueur consulté (mêmes cartes que sur son propre
-   * profil, sans épingle ni édition) + compteur « n / total ».
-   * @param {Array<{badge_id: string}>} unlockedBadges
-   */
-  async function renderViewShowcase(unlockedBadges) {
-    const grid = document.getElementById("badgesShowcase");
-    const count = document.getElementById("badgesCount");
-    if (!grid && !count) return;
-    if (!_badgesList) {
-      const mod = await import("./badges/badgesData.js").catch(() => null);
-      _badgesList = mod?.badgesList ?? null;
-    }
-    if (!_badgesList) return;
-
-    const ids = (unlockedBadges ?? []).map((b) => b.badge_id);
-    if (count) count.textContent = `${ids.length} / ${_badgesList.length}`;
-    if (!grid) return;
-
-    const unlocked = _badgesList.filter((b) => ids.includes(b.id));
-    if (!unlocked.length) {
-      grid.innerHTML = `<p class="badges-showcase-empty">${escapeHtml(
-        t("profile.showcase_empty_other", "No badge yet.")
-      )}</p>`;
-      return;
-    }
-    grid.innerHTML = unlocked
-      .map(
-        (badge) => `
-        <button type="button" class="showcase-badge" data-id="${escapeHtml(badge.id)}"
-                title="${escapeHtml(badge.name)}">
-          <img src="${escapeHtml(badge.img)}" alt="${escapeHtml(badge.name)}" loading="lazy">
-          <span class="showcase-badge-name">${escapeHtml(badge.name)}</span>
-        </button>`
-      )
-      .join("");
-    grid.onclick = (e) => {
-      const btn = e.target.closest(".showcase-badge");
-      const badge = btn && _badgesList.find((b) => b.id === btn.dataset.id);
-      if (badge) showBadgeZoom(badge);
-    };
-  }
-
   function renderViewBadges(profile, unlockedBadges) {
     const previewEl = document.getElementById("previewBadges");
     if (!previewEl) return;
@@ -672,8 +629,6 @@ if (viewParam || uidParam) {
     // ── Badges avec click-to-zoom ──
     renderViewBadges(profile, badges);
 
-    // ── Sa collection de badges (2026-09-16) ──
-    renderViewShowcase(badges);
 
     // ── Thème du joueur consulté ──
     applyViewTheme(profile.wallpaper_id || "all_out");

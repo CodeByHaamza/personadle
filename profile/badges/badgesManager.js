@@ -134,7 +134,6 @@ export function initBadgesSystem(profile, saveProfile) {
   // Rendre l'interface
   renderBadgesPreview(profile);
   renderBadgePicker(profile, saveProfile);
-  renderBadgesShowcase(profile);
   renderBadgesModal(profile, saveProfile);
 
   // Configurer le système de codes
@@ -191,8 +190,7 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
       // Re-render : renderBadgesModal était déjà appelé avant la fin de ce fetch async
       renderBadgesPreview(profile);
       renderBadgePicker(profile, saveProfile);
-      renderBadgesShowcase(profile);
-      renderBadgesModal(profile, saveProfile);
+          renderBadgesModal(profile, saveProfile);
     }
 
     // Local → backend (bloqué si le profil vient d'un autre compte)
@@ -757,56 +755,6 @@ export function renderBadgesPreview(profile) {
 }
 
 /**
- * Rend la vitrine de la page profil : les badges DÉBLOQUÉS, en grand.
- *
- * Retour Hamza (2026-09-16) : « les badges encore plus visibles (petits et
- * cachés, on les voit mal) — et la carte Badges dit "toute ta collection" mais
- * on ne les voit pas dedans ». La carte ne contenait qu'un bouton : elle montre
- * maintenant ce que le joueur a gagné (les verrouillés et leurs conditions
- * restent dans la collection complète, #badgesModal). Un clic zoome le badge.
- *
- * @param {Object} profile - Le profil utilisateur
- */
-export function renderBadgesShowcase(profile) {
-  const grid = document.getElementById("badgesShowcase");
-  const count = document.getElementById("badgesCount");
-  if (count) count.textContent = `${(profile.badges || []).length} / ${badgesList.length}`;
-  if (!grid) return;
-
-  const unlocked = badgesList.filter((b) => (profile.badges || []).includes(b.id));
-  if (!unlocked.length) {
-    grid.innerHTML = `<p class="badges-showcase-empty">${_tr(
-      "profile.showcase_empty",
-      "No badge yet — play a game, they start dropping fast."
-    )}</p>`;
-    return;
-  }
-
-  const pinned = profile.selectedBadges || [];
-  grid.innerHTML = unlocked
-    .map((badge) => {
-      const name = getBadgeName(badge);
-      const isPinned = pinned.includes(badge.id);
-      return `
-        <button type="button" class="showcase-badge${isPinned ? " showcase-badge--pinned" : ""}"
-                data-id="${badge.id}" title="${name}">
-          <img src="${badge.img}" alt="${name}" loading="lazy"
-               onerror="this.src=new URL('./images/default.png',import.meta.url).href">
-          ${isPinned ? '<span class="showcase-pin" aria-hidden="true">📌</span>' : ""}
-          <span class="showcase-badge-name">${name}</span>
-        </button>`;
-    })
-    .join("");
-
-  grid.onclick = (e) => {
-    const btn = e.target.closest(".showcase-badge");
-    if (!btn) return;
-    const badge = badgesList.find((b) => b.id === btn.dataset.id);
-    if (badge) showBadgeZoom(badge);
-  };
-}
-
-/**
  * Rend l'onglet Badges de l'atelier : uniquement les badges débloqués, en
  * vignettes cliquables — épinglé = bordure accent + ✓. Le catalogue complet
  * (verrouillés, conditions) reste dans la modale « See All Badges ».
@@ -1212,7 +1160,6 @@ export function toggleBadgeSelection(profile, saveProfile, badgeId) {
   saveProfile();
   renderBadgesPreview(profile);
   renderBadgePicker(profile, saveProfile);
-  renderBadgesShowcase(profile);
   renderBadgesModal(profile, saveProfile);
 }
 
@@ -1332,8 +1279,7 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     renderBadgesModal(profile, saveProfile);
     renderBadgesPreview(profile);
     renderBadgePicker(profile, saveProfile);
-    renderBadgesShowcase(profile);
-    showCodeMessage(
+      showCodeMessage(
       msg,
       tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
       "success"
@@ -1462,7 +1408,6 @@ export function forceCheckBadges(profile, saveProfile) {
   renderBadgesModal(profile, saveProfile);
   renderBadgesPreview(profile);
   renderBadgePicker(profile, saveProfile);
-  renderBadgesShowcase(profile);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

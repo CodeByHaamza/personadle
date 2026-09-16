@@ -327,9 +327,11 @@
             </div>
 
             <!-- Tout ce qui se personnalise est dans une seule modale (atelier) -->
-            <button id="openAtelierBtn" class="btn-p5 btn-customize" type="button">
-              🎨 <span data-i18n="profile.customize_btn">Customize</span>
-            </button>
+            <div class="customize-row">
+              <button id="openAtelierBtn" class="btn-p5 btn-customize" type="button">
+                🎨 <span data-i18n="profile.customize_btn">Customize</span>
+              </button>
+            </div>
 
             <!-- Enregistrement automatique : plus de bouton Save, l'état se lit ici -->
             <div
@@ -421,19 +423,12 @@
             <h3 class="card-title">
               <span class="card-accent">◆</span>
               <span data-i18n="profile.badges_title">Badges</span>
-              <span class="card-count" id="badgesCount"></span>
             </h3>
-            <!-- Les 4 badges mis en avant — ils vivent ici, dans la carte Badges,
-                 et pas sous la photo de profil (retour Hamza du 2026-09-16 :
-                 « je veux l'ancien fonctionnement, les 4 affichés dans l'onglet
-                 badge »). Remplis depuis l'onglet Badges de l'atelier. -->
-            <div class="pinned-block">
-              <span class="pinned-label" data-i18n="profile.pinned_badges">Pinned badges</span>
-              <div id="previewBadges" class="badge-preview pinned-slots" aria-label="Pinned badges"></div>
-            </div>
-
-            <p class="badges-showcase-label" data-i18n="profile.unlocked_label">Unlocked</p>
-            <div id="badgesShowcase" class="badges-showcase"></div>
+            <!-- Les 4 badges mis en avant, et eux seuls (retour Hamza du
+                 2026-09-16 : « on affichait juste les épinglés, pas tous »).
+                 Ils se choisissent dans l'onglet Badges de l'atelier ; la
+                 collection complète est derrière « See All Badges ». -->
+            <div id="previewBadges" class="badge-preview pinned-slots" aria-label="Pinned badges"></div>
             <button id="openBadgesModal" class="btn-secondary" data-i18n="profile.see_all_badges">
               See All Badges
             </button>
@@ -501,18 +496,17 @@
             <div id="unlockableWallpaperGrid" class="wp-strip"></div>
           </div>
 
-          <!-- Card : Zone dangereuse -->
-          <div
-            class="profile-card profile-card--danger animate-right"
-            style="animation-delay: 0.4s"
-          >
-            <button id="resetProfile" class="btn-danger">
-              🔄 <span data-i18n="profile.reset_btn">Reset Profile</span>
-            </button>
-            <button id="deleteAccountBtn" class="btn-danger">
-              🗑️ <span data-i18n="profile.delete_account_btn">Delete my account</span>
-            </button>
-          </div>
+          <!-- Réinitialisation et suppression de compte ont quitté la page pour
+               les ⚙ Paramètres (retour Hamza du 2026-09-16 : « c'est trop facile
+               de réinitialiser ou supprimer son compte »). Les deux boutons y
+               sont montés par js/settings-modal.js, qui appelle les gestionnaires
+               publiés ici (window._personadleDanger) ; les modales de
+               confirmation, elles, restent dans cette page. Le bouton de
+               suppression reste dans le DOM, masqué : il porte toute la logique
+               (saisie du pseudo, appel DELETE) et sert de relais. -->
+          <button id="deleteAccountBtn" class="btn-danger" hidden>
+            🗑️ <span data-i18n="profile.delete_account_btn">Delete my account</span>
+          </button>
         </section>
       </div>
     </main>
@@ -747,6 +741,17 @@
               <div id="customThemeRow" class="custom-theme-row hidden">
                 <label for="customThemeColor" data-i18n="profile.theme_custom">Custom color</label>
                 <input type="color" id="customThemeColor" value="#e63946" />
+                <!-- Saisie directe : le nuancier du navigateur ne permet pas de
+                     taper une couleur précise partout (retour Hamza). -->
+                <input
+                  type="text"
+                  id="customThemeHex"
+                  class="custom-theme-hex"
+                  maxlength="7"
+                  spellcheck="false"
+                  aria-label="Hex color"
+                  value="#E63946"
+                />
               </div>
             </div>
 
@@ -836,6 +841,41 @@
      — texte de confirmation volontairement explicite + saisie du pseudo pour
      éviter un clic accidentel sur une action aussi destructive.
      ===================================================== -->
+    <!-- =====================================================
+     MODALE DE RÉINITIALISATION
+     Le reset passait par un confirm() natif — un clic et tout partait. Il a
+     maintenant sa propre confirmation, avec ce qu'on perd et ce qu'on garde.
+     ===================================================== -->
+    <div id="resetProfileModal" class="modal hidden">
+      <div class="modal-content delete-account-content">
+        <span id="closeResetProfile" class="close">&times;</span>
+        <div class="delete-account-icon" aria-hidden="true">🔄</div>
+        <h2 data-i18n="profile.reset_title">Wipe this device's progress?</h2>
+        <p class="delete-account-subtext" data-i18n="profile.reset_warning">
+          This erases the profile stored in this browser: stats, streak, badges and
+          titles you unlocked, pinned badges, avatar and colors. It cannot be undone.
+        </p>
+        <ul class="danger-consequences">
+          <li data-i18n="profile.reset_point_local">Everything on this device is cleared.</li>
+          <li data-i18n="profile.reset_point_account">
+            Your account itself stays: log in again and your cloud profile comes back.
+          </li>
+          <li data-i18n="profile.reset_point_anon">
+            Without an account, nothing can be recovered — export your profile first
+            (⚙ Settings → Data).
+          </li>
+        </ul>
+        <div class="share-actions">
+          <button id="resetProfileCancelBtn" class="share-btn">
+            <span data-i18n="ui.cancel">Cancel</span>
+          </button>
+          <button id="resetProfileConfirmBtn" class="btn-danger">
+            🔄 <span data-i18n="profile.reset_confirm_btn">Reset anyway</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div id="deleteAccountModal" class="modal hidden">
       <div class="modal-content delete-account-content">
         <span id="closeDeleteAccount" class="close">&times;</span>

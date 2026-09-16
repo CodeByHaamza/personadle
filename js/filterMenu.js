@@ -213,7 +213,11 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     if (isOpen) {
       // Envoie le focus dans le panneau à l'ouverture (menu déroulant, pas une
       // modale — pas de piège Tab ici, cf. WAI-ARIA menu-button pattern).
-      dropdown.querySelector('button:not([disabled]), [tabindex]:not([tabindex="-1"])')?.focus();
+      // preventScroll : sans ça le navigateur fait défiler le panneau jusqu au
+      // bouton focalisé, et la ligne d explication en tête passait hors champ.
+      dropdown
+        .querySelector('button:not([disabled]), [tabindex]:not([tabindex="-1"])')
+        ?.focus({ preventScroll: true });
     }
   });
 
@@ -228,6 +232,21 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     selectAllBtn.type = "button";
     selectAllBtn.className = "filter-select-all-btn";
     dropdown.prepend(selectAllBtn);
+
+    // Une ligne d'explication en tête du panneau : rien ne disait qu'un clic sur
+    // un jeu l'inclut ou l'exclut, ni que la flèche ouvre ses opus (retour Hamza
+    // du 2026-09-16 : « la sélection d'opus pour les filtres n'est pas intuitive »).
+    const hint = document.createElement("p");
+    hint.className = "filter-hint";
+    hint.setAttribute("data-i18n", "ui.filters_hint");
+    // t(key) renvoie la clé si absente (CLAUDE.md §5) — et i18n peut ne pas être
+    // chargé du tout (tests, premier rendu).
+    const hintText = window.i18n?.t?.("ui.filters_hint");
+    hint.textContent =
+      hintText && hintText !== "ui.filters_hint"
+        ? hintText
+        : "Click a game to include or exclude it. ▸ opens its individual games.";
+    dropdown.prepend(hint);
 
     selectAllBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -427,9 +446,11 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     document.querySelectorAll(".filter-group-select-btn[data-group-codes]").forEach((btn) => {
       const codes = btn.dataset.groupCodes.split(",");
       const allActive = codes.every((c) => activeOpus.includes(c));
+      // Libellé court sur les boutons de groupe : le même texte que le bouton
+      // global juste au-dessus faisait lire deux fois la même action.
       btn.textContent = allActive
-        ? window.i18n?.t?.("ui.deselect_all") || "✗ Deselect all"
-        : window.i18n?.t?.("ui.select_all") || "✓ Select all";
+        ? window.i18n?.t?.("ui.group_none") || "✗ None"
+        : window.i18n?.t?.("ui.group_all") || "✓ All";
       btn.dataset.state = allActive ? "deselect" : "select";
     });
   }

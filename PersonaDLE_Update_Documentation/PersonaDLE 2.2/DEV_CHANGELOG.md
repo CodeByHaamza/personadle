@@ -13,6 +13,62 @@
 
 ---
 
+## 2026-09-16 — fix(ui) : douze corrections de finition (index, profil, pages de mode) — branche `feat/profil-vitrine`
+
+Une passe de relecture de Hamza sur le site en local, douze points. Rien de
+structurant, mais c'est ce qu'on voit tous les jours.
+
+**Accueil**
+1. « Nouveautés » (bas-gauche) et « Reset quotidien » (bas-droite) flottent au-dessus
+   du footer et n'avaient ni la même couleur ni de contour : en sombre ils se
+   fondaient dedans. Les deux partagent maintenant le même habillage (fond franc,
+   bordure, ombre) — leurs règles vivent dans deux fichiers différents
+   (`css/index.css` et le `<style>` de `index.html`), un commentaire croisé le dit.
+2. Les trois liens sociaux collaient au footer : 26 px d'air sous `#socialLinks`.
+
+**Profil**
+3. Dans la modale de partage, les pastilles de couleur sortaient en 52 × 34 (donc
+   ovales) : `global.css §18` impose `padding: 12px 20px` à tout `<button>` et la
+   règle ne remettait que `min-height: 0`. L'interrupteur « afficher le titre »,
+   lui, est un `<label>` — `.share-selector-row label { min-width: 72px }`
+   l'élargissait à 72 px et le bouton rond s'arrêtait au milieu de sa piste.
+4. Choisir un portrait ouvre maintenant le recadrage dans la foulée : beaucoup sont
+   mal cadrés d'origine. Le portrait est appliqué avant d'ouvrir — fermer sans
+   toucher à rien le garde tel quel. Un GIF, lui, ne peut pas être recadré (le
+   canvas lui ferait perdre son animation).
+5. La modale de partage se ferme en cliquant à côté, comme les autres.
+6. **Réinitialiser et supprimer son compte** étaient deux boutons rouges en bas de la
+   page profil, dont un derrière un simple `confirm()` natif. Ils déménagent dans
+   ⚙ Paramètres, section « Zone de danger », et le reset a enfin sa propre
+   confirmation : ce qu'on perd, ce qu'on garde (le compte), et quoi faire sans
+   compte (exporter d'abord) — le tout traduit. La section n'apparaît que là où la
+   page sait ouvrir ces confirmations (`window._personadleDanger`).
+7. « Couleur perso » demandait deux clics (la pastille, puis le carré de couleur qui
+   apparaissait dessous) : le nuancier s'ouvre maintenant au premier clic, et un
+   champ hexadécimal permet de taper une couleur précise.
+
+**Pages de mode**
+8. Les règles étaient écrasées : titres de section, puces et séparateurs se
+   touchaient. Rythme vertical revu (interlignes, marges, largeur de ligne à 78ch).
+9. La flèche du bouton « Filtres » (9 px à 60 % d'opacité) et celle des groupes
+   d'opus (40 %) étaient quasi invisibles : plus grandes, pleinement opaques.
+10. Les filtres d'opus ne disaient pas ce qu'ils font : une ligne d'explication
+    ouvre le panneau, un jeu retenu porte une pastille ✓ (un jeu écarté a un contour
+    en pointillés), les boutons « tout / aucun » de groupe ont un libellé court pour
+    ne plus être confondus avec le bouton global, et le panneau défile au lieu de
+    dépasser de l'écran (P5X était coupé).
+11. Le lien du logo s'étendait sur toute la largeur de l'en-tête : cliquer à côté du
+    logo renvoyait à l'accueil. Il est réduit à l'image.
+12. Le ▶ des lecteurs (mode Musique, musique de profil) paraissait collé à gauche
+    dans son rond : le glyphe a des blancs latéraux asymétriques, flex le centre sur
+    sa boîte et pas sur ce qu'on voit. Décalage optique, retiré sur le ⏸.
+
+**Au passage** : `js/modal.js` — Escape fermait TOUTES les modales ouvertes, chacune
+ayant posé son écouteur. Seule celle du dessus réagit maintenant (l'ordre de
+`_trapState` fait foi) ; sans ça, fermer le recadrage fermait aussi l'atelier.
+
+---
+
 ## 2026-09-16 — feat(profil, classement) : la page profil devient une vitrine, l'atelier passe en modale, le classement repasse au thème du site (branche `feat/profil-vitrine`)
 
 Second retour de Hamza dans la journée, après avoir essayé l'atelier de la PR #121 :

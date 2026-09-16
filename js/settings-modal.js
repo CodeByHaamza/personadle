@@ -176,6 +176,25 @@ function _ensureModal() {
         </div>
       </div>
 
+      <!-- ZONE DE DANGER (uniquement là où la page sait ouvrir les
+           confirmations — window._personadleDanger, soit la page profil) -->
+      <div id="smDangerSection" class="sm-danger hidden">
+        <p class="sm-section-title sm-section-title--danger">${t(
+          "settings.danger_zone",
+          "Danger zone"
+        )}</p>
+        <p class="sm-danger-intro">${t(
+          "settings.danger_intro",
+          "These two are irreversible. Export your profile first if you are unsure."
+        )}</p>
+        <button type="button" class="sm-danger-btn" id="smResetProfile">
+          🔄 ${t("profile.reset_btn", "Reset Profile")}
+        </button>
+        <button type="button" class="sm-danger-btn sm-danger-btn--hard" id="smDeleteAccount">
+          🗑️ ${t("profile.delete_account_btn", "Delete my account")}
+        </button>
+      </div>
+
       <button class="sm-save" id="smSave">${t("settings.save", "Save")}</button>
       <p class="sm-save-status hidden" id="smStatus"></p>
     </div>
@@ -208,6 +227,23 @@ function _ensureModal() {
 
   // Sauvegarder
   el.querySelector("#smSave").addEventListener("click", _save);
+
+  // Zone de danger — les boutons ne sont montés que si la page sait ouvrir les
+  // modales de confirmation (page profil). Ailleurs, la section reste masquée :
+  // proposer « supprimer mon compte » sans confirmation possible serait pire que
+  // de ne pas le proposer.
+  const danger = el.querySelector("#smDangerSection");
+  if (window._personadleDanger) {
+    danger.classList.remove("hidden");
+    el.querySelector("#smResetProfile").addEventListener("click", () => {
+      _closeSettings();
+      window._personadleDanger.reset?.();
+    });
+    el.querySelector("#smDeleteAccount").addEventListener("click", () => {
+      _closeSettings();
+      window._personadleDanger.deleteAccount?.();
+    });
+  }
 
   // Export du profil — déplacé de la page profil vers les paramètres
   // (retour Hamza, 2026-09-16 : c'est de la maintenance de données, ça n'a rien
