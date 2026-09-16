@@ -1193,7 +1193,14 @@ export function maybeNudgeGuest() {
  * @returns {string}
  */
 export function getPlayerSeedId() {
-  const uid = localStorage.getItem("playerUserId");
+  // Le compte d'abord, s'il est déjà connu de la page : au tout premier
+  // chargement d'un appareil, localStorage.playerUserId n'existe pas encore
+  // quand le mode tire sa cible (auth.js le pose après /me) — le tirage partait
+  // alors sur un identifiant anonyme, différent de celui que le serveur utilise.
+  const uid =
+    window._currentUser?.id != null
+      ? String(window._currentUser.id)
+      : localStorage.getItem("playerUserId");
   if (uid) return uid;
 
   let anonId = localStorage.getItem("anonPlayerId");

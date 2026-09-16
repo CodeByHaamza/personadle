@@ -495,7 +495,16 @@ function checkEmojiGuess(name, forceReveal = false) {
  * Clears all game state and picks a fresh target from the current filter pool.
  * Called by the Replay button, daily reset, and filter changes.
  */
-function resetGame() {
+/**
+ * Nouvelle partie. `random` : Rejouer et changement de filtres tirent au hasard
+ * dans le pool filtré ; le reset quotidien (nouveau jour, minuit, retour d'onglet)
+ * tire la cible DU JOUR, seedée joueur + jour + mode — la même que celle que
+ * l'anti-triche serveur recalcule (api/lib/daily_target.php). Avant, tous les
+ * chemins tiraient au hasard : la cible seedée ne servait qu'à la toute première
+ * partie d'un appareil, et chaque partie suivante était signalée « Daily target
+ * mismatch ».
+ */
+function resetGame(random = false) {
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) nav.style.display = "none";
 
@@ -527,10 +536,16 @@ function resetGame() {
 
   gameOver = false;
   attempts = 1;
-  const _prevEmoji = target;
-  const _emojiCandidates =
-    pool.length > 1 && _prevEmoji ? pool.filter((c) => c.nom !== _prevEmoji.nom) : pool;
-  target = _emojiCandidates[Math.floor(Math.random() * _emojiCandidates.length)] || pool[0];
+  if (random) {
+    const _prevEmoji = target;
+    const _emojiCandidates =
+      pool.length > 1 && _prevEmoji ? pool.filter((c) => c.nom !== _prevEmoji.nom) : pool;
+    target = _emojiCandidates[Math.floor(Math.random() * _emojiCandidates.length)] || pool[0];
+  } else {
+    // Même pool qu'à la première visite (tous les personnages à emoji, filtres
+    // ou pas) : c'est ce que le serveur attend.
+    target = getDailyTarget(ALL_EMOJI_CHARS, EXPERT.hashMode);
+  }
   if (target) localStorage.setItem(EXPERT.key("targetEmoji"), JSON.stringify(target));
   localStorage.setItem(EXPERT.key("attemptsEmoji"), attempts);
 
@@ -577,7 +592,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const _filterApi = initFilterMenu("filters_Emoji", ALL_OPUS, (newActive) => {
     activeOpus = newActive;
     if (newActive.length === 0) return;
-    resetGame();
+    resetGame(true);
   });
   activeOpus = _filterApi.getActive();
 
@@ -655,7 +670,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(EXPERT.key("emojiWin"));
     // Le réarmement de l'enregistrement est dans resetGame() — commun aux quatre
     // chemins de nouvelle partie (Replay, minuit, retour d'onglet, filtres).
-    resetGame();
+    resetGame(true);
   });
 
   // ── Daily reset ──
