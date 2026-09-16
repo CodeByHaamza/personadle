@@ -120,4 +120,70 @@ final class ValidationTest extends TestCase
         sort($langs);
         $this->assertSame($files, $langs);
     }
+
+    // ── personadle_validate_avatar ───────────────────────────────────────────
+    // 2.2 : un portrait de la galerie (../img/avatar/…) est accepté — avant, le
+    // choix d un GIF animé était refusé en 400 et revenait au prochain pull cloud.
+
+    private function galleryDir(): string
+    {
+        $dir = sys_get_temp_dir() . '/personadle_avatars_' . getmypid();
+        if (!is_dir($dir)) {
+            mkdir($dir);
+            touch($dir . '/Ren.gif');
+            touch($dir . '/Eriko.png');
+        }
+        return $dir;
+    }
+
+    public function testAvatarNullMeansRemoveAndIsValid(): void
+    {
+        $this->assertNull(personadle_validate_avatar(null, $this->galleryDir()));
+    }
+
+    public function testAvatarAcceptsBase64DataUrls(): void
+    {
+        $this->assertNull(personadle_validate_avatar('data:image/png;base64,iVBORw0KGgo=', $this->galleryDir()));
+        $this->assertNull(personadle_validate_avatar('data:image/webp;base64,UklGR', $this->galleryDir()));
+        $this->assertNotNull(personadle_validate_avatar('data:image/svg+xml;base64,PHN2Zz4=', $this->galleryDir()));
+    }
+
+    public function testAvatarAcceptsAnExistingGalleryPortrait(): void
+    {
+        $this->assertNull(personadle_validate_avatar('../img/avatar/Ren.gif', $this->galleryDir()));
+        $this->assertNull(personadle_validate_avatar('../img/avatar/Eriko.png', $this->galleryDir()));
+    }
+
+    public function testAvatarRejectsAGalleryPortraitThatDoesNotExist(): void
+    {
+        $this->assertSame('Unknown gallery avatar', personadle_validate_avatar('../img/avatar/Nope.gif', $this->galleryDir()));
+    }
+
+    public function testAvatarRejectsAnyOtherPathOrTraversal(): void
+    {
+        foreach ([
+            '../img/avatar/../../api/bootstrap.php',
+            '../img/avatar/Ren.gif/../x.gif',
+            '/img/avatar/Ren.gif',
+            './img/avatar/Ren.gif',
+            'https://evil.example/x.gif',
+            '../img/avatar/Ren.svg',
+            'Ren.gif',
+        ] as $bad) {
+            $this->assertSame('Invalid avatar format', personadle_validate_avatar($bad, $this->galleryDir()), $bad);
+        }
+    }
+
+    public function testAvatarRejectsOversizedPayloads(): void
+    {
+        $huge = 'data:image/png;base64,' . str_repeat('A', 2_000_001);
+        $this->assertSame('Avatar too large (max 2 MB base64)', personadle_validate_avatar($huge, $this->galleryDir()));
+    }
+
+    public function testAvatarDefaultGalleryIsTheRealOne(): void
+    {
+        // Sans dossier explicite : la vraie galerie du dépôt (img/avatar/) — le GIF existe
+        $this->assertNull(personadle_validate_avatar('../img/avatar/Ren.gif'));
+        $this->assertSame('Unknown gallery avatar', personadle_validate_avatar('../img/avatar/DoesNotExist.gif'));
+    }
 }

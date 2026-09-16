@@ -13,6 +13,103 @@
 
 ---
 
+## 2026-09-16 — feat(profile) : l'atelier — personnalisation du profil sans bouton Save (branche `feat/profile-atelier`)
+
+Demande Hamza (2026-09-15) : « rendre la personnalisation du profil plus intuitive —
+la sélection des 4 badges, un meilleur menu pour la photo, les couleurs (UI & contour),
+le titre, enlever le gros bouton Save, moderniser la navigation ». Prototype validé
+le 16 (« go, fais en sorte que ça rende bien »).
+
+### Ce qui change pour le joueur
+
+- **La carte d'identité (gauche) est l'aperçu vivant** : avatar avec une pastille ✎,
+  pseudo, le titre équipé en puce cliquable (« ＋ Choisir un titre » quand il n'y en a
+  pas), **4 emplacements de badges épinglés** (rempli = badge + ✕ au survol pour le
+  retirer, vide = « + » qui ouvre l'onglet Badges), et un **indicateur d'enregistrement**
+  (« Tout est enregistré » / « Enregistrement… » / « Enregistré » / « Non enregistré —
+  clique pour réessayer »).
+- **L'atelier (droite, au-dessus des stats)** : un panneau à cinq onglets — Avatar,
+  Bordure, Thème, Titre, Badges. Onglets verticaux sur desktop, en ligne (les cinq
+  visibles sans défilement) sur mobile ; flèches ←/→ ; le dernier onglet ouvert est
+  mémorisé (`localStorage.atelierTab`).
+- **Avatar** : les portraits de la galerie s'appliquent **au clic** (plus de modale à
+  valider) ; « Importer une image » (fichier local) et « Ajuster le cadrage » ouvrent
+  la modale de recadrage, réduite au canvas. Un portrait fixe est rendu en PNG 300×300
+  comme le faisait « Appliquer », un GIF garde son chemin (il resterait animé).
+- **Badges** : l'onglet ne montre que les badges débloqués, en vignettes ; épinglé =
+  bordure accent + ✓, compteur « n/4 » dans l'indication. Le catalogue complet
+  (verrouillés, conditions, recherche) reste dans « See All Badges ».
+- **Titre** : la grille des titres vit dans l'onglet (mêmes cartes `.tm-card`,
+  reposées sur le thème de la page au lieu du fond de modale sombre).
+- **Mode favori** → carte Statistiques (c'est une préférence d'affichage, pas un look).
+- Disparus : « Change Picture », « Titles », « Save », la carte « Customization »
+  dépliable, la modale Titres, la grille de portraits dans la modale de recadrage.
+
+### Enregistrement automatique
+
+Chaque changement continue d'envoyer **son propre champ tout de suite**
+(`saveProfileToCloud({ … })`, comme avant). `markDirty()` — appelé par tous les
+modules après un choix — n'allume plus un bouton : il programme (`scheduleAutosave`,
+700 ms de regroupement) l'envoi complet `syncProfileToCloud({ strict: true })`, qui
+est le filet. Dix clics de pastille = un envoi complet. L'indicateur reflète cet
+envoi ; en erreur, un clic relance ; un changement pendant l'envoi déclenche un
+second envoi après, jamais en parallèle (`profile/atelier.js`, sans dépendance au
+profil ni à l'API — testable seul).
+
+### Bug trouvé en route : un portrait GIF ne se sauvegardait jamais
+
+Depuis la v2.0, `PATCH /api/user/:id` refusait tout `avatar_data` qui n'est pas un
+`data:image/(png|jpeg|webp)` — or un GIF n'est pas passé au canvas (il perdrait son
+animation) et est stocké par son chemin `../img/avatar/<nom>.gif`, la forme que tout
+le client résout déjà (friends, leaderboard, calling cards, profil public,
+compendium). Résultat : 400 silencieux, et au pull cloud suivant (rechargement, 3 min)
+l'avatar revenait au précédent. Reproduit avant correction sur la pile locale.
+→ `personadle_validate_avatar()` (`api/lib/validation.php`, pure, testée) accepte en
+plus une **référence à la galerie** : regex stricte `../img/avatar/[A-Za-z0-9_-]+.(gif|
+png|jpe?g|webp)` + `is_file()` dans `img/avatar/` (jamais un chemin libre, pas de
+traversée). Un ancien chemin v1 `./img/…` est renvoyé sous cette forme par les deux
+envois complets (`syncProfileToCloud`, `auth.js` au login). Choisir un GIF encodé en
+base64 aurait été l'autre option : jusqu'à 1,7 Mo dans chaque liste d'amis — non.
+
+### Profil consulté (`?view=`)
+
+`activateReadOnlyMode()` masque `#atelier`, `#saveStatus`, la puce vide, désactive
+`#equippedTitleBtn`, et retire la carte Badges entière (elle ne contient plus que
+l'accès à la collection du propriétaire). `renderViewBadges` rend les mêmes
+`.pin-slot--filled` (sans ✕) ; sans badge épinglé, le bloc disparaît (pas de « + »
+pour un visiteur).
+
+### Fichiers
+
+- `profile/atelier.js` (nouveau) — onglets + autosave. `profile/profile.html` — carte,
+  section `#atelier` (ids historiques conservés : `#avatarGrid`, `#borderSwatches`,
+  `#themeSwatches`, `#titlesModalGrid`, `#previewBadges`, `#favModeChips`).
+  `profile/profile-page.js` — `markDirty → scheduleAutosave`, `applyAvatarPreset` /
+  `commitAvatar`, import + ajuster, suppression de `setupPersoCard` /
+  `updateAppearancePreview` / `saveRefreshBtn`. `profile/badges/badgesManager.js` —
+  `renderBadgesPreview` (4 emplacements) + `renderBadgePicker` (nouveau), rappelés
+  partout où `renderBadgesModal` l'est. `profile/titles-ui.js` — puce vide,
+  `_bindTitlesModal` rend la grille sans modale. `profile/profile-view.js`.
+  `profile/profile-page.css` — section 10c ; blocs `.perso-*`, `.appearance-preview`,
+  `#titlesModal` retirés. `lang/*.json` — 27 clés `profile.*` (+ 4 retirées :
+  `customization_title`, `border_color_label`, `theme_label`, `save_refresh`).
+- Tests : `tests/atelier.test.js` (onglets, autosave, emplacements, sélecteur),
+  `tests/titlesUi.test.js` (+2), `tests/php/ValidationTest.php` (+7),
+  `tests-e2e/profile_atelier.spec.js` (7 scénarios : plus de Save, rafale = un envoi,
+  GIF qui survit au rechargement, PNG, puce titre + onglet mémorisé, épingler /
+  désépingler, profil consulté), `tests-e2e/unlocks_usecases.spec.js` (onglet Titre).
+
+### Angles morts connus
+
+- L'indicateur reflète l'envoi complet ; un envoi de champ isolé qui échoue (réseau)
+  alors que l'envoi complet réussit ensuite est de toute façon rattrapé par ce dernier.
+- `syncProfileToCloud` envoie `avatar_data` à chaque autosave — un avatar PNG 300×300
+  base64 (~100 Ko) par rafale de changements. Acceptable ; à revoir si un jour
+  l'autosave se déclenche sur la frappe du pseudo (aujourd'hui le pseudo a son propre
+  envoi, sans passer par `markDirty`).
+
+---
+
 ## 2026-09-16 — fix(modes) : la cible du jour était aléatoire dès le lendemain, dans les six modes (branche `fix/silhouette-daily-target-notifs`)
 
 Point de départ : un joueur sur Discord — « en mode Shadows, ça affiche parfois Akechi,

@@ -84,3 +84,38 @@ function personadle_normalize_lang(string $lang, array $supported = PERSONADLE_S
 {
     return in_array($lang, $supported, true) ? $lang : 'en';
 }
+
+/**
+ * Valide un avatar de profil (`avatar_data`). Retourne un message d'erreur, ou
+ * null si valide.
+ *
+ * Deux formes acceptées :
+ *  - une image encodée (`data:image/…;base64,`) — le recadrage canvas ;
+ *  - une référence à un portrait de la galerie du site (`../img/avatar/<nom>.<ext>`),
+ *    la forme que tout le client résout déjà (friends, leaderboard, calling cards,
+ *    profil public). C'est ainsi que les 13 GIF animés sont choisis : un GIF ne
+ *    passe pas par le canvas (il perdrait son animation) et encodé en base64 il
+ *    pèserait jusqu'à 1,7 Mo dans chaque liste d'amis. Jusqu'en 2.2 le serveur
+ *    refusait cette forme (400) : le choix d'un GIF n'était jamais enregistré et
+ *    revenait à l'avatar précédent au prochain pull cloud.
+ *
+ * @param string|null $avatar   valeur reçue (null = retirer l'avatar, valide)
+ * @param string      $galleryDir  dossier des portraits, pour vérifier que le fichier
+ *                                 référencé existe vraiment (jamais un chemin libre)
+ */
+function personadle_validate_avatar(?string $avatar, string $galleryDir = __DIR__ . '/../../img/avatar'): ?string
+{
+    if ($avatar === null) {
+        return null;
+    }
+    if (strlen($avatar) > 2_000_000) {
+        return 'Avatar too large (max 2 MB base64)';
+    }
+    if (preg_match('/^data:image\/(jpeg|png|webp);base64,/', $avatar)) {
+        return null;
+    }
+    if (preg_match('#^\.\./img/avatar/([A-Za-z0-9_\-]+\.(?:gif|png|jpe?g|webp))$#', $avatar, $m)) {
+        return is_file($galleryDir . '/' . $m[1]) ? null : 'Unknown gallery avatar';
+    }
+    return 'Invalid avatar format';
+}

@@ -206,14 +206,16 @@ if ($method === 'PATCH') {
         $userParams[] = $lang;
     }
 
-    // avatar_data (base64 PNG/JPEG/WebP ou null — taille + préfixe validés)
+    // avatar_data : base64 PNG/JPEG/WebP, portrait de la galerie (../img/avatar/…)
+    // ou null — règles dans api/lib/validation.php (personadle_validate_avatar)
     if (array_key_exists('avatar_data', $data)) {
         $avatar = $data['avatar_data'];
-        if ($avatar !== null && strlen($avatar) > 2_000_000) {
-            jsonError('Avatar too large (max 2 MB base64)');
-        }
-        if ($avatar !== null && !preg_match('/^data:image\/(jpeg|png|webp);base64,/', $avatar)) {
+        if ($avatar !== null && !is_string($avatar)) {
             jsonError('Invalid avatar format', 400);
+        }
+        $avatarError = personadle_validate_avatar($avatar);
+        if ($avatarError !== null) {
+            jsonError($avatarError, 400);
         }
         $profileFields[] = 'avatar_data = ?';
         $profileParams[] = $avatar;

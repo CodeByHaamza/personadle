@@ -549,7 +549,9 @@ async function _syncLocalProfileToCloud(userId) {
     profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
     selected_badges: profile.selectedBadges || [],
   };
-  if (profile.avatar) fields.avatar_data = profile.avatar;
+  // Un ancien chemin v1 (./img/…, stocké depuis la racine) est renvoyé sous la
+  // forme que le serveur accepte (../img/avatar/…, cf. personadle_validate_avatar).
+  if (profile.avatar) fields.avatar_data = profile.avatar.replace(/^\.\/img\//, "../img/");
   if (profile.equippedTitleId != null) fields.equipped_title_id = profile.equippedTitleId;
 
   try {
