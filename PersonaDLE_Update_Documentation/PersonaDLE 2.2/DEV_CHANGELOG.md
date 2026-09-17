@@ -13,6 +13,138 @@
 
 ---
 
+## 2026-09-17 — fix(streak, connexion, filtres, journée de jeu) : campagne de cas d'usage, sept bugs sortis (branche `test/usecases-streak-filtres-defis-auth`)
+
+### Pourquoi
+
+Après la revue des PR #124/#125, campagne de tests « par cas d'usage » sur la streak,
+la connexion, les filtres et les défis — écrits du point de vue du joueur (« j'ai joué
+hier, je rejoue aujourd'hui », « je me connecte sur un nouveau téléphone », « j'accepte
+un défi sur un appareil où je n'ai jamais ouvert ce mode »), pas fonction par fonction.
+Sept bugs, tous reproduits par un test qui échouait avant le correctif. Un fil rouge :
+**la journée de jeu est celle de Paris, et rien ne doit la recalculer via l'heure de la
+machine ou via `now − 24 h`.**
+
+### Quoi — sept correctifs
+
+1. **Streak client, lendemain du passage à l'heure d'été** (`profile/profileStats.js`)
+   — « hier » valait `parisDateKey(Date.now() − 86 400 000)`. La journée du dimanche ne
+   fait que 23 h : entre 00:00 et 00:59 Paris le lundi, on retombait DEUX jours en
+   arrière. Série d'un joueur assidu cassée (et fausse trace Jack Frost), série d'un
+   joueur qui avait sauté le dimanche prolongée. Nouveau `shiftDateKey(key, days)` dans
+   `gameCore.js` (arithmétique pure sur la clé, `Date.UTC`). Au passage, un `lastPlayed`
+   illisible faisait lever Intl (`RangeError`) et la partie n'était plus comptée du tout.
+
+2. **Reset de minuit, appareils hors Europe** (`gameCore.js::msUntilNextParisMidnight`)
+   — l'ancien calcul re-parsait `toLocaleString()` dans le fuseau de la MACHINE puis
+   `setHours(24)`. Juste en Europe seulement : pour un appareil aux États-Unis, au Japon,
+   en Australie, au Brésil ou en UTC, 60 min d'écart mesurées les deux jours de
+   changement d'heure de Paris (reset trop tard au printemps → puzzle de la veille
+   jouable jusqu'à 01 h, victoire datée du jour → mismatch anti-triche ; trop tôt à
+   l'automne → partie en cours effacée à 23 h, partie gagnée réarmée et comptée deux
+   fois). Nouveau `parisMidnightUtc(key)` : essaie UTC+1 et UTC+2, garde celui qu'Intl
+   lit comme « 00 h ce jour-là » à Paris. Le test « ≤ 24 h » passe à 25 h (journée du
+   passage à l'heure d'hiver). Vérifié sous Europe/Paris, UTC, America/New_York,
+   Asia/Tokyo.
+
+3. **Appareil partagé** (`js/auth.js`, `js/api.js`, `gameCore.js`) — A se déconnecte, B
+   se connecte : la trace Jack Frost de A (`streakRecovery`) proposait à B de restaurer
+   la série perdue de A (acceptée par le serveur si B a assez de jours joués) ; les cases
+   `activeChallenge`/`activeChallengeExpert` de A faisaient jouer à B la cible du défi de
+   A, partie comptée ni comme défi (403) ni comme partie du jour ; la file
+   `pendingSessions` rejouée avec le cookie de B créditait à B les parties de A, et
+   `pendingChallengeStatus` partait en 403 puis était jeté. Désormais :
+   `clearAccountLocalState()` à la déconnexion (trace + cases, filtres de l'expéditeur
+   rendus, état du mode purgé) ; les files ne sont PAS vidées mais chaque entrée porte
+   `_owner` (compte au moment de la mise en file, `null` pour un invité) et
+   `syncPending()` / `flushPendingChallengeStatus()` / la migration à l'inscription ne
+   rejouent que les siennes et celles d'un invité (`ownsQueuedEntry`). `_owner` ne part
+   jamais au serveur. `api.js` ne peut pas importer `gameCore.js` (cycle) : filtre passé
+   par `window._personadleOwnsQueuedEntry`, même pont que `_personadleApi`. Au passage,
+   un login en 200 sans `user` fermait la modale sans connecter ni prévenir → échec.
+
+4. **Défi + première ouverture du mode sur l'appareil** (`js/filterMenu.js`,
+   `gameCore.js::isFilterKeyHeldByChallenge`) — sans `<clé>_seeded`, `initFilterMenu`
+   seedait PTS dans la liste installée par le défi et la persistait ;
+   `releaseActiveChallenge` concluait « le joueur a rechoisi » et ne rendait rien : le
+   joueur gardait « filtres de l'expéditeur + PTS » pour toujours. Le panneau joue
+   désormais telle quelle une liste qu'un défi actif a installée, sans seed ni
+   réécriture ; le seed a lieu sur les filtres du joueur, après le défi.
+
+5. **Nouvel appareil / reconnexion : série remise à 1 + faux Jack Frost**
+   (`api/user/index.php`, `js/cloud-sync.js`) — `GET /api/user/:id` ne renvoyait pas
+   `global_streak_date` et le pull n'écrivait pas `stats.lastPlayed`. Après une
+   connexion sur un nouveau téléphone (ou après logout/login, qui vide le profil), la
+   première partie voyait « jamais joué » : série 15 → 1, trace « tu as perdu 15
+   jours ». Le pull suivant remettait 16 mais la trace restait : Jack Frost s'ouvrait
+   (vérifié : l'overlay était bien dans le DOM) et le clic consommait le crédit de
+   60 jours pour rien. Le serveur expose `global_streak_date` ; le pull en dérive
+   `lastPlayed` (midi Paris de ce jour). `null` → valeur locale retirée ; champ absent →
+   rien touché.
+
+6. **Flamme « joué ensemble aujourd'hui »** (`js/social-link.js`) — date UTC côté
+   client, journée Paris côté serveur (`CONVERT_TZ … Europe/Paris`). Entre minuit et 2 h
+   à Paris, l'interaction du soir tombait « hier » en UTC : pas de flamme alors que la
+   refaire était déjà refusé. `parisDateKey` des deux côtés.
+
+7. **Journée d'une partie finie après minuit** (`gameCore.js::currentGameDay`) — onglet
+   ouvert la nuit, téléphone en veille, reset de minuit retardé : le puzzle d'hier fini
+   à 00 h 05 partait daté d'aujourd'hui avec la cible d'hier (mismatch anti-triche,
+   journée d'hier jamais créditée, puis seconde partie « du jour »). `startGame()` note
+   la journée d'armement (`gameDay_<scope>`), `buildGameSession()` date la session de
+   cette journée. Le serveur accepte aujourd'hui ou hier et calcule déjà les streaks
+   depuis `played_date` (chemin de la file hors ligne) : rien à changer côté API. Repli
+   sur aujourd'hui au-delà d'hier.
+
+### Tests
+
+- `tests/streak_usecases.test.js` (28) — les deux passages d'heure 2026 minute par
+  minute, minuit Paris vu depuis UTC été/hiver, 31/12, 29 février, six modes le même
+  jour, abandon, trace de récupération (écrite, non écrasée, remplacée une fois
+  consommée, JSON corrompu, `lastPlayed` corrompu).
+- `tests/auth_usecases.test.js` (34) — `initAuth` (200/401/403, panne ×3 avec backoff
+  300/900 ms mesuré, 503 du service worker puis 200, 429 ×3, 500-500-401, markup qui
+  lève, 200 vide) ; login (payload, trim, remember_me, 401, banni, réseau, 200 sans
+  user, double-clic, erreur effacée) ; déconnexion (nettoyage, API en panne, ce qui
+  survit, appareil partagé × 5) ; session expirée en cours de partie.
+- `tests/filters_usecases.test.js` (33) — sur le vrai panneau : chargement (absent,
+  `[]`, ancien format P2/P3, nouveau format, codes d'un autre mode, JSON corrompu,
+  non-tableau, isolation entre modes), clics (opus, groupe, tout, compteur, dernier
+  opus → `[]`, quota localStorage, fond/✕/Escape), défi × 8,
+  `characterMatchesActiveOpus`.
+- `tests/streak_sync_usecases.test.js` (10) — pull + première partie : hier,
+  aujourd'hui, avant-hier, record, Jack Frost ne s'ouvre pas, journée locale périmée,
+  après récupération serveur, backend sans le champ, `null`, illisible.
+- `tests/game_day_usecases.test.js` (11) — même jour, Replay, nuit sans reset, reset
+  qui arrive, rechargement après minuit, nuit du passage à l'heure d'été, deux jours,
+  ancienne version, portées normal/Expert, toujours aujourd'hui ou hier.
+- `tests/gameCore.test.js` (+27) — `shiftDateKey`, `msUntilNextParisMidnight` à vérité
+  absolue sur douze instants, `parisMidnightUtc`.
+- `tests/social-link.test.js` (+3), `tests/notifications.test.js` (+10, revue #124).
+- `tests/php/StreakTest.php` (+7) — mêmes passages d'heure côté serveur ;
+  `DateTime::diff` est correct sur PHP 8.3, figé au cas où l'hébergeur change de version.
+- `tests-e2e/api.spec.js` — `global_streak_date` renvoyé, à la date du jour.
+
+### Décisions / angles morts
+
+- **Cible du jour hors filtres (Classic/Emoji/Silhouette/Music)** — la cible
+  quotidienne est tirée du catalogue COMPLET (décision 2.2, miroir de
+  `api/lib/daily_target.php`), alors que le texte d'aide des filtres dit « seuls les
+  jeux gardés peuvent tomber ». Un joueur aux filtres restreints peut donc avoir une
+  cible du jour que l'autocomplétion ne propose pas (elle reste acceptée si tapée à la
+  main — les six modes valident sur le roster complet). AOA et Personae re-tirent dans
+  le pool filtré, avec l'angle mort anti-triche documenté dans `daily_target.php`.
+  Non tranché ici : soit aligner le texte d'aide, soit étendre le re-tirage filtré aux
+  quatre modes (élargit le contournement anti-triche) — à décider avant la release.
+- Les six modes ne passent pas encore explicitement `played_date` : `currentGameDay()`
+  lit la portée posée par `checkResetOnLoad`, ce qui couvre les six. Une page qui
+  appellerait `buildGameSession()` sans `checkResetOnLoad` retomberait sur aujourd'hui.
+- `_owner` laisse en file les parties d'un compte qui ne revient jamais sur l'appareil :
+  quelques entrées de localStorage, pas de plafond posé.
+- Le badge « night owl » (`getHours()` local) et les badges d'événement
+  (`getMonth()/getDate()` locaux) restent sur l'heure du joueur — volontaire, c'est sa
+  nuit et sa date à lui.
+
 ## 2026-09-17 — feat(notifications) : demandes d'ami, défis et rank-up en temps réel via Pusher Channels (branche `feature/realtime-notifications`)
 
 ### Pourquoi
