@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../api/lib/social_link_interaction.php';
 require_once __DIR__ . '/../../api/lib/error_log.php';
 require_once __DIR__ . '/../../api/lib/admin_audit.php';
 require_once __DIR__ . '/../../api/lib/deletion_requests.php';
+require_once __DIR__ . '/../../api/lib/moderation.php';
 
 /**
  * Tests d'INTÉGRATION sur la vraie base MariaDB (Docker).
@@ -309,6 +310,66 @@ final class DatabaseIntegrationTest extends TestCase
         );
         $stmt->execute([$uid, 'classic', $today]);
         $this->assertSame(['opus' => ['P5']], json_decode($stmt->fetchColumn(), true));
+    }
+
+    /**
+     * La streak GLOBALE suit le jour de JEU (played_date), pas le jour de
+     * réception. Partie d'hier synchronisée aujourd'hui (file hors ligne vidée
+     * après minuit) puis partie du jour : 2 — et non 1 comme avant, où la partie
+     * d'hier était datée d'aujourd'hui et la journée d'hier n'existait pas.
+     */
+    public function testGlobalStreakFollowsPlayedDateNotReceiptDate(): void
+    {
+        $uid       = $this->makeUser();
+        $paris     = new DateTimeZone('Europe/Paris');
+        $today     = (new DateTime('now', $paris))->format('Y-m-d');
+        $yesterday = (new DateTime('yesterday', $paris))->format('Y-m-d');
+
+        $late = personadle_record_game_session(
+            self::$pdo, $uid, 'classic', $yesterday, 'Joker', 'win', 2, 1000, []
+        );
+        $this->assertSame(1, $late['global_streak']);
+
+        $now = personadle_record_game_session(
+            self::$pdo, $uid, 'emoji', $today, 'Teddie', 'win', 3, 1000, []
+        );
+        $this->assertSame(2, $now['global_streak'], 'hier (en retard) + aujourd\'hui = 2 jours consécutifs');
+
+        $stmt = self::$pdo->prepare('SELECT global_streak, global_streak_date FROM users WHERE id = ?');
+        $stmt->execute([$uid]);
+        $row = $stmt->fetch();
+        $this->assertSame(2, (int) $row['global_streak']);
+        $this->assertSame($today, $row['global_streak_date']);
+
+        // Une session d'hier qui arrive APRÈS celle du jour ne recule pas la date
+        // et ne touche pas à la streak.
+        $again = personadle_record_game_session(
+            self::$pdo, $uid, 'music', $yesterday, 'Mass Destruction', 'win', 1, 1000, []
+        );
+        $this->assertSame(2, $again['global_streak']);
+        $stmt->execute([$uid]);
+        $this->assertSame($today, $stmt->fetch()['global_streak_date']);
+    }
+
+    /** Migration 041 : la suite des essais est persistée telle quelle, NULL si absente. */
+    public function testRecordGameSessionStoresGuesses(): void
+    {
+        $uid   = $this->makeUser();
+        $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+        $with = personadle_record_game_session(
+            self::$pdo, $uid, 'classic', $today, 'Yu Narukami', 'win', 2, 900, [],
+            false, '', ['Yosuke Hanamura', 'Yu Narukami']
+        );
+        $without = personadle_record_game_session(
+            self::$pdo, $uid, 'emoji', $today, 'Teddie', 'giveup', 8, 0, []
+        );
+
+        $stmt = self::$pdo->prepare('SELECT guesses FROM game_sessions WHERE id = ?');
+        $stmt->execute([$with['session_id']]);
+        $this->assertSame(['Yosuke Hanamura', 'Yu Narukami'], json_decode($stmt->fetchColumn(), true));
+        $stmt->execute([$without['session_id']]);
+        $this->assertNull($stmt->fetchColumn(), 'sans liste envoyée, la colonne reste NULL');
     }
 
 
@@ -1015,5 +1076,83 @@ final class DatabaseIntegrationTest extends TestCase
         $notif = self::$pdo->prepare('SELECT id FROM social_link_rankup_notifs WHERE recipient_id = ?');
         $notif->execute([$userB]);
         $this->assertFalse($notif->fetch());
+    }
+
+    // ── Modération avec messages (migration 042) — api/lib/moderation.php ────
+
+    public function testBanStateCarriesReasonAndUntil(): void
+    {
+        $uid = $this->makeUser();
+        self::$pdo->prepare("UPDATE users SET is_banned = 1, ban_reason = 'Triche', banned_at = NOW(),
+                             banned_until = DATE_ADD(NOW(), INTERVAL 1 DAY) WHERE id = ?")->execute([$uid]);
+        $row = self::$pdo->query("SELECT id, is_banned, ban_reason, banned_until FROM users WHERE id = $uid")->fetch();
+
+        $state = personadle_ban_state(self::$pdo, $row);
+        $this->assertNotNull($state);
+        $this->assertSame('Triche', $state['reason']);
+        $this->assertNotNull($state['until']);
+    }
+
+    public function testExpiredBanIsLiftedOnCheck(): void
+    {
+        $uid = $this->makeUser();
+        self::$pdo->prepare("UPDATE users SET is_banned = 1, ban_reason = 'Échu', banned_at = NOW(),
+                             banned_until = DATE_SUB(NOW(), INTERVAL 1 MINUTE) WHERE id = ?")->execute([$uid]);
+        $row = self::$pdo->query("SELECT id, is_banned, ban_reason, banned_until FROM users WHERE id = $uid")->fetch();
+
+        $this->assertNull(personadle_ban_state(self::$pdo, $row), 'un ban échu ne bloque plus');
+        $after = self::$pdo->query("SELECT is_banned, ban_reason, banned_until FROM users WHERE id = $uid")->fetch();
+        $this->assertSame(0, (int) $after['is_banned'], 'et il est levé en base');
+        $this->assertNull($after['ban_reason']);
+        $this->assertNull($after['banned_until']);
+    }
+
+    public function testPermanentBanNeverExpires(): void
+    {
+        $uid = $this->makeUser();
+        self::$pdo->prepare("UPDATE users SET is_banned = 1, banned_until = NULL WHERE id = ?")->execute([$uid]);
+        $row = self::$pdo->query("SELECT id, is_banned, ban_reason, banned_until FROM users WHERE id = $uid")->fetch();
+        $state = personadle_ban_state(self::$pdo, $row);
+        $this->assertNotNull($state);
+        $this->assertNull($state['until']);
+        $this->assertNull($state['reason']);
+    }
+
+    public function testMaintenanceStateFollowsSiteSettings(): void
+    {
+        personadle_set_site_setting(self::$pdo, 'maintenance_enabled', '0', null);
+        // Le cache statique de personadle_site_setting() est par processus : on lit
+        // via un état qui n'a pas encore été mis en cache dans ce test.
+        $direct = self::$pdo->query("SELECT setting_value FROM site_settings WHERE setting_key = 'maintenance_enabled'")->fetchColumn();
+        $this->assertSame('0', $direct);
+
+        personadle_set_site_setting(self::$pdo, 'maintenance_enabled', '1', null);
+        personadle_set_site_setting(self::$pdo, 'maintenance_message_fr', 'Migration', null);
+        $direct = self::$pdo->query("SELECT setting_value FROM site_settings WHERE setting_key = 'maintenance_message_fr'")->fetchColumn();
+        $this->assertSame('Migration', $direct, 'upsert : la valeur est remplacée, pas dupliquée');
+        $count = (int) self::$pdo->query("SELECT COUNT(*) FROM site_settings WHERE setting_key = 'maintenance_enabled'")->fetchColumn();
+        $this->assertSame(1, $count);
+
+        personadle_set_site_setting(self::$pdo, 'maintenance_enabled', '0', null);
+    }
+
+    public function testActiveAnnouncementsRespectWindowAndFlag(): void
+    {
+        self::$pdo->exec("DELETE FROM announcements");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, is_active) VALUES ('info', 'Toujours', 1)");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, is_active) VALUES ('info', 'Inactive', 0)");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, is_active, starts_at) VALUES ('warning', 'Future', 1, DATE_ADD(NOW(), INTERVAL 1 DAY))");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, is_active, ends_at) VALUES ('warning', 'Passée', 1, DATE_SUB(NOW(), INTERVAL 1 DAY))");
+        self::$pdo->exec("INSERT INTO announcements (level, message_fr, message_en, is_active) VALUES ('maintenance', 'Bientôt', 'Soon', 1)");
+
+        $list = personadle_active_announcements(self::$pdo);
+        $msgs = array_column($list, 'message_fr');
+        $this->assertContains('Toujours', $msgs);
+        $this->assertContains('Bientôt', $msgs);
+        $this->assertNotContains('Inactive', $msgs);
+        $this->assertNotContains('Future', $msgs);
+        $this->assertNotContains('Passée', $msgs);
+        $this->assertSame('maintenance', $list[0]['level'], 'la maintenance passe devant');
+        self::$pdo->exec("DELETE FROM announcements");
     }
 }

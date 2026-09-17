@@ -13,6 +13,1360 @@
 
 ---
 
+## 2026-09-17 — feat(contenu) : 7 titres + 1 badge, filtres en fenêtre, et les cas d'usage des filtres sous test (branche `feat/profil-vitrine`)
+
+### Contenu (visuels fournis par Hamza)
+
+Sept calling cards et un badge, ré-encodés au gabarit du dépôt (1146 px de large
+pour les titres, 1024² pour le badge : les sources faisaient jusqu'à 4 Mo sans
+perte) et seedés par la **migration 044** — plus `sql/bdd_mysql.sql` pour qu'une
+base fraîche les ait aussi.
+
+| Titre | Rareté | Condition |
+|---|---|---|
+| S.E.E.S. | epic | posséder 8 titres |
+| We Share the Same Soul (Aigis & Metis) | epic | un Social Link au rang 10 |
+| I Am Not a Princess (Kotone) | rare | 25 victoires parfaites |
+| The Case Is Never Closed (Naoto) | rare | 25 victoires en Silhouette |
+| Don't Need Your Pity (Shinjiro) | epic | 25 victoires rapides en Classique |
+| Take Your Heart (Phantom Thieves) | legendary | 40 victoires en All-Out Attack |
+| Some Things Don't Burn Out (Tatsuya) | legendary | jouer un 24 juin (sortie d'Innocent Sin) |
+
+Le badge « Tartarus Conqueror » du visuel est renommé **Song of Orpheus** (epic,
+25 victoires en Mode Expert) : le dessin montre les deux Orphée — celui de Makoto
+et celui de Kotone — et Messiah, c'est-à-dire la descente aux Enfers et le retour,
+pas la tour, et la lyre est dessinée dessus. Le nom « Katabasis » (le mot grec
+pour cette descente) a été écrit puis écarté le même jour : personne ne le
+comprend sans lire la description, ce qu'un nom de badge doit éviter. Le slug,
+le fichier image et la clé i18n suivent (`song_of_orpheus`) — rien n'était encore
+déployé. Descriptions traduites en 5 langues dans la migration (titres) et dans
+`lang/*.json` + `badgesData.js` (badge, la table `badges` ne portant pas de
+colonne description).
+
+**Deux conditions nouvelles** dans `api/lib/condition_check.php` :
+- `titles_count` → nombre de titres possédés (S.E.E.S. rassemble la troupe) ;
+- `played_on_date` → avoir joué un jour d'anniversaire, `condition_mode` au
+  format `'MM-JJ'` (`condition_value` est un INT, il ne peut pas porter la date).
+  Cumulatif comme le reste : la journée reste dans l'historique, le titre ne se
+  reperd pas (CLAUDE.md §7).
+
+Au passage, `condition_check.php` charge désormais `validation.php` lui-même : il
+dépend de `PERSONADLE_MODES` et ne marchait que si un autre fichier l'avait déjà
+inclus — vrai via `bootstrap.php` en prod, faux quand PHPUnit lance ce seul
+fichier de tests (erreur latente, visible en lançant `ConditionCheckTest` seul).
+
+### Les filtres d'opus : une vraie fenêtre
+
+Le menu déroulant devient une **modale centrée** (fond assombri, en-tête avec
+compteur « 19 / 19 » et croix, deux lignes qui expliquent ce que les filtres
+changent). Une carte par jeu : le logo à gauche, et **ses opus se déroulent vers
+la droite au clic dessus**, chacun arrivant à son tour (retour Hamza — les
+montrer tous d'office remplissait la fenêtre sans qu'on ait rien demandé). Un jeu
+retenu porte une pastille ✓, un jeu écarté un contour en pointillés.
+
+L'animation passe par `max-width` et non `width` : un volet en ligne dont la
+largeur est `auto` ne s'interpole pas, il saute. `max-height: 0` l'accompagne,
+sinon la carte gardait la hauteur du volet replié. `prefers-reduced-motion` coupe
+transition et arrivées échelonnées.
+
+Conséquence côté tests : le bouton « ✓ Tout / ✗ Aucun » d'un jeu est injecté
+**dans** son volet, donc inatteignable tant qu'on n'a pas déroulé.
+`filters_usecases.spec.js` passe par un helper `expandGame()` qui fait ce clic
+d'abord, comme le joueur — c'est ce qui a fait tomber quatre scénarios en CI
+alors qu'ils passaient avant le déroulé.
+
+Le fond est à `z-index: 999` et non 10 000 : `.filter-panel` (`z-index: 1000`,
+`position: absolute`) crée un contexte d'empilement, donc la fenêtre est peinte
+dedans — un fond posé sur le `body` plus haut voilait la fenêtre elle-même.
+
+### Un bug trouvé par les nouveaux tests : les filtres d'un défi restaient
+
+`tests-e2e/filters_usecases.spec.js` (12 scénarios) couvre la fenêtre, l'effet sur
+l'autocomplétion, la persistance, l'indépendance par mode, la cible du jour (tirée
+du catalogue COMPLET quels que soient les filtres — c'est ce que le serveur
+recalcule), les défis et ce que reçoit le serveur.
+
+Le scénario « un receveur qui n'avait jamais touché ses filtres » a sorti un vrai
+bug : `installActiveChallenge()` écrit les filtres de l'expéditeur, et
+`releaseActiveChallenge()` ne les retirait pas quand le receveur n'avait **aucune**
+clé enregistrée (il s'abstenait d'écrire, au lieu de supprimer). Accepter un défi
+« P5 uniquement » restreignait donc son mode Classique **pour toujours**, sans
+qu'il ait rien choisi. Corrigé : clé absente à l'acceptation → clé supprimée à la
+libération.
+
+### Angle mort connu
+
+Changer un filtre relance une partie (décision 2.2) : cette partie-là n'a donc
+pas la cible seedée du jour et l'anti-triche la compte comme un écart. C'est
+volontaire côté jeu, mais ça pèse dans le journal — à trancher quand la phase 2
+(rejet) sera envisagée.
+
+---
+
+## 2026-09-16 — fix(ui) : douze corrections de finition (index, profil, pages de mode) — branche `feat/profil-vitrine`
+
+Une passe de relecture de Hamza sur le site en local, douze points. Rien de
+structurant, mais c'est ce qu'on voit tous les jours.
+
+**Accueil**
+1. « Nouveautés » (bas-gauche) et « Reset quotidien » (bas-droite) flottent au-dessus
+   du footer et n'avaient ni la même couleur ni de contour : en sombre ils se
+   fondaient dedans. Les deux partagent maintenant le même habillage (fond franc,
+   bordure, ombre) — leurs règles vivent dans deux fichiers différents
+   (`css/index.css` et le `<style>` de `index.html`), un commentaire croisé le dit.
+2. Les trois liens sociaux collaient au footer : 26 px d'air sous `#socialLinks`.
+
+**Profil**
+3. Dans la modale de partage, les pastilles de couleur sortaient en 52 × 34 (donc
+   ovales) : `global.css §18` impose `padding: 12px 20px` à tout `<button>` et la
+   règle ne remettait que `min-height: 0`. L'interrupteur « afficher le titre »,
+   lui, est un `<label>` — `.share-selector-row label { min-width: 72px }`
+   l'élargissait à 72 px et le bouton rond s'arrêtait au milieu de sa piste.
+4. Choisir un portrait ouvre maintenant le recadrage dans la foulée : beaucoup sont
+   mal cadrés d'origine. Le portrait est appliqué avant d'ouvrir — fermer sans
+   toucher à rien le garde tel quel. Un GIF, lui, ne peut pas être recadré (le
+   canvas lui ferait perdre son animation).
+5. La modale de partage se ferme en cliquant à côté, comme les autres.
+6. **Réinitialiser et supprimer son compte** étaient deux boutons rouges en bas de la
+   page profil, dont un derrière un simple `confirm()` natif. Ils déménagent dans
+   ⚙ Paramètres, section « Zone de danger », et le reset a enfin sa propre
+   confirmation : ce qu'on perd, ce qu'on garde (le compte), et quoi faire sans
+   compte (exporter d'abord) — le tout traduit. La section n'apparaît que là où la
+   page sait ouvrir ces confirmations (`window._personadleDanger`).
+7. « Couleur perso » demandait deux clics (la pastille, puis le carré de couleur qui
+   apparaissait dessous) : le nuancier s'ouvre maintenant au premier clic, et un
+   champ hexadécimal permet de taper une couleur précise.
+
+**Pages de mode**
+8. Les règles étaient écrasées : titres de section, puces et séparateurs se
+   touchaient. Rythme vertical revu (interlignes, marges, largeur de ligne à 78ch).
+9. La flèche du bouton « Filtres » (9 px à 60 % d'opacité) et celle des groupes
+   d'opus (40 %) étaient quasi invisibles : plus grandes, pleinement opaques.
+10. Les filtres d'opus ne disaient pas ce qu'ils font : une ligne d'explication
+    ouvre le panneau, un jeu retenu porte une pastille ✓ (un jeu écarté a un contour
+    en pointillés), les boutons « tout / aucun » de groupe ont un libellé court pour
+    ne plus être confondus avec le bouton global, et le panneau défile au lieu de
+    dépasser de l'écran (P5X était coupé).
+11. Le lien du logo s'étendait sur toute la largeur de l'en-tête : cliquer à côté du
+    logo renvoyait à l'accueil. Il est réduit à l'image.
+12. Le ▶ des lecteurs (mode Musique, musique de profil) paraissait collé à gauche
+    dans son rond : le glyphe a des blancs latéraux asymétriques, flex le centre sur
+    sa boîte et pas sur ce qu'on voit. Décalage optique, retiré sur le ⏸.
+
+**Au passage** : `js/modal.js` — Escape fermait TOUTES les modales ouvertes, chacune
+ayant posé son écouteur. Seule celle du dessus réagit maintenant (l'ordre de
+`_trapState` fait foi) ; sans ça, fermer le recadrage fermait aussi l'atelier.
+
+---
+
+## 2026-09-16 — feat(profil, classement) : la page profil devient une vitrine, l'atelier passe en modale, le classement repasse au thème du site (branche `feat/profil-vitrine`)
+
+Second retour de Hamza dans la journée, après avoir essayé l'atelier de la PR #121 :
+« les badges encore plus visibles (petits et cachés, on les voit mal — et la carte
+Badges dit "toute ta collection" mais on ne les voit pas dedans) ; l'avatar dans une
+modale, pas dans la fenêtre par défaut ; p't'être une modale globale pour la
+personnalisation ; le bouton exporter on l'enlève et on le met dans les paramètres,
+et on rend le partage plus beau et intuitif ; les wallpapers débloqués, trouve un
+autre moyen, ils sont supra grands. En bref presque tout à changer. Et refais le
+style de la page ranking, vu que Amis a bien été refait. »
+
+Puis, en cours de route : pas d'import d'image en photo de profil (dérives), mais on
+doit pouvoir recadrer un portrait mal cadré ; les badges de la page « comme avant »
+(gros médaillons) ; et de quoi consulter tous les badges et titres d'un ami.
+
+### La page profil est une vitrine, l'édition vit dans une modale
+
+- Bouton **« Personnaliser »** sur la carte d'identité → `#atelierModal`, la modale qui
+  contient les cinq onglets (Avatar, Bordure, Thème, Titre, Badges épinglés). Le ✎ de
+  l'avatar, la puce de titre et un emplacement de badge vide y mènent aussi, sur le bon
+  onglet. Le dernier onglet ouvert est mémorisé, la croix / Escape / le fond ferment, et
+  fermer envoie tout de suite ce qui restait en attente (`closeAtelier`).
+- `#atelierModal` et `#sharePreviewModal` sont à **z-index 10000** : `.modal` vit à 1000
+  et `.top-right-stack` (Mode sombre, ⚙, Compendium) à 9999 — la croix de fermeture se
+  retrouvait sous le bouton Compendium. Même convention que la modale des badges. Le
+  recadrage, ouvert DEPUIS l'atelier, passe à 10002.
+- L'indicateur d'enregistrement est dupliqué dans l'en-tête de la modale : il est écrit
+  sur tous les `[data-save-status]`, la carte étant derrière le fond assombri.
+- **Blowout de grille corrigé** : `grid-template-columns: 300px 1fr` → `minmax(0, 1fr)`.
+  Une bande à défilement horizontal (les wallpapers) élargissait la colonne de droite à
+  1008 px et toute la page défilait de côté.
+
+### Badges : une vraie vitrine, en grand
+
+`renderBadgesShowcase()` (badgesManager.js) rend les badges **débloqués** dans la carte
+Badges — gros médaillons cerclés d'or, comme avant la 2.2, épingle sur ceux qui sont sur
+la carte d'identité, compteur `n / 63` dans le titre, clic = zoom. La carte ne contenait
+qu'un bouton « See All Badges ». La collection complète (verrouillés + conditions) reste
+dans `#badgesModal`, qui perd son bouton « Sauvegarder » (chaque clic enregistre déjà).
+
+### Wallpapers : une bande, plus une galerie
+
+Sept vignettes de 180 px mangeaient ~500 px de haut. `renderUnlockableWallpaperGallery()`
+rend maintenant une **bande horizontale** de jetons 128 × 72 (~84 px de haut au total) +
+compteur ; le clic ouvre `showWallpaperPreview()` — l'image en grand, son nom, sa
+condition (lisible, au lieu d'être écrasée sur la vignette). Verrouillé = assombri.
+
+### Partage : l'aperçu d'abord
+
+La modale empilait tous les réglages en haut, l'aperçu tombait sous la ligne de
+flottaison et les boutons encore plus bas. Elle passe en deux colonnes (aperçu collant à
+gauche, réglages à droite, actions dans une barre fixe), une seule colonne sous 860 px.
+**Bug corrigé au passage** : la carte partait avec « Guest Player » et l'ancien avatar —
+`setupShareProfile` capturait la référence du profil à l'init, or `initProfile()`
+RÉASSIGNE `profile` après le pull cloud. `generatePreview()` relit désormais
+localStorage (`_liveProfile`).
+
+### Export → ⚙ Paramètres
+
+`exportProfileFile()` vit dans `js/settings-modal.js` (section « Données »), lu depuis
+localStorage donc utilisable partout. La modale des paramètres est montée sur la page
+profil **même déconnecté** (`_save()` gère déjà `userId === null`) : un joueur sans
+compte est justement celui qui a besoin d'exporter. La carte « Data » du profil devient
+la carte « Partage ».
+
+### Avatar : portraits du jeu uniquement, mais recadrables
+
+- **Plus d'import d'image** (`#avatarUploadInput` retiré) : un avatar est vu par les
+  amis, le classement et les défis, et rien ne modère une image libre.
+- Le **recadrage reste** (`#avatarCropModal`), mais il ne s'ouvre que sur le portrait
+  porté — certains portraits sont mal cadrés par défaut. Sa branche morte `cropTarget
+  === "song"` disparaît avec `cropTarget`.
+- `api/user/migrate.php` écrivait `avatar_data` **sans aucune validation** (JSON fourni
+  par l'utilisateur au moment de l'inscription) : il passe maintenant par
+  `personadle_validate_avatar()`, comme `PATCH /api/user/:id`.
+- Angle mort assumé et documenté dans la fonction : un appel d'API fabriqué à la main
+  peut encore poster une image encodée arbitraire — le serveur ne peut pas distinguer le
+  recadrage d'un portrait d'une autre image. Fermer ça demanderait de stocker le cadrage
+  (zoom/offsets) au lieu des pixels et de refaire le rendu partout où un avatar
+  s'affiche (amis, classement, calling cards, carte de partage, compendium).
+
+### Profil consulté : sa collection de badges
+
+`profile-view.js` rend la vitrine de badges du joueur visité (compteur compris) : la
+carte Badges n'est plus masquée en entier, seul le bouton vers SA propre collection
+l'est. Une carte listant ses **titres** a été essayée puis retirée le même jour
+(« ça rend mal » — des calling cards 16:9 empilées) ; l'ajout correspondant à
+`GET /api/user/public` a été annulé avec elle. Deux rectangles vides corrigés au
+passage : `.song-card.hidden` et `.profile-card.hidden` gardaient leur hauteur (la page
+n'a pas de règle `.hidden` globale), et le sélecteur de mode favori s'affichait vide sur
+un profil consulté.
+
+### Où vivent les 4 badges mis en avant
+
+Ils étaient passés sous la photo de profil avec la PR #121 ; ils retournent **dans la
+carte Badges** (« je veux l'ancien fonctionnement, les 4 affichés dans l'onglet badge et
+pas sous la pdp »), au-dessus de la vitrine des débloqués, en emplacements de 76 px. La
+carte d'identité ne garde que l'identité : avatar, titre, pseudo, code ami, le bouton
+« Personnaliser » et l'état d'enregistrement.
+
+### Classement : le style de la page Amis
+
+`leaderboard.css` réécrit sur le système de `friends.css` (jetons `--lb-*` redéfinis par
+`.darkmode`) : la page était sombre en permanence, seul écran noir du site en mode clair.
+Le top 3 devient un **podium** (`renderPodium()`, ordre visuel 2–1–3, 1ᵉʳ plus grand et
+doré ; une colonne sur mobile), les lignes s'aèrent, sa propre position est épinglée en
+haut de la carte (`position: sticky`), et « 674 games » en dur devient
+`leaderboard.games_count` traduit.
+
+### Fichiers
+
+`profile/profile.html` (modale atelier, vitrine, carte Titres, modale de partage),
+`profile/atelier.js` (ouverture/fermeture de modale, statut multi-cible),
+`profile/profile-page.js`, `profile/badges/badgesManager.js` (+ `renderBadgesShowcase`),
+`profile/wallpapers-ui.js` (bande + aperçu), `profile/share-card.js` (`_liveProfile`),
+`profile/profile-view.js`, `js/settings-modal.js` (+ `exportProfileFile`), `js/auth.js`,
+`api/user/public.php` (+ `titles`), `api/user/migrate.php`, `api/lib/validation.php`,
+`profile/profile-page.css` (§10c–10f), `profile/leaderboard/leaderboard.{css,js}`,
+`css/settings-modal.css`, `lang/*.json` (+18 clés, 3 retirées).
+
+Tests : `tests/atelier.test.js` (+11 : modale, statut de la modale, vitrine),
+`tests/wallpapersUi.test.js` (bande + aperçu), `tests/php/ValidationTest.php`,
+`tests-e2e/profile_atelier.spec.js` (14 scénarios : vitrine, modale, recadrage, pas
+d'import, export dans les paramètres, collection d'un ami…).
+
+### Angles morts connus
+
+- Le podium n'apparaît qu'à la première page et à partir de 3 entrées ; en dessous, les
+  lignes gardent leur médaille en emoji.
+- La modale de partage garde ses `<select>` natifs : la refonte porte sur la mise en
+  page, pas sur les contrôles eux-mêmes.
+
+---
+
+## 2026-09-16 — feat(profile) : l'atelier — personnalisation du profil sans bouton Save (branche `feat/profile-atelier`)
+
+Demande Hamza (2026-09-15) : « rendre la personnalisation du profil plus intuitive —
+la sélection des 4 badges, un meilleur menu pour la photo, les couleurs (UI & contour),
+le titre, enlever le gros bouton Save, moderniser la navigation ». Prototype validé
+le 16 (« go, fais en sorte que ça rende bien »).
+
+### Ce qui change pour le joueur
+
+- **La carte d'identité (gauche) est l'aperçu vivant** : avatar avec une pastille ✎,
+  pseudo, le titre équipé en puce cliquable (« ＋ Choisir un titre » quand il n'y en a
+  pas), **4 emplacements de badges épinglés** (rempli = badge + ✕ au survol pour le
+  retirer, vide = « + » qui ouvre l'onglet Badges), et un **indicateur d'enregistrement**
+  (« Tout est enregistré » / « Enregistrement… » / « Enregistré » / « Non enregistré —
+  clique pour réessayer »).
+- **L'atelier (droite, au-dessus des stats)** : un panneau à cinq onglets — Avatar,
+  Bordure, Thème, Titre, Badges. Onglets verticaux sur desktop, en ligne (les cinq
+  visibles sans défilement) sur mobile ; flèches ←/→ ; le dernier onglet ouvert est
+  mémorisé (`localStorage.atelierTab`).
+- **Avatar** : les portraits de la galerie s'appliquent **au clic** (plus de modale à
+  valider) ; « Importer une image » (fichier local) et « Ajuster le cadrage » ouvrent
+  la modale de recadrage, réduite au canvas. Un portrait fixe est rendu en PNG 300×300
+  comme le faisait « Appliquer », un GIF garde son chemin (il resterait animé).
+- **Badges** : l'onglet ne montre que les badges débloqués, en vignettes ; épinglé =
+  bordure accent + ✓, compteur « n/4 » dans l'indication. Le catalogue complet
+  (verrouillés, conditions, recherche) reste dans « See All Badges ».
+- **Titre** : la grille des titres vit dans l'onglet (mêmes cartes `.tm-card`,
+  reposées sur le thème de la page au lieu du fond de modale sombre).
+- **Mode favori** → carte Statistiques (c'est une préférence d'affichage, pas un look).
+- Disparus : « Change Picture », « Titles », « Save », la carte « Customization »
+  dépliable, la modale Titres, la grille de portraits dans la modale de recadrage.
+
+### Enregistrement automatique
+
+Chaque changement continue d'envoyer **son propre champ tout de suite**
+(`saveProfileToCloud({ … })`, comme avant). `markDirty()` — appelé par tous les
+modules après un choix — n'allume plus un bouton : il programme (`scheduleAutosave`,
+700 ms de regroupement) l'envoi complet `syncProfileToCloud({ strict: true })`, qui
+est le filet. Dix clics de pastille = un envoi complet. L'indicateur reflète cet
+envoi ; en erreur, un clic relance ; un changement pendant l'envoi déclenche un
+second envoi après, jamais en parallèle (`profile/atelier.js`, sans dépendance au
+profil ni à l'API — testable seul).
+
+### Bug trouvé en route : un portrait GIF ne se sauvegardait jamais
+
+Depuis la v2.0, `PATCH /api/user/:id` refusait tout `avatar_data` qui n'est pas un
+`data:image/(png|jpeg|webp)` — or un GIF n'est pas passé au canvas (il perdrait son
+animation) et est stocké par son chemin `../img/avatar/<nom>.gif`, la forme que tout
+le client résout déjà (friends, leaderboard, calling cards, profil public,
+compendium). Résultat : 400 silencieux, et au pull cloud suivant (rechargement, 3 min)
+l'avatar revenait au précédent. Reproduit avant correction sur la pile locale.
+→ `personadle_validate_avatar()` (`api/lib/validation.php`, pure, testée) accepte en
+plus une **référence à la galerie** : regex stricte `../img/avatar/[A-Za-z0-9_-]+.(gif|
+png|jpe?g|webp)` + `is_file()` dans `img/avatar/` (jamais un chemin libre, pas de
+traversée). Un ancien chemin v1 `./img/…` est renvoyé sous cette forme par les deux
+envois complets (`syncProfileToCloud`, `auth.js` au login). Choisir un GIF encodé en
+base64 aurait été l'autre option : jusqu'à 1,7 Mo dans chaque liste d'amis — non.
+
+### Profil consulté (`?view=`)
+
+`activateReadOnlyMode()` masque `#atelier`, `#saveStatus`, la puce vide, désactive
+`#equippedTitleBtn`, et retire la carte Badges entière (elle ne contient plus que
+l'accès à la collection du propriétaire). `renderViewBadges` rend les mêmes
+`.pin-slot--filled` (sans ✕) ; sans badge épinglé, le bloc disparaît (pas de « + »
+pour un visiteur).
+
+### Fichiers
+
+- `profile/atelier.js` (nouveau) — onglets + autosave. `profile/profile.html` — carte,
+  section `#atelier` (ids historiques conservés : `#avatarGrid`, `#borderSwatches`,
+  `#themeSwatches`, `#titlesModalGrid`, `#previewBadges`, `#favModeChips`).
+  `profile/profile-page.js` — `markDirty → scheduleAutosave`, `applyAvatarPreset` /
+  `commitAvatar`, import + ajuster, suppression de `setupPersoCard` /
+  `updateAppearancePreview` / `saveRefreshBtn`. `profile/badges/badgesManager.js` —
+  `renderBadgesPreview` (4 emplacements) + `renderBadgePicker` (nouveau), rappelés
+  partout où `renderBadgesModal` l'est. `profile/titles-ui.js` — puce vide,
+  `_bindTitlesModal` rend la grille sans modale. `profile/profile-view.js`.
+  `profile/profile-page.css` — section 10c ; blocs `.perso-*`, `.appearance-preview`,
+  `#titlesModal` retirés. `lang/*.json` — 27 clés `profile.*` (+ 4 retirées :
+  `customization_title`, `border_color_label`, `theme_label`, `save_refresh`).
+- Tests : `tests/atelier.test.js` (onglets, autosave, emplacements, sélecteur),
+  `tests/titlesUi.test.js` (+2), `tests/php/ValidationTest.php` (+7),
+  `tests-e2e/profile_atelier.spec.js` (7 scénarios : plus de Save, rafale = un envoi,
+  GIF qui survit au rechargement, PNG, puce titre + onglet mémorisé, épingler /
+  désépingler, profil consulté), `tests-e2e/unlocks_usecases.spec.js` (onglet Titre).
+
+### Angles morts connus
+
+- L'indicateur reflète l'envoi complet ; un envoi de champ isolé qui échoue (réseau)
+  alors que l'envoi complet réussit ensuite est de toute façon rattrapé par ce dernier.
+- `syncProfileToCloud` envoie `avatar_data` à chaque autosave — un avatar PNG 300×300
+  base64 (~100 Ko) par rafale de changements. Acceptable ; à revoir si un jour
+  l'autosave se déclenche sur la frappe du pseudo (aujourd'hui le pseudo a son propre
+  envoi, sans passer par `markDirty`).
+
+---
+
+## 2026-09-16 — fix(modes) : la cible du jour était aléatoire dès le lendemain, dans les six modes (branche `fix/silhouette-daily-target-notifs`)
+
+Point de départ : un joueur sur Discord — « en mode Shadows, ça affiche parfois Akechi,
+taper Akechi ne marche pas, et l'abandon révèle un autre Shadow ». Deux bugs derrière,
+dont un gros.
+
+### 1. Le reset quotidien tirait au hasard (six modes)
+
+`checkResetOnLoad()` (nouveau jour au chargement) et `setupDailyReset()` (minuit page
+ouverte) faisaient `resetBtn.click()` — le bouton **Rejouer**, qui tire au hasard dans
+le pool. La cible seedée joueur + jour + mode (`getDailyTarget`) ne servait donc qu'à
+la toute première partie d'un appareil ; dès le lendemain, chaque joueur jouait un
+personnage aléatoire : différent sur deux appareils, et signalé par l'anti-triche
+serveur (`api/lib/daily_target.php` recalcule la cible seedée) à **chaque** partie.
+Mesuré avec une sonde Playwright (joueur qui revient, identifiant connu, état d'hier
+en place) : Classique, Émoji, Silhouette, Personae, Musique en écart ; AOA correct au
+chargement (il recharge la page) mais pas à minuit. Émoji : `resetGame()` tirait au
+hasard sur TOUS ses chemins, sans aucun `getDailyTarget` hors première visite.
+
+Conséquence directe : le journal anti-triche (phase 1, et le panneau admin 🛡 de la
+2.2) est du bruit — tout le monde y est. La phase 2 (rejet) prévue par l'audit aurait
+bloqué tout le monde. **À vérifier en prod après déploiement** :
+`SELECT JSON_UNQUOTE(JSON_EXTRACT(context,'$.mode')) m, COUNT(*) FROM error_log
+WHERE message='Daily target mismatch' GROUP BY m` — le compteur doit cesser de
+grimper le lendemain de la release.
+
+→ Un tirage explicite par mode : Classique `newRound(random)` (corps de Rejouer),
+Émoji `resetGame(random)`, Silhouette `newRound(random)`, Personae / Musique
+`resetGame()` sans random, AOA même chemin que le chargement. Rejouer et changement
+de filtres restent aléatoires.
+
+### 2. Silhouette : l'image d'hier recouvrait celle du jour (le cas « Akechi »)
+
+Le chargement de l'image **restaurée** depuis localStorage n'avait pas le jeton
+`currentPickToken` de `pickCharacter()` : quand le tirage du jour partait pendant que
+l'image d'hier chargeait encore (réseau lent, cache froid), l'image d'hier finissait
+par se poser dans le DOM — cible d'aujourd'hui, silhouette d'hier. Taper le nom
+d'hier : refusé ; abandonner : `revealSrc` (correct) révélait la vraie cible. → même
+jeton sur la restauration ; `data-target` sur l'image pour les tests.
+
+### 3. `getPlayerSeedId()` : le compte d'abord
+
+Au premier chargement d'un appareil, `localStorage.playerUserId` n'existe pas encore
+quand le mode tire sa cible (posé par auth.js après `/me`) : tirage sur un
+identifiant anonyme, différent de celui du serveur. `window._currentUser.id` est
+préféré quand la page le connaît déjà (re-tirages, retour d'onglet).
+
+### 4. Toast « Title Unlocked! » à chaque visite du profil
+
+« À chaque fois que je vais sur mon profil j'ai la notif de I Remembered » (Hamza).
+`checkAndUnlockTitles()` posait le titre en local et jouait la toast AVANT la réponse
+du serveur, 403 avalé. Sur un navigateur qui perd son localStorage entre deux visites,
+rebelote à chaque fois. → le serveur confirme d'abord ; 4xx = rien n'est posé ni
+annoncé ; l'annonce est mémorisée hors du profil (`_seenTitleAnimIds`, comme
+`_seenBadgeAnimIds`). Invité : le local fait foi. Cette règle rend aussi caduc le
+« titre fantôme » que `syncTitlesWithBackend()` retire : il ne peut plus naître.
+
+### Divers
+
+- Ren Amamiya : citation « Checkmate! » (décision Hamza).
+- README : « Core Team » (Hamza) + « Contributors & Credits » (Léo, Damien, Dzulian,
+  rôles datés) ; tableau de CLAUDE.md aligné.
+
+### Tests
+
+- `tests-e2e/daily_target.spec.js` (8) — six modes : deux navigateurs « joueur qui
+  revient » tirent la même cible, égale à celle que le serveur attend (même helper,
+  pool de `api/data/daily_pools.json`), date du jour posée ; Classique : la partie
+  jouée n'apparaît pas dans `/api/admin/anticheat` ; Silhouette : image d'hier
+  retardée de 1,5 s → la silhouette affichée est celle du jour. 7/8 rouges sans le
+  correctif.
+- `tests/titles_reconcile.test.js` (+2) — 403 → rien en local, rien annoncé ;
+  accepté → annoncé une fois, plus jamais même profil reconstruit ; invité → local.
+
+## 2026-09-15 — test(E2E) : Expert ↔ défis, déblocages, streak vue du profil, mobile — et deux bugs de plus (même branche)
+
+Deuxième vague demandée par Hamza (« streak, stats, mobile, débloquer les modes Expert
+couplé aux défis ça bug beaucoup, badges, titres, wallpapers… ») : 22 tests E2E de
+plus, tous contre la vraie pile, et deux bugs sortis en les écrivant.
+
+### Les bugs
+
+6. **L'annonce « Mode Expert débloqué » jouait une fois sur deux.** Le cache de l'état
+   Expert est rattaché au compte (`window._currentUser.id`, posé par `initAuth()`) et
+   la porte Expert n'attendait pas l'auth : quand `/expert-status` répondait avant
+   `/me`, le cache n'était ni lu (pas de diff → pas de cadenas qui explose) ni écrit
+   (l'annonce était perdue pour la fois suivante aussi). → `fetchExpertStatus()`
+   attend `window._authReady` avant de toucher au cache. Test unitaire rouge sans le
+   correctif (auth résolue un tour après la réponse).
+7. **4 titres fantômes de plus en prod** (`looking_cool`, `pancakes`, `first_awakening`,
+   `always_be_positive`), vus dans `user_titles` du compte de Hamza — la 039 n'en
+   listait que 7. → migration **043**, même méthode par slug, rejouée sur base vierge
+   avec les trois cas seedés (fantôme seul → transféré ; les deux → le canonique
+   reste ; fantôme équipé → repointé), 0 orphelin, idempotente.
+
+### Le diagnostic du titre I Am Not Afraid (compte de Hamza)
+
+Les SELECT prod : `user_stats.classic` = 74 parties / 71 victoires, et
+`user_titles` contient bien `aigis_i_am_not_afraid` depuis le 2026-07-24 (import v1).
+Le compte de Hamza est sain côté serveur ; le cas « badge oui, titre non » rapporté
+est celui d'un ami — même requête à lancer avec son pseudo pour trancher entre
+« < 50 victoires Classique enregistrées » et la course corrigée par
+`syncTitlesWithBackend()`. Au passage : `user_stats` (71) ≫ `game_sessions` (3
+victoires depuis le 24/07) est NORMAL — `user_stats` porte l'historique v1 importé,
+`game_sessions` ne commence qu'à la 2.0. Le badge `velvet_regular` (50 jours) a été
+accordé à l'import, alors que `game_sessions` n'a que 35 jours distincts : deux
+sources, deux histoires.
+
+### Tests ajoutés
+
+- `tests-e2e/unlocks_usecases.spec.js` (15) — **Expert ↔ défis** : porte à 9/10
+  victoires rapides, session Expert 403 avant, `?expert=1` renvoyé, défi Expert vers un
+  ami non débloqué refusé (409), normal + Expert coexistent le même jour, un défi Expert
+  en cours ne bloque pas un défi normal (deux cases), accepter un Expert mène sur
+  `?expert=1` avec le bandeau, le jouer n'écrit ni session normale ni Expert, le cadenas
+  s'anime une fois. **Déblocages** : badge `first_win` / `ace_defective` (403 → 200,
+  idempotent, catalogue), inconnu 404, manuel accordé, fond d'écran `rise_dungeons`
+  (29 → 403, 30 → 200), titre `marie_i_remembered` après 12 badges accordés par l'admin,
+  code événement (201 / 409 / désactivé 404 / inconnu 404 / vide 400). **Autre
+  appareil** : badges et titre accordés en base affichés sur un navigateur neuf, titre
+  équipé → persiste côté serveur et sur un troisième navigateur.
+- `tests-e2e/mobile_streak_usecases.spec.js` (7) — **streak et stats vues du profil**
+  après de vraies parties (0 → hier par API + victoire du jour au navigateur → Parties 2
+  / Victoires 2 / Série 2 / Record 2 ; abandon Émoji → Abandons 1, Parties 3, série
+  toujours 2 ; navigateur neuf → mêmes chiffres). **Mobile 390 × 844 tactile** : pop-up
+  de défi dans l'écran, Accepter au doigt → mode + bandeau, aucun débordement horizontal
+  (accueil, mode, Amis, profil), Boîte au doigt, modale des badges dans l'écran, bulle
+  d'info entière.
+- `tests-e2e/helpers/page.js` — `gotoSettled()` : recharge tant que l'écran de
+  maintenance (déclenché en parallèle par `moderation.spec.js`) est là. Les trois
+  nouveaux specs passent par lui et par `call()` (503 rejoué) : 6 passages complets
+  consécutifs sans échec (184/184).
+- `api/auth/register.php` : limite hors prod 50 → 200 inscriptions / 15 min — la suite
+  complète en fait 51, la 51e tombait en 429. Prod inchangée (5).
+- `tests/expertUnlock.test.js` (+2).
+
+Angle mort : la limite admin (300 requêtes / 5 min, `requireAdmin`) est atteinte si on
+enchaîne deux suites complètes en moins de 5 min en local — pas en CI (un passage par
+job). `DELETE FROM rate_limits` dans le conteneur pour relancer.
+
+## 2026-09-15 — test(défis, stats) : tous les cas d'usage, et les cinq bugs qu'ils ont sortis (branche `test/defis-stats-usecases`)
+
+Demande Hamza : « tester TOUS les cas de défi possibles » (pop-up index / profil,
+Boîte de la page Amis, plusieurs défis en même temps, Plus tard…) et « plein de cas
+d'usage sur l'enregistrement des stats », après les bugs de défis qui les ont abîmées.
+Chaque test a été écrit contre le comportement RÉEL ; cinq ont trouvé un bug, corrigé
+dans le même lot.
+
+### Les bugs trouvés
+
+1. **Titres jamais réclamés au serveur (point 2 de Hamza — « badge Velvet Regular oui,
+   titre I Am Not Afraid non »).** En fin de partie, `checkUnlocksAfterGame()` tourne
+   juste après `savePendingSession()` SANS l'attendre : le client compte la 50ᵉ
+   victoire, POST `/titles/unlock`, le serveur (qui lit `user_stats`) n'a pas encore la
+   session → 403 avalé. Le titre entre dans `profile.unlockedTitles` (donc plus jamais
+   renvoyé par `checkAndUnlockTitles`) et n'atteint jamais `user_titles`. Les badges
+   ont `syncBadgesWithBackend()` depuis toujours ; les titres n'avaient rien.
+   → `profile/titles-ui.js` : `syncTitlesWithBackend()` appelé par `initTitlesSection`
+   (local absent du serveur → repoussé ; 403 définitif → titre fantôme retiré, le
+   backend est la source de vérité ; réseau/404 → gardé pour la prochaine fois).
+   Reproduit contre le vrai serveur dans `tests-e2e/stats_usecases.spec.js` (49
+   victoires → 403, 50 → 200, et `velvet_regular` reste 403 avec 1 jour distinct).
+   **Vérifié sur `develop` avant correctif : le bug y était** (aucun code de titres
+   n'a changé entre `main` et `develop`).
+2. **Streak globale datée du jour de réception, pas du jour de jeu.**
+   `personadle_bump_global_streak()` utilisait `now` : une partie de 23 h 50
+   synchronisée à 0 h 10 (file hors ligne) comptait pour le lendemain ; si la
+   précédente datait de l'avant-veille, la streak repartait à 1 alors que le joueur
+   avait joué chaque jour. La streak par mode lisait déjà `played_date`.
+   → `api/lib/streak.php` + `api/lib/game_session.php` : jour de JEU, la date
+   mémorisée ne recule jamais (une session de la veille arrivée après celle du jour
+   est inerte). PHPUnit `StreakTest` + `DatabaseIntegrationTest`.
+3. **Résultat de défi perdu si l'appel échoue.** `checkChallengeCompletion()` envoyait
+   `beaten`/`expired` en fire-and-forget : réseau coupé = défi `accepted` en base pour
+   toujours (expéditeur jamais prévenu, « en cours » sur la page Amis, 409 pour un
+   nouveau défi le même jour). → file `pendingChallengeStatus` (gameCore.js), rejouée
+   au début de chaque sondage (`notifications.js`) ; 4xx = définitif, jeté.
+4. **Case de défi périmée jamais libérée hors de la page du mode.** Défi accepté lundi,
+   jamais joué, nouveau défi accepté mardi depuis l'accueil : les filtres du défi de
+   lundi étaient encore posés et devenaient les « filtres d'origine » du défi de mardi.
+   → `installActiveChallenge()` partagé dans gameCore.js (les deux chemins
+   d'acceptation dupliquaient le même bloc), qui appelle `releaseStaleChallenge()`
+   d'abord.
+5. **Machine à états des défis sans garde côté serveur.** Un expéditeur pouvait passer
+   son propre défi en `expired`/`accepted` ; un `beaten` pouvait revenir `accepted`
+   (donc re-bloquer un nouveau défi le même jour). → `api/messages/index.php` :
+   destinataire seul, `unread → accepted|read`, `accepted → beaten|expired|read`,
+   finaux immuables, `accepted → accepted` idempotent (double clic / second appareil).
+
+### Point 4 de Hamza — bulle d'info des badges (signalement joueur)
+
+Mesuré avec Playwright (sonde `getBoundingClientRect` + captures), trois causes :
+
+1. **LA cause** (retour de Hamza : « la bulle passe dessous, genre Série ») :
+   `.badges-grid-wrap { overflow: hidden }`, posé pour l'animation de repli des
+   catégories, coupait toute bulle qui MONTE au-dessus du bloc — c'est-à-dire celle
+   de chaque badge de première rangée, quelle que soit la position dans la modale
+   (bulle à `top: 190`, bloc à `top: 367` : invisible). → `overflow: hidden` seulement
+   `.collapsed` ou `.is-animating` (classe posée par `setCategoryCollapsed()` le
+   temps de la transition `grid-template-rows`, filet `setTimeout` 600 ms). Vérifié :
+   replié → hidden, dépliage → hidden, ouvert → visible, hauteurs identiques à avant.
+   `.badge-item:hover { z-index: 5 }` pour que la bulle passe aussi devant la
+   catégorie suivante (le `transform` du survol crée un contexte d'empilement).
+2. Bord haut de la modale (conteneur de défilement) : variante `.badge-tooltip--below`
+   (flèche en haut, couleur via `--badge-arrow`), décidée par
+   `adjustTooltipPositions()` depuis la géométrie du badge — plus depuis la position
+   courante de la bulle, faussée par les `nth-child` écrits pour 4 colonnes.
+3. Mobile : `#badgesModal` en `content-box` faisait 415 px sur 390 (2ᵉ capture du
+   joueur, première colonne coupée). → `border-box` avec `max-width: 764px` (= les
+   700 px de contenu d'avant + padding + bordure : rendu desktop strictement
+   identique, Hamza avait vu la modale rétrécie avec un 700 border-box), padding
+   réduit ≤ 480 px.
+
+Au passage : `opacity: 0.5` sur `.badge-item.locked` rendait la bulle
+semi-transparente — déplacé sur l'image et le nom.
+
+### Tests ajoutés
+
+- `tests/notifications_challenges.test.js` (25) — le sondage n'avait AUCUN test :
+  accueil / profil / pages de jeu / page Amis, deux défis, `_queuedThisPage` vs « vu »
+  persistant, plein écran `cr-overlay`, résultats pour l'expéditeur, file de relance.
+- `tests/friends_challenge_actions.test.js` (20) — Accepter / Refuser / Reprendre /
+  Abandonner par les vrais boutons de la Boîte, serveur d'abord, autre appareil, garde
+  d'exclusivité, Expert verrouillé/débloqué (statut mis en cache par module : un seul
+  jeu de réponses par fichier).
+- `tests/challenge_install.test.js` (15) — l'installateur partagé et la libération
+  d'une case périmée ; les deux chemins produisent une case identique.
+- `tests/titles_reconcile.test.js` (10) — le scénario « badge oui, titre non » de bout
+  en bout côté client.
+- `tests/challengeResult.test.js` (+3) — la file de relance.
+- `tests-e2e/challenge_usecases.spec.js` (13) — API : toute la machine à états ; UI :
+  deux défis à l'accueil, Plus tard / Refuser, mémoire au rechargement et sur le
+  profil, accepter depuis la pop-up du profil, exclusivité depuis la pop-up ET la Boîte,
+  abandon, **et une partie de défi n'entre pas dans les stats, la partie du jour qui
+  suit, si** (vérifié en base).
+- `tests-e2e/stats_usecases.spec.js` (16) — `user_stats` ↔ réponse de POST, le cas
+  titre/badge, streak hier+aujourd'hui / par mode / globale, ce que le serveur refuse.
+- PHPUnit `StreakTest` (+2), `DatabaseIntegrationTest` (+1).
+
+Angle mort assumé : les deux nouveaux specs E2E tolèrent le 503 « maintenance » que
+`moderation.spec.js` déclenche en parallèle (toute requête passe par un `call()` qui
+rejoue sur 503). Les autres specs n'ont pas cette tolérance et peuvent échouer
+localement sans `retries` (la CI en a 2) ; `expert-personae` « nom masqué » échoue
+aussi les jours où la fiche de la cible contient un dérivé de son nom
+(« terpsichorean ») — c'est la règle de frontière de mot de `maskTerms`, pas un
+bug de masquage.
+
+## 2026-09-15 — fix(défi): « Plus tard » ne cachait plus les autres défis en file (relecture PR #112)
+
+Relecture avant merge des PRs empilées #112 → #114 → #117. Un seul vrai bug, dans le
+chemin que « Plus tard » venait de rendre visible : deux défis reçus en même temps (deux
+amis), « Plus tard » ou la croix sur le premier → le second **n'apparaissait jamais sur
+cette page**.
+
+- `js/challenge-notif.js` — `closeOnly` vidait la file (`_queue.length = 0`) en comptant
+  sur le sondage suivant (60 s) pour représenter les défis jamais montrés. Or
+  `js/notifications.js` les avait déjà notés dans `_queuedThisPage` **avant** de les
+  pousser, donc le sondage les filtrait : ils ne revenaient qu'après un changement de
+  page. Le commentaire promettait l'inverse. Désormais « Plus tard » et la croix ne
+  valent que pour le défi fermé et **enchaînent sur le suivant**, comme « Refuser »
+  (`_closeOverlay` → `_showNext`) : le joueur ne l'a pas vu, il n'a rien décidé à son
+  sujet.
+- `tests/challengeAccept.test.js` — cas « deux défis, Plus tard sur le premier » : le
+  second s'affiche, `dismissed` n'est appelé que pour le premier, rien n'est envoyé au
+  serveur. Vérifié rouge sans le correctif.
+- `js/gameCore.js` — docblock mort au-dessus de `challengeScoreFor()` : le bloc décrivait
+  le « par » par mode du 2026-09-12, retiré le 13. Fusionné avec le bloc qui suivait.
+
+Le reste de la relecture (aucun changement de code) :
+
+- migrations 040/041/042 rejouées sur une base **vierge** au schéma de `develop`, puis
+  rejouées une seconde fois (idempotence) ; colonnes **et** index du schéma migré
+  identiques à `sql/bdd_mysql.sql` de la branche (`information_schema` diffé) ;
+- PDO/requêtes préparées ligne à ligne sur `api/admin/{user,announcements,settings,
+  anticheat,user_notes,user_notices}.php`, `api/notices/index.php`,
+  `api/sessions_today.php`, `api/lib/moderation.php` ; `escHtml` partout dans
+  `admin/moderation.js` et `admin/site_panels.js` ;
+- garde de maintenance : `me/login/logout`, `admin/`, `cron/` exemptés, admin connecté
+  passe, 503 + `Retry-After` sinon — couvert par `tests-e2e/moderation.spec.js` ;
+- #114 et #117 n'avaient **jamais tourné en CI** (le workflow ne se déclenche que sur
+  les PR vers `develop`/`main`) : Vitest 1043/1043, PHPUnit 275/275, E2E 133/133, lint,
+  i18n, pools, docs et data verts en local sur la tête de #117.
+
+Angle mort assumé, inchangé : sans les migrations 040→042 jouées **avant** le pull
+Hostinger, `requireAuth()` (colonnes `ban_reason`/`banned_until`), `login.php`, `me.php`
+et l'INSERT de `game_sessions` (`guesses`) tombent en 500 — c'est le contrat de la
+checklist de release (`DEPLOY.md`, `npm run schema:check-prod`), pas un fallback à coder.
+
+---
+
+## 2026-09-15 — Modération avec messages, annonces, maintenance (branche `feat/admin-moderation-maintenance`)
+
+Réponse à « on peut rendre le menu admin plus booster encore ? genre laisser un message pour
+quand je bannis une personne » → « FAIT TOUT et la possibilité de mettre le site en
+maintenance ». Un ban sans explication était un mur pour le joueur et une amnésie pour
+l'admin ; il n'existait aucun canal admin → joueur, et fermer le site voulait dire « couper
+Apache ». Tout passe par la **migration 042** (`042_moderation_maintenance.sql`, MariaDB
+`IF NOT EXISTS`, rejouable — reflétée dans `sql/bdd_mysql.sql`).
+
+### Base (migration 042)
+
+- `users` : `ban_reason` (300, vu par le joueur), `ban_note` (interne), `banned_at`,
+  `banned_until` (NULL = définitif), `reset_local_state_at`.
+- `user_notices` : messages de l'équipe (type `warning`/`info`, `read_at`).
+- `admin_notes` : carnet interne par joueur, jamais exposé.
+- `announcements` : bandeau global (`level` info/warning/maintenance, FR + EN optionnel,
+  fenêtre `starts_at`/`ends_at`, `is_active`).
+- `site_settings` : clé/valeur (`maintenance_enabled`, `maintenance_message_fr/en`,
+  `maintenance_until`) — extensible à d'autres réglages sans nouvelle migration.
+
+### Serveur
+
+- **`api/lib/moderation.php`** : `personadle_ban_state($pdo, $row)` — `null` si pas banni,
+  sinon `{reason, until}` ; **un ban à durée échu est levé en base au passage** (colonnes
+  remises à NULL), pas de cron. `personadle_site_setting()` / `personadle_set_site_setting()`
+  (upsert, cache statique par requête), `personadle_maintenance_state()`,
+  `personadle_active_announcements()` (fenêtre + flag, maintenance devant),
+  **`personadle_maintenance_gate($pdo)`** : appelé en fin de `bootstrap.php`, renvoie **503
+  `{"error":"maintenance", …}`** à tout le monde sauf `auth/(me|login|logout)`, `admin/`,
+  `cron/`, CLI et les admins connectés (`is_admin` mis en cache 60 s en session pour ne pas
+  requêter `users` à chaque appel).
+- `bootstrap.php` : `requireAuth()` lit les colonnes de ban et passe par `personadle_ban_state`
+  (un ban échu ne bloque donc plus) ; **`jsonErrorWith($message, $status, $extra)`** pour les
+  erreurs avec champs.
+- `auth/login.php` : compte banni → 403 `{"error", "code":"banned", "reason", "until"}`.
+  Rate limit login **50/15 min hors prod** (5 en prod), même logique que `register.php` : les
+  specs E2E se connectent toutes depuis la même IP et un retry CI rejoue le `beforeAll`.
+- `auth/me.php` : toute réponse porte désormais `maintenance`, `announcements`,
+  `reset_local_state_at` (et `banned` quand la session vient d'être détruite pour ban) —
+  **un seul appel** au chargement, pas de nouvel aller-retour par page.
+- `api/notices/index.php` (+ `.htaccess`) : `GET /api/notices/` (mes messages non lus),
+  `PATCH /api/notices/:id` (accusé). Dossier avec slash final, comme `friends/` et
+  `messages/` (piège mod_dir).
+- `api/admin/` : `user.php` (GET expose ban, `notes`, `notices` ; PATCH `is_banned` avec
+  `ban_reason`/`ban_note`/`ban_hours` (0 = définitif), `reset_local_state`),
+  `user_notes.php`, `user_notices.php`, `announcements.php` (CRUD), `settings.php`
+  (GET/PATCH maintenance), `anticheat.php` (écarts « Daily target mismatch » de `error_log`
+  groupés par joueur, `?days=`), `users.php` (`?sort=created|last_login|games|pseudo`,
+  `?export=csv` — `;` comme séparateur, Excel FR). Chaque fichier a sa `RewriteRule`.
+  Au passage : `activity.php` lisait `error_logs` (la table est `error_log`, singulier) —
+  corrigé ici, la #114 seule a le bug.
+
+### Client
+
+- **`js/site_notices.js`** (+ `css/site_notices.css`, injecté à la demande) :
+  `showMaintenance()` (écran plein Velvet pour le joueur, `body.maintenance-active` ; simple
+  bandeau avec lien vers l'admin pour un admin connecté), `showAnnouncements()` (un bandeau
+  par annonce, fermeture mémorisée par id dans `dismissedAnnouncements`),
+  `showTeamNotices()` (messages de l'équipe, accusés via `api.notices.markRead`),
+  `applyRemoteLocalReset(at)` (vide `MODE_STATE_KEYS` normal + Expert, `gameId_*`,
+  `guessLog_*`, `activeChallenge`, `lastPlayedDate_*` — **pas** le profil ni la langue ;
+  accusé dans `localResetAckAt`, jamais deux fois). `applySiteNotices(me)` orchestre le tout
+  depuis `initAuth()` et **ne fait rien sur `/admin/`** (un bandeau y interceptait le clic
+  de navigation en test).
+- `js/auth.js` : `resolveBanMessage(err)` → « Compte suspendu jusqu'au … Raison : … » au
+  login (i18n `auth.banned_until` / `banned_permanent` / `banned_reason`, 6 langues).
+- `js/api.js` : `api.notices.pending()` / `markRead(id)`.
+- Admin : onglet **🛡️ Modération** (`admin/moderation.js` — ban avec raison/durée/note,
+  levée, messages + historique lu/pas lu, notes, profil public, reset ciblé), panneaux
+  **📣 Annonces**, **🔧 Maintenance**, **🛡️ Anti-triche** (`admin/site_panels.js`), tri et
+  export CSV de la liste. Le bouton ban de l'onglet Profil renvoie vers Modération.
+
+### Tests
+
+- `tests/site_notices.test.js` (12) ; PHPUnit +5 (état de ban, levée à l'échéance,
+  définitif, upsert `site_settings`, fenêtre des annonces) ;
+  `tests-e2e/moderation.spec.js` (7, stack complète : 403 `banned` au login, accusé de
+  message, 403 admin-only, annonce via `/me`, **503 joueur / admin qui passe**, CSV).
+
+### Angles morts
+
+- La maintenance ne se lève **pas** toute seule à `maintenance_until` (informatif) — choix :
+  c'est l'admin qui rouvre, après avoir vérifié.
+- Le cache `is_admin` de 60 s en session : un admin rétrogradé garde l'accès pendant la
+  maintenance jusqu'à une minute.
+- Les annonces sont livrées par `/me` : un joueur qui reste sur une page sans recharger ne
+  les voit pas avant sa prochaine navigation.
+
+---
+
+## 2026-09-13 — Comparer nos parties, relance des invités, tableau de bord Activité (branche `feat/guest-nudge-compare-admin`)
+
+Trois idées validées par Hamza (« 8, 10, 16 » de la liste du soir), une PR empilée sur #112.
+
+### « Tes amis aujourd'hui » — comparer nos parties (migration 041)
+
+Un bouton **👥 Parties des amis**, jumeau de ⚔ Défier (même hôte — zone Expert puis
+navigation —, même verrou « partie du jour finie », monté par `showChallengeButton()` via
+`_ensureFriendsGamesButton()`), ouvre une fenêtre (`openFriendsGamesModal()`, habillage de la
+modale de défi) avec la **première partie du jour** de chaque ami sur ce mode : résultat,
+nombre d'essais, et la **suite des noms proposés** (le bon en vert) ; les amis qui n'ont pas
+encore joué sont listés aussi. Première version dans la boîte de victoire, déplacée en bouton
+à la demande de Hamza (« à côté des défis ») — la boîte reste propre.
+
+- **Serveur** : `game_sessions.guesses` (JSON, migration 041 — MariaDB `IF NOT EXISTS`,
+  rejouable, **à jouer avant le merge dans main** : sans elle plus aucune partie ne
+  s'enregistre). `api/sessions.php` accepte `guesses[]` (≤ 40 chaînes ≤ 200 car., sinon
+  ignoré, jamais rejeté) ; `personadle_record_game_session()` prend un 12ᵉ paramètre
+  optionnel — les appels existants (tests PHPUnit compris) ne changent pas.
+  **`api/sessions_today.php`** (`GET ?mode=&expert=`) : amis acceptés, `MIN(id)` par ami
+  sur la journée Paris (les replays ne comptent pas — « on garde que la première partie »,
+  décision Hamza), **403 `play_first`** tant que le demandeur n'a pas fini la sienne (la
+  liste des essais révélerait la cible). Fichier **plat**, pas `api/sessions/today.php` :
+  un dossier `sessions/` à côté de `sessions.php` déclenche le 301 de mod_dir sur
+  `POST /api/sessions` (méthode dégradée en GET, 403 sur le listing) — vécu en le
+  développant, c'est le piège CLAUDE.md §7.
+- **Client** (`js/gameCore.js`) : journal des essais `guessLog_<scope>` rattaché à
+  l'identifiant de partie (`currentGameId`) — vidé d'office par un Replay ou un nouveau
+  jour, retrouvé après un rechargement. Alimenté par `showWrongMini()` (5 modes), par
+  `logGuess()` dans le handler de Classique (sa grille ne passe pas par showWrongMini) et
+  dans Music (liste maison) ; doublons consécutifs ignorés (Classique Expert journalise
+  par les deux chemins). `buildGameSession()` ajoute `guesses`, le bon nom en dernier si
+  gagné. `renderFriendsToday(container, mode)` rend la liste (réutilisable) ;
+  `showCommunityStats()` reste une no-op exportée (les 6 modes l'appellent encore) ;
+  `api.stats.friendsToday()`.
+- ⚠️ **La cible du jour est tirée PAR JOUEUR** (`getDailyTarget` seedé sur l'id) : deux
+  amis n'ont pas le même personnage. Découvert en testant en navigateur — on compare des
+  *parcours*, pas des réponses : le bon essai d'un ami est le dernier de sa partie gagnée,
+  et la note le dit (« chacun a son propre personnage du jour »).
+- Avatars : chemins `../img/…` relatifs à `profile/` — les pages de mode sont à la même
+  profondeur, ils marchent tels quels.
+- Tests : `tests/friends_today.test.js` (11 : journal, Replay, showWrongMini, buildGameSession,
+  bornes, bouton jumeau et son verrou, fenêtre ✕/Échap, rendu des trois états, play_first,
+  Expert/invité) ;
+  `DatabaseIntegrationTest::testRecordGameSessionStoresGuesses` (PHPUnit 270 vert) ;
+  scénario navigateur Alice/Bob/Carol vérifié (capture).
+
+### Relance des invités
+
+Un joueur **sans compte** avec **3 jours de série ou plus** voit, à la fin de sa partie, une
+carte « 🔥 N jours de série ! Crée un compte gratuit pour la sauvegarder » — CTA vers
+`profile.html#register`, « Plus tard », au plus une fois par semaine (`guestNudgeShownAt`),
+jamais pour un connecté. `maybeNudgeGuest()` appelée par `savePendingSession()` (les 6 modes y
+passent, invités compris). `js/auth.js` ouvre la modale d'inscription sur `#register` et
+retire l'ancre. La série lue est celle du profil local (`profile/profileStats.js`).
+`tests/guest_nudge.test.js` (5) ; parcours carte → modale vérifié en navigateur.
+
+### Admin — 📈 Activité
+
+`api/admin/activity.php` (`?days=7..180`, `requireAdmin()`) : totaux (inscrits, actifs 7 j /
+N j, parties, nouveaux comptes, écarts anti-triche loggés), par jour (jours vides inclus), par
+mode (parties, taux de victoire, essais moyens sur victoires, part Expert), par heure Paris.
+Les TIMESTAMP sont regroupés **en PHP** (`DateTime` + `Europe/Paris`) : `CONVERT_TZ` dépend
+des tables de fuseaux du serveur SQL, absentes en mutualisé. `admin/activity.js` : KPI, barres
+CSS pures (aucune librairie), sélecteur 7/30/90 j. Route dans `api/admin/.htaccess`, panneau
+dans `admin/index.html`, `ADMIN_PANEL_IDS`. Comptes seulement : les invités ne postent pas de
+session. Vérifié en navigateur avec le compte admin de seed.
+
+### En passant
+
+- `PERSONADLE_MODES` (`api/lib/validation.php`, chargé par `bootstrap.php`) remplace les
+  **neuf** copies de la liste des modes côté PHP ; `tests/expertWiring.test.js` lit désormais
+  cette source unique.
+- Docs : `api/README.md`, `admin/README.md`, `TODO.md` (migration 041 dans la checklist
+  release), FAQ inchangée (rien de nouveau à expliquer au joueur au-delà du bloc lui-même).
+
+### Angles morts
+
+- `guesses` NULL pour toutes les parties enregistrées avant la 2.2 : la comparaison montre
+  alors le nombre d'essais seul — c'est voulu, on n'invente rien.
+- Un ami qui joue en Expert a une autre cible et une autre dimension : le bloc Expert ne
+  liste que les parties Expert (`expert=1`), jamais les normales.
+- La relance des invités lit `stats.streak` : un invité qui n'a jamais eu de profil local
+  (première visite) n'en a pas — normal, il n'a pas 3 jours.
+
+---
+
+## 2026-09-13 — Défi verrouillé avant la partie, entrée 2.2 Velvet Room, pile haut-droite du profil
+
+Trois décisions de Hamza, plus la CI de #112 (rouge depuis l'ajout de `challenge_flow.spec.js`).
+
+### « Défier un ami » : verrouillé tant que la partie du jour n'est pas finie
+
+Le lot du 12 laissait le bouton cliquable dès l'arrivée, avec un score de référence (« par »
+par mode). Décision : un défi porte **toujours un vrai score** — « bats mon score » n'a pas
+de sens sans score. `js/gameCore.js` :
+
+- `CHALLENGE_PAR` et le par sont **retirés** ; `challengeScoreFor(score)` renvoie le score ou
+  `null`, `isChallengeLocked(score)` en découle. Les 6 modes n'ont rien à changer : ils
+  passaient déjà `null` avant la fin et `attempts` après.
+- `showChallengeButton()` pose `.btn-challenge--locked` + `aria-disabled` + `title` (i18n
+  `challenge.locked_hint`) ; le clic verrouillé n'ouvre rien et fait sortir une bulle
+  `.btn-challenge__hint` 2,6 s (le mobile n'a pas de survol). Pas d'attribut `disabled` : le
+  clic doit arriver pour montrer le message. CSS dans `global.css` (gris, 🔒 devant l'épée,
+  bulle avec flèche, retour à la ligne ≤ 480 px).
+- **Depuis la page Amis** (`?challenge=<id>`) sur un mode pas encore joué : la bulle s'affiche
+  au lieu de la modale, la présélection est gardée, et `showChallengeButton()` ouvre la modale
+  **tout seul** sur cet ami au déverrouillage (`_preselectConsumed` garantit une seule fois).
+  Le sélecteur de mode de `friends.js` annonce la règle (`friends.challenge_pick_note`).
+- Deux fragilités trouvées en écrivant les tests, corrigées : la ligne présélectionnée
+  dépendait de `CSS.escape` et de `scrollIntoView`, absents de jsdom — l'exception faisait
+  retomber la liste d'amis sur son état d'erreur. Recherche par `dataset.fid`, appel optionnel.
+- Tests : `tests/challenge_button_always.test.js` → **`challenge_button_lock.test.js`** (15,
+  dont la présélection différée) ; `tests-e2e/challenge_flow.spec.js` étapes 1–5 réécrites
+  (Alice joue pour déverrouiller, Bob joue l'Emoji avant que la modale s'ouvre sur Alice) avec
+  **un seul contexte navigateur pour Alice** — « partie finie » est un état local, un contexte
+  neuf par étape était un autre appareil. Changelogs joueur (index + page 2.2) reformulés.
+
+### CI #112 — pourquoi le E2E était rouge
+
+`challenge_flow` étape 2 cliquait le bouton avant toute partie ; en CI (1280×720) Playwright
+loggait 55× « `.personadle-box` subtree intercepts pointer events » — la boîte de consigne
+chevauche le bouton pendant le défilement d'actionnabilité, jamais en local. Le clic sur ce
+bouton passe en `{ force: true }` (la visibilité est vérifiée à part) ; le scénario a de toute
+façon changé avec le verrou.
+
+### Entrée 2.2 du déroulant « Nouveautés » — Velvet Room, pas techno
+
+« Mise à jour communautaire » était faux (les retours joueurs n'en sont pas le cœur) et le
+thème techno ne parlait de rien. L'entrée s'appelle **« Version 2.2 — Le Compendium »** (6
+langues), reprend le langage du carnet (`css/index.css` §10c réécrite : `.velvet-theme`,
+damier de losanges qui dérive, pentacle qui respire, ornements ❦, or, papier crème en clair /
+velours en sombre, `.velvet-btn`) et ouvre sur une puce 📖 Compendium. Plus aucune trace
+`tech-*`.
+
+### Profil — pile haut-droite
+
+`profile.html` : le toggle dark mode/⚙ et le bouton Compendium sont dans `.top-right-stack`
+(fixe, colonne, `align-items: stretch`) ; le toggle redevient statique dedans, le bouton prend
+**exactement sa largeur** (224 px desktop, 93 px mobile où le libellé disparaît), avec 12 px
+d'écart. `profile-page.css` §16 réécrite. Mesuré des deux côtés.
+
+---
+
+## 2026-09-13 — Le Compendium : carnet de collection (branche `fix/community-feedback-batch`)
+
+Nouvelle page `profile/compendium/` — un livre qui raconte ce que le joueur a accompli :
+badges, titres, fonds d'écran, liens (amitiés + rangs de Social Link), défis et exploits,
+chaque entrée datée, avec qui, et un texte d'ambiance. Demande de Hamza (« comme un carnet
+de collection », dans le style du *Grimoire du Cœur* de Persona Q), décisions prises le
+2026-09-12 : texte **généré** (pas de note personnelle), **uniquement des données
+existantes** (aucune table, aucune migration), **public** comme le profil, pas de 3D
+lourde, et « Avant le Compendium » pour ce qui n'a pas de date plutôt qu'une date
+inventée.
+
+### Backend — `api/user/compendium.php` (+ `RewriteRule ^compendium$` dans `api/user/.htaccess`)
+
+`GET /api/user/compendium` : `?code=` ou `?id=` → public (même exposition que
+`user/public.php` : pseudo, code ami, avatar) ; sans cible → `requireAuth()` et le sien.
+Lecture seule, 100 % PDO préparé, `is_deleted = 0` partout, défis plafonnés à 300.
+
+- **Badges** : `badges_unlocked` (`unlocked_at`).
+- **Titres** : `user_titles × titles` — nom en 5 langues, `rarity`, `image_path`.
+- **Fonds** : `user_wallpapers × wallpapers`.
+- **Liens** : `friendships` (`accepted_at`) + `social_links` (rang, xp) +
+  `social_link_rankup_notifs` (chaque passage de rang daté). Un rang atteint **avant**
+  l'existence de cette table n'a pas de date → le client le marque « avant le compendium ».
+- **Défis** : `messages` type `challenge`, statuts `beaten`/`expired`, dans les deux sens.
+  Le partenaire n'expose que `{id, pseudo}` — l'avatar est résolu côté client depuis la
+  liste d'amis, pour ne pas renvoyer un base64 par défi.
+- **Exploits** : `game_sessions` (première partie, première victoire et premier
+  sans-faute par mode — sous-requêtes `MIN(played_date)` groupées par `mode, is_expert`),
+  `expert_unlocks_granted` (accordé par l'admin) vs première session Expert jouée
+  (débloqué), `users.global_streak_record`.
+
+### Front — `profile/compendium/`
+
+- `compendium_entries.js` — module **pur** (aucun DOM, aucun i18n) : réponse API →
+  `{ badges[], titles[], wallpapers[], bonds[], challenges[], feats[] }` d'entrées
+  `{ chapter, kind, title, flavor, vars, date, img|icon|avatar, rank?, expert?, won? }`.
+  Tri décroissant par date, non datées à la fin, record de série épinglé en tête
+  (`pin`). Doublons de notifs de rang fusionnés (`Set` par rang). `titleName(title,
+  lang)` avec repli EN puis slug. `chapterSummary()` pour la page de gauche,
+  `paginate()` (jamais zéro page).
+- `compendium.js` — la page : `initCompendium()` (exporté pour les tests) attend
+  `__i18nReady` + `_authReady`, lit `?view=`, appelle `api.user.compendium()`. Couverture
+  (pseudo, *Ouvrir*) → `.cp-cover--opening` → livre : onglets (rôle `tab`, compteur),
+  page de gauche (chapitre, résumé chiffré, filigrane, folio romain), page de droite
+  (5 entrées/page, folio numérique), tourne-page 3D avec filet `setTimeout` si
+  `animationend` ne vient pas (onglet en arrière-plan), ‹ › + flèches clavier, balayage
+  tactile. Dates via `Intl.DateTimeFormat(lang, { dateStyle: "long" })`. Scores et
+  tentatives en « N essais » (`compendium.tries` / `tries_one`), jamais un nombre nu.
+  Libellés d'accessibilité (pager, onglets) posés en JS — `data-i18n` ne couvre pas
+  `aria-label`.
+- `compendium.css` — préfixe `cp-*`, palette Velvet Room en variables (`--cp-blue`,
+  `--cp-gold`, `--cp-paper`…), mode sombre en surcharge de variables seulement. Onglets
+  en **index sur le bord supérieur** du livre (première version : signets sur la tranche
+  droite — débordaient du viewport à 1280 px et recouvraient le texte en actif).
+  `.cp-cover` en `box-sizing: border-box` (sinon 360 + padding + bordure = 410 px sur un
+  mobile de 390). Bannières de titre (≈ 4:1) en bandeau au-dessus du texte
+  (`.cp-entry--banner`), pas dans un carré de 52 px. `prefers-reduced-motion` coupe tout.
+- `js/api.js` — `user.compendium({ code } | { id } | {})`. `js/gameCore.js` —
+  `/profile/compendium/` ajouté à `_DEEP_SUBPATHS` (`siteRootPrefix()` → `../../`).
+- **Bouton sur le profil** — `profile/profile.html` `#compendiumBtn.grimoire-btn`, fixe
+  sous `.darkmode-toggle` (losanges bleus animés + pentacle doré, `profile-page.css`
+  §16 ; icône seule ≤ 768 px). `data-auth="connected"` ; en mode `?view=`,
+  `profile-view.js` le pointe vers le carnet du joueur visité et le rend visible même
+  déconnecté (le carnet est public).
+- `sw.js` — les 4 fichiers de la page ajoutés au pré-cache.
+
+### i18n, FAQ, docs, tests
+
+- `lang/*.json` (6 langues) : namespace `compendium.*` — titre, tagline, chapitres et
+  descriptions, états vides, stats, exploits, 19 textes d'ambiance `flavor.*`, libellés
+  d'accessibilité. FAQ : `faq.q44/a44` (c'est quoi) et `faq.q45/a45` (public, « avant le
+  compendium ») dans `pages/faq.html`, section Compte & Profil.
+- `profile/compendium/README.md` — chapitres → tables, contrat API, flux, conventions,
+  procédure pour ajouter une source d'entrées.
+- `tests/compendium_entries.test.js` (18) — chapitres, tri, dates absentes, fusion des
+  rang-ups, genres de défi, avatar de partenaire, exploits, résumé, pagination.
+  `tests/compendium_page.test.js` (9) — couverture, `?view=`, déconnecté, 404, onglets,
+  pagination clavier, rendu d'une entrée (nom i18n, date locale, pastilles, essais).
+  `tests-e2e/compendium.spec.js` (4) — route `.htaccess` publique, 404/401, bouton du
+  profil visité, ouverture du livre sans session.
+
+### Angles morts
+
+- Les rangs de Social Link antérieurs à `social_link_rankup_notifs` resteront sans date
+  pour toujours (pas de reconstruction possible) — c'est assumé, et dit au joueur.
+- Un joueur qui a plus de 300 défis terminés verra les 300 plus récents.
+- `expert_modes` : « débloqué » est daté de la **première session Expert jouée**, pas du
+  jour où la condition a été remplie (non historisé).
+
+---
+
+## 2026-09-12 — Lot « retours communauté » : 8 corrections + 2 refontes (branche `fix/community-feedback-batch`)
+
+Huit remontées joueurs (Discord) plus deux demandes de Hamza, traitées en un commit par
+point. Au passage, trois bugs découverts en creusant les remontées (dont deux qui
+n'avaient rien à voir avec la plainte initiale). Le layout des pages de mode (barre de
+saisie collante, compactage du haut de page) est **volontairement hors de ce lot** : PR
+séparée à venir, pour être validé visuellement à part.
+
+### Boutons ronds rendus ovales (retour n° 2, n° 5) — `css/global.css` §18
+
+La règle tactile `button { min-height: 48px; padding: 12px 20px }` s'applique à **tout**
+`<button>`, y compris ceux qui déclarent leur propre `width`/`height`. Mesuré au pixel :
+pastilles de bordure 28×48, lecteur de musique de profil 34×48, ⚙ Settings 28×48. Sur la
+page Amis, 👁 est un `<a>` (30 px) et ✕ un `<button>` (48 px) sur la même ligne — d'où
+« pas la même taille ». Chaque bouton-icône pose `min-height: 0` dans sa propre règle
+(14 règles, 8 fichiers), `.fr-btn` fixe 36 px pour `<a>` et `<button>`, `.fr-btn--icon`
+fait un carré 36×36. **Piège documenté dans CLAUDE.md §7** — c'est un pattern, pas un cas.
+
+Angle mort : tout nouveau bouton-icône retombe dedans s'il ne pose pas `min-height: 0`.
+
+### Double « + » sur Ajouter (n° 5) — `lang/*.json` + `friends.js` + `profile-view.js`
+
+`friends.js` préfixait `+ ` à une clé i18n qui contenait déjà `+ Add`. La clé
+`friends.add_friend` redevient un libellé nu (c'est aussi le `title`), les deux appelants
+ajoutent le signe.
+
+### Poubelle invisible (n° 6) — `friends.css` + SVG inline
+
+`opacity: 0.5`, 0.78 rem, pleine au survol seulement — donc jamais sur mobile. Zone
+tactile 32 px, opacité de repos 0.85, et un SVG inline en `currentColor` à la place de
+l'emoji 🗑 (trait fin monochrome sur Windows, pictogramme couleur ailleurs — aucun
+contraste garanti).
+
+### Stats Expert : chiffres décalés et fondus (n° 8) — `profile-page.js` / `.css`
+
+Deux causes. L'en-tête « Won / Played · Rate · Best · Streak » était un seul `<span>` calé à
+droite ; la clé i18n (même forme `a · b · c · d` dans les 6 langues) est découpée pour poser
+un libellé par colonne. **Et chaque ligne est sa propre grille** (`display: grid` par
+`.expert-stat-row`) : avec des colonnes `auto`, chaque ligne dimensionne les siennes selon
+son contenu, l'en-tête ne pouvait pas tomber au-dessus des chiffres → colonnes en `fr`.
+Couleur explicite sur les cellules (elles héritaient du corps de page → gris sur gris en
+sombre), et `body.darkmode .mode-stats-header` écrasait le rouge du titre par spécificité.
+
+### Iwatodai Dorm (n° 4) — `musicsMode/database/songs.js`
+
+`opus: ["P3R"]` → `["P3"]`, image `P3.webp`. Convention du dataset = jeu d'origine (Burn My
+Dread, Mass Destruction sont en P3 alors qu'ils sont aussi dans Reload), même si la piste
+jouée est l'arrangement chanté de Reload. Pools quotidiens indexés par titre → inchangés.
+
+### Bouton ⚙ sur les pages de mode + autoplay de profil réglable (n° 3)
+
+`settings-modal.js` crée sa modale à la demande : le bouton ⚙ rejoint le bloc « Mode Sombre »
+sur `index.html` et les 6 modes (style déplacé de `profile-page.css` vers
+`settings-modal.css`, classe générique `.settings-btn`). **L'id utilisateur est résolu au
+clic « Sauvegarder », pas à l'init** : sur ces pages le bouton est monté avant que
+`initAuth()` ait posé `_currentUser`, le réglage ne serait jamais parti en cloud. Deux
+réglages `profile_autoplay_own` / `profile_autoplay_others` (vrais par défaut) dans
+`profiles.settings` (JSON libre, pas de migration), lus par `song-player.js` et
+`profile-view.js` via `profileAutoplayAllowed()`. Tests : `tests/settings_modal.test.js`.
+
+### Mode favori choisi + « Best Mode Overall » (n° 1) — migration **040**
+
+Décision produit : mode favori = choix du joueur ; « Best Mode Overall » = **meilleur taux
+de victoire, 3 parties minimum** (un 1/1 ne fait pas 100 %), égalité → le plus joué.
+Colonne `profiles.favorite_mode` (**et non** une clé de `settings` : le mode favori se voit
+sur le profil visité, `settings` est privé et jamais renvoyé par `public.php`). Validée
+serveur (PATCH) contre la liste de `MODES`. Puces dans la carte Customization, sauvegarde
+locale + cloud au clic ; `cloud-sync.js` redescend le choix, un `null` cloud efface, un
+payload sans le champ (backend pas migré) laisse intact. Helper pur `bestModeOverall()`
+(`profile-format.js`), partagé par la page et le profil visité. `stats.favoriteMode` (le
+plus joué) reste calculé, plus affiché.
+
+Au passage : les pastilles de bordure n'étaient rendues qu'après un pull cloud — un invité
+voyait une rangée vide sous « Avatar Border ». Rendues au chargement et après déconnexion.
+
+⚠️ **Release** : `040` ajoutée à la checklist `TODO.md`. Sans elle, `Unknown column
+'favorite_mode'` sur **tout** GET `/api/user/:id` et `/api/user/public` — le profil ne
+charge plus, pas seulement le mode favori. PHPUnit n'a pas tourné localement (pas de PHP
+hors Docker) : à confirmer en CI.
+
+### Portugais refusé par l'API (bug trouvé en chemin) — `api/lib/validation.php`
+
+Trois listes locales de langues s'arrêtaient à `it` : un joueur en `pt` voyait **tout** son
+PATCH profil refusé en 400 « Invalid lang » (avatar, bordure, badges compris — le client
+envoie toujours la langue avec le reste), était inscrit en `en`, et l'admin ne pouvait pas
+lui poser `pt`. Constante unique `PERSONADLE_SUPPORTED_LANGS`, test PHPUnit de parité avec
+`lang/*.json`.
+
+### « Défier un ami » toujours disponible (n° 7) — `js/gameCore.js` + 6 modes
+
+Ce qui se passait : injecté uniquement à la **victoire fraîche**, dans la navigation de fin
+de partie (cachée avant), et `return` si déjà présent. Absent avant la fin, après un Give
+Up, et au rechargement — pour ce dernier, deux raisons : la victoire restaurée n'est plus
+« fraîche », et quand le mode rejoue sa fin de partie au chargement, `initAuth()` n'a pas
+encore posé `_currentUser`.
+
+- `initChallengeButton(mode, pool, score)` monte le bouton à l'arrivée, après
+  `window._authReady`, dans `.expert-toggle-zone` ; une fois la navigation révélée par
+  `revealNextLink`, il y est **déplacé** entre précédent/suivant. Rappeler
+  `showChallengeButton()` **met à jour** score et pool.
+- Score « par » par mode tant que la partie n'est pas finie (`CHALLENGE_PAR` : classic 5,
+  emoji 5, silhouette 4, alloutattack 4, personae 3, music 3) — le serveur exige un score
+  > 0, la cible est tirée au hasard, rien n'oblige à avoir joué. Vrai score à la fin,
+  victoire **ou abandon**. La modale affiche le score à battre.
+- Le pool de cibles peut être une **fonction**, évaluée au clic (les filtres changent).
+
+Tests : `tests/challenge_button_always.test.js` (placement, par, mise à jour, auth).
+
+### Page Amis en 3 onglets + ⚔ Défier par ami (demande Hamza + n° 7)
+
+Cinq blocs empilés → Amis (demandes + liste) / Boîte (messages & défis, état vide au lieu de
+disparaître) / Trouver (recherche + joueurs, chargés à la **première ouverture** seulement).
+Pastilles (demandes reçues, non-lus), dernier onglet mémorisé, `?tab=`. Ids de sections
+inchangés.
+
+⚔ par ami : un défi se joue dans un mode, avec le pool/filtres/dimension Expert **de la page
+de ce mode**. Plutôt que recharger six datasets sur la page Amis, le bouton demande le mode
+puis navigue vers la page du mode avec `?challenge=<friend_id>` ; `initChallengeButton()`
+ouvre la modale sur cet ami (mis en avant, `scrollIntoView`), retire le paramètre de l'URL
+(sinon un F5 rouvre). Le clic « Envoyer » reste au joueur. Tests : `tests/friends_tabs.test.js`.
+
+### Marqueur True Confidant (demande Hamza) — deux bugs + un restyle
+
+- `friends.html` ne chargeait **pas** `css/rank10-effect.css` : particules et label
+  arrivaient sans style — un bloc de texte brut « ✦ True Confidant » sous l'avatar.
+- La liste se re-rend à chaque poll (30 s) et **rejouait** burst + label à chaque fois.
+  `applyRank10Effect(…, { celebrate })` : la liste ne célèbre qu'à la première apparition
+  de chaque ami dans la session (`Set` par `friendship_id`).
+- Restyle : anneau doré fixe (plus de halo pulsant), pastille « ✦ MAX » plate, label
+  d'entrée en bulle qui s'efface (plus de machine à écrire).
+
+### Masque Personae Expert insensible aux accents (remontée Minthe / Mio Natsukawa)
+
+La fiche FR de Minthe s'ouvre sur « Minthé est une naïade… » : l'accent faisait rater le
+masque « Minthe », la réponse se lisait dès la première ligne. Même fuite en allemand sur
+Moros (« morös »). Un balayage des 6 langues n'en trouve pas d'autre — mais rien n'empêchait
+la prochaine traduction d'en créer une. `maskTerms()` (`gameCore.js`) compare sur une copie
+repliée (é → e) et remplace dans l'original ; NFC en amont pour qu'un accent décomposé garde
+la même longueur. Effet voulu : une lettre accentuée est une lettre, plus une frontière de
+mot. Le test de non-fuite (`tests/expertContent.test.js`) compare lui aussi sans
+diacritiques — il échouait sur Minthe/fr et Moros/de avec l'ancien code.
+
+### Second passage (même jour) — bug `{{count}}`, E2E des défis, six améliorations
+
+- **« ❄️ Rallumer — 0 → {{count}} jours »** : le `tf()` de `profile-page.js` ne transmettait pas
+  son 3ᵉ argument à `i18n.t()`, les placeholders restaient bruts. Seul appelant touché : le
+  bouton Jack Frost sous les stats. Test de régression sur `tf()` (exporté `_tf`).
+- **Profil visité ≠ profil propre pour la streak** : `public.php` n'exposait pas
+  `global_streak` ; `profile-view.js` prenait le max des streaks par mode (un joueur voyait
+  30 chez lui, ses amis 37 — et une correction admin de la globale restait invisible chez
+  eux). Exposée, avec repli sur l'ancien calcul si le champ manque.
+- **E2E `tests-e2e/challenge_flow.spec.js`** (8 étapes, navigateur réel) : bouton avant toute
+  partie, score par, envoi, ⚔ depuis Amis avec présélection, acceptation depuis la Boîte et
+  victoire (`beaten`), *calling card*, abandon depuis le bandeau (`read`), Give Up en défi
+  (`expired`). Un seul contexte navigateur par joueur sur les étapes chaînées : le défi accepté
+  vit dans `localStorage`. C'est la réponse à « comment tester les défis ».
+- **Filtres d'un défi** : un joueur qui n'a jamais touché ses filtres n'a rien en localStorage
+  (voulu : « absent = tout actif »), donc `_getActiveFilters()` envoyait `[]` et le
+  destinataire gardait SES filtres — cible hors de son autocomplétion s'ils étaient
+  restrictifs. `initFilterMenu()` enregistre la liste effective auprès de `gameCore`
+  (`registerActiveFilters`), rien n'est persisté, le seeding des futurs opus est intact.
+- **Défis Expert depuis l'onglet Amis** : ligne ⚡ remplie en asynchrone, limitée aux modes
+  débloqués des deux côtés (`fetchExpertStatus()` + `friends.list({ expert_mode })` par mode
+  débloqué chez soi, en parallèle, six au maximum, à l'ouverture du sélecteur).
+- **Onglet 📊 Stats admin** : note — les streaks y sont *par mode*, la « Série actuelle » du
+  joueur est `users.global_streak` (onglet 🔥). Le « ça ne change rien » était attendu.
+- **`stats.favoriteMode` retiré** de `profileStats.js` / `cloud-sync.js` (plus lu depuis le
+  mode favori choisi) ; le pull efface la clé d'un profil 2.1.
+- **`tests-e2e/visual_layout.spec.js`** (opt-in `E2E_VISUAL=1`, hors CI) : 6 modes × 2
+  viewports, cible du jour masquée (elle dépend de `anonPlayerId` et du jour). Références
+  locales hors dépôt (`tests-e2e/__screenshots__/`, gitignoré) — le rendu des polices n'est
+  pas portable Windows → Linux. À figer AVANT la PR layout, pour relire chaque diff pendant.
+
+### Divers
+
+- Liens GitHub `HamzaKarrouchi` → `CodeByHaamza` (12 fichiers ; l'ancien compte renvoie
+  404, l'avatar du README était cassé).
+- Doc cron Discord : horaire hPanel `5 0 * * *` (jamais une heure « convertie »).
+
+---
+
+## 2026-09-10 — fix(défi): les six façons dont un défi mourait en silence
+
+Signalé en prod : « parfois pas d'animation, parfois pas de redirection donc on joue sans
+rien, parfois redirigé mais le défi n'est pas lancé et on reste bloqué en défi en cours ».
+Trois symptômes, six causes distinctes — toutes **muettes** : aucune erreur, aucun message,
+rien en console. Elles se cumulaient, d'où l'impression rapportée que « seule l'animation
+d'accueil marche ».
+
+### 1. Un défi accepté un autre jour que celui de sa création naissait périmé
+
+`activeChallenge.date` portait `challenge_date`, le jour où **l'expéditeur** a créé le défi.
+Or **toutes** ses lectures le comparent à `parisDateKey()` d'aujourd'hui :
+
+| Lecteur | Effet si la date ne colle pas |
+|---|---|
+| `initChallengeBanner()` | supprime la case, aucune bannière |
+| `getActiveChallengeTarget()` | cible dédiée ignorée → on rejoue la cible du jour |
+| `getPendingActiveChallenge()` | le défi n'existe plus pour le client |
+
+Un défi envoyé à 23 h 55 et accepté le lendemain matin était donc mort-né : redirection OK,
+mais aucun défi à l'arrivée, et un statut `accepted` que plus rien ne pouvait résoudre côté
+serveur. Le joueur restait « en défi en cours », et l'expéditeur n'avait jamais de résultat.
+Rien ne s'y opposait : la cible et le score voyagent dans le message, ils ne dépendent
+d'aucune date.
+
+**Correctif** — la case porte désormais le jour de **jeu** (`date: parisDateKey()`, posé à
+l'acceptation) ; le jour d'origine est conservé en `challengeDate`, pour l'affichage et le
+débogage. Les deux points d'acceptation sont corrigés (`js/challenge-notif.js`,
+`profile/friends/friends.js`).
+
+### 2. Redirection en absolu → 404 hors racine du domaine
+
+`js/challenge-notif.js` construisait sa destination en absolu, avec un seul cas particulier
+codé en dur : `pathname.startsWith("/personadle/")` → `/personadle`, sinon `""`. Le site
+n'est à la racine du domaine qu'en prod. Partout ailleurs — sous-dossier, préproduction, ou
+`…/personadle` **sans** slash final, qui ne déclenche même pas le test — accepter menait sur
+une 404, avec un défi déjà passé `accepted`. Bloqué, et sans page où aller.
+
+`js/bottomNav.js` calculait déjà ses liens en relatif et n'avait pas le problème.
+
+**Correctif** — `siteRootPrefix()` / `modePageHref()` (`js/gameCore.js`), en relatif. Les
+**trois** tables de pages de mode (challenge-notif en absolu, friends.js en `../../`,
+bottomNav dans son coin) sont fusionnées en une seule (`MODE_PAGE_PATH`), et `bottomNav.js`
+consomme le même helper pour qu'elles ne puissent plus diverger.
+
+### 3. Cible introuvable → repli silencieux sur la cible du jour
+
+Les 6 modes faisaient `pool.find(...)` et, quand la cible du défi restait introuvable,
+retombaient **sans rien dire** sur la cible quotidienne — alors qu'`isChallengePlay()`
+restait vrai. La partie ne comptait ni comme défi (mauvaise cible) ni comme partie
+quotidienne (jamais enregistrée) : littéralement « on joue sans rien ». Cas réels : pool
+Expert plus étroit (fiches de lore, paroles), dataset amputé depuis l'envoi, clé de
+désambiguïsation inconnue du client.
+
+**Correctif** — `resolveChallengeTarget(mode, pool, keyOf)` (`js/gameCore.js`) résout contre
+le pool **réellement jouable de la page** (dimension comprise) et, en cas d'échec, purge le
+défi (`dropUnplayableChallenge()`) : case libérée, filtres rendus, état de mode nettoyé,
+statut serveur repassé à `read`, toast au joueur. Personae garde sa résolution maison
+(`challengeKey()` désambiguïse les homonymes) mais applique la même règle de sortie, et
+vérifie en plus la présence d'une fiche de lore en Expert.
+
+### 4. Aucune sortie quand la bannière ne s'affiche pas
+
+Un défi `accepted` n'affichait **aucun bouton** sur la page Amis. La seule sortie était le
+bouton « Abandonner » de la bannière, qui exige la bonne page **et** la bonne dimension
+**et** une case locale encore valable. Dès que cette case disparaissait (autre appareil,
+cache vidé, acceptation d'un jour précédent, cible injouable), le joueur restait bloqué sans
+plus rien pour y toucher — et son ami n'avait jamais de résultat.
+
+**Correctif** — boutons **« Reprendre »** (redirige vers la page du défi) et
+**« Abandonner »** sur chaque défi reçu en statut `accepted` (`profile/friends/friends.js`).
+Adossés au message lui-même, ils fonctionnent donc **sans** état local. L'abandon attend la
+réponse serveur avant de purger le local (piège `performRecovery()`, CLAUDE.md §7) et ne
+défait l'état local que s'il correspond bien à ce défi-là (sinon il effacerait un autre défi
+en cours de la même dimension).
+
+### 5. Une notification manquée était perdue pour toujours
+
+`js/notifications.js` marquait les défis « vus » en `localStorage` **avant** de les afficher.
+Une notification que le joueur n'a jamais vue — navigation dans la seconde, plein écran
+par-dessus — ne revenait donc jamais, alors que le message restait `unread` côté serveur.
+C'est la cause n°1 des « parfois pas d'animation ».
+
+**Correctif** — deux niveaux : un `Set` en mémoire dédoublonne les sondages de la page
+courante, et le « vu » persistant n'est posé que quand le joueur **ferme réellement** la
+notification (accepter / refuser / croix), via `setChallengeNotifDismissHandler()`. Les défis
+encore en file au moment d'une fermeture par la croix ne sont plus jetés en silence : ils
+repartent au sondage suivant. L'acceptation, elle, n'a pas besoin du drapeau : le statut
+serveur passe `accepted`, et le sondage ne remonte que les `unread`.
+
+### 6. L'écran de résultat éjectait le joueur de la page qu'il consultait
+
+`showChallengeResult()` posait un `setTimeout(goHome, 11 s)` **inconditionnel**. Sur la
+variante « notification » (l'expéditeur apprend que son défi a été relevé), il s'appliquait
+aussi : le joueur était renvoyé à l'accueil depuis n'importe quelle page — page Amis
+comprise, où il était peut-être en train d'accepter un défi — et l'overlay plein écran
+masquait les boutons pendant ces 11 secondes. Il détruisait au passage toute notification de
+défi affichée en même temps, définitivement perdue (cause n°5).
+
+**Correctif** — `goHomeOnClose` : vrai en fin de partie (la page de jeu n'a plus rien à
+montrer), faux pour la notification, qui se contente de se fermer. Et `notifications.js`
+n'empile plus une notification de défi par-dessus un `#cr-overlay` visible : il repasse au
+sondage suivant.
+
+### Corrections annexes du même lot
+
+- **Double-clic sur « Accepter »** : deux allers-retours réseau séparent le clic de la
+  redirection ; un joueur qui recliquait parce que « rien ne se passe » lançait deux
+  acceptations et deux gains d'XP. Boutons verrouillés pendant l'appel, rouverts sur échec
+  pour laisser refuser.
+- **« Finish your current challenge first » nomme désormais le mode bloquant** — le défi en
+  cours peut vivre sur n'importe laquelle des 6 pages, et sa bannière ne s'affiche que sur
+  la bonne.
+- **`checkChallengeCompletion()` applique enfin la garde de date** : c'était le seul chemin
+  sans. Une case restée depuis la veille était consommée par la partie du jour, et
+  l'expéditeur recevait un résultat pour une partie qui n'avait rien à voir avec son défi.
+- **Parité des deux chemins d'acceptation** : la page Amis n'avait ni la garde « Expert
+  débloqué » ni le barème d'XP Expert (25/50) que la notification appliquait déjà. Le même
+  défi était donc acceptable ou non selon l'endroit d'où on cliquait.
+- **Une seule table `MODE_STATE_KEYS`** (`js/gameCore.js`) : `challenge-notif.js` et
+  `friends.js` en gardaient chacun une copie manuscrite, pour un même geste sur les deux
+  seuls chemins d'acceptation du produit.
+- **Un seul geste de libération** — `releaseActiveChallenge()` — partagé par la fin de
+  partie, l'abandon et la purge d'un défi injouable. Les trois sorties laissaient le mode
+  dans des états légèrement différents. `initChallengeBanner()` s'en sert aussi pour purger
+  un défi périmé : son `removeItem` nu laissait les filtres du défi installés et, pour un
+  défi à cible dédiée, la cible d'hier persistée dans l'état du mode.
+
+### Nouveau : panneau admin — onglets « Défis » et « Streak »
+
+Un défi vit dans **deux** états (ligne `messages` + case `localStorage`). Quand ils divergent
+au-delà de ce que la page Amis rattrape, il fallait ouvrir phpMyAdmin.
+
+- `api/admin/user_challenges.php` — `GET` liste les 100 derniers défis d'un joueur (les deux
+  sens) ; `PATCH` force le statut (**relancer** = `unread`, **annuler** = `read`) ; `DELETE`
+  supprime. Chaque action est bornée à un défi qui concerne bien l'utilisateur de l'URL —
+  l'id de message vient de la même URL, rien n'empêcherait sinon de piloter n'importe quelle
+  ligne `messages` depuis la fiche d'un joueur. Tout est journalisé (`admin_audit_log`).
+  Pas d'XP Social Link sur un `beaten` posé à la main : une réparation n'est pas une partie.
+- `api/admin/user_streak.php` — `GET` l'état complet (streak globale, record, dernier jour
+  validé, cooldown Jack Frost restant, jours réellement joués, streaks par mode) ; `PATCH`
+  avec trois actions :
+  - `set` — écrit les valeurs telles quelles. **Seul chemin qui autorise une baisse** :
+    `recover` ne peut, par construction, que remonter.
+  - `recover` — Jack Frost **illimité** : ni cooldown de 60 jours, ni plafond « jours
+    réellement joués ». Ces deux gardes protègent d'un joueur qui s'auto-attribue une
+    streak, pas d'un admin qui répare un compte. Ne consomme pas la récupération du joueur
+    (`streak_recovered_at` inchangé) et ne fait jamais régresser une streak de mode
+    (`WHERE streak < ?`).
+  - `reset_cooldown` — efface `streak_recovered_at` : le joueur peut réutiliser Jack Frost
+    depuis le jeu, immédiatement.
+- L'écriture de la restauration est extraite en `personadle_apply_streak_recovery()`
+  (`api/lib/streak_recovery.php`), partagée avec le chemin joueur : ce sont les
+  **vérifications** qui diffèrent entre admin et joueur, pas l'écriture. La dupliquer aurait
+  fait deux `UPDATE` à tenir alignés.
+- Front : `admin/challenges.js`, `admin/streak.js`, onglets `⚔ Défis` et `🔥 Streak`,
+  `RewriteRule` correspondantes dans `api/admin/.htaccess` (CLAUDE.md §4), pastilles d'état
+  et champ `input[type=date]` stylés dans `admin/admin.css`.
+
+### Angles morts connus
+
+- **Non vérifié en bout de chaîne** : ce lot n'a pas pu être rejoué contre la stack Docker
+  (aucun démon Docker dans l'environnement utilisé), donc ni E2E Playwright ni PHPUnit
+  (`vendor/` absent). Les 6 causes sont couvertes par des tests Vitest
+  (`tests/challengeRecovery.test.js`, `tests/challengeAccept.test.js`,
+  `tests/challengeResult.test.js`), mais les **deux endpoints admin n'ont été validés que
+  par `php -l`** — à exercer manuellement avant release.
+- `dropUnplayableChallenge()` libère le local **avant** confirmation serveur (contrairement
+  à l'abandon). Assumé : le local est déjà inutilisable, le garder ne rendrait pas le défi
+  jouable mais continuerait de bloquer l'acceptation d'un autre et de faire passer chaque
+  partie du mode pour un défi. Si le `PATCH` échoue, le défi reste `accepted` en base —
+  c'est précisément ce que le bouton « Abandonner » de la page Amis rattrape.
+- `loadMessages()` (page Amis) ne lit que les 30 messages les plus récents, **tous types
+  confondus** : un défi ancien peut sortir de la fenêtre et redevenir inatteignable depuis
+  le jeu. Le panneau admin en voit 100. Une pagination des messages reste à faire.
+- Le serveur n'expire jamais un défi `unread` : on peut se voir proposer un défi vieux de
+  plusieurs jours. C'est désormais **jouable** (cause n°1), donc ce n'est plus un bug — mais
+  une durée de vie explicite reste à décider côté produit.
+
+---
+
 ## 2026-09-09 — feat(cron): annonce quotidienne du PersonaDLE sur Discord
 
 Le Discord venait d'être refondu, mais rien n'annonçait le PersonaDLE du jour : le salon

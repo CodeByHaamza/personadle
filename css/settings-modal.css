@@ -1,4 +1,40 @@
-/* settings-modal.css — Modal paramètres joueur */
+/* settings-modal.css — Modal paramètres joueur + bouton ⚙ qui l'ouvre */
+
+/* ── Bouton ⚙ dans .darkmode-toggle (profil, accueil, 6 modes) ──────────────
+   Déplacé ici depuis profile-page.css quand le bouton est arrivé sur les pages
+   de jeu (retour joueur 2.2 : « pas de bouton Settings sur la page de mode »),
+   pour que les 7 pages partagent une seule règle. */
+.dm-sep {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.settings-btn {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
+  background: none;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  transition:
+    color 0.15s,
+    transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+.settings-btn:hover {
+  color: #fff;
+  transform: rotate(30deg);
+}
 
 #settingsModal {
   position: fixed;
@@ -30,8 +66,12 @@
   background: #fff;
   border: 1px solid #e8e8e8;
   border-radius: 18px;
-  padding: 28px 28px 24px;
-  width: min(420px, 92vw);
+  padding: 30px 32px 26px;
+  /* 420 px pour son, animations, musique, données ET zone de danger : c'était
+     serré (retour Hamza du 2026-09-16). */
+  width: min(560px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.22);
   display: flex;
   flex-direction: column;
@@ -56,6 +96,7 @@
 }
 
 .sm-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   background: none;
   border: none;
   font-size: 1.1rem;
@@ -307,3 +348,91 @@ body.darkmode .sm-panel {
 body.darkmode .sm-title { color: #e8d8ff !important; }
 body.darkmode .sm-section-title { color: #c8b0e8 !important; }
 body.darkmode .sm-label { color: #b0a0d0 !important; }
+
+/* ── Section « Données » : export du profil (déplacé de la page profil, 2.2) ── */
+.sm-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.sm-data-btn {
+  min-height: 0;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 2px solid var(--accent, #e63946);
+  background: transparent;
+  color: var(--accent, #e63946);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.sm-data-btn:hover {
+  background: var(--accent, #e63946);
+  color: #fff;
+}
+
+/* ── Zone de danger (réinitialisation / suppression de compte, 2.2) ──────────
+   Déplacée depuis le bas de la page profil : deux boutons rouges y étaient
+   atteignables en un clic, dont un derrière un simple confirm() natif. */
+.sm-danger {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 14px;
+}
+
+.sm-danger.hidden {
+  display: none;
+}
+
+.sm-section-title--danger {
+  color: #dc3545;
+}
+
+.sm-danger-intro {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #888;
+}
+
+.sm-danger-btn {
+  min-height: 0;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(220, 53, 69, 0.4);
+  background: transparent;
+  color: #dc3545;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.sm-danger-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: #dc3545;
+}
+
+.sm-danger-btn--hard:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+.darkmode .sm-danger {
+  border-top-color: #2e2e2e;
+}
+
+.darkmode .sm-danger-intro {
+  color: #999;
+}

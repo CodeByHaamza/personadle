@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 911 tests Vitest (52 suites), 280 méthodes PHPUnit, 113 tests E2E,
+> Vérifié le 2026-08-26 : 1155 tests Vitest (65 suites), 293 méthodes PHPUnit, 229 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -44,6 +44,18 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 - [ ] Jouer `sql/migrations/038_badge_false_spring.sql` (badge A Gentle Reprieve). Même
       forme que la 033 : `INSERT IGNORE`, rejouable, mais sans elle le badge n'existe pas
       en base.
+- [ ] Jouer `sql/migrations/040_profiles_favorite_mode.sql` (colonne
+      `profiles.favorite_mode`, MariaDB `IF NOT EXISTS`, rejouable). Sans elle :
+      `Unknown column 'favorite_mode'` sur **tout** GET /api/user/:id et GET
+      /api/user/public — le profil ne charge plus, pas seulement le mode favori.
+- [ ] Jouer `sql/migrations/041_game_sessions_guesses.sql` (colonne `game_sessions.guesses`,
+      MariaDB `IF NOT EXISTS`, rejouable). Sans elle : **tout** `POST /api/sessions` échoue
+      (`Unknown column 'guesses'`) — plus aucune partie n'est enregistrée.
+- [ ] Jouer `sql/migrations/042_moderation_maintenance.sql` (colonnes de ban motivé sur `users`,
+      tables `user_notices`, `admin_notes`, `announcements`, `site_settings` ; MariaDB
+      `IF NOT EXISTS`, rejouable). Sans elle : **`requireAuth()` plante** (`Unknown column
+      'ban_reason'`) — plus aucun appel authentifié ne passe, et `GET /api/auth/me` tombe
+      en 500 sur toutes les pages. À jouer **avant** le `git pull` de Hostinger, pas après.
 - [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v94 → v95, fait le 2026-09-01). Sans bump,
       `activate` ne purge pas l'ancien cache et les assets servis en cache-first (images,
       sons) restent ceux de la version précédente. Invisible en test : seuls les joueurs
@@ -231,6 +243,43 @@ vulnérabilité. Le risque vit dans les 61 fichiers PHP écrits à la main.
 
 ---
 
+## Dépôt git — purge des anciens `.gif` All-Out Attack de l'historique (décision Hamza)
+
+Mesuré le 2026-09-13 (`git rev-list --objects --all | git cat-file --batch-check`) : `.git`
+pèse **3,8 Go**. Dans `allOutAttackMode/database/allOutAttack/` : **79 blobs `.webp` = 1,82 Go**
+(les animations actuelles et leurs versions — **on les garde**, le dépôt doit permettre de
+jouer 100 % en local) et **62 blobs `.gif` = 1,28 Go** : les anciens GIF remplacés par les
+`.webp`, **plus aucun n'est suivi**, ils ne servent qu'à gonfler chaque clone. Le reste
+(0,22 Go de docs d'anciennes versions, quelques wallpapers) est négligeable.
+
+Seule une réécriture de l'historique enlève ces 1,28 Go — donc **force-push, re-clone pour
+Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne faire que :
+
+- [ ] **au bon créneau** : juste après une release, **aucune PR ouverte** (chaque PR ouverte
+      devrait être recréée — tous les SHA changent) ;
+- [ ] **Léo et Damien prévenus** : leurs clones deviennent incompatibles → `git clone` à
+      neuf (rien de local à garder chez eux avant) ;
+- [ ] **sauvegarde** : `git clone --mirror https://github.com/CodeByHaamza/personadle.git
+      personadle-backup.git`, gardée hors ligne un mois ;
+- [ ] **réécriture** : `bash scripts/purge_git_history.sh` (réécrit le 2026-09-13 — il cible
+      **uniquement** `allOutAttackMode/database/allOutAttack/*.gif` ; l'ancienne version purgeait
+      « tout blob > 5 Mo » et aurait emporté les badges et wallpapers PNG). Il fait lui-même le
+      miroir de sauvegarde, refuse un arbre sale, demande `PURGE`, puis `gc`. Attendu :
+      `.git` ≈ 3,8 → ≈ 2,5 Go. Ne toucher ni aux `.webp` (jouer local), ni aux `.gif` d'`img/`
+      (avatars, loading — petits et encore servis) ;
+- [ ] **vérifier** sur le miroir réécrit, cloné à part : `npm test`, `make up` +
+      `npm run test:e2e`, `git log --oneline | wc -l` identique, `git diff <ancien main>
+      <nouveau main>` vide hors `.gif` purgés ;
+- [ ] **pousser** : `git push --force --mirror` (toutes branches et tags) ;
+- [ ] **Hostinger** (le `git pull` auto refusera l'historique divergent) : SSH,
+      `cd domains/personadle.net/public_html && git fetch origin && git reset --hard
+      origin/main`, puis vérifier `api/config.php` et les fichiers non suivis toujours en
+      place. Hors heure de pointe, prévoir quelques minutes ;
+- [ ] **après coup** : `git gc --prune=now --aggressive` sur chaque clone survivant ;
+      supprimer le miroir de sauvegarde après un mois sans problème.
+
+---
+
 ## Outillage
 
 - [ ] **CI : rejeu de migration sur base vierge.** CLAUDE.md §13 l'exige, rien ne le vérifie —
@@ -276,6 +325,12 @@ vulnérabilité. Le risque vit dans les 61 fichiers PHP écrits à la main.
 
 ## Dette repérée en passant
 
+- [ ] **Page Classique défilée de ~215 px au chargement en CI (1280×720)** — la boîte de
+      consigne `.personadle-box` intercepte alors le clic sur ⚔ Défier (55 retries Playwright,
+      trace du run 34777768286 ; capture : bouton collé au bord haut, logo hors écran). Non
+      reproduit en local (bouton à y=214, boîte à y=273, `scrollY=0`). Contourné dans
+      `challenge_flow.spec.js` par `dispatchEvent("click")`. À comprendre avec la PR layout
+      (sticky input) : si un joueur en 720 px de haut arrive défilé, c'est un vrai défaut.
 - [ ] **Débordement horizontal de `.nav-item`** (barre du bas) sur mobile, commun aux 6 modes.
       `.audio-wrapper` et `.expert-lyrics-wrapper` ont été corrigés ; la barre non.
 - [ ] **`personadle_expert_stats_by_mode()` fait du N+1** — un recalcul de streak par mode.

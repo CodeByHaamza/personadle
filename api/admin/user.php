@@ -10,6 +10,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/admin_validation.php';
+require_once __DIR__ . '/../lib/validation.php';
 
 $adminId = requireAdmin();
 
@@ -29,12 +30,29 @@ if ($userId <= 0) jsonError('Invalid user id', 400);
 if ($method === 'GET') {
     // Utilisateur
     $stmt = $pdo->prepare(
-        'SELECT id, email, pseudo, lang, friend_code, is_admin, is_banned, pseudo_locked, created_at, last_login_at
+        'SELECT id, email, pseudo, lang, friend_code, is_admin, is_banned, pseudo_locked, created_at, last_login_at,
+                ban_reason, ban_note, banned_at, banned_until, reset_local_state_at
          FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1'
     );
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user) jsonError('User not found', 404);
+
+    // Modération (migration 042) : notes internes, messages envoyés
+    $stmt = $pdo->prepare(
+        'SELECT n.id, n.note, n.created_at, a.pseudo AS admin_pseudo
+         FROM admin_notes n LEFT JOIN users a ON a.id = n.admin_id
+         WHERE n.user_id = ? ORDER BY n.created_at DESC LIMIT 100'
+    );
+    $stmt->execute([$userId]);
+    $notes = $stmt->fetchAll();
+    $stmt = $pdo->prepare(
+        'SELECT n.id, n.type, n.message, n.created_at, n.read_at, a.pseudo AS admin_pseudo
+         FROM user_notices n LEFT JOIN users a ON a.id = n.admin_id
+         WHERE n.user_id = ? ORDER BY n.created_at DESC LIMIT 50'
+    );
+    $stmt->execute([$userId]);
+    $notices = $stmt->fetchAll();
 
     // Profil
     $stmt = $pdo->prepare(
@@ -124,10 +142,23 @@ if ($method === 'GET') {
             'friend_code'   =>        $user['friend_code'],
             'is_admin'      => (bool) $user['is_admin'],
             'is_banned'     => (bool) ($user['is_banned']      ?? false),
+            'ban_reason'    =>        $user['ban_reason']   ?? null,
+            'ban_note'      =>        $user['ban_note']     ?? null,
+            'banned_at'     =>        $user['banned_at']    ?? null,
+            'banned_until'  =>        $user['banned_until'] ?? null,
+            'reset_local_state_at' => $user['reset_local_state_at'] ?? null,
             'pseudo_locked' => (bool) ($user['pseudo_locked']  ?? false),
             'created_at'    =>        $user['created_at'],
             'last_login_at' =>        $user['last_login_at'],
         ],
+        'notes'   => array_map(static fn($n) => [
+            'id' => (int) $n['id'], 'note' => $n['note'], 'created_at' => $n['created_at'],
+            'admin_pseudo' => $n['admin_pseudo'],
+        ], $notes),
+        'notices' => array_map(static fn($n) => [
+            'id' => (int) $n['id'], 'type' => $n['type'], 'message' => $n['message'],
+            'created_at' => $n['created_at'], 'read_at' => $n['read_at'], 'admin_pseudo' => $n['admin_pseudo'],
+        ], $notices),
         'profile' => [
             'avatar_data'         => $profile['avatar_data']         ?? null,
             'avatar_border_color' => $profile['avatar_border_color'] ?? '#ffffff',
@@ -216,8 +247,8 @@ if ($method === 'PATCH') {
     // lang
     if (array_key_exists('lang', $data)) {
         $lang = trim((string) $data['lang']);
-        if (!in_array($lang, ['en', 'fr', 'es', 'de', 'it'], true)) {
-            jsonError('Invalid lang (en|fr|es|de|it)', 400);
+        if (!in_array($lang, PERSONADLE_SUPPORTED_LANGS, true)) {
+            jsonError('Invalid lang (' . implode('|', PERSONADLE_SUPPORTED_LANGS) . ')', 400);
         }
         $userFields[] = 'lang = ?';
         $userParams[] = $lang;
@@ -232,12 +263,38 @@ if ($method === 'PATCH') {
         $auditEntries[] = ['action' => $isAdmin ? 'user.grant_admin' : 'user.revoke_admin', 'details' => []];
     }
 
-    // is_banned
+    // is_banned — avec raison VISIBLE par le joueur, note interne et durée
+    // (migration 042). ban_hours : null/0 = définitif, sinon échéance = maintenant + N h.
     if (array_key_exists('is_banned', $data)) {
         $isBanned = (bool) $data['is_banned'];
         $userFields[] = 'is_banned = ?';
         $userParams[] = (int) $isBanned;
-        $auditEntries[] = ['action' => $isBanned ? 'user.ban' : 'user.unban', 'details' => []];
+        if ($isBanned) {
+            $reason = trim((string) ($data['ban_reason'] ?? ''));
+            $note   = trim((string) ($data['ban_note']   ?? ''));
+            $hours  = (int) ($data['ban_hours'] ?? 0);
+            if (mb_strlen($reason) > 300) jsonError('ban_reason too long (300 max)', 400);
+            if (mb_strlen($note) > 2000)  jsonError('ban_note too long (2000 max)', 400);
+            if ($hours < 0 || $hours > 24 * 365) jsonError('ban_hours out of range', 400);
+            $until = $hours > 0 ? (new DateTime('now', new DateTimeZone('UTC')))->modify("+$hours hours")->format('Y-m-d H:i:s') : null;
+            $userFields[] = 'ban_reason = ?';   $userParams[] = $reason !== '' ? $reason : null;
+            $userFields[] = 'ban_note = ?';     $userParams[] = $note !== '' ? $note : null;
+            $userFields[] = 'banned_at = NOW()';
+            $userFields[] = 'banned_until = ?'; $userParams[] = $until;
+            $auditEntries[] = ['action' => 'user.ban', 'details' => ['reason' => $reason, 'hours' => $hours, 'until' => $until]];
+        } else {
+            $userFields[] = 'ban_reason = NULL';
+            $userFields[] = 'banned_at = NULL';
+            $userFields[] = 'banned_until = NULL';
+            $auditEntries[] = ['action' => 'user.unban', 'details' => []];
+        }
+    }
+
+    // reset_local_state — reset ciblé : le client du joueur videra son état local
+    // des modes (parties corrompues) au prochain chargement (js/auth.js).
+    if (!empty($data['reset_local_state'])) {
+        $userFields[] = 'reset_local_state_at = NOW()';
+        $auditEntries[] = ['action' => 'user.reset_local_state', 'details' => []];
     }
 
     // pseudo_locked
@@ -295,7 +352,8 @@ if ($method === 'PATCH') {
 
     // Retourner l'utilisateur mis à jour
     $stmt = $pdo->prepare(
-        'SELECT id, email, pseudo, lang, friend_code, is_admin, is_banned, pseudo_locked, created_at, last_login_at
+        'SELECT id, email, pseudo, lang, friend_code, is_admin, is_banned, pseudo_locked, created_at, last_login_at,
+                ban_reason, ban_note, banned_at, banned_until, reset_local_state_at
          FROM users WHERE id = ? LIMIT 1'
     );
     $stmt->execute([$userId]);
@@ -310,6 +368,11 @@ if ($method === 'PATCH') {
             'friend_code'   =>        $updated['friend_code'],
             'is_admin'      => (bool) $updated['is_admin'],
             'is_banned'     => (bool) ($updated['is_banned']     ?? false),
+            'ban_reason'    =>        $updated['ban_reason']   ?? null,
+            'ban_note'      =>        $updated['ban_note']     ?? null,
+            'banned_at'     =>        $updated['banned_at']    ?? null,
+            'banned_until'  =>        $updated['banned_until'] ?? null,
+            'reset_local_state_at' => $updated['reset_local_state_at'] ?? null,
             'pseudo_locked' => (bool) ($updated['pseudo_locked'] ?? false),
             'created_at'    =>        $updated['created_at'],
             'last_login_at' =>        $updated['last_login_at'],

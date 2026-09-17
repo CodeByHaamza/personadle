@@ -6,7 +6,13 @@
  *   initSettingsModal(userId);  // appeler après auth
  *
  * Settings sauvegardés : cloud (profiles.settings) + cache localStorage.
- * Structure : { sound_enabled, sound_volume, anim_victory, anim_friend_request }
+ * Structure : { sound_enabled, sound_volume, anim_victory, anim_friend_request,
+ *               anim_friend_request_style, profile_autoplay_own, profile_autoplay_others }
+ *
+ * Monté sur profile.html, index.html et les 6 pages de mode (retour joueur 2.2 :
+ * « pas de bouton Settings sur la page de mode »). Le bouton ⚙ vit dans
+ * .darkmode-toggle et la modale est créée à la demande, donc aucune page n'a de
+ * markup à porter au-delà du bouton.
  */
 
 import { openModal, closeModal } from "./modal.js";
@@ -17,6 +23,10 @@ const DEFAULTS = {
   anim_victory: true,
   anim_friend_request: true,
   anim_friend_request_style: "calling_card",
+  // Deux réglages distincts, demandés tels quels : couper l'autoplay de SA
+  // musique de profil n'a rien à voir avec couper celle des autres joueurs.
+  profile_autoplay_own: true,
+  profile_autoplay_others: true,
 };
 
 let _userId = null;
@@ -32,7 +42,24 @@ export function openSettingsModal() {
   openModal("settingsModal", { onClose: _close });
 }
 
-export function initSettingsModal(userId) {
+/**
+ * Lecture des réglages effectifs (défauts + cache local), pour les modules qui
+ * n'ouvrent pas la modale — le lecteur de musique de profil, notamment.
+ */
+export function readPlayerSettings() {
+  return _readSettings();
+}
+
+/**
+ * L'autoplay de la musique de profil est-il autorisé ?
+ * @param {"own"|"others"} whose  "own" = mon profil, "others" = profil visité
+ */
+export function profileAutoplayAllowed(whose) {
+  const s = _readSettings();
+  return whose === "own" ? s.profile_autoplay_own !== false : s.profile_autoplay_others !== false;
+}
+
+export function initSettingsModal(userId = null) {
   _userId = userId;
   const btn = document.getElementById("settingsBtn");
   if (btn && !btn._settingsListenerBound) {
@@ -116,6 +143,58 @@ function _ensureModal() {
         </div>
       </div>
 
+      <!-- MUSIQUE DE PROFIL -->
+      <div>
+        <p class="sm-section-title">${t("settings.profile_music", "Profile music")}</p>
+        <div class="sm-row">
+          <span class="sm-label">${t("settings.profile_autoplay_own", "Autoplay on my profile")}</span>
+          <label class="switch sm-toggle">
+            <input type="checkbox" id="smProfileAutoplayOwn">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="sm-row">
+          <span class="sm-label">${t("settings.profile_autoplay_others", "Autoplay on other players' profiles")}</span>
+          <label class="switch sm-toggle">
+            <input type="checkbox" id="smProfileAutoplayOthers">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DONNÉES -->
+      <div>
+        <p class="sm-section-title">${t("settings.data", "Data")}</p>
+        <div class="sm-row sm-row--stack">
+          <span class="sm-label sm-label-sub">${t(
+            "settings.export_desc",
+            "Download your profile as a file: stats, badges, titles, everything."
+          )}</span>
+          <button type="button" class="sm-data-btn" id="smExport">
+            📤 ${t("profile.export", "Export my profile")}
+          </button>
+        </div>
+      </div>
+
+      <!-- ZONE DE DANGER (uniquement là où la page sait ouvrir les
+           confirmations — window._personadleDanger, soit la page profil) -->
+      <div id="smDangerSection" class="sm-danger hidden">
+        <p class="sm-section-title sm-section-title--danger">${t(
+          "settings.danger_zone",
+          "Danger zone"
+        )}</p>
+        <p class="sm-danger-intro">${t(
+          "settings.danger_intro",
+          "These two are irreversible. Export your profile first if you are unsure."
+        )}</p>
+        <button type="button" class="sm-danger-btn" id="smResetProfile">
+          🔄 ${t("profile.reset_btn", "Reset Profile")}
+        </button>
+        <button type="button" class="sm-danger-btn sm-danger-btn--hard" id="smDeleteAccount">
+          🗑️ ${t("profile.delete_account_btn", "Delete my account")}
+        </button>
+      </div>
+
       <button class="sm-save" id="smSave">${t("settings.save", "Save")}</button>
       <p class="sm-save-status hidden" id="smStatus"></p>
     </div>
@@ -148,12 +227,36 @@ function _ensureModal() {
 
   // Sauvegarder
   el.querySelector("#smSave").addEventListener("click", _save);
+
+  // Zone de danger — les boutons ne sont montés que si la page sait ouvrir les
+  // modales de confirmation (page profil). Ailleurs, la section reste masquée :
+  // proposer « supprimer mon compte » sans confirmation possible serait pire que
+  // de ne pas le proposer.
+  const danger = el.querySelector("#smDangerSection");
+  if (window._personadleDanger) {
+    danger.classList.remove("hidden");
+    el.querySelector("#smResetProfile").addEventListener("click", () => {
+      _closeSettings();
+      window._personadleDanger.reset?.();
+    });
+    el.querySelector("#smDeleteAccount").addEventListener("click", () => {
+      _closeSettings();
+      window._personadleDanger.deleteAccount?.();
+    });
+  }
+
+  // Export du profil — déplacé de la page profil vers les paramètres
+  // (retour Hamza, 2026-09-16 : c'est de la maintenance de données, ça n'a rien
+  // à faire à côté du partage). Agit tout de suite, sans passer par « Save ».
+  el.querySelector("#smExport").addEventListener("click", exportProfileFile);
 }
 
 function _loadIntoForm(s) {
   document.getElementById("smSoundEnabled").checked = s.sound_enabled ?? true;
   document.getElementById("smSoundVolume").value = s.sound_volume ?? 1.0;
   document.getElementById("smAnimVictory").checked = s.anim_victory ?? true;
+  document.getElementById("smProfileAutoplayOwn").checked = s.profile_autoplay_own ?? true;
+  document.getElementById("smProfileAutoplayOthers").checked = s.profile_autoplay_others ?? true;
   document.getElementById("smVolumeVal").textContent =
     `${Math.round((s.sound_volume ?? 1.0) * 100)}%`;
 
@@ -165,6 +268,31 @@ function _loadIntoForm(s) {
   document.querySelectorAll(".sm-style-btn").forEach((b) => {
     b.classList.toggle("sm-style-btn--active", b.dataset.style === style);
   });
+}
+
+/**
+ * Télécharge le profil local en JSON. Lu depuis localStorage : marche sur toutes
+ * les pages qui montent la modale, connecté ou non.
+ */
+export function exportProfileFile() {
+  let profile = {};
+  try {
+    profile = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
+  } catch {
+    profile = {};
+  }
+  const exportData = {
+    ...profile,
+    // Jeton de liaison au compte — empêche l'import du JSON sur un autre compte
+    _accountId: window._currentUser?.id ?? profile._accountId ?? null,
+    _exportedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "personadle_profile.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function _readSettings() {
@@ -186,15 +314,19 @@ async function _save() {
     anim_victory: document.getElementById("smAnimVictory").checked,
     anim_friend_request: document.getElementById("smAnimFriendRequest").checked,
     anim_friend_request_style: activeStyleBtn?.dataset.style ?? "calling_card",
+    profile_autoplay_own: document.getElementById("smProfileAutoplayOwn").checked,
+    profile_autoplay_others: document.getElementById("smProfileAutoplayOthers").checked,
   };
 
   btn.disabled = true;
   status.classList.add("hidden");
 
   try {
-    // Sauvegarder en cloud
-    if (_userId && window._personadleApi) {
-      await window._personadleApi.user.update(_userId, { settings: newSettings });
+    // Sauvegarder en cloud. L'id est résolu ICI et non à l'init : sur les pages
+    // de mode, le bouton est monté avant que initAuth() ait posé _currentUser.
+    const userId = _userId ?? window._currentUser?.id ?? null;
+    if (userId && window._personadleApi) {
+      await window._personadleApi.user.update(userId, { settings: newSettings });
     }
     // Cache local
     localStorage.setItem("personaSettings", JSON.stringify(newSettings));

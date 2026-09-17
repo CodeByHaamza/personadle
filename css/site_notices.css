@@ -1,0 +1,241 @@
+/* =============================================================
+   site_notices.css — écran de maintenance, annonces, messages de
+   l'équipe (js/site_notices.js, migration 042). Injecté par le JS
+   sur toute page qui en a besoin : aucune page ne le lie à la main.
+   Préfixes : .site-notices / .site-banner / .maintenance-*
+   ============================================================= */
+
+/* ── Bandeaux en haut de page ─────────────────────────────── */
+.site-notices {
+  position: relative;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 0;
+  font-family: Arial, sans-serif;
+}
+.site-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 980px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
+  animation: siteBannerIn 0.3s ease both;
+}
+@keyframes siteBannerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.site-banner--info {
+  background: #eef4ff;
+  color: #17305f;
+  border: 1px solid rgba(43, 70, 179, 0.3);
+}
+.site-banner--warning {
+  background: #fff4e5;
+  color: #6b3a00;
+  border: 1px solid rgba(230, 120, 40, 0.4);
+}
+.site-banner--maintenance {
+  background: linear-gradient(135deg, #0f1f5c, #1b3a8a);
+  color: #f1d27a;
+  border: 1px solid rgba(212, 175, 55, 0.6);
+}
+.site-banner--notice {
+  border-width: 2px;
+}
+.site-banner__icon {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+.site-banner__text {
+  flex: 1;
+  min-width: 0;
+}
+.site-banner__until {
+  opacity: 0.75;
+  font-size: 0.8em;
+}
+.site-banner__close {
+  flex-shrink: 0;
+  min-height: 0;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.site-banner__close:hover {
+  opacity: 1;
+}
+.site-banner__link {
+  flex-shrink: 0;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+body.darkmode .site-banner--info {
+  background: #14213d;
+  color: #cfe0ff;
+  border-color: rgba(120, 160, 255, 0.35);
+}
+body.darkmode .site-banner--warning {
+  background: #3a2410;
+  color: #ffd9a8;
+  border-color: rgba(255, 170, 90, 0.4);
+}
+@media (max-width: 768px) {
+  /* sous le toggle dark mode fixe (global.css : top 10px, ~44px de haut) */
+  .site-notices {
+    padding-top: 58px;
+  }
+}
+@media (max-width: 480px) {
+  .site-banner {
+    font-size: 0.82rem;
+    padding: 9px 10px;
+    flex-wrap: wrap;
+  }
+  .site-banner__close {
+    margin-left: auto;
+  }
+}
+
+/* ── Écran de maintenance (joueurs) ───────────────────────── */
+.maintenance-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(43, 70, 179, 0.45), transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(212, 175, 55, 0.14), transparent 55%), #070f33;
+  font-family: Arial, sans-serif;
+  animation: siteBannerIn 0.4s ease both;
+}
+body.maintenance-active {
+  overflow: hidden;
+}
+.maintenance-card {
+  position: relative;
+  overflow: hidden;
+  width: min(520px, 100%);
+  box-sizing: border-box;
+  padding: 36px 28px 30px;
+  border-radius: 18px;
+  border: 3px solid #d4af37;
+  color: #f4ead3;
+  text-align: center;
+  background-color: #0f1f5c;
+  box-shadow:
+    inset 0 0 0 6px #070f33,
+    inset 0 0 0 8px rgba(212, 175, 55, 0.5),
+    0 18px 50px rgba(3, 6, 30, 0.6);
+}
+/* Losanges bleus, comme la couverture du Compendium */
+.maintenance-card__diamonds {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  background-image:
+    linear-gradient(45deg, #2b46b3 25%, transparent 25%, transparent 75%, #2b46b3 75%),
+    linear-gradient(-45deg, #2b46b3 25%, transparent 25%, transparent 75%, #2b46b3 75%);
+  background-size: 48px 48px;
+  background-position:
+    0 0,
+    24px 24px;
+  animation: maintenanceDrift 18s linear infinite;
+}
+@keyframes maintenanceDrift {
+  from {
+    background-position:
+      0 0,
+      24px 24px;
+  }
+  to {
+    background-position:
+      48px 48px,
+      72px 72px;
+  }
+}
+.maintenance-card > *:not(.maintenance-card__diamonds) {
+  position: relative;
+  z-index: 1;
+}
+.maintenance-card__pentacle {
+  width: 110px;
+  height: 110px;
+  color: #f1d27a;
+  filter: drop-shadow(0 0 10px rgba(241, 210, 122, 0.5));
+  animation: maintenanceGlow 4s ease-in-out infinite;
+}
+@keyframes maintenanceGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(241, 210, 122, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(241, 210, 122, 0.8));
+  }
+}
+.maintenance-card__title {
+  margin: 10px 0 8px;
+  font-family: "Cinzel", "Playfair Display", Georgia, serif;
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  letter-spacing: 0.06em;
+  color: #f1d27a;
+  text-shadow:
+    0 2px 0 #9a7a1c,
+    0 0 16px rgba(241, 210, 122, 0.35);
+}
+.maintenance-card__text {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #f4ead3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.maintenance-card__until {
+  margin: 0 0 12px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.maintenance-card__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  font-style: italic;
+  color: rgba(244, 234, 211, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+@media (prefers-reduced-motion: reduce) {
+  .maintenance-card__diamonds,
+  .maintenance-card__pentacle,
+  .site-banner,
+  .maintenance-screen {
+    animation: none;
+  }
+}

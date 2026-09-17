@@ -145,6 +145,38 @@ describe("pullProfileFromCloud — succès", () => {
     expect(onSync).toHaveBeenCalledWith(expect.objectContaining({ user: expect.any(Object) }));
   });
 
+  it("le mode favori CHOISI descend du cloud, et un null efface le choix local", async () => {
+    // migration 040 : profiles.favorite_mode est le choix du joueur, distinct du
+    // mode le plus joué (stats.favoriteMode, toujours calculé).
+    localStorage.setItem("personaUserProfile", JSON.stringify({ favoriteMode: "emoji" }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => baseUserPayload({ profile: { favorite_mode: "music" } }),
+    });
+    await pullProfileFromCloud();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).favoriteMode).toBe("music");
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => baseUserPayload({ profile: { favorite_mode: null } }),
+    });
+    await pullProfileFromCloud();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).favoriteMode).toBeNull();
+  });
+
+  it("un payload sans favorite_mode (backend pas encore migré) laisse le choix local intact", async () => {
+    localStorage.setItem("personaUserProfile", JSON.stringify({ favoriteMode: "emoji" }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => baseUserPayload({ profile: {} }),
+    });
+    await pullProfileFromCloud();
+    expect(JSON.parse(localStorage.getItem("personaUserProfile")).favoriteMode).toBe("emoji");
+  });
+
   it("badges/wallpapers/titres cloud jamais régressifs — ajoutés au local existant, rien retiré", async () => {
     localStorage.setItem(
       "personaUserProfile",

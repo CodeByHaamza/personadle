@@ -92,6 +92,12 @@ const PRECACHE_URLS = [
   SW_BASE + "/profile/leaderboard/leaderboard.html",
   SW_BASE + "/profile/leaderboard/leaderboard.css",
   SW_BASE + "/profile/leaderboard/leaderboard.js",
+
+  /* Compendium (carnet de collection) */
+  SW_BASE + "/profile/compendium/compendium.html",
+  SW_BASE + "/profile/compendium/compendium.css",
+  SW_BASE + "/profile/compendium/compendium.js",
+  SW_BASE + "/profile/compendium/compendium_entries.js",
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -237,8 +237,11 @@ export const songs = [
   {
     titre: "Iwatodai Dorm",
     fichier: "Iwatodai_Dorm.mp3",
-    opus: ["P3R"],
-    image: "P3R.webp",
+    // Thème du dortoir dès Persona 3 (2006) : rattaché au jeu d'origine, comme
+    // Burn My Dread ou Mass Destruction, même si la piste jouée ici est
+    // l'arrangement chanté de Reload. Retour joueur 2.2.
+    opus: ["P3"],
+    image: "P3.webp",
     vocalist: "Lotus Juice",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=Cj-FrFI0qnM"

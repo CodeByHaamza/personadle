@@ -43,6 +43,7 @@ function _normalizeAvatar(avatar) {
  * Identifie la page courante d'après l'URL.
  * @returns {'home' | 'profile' | 'other'}
  */
+import { siteRootPrefix } from "./gameCore.js";
 export function getCurrentPage() {
   const path = window.location.pathname;
   if (path.includes("/profile/profile")) return "profile";
@@ -95,22 +96,12 @@ export function buildHrefs(currentPage) {
   const isFriends = currentPage === "friends";
   const isLeader = currentPage === "leaderboard";
 
-  // Compute base from the actual URL path so pages inside any subdirectory
-  // always resolve links correctly, regardless of currentPage value.
-  // profile/friends/ and profile/leaderboard/ are 2 levels deep → need ../../
-  const p = window.location.pathname;
-  const isDeepSubpath = p.includes("/profile/friends/") || p.includes("/profile/leaderboard/");
-  const isSubpath =
-    !isDeepSubpath &&
-    (p.includes("/profile/") ||
-      p.includes("/classiqueMode/") ||
-      p.includes("/emojiMode/") ||
-      p.includes("/silhouetteMode/") ||
-      p.includes("/allOutAttackMode/") ||
-      p.includes("/personaeMode/") ||
-      p.includes("/musicsMode/") ||
-      p.includes("/pages/"));
-  const base = isDeepSubpath ? "../../" : isSubpath ? "../" : "./";
+  // Base calculée depuis l'URL réelle, pour que les liens résolvent correctement
+  // depuis n'importe quel sous-dossier. siteRootPrefix() (gameCore.js) tient ce
+  // calcul pour tout le site : c'est cette version-ci qui était juste, pendant
+  // que les liens de défi partaient en absolu avec un « /personadle » codé en
+  // dur — et tombaient en 404 sur toute autre racine.
+  const base = siteRootPrefix();
   return {
     home: `${base}index.html`,
     profile: isProfile ? "./profile.html" : `${base}profile/profile.html`,

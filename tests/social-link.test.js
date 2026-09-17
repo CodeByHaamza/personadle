@@ -128,6 +128,20 @@ describe("applyRank10Effect", () => {
     expect(wrap.querySelector(".rank10-label")).toBeNull();
   });
 
+  it("celebrate:false pose le marqueur permanent sans burst ni label", () => {
+    // Liste d'amis re-rendue à chaque poll : seule la première apparition
+    // célèbre, les rendus suivants ne reposent que l'anneau et la pastille.
+    applyRank10Effect(avatar, pseudo, 0, { celebrate: false });
+    const wrap = document.getElementById("wrap");
+
+    expect(avatar.classList.contains("rank10-avatar")).toBe(true);
+    expect(pseudo.querySelectorAll(".rank10-icon")).toHaveLength(1);
+
+    vi.advanceTimersByTime(10 + 600 + 1800);
+    expect(wrap.querySelectorAll(".rank10-particle")).toHaveLength(0);
+    expect(wrap.querySelector(".rank10-label")).toBeNull();
+  });
+
   it("respects a custom delayMs before starting the particle burst", () => {
     applyRank10Effect(avatar, pseudo, 500);
     const wrap = document.getElementById("wrap");

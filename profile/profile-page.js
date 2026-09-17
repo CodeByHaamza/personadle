@@ -9,7 +9,7 @@
  *
  * Fonctionnalités :
  *   - Chargement et sauvegarde du profil depuis localStorage
- *   - Sélection et recadrage d'avatar (canvas crop)
+ *   - Choix de l'avatar parmi les portraits du jeu (pas d'import : 2026-09-16)
  *   - Affichage des statistiques avec animation stagger
  *   - Système de badges (délégué à badgesManager.js)
  *   - Code événement (badge exclusif)
@@ -28,16 +28,23 @@ import {
   syncBadgesWithBackend,
   renderBadgesModal,
   renderBadgesPreview,
+  renderBadgePicker,
 } from "./badges/badgesManager.js";
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
 import { canRecover, getPreviousStreak, showStreakRecoveryMenu } from "../js/streak-recovery.js";
 import { openModal, closeModal } from "../js/modal.js";
 import { pullProfileFromCloud, pushLangToCloud } from "../js/cloud-sync.js";
 import { formatPlayTime } from "./formatPlayTime.js";
-import { modeLabel } from "../js/gameCore.js";
+import { MODES, modeLabel, normalizeModeKey } from "../js/gameCore.js";
 import { AVATAR_GROUPS } from "./avatars_data.js";
-import { getStreakTier, formatSongTime, normalizeAvatarPath } from "./profile-format.js";
+import {
+  getStreakTier,
+  formatSongTime,
+  normalizeAvatarPath,
+  bestModeOverall,
+} from "./profile-format.js";
 import { THEME_COLORS, hexToRgb, adjustHex, resolveTheme, applyThemeVars } from "./theme.js";
+import { initAtelier, openAtelier, initSaveStatus, scheduleAutosave } from "./atelier.js";
 import {
   renderUnlockableWallpaperGallery,
   initUnlockableWallpapers,
@@ -49,12 +56,7 @@ import {
   resetTitlesUnlockedState,
   refreshTitlesAfterCloudSync,
 } from "./titles-ui.js";
-import {
-  renderSongCard,
-  setupSongPicker,
-  stopProfileSong,
-  updateSongArtwork,
-} from "./song-player.js";
+import { renderSongCard, setupSongPicker, stopProfileSong } from "./song-player.js";
 import {
   setupShareProfile,
   setupCopyProfileLink,
@@ -65,6 +67,8 @@ import {
 // Ré-exportées pour compatibilité avec le code existant qui importe ces
 // fonctions depuis profile-page.js plutôt que depuis profile-format.js/theme.js.
 export { getStreakTier, formatSongTime, hexToRgb, adjustHex, normalizeAvatarPath };
+// Exporté pour les tests (tests/profilePage.test.js) — voir le bug {{count}} sur tf().
+export { tf as _tf };
 
 // Exposer les songs pour d'autres modules (notifications.js, social-link.js…)
 window._profileSongs = ALL_SONGS;
@@ -95,10 +99,27 @@ const THEMES = THEME_LABELS.map(({ id, label }) => ({
   ...(THEME_COLORS[id] || { accent: null, hover: null, light: null, rgb: null }),
 }));
 
-/** Traduit une clé i18n avec un vrai fallback string (window.i18n.t renvoie la clé brute si absente). */
-function tf(key, fallback) {
-  const v = window.i18n?.t?.(key);
+/**
+ * Traduit une clé i18n avec un vrai fallback string (window.i18n.t renvoie la clé
+ * brute si absente). `vars` est transmis à t() pour les {{placeholders}} — il était
+ * ignoré, et le bouton Jack Frost affichait « 0 → {{count}} jours » (retour 2.2).
+ */
+function tf(key, fallback, vars) {
+  const v = window.i18n?.t?.(key, vars);
   return v != null && v !== key ? v : fallback;
+}
+
+/**
+ * Pose la couleur d'un thème personnalisé : aperçu immédiat, sauvegarde locale
+ * et envoi. Partagé par le nuancier natif et la saisie hexadécimale.
+ * @param {string} color  #RRGGBB
+ */
+function _applyCustomThemeColor(color) {
+  profile.profileCustomColor = color;
+  applyTheme("custom", color);
+  saveProfile();
+  markDirty();
+  saveProfileToCloud({ wallpaper_id: `custom:${color}` });
 }
 
 /**
@@ -135,14 +156,16 @@ function renderThemePicker() {
       </button>`;
   }).join("");
 
-  // Afficher/masquer la rangée de couleur custom
+  // Afficher/masquer la rangée de couleur custom (le nuancier natif + le code
+  // hexadécimal, pour ceux qui ont une couleur précise en tête).
   const customRow = document.getElementById("customThemeRow");
   if (customRow) {
     customRow.classList.toggle("hidden", currentId !== "custom");
     const picker = document.getElementById("customThemeColor");
-    if (picker && profile.profileCustomColor) {
-      picker.value = profile.profileCustomColor;
-    }
+    const hex = document.getElementById("customThemeHex");
+    const current = profile.profileCustomColor || "#e63946";
+    if (picker) picker.value = current;
+    if (hex) hex.value = current.toUpperCase();
   }
 
   // Handlers swatches
@@ -160,24 +183,39 @@ function renderThemePicker() {
 
       saveProfile();
       renderThemePicker();
-      updateAppearancePreview();
       markDirty();
       const wid = id === "custom" ? `custom:${profile.profileCustomColor || "#e63946"}` : id;
       saveProfileToCloud({ wallpaper_id: wid });
+
+      // « Couleur perso » : ouvrir le nuancier tout de suite. Il fallait cliquer
+      // deux fois — la pastille, puis le carré de couleur qui apparaissait
+      // dessous (retour Hamza du 2026-09-16).
+      if (id === "custom") {
+        const picker = document.getElementById("customThemeColor");
+        picker?.focus?.();
+        picker?.click?.();
+      }
 
       // Régénère la preview de partage si la modale est ouverte
       refreshShareCardPreview();
     });
   });
 
-  // Handler couleur custom
+  // Handler couleur custom (nuancier natif)
   document.getElementById("customThemeColor")?.addEventListener("input", (e) => {
-    profile.profileCustomColor = e.target.value;
-    applyTheme("custom", e.target.value);
-    updateAppearancePreview();
-    saveProfile();
-    markDirty();
-    saveProfileToCloud({ wallpaper_id: `custom:${e.target.value}` });
+    _applyCustomThemeColor(e.target.value);
+    const hex = document.getElementById("customThemeHex");
+    if (hex) hex.value = e.target.value.toUpperCase();
+  });
+
+  // …et saisie directe du code hexadécimal (#RRGGBB), pour une couleur précise
+  document.getElementById("customThemeHex")?.addEventListener("input", (e) => {
+    const value = e.target.value.trim();
+    if (!/^#?[0-9a-f]{6}$/i.test(value)) return;
+    const color = value.startsWith("#") ? value : `#${value}`;
+    const picker = document.getElementById("customThemeColor");
+    if (picker) picker.value = color;
+    _applyCustomThemeColor(color);
   });
 }
 
@@ -186,15 +224,14 @@ function renderThemePicker() {
 // ─────────────────────────────────────────────────────────
 
 let profile = null; // Objet profil utilisateur (localStorage)
-let zoom = 1; // Niveau de zoom du canvas crop
+let zoom = 1; // Niveau de zoom du canvas de recadrage
 let offsetX = 0; // Décalage horizontal du canvas
 let offsetY = 0; // Décalage vertical du canvas
 let dragging = false; // État du drag
 let startX = 0; // Position X initiale du drag
 let startY = 0; // Position Y initiale du drag
-let selectedAvatarSrc = ""; // Source de l'avatar sélectionné dans la grille
+let selectedAvatarSrc = ""; // Portrait sélectionné dans la grille (chemin ../img/avatar/…)
 
-let cropTarget = "avatar"; // 'avatar' | 'song' — détermine où le crop est sauvegardé
 
 // ─────────────────────────────────────────────────────────
 // ÉLÉMENTS DOM
@@ -207,32 +244,25 @@ const pseudoInput = document.getElementById("pseudoInput");
 
 // Boutons principaux
 const editAvatarBtn = document.getElementById("editAvatarBtn");
-const saveRefreshBtn = document.getElementById("saveAndRefreshBtn");
 
-// ── Dirty-state : bouton visible uniquement si un changement utilisateur est détecté ──
-let _profileDirty = false;
-
+// ── Enregistrement automatique (2.2) ─────────────────────────────────────────
+// `markDirty()` est l'historique « quelque chose a changé » que tous les
+// modules de la page appellent après un choix du joueur. Il n'allume plus un
+// bouton Save à ne pas oublier : il programme l'envoi complet du profil
+// (syncProfileToCloud) après un court regroupement, et l'indicateur #saveStatus
+// sur la carte d'identité dit où on en est (profile/atelier.js). Chaque
+// changement continue par ailleurs d'envoyer son propre champ tout de suite
+// (saveProfileToCloud) : l'envoi complet est le filet, pas le chemin nominal.
 function markDirty() {
-  if (_profileDirty) return;
-  _profileDirty = true;
-  saveRefreshBtn.innerHTML = "💾 <span>Save changes</span>";
-  saveRefreshBtn.classList.add("btn-dirty");
+  scheduleAutosave();
 }
-
-function markClean() {
-  _profileDirty = false;
-  saveRefreshBtn.classList.add("btn-saving");
-  saveRefreshBtn.innerHTML = "✅ <span>Saved!</span>";
-  setTimeout(() => saveRefreshBtn.classList.remove("btn-dirty", "btn-saving"), 1300);
-}
-const resetProfileBtn = document.getElementById("resetProfile");
-const exportBtn = document.getElementById("exportProfile");
 const borderColorPicker = document.getElementById("borderColorPicker");
 const statsContainer = document.getElementById("statsContainer");
 
-// Modale crop
-const closeCropper = document.getElementById("closeCropper");
 const avatarGrid = document.getElementById("avatarGrid");
+
+// Modale de recadrage (sur un portrait du jeu — aucun import)
+const closeCropper = document.getElementById("closeCropper");
 const canvas = document.getElementById("avatarCanvas");
 const ctx = canvas.getContext("2d");
 const zoomInBtn = document.getElementById("zoomIn");
@@ -307,7 +337,6 @@ function initProfile() {
 
   // ── Couleur de bordure ──
   borderColorPicker.value = profile.avatarBorderColor || "#000000";
-  updateBorderPreview(profile.avatarBorderColor || "#000000");
 
   // ── Statistiques ──
   renderStats();
@@ -385,6 +414,20 @@ function saveProfile() {
 }
 
 /**
+ * Chemin de galerie d'un avatar, ou null si ce n'en est pas un (image encodée
+ * d'avant 2026-09-16, valeur vide…). Les anciens chemins « ./img/… » (stockés
+ * depuis la racine du site en v1) sont ramenés à la forme « ../img/… » attendue
+ * depuis profile/.
+ * @param {string|undefined} avatar
+ * @returns {string|null}
+ */
+function galleryAvatarPath(avatar) {
+  if (typeof avatar !== "string" || !avatar) return null;
+  const path = avatar.replace(/^\.\/img\//, "../img/");
+  return /^\.\.\/img\/avatar\/[A-Za-z0-9_-]+\.(?:gif|png|jpe?g|webp)$/i.test(path) ? path : null;
+}
+
+/**
  * Envoie les champs de profil modifiés vers le backend (PATCH /api/user/:id).
  * Fire-and-forget — une erreur réseau ne bloque pas l'UI locale.
  * @param {object} fields - Champs à synchroniser (avatar_data, avatar_border_color, selected_badges…)
@@ -401,11 +444,13 @@ async function saveProfileToCloud(fields) {
 }
 
 /**
- * Sync initial complet localStorage → cloud au moment du login.
+ * Sync complet localStorage → cloud : au login, et après chaque changement du
+ * joueur (enregistrement automatique 2.2, via markDirty → scheduleAutosave).
  * Envoie avatar, bordure, wallpaper, musique et badges en une seule requête PATCH.
- * Fire-and-forget — n'écrase que les champs non-null si le profil localStorage existe.
+ * @param {{ strict?: boolean }} [opts]  strict : laisser l'erreur remonter (l'indicateur
+ *        #saveStatus doit pouvoir afficher « Non enregistré ») — sinon fire-and-forget.
  */
-async function syncProfileToCloud() {
+async function syncProfileToCloud({ strict = false } = {}) {
   if (!window._currentUser?.id || !window._personadleApi) return;
   if (!profile) return;
   const fields = {
@@ -419,8 +464,14 @@ async function syncProfileToCloud() {
     profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
     selected_badges: profile.selectedBadges || [],
     equipped_title_id: profile.equippedTitleId || null,
+    favorite_mode: normalizeModeKey(profile.favoriteMode) ?? null,
   };
-  if (profile.avatar) fields.avatar_data = profile.avatar;
+  // Portrait de la galerie, ou son recadrage encodé — les deux formes que le
+  // serveur accepte (personadle_validate_avatar). Un ancien chemin v1 « ./img/… »
+  // est ramené à la forme attendue depuis profile/.
+  if (profile.avatar) {
+    fields.avatar_data = galleryAvatarPath(profile.avatar) ?? profile.avatar;
+  }
   // Sync des settings (son, animations…) — stockés dans personaSettings
   const settings = JSON.parse(localStorage.getItem("personaSettings") || "{}");
   if (Object.keys(settings).length) fields.settings = settings;
@@ -428,6 +479,7 @@ async function syncProfileToCloud() {
     await window._personadleApi.user.update(window._currentUser.id, fields);
   } catch (e) {
     console.warn("[Profile] Sync to cloud failed:", e.message);
+    if (strict) throw e;
   }
 }
 
@@ -470,7 +522,7 @@ function _applyCloudToUI() {
   applyTheme(themeId, themeId === "custom" ? profile.profileCustomColor : undefined);
   renderThemePicker();
   renderBorderPicker();
-  updateAppearancePreview();
+  renderFavoriteModePicker();
 
   // ── Stats ─────────────────────────────────────────────────
   renderStats();
@@ -511,6 +563,7 @@ function _applyCloudToUI() {
 
   // ── Badges ────────────────────────────────────────────────
   renderBadgesPreview(profile);
+  renderBadgePicker(profile, saveProfileAndSyncBadges);
   renderBadgesModal(profile, saveProfileAndSyncBadges);
 
   // ── Wallpapers débloquables ───────────────────────────────
@@ -606,7 +659,22 @@ function renderStats() {
     Personae: "Personae",
     Music: "Music",
   };
-  const modeFav = s.favoriteMode ? modeNames[s.favoriteMode] || s.favoriteMode : "—";
+  // Mode favori = le CHOIX du joueur (profile.favoriteMode, migration 040), plus le
+  // mode le plus joué (l'ancien stats.favoriteMode, retiré en 2.2).
+  // Retour joueur 2.2 : « je veux le choisir, et mettre le mode où je performe le
+  // mieux à côté, sous "Best Mode Overall" ».
+  const favKey = normalizeModeKey(profile.favoriteMode);
+  const modeFav = favKey ? modeNames[modeLabel(favKey)] || modeLabel(favKey) : "—";
+  const best = bestModeOverall(
+    Object.keys(s.modeCount || {}).map((m) => ({
+      mode: m,
+      games: s.modeCount?.[m] || 0,
+      wins: s.modeWins?.[m] || 0,
+    }))
+  );
+  const modeBest = best
+    ? `${modeNames[modeLabel(best.mode)] || modeLabel(best.mode)} · ${Math.round(best.rate * 100)}%`
+    : "—";
 
   // Stats standard (hors streak)
   const stats = [
@@ -616,7 +684,8 @@ function renderStats() {
     { icon: "⭐", value: s.streakRecord || 0, label: tf("profile.stat_best_streak_label", "Best Streak") },
     { icon: "⏱️", value: formatPlayTime(s.totalTimeMinutes || 0), label: tf("profile.stat_time_label", "Time Played") },
     { icon: "📅", value: s.firstPlayed?.split("T")[0] || "—", label: tf("profile.stat_first_played_label", "First Played"), full: true },
-    { icon: "🎯", value: modeFav, label: tf("profile.stat_fav_mode_label", "Fav Mode"), full: true },
+    { icon: "🎯", value: modeFav, label: tf("profile.stat_fav_mode_label", "Fav Mode") },
+    { icon: "🏅", value: modeBest, label: tf("profile.stat_best_mode_label", "Best Mode Overall") },
   ];
 
   const streakHTML = buildStreakItem(s.streak || 0, tf("profile.stat_current_streak_label", "Current Streak"), "0.22s");
@@ -788,10 +857,19 @@ async function renderExpertStats() {
     })
     .join("");
 
+  // Les 4 libellés de colonnes vivent dans une seule clé (« Won / Played · Rate ·
+  // Best · Streak », même forme dans les 6 langues) : on la découpe sur « · »
+  // pour poser chaque libellé au-dessus de SA colonne, dans la même grille que
+  // les lignes. En un seul <span> calé à droite, l'en-tête n'était aligné sur
+  // rien — retour joueur 2.2 : « les chiffres sont décalés du texte ».
+  const cols = tf("profile.expert_cols", "Won / Played · Rate · Best · Streak").split(/\s*·\s*/);
   container.innerHTML = `
     <div class="mode-stats-header expert-stats-header">
       <span>${tf("profile.expert_title", "⚡ Expert Mode")}</span>
-      <span>${tf("profile.expert_cols", "Won / Played · Rate · Best · Streak")}</span>
+    </div>
+    <div class="mode-stat-row expert-stat-row expert-stat-cols" aria-hidden="true">
+      <span></span><span></span>
+      ${cols.map((c) => `<span class="expert-stat-cell">${c}</span>`).join("")}
     </div>
     <div class="mode-stats-list">${rows}</div>`;
 }
@@ -800,33 +878,95 @@ async function renderExpertStats() {
 // GESTIONNAIRES D'ÉVÉNEMENTS — PROFIL
 // ─────────────────────────────────────────────────────────
 
-// Ouvrir la modale de crop (avatar)
-editAvatarBtn.onclick = () => {
-  cropTarget = "avatar";
+// ✎ sur l'avatar → onglet Avatar de l'atelier (les portraits s'appliquent au
+// clic ; le recadrage n'est proposé que pour une image importée ou « Ajuster »).
+if (editAvatarBtn) editAvatarBtn.onclick = () => openAtelier("avatar");
+
+// Le titre sous le pseudo → onglet Titre.
+document.getElementById("equippedTitleBtn")?.addEventListener("click", () => {
+  openAtelier("title");
+});
+
+/**
+ * Choisir un portrait du jeu : il est appliqué tout de suite (par son CHEMIN —
+ * jamais une image encodée, c'est ce qui garantit qu'un avatar est toujours un
+ * portrait du jeu, et ça évite ~100 Ko de base64 dans chaque liste d'amis), et
+ * la fenêtre de recadrage s'ouvre dans la foulée : beaucoup de portraits sont
+ * mal cadrés d'origine et le joueur veut régler ça tout de suite (retour Hamza
+ * du 2026-09-16). La fermer sans rien toucher garde le portrait tel quel.
+ *
+ * Un GIF ne passe pas par le canvas (il y perdrait son animation) : pas de
+ * recadrage possible, on s'arrête à l'application.
+ *
+ * @param {string} src  chemin relatif à profile/ (../img/avatar/…)
+ */
+function applyAvatarPreset(src) {
+  selectedAvatarSrc = src;
+  commitAvatar(src);
+  if (src.toLowerCase().endsWith(".gif")) return;
+  loadImageToCanvas(src);
   openModal("avatarCropModal");
-};
+}
 
-// Sauvegarder et rafraîchir
-saveRefreshBtn.onclick = async () => {
-  if (!_profileDirty) return;
-  saveRefreshBtn.classList.add("btn-saving");
-  saveRefreshBtn.innerHTML = "⏳ <span>Saving…</span>";
+/** Pose l'avatar, sauvegarde, envoie. */
+function commitAvatar(result) {
+  profile.avatar = result;
+  profile.avatarSrc = selectedAvatarSrc;
+  pageAvatar.src = result;
   saveProfile();
-  await syncProfileToCloud().catch(() => {});
-  markClean();
-  // Soft-refresh : pull le cloud et re-applique l'UI sans rechargement de page
-  pullProfileFromCloud()
-    .then(_applyCloudToUI)
-    .catch(() => {});
-};
+  markDirty();
+  saveProfileToCloud({ avatar_data: result });
+  refreshShareCardPreview();
+  _markSelectedAvatarCell();
+}
 
-// Réinitialiser le profil
-resetProfileBtn.onclick = () => {
-  if (confirm(tf("profile.reset_confirm", "Reset your profile? This cannot be undone."))) {
-    localStorage.removeItem("personaUserProfile");
-    location.reload();
+// « Ajuster le cadrage » : recadre le portrait porté (certains sont mal cadrés
+// par défaut — retour Hamza du 2026-09-16). Sans portrait choisi, rien à recadrer.
+document.getElementById("avatarAdjustBtn")?.addEventListener("click", () => {
+  const src = selectedAvatarSrc || galleryAvatarPath(profile.avatarSrc || profile.avatar);
+  if (!src || src === "none") {
+    openAtelier("avatar");
+    return;
   }
-};
+  selectedAvatarSrc = src;
+  loadImageToCanvas(src);
+  openModal("avatarCropModal");
+});
+
+/**
+ * Surligne dans la grille le portrait actuellement porté. Un portrait recadré
+ * (PNG) se reconnaît à avatarSrc ; un GIF est stocké tel quel dans avatar
+ * (../img/avatar/…), et avatarSrc ne survit pas à un pull cloud — on regarde
+ * donc les deux.
+ */
+function _markSelectedAvatarCell() {
+  const current = profile.avatarSrc || (profile.avatar?.startsWith("../img/") ? profile.avatar : "");
+  avatarGrid?.querySelectorAll(".avatar-cell img").forEach((img) => {
+    img.classList.toggle("selected", !!current && img.dataset.src === current);
+  });
+}
+
+// ── Réinitialiser le profil ──────────────────────────────────────────────────
+// Déclenché depuis ⚙ Paramètres (window._personadleDanger.reset), plus depuis un
+// bouton posé au bas de la page : un confirm() natif suffisait à tout effacer.
+function openResetProfileModal() {
+  if (!document.getElementById("resetProfileModal")) return;
+  openModal("resetProfileModal");
+}
+
+document.getElementById("closeResetProfile")?.addEventListener("click", () => {
+  closeModal("resetProfileModal");
+});
+document.getElementById("resetProfileCancelBtn")?.addEventListener("click", () => {
+  closeModal("resetProfileModal");
+});
+document.getElementById("resetProfileModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "resetProfileModal") closeModal("resetProfileModal");
+});
+document.getElementById("resetProfileConfirmBtn")?.addEventListener("click", () => {
+  localStorage.removeItem("personaUserProfile");
+  location.reload();
+});
 
 // ─────────────────────────────────────────────────────────
 // SUPPRESSION DE COMPTE (RGPD)
@@ -835,6 +975,13 @@ resetProfileBtn.onclick = () => {
 // Modale de confirmation avec saisie du pseudo (pas un simple confirm() comme
 // pour reset — action plus destructrice, irréversible passé le délai).
 // ─────────────────────────────────────────────────────────
+// Les deux actions destructrices, exposées à la modale ⚙ Paramètres : c'est
+// elle qui porte les boutons désormais, cette page garde les confirmations.
+window._personadleDanger = {
+  reset: openResetProfileModal,
+  deleteAccount: () => document.getElementById("deleteAccountBtn")?.click(),
+};
+
 const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 const deleteAccountModal = document.getElementById("deleteAccountModal");
 const deleteAccountPseudoEl = document.getElementById("deleteAccountPseudo");
@@ -905,19 +1052,8 @@ pseudoInput.oninput = (e) => {
 borderColorPicker.oninput = (e) => {
   profile.avatarBorderColor = e.target.value;
   if (pageAvatar) pageAvatar.style.borderColor = e.target.value;
-  updateAppearancePreview();
 };
 borderColorPicker.onchange = (e) => setBorderColor(e.target.value);
-
-/**
- * Met à jour le dot de prévisualisation et la valeur hex
- * dans le chip couleur de la perso-card.
- * @param {string} color - Valeur hex (ex. "#1a2b3c")
- */
-function updateBorderPreview(color) {
-  const ap = document.getElementById("apAvatar");
-  if (ap) ap.style.borderColor = color;
-}
 
 // Palette de bordures d'avatar (pastilles preset, même UX que le thème).
 const BORDER_PRESETS = [
@@ -925,30 +1061,10 @@ const BORDER_PRESETS = [
   "#ff6b9d", "#ffffff", "#111111", "#00b8d4", "#f39c12",
 ];
 
-/** Couleur d'accent du thème actuellement appliqué. */
-function _currentAccent() {
-  if (profile.profileTheme === "custom") return profile.profileCustomColor || "#e63946";
-  const th = THEMES.find((t) => t.id === (profile.profileTheme || "all_out"));
-  return th?.accent || "#e63946";
-}
-
-/** Met à jour l'aperçu live (avatar bordé + barres d'accent UI). */
-function updateAppearancePreview() {
-  const border = profile.avatarBorderColor || "#000000";
-  const accent = _currentAccent();
-  const ap = document.getElementById("apAvatar");
-  if (ap) ap.style.borderColor = border;
-  ["apAccent", "apAccent2", "apAccentDot"].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.style.background = accent;
-  });
-}
-
 /** Applique une couleur de bordure (clic pastille ou custom) + sauvegarde. */
 function setBorderColor(color) {
   profile.avatarBorderColor = color;
   if (pageAvatar) pageAvatar.style.borderColor = color;
-  updateAppearancePreview();
   renderBorderPicker();
   saveProfile();
   markDirty();
@@ -984,28 +1100,43 @@ function renderBorderPicker() {
   });
 }
 
+/** Icône par clé de mode pour le sélecteur de mode favori (même table que MODE_META). */
+const MODE_ICON_BY_KEY = Object.fromEntries(
+  Object.entries(MODE_META).map(([label, meta]) => [normalizeModeKey(label), meta.icon])
+);
+
 /**
- * Gère le toggle collapse/expand de la perso-card.
- * L'état est persisté dans localStorage.
+ * Rend le sélecteur de mode favori (carte Customization) : une puce par mode,
+ * plus « Aucun ». Le choix est sauvegardé localement et poussé en cloud tout de
+ * suite, comme la couleur de bordure — le bouton Save global le renvoie aussi.
  */
-function setupPersoCard() {
-  const btn = document.getElementById("persoToggle");
-  const body = document.getElementById("persoBody");
-  if (!btn || !body) return;
+function renderFavoriteModePicker() {
+  const container = document.getElementById("favModeChips");
+  if (!container) return;
+  const current = normalizeModeKey(profile.favoriteMode);
+  const noneLabel = tf("profile.fav_mode_none", "None");
 
-  // Restaurer l'état sauvegardé (ouvert par défaut)
-  const saved = localStorage.getItem("persoCardExpanded");
-  const expanded = saved === null ? true : saved === "true";
+  container.innerHTML =
+    MODES.map(
+      ({ key, label }) =>
+        `<button type="button" class="mode-chip${key === current ? " active" : ""}" data-mode="${key}" aria-pressed="${key === current}">${MODE_ICON_BY_KEY[key] ?? ""} ${label === "AllOutAttack" ? "All-Out" : label}</button>`
+    ).join("") +
+    `<button type="button" class="mode-chip mode-chip--none${current ? "" : " active"}" data-mode="" aria-pressed="${!current}">${noneLabel}</button>`;
 
-  btn.setAttribute("aria-expanded", String(expanded));
-  if (!expanded) body.classList.add("perso-body--collapsed");
+  container.querySelectorAll(".mode-chip").forEach((b) =>
+    b.addEventListener("click", () => setFavoriteMode(b.dataset.mode || null))
+  );
+}
 
-  btn.addEventListener("click", () => {
-    const isExpanded = btn.getAttribute("aria-expanded") === "true";
-    btn.setAttribute("aria-expanded", String(!isExpanded));
-    body.classList.toggle("perso-body--collapsed", isExpanded);
-    localStorage.setItem("persoCardExpanded", String(!isExpanded));
-  });
+function setFavoriteMode(key) {
+  const next = normalizeModeKey(key) ?? null;
+  if (next === (normalizeModeKey(profile.favoriteMode) ?? null)) return;
+  profile.favoriteMode = next;
+  saveProfile();
+  markDirty();
+  saveProfileToCloud({ favorite_mode: next });
+  renderFavoriteModePicker();
+  renderStats();
 }
 
 
@@ -1056,15 +1187,11 @@ function initAvatarGrid() {
   }
   avatarGrid.innerHTML = html;
 
-  // Clic sur une image → charger dans le canvas + marquer comme sélectionnée
+  // Clic sur un portrait → appliqué tout de suite (plus d'étape « Appliquer »)
   avatarGrid.querySelectorAll(".avatar-cell img").forEach((img) => {
-    img.onclick = () => {
-      avatarGrid.querySelectorAll("img").forEach((i) => i.classList.remove("selected"));
-      img.classList.add("selected");
-      selectedAvatarSrc = img.dataset.src;
-      loadImageToCanvas(selectedAvatarSrc);
-    };
+    img.onclick = () => applyAvatarPreset(img.dataset.src);
   });
+  _markSelectedAvatarCell();
 
   // Option NONE → vider l'avatar
   const noneOption = avatarGrid.querySelector(".avatar-none");
@@ -1072,10 +1199,13 @@ function initAvatarGrid() {
     noneOption.onclick = () => {
       selectedAvatarSrc = "none";
       profile.avatar = "";
+      profile.avatarSrc = "";
       pageAvatar.src = "../img/default_avatar.png";
       saveProfile();
+      markDirty();
       saveProfileToCloud({ avatar_data: null });
-      closeModal("avatarCropModal");
+      refreshShareCardPreview();
+      _markSelectedAvatarCell();
     };
   }
 }
@@ -1169,49 +1299,24 @@ zoomOutBtn.onclick = () => {
   drawCanvas();
 };
 
-// Confirmer le crop → route vers avatar ou song selon cropTarget
+// Appliquer le recadrage. Un GIF garde son chemin (le canvas perdrait
+// l'animation) ; sinon on enregistre l'image recadrée. La SOURCE reste toujours
+// un portrait du jeu : la modale ne s'ouvre que sur celui qui est porté.
 confirmCrop.onclick = () => {
-  const result = selectedAvatarSrc.endsWith(".gif")
-    ? selectedAvatarSrc
-    : canvas.toDataURL("image/png");
-
-  if (cropTarget === "song") {
-    if (profile.profileSong) {
-      profile.profileSong.customImage = result;
-      updateSongArtwork(result);
-      saveProfile();
-    }
-  } else {
-    profile.avatar = result;
-    profile.avatarSrc = selectedAvatarSrc;
-    pageAvatar.src = result;
-    saveProfile();
-    markDirty();
-    saveProfileToCloud({ avatar_data: result });
-  }
+  commitAvatar(
+    selectedAvatarSrc.toLowerCase().endsWith(".gif")
+      ? selectedAvatarSrc
+      : canvas.toDataURL("image/png")
+  );
   closeModal("avatarCropModal");
-  cropTarget = "avatar"; // reset systématique
 };
 
 // ─────────────────────────────────────────────────────────
-// EXPORT / IMPORT JSON
+// EXPORT JSON
 // ─────────────────────────────────────────────────────────
 
-/** Exporte le profil complet en fichier JSON téléchargeable. */
-exportBtn.onclick = () => {
-  const exportData = {
-    ...profile,
-    // Jeton de liaison au compte — empêche l'import du JSON sur un autre compte
-    _accountId: window._currentUser?.id ?? profile._accountId ?? null,
-    _exportedAt: new Date().toISOString(),
-  };
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "personadle_profile.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
-};
+// L'export du profil vit désormais dans la modale ⚙ Paramètres
+// (js/settings-modal.js → exportProfileFile), retour Hamza du 2026-09-16.
 
 
 // ─────────────────────────────────────────────────────────
@@ -1280,12 +1385,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // localStorage déjà vidé par auth.js — initProfile() crée un profil vierge
     initProfile();
     renderThemePicker();
+    renderBorderPicker();
+    renderFavoriteModePicker();
     renderModeStats();
     renderExpertStats();
     renderSongCard(profile, saveProfile, saveProfileToCloud, markDirty);
     renderUnlockableWallpaperGallery(profile);
     renderBadgesPreview(profile);
-    renderBadgesModal(profile, saveProfileAndSyncBadges);
+    renderBadgePicker(profile, saveProfileAndSyncBadges);
+      renderBadgesModal(profile, saveProfileAndSyncBadges);
     resetTitlesUnlockedState();
     renderTitlesSection(profile, saveProfile, saveProfileToCloud, markDirty);
   });
@@ -1318,8 +1426,18 @@ document.addEventListener("DOMContentLoaded", () => {
   window._onCloudSync = () => _applyCloudToUI();
 
   renderThemePicker();
-  setupPersoCard();
+  // Bordure et mode favori : rendus ici aussi, pas seulement après le pull cloud
+  // (_applyCloudToUI) — sinon un invité, ou un joueur hors ligne, voit les deux
+  // sections vides sous leur intitulé.
+  renderBorderPicker();
+  renderFavoriteModePicker();
   initAvatarGrid();
+  // L'atelier : onglets + indicateur d'enregistrement branché sur l'envoi complet.
+  initAtelier();
+  initSaveStatus(() => {
+    saveProfile();
+    return syncProfileToCloud({ strict: true });
+  });
   setupShareProfile(profile, saveProfile);
   setupCopyProfileLink();
   setupSongPicker(profile, saveProfile, saveProfileToCloud, markDirty);

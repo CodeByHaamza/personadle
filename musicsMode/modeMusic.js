@@ -24,8 +24,9 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
-  getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
   maskTerms,
   expertContext,
@@ -34,6 +35,7 @@ import {
   startGame,
   isGameLogged,
   markGameLogged,
+  logGuess,
 } from "../js/gameCore.js";
 
 // Collapsible opus filter panel (shared across all modes)
@@ -190,6 +192,9 @@ let attempts = 0;
 /** Whether the game is over (win or give-up). */
 let gameOver = false;
 
+/** Cibles possibles d'un défi : pool filtré de la page, chanson du jour exclue. Calculé au clic. */
+const challengePool = () => filteredSongs.filter((s) => s.titre !== target?.titre).map((s) => s.titre);
+
 /** Timestamp when the game session started (for stats). */
 let sessionStartTime = Date.now();
 
@@ -292,6 +297,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   activeFilters = _filterApi.getActive();
 
   // ── UI wiring ──────────────────────────────────────────────────────────────
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que
+  // la partie n'est pas finie. Au rechargement, showVictory() ci-dessus tourne
+  // AVANT que l'auth ait posé _currentUser (no-op) : c'est cet appel, qui
+  // attend l'auth, qui remonte le bouton — le « bouton qui disparaît ».
+  initChallengeButton("music", challengePool, gameOver ? attempts : null);
+
   applyDarkModeStyles();
   applyExpertChrome();
   initCustomPlayer();
@@ -304,16 +315,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeAutocomplete(textbar);
 
   // ── Daily reset checks ─────────────────────────────────────────────────────
+  // Reset quotidien : la chanson DU JOUR (resetGame() sans random), pas un clic
+  // sur « Rejouer » qui tirait au hasard — cf. la même correction dans les cinq
+  // autres modes (anti-triche « Daily target mismatch » sur chaque partie).
   checkResetOnLoad(
     // ← shared utility
     `lastPlayedDate_${STATS_KEY}`,
     STATS_KEY,
-    () => resetBtn.click()
+    () => resetGame()
   );
 
-  setupDailyReset(() => {
-    resetBtn ? resetBtn.click() : location.reload();
-  });
+  setupDailyReset(() => resetGame());
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -343,10 +355,19 @@ function pickSong(random = false) {
 
   // Défi à cible dédiée (2026-07-17) : elle prime sur le tirage du jour ET sur
   // le random du Replay tant que le défi est actif.
-  const _challengeTargetName = getActiveChallengeTarget("music");
-  const _challengeSong = _challengeTargetName
-    ? originalSongs.find((s) => s.titre === _challengeTargetName)
-    : null;
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  // Pool Expert en Expert : une chanson sans paroles (EXPERT_SONGS l'exclut) y
+  // donnerait une partie sans le moindre indice — mieux vaut annuler le défi.
+  const _challengeSong = resolveChallengeTarget(
+    "music",
+    IS_EXPERT ? EXPERT_SONGS : originalSongs,
+    (song) => song?.titre
+  );
 
   if (_challengeSong) {
     target = _challengeSong;
@@ -657,17 +678,6 @@ function showVictory(force = false) {
       count: 30,
       spreadFrom: "bottom",
     });
-    // Le bouton s'affiche AUSSI en Expert depuis la 2.1. La garde `!IS_EXPERT`
-    // qui était ici datait d'avant les défis Expert : à l'époque le destinataire
-    // aurait joué en mode normal (audio donné), donc avec un score incomparable.
-    // La PR #85 a réglé ça — `showChallengeButton()` transmet désormais
-    // `challenge_is_expert` (gameCore.js), et l'acceptation redirige vers
-    // `?expert=1` (challenge-notif.js). La garde est restée par oubli.
-    showChallengeButton(
-      "music",
-      attempts,
-      filteredSongs.filter((s) => s.titre !== target.titre).map((s) => s.titre)
-    );
   }
   checkChallengeCompletion("music", attempts, !force);
   if (!IS_EXPERT) showCommunityStats("music", target.titre);
@@ -675,6 +685,12 @@ function showVictory(force = false) {
   localStorage.setItem(`${KEY_PREFIX}GameOver`, "true");
 
   revealNextLink({ prevHref: "../personaeMode/personae.html" }); // ← shared utility
+  // Victoire OU abandon (2.2) : le nombre d'essais devient le score à battre.
+  // Visible AUSSI en Expert depuis la 2.1 (la PR #85 transmet
+  // `challenge_is_expert`, et l'acceptation redirige vers `?expert=1`). Le
+  // bouton est monté depuis l'arrivée (initChallengeButton) ; ici on fixe le
+  // score réel et il rejoint la navigation révélée juste au-dessus.
+  showChallengeButton("music", attempts, challengePool);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -723,6 +739,7 @@ function handleGuess() {
   if (!guess) return;
 
   if (!triedTitles.includes(guess)) triedTitles.push(guess);
+  logGuess(guess); // « comparer nos parties » — Music n'utilise pas showWrongMini()
 
   attempts++;
   localStorage.setItem(`${KEY_PREFIX}Attempts`, attempts);
@@ -1027,6 +1044,7 @@ function resetPlayerVisuals() {
   if (durEl) durEl.textContent = "--:--";
   if (soundBars) soundBars.classList.remove("playing");
   if (playIcon) playIcon.textContent = "▶";
+  playIcon.classList.remove("is-pause");
   if (playBtn) {
     playBtn.classList.remove("playing");
     playBtn.classList.add("idle");
@@ -1070,18 +1088,21 @@ function initCustomPlayer() {
 
   audioPlayer.addEventListener("play", () => {
     playIcon.textContent = "⏸";
+  playIcon.classList.add("is-pause");
     playBtn.classList.remove("idle");
     soundBars?.classList.add("playing");
   });
 
   audioPlayer.addEventListener("pause", () => {
     playIcon.textContent = "▶";
+  playIcon.classList.remove("is-pause");
     playBtn.classList.add("idle");
     soundBars?.classList.remove("playing");
   });
 
   audioPlayer.addEventListener("ended", () => {
     playIcon.textContent = "▶";
+  playIcon.classList.remove("is-pause");
     playBtn.classList.add("idle");
     soundBars?.classList.remove("playing");
     if (progressFill) progressFill.style.width = "0%";

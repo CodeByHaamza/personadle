@@ -15,9 +15,10 @@ import { queueCallingCards } from "./calling-card.js";
 import { queueTvAnimations } from "./tv-friend-anim.js";
 import { queueEvokerAnimations } from "./p3-evoker-anim.js";
 import { showSenderChallengeResult } from "./challenge-result.js";
-import { queueChallengeNotifs } from "./challenge-notif.js";
+import { queueChallengeNotifs, setChallengeNotifDismissHandler } from "./challenge-notif.js";
 import { showSocialLinkRankUp } from "./social-link.js";
 import { getCsrfToken, BASE_URL } from "./api.js";
+import { flushPendingChallengeStatus } from "./gameCore.js";
 
 const SEEN_KEY = "ccShownFriendshipIds";
 const SEEN_CHALLENGE_KEY = "seenChallengeResults";
@@ -37,6 +38,31 @@ const PUSHER_JS_URL = "https://cdn.jsdelivr.net/npm/pusher-js@8.4.0/dist/web/pus
 let _fallbackPollTimer = null;
 let _pusher = null;
 let _disconnectGraceTimer = null;
+
+/**
+ * Défis déjà poussés dans la file d'animation PENDANT CETTE PAGE.
+ *
+ * Le suivi « déjà vu » était entièrement persistant (localStorage) et posé AVANT
+ * l'affichage : une notification que le joueur n'a jamais vue — parce qu'il a
+ * changé de page dans la seconde, ou parce qu'un autre plein écran est passé
+ * par-dessus — était perdue DÉFINITIVEMENT, alors que le message restait
+ * `unread` côté serveur. C'est la cause n°1 des « parfois pas d'animation ».
+ *
+ * Désormais deux niveaux :
+ *   - ce Set, en mémoire : évite seulement de rejouer la même notification à
+ *     chaque sondage (60 s) tant qu'on est sur la page ;
+ *   - localStorage (SEEN_CHALLENGE_NOTIF) : posé UNIQUEMENT quand le joueur a
+ *     explicitement clos la notification (accepter / refuser / croix).
+ */
+const _queuedThisPage = new Set();
+
+setChallengeNotifDismissHandler((id) => {
+  const seen = _getSeenNotifIds();
+  if (!seen.includes(id)) {
+    seen.push(id);
+    localStorage.setItem(SEEN_CHALLENGE_NOTIF, JSON.stringify(seen.slice(-100)));
+  }
+});
 
 /**
  * Lance le polling des notifications.
@@ -144,6 +170,15 @@ function _stopFallbackPolling() {
 async function _check() {
   const api = window._personadleApi;
   if (!api) return;
+
+  // Résultats de défi que la fin de partie n'a pas pu transmettre (réseau, 5xx) :
+  // rejoués ici avant de lire quoi que ce soit, pour que la liste des messages
+  // ci-dessous reflète déjà le vrai statut. Cf. gameCore.js, file de relance.
+  try {
+    await flushPendingChallengeStatus(api);
+  } catch {
+    /* jamais bloquant */
+  }
 
   try {
     const data = await api.notifications.get();
@@ -254,12 +289,18 @@ async function _checkPendingChallenges(msgs) {
     if (!pending.length) return;
 
     const seenIds = _getSeenNotifIds();
-    const unseen = pending.filter((m) => !seenIds.includes(m.id));
+    const unseen = pending.filter((m) => !seenIds.includes(m.id) && !_queuedThisPage.has(m.id));
     if (!unseen.length) return;
 
-    // Marquer comme vus avant d'afficher (évite un double affichage sur poll rapide)
-    unseen.forEach((m) => seenIds.push(m.id));
-    localStorage.setItem(SEEN_CHALLENGE_NOTIF, JSON.stringify(seenIds.slice(-100)));
+    // Un plein écran de résultat de défi est peut-être déjà affiché (l'expéditeur
+    // vient d'apprendre que son défi a été relevé). Empiler la notification
+    // par-dessus la rendait invisible puis la détruisait — et, à l'époque où le
+    // « vu » était persisté ici, la perdait pour de bon. On repasse dans 60 s.
+    if (document.getElementById("cr-overlay")) return;
+
+    // Anti-doublon de sondage seulement : le « vu » persistant est posé par
+    // challenge-notif.js quand le joueur ferme réellement la notification.
+    unseen.forEach((m) => _queuedThisPage.add(m.id));
 
     queueChallengeNotifs(
       unseen.map((m) => ({

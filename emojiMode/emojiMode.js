@@ -17,6 +17,7 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
@@ -29,7 +30,7 @@ import {
   currentGameId,
   characterMatchesActiveOpus,
   updateCounterElement,
-  getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
 } from "../js/gameCore.js";
 
@@ -101,6 +102,10 @@ let activeOpus = [...ALL_OPUS];
 let personas = [...originalPersonas];
 
 let gameOver = false;
+
+/** Cibles possibles d'un défi : persos AVEC données emoji, cible du jour exclue. Calculé au clic. */
+const challengePool = () =>
+  characters.filter((c) => c.emoji && c.nom !== target?.nom).map((c) => c.nom);
 let sessionStartTime = Date.now();
 let attempts = 0;
 let target = null;
@@ -413,13 +418,10 @@ function checkEmojiGuess(name, forceReveal = false) {
     const wasChallengePlay = isChallengePlay("emoji");
     // Visible AUSSI en Expert : la garde `!EXPERT.isExpert` qui était ici est un
     // reste d'avant les défis Expert (PR #85), retiré en 2.1 — cf. modeMusic.js.
-    if (!forceReveal)
-      showChallengeButton(
-        "emoji",
-        attempts,
-        // Seuls les persos AVEC données emoji sont jouables comme cible de défi.
-        characters.filter((c) => c.emoji && c.nom !== target.nom).map((c) => c.nom)
-      );
+    // Et AUSSI après un abandon (2.2) : le nombre d'essais consommés devient le
+    // score à battre. Le bouton est déjà monté depuis l'arrivée sur la page
+    // (initChallengeButton) ; cet appel ne fait que fixer le score réel.
+    showChallengeButton("emoji", attempts, challengePool);
     checkChallengeCompletion("emoji", attempts, !forceReveal);
     showCommunityStats(modeName, target.nom);
 
@@ -493,7 +495,16 @@ function checkEmojiGuess(name, forceReveal = false) {
  * Clears all game state and picks a fresh target from the current filter pool.
  * Called by the Replay button, daily reset, and filter changes.
  */
-function resetGame() {
+/**
+ * Nouvelle partie. `random` : Rejouer et changement de filtres tirent au hasard
+ * dans le pool filtré ; le reset quotidien (nouveau jour, minuit, retour d'onglet)
+ * tire la cible DU JOUR, seedée joueur + jour + mode — la même que celle que
+ * l'anti-triche serveur recalcule (api/lib/daily_target.php). Avant, tous les
+ * chemins tiraient au hasard : la cible seedée ne servait qu'à la toute première
+ * partie d'un appareil, et chaque partie suivante était signalée « Daily target
+ * mismatch ».
+ */
+function resetGame(random = false) {
   const nav = document.getElementById("modeNavigationContainer");
   if (nav) nav.style.display = "none";
 
@@ -525,10 +536,16 @@ function resetGame() {
 
   gameOver = false;
   attempts = 1;
-  const _prevEmoji = target;
-  const _emojiCandidates =
-    pool.length > 1 && _prevEmoji ? pool.filter((c) => c.nom !== _prevEmoji.nom) : pool;
-  target = _emojiCandidates[Math.floor(Math.random() * _emojiCandidates.length)] || pool[0];
+  if (random) {
+    const _prevEmoji = target;
+    const _emojiCandidates =
+      pool.length > 1 && _prevEmoji ? pool.filter((c) => c.nom !== _prevEmoji.nom) : pool;
+    target = _emojiCandidates[Math.floor(Math.random() * _emojiCandidates.length)] || pool[0];
+  } else {
+    // Même pool qu'à la première visite (tous les personnages à emoji, filtres
+    // ou pas) : c'est ce que le serveur attend.
+    target = getDailyTarget(ALL_EMOJI_CHARS, EXPERT.hashMode);
+  }
   if (target) localStorage.setItem(EXPERT.key("targetEmoji"), JSON.stringify(target));
   localStorage.setItem(EXPERT.key("attemptsEmoji"), attempts);
 
@@ -575,7 +592,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const _filterApi = initFilterMenu("filters_Emoji", ALL_OPUS, (newActive) => {
     activeOpus = newActive;
     if (newActive.length === 0) return;
-    resetGame();
+    resetGame(true);
   });
   activeOpus = _filterApi.getActive();
 
@@ -596,11 +613,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du
   // jour. Persistée dans targetEmoji (état wipé à l'acceptation) → un refresh
   // mi-défi reprend la même cible. Idempotent si déjà persistée.
-  const _challengeTargetName = getActiveChallengeTarget("emoji");
-  if (_challengeTargetName) {
-    const _ct = ALL_EMOJI_CHARS.find((c) => c.nom === _challengeTargetName);
-    if (_ct) target = _ct;
-  }
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  const _challengeChar = resolveChallengeTarget("emoji", ALL_EMOJI_CHARS);
+  if (_challengeChar) target = _challengeChar;
 
   attempts = parseInt(localStorage.getItem(EXPERT.key("attemptsEmoji"))) || 1;
   localStorage.setItem(EXPERT.key("targetEmoji"), JSON.stringify(target));
@@ -614,9 +634,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
 
   // Restore finished game state
-  if (localStorage.getItem(EXPERT.key("emojiGameOver")) === "true" && target?.nom) {
+  const restoredGameOver = localStorage.getItem(EXPERT.key("emojiGameOver")) === "true";
+  if (restoredGameOver && target?.nom) {
     checkEmojiGuess(target.nom, localStorage.getItem(EXPERT.key("emojiForceReveal")) === "true");
   }
+
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que
+  // la partie n'est pas finie. Au rechargement, checkEmojiGuess() ci-dessus
+  // tourne AVANT que l'auth ait posé _currentUser, donc son showChallengeButton
+  // est un no-op : c'est cet appel, qui attend l'auth, qui remonte le bouton —
+  // c'était le « bouton qui disparaît » signalé.
+  initChallengeButton("emoji", challengePool, restoredGameOver ? attempts : null);
 
   // ── Guess button ──
   guessButton.addEventListener("click", () => {
@@ -642,7 +670,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(EXPERT.key("emojiWin"));
     // Le réarmement de l'enregistrement est dans resetGame() — commun aux quatre
     // chemins de nouvelle partie (Replay, minuit, retour d'onglet, filtres).
-    resetGame();
+    resetGame(true);
   });
 
   // ── Daily reset ──

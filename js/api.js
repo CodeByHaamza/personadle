@@ -202,6 +202,20 @@ export const api = {
      * @returns {Promise<{ me, friend, on_cooldown, cooldown_until, xp_gained }>}
      */
     compare: (friendId) => get(`/user/compare?friend_id=${friendId}`),
+
+    /**
+     * Le Compendium (carnet de collection) — public, comme le profil.
+     * Sans paramètre : celui de l'utilisateur connecté. `{ code }` (friend_code)
+     * ou `{ id }` : celui d'un autre joueur.
+     * @param {{ code?: string, id?: number }} [target]
+     */
+    compendium: (target = {}) => {
+      const q = new URLSearchParams();
+      if (target.code) q.set("code", target.code);
+      else if (target.id) q.set("id", String(target.id));
+      const qs = q.toString();
+      return get(`/user/compendium${qs ? `?${qs}` : ""}`);
+    },
   },
 
   // ── Statistiques & sessions de jeu ───────────────────
@@ -219,6 +233,15 @@ export const api = {
     postSession: (session) => post("/sessions", session),
 
     /**
+     * « Tes amis aujourd'hui » : première partie du jour de chaque ami sur un
+     * mode (résultat, essais, suite des essais). 403 `play_first` tant que le
+     * joueur n'a pas fini la sienne — le client l'attrape et n'affiche rien.
+     * @param {{ mode: string, expert?: boolean }} p
+     */
+    friendsToday: ({ mode, expert = false }) =>
+      get(`/sessions_today?mode=${encodeURIComponent(mode)}&expert=${expert ? 1 : 0}`),
+
+    /**
      * Synchronise les sessions en attente stockées dans localStorage.
      * Mutex _syncLock : une seule exécution simultanée (évite la race condition
      * entre gameCore.savePendingSession, auth.initAuth et cloud-sync.pullProfileFromCloud).
@@ -227,7 +250,10 @@ export const api = {
       if (api.stats._syncLock) return;
       api.stats._syncLock = true;
       const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
-      if (!pending.length) { api.stats._syncLock = false; return; }
+      if (!pending.length) {
+        api.stats._syncLock = false;
+        return;
+      }
 
       // Normalize legacy mode names stored before the server enum was finalised
       const _modeAlias = { shadow: "silhouette", classic: "classic" };
@@ -405,9 +431,7 @@ export const api = {
      *   (~2 requêtes par ami) : à ne demander que lorsque c'est nécessaire.
      */
     list: (opts = {}) => {
-      const qs = opts.expert_mode
-        ? `?expert_mode=${encodeURIComponent(opts.expert_mode)}`
-        : "";
+      const qs = opts.expert_mode ? `?expert_mode=${encodeURIComponent(opts.expert_mode)}` : "";
       return get(`/friends${qs}`);
     },
 
@@ -436,6 +460,14 @@ export const api = {
   },
 
   // ── Notifications ─────────────────────────────────────
+  // ── Messages de l'équipe (migration 042) ─────────────────
+  notices: {
+    /** Mes messages de l'équipe non lus (avertissement / info). */
+    pending: () => get("/notices/"),
+    /** Accusé de lecture — le message ne reviendra plus. */
+    markRead: (id) => apiCall(`/notices/${id}`, { method: "PATCH" }),
+  },
+
   notifications: {
     /**
      * Retourne le nombre de demandes d'ami non vues.

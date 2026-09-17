@@ -42,12 +42,13 @@ api/
 ├── config.example.php      ← Template à copier (local + Hostinger)
 ├── config.docker.php       ← Config pour Docker
 ├── sessions.php            ← POST /api/sessions
+├── sessions_today.php      ← GET /api/sessions_today (première partie du jour de mes amis)
 ├── community-stats.php     ← GET /api/community-stats
 ├── .htaccess               ← Routing Apache
 │
 ├── lib/                    ← Logique pure/testable sans BDD, extraite des endpoints
 │   ├── admin_audit.php, admin_validation.php, authz.php, deletion_requests.php
-│   ├── error_log.php, format.php, friends.php, game_session.php
+│   ├── error_log.php, format.php, friends.php, game_session.php, moderation.php
 │   ├── social_link.php, social_link_interaction.php, streak.php
 │   ├── streak_recovery.php, validation.php
 │
@@ -93,6 +94,9 @@ api/
 ├── notifications/          ← Notifications
 │   └── index.php           ← GET / PATCH /api/notifications
 │
+├── notices/                ← Messages de l'équipe (modération)
+│   └── index.php           ← GET /api/notices/ (non lus) · PATCH /api/notices/:id (accusé)
+│
 ├── admin/                  ← Panneau d'administration (is_admin requis) — routes au PLURIEL
 │   ├── users.php           ← GET /api/admin/users
 │   ├── user.php            ← GET / PATCH / DELETE /api/admin/users/:id
@@ -106,7 +110,13 @@ api/
 │   ├── error_logs.php      ← GET /api/admin/error_logs
 │   ├── audit_log.php       ← GET /api/admin/audit_log
 │   ├── deletion_requests.php ← GET / POST /api/admin/deletion_requests (POST = déclenchement manuel du hard delete)
-│   └── rate_limits.php     ← GET / DELETE /api/admin/rate_limits
+│   ├── rate_limits.php     ← GET / DELETE /api/admin/rate_limits
+│   ├── activity.php        ← GET /api/admin/activity (tableau de bord)
+│   ├── user_notes.php      ← GET / POST / DELETE /api/admin/users/:id/notes[/:nid]
+│   ├── user_notices.php    ← GET / POST /api/admin/users/:id/notices
+│   ├── announcements.php   ← CRUD /api/admin/announcements[/:id]
+│   ├── settings.php        ← GET / PATCH /api/admin/settings (maintenance)
+│   └── anticheat.php       ← GET /api/admin/anticheat (écarts de cible groupés)
 │
 └── cron/                   ← Tâches planifiées (auth par header X-Cron-Key, pas en query string)
     ├── leaderboard.php     ← Recalcul périodique du leaderboard_cache
@@ -125,9 +135,9 @@ api/
 | Méthode | Endpoint             | Description                                          |
 | ------- | -------------------- | ---------------------------------------------------- |
 | `POST`  | `/api/auth/register` | Inscription — email + pseudo + mot de passe (bcrypt) |
-| `POST`  | `/api/auth/login`    | Connexion — session PHP httpOnly                     |
+| `POST`  | `/api/auth/login`    | Connexion — session PHP httpOnly. Compte banni : 403 `{ code: "banned", reason, until }` |
 | `POST`  | `/api/auth/logout`   | Déconnexion — destruction session                    |
-| `GET`   | `/api/auth/me`       | Profil courant (requiert session active)             |
+| `GET`   | `/api/auth/me`       | Profil courant (`user` null si invité) + état du site : `maintenance`, `announcements`, `reset_local_state_at`, `banned` |
 | `POST`  | `/api/auth/request-reset` | Demande de reset mot de passe (rate-limité, anti-énumération) |
 | `POST`  | `/api/auth/reset-password` | Applique le nouveau mot de passe via le token reçu (rate-limité) |
 
@@ -135,7 +145,8 @@ api/
 
 | Méthode | Endpoint               | Description                                                     |
 | ------- | ---------------------- | --------------------------------------------------------------- |
-| `POST`  | `/api/sessions`        | Enregistrer une partie — calcule streaks, incrémente user_stats |
+| `POST`  | `/api/sessions`        | Enregistrer une partie — calcule streaks, incrémente user_stats ; `guesses[]` optionnel (migration 041) |
+| `GET`   | `/api/sessions_today`  | `?mode=&expert=` — première partie du jour de chaque ami (résultat, essais, suite des essais) ; 403 `play_first` tant que la sienne n'est pas finie |
 | `GET`   | `/api/community-stats` | % joueurs ayant trouvé le personnage du jour                    |
 
 ### Utilisateur
@@ -152,6 +163,8 @@ api/
 | `GET`    | `/api/user/list`               | Liste paginée de tous les joueurs                     |
 | `GET`    | `/api/user/search?q=`          | Recherche par pseudo ou code ami                      |
 | `GET`    | `/api/user/public?code=\|pseudo=\|id=` | Profil public (pseudo, avatar, border, badges, titre) |
+| `GET`    | `/api/notices/`                | Mes messages de l'équipe non lus (slash final obligatoire) |
+| `PATCH`  | `/api/notices/:id`             | Accuser réception d'un message                        |
 
 ### Amis
 
@@ -205,8 +218,8 @@ Réponse : `{ mode, period, metric, entries: [...], my_rank, count, offset, limi
 
 | Méthode              | Endpoint                            | Description                                             |
 | --------------------- | ------------------------------------ | ------------------------------------------------------- |
-| `GET`                 | `/api/admin/users`                   | Liste paginée avec stats et statut                      |
-| `GET / PATCH / DELETE`| `/api/admin/users/:id`               | Voir / modifier / supprimer un compte (ban, pseudo_locked) |
+| `GET`                 | `/api/admin/users`                   | Liste paginée avec stats et statut — `?sort=`, `?export=csv` |
+| `GET / PATCH / DELETE`| `/api/admin/users/:id`               | Voir (+ notes, notices) / modifier (ban motivé et daté, pseudo_locked, reset_local_state) / supprimer |
 | `PATCH`               | `/api/admin/users/:id/stats`         | Écraser les stats par mode                              |
 | `POST / DELETE`       | `/api/admin/users/:id/badges`        | Attribution / révocation de badges (pas de GET)         |
 | `POST / PATCH / DELETE` | `/api/admin/users/:id/titles`      | Attribution / équipement / révocation de titres         |
@@ -218,6 +231,12 @@ Réponse : `{ mode, period, metric, entries: [...], my_rank, count, offset, limi
 | `GET`                 | `/api/admin/audit_log`               | Journal des actions admin (paginé)                       |
 | `GET / POST`          | `/api/admin/deletion_requests`       | Suivi RGPD + déclenchement manuel du hard delete (POST)  |
 | `GET / DELETE`        | `/api/admin/rate_limits`             | Consultation + purge manuelle des compteurs              |
+| `GET`                 | `/api/admin/activity`                | `?days=7..180` — joueurs actifs, parties et comptes par jour, par mode, par heure |
+| `GET / POST / DELETE` | `/api/admin/users/:id/notes[/:nid]`  | Carnet de notes interne sur un joueur                    |
+| `GET / POST`          | `/api/admin/users/:id/notices`       | Messages de l'équipe envoyés à un joueur (+ lu / pas lu) |
+| `GET/POST/PATCH/DELETE` | `/api/admin/announcements[/:id]`   | Bandeau global (FR/EN, niveau, fenêtre, actif)           |
+| `GET / PATCH`         | `/api/admin/settings`                | Mode maintenance (`maintenance.enabled/message_fr/message_en/until`) |
+| `GET`                 | `/api/admin/anticheat`               | `?days=7..365` — écarts de cible du jour groupés par joueur |
 
 ---
 
@@ -228,11 +247,12 @@ Réponse : `{ mode, period, metric, entries: [...], my_rank, count, offset, limi
 ```php
 $pdo = pdo();             // PDO singleton — exception si connexion impossible
 
-$uid = requireAuth();     // 401 si pas de session · 403 si compte banni · retourne l'id
+$uid = requireAuth();     // 401 si pas de session · 403 si compte banni (ban échu levé au passage) · retourne l'id
 $uid = requireAdmin();    // idem + exige is_admin = 1
 
 jsonSuccess($data, 201);  // {"data": ...}  + code HTTP
 jsonError('message', 400);// {"error": "..."} + code HTTP
+jsonErrorWith('message', 403, ['code' => 'banned']); // idem avec champs supplémentaires
 
 getClientIp();                            // IP client (REMOTE_ADDR ; X-Forwarded-For ignoré, cf. lib/client_ip.php)
 rateLimit('login:'.getClientIp(), 5, 900); // 429 au-delà du quota (table rate_limits)
@@ -242,7 +262,8 @@ Sécurité activée automatiquement :
 
 - **CORS** : whitelist d'origines exactes (pas de wildcard quand `credentials: include`)
 - **Headers** : `Content-Security-Policy`, `Strict-Transport-Security` (prod), `X-Frame-Options`, `X-Content-Type-Options`
-- **Rate limiting** : table SQL `rate_limits` (helper `rateLimit()`, partagé entre instances) — login 5/15 min, register 5/15 min, sessions 15/15 min, friends-add 10/15 min, social-link-interact 30/15 min, messages-send 20/15 min
+- **Maintenance** : `personadle_maintenance_gate()` (lib/moderation.php, appelé en fin de bootstrap) répond **503 `{"error":"maintenance"}`** à tout endpoint quand `site_settings.maintenance_enabled = 1` — sauf `auth/(me|login|logout)`, `admin/`, `cron/`, CLI, et les admins connectés (flag mis en cache 60 s en session)
+- **Rate limiting** : table SQL `rate_limits` (helper `rateLimit()`, partagé entre instances) — login 5/15 min (50 hors prod), register 5/15 min (50 hors prod), sessions 15/15 min, friends-add 10/15 min, social-link-interact 30/15 min, messages-send 20/15 min
   - La clé par IP vient de `getClientIp()` → `REMOTE_ADDR`. **`X-Forwarded-For` n'est jamais lu** tant que `REMOTE_ADDR` n'est pas listé dans `TRUSTED_PROXIES` (`api/config.php`, vide par défaut) : un header client validé sur sa forme ne prouve rien sur sa provenance, et le faire varier suffisait à repartir d'un compteur neuf (corrigé le 2026-09-09, cf. `api/lib/client_ip.php`)
 - **Erreurs** : `display_errors` coupé en prod (`log_errors` seul) — pas de fuite de stack trace
 
