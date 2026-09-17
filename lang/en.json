@@ -10,7 +10,8 @@
     "filters": "FILTERS",
     "select_all": "✓ Select all",
     "deselect_all": "✗ Deselect all",
-    "filters_hint": "Click a game to include or exclude it. ▸ opens its individual games.",
+    "filters_hint": "Only the games you keep can come up as the answer — and only they are suggested as you type.",
+    "filters_hint_2": "Click a game to include or exclude it. The arrow unfolds its individual entries.",
     "group_all": "✓ All",
     "group_none": "✗ None",
     "input_placeholder": "Enter character name...",
@@ -622,6 +623,11 @@
       "name": "Eye of the Navigator",
       "condition": "Use the hint 50 times in Classic mode",
       "description": "Fifty anomalies scanned and deciphered. No truth can hide from your radar."
+    },
+    "katabasis": {
+      "name": "Katabasis",
+      "condition": "Win 25 games in Expert Mode",
+      "description": "Orpheus walked down into the dark with nothing but a lyre, and walked back out singing. Twenty-five Expert wins later, so did you."
     },
     "velvet_regular": {
       "name": "Velvet Regular",

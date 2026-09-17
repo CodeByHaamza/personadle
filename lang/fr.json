@@ -10,7 +10,8 @@
     "filters": "FILTRES",
     "select_all": "✓ Tout sélectionner",
     "deselect_all": "✗ Tout désélectionner",
-    "filters_hint": "Clique un jeu pour l'inclure ou l'exclure. ▸ ouvre ses opus.",
+    "filters_hint": "Seuls les jeux gardés peuvent tomber comme réponse — et eux seuls sont proposés quand tu tapes.",
+    "filters_hint_2": "Clique un jeu pour l’inclure ou l’exclure. La flèche déroule ses opus.",
     "group_all": "✓ Tous",
     "group_none": "✗ Aucun",
     "input_placeholder": "Entrez un nom de personnage...",
@@ -622,6 +623,11 @@
       "name": "Œil du Navigateur",
       "condition": "Utiliser l'indice 50 fois en mode Classique",
       "description": "Cinquante anomalies scannées et déchiffrées. Aucune vérité ne peut se cacher de ton radar."
+    },
+    "katabasis": {
+      "name": "Katabasis",
+      "condition": "Gagner 25 parties en Mode Expert",
+      "description": "Orphée est descendu dans le noir avec une lyre pour seul bagage, et il en est ressorti en chantant. Vingt-cinq victoires en Expert plus tard, toi aussi."
     },
     "velvet_regular": {
       "name": "Habitué du Velvet",

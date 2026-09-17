@@ -10,7 +10,8 @@
     "filters": "FILTROS",
     "select_all": "✓ Selecionar tudo",
     "deselect_all": "✗ Desmarcar tudo",
-    "filters_hint": "Clica num jogo para o incluir ou excluir. ▸ abre os seus títulos.",
+    "filters_hint": "Só os jogos que manténs podem sair como resposta — e só eles são sugeridos enquanto escreves.",
+    "filters_hint_2": "Clica num jogo para o incluir ou excluir. A seta abre os seus títulos.",
     "group_all": "✓ Todos",
     "group_none": "✗ Nenhum",
     "input_placeholder": "Escreve o nome da personagem...",
@@ -622,6 +623,11 @@
       "name": "Olho do Navegador",
       "condition": "Usa a dica 50 vezes no modo Clássico",
       "description": "Cinquenta anomalias analisadas e decifradas. Nenhuma verdade se esconde do teu radar."
+    },
+    "katabasis": {
+      "name": "Katabasis",
+      "condition": "Ganha 25 partidas no Modo Perito",
+      "description": "Orfeu desceu à escuridão com apenas uma lira e voltou a cantar. Vinte e cinco vitórias em Perito depois, tu também."
     },
     "velvet_regular": {
       "name": "Cliente Habitual Velvet",

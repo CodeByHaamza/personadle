@@ -293,21 +293,27 @@ function profileWith(unlocked, selected) {
   return { badges: unlocked, selectedBadges: selected, eventCodes: [], stats: {} };
 }
 
-describe("renderBadgesPreview — 4 emplacements", () => {
-  it("rend toujours 4 cases : épinglés puis « + » pour le reste", () => {
+describe("renderBadgesPreview — les badges mis en avant", () => {
+  // 2.2 : les épinglés + UNE case « + » tant qu'il reste de la place, le tout
+  // centré (retour Hamza du 2026-09-16 : quatre cadres vides laissaient un trou).
+  it("rend les épinglés et une seule case « + »", () => {
     renderBadgesPreview(profileWith(ids, ids.slice(0, 2)));
-    const slots = document.querySelectorAll("#previewBadges .pin-slot");
-    expect(slots).toHaveLength(4);
     expect(document.querySelectorAll(".pin-slot--filled")).toHaveLength(2);
-    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(2);
+    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(1);
     // Les images gardent la classe/données que la carte de partage lit
     const imgs = document.querySelectorAll("#previewBadges img.badge-preview-img");
     expect([...imgs].map((i) => i.dataset.badgeId)).toEqual(ids.slice(0, 2));
   });
 
-  it("sans badge épinglé : 4 « + » et aucun texte « No badges selected »", () => {
+  it("aucune case « + » quand les quatre sont pris", () => {
+    renderBadgesPreview(profileWith(ids, ids.slice(0, 4)));
+    expect(document.querySelectorAll(".pin-slot--filled")).toHaveLength(4);
+    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(0);
+  });
+
+  it("sans badge épinglé : une case « + » et aucun texte « No badges selected »", () => {
     renderBadgesPreview(profileWith(ids, []));
-    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(4);
+    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(1);
     expect(document.getElementById("previewBadges").textContent).not.toMatch(/No badges/);
   });
 
@@ -317,7 +323,7 @@ describe("renderBadgesPreview — 4 emplacements", () => {
     expect(visiblePane()).toBe("badges");
   });
 
-  it("la croix désépingle sans passer par la modale, et re-rend les 4 cases", () => {
+  it("la croix désépingle sans passer par la modale, et re-rend l'ensemble", () => {
     const profile = profileWith(ids, ids.slice(0, 3));
     const save = vi.fn();
     renderBadgePicker(profile, save); // fournit le saveProfile courant
@@ -326,7 +332,7 @@ describe("renderBadgesPreview — 4 emplacements", () => {
     expect(profile.selectedBadges).toEqual([ids[0], ids[2]]);
     expect(save).toHaveBeenCalledOnce();
     expect(document.querySelectorAll(".pin-slot--filled")).toHaveLength(2);
-    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(2);
+    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(1);
   });
 
   it("ignore un id épinglé qui n'existe plus dans le catalogue", () => {

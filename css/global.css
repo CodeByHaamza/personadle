@@ -3340,9 +3340,12 @@ body.darkmode {
   box-shadow:
     0 28px 70px rgba(0, 0, 0, 0.18),
     0 4px 16px rgba(0, 0, 0, 0.07);
-  max-width: 920px;
-  width: 96%;
-  max-height: 88vh;
+  /* La fenêtre touchait presque les bords de l'écran (96 % de large, 88 vh de
+     haut) : on la décolle en haut, en bas et sur les côtés. */
+  max-width: 880px;
+  width: min(880px, 92vw);
+  max-height: 84vh;
+  margin: 0 auto;
   padding: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -3367,7 +3370,7 @@ body.darkmode {
   top: 0;
   z-index: 10;
   margin: 0;
-  padding: 15px 52px 15px 22px;
+  padding: 18px 56px 18px 34px;
   background: linear-gradient(120deg, #c80000 0%, #7a0000 100%);
   color: #fff;
   font-family: "Oswald", "Arial Black", Arial, sans-serif;
@@ -3410,7 +3413,7 @@ body.darkmode {
 /* Tout était collé : sections, puces et séparateurs se touchaient et le texte
    devenait un mur (retour Hamza du 2026-09-16). On aère, sans rien déplacer. */
 #rulesModal [data-i18n-block] {
-  padding: 22px 28px 28px;
+  padding: 26px 34px 34px;
 }
 
 /* ── Séparateurs : discrets ─────────────────────────────── */
