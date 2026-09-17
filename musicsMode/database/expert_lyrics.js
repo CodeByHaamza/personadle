@@ -15,13 +15,15 @@
  */
 export const expertLyrics = {
   "A Lone Prayer": [
-    "Lived in buried memory",
-    "With fear-ridden self-consciousness",
-    "I'm just a lone prayer",
-    "Keep running on the cold track",
-    "The hate crazed thoughts just don't stop",
-    "As if a dream awake from the dark",
-    "The world deletes all I said to you",
+    "Overwrite this pain tearing me apart",
+    "Toketeyuku",
+    "Frozen mind",
+    "Ray of light",
+    "Ready for a trip to nowhere",
+    "Overwrite this pain tearing me apart",
+    "Yasuraida",
+    "My last pray with no aim",
+    "My last... let me feel alive",
   ],
   "Bloody Destiny": [
     "Night Beast",
