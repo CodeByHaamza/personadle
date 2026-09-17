@@ -48,3 +48,13 @@ define('TRUSTED_PROXIES', []);
 // Récupérable dans Discord : Modifier le salon → Intégrations → Webhooks.
 // SECRET : quiconque possède cette URL peut poster sous ce nom.
 define('DISCORD_DAILY_WEBHOOK', '');
+
+// ── Pusher (notifications temps réel) ────────────────────────────────────────
+// Créer une app sur https://dashboard.pusher.com (Channels), copier ses
+// identifiants ici. Laisser vide en local si vous ne testez pas le temps réel :
+// personadle_pusher_trigger() devient alors un no-op silencieux (fallback
+// polling toujours actif côté client).
+define('PUSHER_APP_ID', '');
+define('PUSHER_KEY', '');
+define('PUSHER_SECRET', '');
+define('PUSHER_CLUSTER', '');

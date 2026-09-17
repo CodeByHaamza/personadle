@@ -31,6 +31,10 @@ function meResponse(PDO $pdo, array $user): never
     jsonSuccess(siteState($pdo) + [
         'user'     => formatUser($user, $profileRow),
         'settings' => $settings,
+        'pusher'   => [
+            'key'     => defined('PUSHER_KEY') ? PUSHER_KEY : null,
+            'cluster' => defined('PUSHER_CLUSTER') ? PUSHER_CLUSTER : null,
+        ],
         // Reset ciblé (migration 042) : le client vide son état local des modes
         // si cette date est plus récente que son dernier accusé.
         'reset_local_state_at' => $user['reset_local_state_at'] ?? null,
