@@ -1671,6 +1671,34 @@ export function readActiveChallenge(isExpert = isExpertPage()) {
 }
 
 /**
+ * La valeur actuelle de cette clé de filtres est-elle celle qu'un défi ACTIF
+ * (aujourd'hui, l'une ou l'autre dimension) a installée ?
+ *
+ * filterMenu.js s'en sert pour ne pas retoucher une liste qui n'appartient pas
+ * au joueur. Sans ça, sur un appareil où le mode n'avait jamais été ouvert
+ * (pas de `<clé>_seeded`), le seeding d'un opus récent (PTS) s'ajoutait aux
+ * filtres du défi et les PERSISTAIT ; releaseActiveChallenge() lisait alors
+ * « la clé ne vaut plus ce que le défi a écrit → le joueur a rechoisi » et ne
+ * rendait rien : le joueur gardait « filtres de l'expéditeur + PTS » pour
+ * toujours, sans avoir rien choisi. Sorti par tests/filters_usecases.test.js.
+ *
+ * @param {string} storageKey clé localStorage du mode (FILTER_STORAGE_KEYS)
+ * @returns {boolean}
+ */
+export function isFilterKeyHeldByChallenge(storageKey) {
+  if (!storageKey) return false;
+  const current = localStorage.getItem(storageKey);
+  if (current == null) return false;
+  for (const isExpert of [false, true]) {
+    const c = readActiveChallenge(isExpert);
+    if (c?.filterKey === storageKey && c.installedFilters != null && c.installedFilters === current) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Cible dédiée du défi actif pour un mode (décision produit 2026-07-17 :
  * « le défi doit défier » — cible aléatoire, pas celle du jour).
  * Retourne le nom de la cible, ou null si pas de défi actif pour ce mode ou
