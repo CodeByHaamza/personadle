@@ -1,0 +1,114 @@
+/**
+ * avatars_gallery.test.js — Intégrité de la galerie d'avatars et des fonds de la
+ * carte de partage : ce que le code LISTE doit exister sur le disque, et ce que
+ * le serveur ACCEPTE doit couvrir tout ce que la galerie propose.
+ *
+ * Ajouté le 2026-09-17 en important 29 portraits. La première passe a sorti deux
+ * avatars présents depuis la 2.0 que le serveur refusait (personadle_validate_avatar,
+ * api/lib/validation.php) : `Kanji.avif` (extension hors liste) et
+ * `Caroline&justine.png` (le « & »). Choisis, ils restaient locaux — jamais
+ * persistés sur le compte, écrasés au prochain pull cloud, absents sur un autre
+ * appareil — sans le moindre message. Ce test empêche la récidive.
+ */
+
+import { describe, it, expect } from "vitest";
+import { readdirSync, existsSync } from "node:fs";
+import { join } from "node:path";
+import { AVATAR_GROUPS } from "../profile/avatars_data.js";
+import { shareWallpapers } from "../profile/share-card.js";
+import { UNLOCKABLE_WALLPAPERS } from "../profile/wallpapers-ui.js";
+import { normalizeAvatarPath } from "../profile/profile-format.js";
+
+const ROOT = join(import.meta.dirname, "..");
+const AVATAR_DIR = join(ROOT, "img", "avatar");
+
+/** Miroir EXACT de la liste blanche serveur (api/lib/validation.php, personadle_validate_avatar). */
+const SERVER_GALLERY_NAME = /^[A-Za-z0-9_-]+\.(?:gif|png|jpe?g|webp|avif)$/;
+
+const listed = AVATAR_GROUPS.flatMap((g) => g.avatars);
+const onDisk = readdirSync(AVATAR_DIR);
+
+describe("galerie d'avatars (profile/avatars_data.js ↔ img/avatar/)", () => {
+  it("chaque portrait listé existe sur le disque", () => {
+    const missing = listed.filter((n) => !onDisk.includes(n));
+    expect(missing, "listés dans avatars_data.js mais absents de img/avatar/").toEqual([]);
+  });
+
+  it("chaque fichier de img/avatar/ est proposé dans un groupe (pas d'orphelin)", () => {
+    const orphans = onDisk.filter((f) => !listed.includes(f));
+    expect(orphans, "fichiers de img/avatar/ que personne ne peut choisir").toEqual([]);
+  });
+
+  it("aucun portrait n'apparaît dans deux groupes", () => {
+    const dup = listed.filter((n, i) => listed.indexOf(n) !== i);
+    expect(dup).toEqual([]);
+  });
+
+  it("chaque nom passe la liste blanche du serveur — sinon le choix n'est jamais persisté sur le compte", () => {
+    const rejected = listed.filter((n) => !SERVER_GALLERY_NAME.test(n));
+    expect(rejected, "refusés par personadle_validate_avatar (espace, &, parenthèse, extension…)").toEqual([]);
+  });
+
+  it("les groupes ont une clé connue du picker et un libellé de jeu", () => {
+    const known = ["persona1", "persona2", "persona3", "persona4", "persona5", "persona5x", "special"];
+    for (const g of AVATAR_GROUPS) {
+      expect(known).toContain(g.key);
+      expect(typeof g.game).toBe("string");
+      expect(g.avatars.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("les 29 portraits du lot du 2026-09-17 sont bien là, dans le jeu d'origine du personnage", () => {
+    const byKey = Object.fromEntries(AVATAR_GROUPS.map((g) => [g.key, g.avatars]));
+    for (const n of ["makoto_yuki_pq2.jpg", "yukari_pq2.jpg", "junpei_pq.jpg", "akihiko_pq2.jpg", "mitsuru_pq2.jpg", "aigis_pq2.jpg", "koromaru_pq2.jpg", "ken_amada_pq2.jpg", "shinjiro_pq2.jpg", "kotone_pq.jpg"]) {
+      expect(byKey.persona3, n).toContain(n);
+    }
+    for (const n of ["yu_pq.jpg", "yosuke_pq.jpg", "chie_pq.jpg", "yukiko_pq.jpg", "kanji_pq.jpg", "rise_pq.jpg", "teddie_pq.jpg", "naoto_pq.jpg", "naoto_p4r.jpg"]) {
+      expect(byKey.persona4, n).toContain(n);
+    }
+    for (const n of ["joker_pq.jpg", "ryuji_pq.jpg", "ann_pq.jpg", "morgana_pq.jpg", "morgana_dancing.jpg", "yusuke_pq.jpg", "makoto_nijima_pq.jpg", "haru_pq.jpg", "crow_pq2.jpg"]) {
+      expect(byKey.persona5, n).toContain(n);
+    }
+    expect(byKey.special).toContain("jojo_frost.jpg");
+  });
+});
+
+describe("normalizeAvatarPath — portrait renommé", () => {
+  it("un profil local qui porte encore « Caroline&justine.png » retombe sur le nouveau nom", () => {
+    expect(normalizeAvatarPath("../img/avatar/Caroline&justine.png")).toBe("../img/avatar/caroline_justine.png");
+    expect(normalizeAvatarPath("./img/avatar/Caroline&justine.png")).toBe("../img/avatar/caroline_justine.png");
+  });
+
+  it("…et le nouveau nom existe bien sur le disque, sous un nom que le serveur accepte", () => {
+    expect(onDisk).toContain("caroline_justine.png");
+    expect(onDisk).not.toContain("Caroline&justine.png");
+    expect(SERVER_GALLERY_NAME.test("caroline_justine.png")).toBe(true);
+  });
+});
+
+describe("fonds de la carte de partage (profile/share-card.js)", () => {
+  const all = Object.values(shareWallpapers).flat();
+
+  it("chaque fond référencé existe sur le disque (chemins relatifs à profile/)", () => {
+    const missing = all.filter((w) => w.src && !existsSync(join(ROOT, "profile", w.src)));
+    expect(missing.map((w) => w.src), "fonds listés mais absents").toEqual([]);
+  });
+
+  it("les identifiants de fonds sont uniques", () => {
+    const ids = all.map((w) => w.id);
+    expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
+  });
+
+  it("Persona 4 Revival est disponible d'office dans le groupe Persona 4, pas comme déblocable", () => {
+    const p4r = shareWallpapers.persona4.find((w) => w.id === "p4_revival");
+    expect(p4r).toBeTruthy();
+    expect(p4r.src).toBe("../profile/Wallpaper/wallpaper_p4r.jpg");
+    expect(existsSync(join(ROOT, "profile", p4r.src))).toBe(true);
+    expect(UNLOCKABLE_WALLPAPERS.some((w) => w.id === "p4_revival" || /p4r/.test(w.src))).toBe(false);
+  });
+
+  it("chaque fond déblocable existe aussi sur le disque", () => {
+    const missing = UNLOCKABLE_WALLPAPERS.filter((w) => !existsSync(join(ROOT, "profile", w.src)));
+    expect(missing.map((w) => w.src)).toEqual([]);
+  });
+});

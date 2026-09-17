@@ -125,7 +125,9 @@ function personadle_validate_avatar(?string $avatar, string $galleryDir = __DIR_
     if (preg_match('/^data:image\/(jpeg|png|webp);base64,/', $avatar)) {
         return null;
     }
-    if (preg_match('#^\.\./img/avatar/([A-Za-z0-9_\-]+\.(?:gif|png|jpe?g|webp))$#', $avatar, $m)) {
+    // `avif` : Kanji.avif est dans la galerie depuis la 2.0 et était refusé ici —
+    // choisi, il restait local et disparaissait au prochain pull cloud.
+    if (preg_match('#^\.\./img/avatar/([A-Za-z0-9_\-]+\.(?:gif|png|jpe?g|webp|avif))$#', $avatar, $m)) {
         return is_file($galleryDir . '/' . $m[1]) ? null : 'Unknown gallery avatar';
     }
     return 'Invalid avatar format';

@@ -39,7 +39,14 @@ export function normalizeAvatarPath(avatarPath) {
   // Chemins déjà absolus ou root-relatifs
   if (avatarPath.startsWith("/") || avatarPath.startsWith("http")) return avatarPath;
   // Anciens chemins stockés depuis index.html (./img/...) → corriger pour profile/
-  return avatarPath.replace(/^\.\/img\//, "../img/");
+  return (
+    avatarPath
+      .replace(/^\.\/img\//, "../img/")
+      // Portrait renommé le 2026-09-17 : le « & » n'était pas accepté par le
+      // serveur (personadle_validate_avatar), donc jamais persisté sur le compte —
+      // seul un profil local peut encore porter l'ancien nom.
+      .replace(/\/Caroline&justine\.png$/, "/caroline_justine.png")
+  );
 }
 
 /**

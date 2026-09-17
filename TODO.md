@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1169 tests Vitest (66 suites), 306 méthodes PHPUnit, 229 tests E2E,
+> Vérifié le 2026-08-26 : 1181 tests Vitest (67 suites), 308 méthodes PHPUnit, 229 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
