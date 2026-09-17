@@ -180,9 +180,16 @@ export function resolveRegisterError(message) {
  *   joueur. Purger `playerUserId` sur un simple blip réseau changerait sa cible
  *   du jour (getPlayerSeedId() retomberait sur anonPlayerId) — le puzzle du jour
  *   se mettrait à changer tout seul.
+ * @param {{key: string, cluster: string}|null} [pusherConfig=null] - Identifiants
+ *   publics Pusher renvoyés par GET /api/auth/me, consommés par
+ *   js/notifications.js pour s'abonner au canal temps réel de l'utilisateur.
  */
-export function updateAuthUI(user, authoritative = true) {
+export function updateAuthUI(user, authoritative = true, pusherConfig = null) {
   window._currentUser = user;
+  if (pusherConfig) {
+    window._pusherKey = pusherConfig.key;
+    window._pusherCluster = pusherConfig.cluster;
+  }
 
   // Sync the player seed ID used by getDailyTarget() in gameCore.js.
   // Logged-in  → use numeric user_id (consistent across devices/sessions)
@@ -603,13 +610,13 @@ async function _fetchMeWithRetry(attempts = 3) {
   for (let i = 0; i < attempts; i++) {
     try {
       const me = await api.auth.me();
-      return { user: me.user, reachable: true, me };
+      return { user: me.user, pusher: me.pusher, reachable: true, me };
     } catch (err) {
-      if (!isTransportError(err)) return { user: null, reachable: true };
+      if (!isTransportError(err)) return { user: null, pusher: null, reachable: true, me: null };
       if (i < attempts - 1) await _wait(300 * 3 ** i);
     }
   }
-  return { user: null, reachable: false };
+  return { user: null, pusher: null, reachable: false, me: null };
 }
 
 /**
@@ -628,7 +635,7 @@ async function _fetchMeWithRetry(attempts = 3) {
  */
 export async function initAuth() {
   // 1. Restaurer la session — avec réessais sur panne de transport.
-  const { user, reachable, me } = await _fetchMeWithRetry();
+  const { user, pusher, reachable, me } = await _fetchMeWithRetry();
 
   // `reachable: false` = serveur injoignable, PAS « déconnecté ». On affiche l'UI
   // anonyme faute de mieux, mais sans purger le seed du joueur, et on le signale
@@ -641,7 +648,7 @@ export async function initAuth() {
   // restait false et TOUTES les pages qui l'attendent bloquaient 2 s puis
   // dégradaient en anonyme — pour une exception d'affichage.
   try {
-    updateAuthUI(user, reachable);
+    updateAuthUI(user, reachable, pusher);
 
     // Maintenance, annonces, messages de l'équipe, reset ciblé (migration 042) —
     // tout vient avec /me, une seule fois par page. Ne doit jamais casser l'auth.

@@ -49,6 +49,13 @@ let notifications; // module sous test, réimporté à neuf par test
 let challengeNotif; // espions de la pop-up
 let challengeResult;
 let api;
+let mockChannel;
+
+async function triggerRecheck() {
+  const [, handler] = mockChannel.bind.mock.calls[0];
+  handler();
+  await vi.runAllTimersAsync();
+}
 
 /** Un message « défi » tel que /api/messages le renvoie. */
 function msg(overrides = {}) {
@@ -86,6 +93,7 @@ async function freshPage(pathname = "/index.html") {
   challengeNotif.queueChallengeNotifs.mockClear();
   challengeResult.showSenderChallengeResult.mockClear();
   notifications = await import("../js/notifications.js");
+  window._personadleApi = api;
 }
 
 function queuedIds() {
@@ -107,6 +115,18 @@ beforeEach(async () => {
     socialLink: { getRankUpNotifs: vi.fn().mockResolvedValue({ notifs: [] }) },
   };
   window._personadleApi = api;
+
+  window._pusherKey = "test-key";
+  window._pusherCluster = "eu";
+  mockChannel = { bind: vi.fn() };
+  window.Pusher = vi.fn(function PusherMock() {
+    return {
+      subscribe: vi.fn().mockReturnValue(mockChannel),
+      disconnect: vi.fn(),
+      connection: { bind: vi.fn(), state: "connected" },
+    };
+  });
+
   await freshPage("/index.html");
 });
 
@@ -116,6 +136,9 @@ afterEach(() => {
   localStorage.clear();
   delete window._personadleApi;
   delete window._currentUser;
+  delete window._pusherKey;
+  delete window._pusherCluster;
+  delete window.Pusher;
   vi.clearAllMocks();
 });
 
@@ -235,7 +258,7 @@ describe("plusieurs défis en même temps", () => {
     expect(queuedIds()).toEqual([100]);
 
     api.messages.list.mockResolvedValueOnce({ messages: [msg({ id: 100 }), msg({ id: 101 })] });
-    await vi.advanceTimersByTimeAsync(60_000);
+    await triggerRecheck();
 
     expect(queuedIds()).toEqual([100, 101]); // 100 n'est pas rejoué, 101 arrive
   });
@@ -246,8 +269,8 @@ describe("mémoire : même page, autre page, fermeture explicite", () => {
     api.messages.list.mockResolvedValue({ messages: [msg()] });
     await notifications.initNotifications();
 
-    await vi.advanceTimersByTimeAsync(60_000);
-    await vi.advanceTimersByTimeAsync(60_000);
+    await triggerRecheck();
+    await triggerRecheck();
 
     expect(challengeNotif.queueChallengeNotifs).toHaveBeenCalledTimes(1);
   });
@@ -312,7 +335,7 @@ describe("cohabitation avec le plein écran de résultat", () => {
     expect(challengeNotif.queueChallengeNotifs).not.toHaveBeenCalled();
 
     document.getElementById("cr-overlay").remove();
-    await vi.advanceTimersByTimeAsync(60_000);
+    await triggerRecheck();
 
     expect(queuedIds()).toEqual([100]);
   });
@@ -339,13 +362,13 @@ describe("résultat pour l'expéditeur", () => {
     expect(challengeResult.showSenderChallengeResult).toHaveBeenCalledTimes(1);
     expect(challengeResult.showSenderChallengeResult.mock.calls[0][0].id).toBe(300);
 
-    await vi.advanceTimersByTimeAsync(60_000);
+    await triggerRecheck();
     expect(challengeResult.showSenderChallengeResult).toHaveBeenCalledTimes(1);
 
     api.messages.list.mockResolvedValue({
       messages: [beaten(), msg({ id: 301, sender_id: ME, receiver_id: FRIEND, status: "expired" })],
     });
-    await vi.advanceTimersByTimeAsync(60_000);
+    await triggerRecheck();
     expect(challengeResult.showSenderChallengeResult).toHaveBeenCalledTimes(2);
     expect(challengeResult.showSenderChallengeResult.mock.calls[1][0].id).toBe(301);
   });
@@ -412,7 +435,7 @@ describe("relance des statuts non transmis", () => {
 
     // Le serveur revient : la relance aboutit au sondage suivant.
     api.messages.updateStatus.mockResolvedValue({ updated: true });
-    await vi.advanceTimersByTimeAsync(60_000);
+    await triggerRecheck();
     expect(localStorage.getItem("pendingChallengeStatus")).toBeNull();
   });
 
@@ -443,7 +466,7 @@ describe("robustesse", () => {
     expect(badge.classList.contains("hidden")).toBe(false);
 
     api.notifications.get.mockResolvedValue({ friend_requests: 0 });
-    await vi.advanceTimersByTimeAsync(60_000);
+    await triggerRecheck();
     expect(badge.classList.contains("hidden")).toBe(true);
   });
 

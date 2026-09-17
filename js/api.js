@@ -26,7 +26,7 @@
 // Prod         : Hostinger, projet à la racine du domaine
 // → On détecte si le pathname commence par /personadle/ pour le préfixer.
 const _pathPrefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
-const BASE_URL =
+export const BASE_URL =
   window.location.hostname === "personadle.net"
     ? "https://personadle.net/api"
     : `${window.location.protocol}//${window.location.host}${_pathPrefix}/api`;

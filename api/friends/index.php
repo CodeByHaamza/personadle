@@ -23,6 +23,7 @@
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/friends.php';
 require_once __DIR__ . '/../lib/expert_unlocks.php';
+require_once __DIR__ . '/../lib/pusher_trigger.php';
 
 // Extraire l'éventuel :id depuis l'URL (/api/friends/42)
 $parts        = requestPathSegments();
@@ -227,6 +228,8 @@ if ($method === 'POST') {
     $stmt->execute([$authId, $addresseeId]);
     $friendshipId = (int) $pdo->lastInsertId();
 
+    personadle_pusher_trigger("private-user-{$addresseeId}", 'friend_request', []);
+
     jsonSuccess(['friendship_id' => $friendshipId, 'status' => 'pending'], 201);
 }
 
@@ -280,6 +283,7 @@ if ($method === 'PATCH') {
                 // Non-bloquant — ne pas faire échouer la réponse
                 error_log('[Friends PATCH] decline message insert failed: ' . $e->getMessage());
             }
+            personadle_pusher_trigger("private-user-" . (int) $reqData['requester_id'], 'friend_declined', []);
         }
 
         jsonSuccess(['friendship_id' => $friendshipId, 'status' => 'declined']);
