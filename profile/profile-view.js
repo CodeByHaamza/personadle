@@ -208,7 +208,8 @@ if (viewParam || uidParam) {
     // 2.2 : l atelier, l indicateur d enregistrement et la puce « Choisir un titre »
     // sont des commandes du propriétaire — sur un profil consulté on ne montre que
     // le résultat (avatar, titre équipé, badges épinglés).
-    hide(document.getElementById("atelier"));
+    hide(document.getElementById("atelierModal"));
+    hide(document.getElementById("openAtelierBtn"));
     hide(document.getElementById("saveStatus"));
     hide(document.getElementById("equippedTitleEmpty"));
     const titleBtn = document.getElementById("equippedTitleBtn");
@@ -221,9 +222,12 @@ if (viewParam || uidParam) {
     hide(document.getElementById("authGuest"));
     document.querySelectorAll('[data-auth="anonymous"]').forEach(hide);
     hide(document.querySelector(".pseudo-edit-row"));
-    // La carte « Badges » ne contient plus que l accès à la collection du propriétaire
-    // (les épinglés sont sur la carte d identité) : on la retire entière.
-    hide(document.getElementById("openBadgesModal")?.closest(".profile-card"));
+    // Le sélecteur de mode favori est une commande du propriétaire : sur un
+    // profil consulté il ne restait qu un libellé au-dessus d une rangée vide.
+    hide(document.querySelector(".fav-mode-row"));
+    // La carte « Badges » reste : elle montre la collection du joueur consulté
+    // (retour Hamza du 2026-09-16). Seul le bouton vers SA propre collection part.
+    hide(document.getElementById("openBadgesModal"));
 
     // Masquer les cartes d'action (export, import, share, reset, event code)
     document.querySelectorAll(".profile-card").forEach((card) => {
@@ -624,6 +628,7 @@ if (viewParam || uidParam) {
 
     // ── Badges avec click-to-zoom ──
     renderViewBadges(profile, badges);
+
 
     // ── Thème du joueur consulté ──
     applyViewTheme(profile.wallpaper_id || "all_out");

@@ -192,17 +192,32 @@ describe("case périmée déjà présente", () => {
     expect(slot(true).msgId).toBe(9);
   });
 
-  it("le joueur ne touche jamais ses filtres : aucune clé ne naît d'une libération", () => {
+  it("libérer une case dont le joueur n'avait pas de filtres retire ceux du défi", () => {
+    // originalFilters null = clé absente à l'acceptation. La case périmée avait
+    // posé ceux de l'expéditeur : les laisser, c'était restreindre le mode du
+    // joueur pour toujours. On retire — jamais "[]", que filterMenu.js lirait
+    // comme « tout désélectionné ».
     localStorage.setItem(
       activeChallengeKey(false),
-      JSON.stringify(stale({ originalFilters: null }))
+      JSON.stringify(stale({ originalFilters: null, installedFilters: '["P4"]' }))
     );
     localStorage.setItem(FILTER_STORAGE_KEYS.classic, '["P4"]');
 
     installActiveChallenge({ ...base(), challengeFilters: null });
 
-    // Rien à restaurer (null) : la clé garde ce qu'elle avait, et surtout pas "[]".
-    expect(localStorage.getItem(FILTER_STORAGE_KEYS.classic)).toBe('["P4"]');
+    expect(localStorage.getItem(FILTER_STORAGE_KEYS.classic)).toBeNull();
+  });
+
+  it("…mais respecte un choix fait pendant le défi", () => {
+    localStorage.setItem(
+      activeChallengeKey(false),
+      JSON.stringify(stale({ originalFilters: null, installedFilters: '["P4"]' }))
+    );
+    localStorage.setItem(FILTER_STORAGE_KEYS.classic, '["P3","P3R"]');
+
+    installActiveChallenge({ ...base(), challengeFilters: null });
+
+    expect(localStorage.getItem(FILTER_STORAGE_KEYS.classic)).toBe('["P3","P3R"]');
   });
 });
 

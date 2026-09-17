@@ -317,13 +317,19 @@ function initSongPlayer(profile) {
 
   profileSongAudio.onplay = () => {
     const btn = document.getElementById("songPlayBtn");
-    if (btn) btn.textContent = "⏸";
+    if (btn) {
+      btn.textContent = "⏸";
+      btn.classList.add("playing");
+    }
     document.getElementById("songPlayerUI")?.classList.add("playing");
   };
 
   profileSongAudio.onpause = () => {
     const btn = document.getElementById("songPlayBtn");
-    if (btn) btn.textContent = "▶";
+    if (btn) {
+      btn.textContent = "▶";
+      btn.classList.remove("playing");
+    }
     document.getElementById("songPlayerUI")?.classList.remove("playing");
   };
 

@@ -90,22 +90,33 @@ function personadle_normalize_lang(string $lang, array $supported = PERSONADLE_S
  * null si valide.
  *
  * Deux formes acceptées :
- *  - une image encodée (`data:image/…;base64,`) — le recadrage canvas ;
  *  - une référence à un portrait de la galerie du site (`../img/avatar/<nom>.<ext>`),
- *    la forme que tout le client résout déjà (friends, leaderboard, calling cards,
- *    profil public). C'est ainsi que les 13 GIF animés sont choisis : un GIF ne
- *    passe pas par le canvas (il perdrait son animation) et encodé en base64 il
- *    pèserait jusqu'à 1,7 Mo dans chaque liste d'amis. Jusqu'en 2.2 le serveur
- *    refusait cette forme (400) : le choix d'un GIF n'était jamais enregistré et
- *    revenait à l'avatar précédent au prochain pull cloud.
+ *    la forme que tout le client résout déjà (amis, classement, calling cards,
+ *    profil public, compendium) et la seule possible pour un GIF animé — le
+ *    canvas lui ferait perdre son animation, et encodé il pèserait jusqu'à 1,7 Mo
+ *    dans chaque liste d'amis. Jusqu'en 2.2 le serveur la refusait (400) : le
+ *    choix d'un GIF n'était jamais enregistré et revenait au pull cloud suivant ;
+ *  - une image encodée (`data:image/(jpeg|png|webp);base64,`) : le RECADRAGE d'un
+ *    de ces portraits (certains sont mal cadrés par défaut).
+ *
+ * Décision Hamza du 2026-09-16 : **on ne téléverse plus sa propre image** — un
+ * avatar est vu par les amis, le classement et les défis, et rien ne modère une
+ * image libre. Le client n'offre donc plus d'import : la seule source est la
+ * galerie, éventuellement recadrée. Angle mort assumé : un appel d'API fabriqué
+ * à la main peut encore poster une image arbitraire, le serveur ne pouvant pas
+ * distinguer le recadrage d'un portrait d'une autre image encodée. Fermer ça
+ * demanderait de stocker le cadrage (zoom/offsets) au lieu des pixels, et de
+ * refaire le rendu partout où un avatar s'affiche.
+ *
+ * Le fichier référencé doit exister dans `img/avatar/` : jamais un chemin libre,
+ * pas de traversée (`..`), pas d'URL externe.
  *
  * @param string|null $avatar   valeur reçue (null = retirer l'avatar, valide)
- * @param string      $galleryDir  dossier des portraits, pour vérifier que le fichier
- *                                 référencé existe vraiment (jamais un chemin libre)
+ * @param string      $galleryDir  dossier des portraits
  */
 function personadle_validate_avatar(?string $avatar, string $galleryDir = __DIR__ . '/../../img/avatar'): ?string
 {
-    if ($avatar === null) {
+    if ($avatar === null || $avatar === '') {
         return null;
     }
     if (strlen($avatar) > 2_000_000) {

@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../api/lib/condition_check.php';
  * Trois angles distincts de ConditionCheckTest.php (qui teste la LOGIQUE générique
  * avec des valeurs arbitraires) :
  *
- *  1. Vérifie que CHAQUE ligne réellement seedée (63 badges, 7 wallpapers) a bien
+ *  1. Vérifie que CHAQUE ligne réellement seedée (64 badges, 7 wallpapers) a bien
  *     le condition_type/mode/value attendu — si un futur `npm run` ou une migration
  *     manuelle modifie une valeur par erreur, ce test le détecte immédiatement,
  *     badge par badge / wallpaper par wallpaper (pas juste "la fonction marche").
@@ -115,11 +115,13 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'velvet_regular'  => ['unique_days', null, 50],
             'best_bro'        => ['friends_count', null, 2],
             'denial_of_self'  => ['expert_modes_mastered', null, 10],
+            // Lot du 2026-09-16 (migration 044)
+            'song_of_orpheus' => ['expert_wins_total', null, 25],
         ];
 
         // Le reste du catalogue (46 badges) est 'manual' — flags narratifs, redeem
         // de code événement, ou vérifié par un autre endpoint. Liste exhaustive des
-        // 63 slugs seedés (sql/bdd_mysql.sql) pour détecter un slug ajouté/retiré.
+        // 64 slugs seedés (sql/bdd_mysql.sql) pour détecter un slug ajouté/retiré.
         $manual = [
             'burn_my_dread', 'into_the_fog', 'velvet_headache', 'chinese_new_year', 'twin_blade',
             'persona_q_explorer', 'crimson_legacy', 'hippocampus_reload', 'truth_duality', 'one_shot',
@@ -143,12 +145,12 @@ final class BadgeWallpaperCatalogTest extends TestCase
     public function testEveryBadgeHasExpectedConditionColumns(): void
     {
         $expected = self::expectedBadgeConditions();
-        $this->assertCount(63, $expected, 'Le catalogue de référence de ce test doit lister les 63 badges');
+        $this->assertCount(64, $expected, 'Le catalogue de référence de ce test doit lister les 64 badges');
 
         $rows = self::$pdo->query(
             'SELECT slug, condition_type, condition_mode, condition_value FROM badges'
         )->fetchAll(PDO::FETCH_ASSOC);
-        $this->assertCount(63, $rows, 'La table badges doit contenir exactement 63 lignes (seed bdd_mysql.sql)');
+        $this->assertCount(64, $rows, 'La table badges doit contenir exactement 64 lignes (seed bdd_mysql.sql)');
 
         $bySlug = [];
         foreach ($rows as $r) {

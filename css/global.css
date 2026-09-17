@@ -129,6 +129,20 @@ body.modal-open {
    2. LOGO DE LA PAGE D'ACCUEIL
    ===================================================== */
 
+/* Le lien autour du logo s'étendait sur toute la largeur de l'en-tête : cliquer
+   à CÔTÉ du logo renvoyait à l'accueil (retour Hamza du 2026-09-16). On le
+   réduit à l'image, et c'est lui qui porte le centrage. */
+#homepage {
+  display: flex;
+  justify-content: center;
+}
+
+#homepage > a {
+  display: inline-block;
+  line-height: 0;
+  max-width: 100%;
+}
+
 #imgHomePage {
   width: min(460px, 80vw);
   height: auto;
@@ -3326,9 +3340,12 @@ body.darkmode {
   box-shadow:
     0 28px 70px rgba(0, 0, 0, 0.18),
     0 4px 16px rgba(0, 0, 0, 0.07);
-  max-width: 920px;
-  width: 96%;
-  max-height: 88vh;
+  /* La fenêtre touchait presque les bords de l'écran (96 % de large, 88 vh de
+     haut) : on la décolle en haut, en bas et sur les côtés. */
+  max-width: 880px;
+  width: min(880px, 92vw);
+  max-height: 84vh;
+  margin: 0 auto;
   padding: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -3353,7 +3370,7 @@ body.darkmode {
   top: 0;
   z-index: 10;
   margin: 0;
-  padding: 15px 52px 15px 22px;
+  padding: 18px 56px 18px 34px;
   background: linear-gradient(120deg, #c80000 0%, #7a0000 100%);
   color: #fff;
   font-family: "Oswald", "Arial Black", Arial, sans-serif;
@@ -3393,30 +3410,35 @@ body.darkmode {
 }
 
 /* ── Corps ──────────────────────────────────────────────── */
+/* Tout était collé : sections, puces et séparateurs se touchaient et le texte
+   devenait un mur (retour Hamza du 2026-09-16). On aère, sans rien déplacer. */
 #rulesModal [data-i18n-block] {
-  padding: 16px 22px 20px;
+  padding: 26px 34px 34px;
 }
 
 /* ── Séparateurs : discrets ─────────────────────────────── */
 #rulesModal hr.separator {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  margin: 8px 0;
+  margin: 20px 0 4px;
 }
 
 /* ── En-têtes de section : typographiques, sans boîte ────── */
 #rulesModal strong {
   display: block;
   font-family: "Oswald", "Arial Black", Arial, sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #c00;
-  margin: 10px 0 4px;
-  padding: 0 0 4px 0;
+  margin: 24px 0 10px;
+  padding: 0 0 6px 0;
   border-bottom: 1px solid rgba(204, 0, 0, 0.18);
   background: none;
+}
+#rulesModal [data-i18n-block] > strong:first-child {
+  margin-top: 0;
 }
 
 /* ── Strong inline dans les li et les p ─────────────────── */
@@ -3439,17 +3461,18 @@ body.darkmode {
 #rulesModal ul {
   list-style: none;
   padding: 0;
-  margin: 0 0 2px;
+  margin: 0 0 6px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 8px;
 }
 #rulesModal ul li {
   position: relative;
-  font-size: 0.875rem;
-  line-height: 1.52;
-  color: #444;
-  padding: 4px 6px 4px 18px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #3a3a3a;
+  padding: 0 4px 0 22px;
+  max-width: 78ch;
   background: none;
   border: none;
   border-radius: 0;
@@ -3457,11 +3480,11 @@ body.darkmode {
 #rulesModal ul li::before {
   content: "›";
   position: absolute;
-  left: 4px;
-  top: 3px;
-  color: rgba(204, 0, 0, 0.45);
-  font-size: 1rem;
-  line-height: 1.52;
+  left: 6px;
+  top: 0;
+  color: rgba(204, 0, 0, 0.55);
+  font-size: 1.05rem;
+  line-height: 1.65;
   font-weight: 700;
 }
 
