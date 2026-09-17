@@ -10,6 +10,7 @@
 
 import {
   parisDateKey,
+  shiftDateKey,
   msUntilNextParisMidnight,
   normalize,
   showConfettiExplosion,
@@ -94,6 +95,58 @@ describe("parisDateKey", () => {
     const d1 = new Date("2025-03-25T12:00:00Z");
     const d2 = new Date("2025-03-26T12:00:00Z");
     expect(parisDateKey(d1)).not.toBe(parisDateKey(d2));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// shiftDateKey — « hier » / « demain » en jours calendaires, sans fuseau
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("shiftDateKey", () => {
+  it("recule d'un jour à l'intérieur d'un mois", () => {
+    expect(shiftDateKey("2026-06-15", -1)).toBe("2026-06-14");
+  });
+
+  it("franchit un début de mois en reculant", () => {
+    expect(shiftDateKey("2026-03-01", -1)).toBe("2026-02-28");
+    expect(shiftDateKey("2028-03-01", -1)).toBe("2028-02-29"); // bissextile
+  });
+
+  it("franchit un changement d'année dans les deux sens", () => {
+    expect(shiftDateKey("2027-01-01", -1)).toBe("2026-12-31");
+    expect(shiftDateKey("2026-12-31", 1)).toBe("2027-01-01");
+  });
+
+  it("le lendemain du passage à l'heure d'été est bien J+1, pas J+2 ni J", () => {
+    expect(shiftDateKey("2026-03-29", 1)).toBe("2026-03-30");
+    expect(shiftDateKey("2026-03-30", -1)).toBe("2026-03-29");
+  });
+
+  it("accepte des décalages de plusieurs jours", () => {
+    expect(shiftDateKey("2026-06-15", -7)).toBe("2026-06-08");
+    expect(shiftDateKey("2026-06-15", 30)).toBe("2026-07-15");
+    expect(shiftDateKey("2026-06-15", 0)).toBe("2026-06-15");
+  });
+
+  it("ne dépend pas du fuseau de la machine ni de l'heure système", () => {
+    vi.useFakeTimers();
+    for (const now of ["2026-03-29T22:30:00Z", "2026-10-25T00:30:00Z", "2026-07-01T12:00:00Z"]) {
+      vi.setSystemTime(new Date(now));
+      expect(shiftDateKey("2026-03-30", -1)).toBe("2026-03-29");
+    }
+    vi.useRealTimers();
+  });
+
+  it("rend la clé telle quelle si elle n'est pas au format YYYY-MM-DD", () => {
+    expect(shiftDateKey("30/03/2026", -1)).toBe("30/03/2026");
+    expect(shiftDateKey("", -1)).toBe("");
+    expect(shiftDateKey(null, -1)).toBe(null);
+    expect(shiftDateKey("2026-03-30", 1.5)).toBe("2026-03-30");
+  });
+
+  it("est cohérent avec parisDateKey() sur une vraie date", () => {
+    const today = parisDateKey(new Date("2026-03-30T00:30:00+02:00")); // "2026-03-30"
+    expect(shiftDateKey(today, -1)).toBe("2026-03-29");
   });
 });
 
