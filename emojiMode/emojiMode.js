@@ -16,6 +16,7 @@ import {
   buildGameSession,
   savePendingSession,
   getDailyTarget,
+  getDailyTargetWithin,
   showChallengeButton,
   initChallengeButton,
   showCommunityStats,
@@ -133,6 +134,19 @@ const LAST_PLAYED_KEY = EXPERT.key("lastPlayedDate_Emoji");
  */
 function filterCharacterPool() {
   return characters.filter((c) => characterMatchesActiveOpus(c, activeOpus));
+}
+
+/**
+ * Cible du jour, dans les filtres actifs du joueur (voir getDailyTargetWithin).
+ * Tirée parmi les personnages à émojis, comme le serveur.
+ */
+function dailyEmojiCharacter() {
+  return getDailyTargetWithin(
+    ALL_EMOJI_CHARS,
+    ALL_EMOJI_CHARS.filter((c) => characterMatchesActiveOpus(c, activeOpus)),
+    EXPERT.hashMode,
+    (c) => c?.nom
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -542,9 +556,9 @@ function resetGame(random = false) {
       pool.length > 1 && _prevEmoji ? pool.filter((c) => c.nom !== _prevEmoji.nom) : pool;
     target = _emojiCandidates[Math.floor(Math.random() * _emojiCandidates.length)] || pool[0];
   } else {
-    // Même pool qu'à la première visite (tous les personnages à emoji, filtres
-    // ou pas) : c'est ce que le serveur attend.
-    target = getDailyTarget(ALL_EMOJI_CHARS, EXPERT.hashMode);
+    // Même tirage qu'à la première visite, dans les filtres du joueur : c'est
+    // ce que le serveur attend.
+    target = dailyEmojiCharacter();
   }
   if (target) localStorage.setItem(EXPERT.key("targetEmoji"), JSON.stringify(target));
   localStorage.setItem(EXPERT.key("attemptsEmoji"), attempts);
@@ -601,14 +615,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   personas = poolInit.map((c) => c.nom);
 
   // ── Restore or create target / attempts ──
-  // Daily target uses seeded RNG so all players get the same character today.
-  // Pool is all characters with emoji data (regardless of active opus filters).
+  // Daily target uses seeded RNG (per player + day), drawn among characters
+  // with emoji data and kept within the player's active opus filters.
   const _rawEmoji = localStorage.getItem(EXPERT.key("targetEmoji"));
   let _savedEmoji = null;
   try {
     if (_rawEmoji && _rawEmoji !== "undefined") _savedEmoji = JSON.parse(_rawEmoji);
   } catch {}
-  target = _savedEmoji || getDailyTarget(ALL_EMOJI_CHARS, EXPERT.hashMode);
+  target = _savedEmoji || dailyEmojiCharacter();
 
   // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du
   // jour. Persistée dans targetEmoji (état wipé à l'acceptation) → un refresh

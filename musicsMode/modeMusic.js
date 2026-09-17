@@ -22,7 +22,7 @@ import {
   checkResetOnLoad,
   buildGameSession,
   savePendingSession,
-  getDailyTarget,
+  getDailyTargetWithin,
   showChallengeButton,
   initChallengeButton,
   showCommunityStats,
@@ -383,7 +383,14 @@ function pickSong(random = false) {
     // du mode normal, sinon jouer le normal d'abord (où l'audio est donné) offre
     // la réponse. La chaîne "MusicExpert" doit rester identique à celle de
     // api/lib/daily_target.php, sinon chaque partie est loguée en anti_cheat.
-    target = getDailyTarget(IS_EXPERT ? EXPERT_SONGS : originalSongs, EXPERT.hashMode);
+    // Dans les filtres du joueur (voir getDailyTargetWithin) — filteredSongs est
+    // déjà le pool de la page restreint aux opus actifs, même ordre.
+    target = getDailyTargetWithin(
+      IS_EXPERT ? EXPERT_SONGS : originalSongs,
+      filteredSongs,
+      EXPERT.hashMode,
+      (s) => s?.titre
+    );
   }
 
   audioPlayer.src = `./database/music/song/${target.fichier}`;

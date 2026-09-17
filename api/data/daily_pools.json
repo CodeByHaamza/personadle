@@ -185,7 +185,858 @@
       "Shin Kanzato",
       "Jun Kanzato",
       "Ryo Kanzato"
-    ]
+    ],
+    "opusByName": {
+      "Naoya Todou": [
+        "P1"
+      ],
+      "Maki Sonomura": [
+        "P1",
+        "P2IS"
+      ],
+      "Masao Inaba": [
+        "P1"
+      ],
+      "Kei Nanjo": [
+        "P1",
+        "P2EP"
+      ],
+      "Yukino Mayuzumi": [
+        "P1",
+        "P2IS"
+      ],
+      "Hidehiko Uesugi": [
+        "P1",
+        "P2EP"
+      ],
+      "Eriko Kirishima": [
+        "P1",
+        "P2IS",
+        "P2EP"
+      ],
+      "Yuka Ayase": [
+        "P1"
+      ],
+      "Reiji Kido": [
+        "P1",
+        "P2EP"
+      ],
+      "Tatsuya Suou": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Maya Amano": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Lisa Silverman": [
+        "P2IS"
+      ],
+      "Jun Kurosu": [
+        "P2IS"
+      ],
+      "Eikichi Mishina": [
+        "P2IS"
+      ],
+      "Baofu": [
+        "P2EP"
+      ],
+      "Ulala Serizawa": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Katsuya Suou": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Joker": [
+        "P2IS"
+      ],
+      "Philemon": [
+        "P1",
+        "P2IS",
+        "P2EP"
+      ],
+      "Nameless": [
+        "P1",
+        "P2IS",
+        "P2EP"
+      ],
+      "Belladonna": [
+        "P1",
+        "P2IS",
+        "P2EP"
+      ],
+      "Demon Painter": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Makoto Yuki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R"
+      ],
+      "Kotone Shiomi": [
+        "P3P",
+        "PQ2"
+      ],
+      "Junpei Iori": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Yukari Takeba": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Fuuka Yamagishi": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Mitsuru Kirijo": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Akihiko Sanada": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Aigis": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Ken Amada": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Koromaru": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Shinjiro Aragaki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R"
+      ],
+      "Metis": [
+        "P3FES"
+      ],
+      "Nyx": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Ryoji Mochizuki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Takaya Sakaki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Jin Shirato": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Chidori Yoshino": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Shuji Ikutsuki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Elizabeth": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Theodore": [
+        "P3P",
+        "PQ",
+        "PQ2"
+      ],
+      "Kenji Tomochika": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Hidetoshi Odagiri": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Bunkichi": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Mitsuko": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Kazushi Miyamoto": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Rio Iwasaki": [
+        "P3P"
+      ],
+      "Chihiro Fushimi": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Maya": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Saori Hasegawa": [
+        "P3P"
+      ],
+      "Keisuke Hiraga": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Yuko Nishiwaki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Maiko Oohashi": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Bebe": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "President Tanaka": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Mutatsu": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Mamoru Hayase": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Nozomi Suemitsu": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Akinari Kamiki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Pharos": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Mr. Edogawa": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R",
+        "P4",
+        "P4G"
+      ],
+      "Yu Narukami": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Yosuke Hanamura": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Chie Satonaka": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Yukiko Amagi": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Kanji Tatsumi": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Rise Kujikawa": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Teddie": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Naoto Shirogane": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Labrys": [
+        "P4AU"
+      ],
+      "Tohru Adachi": [
+        "P4",
+        "P4G",
+        "P4AU"
+      ],
+      "Izanami": [
+        "P4",
+        "P4G"
+      ],
+      "Ameno-sagiri": [
+        "P4",
+        "P4G"
+      ],
+      "Sho Minazuki": [
+        "P4AU"
+      ],
+      "Margaret": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Marie": [
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Ai Ebihara": [
+        "P4",
+        "P4G"
+      ],
+      "Ayane Matsunaga": [
+        "P4",
+        "P4G"
+      ],
+      "Daisuke Nagase": [
+        "P4",
+        "P4G"
+      ],
+      "Eri Minami": [
+        "P4",
+        "P4G"
+      ],
+      "Fox": [
+        "P4",
+        "P4G"
+      ],
+      "Hisano Kuroda": [
+        "P4",
+        "P4G"
+      ],
+      "Kou Ichijo": [
+        "P4",
+        "P4G"
+      ],
+      "Nanako Dojima": [
+        "P4",
+        "P4G"
+      ],
+      "Naoki Konishi": [
+        "P4",
+        "P4G"
+      ],
+      "Saki Konishi": [
+        "P4",
+        "P4G"
+      ],
+      "Mayumi Yamano": [
+        "P4",
+        "P4G"
+      ],
+      "Ryotaro Dojima": [
+        "P4",
+        "P4G"
+      ],
+      "Sayako Uehara": [
+        "P4",
+        "P4G"
+      ],
+      "Shu Nakajima": [
+        "P4",
+        "P4G"
+      ],
+      "Yumi Ozawa": [
+        "P4",
+        "P4G"
+      ],
+      "Taro Namatame": [
+        "P4",
+        "P4G"
+      ],
+      "Kinshiro Morooka": [
+        "P4",
+        "P4G"
+      ],
+      "Noriko Kashiwagi": [
+        "P4",
+        "P4G"
+      ],
+      "Hanako Ohtani": [
+        "P4",
+        "P4G"
+      ],
+      "Mitsuo Kubo": [
+        "P4",
+        "P4G"
+      ],
+      "Ren Amamiya": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Morgana": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Ryuji Sakamoto": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Ann Takamaki": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Yusuke Kitagawa": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Makoto Niijima": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Futaba Sakura": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Haru Okumura": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Goro Akechi": [
+        "P5",
+        "P5R",
+        "P5T",
+        "PQ2"
+      ],
+      "Sumire Yoshizawa": [
+        "P5R",
+        "P5T"
+      ],
+      "Sae Niijima": [
+        "P5",
+        "P5R"
+      ],
+      "Kobayakawa": [
+        "P5",
+        "P5R"
+      ],
+      "Wakaba Isshiki": [
+        "P5",
+        "P5R"
+      ],
+      "Sophia": [
+        "P5S"
+      ],
+      "Zenkichi Hasegawa": [
+        "P5S"
+      ],
+      "Akane Hasegawa": [
+        "P5S"
+      ],
+      "Kuon Ichinose": [
+        "P5S"
+      ],
+      "Yaldabaoth": [
+        "P5",
+        "P5R",
+        "P5S"
+      ],
+      "Suguru Kamoshida": [
+        "P5",
+        "P5R"
+      ],
+      "Ichiryusai Madarame": [
+        "P5",
+        "P5R"
+      ],
+      "Junya Kaneshiro": [
+        "P5",
+        "P5R"
+      ],
+      "Kunikazu Okumura": [
+        "P5",
+        "P5R"
+      ],
+      "Masayoshi Shido": [
+        "P5",
+        "P5R"
+      ],
+      "Takuto Maruki": [
+        "P5R"
+      ],
+      "Alice Hiiragi": [
+        "P5S"
+      ],
+      "Ango Natsume": [
+        "P5S"
+      ],
+      "Mariko Hyodo": [
+        "P5S"
+      ],
+      "Akira Konoe": [
+        "P5S"
+      ],
+      "Caroline": [
+        "P5",
+        "P5R",
+        "PQ2"
+      ],
+      "Justine": [
+        "P5",
+        "P5R",
+        "PQ2"
+      ],
+      "Lavenza": [
+        "P5",
+        "P5R",
+        "P5T",
+        "P5S"
+      ],
+      "Tae Takemi": [
+        "P5",
+        "P5R"
+      ],
+      "Ichiko Ohya": [
+        "P5",
+        "P5R"
+      ],
+      "Chihaya Mifune": [
+        "P5",
+        "P5R"
+      ],
+      "Munehisa Iwai": [
+        "P5",
+        "P5R"
+      ],
+      "Sojiro Sakura": [
+        "P5",
+        "P5R"
+      ],
+      "Yuuki Mishima": [
+        "P5",
+        "P5R"
+      ],
+      "Hifumi Togo": [
+        "P5",
+        "P5R"
+      ],
+      "Toranosuke Yoshida": [
+        "P5",
+        "P5R"
+      ],
+      "Sadayo Kawakami": [
+        "P5",
+        "P5R"
+      ],
+      "Shinya Oda": [
+        "P5",
+        "P5R"
+      ],
+      "Kasumi Yoshizawa": [
+        "P5R"
+      ],
+      "Jose": [
+        "P5R"
+      ],
+      "Erina": [
+        "P5T"
+      ],
+      "Toshiro Kasukabe": [
+        "P5T"
+      ],
+      "Nagisa Kamishiro": [
+        "P5X"
+      ],
+      "Lufel": [
+        "P5X"
+      ],
+      "Motoha Arai": [
+        "P5X"
+      ],
+      "Shun Kano": [
+        "P5X"
+      ],
+      "Riko Tanemura": [
+        "P5X"
+      ],
+      "Shoki Ikenami": [
+        "P5X"
+      ],
+      "Seiji Shiratori": [
+        "P5X"
+      ],
+      "Aran Hirano": [
+        "P5X"
+      ],
+      "Narumi Nashimoto": [
+        "P5X"
+      ],
+      "Kumi Katayama": [
+        "P5X"
+      ],
+      "Kotone Montagne": [
+        "P5X"
+      ],
+      "Yukimi Fujikawa": [
+        "P5X"
+      ],
+      "Tomoko Noge": [
+        "P5X"
+      ],
+      "Leo Kamiyama": [
+        "P5X"
+      ],
+      "Yaoling Li": [
+        "P5X"
+      ],
+      "Kiyoshi Kurotani": [
+        "P5X"
+      ],
+      "Kayo Tomiyama": [
+        "P5X"
+      ],
+      "Miyu Sahara": [
+        "P5X"
+      ],
+      "Toshiya Sumi": [
+        "P5X"
+      ],
+      "Haruna Nishimori": [
+        "P5X"
+      ],
+      "YUI": [
+        "P5X"
+      ],
+      "Minami Miyashita": [
+        "P5X"
+      ],
+      "Chizuko Nagao": [
+        "P5X"
+      ],
+      "Yumi Shiina": [
+        "P5X"
+      ],
+      "Ayaka Sakai": [
+        "P5X"
+      ],
+      "Kira Kitazato": [
+        "P5X"
+      ],
+      "Masaki Ashiya": [
+        "P5X"
+      ],
+      "Runa Dogenzaka": [
+        "P5X"
+      ],
+      "Mio Natsukawa": [
+        "P5X"
+      ],
+      "Mayumi Hashimoto": [
+        "P5X"
+      ],
+      "Manaka Nagao": [
+        "P5X"
+      ],
+      "Ichigo Shikano": [
+        "P5X"
+      ],
+      "Merope": [
+        "P5X"
+      ],
+      "Rei": [
+        "PQ"
+      ],
+      "Zen": [
+        "PQ"
+      ],
+      "Hikari": [
+        "PQ2"
+      ],
+      "Nagi": [
+        "PQ2"
+      ],
+      "Igor": [
+        "P1",
+        "P2IS",
+        "P2EP",
+        "P3",
+        "P3FES",
+        "P3P",
+        "P4",
+        "P4G",
+        "P4AU",
+        "P5",
+        "P5R",
+        "P3R"
+      ],
+      "Hatsune Miku": [
+        "P4D",
+        "P5X"
+      ],
+      "Shin Kanzato": [
+        "PTS"
+      ],
+      "Jun Kanzato": [
+        "PTS"
+      ],
+      "Ryo Kanzato": [
+        "PTS"
+      ]
+    }
   },
   "emoji": {
     "pool": [
@@ -373,7 +1224,858 @@
       "Shin Kanzato",
       "Jun Kanzato",
       "Ryo Kanzato"
-    ]
+    ],
+    "opusByName": {
+      "Naoya Todou": [
+        "P1"
+      ],
+      "Maki Sonomura": [
+        "P1",
+        "P2IS"
+      ],
+      "Masao Inaba": [
+        "P1"
+      ],
+      "Kei Nanjo": [
+        "P1",
+        "P2EP"
+      ],
+      "Yukino Mayuzumi": [
+        "P1",
+        "P2IS"
+      ],
+      "Hidehiko Uesugi": [
+        "P1",
+        "P2EP"
+      ],
+      "Eriko Kirishima": [
+        "P1",
+        "P2IS",
+        "P2EP"
+      ],
+      "Yuka Ayase": [
+        "P1"
+      ],
+      "Reiji Kido": [
+        "P1",
+        "P2EP"
+      ],
+      "Tatsuya Suou": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Maya Amano": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Lisa Silverman": [
+        "P2IS"
+      ],
+      "Jun Kurosu": [
+        "P2IS"
+      ],
+      "Eikichi Mishina": [
+        "P2IS"
+      ],
+      "Baofu": [
+        "P2EP"
+      ],
+      "Ulala Serizawa": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Katsuya Suou": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Joker": [
+        "P2IS"
+      ],
+      "Philemon": [
+        "P1",
+        "P2IS",
+        "P2EP"
+      ],
+      "Nameless": [
+        "P1",
+        "P2IS",
+        "P2EP"
+      ],
+      "Belladonna": [
+        "P1",
+        "P2IS",
+        "P2EP"
+      ],
+      "Demon Painter": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Makoto Yuki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R"
+      ],
+      "Kotone Shiomi": [
+        "P3P",
+        "PQ2"
+      ],
+      "Junpei Iori": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Yukari Takeba": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Fuuka Yamagishi": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Mitsuru Kirijo": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Akihiko Sanada": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Aigis": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Ken Amada": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Koromaru": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Shinjiro Aragaki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R"
+      ],
+      "Metis": [
+        "P3FES"
+      ],
+      "Nyx": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Ryoji Mochizuki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Takaya Sakaki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Jin Shirato": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Chidori Yoshino": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Shuji Ikutsuki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Elizabeth": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "PQ",
+        "PQ2",
+        "P3R",
+        "P4AU"
+      ],
+      "Theodore": [
+        "P3P",
+        "PQ",
+        "PQ2"
+      ],
+      "Kenji Tomochika": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Hidetoshi Odagiri": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Bunkichi": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Mitsuko": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Kazushi Miyamoto": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Rio Iwasaki": [
+        "P3P"
+      ],
+      "Chihiro Fushimi": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Maya": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Saori Hasegawa": [
+        "P3P"
+      ],
+      "Keisuke Hiraga": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Yuko Nishiwaki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Maiko Oohashi": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Bebe": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "President Tanaka": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Mutatsu": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Mamoru Hayase": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Nozomi Suemitsu": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Akinari Kamiki": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Pharos": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Mr. Edogawa": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R",
+        "P4",
+        "P4G"
+      ],
+      "Yu Narukami": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Yosuke Hanamura": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Chie Satonaka": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Yukiko Amagi": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Kanji Tatsumi": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Rise Kujikawa": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Teddie": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Naoto Shirogane": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Labrys": [
+        "P4AU"
+      ],
+      "Tohru Adachi": [
+        "P4",
+        "P4G",
+        "P4AU"
+      ],
+      "Izanami": [
+        "P4",
+        "P4G"
+      ],
+      "Ameno-sagiri": [
+        "P4",
+        "P4G"
+      ],
+      "Sho Minazuki": [
+        "P4AU"
+      ],
+      "Margaret": [
+        "P4",
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Marie": [
+        "P4G",
+        "P4AU",
+        "PQ",
+        "PQ2"
+      ],
+      "Ai Ebihara": [
+        "P4",
+        "P4G"
+      ],
+      "Ayane Matsunaga": [
+        "P4",
+        "P4G"
+      ],
+      "Daisuke Nagase": [
+        "P4",
+        "P4G"
+      ],
+      "Eri Minami": [
+        "P4",
+        "P4G"
+      ],
+      "Fox": [
+        "P4",
+        "P4G"
+      ],
+      "Hisano Kuroda": [
+        "P4",
+        "P4G"
+      ],
+      "Kou Ichijo": [
+        "P4",
+        "P4G"
+      ],
+      "Nanako Dojima": [
+        "P4",
+        "P4G"
+      ],
+      "Naoki Konishi": [
+        "P4",
+        "P4G"
+      ],
+      "Saki Konishi": [
+        "P4",
+        "P4G"
+      ],
+      "Mayumi Yamano": [
+        "P4",
+        "P4G"
+      ],
+      "Ryotaro Dojima": [
+        "P4",
+        "P4G"
+      ],
+      "Sayako Uehara": [
+        "P4",
+        "P4G"
+      ],
+      "Shu Nakajima": [
+        "P4",
+        "P4G"
+      ],
+      "Yumi Ozawa": [
+        "P4",
+        "P4G"
+      ],
+      "Taro Namatame": [
+        "P4",
+        "P4G"
+      ],
+      "Kinshiro Morooka": [
+        "P4",
+        "P4G"
+      ],
+      "Noriko Kashiwagi": [
+        "P4",
+        "P4G"
+      ],
+      "Hanako Ohtani": [
+        "P4",
+        "P4G"
+      ],
+      "Mitsuo Kubo": [
+        "P4",
+        "P4G"
+      ],
+      "Ren Amamiya": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Morgana": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Ryuji Sakamoto": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Ann Takamaki": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Yusuke Kitagawa": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Makoto Niijima": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Futaba Sakura": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Haru Okumura": [
+        "P5",
+        "P5R",
+        "P5S",
+        "P5T",
+        "PQ2"
+      ],
+      "Goro Akechi": [
+        "P5",
+        "P5R",
+        "P5T",
+        "PQ2"
+      ],
+      "Sumire Yoshizawa": [
+        "P5R",
+        "P5T"
+      ],
+      "Sae Niijima": [
+        "P5",
+        "P5R"
+      ],
+      "Kobayakawa": [
+        "P5",
+        "P5R"
+      ],
+      "Wakaba Isshiki": [
+        "P5",
+        "P5R"
+      ],
+      "Sophia": [
+        "P5S"
+      ],
+      "Zenkichi Hasegawa": [
+        "P5S"
+      ],
+      "Akane Hasegawa": [
+        "P5S"
+      ],
+      "Kuon Ichinose": [
+        "P5S"
+      ],
+      "Yaldabaoth": [
+        "P5",
+        "P5R",
+        "P5S"
+      ],
+      "Suguru Kamoshida": [
+        "P5",
+        "P5R"
+      ],
+      "Ichiryusai Madarame": [
+        "P5",
+        "P5R"
+      ],
+      "Junya Kaneshiro": [
+        "P5",
+        "P5R"
+      ],
+      "Kunikazu Okumura": [
+        "P5",
+        "P5R"
+      ],
+      "Masayoshi Shido": [
+        "P5",
+        "P5R"
+      ],
+      "Takuto Maruki": [
+        "P5R"
+      ],
+      "Alice Hiiragi": [
+        "P5S"
+      ],
+      "Ango Natsume": [
+        "P5S"
+      ],
+      "Mariko Hyodo": [
+        "P5S"
+      ],
+      "Akira Konoe": [
+        "P5S"
+      ],
+      "Caroline": [
+        "P5",
+        "P5R",
+        "PQ2"
+      ],
+      "Justine": [
+        "P5",
+        "P5R",
+        "PQ2"
+      ],
+      "Lavenza": [
+        "P5",
+        "P5R",
+        "P5T",
+        "P5S"
+      ],
+      "Tae Takemi": [
+        "P5",
+        "P5R"
+      ],
+      "Ichiko Ohya": [
+        "P5",
+        "P5R"
+      ],
+      "Chihaya Mifune": [
+        "P5",
+        "P5R"
+      ],
+      "Munehisa Iwai": [
+        "P5",
+        "P5R"
+      ],
+      "Sojiro Sakura": [
+        "P5",
+        "P5R"
+      ],
+      "Yuuki Mishima": [
+        "P5",
+        "P5R"
+      ],
+      "Hifumi Togo": [
+        "P5",
+        "P5R"
+      ],
+      "Toranosuke Yoshida": [
+        "P5",
+        "P5R"
+      ],
+      "Sadayo Kawakami": [
+        "P5",
+        "P5R"
+      ],
+      "Shinya Oda": [
+        "P5",
+        "P5R"
+      ],
+      "Kasumi Yoshizawa": [
+        "P5R"
+      ],
+      "Jose": [
+        "P5R"
+      ],
+      "Erina": [
+        "P5T"
+      ],
+      "Toshiro Kasukabe": [
+        "P5T"
+      ],
+      "Nagisa Kamishiro": [
+        "P5X"
+      ],
+      "Lufel": [
+        "P5X"
+      ],
+      "Motoha Arai": [
+        "P5X"
+      ],
+      "Shun Kano": [
+        "P5X"
+      ],
+      "Riko Tanemura": [
+        "P5X"
+      ],
+      "Shoki Ikenami": [
+        "P5X"
+      ],
+      "Seiji Shiratori": [
+        "P5X"
+      ],
+      "Aran Hirano": [
+        "P5X"
+      ],
+      "Narumi Nashimoto": [
+        "P5X"
+      ],
+      "Kumi Katayama": [
+        "P5X"
+      ],
+      "Kotone Montagne": [
+        "P5X"
+      ],
+      "Yukimi Fujikawa": [
+        "P5X"
+      ],
+      "Tomoko Noge": [
+        "P5X"
+      ],
+      "Leo Kamiyama": [
+        "P5X"
+      ],
+      "Yaoling Li": [
+        "P5X"
+      ],
+      "Kiyoshi Kurotani": [
+        "P5X"
+      ],
+      "Kayo Tomiyama": [
+        "P5X"
+      ],
+      "Miyu Sahara": [
+        "P5X"
+      ],
+      "Toshiya Sumi": [
+        "P5X"
+      ],
+      "Haruna Nishimori": [
+        "P5X"
+      ],
+      "YUI": [
+        "P5X"
+      ],
+      "Minami Miyashita": [
+        "P5X"
+      ],
+      "Chizuko Nagao": [
+        "P5X"
+      ],
+      "Yumi Shiina": [
+        "P5X"
+      ],
+      "Ayaka Sakai": [
+        "P5X"
+      ],
+      "Kira Kitazato": [
+        "P5X"
+      ],
+      "Masaki Ashiya": [
+        "P5X"
+      ],
+      "Runa Dogenzaka": [
+        "P5X"
+      ],
+      "Mio Natsukawa": [
+        "P5X"
+      ],
+      "Mayumi Hashimoto": [
+        "P5X"
+      ],
+      "Manaka Nagao": [
+        "P5X"
+      ],
+      "Ichigo Shikano": [
+        "P5X"
+      ],
+      "Merope": [
+        "P5X"
+      ],
+      "Rei": [
+        "PQ"
+      ],
+      "Zen": [
+        "PQ"
+      ],
+      "Hikari": [
+        "PQ2"
+      ],
+      "Nagi": [
+        "PQ2"
+      ],
+      "Igor": [
+        "P1",
+        "P2IS",
+        "P2EP",
+        "P3",
+        "P3FES",
+        "P3P",
+        "P4",
+        "P4G",
+        "P4AU",
+        "P5",
+        "P5R",
+        "P3R"
+      ],
+      "Hatsune Miku": [
+        "P4D",
+        "P5X"
+      ],
+      "Shin Kanzato": [
+        "PTS"
+      ],
+      "Jun Kanzato": [
+        "PTS"
+      ],
+      "Ryo Kanzato": [
+        "PTS"
+      ]
+    }
   },
   "silhouette": {
     "pool": [
@@ -541,7 +2243,546 @@
       "Koromaru (P4AU)",
       "Mitsuru Kirijo (P4AU)",
       "Yukari Takeba (P4AU)"
-    ]
+    ],
+    "opusByName": {
+      "Tohru Adachi": [
+        "P4"
+      ],
+      "Ai Ebihara": [
+        "P4"
+      ],
+      "Aigis": [
+        "P3",
+        "P3R"
+      ],
+      "Akihiko Sanada": [
+        "P3",
+        "P3R"
+      ],
+      "Ann Takamaki": [
+        "P5"
+      ],
+      "Ayane Matsunaga": [
+        "P4"
+      ],
+      "Bebe": [
+        "P3",
+        "P3R"
+      ],
+      "Bunkichi": [
+        "P3",
+        "P3R"
+      ],
+      "Caroline & Justine": [
+        "P5"
+      ],
+      "Chidori Yoshino": [
+        "P3",
+        "P3R"
+      ],
+      "Chie Satonaka": [
+        "P4"
+      ],
+      "Chihaya Mifune": [
+        "P5"
+      ],
+      "Chihiro Fushimi": [
+        "P3",
+        "P3R"
+      ],
+      "Daisuke Nagase": [
+        "P4"
+      ],
+      "Ryotaro Dojima": [
+        "P4"
+      ],
+      "Mr. Edogawa": [
+        "P3",
+        "P3R"
+      ],
+      "Elizabeth": [
+        "P3",
+        "P3R"
+      ],
+      "Eri Minami": [
+        "P4"
+      ],
+      "Fox": [
+        "P4"
+      ],
+      "Futaba Sakura": [
+        "P5"
+      ],
+      "Fuuka Yamagishi": [
+        "P3",
+        "P3R"
+      ],
+      "Goro Akechi": [
+        "P5"
+      ],
+      "Haru Okumura": [
+        "P5"
+      ],
+      "Hatsune Miku": [
+        "P4D"
+      ],
+      "Mamoru Hayase": [
+        "P3",
+        "P3R"
+      ],
+      "Hidetoshi Odagiri": [
+        "P3",
+        "P3R"
+      ],
+      "Hifumi Togo": [
+        "P5"
+      ],
+      "Hisano Kuroda": [
+        "P4"
+      ],
+      "Ichiko Ohya": [
+        "P5"
+      ],
+      "Igor": [
+        "P3",
+        "P4",
+        "P5",
+        "P3R"
+      ],
+      "Shuji Ikutsuki": [
+        "P3",
+        "P3R"
+      ],
+      "Munehisa Iwai": [
+        "P5"
+      ],
+      "Jin Shirato": [
+        "P3",
+        "P3R"
+      ],
+      "Jose": [
+        "P5"
+      ],
+      "Junpei Iori": [
+        "P3",
+        "P3R"
+      ],
+      "Kanji Tatsumi": [
+        "P4"
+      ],
+      "Kazushi Miyamoto": [
+        "P3",
+        "P3R"
+      ],
+      "Keisuke Hiraga": [
+        "P3",
+        "P3R"
+      ],
+      "Ken Amada": [
+        "P3",
+        "P3R"
+      ],
+      "Kenji Tomochika": [
+        "P3",
+        "P3R"
+      ],
+      "Koromaru": [
+        "P3",
+        "P3R"
+      ],
+      "Kotone Shiomi": [
+        "P3P",
+        "PQ2"
+      ],
+      "Kou Ichijo": [
+        "P4"
+      ],
+      "Labrys": [
+        "P4AU"
+      ],
+      "Lavenza": [
+        "P5"
+      ],
+      "Maiko Oohashi": [
+        "P3",
+        "P3R"
+      ],
+      "Makoto Niijima": [
+        "P5"
+      ],
+      "Margaret": [
+        "P4"
+      ],
+      "Marie": [
+        "P4G"
+      ],
+      "Maya": [
+        "P3",
+        "P3R"
+      ],
+      "Metis": [
+        "P3FES"
+      ],
+      "Yuuki Mishima": [
+        "P5"
+      ],
+      "Mitsuko": [
+        "P3",
+        "P3R"
+      ],
+      "Mitsuru Kirijo": [
+        "P3",
+        "P3R"
+      ],
+      "Morgana": [
+        "P5"
+      ],
+      "Mutatsu": [
+        "P3",
+        "P3R"
+      ],
+      "Nanako Dojima": [
+        "P4"
+      ],
+      "Naoki Konishi": [
+        "P4"
+      ],
+      "Naoto Shirogane": [
+        "P4"
+      ],
+      "Nozomi Suemitsu": [
+        "P3",
+        "P3R"
+      ],
+      "Pharos": [
+        "P3",
+        "P3R"
+      ],
+      "Ren Amamiya": [
+        "P5"
+      ],
+      "Rio Iwasaki": [
+        "P3P"
+      ],
+      "Rise Kujikawa": [
+        "P4"
+      ],
+      "Ryoji Mochizuki": [
+        "P3",
+        "P3R"
+      ],
+      "Ryuji Sakamoto": [
+        "P5"
+      ],
+      "Sadayo Kawakami": [
+        "P5"
+      ],
+      "Sae Niijima": [
+        "P5"
+      ],
+      "Saori Hasegawa": [
+        "P3P"
+      ],
+      "Sayako Uehara": [
+        "P4"
+      ],
+      "Shinjiro Aragaki": [
+        "P3",
+        "P3R"
+      ],
+      "Shinya Oda": [
+        "P5"
+      ],
+      "Sho Minazuki": [
+        "P4AU"
+      ],
+      "Shu Nakajima": [
+        "P4"
+      ],
+      "Sojiro Sakura": [
+        "P5"
+      ],
+      "Sumire Yoshizawa": [
+        "P5R"
+      ],
+      "Tae Takemi": [
+        "P5"
+      ],
+      "Takaya Sakaki": [
+        "P3",
+        "P3R"
+      ],
+      "Takuto Maruki": [
+        "P5R"
+      ],
+      "Teddie": [
+        "P4"
+      ],
+      "Theodore": [
+        "P3P"
+      ],
+      "Toranosuke Yoshida": [
+        "P5"
+      ],
+      "Yosuke Hanamura": [
+        "P4"
+      ],
+      "Yu Narukami": [
+        "P4"
+      ],
+      "Yukari Takeba": [
+        "P3",
+        "P3R"
+      ],
+      "Makoto Yuki": [
+        "P3",
+        "P3R"
+      ],
+      "Yukiko Amagi": [
+        "P4"
+      ],
+      "Yumi Ozawa": [
+        "P4"
+      ],
+      "Yusuke Kitagawa": [
+        "P5"
+      ],
+      "Sophia": [
+        "P5S"
+      ],
+      "Zenkichi Hasegawa": [
+        "P5S"
+      ],
+      "Motoha Arai": [
+        "P5X"
+      ],
+      "Ayaka Sakai": [
+        "P5X"
+      ],
+      "Haruna Nishimori": [
+        "P5X"
+      ],
+      "Aran Hirano": [
+        "P5X"
+      ],
+      "Narumi Nashimoto": [
+        "P5X"
+      ],
+      "Kumi Katayama": [
+        "P5X"
+      ],
+      "Ichigo Shikano": [
+        "P5X"
+      ],
+      "Kayo Tomiyama": [
+        "P5X"
+      ],
+      "Kira Kitazato": [
+        "P5X"
+      ],
+      "Kiyoshi Kurotani": [
+        "P5X"
+      ],
+      "Leo Kamiyama": [
+        "P5X"
+      ],
+      "Lufel": [
+        "P5X"
+      ],
+      "Manaka Nagao": [
+        "P5X"
+      ],
+      "Masaki Ashiya": [
+        "P5X"
+      ],
+      "Mayumi Hashimoto": [
+        "P5X"
+      ],
+      "Merope": [
+        "P5X"
+      ],
+      "Minami Miyashita": [
+        "P5X"
+      ],
+      "Mio Natsukawa": [
+        "P5X"
+      ],
+      "Miyu Sahara": [
+        "P5X"
+      ],
+      "Kotone Montagne": [
+        "P5X"
+      ],
+      "Nagisa Kamishiro": [
+        "P5X"
+      ],
+      "Riko Tanemura": [
+        "P5X"
+      ],
+      "Runa Dogenzaka": [
+        "P5X"
+      ],
+      "Seiji Shiratori": [
+        "P5X"
+      ],
+      "Shoki Ikenami": [
+        "P5X"
+      ],
+      "Shun Kano": [
+        "P5X"
+      ],
+      "Tomoko Noge": [
+        "P5X"
+      ],
+      "Toshiya Sumi": [
+        "P5X"
+      ],
+      "Yaoling Li": [
+        "P5X"
+      ],
+      "YUI": [
+        "P5X"
+      ],
+      "Yukimi Fujikawa": [
+        "P5X"
+      ],
+      "Yumi Shiina": [
+        "P5X"
+      ],
+      "Chizuko Nagao": [
+        "P5X"
+      ],
+      "Naoya Todou": [
+        "P1"
+      ],
+      "Maki Sonomura": [
+        "P1"
+      ],
+      "Masao Inaba": [
+        "P1"
+      ],
+      "Kei Nanjo": [
+        "P1"
+      ],
+      "Yukino Mayuzumi": [
+        "P1"
+      ],
+      "Hidehiko Uesugi": [
+        "P1"
+      ],
+      "Eriko Kirishima": [
+        "P1"
+      ],
+      "Yuka Ayase": [
+        "P1"
+      ],
+      "Reiji Kido": [
+        "P1"
+      ],
+      "Tatsuya Suou": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Maya Amano": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Lisa Silverman": [
+        "P2IS"
+      ],
+      "Jun Kurosu": [
+        "P2IS"
+      ],
+      "Eikichi Mishina": [
+        "P2IS"
+      ],
+      "Baofu": [
+        "P2EP"
+      ],
+      "Katsuya Suou": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Ulala Serizawa": [
+        "P2IS",
+        "P2EP"
+      ],
+      "Joker": [
+        "P2IS"
+      ],
+      "Izanami": [
+        "P4"
+      ],
+      "Nyx": [
+        "P3",
+        "P3FES",
+        "P3P",
+        "P3R"
+      ],
+      "Yaldabaoth": [
+        "P5",
+        "P5R"
+      ],
+      "Erina": [
+        "P5T"
+      ],
+      "Toshiro Kasukabe": [
+        "P5T"
+      ],
+      "Rei": [
+        "PQ"
+      ],
+      "Zen": [
+        "PQ"
+      ],
+      "Hikari": [
+        "PQ2"
+      ],
+      "Nagi": [
+        "PQ2"
+      ],
+      "Saki Konishi": [
+        "P4",
+        "P4G"
+      ],
+      "Mayumi Yamano": [
+        "P4",
+        "P4G"
+      ],
+      "Shin Kanzato": [
+        "PTS"
+      ],
+      "Jun Kanzato": [
+        "PTS"
+      ],
+      "Ryo Kanzato": [
+        "PTS"
+      ],
+      "Aigis (P4AU)": [
+        "P4AU"
+      ],
+      "Akihiko Sanada (P4AU)": [
+        "P4AU"
+      ],
+      "Fuuka Yamagishi (P4AU)": [
+        "P4AU"
+      ],
+      "Junpei Iori (P4AU)": [
+        "P4AU"
+      ],
+      "Ken Amada (P4AU)": [
+        "P4AU"
+      ],
+      "Koromaru (P4AU)": [
+        "P4AU"
+      ],
+      "Mitsuru Kirijo (P4AU)": [
+        "P4AU"
+      ],
+      "Yukari Takeba (P4AU)": [
+        "P4AU"
+      ]
+    }
   },
   "music": {
     "pool": [
@@ -641,7 +2882,312 @@
       "Heartful Cry",
       "Kimi no Tonari",
       "Memories of You"
-    ]
+    ],
+    "opusByName": {
+      "A Lone Prayer": [
+        "P1"
+      ],
+      "A Way of Life": [
+        "P3P"
+      ],
+      "Ambitions and Visions": [
+        "P5X"
+      ],
+      "Arial Of The Soul": [
+        "P3",
+        "P3P",
+        "P3FES",
+        "P3R",
+        "P4",
+        "P4G",
+        "P5",
+        "P5R",
+        "P5S",
+        "P5X"
+      ],
+      "Backside Of The TV": [
+        "P4"
+      ],
+      "Bloody Destiny": [
+        "P1"
+      ],
+      "Beneath the Mask": [
+        "P5"
+      ],
+      "Brand New Days": [
+        "P3FES"
+      ],
+      "Burn My Dread": [
+        "P3"
+      ],
+      "Changing Seasons": [
+        "P3R"
+      ],
+      "Changing Me": [
+        "PQ"
+      ],
+      "Colors Flying High": [
+        "P5R"
+      ],
+      "Color Your Night": [
+        "P3R"
+      ],
+      "colorful world": [
+        "PQ2"
+      ],
+      "Dance!": [
+        "P4D"
+      ],
+      "Daredevil": [
+        "P5S"
+      ],
+      "Deep Breath Deep Breath": [
+        "P3R"
+      ],
+      "Disconnected": [
+        "P3FES"
+      ],
+      "Don't": [
+        "P3FES"
+      ],
+      "Dream of Butterfly": [
+        "P1"
+      ],
+      "Fatal Desire": [
+        "P5X"
+      ],
+      "Full Moon Full Life": [
+        "P3R"
+      ],
+      "Heartbeat, Heartbreak": [
+        "P4"
+      ],
+      "Heaven": [
+        "P4"
+      ],
+      "I believe": [
+        "P5R"
+      ],
+      "It's Going Down Now": [
+        "P3R"
+      ],
+      "Iwatodai Dorm": [
+        "P3"
+      ],
+      "Last Strike": [
+        "P5X"
+      ],
+      "Last Surprise": [
+        "P5"
+      ],
+      "Layer Cake": [
+        "P5"
+      ],
+      "Let Butterflies Spread Until the Dawn": [
+        "P1"
+      ],
+      "Life Will Change": [
+        "P5"
+      ],
+      "Maki": [
+        "P1"
+      ],
+      "Mass Destruction": [
+        "P3"
+      ],
+      "Mass Destruction - Reload (ZUTOMAYO Ver.)": [
+        "P3R"
+      ],
+      "Map I": [
+        "P2EP"
+      ],
+      "Maya Theme": [
+        "P2EP"
+      ],
+      "Maze of Life": [
+        "PQ"
+      ],
+      "Never More": [
+        "P4"
+      ],
+      "No More What Ifs": [
+        "P5R"
+      ],
+      "Our Light": [
+        "P5R"
+      ],
+      "Pursuing my True Self": [
+        "P4"
+      ],
+      "Pull the Trigger": [
+        "PQ2"
+      ],
+      "Reach Out To The Truth": [
+        "P4"
+      ],
+      "Road Less Taken": [
+        "PQ2"
+      ],
+      "Satomi Tadashi Pharmacy Theme": [
+        "P1"
+      ],
+      "Rivers In the Desert": [
+        "P5"
+      ],
+      "School Days": [
+        "P1"
+      ],
+      "Secret Base": [
+        "P4"
+      ],
+      "Seize the Light": [
+        "P5X"
+      ],
+      "Seven Sisters Theme": [
+        "P2IS"
+      ],
+      "Shadow Loop": [
+        "P5X"
+      ],
+      "Shadow World": [
+        "P4G"
+      ],
+      "Signs Of Love": [
+        "P4"
+      ],
+      "SNOWFLAKES": [
+        "P4G"
+      ],
+      "Soul Phrase": [
+        "P3P"
+      ],
+      "specialist": [
+        "P4D"
+      ],
+      "Take Over": [
+        "P5R"
+      ],
+      "The Battle for Everyone's Souls": [
+        "P3",
+        "P3P",
+        "P3FES",
+        "P3R"
+      ],
+      "When Mother Was There": [
+        "P5"
+      ],
+      "The Whims of Fate": [
+        "P5"
+      ],
+      "Time To Make History": [
+        "P4G"
+      ],
+      "Tokyo Daylight": [
+        "P5"
+      ],
+      "Unbreakable Tie": [
+        "P2IS"
+      ],
+      "Voice": [
+        "P1"
+      ],
+      "Wake Up, Get Up, Get Out There": [
+        "P5"
+      ],
+      "Wake Up Your Hero": [
+        "P5X"
+      ],
+      "When the Moon Reaches for the Stars": [
+        "P3R"
+      ],
+      "Wiping All Out": [
+        "P3P"
+      ],
+      "Wonder Light": [
+        "P5X"
+      ],
+      "You Are Stronger": [
+        "P5S"
+      ],
+      "Your Affection": [
+        "P4"
+      ],
+      "Danger Zone": [
+        "P3P"
+      ],
+      "Time": [
+        "P3P"
+      ],
+      "Want to Be Close -Reload-": [
+        "P3R"
+      ],
+      "A Fool or Clown?": [
+        "P4AU"
+      ],
+      "Best Friends": [
+        "P4AU"
+      ],
+      "Break Out Of...": [
+        "P4AU"
+      ],
+      "I'll Face Myself -Battle-": [
+        "P4G"
+      ],
+      "Throw Away Your Mask": [
+        "P5R"
+      ],
+      "Axe to Grind": [
+        "P5S"
+      ],
+      "Counter Strike": [
+        "P5S"
+      ],
+      "Got Your Tail": [
+        "P5T"
+      ],
+      "Revolution is a Blade": [
+        "P5T"
+      ],
+      "Truth or Dare": [
+        "P5T"
+      ],
+      "Junes Themes": [
+        "P4",
+        "P4G"
+      ],
+      "Mass Destruction (P3FES)": [
+        "P3FES"
+      ],
+      "P3 FES": [
+        "P3FES"
+      ],
+      "Show Stealer": [
+        "P5X"
+      ],
+      "Tokyo Emergency": [
+        "P5",
+        "P5R"
+      ],
+      "What You Wish For": [
+        "P5S"
+      ],
+      "Hoshi to Bokura to": [
+        "P5",
+        "P5R"
+      ],
+      "Wait and See": [
+        "PQ2"
+      ],
+      "Heartful Cry": [
+        "P3FES"
+      ],
+      "Kimi no Tonari": [
+        "P2IS"
+      ],
+      "Memories of You": [
+        "P3R"
+      ]
+    }
   },
   "music_expert": {
     "pool": [

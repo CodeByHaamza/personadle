@@ -13,6 +13,68 @@
 
 ---
 
+## 2026-09-17 — fix(cible du jour) : les six modes respectent les filtres d'opus du joueur (branche `feat/cible-du-jour-filtree`)
+
+### Pourquoi
+
+Classic, Émoji, Silhouette et Music tiraient la cible du jour dans le catalogue COMPLET quels
+que soient les filtres. Un joueur « P5 uniquement » pouvait donc recevoir un personnage P3 que
+l'autocomplétion ne proposait jamais : la partie du jour lui était injouable — tous les jours —
+alors que l'aide des filtres promet « seuls les jeux gardés peuvent tomber ». AOA et Personae
+re-tiraient déjà dans le pool filtré depuis la 2.1, chacun à la main. Le test E2E « la cible
+du jour est tirée du catalogue COMPLET » figeait ce que le serveur recalculait, pas un choix
+produit. Décision Hamza du 2026-09-17 : aligner les quatre modes sur les deux autres.
+
+### Quoi
+
+- `js/gameCore.js::getDailyTargetWithin(pool, filteredPool, mode, keyOf?)` — tirage seedé sur
+  le catalogue complet (stable par joueur/jour) ; si la cible n'est pas dans le pool filtré,
+  re-tirage avec la même graine DANS le pool filtré. Pool filtré vide → cible complète (le mode
+  affiche déjà « aucun résultat »). Une seule source pour les six modes : Classic
+  (`dailyCharacter()`), Émoji (`dailyEmojiCharacter()`, parmi les personnages à émojis comme
+  le serveur), Silhouette, Music (`filteredSongs`), et AOA/Personae refactorés dessus.
+- **Homonymes Personae** (bug préexistant sorti par les nouveaux tests) : Hermes, Susano-o et
+  Prometheus sont portés par deux personnages d'opus différents. La comparaison par NOM
+  (`c.persona === daily.persona`, client ET serveur) faisait passer le Prometheus de Futaba
+  (P5R) pour « présent » chez un joueur « P2 uniquement » parce que celui de Baofu (P2EP)
+  l'était : pas de re-tirage, partie injouable. Client : identité d'entrée (`keyOf` par défaut,
+  `filteredCharacters` est un `filter()` des mêmes références) ; serveur : index dans le pool.
+- `api/lib/daily_target.php::personadle_pick_within_filters()` — miroir exact pour les pools
+  de noms, utilisé par classic/emoji/silhouette/music, leurs variantes Expert (table d'opus du
+  mode normal, mêmes noms) et AOA. En-tête : la LIMITATION CONNUE (filtres soumis par le
+  client, non corrélés) vaut désormais pour les six modes, avec la piste de résolution
+  (filtres synchronisés sur le compte, recalcul depuis les filtres stockés) — idem ROADMAP.
+- `scripts/export-daily-pools.js` — `opusByName` exporté pour classic, emoji, silhouette,
+  music (+ ~70 Ko de JSON, régénéré par `pools:build`).
+- Changer un filtre en cours de journée relance toujours une partie ALÉATOIRE (décision 2.2
+  inchangée) : le re-tirage filtré ne concerne que le tirage de la cible du jour.
+
+### Tests
+
+- **Parité JS ↔ PHP** vérifiée au moment du changement : 1296 cas (4 dates × 4 seeds ×
+  9 modes × 9 filtres), 775 re-tirages effectifs, 0 écart ; +576 cas Personae/Personae Expert
+  après le passage à l'identité d'entrée, 0 écart.
+- `tests/daily_target_within.test.js` (25) — contrat du helper (présent → inchangée, exclu →
+  re-tirage même graine, déterminisme, pool vide, `keyOf`, clés normal/Expert) ; sur les vrais
+  catalogues des huit clés de hash : la cible appartient toujours à un opus actif (140 tirages
+  par mode, au moins un re-tirage exercé), sans filtre = cible complète ; homonymes Personae ;
+  « P5 uniquement » sept jours d'affilée.
+- `tests/php/DailyTargetTest.php` (+7) — table d'opus complète par pool, cible dans les
+  filtres pour les dix clés (mode normal + Expert), cible complète conservée si dans les
+  filtres, filtre vide → catalogue complet, tirages normal/Expert indépendants, Music Expert
+  filtré toujours avec paroles, homonymes Personae.
+- `tests-e2e/filters_usecases.spec.js` — « catalogue COMPLET » remplacé par « RESPECTE les
+  filtres » (cible P5, proposée par l'autocomplétion, stable au rechargement) + « sans filtre
+  touché = catalogue complet ». `daily_target.spec.js` (serveur ↔ client) inchangé et vert.
+
+### Angles morts
+
+- Le contournement anti-triche par filtres soumis vaut maintenant pour les six modes (phase 1
+  = journal seul, sans conséquence aujourd'hui). Étape B à faire avant tout rejet strict —
+  cf. ROADMAP.
+- Un joueur qui décoche TOUT garde la cible du catalogue complet, avec le bandeau « aucun
+  résultat » : comportement existant, non touché.
+
 ## 2026-09-17 — feat(notifications) : demandes d'ami, défis et rank-up en temps réel via Pusher Channels (branche `feature/realtime-notifications`)
 
 ### Pourquoi
