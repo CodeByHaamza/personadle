@@ -36,9 +36,6 @@ describe("notifications.js — push Pusher + fallback", () => {
     globalThis.window.Pusher = vi.fn(function PusherMock() {
       return mockPusherInstance;
     });
-
-    // Simule le CDN déjà chargé : _loadPusherScript() résout immédiatement
-    // puisque window.Pusher existe déjà avant l'injection du <script>.
   });
 
   afterEach(() => {

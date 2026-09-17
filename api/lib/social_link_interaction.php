@@ -132,7 +132,7 @@ function personadle_perform_social_link_interaction(
 
     $result = personadle_sl_add_xp($pdo, $linkId, $xpGained);
 
-    // Notifier l'autre joueur si le rang a monté (push temps réel + fallback poll)
+    // Notifier l'autre joueur si le rang a monté (il verra l'animation au prochain poll)
     if ($result['ranked_up']) {
         $pdo->prepare("
             INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank)

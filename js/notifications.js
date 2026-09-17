@@ -73,7 +73,6 @@ export async function initNotifications() {
 
   _syncSettingsToLocal();
 
-  // Premier check immédiat (état de départ — Pusher ne rejoue pas le passé)
   await _check();
 
   await _initPusher();
@@ -101,13 +100,23 @@ export function stopNotifications() {
 // Pusher — push temps réel + fallback polling
 // ─────────────────────────────────────────────────────────
 
+/** Délai max (ms) pour charger pusher-js avant d'abandonner et de tomber en fallback polling. */
+const PUSHER_SCRIPT_LOAD_TIMEOUT_MS = 8_000;
+
 async function _loadPusherScript() {
   if (window.Pusher) return;
   await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("pusher-js load timed out")), PUSHER_SCRIPT_LOAD_TIMEOUT_MS);
     const script = document.createElement("script");
     script.src = PUSHER_JS_URL;
-    script.onload = resolve;
-    script.onerror = reject;
+    script.onload = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+    script.onerror = () => {
+      clearTimeout(timer);
+      reject(new Error("pusher-js failed to load"));
+    };
     document.head.appendChild(script);
   });
 }
@@ -116,7 +125,6 @@ async function _initPusher() {
   try {
     await _loadPusherScript();
   } catch {
-    // CDN injoignable — le fallback polling prend le relais
     _startFallbackPolling();
     return;
   }
