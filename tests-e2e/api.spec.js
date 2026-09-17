@@ -100,6 +100,16 @@ test.describe.serial("API — régressions sensibles (badges, streak global)", (
     expect(r2.ok(), "POST session emoji doit réussir").toBeTruthy();
     const g2 = (await r2.json()).global_streak;
     expect(g2).toBeGreaterThanOrEqual(g1);
+
+    // Le profil cloud redescend la série AVEC sa dernière journée (Paris). Sans
+    // ce champ, un nouvel appareil recevait « 15 » sans savoir quand la série
+    // s’arrête : sa première partie la remettait à 1 et écrivait une fausse
+    // trace Jack Frost (js/cloud-sync.js, tests/streak_sync_usecases.test.js).
+    const me = await ctx.get(`/api/user/${userId}`);
+    expect(me.ok()).toBeTruthy();
+    const body = await me.json();
+    expect(body.global_streak).toBe(g2);
+    expect(body.global_streak_date).toBe(today);
   });
 });
 
