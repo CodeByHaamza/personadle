@@ -195,6 +195,13 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     activeOpus = _seedNewOpus(migrated, allOpus, storageKey);
   }
   let selectAllBtn = null;
+  let countBadge = null;
+
+  /** t(key) renvoie la clé si absente (CLAUDE.md §5), et i18n peut manquer. */
+  function _t(key, fallback) {
+    const v = window.i18n?.t?.(key);
+    return v && v !== key ? v : fallback;
+  }
 
   // La liste effective est ce que les défis doivent transmettre (js/gameCore.js,
   // _getActiveFilters) — localStorage reste vide tant que le joueur n'a rien touché.
@@ -204,12 +211,27 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
   const toggleBtn = document.getElementById("filterToggleBtn");
   const dropdown = document.getElementById("filterDropdown");
 
+  /** Fond assombri de la modale de filtres (créé/retiré à l'ouverture). */
+  function _setBackdrop(on) {
+    const existing = document.querySelector(".filter-backdrop");
+    if (on && !existing) {
+      const bd = document.createElement("div");
+      bd.className = "filter-backdrop";
+      // Le clic est déjà traité par le handler « clic en dehors du panneau »
+      // plus bas ; ce fond ne sert qu'à assombrir et à capter le clic.
+      document.body.appendChild(bd);
+    } else if (!on) {
+      existing?.remove();
+    }
+  }
+
   toggleBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
     const isOpen = dropdown.classList.toggle("open");
     toggleBtn.classList.toggle("open", isOpen);
     toggleBtn.setAttribute("aria-expanded", String(isOpen));
     dropdown.setAttribute("aria-hidden", String(!isOpen));
+    _setBackdrop(isOpen);
     if (isOpen) {
       // Envoie le focus dans le panneau à l'ouverture (menu déroulant, pas une
       // modale — pas de piège Tab ici, cf. WAI-ARIA menu-button pattern).
@@ -233,20 +255,47 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     selectAllBtn.className = "filter-select-all-btn";
     dropdown.prepend(selectAllBtn);
 
-    // Une ligne d'explication en tête du panneau : rien ne disait qu'un clic sur
-    // un jeu l'inclut ou l'exclut, ni que la flèche ouvre ses opus (retour Hamza
-    // du 2026-09-16 : « la sélection d'opus pour les filtres n'est pas intuitive »).
+    // En-tête de la modale : titre, compteur d'opus retenus, bouton de fermeture.
+    // Le panneau n'avait rien de tout ça — c'était une colonne de logos sans
+    // repère (retour Hamza du 2026-09-16 : « on a une modale, on doit mieux
+    // utiliser notre place »).
+    const head = document.createElement("div");
+    head.className = "filter-head";
+    const title = document.createElement("span");
+    title.className = "filter-head-title";
+    title.textContent = _t("ui.filters", "FILTERS");
+    countBadge = document.createElement("span");
+    countBadge.className = "filter-head-count";
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "filter-head-close";
+    closeBtn.setAttribute("aria-label", _t("ui.close", "Close"));
+    closeBtn.textContent = "✕";
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      _closePannel();
+    });
+    head.append(title, countBadge, closeBtn);
+
+    // Deux lignes d'explication : rien ne disait CE QUE les filtres changent,
+    // ni qu'un clic sur un jeu l'inclut ou l'exclut (retours Hamza du 2026-09-16).
     const hint = document.createElement("p");
     hint.className = "filter-hint";
     hint.setAttribute("data-i18n", "ui.filters_hint");
-    // t(key) renvoie la clé si absente (CLAUDE.md §5) — et i18n peut ne pas être
-    // chargé du tout (tests, premier rendu).
-    const hintText = window.i18n?.t?.("ui.filters_hint");
-    hint.textContent =
-      hintText && hintText !== "ui.filters_hint"
-        ? hintText
-        : "Click a game to include or exclude it. ▸ opens its individual games.";
+    hint.textContent = _t(
+      "ui.filters_hint",
+      "Only the games you keep can come up as the answer — and only they are suggested as you type."
+    );
+    const hint2 = document.createElement("p");
+    hint2.className = "filter-hint filter-hint--sub";
+    hint2.setAttribute("data-i18n", "ui.filters_hint_2");
+    hint2.textContent = _t(
+      "ui.filters_hint_2",
+      "Click a game to include or exclude it. The arrow unfolds its individual entries."
+    );
+    dropdown.prepend(hint2);
     dropdown.prepend(hint);
+    dropdown.prepend(head);
 
     selectAllBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -332,6 +381,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     toggleBtn?.setAttribute("aria-expanded", "false");
     dropdown?.setAttribute("aria-hidden", "true");
     if (restoreFocus) toggleBtn?.focus();
+    document.querySelector(".filter-backdrop")?.remove();
   }
 
   /* ── 4. Boutons logos principaux (expand/collapse groupe) ───── */
@@ -432,6 +482,11 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
         codes.some((c) => activeOpus.includes(c))
       );
     });
+
+    // Compteur de l'en-tête : « 12 / 14 »
+    if (countBadge) {
+      countBadge.textContent = `${activeOpus.length} / ${allOpus.length}`;
+    }
 
     // Bouton global tout-cocher / tout-décocher
     if (selectAllBtn) {

@@ -13,6 +13,80 @@
 
 ---
 
+## 2026-09-17 — feat(contenu) : 7 titres + 1 badge, filtres en fenêtre, et les cas d'usage des filtres sous test (branche `feat/profil-vitrine`)
+
+### Contenu (visuels fournis par Hamza)
+
+Sept calling cards et un badge, ré-encodés au gabarit du dépôt (1146 px de large
+pour les titres, 1024² pour le badge : les sources faisaient jusqu'à 4 Mo sans
+perte) et seedés par la **migration 044** — plus `sql/bdd_mysql.sql` pour qu'une
+base fraîche les ait aussi.
+
+| Titre | Rareté | Condition |
+|---|---|---|
+| S.E.E.S. | epic | posséder 8 titres |
+| We Share the Same Soul (Aigis & Metis) | epic | un Social Link au rang 10 |
+| I Am Not a Princess (Kotone) | rare | 25 victoires parfaites |
+| The Case Is Never Closed (Naoto) | rare | 25 victoires en Silhouette |
+| Don't Need Your Pity (Shinjiro) | epic | 25 victoires rapides en Classique |
+| Take Your Heart (Phantom Thieves) | legendary | 40 victoires en All-Out Attack |
+| Some Things Don't Burn Out (Tatsuya) | legendary | jouer un 24 juin (sortie d'Innocent Sin) |
+
+Le badge « Tartarus Conqueror » du visuel est renommé **Katabasis** (epic, 25
+victoires en Mode Expert) : le dessin montre les deux Orphée — celui de Makoto et
+celui de Kotone — et Messiah, c'est-à-dire la descente aux Enfers et le retour,
+pas la tour. Descriptions traduites en 5 langues dans la migration (titres) et
+dans `lang/*.json` + `badgesData.js` (badge, la table `badges` ne portant pas de
+colonne description).
+
+**Deux conditions nouvelles** dans `api/lib/condition_check.php` :
+- `titles_count` → nombre de titres possédés (S.E.E.S. rassemble la troupe) ;
+- `played_on_date` → avoir joué un jour d'anniversaire, `condition_mode` au
+  format `'MM-JJ'` (`condition_value` est un INT, il ne peut pas porter la date).
+  Cumulatif comme le reste : la journée reste dans l'historique, le titre ne se
+  reperd pas (CLAUDE.md §7).
+
+Au passage, `condition_check.php` charge désormais `validation.php` lui-même : il
+dépend de `PERSONADLE_MODES` et ne marchait que si un autre fichier l'avait déjà
+inclus — vrai via `bootstrap.php` en prod, faux quand PHPUnit lance ce seul
+fichier de tests (erreur latente, visible en lançant `ConditionCheckTest` seul).
+
+### Les filtres d'opus : une vraie fenêtre
+
+Le menu déroulant devient une **modale centrée** (fond assombri, en-tête avec
+compteur « 19 / 19 » et croix, deux lignes qui expliquent ce que les filtres
+changent). Une carte par jeu, avec **tous ses opus visibles d'emblée** — dans une
+fenêtre, la place ne manque pas, donc plus de flèche à déplier. Un jeu retenu
+porte une pastille ✓, un jeu écarté un contour en pointillés.
+
+Le fond est à `z-index: 999` et non 10 000 : `.filter-panel` (`z-index: 1000`,
+`position: absolute`) crée un contexte d'empilement, donc la fenêtre est peinte
+dedans — un fond posé sur le `body` plus haut voilait la fenêtre elle-même.
+
+### Un bug trouvé par les nouveaux tests : les filtres d'un défi restaient
+
+`tests-e2e/filters_usecases.spec.js` (12 scénarios) couvre la fenêtre, l'effet sur
+l'autocomplétion, la persistance, l'indépendance par mode, la cible du jour (tirée
+du catalogue COMPLET quels que soient les filtres — c'est ce que le serveur
+recalcule), les défis et ce que reçoit le serveur.
+
+Le scénario « un receveur qui n'avait jamais touché ses filtres » a sorti un vrai
+bug : `installActiveChallenge()` écrit les filtres de l'expéditeur, et
+`releaseActiveChallenge()` ne les retirait pas quand le receveur n'avait **aucune**
+clé enregistrée (il s'abstenait d'écrire, au lieu de supprimer). Accepter un défi
+« P5 uniquement » restreignait donc son mode Classique **pour toujours**, sans
+qu'il ait rien choisi. Corrigé : clé absente à l'acceptation → clé supprimée à la
+libération.
+
+### Angle mort connu
+
+Changer un filtre relance une partie (décision 2.2) : cette partie-là n'a donc
+pas la cible seedée du jour et l'anti-triche la compte comme un écart. C'est
+volontaire côté jeu, mais ça pèse dans le journal — à trancher quand la phase 2
+(rejet) sera envisagée.
+
+---
+
 ## 2026-09-16 — fix(ui) : douze corrections de finition (index, profil, pages de mode) — branche `feat/profil-vitrine`
 
 Une passe de relecture de Hamza sur le site en local, douze points. Rien de

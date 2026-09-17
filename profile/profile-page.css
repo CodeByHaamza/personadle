@@ -4351,13 +4351,19 @@ body.darkmode .title-chip-empty {
 /* Sélecteur avec l id : badges.css pose #previewBadges { display: flex } et
    gagnait sur la classe — les emplacements tombaient à 23 px de large. */
 #previewBadges.pinned-slots {
-  display: grid;
-  /* Les 4 emplacements occupent TOUTE la largeur de la carte : plafonnés, ils
-     laissaient un vide à droite (retour Hamza du 2026-09-16). */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* Centré et fluide : 1 badge → au milieu, 2 → les deux au milieu, etc. Une
+     grille de 4 colonnes fixes laissait un vide à droite dès qu'il en manquait
+     (retour Hamza du 2026-09-16). */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 14px;
   margin: 0 0 16px;
   width: 100%;
+}
+#previewBadges.pinned-slots .pin-slot {
+  flex: 0 1 152px;
+  max-width: 152px;
 }
 .pin-slot {
   position: relative;

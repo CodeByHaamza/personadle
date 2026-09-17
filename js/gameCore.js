@@ -880,6 +880,11 @@ export function setupRulesModal() {
   window.addEventListener("click", (e) => {
     if (e.target === modal) close();
   });
+
+  // …et Escape, comme toutes les autres fenêtres du site.
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.style.display !== "none") close();
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1619,12 +1624,32 @@ export function getActiveChallengeTarget(mode) {
 export function releaseActiveChallenge(challenge) {
   if (!challenge) return false;
 
-  // `!= null` volontaire : `originalFilters === null` veut dire « la clé était
-  // ABSENTE à l'acceptation ». Ne rien écrire alors, surtout pas "[]", que
-  // filterMenu.js lit comme « tout désélectionné » — un état que le joueur n'a
-  // jamais choisi, et qui vide son pool.
-  if (challenge.filterKey && challenge.originalFilters != null) {
-    localStorage.setItem(challenge.filterKey, challenge.originalFilters);
+  // Remettre EXACTEMENT ce qu'il y avait avant le défi — mais seulement si le
+  // joueur n'a pas rechoisi ses filtres entre-temps.
+  //
+  // `originalFilters === null` veut dire « la clé était ABSENTE à l'acceptation »
+  // (le joueur n'avait jamais touché ses filtres = tout est actif) : il faut alors
+  // la RETIRER, pas seulement s'abstenir d'écrire. installActiveChallenge() y a mis
+  // ceux de l'expéditeur, et ne rien faire ici les lui laissait pour de bon —
+  // accepter un défi « P5 uniquement » restreignait son mode Classique pour
+  // toujours, sans qu'il ait rien choisi (bug sorti par filters_usecases.spec.js).
+  // Surtout pas "[]" en repli : filterMenu.js le lit comme « tout désélectionné »,
+  // un état que le joueur n'a jamais choisi et qui vide son pool.
+  //
+  // `installedFilters` est ce que le défi avait écrit : si la clé ne vaut plus ça,
+  // c'est que le joueur a ouvert les filtres PENDANT le défi — son choix est plus
+  // récent que le nôtre, on n'y touche pas.
+  if (challenge.filterKey) {
+    const current = localStorage.getItem(challenge.filterKey);
+    const untouched =
+      challenge.installedFilters == null || current === challenge.installedFilters;
+    if (untouched) {
+      if (challenge.originalFilters != null) {
+        localStorage.setItem(challenge.filterKey, challenge.originalFilters);
+      } else {
+        localStorage.removeItem(challenge.filterKey);
+      }
+    }
   }
 
   // Défi à cible dédiée : la partie chargée n'est pas celle du jour. On efface
@@ -1788,6 +1813,10 @@ export function installActiveChallenge(c) {
   const entry = {
     msgId: c.msgId,
     mode: modeKey,
+    // Ce que CE défi a écrit dans les filtres : releaseActiveChallenge() ne rend
+    // les filtres d'origine que si la clé vaut encore ça (sinon le joueur a
+    // rechoisi pendant le défi, et c'est son choix qui prime).
+    installedFilters: filterKey && filters ? filters : null,
     // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
     // (`challengeDate`, informatif). Toutes les lectures de la case comparent
     // `date` à parisDateKey() : un défi envoyé la veille au soir et accepté le

@@ -740,7 +740,11 @@ export function renderBadgesPreview(profile) {
     preview.appendChild(slot);
   });
 
-  for (let i = ids.length; i < MAX_SELECTED_BADGES; i++) {
+  // Une seule case « + », et seulement s'il reste de la place : quatre cadres en
+  // pointillés côte à côte laissaient un grand vide dès qu'on n'avait qu'un ou
+  // deux badges (retour Hamza du 2026-09-16). Le tout est centré, donc l'affichage
+  // s'adapte au nombre.
+  if (ids.length < MAX_SELECTED_BADGES) {
     const empty = document.createElement("button");
     empty.type = "button";
     empty.className = "pin-slot pin-slot--empty";
@@ -1052,13 +1056,23 @@ function setupModalControls(openBtn, closeBtn, modal) {
     };
   }
 
-  // Fermer en cliquant en dehors
-  if (modal) {
-    modal.onclick = (e) => {
-      if (e.target === modal) {
+  // Fermer en cliquant en dehors. La modale des badges n'a PAS de fond : c'est
+  // une boîte centrée posée sur la page, donc « cliquer à côté » veut dire
+  // cliquer n'importe où hors de la boîte (retour Hamza du 2026-09-16). Escape
+  // ferme aussi.
+  if (modal && !modal._outsideBound) {
+    modal._outsideBound = true;
+    document.addEventListener("click", (e) => {
+      if (modal.classList.contains("hidden")) return;
+      if (modal.contains(e.target)) return;
+      if (openBtn && (e.target === openBtn || openBtn.contains(e.target))) return;
+      modal.classList.add("hidden");
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) {
         modal.classList.add("hidden");
       }
-    };
+    });
   }
 
   // Plus de bouton « Sauvegarder » ici : depuis la 2.2 chaque clic épingle et
