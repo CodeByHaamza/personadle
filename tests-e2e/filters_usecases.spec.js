@@ -263,12 +263,21 @@ test.describe("Filtres d'opus — effet sur la partie", () => {
 });
 
 test.describe("Filtres d'opus — la cible du jour", () => {
-  test("la cible du jour est tirée du catalogue COMPLET, pas du pool filtré", async ({
+  /** Opus du personnage `nom` dans le catalogue Classique (lu depuis la page). */
+  const opusOf = (page, nom) =>
+    page.evaluate(async (n) => {
+      const { characters } = await import("/database/characters_clean.js");
+      return characters.find((c) => c.nom === n)?.opus ?? null;
+    }, nom);
+
+  test("la cible du jour RESPECTE les filtres : un joueur « P5 uniquement » reçoit un personnage P5", async ({
     browser,
   }) => {
-    // C'est ce que le serveur recalcule (api/lib/daily_target.php) : si les
-    // filtres changeaient la cible seedée, chaque joueur qui filtre serait
-    // signalé par l'anti-triche.
+    // Décision 2.2 (PR « cible du jour filtrée ») : la cible est tirée du catalogue
+    // complet, mais si les filtres du joueur l'excluent, on re-tire dans le pool
+    // filtré — sinon l'autocomplétion ne propose jamais la réponse et la partie du
+    // jour est injouable pour lui. Le serveur (api/lib/daily_target.php) fait le
+    // même re-tirage, sinon chaque joueur qui filtre serait signalé par l'anti-triche.
     const ctxA = await browser.newContext();
     const pageA = await ctxA.newPage();
     await gotoSettled(pageA, "/classiqueMode/classiqueMode.html");
@@ -277,9 +286,10 @@ test.describe("Filtres d'opus — la cible du jour", () => {
     const targetPlein = await storedTarget(pageA);
     expect(seed, "le seed du joueur doit être posé").toBeTruthy();
     expect(targetPlein).toBeTruthy();
+    const opusPlein = await opusOf(pageA, targetPlein);
     await ctxA.close();
 
-    // Même joueur (même seed), mais des filtres restreints AVANT le premier rendu
+    // Même joueur (même seed), mais des filtres « P5 uniquement » AVANT le premier rendu
     const ctxB = await browser.newContext();
     const pageB = await ctxB.newPage();
     await pageB.goto(BASE + "/classiqueMode/classiqueMode.html");
@@ -293,8 +303,37 @@ test.describe("Filtres d'opus — la cible du jour", () => {
     );
     await gotoSettled(pageB, "/classiqueMode/classiqueMode.html");
     await pageB.waitForTimeout(600);
-    expect(await storedTarget(pageB)).toBe(targetPlein);
+    const targetFiltre = await storedTarget(pageB);
+    expect(targetFiltre).toBeTruthy();
+    expect(await opusOf(pageB, targetFiltre), "la cible doit être un personnage P5").toContain("P5");
+    // Cible du catalogue complet déjà P5 → inchangée ; sinon re-tirée dans le pool P5.
+    if (opusPlein?.includes("P5")) expect(targetFiltre).toBe(targetPlein);
+    else expect(targetFiltre).not.toBe(targetPlein);
+
+    // …et elle est proposée par l'autocomplétion : la partie est jouable.
+    const suggestions = await suggestionsFor(pageB, targetFiltre.slice(0, 3));
+    expect(suggestions.map((x) => x.toLowerCase())).toContain(targetFiltre.toLowerCase());
+
+    // Stable au rechargement (même graine, même pool filtré).
+    await gotoSettled(pageB, "/classiqueMode/classiqueMode.html");
+    await pageB.waitForTimeout(400);
+    expect(await storedTarget(pageB)).toBe(targetFiltre);
     await ctxB.close();
+  });
+
+  test("sans filtre touché, la cible du jour est celle du catalogue complet", async ({ browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await gotoSettled(page, "/classiqueMode/classiqueMode.html");
+    await page.waitForTimeout(400);
+    const target = await storedTarget(page);
+    const attendu = await page.evaluate(async () => {
+      const { getDailyTarget, getPlayerSeedId, parisDateKey } = await import("/js/gameCore.js");
+      const { characters } = await import("/database/characters_clean.js");
+      return getDailyTarget(characters, "Classic", parisDateKey(), getPlayerSeedId())?.nom ?? null;
+    });
+    expect(target).toBe(attendu);
+    await ctx.close();
   });
 
   test("changer un filtre retire une cible devenue injouable (elle sort du pool)", async ({

@@ -1251,6 +1251,51 @@ export function getDailyTarget(pool, mode, date = parisDateKey(), seedId = getPl
   return pool[h % pool.length];
 }
 
+/**
+ * Cible du jour qui RESPECTE les filtres d'opus du joueur.
+ *
+ * Le tirage seedé se fait toujours sur le catalogue complet (`pool`, même ordre
+ * que `api/data/daily_pools.json`) : c'est ce qui garantit une cible stable par
+ * joueur et par jour. Mais si cette cible n'est pas dans `filteredPool` (le
+ * joueur a décoché son opus), on re-tire avec la même graine DANS le pool
+ * filtré — sinon la partie du jour est injouable pour lui : l'autocomplétion ne
+ * proposera jamais la réponse, et l'aide des filtres promet pourtant que « seuls
+ * les jeux gardés peuvent tomber ». AOA et Personae le faisaient chacun à la
+ * main depuis la 2.1 ; les quatre autres modes tiraient hors filtres. Une seule
+ * source désormais, miroir exact de personadle_pick_within_filters()
+ * (api/lib/daily_target.php) — les deux doivent rester identiques, sinon chaque
+ * partie d'un joueur qui filtre est signalée par l'anti-triche.
+ *
+ * `filteredPool` doit être un sous-ensemble de `pool` dans le MÊME ordre
+ * (`pool.filter(...)`), le serveur filtrant de la même façon. Vide ou absent →
+ * on garde la cible du catalogue complet (le mode affiche déjà « aucun
+ * résultat » quand tout est décoché).
+ *
+ * @template T
+ * @param {T[]}  pool          catalogue complet, ordre du fichier source
+ * @param {T[]}  filteredPool  `pool` restreint aux opus actifs, même ordre
+ * @param {string} mode        clé de hash (EXPERT.hashMode : "Classic", "MusicExpert"…)
+ * @param {(entry: T) => *} [keyOf] identité d'une entrée (nom, titre, persona)
+ * @param {string} [date]      cf. getDailyTarget
+ * @param {string} [seedId]    cf. getDailyTarget
+ * @returns {T|null}
+ */
+export function getDailyTargetWithin(
+  pool,
+  filteredPool,
+  mode,
+  keyOf = (entry) => entry,
+  date = parisDateKey(),
+  seedId = getPlayerSeedId()
+) {
+  const daily = getDailyTarget(pool, mode, date, seedId);
+  if (daily == null) return null;
+  if (!Array.isArray(filteredPool) || filteredPool.length === 0) return daily;
+  const wanted = keyOf(daily);
+  if (filteredPool.some((entry) => keyOf(entry) === wanted)) return daily;
+  return getDailyTarget(filteredPool, mode, date, seedId);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // COMMUNITY STATS — "X% of players found this today"
 // ─────────────────────────────────────────────────────────────────────────────

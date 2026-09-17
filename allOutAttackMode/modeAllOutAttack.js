@@ -14,7 +14,7 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
-  getDailyTarget,
+  getDailyTargetWithin,
   showChallengeButton,
   initChallengeButton,
   showCommunityStats,
@@ -312,13 +312,9 @@ function getBetterRandomCharacter(random = false) {
       personas.length > 1 && target ? personas.filter((n) => n !== target) : personas;
     return _candidates[Math.floor(Math.random() * _candidates.length)] || personas[0];
   }
-  // Daily target depuis le pool complet — mais si le filtre actif l'exclut,
-  // utiliser un daily depuis la liste filtrée pour rester jouable.
-  const daily = getDailyTarget(originalPersonas, EXPERT.hashMode);
-  if (personas.length && !personas.includes(daily)) {
-    return getDailyTarget(personas, EXPERT.hashMode);
-  }
-  return daily;
+  // Cible du jour depuis le pool complet, re-tirée dans le pool filtré si le
+  // filtre actif l'exclut — geste partagé par les six modes (getDailyTargetWithin).
+  return getDailyTargetWithin(originalPersonas, personas, EXPERT.hashMode);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

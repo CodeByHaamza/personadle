@@ -13,17 +13,25 @@
  * scripts/export-daily-pools.js à partir des datasets JS (source de vérité).
  * `npm run pools:check` (câblé en CI) échoue si ce fichier dérive des sources.
  *
- * ⚠️ LIMITATION CONNUE (revue PR #13) — AllOutAttack et Personae acceptent
- * `$activeFilters` tel que soumis par le client, sans le corréler à un état
- * connu côté serveur (aucune session ne mémorise le filtre opus réellement
- * actif). Un client peut donc soumettre n'importe quel sous-ensemble des
- * codes opus pour faire correspondre le recalcul serveur au nom qu'il veut
- * faire valider — contrairement à Classic/Emoji/Silhouette/Music, qui n'ont
- * pas ce repli filtré et ne sont donc pas contournables de cette façon. Sans
- * conséquence tant que la phase 1 (détection, voir api/sessions.php) reste en
- * mode logging seul ; à résoudre (filtre stocké côté serveur plutôt que
- * re-soumis par le client) avant d'activer un rejet strict pour ces 2 modes
- * spécifiquement — voir ROADMAP.md § Sécurité/compte.
+ * Repli filtré (les SIX modes, depuis la 2.2) : la cible est tirée du catalogue
+ * complet, mais si les filtres d'opus du joueur l'excluent, on re-tire avec la
+ * même graine DANS le pool filtré — personadle_pick_within_filters(), miroir
+ * exact de getDailyTargetWithin() (js/gameCore.js). Sans ça la partie du jour
+ * était injouable pour un joueur qui filtre (AOA et Personae le faisaient déjà
+ * depuis la 2.1, les quatre autres modes non — l'aide des filtres promettait
+ * pourtant « seuls les jeux gardés peuvent tomber »).
+ *
+ * ⚠️ LIMITATION CONNUE (revue PR #13, étendue aux six modes en 2.2) —
+ * `$activeFilters` est accepté tel que soumis par le client, sans être corrélé
+ * à un état connu côté serveur (aucune session ne mémorise le filtre opus
+ * réellement actif). Un client peut donc soumettre n'importe quel sous-ensemble
+ * des codes opus pour faire correspondre le recalcul serveur au nom qu'il veut
+ * faire valider. Sans conséquence tant que la phase 1 (détection, voir
+ * api/sessions.php) reste en mode logging seul. À résoudre AVANT tout rejet
+ * strict, pour les six modes d'un coup : filtres synchronisés sur le compte
+ * (comme `profiles.settings`) et recalcul depuis les filtres STOCKÉS,
+ * `active_filters` soumis ne servant plus que de signal de cohérence — voir
+ * ROADMAP.md § Sécurité/compte.
  */
 
 /**
@@ -79,74 +87,53 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
     $pools = personadle_load_daily_pools();
 
     switch ($mode) {
+        // Quatre modes à pool de NOMS : la cible est tirée du catalogue complet puis,
+        // si les filtres du joueur l'excluent, re-tirée dans le pool filtré — voir
+        // personadle_pick_within_filters(). Les variantes Expert qui gardent le
+        // roster du mode normal (émoji, silhouette, AOA) réutilisent son pool ET sa
+        // table d'opus avec une clé de hash distincte, pour que le tirage soit
+        // indépendant : jouer le mode normal d'abord — indice plus généreux —
+        // donnerait la réponse de l'Expert du jour.
         case 'classic':
-            return personadle_pick_from_pool($pools['classic']['pool'] ?? [], 'Classic', $playedDate, $seedId);
-
+            return personadle_pick_within_filters($pools['classic'] ?? [], 'Classic', $playedDate, $seedId, $activeFilters);
         case 'emoji':
-            return personadle_pick_from_pool($pools['emoji']['pool'] ?? [], 'Emoji', $playedDate, $seedId);
-
+            return personadle_pick_within_filters($pools['emoji'] ?? [], 'Emoji', $playedDate, $seedId, $activeFilters);
         case 'silhouette':
-            return personadle_pick_from_pool($pools['silhouette']['pool'] ?? [], 'Silhouette', $playedDate, $seedId);
-
+            return personadle_pick_within_filters($pools['silhouette'] ?? [], 'Silhouette', $playedDate, $seedId, $activeFilters);
         case 'music':
-            return personadle_pick_from_pool($pools['music']['pool'] ?? [], 'Music', $playedDate, $seedId);
-
-        // Mode Music Expert — pool ET clé de hash distincts de 'music' (73 chansons à
-        // paroles au lieu de 92). Le tirage doit être indépendant : avec la même clé,
-        // jouer le mode normal d'abord (où l'audio est donné) révélerait la réponse de
-        // l'Expert du jour. Le client passe la même chaîne "MusicExpert" à
-        // getDailyTarget() — les deux doivent rester identiques, sinon chaque partie
-        // Expert est loguée en anti_cheat.
+            return personadle_pick_within_filters($pools['music'] ?? [], 'Music', $playedDate, $seedId, $activeFilters);
+        // Mode Music Expert — pool ET clé de hash distincts de 'music' (chansons à
+        // paroles seulement). Le client passe la même chaîne "MusicExpert" à
+        // getDailyTargetWithin() — les deux doivent rester identiques, sinon chaque
+        // partie Expert est loguée en anti_cheat. Table d'opus : celle de `music`
+        // (mêmes titres).
         case 'music_expert':
-            return personadle_pick_from_pool(
-                $pools['music_expert']['pool'] ?? [], 'MusicExpert', $playedDate, $seedId
+            return personadle_pick_within_filters(
+                ['pool' => $pools['music_expert']['pool'] ?? [], 'opusByName' => $pools['music']['opusByName'] ?? []],
+                'MusicExpert', $playedDate, $seedId, $activeFilters
             );
-
         // Classique Expert : seule la citation est donnée, donc seuls les personnages
-        // qui en ont une sont tirables — pool propre, plus étroit que `classic`.
+        // qui en ont une sont tirables — pool propre, plus étroit que `classic`,
+        // table d'opus de `classic` (mêmes noms).
         case 'classic_expert':
-            return personadle_pick_from_pool(
-                $pools['classic_expert']['pool'] ?? [], 'ClassicExpert', $playedDate, $seedId
+            return personadle_pick_within_filters(
+                ['pool' => $pools['classic_expert']['pool'] ?? [], 'opusByName' => $pools['classic']['opusByName'] ?? []],
+                'ClassicExpert', $playedDate, $seedId, $activeFilters
             );
-
         // Émoji Expert : même roster que le mode normal — l'indice change (un des
-        // émojis affichés est un leurre), pas le pool. Clé de hash distincte pour
-        // que le tirage soit indépendant.
+        // émojis affichés est un leurre), pas le pool.
         case 'emoji_expert':
-            return personadle_pick_from_pool(
-                $pools['emoji']['pool'] ?? [], 'EmojiExpert', $playedDate, $seedId
-            );
-
+            return personadle_pick_within_filters($pools['emoji'] ?? [], 'EmojiExpert', $playedDate, $seedId, $activeFilters);
         // Silhouette Expert : MÊME roster que le mode normal — seul l'indice change
-        // (dézoom figé au maximum). On réutilise donc le pool `silhouette` avec une
-        // clé de hash distincte, plutôt que d'en dupliquer 157 entrées dans le JSON
-        // et de les laisser dériver l'une de l'autre.
+        // (dézoom figé au maximum).
         case 'silhouette_expert':
-            return personadle_pick_from_pool(
-                $pools['silhouette']['pool'] ?? [], 'SilhouetteExpert', $playedDate, $seedId
-            );
-
+            return personadle_pick_within_filters($pools['silhouette'] ?? [], 'SilhouetteExpert', $playedDate, $seedId, $activeFilters);
         // AOA Expert : même roster et même logique de filtre que le mode normal
-        // (l'indice change — flou figé et noir et blanc — pas le pool). Partage donc
-        // le corps du cas ci-dessous, avec une clé de hash distincte.
+        // (l'indice change — flou figé et noir et blanc — pas le pool).
         case 'alloutattack_expert':
-        case 'alloutattack': {
-            $hashKey = $mode === 'alloutattack_expert' ? 'AllOutAttackExpert' : 'AllOutAttack';
-            $data = $pools['alloutattack'] ?? [];
-            $pool = $data['pool'] ?? [];
-            $opusByName = $data['opusByName'] ?? [];
-            $daily = personadle_pick_from_pool($pool, $hashKey, $playedDate, $seedId);
-            if ($daily === null) return null;
-            if (empty($activeFilters)) return $daily;
-            $filteredPool = array_values(array_filter($pool, function ($name) use ($opusByName, $activeFilters) {
-                $opus = $opusByName[$name] ?? [];
-                return count(array_intersect($opus, $activeFilters)) > 0;
-            }));
-            if (!empty($filteredPool) && !in_array($daily, $filteredPool, true)) {
-                return personadle_pick_from_pool($filteredPool, $hashKey, $playedDate, $seedId);
-            }
-            return $daily;
-        }
+            return personadle_pick_within_filters($pools['alloutattack'] ?? [], 'AllOutAttackExpert', $playedDate, $seedId, $activeFilters);
+        case 'alloutattack':
+            return personadle_pick_within_filters($pools['alloutattack'] ?? [], 'AllOutAttack', $playedDate, $seedId, $activeFilters);
 
         // Personae Expert : pool restreint aux personas ayant une fiche de lore
         // (139 entrées sur 153) et clé de hash distincte. Même corps que le cas
@@ -159,19 +146,19 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
             $daily = personadle_pick_from_pool($entries, $hashKey, $playedDate, $seedId);
             if ($daily === null) return null;
             if (empty($activeFilters)) return $daily['user'];
-            $filteredEntries = array_values(array_filter($entries, function ($entry) use ($activeFilters) {
+            // Appartenance au pool filtré par INDEX dans le pool, pas par nom de
+            // persona : trois personas sont homonymes (Hermes, Susano-o,
+            // Prometheus — deux personnages, deux opus, deux dessins). Comparer le
+            // nom faisait passer le Prometheus de Futaba (P5R) pour « présent » chez
+            // un joueur « P2 uniquement », parce que celui de Baofu (P2EP) l'était :
+            // pas de re-tirage, partie du jour injouable. Miroir de l'identité de
+            // référence côté client (getDailyTargetWithin, keyOf par défaut).
+            $filteredKeyed = array_filter($entries, function ($entry) use ($activeFilters) {
                 return count(array_intersect($entry['opus'] ?? [], $activeFilters)) > 0;
-            }));
-            // Comparaison sur `persona` (l'entrée exacte tirée), pas `user` : un
-            // même personnage peut avoir plusieurs personas dans des opus
-            // différents — cf. modePersonae.js::pickCharacter(), `c.persona === daily.persona`.
-            $dailyPersona = $daily['persona'];
-            $isDailyInFiltered = false;
-            foreach ($filteredEntries as $e) {
-                if ($e['persona'] === $dailyPersona) { $isDailyInFiltered = true; break; }
-            }
-            if (!empty($filteredEntries) && !$isDailyInFiltered) {
-                $fallback = personadle_pick_from_pool($filteredEntries, $hashKey, $playedDate, $seedId);
+            });
+            $dailyIdx = personadle_fnv1a_index($seedId, $playedDate, $hashKey, count($entries));
+            if (!empty($filteredKeyed) && !array_key_exists($dailyIdx, $filteredKeyed)) {
+                $fallback = personadle_pick_from_pool(array_values($filteredKeyed), $hashKey, $playedDate, $seedId);
                 return $fallback['user'] ?? null;
             }
             return $daily['user'];
@@ -180,6 +167,33 @@ function personadle_compute_daily_target(string $mode, string $playedDate, strin
         default:
             return null;
     }
+}
+
+/**
+ * Cible du jour d'un pool de NOMS, dans les filtres d'opus du joueur — miroir
+ * exact de getDailyTargetWithin() (js/gameCore.js) : tirage sur le pool complet,
+ * puis, si la cible n'appartient à aucun opus actif, re-tirage avec la même
+ * graine dans le pool filtré (`array_filter` conserve l'ordre du fichier source,
+ * comme `pool.filter()` côté client). Aucun filtre, ou un filtre qui vide le
+ * pool → cible du catalogue complet, comme le client.
+ *
+ * @param array{pool?: list<string>, opusByName?: array<string, list<string>>} $data
+ * @param list<string> $activeFilters
+ */
+function personadle_pick_within_filters(array $data, string $hashKey, string $date, string $seedId, array $activeFilters): ?string
+{
+    $pool = $data['pool'] ?? [];
+    $daily = personadle_pick_from_pool($pool, $hashKey, $date, $seedId);
+    if ($daily === null || empty($activeFilters)) return $daily;
+    $opusByName = $data['opusByName'] ?? [];
+    $filteredPool = array_values(array_filter($pool, function ($name) use ($opusByName, $activeFilters) {
+        $opus = $opusByName[$name] ?? [];
+        return count(array_intersect($opus, $activeFilters)) > 0;
+    }));
+    if (!empty($filteredPool) && !in_array($daily, $filteredPool, true)) {
+        return personadle_pick_from_pool($filteredPool, $hashKey, $date, $seedId);
+    }
+    return $daily;
 }
 
 /**
