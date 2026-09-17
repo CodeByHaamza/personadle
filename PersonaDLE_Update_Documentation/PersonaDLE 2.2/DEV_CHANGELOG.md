@@ -13,6 +13,61 @@
 
 ---
 
+## 2026-09-17 — feat(notifications) : demandes d'ami, défis et rank-up en temps réel via Pusher Channels (branche `feature/realtime-notifications`)
+
+### Pourquoi
+
+`js/notifications.js` sondait `/api/notifications` (+ amis, messages, social-links)
+toutes les 60 secondes sur chaque page, connecté ou non. Hostinger mutualisé (Apache
++ PHP, pas de process Node persistant) exclut un WebSocket auto-hébergé — Pusher
+Channels est le seul service tiers qui tienne sans changer d'hébergeur.
+
+### Quoi
+
+- `api/lib/pusher_trigger.php` — déclenchement d'événements côté serveur en cURL brut
+  signé HMAC-SHA256 (pas de SDK, le projet n'a pas de `composer.json`). No-op silencieux
+  si `PUSHER_APP_ID`/`KEY`/`SECRET`/`CLUSTER` sont absents.
+- `api/pusher/auth.php` + `api/lib/pusher_auth.php` — authentifie l'abonnement aux
+  canaux privés `private-user-{id}` via la session PHP existante (refuse tout canal
+  qui n'est pas le sien).
+- Triggers câblés dans `api/friends/index.php` (`friend_request`, `friend_declined`),
+  `api/messages/index.php` (`challenge`, `challenge_beaten`) et
+  `api/lib/social_link_interaction.php` (`rankup`).
+- `js/notifications.js` : `_check()` reste l'unique source de vérité (dédup
+  localStorage, animations) — un event Pusher ne fait que la rappeler immédiatement au
+  lieu d'attendre le tick suivant. Fallback polling à 5 min (contre 60 s avant) si
+  Pusher est indisponible ; `_loadPusherScript()` a un timeout de 8 s pour ne jamais
+  bloquer indéfiniment sur un CDN injoignable.
+- `api/lib/social_link_xp_grant.php` — corrige un bug pré-existant : un rank-up déclenché
+  par un défi (`CALL add_social_link_xp` dans `api/messages/index.php`) ne relisait
+  jamais les OUT params et ne notifiait donc jamais personne, contrairement au chemin
+  `/social-links/by-friend/:id/interact`.
+- `api/config.example.php`, `api/config.docker.php`, `.env.example`, `docker-compose.yml` :
+  4 constantes `PUSHER_*`, vides par défaut.
+- `.htaccess` (racine) : `connect-src` étendu à `https://*.pusher.com wss://*.pusher.com`.
+
+### Tests
+
+- `tests/php/PusherTriggerTest.php`, `PusherAuthTest.php` — logique pure (signature,
+  auth de canal), sans réseau.
+- `tests/php/PusherLiveTest.php` — appel réel signé contre l'API Pusher, skippé sans
+  config. Vérifié manuellement avec un vrai compte : HTTP 200, badge et pop-ups reçus
+  sans recharger la page (demande d'ami, refus, défi, défi relevé).
+- `tests/php/DatabaseIntegrationTest.php` — le correctif rank-up (insertion réelle
+  dans `social_link_rankup_notifs`).
+- `tests/notifications.test.js` — abonnement, rappel de `_check()` sur event, bascule
+  fallback, `stopNotifications()`.
+
+### Angles morts
+
+- Spec complète : `docs/superpowers/specs/2026-09-10-realtime-notifications-design.md`,
+  plan d'implémentation : `docs/superpowers/plans/2026-09-10-realtime-notifications.md`.
+- Compte Pusher (plan gratuit) à créer et ses 4 clés à renseigner sur Hostinger avant
+  le déploiement de cette version — sans ça le comportement retombe intégralement sur
+  le fallback polling (5 min), aucune régression fonctionnelle mais latence dégradée.
+- Le SDK PHP officiel Pusher n'est pas introduit (pas de `composer.json` dans ce lot) ;
+  à revisiter si le besoin de dépendances PHP grossit.
+
 ## 2026-09-17 — feat(contenu) : 7 titres + 1 badge, filtres en fenêtre, et les cas d'usage des filtres sous test (branche `feat/profil-vitrine`)
 
 ### Contenu (visuels fournis par Hamza)
