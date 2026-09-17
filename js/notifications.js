@@ -6,9 +6,14 @@
  *
  * _check() reste l'unique source de vérité (dédup localStorage, animations,
  * affichage) : un event Pusher ne porte aucune donnée, il ne fait que rappeler
- * _check() immédiatement au lieu d'attendre le prochain tick. Si Pusher est
- * indisponible, un fallback polling (5 min, contre 60s avant ce chantier)
- * prend le relais — dégradé de latence, jamais de perte de notification.
+ * _check() immédiatement au lieu d'attendre le prochain tick.
+ *
+ * Trois régimes, choisis dans _initPusher() :
+ *   - Pusher non configuré (pas de clé dans /api/auth/me) → polling 60 s,
+ *     exactement le comportement d'avant ce chantier, aucun script CDN chargé ;
+ *   - Pusher configuré et connecté → push, aucun polling ;
+ *   - Pusher configuré mais indisponible (CDN, socket) → fallback polling 5 min,
+ *     dégradé de latence, jamais de perte de notification.
  */
 
 import { queueCallingCards } from "./calling-card.js";
@@ -27,7 +32,19 @@ const SEEN_CHALLENGE_NOTIF = "seenChallengeNotifIds";
 /** How far back (ms) to look for challenge results to notify about (48 hours). */
 const CHALLENGE_RESULT_CUTOFF_MS = 48 * 60 * 60 * 1000;
 
-/** Fallback polling interval (ms) — seulement si la connexion Pusher est indisponible. */
+/**
+ * Polling « historique » (ms) quand Pusher n’est PAS configuré (clé absente
+ * dans /api/auth/me) — c’est le comportement d’avant ce chantier, conservé tel
+ * quel pour ne créer aucune régression de latence tant que le compte Pusher
+ * n’est pas renseigné en prod.
+ */
+const POLL_INTERVAL_MS = 60_000;
+
+/**
+ * Fallback polling (ms) quand Pusher EST configuré mais que la connexion
+ * WebSocket est indisponible (CDN injoignable, socket coupé…) : plus lent que
+ * le polling historique, puisque Pusher reprendra la main dès qu’il revient.
+ */
 const FALLBACK_POLL_INTERVAL_MS = 5 * 60_000;
 
 /** Délai de grâce avant de considérer une déconnexion Pusher comme "prolongée". */
@@ -121,7 +138,22 @@ async function _loadPusherScript() {
   });
 }
 
+/** Pusher est « configuré » quand /api/auth/me a renvoyé une clé ET un cluster non vides. */
+function _isPusherConfigured() {
+  return Boolean(window._pusherKey) && Boolean(window._pusherCluster);
+}
+
 async function _initPusher() {
+  // Pas de compte Pusher renseigné côté serveur (prod tant que les clés ne sont
+  // pas posées, dev local sans .env) : on ne charge PAS le script CDN et on
+  // garde le polling historique à 60 s — strictement le comportement d’avant.
+  // Sans ce garde, pusher-js lance une exception sur une clé null et plus
+  // aucun rafraîchissement n’a lieu après le premier _check().
+  if (!_isPusherConfigured()) {
+    _startPolling(POLL_INTERVAL_MS);
+    return;
+  }
+
   try {
     await _loadPusherScript();
   } catch {
@@ -130,13 +162,23 @@ async function _initPusher() {
   }
 
   const me = window._currentUser;
-  _pusher = new window.Pusher(window._pusherKey, {
-    cluster: window._pusherCluster,
-    authEndpoint: `${BASE_URL}/pusher/auth`,
-    auth: { headers: { "X-CSRF-Token": getCsrfToken() } },
-  });
+  let channel;
+  try {
+    _pusher = new window.Pusher(window._pusherKey, {
+      cluster: window._pusherCluster,
+      authEndpoint: `${BASE_URL}/pusher/auth`,
+      auth: { headers: { "X-CSRF-Token": getCsrfToken() } },
+    });
+    channel = _pusher.subscribe(`private-user-${me.id}`);
+  } catch (err) {
+    // Clé refusée par pusher-js, constructeur cassé par un bloqueur… : on ne
+    // laisse jamais l’utilisateur sans rafraîchissement.
+    console.warn("[notifications] Pusher init failed, falling back to polling:", err);
+    _pusher = null;
+    _startFallbackPolling();
+    return;
+  }
 
-  const channel = _pusher.subscribe(`private-user-${me.id}`);
   ["friend_request", "friend_declined", "challenge", "challenge_beaten", "rankup"].forEach((evt) => {
     channel.bind(evt, () => _check());
   });
@@ -159,9 +201,13 @@ async function _initPusher() {
   });
 }
 
-function _startFallbackPolling() {
+function _startPolling(intervalMs) {
   if (_fallbackPollTimer) return;
-  _fallbackPollTimer = setInterval(_check, FALLBACK_POLL_INTERVAL_MS);
+  _fallbackPollTimer = setInterval(_check, intervalMs);
+}
+
+function _startFallbackPolling() {
+  _startPolling(FALLBACK_POLL_INTERVAL_MS);
 }
 
 function _stopFallbackPolling() {

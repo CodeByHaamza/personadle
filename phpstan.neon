@@ -17,6 +17,15 @@ parameters:
         # replie la constante sur '' et déclare mort tout le code qui suit la
         # garde — cf. api/cron/discord-daily.php.
         - DISCORD_DAILY_WEBHOOK
+        # Identifiants Pusher Channels (notifications temps réel) : vides dans
+        # config.example.php, renseignés seulement en prod. Même piège que
+        # DISCORD_DAILY_WEBHOOK — sans ces lignes PHPStan déclare la garde
+        # « config absente → return » toujours vraie et tout le déclenchement
+        # d'événement inatteignable (api/lib/pusher_trigger.php, api/pusher/auth.php).
+        - PUSHER_APP_ID
+        - PUSHER_KEY
+        - PUSHER_SECRET
+        - PUSHER_CLUSTER
         - DB_HOST
         - DB_PORT
         - DB_NAME

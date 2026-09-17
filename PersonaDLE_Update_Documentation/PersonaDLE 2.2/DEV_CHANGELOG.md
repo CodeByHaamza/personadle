@@ -35,9 +35,17 @@ Channels est le seul service tiers qui tienne sans changer d'hébergeur.
   `api/lib/social_link_interaction.php` (`rankup`).
 - `js/notifications.js` : `_check()` reste l'unique source de vérité (dédup
   localStorage, animations) — un event Pusher ne fait que la rappeler immédiatement au
-  lieu d'attendre le tick suivant. Fallback polling à 5 min (contre 60 s avant) si
-  Pusher est indisponible ; `_loadPusherScript()` a un timeout de 8 s pour ne jamais
-  bloquer indéfiniment sur un CDN injoignable.
+  lieu d'attendre le tick suivant. Trois régimes dans `_initPusher()` :
+  **Pusher non configuré** (pas de clé renvoyée par `/api/auth/me`) → polling 60 s
+  inchangé, aucun script CDN chargé ; **configuré et connecté** → push pur ;
+  **configuré mais indisponible** (CDN, socket) → fallback polling 5 min.
+  `_loadPusherScript()` a un timeout de 8 s pour ne jamais bloquer indéfiniment sur un
+  CDN injoignable, et `new Pusher()` est sous `try/catch` → fallback.
+  *Revue avant merge* : la première version chargeait pusher-js et instanciait
+  `new Pusher(null)` même sans clé — pusher-js lance alors une exception hors du
+  `try`, `initNotifications()` rejetait et plus aucun rafraîchissement n'avait lieu
+  après le premier `_check()`. C'est précisément l'état de la prod au déploiement
+  (`api/config.php` sans `PUSHER_*`), d'où le garde `_isPusherConfigured()`.
 - `api/lib/social_link_xp_grant.php` — corrige un bug pré-existant : un rank-up déclenché
   par un défi (`CALL add_social_link_xp` dans `api/messages/index.php`) ne relisait
   jamais les OUT params et ne notifiait donc jamais personne, contrairement au chemin
@@ -56,13 +64,19 @@ Channels est le seul service tiers qui tienne sans changer d'hébergeur.
 - `tests/php/DatabaseIntegrationTest.php` — le correctif rank-up (insertion réelle
   dans `social_link_rankup_notifs`).
 - `tests/notifications.test.js` — abonnement, rappel de `_check()` sur event, bascule
-  fallback, `stopNotifications()`.
+  fallback, `stopNotifications()` ; plus les 3 régimes : sans clé (aucun script CDN,
+  polling 60 s, clé `null` ne lance rien), clé sans cluster, constructeur qui lance,
+  CDN en erreur, CDN en timeout 8 s, reconnexion qui coupe le fallback, coupure courte
+  (< grâce 10 s) qui ne l'arme pas, les 5 noms d'événements bindés.
+- `phpstan.neon` — `PUSHER_*` ajoutées à `dynamicConstantNames` (même piège que
+  `DISCORD_DAILY_WEBHOOK` : la constante vide de `config.example.php` rendait la garde
+  « toujours vraie » et le déclenchement « inatteignable », 18 erreurs, CI rouge).
 
 ### Angles morts
 
-- Compte Pusher (plan gratuit) à créer et ses 4 clés à renseigner sur Hostinger avant
-  le déploiement de cette version — sans ça le comportement retombe intégralement sur
-  le fallback polling (5 min), aucune régression fonctionnelle mais latence dégradée.
+- Compte Pusher (plan gratuit) à créer et ses 4 clés à renseigner dans `api/config.php`
+  sur Hostinger pour activer le temps réel — sans ça le site reste sur le polling 60 s
+  d'avant ce lot, strictement sans régression. Ce n'est donc PAS un prérequis de release.
 - Le SDK PHP officiel Pusher n'est pas introduit (pas de `composer.json` dans ce lot) ;
   à revisiter si le besoin de dépendances PHP grossit.
 
