@@ -81,16 +81,52 @@ export function shiftDateKey(key, days) {
 }
 
 /**
- * Returns the number of milliseconds remaining until the next Paris midnight.
- * Used to schedule the automatic daily reset.
+ * Instant (ms UTC) du minuit Paris qui OUVRE la journée `key` ("YYYY-MM-DD").
  *
+ * Paris est à UTC+1 ou UTC+2 : ce minuit tombe 1 h ou 2 h avant le minuit UTC
+ * du même jour. On essaie les deux et on garde celui qu'Intl lit comme
+ * « 00 h, ce jour-là » à Paris — aucun calcul ne passe par le fuseau de la
+ * machine.
+ *
+ * @param {string} key clé "YYYY-MM-DD" (parisDateKey())
+ * @returns {number} timestamp ms
+ */
+export function parisMidnightUtc(key) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key ?? ""));
+  if (!m) return NaN;
+  const utcMidnight = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const hourFmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Paris",
+    hour: "2-digit",
+    hourCycle: "h23",
+  });
+  for (const offsetH of [1, 2]) {
+    const t = utcMidnight - offsetH * 3_600_000;
+    if (parisDateKey(new Date(t)) === key && hourFmt.format(new Date(t)) === "00") return t;
+  }
+  return utcMidnight - 3_600_000; // repli théorique : CET
+}
+
+/**
+ * Returns the number of milliseconds remaining until the next Paris midnight.
+ * Used to schedule the automatic daily reset (setupDailyReset).
+ *
+ * Calculé depuis la clé de date Paris (parisDateKey → lendemain → instant de
+ * son minuit via parisMidnightUtc), JAMAIS en re-parsant une chaîne
+ * `toLocaleString` dans le fuseau de la machine. L'ancienne version le faisait
+ * et, pour tout appareil hors Europe (États-Unis, Japon, Australie, UTC…), se
+ * trompait de 60 min les deux jours de changement d'heure de Paris : reset une
+ * heure trop TARD au printemps (le puzzle de la veille restait jouable jusqu'à
+ * 01 h et une victoire partait datée du jour → mismatch anti-triche), une
+ * heure trop TÔT à l'automne (partie en cours effacée à 23 h). Idem le jour du
+ * changement d'heure LOCAL d'un joueur américain.
+ *
+ * @param {Date} [now=new Date()]
  * @returns {number} Milliseconds until 00:00:00 Paris time
  */
-export function msUntilNextParisMidnight() {
-  const nowInParis = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  const midnight = new Date(nowInParis);
-  midnight.setHours(24, 0, 0, 0);
-  return midnight.getTime() - nowInParis.getTime();
+export function msUntilNextParisMidnight(now = new Date()) {
+  const tomorrow = shiftDateKey(parisDateKey(now), 1);
+  return parisMidnightUtc(tomorrow) - now.getTime();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

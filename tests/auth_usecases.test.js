@@ -13,7 +13,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
-let initAuth, updateAuthUI, api;
+let initAuth, api;
 
 /** Réponse fetch simulée. */
 function res(status, body = null) {
@@ -76,7 +76,7 @@ beforeEach(async () => {
   window._authResolved = false;
   window._authUnavailable = false;
   mountLoginDom();
-  ({ initAuth, updateAuthUI } = await import("../js/auth.js"));
+  ({ initAuth } = await import("../js/auth.js"));
   ({ api } = await import("../js/api.js"));
   window._personadleApi = api;
 });
