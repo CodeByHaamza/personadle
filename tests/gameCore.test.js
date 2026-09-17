@@ -11,6 +11,7 @@
 import {
   parisDateKey,
   shiftDateKey,
+  parisMidnightUtc,
   msUntilNextParisMidnight,
   normalize,
   showConfettiExplosion,
@@ -160,14 +161,68 @@ describe("msUntilNextParisMidnight", () => {
     expect(ms).toBeGreaterThan(0);
   });
 
-  it("returns a value no greater than 24 hours", () => {
+  it("returns a value no greater than 25 hours (the autumn change day lasts 25 h)", () => {
     const ms = msUntilNextParisMidnight();
-    const msIn24Hours = 24 * 60 * 60 * 1000;
-    expect(ms).toBeLessThanOrEqual(msIn24Hours);
+    expect(ms).toBeLessThanOrEqual(25 * 60 * 60 * 1000);
   });
 
   it("returns a number", () => {
     expect(typeof msUntilNextParisMidnight()).toBe("number");
+  });
+
+  // Vérité absolue par instant : ces attentes ne dépendent PAS du fuseau de la
+  // machine qui lance les tests — c'est tout l'intérêt (la CI tourne en UTC, où
+  // l'ancienne implémentation se trompait de 60 min les deux jours ci-dessous).
+  const H = 3_600_000;
+  const cases = [
+    ["jour ordinaire d'été", "2026-07-15T12:00:00Z", "2026-07-16T00:00:00+02:00"],
+    ["jour ordinaire d'hiver", "2026-01-15T12:00:00Z", "2026-01-16T00:00:00+01:00"],
+    ["veille du passage à l'heure d'été, 23:30 Paris", "2026-03-28T22:30:00Z", "2026-03-29T00:00:00+01:00"],
+    ["jour du passage à l'heure d'été (23 h), 00:30 Paris", "2026-03-29T00:30:00+01:00", "2026-03-30T00:00:00+02:00"],
+    ["jour du passage à l'heure d'été, 03:01 CEST", "2026-03-29T03:01:00+02:00", "2026-03-30T00:00:00+02:00"],
+    ["jour du passage à l'heure d'hiver (25 h), 00:30 Paris", "2026-10-25T00:30:00+02:00", "2026-10-26T00:00:00+01:00"],
+    ["heure répétée, 02:30 la 2e fois (CET)", "2026-10-25T02:30:00+01:00", "2026-10-26T00:00:00+01:00"],
+    ["nuit du changement d'heure AMÉRICAIN (8 mars), 02:00 Paris", "2026-03-08T02:00:00+01:00", "2026-03-09T00:00:00+01:00"],
+    ["nuit du changement d'heure américain (1er nov), 02:00 Paris", "2026-11-01T02:00:00+01:00", "2026-11-02T00:00:00+01:00"],
+    ["une seconde avant minuit Paris", "2026-06-10T23:59:59+02:00", "2026-06-11T00:00:00+02:00"],
+    ["minuit Paris pile → le minuit SUIVANT (24 h), pas 0", "2026-06-10T00:00:00+02:00", "2026-06-11T00:00:00+02:00"],
+    ["31 décembre 23:00 Paris", "2026-12-31T23:00:00+01:00", "2027-01-01T00:00:00+01:00"],
+  ];
+  for (const [label, now, nextMidnight] of cases) {
+    it(`vise le vrai prochain minuit Paris — ${label}`, () => {
+      const expected = new Date(nextMidnight).getTime() - new Date(now).getTime();
+      expect(msUntilNextParisMidnight(new Date(now))).toBe(expected);
+      expect(expected).toBeGreaterThan(0);
+      expect(expected).toBeLessThanOrEqual(25 * H);
+    });
+  }
+
+  it("utilise l'heure système quand on ne lui passe rien", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-29T00:30:00+01:00"));
+    expect(msUntilNextParisMidnight()).toBe(22.5 * H);
+    vi.useRealTimers();
+  });
+});
+
+describe("parisMidnightUtc", () => {
+  it("minuit Paris en hiver = 23:00 UTC la veille", () => {
+    expect(parisMidnightUtc("2026-01-15")).toBe(Date.parse("2026-01-14T23:00:00Z"));
+  });
+  it("minuit Paris en été = 22:00 UTC la veille", () => {
+    expect(parisMidnightUtc("2026-07-15")).toBe(Date.parse("2026-07-14T22:00:00Z"));
+  });
+  it("le jour du passage à l'heure d'été, minuit est encore en CET ; le lendemain en CEST", () => {
+    expect(parisMidnightUtc("2026-03-29")).toBe(Date.parse("2026-03-28T23:00:00Z"));
+    expect(parisMidnightUtc("2026-03-30")).toBe(Date.parse("2026-03-29T22:00:00Z"));
+  });
+  it("le jour du passage à l'heure d'hiver, minuit est encore en CEST ; le lendemain en CET", () => {
+    expect(parisMidnightUtc("2026-10-25")).toBe(Date.parse("2026-10-24T22:00:00Z"));
+    expect(parisMidnightUtc("2026-10-26")).toBe(Date.parse("2026-10-25T23:00:00Z"));
+  });
+  it("clé invalide → NaN, pas d'exception", () => {
+    expect(parisMidnightUtc("hier")).toBeNaN();
+    expect(parisMidnightUtc(null)).toBeNaN();
   });
 });
 
