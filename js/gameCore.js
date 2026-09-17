@@ -58,6 +58,29 @@ export function parisDateKey(d = new Date()) {
 }
 
 /**
+ * Décale une clé "YYYY-MM-DD" d'un nombre de jours CALENDAIRES, en arithmétique
+ * pure sur la date (aucun fuseau, aucune heure) : shiftDateKey("2026-03-01", -1)
+ * → "2026-02-28", shiftDateKey("2026-12-31", 1) → "2027-01-01".
+ *
+ * C'est la seule façon correcte de dire « hier » ou « demain » côté client. Le
+ * calcul par `now − 86 400 000 ms` puis parisDateKey() se trompe le lendemain
+ * du passage à l'heure d'été : la journée n'a fait que 23 h, donc entre 00:00 et
+ * 00:59 Paris on retombe DEUX jours en arrière. La série d'un joueur qui avait
+ * joué la veille était cassée, et celle d'un joueur qui avait sauté ce dimanche
+ * était prolongée — une fois par an, une heure durant, sans aucun signal.
+ *
+ * @param {string} key   clé "YYYY-MM-DD" (parisDateKey())
+ * @param {number} days  entier, négatif pour reculer
+ * @returns {string} clé décalée ; `key` inchangée si elle n'est pas au bon format
+ */
+export function shiftDateKey(key, days) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key ?? ""));
+  if (!m || !Number.isInteger(days)) return key;
+  const t = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + days);
+  return new Date(t).toISOString().slice(0, 10);
+}
+
+/**
  * Returns the number of milliseconds remaining until the next Paris midnight.
  * Used to schedule the automatic daily reset.
  *
@@ -1114,14 +1137,10 @@ export async function savePendingSession(session) {
     } catch (err) {
       if (err?.status === 409) return; // Session already recorded (e.g. challenge replay)
       // Offline or other server error — queue to localStorage for later sync
-      const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
-      pending.push(session);
-      localStorage.setItem("pendingSessions", JSON.stringify(pending));
+      _queuePendingSession(session);
     }
   } else {
-    const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
-    pending.push(session);
-    localStorage.setItem("pendingSessions", JSON.stringify(pending));
+    _queuePendingSession(session);
   }
 
   // Always try to show community stats (silent fail if offline).
@@ -1132,6 +1151,70 @@ export async function savePendingSession(session) {
 
   // Invité avec une série qui compte : lui proposer de la sauvegarder.
   maybeNudgeGuest();
+}
+
+/**
+ * Identifiant du compte connecté sur CETTE page, ou null (invité, ou page dont
+ * l'auth n'est pas encore résolue). Sert à marquer le propriétaire de ce qui
+ * attend en localStorage — voir ownsQueuedEntry().
+ */
+export function currentAccountId() {
+  const id = window._currentUser?.id;
+  return id == null ? null : String(id);
+}
+
+/**
+ * Une entrée mise en file (partie hors ligne, statut de défi) appartient-elle au
+ * compte courant ?
+ *
+ * Appareil partagé : A joue hors ligne (ou sa session expire), se déconnecte ; B
+ * se connecte. La file était rejouée avec le cookie de B — les parties de A
+ * finissaient dans les stats de B, et ses statuts de défi partaient en 403 puis
+ * étaient jetés. Chaque entrée porte donc `_owner` (id du compte au moment de la
+ * mise en file, null pour un invité) : on ne rejoue que les siennes et celles
+ * d'un invité (un invité qui se connecte doit bien être crédité), les autres
+ * attendent le retour de leur propriétaire.
+ *
+ * @param {{ _owner?: string|number|null }} entry
+ * @param {string|null} [accountId=currentAccountId()]
+ */
+export function ownsQueuedEntry(entry, accountId = currentAccountId()) {
+  const owner = entry?._owner;
+  return owner == null || String(owner) === String(accountId ?? "");
+}
+
+function _queuePendingSession(session) {
+  const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
+  pending.push({ ...session, _owner: currentAccountId() });
+  localStorage.setItem("pendingSessions", JSON.stringify(pending));
+}
+
+/**
+ * Efface de l'appareil tout ce qui appartient au compte qui se déconnecte et
+ * qui, laissé là, se retrouverait dans les mains du prochain compte connecté
+ * sur ce navigateur :
+ *   - la trace Jack Frost (`streakRecovery`) — B se voyait proposer de restaurer
+ *     la série perdue de A, et le serveur l'acceptait si B avait assez de jours
+ *     de jeu ;
+ *   - les cases de défi actives (normal et Expert), filtres de l'expéditeur
+ *     rendus et état du mode purgé — B aurait joué la cible du défi de A, partie
+ *     comptée ni comme défi (403 sur le message de A) ni comme partie du jour.
+ * Les files hors ligne (`pendingSessions`, `pendingChallengeStatus`) ne sont PAS
+ * vidées : marquées par propriétaire (ownsQueuedEntry), elles attendent A.
+ * Appelé par la déconnexion (js/auth.js). Ne touche ni au profil local ni aux
+ * réglages : auth.js s'en charge déjà.
+ */
+export function clearAccountLocalState() {
+  localStorage.removeItem("streakRecovery");
+  for (const isExpert of [false, true]) {
+    let raw = null;
+    try {
+      raw = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
+    } catch {
+      /* case illisible : releaseActiveChallenge la retire quand même */
+    }
+    releaseActiveChallenge(raw ? { ...raw, isExpert } : { isExpert });
+  }
 }
 
 /**
@@ -1869,7 +1952,7 @@ export function readPendingChallengeStatus() {
 export function queueChallengeStatusUpdate(msgId, status) {
   if (!msgId || !status) return;
   const list = readPendingChallengeStatus().filter((e) => e.msgId !== msgId);
-  list.push({ msgId, status, at: Date.now() });
+  list.push({ msgId, status, at: Date.now(), _owner: currentAccountId() });
   localStorage.setItem(PENDING_CHALLENGE_STATUS_KEY, JSON.stringify(list.slice(-20)));
 }
 
@@ -1885,9 +1968,11 @@ export function queueChallengeStatusUpdate(msgId, status) {
 export async function flushPendingChallengeStatus(api) {
   const list = readPendingChallengeStatus();
   if (!list.length || !api?.messages?.updateStatus) return 0;
-  const remaining = [];
+  // Les relances d'un autre compte de cet appareil attendent son retour : envoyées
+  // avec le cookie du compte courant, elles partiraient en 403 et seraient jetées.
+  const remaining = list.filter((e) => !ownsQueuedEntry(e));
   let done = 0;
-  for (const entry of list) {
+  for (const entry of list.filter((e) => ownsQueuedEntry(e))) {
     try {
       await api.messages.updateStatus(entry.msgId, entry.status);
       done++;
