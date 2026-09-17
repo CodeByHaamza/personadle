@@ -31,6 +31,10 @@
  *   characterMatchesActiveOpus(character, activeOpus) → opus-intersection test used by filterCharacterPool()
  *   updateCounterElement(id, attempts, threshold) → updates a single hint/give-up counter's text + .activated class
  *   getPendingActiveChallenge()  → today's still-unfinished accepted challenge (any mode), or null
+ *   readActiveChallenge(isExpert)→ raw active-challenge box for a dimension, or null if stale
+ *   resolveChallengeTarget(m,p)  → challenge target resolved against the page's playable pool
+ *   releaseActiveChallenge(c)    → undoes a challenge's local state (filters, mode state, box)
+ *   MODE_STATE_KEYS              → per-mode localStorage keys wiped when a challenge starts/ends
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -168,6 +172,44 @@ export function currentGameId(scope) {
     localStorage.setItem(_gameIdKey(scope), id);
   }
   return id;
+}
+
+// ── Journal des essais de la partie en cours ────────────────────────────────
+// « Comparer nos parties » (2.2) : la session envoyée au serveur porte la suite
+// ordonnée des noms proposés (migration 041). Le journal est rattaché à
+// l'identifiant de partie : un Replay (startGame) ou un nouveau jour le vide
+// d'eux-mêmes, un rechargement le retrouve.
+
+/** Portée (scope de stats) de la page courante, posée par checkResetOnLoad(). */
+let _currentScope = null;
+const _guessLogKey = (scope) => `guessLog_${scope}`;
+
+/** Suite des essais de la partie en cours, ou [] si le journal date d'une autre partie. */
+export function readGuessLog(scope = _currentScope) {
+  if (!scope) return [];
+  try {
+    const raw = JSON.parse(localStorage.getItem(_guessLogKey(scope)) || "null");
+    if (!raw || raw.id !== localStorage.getItem(_gameIdKey(scope))) return [];
+    return Array.isArray(raw.guesses) ? raw.guesses : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Ajoute un essai au journal de la partie en cours. Appelé par showWrongMini()
+ * pour les mauvaises réponses de 5 modes ; le mode Music, qui a sa propre liste,
+ * l'appelle directement. Le bon nom est ajouté par buildGameSession() à la victoire.
+ */
+export function logGuess(name, scope = _currentScope) {
+  if (!scope || !name) return;
+  const id = currentGameId(scope);
+  const guesses = readGuessLog(scope);
+  // Classique Expert journalise depuis son handler ET via showWrongMini() : un
+  // même nom deux fois d'affilée est un doublon, pas un second essai.
+  if (guesses.at(-1) === String(name)) return;
+  guesses.push(String(name));
+  localStorage.setItem(_guessLogKey(scope), JSON.stringify({ id, guesses: guesses.slice(0, 40) }));
 }
 
 /** Vrai si la partie EN COURS a déjà été enregistrée (survit à un rechargement). */
@@ -325,6 +367,20 @@ export async function fetchExpertStatus() {
   if (_expertStatusPromise) return _expertStatusPromise;
 
   _expertStatusPromise = (async () => {
+    // Le cache (readCachedExpertStatus / cacheExpertStatus) est rattaché au
+    // compte : il lit window._currentUser.id, que pose initAuth(). La porte
+    // Expert n'attendait pas l'auth — quand /expert-status répondait avant /me,
+    // le cache n'était ni lu ni écrit sur cette page : l'animation « Mode Expert
+    // débloqué » (diff ancien état → nouveau) était manquée, et le cache restait
+    // périmé pour la fois suivante. Une course, donc « ça marche parfois ».
+    if (window._authReady) {
+      try {
+        await window._authReady;
+      } catch {
+        /* sans backend, la porte reste fail-closed plus bas */
+      }
+    }
+
     const api = window._personadleApi;
     if (!api?.user?.expertStatus) {
       // Bridge absent : on ne peut rien affirmer → verrouillé par défaut.
@@ -563,26 +619,61 @@ async function applyExpertGate(ctx, page, toggle) {
  * de mot suffit à éviter les faux positifs — « Io » (persona de Yukari) doit pouvoir
  * être masqué, sinon sa fiche donne la réponse dès la première ligne.
  *
+ * Insensible aux diacritiques : la comparaison se fait sur une copie « repliée »
+ * du texte (é → e, ö → o…), mais le remplacement s'applique au texte d'origine.
+ * Sans ça, la traduction d'une fiche laissait passer la réponse dès qu'elle
+ * accentuait le nom : « Minthé » (FR) n'était pas masqué par « Minthe », « morös »
+ * (DE) pas par « Moros » — signalé par un joueur en 2.2 sur Mio Natsukawa.
+ *
  * @param {string[]} terms  termes à masquer (nom, alias, titre…)
  * @param {string} text     texte brut
  * @param {string} [token]  remplacement affiché
  * @returns {string} texte masqué
  */
 export function maskTerms(terms, text, token = "[?]") {
-  let out = text;
+  // NFC d'abord : un « é » saisi en deux points de code (e + accent combinant)
+  // devient un seul caractère, et foldText garde alors une longueur identique
+  // au texte — condition pour reporter les positions trouvées sur l'original.
+  let out = text.normalize("NFC");
   for (const term of terms) {
     const t = (term ?? "").trim();
     if (t.length < 2) continue;
-    const pattern = t
+    const pattern = foldText(t.normalize("NFC"))
       .replace(/[.*+?^${}()|[\]\\]/g, "\\$&") // échappe les métacaractères regex
       .replace(/\\?[!?.,]/g, "[!?.,]?") // ponctuation interne optionnelle
       .replace(/\s+/g, "\\s+"); // espaces variables
     // Frontière = tout ce qui n'est pas une lettre/chiffre. L'apostrophe en faisait
     // partie : « Io » n'était donc PAS masqué dans « Io's blessing », et la fiche
     // donnait la réponse dès la première ligne — le cas exact que le masquage vise.
-    out = out.replace(new RegExp(`(^|[^\\w])(${pattern})(?=$|[^\\w])`, "gi"), `$1${token}`);
+    const re = new RegExp(`(^|[^\\w])(${pattern})(?=$|[^\\w])`, "gi");
+    const folded = foldText(out);
+    let result = "";
+    let last = 0;
+    let m;
+    while ((m = re.exec(folded)) !== null) {
+      const start = m.index + m[1].length; // début du terme, frontière conservée
+      result += out.slice(last, start) + token;
+      last = m.index + m[0].length;
+    }
+    out = result + out.slice(last);
   }
   return out;
+}
+
+/**
+ * Replie un caractère NFC sur sa base sans diacritique (é → e, ö → o). Seul un
+ * repli à longueur égale est appliqué : ce qui ne se décompose pas (ß, œ, emoji)
+ * reste tel quel, pour que le texte replié garde exactement la longueur de
+ * l'original — c'est ce qui permet à maskTerms() de reporter les positions.
+ */
+function foldChar(c) {
+  const f = c.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return f.length === c.length ? f : c;
+}
+
+/** Replie un texte NFC caractère par caractère — même longueur en sortie. */
+function foldText(s) {
+  return Array.from(s, foldChar).join("");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -789,6 +880,11 @@ export function setupRulesModal() {
   window.addEventListener("click", (e) => {
     if (e.target === modal) close();
   });
+
+  // …et Escape, comme toutes les autres fenêtres du site.
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.style.display !== "none") close();
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -834,6 +930,9 @@ export function setupDailyReset(onReset) {
 export function checkResetOnLoad(lastPlayedKey, statsScope, onReset) {
   const storedDate = localStorage.getItem(lastPlayedKey);
   const today = parisDateKey();
+  // La page a désormais une portée courante : le journal des essais (logGuess)
+  // et la session enregistrée s'y rattachent sans que chaque mode le répète.
+  _currentScope = statsScope;
 
   if (storedDate !== today) {
     console.log(`📅 New day detected → auto-reset (${statsScope})`);
@@ -907,6 +1006,7 @@ export function showWrongMini(
   fallbackSrc = "../database/portraits/unknown.webp"
 ) {
   if (!wrongListEl) return;
+  logGuess(altText);
 
   const div = document.createElement("div");
   div.className = "wrong-mini";
@@ -976,7 +1076,17 @@ export function buildGameSession({
     // est alors stable pour toute la partie, donc un ré-enregistrement après perte
     // du flag local (autre onglet, nettoyage navigateur) est refusé côté base.
     client_session_id: clientSessionId || newId(),
+    // Suite ordonnée des essais, le bon en dernier si gagné (migration 041) —
+    // c'est ce que « comparer nos parties » montre aux amis.
+    guesses: _guessesForSession(result, targetName),
   };
+}
+
+function _guessesForSession(result, targetName) {
+  const log = readGuessLog();
+  const guesses = log.filter((g) => g !== targetName);
+  if (result === "win" && targetName) guesses.push(String(targetName));
+  return guesses.slice(0, 40);
 }
 
 /**
@@ -1019,6 +1129,54 @@ export async function savePendingSession(session) {
   // community-stats.php ne compte que les parties non-Expert — le « X % des joueurs
   // ont trouvé » afficherait donc 0 % en permanence.
   if (!session.is_expert) showCommunityStats(session.mode, session.target_name);
+
+  // Invité avec une série qui compte : lui proposer de la sauvegarder.
+  maybeNudgeGuest();
+}
+
+/**
+ * Relance des invités (2.2, décision Hamza) : un joueur SANS compte qui a
+ * 3 jours de série ou plus voit, dans sa boîte de victoire, une carte
+ * « sauvegarde ta série » avec un lien vers l'inscription — une fois par
+ * semaine au plus (`guestNudgeShownAt`), jamais pour un joueur connecté.
+ * La série lue est celle du profil local (profile/profileStats.js).
+ *
+ * @returns {boolean} true si la carte est affichée
+ */
+export function maybeNudgeGuest() {
+  if (window._currentUser) return false;
+  const box = document.getElementById("victoryBox");
+  if (!box) return false;
+  let streak = 0;
+  try {
+    streak = Number(JSON.parse(localStorage.getItem("personaUserProfile") || "{}")?.stats?.streak || 0);
+  } catch {
+    return false;
+  }
+  if (streak < 3) return false;
+  if (document.getElementById("guestNudge")) return true;
+  const shownAt = Number(localStorage.getItem("guestNudgeShownAt") || 0);
+  if (Date.now() - shownAt < 7 * 86_400_000) return false;
+
+  const t = (key, fb, vars) => {
+    const r = window.i18n?.t?.(key, vars);
+    return r != null && r !== key ? r : fb;
+  };
+  const card = document.createElement("div");
+  card.id = "guestNudge";
+  card.className = "guest-nudge";
+  card.setAttribute("role", "status");
+  card.innerHTML = `
+    <p class="guest-nudge__title">${t("guest_nudge.title", "🔥 {{n}}-day streak!", { n: streak }).replace("{{n}}", String(streak))}</p>
+    <p class="guest-nudge__text">${t("guest_nudge.text", "Create a free account to save it — and find it on any device.")}</p>
+    <div class="guest-nudge__actions">
+      <a class="guest-nudge__cta" href="${siteRootPrefix()}profile/profile.html#register">${t("guest_nudge.cta", "Create an account")}</a>
+      <button type="button" class="guest-nudge__later">${t("guest_nudge.later", "Later")}</button>
+    </div>`;
+  card.querySelector(".guest-nudge__later").addEventListener("click", () => card.remove());
+  box.appendChild(card);
+  localStorage.setItem("guestNudgeShownAt", String(Date.now()));
+  return true;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1040,7 +1198,14 @@ export async function savePendingSession(session) {
  * @returns {string}
  */
 export function getPlayerSeedId() {
-  const uid = localStorage.getItem("playerUserId");
+  // Le compte d'abord, s'il est déjà connu de la page : au tout premier
+  // chargement d'un appareil, localStorage.playerUserId n'existe pas encore
+  // quand le mode tire sa cible (auth.js le pose après /me) — le tirage partait
+  // alors sur un identifiant anonyme, différent de celui que le serveur utilise.
+  const uid =
+    window._currentUser?.id != null
+      ? String(window._currentUser.id)
+      : localStorage.getItem("playerUserId");
   if (uid) return uid;
 
   let anonId = localStorage.getItem("anonPlayerId");
@@ -1099,8 +1264,145 @@ export function getDailyTarget(pool, mode, date = parisDateKey(), seedId = getPl
  * L'endpoint backend `community_stats` reste inutilisé — à retirer complètement
  * dans un second temps si on confirme qu'on n'y revient pas.
  */
-export async function showCommunityStats(_mode, _targetName) {
-  // Feature retirée — plus d'affichage communautaire dans la victoryBox.
+/**
+ * Appelée par les 6 modes et savePendingSession() à la fin d'une partie. Vide
+ * depuis le retrait du « X % des joueurs ont trouvé » ; « Tes amis aujourd'hui »
+ * a d'abord vécu ici (dans la boîte de victoire), puis Hamza l'a voulu comme un
+ * bouton à côté de ⚔ Défier — voir showChallengeButton() / openFriendsGamesModal().
+ * Gardée exportée pour ne pas toucher aux six modes.
+ */
+export async function showCommunityStats(_mode, _targetName) {}
+
+/**
+ * « Tes amis aujourd'hui » (2.2) — la PREMIÈRE partie du jour de chaque ami sur
+ * ce mode : résultat, essais, et la suite des noms proposés (le bon en vert).
+ * Les amis qui n'ont pas encore joué sont listés aussi — c'est le moment de
+ * les défier.
+ *
+ * ⚠️ La cible du jour est tirée PAR JOUEUR (getDailyTarget est seedé sur
+ * l'identifiant) : deux amis n'ont pas le même personnage. On compare donc des
+ * parcours, pas des réponses — le bon essai d'un ami est le dernier de sa
+ * partie gagnée.
+ *
+ * Le serveur (api/sessions_today.php) ne répond qu'à qui a fini sa propre
+ * partie ; avant, il dit `play_first` et le conteneur l'explique.
+ *
+ * @param {HTMLElement} container où rendre (la modale, ou n'importe quel bloc)
+ * @param {string} mode           n'importe quelle graphie (normalizeModeKey)
+ */
+export async function renderFriendsToday(container, mode) {
+  const api = window._personadleApi;
+  if (!container || !api?.stats?.friendsToday || !window._currentUser) return;
+  const t = (k, fb, vars) => {
+    const r = window.i18n?.t?.(k, vars);
+    return r != null && r !== k ? r : fb;
+  };
+  const esc = (v) =>
+    String(v ?? "").replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+    );
+
+  container.classList.add("friends-today");
+  container.innerHTML = `<p class="friends-today__empty">${esc(t("ui.loading", "Loading…"))}</p>`;
+
+  const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
+  let data;
+  try {
+    data = await api.stats.friendsToday({ mode: key, expert: isExpertPage() });
+  } catch (err) {
+    container.innerHTML = `<p class="friends-today__empty">${esc(
+      err?.status === 403
+        ? t("friends_today.locked_hint", "Finish today's game to see your friends' games")
+        : t("friends_today.unavailable", "Unavailable right now.")
+    )}</p>`;
+    return;
+  }
+
+  const avatar = (f) => {
+    const a = f.avatar_data;
+    if (!a) return "../img/default_avatar.png";
+    if (a.startsWith("data:") || a.startsWith("http")) return a;
+    return a.replace(/^(\.\.\/|\.\/)+/, "../");
+  };
+  const friends = data?.friends ?? [];
+  const rows = friends.map((f) => {
+    const sess = f.session;
+    let status;
+    let cls = "friends-today__row--pending";
+    if (!sess) {
+      status = `<span class="friends-today__status">${esc(t("friends_today.not_played", "hasn't played yet"))}</span>`;
+    } else if (sess.result === "win") {
+      cls = "friends-today__row--win";
+      status = `<span class="friends-today__status">✓ ${esc(
+        sess.attempts === 1
+          ? t("compendium.tries_one", "1 try")
+          : t("compendium.tries", `${sess.attempts} tries`, { n: sess.attempts })
+      )}</span>`;
+    } else {
+      cls = "friends-today__row--giveup";
+      status = `<span class="friends-today__status">✗ ${esc(t("friends_today.gave_up", "gave up"))}</span>`;
+    }
+    const guesses = sess?.guesses ?? [];
+    const chips = guesses
+      .map((g, i) => {
+        const ok = sess?.result === "win" && i === guesses.length - 1;
+        return `<span class="friends-today__chip${ok ? " friends-today__chip--ok" : ""}">${esc(g)}</span>`;
+      })
+      .join("");
+    return `<li class="friends-today__row ${cls}">
+      <img class="friends-today__avatar" src="${esc(avatar(f))}" alt="" loading="lazy" onerror="this.src='../img/default_avatar.png'" style="border-color:${esc(f.avatar_border_color || "#fff")}">
+      <div class="friends-today__body">
+        <div class="friends-today__head"><span class="friends-today__pseudo">${esc(f.pseudo)}</span>${status}</div>
+        ${chips ? `<div class="friends-today__chips">${chips}</div>` : ""}
+      </div>
+    </li>`;
+  });
+
+  container.innerHTML = rows.length
+    ? `<ul class="friends-today__list">${rows.join("")}</ul>
+       <p class="friends-today__note">${esc(t("friends_today.first_game_note", "First game of the day only — everyone gets their own daily character."))}</p>`
+    : `<p class="friends-today__empty">${esc(t("friends_today.empty", "Add friends to compare your games."))}</p>`;
+}
+
+/**
+ * Fenêtre « Tes amis aujourd'hui », ouverte par le bouton 👥 à côté de ⚔ Défier.
+ * Même habillage que la modale de défi (challenge-overlay / challenge-card).
+ */
+export function openFriendsGamesModal(mode) {
+  if (!window._currentUser) return null;
+  const t = (k, fb) => {
+    const r = window.i18n?.t?.(k);
+    return r != null && r !== k ? r : fb;
+  };
+  document.getElementById("friendsGamesModal")?.remove();
+  const modal = document.createElement("div");
+  modal.id = "friendsGamesModal";
+  modal.className = "challenge-overlay";
+  modal.innerHTML = `
+    <div class="challenge-card friends-games-card" role="dialog" aria-modal="true" aria-labelledby="friendsGamesTitle">
+      <p id="friendsGamesTitle" class="friends-games-card__title">👥 ${t("friends_today.title", "Your friends today")}</p>
+      <div id="friendsGamesList" class="friends-games-card__body"></div>
+      <div class="challenge-card__footer">
+        <span class="challenge-card__footer-label">${t("friends_today.first_game_short", "First game of the day")}</span>
+        <button id="friendsGamesClose" class="challenge-card__footer-close" aria-label="${t("ui.close", "Close")}">✕</button>
+      </div>
+    </div>`;
+  const close = () => {
+    modal.remove();
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => {
+    if (e.key === "Escape") close();
+  };
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) close();
+  });
+  modal.querySelector("#friendsGamesClose").addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(modal);
+  renderFriendsToday(modal.querySelector("#friendsGamesList"), mode);
+  return modal;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1116,10 +1418,38 @@ export const FILTER_STORAGE_KEYS = {
 };
 const _FILTER_STORAGE_KEY = FILTER_STORAGE_KEYS;
 
+/**
+ * Fournisseurs de la liste d'opus EFFECTIVEMENT active, par clé de stockage —
+ * enregistrés par initFilterMenu() (js/filterMenu.js).
+ *
+ * Pourquoi : un joueur qui n'a jamais touché ses filtres n'a rien en localStorage
+ * (« absent = tout actif », et c'est voulu : un opus ajouté plus tard doit lui
+ * arriver actif). Lire localStorage donnait donc `[]` pour son défi, et le
+ * destinataire gardait SES filtres — s'ils étaient restrictifs, la cible du défi
+ * n'apparaissait pas dans son autocomplétion. La liste effective vit dans
+ * filterMenu ; on la lui demande au lieu de la deviner.
+ */
+const _activeFilterProviders = new Map();
+
+/** @param {string} storageKey clé localStorage du mode · @param {() => string[]} getter */
+export function registerActiveFilters(storageKey, getter) {
+  if (typeof getter === "function") _activeFilterProviders.set(storageKey, getter);
+  else _activeFilterProviders.delete(storageKey);
+}
+
 /** Returns the currently active opus filters for a given mode (array of strings). */
 function _getActiveFilters(mode) {
   const key = _FILTER_STORAGE_KEY[mode?.toLowerCase()];
   if (!key) return [];
+  const provider = _activeFilterProviders.get(key);
+  if (provider) {
+    try {
+      const list = provider();
+      if (Array.isArray(list)) return [...list];
+    } catch {
+      /* on retombe sur localStorage */
+    }
+  }
   try {
     return JSON.parse(localStorage.getItem(key) || "[]");
   } catch {
@@ -1131,11 +1461,66 @@ function _getActiveFilters(mode) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Cible dédiée du défi actif pour un mode (décision produit 2026-07-17 :
- * « le défi doit défier » — cible aléatoire, pas celle du jour).
- * Retourne le nom de la cible, ou null si pas de défi actif pour ce mode ou
- * défi ancien format (sans cible propre → comportement historique, cible du jour).
+ * Page de chaque mode, RELATIVE à la racine du site (pas de « / » initial).
+ * Clés de normalizeModeKey() : toute autre graphie doit être normalisée avant.
  */
+export const MODE_PAGE_PATH = {
+  classic: "classiqueMode/classiqueMode.html",
+  emoji: "emojiMode/emojiMode.html",
+  silhouette: "silhouetteMode/silhouette.html",
+  alloutattack: "allOutAttackMode/allOutAttack.html",
+  personae: "personaeMode/personae.html",
+  music: "musicsMode/musics.html",
+};
+
+/** Dossiers à deux niveaux sous la racine du site. */
+const _DEEP_SUBPATHS = ["/profile/friends/", "/profile/leaderboard/", "/profile/compendium/"];
+
+/** Dossiers à un niveau sous la racine du site. */
+const _SUBPATHS = [
+  "/profile/",
+  "/pages/",
+  "/admin/",
+  ...Object.values(MODE_PAGE_PATH).map((page) => `/${page.split("/")[0]}/`),
+];
+
+/**
+ * Préfixe relatif menant à la racine du site depuis la page courante ("./",
+ * "../" ou "../../").
+ *
+ * Pourquoi relatif : les liens de défi étaient construits en ABSOLU, avec un cas
+ * particulier codé en dur (`pathname.startsWith("/personadle/")` → "/personadle",
+ * sinon ""). Le site n'est à la racine du domaine qu'en prod : partout ailleurs —
+ * installation en sous-dossier, préproduction, `…/personadle` SANS slash final,
+ * qui ne déclenche pas le test — accepter un défi menait droit sur une 404, avec
+ * un défi déjà passé `accepted` côté serveur. Donc bloqué, et sans page où aller.
+ *
+ * La bottomNav (js/bottomNav.js) calculait déjà ses liens exactement ainsi, et
+ * ne rencontrait pas le problème ; elle consomme désormais ce helper, pour que
+ * les deux ne puissent plus diverger.
+ */
+export function siteRootPrefix(pathname = window.location.pathname) {
+  if (_DEEP_SUBPATHS.some((dir) => pathname.includes(dir))) return "../../";
+  if (_SUBPATHS.some((dir) => pathname.includes(dir))) return "../";
+  return "./";
+}
+
+/**
+ * URL de la page d'un mode depuis la page courante, ou null si le mode est
+ * inconnu (l'appelant doit alors refuser AVANT toute écriture — un défi accepté
+ * sans destination est un défi bloqué).
+ *
+ * @param {string} mode  n'importe quelle graphie acceptée par normalizeModeKey()
+ * @param {boolean} [isExpert] ajoute `?expert=1` — sans lui, un défi Expert fait
+ *   atterrir le joueur en mode normal, où sa partie ne le résoudra jamais.
+ */
+export function modePageHref(mode, isExpert = false) {
+  const key = normalizeModeKey(mode) ?? String(mode ?? "").toLowerCase();
+  const page = MODE_PAGE_PATH[key];
+  if (!page) return null;
+  return `${siteRootPrefix()}${page}${isExpert ? "?expert=1" : ""}`;
+}
+
 /**
  * Clé localStorage du défi en cours, CLOISONNÉE par dimension.
  *
@@ -1155,30 +1540,368 @@ export function activeChallengeKey(isExpert = isExpertPage()) {
   return isExpert ? "activeChallengeExpert" : "activeChallenge";
 }
 
-export function getActiveChallengeTarget(mode) {
+/**
+ * État de partie à purger quand un défi commence ou se termine — une entrée par
+ * mode, préfixée par `expertContext().key()` à l'usage.
+ *
+ * Source unique : `js/challenge-notif.js` la ré-exporte et `profile/friends/friends.js`
+ * l'importe d'ici. Les deux en gardaient une copie manuscrite ; elles ont divergé
+ * (le point d'entrée « page Amis » ne purgeait pas les mêmes clés que le point
+ * d'entrée « notification »), ce qui laissait selon le chemin d'acceptation une
+ * partie à moitié restaurée par-dessus le défi.
+ */
+export const MODE_STATE_KEYS = {
+  classic: ["target", "attempts", "guessHistory"],
+  emoji: ["targetEmoji", "attemptsEmoji", "emojiGameOver", "emojiForceReveal", "emojiWin"],
+  silhouette: [
+    "silhouetteTarget",
+    "silhouetteAttempts",
+    "silhouetteGameOver",
+    "silhouetteForceReveal",
+  ],
+  alloutattack: ["aoaTarget", "aoaAttempts", "aoaGameOver", "aoaForceReveal"],
+  personae: ["personaeTarget", "personaeAttempts", "personaeGameOver", "personaeForceReveal"],
+  music: ["musicTarget", "musicAttempts", "musicGameOver", "musicTriedTitles", "musicForceReveal"],
+};
+
+/**
+ * Lit la case de défi d'une dimension et renvoie son contenu s'il est encore
+ * valable AUJOURD'HUI (heure Paris), sinon null.
+ *
+ * ⚠️ `date` est le jour où le défi doit se JOUER (posé à l'acceptation), pas le
+ * jour où l'expéditeur l'a créé (`challengeDate`, purement informatif). Les deux
+ * ont longtemps été confondus : un défi envoyé la veille au soir et accepté le
+ * lendemain matin naissait donc périmé — ni bannière, ni cible dédiée, et un
+ * statut `accepted` que plus rien ne pouvait résoudre côté serveur.
+ *
+ * @param {boolean} [isExpert] défaut : la dimension de la page courante
+ */
+export function readActiveChallenge(isExpert = isExpertPage()) {
   try {
-    const c = JSON.parse(localStorage.getItem(activeChallengeKey()) || "null");
+    const c = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
     if (!c) return null;
-    // Périmé après sa journée — même règle que getPendingActiveChallenge() et
-    // initChallengeBanner(), qui l'appliquaient déjà. Son absence ICI gelait la
-    // progression des joueurs : `isChallengePlay()` en dérive, et les 6 modes
-    // s'en servent pour décider s'ils enregistrent la partie. Un défi accepté et
-    // jamais terminé rendait donc `isChallengePlay()` vrai indéfiniment, et plus
-    // AUCUNE partie de ce mode n'était enregistrée — sans le moindre signal, ni
-    // message ni erreur en console, puisque rien n'était même envoyé.
-    // Constaté en prod le 2026-09-02 sur un joueur bloqué depuis des jours.
     if (c.date && c.date !== parisDateKey()) return null;
-    const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
-    if ((c.mode || "").toLowerCase() !== key) return null;
-    return c.target ?? null;
+    return c;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Cible dédiée du défi actif pour un mode (décision produit 2026-07-17 :
+ * « le défi doit défier » — cible aléatoire, pas celle du jour).
+ * Retourne le nom de la cible, ou null si pas de défi actif pour ce mode ou
+ * défi ancien format (sans cible propre → comportement historique, cible du jour).
+ */
+export function getActiveChallengeTarget(mode) {
+  // Périmé après sa journée — même règle que getPendingActiveChallenge() et
+  // initChallengeBanner(), qui l'appliquaient déjà. Son absence ICI gelait la
+  // progression des joueurs : `isChallengePlay()` en dérive, et les 6 modes
+  // s'en servent pour décider s'ils enregistrent la partie. Un défi accepté et
+  // jamais terminé rendait donc `isChallengePlay()` vrai indéfiniment, et plus
+  // AUCUNE partie de ce mode n'était enregistrée — sans le moindre signal, ni
+  // message ni erreur en console, puisque rien n'était même envoyé.
+  // Constaté en prod le 2026-09-02 sur un joueur bloqué depuis des jours.
+  const c = readActiveChallenge();
+  if (!c) return null;
+  const key = normalizeModeKey(mode) ?? String(mode).toLowerCase();
+  if ((c.mode || "").toLowerCase() !== key) return null;
+  return c.target ?? null;
+}
+
+/**
+ * Défait l'état local d'un défi : filtres rendus au joueur, état de mode purgé
+ * si la partie tournait sur une cible dédiée, case libérée.
+ *
+ * Geste unique partagé par la fin de partie (`checkChallengeCompletion`),
+ * l'abandon (`abandonActiveChallenge`) et la purge d'un défi injouable
+ * (`dropUnplayableChallenge`) : les trois laissaient le mode dans des états
+ * légèrement différents selon la porte de sortie empruntée.
+ *
+ * @param {object} challenge contenu de la case de défi
+ * @returns {boolean} true si l'état du mode a été purgé (donc rechargement utile)
+ */
+export function releaseActiveChallenge(challenge) {
+  if (!challenge) return false;
+
+  // Remettre EXACTEMENT ce qu'il y avait avant le défi — mais seulement si le
+  // joueur n'a pas rechoisi ses filtres entre-temps.
+  //
+  // `originalFilters === null` veut dire « la clé était ABSENTE à l'acceptation »
+  // (le joueur n'avait jamais touché ses filtres = tout est actif) : il faut alors
+  // la RETIRER, pas seulement s'abstenir d'écrire. installActiveChallenge() y a mis
+  // ceux de l'expéditeur, et ne rien faire ici les lui laissait pour de bon —
+  // accepter un défi « P5 uniquement » restreignait son mode Classique pour
+  // toujours, sans qu'il ait rien choisi (bug sorti par filters_usecases.spec.js).
+  // Surtout pas "[]" en repli : filterMenu.js le lit comme « tout désélectionné »,
+  // un état que le joueur n'a jamais choisi et qui vide son pool.
+  //
+  // `installedFilters` est ce que le défi avait écrit : si la clé ne vaut plus ça,
+  // c'est que le joueur a ouvert les filtres PENDANT le défi — son choix est plus
+  // récent que le nôtre, on n'y touche pas.
+  if (challenge.filterKey) {
+    const current = localStorage.getItem(challenge.filterKey);
+    const untouched =
+      challenge.installedFilters == null || current === challenge.installedFilters;
+    if (untouched) {
+      if (challenge.originalFilters != null) {
+        localStorage.setItem(challenge.filterKey, challenge.originalFilters);
+      } else {
+        localStorage.removeItem(challenge.filterKey);
+      }
+    }
+  }
+
+  // Défi à cible dédiée : la partie chargée n'est pas celle du jour. On efface
+  // l'état du mode pour que le prochain chargement retombe sur la cible
+  // quotidienne (seedée, donc parfaitement restaurable).
+  const wiped = Boolean(challenge.target);
+  if (wiped) {
+    const modeKey = normalizeModeKey(challenge.mode) ?? String(challenge.mode ?? "").toLowerCase();
+    (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+  }
+
+  localStorage.removeItem(activeChallengeKey(Boolean(challenge.isExpert)));
+  return wiped;
+}
+
+/**
+ * Résout la cible d'un défi actif contre le pool RÉELLEMENT jouable de la page.
+ *
+ * Les 6 modes faisaient `pool.find(...)` et, quand la cible restait introuvable,
+ * retombaient en SILENCE sur la cible du jour — alors que `isChallengePlay()`
+ * restait vrai. Le joueur jouait donc une partie qui ne comptait ni comme défi
+ * (mauvaise cible) ni comme partie quotidienne (jamais enregistrée), et le défi
+ * restait `accepted` côté serveur : « on joue sans rien », et bloqué ensuite.
+ *
+ * Cas réels d'échec : dimension Expert dont le pool est plus étroit (fiches de
+ * lore, paroles), dataset amputé depuis l'envoi, défi d'un ancien format, ou
+ * clé de désambiguïsation inconnue du client. Aucun n'est rattrapable — mieux
+ * vaut rendre sa liberté au joueur que le laisser jouer pour rien.
+ *
+ * @param {string}   mode  clé de mode ('classic', 'music'…)
+ * @param {Array}    pool  entrées jouables SUR CETTE PAGE (pool Expert inclus)
+ * @param {Function} [keyOf] extrait d'une entrée la clé comparée à la cible
+ * @returns {*} l'entrée du pool, ou null (pas de défi, ou défi purgé)
+ */
+export function resolveChallengeTarget(mode, pool, keyOf = (entry) => entry?.nom) {
+  const wanted = getActiveChallengeTarget(mode);
+  if (!wanted) return null;
+
+  const found = (pool ?? []).find((entry) => keyOf(entry) === wanted);
+  if (found) return found;
+
+  dropUnplayableChallenge(mode, wanted);
+  return null;
+}
+
+/**
+ * Rend sa liberté au joueur quand la cible d'un défi accepté est introuvable.
+ *
+ * L'état local part TOUT DE SUITE : le garder ne rendrait pas le défi jouable,
+ * mais continuerait d'occuper la case (« Finish your current challenge first »)
+ * et de faire passer chaque partie du mode pour un défi, donc non enregistrée.
+ * Le statut serveur repasse à `read` au mieux — `read` et non `expired` : le
+ * joueur n'a pas tenté et manqué, il n'a jamais pu jouer. Si l'appel échoue
+ * (hors ligne), le défi reste `accepted` côté base ; la page Amis expose depuis
+ * ce lot un bouton « Abandonner » sur les défis en cours, qui est la reprise
+ * manuelle de ce même geste.
+ */
+export function dropUnplayableChallenge(mode, wanted) {
+  const isExpert = isExpertPage();
+  let challenge = null;
+  try {
+    challenge = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
+  } catch {
+    /* case illisible : la suppression ci-dessous suffit */
+  }
+
+  console.error(
+    `[challenge] cible « ${wanted} » introuvable dans le pool ${mode}${isExpert ? " (Expert)" : ""} → défi abandonné`
+  );
+
+  releaseActiveChallenge(challenge ?? { mode, isExpert });
+
+  const msgId = challenge?.msgId;
+  if (msgId) {
+    window._personadleApi?.messages?.updateStatus?.(msgId, "read")?.catch?.(() => {});
+  }
+
+  if (typeof window.showToast === "function") {
+    window.showToast(
+      _t(
+        "challenge.target_unavailable",
+        undefined,
+        "This challenge can't be played on this mode anymore — it has been cancelled."
+      )
+    );
   }
 }
 
 /** True si la partie en cours est un défi à cible dédiée (stats quotidiennes à NE PAS logger). */
 export function isChallengePlay(mode) {
   return getActiveChallengeTarget(mode) !== null;
+}
+
+/**
+ * Libère une case de défi PÉRIMÉE (jour de jeu ≠ aujourd'hui) qui traînerait
+ * encore dans la dimension demandée, et rend ses filtres au joueur.
+ *
+ * Seule la page du mode nettoyait les cases périmées (initChallengeBanner) : un
+ * joueur qui acceptait un défi la veille, ne retournait jamais sur le mode, puis
+ * en acceptait un autre depuis l'accueil ou la page Amis, gardait les filtres du
+ * défi de la veille installés — et le nouveau défi les sauvegardait comme
+ * « filtres d'origine ». À sa fin, on lui rendait les filtres du défi périmé,
+ * pas les siens. Appelée avant toute installation (installActiveChallenge).
+ *
+ * @param {boolean} isExpert dimension de la case
+ * @returns {boolean} true si une case périmée a été libérée
+ */
+export function releaseStaleChallenge(isExpert) {
+  let raw = null;
+  try {
+    raw = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
+  } catch {
+    localStorage.removeItem(activeChallengeKey(isExpert));
+    return false;
+  }
+  if (!raw) return false;
+  if (raw.date && raw.date === parisDateKey()) return false;
+  releaseActiveChallenge({ ...raw, isExpert: Boolean(isExpert) });
+  return true;
+}
+
+/**
+ * Installe un défi comme « en cours » sur CET appareil : case périmée libérée,
+ * état du mode purgé, filtres de l'expéditeur appliqués (les tiens sauvegardés),
+ * case `activeChallenge` écrite pour AUJOURD'HUI.
+ *
+ * Geste unique des trois entrées d'un défi — Accepter depuis la notification
+ * (js/challenge-notif.js), Accepter et Reprendre depuis la page Amis
+ * (profile/friends/friends.js). Les deux premiers dupliquaient ce bloc à
+ * l'identique ; chaque correctif (le jour de JEU plutôt que le jour d'envoi,
+ * `originalFilters` à null quand la clé est absente…) a dû être porté deux fois.
+ *
+ * N'appelle PAS le serveur : l'appelant a déjà fait passer le message en
+ * `accepted` (Accepter) ou sait qu'il l'est déjà (Reprendre).
+ *
+ * @param {{ msgId:number, mode:string, score:number, senderId:number|null,
+ *           challengeDate?:string|null, challengeFilters?:string|null,
+ *           challengeTarget?:string|null, isExpert?:boolean }} c
+ * @returns {object} le contenu écrit dans la case
+ */
+export function installActiveChallenge(c) {
+  const isExpert = Boolean(c.isExpert);
+  const modeKey = normalizeModeKey(c.mode) ?? String(c.mode ?? "").toLowerCase();
+
+  releaseStaleChallenge(isExpert);
+
+  // Le joueur repart de zéro sur ce mode : la cible dédiée remplace celle du jour.
+  (MODE_STATE_KEYS[modeKey] ?? []).forEach((k) => localStorage.removeItem(k));
+
+  // Pas de repli "[]" : filterMenu.js lit un tableau vide comme « tout
+  // désélectionné » (état volontaire), différent de l'absence de clé (« tout
+  // actif » par défaut). Si le joueur n'a jamais touché ses filtres, la clé est
+  // absente — on garde null pour que releaseActiveChallenge() la laisse absente
+  // au lieu d'écrire un "[]" qu'il n'a jamais choisi.
+  const filterKey = FILTER_STORAGE_KEYS[modeKey] ?? null;
+  const originalFilters = filterKey ? localStorage.getItem(filterKey) : null;
+  const filters =
+    c.challengeFilters && c.challengeFilters !== "[]" ? String(c.challengeFilters) : null;
+  if (filterKey && filters) localStorage.setItem(filterKey, filters);
+
+  const entry = {
+    msgId: c.msgId,
+    mode: modeKey,
+    // Ce que CE défi a écrit dans les filtres : releaseActiveChallenge() ne rend
+    // les filtres d'origine que si la clé vaut encore ça (sinon le joueur a
+    // rechoisi pendant le défi, et c'est son choix qui prime).
+    installedFilters: filterKey && filters ? filters : null,
+    // ⚠️ Jour où le défi se JOUE, pas le jour où l'expéditeur l'a créé
+    // (`challengeDate`, informatif). Toutes les lectures de la case comparent
+    // `date` à parisDateKey() : un défi envoyé la veille au soir et accepté le
+    // lendemain naissait périmé — ni bannière, ni cible dédiée, et un `accepted`
+    // que plus rien ne résolvait côté serveur.
+    date: parisDateKey(),
+    challengeDate: c.challengeDate ?? null,
+    score: c.score,
+    senderId: c.senderId ?? null,
+    filterKey,
+    originalFilters,
+    isExpert,
+    // Cible dédiée (2026-07-17) : le mode la joue à la place de la cible du jour
+    // et n'enregistre PAS la partie en session quotidienne. Null (ancien défi) =
+    // comportement historique, cible du jour.
+    target: c.challengeTarget ?? null,
+  };
+  localStorage.setItem(activeChallengeKey(isExpert), JSON.stringify(entry));
+  return entry;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE DE RELANCE DES STATUTS DE DÉFI
+//
+// La fin de partie (js/challenge-result.js) prévient le serveur que le défi est
+// `beaten` ou `expired`. Si cet appel échoue (réseau coupé, 500, onglet fermé
+// pendant la requête), le défi reste `accepted` en base pour toujours : le joueur
+// a joué, sa case locale est libérée, mais l'expéditeur ne verra jamais le
+// résultat et le défi apparaît « en cours » sur la page Amis. Rejouer la partie
+// n'est pas possible — on garde l'intention et on la relance au prochain
+// sondage (js/notifications.js), comme les sessions avec `pendingSessions`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PENDING_CHALLENGE_STATUS_KEY = "pendingChallengeStatus";
+
+/** Relances en attente : [{ msgId, status, at }]. */
+export function readPendingChallengeStatus() {
+  try {
+    const list = JSON.parse(localStorage.getItem(PENDING_CHALLENGE_STATUS_KEY) || "[]");
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Note qu'un changement de statut n'a pas pu être transmis. Un même message ne
+ * garde qu'une entrée : la dernière intention l'emporte.
+ */
+export function queueChallengeStatusUpdate(msgId, status) {
+  if (!msgId || !status) return;
+  const list = readPendingChallengeStatus().filter((e) => e.msgId !== msgId);
+  list.push({ msgId, status, at: Date.now() });
+  localStorage.setItem(PENDING_CHALLENGE_STATUS_KEY, JSON.stringify(list.slice(-20)));
+}
+
+/**
+ * Rejoue les relances en attente. Une réponse 4xx est DÉFINITIVE (message
+ * supprimé, transition refusée parce que l'admin ou le joueur a déjà tranché
+ * autrement) : l'entrée est jetée. Tout le reste (réseau, 5xx) est retenté au
+ * prochain passage.
+ *
+ * @param {{ messages: { updateStatus: (id:number, status:string) => Promise<*> } }} api
+ * @returns {Promise<number>} nombre de relances abouties
+ */
+export async function flushPendingChallengeStatus(api) {
+  const list = readPendingChallengeStatus();
+  if (!list.length || !api?.messages?.updateStatus) return 0;
+  const remaining = [];
+  let done = 0;
+  for (const entry of list) {
+    try {
+      await api.messages.updateStatus(entry.msgId, entry.status);
+      done++;
+    } catch (err) {
+      const status = Number(err?.status ?? 0);
+      if (!(status >= 400 && status < 500)) remaining.push(entry);
+    }
+  }
+  if (remaining.length) {
+    localStorage.setItem(PENDING_CHALLENGE_STATUS_KEY, JSON.stringify(remaining));
+  } else {
+    localStorage.removeItem(PENDING_CHALLENGE_STATUS_KEY);
+  }
+  return done;
 }
 
 /**
@@ -1198,56 +1921,250 @@ export function isChallengePlay(mode) {
  * nettoie les entrées périmées au passage) — l'appelant décide de la suite.
  */
 export function getPendingActiveChallenge(isExpert = isExpertPage()) {
-  try {
-    const c = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
-    if (!c) return null;
-    if (c.date && c.date !== parisDateKey()) return null;
-    return c;
-  } catch {
-    return null;
-  }
+  return readActiveChallenge(isExpert);
 }
 
 /**
- * Injecte le bouton "Challenge a Friend" dans le modeNavigationContainer
- * après une victoire. Ne fait rien si l'utilisateur n'est pas connecté.
+ * Un défi porte TOUJOURS le vrai score du jour de l'expéditeur : le bouton est
+ * verrouillé tant que la partie n'est pas finie (décision Hamza, 2026-09-13 —
+ * « bats mon score » n'a pas de sens sans score). Le « par » par mode qui a
+ * servi de score de référence avant la fin de partie (2026-09-12) a été retiré
+ * le lendemain : un défi est réussi si le destinataire gagne en
+ * `attempts <= score` (js/challenge-result.js), un seuil n'a donc de sens que
+ * s'il est le score réel de quelqu'un.
+ */
+export function challengeScoreFor(score) {
+  return Number.isFinite(score) && score > 0 ? score : null;
+}
+
+/** Le bouton est verrouillé tant qu'il n'a pas de score (partie du jour non finie). */
+export function isChallengeLocked(score) {
+  return challengeScoreFor(score) === null;
+}
+
+/**
+ * Affiche (ou met à jour) le bouton "Challenge a Friend". Ne fait rien si
+ * l'utilisateur n'est pas connecté.
+ *
+ * Historique : le bouton n'était injecté qu'à la victoire, dans le
+ * modeNavigationContainer, et `return` si déjà présent — donc absent avant la
+ * fin de partie, absent après un Give Up, absent après un rechargement (la
+ * victoire n'est pas « fraîche »). Retour joueur 2.2 : « toujours disponible »
+ * et « disparaît parfois ». Désormais :
+ *   - tant que la navigation de fin de partie est cachée, le bouton vit dans
+ *     .expert-toggle-zone (sous le logo, toujours visible) ;
+ *   - une fois la navigation révélée (revealNextLink), il y est déplacé, entre
+ *     « mode précédent » et « mode suivant », là où le joueur regarde ;
+ *   - rappeler la fonction MET À JOUR score et pool au lieu de ne rien faire —
+ *     c'est ce qui permet le montage précoce, verrouillé, puis le déverrouillage
+ *     avec le vrai score à la fin (initChallengeButton ci-dessous).
+ *   - **verrouillé tant que la partie du jour n'est pas finie** (score null) :
+ *     visible, grisé, un message au survol / au tap explique quoi faire. Un
+ *     défi se lance sur un score réel, jamais sur un score de référence.
  *
  * @param {string}   mode       - Mode lowercase ('classic', 'emoji', etc.)
- * @param {number}   score      - Score à battre (tentatives ou secondes selon le mode)
- * @param {string[]} targetPool - Noms candidats pour la cible du défi (pool filtré,
- *                                cible du jour exclue par l'appelant). Null/vide =
- *                                défi ancien format (cible du jour).
+ * @param {number|null} score   - Score à battre (tentatives). null = partie non
+ *                                finie → bouton verrouillé.
+ * @param {string[]|(() => string[])} targetPool - Noms candidats pour la cible du
+ *                                défi (pool filtré, cible du jour exclue par
+ *                                l'appelant), ou une fonction qui le calcule au
+ *                                clic — les filtres peuvent changer entre-temps.
+ *                                Null/vide = défi ancien format (cible du jour).
  */
 export function showChallengeButton(mode, score, targetPool = null) {
   if (!window._currentUser) return;
 
-  // L'Expert émet désormais ses propres défis (migration 037). La dimension est
-  // portée jusqu'au serveur : elle décide de la page d'arrivée du destinataire
-  // et du barème appliqué. `targetPool` est déjà le pool de la page courante,
-  // donc celui de l'Expert quand on y est — la cible est tirée au bon endroit
-  // sans traitement supplémentaire.
-  const isExpert = isExpertPage();
-
   const nav = document.getElementById("modeNavigationContainer");
-  if (!nav || document.getElementById("challengeFriendBtn")) return;
+  const zone = document.querySelector(".expert-toggle-zone");
+  // Le conteneur de navigation naît en `display: none` inline et passe en flex
+  // dans revealNextLink() : c'est ce style inline qui dit si la partie est finie.
+  const navVisible = !!nav && nav.style.display !== "none";
 
-  const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
-  const date = parisDateKey();
+  let btn = document.getElementById("challengeFriendBtn");
+  if (!btn) {
+    const host = navVisible ? nav : (zone ?? nav);
+    if (!host) return;
 
-  const btn = document.createElement("button");
-  btn.id = "challengeFriendBtn";
-  btn.className = "btn-challenge";
-  btn.innerHTML = `<span>⚔</span><span>${t("challenge.challenge_friend", "Challenge a Friend")}</span>`;
+    // L'Expert émet ses propres défis (migration 037). La dimension est portée
+    // jusqu'au serveur : elle décide de la page d'arrivée du destinataire et
+    // du barème appliqué. `targetPool` est déjà le pool de la page courante,
+    // donc celui de l'Expert quand on y est.
+    const isExpert = isExpertPage();
+    const t = (key, fb) => window.i18n?.t?.(key) ?? fb;
 
-  // Insérer entre prevMode et nextMode
-  const nextBtn = document.getElementById("nextModeButton");
-  if (nextBtn) nav.insertBefore(btn, nextBtn);
-  else nav.appendChild(btn);
+    btn = document.createElement("button");
+    btn.id = "challengeFriendBtn";
+    btn.className = "btn-challenge";
+    btn.innerHTML = `<span>⚔</span><span>${t("challenge.challenge_friend", "Challenge a Friend")}</span>`;
+    btn.addEventListener("click", () => {
+      // Tout est lu au clic, pas au montage : score et pool changent en fin de
+      // partie, les filtres à tout moment, et la date à minuit.
+      const st = btn._challenge ?? {};
+      if (isChallengeLocked(st.score)) {
+        _showChallengeLockHint(btn);
+        return;
+      }
+      const pool = typeof st.targetPool === "function" ? st.targetPool() : st.targetPool;
+      _showChallengeModal(
+        st.mode ?? mode,
+        challengeScoreFor(st.score),
+        parisDateKey(),
+        _getActiveFilters(st.mode ?? mode),
+        pool ?? null,
+        isExpert
+      );
+    });
+    _placeChallengeButton(btn, host, nav);
+  } else if (navVisible && btn.parentElement !== nav) {
+    _placeChallengeButton(btn, nav, nav);
+  }
 
-  btn.addEventListener("click", () =>
-    _showChallengeModal(mode, score, date, _getActiveFilters(mode), targetPool, isExpert)
-  );
+  btn._challenge = {
+    mode,
+    score: challengeScoreFor(score),
+    targetPool,
+  };
+  _applyChallengeLock(btn);
+  _ensureFriendsGamesButton(btn);
+
+  // Arrivé depuis la page Amis avec un ami présélectionné alors que la partie
+  // n'était pas finie : la modale s'ouvre d'elle-même au déverrouillage.
+  if (_challengePreselectId && !isChallengeLocked(btn._challenge.score) && !_preselectConsumed) {
+    _preselectConsumed = true;
+    btn.click();
+  }
 }
+
+/**
+ * Bouton 👥 « Parties des amis », jumeau de ⚔ Défier : toujours juste après lui
+ * (il suit ses déplacements zone → navigation), même verrou (partie du jour
+ * finie — le serveur refuse de toute façon avant), ouvre openFriendsGamesModal().
+ */
+function _ensureFriendsGamesButton(challengeBtn) {
+  const t = (key, fb) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fb;
+  };
+  let fb = document.getElementById("friendsGamesBtn");
+  if (!fb) {
+    fb = document.createElement("button");
+    fb.id = "friendsGamesBtn";
+    fb.className = "btn-challenge btn-friends";
+    fb.innerHTML = `<span>👥</span><span>${t("friends_today.button", "Friends' games")}</span>`;
+    fb.addEventListener("click", () => {
+      const st = challengeBtn._challenge ?? {};
+      if (isChallengeLocked(st.score)) {
+        _showChallengeLockHint(fb, t("friends_today.locked_hint", "Finish today's game to see your friends' games"));
+        return;
+      }
+      openFriendsGamesModal(st.mode);
+    });
+  }
+  if (fb.previousElementSibling !== challengeBtn) challengeBtn.insertAdjacentElement("afterend", fb);
+  const locked = isChallengeLocked(challengeBtn._challenge?.score);
+  fb.classList.toggle("btn-challenge--locked", locked);
+  fb.setAttribute("aria-disabled", locked ? "true" : "false");
+  if (locked) fb.title = t("friends_today.locked_hint", "Finish today's game to see your friends' games");
+  else fb.removeAttribute("title");
+}
+
+/** Grise le bouton et pose le message d'explication tant qu'il n'y a pas de score. */
+function _applyChallengeLock(btn) {
+  const locked = isChallengeLocked(btn._challenge?.score);
+  const t = (key, fb) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fb;
+  };
+  btn.classList.toggle("btn-challenge--locked", locked);
+  btn.setAttribute("aria-disabled", locked ? "true" : "false");
+  if (locked) {
+    btn.title = t("challenge.locked_hint", "Finish today's game to challenge a friend");
+  } else {
+    btn.removeAttribute("title");
+  }
+}
+
+/** Bulle « finis ta partie » sous le bouton, au clic ou au tap (le survol a le title). */
+function _showChallengeLockHint(btn, text = null) {
+  const t = (key, fb) => {
+    const r = window.i18n?.t?.(key);
+    return r != null && r !== key ? r : fb;
+  };
+  let hint = btn.querySelector(".btn-challenge__hint");
+  if (!hint) {
+    hint = document.createElement("span");
+    hint.className = "btn-challenge__hint";
+    hint.setAttribute("role", "status");
+    btn.appendChild(hint);
+  }
+  hint.textContent = text ?? t("challenge.locked_hint", "Finish today's game to challenge a friend");
+  hint.classList.add("btn-challenge__hint--show");
+  clearTimeout(btn._hintTimer);
+  btn._hintTimer = setTimeout(() => hint.classList.remove("btn-challenge__hint--show"), 2600);
+}
+
+/** La présélection d'ami (?challenge=) ne doit ouvrir la modale qu'une fois. */
+let _preselectConsumed = false;
+
+/** Insère le bouton dans son hôte — entre prev/next quand l'hôte est la navigation. */
+function _placeChallengeButton(btn, host, nav) {
+  if (host === nav) {
+    const nextBtn = document.getElementById("nextModeButton");
+    if (nextBtn && nextBtn.parentElement === nav) nav.insertBefore(btn, nextBtn);
+    else nav.appendChild(btn);
+  } else {
+    host.appendChild(btn);
+  }
+}
+
+/**
+ * Montage précoce du bouton, à l'arrivée sur la page de mode : attend la
+ * résolution de l'auth (window._authReady, posé par initAuth) puisque sans
+ * compte il n'y a pas de bouton, puis délègue à showChallengeButton().
+ *
+ * @param {string} mode
+ * @param {string[]|(() => string[])} targetPool  voir showChallengeButton()
+ * @param {number|null} [score]  score déjà acquis si la partie du jour est
+ *                               finie (état restauré), sinon null = par
+ */
+export async function initChallengeButton(mode, targetPool, score = null) {
+  if (window._authReady) {
+    try {
+      await window._authReady;
+    } catch {
+      /* le mode fonctionne sans backend — pas de bouton, simplement */
+    }
+  }
+  showChallengeButton(mode, score, targetPool);
+
+  // Arrivée depuis l'onglet Amis (profile/friends/friends.js) : `?challenge=<id>`
+  // ouvre la modale directement, sur cet ami. Le paramètre est retiré de l'URL
+  // aussitôt, sinon un F5 rouvrirait la modale à chaque fois.
+  const params = new URLSearchParams(window.location.search);
+  const preselect = params.get("challenge");
+  const btn = document.getElementById("challengeFriendBtn");
+  if (preselect && btn) {
+    params.delete("challenge");
+    const qs = params.toString();
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${window.location.pathname}${qs ? `?${qs}` : ""}${window.location.hash}`
+    );
+    _challengePreselectId = String(preselect);
+    if (isChallengeLocked(btn._challenge?.score)) {
+      // Partie du jour pas encore jouée : on le dit, et la modale s'ouvrira
+      // toute seule sur cet ami à la fin (showChallengeButton).
+      _showChallengeLockHint(btn);
+    } else {
+      _preselectConsumed = true;
+      btn.click();
+    }
+  }
+}
+
+/** Ami à mettre en avant à la prochaine ouverture de la modale (une seule fois). */
+let _challengePreselectId = null;
 
 function _showChallengeModal(mode, score, date, activeFilters = [], targetPool = null, isExpert = false) {
   const api = window._personadleApi;
@@ -1278,6 +2195,7 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
             )}</p>`
           : ""
       }
+      <p class="challenge-card__score">🎯 ${t("challenge.score_to_beat", "Score to beat: {{score}} attempt(s)").replace("{{score}}", String(score))}</p>
       <div id="challengeFriendList" class="challenge-card__list">
         <p class="challenge-card__empty">${t("ui.loading", "Loading…")}</p>
       </div>
@@ -1351,6 +2269,22 @@ function _showChallengeModal(mode, score, date, activeFilters = [], targetPool =
     `
         )
         .join("");
+
+      // Ami présélectionné (arrivée depuis l'onglet Amis) : sa ligne est mise
+      // en avant et amenée à l'écran ; le clic « Envoyer » reste au joueur.
+      if (_challengePreselectId) {
+        // L'id est numérique ; on ne dépend pas de CSS.escape (absent de jsdom).
+        const wanted = String(_challengePreselectId);
+        _challengePreselectId = null;
+        const row = [...listEl.querySelectorAll(".js-send-challenge")]
+          .find((b) => b.dataset.fid === wanted)
+          ?.closest(".challenge-friend-row");
+        if (row) {
+          row.classList.add("challenge-friend-row--preselected");
+          row.scrollIntoView?.({ block: "nearest" });
+          row.querySelector(".js-send-challenge")?.focus({ preventScroll: true });
+        }
+      }
 
       listEl.querySelectorAll(".js-send-challenge").forEach((sendBtn) => {
         sendBtn.addEventListener("click", async () => {

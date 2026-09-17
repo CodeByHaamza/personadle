@@ -15,10 +15,12 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
   showWrongMini,
+  logGuess,
   setGiveUpEnabled,
   startGame,
   isGameLogged,
@@ -26,6 +28,7 @@ import {
   characterMatchesActiveOpus,
   updateCounterElement,
   getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
   expertContext,
   setupExpertToggle,
@@ -699,13 +702,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du jour.
   // Persistée dans "target" (état wipé à l'acceptation) → un refresh mi-défi
   // reprend la même cible. Idempotent si déjà persistée.
-  const challengeTargetName = getActiveChallengeTarget("classic");
-  if (challengeTargetName) {
-    const ct = characters.find((c) => c.nom === challengeTargetName);
-    if (ct) {
-      target = ct;
-      localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
-    }
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  const _challengeChar = resolveChallengeTarget(
+    "classic",
+    EXPERT.isExpert ? EXPERT_CHARACTERS : characters
+  );
+  if (_challengeChar) {
+    target = _challengeChar;
+    localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
   }
 
   // Pick daily target if none stored (seeded RNG — same character for all players today)
@@ -721,6 +730,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Replay previous guesses to restore grid
   history.forEach((name) => checkGuess(name, target));
 
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2) : score « par » tant que
+  // la partie du jour n'est pas finie, vrai score si elle l'est déjà (F5 après
+  // une victoire ou un abandon — le bouton « disparaissait » dans ce cas). Le
+  // pool est calculé au clic pour suivre les filtres.
+  const challengePool = () =>
+    characters.filter((c) => personas.includes(c.nom) && c.nom !== target.nom).map((c) => c.nom);
+  initChallengeButton("classic", challengePool, gameOver ? attempts : null);
+
   updateCounters();
   if (attempts >= HINT_THRESHOLD) enableHintButton();
   if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
@@ -734,6 +751,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem(EXPERT.key("attempts"), attempts);
     history.push(guessName);
     localStorage.setItem(EXPERT.key("guessHistory"), JSON.stringify(history));
+    logGuess(guessName); // « comparer nos parties » — la grille classique ne passe pas par showWrongMini()
     updateCounters();
     if (attempts >= HINT_THRESHOLD) enableHintButton();
     if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
@@ -787,6 +805,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     checkChallengeCompletion("classic", attempts, false);
     if (!EXPERT.isExpert) showCommunityStats(modeName, target.nom);
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+    // Abandon : le défi reste possible, avec le nombre d'essais consommés comme
+    // score à battre — « je n'ai pas trouvé en N, fais mieux ».
+    showChallengeButton("classic", attempts, challengePool);
     fillVictoryBox(target.nom, true);
     document.getElementById("victoryBox").style.display = "block";
   });
@@ -831,8 +852,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ── Reset / Replay button ──
-  resetButton.addEventListener("click", () => {
+  // ── Nouvelle partie : Rejouer (cible aléatoire) ou nouveau jour (cible du jour) ──
+  // Le reset quotidien cliquait sur « Rejouer », donc tirait une cible AU HASARD :
+  // la cible du jour seedée (getDailyTarget) ne servait qu'à la toute première
+  // partie d'un appareil, et l'anti-triche serveur, qui recalcule cette cible,
+  // signalait chaque partie suivante en « Daily target mismatch ». Même chose sur
+  // deux appareils : deux personnages différents le même jour. Les six modes
+  // avaient le raccourci ; ils passent tous par un tirage explicite.
+  const newRound = (random) => {
     startGame(STATS_SCOPE);
     sessionStartTime = Date.now();
 
@@ -869,13 +896,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     // cette restriction, un replay pouvait tomber sur l'un des 4 sans réplique et
     // laisser le joueur sans aucun indice.
     const _pool = EXPERT.isExpert ? EXPERT_CHARACTERS : characters;
-    const _filteredPool = _pool.filter((c) => personas.includes(c.nom));
-    const _prevTarget = target;
-    const _candidates =
-      _filteredPool.length > 1 && _prevTarget
-        ? _filteredPool.filter((c) => c.nom !== _prevTarget.nom)
-        : _filteredPool;
-    target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
+    if (random) {
+      const _filteredPool = _pool.filter((c) => personas.includes(c.nom));
+      const _prevTarget = target;
+      const _candidates =
+        _filteredPool.length > 1 && _prevTarget
+          ? _filteredPool.filter((c) => c.nom !== _prevTarget.nom)
+          : _filteredPool;
+      target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
+    } else {
+      // Même tirage qu'à la première visite : seedé joueur + jour + mode.
+      target = getDailyTarget(_pool, EXPERT.hashMode);
+    }
     localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
 
     // Après le nouveau tirage : la citation à deviner change aussi.
@@ -886,7 +918,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       nav.style.display = "none";
       nav.classList.remove("reveal-style");
     }
-  });
+  };
+  resetButton.addEventListener("click", () => newRound(true));
 
   // ── Daltonian mode toggle ──
   daltonianToggle?.addEventListener("click", () => {
@@ -913,11 +946,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     //
     // Même helper que les 5 autres modes : expiration + mode + dimension.
     if (getActiveChallengeTarget("classic")) return;
-    resetButton.click();
+    newRound(false);
   });
-  setupDailyReset(() => {
-    resetButton?.click() ?? location.reload();
-  });
+  setupDailyReset(() => newRound(false));
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

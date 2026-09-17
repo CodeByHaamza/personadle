@@ -34,9 +34,11 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   getActiveChallengeTarget,
+  dropUnplayableChallenge,
   isChallengePlay,
   setGiveUpEnabled,
   startGame,
@@ -100,6 +102,14 @@ let target = null;
 let attempts = 0;
 const maxAttempts = EXPERT.isExpert ? 5 : 3; // Give Up unlocks after this many wrong guesses
 let gameOver = false;
+
+/**
+ * Cibles possibles d'un défi, calculées au clic : pool filtré de la page, cible
+ * du jour exclue, identifiées par challengeKey() (nom du persona désambiguïsé
+ * par opus quand plusieurs entrées partagent le même nom — voir pickCharacter()).
+ */
+const challengePool = () =>
+  filteredCharacters.filter((c) => c.persona !== target?.persona).map((c) => challengeKey(c));
 
 let sessionStartTime = Date.now();
 // Portée de l'enregistrement : une PARTIE, plus une journée (cf. startGame/
@@ -270,8 +280,19 @@ function pickCharacter(random = false) {
   // cf. TODO.md) : la clé localStorage n'est pas scopée, donc un défi créé en mode
   // normal s'imposait comme cible sur la page Expert — y compris une variante
   // Picaro, qui n'a pas de fiche et donnait une partie sans indice.
+  // Résolution maison (challengeKey() désambiguïse les personas homonymes), donc
+  // pas resolveChallengeTarget() comme les 5 autres modes — mais MÊME règle de
+  // sortie : une cible introuvable, ou sans fiche de lore en Expert, purge le
+  // défi au lieu de laisser le joueur enchaîner sur la cible du jour en croyant
+  // relever un défi (partie ni comptée en défi, ni enregistrée en quotidien).
   const _challengeTargetName = getActiveChallengeTarget("personae");
-  const _challengeChar = _challengeTargetName ? findByChallengeKey(_challengeTargetName) : null;
+  let _challengeChar = _challengeTargetName ? findByChallengeKey(_challengeTargetName) : null;
+  // expertPool() et non originalCharacters : en Expert, une persona sans fiche
+  // ne donne AUCUN indice — la partie serait injouable.
+  if (_challengeChar && !expertPool([_challengeChar]).length) _challengeChar = null;
+  if (_challengeTargetName && !_challengeChar) {
+    dropUnplayableChallenge("personae", _challengeTargetName);
+  }
 
   if (_challengeChar) {
     target = _challengeChar;
@@ -624,15 +645,10 @@ function showVictory(force = false, name = null) {
   // `updateProfileStats` reste gardé plus bas — pour une tout autre raison :
   // l'Expert n'alimente pas les stats du mode normal.
   const wasChallengePlay = isChallengePlay("personae");
-  if (!force)
-    showChallengeButton(
-      "personae",
-      attempts,
-      // La cible d'un défi Personae est identifiée par challengeKey() (nom du
-      // persona, désambiguïsé par opus quand plusieurs entrées partagent le
-      // même nom — voir pickCharacter() plus haut).
-      filteredCharacters.filter((c) => c.persona !== target.persona).map((c) => challengeKey(c))
-    );
+  // Victoire OU abandon (2.2) : le nombre d'essais devient le score à battre.
+  // Le bouton est monté depuis l'arrivée (initChallengeButton) ; ici on fixe le
+  // score réel et il rejoint la navigation révélée juste au-dessus.
+  showChallengeButton("personae", attempts, challengePool);
   checkChallengeCompletion("personae", attempts, !force);
   if (!EXPERT.isExpert)
     showCommunityStats("personae", Array.isArray(target.user) ? target.user[0] : target.user);
@@ -918,13 +934,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     resetGame();
   }
 
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que
+  // la partie n'est pas finie. Au rechargement, showVictory() ci-dessus tourne
+  // AVANT que l'auth ait posé _currentUser (no-op) : c'est cet appel, qui
+  // attend l'auth, qui remonte le bouton — le « bouton qui disparaît ».
+  initChallengeButton("personae", challengePool, storedGameOver ? attempts : null);
+
   // ── Daily reset ──
+  // Reset quotidien : la cible DU JOUR (resetGame() sans random), pas un clic sur
+  // « Rejouer » qui tirait au hasard — cf. la même correction dans les cinq
+  // autres modes (anti-triche « Daily target mismatch » sur chaque partie).
   checkResetOnLoad(EXPERT.key("lastPlayedDate_Personae"), STATS_SCOPE, () => {
-    resetBtn.click();
+    resetGame();
   });
-  setupDailyReset(() => {
-    resetBtn?.click() ?? location.reload();
-  });
+  setupDailyReset(() => resetGame());
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

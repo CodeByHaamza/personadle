@@ -7,14 +7,18 @@
 ## 1. Présentation
 
 **PersonaDLE** — jeu de devinettes quotidien fan-made (Persona P1→P5X), 6 modes.
-**Site** : https://personadle.net | **Dépôt** : https://github.com/HamzaKarrouchi/personadle | **v2.0** (backend PHP+MariaDB)
+**Site** : https://personadle.net | **Dépôt** : https://github.com/CodeByHaamza/personadle | **v2.0** (backend PHP+MariaDB)
 
 | Pseudo | Rôle |
 |---|---|
-| Hamza Karrouchi | Lead Dev |
-| Léo (L2GENDAIRE) | Data & Design |
-| Damien (Corbover) | Front-End / CSS |
-| Dzulian | Consultant P1/P2 |
+| Hamza Karrouchi | Founder & Lead Dev — **seul mainteneur actif** depuis mi-2025 |
+| Léo (L2GENDAIRE) | Data & Design (2025) — base de personnages d'origine, inactif depuis |
+| Damien (Corbover) | Front-End / CSS (2026) — modularisation CSS, ponctuel |
+| Dzulian | Consultant P1/P2 — ponctuel |
+
+Le README distingue désormais « Core Team » (Hamza) et « Contributors & Credits »
+(les trois autres, rôles datés) — décision Hamza du 2026-09-15 : le crédit reste, le
+niveau d'implication est dit honnêtement.
 
 ---
 
@@ -34,12 +38,12 @@ personadle/
 ├── js/                  ← gameCore.js, api.js, auth.js, i18n.js, cloud-sync.js…
 ├── css/                 ← global.css + un CSS par composant
 ├── database/            ← characters_clean.js, personas.js, quotes.js, portraits/
-├── lang/                ← en.json (source de vérité, 1099 clés), fr/es/de/it/pt.json
+├── lang/                ← en.json (source de vérité, 1264 clés), fr/es/de/it/pt.json
 ├── classiqueMode/  emojiMode/  allOutAttackMode/  silhouetteMode/  personaeMode/  musicsMode/
 ├── profile/             ← profile-page.js, badges/, friends/, leaderboard/
 ├── api/                 ← PHP REST (auth/, user/, messages/, social-links/, leaderboard/…)
-├── tests/               ← 52 suites Vitest (911 tests) + tests/php/ (PHPUnit)
-└── sql/                 ← bdd_mysql.sql (24 tables)
+├── tests/               ← 65 suites Vitest (1155 tests) + tests/php/ (PHPUnit)
+└── sql/                 ← bdd_mysql.sql (28 tables)
 ```
 
 **Fichiers clés :**
@@ -209,13 +213,14 @@ Utiliser `min()`, `clamp()`, `vw`/`vh`. Éviter les largeurs fixes en `px` sur l
 | Assets périmés après un déploiement | Bumper `CACHE_VERSION` dans `sw.js` (sinon `activate` ne purge rien et le cache-first sert l'ancien). Invisible en test : seuls les joueurs **déjà venus** sont touchés |
 | Condition de déblocage non monotone | Un accès **gagné ne doit jamais se reperdre**. Toute condition doit être cumulative (`COUNT` à vie) ou un `MAX` sur l'historique — jamais une valeur « en cours ». Vécu en 2.1 : `mode_consecutive_perfects` renvoyait la série courante, donc 3 Modes Expert se re-verrouillaient à la première partie ratée, et une partie Expert en cours était refusée en 403 |
 | Une migration écrite ≠ une migration jouée | `sql/migrations/` n'est PAS le reflet de la prod — une migration vit sur `develop` jusqu'à la release. Seule source fiable : `SELECT version FROM schema_migrations`. Vécu en 2.1 : 029/030 oubliées de la checklist |
+| Bouton rond/carré rendu ovale | `css/global.css` §18 impose `min-height: 48px; padding: 12px 20px` à **tout** `<button>` (cible tactile). Un bouton-icône avec `width`/`height` propres (pastille 28px, play 34px, ✕ de modale) sort en 28×48. Tout nouveau bouton-icône pose `min-height: 0` dans sa propre règle. Vécu en 2.2 : pastilles de bordure, lecteur de musique, ⚙ Settings, boutons amis |
 
 ---
 
 ## 8. Tests & qualité
 
 - `npm test` · `npm run test:watch` · `npm run test:coverage`
-- **911 tests** (Vitest + jsdom), 52 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
+- **1155 tests** (Vitest + jsdom), 65 suites dans `tests/` (`gameCore`, `backend`, `auth`, `i18n`,
   `social-link`, `profilePage`, `badgesManager`, `badgesConditions`, `streakFlow.integration`,
   `streakRecovery`, `validateCharacters`, `formatPlayTime`… — cf. `tests/` pour la liste à jour)
 - `npm run lint` (ESLint flat config) · `npm run data:check` (schéma personnages) · `npm run i18n:check`

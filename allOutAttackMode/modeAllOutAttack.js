@@ -16,9 +16,10 @@ import {
   savePendingSession,
   getDailyTarget,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
-  getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
   expertContext,
   setupExpertToggle,
@@ -272,6 +273,9 @@ let attempts = 0;
 let gameOver = false;
 let target = null;
 
+/** Cibles possibles d'un défi : pool filtré de la page, cible du jour exclue. Calculé au clic. */
+const challengePool = () => personas.filter((n) => n !== target);
+
 // ─────────────────────────────────────────────────────────────────────────────
 // FILTER / CHARACTER POOL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -496,11 +500,7 @@ function handleGuess() {
     // À NE PAS confondre avec le `!EXPERT.isExpert` de showCommunityStats() juste
     // en dessous, qui lui est légitime : ces statistiques portent sur la cible
     // quotidienne du mode normal.
-    showChallengeButton(
-      "alloutattack",
-      attempts,
-      personas.filter((n) => n !== target)
-    );
+    showChallengeButton("alloutattack", attempts, challengePool);
     checkChallengeCompletion("alloutattack", attempts, true);
     if (!EXPERT.isExpert) showCommunityStats("alloutattack", target);
     gameOver = true;
@@ -591,6 +591,8 @@ function giveUp() {
 
   checkChallengeCompletion("alloutattack", attempts, false);
   if (!EXPERT.isExpert) showCommunityStats("alloutattack", target);
+  // Abandon (2.2) : le nombre d'essais consommés devient le score à battre.
+  showChallengeButton("alloutattack", attempts, challengePool);
   localStorage.setItem(EXPERT.key("aoaGameOver"), "true");
   localStorage.setItem(EXPERT.key("aoaTarget"), target);
   localStorage.setItem(EXPERT.key("aoaAttempts"), attempts);
@@ -859,8 +861,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle
   //    du jour. On la persiste dans aoaTarget (état wipé à l'acceptation) pour
   //    que le refresh mi-défi reprenne la même cible. ──
-  const challengeTargetName = getActiveChallengeTarget("alloutattack");
-  if (challengeTargetName && originalPersonas.includes(challengeTargetName)) {
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  // Pool de chaînes : la cible EST la clé.
+  const challengeTargetName = resolveChallengeTarget(
+    "alloutattack",
+    originalPersonas,
+    (name) => name
+  );
+  if (challengeTargetName) {
     localStorage.setItem(EXPERT.key("aoaTarget"), challengeTargetName);
     localStorage.setItem(EXPERT.key("aoaAttempts"), localStorage.getItem(EXPERT.key("aoaAttempts")) || 0);
   }
@@ -908,6 +921,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem(EXPERT.key("aoaAttempts"), 0);
   }
 
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2), score « par » tant que
+  // la partie n'est pas finie, vrai score si elle l'est (F5 après victoire ou
+  // abandon — le bouton « disparaissait » dans ce cas). Attend l'auth.
+  initChallengeButton("alloutattack", challengePool, gameOver ? attempts : null);
+
   // ── Buttons ──
   guessButton.addEventListener("click", handleGuess);
   document.getElementById("giveUpButton").addEventListener("click", giveUp);
@@ -926,7 +944,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(EXPERT.key("aoaGameOver"));
     location.reload();
   });
+  // Minuit page ouverte : même chemin que le nouveau jour au chargement (le
+  // tirage du jour), pas un clic sur « Rejouer » qui tirait au hasard.
   setupDailyReset(() => {
-    document.getElementById("resetButton")?.click() ?? location.reload();
+    localStorage.removeItem(EXPERT.key("aoaTarget"));
+    localStorage.removeItem(EXPERT.key("aoaAttempts"));
+    localStorage.removeItem(EXPERT.key("aoaGameOver"));
+    location.reload();
   });
 });

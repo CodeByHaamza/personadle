@@ -28,31 +28,48 @@ function meResponse(PDO $pdo, array $user): never
     $profileRow = fetchProfile($pdo, (int) $user['id']);
     $settings   = json_decode($profileRow['settings'] ?? 'null', true) ?? [];
 
-    jsonSuccess([
+    jsonSuccess(siteState($pdo) + [
         'user'     => formatUser($user, $profileRow),
         'settings' => $settings,
         'pusher'   => [
             'key'     => defined('PUSHER_KEY') ? PUSHER_KEY : null,
             'cluster' => defined('PUSHER_CLUSTER') ? PUSHER_CLUSTER : null,
         ],
+        // Reset ciblé (migration 042) : le client vide son état local des modes
+        // si cette date est plus récente que son dernier accusé.
+        'reset_local_state_at' => $user['reset_local_state_at'] ?? null,
     ]);
+}
+
+/**
+ * Ce que TOUTE page a besoin de savoir au chargement, connecté ou pas — livré
+ * avec /me pour ne pas ajouter d'appel réseau : maintenance en cours (l'admin
+ * la voit aussi, en bandeau, pour ne pas oublier de la lever) et annonces.
+ */
+function siteState(PDO $pdo): array
+{
+    return [
+        'maintenance'   => personadle_maintenance_state($pdo),
+        'announcements' => personadle_active_announcements($pdo),
+    ];
 }
 
 // ── 1. Session PHP active (cas normal) ──────────────────────────────────────
 if (!empty($_SESSION['user_id'])) {
-    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, is_admin, is_banned FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, is_admin, is_banned, ban_reason, banned_until, reset_local_state_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([(int) $_SESSION['user_id']]);
     $user = $stmt->fetch();
 
     if (!$user) {
         // Session orpheline (compte supprimé entre-temps) — nettoyer
         session_destroy();
-        jsonSuccess(['user' => null]);
+        jsonSuccess(siteState($pdo) + ['user' => null]);
     }
 
-    if (!empty($user['is_banned'])) {
+    $ban = personadle_ban_state($pdo, $user);
+    if ($ban !== null) {
         session_destroy();
-        jsonSuccess(['user' => null, 'banned' => true]);
+        jsonSuccess(siteState($pdo) + ['user' => null, 'banned' => $ban]);
     }
 
     meResponse($pdo, $user);
@@ -68,14 +85,15 @@ if (!empty($_SESSION['user_id'])) {
 $rawToken = $_COOKIE['remember_me'] ?? '';
 
 if ($rawToken === '') {
-    jsonSuccess(['user' => null]);
+    jsonSuccess(siteState($pdo) + ['user' => null]);
 }
 
 try {
     $hashedToken = hash('sha256', $rawToken);
 
     $stmt = $pdo->prepare('
-        SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, is_admin, is_banned FROM users
+        SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, is_admin, is_banned,
+               ban_reason, banned_until, reset_local_state_at FROM users
         WHERE remember_me_hash = ?
           AND remember_me_expires > NOW()
           AND is_deleted = 0
@@ -94,10 +112,11 @@ try {
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
-        jsonSuccess(['user' => null]);
+        jsonSuccess(siteState($pdo) + ['user' => null]);
     }
 
-    if (!empty($user['is_banned'])) {
+    $ban = personadle_ban_state($pdo, $user);
+    if ($ban !== null) {
         setcookie('remember_me', '', [
             'expires'  => time() - 3600,
             'path'     => '/',
@@ -106,7 +125,7 @@ try {
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
-        jsonSuccess(['user' => null, 'banned' => true]);
+        jsonSuccess(siteState($pdo) + ['user' => null, 'banned' => $ban]);
     }
 
     // Token valide → recréer la session PHP + rotation du token (évite la réutilisation)
@@ -135,5 +154,5 @@ try {
 } catch (PDOException $e) {
     // Colonnes remember_me manquantes — retour silencieux user:null
     error_log('[PersonaDLE me] remember_me unavailable: ' . $e->getMessage());
-    jsonSuccess(['user' => null]);
+    jsonSuccess(siteState($pdo) + ['user' => null]);
 }

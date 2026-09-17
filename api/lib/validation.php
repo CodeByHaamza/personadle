@@ -59,11 +59,74 @@ function personadle_validate_password(string $password): ?string
 }
 
 /**
+ * Langues servies par le site — une par fichier lang/*.json. Source unique côté
+ * PHP : register (normalisation), PATCH /api/user/:id et le panel admin la
+ * partagent. Le portugais manquait aux trois listes locales qu'ils gardaient
+ * chacun : un joueur en `pt` voyait son PATCH profil entier refusé en 400
+ * (« Invalid lang »), avatar et bordure compris, puisque le client envoie
+ * toujours la langue avec le reste.
+ */
+const PERSONADLE_SUPPORTED_LANGS = ['en', 'fr', 'es', 'de', 'it', 'pt'];
+
+/**
+ * Les six modes de jeu, clés canoniques (même vocabulaire que MODES dans
+ * js/gameCore.js). Source unique côté PHP depuis le 2026-09-13 : neuf fichiers
+ * recopiaient la liste — un 7ᵉ mode aurait dû être ajouté neuf fois.
+ */
+const PERSONADLE_MODES = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+
+/**
  * Normalise une langue vers une valeur supportée, sinon 'en' par défaut.
  *
  * @param array<int,string> $supported
  */
-function personadle_normalize_lang(string $lang, array $supported = ['en', 'fr', 'es', 'de', 'it']): string
+function personadle_normalize_lang(string $lang, array $supported = PERSONADLE_SUPPORTED_LANGS): string
 {
     return in_array($lang, $supported, true) ? $lang : 'en';
+}
+
+/**
+ * Valide un avatar de profil (`avatar_data`). Retourne un message d'erreur, ou
+ * null si valide.
+ *
+ * Deux formes acceptées :
+ *  - une référence à un portrait de la galerie du site (`../img/avatar/<nom>.<ext>`),
+ *    la forme que tout le client résout déjà (amis, classement, calling cards,
+ *    profil public, compendium) et la seule possible pour un GIF animé — le
+ *    canvas lui ferait perdre son animation, et encodé il pèserait jusqu'à 1,7 Mo
+ *    dans chaque liste d'amis. Jusqu'en 2.2 le serveur la refusait (400) : le
+ *    choix d'un GIF n'était jamais enregistré et revenait au pull cloud suivant ;
+ *  - une image encodée (`data:image/(jpeg|png|webp);base64,`) : le RECADRAGE d'un
+ *    de ces portraits (certains sont mal cadrés par défaut).
+ *
+ * Décision Hamza du 2026-09-16 : **on ne téléverse plus sa propre image** — un
+ * avatar est vu par les amis, le classement et les défis, et rien ne modère une
+ * image libre. Le client n'offre donc plus d'import : la seule source est la
+ * galerie, éventuellement recadrée. Angle mort assumé : un appel d'API fabriqué
+ * à la main peut encore poster une image arbitraire, le serveur ne pouvant pas
+ * distinguer le recadrage d'un portrait d'une autre image encodée. Fermer ça
+ * demanderait de stocker le cadrage (zoom/offsets) au lieu des pixels, et de
+ * refaire le rendu partout où un avatar s'affiche.
+ *
+ * Le fichier référencé doit exister dans `img/avatar/` : jamais un chemin libre,
+ * pas de traversée (`..`), pas d'URL externe.
+ *
+ * @param string|null $avatar   valeur reçue (null = retirer l'avatar, valide)
+ * @param string      $galleryDir  dossier des portraits
+ */
+function personadle_validate_avatar(?string $avatar, string $galleryDir = __DIR__ . '/../../img/avatar'): ?string
+{
+    if ($avatar === null || $avatar === '') {
+        return null;
+    }
+    if (strlen($avatar) > 2_000_000) {
+        return 'Avatar too large (max 2 MB base64)';
+    }
+    if (preg_match('/^data:image\/(jpeg|png|webp);base64,/', $avatar)) {
+        return null;
+    }
+    if (preg_match('#^\.\./img/avatar/([A-Za-z0-9_\-]+\.(?:gif|png|jpe?g|webp))$#', $avatar, $m)) {
+        return is_file($galleryDir . '/' . $m[1]) ? null : 'Unknown gallery avatar';
+    }
+    return 'Invalid avatar format';
 }

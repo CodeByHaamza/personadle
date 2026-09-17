@@ -20,6 +20,9 @@
  *   giveups_total        → SUM(giveups) tous modes
  *   friends_count        → nb d'amis acceptés
  *   badges_count         → nb de badges débloqués
+ *   titles_count         → nb de titres débloqués (une collection en appelle une autre)
+ *   played_on_date       → a joué un jour d'anniversaire donné, condition_mode = 'MM-JJ'
+ *                          (n'importe quelle année : c'est une date qui revient)
  *   social_link_min_rank → au moins un Social Link au rang >= condition_value
  *   all_modes_won        → au moins 1 victoire dans chacun des 6 modes
  *   weekly_clean_modes   → nb de modes où l'utilisateur a joué cette semaine (approx.)
@@ -59,6 +62,12 @@
  * @param ?int     $condValue Valeur numérique de la condition
  * @return bool true si la condition est remplie (ou non structurée/inconnue — safe fallback)
  */
+// PERSONADLE_MODES vient de validation.php : cette lib en dépend (all_modes_won),
+// elle doit donc le charger elle-même. Sans ça elle ne marchait que si un autre
+// fichier avait déjà inclus validation.php — vrai via bootstrap.php en prod, faux
+// quand PHPUnit lance ce seul fichier de tests.
+require_once __DIR__ . "/validation.php";
+
 function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?string $condMode, ?int $condValue): bool
 {
     // Pas de condition définie ou type inconnu → on laisse passer (safe fallback,
@@ -76,7 +85,7 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
     $valueRequiredTypes = [
         'wins_total', 'mode_wins', 'classic_p1_wins', 'emoji_p2_wins', 'mode_games',
         'games_total', 'streak_record', 'perfect_wins', 'unique_days', 'giveups_total',
-        'friends_count', 'badges_count', 'weekly_clean_modes',
+        'friends_count', 'badges_count', 'titles_count', 'weekly_clean_modes',
         'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
         'expert_modes_mastered', 'expert_wins_total',
     ];
@@ -147,6 +156,32 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             return (int) $s->fetchColumn() >= $val;
         }
 
+        case 'titles_count': {
+            // Une collection en appelle une autre : le titre SEES se gagne en
+            // rassemblant des titres, comme Thou Art I se gagne en badges.
+            $s = $pdo->prepare('SELECT COUNT(*) FROM user_titles WHERE user_id = ?');
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn() >= $val;
+        }
+
+        case 'played_on_date': {
+            // Anniversaire : avoir joué un 24 juin, peu importe l'année.
+            // condition_mode porte la date au format 'MM-JJ' (condition_value est un
+            // INT, il ne peut pas la porter). Cumulatif comme toutes les autres
+            // conditions : une fois la journée jouée, elle reste dans l'historique
+            // (CLAUDE.md §7 — un accès gagné ne se reperd jamais).
+            if (!is_string($condMode) || !preg_match('/^\d{2}-\d{2}$/', $condMode)) {
+                return false;
+            }
+            $s = $pdo->prepare(
+                "SELECT 1 FROM game_sessions
+                 WHERE user_id = ? AND DATE_FORMAT(played_date, '%m-%d') = ?
+                 LIMIT 1"
+            );
+            $s->execute([$userId, $condMode]);
+            return (bool) $s->fetchColumn();
+        }
+
         case 'social_link_min_rank': {
             // Au moins un Social Link au rang >= condition_value (défaut 10 = rang
             // maximum si non précisé, pour rester équivalent à l'ancien
@@ -162,7 +197,7 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
 
         case 'all_modes_won': {
             // Au moins 1 victoire dans chacun des 6 modes reconnus
-            $modes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+            $modes = PERSONADLE_MODES;
             $s = $pdo->prepare(
                 'SELECT COUNT(DISTINCT mode) FROM user_stats
                  WHERE user_id = ? AND wins >= 1 AND mode IN (?,?,?,?,?,?)'

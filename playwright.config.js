@@ -17,6 +17,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
+  // Captures de référence (tests-e2e/visual_layout.spec.js, opt-in) : un dossier
+  // par plateforme, hors dépôt — le rendu des polices n'est pas portable.
+  snapshotPathTemplate: "{testDir}/__screenshots__/{platform}/{arg}{ext}",
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8080",
     // Service worker bloqué : après un bump de CACHE_VERSION il s'active et les

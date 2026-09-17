@@ -83,4 +83,6 @@ export const portraitsMap = {
   "Puppet Summer ( Miyu Sahara )": "Puppet_Summer",
   "Closer Radiance ( Motoha Arai )": "Closer_Radiance",
   "Miku ( Hatsune Miku )": "Miku",
+  "Bui Cosmic ( YUI )": "Bui_Cosmic",
+  "Berry Summer ( Ichigo Shikano )": "Berry_Summer",
 };

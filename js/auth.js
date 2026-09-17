@@ -34,6 +34,7 @@
  */
 
 import { api, ApiError } from "./api.js";
+import { applySiteNotices } from "./site_notices.js";
 import { openModal, closeModal } from "./modal.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -79,8 +80,48 @@ const LOGIN_ERROR_MAP = {
     _t("auth.error_banned", "Account banned. Contact support if you think this is an error."),
 };
 
+/**
+ * Message de ban complet (migration 042) : la raison donnée par l'admin et
+ * l'échéance, quand le serveur les renvoie (`code: "banned"`).
+ * @param {ApiError} err
+ * @returns {string|null} null si ce n'est pas un ban détaillé
+ */
+export function resolveBanMessage(err) {
+  const d = err?.data;
+  if (!d || d.code !== "banned") return null;
+  const parts = [];
+  if (d.until) {
+    let when = d.until;
+    try {
+      when = new Intl.DateTimeFormat(window.i18n?.getCurrentLang?.() ?? "en", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(String(d.until).replace(" ", "T") + "Z"));
+    } catch {
+      /* format brut */
+    }
+    parts.push(
+      _t("auth.banned_until", "Account suspended until {{date}}.", { date: when }).replace(
+        "{{date}}",
+        when
+      )
+    );
+  } else {
+    parts.push(_t("auth.banned_permanent", "Account banned."));
+  }
+  if (d.reason)
+    parts.push(
+      _t("auth.banned_reason", "Reason: {{reason}}", { reason: d.reason }).replace(
+        "{{reason}}",
+        d.reason
+      )
+    );
+  return parts.join(" ");
+}
+
 const REGISTER_ERROR_MAP = {
-  "Invalid email address": () => _t("auth.error_invalid_email", "Please enter a valid email address."),
+  "Invalid email address": () =>
+    _t("auth.error_invalid_email", "Please enter a valid email address."),
   "Username must be between 3 and 50 characters": () =>
     _t("auth.error_pseudo_length", "Username must be between 3 and 50 characters."),
   "Username can only contain letters, numbers, hyphens, dots and underscores": () =>
@@ -91,7 +132,10 @@ const REGISTER_ERROR_MAP = {
   "Password must be at least 8 characters": () =>
     _t("auth.error_password_length", "Password must be at least 8 characters."),
   "This password is too common — please choose a less predictable one": () =>
-    _t("auth.error_password_common", "This password is too common — please choose a less predictable one."),
+    _t(
+      "auth.error_password_common",
+      "This password is too common — please choose a less predictable one."
+    ),
   "This email is already registered": () =>
     _t("auth.error_email_taken", "This email is already in use."),
   "This username is already taken": () =>
@@ -274,7 +318,9 @@ function setupLoginForm() {
       // JS brut à l'utilisateur, seulement les messages backend connus/mappés.
       showAuthError(
         error,
-        err instanceof ApiError ? resolveLoginError(err.message) : _t("auth.error_generic", "Login failed")
+        err instanceof ApiError
+          ? (resolveBanMessage(err) ?? resolveLoginError(err.message))
+          : _t("auth.error_generic", "Login failed")
       );
     } finally {
       if (btn) btn.disabled = false;
@@ -340,7 +386,10 @@ function setupRegisterForm() {
       return;
     }
     if (password.length < 8) {
-      showAuthError(error, _t("auth.error_password_length", "Password must be at least 8 characters."));
+      showAuthError(
+        error,
+        _t("auth.error_password_length", "Password must be at least 8 characters.")
+      );
       return;
     }
 
@@ -420,6 +469,17 @@ function setupModalNavigation() {
     openModal("loginModal");
   });
 
+  // Arrivée avec #register (relance des invités, js/gameCore.js maybeNudgeGuest) :
+  // ouvrir l'inscription directement, et retirer l'ancre pour qu'un F5 ne la rouvre pas.
+  if (window.location.hash === "#register" && document.getElementById("registerModal")) {
+    openModal("registerModal");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      window.location.pathname + window.location.search
+    );
+  }
+
   // Boutons d'ouverture (data-open-modal="loginModal" etc.)
   document.querySelectorAll("[data-open-modal]").forEach((btn) => {
     btn.addEventListener("click", () => openModal(btn.getAttribute("data-open-modal")));
@@ -496,7 +556,9 @@ async function _syncLocalProfileToCloud(userId) {
     profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
     selected_badges: profile.selectedBadges || [],
   };
-  if (profile.avatar) fields.avatar_data = profile.avatar;
+  // Un ancien chemin v1 (./img/…, stocké depuis la racine) est renvoyé sous la
+  // forme que le serveur accepte (../img/avatar/…, cf. personadle_validate_avatar).
+  if (profile.avatar) fields.avatar_data = profile.avatar.replace(/^\.\/img\//, "../img/");
   if (profile.equippedTitleId != null) fields.equipped_title_id = profile.equippedTitleId;
 
   try {
@@ -509,7 +571,6 @@ async function _syncLocalProfileToCloud(userId) {
 // ─────────────────────────────────────────────────────────────────────────────
 // POINT D'ENTRÉE — initAuth()
 // ─────────────────────────────────────────────────────────────────────────────
-
 
 /**
  * Vrai si l'erreur signifie « je n'ai pas pu poser la question au serveur », par
@@ -548,14 +609,14 @@ const _wait = (ms) => new Promise((r) => setTimeout(r, ms));
 async function _fetchMeWithRetry(attempts = 3) {
   for (let i = 0; i < attempts; i++) {
     try {
-      const { user, pusher } = await api.auth.me();
-      return { user, pusher, reachable: true };
+      const me = await api.auth.me();
+      return { user: me.user, pusher: me.pusher, reachable: true, me };
     } catch (err) {
-      if (!isTransportError(err)) return { user: null, pusher: null, reachable: true };
+      if (!isTransportError(err)) return { user: null, pusher: null, reachable: true, me: null };
       if (i < attempts - 1) await _wait(300 * 3 ** i);
     }
   }
-  return { user: null, pusher: null, reachable: false };
+  return { user: null, pusher: null, reachable: false, me: null };
 }
 
 /**
@@ -574,7 +635,7 @@ async function _fetchMeWithRetry(attempts = 3) {
  */
 export async function initAuth() {
   // 1. Restaurer la session — avec réessais sur panne de transport.
-  const { user, pusher, reachable } = await _fetchMeWithRetry();
+  const { user, pusher, reachable, me } = await _fetchMeWithRetry();
 
   // `reachable: false` = serveur injoignable, PAS « déconnecté ». On affiche l'UI
   // anonyme faute de mieux, mais sans purger le seed du joueur, et on le signale
@@ -588,6 +649,14 @@ export async function initAuth() {
   // dégradaient en anonyme — pour une exception d'affichage.
   try {
     updateAuthUI(user, reachable, pusher);
+
+    // Maintenance, annonces, messages de l'équipe, reset ciblé (migration 042) —
+    // tout vient avec /me, une seule fois par page. Ne doit jamais casser l'auth.
+    try {
+      applySiteNotices(me);
+    } catch {
+      /* affichage seulement */
+    }
 
     // 2. Si connecté, sync des sessions offline accumulées (fire-and-forget)
     // On ne bloque pas initAuth() sur une opération réseau non critique.

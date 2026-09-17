@@ -14,7 +14,9 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   if (result === "win") stats.wins = (stats.wins || 0) + 1;
   if (result === "giveup") stats.giveups = (stats.giveups || 0) + 1;
 
-  // Mode favori — libellé canonique via le mapping unique de gameCore.js
+  // Compteurs par mode — libellé canonique via le mapping unique de gameCore.js.
+  // (Le « mode favori » n'est plus dérivé d'ici depuis la 2.2 : c'est un choix du
+  // joueur, profile.favoriteMode ; le « meilleur mode » se calcule à l'affichage.)
   const normalizedMode = modeLabel(mode);
   stats.modeCount = stats.modeCount || {};
   stats.modeCount[normalizedMode] = (stats.modeCount[normalizedMode] || 0) + 1;
@@ -24,9 +26,6 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
     stats.modeWins = stats.modeWins || {};
     stats.modeWins[normalizedMode] = (stats.modeWins[normalizedMode] || 0) + 1;
   }
-
-  const mostPlayed = Object.entries(stats.modeCount).sort((a, b) => b[1] - a[1]);
-  if (mostPlayed.length > 0) stats.favoriteMode = mostPlayed[0][0];
 
   // Gestion du streak quotidien — frontière de journée en heure de Paris
   // (jamais UTC : tout le jeu est calé sur Europe/Paris via parisDateKey()).

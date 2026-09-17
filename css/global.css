@@ -129,6 +129,20 @@ body.modal-open {
    2. LOGO DE LA PAGE D'ACCUEIL
    ===================================================== */
 
+/* Le lien autour du logo s'étendait sur toute la largeur de l'en-tête : cliquer
+   à CÔTÉ du logo renvoyait à l'accueil (retour Hamza du 2026-09-16). On le
+   réduit à l'image, et c'est lui qui porte le centrage. */
+#homepage {
+  display: flex;
+  justify-content: center;
+}
+
+#homepage > a {
+  display: inline-block;
+  line-height: 0;
+  max-width: 100%;
+}
+
 #imgHomePage {
   width: min(460px, 80vw);
   height: auto;
@@ -998,6 +1012,240 @@ input:checked + .slider.red {
   font-style: italic;
   text-align: center;
   color: inherit;
+}
+
+/* ── « Tes amis aujourd'hui » (2.2) — dans la boîte de victoire ──
+   Première partie du jour de chaque ami sur ce mode : résultat, essais, et la
+   suite des noms proposés (le bon en vert). Rendu par showCommunityStats()
+   (js/gameCore.js) depuis api/sessions_today.php. Les avatars ne sont pas
+   des <button> : pas de piège min-height (§18). */
+.friends-today {
+  width: 100%;
+  max-width: 520px;
+  margin: 16px auto 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-family: Arial, sans-serif;
+  text-align: left;
+  animation: friendsTodayIn 0.35s ease both;
+}
+@keyframes friendsTodayIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.friends-today__title {
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #333;
+}
+.friends-today__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.friends-today__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-left: 3px solid #bbb;
+}
+.friends-today__row--win {
+  border-left-color: #2e7d32;
+}
+.friends-today__row--giveup {
+  border-left-color: #c62828;
+}
+.friends-today__row--pending {
+  opacity: 0.75;
+}
+.friends-today__avatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  /* La règle .victory-box img (200px, marge auto) ne doit pas s'appliquer ici */
+  max-height: 34px;
+  margin: 0;
+}
+.friends-today__body {
+  min-width: 0;
+  flex: 1;
+}
+.friends-today__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.86rem;
+}
+.friends-today__pseudo {
+  font-weight: 700;
+  color: #222;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.friends-today__status {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+}
+.friends-today__row--win .friends-today__status {
+  color: #2e7d32;
+}
+.friends-today__row--giveup .friends-today__status {
+  color: #c62828;
+}
+.friends-today__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.friends-today__chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(198, 40, 40, 0.1);
+  color: #8a2222;
+  text-decoration: line-through;
+  text-decoration-color: rgba(138, 34, 34, 0.45);
+}
+.friends-today__chip--ok {
+  background: rgba(46, 125, 50, 0.14);
+  color: #1f5f24;
+  text-decoration: none;
+}
+.friends-today__note,
+.friends-today__empty {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: #666;
+  font-style: italic;
+}
+body.darkmode .friends-today {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+body.darkmode .friends-today__title,
+body.darkmode .friends-today__pseudo {
+  color: #eee;
+}
+body.darkmode .friends-today__row {
+  background: rgba(255, 255, 255, 0.06);
+}
+body.darkmode .friends-today__status {
+  color: #bbb;
+}
+body.darkmode .friends-today__chip {
+  background: rgba(255, 99, 99, 0.16);
+  color: #ffb3b3;
+}
+body.darkmode .friends-today__chip--ok {
+  background: rgba(102, 187, 106, 0.2);
+  color: #a5d6a7;
+}
+body.darkmode .friends-today__note,
+body.darkmode .friends-today__empty {
+  color: #999;
+}
+
+/* ── Relance des invités (2.2) — « sauvegarde ta série » dans la boîte de victoire ──
+   Affichée par maybeNudgeGuest() (js/gameCore.js) à un joueur sans compte qui a
+   3 jours de série ou plus, une fois par semaine. Le CTA est un <a> (pas de
+   piège min-height §18), « Plus tard » un vrai bouton. */
+.guest-nudge {
+  width: 100%;
+  max-width: 520px;
+  margin: 16px auto 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff4e5, #ffe3c2);
+  border: 1px solid rgba(230, 120, 40, 0.35);
+  font-family: Arial, sans-serif;
+  text-align: center;
+  animation: friendsTodayIn 0.35s ease both;
+}
+.guest-nudge__title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #b34700;
+}
+.guest-nudge__text {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  color: #5a3a1a;
+  line-height: 1.4;
+}
+.guest-nudge__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.guest-nudge__cta {
+  display: inline-block;
+  padding: 9px 18px;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #c00, #e63946);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.84rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(230, 57, 70, 0.35);
+}
+.guest-nudge__cta:hover {
+  filter: brightness(1.08);
+}
+.guest-nudge__later {
+  min-height: 0;
+  padding: 9px 14px;
+  border-radius: 100px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: transparent;
+  color: #5a3a1a;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+body.darkmode .guest-nudge {
+  background: linear-gradient(135deg, #3a2410, #4a2c12);
+  border-color: rgba(255, 170, 90, 0.35);
+}
+body.darkmode .guest-nudge__title {
+  color: #ffb66b;
+}
+body.darkmode .guest-nudge__text,
+body.darkmode .guest-nudge__later {
+  color: #f0d9c0;
+}
+body.darkmode .guest-nudge__later {
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 /* =====================================================
@@ -1879,6 +2127,121 @@ body.darkmode .btn-challenge:hover {
     0 6px 22px rgba(0, 0, 0, 0.5);
 }
 
+/* ── 👥 Parties des amis — jumeau bleu de ⚔ Défier (2.2) ── */
+.btn-friends,
+body.darkmode .btn-friends {
+  background: linear-gradient(135deg, #1e4fbf 0%, #3b7dff 100%);
+  box-shadow:
+    0 0 0 0 rgba(59, 125, 255, 0.55),
+    0 3px 12px rgba(0, 0, 0, 0.25);
+  animation: none;
+}
+.btn-friends:hover,
+body.darkmode .btn-friends:hover {
+  background: linear-gradient(135deg, #173f9c 0%, #2b6be6 100%);
+  box-shadow:
+    0 0 18px rgba(59, 125, 255, 0.55),
+    0 6px 20px rgba(0, 0, 0, 0.35);
+}
+.challenge-card.friends-games-card {
+  width: min(440px, 94vw);
+  max-height: 85vh;
+}
+.friends-games-card__title {
+  margin: 0;
+  padding: 14px 18px 10px;
+  font-family: Arial, sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--challenge-header-text);
+  background: var(--challenge-header-bg);
+  border-bottom: 1px solid var(--challenge-border);
+}
+.friends-games-card__body {
+  overflow-y: auto;
+  padding: 12px 14px;
+}
+.friends-games-card .friends-today {
+  box-sizing: border-box; /* width: 100% + le padding du corps, sinon ça déborde */
+  max-width: none;
+  margin: 0;
+  background: none;
+  border: none;
+  animation: none;
+}
+
+/* ── Verrouillé tant que la partie du jour n'est pas finie (2.2) ──
+   Visible mais grisé, sans pulsation ; le `title` explique au survol, et un
+   clic / tap fait sortir la même phrase en bulle sous le bouton (mobile n'a
+   pas de survol). Pas d'attribut disabled : il faut que le clic arrive. */
+.btn-challenge--locked,
+body.darkmode .btn-challenge--locked {
+  background: linear-gradient(135deg, #5a5a5a 0%, #7a7a7a 100%);
+  color: rgba(255, 255, 255, 0.75);
+  cursor: not-allowed;
+  animation: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+.btn-challenge--locked:hover,
+body.darkmode .btn-challenge--locked:hover {
+  background: linear-gradient(135deg, #5a5a5a 0%, #7a7a7a 100%);
+  transform: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+.btn-challenge--locked:hover > span:first-child {
+  transform: none;
+}
+.btn-challenge--locked > span:first-child::before {
+  content: "🔒";
+  font-size: 0.8em;
+  margin-right: 4px;
+}
+.btn-challenge__hint {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  transform: translate(-50%, -4px);
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.btn-challenge__hint::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  background: #1a1a1a;
+  transform: translateX(-50%) rotate(45deg);
+}
+.btn-challenge__hint--show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+@media (max-width: 480px) {
+  .btn-challenge__hint {
+    white-space: normal;
+    width: max-content;
+    max-width: 78vw;
+    text-align: center;
+  }
+}
+
 /* ── Overlay de la modale ── */
 .challenge-overlay {
   position: fixed;
@@ -1946,6 +2309,21 @@ body.darkmode {
 }
 
 /* ── Pied de la modale ── */
+/* Score à battre, rappelé au-dessus de la liste d'amis : avec le montage précoce
+   du bouton (score « par » avant la fin de partie), le joueur doit voir ce qu'il
+   s'apprête à envoyer. */
+.challenge-card__score {
+  margin: 0;
+  padding: 10px 16px 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e63946;
+  text-align: center;
+}
+.challenge-card--expert .challenge-card__score {
+  color: #ffd166;
+}
+
 .challenge-card__footer {
   display: flex;
   align-items: center;
@@ -1994,6 +2372,12 @@ body.darkmode {
 }
 
 /* ── Ligne ami ── */
+/* Ami présélectionné (arrivée depuis l'onglet Amis avec ?challenge=<id>). */
+.challenge-friend-row--preselected {
+  border-left-color: #e63946 !important;
+  background: rgba(230, 57, 70, 0.1);
+}
+
 .challenge-friend-row {
   display: flex;
   align-items: center;
@@ -2895,6 +3279,7 @@ body.darkmode {
   max-width: 450px;
 }
 .badge-zoom-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   position: absolute;
   top: 15px;
   right: 20px;
@@ -2955,9 +3340,12 @@ body.darkmode {
   box-shadow:
     0 28px 70px rgba(0, 0, 0, 0.18),
     0 4px 16px rgba(0, 0, 0, 0.07);
-  max-width: 920px;
-  width: 96%;
-  max-height: 88vh;
+  /* La fenêtre touchait presque les bords de l'écran (96 % de large, 88 vh de
+     haut) : on la décolle en haut, en bas et sur les côtés. */
+  max-width: 880px;
+  width: min(880px, 92vw);
+  max-height: 84vh;
+  margin: 0 auto;
   padding: 0;
   overflow-y: auto;
   overflow-x: hidden;
@@ -2982,7 +3370,7 @@ body.darkmode {
   top: 0;
   z-index: 10;
   margin: 0;
-  padding: 15px 52px 15px 22px;
+  padding: 18px 56px 18px 34px;
   background: linear-gradient(120deg, #c80000 0%, #7a0000 100%);
   color: #fff;
   font-family: "Oswald", "Arial Black", Arial, sans-serif;
@@ -3022,30 +3410,35 @@ body.darkmode {
 }
 
 /* ── Corps ──────────────────────────────────────────────── */
+/* Tout était collé : sections, puces et séparateurs se touchaient et le texte
+   devenait un mur (retour Hamza du 2026-09-16). On aère, sans rien déplacer. */
 #rulesModal [data-i18n-block] {
-  padding: 16px 22px 20px;
+  padding: 26px 34px 34px;
 }
 
 /* ── Séparateurs : discrets ─────────────────────────────── */
 #rulesModal hr.separator {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  margin: 8px 0;
+  margin: 20px 0 4px;
 }
 
 /* ── En-têtes de section : typographiques, sans boîte ────── */
 #rulesModal strong {
   display: block;
   font-family: "Oswald", "Arial Black", Arial, sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #c00;
-  margin: 10px 0 4px;
-  padding: 0 0 4px 0;
+  margin: 24px 0 10px;
+  padding: 0 0 6px 0;
   border-bottom: 1px solid rgba(204, 0, 0, 0.18);
   background: none;
+}
+#rulesModal [data-i18n-block] > strong:first-child {
+  margin-top: 0;
 }
 
 /* ── Strong inline dans les li et les p ─────────────────── */
@@ -3068,17 +3461,18 @@ body.darkmode {
 #rulesModal ul {
   list-style: none;
   padding: 0;
-  margin: 0 0 2px;
+  margin: 0 0 6px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 8px;
 }
 #rulesModal ul li {
   position: relative;
-  font-size: 0.875rem;
-  line-height: 1.52;
-  color: #444;
-  padding: 4px 6px 4px 18px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #3a3a3a;
+  padding: 0 4px 0 22px;
+  max-width: 78ch;
   background: none;
   border: none;
   border-radius: 0;
@@ -3086,11 +3480,11 @@ body.darkmode {
 #rulesModal ul li::before {
   content: "›";
   position: absolute;
-  left: 4px;
-  top: 3px;
-  color: rgba(204, 0, 0, 0.45);
-  font-size: 1rem;
-  line-height: 1.52;
+  left: 6px;
+  top: 0;
+  color: rgba(204, 0, 0, 0.55);
+  font-size: 1.05rem;
+  line-height: 1.65;
   font-weight: 700;
 }
 
@@ -3415,9 +3809,23 @@ body.darkmode #rulesModal em {
 .expert-toggle-zone {
   display: flex;
   justify-content: center;
+  align-items: center;
+  /* « Défier un ami » vit ici aussi tant que la partie n'est pas finie (2.2) :
+     les deux pilules sur une ligne, passage à la ligne sur mobile étroit. */
+  flex-wrap: wrap;
+  gap: 10px;
   /* Marge basse : le bouton précède directement le bandeau de consigne du mode
      (« Devinez le personnage Persona du jour ! »), les deux se touchaient. */
   margin: 14px auto 22px;
+}
+
+/* Même gabarit que la pilule Expert quand le bouton est dans la zone ; il
+   retrouve sa taille normale une fois déplacé dans la navigation. */
+.expert-toggle-zone .btn-challenge {
+  margin-top: 0;
+  min-height: 0;
+  padding: 8px 18px;
+  font-size: 0.78rem;
 }
 
 .expert-toggle {

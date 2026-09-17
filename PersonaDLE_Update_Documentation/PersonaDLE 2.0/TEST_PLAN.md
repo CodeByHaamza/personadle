@@ -53,7 +53,7 @@ Si l'une de ces commandes ne fonctionne pas ("command not found"), c'est que l'o
 ### 1.2 Récupérer le projet
 
 ```bash
-git clone https://github.com/HamzaKarrouchi/personadle.git
+git clone https://github.com/CodeByHaamza/personadle.git
 cd personadle
 git checkout develop
 ```

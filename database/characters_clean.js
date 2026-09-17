@@ -892,8 +892,8 @@ export const characters = [
     age: "15-20",
     arcane: ["Aeon"],
     opus: ["P4G", "P4AU","PQ","PQ2"],
-    personaUser: false,
-    persona: "NONE",
+    personaUser: true,
+    persona: "Kaguya",
     emoji: ["🧢", "📝", "🌧️"],
     quote: "There are things that you can't do by yourself, but can do with others... That's true. You gave me a new memory. You taught me that I don't need to be worried. ...I wouldn't have been able to do that on my own. I only realized that because of you."
   },
@@ -1137,7 +1137,7 @@ export const characters = [
     personaUser: true,
     persona: "Arsène",
     emoji: ["🎭", "🃏", "💥"],
-    quote: "...You are held captive. A prisoner of fate to a future that has been sealed in advance. This is truly an unjust game... Your chances of winning are almost none. But if my voice is reaching you, there may yet be a possibility open to you... ...I beg you. Please overcome this game... and save the world... The key to victory lies within the memories of your bonds—the truth that you and your friends grasped. It all began that day... when the game was started half a year ago... For the sake of your world's future... as well as your own... you must remember..."
+    quote: "Checkmate!"
   },
 
   // ── Équipe proche (jouable) ───────────────────────────────────

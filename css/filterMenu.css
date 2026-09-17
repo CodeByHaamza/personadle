@@ -84,10 +84,12 @@
 
 /* Flèche — tourne 180° quand ouvert */
 .filter-toggle-arrow {
-  font-size: 9px;
+  /* 9 px à 60 % d'opacité : on ne la voyait pas (retour Hamza du 2026-09-16). */
+  font-size: 12px;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-block;
-  color: rgba(255, 255, 255, 0.6);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .filter-toggle-btn.open .filter-toggle-arrow {
@@ -237,8 +239,8 @@
 
 /* Flèche expand — ▸ tourne 90° quand ouvert */
 .filter-expand-arrow {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
   transition:
     transform 0.22s ease,
     color 0.18s ease;
@@ -248,7 +250,7 @@
 
 .filter-main-btn.expanded .filter-expand-arrow {
   transform: rotate(90deg);
-  color: rgba(255, 255, 255, 0.75);
+  color: #fff;
 }
 
 /* ── Lueurs colorées pour chaque jeu (état active) ──── */
@@ -1448,4 +1450,388 @@ body:not(.darkmode) [data-group-panel="PQ"] .filter-group-select-btn {
   box-shadow:
     0 0 10px rgba(0, 190, 200, 0.7),
     inset 0 0 5px rgba(0, 190, 200, 0.1);
+}
+
+/* ── Ce que fait un clic, dit une fois en haut du panneau (2.2) ─────────────
+   Le panneau ne montrait que des logos : impossible de deviner qu'un clic
+   inclut/exclut un jeu et que la flèche ouvre ses opus. */
+.filter-hint {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  line-height: 1.45;
+}
+body:not(.darkmode) .filter-hint {
+  background: rgba(0, 0, 0, 0.05);
+  color: #555;
+}
+
+/* État lisible d'un coup d'œil : un jeu retenu porte une pastille ✓ */
+.filter-main-btn,
+.filter-sub-btn {
+  position: relative;
+}
+/* ::before et pas ::after : ::after porte déjà l infobulle du nom du jeu
+   (opacity 0 au repos) — la pastille y était invisible ET cassait l infobulle. */
+.filter-main-btn.active::before,
+.filter-sub-btn.active::before {
+  content: "✓";
+  position: absolute;
+  /* À l intérieur du bouton : le panneau défile (overflow) et une pastille
+     débordante était rognée. */
+  top: 4px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2bae66;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+/* …et un jeu écarté se voit aussi : contour en pointillés, pas juste un logo pâle */
+.filter-main-btn:not(.active),
+.filter-sub-btn:not(.active) {
+  border-style: dashed;
+}
+
+/* Boutons « tout / aucun » de groupe : plus discrets que le bouton global */
+.filter-group-select-btn {
+  font-size: 10px;
+  padding: 3px 8px;
+  opacity: 0.85;
+}
+
+/* Le panneau ne dépasse plus de l'écran (P5X était coupé en bas) */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PANNEAU EN MODALE (2.2 — retours Hamza du 2026-09-16)
+   Le menu déroulant était une colonne étroite accrochée sous le bouton, qui
+   dépassait de l'écran. Ouvert, il devient une fenêtre centrée : en-tête avec
+   compteur et croix, une carte par jeu, et TOUS les opus visibles d'emblée —
+   dans une modale, il y a la place, donc plus de flèches à déplier.
+   Le markup des pages ne change pas : .filter-dropdown.open suffit.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.filter-dropdown.open {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10050;
+  width: min(880px, 94vw);
+  max-width: 880px;
+  max-height: min(84vh, 780px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 0 16px;
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  display: block;
+}
+
+/* ── En-tête collant ── */
+.filter-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  background: inherit;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.filter-head-title {
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent, #e63946);
+}
+
+.filter-head-count {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+.filter-head-close {
+  min-height: 0;
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.filter-head-close:hover {
+  background: var(--accent, #e63946);
+  color: #fff;
+}
+
+.filter-hint {
+  margin: 12px 16px 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.filter-hint--sub {
+  margin: 0 16px 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.filter-dropdown.open > .filter-select-all-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 14px;
+}
+
+/* ── Une carte par jeu ── */
+.filter-dropdown.open .filter-group {
+  margin: 0 16px 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  transition: background 0.2s ease;
+}
+
+/* La carte d'un jeu déplié se détache un peu */
+.filter-dropdown.open .filter-group:has(.filter-sub-panel.expanded) {
+  background: rgba(255, 255, 255, 0.08);
+}
+body:not(.darkmode) .filter-dropdown.open .filter-group:has(.filter-sub-panel.expanded) {
+  background: rgba(0, 0, 0, 0.055);
+}
+
+/* Un jeu sans sous-opus (P1, P5X…) : sa carte n'a qu'une colonne */
+.filter-dropdown.open .filter-group:not(:has(.filter-sub-panel)) {
+  grid-template-columns: minmax(0, 260px);
+  justify-content: center;
+}
+
+/* Le libellé « PERSONA 2 » des groupes auto-dépliés */
+.filter-dropdown.open .filter-group-auto-label {
+  grid-column: 1;
+  align-self: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.12em;
+}
+
+/* Les opus d'un jeu se DÉROULENT VERS LA DROITE au clic sur son logo (retour
+   Hamza du 2026-09-17), au lieu d'être ouverts d'office. Le volet est en ligne,
+   donc on anime sa largeur : max-width (animable) + overflow, plutôt qu'un
+   width:auto qui ne s'interpole pas. */
+.filter-dropdown.open .filter-sub-panel {
+  padding-left: 0;
+  gap: 8px;
+  justify-content: flex-start;
+  align-items: center;
+
+  /* Replié : largeur ET hauteur nulles. Sans max-height, les boutons wrappés
+     dans une largeur 0 s empilaient en colonne et la carte du jeu devenait
+     immense alors que rien n était visible. */
+  max-width: 0;
+  max-height: 0;
+  opacity: 0;
+  transform: translateX(-10px);
+  overflow: hidden;
+  transition:
+    max-width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 0.3s ease,
+    opacity 0.28s ease 0.05s,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.filter-dropdown.open .filter-sub-panel.expanded {
+  max-width: 1200px;
+  max-height: 400px;
+  opacity: 1;
+  transform: none;
+}
+
+/* Chaque opus arrive à son tour pendant que le volet s'ouvre */
+.filter-dropdown.open .filter-sub-panel.expanded > * {
+  animation: filterOpusIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.filter-dropdown.open .filter-sub-panel.expanded > *:nth-child(1) { animation-delay: 0.04s; }
+.filter-dropdown.open .filter-sub-panel.expanded > *:nth-child(2) { animation-delay: 0.09s; }
+.filter-dropdown.open .filter-sub-panel.expanded > *:nth-child(3) { animation-delay: 0.14s; }
+.filter-dropdown.open .filter-sub-panel.expanded > *:nth-child(4) { animation-delay: 0.19s; }
+.filter-dropdown.open .filter-sub-panel.expanded > *:nth-child(5) { animation-delay: 0.24s; }
+.filter-dropdown.open .filter-sub-panel.expanded > *:nth-child(n + 6) { animation-delay: 0.28s; }
+
+@keyframes filterOpusIn {
+  from {
+    opacity: 0;
+    transform: translateX(-14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* La flèche du logo dit qu'il y a quelque chose à ouvrir, et tourne quand c'est fait */
+/* Les logos ont toutes les couleurs : la flèche porte sa propre pastille pour
+   rester lisible sur un fond clair comme sur un fond sombre. */
+.filter-dropdown.open .filter-expand-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(10, 10, 16, 0.72);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* Rien ne bouge pour qui préfère que rien ne bouge */
+@media (prefers-reduced-motion: reduce) {
+  .filter-dropdown.open .filter-sub-panel,
+  .filter-dropdown.open .filter-sub-panel.expanded > * {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Boutons « tout / aucun » de groupe : en haut à droite de la carte */
+.filter-dropdown.open .filter-group-select-btn {
+  order: -1;
+  /* La règle de base met flex: 0 0 100% (pleine largeur dans le menu étroit) :
+     dans la modale la place ne manque pas, la pastille reste compacte. */
+  flex: 0 0 auto;
+  align-self: center;
+  width: auto;
+  margin-bottom: 0;
+  font-size: 10px;
+  padding: 5px 12px;
+  opacity: 0.9;
+}
+
+.filter-dropdown.open .filter-main-btn {
+  height: 100%;
+  justify-content: center;
+}
+
+.filter-dropdown.open .filter-logo {
+  height: 60px;
+}
+
+/* Le fond assombri, posé par filterMenu.js pendant l'ouverture.
+   z-index 999 et pas 10 000 : .filter-panel (z-index: 1000, position: absolute)
+   crée un contexte d'empilement — la fenêtre est peinte DEDANS. Un fond posé sur
+   le body à 10 040 passerait par-dessus et voilerait la fenêtre elle-même. */
+.filter-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+/* Mode clair : la modale suit le thème de la page */
+body:not(.darkmode) .filter-head {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+body:not(.darkmode) .filter-head-count {
+  color: #666;
+}
+body:not(.darkmode) .filter-hint {
+  color: #444;
+}
+body:not(.darkmode) .filter-hint--sub {
+  color: #777;
+}
+body:not(.darkmode) .filter-head-close {
+  background: rgba(0, 0, 0, 0.06);
+  color: #555;
+}
+body:not(.darkmode) .filter-dropdown.open .filter-group {
+  background: rgba(0, 0, 0, 0.035);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+body:not(.darkmode) .filter-dropdown.open .filter-group-auto-label {
+  color: #555;
+}
+
+/* État lisible d'un coup d'œil : un jeu retenu porte une pastille ✓.
+   ::before et pas ::after : ::after porte déjà l'infobulle du nom du jeu
+   (opacity 0 au repos) — la pastille y était invisible ET cassait l'infobulle. */
+.filter-main-btn,
+.filter-sub-btn {
+  position: relative;
+}
+.filter-main-btn.active::before,
+.filter-sub-btn.active::before {
+  content: "✓";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2bae66;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* …et un jeu écarté se voit aussi : contour en pointillés, pas juste un logo pâle */
+.filter-main-btn:not(.active),
+.filter-sub-btn:not(.active) {
+  border-style: dashed;
+}
+
+@media (max-width: 720px) {
+  .filter-dropdown.open {
+    width: 96vw;
+    max-height: 88vh;
+  }
+  .filter-dropdown.open .filter-group {
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0 12px 10px;
+  }
+  .filter-dropdown.open > .filter-select-all-btn {
+    width: calc(100% - 24px);
+    margin: 0 12px 12px;
+  }
+  .filter-hint {
+    margin: 10px 12px 8px;
+  }
 }

@@ -651,13 +651,22 @@ export function addFlameIfPlayedToday(friendEntry, el) {
 
 /**
  * Applique l'effet visuel True Confidant (rang 10) sur un avatar et son pseudo.
- * Marqueur permanent : halo doré (.rank10-avatar) + icône ✦ (.rank10-icon).
- * Animation d'entrée : burst 8 particules + label typewriter "✦ True Confidant".
+ * Marqueur permanent : anneau doré (.rank10-avatar) + pastille « ✦ MAX »
+ * (.rank10-icon). Animation d'entrée, une fois : burst 8 particules + label
+ * « ✦ True Confidant » qui s'efface.
+ *
+ * Assagi en 2.2 (retour joueur : « badge True Confidant ultra moche ») : le
+ * halo pulsait sans fin, la pastille brillait, et la liste d'amis rejouait le
+ * burst + le label à CHAQUE poll (30 s), puisqu'elle se re-rend en entier.
+ * D'où `celebrate` : l'appelant ne le passe à false que pour les rendus
+ * suivants, le marqueur permanent est reposé à chaque fois.
+ *
  * @param {HTMLElement} avatarEl  - Élément <img> ou <div> de l'avatar
  * @param {HTMLElement} pseudoEl  - Élément contenant le pseudo
  * @param {number}      [delayMs] - Délai avant l'animation (séquences décalées)
+ * @param {{celebrate?: boolean}} [opts] - false = marqueur permanent seulement
  */
-export function applyRank10Effect(avatarEl, pseudoEl, delayMs = 0) {
+export function applyRank10Effect(avatarEl, pseudoEl, delayMs = 0, { celebrate = true } = {}) {
   if (!avatarEl) return;
 
   const wrap = avatarEl.parentElement;
@@ -668,9 +677,12 @@ export function applyRank10Effect(avatarEl, pseudoEl, delayMs = 0) {
   if (pseudoEl && !pseudoEl.querySelector(".rank10-icon")) {
     const icon = document.createElement("span");
     icon.className = "rank10-icon";
-    icon.textContent = "✦";
+    icon.textContent = "✦ MAX";
+    icon.title = "True Confidant";
     pseudoEl.appendChild(icon);
   }
+
+  if (!celebrate) return;
 
   setTimeout(() => {
     if (!wrap) return;

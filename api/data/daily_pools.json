@@ -2232,7 +2232,9 @@
       "Marian Summer ( Minami Miyashita )",
       "Puppet Summer ( Miyu Sahara )",
       "Closer Radiance ( Motoha Arai )",
-      "Miku ( Hatsune Miku )"
+      "Miku ( Hatsune Miku )",
+      "Bui Cosmic ( YUI )",
+      "Berry Summer ( Ichigo Shikano )"
     ],
     "opusByName": {
       "Aigis": [
@@ -2450,6 +2452,12 @@
         "P5X"
       ],
       "Closer Radiance ( Motoha Arai )": [
+        "P5X"
+      ],
+      "Bui Cosmic ( YUI )": [
+        "P5X"
+      ],
+      "Berry Summer ( Ichigo Shikano )": [
         "P5X"
       ],
       "Miku ( Hatsune Miku )": [

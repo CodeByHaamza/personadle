@@ -1,0 +1,6 @@
+Options -Indexes
+
+RewriteEngine On
+
+# /api/notices/42 → index.php (PATCH accusé de lecture)
+RewriteRule ^[0-9]+$   index.php [L,QSA]

@@ -1,0 +1,233 @@
+/**
+ * friends_tabs.test.js — profile/friends/friends.js, onglets et ⚔ Défier (2.2)
+ *
+ * La page Amis empilait cinq blocs ; elle a maintenant trois onglets (Amis /
+ * Boîte / Trouver) et un bouton ⚔ par ami qui emmène sur la page du mode choisi
+ * avec l'ami présélectionné. Ces tests couvrent la mécanique d'onglets (état,
+ * persistance, ?tab=, pastilles) et le sélecteur de mode.
+ */
+
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import {
+  activateTab,
+  initialTab,
+  setTabBadge,
+  openChallengeModePicker,
+} from "../profile/friends/friends.js";
+
+function mountTabs() {
+  document.body.innerHTML = `
+    <nav class="fr-tabs">
+      <button class="fr-tab active" data-tab="friends" aria-selected="true">Amis <span class="fr-tab-badge hidden" id="tabFriendsBadge">0</span></button>
+      <button class="fr-tab" data-tab="inbox" aria-selected="false">Boîte <span class="fr-tab-badge hidden" id="tabInboxBadge">0</span></button>
+      <button class="fr-tab" data-tab="find" aria-selected="false">Trouver</button>
+    </nav>
+    <div class="fr-tab-panel" data-tab-panel="friends"></div>
+    <div class="fr-tab-panel hidden" data-tab-panel="inbox"></div>
+    <div class="fr-tab-panel hidden" data-tab-panel="find"><input id="browseSearch" /></div>`;
+}
+
+const visiblePanels = () =>
+  [...document.querySelectorAll(".fr-tab-panel")]
+    .filter((p) => !p.classList.contains("hidden"))
+    .map((p) => p.dataset.tabPanel);
+
+beforeEach(() => {
+  vi.restoreAllMocks();
+  localStorage.clear();
+  window.history.replaceState({}, "", "/profile/friends/friends.html");
+  delete window._personadleApi;
+  mountTabs();
+});
+
+describe("activateTab", () => {
+  it("n'affiche qu'un panneau à la fois et marque l'onglet actif", () => {
+    activateTab("inbox");
+    expect(visiblePanels()).toEqual(["inbox"]);
+    const active = [...document.querySelectorAll(".fr-tab.active")].map((b) => b.dataset.tab);
+    expect(active).toEqual(["inbox"]);
+    expect(document.querySelector('[data-tab="inbox"]').getAttribute("aria-selected")).toBe("true");
+    expect(document.querySelector('[data-tab="friends"]').getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("mémorise le dernier onglet ouvert", () => {
+    activateTab("find");
+    expect(localStorage.getItem("friendsTab")).toBe("find");
+  });
+
+  it("retombe sur Amis pour un onglet inconnu", () => {
+    activateTab("nope");
+    expect(visiblePanels()).toEqual(["friends"]);
+  });
+});
+
+describe("initialTab", () => {
+  it("Amis par défaut", () => {
+    expect(initialTab()).toBe("friends");
+  });
+
+  it("reprend le dernier onglet mémorisé", () => {
+    localStorage.setItem("friendsTab", "inbox");
+    expect(initialTab()).toBe("inbox");
+  });
+
+  it("?tab= dans l'URL l'emporte sur la mémoire (lien direct vers la boîte)", () => {
+    localStorage.setItem("friendsTab", "find");
+    window.history.replaceState({}, "", "/profile/friends/friends.html?tab=inbox");
+    expect(initialTab()).toBe("inbox");
+  });
+
+  it("ignore un ?tab= inconnu", () => {
+    window.history.replaceState({}, "", "/profile/friends/friends.html?tab=xyz");
+    expect(initialTab()).toBe("friends");
+  });
+});
+
+describe("setTabBadge", () => {
+  it("affiche le compte et se cache à zéro", () => {
+    setTabBadge("tabInboxBadge", 3);
+    const badge = document.getElementById("tabInboxBadge");
+    expect(badge.textContent).toBe("3");
+    expect(badge.classList.contains("hidden")).toBe(false);
+
+    setTabBadge("tabInboxBadge", 0);
+    expect(badge.classList.contains("hidden")).toBe(true);
+  });
+
+  it("ne plante pas sur une pastille absente", () => {
+    expect(() => setTabBadge("nope", 2)).not.toThrow();
+  });
+});
+
+describe("openChallengeModePicker — ⚔ depuis l'onglet Amis", () => {
+  it("propose les 6 modes, chacun menant à sa page avec l'ami présélectionné", () => {
+    document.body.innerHTML = `
+      <div class="fr-entry"><div class="fr-entry-actions">
+        <button class="fr-btn js-challenge" data-friend-id="42" data-pseudo="Ann">⚔</button>
+      </div></div>`;
+    const btn = document.querySelector(".js-challenge");
+    openChallengeModePicker(btn, "42", "Ann");
+
+    const links = [...document.querySelectorAll(".fr-mode-picker__btn")];
+    expect(links).toHaveLength(6);
+    for (const a of links) {
+      expect(a.getAttribute("href")).toMatch(/^\.\.\/\.\.\/[A-Za-z]+Mode\/[A-Za-z]+\.html\?challenge=42$/);
+    }
+    expect(document.querySelector(".fr-mode-picker__title").textContent).toContain("Ann");
+  });
+
+  it("un second appel remplace le sélecteur au lieu d'en empiler un deuxième", () => {
+    document.body.innerHTML = `
+      <div class="fr-entry"><button class="js-challenge" data-friend-id="1" data-pseudo="A">⚔</button></div>
+      <div class="fr-entry"><button class="js-challenge" data-friend-id="2" data-pseudo="B">⚔</button></div>`;
+    const [b1, b2] = document.querySelectorAll(".js-challenge");
+    openChallengeModePicker(b1, "1", "A");
+    openChallengeModePicker(b2, "2", "B");
+    expect(document.querySelectorAll("#frModePicker")).toHaveLength(1);
+    expect(document.querySelector("#frModePicker").closest(".fr-entry")).toBe(b2.closest(".fr-entry"));
+  });
+
+  it("échappe le pseudo", () => {
+    document.body.innerHTML = `<div class="fr-entry"><button class="js-challenge">⚔</button></div>`;
+    openChallengeModePicker(document.querySelector(".js-challenge"), "1", "<img src=x>");
+    expect(document.querySelector("#frModePicker img")).toBeNull();
+  });
+});
+
+describe("expertModesSharedWith — ligne ⚡ du sélecteur", () => {
+  let expertModesSharedWith, resetExpertStatusCache;
+
+  beforeEach(async () => {
+    ({ expertModesSharedWith } = await import("../profile/friends/friends.js"));
+    ({ resetExpertStatusCache } = await import("../js/gameCore.js"));
+    resetExpertStatusCache();
+  });
+
+  const status = (unlocked) =>
+    Object.fromEntries(
+      ["classic", "emoji", "silhouette", "alloutattack", "personae", "music"].map((m) => [
+        m,
+        { unlocked: unlocked.includes(m) },
+      ])
+    );
+
+  it("ne propose que les modes débloqués des DEUX côtés, dans l'ordre des modes", async () => {
+    const list = vi.fn(async ({ expert_mode }) => ({
+      friends: [
+        { friend_id: 42, expert_unlocked: expert_mode !== "music" }, // Bob : tout sauf Music
+        { friend_id: 7, expert_unlocked: true },
+      ],
+    }));
+    window._personadleApi = {
+      user: { expertStatus: async () => ({ expert_status: status(["music", "classic", "personae"]) }) },
+      friends: { list },
+    };
+    expect(await expertModesSharedWith(42)).toEqual(["classic", "personae"]);
+    // Une requête par mode débloqué chez soi, pas six.
+    expect(list).toHaveBeenCalledTimes(3);
+  });
+
+  it("rien si le joueur n'a aucun Expert, sans appeler l'API amis", async () => {
+    const list = vi.fn();
+    window._personadleApi = {
+      user: { expertStatus: async () => ({ expert_status: status([]) }) },
+      friends: { list },
+    };
+    expect(await expertModesSharedWith(42)).toEqual([]);
+    expect(list).not.toHaveBeenCalled();
+  });
+
+  it("rien si le statut Expert est indisponible (hors ligne) — on ne devine pas", async () => {
+    window._personadleApi = {
+      user: { expertStatus: async () => { throw new Error("offline"); } },
+      friends: { list: vi.fn() },
+    };
+    expect(await expertModesSharedWith(42)).toEqual([]);
+  });
+});
+
+describe("installActiveChallenge — Reprendre depuis un autre appareil", () => {
+  let installActiveChallenge, readActiveChallenge;
+
+  beforeEach(async () => {
+    ({ installActiveChallenge } = await import("../profile/friends/friends.js"));
+    ({ readActiveChallenge } = await import("../js/gameCore.js"));
+    localStorage.clear();
+  });
+
+  it("écrit la case locale du défi, datée du jour de JEU, avec la cible dédiée", () => {
+    // Signalé par Hamza : « Reprendre » ne faisait que rediriger ; sans case
+    // locale (défi accepté ailleurs), le mode jouait la partie du jour.
+    installActiveChallenge({
+      mid: 77,
+      modeKey: "classic",
+      date: "2026-09-10",
+      score: 5,
+      senderId: 8,
+      challengeFilters: "[]",
+      challengeTarget: "Zenkichi Hasegawa",
+      isExpert: false,
+    });
+    const c = readActiveChallenge(false);
+    expect(c).toMatchObject({ msgId: 77, mode: "classic", score: 5, senderId: 8, target: "Zenkichi Hasegawa" });
+    expect(c.challengeDate).toBe("2026-09-10");
+    expect(c.date).not.toBe("2026-09-10"); // jour de jeu = aujourd'hui, pas le jour d'envoi
+  });
+
+  it("applique les filtres de l'expéditeur en sauvegardant les tiens, sauf « [] »", () => {
+    localStorage.setItem("filters_Classic", JSON.stringify(["P5"]));
+    installActiveChallenge({ mid: 1, modeKey: "classic", score: 3, senderId: 2, challengeFilters: '["P3","P4"]', isExpert: false });
+    expect(JSON.parse(localStorage.getItem("filters_Classic"))).toEqual(["P3", "P4"]);
+    expect(readActiveChallenge(false).originalFilters).toBe(JSON.stringify(["P5"]));
+
+    localStorage.setItem("filters_Classic", JSON.stringify(["P5"]));
+    installActiveChallenge({ mid: 2, modeKey: "classic", score: 3, senderId: 2, challengeFilters: "[]", isExpert: false });
+    expect(JSON.parse(localStorage.getItem("filters_Classic"))).toEqual(["P5"]);
+  });
+
+  it("un défi Expert va dans SA case, sans toucher à la case normale", () => {
+    installActiveChallenge({ mid: 3, modeKey: "music", score: 3, senderId: 2, isExpert: true });
+    expect(readActiveChallenge(true)?.msgId).toBe(3);
+    expect(readActiveChallenge(false)).toBeNull();
+  });
+});

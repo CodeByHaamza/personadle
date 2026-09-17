@@ -129,6 +129,7 @@
 
 /* ── Bouton fermer — HAUT GAUCHE ──────────────────────────── */
 .cn-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   position: fixed;
   top: 18px;
   left: 18px;
@@ -254,6 +255,15 @@
   background: #c1121f;
 }
 
+.cn-btn--later {
+  background: transparent;
+  color: #ddd;
+  border: 1px solid #555;
+}
+.cn-btn--later:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
 .cn-btn--refuse {
   background: #2a2a2a;
   color: #888;

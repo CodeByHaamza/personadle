@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getStreakTier, formatSongTime } from "../profile/profile-format.js";
+import { getStreakTier, formatSongTime, bestModeOverall } from "../profile/profile-format.js";
 
 describe("getStreakTier", () => {
   it("returns tier 0 for no streak", () => {
@@ -37,5 +37,40 @@ describe("formatSongTime", () => {
     expect(formatSongTime(-5)).toBe("0:00");
     expect(formatSongTime(NaN)).toBe("0:00");
     expect(formatSongTime(Infinity)).toBe("0:00");
+  });
+});
+
+describe("bestModeOverall", () => {
+  const e = (mode, games, wins) => ({ mode, games, wins });
+
+  it("retourne le mode au meilleur taux de victoire", () => {
+    const best = bestModeOverall([e("classic", 10, 5), e("music", 4, 4), e("emoji", 8, 7)]);
+    expect(best.mode).toBe("music");
+    expect(best.rate).toBe(1);
+  });
+
+  it("ignore les modes sous le plancher de parties — un 1/1 ne fait pas 100 %", () => {
+    const best = bestModeOverall([e("classic", 10, 8), e("music", 1, 1), e("emoji", 2, 2)]);
+    expect(best.mode).toBe("classic");
+  });
+
+  it("à taux égal, le plus joué l'emporte", () => {
+    const best = bestModeOverall([e("classic", 4, 2), e("music", 10, 5)]);
+    expect(best.mode).toBe("music");
+    expect(best.games).toBe(10);
+  });
+
+  it("null quand aucun mode n'atteint le plancher, ou sans données", () => {
+    expect(bestModeOverall([e("classic", 2, 2)])).toBeNull();
+    expect(bestModeOverall([])).toBeNull();
+    expect(bestModeOverall(undefined)).toBeNull();
+  });
+
+  it("le plancher est paramétrable", () => {
+    expect(bestModeOverall([e("classic", 2, 2)], 1).mode).toBe("classic");
+  });
+
+  it("tolère des compteurs absents ou non numériques", () => {
+    expect(bestModeOverall([{ mode: "classic" }, e("music", 3, "2")]).mode).toBe("music");
   });
 });
