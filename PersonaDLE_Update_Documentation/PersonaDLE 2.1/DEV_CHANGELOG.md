@@ -13,6 +13,29 @@
 
 ---
 
+## 2026-09-17 — content(music expert): vers plus représentatifs pour « A Lone Prayer »
+
+Les vers révélés pour « A Lone Prayer » (Persona 1) étaient bons — de vraies paroles de la
+chanson, correctement transcrites. Ils n'étaient simplement pas les plus marquants ni les
+plus représentatifs du morceau, alors que c'est exactement ce qu'on attend d'un indice
+progressif. Remplacés par le passage emblématique de la chanson, décision de Hamza.
+Rien n'était faux : c'est un choix de contenu, pas un correctif de données.
+
+Modification faite dans `expert_mode_content.md` (source de vérité curée à la main), puis
+régénération de `musicsMode/database/expert_lyrics.js` via `npm run lyrics:build` — jamais
+d'édition directe du fichier généré.
+
+### Détails techniques
+- 7 vers → 9 vers, donc un palier de révélation de plus sur cette chanson : rien à
+  ajuster côté `modeMusic.js`, la progression se cale sur `expertLyrics[titre].length`.
+- Pool Expert Music inchangé (76 chansons), `npm run pools:check` vert : le nombre de
+  vers n'entre pas dans `api/data/daily_pools.json`.
+- Le titre reste stocké brut ici — pas de masquage manuel, `maskTerms()` s'en charge à
+  l'affichage (ce texte-ci ne cite de toute façon pas son propre titre).
+- Reporté dans le changelog joueur (`PersonaDLE_Update.html`, section « Confort de jeu »
+  FR + EN) et non dans « Corrections notables » : rien n'est corrigé ici, le passage
+  précédent était valide.
+
 ## 2026-09-02 — fix(défi): un défi périmé gelait l'enregistrement des parties
 
 Deux fonctions lisaient la **même** case `localStorage`, avec **deux règles différentes** :
