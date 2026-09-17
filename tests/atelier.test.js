@@ -11,7 +11,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   initAtelier,
+  openAtelier,
   openAtelierTab,
+  closeAtelier,
   savedAtelierTab,
   initSaveStatus,
   scheduleAutosave,
@@ -29,28 +31,44 @@ const TABS = ["avatar", "border", "theme", "title", "badges"];
 
 function atelierDom() {
   document.body.innerHTML = `
-    <section id="atelier">
-      <div id="atelierTabs" role="tablist">
-        ${TABS.map(
-          (p, i) =>
-            `<button class="atelier-tab" role="tab" data-pane="${p}" aria-selected="${i === 0}"></button>`
-        ).join("")}
+    <button id="openAtelierBtn"></button>
+    <div id="saveStatus" data-save-status>
+      <span class="save-status-dot"></span><span id="saveStatusText" data-save-status-text></span>
+    </div>
+    <div id="atelierModal" class="modal hidden">
+      <div class="modal-content" id="atelier">
+        <div class="atelier-modal-head">
+          <div id="atelierSaveStatus" data-save-status>
+            <span data-save-status-text></span>
+          </div>
+          <button id="closeAtelierModal"></button>
+        </div>
+        <div id="atelierTabs" role="tablist">
+          ${TABS.map(
+            (p, i) =>
+              `<button class="atelier-tab" role="tab" data-pane="${p}" aria-selected="${i === 0}"></button>`
+          ).join("")}
+        </div>
+        <div class="atelier-panes">
+          ${TABS.map(
+            (p, i) => `<div class="atelier-pane${i === 0 ? "" : " hidden"}" data-pane="${p}"></div>`
+          ).join("")}
+        </div>
       </div>
-      ${TABS.map(
-        (p, i) => `<div class="atelier-pane${i === 0 ? "" : " hidden"}" data-pane="${p}"></div>`
-      ).join("")}
-    </section>
-    <div id="saveStatus"><span class="save-status-dot"></span><span id="saveStatusText"></span></div>
+    </div>
     <div id="previewBadges"></div>
     <p id="badgePickHint"></p>
     <div id="badgePickGrid"></div>
   `;
 }
 
+const modalOpen = () => !document.getElementById("atelierModal").classList.contains("hidden");
+
 const selectedTab = () =>
   document.querySelector('.atelier-tab[aria-selected="true"]')?.dataset.pane;
 const visiblePane = () => document.querySelector(".atelier-pane:not(.hidden)")?.dataset.pane;
 const status = () => document.getElementById("saveStatus").dataset.state;
+const modalStatus = () => document.getElementById("atelierSaveStatus").dataset.state;
 
 beforeEach(() => {
   atelierDom();
@@ -107,17 +125,82 @@ describe("onglets de l'atelier", () => {
     expect(document.querySelector('.atelier-tab[data-pane="avatar"]').tabIndex).toBe(-1);
   });
 
-  it("scroll:true amène l'atelier à l'écran (clic depuis la carte d'identité)", () => {
-    const spy = vi.fn();
-    document.getElementById("atelier").scrollIntoView = spy;
-    openAtelierTab("avatar", { scroll: true });
-    expect(spy).toHaveBeenCalledOnce();
-  });
-
   it("ne plante pas sur une page sans atelier (profil public, tests d'autres modules)", () => {
     document.body.innerHTML = "";
     expect(() => openAtelierTab("title")).not.toThrow();
+    expect(() => openAtelier("title")).not.toThrow();
+    expect(() => closeAtelier()).not.toThrow();
     expect(() => initAtelier()).not.toThrow();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La modale (2.2, second retour Hamza : la page profil est une vitrine)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("la modale de personnalisation", () => {
+  it("openAtelierTab seul ne l'ouvre PAS — c'est openAtelier qui ouvre", () => {
+    openAtelierTab("theme");
+    expect(modalOpen()).toBe(false);
+    openAtelier("theme");
+    expect(modalOpen()).toBe(true);
+    expect(visiblePane()).toBe("theme");
+  });
+
+  it("openAtelier sans argument rouvre le dernier onglet utilisé", () => {
+    localStorage.setItem("atelierTab", "badges");
+    openAtelier();
+    expect(modalOpen()).toBe(true);
+    expect(visiblePane()).toBe("badges");
+  });
+
+  it("« Personnaliser », la croix et le clic sur le fond ouvrent/ferment", () => {
+    initAtelier();
+    document.getElementById("openAtelierBtn").click();
+    expect(modalOpen()).toBe(true);
+
+    document.getElementById("closeAtelierModal").click();
+    expect(modalOpen()).toBe(false);
+
+    document.getElementById("openAtelierBtn").click();
+    document.getElementById("atelierModal").click(); // le fond, pas le contenu
+    expect(modalOpen()).toBe(false);
+  });
+
+  it("un clic DANS la modale ne la ferme pas", () => {
+    initAtelier();
+    openAtelier();
+    document.getElementById("atelier").click();
+    expect(modalOpen()).toBe(true);
+  });
+
+  it("fermer envoie tout de suite ce qui était en attente (et rien sinon)", async () => {
+    const sync = vi.fn().mockResolvedValue();
+    initSaveStatus(sync);
+    initAtelier();
+    openAtelier();
+
+    closeAtelier();
+    expect(sync, "rien en attente : pas d'envoi pour une simple fermeture").not.toHaveBeenCalled();
+
+    openAtelier();
+    scheduleAutosave();
+    closeAtelier();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(sync, "un choix en attente part sans attendre le regroupement").toHaveBeenCalledOnce();
+  });
+
+  it("l'indicateur de l'en-tête de la modale suit celui de la carte", async () => {
+    const sync = vi.fn().mockResolvedValue();
+    initSaveStatus(sync);
+    scheduleAutosave();
+    expect(status()).toBe("saving");
+    expect(modalStatus()).toBe("saving");
+    await vi.advanceTimersByTimeAsync(700);
+    expect(modalStatus()).toBe("saved");
+    expect(document.querySelector("#atelierSaveStatus [data-save-status-text]").textContent).toBe(
+      "Saved"
+    );
   });
 });
 
@@ -153,8 +236,9 @@ describe("enregistrement automatique", () => {
     await vi.advanceTimersByTimeAsync(700);
     expect(status()).toBe("error");
     expect(document.getElementById("saveStatus").classList.contains("save-status--error")).toBe(true);
+    expect(modalStatus()).toBe("error");
 
-    document.getElementById("saveStatus").click();
+    document.getElementById("atelierSaveStatus").click(); // relance depuis la modale aussi
     await vi.advanceTimersByTimeAsync(0);
     expect(sync).toHaveBeenCalledTimes(2);
     expect(status()).toBe("saved");
@@ -209,21 +293,27 @@ function profileWith(unlocked, selected) {
   return { badges: unlocked, selectedBadges: selected, eventCodes: [], stats: {} };
 }
 
-describe("renderBadgesPreview — 4 emplacements", () => {
-  it("rend toujours 4 cases : épinglés puis « + » pour le reste", () => {
+describe("renderBadgesPreview — les badges mis en avant", () => {
+  // 2.2 : les épinglés + UNE case « + » tant qu'il reste de la place, le tout
+  // centré (retour Hamza du 2026-09-16 : quatre cadres vides laissaient un trou).
+  it("rend les épinglés et une seule case « + »", () => {
     renderBadgesPreview(profileWith(ids, ids.slice(0, 2)));
-    const slots = document.querySelectorAll("#previewBadges .pin-slot");
-    expect(slots).toHaveLength(4);
     expect(document.querySelectorAll(".pin-slot--filled")).toHaveLength(2);
-    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(2);
+    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(1);
     // Les images gardent la classe/données que la carte de partage lit
     const imgs = document.querySelectorAll("#previewBadges img.badge-preview-img");
     expect([...imgs].map((i) => i.dataset.badgeId)).toEqual(ids.slice(0, 2));
   });
 
-  it("sans badge épinglé : 4 « + » et aucun texte « No badges selected »", () => {
+  it("aucune case « + » quand les quatre sont pris", () => {
+    renderBadgesPreview(profileWith(ids, ids.slice(0, 4)));
+    expect(document.querySelectorAll(".pin-slot--filled")).toHaveLength(4);
+    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(0);
+  });
+
+  it("sans badge épinglé : une case « + » et aucun texte « No badges selected »", () => {
     renderBadgesPreview(profileWith(ids, []));
-    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(4);
+    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(1);
     expect(document.getElementById("previewBadges").textContent).not.toMatch(/No badges/);
   });
 
@@ -233,7 +323,7 @@ describe("renderBadgesPreview — 4 emplacements", () => {
     expect(visiblePane()).toBe("badges");
   });
 
-  it("la croix désépingle sans passer par la modale, et re-rend les 4 cases", () => {
+  it("la croix désépingle sans passer par la modale, et re-rend l'ensemble", () => {
     const profile = profileWith(ids, ids.slice(0, 3));
     const save = vi.fn();
     renderBadgePicker(profile, save); // fournit le saveProfile courant
@@ -242,7 +332,7 @@ describe("renderBadgesPreview — 4 emplacements", () => {
     expect(profile.selectedBadges).toEqual([ids[0], ids[2]]);
     expect(save).toHaveBeenCalledOnce();
     expect(document.querySelectorAll(".pin-slot--filled")).toHaveLength(2);
-    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(2);
+    expect(document.querySelectorAll(".pin-slot--empty")).toHaveLength(1);
   });
 
   it("ignore un id épinglé qui n'existe plus dans le catalogue", () => {
@@ -296,6 +386,13 @@ describe("renderBadgePicker — onglet Badges", () => {
     renderBadgePicker(profileWith([], []), vi.fn());
     expect(document.querySelector("#badgePickGrid .badge-pick-empty")).not.toBeNull();
     expect(document.querySelectorAll(".badge-pick")).toHaveLength(0);
+  });
+
+  it("un emplacement vide ouvre la MODALE sur l'onglet Badges", () => {
+    renderBadgesPreview(profileWith(ids, []));
+    document.querySelector(".pin-slot--empty").click();
+    expect(modalOpen()).toBe(true);
+    expect(visiblePane()).toBe("badges");
   });
 
   it("toggleBadgeSelection re-rend aussi le sélecteur (une seule source d'état)", () => {

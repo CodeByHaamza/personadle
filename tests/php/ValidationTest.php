@@ -122,8 +122,10 @@ final class ValidationTest extends TestCase
     }
 
     // ── personadle_validate_avatar ───────────────────────────────────────────
-    // 2.2 : un portrait de la galerie (../img/avatar/…) est accepté — avant, le
-    // choix d un GIF animé était refusé en 400 et revenait au prochain pull cloud.
+    // 2.2 : deux formes valides — le chemin d'un portrait de la galerie (seule
+    // forme possible pour un GIF animé, refusée en 400 jusqu'ici) et son
+    // recadrage encodé. Tout le reste est refusé ; côté client, il n'y a plus
+    // d'import d'image du tout (décision Hamza du 2026-09-16, dérives).
 
     private function galleryDir(): string
     {
@@ -141,11 +143,32 @@ final class ValidationTest extends TestCase
         $this->assertNull(personadle_validate_avatar(null, $this->galleryDir()));
     }
 
-    public function testAvatarAcceptsBase64DataUrls(): void
+    public function testAvatarAcceptsACroppedPortrait(): void
     {
+        // Le recadrage d'un portrait sort du canvas en PNG/JPEG/WebP encodé.
         $this->assertNull(personadle_validate_avatar('data:image/png;base64,iVBORw0KGgo=', $this->galleryDir()));
+        $this->assertNull(personadle_validate_avatar('data:image/jpeg;base64,/9j/4AAQ', $this->galleryDir()));
         $this->assertNull(personadle_validate_avatar('data:image/webp;base64,UklGR', $this->galleryDir()));
-        $this->assertNotNull(personadle_validate_avatar('data:image/svg+xml;base64,PHN2Zz4=', $this->galleryDir()));
+    }
+
+    public function testAvatarRejectsNonImageDataUrls(): void
+    {
+        foreach ([
+            'data:image/svg+xml;base64,PHN2Zz4=', // SVG = script potentiel
+            'data:text/html,<script>alert(1)</script>',
+            'javascript:alert(1)',
+        ] as $bad) {
+            $this->assertSame(
+                'Invalid avatar format',
+                personadle_validate_avatar($bad, $this->galleryDir()),
+                $bad
+            );
+        }
+    }
+
+    public function testAvatarEmptyStringIsTreatedAsNoAvatar(): void
+    {
+        $this->assertNull(personadle_validate_avatar('', $this->galleryDir()));
     }
 
     public function testAvatarAcceptsAnExistingGalleryPortrait(): void

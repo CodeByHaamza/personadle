@@ -13,6 +13,286 @@
 
 ---
 
+## 2026-09-17 — feat(contenu) : 7 titres + 1 badge, filtres en fenêtre, et les cas d'usage des filtres sous test (branche `feat/profil-vitrine`)
+
+### Contenu (visuels fournis par Hamza)
+
+Sept calling cards et un badge, ré-encodés au gabarit du dépôt (1146 px de large
+pour les titres, 1024² pour le badge : les sources faisaient jusqu'à 4 Mo sans
+perte) et seedés par la **migration 044** — plus `sql/bdd_mysql.sql` pour qu'une
+base fraîche les ait aussi.
+
+| Titre | Rareté | Condition |
+|---|---|---|
+| S.E.E.S. | epic | posséder 8 titres |
+| We Share the Same Soul (Aigis & Metis) | epic | un Social Link au rang 10 |
+| I Am Not a Princess (Kotone) | rare | 25 victoires parfaites |
+| The Case Is Never Closed (Naoto) | rare | 25 victoires en Silhouette |
+| Don't Need Your Pity (Shinjiro) | epic | 25 victoires rapides en Classique |
+| Take Your Heart (Phantom Thieves) | legendary | 40 victoires en All-Out Attack |
+| Some Things Don't Burn Out (Tatsuya) | legendary | jouer un 24 juin (sortie d'Innocent Sin) |
+
+Le badge « Tartarus Conqueror » du visuel est renommé **Song of Orpheus** (epic,
+25 victoires en Mode Expert) : le dessin montre les deux Orphée — celui de Makoto
+et celui de Kotone — et Messiah, c'est-à-dire la descente aux Enfers et le retour,
+pas la tour, et la lyre est dessinée dessus. Le nom « Katabasis » (le mot grec
+pour cette descente) a été écrit puis écarté le même jour : personne ne le
+comprend sans lire la description, ce qu'un nom de badge doit éviter. Le slug,
+le fichier image et la clé i18n suivent (`song_of_orpheus`) — rien n'était encore
+déployé. Descriptions traduites en 5 langues dans la migration (titres) et dans
+`lang/*.json` + `badgesData.js` (badge, la table `badges` ne portant pas de
+colonne description).
+
+**Deux conditions nouvelles** dans `api/lib/condition_check.php` :
+- `titles_count` → nombre de titres possédés (S.E.E.S. rassemble la troupe) ;
+- `played_on_date` → avoir joué un jour d'anniversaire, `condition_mode` au
+  format `'MM-JJ'` (`condition_value` est un INT, il ne peut pas porter la date).
+  Cumulatif comme le reste : la journée reste dans l'historique, le titre ne se
+  reperd pas (CLAUDE.md §7).
+
+Au passage, `condition_check.php` charge désormais `validation.php` lui-même : il
+dépend de `PERSONADLE_MODES` et ne marchait que si un autre fichier l'avait déjà
+inclus — vrai via `bootstrap.php` en prod, faux quand PHPUnit lance ce seul
+fichier de tests (erreur latente, visible en lançant `ConditionCheckTest` seul).
+
+### Les filtres d'opus : une vraie fenêtre
+
+Le menu déroulant devient une **modale centrée** (fond assombri, en-tête avec
+compteur « 19 / 19 » et croix, deux lignes qui expliquent ce que les filtres
+changent). Une carte par jeu : le logo à gauche, et **ses opus se déroulent vers
+la droite au clic dessus**, chacun arrivant à son tour (retour Hamza — les
+montrer tous d'office remplissait la fenêtre sans qu'on ait rien demandé). Un jeu
+retenu porte une pastille ✓, un jeu écarté un contour en pointillés.
+
+L'animation passe par `max-width` et non `width` : un volet en ligne dont la
+largeur est `auto` ne s'interpole pas, il saute. `max-height: 0` l'accompagne,
+sinon la carte gardait la hauteur du volet replié. `prefers-reduced-motion` coupe
+transition et arrivées échelonnées.
+
+Conséquence côté tests : le bouton « ✓ Tout / ✗ Aucun » d'un jeu est injecté
+**dans** son volet, donc inatteignable tant qu'on n'a pas déroulé.
+`filters_usecases.spec.js` passe par un helper `expandGame()` qui fait ce clic
+d'abord, comme le joueur — c'est ce qui a fait tomber quatre scénarios en CI
+alors qu'ils passaient avant le déroulé.
+
+Le fond est à `z-index: 999` et non 10 000 : `.filter-panel` (`z-index: 1000`,
+`position: absolute`) crée un contexte d'empilement, donc la fenêtre est peinte
+dedans — un fond posé sur le `body` plus haut voilait la fenêtre elle-même.
+
+### Un bug trouvé par les nouveaux tests : les filtres d'un défi restaient
+
+`tests-e2e/filters_usecases.spec.js` (12 scénarios) couvre la fenêtre, l'effet sur
+l'autocomplétion, la persistance, l'indépendance par mode, la cible du jour (tirée
+du catalogue COMPLET quels que soient les filtres — c'est ce que le serveur
+recalcule), les défis et ce que reçoit le serveur.
+
+Le scénario « un receveur qui n'avait jamais touché ses filtres » a sorti un vrai
+bug : `installActiveChallenge()` écrit les filtres de l'expéditeur, et
+`releaseActiveChallenge()` ne les retirait pas quand le receveur n'avait **aucune**
+clé enregistrée (il s'abstenait d'écrire, au lieu de supprimer). Accepter un défi
+« P5 uniquement » restreignait donc son mode Classique **pour toujours**, sans
+qu'il ait rien choisi. Corrigé : clé absente à l'acceptation → clé supprimée à la
+libération.
+
+### Angle mort connu
+
+Changer un filtre relance une partie (décision 2.2) : cette partie-là n'a donc
+pas la cible seedée du jour et l'anti-triche la compte comme un écart. C'est
+volontaire côté jeu, mais ça pèse dans le journal — à trancher quand la phase 2
+(rejet) sera envisagée.
+
+---
+
+## 2026-09-16 — fix(ui) : douze corrections de finition (index, profil, pages de mode) — branche `feat/profil-vitrine`
+
+Une passe de relecture de Hamza sur le site en local, douze points. Rien de
+structurant, mais c'est ce qu'on voit tous les jours.
+
+**Accueil**
+1. « Nouveautés » (bas-gauche) et « Reset quotidien » (bas-droite) flottent au-dessus
+   du footer et n'avaient ni la même couleur ni de contour : en sombre ils se
+   fondaient dedans. Les deux partagent maintenant le même habillage (fond franc,
+   bordure, ombre) — leurs règles vivent dans deux fichiers différents
+   (`css/index.css` et le `<style>` de `index.html`), un commentaire croisé le dit.
+2. Les trois liens sociaux collaient au footer : 26 px d'air sous `#socialLinks`.
+
+**Profil**
+3. Dans la modale de partage, les pastilles de couleur sortaient en 52 × 34 (donc
+   ovales) : `global.css §18` impose `padding: 12px 20px` à tout `<button>` et la
+   règle ne remettait que `min-height: 0`. L'interrupteur « afficher le titre »,
+   lui, est un `<label>` — `.share-selector-row label { min-width: 72px }`
+   l'élargissait à 72 px et le bouton rond s'arrêtait au milieu de sa piste.
+4. Choisir un portrait ouvre maintenant le recadrage dans la foulée : beaucoup sont
+   mal cadrés d'origine. Le portrait est appliqué avant d'ouvrir — fermer sans
+   toucher à rien le garde tel quel. Un GIF, lui, ne peut pas être recadré (le
+   canvas lui ferait perdre son animation).
+5. La modale de partage se ferme en cliquant à côté, comme les autres.
+6. **Réinitialiser et supprimer son compte** étaient deux boutons rouges en bas de la
+   page profil, dont un derrière un simple `confirm()` natif. Ils déménagent dans
+   ⚙ Paramètres, section « Zone de danger », et le reset a enfin sa propre
+   confirmation : ce qu'on perd, ce qu'on garde (le compte), et quoi faire sans
+   compte (exporter d'abord) — le tout traduit. La section n'apparaît que là où la
+   page sait ouvrir ces confirmations (`window._personadleDanger`).
+7. « Couleur perso » demandait deux clics (la pastille, puis le carré de couleur qui
+   apparaissait dessous) : le nuancier s'ouvre maintenant au premier clic, et un
+   champ hexadécimal permet de taper une couleur précise.
+
+**Pages de mode**
+8. Les règles étaient écrasées : titres de section, puces et séparateurs se
+   touchaient. Rythme vertical revu (interlignes, marges, largeur de ligne à 78ch).
+9. La flèche du bouton « Filtres » (9 px à 60 % d'opacité) et celle des groupes
+   d'opus (40 %) étaient quasi invisibles : plus grandes, pleinement opaques.
+10. Les filtres d'opus ne disaient pas ce qu'ils font : une ligne d'explication
+    ouvre le panneau, un jeu retenu porte une pastille ✓ (un jeu écarté a un contour
+    en pointillés), les boutons « tout / aucun » de groupe ont un libellé court pour
+    ne plus être confondus avec le bouton global, et le panneau défile au lieu de
+    dépasser de l'écran (P5X était coupé).
+11. Le lien du logo s'étendait sur toute la largeur de l'en-tête : cliquer à côté du
+    logo renvoyait à l'accueil. Il est réduit à l'image.
+12. Le ▶ des lecteurs (mode Musique, musique de profil) paraissait collé à gauche
+    dans son rond : le glyphe a des blancs latéraux asymétriques, flex le centre sur
+    sa boîte et pas sur ce qu'on voit. Décalage optique, retiré sur le ⏸.
+
+**Au passage** : `js/modal.js` — Escape fermait TOUTES les modales ouvertes, chacune
+ayant posé son écouteur. Seule celle du dessus réagit maintenant (l'ordre de
+`_trapState` fait foi) ; sans ça, fermer le recadrage fermait aussi l'atelier.
+
+---
+
+## 2026-09-16 — feat(profil, classement) : la page profil devient une vitrine, l'atelier passe en modale, le classement repasse au thème du site (branche `feat/profil-vitrine`)
+
+Second retour de Hamza dans la journée, après avoir essayé l'atelier de la PR #121 :
+« les badges encore plus visibles (petits et cachés, on les voit mal — et la carte
+Badges dit "toute ta collection" mais on ne les voit pas dedans) ; l'avatar dans une
+modale, pas dans la fenêtre par défaut ; p't'être une modale globale pour la
+personnalisation ; le bouton exporter on l'enlève et on le met dans les paramètres,
+et on rend le partage plus beau et intuitif ; les wallpapers débloqués, trouve un
+autre moyen, ils sont supra grands. En bref presque tout à changer. Et refais le
+style de la page ranking, vu que Amis a bien été refait. »
+
+Puis, en cours de route : pas d'import d'image en photo de profil (dérives), mais on
+doit pouvoir recadrer un portrait mal cadré ; les badges de la page « comme avant »
+(gros médaillons) ; et de quoi consulter tous les badges et titres d'un ami.
+
+### La page profil est une vitrine, l'édition vit dans une modale
+
+- Bouton **« Personnaliser »** sur la carte d'identité → `#atelierModal`, la modale qui
+  contient les cinq onglets (Avatar, Bordure, Thème, Titre, Badges épinglés). Le ✎ de
+  l'avatar, la puce de titre et un emplacement de badge vide y mènent aussi, sur le bon
+  onglet. Le dernier onglet ouvert est mémorisé, la croix / Escape / le fond ferment, et
+  fermer envoie tout de suite ce qui restait en attente (`closeAtelier`).
+- `#atelierModal` et `#sharePreviewModal` sont à **z-index 10000** : `.modal` vit à 1000
+  et `.top-right-stack` (Mode sombre, ⚙, Compendium) à 9999 — la croix de fermeture se
+  retrouvait sous le bouton Compendium. Même convention que la modale des badges. Le
+  recadrage, ouvert DEPUIS l'atelier, passe à 10002.
+- L'indicateur d'enregistrement est dupliqué dans l'en-tête de la modale : il est écrit
+  sur tous les `[data-save-status]`, la carte étant derrière le fond assombri.
+- **Blowout de grille corrigé** : `grid-template-columns: 300px 1fr` → `minmax(0, 1fr)`.
+  Une bande à défilement horizontal (les wallpapers) élargissait la colonne de droite à
+  1008 px et toute la page défilait de côté.
+
+### Badges : une vraie vitrine, en grand
+
+`renderBadgesShowcase()` (badgesManager.js) rend les badges **débloqués** dans la carte
+Badges — gros médaillons cerclés d'or, comme avant la 2.2, épingle sur ceux qui sont sur
+la carte d'identité, compteur `n / 63` dans le titre, clic = zoom. La carte ne contenait
+qu'un bouton « See All Badges ». La collection complète (verrouillés + conditions) reste
+dans `#badgesModal`, qui perd son bouton « Sauvegarder » (chaque clic enregistre déjà).
+
+### Wallpapers : une bande, plus une galerie
+
+Sept vignettes de 180 px mangeaient ~500 px de haut. `renderUnlockableWallpaperGallery()`
+rend maintenant une **bande horizontale** de jetons 128 × 72 (~84 px de haut au total) +
+compteur ; le clic ouvre `showWallpaperPreview()` — l'image en grand, son nom, sa
+condition (lisible, au lieu d'être écrasée sur la vignette). Verrouillé = assombri.
+
+### Partage : l'aperçu d'abord
+
+La modale empilait tous les réglages en haut, l'aperçu tombait sous la ligne de
+flottaison et les boutons encore plus bas. Elle passe en deux colonnes (aperçu collant à
+gauche, réglages à droite, actions dans une barre fixe), une seule colonne sous 860 px.
+**Bug corrigé au passage** : la carte partait avec « Guest Player » et l'ancien avatar —
+`setupShareProfile` capturait la référence du profil à l'init, or `initProfile()`
+RÉASSIGNE `profile` après le pull cloud. `generatePreview()` relit désormais
+localStorage (`_liveProfile`).
+
+### Export → ⚙ Paramètres
+
+`exportProfileFile()` vit dans `js/settings-modal.js` (section « Données »), lu depuis
+localStorage donc utilisable partout. La modale des paramètres est montée sur la page
+profil **même déconnecté** (`_save()` gère déjà `userId === null`) : un joueur sans
+compte est justement celui qui a besoin d'exporter. La carte « Data » du profil devient
+la carte « Partage ».
+
+### Avatar : portraits du jeu uniquement, mais recadrables
+
+- **Plus d'import d'image** (`#avatarUploadInput` retiré) : un avatar est vu par les
+  amis, le classement et les défis, et rien ne modère une image libre.
+- Le **recadrage reste** (`#avatarCropModal`), mais il ne s'ouvre que sur le portrait
+  porté — certains portraits sont mal cadrés par défaut. Sa branche morte `cropTarget
+  === "song"` disparaît avec `cropTarget`.
+- `api/user/migrate.php` écrivait `avatar_data` **sans aucune validation** (JSON fourni
+  par l'utilisateur au moment de l'inscription) : il passe maintenant par
+  `personadle_validate_avatar()`, comme `PATCH /api/user/:id`.
+- Angle mort assumé et documenté dans la fonction : un appel d'API fabriqué à la main
+  peut encore poster une image encodée arbitraire — le serveur ne peut pas distinguer le
+  recadrage d'un portrait d'une autre image. Fermer ça demanderait de stocker le cadrage
+  (zoom/offsets) au lieu des pixels et de refaire le rendu partout où un avatar
+  s'affiche (amis, classement, calling cards, carte de partage, compendium).
+
+### Profil consulté : sa collection de badges
+
+`profile-view.js` rend la vitrine de badges du joueur visité (compteur compris) : la
+carte Badges n'est plus masquée en entier, seul le bouton vers SA propre collection
+l'est. Une carte listant ses **titres** a été essayée puis retirée le même jour
+(« ça rend mal » — des calling cards 16:9 empilées) ; l'ajout correspondant à
+`GET /api/user/public` a été annulé avec elle. Deux rectangles vides corrigés au
+passage : `.song-card.hidden` et `.profile-card.hidden` gardaient leur hauteur (la page
+n'a pas de règle `.hidden` globale), et le sélecteur de mode favori s'affichait vide sur
+un profil consulté.
+
+### Où vivent les 4 badges mis en avant
+
+Ils étaient passés sous la photo de profil avec la PR #121 ; ils retournent **dans la
+carte Badges** (« je veux l'ancien fonctionnement, les 4 affichés dans l'onglet badge et
+pas sous la pdp »), au-dessus de la vitrine des débloqués, en emplacements de 76 px. La
+carte d'identité ne garde que l'identité : avatar, titre, pseudo, code ami, le bouton
+« Personnaliser » et l'état d'enregistrement.
+
+### Classement : le style de la page Amis
+
+`leaderboard.css` réécrit sur le système de `friends.css` (jetons `--lb-*` redéfinis par
+`.darkmode`) : la page était sombre en permanence, seul écran noir du site en mode clair.
+Le top 3 devient un **podium** (`renderPodium()`, ordre visuel 2–1–3, 1ᵉʳ plus grand et
+doré ; une colonne sur mobile), les lignes s'aèrent, sa propre position est épinglée en
+haut de la carte (`position: sticky`), et « 674 games » en dur devient
+`leaderboard.games_count` traduit.
+
+### Fichiers
+
+`profile/profile.html` (modale atelier, vitrine, carte Titres, modale de partage),
+`profile/atelier.js` (ouverture/fermeture de modale, statut multi-cible),
+`profile/profile-page.js`, `profile/badges/badgesManager.js` (+ `renderBadgesShowcase`),
+`profile/wallpapers-ui.js` (bande + aperçu), `profile/share-card.js` (`_liveProfile`),
+`profile/profile-view.js`, `js/settings-modal.js` (+ `exportProfileFile`), `js/auth.js`,
+`api/user/public.php` (+ `titles`), `api/user/migrate.php`, `api/lib/validation.php`,
+`profile/profile-page.css` (§10c–10f), `profile/leaderboard/leaderboard.{css,js}`,
+`css/settings-modal.css`, `lang/*.json` (+18 clés, 3 retirées).
+
+Tests : `tests/atelier.test.js` (+11 : modale, statut de la modale, vitrine),
+`tests/wallpapersUi.test.js` (bande + aperçu), `tests/php/ValidationTest.php`,
+`tests-e2e/profile_atelier.spec.js` (14 scénarios : vitrine, modale, recadrage, pas
+d'import, export dans les paramètres, collection d'un ami…).
+
+### Angles morts connus
+
+- Le podium n'apparaît qu'à la première page et à partir de 3 entrées ; en dessous, les
+  lignes gardent leur médaille en emoji.
+- La modale de partage garde ses `<select>` natifs : la refonte porte sur la mise en
+  page, pas sur les contrôles eux-mêmes.
+
+---
+
 ## 2026-09-16 — feat(profile) : l'atelier — personnalisation du profil sans bouton Save (branche `feat/profile-atelier`)
 
 Demande Hamza (2026-09-15) : « rendre la personnalisation du profil plus intuitive —

@@ -256,6 +256,82 @@ final class ConditionCheckTest extends TestCase
         $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'badges_count', null, 2));
     }
 
+    // ── titles_count (titre S.E.E.S. — « une escouade, ce n'est pas une personne ») ──
+
+    public function testTitlesCountCountsUnlockedTitles(): void
+    {
+        $uid = $this->makeUser();
+        $titleIds = self::$pdo->query('SELECT id FROM titles ORDER BY id LIMIT 2')
+            ->fetchAll(PDO::FETCH_COLUMN);
+        $this->assertCount(2, $titleIds, 'le catalogue de titres doit être seedé');
+        $ins = self::$pdo->prepare('INSERT INTO user_titles (user_id, title_id) VALUES (?, ?)');
+        $ins->execute([$uid, $titleIds[0]]);
+
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'titles_count', null, 1));
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'titles_count', null, 2));
+
+        $ins->execute([$uid, $titleIds[1]]);
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'titles_count', null, 2));
+    }
+
+    public function testTitlesCountIsPerUser(): void
+    {
+        $uid = $this->makeUser('a');
+        $other = $this->makeUser('b');
+        $titleId = (int) self::$pdo->query('SELECT id FROM titles ORDER BY id LIMIT 1')->fetchColumn();
+        self::$pdo->prepare('INSERT INTO user_titles (user_id, title_id) VALUES (?, ?)')
+            ->execute([$other, $titleId]);
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'titles_count', null, 1));
+    }
+
+    // ── played_on_date (titre Tatsuya — un 24 juin, n'importe quelle année) ────
+
+    private function playedOn(int $userId, string $date): void
+    {
+        self::$pdo->prepare(
+            'INSERT INTO game_sessions (user_id, mode, played_date, target_name, result, attempts)
+             VALUES (?, "classic", ?, "X", "win", 1)'
+        )->execute([$userId, $date]);
+    }
+
+    public function testPlayedOnDateMatchesTheDayWhateverTheYear(): void
+    {
+        $uid = $this->makeUser();
+        $this->playedOn($uid, '2024-06-24');
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'played_on_date', '06-24', null));
+    }
+
+    public function testPlayedOnDateIgnoresOtherDays(): void
+    {
+        $uid = $this->makeUser();
+        $this->playedOn($uid, '2026-06-23');
+        $this->playedOn($uid, '2026-07-24');
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $uid, 'played_on_date', '06-24', null));
+    }
+
+    public function testPlayedOnDateRejectsAMalformedDate(): void
+    {
+        $uid = $this->makeUser();
+        $this->playedOn($uid, '2026-06-24');
+        // condition_mode mal rempli : on refuse plutôt que d'accorder au hasard
+        foreach ([null, '', '24-06-2026', 'juin', '6-24'] as $bad) {
+            $this->assertFalse(
+                personadle_verify_condition(self::$pdo, $uid, 'played_on_date', $bad, null),
+                var_export($bad, true)
+            );
+        }
+    }
+
+    public function testPlayedOnDateStaysTrueForever(): void
+    {
+        // CLAUDE.md §7 : un accès gagné ne se reperd jamais. La session du
+        // 24 juin reste dans l'historique, la condition reste vraie l'année d'après.
+        $uid = $this->makeUser();
+        $this->playedOn($uid, '2020-06-24');
+        $this->playedOn($uid, '2026-09-16');
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $uid, 'played_on_date', '06-24', null));
+    }
+
     // ── social_link_min_rank (remplace l'ancien social_link_rank_10, retiré car
     //    strictement équivalent à social_link_min_rank + condition_value=10, et
     //    aucune donnée de seed ne l'utilisait — voir docblock de condition_check.php) ──

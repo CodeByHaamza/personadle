@@ -559,6 +559,21 @@ export const badgesList = [
     check: (stats, profile) => (profile?.classicHintsUsed || 0) >= 50,
   },
   {
+    id: "song_of_orpheus",
+    name: "Song of Orpheus",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Song_Of_Orpheus.webp",
+    condition: "Win 25 games in Expert Mode",
+    description:
+      "Orpheus walked down into the dark with nothing but a lyre, and walked back out singing. Twenty-five Expert wins later, so did you.",
+    secret: false,
+    // Vérifié UNIQUEMENT côté serveur (condition_type `expert_wins_total`,
+    // api/lib/condition_check.php) : le Mode Expert n'alimente pas `user_stats`,
+    // ses victoires se recomptent depuis `game_sessions`. Même cas que
+    // denial_of_self — badgesManager fusionne `is_unlocked` de GET /api/badges.
+    check: () => false,
+  },
+  {
     id: "velvet_regular",
     name: "Velvet Regular",
     category: BADGE_CATEGORIES.ACHIEVEMENT,

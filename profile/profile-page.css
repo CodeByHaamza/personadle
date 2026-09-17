@@ -113,9 +113,16 @@
 /* Desktop : side-by-side (1/3 gauche + 2/3 droite) */
 .profile-container {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  /* minmax(0, 1fr) et pas 1fr : la piste doit pouvoir rétrécir sous la taille
+     min-content de son contenu, sinon une bande à défilement horizontal (la
+     collection de wallpapers) élargit toute la colonne et la page défile de côté. */
+  grid-template-columns: 300px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+}
+
+.profile-right {
+  min-width: 0;
 }
 
 /* =====================================================
@@ -1802,6 +1809,17 @@ body.darkmode .custom-theme-row input[type="color"] {
   box-shadow: 0 3px 10px rgba(var(--accent-rgb), 0.35);
 }
 
+/* Le glyphe ▶ a des blancs latéraux asymétriques : centré « mathématiquement »
+   par flex, il paraît collé à gauche dans un rond (retour Hamza du 2026-09-16).
+   1 px de décalage optique, retiré quand le bouton affiche ⏸ (symétrique, lui). */
+.song-play-btn {
+  text-indent: 2px;
+}
+.song-play-btn.playing,
+.song-play-btn[data-state="playing"] {
+  text-indent: 0;
+}
+
 .song-play-btn:hover {
   background: var(--accent-hover);
   transform: scale(1.08);
@@ -1943,12 +1961,6 @@ body.darkmode .song-empty-hint {
    14. SHARE MODAL — Interface de partage de profil
    ===================================================== */
 
-/* Modale élargie pour contenir la preview + sélecteurs */
-#sharePreviewModal .modal-content {
-  max-width: 600px;
-  padding: 26px 24px 22px;
-}
-
 #sharePreviewModal h2 {
   font-family: "Oswald", "Arial Black", Arial, sans-serif;
   font-size: 1rem;
@@ -2067,13 +2079,17 @@ body.darkmode .song-empty-hint {
   margin-bottom: 12px;
 }
 
-/* Toggle switch (include title) */
+/* Toggle switch (include title) — c'est un <label>, et « .share-selector-row
+   label { min-width: 72px } » l'élargissait : le bouton rond parcourait ses
+   20 px et s'arrêtait bien avant le bout de la piste. */
+.share-selector-row .share-toggle,
 .share-toggle {
   position: relative;
   display: inline-block;
   width: 44px;
+  min-width: 44px;
   height: 24px;
-  flex-shrink: 0;
+  flex: 0 0 44px;
 }
 .share-toggle input {
   opacity: 0;
@@ -2116,9 +2132,14 @@ body.darkmode .song-empty-hint {
 }
 
 .share-color-swatch {
-  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
+  /* global.css §18 impose min-height ET padding: 12px 20px à tout <button> :
+     sans padding: 0 la pastille sortait en 52 × 34, donc ovale. */
+  min-height: 0;
+  padding: 0;
+  box-sizing: border-box;
   width: 26px;
   height: 26px;
+  flex: 0 0 26px;
   border-radius: 50%;
   border: 2px solid rgba(0, 0, 0, 0.15);
   cursor: pointer;
@@ -2139,8 +2160,10 @@ body.darkmode .song-empty-hint {
 }
 
 .share-color-picker {
+  box-sizing: border-box;
   width: 32px;
   height: 26px;
+  flex: 0 0 32px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   padding: 1px 2px;
@@ -2369,8 +2392,11 @@ body.darkmode .share-btn--email:hover {
 
 /* Tablette : preview identique (260px tient dans la modale 90%) */
 @media (max-width: 768px) {
-  #sharePreviewModal .modal-content {
-    padding: 22px 18px 18px;
+  .share-modal .share-body,
+  .share-modal .share-actions,
+  .share-modal .share-head {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .share-preview-area {
@@ -2385,8 +2411,11 @@ body.darkmode .share-btn--email:hover {
 
 /* Mobile : preview réduite, boutons en colonne */
 @media (max-width: 480px) {
-  #sharePreviewModal .modal-content {
-    padding: 18px 12px 16px;
+  .share-modal .share-body,
+  .share-modal .share-actions,
+  .share-modal .share-head {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .share-preview-area {
@@ -3394,107 +3423,8 @@ body.darkmode .vb-code {
   flex-shrink: 0;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   🖼️ Wallpapers débloquables
-   ═══════════════════════════════════════════════════════════════════════════ */
-#unlockableWallpaperGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.unlockable-wp-item {
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  aspect-ratio: 16/9;
-  cursor: default;
-  border: 2px solid transparent;
-  transition: border-color 0.2s;
-}
-
-.unlockable-wp-item.unlocked {
-  border-color: var(--accent);
-  cursor: pointer;
-}
-
-.unlockable-wp-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.unlockable-wp-item.locked img {
-  filter: brightness(0.3) blur(2px);
-}
-
-.wp-lock-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  color: #fff;
-  gap: 6px;
-}
-
-.wp-lock-cond {
-  font-size: 0.62rem;
-  text-align: center;
-  padding: 0 8px;
-  opacity: 0.85;
-  line-height: 1.3;
-}
-
-.wp-unlocked-label {
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.6);
-  color: #ffd700;
-  font-size: 0.7rem;
-  padding: 2px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-  transition: opacity 0.2s;
-}
-
-/* Rappel de la condition d'obtention au survol d'un wallpaper DÉBLOQUÉ
-   (comme badges/titres). Caché par défaut, révélé au hover/focus. */
-.wp-cond-hover {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0 10px;
-  background: rgba(0, 0, 0, 0.72);
-  color: #fff;
-  font-size: 0.66rem;
-  line-height: 1.35;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.unlockable-wp-item.unlocked:hover .wp-cond-hover,
-.unlockable-wp-item.unlocked:focus-within .wp-cond-hover {
-  opacity: 1;
-}
-.unlockable-wp-item.unlocked:hover .wp-unlocked-label {
-  opacity: 0;
-}
-
-@media (max-width: 480px) {
-  #unlockableWallpaperGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-}
+/* Les wallpapers : voir §10d (.wp-strip / .wp-chip / .wp-preview) — la grille
+   plein écran de la 2.1 a été remplacée par une bande compacte. */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    🏅 TITLES MODAL — classes préfixées tm- pour éviter tout conflit
@@ -3932,6 +3862,7 @@ body.darkmode .song-row:hover { background: rgba(230, 57, 70, 0.2); }
 }
 .song-card-opus { font-size: 0.62rem; font-weight: 700; opacity: 0.55; }
 .song-card-play {
+  text-indent: 2px; /* centrage optique du ▶ (cf. .song-play-btn) */
   position: absolute;
   top: 12px;
   right: 12px;
@@ -4409,14 +4340,7 @@ body.darkmode .title-chip-empty {
   color: #777;
 }
 
-/* ── 4 emplacements de badges épinglés ── */
-.pinned-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0 14px;
-}
+/* ── Les 4 badges épinglés, en grand, dans la carte Badges ── */
 .pinned-label {
   font-size: 0.68rem;
   font-weight: 700;
@@ -4424,17 +4348,26 @@ body.darkmode .title-chip-empty {
   text-transform: uppercase;
   color: #999;
 }
-.pinned-slots {
-  display: grid;
-  grid-template-columns: repeat(4, 54px);
-  gap: 10px;
-  margin: 0;
+/* Sélecteur avec l id : badges.css pose #previewBadges { display: flex } et
+   gagnait sur la classe — les emplacements tombaient à 23 px de large. */
+#previewBadges.pinned-slots {
+  /* Centré et fluide : 1 badge → au milieu, 2 → les deux au milieu, etc. Une
+     grille de 4 colonnes fixes laissait un vide à droite dès qu'il en manquait
+     (retour Hamza du 2026-09-16). */
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 14px;
+  margin: 0 0 16px;
+  width: 100%;
+}
+#previewBadges.pinned-slots .pin-slot {
+  flex: 0 1 152px;
+  max-width: 152px;
 }
 .pin-slot {
   position: relative;
-  width: 54px;
-  height: 54px;
+  aspect-ratio: 1 / 1;
   border-radius: 12px;
   border: 2px dashed #d0d0d0;
   background: #f6f6f6;
@@ -4452,9 +4385,9 @@ body.darkmode .title-chip-empty {
   background: #fff;
 }
 .pin-slot--filled .badge-preview-img {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
   border: 0;
   box-shadow: none;
   object-fit: cover;
@@ -4469,10 +4402,10 @@ body.darkmode .title-chip-empty {
 .pin-unpin {
   min-height: 0;
   position: absolute;
-  top: -7px;
-  right: -7px;
-  width: 20px;
-  height: 20px;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -4493,7 +4426,7 @@ body.darkmode .title-chip-empty {
 .pin-slot--empty {
   min-height: 0;
   padding: 0;
-  font-size: 1.4rem;
+  font-size: 2rem;
   font-weight: 300;
   line-height: 1;
   color: #aaa;
@@ -4583,16 +4516,17 @@ body.darkmode .save-status[data-state="saved"] .save-status-dot {
   background: #3ddc84;
 }
 
-/* ── Le panneau ── */
-.atelier {
-  background: #fff;
-  border-radius: 14px;
-  border: 2px solid #e8e8e8;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  position: relative;
-  overflow: hidden;
+/* ── La modale d'atelier ── */
+.atelier-modal {
+  width: min(96vw, 980px);
+  max-width: 980px;
+  max-height: min(88vh, 880px);
+  padding: 0; /* l'en-tête, le corps et les panneaux gèrent leur propre marge */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* le défilement vit dans .atelier-panes, pas sur la modale */
 }
-.atelier::before {
+.atelier-modal::before {
   content: "";
   position: absolute;
   top: 0;
@@ -4600,16 +4534,72 @@ body.darkmode .save-status[data-state="saved"] .save-status-dot {
   right: 0;
   height: 4px;
   background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 50%, var(--accent) 100%);
-  z-index: 1;
+  z-index: 2;
 }
-.atelier-title {
+.atelier-modal-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #ececec;
+  flex: 0 0 auto;
+}
+.atelier-modal-title {
   margin: 0;
-  padding: 18px 22px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1a1a1a;
 }
+.atelier-modal .save-status--modal {
+  margin: 0 0 0 auto;
+}
+.atelier-modal-close,
+.share-modal-close {
+  min-height: 0; /* bouton-icône : sort de la cible tactile globale (global.css §18) */
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.atelier-modal-close:hover,
+.share-modal-close:hover {
+  background: var(--accent);
+  color: #fff;
+}
+body.darkmode .atelier-modal-title {
+  color: #f0f0f0;
+}
+body.darkmode .atelier-modal-head,
+body.darkmode .share-head,
+body.darkmode .share-actions {
+  border-color: #2e2e2e;
+}
+body.darkmode .atelier-modal-close,
+body.darkmode .share-modal-close {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ccc;
+}
+
 .atelier-body {
   display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
-  border-top: 1px solid #ececec;
+  grid-template-columns: 168px minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0; /* sinon la grille refuse de rétrécir et la modale déborde */
 }
 .atelier-tabs {
   display: flex;
@@ -4617,6 +4607,7 @@ body.darkmode .save-status[data-state="saved"] .save-status-dot {
   padding: 8px 0;
   background: #f6f6f6;
   border-right: 1px solid #ececec;
+  overflow-y: auto;
 }
 .atelier-tab {
   min-height: 0; /* la hauteur vient du padding, pas de la cible tactile globale */
@@ -4660,6 +4651,8 @@ body.darkmode .save-status[data-state="saved"] .save-status-dot {
 }
 .atelier-panes {
   min-width: 0;
+  overflow-y: auto; /* un seul ascenseur pour tout l'atelier */
+  overscroll-behavior: contain;
 }
 .atelier-pane {
   padding: 18px 22px 22px;
@@ -4699,34 +4692,57 @@ body.darkmode .save-status[data-state="saved"] .save-status-dot {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.atelier-avatar-grid {
-  max-height: 340px;
-  padding-right: 6px;
+.atelier-modal .atelier-avatar-grid {
+  max-height: none;
+  padding-right: 2px;
 }
 .atelier-avatar-grid .avatar-group-grid {
   grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
 }
 
 /* Onglet Bordure : pastilles plus grandes qu'en 2.1 (elles sont seules sur l'onglet) */
-.atelier .swatch-row {
+.atelier-modal .swatch-row {
   gap: 12px;
 }
-.atelier .swatch {
+.atelier-modal .swatch {
   width: 40px;
   height: 40px;
   font-size: 1rem;
 }
 
 /* Onglet Thème : chips en grille fluide */
-.atelier .theme-swatches {
+.atelier-modal .theme-swatches {
   grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
   gap: 8px;
 }
-.atelier .theme-swatch {
+.atelier-modal .theme-swatch {
   height: 52px;
 }
-.atelier .custom-theme-row {
+.atelier-modal .custom-theme-row {
   margin-top: 4px;
+}
+
+/* Saisie hexadécimale à côté du nuancier natif */
+.custom-theme-hex {
+  width: 96px;
+  padding: 7px 10px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #fff;
+  color: #1a1a1a;
+}
+.custom-theme-hex:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+body.darkmode .custom-theme-hex {
+  background: #111;
+  border-color: #3a3a3a;
+  color: #f0f0f0;
 }
 
 /* Onglet Titre : les cartes tm- étaient dessinées pour une modale sombre —
@@ -4734,9 +4750,7 @@ body.darkmode .save-status[data-state="saved"] .save-status-dot {
 .atelier-titles-grid {
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 12px;
-  max-height: 460px;
-  overflow-y: auto;
-  padding: 2px 6px 2px 2px;
+  padding: 2px;
 }
 .atelier-titles-grid .tm-card {
   background: #f6f6f6;
@@ -4800,9 +4814,7 @@ body.darkmode .atelier-titles-grid .tm-rarity {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
   gap: 10px;
-  max-height: 420px;
-  overflow-y: auto;
-  padding: 2px 6px 2px 2px;
+  padding: 2px;
 }
 .badge-pick {
   min-height: 0;
@@ -4933,14 +4945,6 @@ body.darkmode .fav-mode-row {
 }
 
 /* ── Dark mode du panneau ── */
-body.darkmode .atelier {
-  background: #1a1a1a;
-  border-color: #2e2e2e;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-}
-body.darkmode .atelier-body {
-  border-top-color: #2a2a2a;
-}
 body.darkmode .atelier-tabs {
   background: #141414;
   border-right-color: #2a2a2a;
@@ -4953,7 +4957,7 @@ body.darkmode .atelier-tab[aria-selected="true"] {
   color: #f0f0f0;
 }
 body.darkmode .atelier-tab[aria-selected="true"] {
-  background: #1a1a1a;
+  background: #1f1f1f;
 }
 body.darkmode .atelier-hint,
 body.darkmode .card-desc {
@@ -4965,10 +4969,23 @@ body.darkmode .pinned-label {
 
 /* ── Responsive : onglets en ligne au-dessus des panneaux ── */
 @media (max-width: 768px) {
+  .atelier-modal,
+  .share-modal {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
   .atelier-body {
     grid-template-columns: 1fr;
+    /* auto + minmax(0,1fr) : sinon les deux rangées se partagent la hauteur et la
+       barre d onglets occupe un tiers de l écran. */
+    grid-template-rows: auto minmax(0, 1fr);
   }
   .atelier-tabs {
+    align-items: center;
     flex-direction: row;
     overflow-x: auto;
     padding: 0 6px;
@@ -5000,15 +5017,8 @@ body.darkmode .pinned-label {
   .atelier-pane {
     padding: 14px 16px 18px;
   }
-  .atelier-avatar-grid {
-    max-height: 260px;
-  }
   .atelier-titles-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    max-height: 380px;
-  }
-  .badge-pick-grid {
-    max-height: 320px;
   }
 }
 
@@ -5035,12 +5045,8 @@ body.darkmode .pinned-label {
   .profile-equipped-title-img {
     margin: 0;
   }
-  .pinned-block {
-    align-items: flex-start;
-  }
-  .pinned-slots {
-    grid-template-columns: repeat(4, minmax(0, 54px));
-    justify-content: start;
+  #previewBadges.pinned-slots {
+    gap: 10px;
   }
   .save-status {
     margin: 0 0 6px;
@@ -5074,4 +5080,333 @@ body.darkmode .pinned-label {
   .atelier-tab {
     font-size: 0.68rem;
   }
+}
+
+/* =====================================================
+   10d. VITRINE DU PROFIL (2.2 — second retour Hamza)
+   La page profil MONTRE (badges gagnés, collection de
+   wallpapers, carte de partage) ; tout ce qui s'édite est
+   passé dans la modale d'atelier.
+   ===================================================== */
+
+/* Bouton d'entrée dans l'atelier, sur la carte d'identité. La rangée lui donne
+   de l'air : collé au code ami juste au-dessus, on lisait un seul bloc. */
+.customize-row {
+  margin: 18px 0 12px;
+  padding-top: 16px;
+  border-top: 1px solid #ececec;
+}
+body.darkmode .customize-row {
+  border-top-color: #2a2a2a;
+}
+.btn-customize {
+  width: 100%;
+  margin: 0;
+}
+
+/* Compteur aligné à droite dans un titre de carte (12 / 63, 0 / 7…) */
+.card-count {
+  margin-left: auto;
+  font-family: "Oswald", "Arial Narrow", Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #999;
+  font-variant-numeric: tabular-nums;
+}
+body.darkmode .card-count {
+  color: #777;
+}
+
+/* ── Wallpapers : une bande, plus une galerie plein écran ── */
+.wp-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 2px 10px;
+  scrollbar-width: thin;
+}
+.wp-chip {
+  min-height: 0;
+  position: relative;
+  flex: 0 0 auto;
+  width: 128px;
+  height: 72px;
+  padding: 0;
+  border: 2px solid #e4e4e4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0a0a0a;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+.wp-chip:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+.wp-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.wp-chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.wp-chip.locked img {
+  filter: grayscale(1) brightness(0.4);
+}
+.wp-chip.unlocked {
+  border-color: var(--accent);
+}
+.wp-chip-lock,
+.wp-chip-check {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  pointer-events: none;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+.wp-chip-check {
+  inset: auto 4px 4px auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+body.darkmode .wp-chip {
+  border-color: #2e2e2e;
+}
+body.darkmode .wp-chip.unlocked {
+  border-color: var(--accent);
+}
+
+/* Aperçu plein écran d'un wallpaper */
+.wp-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.84);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.wp-preview.show {
+  opacity: 1;
+}
+.wp-preview-box {
+  position: relative;
+  width: min(92vw, 900px);
+  background: #141414;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.wp-preview-img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: cover;
+  display: block;
+}
+.wp-preview.locked .wp-preview-img {
+  filter: grayscale(1) brightness(0.35);
+}
+.wp-preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 18px 16px;
+  color: #fff;
+}
+.wp-preview-name {
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.wp-preview-cond {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+.wp-preview.unlocked .wp-preview-cond {
+  color: #3ddc84;
+}
+.wp-preview-close {
+  min-height: 0;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.wp-preview-close:hover {
+  background: var(--accent);
+}
+
+/* Ligne d'état sous les boutons de partage */
+.share-status-line {
+  margin: 8px 0 0;
+  font-size: 0.82em;
+  opacity: 0.7;
+}
+
+/* =====================================================
+   10e. MODALE DE PARTAGE — l'aperçu d'abord
+   ===================================================== */
+
+.share-modal {
+  width: min(96vw, 940px);
+  max-width: 940px;
+  max-height: min(92vh, 900px);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.share-modal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  z-index: 2;
+}
+.share-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #ececec;
+  flex: 0 0 auto;
+}
+.share-modal-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+}
+.share-modal-close {
+  margin-left: auto;
+}
+body.darkmode .share-modal-title {
+  color: #f0f0f0;
+}
+.share-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 22px;
+  padding: 18px 20px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+.share-stage {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.share-modal .share-preview-area {
+  margin: 0;
+  position: sticky;
+  top: 0;
+}
+.share-controls {
+  min-width: 0;
+}
+.share-modal .share-actions {
+  padding: 14px 20px;
+  border-top: 1px solid #ececec;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  flex: 0 0 auto;
+}
+
+/* Sous 860px : l'aperçu passe au-dessus des réglages */
+@media (max-width: 860px) {
+  .share-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .share-modal .share-preview-area {
+    position: static;
+  }
+  .share-modal .share-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* =====================================================
+   10f. COUCHES — modales plein écran au-dessus des boutons flottants
+   .top-right-stack (Mode sombre, ⚙, Compendium) vit à z-index 9999 :
+   une modale laissée à la couche 1000 de .modal (css/global.css) passe
+   DESSOUS, et sa croix de fermeture se retrouve sous le Compendium.
+   Même convention que la modale des badges (badges.css, 10000).
+   ===================================================== */
+
+#atelierModal,
+#sharePreviewModal {
+  z-index: 10000;
+}
+
+/* Le recadrage s'ouvre DEPUIS l'atelier : il doit passer par-dessus. */
+#avatarCropModal {
+  z-index: 10002;
+}
+
+/* Une carte masquée l'est vraiment : la page n'a pas de règle `.hidden` globale
+   (chaque composant a la sienne), et #viewTitlesCard ne doit apparaître qu'en
+   mode consultation, quand profile-view.js retire la classe. */
+.profile-card.hidden {
+  display: none;
+}
+
+/* Même raison : la carte musique masquée gardait 34 px de haut (un rectangle
+   blanc vide sous la carte d'identité sur un profil sans musique). */
+.song-card.hidden {
+  display: none;
+}
+
+/* Conséquences listées dans les modales destructrices (reset / suppression) */
+.danger-consequences {
+  margin: 0 0 18px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: #555;
+  text-align: left;
+}
+.danger-consequences li::marker {
+  color: #dc3545;
+}
+body.darkmode .danger-consequences {
+  color: #bbb;
 }

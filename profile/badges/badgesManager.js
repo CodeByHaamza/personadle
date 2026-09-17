@@ -4,7 +4,7 @@
 
 import { badgesList, BADGE_CATEGORIES, getBadgeById } from "./badgesData.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
-import { openAtelierTab } from "../atelier.js";
+import { openAtelier } from "../atelier.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
 let _lastSaveProfile = () => {};
 
@@ -190,7 +190,7 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
       // Re-render : renderBadgesModal était déjà appelé avant la fin de ce fetch async
       renderBadgesPreview(profile);
       renderBadgePicker(profile, saveProfile);
-      renderBadgesModal(profile, saveProfile);
+          renderBadgesModal(profile, saveProfile);
     }
 
     // Local → backend (bloqué si le profil vient d'un autre compte)
@@ -740,14 +740,18 @@ export function renderBadgesPreview(profile) {
     preview.appendChild(slot);
   });
 
-  for (let i = ids.length; i < MAX_SELECTED_BADGES; i++) {
+  // Une seule case « + », et seulement s'il reste de la place : quatre cadres en
+  // pointillés côte à côte laissaient un grand vide dès qu'on n'avait qu'un ou
+  // deux badges (retour Hamza du 2026-09-16). Le tout est centré, donc l'affichage
+  // s'adapte au nombre.
+  if (ids.length < MAX_SELECTED_BADGES) {
     const empty = document.createElement("button");
     empty.type = "button";
     empty.className = "pin-slot pin-slot--empty";
     empty.setAttribute("aria-label", _tr("profile.pin_badge", "Pin a badge"));
     empty.title = _tr("profile.pin_badge", "Pin a badge");
     empty.textContent = "+";
-    empty.onclick = () => openAtelierTab("badges", { scroll: true });
+    empty.onclick = () => openAtelier("badges");
     preview.appendChild(empty);
   }
 
@@ -1052,53 +1056,28 @@ function setupModalControls(openBtn, closeBtn, modal) {
     };
   }
 
-  // Fermer en cliquant en dehors
-  if (modal) {
-    modal.onclick = (e) => {
-      if (e.target === modal) {
+  // Fermer en cliquant en dehors. La modale des badges n'a PAS de fond : c'est
+  // une boîte centrée posée sur la page, donc « cliquer à côté » veut dire
+  // cliquer n'importe où hors de la boîte (retour Hamza du 2026-09-16). Escape
+  // ferme aussi.
+  if (modal && !modal._outsideBound) {
+    modal._outsideBound = true;
+    document.addEventListener("click", (e) => {
+      if (modal.classList.contains("hidden")) return;
+      if (modal.contains(e.target)) return;
+      if (openBtn && (e.target === openBtn || openBtn.contains(e.target))) return;
+      modal.classList.add("hidden");
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) {
         modal.classList.add("hidden");
       }
-    };
+    });
   }
 
-  // Bouton « Sauvegarder » explicite, en bas de la modale (sticky). La sélection
-  // s'auto-sauve déjà à chaque clic, mais ce bouton confirme visuellement
-  // (sync cloud best-effort + feedback inline + fermeture).
-  if (modal && !document.getElementById("saveBadgesBtn")) {
-    const _t = (k, fb) => {
-      const r = window.i18n?.t?.(k);
-      return r != null && r !== k ? r : fb;
-    };
-    const footer = document.createElement("div");
-    footer.className = "badges-modal-footer";
-    const btn = document.createElement("button");
-    btn.id = "saveBadgesBtn";
-    btn.type = "button";
-    btn.className = "badges-save-btn";
-    const label = _t("profile.badges_save", "💾 Save");
-    btn.textContent = label;
-    btn.onclick = () => {
-      try {
-        _lastSaveProfile();
-      } catch (_) {
-        /* sauvegarde best-effort */
-      }
-      // Feedback inline garanti (ne dépend pas de window.showToast qui peut manquer)
-      btn.classList.add("saved");
-      btn.textContent = _t("profile.badges_saved", "✅ Badges saved!");
-      if (typeof window.showToast === "function") {
-        window.showToast(_t("profile.badges_saved", "✅ Badges saved!"));
-      }
-      setTimeout(() => modal.classList.add("hidden"), 550);
-      setTimeout(() => {
-        btn.classList.remove("saved");
-        btn.textContent = label;
-      }, 900);
-    };
-    footer.appendChild(btn);
-    // En bas de la modale, après la grille des badges.
-    modal.appendChild(footer);
-  }
+  // Plus de bouton « Sauvegarder » ici : depuis la 2.2 chaque clic épingle et
+  // envoie tout de suite (voir profile/atelier.js), un bouton Save ne ferait que
+  // laisser croire qu'il faut penser à l'utiliser.
 }
 
 /**
@@ -1314,7 +1293,7 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     renderBadgesModal(profile, saveProfile);
     renderBadgesPreview(profile);
     renderBadgePicker(profile, saveProfile);
-    showCodeMessage(
+      showCodeMessage(
       msg,
       tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
       "success"

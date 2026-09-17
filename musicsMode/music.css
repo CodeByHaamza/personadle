@@ -249,6 +249,15 @@ audio {
   user-select: none;
 }
 
+/* Centrage optique du ▶ : le glyphe est asymétrique, flex le centre sur sa
+   boîte et pas sur ce qu'on voit (retour Hamza du 2026-09-16). */
+#p5PlayIcon {
+  text-indent: 3px;
+}
+#p5PlayIcon.is-pause {
+  text-indent: 0;
+}
+
 .p5-play-btn:hover {
   background: var(--player-accent-dark);
   transform: scale(1.1);

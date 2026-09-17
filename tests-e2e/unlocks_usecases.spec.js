@@ -493,7 +493,8 @@ test.describe.serial("Autre appareil : badges et titres accordés en base", () =
     const ctx = await browser.newContext({ storageState: await u.ctx.storageState() });
     const page = await ctx.newPage();
     await gotoSettled(page, "/profile/profile.html");
-    // 2.2 : la grille des titres vit dans l atelier (onglet Titre), plus de modale.
+    // 2.2 : la grille des titres vit dans la modale d'atelier, onglet Titre.
+    await page.click("#openAtelierBtn");
     await page.click('.atelier-tab[data-pane="title"]');
     const card = page.locator('#titlesModalGrid .tm-card[data-slug="junes"]');
     await expect(card).toHaveAttribute("data-unlocked", "true", { timeout: 10_000 });
