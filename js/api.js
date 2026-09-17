@@ -249,7 +249,7 @@ export const api = {
     syncPending: async () => {
       if (api.stats._syncLock) return;
       api.stats._syncLock = true;
-      const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
+      let pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
       if (!pending.length) {
         api.stats._syncLock = false;
         return;
@@ -257,10 +257,24 @@ export const api = {
 
       // Normalize legacy mode names stored before the server enum was finalised
       const _modeAlias = { shadow: "silhouette", classic: "classic" };
-      const normalize = (s) => {
+      // `_owner` est un marqueur local (voir ownsQueuedEntry, js/gameCore.js) :
+      // il ne part pas au serveur.
+      const normalize = ({ _owner, ...s }) => {
         const m = (s.mode ?? "").toLowerCase();
         return { ...s, mode: _modeAlias[m] ?? m };
       };
+
+      // Appareil partagé : on ne rejoue que les parties de CE compte et celles
+      // d'un invité (sans propriétaire). Celles d'un autre compte restent en file,
+      // intactes, jusqu'à ce qu'il se reconnecte — sinon elles atterrissaient dans
+      // les stats du compte connecté (le serveur ne connaît que le cookie).
+      const ownsEntry = window._personadleOwnsQueuedEntry ?? (() => true);
+      const foreign = pending.filter((s) => !ownsEntry(s));
+      const mine = pending.filter((s) => ownsEntry(s));
+      if (!mine.length) {
+        api.stats._syncLock = false;
+        return;
+      }
 
       // Clé d'idempotence rétro-active : les sessions mises en file AVANT la
       // migration 032 n'en ont pas, et l'unique key par jour qui les protégeait
@@ -276,6 +290,7 @@ export const api = {
         }
       }
       if (seeded) localStorage.setItem("pendingSessions", JSON.stringify(pending));
+      pending = mine;
 
       // Plafond par passage. Le rate limit de POST /api/sessions est de 90 requêtes
       // par 15 min (api/sessions.php), PARTAGÉ avec les parties en cours. Vider une
@@ -337,7 +352,10 @@ export const api = {
           console.warn("⚠️ Session sync failed:", e.message);
         }
       }
-      localStorage.setItem("pendingSessions", JSON.stringify([...remaining, ...deferred]));
+      localStorage.setItem(
+        "pendingSessions",
+        JSON.stringify([...remaining, ...deferred, ...foreign])
+      );
       api.stats._syncLock = false;
     },
     _syncLock: false,
