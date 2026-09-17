@@ -60,8 +60,6 @@ Channels est le seul service tiers qui tienne sans changer d'hébergeur.
 
 ### Angles morts
 
-- Spec complète : `docs/superpowers/specs/2026-09-10-realtime-notifications-design.md`,
-  plan d'implémentation : `docs/superpowers/plans/2026-09-10-realtime-notifications.md`.
 - Compte Pusher (plan gratuit) à créer et ses 4 clés à renseigner sur Hostinger avant
   le déploiement de cette version — sans ça le comportement retombe intégralement sur
   le fallback polling (5 min), aucune régression fonctionnelle mais latence dégradée.
