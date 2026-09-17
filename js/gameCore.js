@@ -186,6 +186,8 @@ export function normalize(str) {
 
 const _gameIdKey = (scope) => `gameId_${scope}`;
 const _gameLoggedKey = (scope) => `gameLogged_${scope}`;
+/** Journée Paris pour laquelle la partie a été ARMÉE (tirage de la cible). */
+const _gameDayKey = (scope) => `gameDay_${scope}`;
 
 /**
  * Identifiant unique de partie.
@@ -214,6 +216,35 @@ function newId() {
 export function startGame(scope) {
   localStorage.setItem(_gameIdKey(scope), newId());
   localStorage.removeItem(_gameLoggedKey(scope));
+  localStorage.setItem(_gameDayKey(scope), parisDateKey());
+}
+
+/**
+ * Journée Paris à laquelle appartient la partie en cours de `scope` — celle où
+ * sa cible a été tirée, pas celle où elle se termine.
+ *
+ * Les deux ne coïncident pas quand l'onglet reste ouvert après minuit sans que
+ * le reset quotidien ait tourné (téléphone en veille : setTimeout est retardé).
+ * Le joueur finit alors le puzzle d'HIER à 00 h 05. Daté du jour de fin, la
+ * session partait avec la cible d'hier sous la date d'aujourd'hui : signalée
+ * par l'anti-triche (qui recalcule la cible du jour), et la journée d'hier
+ * jamais créditée — puis le puzzle d'aujourd'hui, une fois le reset passé,
+ * donnait une seconde partie « du jour ». Le serveur accepte aujourd'hui OU
+ * hier (api/sessions.php) : on lui envoie le vrai jour.
+ *
+ * Repli sur aujourd'hui si la partie n'a pas de journée (ancienne version
+ * armée avant cette clé) ou si elle date d'avant-hier ou plus (le serveur la
+ * refuserait ; mieux vaut une partie signalée qu'une partie perdue).
+ *
+ * @param {string} [scope=_currentScope]
+ * @returns {string} clé "YYYY-MM-DD"
+ */
+export function currentGameDay(scope = _currentScope) {
+  const today = parisDateKey();
+  if (!scope) return today;
+  const armed = localStorage.getItem(_gameDayKey(scope));
+  if (armed === today || armed === shiftDateKey(today, -1)) return armed;
+  return today;
 }
 
 /**
@@ -1003,6 +1034,11 @@ export function checkResetOnLoad(lastPlayedKey, statsScope, onReset) {
     onReset();
   } else {
     console.log(`📅 Same day, no reset needed (${statsScope})`);
+    // Partie armée par une version antérieure à `gameDay_*` : elle est bien
+    // d'aujourd'hui (la date du mode le dit), on le note pour currentGameDay().
+    if (!localStorage.getItem(_gameDayKey(statsScope))) {
+      localStorage.setItem(_gameDayKey(statsScope), today);
+    }
   }
 }
 
@@ -1118,7 +1154,9 @@ export function buildGameSession({
     // Clé backend canonique, quelle que soit la graphie passée par le mode
     // ("AllOutAttack", "All Out Attack", "Classic"…). Voir normalizeModeKey().
     mode: normalizeModeKey(mode) ?? mode,
-    played_date: parisDateKey(),
+    // Le jour où la partie a été ARMÉE, pas celui où elle se termine — voir
+    // currentGameDay() : après minuit sans reset (veille), c'est encore hier.
+    played_date: currentGameDay(),
     target_name: targetName,
     result,
     attempts,
