@@ -32,11 +32,15 @@ base fraîche les ait aussi.
 | Take Your Heart (Phantom Thieves) | legendary | 40 victoires en All-Out Attack |
 | Some Things Don't Burn Out (Tatsuya) | legendary | jouer un 24 juin (sortie d'Innocent Sin) |
 
-Le badge « Tartarus Conqueror » du visuel est renommé **Katabasis** (epic, 25
-victoires en Mode Expert) : le dessin montre les deux Orphée — celui de Makoto et
-celui de Kotone — et Messiah, c'est-à-dire la descente aux Enfers et le retour,
-pas la tour. Descriptions traduites en 5 langues dans la migration (titres) et
-dans `lang/*.json` + `badgesData.js` (badge, la table `badges` ne portant pas de
+Le badge « Tartarus Conqueror » du visuel est renommé **Song of Orpheus** (epic,
+25 victoires en Mode Expert) : le dessin montre les deux Orphée — celui de Makoto
+et celui de Kotone — et Messiah, c'est-à-dire la descente aux Enfers et le retour,
+pas la tour, et la lyre est dessinée dessus. Le nom « Katabasis » (le mot grec
+pour cette descente) a été écrit puis écarté le même jour : personne ne le
+comprend sans lire la description, ce qu'un nom de badge doit éviter. Le slug,
+le fichier image et la clé i18n suivent (`song_of_orpheus`) — rien n'était encore
+déployé. Descriptions traduites en 5 langues dans la migration (titres) et dans
+`lang/*.json` + `badgesData.js` (badge, la table `badges` ne portant pas de
 colonne description).
 
 **Deux conditions nouvelles** dans `api/lib/condition_check.php` :
@@ -55,9 +59,21 @@ fichier de tests (erreur latente, visible en lançant `ConditionCheckTest` seul)
 
 Le menu déroulant devient une **modale centrée** (fond assombri, en-tête avec
 compteur « 19 / 19 » et croix, deux lignes qui expliquent ce que les filtres
-changent). Une carte par jeu, avec **tous ses opus visibles d'emblée** — dans une
-fenêtre, la place ne manque pas, donc plus de flèche à déplier. Un jeu retenu
-porte une pastille ✓, un jeu écarté un contour en pointillés.
+changent). Une carte par jeu : le logo à gauche, et **ses opus se déroulent vers
+la droite au clic dessus**, chacun arrivant à son tour (retour Hamza — les
+montrer tous d'office remplissait la fenêtre sans qu'on ait rien demandé). Un jeu
+retenu porte une pastille ✓, un jeu écarté un contour en pointillés.
+
+L'animation passe par `max-width` et non `width` : un volet en ligne dont la
+largeur est `auto` ne s'interpole pas, il saute. `max-height: 0` l'accompagne,
+sinon la carte gardait la hauteur du volet replié. `prefers-reduced-motion` coupe
+transition et arrivées échelonnées.
+
+Conséquence côté tests : le bouton « ✓ Tout / ✗ Aucun » d'un jeu est injecté
+**dans** son volet, donc inatteignable tant qu'on n'a pas déroulé.
+`filters_usecases.spec.js` passe par un helper `expandGame()` qui fait ce clic
+d'abord, comme le joueur — c'est ce qui a fait tomber quatre scénarios en CI
+alors qu'ils passaient avant le déroulé.
 
 Le fond est à `z-index: 999` et non 10 000 : `.filter-panel` (`z-index: 1000`,
 `position: absolute`) crée un contexte d'empilement, donc la fenêtre est peinte

@@ -90,7 +90,10 @@ test.describe("Atelier — enregistrement automatique, avatar, bordure", () => {
     await expect(page.locator("#atelierModal")).toBeHidden();
     await expect(page.locator("#atelierModal .atelier-tab")).toHaveCount(5);
     await expect(page.locator("#openAtelierBtn")).toBeVisible();
-    await expect(page.locator("#previewBadges .pin-slot")).toHaveCount(4);
+    // Aucun badge épinglé : une seule case « + », pas quatre cadres vides
+    // alignés (retour Hamza — la carte s’adapte au nombre).
+    await expect(page.locator("#previewBadges .pin-slot")).toHaveCount(1);
+    await expect(page.locator("#previewBadges .pin-slot--empty")).toHaveCount(1);
     // La bande de wallpapers est sur la page
     await expect(page.locator(".wp-chip")).toHaveCount(7);
     await expect(page.locator("#wallpapersCount")).toHaveText(/\d+ \/ 7/);
@@ -364,7 +367,8 @@ test.describe("Atelier — badges épinglés et profil consulté", () => {
       "true"
     );
     await expect(page.locator("#previewBadges .pin-slot--filled")).toHaveCount(1);
-    await expect(page.locator("#previewBadges .pin-slot--empty")).toHaveCount(3);
+    // Une seule case « + » reste, quel que soit le nombre de places libres
+    await expect(page.locator("#previewBadges .pin-slot--empty")).toHaveCount(1);
     await expect(page.locator("#badgePickHint")).toHaveAttribute("data-count", "1/4");
     await expect.poll(async () => (await serverProfile(u)).selected_badges).toEqual(["first_win"]);
 

@@ -559,10 +559,10 @@ export const badgesList = [
     check: (stats, profile) => (profile?.classicHintsUsed || 0) >= 50,
   },
   {
-    id: "katabasis",
-    name: "Katabasis",
+    id: "song_of_orpheus",
+    name: "Song of Orpheus",
     category: BADGE_CATEGORIES.ACHIEVEMENT,
-    img: BADGE_IMG_BASE + "Badge_Katabasis.webp",
+    img: BADGE_IMG_BASE + "Badge_Song_Of_Orpheus.webp",
     condition: "Win 25 games in Expert Mode",
     description:
       "Orpheus walked down into the dark with nothing but a lyre, and walked back out singing. Twenty-five Expert wins later, so did you.",

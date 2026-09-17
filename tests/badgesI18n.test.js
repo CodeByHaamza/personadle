@@ -29,7 +29,6 @@ const KEEP_ORIGINAL = new Set([
   "hippocampus_reload", // « Reload » = Persona 3 Reload, nom propre
   "golden_week", // période fériée japonaise
   "tanabata", // fête japonaise
-  "katabasis", // κατάβασις — terme grec, comme « Memento Mori »
 ]);
 
 /** Ids de badges réellement définis (les autres clés de `badges` sont de l'UI). */

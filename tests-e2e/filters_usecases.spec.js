@@ -76,6 +76,26 @@ const openFilters = async (page) => {
   await expect(page.locator("#filterDropdown")).toHaveClass(/open/);
 };
 
+/**
+ * Déroule les opus d'un jeu (clic sur son logo). Ils sont repliés au départ :
+ * tout ce qui vit dans le volet — sous-boutons ET bouton « ✓ Tout / ✗ Aucun » —
+ * est inatteignable avant ce clic.
+ */
+const expandGame = async (page, group) => {
+  const panel = page.locator(`[data-group-panel="${group}"]`);
+  if (!(await panel.evaluate((el) => el.classList.contains("expanded")))) {
+    await page.locator(`[data-opus-group="${group}"]`).click();
+    await expect(panel).toHaveClass(/expanded/);
+  }
+  return panel;
+};
+
+/** Coche ou décoche un jeu entier depuis le bouton de son volet. */
+const toggleGame = async (page, group) => {
+  const panel = await expandGame(page, group);
+  await panel.locator(".filter-group-select-btn").click();
+};
+
 /** Opus actuellement retenus, lus dans le DOM (source d'affichage). */
 const activeOpus = (page) =>
   page.evaluate(() =>
@@ -161,7 +181,7 @@ test.describe("Filtres d'opus — effet sur la partie", () => {
     expect(all).toBeGreaterThan(5);
 
     await openFilters(page);
-    await page.locator('[data-group-panel="P3"] .filter-group-select-btn').click();
+    await toggleGame(page, "P3");
     expect(await activeOpus(page)).not.toContain("P3");
     await page.click(".filter-head-close");
 
@@ -169,7 +189,7 @@ test.describe("Filtres d'opus — effet sur la partie", () => {
     expect(reduced, "sans les opus P3, il reste moins de monde").toBeLessThan(all);
 
     await openFilters(page);
-    await page.locator('[data-group-panel="P3"] .filter-group-select-btn').click();
+    await toggleGame(page, "P3");
     expect(await activeOpus(page)).toContain("P3");
     await page.click(".filter-head-close");
 
@@ -216,7 +236,7 @@ test.describe("Filtres d'opus — effet sur la partie", () => {
   test("le choix survit au rechargement", async ({ page }) => {
     await gotoSettled(page, "/classiqueMode/classiqueMode.html");
     await openFilters(page);
-    await page.locator('[data-group-panel="P4"] .filter-group-select-btn').click();
+    await toggleGame(page, "P4");
     const chosen = await activeOpus(page);
     const stored = await storedFilters(page);
 
@@ -230,7 +250,7 @@ test.describe("Filtres d'opus — effet sur la partie", () => {
   test("chaque mode a ses propres filtres", async ({ page }) => {
     await gotoSettled(page, "/classiqueMode/classiqueMode.html");
     await openFilters(page);
-    await page.locator('[data-group-panel="P3"] .filter-group-select-btn').click();
+    await toggleGame(page, "P3");
     const classic = await storedFilters(page, "filters_Classic");
     expect(classic).not.toBeNull();
 
@@ -286,6 +306,7 @@ test.describe("Filtres d'opus — la cible du jour", () => {
     await page.waitForTimeout(400);
 
     await openFilters(page);
+    await expandGame(page, "P5");
     await page.locator('[data-opus="P5"]').first().click();
     await page.click(".filter-head-close");
     await page.waitForTimeout(400);
