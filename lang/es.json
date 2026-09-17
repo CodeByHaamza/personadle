@@ -11,7 +11,7 @@
     "select_all": "✓ Seleccionar todo",
     "deselect_all": "✗ Deseleccionar todo",
     "filters_hint": "Solo los juegos que dejes marcados pueden salir como respuesta, y solo ellos se sugieren al escribir.",
-    "filters_hint_2": "Haz clic en un juego para incluirlo o excluirlo. La flecha despliega sus entregas.",
+    "filters_hint_2": "Haz clic en un juego para desplegar sus entregas: quédatelas todas de golpe o una a una.",
     "group_all": "✓ Todos",
     "group_none": "✗ Ninguno",
     "input_placeholder": "Escribe el nombre del personaje...",
@@ -624,8 +624,8 @@
       "condition": "Usa la pista 50 veces en modo Clásico",
       "description": "Cincuenta anomalías escaneadas y descifradas. Ninguna verdad puede esconderse de tu radar."
     },
-    "katabasis": {
-      "name": "Katabasis",
+    "song_of_orpheus": {
+      "name": "El canto de Orfeo",
       "condition": "Gana 25 partidas en Modo Experto",
       "description": "Orfeo bajó a la oscuridad con solo una lira y salió cantando. Veinticinco victorias en Experto después, tú también."
     },

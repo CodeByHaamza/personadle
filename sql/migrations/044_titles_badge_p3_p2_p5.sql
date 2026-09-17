@@ -2,9 +2,9 @@
 -- 044 — Sept nouveaux titres + un badge (visuels fournis par Hamza, 2026-09-16)
 --
 -- Titres : S.E.E.S., Aigis & Metis, Kotone, Naoto, Shinjiro, Phantom Thieves,
--- Tatsuya. Badge : Katabasis (ex-« Tartarus Conqueror » sur le visuel — renommé,
--- le dessin montre les deux Orphée et Messiah, pas Tartarus : c'est la descente
--- d'Orphée aux Enfers, pas la tour).
+-- Tatsuya. Badge : Song of Orpheus (ex-« Tartarus Conqueror » sur le visuel —
+-- renommé, le dessin montre les deux Orphée et Messiah, pas Tartarus : c'est la
+-- descente d'Orphée aux Enfers et son retour, pas la tour).
 --
 -- Deux conditions nouvelles, ajoutées à api/lib/condition_check.php dans le même
 -- lot :
@@ -97,18 +97,23 @@ VALUES
    'played_on_date', '06-24', NULL, 'legendary');
 
 -- ── Badge ────────────────────────────────────────────────────────────────────
--- Katabasis : la descente d'Orphée aux Enfers. Le visuel montre les deux Orphée
+-- Song of Orpheus : la lyre est dessinée sur le badge, et Orpheus est la persona
+-- que reconnaît n'importe quel joueur de P3. Le visuel montre les deux Orphée
 -- (Makoto et Kotone) et Messiah — c'est la descente ET le retour, pas la tour.
+-- « Katabasis » (le mot grec pour cette descente) a été écrit puis écarté le
+-- 2026-09-17 : joli, mais illisible pour qui ne connaît pas le terme.
 -- La table badges ne porte ni description ni condition traduite : les textes
--- vivent dans profile/badges/badgesData.js et lang/*.json (badges.katabasis.*).
+-- vivent dans profile/badges/badgesData.js et lang/*.json
+-- (badges.song_of_orpheus.*). La table n'a pas de colonne name_pt : le portugais
+-- vient de lang/pt.json, comme pour tous les autres badges.
 INSERT IGNORE INTO badges
   (slug, image_path, name_en, name_fr, name_es, name_de, name_it,
    condition_en, category, rarity, is_secret,
    condition_type, condition_mode, condition_value)
 VALUES
-  ('katabasis',
-   'profile/badges/images/Badge_Katabasis.webp',
-   'Katabasis', 'Katabasis', 'Katabasis', 'Katabasis', 'Katabasis',
+  ('song_of_orpheus',
+   'profile/badges/images/Badge_Song_Of_Orpheus.webp',
+   'Song of Orpheus', 'Le Chant d''Orphée', 'El canto de Orfeo', 'Orpheus'' Lied', 'Il canto di Orfeo',
    'Win 25 games in Expert Mode',
    'achievement', 'epic', 0,
    'expert_wins_total', NULL, 25);

@@ -11,7 +11,7 @@
     "select_all": "✓ Selecionar tudo",
     "deselect_all": "✗ Desmarcar tudo",
     "filters_hint": "Só os jogos que manténs podem sair como resposta — e só eles são sugeridos enquanto escreves.",
-    "filters_hint_2": "Clica num jogo para o incluir ou excluir. A seta abre os seus títulos.",
+    "filters_hint_2": "Clica num jogo para abrir os seus títulos — guarda-os todos de uma vez ou um a um.",
     "group_all": "✓ Todos",
     "group_none": "✗ Nenhum",
     "input_placeholder": "Escreve o nome da personagem...",
@@ -624,8 +624,8 @@
       "condition": "Usa a dica 50 vezes no modo Clássico",
       "description": "Cinquenta anomalias analisadas e decifradas. Nenhuma verdade se esconde do teu radar."
     },
-    "katabasis": {
-      "name": "Katabasis",
+    "song_of_orpheus": {
+      "name": "O canto de Orfeu",
       "condition": "Ganha 25 partidas no Modo Perito",
       "description": "Orfeu desceu à escuridão com apenas uma lira e voltou a cantar. Vinte e cinco vitórias em Perito depois, tu também."
     },

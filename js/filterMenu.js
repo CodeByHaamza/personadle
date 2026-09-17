@@ -291,7 +291,7 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     hint2.setAttribute("data-i18n", "ui.filters_hint_2");
     hint2.textContent = _t(
       "ui.filters_hint_2",
-      "Click a game to include or exclude it. The arrow unfolds its individual entries."
+      "Click a game to unfold its entries — then keep them all at once, or one by one."
     );
     dropdown.prepend(hint2);
     dropdown.prepend(hint);

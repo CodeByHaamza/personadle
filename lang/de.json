@@ -11,7 +11,7 @@
     "select_all": "✓ Alle auswählen",
     "deselect_all": "✗ Alle abwählen",
     "filters_hint": "Nur die behaltenen Spiele können die Lösung sein — und nur sie werden beim Tippen vorgeschlagen.",
-    "filters_hint_2": "Klicke ein Spiel an, um es ein- oder auszuschließen. Der Pfeil klappt seine Teile aus.",
+    "filters_hint_2": "Klicke ein Spiel an, um seine Teile auszuklappen — alle auf einmal behalten oder einzeln.",
     "group_all": "✓ Alle",
     "group_none": "✗ Keine",
     "input_placeholder": "Charakternamen eingeben...",
@@ -624,8 +624,8 @@
       "condition": "Den Hinweis 50 Mal im Klassischen Modus verwenden",
       "description": "Fünfzig gescannte und entschlüsselte Anomalien. Keine Wahrheit kann sich vor deinem Radar verstecken."
     },
-    "katabasis": {
-      "name": "Katabasis",
+    "song_of_orpheus": {
+      "name": "Orpheus' Lied",
       "condition": "Gewinne 25 Runden im Expertenmodus",
       "description": "Orpheus stieg mit nichts als einer Leier hinab ins Dunkel und kam singend zurück. Nach fünfundzwanzig Expertensiegen auch du."
     },

@@ -116,7 +116,7 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'best_bro'        => ['friends_count', null, 2],
             'denial_of_self'  => ['expert_modes_mastered', null, 10],
             // Lot du 2026-09-16 (migration 044)
-            'katabasis'       => ['expert_wins_total', null, 25],
+            'song_of_orpheus' => ['expert_wins_total', null, 25],
         ];
 
         // Le reste du catalogue (46 badges) est 'manual' — flags narratifs, redeem

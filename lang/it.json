@@ -11,7 +11,7 @@
     "select_all": "✓ Seleziona tutto",
     "deselect_all": "✗ Deseleziona tutto",
     "filters_hint": "Solo i giochi che tieni possono uscire come risposta — e solo loro vengono suggeriti mentre scrivi.",
-    "filters_hint_2": "Clicca un gioco per includerlo o escluderlo. La freccia apre i suoi capitoli.",
+    "filters_hint_2": "Clicca un gioco per aprire i suoi capitoli: tienili tutti insieme o uno per uno.",
     "group_all": "✓ Tutti",
     "group_none": "✗ Nessuno",
     "input_placeholder": "Inserisci il nome del personaggio...",
@@ -624,8 +624,8 @@
       "condition": "Usare il suggerimento 50 volte in modalità Classica",
       "description": "Cinquanta anomalie scansionate e decifrate. Nessuna verità può nascondersi dal tuo radar."
     },
-    "katabasis": {
-      "name": "Katabasis",
+    "song_of_orpheus": {
+      "name": "Il canto di Orfeo",
       "condition": "Vinci 25 partite in Modalità Esperto",
       "description": "Orfeo scese nel buio con una sola lira e ne uscì cantando. Venticinque vittorie in Esperto dopo, anche tu."
     },
