@@ -257,8 +257,7 @@ if ($method === 'POST') {
 
         personadle_pusher_trigger("private-user-{$receiverId}", 'challenge', []);
 
-        // XP Social Link : action 'challenge' (15 XP solo). Rank-up notifié au
-        // destinataire (bénéficiaire passif du lien, cf. api/lib/social_link_xp_grant.php).
+        // XP Social Link : action 'challenge' (15 XP solo)
         try {
             $stmt = $pdo->prepare('SELECT get_or_create_social_link(?, ?) AS link_id');
             $stmt->execute([min($authId, $receiverId), max($authId, $receiverId)]);
@@ -343,7 +342,7 @@ if ($method === 'PATCH') {
 
     $pdo->prepare('UPDATE messages SET status = ? WHERE id = ?')->execute([$status, $msgId]);
 
-    // Si 'beaten' → notifier l'expéditeur du défi + XP Social Link mutuel (35 XP)
+    // Si 'beaten' → XP Social Link mutuel (35 XP)
     if ($status === 'beaten') {
         $senderId   = (int) $msg['sender_id'];
         $receiverId = (int) $msg['receiver_id'];
@@ -355,8 +354,6 @@ if ($method === 'PATCH') {
             $stmt->execute([min($senderId, $receiverId), max($senderId, $receiverId)]);
             $linkId = (int) $stmt->fetchColumn();
             if ($linkId) {
-                // Rank-up notifié à l'expéditeur (bénéficiaire passif — le receveur
-                // vient d'agir en relevant le défi, cf. api/lib/social_link_xp_grant.php).
                 $xpResult = personadle_grant_social_link_xp_via_procedure($pdo, $linkId, 35, $senderId, $receiverId);
                 if ($xpResult['ranked_up']) {
                     personadle_pusher_trigger("private-user-{$senderId}", 'rankup', []);

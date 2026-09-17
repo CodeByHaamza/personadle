@@ -82,9 +82,6 @@ final class PusherLiveTest extends TestCase
     {
         require_once __DIR__ . '/../../api/lib/pusher_auth.php';
 
-        // Un "socket_id" Pusher réel a la forme "12345.6789" ; on en simule un
-        // plausible pour vérifier que la signature calculée par notre endpoint
-        // suit exactement le format que pusher-js attend d'un vrai serveur.
         $socketId = '123456.789012';
         $channel  = 'private-user-999';
 

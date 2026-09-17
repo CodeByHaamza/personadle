@@ -57,8 +57,6 @@ final class PusherTriggerTest extends TestCase
 
     public function testTriggerIsNoOpWithoutConfig(): void
     {
-        // PUSHER_APP_ID etc. ne sont pas définies dans l'environnement de test —
-        // ne doit lever aucune exception ni tenter d'appel réseau.
         $this->expectNotToPerformAssertions();
         personadle_pusher_trigger('private-user-1', 'friend_request', []);
     }
