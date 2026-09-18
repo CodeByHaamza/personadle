@@ -420,10 +420,14 @@ export const api = {
   leaderboard: {
     /**
      * Récupère un classement.
-     * @param {{ mode?, period?, metric?, limit?, offset? }} params
+     * @param {{ mode?, period?, metric?, limit?, offset?, expert? }} params
      *   mode   : 'all' | 'classic' | 'emoji' | 'silhouette' | 'alloutattack' | 'personae' | 'music'
      *   period : 'day' | 'week' | 'month' | 'ever'
      *   metric : 'wins' | 'winrate' | 'streak' | 'perfect' | 'games'
+     *   expert : 0 | 1 — dimension du classement (migration 045). L'Expert a le
+     *            sien : autre pool, autre barème, taux de victoire sans commune
+     *            mesure. `metric: 'streak'` y renvoie un classement vide, par
+     *            choix (cf. api/lib/leaderboard_metrics.php).
      */
     get: ({
       mode = "all",
@@ -432,9 +436,10 @@ export const api = {
       limit = 50,
       offset = 0,
       friends_only = 0,
+      expert = 0,
     } = {}) =>
       get(
-        `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}&friends_only=${friends_only}`
+        `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}&friends_only=${friends_only}&expert=${expert}`
       ),
   },
 

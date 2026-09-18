@@ -887,10 +887,14 @@
     "filter_note": "Opus-Filter werden nicht berücksichtigt.",
     "filter_all_modes": "Alle Modi",
     "filter_scope": "Bereich",
+    "filter_dimension": "Dimension",
+    "dimension_normal": "Normal",
+    "dimension_expert": "⚡ Experte",
     "scope_global": "Global",
     "scope_friends": "Freunde",
     "login_for_friends": "Melde dich an, um das Freundes-Ranking zu sehen.",
-    "no_friends": "Noch keiner deiner Freunde erscheint in diesem Ranking."
+    "no_friends": "Noch keiner deiner Freunde erscheint in diesem Ranking.",
+    "expert_no_streak": "Für die beste Serie gibt es keine Experten-Rangliste: eine Serie zählt aufeinanderfolgende Tage, und der Experten-Modus ist kein tägliches Ritual."
   },
   "friends": {
     "title": "Freunde",
@@ -979,6 +983,8 @@
     "already_active": "Schließe zuerst deine aktuelle Herausforderung ab.",
     "active_challenge": "Herausforderung",
     "notif_challenges_you": "fordert dich heraus!",
+    "notif_challenges_you_expert": "fordert dich im Experten-Modus heraus!",
+    "notif_expert_tag": "⚡ EXPERTE",
     "notif_beat": "Schlagen",
     "notif_attempts": "Versuch(e)",
     "unknown_mode": "Der Modus dieser Herausforderung ist nicht verfügbar.",

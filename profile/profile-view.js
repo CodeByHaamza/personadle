@@ -867,13 +867,20 @@ if (viewParam || uidParam) {
       localProfile.visitedProfileIds = [...visitedSet];
       localStorage.setItem("personaUserProfile", JSON.stringify(localProfile));
       if (visitedSet.size >= 5) {
+        // checkBadgesAfterGame() et non un `checkBadges(profile, save)` : cette
+        // fonction-là n'a JAMAIS existé dans badgesManager.js. L'appel partait
+        // donc sur `undefined`, levait un TypeError, et le `.catch(() => {})`
+        // l'avalait en silence — le badge Data Mining ne se débloquait jamais au
+        // moment de la 5e visite (il fallait rouvrir son propre profil pour que
+        // initBadgesSystem() finisse par le voir).
+        //
+        // Son nom dit « AfterGame » mais c'est le check léger COMMUN à toutes les
+        // pages (cf. js/unlock-notify.js) : il relit localStorage — qu'on vient
+        // d'écrire juste au-dessus — évalue toutes les conditions et affiche la
+        // notification de déblocage, sans toucher à l'UI de la page profil (qui
+        // n'existe pas ici, on regarde le profil de quelqu'un d'autre).
         import("./badges/badgesManager.js")
-          .then((m) => {
-            const p = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
-            m.checkBadges(p, (updated) =>
-              localStorage.setItem("personaUserProfile", JSON.stringify(updated))
-            );
-          })
+          .then((m) => m.checkBadgesAfterGame())
           .catch(() => {});
       }
     }

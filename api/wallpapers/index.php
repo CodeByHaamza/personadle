@@ -41,13 +41,12 @@ function canUnlockWallpaper(PDO $pdo, int $userId, array $wallpaper): bool
         return true;
     }
 
-    if (empty($wallpaper['condition_type'])
-        || !in_array($wallpaper['condition_type'], personadle_known_condition_types(), true)
-    ) {
-        return false; // fail-closed : condition_type absent, vide ou inconnu du vocabulaire
-    }
-
-    return personadle_verify_condition(
+    // La garde fail-closed vivait ici, en toutes lettres. Elle a été remontée dans
+    // personadle_condition_allows_unlock() pour que badges et titles — qui
+    // appelaient encore la fonction permissive en direct — l'appliquent aussi,
+    // sans qu'on ait trois copies à tenir alignées. Comportement inchangé de ce
+    // côté : condition_type absent, vide ou hors vocabulaire → refus.
+    return personadle_condition_allows_unlock(
         $pdo,
         $userId,
         $wallpaper['condition_type'] ?? null,

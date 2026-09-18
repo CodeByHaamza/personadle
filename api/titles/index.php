@@ -47,8 +47,12 @@ if ($method === 'POST' && $action === 'unlock') {
     $title = $check->fetch();
     if (!$title) jsonError('Title not found', 404);
 
-    // Vérifie que la condition est remplie côté serveur
-    if (!personadle_verify_condition(
+    // Vérifie que la condition est remplie côté serveur.
+    //
+    // Fail-closed sur le type : un condition_type inconnu ou mal orthographié
+    // refuse l'unlock au lieu de l'accorder. Cf. le docblock de
+    // personadle_condition_allows_unlock() — même porte que badges et wallpapers.
+    if (!personadle_condition_allows_unlock(
         $pdo,
         $authId,
         $title['condition_type'],

@@ -494,6 +494,7 @@ CREATE TABLE leaderboard_cache (
     mode            VARCHAR(30)      NOT NULL,   -- 'all' ou nom de mode
     period          VARCHAR(15)      NOT NULL,   -- 'day' | 'week' | 'month' | 'ever'
     metric          VARCHAR(20)      NOT NULL DEFAULT 'wins',  -- 'wins' | 'winrate' | 'streak' | 'perfect' | 'games'
+    is_expert       TINYINT(1)       NOT NULL DEFAULT 0,  -- dimension du classement (migration 045) : 1 = Mode Expert
     period_start    DATETIME,                    -- '2000-01-01 00:00:00' pour 'ever'
     score           DECIMAL(8,1)     NOT NULL,
     rank_position   INT,
@@ -501,11 +502,13 @@ CREATE TABLE leaderboard_cache (
                                               ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    UNIQUE KEY uq_leaderboard (user_id, mode, period, metric, period_start),
+    -- is_expert fait partie de la clé (migration 045) : sans lui, le cron écraserait
+    -- la ligne normale d'un joueur avec sa ligne Expert à chaque passage.
+    UNIQUE KEY uq_leaderboard (user_id, mode, period, metric, period_start, is_expert),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE INDEX idx_leaderboard_ranking ON leaderboard_cache(mode, period, metric, period_start, score DESC);
+CREATE INDEX idx_leaderboard_ranking ON leaderboard_cache(mode, period, metric, is_expert, period_start, score DESC);
 
 
 -- =============================================================================

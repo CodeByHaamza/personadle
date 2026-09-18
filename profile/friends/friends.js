@@ -62,8 +62,8 @@ export function avatarSrc(avatarData) {
   if (!avatarData) return "../../img/default_avatar.png";
   if (avatarData.startsWith("data:")) return avatarData;
   // Paths stored in DB are relative to profile/ (../img/...) → adjust for friends/ depth
-  if (avatarData.startsWith("../img/")) return "../" + avatarData;  // ../../img/
-  if (avatarData.startsWith("./img/"))  return "../../img/" + avatarData.slice(6);
+  if (avatarData.startsWith("../img/")) return "../" + avatarData; // ../../img/
+  if (avatarData.startsWith("./img/")) return "../../img/" + avatarData.slice(6);
   return avatarData;
 }
 
@@ -361,7 +361,6 @@ export function openChallengeModePicker(anchorBtn, friendId, pseudo) {
     document.addEventListener("keydown", _onEscClosePicker);
   }, 0);
 }
-
 
 /**
  * Modes Expert débloqués par le joueur ET par l'ami, pour la ligne ⚡ du
@@ -909,25 +908,40 @@ function renderMessage(msg) {
     const dateLabel = msg.challenge_date ?? "";
     const score = msg.challenge_score ?? "?";
 
+    // Dimension du défi (migration 037). `challenge_is_expert` n'était lu que par
+    // les boutons (data-isexpert) : à l'œil, un défi Expert et un défi normal
+    // étaient identiques dans la Boîte, alors qu'ils n'ont ni le même pool, ni le
+    // même barème, ni les mêmes prérequis. La pastille le dit, la classe porte
+    // l'écart visuel — même palette que la pop-up d'arrivée (challenge-notif.css)
+    // et que la carte d'envoi (.challenge-card--expert, global.css).
+    const isExpert = !!msg.challenge_is_expert;
+    const expertCls = isExpert ? " fr-challenge-card--expert" : "";
+    const expertPill = isExpert
+      ? `<span class="fr-challenge-expert-pill">${tf("challenge.notif_expert_tag", "⚡ EXPERT")}</span>`
+      : "";
+
     if (msg.status === "beaten") {
       content = `
-        <div class="fr-challenge-card fr-challenge-card--won">
+        <div class="fr-challenge-card fr-challenge-card--won${expertCls}">
           <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
+          ${expertPill}
           <span class="fr-challenge-outcome">🏆 ${tf("friends.challenge_beaten", "Challenge beaten!")}</span>
           <span class="fr-challenge-date">${esc(dateLabel)}</span>
         </div>`;
     } else if (msg.status === "expired") {
       content = `
-        <div class="fr-challenge-card fr-challenge-card--lost">
+        <div class="fr-challenge-card fr-challenge-card--lost${expertCls}">
           <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
+          ${expertPill}
           <span class="fr-challenge-outcome">✗ ${tf("friends.challenge_failed", "Challenge failed")}</span>
           <span class="fr-challenge-date">${esc(dateLabel)}</span>
         </div>`;
     } else {
       content = `
-        <div class="fr-challenge-card">
+        <div class="fr-challenge-card${expertCls}">
           <div class="fr-challenge-header">
             <span class="fr-challenge-mode-badge">${modeIcon} ${modeName}</span>
+            ${expertPill}
             <span class="fr-challenge-date">${esc(dateLabel)}</span>
           </div>
           <span class="fr-challenge-score">${tf("friends.challenge_beat", "Beat")} <b>${score}</b> attempts</span>
@@ -1127,7 +1141,11 @@ function attachListeners() {
     const challengeBtn = e.target.closest(".js-challenge");
     if (challengeBtn) {
       e.stopPropagation();
-      openChallengeModePicker(challengeBtn, challengeBtn.dataset.friendId, challengeBtn.dataset.pseudo);
+      openChallengeModePicker(
+        challengeBtn,
+        challengeBtn.dataset.friendId,
+        challengeBtn.dataset.pseudo
+      );
       return;
     }
 

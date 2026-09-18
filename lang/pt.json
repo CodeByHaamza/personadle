@@ -887,10 +887,14 @@
     "filter_note": "Os filtros de opus não são considerados.",
     "filter_all_modes": "Todos os modos",
     "filter_scope": "Âmbito",
+    "filter_dimension": "Dimensão",
+    "dimension_normal": "Normal",
+    "dimension_expert": "⚡ Especialista",
     "scope_global": "Global",
     "scope_friends": "Amigos",
     "login_for_friends": "Inicia sessão para veres a classificação dos teus amigos.",
-    "no_friends": "Nenhum dos teus amigos aparece ainda nesta classificação."
+    "no_friends": "Nenhum dos teus amigos aparece ainda nesta classificação.",
+    "expert_no_streak": "A melhor sequência não tem classificação Especialista: uma sequência conta dias consecutivos, e o Especialista não é um compromisso diário."
   },
   "friends": {
     "title": "Amigos",
@@ -1097,6 +1101,8 @@
     "refuse": "Recusar",
     "already_active": "Termina primeiro o teu desafio atual.",
     "notif_challenges_you": "desafia-te!",
+    "notif_challenges_you_expert": "desafia-te em Especialista!",
+    "notif_expert_tag": "⚡ ESPECIALISTA",
     "notif_beat": "Bate",
     "notif_attempts": "tentativa(s)",
     "unknown_mode": "O modo deste desafio está indisponível.",
