@@ -56,10 +56,26 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       `IF NOT EXISTS`, rejouable). Sans elle : **`requireAuth()` plante** (`Unknown column
       'ban_reason'`) — plus aucun appel authentifié ne passe, et `GET /api/auth/me` tombe
       en 500 sur toutes les pages. À jouer **avant** le `git pull` de Hostinger, pas après.
-- [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v94 → v95, fait le 2026-09-01). Sans bump,
-      `activate` ne purge pas l'ancien cache et les assets servis en cache-first (images,
-      sons) restent ceux de la version précédente. Invisible en test : seuls les joueurs
-      DÉJÀ venus sont concernés.
+- [ ] Jouer `sql/migrations/045_leaderboard_expert_dimension.sql` (colonne
+      `leaderboard_cache.is_expert`, clé unique `uq_leaderboard` élargie, index de lecture
+      refait ; MariaDB `IF NOT EXISTS`, rejouable). **À jouer AVANT le `git pull` Hostinger.**
+      Sans elle, `api/leaderboard/index.php` interroge `lc.is_expert` sur une colonne qui
+      n'existe pas : `Unknown column` → **le classement day/week/month tombe en 500 pour
+      tout le monde** (la période `ever` survit, elle ne lit pas le cache), et le cron
+      horaire échoue à chaque passage. Rejouée pour de vrai le 2026-09-18 contre une base
+      vierge au schéma pré-migration, puis une seconde fois pour l'idempotence.
+- [ ] **Après la migration 045 : laisser passer un cycle du cron** (`api/cron/leaderboard.php`,
+      horaire) pour peupler la dimension Expert du cache. D'ici là le classement Expert par
+      période bascule sur le calcul live — correct, mais plus coûteux. Rien à faire, ça se
+      résorbe seul ; c'est noté pour ne pas le prendre pour une panne.
+- [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v95 → v96, fait le 2026-09-18 — précédemment
+      v94 → v95 le 2026-09-01). Sans bump, `activate` ne purge pas l'ancien cache et les
+      assets servis en cache-first restent ceux de la version précédente. Invisible en test :
+      seuls les joueurs DÉJÀ venus sont concernés. Ce lot le rendait critique et pas seulement
+      cosmétique : `js/api.js`, `profile/leaderboard/leaderboard.{html,css,js}` et
+      `profile/friends/friends.{css,js}` sont tous **précachés** et tous modifiés — sans bump,
+      un joueur déjà venu garde l'ancien front et ne voit ni le filtre Dimension du classement,
+      ni la pastille Expert de sa Boîte, alors que l'API, elle, aura changé.
 - [ ] **Déployer hors heure de pointe.** `sw.js` envoie `SW_UPDATED` à tous les onglets via
       `clients.claim()`, et chaque page répond par `window.location.reload()`. L'état de
       partie survit (il vit dans `localStorage`), mais un joueur en cours de partie est
