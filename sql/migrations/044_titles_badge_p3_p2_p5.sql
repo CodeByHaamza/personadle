@@ -12,7 +12,30 @@
 --   • played_on_date  → avoir joué un jour d'anniversaire (condition_mode 'MM-JJ')
 --
 -- Rejouable : INSERT IGNORE sur la clé unique `slug` (titles) et `slug` (badges).
+--
+-- ⚠️ Prérequis de schéma, découvert en jouant cette migration en prod le
+-- 2026-09-18 : la table `titles` de Hostinger (archive du 2026-05-06) n'a
+-- JAMAIS eu les colonnes `description_*` / `name_jp` de `sql/bdd_mysql.sql`, et
+-- son `condition_value` est `INT NOT NULL DEFAULT 0` là où la référence le
+-- laisse NULL. La 025 avait classé cet écart « cosmétique » parce qu'aucun code
+-- ne lisait ces colonnes — c'était vrai jusqu'à ce que CETTE migration insère
+-- des descriptions et un titre sans valeur numérique (`played_on_date`) :
+-- `Unknown column 'description_en'`, puis `Column 'condition_value' cannot be
+-- null`. Le bloc ci-dessous aligne `titles` sur la référence AVANT l'insertion.
+-- Additif (colonnes NULL) + assouplissement de nullabilité : aucune ligne
+-- touchée, no-op sur une base importée de `bdd_mysql.sql` (Docker, CI).
 -- ─────────────────────────────────────────────────────────────────────────────
+
+-- ── Schéma : titles rejoint sql/bdd_mysql.sql ───────────────────────────────
+ALTER TABLE titles
+    ADD COLUMN IF NOT EXISTS name_jp        VARCHAR(100) NULL AFTER name_it,
+    ADD COLUMN IF NOT EXISTS description_en TEXT NULL AFTER name_jp,
+    ADD COLUMN IF NOT EXISTS description_fr TEXT NULL AFTER description_en,
+    ADD COLUMN IF NOT EXISTS description_es TEXT NULL AFTER description_fr,
+    ADD COLUMN IF NOT EXISTS description_de TEXT NULL AFTER description_es,
+    ADD COLUMN IF NOT EXISTS description_it TEXT NULL AFTER description_de,
+    ADD COLUMN IF NOT EXISTS description_jp TEXT NULL AFTER description_it,
+    MODIFY COLUMN condition_value INT NULL DEFAULT NULL;
 
 -- ── Titres ───────────────────────────────────────────────────────────────────
 INSERT IGNORE INTO titles
