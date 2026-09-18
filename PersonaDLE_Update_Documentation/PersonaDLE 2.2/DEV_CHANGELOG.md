@@ -2323,3 +2323,77 @@ seraient pourtant vérifiables côté serveur sans migration — `social_link_in
 journalise déjà les `visit_profile` par lien, et `game_sessions` + `friendships`
 suffisent pour le second. À reprendre si l'envie vient ; ce n'est pas une dette
 urgente pour un fan-game sans enjeu compétitif.
+
+## 2026-09-18 — Trois points de synchronisation oubliés par les lots précédents
+
+Revue de fin de branche : les cinq lots ci-dessus étaient corrects en eux-mêmes, mais
+trois conventions du dépôt n'avaient pas été honorées. Aucune n'est un bug de code, les
+trois auraient coûté cher au déploiement.
+
+### 1. `CACHE_VERSION` non bumpé — le plus grave des trois
+
+`sw.js` restait en `personadle-v95`. Or ce lot modifie `js/api.js`,
+`profile/leaderboard/leaderboard.{html,css,js}` et `profile/friends/friends.{css,js}` —
+**tous précachés** par le service worker.
+
+Sans bump, `activate` ne purge rien et le cache-first continue de servir l'ancien front
+aux joueurs **déjà venus** : ni le filtre « Dimension » du classement, ni la pastille
+Expert de la Boîte, alors que l'API, elle, aurait changé. Invisible en test (un
+navigateur neuf reçoit toujours le bon code), visible uniquement pour les habitués —
+c'est-à-dire exactement les joueurs qu'on ne veut pas casser. Bumpé en `v96`.
+
+`css/challenge-notif.css` n'est pas dans la liste de précache : il est récupéré au
+réseau, rien à faire de ce côté.
+
+### 2. Migration 045 absente de la checklist bloquante de `TODO.md`
+
+C'est **le piège que le dépôt documente lui-même** : les migrations 029/030 avaient été
+oubliées de cette liste jusqu'au 2026-09-01, et CLAUDE.md §13 en a fait une règle.
+Écrire la migration ne suffit pas — elle doit figurer dans la liste que suit la release.
+
+Conséquence si elle manquait : `api/leaderboard/index.php` interroge `lc.is_expert`, et
+la prod n'a pas la colonne. Vérifié pour de vrai contre une base au schéma
+pré-migration plutôt qu'affirmé :
+
+```
+requête cache → SQLSTATE[42S22] Unknown column 'lc.is_expert'  → 500
+période ever  → OK (ne lit pas le cache) → survit
+```
+
+Donc **le classement day/week/month tombe en 500 pour tout le monde**, et le cron
+horaire échoue à chaque passage. `ever` survit seul. L'entrée de checklist dit
+explicitement « avant le `git pull` Hostinger », comme les 040/041/042.
+
+Une seconde entrée a été ajoutée pour le cycle de cron à laisser passer après la
+migration — sans elle, le classement Expert par période bascule sur le calcul live
+pendant une heure. C'est correct, juste plus coûteux, et ça se résorbe seul : noté pour
+que ça ne soit pas pris pour une panne.
+
+### 3. Changelog joueur non alimenté
+
+CLAUDE.md §9 : tout changement **visible ou parlant pour un joueur** va aussi dans
+`PersonaDLE_Update.html`. Les cinq lots n'avaient nourri que `DEV_CHANGELOG.md`.
+
+Deux sections ajoutées, en blocs `data-i18n-block` FR/EN appariés (103/103, vérifié),
+en langage non technique :
+
+- **⚡ Le Mode Expert sort de l'ombre** — la notification de défi Expert, la pastille
+  dans la Boîte, le nouvel axe du classement, et pourquoi « meilleure série » n'y a pas
+  d'équivalent (un joueur qui ne trouve pas sa métrique doit lire la raison, pas
+  conclure à un oubli).
+- **🎖️ Ce qui se gagne, se gagne vraiment** — Data Mining qui tombe enfin au bon
+  moment, les badges à code redevenus des badges à code (avec la précision « rien ne
+  change si tu as utilisé le tien »), et les Social Links qui comptent juste.
+
+Le reste du travail — fail-closed, vocabulaire des conditions, trous de tests — n'y
+figure pas : rien de tout ça ne se voit depuis le jeu, et la section §9 interdit
+explicitement de gonfler la page joueur avec du détail technique.
+
+### Ce qui reste non vérifiable depuis cet environnement
+
+Les tests **E2E Playwright** (`npm run test:e2e`, job CI bloquant) n'ont pas pu tourner
+ici : ils exigent `make up`, donc un démon Docker, absent de cet environnement. Les
+spécifications concernées par ce lot (`challenge_flow`, `challenge_usecases`,
+`unlocks_usecases`, `visual_layout`) seront donc jouées pour la première fois **en CI**.
+Les 1383 tests Vitest et 351 PHPUnit, eux, sont verts — ces derniers contre une MariaDB
+sans tables de fuseaux, soit la configuration de la prod et non celle de la CI.
