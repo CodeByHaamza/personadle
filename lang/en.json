@@ -629,6 +629,31 @@
       "condition": "Win 25 games in Expert Mode",
       "description": "Orpheus walked down into the dark with nothing but a lyre, and walked back out singing. Twenty-five Expert wins later, so did you."
     },
+    "starlight_festival": {
+      "name": "Starlight Festival",
+      "condition": "Find Joker, Panther and Mona in their Starlight outfits in All-Out Attack",
+      "description": "Ren, Ann and Morgana stepped onto the stage in their Starlight outfits. You caught all three mid-performance."
+    },
+    "shujin_outlaws": {
+      "name": "Shujin Outlaws",
+      "condition": "Find Wonder's Shujin All-Out Attack, then Ren and Wonder in Silhouette mode",
+      "description": "Same uniform, same school, two worlds apart. You recognized both Shujin transfer students by their shadows — and Wonder by his finisher."
+    },
+    "absolute_authority": {
+      "name": "Absolute Authority",
+      "condition": "Find Mitsuru Kirijo and Makoto Niijima in Classic mode",
+      "description": "Two student council presidents, two schools, zero tolerance. Gekkoukan and Shujin answer to the same authority — yours."
+    },
+    "dont_waste_your_breath": {
+      "name": "Don't Waste Your Breath",
+      "condition": "Win 5 Classic Expert games on the very first guess",
+      "description": "One line was enough. Classic Expert hands you a single quote — five times over, you didn't need a word more. Shinji would approve."
+    },
+    "same_energy": {
+      "name": "Same Energy",
+      "condition": "Reach Social Link rank 5 with a friend while one of you wears Motoha Arai and the other Chie Satonaka",
+      "description": "Two kung-fu girls, two games, one energy. When a rank-5 friend shows up as Chie while you're wearing Arai — or the other way around — you both get this one, at the same moment."
+    },
     "velvet_regular": {
       "name": "Velvet Regular",
       "condition": "Play on 50 unique days",

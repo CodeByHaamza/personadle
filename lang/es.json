@@ -629,6 +629,31 @@
       "condition": "Gana 25 partidas en Modo Experto",
       "description": "Orfeo bajó a la oscuridad con solo una lira y salió cantando. Veinticinco victorias en Experto después, tú también."
     },
+    "starlight_festival": {
+      "name": "Festival Starlight",
+      "condition": "Encuentra a Joker, Panther y Mona con sus trajes Starlight en All-Out Attack",
+      "description": "Ren, Ann y Morgana subieron al escenario con sus trajes Starlight. Los pillaste a los tres en plena actuación."
+    },
+    "shujin_outlaws": {
+      "name": "Forajidos de Shujin",
+      "condition": "Encuentra el All-Out Attack de Wonder con el uniforme de Shujin y luego a Ren y Wonder en el modo Silueta",
+      "description": "Mismo uniforme, mismo instituto, dos mundos. Reconociste a los dos alumnos trasladados de Shujin por su sombra, y a Wonder por su remate."
+    },
+    "absolute_authority": {
+      "name": "Autoridad absoluta",
+      "condition": "Encuentra a Mitsuru Kirijo y Makoto Niijima en el modo Clásico",
+      "description": "Dos presidentas del consejo estudiantil, dos institutos, tolerancia cero. Gekkoukan y Shujin responden ante la misma autoridad: la tuya."
+    },
+    "dont_waste_your_breath": {
+      "name": "No gastes saliva",
+      "condition": "Gana 5 partidas de Clásico Experto al primer intento",
+      "description": "Con una frase bastó. El Clásico Experto solo te da una cita: cinco veces no necesitaste ni una palabra más. Shinji lo aprobaría."
+    },
+    "same_energy": {
+      "name": "La misma energía",
+      "condition": "Alcanza el rango 5 de vínculo social con un amigo mientras uno lleva a Motoha Arai y el otro a Chie Satonaka",
+      "description": "Dos chicas de kung-fu, dos juegos, una sola energía. Cuando un amigo de rango 5 aparece como Chie mientras tú llevas a Arai, o al revés, los dos recibís esta insignia en el mismo instante."
+    },
     "velvet_regular": {
       "name": "Cliente Habitual del Velvet",
       "condition": "Jugar en 50 días únicos",

@@ -41,6 +41,7 @@ import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplet
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
+import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -575,6 +576,13 @@ function checkGuess(name, target, forceReveal = false) {
       // one_shot : victoire en 1 essai
       if (attempts === 1 && !_pr.hasWonFirstTry) _pr.hasWonFirstTry = true;
 
+      // dont_waste_your_breath : victoires EXPERT au premier essai — une seule
+      // citation, pas un mot de plus. Le serveur recompte depuis game_sessions
+      // (attempts = 1, is_expert = 1) ; ce compteur n'est que le retour immédiat.
+      if (EXPERT.isExpert && attempts === 1) {
+        _pr.classicExpertPerfectWins = (_pr.classicExpertPerfectWins || 0) + 1;
+      }
+
       // night_owl / nyx_hour : heure Paris
       const _now = new Date();
       const _hour = parseInt(
@@ -598,6 +606,10 @@ function checkGuess(name, target, forceReveal = false) {
       localStorage.setItem("personaUserProfile", JSON.stringify(_pr));
       trackUniqueDay(_pr, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pr)));
       if (!EXPERT.isExpert) checkUnlocksAfterGame(modeName);
+      // En Expert, les badges seuls (pas le suivi hebdo ni les stats, que l'Expert
+      // n'alimente pas) : dont_waste_your_breath se gagne ICI, pas à la partie
+      // normale suivante.
+      else checkBadgesAfterGame();
     }
 
     // !forceReveal ici aussi : le handler Give Up gère déjà lui-même revealNextLink/
