@@ -629,6 +629,31 @@
       "condition": "Gagner 25 parties en Mode Expert",
       "description": "Orphée est descendu dans le noir avec une lyre pour seul bagage, et il en est ressorti en chantant. Vingt-cinq victoires en Expert plus tard, toi aussi."
     },
+    "starlight_festival": {
+      "name": "Festival Starlight",
+      "condition": "Trouver Joker, Panther et Mona en tenue Starlight en All-Out Attack",
+      "description": "Ren, Ann et Morgana sont montés sur scène en tenue Starlight. Tu les as surpris tous les trois en plein numéro."
+    },
+    "shujin_outlaws": {
+      "name": "Hors-la-loi de Shujin",
+      "condition": "Trouver l'All-Out Attack de Wonder en uniforme Shujin, puis Ren et Wonder en mode Silhouette",
+      "description": "Même uniforme, même lycée, deux mondes. Tu as reconnu les deux élèves transférés de Shujin à leur ombre — et Wonder à son coup de grâce."
+    },
+    "absolute_authority": {
+      "name": "Autorité absolue",
+      "condition": "Trouver Mitsuru Kirijo et Makoto Niijima en mode Classique",
+      "description": "Deux présidentes du conseil des élèves, deux lycées, zéro tolérance. Gekkoukan et Shujin répondent à la même autorité : la tienne."
+    },
+    "dont_waste_your_breath": {
+      "name": "Garde ta salive",
+      "condition": "Gagner 5 parties de Classique Expert du premier coup",
+      "description": "Une réplique a suffi. Le Classique Expert ne te donne qu'une citation — cinq fois, tu n'as pas eu besoin d'un mot de plus. Shinji approuverait."
+    },
+    "same_energy": {
+      "name": "Même énergie",
+      "condition": "Atteindre le rang 5 de lien social avec un ami pendant que l'un porte Motoha Arai et l'autre Chie Satonaka",
+      "description": "Deux filles de kung-fu, deux jeux, une seule énergie. Quand un ami de rang 5 arrive en Chie pendant que tu portes Arai — ou l'inverse —, vous recevez ce badge tous les deux, au même instant."
+    },
     "velvet_regular": {
       "name": "Habitué du Velvet",
       "condition": "Jouer 50 jours uniques",

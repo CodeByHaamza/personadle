@@ -629,6 +629,31 @@
       "condition": "Ganha 25 partidas no Modo Perito",
       "description": "Orfeu desceu à escuridão com apenas uma lira e voltou a cantar. Vinte e cinco vitórias em Perito depois, tu também."
     },
+    "starlight_festival": {
+      "name": "Festival Starlight",
+      "condition": "Encontre Joker, Panther e Mona com seus trajes Starlight no All-Out Attack",
+      "description": "Ren, Ann e Morgana subiram ao palco com seus trajes Starlight. Você pegou os três em plena apresentação."
+    },
+    "shujin_outlaws": {
+      "name": "Foras da lei de Shujin",
+      "condition": "Encontre o All-Out Attack de Wonder com o uniforme de Shujin e depois Ren e Wonder no modo Silhueta",
+      "description": "Mesmo uniforme, mesma escola, dois mundos. Você reconheceu os dois alunos transferidos de Shujin pela sombra — e Wonder pelo seu golpe final."
+    },
+    "absolute_authority": {
+      "name": "Autoridade absoluta",
+      "condition": "Encontre Mitsuru Kirijo e Makoto Niijima no modo Clássico",
+      "description": "Duas presidentes do conselho estudantil, duas escolas, tolerância zero. Gekkoukan e Shujin respondem à mesma autoridade: a sua."
+    },
+    "dont_waste_your_breath": {
+      "name": "Não gaste saliva",
+      "condition": "Vença 5 partidas de Clássico Expert na primeira tentativa",
+      "description": "Uma frase bastou. O Clássico Expert só te dá uma citação — cinco vezes você não precisou de uma palavra a mais. Shinji aprovaria."
+    },
+    "same_energy": {
+      "name": "A mesma energia",
+      "condition": "Alcance o rank 5 de vínculo social com um amigo enquanto um de vocês usa Motoha Arai e o outro Chie Satonaka",
+      "description": "Duas garotas do kung-fu, dois jogos, uma só energia. Quando um amigo de rank 5 aparece como Chie enquanto você usa Arai — ou o contrário —, os dois recebem esta insígnia no mesmo instante."
+    },
     "velvet_regular": {
       "name": "Cliente Habitual Velvet",
       "condition": "Joga em 50 dias diferentes",

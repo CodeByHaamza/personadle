@@ -158,7 +158,9 @@ INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_i
 ('naoto_case_never_closed',   'profile/titles/naoto_case_never_closed.webp',   'The Case Is Never Closed', 'L''affaire n''est jamais close', 'El caso nunca se cierra', 'Der Fall ist nie abgeschlossen', 'Il caso non è mai chiuso', 'mode_wins', 'silhouette', 25, 'rare'),
 ('shinjiro_no_pity',          'profile/titles/shinjiro_no_pity.webp',          'Don''t Need Your Pity',  'J''ai pas besoin de ta pitié', 'No necesito tu lástima', 'Spar dir dein Mitleid', 'Non mi serve la tua pietà', 'mode_wins_under_attempts', 'classic', 25, 'epic'),
 ('take_your_heart',           'profile/titles/take_your_heart.webp',           'Take Your Heart',        'Je prends ton cœur',      'Te robaré el corazón',  'Ich nehme dein Herz',  'Ti rubo il cuore',    'mode_wins',           'alloutattack', 40, 'legendary'),
-('tatsuya_dont_burn_out',     'profile/titles/tatsuya_dont_burn_out.webp',     'Some Things Don''t Burn Out', 'Certaines choses ne s''éteignent pas', 'Algunas cosas no se apagan', 'Manches erlischt nie', 'Certe cose non si spengono', 'played_on_date', '06-24', NULL, 'legendary');
+('tatsuya_dont_burn_out',     'profile/titles/tatsuya_dont_burn_out.webp',     'Some Things Don''t Burn Out', 'Certaines choses ne s''éteignent pas', 'Algunas cosas no se apagan', 'Manches erlischt nie', 'Certe cose non si spengono', 'played_on_date', '06-24', NULL, 'legendary'),
+-- Lot du 2026-09-18 (migration 046) : « Go Beyond » — tout Wonder (targets_found, ensemble wonder_go_beyond).
+('wonder_go_beyond',          'profile/titles/wonder_go_beyond.webp',          'Go Beyond',              'Go Beyond',               'Go Beyond',             'Go Beyond',            'Go Beyond',           'targets_found',       'wonder_go_beyond', NULL, 'legendary');
 
 
 -- =============================================================================
@@ -832,7 +834,13 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('github_contributor',  'Phantom Coder',              'secret',      'common',    'profile/badges/images/Badges_Github_Morgana.png',        '???', 'manual', NULL, NULL, 1),
 ('lobster',             'Artistic Lobster',           'secret',      'rare',      'profile/badges/images/Badges_Lobster.png',               '???', 'manual', NULL, NULL, 1),
 ('hifumi_archives',     'The Grandmaster''s Tome',    'secret',      'rare',      'profile/badges/images/Badge_Hifumi_Archives.webp',       '???', 'manual', NULL, NULL, 1),
-('report',              'The Priestess''s Audit',     'secret',      'rare',      'profile/badges/images/Badge_Report.webp',                '???', 'manual', NULL, NULL, 1);
+('report',              'The Priestess''s Audit',     'secret',      'rare',      'profile/badges/images/Badge_Report.webp',                '???', 'manual', NULL, NULL, 1),
+-- Lot du 2026-09-18 (migration 046) : quatre conditions vérifiées depuis game_sessions/social_links, aucun 'manual'.
+('starlight_festival',    'Starlight Festival',         'achievement', 'rare',      'profile/badges/images/Badge_Starlight_Festival.webp',    'Find Joker, Panther and Mona in their Starlight outfits in All-Out Attack', 'targets_found', 'starlight_trio', NULL, 0),
+('shujin_outlaws',        'Shujin Outlaws',             'achievement', 'rare',      'profile/badges/images/Badge_Shujin_Outlaws.webp',        'Find Wonder''s Shujin All-Out Attack, then Ren and Wonder in Silhouette mode', 'targets_found', 'shujin_outlaws', NULL, 0),
+('absolute_authority',    'Absolute Authority',         'achievement', 'rare',      'profile/badges/images/Badge_Absolute_Authority.webp',    'Find Mitsuru Kirijo and Makoto Niijima in Classic mode', 'targets_found', 'absolute_authority', NULL, 0),
+('dont_waste_your_breath','Don''t Waste Your Breath',   'achievement', 'epic',      'profile/badges/images/Badge_Dont_Waste_Your_Breath.webp', 'Win 5 Classic Expert games on the very first guess', 'mode_expert_perfect_wins', 'classic', 5, 0),
+('same_energy',           'Same Energy',                'social',      'epic',      'profile/badges/images/Badge_Same_Energy.webp',           'Reach Social Link rank 5 with a friend while one of you wears Motoha Arai and the other Chie Satonaka', 'same_energy', NULL, NULL, 0);
 
 INSERT IGNORE INTO wallpapers (id, game, is_default, unlock_condition, condition_type, condition_mode, condition_value, name, image_path) VALUES
 ('kamoshida_palace',       'P5', 0, 'Play at least 1 game in each of the 6 modes',                     'all_modes_won',        NULL,     NULL, 'Kamoshida''s Palace',    'profile/Wallpaper/unlockable/kamoshida_palace.webp'),

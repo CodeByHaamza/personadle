@@ -2811,12 +2811,15 @@
       "Heartbeat, Heartbreak",
       "Heaven",
       "I believe",
+      "Invitation to Freedom",
       "It's Going Down Now",
       "Iwatodai Dorm",
       "Last Strike",
       "Last Surprise",
       "Layer Cake",
       "Let Butterflies Spread Until the Dawn",
+      "Light the Fire Up in the Night (P3 Side)",
+      "Light the Fire Up in the Night (P4 Side)",
       "Life Will Change",
       "Maki",
       "Mass Destruction",
@@ -2968,6 +2971,9 @@
       "I believe": [
         "P5R"
       ],
+      "Invitation to Freedom": [
+        "PQ2"
+      ],
       "It's Going Down Now": [
         "P3R"
       ],
@@ -2985,6 +2991,12 @@
       ],
       "Let Butterflies Spread Until the Dawn": [
         "P1"
+      ],
+      "Light the Fire Up in the Night (P3 Side)": [
+        "PQ"
+      ],
+      "Light the Fire Up in the Night (P4 Side)": [
+        "PQ"
       ],
       "Life Will Change": [
         "P5"
@@ -3215,11 +3227,13 @@
       "Heartbeat, Heartbreak",
       "Heaven",
       "I believe",
+      "Invitation to Freedom",
       "It's Going Down Now",
       "Iwatodai Dorm",
       "Last Strike",
       "Last Surprise",
       "Let Butterflies Spread Until the Dawn",
+      "Light the Fire Up in the Night (P3 Side)",
       "Life Will Change",
       "Mass Destruction",
       "Mass Destruction - Reload (ZUTOMAYO Ver.)",
@@ -4768,6 +4782,7 @@
       "Wonder Chinese New Year ( Nagisa Kamishiro )",
       "Wonder Velvet ( Nagisa Kamishiro )",
       "Wonder Summer ( Nagisa Kamishiro )",
+      "Wonder Shujin ( Nagisa Kamishiro )",
       "Yuki ( Yukimi Fujikawa )",
       "Yukari Takeba",
       "Anri ( Aran Hirano )",
@@ -4878,6 +4893,9 @@
         "P5X"
       ],
       "Wonder Summer ( Nagisa Kamishiro )": [
+        "P5X"
+      ],
+      "Wonder Shujin ( Nagisa Kamishiro )": [
         "P5X"
       ],
       "Chord ( Ayaka Sakai )": [

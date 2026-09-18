@@ -751,7 +751,13 @@
    contrairement à la notification de défi, qui est un événement. */
 .lb-filters-card--expert {
   border-color: rgba(178, 106, 255, 0.4);
-  background: linear-gradient(180deg, rgba(178, 106, 255, 0.07) 0%, var(--lb-surface) 120px);
+  /* Le voile violet est EMPILÉ sur la surface opaque : seul, ce dégradé à 7 %
+     d'alpha laissait le décor de la ville transparaître sur les 120 premiers
+     pixels — l'en-tête « Rankings » paraissait fondu dès qu'on passait en Expert
+     (retour Hamza, 2026-09-18). */
+  background:
+    linear-gradient(180deg, rgba(178, 106, 255, 0.07) 0%, rgba(178, 106, 255, 0) 120px),
+    var(--lb-surface);
   box-shadow:
     var(--lb-shadow),
     0 0 40px -22px rgba(150, 70, 255, 0.6);
