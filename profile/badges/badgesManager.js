@@ -2,8 +2,9 @@
 // 🎖️ PERSONADLE - GESTIONNAIRE DE BADGES
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { badgesList, BADGE_CATEGORIES, getBadgeById } from "./badgesData.js";
+import { badgesList, BADGE_CATEGORIES, getBadgeById, SAME_ENERGY_AVATARS, wearsAvatar } from "./badgesData.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
+import { openAtelier } from "../atelier.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
 let _lastSaveProfile = () => {};
 
@@ -132,6 +133,7 @@ export function initBadgesSystem(profile, saveProfile) {
 
   // Rendre l'interface
   renderBadgesPreview(profile);
+  renderBadgePicker(profile, saveProfile);
   renderBadgesModal(profile, saveProfile);
 
   // Configurer le système de codes
@@ -187,7 +189,8 @@ export async function syncBadgesWithBackend(profile, saveProfile) {
 
       // Re-render : renderBadgesModal était déjà appelé avant la fin de ce fetch async
       renderBadgesPreview(profile);
-      renderBadgesModal(profile, saveProfile);
+      renderBadgePicker(profile, saveProfile);
+          renderBadgesModal(profile, saveProfile);
     }
 
     // Local → backend (bloqué si le profil vient d'un autre compte)
@@ -234,6 +237,24 @@ export async function checkSocialBadges(profile, saveProfile) {
     if (onlineToday.length >= 3 && !profile.leblanc3FriendsDay) {
       profile.leblanc3FriendsDay = today;
       saveProfile();
+    }
+    // Same Energy : un ami de rang ≥ 5 porte Arai quand je porte Chie (ou l'inverse).
+    // Retour immédiat seulement — le serveur revérifie la paire à l'unlock et
+    // accorde le badge aux deux (api/badges/index.php).
+    if (!profile.sameEnergyWith) {
+      const mine = profile.avatar;
+      const partner = friends.find((f) => {
+        if ((f.social_link_rank ?? 1) < 5) return false;
+        const theirs = f.avatar_data;
+        return (
+          (wearsAvatar(mine, SAME_ENERGY_AVATARS.arai) && wearsAvatar(theirs, SAME_ENERGY_AVATARS.chie)) ||
+          (wearsAvatar(mine, SAME_ENERGY_AVATARS.chie) && wearsAvatar(theirs, SAME_ENERGY_AVATARS.arai))
+        );
+      });
+      if (partner) {
+        profile.sameEnergyWith = partner.user_id ?? partner.id ?? true;
+        saveProfile();
+      }
     }
   } catch (e) {
     console.warn("⚠️ Social badge check failed:", e.message);
@@ -291,9 +312,8 @@ function trackP4ConsecutiveDays(profile, saveProfile, today) {
   y.setUTCDate(y.getUTCDate() - 1);
   const yesterday = y.toISOString().slice(0, 10);
 
-  profile.p4ConsecutiveDays = profile.p4LastDate === yesterday
-    ? (profile.p4ConsecutiveDays || 0) + 1
-    : 1;
+  profile.p4ConsecutiveDays =
+    profile.p4LastDate === yesterday ? (profile.p4ConsecutiveDays || 0) + 1 : 1;
   profile.p4LastDate = today;
   saveProfile();
 }
@@ -679,43 +699,132 @@ function showBadgeZoom(badge) {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// 🏅 PRÉVISUALISATION DES BADGES (4 badges max)
+// 🏅 BADGES ÉPINGLÉS (4 emplacements sur la carte d'identité)
 // ───────────────────────────────────────────────────────────────────────────
 
+/** t(key) renvoie la clé si absente — cf. CLAUDE.md §5. */
+function _tr(key, fallback) {
+  const r = window.i18n?.t?.(key);
+  return r != null && r !== key ? r : fallback;
+}
+
 /**
- * Affiche la prévisualisation des badges sélectionnés
+ * Rend les 4 emplacements de badges épinglés sur la carte d'identité (2.2).
+ * Un emplacement rempli montre le badge (clic = zoom, cf. share-card.js) avec
+ * une croix pour le désépingler ; un emplacement vide est un « + » qui ouvre
+ * l'onglet Badges de l'atelier. Toujours 4 cases : le joueur voit d'un coup
+ * d'œil ce qu'il lui reste à remplir, sans texte à lire.
  * @param {Object} profile - Le profil utilisateur
  */
 export function renderBadgesPreview(profile) {
   const preview = document.getElementById("previewBadges");
   if (!preview) return;
 
-  const ids = profile.selectedBadges || [];
+  const ids = (profile.selectedBadges || []).slice(0, MAX_SELECTED_BADGES);
   preview.innerHTML = "";
-
-  if (ids.length === 0) {
-    preview.innerHTML = `<p style="opacity:0.6; text-align:center;">No badges selected yet.</p>`;
-    window.dispatchEvent(new CustomEvent("badgesRendered"));
-    return;
-  }
 
   ids.forEach((id) => {
     const strId = String(id);
     const badge = badgesList.find((b) => b.id === id);
     if (!badge) return;
+    const name = getBadgeName(badge);
+    const slot = document.createElement("div");
+    slot.className = "pin-slot pin-slot--filled";
+    slot.dataset.badgeId = strId;
+
     const img = document.createElement("img");
     img.src = badge.img;
-    img.alt = badge.name;
-    img.title = badge.name;
+    img.alt = name;
+    img.title = name;
     img.className = "badge-preview-img";
     img.dataset.badgeId = strId;
     img.onerror = () => {
       img.src = new URL("./images/default.png", import.meta.url).href;
     };
-    preview.appendChild(img);
+    slot.appendChild(img);
+
+    const unpin = document.createElement("button");
+    unpin.type = "button";
+    unpin.className = "pin-unpin";
+    unpin.dataset.unpin = strId;
+    unpin.setAttribute("aria-label", `${_tr("profile.unpin_badge", "Unpin")} — ${name}`);
+    unpin.title = _tr("profile.unpin_badge", "Unpin");
+    unpin.textContent = "✕";
+    unpin.onclick = (e) => {
+      e.stopPropagation();
+      toggleBadgeSelection(profile, _lastSaveProfile, strId);
+    };
+    slot.appendChild(unpin);
+    preview.appendChild(slot);
   });
 
+  // Une seule case « + », et seulement s'il reste de la place : quatre cadres en
+  // pointillés côte à côte laissaient un grand vide dès qu'on n'avait qu'un ou
+  // deux badges (retour Hamza du 2026-09-16). Le tout est centré, donc l'affichage
+  // s'adapte au nombre.
+  if (ids.length < MAX_SELECTED_BADGES) {
+    const empty = document.createElement("button");
+    empty.type = "button";
+    empty.className = "pin-slot pin-slot--empty";
+    empty.setAttribute("aria-label", _tr("profile.pin_badge", "Pin a badge"));
+    empty.title = _tr("profile.pin_badge", "Pin a badge");
+    empty.textContent = "+";
+    empty.onclick = () => openAtelier("badges");
+    preview.appendChild(empty);
+  }
+
   window.dispatchEvent(new CustomEvent("badgesRendered"));
+}
+
+/**
+ * Rend l'onglet Badges de l'atelier : uniquement les badges débloqués, en
+ * vignettes cliquables — épinglé = bordure accent + ✓. Le catalogue complet
+ * (verrouillés, conditions) reste dans la modale « See All Badges ».
+ * @param {Object} profile - Le profil utilisateur
+ * @param {Function} saveProfile - Fonction de sauvegarde
+ */
+export function renderBadgePicker(profile, saveProfile) {
+  const grid = document.getElementById("badgePickGrid");
+  if (!grid) return;
+  if (saveProfile) _lastSaveProfile = saveProfile;
+
+  const unlocked = badgesList.filter((b) => (profile.badges || []).includes(b.id));
+  const selected = profile.selectedBadges || [];
+  const hint = document.getElementById("badgePickHint");
+  if (hint) {
+    hint.dataset.count = `${selected.length}/${MAX_SELECTED_BADGES}`;
+  }
+
+  if (!unlocked.length) {
+    grid.innerHTML = `<p class="badge-pick-empty">${_tr(
+      "profile.pick_empty",
+      "No badge unlocked yet — play a few games, they will show up here."
+    )}</p>`;
+    return;
+  }
+
+  grid.innerHTML = unlocked
+    .map((badge) => {
+      const pinned = selected.includes(badge.id);
+      const name = getBadgeName(badge);
+      return `
+        <button type="button" class="badge-pick${pinned ? " badge-pick--pinned" : ""}"
+                data-id="${badge.id}" aria-pressed="${pinned}" title="${name}">
+          <span class="badge-pick-thumb">
+            <img src="${badge.img}" alt="" loading="lazy"
+                 onerror="this.src=new URL('./images/default.png',import.meta.url).href">
+            ${pinned ? '<span class="badge-pick-check" aria-hidden="true">✓</span>' : ""}
+          </span>
+          <span class="badge-pick-name">${name}</span>
+        </button>`;
+    })
+    .join("");
+
+  grid.onclick = (e) => {
+    const btn = e.target.closest(".badge-pick");
+    if (!btn) return;
+    toggleBadgeSelection(profile, _lastSaveProfile, btn.dataset.id);
+  };
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -890,12 +999,35 @@ function attachBadgeClickEvents(profile, saveProfile, grid) {
   });
 }
 
+/**
+ * Replie / déplie une catégorie. `overflow: hidden` n'est posé sur le bloc que
+ * pendant l'animation (classe is-animating) et à l'état replié : à l'état ouvert
+ * il coupait la bulle d'info de la première rangée (badges.css).
+ */
+function setCategoryCollapsed(section, collapsed) {
+  const wrap = section.querySelector(".badges-grid-wrap");
+  if (wrap && !collapsed && section.classList.contains("collapsed")) {
+    wrap.classList.add("is-animating");
+    const done = (e) => {
+      if (e && e.target !== wrap) return;
+      wrap.classList.remove("is-animating");
+      wrap.removeEventListener("transitionend", done);
+    };
+    wrap.addEventListener("transitionend", done);
+    // Filet si transitionend ne vient pas (onglet en arrière-plan, reduced motion).
+    setTimeout(done, 600);
+  }
+  section.classList.toggle("collapsed", collapsed);
+  section
+    .querySelector(".badges-category-header")
+    ?.setAttribute("aria-expanded", String(!collapsed));
+}
+
 function setupCategoryCollapse(grid) {
   grid.querySelectorAll(".badges-category-header").forEach((header) => {
     header.addEventListener("click", () => {
       const section = header.closest(".badges-category-section");
-      const isCollapsed = section.classList.toggle("collapsed");
-      header.setAttribute("aria-expanded", String(!isCollapsed));
+      setCategoryCollapsed(section, !section.classList.contains("collapsed"));
     });
   });
 }
@@ -916,10 +1048,7 @@ function setupBadgesSearch(grid) {
       });
       section.style.display = anyVisible ? "" : "none";
       // Auto-expand sections that have matching results
-      if (q && anyVisible) {
-        section.classList.remove("collapsed");
-        section.querySelector(".badges-category-header")?.setAttribute("aria-expanded", "true");
-      }
+      if (q && anyVisible) setCategoryCollapsed(section, false);
     });
   };
 }
@@ -945,53 +1074,28 @@ function setupModalControls(openBtn, closeBtn, modal) {
     };
   }
 
-  // Fermer en cliquant en dehors
-  if (modal) {
-    modal.onclick = (e) => {
-      if (e.target === modal) {
+  // Fermer en cliquant en dehors. La modale des badges n'a PAS de fond : c'est
+  // une boîte centrée posée sur la page, donc « cliquer à côté » veut dire
+  // cliquer n'importe où hors de la boîte (retour Hamza du 2026-09-16). Escape
+  // ferme aussi.
+  if (modal && !modal._outsideBound) {
+    modal._outsideBound = true;
+    document.addEventListener("click", (e) => {
+      if (modal.classList.contains("hidden")) return;
+      if (modal.contains(e.target)) return;
+      if (openBtn && (e.target === openBtn || openBtn.contains(e.target))) return;
+      modal.classList.add("hidden");
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) {
         modal.classList.add("hidden");
       }
-    };
+    });
   }
 
-  // Bouton « Sauvegarder » explicite, en bas de la modale (sticky). La sélection
-  // s'auto-sauve déjà à chaque clic, mais ce bouton confirme visuellement
-  // (sync cloud best-effort + feedback inline + fermeture).
-  if (modal && !document.getElementById("saveBadgesBtn")) {
-    const _t = (k, fb) => {
-      const r = window.i18n?.t?.(k);
-      return r != null && r !== k ? r : fb;
-    };
-    const footer = document.createElement("div");
-    footer.className = "badges-modal-footer";
-    const btn = document.createElement("button");
-    btn.id = "saveBadgesBtn";
-    btn.type = "button";
-    btn.className = "badges-save-btn";
-    const label = _t("profile.badges_save", "💾 Save");
-    btn.textContent = label;
-    btn.onclick = () => {
-      try {
-        _lastSaveProfile();
-      } catch (_) {
-        /* sauvegarde best-effort */
-      }
-      // Feedback inline garanti (ne dépend pas de window.showToast qui peut manquer)
-      btn.classList.add("saved");
-      btn.textContent = _t("profile.badges_saved", "✅ Badges saved!");
-      if (typeof window.showToast === "function") {
-        window.showToast(_t("profile.badges_saved", "✅ Badges saved!"));
-      }
-      setTimeout(() => modal.classList.add("hidden"), 550);
-      setTimeout(() => {
-        btn.classList.remove("saved");
-        btn.textContent = label;
-      }, 900);
-    };
-    footer.appendChild(btn);
-    // En bas de la modale, après la grille des badges.
-    modal.appendChild(footer);
-  }
+  // Plus de bouton « Sauvegarder » ici : depuis la 2.2 chaque clic épingle et
+  // envoie tout de suite (voir profile/atelier.js), un bouton Save ne ferait que
+  // laisser croire qu'il faut penser à l'utiliser.
 }
 
 /**
@@ -1009,25 +1113,45 @@ function adjustTooltipPositions() {
       const modalRect = modal.getBoundingClientRect();
 
       setTimeout(() => {
-        const tooltipRect = tooltip.getBoundingClientRect();
+        // Tout se calcule depuis la géométrie du BADGE et la taille de la bulle,
+        // jamais depuis la position courante de la bulle : celle-ci dépend des
+        // styles inline du survol précédent et des règles nth-child de badges.css
+        // (écrites pour 4 colonnes, fausses dès que la grille auto-fill en a 2
+        // ou 3) — mesurer la bulle, c'était mesurer le résultat d'un calcul faux.
+        const itemRect = item.getBoundingClientRect();
+        const w = tooltip.offsetWidth;
+        const h = tooltip.offsetHeight;
+        const margin = 10;
+
+        // Verticalement d'abord : la modale est le conteneur de défilement, tout
+        // ce qui passe au-dessus de son bord haut est coupé. Première rangée d'une
+        // catégorie collée en haut → la bulle bascule SOUS le badge (signalé par
+        // un joueur, 2.2). `bottom: 110%` place la bulle à 10 % de la hauteur du
+        // badge au-dessus de lui, plus les 10 px du survol.
+        const topIfAbove = itemRect.top - itemRect.height * 0.1 - h - margin;
+        const below = topIfAbove < modalRect.top + margin;
+        tooltip.classList.toggle("badge-tooltip--below", below);
+        const dy = below ? "10px" : "-10px";
+
+        const centerX = itemRect.left + itemRect.width / 2;
 
         // Déborde à gauche
-        if (tooltipRect.left < modalRect.left + 10) {
+        if (centerX - w / 2 < modalRect.left + margin) {
           tooltip.style.left = "0";
           tooltip.style.right = "auto";
-          tooltip.style.transform = "translateX(0) translateY(-10px)";
+          tooltip.style.transform = `translateX(0) translateY(${dy})`;
         }
         // Déborde à droite
-        else if (tooltipRect.right > modalRect.right - 10) {
+        else if (centerX + w / 2 > modalRect.right - margin) {
           tooltip.style.left = "auto";
           tooltip.style.right = "0";
-          tooltip.style.transform = "translateX(0) translateY(-10px)";
+          tooltip.style.transform = `translateX(0) translateY(${dy})`;
         }
         // Centré (position normale)
         else {
           tooltip.style.left = "50%";
           tooltip.style.right = "auto";
-          tooltip.style.transform = "translate(-50%, -10px)";
+          tooltip.style.transform = `translate(-50%, ${dy})`;
         }
       }, 10);
     });
@@ -1067,6 +1191,7 @@ export function toggleBadgeSelection(profile, saveProfile, badgeId) {
   // Sauvegarder et rafraîchir
   saveProfile();
   renderBadgesPreview(profile);
+  renderBadgePicker(profile, saveProfile);
   renderBadgesModal(profile, saveProfile);
 }
 
@@ -1078,8 +1203,8 @@ function showSelectionLimitAlert() {
   alertDiv.className = "badge-limit-alert";
   alertDiv.innerHTML = `
     <div class="alert-content">
-      ⚠️ You can only select <strong>${MAX_SELECTED_BADGES} badges</strong>!<br>
-      <small>Deselect one first.</small>
+      ⚠️ ${_tr("profile.pin_limit", `You can only pin <strong>${MAX_SELECTED_BADGES} badges</strong>!`)}<br>
+      <small>${_tr("profile.pin_limit_hint", "Unpin one first.")}</small>
     </div>
   `;
 
@@ -1141,7 +1266,11 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
 
   // Vérifier que le code n'est pas vide
   if (!code) {
-    showCodeMessage(msg, tCode("badges.event_code_empty", "⚠️ Please enter a code first!"), "warning");
+    showCodeMessage(
+      msg,
+      tCode("badges.event_code_empty", "⚠️ Please enter a code first!"),
+      "warning"
+    );
     return;
   }
 
@@ -1153,7 +1282,7 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     showCodeMessage(
       msg,
       tCode("badges.event_code_failed", "⚠️ Couldn't reach the server. Try again in a moment."),
-      "error",
+      "error"
     );
     input.value = "";
     return;
@@ -1181,7 +1310,12 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
     saveProfile();
     renderBadgesModal(profile, saveProfile);
     renderBadgesPreview(profile);
-    showCodeMessage(msg, tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"), "success");
+    renderBadgePicker(profile, saveProfile);
+      showCodeMessage(
+      msg,
+      tCode("badges.event_code_success", "🎉 Badge unlocked successfully!"),
+      "success"
+    );
   } catch (e) {
     input.value = "";
 
@@ -1192,31 +1326,42 @@ export async function handleEventCodeSubmit(profile, saveProfile, input, msg) {
       case 401:
         showCodeMessage(
           msg,
-          tCode("badges.event_code_signin", "🔒 Sign in to redeem a code — badges are saved to your account."),
-          "warning",
+          tCode(
+            "badges.event_code_signin",
+            "🔒 Sign in to redeem a code — badges are saved to your account."
+          ),
+          "warning"
         );
         break;
       case 409:
-        showCodeMessage(msg, tCode("badges.event_code_already", "✅ You already redeemed this code!"), "success");
+        showCodeMessage(
+          msg,
+          tCode("badges.event_code_already", "✅ You already redeemed this code!"),
+          "success"
+        );
         break;
       case 410:
         showCodeMessage(
           msg,
           tCode("badges.event_code_expired", "⏰ This event is not active yet or has expired."),
-          "error",
+          "error"
         );
         break;
       case 400:
       case 404:
         // Les deux seuls cas où le code est réellement en cause.
-        showCodeMessage(msg, tCode("badges.event_code_error", "❌ Invalid code. Check your spelling!"), "error");
+        showCodeMessage(
+          msg,
+          tCode("badges.event_code_error", "❌ Invalid code. Check your spelling!"),
+          "error"
+        );
         break;
       default:
         // 500, panne réseau, ou bug client : ne jamais accuser le code.
         showCodeMessage(
           msg,
           tCode("badges.event_code_failed", "⚠️ Couldn't reach the server. Try again in a moment."),
-          "error",
+          "error"
         );
     }
   }
@@ -1294,6 +1439,7 @@ export function forceCheckBadges(profile, saveProfile) {
   checkAndUnlockBadges(profile, saveProfile);
   renderBadgesModal(profile, saveProfile);
   renderBadgesPreview(profile);
+  renderBadgePicker(profile, saveProfile);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

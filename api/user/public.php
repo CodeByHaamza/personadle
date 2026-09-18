@@ -13,6 +13,8 @@
  *   user:    id, pseudo, friend_code, lang, created_at
  *   profile: avatar_data, avatar_border_color, wallpaper_id,
  *            profile_music_id, selected_badges, equipped_title_id
+ *   badges, unlocked_wallpapers : ce que le joueur a débloqué (sa collection
+ *   est publique, comme son profil)
  *   stats:   tableau by_mode[] + agrégats globaux
  *   badges:  liste des badge_id débloqués
  *   title:   titre équipé (slug + nom traduit) ou null
@@ -29,7 +31,7 @@ $id     = trim($_GET['id']     ?? '');
 
 if ($code !== '') {
     $stmt = $pdo->prepare(
-        'SELECT id, pseudo, friend_code, lang, created_at
+        'SELECT id, pseudo, friend_code, lang, created_at, global_streak, global_streak_record
          FROM users
          WHERE friend_code = ? AND is_deleted = 0
          LIMIT 1'
@@ -37,7 +39,7 @@ if ($code !== '') {
     $stmt->execute([$code]);
 } elseif ($pseudo !== '') {
     $stmt = $pdo->prepare(
-        'SELECT id, pseudo, friend_code, lang, created_at
+        'SELECT id, pseudo, friend_code, lang, created_at, global_streak, global_streak_record
          FROM users
          WHERE pseudo = ? AND is_deleted = 0
          LIMIT 1'
@@ -46,7 +48,7 @@ if ($code !== '') {
 } elseif ($id !== '' && ctype_digit($id)) {
     // Vue publique par id (lien ?uid= depuis la jauge Social Link)
     $stmt = $pdo->prepare(
-        'SELECT id, pseudo, friend_code, lang, created_at
+        'SELECT id, pseudo, friend_code, lang, created_at, global_streak, global_streak_record
          FROM users
          WHERE id = ? AND is_deleted = 0
          LIMIT 1'
@@ -147,6 +149,7 @@ jsonSuccess([
         'profile_music_id'    => $profile['profile_music_id']     ?? null,
         'selected_badges'     => json_decode($profile['selected_badges'] ?? 'null') ?? [],
         'equipped_title_id'   => $profile['equipped_title_id']    ?? null,
+        'favorite_mode'       => $profile['favorite_mode']        ?? null,
     ],
     'stats' => [
         'by_mode'        => $byMode,
@@ -155,6 +158,12 @@ jsonSuccess([
         'total_time_ms'  => $totalTimeMs,
         'best_streak'    => $bestStreak,
         'total_perfect'  => $totalPerfect,
+        // Streak GLOBALE autoritative (users.*), la même que sur son propre profil.
+        // Sans elle, profile-view.js prenait le max des streaks par mode : un joueur
+        // voyait 30 chez lui et ses amis en voyaient 37 — et une correction admin
+        // de la streak globale restait invisible sur le profil visité.
+        'global_streak'        => (int) ($user['global_streak'] ?? 0),
+        'global_streak_record' => (int) ($user['global_streak_record'] ?? 0),
     ],
     'badges'              => array_map(fn($b) => [
         'badge_id'    => $b['badge_id'],

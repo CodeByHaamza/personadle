@@ -68,6 +68,14 @@ CREATE TABLE users (
     is_admin             TINYINT(1)       NOT NULL DEFAULT 0,
     -- Modération : compte banni / pseudo verrouillé (api/admin/, login.php).
     is_banned            TINYINT(1)       NOT NULL DEFAULT 0,
+    -- Ban avec message (migration 042) : raison VISIBLE par le joueur, note interne,
+    -- date, échéance (NULL = définitif — un ban échu est levé au prochain login).
+    ban_reason           VARCHAR(300)     NULL,
+    ban_note             TEXT             NULL,
+    banned_at            DATETIME         NULL,
+    banned_until         DATETIME         NULL,
+    -- Reset ciblé (migration 042) : le client vide son état local des modes si plus récent que son accusé.
+    reset_local_state_at DATETIME         NULL,
     pseudo_locked        TINYINT(1)       NOT NULL DEFAULT 0,
     -- Date de la dernière récupération de streak Jack Frost (cooldown 60j, migration 013).
     streak_recovered_at  DATETIME         DEFAULT NULL,
@@ -142,7 +150,17 @@ INSERT INTO titles (slug, image_path, name_en, name_fr, name_es, name_de, name_i
 ('junes',                     'profile/titles/junes.webp',                     'Junes',                  'Junes',                   'Junes',                 'Junes',                'Junes',               'mode_wins',           'music',   15,  'rare'),
 ('naoya_first_awakening',     'profile/titles/naoya_first_awakening.webp',     'The First Awakening',    'Le Premier Éveil',        'El Primer Despertar',   'Das Erste Erwachen',   'Il Primo Risveglio',  'classic_p1_wins',     NULL,      15,  'rare'),
 ('maya_always_be_positive',   'profile/titles/maya_always_be_positive.webp',   'Always Be Positive',     'Toujours Positif',        'Siempre Positivo',      'Immer Positiv',        'Sempre Positivo',     'emoji_p2_wins',       NULL,      10,  'common'),
-('shadows_converge',          'profile/titles/shadows_converge.webp',          'Shadows Converge',       'Shadows Converge',        'Shadows Converge',      'Shadows Converge',     'Shadows Converge',    'expert_wins_total',   NULL,      50,  'legendary');
+('shadows_converge',          'profile/titles/shadows_converge.webp',          'Shadows Converge',       'Shadows Converge',        'Shadows Converge',      'Shadows Converge',     'Shadows Converge',    'expert_wins_total',   NULL,      50,  'legendary'),
+-- Lot du 2026-09-16 (migration 044) — descriptions traduites incluses là-bas
+('sees',                      'profile/titles/sees.webp',                      'S.E.E.S.',               'S.E.E.S.',                'S.E.E.S.',              'S.E.E.S.',             'S.E.E.S.',            'titles_count',        NULL,      8,   'epic'),
+('aigis_metis_same_soul',     'profile/titles/aigis_metis_same_soul.webp',     'We Share the Same Soul', 'Nous partageons la même âme', 'Compartimos la misma alma', 'Wir teilen dieselbe Seele', 'Condividiamo la stessa anima', 'social_link_min_rank', NULL, 10, 'epic'),
+('kotone_not_a_princess',     'profile/titles/kotone_not_a_princess.webp',     'I Am Not a Princess',    'Je ne suis pas une princesse', 'No soy una princesa', 'Ich bin keine Prinzessin', 'Non sono una principessa', 'perfect_wins',   NULL,      25,  'rare'),
+('naoto_case_never_closed',   'profile/titles/naoto_case_never_closed.webp',   'The Case Is Never Closed', 'L''affaire n''est jamais close', 'El caso nunca se cierra', 'Der Fall ist nie abgeschlossen', 'Il caso non è mai chiuso', 'mode_wins', 'silhouette', 25, 'rare'),
+('shinjiro_no_pity',          'profile/titles/shinjiro_no_pity.webp',          'Don''t Need Your Pity',  'J''ai pas besoin de ta pitié', 'No necesito tu lástima', 'Spar dir dein Mitleid', 'Non mi serve la tua pietà', 'mode_wins_under_attempts', 'classic', 25, 'epic'),
+('take_your_heart',           'profile/titles/take_your_heart.webp',           'Take Your Heart',        'Je prends ton cœur',      'Te robaré el corazón',  'Ich nehme dein Herz',  'Ti rubo il cuore',    'mode_wins',           'alloutattack', 40, 'legendary'),
+('tatsuya_dont_burn_out',     'profile/titles/tatsuya_dont_burn_out.webp',     'Some Things Don''t Burn Out', 'Certaines choses ne s''éteignent pas', 'Algunas cosas no se apagan', 'Manches erlischt nie', 'Certe cose non si spengono', 'played_on_date', '06-24', NULL, 'legendary'),
+-- Lot du 2026-09-18 (migration 046) : « Go Beyond » — tout Wonder (targets_found, ensemble wonder_go_beyond).
+('wonder_go_beyond',          'profile/titles/wonder_go_beyond.webp',          'Go Beyond',              'Go Beyond',               'Go Beyond',             'Go Beyond',            'Go Beyond',           'targets_found',       'wonder_go_beyond', NULL, 'legendary');
 
 
 -- =============================================================================
@@ -156,6 +174,10 @@ CREATE TABLE profiles (
     profile_music_id    VARCHAR(100),
     selected_badges     JSON,                             -- max 4 badge IDs
     equipped_title_id   BIGINT UNSIGNED  NULL,
+    -- Mode favori CHOISI par le joueur (clé canonique de mode ou NULL) — visible
+    -- sur le profil public, d'où une colonne et non une clé de `settings`
+    -- (migration 040). Le « Best Mode Overall » est calculé à l'affichage.
+    favorite_mode       VARCHAR(20)      NULL,
     settings            JSON             NULL,
     updated_at          TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP
                                                   ON UPDATE CURRENT_TIMESTAMP,
@@ -227,6 +249,7 @@ CREATE TABLE game_sessions (
     attempts        INT              NOT NULL,
     time_ms         INT,
     active_filters  JSON,                        -- ["P3","P5","P5R"]
+    guesses         JSON,                        -- suite des essais, le bon en dernier si gagné (migration 041)
     created_at      TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
@@ -473,6 +496,7 @@ CREATE TABLE leaderboard_cache (
     mode            VARCHAR(30)      NOT NULL,   -- 'all' ou nom de mode
     period          VARCHAR(15)      NOT NULL,   -- 'day' | 'week' | 'month' | 'ever'
     metric          VARCHAR(20)      NOT NULL DEFAULT 'wins',  -- 'wins' | 'winrate' | 'streak' | 'perfect' | 'games'
+    is_expert       TINYINT(1)       NOT NULL DEFAULT 0,  -- dimension du classement (migration 045) : 1 = Mode Expert
     period_start    DATETIME,                    -- '2000-01-01 00:00:00' pour 'ever'
     score           DECIMAL(8,1)     NOT NULL,
     rank_position   INT,
@@ -480,11 +504,13 @@ CREATE TABLE leaderboard_cache (
                                               ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    UNIQUE KEY uq_leaderboard (user_id, mode, period, metric, period_start),
+    -- is_expert fait partie de la clé (migration 045) : sans lui, le cron écraserait
+    -- la ligne normale d'un joueur avec sa ligne Expert à chaque passage.
+    UNIQUE KEY uq_leaderboard (user_id, mode, period, metric, period_start, is_expert),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE INDEX idx_leaderboard_ranking ON leaderboard_cache(mode, period, metric, period_start, score DESC);
+CREATE INDEX idx_leaderboard_ranking ON leaderboard_cache(mode, period, metric, is_expert, period_start, score DESC);
 
 
 -- =============================================================================
@@ -626,6 +652,60 @@ CREATE INDEX idx_messages_challenge_dedup
 -- =============================================================================
 -- 20. ERROR_LOG — Observabilité applicative (erreurs backend capturées)
 -- =============================================================================
+-- =============================================================================
+-- MODÉRATION AVEC MESSAGES, ANNONCES, MAINTENANCE (migration 042)
+-- =============================================================================
+
+-- Avertissement / message de l'équipe à un joueur, vu une fois (read_at).
+CREATE TABLE user_notices (
+    id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT UNSIGNED NOT NULL,
+    admin_id   BIGINT UNSIGNED NULL,
+    type       VARCHAR(20)     NOT NULL DEFAULT 'warning',   -- 'warning' | 'info'
+    message    TEXT            NOT NULL,
+    created_at TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    read_at    DATETIME        NULL,
+    INDEX idx_user_notices_pending (user_id, read_at),
+    CONSTRAINT fk_user_notices_user  FOREIGN KEY (user_id)  REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_notices_admin FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Carnet interne de l'admin sur un joueur — jamais exposé au joueur.
+CREATE TABLE admin_notes (
+    id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT UNSIGNED NOT NULL,
+    admin_id   BIGINT UNSIGNED NULL,
+    note       TEXT            NOT NULL,
+    created_at TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_admin_notes_user (user_id, created_at),
+    CONSTRAINT fk_admin_notes_user  FOREIGN KEY (user_id)  REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_admin_notes_admin FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Annonce globale (bandeau sur toutes les pages), FR + EN, fenêtre optionnelle.
+CREATE TABLE announcements (
+    id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    level      VARCHAR(20)     NOT NULL DEFAULT 'info',      -- 'info' | 'warning' | 'maintenance'
+    message_fr TEXT            NOT NULL,
+    message_en TEXT            NULL,                          -- NULL = message_fr partout
+    starts_at  DATETIME        NULL,                          -- NULL = tout de suite
+    ends_at    DATETIME        NULL,                          -- NULL = jusqu'à désactivation
+    is_active  TINYINT(1)      NOT NULL DEFAULT 1,
+    created_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_announcements_active (is_active, starts_at, ends_at),
+    CONSTRAINT fk_announcements_admin FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Réglages du site (maintenance_enabled, maintenance_message_fr/en, maintenance_until).
+CREATE TABLE site_settings (
+    setting_key   VARCHAR(60)     NOT NULL PRIMARY KEY,
+    setting_value TEXT            NULL,
+    updated_by    BIGINT UNSIGNED NULL,
+    updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_site_settings_admin FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE error_log (
     id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     level      VARCHAR(20)     NOT NULL DEFAULT 'error',
@@ -658,9 +738,12 @@ CREATE TABLE admin_audit_log (
     --     'badge.grant', 'badge.revoke', 'title.grant', 'title.revoke',
     --     'wallpaper.grant', 'wallpaper.revoke', 'event_code.create',
     --     'event_code.update', 'event_code.delete', 'social_link.update',
-    --     'social_link.delete'
+    --     'social_link.delete', 'user_stats.overwrite',
+    --     'challenge.set_status', 'challenge.delete',
+    --     'streak.set', 'streak.recover', 'streak.reset_cooldown'
     target_type VARCHAR(40)     NOT NULL,
-    -- ex: 'user', 'badge', 'title', 'wallpaper', 'event_code', 'social_link'
+    -- ex: 'user', 'badge', 'title', 'wallpaper', 'event_code', 'social_link',
+    --     'message' (défi piloté depuis l'onglet Défis du panel admin)
     target_id   VARCHAR(100)    NOT NULL,
     -- id numérique ou code/slug selon la cible, toujours stocké en texte
     details     JSON            NULL,
@@ -701,6 +784,7 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('emoji_decoder',       'Emoji Decoder',              'achievement', 'common',    'profile/badges/images/Badge_Emoji_Decoder.webp',         'Win 10 games in Emoji mode', 'mode_wins', 'emoji', 10, 0),
 ('navigator',           'Eye of the Navigator',       'achievement', 'rare',      'profile/badges/images/Badge_Navigator.webp',             'Use the hint 50 times in Classic mode', 'manual', NULL, NULL, 0),
 ('velvet_regular',      'Velvet Regular',             'achievement', 'epic',      'profile/badges/images/Badge_Velvet_Regular.webp',        'Play on 50 unique days', 'unique_days', NULL, 50, 0),
+('song_of_orpheus',    'Song of Orpheus',            'achievement', 'epic',      'profile/badges/images/Badge_Song_Of_Orpheus.webp',       'Win 25 games in Expert Mode', 'expert_wins_total', NULL, 25, 0),
 ('strega',              'Apostles of the Fall',       'achievement', 'rare',      'profile/badges/images/Badge_Strega.webp',                'Find Hypnos (Takaya), Moros (Jin) and Medea (Chidori) in Personae mode', 'manual', NULL, NULL, 0),
 ('twin_fist',           'Twin Fist',                  'achievement', 'rare',      'profile/badges/images/Badge_Twin_Fist.webp',             'Find Makoto Nijima''s and Akihiko''s personas + their All-Out Attacks', 'manual', NULL, NULL, 0),
 ('twin_spear',          'Twin Spear',                 'achievement', 'rare',      'profile/badges/images/Badge_Twin_Spear.webp',            'Find Kotone''s and Ken''s personas + their All-Out Attacks', 'manual', NULL, NULL, 0),
@@ -750,7 +834,13 @@ INSERT IGNORE INTO badges (slug, name_en, category, rarity, image_path, conditio
 ('github_contributor',  'Phantom Coder',              'secret',      'common',    'profile/badges/images/Badges_Github_Morgana.png',        '???', 'manual', NULL, NULL, 1),
 ('lobster',             'Artistic Lobster',           'secret',      'rare',      'profile/badges/images/Badges_Lobster.png',               '???', 'manual', NULL, NULL, 1),
 ('hifumi_archives',     'The Grandmaster''s Tome',    'secret',      'rare',      'profile/badges/images/Badge_Hifumi_Archives.webp',       '???', 'manual', NULL, NULL, 1),
-('report',              'The Priestess''s Audit',     'secret',      'rare',      'profile/badges/images/Badge_Report.webp',                '???', 'manual', NULL, NULL, 1);
+('report',              'The Priestess''s Audit',     'secret',      'rare',      'profile/badges/images/Badge_Report.webp',                '???', 'manual', NULL, NULL, 1),
+-- Lot du 2026-09-18 (migration 046) : quatre conditions vérifiées depuis game_sessions/social_links, aucun 'manual'.
+('starlight_festival',    'Starlight Festival',         'achievement', 'rare',      'profile/badges/images/Badge_Starlight_Festival.webp',    'Find Joker, Panther and Mona in their Starlight outfits in All-Out Attack', 'targets_found', 'starlight_trio', NULL, 0),
+('shujin_outlaws',        'Shujin Outlaws',             'achievement', 'rare',      'profile/badges/images/Badge_Shujin_Outlaws.webp',        'Find Wonder''s Shujin All-Out Attack, then Ren and Wonder in Silhouette mode', 'targets_found', 'shujin_outlaws', NULL, 0),
+('absolute_authority',    'Absolute Authority',         'achievement', 'rare',      'profile/badges/images/Badge_Absolute_Authority.webp',    'Find Mitsuru Kirijo and Makoto Niijima in Classic mode', 'targets_found', 'absolute_authority', NULL, 0),
+('dont_waste_your_breath','Don''t Waste Your Breath',   'achievement', 'epic',      'profile/badges/images/Badge_Dont_Waste_Your_Breath.webp', 'Win 5 Classic Expert games on the very first guess', 'mode_expert_perfect_wins', 'classic', 5, 0),
+('same_energy',           'Same Energy',                'social',      'epic',      'profile/badges/images/Badge_Same_Energy.webp',           'Reach Social Link rank 5 with a friend while one of you wears Motoha Arai and the other Chie Satonaka', 'same_energy', NULL, NULL, 0);
 
 INSERT IGNORE INTO wallpapers (id, game, is_default, unlock_condition, condition_type, condition_mode, condition_value, name, image_path) VALUES
 ('kamoshida_palace',       'P5', 0, 'Play at least 1 game in each of the 6 modes',                     'all_modes_won',        NULL,     NULL, 'Kamoshida''s Palace',    'profile/Wallpaper/unlockable/kamoshida_palace.webp'),

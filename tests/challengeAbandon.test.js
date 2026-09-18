@@ -84,14 +84,35 @@ describe("abandonActiveChallenge — chemin nominal", () => {
     expect(localStorage.getItem("classicFilters")).toBe('["P3","P4"]');
   });
 
-  it("ne restaure rien quand aucun filtre n'avait été sauvegardé", async () => {
-    const c = challenge({ filterKey: "classicFilters", originalFilters: null });
+  it("retire la clé quand le joueur n'avait aucun filtre à lui", async () => {
+    // Clé ABSENTE à l'acceptation = « je n'ai jamais touché mes filtres, tout est
+    // actif ». L'abandon doit rendre cet état-là, donc supprimer la clé : la
+    // version précédente ne faisait rien, et les filtres de l'expéditeur restaient
+    // pour toujours (bug sorti par tests-e2e/filters_usecases.spec.js).
+    const c = challenge({
+      filterKey: "classicFilters",
+      originalFilters: null,
+      installedFilters: '["P5X"]',
+    });
     localStorage.setItem("classicFilters", '["P5X"]');
 
     await abandonActiveChallenge(c);
 
-    // Écrire `null` par-dessus poserait la chaîne "null" dans localStorage.
-    expect(localStorage.getItem("classicFilters")).toBe('["P5X"]');
+    expect(localStorage.getItem("classicFilters")).toBeNull();
+  });
+
+  it("ne touche pas aux filtres si le joueur les a rechoisis pendant le défi", async () => {
+    // Son choix est plus récent que celui du défi : il gagne.
+    const c = challenge({
+      filterKey: "classicFilters",
+      originalFilters: '["P3"]',
+      installedFilters: '["P5X"]',
+    });
+    localStorage.setItem("classicFilters", '["P4","P4G"]');
+
+    await abandonActiveChallenge(c);
+
+    expect(localStorage.getItem("classicFilters")).toBe('["P4","P4G"]');
   });
 });
 

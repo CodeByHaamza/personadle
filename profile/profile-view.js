@@ -4,9 +4,10 @@ import {
   getSocialLinkData,
   applyRank10Effect,
 } from "../js/social-link.js";
-import { getStreakTier, formatSongTime } from "./profile-format.js";
+import { getStreakTier, formatSongTime, bestModeOverall } from "./profile-format.js";
 import { formatPlayTime } from "./formatPlayTime.js";
 import { resolveTheme, applyThemeVars } from "./theme.js";
+import { profileAutoplayAllowed } from "../js/settings-modal.js";
 
 /**
  * profile/profile-view.js — Mode consultation du profil d'un autre joueur
@@ -203,16 +204,30 @@ if (viewParam || uidParam) {
     };
 
     hide(document.getElementById("editAvatarBtn"));
-    hide(document.getElementById("saveAndRefreshBtn"));
     hide(document.getElementById("authSection"));
+    // 2.2 : l atelier, l indicateur d enregistrement et la puce « Choisir un titre »
+    // sont des commandes du propriétaire — sur un profil consulté on ne montre que
+    // le résultat (avatar, titre équipé, badges épinglés).
+    hide(document.getElementById("atelierModal"));
+    hide(document.getElementById("openAtelierBtn"));
+    hide(document.getElementById("saveStatus"));
+    hide(document.getElementById("equippedTitleEmpty"));
+    const titleBtn = document.getElementById("equippedTitleBtn");
+    if (titleBtn) {
+      titleBtn.disabled = true;
+      titleBtn.classList.add("title-chip--static");
+    }
     // En mode consultation, masquer l'UI invité « connecte-toi » qu'auth.js affiche
     // pour un visiteur déconnecté — sinon le profil consulté ressemble à un mur de login.
     hide(document.getElementById("authGuest"));
     document.querySelectorAll('[data-auth="anonymous"]').forEach(hide);
     hide(document.querySelector(".pseudo-edit-row"));
-    hide(document.querySelector(".perso-card"));
+    // Le sélecteur de mode favori est une commande du propriétaire : sur un
+    // profil consulté il ne restait qu un libellé au-dessus d une rangée vide.
+    hide(document.querySelector(".fav-mode-row"));
+    // La carte « Badges » reste : elle montre la collection du joueur consulté
+    // (retour Hamza du 2026-09-16). Seul le bouton vers SA propre collection part.
     hide(document.getElementById("openBadgesModal"));
-    hide(document.getElementById("openTitlesModal"));
 
     // Masquer les cartes d'action (export, import, share, reset, event code)
     document.querySelectorAll(".profile-card").forEach((card) => {
@@ -269,7 +284,7 @@ if (viewParam || uidParam) {
       } else if (friendshipStatus === "pending_received") {
         friendBtn = `<button id="vbAcceptBtn" class="vb-friend-btn vb-friend-btn--accept" data-code="${escapeHtml(friendCode)}">${t("friends.accept", "Accept")}</button>`;
       } else {
-        friendBtn = `<button id="vbAddFriendBtn" class="vb-friend-btn" data-code="${escapeHtml(friendCode)}">${t("friends.add_friend", "+ Add friend")}</button>`;
+        friendBtn = `<button id="vbAddFriendBtn" class="vb-friend-btn" data-code="${escapeHtml(friendCode)}">+ ${t("friends.add_friend", "Add friend")}</button>`;
       }
     }
 
@@ -298,7 +313,7 @@ if (viewParam || uidParam) {
           addBtn.outerHTML = `<span class="vb-friend-status vb-friend-status--pending">${t("friends.request_sent", "Request sent")}</span>`;
         } catch (err) {
           addBtn.disabled = false;
-          addBtn.textContent = t("friends.add_friend", "+ Add friend");
+          addBtn.textContent = `+ ${t("friends.add_friend", "Add friend")}`;
           alert(err.message || "Could not send friend request.");
         }
       });
@@ -366,6 +381,9 @@ if (viewParam || uidParam) {
 
     if (!selectedIds.length) {
       previewEl.innerHTML = "";
+      // Pas de « + » à proposer à un visiteur : le bloc entier disparaît.
+      const block = previewEl.closest(".pinned-block");
+      if (block) block.style.display = "none";
       return;
     }
 
@@ -378,7 +396,8 @@ if (viewParam || uidParam) {
         const badge = _badgesList.find((b) => b.id === id);
         if (!badge) continue;
         const wrapper = document.createElement("div");
-        wrapper.className = "badge-preview-item";
+        // Même emplacement que sur le profil du propriétaire (2.2), sans la croix.
+        wrapper.className = "pin-slot pin-slot--filled badge-preview-item";
         wrapper.title = escapeHtml(badge.name);
         const img = document.createElement("img");
         img.className = "badge-preview-img";
@@ -420,9 +439,20 @@ if (viewParam || uidParam) {
     // ── Agrégats calculés côté client (manquants dans l'API) ──
     const totalGiveups = byMode.reduce((acc, m) => acc + (m.giveups ?? 0), 0);
     const totalTimeMinutes = (stats.total_time_ms ?? 0) / 60000;
-    const currentStreak = byMode.reduce((acc, m) => Math.max(acc, m.streak ?? 0), 0);
-    const favMode = byMode.reduce((acc, m) => (!acc || m.games > acc.games ? m : acc), null);
-    const favModeLabel = favMode ? (VIEW_MODE_META[favMode.mode]?.label ?? favMode.mode) : "—";
+    // Streak globale = users.global_streak, comme sur son propre profil (cloud-sync.js).
+    // Repli sur le max par mode si l'API ne l'expose pas encore (backend antérieur).
+    const currentStreak =
+      stats.global_streak ?? byMode.reduce((acc, m) => Math.max(acc, m.streak ?? 0), 0);
+    const bestStreak = Math.max(stats.global_streak_record ?? 0, stats.best_streak ?? 0);
+    // Mode favori = le CHOIX du joueur (profiles.favorite_mode, migration 040) ;
+    // « Best Mode Overall » = meilleur taux de victoire, 3 parties minimum —
+    // même calcul que renderStats() dans profile-page.js.
+    const favKey = profile.favorite_mode ?? null;
+    const favModeLabel = favKey ? (VIEW_MODE_META[favKey]?.label ?? favKey) : "—";
+    const best = bestModeOverall(byMode);
+    const bestModeLabel = best
+      ? `${VIEW_MODE_META[best.mode]?.label ?? best.mode} · ${Math.round(best.rate * 100)}%`
+      : "—";
 
     // ── Avatar — supporte les GIFs animés ──
     const avatarEl = document.getElementById("pageAvatar");
@@ -512,7 +542,7 @@ if (viewParam || uidParam) {
         },
         {
           icon: "⭐",
-          value: stats.best_streak ?? 0,
+          value: bestStreak,
           label: t("profile.stat_best_streak_label", "Best Streak"),
         },
         {
@@ -530,7 +560,11 @@ if (viewParam || uidParam) {
           icon: "🎯",
           value: favModeLabel,
           label: t("profile.stat_fav_mode_label", "Fav Mode"),
-          full: true,
+        },
+        {
+          icon: "🏅",
+          value: bestModeLabel,
+          label: t("profile.stat_best_mode_label", "Best Mode Overall"),
         },
       ];
 
@@ -594,6 +628,7 @@ if (viewParam || uidParam) {
 
     // ── Badges avec click-to-zoom ──
     renderViewBadges(profile, badges);
+
 
     // ── Thème du joueur consulté ──
     applyViewTheme(profile.wallpaper_id || "all_out");
@@ -718,6 +753,8 @@ if (viewParam || uidParam) {
     });
 
     // ── Autoplay avec fallback au premier geste utilisateur ──
+    // Réglage « Autoplay sur les profils des autres » (settings-modal.js).
+    if (!profileAutoplayAllowed("others")) return;
     _viewSongAudio.play().catch(() => {
       const unlock = () => _viewSongAudio.play().catch(() => {});
       document.addEventListener("click", unlock, { once: true });
@@ -774,6 +811,15 @@ if (viewParam || uidParam) {
     header?.insertAdjacentElement("afterend", banner);
     attachBannerActions(user.friend_code);
 
+    // Le Compendium est public : le bouton pointe vers le carnet du joueur
+    // visité, et reste visible même pour un visiteur non connecté.
+    const compendiumBtn = document.getElementById("compendiumBtn");
+    if (compendiumBtn) {
+      compendiumBtn.href = `./compendium/compendium.html?view=${encodeURIComponent(user.friend_code)}`;
+      compendiumBtn.removeAttribute("data-auth");
+      compendiumBtn.style.display = "";
+    }
+
     // Remplir le profil + appliquer le thème
     populatePublicProfile(profileData);
 
@@ -821,13 +867,20 @@ if (viewParam || uidParam) {
       localProfile.visitedProfileIds = [...visitedSet];
       localStorage.setItem("personaUserProfile", JSON.stringify(localProfile));
       if (visitedSet.size >= 5) {
+        // checkBadgesAfterGame() et non un `checkBadges(profile, save)` : cette
+        // fonction-là n'a JAMAIS existé dans badgesManager.js. L'appel partait
+        // donc sur `undefined`, levait un TypeError, et le `.catch(() => {})`
+        // l'avalait en silence — le badge Data Mining ne se débloquait jamais au
+        // moment de la 5e visite (il fallait rouvrir son propre profil pour que
+        // initBadgesSystem() finisse par le voir).
+        //
+        // Son nom dit « AfterGame » mais c'est le check léger COMMUN à toutes les
+        // pages (cf. js/unlock-notify.js) : il relit localStorage — qu'on vient
+        // d'écrire juste au-dessus — évalue toutes les conditions et affiche la
+        // notification de déblocage, sans toucher à l'UI de la page profil (qui
+        // n'existe pas ici, on regarde le profil de quelqu'un d'autre).
         import("./badges/badgesManager.js")
-          .then((m) => {
-            const p = JSON.parse(localStorage.getItem("personaUserProfile") || "{}");
-            m.checkBadges(p, (updated) =>
-              localStorage.setItem("personaUserProfile", JSON.stringify(updated))
-            );
-          })
+          .then((m) => m.checkBadgesAfterGame())
           .catch(() => {});
       }
     }

@@ -165,6 +165,137 @@ final class DailyTargetTest extends TestCase
         $this->assertTrue($hasMatchingP4Entry, "Aucune entrée P4 du pool Personae ne correspond à \"$filtered\"");
     }
 
+    // ── Repli filtré des quatre modes à pool de noms (2.2) ──────────────────
+    //
+    // Avant : Classic/Emoji/Silhouette/Music tiraient hors filtres — un joueur
+    // « P5 uniquement » pouvait recevoir un personnage P3 que l'autocomplétion ne
+    // proposait jamais. Le client (getDailyTargetWithin) et ce fichier re-tirent
+    // désormais dans le pool filtré ; parité JS ↔ PHP vérifiée sur 1296 cas au
+    // moment du changement (0 écart, 775 re-tirages effectifs).
+
+    /** @return list<array{string, string, string}> [mode, clé du pool, clé de la table d'opus] */
+    private static function filteredNameModes(): array
+    {
+        return [
+            ['classic',           'classic',        'classic'],
+            ['classic_expert',    'classic_expert', 'classic'],
+            ['emoji',             'emoji',          'emoji'],
+            ['emoji_expert',      'emoji',          'emoji'],
+            ['silhouette',        'silhouette',     'silhouette'],
+            ['silhouette_expert', 'silhouette',     'silhouette'],
+            ['music',             'music',          'music'],
+            ['music_expert',      'music_expert',   'music'],
+            ['alloutattack',      'alloutattack',   'alloutattack'],
+            ['alloutattack_expert', 'alloutattack', 'alloutattack'],
+        ];
+    }
+
+    public function testEveryNamePoolCarriesAnOpusTable(): void
+    {
+        $pools = personadle_load_daily_pools();
+        foreach (['classic', 'emoji', 'silhouette', 'music', 'alloutattack'] as $key) {
+            $this->assertArrayHasKey('opusByName', $pools[$key], "$key sans table d'opus");
+            foreach ($pools[$key]['pool'] as $name) {
+                $this->assertArrayHasKey($name, $pools[$key]['opusByName'], "$key : « $name » sans opus");
+                $this->assertNotEmpty($pools[$key]['opusByName'][$name], "$key : « $name » opus vide");
+            }
+        }
+    }
+
+    public function testFilteredModesAlwaysReturnATargetInsideTheActiveFilters(): void
+    {
+        $pools = personadle_load_daily_pools();
+        $filters = [['P5'], ['P1'], ['P3', 'P3FES', 'P3P'], ['P4G'], ['P2IS', 'P2EP'], ['P5R'], ['PTS']];
+        $fallbacks = 0;
+        foreach (self::filteredNameModes() as [$mode, $poolKey, $opusKey]) {
+            $opusByName = $pools[$opusKey]['opusByName'];
+            foreach (['2026-09-17', '2026-03-29', '2026-12-31', '2027-02-28'] as $date) {
+                foreach (['1', '42', '12345'] as $seed) {
+                    $unfiltered = personadle_compute_daily_target($mode, $date, $seed, []);
+                    foreach ($filters as $f) {
+                        $filteredPool = array_values(array_filter(
+                            $pools[$poolKey]['pool'],
+                            fn ($n) => count(array_intersect($opusByName[$n] ?? [], $f)) > 0
+                        ));
+                        if ($filteredPool === []) continue; // filtre sans entrée pour ce mode
+                        $got = personadle_compute_daily_target($mode, $date, $seed, $f);
+                        $this->assertIsString($got, "$mode $date $seed");
+                        $this->assertNotEmpty(
+                            array_intersect($opusByName[$got] ?? [], $f),
+                            "$mode $date $seed [" . implode(',', $f) . "] → « $got » hors filtres"
+                        );
+                        if ($got !== $unfiltered) $fallbacks++;
+                    }
+                }
+            }
+        }
+        $this->assertGreaterThan(0, $fallbacks, 'au moins un re-tirage doit avoir été exercé');
+    }
+
+    public function testFilteredModesKeepTheFullCatalogueTargetWhenItIsInsideTheFilters(): void
+    {
+        $pools = personadle_load_daily_pools();
+        foreach (self::filteredNameModes() as [$mode, $poolKey, $opusKey]) {
+            $unfiltered = personadle_compute_daily_target($mode, '2026-09-17', '42', []);
+            $opus = $pools[$opusKey]['opusByName'][$unfiltered];
+            // Filtrer sur les opus DE la cible : elle doit rester la même.
+            $this->assertSame($unfiltered, personadle_compute_daily_target($mode, '2026-09-17', '42', $opus), $mode);
+        }
+    }
+
+    public function testAFilterThatEmptiesThePoolFallsBackToTheFullCatalogue(): void
+    {
+        foreach (self::filteredNameModes() as [$mode]) {
+            $unfiltered = personadle_compute_daily_target($mode, '2026-09-17', '42', []);
+            $this->assertSame($unfiltered, personadle_compute_daily_target($mode, '2026-09-17', '42', ['ZZZ']), $mode);
+        }
+    }
+
+    public function testExpertVariantsStillDrawIndependentlyFromTheirNormalMode(): void
+    {
+        // Même filtre, même joueur, même jour : normal et Expert ne doivent pas
+        // systématiquement tomber sur la même cible (sinon jouer le normal d'abord
+        // révèle l'Expert). Sur 30 tirages, au moins un diffère.
+        foreach ([['classic', 'classic_expert'], ['emoji', 'emoji_expert'], ['silhouette', 'silhouette_expert'], ['music', 'music_expert']] as [$normal, $expert]) {
+            $differ = 0;
+            for ($d = 1; $d <= 30; $d++) {
+                $date = sprintf('2026-08-%02d', $d);
+                if (personadle_compute_daily_target($normal, $date, '42', ['P5']) !== personadle_compute_daily_target($expert, $date, '42', ['P5'])) $differ++;
+            }
+            $this->assertGreaterThan(0, $differ, "$normal / $expert tirent toujours la même cible");
+        }
+    }
+
+    public function testMusicExpertFilteredTargetAlwaysHasLyrics(): void
+    {
+        $pools = personadle_load_daily_pools();
+        for ($d = 1; $d <= 28; $d++) {
+            $date = sprintf('2026-10-%02d', $d);
+            foreach ([['P5'], ['P3', 'P3FES', 'P3P'], ['P4G']] as $f) {
+                $got = personadle_compute_daily_target('music_expert', $date, '7', $f);
+                $this->assertContains($got, $pools['music_expert']['pool'], "cible hors pool Expert le $date");
+            }
+        }
+    }
+
+    public function testPersonaeHomonymFromAnotherOpusDoesNotCountAsPresent(): void
+    {
+        // Prometheus est porté par Futaba (P5/P5R) ET Baofu (P2EP) — même nom,
+        // deux entrées. Comparer par nom faisait passer celui de Futaba pour
+        // « présent » chez un joueur « P2 uniquement » ; on compare par index.
+        $pools = personadle_load_daily_pools();
+        $entries = $pools['personae']['pool'];
+        $p2 = array_values(array_filter($entries, fn ($e) => count(array_intersect($e['opus'], ['P2IS', 'P2EP'])) > 0));
+        $this->assertNotEmpty(array_filter($p2, fn ($e) => $e['persona'] === 'Prometheus'), 'le jeu de données a changé : plus de Prometheus P2');
+        $p2Users = array_map(fn ($e) => $e['user'], $p2);
+        foreach (['2026-09-17', '2026-03-29', '2026-12-31', '2027-02-28', '2026-06-06', '2026-11-11'] as $date) {
+            foreach (['1', '42', '12345', '777', '31337', '9f3c1a2b-anon'] as $seed) {
+                $got = personadle_compute_daily_target('personae', $date, $seed, ['P2IS', 'P2EP']);
+                $this->assertContains($got, $p2Users, "$date $seed → « $got » n'est pas un personnage P2");
+            }
+        }
+    }
+
     // ── Mode Expert ─────────────────────────────────────────────────────────
 
     public function testMusicExpertPoolIsAStrictSubsetOfMusic(): void

@@ -13,12 +13,14 @@ import {
   checkResetOnLoad,
   buildGameSession,
   savePendingSession,
-  getDailyTarget,
+  getDailyTargetWithin,
   showChallengeButton,
+  initChallengeButton,
   showCommunityStats,
   applyDarkModeOverrides,
   enableGiveUpButton,
   showWrongMini,
+  logGuess,
   setGiveUpEnabled,
   startGame,
   isGameLogged,
@@ -26,6 +28,7 @@ import {
   characterMatchesActiveOpus,
   updateCounterElement,
   getActiveChallengeTarget,
+  resolveChallengeTarget,
   isChallengePlay,
   expertContext,
   setupExpertToggle,
@@ -38,6 +41,7 @@ import { closeAutocompleteList, removeFromAutocomplete } from "../js/autocomplet
 import { checkChallengeCompletion } from "../js/challenge-result.js";
 import { trackUniqueDay } from "../profile/badges/badgesManager.js";
 import { checkUnlocksAfterGame } from "../js/unlock-notify.js";
+import { checkBadgesAfterGame } from "../profile/badges/badgesManager.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS & STATE
@@ -253,6 +257,21 @@ function initializeAutocomplete(element, array) {
  * Rebuilds the autocomplete list based on the currently active opus filters.
  * Also re-initialises the autocomplete listener on the text input.
  */
+/**
+ * Cible du jour, dans les filtres actifs du joueur (voir getDailyTargetWithin).
+ * Pool ET clé de hash distincts en Expert : sans ça, jouer le mode normal
+ * d'abord — où sept attributs sont comparés — donnerait la réponse du jour.
+ */
+function dailyCharacter() {
+  const pool = EXPERT.isExpert ? EXPERT_CHARACTERS : characters;
+  return getDailyTargetWithin(
+    pool,
+    pool.filter((c) => characterMatchesActiveOpus(c, activeOpus)),
+    EXPERT.hashMode,
+    (c) => c?.nom
+  );
+}
+
 function filterCharacterPool() {
   // Exclure les noms déjà devinés pour que l'autocomplétion reste cohérente
   const history = JSON.parse(localStorage.getItem(EXPERT.key("guessHistory"))) || [];
@@ -557,6 +576,13 @@ function checkGuess(name, target, forceReveal = false) {
       // one_shot : victoire en 1 essai
       if (attempts === 1 && !_pr.hasWonFirstTry) _pr.hasWonFirstTry = true;
 
+      // dont_waste_your_breath : victoires EXPERT au premier essai — une seule
+      // citation, pas un mot de plus. Le serveur recompte depuis game_sessions
+      // (attempts = 1, is_expert = 1) ; ce compteur n'est que le retour immédiat.
+      if (EXPERT.isExpert && attempts === 1) {
+        _pr.classicExpertPerfectWins = (_pr.classicExpertPerfectWins || 0) + 1;
+      }
+
       // night_owl / nyx_hour : heure Paris
       const _now = new Date();
       const _hour = parseInt(
@@ -580,6 +606,10 @@ function checkGuess(name, target, forceReveal = false) {
       localStorage.setItem("personaUserProfile", JSON.stringify(_pr));
       trackUniqueDay(_pr, () => localStorage.setItem("personaUserProfile", JSON.stringify(_pr)));
       if (!EXPERT.isExpert) checkUnlocksAfterGame(modeName);
+      // En Expert, les badges seuls (pas le suivi hebdo ni les stats, que l'Expert
+      // n'alimente pas) : dont_waste_your_breath se gagne ICI, pas à la partie
+      // normale suivante.
+      else checkBadgesAfterGame();
     }
 
     // !forceReveal ici aussi : le handler Give Up gère déjà lui-même revealNextLink/
@@ -699,27 +729,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Défi à cible dédiée (2026-07-17) : jouer la cible du défi, pas celle du jour.
   // Persistée dans "target" (état wipé à l'acceptation) → un refresh mi-défi
   // reprend la même cible. Idempotent si déjà persistée.
-  const challengeTargetName = getActiveChallengeTarget("classic");
-  if (challengeTargetName) {
-    const ct = characters.find((c) => c.nom === challengeTargetName);
-    if (ct) {
-      target = ct;
-      localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
-    }
+  // Défi à cible dédiée : résolue contre le pool RÉELLEMENT jouable de cette page
+  // (dimension comprise). resolveChallengeTarget() et non un `find()` nu : quand
+  // la cible restait introuvable, le mode retombait EN SILENCE sur la cible du
+  // jour alors qu'isChallengePlay() restait vrai — partie qui ne comptait ni
+  // comme défi (mauvaise cible) ni comme partie quotidienne (jamais enregistrée),
+  // et défi bloqué `accepted` côté serveur. Le helper purge le défi et prévient.
+  const _challengeChar = resolveChallengeTarget(
+    "classic",
+    EXPERT.isExpert ? EXPERT_CHARACTERS : characters
+  );
+  if (_challengeChar) {
+    target = _challengeChar;
+    localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
   }
 
-  // Pick daily target if none stored (seeded RNG — same character for all players today)
+  // Pick daily target if none stored (seeded RNG, dans les filtres du joueur)
   if (!target) {
-    // Pool ET clé de hash distincts en Expert : sans ça, jouer le mode normal
-    // d'abord — où sept attributs sont comparés — donnerait la réponse du jour.
-    target = EXPERT.isExpert
-      ? getDailyTarget(EXPERT_CHARACTERS, EXPERT.hashMode)
-      : getDailyTarget(characters, EXPERT.hashMode);
+    target = dailyCharacter();
     localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
   }
 
   // Replay previous guesses to restore grid
   history.forEach((name) => checkGuess(name, target));
+
+  // « Défier un ami » dès l'arrivée (retour joueur 2.2) : score « par » tant que
+  // la partie du jour n'est pas finie, vrai score si elle l'est déjà (F5 après
+  // une victoire ou un abandon — le bouton « disparaissait » dans ce cas). Le
+  // pool est calculé au clic pour suivre les filtres.
+  const challengePool = () =>
+    characters.filter((c) => personas.includes(c.nom) && c.nom !== target.nom).map((c) => c.nom);
+  initChallengeButton("classic", challengePool, gameOver ? attempts : null);
 
   updateCounters();
   if (attempts >= HINT_THRESHOLD) enableHintButton();
@@ -734,6 +774,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem(EXPERT.key("attempts"), attempts);
     history.push(guessName);
     localStorage.setItem(EXPERT.key("guessHistory"), JSON.stringify(history));
+    logGuess(guessName); // « comparer nos parties » — la grille classique ne passe pas par showWrongMini()
     updateCounters();
     if (attempts >= HINT_THRESHOLD) enableHintButton();
     if (attempts >= GIVE_UP_THRESHOLD) enableGiveUpButton();
@@ -787,6 +828,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     checkChallengeCompletion("classic", attempts, false);
     if (!EXPERT.isExpert) showCommunityStats(modeName, target.nom);
     revealNextLink({ nextHref: "../emojiMode/emojiMode.html" });
+    // Abandon : le défi reste possible, avec le nombre d'essais consommés comme
+    // score à battre — « je n'ai pas trouvé en N, fais mieux ».
+    showChallengeButton("classic", attempts, challengePool);
     fillVictoryBox(target.nom, true);
     document.getElementById("victoryBox").style.display = "block";
   });
@@ -831,8 +875,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // ── Reset / Replay button ──
-  resetButton.addEventListener("click", () => {
+  // ── Nouvelle partie : Rejouer (cible aléatoire) ou nouveau jour (cible du jour) ──
+  // Le reset quotidien cliquait sur « Rejouer », donc tirait une cible AU HASARD :
+  // la cible du jour seedée (getDailyTarget) ne servait qu'à la toute première
+  // partie d'un appareil, et l'anti-triche serveur, qui recalcule cette cible,
+  // signalait chaque partie suivante en « Daily target mismatch ». Même chose sur
+  // deux appareils : deux personnages différents le même jour. Les six modes
+  // avaient le raccourci ; ils passent tous par un tirage explicite.
+  const newRound = (random) => {
     startGame(STATS_SCOPE);
     sessionStartTime = Date.now();
 
@@ -869,13 +919,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     // cette restriction, un replay pouvait tomber sur l'un des 4 sans réplique et
     // laisser le joueur sans aucun indice.
     const _pool = EXPERT.isExpert ? EXPERT_CHARACTERS : characters;
-    const _filteredPool = _pool.filter((c) => personas.includes(c.nom));
-    const _prevTarget = target;
-    const _candidates =
-      _filteredPool.length > 1 && _prevTarget
-        ? _filteredPool.filter((c) => c.nom !== _prevTarget.nom)
-        : _filteredPool;
-    target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
+    if (random) {
+      const _filteredPool = _pool.filter((c) => personas.includes(c.nom));
+      const _prevTarget = target;
+      const _candidates =
+        _filteredPool.length > 1 && _prevTarget
+          ? _filteredPool.filter((c) => c.nom !== _prevTarget.nom)
+          : _filteredPool;
+      target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
+    } else {
+      // Même tirage qu'à la première visite : seedé joueur + jour + mode, dans
+      // les filtres du joueur.
+      target = dailyCharacter();
+    }
     localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
 
     // Après le nouveau tirage : la citation à deviner change aussi.
@@ -886,7 +942,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       nav.style.display = "none";
       nav.classList.remove("reveal-style");
     }
-  });
+  };
+  resetButton.addEventListener("click", () => newRound(true));
 
   // ── Daltonian mode toggle ──
   daltonianToggle?.addEventListener("click", () => {
@@ -913,11 +970,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     //
     // Même helper que les 5 autres modes : expiration + mode + dimension.
     if (getActiveChallengeTarget("classic")) return;
-    resetButton.click();
+    newRound(false);
   });
-  setupDailyReset(() => {
-    resetButton?.click() ?? location.reload();
-  });
+  setupDailyReset(() => newRound(false));
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

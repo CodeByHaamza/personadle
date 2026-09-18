@@ -33,7 +33,7 @@ if (!$stmt->fetch()) jsonError('User not found', 404);
 // ── Lire et valider le body ───────────────────────────────────────────────────
 $data = getJsonBody();
 
-$validModes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+$validModes = PERSONADLE_MODES;
 $mode = trim((string) ($data['mode'] ?? ''));
 if (!in_array($mode, $validModes, true)) {
     jsonError('Invalid mode. Valid values: ' . implode(', ', $validModes), 400);

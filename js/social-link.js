@@ -16,6 +16,8 @@
  *     → Halo doré permanent + animation burst/typewriter (rang 10)
  */
 
+import { parisDateKey } from "./gameCore.js";
+
 /** Cache linkId par friendId pour la session. */
 const _linkCache = new Map();
 
@@ -638,10 +640,18 @@ window._showSocialLinkRankUp = showSocialLinkRankUp;
  * @param {HTMLElement} el      — élément dans lequel injecter la flamme
  */
 export function addFlameIfPlayedToday(friendEntry, el) {
-  const lastInteraction = (friendEntry.social_link_last_interaction ?? "").slice(0, 10);
-  if (!lastInteraction) return;
-  const today = new Date().toISOString().slice(0, 10);
-  if (lastInteraction === today) {
+  const raw = friendEntry.social_link_last_interaction;
+  if (!raw) return;
+  // `last_interaction_at` est un DATETIME MySQL en UTC ("YYYY-MM-DD HH:MM:SS").
+  // La journée est celle de PARIS, comme le « déjà fait aujourd'hui » du serveur
+  // (api/lib/social_link_interaction.php, CONVERT_TZ … Europe/Paris) — pas la
+  // date UTC : entre minuit et 2 h à Paris, une interaction faite ce soir tombait
+  // encore « hier » en UTC et la flamme manquait, alors que le serveur refusait
+  // déjà de la refaire « aujourd'hui ».
+  const iso = typeof raw === "string" && !raw.includes("T") ? raw.replace(" ", "T") + "Z" : raw;
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return;
+  if (parisDateKey(when) === parisDateKey()) {
     el.insertAdjacentHTML(
       "beforeend",
       '<span class="fr-flame" title="Played together today!">🔥</span>'
@@ -651,13 +661,22 @@ export function addFlameIfPlayedToday(friendEntry, el) {
 
 /**
  * Applique l'effet visuel True Confidant (rang 10) sur un avatar et son pseudo.
- * Marqueur permanent : halo doré (.rank10-avatar) + icône ✦ (.rank10-icon).
- * Animation d'entrée : burst 8 particules + label typewriter "✦ True Confidant".
+ * Marqueur permanent : anneau doré (.rank10-avatar) + pastille « ✦ MAX »
+ * (.rank10-icon). Animation d'entrée, une fois : burst 8 particules + label
+ * « ✦ True Confidant » qui s'efface.
+ *
+ * Assagi en 2.2 (retour joueur : « badge True Confidant ultra moche ») : le
+ * halo pulsait sans fin, la pastille brillait, et la liste d'amis rejouait le
+ * burst + le label à CHAQUE poll (30 s), puisqu'elle se re-rend en entier.
+ * D'où `celebrate` : l'appelant ne le passe à false que pour les rendus
+ * suivants, le marqueur permanent est reposé à chaque fois.
+ *
  * @param {HTMLElement} avatarEl  - Élément <img> ou <div> de l'avatar
  * @param {HTMLElement} pseudoEl  - Élément contenant le pseudo
  * @param {number}      [delayMs] - Délai avant l'animation (séquences décalées)
+ * @param {{celebrate?: boolean}} [opts] - false = marqueur permanent seulement
  */
-export function applyRank10Effect(avatarEl, pseudoEl, delayMs = 0) {
+export function applyRank10Effect(avatarEl, pseudoEl, delayMs = 0, { celebrate = true } = {}) {
   if (!avatarEl) return;
 
   const wrap = avatarEl.parentElement;
@@ -668,9 +687,12 @@ export function applyRank10Effect(avatarEl, pseudoEl, delayMs = 0) {
   if (pseudoEl && !pseudoEl.querySelector(".rank10-icon")) {
     const icon = document.createElement("span");
     icon.className = "rank10-icon";
-    icon.textContent = "✦";
+    icon.textContent = "✦ MAX";
+    icon.title = "True Confidant";
     pseudoEl.appendChild(icon);
   }
+
+  if (!celebrate) return;
 
   setTimeout(() => {
     if (!wrap) return;

@@ -22,6 +22,8 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/expert_unlocks.php';
+require_once __DIR__ . '/../lib/pusher_trigger.php';
+require_once __DIR__ . '/../lib/social_link_xp_grant.php';
 
 $authId = requireAuth();
 $pdo    = pdo();
@@ -146,7 +148,7 @@ if ($method === 'POST') {
     }
 
     if ($type === 'challenge') {
-        $validModes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+        $validModes = PERSONADLE_MODES;
         $mode = trim($data['challenge_mode'] ?? '');
         if (!in_array($mode, $validModes, true)) jsonError('Invalid challenge_mode', 400);
         $score = (int) ($data['challenge_score'] ?? 0);
@@ -253,13 +255,18 @@ if ($method === 'POST') {
               AND id <> ?
         ")->execute([$authId, $receiverId, $isExpert, $newId]);
 
+        personadle_pusher_trigger("private-user-{$receiverId}", 'challenge', []);
+
         // XP Social Link : action 'challenge' (15 XP solo)
         try {
             $stmt = $pdo->prepare('SELECT get_or_create_social_link(?, ?) AS link_id');
             $stmt->execute([min($authId, $receiverId), max($authId, $receiverId)]);
             $linkId = (int) $stmt->fetchColumn();
             if ($linkId) {
-                $pdo->prepare('CALL add_social_link_xp(?, 15, @x, @r, @u)')->execute([$linkId]);
+                $xpResult = personadle_grant_social_link_xp_via_procedure($pdo, $linkId, 15, $receiverId, $authId);
+                if ($xpResult['ranked_up']) {
+                    personadle_pusher_trigger("private-user-{$receiverId}", 'rankup', []);
+                }
             }
         } catch (Throwable) { /* silencieux */ }
     }
@@ -280,23 +287,56 @@ if ($method === 'PATCH') {
     $allowed = ['read', 'accepted', 'beaten', 'expired'];
     if (!in_array($status, $allowed, true)) jsonError('Invalid status');
 
-    // 'beaten' : seul le receiver peut marquer le défi comme relevé
-    if ($status === 'beaten') {
-        $stmt = $pdo->prepare(
-            'SELECT * FROM messages WHERE id = ? AND receiver_id = ? LIMIT 1'
-        );
-        $stmt->execute([$msgId, $authId]);
-    } else {
-        $stmt = $pdo->prepare(
-            'SELECT * FROM messages WHERE id = ? AND (receiver_id = ? OR sender_id = ?) LIMIT 1'
-        );
-        $stmt->execute([$msgId, $authId, $authId]);
-    }
+    // Les deux parties voient le message ; QUI a le droit de changer QUOI est
+    // décidé par la machine à états ci-dessous (403), pas par une sélection
+    // différente selon le statut — un expéditeur recevait 404 pour `beaten` et
+    // 200 pour `expired`, deux réponses pour la même interdiction.
+    $stmt = $pdo->prepare(
+        'SELECT * FROM messages WHERE id = ? AND (receiver_id = ? OR sender_id = ?) LIMIT 1'
+    );
+    $stmt->execute([$msgId, $authId, $authId]);
     $msg = $stmt->fetch();
     if (!$msg) jsonError('Message not found or unauthorized', 404);
 
-    // 'beaten' : seulement si le statut était 'accepted'
-    if ($status === 'beaten' && $msg['status'] !== 'accepted') {
+    // ── Machine à états d'un DÉFI ──────────────────────────────────────────
+    //   unread ──accepted──▶ accepted ──beaten / expired──▶ (final)
+    //     │                     │
+    //     └──read (refus)       └──read (abandon)
+    //
+    // Seul le DESTINATAIRE décide : l'expéditeur voit le résultat, il ne le
+    // fabrique pas. Jusqu'ici seul `beaten` était gardé — un expéditeur pouvait
+    // passer son propre défi en `expired` ou `accepted`, et un défi terminé
+    // (`beaten`/`expired`) pouvait revenir en `accepted`, ce qui le remettait « en
+    // cours » sur la page Amis et bloquait un nouveau défi le même jour (409).
+    // Une transition refusée répond 400, que la file de relance du client
+    // (gameCore.js) lit comme définitive — un rejeu tardif de `expired` sur un
+    // défi que l'admin a déjà annulé n'insiste pas.
+    //
+    // `accepted → accepted` est accepté sans rien écrire (idempotent) : un double
+    // clic, ou Accepter depuis un second appareil, ne doit pas tomber en erreur.
+    if ($msg['type'] === 'challenge') {
+        $isReceiver = (int) $msg['receiver_id'] === $authId;
+        $from       = (string) $msg['status'];
+        $allowedFrom = [
+            'accepted' => ['unread', 'accepted'],
+            'beaten'   => ['accepted'],
+            'expired'  => ['accepted'],
+            'read'     => ['unread', 'accepted'],
+        ];
+        // `read` compris : par un expéditeur, ce serait annuler dans le dos du
+        // destinataire un défi qu'il a peut-être déjà commencé (la règle de
+        // remplacement ci-dessus ne touche jamais un `accepted` pour cette raison).
+        // L'expéditeur dispose de DELETE pour retirer son message.
+        if (!$isReceiver) {
+            jsonError('Only the challenged player can change a challenge status', 403);
+        }
+        if (!in_array($from, $allowedFrom[$status] ?? [], true)) {
+            jsonError("Cannot mark challenge as {$status} from {$from}", 400);
+        }
+        if ($status === 'accepted' && $from === 'accepted') {
+            jsonSuccess(['updated' => false, 'status' => 'accepted']);
+        }
+    } elseif ($status === 'beaten' && $msg['status'] !== 'accepted') {
         jsonError('Can only mark as beaten if status was accepted');
     }
 
@@ -304,15 +344,20 @@ if ($method === 'PATCH') {
 
     // Si 'beaten' → XP Social Link mutuel (35 XP)
     if ($status === 'beaten') {
+        $senderId   = (int) $msg['sender_id'];
+        $receiverId = (int) $msg['receiver_id'];
+
+        personadle_pusher_trigger("private-user-{$senderId}", 'challenge_beaten', []);
+
         try {
             $stmt = $pdo->prepare('SELECT get_or_create_social_link(?, ?) AS link_id');
-            $stmt->execute([
-                min((int)$msg['sender_id'], (int)$msg['receiver_id']),
-                max((int)$msg['sender_id'], (int)$msg['receiver_id'])
-            ]);
+            $stmt->execute([min($senderId, $receiverId), max($senderId, $receiverId)]);
             $linkId = (int) $stmt->fetchColumn();
             if ($linkId) {
-                $pdo->prepare('CALL add_social_link_xp(?, 35, @x, @r, @u)')->execute([$linkId]);
+                $xpResult = personadle_grant_social_link_xp_via_procedure($pdo, $linkId, 35, $senderId, $receiverId);
+                if ($xpResult['ranked_up']) {
+                    personadle_pusher_trigger("private-user-{$senderId}", 'rankup', []);
+                }
             }
         } catch (Throwable) { /* silencieux */ }
     }

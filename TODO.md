@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 907 tests Vitest (51 suites), 241 méthodes PHPUnit, 113 tests E2E,
+> Vérifié le 2026-08-26 : 1409 tests Vitest (77 suites), 358 méthodes PHPUnit, 239 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -22,7 +22,7 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
 > [`DEPLOY.md`](DEPLOY.md) § « Release majeure ». Cette liste-ci ne suit que l'état
 > d'avancement.
 
-- [ ] Jouer `sql/migrations/029_badge_gyotre.sql` et `030_titles_junes_investigation.sql`.
+- [x] Jouer `sql/migrations/029_badge_gyotre.sql` et `030_titles_junes_investigation.sql`.
       **Oubliées de cette liste jusqu'au 2026-09-01** : elles datent du lot de contenu 2.1
       (commits `6f79abb` / `cdb8941`), alors que cette section a été rédigée pendant le
       travail Mode Expert et démarrait donc à 031. Leurs propres en-têtes disent « insère
@@ -30,24 +30,68 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       badge secret Gyotre et les titres Junes / Investigation Team n'existent pas en base :
       le code 2.1 les affiche mais personne ne peut les décrocher. `INSERT IGNORE`, donc
       sans risque même si elles avaient déjà été passées à la main.
-- [ ] Jouer `sql/migrations/031_game_sessions_is_expert.sql` en prod (MariaDB, garder les
+- [x] Jouer `sql/migrations/031_game_sessions_is_expert.sql` en prod (MariaDB, garder les
       `IF NOT EXISTS`). Sans elle : `Unknown column 'is_expert'` à chaque partie Expert.
-- [ ] Jouer `sql/migrations/032_sessions_count_every_game.sql` — **dans cet ordre** : sa
+- [x] Jouer `sql/migrations/032_sessions_count_every_game.sql` — **dans cet ordre** : sa
       colonne est déclarée `AFTER is_expert`, que la 031 crée. Sans elle :
       `Unknown column 'client_session_id'` à chaque partie.
-- [ ] Backup avant la 032 — elle supprime une contrainte d'unicité (aucune donnée effacée,
+- [x] Backup avant la 032 — elle supprime une contrainte d'unicité (aucune donnée effacée,
       mais le retour arrière exigerait de dédoublonner à la main).
-- [ ] Jouer `sql/migrations/033_badge_denial_of_self.sql` (badge Denial of Self) et
+- [x] Jouer `sql/migrations/033_badge_denial_of_self.sql` (badge Denial of Self) et
       `034_title_shadows_converge.sql` (titre Shadows Converge). Les deux sont
       `INSERT IGNORE`, sans risque et rejouables — mais sans elles le badge et le titre
       n'existent pas en prod, et le joueur ne peut jamais les décrocher.
-- [ ] Jouer `sql/migrations/038_badge_false_spring.sql` (badge A Gentle Reprieve). Même
+- [x] Jouer `sql/migrations/038_badge_false_spring.sql` (badge A Gentle Reprieve). Même
       forme que la 033 : `INSERT IGNORE`, rejouable, mais sans elle le badge n'existe pas
       en base.
-- [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v94 → v95, fait le 2026-09-01). Sans bump,
-      `activate` ne purge pas l'ancien cache et les assets servis en cache-first (images,
-      sons) restent ceux de la version précédente. Invisible en test : seuls les joueurs
-      DÉJÀ venus sont concernés.
+- [x] Jouer `sql/migrations/040_profiles_favorite_mode.sql` (colonne
+      `profiles.favorite_mode`, MariaDB `IF NOT EXISTS`, rejouable). Sans elle :
+      `Unknown column 'favorite_mode'` sur **tout** GET /api/user/:id et GET
+      /api/user/public — le profil ne charge plus, pas seulement le mode favori.
+- [x] Jouer `sql/migrations/041_game_sessions_guesses.sql` (colonne `game_sessions.guesses`,
+      MariaDB `IF NOT EXISTS`, rejouable). Sans elle : **tout** `POST /api/sessions` échoue
+      (`Unknown column 'guesses'`) — plus aucune partie n'est enregistrée.
+- [x] Jouer `sql/migrations/042_moderation_maintenance.sql` (colonnes de ban motivé sur `users`,
+      tables `user_notices`, `admin_notes`, `announcements`, `site_settings` ; MariaDB
+      `IF NOT EXISTS`, rejouable). Sans elle : **`requireAuth()` plante** (`Unknown column
+      'ban_reason'`) — plus aucun appel authentifié ne passe, et `GET /api/auth/me` tombe
+      en 500 sur toutes les pages. À jouer **avant** le `git pull` de Hostinger, pas après.
+- [x] Jouer `sql/migrations/045_leaderboard_expert_dimension.sql` (colonne
+      `leaderboard_cache.is_expert`, clé unique `uq_leaderboard` élargie, index de lecture
+      refait ; MariaDB `IF NOT EXISTS`, rejouable). **À jouer AVANT le `git pull` Hostinger.**
+      Sans elle, `api/leaderboard/index.php` interroge `lc.is_expert` sur une colonne qui
+      n'existe pas : `Unknown column` → **le classement day/week/month tombe en 500 pour
+      tout le monde** (la période `ever` survit, elle ne lit pas le cache), et le cron
+      horaire échoue à chaque passage. Rejouée pour de vrai le 2026-09-18 contre une base
+      vierge au schéma pré-migration, puis une seconde fois pour l'idempotence.
+- [x] Jouer `sql/migrations/046_badges_wonder_shujin_go_beyond.sql` (5 badges + titre Go Beyond,
+      `INSERT IGNORE`, rejouable). Sans elle, les cinq badges et le titre n'existent pas en base :
+      le client tente `POST /api/badges/unlock` sur un slug inconnu (404) et personne ne peut les
+      décrocher. Rejouée le 2026-09-18 contre une base vierge (69 badges / 22 titres), puis une
+      seconde fois : no-op.
+- [x] **Téléverser `allOutAttackMode/database/allOutAttack/Wonder_Shujin.webp` sur le bucket R2**
+      (`allOutAttack/Wonder_Shujin.webp`) **avant** `develop → main`. En prod les animations AOA
+      sont servies depuis le CDN, pas depuis git : sans l'upload, la cible « Wonder Shujin »
+      affiche une image cassée le jour où elle est tirée. Bui Cosmic et Berry Summer ont-ils
+      déjà été poussés ? À vérifier au même moment (même lot 2.2).
+- [ ] Jouer `sql/migrations/047_leaderboard_cache_score_decimal.sql` (`leaderboard_cache.score`
+      `int` → `DECIMAL(8,1)`, MODIFY idempotent, rejouable). Sans elle, la métrique winrate du
+      classement mis en cache est tronquée à l'entier (73.4 → 73, égalités artificielles). Pas
+      bloquante pour le déploiement (aucun crash, et le cache était vide en prod) — à jouer dès
+      que possible : `ssh hostinger-personadle mysql u870779941_personadle < sql/migrations/047_leaderboard_cache_score_decimal.sql`
+      puis `INSERT IGNORE INTO schema_migrations (version) VALUES ('047_leaderboard_cache_score_decimal')`.
+- [ ] **Après la migration 045 : laisser passer un cycle du cron** (`api/cron/leaderboard.php`,
+      horaire) pour peupler la dimension Expert du cache. D'ici là le classement Expert par
+      période bascule sur le calcul live — correct, mais plus coûteux. Rien à faire, ça se
+      résorbe seul ; c'est noté pour ne pas le prendre pour une panne.
+- [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v95 → v96, fait le 2026-09-18 — précédemment
+      v94 → v95 le 2026-09-01). Sans bump, `activate` ne purge pas l'ancien cache et les
+      assets servis en cache-first restent ceux de la version précédente. Invisible en test :
+      seuls les joueurs DÉJÀ venus sont concernés. Ce lot le rendait critique et pas seulement
+      cosmétique : `js/api.js`, `profile/leaderboard/leaderboard.{html,css,js}` et
+      `profile/friends/friends.{css,js}` sont tous **précachés** et tous modifiés — sans bump,
+      un joueur déjà venu garde l'ancien front et ne voit ni le filtre Dimension du classement,
+      ni la pastille Expert de sa Boîte, alors que l'API, elle, aura changé.
 - [ ] **Déployer hors heure de pointe.** `sw.js` envoie `SW_UPDATED` à tous les onglets via
       `clients.claim()`, et chaque page répond par `window.location.reload()`. L'état de
       partie survit (il vit dans `localStorage`), mais un joueur en cours de partie est
@@ -55,6 +99,13 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       volontaire (c'est lui qui garantit qu'on ne reste pas sur du code périmé), simplement
       à ne pas déclencher en pleine affluence.
 
+> ✅ **Release 2.2 — 2026-09-18** : `schema_migrations` en prod confirme 029→039 (jouées à la 2.1)
+> puis 040→046 jouées ce jour depuis le poste local (backup `~/personadle_backups/` 49 Mo avant).
+> La 044 a d'abord été refusée (`titles` de prod sans `description_*`, `condition_value NOT NULL`) et
+> porte désormais son prérequis de schéma — voir DEV_CHANGELOG 2.2 du 2026-09-18. Le cache de
+> classement était vide en prod : **vérifier dans hPanel que le cron horaire
+> `api/cron/leaderboard.php` existe et passe** (sinon le classement par période reste en live).
+>
 > ✅ Les deux migrations ont été **rejouées pour de vrai** le 2026-08-21 contre une base vierge
 > au schéma pré-migration, puis une seconde fois pour l'idempotence : schéma final identique à
 > `sql/bdd_mysql.sql`, rejeu sans erreur. Elles portent désormais `IF EXISTS` / `IF NOT EXISTS`.
@@ -231,6 +282,43 @@ vulnérabilité. Le risque vit dans les 61 fichiers PHP écrits à la main.
 
 ---
 
+## Dépôt git — purge des anciens `.gif` All-Out Attack de l'historique (décision Hamza)
+
+Mesuré le 2026-09-13 (`git rev-list --objects --all | git cat-file --batch-check`) : `.git`
+pèse **3,8 Go**. Dans `allOutAttackMode/database/allOutAttack/` : **79 blobs `.webp` = 1,82 Go**
+(les animations actuelles et leurs versions — **on les garde**, le dépôt doit permettre de
+jouer 100 % en local) et **62 blobs `.gif` = 1,28 Go** : les anciens GIF remplacés par les
+`.webp`, **plus aucun n'est suivi**, ils ne servent qu'à gonfler chaque clone. Le reste
+(0,22 Go de docs d'anciennes versions, quelques wallpapers) est négligeable.
+
+Seule une réécriture de l'historique enlève ces 1,28 Go — donc **force-push, re-clone pour
+Léo et Damien, `reset --hard` sur Hostinger, PR ouvertes à recréer**. À ne faire que :
+
+- [ ] **au bon créneau** : juste après une release, **aucune PR ouverte** (chaque PR ouverte
+      devrait être recréée — tous les SHA changent) ;
+- [ ] **Léo et Damien prévenus** : leurs clones deviennent incompatibles → `git clone` à
+      neuf (rien de local à garder chez eux avant) ;
+- [ ] **sauvegarde** : `git clone --mirror https://github.com/CodeByHaamza/personadle.git
+      personadle-backup.git`, gardée hors ligne un mois ;
+- [ ] **réécriture** : `bash scripts/purge_git_history.sh` (réécrit le 2026-09-13 — il cible
+      **uniquement** `allOutAttackMode/database/allOutAttack/*.gif` ; l'ancienne version purgeait
+      « tout blob > 5 Mo » et aurait emporté les badges et wallpapers PNG). Il fait lui-même le
+      miroir de sauvegarde, refuse un arbre sale, demande `PURGE`, puis `gc`. Attendu :
+      `.git` ≈ 3,8 → ≈ 2,5 Go. Ne toucher ni aux `.webp` (jouer local), ni aux `.gif` d'`img/`
+      (avatars, loading — petits et encore servis) ;
+- [ ] **vérifier** sur le miroir réécrit, cloné à part : `npm test`, `make up` +
+      `npm run test:e2e`, `git log --oneline | wc -l` identique, `git diff <ancien main>
+      <nouveau main>` vide hors `.gif` purgés ;
+- [ ] **pousser** : `git push --force --mirror` (toutes branches et tags) ;
+- [ ] **Hostinger** (le `git pull` auto refusera l'historique divergent) : SSH,
+      `cd domains/personadle.net/public_html && git fetch origin && git reset --hard
+      origin/main`, puis vérifier `api/config.php` et les fichiers non suivis toujours en
+      place. Hors heure de pointe, prévoir quelques minutes ;
+- [ ] **après coup** : `git gc --prune=now --aggressive` sur chaque clone survivant ;
+      supprimer le miroir de sauvegarde après un mois sans problème.
+
+---
+
 ## Outillage
 
 - [ ] **CI : rejeu de migration sur base vierge.** CLAUDE.md §13 l'exige, rien ne le vérifie —
@@ -276,6 +364,12 @@ vulnérabilité. Le risque vit dans les 61 fichiers PHP écrits à la main.
 
 ## Dette repérée en passant
 
+- [ ] **Page Classique défilée de ~215 px au chargement en CI (1280×720)** — la boîte de
+      consigne `.personadle-box` intercepte alors le clic sur ⚔ Défier (55 retries Playwright,
+      trace du run 34777768286 ; capture : bouton collé au bord haut, logo hors écran). Non
+      reproduit en local (bouton à y=214, boîte à y=273, `scrollY=0`). Contourné dans
+      `challenge_flow.spec.js` par `dispatchEvent("click")`. À comprendre avec la PR layout
+      (sticky input) : si un joueur en 720 px de haut arrive défilé, c'est un vrai défaut.
 - [ ] **Débordement horizontal de `.nav-item`** (barre du bas) sur mobile, commun aux 6 modes.
       `.audio-wrapper` et `.expert-lyrics-wrapper` ont été corrigés ; la barre non.
 - [ ] **`personadle_expert_stats_by_mode()` fait du N+1** — un recalcul de streak par mode.

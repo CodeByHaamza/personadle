@@ -87,19 +87,40 @@ describe("renderUnlockableWallpaperGallery", () => {
     expect(lockedItem.classList.contains("locked")).toBe(true);
   });
 
-  it("renders one entry per catalog wallpaper", () => {
+  it("renders one chip per catalog wallpaper", () => {
     renderUnlockableWallpaperGallery({});
     const grid = document.getElementById("unlockableWallpaperGrid");
-    expect(grid.querySelectorAll(".unlockable-wp-item")).toHaveLength(UNLOCKABLE_WALLPAPERS.length);
+    expect(grid.querySelectorAll(".wp-chip")).toHaveLength(UNLOCKABLE_WALLPAPERS.length);
   });
 
-  it("shows the condition reminder on hover only for unlocked wallpapers", () => {
+  // 2.2 : la grille plein écran est devenue une bande + un aperçu au clic
+  // (retour Hamza : « ils sont supra grands »).
+  it("met à jour le compteur de la carte", () => {
+    document.body.innerHTML = `<span id="wallpapersCount"></span><div id="unlockableWallpaperGrid"></div>`;
     renderUnlockableWallpaperGallery({ unlockedWallpapers: ["kamoshida_palace"] });
-    const grid = document.getElementById("unlockableWallpaperGrid");
-    const unlockedItem = grid.querySelector('[data-id="kamoshida_palace"]');
-    const lockedItem = grid.querySelector('[data-id="madarame_wallpaper"]');
-    expect(unlockedItem.querySelector(".wp-cond-hover")).not.toBeNull();
-    expect(lockedItem.querySelector(".wp-cond-hover")).toBeNull();
+    expect(document.getElementById("wallpapersCount").textContent).toBe(
+      `1 / ${UNLOCKABLE_WALLPAPERS.length}`
+    );
+  });
+
+  it("un clic ouvre l'aperçu, avec la condition, et Escape le ferme", () => {
+    renderUnlockableWallpaperGallery({ unlockedWallpapers: ["kamoshida_palace"] });
+    document.querySelector('[data-id="madarame_wallpaper"]').click();
+    const preview = document.querySelector(".wp-preview");
+    expect(preview).not.toBeNull();
+    expect(preview.classList.contains("locked")).toBe(true);
+    expect(preview.textContent).toContain("Set a custom avatar");
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(document.querySelector(".wp-preview").classList.contains("show")).toBe(false);
+  });
+
+  it("l'aperçu d'un wallpaper débloqué le dit au lieu d'afficher un cadenas", () => {
+    renderUnlockableWallpaperGallery({ unlockedWallpapers: ["kamoshida_palace"] });
+    document.querySelector('[data-id="kamoshida_palace"]').click();
+    const preview = document.querySelector(".wp-preview");
+    expect(preview.classList.contains("unlocked")).toBe(true);
+    expect(preview.querySelector(".wp-preview-name").textContent).not.toContain("🔒");
   });
 
   it("includes the wallpaper name and condition in the title tooltip of an unlocked wallpaper", () => {

@@ -20,6 +20,9 @@
  *   giveups_total        → SUM(giveups) tous modes
  *   friends_count        → nb d'amis acceptés
  *   badges_count         → nb de badges débloqués
+ *   titles_count         → nb de titres débloqués (une collection en appelle une autre)
+ *   played_on_date       → a joué un jour d'anniversaire donné, condition_mode = 'MM-JJ'
+ *                          (n'importe quelle année : c'est une date qui revient)
  *   social_link_min_rank → au moins un Social Link au rang >= condition_value
  *   all_modes_won        → au moins 1 victoire dans chacun des 6 modes
  *   weekly_clean_modes   → nb de modes où l'utilisateur a joué cette semaine (approx.)
@@ -42,6 +45,14 @@
  *                          n'alimente pas.
  *   expert_modes_mastered → condition_value victoires EN EXPERT dans chacun des 6 modes
  *                          (badge `denial_of_self`)
+ *   mode_expert_perfect_wins → condition_value victoires EN EXPERT au premier essai dans
+ *                          condition_mode (badge `dont_waste_your_breath`)
+ *   targets_found        → toutes les cibles d'un ENSEMBLE nommé (condition_mode = clé de
+ *                          PERSONADLE_TARGET_SETS) gagnées, lu dans game_sessions —
+ *                          badges Starlight Festival / Shujin Outlaws / Absolute
+ *                          Authority, titre Go Beyond
+ *   same_energy          → un ami de rang Social Link ≥ 5 porte Motoha Arai quand on
+ *                          porte Chie, ou l'inverse (badge `same_energy`, accordé aux deux)
  *   joker_profile        → condition manuelle — retourne true (vérifié en aval par admin)
  *   manual               → condition manuelle/flag client/redeem — retourne true
  *   NULL ou inconnu      → true (safe fallback)
@@ -59,6 +70,12 @@
  * @param ?int     $condValue Valeur numérique de la condition
  * @return bool true si la condition est remplie (ou non structurée/inconnue — safe fallback)
  */
+// PERSONADLE_MODES vient de validation.php : cette lib en dépend (all_modes_won),
+// elle doit donc le charger elle-même. Sans ça elle ne marchait que si un autre
+// fichier avait déjà inclus validation.php — vrai via bootstrap.php en prod, faux
+// quand PHPUnit lance ce seul fichier de tests.
+require_once __DIR__ . "/validation.php";
+
 function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?string $condMode, ?int $condValue): bool
 {
     // Pas de condition définie ou type inconnu → on laisse passer (safe fallback,
@@ -76,8 +93,11 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
     $valueRequiredTypes = [
         'wins_total', 'mode_wins', 'classic_p1_wins', 'emoji_p2_wins', 'mode_games',
         'games_total', 'streak_record', 'perfect_wins', 'unique_days', 'giveups_total',
-        'friends_count', 'badges_count', 'weekly_clean_modes',
+        'friends_count', 'badges_count', 'titles_count', 'weekly_clean_modes',
         'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
+        // targets_found et same_energy n'ont PAS de condition_value (ensemble nommé,
+        // paire d'avatars) : ils ne doivent pas figurer ici, sinon NULL les refuse.
+        'mode_expert_perfect_wins',
         'expert_modes_mastered', 'expert_wins_total',
     ];
     if (in_array($condType, $valueRequiredTypes, true) && $condValue === null) {
@@ -147,6 +167,32 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             return (int) $s->fetchColumn() >= $val;
         }
 
+        case 'titles_count': {
+            // Une collection en appelle une autre : le titre SEES se gagne en
+            // rassemblant des titres, comme Thou Art I se gagne en badges.
+            $s = $pdo->prepare('SELECT COUNT(*) FROM user_titles WHERE user_id = ?');
+            $s->execute([$userId]);
+            return (int) $s->fetchColumn() >= $val;
+        }
+
+        case 'played_on_date': {
+            // Anniversaire : avoir joué un 24 juin, peu importe l'année.
+            // condition_mode porte la date au format 'MM-JJ' (condition_value est un
+            // INT, il ne peut pas la porter). Cumulatif comme toutes les autres
+            // conditions : une fois la journée jouée, elle reste dans l'historique
+            // (CLAUDE.md §7 — un accès gagné ne se reperd jamais).
+            if (!is_string($condMode) || !preg_match('/^\d{2}-\d{2}$/', $condMode)) {
+                return false;
+            }
+            $s = $pdo->prepare(
+                "SELECT 1 FROM game_sessions
+                 WHERE user_id = ? AND DATE_FORMAT(played_date, '%m-%d') = ?
+                 LIMIT 1"
+            );
+            $s->execute([$userId, $condMode]);
+            return (bool) $s->fetchColumn();
+        }
+
         case 'social_link_min_rank': {
             // Au moins un Social Link au rang >= condition_value (défaut 10 = rang
             // maximum si non précisé, pour rester équivalent à l'ancien
@@ -162,7 +208,7 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
 
         case 'all_modes_won': {
             // Au moins 1 victoire dans chacun des 6 modes reconnus
-            $modes = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+            $modes = PERSONADLE_MODES;
             $s = $pdo->prepare(
                 'SELECT COUNT(DISTINCT mode) FROM user_stats
                  WHERE user_id = ? AND wins >= 1 AND mode IN (?,?,?,?,?,?)'
@@ -202,6 +248,27 @@ function personadle_verify_condition(PDO $pdo, int $userId, ?string $condType, ?
             // donc uniquement les parties normales.
             return personadle_count_expert_wins($pdo, $userId) >= $val;
 
+        case 'mode_expert_perfect_wins':
+            // condition_value victoires EN EXPERT au premier essai dans le mode
+            // condition_mode (badge Don't Waste Your Breath : Classique Expert ne
+            // donne que la citation — gagner du premier coup, c'est n'avoir pas eu
+            // besoin d'un mot de plus).
+            if (!$condMode) return false;
+            return personadle_count_expert_perfect_wins($pdo, $userId, $condMode) >= $val;
+
+        case 'targets_found':
+            // condition_mode nomme un ENSEMBLE de cibles à avoir trouvées (gagnées),
+            // décrit dans PERSONADLE_TARGET_SETS — vérifié depuis game_sessions,
+            // donc pas sur déclaration du client. Badges Starlight Festival, Shujin
+            // Outlaws, Absolute Authority ; titre Go Beyond.
+            if (!$condMode) return false;
+            return personadle_target_set_met($pdo, $userId, $condMode);
+
+        case 'same_energy':
+            // Un ami de rang Social Link ≥ 5 porte Motoha Arai quand je porte Chie
+            // (ou l'inverse) — voir personadle_same_energy_partners().
+            return personadle_same_energy_partners($pdo, $userId) !== [];
+
         case 'expert_modes_mastered':
             // condition_value victoires EN EXPERT dans chacun des 6 modes (badge Denial of Self).
             // Pas besoin de vérifier en plus que les 6 gates sont franchis : le serveur
@@ -240,11 +307,42 @@ function personadle_known_condition_types(): array
     return [
         'wins_total', 'mode_wins', 'mode_games', 'games_total', 'streak_record',
         'perfect_wins', 'unique_days', 'giveups_total', 'friends_count', 'badges_count',
+        'titles_count', 'played_on_date',
         'social_link_min_rank', 'all_modes_won', 'weekly_clean_modes',
         'classic_p1_wins', 'emoji_p2_wins', 'joker_profile', 'manual',
         'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
         'expert_modes_mastered', 'expert_wins_total',
+        // Lot du 2026-09-18 (migration 046)
+        'mode_expert_perfect_wins', 'targets_found', 'same_energy',
     ];
+}
+
+/**
+ * Vérification FAIL-CLOSED d'une condition de déblocage — le point d'entrée que
+ * doivent utiliser tous les endpoints d'unlock (badges, titres, wallpapers).
+ *
+ * Différence avec personadle_verify_condition() : un `condition_type` absent,
+ * vide, mal orthographié ou retiré du vocabulaire tombe ici sur `false`, alors
+ * que la fonction générique le laisse passer par son `default: return true`.
+ *
+ * Ce safe-fallback permissif a sa raison d'être là où il est — il évite qu'un
+ * badge ajouté demain, avec un type pas encore implémenté, soit inaccessible à
+ * tout le monde. Mais sur le chemin d'un POST /unlock, il a l'effet exactement
+ * inverse de celui qu'on veut : une faute de frappe dans une migration ouvre le
+ * badge à n'importe quel compte authentifié. `api/wallpapers/index.php` fermait
+ * déjà ce trou dans son coin (revue PR #14) ; badges et titles appelaient encore
+ * la fonction permissive en direct. Ils appellent désormais tous les trois cette
+ * fonction-ci, pour que le comportement soit le même partout et défini une fois.
+ */
+function personadle_condition_allows_unlock(PDO $pdo, int $userId, ?string $condType, ?string $condMode, ?int $condValue): bool
+{
+    if ($condType === null || $condType === ''
+        || !in_array($condType, personadle_known_condition_types(), true)
+    ) {
+        return false;
+    }
+
+    return personadle_verify_condition($pdo, $userId, $condType, $condMode, $condValue);
 }
 
 /**
@@ -406,4 +504,180 @@ function personadle_count_mastered_expert_modes(PDO $pdo, int $userId, int $wins
     );
     $s->execute([$userId, 'win', $winsPerMode]);
     return (int) $s->fetchColumn();
+}
+
+/**
+ * Victoires EN EXPERT au premier essai dans un mode (badge Don't Waste Your Breath).
+ * `attempts` vaut 1 sur une victoire du premier coup : les modes incrémentent
+ * AVANT de tester la victoire (cf. personadle_is_perfect, api/lib/streak.php).
+ */
+function personadle_count_expert_perfect_wins(PDO $pdo, int $userId, string $mode): int
+{
+    $s = $pdo->prepare(
+        'SELECT COUNT(*) FROM game_sessions
+         WHERE user_id = ? AND mode = ? AND is_expert = 1 AND result = ? AND attempts = 1'
+    );
+    $s->execute([$userId, $mode, 'win']);
+    return (int) $s->fetchColumn();
+}
+
+/**
+ * Ensembles de cibles à avoir GAGNÉES pour le type `targets_found`, par clé
+ * (= condition_mode). Chaque exigence : [mode, is_expert (null = indifférent),
+ * liste de target_name EXACTS tels qu'enregistrés par api/sessions.php,
+ * nombre minimum de cibles DISTINCTES de la liste à avoir gagnées].
+ *
+ * Les noms sont ceux des datasets JS (aoaCharacters.js, characters_clean.js,
+ * personaeCharacters.js → `user`, songs.js → `titre`) : le client les écrit tels
+ * quels dans `target_name`. Une cible renommée dans un dataset doit l'être ici
+ * aussi — tests/php/DatabaseIntegrationTest.php (contre api/data/daily_pools.json) et
+ * tests/unlocks_wonder_shujin.test.js (contre les datasets) vérifient qu'elles existent
+ * encore côté données.
+ *
+ * Le miroir client (profile.characterModeMap) donne le retour immédiat ; c'est
+ * ICI que l'unlock est tranché.
+ */
+const PERSONADLE_TARGET_SETS = [
+    // Badge Starlight Festival : les trois skins Starlight en All-Out Attack.
+    'starlight_trio' => [
+        ['alloutattack', null, [
+            'Joker Starlight ( Ren Amamiya )',
+            'Panther Starlight ( Ann Takamaki )',
+            'Mona Starlight ( Morgana )',
+        ], 3],
+    ],
+    // Badge Shujin Outlaws : l'All-Out Attack de Wonder en uniforme Shujin, et les
+    // deux élèves de Shujin (Ren, Wonder) reconnus à leur silhouette.
+    'shujin_outlaws' => [
+        ['alloutattack', null, ['Wonder Shujin ( Nagisa Kamishiro )'], 1],
+        ['silhouette',   null, ['Ren Amamiya', 'Nagisa Kamishiro'], 2],
+    ],
+    // Badge Absolute Authority : les deux présidentes du conseil des élèves,
+    // trouvées en Classique.
+    'absolute_authority' => [
+        ['classic', null, ['Mitsuru Kirijo', 'Makoto Niijima'], 2],
+    ],
+    // Titre Go Beyond : tout Wonder. Ses cinq All-Out Attack, lui en Classique et
+    // en Émoji, sa persona (Jánošík — target_name = le personnage) en Personae
+    // normal ET Expert, et toutes les musiques de P5X en Music normal (9) ET en
+    // Expert (les 8 qui ont des paroles). Légendaire, et grindable : le filtre
+    // d'opus P5X seul + Rejouer suffit à faire tourner les 9 chansons.
+    'wonder_go_beyond' => [
+        ['alloutattack', null, [
+            'Wonder ( Nagisa Kamishiro )',
+            'Wonder Chinese New Year ( Nagisa Kamishiro )',
+            'Wonder Velvet ( Nagisa Kamishiro )',
+            'Wonder Summer ( Nagisa Kamishiro )',
+            'Wonder Shujin ( Nagisa Kamishiro )',
+        ], 5],
+        ['classic',  null, ['Nagisa Kamishiro'], 1],
+        ['emoji',    null, ['Nagisa Kamishiro'], 1],
+        ['personae', 0,    ['Nagisa Kamishiro'], 1],
+        ['personae', 1,    ['Nagisa Kamishiro'], 1],
+        ['music', 0, [
+            'Ambitions and Visions', 'Arial Of The Soul', 'Fatal Desire', 'Last Strike',
+            'Seize the Light', 'Shadow Loop', 'Wake Up Your Hero', 'Wonder Light', 'Show Stealer',
+        ], 9],
+        ['music', 1, [
+            'Ambitions and Visions', 'Fatal Desire', 'Last Strike', 'Seize the Light',
+            'Shadow Loop', 'Wake Up Your Hero', 'Wonder Light', 'Show Stealer',
+        ], 8],
+    ],
+];
+
+/** Clés d'ensembles connues (pour les tests et la validation d'une migration). */
+function personadle_target_set_keys(): array
+{
+    return array_keys(PERSONADLE_TARGET_SETS);
+}
+
+/**
+ * Toutes les exigences d'un ensemble PERSONADLE_TARGET_SETS sont-elles remplies ?
+ * Une clé inconnue → false (fail-closed : une faute de frappe dans une migration
+ * ne doit pas accorder le badge à tout le monde).
+ */
+function personadle_target_set_met(PDO $pdo, int $userId, string $setKey): bool
+{
+    $set = PERSONADLE_TARGET_SETS[$setKey] ?? null;
+    if ($set === null) return false;
+    foreach ($set as [$mode, $isExpert, $names, $minDistinct]) {
+        if (personadle_count_distinct_targets_won($pdo, $userId, $mode, $isExpert, $names) < $minDistinct) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Nombre de cibles DISTINCTES de `$names` gagnées par le joueur dans `$mode`
+ * (dimension `$isExpert` si non null). Une partie de défi n'est jamais
+ * enregistrée en session (js/gameCore.js) : elle ne compte pas — voulu.
+ *
+ * @param list<string> $names
+ */
+function personadle_count_distinct_targets_won(PDO $pdo, int $userId, string $mode, ?int $isExpert, array $names): int
+{
+    if ($names === []) return 0;
+    $ph  = implode(',', array_fill(0, count($names), '?'));
+    $sql = "SELECT COUNT(DISTINCT target_name) FROM game_sessions
+            WHERE user_id = ? AND mode = ? AND result = 'win' AND target_name IN ($ph)";
+    $args = array_merge([$userId, $mode], $names);
+    if ($isExpert !== null) {
+        $sql .= ' AND is_expert = ?';
+        $args[] = $isExpert;
+    }
+    $s = $pdo->prepare($sql);
+    $s->execute($args);
+    return (int) $s->fetchColumn();
+}
+
+/**
+ * Portraits de la galerie qui « portent » Motoha Arai et Chie Satonaka — badge
+ * Same Energy. Noms de fichiers EXACTS de img/avatar/ (cf. profile/avatars_data.js) ;
+ * miroir client dans profile/badges/badgesData.js (SAME_ENERGY_AVATARS).
+ */
+const PERSONADLE_SAME_ENERGY_AVATARS = [
+    'arai' => ['Arai.png', 'Arai2.png'],
+    'chie' => ['Chie.jpg', 'Chie2.jpg', 'chie_pq.jpg', 'meme_chie_shut_teddie.jpg'],
+];
+
+/**
+ * Amis avec qui le joueur forme la paire Same Energy : lien Social ≥ rang 5, et
+ * l'un porte Motoha Arai pendant que l'autre porte Chie (dans un sens ou dans
+ * l'autre). Renvoie leurs ids — vide si personne. Sert à vérifier la condition
+ * (`same_energy`) ET à accorder le badge aux deux d'un coup (api/badges/index.php) :
+ * le badge se débloque « en même temps » pour les deux (décision Hamza).
+ *
+ * @return list<int>
+ */
+function personadle_same_energy_partners(PDO $pdo, int $userId): array
+{
+    $stmt = $pdo->prepare(
+        'SELECT f.requester_id, f.addressee_id, pm.avatar_data AS mine, pf.avatar_data AS theirs
+         FROM friendships f
+         JOIN social_links sl
+           ON sl.user_a_id = LEAST(f.requester_id, f.addressee_id)
+          AND sl.user_b_id = GREATEST(f.requester_id, f.addressee_id)
+         LEFT JOIN profiles pm ON pm.user_id = ?
+         LEFT JOIN profiles pf ON pf.user_id = IF(f.requester_id = ?, f.addressee_id, f.requester_id)
+         WHERE f.status = ? AND (f.requester_id = ? OR f.addressee_id = ?) AND sl.`rank` >= 5'
+    );
+    $stmt->execute([$userId, $userId, 'accepted', $userId, $userId]);
+
+    $wears = static function (?string $avatar, string $who): bool {
+        if (!$avatar) return false;
+        foreach (PERSONADLE_SAME_ENERGY_AVATARS[$who] as $file) {
+            if (str_ends_with($avatar, '/' . $file)) return true;
+        }
+        return false;
+    };
+
+    $partners = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $friendId = (int) ($row['requester_id'] == $userId ? $row['addressee_id'] : $row['requester_id']);
+        $pair = ($wears($row['mine'], 'arai') && $wears($row['theirs'], 'chie'))
+             || ($wears($row['mine'], 'chie') && $wears($row['theirs'], 'arai'));
+        if ($pair) $partners[] = $friendId;
+    }
+    return array_values(array_unique($partners));
 }

@@ -129,6 +129,7 @@
 
 /* ── Bouton fermer — HAUT GAUCHE ──────────────────────────── */
 .cn-close {
+  min-height: 0; /* neutralise la taille tactile globale (global.css §18) qui l'étirait en ovale */
   position: fixed;
   top: 18px;
   left: 18px;
@@ -254,6 +255,15 @@
   background: #c1121f;
 }
 
+.cn-btn--later {
+  background: transparent;
+  color: #ddd;
+  border: 1px solid #555;
+}
+.cn-btn--later:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
 .cn-btn--refuse {
   background: #2a2a2a;
   color: #888;
@@ -280,5 +290,183 @@
 @keyframes cnFadeIn {
   to {
     opacity: 1;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   VARIANTE EXPERT — .cn--expert
+   ─────────────────────────────────────────────────────────────────────────────
+   Un défi Expert n'a ni le même pool de tirage, ni le même barème, ni les mêmes
+   prérequis qu'un défi normal : il ne doit pas lui ressembler. Jusqu'ici le
+   drapeau `challenge_is_expert` ne pilotait que la redirection et le casier de
+   stockage — la pop-up était rigoureusement identique dans les deux cas.
+
+   Palette reprise de `.challenge-card--expert` (css/global.css), la carte
+   d'ENVOI du défi Expert : violet #b26aff → magenta #ff4d8d sur fond
+   violet-noir. Volontairement la MÊME des deux côtés — celui qui envoie et
+   celui qui reçoit doivent reconnaître le même objet. Inventer un troisième
+   vocabulaire Expert (l'or #ffd700 de l'écran de déblocage) aurait dit « autre
+   chose » alors que c'est la même dimension.
+
+   Construite en surcharges de la notification de base, jamais en second
+   composant : le DOM reste commun (cf. js/challenge-notif.js), donc toute
+   évolution de la pop-up normale suit automatiquement.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Fond plus dense que le noir à 85 % du défi normal : l'Expert coupe davantage
+   la page derrière lui. */
+#cn-overlay.cn--expert.cn--visible .cn-backdrop {
+  background: radial-gradient(circle at 50% 50%, rgba(28, 10, 44, 0.9), rgba(3, 1, 6, 0.96));
+}
+
+/* ── Anneaux d'impact ─────────────────────────────────────────────────────────
+   Mêmes tailles et mêmes délais (l'animation cnRing est partagée) : seule la
+   couleur change. Le noir des anneaux 2 et 4 vire au violet très sombre, sinon
+   ils disparaissent sur le nouveau fond. */
+.cn--expert .cn-ring:nth-child(1) {
+  border-color: #b26aff;
+}
+.cn--expert .cn-ring:nth-child(2) {
+  border-color: #150c22;
+  box-shadow: 0 0 0 5px #ff4d8d;
+}
+.cn--expert .cn-ring:nth-child(3) {
+  border-color: #ff4d8d;
+}
+.cn--expert .cn-ring:nth-child(4) {
+  border-color: #150c22;
+  box-shadow: 0 0 0 4px #b26aff;
+}
+
+/* Flash d'impact — violet au lieu du rouge, et un peu plus appuyé. */
+.cn--expert .cn-flash {
+  background: linear-gradient(120deg, #7b3fd4, #ff4d8d);
+  animation-name: cnFlashExpert;
+}
+
+@keyframes cnFlashExpert {
+  0% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ── Carte ────────────────────────────────────────────────────────────────── */
+.cn--expert .cn-card {
+  /* Référentiel du liseré ::before et de l'étiquette, tous deux positionnés. */
+  position: relative;
+  background: linear-gradient(165deg, #191325 0%, #100b18 55%, #0b0710 100%);
+  border-color: rgba(178, 106, 255, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(178, 106, 255, 0.14),
+    0 10px 48px rgba(0, 0, 0, 0.72),
+    0 0 70px -16px rgba(150, 70, 255, 0.6);
+}
+
+/* Liseré supérieur — même geste que `.challenge-card--expert::before`.
+   `position: absolute` et non un enfant de flux : la carte est un flex column
+   avec `gap: 10px`, un ::before dans le flux ajouterait un espace fantôme en
+   haut et décalerait l'avatar. */
+.cn--expert .cn-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(90deg, transparent, #b26aff 35%, #ff4d8d 65%, transparent);
+}
+
+/* ── Étiquette « ⚡ EXPERT » ──────────────────────────────────────────────────
+   Le marqueur explicite, en plus de l'ambiance : la couleur seule ne se lit pas
+   pour un daltonien, et ne se lit pas non plus quand on n'a jamais vu la
+   variante normale à côté. */
+.cn-expert-tag {
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #0b0710;
+  background: linear-gradient(90deg, #b26aff, #ff4d8d);
+  padding: 3px 14px;
+  border-radius: 3px;
+  /* Angles coupés — même vocabulaire graphique que .expert-toggle (global.css). */
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+
+/* ── Textes ──────────────────────────────────────────────────────────────── */
+.cn--expert .cn-pseudo {
+  color: #d9a4ff;
+  text-shadow: 0 0 18px rgba(178, 106, 255, 0.5);
+}
+
+.cn--expert .cn-avatar {
+  border-color: #b26aff;
+  box-shadow: 0 0 18px rgba(178, 106, 255, 0.55);
+}
+
+.cn--expert .cn-mode-badge {
+  background: rgba(178, 106, 255, 0.1);
+  border-color: rgba(178, 106, 255, 0.55);
+  color: #d9a4ff;
+}
+
+.cn--expert .cn-divider {
+  border-top-color: rgba(178, 106, 255, 0.22);
+}
+
+.cn--expert .cn-score {
+  color: #a99cc4;
+}
+.cn--expert .cn-score strong {
+  color: #ffd6ec;
+}
+
+/* ── Boutons ─────────────────────────────────────────────────────────────── */
+.cn--expert .cn-btn--accept {
+  background: linear-gradient(135deg, #7b3fd4, #b26aff);
+  color: #fff;
+}
+.cn--expert .cn-btn--accept:hover {
+  background: linear-gradient(135deg, #8f4ae8, #c98cff);
+}
+
+.cn--expert .cn-btn--later {
+  color: #c3b4e0;
+  border-color: rgba(178, 106, 255, 0.34);
+}
+.cn--expert .cn-btn--later:hover {
+  background: rgba(178, 106, 255, 0.12);
+  color: #fff;
+}
+
+.cn--expert .cn-btn--refuse {
+  background: rgba(178, 106, 255, 0.07);
+  border-color: rgba(178, 106, 255, 0.2);
+  color: #8d80a8;
+}
+.cn--expert .cn-btn--refuse:hover {
+  background: rgba(178, 106, 255, 0.15);
+  color: #c3b4e0;
+}
+
+.cn--expert .cn-close {
+  border-color: rgba(178, 106, 255, 0.34);
+}
+
+/* Le surcroît d'effet de l'Expert reste un effet, jamais l'information : le
+   marqueur « ⚡ EXPERT » et le texte du message portent le sens à eux seuls.
+   Même règle que .expert-toggle (global.css §Mode Expert). */
+@media (prefers-reduced-motion: reduce) {
+  .cn--expert .cn-flash {
+    animation: none;
+    opacity: 0;
+  }
+  .cn--expert .cn-pseudo {
+    text-shadow: none;
   }
 }

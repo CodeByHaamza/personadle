@@ -27,6 +27,10 @@ const filters = {
   period: "ever",
   metric: "wins",
   friendsOnly: false,
+  // Dimension du classement (migration 045). L'Expert a le sien : autre pool de
+  // tirage, autre barème, et un taux de victoire sans commune mesure — les
+  // mélanger ne décrirait ni l'un ni l'autre.
+  expert: false,
   offset: 0,
 };
 
@@ -63,6 +67,14 @@ function formatScore(entry) {
     default:
       return String(entry.score ?? 0);
   }
+}
+
+/** « 674 parties » — sous-titre d'une ligne, localisé (c'était "games" en dur). */
+function gamesLabel(n) {
+  const raw = t("leaderboard.games_count");
+  return raw && raw !== "leaderboard.games_count"
+    ? raw.replace("{{count}}", n)
+    : `${n} game${n > 1 ? "s" : ""}`;
 }
 
 /** Label de la métrique courante (pour la sous-info). */
@@ -114,8 +126,28 @@ function renderFilterNote() {
     ? `<span class="lb-fn-sep">·</span><span class="lb-fn-chip lb-fn-chip--friends">👥 ${esc(t("leaderboard.scope_friends") || "Friends")}</span>`
     : "";
 
+  // La pastille Expert est collée au mode qu'elle qualifie, en tête : « Classique »
+  // et « Classique Expert » sont deux classements, pas deux affichages du même.
+  const expertChip = filters.expert
+    ? `<span class="lb-fn-chip lb-fn-chip--expert">${esc(t("leaderboard.dimension_expert") || "⚡ Expert")}</span><span class="lb-fn-sep">·</span>`
+    : "";
+
+  // Expert + « meilleure série » ne renvoie rien, et c'est voulu : une série se
+  // compte en jours consécutifs, or l'Expert n'est pas un rendez-vous quotidien
+  // (cf. api/lib/leaderboard_metrics.php). Sans cette phrase, le joueur voit une
+  // page vide et conclut à une panne — c'est le même réflexe que le texte qui
+  // explique pourquoi la liste d'amis est plus courte en défi Expert.
+  const streakNote =
+    filters.expert && filters.metric === "streak"
+      ? esc(
+          t("leaderboard.expert_no_streak") ||
+            "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run."
+        )
+      : note;
+
   el.innerHTML = `
     <span class="lb-fn-chips">
+      ${expertChip}
       <span class="lb-fn-chip">${mode}</span>
       <span class="lb-fn-sep">·</span>
       <span class="lb-fn-chip">${period}</span>
@@ -123,7 +155,7 @@ function renderFilterNote() {
       <span class="lb-fn-chip">${metric}</span>
       ${friendsChip}
     </span>
-    <span class="lb-fn-note">${note}</span>
+    <span class="lb-fn-note">${streakNote}</span>
   `;
 }
 
@@ -135,9 +167,55 @@ function renderFilterNote() {
 function avatarSrc(avatarData) {
   if (!avatarData) return "../../img/default_avatar.png";
   if (avatarData.startsWith("data:")) return avatarData;
-  if (avatarData.startsWith("../img/")) return "../" + avatarData;  // ../../img/
-  if (avatarData.startsWith("./img/"))  return "../../img/" + avatarData.slice(6);
+  if (avatarData.startsWith("../img/")) return "../" + avatarData; // ../../img/
+  if (avatarData.startsWith("./img/")) return "../../img/" + avatarData.slice(6);
   return avatarData;
+}
+
+/**
+ * Rend le podium (3 premiers), affiché seulement sur la première page.
+ *
+ * Refonte 2026-09-16 (demande Hamza : « refais le style de la page ranking »,
+ * la page Amis servant de référence) : les trois premiers étaient trois lignes
+ * identiques aux autres, avec juste une médaille en emoji. Ils ont maintenant
+ * leur estrade — 1ᵉʳ au centre et plus haut, comme sur un vrai podium.
+ *
+ * @param {Array<Object>} top  1 à 3 entrées, déjà triées
+ * @param {number|null} myId
+ */
+function renderPodium(top, myId) {
+  // Ordre visuel : 2 — 1 — 3 (le CSS remet 1,2,3 en colonne sur mobile)
+  const order = [top[1], top[0], top[2]].filter(Boolean);
+  const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+  return `
+    <div class="lb-podium">
+      ${order
+        .map((entry) => {
+          const rank = entry.rank ?? top.indexOf(entry) + 1;
+          const isMe = myId && entry.user_id === myId;
+          const href = isMe ? "../profile.html" : `../profile.html?view=${esc(entry.friend_code)}`;
+          const border = entry.avatar_border_color
+            ? `style="border-color:${esc(entry.avatar_border_color)}"`
+            : "";
+          return `
+            <a class="lb-podium-card lb-podium-card--${rank}${isMe ? " lb-podium-card--me" : ""}"
+               href="${href}" title="${esc(t("friends.view_profile") || "View profile")}">
+              <span class="lb-podium-medal" aria-hidden="true">${medals[rank] ?? rank}</span>
+              <img class="lb-podium-avatar"
+                   src="${esc(avatarSrc(entry.avatar_data))}"
+                   alt="${esc(entry.pseudo)}"
+                   loading="lazy" ${border}
+                   onerror="this.src='../../img/default_avatar.png'">
+              <span class="lb-podium-name">${esc(entry.pseudo)}</span>
+              <span class="lb-podium-score">${esc(formatScore(entry))}</span>
+              <span class="lb-podium-sub">${
+                entry.total_games ? esc(gamesLabel(entry.total_games)) : esc(metricLabel())
+              }</span>
+            </a>`;
+        })
+        .join("")}
+    </div>`;
 }
 
 /**
@@ -148,13 +226,13 @@ function avatarSrc(avatarData) {
 function renderRow(entry, myId) {
   const rank = entry.rank ?? filters.offset + 1;
   const isMe = myId && entry.user_id === myId;
+  // Le podium prend les médailles quand il est affiché ; une ligne de top 3 en
+  // garde une (classement amis à deux joueurs, page 2 d'une recherche…).
   const rankEmoji = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : String(rank);
   const href = isMe ? "../profile.html" : `../profile.html?view=${esc(entry.friend_code)}`;
-  // Couleur de bordure personnelle (sauf top 3 qui ont leurs couleurs podium en CSS)
-  const borderStyle =
-    rank > 3 && entry.avatar_border_color
-      ? `style="border-color:${esc(entry.avatar_border_color)}"`
-      : "";
+  const borderStyle = entry.avatar_border_color
+    ? `style="border-color:${esc(entry.avatar_border_color)}"`
+    : "";
 
   return `
     <a class="lb-row lb-row--${rank <= 3 ? rank : "n"} ${isMe ? "lb-row--me" : ""}"
@@ -169,7 +247,9 @@ function renderRow(entry, myId) {
            onerror="this.src='../../img/default_avatar.png'">
       <div class="lb-info">
         <div class="lb-pseudo">${esc(entry.pseudo)}</div>
-        <div class="lb-sub">${entry.total_games ? `${entry.total_games} games` : metricLabel()}</div>
+        <div class="lb-sub">${
+          entry.total_games ? esc(gamesLabel(entry.total_games)) : esc(metricLabel())
+        }</div>
       </div>
       <span class="lb-score">${esc(formatScore(entry))}</span>
       <span class="lb-profile-link">→</span>
@@ -216,12 +296,15 @@ function renderLeaderboard(data) {
     return;
   }
 
-  let html = "";
-  entries.forEach((entry, i) => {
-    // Séparateur après le podium
-    if (i === 3 && filters.offset === 0) {
-      html += `<div class="lb-podium-divider">── ${t("leaderboard.others") || "Others"} ──</div>`;
-    }
+  // Podium sur la première page seulement, et seulement s'il y a un vrai top 3.
+  const podium = filters.offset === 0 && entries.length >= 3;
+  let html = podium ? renderPodium(entries.slice(0, 3), myId) : "";
+  if (podium) {
+    html += `<div class="lb-podium-divider"><span>${esc(
+      t("leaderboard.others") || "Others"
+    )}</span></div>`;
+  }
+  (podium ? entries.slice(3) : entries).forEach((entry) => {
     html += renderRow(entry, myId);
   });
 
@@ -294,6 +377,7 @@ async function loadLeaderboard() {
       limit: PAGE_SIZE,
       offset: filters.offset,
       friends_only: filters.friendsOnly ? 1 : 0,
+      expert: filters.expert ? 1 : 0,
     });
 
     renderLeaderboard(data);
@@ -358,6 +442,21 @@ function attachFilterListeners() {
     filters.metric = pill.dataset.value;
     filters.offset = 0;
     activatePill(metricGroup, filters.metric);
+    loadLeaderboard();
+  });
+
+  const dimensionGroup = document.getElementById("dimensionFilter");
+  dimensionGroup?.addEventListener("click", (e) => {
+    const pill = e.target.closest(".lb-pill");
+    if (!pill) return;
+    filters.expert = pill.dataset.value === "expert";
+    filters.offset = 0;
+    activatePill(dimensionGroup, pill.dataset.value);
+    // La carte des filtres prend l'ambiance Expert : l'écart de contexte doit se
+    // voir sans relire la pastille, comme pour les défis Expert.
+    document
+      .querySelector(".lb-filters-card")
+      ?.classList.toggle("lb-filters-card--expert", filters.expert);
     loadLeaderboard();
   });
 

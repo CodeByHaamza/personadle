@@ -21,6 +21,7 @@
  *   profile_music_id  string slug ou null
  *   selected_badges   array (max 4 IDs)
  *   equipped_title_id int ou null
+ *   favorite_mode     clé de mode (classic|emoji|silhouette|alloutattack|personae|music) ou null
  *   settings          object JSON (préférences diverses)
  *
  * On utilise un système de champs explicitement whitelistés pour éviter
@@ -28,6 +29,7 @@
  */
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../lib/validation.php';
 
 // ── Extraire l'userId depuis l'URL (/api/user/42 ou /api/user/42/stats) ───────
 $parts  = requestPathSegments();
@@ -73,13 +75,13 @@ if ($method === 'GET') {
     }
 
     // Récupérer l'utilisateur
-    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, global_streak, global_streak_record, streak_recovered_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, global_streak, global_streak_record, global_streak_date, streak_recovered_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user) jsonError('User not found', 404);
 
     // Récupérer le profil
-    $stmt = $pdo->prepare('SELECT user_id, avatar_data, avatar_border_color, wallpaper_id, profile_music_id, selected_badges, equipped_title_id, settings FROM profiles WHERE user_id = ?');
+    $stmt = $pdo->prepare('SELECT user_id, avatar_data, avatar_border_color, wallpaper_id, profile_music_id, selected_badges, equipped_title_id, favorite_mode, settings FROM profiles WHERE user_id = ?');
     $stmt->execute([$userId]);
     $profile = $stmt->fetch() ?: [];
 
@@ -120,12 +122,22 @@ if ($method === 'GET') {
             'profile_music_id'    => $profile['profile_music_id']    ?? null,
             'selected_badges'     => json_decode($profile['selected_badges'] ?? 'null') ?? [],
             'equipped_title_id'   => $profile['equipped_title_id']   ?? null,
+            'favorite_mode'       => $profile['favorite_mode']       ?? null,
             'equipped_title_slug' => $equippedTitleSlug,
             'settings'            => json_decode($profile['settings']  ?? 'null', true) ?? [],
         ],
         'stats'   => $stats,
         'global_streak'        => (int) ($user['global_streak'] ?? 0),
         'global_streak_record' => (int) ($user['global_streak_record'] ?? 0),
+        // Dernière JOURNÉE (Paris, "Y-m-d") comptée dans la streak globale, ou null.
+        //
+        // Sans elle, le client recevait la série (15) mais pas le jour où elle
+        // s'arrête : sur un nouvel appareil, ou après une déconnexion (le profil
+        // local est vidé), sa première partie voyait « jamais joué », remettait la
+        // série à 1 et écrivait une trace Jack Frost « tu as perdu 15 jours ». Le
+        // joueur se voyait proposer de restaurer une série intacte — et le clic
+        // consommait son crédit de 60 jours pour rien (js/cloud-sync.js la lit).
+        'global_streak_date'   => $user['global_streak_date'] ?? null,
         // Dernière récupération de streak (Jack Frost), ou null si jamais utilisée.
         //
         // Exposé pour que le client cesse de deviner. Le cooldown de 60 jours est
@@ -196,21 +208,23 @@ if ($method === 'PATCH') {
     // lang
     if (array_key_exists('lang', $data)) {
         $lang = trim($data['lang']);
-        if (!in_array($lang, ['en', 'fr', 'es', 'de', 'it'], true)) {
+        if (!in_array($lang, PERSONADLE_SUPPORTED_LANGS, true)) {
             jsonError('Invalid lang');
         }
         $userFields[] = 'lang = ?';
         $userParams[] = $lang;
     }
 
-    // avatar_data (base64 PNG/JPEG/WebP ou null — taille + préfixe validés)
+    // avatar_data : base64 PNG/JPEG/WebP, portrait de la galerie (../img/avatar/…)
+    // ou null — règles dans api/lib/validation.php (personadle_validate_avatar)
     if (array_key_exists('avatar_data', $data)) {
         $avatar = $data['avatar_data'];
-        if ($avatar !== null && strlen($avatar) > 2_000_000) {
-            jsonError('Avatar too large (max 2 MB base64)');
-        }
-        if ($avatar !== null && !preg_match('/^data:image\/(jpeg|png|webp);base64,/', $avatar)) {
+        if ($avatar !== null && !is_string($avatar)) {
             jsonError('Invalid avatar format', 400);
+        }
+        $avatarError = personadle_validate_avatar($avatar);
+        if ($avatarError !== null) {
+            jsonError($avatarError, 400);
         }
         $profileFields[] = 'avatar_data = ?';
         $profileParams[] = $avatar;
@@ -277,6 +291,22 @@ if ($method === 'PATCH') {
         }
         $profileFields[] = 'equipped_title_id = ?';
         $profileParams[] = $titleId;
+    }
+
+    // favorite_mode — choix du joueur (migration 040). Clé canonique de mode ou null.
+    // Même vocabulaire que game_sessions.mode : la liste ci-dessous est celle de
+    // MODES dans js/gameCore.js, à tenir synchronisée si un mode arrive.
+    if (array_key_exists('favorite_mode', $data)) {
+        $fav = $data['favorite_mode'];
+        if ($fav !== null) {
+            if (!is_string($fav)) jsonError('Invalid favorite_mode');
+            $fav = strtolower(trim($fav));
+            if (!in_array($fav, PERSONADLE_MODES, true)) {
+                jsonError('Invalid favorite_mode');
+            }
+        }
+        $profileFields[] = 'favorite_mode = ?';
+        $profileParams[] = $fav;
     }
 
     // settings (JSON objet — stocker tel quel après validation minimale)

@@ -23,6 +23,66 @@ export const BADGE_CATEGORIES = {
 // ───────────────────────────────────────────────────────────────────────────
 // 🎖️ LISTE COMPLÈTE DES BADGES
 // ───────────────────────────────────────────────────────────────────────────
+/**
+ * Portraits de la galerie qui « portent » Motoha Arai et Chie Satonaka (badge
+ * Same Energy). Miroir EXACT de PERSONADLE_SAME_ENERGY_AVATARS
+ * (api/lib/condition_check.php) — c'est le serveur qui tranche, ceci ne sert
+ * qu'au retour immédiat côté client (badgesManager.checkSocialBadges).
+ */
+export const SAME_ENERGY_AVATARS = {
+  arai: ["Arai.png", "Arai2.png"],
+  chie: ["Chie.jpg", "Chie2.jpg", "chie_pq.jpg", "meme_chie_shut_teddie.jpg"],
+};
+
+/** Vrai si `avatar` (chemin galerie ou data URL) est l'un des portraits listés. */
+export function wearsAvatar(avatar, files) {
+  if (typeof avatar !== "string" || !avatar) return false;
+  return files.some((f) => avatar.endsWith("/" + f));
+}
+
+/**
+ * Cibles à avoir trouvées, par badge/titre — miroir de PERSONADLE_TARGET_SETS
+ * (api/lib/condition_check.php), lu ici depuis profile.characterModeMap (le
+ * personnage → les modes où on l'a trouvé, écrit par les six modes). Le serveur
+ * revérifie depuis game_sessions au moment de l'unlock.
+ */
+export const TARGET_SETS = {
+  starlight_trio: [
+    ["alloutattack", ["Joker Starlight ( Ren Amamiya )", "Panther Starlight ( Ann Takamaki )", "Mona Starlight ( Morgana )"], 3],
+  ],
+  shujin_outlaws: [
+    ["alloutattack", ["Wonder Shujin ( Nagisa Kamishiro )"], 1],
+    ["silhouette", ["Ren Amamiya", "Nagisa Kamishiro"], 2],
+  ],
+  absolute_authority: [["classic", ["Mitsuru Kirijo", "Makoto Niijima"], 2]],
+  // Titre Go Beyond : la partie visible dans characterModeMap (la dimension Expert
+  // et les musiques n'y sont pas — le serveur les vérifie, voir titles-ui.js).
+  wonder_go_beyond: [
+    [
+      "alloutattack",
+      [
+        "Wonder ( Nagisa Kamishiro )",
+        "Wonder Chinese New Year ( Nagisa Kamishiro )",
+        "Wonder Velvet ( Nagisa Kamishiro )",
+        "Wonder Summer ( Nagisa Kamishiro )",
+        "Wonder Shujin ( Nagisa Kamishiro )",
+      ],
+      5,
+    ],
+    ["classic", ["Nagisa Kamishiro"], 1],
+    ["emoji", ["Nagisa Kamishiro"], 1],
+    ["personae", ["Nagisa Kamishiro"], 1],
+  ],
+};
+
+/** Toutes les exigences d'un ensemble TARGET_SETS sont-elles visibles dans characterModeMap ? */
+export function targetSetMet(profile, setKey) {
+  const map = profile?.characterModeMap || {};
+  return (TARGET_SETS[setKey] || []).every(
+    ([mode, names, min]) => names.filter((n) => (map[n] || []).includes(mode)).length >= min
+  );
+}
+
 export const badgesList = [
   // ═════════════════════════════════════════════════════════════════════════
   // 🏆 BADGES DE RÉUSSITE (Achievement Badges)
@@ -559,6 +619,21 @@ export const badgesList = [
     check: (stats, profile) => (profile?.classicHintsUsed || 0) >= 50,
   },
   {
+    id: "song_of_orpheus",
+    name: "Song of Orpheus",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Song_Of_Orpheus.webp",
+    condition: "Win 25 games in Expert Mode",
+    description:
+      "Orpheus walked down into the dark with nothing but a lyre, and walked back out singing. Twenty-five Expert wins later, so did you.",
+    secret: false,
+    // Vérifié UNIQUEMENT côté serveur (condition_type `expert_wins_total`,
+    // api/lib/condition_check.php) : le Mode Expert n'alimente pas `user_stats`,
+    // ses victoires se recomptent depuis `game_sessions`. Même cas que
+    // denial_of_self — badgesManager fusionne `is_unlocked` de GET /api/badges.
+    check: () => false,
+  },
+  {
     id: "velvet_regular",
     name: "Velvet Regular",
     category: BADGE_CATEGORIES.ACHIEVEMENT,
@@ -863,6 +938,70 @@ export const badgesList = [
       "A true tactician studies the board before striking. You've uncovered the hidden reports.",
     secret: true,
     check: (stats, profile) => profile?.hifumiArchivesRead === true,
+  },
+  // ── Lot du 2026-09-18 (migration 046) — visuels fournis par Hamza ──────────
+  // Quatre badges vérifiés côté SERVEUR depuis game_sessions (targets_found,
+  // mode_expert_perfect_wins) et un badge social (same_energy) : le check()
+  // client n'est que le retour immédiat, l'unlock est tranché par le serveur.
+  {
+    id: "starlight_festival",
+    name: "Starlight Festival",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Starlight_Festival.webp",
+    condition: "Find Joker, Panther and Mona in their Starlight outfits in All-Out Attack",
+    description:
+      "Ren, Ann and Morgana stepped onto the stage in their Starlight outfits. You caught all three mid-performance.",
+    secret: false,
+    check: (stats, profile) => targetSetMet(profile, "starlight_trio"),
+  },
+  {
+    id: "shujin_outlaws",
+    name: "Shujin Outlaws",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Shujin_Outlaws.webp",
+    condition: "Find Wonder's Shujin All-Out Attack, then Ren and Wonder in Silhouette mode",
+    description:
+      "Same uniform, same school, two worlds apart. You recognized both Shujin transfer students by their shadows — and Wonder by his finisher.",
+    secret: false,
+    check: (stats, profile) => targetSetMet(profile, "shujin_outlaws"),
+  },
+  {
+    id: "absolute_authority",
+    name: "Absolute Authority",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Absolute_Authority.webp",
+    condition: "Find Mitsuru Kirijo and Makoto Niijima in Classic mode",
+    description:
+      "Two student council presidents, two schools, zero tolerance. Gekkoukan and Shujin answer to the same authority — yours.",
+    secret: false,
+    check: (stats, profile) => targetSetMet(profile, "absolute_authority"),
+  },
+  {
+    id: "dont_waste_your_breath",
+    name: "Don't Waste Your Breath",
+    category: BADGE_CATEGORIES.ACHIEVEMENT,
+    img: BADGE_IMG_BASE + "Badge_Dont_Waste_Your_Breath.webp",
+    condition: "Win 5 Classic Expert games on the very first guess",
+    description:
+      "One line was enough. Classic Expert hands you a single quote — five times over, you didn't need a word more. Shinji would approve.",
+    secret: false,
+    // Compteur écrit par modeClassique.js à chaque victoire Expert au 1er essai ;
+    // le serveur recompte depuis game_sessions (attempts = 1, is_expert = 1).
+    check: (stats, profile) => (profile?.classicExpertPerfectWins || 0) >= 5,
+  },
+  {
+    id: "same_energy",
+    name: "Same Energy",
+    category: BADGE_CATEGORIES.SOCIAL,
+    img: BADGE_IMG_BASE + "Badge_Same_Energy.webp",
+    condition:
+      "Reach Social Link rank 5 with a friend while one of you wears Motoha Arai and the other Chie Satonaka",
+    description:
+      "Two kung-fu girls, two games, one energy. When a rank-5 friend shows up as Chie while you're wearing Arai — or the other way around — you both get this one, at the same moment.",
+    secret: false,
+    // Posé par badgesManager.checkSocialBadges() (il faut la liste d'amis) ;
+    // le serveur vérifie la paire et accorde le badge aux DEUX d'un coup.
+    check: (stats, profile) => Boolean(profile?.sameEnergyWith),
   },
   {
     id: "report",

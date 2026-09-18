@@ -10,6 +10,10 @@
     "filters": "FILTRI",
     "select_all": "✓ Seleziona tutto",
     "deselect_all": "✗ Deseleziona tutto",
+    "filters_hint": "Solo i giochi che tieni possono uscire come risposta — e solo loro vengono suggeriti mentre scrivi.",
+    "filters_hint_2": "Clicca un gioco per aprire i suoi capitoli: tienili tutti insieme o uno per uno.",
+    "group_all": "✓ Tutti",
+    "group_none": "✗ Nessuno",
     "input_placeholder": "Inserisci il nome del personaggio...",
     "music_input_placeholder": "Indovina la canzone...",
     "daltonian_off": "Modalità Daltonico: OFF",
@@ -312,7 +316,6 @@
     "stat_time": "⏱️ Tempo totale: {{value}}",
     "stat_first_played": "📅 Prima partita: {{date}}",
     "stat_last_played": "📅 Ultima partita: {{date}}",
-    "reset_confirm": "⚠️ Questo eliminerà definitivamente i dati del tuo profilo. Vuoi continuare?",
     "export": "Esporta profilo",
     "import": "Importa profilo",
     "import_already_done": "Hai già importato un profilo JSON. È consentita una sola importazione per account.",
@@ -327,11 +330,42 @@
     "friend_code_label": "Il tuo codice amico",
     "leaderboard": "Classifica",
     "change_picture": "Cambia immagine",
-    "customization_title": "Personalizzazione",
-    "border_color_label": "Bordo avatar",
-    "theme_label": "Tema dell'interfaccia",
+    "atelier_title": "Personalizza",
+    "tab_avatar": "Avatar",
+    "tab_border": "Bordo",
+    "tab_theme": "Tema",
+    "tab_title": "Titolo",
+    "tab_badges": "Badge",
+    "avatar_hint": "Scegli un ritratto — viene applicato subito. Inquadrato male? Regolalo.",
+    "avatar_adjust": "Regola l'inquadratura",
+    "crop_title": "Regola il tuo avatar",
+    "crop_label": "Trascina, zooma, conferma",
+    "border_hint": "L'anello attorno al tuo avatar: sul tuo profilo, nelle liste amici e nelle sfide.",
+    "theme_hint": "L'aspetto della tua pagina profilo: sfondo e colore d'accento.",
+    "title_pick_hint": "Un solo titolo compare sotto il tuo nome. Clicca per equipaggiarlo, riclicca per toglierlo.",
+    "no_title": "＋ Scegli un titolo",
+    "pinned_badges": "Badge in evidenza",
+    "pinned_hint": "Scegli fino a 4 badge da mettere in evidenza sulla tua carta. Clicca su uno in evidenza per toglierlo.",
+    "pin_badge": "Metti in evidenza un badge",
+    "unpin_badge": "Togli",
+    "pick_empty": "Nessun badge sbloccato per ora — gioca qualche partita e compariranno qui.",
+    "pin_limit": "Puoi mettere in evidenza solo <strong>4 badge</strong>!",
+    "pin_limit_hint": "Toglline uno prima.",
+    "saving": "Salvataggio…",
+    "saved": "Salvato",
+    "save_failed": "Non salvato — tocca per riprovare",
+    "all_saved": "Tutto è salvato",
+    "customize_btn": "Personalizza",
+    "wallpapers_title": "🖼️ Sfondi da sbloccare",
+    "wp_owned": "Sbloccato",
+    "share_title": "Condivisione",
+    "share_desc": "Trasforma il tuo profilo in una carta da postare ovunque — o copia il link perché un amico venga a dare un'occhiata.",
+    "share_modal_title": "Condividi il mio profilo",
+    "share_download": "Scarica PNG",
+    "share_on_x": "Condividi su X",
+    "share_discord": "Copia per Discord",
+    "share_email": "E-mail",
     "theme_custom": "Colore personalizzato",
-    "save_refresh": "Salva e aggiorna",
     "friend_code_copy_hint": "Clicca per copiare il tuo codice amico",
     "friend_code_copied": "Copiato!",
     "see_all_badges": "Vedi tutti i badge",
@@ -340,11 +374,16 @@
     "about_badges_text": "Ciao! Volevo solo essere trasparente – questi badge sono stati creati con l'aiuto dell'IA. Siamo solo studenti che lavorano su questo progetto passionale gratuitamente nel nostro tempo libero, e onestamente non avevamo il budget né il tempo per ingaggiare un artista. Rispettiamo assolutamente gli artisti umani e adoreremo lavorare con uno un giorno se ne avremo l'opportunità! Questo era puramente per necessità, non per preferenza. Grazie per la comprensione e per giocare! ❤️",
     "event_code_title": "Codice evento",
     "event_code_desc": "Inserisci un codice valido per sbloccare un badge esclusivo!",
-    "export_import_title": "Esporta / Importa",
     "share_btn": "Condividi il mio profilo",
     "copy_link": "Copia link",
     "link_copied": "Link copiato!",
     "reset_btn": "Reimposta profilo",
+    "reset_title": "Cancellare i progressi di questo dispositivo?",
+    "reset_warning": "Cancella il profilo salvato in questo browser: statistiche, serie, badge e titoli sbloccati, badge in evidenza, avatar e colori. Non si può annullare.",
+    "reset_point_local": "Tutto ciò che è su questo dispositivo viene cancellato.",
+    "reset_point_account": "Il tuo account resta: rientra e il profilo sul cloud torna.",
+    "reset_point_anon": "Senza account non si recupera nulla — esporta prima il profilo (⚙ Impostazioni → Dati).",
+    "reset_confirm_btn": "Reimposta comunque",
     "badges_unlocked": "badge sbloccati",
     "stat_wins_label": "Vittorie",
     "stat_giveups_label": "Abbandoni",
@@ -353,6 +392,9 @@
     "stat_time_label": "Tempo giocato",
     "stat_first_played_label": "Prima partita",
     "stat_fav_mode_label": "Modalità preferita",
+    "stat_best_mode_label": "Modalità migliore",
+    "fav_mode_pick_label": "Modalità preferita",
+    "fav_mode_none": "Nessuna",
     "stat_current_streak_label": "Serie attuale",
     "mode_col_mode": "Modalità",
     "mode_col_games": "Partite / Win %",
@@ -582,6 +624,36 @@
       "condition": "Usare il suggerimento 50 volte in modalità Classica",
       "description": "Cinquanta anomalie scansionate e decifrate. Nessuna verità può nascondersi dal tuo radar."
     },
+    "song_of_orpheus": {
+      "name": "Il canto di Orfeo",
+      "condition": "Vinci 25 partite in Modalità Esperto",
+      "description": "Orfeo scese nel buio con una sola lira e ne uscì cantando. Venticinque vittorie in Esperto dopo, anche tu."
+    },
+    "starlight_festival": {
+      "name": "Festival Starlight",
+      "condition": "Trova Joker, Panther e Mona con i loro abiti Starlight in All-Out Attack",
+      "description": "Ren, Ann e Morgana sono saliti sul palco con gli abiti Starlight. Li hai colti tutti e tre in piena esibizione."
+    },
+    "shujin_outlaws": {
+      "name": "Fuorilegge di Shujin",
+      "condition": "Trova l'All-Out Attack di Wonder in uniforme Shujin, poi Ren e Wonder nella modalità Silhouette",
+      "description": "Stessa uniforme, stessa scuola, due mondi. Hai riconosciuto entrambi gli studenti trasferiti alla Shujin dalla loro ombra — e Wonder dal suo colpo finale."
+    },
+    "absolute_authority": {
+      "name": "Autorità assoluta",
+      "condition": "Trova Mitsuru Kirijo e Makoto Niijima nella modalità Classica",
+      "description": "Due presidentesse del consiglio studentesco, due scuole, tolleranza zero. Gekkoukan e Shujin rispondono alla stessa autorità: la tua."
+    },
+    "dont_waste_your_breath": {
+      "name": "Non sprecare il fiato",
+      "condition": "Vinci 5 partite di Classica Esperto al primo tentativo",
+      "description": "Una battuta è bastata. La Classica Esperto ti dà una sola citazione — cinque volte non ti è servita una parola di più. Shinji approverebbe."
+    },
+    "same_energy": {
+      "name": "Stessa energia",
+      "condition": "Raggiungi il rango 5 di legame sociale con un amico mentre uno di voi indossa Motoha Arai e l'altro Chie Satonaka",
+      "description": "Due ragazze del kung-fu, due giochi, una sola energia. Quando un amico di rango 5 compare come Chie mentre tu indossi Arai — o viceversa — ricevete questo badge entrambi, nello stesso istante."
+    },
     "velvet_regular": {
       "name": "Cliente Fisso del Velvet",
       "condition": "Giocare in 50 giorni unici",
@@ -799,7 +871,10 @@
     "forgot_password": "Password dimenticata?",
     "send_reset": "Invia il link",
     "back": "Torna al login",
-    "reset_sent": "Se l'email esiste, è stato inviato un link di reset. Controlla la posta."
+    "reset_sent": "Se l'email esiste, è stato inviato un link di reset. Controlla la posta.",
+    "banned_until": "Account sospeso fino al {{date}}.",
+    "banned_permanent": "Account bannato.",
+    "banned_reason": "Motivo: {{reason}}"
   },
   "leaderboard": {
     "title": "Classifica",
@@ -828,6 +903,7 @@
     "metric_streak": "Migliore serie",
     "metric_perfect": "Perfetto",
     "metric_games": "Partite",
+    "games_count": "{{count}} partite",
     "no_entries": "Nessuna voce per questo periodo.",
     "no_entries_sub": "Gioca alcune partite per apparire qui!",
     "others": "Altri",
@@ -836,10 +912,14 @@
     "filter_note": "I filtri opus non vengono considerati.",
     "filter_all_modes": "Tutte le modalità",
     "filter_scope": "Ambito",
+    "filter_dimension": "Dimensione",
+    "dimension_normal": "Normale",
+    "dimension_expert": "⚡ Esperto",
     "scope_global": "Globale",
     "scope_friends": "Amici",
     "login_for_friends": "Accedi per vedere la classifica dei tuoi amici.",
-    "no_friends": "Nessuno dei tuoi amici appare ancora in questa classifica."
+    "no_friends": "Nessuno dei tuoi amici appare ancora in questa classifica.",
+    "expert_no_streak": "La serie migliore non ha una classifica Esperto: una serie conta giorni consecutivi, e l'Esperto non è un appuntamento quotidiano."
   },
   "friends": {
     "title": "Amici",
@@ -854,7 +934,7 @@
     "search_error": "Ricerca fallita. Riprova.",
     "login_required": "Accedi per aggiungere amici e vedere i loro profili.",
     "view_profile": "Vedi profilo",
-    "add_friend": "+ Aggiungi",
+    "add_friend": "Aggiungi",
     "remove_friend": "Rimuovi",
     "accept": "Accetta",
     "decline": "Rifiuta",
@@ -900,22 +980,36 @@
     "msg_clear": "Svuota risolti",
     "msg_clear_kept_active": "{{count}} sfida/e in corso conservate — finiscile prima.",
     "msg_empty": "Nessun messaggio.",
+    "tab_friends": "Amici",
+    "tab_inbox": "Posta",
+    "tab_find": "Cerca",
+    "challenge_btn": "Sfida",
+    "challenge_pick_mode": "Quale modalità?",
+    "challenge_expert_row": "⚡ Esperto — sbloccato da entrambi",
     "delete_msg": "Elimina",
     "server_unreachable": "Impossibile contattare il server. La tua sessione è probabilmente ancora valida: riprova.",
-    "retry": "Riprova"
+    "retry": "Riprova",
+    "challenge_resume": "▶ Riprendi",
+    "challenge_give_up": "Rinuncia",
+    "challenge_pick_note": "Vale il tuo punteggio del giorno — se non hai ancora giocato quella modalità, la giocherai prima."
   },
   "challenge": {
     "challenge_friend": "Sfida un Amico",
     "select_friend": "Seleziona un amico da sfidare",
+    "score_to_beat": "Punteggio da battere: {{score}} tentativo/i",
     "send": "Invia",
     "banner_title": "⚔ Sfida attiva",
     "banner_beat": "Battere",
     "accept": "⚔ Accetta",
     "decline": "✕ Rifiuta",
     "already_sent": "Già inviato oggi",
+    "later": "Più tardi",
+    "refuse": "Rifiuta",
     "already_active": "Finisci prima la tua sfida in corso.",
     "active_challenge": "Sfida",
     "notif_challenges_you": "ti sfida!",
+    "notif_challenges_you_expert": "ti sfida in Esperto!",
+    "notif_expert_tag": "⚡ ESPERTO",
     "notif_beat": "Battere",
     "notif_attempts": "tentativo/i",
     "unknown_mode": "La modalità di questa sfida non è disponibile.",
@@ -928,7 +1022,91 @@
     "select_friend_expert": "Sfida un amico — Esperto",
     "expert_note": "Sfida Esperto: solo gli amici che hanno sbloccato l'Esperto di questa modalità possono raccoglierla.",
     "no_expert_friend": "Nessuno dei tuoi amici ha ancora sbloccato l'Esperto di questa modalità.",
-    "expert_locked": "Sblocca l'Esperto di questa modalità prima di accettare questa sfida."
+    "expert_locked": "Sblocca l'Esperto di questa modalità prima di accettare questa sfida.",
+    "target_unavailable": "Questa sfida non è più giocabile in questa modalità: è stata annullata.",
+    "locked_hint": "Finisci la partita di oggi per sfidare un amico"
+  },
+  "compendium": {
+    "title": "Compendio",
+    "tagline": "La personalità cambia il mondo.",
+    "open": "Apri il Compendio",
+    "button": "Compendio",
+    "button_hint": "Il tuo libro della collezione",
+    "chapter_kicker": "Capitolo",
+    "undated": "Prima del Compendio",
+    "tries": "{{n}} tentativi",
+    "tries_one": "1 tentativo",
+    "rank": "Rango {{n}}",
+    "page_prev": "Pagina precedente",
+    "page_next": "Pagina successiva",
+    "chapters_label": "Capitoli",
+    "login_required": "Accedi per aprire il tuo Compendio.",
+    "unavailable": "Il Compendio non è disponibile al momento.",
+    "not_found": "Nessun Compendio per questo giocatore.",
+    "back_to_profile": "Torna al profilo",
+    "chapter": {
+      "badges": "Distintivi",
+      "titles": "Titoli",
+      "wallpapers": "Sfondi",
+      "bonds": "Legami",
+      "challenges": "Sfide",
+      "feats": "Imprese"
+    },
+    "chapter_desc": {
+      "badges": "Ogni distintivo ottenuto, con il giorno in cui è stato appuntato alla tua giacca.",
+      "titles": "I titoli che puoi portare, dal comune al leggendario.",
+      "wallpapers": "I luoghi sbloccati per decorare la tua stanza.",
+      "bonds": "Amicizie strette e Social Link aumentati — le persone della tua storia.",
+      "challenges": "Guanti lanciati e raccolti: la tua storia di sfide tra amici.",
+      "feats": "Prime volte, partite perfette, record — le tappe del tuo percorso."
+    },
+    "empty": {
+      "default": "Ancora niente qui. Le pagine aspettano.",
+      "badges": "Nessun distintivo ancora. Gioca, e il primo arriverà.",
+      "titles": "Nessun titolo ancora. Continua a giocare per guadagnare il primo.",
+      "wallpapers": "Nessuno sfondo ancora. Alcuni si meritano, altri si trovano.",
+      "bonds": "Nessun legame ancora. Aggiungi un amico per scrivere la prima riga.",
+      "challenges": "Nessuna sfida ancora. Sfida un amico dal suo profilo.",
+      "feats": "Nessuna impresa ancora. La tua prima partita sarà la prima voce."
+    },
+    "stat": {
+      "games": "Partite",
+      "wins": "Vittorie",
+      "days": "Giorni giocati",
+      "streak": "Miglior serie",
+      "friends": "Amici",
+      "confidants": "True Confidants",
+      "challenges": "Sfide",
+      "won": "Vinte"
+    },
+    "feat": {
+      "first_game": "Prima partita",
+      "first_win": "Prima vittoria",
+      "first_perfect": "Prima perfetta",
+      "expert_unlocked": "Modalità Esperto",
+      "streak_record": "Record di serie"
+    },
+    "flavor": {
+      "badge": "Guadagnato con fatica, conservato per sempre. Il Compendio ricorda.",
+      "title_common": "Un titolo da portare con orgoglio: {{name}}.",
+      "title_rare": "Pochi l'hanno ottenuto. Ora è tuo: {{name}}.",
+      "title_epic": "La Velvet Room prende nota. {{name}} entra nella tua leggenda.",
+      "title_legendary": "Scritto a lettere d'oro nel grande libro: {{name}}.",
+      "wallpaper": "{{name}} decora ora la tua stanza — un pezzo di {{game}} tutto tuo.",
+      "bond_created": "Un nuovo legame nasce con {{name}}. Ogni storia inizia con un ciao.",
+      "bond_rank": "Il tuo legame con {{name}} si rafforza — Rango {{rank}}.",
+      "bond_max": "True Confidants. Il tuo legame con {{name}} ha raggiunto l'apice.",
+      "challenge_won": "{{name}} ha lanciato il guanto in {{mode}} — e tu l'hai raccolto. Battuto in {{score}}.",
+      "challenge_lost": "La sfida {{mode}} di {{name}} ha resistito stavolta. Alla prossima.",
+      "challenge_sent_beaten": "Hai sfidato {{name}} in {{mode}}… e il tuo record di {{score}} è stato battuto. Ben giocato.",
+      "challenge_sent_held": "La tua sfida {{mode}} a {{name}} è ancora in piedi — {{score}}, era troppo forte.",
+      "first_game": "Dove tutto è cominciato. La prima porta della Velvet Room si è aperta.",
+      "first_win": "Prima vittoria in {{mode}}: {{target}}, trovato in {{n}}.",
+      "first_perfect": "Una partita perfetta in {{mode}} — {{target}} al primo tentativo.",
+      "expert_unlocked": "{{mode}} Esperto sbloccato. La vera prova comincia.",
+      "expert_granted": "{{mode}} Esperto concesso. Dimostra che avevano ragione.",
+      "streak_record": "{{n}} giorni di fila. L'abitudine diventa leggenda."
+    }
   },
   "challenge_result": {
     "title_win": "BRAVO!",
@@ -943,7 +1121,25 @@
     "to_beat": "Punteggio da battere",
     "social_link": "Social Link",
     "xp_gained": "+{{xp}} XP Social Link",
-    "close": "Torna alla Home"
+    "close": "Torna alla Home",
+    "close_notif": "Chiudi"
+  },
+  "friends_today": {
+    "title": "I tuoi amici oggi",
+    "not_played": "non ha ancora giocato",
+    "gave_up": "si è arreso",
+    "first_game_note": "Solo la prima partita del giorno — ognuno ha il proprio personaggio del giorno.",
+    "empty": "Aggiungi amici per confrontare le vostre partite.",
+    "button": "Partite degli amici",
+    "locked_hint": "Finisci la partita di oggi per vedere quelle dei tuoi amici",
+    "first_game_short": "Prima partita del giorno",
+    "unavailable": "Non disponibile al momento."
+  },
+  "guest_nudge": {
+    "title": "🔥 Serie di {{n}} giorni!",
+    "text": "Crea un account gratuito per salvarla — e ritrovarla su qualsiasi dispositivo.",
+    "cta": "Crea un account",
+    "later": "Più tardi"
   },
   "settings": {
     "title": "Impostazioni",
@@ -957,8 +1153,15 @@
     "anim_style_cc": "Calling Card",
     "anim_style_tv": "TV P4",
     "anim_style_p3": "P3 Evoker",
+    "profile_music": "Musica del profilo",
+    "profile_autoplay_own": "Riproduzione automatica sul mio profilo",
+    "profile_autoplay_others": "Riproduzione automatica sui profili degli altri giocatori",
     "save": "Salva",
-    "saved": "✓ Salvato!"
+    "saved": "✓ Salvato!",
+    "data": "Dati",
+    "export_desc": "Scarica il tuo profilo in un file: statistiche, badge, titoli, tutto.",
+    "danger_zone": "Zona pericolosa",
+    "danger_intro": "Queste due azioni sono irreversibili. Nel dubbio, esporta prima il profilo."
   },
   "index": {
     "main_title": "Prova a indovinare il personaggio di Persona (da Persona 1 a Persona 5)",
@@ -1233,7 +1436,11 @@
     "q42": "Le partite rigiocate contano?",
     "a42": "Sì, dalla v2.1 ogni partita conclusa viene registrata, comprese quelle rigiocate nello stesso giorno. Prima veniva salvata solo la prima partita di ogni giorno e di ogni modalità — ecco perché alcuni contatori di sblocco sembravano fermi.",
     "q43": "Come si guadagna XP Social Link con un amico?",
-    "a43": "Sei azioni danno XP: inviare una sfida (15), giocare lo stesso giorno (20), condividere la propria serie (15), confrontare le statistiche (10), condividere un punteggio (10) e visitare il suo profilo (5). Ognuna rende circa il doppio se il tuo amico fa la stessa cosa lo stesso giorno. Una sfida Esperto vale di più — 25, o 50 reciproca — perché entrambi avete dovuto sbloccare quella modalità perché potesse esistere."
+    "a43": "Sei azioni danno XP: inviare una sfida (15), giocare lo stesso giorno (20), condividere la propria serie (15), confrontare le statistiche (10), condividere un punteggio (10) e visitare il suo profilo (5). Ognuna rende circa il doppio se il tuo amico fa la stessa cosa lo stesso giorno. Una sfida Esperto vale di più — 25, o 50 reciproca — perché entrambi avete dovuto sbloccare quella modalità perché potesse esistere.",
+    "q44": "Cos'è il Compendio?",
+    "a44": "Il tuo libro della collezione. Sul tuo profilo, il pulsante con il pentacolo sotto la modalità scura lo apre: sei capitoli — distintivi, titoli, sfondi, legami, sfide e imprese — ogni voce datata, con chi, e una breve nota. Si scrive da solo a partire da ciò che hai già fatto: niente da compilare.",
+    "q45": "Gli altri possono leggere il mio Compendio, e perché alcune voci dicono « Prima del Compendio »?",
+    "a45": "È pubblico, come il tuo profilo — dal profilo di un amico, lo stesso pulsante apre il suo. Le voci la cui data esatta non era registrata prima dell'arrivo della funzione (vecchi ranghi di Social Link, record di serie) sono segnate « Prima del Compendio » invece di inventare una data."
   },
   "updates": {
     "new_content_title": "✨ Nuovi contenuti v2.0",
@@ -1289,5 +1496,20 @@
     "error_invalid_expired": "Il link di ripristino non è valido o è scaduto.",
     "error_network": "Errore di rete. Riprova.",
     "success": "Password aggiornata! Ora puoi accedere."
+  },
+  "maintenance": {
+    "title": "Manutenzione in corso",
+    "default": "La Velvet Room è chiusa per un momento. Torniamo subito.",
+    "until": "Ritorno previsto: {{time}}",
+    "hint": "I tuoi progressi sono al sicuro — torna un po' più tardi.",
+    "admin_banner": "Modalità manutenzione ATTIVA — i giocatori vedono la schermata di manutenzione.",
+    "admin_link": "Apri l'admin"
+  },
+  "announce": {
+    "until": "fino al {{time}}"
+  },
+  "notice": {
+    "from_team": "Messaggio del team",
+    "ack": "Capito"
   }
 }

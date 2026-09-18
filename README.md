@@ -13,10 +13,10 @@
 <p align="center">
   <a href="https://personadle.net"><img src="https://img.shields.io/badge/Play%20Now-personadle.net-red?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptLTIgMTVsLTUtNSAxLjQxLTEuNDFMMTAgMTQuMTdsNy41OS03LjU5TDE5IDhsLTkgOXoiIGZpbGw9IndoaXRlIi8+PC9zdmc+"/></a>
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License"></a>
-  <a href="https://github.com/HamzaKarrouchi/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/HamzaKarrouchi/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
+  <a href="https://github.com/CodeByHaamza/personadle/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CodeByHaamza/personadle/ci.yml?branch=develop&style=for-the-badge&label=CI" alt="CI Status"></a>
   <img src="https://img.shields.io/badge/Version-2.1-brightgreen?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Made%20with-Vanilla%20JS-yellow?style=for-the-badge&logo=javascript" alt="Made with JavaScript">
-  <img src="https://img.shields.io/badge/Tests-907%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
+  <img src="https://img.shields.io/badge/Tests-1409%20passing-brightgreen?style=for-the-badge&logo=vitest" alt="Tests">
   <img src="https://img.shields.io/badge/Backend-PHP%208.3%20%2B%20MariaDB-8892BF?style=for-the-badge&logo=php" alt="PHP Backend">
   <img src="https://img.shields.io/badge/i18n-EN%20%7C%20FR%20%7C%20ES%20%7C%20DE%20%7C%20IT%20%7C%20PT-blueviolet?style=for-the-badge" alt="Languages">
 </p>
@@ -241,7 +241,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 ### ☁️ Full Backend — PHP 8.3 + MariaDB
 
 - Complete REST API with JWT-less auth (bcrypt + PHP sessions httpOnly)
-- 24-table relational schema, 907+ unit tests (Vitest + jsdom)
+- 28-table relational schema, 1409+ unit tests (Vitest + jsdom)
 - Cloud sync: offline-first, auto-sync on reconnect, migration from localStorage
 
 ### 👥 Friends & Social
@@ -265,7 +265,7 @@ Listen to short music clips and identify the character or theme. True fans will 
 
 ### 🌐 Internationalisation
 
-- 6 languages: EN · FR · ES · DE · IT · PT (1099 keys each)
+- 6 languages: EN · FR · ES · DE · IT · PT (1285 keys each)
 - Auto-detected from browser, persisted in cloud account
 - Localised buttons, messages, badge descriptions, titles
 
@@ -420,7 +420,7 @@ JavaScript  → Modular ES6+, localStorage, dynamic UI
 
 ```
 PHP 8.3       → REST API, bcrypt auth, PDO prepared statements, rate-limiting SQL
-MariaDB 10.6+ → 24-table relational schema (MySQL 8.0 compatible)
+MariaDB 10.6+ → 28-table relational schema (MySQL 8.0 compatible)
 Apache        → .htaccess routing, CORS exact-origin, HTTPS, CSP/HSTS
 Hostinger     → Production hosting
 ```
@@ -437,9 +437,9 @@ GitHub Actions → lint + i18n + data-check + coverage + PHPUnit (DB) + PHPStan
 ### Tests & quality
 
 ```
-Vitest + jsdom → 907 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
+Vitest + jsdom → 1409 tests unitaires (logique de jeu, backend, streak, i18n, validation données)
 PHPUnit        → tests de logique pure + intégration DB (contrat de schéma)
-Playwright     → 113 E2E sur la stack Docker complète (smoke, API, Social Link)
+Playwright     → 239 E2E sur la stack Docker complète (smoke, API, Social Link)
 PHPStan        → analyse statique PHP niveau 5
 ESLint+Prettier→ lint + format
 npm test       → lance la suite Vitest · make check → tout (lint, data, i18n)
@@ -483,7 +483,7 @@ Track your journey with comprehensive stats:
 ## 🗺️ Roadmap
 
 Grosses briques déjà livrées — backend PHP/MariaDB, amis + Social Link, leaderboard, défis
-quotidiens, i18n 6 langues, panel admin, 907 tests automatisés (Vitest + PHPUnit + Playwright).
+quotidiens, i18n 6 langues, panel admin, 1409 tests automatisés (Vitest + PHPUnit + Playwright).
 
 | Feature                            | Status       |
 | ----------------------------------- | ------------ |
@@ -536,43 +536,44 @@ quotidiens, i18n 6 langues, panel admin, 907 tests automatisés (Vitest + PHPUni
 
 <table>
   <tr>
-    <td align="center" width="25%">
-      <img src="https://github.com/HamzaKarrouchi.png" width="100px;" alt="Hamza"/><br>
+    <td align="center" width="100%">
+      <img src="https://github.com/CodeByHaamza.png" width="100px;" alt="Hamza"/><br>
       <sub><b>Hamza Karrouchi</b></sub><br>
       <em>Founder & Lead Developer</em><br>
-      <sub>Game logic, backend, animations, UI, profile system</sub><br>
+      <sub>Game design, game logic, backend, animations, UI, profile system, content, ops</sub><br>
       <sub>CS student & Persona/JoJo enjoyer</sub>
-    </td>
-    <td align="center" width="25%">
-      <img src="https://github.com/L2GENDAIRE.png" width="100px;" alt="Léo" /><br>
-      <sub><b>Léo (L2GENDAIRE)</b></sub><br>
-      <em>Data & Design Lead</em><br>
-      <sub>Character database, layout, portraits</sub><br>
-      <sub>Spreadsheet wizard & UI enthusiast</sub>
-    </td>
-    <td align="center" width="25%">
-      <img src="https://github.com/Corbover.png" width="100px;" alt="Damien"/><br>
-      <sub><b>Damien (Corbover)</b></sub><br>
-      <em>Front-End Developer</em><br>
-      <sub>CSS Architecture & Responsive Design</sub><br>
-      <sub>Modularization specialist</sub>
-    </td>
-    <td align="center" width="25%">
-      <img src="https://i.pinimg.com/736x/db/c8/93/dbc8933b2e2b02ae9aca23fc78ea9107.jpg" width="100px;" alt="Dzulian"/><br>
-      <sub><b>Dzulian</b></sub><br>
-      <em>Creative Consultant & Data Specialist</em><br>
-      <sub>Ideas development & P1/P2 accuracy</sub><br>
-      <sub>Classic trilogy preservation expert</sub>
     </td>
   </tr>
 </table>
 
-### 🌟 Special Thanks
+### Contributors & Credits
 
-**Active Contributors:**
+PersonaDLE started as a small team in spring 2025. The people below shaped its early
+days and are credited for it — the project is maintained by Hamza alone since mid-2025.
 
-- **Damien Nouvellon** - CSS restructuring and modularization for improved maintainability and responsive design preparation
-- **Dzulian** - Creative ideas and data accuracy for Persona 1 & 2 (Megami Ibunroku, IS, EP)
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="https://github.com/L2GENDAIRE.png" width="100px;" alt="Léo" /><br>
+      <sub><b>Léo (L2GENDAIRE)</b></sub><br>
+      <em>Data & Design — 2025</em><br>
+      <sub>Original character database, layout, portraits</sub><br>
+      <sub>Spreadsheet wizard & UI enthusiast</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="https://github.com/Corbover.png" width="100px;" alt="Damien"/><br>
+      <sub><b>Damien (Corbover)</b></sub><br>
+      <em>Front-End — 2026</em><br>
+      <sub>CSS modularization, responsive groundwork</sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="https://i.pinimg.com/736x/db/c8/93/dbc8933b2e2b02ae9aca23fc78ea9107.jpg" width="100px;" alt="Dzulian"/><br>
+      <sub><b>Dzulian</b></sub><br>
+      <em>Consultant — P1 / P2</em><br>
+      <sub>Ideas & data accuracy for Persona 1 & 2 (Megami Ibunroku, IS, EP)</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -585,7 +586,7 @@ quotidiens, i18n 6 langues, panel admin, 907 tests automatisés (Vitest + PHPUni
 
 ### Community
 
-- **Arati** ([@Arati](https://x.com/Arati)) - Community support and featuring PersonaDLE
+- <img src="img/credits/arati_youtube.jpg" width="28" height="28" alt="" align="absmiddle"/> **Arati** ([YouTube](https://www.youtube.com/@Arati_Persona) · [@Arati](https://x.com/Arati)) - Community support and featuring PersonaDLE
 - **Discord Communities** - [PersonaDLE (international)](https://discord.gg/wpMdGGDp3y) & [Le Grimoire du Cœur (French partner, most active)](https://discord.gg/CfR8UHXTAE) - beta testing, bug reports, and endless feedback
 - **Reddit r/persona4golden** - Support and suggestions
 
@@ -598,6 +599,7 @@ quotidiens, i18n 6 langues, panel admin, 907 tests automatisés (Vitest + PHPUni
 ### Resources
 
 - **[Megami Tensei Wiki](https://megamitensei.fandom.com/)** - Character data and lore
+- <img src="img/credits/faz_youtube.jpg" width="28" height="28" alt="" align="absmiddle"/> **[Faz](https://www.youtube.com/@FazPersona)** (YouTube) - Persona footage, notably the All-Out Attack references
 - **Atlus/SEGA** - For creating the incredible Persona universe
 - **Shoji Meguro** - For the unforgettable music
 
@@ -632,7 +634,7 @@ Some badges and wallpapers were created with AI assistance. As students working 
 
 We welcome contributions! Here's how you can help:
 
-1. **Report Bugs** - Found an issue? [Open an issue](https://github.com/HamzaKarrouchi/personadle/issues)
+1. **Report Bugs** - Found an issue? [Open an issue](https://github.com/CodeByHaamza/personadle/issues)
 2. **Suggest Features** - Have an idea? We'd love to hear it!
 3. **Join the Community** - Share your achievements and help others
 4. **Spread the Word** - Share PersonaDLE with fellow Persona fans!
@@ -641,13 +643,13 @@ We welcome contributions! Here's how you can help:
 
 ```bash
 # Clone the repository
-git clone https://github.com/HamzaKarrouchi/personadle.git
+git clone https://github.com/CodeByHaamza/personadle.git
 cd personadle
 
 # Install test dependencies
 npm install
 
-# Run the 907 unit tests
+# Run the 1409 unit tests
 npm test
 
 # Backend setup (first time only — creates DB, imports schema, configures Apache)
@@ -676,7 +678,7 @@ We're always looking for passionate contributors! Whether you're a developer, de
 ## 📞 Contact & Community
 
 - 🌐 **Website**: [personadle.net](https://personadle.net)
-- 🐙 **GitHub**: [HamzaKarrouchi/personadle](https://github.com/HamzaKarrouchi/personadle)
+- 🐙 **GitHub**: [CodeByHaamza/personadle](https://github.com/CodeByHaamza/personadle)
 - 💬 **Discord (PersonaDLE)**: [International server](https://discord.gg/wpMdGGDp3y) — always active, English-friendly
 - 💬 **Discord (Le Grimoire du Cœur)**: [French partner server](https://discord.gg/CfR8UHXTAE) — our most active community, in collaboration with PersonaDLE
 - 📧 **Contact**: Open an issue on GitHub for support or collaboration
@@ -686,10 +688,10 @@ We're always looking for passionate contributors! Whether you're a developer, de
 ## 📈 Stats
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/HamzaKarrouchi/personadle?style=social" alt="GitHub Stars">
-  <img src="https://img.shields.io/github/forks/HamzaKarrouchi/personadle?style=social" alt="GitHub Forks">
-  <img src="https://img.shields.io/github/watchers/HamzaKarrouchi/personadle?style=social" alt="GitHub Watchers">
-  <img src="https://img.shields.io/github/contributors/HamzaKarrouchi/personadle?style=social" alt="Contributors">
+  <img src="https://img.shields.io/github/stars/CodeByHaamza/personadle?style=social" alt="GitHub Stars">
+  <img src="https://img.shields.io/github/forks/CodeByHaamza/personadle?style=social" alt="GitHub Forks">
+  <img src="https://img.shields.io/github/watchers/CodeByHaamza/personadle?style=social" alt="GitHub Watchers">
+  <img src="https://img.shields.io/github/contributors/CodeByHaamza/personadle?style=social" alt="Contributors">
 </p>
 
 ---

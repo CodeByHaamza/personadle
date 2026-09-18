@@ -76,26 +76,52 @@ function personadle_attempt_streak_recovery(PDO $pdo, int $userId, int $previous
         );
     }
 
+    return personadle_apply_streak_recovery($pdo, $userId, $previousStreak, true);
+}
+
+/**
+ * ÉCRIT la streak restaurée — sans aucune vérification.
+ *
+ * Extrait de personadle_attempt_streak_recovery() pour que le panneau admin
+ * puisse restaurer une streak SANS le cooldown de 60 jours ni le plafond
+ * « jours réellement joués » : ces deux gardes protègent d'un joueur qui
+ * s'auto-attribue une streak, pas d'un administrateur qui répare un compte.
+ * Les dupliquer côté admin aurait fait deux écritures à tenir alignées ; c'est
+ * la vérification qui reste propre à chaque appelant, pas l'écriture.
+ *
+ * @param bool $startCooldown true depuis le jeu (Jack Frost consomme sa
+ *   récupération des 60 jours) ; false depuis l'admin — un geste de
+ *   maintenance ne doit pas priver le joueur de SA récupération.
+ * @return array{modes_updated:int}
+ */
+function personadle_apply_streak_recovery(
+    PDO $pdo,
+    int $userId,
+    int $streak,
+    bool $startCooldown
+): array {
+    // `WHERE streak < ?` : jamais de régression. Un mode dont la streak est déjà
+    // supérieure a été joué depuis — l'écraser ferait PERDRE de la progression.
     $stmt = $pdo->prepare(
         'UPDATE user_stats
          SET streak = ?, streak_record = GREATEST(streak_record, ?)
          WHERE user_id = ? AND streak < ?'
     );
-    $stmt->execute([$previousStreak, $previousStreak, $userId, $previousStreak]);
+    $stmt->execute([$streak, $streak, $userId, $streak]);
     $rowsUpdated = $stmt->rowCount();
 
     // Restaure aussi la streak GLOBALE autoritative (datée aujourd'hui, heure de
-    // Paris) pour qu'elle reparte de previous_streak et ne soit pas écrasée à la
+    // Paris) pour qu'elle reparte de $streak et ne soit pas écrasée à la
     // prochaine sync.
     $parisToday = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
     $pdo->prepare(
         'UPDATE users
-         SET streak_recovered_at  = UTC_TIMESTAMP(),
+         SET streak_recovered_at  = ' . ($startCooldown ? 'UTC_TIMESTAMP()' : 'streak_recovered_at') . ',
              global_streak        = GREATEST(global_streak, ?),
              global_streak_record = GREATEST(global_streak_record, ?),
              global_streak_date   = ?
          WHERE id = ?'
-    )->execute([$previousStreak, $previousStreak, $parisToday, $userId]);
+    )->execute([$streak, $streak, $parisToday, $userId]);
 
     return ['modes_updated' => $rowsUpdated];
 }

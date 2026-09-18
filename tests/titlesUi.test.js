@@ -13,6 +13,7 @@ import {
   resetTitlesUnlockedState,
   checkTitlesAfterGame,
   _resetTitlesData,
+  _bindTitlesModal,
 } from "../profile/titles-ui.js";
 
 beforeEach(() => {
@@ -195,6 +196,37 @@ describe("renderTitlesSection", () => {
     const img = document.getElementById("equippedTitleImg");
     expect(img.style.display).toBe("block");
     expect(img.dataset.rarity).toBe("common");
+  });
+
+  // 2.2 — la puce de titre sur la carte d'identité : « ＋ Choisir un titre » quand
+  // rien n'est équipé, l'image sinon ; le bouton porte l'état pour le style.
+  it("toggles the « Choose a title » placeholder and the chip state (2.2 identity card)", () => {
+    document.body.innerHTML = `
+      <button id="equippedTitleBtn" class="title-chip">
+        <img id="equippedTitleImg"><span id="equippedTitleEmpty">＋ Choose a title</span>
+      </button>`;
+    renderTitlesSection({}, vi.fn(), vi.fn(), vi.fn());
+    expect(document.getElementById("equippedTitleEmpty").hidden).toBe(false);
+    expect(document.getElementById("equippedTitleBtn").classList.contains("title-chip--empty")).toBe(
+      true
+    );
+
+    renderTitlesSection({ equippedTitleSlug: "adachi_boring_isnt_it" }, vi.fn(), vi.fn(), vi.fn());
+    expect(document.getElementById("equippedTitleEmpty").hidden).toBe(true);
+    expect(document.getElementById("equippedTitleBtn").classList.contains("title-chip--empty")).toBe(
+      false
+    );
+    expect(document.getElementById("equippedTitleImg").style.display).toBe("block");
+  });
+});
+
+describe("_bindTitlesModal without a modal (2.2 — grid lives in the Atelier)", () => {
+  it("still renders the grid immediately from localStorage when #titlesModal/#openTitlesModal are gone", () => {
+    document.body.innerHTML = `<div id="titlesModalGrid"></div>`;
+    _bindTitlesModal({ unlockedTitles: ["adachi_boring_isnt_it"] }, vi.fn(), vi.fn(), vi.fn());
+    const card = document.querySelector('.tm-card[data-slug="adachi_boring_isnt_it"]');
+    expect(card).not.toBeNull();
+    expect(card.dataset.unlocked).toBe("true");
   });
 });
 

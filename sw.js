@@ -21,7 +21,7 @@
 // Sans bump, `activate` ne purge rien et les assets servis en cache-first
 // (images, sons) restent ceux de la version précédente — invisible en test,
 // puisque c'est justement le cache des joueurs DÉJÀ venus qui est concerné.
-const CACHE_VERSION = "personadle-v95";
+const CACHE_VERSION = "personadle-v96";
 
 // Préfixe du sous-dossier : '/personadle' en dev local, '' en production (racine).
 // Calculé depuis l'URL du SW lui-même (ex: /personadle/sw.js → /personadle).
@@ -92,6 +92,12 @@ const PRECACHE_URLS = [
   SW_BASE + "/profile/leaderboard/leaderboard.html",
   SW_BASE + "/profile/leaderboard/leaderboard.css",
   SW_BASE + "/profile/leaderboard/leaderboard.js",
+
+  /* Compendium (carnet de collection) */
+  SW_BASE + "/profile/compendium/compendium.html",
+  SW_BASE + "/profile/compendium/compendium.css",
+  SW_BASE + "/profile/compendium/compendium.js",
+  SW_BASE + "/profile/compendium/compendium_entries.js",
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -20,8 +20,7 @@
  * — le cache client se purge à minuit (heure de Paris), mais rien avant.
  */
 
-import { MODE_STATE_KEYS } from "./challenge-notif.js";
-import { activeChallengeKey } from "./gameCore.js";
+import { activeChallengeKey, parisDateKey, releaseActiveChallenge } from "./gameCore.js";
 
 export function initChallengeBanner(currentMode) {
   // Case cloisonnée par dimension : le bandeau d'une page Expert ne doit annoncer
@@ -38,10 +37,16 @@ export function initChallengeBanner(currentMode) {
     return;
   }
 
-  // Vérifier que c'est pour aujourd'hui (heure Paris, cohérent avec le reset quotidien)
-  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
-  if (challenge.date && challenge.date !== today) {
-    localStorage.removeItem(storageKey);
+  // Périmé : la case part, mais on rend AUSSI ses filtres au joueur et on purge
+  // l'état de mode. Le `removeItem` nu laissait les filtres du défi installés
+  // (un pool restreint que le joueur n'a jamais choisi) et, pour un défi à cible
+  // dédiée, la cible d'hier persistée dans l'état du mode : la partie reprenait
+  // sur le mauvais personnage, cette fois enregistrée en session quotidienne.
+  // parisDateKey() plutôt qu'un Intl reconstruit ici : même frontière de journée
+  // que getActiveChallengeTarget() / readActiveChallenge(), qui décident, elles,
+  // si le mode joue la cible du défi. Deux calculs, deux dérives possibles.
+  if (challenge.date && challenge.date !== parisDateKey()) {
+    releaseActiveChallenge(challenge);
     return;
   }
 
@@ -132,28 +137,16 @@ export async function abandonActiveChallenge(challenge, banner) {
   }
 
   // ── Le serveur a confirmé : on peut défaire l'état local ──────────────────
-  // Mêmes gestes que checkChallengeCompletion() (js/challenge-result.js), dans
-  // le même ordre — un abandon et une fin de partie laissent le mode dans un
-  // état strictement identique.
-  if (challenge.filterKey && challenge.originalFilters != null) {
-    localStorage.setItem(challenge.filterKey, challenge.originalFilters);
-  }
-
-  // Défi à cible dédiée : la partie chargée n'est pas celle du jour. On efface
-  // l'état du mode pour que le rechargement retombe sur la cible quotidienne.
-  if (challenge.target) {
-    (MODE_STATE_KEYS[(challenge.mode ?? "").toLowerCase()] ?? []).forEach((k) =>
-      localStorage.removeItem(k)
-    );
-  }
-
-  localStorage.removeItem(activeChallengeKey());
+  // Geste partagé avec checkChallengeCompletion() (js/challenge-result.js) et
+  // dropUnplayableChallenge() (gameCore.js) — les trois sorties d'un défi
+  // laissent le mode dans un état strictement identique.
+  const wiped = releaseActiveChallenge(challenge);
   banner?.remove();
   _toast(tf("challenge.abandoned", "Challenge given up. You can accept another one."));
 
   // Rechargement seulement si la partie affichée était celle du défi : sans lui,
   // le joueur continuerait sur la cible dédiée qu'on vient de retirer du stockage.
-  if (challenge.target) setTimeout(() => window.location.reload(), 900);
+  if (wiped) setTimeout(() => window.location.reload(), 900);
   return true;
 }
 

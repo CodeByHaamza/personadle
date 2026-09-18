@@ -11,7 +11,7 @@
  */
 
 // Conversion clé backend → libellé canonique : voir modeLabel() dans gameCore.js
-import { modeLabel } from "./gameCore.js";
+import { modeLabel, parisMidnightUtc } from "./gameCore.js";
 import { syncRecoveryCooldown } from "./streak-recovery.js";
 
 function _prefix() {
@@ -99,6 +99,9 @@ export async function pullProfileFromCloud() {
       p.selectedBadges = Array.isArray(cp.selected_badges) ? cp.selected_badges : [];
     if (cp.equipped_title_id !== undefined) p.equippedTitleId = cp.equipped_title_id ?? null;
     if (cp.equipped_title_slug !== undefined) p.equippedTitleSlug = cp.equipped_title_slug ?? null;
+    // Mode favori CHOISI (migration 040). Le « Best Mode Overall » est calculé à
+    // l'affichage depuis modeCount / modeWins ; rien d'autre n'est dérivé ici.
+    if (cp.favorite_mode !== undefined) p.favoriteMode = cp.favorite_mode ?? null;
 
     // Wallpaper / thème  (wallpaper_id stocke aussi 'custom:#rrggbb' ou l'id de thème)
     if (cp.wallpaper_id) {
@@ -153,10 +156,25 @@ export async function pullProfileFromCloud() {
       const backendGlobal = d.global_streak ?? Math.max(0, ...d.stats.map((r) => r.streak ?? 0));
       p.stats.streak = backendGlobal;
       p.stats.streakRecord = Math.max(best, d.global_streak_record ?? 0, backendGlobal);
+      // Dernière journée comptée (Paris) : sans elle, la série redescendait sans
+      // son point d'arrêt et la première partie sur cet appareil la voyait comme
+      // « jamais joué » → remise à 1 + fausse trace Jack Frost (crédit de 60 jours
+      // consommé pour rien au clic). Posée à midi Paris de ce jour-là : c'est un
+      // instant sans ambiguïté de journée, ce que profileStats.js relit ensuite
+      // via parisDateKey(). Champ absent (backend antérieur) → on ne touche à rien ;
+      // null (jamais joué) → on retire une valeur locale forcément périmée.
+      if (d.global_streak_date === null) {
+        delete p.stats.lastPlayed;
+      } else if (typeof d.global_streak_date === "string") {
+        const key = d.global_streak_date.slice(0, 10);
+        const noon = parisMidnightUtc(key) + 12 * 3_600_000;
+        if (Number.isFinite(noon)) p.stats.lastPlayed = new Date(noon).toISOString();
+      }
       p.stats.modeCount = modeCount;
       p.stats.modeWins = modeWins;
-      const fav = d.stats.reduce((b, r) => (!b || r.games > b.games ? r : b), null);
-      if (fav) p.stats.favoriteMode = modeLabel(fav.mode);
+      // stats.favoriteMode (le plus joué) n'est plus écrit : un profil local qui
+      // en garde un de la 2.1 n'est pas lu, il est simplement inerte.
+      delete p.stats.favoriteMode;
     }
 
     // Cooldown Jack Frost : le backend est la source de vérité, ici comme ailleurs.

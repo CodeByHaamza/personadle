@@ -13,15 +13,14 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../lib/validation.php';
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
-$rawForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-$firstIp         = trim(explode(',', $rawForwardedFor)[0]);
-$rlIp            = filter_var($firstIp, FILTER_VALIDATE_IP) ? $firstIp : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
 // 5 inscriptions / 15 min en prod ; marge élargie hors prod — les specs E2E
 // enregistrent chacun leurs propres comptes depuis la même IP locale, et un
 // retry CI sur un test en échec dans un describe.serial ré-exécute tout le
 // bloc (donc son beforeAll), ce qui peut ré-inscrire les mêmes comptes.
-$rlMaxRegister   = APP_ENV === 'production' ? 5 : 50;
-rateLimit('register:' . $rlIp, $rlMaxRegister, 15 * 60);
+// 200 et non 50 depuis le 2026-09-15 : la suite complète en crée 51 en un
+// passage, la 51e tombait en 429 — et deux retries CI en ajoutent autant.
+$rlMaxRegister = APP_ENV === 'production' ? 5 : 200;
+rateLimit('register:' . getClientIp(), $rlMaxRegister, 15 * 60);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);
@@ -79,7 +78,7 @@ try {
 
     // 3. Stats initialisées à zéro pour chaque mode
     $stmtStats = $pdo->prepare('INSERT INTO user_stats (user_id, mode) VALUES (?, ?)');
-    foreach (['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'] as $mode) {
+    foreach (PERSONADLE_MODES as $mode) {
         $stmtStats->execute([$userId, $mode]);
     }
 

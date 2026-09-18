@@ -63,6 +63,7 @@ export const personas = [
   "Wonder Chinese New Year ( Nagisa Kamishiro )",
   "Wonder Velvet ( Nagisa Kamishiro )",
   "Wonder Summer ( Nagisa Kamishiro )",
+  "Wonder Shujin ( Nagisa Kamishiro )",
   "Yuki ( Yukimi Fujikawa )",
   "Yukari Takeba",
   "Anri ( Aran Hirano )",
@@ -74,4 +75,6 @@ export const personas = [
   "Puppet Summer ( Miyu Sahara )",
   "Closer Radiance ( Motoha Arai )",
   "Miku ( Hatsune Miku )",
+  "Bui Cosmic ( YUI )",
+  "Berry Summer ( Ichigo Shikano )",
 ];
