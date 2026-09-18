@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1409 tests Vitest (77 suites), 358 méthodes PHPUnit, 239 tests E2E,
+> Vérifié le 2026-08-26 : 1416 tests Vitest (77 suites), 358 méthodes PHPUnit, 243 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -97,6 +97,16 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       horaire) pour peupler la dimension Expert du cache. D'ici là le classement Expert par
       période bascule sur le calcul live — correct, mais plus coûteux. Rien à faire, ça se
       résorbe seul ; c'est noté pour ne pas le prendre pour une panne.
+- [x] Jouer `sql/migrations/049_titles_pt_descriptions.sql` (`titles.name_pt`, `description_pt`,
+      noms PT + descriptions six langues des 22 titres ; `ADD COLUMN IF NOT EXISTS` + `UPDATE` par
+      slug, rejouable). **À jouer AVANT le `git pull` Hostinger.** Sans elle, `GET /api/titles` et
+      le Compendium interrogent `name_pt` → `Unknown column` → **500 pour tout le monde**, quelle
+      que soit la langue. Vérifiée le 2026-09-18 sur un import vierge du nouveau `bdd_mysql.sql`
+      (no-op) et sur la base de dev au schéma 048.
+- [x] **Bumper `CACHE_VERSION` dans `sw.js` (v96 → v97, fait le 2026-09-18 soir)** : `js/filterMenu.js`
+      (précaché) et `profile/titles-ui.js` changent après la 2.2 (marqueur de format des filtres,
+      descriptions de titres — 2026-09-18 soir). Sans bump,
+      un joueur déjà venu garde l'ancien menu de filtres et le bug « Royal revient » avec.
 - [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v95 → v96, fait le 2026-09-18 — précédemment
       v94 → v95 le 2026-09-01). Sans bump, `activate` ne purge pas l'ancien cache et les
       assets servis en cache-first restent ceux de la version précédente. Invisible en test :
@@ -112,6 +122,10 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       volontaire (c'est lui qui garantit qu'on ne reste pas sur du code périmé), simplement
       à ne pas déclencher en pleine affluence.
 
+> ✅ **Release 2.2.1 — 2026-09-18 soir** : 049 jouée en prod (dump `titles`/`user_titles` avant, 22 titres,
+> 0 NULL), `CACHE_VERSION` v97, puis `develop → main` — l'auto-déploiement Hostinger re-branché a
+> tiré le commit tout seul. Contient #135 (filtres) et #136 (titres PT + descriptions).
+>
 > ✅ **Release 2.2 — 2026-09-18** : `schema_migrations` en prod confirme 029→039 (jouées à la 2.1)
 > puis 040→046 jouées ce jour depuis le poste local (backup `~/personadle_backups/` 49 Mo avant).
 > La 044 a d'abord été refusée (`titles` de prod sans `description_*`, `condition_value NOT NULL`) et

@@ -130,8 +130,17 @@ export function isTitleConditionMet(title, ctx) {
   }
 }
 
-/** Texte lisible de la condition d'un titre (fallback si l'API n'a pas fourni de description). */
+/**
+ * Texte lisible de la condition d'un titre.
+ *
+ * La description servie par l'API (colonne description_<lang> de la table titles, repli
+ * anglais côté serveur) prime : c'est elle qui parle la langue du joueur et qui
+ * porte la phrase de lore. Le texte codé en dur ci-dessous ne sert plus que si
+ * l'API n'a pas répondu (mode hors-ligne, première ouverture) — il est en
+ * anglais, comme avant la 049.
+ */
 export function titleConditionText(t) {
+  if (typeof t?.description === "string" && t.description.trim() !== "") return t.description;
   const v = t.condition_value;
   switch (t.condition_type) {
     case "wins_total":
@@ -623,6 +632,7 @@ export async function initTitlesSection(profile, saveProfile, saveProfileToCloud
           ...t,
           id: api.id ?? t.id,
           name: api.name || t.name,
+          description: api.description || null,
           // On garde le chemin local relatif (titles/slug.webp depuis profile/)
           // Le chemin DB (profile/titles/...) est réservé à profile-view.js
           is_unlocked: api.is_unlocked ? 1 : 0,

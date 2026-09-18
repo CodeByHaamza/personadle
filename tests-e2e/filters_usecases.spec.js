@@ -289,18 +289,27 @@ test.describe("Filtres d'opus — la cible du jour", () => {
     const opusPlein = await opusOf(pageA, targetPlein);
     await ctxA.close();
 
-    // Même joueur (même seed), mais des filtres « P5 uniquement » AVANT le premier rendu
+    // Même joueur (même seed), mais des filtres « P5 uniquement » AVANT le premier rendu.
+    // addInitScript et non goto + evaluate : l'état doit être là avant que le module
+    // ne tire la cible, à chaque navigation (le gotoSettled peut recharger).
+    // « P5 uniquement » = le P5 de base, au format précis : sans le marqueur
+    // `_precise`, ["P5"] seul passait pour l'ancien format large et devenait toute
+    // la famille P5 — la cible pouvait être un personnage P5S/P5R/P5T selon la
+    // graine du joueur, et l'assertion `opus contient "P5"` tombait une fois sur
+    // deux en CI (2026-09-18). PTS est marqué « déjà proposé » pour que le seed des
+    // opus récents ne l'ajoute pas à la liste.
     const ctxB = await browser.newContext();
-    const pageB = await ctxB.newPage();
-    await pageB.goto(BASE + "/classiqueMode/classiqueMode.html");
-    await pageB.evaluate(
+    await ctxB.addInitScript(
       ([s, f]) => {
         if (s) localStorage.setItem("anonPlayerId", s);
         localStorage.setItem("filters_Classic", JSON.stringify(f));
+        localStorage.setItem("filters_Classic_precise", "1");
+        localStorage.setItem("filters_Classic_seeded", JSON.stringify(["PTS"]));
         localStorage.removeItem("target");
       },
       [seed, ["P5"]]
     );
+    const pageB = await ctxB.newPage();
     await gotoSettled(pageB, "/classiqueMode/classiqueMode.html");
     await pageB.waitForTimeout(600);
     const targetFiltre = await storedTarget(pageB);
