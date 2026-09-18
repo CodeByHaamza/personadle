@@ -13,6 +13,54 @@
 
 ---
 
+## 2026-09-18 — 2.2 en prod : le Compendium en 500 trente minutes après (migration 048)
+
+**Livré** : PR #132 `develop → main` mergée à 17:37 UTC, commit `7a426b2`. L'auto-déploiement
+Hostinger n'a **rien tiré** : le webroot n'avait plus fait de `fetch` depuis le 2 septembre et
+son remote pointait encore sur `HamzaKarrouchi/personadle` (compte renommé le 2026-09-12).
+Déploiement à la main par Hamza (`git remote set-url origin …CodeByHaamza… && git pull
+--ff-only`), puis contrôles : `sw.js` v96 servi, `/api/auth/me` 200 (tables de la 042
+lues), classement day et Expert 200, pages et assets 2.2 en 200. La 047 jouée par Hamza dans
+la foulée (`leaderboard_cache.score` en `DECIMAL(8,1)`).
+
+**Incident** : « Le Compendium est indisponible pour le moment » pour tout le monde.
+`GET /api/user/compendium?id=…` → 500. Le `error_log` en base ne contenait que de
+l'anti-triche (l'exception PDO n'y passe pas) ; trouvé en rejouant une à une les requêtes
+de `compendium.php` contre la prod : `ORDER BY ut.unlocked_at, ut.id` → **`user_titles.id`
+n'existe pas en prod** (clé primaire composite `(user_id, title_id)`, comme
+`badges_unlocked` avant la 025). Deuxième fois dans la journée qu'une colonne classée
+« cosmétique, jamais lue » par la 025 devient fonctionnelle (la 044 ce matin, avec
+`titles.description_*`).
+
+**Correction — migration `048_reconcile_prod_id_columns.sql`** : les quatre colonnes de
+`bdd_mysql.sql` encore absentes en prod, d'un coup — `user_titles.id` (celle qui casse),
+`user_stats.id`, `game_sessions.created_at`, `social_link_ranks.name_jp`. Même technique que
+la 025 pour les `id` : `AUTO_INCREMENT` ajouté en `UNIQUE KEY`, la clé primaire composite
+reste ; les lignes existantes sont numérotées. Validée contre des tables recréées dans
+Docker avec le `SHOW CREATE TABLE` de la prod (passe, rejeu no-op), no-op sur la
+référence, puis jouée en prod et enregistrée : Compendium en 200 avec `user, badges,
+titles, wallpapers, friends, challenges, feats` pour deux joueurs testés.
+
+**Depuis la 048, la prod a exactement les colonnes de la référence** (diff
+`information_schema` vide hors vues `v_friends`/`v_global_stats`, jamais lues par le code).
+Nouveau piège dans CLAUDE.md §7 : plus d'exception « cosmétique » ; `npm run
+schema:check-prod` sur le serveur avant chaque release, et toute migration qui INSERT est
+rejouée contre le schéma prod recréé, pas seulement contre `bdd_mysql.sql`.
+
+### Ce que l'incident dit de la chaîne de release
+
+- La CI ne peut pas voir ce bug : elle importe `bdd_mysql.sql`, jamais le schéma réel de
+  la prod. Un code juste contre la référence était faux contre la prod pendant trente
+  minutes. Le détecteur `scripts/check_prod_schema.php` existait depuis juillet et aurait
+  listé `user_titles.id` — il n'a pas été lancé, parce que la 025 avait décidé que ces
+  colonnes ne comptaient pas.
+- `error_log` (table) n'attrape pas les exceptions PDO des endpoints : on l'a appris en
+  cherchant l'erreur. La méthode qui a marché — extraire les requêtes du fichier et les
+  rejouer une à une en lecture seule — mérite un script si ça se reproduit.
+- L'auto-déploiement est à re-brancher dans hPanel (Git → dépôt `CodeByHaamza/personadle`),
+  sinon chaque `main` demande un pull manuel. Le cron horaire `api/cron/leaderboard.php`
+  est à vérifier au même endroit : le cache était vide avant la release.
+
 ## 2026-09-18 — Release 2.2 : la 044 refusée par la prod, `titles` n'avait jamais eu ses colonnes de description
 
 En jouant les migrations 040→046 sur Hostinger avant `develop → main` (procédure
