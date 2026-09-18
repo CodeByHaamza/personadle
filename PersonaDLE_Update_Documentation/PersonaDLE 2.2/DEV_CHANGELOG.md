@@ -13,6 +13,24 @@
 
 ---
 
+## 2026-09-18 — L'annonce Discord du daily pingue le rôle opt-in « 🔔 Daily » ; le quiz d'Arcane vit dans le bot, pas dans le site
+
+`api/cron/discord-daily.php` : mention optionnelle pilotée par `DISCORD_DAILY_MENTION_ROLE`
+(`config.php`) — `content` = `<@&id>`, `allowed_mentions.roles` restreint à ce seul rôle, id
+nettoyé (`\D` retirés). Constante absente ou vide → aucun ping, comme avant. **Jamais le rôle
+Membres** : un ping quotidien sur un rendez-vous de routine fait couper le salon ; le rôle
+« 🔔 Daily » est opt-in dans `🎭┃roles`. Renseigné dans `config.example.php` avec l'id du rôle.
+
+**Décision d'organisation** (le même soir) : le test de personnalité `/velvetroom`, écrit en
+PHP dans ce dépôt (`api/discord/interactions.php` — HTTP Interactions signées Ed25519, jamais
+commité), **n'entre pas dans le site**. Il a été porté dans le bot Python
+(`personadle-discord/bot/velvetroom.py` + `velvetroom_ui.py`), qui tourne désormais 24 h/24
+en Docker sur le serveur maison. Pourquoi : un seul endroit pour toute la logique Discord,
+aucun token de bot ni clé d'application sur l'hébergement du jeu, et des questions modifiables
+sans passer par une release du jeu. Le site ne garde que ce qui lui appartient : le daily
+(il lit la cible du jour) et son webhook. Les constantes `DISCORD_APP_ID/PUBLIC_KEY/BOT_TOKEN/
+GUILD_ID` ajoutées à `config.example.php` pour cette version PHP ont été retirées.
+
 ## 2026-09-18 — Les titres parlent portugais, et chacun raconte sa condition dans la langue du joueur (migration 049)
 
 En triant les 288 « valeurs identiques à l'anglais » de `i18n:check-untranslated` (quasi
