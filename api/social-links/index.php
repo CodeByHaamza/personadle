@@ -161,15 +161,18 @@ if ($method === 'GET') {
     $link = $stmt->fetch();
     if (!$link) jsonError('Social Link not found or access denied', 404);
 
-    // Interactions du jour (Paris)
-    $today = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+    // Interactions du jour (Paris). Bornes UTC calculées en PHP : CONVERT_TZ vers
+    // un fuseau nommé renvoie NULL quand les tables de fuseaux du serveur SQL ne
+    // sont pas peuplées — cette liste revenait alors systématiquement vide, et la
+    // jauge affichait « rien fait aujourd'hui » quoi que le joueur ait fait.
+    [$dayStart, $dayEnd] = personadle_paris_day_bounds_utc();
     $stmt2 = $pdo->prepare("
         SELECT action_type, initiator_id, is_mutual
         FROM social_link_interactions
         WHERE social_link_id = ?
-          AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
+          AND created_at >= ? AND created_at < ?
     ");
-    $stmt2->execute([$linkId, $today]);
+    $stmt2->execute([$linkId, $dayStart, $dayEnd]);
     $todayInteractions = $stmt2->fetchAll();
 
     jsonSuccess([

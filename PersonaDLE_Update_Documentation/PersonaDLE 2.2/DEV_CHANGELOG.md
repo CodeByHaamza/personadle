@@ -2031,3 +2031,128 @@ si la variante Expert diverge structurellement, elle cesse de suivre les
   purement front, sans rien à faire côté API. À reprendre.
 - Aucun test E2E : les tests ci-dessus sont en jsdom, donc le rendu réel des
   dégradés et du liseré n'est vérifié qu'à l'œil.
+
+## 2026-09-18 — Audit des conditions de déblocage : 3 bugs serveur, dont un exploitable
+
+Audit de bout en bout des **92 lignes** du catalogue (64 badges, 7 wallpapers, 21 titres)
+et des 64 `check()` client. Chaque condition structurée a été jouée contre une vraie
+MariaDB 10.11, à la frontière exacte : compte à `seuil - 1` → doit refuser, compte à
+`seuil` → doit accorder.
+
+**Résultat : les 42 conditions structurées sont correctes.** Les 50 autres lignes sont
+`manual`/`joker_profile`, c'est-à-dire **pas vérifiées côté serveur du tout** — ce n'est
+pas un bug mais c'est un fait qui ne se lisait nulle part. Les bugs trouvés sont ailleurs :
+dans l'infrastructure de vérification elle-même.
+
+### Bug 1 — `CONVERT_TZ` rendait la garde anti-spam Social Link totalement inopérante
+
+**Avant.** Les 4 requêtes « interactions d'aujourd'hui » filtraient avec
+`DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = :jour`. Vers un fuseau **nommé**,
+`CONVERT_TZ` exige les tables de fuseaux du serveur SQL (`mysql.time_zone_name`), qui ne
+sont pas peuplées par défaut et sont typiquement absentes d'un hébergement mutualisé — le
+dépôt le documentait **déjà** dans `api/admin/activity.php`, qui contourne en regroupant
+côté PHP. Les requêtes Social Link, elles, étaient restées dessus.
+
+Sans ces tables, `CONVERT_TZ` ne lève rien : il renvoie `NULL`. `DATE(NULL) = '2026-09-18'`
+vaut `NULL`, donc faux, donc **la requête ne trouve jamais rien**. Mesuré sur MariaDB 10.11
+sans tables de fuseaux :
+
+- garde « 1 action par jour » morte → **180 appels de `share_streak` d'affilée le même jour
+  acceptés**, 2700 XP, rang 10 atteint d'un coup ;
+- donc le wallpaper `dark_shopping_district` (rang ≥ 5) **et** le titre
+  `aigis_metis_same_soul` (rang ≥ 10) accordés par simple répétition ;
+- bonus mutuel mort → deux amis actifs le même jour payés au tarif solo (15 au lieu de 30),
+  la jauge progressant deux fois moins vite que ce que le produit annonce.
+
+**Après.** Nouvelle fonction `personadle_paris_day_bounds_utc()` (`api/lib/social_link.php`)
+qui calcule les bornes UTC de la journée Paris **en PHP**, DST compris, et les 4 requêtes
+comparent désormais la colonne nue : `created_at >= ? AND created_at < ?`. Vérifié : le
+même scénario est bloqué au 1ᵉʳ appel, les deux déblocages repassent à « refusé ».
+Bénéfice secondaire — la comparaison ne porte plus sur une expression, donc un index sur
+`created_at` redevient utilisable.
+
+**Pourquoi rien ne l'avait vu.** Les deux tests de `DatabaseIntegrationTest` qui couvrent
+la garde et le bonus mutuel sont bons ; c'est l'**environnement** qui mentait. L'image
+Docker MySQL de la CI embarque les tables de fuseaux — CI verte sur un chemin que la prod
+n'emprunte pas. Cas exact de CLAUDE.md §13 (« CI verte insuffisante si elle ne peut pas
+exécuter le scénario concerné »). Le nouveau `tests/php/ParisDayBoundsTest.php` attaque
+donc par un garde-fou **statique** (plus aucun `CONVERT_TZ` exécuté dans `api/`, analyse du
+code hors commentaires) plus 7 tests de calcul de bornes, dont les deux journées de
+bascule DST (23 h et 25 h). Aucun ne dépend du serveur SQL.
+
+⚠️ **À vérifier en prod** : si les tables de fuseaux SONT peuplées chez Hostinger, la garde
+fonctionnait et il n'y a rien à rattraper. Sinon, des rangs Social Link ont pu être gonflés,
+et avec eux ces deux déblocages. Commande de contrôle :
+`SELECT COUNT(*) FROM mysql.time_zone_name;` — 0 = le bug était actif.
+
+### Bug 2 — badges et titres étaient fail-**open** sur un `condition_type` inconnu
+
+**Avant.** `api/badges/index.php` et `api/titles/index.php` appelaient
+`personadle_verify_condition()` en direct. Cette fonction se termine par
+`default: return true` — un safe-fallback voulu, pour ne pas rendre inaccessible un badge
+ajouté demain avec un type pas encore implémenté. Mais sur le chemin d'un `POST /unlock`,
+il fait l'inverse de ce qu'on veut : **une faute de frappe dans une migration ouvrait le
+badge à n'importe quel compte authentifié**. `api/wallpapers/index.php` fermait déjà ce
+trou de son côté (revue PR #14) — donc trois endpoints, deux comportements.
+
+**Après.** La garde est remontée dans `personadle_condition_allows_unlock()`
+(`api/lib/condition_check.php`) et les **trois** endpoints passent par elle. Un type absent,
+vide, mal orthographié ou retiré du vocabulaire refuse l'unlock. `personadle_verify_condition()`
+garde son fallback permissif là où il a du sens (affichage du catalogue).
+
+### Bug 3 — le vocabulaire avait dérivé, et le test censé le détecter comptait au lieu de comparer
+
+**Avant.** `personadle_known_condition_types()` listait 22 types alors que le `switch` en
+gère 24 : **`titles_count` et `played_on_date` manquaient**. Inoffensif tant que seuls les
+wallpapers utilisaient cette liste (aucun n'emploie ces deux types), mais c'était une mine :
+en étendant le fail-closed aux titres (bug 2), les titres **`sees`** (`titles_count`) et
+**`tatsuya_dont_burn_out`** (`played_on_date`) seraient devenus indébloquables pour toujours
+— un 403 « Condition not met » sur un joueur qui remplit pourtant la condition.
+
+Un test existait pourtant, `ConditionCheckTest::testKnownConditionTypesMatchesSwitchCases`,
+et son commentaire décrivait exactement le bon invariant. Son implémentation faisait
+`assertCount(22, $known)`. **Un compte ne dit rien de l'ensemble** : la liste était bien à
+22 entrées, avec les deux mauvaises manquantes. Le test était vert et épinglait le mauvais
+nombre — c'est lui qui rendait la dérive invisible.
+
+**Après.** Les deux types ajoutés (corrigé **avant** d'appliquer le fail-closed, sinon les
+deux titres cassaient). Le compte magique est remplacé par une comparaison **ensembliste**
+entre les `case` du switch et la liste — dans `tests/php/ConditionVocabularyTest.php`, sans
+base de données, donc elle tourne même sans `make up`. Les 6 tests de ce fichier échouent
+tous sur le code d'avant.
+
+### Ce que l'audit a AUSSI vérifié, sans rien trouver
+
+- **Les 64 `check()` client** : chaque champ de profil lu par un `check()` a bien au moins
+  un écrivain dans le dépôt. Trois candidats (`velvet_headache`, `chinese_new_year`,
+  `github_contributor`) se sont révélés être des **faux positifs de l'outil d'audit** — leurs
+  flags sont écrits par le helper `check("flag", cond)` de `modeAllOutAttack.js` et par un
+  `onclick` dans `index.html`, deux formes que la première version du script ne couvrait pas.
+- **Tous les imports dynamiques du dépôt** : les 4 appels `import(…).then(m => m.x())`
+  ciblent des symboles réellement exportés (`data_mining` était le seul cassé, corrigé plus haut).
+- **Parité des deux catalogues de badges** : client (64 entrées) ↔ SQL (64 lignes) — mêmes
+  slugs, mêmes drapeaux « secret », mêmes seuils chiffrés.
+
+### Trous de test comblés
+
+| Trou | Comblé par |
+|---|---|
+| Aucun balayage de seuil sur les 5 types Expert | `NUMERIC_THRESHOLD_TYPES` étendu + 6 helpers `game_sessions` |
+| Aucun mapping exhaustif par titre (badges/wallpapers en avaient un) | `testEveryTitleHasExpectedConditionColumns` — 21 titres |
+| Rien ne comparait `badgesData.js` et la table `badges` | `tests/badgesCatalogParity.test.js` (7 tests, sans base) |
+| Le vocabulaire pouvait dériver en silence | `tests/php/ConditionVocabularyTest.php` (6 tests, sans base) |
+| `CONVERT_TZ` invisible en CI | `tests/php/ParisDayBoundsTest.php` (8 tests, sans base) |
+
+Total : 338 tests PHPUnit (contre 322) et 1383 Vitest (contre 1376), tous verts — les
+PHPUnit joués contre une MariaDB **sans** tables de fuseaux, c'est-à-dire dans la
+configuration de la prod et non dans celle de la CI.
+
+### Angle mort assumé, non corrigé ici
+
+**47 badges sur 64** et 1 titre sont `condition_type = 'manual'` : le serveur les accorde
+sur simple déclaration du client. N'importe quel compte authentifié peut appeler
+`POST /api/badges/unlock` avec ces slugs et les obtenir. C'est cohérent avec un fan-game
+sans enjeu compétitif, et plusieurs de ces conditions ne sont pas re-vérifiables depuis les
+tables de stats (flags narratifs, codes événement, découvertes de personnages) — mais
+certaines le seraient (`data_mining` = 5 profils visités, `leblanc_meeting` = 3 amis
+connectés le même jour). À trancher comme décision produit, pas à corriger au détour d'un lot.

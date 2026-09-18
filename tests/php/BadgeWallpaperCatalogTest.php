@@ -205,6 +205,104 @@ final class BadgeWallpaperCatalogTest extends TestCase
 
     // ── 2. Flux bout-en-bout : même SELECT que les 3 endpoints réels ─────────────
 
+    // ── 1bis. Catalogue des TITRES, ligne par ligne ──────────────────────────
+    //
+    // Les badges et les wallpapers avaient leur mapping exhaustif depuis la
+    // migration 021 ; les titres, non — ils n'étaient couverts que par le
+    // balayage de seuil générique, qui vérifie la LOGIQUE mais pas la DONNÉE.
+    // Une valeur changée par erreur dans bdd_mysql.sql (un 25 devenu 250) y
+    // passait donc inaperçue : le balayage l'aurait testée à 249/250 et trouvée
+    // « correcte », puisqu'il lit le seuil dans la base au lieu de l'attendre.
+
+    /** @return array<string, array{0: ?string, 1: ?string, 2: ?int}> */
+    private static function expectedTitleConditions(): array
+    {
+        return [
+            'velvet_room_thou_art_i'      => ['badges_count', null, 20],
+            'joker_looking_cool'          => ['joker_profile', null, 0],
+            'makoto_yuki_memento_mori'    => ['unique_days', null, 100],
+            'aigis_i_am_not_afraid'       => ['mode_wins', 'classic', 50],
+            'akechi_pancakes'             => ['weekly_clean_modes', null, 3],
+            'yosuke_ride_the_wind'        => ['friends_count', null, 5],
+            'adachi_boring_isnt_it'       => ['giveups_total', null, 50],
+            'marie_i_remembered'          => ['badges_count', null, 15],
+            // all_modes_won ignore condition_value : le 1 est décoratif, il ne
+            // doit surtout pas être lu comme un seuil.
+            'yu_reach_out_to_the_truth'   => ['all_modes_won', null, 1],
+            'investigation_team'          => ['mode_wins', 'personae', 8],
+            'junes'                       => ['mode_wins', 'music', 15],
+            'naoya_first_awakening'       => ['classic_p1_wins', null, 15],
+            'maya_always_be_positive'     => ['emoji_p2_wins', null, 10],
+            'shadows_converge'            => ['expert_wins_total', null, 50],
+            'sees'                        => ['titles_count', null, 8],
+            'aigis_metis_same_soul'       => ['social_link_min_rank', null, 10],
+            'kotone_not_a_princess'       => ['perfect_wins', null, 25],
+            'naoto_case_never_closed'     => ['mode_wins', 'silhouette', 25],
+            'shinjiro_no_pity'            => ['mode_wins_under_attempts', 'classic', 25],
+            'take_your_heart'             => ['mode_wins', 'alloutattack', 40],
+            // condition_mode porte la date 'MM-JJ' (24 juin) ; condition_value est
+            // un INT, il ne peut pas la porter — d'où le null.
+            'tatsuya_dont_burn_out'       => ['played_on_date', '06-24', null],
+        ];
+    }
+
+    public function testEveryTitleHasExpectedConditionColumns(): void
+    {
+        $expected = self::expectedTitleConditions();
+
+        $rows = self::$pdo->query(
+            'SELECT slug, condition_type, condition_mode, condition_value FROM titles'
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        $this->assertCount(
+            count($expected),
+            $rows,
+            'La table titles doit contenir exactement ' . count($expected)
+            . ' lignes (seed bdd_mysql.sql) — un titre ajouté/retiré demande de mettre '
+            . 'à jour expectedTitleConditions()'
+        );
+
+        $bySlug = [];
+        foreach ($rows as $r) {
+            $bySlug[$r['slug']] = [
+                $r['condition_type'],
+                $r['condition_mode'],
+                $r['condition_value'] === null ? null : (int) $r['condition_value'],
+            ];
+        }
+
+        foreach ($expected as $slug => $expectedRow) {
+            $this->assertArrayHasKey($slug, $bySlug, "Titre '$slug' absent de la table titles");
+            $this->assertSame(
+                $expectedRow,
+                $bySlug[$slug],
+                "Titre '$slug' : condition_type/mode/value diffèrent de la référence du test"
+            );
+        }
+
+        $this->assertSame(
+            [],
+            array_values(array_diff(array_keys($bySlug), array_keys($expected))),
+            'Titre(s) présent(s) en base mais absent(s) de la référence du test'
+        );
+    }
+
+    public function testEveryTitleConditionTypeIsInTheVocabulary(): void
+    {
+        // Sans ça, le fail-closed des endpoints d'unlock (revue 2026-09-18) rendrait
+        // le titre indébloquable en silence — c'est exactement ce qui pendait au nez
+        // de `sees` et `tatsuya_dont_burn_out`.
+        $known = personadle_known_condition_types();
+
+        foreach (self::expectedTitleConditions() as $slug => [$type, , ]) {
+            $this->assertContains(
+                $type,
+                $known,
+                "Titre '$slug' : condition_type '$type' hors du vocabulaire reconnu"
+            );
+        }
+    }
+
     public function testBadgeEndpointSelectColumnsMatchConditionChecker(): void
     {
         $uid = $this->makeUser();
@@ -311,7 +409,17 @@ final class BadgeWallpaperCatalogTest extends TestCase
     private const NUMERIC_THRESHOLD_TYPES = [
         'wins_total', 'mode_wins', 'mode_games', 'games_total', 'streak_record',
         'perfect_wins', 'unique_days', 'giveups_total', 'friends_count', 'badges_count',
-        'social_link_min_rank', 'weekly_clean_modes', 'classic_p1_wins', 'emoji_p2_wins',
+        'titles_count', 'social_link_min_rank', 'weekly_clean_modes',
+        'classic_p1_wins', 'emoji_p2_wins',
+        // Types Expert — ajoutés après coup. Ils étaient testés unitairement
+        // (ExpertUnlocksTest pour les 3 portes, ConditionCheckTest pour les 2
+        // agrégats) mais AUCUN ne passait par la frontière value-1 / value sur la
+        // ligne de catalogue qui l'utilise réellement. Trois lignes en dépendent :
+        // le badge `denial_of_self` (expert_modes_mastered), le badge
+        // `song_of_orpheus` et le titre `shadows_converge` (expert_wins_total),
+        // et le titre en `mode_wins_under_attempts`.
+        'expert_wins_total', 'expert_modes_mastered',
+        'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
     ];
 
     /**
@@ -458,6 +566,27 @@ final class BadgeWallpaperCatalogTest extends TestCase
             case 'weekly_clean_modes':
                 $this->setWeeklyCleanModes($userId, $value);
                 break;
+            case 'titles_count':
+                $this->setTitlesCount($userId, $value);
+                break;
+            case 'expert_wins_total':
+                $this->setExpertWins($userId, 'classic', $value);
+                break;
+            case 'expert_modes_mastered':
+                // $value victoires Expert dans CHACUN des 6 modes. À $value-1 la
+                // condition doit échouer : c'est bien le seuil par mode qui est
+                // testé, pas le nombre de modes.
+                $this->setExpertWinsEveryMode($userId, $value);
+                break;
+            case 'mode_wins_under_attempts':
+                $this->setFastWins($userId, (string) $mode, $value);
+                break;
+            case 'mode_wins_single_day':
+                $this->setSingleDayWins($userId, (string) $mode, $value);
+                break;
+            case 'mode_consecutive_perfects':
+                $this->setConsecutivePerfects($userId, (string) $mode, $value);
+                break;
             default:
                 throw new InvalidArgumentException("Type non géré par ce test: $type");
         }
@@ -524,6 +653,110 @@ final class BadgeWallpaperCatalogTest extends TestCase
         $stmt = self::$pdo->prepare('INSERT INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)');
         for ($i = 0; $i < $count; $i++) {
             $stmt->execute([$userId, "phpunit_synthetic_badge_{$i}"]);
+        }
+    }
+
+    /**
+     * `user_titles.title_id` PORTE une FK vers `titles(id)` — contrairement à
+     * `badges_unlocked.badge_id`, qui est une colonne libre. Des ids synthétiques
+     * y sont donc rejetés en 1452 ; il faut de vrais titres du catalogue.
+     */
+    private function setTitlesCount(int $userId, int $count): void
+    {
+        self::$pdo->prepare('DELETE FROM user_titles WHERE user_id = ?')->execute([$userId]);
+        $ids = self::$pdo->query('SELECT id FROM titles ORDER BY id')->fetchAll(PDO::FETCH_COLUMN);
+        $this->assertGreaterThanOrEqual(
+            $count,
+            count($ids),
+            "titles_count=$count demandé mais seulement " . count($ids) . ' titres au catalogue'
+        );
+        $stmt = self::$pdo->prepare('INSERT INTO user_titles (user_id, title_id) VALUES (?, ?)');
+        for ($i = 0; $i < $count; $i++) {
+            $stmt->execute([$userId, (int) $ids[$i]]);
+        }
+    }
+
+    // ── Helpers Expert ────────────────────────────────────────────────────────
+    // Tous écrivent dans `game_sessions` avec is_expert = 1 (ou 0 pour les portes,
+    // qui mesurent la maîtrise du mode NORMAL). `user_stats` n'aiderait pas : elle
+    // n'a qu'une ligne par (user, mode) et ne distingue ni les essais, ni la date,
+    // ni Expert vs normal — les trois dimensions dont ces conditions ont besoin.
+    // Chaque partie a son propre client_session_id : la clé est UNIQUE, et un NULL
+    // répété passerait en MySQL mais rendrait les lignes indistinguables au débogage.
+
+    private function insertSession(
+        int $userId,
+        string $mode,
+        string $result,
+        int $attempts,
+        int $isExpert,
+        int $daysAgo = 0
+    ): void {
+        self::$pdo->prepare(
+            'INSERT INTO game_sessions
+                 (user_id, mode, is_expert, client_session_id, played_date, target_name, result, attempts)
+             VALUES (?, ?, ?, ?, DATE_SUB(CURDATE(), INTERVAL ? DAY), "x", ?, ?)'
+        )->execute([$userId, $mode, $isExpert, self::uuid(), $daysAgo, $result, $attempts]);
+    }
+
+    private static function uuid(): string
+    {
+        $b = random_bytes(16);
+        $b[6] = chr((ord($b[6]) & 0x0f) | 0x40);
+        $b[8] = chr((ord($b[8]) & 0x3f) | 0x80);
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($b), 4));
+    }
+
+    private function clearSessions(int $userId): void
+    {
+        self::$pdo->prepare('DELETE FROM game_sessions WHERE user_id = ?')->execute([$userId]);
+    }
+
+    /** $wins victoires EN EXPERT dans un mode (expert_wins_total agrège tous modes). */
+    private function setExpertWins(int $userId, string $mode, int $wins): void
+    {
+        $this->clearSessions($userId);
+        for ($i = 0; $i < $wins; $i++) {
+            $this->insertSession($userId, $mode, 'win', 2, 1, $i);
+        }
+    }
+
+    /** $winsPerMode victoires EN EXPERT dans CHACUN des 6 modes. */
+    private function setExpertWinsEveryMode(int $userId, int $winsPerMode): void
+    {
+        $this->clearSessions($userId);
+        $day = 0;
+        foreach (PERSONADLE_MODES as $mode) {
+            for ($i = 0; $i < $winsPerMode; $i++) {
+                $this->insertSession($userId, $mode, 'win', 2, 1, $day++);
+            }
+        }
+    }
+
+    /** $count victoires en <= 4 essais dans le mode NORMAL (porte Expert Classique/Silhouette). */
+    private function setFastWins(int $userId, string $mode, int $count): void
+    {
+        $this->clearSessions($userId);
+        for ($i = 0; $i < $count; $i++) {
+            $this->insertSession($userId, $mode, 'win', PERSONADLE_FAST_WIN_MAX_ATTEMPTS, 0, $i);
+        }
+    }
+
+    /** $count victoires le MÊME jour dans le mode normal (porte Expert Émoji). */
+    private function setSingleDayWins(int $userId, string $mode, int $count): void
+    {
+        $this->clearSessions($userId);
+        for ($i = 0; $i < $count; $i++) {
+            $this->insertSession($userId, $mode, 'win', 3, 0, 5); // toutes le même jour
+        }
+    }
+
+    /** Série de $count victoires parfaites consécutives (porte Expert AOA/Personae/Music). */
+    private function setConsecutivePerfects(int $userId, string $mode, int $count): void
+    {
+        $this->clearSessions($userId);
+        for ($i = 0; $i < $count; $i++) {
+            $this->insertSession($userId, $mode, 'win', 1, 0, $count - $i);
         }
     }
 
