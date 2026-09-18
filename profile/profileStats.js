@@ -1,4 +1,15 @@
-import { parisDateKey, modeLabel } from "../js/gameCore.js";
+import { parisDateKey, shiftDateKey, modeLabel } from "../js/gameCore.js";
+
+/**
+ * Jour Paris du dernier `lastPlayed` enregistré, ou null s'il est absent ou
+ * illisible. Une valeur corrompue faisait lever Intl (RangeError) et la partie
+ * n'était plus comptée du tout — mieux vaut la traiter comme une première partie.
+ */
+function _lastPlayedKey(raw) {
+  if (!raw) return null;
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? null : parisDateKey(d);
+}
 
 export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   const savedProfile = localStorage.getItem("personaUserProfile");
@@ -30,11 +41,14 @@ export function updateProfileStats({ result, mode, timeSpent = 0 }) {
   // Gestion du streak quotidien — frontière de journée en heure de Paris
   // (jamais UTC : tout le jeu est calé sur Europe/Paris via parisDateKey()).
   const today = parisDateKey();
-  const lastPlayed = stats.lastPlayed ? parisDateKey(new Date(stats.lastPlayed)) : null;
+  const lastPlayed = _lastPlayedKey(stats.lastPlayed);
   stats.lastPlayed = new Date().toISOString();
 
   if (!lastPlayed || lastPlayed !== today) {
-    const yDate = parisDateKey(new Date(Date.now() - 86_400_000));
+    // « Hier » en jours CALENDAIRES Paris — pas `now − 24 h`, qui retombe deux
+    // jours en arrière entre 00:00 et 00:59 le lendemain du passage à l'heure
+    // d'été (journée de 23 h). Voir shiftDateKey() dans gameCore.js.
+    const yDate = shiftDateKey(today, -1);
 
     if (lastPlayed === yDate) {
       stats.streak = (stats.streak || 0) + 1;

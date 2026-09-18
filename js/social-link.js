@@ -16,6 +16,8 @@
  *     → Halo doré permanent + animation burst/typewriter (rang 10)
  */
 
+import { parisDateKey } from "./gameCore.js";
+
 /** Cache linkId par friendId pour la session. */
 const _linkCache = new Map();
 
@@ -638,10 +640,18 @@ window._showSocialLinkRankUp = showSocialLinkRankUp;
  * @param {HTMLElement} el      — élément dans lequel injecter la flamme
  */
 export function addFlameIfPlayedToday(friendEntry, el) {
-  const lastInteraction = (friendEntry.social_link_last_interaction ?? "").slice(0, 10);
-  if (!lastInteraction) return;
-  const today = new Date().toISOString().slice(0, 10);
-  if (lastInteraction === today) {
+  const raw = friendEntry.social_link_last_interaction;
+  if (!raw) return;
+  // `last_interaction_at` est un DATETIME MySQL en UTC ("YYYY-MM-DD HH:MM:SS").
+  // La journée est celle de PARIS, comme le « déjà fait aujourd'hui » du serveur
+  // (api/lib/social_link_interaction.php, CONVERT_TZ … Europe/Paris) — pas la
+  // date UTC : entre minuit et 2 h à Paris, une interaction faite ce soir tombait
+  // encore « hier » en UTC et la flamme manquait, alors que le serveur refusait
+  // déjà de la refaire « aujourd'hui ».
+  const iso = typeof raw === "string" && !raw.includes("T") ? raw.replace(" ", "T") + "Z" : raw;
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return;
+  if (parisDateKey(when) === parisDateKey()) {
     el.insertAdjacentHTML(
       "beforeend",
       '<span class="fr-flame" title="Played together today!">🔥</span>'
