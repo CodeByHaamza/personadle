@@ -21,7 +21,7 @@
 /* ── Migration : anciens codes larges → codes précis ───────────
    Quand l'utilisateur a sauvegardé "P3" dans l'ancien format,
    on l'étend automatiquement en ["P3", "P3FES", "P3P"]. */
-import { registerActiveFilters } from "./gameCore.js";
+import { registerActiveFilters, isFilterKeyHeldByChallenge } from "./gameCore.js";
 
 const LEGACY_EXPAND = {
   P2: ["P2IS", "P2EP"],
@@ -190,6 +190,13 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     activeOpus = [...allOpus];
     _markOpusSeeded(allOpus, storageKey);
   } else if (migrated.length === 0) {
+    activeOpus = migrated;
+  } else if (isFilterKeyHeldByChallenge(storageKey)) {
+    // La liste est celle qu'un défi en cours a installée, pas celle du joueur :
+    // on la joue telle quelle, sans y seeder un opus récent ni la réécrire.
+    // Sinon releaseActiveChallenge() croyait à un choix du joueur et ne lui
+    // rendait jamais ses filtres (première ouverture du mode sur l'appareil).
+    // Le seed aura lieu sur SES filtres, une fois le défi terminé.
     activeOpus = migrated;
   } else {
     activeOpus = _seedNewOpus(migrated, allOpus, storageKey);
