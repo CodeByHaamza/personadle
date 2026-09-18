@@ -979,6 +979,8 @@
     "already_active": "Schließe zuerst deine aktuelle Herausforderung ab.",
     "active_challenge": "Herausforderung",
     "notif_challenges_you": "fordert dich heraus!",
+    "notif_challenges_you_expert": "fordert dich im Experten-Modus heraus!",
+    "notif_expert_tag": "⚡ EXPERTE",
     "notif_beat": "Schlagen",
     "notif_attempts": "Versuch(e)",
     "unknown_mode": "Der Modus dieser Herausforderung ist nicht verfügbar.",

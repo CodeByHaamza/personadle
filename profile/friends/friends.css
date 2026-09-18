@@ -1073,6 +1073,62 @@
   border-color: rgba(120, 120, 120, 0.2);
 }
 
+/* ── Défi Expert ───────────────────────────────────────────────────────────
+   Même palette violet/magenta que la pop-up d'arrivée (css/challenge-notif.css)
+   et que la carte d'envoi (.challenge-card--expert, css/global.css) : les trois
+   écrans d'un même défi Expert doivent se reconnaître entre eux.
+
+   Surcharges de la carte de base, pas un second composant — la structure reste
+   commune aux trois statuts (en cours / gagné / expiré). */
+.fr-challenge-card--expert {
+  border-color: rgba(178, 106, 255, 0.35);
+  background: rgba(178, 106, 255, 0.07);
+}
+
+/* La pastille de mode reprend l'accent Expert, y compris sur une carte gagnée
+   ou expirée : ces deux-là ont leurs propres surcharges de couleur définies plus
+   haut, il faut donc une sélectivité supérieure pour repasser devant. */
+.fr-challenge-card--expert .fr-challenge-mode-badge,
+.fr-challenge-card--won.fr-challenge-card--expert .fr-challenge-mode-badge,
+.fr-challenge-card--lost.fr-challenge-card--expert .fr-challenge-mode-badge {
+  color: #8b46d8;
+  background: rgba(178, 106, 255, 0.13);
+  border-color: rgba(178, 106, 255, 0.3);
+}
+
+/* Le marqueur explicite. La couleur seule ne se lit ni en daltonisme, ni quand
+   on n'a pas la variante normale sous les yeux pour comparer. */
+.fr-challenge-expert-pill {
+  /* `.fr-challenge-header` est en space-between : sans ce margin-right auto la
+     pastille se placerait au centre, entre le mode et la date, au lieu de rester
+     collée au mode qu'elle qualifie. */
+  margin-right: auto;
+  /* Les cartes gagnée/expirée sont en flex COLUMN : sans align-self la pastille
+     s'étirerait sur toute la largeur. */
+  align-self: flex-start;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(90deg, #8b46d8, #d63384);
+  border-radius: 4px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* Dark mode : le violet foncé de la pastille de mode passe sous le seuil de
+   lisibilité sur fond #1a1a1a — on remonte en clair. Le dégradé de la pastille
+   Expert, lui, porte déjà du texte blanc et ne bouge pas. */
+.darkmode .fr-challenge-card--expert .fr-challenge-mode-badge,
+.darkmode .fr-challenge-card--won.fr-challenge-card--expert .fr-challenge-mode-badge,
+.darkmode .fr-challenge-card--lost.fr-challenge-card--expert .fr-challenge-mode-badge {
+  color: #d9a4ff;
+  background: rgba(178, 106, 255, 0.16);
+  border-color: rgba(178, 106, 255, 0.38);
+}
+
 .fr-challenge-date {
   font-size: 0.68rem;
   color: var(--fr-text-muted);

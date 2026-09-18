@@ -979,6 +979,8 @@
     "already_active": "Finisci prima la tua sfida in corso.",
     "active_challenge": "Sfida",
     "notif_challenges_you": "ti sfida!",
+    "notif_challenges_you_expert": "ti sfida in Esperto!",
+    "notif_expert_tag": "⚡ ESPERTO",
     "notif_beat": "Battere",
     "notif_attempts": "tentativo/i",
     "unknown_mode": "La modalità di questa sfida non è disponibile.",
