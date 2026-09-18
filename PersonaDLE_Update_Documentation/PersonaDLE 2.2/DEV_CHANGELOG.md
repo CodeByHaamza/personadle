@@ -30,9 +30,14 @@ d'écran Persona 4 Revival pour la carte de partage — **de base, pas débloqua
   la règle CLAUDE.md §4, et la liste blanche du serveur (`personadle_validate_avatar`,
   `[A-Za-z0-9_-]+\.(gif|png|jpe?g|webp)`) — un espace ou une parenthèse rend le portrait
   impossible à enregistrer sur le compte.
-- `profile/avatars_data.js` : chaque portrait dans le groupe du **jeu d'origine du
-  personnage** (les PQ des P3 en P3, etc. — même logique que `ken_amada_p4au.jpg` en P3) ;
-  JoJo Frost en SPECIAL. 175 → 204 entrées.
+- `profile/avatars_data.js` : les 26 portraits Q/Q2 dans un **nouveau groupe « Persona Q »**
+  (`key: "personaq"`, ordonné P3 → P4 → P5, placé entre P5X et Spécial ; libellé dans
+  `profile-page.js`, en-tête orange Golden Labyrinth dans `profile-page.css`) — retour
+  Hamza du 2026-09-18 : on cherche le style, pas le personnage. Naoto P4R en P4, Morgana
+  dancing en P5, JoJo Frost en SPECIAL. 175 → 204 entrées.
+- Deux portraits mal rangés depuis la 2.0, reclassés au passage (retour Hamza) :
+  `hui_marie_p4r_pfp.jpg` de P5X vers **P4** (Marie est un personnage de Persona 4),
+  `JOKER.webp` de P5 vers **P2** (c'est le Joker d'Innocent Sin).
 - `profile/Wallpaper/wallpaper_p4r.jpg` (1440×2160, 738 Ko) + entrée `p4_revival` dans
   `shareWallpapers.persona4` (`profile/share-card.js`, désormais exporté pour les tests) —
   et non dans `UNLOCKABLE_WALLPAPERS`.

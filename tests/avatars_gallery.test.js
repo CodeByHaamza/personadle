@@ -50,7 +50,7 @@ describe("galerie d'avatars (profile/avatars_data.js ↔ img/avatar/)", () => {
   });
 
   it("les groupes ont une clé connue du picker et un libellé de jeu", () => {
-    const known = ["persona1", "persona2", "persona3", "persona4", "persona5", "persona5x", "special"];
+    const known = ["persona1", "persona2", "persona3", "persona4", "persona5", "persona5x", "personaq", "special"];
     for (const g of AVATAR_GROUPS) {
       expect(known).toContain(g.key);
       expect(typeof g.game).toBe("string");
@@ -58,18 +58,43 @@ describe("galerie d'avatars (profile/avatars_data.js ↔ img/avatar/)", () => {
     }
   });
 
-  it("les 29 portraits du lot du 2026-09-17 sont bien là, dans le jeu d'origine du personnage", () => {
+  it("les 26 portraits Persona Q/Q2 sont regroupés dans le groupe « Persona Q », ordonnés P3 → P4 → P5", () => {
+    const pq = AVATAR_GROUPS.find((g) => g.key === "personaq");
+    expect(pq).toBeTruthy();
+    expect(pq.avatars).toEqual([
+      "makoto_yuki_pq2.jpg", "kotone_pq.jpg", "yukari_pq2.jpg", "junpei_pq.jpg", "akihiko_pq2.jpg",
+      "mitsuru_pq2.jpg", "aigis_pq2.jpg", "koromaru_pq2.jpg", "ken_amada_pq2.jpg", "shinjiro_pq2.jpg",
+      "yu_pq.jpg", "yosuke_pq.jpg", "chie_pq.jpg", "yukiko_pq.jpg", "kanji_pq.jpg", "rise_pq.jpg", "teddie_pq.jpg", "naoto_pq.jpg",
+      "joker_pq.jpg", "ryuji_pq.jpg", "ann_pq.jpg", "morgana_pq.jpg", "yusuke_pq.jpg", "makoto_nijima_pq.jpg", "haru_pq.jpg", "crow_pq2.jpg",
+    ]);
+    // Aucun portrait Q/Q2 ne traîne dans un autre groupe
+    for (const g of AVATAR_GROUPS) {
+      if (g.key === "personaq") continue;
+      expect(g.avatars.filter((n) => /_pq2?\.jpg$/.test(n)), g.key).toEqual([]);
+    }
+  });
+
+  it("les trois autres portraits du lot restent dans le jeu de leur personnage", () => {
     const byKey = Object.fromEntries(AVATAR_GROUPS.map((g) => [g.key, g.avatars]));
-    for (const n of ["makoto_yuki_pq2.jpg", "yukari_pq2.jpg", "junpei_pq.jpg", "akihiko_pq2.jpg", "mitsuru_pq2.jpg", "aigis_pq2.jpg", "koromaru_pq2.jpg", "ken_amada_pq2.jpg", "shinjiro_pq2.jpg", "kotone_pq.jpg"]) {
-      expect(byKey.persona3, n).toContain(n);
-    }
-    for (const n of ["yu_pq.jpg", "yosuke_pq.jpg", "chie_pq.jpg", "yukiko_pq.jpg", "kanji_pq.jpg", "rise_pq.jpg", "teddie_pq.jpg", "naoto_pq.jpg", "naoto_p4r.jpg"]) {
-      expect(byKey.persona4, n).toContain(n);
-    }
-    for (const n of ["joker_pq.jpg", "ryuji_pq.jpg", "ann_pq.jpg", "morgana_pq.jpg", "morgana_dancing.jpg", "yusuke_pq.jpg", "makoto_nijima_pq.jpg", "haru_pq.jpg", "crow_pq2.jpg"]) {
-      expect(byKey.persona5, n).toContain(n);
-    }
+    expect(byKey.persona4).toContain("naoto_p4r.jpg");
+    expect(byKey.persona5).toContain("morgana_dancing.jpg");
     expect(byKey.special).toContain("jojo_frost.jpg");
+  });
+
+  it("deux portraits mal rangés depuis la 2.0 sont dans le jeu de leur personnage (retour Hamza 2026-09-18)", () => {
+    const byKey = Object.fromEntries(AVATAR_GROUPS.map((g) => [g.key, g.avatars]));
+    // Marie est un personnage de Persona 4 (ici sa version P4 Revival), pas de P5X.
+    expect(byKey.persona4).toContain("hui_marie_p4r_pfp.jpg");
+    expect(byKey.persona5x).not.toContain("hui_marie_p4r_pfp.jpg");
+    // JOKER.webp est le Joker d'Innocent Sin (Persona 2), pas celui de Persona 5.
+    expect(byKey.persona2).toContain("JOKER.webp");
+    expect(byKey.persona5).not.toContain("JOKER.webp");
+  });
+
+  it("le groupe Persona Q vient après Persona 5X et avant Spécial", () => {
+    const keys = AVATAR_GROUPS.map((g) => g.key);
+    expect(keys.indexOf("personaq")).toBe(keys.indexOf("persona5x") + 1);
+    expect(keys.indexOf("special")).toBe(keys.indexOf("personaq") + 1);
   });
 });
 

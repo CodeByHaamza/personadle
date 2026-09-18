@@ -2634,6 +2634,7 @@ body.darkmode .share-btn--email:hover {
 .avatar-group--persona4 { --g: #d4a017; }
 .avatar-group--persona5 { --g: #e63946; }
 .avatar-group--persona5x { --g: #00a3b8; }
+.avatar-group--personaq { --g: #f97316; } /* Golden Labyrinth (profile/theme.js) */
 .avatar-group--special { --g: #f39c12; }
 .avatar-group-grid {
   display: grid;
