@@ -625,16 +625,28 @@ export async function initTitlesSection(profile, saveProfile, saveProfileToCloud
       for (const t of apiTitles) bySlug[t.slug] = t;
       serverSlugs = apiTitles.filter((t) => Number(t.is_unlocked) === 1).map((t) => t.slug);
 
-      _titlesData = _titlesData.map((t) => {
-        const api = bySlug[t.slug];
-        if (!api) return t;
+      // La liste de l'API est LA liste : un titre ajouté en base (044, 046…) doit
+      // apparaître sans qu'on pense à recopier TITLES_LOCAL — c'est exactement ce
+      // qui a été oublié pour les 8 titres de la 2.2, invisibles dans le menu
+      // jusqu'au 2026-09-18. TITLES_LOCAL ne sert plus qu'aux drapeaux que la
+      // base ne porte pas (is_hidden) et au repli sans réponse serveur.
+      const localBySlug = {};
+      for (const t of _titlesData) localBySlug[t.slug] = t;
+      _titlesData = apiTitles.map((api) => {
+        const local = localBySlug[api.slug] || {};
         return {
-          ...t,
-          id: api.id ?? t.id,
-          name: api.name || t.name,
+          ...local,
+          id: api.id ?? local.id ?? null,
+          slug: api.slug,
+          name: api.name || local.name || api.slug,
           description: api.description || null,
+          rarity: api.rarity || local.rarity || "common",
+          condition_type: api.condition_type ?? local.condition_type,
+          condition_mode: api.condition_mode ?? local.condition_mode ?? null,
+          condition_value: api.condition_value ?? local.condition_value ?? null,
           // On garde le chemin local relatif (titles/slug.webp depuis profile/)
           // Le chemin DB (profile/titles/...) est réservé à profile-view.js
+          image_path: `titles/${api.slug}.webp`,
           is_unlocked: api.is_unlocked ? 1 : 0,
         };
       });
