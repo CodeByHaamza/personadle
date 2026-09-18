@@ -219,6 +219,7 @@ describe("catalogue badges — client ↔ serveur", () => {
       "mode_consecutive_perfects",
       "expert_modes_mastered",
       "expert_wins_total",
+      "mode_expert_perfect_wins",
     ];
     const broken = Object.entries(SQL)
       .filter(([, v]) => NUMERIC.includes(v.condition_type) && v.condition_value === null)

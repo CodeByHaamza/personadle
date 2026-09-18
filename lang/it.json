@@ -629,6 +629,31 @@
       "condition": "Vinci 25 partite in Modalità Esperto",
       "description": "Orfeo scese nel buio con una sola lira e ne uscì cantando. Venticinque vittorie in Esperto dopo, anche tu."
     },
+    "starlight_festival": {
+      "name": "Festival Starlight",
+      "condition": "Trova Joker, Panther e Mona con i loro abiti Starlight in All-Out Attack",
+      "description": "Ren, Ann e Morgana sono saliti sul palco con gli abiti Starlight. Li hai colti tutti e tre in piena esibizione."
+    },
+    "shujin_outlaws": {
+      "name": "Fuorilegge di Shujin",
+      "condition": "Trova l'All-Out Attack di Wonder in uniforme Shujin, poi Ren e Wonder nella modalità Silhouette",
+      "description": "Stessa uniforme, stessa scuola, due mondi. Hai riconosciuto entrambi gli studenti trasferiti alla Shujin dalla loro ombra — e Wonder dal suo colpo finale."
+    },
+    "absolute_authority": {
+      "name": "Autorità assoluta",
+      "condition": "Trova Mitsuru Kirijo e Makoto Niijima nella modalità Classica",
+      "description": "Due presidentesse del consiglio studentesco, due scuole, tolleranza zero. Gekkoukan e Shujin rispondono alla stessa autorità: la tua."
+    },
+    "dont_waste_your_breath": {
+      "name": "Non sprecare il fiato",
+      "condition": "Vinci 5 partite di Classica Esperto al primo tentativo",
+      "description": "Una battuta è bastata. La Classica Esperto ti dà una sola citazione — cinque volte non ti è servita una parola di più. Shinji approverebbe."
+    },
+    "same_energy": {
+      "name": "Stessa energia",
+      "condition": "Raggiungi il rango 5 di legame sociale con un amico mentre uno di voi indossa Motoha Arai e l'altro Chie Satonaka",
+      "description": "Due ragazze del kung-fu, due giochi, una sola energia. Quando un amico di rango 5 compare come Chie mentre tu indossi Arai — o viceversa — ricevete questo badge entrambi, nello stesso istante."
+    },
     "velvet_regular": {
       "name": "Cliente Fisso del Velvet",
       "condition": "Giocare in 50 giorni unici",

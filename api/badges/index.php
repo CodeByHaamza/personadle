@@ -101,6 +101,17 @@ if ($action === 'unlock') {
     $pdo->prepare('INSERT IGNORE INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)')
         ->execute([$authId, $badgeId]);
 
+    // Same Energy se débloque pour les DEUX d'un coup (décision Hamza) : la paire
+    // vient d'être vérifiée pour le demandeur, elle vaut symétriquement pour
+    // chaque partenaire. Son client la verra au prochain sync (backend → local,
+    // avec l'animation). INSERT IGNORE : déjà acquis = rien.
+    if ($badge['condition_type'] === 'same_energy') {
+        $grant = $pdo->prepare('INSERT IGNORE INTO badges_unlocked (user_id, badge_id) VALUES (?, ?)');
+        foreach (personadle_same_energy_partners($pdo, $authId) as $partnerId) {
+            $grant->execute([$partnerId, $badgeId]);
+        }
+    }
+
     jsonSuccess(['unlocked' => true, 'badge_id' => $badgeId]);
 }
 

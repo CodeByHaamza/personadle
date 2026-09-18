@@ -2,7 +2,7 @@
 // 🎖️ PERSONADLE - GESTIONNAIRE DE BADGES
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { badgesList, BADGE_CATEGORIES, getBadgeById } from "./badgesData.js";
+import { badgesList, BADGE_CATEGORIES, getBadgeById, SAME_ENERGY_AVATARS, wearsAvatar } from "./badgesData.js";
 import { normalizeModeKey } from "../../js/gameCore.js";
 import { openAtelier } from "../atelier.js";
 // Référence au saveProfile courant pour les click handlers (mis à jour à chaque renderBadgesModal)
@@ -237,6 +237,24 @@ export async function checkSocialBadges(profile, saveProfile) {
     if (onlineToday.length >= 3 && !profile.leblanc3FriendsDay) {
       profile.leblanc3FriendsDay = today;
       saveProfile();
+    }
+    // Same Energy : un ami de rang ≥ 5 porte Arai quand je porte Chie (ou l'inverse).
+    // Retour immédiat seulement — le serveur revérifie la paire à l'unlock et
+    // accorde le badge aux deux (api/badges/index.php).
+    if (!profile.sameEnergyWith) {
+      const mine = profile.avatar;
+      const partner = friends.find((f) => {
+        if ((f.social_link_rank ?? 1) < 5) return false;
+        const theirs = f.avatar_data;
+        return (
+          (wearsAvatar(mine, SAME_ENERGY_AVATARS.arai) && wearsAvatar(theirs, SAME_ENERGY_AVATARS.chie)) ||
+          (wearsAvatar(mine, SAME_ENERGY_AVATARS.chie) && wearsAvatar(theirs, SAME_ENERGY_AVATARS.arai))
+        );
+      });
+      if (partner) {
+        profile.sameEnergyWith = partner.user_id ?? partner.id ?? true;
+        saveProfile();
+      }
     }
   } catch (e) {
     console.warn("⚠️ Social badge check failed:", e.message);

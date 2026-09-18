@@ -10,6 +10,7 @@
  */
 
 import { openModal, closeModal } from "../js/modal.js";
+import { targetSetMet } from "./badges/badgesData.js";
 
 /** Définitions locales des titres — toujours disponibles ; l'API enrichit avec le statut par utilisateur. */
 export const TITLES_LOCAL = [
@@ -98,6 +99,13 @@ export function isTitleConditionMet(title, ctx) {
       return false;
     case "leaderboard_top":
       return (profile.bestLeaderboardRank || 9999) <= v;
+    case "targets_found":
+      // Ensemble nommé de cibles (api/lib/condition_check.php, PERSONADLE_TARGET_SETS),
+      // tranché par le SERVEUR depuis game_sessions. Ici, seulement ce que
+      // characterModeMap laisse voir (ni la dimension Expert, ni les musiques) :
+      // dès que cette partie visible est remplie, on TENTE l'unlock — le serveur
+      // répond 403 tant que le reste manque, et on retentera à la partie suivante.
+      return targetSetMet(profile, title.condition_mode);
     case "weekly_clean_modes":
       return (profile.weeklyCleanWinModes || 0) >= v;
     case "joker_profile": {
@@ -152,6 +160,13 @@ export function titleConditionText(t) {
       return `Win ${v} games in Expert mode`;
     case "leaderboard_top":
       return `Reach top ${v} on the leaderboard`;
+    case "targets_found":
+      return (
+        {
+          wonder_go_beyond:
+            "Find all five of Wonder's All-Out Attacks, Wonder in Classic and Emoji, Jánošík in Personae (normal and Expert), and every P5X song in Music (normal and Expert)",
+        }[t.condition_mode] ?? "Find a specific set of characters"
+      );
     case "weekly_clean_modes":
       // Correspond à ce que vérifie réellement api/lib/condition_check.php : le
       // nombre de modes DISTINCTS joués sur 7 jours, peu importe le résultat —
