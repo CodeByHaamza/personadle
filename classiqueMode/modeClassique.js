@@ -13,7 +13,7 @@ import {
   checkResetOnLoad,
   buildGameSession,
   savePendingSession,
-  getDailyTarget,
+  getDailyTargetWithin,
   showChallengeButton,
   initChallengeButton,
   showCommunityStats,
@@ -256,6 +256,21 @@ function initializeAutocomplete(element, array) {
  * Rebuilds the autocomplete list based on the currently active opus filters.
  * Also re-initialises the autocomplete listener on the text input.
  */
+/**
+ * Cible du jour, dans les filtres actifs du joueur (voir getDailyTargetWithin).
+ * Pool ET clé de hash distincts en Expert : sans ça, jouer le mode normal
+ * d'abord — où sept attributs sont comparés — donnerait la réponse du jour.
+ */
+function dailyCharacter() {
+  const pool = EXPERT.isExpert ? EXPERT_CHARACTERS : characters;
+  return getDailyTargetWithin(
+    pool,
+    pool.filter((c) => characterMatchesActiveOpus(c, activeOpus)),
+    EXPERT.hashMode,
+    (c) => c?.nom
+  );
+}
+
 function filterCharacterPool() {
   // Exclure les noms déjà devinés pour que l'autocomplétion reste cohérente
   const history = JSON.parse(localStorage.getItem(EXPERT.key("guessHistory"))) || [];
@@ -717,13 +732,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
   }
 
-  // Pick daily target if none stored (seeded RNG — same character for all players today)
+  // Pick daily target if none stored (seeded RNG, dans les filtres du joueur)
   if (!target) {
-    // Pool ET clé de hash distincts en Expert : sans ça, jouer le mode normal
-    // d'abord — où sept attributs sont comparés — donnerait la réponse du jour.
-    target = EXPERT.isExpert
-      ? getDailyTarget(EXPERT_CHARACTERS, EXPERT.hashMode)
-      : getDailyTarget(characters, EXPERT.hashMode);
+    target = dailyCharacter();
     localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
   }
 
@@ -905,8 +916,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           : _filteredPool;
       target = _candidates[Math.floor(Math.random() * _candidates.length)] || _filteredPool[0];
     } else {
-      // Même tirage qu'à la première visite : seedé joueur + jour + mode.
-      target = getDailyTarget(_pool, EXPERT.hashMode);
+      // Même tirage qu'à la première visite : seedé joueur + jour + mode, dans
+      // les filtres du joueur.
+      target = dailyCharacter();
     }
     localStorage.setItem(EXPERT.key("target"), JSON.stringify(target));
 

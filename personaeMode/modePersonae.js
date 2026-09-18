@@ -32,7 +32,7 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
-  getDailyTarget,
+  getDailyTargetWithin,
   showChallengeButton,
   initChallengeButton,
   showCommunityStats,
@@ -304,12 +304,19 @@ function pickCharacter(random = false) {
         : filteredCharacters;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
   } else {
-    const daily = getDailyTarget(expertPool(originalCharacters), EXPERT.hashMode);
-    if (filteredCharacters.length && !filteredCharacters.some((c) => c.persona === daily.persona)) {
-      target = getDailyTarget(expertPool(filteredCharacters), EXPERT.hashMode);
-    } else {
-      target = daily;
-    }
+    // Cible du jour dans les filtres du joueur — geste partagé par les six modes
+    // (getDailyTargetWithin). Appartenance par IDENTITÉ d'entrée (keyOf par
+    // défaut) et non par nom : trois personas sont homonymes (Hermes, Susano-o,
+    // Prometheus — deux personnages, deux opus). Comparer `persona` faisait
+    // passer le Prometheus de Futaba (P5R) pour présent chez un joueur « P2
+    // uniquement » parce que celui de Baofu (P2EP) l'était : pas de re-tirage,
+    // partie injouable. filteredCharacters est un filter() de originalCharacters,
+    // les références sont les mêmes ; le serveur compare par index du pool.
+    target = getDailyTargetWithin(
+      expertPool(originalCharacters),
+      expertPool(filteredCharacters),
+      EXPERT.hashMode
+    );
   }
 
   // En Expert l'image est l'inverse d'un indice : elle EST la réponse. Elle n'est

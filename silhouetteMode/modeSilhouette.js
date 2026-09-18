@@ -14,7 +14,7 @@ import {
   showWrongMini,
   buildGameSession,
   savePendingSession,
-  getDailyTarget,
+  getDailyTargetWithin,
   showChallengeButton,
   initChallengeButton,
   showCommunityStats,
@@ -252,7 +252,13 @@ function pickCharacter(random = false) {
         : filteredCharacters;
     target = _candidates[Math.floor(Math.random() * _candidates.length)] || filteredCharacters[0];
   } else {
-    target = getDailyTarget(originalCharacters, EXPERT.hashMode);
+    // Cible du jour dans les filtres du joueur (voir getDailyTargetWithin).
+    target = getDailyTargetWithin(
+      originalCharacters,
+      filteredCharacters,
+      EXPERT.hashMode,
+      (c) => c?.nom
+    );
   }
 
   currentZoom = INITIAL_ZOOM;
