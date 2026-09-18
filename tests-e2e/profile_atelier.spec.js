@@ -295,6 +295,18 @@ test.describe("Atelier — enregistrement automatique, avatar, bordure", () => {
     await expect(page.locator("#pane-title")).toBeVisible();
     await expect(page.locator("#titlesModalGrid .tm-card").first()).toBeVisible();
 
+    // Le menu liste TOUS les titres que l'API connaît (hors cachés non débloqués) :
+    // les 8 titres de la 2.2 n'apparaissaient pas, la grille partait de la liste
+    // locale TITLES_LOCAL et n'y ajoutait jamais ceux de la base (2026-09-18).
+    const apiTitles = await (await call(u.ctx, "get", "/api/titles")).json();
+    const attendus = apiTitles.filter((t) => t.slug !== "joker_looking_cool").map((t) => t.slug);
+    expect(attendus.length).toBeGreaterThanOrEqual(21);
+    const slugsGrille = await page.locator("#titlesModalGrid .tm-card").evaluateAll((els) =>
+      els.map((el) => el.dataset.slug)
+    );
+    for (const s of attendus) expect(slugsGrille, `titre ${s} dans le menu`).toContain(s);
+    await expect(page.locator('#titlesModalGrid .tm-card[data-slug="wonder_go_beyond"] .tm-name')).toHaveText("Go Beyond");
+
     await page.click('.atelier-tab[data-pane="theme"]');
     await page.keyboard.press("Escape");
     await page.reload();
