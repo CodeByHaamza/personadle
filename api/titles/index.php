@@ -13,11 +13,17 @@ $parts  = requestPathSegments();
 $action = end($parts);
 
 if ($method === 'GET') {
+    // Six langues servies (pt compris — il ne l'était pas : les joueurs portugais
+    // lisaient l'anglais). Le suffixe est validé par liste blanche avant d'entrer
+    // dans le nom de colonne ; la description retombe sur l'anglais si la langue
+    // n'a pas encore la sienne (COALESCE), le client garde son texte générique
+    // quand les deux manquent.
     $lang = $_GET['lang'] ?? 'en';
-    $col  = in_array($lang, ['fr','es','de','it'], true) ? "name_{$lang}" : 'name_en';
+    $sfx  = in_array($lang, ['fr','es','de','it','pt'], true) ? $lang : 'en';
 
     $stmt = $pdo->prepare(
-        "SELECT t.id, t.slug, t.image_path, t.{$col} AS name, t.rarity,
+        "SELECT t.id, t.slug, t.image_path, t.name_{$sfx} AS name,
+                COALESCE(t.description_{$sfx}, t.description_en) AS description, t.rarity,
                 t.condition_type, t.condition_mode, t.condition_value,
                 (SELECT COUNT(*) FROM user_titles ut WHERE ut.user_id = ? AND ut.title_id = t.id) AS is_unlocked
          FROM titles t ORDER BY t.id"

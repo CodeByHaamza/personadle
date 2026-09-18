@@ -13,6 +13,67 @@
 
 ---
 
+## 2026-09-18 — Les titres parlent portugais, et chacun raconte sa condition dans la langue du joueur (migration 049)
+
+En triant les 288 « valeurs identiques à l'anglais » de `i18n:check-untranslated` (quasi
+tous légitimes : noms de modes, titres de jeux, lore gardé en anglais, mots identiques),
+le seul vrai trou de traduction trouvé n'était pas dans `lang/` : **`titles` n'avait pas
+de `name_pt`**, et `api/titles/index.php` ne connaissait que fr/es/de/it — les joueurs
+portugais lisaient les titres en anglais. Et les `description_*` écrites par les
+migrations 044/046 n'étaient **jamais servies** : le client affichait pour tout le monde
+un texte de condition anglais codé en dur (`titleConditionText`, `profile/titles-ui.js`).
+Les 14 titres d'avant la 044 n'avaient d'ailleurs aucune description.
+
+### Quoi
+
+- **Migration 049** : `name_pt`, `description_pt`, puis pour les **22 titres** le nom
+  portugais et la description dans les **six langues** — condition lisible + une phrase de
+  lore, dans le ton de la 044 (« Une escouade, ce n'est pas une personne… »). Les textes
+  en/fr/es/de/it des huit titres de 044/046 sont repris à l'identique. `UPDATE … WHERE slug`,
+  idempotente, no-op sur le seed.
+- **`sql/bdd_mysql.sql`** : le seed `titles` porte désormais les mêmes colonnes et les mêmes
+  textes — il ne les avait pas : une base neuve (Docker, CI) avait toutes les descriptions à
+  NULL alors que la prod les avait via 044/046. Le seed redevient la référence des données
+  aussi, pas seulement du schéma. Réécrit par script depuis un fichier de traductions, une
+  ligne par colonne pour rester lisible en diff.
+- **`api/titles/index.php`** : liste blanche `fr/es/de/it/pt`, `name_{lang}` et
+  `COALESCE(description_{lang}, description_en) AS description`. Le suffixe passe par la
+  liste blanche avant d'entrer dans le nom de colonne (PHPStan/Psalm taint : rien à dire).
+- **`api/user/compendium.php`** : `name.pt` dans la carte des noms (le client
+  `titleName(title, lang)` le lisait déjà avec repli EN).
+- **`profile/titles-ui.js`** : `titleConditionText()` renvoie la description de l'API quand
+  elle existe ; le texte anglais codé en dur ne sert plus que sans réponse serveur
+  (hors-ligne, première ouverture). Trois rendus concernés : grille des titres, modale
+  zoom, toast.
+
+### Choix
+
+- Descriptions plutôt qu'une i18n de `titleConditionText` (22 types × 6 langues dans
+  `lang/`) : la table porte déjà les colonnes, la 044 avait choisi ce chemin, et une phrase
+  écrite par titre vaut mieux qu'un gabarit « Win {n} {mode} games » traduit.
+- Pas de `name_jp` / `description_jp` remplis : aucune langue japonaise servie par le site.
+- Le fichier de traductions n'est pas versionné : le seed et la migration **sont** la
+  source ; le regénérer se fait depuis la base.
+
+### Prod
+
+- **049 à jouer** avant la prochaine `develop → main` (checklist `TODO.md`). Sans elle :
+  `Unknown column 'name_pt'` sur `GET /api/titles` et sur le Compendium → **les deux tombent
+  en 500 pour tout le monde**, quelle que soit la langue. Additive et idempotente.
+- Vérifiée : import du nouveau `bdd_mysql.sql` dans une base vierge (22 titres, 0 NULL),
+  049 rejouée dessus (no-op) et sur la base de dev au schéma 048 (0 NULL après).
+
+### Tests
+
+- `tests/titlesUi.test.js` (+2) : la description prime, une description vide/absente garde
+  le texte générique.
+- `tests-e2e/titles_i18n.spec.js` (nouveau, 4) : six langues → `name` et `description`
+  non vides pour chaque titre ; `pt` renvoie du portugais (« Não Tenho Medo ») et non le
+  repli anglais ; langue inconnue → anglais sans erreur ; le Compendium expose `name.pt`
+  d'un titre accordé par l'admin.
+- PHPUnit 358, Vitest 1411, PHPStan propre sur la branche (les 4 erreurs affichées en local
+  viennent d'`api/discord/interactions.php`, travail non commité hors de cette PR), Psalm
+  taint propre, `compendium` + `stats_usecases` E2E rejoués.
 ## 2026-09-18 — 2.2 en prod : le Compendium en 500 trente minutes après (migration 048)
 
 **Livré** : PR #132 `develop → main` mergée à 17:37 UTC, commit `7a426b2`. L'auto-déploiement
