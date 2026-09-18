@@ -979,6 +979,8 @@
     "already_active": "Termine ton défi en cours d'abord.",
     "active_challenge": "Défi",
     "notif_challenges_you": "vous lance un défi !",
+    "notif_challenges_you_expert": "vous défie en Expert !",
+    "notif_expert_tag": "⚡ EXPERT",
     "notif_beat": "Battre",
     "notif_attempts": "tentative(s)",
     "unknown_mode": "Le mode de ce défi est indisponible.",

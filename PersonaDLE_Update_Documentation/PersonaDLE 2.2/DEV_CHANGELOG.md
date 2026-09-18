@@ -1956,3 +1956,78 @@ regarde le profil de quelqu'un d'autre.
   silence. Dépendance à une div sans rapport, à sortir de ce bloc à la prochaine passe.
 - Le badge est `condition_type = 'manual'` côté serveur (comme 46 autres) : la condition
   n'est pas revérifiée à l'unlock. Cf. l'audit des conditions de déblocage.
+
+## 2026-09-18 — Un défi Expert se voit enfin comme tel
+
+`challenge_is_expert` (migration 037) traversait toute la chaîne — `api/messages`
+→ `js/notifications.js` → `js/challenge-notif.js` — mais ne pilotait que trois
+choses **invisibles** : la page d'arrivée (`?expert=1`), le casier `localStorage`
+et le barème d'XP. À l'écran, un défi Expert et un défi normal étaient
+rigoureusement identiques : même pop-up rouge, même pastille de mode, mêmes
+anneaux, même flash. Dans la Boîte de la page Amis, `challenge_is_expert`
+n'apparaissait que dans les attributs `data-isexpert` des boutons — lu par le
+code, jamais par l'œil.
+
+Le joueur ne découvrait donc la dimension qu'une fois **arrivé sur la page du
+mode**, c'est-à-dire après avoir accepté, donc après s'être engagé sur un barème
+qui n'a rien à voir (un seul indice, 5 à 30 essais contre 3). Et la migration 037
+autorise explicitement un défi normal ET un défi Expert le même jour entre les
+mêmes amis : deux lignes strictement identiques dans la Boîte, sans moyen de
+savoir lequel des deux boutons « Accepter » menait où.
+
+### Choix de palette
+
+Violet `#b26aff` → magenta `#ff4d8d` sur fond violet-noir, repris **tel quel** de
+`.challenge-card--expert` (`css/global.css`), la carte d'**envoi** du défi Expert
+qui existait déjà. Volontairement la même des deux côtés : celui qui envoie et
+celui qui reçoit doivent reconnaître le même objet. L'or `#ffd700` de l'écran de
+déblocage du Mode Expert a été écarté — il dit « tu viens de débloquer quelque
+chose », pas « ce défi-ci est Expert », et un troisième vocabulaire Expert aurait
+brouillé les deux.
+
+### Détails techniques
+
+- `js/challenge-notif.js` — classe `cn--expert` sur l'overlay + étiquette
+  `.cn-expert-tag` dans la carte + message d'accroche dédié. Le DOM reste
+  **commun** aux deux variantes : tout l'écart vit dans le CSS, donc une
+  évolution de la pop-up normale suit automatiquement.
+- `css/challenge-notif.css` — bloc `.cn--expert` en surcharges : fond radial plus
+  dense, anneaux violet/magenta, flash `cnFlashExpert`, carte en dégradé avec
+  liseré supérieur, avatar/pseudo/pastille/boutons réaccordés. Le liseré est en
+  `position: absolute` et non un enfant de flux : la carte est un flex column
+  avec `gap: 10px`, un `::before` dans le flux aurait ajouté un espace fantôme.
+  Bloc `prefers-reduced-motion` : le surcroît d'effet est coupé, le marqueur
+  textuel porte le sens à lui seul.
+- `profile/friends/friends.js` — pastille `.fr-challenge-expert-pill` + classe
+  `.fr-challenge-card--expert`, sur les **trois** statuts (en cours / gagné /
+  expiré). L'historique est justement l'écran où l'on compare ses défis.
+- `profile/friends/friends.css` — surcharges assorties, dark mode compris (le
+  violet foncé de la pastille de mode passe sous le seuil de lisibilité sur
+  `#1a1a1a`, remonté en `#d9a4ff`). La pastille pose `margin-right: auto`
+  (l'en-tête est en `space-between`, elle se serait placée au centre) et
+  `align-self: flex-start` (les cartes gagnée/expirée sont en flex column, elle
+  se serait étirée sur toute la largeur).
+- i18n : `challenge.notif_expert_tag` et `challenge.notif_challenges_you_expert`,
+  EN d'abord puis fr/es/de/it/pt — `npm run i18n:check` vert, 1266 clés.
+- Tests : `tests/challengeNotifExpert.test.js` (nouveau, 10 tests) et 5 tests
+  ajoutés à `tests/friends_challenge_actions.test.js`.
+
+### Pourquoi les tests vérifient la CLASSE et pas la couleur
+
+jsdom ne résout pas les feuilles externes : une valeur hexadécimale attendue dans
+un test ne prouverait rien de plus que sa propre recopie. Ce qui est verrouillé,
+c'est le **crochet** (`cn--expert`, `fr-challenge-card--expert`), le **marqueur
+textuel** (traduisible, et vérifié contre le piège CLAUDE.md §5 où `t(key)`
+renvoie la clé brute), et la **parité de structure** entre les deux variantes —
+si la variante Expert diverge structurellement, elle cesse de suivre les
+évolutions de la pop-up normale, ce qui est l'inverse du but.
+
+### Angles morts connus
+
+- La pop-up de **résultat** de défi (`js/challenge-result.js`, vue par
+  l'expéditeur quand son défi est battu ou expiré) n'est pas encore marquée. Elle
+  reçoit pourtant le message brut, `challenge_is_expert` compris — elle l'ignore,
+  simplement (0 occurrence de « expert » dans le fichier). C'est donc un ajout
+  purement front, sans rien à faire côté API. À reprendre.
+- Aucun test E2E : les tests ci-dessus sont en jsdom, donc le rendu réel des
+  dégradés et du liseré n'est vérifié qu'à l'œil.

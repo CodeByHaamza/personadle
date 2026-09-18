@@ -140,6 +140,21 @@ function _render({
 
   const overlay = document.createElement("div");
   overlay.id = "cn-overlay";
+  // Variante Expert : le drapeau ne pilotait que la redirection et le casier de
+  // stockage, rien à l'écran. Un défi Expert et un défi normal étaient donc
+  // strictement identiques jusqu'à l'atterrissage sur la page — alors que les
+  // deux n'ont ni le même pool, ni le même barème, ni les mêmes prérequis
+  // (il faut avoir débloqué l'Expert du mode pour pouvoir l'accepter).
+  //
+  // La classe porte TOUT l'écart visuel (css/challenge-notif.css) : la structure
+  // du DOM reste commune, comme .challenge-card--expert le fait déjà pour la
+  // carte d'ENVOI (css/global.css). Même palette violet/magenta des deux côtés :
+  // le joueur qui envoie un défi Expert et l'ami qui le reçoit doivent reconnaître
+  // le même objet.
+  if (challengeIsExpert) overlay.classList.add("cn--expert");
+  const expertTag = challengeIsExpert
+    ? `<span class="cn-expert-tag">${_t("challenge.notif_expert_tag", "⚡ EXPERT")}</span>`
+    : "";
   overlay.innerHTML = `
     <div class="cn-backdrop"></div>
     <button class="cn-close" aria-label="Close">✕</button>
@@ -152,12 +167,17 @@ function _render({
     </div>
     <div class="cn-scene">
       <div class="cn-card">
+        ${expertTag}
         <img class="cn-avatar"
              src="${_avatarSrc(senderAvatar)}"
              alt="${_esc(senderPseudo)}"
              onerror="this.src='${_imgBase()}default_avatar.png'">
         <p class="cn-pseudo">${_esc(senderPseudo)}</p>
-        <p class="cn-message">${_t("challenge.notif_challenges_you", "vous lance un défi !")}</p>
+        <p class="cn-message">${
+          challengeIsExpert
+            ? _t("challenge.notif_challenges_you_expert", "vous défie en Expert !")
+            : _t("challenge.notif_challenges_you", "vous lance un défi !")
+        }</p>
         <hr class="cn-divider">
         <div class="cn-mode-badge">${modeIcon} ${_esc(modeName)}</div>
         <p class="cn-score">

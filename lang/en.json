@@ -1097,6 +1097,8 @@
     "refuse": "Refuse",
     "already_active": "Finish your current challenge first.",
     "notif_challenges_you": "challenges you!",
+    "notif_challenges_you_expert": "challenges you in Expert!",
+    "notif_expert_tag": "⚡ EXPERT",
     "notif_beat": "Beat",
     "notif_attempts": "attempt(s)",
     "unknown_mode": "This challenge's mode is unavailable.",
