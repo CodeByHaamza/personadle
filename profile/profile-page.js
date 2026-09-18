@@ -1158,6 +1158,7 @@ function initAvatarGrid() {
     persona4: "Persona 4",
     persona5: "Persona 5",
     persona5x: "Persona 5X",
+    personaq: "Persona Q",
     special: _t("profile.avatar_group_special", "Special"),
   };
   const themeBadge = (name) => {
