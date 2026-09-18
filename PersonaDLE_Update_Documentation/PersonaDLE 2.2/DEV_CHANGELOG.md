@@ -13,6 +13,58 @@
 
 ---
 
+## 2026-09-19 — Le Mode Expert ne se débloquait pas : la prod plafonnait toujours à une partie par jour (migration 050)
+
+Signalé par Hamza : « des gens ne débloquent pas le Mode Expert même en remplissant les
+conditions ». Lecture de la prod : **aucun joueur n'a plus d'une session par mode et par
+jour** — 10 377 sessions depuis le 24 juillet, maximum 1/jour partout, 0 journée à deux
+parties. La porte Émoji (« 10 victoires en une journée ») est donc **inatteignable pour
+tout le monde** (tous les joueurs à 1/10), les autres portes n'avancent que d'un cran par
+jour, et une partie Expert jouée le même jour que la partie normale n'est jamais
+enregistrée — ni pour la porte, ni pour les stats, ni pour le classement.
+
+### Cause
+
+La migration **032** (« chaque partie compte », 2026-09-01) supprimait la contrainte
+`uq_session_per_day (user_id, mode, played_date, is_expert)` — le **nom de la référence**
+`sql/bdd_mysql.sql`. La table de prod, montée depuis l'archive du 2026-05-06, porte la même
+contrainte sous le nom **`uq_session` (user_id, mode, played_date)**, sans `is_expert`.
+`DROP INDEX IF EXISTS uq_session_per_day` n'a rien trouvé et n'a rien dit. Depuis, chaque
+seconde partie du jour (rejeu, victoire après abandon, Expert après la normale) tombe en
+erreur 23000, que `api/lib/game_session.php` traduit — à raison dans le monde de la
+référence, où le seul doublon possible est un rejeu de `client_session_id` — en **409
+« déjà enregistrée »**, et que `savePendingSession()` jette en silence. Dix-huit jours de
+parties perdues, pas un log : le 409 est traité comme un succès des deux côtés.
+
+Le diff `information_schema` prod ↔ référence fait pour la 048 ne comparait que les
+**colonnes**. Un diff des contraintes UNIQUE ne montre que celle-ci (hors tables propres à
+la prod).
+
+### Correction
+
+- **Migration 050** : `ALTER TABLE game_sessions DROP INDEX IF EXISTS uq_session`. Reste
+  `uq_session_client_id` (idempotence de la 032) et l'index de lecture `idx_session_per_day`.
+  No-op sur la référence. Validée sur une table recréée avec les index de la prod (deuxième
+  insertion du jour refusée avant, acceptée après, rejeu no-op), puis **jouée en prod** après
+  un dump de `game_sessions` (1,7 Mo) : il ne reste que `PRIMARY` et `uq_session_client_id`.
+  Aucun code à changer : le serveur et le client fonctionnent déjà en « chaque partie
+  compte » depuis la 032 (E2E `sessions-same-day.spec.js`), c'est la prod qui ne suivait pas.
+- **`scripts/check_prod_schema.php`** compare désormais aussi les **contraintes UNIQUE** :
+  toute contrainte présente en prod dont les colonnes ne correspondent ni à un `UNIQUE KEY`
+  ni à la `PRIMARY KEY` de la table dans `bdd_mysql.sql` est signalée (les `uq_*_id (id)`
+  posés par 025/048 sur l'`id` AUTO_INCREMENT sont donc acceptés : même garantie que la PK
+  de la référence). Lancé en prod après la 050 : ✅ aucune dérive. Avant la 050 il aurait
+  écrit `game_sessions — contrainte UNIQUE en trop : uq_session (user_id,mode,played_date)`.
+- CLAUDE.md §7, nouveau piège : un `DROP INDEX IF EXISTS <nom>` se vérifie par ses
+  **colonnes** dans `information_schema.STATISTICS`, jamais par son nom seul.
+
+### Ce qu'on ne récupère pas
+
+Les parties rejetées entre le 1er et le 19 septembre n'ont jamais atteint la base et le
+client ne les a pas mises en file (un 409 n'est pas une erreur pour lui). Les progressions
+Expert repartent de ce que la prod a réellement enregistré ; les 15 accès offerts par
+l'admin (`expert_unlocks_granted`) restent. À partir de maintenant, chaque rejeu compte —
+la porte Émoji redevient atteignable en une bonne journée de Rejouer.
 ## 2026-09-18 — L'annonce Discord du daily pingue le rôle opt-in « 🔔 Daily » ; le quiz d'Arcane vit dans le bot, pas dans le site
 
 `api/cron/discord-daily.php` : mention optionnelle pilotée par `DISCORD_DAILY_MENTION_ROLE`
