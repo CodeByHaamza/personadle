@@ -13,6 +13,190 @@
 
 ---
 
+## 2026-09-18 — content(Shujin) : Wonder Shujin en AOA, cinq badges vérifiés serveur, le titre Go Beyond, trois musiques (branche `content/wonder-shujin-badges-musiques`)
+
+Lot de contenu autour de la tenue Shujin de Wonder (P5X). Ce qui le distingue des lots
+de badges précédents : **aucun des cinq badges n'est `manual`**. Chacun a une condition
+que `api/lib/condition_check.php` tranche à partir de `game_sessions` (ou de
+`friendships`/`social_links`/`profiles` pour le badge social), le client ne faisant que
+le miroir pour le retour immédiat. Deux vocabulaires nouveaux en découlent
+(`targets_found`, `same_energy`), plus un compteur (`mode_expert_perfect_wins`).
+
+### All-Out Attack — Wonder Shujin
+
+- Source : une vidéo mp4 (zip fourni). Conversion en webp animé au format des autres
+  AOA (800×450, 30 fps, 106 frames, 1,7 Mo) :
+  `ffmpeg -i in.mp4 -vf "crop=1296:729:11:26,fps=30,scale=800:450:flags=lanczos" -loop 0 -an -c:v libwebp_anim -q:v 75 -compression_level 6 Wonder_Shujin.webp`
+  Le `crop` retire les bandes de l'enregistrement ; le `-an` retire la piste audio (un
+  webp n'en porte pas, mais sans le flag ffmpeg avertit et certains builds échouent).
+- Trois fichiers, nommés comme les autres tenues de Wonder (`Wonder_Velvet`,
+  `Wonder_Summer`…) : `allOutAttackMode/database/allOutAttack/Wonder_Shujin.webp`
+  (animation), `img/Wonder_Shujin.webp` (rendu AOA, portrait), `img/Wonder_Shujin_Battle.webp`
+  (artwork de la tenue).
+- `aoaCharacters.js` (`{ nom: "Wonder Shujin ( Nagisa Kamishiro )", gif: "Wonder_Shujin", opus: ["P5X"] }`),
+  `personas_allOut.js` (autocomplétion), `portraitsMap.js`.
+- **Prod** : les animations AOA sont servies depuis le CDN R2 (`allOutAttack/`), pas depuis
+  git. `Wonder_Shujin.webp` doit y être **téléversé avant** `develop → main`, sinon la
+  cible tombe sur une image cassée le jour où elle sort. Noté dans la checklist `TODO.md`.
+- Au passage, le test d'intégrité des assets a sorti une coquille préexistante :
+  `Yuki ( Yukimi Fujikawa )` pointait sur `gif: "Yuki_X"` alors que les fichiers et
+  `portraitsMap` s'appellent `YukiX` — l'animation ne chargeait pas. Corrigé.
+
+### Cinq badges (migration 046, `sql/bdd_mysql.sql` → 69 badges)
+
+| Badge | Rareté | `condition_type` / `mode` / `value` | Ce que le serveur vérifie |
+| --- | --- | --- | --- |
+| `starlight_festival` | rare | `targets_found` / `starlight_trio` / NULL | 3 victoires AOA distinctes : Joker, Panther, Mona Starlight |
+| `shujin_outlaws` | rare | `targets_found` / `shujin_outlaws` / NULL | AOA Wonder Shujin **et** Silhouette Ren Amamiya + Nagisa Kamishiro |
+| `absolute_authority` | rare | `targets_found` / `absolute_authority` / NULL | Classique : Mitsuru Kirijo + Makoto Niijima (les deux présidentes du conseil) |
+| `dont_waste_your_breath` | epic | `mode_expert_perfect_wins` / `classic` / 5 | 5 victoires Classique **Expert** en 1 essai (`is_expert = 1`, `attempts = 1`) |
+| `same_energy` | epic (social) | `same_energy` / NULL / NULL | un ami accepté, `social_links.rank ≥ 5`, l'un porte Motoha Arai, l'autre Chie |
+
+Les deux badges « je te laisse faire » : *Absolute Authority* réunit les deux présidentes
+du conseil des élèves (Mitsuru, Makoto) en Classique — le mode où leur autorité s'entend
+dans la citation ; *Don't Waste Your Breath* colle au nom : en Classique Expert, une
+citation, une réponse, cinq fois. Cumulatif, donc monotone (piège §7 de CLAUDE.md).
+
+- **`targets_found`** : `condition_mode` est une **clé d'ensemble** de la constante
+  `PERSONADLE_TARGET_SETS` (pas un mode de jeu). Un ensemble = liste d'exigences
+  `[mode, is_expert|null, [target_name…], minDistinct]` ; `personadle_target_set_met()`
+  exige que **toutes** soient remplies, via `COUNT(DISTINCT target_name)` sur les
+  sessions gagnées (`result = 'win'`, `target_name IN (…)`, `is_expert` optionnel). Les
+  noms sont les `target_name` **exacts** écrits par `api/sessions.php` — donc ceux des
+  datasets (`"Wonder Shujin ( Nagisa Kamishiro )"` en AOA, `"Nagisa Kamishiro"` en
+  Classique/Émoji/Silhouette/Personae, le `titre` en Music). Une clé inconnue → `false`
+  (fail-closed : une faute de frappe dans une migration n'accorde rien à personne).
+  `targets_found` et `same_energy` **ne figurent pas** dans `$valueRequiredTypes` : leur
+  `condition_value` est légitimement NULL. La première version les y avait mis par
+  erreur (mauvaise ancre de patch) et le test PHPUnit Same Energy l'a attrapé.
+- **`same_energy`** : `personadle_same_energy_partners()` renvoie les ids des amis
+  (`friendships.status = 'accepted'`) dont le lien a `rank ≥ 5` (`LEAST/GREATEST` pour
+  retrouver la paire) et dont l'`avatar_data` forme la paire attendue avec le mien —
+  `PERSONADLE_SAME_ENERGY_AVATARS = ['arai' => ['Arai.png','Arai2.png'], 'chie' =>
+  ['Chie.jpg','Chie2.jpg','chie_pq.jpg','meme_chie_shut_teddie.jpg']]`, comparé par
+  `str_ends_with($avatar, '/'.$file)` (le chemin galerie exact ; une data URL ou un nom
+  voisin ne passe pas). `LEFT JOIN profiles` parce que `makeUser()` des tests ne crée pas
+  de ligne `profiles` (register.php le fait en prod) — et un compte sans ligne profiles ne
+  doit pas casser la requête, juste ne pas matcher.
+  **Les deux reçoivent le badge au même instant** : `api/badges/index.php`, après
+  l'`INSERT IGNORE` du demandeur, boucle sur les partenaires et insère pour eux aussi.
+  L'ami le voit à son prochain `pullProfileFromCloud()`.
+- **`mode_expert_perfect_wins`** : `personadle_count_expert_perfect_wins()` — `is_expert = 1`,
+  `result = 'win'`, `attempts = 1`, par mode. Seul des trois à exiger une `condition_value`.
+- Vocabulaire : `personadle_known_condition_types()` gagne les trois ;
+  `tests/php/ConditionVocabularyTest.php` (switch == liste connue) reste vert.
+
+### Titre Go Beyond (migration 046, `titles` → 22)
+
+`wonder_go_beyond` — `targets_found` / `wonder_go_beyond`, légendaire, image
+`profile/titles/wonder_go_beyond.webp` (2080×512, fourni). L'ensemble : les **5** AOA de
+Wonder (Classic, Chinese New Year, Velvet, Summer, Shujin), Nagisa en Classique **et**
+Émoji, Nagisa en Personae normal **et** Expert (le `target_name` Personae est le
+personnage, pas la persona), et toutes les musiques P5X en Music normal (9 titres) **et**
+Expert (les 8 qui ont des paroles — `Arial Of The Soul` est instrumental, donc absent de
+`expert_mode_content.md` et non tirable en Expert). Reformulation assumée de la demande
+(« ou un truc du genre ») : l'ensemble est fermé et chaque exigence est vérifiable en SQL.
+Grindable par construction : le filtre d'opus P5X seul + Rejouer fait tourner les 9 chansons.
+
+Client : `profile/titles-ui.js` `isTitleConditionMet()` gagne `case "targets_found"` →
+`targetSetMet(profile, title.condition_mode)`. Le miroir client (`TARGET_SETS` dans
+`badgesData.js`) ne connaît que la partie **visible** de l'ensemble (AOA, Classique, Émoji,
+Personae — via `profile.characterModeMap`), pas la dimension Expert ni les musiques : il
+déclenche la *tentative* d'unlock, et c'est le serveur qui tranche (403 tant que le reste
+manque). Un texte de condition lisible est ajouté dans `titleConditionText()`.
+
+### Client (miroirs)
+
+- `profile/badges/badgesData.js` : `TARGET_SETS`, `targetSetMet(profile, key)`,
+  `SAME_ENERGY_AVATARS`, `wearsAvatar(avatar, files)`, et les cinq entrées. Les checks :
+  `targetSetMet(profile, "starlight_trio" | "shujin_outlaws" | "absolute_authority")`,
+  `(profile.classicExpertPerfectWins || 0) >= 5`, `Boolean(profile.sameEnergyWith)`.
+- `profile/badges/badgesManager.js` `checkSocialBadges()` : pose `profile.sameEnergyWith =
+  partner.user_id` quand un ami de `social_link_rank ≥ 5` forme la paire d'avatars avec moi.
+- `classiqueMode/modeClassique.js` : en victoire Expert à 1 essai, `classicExpertPerfectWins++` ;
+  le chemin Expert appelle désormais `checkBadgesAfterGame()` (il n'appelait rien, puisque
+  `checkUnlocksAfterGame()` est réservé au mode normal).
+- `lang/*.json` : `badges.{starlight_festival,shujin_outlaws,absolute_authority,dont_waste_your_breath,same_energy}.{name,condition,description}` ×6 (1285 clés).
+
+### Musique — trois titres, et la règle des jumelles Expert
+
+- `musicsMode/database/music/song/{Invitation_to_Freedom,Light_the_Fire_Up_in_the_Night_P3_Side,Light_the_Fire_Up_in_the_Night_P4_Side}.mp3`,
+  `songs.js` (+3 : PQ2 / Lyn Inaizumi ; PQ / Lotus Juice & Yumi Kawamura ; PQ / Lotus Juice
+  & Shihoko Hirata), `musicTitles.js` (+3), pools régénérés (`music` 99, `music_expert` 78).
+- `expert_mode_content.md` : paroles de *Invitation to Freedom* et de *Light the Fire Up in
+  the Night (P3 Side)* uniquement. Les deux faces partagent les **mêmes paroles** — les
+  mettre deux fois aurait fait tirer deux cibles indistinguables. Décision : seule la face
+  P3 est tirable en Expert, et la face P4 est **acceptée comme réponse** quand la P3 est la
+  cible. Nouveau `musicsMode/database/expert_twins.js` (`EXPERT_TWINS = { "…(P3 Side)":
+  ["…(P4 Side)"] }`), consommé par `guessMatchesTarget()` dans `modeMusic.js` — Expert
+  seulement ; en mode normal les deux mp3 sont différents, la réponse doit être exacte.
+- Angle mort assumé : la jumelle ne s'applique qu'à la validation. La cible enregistrée
+  (`target_name`) reste la face P3, donc le titre Go Beyond ne dépend pas de ce mécanisme
+  (aucune des deux faces n'est P5X).
+
+### Classement — le haut du bloc Expert laissait passer le fond
+
+`profile/leaderboard/leaderboard.css` `.lb-filters-card--expert` : le dégradé violet était
+posé **seul** en `background`, translucide jusqu'au bout → la ville en arrière-plan
+transparaissait sous le haut du bloc « Classement » quand on cliquait Expert.
+`background: linear-gradient(…), var(--lb-surface)` — la teinte par-dessus la surface
+opaque, comme le bloc normal.
+
+### Migration `sql/migrations/046_badges_wonder_shujin_go_beyond.sql`
+
+`INSERT IGNORE` sur `badges` (5 lignes, noms en/fr/es/de/it + `condition_en`) et `titles`
+(1 ligne, noms et descriptions en 5 langues). Rejouée contre une base vierge (import
+`bdd_mysql.sql` → 69 badges / 22 titres), puis une seconde fois : no-op. **À jouer en prod
+avant `develop → main`** — sans elle, le client tente `POST /api/badges/unlock` sur un
+slug inconnu (404) et les cinq badges n'existent pour personne.
+
+Pas de bump `CACHE_VERSION` ici : `develop` est déjà en v96 contre v95 en `main`
+(lot 045, non livré), et ce bump couvrira `modeMusic.js`, `modeClassique.js`,
+`leaderboard.css` et `badgesData.js`, tous précachés et tous modifiés par ce lot.
+
+### Tests
+
+- `tests/php/DatabaseIntegrationTest.php` : `winTarget()` (session gagnée sur une cible
+  exacte, mode, dimension Expert), un test par ensemble (2/3 → refusé, 3/3 → accordé ; mauvais
+  mode → refusé ; Expert requis → normal refusé), Go Beyond complet (24 victoires distinctes),
+  `mode_expert_perfect_wins` (4 → refusé, 5 → accordé ; un essai de plus ne compte pas ;
+  mode normal ne compte pas), Same Energy (`makeSameEnergyPair()` : rang 4 → refusé, rang 5 →
+  accordé dans les deux sens ; deux Arai → refusé ; non ami → refusé ; les deux comptes reçoivent
+  le badge via l'endpoint), et **chaque `target_name` des ensembles existe dans
+  `api/data/daily_pools.json`** (un renommage de dataset rendrait le badge indébloquable en
+  silence). PHPUnit : 358 tests, 2 skips.
+- `tests/php/BadgeWallpaperCatalogTest.php` : catalogue exact (69), `wonder_go_beyond` dans
+  la table des titres, `mode_expert_perfect_wins` dans le balayage des seuils numériques.
+- `tests/badgesCatalogParity.test.js` : `mode_expert_perfect_wins` dans les types numériques.
+- `tests/unlocks_wonder_shujin.test.js` (nouveau, 26 tests) : parité **littérale** des miroirs
+  (les listes `TARGET_SETS`/`SAME_ENERGY_AVATARS` du client sont comparées à
+  `PERSONADLE_TARGET_SETS`/`PERSONADLE_SAME_ENERGY_AVATARS` extraits du **source PHP**,
+  commentaires `//` retirés d'abord — une apostrophe dans un commentaire faussait l'extraction),
+  existence de chaque cible dans les datasets, `check()` des cinq badges, `checkSocialBadges`,
+  le titre côté client, l'intégrité des assets de **toutes** les entrées AOA (webp animé +
+  portrait + Battle, autocomplétion, portraitsMap — c'est lui qui a sorti `Yuki_X`), les trois
+  musiques (mp3, image, autocomplétion, paroles P3 oui / P4 non), les jumelles (la clé a des
+  paroles, chaque valeur est un vrai titre **sans** paroles propres) et un test de source qui
+  vérifie que `modeMusic.js` valide bien via `guessMatchesTarget`.
+- `tests-e2e/unlocks_wonder_shujin.spec.js` (nouveau, 7 tests, contre la vraie API) : pour
+  chaque badge, sessions réelles → `POST /api/badges/unlock` répond **403 avant, 200 après** ;
+  Same Energy monté via l'admin (`PATCH /api/admin/social-links/:id {rank}` +
+  `PATCH /api/user/:id {avatar_data}`) puis `interact` → **les deux comptes** ont le badge ;
+  Go Beyond via `POST /api/titles/unlock {title_slug}` après avoir ouvert les portes Expert
+  Personae et Music (15 parfaites chacune). 7/7 en local.
+- Changelog joueur : la section « Sept titres et un badge de plus » (volontairement sans noms
+  ni conditions) est remplacée par **« Huit titres, six badges et trois musiques »** — demande
+  Hamza du 2026-09-18 : « mets tous les badges et titres, bref toute nouvelle donnée ». Tout ce
+  que la 2.2 ajoute à la collection y est écrit, images, noms FR/EN et conditions : les 7 titres
+  de la 044 + Go Beyond en `.title-card` (vocabulaire de rareté de la 2.0), Song of Orpheus + les
+  5 badges de la 046 dans une vitrine `.badge-showcase` (mêmes couleurs de rareté), et la liste
+  des 3 musiques avec la règle des jumelles. Les conditions sont de toute façon lisibles dans la
+  collection du profil. La section AOA passe à « Trois nouveaux All-Out Attack » avec la carte
+  Wonder Shujin (variante `.aoa-card-shujin` — blazer noir à trame, boutons dorés, bande de
+  tartan rouge en pied, sombre dans les deux thèmes). Le modal « Nouveautés » 2.2 de
+  `index.html` passe à « trois All-Out Attack » et gagne la puce titres/badges/musiques dans les
+  6 langues (noms de titres en anglais pour le PT : la table `titles` n'a pas de `name_pt`).
+
 ## 2026-09-18 — Badge Data Mining : appel à une fonction qui n'existe pas
 
 Signalé en test : le badge `data_mining` (« Visit 5 different user profiles ») ne se

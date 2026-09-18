@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1383 tests Vitest (76 suites), 352 méthodes PHPUnit, 232 tests E2E,
+> Vérifié le 2026-08-26 : 1409 tests Vitest (77 suites), 358 méthodes PHPUnit, 239 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -64,6 +64,16 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       tout le monde** (la période `ever` survit, elle ne lit pas le cache), et le cron
       horaire échoue à chaque passage. Rejouée pour de vrai le 2026-09-18 contre une base
       vierge au schéma pré-migration, puis une seconde fois pour l'idempotence.
+- [ ] Jouer `sql/migrations/046_badges_wonder_shujin_go_beyond.sql` (5 badges + titre Go Beyond,
+      `INSERT IGNORE`, rejouable). Sans elle, les cinq badges et le titre n'existent pas en base :
+      le client tente `POST /api/badges/unlock` sur un slug inconnu (404) et personne ne peut les
+      décrocher. Rejouée le 2026-09-18 contre une base vierge (69 badges / 22 titres), puis une
+      seconde fois : no-op.
+- [ ] **Téléverser `allOutAttackMode/database/allOutAttack/Wonder_Shujin.webp` sur le bucket R2**
+      (`allOutAttack/Wonder_Shujin.webp`) **avant** `develop → main`. En prod les animations AOA
+      sont servies depuis le CDN, pas depuis git : sans l'upload, la cible « Wonder Shujin »
+      affiche une image cassée le jour où elle est tirée. Bui Cosmic et Berry Summer ont-ils
+      déjà été poussés ? À vérifier au même moment (même lot 2.2).
 - [ ] **Après la migration 045 : laisser passer un cycle du cron** (`api/cron/leaderboard.php`,
       horaire) pour peupler la dimension Expert du cache. D'ici là le classement Expert par
       période bascule sur le calcul live — correct, mais plus coûteux. Rien à faire, ça se
