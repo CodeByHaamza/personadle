@@ -193,6 +193,173 @@ final class DatabaseIntegrationTest extends TestCase
         $this->assertSame(2, (int) $n->fetchColumn(), 'normal et Expert doivent coexister pour la même clé');
     }
 
+    // ── Conditions du lot 2026-09-18 (migration 046) — api/lib/condition_check.php ──
+
+    /** Insère une victoire pour `$target` dans `$mode` (dimension `$isExpert`). */
+    private function winTarget(int $userId, string $mode, string $target, int $isExpert = 0, int $attempts = 2): void
+    {
+        self::$pdo->prepare(
+            'INSERT INTO game_sessions
+                 (user_id, mode, is_expert, client_session_id, played_date, target_name, result, attempts)
+             VALUES (?, ?, ?, ?, CURDATE(), ?, ?, ?)'
+        )->execute([$userId, $mode, $isExpert, bin2hex(random_bytes(8)) . '-' . bin2hex(random_bytes(2)), $target, 'win', $attempts]);
+    }
+
+    public function testTargetSetIsMetOnlyWhenEveryRequirementIsWon(): void
+    {
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        $u = $this->makeUser('ts');
+
+        // Shujin Outlaws : l'AOA Wonder Shujin + Ren ET Wonder en Silhouette.
+        $this->assertFalse(personadle_target_set_met(self::$pdo, $u, 'shujin_outlaws'));
+        $this->winTarget($u, 'alloutattack', 'Wonder Shujin ( Nagisa Kamishiro )');
+        $this->winTarget($u, 'silhouette', 'Ren Amamiya');
+        $this->assertFalse(personadle_target_set_met(self::$pdo, $u, 'shujin_outlaws'), 'il manque Wonder en Silhouette');
+        // Le trouver dans un AUTRE mode ne compte pas
+        $this->winTarget($u, 'classic', 'Nagisa Kamishiro');
+        $this->assertFalse(personadle_target_set_met(self::$pdo, $u, 'shujin_outlaws'), 'Classique ≠ Silhouette');
+        // Un abandon sur la bonne cible ne compte pas non plus
+        self::$pdo->prepare(
+            'INSERT INTO game_sessions (user_id, mode, is_expert, client_session_id, played_date, target_name, result, attempts)
+             VALUES (?, ?, 0, ?, CURDATE(), ?, ?, 5)'
+        )->execute([$u, 'silhouette', bin2hex(random_bytes(8)), 'Nagisa Kamishiro', 'giveup']);
+        $this->assertFalse(personadle_target_set_met(self::$pdo, $u, 'shujin_outlaws'), 'un give-up ne compte pas');
+        $this->winTarget($u, 'silhouette', 'Nagisa Kamishiro');
+        $this->assertTrue(personadle_target_set_met(self::$pdo, $u, 'shujin_outlaws'));
+
+        // Une clé d'ensemble inconnue est fail-closed
+        $this->assertFalse(personadle_target_set_met(self::$pdo, $u, 'ensemble_qui_nexiste_pas'));
+
+        // La même victoire répétée ne compte qu'une fois (DISTINCT)
+        $this->winTarget($u, 'alloutattack', 'Joker Starlight ( Ren Amamiya )');
+        $this->winTarget($u, 'alloutattack', 'Joker Starlight ( Ren Amamiya )');
+        $this->winTarget($u, 'alloutattack', 'Joker Starlight ( Ren Amamiya )');
+        $this->assertFalse(personadle_target_set_met(self::$pdo, $u, 'starlight_trio'), '3 fois Joker ≠ le trio');
+        $this->winTarget($u, 'alloutattack', 'Panther Starlight ( Ann Takamaki )');
+        $this->winTarget($u, 'alloutattack', 'Mona Starlight ( Morgana )');
+        $this->assertTrue(personadle_target_set_met(self::$pdo, $u, 'starlight_trio'));
+    }
+
+    public function testGoBeyondRequiresBothDimensionsAndEverySong(): void
+    {
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        $u = $this->makeUser('gb');
+        foreach ([
+            'Wonder ( Nagisa Kamishiro )', 'Wonder Chinese New Year ( Nagisa Kamishiro )',
+            'Wonder Velvet ( Nagisa Kamishiro )', 'Wonder Summer ( Nagisa Kamishiro )',
+            'Wonder Shujin ( Nagisa Kamishiro )',
+        ] as $aoa) $this->winTarget($u, 'alloutattack', $aoa);
+        $this->winTarget($u, 'classic', 'Nagisa Kamishiro');
+        $this->winTarget($u, 'emoji', 'Nagisa Kamishiro');
+        $this->winTarget($u, 'personae', 'Nagisa Kamishiro', 0);
+        $songs = ['Ambitions and Visions', 'Arial Of The Soul', 'Fatal Desire', 'Last Strike',
+                  'Seize the Light', 'Shadow Loop', 'Wake Up Your Hero', 'Wonder Light', 'Show Stealer'];
+        foreach ($songs as $t) $this->winTarget($u, 'music', $t, 0);
+        foreach (array_diff($songs, ['Arial Of The Soul', 'Show Stealer']) as $t) $this->winTarget($u, 'music', $t, 1);
+        $this->assertFalse(personadle_target_set_met(self::$pdo, $u, 'wonder_go_beyond'), 'il manque Personae Expert et Show Stealer en Expert');
+
+        $this->winTarget($u, 'personae', 'Nagisa Kamishiro', 1);
+        $this->assertFalse(personadle_target_set_met(self::$pdo, $u, 'wonder_go_beyond'), 'il manque Show Stealer en Expert');
+        $this->winTarget($u, 'music', 'Show Stealer', 1);
+        $this->assertTrue(personadle_target_set_met(self::$pdo, $u, 'wonder_go_beyond'));
+    }
+
+    public function testEveryTargetSetNameExistsInTheDailyPools(): void
+    {
+        // Les noms des ensembles sont des target_name EXACTS : un personnage renommé
+        // dans un dataset rendrait le badge indébloquable en silence. Les pools
+        // exportés (api/data/daily_pools.json) sont le reflet des datasets.
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        $pools = json_decode(file_get_contents(__DIR__ . '/../../api/data/daily_pools.json'), true);
+        $known = [
+            'alloutattack' => $pools['alloutattack']['pool'],
+            'classic'      => $pools['classic']['pool'],
+            'emoji'        => $pools['emoji']['pool'],
+            'silhouette'   => $pools['silhouette']['pool'],
+            'music'        => $pools['music']['pool'],
+            'personae'     => array_map(fn ($e) => $e['user'], $pools['personae']['pool']),
+        ];
+        foreach (PERSONADLE_TARGET_SETS as $key => $reqs) {
+            foreach ($reqs as [$mode, , $names, $min]) {
+                $this->assertArrayHasKey($mode, $known, "$key : mode inconnu $mode");
+                $this->assertLessThanOrEqual(count($names), $min, "$key/$mode : minimum > nombre de noms");
+                foreach ($names as $n) {
+                    $this->assertContains($n, $known[$mode], "$key : « $n » n'existe pas dans le pool $mode");
+                }
+            }
+        }
+    }
+
+    public function testExpertPerfectWinsCountOnlyExpertFirstTryWins(): void
+    {
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        $u = $this->makeUser('dw');
+        $this->winTarget($u, 'classic', 'A', 1, 1);
+        $this->winTarget($u, 'classic', 'B', 1, 1);
+        $this->winTarget($u, 'classic', 'C', 1, 2); // Expert, 2 essais
+        $this->winTarget($u, 'classic', 'D', 0, 1); // normal, 1 essai
+        $this->winTarget($u, 'emoji',   'E', 1, 1); // autre mode
+        $this->assertSame(2, personadle_count_expert_perfect_wins(self::$pdo, $u, 'classic'));
+        $this->assertFalse(personadle_verify_condition(self::$pdo, $u, 'mode_expert_perfect_wins', 'classic', 3));
+        $this->winTarget($u, 'classic', 'F', 1, 1);
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $u, 'mode_expert_perfect_wins', 'classic', 3));
+    }
+
+    /** Ami accepté + lien social au rang voulu + avatars posés. */
+    private function makeSameEnergyPair(string $myAvatar, ?string $theirAvatar, int $rank): array
+    {
+        $me = $this->makeUser('se1');
+        $them = $this->makeUser('se2');
+        self::$pdo->prepare('INSERT INTO friendships (requester_id, addressee_id, status) VALUES (?, ?, ?)')
+            ->execute([$them, $me, 'accepted']); // je suis le DESTINATAIRE : les deux sens doivent marcher
+        $stmt = self::$pdo->prepare('SELECT get_or_create_social_link(?, ?)');
+        $stmt->execute([min($me, $them), max($me, $them)]);
+        $linkId = (int) $stmt->fetchColumn();
+        self::$pdo->prepare('UPDATE social_links SET `rank` = ? WHERE id = ?')->execute([$rank, $linkId]);
+        // makeUser() ne crée pas de ligne profiles (register.php le fait en prod) : on la pose.
+        $up = self::$pdo->prepare(
+            'INSERT INTO profiles (user_id, avatar_data) VALUES (?, ?)
+             ON DUPLICATE KEY UPDATE avatar_data = VALUES(avatar_data)'
+        );
+        $up->execute([$me, $myAvatar]);
+        $up->execute([$them, $theirAvatar]);
+        return [$me, $them];
+    }
+
+    public function testSameEnergyNeedsRankFiveAndTheRightPairInEitherDirection(): void
+    {
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        // Moi en Arai, l'ami en Chie (version PQ), rang 5 → paire des deux côtés
+        [$me, $them] = $this->makeSameEnergyPair('../img/avatar/Arai.png', '../img/avatar/chie_pq.jpg', 5);
+        $this->assertSame([$them], personadle_same_energy_partners(self::$pdo, $me));
+        $this->assertSame([$me], personadle_same_energy_partners(self::$pdo, $them), 'symétrique : l\'ami voit la paire aussi');
+        $this->assertTrue(personadle_verify_condition(self::$pdo, $me, 'same_energy', null, null));
+
+        // Rang 4 → non
+        [$me4] = $this->makeSameEnergyPair('../img/avatar/Arai2.png', '../img/avatar/Chie.jpg', 4);
+        $this->assertSame([], personadle_same_energy_partners(self::$pdo, $me4));
+
+        // Les deux en Chie → non (il faut une Arai ET une Chie)
+        [$me2] = $this->makeSameEnergyPair('../img/avatar/Chie.jpg', '../img/avatar/Chie2.jpg', 7);
+        $this->assertSame([], personadle_same_energy_partners(self::$pdo, $me2));
+
+        // Avatar personnalisé (data URL) ou absent → non
+        [$me3] = $this->makeSameEnergyPair('data:image/png;base64,AAAA', '../img/avatar/Arai.png', 9);
+        $this->assertSame([], personadle_same_energy_partners(self::$pdo, $me3));
+        [$me5] = $this->makeSameEnergyPair('../img/avatar/Arai.png', null, 9);
+        $this->assertSame([], personadle_same_energy_partners(self::$pdo, $me5));
+    }
+
+    public function testSameEnergyAvatarFilesExistInTheGallery(): void
+    {
+        require_once __DIR__ . '/../../api/lib/condition_check.php';
+        foreach (PERSONADLE_SAME_ENERGY_AVATARS as $who => $files) {
+            foreach ($files as $f) {
+                $this->assertFileExists(__DIR__ . "/../../img/avatar/$f", "$who : $f absent de img/avatar/");
+            }
+        }
+    }
+
     public function testMessagesTableHasChallengeColumns(): void
     {
         // Garde-fou anti-dérive : api/messages/index.php écrit/relit ces colonnes

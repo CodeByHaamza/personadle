@@ -117,6 +117,14 @@ final class BadgeWallpaperCatalogTest extends TestCase
             'denial_of_self'  => ['expert_modes_mastered', null, 10],
             // Lot du 2026-09-16 (migration 044)
             'song_of_orpheus' => ['expert_wins_total', null, 25],
+            // Lot du 2026-09-18 (migration 046) — aucun 'manual' : tous vérifiés
+            // depuis game_sessions (targets_found, mode_expert_perfect_wins) ou
+            // depuis friendships/social_links/profiles (same_energy).
+            'starlight_festival'     => ['targets_found', 'starlight_trio', null],
+            'shujin_outlaws'         => ['targets_found', 'shujin_outlaws', null],
+            'absolute_authority'     => ['targets_found', 'absolute_authority', null],
+            'dont_waste_your_breath' => ['mode_expert_perfect_wins', 'classic', 5],
+            'same_energy'            => ['same_energy', null, null],
         ];
 
         // Le reste du catalogue (46 badges) est 'manual' — flags narratifs, redeem
@@ -145,12 +153,12 @@ final class BadgeWallpaperCatalogTest extends TestCase
     public function testEveryBadgeHasExpectedConditionColumns(): void
     {
         $expected = self::expectedBadgeConditions();
-        $this->assertCount(64, $expected, 'Le catalogue de référence de ce test doit lister les 64 badges');
+        $this->assertCount(69, $expected, 'Le catalogue de référence de ce test doit lister les 69 badges');
 
         $rows = self::$pdo->query(
             'SELECT slug, condition_type, condition_mode, condition_value FROM badges'
         )->fetchAll(PDO::FETCH_ASSOC);
-        $this->assertCount(64, $rows, 'La table badges doit contenir exactement 64 lignes (seed bdd_mysql.sql)');
+        $this->assertCount(69, $rows, 'La table badges doit contenir exactement 69 lignes (seed bdd_mysql.sql)');
 
         $bySlug = [];
         foreach ($rows as $r) {
@@ -243,6 +251,8 @@ final class BadgeWallpaperCatalogTest extends TestCase
             // condition_mode porte la date 'MM-JJ' (24 juin) ; condition_value est
             // un INT, il ne peut pas la porter — d'où le null.
             'tatsuya_dont_burn_out'       => ['played_on_date', '06-24', null],
+            // Lot du 2026-09-18 (migration 046)
+            'wonder_go_beyond'            => ['targets_found', 'wonder_go_beyond', null],
         ];
     }
 
@@ -420,6 +430,8 @@ final class BadgeWallpaperCatalogTest extends TestCase
         // et le titre en `mode_wins_under_attempts`.
         'expert_wins_total', 'expert_modes_mastered',
         'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
+        // Badge dont_waste_your_breath (046) : victoires Expert au premier essai.
+        'mode_expert_perfect_wins',
     ];
 
     /**
@@ -587,6 +599,9 @@ final class BadgeWallpaperCatalogTest extends TestCase
             case 'mode_consecutive_perfects':
                 $this->setConsecutivePerfects($userId, (string) $mode, $value);
                 break;
+            case 'mode_expert_perfect_wins':
+                $this->setExpertPerfectWins($userId, (string) $mode, $value);
+                break;
             default:
                 throw new InvalidArgumentException("Type non géré par ce test: $type");
         }
@@ -710,6 +725,21 @@ final class BadgeWallpaperCatalogTest extends TestCase
     private function clearSessions(int $userId): void
     {
         self::$pdo->prepare('DELETE FROM game_sessions WHERE user_id = ?')->execute([$userId]);
+    }
+
+    /**
+     * $count victoires EN EXPERT au premier essai dans un mode, plus une victoire
+     * Expert en 2 essais et une victoire NORMALE en 1 essai : ni l'une ni l'autre
+     * ne doit compter (mode_expert_perfect_wins = Expert ET attempts = 1).
+     */
+    private function setExpertPerfectWins(int $userId, string $mode, int $count): void
+    {
+        $this->clearSessions($userId);
+        for ($i = 0; $i < $count; $i++) {
+            $this->insertSession($userId, $mode, 'win', 1, 1, $i);
+        }
+        $this->insertSession($userId, $mode, 'win', 2, 1, 40); // Expert mais 2 essais
+        $this->insertSession($userId, $mode, 'win', 1, 0, 41); // 1 essai mais normal
     }
 
     /** $wins victoires EN EXPERT dans un mode (expert_wins_total agrège tous modes). */

@@ -629,6 +629,31 @@
       "condition": "Gewinne 25 Runden im Expertenmodus",
       "description": "Orpheus stieg mit nichts als einer Leier hinab ins Dunkel und kam singend zurück. Nach fünfundzwanzig Expertensiegen auch du."
     },
+    "starlight_festival": {
+      "name": "Starlight-Festival",
+      "condition": "Finde Joker, Panther und Mona in ihren Starlight-Outfits in All-Out Attack",
+      "description": "Ren, Ann und Morgana traten in ihren Starlight-Outfits auf die Bühne. Du hast alle drei mitten im Auftritt erwischt."
+    },
+    "shujin_outlaws": {
+      "name": "Shujin-Gesetzlose",
+      "condition": "Finde Wonders All-Out Attack in Shujin-Uniform, dann Ren und Wonder im Silhouetten-Modus",
+      "description": "Gleiche Uniform, gleiche Schule, zwei Welten. Du hast beide Shujin-Austauschschüler an ihrem Schatten erkannt — und Wonder an seinem Finisher."
+    },
+    "absolute_authority": {
+      "name": "Absolute Autorität",
+      "condition": "Finde Mitsuru Kirijo und Makoto Niijima im Klassik-Modus",
+      "description": "Zwei Schülersprecherinnen, zwei Schulen, null Toleranz. Gekkoukan und Shujin gehorchen derselben Autorität — deiner."
+    },
+    "dont_waste_your_breath": {
+      "name": "Spar dir deine Worte",
+      "condition": "Gewinne 5 Klassik-Experten-Runden mit dem allerersten Versuch",
+      "description": "Eine Zeile hat gereicht. Klassik-Experte gibt dir ein einziges Zitat — fünfmal hast du kein Wort mehr gebraucht. Shinji wäre einverstanden."
+    },
+    "same_energy": {
+      "name": "Dieselbe Energie",
+      "condition": "Erreiche Sozialverbindungs-Rang 5 mit einem Freund, während einer von euch Motoha Arai trägt und der andere Chie Satonaka",
+      "description": "Zwei Kung-Fu-Mädchen, zwei Spiele, eine Energie. Wenn ein Rang-5-Freund als Chie auftaucht, während du Arai trägst — oder umgekehrt —, bekommt ihr dieses Abzeichen beide, im selben Moment."
+    },
     "velvet_regular": {
       "name": "Stammgast im Velvet",
       "condition": "An 50 einzigartigen Tagen spielen",
