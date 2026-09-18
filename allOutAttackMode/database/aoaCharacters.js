@@ -44,6 +44,8 @@ export const aoaCharacters = [
   { nom: "Wonder Chinese New Year ( Nagisa Kamishiro )", gif: "Wonder_ChineseNY", opus: ["P5X"] },
   { nom: "Wonder Velvet ( Nagisa Kamishiro )", gif: "Wonder_Velvet", opus: ["P5X"] },
   { nom: "Wonder Summer ( Nagisa Kamishiro )", gif: "Wonder_Summer", opus: ["P5X"] },
+  // Tenue Shujin (P5Fes, version 5.1.1 — lot du 2026-09-18)
+  { nom: "Wonder Shujin ( Nagisa Kamishiro )", gif: "Wonder_Shujin", opus: ["P5X"] },
 
   { nom: "Chord ( Ayaka Sakai )", gif: "Chord", opus: ["P5X"] },
   { nom: "Closer ( Motoha Arai )", gif: "Closer", opus: ["P5X"] },
@@ -61,7 +63,7 @@ export const aoaCharacters = [
   { nom: "Okyann ( Kayo Tomiyama )", gif: "Okyann", opus: ["P5X"] },
   { nom: "Puppet ( Miyu Sahara )", gif: "Puppet", opus: ["P5X"] },
   { nom: "Riddle ( Haruna Nishimori )", gif: "Riddle", opus: ["P5X"] },
-  { nom: "Yuki ( Yukimi Fujikawa )", gif: "Yuki_X", opus: ["P5X"] },
+  { nom: "Yuki ( Yukimi Fujikawa )", gif: "YukiX", opus: ["P5X"] },
   { nom: "Mont ( Kotone Montagne )", gif: "Mont", opus: ["P5X"] },
   { nom: "Messa ( Kira Kitazato )", gif: "Messa", opus: ["P5X"] },
   { nom: "Cherish ( Masaki Ashiya )", gif: "Cherish", opus: ["P5X"] },

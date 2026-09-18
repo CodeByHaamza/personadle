@@ -226,6 +226,15 @@ export const songs = [
     lien: "https://www.youtube.com/watch?v=LkuyO0cU3tQ"
   },
   {
+    titre: "Invitation to Freedom",
+    fichier: "Invitation_to_Freedom.mp3",
+    opus: ["PQ2"],
+    image: "PQ2.webp",
+    vocalist: "Lyn Inaizumi",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=PGgFhpf9_KQ"
+  },
+  {
     titre: "It's Going Down Now",
     fichier: "It's_Going_Down_Now.mp3",
     opus: ["P3R"],
@@ -281,6 +290,27 @@ export const songs = [
     vocalist: "Yumi Kawamura",
     proprietaire: "ATLUS",
     lien: "https://www.youtube.com/watch?v=nuKpIDf4U_o"
+  },
+  // Les deux faces de Light the Fire Up in the Night partagent les mêmes paroles :
+  // en Expert, seule la face P3 porte les paroles (expert_mode_content.md) et les
+  // DEUX titres sont acceptés comme réponse — voir EXPERT_TWINS (modeMusic.js).
+  {
+    titre: "Light the Fire Up in the Night (P3 Side)",
+    fichier: "Light_the_Fire_Up_in_the_Night_P3_Side.mp3",
+    opus: ["PQ"],
+    image: "PQ.webp",
+    vocalist: "Lotus Juice, Yumi Kawamura",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=zcR9bXY3s8Q"
+  },
+  {
+    titre: "Light the Fire Up in the Night (P4 Side)",
+    fichier: "Light_the_Fire_Up_in_the_Night_P4_Side.mp3",
+    opus: ["PQ"],
+    image: "PQ.webp",
+    vocalist: "Lotus Juice, Shihoko Hirata",
+    proprietaire: "ATLUS",
+    lien: "https://www.youtube.com/watch?v=jGGLsdSW9JI"
   },
   {
     titre: "Life Will Change",

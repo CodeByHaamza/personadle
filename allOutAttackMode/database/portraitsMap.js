@@ -41,6 +41,7 @@ export const portraitsMap = {
   "Wonder Chinese New Year ( Nagisa Kamishiro )": "Wonder_ChineseNY",
   "Wonder Velvet ( Nagisa Kamishiro )": "Wonder_Velvet",
   "Wonder Summer ( Nagisa Kamishiro )": "Wonder_Summer",
+  "Wonder Shujin ( Nagisa Kamishiro )": "Wonder_Shujin",
   "Closer ( Motoha Arai )": "Closer",
   "Closer Summer ( Motoha Arai )": "Closer_Summer",
   "Fleuret ( Seiji Shiratori )": "Fleuret",

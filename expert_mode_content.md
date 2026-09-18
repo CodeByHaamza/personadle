@@ -1758,6 +1758,16 @@ We couldn't stop it, just set it free and ... dance!
 
 -- Persona Q --
 
+Light the Fire Up in the Night (P3 Side) [X]
+Parole :
+Like the shining stars lights the path whenever it's dark
+You keep on blinking at me
+You never turn away from me, in this vast gloomy night sky
+
+Light the fire up in the night
+The journey that we travel for uprise
+No matter where we go, we will not stop the shining forever
+
 Changing Me [X]
 Parole : 
 Jibun dake no chizu kakenai de itanda
@@ -1795,6 +1805,32 @@ It's only just begun
 
 
 -- Persona Q2 --
+
+Invitation to Freedom [X]
+Parole :
+No surprise, after all
+You chose the wrong rival
+We are more than some bored teenagers, yeah
+Bad luck, underestimating us was your worst choice
+Don't sweat it, grownups, fakers
+
+You have no chance, no
+We'll be through with you before you know it, too bad, right?
+We came to take ev'ry heart
+Your's included, don't worry
+This is war, society
+
+We'll keep on fighting
+How about looking at things from a new perspective?
+Ain't no superhero around
+To save the world forever
+This job's up to us, yeah
+
+Time to ask, did you get a grip on the truth?
+We are here to bring change to our world
+Take a side, make it right
+Or get out of the way right now
+You cannot stop us
 
 Wait and See [X]
 Parole : 
