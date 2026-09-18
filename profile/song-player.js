@@ -11,6 +11,7 @@
 import { songs as ALL_SONGS } from "../musicsMode/database/songs.js";
 import { formatSongTime } from "./profile-format.js";
 import { openModal, closeModal } from "../js/modal.js";
+import { profileAutoplayAllowed } from "../js/settings-modal.js";
 
 /** Élément <audio> du profile song — état interne, jamais exposé directement. */
 let profileSongAudio = null;
@@ -316,17 +317,26 @@ function initSongPlayer(profile) {
 
   profileSongAudio.onplay = () => {
     const btn = document.getElementById("songPlayBtn");
-    if (btn) btn.textContent = "⏸";
+    if (btn) {
+      btn.textContent = "⏸";
+      btn.classList.add("playing");
+    }
     document.getElementById("songPlayerUI")?.classList.add("playing");
   };
 
   profileSongAudio.onpause = () => {
     const btn = document.getElementById("songPlayBtn");
-    if (btn) btn.textContent = "▶";
+    if (btn) {
+      btn.textContent = "▶";
+      btn.classList.remove("playing");
+    }
     document.getElementById("songPlayerUI")?.classList.remove("playing");
   };
 
   // ── Autoplay avec fallback au premier geste utilisateur ──
+  // Réglage « Autoplay sur mon profil » (settings-modal.js) : coupé, la piste
+  // reste chargée et le bouton ▶ fonctionne, elle ne démarre juste pas seule.
+  if (!profileAutoplayAllowed("own")) return;
   profileSongAudio.play().catch(() => {
     // Autoplay bloqué — on attend la première interaction
     const unlock = () => {

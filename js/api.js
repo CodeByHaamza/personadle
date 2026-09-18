@@ -26,7 +26,7 @@
 // Prod         : Hostinger, projet à la racine du domaine
 // → On détecte si le pathname commence par /personadle/ pour le préfixer.
 const _pathPrefix = window.location.pathname.startsWith("/personadle/") ? "/personadle" : "";
-const BASE_URL =
+export const BASE_URL =
   window.location.hostname === "personadle.net"
     ? "https://personadle.net/api"
     : `${window.location.protocol}//${window.location.host}${_pathPrefix}/api`;
@@ -202,6 +202,20 @@ export const api = {
      * @returns {Promise<{ me, friend, on_cooldown, cooldown_until, xp_gained }>}
      */
     compare: (friendId) => get(`/user/compare?friend_id=${friendId}`),
+
+    /**
+     * Le Compendium (carnet de collection) — public, comme le profil.
+     * Sans paramètre : celui de l'utilisateur connecté. `{ code }` (friend_code)
+     * ou `{ id }` : celui d'un autre joueur.
+     * @param {{ code?: string, id?: number }} [target]
+     */
+    compendium: (target = {}) => {
+      const q = new URLSearchParams();
+      if (target.code) q.set("code", target.code);
+      else if (target.id) q.set("id", String(target.id));
+      const qs = q.toString();
+      return get(`/user/compendium${qs ? `?${qs}` : ""}`);
+    },
   },
 
   // ── Statistiques & sessions de jeu ───────────────────
@@ -219,6 +233,15 @@ export const api = {
     postSession: (session) => post("/sessions", session),
 
     /**
+     * « Tes amis aujourd'hui » : première partie du jour de chaque ami sur un
+     * mode (résultat, essais, suite des essais). 403 `play_first` tant que le
+     * joueur n'a pas fini la sienne — le client l'attrape et n'affiche rien.
+     * @param {{ mode: string, expert?: boolean }} p
+     */
+    friendsToday: ({ mode, expert = false }) =>
+      get(`/sessions_today?mode=${encodeURIComponent(mode)}&expert=${expert ? 1 : 0}`),
+
+    /**
      * Synchronise les sessions en attente stockées dans localStorage.
      * Mutex _syncLock : une seule exécution simultanée (évite la race condition
      * entre gameCore.savePendingSession, auth.initAuth et cloud-sync.pullProfileFromCloud).
@@ -226,15 +249,32 @@ export const api = {
     syncPending: async () => {
       if (api.stats._syncLock) return;
       api.stats._syncLock = true;
-      const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
-      if (!pending.length) { api.stats._syncLock = false; return; }
+      let pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
+      if (!pending.length) {
+        api.stats._syncLock = false;
+        return;
+      }
 
       // Normalize legacy mode names stored before the server enum was finalised
       const _modeAlias = { shadow: "silhouette", classic: "classic" };
-      const normalize = (s) => {
+      // `_owner` est un marqueur local (voir ownsQueuedEntry, js/gameCore.js) :
+      // il ne part pas au serveur.
+      const normalize = ({ _owner, ...s }) => {
         const m = (s.mode ?? "").toLowerCase();
         return { ...s, mode: _modeAlias[m] ?? m };
       };
+
+      // Appareil partagé : on ne rejoue que les parties de CE compte et celles
+      // d'un invité (sans propriétaire). Celles d'un autre compte restent en file,
+      // intactes, jusqu'à ce qu'il se reconnecte — sinon elles atterrissaient dans
+      // les stats du compte connecté (le serveur ne connaît que le cookie).
+      const ownsEntry = window._personadleOwnsQueuedEntry ?? (() => true);
+      const foreign = pending.filter((s) => !ownsEntry(s));
+      const mine = pending.filter((s) => ownsEntry(s));
+      if (!mine.length) {
+        api.stats._syncLock = false;
+        return;
+      }
 
       // Clé d'idempotence rétro-active : les sessions mises en file AVANT la
       // migration 032 n'en ont pas, et l'unique key par jour qui les protégeait
@@ -250,6 +290,7 @@ export const api = {
         }
       }
       if (seeded) localStorage.setItem("pendingSessions", JSON.stringify(pending));
+      pending = mine;
 
       // Plafond par passage. Le rate limit de POST /api/sessions est de 90 requêtes
       // par 15 min (api/sessions.php), PARTAGÉ avec les parties en cours. Vider une
@@ -311,7 +352,10 @@ export const api = {
           console.warn("⚠️ Session sync failed:", e.message);
         }
       }
-      localStorage.setItem("pendingSessions", JSON.stringify([...remaining, ...deferred]));
+      localStorage.setItem(
+        "pendingSessions",
+        JSON.stringify([...remaining, ...deferred, ...foreign])
+      );
       api.stats._syncLock = false;
     },
     _syncLock: false,
@@ -376,10 +420,14 @@ export const api = {
   leaderboard: {
     /**
      * Récupère un classement.
-     * @param {{ mode?, period?, metric?, limit?, offset? }} params
+     * @param {{ mode?, period?, metric?, limit?, offset?, expert? }} params
      *   mode   : 'all' | 'classic' | 'emoji' | 'silhouette' | 'alloutattack' | 'personae' | 'music'
      *   period : 'day' | 'week' | 'month' | 'ever'
      *   metric : 'wins' | 'winrate' | 'streak' | 'perfect' | 'games'
+     *   expert : 0 | 1 — dimension du classement (migration 045). L'Expert a le
+     *            sien : autre pool, autre barème, taux de victoire sans commune
+     *            mesure. `metric: 'streak'` y renvoie un classement vide, par
+     *            choix (cf. api/lib/leaderboard_metrics.php).
      */
     get: ({
       mode = "all",
@@ -388,9 +436,10 @@ export const api = {
       limit = 50,
       offset = 0,
       friends_only = 0,
+      expert = 0,
     } = {}) =>
       get(
-        `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}&friends_only=${friends_only}`
+        `/leaderboard/?mode=${mode}&period=${period}&metric=${metric}&limit=${limit}&offset=${offset}&friends_only=${friends_only}&expert=${expert}`
       ),
   },
 
@@ -405,9 +454,7 @@ export const api = {
      *   (~2 requêtes par ami) : à ne demander que lorsque c'est nécessaire.
      */
     list: (opts = {}) => {
-      const qs = opts.expert_mode
-        ? `?expert_mode=${encodeURIComponent(opts.expert_mode)}`
-        : "";
+      const qs = opts.expert_mode ? `?expert_mode=${encodeURIComponent(opts.expert_mode)}` : "";
       return get(`/friends${qs}`);
     },
 
@@ -436,6 +483,14 @@ export const api = {
   },
 
   // ── Notifications ─────────────────────────────────────
+  // ── Messages de l'équipe (migration 042) ─────────────────
+  notices: {
+    /** Mes messages de l'équipe non lus (avertissement / info). */
+    pending: () => get("/notices/"),
+    /** Accusé de lecture — le message ne reviendra plus. */
+    markRead: (id) => apiCall(`/notices/${id}`, { method: "PATCH" }),
+  },
+
   notifications: {
     /**
      * Retourne le nombre de demandes d'ami non vues.

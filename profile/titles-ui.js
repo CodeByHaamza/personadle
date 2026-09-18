@@ -10,6 +10,7 @@
  */
 
 import { openModal, closeModal } from "../js/modal.js";
+import { targetSetMet } from "./badges/badgesData.js";
 
 /** Définitions locales des titres — toujours disponibles ; l'API enrichit avec le statut par utilisateur. */
 export const TITLES_LOCAL = [
@@ -98,6 +99,13 @@ export function isTitleConditionMet(title, ctx) {
       return false;
     case "leaderboard_top":
       return (profile.bestLeaderboardRank || 9999) <= v;
+    case "targets_found":
+      // Ensemble nommé de cibles (api/lib/condition_check.php, PERSONADLE_TARGET_SETS),
+      // tranché par le SERVEUR depuis game_sessions. Ici, seulement ce que
+      // characterModeMap laisse voir (ni la dimension Expert, ni les musiques) :
+      // dès que cette partie visible est remplie, on TENTE l'unlock — le serveur
+      // répond 403 tant que le reste manque, et on retentera à la partie suivante.
+      return targetSetMet(profile, title.condition_mode);
     case "weekly_clean_modes":
       return (profile.weeklyCleanWinModes || 0) >= v;
     case "joker_profile": {
@@ -152,6 +160,13 @@ export function titleConditionText(t) {
       return `Win ${v} games in Expert mode`;
     case "leaderboard_top":
       return `Reach top ${v} on the leaderboard`;
+    case "targets_found":
+      return (
+        {
+          wonder_go_beyond:
+            "Find all five of Wonder's All-Out Attacks, Wonder in Classic and Emoji, Jánošík in Personae (normal and Expert), and every P5X song in Music (normal and Expert)",
+        }[t.condition_mode] ?? "Find a specific set of characters"
+      );
     case "weekly_clean_modes":
       // Correspond à ce que vérifie réellement api/lib/condition_check.php : le
       // nombre de modes DISTINCTS joués sur 7 jours, peu importe le résultat —
@@ -228,17 +243,63 @@ async function checkAndUnlockTitles(profile, saveProfile) {
   for (const title of _titlesData) {
     if (title.is_unlocked) continue;
     if (!isTitleConditionMet(title, ctx)) continue;
+    if (!profile.unlockedTitles) profile.unlockedTitles = [];
+    if (profile.unlockedTitles.includes(title.slug)) {
+      // Déjà acquis en local (hors ligne, ou avant le serveur) : rien à annoncer.
+      title.is_unlocked = 1;
+      continue;
+    }
+
+    // Le SERVEUR tranche avant qu'on annonce quoi que ce soit. Avant : le titre
+    // était posé en local et la toast « Title Unlocked! » jouait AVANT la
+    // réponse, et un 403 (condition non remplie côté serveur — un badge compté
+    // en local mais absent de badges_unlocked, une session pas encore
+    // enregistrée) était avalé. Sur un navigateur qui perd son localStorage
+    // entre deux visites (navigation privée, nettoyage, second appareil), le
+    // titre revenait donc en « nouveau » à CHAQUE visite du profil — « la notif
+    // de I Remembered à chaque fois que je vais sur mon profil » (Hamza).
+    const api = window._personadleApi;
+    let confirmed = !api?.titles?.unlock || !window._currentUser; // invité / hors bridge : local fait foi
+    if (!confirmed) {
+      try {
+        await api.titles.unlock(title.slug);
+        confirmed = true;
+      } catch (err) {
+        // 4xx = le serveur dit non (ou ne connaît pas le titre) : on n'insiste
+        // pas et on n'annonce rien. Réseau/5xx : on garde l'acquis local, la
+        // réconciliation (syncTitlesWithBackend) le repoussera.
+        confirmed = !(Number(err?.status) >= 400 && Number(err?.status) < 500);
+      }
+    }
+    if (!confirmed) continue;
 
     title.is_unlocked = 1;
-    if (!profile.unlockedTitles) profile.unlockedTitles = [];
-    if (!profile.unlockedTitles.includes(title.slug)) {
-      profile.unlockedTitles.push(title.slug);
-      saveProfile();
-      _showTitleNotification(title);
-      // Persister en BDD — on envoie le slug (l'id peut être null si l'API n'a pas répondu)
-      window._personadleApi?.titles?.unlock(title.slug).catch(() => {});
-    }
+    profile.unlockedTitles.push(title.slug);
+    saveProfile();
+    // Annonce une seule fois par titre sur cet appareil, même si le profil local
+    // est reconstruit entre-temps — même mécanisme que _seenBadgeAnimIds.
+    if (_markTitleAnnounced(title.slug)) _showTitleNotification(title);
   }
+}
+
+const SEEN_TITLE_ANIM_KEY = "_seenTitleAnimIds";
+
+/** true la PREMIÈRE fois qu'on note ce titre comme annoncé sur cet appareil. */
+function _markTitleAnnounced(slug) {
+  let seen = [];
+  try {
+    seen = JSON.parse(localStorage.getItem(SEEN_TITLE_ANIM_KEY) || "[]");
+  } catch {
+    seen = [];
+  }
+  if (seen.includes(slug)) return false;
+  seen.push(slug);
+  try {
+    localStorage.setItem(SEEN_TITLE_ANIM_KEY, JSON.stringify(seen.slice(-100)));
+  } catch {
+    /* stockage indisponible : on annonce quand même */
+  }
+  return true;
 }
 
 /**
@@ -332,6 +393,9 @@ export function renderTitlesSection(profile, saveProfile, saveProfileToCloud, ma
     (t) => (equippedId && t.id && t.id === equippedId) || (equippedSlug && t.slug === equippedSlug)
   );
   const titleImg = document.getElementById("equippedTitleImg");
+  // Sans titre, la puce affiche « ＋ Choisir un titre » (2.2, atelier) — même
+  // bouton, il ouvre l'onglet Titre dans les deux cas.
+  const titleEmpty = document.getElementById("equippedTitleEmpty");
   if (titleImg) {
     if (eq) {
       titleImg.src = eq.image_path || `titles/${eq.slug}.webp`;
@@ -341,6 +405,8 @@ export function renderTitlesSection(profile, saveProfile, saveProfileToCloud, ma
       titleImg.style.display = "none";
     }
   }
+  if (titleEmpty) titleEmpty.hidden = !!eq;
+  document.getElementById("equippedTitleBtn")?.classList.toggle("title-chip--empty", !eq);
   // ── Grille modale ─────────────────────────────────────────────────────────
   _renderTitlesGrid(profile, saveProfile, saveProfileToCloud, markDirty);
 }
@@ -413,9 +479,12 @@ export function _bindTitlesModal(profile, saveProfile, saveProfileToCloud, markD
   const overlay = document.getElementById("titlesModalOverlay");
   const openBtn = document.getElementById("openTitlesModal");
   const closeBtn = document.getElementById("closeTitlesModal");
-  if (!modal || !openBtn) return;
 
+  // Rendu immédiat depuis localStorage, avant auth/cloud. Depuis la 2.2 la
+  // grille vit dans l'atelier (onglet Titre, #titlesModalGrid) et il n'y a plus
+  // de modale : on rend et on s'arrête là.
   _renderTitlesGrid(profile, saveProfile, saveProfileToCloud, markDirty);
+  if (!modal || !openBtn) return;
 
   const open = () => {
     // Escape (géré par le trap clavier d'openModal) doit aussi refermer
@@ -453,6 +522,68 @@ export function resetTitlesUnlockedState() {
 }
 
 /**
+ * Réconcilie les titres local → backend, comme syncBadgesWithBackend() le fait
+ * pour les badges depuis toujours. Les titres n'avaient PAS ce rattrapage, et
+ * c'est ce qui produisait « j'ai le badge des 50 jours mais pas le titre des
+ * 50 victoires » :
+ *
+ * En fin de partie, checkUnlocksAfterGame() tourne juste après
+ * savePendingSession() — SANS l'attendre. Le client compte déjà la 50ᵉ victoire
+ * (updateProfileStats), donc il pose le titre en local et POST /titles/unlock ;
+ * mais le serveur, qui revérifie sur `user_stats`, n'a pas encore reçu la
+ * session : 403 « Condition not met », avalé. Le titre est alors dans
+ * `profile.unlockedTitles` (donc plus jamais renvoyé par checkAndUnlockTitles,
+ * qui saute ce qui est déjà local) mais absent de `user_titles` — invisible sur
+ * tout autre appareil, et impossible à équiper. Les badges, eux, sont repoussés
+ * à chaque visite du profil.
+ *
+ * Règle : le backend est la source de vérité (js/cloud-sync.js). Une entrée
+ * locale qu'il refuse pour de bon (403 : condition réellement non remplie, par
+ * exemple une victoire comptée en local mais jamais enregistrée) est un titre
+ * fantôme — on la retire, le joueur ne doit pas voir un titre qu'il ne peut ni
+ * équiper ni afficher aux autres. Un échec réseau, lui, garde l'entrée : on
+ * réessaiera à la prochaine visite.
+ *
+ * @param {object} profile  profil local (personaUserProfile)
+ * @param {string[]} serverSlugs  slugs que /api/titles donne comme débloqués
+ * @param {() => void} saveProfile
+ * @returns {Promise<{pushed:string[], dropped:string[]}>}
+ */
+export async function syncTitlesWithBackend(profile, serverSlugs, saveProfile) {
+  const api = window._personadleApi;
+  const user = window._currentUser;
+  const result = { pushed: [], dropped: [] };
+  if (!api?.titles?.unlock || !user) return result;
+
+  // Même garde anti-import que les badges : un profil local venu d'un autre
+  // compte ne pousse rien vers le backend.
+  if (profile._accountId && String(profile._accountId) !== String(user.id)) return result;
+
+  const server = new Set(serverSlugs);
+  const local = Array.isArray(profile.unlockedTitles) ? profile.unlockedTitles : [];
+  const toPush = local.filter((slug) => !server.has(slug));
+
+  for (const slug of toPush) {
+    try {
+      await api.titles.unlock(slug);
+      result.pushed.push(slug);
+      const t = _titlesData.find((x) => x.slug === slug);
+      if (t) t.is_unlocked = 1;
+    } catch (err) {
+      if (Number(err?.status) === 403) {
+        result.dropped.push(slug);
+        profile.unlockedTitles = profile.unlockedTitles.filter((s) => s !== slug);
+        const t = _titlesData.find((x) => x.slug === slug);
+        if (t) t.is_unlocked = 0;
+      }
+      // 404 (titre inconnu côté serveur) ou réseau : on laisse tel quel.
+    }
+  }
+  if (result.dropped.length) saveProfile();
+  return result;
+}
+
+/**
  * Rafraîchissement léger après un pull cloud (sans re-fetch de /api/titles) :
  * resync l'état débloqué depuis profile.unlockedTitles, résout l'équipé,
  * revérifie les conditions, re-rend.
@@ -473,6 +604,9 @@ export async function initTitlesSection(profile, saveProfile, saveProfileToCloud
   //    - vrais IDs (pour les appels unlock)
   //    - noms localisés (depuis la BDD)
   //    - is_unlocked PER-USER (la source de vérité la plus fiable)
+  // `serverSlugs` reste null si l'API n'a pas répondu : sans vérité serveur, on
+  // ne réconcilie rien (ni push, ni retrait) — on repart du local comme avant.
+  let serverSlugs = null;
   try {
     const res = await fetch(`${_prefix}/api/titles?lang=${lang}`, { credentials: "include" });
     const json = await res.json();
@@ -480,6 +614,7 @@ export async function initTitlesSection(profile, saveProfile, saveProfileToCloud
     if (apiTitles.length > 0) {
       const bySlug = {};
       for (const t of apiTitles) bySlug[t.slug] = t;
+      serverSlugs = apiTitles.filter((t) => Number(t.is_unlocked) === 1).map((t) => t.slug);
 
       _titlesData = _titlesData.map((t) => {
         const api = bySlug[t.slug];
@@ -495,6 +630,11 @@ export async function initTitlesSection(profile, saveProfile, saveProfileToCloud
       });
     }
   } catch (_) {}
+
+  // 1bis. Local → backend : ce que cet appareil croit débloqué et que le serveur
+  //       n'a pas (déblocage refusé dans la course de fin de partie, ou fait hors
+  //       ligne) est repoussé ; ce qu'il refuse pour de bon est retiré du local.
+  if (serverSlugs) await syncTitlesWithBackend(profile, serverSlugs, saveProfile);
 
   // 2. Fusionner avec localStorage (titres débloqués offline ou sur un autre appareil)
   _refreshTitlesUnlockState(profile);

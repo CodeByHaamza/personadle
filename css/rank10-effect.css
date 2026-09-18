@@ -1,44 +1,49 @@
-/* ─── Rang 10 — Effet True Confidant ──────────────────────────────────────── */
+/* ─── Rang 10 — Effet True Confidant ──────────────────────────────────────────
+   Chargé par profile.html ET profile/friends/friends.html. La liste d'amis ne
+   le chargeait pas : particules et label y arrivaient sans aucun style — un bloc
+   de texte brut « ✦ True Confidant » sous l'avatar, rejoué à chaque poll. C'était
+   le « badge True Confidant ultra moche » remonté en 2.2.
 
-/* Marqueur permanent : halo doré pulsant autour de l'avatar */
+   Assagi au passage : le halo ne pulse plus (anneau doré fixe), la pastille ne
+   brille plus, le label s'efface sans machine à écrire.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Marqueur permanent : anneau doré fixe, séparé de l'avatar par un liseré sombre */
 .rank10-avatar {
   box-shadow:
-    0 0 0 2px #f0b840,
-    0 0 12px 4px rgba(240, 184, 64, 0.5);
-  animation: rank10Pulse 2s ease-in-out infinite;
+    0 0 0 2px #15120a,
+    0 0 0 4px #e0b64a,
+    0 2px 10px rgba(224, 182, 74, 0.35);
 }
 
-@keyframes rank10Pulse {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 2px #f0b840,
-      0 0 12px 4px rgba(240, 184, 64, 0.5);
-  }
-  50% {
-    box-shadow:
-      0 0 0 2px #f5d070,
-      0 0 22px 8px rgba(240, 184, 64, 0.75);
-  }
-}
-
-/* Marqueur permanent : icône ✦ dorée à côté du pseudo */
+/* Marqueur permanent : pastille « ✦ MAX » à côté du pseudo */
 .rank10-icon {
-  color: #f0b840;
-  font-size: 0.85em;
-  margin-left: 5px;
-  text-shadow: 0 0 8px rgba(240, 184, 64, 0.8);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #f1d27a, #c9962b);
+  color: #2a1f05;
+  font-family: "Oswald", "Arial Black", Arial, sans-serif;
+  font-size: 0.58em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
   vertical-align: middle;
+  text-shadow: none;
   pointer-events: none;
+  white-space: nowrap;
 }
 
-/* Particule de burst */
+/* Particule de burst (entrée, une seule fois) */
 .rank10-particle {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #f0b840;
+  background: #e0b64a;
   pointer-events: none;
   top: 50%;
   left: 50%;
@@ -53,35 +58,36 @@
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(44px) scale(0);
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateX(40px) scale(0);
     opacity: 0;
   }
 }
 
-/* Label typewriter "✦ True Confidant" */
+/* Label « ✦ True Confidant » : fondu simple, positionné sous l'avatar, jamais
+   dans le flux (la liste d'amis ne doit pas sauter). */
 .rank10-label {
   position: absolute;
-  bottom: -26px;
+  bottom: -14px;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  overflow: hidden;
-  width: 0;
-  color: #f0b840;
-  font-size: 0.72rem;
-  font-weight: bold;
-  letter-spacing: 0.03em;
-  text-shadow: 0 0 8px rgba(240, 184, 64, 0.8);
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: #15120a;
+  color: #f1d27a;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   pointer-events: none;
-  animation: rank10Typewriter 1.1s steps(16) 0.6s forwards;
+  z-index: 2;
+  opacity: 0;
+  animation: rank10LabelIn 0.4s ease forwards;
 }
 
-@keyframes rank10Typewriter {
-  from {
-    width: 0;
-  }
+@keyframes rank10LabelIn {
   to {
-    width: 120px;
+    opacity: 1;
   }
 }
 
@@ -96,16 +102,21 @@
 }
 
 /* ── Dark Mode ─────────────────────────────────────────────── */
+body.darkmode .rank10-avatar {
+  box-shadow:
+    0 0 0 2px #0b0b0b,
+    0 0 0 4px #e0b64a,
+    0 2px 12px rgba(224, 182, 74, 0.3);
+}
 body.darkmode .rank10-label {
-  color: #ffd96a;
-  text-shadow: 0 0 12px rgba(255, 200, 50, 0.6);
+  background: #f1d27a;
+  color: #2a1f05;
 }
 
 /* ── prefers-reduced-motion ─────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .rank10-avatar,
-  .rank10-label,
-  .rank10-burst {
+  .rank10-particle,
+  .rank10-label {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }

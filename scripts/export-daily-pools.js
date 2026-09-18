@@ -45,12 +45,26 @@ const expertLore = JSON.parse(
 );
 
 const opusByName = Object.fromEntries(aoaCharacters.map((c) => [c.nom, c.opus]));
-
+// Opus par nom pour chaque pool filtrable : c'est ce qui permet au serveur de
+// re-tirer dans le pool filtré exactement comme le client (getDailyTargetWithin,
+// js/gameCore.js) quand la cible du catalogue complet est hors des filtres du
+// joueur. Les variantes Expert (classic_expert, emoji_expert, music_expert,
+// silhouette_expert) réutilisent la table de leur mode normal — mêmes noms.
+const opusOf = (list, key) => Object.fromEntries(list.map((c) => [c[key], c.opus]));
 const pools = {
-  classic: { pool: characters.map((c) => c.nom) },
-  emoji: { pool: characters.filter((c) => c.emoji).map((c) => c.nom) },
-  silhouette: { pool: silhouetteCharacters.map((c) => c.nom) },
-  music: { pool: songs.map((s) => s.titre) },
+  classic: { pool: characters.map((c) => c.nom), opusByName: opusOf(characters, "nom") },
+  emoji: {
+    pool: characters.filter((c) => c.emoji).map((c) => c.nom),
+    opusByName: opusOf(
+      characters.filter((c) => c.emoji),
+      "nom"
+    ),
+  },
+  silhouette: {
+    pool: silhouetteCharacters.map((c) => c.nom),
+    opusByName: opusOf(silhouetteCharacters, "nom"),
+  },
+  music: { pool: songs.map((s) => s.titre), opusByName: opusOf(songs, "titre") },
   // ── Pools Mode Expert ──────────────────────────────────────────────────────
   // Tous ont une clé de hash distincte de leur mode normal : le tirage doit être
   // indépendant, sinon jouer le mode normal d'abord — où l'indice est bien plus

@@ -5,7 +5,7 @@
 <img src="https://img.shields.io/badge/Playwright-Chromium-2EAD33?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
 <img src="https://img.shields.io/badge/cible-stack%20Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
 
-> **113 tests (15 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
+> **239 tests (27 fichiers) sur un vrai navigateur, contre la stack Docker complète.**
 > Couvre les parcours qu'aucun test unitaire ne voit (login, leaderboard, profil public, Social Link, admin).
 
 </div>
@@ -85,6 +85,59 @@ admin de seed.
 | Changement de langue                          | l'UI se met à jour et persiste après rechargement          |
 | Responsive (375px)                            | pas de débordement horizontal sur les 6 modes de jeu        |
 
+### `challenge_flow.spec.js` — un défi de bout en bout (navigateur réel)
+
+`challenge-supersede.spec.js` verrouille les règles serveur par l'API ; ici c'est l'interface qui
+est conduite, comme un joueur. Deux jeux de comptes frais à chaque run.
+
+| Étape | Vérifie                                                                                   |
+| ----- | ------------------------------------------------------------------------------------------ |
+| 1     | « Défier un ami » est présent **avant** toute partie, dans la zone Expert — mais **verrouillé** : bulle « finis ta partie du jour », pas de modale |
+| 2     | Alice gagne → déverrouillé ; la modale porte son **vrai score** (1) ; l'envoi crée un message avec ce score et une cible |
+| 3     | le bouton survit à un rechargement, toujours déverrouillé (même appareil)                    |
+| 4     | ⚔ depuis l'onglet Amis → choix du mode → page verrouillée (« joue d'abord ») → Bob gagne → modale ouverte sur cet ami (`?challenge=` consommé) |
+| 5     | acceptation depuis la Boîte → bandeau au score d'Alice → cible du défi jouée → statut serveur `beaten` |
+| 6     | la *calling card* (`js/challenge-notif.js`) sur une page quelconque ; accepter emmène sur le mode |
+| 7     | « Abandonner » depuis le bandeau → case locale libérée, statut `read` (pas une défaite)      |
+| 8     | Give Up en plein défi → statut `expired`, case libérée                                      |
+
+C'est **la** façon de vérifier les défis après une modification : `npx playwright test
+challenge_flow` (ou `--headed` pour regarder le navigateur jouer).
+
+### `visual_layout.spec.js` — captures de référence des 6 modes (opt-in, hors CI)
+
+`E2E_VISUAL=1 npx playwright test visual_layout` — ignoré sans la variable. Les 6 modes × 2
+viewports (390×844, 1440×900), page fraîche, non connecté, zone de la cible du jour masquée
+(elle dépend du joueur et du jour). Les références vivent en local dans
+`tests-e2e/__screenshots__/<plateforme>/` (ignoré par git : le rendu des polices n'est pas
+portable d'un OS à l'autre, une capture Windows ne vaut rien sur le Linux de la CI).
+
+```bash
+E2E_VISUAL=1 npx playwright test visual_layout --update-snapshots   # figer une référence
+E2E_VISUAL=1 npx playwright test visual_layout                      # comparer
+npx playwright show-report                                          # diffs côte à côte
+```
+
+Usage prévu : figer l'état **avant** une refonte de layout, relire chaque diff pendant.
+
+### `compendium.spec.js` — le carnet de collection (2.2)
+
+Ce que l'unitaire ne voit pas : la route `.htaccess` `GET /api/user/compendium` (publique par
+`?code=`, 404 sur un code inconnu, 401 sans cible ni session), le bouton `#compendiumBtn` d'un
+profil visité qui pointe vers `compendium.html?view=<code>`, et l'ouverture du livre sans
+session (couverture → 6 onglets → page de gauche du chapitre). Joueur seed : Yu (`SEED2226`).
+
+### `moderation.spec.js` — modération, annonces, maintenance (2.2, migration 042)
+
+Via l'API, `describe.serial`, compte admin de seed + un joueur inscrit pour l'occasion. Ce que
+PHPUnit et Vitest ne voient pas : les routes `.htaccess` (`users/:id/notes`, `/notices`,
+`announcements`, `settings`, `anticheat`, `/api/notices/`), le **403 `code: banned`** avec
+raison et échéance au login, la session détruite par `/me` d'un joueur banni, l'accusé d'un
+message de l'équipe visible dans l'historique admin, une annonce livrée par `/me` puis retirée,
+et la garde de maintenance de `bootstrap.php` — **503 pour le joueur, l'admin passe**, puis
+rouverture (`afterAll` rouvre le site quoi qu'il arrive). Le login est rate-limité 5/15 min en
+prod, 50 hors prod : c'est ce qui permet à cette spec de se connecter trois fois.
+
 ---
 
 ## 🚀 Lancer
@@ -101,6 +154,10 @@ make up
 npm run test:e2e
 ```
 
+> Rate limit : le global-setup inscrit 6 comptes à chaque run, et plusieurs runs rapprochés
+> déclenchent la limite d'inscription (`429` dans le setup). Attendre ~15 min, ou en local :
+> `docker compose exec -T db mariadb -u root -prootpassword personadle_db -e "DELETE FROM rate_limits;"`.
+>
 > Cible par défaut : `http://localhost:8080` (le `APP_PORT` par défaut de `docker-compose.yml`).
 > Si ton `.env` change `APP_PORT` : `PLAYWRIGHT_BASE_URL=http://localhost:TON_PORT npm run test:e2e`.
 > Pas de `webServer` dans [playwright.config.js](../playwright.config.js) — c'est Docker qui sert le site.

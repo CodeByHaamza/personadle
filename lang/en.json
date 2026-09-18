@@ -10,6 +10,10 @@
     "filters": "FILTERS",
     "select_all": "✓ Select all",
     "deselect_all": "✗ Deselect all",
+    "filters_hint": "Only the games you keep can come up as the answer — and only they are suggested as you type.",
+    "filters_hint_2": "Click a game to unfold its entries — then keep them all at once, or one by one.",
+    "group_all": "✓ All",
+    "group_none": "✗ None",
     "input_placeholder": "Enter character name...",
     "music_input_placeholder": "Guess the song...",
     "daltonian_off": "Daltonian Mode: OFF",
@@ -312,7 +316,6 @@
     "stat_time": "⏱️ Total Time: {{value}}",
     "stat_first_played": "📅 First Played: {{date}}",
     "stat_last_played": "📅 Last Played: {{date}}",
-    "reset_confirm": "⚠️ This will permanently erase your profile data. Do you want to continue?",
     "export": "Export Profile",
     "import": "Import Profile",
     "import_already_done": "You have already imported a JSON profile. Only one import is allowed per account.",
@@ -327,11 +330,42 @@
     "friend_code_label": "Your friend code",
     "leaderboard": "Leaderboard",
     "change_picture": "Change picture",
-    "customization_title": "Customization",
-    "border_color_label": "Avatar Border",
-    "theme_label": "Interface Theme",
+    "atelier_title": "Customize",
+    "tab_avatar": "Avatar",
+    "tab_border": "Border",
+    "tab_theme": "Theme",
+    "tab_title": "Title",
+    "tab_badges": "Badges",
+    "avatar_hint": "Pick a portrait — it is applied right away. Badly framed? Adjust it.",
+    "avatar_adjust": "Adjust framing",
+    "crop_title": "Adjust your avatar",
+    "crop_label": "Drag, zoom, confirm",
+    "border_hint": "The ring around your avatar: on your profile, in your friends' lists and in challenges.",
+    "theme_hint": "The look of your profile page: background and accent color.",
+    "title_pick_hint": "One title shows under your name. Click to equip, click again to remove.",
+    "no_title": "＋ Choose a title",
+    "pinned_badges": "Pinned badges",
+    "pinned_hint": "Pick up to 4 badges to pin on your card. Click a pinned one to unpin it.",
+    "pin_badge": "Pin a badge",
+    "unpin_badge": "Unpin",
+    "pick_empty": "No badge unlocked yet — play a few games, they will show up here.",
+    "pin_limit": "You can only pin <strong>4 badges</strong>!",
+    "pin_limit_hint": "Unpin one first.",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "save_failed": "Not saved — tap to retry",
+    "all_saved": "Everything is saved",
+    "customize_btn": "Customize",
+    "wallpapers_title": "🖼️ Unlockable Wallpapers",
+    "wp_owned": "Unlocked",
+    "share_title": "Share",
+    "share_desc": "Turn your profile into a card to post anywhere — or copy its link so a friend can come and look around.",
+    "share_modal_title": "Share my profile",
+    "share_download": "Download PNG",
+    "share_on_x": "Share on X",
+    "share_discord": "Copy for Discord",
+    "share_email": "Email",
     "theme_custom": "Custom color",
-    "save_refresh": "Save & Refresh",
     "friend_code_copy_hint": "Click to copy your friend code",
     "friend_code_copied": "Copied!",
     "see_all_badges": "See All Badges",
@@ -340,11 +374,16 @@
     "about_badges_text": "Hey! Just wanted to be transparent – these badges were made with AI help. We're just students working on this passion project for free in our spare time, and honestly, we didn't have the budget or time to commission an artist. We absolutely respect human artists and would love to work with one someday if we get the chance! This was purely out of necessity, not preference. Thanks for understanding and for playing! ❤️",
     "event_code_title": "Event Code",
     "event_code_desc": "Enter a valid code to unlock an exclusive badge!",
-    "export_import_title": "Export / Import",
     "share_btn": "Share My Profile",
     "copy_link": "Copy link",
     "link_copied": "Link copied!",
     "reset_btn": "Reset Profile",
+    "reset_title": "Wipe this device's progress?",
+    "reset_warning": "This erases the profile stored in this browser: stats, streak, badges and titles you unlocked, pinned badges, avatar and colors. It cannot be undone.",
+    "reset_point_local": "Everything on this device is cleared.",
+    "reset_point_account": "Your account itself stays: log in again and your cloud profile comes back.",
+    "reset_point_anon": "Without an account, nothing can be recovered — export your profile first (⚙ Settings → Data).",
+    "reset_confirm_btn": "Reset anyway",
     "badges_unlocked": "badges unlocked",
     "stat_wins_label": "Wins",
     "stat_giveups_label": "Give-ups",
@@ -353,6 +392,9 @@
     "stat_time_label": "Time Played",
     "stat_first_played_label": "First Played",
     "stat_fav_mode_label": "Fav Mode",
+    "stat_best_mode_label": "Best Mode Overall",
+    "fav_mode_pick_label": "Favorite mode",
+    "fav_mode_none": "None",
     "stat_current_streak_label": "Current Streak",
     "mode_col_mode": "Mode",
     "mode_col_games": "Games / Win %",
@@ -582,6 +624,36 @@
       "condition": "Use the hint 50 times in Classic mode",
       "description": "Fifty anomalies scanned and deciphered. No truth can hide from your radar."
     },
+    "song_of_orpheus": {
+      "name": "Song of Orpheus",
+      "condition": "Win 25 games in Expert Mode",
+      "description": "Orpheus walked down into the dark with nothing but a lyre, and walked back out singing. Twenty-five Expert wins later, so did you."
+    },
+    "starlight_festival": {
+      "name": "Starlight Festival",
+      "condition": "Find Joker, Panther and Mona in their Starlight outfits in All-Out Attack",
+      "description": "Ren, Ann and Morgana stepped onto the stage in their Starlight outfits. You caught all three mid-performance."
+    },
+    "shujin_outlaws": {
+      "name": "Shujin Outlaws",
+      "condition": "Find Wonder's Shujin All-Out Attack, then Ren and Wonder in Silhouette mode",
+      "description": "Same uniform, same school, two worlds apart. You recognized both Shujin transfer students by their shadows — and Wonder by his finisher."
+    },
+    "absolute_authority": {
+      "name": "Absolute Authority",
+      "condition": "Find Mitsuru Kirijo and Makoto Niijima in Classic mode",
+      "description": "Two student council presidents, two schools, zero tolerance. Gekkoukan and Shujin answer to the same authority — yours."
+    },
+    "dont_waste_your_breath": {
+      "name": "Don't Waste Your Breath",
+      "condition": "Win 5 Classic Expert games on the very first guess",
+      "description": "One line was enough. Classic Expert hands you a single quote — five times over, you didn't need a word more. Shinji would approve."
+    },
+    "same_energy": {
+      "name": "Same Energy",
+      "condition": "Reach Social Link rank 5 with a friend while one of you wears Motoha Arai and the other Chie Satonaka",
+      "description": "Two kung-fu girls, two games, one energy. When a rank-5 friend shows up as Chie while you're wearing Arai — or the other way around — you both get this one, at the same moment."
+    },
     "velvet_regular": {
       "name": "Velvet Regular",
       "condition": "Play on 50 unique days",
@@ -799,7 +871,10 @@
     "forgot_password": "Forgot password?",
     "send_reset": "Send reset link",
     "back": "Back to login",
-    "reset_sent": "If that email exists, a reset link has been sent. Check your inbox."
+    "reset_sent": "If that email exists, a reset link has been sent. Check your inbox.",
+    "banned_until": "Account suspended until {{date}}.",
+    "banned_permanent": "Account banned.",
+    "banned_reason": "Reason: {{reason}}"
   },
   "leaderboard": {
     "title": "Leaderboard",
@@ -828,6 +903,7 @@
     "metric_streak": "Best streak",
     "metric_perfect": "Perfect",
     "metric_games": "Games",
+    "games_count": "{{count}} games",
     "no_entries": "No entries for this period.",
     "no_entries_sub": "Play some games to appear here!",
     "others": "Others",
@@ -836,10 +912,14 @@
     "filter_note": "Opus filters are not factored in.",
     "filter_all_modes": "All modes",
     "filter_scope": "Scope",
+    "filter_dimension": "Dimension",
+    "dimension_normal": "Normal",
+    "dimension_expert": "⚡ Expert",
     "scope_global": "Global",
     "scope_friends": "Friends",
     "login_for_friends": "Log in to see your friends leaderboard.",
-    "no_friends": "None of your friends appear in this ranking yet."
+    "no_friends": "None of your friends appear in this ranking yet.",
+    "expert_no_streak": "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run."
   },
   "friends": {
     "title": "Friends",
@@ -854,7 +934,7 @@
     "search_error": "Search failed. Try again.",
     "login_required": "Log in to add friends and see their profiles.",
     "view_profile": "View profile",
-    "add_friend": "+ Add",
+    "add_friend": "Add",
     "remove_friend": "Remove",
     "accept": "Accept",
     "decline": "Decline",
@@ -900,9 +980,18 @@
     "msg_clear": "Clear resolved",
     "msg_clear_kept_active": "{{count}} challenge(s) in progress were kept — finish them first.",
     "msg_empty": "No messages yet.",
+    "tab_friends": "Friends",
+    "tab_inbox": "Inbox",
+    "tab_find": "Find players",
+    "challenge_btn": "Challenge",
+    "challenge_pick_mode": "Which mode?",
+    "challenge_expert_row": "⚡ Expert — unlocked by you both",
     "delete_msg": "Delete",
     "server_unreachable": "Could not reach the server. Your session is probably still valid — try again.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "challenge_resume": "▶ Resume",
+    "challenge_give_up": "Give up",
+    "challenge_pick_note": "Your score of the day is used — if you haven't played that mode yet, you'll play it first."
   },
   "settings": {
     "title": "Settings",
@@ -916,8 +1005,15 @@
     "anim_style_cc": "Calling Card",
     "anim_style_tv": "P4 TV",
     "anim_style_p3": "P3 Evoker",
+    "profile_music": "Profile music",
+    "profile_autoplay_own": "Autoplay on my profile",
+    "profile_autoplay_others": "Autoplay on other players' profiles",
     "save": "Save",
-    "saved": "✓ Saved!"
+    "saved": "✓ Saved!",
+    "data": "Data",
+    "export_desc": "Download your profile as a file: stats, badges, titles, everything.",
+    "danger_zone": "Danger zone",
+    "danger_intro": "These two are irreversible. Export your profile first if you are unsure."
   },
   "index": {
     "main_title": "Try to guess the Persona character (Persona 1 to Persona 5)",
@@ -1018,6 +1114,7 @@
   "challenge": {
     "challenge_friend": "Challenge a Friend",
     "select_friend": "Select a friend to challenge",
+    "score_to_beat": "Score to beat: {{score}} attempt(s)",
     "send": "Send",
     "active_challenge": "Challenge",
     "banner_title": "⚔ Active Challenge",
@@ -1025,8 +1122,12 @@
     "accept": "⚔ Accept",
     "decline": "✕ Decline",
     "already_sent": "Already sent today",
+    "later": "Later",
+    "refuse": "Refuse",
     "already_active": "Finish your current challenge first.",
     "notif_challenges_you": "challenges you!",
+    "notif_challenges_you_expert": "challenges you in Expert!",
+    "notif_expert_tag": "⚡ EXPERT",
     "notif_beat": "Beat",
     "notif_attempts": "attempt(s)",
     "unknown_mode": "This challenge's mode is unavailable.",
@@ -1039,7 +1140,91 @@
     "select_friend_expert": "Challenge a friend — Expert",
     "expert_note": "Expert challenge: only friends who have unlocked this mode's Expert can take it on.",
     "no_expert_friend": "None of your friends has unlocked this mode's Expert yet.",
-    "expert_locked": "Unlock this mode's Expert before accepting this challenge."
+    "expert_locked": "Unlock this mode's Expert before accepting this challenge.",
+    "target_unavailable": "This challenge can't be played on this mode anymore — it has been cancelled.",
+    "locked_hint": "Finish today's game to challenge a friend"
+  },
+  "compendium": {
+    "title": "Compendium",
+    "tagline": "Personality changes the world.",
+    "open": "Open the Compendium",
+    "button": "Compendium",
+    "button_hint": "Your collection book",
+    "chapter_kicker": "Chapter",
+    "undated": "Before the Compendium",
+    "tries": "{{n}} tries",
+    "tries_one": "1 try",
+    "rank": "Rank {{n}}",
+    "page_prev": "Previous page",
+    "page_next": "Next page",
+    "chapters_label": "Chapters",
+    "login_required": "Log in to open your Compendium.",
+    "unavailable": "The Compendium is unavailable right now.",
+    "not_found": "No Compendium for this player.",
+    "back_to_profile": "Back to profile",
+    "chapter": {
+      "badges": "Badges",
+      "titles": "Titles",
+      "wallpapers": "Wallpapers",
+      "bonds": "Bonds",
+      "challenges": "Challenges",
+      "feats": "Feats"
+    },
+    "chapter_desc": {
+      "badges": "Every badge you have earned, with the day it was pinned to your coat.",
+      "titles": "The titles you may carry, from the common to the legendary.",
+      "wallpapers": "The places you have unlocked to decorate your room.",
+      "bonds": "Friendships formed and Social Links raised — the people of your story.",
+      "challenges": "Gauntlets thrown and picked up: your challenge history with friends.",
+      "feats": "Firsts, perfects, records — the milestones of your journey."
+    },
+    "empty": {
+      "default": "Nothing here yet. The pages are waiting.",
+      "badges": "No badge yet. Play, and the first one will come.",
+      "titles": "No title yet. Keep playing to earn your first.",
+      "wallpapers": "No wallpaper yet. Some are earned, some are found.",
+      "bonds": "No bond yet. Add a friend to write the first line.",
+      "challenges": "No challenge yet. Dare a friend from their profile.",
+      "feats": "No feat yet. Your first game will be the first entry."
+    },
+    "stat": {
+      "games": "Games",
+      "wins": "Wins",
+      "days": "Days played",
+      "streak": "Best streak",
+      "friends": "Friends",
+      "confidants": "True Confidants",
+      "challenges": "Challenges",
+      "won": "Won"
+    },
+    "feat": {
+      "first_game": "First game",
+      "first_win": "First win",
+      "first_perfect": "First perfect",
+      "expert_unlocked": "Expert Mode",
+      "streak_record": "Streak record"
+    },
+    "flavor": {
+      "badge": "Earned through effort, kept for good. The Compendium remembers.",
+      "title_common": "A title to carry with pride: {{name}}.",
+      "title_rare": "Few have earned it. Now it is yours: {{name}}.",
+      "title_epic": "The Velvet Room takes notice. {{name}} joins your legend.",
+      "title_legendary": "Written in gold in the great book: {{name}}.",
+      "wallpaper": "{{name}} now decorates your room — a piece of {{game}} to call your own.",
+      "bond_created": "A new bond is formed with {{name}}. Every story starts with hello.",
+      "bond_rank": "Your bond with {{name}} grows stronger — Rank {{rank}}.",
+      "bond_max": "True Confidants. Your bond with {{name}} has reached its peak.",
+      "challenge_won": "{{name}} threw down the gauntlet in {{mode}} — and you picked it up. Beaten in {{score}}.",
+      "challenge_lost": "{{name}}'s {{mode}} challenge held the line this time. Next time.",
+      "challenge_sent_beaten": "You dared {{name}} in {{mode}}… and your score of {{score}} was beaten. Well played.",
+      "challenge_sent_held": "Your {{mode}} challenge to {{name}} still stands — {{score}} was too strong.",
+      "first_game": "Where it all began. The first door of the Velvet Room opened.",
+      "first_win": "First victory in {{mode}}: {{target}}, found in {{n}}.",
+      "first_perfect": "A flawless run in {{mode}} — {{target}} on the very first try.",
+      "expert_unlocked": "{{mode}} Expert unlocked. The real trial begins.",
+      "expert_granted": "{{mode}} Expert granted to you. Prove them right.",
+      "streak_record": "{{n}} days in a row. Habit becomes legend."
+    }
   },
   "challenge_result": {
     "title_win": "WELL DONE!",
@@ -1054,7 +1239,25 @@
     "to_beat": "Score to beat",
     "social_link": "Social Link",
     "xp_gained": "+{{xp}} XP Social Link",
-    "close": "Back to Home"
+    "close": "Back to Home",
+    "close_notif": "Close"
+  },
+  "friends_today": {
+    "title": "Your friends today",
+    "not_played": "hasn't played yet",
+    "gave_up": "gave up",
+    "first_game_note": "First game of the day only — everyone gets their own daily character.",
+    "empty": "Add friends to compare your games.",
+    "button": "Friends' games",
+    "locked_hint": "Finish today's game to see your friends' games",
+    "first_game_short": "First game of the day",
+    "unavailable": "Unavailable right now."
+  },
+  "guest_nudge": {
+    "title": "🔥 {{n}}-day streak!",
+    "text": "Create a free account to save it — and find it on any device.",
+    "cta": "Create an account",
+    "later": "Later"
   },
   "social": {
     "action_visit": "👁 Visit +5 XP",
@@ -1233,7 +1436,11 @@
     "q42": "Do replays count?",
     "a42": "Yes, since v2.1 every game you finish is recorded — including the ones you replay the same day. Before that, only the first game of each day and each mode was ever saved, which is why some unlock counters seemed frozen.",
     "q43": "How do I earn Social Link XP with a friend?",
-    "a43": "Six actions give XP: sending a challenge (15), playing the same day (20), sharing your streak (15), comparing stats (10), sharing a score (10) and visiting their profile (5). Each one gives roughly double if your friend does the same thing the same day. An Expert challenge is worth more — 25, or 50 mutual — because both of you had to unlock that mode for it to exist at all."
+    "a43": "Six actions give XP: sending a challenge (15), playing the same day (20), sharing your streak (15), comparing stats (10), sharing a score (10) and visiting their profile (5). Each one gives roughly double if your friend does the same thing the same day. An Expert challenge is worth more — 25, or 50 mutual — because both of you had to unlock that mode for it to exist at all.",
+    "q44": "What is the Compendium?",
+    "a44": "Your collection book. On your profile, the pentacle button under Dark Mode opens it: six chapters — badges, titles, wallpapers, bonds, challenges and feats — each entry dated, with who was involved and a short note. It's written from what you've already done: nothing to fill in.",
+    "q45": "Can others read my Compendium, and why do some entries say « Before the Compendium »?",
+    "a45": "It's public, like your profile — from a friend's profile the same button opens theirs. Entries whose exact date wasn't recorded before the feature existed (older Social Link ranks, a streak record) are marked « Before the Compendium » rather than given a made-up date."
   },
   "updates": {
     "new_content_title": "✨ New Content v2.0",
@@ -1289,5 +1496,20 @@
     "error_invalid_expired": "Reset link is invalid or expired.",
     "error_network": "Network error. Please try again.",
     "success": "Password updated! You can now log in."
+  },
+  "maintenance": {
+    "title": "Maintenance in progress",
+    "default": "The Velvet Room is closed for a moment. We'll be back shortly.",
+    "until": "Expected return: {{time}}",
+    "hint": "Your progress is safe — come back a little later.",
+    "admin_banner": "Maintenance mode is ON — players see the maintenance screen.",
+    "admin_link": "Open admin"
+  },
+  "announce": {
+    "until": "until {{time}}"
+  },
+  "notice": {
+    "from_team": "Message from the team",
+    "ack": "Understood"
   }
 }

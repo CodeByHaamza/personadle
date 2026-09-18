@@ -3292,37 +3292,51 @@ body.darkmode .border-color-label {
    7. MODALE DAILY (compte à rebours jusqu'au prochain jour)
    ===================================================== */
 
-/* Bouton fixe en bas à droite — au-dessus de la bottom nav (62px + 16px marge = 78px) */
+/* Bouton fixe en bas à droite — au-dessus de la bottom nav (62px + 16px marge = 78px).
+   Même habillage que .news-btn (index.html) : les deux se posent SUR le footer,
+   et sans contour ni ombre ils s'y fondaient, surtout en mode sombre (retour
+   Hamza du 2026-09-16). Toute modification ici doit être reportée là-bas. */
 .daily-btn {
   position: fixed;
   bottom: 78px;
   right: 10px;
-  background: #eee;
+  background: #fff;
   color: #111;
-  border: none;
+  border: 2px solid rgba(0, 0, 0, 0.14);
   padding: 10px 18px;
   border-radius: 10px;
   cursor: pointer;
   z-index: 1000;
   font-size: 15px;
   font-weight: bold;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
   transition:
     background 0.2s,
+    border-color 0.2s,
     transform 0.2s;
 }
 
 .daily-btn:hover {
-  background: #ddd;
+  background: #f2f2f2;
+  border-color: var(--accent, #e63946);
   transform: scale(1.05);
 }
 
 body.darkmode .daily-btn {
-  background: #2a2a2a;
-  color: #eee;
+  background: #1c1c1c;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 
 body.darkmode .daily-btn:hover {
-  background: #333;
+  background: #262626;
+  border-color: var(--accent, #e63946);
+}
+
+/* Les trois liens sociaux se posaient directement sur le footer */
+#socialLinks {
+  margin-bottom: 26px;
 }
 
 /* Overlay de la modale daily */
@@ -4156,6 +4170,208 @@ body.darkmode .expert-theme .version-content ul li strong {
   }
   .expert-slash {
     opacity: 0.35;
+  }
+}
+
+/* =====================================================
+   10c. THÈME v2.2 — Le Compendium (Velvet Room)
+   -----------------------------------------------------
+   Même langage que le carnet de collection
+   (profile/compendium/) : losanges bleus deux tons, or,
+   pentacle. Le damier dérive lentement, le pentacle
+   respire. Aucun asset : le pentacle est un SVG inline
+   dans index.html, le reste est en CSS.
+   ===================================================== */
+
+.velvet-theme {
+  --vr-blue: #0f1f5c;
+  --vr-blue-deep: #070f33;
+  --vr-blue-light: #2b46b3;
+  --vr-gold: #d4af37;
+  --vr-gold-light: #f1d27a;
+  --vr-gold-dark: #9a7a1c;
+  --vr-paper: #f4ead3;
+  border: 2px solid var(--vr-gold) !important;
+  background-color: var(--vr-paper);
+  box-shadow:
+    0 0 0 1px rgba(154, 122, 28, 0.35),
+    0 6px 22px rgba(7, 15, 51, 0.25);
+}
+
+.velvet-theme .version-header {
+  position: relative;
+  overflow: hidden;
+  padding: 15px;
+  z-index: 0;
+  color: var(--vr-gold-light);
+  background-color: var(--vr-blue);
+  background-image:
+    linear-gradient(45deg, var(--vr-blue-light) 25%, transparent 25%, transparent 75%, var(--vr-blue-light) 75%),
+    linear-gradient(-45deg, var(--vr-blue-light) 25%, transparent 25%, transparent 75%, var(--vr-blue-light) 75%);
+  background-size: 44px 44px;
+  background-position:
+    0 0,
+    22px 22px;
+  border-bottom: 2px solid var(--vr-gold);
+  box-shadow:
+    inset 0 0 0 4px var(--vr-blue-deep),
+    inset 0 0 0 5px rgba(212, 175, 55, 0.45);
+  animation: velvetDrift 16s linear infinite;
+}
+
+@keyframes velvetDrift {
+  from {
+    background-position:
+      0 0,
+      22px 22px;
+  }
+  to {
+    background-position:
+      44px 44px,
+      66px 66px;
+  }
+}
+
+/* Voile : éclaircit le haut, assombrit le bas — le texte reste lisible sur le damier */
+.velvet-theme .version-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.12), transparent 60%),
+    linear-gradient(180deg, rgba(7, 15, 51, 0.15), rgba(7, 15, 51, 0.45));
+}
+
+/* Ornements ❦ dans les coins, comme sur la couverture du carnet */
+.velvet-ornament {
+  position: absolute;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--vr-gold-light);
+  opacity: 0.8;
+  text-shadow: 0 0 6px rgba(241, 210, 122, 0.55);
+  pointer-events: none;
+}
+.velvet-ornament--tl {
+  top: 6px;
+  left: 8px;
+}
+.velvet-ornament--br {
+  bottom: 6px;
+  right: 8px;
+  transform: scale(-1);
+}
+
+.velvet-theme .v2-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.velvet-pentacle {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  color: var(--vr-gold-light);
+  filter: drop-shadow(0 0 6px rgba(241, 210, 122, 0.5));
+  animation: velvetGlow 4s ease-in-out infinite;
+}
+
+@keyframes velvetGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(241, 210, 122, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(241, 210, 122, 0.85));
+  }
+}
+
+.velvet-theme .version-title {
+  font-family: "Cinzel", "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--vr-gold-light);
+  text-shadow:
+    0 1px 0 var(--vr-gold-dark),
+    0 0 12px rgba(241, 210, 122, 0.35);
+}
+
+.velvet-theme .version-date {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  color: rgba(244, 234, 211, 0.85);
+}
+
+.velvet-theme .version-arrow {
+  color: var(--vr-gold-light);
+  transition: transform 0.3s ease;
+}
+
+.velvet-theme .version-content {
+  background: var(--vr-paper);
+  color: #2a2118;
+}
+.velvet-theme .version-content ul li strong {
+  color: var(--vr-blue);
+}
+
+.velvet-btn {
+  background: linear-gradient(135deg, var(--vr-gold-dark), var(--vr-gold)) !important;
+  color: #1a1305 !important;
+  border: 2px solid var(--vr-gold) !important;
+  font-family: "Cinzel", Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+}
+.velvet-btn:hover {
+  background: linear-gradient(135deg, var(--vr-gold), var(--vr-gold-light)) !important;
+  box-shadow: 0 8px 22px rgba(241, 210, 122, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Survol : index.html pose un `.version-header:hover { background: #e8e8e8 }`
+   inline (raccourci → efface aussi le damier). On le surclasse en restatant le
+   fond complet, juste un bleu plus clair et l'or qui s'allume — pas de filter,
+   qui délavait le pentacle. */
+.velvet-theme .version-header:hover {
+  background-color: #15308f;
+  background-image:
+    linear-gradient(45deg, #3552c9 25%, transparent 25%, transparent 75%, #3552c9 75%),
+    linear-gradient(-45deg, #3552c9 25%, transparent 25%, transparent 75%, #3552c9 75%);
+  background-size: 44px 44px; /* le raccourci inline remettait la taille à auto → un seul losange géant */
+  box-shadow:
+    inset 0 0 0 4px var(--vr-blue-deep),
+    inset 0 0 0 5px rgba(241, 210, 122, 0.75),
+    0 0 18px rgba(212, 175, 55, 0.35);
+}
+.velvet-theme .version-header:hover .version-arrow {
+  transform: translateY(2px);
+}
+.velvet-theme.active .version-header .version-arrow {
+  transform: rotate(180deg);
+}
+
+/* Mode sombre : le velours reste, le papier s'assombrit */
+body.darkmode .velvet-theme {
+  --vr-paper: #1b1a2b;
+  background-color: var(--vr-paper);
+}
+body.darkmode .velvet-theme .version-content {
+  color: #efe6d2;
+}
+body.darkmode .velvet-theme .version-content ul li strong {
+  color: var(--vr-gold-light);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .velvet-theme .version-header,
+  .velvet-pentacle {
+    animation: none;
   }
 }
 

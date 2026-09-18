@@ -19,3 +19,8 @@ define('DB_USER', getenv('DB_USER')  ?: 'personadle_usr');
 define('DB_PASS', getenv('DB_PASSWORD') ?: 'devpassword');
 
 define('APP_ENV', getenv('APP_ENV') ?: 'local');
+
+define('PUSHER_APP_ID', getenv('PUSHER_APP_ID') ?: '');
+define('PUSHER_KEY', getenv('PUSHER_KEY') ?: '');
+define('PUSHER_SECRET', getenv('PUSHER_SECRET') ?: '');
+define('PUSHER_CLUSTER', getenv('PUSHER_CLUSTER') ?: '');

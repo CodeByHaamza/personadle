@@ -39,5 +39,41 @@ export function normalizeAvatarPath(avatarPath) {
   // Chemins déjà absolus ou root-relatifs
   if (avatarPath.startsWith("/") || avatarPath.startsWith("http")) return avatarPath;
   // Anciens chemins stockés depuis index.html (./img/...) → corriger pour profile/
-  return avatarPath.replace(/^\.\/img\//, "../img/");
+  return (
+    avatarPath
+      .replace(/^\.\/img\//, "../img/")
+      // Portrait renommé le 2026-09-17 : le « & » n'était pas accepté par le
+      // serveur (personadle_validate_avatar), donc jamais persisté sur le compte —
+      // seul un profil local peut encore porter l'ancien nom.
+      .replace(/\/Caroline&justine\.png$/, "/caroline_justine.png")
+  );
+}
+
+/**
+ * « Best Mode Overall » — le mode où le joueur performe le mieux.
+ *
+ * Décision produit 2026-09-12 (retour joueur) : le mode favori devient un CHOIX
+ * du joueur, et ce qui était calculé jusque-là (le plus joué) est remplacé par le
+ * meilleur taux de victoire. Plancher de parties pour qu'un 1/1 ne fasse pas
+ * 100 % : en dessous de `minGames`, le mode n'est pas candidat. Égalité de taux
+ * → le plus joué l'emporte (plus de parties = performance mieux établie).
+ *
+ * @param {Array<{mode: string, games?: number, wins?: number}>} entries
+ *        une entrée par mode, dans le vocabulaire de l'appelant (clé ou libellé)
+ * @param {number} [minGames=3]
+ * @returns {{mode: string, games: number, wins: number, rate: number}|null}
+ *          null si aucun mode n'atteint le plancher
+ */
+export function bestModeOverall(entries, minGames = 3) {
+  let best = null;
+  for (const e of entries ?? []) {
+    const games = Number(e?.games) || 0;
+    const wins = Number(e?.wins) || 0;
+    if (games < minGames || games <= 0) continue;
+    const rate = wins / games;
+    if (!best || rate > best.rate || (rate === best.rate && games > best.games)) {
+      best = { mode: e.mode, games, wins, rate };
+    }
+  }
+  return best;
 }

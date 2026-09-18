@@ -34,7 +34,14 @@
  */
 
 import { api, ApiError } from "./api.js";
+import { applySiteNotices } from "./site_notices.js";
 import { openModal, closeModal } from "./modal.js";
+import { clearAccountLocalState, ownsQueuedEntry } from "./gameCore.js";
+
+// syncPending() (js/api.js) ne peut pas importer gameCore.js (cycle gameCore ↔ api,
+// cf. CLAUDE.md §4) : on lui passe le filtre de propriétaire par le même pont
+// window.* que _personadleApi.
+window._personadleOwnsQueuedEntry = ownsQueuedEntry;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ÉTAT
@@ -79,8 +86,48 @@ const LOGIN_ERROR_MAP = {
     _t("auth.error_banned", "Account banned. Contact support if you think this is an error."),
 };
 
+/**
+ * Message de ban complet (migration 042) : la raison donnée par l'admin et
+ * l'échéance, quand le serveur les renvoie (`code: "banned"`).
+ * @param {ApiError} err
+ * @returns {string|null} null si ce n'est pas un ban détaillé
+ */
+export function resolveBanMessage(err) {
+  const d = err?.data;
+  if (!d || d.code !== "banned") return null;
+  const parts = [];
+  if (d.until) {
+    let when = d.until;
+    try {
+      when = new Intl.DateTimeFormat(window.i18n?.getCurrentLang?.() ?? "en", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(String(d.until).replace(" ", "T") + "Z"));
+    } catch {
+      /* format brut */
+    }
+    parts.push(
+      _t("auth.banned_until", "Account suspended until {{date}}.", { date: when }).replace(
+        "{{date}}",
+        when
+      )
+    );
+  } else {
+    parts.push(_t("auth.banned_permanent", "Account banned."));
+  }
+  if (d.reason)
+    parts.push(
+      _t("auth.banned_reason", "Reason: {{reason}}", { reason: d.reason }).replace(
+        "{{reason}}",
+        d.reason
+      )
+    );
+  return parts.join(" ");
+}
+
 const REGISTER_ERROR_MAP = {
-  "Invalid email address": () => _t("auth.error_invalid_email", "Please enter a valid email address."),
+  "Invalid email address": () =>
+    _t("auth.error_invalid_email", "Please enter a valid email address."),
   "Username must be between 3 and 50 characters": () =>
     _t("auth.error_pseudo_length", "Username must be between 3 and 50 characters."),
   "Username can only contain letters, numbers, hyphens, dots and underscores": () =>
@@ -91,7 +138,10 @@ const REGISTER_ERROR_MAP = {
   "Password must be at least 8 characters": () =>
     _t("auth.error_password_length", "Password must be at least 8 characters."),
   "This password is too common — please choose a less predictable one": () =>
-    _t("auth.error_password_common", "This password is too common — please choose a less predictable one."),
+    _t(
+      "auth.error_password_common",
+      "This password is too common — please choose a less predictable one."
+    ),
   "This email is already registered": () =>
     _t("auth.error_email_taken", "This email is already in use."),
   "This username is already taken": () =>
@@ -136,9 +186,16 @@ export function resolveRegisterError(message) {
  *   joueur. Purger `playerUserId` sur un simple blip réseau changerait sa cible
  *   du jour (getPlayerSeedId() retomberait sur anonPlayerId) — le puzzle du jour
  *   se mettrait à changer tout seul.
+ * @param {{key: string, cluster: string}|null} [pusherConfig=null] - Identifiants
+ *   publics Pusher renvoyés par GET /api/auth/me, consommés par
+ *   js/notifications.js pour s'abonner au canal temps réel de l'utilisateur.
  */
-export function updateAuthUI(user, authoritative = true) {
+export function updateAuthUI(user, authoritative = true, pusherConfig = null) {
   window._currentUser = user;
+  if (pusherConfig) {
+    window._pusherKey = pusherConfig.key;
+    window._pusherCluster = pusherConfig.cluster;
+  }
 
   // Sync the player seed ID used by getDailyTarget() in gameCore.js.
   // Logged-in  → use numeric user_id (consistent across devices/sessions)
@@ -205,6 +262,18 @@ async function migrateLocalStorageToCloud() {
     // JSON corrompu — on migre ce qu'on peut
   }
 
+  // Appareil partagé : les parties hors ligne d'un AUTRE compte (marquées
+  // `_owner`) ne sont pas celles du nouvel inscrit — elles restent en file pour
+  // leur propriétaire. Seules celles jouées en invité (sans propriétaire) migrent.
+  const foreign = Array.isArray(pendingSessions)
+    ? pendingSessions.filter((s) => !ownsQueuedEntry(s, null))
+    : [];
+  if (Array.isArray(pendingSessions)) {
+    pendingSessions = pendingSessions
+      .filter((s) => ownsQueuedEntry(s, null))
+      .map(({ _owner, ...s }) => s);
+  }
+
   try {
     const result = await api.user.migrate({ profile, pendingSessions });
     console.info(
@@ -212,8 +281,10 @@ async function migrateLocalStorageToCloud() {
         ` ${result.skipped_sessions} skipped.`
     );
 
-    // Migration réussie : vider la queue locale (les sessions sont en BDD)
-    localStorage.removeItem("pendingSessions");
+    // Migration réussie : vider la queue locale (les sessions sont en BDD) —
+    // sauf ce qui appartient à un autre compte de cet appareil.
+    if (foreign.length) localStorage.setItem("pendingSessions", JSON.stringify(foreign));
+    else localStorage.removeItem("pendingSessions");
     localStorage.setItem("migratedToCloud", "true");
   } catch (e) {
     // 409 = déjà migré côté serveur → marquer localement pour ne plus réessayer
@@ -254,6 +325,9 @@ function setupLoginForm() {
 
     try {
       const { user } = await api.auth.login({ identifier, password, remember_me: rememberMe });
+      // Un 200 sans `user` (contrat rompu, proxy qui réécrit la réponse…) fermait
+      // la modale et laissait la page en état fantôme : ni connecté, ni message.
+      if (!user?.id) throw new Error("Invalid login response");
       updateAuthUI(user);
       closeModal("loginModal");
       localStorage.removeItem("_crInitDone");
@@ -267,7 +341,9 @@ function setupLoginForm() {
       // JS brut à l'utilisateur, seulement les messages backend connus/mappés.
       showAuthError(
         error,
-        err instanceof ApiError ? resolveLoginError(err.message) : _t("auth.error_generic", "Login failed")
+        err instanceof ApiError
+          ? (resolveBanMessage(err) ?? resolveLoginError(err.message))
+          : _t("auth.error_generic", "Login failed")
       );
     } finally {
       if (btn) btn.disabled = false;
@@ -333,7 +409,10 @@ function setupRegisterForm() {
       return;
     }
     if (password.length < 8) {
-      showAuthError(error, _t("auth.error_password_length", "Password must be at least 8 characters."));
+      showAuthError(
+        error,
+        _t("auth.error_password_length", "Password must be at least 8 characters.")
+      );
       return;
     }
 
@@ -413,6 +492,17 @@ function setupModalNavigation() {
     openModal("loginModal");
   });
 
+  // Arrivée avec #register (relance des invités, js/gameCore.js maybeNudgeGuest) :
+  // ouvrir l'inscription directement, et retirer l'ancre pour qu'un F5 ne la rouvre pas.
+  if (window.location.hash === "#register" && document.getElementById("registerModal")) {
+    openModal("registerModal");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      window.location.pathname + window.location.search
+    );
+  }
+
   // Boutons d'ouverture (data-open-modal="loginModal" etc.)
   document.querySelectorAll("[data-open-modal]").forEach((btn) => {
     btn.addEventListener("click", () => openModal(btn.getAttribute("data-open-modal")));
@@ -451,6 +541,10 @@ function setupLogoutButton() {
       // sur ce navigateur repart d'un profil vierge et récupère le sien depuis le cloud.
       localStorage.removeItem("personaUserProfile");
       localStorage.removeItem("personaSettings");
+      // …et tout ce qui appartient à CE compte et piégerait le suivant : trace
+      // Jack Frost, défis en cours (filtres de l'expéditeur rendus). Les files
+      // hors ligne restent, marquées par propriétaire — voir clearAccountLocalState().
+      clearAccountLocalState();
       updateAuthUI(null);
       window.dispatchEvent(new CustomEvent("personadle:auth-logout"));
     });
@@ -489,7 +583,9 @@ async function _syncLocalProfileToCloud(userId) {
     profile_music_id: profile.profileSong?.fichier || profile.profileMusicId || null,
     selected_badges: profile.selectedBadges || [],
   };
-  if (profile.avatar) fields.avatar_data = profile.avatar;
+  // Un ancien chemin v1 (./img/…, stocké depuis la racine) est renvoyé sous la
+  // forme que le serveur accepte (../img/avatar/…, cf. personadle_validate_avatar).
+  if (profile.avatar) fields.avatar_data = profile.avatar.replace(/^\.\/img\//, "../img/");
   if (profile.equippedTitleId != null) fields.equipped_title_id = profile.equippedTitleId;
 
   try {
@@ -502,7 +598,6 @@ async function _syncLocalProfileToCloud(userId) {
 // ─────────────────────────────────────────────────────────────────────────────
 // POINT D'ENTRÉE — initAuth()
 // ─────────────────────────────────────────────────────────────────────────────
-
 
 /**
  * Vrai si l'erreur signifie « je n'ai pas pu poser la question au serveur », par
@@ -541,14 +636,14 @@ const _wait = (ms) => new Promise((r) => setTimeout(r, ms));
 async function _fetchMeWithRetry(attempts = 3) {
   for (let i = 0; i < attempts; i++) {
     try {
-      const { user } = await api.auth.me();
-      return { user, reachable: true };
+      const me = await api.auth.me();
+      return { user: me.user, pusher: me.pusher, reachable: true, me };
     } catch (err) {
-      if (!isTransportError(err)) return { user: null, reachable: true };
+      if (!isTransportError(err)) return { user: null, pusher: null, reachable: true, me: null };
       if (i < attempts - 1) await _wait(300 * 3 ** i);
     }
   }
-  return { user: null, reachable: false };
+  return { user: null, pusher: null, reachable: false, me: null };
 }
 
 /**
@@ -567,7 +662,7 @@ async function _fetchMeWithRetry(attempts = 3) {
  */
 export async function initAuth() {
   // 1. Restaurer la session — avec réessais sur panne de transport.
-  const { user, reachable } = await _fetchMeWithRetry();
+  const { user, pusher, reachable, me } = await _fetchMeWithRetry();
 
   // `reachable: false` = serveur injoignable, PAS « déconnecté ». On affiche l'UI
   // anonyme faute de mieux, mais sans purger le seed du joueur, et on le signale
@@ -580,7 +675,15 @@ export async function initAuth() {
   // restait false et TOUTES les pages qui l'attendent bloquaient 2 s puis
   // dégradaient en anonyme — pour une exception d'affichage.
   try {
-    updateAuthUI(user, reachable);
+    updateAuthUI(user, reachable, pusher);
+
+    // Maintenance, annonces, messages de l'équipe, reset ciblé (migration 042) —
+    // tout vient avec /me, une seule fois par page. Ne doit jamais casser l'auth.
+    try {
+      applySiteNotices(me);
+    } catch {
+      /* affichage seulement */
+    }
 
     // 2. Si connecté, sync des sessions offline accumulées (fire-and-forget)
     // On ne bloque pas initAuth() sur une opération réseau non critique.

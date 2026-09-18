@@ -15,12 +15,11 @@
 require_once __DIR__ . '/../bootstrap.php';
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
-// Prend uniquement la première IP de X-Forwarded-For et valide le format
-// pour empêcher le spoofing du rate limiting via un header arbitraire.
-$rawForwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-$firstIp         = trim(explode(',', $rawForwardedFor)[0]);
-$rlIp            = filter_var($firstIp, FILTER_VALIDATE_IP) ? $firstIp : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
-rateLimit('login:' . $rlIp, 5, 15 * 60); // 5 tentatives / 15 min
+// 5 tentatives / 15 min en prod ; marge élargie hors prod, même raison que pour
+// register.php — les specs E2E (admin, modération) se connectent depuis la même
+// IP locale, et un retry CI rejoue tout le describe.serial, beforeAll compris.
+$rlMaxLogin = APP_ENV === 'production' ? 5 : 50;
+rateLimit('login:' . getClientIp(), $rlMaxLogin, 15 * 60);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Method Not Allowed', 405);
@@ -42,7 +41,8 @@ $pdo = pdo();
 
 // Cherche par email en premier, puis par pseudo
 $stmt = $pdo->prepare('
-    SELECT id, email, pseudo, password_hash, lang, friend_code, created_at, last_login_at, is_admin, is_banned
+    SELECT id, email, pseudo, password_hash, lang, friend_code, created_at, last_login_at, is_admin, is_banned,
+           ban_reason, banned_until
     FROM users
     WHERE (email = ? OR pseudo = ?) AND is_deleted = 0
     LIMIT 1
@@ -57,9 +57,15 @@ if (!$user || !password_verify($password, $hash)) {
     jsonError('Invalid email or password', 401);
 }
 
-// Compte banni
-if (!empty($user['is_banned'])) {
-    jsonError('Account banned. Contact support if you think this is an error.', 403);
+// Compte banni — avec la raison et l'échéance (migration 042). Un ban échu est
+// levé par personadle_ban_state() et la connexion continue normalement.
+$ban = personadle_ban_state($pdo, $user);
+if ($ban !== null) {
+    jsonErrorWith('Account banned. Contact support if you think this is an error.', 403, [
+        'code'   => 'banned',
+        'reason' => $ban['reason'],
+        'until'  => $ban['until'],
+    ]);
 }
 
 // Mettre à jour la date de dernière connexion

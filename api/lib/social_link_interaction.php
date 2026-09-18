@@ -12,6 +12,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/social_link.php';
+require_once __DIR__ . '/pusher_trigger.php';
 
 /** Levée quand l'action a déjà été effectuée aujourd'hui pour ce couple d'amis — mappée vers un 409. */
 class PersonadleAlreadyInteractedException extends RuntimeException
@@ -88,16 +89,22 @@ function personadle_perform_social_link_interaction(
     }
 
     $linkId = personadle_sl_get_or_create_link($pdo, $authId, $friendId);
-    $today  = (new DateTime('now', new DateTimeZone('Europe/Paris')))->format('Y-m-d');
+
+    // Bornes UTC de la journée Paris. Remplace
+    // `DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = :jour`, qui renvoyait
+    // NULL — donc ne matchait JAMAIS — partout où les tables de fuseaux du serveur
+    // SQL ne sont pas peuplées (cas d'un hébergement mutualisé). Voir le docblock
+    // de personadle_paris_day_bounds_utc() pour ce que ça cassait exactement.
+    [$dayStart, $dayEnd] = personadle_paris_day_bounds_utc();
 
     // Anti-spam : 1 action par jour (toutes actions, y compris play_same_day)
     $stmtCheck = $pdo->prepare("
         SELECT id FROM social_link_interactions
         WHERE social_link_id = ? AND initiator_id = ? AND action_type = ?
-          AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
+          AND created_at >= ? AND created_at < ?
         LIMIT 1
     ");
-    $stmtCheck->execute([$linkId, $authId, $actionType, $today]);
+    $stmtCheck->execute([$linkId, $authId, $actionType, $dayStart, $dayEnd]);
     if ($stmtCheck->fetch()) {
         throw new PersonadleAlreadyInteractedException('Already performed this action today');
     }
@@ -106,10 +113,10 @@ function personadle_perform_social_link_interaction(
     $stmtOther = $pdo->prepare("
         SELECT id FROM social_link_interactions
         WHERE social_link_id = ? AND initiator_id = ? AND action_type = ?
-          AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
+          AND created_at >= ? AND created_at < ?
         LIMIT 1
     ");
-    $stmtOther->execute([$linkId, $friendId, $actionType, $today]);
+    $stmtOther->execute([$linkId, $friendId, $actionType, $dayStart, $dayEnd]);
     $isMutual = $actionType === 'play_same_day' ? true : (bool) $stmtOther->fetch();
 
     $xpGained = personadle_sl_xp_for_action($actionType, $isMutual);
@@ -123,8 +130,8 @@ function personadle_perform_social_link_interaction(
         $pdo->prepare("
             UPDATE social_link_interactions SET is_mutual = 1, xp_gained = ?
             WHERE social_link_id = ? AND initiator_id = ? AND action_type = ?
-              AND DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = ?
-        ")->execute([PERSONADLE_SL_XP_TABLE[$actionType]['mutual'], $linkId, $friendId, $actionType, $today]);
+              AND created_at >= ? AND created_at < ?
+        ")->execute([PERSONADLE_SL_XP_TABLE[$actionType]['mutual'], $linkId, $friendId, $actionType, $dayStart, $dayEnd]);
         $bonusXp = PERSONADLE_SL_XP_TABLE[$actionType]['mutual'] - PERSONADLE_SL_XP_TABLE[$actionType]['solo'];
         if ($bonusXp > 0) personadle_sl_add_xp($pdo, $linkId, $bonusXp);
     }
@@ -137,6 +144,7 @@ function personadle_perform_social_link_interaction(
             INSERT INTO social_link_rankup_notifs (recipient_id, partner_id, new_rank)
             VALUES (?, ?, ?)
         ")->execute([$friendId, $authId, $result['rank']]);
+        personadle_pusher_trigger("private-user-{$friendId}", 'rankup', []);
     }
 
     return [

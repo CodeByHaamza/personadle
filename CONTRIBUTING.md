@@ -40,8 +40,8 @@ Le hook de pre-commit lance déjà i18n + tests. Détail :
 
 | Commande | Vérifie |
 |---|---|
-| `make test` / `npm test` | 907 tests JS (Vitest) |
-| `make test-php` | 241 méthodes de test PHPUnit dans 14 fichiers (logique + intégration BDD). Tourne **dans le conteneur Docker** (`make up` requis) — pas besoin de PHP installé sur ta machine |
+| `make test` / `npm test` | 1409 tests JS (Vitest) |
+| `make test-php` | 358 méthodes de test PHPUnit dans 21 fichiers (logique + intégration BDD). Tourne **dans le conteneur Docker** (`make up` requis) — pas besoin de PHP installé sur ta machine |
 | `npm run lint` | ESLint |
 | `npm run data:check` | schéma des données personnages |
 | `npm run i18n:check` | cohérence des clés de traduction |
@@ -87,7 +87,7 @@ Settings → Branches → Add rule sur `main` :
 
 Ou en CLI :
 ```bash
-gh api -X PUT repos/HamzaKarrouchi/personadle/branches/main/protection \
+gh api -X PUT repos/CodeByHaamza/personadle/branches/main/protection \
   -F required_pull_request_reviews.required_approving_review_count=0 \
   -F required_status_checks.strict=true \
   -F enforce_admins=true -F restrictions=

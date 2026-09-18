@@ -121,7 +121,7 @@ $skippedSessions  = 0;
 // de streak soit cohérent.
 // ═════════════════════════════════════════════════════════════════════════════
 
-$validModes    = ['classic', 'emoji', 'silhouette', 'alloutattack', 'personae', 'music'];
+$validModes    = PERSONADLE_MODES;
 $validResults  = ['win', 'giveup'];
 
 // Trier par date croissante (ordre chronologique)
@@ -270,6 +270,14 @@ if (is_array($profileData)) {
     // (les paths stockés depuis la racine du site doivent être ajustés pour profile/)
     if ($avatar && !str_starts_with($avatar, 'data:') && str_starts_with($avatar, './')) {
         $avatar = '../' . substr($avatar, 2);
+    }
+
+    // Un profil importé est un JSON fourni par l'utilisateur : il passe par la
+    // même règle que PATCH /api/user/:id (portraits du jeu uniquement, cf.
+    // personadle_validate_avatar). Sans ça, cette route restait une porte
+    // d'entrée pour un avatar arbitraire. Non conforme → pas d'avatar.
+    if ($avatar !== null && personadle_validate_avatar((string) $avatar) !== null) {
+        $avatar = null;
     }
 
     // Valider la couleur (hex #RRGGBB)

@@ -31,6 +31,11 @@ import { renderErrorLogs } from "./error-logs.js";
 import { renderAuditLog } from "./audit-log.js";
 import { renderDeletionRequests } from "./deletion-requests.js";
 import { renderRateLimits } from "./rate-limits.js";
+import { renderActivity } from "./activity.js";
+import { renderModerationTab } from "./moderation.js";
+import { renderAnnouncements, renderMaintenance, renderAnticheat } from "./site_panels.js";
+import { renderTabChallenges } from "./challenges.js";
+import { renderTabStreak } from "./streak.js";
 
 // ── State ──────────────────────────────────────────────────────────────────
 let _users = [];
@@ -38,6 +43,7 @@ let _selectedUser = null;
 let _userDetail = null;
 let _currentPage = 1;
 let _searchQuery = "";
+let _sortKey = "created";
 let _activeTab = "profile";
 let pendingGifts = [];
 
@@ -140,6 +146,33 @@ function setupEvents() {
     showPanel("rate-limits-panel");
     renderRateLimits();
   };
+
+  // Activité (joueurs actifs, parties par jour et par mode)
+  document.getElementById("btn-activity").onclick = () => {
+    showPanel("activity-panel");
+    renderActivity();
+  };
+
+  // Annonces / Maintenance / Anti-triche (migration 042)
+  document.getElementById("btn-announcements").onclick = () => {
+    showPanel("announcements-panel");
+    renderAnnouncements();
+  };
+  document.getElementById("btn-maintenance").onclick = () => {
+    showPanel("maintenance-panel");
+    renderMaintenance();
+  };
+  document.getElementById("btn-anticheat").onclick = () => {
+    showPanel("anticheat-panel");
+    renderAnticheat((userId, tab) => openUserDetail(userId, tab));
+  };
+
+  // Tri de la liste des joueurs
+  document.getElementById("user-sort")?.addEventListener("change", (e) => {
+    _sortKey = e.target.value;
+    _currentPage = 1;
+    loadUsers();
+  });
 }
 
 // ── Panel visibility (mutually exclusive right-hand panels) ────────────────
@@ -151,6 +184,10 @@ const ADMIN_PANEL_IDS = [
   "audit-log-panel",
   "deletion-requests-panel",
   "rate-limits-panel",
+  "activity-panel",
+  "announcements-panel",
+  "maintenance-panel",
+  "anticheat-panel",
 ];
 
 function showPanel(panelId) {
@@ -162,7 +199,7 @@ function showPanel(panelId) {
 // ── Users List ─────────────────────────────────────────────────────────────
 async function loadUsers() {
   const data = await api.get(
-    `/api/admin/users?q=${encodeURIComponent(_searchQuery)}&page=${_currentPage}&limit=25`
+    `/api/admin/users?q=${encodeURIComponent(_searchQuery)}&page=${_currentPage}&limit=25&sort=${encodeURIComponent(_sortKey)}`
   );
   _users = data.users || [];
 
@@ -245,7 +282,7 @@ function renderPagination(total, page, limit) {
 }
 
 // ── User Detail ────────────────────────────────────────────────────────────
-async function openUserDetail(userId) {
+async function openUserDetail(userId, initialTab = "profile") {
   // Highlight selected row
   document
     .querySelectorAll(".user-row")
@@ -265,7 +302,7 @@ async function openUserDetail(userId) {
 
   renderDetailHeader(data);
   renderDetailQuickStats(data);
-  switchTab("profile");
+  switchTab(initialTab);
 }
 
 function renderDetailHeader(data) {
@@ -336,11 +373,28 @@ function switchTab(tab) {
     case "stats":
       renderTabStats(d);
       break;
+    case "streak":
+      renderTabStreak(d);
+      break;
+    case "challenges":
+      renderTabChallenges(d);
+      break;
     case "friends":
       renderTabFriends(d);
       break;
     case "social":
       renderTabSocial(d);
+      break;
+    case "moderation":
+      renderModerationTab(
+        document.getElementById("user-detail-content"),
+        d,
+        _selectedUser,
+        (patch) => {
+          _userDetail.user = { ..._userDetail.user, ...patch };
+          renderDetailHeader(_userDetail);
+        }
+      );
       break;
   }
 }
@@ -395,13 +449,10 @@ function renderTabProfile(d) {
         </div>
         <div class="mod-item mod-item--ban">
           <div class="mod-item-label">
-            <span>🚫 Bannir le compte</span>
-            <small>Empêche toute connexion. La session active reste ouverte jusqu'au prochain chargement.</small>
+            <span>🚫 Bannir / avertir / notes</span>
+            <small>${u.is_banned ? "<strong>Compte banni</strong> — " : ""}Raison visible par le joueur, durée, messages de l'équipe, carnet interne : onglet 🛡️ Modération.</small>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" id="mod-is-banned" ${u.is_banned ? "checked" : ""}>
-            <span class="toggle-slider toggle-slider--red"></span>
-          </label>
+          <button class="btn-secondary" id="mod-goto-btn" type="button">🛡️ Ouvrir</button>
         </div>
       </div>
       <button class="btn-secondary" id="save-mod-btn" style="margin-top:10px">💾 Appliquer modération</button>
@@ -480,30 +531,20 @@ function renderTabProfile(d) {
   };
 
   // ── Moderation ────────────────────────────────────────────────────────────
+  document.getElementById("mod-goto-btn").onclick = () => switchTab("moderation");
   document.getElementById("save-mod-btn").onclick = async () => {
     const btn = document.getElementById("save-mod-btn");
-    const isBanned = document.getElementById("mod-is-banned").checked;
     const pseudoLock = document.getElementById("mod-pseudo-locked").checked;
     btn.disabled = true;
     btn.textContent = "…";
-    const res = await api.patch(`/api/admin/users/${_selectedUser}`, {
-      is_banned: isBanned,
-      pseudo_locked: pseudoLock,
-    });
+    const res = await api.patch(`/api/admin/users/${_selectedUser}`, { pseudo_locked: pseudoLock });
     btn.disabled = false;
     btn.textContent = "💾 Appliquer modération";
     if (res.error) {
       toast("❌ " + res.error, "error");
     } else {
       _userDetail.user = { ..._userDetail.user, ...res.user };
-      toast(
-        isBanned
-          ? "🚫 Compte banni"
-          : pseudoLock
-            ? "🔒 Pseudo verrouillé"
-            : "✅ Modération mise à jour",
-        isBanned ? "error" : "success"
-      );
+      toast(pseudoLock ? "🔒 Pseudo verrouillé" : "✅ Modération mise à jour", "success");
     }
   };
 
@@ -910,7 +951,10 @@ async function grantExpertMode(d, mode) {
   const label = EXPERT_MODE_LABELS[mode] || mode;
   const res = await api.post(`/api/admin/users/${d.user.id}/expert`, { mode });
   if (res?.success) {
-    toast(res.already_had ? `${label} était déjà accordé.` : `${label} Expert débloqué.`, "success");
+    toast(
+      res.already_had ? `${label} était déjà accordé.` : `${label} Expert débloqué.`,
+      "success"
+    );
     renderTabExpert(d);
   } else {
     toast(res?.error || "Échec du déblocage.", "error");
@@ -958,7 +1002,13 @@ function renderTabStats(d) {
   document.getElementById("user-detail-content").innerHTML = `
     <div class="tab-section">
       <h3>Statistiques par mode</h3>
-      <div class="tab-note">Modifier les valeurs puis cliquer Save sur chaque ligne.</div>
+      <div class="tab-note">
+        Modifier les valeurs puis cliquer Save sur chaque ligne.<br>
+        ⚠️ Les colonnes <strong>streak</strong> / <strong>streak_record</strong> ci-dessous sont
+        <em>par mode</em>. La « Série actuelle » que le joueur voit sur son profil est la streak
+        <strong>globale</strong> (<code>users.global_streak</code>) : elle se corrige dans l'onglet
+        🔥 Streak, pas ici.
+      </div>
       <div style="overflow-x:auto">
         <table class="stats-table">
           <thead>

@@ -41,6 +41,7 @@ export const portraitsMap = {
   "Wonder Chinese New Year ( Nagisa Kamishiro )": "Wonder_ChineseNY",
   "Wonder Velvet ( Nagisa Kamishiro )": "Wonder_Velvet",
   "Wonder Summer ( Nagisa Kamishiro )": "Wonder_Summer",
+  "Wonder Shujin ( Nagisa Kamishiro )": "Wonder_Shujin",
   "Closer ( Motoha Arai )": "Closer",
   "Closer Summer ( Motoha Arai )": "Closer_Summer",
   "Fleuret ( Seiji Shiratori )": "Fleuret",
@@ -83,4 +84,6 @@ export const portraitsMap = {
   "Puppet Summer ( Miyu Sahara )": "Puppet_Summer",
   "Closer Radiance ( Motoha Arai )": "Closer_Radiance",
   "Miku ( Hatsune Miku )": "Miku",
+  "Bui Cosmic ( YUI )": "Bui_Cosmic",
+  "Berry Summer ( Ichigo Shikano )": "Berry_Summer",
 };
