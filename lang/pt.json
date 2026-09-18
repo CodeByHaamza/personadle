@@ -887,10 +887,14 @@
     "filter_note": "Os filtros de opus não são considerados.",
     "filter_all_modes": "Todos os modos",
     "filter_scope": "Âmbito",
+    "filter_dimension": "Dimensão",
+    "dimension_normal": "Normal",
+    "dimension_expert": "⚡ Especialista",
     "scope_global": "Global",
     "scope_friends": "Amigos",
     "login_for_friends": "Inicia sessão para veres a classificação dos teus amigos.",
-    "no_friends": "Nenhum dos teus amigos aparece ainda nesta classificação."
+    "no_friends": "Nenhum dos teus amigos aparece ainda nesta classificação.",
+    "expert_no_streak": "A melhor sequência não tem classificação Especialista: uma sequência conta dias consecutivos, e o Especialista não é um compromisso diário."
   },
   "friends": {
     "title": "Amigos",

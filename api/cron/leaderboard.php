@@ -37,28 +37,46 @@ $metrics = ['wins', 'winrate', 'streak', 'perfect', 'games'];
 $processed = 0;
 $errors    = [];
 
+// Les deux dimensions (migration 045). L'Expert a son propre classement : autre
+// pool de tirage, autre barème, et un taux de victoire sans commune mesure — les
+// mélanger n'aurait décrit ni l'un ni l'autre.
+$dimensions = [false, true];
+
 $cleanStmt = $pdo->prepare("
     DELETE FROM leaderboard_cache
-    WHERE mode = ? AND period = ? AND period_start != ?
+    WHERE mode = ? AND period = ? AND is_expert = ? AND period_start != ?
 ");
 
 foreach ($modes as $mode) {
     foreach ($periods as $period => $periodStart) {
-        // Purger les entrées des périodes précédentes (ex: semaine passée).
-        // L'API ne filtre pas sur period_start — sans ce nettoyage, d'anciens
-        // rangs s'accumulent et faussent les résultats.
-        try {
-            $cleanStmt->execute([$mode, $period, $periodStart . ' 00:00:00']);
-        } catch (Throwable $e) {
-            $errors[] = "cleanup $mode/$period: " . $e->getMessage();
-        }
-
-        foreach ($metrics as $metric) {
+        foreach ($dimensions as $expertOnly) {
+            // Purger les entrées des périodes précédentes (ex: semaine passée).
+            // L'API ne filtre pas sur period_start — sans ce nettoyage, d'anciens
+            // rangs s'accumulent et faussent les résultats.
+            //
+            // `is_expert` fait partie du filtre de purge : sans lui, le passage sur
+            // une dimension effacerait les lignes périmées de L'AUTRE aussi, ce qui
+            // marcherait par accident aujourd'hui (les deux sont recalculées dans la
+            // foulée) mais casserait à la première exécution partielle.
             try {
-                _recalculate($pdo, $mode, $period, $periodStart, $metric);
-                $processed++;
+                $cleanStmt->execute([$mode, $period, $expertOnly ? 1 : 0, $periodStart . ' 00:00:00']);
             } catch (Throwable $e) {
-                $errors[] = "$mode/$period/$metric: " . $e->getMessage();
+                $errors[] = "cleanup $mode/$period" . ($expertOnly ? '/expert' : '') . ': ' . $e->getMessage();
+            }
+
+            foreach ($metrics as $metric) {
+                // `streak` n'existe pas en Expert (cf. leaderboard_metrics.php) :
+                // rien à calculer, et surtout rien à écrire en cache — une ligne
+                // vide y serait indiscernable d'un cache pas encore alimenté, et
+                // l'API basculerait sur le fallback live à chaque appel.
+                if ($expertOnly && $metric === 'streak') continue;
+
+                try {
+                    _recalculate($pdo, $mode, $period, $periodStart, $metric, $expertOnly);
+                    $processed++;
+                } catch (Throwable $e) {
+                    $errors[] = "$mode/$period/$metric" . ($expertOnly ? '/expert' : '') . ': ' . $e->getMessage();
+                }
             }
         }
     }
@@ -85,9 +103,12 @@ jsonSuccess([
  * api/lib/leaderboard_metrics.php) — identique au fallback live de
  * buildPeriodLeaderboardLive, puisque les deux appellent la même fonction.
  */
-function _recalculate(PDO $pdo, string $mode, string $period, string $periodStart, string $metric): void
+function _recalculate(PDO $pdo, string $mode, string $period, string $periodStart, string $metric, bool $expertOnly = false): void
 {
     $modeFilter = ($mode === 'all') ? '' : 'AND gs.mode = :mode';
+    // Littéral 0/1 issu d'un bool de la boucle ci-dessus, jamais d'une entrée
+    // utilisateur : ce script n'est appelable qu'avec le secret de cron.
+    $expertFilter = 'AND gs.is_expert = ' . ($expertOnly ? 1 : 0);
 
     // ── Le classement compte des PARTIES, volontairement ─────────────────────
     // Décision produit (Hamza) : « toutes les parties comptent » vaut aussi pour le
@@ -106,10 +127,10 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
 
     if ($metric === 'streak') {
         // La série n'est pas une agrégation : elle a sa propre requête.
-        $sql = personadle_period_streak_scores_sql($modeFilter, '', ':period_start')
+        $sql = personadle_period_streak_scores_sql($modeFilter, '', ':period_start', $expertOnly)
             . ' ORDER BY score DESC LIMIT 500';
     } else {
-        $prior     = personadle_leaderboard_prior($pdo, $mode);
+        $prior     = personadle_leaderboard_prior($pdo, $mode, $expertOnly);
         $scoreExpr = personadle_period_score_expr($metric, $prior);
         if ($scoreExpr === null) return; // métrique inconnue : rien à recalculer
 
@@ -124,10 +145,10 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
             FROM game_sessions gs
             JOIN users u ON u.id = gs.user_id AND u.is_deleted = 0
             WHERE gs.played_date >= :period_start
-              -- is_expert = 0 : le classement Expert est une dimension à part (ROADMAP
-              -- v2.1), pas encore exposée. Sans ça les parties Expert gonfleraient le
-              -- classement du mode normal.
-              AND gs.is_expert = 0
+              -- Dimension du classement (migration 045). Les deux sont calculées et
+              -- stockées séparément : sans ce filtre, les parties Expert gonfleraient
+              -- le classement du mode normal.
+              {$expertFilter}
             {$modeFilter}
             GROUP BY gs.user_id
             HAVING score IS NOT NULL AND score > 0 {$participation}
@@ -144,9 +165,9 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
 
     $upsert = $pdo->prepare("
         INSERT INTO leaderboard_cache
-            (user_id, mode, period, metric, score, rank_position, period_start, updated_at)
+            (user_id, mode, period, metric, is_expert, score, rank_position, period_start, updated_at)
         VALUES
-            (:user_id, :mode, :period, :metric, :score, :rank, :period_start, NOW())
+            (:user_id, :mode, :period, :metric, :expert, :score, :rank, :period_start, NOW())
         ON DUPLICATE KEY UPDATE
             score         = VALUES(score),
             rank_position = VALUES(rank_position),
@@ -159,6 +180,7 @@ function _recalculate(PDO $pdo, string $mode, string $period, string $periodStar
             ':mode'         => $mode,
             ':period'       => $period,
             ':metric'       => $metric,
+            ':expert'       => $expertOnly ? 1 : 0,
             ':score'        => $row['score'],
             ':rank'         => $i + 1,
             ':period_start' => $periodStartDt,

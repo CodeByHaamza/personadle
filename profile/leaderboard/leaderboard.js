@@ -27,6 +27,10 @@ const filters = {
   period: "ever",
   metric: "wins",
   friendsOnly: false,
+  // Dimension du classement (migration 045). L'Expert a le sien : autre pool de
+  // tirage, autre barème, et un taux de victoire sans commune mesure — les
+  // mélanger ne décrirait ni l'un ni l'autre.
+  expert: false,
   offset: 0,
 };
 
@@ -122,8 +126,28 @@ function renderFilterNote() {
     ? `<span class="lb-fn-sep">·</span><span class="lb-fn-chip lb-fn-chip--friends">👥 ${esc(t("leaderboard.scope_friends") || "Friends")}</span>`
     : "";
 
+  // La pastille Expert est collée au mode qu'elle qualifie, en tête : « Classique »
+  // et « Classique Expert » sont deux classements, pas deux affichages du même.
+  const expertChip = filters.expert
+    ? `<span class="lb-fn-chip lb-fn-chip--expert">${esc(t("leaderboard.dimension_expert") || "⚡ Expert")}</span><span class="lb-fn-sep">·</span>`
+    : "";
+
+  // Expert + « meilleure série » ne renvoie rien, et c'est voulu : une série se
+  // compte en jours consécutifs, or l'Expert n'est pas un rendez-vous quotidien
+  // (cf. api/lib/leaderboard_metrics.php). Sans cette phrase, le joueur voit une
+  // page vide et conclut à une panne — c'est le même réflexe que le texte qui
+  // explique pourquoi la liste d'amis est plus courte en défi Expert.
+  const streakNote =
+    filters.expert && filters.metric === "streak"
+      ? esc(
+          t("leaderboard.expert_no_streak") ||
+            "Best streak has no Expert ranking: a streak counts consecutive days, and Expert is not a daily run."
+        )
+      : note;
+
   el.innerHTML = `
     <span class="lb-fn-chips">
+      ${expertChip}
       <span class="lb-fn-chip">${mode}</span>
       <span class="lb-fn-sep">·</span>
       <span class="lb-fn-chip">${period}</span>
@@ -131,7 +155,7 @@ function renderFilterNote() {
       <span class="lb-fn-chip">${metric}</span>
       ${friendsChip}
     </span>
-    <span class="lb-fn-note">${note}</span>
+    <span class="lb-fn-note">${streakNote}</span>
   `;
 }
 
@@ -143,8 +167,8 @@ function renderFilterNote() {
 function avatarSrc(avatarData) {
   if (!avatarData) return "../../img/default_avatar.png";
   if (avatarData.startsWith("data:")) return avatarData;
-  if (avatarData.startsWith("../img/")) return "../" + avatarData;  // ../../img/
-  if (avatarData.startsWith("./img/"))  return "../../img/" + avatarData.slice(6);
+  if (avatarData.startsWith("../img/")) return "../" + avatarData; // ../../img/
+  if (avatarData.startsWith("./img/")) return "../../img/" + avatarData.slice(6);
   return avatarData;
 }
 
@@ -353,6 +377,7 @@ async function loadLeaderboard() {
       limit: PAGE_SIZE,
       offset: filters.offset,
       friends_only: filters.friendsOnly ? 1 : 0,
+      expert: filters.expert ? 1 : 0,
     });
 
     renderLeaderboard(data);
@@ -417,6 +442,21 @@ function attachFilterListeners() {
     filters.metric = pill.dataset.value;
     filters.offset = 0;
     activatePill(metricGroup, filters.metric);
+    loadLeaderboard();
+  });
+
+  const dimensionGroup = document.getElementById("dimensionFilter");
+  dimensionGroup?.addEventListener("click", (e) => {
+    const pill = e.target.closest(".lb-pill");
+    if (!pill) return;
+    filters.expert = pill.dataset.value === "expert";
+    filters.offset = 0;
+    activatePill(dimensionGroup, pill.dataset.value);
+    // La carte des filtres prend l'ambiance Expert : l'écart de contexte doit se
+    // voir sans relire la pastille, comme pour les défis Expert.
+    document
+      .querySelector(".lb-filters-card")
+      ?.classList.toggle("lb-filters-card--expert", filters.expert);
     loadLeaderboard();
   });
 
