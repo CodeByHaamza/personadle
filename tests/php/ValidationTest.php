@@ -134,6 +134,8 @@ final class ValidationTest extends TestCase
             mkdir($dir);
             touch($dir . '/Ren.gif');
             touch($dir . '/Eriko.png');
+            touch($dir . '/Kanji.avif');
+            touch($dir . '/Caroline&justine.png');
         }
         return $dir;
     }
@@ -175,6 +177,21 @@ final class ValidationTest extends TestCase
     {
         $this->assertNull(personadle_validate_avatar('../img/avatar/Ren.gif', $this->galleryDir()));
         $this->assertNull(personadle_validate_avatar('../img/avatar/Eriko.png', $this->galleryDir()));
+    }
+
+    public function testAvatarAcceptsAnAvifGalleryPortrait(): void
+    {
+        // Kanji.avif est dans la galerie depuis la 2.0 : refusé ici, il restait
+        // local et disparaissait au prochain pull cloud (sorti par
+        // tests/avatars_gallery.test.js le 2026-09-17).
+        $this->assertNull(personadle_validate_avatar('../img/avatar/Kanji.avif', $this->galleryDir()));
+    }
+
+    public function testAvatarRejectsAGalleryNameWithCharactersOutsideTheWhitelist(): void
+    {
+        // Le fichier EXISTE, mais « & » n'est pas dans la liste blanche du nom :
+        // c'est pour ça que Caroline&justine.png a été renommée caroline_justine.png.
+        $this->assertSame('Invalid avatar format', personadle_validate_avatar('../img/avatar/Caroline&justine.png', $this->galleryDir()));
     }
 
     public function testAvatarRejectsAGalleryPortraitThatDoesNotExist(): void
