@@ -13,6 +13,67 @@
 
 ---
 
+## 2026-09-17 — content(profil) : 29 portraits Persona Q/Q2 + fond Persona 4 Revival, et deux avatars enfin persistables (branche `content/avatars-pq-fond-p4r`)
+
+### Pourquoi
+
+Lot d'images fourni par Hamza (Downloads du 2026-09-17) : les héros de P3/P4/P5 façon
+Persona Q et Q2, Naoto version P4 Revival, Morgana dancing, JoJo Frost, et un fond
+d'écran Persona 4 Revival pour la carte de partage — **de base, pas débloquable**
+(décision Hamza).
+
+### Quoi
+
+- `img/avatar/` : 29 fichiers, renommés en snake_case ASCII (« P3 Ken Amada PQ2.jpg » →
+  `ken_amada_pq2.jpg`, « Naoto Shirogane icon (Persona 4 Revival).jpg » → `naoto_p4r.jpg`,
+  « JoJo Frost.jpg » → `jojo_frost.jpg`, `Yosuke_pq.jpg` → `yosuke_pq.jpg`…). Deux raisons :
+  la règle CLAUDE.md §4, et la liste blanche du serveur (`personadle_validate_avatar`,
+  `[A-Za-z0-9_-]+\.(gif|png|jpe?g|webp)`) — un espace ou une parenthèse rend le portrait
+  impossible à enregistrer sur le compte.
+- `profile/avatars_data.js` : les 26 portraits Q/Q2 dans un **nouveau groupe « Persona Q »**
+  (`key: "personaq"`, ordonné P3 → P4 → P5, placé entre P5X et Spécial ; libellé dans
+  `profile-page.js`, en-tête orange Golden Labyrinth dans `profile-page.css`) — retour
+  Hamza du 2026-09-18 : on cherche le style, pas le personnage. Naoto P4R en P4, Morgana
+  dancing en P5, JoJo Frost en SPECIAL. 175 → 204 entrées.
+- Deux portraits mal rangés depuis la 2.0, reclassés au passage (retour Hamza) :
+  `hui_marie_p4r_pfp.jpg` de P5X vers **P4** (Marie est un personnage de Persona 4),
+  `JOKER.webp` de P5 vers **P2** (c'est le Joker d'Innocent Sin).
+- `profile/Wallpaper/wallpaper_p4r.jpg` (1440×2160, 738 Ko) + entrée `p4_revival` dans
+  `shareWallpapers.persona4` (`profile/share-card.js`, désormais exporté pour les tests) —
+  et non dans `UNLOCKABLE_WALLPAPERS`.
+
+### Deux avatars cassés depuis la 2.0, sortis par le test d'intégrité
+
+En vérifiant que chaque nom listé passe la liste blanche du serveur : `Kanji.avif`
+(extension hors liste) et `Caroline&justine.png` (le « & »). Choisis dans la galerie, le
+PATCH était refusé en silence (`_syncLocalProfileToCloud` avale l'erreur) : le portrait
+restait local, disparaissait au prochain pull cloud, n'apparaissait jamais sur un autre
+appareil.
+- `api/lib/validation.php` : `avif` accepté dans la galerie (le fichier existe depuis la 2.0,
+  les navigateurs le rendent).
+- `Caroline&justine.png` → `caroline_justine.png` (`git mv`) ; `normalizeAvatarPath()`
+  (`profile/profile-format.js`) remappe l'ancien nom — seul un profil LOCAL peut encore le
+  porter, le serveur ne l'a jamais accepté.
+- Pas de bump `CACHE_VERSION` : JS/CSS sont en network-first, les nouvelles images ne sont
+  pas encore en cache.
+
+### Tests
+
+- `tests/avatars_gallery.test.js` (11) — chaque portrait listé existe, aucun orphelin dans
+  `img/avatar/`, aucun doublon, chaque nom passe la liste blanche serveur (miroir exact de la
+  regex), groupes connus du picker, les 29 du lot dans le bon groupe ; `normalizeAvatarPath`
+  remappe l'ancien nom ; chaque fond de la carte de partage et chaque déblocable existe sur
+  le disque, identifiants uniques, P4R d'office et pas déblocable.
+- `tests/php/ValidationTest.php` (+2) — `.avif` accepté ; un nom avec « & » refusé même si
+  le fichier existe.
+
+### Angles morts
+
+- Les anciens noms non-snake_case de `img/avatar/` et `profile/Wallpaper/` (majuscules,
+  « & » dans `Aigis_&_makoto.jpg`…) restent tels quels : les fonds ne passent pas par la
+  liste blanche serveur, et renommer des avatars déjà persistés sur des comptes casserait
+  leurs profils. Seul `Caroline&justine.png` était à la fois cassé ET jamais persistable.
+
 ## 2026-09-17 — feat(notifications) : demandes d'ami, défis et rank-up en temps réel via Pusher Channels (branche `feature/realtime-notifications`)
 
 ### Pourquoi
