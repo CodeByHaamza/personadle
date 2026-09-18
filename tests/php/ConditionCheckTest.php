@@ -410,12 +410,22 @@ final class ConditionCheckTest extends TestCase
         // wallpapers, revue PR #14) doit rester synchronisé avec les `case` réellement
         // gérés ci-dessus — sinon un type retiré du switch resterait accepté par le
         // fail-closed, ou un type ajouté au switch serait refusé à tort.
+        //
+        // ⚠️ Ce test contenait un `assertCount(22, $known)`. Un COMPTE ne dit rien de
+        // l'ENSEMBLE : la liste était bien à 22 entrées, et il manquait pourtant
+        // `titles_count` et `played_on_date`, tous deux gérés par le switch et tous
+        // deux utilisés par un titre seedé (`sees`, `tatsuya_dont_burn_out`). Le test
+        // était vert et épinglait le mauvais nombre — c'est lui qui rendait la
+        // dérive invisible. La comparaison ensembliste exhaustive vit désormais dans
+        // ConditionVocabularyTest (sans base, donc elle tourne même sans `make up`) ;
+        // ici on garde les vérifications de sens, sans compte magique.
         $known = personadle_known_condition_types();
         $this->assertContains('manual', $known);
         $this->assertContains('social_link_min_rank', $known);
         $this->assertContains('expert_modes_mastered', $known);
         $this->assertContains('expert_wins_total', $known);
+        $this->assertContains('titles_count', $known);
+        $this->assertContains('played_on_date', $known);
         $this->assertNotContains('social_link_rank_10', $known);
-        $this->assertCount(22, $known, 'Ajuste ce compte si le vocabulaire de condition_check.php change');
     }
 }

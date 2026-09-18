@@ -87,3 +87,64 @@ function personadle_sl_rank_for_xp(int $xp, array $thresholds): array
         'xp_next_rank'    => $xpNextRank,
     ];
 }
+
+/**
+ * Bornes UTC d'une journée du JEU (Europe/Paris), pour filtrer une colonne
+ * TIMESTAMP stockée en UTC.
+ *
+ * ── Pourquoi cette fonction existe ───────────────────────────────────────────
+ * Les requêtes Social Link filtraient la journée avec
+ * `DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = :jour`. `CONVERT_TZ`
+ * vers un fuseau NOMMÉ exige les tables de fuseaux du serveur SQL
+ * (`mysql.time_zone_name`), qui ne sont **pas peuplées par défaut** et sont
+ * typiquement absentes d'un hébergement mutualisé — le dépôt le documentait déjà
+ * dans `api/admin/activity.php`, qui contourne le problème en regroupant côté PHP.
+ *
+ * Quand ces tables manquent, `CONVERT_TZ` ne lève rien : il renvoie **NULL**. La
+ * comparaison `DATE(NULL) = '2026-09-18'` vaut alors NULL, donc faux, et TOUTES
+ * ces requêtes ne trouvent jamais rien. Conséquences constatées :
+ *   - la garde anti-spam « 1 action par jour » ne se déclenche jamais : la même
+ *     action répétée le même jour est acceptée indéfiniment. Mesuré : 180 appels
+ *     de `share_streak` d'affilée suffisent à atteindre le rang 10 (2700 XP),
+ *     ce qui accorde d'un coup le wallpaper `dark_shopping_district` (rang ≥ 5)
+ *     et le titre `aigis_metis_same_soul` (rang ≥ 10) ;
+ *   - le bonus mutuel ne se déclenche jamais : deux amis qui font la même action
+ *     le même jour touchent le tarif solo, et la jauge progresse deux fois moins
+ *     vite que ce que le produit annonce.
+ *
+ * Invisible en CI : l'image Docker MySQL, elle, embarque les tables de fuseaux.
+ * Les tests passaient donc au vert sur un chemin que la prod n'emprunte pas —
+ * exactement le cas signalé par CLAUDE.md §13 (« CI verte insuffisante si elle ne
+ * peut pas exécuter le scénario concerné »).
+ *
+ * ── Pourquoi PHP plutôt que CONVERT_TZ avec un décalage fixe ────────────────
+ * `'+02:00'` marcherait sans tables… jusqu'au changement d'heure. PHP connaît le
+ * DST, lui, et `Europe/Paris` y est déjà la référence partout ailleurs
+ * (`parisDateKey()` côté client, `api/sessions.php` côté serveur).
+ *
+ * Bénéfice secondaire : la comparaison porte désormais sur la colonne NUE
+ * (`created_at >= ? AND created_at < ?`) au lieu d'une expression, donc un index
+ * sur `created_at` redevient utilisable.
+ *
+ * @param  ?string $day Jour Paris au format 'Y-m-d'. Par défaut : aujourd'hui.
+ * @return array{0: string, 1: string} [début inclus, fin exclue], en UTC 'Y-m-d H:i:s'.
+ */
+function personadle_paris_day_bounds_utc(?string $day = null): array
+{
+    $paris = new DateTimeZone('Europe/Paris');
+    $utc   = new DateTimeZone('UTC');
+
+    $day ??= (new DateTime('now', $paris))->format('Y-m-d');
+
+    // Minuit à Paris ce jour-là, puis minuit le lendemain. Passer par
+    // `modify('+1 day')` sur un objet EN heure de Paris — et non par +86400
+    // secondes — est ce qui rend les deux journées de bascule DST correctes :
+    // l'une dure 23 h, l'autre 25 h.
+    $start = new DateTime($day . ' 00:00:00', $paris);
+    $end   = (clone $start)->modify('+1 day');
+
+    return [
+        $start->setTimezone($utc)->format('Y-m-d H:i:s'),
+        $end->setTimezone($utc)->format('Y-m-d H:i:s'),
+    ];
+}

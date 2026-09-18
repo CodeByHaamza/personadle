@@ -275,11 +275,40 @@ function personadle_known_condition_types(): array
     return [
         'wins_total', 'mode_wins', 'mode_games', 'games_total', 'streak_record',
         'perfect_wins', 'unique_days', 'giveups_total', 'friends_count', 'badges_count',
+        'titles_count', 'played_on_date',
         'social_link_min_rank', 'all_modes_won', 'weekly_clean_modes',
         'classic_p1_wins', 'emoji_p2_wins', 'joker_profile', 'manual',
         'mode_wins_under_attempts', 'mode_wins_single_day', 'mode_consecutive_perfects',
         'expert_modes_mastered', 'expert_wins_total',
     ];
+}
+
+/**
+ * Vérification FAIL-CLOSED d'une condition de déblocage — le point d'entrée que
+ * doivent utiliser tous les endpoints d'unlock (badges, titres, wallpapers).
+ *
+ * Différence avec personadle_verify_condition() : un `condition_type` absent,
+ * vide, mal orthographié ou retiré du vocabulaire tombe ici sur `false`, alors
+ * que la fonction générique le laisse passer par son `default: return true`.
+ *
+ * Ce safe-fallback permissif a sa raison d'être là où il est — il évite qu'un
+ * badge ajouté demain, avec un type pas encore implémenté, soit inaccessible à
+ * tout le monde. Mais sur le chemin d'un POST /unlock, il a l'effet exactement
+ * inverse de celui qu'on veut : une faute de frappe dans une migration ouvre le
+ * badge à n'importe quel compte authentifié. `api/wallpapers/index.php` fermait
+ * déjà ce trou dans son coin (revue PR #14) ; badges et titles appelaient encore
+ * la fonction permissive en direct. Ils appellent désormais tous les trois cette
+ * fonction-ci, pour que le comportement soit le même partout et défini une fois.
+ */
+function personadle_condition_allows_unlock(PDO $pdo, int $userId, ?string $condType, ?string $condMode, ?int $condValue): bool
+{
+    if ($condType === null || $condType === ''
+        || !in_array($condType, personadle_known_condition_types(), true)
+    ) {
+        return false;
+    }
+
+    return personadle_verify_condition($pdo, $userId, $condType, $condMode, $condValue);
 }
 
 /**

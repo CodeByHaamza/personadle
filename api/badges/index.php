@@ -55,8 +55,17 @@ if ($action === 'unlock') {
     $badge = $check->fetch();
     if (!$badge) jsonError('Badge not found in catalog', 404);
 
-    // Vérifie que la condition du badge est réellement remplie côté serveur
-    if (!personadle_verify_condition(
+    // Vérifie que la condition du badge est réellement remplie côté serveur.
+    //
+    // personadle_condition_allows_unlock() et non personadle_verify_condition() :
+    // cette dernière laisse passer un condition_type inconnu (son `default:
+    // return true`, safe fallback voulu pour ne pas rendre inaccessible un badge
+    // ajouté demain avec un type pas encore implémenté). Sur le chemin d'un
+    // POST /unlock, ce fallback fait l'inverse de ce qu'on veut : une faute de
+    // frappe dans une migration ouvrirait le badge à n'importe quel compte
+    // authentifié. Les wallpapers fermaient déjà ce trou de leur côté (revue
+    // PR #14) ; les trois endpoints partagent désormais la même porte.
+    if (!personadle_condition_allows_unlock(
         $pdo,
         $authId,
         $badge['condition_type'],
