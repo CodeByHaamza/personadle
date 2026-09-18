@@ -13,6 +13,50 @@
 
 ---
 
+## 2026-09-18 — Release 2.2 : la 044 refusée par la prod, `titles` n'avait jamais eu ses colonnes de description
+
+En jouant les migrations 040→046 sur Hostinger avant `develop → main` (procédure
+`DEPLOY.md` § Release majeure), la **044** est tombée dès la première ligne :
+`Unknown column 'description_en'`. La table `titles` de prod vient de l'archive du
+2026-05-06 et n'a **jamais** eu `description_*` / `name_jp` ; son `condition_value` est
+`INT NOT NULL DEFAULT 0` là où `sql/bdd_mysql.sql` le laisse NULL. La **025** avait
+classé cet écart « cosmétique, jamais lu par le code » — exact jusqu'à ce que la 044
+insère des descriptions et un titre sans valeur numérique (`tatsuya_dont_burn_out`,
+`played_on_date`), et la 046 pareil (`wonder_go_beyond`, `targets_found`).
+
+Rien n'a été inséré (l'`INSERT` a échoué atomiquement), 040→043 étaient déjà passées.
+Correction : la **044 porte désormais son prérequis** — un `ALTER TABLE titles ADD COLUMN
+IF NOT EXISTS …` (7 colonnes NULL) + `MODIFY condition_value INT NULL` en tête, avant les
+insertions. Choix de l'amender plutôt que d'ajouter une 047 : une 047 numérotée après la
+046 devrait pourtant passer AVANT la 044 sur toute base au schéma prod, ce que
+`scripts/apply_migrations.sh` (ordre des fichiers) ne ferait jamais. La 044 n'avait été
+jouée nulle part ailleurs qu'en Docker/CI, où elle est un no-op.
+
+Vérifié : rejouée contre une base Docker recréée avec le `SHOW CREATE TABLE titles/badges`
+de la prod (passe, rejeu no-op, puis 046 passe derrière), et contre le schéma de référence
+(no-op). Puis en prod : 044, 045, 046 OK ; `schema_migrations` 040→046 enregistrées ;
+69 badges / 22 titres ; `favorite_mode`, `guesses`, `ban_reason`, `is_expert` présentes ;
+`uq_leaderboard` à 6 colonnes. Backup local avant tout (`~/personadle_backups/`, 49 Mo).
+
+### Dérive prod restante, constatée au passage (diff `information_schema` prod ↔ référence)
+
+Corrigé dans la foulée : `leaderboard_cache.score` était `int(11)` en prod contre
+`DECIMAL(8,1)` dans la référence, et la métrique winrate (`ROUND(…, 1)`,
+`api/lib/leaderboard_metrics.php`) y aurait été tronquée — 73.4 et 73.1 à égalité dans le
+cache day/week/month. → **047** `leaderboard_cache_score_decimal` (MODIFY idempotent, no-op
+sur la référence). Le cache était **vide** en prod au moment de la release (0 ligne dans le
+dump d'avant-migration) : le cron horaire `api/cron/leaderboard.php` n'a visiblement jamais
+tourné sur Hostinger — à vérifier dans hPanel, sinon le classement par période reste en
+calcul live. La 047 est dans le dépôt, à jouer en prod (checklist `TODO.md`).
+
+Non corrigé — aucune n'est lue par le code 2.2, même critère que la 025 :
+`game_sessions.created_at`, `social_link_ranks.name_jp`, `user_stats.id`, `user_titles.id`
+absentes en prod ; en prod seulement : `friendships.updated_at`, `game_sessions.perfect_win`,
+`messages.updated_at`, la table `social_link_badge_configs` et
+`social_link_rankup_notifs.is_badge_prompt` ; vues `v_friends` / `v_global_stats` de
+définition différente ; types plus stricts en prod (`enum` vs `varchar` sur
+`friendships.status`, `game_sessions.result`, `titles.rarity`).
+
 ## 2026-09-18 — content(Shujin) : Wonder Shujin en AOA, cinq badges vérifiés serveur, le titre Go Beyond, trois musiques (branche `content/wonder-shujin-badges-musiques`)
 
 Lot de contenu autour de la tenue Shujin de Wonder (P5X). Ce qui le distingue des lots
