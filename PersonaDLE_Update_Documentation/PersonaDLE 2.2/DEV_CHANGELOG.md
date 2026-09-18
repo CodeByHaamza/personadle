@@ -2253,3 +2253,73 @@ venue de `$_GET`, si. Même contrat que `$modeFilter`, qui passe par `$pdo->quot
 - Le classement Expert « depuis toujours » scanne `game_sessions` à chaque appel,
   sans cache (comme le `ever` normal scanne `user_stats`). `game_sessions` étant bien
   plus grosse, ça deviendra le premier point à surveiller si la page ralentit.
+
+## 2026-09-18 — Les badges à code événement n'étaient pas protégés par leur code
+
+**13 badges** du catalogue ont une ligne dans `event_codes` : les saisonniers
+(`christmas_2025`, `valentine_2026`, `new_years_2026`, `chinese_new_year_2026`,
+`easter_2026`, `sport`) et les secrets communautaires (`true_hacker`, `tae_takemi`,
+`arati`, `gyotre`, `dzulian`, `chef`, `lobster`). Leur condition réelle, c'est
+« connaître le code », et seul `POST /api/badges/redeem` sait la vérifier — il valide
+le code, sa fenêtre de validité, et consomme la redemption dans une transaction.
+
+Mais en base ils portent `condition_type = 'manual'`, ce qui vaut « accordé sans
+vérification » côté `personadle_verify_condition()`. Donc **`POST /api/badges/unlock`
+avec le slug les accordait aussi, sans le code**. Et le slug n'est pas un secret :
+`GET /api/badges` renvoie le catalogue complet à tout utilisateur authentifié, slug
+compris. Le code protégeait une porte, à côté d'une fenêtre ouverte.
+
+Vérifié avant/après sur les quatre slugs les plus parlants :
+
+| Badge | Avant | Après |
+|---|---|---|
+| `christmas_2025` | accordé sans le code | 403 — code requis |
+| `valentine_2026` | accordé sans le code | 403 — code requis |
+| `dzulian` | accordé sans le code | 403 — code requis |
+| `lobster` | accordé sans le code | 403 — code requis |
+| `first_win` (sans code) | selon la condition | inchangé |
+| `data_mining` (sans code) | accordé (`manual`) | inchangé |
+
+### Où vit le garde, et pourquoi pas dans `condition_check.php`
+
+Dans `api/badges/index.php`, juste après la recherche du badge et **avant** la
+vérification de condition. Ce n'est pas une question de CONDITION mais de ROUTE :
+`condition_check.php` répond « cet utilisateur remplit-il la condition ? », or ici la
+réponse dépend d'un secret que l'utilisateur fournit, pas d'un état en base. L'y
+mettre obligerait cette lib à connaître `event_codes`, une table qui ne la regarde pas.
+
+L'ordre compte et il est testé : le garde passe avant la vérification de condition.
+S'il passait après, il ne servirait à rien — la condition `manual` aurait déjà répondu
+oui et l'endpoint aurait inséré la ligne.
+
+Le garde interroge `event_codes`, **sans aucun slug codé en dur** : un badge saisonnier
+créé demain par l'admin est protégé dès la création de son code, sans toucher au PHP.
+Un test verrouille ce lien.
+
+### Aucun effet sur un joueur légitime, et c'est vérifié
+
+`handleEventCodeSubmit()` (`profile/badges/badgesManager.js`) est **serveur-d'abord** :
+`await api.badges.redeem(code)` d'abord, et le badge n'entre dans le profil local
+qu'une fois la réponse OK. Le backend le connaît donc toujours avant le local, et
+`syncBadgesWithBackend()` n'a jamais à le repousser par `/unlock` (il ne pousse que les
+badges locaux **absents** du backend). Le chemin `/redeem` est inchangé.
+
+### Détails techniques
+
+- `api/badges/index.php` — garde `event_codes` dans la branche `unlock`
+- `tests/php/EventCodeBadgeGateTest.php` (nouveau, 6 tests) en deux moitiés :
+  la route est fermée (tous les badges à code refusés, garde avant la condition,
+  aucun slug en dur) **et** les joueurs légitimes ne sont pas cassés (les badges sans
+  code inchangés, `/redeem` accorde et consomme toujours, aucun code n'est orphelin).
+  Le test de position échoue sur le code d'avant.
+
+### Ce qui reste `manual` et le restera
+
+Après ce lot, 34 badges restent `manual` sans protection : flags narratifs
+(découvertes de personnages en cours de partie), horaires (`night_owl`, `nyx_hour`),
+et quelques sociaux. Décision produit prise le 2026-09-18 : on ne les verrouille pas.
+`data_mining` (5 profils visités) et `leblanc_meeting` (3 amis connectés le même jour)
+seraient pourtant vérifiables côté serveur sans migration — `social_link_interactions`
+journalise déjà les `visit_profile` par lien, et `game_sessions` + `friendships`
+suffisent pour le second. À reprendre si l'envie vient ; ce n'est pas une dette
+urgente pour un fan-game sans enjeu compétitif.
