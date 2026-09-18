@@ -74,6 +74,48 @@ Les 14 titres d'avant la 044 n'avaient d'ailleurs aucune description.
 - PHPUnit 358, Vitest 1411, PHPStan propre sur la branche (les 4 erreurs affichées en local
   viennent d'`api/discord/interactions.php`, travail non commité hors de cette PR), Psalm
   taint propre, `compendium` + `stats_usecases` E2E rejoués.
+
+## 2026-09-18 — Filtres : ne garder que le P5 de base ne tenait pas au rechargement (et l'E2E « cible P5 » qui clignotait)
+
+L'E2E `filters_usecases › la cible du jour RESPECTE les filtres` est tombé une fois sur deux
+sur la PR de release #134, sur une arborescence strictement identique à un run vert. Pas
+une course : la cible reçue était un personnage **P5S** alors que le joueur du test avait
+`filters_Classic = ["P5"]`. Cause dans `js/filterMenu.js` : `_migrate()` ne peut pas
+distinguer `["P5"]` écrit par la fenêtre de filtres 2.2 (« le P5 de base, rien d'autre »)
+de `["P5"]` de l'ancien format large (« tout Persona 5 ») — il l'étend donc en
+`["P5","P5R","P5S","P5T"]` à **chaque** chargement. Le test tirait dans toute la famille,
+et selon la graine aléatoire du joueur anonyme tombait sur Kasumi, Sophia ou Toshiro.
+
+Ce n'est pas qu'un problème de test : un joueur qui décoche Royal, Strikers et Tactica
+pour ne garder que Persona 5 les retrouvait cochés au rechargement suivant. Même chose
+pour P3, P4 ou PQ seuls. Le test unitaire « `['P5']` seul s'étend » (PIÈGE 3,
+`tests/gameCore.test.js`) documentait la moitié legacy du compromis, pas la collision.
+
+### Correction — un marqueur de format
+
+- `<storageKey>_precise = "1"`, posé à **chaque** écriture de la liste par le menu
+  (`_save`, seed d'un opus récent, migration unique). `_migrate(saved, allOpus, precise)` :
+  avec le marqueur, aucun code n'est étendu, on ne garde que les codes connus du mode.
+- Une liste **sans** marqueur est une liste d'avant : étendue une fois, réécrite étendue
+  **avec** le marqueur. Le joueur peut ensuite décocher Royal et le voir rester décoché.
+- Les listes installées par un **défi** gardent l'heuristique large et ne sont ni
+  réécrites ni marquées : un expéditeur sur un ancien front peut encore envoyer `["P3"]`
+  au sens « toute la famille » (`tests/filters_usecases.test.js` le vérifie), et le
+  marqueur décrit les listes du joueur, pas celles d'un défi. Limite connue : un défi
+  dont l'expéditeur ne joue que le P5 de base arrive chez le receveur en famille P5.
+- `js/filterMenu.js` est précaché par `sw.js` → **bump `CACHE_VERSION` à la prochaine
+  release** (noté dans `TODO.md`).
+
+### Tests
+
+- `tests/filterMenu.test.js` (+5) : migration unique + marquage, `["P5"]` marqué reste
+  `["P5"]`, ce que le joueur décoche reste décoché au rechargement, le seed pose aussi le
+  marqueur, code inconnu ignoré / liste vide préservée.
+- `tests-e2e/filters_usecases.spec.js` : l'état du joueur B est posé par `addInitScript`
+  (filtres, marqueur, `_seeded` = PTS, graine) avant que le module ne tire la cible — et
+  non goto + evaluate + reload. 10 passages d'affilée sans retry ; 35/35 sur les specs
+  filtres + défis.
+
 ## 2026-09-18 — 2.2 en prod : le Compendium en 500 trente minutes après (migration 048)
 
 **Livré** : PR #132 `develop → main` mergée à 17:37 UTC, commit `7a426b2`. L'auto-déploiement
