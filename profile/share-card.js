@@ -65,8 +65,12 @@ const shareBackgrounds = [
   },
 ];
 
-/** Papiers peints disponibles (organisés par jeu) */
-const shareWallpapers = {
+/**
+ * Papiers peints disponibles (organisés par jeu).
+ * Exporté pour tests/avatars_gallery.test.js : chaque `src` doit exister sur
+ * le disque — un chemin cassé donne une carte de partage sans fond, sans erreur.
+ */
+export const shareWallpapers = {
   none: [{ id: "none", name: "None", src: null }],
   persona1: [
     { id: "p1_prota", name: "Protagonist", src: "../profile/Wallpaper/P1_Prota_Wallpaper.png" },
@@ -142,6 +146,9 @@ const shareWallpapers = {
       name: "Shadow Teddie",
       src: "../profile/Wallpaper/Shadow_Teddie_Shadow_World.jpg",
     },
+    // Persona 4 Revival (2026-09-17) — fond de base, pas un déblocable : il vit
+    // ici et non dans UNLOCKABLE_WALLPAPERS (décision Hamza).
+    { id: "p4_revival", name: "Persona 4 Revival", src: "../profile/Wallpaper/wallpaper_p4r.jpg" },
   ],
   persona5: [
     {
