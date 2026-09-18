@@ -159,6 +159,23 @@ describe("titleConditionText", () => {
   it("falls back to the raw condition_type for an unknown one", () => {
     expect(titleConditionText({ condition_type: "mystery_condition" })).toBe("mystery_condition");
   });
+
+  // 049 : l'API sert description_<lang> (repli anglais côté serveur). Elle prime
+  // sur le texte anglais codé en dur — c'est elle qui parle la langue du joueur.
+  it("prefers the localized description served by the API when present", () => {
+    expect(
+      titleConditionText({
+        condition_type: "badges_count",
+        condition_value: 20,
+        description: "Débloque 20 badges. La porte de la Velvet Room s'ouvre à qui a rassemblé assez de soi-même.",
+      })
+    ).toBe("Débloque 20 badges. La porte de la Velvet Room s'ouvre à qui a rassemblé assez de soi-même.");
+  });
+
+  it("ignores an empty or missing description (offline, API silent) and keeps the generic text", () => {
+    expect(titleConditionText({ condition_type: "badges_count", condition_value: 20, description: "  " })).toBe("Unlock 20 badges");
+    expect(titleConditionText({ condition_type: "badges_count", condition_value: 20, description: null })).toBe("Unlock 20 badges");
+  });
 });
 
 describe("getEquippedTitle", () => {

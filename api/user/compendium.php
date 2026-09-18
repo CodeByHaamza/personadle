@@ -67,7 +67,7 @@ $badges = array_map(fn($r) => ['badge_id' => $r['badge_id'], 'unlocked_at' => $r
 
 // ── Titres ───────────────────────────────────────────────────────────────────
 $stmt = $pdo->prepare(
-    'SELECT t.slug, t.image_path, t.rarity, t.name_en, t.name_fr, t.name_es, t.name_de, t.name_it, ut.unlocked_at
+    'SELECT t.slug, t.image_path, t.rarity, t.name_en, t.name_fr, t.name_es, t.name_de, t.name_it, t.name_pt, ut.unlocked_at
      FROM user_titles ut JOIN titles t ON t.id = ut.title_id
      WHERE ut.user_id = ? ORDER BY ut.unlocked_at, ut.id'
 );
@@ -78,7 +78,7 @@ $titles = array_map(fn($r) => [
     'rarity'      => $r['rarity'],
     'name'        => [
         'en' => $r['name_en'], 'fr' => $r['name_fr'], 'es' => $r['name_es'],
-        'de' => $r['name_de'], 'it' => $r['name_it'],
+        'de' => $r['name_de'], 'it' => $r['name_it'], 'pt' => $r['name_pt'],
     ],
     'unlocked_at' => $r['unlocked_at'],
 ], $stmt->fetchAll());
