@@ -96,16 +96,49 @@ function _seedNewOpus(activeOpus, allOpus, storageKey) {
   }
   try {
     localStorage.setItem(key, JSON.stringify([...done]));
-    // Persister AUSSI la liste : sans ça le seed ne tenait qu'un chargement.
-    // Le drapeau `_seeded` était écrit tout de suite, la liste non — au
-    // rechargement suivant l'opus n'était plus réinjecté (déjà « seedé ») et
-    // disparaissait définitivement pour un joueur qui n'avait touché à aucun
-    // filtre entre-temps.
-    localStorage.setItem(storageKey, JSON.stringify(activeOpus));
   } catch (_) {
     /* quota dépassé → silencieux */
   }
+  // Persister AUSSI la liste : sans ça le seed ne tenait qu'un chargement.
+  // Le drapeau `_seeded` était écrit tout de suite, la liste non — au
+  // rechargement suivant l'opus n'était plus réinjecté (déjà « seedé ») et
+  // disparaissait définitivement pour un joueur qui n'avait touché à aucun
+  // filtre entre-temps.
+  _persist(storageKey, activeOpus);
   return activeOpus;
+}
+
+/**
+ * Marqueur « liste écrite au format précis » : `${storageKey}_precise`.
+ *
+ * Sans lui, ["P5"] seul est indiscernable de l'ancien format large et
+ * _migrate() le ré-étend en ["P5","P5R","P5S","P5T"] à CHAQUE chargement — un
+ * joueur qui ne garde que le P5 de base dans la fenêtre de filtres retrouvait
+ * Royal, Strikers et Tactica cochés au rechargement suivant (même chose pour
+ * P3, P4 ou PQ seuls). Vécu le 2026-09-18 via tests-e2e/filters_usecases :
+ * la « cible P5 » tombait sur un personnage P5S selon la graine du joueur.
+ * Le marqueur est posé à chaque écriture de la liste (_save, seed, migration
+ * unique) ; une liste sans marqueur est une liste d'avant, migrée une fois.
+ */
+function _preciseKey(storageKey) {
+  return `${storageKey}_precise`;
+}
+
+function _isPrecise(storageKey) {
+  try {
+    return localStorage.getItem(_preciseKey(storageKey)) === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function _persist(storageKey, activeOpus) {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(activeOpus));
+    localStorage.setItem(_preciseKey(storageKey), "1");
+  } catch (_) {
+    /* quota dépassé → silencieux */
+  }
 }
 
 /**
@@ -115,11 +148,19 @@ function _seedNewOpus(activeOpus, allOpus, storageKey) {
  *
  * @param {string[]|null} saved    - Valeur lue depuis localStorage
  * @param {string[]}      allOpus  - Tous les codes valides pour ce mode
+ * @param {boolean}       [precise] - La liste porte le marqueur « format précis » :
+ *                                    aucun code large à étendre, on ne garde que
+ *                                    les codes connus de allOpus.
  * @returns {string[]|null}
  */
-function _migrate(saved, allOpus) {
+function _migrate(saved, allOpus, precise = false) {
   if (!Array.isArray(saved)) return null;
   if (saved.length === 0) return []; // preserve "all deselected" state
+
+  if (precise) {
+    const kept = saved.filter((code) => allOpus.includes(code));
+    return kept.length > 0 ? [...new Set(kept)] : null;
+  }
 
   const result = [];
   for (const code of saved) {
@@ -179,7 +220,19 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     /* localStorage indisponible → on ignore */
   }
 
-  const migrated = _migrate(stored, allOpus);
+  // Une liste installée par un défi n'est pas celle du joueur : elle garde
+  // l'heuristique large (un expéditeur sur un ancien front peut encore envoyer
+  // ["P3"] au sens « toute la famille », cf. tests/filters_usecases.test.js) et
+  // n'est ni réécrite ni marquée — le marqueur décrit les listes du joueur.
+  const heldByChallenge = isFilterKeyHeldByChallenge(storageKey);
+  const precise = _isPrecise(storageKey) && !heldByChallenge;
+  const migrated = _migrate(stored, allOpus, precise);
+  // Migration unique d'une liste d'avant le marqueur : on réécrit la liste étendue
+  // avec le marqueur, pour ne plus jamais la ré-étendre (le joueur peut ensuite
+  // décocher Royal et le voir rester décoché).
+  if (!precise && !heldByChallenge && migrated !== null) {
+    _persist(storageKey, migrated);
+  }
   // Liste vide = « tout décoché » assumé par le joueur : on n'y réinjecte rien.
   // Aucun filtre enregistré = joueur neuf, tout est déjà actif : rien à seeder non
   // plus, mais il faut MARQUER les opus comme déjà proposés. Sans ça, un joueur qui
@@ -517,13 +570,9 @@ export function initFilterMenu(storageKey, allOpus, onFilterChange) {
     });
   }
 
-  /** Sauvegarde les filtres actifs dans localStorage. */
+  /** Sauvegarde les filtres actifs dans localStorage (au format précis, marqué). */
   function _save() {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(activeOpus));
-    } catch (_) {
-      /* quota dépassé → silencieux */
-    }
+    _persist(storageKey, activeOpus);
   }
 
   /* ── Bandeau "aucun filtre" injecté dans #filterPanel ─────────── */
