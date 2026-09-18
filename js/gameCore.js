@@ -58,16 +58,75 @@ export function parisDateKey(d = new Date()) {
 }
 
 /**
- * Returns the number of milliseconds remaining until the next Paris midnight.
- * Used to schedule the automatic daily reset.
+ * Décale une clé "YYYY-MM-DD" d'un nombre de jours CALENDAIRES, en arithmétique
+ * pure sur la date (aucun fuseau, aucune heure) : shiftDateKey("2026-03-01", -1)
+ * → "2026-02-28", shiftDateKey("2026-12-31", 1) → "2027-01-01".
  *
+ * C'est la seule façon correcte de dire « hier » ou « demain » côté client. Le
+ * calcul par `now − 86 400 000 ms` puis parisDateKey() se trompe le lendemain
+ * du passage à l'heure d'été : la journée n'a fait que 23 h, donc entre 00:00 et
+ * 00:59 Paris on retombe DEUX jours en arrière. La série d'un joueur qui avait
+ * joué la veille était cassée, et celle d'un joueur qui avait sauté ce dimanche
+ * était prolongée — une fois par an, une heure durant, sans aucun signal.
+ *
+ * @param {string} key   clé "YYYY-MM-DD" (parisDateKey())
+ * @param {number} days  entier, négatif pour reculer
+ * @returns {string} clé décalée ; `key` inchangée si elle n'est pas au bon format
+ */
+export function shiftDateKey(key, days) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key ?? ""));
+  if (!m || !Number.isInteger(days)) return key;
+  const t = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + days);
+  return new Date(t).toISOString().slice(0, 10);
+}
+
+/**
+ * Instant (ms UTC) du minuit Paris qui OUVRE la journée `key` ("YYYY-MM-DD").
+ *
+ * Paris est à UTC+1 ou UTC+2 : ce minuit tombe 1 h ou 2 h avant le minuit UTC
+ * du même jour. On essaie les deux et on garde celui qu'Intl lit comme
+ * « 00 h, ce jour-là » à Paris — aucun calcul ne passe par le fuseau de la
+ * machine.
+ *
+ * @param {string} key clé "YYYY-MM-DD" (parisDateKey())
+ * @returns {number} timestamp ms
+ */
+export function parisMidnightUtc(key) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(key ?? ""));
+  if (!m) return NaN;
+  const utcMidnight = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const hourFmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Paris",
+    hour: "2-digit",
+    hourCycle: "h23",
+  });
+  for (const offsetH of [1, 2]) {
+    const t = utcMidnight - offsetH * 3_600_000;
+    if (parisDateKey(new Date(t)) === key && hourFmt.format(new Date(t)) === "00") return t;
+  }
+  return utcMidnight - 3_600_000; // repli théorique : CET
+}
+
+/**
+ * Returns the number of milliseconds remaining until the next Paris midnight.
+ * Used to schedule the automatic daily reset (setupDailyReset).
+ *
+ * Calculé depuis la clé de date Paris (parisDateKey → lendemain → instant de
+ * son minuit via parisMidnightUtc), JAMAIS en re-parsant une chaîne
+ * `toLocaleString` dans le fuseau de la machine. L'ancienne version le faisait
+ * et, pour tout appareil hors Europe (États-Unis, Japon, Australie, UTC…), se
+ * trompait de 60 min les deux jours de changement d'heure de Paris : reset une
+ * heure trop TARD au printemps (le puzzle de la veille restait jouable jusqu'à
+ * 01 h et une victoire partait datée du jour → mismatch anti-triche), une
+ * heure trop TÔT à l'automne (partie en cours effacée à 23 h). Idem le jour du
+ * changement d'heure LOCAL d'un joueur américain.
+ *
+ * @param {Date} [now=new Date()]
  * @returns {number} Milliseconds until 00:00:00 Paris time
  */
-export function msUntilNextParisMidnight() {
-  const nowInParis = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  const midnight = new Date(nowInParis);
-  midnight.setHours(24, 0, 0, 0);
-  return midnight.getTime() - nowInParis.getTime();
+export function msUntilNextParisMidnight(now = new Date()) {
+  const tomorrow = shiftDateKey(parisDateKey(now), 1);
+  return parisMidnightUtc(tomorrow) - now.getTime();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -127,6 +186,8 @@ export function normalize(str) {
 
 const _gameIdKey = (scope) => `gameId_${scope}`;
 const _gameLoggedKey = (scope) => `gameLogged_${scope}`;
+/** Journée Paris pour laquelle la partie a été ARMÉE (tirage de la cible). */
+const _gameDayKey = (scope) => `gameDay_${scope}`;
 
 /**
  * Identifiant unique de partie.
@@ -155,6 +216,35 @@ function newId() {
 export function startGame(scope) {
   localStorage.setItem(_gameIdKey(scope), newId());
   localStorage.removeItem(_gameLoggedKey(scope));
+  localStorage.setItem(_gameDayKey(scope), parisDateKey());
+}
+
+/**
+ * Journée Paris à laquelle appartient la partie en cours de `scope` — celle où
+ * sa cible a été tirée, pas celle où elle se termine.
+ *
+ * Les deux ne coïncident pas quand l'onglet reste ouvert après minuit sans que
+ * le reset quotidien ait tourné (téléphone en veille : setTimeout est retardé).
+ * Le joueur finit alors le puzzle d'HIER à 00 h 05. Daté du jour de fin, la
+ * session partait avec la cible d'hier sous la date d'aujourd'hui : signalée
+ * par l'anti-triche (qui recalcule la cible du jour), et la journée d'hier
+ * jamais créditée — puis le puzzle d'aujourd'hui, une fois le reset passé,
+ * donnait une seconde partie « du jour ». Le serveur accepte aujourd'hui OU
+ * hier (api/sessions.php) : on lui envoie le vrai jour.
+ *
+ * Repli sur aujourd'hui si la partie n'a pas de journée (ancienne version
+ * armée avant cette clé) ou si elle date d'avant-hier ou plus (le serveur la
+ * refuserait ; mieux vaut une partie signalée qu'une partie perdue).
+ *
+ * @param {string} [scope=_currentScope]
+ * @returns {string} clé "YYYY-MM-DD"
+ */
+export function currentGameDay(scope = _currentScope) {
+  const today = parisDateKey();
+  if (!scope) return today;
+  const armed = localStorage.getItem(_gameDayKey(scope));
+  if (armed === today || armed === shiftDateKey(today, -1)) return armed;
+  return today;
 }
 
 /**
@@ -944,6 +1034,11 @@ export function checkResetOnLoad(lastPlayedKey, statsScope, onReset) {
     onReset();
   } else {
     console.log(`📅 Same day, no reset needed (${statsScope})`);
+    // Partie armée par une version antérieure à `gameDay_*` : elle est bien
+    // d'aujourd'hui (la date du mode le dit), on le note pour currentGameDay().
+    if (!localStorage.getItem(_gameDayKey(statsScope))) {
+      localStorage.setItem(_gameDayKey(statsScope), today);
+    }
   }
 }
 
@@ -1059,7 +1154,9 @@ export function buildGameSession({
     // Clé backend canonique, quelle que soit la graphie passée par le mode
     // ("AllOutAttack", "All Out Attack", "Classic"…). Voir normalizeModeKey().
     mode: normalizeModeKey(mode) ?? mode,
-    played_date: parisDateKey(),
+    // Le jour où la partie a été ARMÉE, pas celui où elle se termine — voir
+    // currentGameDay() : après minuit sans reset (veille), c'est encore hier.
+    played_date: currentGameDay(),
     target_name: targetName,
     result,
     attempts,
@@ -1114,14 +1211,10 @@ export async function savePendingSession(session) {
     } catch (err) {
       if (err?.status === 409) return; // Session already recorded (e.g. challenge replay)
       // Offline or other server error — queue to localStorage for later sync
-      const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
-      pending.push(session);
-      localStorage.setItem("pendingSessions", JSON.stringify(pending));
+      _queuePendingSession(session);
     }
   } else {
-    const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
-    pending.push(session);
-    localStorage.setItem("pendingSessions", JSON.stringify(pending));
+    _queuePendingSession(session);
   }
 
   // Always try to show community stats (silent fail if offline).
@@ -1132,6 +1225,70 @@ export async function savePendingSession(session) {
 
   // Invité avec une série qui compte : lui proposer de la sauvegarder.
   maybeNudgeGuest();
+}
+
+/**
+ * Identifiant du compte connecté sur CETTE page, ou null (invité, ou page dont
+ * l'auth n'est pas encore résolue). Sert à marquer le propriétaire de ce qui
+ * attend en localStorage — voir ownsQueuedEntry().
+ */
+export function currentAccountId() {
+  const id = window._currentUser?.id;
+  return id == null ? null : String(id);
+}
+
+/**
+ * Une entrée mise en file (partie hors ligne, statut de défi) appartient-elle au
+ * compte courant ?
+ *
+ * Appareil partagé : A joue hors ligne (ou sa session expire), se déconnecte ; B
+ * se connecte. La file était rejouée avec le cookie de B — les parties de A
+ * finissaient dans les stats de B, et ses statuts de défi partaient en 403 puis
+ * étaient jetés. Chaque entrée porte donc `_owner` (id du compte au moment de la
+ * mise en file, null pour un invité) : on ne rejoue que les siennes et celles
+ * d'un invité (un invité qui se connecte doit bien être crédité), les autres
+ * attendent le retour de leur propriétaire.
+ *
+ * @param {{ _owner?: string|number|null }} entry
+ * @param {string|null} [accountId=currentAccountId()]
+ */
+export function ownsQueuedEntry(entry, accountId = currentAccountId()) {
+  const owner = entry?._owner;
+  return owner == null || String(owner) === String(accountId ?? "");
+}
+
+function _queuePendingSession(session) {
+  const pending = JSON.parse(localStorage.getItem("pendingSessions") || "[]");
+  pending.push({ ...session, _owner: currentAccountId() });
+  localStorage.setItem("pendingSessions", JSON.stringify(pending));
+}
+
+/**
+ * Efface de l'appareil tout ce qui appartient au compte qui se déconnecte et
+ * qui, laissé là, se retrouverait dans les mains du prochain compte connecté
+ * sur ce navigateur :
+ *   - la trace Jack Frost (`streakRecovery`) — B se voyait proposer de restaurer
+ *     la série perdue de A, et le serveur l'acceptait si B avait assez de jours
+ *     de jeu ;
+ *   - les cases de défi actives (normal et Expert), filtres de l'expéditeur
+ *     rendus et état du mode purgé — B aurait joué la cible du défi de A, partie
+ *     comptée ni comme défi (403 sur le message de A) ni comme partie du jour.
+ * Les files hors ligne (`pendingSessions`, `pendingChallengeStatus`) ne sont PAS
+ * vidées : marquées par propriétaire (ownsQueuedEntry), elles attendent A.
+ * Appelé par la déconnexion (js/auth.js). Ne touche ni au profil local ni aux
+ * réglages : auth.js s'en charge déjà.
+ */
+export function clearAccountLocalState() {
+  localStorage.removeItem("streakRecovery");
+  for (const isExpert of [false, true]) {
+    let raw = null;
+    try {
+      raw = JSON.parse(localStorage.getItem(activeChallengeKey(isExpert)) || "null");
+    } catch {
+      /* case illisible : releaseActiveChallenge la retire quand même */
+    }
+    releaseActiveChallenge(raw ? { ...raw, isExpert } : { isExpert });
+  }
 }
 
 /**
@@ -1588,6 +1745,34 @@ export function readActiveChallenge(isExpert = isExpertPage()) {
 }
 
 /**
+ * La valeur actuelle de cette clé de filtres est-elle celle qu'un défi ACTIF
+ * (aujourd'hui, l'une ou l'autre dimension) a installée ?
+ *
+ * filterMenu.js s'en sert pour ne pas retoucher une liste qui n'appartient pas
+ * au joueur. Sans ça, sur un appareil où le mode n'avait jamais été ouvert
+ * (pas de `<clé>_seeded`), le seeding d'un opus récent (PTS) s'ajoutait aux
+ * filtres du défi et les PERSISTAIT ; releaseActiveChallenge() lisait alors
+ * « la clé ne vaut plus ce que le défi a écrit → le joueur a rechoisi » et ne
+ * rendait rien : le joueur gardait « filtres de l'expéditeur + PTS » pour
+ * toujours, sans avoir rien choisi. Sorti par tests/filters_usecases.test.js.
+ *
+ * @param {string} storageKey clé localStorage du mode (FILTER_STORAGE_KEYS)
+ * @returns {boolean}
+ */
+export function isFilterKeyHeldByChallenge(storageKey) {
+  if (!storageKey) return false;
+  const current = localStorage.getItem(storageKey);
+  if (current == null) return false;
+  for (const isExpert of [false, true]) {
+    const c = readActiveChallenge(isExpert);
+    if (c?.filterKey === storageKey && c.installedFilters != null && c.installedFilters === current) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Cible dédiée du défi actif pour un mode (décision produit 2026-07-17 :
  * « le défi doit défier » — cible aléatoire, pas celle du jour).
  * Retourne le nom de la cible, ou null si pas de défi actif pour ce mode ou
@@ -1869,7 +2054,7 @@ export function readPendingChallengeStatus() {
 export function queueChallengeStatusUpdate(msgId, status) {
   if (!msgId || !status) return;
   const list = readPendingChallengeStatus().filter((e) => e.msgId !== msgId);
-  list.push({ msgId, status, at: Date.now() });
+  list.push({ msgId, status, at: Date.now(), _owner: currentAccountId() });
   localStorage.setItem(PENDING_CHALLENGE_STATUS_KEY, JSON.stringify(list.slice(-20)));
 }
 
@@ -1885,9 +2070,11 @@ export function queueChallengeStatusUpdate(msgId, status) {
 export async function flushPendingChallengeStatus(api) {
   const list = readPendingChallengeStatus();
   if (!list.length || !api?.messages?.updateStatus) return 0;
-  const remaining = [];
+  // Les relances d'un autre compte de cet appareil attendent son retour : envoyées
+  // avec le cookie du compte courant, elles partiraient en 403 et seraient jetées.
+  const remaining = list.filter((e) => !ownsQueuedEntry(e));
   let done = 0;
-  for (const entry of list) {
+  for (const entry of list.filter((e) => ownsQueuedEntry(e))) {
     try {
       await api.messages.updateStatus(entry.msgId, entry.status);
       done++;

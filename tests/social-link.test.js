@@ -44,15 +44,44 @@ describe("addFlameIfPlayedToday", () => {
   });
 
   it("adds the flame when the last interaction is today", () => {
+    // Midi UTC est « aujourd'hui » à Paris quel que soit le jour de l'année.
     const today = new Date().toISOString().slice(0, 10);
-    addFlameIfPlayedToday({ social_link_last_interaction: `${today} 10:00:00` }, container);
+    addFlameIfPlayedToday({ social_link_last_interaction: `${today} 12:00:00` }, container);
     expect(container.querySelector(".fr-flame")).not.toBeNull();
   });
 
   it("does not add the flame when the last interaction was yesterday", () => {
     const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
-    addFlameIfPlayedToday({ social_link_last_interaction: `${yesterday} 10:00:00` }, container);
+    addFlameIfPlayedToday({ social_link_last_interaction: `${yesterday} 12:00:00` }, container);
     expect(container.querySelector(".fr-flame")).toBeNull();
+  });
+
+  it("la journée est celle de PARIS : une interaction à 00:30 Paris (22:30 UTC la veille) est « aujourd'hui »", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-11T08:00:00+02:00")); // 11 juillet, matin, Paris
+    // Hier soir 22:30 UTC = aujourd'hui 00:30 Paris — même journée Paris que maintenant
+    addFlameIfPlayedToday({ social_link_last_interaction: "2026-07-10 22:30:00" }, container);
+    expect(container.querySelector(".fr-flame")).not.toBeNull();
+    vi.useRealTimers();
+  });
+
+  it("…et une interaction à 23:30 Paris hier (21:30 UTC) n'est PAS « aujourd'hui »", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-11T08:00:00+02:00"));
+    addFlameIfPlayedToday({ social_link_last_interaction: "2026-07-10 21:30:00" }, container);
+    expect(container.querySelector(".fr-flame")).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it("accepte aussi un ISO déjà suffixé Z, et ignore une date illisible", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-11T08:00:00+02:00"));
+    addFlameIfPlayedToday({ social_link_last_interaction: "2026-07-10T22:30:00Z" }, container);
+    expect(container.querySelector(".fr-flame")).not.toBeNull();
+    container.innerHTML = "";
+    addFlameIfPlayedToday({ social_link_last_interaction: "n/a" }, container);
+    expect(container.querySelector(".fr-flame")).toBeNull();
+    vi.useRealTimers();
   });
 
   it("is a no-op when there is no last interaction", () => {

@@ -75,7 +75,7 @@ if ($method === 'GET') {
     }
 
     // Récupérer l'utilisateur
-    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, global_streak, global_streak_record, streak_recovered_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, pseudo, lang, friend_code, created_at, last_login_at, global_streak, global_streak_record, global_streak_date, streak_recovered_at FROM users WHERE id = ? AND is_deleted = 0 LIMIT 1');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user) jsonError('User not found', 404);
@@ -129,6 +129,15 @@ if ($method === 'GET') {
         'stats'   => $stats,
         'global_streak'        => (int) ($user['global_streak'] ?? 0),
         'global_streak_record' => (int) ($user['global_streak_record'] ?? 0),
+        // Dernière JOURNÉE (Paris, "Y-m-d") comptée dans la streak globale, ou null.
+        //
+        // Sans elle, le client recevait la série (15) mais pas le jour où elle
+        // s'arrête : sur un nouvel appareil, ou après une déconnexion (le profil
+        // local est vidé), sa première partie voyait « jamais joué », remettait la
+        // série à 1 et écrivait une trace Jack Frost « tu as perdu 15 jours ». Le
+        // joueur se voyait proposer de restaurer une série intacte — et le clic
+        // consommait son crédit de 60 jours pour rien (js/cloud-sync.js la lit).
+        'global_streak_date'   => $user['global_streak_date'] ?? null,
         // Dernière récupération de streak (Jack Frost), ou null si jamais utilisée.
         //
         // Exposé pour que le client cesse de deviner. Le cooldown de 60 jours est
