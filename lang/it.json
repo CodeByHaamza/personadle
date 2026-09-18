@@ -887,10 +887,14 @@
     "filter_note": "I filtri opus non vengono considerati.",
     "filter_all_modes": "Tutte le modalità",
     "filter_scope": "Ambito",
+    "filter_dimension": "Dimensione",
+    "dimension_normal": "Normale",
+    "dimension_expert": "⚡ Esperto",
     "scope_global": "Globale",
     "scope_friends": "Amici",
     "login_for_friends": "Accedi per vedere la classifica dei tuoi amici.",
-    "no_friends": "Nessuno dei tuoi amici appare ancora in questa classifica."
+    "no_friends": "Nessuno dei tuoi amici appare ancora in questa classifica.",
+    "expert_no_streak": "La serie migliore non ha una classifica Esperto: una serie conta giorni consecutivi, e l'Esperto non è un appuntamento quotidiano."
   },
   "friends": {
     "title": "Amici",

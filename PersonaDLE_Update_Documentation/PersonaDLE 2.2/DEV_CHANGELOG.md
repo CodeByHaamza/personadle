@@ -2156,3 +2156,100 @@ sans enjeu compétitif, et plusieurs de ces conditions ne sont pas re-vérifiabl
 tables de stats (flags narratifs, codes événement, découvertes de personnages) — mais
 certaines le seraient (`data_mining` = 5 profils visités, `leblanc_meeting` = 3 amis
 connectés le même jour). À trancher comme décision produit, pas à corriger au détour d'un lot.
+
+## 2026-09-18 — Le classement gagne son axe Expert
+
+L'Expert était exclu du classement **partout**, et de façon cohérente :
+`api/cron/leaderboard.php` et `api/leaderboard/index.php` filtraient
+`gs.is_expert = 0`, `api/lib/leaderboard_metrics.php` faisait de même pour la série,
+et la période `ever` lisait `user_stats` — table que le Mode Expert n'alimente pas,
+donc l'exclusion y était vraie **par construction**, sans filtre explicite. Les
+commentaires en place l'assumaient (« classement Expert = dimension à part, pas
+encore exposée ») et un crochet dormait déjà dans le code :
+`personadle_leaderboard_prior()` acceptait un `$expertOnly` qu'aucun appelant ne
+passait à `true`. Ce lot l'expose.
+
+### Migration 045 — une colonne, pas un mode de plus
+
+`leaderboard_cache` gagne `is_expert`, et `uq_leaderboard` devient
+`(user_id, mode, period, metric, period_start, is_expert)`. **Sans cette clé
+élargie, le cron écraserait la ligne normale d'un joueur avec sa ligne Expert à
+chaque passage** : un seul des deux classements survivrait, et lequel dépendrait
+de l'ordre d'exécution. L'index de lecture est refait pour la même raison —
+l'endpoint filtre désormais sur `is_expert`, et un index qui l'ignore force un tri
+sur des lignes dont la moitié sera jetée.
+
+Même raisonnement que `game_sessions.is_expert` (031) et
+`messages.challenge_is_expert` (037) : l'Expert est une **dimension** du mode. Un
+`mode = 'classic_expert'` aurait dupliqué les 7 valeurs de mode, cassé le filtre par
+mode du front, et rendu le total `all` ambigu.
+
+Migration rejouée sur base **vierge** (pré-migration), puis une seconde fois pour
+vérifier l'idempotence — elle annonce alors « uq_leaderboard porte déjà is_expert »
+sans rien toucher.
+
+### Le cas `ever`, qui a demandé son propre chemin
+
+`buildEverLeaderboard()` lit `user_stats`, que l'Expert n'alimente pas : lui ajouter
+un filtre n'aurait produit que des zéros. D'où `buildEverExpertLeaderboard()`, qui
+agrège `game_sessions`. C'est la **seule** raison pour laquelle ce cas est dupliqué
+plutôt que paramétré comme les autres.
+
+### `metric=streak` n'existe pas en Expert, volontairement
+
+`personadle_ever_expert_score_expr('streak')` renvoie `null`. Une série se compte en
+jours consécutifs, et l'Expert n'est pas un rendez-vous quotidien : c'est un mode
+qu'on ouvre quand on a débloqué la porte. Afficher une « série Expert » inviterait à
+jouer l'Expert tous les jours pour ne pas la perdre — ce n'est pas ce que ce mode
+raconte.
+
+L'endpoint renvoie donc un classement **vide** plutôt qu'un 400 (un code d'erreur
+ressemblerait à une panne pour une absence assumée), le cron ne calcule ni n'écrit
+cette combinaison (une ligne vide en cache serait indiscernable d'un cache pas
+encore alimenté, et l'API basculerait sur le fallback live à chaque appel), et le
+front **explique** l'absence sous les filtres plutôt que de laisser une page blanche
+— même réflexe que le texte qui explique pourquoi la liste d'amis est plus courte en
+défi Expert.
+
+La série de **période**, elle, existe dans les deux dimensions : son filtre est
+simplement paramétré.
+
+### Détails techniques
+
+- `sql/migrations/045_leaderboard_expert_dimension.sql`
+- `api/lib/leaderboard_metrics.php` — `personadle_period_streak_scores_sql()` et
+  `personadle_period_streak_sql()` prennent `$expertOnly` ; nouvelle
+  `personadle_ever_expert_score_expr()`
+- `api/leaderboard/index.php` — paramètre `expert`, `buildEverExpertLeaderboard()`,
+  dimension dans la clé de lecture du cache et dans le fallback live, et `expert`
+  renvoyé dans la réponse **tel qu'il a été compris** (le front vérifie qu'il affiche
+  bien ce qu'il croit, au lieu d'un classement normal servi en silence)
+- `api/cron/leaderboard.php` — boucle sur les deux dimensions, `is_expert` dans le
+  filtre de purge (sans lui, le passage sur une dimension effacerait les lignes
+  périmées de l'autre) et dans l'upsert
+- `js/api.js` — paramètre `expert`
+- `profile/leaderboard/leaderboard.{html,js,css}` — groupe de pills « Dimension »,
+  placé **avant** Mode puisqu'il le qualifie ; pastille dans le résumé des filtres ;
+  ambiance violet/magenta sur la carte, volontairement plus discrète que la
+  notification de défi (le tableau doit rester le sujet), dark mode compris
+- i18n : 4 clés × 6 langues, EN d'abord — 1270 clés, `i18n:check` vert
+- 8 tests dans `tests/php/LeaderboardMetricsTest.php`
+
+### Sécurité de l'interpolation SQL
+
+`is_expert` est interpolé en **littéral 0/1** dans plusieurs fragments SQL, pas lié
+en paramètre — les fragments sont assemblés avant préparation. La valeur est donc
+normalisée en `bool` dès la lecture de `$_GET` (`($_GET['expert'] ?? '0') === '1'`)
+et ne circule plus que sous cette forme : un `bool` ne peut rien injecter, une chaîne
+venue de `$_GET`, si. Même contrat que `$modeFilter`, qui passe par `$pdo->quote()`.
+
+### Angles morts connus
+
+- **Le cron doit tourner une fois après la migration** pour peupler la dimension
+  Expert du cache. D'ici là, `day/week/month` + Expert tombe sur le fallback live
+  (`game_sessions`) — correct mais plus coûteux. Rien à faire, ça se résorbe tout seul.
+- Pas de test E2E sur le filtre : la séparation des deux classements est vérifiée au
+  niveau des requêtes SQL, pas du parcours navigateur.
+- Le classement Expert « depuis toujours » scanne `game_sessions` à chaque appel,
+  sans cache (comme le `ever` normal scanne `user_stats`). `game_sessions` étant bien
+  plus grosse, ça deviendra le premier point à surveiller si la page ralentit.

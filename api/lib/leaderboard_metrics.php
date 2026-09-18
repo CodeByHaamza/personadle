@@ -135,6 +135,38 @@ function personadle_ever_score_expr(string $metric, string $mode, float $prior):
 }
 
 /**
+ * Expression de score « depuis toujours » pour l'EXPERT, agrégée sur game_sessions.
+ *
+ * Pourquoi une fonction séparée de personadle_ever_score_expr() : celle-ci lit
+ * `user_stats`, une table que le Mode Expert **n'alimente pas** du tout
+ * (api/lib/game_session.php — décision de la migration 031). Un classement Expert
+ * « depuis toujours » basé dessus n'afficherait donc que des zéros. La seule
+ * source qui connaisse les parties Expert est `game_sessions`.
+ *
+ * Conséquence assumée sur la métrique `streak` : elle n'existe pas ici et la
+ * fonction renvoie null. Une série se compte en jours consécutifs et l'Expert
+ * n'est pas un rendez-vous quotidien — c'est un mode qu'on ouvre quand on a
+ * débloqué la porte. Afficher une « série Expert » inviterait à jouer l'Expert
+ * tous les jours pour ne pas la perdre, ce qui n'est pas ce que ce mode raconte.
+ * L'appelant bascule alors sur un classement vide plutôt que d'inventer un
+ * chiffre — l'erreur exacte que la métrique `streak` des périodes avait faite en
+ * renvoyant le nombre de victoires « en approximation ».
+ */
+function personadle_ever_expert_score_expr(string $metric, float $prior): ?string
+{
+    $wins = "SUM(CASE WHEN gs.result = 'win' THEN 1 ELSE 0 END)";
+
+    return match ($metric) {
+        'wins'    => $wins,
+        'winrate' => personadle_ratio_expr($wins, 'COUNT(*)', $prior),
+        'perfect' => "SUM(CASE WHEN gs.result = 'win' AND gs.attempts = 1 THEN 1 ELSE 0 END)",
+        'games'   => 'COUNT(*)',
+        'streak'  => null, // voir docblock — volontairement absente en Expert
+        default   => null,
+    };
+}
+
+/**
  * Requête « plus longue série de jours consécutifs » à l'intérieur d'une fenêtre.
  *
  * Méthode des îlots (gaps and islands) : pour chaque joueur, on numérote ses
@@ -153,9 +185,17 @@ function personadle_ever_score_expr(string $metric, string $mode, float $prior):
  * Nécessite les fonctions fenêtre — MariaDB 10.2+ / MySQL 8.0+. La prod tourne
  * en MariaDB 10.6.
  */
-function personadle_period_streak_scores_sql(string $modeFilter, string $friendsFilter, string $dateParam = '?'): string
-{
+function personadle_period_streak_scores_sql(
+    string $modeFilter,
+    string $friendsFilter,
+    string $dateParam = '?',
+    bool $expertOnly = false
+): string {
     // `u.` est requis par $friendsFilter, qui filtre sur u.id.
+    // La dimension est un littéral 0/1 calculé ici, jamais une entrée utilisateur :
+    // l'appelant ne transmet qu'un bool, déjà validé en amont.
+    $expert = $expertOnly ? 1 : 0;
+
     return "
         SELECT
             jours.user_id,
@@ -181,7 +221,7 @@ function personadle_period_streak_scores_sql(string $modeFilter, string $friends
                     JOIN users u ON u.id = gs.user_id
                     WHERE gs.played_date >= {$dateParam}
                       AND u.is_deleted = 0
-                      AND gs.is_expert = 0
+                      AND gs.is_expert = {$expert}
                       {$modeFilter}
                       {$friendsFilter}
                     GROUP BY gs.user_id, gs.played_date
@@ -201,9 +241,9 @@ function personadle_period_streak_scores_sql(string $modeFilter, string $friends
  * `user_id` + `score`) et l'endpoint (qui affiche pseudo, avatar, badges)
  * partagent exactement la même définition de « série ».
  */
-function personadle_period_streak_sql(string $modeFilter, string $friendsFilter): string
+function personadle_period_streak_sql(string $modeFilter, string $friendsFilter, bool $expertOnly = false): string
 {
-    $core = personadle_period_streak_scores_sql($modeFilter, $friendsFilter);
+    $core = personadle_period_streak_scores_sql($modeFilter, $friendsFilter, '?', $expertOnly);
 
     return "
         SELECT
