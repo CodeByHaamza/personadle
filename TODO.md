@@ -8,7 +8,7 @@
 >
 > Chaque section numérotée est dimensionnée pour tenir dans **une seule branche**.
 >
-> Vérifié le 2026-08-26 : 1411 tests Vitest (77 suites), 358 méthodes PHPUnit, 243 tests E2E,
+> Vérifié le 2026-08-26 : 1416 tests Vitest (77 suites), 358 méthodes PHPUnit, 243 tests E2E,
 > lint et data/i18n/pools propres.
 
 ---
@@ -97,6 +97,9 @@ Le merge dans `develop` ne déploie rien. C'est la PR `develop → main` qui dé
       horaire) pour peupler la dimension Expert du cache. D'ici là le classement Expert par
       période bascule sur le calcul live — correct, mais plus coûteux. Rien à faire, ça se
       résorbe seul ; c'est noté pour ne pas le prendre pour une panne.
+- [ ] **Bumper `CACHE_VERSION` dans `sw.js` à la prochaine release (v96 → v97)** : `js/filterMenu.js`
+      (précaché) change après la 2.2 (marqueur de format des filtres, 2026-09-18 soir). Sans bump,
+      un joueur déjà venu garde l'ancien menu de filtres et le bug « Royal revient » avec.
 - [x] **Bumper `CACHE_VERSION` dans `sw.js`** (v95 → v96, fait le 2026-09-18 — précédemment
       v94 → v95 le 2026-09-01). Sans bump, `activate` ne purge pas l'ancien cache et les
       assets servis en cache-first restent ceux de la version précédente. Invisible en test :
