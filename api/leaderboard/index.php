@@ -284,6 +284,16 @@ function buildEverExpertLeaderboard(PDO $pdo, string $mode, string $metric, int 
  */
 function buildPeriodLeaderboard(PDO $pdo, string $mode, string $period, string $metric, int $limit, int $offset, int $myId, bool $friendsOnly = false, bool $expertOnly = false): never
 {
+    // `streak` n'existe pas en Expert, par période comme « depuis toujours »
+    // (cf. personadle_ever_expert_score_expr). Le cron n'écrit jamais cette
+    // combinaison en cache, donc sans cette garde l'appel tombait TOUJOURS sur
+    // le repli live, qui calculait bel et bien une série Expert et renvoyait des
+    // entrées — pendant que le front affichait « pas de classement série en
+    // Expert » au-dessus d'une liste pleine. Même réponse partout : vide.
+    if ($expertOnly && $metric === 'streak') {
+        formatAndSend($pdo, [], $metric, $myId, $mode, $period, $limit, $offset, 0, true);
+    }
+
     // ── Tentative lecture depuis leaderboard_cache ────────────────────────────
     // `is_expert` fait partie de la clé de lecture comme il fait partie de
     // `uq_leaderboard` (migration 045) : sans lui, le classement Expert et le

@@ -13,6 +13,516 @@
 
 ---
 
+## 2026-09-18 — Badge Data Mining : appel à une fonction qui n'existe pas
+
+Signalé en test : le badge `data_mining` (« Visit 5 different user profiles ») ne se
+débloquait pas à la 5e visite. `profile/profile-view.js` appelait
+`m.checkBadges(profile, save)` sur le module `badgesManager.js` — **ce symbole n'a
+jamais été exporté**. L'appel partait donc sur `undefined`, levait un TypeError, et le
+`.catch(() => {})` qui entourait l'import dynamique l'avalait sans la moindre trace en
+console. Le joueur finissait par récupérer le badge en rouvrant SON profil (où
+`initBadgesSystem()` réévalue toutes les conditions), ce qui rendait le symptôme
+intermittent et difficile à relier à la visite elle-même.
+
+Remplacé par `checkBadgesAfterGame()`, le check léger commun à toutes les pages (déjà
+utilisé par `js/unlock-notify.js` pour les 6 modes) : il relit `localStorage` — qu'on
+vient d'écrire deux lignes plus haut — évalue toutes les conditions et affiche la
+notification de déblocage, sans toucher à l'UI de la page profil, absente ici puisqu'on
+regarde le profil de quelqu'un d'autre.
+
+### Détails techniques
+
+- `profile/profile-view.js` — `m.checkBadges(...)` → `m.checkBadgesAfterGame()`
+- `tests/dataMiningBadge.test.js` (nouveau, 7 tests) sur deux angles :
+  - **contrat d'import** : tout `m.xxx()` appelé dans `profile-view.js` doit exister
+    parmi les exports de `badgesManager.js`. C'est l'angle qui manquait — un import
+    **dynamique** n'est vérifié ni par ESLint ni au chargement, et c'est précisément ce
+    qui a laissé passer le bug pendant des mois. Ce garde-fou couvre tous les futurs
+    appels de ce module, pas seulement `checkBadges`.
+  - **comportement** : 4 profils visités → refusé, 5 → accordé ; 5 fois le même profil →
+    refusé (la liste est dédoublonnée par un `Set` côté `profile-view.js`).
+- Vérifié en réel : les 2 tests de contrat échouent sur le code d'avant, les 7 passent après.
+
+### Angles morts connus (non corrigés ici)
+
+- `visitedProfileIds` vit **uniquement en `localStorage`**, jamais poussé au backend.
+  Visiter 3 profils sur mobile et 2 sur desktop ne débloque donc rien nulle part. Une
+  colonne dédiée (ou une réutilisation de l'historique `social_links`) réglerait le point ;
+  c'est un choix produit, pas une régression.
+- Le suivi des visites est imbriqué dans le `if (gaugeContainer && ...)` de la jauge
+  Social Link : si `#socialLinkGaugeContainer` disparaît du HTML, le comptage s'arrête en
+  silence. Dépendance à une div sans rapport, à sortir de ce bloc à la prochaine passe.
+- Le badge est `condition_type = 'manual'` côté serveur (comme 46 autres) : la condition
+  n'est pas revérifiée à l'unlock. Cf. l'audit des conditions de déblocage.
+
+## 2026-09-18 — Un défi Expert se voit enfin comme tel
+
+`challenge_is_expert` (migration 037) traversait toute la chaîne — `api/messages`
+→ `js/notifications.js` → `js/challenge-notif.js` — mais ne pilotait que trois
+choses **invisibles** : la page d'arrivée (`?expert=1`), le casier `localStorage`
+et le barème d'XP. À l'écran, un défi Expert et un défi normal étaient
+rigoureusement identiques : même pop-up rouge, même pastille de mode, mêmes
+anneaux, même flash. Dans la Boîte de la page Amis, `challenge_is_expert`
+n'apparaissait que dans les attributs `data-isexpert` des boutons — lu par le
+code, jamais par l'œil.
+
+Le joueur ne découvrait donc la dimension qu'une fois **arrivé sur la page du
+mode**, c'est-à-dire après avoir accepté, donc après s'être engagé sur un barème
+qui n'a rien à voir (un seul indice, 5 à 30 essais contre 3). Et la migration 037
+autorise explicitement un défi normal ET un défi Expert le même jour entre les
+mêmes amis : deux lignes strictement identiques dans la Boîte, sans moyen de
+savoir lequel des deux boutons « Accepter » menait où.
+
+### Choix de palette
+
+Violet `#b26aff` → magenta `#ff4d8d` sur fond violet-noir, repris **tel quel** de
+`.challenge-card--expert` (`css/global.css`), la carte d'**envoi** du défi Expert
+qui existait déjà. Volontairement la même des deux côtés : celui qui envoie et
+celui qui reçoit doivent reconnaître le même objet. L'or `#ffd700` de l'écran de
+déblocage du Mode Expert a été écarté — il dit « tu viens de débloquer quelque
+chose », pas « ce défi-ci est Expert », et un troisième vocabulaire Expert aurait
+brouillé les deux.
+
+### Détails techniques
+
+- `js/challenge-notif.js` — classe `cn--expert` sur l'overlay + étiquette
+  `.cn-expert-tag` dans la carte + message d'accroche dédié. Le DOM reste
+  **commun** aux deux variantes : tout l'écart vit dans le CSS, donc une
+  évolution de la pop-up normale suit automatiquement.
+- `css/challenge-notif.css` — bloc `.cn--expert` en surcharges : fond radial plus
+  dense, anneaux violet/magenta, flash `cnFlashExpert`, carte en dégradé avec
+  liseré supérieur, avatar/pseudo/pastille/boutons réaccordés. Le liseré est en
+  `position: absolute` et non un enfant de flux : la carte est un flex column
+  avec `gap: 10px`, un `::before` dans le flux aurait ajouté un espace fantôme.
+  Bloc `prefers-reduced-motion` : le surcroît d'effet est coupé, le marqueur
+  textuel porte le sens à lui seul.
+- `profile/friends/friends.js` — pastille `.fr-challenge-expert-pill` + classe
+  `.fr-challenge-card--expert`, sur les **trois** statuts (en cours / gagné /
+  expiré). L'historique est justement l'écran où l'on compare ses défis.
+- `profile/friends/friends.css` — surcharges assorties, dark mode compris (le
+  violet foncé de la pastille de mode passe sous le seuil de lisibilité sur
+  `#1a1a1a`, remonté en `#d9a4ff`). La pastille pose `margin-right: auto`
+  (l'en-tête est en `space-between`, elle se serait placée au centre) et
+  `align-self: flex-start` (les cartes gagnée/expirée sont en flex column, elle
+  se serait étirée sur toute la largeur).
+- i18n : `challenge.notif_expert_tag` et `challenge.notif_challenges_you_expert`,
+  EN d'abord puis fr/es/de/it/pt — `npm run i18n:check` vert, 1266 clés.
+- Tests : `tests/challengeNotifExpert.test.js` (nouveau, 10 tests) et 5 tests
+  ajoutés à `tests/friends_challenge_actions.test.js`.
+
+### Pourquoi les tests vérifient la CLASSE et pas la couleur
+
+jsdom ne résout pas les feuilles externes : une valeur hexadécimale attendue dans
+un test ne prouverait rien de plus que sa propre recopie. Ce qui est verrouillé,
+c'est le **crochet** (`cn--expert`, `fr-challenge-card--expert`), le **marqueur
+textuel** (traduisible, et vérifié contre le piège CLAUDE.md §5 où `t(key)`
+renvoie la clé brute), et la **parité de structure** entre les deux variantes —
+si la variante Expert diverge structurellement, elle cesse de suivre les
+évolutions de la pop-up normale, ce qui est l'inverse du but.
+
+### Angles morts connus
+
+- La pop-up de **résultat** de défi (`js/challenge-result.js`, vue par
+  l'expéditeur quand son défi est battu ou expiré) n'est pas encore marquée. Elle
+  reçoit pourtant le message brut, `challenge_is_expert` compris — elle l'ignore,
+  simplement (0 occurrence de « expert » dans le fichier). C'est donc un ajout
+  purement front, sans rien à faire côté API. À reprendre.
+- Aucun test E2E : les tests ci-dessus sont en jsdom, donc le rendu réel des
+  dégradés et du liseré n'est vérifié qu'à l'œil.
+
+## 2026-09-18 — Audit des conditions de déblocage : 3 bugs serveur, dont un exploitable
+
+Audit de bout en bout des **92 lignes** du catalogue (64 badges, 7 wallpapers, 21 titres)
+et des 64 `check()` client. Chaque condition structurée a été jouée contre une vraie
+MariaDB 10.11, à la frontière exacte : compte à `seuil - 1` → doit refuser, compte à
+`seuil` → doit accorder.
+
+**Résultat : les 42 conditions structurées sont correctes.** Les 50 autres lignes sont
+`manual`/`joker_profile`, c'est-à-dire **pas vérifiées côté serveur du tout** — ce n'est
+pas un bug mais c'est un fait qui ne se lisait nulle part. Les bugs trouvés sont ailleurs :
+dans l'infrastructure de vérification elle-même.
+
+### Bug 1 — `CONVERT_TZ` rendait la garde anti-spam Social Link totalement inopérante
+
+**Avant.** Les 4 requêtes « interactions d'aujourd'hui » filtraient avec
+`DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = :jour`. Vers un fuseau **nommé**,
+`CONVERT_TZ` exige les tables de fuseaux du serveur SQL (`mysql.time_zone_name`), qui ne
+sont pas peuplées par défaut et sont typiquement absentes d'un hébergement mutualisé — le
+dépôt le documentait **déjà** dans `api/admin/activity.php`, qui contourne en regroupant
+côté PHP. Les requêtes Social Link, elles, étaient restées dessus.
+
+Sans ces tables, `CONVERT_TZ` ne lève rien : il renvoie `NULL`. `DATE(NULL) = '2026-09-18'`
+vaut `NULL`, donc faux, donc **la requête ne trouve jamais rien**. Mesuré sur MariaDB 10.11
+sans tables de fuseaux :
+
+- garde « 1 action par jour » morte → **180 appels de `share_streak` d'affilée le même jour
+  acceptés**, 2700 XP, rang 10 atteint d'un coup ;
+- donc le wallpaper `dark_shopping_district` (rang ≥ 5) **et** le titre
+  `aigis_metis_same_soul` (rang ≥ 10) accordés par simple répétition ;
+- bonus mutuel mort → deux amis actifs le même jour payés au tarif solo (15 au lieu de 30),
+  la jauge progressant deux fois moins vite que ce que le produit annonce.
+
+**Après.** Nouvelle fonction `personadle_paris_day_bounds_utc()` (`api/lib/social_link.php`)
+qui calcule les bornes UTC de la journée Paris **en PHP**, DST compris, et les 4 requêtes
+comparent désormais la colonne nue : `created_at >= ? AND created_at < ?`. Vérifié : le
+même scénario est bloqué au 1ᵉʳ appel, les deux déblocages repassent à « refusé ».
+Bénéfice secondaire — la comparaison ne porte plus sur une expression, donc un index sur
+`created_at` redevient utilisable.
+
+**Pourquoi rien ne l'avait vu.** Les deux tests de `DatabaseIntegrationTest` qui couvrent
+la garde et le bonus mutuel sont bons ; c'est l'**environnement** qui mentait. L'image
+Docker MySQL de la CI embarque les tables de fuseaux — CI verte sur un chemin que la prod
+n'emprunte pas. Cas exact de CLAUDE.md §13 (« CI verte insuffisante si elle ne peut pas
+exécuter le scénario concerné »). Le nouveau `tests/php/ParisDayBoundsTest.php` attaque
+donc par un garde-fou **statique** (plus aucun `CONVERT_TZ` exécuté dans `api/`, analyse du
+code hors commentaires) plus 7 tests de calcul de bornes, dont les deux journées de
+bascule DST (23 h et 25 h). Aucun ne dépend du serveur SQL.
+
+⚠️ **À vérifier en prod** : si les tables de fuseaux SONT peuplées chez Hostinger, la garde
+fonctionnait et il n'y a rien à rattraper. Sinon, des rangs Social Link ont pu être gonflés,
+et avec eux ces deux déblocages. Commande de contrôle :
+`SELECT COUNT(*) FROM mysql.time_zone_name;` — 0 = le bug était actif.
+
+### Bug 2 — badges et titres étaient fail-**open** sur un `condition_type` inconnu
+
+**Avant.** `api/badges/index.php` et `api/titles/index.php` appelaient
+`personadle_verify_condition()` en direct. Cette fonction se termine par
+`default: return true` — un safe-fallback voulu, pour ne pas rendre inaccessible un badge
+ajouté demain avec un type pas encore implémenté. Mais sur le chemin d'un `POST /unlock`,
+il fait l'inverse de ce qu'on veut : **une faute de frappe dans une migration ouvrait le
+badge à n'importe quel compte authentifié**. `api/wallpapers/index.php` fermait déjà ce
+trou de son côté (revue PR #14) — donc trois endpoints, deux comportements.
+
+**Après.** La garde est remontée dans `personadle_condition_allows_unlock()`
+(`api/lib/condition_check.php`) et les **trois** endpoints passent par elle. Un type absent,
+vide, mal orthographié ou retiré du vocabulaire refuse l'unlock. `personadle_verify_condition()`
+garde son fallback permissif là où il a du sens (affichage du catalogue).
+
+### Bug 3 — le vocabulaire avait dérivé, et le test censé le détecter comptait au lieu de comparer
+
+**Avant.** `personadle_known_condition_types()` listait 22 types alors que le `switch` en
+gère 24 : **`titles_count` et `played_on_date` manquaient**. Inoffensif tant que seuls les
+wallpapers utilisaient cette liste (aucun n'emploie ces deux types), mais c'était une mine :
+en étendant le fail-closed aux titres (bug 2), les titres **`sees`** (`titles_count`) et
+**`tatsuya_dont_burn_out`** (`played_on_date`) seraient devenus indébloquables pour toujours
+— un 403 « Condition not met » sur un joueur qui remplit pourtant la condition.
+
+Un test existait pourtant, `ConditionCheckTest::testKnownConditionTypesMatchesSwitchCases`,
+et son commentaire décrivait exactement le bon invariant. Son implémentation faisait
+`assertCount(22, $known)`. **Un compte ne dit rien de l'ensemble** : la liste était bien à
+22 entrées, avec les deux mauvaises manquantes. Le test était vert et épinglait le mauvais
+nombre — c'est lui qui rendait la dérive invisible.
+
+**Après.** Les deux types ajoutés (corrigé **avant** d'appliquer le fail-closed, sinon les
+deux titres cassaient). Le compte magique est remplacé par une comparaison **ensembliste**
+entre les `case` du switch et la liste — dans `tests/php/ConditionVocabularyTest.php`, sans
+base de données, donc elle tourne même sans `make up`. Les 6 tests de ce fichier échouent
+tous sur le code d'avant.
+
+### Ce que l'audit a AUSSI vérifié, sans rien trouver
+
+- **Les 64 `check()` client** : chaque champ de profil lu par un `check()` a bien au moins
+  un écrivain dans le dépôt. Trois candidats (`velvet_headache`, `chinese_new_year`,
+  `github_contributor`) se sont révélés être des **faux positifs de l'outil d'audit** — leurs
+  flags sont écrits par le helper `check("flag", cond)` de `modeAllOutAttack.js` et par un
+  `onclick` dans `index.html`, deux formes que la première version du script ne couvrait pas.
+- **Tous les imports dynamiques du dépôt** : les 4 appels `import(…).then(m => m.x())`
+  ciblent des symboles réellement exportés (`data_mining` était le seul cassé, corrigé plus haut).
+- **Parité des deux catalogues de badges** : client (64 entrées) ↔ SQL (64 lignes) — mêmes
+  slugs, mêmes drapeaux « secret », mêmes seuils chiffrés.
+
+### Trous de test comblés
+
+| Trou | Comblé par |
+|---|---|
+| Aucun balayage de seuil sur les 5 types Expert | `NUMERIC_THRESHOLD_TYPES` étendu + 6 helpers `game_sessions` |
+| Aucun mapping exhaustif par titre (badges/wallpapers en avaient un) | `testEveryTitleHasExpectedConditionColumns` — 21 titres |
+| Rien ne comparait `badgesData.js` et la table `badges` | `tests/badgesCatalogParity.test.js` (7 tests, sans base) |
+| Le vocabulaire pouvait dériver en silence | `tests/php/ConditionVocabularyTest.php` (6 tests, sans base) |
+| `CONVERT_TZ` invisible en CI | `tests/php/ParisDayBoundsTest.php` (8 tests, sans base) |
+
+Total : 338 tests PHPUnit (contre 322) et 1383 Vitest (contre 1376), tous verts — les
+PHPUnit joués contre une MariaDB **sans** tables de fuseaux, c'est-à-dire dans la
+configuration de la prod et non dans celle de la CI.
+
+### Angle mort assumé, non corrigé ici
+
+**47 badges sur 64** et 1 titre sont `condition_type = 'manual'` : le serveur les accorde
+sur simple déclaration du client. N'importe quel compte authentifié peut appeler
+`POST /api/badges/unlock` avec ces slugs et les obtenir. C'est cohérent avec un fan-game
+sans enjeu compétitif, et plusieurs de ces conditions ne sont pas re-vérifiables depuis les
+tables de stats (flags narratifs, codes événement, découvertes de personnages) — mais
+certaines le seraient (`data_mining` = 5 profils visités, `leblanc_meeting` = 3 amis
+connectés le même jour). À trancher comme décision produit, pas à corriger au détour d'un lot.
+
+## 2026-09-18 — Le classement gagne son axe Expert
+
+L'Expert était exclu du classement **partout**, et de façon cohérente :
+`api/cron/leaderboard.php` et `api/leaderboard/index.php` filtraient
+`gs.is_expert = 0`, `api/lib/leaderboard_metrics.php` faisait de même pour la série,
+et la période `ever` lisait `user_stats` — table que le Mode Expert n'alimente pas,
+donc l'exclusion y était vraie **par construction**, sans filtre explicite. Les
+commentaires en place l'assumaient (« classement Expert = dimension à part, pas
+encore exposée ») et un crochet dormait déjà dans le code :
+`personadle_leaderboard_prior()` acceptait un `$expertOnly` qu'aucun appelant ne
+passait à `true`. Ce lot l'expose.
+
+### Migration 045 — une colonne, pas un mode de plus
+
+`leaderboard_cache` gagne `is_expert`, et `uq_leaderboard` devient
+`(user_id, mode, period, metric, period_start, is_expert)`. **Sans cette clé
+élargie, le cron écraserait la ligne normale d'un joueur avec sa ligne Expert à
+chaque passage** : un seul des deux classements survivrait, et lequel dépendrait
+de l'ordre d'exécution. L'index de lecture est refait pour la même raison —
+l'endpoint filtre désormais sur `is_expert`, et un index qui l'ignore force un tri
+sur des lignes dont la moitié sera jetée.
+
+Même raisonnement que `game_sessions.is_expert` (031) et
+`messages.challenge_is_expert` (037) : l'Expert est une **dimension** du mode. Un
+`mode = 'classic_expert'` aurait dupliqué les 7 valeurs de mode, cassé le filtre par
+mode du front, et rendu le total `all` ambigu.
+
+Migration rejouée sur base **vierge** (pré-migration), puis une seconde fois pour
+vérifier l'idempotence — elle annonce alors « uq_leaderboard porte déjà is_expert »
+sans rien toucher.
+
+### Le cas `ever`, qui a demandé son propre chemin
+
+`buildEverLeaderboard()` lit `user_stats`, que l'Expert n'alimente pas : lui ajouter
+un filtre n'aurait produit que des zéros. D'où `buildEverExpertLeaderboard()`, qui
+agrège `game_sessions`. C'est la **seule** raison pour laquelle ce cas est dupliqué
+plutôt que paramétré comme les autres.
+
+### `metric=streak` n'existe pas en Expert, volontairement
+
+`personadle_ever_expert_score_expr('streak')` renvoie `null`. Une série se compte en
+jours consécutifs, et l'Expert n'est pas un rendez-vous quotidien : c'est un mode
+qu'on ouvre quand on a débloqué la porte. Afficher une « série Expert » inviterait à
+jouer l'Expert tous les jours pour ne pas la perdre — ce n'est pas ce que ce mode
+raconte.
+
+L'endpoint renvoie donc un classement **vide** plutôt qu'un 400 (un code d'erreur
+ressemblerait à une panne pour une absence assumée), le cron ne calcule ni n'écrit
+cette combinaison (une ligne vide en cache serait indiscernable d'un cache pas
+encore alimenté, et l'API basculerait sur le fallback live à chaque appel), et le
+front **explique** l'absence sous les filtres plutôt que de laisser une page blanche
+— même réflexe que le texte qui explique pourquoi la liste d'amis est plus courte en
+défi Expert.
+
+La série de **période**, elle, existe dans les deux dimensions : son filtre est
+simplement paramétré.
+
+### Détails techniques
+
+- `sql/migrations/045_leaderboard_expert_dimension.sql`
+- `api/lib/leaderboard_metrics.php` — `personadle_period_streak_scores_sql()` et
+  `personadle_period_streak_sql()` prennent `$expertOnly` ; nouvelle
+  `personadle_ever_expert_score_expr()`
+- `api/leaderboard/index.php` — paramètre `expert`, `buildEverExpertLeaderboard()`,
+  dimension dans la clé de lecture du cache et dans le fallback live, et `expert`
+  renvoyé dans la réponse **tel qu'il a été compris** (le front vérifie qu'il affiche
+  bien ce qu'il croit, au lieu d'un classement normal servi en silence)
+- `api/cron/leaderboard.php` — boucle sur les deux dimensions, `is_expert` dans le
+  filtre de purge (sans lui, le passage sur une dimension effacerait les lignes
+  périmées de l'autre) et dans l'upsert
+- `js/api.js` — paramètre `expert`
+- `profile/leaderboard/leaderboard.{html,js,css}` — groupe de pills « Dimension »,
+  placé **avant** Mode puisqu'il le qualifie ; pastille dans le résumé des filtres ;
+  ambiance violet/magenta sur la carte, volontairement plus discrète que la
+  notification de défi (le tableau doit rester le sujet), dark mode compris
+- i18n : 4 clés × 6 langues, EN d'abord — 1270 clés, `i18n:check` vert
+- 8 tests dans `tests/php/LeaderboardMetricsTest.php`
+
+### Sécurité de l'interpolation SQL
+
+`is_expert` est interpolé en **littéral 0/1** dans plusieurs fragments SQL, pas lié
+en paramètre — les fragments sont assemblés avant préparation. La valeur est donc
+normalisée en `bool` dès la lecture de `$_GET` (`($_GET['expert'] ?? '0') === '1'`)
+et ne circule plus que sous cette forme : un `bool` ne peut rien injecter, une chaîne
+venue de `$_GET`, si. Même contrat que `$modeFilter`, qui passe par `$pdo->quote()`.
+
+### Angles morts connus
+
+- **Le cron doit tourner une fois après la migration** pour peupler la dimension
+  Expert du cache. D'ici là, `day/week/month` + Expert tombe sur le fallback live
+  (`game_sessions`) — correct mais plus coûteux. Rien à faire, ça se résorbe tout seul.
+- Pas de test E2E sur le filtre : la séparation des deux classements est vérifiée au
+  niveau des requêtes SQL, pas du parcours navigateur.
+- Le classement Expert « depuis toujours » scanne `game_sessions` à chaque appel,
+  sans cache (comme le `ever` normal scanne `user_stats`). `game_sessions` étant bien
+  plus grosse, ça deviendra le premier point à surveiller si la page ralentit.
+
+### Revue avant merge (2026-09-18)
+
+Deux défauts trouvés en rejouant la PR sur la stack Docker, corrigés sur la branche :
+
+- **`sql/bdd_mysql.sql` n'avait pas suivi la 045.** Ce fichier est la source de vérité
+  chargée par Docker et la CI (aucun runner de migrations sur une base neuve) : sans
+  `is_expert`, tout appel `period=day|week|month` plantait en **Fatal PDOException —
+  le classement normal compris**, pas seulement l'Expert. Invisible en CI parce
+  qu'aucun E2E n'appelait ces périodes. Colonne, clé unique et index ajoutés au schéma
+  (miroir exact de la 045, vérifié par import à blanc dans une base neuve puis rejeu
+  de la 045 = no-op) ; `DatabaseIntegrationTest::testLeaderboardCacheHasExpertDimension`
+  garde le contrat ; `tests-e2e/api.spec.js` appelle désormais day/week/month dans les
+  deux dimensions.
+- **La série Expert n'était vide que « depuis toujours ».** Pour day/week/month, le cron
+  n'écrit jamais la combinaison série × Expert, donc l'appel tombait TOUJOURS sur le
+  repli live — qui calculait bel et bien une série Expert (271 entrées sur `week`,
+  299 sur `month` en local), pendant que le front affichait « pas de classement série
+  en Expert » au-dessus d'une liste pleine. Garde ajoutée en tête de
+  `buildPeriodLeaderboard()` : vide pour toutes les périodes, testé en E2E.
+
+Vérifié aussi : **la faille `CONVERT_TZ` était active en prod** (MariaDB 11.8,
+`CONVERT_TZ(…,'Europe/Paris')` renvoie `NULL`) — 283 groupes (lien, joueur, action,
+jour) répétés dans `social_link_interactions`, jusqu'à 28 `visit_profile` le même jour
+sur un lien ; 15 liens à rang ≥ 5, 2 à rang 10. Audit de l'existant à la discrétion du
+mainteneur. Rendu clair/sombre capturé (pop-up Expert, Boîte, filtre Dimension, note
+série) ; E2E complet joué en local (4 flakes « maintenance » rejoués verts isolément).
+
+## 2026-09-18 — Les badges à code événement n'étaient pas protégés par leur code
+
+**13 badges** du catalogue ont une ligne dans `event_codes` : les saisonniers
+(`christmas_2025`, `valentine_2026`, `new_years_2026`, `chinese_new_year_2026`,
+`easter_2026`, `sport`) et les secrets communautaires (`true_hacker`, `tae_takemi`,
+`arati`, `gyotre`, `dzulian`, `chef`, `lobster`). Leur condition réelle, c'est
+« connaître le code », et seul `POST /api/badges/redeem` sait la vérifier — il valide
+le code, sa fenêtre de validité, et consomme la redemption dans une transaction.
+
+Mais en base ils portent `condition_type = 'manual'`, ce qui vaut « accordé sans
+vérification » côté `personadle_verify_condition()`. Donc **`POST /api/badges/unlock`
+avec le slug les accordait aussi, sans le code**. Et le slug n'est pas un secret :
+`GET /api/badges` renvoie le catalogue complet à tout utilisateur authentifié, slug
+compris. Le code protégeait une porte, à côté d'une fenêtre ouverte.
+
+Vérifié avant/après sur les quatre slugs les plus parlants :
+
+| Badge | Avant | Après |
+|---|---|---|
+| `christmas_2025` | accordé sans le code | 403 — code requis |
+| `valentine_2026` | accordé sans le code | 403 — code requis |
+| `dzulian` | accordé sans le code | 403 — code requis |
+| `lobster` | accordé sans le code | 403 — code requis |
+| `first_win` (sans code) | selon la condition | inchangé |
+| `data_mining` (sans code) | accordé (`manual`) | inchangé |
+
+### Où vit le garde, et pourquoi pas dans `condition_check.php`
+
+Dans `api/badges/index.php`, juste après la recherche du badge et **avant** la
+vérification de condition. Ce n'est pas une question de CONDITION mais de ROUTE :
+`condition_check.php` répond « cet utilisateur remplit-il la condition ? », or ici la
+réponse dépend d'un secret que l'utilisateur fournit, pas d'un état en base. L'y
+mettre obligerait cette lib à connaître `event_codes`, une table qui ne la regarde pas.
+
+L'ordre compte et il est testé : le garde passe avant la vérification de condition.
+S'il passait après, il ne servirait à rien — la condition `manual` aurait déjà répondu
+oui et l'endpoint aurait inséré la ligne.
+
+Le garde interroge `event_codes`, **sans aucun slug codé en dur** : un badge saisonnier
+créé demain par l'admin est protégé dès la création de son code, sans toucher au PHP.
+Un test verrouille ce lien.
+
+### Aucun effet sur un joueur légitime, et c'est vérifié
+
+`handleEventCodeSubmit()` (`profile/badges/badgesManager.js`) est **serveur-d'abord** :
+`await api.badges.redeem(code)` d'abord, et le badge n'entre dans le profil local
+qu'une fois la réponse OK. Le backend le connaît donc toujours avant le local, et
+`syncBadgesWithBackend()` n'a jamais à le repousser par `/unlock` (il ne pousse que les
+badges locaux **absents** du backend). Le chemin `/redeem` est inchangé.
+
+### Détails techniques
+
+- `api/badges/index.php` — garde `event_codes` dans la branche `unlock`
+- `tests/php/EventCodeBadgeGateTest.php` (nouveau, 6 tests) en deux moitiés :
+  la route est fermée (tous les badges à code refusés, garde avant la condition,
+  aucun slug en dur) **et** les joueurs légitimes ne sont pas cassés (les badges sans
+  code inchangés, `/redeem` accorde et consomme toujours, aucun code n'est orphelin).
+  Le test de position échoue sur le code d'avant.
+
+### Ce qui reste `manual` et le restera
+
+Après ce lot, 34 badges restent `manual` sans protection : flags narratifs
+(découvertes de personnages en cours de partie), horaires (`night_owl`, `nyx_hour`),
+et quelques sociaux. Décision produit prise le 2026-09-18 : on ne les verrouille pas.
+`data_mining` (5 profils visités) et `leblanc_meeting` (3 amis connectés le même jour)
+seraient pourtant vérifiables côté serveur sans migration — `social_link_interactions`
+journalise déjà les `visit_profile` par lien, et `game_sessions` + `friendships`
+suffisent pour le second. À reprendre si l'envie vient ; ce n'est pas une dette
+urgente pour un fan-game sans enjeu compétitif.
+
+## 2026-09-18 — Trois points de synchronisation oubliés par les lots précédents
+
+Revue de fin de branche : les cinq lots ci-dessus étaient corrects en eux-mêmes, mais
+trois conventions du dépôt n'avaient pas été honorées. Aucune n'est un bug de code, les
+trois auraient coûté cher au déploiement.
+
+### 1. `CACHE_VERSION` non bumpé — le plus grave des trois
+
+`sw.js` restait en `personadle-v95`. Or ce lot modifie `js/api.js`,
+`profile/leaderboard/leaderboard.{html,css,js}` et `profile/friends/friends.{css,js}` —
+**tous précachés** par le service worker.
+
+Sans bump, `activate` ne purge rien et le cache-first continue de servir l'ancien front
+aux joueurs **déjà venus** : ni le filtre « Dimension » du classement, ni la pastille
+Expert de la Boîte, alors que l'API, elle, aurait changé. Invisible en test (un
+navigateur neuf reçoit toujours le bon code), visible uniquement pour les habitués —
+c'est-à-dire exactement les joueurs qu'on ne veut pas casser. Bumpé en `v96`.
+
+`css/challenge-notif.css` n'est pas dans la liste de précache : il est récupéré au
+réseau, rien à faire de ce côté.
+
+### 2. Migration 045 absente de la checklist bloquante de `TODO.md`
+
+C'est **le piège que le dépôt documente lui-même** : les migrations 029/030 avaient été
+oubliées de cette liste jusqu'au 2026-09-01, et CLAUDE.md §13 en a fait une règle.
+Écrire la migration ne suffit pas — elle doit figurer dans la liste que suit la release.
+
+Conséquence si elle manquait : `api/leaderboard/index.php` interroge `lc.is_expert`, et
+la prod n'a pas la colonne. Vérifié pour de vrai contre une base au schéma
+pré-migration plutôt qu'affirmé :
+
+```
+requête cache → SQLSTATE[42S22] Unknown column 'lc.is_expert'  → 500
+période ever  → OK (ne lit pas le cache) → survit
+```
+
+Donc **le classement day/week/month tombe en 500 pour tout le monde**, et le cron
+horaire échoue à chaque passage. `ever` survit seul. L'entrée de checklist dit
+explicitement « avant le `git pull` Hostinger », comme les 040/041/042.
+
+Une seconde entrée a été ajoutée pour le cycle de cron à laisser passer après la
+migration — sans elle, le classement Expert par période bascule sur le calcul live
+pendant une heure. C'est correct, juste plus coûteux, et ça se résorbe seul : noté pour
+que ça ne soit pas pris pour une panne.
+
+### 3. Changelog joueur non alimenté
+
+CLAUDE.md §9 : tout changement **visible ou parlant pour un joueur** va aussi dans
+`PersonaDLE_Update.html`. Les cinq lots n'avaient nourri que `DEV_CHANGELOG.md`.
+
+Deux sections ajoutées, en blocs `data-i18n-block` FR/EN appariés (103/103, vérifié),
+en langage non technique :
+
+- **⚡ Le Mode Expert sort de l'ombre** — la notification de défi Expert, la pastille
+  dans la Boîte, le nouvel axe du classement, et pourquoi « meilleure série » n'y a pas
+  d'équivalent (un joueur qui ne trouve pas sa métrique doit lire la raison, pas
+  conclure à un oubli).
+- **🎖️ Ce qui se gagne, se gagne vraiment** — Data Mining qui tombe enfin au bon
+  moment, les badges à code redevenus des badges à code (avec la précision « rien ne
+  change si tu as utilisé le tien »), et les Social Links qui comptent juste.
+
+Le reste du travail — fail-closed, vocabulaire des conditions, trous de tests — n'y
+figure pas : rien de tout ça ne se voit depuis le jeu, et la section §9 interdit
+explicitement de gonfler la page joueur avec du détail technique.
+
+### Ce qui reste non vérifiable depuis cet environnement
+
+Les tests **E2E Playwright** (`npm run test:e2e`, job CI bloquant) n'ont pas pu tourner
+ici : ils exigent `make up`, donc un démon Docker, absent de cet environnement. Les
+spécifications concernées par ce lot (`challenge_flow`, `challenge_usecases`,
+`unlocks_usecases`, `visual_layout`) seront donc jouées pour la première fois **en CI**.
+Les 1383 tests Vitest et 351 PHPUnit, eux, sont verts — ces derniers contre une MariaDB
+sans tables de fuseaux, soit la configuration de la prod et non celle de la CI.
+
 ## 2026-09-17 — content(profil) : 29 portraits Persona Q/Q2 + fond Persona 4 Revival, et deux avatars enfin persistables (branche `content/avatars-pq-fond-p4r`)
 
 ### Pourquoi
@@ -1914,486 +2424,3 @@ points cités, à traiter séparément :
    (`SELECT version FROM schema_migrations` = seule source fiable).
 3. Image silhouette lisible dans l'onglet Network — à recouper avec `js/silhouette_mask.js`
    (le masque est déjà cuit dans les pixels ; reste à vérifier ce qui transite).
-
-## 2026-09-18 — Badge Data Mining : appel à une fonction qui n'existe pas
-
-Signalé en test : le badge `data_mining` (« Visit 5 different user profiles ») ne se
-débloquait pas à la 5e visite. `profile/profile-view.js` appelait
-`m.checkBadges(profile, save)` sur le module `badgesManager.js` — **ce symbole n'a
-jamais été exporté**. L'appel partait donc sur `undefined`, levait un TypeError, et le
-`.catch(() => {})` qui entourait l'import dynamique l'avalait sans la moindre trace en
-console. Le joueur finissait par récupérer le badge en rouvrant SON profil (où
-`initBadgesSystem()` réévalue toutes les conditions), ce qui rendait le symptôme
-intermittent et difficile à relier à la visite elle-même.
-
-Remplacé par `checkBadgesAfterGame()`, le check léger commun à toutes les pages (déjà
-utilisé par `js/unlock-notify.js` pour les 6 modes) : il relit `localStorage` — qu'on
-vient d'écrire deux lignes plus haut — évalue toutes les conditions et affiche la
-notification de déblocage, sans toucher à l'UI de la page profil, absente ici puisqu'on
-regarde le profil de quelqu'un d'autre.
-
-### Détails techniques
-
-- `profile/profile-view.js` — `m.checkBadges(...)` → `m.checkBadgesAfterGame()`
-- `tests/dataMiningBadge.test.js` (nouveau, 7 tests) sur deux angles :
-  - **contrat d'import** : tout `m.xxx()` appelé dans `profile-view.js` doit exister
-    parmi les exports de `badgesManager.js`. C'est l'angle qui manquait — un import
-    **dynamique** n'est vérifié ni par ESLint ni au chargement, et c'est précisément ce
-    qui a laissé passer le bug pendant des mois. Ce garde-fou couvre tous les futurs
-    appels de ce module, pas seulement `checkBadges`.
-  - **comportement** : 4 profils visités → refusé, 5 → accordé ; 5 fois le même profil →
-    refusé (la liste est dédoublonnée par un `Set` côté `profile-view.js`).
-- Vérifié en réel : les 2 tests de contrat échouent sur le code d'avant, les 7 passent après.
-
-### Angles morts connus (non corrigés ici)
-
-- `visitedProfileIds` vit **uniquement en `localStorage`**, jamais poussé au backend.
-  Visiter 3 profils sur mobile et 2 sur desktop ne débloque donc rien nulle part. Une
-  colonne dédiée (ou une réutilisation de l'historique `social_links`) réglerait le point ;
-  c'est un choix produit, pas une régression.
-- Le suivi des visites est imbriqué dans le `if (gaugeContainer && ...)` de la jauge
-  Social Link : si `#socialLinkGaugeContainer` disparaît du HTML, le comptage s'arrête en
-  silence. Dépendance à une div sans rapport, à sortir de ce bloc à la prochaine passe.
-- Le badge est `condition_type = 'manual'` côté serveur (comme 46 autres) : la condition
-  n'est pas revérifiée à l'unlock. Cf. l'audit des conditions de déblocage.
-
-## 2026-09-18 — Un défi Expert se voit enfin comme tel
-
-`challenge_is_expert` (migration 037) traversait toute la chaîne — `api/messages`
-→ `js/notifications.js` → `js/challenge-notif.js` — mais ne pilotait que trois
-choses **invisibles** : la page d'arrivée (`?expert=1`), le casier `localStorage`
-et le barème d'XP. À l'écran, un défi Expert et un défi normal étaient
-rigoureusement identiques : même pop-up rouge, même pastille de mode, mêmes
-anneaux, même flash. Dans la Boîte de la page Amis, `challenge_is_expert`
-n'apparaissait que dans les attributs `data-isexpert` des boutons — lu par le
-code, jamais par l'œil.
-
-Le joueur ne découvrait donc la dimension qu'une fois **arrivé sur la page du
-mode**, c'est-à-dire après avoir accepté, donc après s'être engagé sur un barème
-qui n'a rien à voir (un seul indice, 5 à 30 essais contre 3). Et la migration 037
-autorise explicitement un défi normal ET un défi Expert le même jour entre les
-mêmes amis : deux lignes strictement identiques dans la Boîte, sans moyen de
-savoir lequel des deux boutons « Accepter » menait où.
-
-### Choix de palette
-
-Violet `#b26aff` → magenta `#ff4d8d` sur fond violet-noir, repris **tel quel** de
-`.challenge-card--expert` (`css/global.css`), la carte d'**envoi** du défi Expert
-qui existait déjà. Volontairement la même des deux côtés : celui qui envoie et
-celui qui reçoit doivent reconnaître le même objet. L'or `#ffd700` de l'écran de
-déblocage du Mode Expert a été écarté — il dit « tu viens de débloquer quelque
-chose », pas « ce défi-ci est Expert », et un troisième vocabulaire Expert aurait
-brouillé les deux.
-
-### Détails techniques
-
-- `js/challenge-notif.js` — classe `cn--expert` sur l'overlay + étiquette
-  `.cn-expert-tag` dans la carte + message d'accroche dédié. Le DOM reste
-  **commun** aux deux variantes : tout l'écart vit dans le CSS, donc une
-  évolution de la pop-up normale suit automatiquement.
-- `css/challenge-notif.css` — bloc `.cn--expert` en surcharges : fond radial plus
-  dense, anneaux violet/magenta, flash `cnFlashExpert`, carte en dégradé avec
-  liseré supérieur, avatar/pseudo/pastille/boutons réaccordés. Le liseré est en
-  `position: absolute` et non un enfant de flux : la carte est un flex column
-  avec `gap: 10px`, un `::before` dans le flux aurait ajouté un espace fantôme.
-  Bloc `prefers-reduced-motion` : le surcroît d'effet est coupé, le marqueur
-  textuel porte le sens à lui seul.
-- `profile/friends/friends.js` — pastille `.fr-challenge-expert-pill` + classe
-  `.fr-challenge-card--expert`, sur les **trois** statuts (en cours / gagné /
-  expiré). L'historique est justement l'écran où l'on compare ses défis.
-- `profile/friends/friends.css` — surcharges assorties, dark mode compris (le
-  violet foncé de la pastille de mode passe sous le seuil de lisibilité sur
-  `#1a1a1a`, remonté en `#d9a4ff`). La pastille pose `margin-right: auto`
-  (l'en-tête est en `space-between`, elle se serait placée au centre) et
-  `align-self: flex-start` (les cartes gagnée/expirée sont en flex column, elle
-  se serait étirée sur toute la largeur).
-- i18n : `challenge.notif_expert_tag` et `challenge.notif_challenges_you_expert`,
-  EN d'abord puis fr/es/de/it/pt — `npm run i18n:check` vert, 1266 clés.
-- Tests : `tests/challengeNotifExpert.test.js` (nouveau, 10 tests) et 5 tests
-  ajoutés à `tests/friends_challenge_actions.test.js`.
-
-### Pourquoi les tests vérifient la CLASSE et pas la couleur
-
-jsdom ne résout pas les feuilles externes : une valeur hexadécimale attendue dans
-un test ne prouverait rien de plus que sa propre recopie. Ce qui est verrouillé,
-c'est le **crochet** (`cn--expert`, `fr-challenge-card--expert`), le **marqueur
-textuel** (traduisible, et vérifié contre le piège CLAUDE.md §5 où `t(key)`
-renvoie la clé brute), et la **parité de structure** entre les deux variantes —
-si la variante Expert diverge structurellement, elle cesse de suivre les
-évolutions de la pop-up normale, ce qui est l'inverse du but.
-
-### Angles morts connus
-
-- La pop-up de **résultat** de défi (`js/challenge-result.js`, vue par
-  l'expéditeur quand son défi est battu ou expiré) n'est pas encore marquée. Elle
-  reçoit pourtant le message brut, `challenge_is_expert` compris — elle l'ignore,
-  simplement (0 occurrence de « expert » dans le fichier). C'est donc un ajout
-  purement front, sans rien à faire côté API. À reprendre.
-- Aucun test E2E : les tests ci-dessus sont en jsdom, donc le rendu réel des
-  dégradés et du liseré n'est vérifié qu'à l'œil.
-
-## 2026-09-18 — Audit des conditions de déblocage : 3 bugs serveur, dont un exploitable
-
-Audit de bout en bout des **92 lignes** du catalogue (64 badges, 7 wallpapers, 21 titres)
-et des 64 `check()` client. Chaque condition structurée a été jouée contre une vraie
-MariaDB 10.11, à la frontière exacte : compte à `seuil - 1` → doit refuser, compte à
-`seuil` → doit accorder.
-
-**Résultat : les 42 conditions structurées sont correctes.** Les 50 autres lignes sont
-`manual`/`joker_profile`, c'est-à-dire **pas vérifiées côté serveur du tout** — ce n'est
-pas un bug mais c'est un fait qui ne se lisait nulle part. Les bugs trouvés sont ailleurs :
-dans l'infrastructure de vérification elle-même.
-
-### Bug 1 — `CONVERT_TZ` rendait la garde anti-spam Social Link totalement inopérante
-
-**Avant.** Les 4 requêtes « interactions d'aujourd'hui » filtraient avec
-`DATE(CONVERT_TZ(created_at, '+00:00', 'Europe/Paris')) = :jour`. Vers un fuseau **nommé**,
-`CONVERT_TZ` exige les tables de fuseaux du serveur SQL (`mysql.time_zone_name`), qui ne
-sont pas peuplées par défaut et sont typiquement absentes d'un hébergement mutualisé — le
-dépôt le documentait **déjà** dans `api/admin/activity.php`, qui contourne en regroupant
-côté PHP. Les requêtes Social Link, elles, étaient restées dessus.
-
-Sans ces tables, `CONVERT_TZ` ne lève rien : il renvoie `NULL`. `DATE(NULL) = '2026-09-18'`
-vaut `NULL`, donc faux, donc **la requête ne trouve jamais rien**. Mesuré sur MariaDB 10.11
-sans tables de fuseaux :
-
-- garde « 1 action par jour » morte → **180 appels de `share_streak` d'affilée le même jour
-  acceptés**, 2700 XP, rang 10 atteint d'un coup ;
-- donc le wallpaper `dark_shopping_district` (rang ≥ 5) **et** le titre
-  `aigis_metis_same_soul` (rang ≥ 10) accordés par simple répétition ;
-- bonus mutuel mort → deux amis actifs le même jour payés au tarif solo (15 au lieu de 30),
-  la jauge progressant deux fois moins vite que ce que le produit annonce.
-
-**Après.** Nouvelle fonction `personadle_paris_day_bounds_utc()` (`api/lib/social_link.php`)
-qui calcule les bornes UTC de la journée Paris **en PHP**, DST compris, et les 4 requêtes
-comparent désormais la colonne nue : `created_at >= ? AND created_at < ?`. Vérifié : le
-même scénario est bloqué au 1ᵉʳ appel, les deux déblocages repassent à « refusé ».
-Bénéfice secondaire — la comparaison ne porte plus sur une expression, donc un index sur
-`created_at` redevient utilisable.
-
-**Pourquoi rien ne l'avait vu.** Les deux tests de `DatabaseIntegrationTest` qui couvrent
-la garde et le bonus mutuel sont bons ; c'est l'**environnement** qui mentait. L'image
-Docker MySQL de la CI embarque les tables de fuseaux — CI verte sur un chemin que la prod
-n'emprunte pas. Cas exact de CLAUDE.md §13 (« CI verte insuffisante si elle ne peut pas
-exécuter le scénario concerné »). Le nouveau `tests/php/ParisDayBoundsTest.php` attaque
-donc par un garde-fou **statique** (plus aucun `CONVERT_TZ` exécuté dans `api/`, analyse du
-code hors commentaires) plus 7 tests de calcul de bornes, dont les deux journées de
-bascule DST (23 h et 25 h). Aucun ne dépend du serveur SQL.
-
-⚠️ **À vérifier en prod** : si les tables de fuseaux SONT peuplées chez Hostinger, la garde
-fonctionnait et il n'y a rien à rattraper. Sinon, des rangs Social Link ont pu être gonflés,
-et avec eux ces deux déblocages. Commande de contrôle :
-`SELECT COUNT(*) FROM mysql.time_zone_name;` — 0 = le bug était actif.
-
-### Bug 2 — badges et titres étaient fail-**open** sur un `condition_type` inconnu
-
-**Avant.** `api/badges/index.php` et `api/titles/index.php` appelaient
-`personadle_verify_condition()` en direct. Cette fonction se termine par
-`default: return true` — un safe-fallback voulu, pour ne pas rendre inaccessible un badge
-ajouté demain avec un type pas encore implémenté. Mais sur le chemin d'un `POST /unlock`,
-il fait l'inverse de ce qu'on veut : **une faute de frappe dans une migration ouvrait le
-badge à n'importe quel compte authentifié**. `api/wallpapers/index.php` fermait déjà ce
-trou de son côté (revue PR #14) — donc trois endpoints, deux comportements.
-
-**Après.** La garde est remontée dans `personadle_condition_allows_unlock()`
-(`api/lib/condition_check.php`) et les **trois** endpoints passent par elle. Un type absent,
-vide, mal orthographié ou retiré du vocabulaire refuse l'unlock. `personadle_verify_condition()`
-garde son fallback permissif là où il a du sens (affichage du catalogue).
-
-### Bug 3 — le vocabulaire avait dérivé, et le test censé le détecter comptait au lieu de comparer
-
-**Avant.** `personadle_known_condition_types()` listait 22 types alors que le `switch` en
-gère 24 : **`titles_count` et `played_on_date` manquaient**. Inoffensif tant que seuls les
-wallpapers utilisaient cette liste (aucun n'emploie ces deux types), mais c'était une mine :
-en étendant le fail-closed aux titres (bug 2), les titres **`sees`** (`titles_count`) et
-**`tatsuya_dont_burn_out`** (`played_on_date`) seraient devenus indébloquables pour toujours
-— un 403 « Condition not met » sur un joueur qui remplit pourtant la condition.
-
-Un test existait pourtant, `ConditionCheckTest::testKnownConditionTypesMatchesSwitchCases`,
-et son commentaire décrivait exactement le bon invariant. Son implémentation faisait
-`assertCount(22, $known)`. **Un compte ne dit rien de l'ensemble** : la liste était bien à
-22 entrées, avec les deux mauvaises manquantes. Le test était vert et épinglait le mauvais
-nombre — c'est lui qui rendait la dérive invisible.
-
-**Après.** Les deux types ajoutés (corrigé **avant** d'appliquer le fail-closed, sinon les
-deux titres cassaient). Le compte magique est remplacé par une comparaison **ensembliste**
-entre les `case` du switch et la liste — dans `tests/php/ConditionVocabularyTest.php`, sans
-base de données, donc elle tourne même sans `make up`. Les 6 tests de ce fichier échouent
-tous sur le code d'avant.
-
-### Ce que l'audit a AUSSI vérifié, sans rien trouver
-
-- **Les 64 `check()` client** : chaque champ de profil lu par un `check()` a bien au moins
-  un écrivain dans le dépôt. Trois candidats (`velvet_headache`, `chinese_new_year`,
-  `github_contributor`) se sont révélés être des **faux positifs de l'outil d'audit** — leurs
-  flags sont écrits par le helper `check("flag", cond)` de `modeAllOutAttack.js` et par un
-  `onclick` dans `index.html`, deux formes que la première version du script ne couvrait pas.
-- **Tous les imports dynamiques du dépôt** : les 4 appels `import(…).then(m => m.x())`
-  ciblent des symboles réellement exportés (`data_mining` était le seul cassé, corrigé plus haut).
-- **Parité des deux catalogues de badges** : client (64 entrées) ↔ SQL (64 lignes) — mêmes
-  slugs, mêmes drapeaux « secret », mêmes seuils chiffrés.
-
-### Trous de test comblés
-
-| Trou | Comblé par |
-|---|---|
-| Aucun balayage de seuil sur les 5 types Expert | `NUMERIC_THRESHOLD_TYPES` étendu + 6 helpers `game_sessions` |
-| Aucun mapping exhaustif par titre (badges/wallpapers en avaient un) | `testEveryTitleHasExpectedConditionColumns` — 21 titres |
-| Rien ne comparait `badgesData.js` et la table `badges` | `tests/badgesCatalogParity.test.js` (7 tests, sans base) |
-| Le vocabulaire pouvait dériver en silence | `tests/php/ConditionVocabularyTest.php` (6 tests, sans base) |
-| `CONVERT_TZ` invisible en CI | `tests/php/ParisDayBoundsTest.php` (8 tests, sans base) |
-
-Total : 338 tests PHPUnit (contre 322) et 1383 Vitest (contre 1376), tous verts — les
-PHPUnit joués contre une MariaDB **sans** tables de fuseaux, c'est-à-dire dans la
-configuration de la prod et non dans celle de la CI.
-
-### Angle mort assumé, non corrigé ici
-
-**47 badges sur 64** et 1 titre sont `condition_type = 'manual'` : le serveur les accorde
-sur simple déclaration du client. N'importe quel compte authentifié peut appeler
-`POST /api/badges/unlock` avec ces slugs et les obtenir. C'est cohérent avec un fan-game
-sans enjeu compétitif, et plusieurs de ces conditions ne sont pas re-vérifiables depuis les
-tables de stats (flags narratifs, codes événement, découvertes de personnages) — mais
-certaines le seraient (`data_mining` = 5 profils visités, `leblanc_meeting` = 3 amis
-connectés le même jour). À trancher comme décision produit, pas à corriger au détour d'un lot.
-
-## 2026-09-18 — Le classement gagne son axe Expert
-
-L'Expert était exclu du classement **partout**, et de façon cohérente :
-`api/cron/leaderboard.php` et `api/leaderboard/index.php` filtraient
-`gs.is_expert = 0`, `api/lib/leaderboard_metrics.php` faisait de même pour la série,
-et la période `ever` lisait `user_stats` — table que le Mode Expert n'alimente pas,
-donc l'exclusion y était vraie **par construction**, sans filtre explicite. Les
-commentaires en place l'assumaient (« classement Expert = dimension à part, pas
-encore exposée ») et un crochet dormait déjà dans le code :
-`personadle_leaderboard_prior()` acceptait un `$expertOnly` qu'aucun appelant ne
-passait à `true`. Ce lot l'expose.
-
-### Migration 045 — une colonne, pas un mode de plus
-
-`leaderboard_cache` gagne `is_expert`, et `uq_leaderboard` devient
-`(user_id, mode, period, metric, period_start, is_expert)`. **Sans cette clé
-élargie, le cron écraserait la ligne normale d'un joueur avec sa ligne Expert à
-chaque passage** : un seul des deux classements survivrait, et lequel dépendrait
-de l'ordre d'exécution. L'index de lecture est refait pour la même raison —
-l'endpoint filtre désormais sur `is_expert`, et un index qui l'ignore force un tri
-sur des lignes dont la moitié sera jetée.
-
-Même raisonnement que `game_sessions.is_expert` (031) et
-`messages.challenge_is_expert` (037) : l'Expert est une **dimension** du mode. Un
-`mode = 'classic_expert'` aurait dupliqué les 7 valeurs de mode, cassé le filtre par
-mode du front, et rendu le total `all` ambigu.
-
-Migration rejouée sur base **vierge** (pré-migration), puis une seconde fois pour
-vérifier l'idempotence — elle annonce alors « uq_leaderboard porte déjà is_expert »
-sans rien toucher.
-
-### Le cas `ever`, qui a demandé son propre chemin
-
-`buildEverLeaderboard()` lit `user_stats`, que l'Expert n'alimente pas : lui ajouter
-un filtre n'aurait produit que des zéros. D'où `buildEverExpertLeaderboard()`, qui
-agrège `game_sessions`. C'est la **seule** raison pour laquelle ce cas est dupliqué
-plutôt que paramétré comme les autres.
-
-### `metric=streak` n'existe pas en Expert, volontairement
-
-`personadle_ever_expert_score_expr('streak')` renvoie `null`. Une série se compte en
-jours consécutifs, et l'Expert n'est pas un rendez-vous quotidien : c'est un mode
-qu'on ouvre quand on a débloqué la porte. Afficher une « série Expert » inviterait à
-jouer l'Expert tous les jours pour ne pas la perdre — ce n'est pas ce que ce mode
-raconte.
-
-L'endpoint renvoie donc un classement **vide** plutôt qu'un 400 (un code d'erreur
-ressemblerait à une panne pour une absence assumée), le cron ne calcule ni n'écrit
-cette combinaison (une ligne vide en cache serait indiscernable d'un cache pas
-encore alimenté, et l'API basculerait sur le fallback live à chaque appel), et le
-front **explique** l'absence sous les filtres plutôt que de laisser une page blanche
-— même réflexe que le texte qui explique pourquoi la liste d'amis est plus courte en
-défi Expert.
-
-La série de **période**, elle, existe dans les deux dimensions : son filtre est
-simplement paramétré.
-
-### Détails techniques
-
-- `sql/migrations/045_leaderboard_expert_dimension.sql`
-- `api/lib/leaderboard_metrics.php` — `personadle_period_streak_scores_sql()` et
-  `personadle_period_streak_sql()` prennent `$expertOnly` ; nouvelle
-  `personadle_ever_expert_score_expr()`
-- `api/leaderboard/index.php` — paramètre `expert`, `buildEverExpertLeaderboard()`,
-  dimension dans la clé de lecture du cache et dans le fallback live, et `expert`
-  renvoyé dans la réponse **tel qu'il a été compris** (le front vérifie qu'il affiche
-  bien ce qu'il croit, au lieu d'un classement normal servi en silence)
-- `api/cron/leaderboard.php` — boucle sur les deux dimensions, `is_expert` dans le
-  filtre de purge (sans lui, le passage sur une dimension effacerait les lignes
-  périmées de l'autre) et dans l'upsert
-- `js/api.js` — paramètre `expert`
-- `profile/leaderboard/leaderboard.{html,js,css}` — groupe de pills « Dimension »,
-  placé **avant** Mode puisqu'il le qualifie ; pastille dans le résumé des filtres ;
-  ambiance violet/magenta sur la carte, volontairement plus discrète que la
-  notification de défi (le tableau doit rester le sujet), dark mode compris
-- i18n : 4 clés × 6 langues, EN d'abord — 1270 clés, `i18n:check` vert
-- 8 tests dans `tests/php/LeaderboardMetricsTest.php`
-
-### Sécurité de l'interpolation SQL
-
-`is_expert` est interpolé en **littéral 0/1** dans plusieurs fragments SQL, pas lié
-en paramètre — les fragments sont assemblés avant préparation. La valeur est donc
-normalisée en `bool` dès la lecture de `$_GET` (`($_GET['expert'] ?? '0') === '1'`)
-et ne circule plus que sous cette forme : un `bool` ne peut rien injecter, une chaîne
-venue de `$_GET`, si. Même contrat que `$modeFilter`, qui passe par `$pdo->quote()`.
-
-### Angles morts connus
-
-- **Le cron doit tourner une fois après la migration** pour peupler la dimension
-  Expert du cache. D'ici là, `day/week/month` + Expert tombe sur le fallback live
-  (`game_sessions`) — correct mais plus coûteux. Rien à faire, ça se résorbe tout seul.
-- Pas de test E2E sur le filtre : la séparation des deux classements est vérifiée au
-  niveau des requêtes SQL, pas du parcours navigateur.
-- Le classement Expert « depuis toujours » scanne `game_sessions` à chaque appel,
-  sans cache (comme le `ever` normal scanne `user_stats`). `game_sessions` étant bien
-  plus grosse, ça deviendra le premier point à surveiller si la page ralentit.
-
-## 2026-09-18 — Les badges à code événement n'étaient pas protégés par leur code
-
-**13 badges** du catalogue ont une ligne dans `event_codes` : les saisonniers
-(`christmas_2025`, `valentine_2026`, `new_years_2026`, `chinese_new_year_2026`,
-`easter_2026`, `sport`) et les secrets communautaires (`true_hacker`, `tae_takemi`,
-`arati`, `gyotre`, `dzulian`, `chef`, `lobster`). Leur condition réelle, c'est
-« connaître le code », et seul `POST /api/badges/redeem` sait la vérifier — il valide
-le code, sa fenêtre de validité, et consomme la redemption dans une transaction.
-
-Mais en base ils portent `condition_type = 'manual'`, ce qui vaut « accordé sans
-vérification » côté `personadle_verify_condition()`. Donc **`POST /api/badges/unlock`
-avec le slug les accordait aussi, sans le code**. Et le slug n'est pas un secret :
-`GET /api/badges` renvoie le catalogue complet à tout utilisateur authentifié, slug
-compris. Le code protégeait une porte, à côté d'une fenêtre ouverte.
-
-Vérifié avant/après sur les quatre slugs les plus parlants :
-
-| Badge | Avant | Après |
-|---|---|---|
-| `christmas_2025` | accordé sans le code | 403 — code requis |
-| `valentine_2026` | accordé sans le code | 403 — code requis |
-| `dzulian` | accordé sans le code | 403 — code requis |
-| `lobster` | accordé sans le code | 403 — code requis |
-| `first_win` (sans code) | selon la condition | inchangé |
-| `data_mining` (sans code) | accordé (`manual`) | inchangé |
-
-### Où vit le garde, et pourquoi pas dans `condition_check.php`
-
-Dans `api/badges/index.php`, juste après la recherche du badge et **avant** la
-vérification de condition. Ce n'est pas une question de CONDITION mais de ROUTE :
-`condition_check.php` répond « cet utilisateur remplit-il la condition ? », or ici la
-réponse dépend d'un secret que l'utilisateur fournit, pas d'un état en base. L'y
-mettre obligerait cette lib à connaître `event_codes`, une table qui ne la regarde pas.
-
-L'ordre compte et il est testé : le garde passe avant la vérification de condition.
-S'il passait après, il ne servirait à rien — la condition `manual` aurait déjà répondu
-oui et l'endpoint aurait inséré la ligne.
-
-Le garde interroge `event_codes`, **sans aucun slug codé en dur** : un badge saisonnier
-créé demain par l'admin est protégé dès la création de son code, sans toucher au PHP.
-Un test verrouille ce lien.
-
-### Aucun effet sur un joueur légitime, et c'est vérifié
-
-`handleEventCodeSubmit()` (`profile/badges/badgesManager.js`) est **serveur-d'abord** :
-`await api.badges.redeem(code)` d'abord, et le badge n'entre dans le profil local
-qu'une fois la réponse OK. Le backend le connaît donc toujours avant le local, et
-`syncBadgesWithBackend()` n'a jamais à le repousser par `/unlock` (il ne pousse que les
-badges locaux **absents** du backend). Le chemin `/redeem` est inchangé.
-
-### Détails techniques
-
-- `api/badges/index.php` — garde `event_codes` dans la branche `unlock`
-- `tests/php/EventCodeBadgeGateTest.php` (nouveau, 6 tests) en deux moitiés :
-  la route est fermée (tous les badges à code refusés, garde avant la condition,
-  aucun slug en dur) **et** les joueurs légitimes ne sont pas cassés (les badges sans
-  code inchangés, `/redeem` accorde et consomme toujours, aucun code n'est orphelin).
-  Le test de position échoue sur le code d'avant.
-
-### Ce qui reste `manual` et le restera
-
-Après ce lot, 34 badges restent `manual` sans protection : flags narratifs
-(découvertes de personnages en cours de partie), horaires (`night_owl`, `nyx_hour`),
-et quelques sociaux. Décision produit prise le 2026-09-18 : on ne les verrouille pas.
-`data_mining` (5 profils visités) et `leblanc_meeting` (3 amis connectés le même jour)
-seraient pourtant vérifiables côté serveur sans migration — `social_link_interactions`
-journalise déjà les `visit_profile` par lien, et `game_sessions` + `friendships`
-suffisent pour le second. À reprendre si l'envie vient ; ce n'est pas une dette
-urgente pour un fan-game sans enjeu compétitif.
-
-## 2026-09-18 — Trois points de synchronisation oubliés par les lots précédents
-
-Revue de fin de branche : les cinq lots ci-dessus étaient corrects en eux-mêmes, mais
-trois conventions du dépôt n'avaient pas été honorées. Aucune n'est un bug de code, les
-trois auraient coûté cher au déploiement.
-
-### 1. `CACHE_VERSION` non bumpé — le plus grave des trois
-
-`sw.js` restait en `personadle-v95`. Or ce lot modifie `js/api.js`,
-`profile/leaderboard/leaderboard.{html,css,js}` et `profile/friends/friends.{css,js}` —
-**tous précachés** par le service worker.
-
-Sans bump, `activate` ne purge rien et le cache-first continue de servir l'ancien front
-aux joueurs **déjà venus** : ni le filtre « Dimension » du classement, ni la pastille
-Expert de la Boîte, alors que l'API, elle, aurait changé. Invisible en test (un
-navigateur neuf reçoit toujours le bon code), visible uniquement pour les habitués —
-c'est-à-dire exactement les joueurs qu'on ne veut pas casser. Bumpé en `v96`.
-
-`css/challenge-notif.css` n'est pas dans la liste de précache : il est récupéré au
-réseau, rien à faire de ce côté.
-
-### 2. Migration 045 absente de la checklist bloquante de `TODO.md`
-
-C'est **le piège que le dépôt documente lui-même** : les migrations 029/030 avaient été
-oubliées de cette liste jusqu'au 2026-09-01, et CLAUDE.md §13 en a fait une règle.
-Écrire la migration ne suffit pas — elle doit figurer dans la liste que suit la release.
-
-Conséquence si elle manquait : `api/leaderboard/index.php` interroge `lc.is_expert`, et
-la prod n'a pas la colonne. Vérifié pour de vrai contre une base au schéma
-pré-migration plutôt qu'affirmé :
-
-```
-requête cache → SQLSTATE[42S22] Unknown column 'lc.is_expert'  → 500
-période ever  → OK (ne lit pas le cache) → survit
-```
-
-Donc **le classement day/week/month tombe en 500 pour tout le monde**, et le cron
-horaire échoue à chaque passage. `ever` survit seul. L'entrée de checklist dit
-explicitement « avant le `git pull` Hostinger », comme les 040/041/042.
-
-Une seconde entrée a été ajoutée pour le cycle de cron à laisser passer après la
-migration — sans elle, le classement Expert par période bascule sur le calcul live
-pendant une heure. C'est correct, juste plus coûteux, et ça se résorbe seul : noté pour
-que ça ne soit pas pris pour une panne.
-
-### 3. Changelog joueur non alimenté
-
-CLAUDE.md §9 : tout changement **visible ou parlant pour un joueur** va aussi dans
-`PersonaDLE_Update.html`. Les cinq lots n'avaient nourri que `DEV_CHANGELOG.md`.
-
-Deux sections ajoutées, en blocs `data-i18n-block` FR/EN appariés (103/103, vérifié),
-en langage non technique :
-
-- **⚡ Le Mode Expert sort de l'ombre** — la notification de défi Expert, la pastille
-  dans la Boîte, le nouvel axe du classement, et pourquoi « meilleure série » n'y a pas
-  d'équivalent (un joueur qui ne trouve pas sa métrique doit lire la raison, pas
-  conclure à un oubli).
-- **🎖️ Ce qui se gagne, se gagne vraiment** — Data Mining qui tombe enfin au bon
-  moment, les badges à code redevenus des badges à code (avec la précision « rien ne
-  change si tu as utilisé le tien »), et les Social Links qui comptent juste.
-
-Le reste du travail — fail-closed, vocabulaire des conditions, trous de tests — n'y
-figure pas : rien de tout ça ne se voit depuis le jeu, et la section §9 interdit
-explicitement de gonfler la page joueur avec du détail technique.
-
-### Ce qui reste non vérifiable depuis cet environnement
-
-Les tests **E2E Playwright** (`npm run test:e2e`, job CI bloquant) n'ont pas pu tourner
-ici : ils exigent `make up`, donc un démon Docker, absent de cet environnement. Les
-spécifications concernées par ce lot (`challenge_flow`, `challenge_usecases`,
-`unlocks_usecases`, `visual_layout`) seront donc jouées pour la première fois **en CI**.
-Les 1383 tests Vitest et 351 PHPUnit, eux, sont verts — ces derniers contre une MariaDB
-sans tables de fuseaux, soit la configuration de la prod et non celle de la CI.

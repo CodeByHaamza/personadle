@@ -158,6 +158,41 @@ final class DatabaseIntegrationTest extends TestCase
         }
     }
 
+    public function testLeaderboardCacheHasExpertDimension(): void
+    {
+        // Garde-fou anti-dérive (migration 045) : api/cron/leaderboard.php écrit
+        // is_expert et api/leaderboard/index.php filtre dessus. La PR qui a introduit
+        // la colonne avait mis à jour la migration mais pas bdd_mysql.sql : sur une
+        // base neuve (Docker, CI, nouveau contributeur) le classement day/week/month
+        // plantait en Fatal PDOException — le normal compris, pas seulement l'Expert.
+        // Aucun test n'exerçait leaderboard_cache, celui-ci comble le trou.
+        $cols = self::$pdo->query(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'leaderboard_cache'"
+        )->fetchAll(PDO::FETCH_COLUMN);
+        $this->assertContains('is_expert', $cols, 'Colonne leaderboard_cache.is_expert manquante (schéma périmé ?)');
+
+        $uq = self::$pdo->query(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.STATISTICS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'leaderboard_cache'
+               AND INDEX_NAME = 'uq_leaderboard' ORDER BY SEQ_IN_INDEX"
+        )->fetchAll(PDO::FETCH_COLUMN);
+        $this->assertContains('is_expert', $uq, 'uq_leaderboard doit inclure is_expert, sinon les deux dimensions s\'écrasent');
+
+        // Et le chemin d'écriture du cron passe réellement : une ligne par dimension
+        // pour le même (user, mode, period, metric, period_start).
+        $userId = $this->makeUser('lb');
+        $ins = self::$pdo->prepare(
+            'INSERT INTO leaderboard_cache (user_id, mode, period, metric, is_expert, score, rank_position, period_start)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        $ins->execute([$userId, 'all', 'week', 'wins', 0, 5, 1, '2026-09-14 00:00:00']);
+        $ins->execute([$userId, 'all', 'week', 'wins', 1, 2, 1, '2026-09-14 00:00:00']);
+        $n = self::$pdo->prepare('SELECT COUNT(*) FROM leaderboard_cache WHERE user_id = ?');
+        $n->execute([$userId]);
+        $this->assertSame(2, (int) $n->fetchColumn(), 'normal et Expert doivent coexister pour la même clé');
+    }
+
     public function testMessagesTableHasChallengeColumns(): void
     {
         // Garde-fou anti-dérive : api/messages/index.php écrit/relit ces colonnes

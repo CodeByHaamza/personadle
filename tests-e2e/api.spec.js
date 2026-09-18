@@ -113,6 +113,44 @@ test.describe.serial("API — régressions sensibles (badges, streak global)", (
   });
 });
 
+test.describe("API — classement par période et dimension Expert (migration 045)", () => {
+  // Ces appels lisent leaderboard_cache (ou son repli live) : ils plantaient en
+  // Fatal PDOException sur une base neuve quand bdd_mysql.sql n'avait pas suivi
+  // la migration 045 — aucun autre test ne touchait period=day|week|month.
+  const lb = async (q) => {
+    const ctx = await pwRequest.newContext({ baseURL: BASE });
+    const res = await ctx.get(`/api/leaderboard/?${q}`);
+    const body = res.ok() ? await res.json() : { error: await res.text() };
+    await ctx.dispose();
+    return { status: res.status(), body };
+  };
+
+  test("day / week / month répondent en JSON, dans les deux dimensions", async () => {
+    for (const period of ["day", "week", "month"]) {
+      for (const expert of [0, 1]) {
+        const { status, body } = await lb(`period=${period}&metric=wins&expert=${expert}`);
+        expect(status, `${period} expert=${expert}`).toBe(200);
+        expect(body.period).toBe(period);
+        expect(body.expert).toBe(expert === 1);
+        expect(Array.isArray(body.entries)).toBeTruthy();
+      }
+    }
+  });
+
+  test("la série n'existe pas en Expert : classement VIDE pour toutes les périodes, pas seulement « depuis toujours »", async () => {
+    for (const period of ["day", "week", "month", "ever"]) {
+      const { status, body } = await lb(`period=${period}&metric=streak&expert=1`);
+      expect(status).toBe(200);
+      expect(body.expert).toBe(true);
+      expect(body.entries, `série Expert ${period}`).toEqual([]);
+      expect(body.count).toBe(0);
+    }
+    // …alors que la série NORMALE, elle, existe bien.
+    const { body: normal } = await lb("period=month&metric=streak");
+    expect(normal.expert).toBe(false);
+  });
+});
+
 test.describe("API — anti-triche de la récupération de streak (recover-streak)", () => {
   let ctx;
 
