@@ -11,6 +11,7 @@
 // === IMPORTS ===
 import { songs as originalSongs } from "./database/songs.js";
 import { expertLyrics } from "./database/expert_lyrics.js";
+import { EXPERT_TWINS } from "./database/expert_twins.js";
 import { updateProfileStats } from "../profile/profileStats.js";
 
 import {
@@ -154,6 +155,15 @@ const STATS_KEY = EXPERT.statsKey;
  *  de api/data/daily_pools.json, sinon le serveur attend une autre cible et logue
  *  chaque partie en anti_cheat. `npm run pools:build` régénère les deux depuis ici. */
 const EXPERT_SONGS = originalSongs.filter((s) => expertLyrics[s.titre]);
+
+/** La réponse `guess` vaut-elle pour la cible courante ? (titre exact, ou jumelle en Expert) */
+function guessMatchesTarget(guess) {
+  if (!target) return false;
+  const g = normalize(guess);
+  if (g === normalize(target.titre)) return true;
+  if (!IS_EXPERT) return false;
+  return (EXPERT_TWINS[target.titre] ?? []).some((twin) => normalize(twin) === g);
+}
 
 /** Les vers de la cible courante, ou [] hors Expert. */
 function targetLyrics() {
@@ -759,7 +769,7 @@ function handleGuess() {
     giveUpCounter.classList.add("activated");
   }
 
-  if (normalize(guess) === normalize(target.titre)) {
+  if (guessMatchesTarget(guess)) {
     showVictory(false);
   } else {
     showWrong(guess);
